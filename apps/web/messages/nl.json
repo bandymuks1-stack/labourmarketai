@@ -2940,8 +2940,8 @@
     "work_done": "Uitgevoerd werk",
     "skill_claim": "Vaardigheidsclaim",
     "service_offer": "Dienstenaanbod",
-    "worker_need": "Werkbehoefte (werknemer)",
-    "project_need": "Projectbehoefte",
+    "worker_need": "Werkaanvraag (werknemer)",
+    "project_need": "Projectaanvraag",
     "team_offer": "Ploegaanbod",
     "company_activity": "Bedrijfsactiviteit",
     "learning_goal": "Leerdoel",
@@ -7668,9 +7668,9 @@
     "structuredNote": "Uw cv-tekst wordt automatisch gestructureerd tot een profiel — u beoordeelt elke suggestie en beslist wat wordt opgeslagen."
   },
   "needStructuring": {
-    "pageTitle": "Behoeftestructurering",
-    "pageIntro": "Ingediende behoeften zonder gestructureerde velden. Het systeem stelt werktype, land, aantal, timing en huisvesting voor op basis van de tekst — bevestig of corrigeer. Alleen bevestigde velden met vaste keuzeopties bereiken het werknemersbord.",
-    "empty": "Alle ingediende behoeften hebben al gestructureerde velden.",
+    "pageTitle": "Aanvraagstructurering",
+    "pageIntro": "Ingediende aanvragen zonder gestructureerde velden. Het systeem stelt werktype, land, aantal, timing en huisvesting voor op basis van de tekst — bevestig of corrigeer. Alleen bevestigde velden met vaste keuzeopties bereiken het werknemersbord.",
+    "empty": "Alle ingediende aanvragen hebben al gestructureerde velden.",
     "footnote": "Suggesties zijn deterministisch (op trefwoorden gebaseerd), geen AI. Vrije tekst wordt alleen hier getoond en bereikt nooit het werknemersbord.",
     "freeTextHeading": "Originele tekst (alleen voor admins)",
     "freeText": {
@@ -7794,7 +7794,7 @@
       }
     },
     "title": "Kansen voor jou",
-    "intro": "Hier zie je personeelsbehoeften van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
+    "intro": "Hier zie je personeelsaanvragen van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
     "noWorkerBody": "Maak eerst je werknemersprofiel af om kansen te zien die bij je passen.",
     "readinessTitle": "Jouw gereedheid",
     "matchTitle": "Matchoverzicht",
@@ -7818,7 +7818,7 @@
       "check": "controleren",
       "unknown": "onbekend"
     },
-    "readinessIntro": "Hoe vollediger je profiel, hoe makkelijker werkgevers je vinden — en hoe preciezer we passende behoeften kunnen tonen.",
+    "readinessIntro": "Hoe vollediger je profiel, hoe makkelijker werkgevers je vinden — en hoe preciezer we passende aanvragen kunnen tonen.",
     "ready": {
       "workType": "Sector & werktype",
       "skills": "Vaardigheden",
@@ -7830,9 +7830,9 @@
     },
     "ctaProfile": "Maak je profiel compleet",
     "needsAccessTitle": "Kansen worden voorbereid",
-    "needsAccessBody": "Personeelsbehoeften van werkgevers verschijnen hier zodra zichtbaarheid voor werknemers is ingeschakeld. Maak intussen je profiel compleet, zodat je klaar bent zodra passende behoeften verschijnen.",
-    "emptyTitle": "Op dit moment geen open behoeften",
-    "emptyBody": "Wanneer werkgevers nieuwe behoeften plaatsen, verschijnen ze hier. Intussen is het de moeite waard om je profiel compleet te maken.",
+    "needsAccessBody": "Personeelsaanvragen van werkgevers verschijnen hier zodra zichtbaarheid voor werknemers is ingeschakeld. Maak intussen je profiel compleet, zodat je klaar bent zodra passende aanvragen verschijnen.",
+    "emptyTitle": "Op dit moment geen open aanvragen",
+    "emptyBody": "Wanneer werkgevers nieuwe aanvragen plaatsen, verschijnen ze hier. Intussen is het de moeite waard om je profiel compleet te maken.",
     "trustNote": "Werknemers zien eerst alleen goedgekeurde of veilig beheerde kansen. Dit helpt risico's te verminderen en een betrouwbaardere arbeidsmarkt op te bouwen.",
     "approvedEmptyTitle": "Nog geen goedgekeurde kansen.",
     "approvedEmptyBody": "Maak je profiel compleet zodat we je beter kunnen matchen met passende kansen zodra ze zijn goedgekeurd.",
@@ -7851,7 +7851,7 @@
       "country_unknown": "Je land is niet ingesteld",
       "availability_unknown": "Beschikbaarheid niet ingesteld"
     },
-    "fieldRoleUnknown": "Werkbehoefte",
+    "fieldRoleUnknown": "Werkaanvraag",
     "fieldCountry": "Land",
     "fieldStart": "Start",
     "fieldTeam": "Mensen",
@@ -7892,7 +7892,7 @@
         "insufficient_data": "Nog niet vergelijkbaar"
       },
       "basis": "{matched} van {total} vereiste vaardigheden komen overeen ({confirmed} door manager bevestigd)",
-      "recognizedNote": "eisen herkend uit de behoeftetekst — nog niet bevestigd",
+      "recognizedNote": "eisen herkend uit de aanvraagtekst — nog niet bevestigd",
       "missingPrefix": "ontbreekt:"
     },
     "recommendations": {

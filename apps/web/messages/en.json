@@ -2940,8 +2940,8 @@
     "work_done": "Work done",
     "skill_claim": "Skill claim",
     "service_offer": "Service offer",
-    "worker_need": "Work need (worker)",
-    "project_need": "Project need",
+    "worker_need": "Work inquiry (worker)",
+    "project_need": "Project inquiry",
     "team_offer": "Team offer",
     "company_activity": "Company activity",
     "learning_goal": "Learning goal",
@@ -7668,9 +7668,9 @@
     "structuredNote": "We read your CV and turn it into a profile you can review — you check every suggestion and decide what is saved."
   },
   "needStructuring": {
-    "pageTitle": "Need structuring",
-    "pageIntro": "Submitted needs that lack structured fields. The system suggests work type, country, count, timing and accommodation from the text — confirm or correct. Only confirmed closed-set fields reach the worker board.",
-    "empty": "All submitted needs already have structured fields.",
+    "pageTitle": "Inquiry structuring",
+    "pageIntro": "Submitted inquiries that lack structured fields. The system suggests work type, country, count, timing and accommodation from the text — confirm or correct. Only confirmed closed-set fields reach the worker board.",
+    "empty": "All submitted inquiries already have structured fields.",
     "footnote": "Suggestions are deterministic (keyword-based), not AI. Free text is shown here only and never reaches the worker board.",
     "freeTextHeading": "Original text (admin-only)",
     "freeText": {
@@ -7794,7 +7794,7 @@
       }
     },
     "title": "Opportunities for you",
-    "intro": "Here you'll see employer needs that could fit you, and what's worth adding to your profile to be ready.",
+    "intro": "Here you'll see employer inquiries that could fit you, and what's worth adding to your profile to be ready.",
     "noWorkerBody": "Finish your worker profile first to see opportunities that fit you.",
     "readinessTitle": "Your readiness",
     "matchTitle": "Match breakdown",
@@ -7818,7 +7818,7 @@
       "check": "check",
       "unknown": "unknown"
     },
-    "readinessIntro": "The fuller your profile, the easier it is for employers to find you — and the more precisely we can show fitting needs.",
+    "readinessIntro": "The fuller your profile, the easier it is for employers to find you — and the more precisely we can show fitting inquiries.",
     "ready": {
       "workType": "Sector & work type",
       "skills": "Skills",
@@ -7830,9 +7830,9 @@
     },
     "ctaProfile": "Complete your profile",
     "needsAccessTitle": "Opportunities are being prepared",
-    "needsAccessBody": "Employer needs will appear here once worker visibility is enabled. In the meantime, complete your profile so you're ready the moment fitting needs appear.",
-    "emptyTitle": "No open needs right now",
-    "emptyBody": "When employers post new needs, they'll show up here. In the meantime it's worth completing your profile.",
+    "needsAccessBody": "Employer inquiries will appear here once worker visibility is enabled. In the meantime, complete your profile so you're ready the moment fitting inquiries appear.",
+    "emptyTitle": "No open inquiries right now",
+    "emptyBody": "When employers post new inquiries, they'll show up here. In the meantime it's worth completing your profile.",
     "trustNote": "Workers first see only approved or safely managed opportunities. This helps reduce risk and build a more reliable labour market.",
     "approvedEmptyTitle": "No approved opportunities yet.",
     "approvedEmptyBody": "Complete your profile so we can better match you with suitable opportunities once they are approved.",
@@ -7851,7 +7851,7 @@
       "country_unknown": "Your country isn't set",
       "availability_unknown": "Availability not set"
     },
-    "fieldRoleUnknown": "Work need",
+    "fieldRoleUnknown": "Work inquiry",
     "fieldCountry": "Country",
     "fieldStart": "Start",
     "fieldTeam": "People",
@@ -7969,9 +7969,9 @@
     "myInterest": {
       "title": "My interest",
       "summary": "Total: {count}",
-      "intro": "Needs you showed interest in, with their current state. The entry stays even after a need closes.",
-      "closed": "This need is no longer active",
-      "viewDemand": "View the need",
+      "intro": "Inquiries you showed interest in, with their current state. The entry stays even after an inquiry closes.",
+      "closed": "This inquiry is no longer active",
+      "viewDemand": "View the inquiry",
       "cvLink": "View tailored CV",
       "status": {
         "interested": "Sent",
