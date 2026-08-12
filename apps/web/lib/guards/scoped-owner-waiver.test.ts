@@ -262,7 +262,22 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // route. #1123 changes the route's CTA markup only (a <button> nested in
     // the anchor becomes the anchor itself); the gate reports "0 new product
     // surface(s)" and the six excused findings are unchanged.
-    expect(w.pullRequests).toEqual([1119, 1123]);
+    //
+    // [1119, 1123] -> [1119, 1123, 1131] under OWNER APPROVAL, PUBLIC BETA
+    // TRAIN V6_4 §1 "OWNER APPROVAL B" (2026-08-12): "The owner explicitly
+    // authorizes adding PR 1131 to public-acquisition-route-create-cv ...
+    // pullRequests list", and "ONLY for the six already-known /create-cv A-01
+    // findings described in the V6.3 report" — explicitly NOT authority for
+    // future waivers, unrelated findings, a wider scope or changed expected
+    // findings.
+    //
+    // Again the RECORD count is untouched. #1131 changes two CTA hrefs on the
+    // route so the free-CV intent survives signup (`?next=/dashboard/profile`);
+    // the gate reports "0 new product surface(s)" and the six excused findings
+    // are byte-identical. Verified by RUNNING the gate at head 7809272d, both
+    // ways: PR 1131 -> PASS_WITH_SCOPED_TRANSITIONAL_WAIVER, and an unlisted PR
+    // -> still `pr-not-covered`, proving the list grew by one and not by scope.
+    expect(w.pullRequests).toEqual([1119, 1123, 1131]);
     expect(w.owner).toMatch(/PUBLIC BETA TRAIN V3/);
     // A waiver with no named resolution is a permanent exception wearing a
     // deadline. This one names the constitution decision that deletes it.

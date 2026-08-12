@@ -121,8 +121,37 @@ export const SCOPED_OWNER_WAIVERS = [
      * expiry and the subset rule all still bind; a seventh finding anywhere
      * still un-waives the whole run; and no other PR, route or axiom inherits
      * anything from this line.
+     *
+     * ── #1131 (2026-08-12) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, PUBLIC BETA TRAIN V6_4 §1 "OWNER APPROVAL B", verbatim:
+     *   "The owner explicitly authorizes adding PR 1131 to
+     *    public-acquisition-route-create-cv ... pullRequests list."
+     *   "This approval is ONLY for the six already-known /create-cv A-01
+     *    findings described in the V6.3 report."
+     * and, equally binding, what it is NOT: not permission for future waivers,
+     * not for unrelated product-gate findings, not to weaken the product
+     * constitution, not to expand the waiver scope, not to change the expected
+     * findings. None of those were touched.
+     *
+     * The owner's pre-conditions were checked by RUNNING the gate, not by
+     * reasoning about it — the CI run on head `7809272d` is the evidence:
+     *   * "product-gate: 0 new product surface(s) in this diff" — its own words;
+     *   * exactly SIX findings, all `/create-cv`, all axiom A-01, byte-identical
+     *     to `expectedFindings` below — the subset rule satisfied with nothing
+     *     left over, and no unrelated finding anywhere in the run;
+     *   * the sole rejection was `pr-not-covered`, i.e. the waiver was working
+     *     correctly and simply did not list this PR;
+     *   * PR head unchanged from the one the owner approved (`7809272d`);
+     *   * `expiresAt` unchanged.
+     *
+     * WHAT #1131 ACTUALLY DOES to this route: two CTA hrefs gain
+     * `?next=/dashboard/profile` (from one named constant), so a visitor who
+     * came to build a free CV is no longer dropped on the generic dashboard
+     * after signup. The route's existence, purpose and copy are untouched —
+     * the same class of change as #1123, which is why the ruling that approved
+     * the route still covers it.
      */
-    pullRequests: [1119, 1123],
+    pullRequests: [1119, 1123, 1131],
     // Deliberately empty: the waiver must live IN the branch whose CI honours
     // it, so writing the head SHA down changes the head SHA. The PR number is
     // the binding key; see the module header.
