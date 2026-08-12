@@ -45,6 +45,19 @@ const APPLIED_SOURCE =
   "supabase/migrations/20260711130000_privacy_consent_and_disclosure_v1.sql";
 
 const migration = () => readRepo(MIGRATION);
+/**
+ * The header prose is hard-wrapped inside `--` comment lines, so a
+ * SENTENCE-level assertion has to read the content, not the wrapping. Stripping
+ * the comment leaders and collapsing whitespace keeps each phrase requirement
+ * exact while letting the author re-wrap the block freely. SQL-level
+ * assertions keep using `migration()` — only prose uses this.
+ */
+const migrationFlat = () =>
+  migration()
+    .split("\n")
+    .map((l) => l.replace(/^\s*--\s?/, ""))
+    .join(" ")
+    .replace(/\s+/g, " ");
 const rollback = () => readRepo(ROLLBACK);
 
 /** SQL with `-- …` comment lines removed — so pins cannot be satisfied by
@@ -68,19 +81,45 @@ function fnBody(src: string, signature: string): string {
 const norm = (s: string) => s.replace(/\s+/g, " ").trim();
 
 describe("owner gate — draft, never self-approved, paired rollback", () => {
-  it("carries the DRAFT needs-human-gate header and the never-db-push rule", () => {
-    const m = migration();
-    expect(m).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY automatically/);
+  it("pins the apply ROUTE, which the owner decision did not change", () => {
+    // Until 2026-08-12 this also asserted a "DRAFT — needs-human-gate" header.
+    // That half moved when the owner approved the marker (see below) — the file
+    // is no longer a draft. What must NEVER move is how it reaches production:
+    // the MCP apply path, and the standing prohibition on `db push`.
+    const m = migrationFlat();
     expect(m).toMatch(/Apply ONLY via Supabase MCP apply_migration/);
-    expect(m).toMatch(/Never `db push`/);
+    expect(m).toMatch(/NEVER `db push`/i);
+    // It also keeps naming its own RED classification, so nobody later reads
+    // "approved" as "routine".
+    expect(m).toMatch(/RED-class by classification/);
   });
 
-  it("does NOT carry `@human-gate-approved` — no owner decision exists yet", () => {
-    // The agent must never self-approve. migration-safety CI going RED on this
-    // file is the intended, honest state until the owner reviews it. If a
-    // decision is later given, replace this assertion with one naming the
-    // decision (the repo convention is that the rule MOVES, never disappears).
-    expect(migration()).not.toMatch(/^--\s*@human-gate-approved\s*$/m);
+  it("carries `@human-gate-approved` ONLY beside the named owner decision", () => {
+    // THE RULE MOVED, IT DID NOT DISAPPEAR. Until 2026-08-12 this asserted the
+    // marker was ABSENT, because no owner decision existed and an agent must
+    // never self-approve. The owner then granted it in writing (TRAIN_V6_4 §1,
+    // Approval A). So the guard now pins the stronger property: the marker may
+    // exist, but ONLY with the decision that authorised it recorded in the same
+    // file. A bare marker — the shape a self-approving agent would produce —
+    // still fails.
+    // The marker itself is a LINE-level fact, so it reads the raw file.
+    expect(migration()).toMatch(/^--\s*@human-gate-approved\s*$/m);
+    // Everything that must accompany it is prose, so it reads the flattened
+    // form — the phrases must be present, however the block is wrapped.
+    const m = migrationFlat();
+    expect(m).toMatch(/OWNER APPROVAL — GRANTED/);
+    expect(m).toMatch(/TRAIN_V6_4/);
+    // The scope of that approval must stay written down: this migration only.
+    expect(m).toContain("20260809120000");
+    expect(m).toMatch(/carries no authority for any other migration/i);
+    // And the apply route may never silently become db push.
+    expect(m).toMatch(/NEVER `db push`/i);
+  });
+
+  it("still records that C1/C2a/C2b were the conditions of that approval", () => {
+    const m = migration();
+    for (const c of ["C1", "C2a", "C2b"]) expect(m, c).toContain(c);
+    expect(m).toMatch(/SATISFIED/);
   });
 
   it("points at the owner decision memo, and the memo exists", () => {

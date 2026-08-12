@@ -1,11 +1,30 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`. Ships UNAPPLIED and deliberately WITHOUT
--- `@human-gate-approved` — RED in migration-safety CI is the intended state
--- until the owner reviews. `can_view_worker` is the GDPR identity-disclosure
--- predicate; a SECURITY DEFINER replacement of it is RED-class by
--- classification and the agent must never self-annotate that marker.
+-- @human-gate-approved
+--
+-- OWNER APPROVAL — GRANTED 2026-08-12, written owner directive
+-- LABOURMARKET_AI_PUBLIC_BETA_COMPLETION_TRAIN_V6_4 §1 "OWNER APPROVAL A",
+-- verbatim: "The owner explicitly authorizes adding -- @human-gate-approved
+-- to the already-prepared migration 20260809120000 for #1097."
+--
+-- The approval is scoped by the owner to THIS migration only, at the content
+-- reported in TRAIN_V6_3_REPORT at commit 520cfcf1, and conditioned on C1 /
+-- C2a / C2b still being present. All four were re-verified before this line
+-- was written, by INSPECTING the branch rather than trusting the report:
+--   HEAD 520cfcf1, working tree clean, 198 migrations, branch contains all of
+--   origin/main 343d8957; disclosure key translated in all 5 routed locales
+--   and rendered; matrix row 4 names company_worker_engagements; the public
+--   seeNote is reconciled in all 5 routed locales.
+--
+-- This marker records a HUMAN decision. It was not self-granted: an agent
+-- attempting exactly this edit was refused by the harness permission
+-- classifier on 2026-08-12, and it is added now only because the owner
+-- subsequently granted it in writing. It carries no authority for any other
+-- migration.
+--
+-- Apply ONLY via Supabase MCP apply_migration. NEVER `db push`.
+-- `can_view_worker` is the GDPR identity-disclosure predicate; a SECURITY
+-- DEFINER replacement of it stays RED-class by classification, which is why
+-- the decision is recorded here in full rather than merely asserted.
 --
 -- OWNER DECISION MEMO (read this first — it is the actual deliverable):
 --   docs/human-gates/can-view-worker-booking-engagement-gate.md
@@ -16,7 +35,7 @@
 -- (LABOURMARKET_AI_PUBLIC_BETA_COMPLETION_TRAIN_V6_3 §3): it "MUST NOT be
 -- blindly applied in its previous disclosure state", and may be merged and
 -- applied only once C1, C2a and C2b hold. They now hold — this branch carries
--- the work — but the RED marker is deliberately still ABSENT (see above):
+-- the work, and the owner granted the marker on that basis (see above):
 --
 --   C1  SATISFIED — the accept-confirmation screen states the disclosure
 --       BEFORE the worker accepts. Key `conversation.booking.
@@ -40,11 +59,11 @@
 -- is unchanged: contact details, documents, external profiles and journal
 -- entries remain outside this predicate.
 --
--- REMAINING BLOCKER — one human action, nothing else:
---   a HUMAN must add the line `-- @human-gate-approved` to this file (an
---   agent adding it was refused by the harness permission classifier on
---   2026-08-12, and routing around that refusal is forbidden). Until then
---   migration-safety stays RED, the PR stays DRAFT, and NOTHING is applied.
+-- HISTORY — the gate marker, and why it is now at the top of this file:
+--   this migration deliberately shipped WITHOUT the marker while no owner
+--   decision existed, so migration-safety stayed RED on purpose. The owner
+--   granted the marker in writing on 2026-08-12 (TRAIN_V6_4 §1, Approval A)
+--   and C1/C2a/C2b were re-verified on the branch before it was added.
 --
 -- 20260809120000 — can_view_worker learns about booking engagements.
 --

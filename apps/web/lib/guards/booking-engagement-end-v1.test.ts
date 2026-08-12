@@ -686,6 +686,29 @@ describe("the migration set is exactly what this slice declared", () => {
       // `pg_proc.prosrc` rather than by eye. Guard for that provenance:
       // lib/guards/caller-manages-worker-engagements.test.ts.
       "20260808150000_caller_manages_worker_engagements_v1.sql",
+      // 2026-08-12: #1097 — can_view_worker learns about booking engagements.
+      // The marker records that the RED content (a SECURITY DEFINER function
+      // body + its GRANT/REVOKE posture) is INTENTIONAL: replacing the GDPR
+      // identity-disclosure predicate IS the change.
+      //
+      // AN APPLY APPROVAL EXISTS, and it was CONDITIONAL. The owner first
+      // approved only the PREPARATION (train v6.3 §3): the widening "MUST NOT
+      // be blindly applied in its previous disclosure state", and could be
+      // merged/applied only once C1 (the accept screen states the disclosure),
+      // C2a (legal-basis matrix names company_worker_engagements) and C2b (the
+      // public data-access matrix stops under-claiming) held. Those three
+      // shipped in 520cfcf1 and the migration stayed deliberately UNMARKED —
+      // an agent attempting the marker was refused by the harness permission
+      // classifier, and that refusal was respected rather than routed around.
+      // The owner then granted the marker outright in train v6.4 §1
+      // "OWNER APPROVAL A", scoped to this migration only. It was added in the
+      // same commit that recorded the decision, and only after re-verifying on
+      // the branch (not from the prior report) that HEAD was 520cfcf1, the tree
+      // clean, the count 198, main fully contained, and C1/C2a/C2b still
+      // present. Guard for that provenance — including a negative control that
+      // a BARE marker without the recorded decision fails:
+      // lib/guards/can-view-worker-booking-engagement.test.ts.
+      "20260809120000_can_view_worker_booking_engagement_v1.sql",
       // 2026-08-09: public vacancy persistence v1. The marker records that the
       // RED content (GRANT/REVOKE and a CREATE POLICY) is STRUCTURALLY
       // UNAVOIDABLE — there is no way to add a table with row-level security
