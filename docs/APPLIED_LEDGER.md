@@ -35,6 +35,85 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260808150000_caller_manages_worker_engagements_v1` (#1095, beta-audit P1 defect A1)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-12** via Supabase MCP `apply_migration` (`{"success":true}`). Never `db push` |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260812180224`, name `caller_manages_worker_engagements_v1` (match on `name` — the drift documented above recurs: prod stamps APPLY TIME as `version`) |
+| PR | **#1095**, branch `fix/cc/caller-manages-worker-engagements`, squash-merged as main **`9e20f1b4`** (from `1d16912d`) |
+| Owner gate | "**#1095 = APPROVED YES**", public beta completion train v6.2 directive, 2026-08-12. The `@human-gate-approved` marker was added in the SAME commit that recorded the decision (`f7705f05`), never on agent initiative |
+| Checksums | migration file sha256 `df8019bd…2d80a`; comment-stripped executable sha256 `aac4b753…6d7f6` (102 lines, `begin;` → `commit;`) — the executable portion is what was applied, verbatim |
+
+**What it does**: three `create or replace function` bodies, no schema change.
+(1) NEW `caller_manages_worker_by_roster(uuid)` — the pre-existing roster rule
+under an honest name. (2) `caller_manages_worker(uuid)` — delegates to the
+helper OR an ACTIVE `company_worker_engagements` row for a company the caller
+owns (the A1 fix). (3) `assign_worker_to_project(text,text)` — restores the
+`caller_has_booking_engagement_for_project` OR-branch that W11's
+`20260804120000` silently reverted, bound to `by_roster` (NOT the widened
+predicate) so engagement authority cannot leak to a sibling company's project.
+No table, column, index, constraint, trigger or policy added/changed. **Zero DML.**
+
+**The two claims a reviewer cannot check by eye were proven MECHANICALLY, not asserted.**
+Both "body preserved from the APPLIED migration" claims were verified BEFORE
+merge by comparing comment-stripped, whitespace-normalised md5 of the repo file's
+function bodies against production `pg_proc.prosrc`:
+
+| Claim | Digest | Result |
+|---|---|---|
+| `caller_manages_worker_by_roster` body == pre-apply `caller_manages_worker` | `0595bf33df9029f9aea83b7db4d61488` (303 chars) | **EXACT MATCH** |
+| `assign_worker_to_project` body, with the ONE new auth clause reverted, == prod | `58b6d2f458466d39212dd200bb38dc77` (1190 chars) | **EXACT MATCH** |
+
+So the migration provably changes exactly one authorization line in
+`assign_worker_to_project` and nothing else in that body — W11's
+completed-project guard included.
+
+**Pre-apply checks (read-only, immediately before, all as the header predicted)**:
+`caller_manages_worker` mentions `company_worker_engagements` → **false** (the
+A1 defect still live); `caller_manages_worker_by_roster` → **0 rows** (name
+free); `assign_worker_to_project` mentions
+`caller_has_booking_engagement_for_project` → **false** (W11's revert still
+live); `caller_has_booking_engagement_for_project` existed with **0 callers**
+(orphaned SECURITY DEFINER function). Policies on
+`workers`+`worker_skills`+`worker_professions`+`worker_languages` = **9**.
+`company_worker_engagements` = **0 rows**. `worker_absences` at
+`status='requested'` = **0 rows**.
+
+**Post-apply verified by production read-back (not inferred)**:
+`caller_manages_worker` now delegates to `by_roster` AND carries the engagement
+branch, and does NOT re-inline `company_workers`/`agency_workers`.
+`caller_manages_worker_by_roster` normalised md5 = **`0595bf33…`** — byte-for-byte
+the pre-apply `caller_manages_worker` body, so the roster rule survived
+verbatim. `assign_worker_to_project` carries the project-bound helper AND still
+carries W11's `Project is completed` guard, and does NOT reference
+`company_worker_engagements` directly. All three: `prosecdef=true`,
+`search_path=public` pinned, ACL exactly `postgres=X | authenticated=X` — no
+`PUBLIC`, no `anon`. **Policy count unchanged at 9**; total public policies 255,
+tables 139. `company_worker_engagements` still **0 rows** and
+`project_worker_assignments` still **2 rows** — zero DML confirmed.
+`caller_has_booking_engagement_for_project` caller count **0 → 1**: the orphaned
+bridge is reconnected, which is the measurable proof of Problem 2's fix.
+`can_view_worker` still has NO engagement branch — #1097 correctly NOT applied.
+
+**⚠️ HONEST GAP — the per-role BEHAVIOURAL proof was NOT executed.**
+`scripts/db-proof/a1-caller-manages-worker-engagements.sh` (which measures
+engaged-employer authority, SIBLING-company isolation, UNRELATED-employer
+refusal, ENDED-engagement revocation, private-reason protection and worker
+self-access, BEFORE→AFTER→ROLLBACK→RE-APPLY against a throwaway Postgres) could
+not run: the sandbox classifier denied the Docker invocation. It was NOT run
+against production, and no test rows were created in production.
+**The exposure of that gap is bounded to zero.** Production holds **0
+`company_worker_engagements` rows**, so the new OR-branch is `exists(<empty>)`
+for every caller — it grants authority to nobody today, and cannot until a
+worker accepts a booking. What IS proven is the structure (above) and the
+static branch-narrowness guards in
+`apps/web/lib/guards/caller-manages-worker-engagements.test.ts`. Running the
+DB proof remains the outstanding verification for this migration.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260809160000_public_vacancy_persistence_v1` (#1107, real-supply foundation)
 
 | Field | Value |
