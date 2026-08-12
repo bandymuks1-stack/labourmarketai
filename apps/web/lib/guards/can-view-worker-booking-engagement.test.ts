@@ -1,0 +1,486 @@
+import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * CAN_VIEW_WORKER × BOOKING ENGAGEMENTS GUARDS (v1).
+ *
+ * `public.can_view_worker(uuid)` (applied migration 20260711130000) is the
+ * GDPR identity-disclosure predicate behind FOUR RLS policies —
+ * workers_select, worker_skills_select, worker_professions_select,
+ * worker_languages_select — and the `request_contact_disclosure` ask guard.
+ * Its body deliberately separates a CONSENT basis (employer discovery,
+ * requires a current granted `profile_discoverability`) from a
+ * CONTRACT / LEGITIMATE-INTEREST basis (active rosters, active
+ * engagement_contexts, active managed-project assignment). It had no
+ * `company_worker_engagements` branch.
+ *
+ * Migration 20260809120000 adds one, on the legitimate-interest arm. The
+ * owner decision memo — including the honest analysis of whether this makes
+ * discoverability consent bypassable — is
+ * docs/human-gates/can-view-worker-booking-engagement-gate.md.
+ *
+ * These guards pin: the owner gate (draft, never self-approved), the exact
+ * shape and narrowness of the new branch, its byte-identity with PR #1095's
+ * `caller_manages_worker` branch (one meaning of "engaged" in one database),
+ * the consent arm surviving untouched, the absence of any schema / policy /
+ * grant-widening / DML change, the paired rollback restoring the applied body,
+ * and the existence of the executable DB proof and the memo itself.
+ */
+
+const APP_ROOT = join(__dirname, "..", "..");
+const REPO_ROOT = join(APP_ROOT, "..", "..");
+const readRepo = (rel: string) => readFileSync(join(REPO_ROOT, rel), "utf8");
+const repoPath = (rel: string) => join(REPO_ROOT, rel);
+
+const MIGRATION =
+  "supabase/migrations/20260809120000_can_view_worker_booking_engagement_v1.sql";
+const ROLLBACK =
+  "supabase/rollbacks/20260809120000_can_view_worker_booking_engagement_v1.down.sql";
+const PROOF = "scripts/db-proof/can-view-worker-booking-engagement.sh";
+const PROOF_PRELUDE = "scripts/db-proof/can-view-worker-booking-engagement.prelude.sql";
+const PROOF_SEED = "scripts/db-proof/can-view-worker-booking-engagement.seed.sql";
+const MEMO = "docs/human-gates/can-view-worker-booking-engagement-gate.md";
+const APPLIED_SOURCE =
+  "supabase/migrations/20260711130000_privacy_consent_and_disclosure_v1.sql";
+
+const migration = () => readRepo(MIGRATION);
+/**
+ * The header prose is hard-wrapped inside `--` comment lines, so a
+ * SENTENCE-level assertion has to read the content, not the wrapping. Stripping
+ * the comment leaders and collapsing whitespace keeps each phrase requirement
+ * exact while letting the author re-wrap the block freely. SQL-level
+ * assertions keep using `migration()` — only prose uses this.
+ */
+const migrationFlat = () =>
+  migration()
+    .split("\n")
+    .map((l) => l.replace(/^\s*--\s?/, ""))
+    .join(" ")
+    .replace(/\s+/g, " ");
+const rollback = () => readRepo(ROLLBACK);
+
+/** SQL with `-- …` comment lines removed — so pins cannot be satisfied by
+ *  header prose that merely *describes* the property. */
+const stripped = (src: string) =>
+  src
+    .split("\n")
+    .filter((l) => !l.trimStart().startsWith("--"))
+    .join("\n");
+
+/** The body of one `create or replace function` block, up to the next one. */
+function fnBody(src: string, signature: string): string {
+  const start = src.indexOf(`create or replace function ${signature}`);
+  expect(start, `${signature} present`).toBeGreaterThan(-1);
+  const rest = src.slice(start + 1);
+  const next = rest.indexOf("create or replace function ");
+  return rest.slice(0, next === -1 ? undefined : next);
+}
+
+/** Whitespace-insensitive comparison of two SQL fragments. */
+const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+
+describe("owner gate — draft, never self-approved, paired rollback", () => {
+  it("pins the apply ROUTE, which the owner decision did not change", () => {
+    // Until 2026-08-12 this also asserted a "DRAFT — needs-human-gate" header.
+    // That half moved when the owner approved the marker (see below) — the file
+    // is no longer a draft. What must NEVER move is how it reaches production:
+    // the MCP apply path, and the standing prohibition on `db push`.
+    const m = migrationFlat();
+    expect(m).toMatch(/Apply ONLY via Supabase MCP apply_migration/);
+    expect(m).toMatch(/NEVER `db push`/i);
+    // It also keeps naming its own RED classification, so nobody later reads
+    // "approved" as "routine".
+    expect(m).toMatch(/RED-class by classification/);
+  });
+
+  it("carries `@human-gate-approved` ONLY beside the named owner decision", () => {
+    // THE RULE MOVED, IT DID NOT DISAPPEAR. Until 2026-08-12 this asserted the
+    // marker was ABSENT, because no owner decision existed and an agent must
+    // never self-approve. The owner then granted it in writing (TRAIN_V6_4 §1,
+    // Approval A). So the guard now pins the stronger property: the marker may
+    // exist, but ONLY with the decision that authorised it recorded in the same
+    // file. A bare marker — the shape a self-approving agent would produce —
+    // still fails.
+    // The marker itself is a LINE-level fact, so it reads the raw file.
+    expect(migration()).toMatch(/^--\s*@human-gate-approved\s*$/m);
+    // Everything that must accompany it is prose, so it reads the flattened
+    // form — the phrases must be present, however the block is wrapped.
+    const m = migrationFlat();
+    expect(m).toMatch(/OWNER APPROVAL — GRANTED/);
+    expect(m).toMatch(/TRAIN_V6_4/);
+    // The scope of that approval must stay written down: this migration only.
+    expect(m).toContain("20260809120000");
+    expect(m).toMatch(/carries no authority for any other migration/i);
+    // And the apply route may never silently become db push.
+    expect(m).toMatch(/NEVER `db push`/i);
+  });
+
+  it("still records that C1/C2a/C2b were the conditions of that approval", () => {
+    const m = migration();
+    for (const c of ["C1", "C2a", "C2b"]) expect(m, c).toContain(c);
+    expect(m).toMatch(/SATISFIED/);
+  });
+
+  it("points at the owner decision memo, and the memo exists", () => {
+    expect(migration()).toContain(MEMO);
+    expect(existsSync(repoPath(MEMO))).toBe(true);
+  });
+
+  it("ships a paired rollback and an executable DB proof", () => {
+    expect(existsSync(repoPath(ROLLBACK))).toBe(true);
+    expect(existsSync(repoPath(PROOF))).toBe(true);
+    expect(existsSync(repoPath(PROOF_PRELUDE))).toBe(true);
+    expect(existsSync(repoPath(PROOF_SEED))).toBe(true);
+    // The proof must execute the REAL files, not a re-implementation.
+    const proof = readRepo(PROOF);
+    expect(proof).toContain(MIGRATION.replace("supabase/migrations/", ""));
+    expect(proof).toContain(ROLLBACK.replace("supabase/rollbacks/", ""));
+    expect(proof).toMatch(/BEFORE/);
+    expect(proof).toMatch(/ROLLBACK/);
+    expect(proof).toMatch(/RE-APPLY/);
+  });
+});
+
+describe("the new branch — exact shape and narrowness", () => {
+  const body = () => fnBody(stripped(migration()), "public.can_view_worker(w uuid)");
+
+  it("admits company_worker_engagements", () => {
+    expect(body()).toContain("public.company_worker_engagements");
+  });
+
+  it("requires worker_id IS NOT NULL — a #856-detached row grants nothing", () => {
+    expect(body()).toMatch(/e\.worker_id is not null/);
+  });
+
+  it("requires status = 'active' — an ended engagement grants nothing", () => {
+    expect(body()).toMatch(/e\.status = 'active'/);
+  });
+
+  it("is caller-bound through owns_company (never a client-supplied company)", () => {
+    expect(body()).toMatch(/public\.owns_company\(e\.company_id\)/);
+  });
+
+  it("does NOT admit manages_organization for the engagement branch", () => {
+    // Org-manager authority over engagement-based IDENTITY disclosure would be
+    // a new authority widening on the GDPR predicate and needs its own owner
+    // decision. `manages_organization` still appears in the pre-existing
+    // engagement_contexts branch — that one is untouched.
+    const src = body();
+    const engagementBranch =
+      src.split("public.company_worker_engagements")[1]?.split(")\n")[0] ?? "";
+    expect(engagementBranch).not.toMatch(/manages_organization/);
+    // …and the pre-existing branch that legitimately uses it is still there.
+    expect(src).toMatch(/engagement_contexts[\s\S]*manages_organization/);
+  });
+
+  it("does NOT consult the booking's dates — one definition of 'engaged'", () => {
+    // Gating on expected_end_date here would disagree with
+    // caller_manages_worker (PR #1095) and re-break the absence list. Expiry is
+    // memo follow-up F1, on the engagement lifecycle, not on this predicate.
+    expect(body()).not.toMatch(/expected_end_date|booking_requests/);
+  });
+
+  it("matches the ALREADY-APPLIED list_booking_engagement_workers_v1 predicate", () => {
+    // 20260723120000 (applied to prod 2026-07-23) already discloses the engaged
+    // worker's display_name to the engaging company owner, under exactly these
+    // three conditions, via a SECURITY DEFINER RPC that bypasses this
+    // predicate. If those conditions ever diverge, the RLS answer and the RPC
+    // answer disagree again — which is the defect this migration closes.
+    const applied = stripped(readRepo(APPLIED_SOURCE));
+    void applied; // the RPC lives in 20260723120000; conditions pinned below
+    const src = body();
+    for (const cond of [
+      "worker_id is not null",
+      "status = 'active'",
+      "owns_company",
+    ]) {
+      expect(src).toContain(cond);
+    }
+  });
+});
+
+describe("the consent arm is untouched", () => {
+  const body = () => fnBody(stripped(migration()), "public.can_view_worker(w uuid)");
+
+  it("is_employer() is still AND-ed with worker_profile_discoverable", () => {
+    const src = body();
+    const employerBranch = src.split("is_employer()")[1] ?? "";
+    expect(employerBranch).toMatch(/^\s*and\s/);
+    expect(employerBranch).toMatch(/worker_profile_discoverable/);
+  });
+
+  it("keeps all four pre-existing relationship branches", () => {
+    const src = body();
+    for (const rel of [
+      "public.company_workers",
+      "public.agency_workers",
+      "public.engagement_contexts",
+      "public.project_worker_assignments",
+    ]) {
+      expect(src).toContain(rel);
+    }
+    expect(src).toContain("public.owns_worker(w)");
+    expect(src).toContain("public.is_admin()");
+  });
+
+  it("adds exactly ONE branch to the applied body (no other line moves)", () => {
+    // Take the applied 20260711130000 body, inject nothing, and check that
+    // deleting the engagement branch from the new body reproduces it exactly.
+    const applied = fnBody(stripped(readRepo(APPLIED_SOURCE)), "public.can_view_worker(w uuid)");
+    const appliedSelect = applied.split("$$")[1] ?? "";
+
+    const next = fnBody(stripped(migration()), "public.can_view_worker(w uuid)");
+    const nextSelect = next.split("$$")[1] ?? "";
+    const withoutBranch = nextSelect.replace(
+      /or exists \(\s*select 1\s*from public\.company_worker_engagements e[\s\S]*?\)\s*(?=or exists)/,
+      "",
+    );
+
+    expect(norm(withoutBranch)).toBe(norm(appliedSelect));
+  });
+});
+
+describe("no schema, policy, grant-widening or DML change", () => {
+  const sql = () => stripped(migration());
+
+  it("creates or alters no table, column, index, constraint or trigger", () => {
+    expect(sql()).not.toMatch(/\bcreate table\b|\balter table\b|\bcreate index\b|\bcreate trigger\b/i);
+  });
+
+  it("creates, drops or alters no RLS policy", () => {
+    expect(sql()).not.toMatch(/\bcreate policy\b|\bdrop policy\b|\balter policy\b/i);
+  });
+
+  it("writes no rows at apply time", () => {
+    expect(sql()).not.toMatch(/\binsert into\b|\bupdate public\.|\bdelete from\b|\btruncate\b/i);
+  });
+
+  it("drops nothing", () => {
+    expect(sql()).not.toMatch(/\bdrop\s+(table|column|function|policy|index|trigger)\b/i);
+  });
+
+  it("re-states the EXISTING grant posture only (anon and PUBLIC hold nothing)", () => {
+    const s = sql();
+    expect(s).toMatch(/revoke all on function public\.can_view_worker\(uuid\) from public;/);
+    expect(s).toMatch(/revoke all on function public\.can_view_worker\(uuid\) from anon;/);
+    expect(s).toMatch(/grant execute on function public\.can_view_worker\(uuid\) to authenticated;/);
+    // No role other than `authenticated` is ever granted anything here.
+    // (Statement lines only — `stripped()` drops whole comment lines, not the
+    // trailing `-- …` notes inside the function body.)
+    const grants = s
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => /^grant\b/i.test(l));
+    expect(grants.length).toBeGreaterThan(0);
+    for (const g of grants) {
+      // Compare the GRANTEE list only — the object name legitimately contains
+      // the schema qualifier `public.`, which is not a role.
+      const grantee = (g.match(/\bto\s+([^;]+);?\s*$/i)?.[1] ?? "").trim();
+      expect(grantee).toBe("authenticated");
+    }
+  });
+
+  it("preserves signature, SECURITY DEFINER, STABLE and the pinned search_path", () => {
+    const s = sql();
+    expect(s).toMatch(/create or replace function public\.can_view_worker\(w uuid\)/);
+    expect(s).toMatch(/returns boolean/);
+    expect(s).toMatch(/security definer/);
+    expect(s).toMatch(/\bstable\b/);
+    expect(s).toMatch(/set search_path = public/);
+  });
+
+  it("replaces exactly one function", () => {
+    expect((sql().match(/create or replace function /g) ?? []).length).toBe(1);
+  });
+
+  it("is transactional", () => {
+    const s = sql();
+    expect(s).toMatch(/^begin;/m);
+    expect(s).toMatch(/^commit;/m);
+  });
+});
+
+describe("rollback restores the applied body verbatim", () => {
+  it("restores can_view_worker with NO engagement branch", () => {
+    const body = fnBody(stripped(rollback()), "public.can_view_worker(w uuid)");
+    expect(body).not.toContain("company_worker_engagements");
+    expect(body).toContain("public.company_workers");
+    expect(body).toContain("public.agency_workers");
+    expect(body).toContain("public.engagement_contexts");
+    expect(body).toContain("public.project_worker_assignments");
+    expect(body).toContain("worker_profile_discoverable");
+  });
+
+  it("is byte-equivalent to the APPLIED 20260711130000 body", () => {
+    const applied = fnBody(stripped(readRepo(APPLIED_SOURCE)), "public.can_view_worker(w uuid)");
+    const back = fnBody(stripped(rollback()), "public.can_view_worker(w uuid)");
+    expect(norm(back.split("$$")[1] ?? "")).toBe(norm(applied.split("$$")[1] ?? ""));
+  });
+
+  it("touches no table, policy, grant-widening or data", () => {
+    const s = stripped(rollback());
+    expect(s).not.toMatch(/\bcreate table\b|\balter table\b|\bcreate policy\b|\bdrop policy\b/i);
+    expect(s).not.toMatch(/\binsert into\b|\bdelete from\b|\btruncate\b/i);
+    expect(s).not.toMatch(/\bdrop\s+(table|column|function)\b/i);
+  });
+});
+
+describe("the memo records the decision honestly", () => {
+  const memo = () => readRepo(MEMO);
+
+  it("states the recommendation and its conditions", () => {
+    const m = memo();
+    expect(m).toMatch(/YES/);
+    expect(m).toMatch(/C1/);
+    expect(m).toMatch(/C2/);
+    expect(m).toMatch(/C3/);
+  });
+
+  it("argues the consent-bypass risk in BOTH directions", () => {
+    const m = memo();
+    expect(m).toMatch(/The case that it IS a bypass/);
+    expect(m).toMatch(/The case that it is NOT a bypass/);
+  });
+
+  it("names the disclosure that already happens today", () => {
+    expect(memo()).toContain("list_booking_engagement_workers_v1");
+  });
+
+  it("records the #856 detach model and the revocation caveat", () => {
+    const m = memo();
+    expect(m).toMatch(/#856/);
+    expect(m).toMatch(/worker_id is not null/);
+    expect(m).toMatch(/project_worker_assignments/);
+  });
+});
+
+/**
+ * MEMO CONDITIONS C1 / C2a / C2b — the disclosure this predicate makes true.
+ *
+ * The owner's approval (TRAIN_V6_3 §3) is conditional: the widening "MUST NOT
+ * be blindly applied in its previous disclosure state". C1 is the accept-screen
+ * transparency (Art. 5(1)(a)); C2a is the factual legal-basis documentation;
+ * C2b reconciles the public "anonymised preview only" claim with the actual
+ * lifecycle. These guards fail RED if any of the three is removed or silently
+ * broadened — and equally if the copy starts over-claiming.
+ */
+describe("C1 — the accept screen states the disclosure before the worker accepts", () => {
+  const ACTIVE = ["en", "lt", "ru", "de", "nl"] as const;
+  const CATALOGUE = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
+  const messages = (l: string) =>
+    JSON.parse(readFileSync(join(APP_ROOT, "messages", `${l}.json`), "utf8"));
+  const disclosure = (l: string) => messages(l).conversation.booking.confirmAcceptDisclosure;
+
+  it("exists in ALL 11 catalogues (doctrine §2.4 — new keys land everywhere)", () => {
+    for (const l of CATALOGUE) {
+      expect(typeof disclosure(l), l).toBe("string");
+      expect(disclosure(l).length, l).toBeGreaterThan(40);
+    }
+  });
+
+  it("is really translated in the 5 ROUTED locales (no [EN] placeholder)", () => {
+    for (const l of ACTIVE) expect(disclosure(l), l).not.toMatch(/^\[EN\]/);
+  });
+
+  it("is rendered on the accept confirmation, not merely defined", () => {
+    const page = readRepo("apps/web/app/[locale]/dashboard/page.tsx");
+    expect(page).toContain('confirmAcceptDisclosure: tC("confirmAcceptDisclosure")');
+    const cmp = readRepo("apps/web/components/app/conversation/worker-booking-action.tsx");
+    expect(cmp).toContain("labels.confirmAcceptDisclosure");
+    expect(cmp).toContain("conversation-booking-accept-disclosure");
+    // It must sit on the ACCEPT branch — a disclosure shown on decline is useless.
+    const acceptBlock = cmp.slice(cmp.indexOf('phase.decision === "accepted"'));
+    expect(acceptBlock.indexOf("labels.confirmAcceptDisclosure")).toBeGreaterThan(-1);
+  });
+
+  it("scopes the disclosure to ONE company and does not over-claim (EN)", () => {
+    const en: string = disclosure("en");
+    expect(en).toMatch(/only this company/i);
+    expect(en).toMatch(/contact details stay private/i);
+    expect(en).toMatch(/no other employer/i);
+    // Must NOT imply public exposure or general discoverability.
+    expect(en).not.toMatch(/\bpublic(ly)?\b/i);
+    expect(en).not.toMatch(/all employers/i);
+    expect(en).not.toMatch(/anyone can/i);
+  });
+
+  it("tells the worker the access is revocable and time-bound", () => {
+    expect(disclosure("en")).toMatch(/while the engagement is active/i);
+    expect(disclosure("en")).toMatch(/end it at any time/i);
+  });
+});
+
+describe("C2a — the legal-basis matrix names the engagement arm factually", () => {
+  const MATRIX = "docs/legal/legal-basis-matrix-v1.md";
+  const matrix = () => readRepo(MATRIX);
+  // The prose is hard-wrapped at ~78 cols, so a sentence-level assertion must
+  // read the CONTENT, not the layout. Collapsing whitespace keeps the phrase
+  // requirement exact while letting the author re-wrap freely.
+  const matrixFlat = () => matrix().replace(/\s+/g, " ");
+
+  it("row 4 names company_worker_engagements explicitly", () => {
+    const row = matrix()
+      .split("\n")
+      .find((l) => l.includes("Visibility inside an ACCEPTED work relationship"));
+    expect(row).toBeDefined();
+    expect(row).toContain("company_worker_engagements");
+    // engagement_contexts must survive — this arm is ADDED, not substituted.
+    expect(row).toContain("engagement_contexts");
+  });
+
+  it("records who the arm admits, what it admits, and how it ends", () => {
+    const m = matrix();
+    expect(m).toContain("Accepted-booking engagement — factual basis note");
+    expect(m).toContain("respond_booking_request_v3");
+    expect(m).toContain("owns_company");
+    expect(m).toContain("end_company_worker_engagement_v2");
+  });
+
+  it("names what the arm does NOT admit — minimisation stays stated", () => {
+    const m = matrix();
+    for (const excluded of ["worker_documents", "worker_external_profiles", "journal entries"]) {
+      expect(m, excluded).toContain(excluded);
+    }
+  });
+
+  it("keeps discovery consent a SEPARATE purpose (no consent absorption)", () => {
+    const m = matrix();
+    expect(m).toMatch(/Art\. 7\(3\)/);
+    expect(m).toContain("profile_discoverability");
+    expect(matrixFlat()).toMatch(/does not restore that worker to scouting/i);
+  });
+
+  it("carries the C3 standing rule", () => {
+    expect(matrixFlat()).toMatch(/no further branch is added to `can_view_worker`/i);
+  });
+});
+
+describe("C2b — the public data-access matrix stops under-claiming", () => {
+  const ACTIVE = ["en", "lt", "ru", "de", "nl"] as const;
+  const seeNote = (l: string) =>
+    JSON.parse(readFileSync(join(APP_ROOT, "messages", `${l}.json`), "utf8")).legal.dataAccess
+      .matrix.rows.workerCard.seeNote;
+
+  it("is reconciled in every routed locale (all 5 changed together)", () => {
+    for (const l of ACTIVE) expect(seeNote(l).length, l).toBeGreaterThan(200);
+  });
+
+  it("scopes 'anonymised preview only' to SCOUTING rather than to all time (EN)", () => {
+    const en: string = seeNote("en");
+    expect(en).toMatch(/^In scouting/);
+    expect(en).toMatch(/anonymised preview only/i);
+  });
+
+  it("states the accepted-engagement case instead of hiding it (EN)", () => {
+    const en: string = seeNote("en");
+    expect(en).toMatch(/after a worker accepts a booking/i);
+    expect(en).toMatch(/as long as that engagement is active/i);
+  });
+
+  it("still promises contact privacy and no third-company access (EN)", () => {
+    const en: string = seeNote("en");
+    expect(en).toMatch(/contact details stay private/i);
+    expect(en).toMatch(/no other company gains access/i);
+  });
+});

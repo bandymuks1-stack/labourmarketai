@@ -4950,7 +4950,7 @@
           },
           "workerCard": {
             "surface": "Worker card in scouting",
-            "seeNote": "Companies see an anonymised preview only — no name and no contact details without the worker's permission. The worker sees their own full card.",
+            "seeNote": "In scouting, companies see an anonymised preview only — no name and no contact details without the worker's permission. After a worker accepts a booking, the company they accepted can see that worker's profile card (name, skills, professions, languages, availability) for as long as that engagement is active; contact details stay private and no other company gains access. The worker sees their own full card.",
             "editNote": "Only the worker (and, when needed, an administrator) can change the card."
           },
           "workJournal": {
@@ -10766,6 +10766,7 @@
       "offerTitle": "Job offer",
       "confirmAcceptTitle": "Accept this offer?",
       "confirmAcceptBody": "Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
+      "confirmAcceptDisclosure": "Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
       "confirmDeclineTitle": "Decline this offer?",
       "confirmCta": "Yes, confirm",
       "cancelCta": "Cancel",

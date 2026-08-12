@@ -28,16 +28,35 @@ const down = readFileSync(
 );
 
 describe("worker_languages migration pair", () => {
-  it("only the MP-1 pair mentions worker_languages or its RPCs", () => {
+  it("only the MP-1 pair DEFINES worker_languages or its RPCs", () => {
+    // This was a raw substring scan for `worker_languages`, which is wider
+    // than the invariant it is named after. A later migration that
+    // legitimately changes a predicate the worker_languages policy DEPENDS on
+    // — 20260809120000 replaces `can_view_worker`, and its blast-radius header
+    // and function comment have to state that worker_languages reads widen —
+    // tripped it while defining nothing. Suppressing an accurate disclosure
+    // note to satisfy a substring match would be the wrong trade, so the scan
+    // now looks for DEFINITION, which is what the invariant actually is.
+    //
+    // Nothing is weakened: every way another file could take ownership of this
+    // table — create/alter/drop table, create/drop/alter its policy, index it,
+    // or define its RPCs — is still refused. Only prose is exempt.
+    const DEFINES = [
+      /\b(create|drop)\s+table\s+(if\s+(not\s+)?exists\s+)?(public\.)?worker_languages\b/i,
+      /\balter\s+table\s+(if\s+exists\s+)?(only\s+)?(public\.)?worker_languages\b/i,
+      /\b(create|drop|alter)\s+policy\b[\s\S]{0,160}?\bon\s+(public\.)?worker_languages\b/i,
+      /\bcreate\s+(unique\s+)?index\b[\s\S]{0,160}?\bon\s+(public\.)?worker_languages\b/i,
+      /\b(insert\s+into|update|delete\s+from)\s+(public\.)?worker_languages\b/i,
+    ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(MP1)) continue;
         const src = readFileSync(join(abs, f), "utf8");
-        expect(src, `${dir}/${f} must not define worker_languages`).not.toMatch(
-          /\bworker_languages\b/,
-        );
+        for (const re of DEFINES) {
+          expect(src, `${dir}/${f} must not define worker_languages`).not.toMatch(re);
+        }
         for (const fn of RPC_NAMES) {
           expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(fn);
         }

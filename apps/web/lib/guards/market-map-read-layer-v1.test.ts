@@ -489,10 +489,21 @@ describe("NO new DB migration in this PR", () => {
     // (the absence-review surface was blind to booking-created engagements)
     // and restores the project-assign engagement OR-branch that W11's
     // 20260804120000 reverted. Three function bodies, paired rollback, no
-    // schema/policy/grant change, zero DML. RECOUNTED after merging main
-    // (post-#1116, dc354727): origin/main holds 196 .sql files, this branch
-    // adds exactly one. Owner-gated: ships UNAPPLIED.
-    expect(count).toBeLessThanOrEqual(197);
+    // schema/policy/grant change, zero DML. Merged as #1095 and APPLIED to
+    // production 2026-08-12 (ledger 20260812180224).
+    // Bumped 197 -> 198 for the can_view_worker booking-engagement branch
+    // (20260809120000_can_view_worker_booking_engagement_v1) — a single
+    // create-or-replace adding one OR-branch to the GDPR identity-disclosure
+    // predicate's legitimate-interest arm. No table, policy, index, trigger
+    // or grant change and zero DML at apply time. Owner-gated
+    // (docs/human-gates/can-view-worker-booking-engagement-gate.md), NOT
+    // @human-gate-approved, rollback paired, ships UNAPPLIED.
+    // THE MERGE-ORDER NOTE THIS LINE CARRIED CAME TRUE: #1095 claimed the same
+    // 197 slot and merged first, so this slot is RECOUNTED to 198, not summed.
+    // Derived from the real tree rather than assumed — `git ls-tree -r
+    // origin/main supabase/migrations/` = 197 .sql files at 9e20f1b4, and this
+    // branch adds exactly one.
+    expect(count).toBeLessThanOrEqual(198);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
