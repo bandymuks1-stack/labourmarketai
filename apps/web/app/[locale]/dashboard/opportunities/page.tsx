@@ -1123,16 +1123,11 @@ export default async function OpportunitiesPage({
               // How old this supply is, in the worker's own words. The date is
               // locale-formatted; no infrastructure state is ever surfaced.
               freshnessNotice: (freshness) => {
-                const date = freshness.lastRefreshedAt
-                  ? new Intl.DateTimeFormat(locale, {
-                      dateStyle: "medium",
-                      // W12 doctrine: pin the zone. `last_seen_at` is a UTC
-                      // instant, and an SSR render would otherwise format it
-                      // in the SERVER's ambient zone — a different day for the
-                      // reader, from a value meant to be exact.
-                      timeZone: "UTC",
-                    }).format(new Date(freshness.lastRefreshedAt))
-                  : null;
+                // `dateFmt` is the page's existing UTC-pinned formatter.
+                // `last_seen_at` is a UTC instant; formatting it in the
+                // server's ambient zone would show the reader a different day
+                // for a value meant to be exact (W12 doctrine).
+                const date = dateFmt(freshness.lastRefreshedAt);
                 if (freshness.state === "unavailable")
                   return t("external.freshnessUnavailable");
                 if (!date || freshness.state === "unknown")
