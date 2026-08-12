@@ -39,6 +39,26 @@ export async function generateMetadata({
  * The signup CTA enters the EXISTING auth → onboarding → profile flow where
  * cv_upload_started / cv_upload_succeeded already instrument the chain.
  */
+/**
+ * Where "Create my CV — free" actually has to land.
+ *
+ * `/dashboard/profile` is the surface that mounts `ProfileTextFirstFlow` →
+ * `CvInputPanel` → `CvImportUpload`: upload a PDF/DOCX/TXT or paste the text,
+ * review every extracted fact, then apply. It is the page this file's own
+ * header has always claimed the CTA enters ("the EXISTING auth → onboarding →
+ * profile flow"), and the one where `cv_upload_started` / `cv_upload_succeeded`
+ * are instrumented.
+ *
+ * NOT `/cv` — that route is the finished print/PDF sheet. Sending a brand-new
+ * account there would show an empty CV and no way to fill it.
+ *
+ * Carried as `?next=` so it survives signup AND onboarding: `signup-form`
+ * sanitises it via `getSafeReturnPath` and re-attaches it to
+ * `/onboarding?next=…`, where an attached safe `next` beats the generic
+ * dashboard. Without it the CTA loses the one promise this page makes.
+ */
+const CREATE_CV_NEXT = "/dashboard/profile";
+
 export default async function CreateCvPage({
   params,
 }: {
@@ -60,6 +80,7 @@ export default async function CreateCvPage({
         ctaKind="signup"
         ctaLabel={t("cta")}
         ctaSource="create_cv_hero"
+        ctaNext={CREATE_CV_NEXT}
       />
       <BenefitCards items={benefits} />
       <section className="mx-auto max-w-container px-6 pb-12 sm:px-12">
@@ -90,7 +111,7 @@ export default async function CreateCvPage({
         </p>
         <div className="mt-8">
           <TrackedCta
-            href="/auth/signup"
+            href={`/auth/signup?next=${encodeURIComponent(CREATE_CV_NEXT)}`}
             ctaId="create_cv_footer"
             audience="workers"
             className={buttonLinkClassName()}

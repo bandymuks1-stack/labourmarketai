@@ -15,6 +15,7 @@ export function PageHero({
   ctaKind,
   ctaLabel,
   ctaSource,
+  ctaNext,
 }: {
   eyebrow: string;
   title: string;
@@ -23,7 +24,23 @@ export function PageHero({
   ctaKind: "signup" | "companyNeed" | "waitlist";
   ctaLabel: string;
   ctaSource: string;
+  /**
+   * OPT-IN post-signup destination for a `signup` CTA, as an internal path.
+   *
+   * A landing page that promises ONE specific thing ("create a CV", "start a
+   * journal") must not drop the visitor on the generic dashboard after signup
+   * — the promise is lost at the first hop. `signup-form` already reads
+   * `?next=`, sanitises it through `getSafeReturnPath` and propagates it
+   * across onboarding; this prop is simply how a page opts into that chain.
+   *
+   * Omitted on every other hero on purpose: a generic page has no single
+   * destination to promise, so the default `/dashboard` is the honest landing.
+   */
+  ctaNext?: string;
 }) {
+  const signupHref = ctaNext
+    ? `/auth/signup?next=${encodeURIComponent(ctaNext)}`
+    : "/auth/signup";
   return (
     <section className="relative mx-auto max-w-container px-6 pb-12 pt-16 sm:px-12">
       <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
@@ -39,7 +56,7 @@ export function PageHero({
       <div className="mt-8">
         {ctaKind === "signup" ? (
           <TrackedCta
-            href="/auth/signup"
+            href={signupHref}
             ctaId={ctaSource}
             audience="workers"
             className={buttonLinkClassName()}
