@@ -151,6 +151,46 @@ describe("the inquiry noun is actually present (not just absent)", () => {
   }
 });
 
+describe("the /company-need SEO title uses the inquiry noun", () => {
+  /**
+   * The page <title> is user-facing (browser tab + search result) and is NOT
+   * in the message catalogs — it is hard-coded in lib/seo/metadata.ts. It was
+   * missed by the catalog sweep, so production briefly served
+   * `<h1>Pradėti darbuotojų užklausą</h1>` under the tab title
+   * "Įmonės poreikis". Only the TITLE is asserted: the descriptions say
+   * "what your project needs" / "ko reikia projektui", which is category-B
+   * ordinary language and stays.
+   */
+  const EXPECTED: Record<(typeof ACTIVE_LOCALES)[number], RegExp> = {
+    lt: /užklaus/i,
+    en: /inquir/i,
+    ru: /запрос/i,
+    nl: /aanvraag/i,
+    de: /anfrage/i,
+  };
+
+  const source = readFileSync(
+    join(APP_ROOT, "lib", "seo", "metadata.ts"),
+    "utf8",
+  );
+
+  /** The `companyNeed: { ... }` entry of the metadata table. */
+  const block = (() => {
+    const start = source.indexOf("\n  companyNeed: {");
+    expect(start, "companyNeed entry not found in lib/seo/metadata.ts").toBeGreaterThan(-1);
+    const end = source.indexOf("\n  },", start);
+    return source.slice(start, end);
+  })();
+
+  for (const locale of ACTIVE_LOCALES) {
+    it(`${locale}: company-need page title names the inquiry`, () => {
+      const m = block.match(new RegExp(`${locale}:\\s*\\{\\s*title:\\s*"([^"]+)"`));
+      expect(m, `${locale}: no title found in the companyNeed metadata entry`).toBeTruthy();
+      expect(m![1]).toMatch(EXPECTED[locale]);
+    });
+  }
+});
+
 describe("technical identifiers are NOT renamed (V6 §4C)", () => {
   it("the i18n keys keep their legacy names in every active locale", () => {
     for (const locale of ACTIVE_LOCALES) {

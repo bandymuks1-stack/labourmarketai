@@ -237,27 +237,27 @@ export const PAGE_SEO: Readonly<
   },
   companyNeed: {
     en: {
-      title: "Company Need — Describe the workforce you need",
+      title: "Workforce Inquiry — Describe the workforce you need",
       description:
         "Tell LabourMarket.ai what your project needs: professions, skills, team size, location and start. We prepare a structured draft you review — nothing is published automatically.",
     },
     lt: {
-      title: "Įmonės poreikis — aprašyk reikalingą darbo jėgą",
+      title: "Darbuotojų užklausa — aprašyk reikalingą darbo jėgą",
       description:
         "Pasakyk LabourMarket.ai, ko reikia projektui: profesijos, įgūdžiai, komandos dydis, vieta ir pradžia. Paruošiame struktūruotą juodraštį, kurį peržiūri — niekas nepublikuojama automatiškai.",
     },
     ru: {
-      title: "Потребность компании — опишите нужную рабочую силу",
+      title: "Запрос на работников — опишите нужную рабочую силу",
       description:
         "Расскажите LabourMarket.ai, что нужно проекту: профессии, навыки, размер бригады, локация и старт. Мы готовим структурированный черновик, который вы проверяете — ничего не публикуется автоматически.",
     },
     nl: {
-      title: "Personeelsbehoefte — Beschrijf de werknemers die je nodig hebt",
+      title: "Personeelsaanvraag — Beschrijf de werknemers die je nodig hebt",
       description:
         "Vertel LabourMarket.ai wat je project nodig heeft: beroepen, vaardigheden, teamgrootte, locatie en startdatum. Wij bereiden een gestructureerd concept voor dat jij beoordeelt — niets wordt automatisch gepubliceerd.",
     },
     de: {
-      title: "Personalbedarf — Beschreiben Sie die Arbeitskräfte, die Sie benötigen",
+      title: "Personalanfrage — Beschreiben Sie die Arbeitskräfte, die Sie benötigen",
       description:
         "Sagen Sie LabourMarket.ai, was Ihr Projekt braucht: Berufe, Fähigkeiten, Teamgröße, Standort und Start. Wir erstellen einen strukturierten Entwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
     },
