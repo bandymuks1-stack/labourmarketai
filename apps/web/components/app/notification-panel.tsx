@@ -140,6 +140,9 @@ type Notif = {
   /** Derived signals carry a real count + the surface that clears them. */
   count?: number;
   href?: string;
+  /** Stored event whose read state persists — the only kind "mark all read"
+   *  may touch. Independent of `href`: a durable row can also link out. */
+  durable?: boolean;
 };
 
 /** Body shared between the desktop popover and the mobile sheet. `chromeless`
@@ -180,8 +183,13 @@ function NotificationsBody({
           </p>
           {/* "Mark all read" applies only to stored notifications — derived
               signals clear by visiting their surface; faking them read would
-              just be a lie the next page-load reverts. */}
-          {notifications.some((n) => !n.href) && (
+              just be a lie the next page-load reverts.
+
+              Keyed off `durable`, NOT off a missing href. The two were
+              conflated before, which meant a stored row could only keep the
+              mark-all-read control by having nowhere to go — so every durable
+              notification shipped without a destination. */}
+          {notifications.some((n) => n.durable) && (
             <button
               type="button"
               onClick={markAllRead}

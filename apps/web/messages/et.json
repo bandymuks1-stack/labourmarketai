@@ -816,6 +816,47 @@
       "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
       "title": "[EN] Your skills,",
       "titleAccent": "[EN] discoverable."
+    },
+    "createCv": {
+      "eyebrow": "Tasuta CV-looja",
+      "title": "Professionaalne CV,",
+      "titleAccent": "tasuta.",
+      "subcopy": "Loo CV nullist või impordi olemasolev PDF või DOCX. Vaata iga eraldatud fakt üle, vali puhas mall ja laadi alla PDF-ina — tasuta. Soovi korral saab sama info ehitada sinu töötajaprofiili ja näidata päris töökuulutusi ametlikest avalikest allikatest.",
+      "cta": "Loo minu CV — tasuta",
+      "benefits": [
+        {
+          "title": "Impordi või alusta uuesti",
+          "body": "Laadi üles olemasolev CV (PDF, DOCX või tekst) või alusta tühjalt lehelt. Eraldatud faktid jäävad ettepanekuteks, kuni sa need vastu võtad."
+        },
+        {
+          "title": "Aus struktuur",
+          "body": "Sinu kogemus, haridus, keeled ja oskused struktureeritakse sinu ülevaatuseks — midagi ei mõelda välja ega salvestata ilma sinu nõusolekuta."
+        },
+        {
+          "title": "Puhtad mallid, päris PDF",
+          "body": "Vali professionaalne mall ja ekspordi brauseri kaudu A4 PDF-iks — ilma vesimärgita, ilma maksumüürita."
+        },
+        {
+          "title": "Rohkem kui dokument",
+          "body": "Sinu selgesõnalisel nõusolekul saavad samad faktid ehitada töötajaprofiili, siduda oskused ühise Euroopa oskuste kataloogiga ja näidata sobivaid avalikke töökuulutusi."
+        }
+      ],
+      "stepsTitle": "Kuidas see töötab",
+      "steps": [
+        {
+          "title": "Registreeru tasuta",
+          "body": "Konto hoiab CV muudetavana ja andmed sinu kontrolli all — võid need igal ajal kustutada."
+        },
+        {
+          "title": "Lisa oma kogemus",
+          "body": "Impordi vana CV või kirjuta see sisse — seejärel vaata iga fakt üle ja otsusta enne kasutamist, mis jääb."
+        },
+        {
+          "title": "Laadi alla ja otsusta",
+          "body": "Ekspordi CV PDF-ina. Tööandjatele nähtavaks saamine jääb eraldi, vabatahtlikuks valikuks."
+        }
+      ],
+      "privacyNote": "Sinu CV jääb vaikimisi privaatseks. Midagi ei jagata tööandjatega enne, kui sa nähtavuse selgesõnaliselt sisse lülitad — ja selle saab igal ajal välja lülitada."
     }
   },
   "playercards": {
@@ -1983,6 +2024,10 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "freshnessDelayed": "Kuulutusi värskendati viimati {date}. Selle allika uuendused on ajutiselt hilinenud, seega võivad mõned kohad juba täidetud olla.",
+      "freshnessStale": "Kuulutusi värskendati viimati {date}. Sellest ajast pole neid uuesti kinnitatud — kontrolli praegust saadavust algsest kuulutusest.",
+      "freshnessUnknown": "Me ei saa kinnitada, millal neid kuulutusi viimati värskendati. Kontrolli praegust saadavust algsest kuulutusest.",
+      "freshnessUnavailable": "Välised kuulutused on ajutiselt kättesaamatud.",
       "openOriginal": "Ava originaalkuulutus",
       "noApplicationRoute": "Allikas ei avaldanud selle kuulutuse kandideerimisaadressi.",
       "publishedOn": "Avaldatud {date}",

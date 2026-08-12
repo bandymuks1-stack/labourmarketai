@@ -1,5 +1,5 @@
 import { Link } from "@/lib/i18n/navigation";
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 
 /** Bottom call-to-action band. CTA kind chooses between the real worker
@@ -37,8 +37,8 @@ export function CtaBand({
         </p>
         <div className="mt-8 flex justify-center">
           {ctaKind === "signup" ? (
-            <Link href="/auth/signup">
-              <Button>{ctaLabel} →</Button>
+            <Link href="/auth/signup" className={buttonLinkClassName()}>
+              {ctaLabel} →
             </Link>
           ) : (
             <WaitlistModal

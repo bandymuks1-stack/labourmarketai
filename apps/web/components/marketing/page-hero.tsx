@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { TrackedCta } from "@/components/app/tracked-cta";
 
@@ -38,16 +38,22 @@ export function PageHero({
       </p>
       <div className="mt-8">
         {ctaKind === "signup" ? (
-          <TrackedCta href="/auth/signup" ctaId={ctaSource} audience="workers">
-            <Button>{ctaLabel} →</Button>
+          <TrackedCta
+            href="/auth/signup"
+            ctaId={ctaSource}
+            audience="workers"
+            className={buttonLinkClassName()}
+          >
+            {ctaLabel} →
           </TrackedCta>
         ) : ctaKind === "companyNeed" ? (
           <TrackedCta
             href="/company-need"
             ctaId={ctaSource}
             audience="companies"
+            className={buttonLinkClassName()}
           >
-            <Button>{ctaLabel} →</Button>
+            {ctaLabel} →
           </TrackedCta>
         ) : (
           <WaitlistModal

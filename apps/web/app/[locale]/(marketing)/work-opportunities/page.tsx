@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { SEO_PROBLEMS, pick } from "@/lib/seo/profession-problem-content";
@@ -189,11 +189,11 @@ export default async function WorkOpportunitiesPage({
       </section>
 
       <section className="mt-12 flex flex-wrap gap-3">
-        <Link href="/worker-intake">
-          <Button>{pick(CTA_PROFILE, l)}</Button>
+        <Link href="/worker-intake" className={buttonLinkClassName()}>
+          {pick(CTA_PROFILE, l)}
         </Link>
-        <Link href="/skills">
-          <Button variant="secondary">{pick(CTA_SKILLS, l)}</Button>
+        <Link href="/skills" className={buttonLinkClassName("secondary")}>
+          {pick(CTA_SKILLS, l)}
         </Link>
       </section>
     </div>

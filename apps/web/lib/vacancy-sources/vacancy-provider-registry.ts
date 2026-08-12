@@ -34,9 +34,39 @@ export interface VacancyChannelEndpointV1 {
   /**
    * Whether the endpoint pages. `none` = one response holds the whole batch
    * (a snapshot); `offset_limit` = classic offset/limit; `cursor` = the
-   * publisher hands back a continuation token.
+   * publisher hands back a continuation token; `time_window` = the endpoint
+   * has no paging of its own and is bounded by a time slice instead, walked
+   * forward by the importer (`window` below is then REQUIRED);
+   * `record_offset` = the endpoint has no paging of its own AND no time axis
+   * to slice on, so the body is walked by RECORD INDEX on our side. That is
+   * only affordable over a streamed body, so it requires
+   * `bodyFormat: "json_lines"`.
    */
-  readonly pagination: "none" | "offset_limit" | "cursor";
+  readonly pagination:
+    | "none"
+    | "offset_limit"
+    | "cursor"
+    | "time_window"
+    | "record_offset";
+  /**
+   * How the response body is shaped, and therefore how it is transported.
+   *
+   *   - `json`       one JSON document, read into memory whole and bounded by
+   *                  `maxResponseBytes`. The default, correct for any response
+   *                  that comfortably fits.
+   *   - `json_lines` one complete record per line, consumed incrementally and
+   *                  never assembled. Required for a body that cannot fit the
+   *                  buffered cap — which is a TRANSPORT answer, not a licence
+   *                  to raise the cap.
+   *
+   * Absent means `json`, so no existing endpoint changes meaning.
+   */
+  readonly bodyFormat?: "json" | "json_lines";
+  /**
+   * Time-slice configuration for a `time_window` endpoint. Required for that
+   * mode and meaningless otherwise.
+   */
+  readonly window?: VacancyChannelWindowV1;
   /**
    * True when the endpoint requires an API key. The adapter refuses to run a
    * key-requiring endpoint unless the owner has provisioned the secret — it
@@ -83,6 +113,27 @@ export interface VacancyChannelCadenceV1 {
  */
 const ONE_MINUTE_SECONDS = 60;
 const ONE_DAY_SECONDS = 24 * 60 * 60;
+
+/**
+ * How a `time_window` channel is sliced. The query-key NAMES live here rather
+ * than in the importer for the same reason every other publisher fact does:
+ * the shared stages must not learn one publisher's parameter vocabulary, or
+ * the next country becomes an edit to the pipeline instead of an entry here.
+ */
+export interface VacancyChannelWindowV1 {
+  /** Query key carrying the INCLUSIVE start of the slice. */
+  readonly startQueryKey: string;
+  /** Query key carrying the EXCLUSIVE end of the slice. */
+  readonly endQueryKey: string;
+  /** Width of one slice, in seconds. Chosen from a MEASURED response size. */
+  readonly widthSeconds: number;
+  /**
+   * Never request closer to `now` than this. The publisher's write is not
+   * instantaneous, and since a consumed window's end becomes the checkpoint,
+   * a record landing just after a window closed would be skipped forever.
+   */
+  readonly safetyLagSeconds: number;
+}
 
 export interface VacancyProviderDescriptorV1 {
   readonly key: VacancyProviderKey;
@@ -150,24 +201,69 @@ const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
   defaultTargetLanguage: "en",
   endpoints: [
     {
-      // ONE initial snapshot. Never on a schedule — see `runOnce`.
+      // THE COLD START. Never on a schedule — see `runOnce`.
+      //
+      // STREAMED, AND WALKED BY RECORD INDEX. Measured 2026-08-11: the live
+      // Swedish snapshot is 389.94 MiB — 37,014 ads, ~11 KB each, 313 s on the
+      // wire. That is 24× the buffered transport cap, so the previous shape
+      // (`/snapshot`, one JSON array, read whole) could never have succeeded
+      // even once. It was not a tuning problem and no retry would have helped.
+      //
+      // Two things fix it, both of them the publisher's own offering:
+      //   - `/v2/snapshot` replaces `/snapshot`, which its swagger contract
+      //     marks DEPRECATED ("use the /v2/snapshot endpoint");
+      //   - `bodyFormat: "json_lines"` asks for `application/jsonl`, one
+      //     complete ad per line, so the body is consumed a record at a time
+      //     and the reader's memory bound is one line rather than 390 MiB.
+      //     The legacy path ignores that Accept header and answers one
+      //     newline-free array — which is precisely why it had to move.
+      //
+      // The endpoint offers no offset parameter, so a session that fills its
+      // record budget checkpoints the INDEX it stopped at and the next run
+      // resumes there. A full Swedish cold start is therefore ~8 bounded
+      // sessions instead of one impossible request.
       channel: "snapshot",
       host: "jobstream.api.jobtechdev.se",
-      path: "/snapshot",
-      pagination: "none",
+      path: "/v2/snapshot",
+      pagination: "record_offset",
+      bodyFormat: "json_lines",
       requiresApiKey: false,
       cadence: {
         intervalSeconds: 0,
         runOnce: true,
+        // Checkpointed in the RECORD-OFFSET sense, not the timestamp sense:
+        // there is no publisher instant to resume from. `checkpointed` stays
+        // false so the importer's "a stream needs a timestamp cursor" refusal
+        // does not fire on a channel that legitimately starts from nothing.
         checkpointed: false,
       },
     },
     {
       // Deltas, polled about once a minute, resuming from the last cursor.
+      //
+      // WALKED IN TIME SLICES, not requested in one go. `/stream` takes only
+      // a start bound and answers with everything changed since it, in a
+      // single un-paginated body — so the response grows with the gap since
+      // the last success and eventually exceeds the transport byte cap for
+      // good (measured 2026-08-11: a ~1.8-day gap answered 31.9 MiB against a
+      // 16 MiB cap, and a failed run cannot advance the checkpoint, so the
+      // next request is wider still). `updated-before-date` is a real,
+      // honoured JobStream parameter — the same request bounded to a ~4 h
+      // slice answered 0.51 MiB — so bounding both ends turns an unbounded
+      // ask into an affordable walk that drains a backlog instead of
+      // deadlocking on it.
       channel: "stream",
       host: "jobstream.api.jobtechdev.se",
       path: "/stream",
-      pagination: "none",
+      pagination: "time_window",
+      window: {
+        startQueryKey: "date",
+        endQueryKey: "updated-before-date",
+        // 3 h measured at ~0.4 MiB — two orders of magnitude under the cap,
+        // so an unusually busy slice still cannot reach it.
+        widthSeconds: 3 * 60 * 60,
+        safetyLagSeconds: ONE_MINUTE_SECONDS,
+      },
       requiresApiKey: false,
       cadence: {
         intervalSeconds: ONE_MINUTE_SECONDS,

@@ -31,6 +31,11 @@ export function TrackedCta({
   return (
     <Link
       {...rest}
+      // The funnel id, in the DOM. `ctaId` already names this CTA for
+      // telemetry; exposing it makes the same CTA addressable to a browser
+      // test without inventing a parallel testid vocabulary or matching on
+      // translated label text.
+      data-cta-id={ctaId}
       onClick={(e: MouseEvent<HTMLAnchorElement>) => {
         trackFunnel(FUNNEL_EVENTS.ctaClicked, {
           cta_id: ctaId,

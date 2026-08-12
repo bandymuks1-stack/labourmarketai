@@ -36,20 +36,130 @@
 // guard imports the same module. There is no second copy of the rules.
 
 /**
- * The active waivers. Exactly one, covering the already-reviewed W3/W4
- * transitional debt: the Context Panel cannot be reflected on the World Map
- * before the map is part of the workspace, and the owner sequenced the map
- * after the panel.
+ * The active waivers.
+ *
+ * The list was EMPTY from W6 (the `w3-w4-context-panel-not-on-map` record was
+ * removed the moment the workspace map shipped and `reflectedOnMap` became a
+ * real yes — exactly the self-expiry the owner demanded) until the record
+ * below, which is a NEW owner ruling and not a leftover.
  */
-/**
- * The active waivers. EMPTY since W6: the one recorded waiver
- * (`w3-w4-context-panel-not-on-map`) was removed the moment the workspace map
- * shipped and `reflectedOnMap` became a real yes — exactly the self-expiry the
- * owner demanded. The MECHANISM stays: a future owner ruling adds a record
- * here, with the same six constraints, and the tests keep proving them on
- * synthetic fixtures.
- */
-export const SCOPED_OWNER_WAIVERS = [];
+export const SCOPED_OWNER_WAIVERS = [
+  /**
+   * PUBLIC ACQUISITION ROUTE — `/create-cv`.
+   *
+   * OWNER RULING, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10), verbatim:
+   *   "YES — labourmarket.ai SHOULD have a dedicated public FREE CV creation /
+   *    acquisition surface. The public CV builder is intentional. Do NOT fold
+   *    it invisibly into /worker-intake merely to avoid adding a page."
+   *   "If the Product Constitution requires an explicit scoped owner waiver for
+   *    #1119, this command supplies the PRODUCT DECISION: APPROVED: dedicated
+   *    public /create-cv route."
+   *
+   * WHAT IS ACTUALLY BEING EXCUSED. Not the axiom — the CATEGORY ERROR. A-01's
+   * five World-State questions describe a surface inside the AUTHENTICATED
+   * workspace. An anonymous visitor arriving from a search result or an advert
+   * has no World State, no avatar, no map and no assistant, so all five answers
+   * are honestly "no", and `worldStateCanControlIt` is "no" for the same
+   * reason. The declaration in `surface-registry.ts` records them as "no"
+   * rather than rewriting them to green — A-06 forbids the lie more strongly
+   * than A-01 forbids the page.
+   *
+   * WHY THIS IS BOUNDED AND NOT A HOLE. The gate's own six constraints all
+   * bind: the six codes, the axiom A-01, the file `/create-cv`, PR #1119, the
+   * expiry, and the subset rule. A seventh finding anywhere — including on
+   * `/create-cv` itself — un-waives the whole run. No other route, PR or axiom
+   * inherits anything, which is exactly what the owner meant by "Do not
+   * interpret this as permission to waive unrelated landing/page rules."
+   *
+   * WHAT REMOVES IT (`resolvedBy`). The gate does not model a pre-auth public
+   * acquisition route as a distinct kind, so it judges one by workspace rules.
+   * The 118 grandfathered BASELINE screens — `/`, `/for-workers`,
+   * `/for-companies`, `/pricing` — fail the same five questions and escape only
+   * by being older, not by being compliant. Teaching the gate that category is
+   * a CONSTITUTION CHANGE and therefore an owner decision; this train had
+   * authority over the product surface, not over the constitution, so it took
+   * the bounded waiver and left the amendment to the owner.
+   *
+   * KNOWN PROPERTY THE OWNER SHOULD SEE. `decideWaiver` tests `expiresAt`
+   * BEFORE the unrelated-PR escape. After `expiresAt` these six findings block
+   * EVERY pull request in the repository, not just ones touching `/create-cv`,
+   * because rule 6c re-validates the whole registry on every run. That is the
+   * mechanism's designed pressure to resolve the debt rather than renew it —
+   * but it is a repo-wide deadline, not a local one, and it is written down
+   * here so nobody meets it by surprise.
+   */
+  {
+    id: "public-acquisition-route-create-cv",
+    axioms: ["A-01"],
+    scope: "The public free-CV acquisition route /create-cv (PUBLIC BETA TRAIN V3 §2.1)",
+    /**
+     * #1119 CREATED the route under the ruling above. #1123 changes its CTA
+     * markup and nothing else, so the owner extended the same ruling to it —
+     * OWNER APPROVAL, PUBLIC BETA TRAIN V5_1 §1 (2026-08-11), verbatim:
+     *   "OWNER APPROVES extending the existing /create-cv
+     *    product-constitution waiver to PR #1123."
+     *   "This approval is specifically for #1123. It is NOT a general
+     *    authority to self-approve future waivers."
+     *
+     * The four conditions the owner attached were checked before this line was
+     * written, by RUNNING the gate at head `bd5ab221` rather than reasoning
+     * about it:
+     *   * "0 new product surface(s) in this diff" — the gate's own words;
+     *   * the diff adds exactly ONE file, a Playwright spec — no route, no
+     *     page, no surface-registry entry;
+     *   * the six findings are byte-identical to `expectedFindings` below,
+     *     same codes, same `/create-cv`, same axiom A-01 — the subset rule is
+     *     satisfied with nothing left over;
+     *   * PR head unchanged from the one the owner reviewed.
+     *
+     * WHAT #1123 ACTUALLY DOES to this route: a <button> nested inside the
+     * anchor is removed, and the anchor itself carries the CTA grammar. The
+     * route's existence, purpose and copy are untouched, which is why the
+     * ruling that approved the route still covers it.
+     *
+     * Nothing is loosened. The six codes, axiom A-01, the file list, the
+     * expiry and the subset rule all still bind; a seventh finding anywhere
+     * still un-waives the whole run; and no other PR, route or axiom inherits
+     * anything from this line.
+     */
+    pullRequests: [1119, 1123],
+    // Deliberately empty: the waiver must live IN the branch whose CI honours
+    // it, so writing the head SHA down changes the head SHA. The PR number is
+    // the binding key; see the module header.
+    approvedHeadShas: [],
+    // After the squash-merge the gate re-validates the whole registry on
+    // `main`, so the post-merge branch run must be covered too.
+    postMergeBranches: ["main"],
+    // TWO entries, and both are load-bearing — this is the subtle one.
+    //
+    //  • "/create-cv" is the finding's `what` (a ROUTE id), and `decideWaiver`
+    //    requires `files.includes(finding.what)`.
+    //  • the page PATH is what `touchesWaivedFile` compares against the real
+    //    diff. Without it, no changed file would ever end with "/create-cv",
+    //    every unlisted PR would look "unrelated", and the "nothing new can
+    //    inherit this waiver" guarantee would silently evaporate. Proven by the
+    //    negative-control test that puts the page in an unlisted PR's diff and
+    //    expects `pr-not-covered`.
+    files: ["/create-cv", "apps/web/app/[locale]/(marketing)/create-cv/page.tsx"],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=1119 node .github/scripts/product-gate.mjs
+    // on 2026-08-10. Verified by running the gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/create-cv" },
+      { code: "not_reflected_on_map", file: "/create-cv" },
+      { code: "not_ai_controlled", file: "/create-cv" },
+      { code: "requires_leaving_workspace", file: "/create-cv" },
+      { code: "requires_new_page", file: "/create-cv" },
+      { code: "world_state_cannot_control_it", file: "/create-cv" },
+    ],
+    reason:
+      "A pre-authentication public acquisition route cannot satisfy questions that presuppose an authenticated workspace. The owner approved the surface; the honest declaration answers all six 'no'; this record excuses those six answers for this one route and nothing else.",
+    resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner ruling, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10) — APPROVED: dedicated public /create-cv route.",
+  },
+];
 
 /** Is this ONE finding excused? Every constraint must hold. */
 export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {

@@ -28,7 +28,10 @@ vi.mock("@/lib/intelligence/source-governance", async (importOriginal) => {
 import { runVacancyImport } from "./vacancy-importer";
 import { getVacancyProvider } from "@/lib/vacancy-sources/vacancy-provider-registry";
 import { emptyDedupState } from "@/lib/vacancy-sources/vacancy-dedup";
-import { computeVacancyContentHash } from "@/lib/vacancy-sources/vacancy-hash";
+import {
+  computeVacancyContentHash,
+  vacancyIdentityKey,
+} from "@/lib/vacancy-sources/vacancy-hash";
 import type { TranslationProvider } from "@/lib/translation/translation-service";
 
 const PROVIDER = getVacancyProvider("arbetsformedlingen")!;
@@ -63,13 +66,48 @@ function ad(over: Record<string, unknown> = {}): Record<string, unknown> {
   };
 }
 
-function stubFetch(body: unknown, init: { status?: number } = {}): void {
+/**
+ * Serve the shape the REAL endpoint serves for that path: the snapshot channel
+ * answers line-delimited JSON (`application/jsonl`, one ad per line), every
+ * other channel answers one JSON document. Keying on the URL rather than on a
+ * per-test flag means these tests keep exercising the transport each channel
+ * actually uses, instead of a uniform stub that no endpoint matches.
+ *
+ * `rawBody` overrides the encoding entirely, for the tests that deliberately
+ * serve a malformed or wrong-typed body.
+ */
+function stubFetch(
+  body: unknown,
+  init: { status?: number; rawBody?: string; contentType?: string } = {},
+): void {
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockImplementation(async () => {
-      return new Response(JSON.stringify(body), {
+    vi.fn().mockImplementation(async (url: string) => {
+      const jsonLines = String(url).includes("/v2/snapshot");
+      if (init.rawBody !== undefined) {
+        return new Response(init.rawBody, {
+          status: init.status ?? 200,
+          headers: {
+            "content-type":
+              init.contentType ??
+              (jsonLines ? "application/jsonl" : "application/json"),
+          },
+        });
+      }
+      if (!jsonLines) {
+        return new Response(JSON.stringify(body), {
+          status: init.status ?? 200,
+          headers: {
+            "content-type": init.contentType ?? "application/json",
+          },
+        });
+      }
+      const rows = Array.isArray(body) ? body : [body];
+      return new Response(rows.map((r) => JSON.stringify(r)).join("\n") + "\n", {
         status: init.status ?? 200,
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": init.contentType ?? "application/jsonl",
+        },
       });
     }),
   );
@@ -182,29 +220,144 @@ describe("channel cadence and the stream checkpoint", () => {
     expect(url).toContain("date=2026-08-03T11%3A59%3A59.000Z");
   });
 
-  it("returns the next checkpoint, advanced over everything SEEN", async () => {
+  it("walks the stream in BOUNDED slices — every request carries both ends", async () => {
     enable();
+    const fetchSpy = vi.fn().mockImplementation(
+      async () =>
+        new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    // 4 h of backlog against a 3 h slice and a 60 s safety lag → two slices.
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
+    );
+
+    // NEGATIVE CONTROL for the deadlock this fix exists to break: the old
+    // behaviour issued exactly ONE request with a start bound only, and its
+    // response therefore grew without limit until it passed the byte cap for
+    // good. More than one request, each closed at both ends, is the whole
+    // difference.
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    const urls = fetchSpy.mock.calls.map((c) => new URL(String(c[0])));
+    for (const url of urls) {
+      const start = Date.parse(url.searchParams.get("date")!);
+      const end = Date.parse(url.searchParams.get("updated-before-date")!);
+      expect(Number.isFinite(start) && Number.isFinite(end)).toBe(true);
+      expect(end).toBeGreaterThan(start);
+      // No slice may exceed the descriptor's width — that bound is the only
+      // thing keeping one response affordable.
+      expect(end - start).toBeLessThanOrEqual(3 * 60 * 60 * 1000);
+    }
+
+    // Slice 1 opens at the cursor nudged back by the overlap; the slices abut
+    // exactly, so nothing between them can fall through.
+    expect(urls[0].searchParams.get("date")).toBe("2026-08-04T04:59:59.000Z");
+    expect(urls[0].searchParams.get("updated-before-date")).toBe(
+      "2026-08-04T07:59:59.000Z",
+    );
+    expect(urls[1].searchParams.get("date")).toBe("2026-08-04T07:59:59.000Z");
+
+    // The walk stops short of the present by the safety lag, never at "now".
+    expect(urls[1].searchParams.get("updated-before-date")).toBe(
+      "2026-08-04T08:59:00.000Z",
+    );
+    expect(result.nextCursor).toBe("2026-08-04T08:59:00.000Z");
+    expect(result.caughtUp).toBe(true);
+    expect(result.metrics.windowsPlanned).toBe(2);
+    expect(result.metrics.windowsCompleted).toBe(2);
+  });
+
+  it("checkpoints on the CONSUMED SLICE, never on a publisher timestamp", async () => {
+    enable();
+    // The two shapes that make publisher timestamps unusable as a checkpoint,
+    // both measured on the live Swedish stream (2026-08-11):
+    //   - an ad UPDATED inside the slice but PUBLISHED long before it (over
+    //     half of a real slice, the oldest by 11 days) — trusting it rewinds
+    //     the walk into a permanent replay;
+    //   - a withdrawal delta, which carries no publication date at all and so
+    //     falls back to our capture clock — trusting it jerks the checkpoint
+    //     to "now" and silently skips everything in between.
     stubFetch([
-      ad({ id: "a", publication_date: "2026-08-04T08:00:00Z" }),
-      ad({ id: "b", publication_date: "2026-08-04T10:00:00Z" }),
+      ad({ id: "old-but-updated", publication_date: "2026-07-24T06:00:00Z" }),
+      { id: "withdrawn", removed: true },
     ]);
 
     const result = await runVacancyImport(
-      request({ channel: "stream", cursor: "2026-08-01T00:00:00.000Z" }),
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
     );
 
-    expect(result.nextCursor).toBe("2026-08-04T10:00:00.000Z");
+    expect(result.nextCursor).toBe("2026-08-04T08:59:00.000Z");
+    expect(result.nextCursor).not.toBe("2026-07-24T06:00:00.000Z");
+    expect(result.nextCursor).not.toBe(CAPTURED_AT);
   });
 
-  it("a run that fetched nothing leaves the checkpoint untouched", async () => {
+  it("a slice that returns nothing still counts as consumed", async () => {
     enable();
     stubFetch([]);
 
     const result = await runVacancyImport(
-      request({ channel: "stream", cursor: "2026-08-01T00:00:00.000Z" }),
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
     );
 
-    expect(result.nextCursor).toBe("2026-08-01T00:00:00.000Z");
+    // A quiet three hours is ordinary. Refusing to move over an empty slice
+    // would stall the walk permanently the first time Sweden had a slow night.
+    expect(result.nextCursor).toBe("2026-08-04T08:59:00.000Z");
+    expect(result.metrics.windowsCompleted).toBe(2);
+  });
+
+  it("a backlog wider than one session is TRUNCATED HONESTLY, not silently", async () => {
+    enable();
+    stubFetch([]);
+
+    // ~34 days of backlog against a 50-slice-per-session cap.
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-07-01T00:00:00.000Z" }),
+    );
+
+    expect(result.metrics.windowsPlanned).toBe(50);
+    expect(result.metrics.windowsCompleted).toBe(50);
+    // Progress is real and monotonic — 50 slices × 3 h forward from the
+    // overlap-nudged cursor — but the session must NOT claim to be current.
+    expect(result.nextCursor).toBe("2026-07-07T05:59:59.000Z");
+    expect(result.caughtUp).toBe(false);
+  });
+
+  it("a failed slice keeps the slices already consumed", async () => {
+    enable();
+    let call = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        call += 1;
+        // A 4xx is deterministic — the adapter returns it without retrying.
+        return call === 1
+          ? new Response(JSON.stringify([]), {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            })
+          : new Response("nope", { status: 404 });
+      }),
+    );
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
+    );
+
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.metrics.windowsCompleted).toBe(1);
+    // Slice 1 was answered in full, so it stays consumed. Pinning the
+    // checkpoint back to the start on any failure is what let one bad window
+    // freeze the source indefinitely.
+    expect(result.nextCursor).toBe("2026-08-04T07:59:59.000Z");
+    expect(result.caughtUp).toBe(false);
+    // The real classification survives for the operator to read.
+    expect(
+      result.logs.find((l) => l.code === "page_fetch_failed")?.detail,
+    ).toBe("http_error");
   });
 
   it("a snapshot is a ONE-SHOT — a single page, never a paged sweep", async () => {
@@ -338,11 +491,16 @@ describe("failure handling", () => {
     expect(result.logs.some((l) => l.level === "error")).toBe(true);
   });
 
-  it("an unparseable body is reported, not silently treated as empty", async () => {
+  it("an unparseable BUFFERED body is reported, not silently treated as empty", async () => {
     enable();
     stubFetch({ unexpected: true });
 
-    const result = await runVacancyImport(request());
+    // The links channel still reads one whole JSON document, so a body that
+    // is not a list is a whole-batch failure there. It is checkpointed, so it
+    // needs a cursor before it will touch the network at all.
+    const result = await runVacancyImport(
+      request({ channel: "links", cursor: "2026-08-01T00:00:00.000Z" }),
+    );
 
     expect(
       result.session!.reasonCounts.find(
@@ -350,6 +508,30 @@ describe("failure handling", () => {
       ),
     ).toBeTruthy();
     expect(result.logs.some((l) => l.code === "batch_unparseable")).toBe(true);
+  });
+
+  it("unparseable LINES on the streamed channel are counted, never silently dropped", async () => {
+    enable();
+    // Two good ads around one line that is not JSON at all.
+    stubFetch(null, {
+      rawBody:
+        `${JSON.stringify(ad({ id: "ad-1" }))}\n` +
+        `{ this is not json\n` +
+        `${JSON.stringify(ad({ id: "ad-2" }))}\n`,
+    });
+
+    const result = await runVacancyImport(request());
+
+    // The good ads survive — one bad line must not cost the batch.
+    expect(result.metrics.itemsParsed).toBe(2);
+    // And the bad line is accounted for by a stable reason rather than
+    // vanishing, so `scanned` still means everything we crossed.
+    expect(
+      result.session!.reasonCounts.find(
+        (r) => r.code === "parse_malformed_json_line",
+      )?.count,
+    ).toBe(1);
+    expect(result.metrics.itemsSeen).toBe(3);
   });
 
   it("an unsupported channel never reaches the network", async () => {
@@ -459,5 +641,285 @@ describe("translation stage", () => {
 
     expect(result.metrics.translationsAvailable).toBe(0);
     expect(result.metrics.translationsUnavailable).toBe(1);
+  });
+});
+
+describe("withdrawals — the publisher taking an ad down", () => {
+  /** Dedup state that already holds the ad the stream is about to withdraw. */
+  function storing(externalId: string) {
+    return {
+      knownContentHashes: new Set(["stored-hash"]),
+      knownIdentityHashes: new Map([
+        [vacancyIdentityKey("arbetsformedlingen", externalId), "stored-hash"],
+      ]),
+    };
+  }
+
+  // One 2.5 h backlog → exactly one slice, so the stub body is read once.
+  const ONE_SLICE_CURSOR = "2026-08-04T06:30:00.000Z";
+
+  it("accepts a withdrawal that carries no headline", async () => {
+    enable();
+    // What a real JobStream withdrawal looks like: identity plus `removed`,
+    // and nothing else. Requiring a title here rejected every one of them.
+    stubFetch([{ id: "gone-1", removed: true }]);
+
+    const result = await runVacancyImport(
+      request({
+        channel: "stream",
+        cursor: ONE_SLICE_CURSOR,
+        dedupState: storing("gone-1"),
+      }),
+    );
+
+    expect(result.metrics.itemsRejectedByValidation).toBe(0);
+    expect(result.metrics.itemsRemoval).toBe(1);
+    expect(result.acceptedVacancies).toHaveLength(1);
+    expect(result.acceptedVacancies[0].lifecycle).toBe("removed");
+  });
+
+  it("still rejects a PUBLISHED record with no headline", async () => {
+    enable();
+    // NEGATIVE CONTROL: the exemption is for withdrawals only. A live ad
+    // nobody can name is still not a vacancy, and must not slip through on
+    // the back of this change.
+    stubFetch([{ id: "nameless", publication_date: "2026-08-04T06:00:00Z" }]);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: ONE_SLICE_CURSOR }),
+    );
+
+    // Refused one stage earlier than the withdrawal case — the parser already
+    // refuses a titleless LIVE ad — so it never reaches validation at all.
+    // The rule itself is pinned directly in vacancy-validation.test.ts.
+    expect(result.metrics.itemsRejectedByParser).toBe(1);
+    expect(result.metrics.itemsParsed).toBe(0);
+    expect(result.acceptedVacancies).toEqual([]);
+  });
+
+  it("still refuses a withdrawal it cannot identify", async () => {
+    enable();
+    // Identity is what actually protects the store — a withdrawal without it
+    // could deactivate anything. The parser rejects it before validation.
+    stubFetch([{ removed: true }]);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: ONE_SLICE_CURSOR }),
+    );
+
+    expect(result.metrics.itemsRejectedByParser).toBe(1);
+    expect(result.acceptedVacancies).toEqual([]);
+  });
+
+  it("hands the withdrawal to the writer, which stores it as not-live", async () => {
+    enable();
+    const persist = vi.fn().mockResolvedValue({ inserted: 0, updated: 1 });
+    stubFetch([{ id: "gone-2", removed: true }]);
+
+    await runVacancyImport(
+      request({
+        channel: "stream",
+        mode: "persist",
+        persist,
+        cursor: ONE_SLICE_CURSOR,
+        dedupState: storing("gone-2"),
+      }),
+    );
+
+    // The end of the chain that was dead: the row mapper turns a `removed`
+    // lifecycle into `is_active: false`, and the board reads only active rows.
+    // Without this record reaching the writer, a job the publisher has taken
+    // down stays advertised and its apply link goes nowhere.
+    expect(persist).toHaveBeenCalledTimes(1);
+    const rows = persist.mock.calls[0][0] as { lifecycle: string }[];
+    expect(rows).toHaveLength(1);
+    expect(rows[0].lifecycle).toBe("removed");
+  });
+});
+
+// ── STREAMED SNAPSHOT COLD START ────────────────────────────────────────────
+/**
+ * The snapshot is the cold start, and it is the one channel that could never
+ * work before: the live Swedish body measured 389.94 MiB across 37,014 ads
+ * (2026-08-11), against a 16 MiB buffered cap. It is now read line by line and
+ * walked by record index, so these tests pin the properties that make a
+ * multi-session cold start safe — above all that a session which stopped early
+ * can never be mistaken for one that finished.
+ */
+describe("snapshot cold start — bounded, resumable, honest about finishing", () => {
+  /** A provider whose session budget is 2 records, so a 5-ad body truncates. */
+  const SMALL = {
+    ...PROVIDER,
+    boundOverrides: { ...PROVIDER.boundOverrides, maxAcceptedPerSession: 2 },
+  };
+
+  function ads(n: number, from = 0): Record<string, unknown>[] {
+    return Array.from({ length: n }, (_, i) =>
+      ad({ id: `ad-${from + i}`, headline: `Jobb ${from + i}` }),
+    );
+  }
+
+  it("a body larger than the session budget stops early and says so", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    expect(result.metrics.itemsParsed).toBe(2);
+    // The load-bearing assertion: an incomplete walk must never read as done.
+    expect(result.caughtUp).toBe(false);
+    expect(result.nextCursor).toBe("record-offset:2");
+    expect(
+      result.logs.some((l) => l.code === "stream_walk_incomplete"),
+    ).toBe(true);
+  });
+
+  it("resumes from the stored offset without re-reading or skipping an ad", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    const result = await runVacancyImport(
+      request({ provider: SMALL, cursor: "record-offset:2" }),
+    );
+
+    expect(result.acceptedVacancies.map((v) => v.externalId)).toEqual([
+      "ad-2",
+      "ad-3",
+    ]);
+    expect(result.metrics.recordsSkipped).toBe(2);
+    expect(result.nextCursor).toBe("record-offset:4");
+    expect(result.caughtUp).toBe(false);
+  });
+
+  it("three sessions drain the body, then the walk resets for reconciliation", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    let cursor: string | null = null;
+    const seen: string[] = [];
+    for (let session = 0; session < 3; session += 1) {
+      const result: Awaited<ReturnType<typeof runVacancyImport>> =
+        await runVacancyImport(request({ provider: SMALL, cursor }));
+      for (const v of result.acceptedVacancies) seen.push(v.externalId);
+      cursor = result.nextCursor;
+      if (result.caughtUp === true) break;
+    }
+
+    expect(seen).toEqual(["ad-0", "ad-1", "ad-2", "ad-3", "ad-4"]);
+    // Drained: the checkpoint resets so the next run reconciles from the top
+    // rather than sitting past the end of a body that keeps changing.
+    expect(cursor).toBe("record-offset:0");
+  });
+
+  it("a body that fits reports the walk COMPLETE", async () => {
+    enable();
+    stubFetch(ads(2));
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    expect(result.caughtUp).toBe(true);
+    expect(result.nextCursor).toBe("record-offset:0");
+    expect(
+      result.logs.some((l) => l.code === "stream_walk_incomplete"),
+    ).toBe(false);
+  });
+
+  it("REFUSES the deprecated array body instead of reading it as an empty snapshot", async () => {
+    enable();
+    // Exactly what the deprecated /snapshot path does: it accepts the jsonl
+    // Accept header and ignores it, answering one newline-free JSON array.
+    // Read as lines that is zero records — indistinguishable from "Sweden has
+    // no vacancies at all", which would quietly deactivate real supply.
+    stubFetch(null, {
+      rawBody: JSON.stringify(ads(3)),
+      contentType: "application/json",
+    });
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.metrics.itemsParsed).toBe(0);
+    expect(
+      result.logs.some((l) => l.code === "page_fetch_failed"),
+    ).toBe(true);
+    // Nothing was consumed, so the checkpoint must not move.
+    expect(result.nextCursor).toBeNull();
+    expect(result.caughtUp).toBeNull();
+  });
+
+  it("keeps what it read when the body is cut mid-transfer, and still reports failure", async () => {
+    enable();
+    const rows = ads(4).map((r) => JSON.stringify(r));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        // Two complete records are DELIVERED, and only then does the
+        // connection die. Erroring in `start` would discard the queued chunk
+        // and test nothing — the interruption has to land mid-transfer.
+        let pulls = 0;
+        const stream = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            pulls += 1;
+            if (pulls === 1) {
+              controller.enqueue(new TextEncoder().encode(`${rows[0]}\n${rows[1]}\n`));
+              return;
+            }
+            controller.error(new Error("connection reset"));
+          },
+        });
+        return new Response(stream, {
+          status: 200,
+          headers: { "content-type": "application/jsonl" },
+        });
+      }),
+    );
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    // Real progress is kept — throwing it away would make every interruption
+    // restart a 390 MiB walk from zero.
+    expect(result.metrics.itemsParsed).toBe(2);
+    // But it is still a failed run: the health streak has to see it.
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.caughtUp).toBe(false);
+    expect(result.nextCursor).toBe("record-offset:2");
+  });
+
+  it("a TIMESTAMP cursor on the snapshot channel restarts the walk rather than seeking nowhere", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    // The two checkpoint kinds share one opaque text column. A wrong-shaped
+    // value must fail closed — start over — never be coerced into an index.
+    const result = await runVacancyImport(
+      request({ provider: SMALL, cursor: "2026-08-01T00:00:00.000Z" }),
+    );
+
+    expect(result.metrics.recordsSkipped).toBe(0);
+    expect(result.acceptedVacancies.map((v) => v.externalId)).toEqual([
+      "ad-0",
+      "ad-1",
+    ]);
+  });
+
+  it("asks for line-delimited JSON on the non-deprecated path", async () => {
+    enable();
+    const spy = vi.fn().mockImplementation(async () => {
+      return new Response(`${JSON.stringify(ad())}\n`, {
+        status: 200,
+        headers: { "content-type": "application/jsonl" },
+      });
+    });
+    vi.stubGlobal("fetch", spy);
+
+    await runVacancyImport(request({ provider: SMALL }));
+
+    const [url, init] = spy.mock.calls[0];
+    expect(String(url)).toContain("/v2/snapshot");
+    expect((init.headers as Record<string, string>).Accept).toBe(
+      "application/jsonl",
+    );
+    expect(init.method).toBe("GET");
+    expect(init.redirect).toBe("error");
   });
 });

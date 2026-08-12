@@ -92,7 +92,12 @@ export function WaitlistModal({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "underline decoration-ink-500 underline-offset-4 transition-colors hover:text-text-primary hover:decoration-brand-blue",
+          // `inline-flex min-h-11` keeps the underlined-text affordance while
+          // giving it a 44px tap height: on /pricing this trigger IS the
+          // primary action of every plan card, and it measured 20-40px tall
+          // across 320-1440px (2026-08-11). The underline still sits on the
+          // baseline — only the hit area grows.
+          "inline-flex min-h-11 items-center underline decoration-ink-500 underline-offset-4 transition-colors hover:text-text-primary hover:decoration-brand-blue",
           triggerClassName,
         )}
       >

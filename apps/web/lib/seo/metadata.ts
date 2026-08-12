@@ -117,7 +117,8 @@ export type PageKey =
   | "workOpportunities"
   | "skills"
   | "professions"
-  | "projectCostCalculator";
+  | "projectCostCalculator"
+  | "createCv";
 
 /**
  * Curated, honest per-page SEO copy (active locales). No fabricated
@@ -236,27 +237,27 @@ export const PAGE_SEO: Readonly<
   },
   companyNeed: {
     en: {
-      title: "Company Need — Describe the workforce you need",
+      title: "Workforce Inquiry — Describe the workforce you need",
       description:
         "Tell LabourMarket.ai what your project needs: professions, skills, team size, location and start. We prepare a structured draft you review — nothing is published automatically.",
     },
     lt: {
-      title: "Įmonės poreikis — aprašyk reikalingą darbo jėgą",
+      title: "Darbuotojų užklausa — aprašyk reikalingą darbo jėgą",
       description:
         "Pasakyk LabourMarket.ai, ko reikia projektui: profesijos, įgūdžiai, komandos dydis, vieta ir pradžia. Paruošiame struktūruotą juodraštį, kurį peržiūri — niekas nepublikuojama automatiškai.",
     },
     ru: {
-      title: "Потребность компании — опишите нужную рабочую силу",
+      title: "Запрос на работников — опишите нужную рабочую силу",
       description:
         "Расскажите LabourMarket.ai, что нужно проекту: профессии, навыки, размер бригады, локация и старт. Мы готовим структурированный черновик, который вы проверяете — ничего не публикуется автоматически.",
     },
     nl: {
-      title: "Personeelsbehoefte — Beschrijf de werknemers die je nodig hebt",
+      title: "Personeelsaanvraag — Beschrijf de werknemers die je nodig hebt",
       description:
         "Vertel LabourMarket.ai wat je project nodig heeft: beroepen, vaardigheden, teamgrootte, locatie en startdatum. Wij bereiden een gestructureerd concept voor dat jij beoordeelt — niets wordt automatisch gepubliceerd.",
     },
     de: {
-      title: "Personalbedarf — Beschreiben Sie die Arbeitskräfte, die Sie benötigen",
+      title: "Personalanfrage — Beschreiben Sie die Arbeitskräfte, die Sie benötigen",
       description:
         "Sagen Sie LabourMarket.ai, was Ihr Projekt braucht: Berufe, Fähigkeiten, Teamgröße, Standort und Start. Wir erstellen einen strukturierten Entwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
     },
@@ -448,6 +449,33 @@ export const PAGE_SEO: Readonly<
       title: "Projektrechner — Arbeits- und Projektkosten kalkulieren",
       description:
         "Kostenloser Arbeits- und Projektkostenrechner: Geben Sie Ihre eigenen Arbeitskräfte, Stunden, Sätze, Material- und Zusatzkosten ein und erhalten Sie eine transparente vorläufige Schätzung. Branchenübergreifend — Logistik, Reinigung, Produktion, Gastgewerbe, Pflege, Bau und mehr. Ohne Konto; Ihre Zahlen werden nicht gespeichert.",
+    },
+  },
+  createCv: {
+    en: {
+      title: "Free CV Builder — Create a professional CV online",
+      description:
+        "Create a professional CV free on LabourMarket.ai: import an existing PDF or DOCX or start from scratch, review every extracted fact, choose a clean template and download as PDF. Optionally build your worker profile, structure your skills with the European ESCO taxonomy and see real job ads from official public sources.",
+    },
+    lt: {
+      title: "Nemokamas CV kūrimas — susikurk profesionalų CV internetu",
+      description:
+        "Susikurk profesionalų CV nemokamai LabourMarket.ai: importuok esamą PDF ar DOCX arba pradėk nuo nulio, peržiūrėk kiekvieną faktą, pasirink tvarkingą šabloną ir atsisiųsk PDF. Papildomai gali susikurti darbuotojo profilį, struktūruoti įgūdžius pagal Europos ESCO klasifikatorių ir matyti tikrus darbo skelbimus iš oficialių viešų šaltinių.",
+    },
+    ru: {
+      title: "Бесплатный конструктор CV — создайте профессиональное резюме онлайн",
+      description:
+        "Создайте профессиональное CV бесплатно на LabourMarket.ai: импортируйте существующий PDF или DOCX либо начните с нуля, проверьте каждый факт, выберите аккуратный шаблон и скачайте PDF. По желанию — создайте профиль работника, структурируйте навыки по европейской классификации ESCO и смотрите реальные вакансии из официальных публичных источников.",
+    },
+    nl: {
+      title: "Gratis cv-maker — Maak online een professioneel cv",
+      description:
+        "Maak gratis een professioneel cv op LabourMarket.ai: importeer een bestaand PDF- of DOCX-bestand of begin vanaf nul, controleer elk feit, kies een strakke template en download als PDF. Optioneel bouw je je werknemersprofiel op, structureer je je vaardigheden met de Europese ESCO-taxonomie en zie je echte vacatures uit officiële publieke bronnen.",
+    },
+    de: {
+      title: "Kostenloser Lebenslauf-Generator — Professionellen Lebenslauf online erstellen",
+      description:
+        "Erstellen Sie kostenlos einen professionellen Lebenslauf auf LabourMarket.ai: Importieren Sie ein vorhandenes PDF oder DOCX oder beginnen Sie bei null, prüfen Sie jeden Fakt, wählen Sie eine klare Vorlage und laden Sie als PDF herunter. Optional bauen Sie Ihr Arbeitskraft-Profil auf, strukturieren Ihre Fähigkeiten mit der europäischen ESCO-Taxonomie und sehen echte Stellenanzeigen aus offiziellen öffentlichen Quellen.",
     },
   },
 };

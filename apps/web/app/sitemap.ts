@@ -24,6 +24,8 @@ const STATIC_PATHS: readonly string[] = [
   "/professions",
   "/company-need",
   "/worker-intake",
+  // Free CV builder — worker acquisition entry (beta train v2 §12).
+  "/create-cv",
   "/labour-market",
   "/match-preview",
   "/pricing",
@@ -62,6 +64,7 @@ const CORE_PATHS: readonly string[] = [
   "/labour-market",
   "/company-need",
   "/worker-intake",
+  "/create-cv",
   "/work-opportunities",
   "/skills",
   "/professions",

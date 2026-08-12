@@ -300,3 +300,45 @@ export function fromPublicVacancyRow(
     requestRef: str("request_ref") ?? "",
   };
 }
+
+/**
+ * The newest confirmed refresh across the supply a worker can currently see.
+ *
+ * `last_seen_at` is the importer's own record of the last time it re-confirmed
+ * an ad still existed at the publisher, so the maximum across the visible rows
+ * IS the age of the supply. Deliberately reads through the SAME RLS-scoped
+ * client and the SAME `is_active` predicate as the board: the number describes
+ * exactly the rows the worker is being shown, not a broader operator view.
+ *
+ * Uses `vacancy_import_cursors` NOWHERE — that table is RLS-enabled with no
+ * policy and granted only to postgres/service_role. See source-freshness.ts.
+ */
+export async function readSupplyLastRefreshedAt(
+  client: VacancyDbClient,
+  filters: Pick<VacancySearchFiltersV1, "country" | "nowIso">,
+): Promise<{ status: VacancySearchStatus; lastRefreshedAt: string | null }> {
+  let q = client
+    .from(VACANCY_TABLE)
+    .select("last_seen_at")
+    .eq("is_active", true)
+    .or(`expires_at.is.null,expires_at.gt.${filters.nowIso}`);
+
+  if (filters.country) {
+    q = q.eq("country", filters.country.trim().toUpperCase());
+  }
+
+  const { data, error } = await q
+    .order("last_seen_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    if (error.code === UNDEFINED_TABLE) {
+      return { status: "not_provisioned", lastRefreshedAt: null };
+    }
+    throw new Error(`vacancy_freshness_failed:${error.code ?? "unknown"}`);
+  }
+
+  const row = (data ?? [])[0] as { last_seen_at?: unknown } | undefined;
+  const value = typeof row?.last_seen_at === "string" ? row.last_seen_at : null;
+  return { status: "ok", lastRefreshedAt: value };
+}

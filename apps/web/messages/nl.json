@@ -1377,9 +1377,9 @@
       "errorNoCompany": "Alleen een bedrijfsaccount kan een projectcontext aanmaken.",
       "error": "Aanmaken is niet gelukt. Probeer het opnieuw."
     },
-    "needsTitle": "Behoeften",
+    "needsTitle": "Aanvragen",
     "needsBody": "Dien een gestructureerde aanvraag in en volg de status.",
-    "needsCta": "Behoeften openen",
+    "needsCta": "Aanvragen openen",
     "connections": {
       "title": "Toewijzing is verbonden met",
       "intro": "Het toewijzen van je mensen is gekoppeld aan het plan, de kaart en het dossier.",
@@ -1397,10 +1397,10 @@
     "statusOther": "In beoordeling",
     "heading": "Je ingediende aanvragen",
     "note": "Opgeslagen in je privéruimte en handmatig beoordeeld — we stellen niet automatisch kandidaten voor. Statusupdates verschijnen hier.",
-    "workerVisibilityNote": "Eerlijke status: personeelsbehoeften van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je behoeften privé voor jou en het beoordelingsteam.",
-    "empty": "Nog geen aanvragen ingediend. Dien je behoefte hierboven in en die verschijnt hier met de status.",
+    "workerVisibilityNote": "Eerlijke status: personeelsaanvragen van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je aanvragen privé voor jou en het beoordelingsteam.",
+    "empty": "Nog geen aanvragen ingediend. Dien je aanvraag hierboven in en die verschijnt hier met de status.",
     "created": "Aangemaakt",
-    "manageHelp": "Concepten kunnen worden verwijderd. Het sluiten of heropenen van een ingediende behoefte — en het bevestigen van de herkende vaardigheden — doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
+    "manageHelp": "Concepten kunnen worden verwijderd. Het sluiten of heropenen van een ingediende aanvraag — en het bevestigen van de herkende vaardigheden — doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
     "detailsLabel": "Ingediende gegevens",
     "fields": {
       "description": "Beschrijving",
@@ -1410,7 +1410,7 @@
       "urgency": "Wanneer nodig",
       "notes": "Notities"
     },
-    "scoutLink": "Gematchte werknemers & interesse voor deze behoefte"
+    "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag"
   },
   "journey": {
     "eyebrow": "Hoe het werkt",
@@ -2940,8 +2940,8 @@
     "work_done": "Uitgevoerd werk",
     "skill_claim": "Vaardigheidsclaim",
     "service_offer": "Dienstenaanbod",
-    "worker_need": "Werkbehoefte (werknemer)",
-    "project_need": "Projectbehoefte",
+    "worker_need": "Werkaanvraag (werknemer)",
+    "project_need": "Projectaanvraag",
     "team_offer": "Ploegaanbod",
     "company_activity": "Bedrijfsactiviteit",
     "learning_goal": "Leerdoel",
@@ -4485,7 +4485,7 @@
         }
       ],
       "screenshot": "Bedrijfsvraagflow",
-      "cta": "Start een personeelsbehoefte"
+      "cta": "Start een personeelsaanvraag"
     },
     "agencies": {
       "eyebrow": "Voor uitzendbureaus",
@@ -4508,6 +4508,47 @@
       ],
       "screenshot": "Uitzendbureau-modusflow",
       "cta": "Maak een uitzendbureau-account aan"
+    },
+    "createCv": {
+      "eyebrow": "Gratis cv-maker",
+      "title": "Een professioneel cv,",
+      "titleAccent": "gratis.",
+      "subcopy": "Maak een cv vanaf nul of importeer je bestaande PDF of DOCX. Controleer elk geëxtraheerd feit, kies een strakke template en download als PDF — gratis. Als je wilt, kan dezelfde informatie je werknemersprofiel opbouwen en echte vacatures uit officiële publieke bronnen tonen.",
+      "cta": "Maak mijn cv — gratis",
+      "benefits": [
+        {
+          "title": "Importeer of begin opnieuw",
+          "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat jij ze accepteert."
+        },
+        {
+          "title": "Eerlijke structuur",
+          "body": "Je ervaring, opleiding, talen en vaardigheden worden gestructureerd voor jouw controle — niets wordt verzonnen en niets wordt opgeslagen zonder jouw toestemming."
+        },
+        {
+          "title": "Strakke templates, echte PDF",
+          "body": "Kies een professionele template en exporteer naar A4-PDF via je browser — zonder watermerk, zonder betaalmuur."
+        },
+        {
+          "title": "Meer dan een document",
+          "body": "Met jouw uitdrukkelijke toestemming kunnen dezelfde feiten je werknemersprofiel opbouwen, je vaardigheden koppelen aan de gemeenschappelijke Europese vaardighedencatalogus en passende publieke vacatures tonen."
+        }
+      ],
+      "stepsTitle": "Hoe het werkt",
+      "steps": [
+        {
+          "title": "Meld je gratis aan",
+          "body": "Met een account blijft je cv bewerkbaar en houd jij je gegevens onder controle — je kunt ze op elk moment verwijderen."
+        },
+        {
+          "title": "Voeg je ervaring toe",
+          "body": "Importeer je oude cv of typ het in — bekijk daarna elk feit en bepaal wat je houdt voordat het wordt gebruikt."
+        },
+        {
+          "title": "Download en beslis",
+          "body": "Exporteer je cv als PDF. Vindbaar worden voor werkgevers blijft een aparte, optionele keuze."
+        }
+      ],
+      "privacyNote": "Je cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat jij vindbaarheid expliciet inschakelt, en je kunt dit op elk moment uitzetten."
     }
   },
   "pricing": {
@@ -7482,13 +7523,13 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Vroege toegang",
-      "body": "Publieke betalingen zijn nog niet ingeschakeld. De eerste klanten worden direct bediend: een personeelsbehoefte indienen is gratis, en de definitieve prijs wordt altijd met je bevestigd voordat betaald werk begint.",
-      "cta": "Dien een personeelsbehoefte in"
+      "body": "Publieke betalingen zijn nog niet ingeschakeld. De eerste klanten worden direct bediend: een personeelsaanvraag indienen is gratis, en de definitieve prijs wordt altijd met je bevestigd voordat betaald werk begint.",
+      "cta": "Dien een personeelsaanvraag in"
     },
     "title": "Hoe de eerste betaalde dienst werkt",
     "steps": [
       {
-        "title": "Dien je behoefte gratis in",
+        "title": "Dien je aanvraag gratis in",
         "body": "Beschrijf welke werknemers of ploeg je nodig hebt. Geen kosten, geen kaart, niets wordt automatisch gepubliceerd."
       },
       {
@@ -7497,7 +7538,7 @@
       },
       {
         "title": "Je krijgt een handmatig gecontroleerde shortlist",
-        "body": "Echte kandidaten of ploegen, door een mens gecontroleerd aan de hand van jouw behoefte. Als we geen geschikte shortlist kunnen samenstellen, betaal je niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
+        "body": "Echte kandidaten of ploegen, door een mens gecontroleerd aan de hand van jouw aanvraag. Als we geen geschikte shortlist kunnen samenstellen, betaal je niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
       },
       {
         "title": "Je betaalt alleen voor geleverde dienstverlening",
@@ -7505,7 +7546,7 @@
       }
     ],
     "note": "Er is hier nog geen automatische vacaturebank en geen automatische matching — tijdens de vroege toegang wordt de selectie door een mens gecoördineerd. Wat je ziet is wat er echt draait.",
-    "ctaLabel": "Dien een personeelsbehoefte in →"
+    "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {
     "eyebrow": "Lanceringsgereedheid",
@@ -7627,9 +7668,9 @@
     "structuredNote": "Uw cv-tekst wordt automatisch gestructureerd tot een profiel — u beoordeelt elke suggestie en beslist wat wordt opgeslagen."
   },
   "needStructuring": {
-    "pageTitle": "Behoeftestructurering",
-    "pageIntro": "Ingediende behoeften zonder gestructureerde velden. Het systeem stelt werktype, land, aantal, timing en huisvesting voor op basis van de tekst — bevestig of corrigeer. Alleen bevestigde velden met vaste keuzeopties bereiken het werknemersbord.",
-    "empty": "Alle ingediende behoeften hebben al gestructureerde velden.",
+    "pageTitle": "Aanvraagstructurering",
+    "pageIntro": "Ingediende aanvragen zonder gestructureerde velden. Het systeem stelt werktype, land, aantal, timing en huisvesting voor op basis van de tekst — bevestig of corrigeer. Alleen bevestigde velden met vaste keuzeopties bereiken het werknemersbord.",
+    "empty": "Alle ingediende aanvragen hebben al gestructureerde velden.",
     "footnote": "Suggesties zijn deterministisch (op trefwoorden gebaseerd), geen AI. Vrije tekst wordt alleen hier getoond en bereikt nooit het werknemersbord.",
     "freeTextHeading": "Originele tekst (alleen voor admins)",
     "freeText": {
@@ -7753,7 +7794,7 @@
       }
     },
     "title": "Kansen voor jou",
-    "intro": "Hier zie je personeelsbehoeften van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
+    "intro": "Hier zie je personeelsaanvragen van werkgevers die bij je kunnen passen, en wat je aan je profiel kunt toevoegen om er klaar voor te zijn.",
     "noWorkerBody": "Maak eerst je werknemersprofiel af om kansen te zien die bij je passen.",
     "readinessTitle": "Jouw gereedheid",
     "matchTitle": "Matchoverzicht",
@@ -7777,7 +7818,7 @@
       "check": "controleren",
       "unknown": "onbekend"
     },
-    "readinessIntro": "Hoe vollediger je profiel, hoe makkelijker werkgevers je vinden — en hoe preciezer we passende behoeften kunnen tonen.",
+    "readinessIntro": "Hoe vollediger je profiel, hoe makkelijker werkgevers je vinden — en hoe preciezer we passende aanvragen kunnen tonen.",
     "ready": {
       "workType": "Sector & werktype",
       "skills": "Vaardigheden",
@@ -7789,9 +7830,9 @@
     },
     "ctaProfile": "Maak je profiel compleet",
     "needsAccessTitle": "Kansen worden voorbereid",
-    "needsAccessBody": "Personeelsbehoeften van werkgevers verschijnen hier zodra zichtbaarheid voor werknemers is ingeschakeld. Maak intussen je profiel compleet, zodat je klaar bent zodra passende behoeften verschijnen.",
-    "emptyTitle": "Op dit moment geen open behoeften",
-    "emptyBody": "Wanneer werkgevers nieuwe behoeften plaatsen, verschijnen ze hier. Intussen is het de moeite waard om je profiel compleet te maken.",
+    "needsAccessBody": "Personeelsaanvragen van werkgevers verschijnen hier zodra zichtbaarheid voor werknemers is ingeschakeld. Maak intussen je profiel compleet, zodat je klaar bent zodra passende aanvragen verschijnen.",
+    "emptyTitle": "Op dit moment geen open aanvragen",
+    "emptyBody": "Wanneer werkgevers nieuwe aanvragen plaatsen, verschijnen ze hier. Intussen is het de moeite waard om je profiel compleet te maken.",
     "trustNote": "Werknemers zien eerst alleen goedgekeurde of veilig beheerde kansen. Dit helpt risico's te verminderen en een betrouwbaardere arbeidsmarkt op te bouwen.",
     "approvedEmptyTitle": "Nog geen goedgekeurde kansen.",
     "approvedEmptyBody": "Maak je profiel compleet zodat we je beter kunnen matchen met passende kansen zodra ze zijn goedgekeurd.",
@@ -7810,7 +7851,7 @@
       "country_unknown": "Je land is niet ingesteld",
       "availability_unknown": "Beschikbaarheid niet ingesteld"
     },
-    "fieldRoleUnknown": "Werkbehoefte",
+    "fieldRoleUnknown": "Werkaanvraag",
     "fieldCountry": "Land",
     "fieldStart": "Start",
     "fieldTeam": "Mensen",
@@ -7851,7 +7892,7 @@
         "insufficient_data": "Nog niet vergelijkbaar"
       },
       "basis": "{matched} van {total} vereiste vaardigheden komen overeen ({confirmed} door manager bevestigd)",
-      "recognizedNote": "eisen herkend uit de behoeftetekst — nog niet bevestigd",
+      "recognizedNote": "eisen herkend uit de aanvraagtekst — nog niet bevestigd",
       "missingPrefix": "ontbreekt:"
     },
     "recommendations": {
@@ -7942,6 +7983,10 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "freshnessDelayed": "Vacatures voor het laatst ververst op {date}. Updates van deze bron zijn tijdelijk vertraagd, dus sommige functies kunnen al vervuld zijn.",
+      "freshnessStale": "Vacatures voor het laatst ververst op {date}. Ze zijn sindsdien niet opnieuw bevestigd — controleer de originele vacature van de uitgever voor de actuele beschikbaarheid.",
+      "freshnessUnknown": "We kunnen niet bevestigen wanneer deze vacatures voor het laatst zijn ververst. Controleer de originele vacature voor de actuele beschikbaarheid.",
+      "freshnessUnavailable": "Externe vacatures zijn tijdelijk niet beschikbaar.",
       "openOriginal": "Originele advertentie openen",
       "noApplicationRoute": "De bron heeft voor deze advertentie geen sollicitatieadres gepubliceerd.",
       "publishedOn": "Gepubliceerd {date}",
@@ -8015,13 +8060,13 @@
     "bridgeLogin": "Heb je al een account? Log in"
   },
   "companyNeed": {
-    "title": "Start een personeelsbehoefte",
+    "title": "Start een personeelsaanvraag",
     "subtitle": "Beschrijf de mensen die je nodig hebt. Wij maken er een net vacatureconcept van dat jij beoordeelt — we verzinnen nooit loon en publiceren nooit automatisch.",
     "companyName": "Bedrijfsnaam",
     "profession": "Sector & type werk dat nodig is",
     "country": "Land",
     "countryHelp": "Selecteer het land waar de werknemers nodig zijn.",
-    "honestNote": "Vul je behoefte in — wij structureren die netjes en bereiden die voor op opvolging. Niets wordt automatisch gepubliceerd.",
+    "honestNote": "Vul je aanvraag in — wij structureren die netjes en bereiden die voor op opvolging. Niets wordt automatisch gepubliceerd.",
     "countries": {
       "LT": "Litouwen",
       "LV": "Letland",
@@ -8035,9 +8080,9 @@
       "FI": "Finland"
     },
     "contactPerson": "Contactpersoon",
-    "contactPersonHelp": "Optioneel. Wie we kunnen bereiken over deze behoefte.",
+    "contactPersonHelp": "Optioneel. Wie we kunnen bereiken over deze aanvraag.",
     "contactEmail": "Contact-e-mailadres",
-    "contactEmailHelp": "Optioneel, maar zo kunnen we sneller opvolgen over je behoefte.",
+    "contactEmailHelp": "Optioneel, maar zo kunnen we sneller opvolgen over je aanvraag.",
     "cityRegion": "Stad of regio",
     "cityRegionHelp": "Optioneel. Waar het werk zal zijn.",
     "expectedDuration": "Verwachte duur",
@@ -8069,7 +8114,7 @@
     "engEmployment": "Loondienst",
     "engSubcontracting": "Onderaanneming",
     "engAgency": "Via uitzendbureau",
-    "description": "Beschrijf de behoefte",
+    "description": "Beschrijf je aanvraag",
     "descriptionHelp": "Wat het werk is, waar, en eventuele eisen — de assistent gebruikt dit om een net vacatureconcept op te stellen.",
     "submit": "Maak vacatureconcept",
     "aiBadge": "AI-suggestie",
@@ -8083,16 +8128,16 @@
     "aiNone": "Er is geen suggestie gegenereerd — controleer je gegevens.",
     "statusInvalid": "Sommige gegevens moeten worden aangepast. Controleer het formulier.",
     "statusError": "Er is iets misgegaan. Probeer het opnieuw.",
-    "bridgeNote": "Om deze behoefte in te dienen voor opvolging, maak je een gratis account aan. Heb je er al een? Log in.",
-    "bridgeSignup": "Maak een account aan en plaats je behoefte",
+    "bridgeNote": "Om deze aanvraag in te dienen voor opvolging, maak je een gratis account aan. Heb je er al een? Log in.",
+    "bridgeSignup": "Maak een account aan en dien je aanvraag in",
     "bridgeLogin": "Heb je al een account? Log in",
     "autoSuggested": "Voorgesteld op basis van je beschrijving — controleer en pas aan waar nodig. Niets wordt automatisch ingediend.",
-    "preparedTitle": "Je behoefte is voorbereid",
-    "preparedBody": "We hebben je behoefte georganiseerd. Om die in te dienen voor opvolging, maak je hieronder een gratis account aan of log je in — dan bereikt die het team.",
+    "preparedTitle": "Je aanvraag is voorbereid",
+    "preparedBody": "We hebben je aanvraag georganiseerd. Om die in te dienen voor opvolging, maak je hieronder een gratis account aan of log je in — dan bereikt die het team.",
     "receivedTitle": "Aanvraag ontvangen",
-    "receivedBody": "We hebben je behoefte ontvangen en bewaren die voor opvolging met jou. Om die te bekijken en te beheren, maak je hieronder een account aan of log je in.",
-    "partnerRouteTitle": "Voor bouwbehoeften — een route via partnerbedrijven",
-    "partnerRouteBody": "Als er nog geen geschikte directe match met een werknemer is, kunnen wij voor bouwbehoeften eerst aanraden contact op te nemen met onze partner UAB “Nonstop Group” (LT) — de exploitant van het platform. Dat helpt documenten, verantwoordelijkheden en onboarding sneller te coördineren, met een mens die elke stap begeleidt."
+    "receivedBody": "We hebben je aanvraag ontvangen en bewaren die voor opvolging met jou. Om die te bekijken en te beheren, maak je hieronder een account aan of log je in.",
+    "partnerRouteTitle": "Voor bouwaanvragen — een route via partnerbedrijven",
+    "partnerRouteBody": "Als er nog geen geschikte directe match met een werknemer is, kunnen wij voor bouwaanvragen eerst aanraden contact op te nemen met onze partner UAB “Nonstop Group” (LT) — de exploitant van het platform. Dat helpt documenten, verantwoordelijkheden en onboarding sneller te coördineren, met een mens die elke stap begeleidt."
   },
   "candidatePool": {
     "title": "Kandidatenpool",
@@ -10764,7 +10809,7 @@
         "needsAccommodation": "Huisvesting nodig?",
         "availabilityNote": "Notitie (optioneel)",
         "availabilityNotePlaceholder": "Bijv. beschikbaar vanaf augustus, liefst 2-weekse rotaties",
-        "demandDescription": "Beschrijf de behoefte",
+        "demandDescription": "Beschrijf de aanvraag",
         "demandDescriptionPlaceholder": "Bijv.: 4 metselaars nodig in Kaunas vanaf augustus, 3 maanden werk, ervaring vereist",
         "demandRole": "Functie",
         "demandRolePlaceholder": "Bijv. metselaar",
@@ -11116,7 +11161,7 @@
       "fieldEnd": "Einde",
       "fieldSource": "Bron",
       "fieldSkills": "Vaardigheden",
-      "fieldDemands": "Open behoeften",
+      "fieldDemands": "Open aanvragen",
       "fieldWorkspace": "Werkruimte",
       "fieldProjectId": "Project-id",
       "evalDemand": "Vraag",

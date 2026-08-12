@@ -143,7 +143,18 @@ describe("5. the bell states only real derived signals", () => {
     expect(panel).toMatch(/n\.href \?/);
     expect(panel).toMatch(/data-testid=\{`notification-signal-\$\{n\.id\}`\}/);
     // "Mark all read" never renders for derived signals.
-    expect(panel).toMatch(/notifications\.some\(\(n\) => !n\.href\)/);
+    //
+    // This used to pin the literal `notifications.some((n) => !n.href)`, which
+    // certified an IMPLEMENTATION rather than the property in the comment
+    // above it — and that implementation was wrong: it made "has no link" mean
+    // "has a persisted read state", so every durable notification had to ship
+    // without a destination to keep its mark-all-read control. The property is
+    // unchanged (derived signals set no `durable` flag, so they still never
+    // get the control); only the expression it is read from moved.
+    //
+    // Behaviourally pinned in lib/guards/notification-event-links.test.ts,
+    // which also fails if the `!n.href` form comes back.
+    expect(panel).toMatch(/notifications\.some\(\(n\) => n\.durable\)/);
   });
   it("signal type labels exist in every active locale", () => {
     for (const loc of LOCALES) {
