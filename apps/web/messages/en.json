@@ -1377,9 +1377,9 @@
       "errorNoCompany": "Only a company account can create project context.",
       "error": "Could not create. Please try again."
     },
-    "needsTitle": "Needs",
-    "needsBody": "Submit a structured demand and track its status.",
-    "needsCta": "Open needs",
+    "needsTitle": "Inquiries",
+    "needsBody": "Submit a structured inquiry and track its status.",
+    "needsCta": "Open inquiries",
     "connections": {
       "title": "Assignment connects to",
       "intro": "Assigning your people links into the plan, the map and the record.",
@@ -1395,12 +1395,12 @@
   },
   "demandReadback": {
     "statusOther": "In review",
-    "heading": "Your submitted requests",
+    "heading": "Your submitted inquiries",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
-    "workerVisibilityNote": "Honest status: needs from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your needs stay private to you and the review team.",
-    "empty": "No requests submitted yet. Submit your need above and it will appear here with its status.",
+    "workerVisibilityNote": "Honest status: inquiries from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your inquiries stay private to you and the review team.",
+    "empty": "No inquiries submitted yet. Submit your inquiry above and it will appear here with its status.",
     "created": "Created",
-    "manageHelp": "Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "Drafts can be deleted. Closing or reopening a submitted inquiry — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
     "detailsLabel": "Submitted details",
     "fields": {
       "description": "Description",
@@ -1410,7 +1410,7 @@
       "urgency": "When needed",
       "notes": "Notes"
     },
-    "scoutLink": "Matched workers & interest for this need"
+    "scoutLink": "Matched workers & interest for this inquiry"
   },
   "journey": {
     "eyebrow": "How it works",
@@ -4485,7 +4485,7 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Start a work need"
+      "cta": "Start a workforce inquiry"
     },
     "agencies": {
       "eyebrow": "For agencies",
@@ -7523,22 +7523,22 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Early access",
-      "body": "Public payments are not enabled yet. First clients are served directly: submitting a worker need is free, and the final price is always confirmed with you before any paid work starts.",
-      "cta": "Submit a worker need"
+      "body": "Public payments are not enabled yet. First clients are served directly: submitting a workforce inquiry is free, and the final price is always confirmed with you before any paid work starts.",
+      "cta": "Submit a workforce inquiry"
     },
     "title": "How the first paid service works",
     "steps": [
       {
-        "title": "Submit your need for free",
-        "body": "Describe the workers or crew you need in the need form. No fee, no card, nothing is published automatically."
+        "title": "Submit your inquiry for free",
+        "body": "Describe the workers or crew you need in the inquiry form. No fee, no card, nothing is published automatically."
       },
       {
         "title": "A person reviews it",
-        "body": "An operator reads every request, contacts you and clarifies scope, timing and conditions before anything moves."
+        "body": "An operator reads every inquiry, contacts you and clarifies scope, timing and conditions before anything moves."
       },
       {
         "title": "You get a manually checked shortlist",
-        "body": "Real candidates or crews, checked by a person against your need. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
+        "body": "Real candidates or crews, checked by a person against your inquiry. If we cannot put together a suitable shortlist, there is no fee — and we never promise that a candidate will always be found."
       },
       {
         "title": "You pay only for delivered service",
@@ -7546,7 +7546,7 @@
       }
     ],
     "note": "There is no automatic job board and no automatic matching here yet — during early access, selection is coordinated by a person. What you see is what really runs.",
-    "ctaLabel": "Submit a worker need →"
+    "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {
     "eyebrow": "Launch readiness",
@@ -8056,13 +8056,13 @@
     "bridgeLogin": "Already have an account? Sign in"
   },
   "companyNeed": {
-    "title": "Start a work need",
+    "title": "Start a workforce inquiry",
     "subtitle": "Describe the people you need. We turn it into a clean vacancy draft you review — we never invent pay and never publish automatically.",
     "companyName": "Company name",
     "profession": "Sector & work type needed",
     "country": "Country",
     "countryHelp": "Select the country where the workers are needed.",
-    "honestNote": "Fill in your need — we'll structure it cleanly and prepare it for follow-up. Nothing is published automatically.",
+    "honestNote": "Fill in your inquiry — we'll structure it cleanly and prepare it for follow-up. Nothing is published automatically.",
     "countries": {
       "LT": "Lithuania",
       "LV": "Latvia",
@@ -8076,9 +8076,9 @@
       "FI": "Finland"
     },
     "contactPerson": "Contact person",
-    "contactPersonHelp": "Optional. Who to reach about this need.",
+    "contactPersonHelp": "Optional. Who to reach about this inquiry.",
     "contactEmail": "Contact email",
-    "contactEmailHelp": "Optional, but it helps us follow up faster about your need.",
+    "contactEmailHelp": "Optional, but it helps us follow up faster about your inquiry.",
     "cityRegion": "City or region",
     "cityRegionHelp": "Optional. Where the work will be.",
     "expectedDuration": "Expected duration",
@@ -8110,7 +8110,7 @@
     "engEmployment": "Employment",
     "engSubcontracting": "Subcontracting",
     "engAgency": "Agency supply",
-    "description": "Describe the need",
+    "description": "Describe your inquiry",
     "descriptionHelp": "What the work is, where, and any requirements — the assistant uses this to draft a clean vacancy.",
     "submit": "Create vacancy draft",
     "aiBadge": "AI suggestion",
@@ -8124,16 +8124,16 @@
     "aiNone": "No suggestion was produced — please review your details.",
     "statusInvalid": "Some details need fixing. Please check the form.",
     "statusError": "Something went wrong. Please try again.",
-    "bridgeNote": "To submit this need for follow-up, create a free account. Already have one? Sign in.",
-    "bridgeSignup": "Create an account and post your need",
+    "bridgeNote": "To submit this inquiry for follow-up, create a free account. Already have one? Sign in.",
+    "bridgeSignup": "Create an account and submit your inquiry",
     "bridgeLogin": "Already have an account? Sign in",
     "autoSuggested": "Suggested from your description — please check and adjust if needed. Nothing is submitted automatically.",
-    "preparedTitle": "Your need is prepared",
-    "preparedBody": "We've organised your need. To submit it for follow-up, create a free account or sign in below — then it reaches the team.",
-    "receivedTitle": "Request received",
-    "receivedBody": "We've received your need and are keeping it for follow-up with you. To view and manage it, create an account or sign in below.",
-    "partnerRouteTitle": "For construction needs — a partner-company route",
-    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction needs we may first recommend contacting our partner company UAB “Nonstop Group” (LT) — the platform's operator. This can help coordinate documents, responsibilities and onboarding faster, with a human coordinating each step."
+    "preparedTitle": "Your inquiry is prepared",
+    "preparedBody": "We've organised your inquiry. To submit it for follow-up, create a free account or sign in below — then it reaches the team.",
+    "receivedTitle": "Inquiry received",
+    "receivedBody": "We've received your inquiry and are keeping it for follow-up with you. To view and manage it, create an account or sign in below.",
+    "partnerRouteTitle": "For construction inquiries — a partner-company route",
+    "partnerRouteBody": "If a suitable direct worker match isn't available yet, for construction inquiries we may first recommend contacting our partner company UAB “Nonstop Group” (LT) — the platform's operator. This can help coordinate documents, responsibilities and onboarding faster, with a human coordinating each step."
   },
   "candidatePool": {
     "title": "Candidate pool",
@@ -10805,7 +10805,7 @@
         "needsAccommodation": "Need accommodation?",
         "availabilityNote": "Note (optional)",
         "availabilityNotePlaceholder": "e.g. available from August, prefer 2-week rotations",
-        "demandDescription": "Describe the need",
+        "demandDescription": "Describe the inquiry",
         "demandDescriptionPlaceholder": "E.g.: need 4 bricklayers in Kaunas from August, 3-month job, experience required",
         "demandRole": "Role",
         "demandRolePlaceholder": "E.g. bricklayer",
@@ -11157,7 +11157,7 @@
       "fieldEnd": "End",
       "fieldSource": "Source",
       "fieldSkills": "Skills",
-      "fieldDemands": "Open needs",
+      "fieldDemands": "Open inquiries",
       "fieldWorkspace": "Workspace",
       "fieldProjectId": "Project id",
       "evalDemand": "Demand",

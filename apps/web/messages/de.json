@@ -1377,9 +1377,9 @@
       "errorNoCompany": "Nur ein Unternehmenskonto kann einen Projektkontext anlegen.",
       "error": "Konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
     },
-    "needsTitle": "Bedarfe",
-    "needsBody": "Reichen Sie einen strukturierten Bedarf ein und verfolgen Sie seinen Status.",
-    "needsCta": "Bedarfe öffnen",
+    "needsTitle": "Anfragen",
+    "needsBody": "Reichen Sie eine strukturierte Anfrage ein und verfolgen Sie ihren Status.",
+    "needsCta": "Anfragen öffnen",
     "connections": {
       "title": "Die Zuweisung ist verbunden mit",
       "intro": "Die Zuweisung Ihrer Leute fließt in den Plan, die Karte und die Dokumentation ein.",
@@ -1397,10 +1397,10 @@
     "statusOther": "In Prüfung",
     "heading": "Ihre eingereichten Anfragen",
     "note": "In Ihrem privaten Bereich gespeichert und manuell geprüft — wir schlagen keine Kandidaten automatisch vor. Statusaktualisierungen erscheinen hier.",
-    "workerVisibilityNote": "Ehrlicher Status: Bedarfe verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Bedarfe privat für Sie und das Prüfteam.",
-    "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihren Bedarf oben ein — er erscheint hier mit seinem Status.",
+    "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
+    "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
-    "manageHelp": "Entwürfe können gelöscht werden. Das Schließen oder Wiedereröffnen eines eingereichten Bedarfs — und das Bestätigen seiner erkannten Fähigkeiten — erfolgt über seine Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
+    "manageHelp": "Entwürfe können gelöscht werden. Das Schließen oder Wiedereröffnen einer eingereichten Anfrage — und das Bestätigen ihrer erkannten Fähigkeiten — erfolgt über ihre Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
     "detailsLabel": "Eingereichte Angaben",
     "fields": {
       "description": "Beschreibung",
@@ -1410,7 +1410,7 @@
       "urgency": "Wann benötigt",
       "notes": "Notizen"
     },
-    "scoutLink": "Passende Arbeitskräfte & Interesse für diesen Bedarf"
+    "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage"
   },
   "journey": {
     "eyebrow": "So funktioniert es",
@@ -4485,7 +4485,7 @@
         }
       ],
       "screenshot": "Bedarfsablauf für Unternehmen",
-      "cta": "Personalbedarf starten"
+      "cta": "Personalanfrage starten"
     },
     "agencies": {
       "eyebrow": "Für Personalagenturen",
@@ -7523,13 +7523,13 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Early Access",
-      "body": "Öffentliche Zahlungen sind noch nicht aktiviert. Die ersten Kunden werden direkt betreut: Das Einreichen eines Personalbedarfs ist kostenlos, und der endgültige Preis wird immer mit Ihnen bestätigt, bevor bezahlte Arbeit beginnt.",
-      "cta": "Personalbedarf einreichen"
+      "body": "Öffentliche Zahlungen sind noch nicht aktiviert. Die ersten Kunden werden direkt betreut: Das Einreichen einer Personalanfrage ist kostenlos, und der endgültige Preis wird immer mit Ihnen bestätigt, bevor bezahlte Arbeit beginnt.",
+      "cta": "Personalanfrage einreichen"
     },
     "title": "So funktioniert der erste bezahlte Service",
     "steps": [
       {
-        "title": "Reichen Sie Ihren Bedarf kostenlos ein",
+        "title": "Reichen Sie Ihre Anfrage kostenlos ein",
         "body": "Beschreiben Sie, welche Arbeitskräfte oder welche Kolonne Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
       },
       {
@@ -7538,7 +7538,7 @@
       },
       {
         "title": "Sie erhalten eine manuell geprüfte Shortlist",
-        "body": "Echte Kandidaten oder Kolonnen, von einem Menschen gegen Ihren Bedarf geprüft. Wenn wir keine passende Shortlist zusammenstellen können, fällt keine Gebühr an — und wir versprechen nie, dass immer ein Kandidat gefunden wird."
+        "body": "Echte Kandidaten oder Kolonnen, von einem Menschen gegen Ihre Anfrage geprüft. Wenn wir keine passende Shortlist zusammenstellen können, fällt keine Gebühr an — und wir versprechen nie, dass immer ein Kandidat gefunden wird."
       },
       {
         "title": "Sie zahlen nur für erbrachte Leistung",
@@ -7546,7 +7546,7 @@
       }
     ],
     "note": "Es gibt hier noch keine automatische Jobbörse und kein automatisches Matching — während des Early Access wird die Auswahl von einem Menschen koordiniert. Was Sie sehen, ist das, was wirklich läuft.",
-    "ctaLabel": "Personalbedarf einreichen →"
+    "ctaLabel": "Personalanfrage einreichen →"
   },
   "adminLaunchReadiness": {
     "eyebrow": "Startbereitschaft",
@@ -8056,13 +8056,13 @@
     "bridgeLogin": "Sie haben bereits ein Konto? Anmelden"
   },
   "companyNeed": {
-    "title": "Einen Arbeitsbedarf starten",
+    "title": "Eine Personalanfrage starten",
     "subtitle": "Beschreiben Sie die Menschen, die Sie brauchen. Wir machen daraus einen sauberen Stellenentwurf, den Sie prüfen — wir erfinden niemals Löhne und veröffentlichen niemals automatisch.",
     "companyName": "Unternehmensname",
     "profession": "Benötigte Branche & Arbeitsart",
     "country": "Land",
     "countryHelp": "Wählen Sie das Land, in dem die Arbeitskräfte benötigt werden.",
-    "honestNote": "Tragen Sie Ihren Bedarf ein — wir strukturieren ihn sauber und bereiten ihn für die Nachverfolgung vor. Nichts wird automatisch veröffentlicht.",
+    "honestNote": "Tragen Sie Ihre Anfrage ein — wir strukturieren sie sauber und bereiten sie für die Nachverfolgung vor. Nichts wird automatisch veröffentlicht.",
     "countries": {
       "LT": "Litauen",
       "LV": "Lettland",
@@ -8076,9 +8076,9 @@
       "FI": "Finnland"
     },
     "contactPerson": "Ansprechpartner",
-    "contactPersonHelp": "Optional. Wer zu diesem Bedarf erreichbar ist.",
+    "contactPersonHelp": "Optional. Wer zu dieser Anfrage erreichbar ist.",
     "contactEmail": "Kontakt-E-Mail",
-    "contactEmailHelp": "Optional, hilft uns aber, schneller zu Ihrem Bedarf nachzufassen.",
+    "contactEmailHelp": "Optional, hilft uns aber, schneller zu Ihrer Anfrage nachzufassen.",
     "cityRegion": "Stadt oder Region",
     "cityRegionHelp": "Optional. Wo die Arbeit stattfinden wird.",
     "expectedDuration": "Voraussichtliche Dauer",
@@ -8110,7 +8110,7 @@
     "engEmployment": "Anstellung",
     "engSubcontracting": "Subunternehmervergabe",
     "engAgency": "Überlassung durch Personalagentur",
-    "description": "Beschreiben Sie den Bedarf",
+    "description": "Beschreiben Sie Ihre Anfrage",
     "descriptionHelp": "Was die Arbeit ist, wo sie stattfindet und welche Anforderungen es gibt — der Assistent nutzt dies, um einen sauberen Stellenentwurf zu erstellen.",
     "submit": "Stellenentwurf erstellen",
     "aiBadge": "KI-Vorschlag",
@@ -8124,15 +8124,15 @@
     "aiNone": "Es wurde kein Vorschlag erstellt — bitte prüfen Sie Ihre Angaben.",
     "statusInvalid": "Einige Angaben müssen korrigiert werden. Bitte prüfen Sie das Formular.",
     "statusError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-    "bridgeNote": "Um diesen Bedarf zur Nachverfolgung einzureichen, erstellen Sie ein kostenloses Konto. Sie haben bereits eines? Melden Sie sich an.",
-    "bridgeSignup": "Konto erstellen und Bedarf einstellen",
+    "bridgeNote": "Um diese Anfrage zur Nachverfolgung einzureichen, erstellen Sie ein kostenloses Konto. Sie haben bereits eines? Melden Sie sich an.",
+    "bridgeSignup": "Konto erstellen und Anfrage einreichen",
     "bridgeLogin": "Sie haben bereits ein Konto? Anmelden",
     "autoSuggested": "Aus Ihrer Beschreibung vorgeschlagen — bitte prüfen und bei Bedarf anpassen. Nichts wird automatisch eingereicht.",
-    "preparedTitle": "Ihr Bedarf ist vorbereitet",
-    "preparedBody": "Wir haben Ihren Bedarf strukturiert. Um ihn zur Nachverfolgung einzureichen, erstellen Sie unten ein kostenloses Konto oder melden Sie sich an — dann erreicht er das Team.",
+    "preparedTitle": "Ihre Anfrage ist vorbereitet",
+    "preparedBody": "Wir haben Ihre Anfrage strukturiert. Um sie zur Nachverfolgung einzureichen, erstellen Sie unten ein kostenloses Konto oder melden Sie sich an — dann erreicht sie das Team.",
     "receivedTitle": "Anfrage erhalten",
-    "receivedBody": "Wir haben Ihren Bedarf erhalten und bewahren ihn für die Nachverfolgung mit Ihnen auf. Um ihn anzusehen und zu verwalten, erstellen Sie unten ein Konto oder melden Sie sich an.",
-    "partnerRouteTitle": "Für Baubedarfe — ein Weg über Partnerunternehmen",
+    "receivedBody": "Wir haben Ihre Anfrage erhalten und bewahren sie für die Nachverfolgung mit Ihnen auf. Um sie anzusehen und zu verwalten, erstellen Sie unten ein Konto oder melden Sie sich an.",
+    "partnerRouteTitle": "Für Bauanfragen — ein Weg über Partnerunternehmen",
     "partnerRouteBody": "Wenn noch keine passende direkte Arbeitskraft verfügbar ist, können wir für Bauanfragen zunächst empfehlen, unsere Partnerin UAB „Nonstop Group“ (LT) — die Betreiberin der Plattform — zu kontaktieren. Das hilft, Dokumente, Zuständigkeiten und Onboarding schneller abzustimmen, wobei ein Mensch jeden Schritt koordiniert."
   },
   "candidatePool": {
@@ -10805,7 +10805,7 @@
         "needsAccommodation": "Unterkunft nötig?",
         "availabilityNote": "Notiz (optional)",
         "availabilityNotePlaceholder": "z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen",
-        "demandDescription": "Beschreibe den Bedarf",
+        "demandDescription": "Beschreibe die Anfrage",
         "demandDescriptionPlaceholder": "Z. B.: 4 Maurer in Kaunas ab August, 3 Monate, Erfahrung erforderlich",
         "demandRole": "Rolle",
         "demandRolePlaceholder": "Z. B. Maurer",
@@ -11157,7 +11157,7 @@
       "fieldEnd": "Ende",
       "fieldSource": "Quelle",
       "fieldSkills": "Fähigkeiten",
-      "fieldDemands": "Offene Bedarfe",
+      "fieldDemands": "Offene Anfragen",
       "fieldWorkspace": "Arbeitsbereich",
       "fieldProjectId": "Projekt-ID",
       "evalDemand": "Bedarf",
