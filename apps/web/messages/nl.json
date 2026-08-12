@@ -7983,6 +7983,10 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "freshnessDelayed": "Vacatures voor het laatst ververst op {date}. Updates van deze bron zijn tijdelijk vertraagd, dus sommige functies kunnen al vervuld zijn.",
+      "freshnessStale": "Vacatures voor het laatst ververst op {date}. Ze zijn sindsdien niet opnieuw bevestigd — controleer de originele vacature van de uitgever voor de actuele beschikbaarheid.",
+      "freshnessUnknown": "We kunnen niet bevestigen wanneer deze vacatures voor het laatst zijn ververst. Controleer de originele vacature voor de actuele beschikbaarheid.",
+      "freshnessUnavailable": "Externe vacatures zijn tijdelijk niet beschikbaar.",
       "openOriginal": "Originele advertentie openen",
       "noApplicationRoute": "De bron heeft voor deze advertentie geen sollicitatieadres gepubliceerd.",
       "publishedOn": "Gepubliceerd {date}",

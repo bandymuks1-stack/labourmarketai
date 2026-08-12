@@ -7983,6 +7983,10 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
+      "freshnessDelayed": "Listings last refreshed {date}. Updates from this source are temporarily delayed, so some roles may already be filled.",
+      "freshnessStale": "Listings last refreshed {date}. They have not been re-confirmed since, so check the publisher's original listing for current availability.",
+      "freshnessUnknown": "We cannot confirm when these listings were last refreshed. Check the publisher's original listing for current availability.",
+      "freshnessUnavailable": "External listings are temporarily unavailable.",
       "openOriginal": "Open the original advertisement",
       "noApplicationRoute": "The source did not publish an application address for this advertisement.",
       "publishedOn": "Published {date}",

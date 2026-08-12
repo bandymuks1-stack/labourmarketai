@@ -2024,6 +2024,10 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "freshnessDelayed": "Kuulutusi värskendati viimati {date}. Selle allika uuendused on ajutiselt hilinenud, seega võivad mõned kohad juba täidetud olla.",
+      "freshnessStale": "Kuulutusi värskendati viimati {date}. Sellest ajast pole neid uuesti kinnitatud — kontrolli praegust saadavust algsest kuulutusest.",
+      "freshnessUnknown": "Me ei saa kinnitada, millal neid kuulutusi viimati värskendati. Kontrolli praegust saadavust algsest kuulutusest.",
+      "freshnessUnavailable": "Välised kuulutused on ajutiselt kättesaamatud.",
       "openOriginal": "Ava originaalkuulutus",
       "noApplicationRoute": "Allikas ei avaldanud selle kuulutuse kandideerimisaadressi.",
       "publishedOn": "Avaldatud {date}",

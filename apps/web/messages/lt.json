@@ -7983,6 +7983,10 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "freshnessDelayed": "Skelbimai paskutinį kartą atnaujinti {date}. Atnaujinimai iš šio šaltinio laikinai vėluoja, todėl dalis vietų gali būti jau užimtos.",
+      "freshnessStale": "Skelbimai paskutinį kartą atnaujinti {date}. Nuo tada jie nebuvo patvirtinti iš naujo, todėl dabartinį prieinamumą pasitikrinkite originaliame skelbime.",
+      "freshnessUnknown": "Negalime patvirtinti, kada šie skelbimai atnaujinti paskutinį kartą. Dabartinį prieinamumą pasitikrinkite originaliame skelbime.",
+      "freshnessUnavailable": "Išoriniai skelbimai laikinai nepasiekiami.",
       "openOriginal": "Atidaryti originalų skelbimą",
       "noApplicationRoute": "Šaltinis nepaskelbė šio skelbimo kandidatavimo adreso.",
       "publishedOn": "Paskelbta {date}",
