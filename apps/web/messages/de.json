@@ -11337,6 +11337,7 @@
       "engagementsWorking": "Wird beendet…",
       "engagementsEnded": "Die Arbeitsbeziehung ist beendet.",
       "engagementsEndedAt": "Die Arbeitsbeziehung ist am {date} beendet.",
+      "engagementsEndedStillVisible": "Hinweis: Dieses Unternehmen kann Ihr Profil weiterhin sehen, solange Sie seinem Projekt zugewiesen sind. Dieser Zugriff endet mit dem Ende der Zuweisung.",
       "engagementsAlreadyEnded": "Diese Arbeitsbeziehung war bereits beendet. Es wurde nichts geändert.",
       "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert."
     }

@@ -73,6 +73,11 @@ export const ENGAGEMENT_EXECUTORS: {
             engagementId: r.engagementId,
             endedAt: r.endedAt,
             actorSide: r.actorSide,
+            // F2: `true` obliges the surface to say the company still sees
+            // the profile via an active project assignment. `null` (unknown)
+            // and `false` both add nothing — only a POSITIVE finding is
+            // spoken, never a guess.
+            companyStillSeesProfile: r.companyStillSeesProfile,
           },
         };
       case "already_ended":

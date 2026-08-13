@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { companyStillSeesWorkerViaAssignment } from "@/lib/engagements/end-engagement-visibility";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 
@@ -52,8 +53,22 @@ function asAny(c: SupabaseClient): any {
 export type EngagementActorSide = "company" | "worker";
 
 export type EndEngagementResult =
-  /** This call moved active → ended. `endedAt` is the stored timestamp. */
-  | { kind: "ended"; engagementId: string; endedAt: string | null; actorSide: EngagementActorSide }
+  /** This call moved active → ended. `endedAt` is the stored timestamp.
+   *
+   *  `companyStillSeesProfile` (F2, #1097 follow-up) is computed for the
+   *  WORKER actor only: `true` means an active assignment on this company's
+   *  project keeps the employer's `can_view_worker` read alive despite the
+   *  end; `false` means no such assignment was readable; `null` means the
+   *  check could not run — unknown is reported as unknown, and the surface
+   *  must add nothing for it. For a company actor it is always `null`: the
+   *  company is not being told about its own visibility. */
+  | {
+      kind: "ended";
+      engagementId: string;
+      endedAt: string | null;
+      actorSide: EngagementActorSide;
+      companyStillSeesProfile: boolean | null;
+    }
   /** It was already ended. NOT a failure, and NOT a second write. */
   | { kind: "already_ended"; engagementId: string; endedAt: string | null; actorSide: EngagementActorSide }
   /** No such row, OR the caller may not act on it. Deliberately the same
@@ -91,10 +106,12 @@ export async function endEngagementAction(
     return { kind: "not_found" };
   }
 
+  let client: SupabaseClient;
   let data: unknown;
   let error: { code?: string } | null = null;
   try {
-    const res = await asAny(await createClient()).rpc(
+    client = await createClient();
+    const res = await asAny(client).rpc(
       "end_company_worker_engagement_v2",
       { p_engagement_id: engagementId },
     );
@@ -120,13 +137,28 @@ export async function endEngagementAction(
     case "ended": {
       // A success whose subject we cannot read is not a success we can report.
       if (!engagement) return { kind: "error" };
+      const actorSide = asSide(payload.actor_side);
+      // F2 — the end is already stored; this only decides what the worker is
+      // TOLD. A thrown check must therefore never fail the action: it
+      // collapses to `null` (unknown), and unknown adds no sentence.
+      let companyStillSeesProfile: boolean | null = null;
+      if (actorSide === "worker") {
+        try {
+          companyStillSeesProfile = await companyStillSeesWorkerViaAssignment(
+            client,
+            engagement,
+          );
+        } catch {
+          companyStillSeesProfile = null;
+        }
+      }
       // W14 mid-funnel: only a real state change counts — `already_ended`,
       // refusals and errors emit nothing. `role_context` is the
       // server-derived side of THIS engagement; other engagements of the
       // same person are untouched and unreported.
       emitServerFunnelEvent(FUNNEL_EVENTS.engagementEnded, {
         source: "engagements",
-        metadata: { role_context: asSide(payload.actor_side) },
+        metadata: { role_context: actorSide },
       });
       // Every surface that renders engagement state re-reads.
       revalidatePath(`/${locale}/dashboard/projects`);
@@ -135,7 +167,8 @@ export async function endEngagementAction(
         kind: "ended",
         engagementId: engagement,
         endedAt: asIsoOrNull(payload.ended_at),
-        actorSide: asSide(payload.actor_side),
+        actorSide,
+        companyStillSeesProfile,
       };
     }
     case "already_ended": {

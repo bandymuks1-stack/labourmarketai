@@ -11337,6 +11337,7 @@
       "engagementsWorking": "Baigiama…",
       "engagementsEnded": "Darbo santykis baigtas.",
       "engagementsEndedAt": "Darbo santykis baigtas {date}.",
+      "engagementsEndedStillVisible": "Pastaba: ši įmonė vis dar mato jūsų profilį, kol tebesate priskirti jos projektui. Ši prieiga baigsis pasibaigus priskyrimui.",
       "engagementsAlreadyEnded": "Šis darbo santykis jau buvo baigtas. Niekas nepakeista.",
       "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista."
     }

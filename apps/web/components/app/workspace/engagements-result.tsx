@@ -65,8 +65,11 @@ type Phase =
   | { readonly kind: "error" }
   | { readonly kind: "loaded"; readonly view: EngagementsView };
 
-/** What the person is told after acting. `error: false` is the one success. */
-type Outcome = { readonly text: string; readonly error: boolean };
+/** What the person is told after acting. `error: false` is the one success.
+ *  `note` (F2) is an honesty rider rendered as its own muted line — used when
+ *  the engagement ended but an active project assignment still lets the
+ *  company see the worker's profile. */
+type Outcome = { readonly text: string; readonly error: boolean; readonly note?: string };
 
 export function EngagementsResult({
   context,
@@ -111,13 +114,26 @@ export function EngagementsResult({
   }, [context, attempt]);
 
   const message = outcome ? (
-    <p
-      role="status"
-      className={`text-meta ${outcome.error ? "text-state-danger" : "text-state-success"}`}
-      data-testid="engagements-message"
-    >
-      {outcome.text}
-    </p>
+    <div className="flex flex-col gap-1">
+      <p
+        role="status"
+        className={`text-meta ${outcome.error ? "text-state-danger" : "text-state-success"}`}
+        data-testid="engagements-message"
+      >
+        {outcome.text}
+      </p>
+      {outcome.note ? (
+        // F2: the ending is real AND the remaining visibility is real. The
+        // rider is its own line so neither truth softens the other.
+        <p
+          role="status"
+          className="text-meta text-text-secondary"
+          data-testid="engagements-visibility-note"
+        >
+          {outcome.note}
+        </p>
+      ) : null}
+    </div>
   ) : null;
 
   if (phase.kind === "loading") {
@@ -250,6 +266,13 @@ function EngagementRowView({
         onOutcome({
           text: at ? t("engagementsEndedAt", { date: at.slice(0, 10) }) : t("engagementsEnded"),
           error: false,
+          // F2: only a POSITIVE server finding produces the rider. `false`
+          // and `null`/absent both stay silent — the surface never guesses
+          // about visibility it did not measure.
+          note:
+            res.data?.companyStillSeesProfile === true
+              ? t("engagementsEndedStillVisible")
+              : undefined,
         });
         onDone();
         return;
