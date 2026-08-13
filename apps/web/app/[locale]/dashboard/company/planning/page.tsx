@@ -9,6 +9,8 @@ import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-nav
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
 import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
+import { getOrganizationToday } from "@/lib/planning/organization-today";
+import { OrganizationTodayPanel } from "@/components/app/organization-today-panel";
 import {
   buildPlanningZoneView,
   type PlanningZoneEntry,
@@ -111,6 +113,10 @@ export default async function CompanyWorkforcePlanningPage({
   // W12 employer projection — approved unavailability for the workers this
   // caller manages. Degrades to nothing rather than blocking the page.
   const availability = await getEmployerWorkerAvailability();
+  // Organization Today (V8 GAP 2) — the morning facts, composed here and
+  // passed down pre-derived. not-authed/error renders NOTHING: an absent
+  // panel must not impersonate "all clear".
+  const organizationToday = await getOrganizationToday();
   const demandTrustCard = buildCompanyDemandTrustCard(
     demandIntel.kind === "ok"
       ? {
@@ -378,6 +384,9 @@ export default async function CompanyWorkforcePlanningPage({
         data-testid="workforce-planning-page"
       >
         {header}
+        {/* The morning facts stand at the top of the zone in BOTH branches —
+            the manager with no demand entered still starts the day here. */}
+        <OrganizationTodayPanel state={organizationToday} />
         <Notes notes={view.notes} />
         {/* Unavailability is independent of whether any demand has been
             entered — an employer with an empty planning zone is precisely the
@@ -407,6 +416,9 @@ export default async function CompanyWorkforcePlanningPage({
   return (
     <div className="flex flex-col gap-6" data-testid="workforce-planning-page">
       {header}
+
+      {/* Organization Today (V8 GAP 2) — facts first, then the plan. */}
+      <OrganizationTodayPanel state={organizationToday} />
 
       <Notes notes={view.notes} />
 

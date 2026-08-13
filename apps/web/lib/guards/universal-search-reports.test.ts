@@ -387,6 +387,8 @@ describe("4. reports hub shows basis labels and fabricates nothing", () => {
     "orgTasks",
     "orgDocuments",
     "orgFinance",
+    // V8 GAP 5: the org journal-activity section.
+    "journal",
   ];
 
   it("every section renders its calculation-basis label", () => {
@@ -409,7 +411,7 @@ describe("4. reports hub shows basis labels and fabricates nothing", () => {
     expect(values.length).toBeGreaterThan(0);
     for (const v of values) {
       expect(v, `metric value "${v}"`).toMatch(
-        /^(view|demand|projects|tasks|documents|finance)\./,
+        /^(view|demand|projects|tasks|documents|finance|journal)\./,
       );
     }
   });
@@ -448,6 +450,11 @@ describe("4. reports hub shows basis labels and fabricates nothing", () => {
     expect(HUB_READS).toMatch(/buildVerifiedCv/);
     expect(HUB_READS).toMatch(/buildEvidenceReport/);
     expect(HUB_READS).toMatch(/callerCompanyId/);
+    // V8 GAP 5: the journal section rides the windowed-report read (canonical
+    // org resolver + minimised query) and the existing reviewable count.
+    expect(HUB_READS).toMatch(/from "@\/lib\/journal\/journal-window-report"/);
+    expect(HUB_READS).toMatch(/getJournalWindowReport/);
+    expect(HUB_READS).toMatch(/countReviewablePendingEntries/);
     const c = code(HUB_READS);
     expect(c).not.toMatch(/supabase\/admin|createAdminClient|service_role/);
     // Read-only composition: no writes, no direct RPC here.
@@ -610,6 +617,12 @@ describe("6. copy resolves in every ACTIVE locale", () => {
     "reports.org.finance.overdue",
     "reports.org.finance.total",
     "reports.org.finance.link",
+    "reports.basis.journal",
+    "reports.org.journal.title",
+    "reports.org.journal.recorded",
+    "reports.org.journal.awaitingReview",
+    "reports.org.journal.confirmed",
+    "reports.org.journal.link",
   ];
 
   for (const loc of activeLocales) {

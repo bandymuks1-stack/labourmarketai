@@ -497,7 +497,8 @@
       "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
       "orgDocuments": "Only workers who agreed to share combined document counts are counted.",
       "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data.",
-      "orgDemandOrg": "Counts over demand requests attributed to your organisation (all members with demand access see the same figures). Open = draft, submitted, in review or needs follow-up. Worker interest counts workers who signalled interest on these requests."
+      "orgDemandOrg": "Counts over demand requests attributed to your organisation (all members with demand access see the same figures). Open = draft, submitted, in review or needs follow-up. Worker interest counts workers who signalled interest on these requests.",
+      "journal": "Counts of work entries recorded by workers in this organisation's engagements over the last seven calendar days. Awaiting review is the current review queue; confirmed counts the window's entries a manager has confirmed. An absence of entries is not evidence that no work happened."
     },
     "worker": {
       "evidence": {
@@ -573,7 +574,40 @@
         "overdue": "Overdue",
         "total": "Total records",
         "link": "Open finance records"
+      },
+      "journal": {
+        "title": "Work journal (last seven days)",
+        "recorded": "Entries recorded",
+        "awaitingReview": "Awaiting review",
+        "confirmed": "Confirmed",
+        "link": "Open the journal report"
       }
+    },
+    "journalWindow": {
+      "title": "Work journal report",
+      "intro": "Counts of recorded work entries per worker over a fixed calendar window. Counts and dates only — no entry text, no rating.",
+      "windowLabel": "Report window",
+      "window": {
+        "today": "Today",
+        "week": "Last seven days",
+        "month": "Last thirty days"
+      },
+      "windowRange": "{start} – {end}",
+      "noOrg": "This report needs an organisation context. Switch to your company workspace to see it.",
+      "unavailable": "This report cannot be read right now. Nothing is estimated in its place.",
+      "empty": "No work entries were recorded in this window.",
+      "emptyNext": "An empty window is not evidence that no work happened — it only means nothing was recorded here.",
+      "table": {
+        "worker": "Worker",
+        "entries": "Entries",
+        "awaitingReview": "Awaiting review",
+        "confirmed": "Confirmed",
+        "lastEntry": "Last entry"
+      },
+      "totals": "{count, plural, one {Total · # worker} other {Total · # workers}}",
+      "basisLabel": "Basis",
+      "basis": "Counted from work entries recorded by workers in this organisation's engagements within the selected window. Review state comes from manager confirmations. Absence of entries is not evidence of absence of work, and nothing here rates or scores anyone.",
+      "collapse": "Hide the detailed report"
     }
   },
   "marketRecognition": {
@@ -8919,6 +8953,19 @@
       "intro": "Approved time off for workers you manage. Dates only — the reason stays private to the worker.",
       "unavailable": "Unavailable",
       "unnamedWorker": "Worker"
+    },
+    "organizationToday": {
+      "title": "Today in your organization",
+      "roster": "Active roster",
+      "pendingDecisions": "Absence requests awaiting decision",
+      "journalToday": "Work entries today",
+      "awaitingReview": "Entries awaiting review",
+      "absentToday": "Recorded absent today",
+      "absentNext": "Recorded absences in the next 7 days",
+      "noneRecordedToday": "No approved absence is recorded for today.",
+      "noneRecordedNext": "No approved absence is recorded for the next 7 days.",
+      "notReadable": "Cannot be read right now",
+      "basis": "Active roster counts workers actively linked to your company. Absences are approved recorded absences — a worker without a recorded absence is not thereby confirmed to be at work. Work entry counts cover entries recorded by workers in your organization's engagements today. Reasons for absences stay private."
     }
   },
   "tasks": {
