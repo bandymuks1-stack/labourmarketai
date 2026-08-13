@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Copy, Share2 } from "lucide-react";
 
+import { NATIVE_LOCALE_NAMES } from "@/components/marketing/locale-switcher";
+import { activeLocales } from "@/lib/i18n/config";
 import {
   createAndSendInvitations,
   type CreateInvitationsResult,
@@ -51,6 +53,11 @@ export function InvitePanel({
       : "join_platform",
   );
   const [emails, setEmails] = useState("");
+  // The RECIPIENT'S language (V8 W4-B item 6): email subject/body + invite
+  // link land in this language. Defaults to the sender's current locale.
+  const [recipientLocale, setRecipientLocale] = useState(
+    (activeLocales as readonly string[]).includes(locale) ? locale : "lt",
+  );
   const [invitedName, setInvitedName] = useState("");
   const [proposedRole, setProposedRole] = useState("");
   const [message, setMessage] = useState("");
@@ -89,6 +96,7 @@ export function InvitePanel({
         emails,
         invitationType: type,
         locale,
+        recipientLocale,
         organizationId: needsOrg ? organizationId : null,
         projectId: needsProject ? projectId : null,
         invitedName: invitedName || null,
@@ -190,6 +198,22 @@ export function InvitePanel({
             </select>
           </label>
         )}
+
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {t("recipientLanguageLabel")}
+          <select
+            value={recipientLocale}
+            onChange={(e) => setRecipientLocale(e.target.value)}
+            data-testid="invite-recipient-language"
+            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+          >
+            {activeLocales.map((l) => (
+              <option key={l} value={l}>
+                {NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("emailsLabel", { max: MAX_EMAILS_PER_ACTION })}

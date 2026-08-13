@@ -9638,7 +9638,8 @@
         "rate_limited": "Per daug kvietimų šiandien",
         "not_authorized": "Neturite teisės",
         "error": "Nepavyko"
-      }
+      },
+      "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)"
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
@@ -12134,6 +12135,19 @@
       "stateNoRunYet": "Dar nepaleista",
       "stateOk": "Paskutinis paleidimas pavyko",
       "stateFailing": "Nepavyksta"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Kvietimas prisijungti prie projekto — LabourMarket.ai",
+        "collaborate": "Kvietimas bendradarbiauti — LabourMarket.ai",
+        "platform": "Kvietimas prisijungti prie LabourMarket.ai",
+        "team": "Kvietimas prisijungti prie komandos — LabourMarket.ai"
+      },
+      "intro": "Jus pakvietė prisijungti per LabourMarket.ai.",
+      "open": "Atidarykite kvietimą:",
+      "validity": "Nuoroda galioja 14 dienų. Jei kvietimo nelaukėte, tiesiog ignoruokite šį laišką."
     }
   }
 }

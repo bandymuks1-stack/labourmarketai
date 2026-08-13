@@ -9638,7 +9638,8 @@
         "rate_limited": "Zu viele Einladungen heute",
         "not_authorized": "Nicht erlaubt",
         "error": "Fehlgeschlagen"
-      }
+      },
+      "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)"
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
@@ -12134,6 +12135,19 @@
       "stateNoRunYet": "Noch kein Lauf",
       "stateOk": "Letzter Lauf OK",
       "stateFailing": "Fehlerhaft"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Einladung zu einem Projekt — LabourMarket.ai",
+        "collaborate": "Einladung zur Zusammenarbeit — LabourMarket.ai",
+        "platform": "Einladung zu LabourMarket.ai",
+        "team": "Einladung in ein Team — LabourMarket.ai"
+      },
+      "intro": "Sie wurden über LabourMarket.ai eingeladen.",
+      "open": "Öffnen Sie die Einladung:",
+      "validity": "Der Link ist 14 Tage gültig. Falls Sie diese Einladung nicht erwartet haben, ignorieren Sie diese E-Mail einfach."
     }
   }
 }

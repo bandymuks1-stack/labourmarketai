@@ -9638,7 +9638,8 @@
         "rate_limited": "Слишком много приглашений сегодня",
         "not_authorized": "Нет прав",
         "error": "Не удалось"
-      }
+      },
+      "recipientLanguageLabel": "Язык получателя (письмо и приглашение)"
     },
     "invitePage": {
       "eyebrow": "ПРИГЛАШЕНИЕ",
@@ -12134,6 +12135,19 @@
       "stateNoRunYet": "Запусков ещё не было",
       "stateOk": "Последний запуск успешен",
       "stateFailing": "Сбой"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Приглашение присоединиться к проекту — LabourMarket.ai",
+        "collaborate": "Приглашение к сотрудничеству — LabourMarket.ai",
+        "platform": "Приглашение присоединиться к LabourMarket.ai",
+        "team": "Приглашение присоединиться к команде — LabourMarket.ai"
+      },
+      "intro": "Вас пригласили через LabourMarket.ai.",
+      "open": "Откройте приглашение:",
+      "validity": "Ссылка действительна 14 дней. Если вы не ждали этого приглашения, просто проигнорируйте это письмо."
     }
   }
 }

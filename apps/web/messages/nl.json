@@ -9638,7 +9638,8 @@
         "rate_limited": "Te veel uitnodigingen vandaag",
         "not_authorized": "Niet toegestaan",
         "error": "Mislukt"
-      }
+      },
+      "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)"
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
@@ -12134,6 +12135,19 @@
       "stateNoRunYet": "Nog geen run",
       "stateOk": "Laatste run OK",
       "stateFailing": "Faalt"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Uitnodiging om deel te nemen aan een project — LabourMarket.ai",
+        "collaborate": "Uitnodiging om samen te werken — LabourMarket.ai",
+        "platform": "Uitnodiging om deel te nemen aan LabourMarket.ai",
+        "team": "Uitnodiging om deel te nemen aan een team — LabourMarket.ai"
+      },
+      "intro": "Je bent uitgenodigd via LabourMarket.ai.",
+      "open": "Open de uitnodiging:",
+      "validity": "De link is 14 dagen geldig. Verwachtte je deze uitnodiging niet, negeer deze e-mail dan gewoon."
     }
   }
 }

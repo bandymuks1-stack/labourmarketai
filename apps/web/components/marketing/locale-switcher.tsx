@@ -11,7 +11,9 @@ import { cn } from "@/lib/utils";
 const TIER1 = new Set<string>(tier1Locales);
 
 // Native language names — language-invariant, so not in the i18n bundle.
-const NATIVE: Record<string, string> = {
+// Exported for other language pickers (the invitation recipient-language
+// select) so the product never grows a second, drifting name map.
+export const NATIVE_LOCALE_NAMES: Record<string, string> = {
   en: "English",
   lt: "Lietuvių",
   lv: "Latviešu",
@@ -101,12 +103,12 @@ export function LocaleSwitcher({
         {compactBelowSm ? (
           <>
             <span className="hidden sm:inline">
-              {NATIVE[active] ?? active.toUpperCase()}
+              {NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}
             </span>
             <span className="sm:hidden">{active.toUpperCase()}</span>
           </>
         ) : (
-          <span>{NATIVE[active] ?? active.toUpperCase()}</span>
+          <span>{NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}</span>
         )}
         <ChevronDown
           aria-hidden
@@ -153,7 +155,7 @@ export function LocaleSwitcher({
                 )}
               >
                 <span className="flex items-center gap-2">
-                  {NATIVE[l] ?? l.toUpperCase()}
+                  {NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}
                   {preview && (
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("localePreview")}
