@@ -63,6 +63,11 @@ export interface VacancyPersistResultV1 {
    *  re-written. Reported so a caller can tell "nothing changed" apart from
    *  "nothing arrived". */
   readonly unchanged: number;
+  /** Withdrawals for ads this store never held. Nothing was written — there
+   *  is no row to tombstone, and the table's own bounds (title 1..300)
+   *  rightly refuse a contentless insert. Reported so "we ignored N
+   *  withdrawals" is a stated fact rather than a silent drop. */
+  readonly withdrawnAbsent: number;
 }
 
 const VACANCY_TABLE = "public_vacancies";
@@ -97,7 +102,7 @@ export async function persistVacancies(
   sessionId: string,
 ): Promise<VacancyPersistResultV1> {
   if (vacancies.length === 0) {
-    return { inserted: 0, updated: 0, unchanged: 0 };
+    return { inserted: 0, updated: 0, unchanged: 0, withdrawnAbsent: 0 };
   }
 
   // Every record in one batch comes from one provider — the importer runs one
@@ -106,12 +111,12 @@ export async function persistVacancies(
   const providerKeys = [...new Set(vacancies.map((v) => v.providerKey))];
   const externalIds = vacancies.map((v) => v.externalId);
 
-  const storedHashByKey = new Map<string, string>();
+  const storedByKey = new Map<string, { hash: string; lifecycle: string }>();
   for (let i = 0; i < externalIds.length; i += EXISTENCE_READ_CHUNK) {
     const chunk = externalIds.slice(i, i + EXISTENCE_READ_CHUNK);
     const { data: existingRows, error: readError } = await client
       .from(VACANCY_TABLE)
-      .select("provider_key, external_id, content_hash")
+      .select("provider_key, external_id, content_hash, lifecycle")
       .in("provider_key", providerKeys)
       .in("external_id", chunk);
 
@@ -120,22 +125,52 @@ export async function persistVacancies(
     }
 
     for (const row of existingRows ?? []) {
-      const r = row as { provider_key: string; external_id: string; content_hash: string };
-      storedHashByKey.set(vacancyRowKey(r.provider_key, r.external_id), r.content_hash);
+      const r = row as {
+        provider_key: string;
+        external_id: string;
+        content_hash: string;
+        lifecycle: string;
+      };
+      storedByKey.set(vacancyRowKey(r.provider_key, r.external_id), {
+        hash: r.content_hash,
+        lifecycle: r.lifecycle,
+      });
     }
   }
 
   const toInsert: PublicVacancyRowV1[] = [];
   const toUpdate: PublicVacancyRowV1[] = [];
   const toTouch: PublicVacancyRowV1[] = [];
+  /** A withdrawal is a LIFECYCLE TRANSITION, not a content rewrite. The
+   *  stream's removal records legitimately carry no body (the validator
+   *  admits a titleless removal on purpose), so writing the whole row would
+   *  hand the table an empty title its own `1..300` bound refuses — 23514,
+   *  observed live on 2026-08-13, run aborted, cursor stuck. These rows get a
+   *  narrow UPDATE that flips lifecycle/is_active and stamps the run, and
+   *  leaves the last published content in place as history. */
+  const toWithdraw: PublicVacancyRowV1[] = [];
+  let withdrawnAbsent = 0;
 
   for (const vacancy of vacancies) {
     const row = toPublicVacancyRow(vacancy, seenAt, sessionId);
-    const storedHash = storedHashByKey.get(
+    const stored = storedByKey.get(
       vacancyRowKey(vacancy.providerKey, vacancy.externalId),
     );
-    if (storedHash === undefined) toInsert.push(row);
-    else if (storedHash !== row.content_hash) toUpdate.push(row);
+    if (vacancy.lifecycle === "removed") {
+      // Never stored: there is nothing to tombstone and no content to insert.
+      if (stored === undefined) withdrawnAbsent += 1;
+      // Already withdrawn: re-seen, refresh liveness only — the second removal
+      // of one ad is not a second state change.
+      else if (stored.lifecycle === "removed") toTouch.push(row);
+      else toWithdraw.push(row);
+      continue;
+    }
+    if (stored === undefined) toInsert.push(row);
+    // A republished ad whose content happens to match its pre-withdrawal hash
+    // must still be REWRITTEN — an equal hash would otherwise leave the stored
+    // lifecycle at 'removed' and the ad invisibly dead while live upstream.
+    else if (stored.hash !== row.content_hash || stored.lifecycle === "removed")
+      toUpdate.push(row);
     else toTouch.push(row);
   }
 
@@ -161,6 +196,27 @@ export async function persistVacancies(
     }
   }
 
+  // The narrow withdrawal write: lifecycle, liveness, and the run that did it.
+  // Deliberately NOT the full row — a removal record's empty body must never
+  // overwrite the last published content, and the table's own bounds would
+  // refuse it anyway.
+  for (const row of toWithdraw) {
+    const { error } = await client
+      .from(VACANCY_TABLE)
+      .update({
+        lifecycle: "removed",
+        is_active: false,
+        last_seen_at: row.last_seen_at,
+        updated_at: row.updated_at,
+        import_session_id: row.import_session_id,
+      } as never)
+      .eq("provider_key", row.provider_key)
+      .eq("external_id", row.external_id);
+    if (error) {
+      throw new Error(`vacancy_persist_withdraw_failed:${error.code ?? "unknown"}`);
+    }
+  }
+
   // Unchanged rows get their liveness refreshed and nothing else. This is what
   // makes "we still saw this ad today" recordable without pretending the ad
   // was rewritten.
@@ -177,8 +233,11 @@ export async function persistVacancies(
 
   return {
     inserted: toInsert.length,
-    updated: toUpdate.length,
+    // A withdrawal that flipped a stored row IS an update — one real state
+    // change, counted once, exactly like a content revision.
+    updated: toUpdate.length + toWithdraw.length,
     unchanged: toTouch.length,
+    withdrawnAbsent,
   };
 }
 
