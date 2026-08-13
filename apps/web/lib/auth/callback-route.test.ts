@@ -19,6 +19,13 @@ vi.mock("@/lib/supabase/server", () => ({
   })),
 }));
 
+// The route reads the NEXT_LOCALE cookie (V8 W4-B item 2) via next/headers,
+// which throws outside a request scope. Tests control the jar per case.
+const cookieGetMock = vi.fn<(name: string) => { value: string } | undefined>();
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ get: cookieGetMock })),
+}));
+
 import { GET } from "@/app/[locale]/auth/callback/route";
 
 const ORIGIN = "https://labourmarket.ai";
@@ -32,10 +39,13 @@ beforeEach(() => {
   getUserMock.mockReset();
   getSessionMock.mockReset();
   fromMock.mockReset();
+  cookieGetMock.mockReset();
   // Default: no fallback session unless a specific test opts in. This
   // keeps the existing error-path assertions valid after the PKCE-race
   // fallback was added (failed exchange + no session → exchange_failed).
   getSessionMock.mockResolvedValue({ data: { session: null } });
+  // Default: no NEXT_LOCALE cookie on the device.
+  cookieGetMock.mockReturnValue(undefined);
 });
 
 describe("auth/callback route", () => {
@@ -171,6 +181,57 @@ describe("auth/callback route", () => {
     const loc = res.headers.get("location") ?? "";
     expect(loc).toBe(`${ORIGIN}/lt/dashboard`);
     expect(loc).not.toContain("evil.example");
+  });
+
+  // V8 W4-B item 2 — the account language on a fresh device.
+  describe("account language preference (cookie > profile > URL)", () => {
+    const profileWith = (locale: string | null) =>
+      fromMock.mockReturnValue({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({
+              data: { onboarded_at: "2025-01-01T00:00:00Z", locale },
+            }),
+          }),
+        }),
+      });
+
+    it("no cookie + differing profile locale → lands in the profile language and sets the cookie", async () => {
+      exchangeMock.mockResolvedValue({ error: null });
+      getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+      profileWith("ru");
+
+      const res = await GET(buildRequest("code=X"), {
+        params: Promise.resolve({ locale: "lt" }),
+      });
+      expect(res.headers.get("location")).toBe(`${ORIGIN}/ru/dashboard`);
+      expect(res.headers.get("set-cookie") ?? "").toContain("NEXT_LOCALE=ru");
+    });
+
+    it("an existing device cookie wins — no override, no cookie churn", async () => {
+      exchangeMock.mockResolvedValue({ error: null });
+      getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+      cookieGetMock.mockReturnValue({ value: "lt" });
+      profileWith("ru");
+
+      const res = await GET(buildRequest("code=X"), {
+        params: Promise.resolve({ locale: "lt" }),
+      });
+      expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+      expect(res.headers.get("set-cookie") ?? "").not.toContain("NEXT_LOCALE");
+    });
+
+    it("an inactive profile locale never overrides", async () => {
+      exchangeMock.mockResolvedValue({ error: null });
+      getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+      profileWith("sv");
+
+      const res = await GET(buildRequest("code=X"), {
+        params: Promise.resolve({ locale: "lt" }),
+      });
+      expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+      expect(res.headers.get("set-cookie") ?? "").not.toContain("NEXT_LOCALE");
+    });
   });
 
   it("logs unexpected exceptions and redirects with error=callback", async () => {

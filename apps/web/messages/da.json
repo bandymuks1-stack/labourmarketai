@@ -2790,7 +2790,7 @@
         "adminCurated": "Ejer-indtastede gennemsnit med en kildenote i stedet for en stikprøvestørrelse.",
         "statGovLt": "Officiel statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
         "eurostat": "Officiel EU-statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
-        "arbetsformedlingen": "Foreslået kilde. Brugsvilkårene er endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Der hentes intet i dag.",
+        "arbetsformedlingen": "Aktiv kilde. Brugsvilkår bekræftet: en gratis offentlig datakilde (CC0). Kilden vises ved hver annonce, og hver annonce linker tilbage til det oprindelige opslag.",
         "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal.",
         "eures": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag.",
         "uztLt": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag."

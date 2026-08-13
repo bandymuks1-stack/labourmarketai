@@ -5,11 +5,18 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getTranslations } from "next-intl/server";
+
 import { createClient } from "@/lib/supabase/server";
 import {
   isTransactionalEmailConfigured,
   sendTransactionalEmail,
 } from "@/lib/email/transactional";
+import {
+  buildInvitationBody,
+  buildInvitationSubject,
+  resolveRecipientLocale,
+} from "@/lib/invitations/email-content";
 import {
   buildInviteLink,
   isInvitationType,
@@ -96,6 +103,10 @@ export async function createAndSendInvitations(input: {
   emails: string;
   invitationType: string;
   locale: string;
+  /** The RECIPIENT'S language (V8 W4-B item 6) — subject, body and the
+   *  invite-link locale. Validated server-side; falls back to the sender's
+   *  locale when absent or not an active locale. */
+  recipientLocale?: string | null;
   organizationId?: string | null;
   projectId?: string | null;
   invitedName?: string | null;
@@ -114,6 +125,15 @@ export async function createAndSendInvitations(input: {
   const parsed = parseEmailList(input.emails ?? "");
   const origin = await requestOrigin();
   const emailConfigured = isTransactionalEmailConfigured();
+  // Recipient-oriented language: email copy AND the invite-link path locale.
+  const recipientLocale = resolveRecipientLocale(
+    input.recipientLocale,
+    input.locale,
+  );
+  const tEmail = await getTranslations({
+    locale: recipientLocale,
+    namespace: "invitations.email",
+  });
   const results: InvitationSendOutcome[] = [];
 
   for (const email of parsed.valid) {
@@ -127,7 +147,9 @@ export async function createAndSendInvitations(input: {
       p_project_id: input.projectId ?? null,
       p_proposed_role: input.proposedRole ?? null,
       p_personal_message: input.personalMessage ?? null,
-      p_locale: input.locale,
+      // The stored locale is the RECIPIENT'S — the accept flow and any
+      // resend read it back as the invited person's language.
+      p_locale: recipientLocale,
     });
     if (error) {
       if (isMissingSchema(error)) return { status: "needs-migration" };
@@ -153,7 +175,7 @@ export async function createAndSendInvitations(input: {
       continue;
     }
     const invitationId = data.invitation_id as string;
-    const inviteLink = buildInviteLink(origin, input.locale, token);
+    const inviteLink = buildInviteLink(origin, recipientLocale, token);
 
     if (!emailConfigured) {
       results.push({ email, outcome: "created", invitationId, inviteLink });
@@ -162,11 +184,10 @@ export async function createAndSendInvitations(input: {
 
     const sendResult = await sendTransactionalEmail({
       to: email,
-      subject: buildSubject(type, input.locale),
-      text: buildBody({
+      subject: buildInvitationSubject(tEmail, type),
+      text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
-        locale: input.locale,
       }),
     });
     const deliveryOutcome =
@@ -194,54 +215,9 @@ export async function createAndSendInvitations(input: {
   };
 }
 
-function buildSubject(type: InvitationType, locale: string): string {
-  const lt = locale === "lt";
-  switch (type) {
-    case "join_project":
-      return lt
-        ? "Kvietimas prisijungti prie projekto — LabourMarket.ai"
-        : "Invitation to join a project — LabourMarket.ai";
-    case "collaborate_partner":
-      return lt
-        ? "Kvietimas bendradarbiauti — LabourMarket.ai"
-        : "Invitation to collaborate — LabourMarket.ai";
-    case "join_platform":
-    case "invite_company":
-      return lt
-        ? "Kvietimas prisijungti prie LabourMarket.ai"
-        : "Invitation to join LabourMarket.ai";
-    default:
-      return lt
-        ? "Kvietimas prisijungti prie komandos — LabourMarket.ai"
-        : "Invitation to join a team — LabourMarket.ai";
-  }
-}
-
-function buildBody(input: {
-  link: string;
-  personalMessage: string | null;
-  locale: string;
-}): string {
-  const lt = input.locale === "lt";
-  const lines = [
-    lt
-      ? "Jus pakvietė prisijungti per LabourMarket.ai."
-      : "You have been invited via LabourMarket.ai.",
-  ];
-  if (input.personalMessage?.trim()) {
-    lines.push("", `"${input.personalMessage.trim()}"`);
-  }
-  lines.push(
-    "",
-    lt ? "Atidarykite kvietimą:" : "Open the invitation:",
-    input.link,
-    "",
-    lt
-      ? "Nuoroda galioja 14 dienų. Jei kvietimo nelaukėte, tiesiog ignoruokite šį laišką."
-      : "The link is valid for 14 days. If you were not expecting this, simply ignore this email.",
-  );
-  return lines.join("\n");
-}
+// The old hardcoded LT/EN buildSubject/buildBody ternaries (keyed on the
+// SENDER'S UI locale) are gone — subject/body now come from the i18n
+// catalogs in the RECIPIENT'S language via lib/invitations/email-content.ts.
 
 export type SimpleInvitationResult =
   | { status: "needs-migration" }
@@ -273,6 +249,9 @@ export async function resendInvitationAction(input: {
   invitationId: string;
   email: string;
   locale: string;
+  /** The invitation's stored recipient language (invitations.locale). Falls
+   *  back to the sender's locale when absent/invalid. */
+  recipientLocale?: string | null;
   invitationType: string;
   personalMessage?: string | null;
 }): Promise<SimpleInvitationResult> {
@@ -295,19 +274,22 @@ export async function resendInvitationAction(input: {
   if (data !== "ok") return { status: "ok", outcome: data as string };
 
   const origin = await requestOrigin();
-  const inviteLink = buildInviteLink(
-    origin,
+  const recipientLocale = resolveRecipientLocale(
+    input.recipientLocale,
     input.locale,
-    token,
   );
+  const inviteLink = buildInviteLink(origin, recipientLocale, token);
   if (isTransactionalEmailConfigured() && isInvitationType(input.invitationType)) {
+    const tEmail = await getTranslations({
+      locale: recipientLocale,
+      namespace: "invitations.email",
+    });
     const sendResult = await sendTransactionalEmail({
       to: input.email,
-      subject: buildSubject(input.invitationType, input.locale),
-      text: buildBody({
+      subject: buildInvitationSubject(tEmail, input.invitationType),
+      text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
-        locale: input.locale,
       }),
     });
     await asAny(supabase).rpc("mark_invitation_delivery_v1", {

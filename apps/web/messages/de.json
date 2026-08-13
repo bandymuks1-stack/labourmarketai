@@ -8046,7 +8046,10 @@
         "no_requirement_set": "Qualifikationsanforderungen",
         "no_start_date": "Startdatum",
         "pay_not_comparable": "Vergütung nicht vergleichbar (nicht in EUR)"
-      }
+      },
+      "confirmNotice": "Ihre Bewerbung wird auf einem anderen Portal fortgesetzt — in der Originalanzeige.",
+      "confirmContinue": "Weiter",
+      "confirmDismiss": "Abbrechen"
     }
   },
   "workerIntake": {
@@ -9635,7 +9638,8 @@
         "rate_limited": "Zu viele Einladungen heute",
         "not_authorized": "Nicht erlaubt",
         "error": "Fehlgeschlagen"
-      }
+      },
+      "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)"
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
@@ -10143,7 +10147,7 @@
         "adminCurated": "Vom Eigentümer eingegebene Durchschnitte mit Quellennotiz statt Stichprobengröße.",
         "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
-        "arbetsformedlingen": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Eigentümers. Heute wird nichts abgerufen.",
+        "arbetsformedlingen": "Aktive Quelle. Nutzungsbedingungen bestätigt: eine kostenlose öffentliche Datenquelle (CC0). Bei jeder Anzeige wird die Quelle genannt, und jede Anzeige verlinkt zurück auf die Originalveröffentlichung.",
         "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
         "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
         "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."
@@ -12131,6 +12135,19 @@
       "stateNoRunYet": "Noch kein Lauf",
       "stateOk": "Letzter Lauf OK",
       "stateFailing": "Fehlerhaft"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Einladung zu einem Projekt — LabourMarket.ai",
+        "collaborate": "Einladung zur Zusammenarbeit — LabourMarket.ai",
+        "platform": "Einladung zu LabourMarket.ai",
+        "team": "Einladung in ein Team — LabourMarket.ai"
+      },
+      "intro": "Sie wurden über LabourMarket.ai eingeladen.",
+      "open": "Öffnen Sie die Einladung:",
+      "validity": "Der Link ist 14 Tage gültig. Falls Sie diese Einladung nicht erwartet haben, ignorieren Sie diese E-Mail einfach."
     }
   }
 }

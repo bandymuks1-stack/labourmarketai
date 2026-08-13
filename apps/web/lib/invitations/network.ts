@@ -35,6 +35,9 @@ export type SentInvitationRow = {
   organizationId: string | null;
   projectId: string | null;
   personalMessage: string | null;
+  /** The RECIPIENT'S language the invitation was created with (V8 W4-B
+   *  item 6) — a resend keeps it instead of the sender's UI locale. */
+  recipientLocale: string | null;
 };
 
 export type SentInvitationsRead =
@@ -48,7 +51,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
   const { data, error } = await asAny(supabase)
     .from("invitations")
     .select(
-      "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message",
+      "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, locale",
     )
     .order("created_at", { ascending: false })
     .limit(100);
@@ -72,6 +75,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     organization_id: string | null;
     project_id: string | null;
     personal_message: string | null;
+    locale: string | null;
   };
   return {
     status: "ok",
@@ -91,6 +95,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
       organizationId: r.organization_id,
       projectId: r.project_id,
       personalMessage: r.personal_message,
+      recipientLocale: r.locale,
     })),
   };
 }

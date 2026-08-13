@@ -96,6 +96,9 @@ const LABELS = {
   sectionNote: "note",
   freshnessNotice: (f: SourceFreshnessV1) => `NOTICE:${f.state}`,
   openOriginal: "open",
+  confirmNotice: "continues elsewhere",
+  confirmContinue: "continue",
+  confirmDismiss: "cancel",
   noApplicationRoute: "none",
   publishedOn: (d: string) => d,
   positionsLabel: (n: number) => String(n),
@@ -146,8 +149,11 @@ describe("the board states how old its external supply is", () => {
     expect(html).toContain('data-freshness-state="stale"');
     expect(html).toContain("NOTICE:stale");
     // The publisher route must survive the notice — attribution and the
-    // original ad are never traded away for a warning.
-    expect(html).toContain("https://example.org/ad/1");
+    // original ad are never traded away for a warning. Since V8 W4-B item 3
+    // the route sits behind ONE confirm step (owner decision, addendum §4),
+    // so the initial render carries the confirm trigger, not the raw URL —
+    // lib/guards/external-apply-confirm.test.ts pins the anchor itself.
+    expect(html).toContain("external-vacancy-original-link-confirm");
   });
 
   it("renders a notice for every non-current state", () => {

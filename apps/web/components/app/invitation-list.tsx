@@ -57,6 +57,8 @@ export function SentInvitationList({
         invitationId: row.id,
         email: row.invitedEmail,
         locale,
+        // A resend keeps the invitation's stored RECIPIENT language.
+        recipientLocale: row.recipientLocale,
         invitationType: row.invitationType,
         personalMessage: row.personalMessage,
       });

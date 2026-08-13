@@ -8046,7 +8046,10 @@
         "no_requirement_set": "įgūdžių reikalavimai",
         "no_start_date": "pradžios data",
         "pay_not_comparable": "atlygis nepalyginamas (ne EUR)"
-      }
+      },
+      "confirmNotice": "Kandidatavimas tęsiamas kitame portale — originaliame skelbime.",
+      "confirmContinue": "Tęsti",
+      "confirmDismiss": "Atšaukti"
     }
   },
   "workerIntake": {
@@ -9635,7 +9638,8 @@
         "rate_limited": "Per daug kvietimų šiandien",
         "not_authorized": "Neturite teisės",
         "error": "Nepavyko"
-      }
+      },
+      "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)"
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
@@ -10143,7 +10147,7 @@
         "adminCurated": "Savininko įvesti vidurkiai su šaltinio pastaba vietoj imties dydžio.",
         "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
-        "arbetsformedlingen": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
+        "arbetsformedlingen": "Aktyvus šaltinis. Naudojimo sąlygos patvirtintos: nemokamas viešas duomenų šaltinis (CC0). Prie kiekvieno skelbimo nurodomas šaltinis, o skelbimas veda atgal į originalų skelbimą.",
         "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
         "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
         "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
@@ -12131,6 +12135,19 @@
       "stateNoRunYet": "Dar nepaleista",
       "stateOk": "Paskutinis paleidimas pavyko",
       "stateFailing": "Nepavyksta"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Kvietimas prisijungti prie projekto — LabourMarket.ai",
+        "collaborate": "Kvietimas bendradarbiauti — LabourMarket.ai",
+        "platform": "Kvietimas prisijungti prie LabourMarket.ai",
+        "team": "Kvietimas prisijungti prie komandos — LabourMarket.ai"
+      },
+      "intro": "Jus pakvietė prisijungti per LabourMarket.ai.",
+      "open": "Atidarykite kvietimą:",
+      "validity": "Nuoroda galioja 14 dienų. Jei kvietimo nelaukėte, tiesiog ignoruokite šį laišką."
     }
   }
 }

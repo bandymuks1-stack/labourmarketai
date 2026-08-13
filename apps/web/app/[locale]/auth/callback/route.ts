@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import {
+  LOCALE_COOKIE_NAME,
+  resolvePostLoginLocale,
+} from "@/lib/auth/locale-preference";
 import { readOauthTraceId } from "@/lib/auth/oauth-trace";
+import { routing } from "@/lib/i18n/routing";
 
 /**
  * Magic-link / OAuth callback. Supabase redirects here after the user
@@ -90,27 +96,57 @@ export async function GET(
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarded_at")
+      .select("onboarded_at, locale")
       .eq("id", user.id)
       .single();
+
+    // V8 W4-B item 2: honor the ACCOUNT language on a device that carries no
+    // explicit choice. Priority (pinned by lib/auth/locale-preference.test.ts):
+    // NEXT_LOCALE cookie > profiles.locale > the URL locale the middleware
+    // derived from Accept-Language. When the profile preference wins, the
+    // cookie is set so the choice sticks for every later navigation.
+    const jar = await cookies();
+    const decision = resolvePostLoginLocale({
+      cookieLocale: jar.get(LOCALE_COOKIE_NAME)?.value ?? null,
+      profileLocale:
+        (profile as { locale?: string | null } | null)?.locale ?? null,
+      urlLocale: locale,
+    });
+    const landingLocale = decision.locale;
+    const withLocaleCookie = (res: NextResponse): NextResponse => {
+      if (decision.overridden) {
+        res.cookies.set(LOCALE_COOKIE_NAME, landingLocale, {
+          // The SAME lifetime next-intl's middleware gives this cookie
+          // (routing.localeCookie) — one truth for how long a choice lives.
+          maxAge:
+            (routing.localeCookie as { maxAge?: number }).maxAge ??
+            60 * 60 * 24 * 365,
+          path: "/",
+          sameSite: "lax",
+        });
+      }
+      return res;
+    };
 
     // If onboarding is incomplete /onboarding still wins — the user
     // cannot usefully land on /dashboard/<anything> without a profile.
     // We attach the `next` query so onboarding completion can fall
     // back to it (when that hook is wired in a future PR).
     if (!profile?.onboarded_at) {
-      const onboarding = new URL(`/${locale}/onboarding`, url.origin);
+      const onboarding = new URL(`/${landingLocale}/onboarding`, url.origin);
       if (nextParam) onboarding.searchParams.set("next", nextParam);
-      return NextResponse.redirect(onboarding);
+      return withLocaleCookie(NextResponse.redirect(onboarding));
     }
 
-    const safeNext = getSafeReturnPath(nextParam, locale);
+    // A `next` value carrying its OWN locale prefix is an explicit deep link
+    // and keeps it; a bare path gets the landing locale prefixed.
+    const safeNext = getSafeReturnPath(nextParam, landingLocale);
     console.info("[auth/callback] success", {
       locale,
       trace: traceId,
       onboarded: !!profile?.onboarded_at,
     });
-    return NextResponse.redirect(new URL(safeNext, url.origin));
+    return withLocaleCookie(NextResponse.redirect(new URL(safeNext, url.origin)));
   } catch (e) {
     // Without this the bare catch silently swallowed every unexpected error
     // (env throws, fetch failures, etc.) and the user saw `error=callback`

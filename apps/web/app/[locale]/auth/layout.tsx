@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import {
   AUTH_CLIENT_MESSAGE_ROOTS,
@@ -37,13 +38,18 @@ export default async function AuthLayout({
     >
       <div className="relative min-h-screen">
         <AmbientGlow />
-        <header className="relative z-10 mx-auto max-w-container px-6 py-6 sm:px-12">
+        {/* V8 W4-B: the language choice must exist BEFORE login — a person
+            landing on a login/registration screen in the wrong language had
+            no way out (the switcher lived only on marketing + dashboard
+            chrome). Same compact mode the public header uses at 320px. */}
+        <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-6 sm:px-12">
           <Link
             href="/"
             className="font-display text-lg font-bold tracking-tightest text-text-primary"
           >
             LabourMarket<span className="text-gradient-accent">.ai</span>
           </Link>
+          <LocaleSwitcher compactBelowSm />
         </header>
         <main className="relative z-10 mx-auto flex max-w-md flex-col px-6 pb-20">
           {children}

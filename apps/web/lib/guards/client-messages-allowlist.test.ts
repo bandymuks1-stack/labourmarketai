@@ -340,7 +340,8 @@ describe("the allowlist itself is honest", () => {
       unknown
     >;
     expect(picked.auth).toBe((tree as Record<string, unknown>).auth);
-    expect(Object.keys(picked)).toEqual(["auth"]);
+    // V8 W4-B: `common` rides with the locale switcher on auth/onboarding.
+    expect(Object.keys(picked)).toEqual(["auth", "common"]);
   });
 });
 

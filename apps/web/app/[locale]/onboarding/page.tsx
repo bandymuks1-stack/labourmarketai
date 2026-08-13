@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { Link } from "@/lib/i18n/navigation";
@@ -68,13 +69,19 @@ export default async function OnboardingPage({
           once the user later reaches the dashboard in the same tab. */}
       <SessionTelemetry />
       <AmbientGlow />
-      <header className="relative z-10 mx-auto max-w-container px-6 py-6 sm:px-12">
+      {/* V8 W4-B: language stays switchable DURING onboarding — the wizard
+          writes profiles.locale from the URL locale at completion, so the
+          person must be able to correct the language before that happens.
+          (The layout is a pure message-scope wrapper; this page owns the
+          chrome, so the switcher mounts here, mirroring the auth header.) */}
+      <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-6 sm:px-12">
         <Link
           href="/"
           className="font-display text-lg font-bold tracking-tightest text-text-primary"
         >
           LabourMarket<span className="text-gradient-accent">.ai</span>
         </Link>
+        <LocaleSwitcher compactBelowSm />
       </header>
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-col px-6 pb-20 sm:max-w-lg lg:max-w-2xl">
         {pendingInvites.length > 0 && (

@@ -8046,7 +8046,10 @@
         "no_requirement_set": "vaardigheidseisen",
         "no_start_date": "startdatum",
         "pay_not_comparable": "loon niet vergelijkbaar (niet in EUR)"
-      }
+      },
+      "confirmNotice": "Je sollicitatie gaat verder op een ander portaal — in de originele advertentie.",
+      "confirmContinue": "Doorgaan",
+      "confirmDismiss": "Annuleren"
     }
   },
   "workerIntake": {
@@ -9635,7 +9638,8 @@
         "rate_limited": "Te veel uitnodigingen vandaag",
         "not_authorized": "Niet toegestaan",
         "error": "Mislukt"
-      }
+      },
+      "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)"
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
@@ -10143,7 +10147,7 @@
         "adminCurated": "Door de eigenaar ingevoerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
         "statGovLt": "Officiële statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
         "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
-        "arbetsformedlingen": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Vandaag wordt er niets opgehaald.",
+        "arbetsformedlingen": "Actieve bron. Gebruiksvoorwaarden bevestigd: een gratis openbare gegevensbron (CC0). Bij elke advertentie wordt de bron vermeld en elke advertentie linkt terug naar de oorspronkelijke publicatie.",
         "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd.",
         "eures": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
         "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald."
@@ -12131,6 +12135,19 @@
       "stateNoRunYet": "Nog geen run",
       "stateOk": "Laatste run OK",
       "stateFailing": "Faalt"
+    }
+  },
+  "invitations": {
+    "email": {
+      "subject": {
+        "project": "Uitnodiging om deel te nemen aan een project — LabourMarket.ai",
+        "collaborate": "Uitnodiging om samen te werken — LabourMarket.ai",
+        "platform": "Uitnodiging om deel te nemen aan LabourMarket.ai",
+        "team": "Uitnodiging om deel te nemen aan een team — LabourMarket.ai"
+      },
+      "intro": "Je bent uitgenodigd via LabourMarket.ai.",
+      "open": "Open de uitnodiging:",
+      "validity": "De link is 14 dagen geldig. Verwachtte je deze uitnodiging niet, negeer deze e-mail dan gewoon."
     }
   }
 }
