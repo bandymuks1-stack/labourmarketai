@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Wie is er nu afwezig",
+      "today": "Vandaag afwezig ({count})",
+      "week": "Afwezig in de komende 7 dagen ({count})",
+      "noneToday": "Geen van uw medewerkers heeft vandaag een goedgekeurde afwezigheid.",
+      "noneWeek": "Geen goedgekeurde afwezigheden in de komende 7 dagen.",
+      "coverage": "Op basis van goedgekeurde afwezigheden van {count} beheerde medewerkers. Redenen blijven privé.",
+      "unavailable": "Het afwezigheidsschema is hier nog niet ingeschakeld."
+    },
     "types": {
       "annual_leave": "Jaarlijks verlof",
       "sickness": "Ziekteverlof",
@@ -10956,6 +10965,11 @@
       "briefConflicts": "Je agenda heeft {count} overlappende verplichtingen.",
       "briefOverdue": "{count} taken zijn over hun einddatum heen.",
       "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
+      "briefEmployerJournalReviews": "{count, plural, one {# werkregistratie wacht} other {# werkregistraties wachten}} op uw beoordeling.",
+      "briefEmployerPendingAbsences": "{count, plural, one {# afwezigheidsverzoek wacht} other {# afwezigheidsverzoeken wachten}} op uw besluit.",
+      "briefEmployerAbsentToday": "{count, plural, one {# van uw medewerkers is} other {# van uw medewerkers zijn}} vandaag afwezig.",
+      "chipEmployerInbox": "Beoordelingsrij",
+      "chipEmployerAbsences": "Afwezigheden",
       "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}.",
       "playerCardOpened": "Je kaart staat open in het paneel — echte gegevens uit je eigen records.",

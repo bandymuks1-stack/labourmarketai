@@ -247,3 +247,44 @@ export function workersUnavailableFor(
 ): readonly WorkerUnavailability[] {
   return unavailability.filter((u) => unavailabilityOverlaps(planned, u.item));
 }
+
+// ── "Who is absent NOW" (V8 employer daily loop, GAP 3) ─────────────────────
+//
+// The audit of 2026-08-13 named this precisely: both halves of the answer
+// were already written — the minimised availability read above and the
+// canonical overlap predicate — and nothing composed them into the question
+// a manager actually asks each morning. These two derivations are pure and
+// UTC-day based (dates in this domain are date-only strings; the W12
+// presentation doctrine is UTC → UTC, so "today" is the UTC calendar day).
+
+/** ISO date (YYYY-MM-DD) `days` calendar days after `todayIso` (UTC). */
+function isoDayPlus(todayIso: string, days: number): string {
+  const d = new Date(`${todayIso}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Managed workers whose approved unavailability covers the UTC day
+ *  `todayIso`. A worker appears once per overlapping absence band. */
+export function absentOn(
+  todayIso: string,
+  unavailability: readonly WorkerUnavailability[],
+): readonly WorkerUnavailability[] {
+  return workersUnavailableFor(
+    { startDate: todayIso, endDate: todayIso },
+    unavailability,
+  );
+}
+
+/** Managed workers whose approved unavailability overlaps the window of
+ *  `days` calendar days starting at `todayIso` (inclusive). */
+export function absentWithinDays(
+  todayIso: string,
+  days: number,
+  unavailability: readonly WorkerUnavailability[],
+): readonly WorkerUnavailability[] {
+  return workersUnavailableFor(
+    { startDate: todayIso, endDate: isoDayPlus(todayIso, days - 1) },
+    unavailability,
+  );
+}

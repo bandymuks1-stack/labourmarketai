@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Wer ist gerade abwesend",
+      "today": "Heute abwesend ({count})",
+      "week": "Abwesend in den nächsten 7 Tagen ({count})",
+      "noneToday": "Keiner Ihrer Mitarbeitenden hat heute eine genehmigte Abwesenheit.",
+      "noneWeek": "Keine genehmigten Abwesenheiten in den nächsten 7 Tagen.",
+      "coverage": "Basierend auf genehmigten Abwesenheiten von {count} verwalteten Mitarbeitenden. Gründe bleiben privat.",
+      "unavailable": "Der Abwesenheitsplan ist hier noch nicht aktiviert."
+    },
     "types": {
       "annual_leave": "Jahresurlaub",
       "sickness": "Krankheit",
@@ -10956,6 +10965,11 @@
       "briefConflicts": "Dein Kalender hat {count} überlappende Verpflichtungen.",
       "briefOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
       "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
+      "briefEmployerJournalReviews": "{count, plural, one {# Arbeitseintrag wartet} other {# Arbeitseinträge warten}} auf Ihre Prüfung.",
+      "briefEmployerPendingAbsences": "{count, plural, one {# Abwesenheitsantrag wartet} other {# Abwesenheitsanträge warten}} auf Ihre Entscheidung.",
+      "briefEmployerAbsentToday": "{count, plural, one {# Ihrer Mitarbeitenden ist} other {# Ihrer Mitarbeitenden sind}} heute abwesend.",
+      "chipEmployerInbox": "Prüfliste",
+      "chipEmployerAbsences": "Abwesenheiten",
       "briefUnreadMessages": "Du hast {count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}.",
       "briefProfileGap": "Deinem Profil fehlt noch: {step}.",
       "playerCardOpened": "Deine Karte ist im Panel geöffnet — echte Daten aus deinen eigenen Einträgen.",

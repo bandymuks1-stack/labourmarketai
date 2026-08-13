@@ -79,7 +79,10 @@ import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
-import { loadOpeningBrief } from "@/lib/conversation/opening-brief";
+import {
+  loadEmployerOpeningBrief,
+  loadOpeningBrief,
+} from "@/lib/conversation/opening-brief";
 import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
@@ -791,11 +794,13 @@ export function ConversationChat({
   useEffect(() => {
     if (script || openedWithStateRef.current) return;
     if (!auth?.profile) return; // signed-out: nothing real to show
-    // Employer identity opens with the employer starters — the worker
-    // reads would be the wrong audience (rebuild W4).
-    if (identity !== "person") return;
+    // V8 GAP 1: the employer no longer opens to silence. Each identity gets
+    // its OWN brief over its OWN reads — the worker ladder for a person, the
+    // manager's morning ladder (reviews, absence decisions, absent-today,
+    // unread) for an organization. Same caps, same honesty: a failed read
+    // contributes nothing and `none` leaves the greeting standing alone.
     openedWithStateRef.current = true;
-    loadOpeningBrief()
+    (identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief())
       .then((brief) => {
         if (brief.kind !== "brief") return; // honest: nothing to report
         pushMessage({

@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Who is absent now",
+      "today": "Absent today ({count})",
+      "week": "Absent in the next 7 days ({count})",
+      "noneToday": "Nobody you manage has an approved absence today.",
+      "noneWeek": "No approved absences in the next 7 days.",
+      "coverage": "Based on approved absences of {count} managed workers. Reasons stay private.",
+      "unavailable": "The absence schedule is not switched on here yet."
+    },
     "types": {
       "annual_leave": "Annual leave",
       "sickness": "Sick leave",
@@ -10956,6 +10965,11 @@
       "briefConflicts": "Your calendar has {count} overlapping commitments.",
       "briefOverdue": "{count} tasks are past their due day.",
       "briefLogToday": "You are working today and nothing is logged yet.",
+      "briefEmployerJournalReviews": "{count, plural, one {# work entry awaits} other {# work entries await}} your review.",
+      "briefEmployerPendingAbsences": "{count, plural, one {# absence request awaits} other {# absence requests await}} your decision.",
+      "briefEmployerAbsentToday": "{count, plural, one {# of your workers is} other {# of your workers are}} absent today.",
+      "chipEmployerInbox": "Review queue",
+      "chipEmployerAbsences": "Absences",
       "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
       "briefProfileGap": "Your profile is still missing: {step}.",
       "playerCardOpened": "Your card is open in the panel — real data from your own records.",

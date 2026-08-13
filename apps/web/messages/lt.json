@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Kas dabar nedirba",
+      "today": "Šiandien nedirba ({count})",
+      "week": "Nedirbs per artimiausias 7 dienas ({count})",
+      "noneToday": "Šiandien nė vienas jūsų valdomas darbuotojas neturi patvirtinto neatvykimo.",
+      "noneWeek": "Per artimiausias 7 dienas patvirtintų neatvykimų nėra.",
+      "coverage": "Pagal {count} valdomų darbuotojų patvirtintus neatvykimus. Priežastys lieka privačios.",
+      "unavailable": "Neatvykimų grafikas čia dar neįjungtas."
+    },
     "types": {
       "annual_leave": "Kasmetinės atostogos",
       "sickness": "Nedarbingumas",
@@ -10956,6 +10965,11 @@
       "briefConflicts": "Kalendoriuje {count} persidengiantys įsipareigojimai.",
       "briefOverdue": "{count} užduotys jau pradelstos.",
       "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
+      "briefEmployerJournalReviews": "{count, plural, one {# darbo įrašas laukia} few {# darbo įrašai laukia} other {# darbo įrašų laukia}} jūsų peržiūros.",
+      "briefEmployerPendingAbsences": "{count, plural, one {# neatvykimo prašymas laukia} few {# neatvykimo prašymai laukia} other {# neatvykimo prašymų laukia}} jūsų sprendimo.",
+      "briefEmployerAbsentToday": "{count, plural, one {Šiandien nedirba # jūsų darbuotojas} few {Šiandien nedirba # jūsų darbuotojai} other {Šiandien nedirba # jūsų darbuotojų}}.",
+      "chipEmployerInbox": "Peržiūros eilė",
+      "chipEmployerAbsences": "Neatvykimai",
       "briefUnreadMessages": "Turi {count, plural, one {# neperskaitytą žinutę} few {# neperskaitytas žinutes} other {# neperskaitytų žinučių}}.",
       "briefProfileGap": "Profilyje dar trūksta: {step}.",
       "playerCardOpened": "Tavo kortelė atidaryta šone — ten matai tikrus savo duomenis.",
