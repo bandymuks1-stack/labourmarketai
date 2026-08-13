@@ -1,4 +1,4 @@
-# LANGUAGE_CAPABILITY_MATRIX (V9 §16)
+# LANGUAGE_CAPABILITY_MATRIX (V9 §16, updated V10 §23)
 
 Basis: W4 audits (2026-08-13) + #1148 shipped fixes + ESCO DB measurement. Detection priority
 (implemented, test-pinned): NEXT_LOCALE cookie → profiles.locale (login) → Accept-Language → lt.
@@ -13,6 +13,11 @@ No country→language inference exists anywhere; user choice always wins. COUNTR
 | de | FULL routed (preview) | YES | NO — same | YES | FULL | YES | ALL | READY (preview; AI gap documented) |
 | lv,et,da,no,sv,pl | 65/171 namespaces (106 missing incl. dashboard/CV/journal/planning) | NO | NO | NO | NO (legal namespaces absent) | copy exists (#1143: 11 catalogs) | marketing/auth core only | NOT ROUTED — promotion = translation project, not config flip |
 | fi | taxonomy/recognition only (deliberate) | NO | NO | NO | NO | NO | none | RECOGNITION ONLY |
+
+V10 additions:
+- VALUE ROUTER (intent + structurer + eligibility + corrections): systematic LT/EN/RU needles,
+  opportunistic NL/DE; interpretation/option/refusal copy in all 5 routed locales.
+- CHANNEL registry copy (listings/services hints, legal-check, refusals): 5 routed locales.
 
 Supplementary facts:
 - Auth emails (signup confirm / password reset) are Supabase GoTrue templates managed outside the
