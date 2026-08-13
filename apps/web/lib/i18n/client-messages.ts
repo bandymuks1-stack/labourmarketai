@@ -154,8 +154,10 @@ export const MARKETING_CLIENT_MESSAGE_ROOTS = [
 ] as const;
 
 /** Shipped by `app/[locale]/auth/layout.tsx` and
- *  `app/[locale]/onboarding/layout.tsx`. (~28 KB) */
-export const AUTH_CLIENT_MESSAGE_ROOTS = ["auth"] as const;
+ *  `app/[locale]/onboarding/layout.tsx`. `common` joined with the V8 W4-B
+ *  locale switcher on the auth/onboarding chrome (~1 KB — the switcher's
+ *  aria labels). (~29 KB) */
+export const AUTH_CLIENT_MESSAGE_ROOTS = ["auth", "common"] as const;
 
 /** Pure pick of top-level roots — no key is rewritten, so every resolved
  *  translation is byte-identical to the full-tree behaviour. */
