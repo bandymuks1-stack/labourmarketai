@@ -15,6 +15,8 @@ import {
   type WorkProofSummary,
 } from "@/lib/documents/document-centre";
 import { getFinanceSummary } from "@/lib/finance/finance";
+import { getJournalWindowReport } from "@/lib/journal/journal-window-report";
+import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { buildEvidenceReport } from "@/lib/reports/evidence-report";
 import { createClient } from "@/lib/supabase/server";
@@ -142,6 +144,21 @@ export interface OrgReportsView {
         readonly state: "ok";
         readonly overdueCount: number;
         readonly totalCount: number;
+      }
+    | { readonly state: Exclude<SectionState, "ok"> };
+  /**
+   * V8 GAP 5: work-journal activity in the org's engagements over the last 7
+   * calendar days (UTC, inclusive of today) — the windowed-report lib's week
+   * window, so the hub figure and /dashboard/reports/journal can never
+   * disagree. `awaitingReview` is the CURRENT reviewable queue (not windowed);
+   * `confirmed` counts the window's entries that carry a manager confirmation.
+   */
+  readonly journal:
+    | {
+        readonly state: "ok";
+        readonly recorded: number;
+        readonly awaitingReview: number;
+        readonly confirmed: number;
       }
     | { readonly state: Exclude<SectionState, "ok"> };
 }
@@ -315,15 +332,37 @@ async function readFinanceCounts(): Promise<OrgReportsView["finance"]> {
   }
 }
 
+/** Org journal activity, last 7 UTC calendar days. Reuses the windowed-report
+ *  read (same org resolver, same minimised query) + the existing reviewable
+ *  count — no second query truth. Any failure degrades to an explicit
+ *  unavailable state, never a fabricated zero. */
+async function readJournalCounts(): Promise<OrgReportsView["journal"]> {
+  try {
+    const report = await getJournalWindowReport("week");
+    if (!report.applied) return { state: "unavailable" };
+    const awaitingReview = await countReviewablePendingEntries();
+    return {
+      state: "ok",
+      recorded: report.totals.entries,
+      awaitingReview,
+      confirmed: report.totals.confirmed,
+    };
+  } catch {
+    return { state: "unavailable" };
+  }
+}
+
 async function getOrgReportsView(): Promise<OrgReportsView> {
-  const [demand, projects, tasks, documents, finance] = await Promise.all([
-    readDemandCounts(),
-    readProjectCounts(),
-    readTaskCounts(),
-    readOrgDocumentCounts(),
-    readFinanceCounts(),
-  ]);
-  return { kind: "org", demand, projects, tasks, documents, finance };
+  const [demand, projects, tasks, documents, finance, journal] =
+    await Promise.all([
+      readDemandCounts(),
+      readProjectCounts(),
+      readTaskCounts(),
+      readOrgDocumentCounts(),
+      readFinanceCounts(),
+      readJournalCounts(),
+    ]);
+  return { kind: "org", demand, projects, tasks, documents, finance, journal };
 }
 
 /**

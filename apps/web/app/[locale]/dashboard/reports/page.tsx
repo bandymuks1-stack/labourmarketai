@@ -280,7 +280,7 @@ function OrgSections({
   t: Translate;
   locale: string;
 }): ReactNode {
-  const { demand, projects, tasks, documents, finance } = view;
+  const { demand, projects, tasks, documents, finance, journal } = view;
   return (
     <>
       {/* Org 1 — own demand requests. */}
@@ -483,7 +483,50 @@ function OrgSections({
         </Link>
       </section>
 
-      {/* Org 5 — own finance records (degrades until I2 is applied). */}
+      {/* Org 5 — work-journal activity (V8 GAP 5): recorded entries in the
+          org's engagements over the last seven calendar days, the current
+          review queue, and how many of the window's entries are confirmed.
+          Counts only — no rating, no score. */}
+      <section
+        className={SECTION_CLASS}
+        data-testid="reports-org-journal"
+        aria-labelledby="reports-org-journal-heading"
+      >
+        <h2
+          id="reports-org-journal-heading"
+          className="font-display text-lg font-semibold tracking-tight text-text-primary"
+        >
+          {t("org.journal.title")}
+        </h2>
+        {journal.state === "ok" ? (
+          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <MetricTile
+              label={t("org.journal.recorded")}
+              value={journal.recorded}
+            />
+            <MetricTile
+              label={t("org.journal.awaitingReview")}
+              value={journal.awaitingReview}
+            />
+            <MetricTile
+              label={t("org.journal.confirmed")}
+              value={journal.confirmed}
+            />
+          </dl>
+        ) : (
+          <UnavailableNote t={t} state={journal.state} />
+        )}
+        <BasisNote t={t} basisKey="journal" />
+        <Link
+          href={"/dashboard/reports/journal" as "/dashboard"}
+          className={LINK_CLASS}
+          data-testid="reports-link-journal-report"
+        >
+          {t("org.journal.link")} →
+        </Link>
+      </section>
+
+      {/* Org 6 — own finance records (degrades until I2 is applied). */}
       <section
         className={SECTION_CLASS}
         data-testid="reports-org-finance"
