@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import {
@@ -12,6 +13,12 @@ import {
  *  pick (~300 KB serialized). Purely a message-scope wrapper — no chrome,
  *  no layout change. Re-derived from this tree's import graph by
  *  lib/guards/client-messages-allowlist.test.ts on every CI run. */
+/** Private flow: never indexable — robots.txt disallow alone does not stop
+ *  URL-only indexing from inbound links. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function OnboardingLayout({
   children,
   params,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -50,6 +51,17 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  * No route files move, so the dashboard file-path contract the guard suite pins
  * stays intact. Doctrine §18 (real, not overlay illusions).
  */
+
+/**
+ * Private surface: robots.txt already disallows crawling, but a disallow does
+ * not stop URL-only indexing from inbound links — the locale layout's
+ * `index: true` used to be inherited here. Explicit noindex closes that gap
+ * for the whole authenticated tree (metadata merges downward).
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function DashboardLayout({
   children,
   params,
