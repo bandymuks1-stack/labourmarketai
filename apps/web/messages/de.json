@@ -11071,7 +11071,28 @@
       "engagementsOpened": "Das sind die erfassten Arbeitsbeziehungen. Im Panel kannst du eine davon beenden.",
       "engagementsNone": "Es sind keine Arbeitsbeziehungen erfasst.",
       "engagementsNoCompany": "Du handelst gerade nicht für eine Organisation, daher gibt es keine Liste zu zeigen.",
-      "engagementsUnavailable": "Die Arbeitsbeziehungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben."
+      "engagementsUnavailable": "Die Arbeitsbeziehungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben.",
+      "valueIntent": {
+        "understood": "Verstanden: {summary}.",
+        "people": "{count, plural, one {# Person} other {# Personen}}",
+        "daysCount": "{count, plural, one {# Tag} other {# Tage}}",
+        "window": {
+          "next_week": "nächste Woche",
+          "this_week": "diese Woche",
+          "next_month": "nächsten Monat"
+        },
+        "ask": {
+          "location": "Wo (Stadt oder Land)?",
+          "window": "Wann — welche Woche oder welcher Monat?",
+          "quantity": "Welche Menge?",
+          "headcount": "Wie viele Personen werden benötigt?"
+        },
+        "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
+        "goodsChannelGated": "Einen Käuferkanal für Waren gibt es auf der Plattform noch nicht — niemand würde dieses Verkaufsangebot hier sehen. Das Geschriebene wurde nirgends gespeichert.",
+        "goodsListingsHint": "Handelt es sich um Arbeitsausrüstung oder Werkzeuge, können Sie sie am Anzeigenbrett veröffentlichen.",
+        "chipListings": "Anzeigen öffnen",
+        "capacityNext": "Ich kann Ihre Verfügbarkeit auf Ihrer Arbeitskarte eintragen oder sofort Arbeit suchen — die Ergebnisse sind die derzeit offenen Anfragen."
+      }
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

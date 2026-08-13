@@ -80,6 +80,12 @@ import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import {
+  structureValueStatement,
+  type ValueStatement,
+} from "@/lib/structuring/value-statement";
+import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
+import { foldText } from "@/lib/structuring/normalize";
+import {
   loadEmployerOpeningBrief,
   loadOpeningBrief,
 } from "@/lib/conversation/opening-brief";
@@ -343,6 +349,9 @@ export function ConversationChat({
    */
   const t = useTranslations("conversation.chat");
   const tSummary = useTranslations("conversation.summary");
+  /** V9 value-intent: slug → localized work-type label for honest readbacks
+   *  and demand-form prefill (the ONE taxonomy label map, not a new list). */
+  const workTypeLabels = useMemo(() => buildWorkTypeLabelMap(locale), [locale]);
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
   /** The AI's hand on World State, published by the bridge inside the provider. */
@@ -507,7 +516,12 @@ export function ConversationChat({
   ]);
 
   const openForm = useCallback(
-    (actionId: string, onCloseOverride?: () => void, continueLabel?: string) => {
+    (
+      actionId: string,
+      onCloseOverride?: () => void,
+      continueLabel?: string,
+      initialValues?: Record<string, string | boolean>,
+    ) => {
       // ONE form renderer, BOTH sides (rebuild W4): worker specs and company
       // specs share InlineActionForm + the canonical dispatcher.
       const spec = getWorkerForm(actionId) ?? getCompanyForm(actionId);
@@ -518,6 +532,9 @@ export function ConversationChat({
           <InlineActionForm
             spec={spec}
             locale={locale}
+            // V9 value-intent: what the person already SAID pre-fills the
+            // fields — visible, editable, still reviewed before any write.
+            initialValues={initialValues}
             // Closing a form shows the contextual next step, never a generic
             // menu: worker forms re-read the REAL profile state; the employer
             // demand form offers the real demand follow-ups. A caller with a
@@ -1586,6 +1603,53 @@ export function ConversationChat({
     labels.chipAttachCv,
   ]);
 
+  /** V9 value-intent: the honest one-line readback of what was understood —
+   *  only facts the structurer actually read, joined plainly. */
+  const valueSummary = useCallback(
+    (v: ValueStatement): string => {
+      const parts: string[] = [];
+      if (v.subjectLabel) parts.push(v.subjectLabel);
+      else if (v.workType) parts.push(workTypeLabels[v.workType] ?? v.workType);
+      if (v.subject === "goods" && v.quantity) parts.push(v.quantity.raw);
+      if (v.headcount !== null) {
+        parts.push(t("valueIntent.people", { count: v.headcount }));
+      }
+      if (v.window) {
+        if (v.window.kind === "days_count") {
+          parts.push(t("valueIntent.daysCount", { count: v.window.days ?? 0 }));
+        } else {
+          const base = t(
+            `valueIntent.window.${v.window.kind}` as Parameters<typeof t>[0],
+          );
+          parts.push(
+            v.window.days
+              ? `${base} (${t("valueIntent.daysCount", { count: v.window.days })})`
+              : base,
+          );
+        }
+      }
+      if (v.country) parts.push(v.country);
+      return parts.join(" · ");
+    },
+    [t, workTypeLabels],
+  );
+
+  /** V9: demand-form prefill from the read statement — initial values only,
+   *  every field stays visible/editable and the review step still gates. */
+  const demandPrefill = useCallback(
+    (v: ValueStatement, original: string): Record<string, string | boolean> => {
+      const out: Record<string, string | boolean> = { description: original };
+      const roleLabel = v.workType ? workTypeLabels[v.workType] : undefined;
+      if (roleLabel) out.role = roleLabel;
+      if (v.headcount !== null) out.teamSize = String(v.headcount);
+      if (v.window) {
+        out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";
+      }
+      return out;
+    },
+    [workTypeLabels],
+  );
+
   const handleSend = useCallback(
     (text: string) => {
       user(text);
@@ -1655,12 +1719,100 @@ export function ConversationChat({
             // Employer demand (rebuild W4): the canonical intake as an inline
             // form — for the employer identity only; a worker typing about
             // workers gets the honest fallback, never a wrong-audience form.
+            // V9: what the sentence already SAID pre-fills the form (visible,
+            // editable, still reviewed — nothing submitted on their behalf).
             if (identity === "company") {
-              openForm("company.create-demand");
+              openForm(
+                "company.create-demand",
+                undefined,
+                undefined,
+                demandPrefill(structureValueStatement(text), text),
+              );
             } else {
               assistant(labels.fallback, starterChips);
             }
             break;
+          case "offer-value": {
+            // V9 value-intent: read the statement, say what was understood,
+            // ask ONLY what is missing, offer the real next steps by subject.
+            const v = structureValueStatement(text);
+            const summary = valueSummary(v);
+            const understood = summary
+              ? t("valueIntent.understood", { summary })
+              : null;
+            const questions = v.missing
+              .filter(
+                (m): m is "location" | "window" | "quantity" | "headcount" =>
+                  m === "location" ||
+                  m === "window" ||
+                  m === "quantity" ||
+                  m === "headcount",
+              )
+              .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
+
+            if (v.subject === "goods") {
+              // CHANNEL_GATED — no produce/goods buyer channel exists, and
+              // saying so beats pretending. NOTHING is persisted, stated
+              // plainly. The work-bounded marketplace is offered ONLY when
+              // the goods plausibly belong there (equipment/tool wording)
+              // and the person acts as a company.
+              const equipmenty =
+                /irang|tool|equipment|оборудован|stakl|krautuv|masin|machin|technik/.test(
+                  foldText(text),
+                );
+              const lines = [understood, t("valueIntent.goodsChannelGated")];
+              const offerListings = identity === "company" && equipmenty;
+              if (offerListings) lines.push(t("valueIntent.goodsListingsHint"));
+              assistant(
+                lines.filter((l): l is string => Boolean(l)).join("\n"),
+                offerListings
+                  ? [
+                      {
+                        id: "link:/dashboard/listings",
+                        label: t("valueIntent.chipListings"),
+                      },
+                    ]
+                  : undefined,
+              );
+              break;
+            }
+            if (v.subject === "work_capacity" && identity === "person") {
+              // Real next steps: the existing work-card form persists the
+              // availability fields; find-work runs the existing search over
+              // the open inquiries the person can see now.
+              assistant(
+                [understood, t("valueIntent.capacityNext"), ...questions]
+                  .filter((l): l is string => Boolean(l))
+                  .join("\n"),
+                [
+                  { id: "f:worker.save-work-card", label: labels.chipCard },
+                  { id: "jobs", label: labels.chipJobs },
+                ],
+              );
+              break;
+            }
+            if (
+              (v.subject === "workforce" || v.axis === "seek") &&
+              identity === "company"
+            ) {
+              if (understood) assistant(understood);
+              openForm(
+                "company.create-demand",
+                undefined,
+                undefined,
+                demandPrefill(v, text),
+              );
+              break;
+            }
+            // Ambiguous — say what WAS read, ask what would disambiguate.
+            assistant(
+              [understood, t("valueIntent.unclear"), ...questions]
+                .filter((l): l is string => Boolean(l))
+                .join("\n"),
+              starterChips,
+            );
+            break;
+          }
           case "offers":
             handleChip({ id: "offers", label: "" });
             break;
@@ -1695,7 +1847,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity, t, valueSummary, demandPrefill],
   );
 
   const nav = {
