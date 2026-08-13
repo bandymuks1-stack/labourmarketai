@@ -173,6 +173,18 @@ const WORK_VERB_STEMS = [
 const GENERIC_VERB_STEMS = ["dirb", "buv", "ej", "atvy", "isvy"];
 
 const QUANTITY_RE = /(\d+(?:[.,]\d+)?)\s*(m²|m2|m³|m3|km|kg|cm|mm|t\b|vnt|ha)/giu;
+
+/** The quantity extraction, reusable on its own (V9 value-intent foundation:
+ *  the value structurer reads "30 kg" through the SAME rule the journal
+ *  recogniser uses — one unit vocabulary, no drift). Behaviour identical to
+ *  the former inline loop in recognizeUniversal. */
+export function extractQuantities(text: string): RecognizedQuantity[] {
+  const out: RecognizedQuantity[] = [];
+  for (const m of (text ?? "").matchAll(QUANTITY_RE)) {
+    out.push({ value: num(m[1]), unit: normUnit(m[2]), raw: m[0].trim() });
+  }
+  return out;
+}
 const DURATION_RE =
   /(\d+(?:[.,]\d+)?)\s*(valand[\p{L}]*|val\b|h\b|hours?\b|min[\p{L}]*|dien[\p{L}]*|d\b)/giu;
 
@@ -294,10 +306,7 @@ export function recognizeUniversal(text: string): UniversalRecognition {
   const verbs = [...new Set(matchedWords(originalTokens, foldedTokens, ALL_VERB_NEEDLES))];
   const objects = [...new Set(matchedWords(originalTokens, foldedTokens, ALL_OBJECT_NEEDLES))];
 
-  const quantities: RecognizedQuantity[] = [];
-  for (const m of trimmed.matchAll(QUANTITY_RE)) {
-    quantities.push({ value: num(m[1]), unit: normUnit(m[2]), raw: m[0].trim() });
-  }
+  const quantities = extractQuantities(trimmed);
   const durations: RecognizedDuration[] = [];
   for (const m of trimmed.matchAll(DURATION_RE)) {
     durations.push({ value: num(m[1]), unit: durationUnit(m[2]), raw: m[0].trim() });

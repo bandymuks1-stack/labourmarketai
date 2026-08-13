@@ -11121,7 +11121,28 @@
       "engagementsOpened": "Here are the work relationships on record. You can end one from the panel.",
       "engagementsNone": "There are no work relationships on record.",
       "engagementsNoCompany": "You are not acting for an organisation right now, so there is no roster to show.",
-      "engagementsUnavailable": "The work relationships cannot be read right now. This is not the same as having none."
+      "engagementsUnavailable": "The work relationships cannot be read right now. This is not the same as having none.",
+      "valueIntent": {
+        "understood": "Understood: {summary}.",
+        "people": "{count, plural, one {# person} other {# people}}",
+        "daysCount": "{count, plural, one {# day} other {# days}}",
+        "window": {
+          "next_week": "next week",
+          "this_week": "this week",
+          "next_month": "next month"
+        },
+        "ask": {
+          "location": "Where (city or country)?",
+          "window": "When — which week or month?",
+          "quantity": "How much is it?",
+          "headcount": "How many people are needed?"
+        },
+        "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
+        "goodsChannelGated": "There is no buyer channel for goods on the platform yet, so nobody here would see this for sale. Nothing you wrote has been saved anywhere.",
+        "goodsListingsHint": "If this is work equipment or tools, you can post it on the listings board.",
+        "chipListings": "Open the listings",
+        "capacityNext": "I can record your availability on your work card, or search for work right away — the results are the currently open inquiries."
+      }
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

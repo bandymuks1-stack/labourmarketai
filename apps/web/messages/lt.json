@@ -11121,7 +11121,28 @@
       "engagementsOpened": "Štai įrašyti darbo santykiai. Skydelyje galite vieną iš jų užbaigti.",
       "engagementsNone": "Įrašytų darbo santykių nėra.",
       "engagementsNoCompany": "Šiuo metu neveikiate organizacijos vardu, todėl sąrašo nėra ką rodyti.",
-      "engagementsUnavailable": "Šiuo metu darbo santykių perskaityti nepavyksta. Tai nereiškia, kad jų nėra."
+      "engagementsUnavailable": "Šiuo metu darbo santykių perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
+      "valueIntent": {
+        "understood": "Supratau: {summary}.",
+        "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+        "daysCount": "{count, plural, one {# diena} few {# dienos} other {# dienų}}",
+        "window": {
+          "next_week": "kitą savaitę",
+          "this_week": "šią savaitę",
+          "next_month": "kitą mėnesį"
+        },
+        "ask": {
+          "location": "Kur (miestas ar šalis)?",
+          "window": "Kada — kurią savaitę ar mėnesį?",
+          "quantity": "Koks kiekis?",
+          "headcount": "Kiek žmonių reikia?"
+        },
+        "unclear": "Nesu tikras, ar kažką siūlote, ar ko nors ieškote. Parašykite, ką turite arba ko reikia.",
+        "goodsChannelGated": "Prekių pirkėjų kanalo platformoje kol kas nėra — pardavimo skelbimo čia niekas nepamatytų. Tai, ką parašėte, niekur neišsaugota.",
+        "goodsListingsHint": "Jei tai darbo įranga ar įrankiai, galite paskelbti skelbimų lentoje.",
+        "chipListings": "Atidaryti skelbimus",
+        "capacityNext": "Galiu įrašyti jūsų prieinamumą į darbo kortelę arba iš karto paieškoti darbo — rezultatai yra šiuo metu atviros užklausos."
+      }
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

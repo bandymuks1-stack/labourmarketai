@@ -11,11 +11,12 @@ import { cn } from "@/lib/utils";
  * Deterministic ESCO typeahead input (Etapas 1D) — dark suggestion list in
  * the DarkListbox visual family (no native datalist / white OS popup).
  *
- * Ships UNWIRED + flag-off: renders nothing while ESCO_AUTOCOMPLETE_ENABLED
- * is false (draft migrations not applied / import not run). The flag-flip
- * slice wires it into the profile / onboarding / journal inputs. A pick is
- * the HUMAN's structured choice — Level 0 self-declared input, never a
- * verification (design doc §1).
+ * WIRED + flag-on since 2026-06-10: ESCO_AUTOCOMPLETE_ENABLED is true, the
+ * component is mounted in the skill-clarify capture, and the v1.2.1
+ * catalogue is imported in production (1,045,186 labels / 28 locales,
+ * verified 2026-08-13) — suggestions are real. It still renders nothing if
+ * the flag is ever switched off. A pick is the HUMAN's structured choice —
+ * Level 0 self-declared input, never a verification (design doc §1).
  */
 export function EscoTypeahead({
   locale,

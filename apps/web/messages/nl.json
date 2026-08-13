@@ -11121,7 +11121,28 @@
       "engagementsOpened": "Dit zijn de vastgelegde werkrelaties. Je kunt er één beëindigen in het paneel.",
       "engagementsNone": "Er zijn geen vastgelegde werkrelaties.",
       "engagementsNoCompany": "Je handelt nu niet namens een organisatie, dus er is geen lijst om te tonen.",
-      "engagementsUnavailable": "De werkrelaties kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben."
+      "engagementsUnavailable": "De werkrelaties kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben.",
+      "valueIntent": {
+        "understood": "Begrepen: {summary}.",
+        "people": "{count, plural, one {# persoon} other {# personen}}",
+        "daysCount": "{count, plural, one {# dag} other {# dagen}}",
+        "window": {
+          "next_week": "volgende week",
+          "this_week": "deze week",
+          "next_month": "volgende maand"
+        },
+        "ask": {
+          "location": "Waar (stad of land)?",
+          "window": "Wanneer — welke week of maand?",
+          "quantity": "Hoeveel is het?",
+          "headcount": "Hoeveel mensen zijn er nodig?"
+        },
+        "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
+        "goodsChannelGated": "Er is nog geen koperskanaal voor goederen op het platform — niemand zou dit hier te koop zien. Wat je schreef is nergens opgeslagen.",
+        "goodsListingsHint": "Gaat het om werkuitrusting of gereedschap, dan kun je het op het advertentiebord plaatsen.",
+        "chipListings": "Advertenties openen",
+        "capacityNext": "Ik kan je beschikbaarheid op je werkkaart zetten of meteen werk zoeken — de resultaten zijn de nu openstaande aanvragen."
+      }
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

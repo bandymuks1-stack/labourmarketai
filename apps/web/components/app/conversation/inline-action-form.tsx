@@ -34,6 +34,7 @@ export function InlineActionForm({
   locale,
   onClose,
   continueLabel,
+  initialValues,
 }: {
   spec: WorkerFormSpec;
   locale: string;
@@ -48,10 +49,18 @@ export function InlineActionForm({
    * does; everyone else keeps the generic "Add another".
    */
   continueLabel?: string;
+  /**
+   * V9 value-intent: PRE-FILLED field values from what the person already
+   * SAID ("trūks keturių suvirintojų" → role/teamSize/description). Purely
+   * initial state — every value stays visible and editable, the review step
+   * still shows exactly what will be written, and the same declarative spec
+   * validates it. Nothing is submitted on the person's behalf.
+   */
+  initialValues?: FormState;
 }) {
   const t = useTranslations();
   const router = useRouter();
-  const [values, setValues] = useState<FormState>({});
+  const [values, setValues] = useState<FormState>(initialValues ?? {});
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const [saving, start] = useTransition();
 
