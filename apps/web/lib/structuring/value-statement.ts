@@ -147,6 +147,14 @@ function equipmentToken(text: string): string | null {
   return null;
 }
 
+/** Extend an index to the end of the word it sits in — a stem match
+ *  ("parduo" inside "Parduodu") must never cut the echo mid-word. */
+function endOfWord(text: string, index: number): number {
+  let i = index;
+  while (i < text.length && /[\p{L}\p{N}]/u.test(text[i])) i++;
+  return i;
+}
+
 /** The noun phrase following an anchor (a quantity or a sell verb) in the
  *  ORIGINAL text — trimmed at connectives, bounded, honestly raw. */
 function echoAfter(text: string, anchorEnd: number): string | null {
@@ -276,7 +284,7 @@ export function structureValueStatement(
       // person's own description (incl. a language pair when they state one).
       const sv = folded.match(SERVICE_VERB_RE);
       if (sv?.index !== undefined) {
-        subjectLabel = echoAfter(raw, sv.index + sv[0].length);
+        subjectLabel = echoAfter(raw, endOfWord(raw, sv.index + sv[0].length));
       }
     } else if (equipmentCapacity) {
       // V10: the MACHINE is free — a goods/equipment capacity, not a person's.
@@ -300,7 +308,7 @@ export function structureValueStatement(
         subject = "goods";
         const m = folded.match(STRONG_SELL_RE);
         subjectLabel = m?.index !== undefined
-          ? echoAfter(raw, m.index + m[0].length)
+          ? echoAfter(raw, endOfWord(raw, m.index + m[0].length))
           : null;
       } else if (skills.length > 0 || workType) {
         subject = "work_capacity";

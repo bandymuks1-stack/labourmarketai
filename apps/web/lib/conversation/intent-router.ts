@@ -247,6 +247,9 @@ const RULES: IntentRule[] = [
       p("\\bturiu\\b\\s*.{0,16}laisv", 3),
       // V10: a MACHINE stated free is an offer of its capacity.
       p("(ekskavator|krautuv|traktor|kran|pastoli|stakl|generator|kompresor|priekab|excavator|forklift|scaffold|экскаватор|погрузчик)\\w*.{0,16}(laisv|available|free|свободн)", 4),
+      // V10: "galiu versti / suremontuoti" is an OFFER of a service — it must
+      // outrank the translate-REQUEST intent ("išversk…" stays translate).
+      p("(galiu|siulau|\\bcan\\b|могу)\\s+.{0,6}(vers|isvers|remontuo|taisy|projektuo|translat|repair|перевести|отремонтир)", 5),
       p("free\\s+days?", 3),
       // `.{0,4}` (not \w): the Cyrillic inflection ("свободные") is outside
       // ASCII \w, and the folded text keeps Cyrillic letters as-is.
