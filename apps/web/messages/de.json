@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Wer ist gerade abwesend",
+      "today": "Heute abwesend ({count})",
+      "week": "Abwesend in den nächsten 7 Tagen ({count})",
+      "noneToday": "Keiner Ihrer Mitarbeitenden hat heute eine genehmigte Abwesenheit.",
+      "noneWeek": "Keine genehmigten Abwesenheiten in den nächsten 7 Tagen.",
+      "coverage": "Basierend auf genehmigten Abwesenheiten von {count} verwalteten Mitarbeitenden. Gründe bleiben privat.",
+      "unavailable": "Der Abwesenheitsplan ist hier noch nicht aktiviert."
+    },
     "types": {
       "annual_leave": "Jahresurlaub",
       "sickness": "Krankheit",

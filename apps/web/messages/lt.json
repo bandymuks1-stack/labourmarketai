@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Kas dabar nedirba",
+      "today": "Šiandien nedirba ({count})",
+      "week": "Nedirbs per artimiausias 7 dienas ({count})",
+      "noneToday": "Šiandien nė vienas jūsų valdomas darbuotojas neturi patvirtinto neatvykimo.",
+      "noneWeek": "Per artimiausias 7 dienas patvirtintų neatvykimų nėra.",
+      "coverage": "Pagal {count} valdomų darbuotojų patvirtintus neatvykimus. Priežastys lieka privačios.",
+      "unavailable": "Neatvykimų grafikas čia dar neįjungtas."
+    },
     "types": {
       "annual_leave": "Kasmetinės atostogos",
       "sickness": "Nedarbingumas",

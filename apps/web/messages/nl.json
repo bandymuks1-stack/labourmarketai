@@ -329,6 +329,15 @@
     }
   },
   "absences": {
+    "absentNow": {
+      "title": "Wie is er nu afwezig",
+      "today": "Vandaag afwezig ({count})",
+      "week": "Afwezig in de komende 7 dagen ({count})",
+      "noneToday": "Geen van uw medewerkers heeft vandaag een goedgekeurde afwezigheid.",
+      "noneWeek": "Geen goedgekeurde afwezigheden in de komende 7 dagen.",
+      "coverage": "Op basis van goedgekeurde afwezigheden van {count} beheerde medewerkers. Redenen blijven privé.",
+      "unavailable": "Het afwezigheidsschema is hier nog niet ingeschakeld."
+    },
     "types": {
       "annual_leave": "Jaarlijks verlof",
       "sickness": "Ziekteverlof",
