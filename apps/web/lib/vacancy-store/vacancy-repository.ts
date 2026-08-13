@@ -84,6 +84,18 @@ const CURSOR_TABLE = "vacancy_import_cursors";
 const EXISTENCE_READ_CHUNK = 200;
 
 /**
+ * The write arms need a bound too, learned the same day: a single upsert
+ * carrying the whole batch (2 500+ full rows in one statement) tripped the
+ * database's statement timeout — 57014, `vacancy_persist_insert_failed`, run
+ * aborted, cursor honestly stuck. 500 rows keeps each statement's work well
+ * inside the timeout while still being ~5 round trips per thousand ads.
+ * Chunked upserts stay idempotent (natural-key ON CONFLICT), so a run that
+ * dies between chunks re-runs safely: already-written rows re-classify as
+ * unchanged and are merely touched.
+ */
+const WRITE_CHUNK = 500;
+
+/**
  * Store a batch of accepted vacancies idempotently.
  *
  * `seenAt` is the caller's capture clock — the same value the importer used
@@ -178,19 +190,23 @@ export async function persistVacancies(
   // insert arm that is not redundancy — it is the only thing that makes two
   // concurrent runs safe. Without it, two importers that both read "absent"
   // would race and one would fail on the unique index.
-  if (toInsert.length > 0) {
+  for (let i = 0; i < toInsert.length; i += WRITE_CHUNK) {
     const { error } = await client
       .from(VACANCY_TABLE)
-      .upsert(toInsert as never, { onConflict: "provider_key,external_id" });
+      .upsert(toInsert.slice(i, i + WRITE_CHUNK) as never, {
+        onConflict: "provider_key,external_id",
+      });
     if (error) {
       throw new Error(`vacancy_persist_insert_failed:${error.code ?? "unknown"}`);
     }
   }
 
-  if (toUpdate.length > 0) {
+  for (let i = 0; i < toUpdate.length; i += WRITE_CHUNK) {
     const { error } = await client
       .from(VACANCY_TABLE)
-      .upsert(toUpdate as never, { onConflict: "provider_key,external_id" });
+      .upsert(toUpdate.slice(i, i + WRITE_CHUNK) as never, {
+        onConflict: "provider_key,external_id",
+      });
     if (error) {
       throw new Error(`vacancy_persist_update_failed:${error.code ?? "unknown"}`);
     }
