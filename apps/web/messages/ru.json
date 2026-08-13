@@ -3992,6 +3992,8 @@
         "event_absence_requested": "Для вас зарегистрировано отсутствие",
         "event_absence_approved": "Ваше отсутствие одобрено",
         "event_absence_rejected": "Ваше отсутствие отклонено",
+        "event_booking_withdrawn": "Предложение о бронировании отозвано",
+        "event_engagement_ended": "Рабочие отношения завершены",
         "event_engagement_created": "Создано новое сотрудничество"
       },
       "label": "Мои уведомления",

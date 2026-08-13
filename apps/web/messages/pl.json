@@ -347,6 +347,8 @@
         "event_absence_requested": "Zgłoszono dla Ciebie nieobecność",
         "event_absence_approved": "Twoja nieobecność została zatwierdzona",
         "event_absence_rejected": "Twoja nieobecność została odrzucona",
+        "event_booking_withdrawn": "Propozycja rezerwacji została wycofana",
+        "event_engagement_ended": "Współpraca została zakończona",
         "event_engagement_created": "Utworzono nową współpracę"
       }
     },

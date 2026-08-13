@@ -37,10 +37,18 @@ export type NotificationEventType =
   | "booking_proposed"
   | "booking_accepted"
   | "booking_declined"
+  // v2 (20260813100000): the withdrawn proposal — the worker who saw the
+  // offer durably learns it is gone instead of finding a vanished row.
+  | "booking_withdrawn"
   | "absence_requested"
   | "absence_approved"
   | "absence_rejected"
-  | "engagement_created";
+  | "engagement_created"
+  // v2: the ended relationship — the COUNTERPARTY hears it durably. The
+  // label copy is deliberately neutral about visibility: whether the company
+  // still sees the worker depends on other relationships (F2), and a
+  // notification must not claim what it has not measured.
+  | "engagement_ended";
 
 export type NotificationEntityType =
   | "booking_request"

@@ -3992,6 +3992,8 @@
         "event_absence_requested": "Er is een afwezigheid voor je geregistreerd",
         "event_absence_approved": "Je afwezigheid is goedgekeurd",
         "event_absence_rejected": "Je afwezigheid is afgewezen",
+        "event_booking_withdrawn": "Het boekingsvoorstel is ingetrokken",
+        "event_engagement_ended": "De samenwerking is beëindigd",
         "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt"
       },
       "label": "Mijn meldingen",

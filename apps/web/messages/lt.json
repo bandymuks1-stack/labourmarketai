@@ -3992,6 +3992,8 @@
         "event_absence_requested": "Tau užregistruotas neatvykimas",
         "event_absence_approved": "Tavo neatvykimas patvirtintas",
         "event_absence_rejected": "Tavo neatvykimas atmestas",
+        "event_booking_withdrawn": "Rezervacijos pasiūlymas atšauktas",
+        "event_engagement_ended": "Darbo santykis baigtas",
         "event_engagement_created": "Sukurtas naujas bendradarbiavimas"
       },
       "label": "Mano pranešimai",

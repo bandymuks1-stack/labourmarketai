@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { companyStillSeesWorkerViaAssignment } from "@/lib/engagements/end-engagement-visibility";
+import { emitEngagementEndedNotification } from "@/lib/notifications/event-emitters";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 
@@ -160,6 +161,9 @@ export async function endEngagementAction(
         source: "engagements",
         metadata: { role_context: actorSide },
       });
+      // v2: the COUNTERPARTY hears the end durably (the actor is watching it
+      // happen). Fire-and-forget — the end already succeeded.
+      void emitEngagementEndedNotification(engagement, actorSide);
       // Every surface that renders engagement state re-reads.
       revalidatePath(`/${locale}/dashboard/projects`);
       revalidatePath(`/${locale}/dashboard`);
