@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { ExternalApplyConfirm } from "@/components/app/external-apply-confirm";
+import { ExternalApplyConfirm } from "@/components/app/external-vacancy-confirm";
 import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { useWorldStateOptional } from "@/components/app/world-state/world-state-provider";

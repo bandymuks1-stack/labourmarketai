@@ -8,7 +8,7 @@ import {
   ExternalApplyConfirm,
   ExternalApplyConfirmedBlock,
   externalApplyHref,
-} from "@/components/app/external-apply-confirm";
+} from "@/components/app/external-vacancy-confirm";
 
 /**
  * External-apply confirmation step (V8 W4-B item 3, owner decision V8
@@ -82,7 +82,7 @@ describe("no surface bypasses the confirm step with a direct anchor", () => {
     it(`${rel} mounts ExternalApplyConfirm and holds no external anchor of its own`, () => {
       const src = read(rel);
       expect(src).toContain(
-        'from "@/components/app/external-apply-confirm"',
+        'from "@/components/app/external-vacancy-confirm"',
       );
       expect(src).toContain("<ExternalApplyConfirm");
       // The direct-anchor shape must not come back: no _blank anchor, no
@@ -94,7 +94,7 @@ describe("no surface bypasses the confirm step with a direct anchor", () => {
   }
 
   it("the confirm component holds exactly one anchor, inside the revealed block", () => {
-    const src = read("components/app/external-apply-confirm.tsx");
+    const src = read("components/app/external-vacancy-confirm.tsx");
     const anchors = [...src.matchAll(/<a\s/g)];
     expect(anchors).toHaveLength(1);
     expect(src).toContain('rel="noopener noreferrer nofollow"');

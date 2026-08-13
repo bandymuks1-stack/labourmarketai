@@ -21,7 +21,7 @@ import type { ReactNode } from "react";
  *   - matching gaps render as UNKNOWNS. An ad that does not state a language
  *     requirement is not "no language required".
  */
-import { ExternalApplyConfirm } from "@/components/app/external-apply-confirm";
+import { ExternalApplyConfirm } from "@/components/app/external-vacancy-confirm";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import type { ExternalOpportunityCardV1 } from "@/lib/opportunities/external-vacancies";
 import {
