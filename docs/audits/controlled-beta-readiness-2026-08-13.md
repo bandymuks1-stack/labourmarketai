@@ -120,11 +120,15 @@ branch, because a committed port move would hit ~50 worktrees and CI.
 **Blocker B — the reset dies under memory pressure.** With the stack up,
 `supabase db reset` (198 migrations) terminated with
 `error running container: exit 137` — SIGKILL, i.e. the container was OOM-killed.
-Note the trap for the next session: **the shell still reported exit code 0**, so
-a script that trusts the exit code will believe the reset succeeded. It did not;
-afterwards every `supabase_*` container was gone, and `e2e-mint-session.ts`
+Afterwards every `supabase_*` container was gone, and `e2e-mint-session.ts`
 correctly refused with `REFUSED_NON_LOCAL_E2E_SESSION_MINT` (it never falls back
 to `.env.local` — the fail-closed guard behaved exactly as designed).
+
+*Method note, so the next session does not repeat it:* the failure was initially
+missed because the reset was run as `supabase db reset | tail`. **A pipe returns
+the exit status of the last stage**, so the shell reported 0 while the reset had
+in fact died. This is a pre-existing documented trap, not a supabase behaviour —
+check the reset's exit code directly, never through a pipe.
 
 **Exact action (owner):** raise the Docker Desktop memory limit (the 198-migration
 reset is the peak), and either free the reserved range via
