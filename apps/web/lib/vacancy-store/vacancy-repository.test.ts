@@ -406,3 +406,96 @@ describe("the cursor store", () => {
     expect(written.last_success_at).toBe(SEEN_AT);
   });
 });
+
+describe("persistVacancies — existence read stays under the URL limit", () => {
+  /**
+   * Fake that records every `.in("external_id", …)` argument and answers each
+   * read with only the existing rows matching that chunk — the shape a real
+   * database gives back. The 2026-08-13 production incident: one read carrying
+   * ~800 ids exceeded the gateway URL cap and every persist failed while the
+   * dry run looked healthy.
+   */
+  function chunkRecordingClient(
+    existing: readonly { provider_key: string; external_id: string; content_hash: string }[],
+  ) {
+    const idReads: string[][] = [];
+    const upserts: unknown[][] = [];
+
+    const client = {
+      from(table: string) {
+        let requestedIds: readonly string[] = [];
+        const chain: Record<string, unknown> = {};
+        chain.select = () => chain;
+        chain.eq = () => chain;
+        chain.in = (column: string, values: readonly string[]) => {
+          if (column === "external_id") {
+            requestedIds = values;
+            idReads.push([...values]);
+          }
+          return chain;
+        };
+        chain.then = (onOk: (v: unknown) => unknown, onErr?: (e: unknown) => unknown) =>
+          Promise.resolve({
+            data: existing.filter((r) => requestedIds.includes(r.external_id)),
+            error: null,
+          }).then(onOk, onErr);
+        chain.update = () => chain;
+        chain.upsert = (payload: unknown[]) => {
+          upserts.push(payload);
+          return Promise.resolve({ data: null, error: null });
+        };
+        void table;
+        return chain as never;
+      },
+    };
+
+    return { client: client as never, idReads, upserts };
+  }
+
+  it("a 450-ad batch reads existence in chunks of at most 200 ids", async () => {
+    const batch = Array.from({ length: 450 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, idReads } = chunkRecordingClient([]);
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 450, updated: 0, unchanged: 0 });
+    // The naive single read carries all 450 ids in one URL — that is the
+    // implementation that failed against production. Every read must stay
+    // bounded, and together they must cover the whole batch.
+    expect(idReads.length).toBe(3);
+    for (const read of idReads) {
+      expect(read.length).toBeLessThanOrEqual(200);
+    }
+    expect(idReads.flat().sort()).toEqual(batch.map((v) => v.externalId).sort());
+  });
+
+  it("rows found in a later chunk still classify as updated/unchanged, never re-inserted", async () => {
+    const moved = vacancy({ externalId: "ad-10" });
+    const same = vacancy({ externalId: "ad-240" });
+    const batch = Array.from({ length: 250 }, (_, i) => {
+      if (i === 10) return moved;
+      if (i === 240) return same;
+      return vacancy({ externalId: `ad-${i}` });
+    });
+    const { client } = chunkRecordingClient([
+      {
+        provider_key: moved.providerKey,
+        external_id: moved.externalId,
+        content_hash: "stale-hash-forces-update",
+      },
+      {
+        provider_key: same.providerKey,
+        external_id: same.externalId,
+        content_hash: same.contentHash,
+      },
+    ]);
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    // ad-240 sits in the SECOND chunk: if per-chunk results were dropped
+    // instead of merged, it would misclassify as an insert.
+    expect(result).toEqual({ inserted: 248, updated: 1, unchanged: 1 });
+  });
+});
