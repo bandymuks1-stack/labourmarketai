@@ -41,7 +41,7 @@ export interface NeedStructureSuggestion {
 /** Work-type needles → slug. Order matters: more specific rows sit first so a
  *  "truck driver" matches transport before a bare "driver", etc. Slugs are
  *  validated against the taxonomy at module load. */
-const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
+export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк"] },
   { slug: "electrician", needles: ["electrician", "elektrik", "электрик"] },
   { slug: "plumber", needles: ["plumber", "santechnik", "сантехник"] },
@@ -85,7 +85,7 @@ const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
 const KNOWN_SLUGS = new Set(ALL_WORK_TYPE_SLUGS);
 
 /** Country needles (codes, names, major cities) → ISO-2 market. */
-const COUNTRY_RULES: { code: string; needles: string[] }[] = [
+export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilnius", "kaunas", "klaipėd", "klaiped"] },
   { code: "LV", needles: ["latvia", "latvij", "латв", "riga", "ryga"] },
   { code: "EE", needles: ["estonia", "eston", "эстон", "tallinn", "talin"] },
