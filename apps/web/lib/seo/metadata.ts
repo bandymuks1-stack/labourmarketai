@@ -155,30 +155,34 @@ export const PAGE_SEO: Readonly<
     },
   },
   companies: {
+    // §19 terminology: the employer's SUBMITTED REQUEST is an "inquiry", matching
+    // the already-migrated `companyNeed` block below (en inquiry / lt užklausa /
+    // ru запрос / nl aanvraag / de Anfrage). Ordinary-language "the skills you
+    // need" is deliberately KEPT — that is a real need, not the artefact.
     en: {
-      title: "For Employers — Submit your workforce need",
+      title: "For Employers — Submit your workforce inquiry",
       description:
-        "Employers and contractors: describe the workers, teams and skills you need. LabourMarket.ai structures your workforce need and helps organise matching and next steps across Europe.",
+        "Employers and contractors: describe the workers, teams and skills you need. LabourMarket.ai structures your workforce inquiry and helps organise matching and next steps across Europe.",
     },
     lt: {
-      title: "Darbdaviams — pateik darbo jėgos poreikį",
+      title: "Darbdaviams — pateik darbo jėgos užklausą",
       description:
-        "Darbdaviai ir rangovai: aprašyk reikalingus darbuotojus, brigadas ir įgūdžius. LabourMarket.ai struktūruoja poreikį ir padeda organizuoti atranką bei tolimesnius veiksmus Europoje.",
+        "Darbdaviai ir rangovai: aprašyk reikalingus darbuotojus, brigadas ir įgūdžius. LabourMarket.ai struktūruoja užklausą ir padeda organizuoti atranką bei tolimesnius veiksmus Europoje.",
     },
     ru: {
-      title: "Работодателям — подайте кадровую потребность",
+      title: "Работодателям — подайте запрос на работников",
       description:
-        "Работодатели и подрядчики: опишите нужных работников, бригады и навыки. LabourMarket.ai структурирует потребность и помогает организовать подбор и дальнейшие шаги в Европе.",
+        "Работодатели и подрядчики: опишите нужных работников, бригады и навыки. LabourMarket.ai структурирует запрос и помогает организовать подбор и дальнейшие шаги в Европе.",
     },
     nl: {
-      title: "Voor werkgevers — Dien je personeelsbehoefte in",
+      title: "Voor werkgevers — Dien je personeelsaanvraag in",
       description:
-        "Werkgevers en aannemers: beschrijf de werknemers, ploegen en vaardigheden die je nodig hebt. LabourMarket.ai structureert je personeelsbehoefte en helpt de selectie en vervolgstappen in Europa te organiseren.",
+        "Werkgevers en aannemers: beschrijf de werknemers, ploegen en vaardigheden die je nodig hebt. LabourMarket.ai structureert je personeelsaanvraag en helpt de selectie en vervolgstappen in Europa te organiseren.",
     },
     de: {
-      title: "Für Arbeitgeber — Melden Sie Ihren Personalbedarf",
+      title: "Für Arbeitgeber — Stellen Sie Ihre Personalanfrage",
       description:
-        "Arbeitgeber und Auftragnehmer: Beschreiben Sie die Arbeitskräfte, Kolonnen und Fähigkeiten, die Sie benötigen. LabourMarket.ai strukturiert Ihren Personalbedarf und hilft, Auswahl und nächste Schritte in Europa zu organisieren.",
+        "Arbeitgeber und Auftragnehmer: Beschreiben Sie die Arbeitskräfte, Kolonnen und Fähigkeiten, die Sie benötigen. LabourMarket.ai strukturiert Ihre Personalanfrage und hilft, Auswahl und nächste Schritte in Europa zu organisieren.",
     },
   },
   agencies: {
