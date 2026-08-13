@@ -584,7 +584,6 @@
       }
     },
     "journalWindow": {
-      "eyebrow": "Berichte",
       "title": "Arbeitsjournal-Bericht",
       "intro": "Anzahl erfasster Arbeitseinträge je Beschäftigtem über ein festes Kalenderzeitfenster. Nur Zahlen und Daten — kein Eintragstext, keine Bewertung.",
       "windowLabel": "Berichtszeitfenster",
@@ -608,7 +607,7 @@
       "totals": "{count, plural, one {Gesamt · # Beschäftigte/r} other {Gesamt · # Beschäftigte}}",
       "basisLabel": "Grundlage",
       "basis": "Gezählt aus Arbeitseinträgen, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation innerhalb des gewählten Zeitfensters erfasst haben. Der Prüfstatus stammt aus Bestätigungen von Führungskräften. Fehlende Einträge sind kein Beleg für fehlende Arbeit, und niemand wird hier bewertet oder benotet.",
-      "back": "Zurück zu den Berichten"
+      "collapse": "Detailbericht ausblenden"
     }
   },
   "marketRecognition": {

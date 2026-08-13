@@ -584,7 +584,6 @@
       }
     },
     "journalWindow": {
-      "eyebrow": "Ataskaitos",
       "title": "Darbo žurnalo ataskaita",
       "intro": "Užfiksuotų darbo įrašų skaičiai pagal darbuotoją per pasirinktą kalendorinį langą. Tik skaičiai ir datos — be įrašų teksto, be vertinimų.",
       "windowLabel": "Ataskaitos langas",
@@ -608,7 +607,7 @@
       "totals": "{count, plural, one {Iš viso · # darbuotojas} few {Iš viso · # darbuotojai} other {Iš viso · # darbuotojų}}",
       "basisLabel": "Pagrindas",
       "basis": "Skaičiuojama iš darbo įrašų, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per pasirinktą langą. Peržiūros būsena — iš vadovų patvirtinimų. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko, ir niekas čia darbuotojų nevertina balais.",
-      "back": "Grįžti į ataskaitas"
+      "collapse": "Slėpti detalią ataskaitą"
     }
   },
   "marketRecognition": {

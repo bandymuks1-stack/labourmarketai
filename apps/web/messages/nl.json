@@ -584,7 +584,6 @@
       }
     },
     "journalWindow": {
-      "eyebrow": "Rapporten",
       "title": "Werkjournaalrapport",
       "intro": "Aantallen vastgelegde werkregistraties per werker over een vast kalendervenster. Alleen aantallen en datums — geen tekst van registraties, geen beoordeling.",
       "windowLabel": "Rapportvenster",
@@ -608,7 +607,7 @@
       "totals": "{count, plural, one {Totaal · # werker} other {Totaal · # werkers}}",
       "basisLabel": "Basis",
       "basis": "Geteld uit werkregistraties die werkers in de dienstverbanden van deze organisatie binnen het gekozen venster hebben vastgelegd. De beoordelingsstatus komt uit bevestigingen van managers. Het ontbreken van registraties is geen bewijs van afwezigheid van werk, en niets hier beoordeelt of scoort iemand.",
-      "back": "Terug naar rapporten"
+      "collapse": "Gedetailleerd rapport verbergen"
     }
   },
   "marketRecognition": {

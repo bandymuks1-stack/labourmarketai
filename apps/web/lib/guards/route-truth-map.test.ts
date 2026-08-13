@@ -109,11 +109,10 @@ const CLASSIFICATION: Record<string, string> = {
   // Reports hub (control room PR K) — role-specific real-data reports index
   // over the caller's own RLS reads; every figure basis-labelled.
   "dashboard/reports": "REAL_LAUNCH_SURFACE",
+  // NOTE (V8 GAP 4): the windowed journal report is NOT a route — it expands
+  // inside /dashboard/reports via ?journalWindow= (product gate A-09: no new
+  // surface without an owner-declared registry entry).
   "dashboard/reports/evidence": "REAL_LAUNCH_SURFACE",
-  // Windowed journal report (V8 employer daily loop, GAP 4) — per-worker
-  // counts of recorded work entries over today/week/month, manager roles
-  // only; reachable from the reports hub's journal section.
-  "dashboard/reports/journal": "REAL_LAUNCH_SURFACE",
 
   // ── INTERNAL_ADMIN (all under requireSuperadmin, fail-closed) ─────────
   "dashboard/admin": "INTERNAL_ADMIN",

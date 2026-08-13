@@ -584,7 +584,6 @@
       }
     },
     "journalWindow": {
-      "eyebrow": "Reports",
       "title": "Work journal report",
       "intro": "Counts of recorded work entries per worker over a fixed calendar window. Counts and dates only — no entry text, no rating.",
       "windowLabel": "Report window",
@@ -608,7 +607,7 @@
       "totals": "{count, plural, one {Total · # worker} other {Total · # workers}}",
       "basisLabel": "Basis",
       "basis": "Counted from work entries recorded by workers in this organisation's engagements within the selected window. Review state comes from manager confirmations. Absence of entries is not evidence of absence of work, and nothing here rates or scores anyone.",
-      "back": "Back to reports"
+      "collapse": "Hide the detailed report"
     }
   },
   "marketRecognition": {
