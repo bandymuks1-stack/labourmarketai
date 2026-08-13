@@ -163,3 +163,95 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   if (lines.length === 0) return { kind: "none" };
   return { kind: "brief", lines: lines.slice(0, MAX_LINES), chips };
 }
+
+/**
+ * THE EMPLOYER OPENING BRIEF (V8 employer daily loop, GAP 1).
+ *
+ * The 2026-08-13 audit measured the employer's first screen as a greeting
+ * plus three HIRING chips — the state-aware brief was worker-only by a
+ * one-line gate, with the comment "the worker reads would be the wrong
+ * audience". Correct comment, wrong conclusion: the fix is an employer
+ * brief over EMPLOYER reads, not silence.
+ *
+ * Priority ladder — the manager's morning, most-blocking first:
+ *   1. work entries awaiting YOUR review   → people are blocked on you
+ *   2. absence requests awaiting decision  → people are blocked on you
+ *   3. workers absent today                → today's plan may be short-handed
+ *   4. unread human messages               → someone wrote to you
+ *
+ * Same contract as the worker brief: at most three lines, at most three
+ * chips, every line a count from rows the caller may already read, a failed
+ * read contributes NOTHING, and an empty brief returns `none` so the
+ * greeting stands honestly on its own. Recruitment deliberately does not
+ * appear here — hiring is episodic; the daily loop is the product.
+ */
+export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
+  const t = await getTranslations("conversation.chat");
+
+  const lines: string[] = [];
+  const chips: OpeningChip[] = [];
+  const seenChip = new Set<string>();
+  const addChip = (id: string, label: string) => {
+    if (chips.length >= MAX_CHIPS || seenChip.has(id)) return;
+    seenChip.add(id);
+    chips.push({ id, label });
+  };
+
+  // 1 ── work entries awaiting review ──────────────────────────────────────
+  try {
+    const { fetchQuickReviewQueue } = await import("@/lib/journal/review-queue");
+    const queue = await fetchQuickReviewQueue();
+    if (queue.length > 0) {
+      lines.push(t("briefEmployerJournalReviews", { count: queue.length }));
+      addChip("link:/dashboard/inbox", t("chipEmployerInbox"));
+    }
+  } catch {
+    /* no line — a failed read never invents a queue */
+  }
+
+  // 2 ── absence requests awaiting decision ────────────────────────────────
+  try {
+    const { getManagerPendingAbsences } = await import("@/lib/leave/absences");
+    const pending = await getManagerPendingAbsences();
+    if (pending.applied && pending.pending.length > 0 && lines.length < MAX_LINES) {
+      lines.push(t("briefEmployerPendingAbsences", { count: pending.pending.length }));
+      addChip("link:/dashboard/absences", t("chipEmployerAbsences"));
+    }
+  } catch {
+    /* no line */
+  }
+
+  // 3 ── workers absent today ──────────────────────────────────────────────
+  try {
+    const { getEmployerWorkerAvailability, absentOn } = await import(
+      "@/lib/planning/employer-availability"
+    );
+    const availability = await getEmployerWorkerAvailability();
+    if (availability.status === "ok" && lines.length < MAX_LINES) {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const absent = absentOn(todayIso, availability.unavailability);
+      if (absent.length > 0) {
+        lines.push(t("briefEmployerAbsentToday", { count: absent.length }));
+        addChip("link:/dashboard/absences", t("chipEmployerAbsences"));
+      }
+    }
+  } catch {
+    /* no line */
+  }
+
+  // 4 ── unread human messages ─────────────────────────────────────────────
+  try {
+    if (lines.length < MAX_LINES) {
+      const unread = await getUnreadConversationCount();
+      if (unread > 0) {
+        lines.push(t("briefUnreadMessages", { count: unread }));
+        addChip("link:/dashboard/communication", t("navMessages"));
+      }
+    }
+  } catch {
+    /* no line */
+  }
+
+  if (lines.length === 0) return { kind: "none" };
+  return { kind: "brief", lines: lines.slice(0, MAX_LINES), chips };
+}
