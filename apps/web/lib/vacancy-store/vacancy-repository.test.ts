@@ -143,7 +143,7 @@ describe("persistVacancies — exact accounting", () => {
     const { client, ops } = fakeClient();
     const result = await persistVacancies(client, [], SEEN_AT, SESSION_ID);
 
-    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 0 });
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
     // Not merely "wrote nothing" — it must not even open a read.
     expect(ops).toHaveLength(0);
   });
@@ -157,7 +157,7 @@ describe("persistVacancies — exact accounting", () => {
       SESSION_ID,
     );
 
-    expect(result).toEqual({ inserted: 2, updated: 0, unchanged: 0 });
+    expect(result).toEqual({ inserted: 2, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
     const upserts = ops.filter((o) => o.kind === "upsert");
     expect(upserts).toHaveLength(1);
     const rows = upserts[0].payload as { import_session_id: string | null }[];
@@ -186,7 +186,7 @@ describe("persistVacancies — exact accounting", () => {
 
     const result = await persistVacancies(client, [a, b], SEEN_AT, SESSION_ID);
 
-    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 2 });
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 2, withdrawnAbsent: 0 });
     expect(ops.filter((o) => o.kind === "upsert")).toHaveLength(0);
 
     // The only writes are liveness touches, and they carry ONLY last_seen_at —
@@ -215,7 +215,7 @@ describe("persistVacancies — exact accounting", () => {
 
     const result = await persistVacancies(client, [revised], SEEN_AT, SESSION_ID);
 
-    expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 0 });
+    expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 0, withdrawnAbsent: 0 });
     const upserts = ops.filter((o) => o.kind === "upsert");
     expect(upserts).toHaveLength(1);
     const written = (upserts[0].payload as {
@@ -254,7 +254,7 @@ describe("persistVacancies — exact accounting", () => {
       SESSION_ID,
     );
 
-    expect(result).toEqual({ inserted: 1, updated: 1, unchanged: 1 });
+    expect(result).toEqual({ inserted: 1, updated: 1, unchanged: 1, withdrawnAbsent: 0 });
   });
 });
 
@@ -460,7 +460,7 @@ describe("persistVacancies — existence read stays under the URL limit", () => 
 
     const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
 
-    expect(result).toEqual({ inserted: 450, updated: 0, unchanged: 0 });
+    expect(result).toEqual({ inserted: 450, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
     // The naive single read carries all 450 ids in one URL — that is the
     // implementation that failed against production. Every read must stay
     // bounded, and together they must cover the whole batch.
@@ -496,6 +496,110 @@ describe("persistVacancies — existence read stays under the URL limit", () => 
 
     // ad-240 sits in the SECOND chunk: if per-chunk results were dropped
     // instead of merged, it would misclassify as an insert.
-    expect(result).toEqual({ inserted: 248, updated: 1, unchanged: 1 });
+    expect(result).toEqual({ inserted: 248, updated: 1, unchanged: 1, withdrawnAbsent: 0 });
+  });
+});
+
+describe("persistVacancies — withdrawals are lifecycle transitions, not rewrites", () => {
+  /**
+   * The 2026-08-13 production incident, second act: the stream's removal
+   * records carry no body (the validator admits a titleless removal on
+   * purpose), and upserting one handed the table an empty title its own
+   * `1..300` bound refused — 23514, run aborted, cursor stuck. A withdrawal
+   * must therefore be a NARROW update, never a row write.
+   */
+  const removal = (externalId: string) =>
+    vacancy({ externalId, lifecycle: "removed", titleRaw: "", channel: "stream" });
+
+  it("a withdrawal of a stored published ad flips lifecycle via a narrow update and counts as updated", async () => {
+    const a = vacancy({ externalId: "ad-1" });
+    const { client, ops } = fakeClient({
+      existing: [
+        {
+          provider_key: a.providerKey,
+          external_id: a.externalId,
+          content_hash: a.contentHash,
+          lifecycle: "published",
+        } as never,
+      ],
+    });
+
+    const result = await persistVacancies(client, [removal("ad-1")], SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 0, withdrawnAbsent: 0 });
+    // NO upsert happened — the empty body never travels.
+    expect(ops.filter((o) => o.kind === "upsert")).toHaveLength(0);
+    // Exactly one narrow update: the transition, the liveness stamps and the
+    // run — and NOT title_raw, NOT description_raw, NOT content_hash.
+    const updates = ops.filter((o) => o.kind === "update");
+    expect(updates).toHaveLength(1);
+    expect(Object.keys(updates[0].payload as object).sort()).toEqual([
+      "import_session_id",
+      "is_active",
+      "last_seen_at",
+      "lifecycle",
+      "updated_at",
+    ]);
+    expect((updates[0].payload as { lifecycle: string }).lifecycle).toBe("removed");
+    expect((updates[0].payload as { is_active: boolean }).is_active).toBe(false);
+    expect((updates[0].payload as { import_session_id: string }).import_session_id).toBe(
+      SESSION_ID,
+    );
+  });
+
+  it("a withdrawal of an ad this store never held writes NOTHING and is reported, not dropped", async () => {
+    const { client, ops } = fakeClient({ existing: [] });
+
+    const result = await persistVacancies(client, [removal("ghost-1")], SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 0, withdrawnAbsent: 1 });
+    expect(ops.filter((o) => o.kind === "upsert")).toHaveLength(0);
+    expect(ops.filter((o) => o.kind === "update")).toHaveLength(0);
+  });
+
+  it("a SECOND withdrawal of an already-removed ad refreshes liveness only", async () => {
+    const a = vacancy({ externalId: "ad-1" });
+    const { client, ops } = fakeClient({
+      existing: [
+        {
+          provider_key: a.providerKey,
+          external_id: a.externalId,
+          content_hash: a.contentHash,
+          lifecycle: "removed",
+        } as never,
+      ],
+    });
+
+    const result = await persistVacancies(client, [removal("ad-1")], SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 1, withdrawnAbsent: 0 });
+    const updates = ops.filter((o) => o.kind === "update");
+    expect(updates).toHaveLength(1);
+    expect(Object.keys(updates[0].payload as object)).toEqual(["last_seen_at"]);
+  });
+
+  it("a republished ad with an UNCHANGED hash is still rewritten so it comes back to life", async () => {
+    const a = vacancy({ externalId: "ad-1" });
+    const { client, ops } = fakeClient({
+      existing: [
+        {
+          provider_key: a.providerKey,
+          external_id: a.externalId,
+          content_hash: a.contentHash, // identical content…
+          lifecycle: "removed", // …but the stored row is dead
+        } as never,
+      ],
+    });
+
+    const result = await persistVacancies(client, [a], SEEN_AT, SESSION_ID);
+
+    // Hash-equal would normally mean "touch"; lifecycle disagreement forces
+    // the rewrite, or the ad stays invisibly dead while live upstream.
+    expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 0, withdrawnAbsent: 0 });
+    const upserts = ops.filter((o) => o.kind === "upsert");
+    expect(upserts).toHaveLength(1);
+    const row = (upserts[0].payload as { lifecycle: string; is_active: boolean }[])[0];
+    expect(row.lifecycle).toBe("published");
+    expect(row.is_active).toBe(true);
   });
 });
