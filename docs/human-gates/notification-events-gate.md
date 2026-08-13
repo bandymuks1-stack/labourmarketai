@@ -2,7 +2,12 @@
 
 Migration: `supabase/migrations/20260810070000_notification_events_v1.sql`
 Rollback:  `supabase/rollbacks/20260810070000_notification_events_v1.down.sql`
-State: `AWAITING_OWNER_DECISION` — ships UNAPPLIED; nothing in production changes until applied.
+State: `APPLIED_TO_PRODUCTION` — owner approved in the V8 continuation directive
+(2026-08-13) conditional on all safety gates GREEN; every gate re-verified GREEN
+that day and the migration applied via Supabase MCP `apply_migration`.
+Production ledger row: version `20260813065236`, name `notification_events_v1`
+(apply-time-as-version drift, match on name). Full apply record:
+`docs/APPLIED_LEDGER.md` §2026-08-13.
 
 ## Problem, measured (2026-08-10)
 

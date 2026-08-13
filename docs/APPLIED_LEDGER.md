@@ -1,5 +1,27 @@
 # Applied Migration Ledger
 
+## Production data cleanup 2026-08-13 — the four QA-synthetic rows (V8 owner decision 3, STRICTLY BOUNDED)
+
+- **Owner-approved bounded delete, executed 2026-08-13.** Before: `booking_requests` = 2 (both `[QA-SYNTHETIC] testinis pasiulymas - NEREAGUOTI`, ids `88a43ead-…` accepted / `435488f2-…` proposed), `customer_requests` = 19 of which 2 QA (`02684b8a-…`, `6689f801-…`, titles `[QA-SYNTHETIC - nereaguoti / test]`). Provenance proven from the rows themselves; all children (4 `booking_request_events`, 1 `demand_shortlist`, 1 `demand_interest_signals`) belonged to the same 2026-08-06 #1042 QA journey — same QA worker `2b7213f7-…`, same evening, attached ONLY to the QA parents; all FKs `ON DELETE CASCADE`.
+- **The DELETE carried the QA marker in its own predicate** (`note like '[QA-SYNTHETIC]%'` / `title like '[QA-SYNTHETIC%'`) so a mistyped id could not remove a real row. One transaction: `bookings_deleted = 2`, `requests_deleted = 2`.
+- **After (VERIFIED_DB):** `booking_requests` = **0**, `customer_requests` = **17 (all real)**, QA markers left in either table = **0**, orphaned children = **0/0/0**, unrelated data untouched (`journal_entries` 36, `workers` 36, `company_worker_engagements` 0). Traction counts are now clean: any non-zero booking from here on is real traffic.
+
+## Reconciled 2026-08-13 — privacy_request_intake was ALREADY APPLIED (ledger doc gap, closed)
+
+- **`20260706150000_privacy_request_intake.sql` — `submit_privacy_request_v1` (data-export / account-deletion intake). DISCOVERED APPLIED in production since 2026-07-06** — production ledger row version **`20260706160157`**, name **`20260706150000_privacy_request_intake`** — but never recorded in THIS document, and the 2026-08-13 trust audit consequently mis-reported the deletion-request path as "not accepted in production" by grepping this doc instead of probing `supabase_migrations.schema_migrations`. The lesson is the method: **this document is a secondary record; the production schema_migrations table is the truth.**
+
+  **Re-verified byte-identical on 2026-08-13 (V8 owner decision 2):** deployed body md5 `99636c98902af0211eec3c4b46febf3f`, length 1543 — exactly the repo migration's `$$…$$` body. SECURITY DEFINER with `search_path=public` pinned; EXECUTE granted to `authenticated` (+ owner) only — anon/public revoked. Self-only insert (`profile_id := auth.uid()`), type allowlist (`data_export` / `account_deletion`), note bounded 500, open-request cap 3. Requester read isolation via `customer_requests_select` (`profile_id = auth.uid() OR is_admin() OR has_org_demand_access(organization_id)`), and `has_org_demand_access(NULL)` measured **false** — privacy rows (org NULL) are invisible to org readers. `customer_requests` privacy-marked rows in production today: **0** — the path works and simply has not been used.
+
+## Applied 2026-08-13 — durable notification events (V8 owner decision 1)
+
+- **`20260810070000_notification_events_v1.sql` — durable per-recipient notification events. APPLIED TO PRODUCTION 2026-08-13 under the owner's explicit V8-continuation approval ("APPROVED ... TIK jeigu ... byte-identical ... visi safety gates GREEN").** Production ledger row: version **`20260813065236`**, name **`notification_events_v1`**, prod `gorgitwvdzxbnaxhrsrw`. Ledger drift as documented three times before: production stamps APPLY TIME as `version` — match on `name`. Exactly one ledger row added.
+
+  **Pre-apply gates, each verified GREEN the same day on `origin/main` `7669c61a`:** LF-normalized SHA-256 `c71a3b18…` (migration) and `d6230765…` (rollback) matched the gate doc exactly; comment-stripped executable body `2391723f…` matched; RLS decision read from the executable body (anon: no grant, no policy; authenticated: SELECT own + UPDATE of the `read_at` column only, both policies keyed `recipient_profile_id = auth.uid()`; INSERT deliberately not granted — service_role is the only writer); idempotency `(recipient_profile_id, dedupe_key)` UNIQUE; metadata bounded 2 KB with code-side allowlist; 112 notification tests GREEN locally (`lib/notifications/` 64 + notification guards 48, including the #1125 href guard).
+
+  **Post-apply readback (VERIFIED_DB, same session):** table exists; `relrowsecurity = true`; **0 rows** (zero unintended DML); exactly 2 policies (`notification_events_select_own` r / `notification_events_mark_read_own` w, both authenticated-only); anon holds **no** table or column grant; authenticated table grant = SELECT only; the only UPDATE column grant is `read_at`; 4 indexes; 1 unique constraint. Rollback remains `drop table if exists public.notification_events` — reversible by construction.
+
+  **Retention note, stated honestly:** the table has no automatic retention; rows persist until a future owner-approved retention policy. This is the gate-approved shape (append-only), not an oversight.
+
 > Human-readable record of migrations **actually applied to prod**
 > (`gorgitwvdzxbnaxhrsrw`), who approved each, and what it did. Source of truth
 > for "is it live" is always the Supabase ledger (`supabase_migrations.schema_migrations`)

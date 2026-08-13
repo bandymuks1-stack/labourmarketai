@@ -503,7 +503,10 @@ describe("NO new DB migration in this PR", () => {
     // Derived from the real tree rather than assumed — `git ls-tree -r
     // origin/main supabase/migrations/` = 197 .sql files at 9e20f1b4, and this
     // branch adds exactly one.
-    expect(count).toBeLessThanOrEqual(198);
+    // Bumped 198 -> 199 for the notification event types v2 DRAFT
+    // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
+    // follow-up; gate doc notification-events-v2-types-gate.md.
+    expect(count).toBeLessThanOrEqual(199);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
