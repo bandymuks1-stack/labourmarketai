@@ -8046,7 +8046,10 @@
         "no_requirement_set": "требования к навыкам",
         "no_start_date": "дата начала",
         "pay_not_comparable": "оплата несопоставима (не в EUR)"
-      }
+      },
+      "confirmNotice": "Подача заявки продолжается на другом портале — в оригинальном объявлении.",
+      "confirmContinue": "Продолжить",
+      "confirmDismiss": "Отмена"
     }
   },
   "workerIntake": {

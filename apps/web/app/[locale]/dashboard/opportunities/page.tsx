@@ -1137,6 +1137,9 @@ export default async function OpportunitiesPage({
                   : t("external.freshnessDelayed", { date });
               },
               openOriginal: t("external.openOriginal"),
+              confirmNotice: t("external.confirmNotice"),
+              confirmContinue: t("external.confirmContinue"),
+              confirmDismiss: t("external.confirmDismiss"),
               noApplicationRoute: t("external.noApplicationRoute"),
               publishedOn: (d) => t("external.publishedOn", { date: d }),
               positionsLabel: (n) => t("external.positions", { count: n }),

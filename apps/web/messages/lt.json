@@ -8046,7 +8046,10 @@
         "no_requirement_set": "įgūdžių reikalavimai",
         "no_start_date": "pradžios data",
         "pay_not_comparable": "atlygis nepalyginamas (ne EUR)"
-      }
+      },
+      "confirmNotice": "Kandidatavimas tęsiamas kitame portale — originaliame skelbime.",
+      "confirmContinue": "Tęsti",
+      "confirmDismiss": "Atšaukti"
     }
   },
   "workerIntake": {

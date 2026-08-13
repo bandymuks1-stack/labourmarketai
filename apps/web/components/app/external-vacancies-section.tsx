@@ -21,6 +21,7 @@ import type { ReactNode } from "react";
  *   - matching gaps render as UNKNOWNS. An ad that does not state a language
  *     requirement is not "no language required".
  */
+import { ExternalApplyConfirm } from "@/components/app/external-apply-confirm";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import type { ExternalOpportunityCardV1 } from "@/lib/opportunities/external-vacancies";
 import {
@@ -34,6 +35,10 @@ export interface ExternalVacanciesLabels {
   /** Worker-facing sentence for a non-current supply state. */
   readonly freshnessNotice: (freshness: SourceFreshnessV1) => string;
   readonly openOriginal: string;
+  /** V8 addendum §4 — the confirm step before leaving for the publisher. */
+  readonly confirmNotice: string;
+  readonly confirmContinue: string;
+  readonly confirmDismiss: string;
   readonly noApplicationRoute: string;
   readonly publishedOn: (iso: string) => string;
   readonly positionsLabel: (n: number) => string;
@@ -183,15 +188,18 @@ export function ExternalVacanciesSection({
             {capabilities.canApplyInternally ? null : view.provenance
                 .applicationRoute === "source_original" &&
               view.provenance.applicationUrl ? (
-              <a
-                href={`https://${view.provenance.applicationUrl.replace(/^https?:\/\//, "")}`}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="inline-flex min-h-[2.75rem] w-fit items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary transition-colors hover:border-brand-blue"
-                data-testid="external-vacancy-original-link"
-              >
-                {labels.openOriginal} ↗
-              </a>
+              /* Owner decision (V8 addendum §4): inform → confirm → open.
+                 The real anchor (same href/target/rel) renders only after
+                 the person confirms leaving for the publisher's portal. */
+              <ExternalApplyConfirm
+                url={view.provenance.applicationUrl}
+                openLabel={labels.openOriginal}
+                noticeText={labels.confirmNotice}
+                continueLabel={labels.confirmContinue}
+                dismissLabel={labels.confirmDismiss}
+                anchorTestId="external-vacancy-original-link"
+                variant="card"
+              />
             ) : (
               <p className="text-meta text-text-muted">
                 {labels.noApplicationRoute}

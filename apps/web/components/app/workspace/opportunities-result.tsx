@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { ExternalApplyConfirm } from "@/components/app/external-apply-confirm";
 import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { useWorldStateOptional } from "@/components/app/world-state/world-state-provider";
@@ -443,15 +444,18 @@ function ExternalRow({ row }: { row: import("@/lib/marketplace/worker-opportunit
       </span>
       <span className="text-meta text-text-muted">{row.attributionText}</span>
       {row.originalUrl ? (
-        <a
-          href={`https://${row.originalUrl.replace(/^https?:\/\//, "")}`}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-          className="w-fit rounded-sm text-meta text-brand-blue underline-offset-2 hover:underline"
-          data-testid="opportunities-external-original"
-        >
-          {tOpp("external.openOriginal")} ↗
-        </a>
+        /* Owner decision (V8 addendum §4): inform → confirm → open. Still an
+           external link behind one confirm, not internal routing — the
+           panel's "no router" rule holds. */
+        <ExternalApplyConfirm
+          url={row.originalUrl}
+          openLabel={tOpp("external.openOriginal")}
+          noticeText={tOpp("external.confirmNotice")}
+          continueLabel={tOpp("external.confirmContinue")}
+          dismissLabel={tOpp("external.confirmDismiss")}
+          anchorTestId="opportunities-external-original"
+          variant="row"
+        />
       ) : (
         <span className="text-meta text-text-muted">
           {tOpp("external.noApplicationRoute")}

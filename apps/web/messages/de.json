@@ -8046,7 +8046,10 @@
         "no_requirement_set": "Qualifikationsanforderungen",
         "no_start_date": "Startdatum",
         "pay_not_comparable": "Vergütung nicht vergleichbar (nicht in EUR)"
-      }
+      },
+      "confirmNotice": "Ihre Bewerbung wird auf einem anderen Portal fortgesetzt — in der Originalanzeige.",
+      "confirmContinue": "Weiter",
+      "confirmDismiss": "Abbrechen"
     }
   },
   "workerIntake": {

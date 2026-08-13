@@ -8046,7 +8046,10 @@
         "no_requirement_set": "vaardigheidseisen",
         "no_start_date": "startdatum",
         "pay_not_comparable": "loon niet vergelijkbaar (niet in EUR)"
-      }
+      },
+      "confirmNotice": "Je sollicitatie gaat verder op een ander portaal — in de originele advertentie.",
+      "confirmContinue": "Doorgaan",
+      "confirmDismiss": "Annuleren"
     }
   },
   "workerIntake": {

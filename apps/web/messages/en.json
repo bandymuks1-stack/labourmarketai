@@ -8046,7 +8046,10 @@
         "no_requirement_set": "skill requirements",
         "no_start_date": "start date",
         "pay_not_comparable": "pay not comparable (not in EUR)"
-      }
+      },
+      "confirmNotice": "Your application continues on another portal — in the original advertisement.",
+      "confirmContinue": "Continue",
+      "confirmDismiss": "Cancel"
     }
   },
   "workerIntake": {
