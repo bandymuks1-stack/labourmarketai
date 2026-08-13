@@ -44,6 +44,10 @@ export type ConversationIntent =
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
   | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
+  // ── V9 value-intent: a stated OFFER of value (goods to sell, free
+  //    capacity) — the structurer (lib/structuring/value-statement.ts)
+  //    refines it; the router only opens the door. ─────────────────────────
+  | "offer-value" // "turiu 30 kg agurkų ir noriu parduoti" / "turiu dvi laisvas dienas"
   | "unknown";
 
 export type IntentMatch = {
@@ -222,6 +226,29 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    // V9 value-intent: a stated OFFER of value — goods to sell or free work
+    // capacity. Kept SIMPLE on purpose (the structurer refines): strong sell
+    // verbs, have+unit co-occurrence, free-days phrasing. Placed before
+    // log-work/find-work so the specific reading wins ties; the weights make
+    // it win on score anyway.
+    intent: "offer-value",
+    patterns: [
+      p("parduo", 4), // parduodu / parduoti / noriu parduoti
+      p("прода(м|ю|ем)", 4),
+      p("\\bsell(ing)?\\b", 4),
+      p("\\bsiūlau\\b", 3),
+      p("предлагаю", 3),
+      p("\\bturiu\\b\\s*.{0,24}\\b(kg|vnt|tonn|litr|ha)", 4),
+      p("\\bhave\\b\\s*.{0,24}\\b(kg|tonnes?|litres?|pieces)", 3),
+      p("laisv\\w{0,4}\\s+dien", 3), // "laisvas dienas" / "laisvų dienų"
+      p("\\bturiu\\b\\s*.{0,16}laisv", 3),
+      p("free\\s+days?", 3),
+      // `.{0,4}` (not \w): the Cyrillic inflection ("свободные") is outside
+      // ASCII \w, and the folded text keeps Cyrillic letters as-is.
+      p("свободн.{0,4}\\s+(день|дня|дней|дни)", 3),
+    ],
+  },
+  {
     // Employer demand (rebuild W4): "I need WORKERS" must beat "I'm looking
     // for WORK" — the worker-plural stems carry the decisive weight, so
     // "ieškau darbuotojų" routes here while "ieškau darbo" stays find-work.
@@ -236,6 +263,15 @@ const RULES: IntentRule[] = [
       p("\\breikia\\s+žmoni", 3), // "reikia žmonių"
       p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
       p("\\bbrigad", 2), // team/brigade need
+      // V9 audit finding: "kitą mėnesį trūks keturių suvirintojų" carried no
+      // worker-plural stem and landed `unknown`. A SEEK VERB co-occurring
+      // with an occupation stem (the most common WORK_TYPE_RULES needles) is
+      // employer demand — while a bare "esu suvirintojas" (no seek verb)
+      // deliberately stays out of this intent.
+      p(
+        "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|требу(ется|ются))\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик)",
+        6,
+      ),
     ],
   },
   {

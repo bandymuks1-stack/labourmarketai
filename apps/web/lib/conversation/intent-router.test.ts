@@ -81,6 +81,58 @@ describe("diacritic folding — LT without diacritics reaches the same intent", 
 });
 
 /**
+ * V9 value-intent routing — the "grandmother's cucumbers" acceptance set.
+ * The audit found "kitą mėnesį trūks keturių suvirintojų" landing `unknown`;
+ * these cases pin the three fixtures AND the boundaries that must not move.
+ */
+describe("classifyIntent — V9 value statements", () => {
+  it("fixture A: a goods offer routes to offer-value", () => {
+    expect(
+      classifyIntent("Turiu 30 kg savo darže užaugintų agurkų ir noriu parduoti").intent,
+    ).toBe("offer-value");
+  });
+
+  it("fixture B: free work capacity routes to offer-value", () => {
+    expect(
+      classifyIntent("Esu elektrikas ir kitą savaitę turiu dvi laisvas dienas").intent,
+    ).toBe("offer-value");
+  });
+
+  it("fixture C: a shortage with an occupation routes to need-workers", () => {
+    expect(
+      classifyIntent("Mūsų įmonei kitą mėnesį trūks keturių suvirintojų").intent,
+    ).toBe("need-workers");
+  });
+
+  it("occupation + seek-verb co-occurrence works across locales", () => {
+    expect(classifyIntent("ieškome suvirintojų į Norvegiją").intent).toBe("need-workers");
+    expect(classifyIntent("we need welders next month").intent).toBe("need-workers");
+    expect(classifyIntent("нужны сварщики").intent).toBe("need-workers");
+  });
+
+  it("boundaries: an occupation WITHOUT a seek verb is never need-workers", () => {
+    expect(classifyIntent("esu suvirintojas").intent).not.toBe("need-workers");
+    expect(classifyIntent("Esu elektrikas ir kitą savaitę turiu dvi laisvas dienas").intent).not.toBe(
+      "need-workers",
+    );
+  });
+
+  it("boundaries: the existing routes stay put", () => {
+    expect(classifyIntent("Ieškau darbo").intent).toBe("find-work");
+    expect(classifyIntent("ieškau darbuotojų").intent).toBe("need-workers");
+    expect(classifyIntent("Rask man darbą Nyderlanduose.").intent).toBe("find-work");
+    expect(classifyIntent("Šiandien dirbau nuo 8 iki 17.").intent).toBe("log-work");
+  });
+
+  it("diacritic-free typing reaches offer-value too", () => {
+    expect(
+      classifyIntent("Turiu 30 kg savo darze uzaugintu agurku ir noriu parduoti").intent,
+    ).toBe("offer-value");
+    expect(classifyIntent("kita savaite turiu dvi laisvas dienas").intent).toBe("offer-value");
+  });
+});
+
+/**
  * `isExplicitJournalRequest` — the predicate that decides whether the chat
  * OPENS the work-log flow or answers with the clarify question.
  *
