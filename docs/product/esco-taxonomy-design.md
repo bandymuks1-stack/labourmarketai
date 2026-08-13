@@ -80,11 +80,12 @@ modelio — alfabetinė/ilgio tvarka), graceful degrade kai lentelių nėra
 (42P01 → tuščias sąrašas). UI: `EscoTypeahead` komponentas (dark, DarkListbox
 stiliaus sąrašas), paruoštas profilio / onboarding / žurnalo įvedimo vietoms.
 
-**Feature flag:** `ESCO_AUTOCOMPLETE_ENABLED = false`
-(`apps/web/lib/config/esco.ts`). Įjungiama TIK po: migracijos pritaikytos →
-importas paleistas → owner flip (vienos eilutės PR). Sąmoningai NEwirinta į
-esamus composer'ius šiame sprinte: jie guard-pinned, o flag-off wiring =
-negyvas kodas pinned failuose; wiring = to paties flag-flip slice dalis.
+**Feature flag:** `ESCO_AUTOCOMPLETE_ENABLED = true`
+(`apps/web/lib/config/esco.ts`) — ĮJUNGTA nuo 2026-06-10: S2 migracijos
+pritaikytos prod, typeahead PRIJUNGTAS prie skill-clarify įvedimo, o
+v1.2.1 katalogas IMPORTUOTAS į prod (1 045 186 etiketės / 28 kalbos,
+patikrinta 2026-08-13) — pasiūlymai tikri. Ankstesnė šio skyriaus būsena
+("flag-off, newirinta, importas nepaleistas") nebegalioja.
 
 Vertė be jokio AI: struktūruota įvestis vietoj laisvo teksto — žmogus pats
 pasirenka iš kanono savo kalba; vidinis CV iškart gauna ESCO ID.

@@ -4,10 +4,11 @@
  * Flag-flip slice (design doc §9 step 3): ON since 2026-06-10 — the three S2
  * migrations are APPLIED to prod via MCP apply_migration (ledger
  * 20260610172207/172226/172251) and the typeahead is wired into the
- * skill-clarify capture with the EU attribution. The v1.2.1 catalogue import
- * is owner-gated (the ESCO portal download requires accepting licence
- * conditions); until it runs, esco_labels is empty and the typeahead
- * degrades honestly to no suggestions — never an error, never fake data.
+ * skill-clarify capture with the EU attribution. The v1.2.1 catalogue IS
+ * IMPORTED: 1,045,186 labels across 28 locales in `esco_labels`
+ * (prod-verified 2026-08-13) — the typeahead serves real suggestions. The
+ * honest empty degradation remains only for environments where the import
+ * has not been run.
  */
 export const ESCO_AUTOCOMPLETE_ENABLED = true;
 
