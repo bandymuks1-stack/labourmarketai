@@ -732,6 +732,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // UNAPPLIED; the gate record states the decision being asked for.
       // Gate record: docs/human-gates/notification-events-gate.md.
       "20260810070000_notification_events_v1.sql",
+      // 2026-08-13: notification event types v2 (booking_withdrawn +
+      // engagement_ended) — DRAFT under the V8 loop-matrix follow-up,
+      // @human-gate-approved states the ROUTE only; the apply decision is
+      // AWAITING_OWNER_DECISION in
+      // docs/human-gates/notification-events-v2-types-gate.md. Rollback
+      // paired, ships UNAPPLIED.
+      "20260813100000_notification_events_v2_types.sql",
     ]);
   });
 

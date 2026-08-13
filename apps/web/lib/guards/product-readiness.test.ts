@@ -2061,7 +2061,10 @@ describe("no migration files added by this sprint", () => {
     // neither references the other's objects — but whichever merges second
     // must RECOUNT git ls-tree and take the slot to 198. Never sum, and never take either side of a rebase
     // verbatim.
-    const SPRINT_BASELINE = 198;
+    // Bumped 198 -> 199 for the notification event types v2 DRAFT
+    // (20260813100000, owner-gated, UNAPPLIED) — recounted from the tree,
+    // never summed; gate doc notification-events-v2-types-gate.md.
+    const SPRINT_BASELINE = 199;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
