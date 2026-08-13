@@ -100,19 +100,37 @@ counts at render time only — a worker whose absence is decided while offline
 learns nothing durable. **Exact action:** owner approves or declines the apply.
 
 ### 5.3 Local E2E (CV funnel, golden chain) — BLOCKED_EXTERNAL, newly diagnosed
-`supabase start` fails with
-`bind: An attempt was made to access a socket in a way forbidden by its access permissions`
-on port **54322**. Root cause found: Windows/Hyper-V has **reserved TCP
-54258–54357**, and Supabase's default local DB port 54322 falls inside it
-(`netsh interface ipv4 show excludedportrange protocol=tcp`).
-
 This is why the authenticated CV E2E and the booking golden chain keep coming
-back unproven — it is an environment blocker, not a product defect. Releasing a
-reserved port range is a system-settings change (not something an agent should
-do), and moving the port in `supabase/config.toml` would affect ~50 worktrees and
-CI, so it is flagged rather than changed unilaterally. **Exact action (owner's
-choice of one):** free the range via `netsh int ipv4 delete excludedportrange`
-after a reboot, or agree a project-wide port move.
+back unproven. **Two independent environment blockers**, neither a product
+defect. Both were reproduced this window.
+
+**Blocker A — reserved port range.** `supabase start` fails with
+`bind: An attempt was made to access a socket in a way forbidden by its access permissions`.
+Root cause: Windows/Hyper-V has **reserved TCP 54258–54357**
+(`netsh interface ipv4 show excludedportrange protocol=tcp`), and **every**
+Supabase local default port falls inside it — 54320 shadow, 54321 api, 54322 db,
+54323 studio, 54324 inbucket, 54327 analytics. Not one port: the whole block.
+
+*This was worked around* (temporarily, uncommitted: ports moved to the 553xx
+band, analytics disabled) and **the core stack did come up** — Studio on 55323,
+API/GraphQL on 55321. So the port range is a real but surmountable blocker.
+The workaround was **reverted**; `supabase/config.toml` is untouched on this
+branch, because a committed port move would hit ~50 worktrees and CI.
+
+**Blocker B — the reset dies under memory pressure.** With the stack up,
+`supabase db reset` (198 migrations) terminated with
+`error running container: exit 137` — SIGKILL, i.e. the container was OOM-killed.
+Note the trap for the next session: **the shell still reported exit code 0**, so
+a script that trusts the exit code will believe the reset succeeded. It did not;
+afterwards every `supabase_*` container was gone, and `e2e-mint-session.ts`
+correctly refused with `REFUSED_NON_LOCAL_E2E_SESSION_MINT` (it never falls back
+to `.env.local` — the fail-closed guard behaved exactly as designed).
+
+**Exact action (owner):** raise the Docker Desktop memory limit (the 198-migration
+reset is the peak), and either free the reserved range via
+`netsh int ipv4 delete excludedportrange` after a reboot or agree a project-wide
+port move. Until both are done, no authenticated local proof is obtainable on
+this machine.
 
 ### 5.4 Authenticated production verification — BLOCKED_EXTERNAL
 An agent may not create accounts or enter passwords. Every authenticated
