@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
@@ -50,6 +51,13 @@ const TIER_STYLES: Record<CvSkillTier, string> = {
   confirmed: "border-slate-400 bg-slate-50 text-slate-800",
   evidence: "border-sky-500 bg-sky-50 text-sky-900",
   declared: "border-zinc-300 bg-zinc-50 text-zinc-600",
+};
+
+/** A person's CV render: private surface, never indexable. robots.txt
+ *  already disallows the cv path, but a disallow does not stop URL-only
+ *  indexing from inbound links. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
 };
 
 export default async function VerifiedCvPage({

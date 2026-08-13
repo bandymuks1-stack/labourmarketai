@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
@@ -14,6 +15,12 @@ import {
  *  minimal message context with the auth pick (~28 KB) — the union client
  *  pick (~300 KB serialized) no longer ships on auth pages. Re-derived from
  *  this tree's import graph by client-messages-allowlist.test.ts. */
+/** Private flow: never indexable — robots.txt disallow alone does not stop
+ *  URL-only indexing from inbound links. Metadata merges to every auth page. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function AuthLayout({
   children,
   params,
