@@ -2,7 +2,11 @@
 
 Migration: `supabase/migrations/20260813100000_notification_events_v2_types.sql`
 Rollback:  `supabase/rollbacks/20260813100000_notification_events_v2_types.down.sql`
-State: `AWAITING_OWNER_DECISION` — ships UNAPPLIED.
+State: `APPLIED_TO_PRODUCTION` — owner conditionally approved in the V8
+continuation directive (2026-08-13); every gate verified GREEN and applied the
+same day via Supabase MCP `apply_migration`. Production ledger row: version
+`20260813072402`, name `notification_events_v2_types`. Full record:
+`docs/APPLIED_LEDGER.md` §2026-08-13 (decision A).
 
 ## What it changes
 ONE check constraint on `public.notification_events`: the `event_type`

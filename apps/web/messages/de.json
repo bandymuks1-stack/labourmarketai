@@ -3992,6 +3992,8 @@
         "event_absence_requested": "Für Sie wurde eine Abwesenheit eingetragen",
         "event_absence_approved": "Ihre Abwesenheit wurde genehmigt",
         "event_absence_rejected": "Ihre Abwesenheit wurde abgelehnt",
+        "event_booking_withdrawn": "Der Buchungsvorschlag wurde zurückgezogen",
+        "event_engagement_ended": "Das Arbeitsverhältnis wurde beendet",
         "event_engagement_created": "Ein neues Engagement wurde erstellt"
       },
       "label": "Meine Benachrichtigungen",

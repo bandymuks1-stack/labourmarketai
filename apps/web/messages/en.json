@@ -3992,6 +3992,8 @@
         "event_absence_requested": "An absence was filed for you",
         "event_absence_approved": "Your absence was approved",
         "event_absence_rejected": "Your absence was rejected",
+        "event_booking_withdrawn": "The booking proposal was withdrawn",
+        "event_engagement_ended": "The engagement was ended",
         "event_engagement_created": "A new engagement was created"
       },
       "label": "My notifications",

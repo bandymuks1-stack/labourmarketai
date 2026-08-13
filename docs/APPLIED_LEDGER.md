@@ -1,5 +1,11 @@
 # Applied Migration Ledger
 
+## Applied 2026-08-13 — notification event types v2 (V8 owner decision A)
+
+- **`20260813100000_notification_events_v2_types.sql` — `event_type` allowlist grows by `booking_withdrawn` and `engagement_ended`. APPLIED TO PRODUCTION 2026-08-13 under the owner's conditional V8 approval.** Production ledger row: version **`20260813072402`**, name **`notification_events_v2_types`** (apply-time-as-version drift — match on name). LF-normalized SHA-256 of the applied file: migration `e39f586e…`, rollback `8a4e7948…`, both from `origin/main` `77828e37` with a clean worktree.
+- **BEFORE readback:** v1 constraint (7 types), 0 rows, 2 policies, authenticated-only grants, 7 constraints. **AFTER readback:** constraint carries exactly the 9 types, rows still 0 (zero unintended DML), policies/grants/constraint-count unchanged. Dependency proof: v1 table + constraint name existed (ledger `20260813065236`). Rollback restores the v1 list; at 0 rows its cost is zero.
+- **Emitters wired the same day:** every withdraw success path notifies the WORKER; ending an engagement notifies the COUNTERPARTY of the server-derived actor side; labels in all 11 catalogues; the `engagement_ended` copy is deliberately neutral about visibility (F2 — a notification may not claim what it has not measured), enforced by `lib/guards/notification-v2-emitters.test.ts`.
+
 ## Production data cleanup 2026-08-13 — the four QA-synthetic rows (V8 owner decision 3, STRICTLY BOUNDED)
 
 - **Owner-approved bounded delete, executed 2026-08-13.** Before: `booking_requests` = 2 (both `[QA-SYNTHETIC] testinis pasiulymas - NEREAGUOTI`, ids `88a43ead-…` accepted / `435488f2-…` proposed), `customer_requests` = 19 of which 2 QA (`02684b8a-…`, `6689f801-…`, titles `[QA-SYNTHETIC - nereaguoti / test]`). Provenance proven from the rows themselves; all children (4 `booking_request_events`, 1 `demand_shortlist`, 1 `demand_interest_signals`) belonged to the same 2026-08-06 #1042 QA journey — same QA worker `2b7213f7-…`, same evening, attached ONLY to the QA parents; all FKs `ON DELETE CASCADE`.

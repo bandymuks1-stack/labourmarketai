@@ -347,6 +347,8 @@
         "event_absence_requested": "Tev reģistrēta prombūtne",
         "event_absence_approved": "Tava prombūtne apstiprināta",
         "event_absence_rejected": "Tava prombūtne noraidīta",
+        "event_booking_withdrawn": "Rezervācijas piedāvājums tika atsaukts",
+        "event_engagement_ended": "Sadarbība tika pārtraukta",
         "event_engagement_created": "Izveidota jauna sadarbība"
       }
     },

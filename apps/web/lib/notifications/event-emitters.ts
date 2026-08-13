@@ -55,7 +55,7 @@ export async function emitBookingNotification(
   bookingId: string,
   eventType: Extract<
     NotificationEventType,
-    "booking_proposed" | "booking_accepted" | "booking_declined"
+    "booking_proposed" | "booking_accepted" | "booking_declined" | "booking_withdrawn"
   >,
 ): Promise<void> {
   try {
@@ -78,7 +78,10 @@ export async function emitBookingNotification(
       startDate: row.start_date ?? undefined,
     };
 
-    if (eventType === "booking_proposed") {
+    // The COMPANY acts on these two — the worker is who must hear about it.
+    // A withdrawn proposal is v2's first gap: the worker who saw the offer
+    // otherwise finds a silently vanished row.
+    if (eventType === "booking_proposed" || eventType === "booking_withdrawn") {
       const worker = row.worker_id
         ? await workerProfileId(admin, row.worker_id)
         : null;
@@ -146,6 +149,63 @@ export async function emitEngagementCreatedNotification(
         metadata,
       });
     }
+  } catch {
+    // Emission is an enhancement; the domain write already succeeded.
+  }
+}
+
+/**
+ * Engagement END — v2's second gap. The COUNTERPARTY hears it durably; the
+ * actor already watched it happen on their own screen.
+ *
+ * Recipient resolution mirrors the shared end action's authority model: the
+ * row itself names both parties, and `actorSide` (server-derived by the RPC,
+ * never client-supplied) says which of them acted. worker acted → the
+ * company owner hears; company acted → the worker hears.
+ *
+ * The rendered label stays NEUTRAL about visibility on purpose: whether the
+ * company still sees the worker after the end depends on other relationships
+ * (the F2 assignment branch), and this emitter has not measured that. The
+ * acting surface carries the measured rider; the notification only states
+ * the fact that the engagement ended.
+ */
+export async function emitEngagementEndedNotification(
+  engagementId: string,
+  actorSide: "company" | "worker",
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("company_worker_engagements")
+      .select("company_id, worker_id")
+      .eq("id", engagementId)
+      .maybeSingle();
+    const row = data as { company_id?: string | null; worker_id?: string | null } | null;
+    if (!row) return;
+
+    let recipient: string | null = null;
+    if (actorSide === "worker") {
+      // The company owner hears. companies.profile_id is the owner pointer.
+      if (row.company_id) {
+        const { data: company } = await admin
+          .from("companies")
+          .select("profile_id")
+          .eq("id", row.company_id)
+          .maybeSingle();
+        recipient = (company as { profile_id?: string } | null)?.profile_id ?? null;
+      }
+    } else if (row.worker_id) {
+      recipient = await workerProfileId(admin, row.worker_id);
+    }
+    if (!recipient) return;
+
+    emitNotificationEventInBackground(admin, {
+      recipientProfileId: recipient,
+      eventType: "engagement_ended",
+      entityType: "engagement",
+      entityId: engagementId,
+      metadata: {},
+    });
   } catch {
     // Emission is an enhancement; the domain write already succeeded.
   }

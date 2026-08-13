@@ -347,6 +347,8 @@
         "event_absence_requested": "Et fravær ble registrert for deg",
         "event_absence_approved": "Fraværet ditt ble godkjent",
         "event_absence_rejected": "Fraværet ditt ble avslått",
+        "event_booking_withdrawn": "Bookingforslaget ble trukket tilbake",
+        "event_engagement_ended": "Engasjementet ble avsluttet",
         "event_engagement_created": "Et nytt engasjement ble opprettet"
       }
     },

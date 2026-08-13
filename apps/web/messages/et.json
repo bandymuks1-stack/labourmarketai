@@ -347,6 +347,8 @@
         "event_absence_requested": "Sinule registreeriti puudumine",
         "event_absence_approved": "Sinu puudumine kiideti heaks",
         "event_absence_rejected": "Sinu puudumine lükati tagasi",
+        "event_booking_withdrawn": "Broneeringu ettepanek võeti tagasi",
+        "event_engagement_ended": "Töösuhe lõpetati",
         "event_engagement_created": "Loodi uus koostöö"
       }
     },

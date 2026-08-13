@@ -316,6 +316,7 @@ export async function withdrawBookingAction(input: {
     });
     if (!v2.error) {
       revalidatePath(`/${input.locale}/dashboard/bookings`);
+      void emitBookingNotification(input.bookingId, "booking_withdrawn");
       return { kind: "ok", status: "withdrawn", reasonStored: true };
     }
     if (!isAbsentFunction(v2.error)) return classify(v2.error);
@@ -324,6 +325,7 @@ export async function withdrawBookingAction(input: {
     });
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
+    void emitBookingNotification(input.bookingId, "booking_withdrawn");
     return { kind: "ok", status: "withdrawn", reasonStored: false };
   }
 
@@ -332,6 +334,7 @@ export async function withdrawBookingAction(input: {
   });
   if (error) return classify(error);
   revalidatePath(`/${input.locale}/dashboard/bookings`);
+  void emitBookingNotification(input.bookingId, "booking_withdrawn");
   return { kind: "ok", status: "withdrawn" };
 }
 

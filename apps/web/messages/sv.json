@@ -347,6 +347,8 @@
         "event_absence_requested": "En frånvaro registrerades för dig",
         "event_absence_approved": "Din frånvaro godkändes",
         "event_absence_rejected": "Din frånvaro avböjdes",
+        "event_booking_withdrawn": "Bokningsförslaget drogs tillbaka",
+        "event_engagement_ended": "Engagemanget avslutades",
         "event_engagement_created": "Ett nytt engagemang skapades"
       }
     },
