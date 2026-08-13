@@ -240,8 +240,13 @@ const RULES: IntentRule[] = [
       p("предлагаю", 3),
       p("\\bturiu\\b\\s*.{0,24}\\b(kg|vnt|tonn|litr|ha)", 4),
       p("\\bhave\\b\\s*.{0,24}\\b(kg|tonnes?|litres?|pieces)", 3),
-      p("laisv\\w{0,4}\\s+dien", 3), // "laisvas dienas" / "laisvų dienų"
+      // "laisvas dienas" AND the counted form "laisvas trims dienoms" —
+      // one intervening word allowed (V10: the equipment-availability
+      // fixture routed `unknown` without it).
+      p("laisv\\w{0,4}\\s+(?:\\S+\\s+)?dien", 3),
       p("\\bturiu\\b\\s*.{0,16}laisv", 3),
+      // V10: a MACHINE stated free is an offer of its capacity.
+      p("(ekskavator|krautuv|traktor|kran|pastoli|stakl|generator|kompresor|priekab|excavator|forklift|scaffold|экскаватор|погрузчик)\\w*.{0,16}(laisv|available|free|свободн)", 4),
       p("free\\s+days?", 3),
       // `.{0,4}` (not \w): the Cyrillic inflection ("свободные") is outside
       // ASCII \w, and the folded text keeps Cyrillic letters as-is.
