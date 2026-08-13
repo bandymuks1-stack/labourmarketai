@@ -13,4 +13,12 @@ export const routing = defineRouting({
   locales: activeLocales,
   defaultLocale,
   localePrefix: "always",
+  // V8 §6 — the preference must SURVIVE. next-intl's default NEXT_LOCALE
+  // cookie carries no maxAge, so it dies with the browser session: a person
+  // who chose Russian was back on Lithuanian the next morning, on the same
+  // device, logged in. One year, refreshed on every sync. The cookie stays
+  // functional-only (documented on /legal/cookies) — nothing else changes.
+  localeCookie: {
+    maxAge: 60 * 60 * 24 * 365,
+  },
 });
