@@ -603,3 +603,32 @@ describe("persistVacancies — withdrawals are lifecycle transitions, not rewrit
     expect(row.is_active).toBe(true);
   });
 });
+
+describe("persistVacancies — write arms stay under the statement timeout", () => {
+  /**
+   * Third act of the 2026-08-13 incident: with reads chunked and withdrawals
+   * narrowed, a 2 500-row single-statement upsert tripped the database's
+   * statement timeout (57014) and aborted the run. Writes must travel in
+   * bounded chunks; idempotent ON CONFLICT makes a mid-run death safe.
+   */
+  it("a 1200-ad insert batch travels as 3 bounded upserts covering every row", async () => {
+    const batch = Array.from({ length: 1200 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, ops } = fakeClient({ existing: [] });
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 1200, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
+    const upserts = ops.filter((o) => o.kind === "upsert");
+    // The naive single statement is exactly what timed out in production.
+    expect(upserts).toHaveLength(3);
+    for (const u of upserts) {
+      expect((u.payload as unknown[]).length).toBeLessThanOrEqual(500);
+    }
+    const written = upserts.flatMap((u) =>
+      (u.payload as { external_id: string }[]).map((r) => r.external_id),
+    );
+    expect(written.sort()).toEqual(batch.map((v) => v.externalId).sort());
+  });
+});
