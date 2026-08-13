@@ -497,7 +497,8 @@
       "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
       "orgDocuments": "Gezählt werden nur Arbeitskräfte, die dem Teilen von Gesamtzahlen ihrer Dokumente zugestimmt haben.",
       "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten.",
-      "orgDemandOrg": "Zählungen über die Ihrer Organisation zugeordneten Bedarfsanfragen (alle Mitglieder mit Bedarfszugriff sehen dieselben Zahlen). Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig. Interesse von Arbeitskräften zählt Arbeitskräfte, die Interesse an diesen Anfragen gezeigt haben."
+      "orgDemandOrg": "Zählungen über die Ihrer Organisation zugeordneten Bedarfsanfragen (alle Mitglieder mit Bedarfszugriff sehen dieselben Zahlen). Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig. Interesse von Arbeitskräften zählt Arbeitskräfte, die Interesse an diesen Anfragen gezeigt haben.",
+      "journal": "Gezählt werden Arbeitseinträge, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation in den letzten sieben Kalendertagen erfasst haben. „Wartet auf Prüfung“ ist die aktuelle Prüfliste; „bestätigt“ zählt die Einträge des Zeitfensters, die eine Führungskraft bestätigt hat. Fehlende Einträge sind kein Beleg dafür, dass nicht gearbeitet wurde."
     },
     "worker": {
       "evidence": {
@@ -573,7 +574,41 @@
         "overdue": "Überfällig",
         "total": "Einträge gesamt",
         "link": "Finanzeinträge öffnen"
+      },
+      "journal": {
+        "title": "Arbeitsjournal (letzte sieben Tage)",
+        "recorded": "Erfasste Einträge",
+        "awaitingReview": "Wartet auf Prüfung",
+        "confirmed": "Bestätigt",
+        "link": "Journalbericht öffnen"
       }
+    },
+    "journalWindow": {
+      "eyebrow": "Berichte",
+      "title": "Arbeitsjournal-Bericht",
+      "intro": "Anzahl erfasster Arbeitseinträge je Beschäftigtem über ein festes Kalenderzeitfenster. Nur Zahlen und Daten — kein Eintragstext, keine Bewertung.",
+      "windowLabel": "Berichtszeitfenster",
+      "window": {
+        "today": "Heute",
+        "week": "Letzte sieben Tage",
+        "month": "Letzte dreißig Tage"
+      },
+      "windowRange": "{start} – {end}",
+      "noOrg": "Dieser Bericht benötigt einen Organisationskontext. Wechseln Sie in den Arbeitsbereich Ihres Unternehmens.",
+      "unavailable": "Dieser Bericht kann gerade nicht gelesen werden. Anstelle echter Daten wird nichts geschätzt.",
+      "empty": "In diesem Zeitfenster wurden keine Arbeitseinträge erfasst.",
+      "emptyNext": "Ein leeres Zeitfenster ist kein Beleg dafür, dass nicht gearbeitet wurde — es bedeutet nur, dass hier nichts erfasst wurde.",
+      "table": {
+        "worker": "Beschäftigte/r",
+        "entries": "Einträge",
+        "awaitingReview": "Wartet auf Prüfung",
+        "confirmed": "Bestätigt",
+        "lastEntry": "Letzter Eintrag"
+      },
+      "totals": "{count, plural, one {Gesamt · # Beschäftigte/r} other {Gesamt · # Beschäftigte}}",
+      "basisLabel": "Grundlage",
+      "basis": "Gezählt aus Arbeitseinträgen, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation innerhalb des gewählten Zeitfensters erfasst haben. Der Prüfstatus stammt aus Bestätigungen von Führungskräften. Fehlende Einträge sind kein Beleg für fehlende Arbeit, und niemand wird hier bewertet oder benotet.",
+      "back": "Zurück zu den Berichten"
     }
   },
   "marketRecognition": {
@@ -8919,6 +8954,19 @@
       "intro": "Genehmigte Abwesenheiten der von Ihnen verwalteten Mitarbeitenden. Nur Daten — der Grund bleibt privat.",
       "unavailable": "Nicht verfügbar",
       "unnamedWorker": "Mitarbeiter/in"
+    },
+    "organizationToday": {
+      "title": "Heute in Ihrer Organisation",
+      "roster": "Aktives Team",
+      "pendingDecisions": "Abwesenheitsanträge warten auf Entscheidung",
+      "journalToday": "Arbeitseinträge heute",
+      "awaitingReview": "Einträge warten auf Prüfung",
+      "absentToday": "Heute als abwesend erfasst",
+      "absentNext": "Erfasste Abwesenheiten in den nächsten 7 Tagen",
+      "noneRecordedToday": "Für heute ist keine genehmigte Abwesenheit erfasst.",
+      "noneRecordedNext": "Für die nächsten 7 Tage ist keine genehmigte Abwesenheit erfasst.",
+      "notReadable": "Kann gerade nicht gelesen werden",
+      "basis": "Das aktive Team zählt Beschäftigte, die aktiv mit Ihrem Unternehmen verknüpft sind. Abwesenheiten sind genehmigte erfasste Abwesenheiten — eine Person ohne erfasste Abwesenheit ist damit nicht bestätigt bei der Arbeit. Die Zahl der Arbeitseinträge umfasst Einträge, die Beschäftigte heute in den Beschäftigungsverhältnissen Ihrer Organisation erfasst haben. Gründe für Abwesenheiten bleiben privat."
     }
   },
   "tasks": {

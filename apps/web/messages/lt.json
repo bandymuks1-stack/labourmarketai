@@ -497,7 +497,8 @@
       "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
       "orgDocuments": "Skaičiuojami tik tie darbuotojai, kurie sutiko, kad jų dokumentų skaičiai būtų rodomi bendrai.",
       "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų.",
-      "orgDemandOrg": "Skaičiai pagal jūsų organizacijai priskirtas poreikio užklausas (visi nariai su poreikių prieiga mato tuos pačius skaičius). Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio. Darbuotojų susidomėjimas — darbuotojai, parodę susidomėjimą šiomis užklausomis."
+      "orgDemandOrg": "Skaičiai pagal jūsų organizacijai priskirtas poreikio užklausas (visi nariai su poreikių prieiga mato tuos pačius skaičius). Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio. Darbuotojų susidomėjimas — darbuotojai, parodę susidomėjimą šiomis užklausomis.",
+      "journal": "Skaičiuojami darbo įrašai, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per paskutines septynias kalendorines dienas. „Laukia peržiūros“ — dabartinė peržiūros eilė; „patvirtinta“ — lango įrašai, kuriuos patvirtino vadovas. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko."
     },
     "worker": {
       "evidence": {
@@ -573,7 +574,41 @@
         "overdue": "Vėluojantys",
         "total": "Iš viso įrašų",
         "link": "Atidaryti finansų įrašus"
+      },
+      "journal": {
+        "title": "Darbo žurnalas (paskutinės septynios dienos)",
+        "recorded": "Užfiksuoti įrašai",
+        "awaitingReview": "Laukia peržiūros",
+        "confirmed": "Patvirtinta",
+        "link": "Atverti žurnalo ataskaitą"
       }
+    },
+    "journalWindow": {
+      "eyebrow": "Ataskaitos",
+      "title": "Darbo žurnalo ataskaita",
+      "intro": "Užfiksuotų darbo įrašų skaičiai pagal darbuotoją per pasirinktą kalendorinį langą. Tik skaičiai ir datos — be įrašų teksto, be vertinimų.",
+      "windowLabel": "Ataskaitos langas",
+      "window": {
+        "today": "Šiandien",
+        "week": "Paskutinės septynios dienos",
+        "month": "Paskutinės trisdešimt dienų"
+      },
+      "windowRange": "{start} – {end}",
+      "noOrg": "Šiai ataskaitai reikia organizacijos konteksto. Perjunkite į savo įmonės erdvę.",
+      "unavailable": "Šios ataskaitos dabar nepavyksta perskaityti. Vietoje tikrų duomenų niekas nerodoma.",
+      "empty": "Šiame lange darbo įrašų neužfiksuota.",
+      "emptyNext": "Tuščias langas nėra įrodymas, kad darbas nevyko — tai reiškia tik tiek, kad čia nieko neužrašyta.",
+      "table": {
+        "worker": "Darbuotojas",
+        "entries": "Įrašai",
+        "awaitingReview": "Laukia peržiūros",
+        "confirmed": "Patvirtinta",
+        "lastEntry": "Paskutinis įrašas"
+      },
+      "totals": "{count, plural, one {Iš viso · # darbuotojas} few {Iš viso · # darbuotojai} other {Iš viso · # darbuotojų}}",
+      "basisLabel": "Pagrindas",
+      "basis": "Skaičiuojama iš darbo įrašų, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per pasirinktą langą. Peržiūros būsena — iš vadovų patvirtinimų. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko, ir niekas čia darbuotojų nevertina balais.",
+      "back": "Grįžti į ataskaitas"
     }
   },
   "marketRecognition": {
@@ -8919,6 +8954,19 @@
       "intro": "Patvirtintos jūsų valdomų darbuotojų atostogos. Tik datos — priežastis lieka darbuotojo privatumu.",
       "unavailable": "Nedirba",
       "unnamedWorker": "Darbuotojas"
+    },
+    "organizationToday": {
+      "title": "Šiandien jūsų organizacijoje",
+      "roster": "Aktyvi komanda",
+      "pendingDecisions": "Neatvykimo prašymai laukia sprendimo",
+      "journalToday": "Šiandienos darbo įrašai",
+      "awaitingReview": "Įrašai laukia peržiūros",
+      "absentToday": "Užfiksuota, kad šiandien nedirba",
+      "absentNext": "Užfiksuoti neatvykimai per artimiausias 7 dienas",
+      "noneRecordedToday": "Šiandienai patvirtintų neatvykimų neužfiksuota.",
+      "noneRecordedNext": "Artimiausioms 7 dienoms patvirtintų neatvykimų neužfiksuota.",
+      "notReadable": "Dabar nepavyksta perskaityti",
+      "basis": "Aktyvi komanda — darbuotojai, aktyviai susieti su jūsų įmone. Neatvykimai — patvirtinti užfiksuoti neatvykimai; darbuotojas be užfiksuoto neatvykimo nėra dėl to patvirtintai darbe. Darbo įrašų skaičiai apima įrašus, kuriuos darbuotojai šiandien užfiksavo jūsų organizacijos darbo santykiuose. Neatvykimų priežastys lieka privačios."
     }
   },
   "tasks": {

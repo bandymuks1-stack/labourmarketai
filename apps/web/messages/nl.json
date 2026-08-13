@@ -497,7 +497,8 @@
       "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
       "orgDocuments": "Alleen werknemers die instemden met gedeelde totaalcijfers van documenten worden geteld.",
       "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens.",
-      "orgDemandOrg": "Tellingen over aanvraagverzoeken die aan je organisatie zijn toegeschreven (alle leden met toegang tot aanvragen zien dezelfde cijfers). Open = concept, ingediend, in beoordeling of vervolg nodig. Interesse van werkers telt werkers die interesse toonden in deze verzoeken."
+      "orgDemandOrg": "Tellingen over aanvraagverzoeken die aan je organisatie zijn toegeschreven (alle leden met toegang tot aanvragen zien dezelfde cijfers). Open = concept, ingediend, in beoordeling of vervolg nodig. Interesse van werkers telt werkers die interesse toonden in deze verzoeken.",
+      "journal": "Telt werkregistraties die werkers in de dienstverbanden van deze organisatie hebben vastgelegd over de laatste zeven kalenderdagen. 'Wacht op beoordeling' is de huidige beoordelingswachtrij; 'bevestigd' telt de registraties uit het venster die een manager heeft bevestigd. Het ontbreken van registraties is geen bewijs dat er niet is gewerkt."
     },
     "worker": {
       "evidence": {
@@ -573,7 +574,41 @@
         "overdue": "Achterstallig",
         "total": "Totaal registraties",
         "link": "Open financiële registraties"
+      },
+      "journal": {
+        "title": "Werkjournaal (laatste zeven dagen)",
+        "recorded": "Vastgelegde registraties",
+        "awaitingReview": "Wacht op beoordeling",
+        "confirmed": "Bevestigd",
+        "link": "Journaalrapport openen"
       }
+    },
+    "journalWindow": {
+      "eyebrow": "Rapporten",
+      "title": "Werkjournaalrapport",
+      "intro": "Aantallen vastgelegde werkregistraties per werker over een vast kalendervenster. Alleen aantallen en datums — geen tekst van registraties, geen beoordeling.",
+      "windowLabel": "Rapportvenster",
+      "window": {
+        "today": "Vandaag",
+        "week": "Laatste zeven dagen",
+        "month": "Laatste dertig dagen"
+      },
+      "windowRange": "{start} – {end}",
+      "noOrg": "Dit rapport heeft een organisatiecontext nodig. Schakel naar de werkruimte van je bedrijf.",
+      "unavailable": "Dit rapport kan nu niet worden gelezen. Er wordt niets geschat in de plaats van echte gegevens.",
+      "empty": "In dit venster zijn geen werkregistraties vastgelegd.",
+      "emptyNext": "Een leeg venster is geen bewijs dat er niet is gewerkt — het betekent alleen dat hier niets is vastgelegd.",
+      "table": {
+        "worker": "Werker",
+        "entries": "Registraties",
+        "awaitingReview": "Wacht op beoordeling",
+        "confirmed": "Bevestigd",
+        "lastEntry": "Laatste registratie"
+      },
+      "totals": "{count, plural, one {Totaal · # werker} other {Totaal · # werkers}}",
+      "basisLabel": "Basis",
+      "basis": "Geteld uit werkregistraties die werkers in de dienstverbanden van deze organisatie binnen het gekozen venster hebben vastgelegd. De beoordelingsstatus komt uit bevestigingen van managers. Het ontbreken van registraties is geen bewijs van afwezigheid van werk, en niets hier beoordeelt of scoort iemand.",
+      "back": "Terug naar rapporten"
     }
   },
   "marketRecognition": {
@@ -8919,6 +8954,19 @@
       "intro": "Goedgekeurd verlof van medewerkers die u beheert. Alleen datums — de reden blijft privé.",
       "unavailable": "Niet beschikbaar",
       "unnamedWorker": "Medewerker"
+    },
+    "organizationToday": {
+      "title": "Vandaag in je organisatie",
+      "roster": "Actieve ploeg",
+      "pendingDecisions": "Afwezigheidsverzoeken wachten op besluit",
+      "journalToday": "Werkregistraties vandaag",
+      "awaitingReview": "Registraties wachten op beoordeling",
+      "absentToday": "Vandaag geregistreerd afwezig",
+      "absentNext": "Geregistreerde afwezigheden in de komende 7 dagen",
+      "noneRecordedToday": "Voor vandaag is geen goedgekeurde afwezigheid geregistreerd.",
+      "noneRecordedNext": "Voor de komende 7 dagen is geen goedgekeurde afwezigheid geregistreerd.",
+      "notReadable": "Kan nu niet worden gelezen",
+      "basis": "De actieve ploeg telt werkers die actief aan je bedrijf zijn gekoppeld. Afwezigheden zijn goedgekeurde geregistreerde afwezigheden — een werker zonder geregistreerde afwezigheid is daarmee niet bevestigd aan het werk. Werkregistratie-aantallen omvatten registraties die werkers vandaag in de dienstverbanden van je organisatie hebben vastgelegd. Redenen van afwezigheid blijven privé."
     }
   },
   "tasks": {
