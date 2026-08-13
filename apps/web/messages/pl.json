@@ -3626,6 +3626,7 @@
       "engagementsWorking": "Kończenie…",
       "engagementsEnded": "Relacja robocza została zakończona.",
       "engagementsEndedAt": "Relacja robocza została zakończona {date}.",
+      "engagementsEndedStillVisible": "Uwaga: ta firma nadal widzi Twój profil, dopóki jesteś przypisany(-a) do jej projektu. Ten dostęp wygaśnie po zakończeniu przypisania.",
       "engagementsAlreadyEnded": "Ta relacja robocza była już zakończona. Nic nie zmieniono.",
       "engagementsAlreadyEndedAt": "Ta relacja robocza była już zakończona {date}. Nic nie zmieniono."
     }

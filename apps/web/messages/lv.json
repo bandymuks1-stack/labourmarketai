@@ -3626,6 +3626,7 @@
       "engagementsWorking": "Notiek beigšana…",
       "engagementsEnded": "Darba attiecības ir beigtas.",
       "engagementsEndedAt": "Darba attiecības beigtas {date}.",
+      "engagementsEndedStillVisible": "Piezīme: šis uzņēmums joprojām redz jūsu profilu, kamēr esat norīkots tā projektā. Šī piekļuve beigsies, kad norīkojums beigsies.",
       "engagementsAlreadyEnded": "Šīs darba attiecības jau bija beigtas. Nekas netika mainīts.",
       "engagementsAlreadyEndedAt": "Šīs darba attiecības jau bija beigtas {date}. Nekas netika mainīts."
     }

@@ -37,8 +37,12 @@ export function BookingRespondButtons({
   };
 }) {
   const t = useTranslations("bookings");
+  // C1 (#1097): the SAME canonical disclosure string the conversation accept
+  // surface shows — one source, all 11 locales, no second wording to drift.
+  const tBooking = useTranslations("conversation.booking");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [acceptOpen, setAcceptOpen] = useState(false);
   const [declineOpen, setDeclineOpen] = useState(false);
   const [reasonKind, setReasonKind] = useState("");
   const [reasonNote, setReasonNote] = useState("");
@@ -125,11 +129,21 @@ export function BookingRespondButtons({
       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
         {/* min-h-11 = 44px touch targets (audit PR8); w-full on phones so the
             decision buttons are unmissable one-thumb targets (P2-PR6). Accept
-            is the visually PRIMARY action of an incoming proposed row. */}
+            is the visually PRIMARY action of an incoming proposed row.
+
+            C1 (#1097): accept is no longer a one-tap write. It opens a confirm
+            step that states the disclosure — accepting lets THIS company see
+            the profile card while the engagement is active — BEFORE the
+            predicate widens. The conversation surface has said this since
+            #1097; a second accept door that stayed silent was the gap. */}
         <button
           type="button"
           disabled={pending}
-          onClick={() => respond("accepted")}
+          onClick={() => {
+            setAcceptOpen((v) => !v);
+            setDeclineOpen(false);
+          }}
+          data-testid="booking-accept-open"
           className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success hover:bg-state-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
         >
           {labels.accept}
@@ -137,13 +151,47 @@ export function BookingRespondButtons({
         <button
           type="button"
           disabled={pending}
-          onClick={() => setDeclineOpen((v) => !v)}
+          onClick={() => {
+            setDeclineOpen((v) => !v);
+            setAcceptOpen(false);
+          }}
           data-testid="booking-decline-open"
           className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
         >
           {labels.decline}
         </button>
       </div>
+      {acceptOpen ? (
+        <div
+          className="flex w-full flex-col gap-2 rounded-md border border-state-success/30 bg-ink-800/60 p-2.5"
+          data-testid="booking-accept-form"
+        >
+          <p
+            className="text-meta leading-relaxed text-text-secondary"
+            data-testid="booking-accept-disclosure"
+          >
+            {tBooking("confirmAcceptDisclosure")}
+          </p>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => respond("accepted")}
+              data-testid="booking-accept-confirm"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success hover:bg-state-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+            >
+              {labels.accept}
+            </button>
+            <button
+              type="button"
+              onClick={() => setAcceptOpen(false)}
+              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+            >
+              {t("reason.cancel")}
+            </button>
+          </div>
+        </div>
+      ) : null}
       {declineOpen ? (
         <div
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"

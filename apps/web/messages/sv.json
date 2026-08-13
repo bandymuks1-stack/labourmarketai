@@ -3626,6 +3626,7 @@
       "engagementsWorking": "Avslutar…",
       "engagementsEnded": "Arbetsrelationen är avslutad.",
       "engagementsEndedAt": "Arbetsrelationen avslutades {date}.",
+      "engagementsEndedStillVisible": "Obs: det här företaget kan fortfarande se din profil så länge du är tilldelad dess projekt. Åtkomsten upphör när tilldelningen avslutas.",
       "engagementsAlreadyEnded": "Den här arbetsrelationen var redan avslutad. Inget ändrades.",
       "engagementsAlreadyEndedAt": "Den här arbetsrelationen var redan avslutad {date}. Inget ändrades."
     }
