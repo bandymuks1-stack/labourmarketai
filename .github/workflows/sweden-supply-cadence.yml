@@ -1,0 +1,82 @@
+# Sweden supply freshness cadence — V8 §10 / docs/operations/sweden-freshness-cadence-v1.md
+#
+# INERT BY DEFAULT. This workflow no-ops until the owner performs BOTH
+# console actions (never done by an agent):
+#   secrets:   SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SUPABASE_URL
+#   variables: VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED=true
+#              VACANCY_SCHEDULE_ENABLED=true
+#
+# It invokes EXACTLY the canonical operator runner — the same bounded windows,
+# cursor discipline, lifecycle withdrawals, chunked reads/writes and failure
+# semantics a human operator gets. No new importer, no relaxed gate.
+# Kill switch: unset/false VACANCY_SCHEDULE_ENABLED (one console action).
+# Failure surface: red workflow run + the cursor's own consecutive_failures.
+name: sweden-supply-cadence
+
+on:
+  schedule:
+    - cron: "17 5,11,17 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: sweden-supply-cadence
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Kill switch / configuration gate
+        id: gate
+        env:
+          SCHEDULE_ENABLED: ${{ vars.VACANCY_SCHEDULE_ENABLED }}
+          PROVIDER_ENABLED: ${{ vars.VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED }}
+          HAS_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+          HAS_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+        run: |
+          if [ "$SCHEDULE_ENABLED" != "true" ] || [ "$PROVIDER_ENABLED" != "true" ] || [ "$HAS_KEY" != "true" ] || [ "$HAS_URL" != "true" ]; then
+            echo "configuration_gated=true" >> "$GITHUB_OUTPUT"
+            echo "Inert: schedule/provider variables or secrets not configured. This is the designed no-op state."
+          else
+            echo "configuration_gated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.configuration_gated == 'false'
+
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.configuration_gated == 'false'
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.configuration_gated == 'false'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        if: steps.gate.outputs.configuration_gated == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Bounded stream import (canonical operator runner)
+        if: steps.gate.outputs.configuration_gated == 'false'
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED: "true"
+        run: |
+          pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
+            --provider arbetsformedlingen --channel stream --mode persist \
+            --apply --i-understand-this-writes-production | tee run-accounting.json
+
+      - name: Upload accounting artifact
+        if: steps.gate.outputs.configuration_gated == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sweden-run-accounting-${{ github.run_id }}
+          path: apps/web/run-accounting.json
+          retention-days: 30
