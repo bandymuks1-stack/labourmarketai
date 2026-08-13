@@ -4910,6 +4910,15 @@
           ]
         },
         {
+          "heading": "Infrastructure providers (subprocessors)",
+          "items": [
+            "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
+            "Vercel — application hosting and content delivery.",
+            "GitHub — source code hosting. No user data is stored there.",
+            "No email provider, no AI provider, no translation provider and no payment provider is currently active. If one is activated, this list is updated first."
+          ]
+        },
+        {
           "heading": "Honest limits",
           "items": [
             "No system can promise absolute security. If you notice a problem, contact us — a person will review it."
@@ -4919,7 +4928,7 @@
       "pendingTitle": "Still waiting for final legal wording:",
       "pendingItems": [
         "The formal description of technical and organisational measures.",
-        "The list of processors and data-processing agreements.",
+        "Signed data-processing agreements with the infrastructure providers listed above.",
         "Final retention periods."
       ]
     },
