@@ -11337,6 +11337,7 @@
       "engagementsWorking": "Ending…",
       "engagementsEnded": "The engagement is ended.",
       "engagementsEndedAt": "The engagement is ended on {date}.",
+      "engagementsEndedStillVisible": "Note: this company can still see your profile while you remain assigned to their project. That access ends when the assignment ends.",
       "engagementsAlreadyEnded": "This engagement was already ended. Nothing was changed.",
       "engagementsAlreadyEndedAt": "This engagement was already ended on {date}. Nothing was changed."
     }

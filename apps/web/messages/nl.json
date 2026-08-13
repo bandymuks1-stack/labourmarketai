@@ -11337,6 +11337,7 @@
       "engagementsWorking": "Bezig met beëindigen…",
       "engagementsEnded": "De werkrelatie is beëindigd.",
       "engagementsEndedAt": "De werkrelatie is beëindigd op {date}.",
+      "engagementsEndedStillVisible": "Let op: dit bedrijf kan uw profiel nog steeds zien zolang u aan zijn project bent toegewezen. Die toegang eindigt wanneer de toewijzing eindigt.",
       "engagementsAlreadyEnded": "Deze werkrelatie was al beëindigd. Er is niets gewijzigd.",
       "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd."
     }

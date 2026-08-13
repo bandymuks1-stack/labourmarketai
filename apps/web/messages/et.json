@@ -3626,6 +3626,7 @@
       "engagementsWorking": "Lõpetamine…",
       "engagementsEnded": "Töösuhe on lõpetatud.",
       "engagementsEndedAt": "Töösuhe lõpetati {date}.",
+      "engagementsEndedStillVisible": "Märkus: see ettevõte näeb teie profiili endiselt, kuni olete tema projekti määratud. See juurdepääs lõpeb määramise lõppedes.",
       "engagementsAlreadyEnded": "See töösuhe oli juba lõpetatud. Midagi ei muudetud.",
       "engagementsAlreadyEndedAt": "See töösuhe oli juba lõpetatud {date}. Midagi ei muudetud."
     }

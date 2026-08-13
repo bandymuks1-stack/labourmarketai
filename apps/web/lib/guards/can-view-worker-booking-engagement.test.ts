@@ -166,7 +166,10 @@ describe("the new branch — exact shape and narrowness", () => {
     // a new authority widening on the GDPR predicate and needs its own owner
     // decision. `manages_organization` still appears in the pre-existing
     // engagement_contexts branch — that one is untouched.
-    const src = body();
+    // Normalize line endings first: on a CRLF checkout (Windows) `")\n"`
+    // never matches, the slice runs to the end of the function and swallows
+    // the engagement_contexts branch — a false RED that only appears off-CI.
+    const src = body().replace(/\r\n/g, "\n");
     const engagementBranch =
       src.split("public.company_worker_engagements")[1]?.split(")\n")[0] ?? "";
     expect(engagementBranch).not.toMatch(/manages_organization/);
@@ -482,5 +485,84 @@ describe("C2b — the public data-access matrix stops under-claiming", () => {
     const en: string = seeNote("en");
     expect(en).toMatch(/contact details stay private/i);
     expect(en).toMatch(/no other company gains access/i);
+  });
+});
+
+/**
+ * V8 §23 — the two follow-ups the #1097 behavioural proof left open, pinned.
+ *
+ * C1 completion: the proof found the disclosure on the CONVERSATION accept
+ * door only; `/dashboard/bookings` accepted with one silent tap. Both doors
+ * widen the same predicate, so both must say the same sentence first.
+ *
+ * F2: ending an engagement does not always end the employer's view — an
+ * active project assignment keeps the `can_view_worker` assignment branch
+ * alive. The end surface must state a POSITIVE finding and stay silent on
+ * false/unknown; claiming either way without measuring is the defect class.
+ */
+describe("C1 completion — the bookings-page accept door discloses too", () => {
+  const CATALOGUE = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
+
+  it("accept opens a confirm step that renders the SAME canonical disclosure", () => {
+    const cmp = readRepo("apps/web/components/app/booking-respond-buttons.tsx");
+    // One canonical string: the component must read the conversation.booking
+    // namespace, not define a second wording that can drift from the memo's.
+    expect(cmp).toContain('useTranslations("conversation.booking")');
+    expect(cmp).toContain('tBooking("confirmAcceptDisclosure")');
+    expect(cmp).toContain("booking-accept-disclosure");
+  });
+
+  it("the accept WRITE is reachable only from the confirm step", () => {
+    const cmp = readRepo("apps/web/components/app/booking-respond-buttons.tsx");
+    // Exactly one call site of the accepted write…
+    const writes = cmp.match(/respond\("accepted"\)/g) ?? [];
+    expect(writes).toHaveLength(1);
+    // …and it sits INSIDE the accept confirm form, after the disclosure —
+    // a one-tap accept on the row would put it before the form opens.
+    const formAt = cmp.indexOf("booking-accept-form");
+    const disclosureAt = cmp.indexOf("booking-accept-disclosure");
+    const writeAt = cmp.indexOf('respond("accepted")');
+    expect(formAt).toBeGreaterThan(-1);
+    expect(disclosureAt).toBeGreaterThan(formAt);
+    expect(writeAt).toBeGreaterThan(disclosureAt);
+  });
+});
+
+describe("F2 — ending an engagement states the visibility that remains", () => {
+  const CATALOGUE = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
+  const messages = (l: string) =>
+    JSON.parse(readFileSync(join(APP_ROOT, "messages", `${l}.json`), "utf8"));
+
+  it("the rider copy exists in ALL 11 catalogues", () => {
+    for (const l of CATALOGUE) {
+      const rider = messages(l).conversation.results.engagementsEndedStillVisible;
+      expect(typeof rider, l).toBe("string");
+      expect(rider.length, l).toBeGreaterThan(40);
+    }
+  });
+
+  it("the EN rider claims exactly the assignment basis — scoped, revocable, no over-claim", () => {
+    const en: string = messages("en").conversation.results.engagementsEndedStillVisible;
+    expect(en).toMatch(/this company/i);
+    expect(en).toMatch(/assigned to their project/i);
+    expect(en).toMatch(/ends when the assignment ends/i);
+    expect(en).not.toMatch(/\bpublic(ly)?\b/i);
+    expect(en).not.toMatch(/all employers/i);
+  });
+
+  it("the action computes the finding for the WORKER actor and never invents one", () => {
+    const action = readRepo("apps/web/lib/engagements/end-engagement.ts");
+    expect(action).toContain("companyStillSeesWorkerViaAssignment");
+    // Only the worker is warned about the company's view of them.
+    expect(action).toContain('actorSide === "worker"');
+    // A thrown check collapses to unknown — the end itself must still report.
+    expect(action).toContain("companyStillSeesProfile = null");
+  });
+
+  it("the surface speaks ONLY on a positive finding — false and unknown stay silent", () => {
+    const cmp = readRepo("apps/web/components/app/workspace/engagements-result.tsx");
+    expect(cmp).toContain("companyStillSeesProfile === true");
+    expect(cmp).toContain('t("engagementsEndedStillVisible")');
+    expect(cmp).toContain("engagements-visibility-note");
   });
 });
