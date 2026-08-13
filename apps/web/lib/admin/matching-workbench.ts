@@ -9,6 +9,7 @@ import {
   type AgencyOfferMark,
   type StructuredNeed,
 } from "@/lib/market/fit";
+import { isPrivacyRequestPayload } from "@/lib/privacy/privacy-request-model";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
 import { buildTeamMatchInput } from "@/lib/company/team-match-input";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
@@ -227,8 +228,16 @@ export async function listWorkbench(
     // bridge unavailable → slugs-only (still fully functional)
   }
 
+  // Privacy self-service rows (export / deletion requests) are requests
+  // ABOUT data, not labour demand — they must never sit in a matching queue
+  // (V8 W4-C item 2). They surface on the admin control room's own privacy
+  // section instead; the shared classifier keeps the two reads from drifting.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const demand: DemandRow[] = ((requests ?? []) as any[]).map((r) => {
+  const demandSource = ((requests ?? []) as any[]).filter(
+    (r) => !isPrivacyRequestPayload(r.payload),
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const demand: DemandRow[] = (demandSource as any[]).map((r) => {
     const derived = buildNeedFromRequestRow(
       {
         title: (r.title as string | null) ?? null,

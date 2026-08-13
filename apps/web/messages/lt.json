@@ -2808,6 +2808,19 @@
         "technical_foundation": "Techninis pagrindas",
         "launch_readiness": "Pasirengimas paleidimui"
       }
+    },
+    "privacyRequests": {
+      "title": "Privatumo prašymai",
+      "subtitle": "Duomenų eksporto ir paskyros ištrynimo prašymai, pateikti privatumo savitarnos puslapyje.",
+      "empty": "Privatumo prašymų nėra.",
+      "needsMigration": "Privatumo prašymų priėmimas šioje aplinkoje dar neįjungtas.",
+      "unavailable": "Privatumo prašymų dabar nepavyksta perskaityti.",
+      "manualNote": "Apdorojimas rankinis: kiekvieną prašymą peržiūri ir įvykdo žmogus. Šiame sąraše niekas nevyksta automatiškai.",
+      "type": {
+        "dataExport": "Duomenų eksportas",
+        "accountDeletion": "Paskyros ištrynimas",
+        "unknown": "Privatumo prašymas"
+      }
     }
   },
   "profileSkillClaims": {
@@ -4910,6 +4923,15 @@
           ]
         },
         {
+          "heading": "Infrastruktūros paslaugų teikėjai (pagalbiniai tvarkytojai)",
+          "items": [
+            "Supabase — duomenų bazė, naudotojų prisijungimas ir failų saugykla. Duomenys laikomi Europos Sąjungoje (eu-west-1 regione).",
+            "Vercel — svetainės talpinimas ir turinio pateikimas.",
+            "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
+            "Šiuo metu neveikia joks el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
+          ]
+        },
+        {
           "heading": "Sąžiningos ribos",
           "items": [
             "Jokia sistema negali pažadėti absoliutaus saugumo. Pastebėję problemą, susisiekite su mumis — ją peržiūrės žmogus."
@@ -4919,7 +4941,7 @@
       "pendingTitle": "Dar laukia galutinio teisinio teksto:",
       "pendingItems": [
         "Oficialus techninių ir organizacinių priemonių aprašymas.",
-        "Tvarkytojų sąrašas ir duomenų tvarkymo sutartys.",
+        "Pasirašytos duomenų tvarkymo sutartys su aukščiau išvardytais infrastruktūros teikėjais.",
         "Galutiniai saugojimo terminai."
       ]
     },

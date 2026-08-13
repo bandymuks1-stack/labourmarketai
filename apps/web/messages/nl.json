@@ -2808,6 +2808,19 @@
         "technical_foundation": "Technisch fundament",
         "launch_readiness": "Lanceergereedheid"
       }
+    },
+    "privacyRequests": {
+      "title": "Privacyverzoeken",
+      "subtitle": "Verzoeken om gegevensexport en accountverwijdering, ingediend via de privacy-zelfbedieningspagina.",
+      "empty": "Geen privacyverzoeken.",
+      "needsMigration": "De ontvangst van privacyverzoeken is in deze omgeving nog niet ingeschakeld.",
+      "unavailable": "Privacyverzoeken kunnen nu niet worden gelezen.",
+      "manualNote": "De verwerking is handmatig: elk verzoek wordt door een persoon beoordeeld en afgehandeld. Niets in deze lijst gebeurt automatisch.",
+      "type": {
+        "dataExport": "Gegevensexport",
+        "accountDeletion": "Accountverwijdering",
+        "unknown": "Privacyverzoek"
+      }
     }
   },
   "profileSkillClaims": {
@@ -4910,6 +4923,15 @@
           ]
         },
         {
+          "heading": "Infrastructuurleveranciers (subverwerkers)",
+          "items": [
+            "Supabase — database, gebruikersaanmelding en bestandsopslag. Gegevens worden gehost in de Europese Unie (regio eu-west-1).",
+            "Vercel — hosting van de applicatie en levering van inhoud.",
+            "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
+            "Er is momenteel geen e-mailleverancier, AI-leverancier, vertaalleverancier of betalingsleverancier actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
+          ]
+        },
+        {
           "heading": "Eerlijke grenzen",
           "items": [
             "Geen enkel systeem kan absolute veiligheid beloven. Als je een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
@@ -4919,7 +4941,7 @@
       "pendingTitle": "Wacht nog op de definitieve juridische verwoording:",
       "pendingItems": [
         "De formele beschrijving van technische en organisatorische maatregelen.",
-        "De lijst met verwerkers en verwerkersovereenkomsten.",
+        "Ondertekende verwerkersovereenkomsten met de hierboven genoemde infrastructuurleveranciers.",
         "Definitieve bewaartermijnen."
       ]
     },

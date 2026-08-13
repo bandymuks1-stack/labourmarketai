@@ -2808,6 +2808,19 @@
         "technical_foundation": "Technisches Fundament",
         "launch_readiness": "Launch-Bereitschaft"
       }
+    },
+    "privacyRequests": {
+      "title": "Datenschutzanfragen",
+      "subtitle": "Anfragen auf Datenexport und Kontolöschung, eingereicht über die Datenschutz-Selbstbedienungsseite.",
+      "empty": "Keine Datenschutzanfragen.",
+      "needsMigration": "Die Annahme von Datenschutzanfragen ist in dieser Umgebung noch nicht aktiviert.",
+      "unavailable": "Datenschutzanfragen können gerade nicht gelesen werden.",
+      "manualNote": "Die Bearbeitung erfolgt manuell: Jede Anfrage wird von einer Person geprüft und erledigt. Nichts in dieser Liste läuft automatisch.",
+      "type": {
+        "dataExport": "Datenexport",
+        "accountDeletion": "Kontolöschung",
+        "unknown": "Datenschutzanfrage"
+      }
     }
   },
   "profileSkillClaims": {
@@ -4910,6 +4923,15 @@
           ]
         },
         {
+          "heading": "Infrastrukturanbieter (Unterauftragsverarbeiter)",
+          "items": [
+            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher. Die Daten werden in der Europäischen Union gehostet (Region eu-west-1).",
+            "Vercel — Hosting der Anwendung und Auslieferung der Inhalte.",
+            "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
+            "Derzeit ist kein E-Mail-Anbieter, kein KI-Anbieter, kein Übersetzungsanbieter und kein Zahlungsanbieter aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
+          ]
+        },
+        {
           "heading": "Ehrliche Grenzen",
           "items": [
             "Kein System kann absolute Sicherheit versprechen. Wenn Sie ein Problem bemerken, kontaktieren Sie uns — ein Mensch wird es prüfen."
@@ -4919,7 +4941,7 @@
       "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
       "pendingItems": [
         "Die formale Beschreibung der technischen und organisatorischen Maßnahmen.",
-        "Die Liste der Auftragsverarbeiter und Auftragsverarbeitungsverträge.",
+        "Unterzeichnete Auftragsverarbeitungsverträge mit den oben genannten Infrastrukturanbietern.",
         "Endgültige Aufbewahrungsfristen."
       ]
     },
