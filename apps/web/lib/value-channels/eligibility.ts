@@ -103,10 +103,6 @@ const CATEGORY_RES: ReadonlyArray<{ category: ListingCategory; re: RegExp }> = [
   { category: "safety_equipment", re: /salm|apsaugin|liemen|safety\s+(equipment|gear|helmet)|helmet|каск|защитн|helm\b|veiligheids/u },
 ];
 
-/** Availability wording that makes an equipment offer a RENTAL, not a sale. */
-const RENTAL_RES =
-  /laisv|nuomo|isnuomo|\brent(al)?\b|\bhire\b|for\s+hire|аренд|сда(м|ю|ем)|\bhuur|miet(e|en)/u;
-
 function scanHaystack(statement: ValueStatement, text?: string): string {
   return foldText(`${statement.subjectLabel ?? ""} ${text ?? ""}`);
 }

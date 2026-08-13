@@ -11123,7 +11123,7 @@
       "engagementsNoCompany": "You are not acting for an organisation right now, so there is no roster to show.",
       "engagementsUnavailable": "The work relationships cannot be read right now. This is not the same as having none.",
       "valueIntent": {
-        "understood": "Understood: {summary}.",
+        "understood": "As you state it: {summary}.",
         "people": "{count, plural, one {# person} other {# people}}",
         "daysCount": "{count, plural, one {# day} other {# days}}",
         "window": {
@@ -11139,9 +11139,17 @@
         },
         "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
         "goodsChannelGated": "There is no buyer channel for goods on the platform yet, so nobody here would see this for sale. Nothing you wrote has been saved anywhere.",
-        "goodsListingsHint": "If this is work equipment or tools, you can post it on the listings board.",
         "chipListings": "Open the listings",
-        "capacityNext": "I can record your availability on your work card, or search for work right away — the results are the currently open inquiries."
+        "capacityNext": "I can record your availability on your work card, or search for work right away — the results are the currently open inquiries.",
+        "unsupported": "This cannot be offered through the platform. No route is available for it.",
+        "legalCheckFood": "Selling food or home-grown produce falls under food sale, hygiene and marketing rules that would have to be checked first — the platform has no approved channel for produce.",
+        "goodsListable": "This looks like a work-related resource — you can post it as a listing on the listings board.",
+        "goodsListableRental": "This looks like available work equipment — you can post it as a rental listing on the listings board.",
+        "goodsCategoryUnsupported": "This category is not supported on the platform's work-bounded listings board today. Nothing you wrote has been saved.",
+        "serviceNext": "You can post this as a service offering so others can find it.",
+        "chipServices": "Open the services board",
+        "corrected": "Updated: {changes}.",
+        "changeInsteadOf": "{next} (instead of {previous})"
       }
     },
     "worklog": {
