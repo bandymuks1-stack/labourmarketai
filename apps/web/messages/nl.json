@@ -2808,6 +2808,19 @@
         "technical_foundation": "Technisch fundament",
         "launch_readiness": "Lanceergereedheid"
       }
+    },
+    "privacyRequests": {
+      "title": "Privacyverzoeken",
+      "subtitle": "Verzoeken om gegevensexport en accountverwijdering, ingediend via de privacy-zelfbedieningspagina.",
+      "empty": "Geen privacyverzoeken.",
+      "needsMigration": "De ontvangst van privacyverzoeken is in deze omgeving nog niet ingeschakeld.",
+      "unavailable": "Privacyverzoeken kunnen nu niet worden gelezen.",
+      "manualNote": "De verwerking is handmatig: elk verzoek wordt door een persoon beoordeeld en afgehandeld. Niets in deze lijst gebeurt automatisch.",
+      "type": {
+        "dataExport": "Gegevensexport",
+        "accountDeletion": "Accountverwijdering",
+        "unknown": "Privacyverzoek"
+      }
     }
   },
   "profileSkillClaims": {

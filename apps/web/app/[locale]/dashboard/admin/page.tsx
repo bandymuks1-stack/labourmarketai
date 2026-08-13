@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
+import { PrivacyRequestsSection } from "@/components/admin/privacy-requests-section";
 import { VacancySourcesSection } from "@/components/admin/vacancy-sources-section";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
@@ -613,6 +614,13 @@ export default async function AdminDashboardPage({
             </>
         )}
       </section>
+
+      {/* BAND 2a½ — Privacy requests (V8 W4-C item 2). Export/deletion
+          requests used to surface ONLY inside the matching workbench, mixed
+          with hiring demand. A queue in the band-2 slot, NOT a route (the
+          same Product Gate reasoning as experience moderation below):
+          visibility only, processing stays manual — no executor is faked. */}
+      <PrivacyRequestsSection locale={locale} />
 
       {/* BAND 2b — Internal follow-up task queue (§8.13, branch 24). The
           platform's memory of next actions: internal only, contacts nobody. */}

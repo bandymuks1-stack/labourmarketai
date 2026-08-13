@@ -2808,6 +2808,19 @@
         "technical_foundation": "Technical foundation",
         "launch_readiness": "Launch readiness"
       }
+    },
+    "privacyRequests": {
+      "title": "Privacy requests",
+      "subtitle": "Data export and account deletion requests submitted from the privacy self-service page.",
+      "empty": "No privacy requests.",
+      "needsMigration": "The privacy request intake is not enabled in this environment.",
+      "unavailable": "Privacy requests cannot be read right now.",
+      "manualNote": "Processing is manual: a person reviews and completes each request. Nothing on this list acts automatically.",
+      "type": {
+        "dataExport": "Data export",
+        "accountDeletion": "Account deletion",
+        "unknown": "Privacy request"
+      }
     }
   },
   "profileSkillClaims": {

@@ -2808,6 +2808,19 @@
         "technical_foundation": "Techninis pagrindas",
         "launch_readiness": "Pasirengimas paleidimui"
       }
+    },
+    "privacyRequests": {
+      "title": "Privatumo prašymai",
+      "subtitle": "Duomenų eksporto ir paskyros ištrynimo prašymai, pateikti privatumo savitarnos puslapyje.",
+      "empty": "Privatumo prašymų nėra.",
+      "needsMigration": "Privatumo prašymų priėmimas šioje aplinkoje dar neįjungtas.",
+      "unavailable": "Privatumo prašymų dabar nepavyksta perskaityti.",
+      "manualNote": "Apdorojimas rankinis: kiekvieną prašymą peržiūri ir įvykdo žmogus. Šiame sąraše niekas nevyksta automatiškai.",
+      "type": {
+        "dataExport": "Duomenų eksportas",
+        "accountDeletion": "Paskyros ištrynimas",
+        "unknown": "Privatumo prašymas"
+      }
     }
   },
   "profileSkillClaims": {

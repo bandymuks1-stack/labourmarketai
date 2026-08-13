@@ -2808,6 +2808,19 @@
         "technical_foundation": "Technisches Fundament",
         "launch_readiness": "Launch-Bereitschaft"
       }
+    },
+    "privacyRequests": {
+      "title": "Datenschutzanfragen",
+      "subtitle": "Anfragen auf Datenexport und Kontolöschung, eingereicht über die Datenschutz-Selbstbedienungsseite.",
+      "empty": "Keine Datenschutzanfragen.",
+      "needsMigration": "Die Annahme von Datenschutzanfragen ist in dieser Umgebung noch nicht aktiviert.",
+      "unavailable": "Datenschutzanfragen können gerade nicht gelesen werden.",
+      "manualNote": "Die Bearbeitung erfolgt manuell: Jede Anfrage wird von einer Person geprüft und erledigt. Nichts in dieser Liste läuft automatisch.",
+      "type": {
+        "dataExport": "Datenexport",
+        "accountDeletion": "Kontolöschung",
+        "unknown": "Datenschutzanfrage"
+      }
     }
   },
   "profileSkillClaims": {
