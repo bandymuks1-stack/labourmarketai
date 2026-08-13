@@ -10146,7 +10146,7 @@
         "adminCurated": "Owner-entered averages with a source note instead of a sample size.",
         "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
-        "arbetsformedlingen": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
+        "arbetsformedlingen": "Active source. Usage terms confirmed: a free public data source (CC0). Attribution is shown with every advertisement, and each advertisement links back to the original posting.",
         "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
         "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
         "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
