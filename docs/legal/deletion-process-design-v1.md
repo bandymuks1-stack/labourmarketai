@@ -1,6 +1,20 @@
 # Deletion process design v1 — DESIGN ONLY (2026-08-13)
 
-State: `DESIGN — NOTHING HERE IS IMPLEMENTED BY THIS PR`. This document
+> **STATUS UPDATE (2026-08-13, V9 PR `feat/cc/v9-deletion-executor-phase1`):
+> Phases 1+2 SHIPPED — the NON-destructive phases only.**
+> Phase 1 (review verbs): superadmin status transitions
+> (`in_review / needs_followup / approved / closed`) + note on the admin
+> queue, audit-logged into the row's payload (`privacy_review_log`, the
+> workbench `match_log` pattern) through the existing `customer_requests`
+> admin UPDATE policy — no migration, no new table.
+> Phase 2 (dry-run plan): the read-only `DeletionPlanPreview`
+> (`lib/privacy/deletion-plan.ts`, zero-writes guard-pinned) rendered as a
+> same-page expand on the admin queue; RLS-self-only classes (consents,
+> notifications) are marked NOT COUNTABLE rather than false zeros.
+> **Phases 3–4 remain OWNER_GATED + LEGAL_DECISION_REQUIRED exactly as
+> designed below — no destructive step exists, is scheduled, or is enabled.**
+
+State: `DESIGN — NOTHING DESTRUCTIVE IS IMPLEMENTED`. This document
 designs the account-deletion (GDPR Art. 17) process end to end so the owner
 can review it as a whole before ANY executor code exists. Every destructive
 step below is OWNER_GATED. The only shipped pieces as of this document are
@@ -111,9 +125,9 @@ because they need the identity to find the rows; the cascade runs last.
 Sequencing rule: a phase merges only after the previous phase has run on a
 real request at least once (the W4 "real benefit" discipline).
 
-## 6. What this PR changes
+## 6. What the original #1149 PR changed
 
-Nothing executable. This PR ships: the admin visibility queue (item 2, no
+Nothing executable. That PR shipped: the admin visibility queue (item 2, no
 processing controls), the factual subprocessors list (item 1), and this
 document. **No deletion, anonymisation, or account-removal code is
 implemented, scheduled, or enabled by this PR.**

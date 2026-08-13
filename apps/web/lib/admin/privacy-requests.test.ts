@@ -144,7 +144,162 @@ describe("3 · the admin queue read", () => {
   });
 });
 
+/** Recording fake for the review verb: read (maybeSingle) + update chains. */
+function reviewFakeClient(options: {
+  row?: Record<string, unknown> | null;
+  readError?: { code?: string } | null;
+  updatedRows?: unknown[];
+}) {
+  const updates: { payload: Record<string, unknown>; filters: [string, unknown][] }[] = [];
+  const client = {
+    auth: { getUser: async () => ({ data: { user: { id: "admin-1" } } }) },
+    from: (table: string) => {
+      const chain: Record<string, unknown> = {};
+      const self = () => chain;
+      chain.select = self;
+      chain.eq = (col: string, value: unknown) => {
+        const last = updates[updates.length - 1];
+        if (last && !("done" in last)) last.filters.push([col, value]);
+        return chain;
+      };
+      chain.maybeSingle = async () => ({
+        data: options.readError ? null : (options.row ?? null),
+        error: options.readError ?? null,
+      });
+      chain.update = (payload: Record<string, unknown>) => {
+        updates.push({ payload, filters: [] });
+        return chain;
+      };
+      chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
+        Promise.resolve({
+          data: options.updatedRows ?? [{ id: "req-privacy" }],
+          error: null,
+        }).then(ok, err);
+      void table;
+      return chain;
+    },
+  };
+  return { client, updates };
+}
+
+async function runReview(
+  fake: ReturnType<typeof reviewFakeClient>,
+  input: { requestId: string; status: string; note?: string | null },
+  superadmin = true,
+) {
+  vi.doMock("@/lib/supabase/server", () => ({
+    createClient: async () => fake.client,
+  }));
+  vi.doMock("@/lib/auth/superadmin", () => ({
+    isSuperadmin: async () => superadmin,
+  }));
+  vi.resetModules();
+  const mod = await import("@/lib/admin/privacy-requests");
+  const result = await mod.reviewPrivacyRequest(input);
+  vi.doUnmock("@/lib/supabase/server");
+  vi.doUnmock("@/lib/auth/superadmin");
+  vi.resetModules();
+  return result;
+}
+
+describe("5 · review verbs (V9 phase 1) — review only, never deletion", () => {
+  it("the allowed transition set is exactly the review subset", async () => {
+    const { PRIVACY_REVIEW_STATUSES } = await import("./privacy-requests");
+    expect([...PRIVACY_REVIEW_STATUSES]).toEqual([
+      "in_review",
+      "needs_followup",
+      "approved",
+      "closed",
+    ]);
+    // Intake states are not review outcomes.
+    for (const bad of ["draft", "submitted", "deleted", ""]) {
+      const fake = reviewFakeClient({ row: PRIVACY_ROW });
+      expect(await runReview(fake, { requestId: "req-privacy", status: bad })).toEqual({
+        kind: "invalid",
+      });
+      expect(fake.updates).toHaveLength(0);
+    }
+  });
+
+  it("a non-superadmin caller is refused before any read or write", async () => {
+    const fake = reviewFakeClient({ row: PRIVACY_ROW });
+    const result = await runReview(
+      fake,
+      { requestId: "req-privacy", status: "approved" },
+      false,
+    );
+    expect(result).toEqual({ kind: "not-superadmin" });
+    expect(fake.updates).toHaveLength(0);
+  });
+
+  it("NEGATIVE CONTROL: a demand row can never be reviewed through this verb", async () => {
+    const fake = reviewFakeClient({ row: DEMAND_ROW });
+    const result = await runReview(fake, {
+      requestId: "req-demand",
+      status: "closed",
+    });
+    expect(result).toEqual({ kind: "not-privacy-request" });
+    expect(fake.updates).toHaveLength(0);
+  });
+
+  it("a successful review writes the status AND appends the payload audit entry", async () => {
+    const fake = reviewFakeClient({ row: PRIVACY_ROW });
+    const result = await runReview(fake, {
+      requestId: "req-privacy",
+      status: "approved",
+      note: "identity checked",
+    });
+    expect(result).toEqual({ kind: "ok" });
+    expect(fake.updates).toHaveLength(1);
+    const update = fake.updates[0];
+    expect(update.payload.status).toBe("approved");
+    expect(update.payload.manual_review_note).toBe("identity checked");
+    const payload = update.payload.payload as Record<string, unknown>;
+    // The original markers survive; the audit log is APPENDED, not replaced.
+    expect(payload.source).toBe("privacy_self_service");
+    const log = payload.privacy_review_log as Record<string, unknown>[];
+    expect(log).toHaveLength(1);
+    expect(log[0]).toMatchObject({
+      status_set: "approved",
+      note: "identity checked",
+      decided_by: "admin-1",
+      decided_via: "human",
+    });
+    expect(typeof log[0].decided_at).toBe("string");
+    // The UPDATE carries the SQL-side source lock as its second filter.
+    expect(update.filters).toContainEqual([
+      "payload->>source",
+      "privacy_self_service",
+    ]);
+  });
+
+  it("0 updated rows (RLS/source filter) is a refusal, never a fake ok", async () => {
+    const fake = reviewFakeClient({ row: PRIVACY_ROW, updatedRows: [] });
+    const result = await runReview(fake, {
+      requestId: "req-privacy",
+      status: "closed",
+    });
+    expect(result).toEqual({ kind: "not-found" });
+  });
+
+  it("42P01 on the read degrades to needs-migration", async () => {
+    const fake = reviewFakeClient({ readError: { code: "42P01" } });
+    expect(
+      await runReview(fake, { requestId: "req-privacy", status: "closed" }),
+    ).toEqual({ kind: "needs-migration" });
+  });
+});
+
 describe("4 · wiring — an existing surface, visibility only", () => {
+  it("the admin page passes ?deletionPlanFor= through — the section renders fine without it", () => {
+    const page = read("app/[locale]/dashboard/admin/page.tsx");
+    expect(page).toMatch(/deletionPlanFor\?: string/);
+    expect(page).toMatch(/deletionPlanFor=\{sp\.deletionPlanFor \?\? null\}/);
+    const section = read("components/admin/privacy-requests-section.tsx");
+    // The prop is optional with a null default — absent param = collapsed.
+    expect(section).toMatch(/deletionPlanFor = null/);
+  });
+
   it("the workbench read routes exclusion through the shared classifier", () => {
     const src = read("lib/admin/matching-workbench.ts");
     expect(src).toContain(
@@ -164,11 +319,19 @@ describe("4 · wiring — an existing surface, visibility only", () => {
     ).toThrow();
   });
 
-  it("the section is a visibility queue — no action control, honest manual note", () => {
+  it("the section's ONLY mutating control is the review verb — deletion never", () => {
     const section = read("components/admin/privacy-requests-section.tsx");
     expect(section).toMatch(/manualNote/);
-    // No button, no form, no server-action import — nothing pretends to act.
-    expect(section).not.toMatch(/<button|<form|action=/);
+    // V9 phase 1: exactly ONE form action — the review verb. The honesty
+    // line renders beside it, and no destructive path is reachable.
+    const actions = [...section.matchAll(/action=\{([^}]+)\}/g)].map((m) =>
+      m[1].trim(),
+    );
+    expect(actions).toEqual(["reviewPrivacyRequestAction"]);
+    expect(section).toMatch(/review\.honesty/);
     expect(section).not.toMatch(/\.rpc\(|\.update\(|\.delete\(/);
+    // The phase-2 preview renders through the read-only plan lib only.
+    expect(section).toMatch(/buildDeletionPlanPreview/);
+    expect(section).not.toMatch(/executeDeletion|deleteUser|admin\.delete/);
   });
 });

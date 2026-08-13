@@ -2820,6 +2820,56 @@
         "dataExport": "Datenexport",
         "accountDeletion": "Kontolöschung",
         "unknown": "Datenschutzanfrage"
+      },
+      "status": {
+        "in_review": "In Prüfung",
+        "needs_followup": "Nachfassen nötig",
+        "approved": "Genehmigt",
+        "closed": "Geschlossen"
+      },
+      "review": {
+        "statusLabel": "Status setzen",
+        "noteLabel": "Notiz",
+        "submit": "Prüfentscheidung speichern",
+        "honesty": "Nur Prüfentscheidungen — diese Bedienelemente löschen nichts.",
+        "result": {
+          "saved": "Prüfentscheidung gespeichert.",
+          "not_superadmin": "Abgelehnt: nur für Administratoren.",
+          "invalid": "Ungültige Prüfeingabe.",
+          "not_found": "Die Anfrage wurde nicht gefunden.",
+          "not_privacy_request": "Abgelehnt: diese Zeile ist keine Datenschutzanfrage.",
+          "needs_migration": "Der Speicher für Datenschutzanfragen ist in dieser Umgebung nicht aktiviert.",
+          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        }
+      },
+      "plan": {
+        "link": "Löschplan ansehen",
+        "title": "Löschplan-Vorschau",
+        "honesty": "Nur Vorschau — Löschung ist nicht implementiert. Destruktive Ausführung ist eigentümergebunden.",
+        "collapse": "Vorschau ausblenden",
+        "noProfile": "Mit dieser Anfrage ist kein Profil verknüpft — nichts anzuzeigen.",
+        "unavailable": "Der Plan kann gerade nicht erstellt werden.",
+        "notCountable": "auf dieser Zugriffsebene nicht zählbar",
+        "class": {
+          "account": "Konto (Anmeldung und Profil)",
+          "journal": "Arbeitsjournal-Einträge",
+          "journalPhotos": "Journalfotos",
+          "skills": "Kompetenzeinträge",
+          "skillClaims": "Kompetenzangaben",
+          "documents": "Dokumente der Arbeitskraft",
+          "bookings": "Buchungen",
+          "engagements": "Beschäftigungsverhältnisse",
+          "consents": "Einwilligungsverlauf",
+          "messages": "Nachrichten",
+          "inquiries": "Anfragen und Gesuche",
+          "notifications": "Benachrichtigungen"
+        },
+        "action": {
+          "delete": "Löschen",
+          "anonymize_detach": "Anonymisieren (Identität ablösen)",
+          "keep_legal": "Behalten (rechtliche Grundlage)",
+          "keep_pending_decision": "Behalten (Aufbewahrungsentscheidung ausstehend)"
+        }
       }
     }
   },

@@ -2820,6 +2820,56 @@
         "dataExport": "Duomenų eksportas",
         "accountDeletion": "Paskyros ištrynimas",
         "unknown": "Privatumo prašymas"
+      },
+      "status": {
+        "in_review": "Peržiūrima",
+        "needs_followup": "Reikia tęsinio",
+        "approved": "Priimta",
+        "closed": "Uždaryta"
+      },
+      "review": {
+        "statusLabel": "Nustatyti būseną",
+        "noteLabel": "Pastaba",
+        "submit": "Įrašyti peržiūros sprendimą",
+        "honesty": "Tik peržiūros sprendimai — šie valdikliai nieko neištrina.",
+        "result": {
+          "saved": "Peržiūros sprendimas įrašytas.",
+          "not_superadmin": "Atmesta: tik administratoriui.",
+          "invalid": "Neteisingi peržiūros duomenys.",
+          "not_found": "Prašymas nerastas.",
+          "not_privacy_request": "Atmesta: tai ne privatumo prašymas.",
+          "needs_migration": "Privatumo prašymų saugykla šioje aplinkoje neįjungta.",
+          "error": "Įvyko klaida. Bandykite dar kartą."
+        }
+      },
+      "plan": {
+        "link": "Peržiūrėti ištrynimo planą",
+        "title": "Ištrynimo plano peržiūra",
+        "honesty": "Tik peržiūra — ištrynimas neįgyvendintas. Naikinantį vykdymą įjungia tik savininkas.",
+        "collapse": "Slėpti peržiūrą",
+        "noProfile": "Prie šio prašymo nepririštas joks profilis — nėra ko peržiūrėti.",
+        "unavailable": "Plano dabar nepavyksta sudaryti.",
+        "notCountable": "šiuo prieigos lygiu nesuskaičiuojama",
+        "class": {
+          "account": "Paskyra (prisijungimas ir profilis)",
+          "journal": "Darbo žurnalo įrašai",
+          "journalPhotos": "Žurnalo nuotraukos",
+          "skills": "Įgūdžių įrašai",
+          "skillClaims": "Įgūdžių teiginiai",
+          "documents": "Darbuotojo dokumentai",
+          "bookings": "Rezervacijos",
+          "engagements": "Darbo santykiai",
+          "consents": "Sutikimų istorija",
+          "messages": "Žinutės",
+          "inquiries": "Užklausos ir prašymai",
+          "notifications": "Pranešimai"
+        },
+        "action": {
+          "delete": "Ištrinti",
+          "anonymize_detach": "Anonimizuoti (atsieti tapatybę)",
+          "keep_legal": "Palikti (teisinis pagrindas)",
+          "keep_pending_decision": "Palikti (laukiama saugojimo sprendimo)"
+        }
       }
     }
   },

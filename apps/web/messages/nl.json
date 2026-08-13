@@ -2820,6 +2820,56 @@
         "dataExport": "Gegevensexport",
         "accountDeletion": "Accountverwijdering",
         "unknown": "Privacyverzoek"
+      },
+      "status": {
+        "in_review": "In beoordeling",
+        "needs_followup": "Vervolg nodig",
+        "approved": "Goedgekeurd",
+        "closed": "Gesloten"
+      },
+      "review": {
+        "statusLabel": "Status instellen",
+        "noteLabel": "Notitie",
+        "submit": "Beoordelingsbesluit opslaan",
+        "honesty": "Alleen beoordelingsbesluiten — deze knoppen verwijderen niets.",
+        "result": {
+          "saved": "Beoordelingsbesluit opgeslagen.",
+          "not_superadmin": "Geweigerd: alleen beheerders.",
+          "invalid": "Ongeldige beoordelingsinvoer.",
+          "not_found": "Het verzoek is niet gevonden.",
+          "not_privacy_request": "Geweigerd: die rij is geen privacyverzoek.",
+          "needs_migration": "De opslag van privacyverzoeken is in deze omgeving niet ingeschakeld.",
+          "error": "Er ging iets mis. Probeer het opnieuw."
+        }
+      },
+      "plan": {
+        "link": "Verwijderplan bekijken",
+        "title": "Voorbeeld van het verwijderplan",
+        "honesty": "Alleen een voorbeeld — verwijdering is niet geïmplementeerd. Destructieve uitvoering is eigenaar-gebonden.",
+        "collapse": "Voorbeeld verbergen",
+        "noProfile": "Aan dit verzoek is geen profiel gekoppeld — niets te tonen.",
+        "unavailable": "Het plan kan nu niet worden opgebouwd.",
+        "notCountable": "niet telbaar op dit toegangsniveau",
+        "class": {
+          "account": "Account (aanmelding en profiel)",
+          "journal": "Werkjournaalregistraties",
+          "journalPhotos": "Journaalfoto's",
+          "skills": "Vaardigheidsrecords",
+          "skillClaims": "Vaardigheidsclaims",
+          "documents": "Werkersdocumenten",
+          "bookings": "Boekingen",
+          "engagements": "Dienstverbanden",
+          "consents": "Toestemmingsgeschiedenis",
+          "messages": "Berichten",
+          "inquiries": "Aanvragen en verzoeken",
+          "notifications": "Meldingen"
+        },
+        "action": {
+          "delete": "Verwijderen",
+          "anonymize_detach": "Anonimiseren (identiteit loskoppelen)",
+          "keep_legal": "Bewaren (juridische grondslag)",
+          "keep_pending_decision": "Bewaren (bewaarbeslissing in behandeling)"
+        }
       }
     }
   },

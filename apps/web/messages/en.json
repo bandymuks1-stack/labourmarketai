@@ -2820,6 +2820,56 @@
         "dataExport": "Data export",
         "accountDeletion": "Account deletion",
         "unknown": "Privacy request"
+      },
+      "status": {
+        "in_review": "In review",
+        "needs_followup": "Needs follow-up",
+        "approved": "Approved",
+        "closed": "Closed"
+      },
+      "review": {
+        "statusLabel": "Set status",
+        "noteLabel": "Note",
+        "submit": "Save review decision",
+        "honesty": "Review decisions only — nothing is deleted by these controls.",
+        "result": {
+          "saved": "Review decision saved.",
+          "not_superadmin": "Refused: administrators only.",
+          "invalid": "Invalid review input.",
+          "not_found": "The request was not found.",
+          "not_privacy_request": "Refused: that row is not a privacy request.",
+          "needs_migration": "The privacy request store is not enabled in this environment.",
+          "error": "Something went wrong. Try again."
+        }
+      },
+      "plan": {
+        "link": "Preview deletion plan",
+        "title": "Deletion plan preview",
+        "honesty": "Preview only — no deletion is implemented. Destructive execution is owner-gated.",
+        "collapse": "Hide the preview",
+        "noProfile": "No profile is linked to this request — nothing to preview.",
+        "unavailable": "The plan cannot be built right now.",
+        "notCountable": "not countable at this access level",
+        "class": {
+          "account": "Account (sign-in and profile)",
+          "journal": "Work journal entries",
+          "journalPhotos": "Journal photos",
+          "skills": "Skill records",
+          "skillClaims": "Skill claims",
+          "documents": "Worker documents",
+          "bookings": "Bookings",
+          "engagements": "Engagements",
+          "consents": "Consent history",
+          "messages": "Messages",
+          "inquiries": "Requests and inquiries",
+          "notifications": "Notifications"
+        },
+        "action": {
+          "delete": "Delete",
+          "anonymize_detach": "Anonymize (detach identity)",
+          "keep_legal": "Keep (legal basis)",
+          "keep_pending_decision": "Keep (retention decision pending)"
+        }
       }
     }
   },
