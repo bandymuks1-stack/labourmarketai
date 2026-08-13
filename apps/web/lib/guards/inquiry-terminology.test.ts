@@ -212,6 +212,47 @@ describe("the /company-need SEO title uses the inquiry noun", () => {
   }
 });
 
+/**
+ * The `companies` entry is the /for-companies MARKETING page metadata, and it
+ * was missed by phase 1/2: the guard above asserts only the `companyNeed`
+ * entry, so production shipped "For Employers — Submit your workforce need"
+ * while the inquiry page next to it already said "Workforce Inquiry". Two
+ * adjacent public pages named the same artefact two different ways.
+ *
+ * Same category rules as everywhere else: this asserts the TITLE only, because
+ * the descriptions legitimately keep category-B ordinary language ("the skills
+ * you need", "die Sie benötigen").
+ */
+describe("for-companies page metadata names the inquiry (V6 §4)", () => {
+  const EXPECTED_COMPANIES: Record<(typeof ACTIVE_LOCALES)[number], RegExp> = {
+    lt: /užklaus/i,
+    en: /inquir/i,
+    ru: /запрос/i,
+    nl: /aanvraag/i,
+    de: /anfrage/i,
+  };
+
+  const source = readFileSync(
+    join(APP_ROOT, "lib", "seo", "metadata.ts"),
+    "utf8",
+  );
+
+  const block = (() => {
+    const start = source.indexOf("\n  companies: {");
+    expect(start, "companies entry not found in lib/seo/metadata.ts").toBeGreaterThan(-1);
+    const end = source.indexOf("\n  },", start);
+    return source.slice(start, end);
+  })();
+
+  for (const locale of ACTIVE_LOCALES) {
+    it(`${locale}: for-companies page title names the inquiry`, () => {
+      const m = block.match(new RegExp(`${locale}:\\s*\\{\\s*title:\\s*"([^"]+)"`));
+      expect(m, `${locale}: no title found in the companies metadata entry`).toBeTruthy();
+      expect(m![1]).toMatch(EXPECTED_COMPANIES[locale]);
+    });
+  }
+});
+
 describe("technical identifiers are NOT renamed (V6 §4C)", () => {
   it("the i18n keys keep their legacy names in every active locale", () => {
     for (const locale of ACTIVE_LOCALES) {
