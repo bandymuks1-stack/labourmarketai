@@ -11123,7 +11123,7 @@
       "engagementsNoCompany": "Šiuo metu neveikiate organizacijos vardu, todėl sąrašo nėra ką rodyti.",
       "engagementsUnavailable": "Šiuo metu darbo santykių perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
       "valueIntent": {
-        "understood": "Supratau: {summary}.",
+        "understood": "Jūsų teigimu: {summary}.",
         "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
         "daysCount": "{count, plural, one {# diena} few {# dienos} other {# dienų}}",
         "window": {
@@ -11139,9 +11139,17 @@
         },
         "unclear": "Nesu tikras, ar kažką siūlote, ar ko nors ieškote. Parašykite, ką turite arba ko reikia.",
         "goodsChannelGated": "Prekių pirkėjų kanalo platformoje kol kas nėra — pardavimo skelbimo čia niekas nepamatytų. Tai, ką parašėte, niekur neišsaugota.",
-        "goodsListingsHint": "Jei tai darbo įranga ar įrankiai, galite paskelbti skelbimų lentoje.",
         "chipListings": "Atidaryti skelbimus",
-        "capacityNext": "Galiu įrašyti jūsų prieinamumą į darbo kortelę arba iš karto paieškoti darbo — rezultatai yra šiuo metu atviros užklausos."
+        "capacityNext": "Galiu įrašyti jūsų prieinamumą į darbo kortelę arba iš karto paieškoti darbo — rezultatai yra šiuo metu atviros užklausos.",
+        "unsupported": "Šito per platformą pasiūlyti negalima. Kelio tam nėra.",
+        "legalCheckFood": "Maisto ar užaugintos produkcijos pardavimui galioja maisto pardavimo, higienos ir prekybos taisyklės, kurias pirmiausia reikėtų pasitikrinti — patvirtinto produkcijos kanalo platformoje nėra.",
+        "goodsListable": "Tai panašu į darbo išteklių — galite paskelbti skelbimą skelbimų lentoje.",
+        "goodsListableRental": "Tai panašu į laisvą darbo įrangą — galite paskelbti nuomos skelbimą skelbimų lentoje.",
+        "goodsCategoryUnsupported": "Ši kategorija platformos darbo srities skelbimų lentoje šiandien nepalaikoma. Tai, ką parašėte, niekur neišsaugota.",
+        "serviceNext": "Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų.",
+        "chipServices": "Atidaryti paslaugas",
+        "corrected": "Atnaujinau: {changes}.",
+        "changeInsteadOf": "{next} (vietoj {previous})"
       }
     },
     "worklog": {

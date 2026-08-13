@@ -90,6 +90,74 @@ describe("fixture C — workforce shortage (four welders next month)", () => {
   });
 });
 
+describe("fixture A' — manufactured goods, bare count (V10)", () => {
+  const v = structureValueStatement(
+    "Pagaminome 500 medinių palečių ir norime jas parduoti.",
+    TODAY,
+  );
+
+  it("axis=offer, subject=goods, offerMode=sale", () => {
+    expect(v.axis).toBe("offer");
+    expect(v.subject).toBe("goods");
+    expect(v.offerMode).toBe("sale");
+  });
+
+  it("quantity is the stated bare count — no unit is invented", () => {
+    expect(v.quantity).toEqual({ value: 500, unit: null, raw: "500" });
+  });
+
+  it("subjectLabel echoes the person's own noun phrase", () => {
+    expect(v.subjectLabel?.toLowerCase()).toContain("medinių palečių");
+  });
+});
+
+describe("fixture B' — equipment availability (V10)", () => {
+  const v = structureValueStatement(
+    "Mūsų ekskavatorius laisvas trims dienoms.",
+    TODAY,
+  );
+
+  it("axis=offer, subject=goods (the MACHINE, not a person), offerMode=availability", () => {
+    expect(v.axis).toBe("offer");
+    expect(v.subject).toBe("goods");
+    expect(v.offerMode).toBe("availability");
+    expect(v.subjectLabel?.toLowerCase()).toContain("ekskavatorius");
+  });
+
+  it("window carries the stated three days (dative word-number)", () => {
+    expect(v.window).toMatchObject({ kind: "days_count", days: 3 });
+  });
+
+  it("no quantity is demanded of a stated availability", () => {
+    expect(v.missing).not.toContain("quantity");
+  });
+
+  it("the operator variant stays a PERSON'S capacity", () => {
+    const person = structureValueStatement(
+      "Esu ekskavatorininkas ir kitą savaitę turiu dvi laisvas dienas",
+      TODAY,
+    );
+    expect(person.subject).toBe("work_capacity");
+  });
+});
+
+describe("fixture C' — service via verb + language pair (V10)", () => {
+  const v = structureValueStatement(
+    "Galiu versti dokumentus iš lenkų į lietuvių.",
+    TODAY,
+  );
+
+  it("axis=offer, subject=service", () => {
+    expect(v.axis).toBe("offer");
+    expect(v.subject).toBe("service");
+  });
+
+  it("subjectLabel carries the person's own description with the language pair", () => {
+    expect(v.subjectLabel).toBeTruthy();
+    expect(v.subjectLabel!.toLowerCase()).toContain("iš lenkų į lietuvių");
+  });
+});
+
 describe("negatives — the reader never invents a value statement", () => {
   it("a job search is NOT goods (and stays the router's find-work territory)", () => {
     const v = structureValueStatement("Ieškau darbo Vokietijoje", TODAY);

@@ -124,6 +124,18 @@ describe("classifyIntent — V9 value statements", () => {
     expect(classifyIntent("Šiandien dirbau nuo 8 iki 17.").intent).toBe("log-work");
   });
 
+  it("V10 fixtures: bare-count goods and equipment availability route to offer-value", () => {
+    expect(
+      classifyIntent("Pagaminome 500 medinių palečių ir norime jas parduoti.").intent,
+    ).toBe("offer-value");
+    expect(classifyIntent("Mūsų ekskavatorius laisvas trims dienoms.").intent).toBe(
+      "offer-value",
+    );
+    expect(classifyIntent("Galiu versti dokumentus iš lenkų į lietuvių.").intent).not.toBe(
+      "need-workers",
+    );
+  });
+
   it("diacritic-free typing reaches offer-value too", () => {
     expect(
       classifyIntent("Turiu 30 kg savo darze uzaugintu agurku ir noriu parduoti").intent,

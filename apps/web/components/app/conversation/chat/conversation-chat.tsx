@@ -83,8 +83,9 @@ import {
   structureValueStatement,
   type ValueStatement,
 } from "@/lib/structuring/value-statement";
+import { applyCorrection } from "@/lib/structuring/apply-correction";
+import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
-import { foldText } from "@/lib/structuring/normalize";
 import {
   loadEmployerOpeningBrief,
   loadOpeningBrief,
@@ -1650,9 +1651,208 @@ export function ConversationChat({
     [workTypeLabels],
   );
 
+  /** V10 §36: the LAST value interpretation, held for explicit corrections.
+   *  Component state ONLY — nothing from this pair is ever persisted, so a
+   *  correction can never create a duplicate inquiry. */
+  const lastValueRef = useRef<{ statement: ValueStatement; text: string } | null>(
+    null,
+  );
+
+  /**
+   * V10: render a value statement through channel DISCOVERY — the honest
+   * readback ("as you state it"), only-missing questions, and the real
+   * next step the registry verdict allows. Shared by the offer-value intent
+   * and the correction path, so both render identically.
+   */
+  const renderValueStatement = useCallback(
+    (v: ValueStatement, text: string) => {
+      const summary = valueSummary(v);
+      const understood = summary
+        ? t("valueIntent.understood", { summary })
+        : null;
+      const questions = v.missing
+        .filter(
+          (m): m is "location" | "window" | "quantity" | "headcount" =>
+            m === "location" ||
+            m === "window" ||
+            m === "quantity" ||
+            m === "headcount",
+        )
+        .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
+
+      const discovery = discoverChannels(v, text);
+      // RESTRICTED categories: every channel refused — a clear refusal, no
+      // alternatives, and no stored interpretation to "correct" into a route.
+      const restricted =
+        discovery.options.length > 0 &&
+        discovery.options.every(
+          (o) =>
+            o.verdict.kind === "UNSUPPORTED" &&
+            o.verdict.reasonKey === "restricted_category",
+        );
+      if (restricted) {
+        lastValueRef.current = null;
+        assistant(t("valueIntent.unsupported"));
+        return;
+      }
+      lastValueRef.current = { statement: v, text };
+
+      if (v.subject === "goods") {
+        const marketplace = discovery.options.find(
+          (o) => o.channelId === "internal_marketplace_listings",
+        );
+        const verdict = marketplace?.verdict;
+        if (verdict?.kind === "CAN_ROUTE") {
+          // A real next step on the existing work-bounded listings board.
+          assistant(
+            [
+              understood,
+              verdict.listingKind === "rental"
+                ? t("valueIntent.goodsListableRental")
+                : t("valueIntent.goodsListable"),
+              ...questions,
+            ]
+              .filter((l): l is string => Boolean(l))
+              .join("\n"),
+            [
+              {
+                id: "link:/dashboard/listings",
+                label: t("valueIntent.chipListings"),
+              },
+            ],
+          );
+          return;
+        }
+        if (verdict?.kind === "LEGAL_CHECK_REQUIRED") {
+          // Food/produce: name plainly WHAT would have to be checked, then
+          // the channel truth — no approved produce channel, nothing saved.
+          assistant(
+            [
+              understood,
+              t("valueIntent.legalCheckFood"),
+              t("valueIntent.goodsChannelGated"),
+            ]
+              .filter((l): l is string => Boolean(l))
+              .join("\n"),
+          );
+          return;
+        }
+        if (
+          verdict?.kind === "CHANNEL_RESTRICTED" &&
+          verdict.reasonKey === "category_not_supported"
+        ) {
+          assistant(
+            [understood, t("valueIntent.goodsCategoryUnsupported")]
+              .filter((l): l is string => Boolean(l))
+              .join("\n"),
+          );
+          return;
+        }
+        // NEEDS_MORE_INFORMATION → the unclear branch below asks for it.
+      }
+
+      if (v.subject === "service") {
+        assistant(
+          [understood, t("valueIntent.serviceNext"), ...questions]
+            .filter((l): l is string => Boolean(l))
+            .join("\n"),
+          [
+            {
+              id: "link:/dashboard/services",
+              label: t("valueIntent.chipServices"),
+            },
+          ],
+        );
+        return;
+      }
+
+      if (v.subject === "work_capacity" && identity === "person") {
+        // Real next steps: the existing work-card form persists the
+        // availability fields; find-work runs the existing search over
+        // the open inquiries the person can see now.
+        assistant(
+          [understood, t("valueIntent.capacityNext"), ...questions]
+            .filter((l): l is string => Boolean(l))
+            .join("\n"),
+          [
+            { id: "f:worker.save-work-card", label: labels.chipCard },
+            { id: "jobs", label: labels.chipJobs },
+          ],
+        );
+        return;
+      }
+
+      if (
+        (v.subject === "workforce" || v.axis === "seek") &&
+        identity === "company"
+      ) {
+        if (understood) assistant(understood);
+        openForm(
+          "company.create-demand",
+          undefined,
+          undefined,
+          demandPrefill(v, text),
+        );
+        return;
+      }
+
+      // Ambiguous — say what WAS read, ask what would disambiguate.
+      assistant(
+        [understood, t("valueIntent.unclear"), ...questions]
+          .filter((l): l is string => Boolean(l))
+          .join("\n"),
+        starterChips,
+      );
+    },
+    [
+      assistant,
+      t,
+      valueSummary,
+      demandPrefill,
+      identity,
+      labels.chipCard,
+      labels.chipJobs,
+      openForm,
+      starterChips,
+    ],
+  );
+
   const handleSend = useCallback(
     (text: string) => {
       user(text);
+
+      // V10 §36: an explicit correction ("Ne 30, o 300 kg") of the LAST
+      // interpretation replaces exactly the corrected fact and re-renders
+      // the SAME statement — state only, nothing dispatched or persisted.
+      // A bare restatement is NOT a correction and falls through to full
+      // structuring below.
+      const last = lastValueRef.current;
+      if (last) {
+        const corrected = applyCorrection(
+          last.statement,
+          text,
+          new Date().toISOString().slice(0, 10),
+        );
+        if (corrected) {
+          const changes = corrected.changes
+            .map((c) =>
+              c.previous
+                ? t("valueIntent.changeInsteadOf", {
+                    next: c.next,
+                    previous: c.previous,
+                  })
+                : c.next,
+            )
+            .join("; ");
+          withTyping(() => {
+            // The OLD value is named as replaced — never silently swapped.
+            assistant(t("valueIntent.corrected", { changes }));
+            renderValueStatement(corrected.statement, last.text);
+          });
+          return;
+        }
+      }
+
       const { intent } = classifyIntent(text);
 
       /**
@@ -1732,87 +1932,12 @@ export function ConversationChat({
               assistant(labels.fallback, starterChips);
             }
             break;
-          case "offer-value": {
-            // V9 value-intent: read the statement, say what was understood,
-            // ask ONLY what is missing, offer the real next steps by subject.
-            const v = structureValueStatement(text);
-            const summary = valueSummary(v);
-            const understood = summary
-              ? t("valueIntent.understood", { summary })
-              : null;
-            const questions = v.missing
-              .filter(
-                (m): m is "location" | "window" | "quantity" | "headcount" =>
-                  m === "location" ||
-                  m === "window" ||
-                  m === "quantity" ||
-                  m === "headcount",
-              )
-              .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
-
-            if (v.subject === "goods") {
-              // CHANNEL_GATED — no produce/goods buyer channel exists, and
-              // saying so beats pretending. NOTHING is persisted, stated
-              // plainly. The work-bounded marketplace is offered ONLY when
-              // the goods plausibly belong there (equipment/tool wording)
-              // and the person acts as a company.
-              const equipmenty =
-                /irang|tool|equipment|оборудован|stakl|krautuv|masin|machin|technik/.test(
-                  foldText(text),
-                );
-              const lines = [understood, t("valueIntent.goodsChannelGated")];
-              const offerListings = identity === "company" && equipmenty;
-              if (offerListings) lines.push(t("valueIntent.goodsListingsHint"));
-              assistant(
-                lines.filter((l): l is string => Boolean(l)).join("\n"),
-                offerListings
-                  ? [
-                      {
-                        id: "link:/dashboard/listings",
-                        label: t("valueIntent.chipListings"),
-                      },
-                    ]
-                  : undefined,
-              );
-              break;
-            }
-            if (v.subject === "work_capacity" && identity === "person") {
-              // Real next steps: the existing work-card form persists the
-              // availability fields; find-work runs the existing search over
-              // the open inquiries the person can see now.
-              assistant(
-                [understood, t("valueIntent.capacityNext"), ...questions]
-                  .filter((l): l is string => Boolean(l))
-                  .join("\n"),
-                [
-                  { id: "f:worker.save-work-card", label: labels.chipCard },
-                  { id: "jobs", label: labels.chipJobs },
-                ],
-              );
-              break;
-            }
-            if (
-              (v.subject === "workforce" || v.axis === "seek") &&
-              identity === "company"
-            ) {
-              if (understood) assistant(understood);
-              openForm(
-                "company.create-demand",
-                undefined,
-                undefined,
-                demandPrefill(v, text),
-              );
-              break;
-            }
-            // Ambiguous — say what WAS read, ask what would disambiguate.
-            assistant(
-              [understood, t("valueIntent.unclear"), ...questions]
-                .filter((l): l is string => Boolean(l))
-                .join("\n"),
-              starterChips,
-            );
+          case "offer-value":
+            // V9/V10: read the statement, run channel DISCOVERY, render the
+            // honest options (renderValueStatement — shared with the
+            // correction path so both render identically).
+            renderValueStatement(structureValueStatement(text), text);
             break;
-          }
           case "offers":
             handleChip({ id: "offers", label: "" });
             break;
@@ -1847,7 +1972,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity, t, valueSummary, demandPrefill],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity, t, demandPrefill, renderValueStatement],
   );
 
   const nav = {

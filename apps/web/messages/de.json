@@ -11123,7 +11123,7 @@
       "engagementsNoCompany": "Du handelst gerade nicht für eine Organisation, daher gibt es keine Liste zu zeigen.",
       "engagementsUnavailable": "Die Arbeitsbeziehungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben.",
       "valueIntent": {
-        "understood": "Verstanden: {summary}.",
+        "understood": "Nach Ihren Angaben: {summary}.",
         "people": "{count, plural, one {# Person} other {# Personen}}",
         "daysCount": "{count, plural, one {# Tag} other {# Tage}}",
         "window": {
@@ -11139,9 +11139,17 @@
         },
         "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
         "goodsChannelGated": "Einen Käuferkanal für Waren gibt es auf der Plattform noch nicht — niemand würde dieses Verkaufsangebot hier sehen. Das Geschriebene wurde nirgends gespeichert.",
-        "goodsListingsHint": "Handelt es sich um Arbeitsausrüstung oder Werkzeuge, können Sie sie am Anzeigenbrett veröffentlichen.",
         "chipListings": "Anzeigen öffnen",
-        "capacityNext": "Ich kann Ihre Verfügbarkeit auf Ihrer Arbeitskarte eintragen oder sofort Arbeit suchen — die Ergebnisse sind die derzeit offenen Anfragen."
+        "capacityNext": "Ich kann Ihre Verfügbarkeit auf Ihrer Arbeitskarte eintragen oder sofort Arbeit suchen — die Ergebnisse sind die derzeit offenen Anfragen.",
+        "unsupported": "Das kann über die Plattform nicht angeboten werden. Dafür gibt es keinen Weg.",
+        "legalCheckFood": "Für den Verkauf von Lebensmitteln oder eigenem Anbau gelten Regeln zu Lebensmittelverkauf, Hygiene und Handel, die zuerst geprüft werden müssten — die Plattform hat keinen freigegebenen Kanal für Erzeugnisse.",
+        "goodsListable": "Das sieht nach einer arbeitsbezogenen Ressource aus — Sie können sie als Anzeige am Anzeigenbrett veröffentlichen.",
+        "goodsListableRental": "Das sieht nach freier Arbeitsausrüstung aus — Sie können eine Miet-Anzeige am Anzeigenbrett veröffentlichen.",
+        "goodsCategoryUnsupported": "Diese Kategorie wird am arbeitsgebundenen Anzeigenbrett der Plattform heute nicht unterstützt. Das Geschriebene wurde nirgends gespeichert.",
+        "serviceNext": "Sie können dies als Dienstleistungsangebot veröffentlichen, damit andere es finden.",
+        "chipServices": "Dienstleistungen öffnen",
+        "corrected": "Aktualisiert: {changes}.",
+        "changeInsteadOf": "{next} (statt {previous})"
       }
     },
     "worklog": {
