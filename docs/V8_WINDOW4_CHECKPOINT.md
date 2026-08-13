@@ -1,9 +1,9 @@
 # V8 WINDOW 4 CHECKPOINT
 
 TIME: 2026-08-13 (afternoon UTC) — updated after W4-A implementation
-ORIGIN_MAIN: 8ef80460 at window start (PR #1147 pending merge on top)
-HEAD: feat/cc/v8-w4-employer-daily-os @ 1b9a3209 (3 commits over 8ef80460)
-CURRENT_PHASE: W4-A terminal (PR #1147 in CI) → next W4-B
+ORIGIN_MAIN: ac3902a2 (#1147 W4-A MERGED + Vercel deploy success)
+HEAD: feat/cc/v8-w4b-language-and-external-apply (W4-B slice, PR pending)
+CURRENT_PHASE: W4-B implementation slice complete (PR pending) → W4-B verification → W4-C
 
 ## COMPLETED
 - Phase 0: real state re-derived; canonical checkout confirmed stale (worked from worktree
@@ -17,13 +17,20 @@ CURRENT_PHASE: W4-A terminal (PR #1147 in CI) → next W4-B
 - W4-C read-only audits COMPLETE (trust/deletion/billing/economics).
 
 ## MERGED
-- Nothing new merged yet this window; #1147 pending CI.
+- #1147 W4-A (GAPs 2/4/5) — squash-merged to main ac3902a2. Product-gate lesson: new
+  page folded into /dashboard/reports?journalWindow= (no new surface, no waiver).
 
 ## DEPLOYED / PRODUCTION_VERIFIED
-- Pending #1147 merge → Vercel deploy → smoke.
+- Vercel success on ac3902a2; smoke VERIFIED_BROWSER: landing 200 LT; unauthenticated
+  /lt/dashboard/reports?journalWindow=week fail-closed redirects to login preserving next.
+  Authed rendering proof BLOCKED_EXTERNAL (owner/tester session).
 
 ## IN_FLIGHT
-- OPEN_PR: #1147 (W4-A GAPs 2/4/5) — CI running at checkpoint time.
+- OPEN_PR: W4-B slice branch feat/cc/v8-w4b-language-and-external-apply — 7 commits:
+  auth/onboarding locale switcher; profiles.locale honored on login (cookie > profile > URL,
+  pinned) + switcher persistence; external-apply confirm step (owner §4); vacancy health
+  HEAD-count; truthful arbetsformedlingen terms (11 catalogs); recipient-language invitation
+  emails (invitations.email.*, 5 locales). Full suite 932 files / 15114 tests green.
 
 ## W4_A_STATUS (evidence labels)
 - EMPLOYER_GAP_2 = IMPLEMENTED, VERIFIED_LOCAL (fact-only Organization Today; null ≠ 0;
