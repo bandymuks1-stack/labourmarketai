@@ -69,6 +69,16 @@ const VACANCY_TABLE = "public_vacancies";
 const CURSOR_TABLE = "vacancy_import_cursors";
 
 /**
+ * PostgREST encodes `.in()` filters into the request URL, and the gateway
+ * rejects URLs past ~8 KB with a non-PostgREST error (empty `code`). A stream
+ * batch of ~800 Swedish ad ids crossed that line on 2026-08-13 and every
+ * persist failed as `vacancy_persist_read_failed:` while the dry run — which
+ * never reads existing rows — looked healthy. 200 ids keeps the URL an order
+ * of magnitude under the limit regardless of id shape.
+ */
+const EXISTENCE_READ_CHUNK = 200;
+
+/**
  * Store a batch of accepted vacancies idempotently.
  *
  * `seenAt` is the caller's capture clock — the same value the importer used
@@ -96,20 +106,23 @@ export async function persistVacancies(
   const providerKeys = [...new Set(vacancies.map((v) => v.providerKey))];
   const externalIds = vacancies.map((v) => v.externalId);
 
-  const { data: existingRows, error: readError } = await client
-    .from(VACANCY_TABLE)
-    .select("provider_key, external_id, content_hash")
-    .in("provider_key", providerKeys)
-    .in("external_id", externalIds);
-
-  if (readError) {
-    throw new Error(`vacancy_persist_read_failed:${readError.code ?? "unknown"}`);
-  }
-
   const storedHashByKey = new Map<string, string>();
-  for (const row of existingRows ?? []) {
-    const r = row as { provider_key: string; external_id: string; content_hash: string };
-    storedHashByKey.set(vacancyRowKey(r.provider_key, r.external_id), r.content_hash);
+  for (let i = 0; i < externalIds.length; i += EXISTENCE_READ_CHUNK) {
+    const chunk = externalIds.slice(i, i + EXISTENCE_READ_CHUNK);
+    const { data: existingRows, error: readError } = await client
+      .from(VACANCY_TABLE)
+      .select("provider_key, external_id, content_hash")
+      .in("provider_key", providerKeys)
+      .in("external_id", chunk);
+
+    if (readError) {
+      throw new Error(`vacancy_persist_read_failed:${readError.code ?? "unknown"}`);
+    }
+
+    for (const row of existingRows ?? []) {
+      const r = row as { provider_key: string; external_id: string; content_hash: string };
+      storedHashByKey.set(vacancyRowKey(r.provider_key, r.external_id), r.content_hash);
+    }
   }
 
   const toInsert: PublicVacancyRowV1[] = [];
