@@ -432,16 +432,22 @@ export async function readVacancySourceHealth(
   }
   for (const row of cursors ?? []) cursorRows.push(row as Record<string, unknown>);
 
-  const { data: countRows, error: countError } = await client
-    .from("public_vacancies")
-    .select("provider_key")
-    .eq("is_active", true);
-  if (countError && countError.code !== "42P01") {
-    throw new Error(`health_count_read_failed:${countError.code ?? "unknown"}`);
-  }
-  for (const row of countRows ?? []) {
-    const key = (row as { provider_key: string }).provider_key;
-    countsByProvider.set(key, (countsByProvider.get(key) ?? 0) + 1);
+  // COUNT, never rows: this used to select `provider_key` for every active
+  // row (~7k full round-tripped values by 2026-08) just to count them. A
+  // HEAD request with count=exact returns the number and zero rows — one
+  // request per registered provider (one today).
+  for (const provider of VACANCY_PROVIDERS) {
+    const { count, error: countError } = await client
+      .from("public_vacancies")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_key", provider.key)
+      .eq("is_active", true);
+    if (countError && countError.code !== "42P01") {
+      throw new Error(
+        `health_count_read_failed:${countError.code ?? "unknown"}`,
+      );
+    }
+    countsByProvider.set(provider.key, countError ? 0 : (count ?? 0));
   }
 
   return VACANCY_PROVIDERS.map((provider) => {

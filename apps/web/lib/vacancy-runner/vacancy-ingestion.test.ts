@@ -132,18 +132,44 @@ function fakeDb(options: {
 
     const chain: Record<string, unknown> = {};
     const self = () => chain;
+    // HEAD count support (health read): a select with { count, head } answers
+    // `count` over the vacancy fixtures matching every eq() filter whose
+    // column the fixture actually carries (fixtures list provider_key only).
+    let headCount = false;
+    const eqFilters: [string, unknown][] = [];
     chain.select = (...args: unknown[]) => {
       ops.push({ table, kind: "select", payload: args[0] });
+      const opts = args[1] as { head?: boolean } | undefined;
+      headCount = opts?.head === true;
       return chain;
     };
-    chain.eq = self;
+    chain.eq = (col: string, value: unknown) => {
+      eqFilters.push([col, value]);
+      return chain;
+    };
     chain.in = self;
     chain.or = self;
     chain.order = self;
     chain.range = self;
     chain.maybeSingle = () => Promise.resolve(single);
-    chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
-      Promise.resolve(result).then(ok, err);
+    chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) => {
+      if (headCount) {
+        const value =
+          options.tableMissing === true
+            ? { data: null, error: missing, count: null }
+            : {
+                data: null,
+                error: null,
+                count: (options.vacancies ?? []).filter((row) =>
+                  eqFilters.every(
+                    ([col, v]) => !(col in row) || row[col] === v,
+                  ),
+                ).length,
+              };
+        return Promise.resolve(value).then(ok, err);
+      }
+      return Promise.resolve(result).then(ok, err);
+    };
     chain.upsert = (payload: unknown) => {
       ops.push({ table, kind: "upsert", payload });
       return Promise.resolve({ data: null, error: null });
