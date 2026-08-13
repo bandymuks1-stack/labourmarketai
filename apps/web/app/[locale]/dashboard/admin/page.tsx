@@ -69,13 +69,22 @@ function claims(supabase: SupabaseClient) {
  */
 export default async function AdminDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** `?deletionPlanFor=` / `?privacyReviewNotice=` — the privacy section's
+   *  same-page plan preview and review-outcome banner (V9 phases 1–2).
+   *  Query state, not routes. */
+  searchParams?: Promise<{
+    deletionPlanFor?: string;
+    privacyReviewNotice?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   await requireSuperadmin(locale);
+  const sp = (await searchParams) ?? {};
 
   const t = await getTranslations("admin");
   const tReview = await getTranslations("admin.requestReview");
@@ -620,7 +629,11 @@ export default async function AdminDashboardPage({
           with hiring demand. A queue in the band-2 slot, NOT a route (the
           same Product Gate reasoning as experience moderation below):
           visibility only, processing stays manual — no executor is faked. */}
-      <PrivacyRequestsSection locale={locale} />
+      <PrivacyRequestsSection
+        locale={locale}
+        deletionPlanFor={sp.deletionPlanFor ?? null}
+        reviewNotice={sp.privacyReviewNotice ?? null}
+      />
 
       {/* BAND 2b — Internal follow-up task queue (§8.13, branch 24). The
           platform's memory of next actions: internal only, contacts nobody. */}

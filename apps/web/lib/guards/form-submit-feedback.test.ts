@@ -81,6 +81,12 @@ const NATIVE_NAV = new Set([
   // ?notice= outcome banner.
   "app/[locale]/invite/[token]/page.tsx",
   "app/[locale]/dashboard/account/page.tsx", // logout POST
+  // Admin privacy-request review verbs (V9 phase 1) — a NATIVE-NAV server
+  // action that ALWAYS redirects back to the admin control room with an
+  // honest ?privacyReviewNotice= outcome (rendered as a role="status"
+  // banner by the section), exactly the tasks/finance pattern. Pure server
+  // component — no client state.
+  "components/admin/privacy-requests-section.tsx",
   // (The company page left this list with W3 rows 7/8/25: the demand wizard
   // now lives ON it as a client component, and no NATIVE-NAV form remains.)
   // Workforce planning zone (Labour Market OS P10) — the ONLY forms are the
