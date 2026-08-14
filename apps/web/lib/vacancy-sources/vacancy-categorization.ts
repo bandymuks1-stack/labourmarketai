@@ -69,16 +69,29 @@ export function categorizeVacancy(
   input: VacancyCategorizationInput,
 ): VacancyCategorizationV1 {
   const occupation = input.occupationRaw?.trim() ?? "";
+  const title = input.titleRaw.trim();
 
   // 1. The publisher's own occupation label, if the profession lexicon knows
   //    it. This is the only path that yields origin "publisher".
   const fromOccupation =
     occupation.length > 0 ? detectNeedProfession(occupation) : null;
 
-  // 2. The shared derivation over the ad's own words. `payload` is
-  //    deliberately absent: an external ad carries no platform
-  //    structured_need, so the human-structured tiers cannot fire and the
-  //    result can only ever be recognized-from-text or profession-expanded.
+  // 2. Title-only fallback. The DESCRIPTION is deliberately EXCLUDED from
+  //    profession detection: ad bodies routinely name OTHER professions
+  //    ("our electricians", "kontakta din chef") and everyday words that
+  //    collide with profession needles across languages (Swedish "chef" =
+  //    manager, "driver" = runs). The 2026-08-14 production audit measured
+  //    systematic mistags from exactly this — hundreds of nurse/retail ads
+  //    tagged cook or driver by their body text. A title is short and, when
+  //    it names a profession, names THIS ad's profession.
+  const fromTitle =
+    fromOccupation ?? (title.length > 0 ? detectNeedProfession(title) : null);
+  const professionSlug = fromTitle;
+
+  // 3. The shared derivation over the ad's own words — for SKILLS only.
+  //    Skill recognition stays full-text: it matches curated activity
+  //    phrases (fuzzy tier filtered out), which do not have the everyday-word
+  //    collision problem profession needles have.
   const derived = deriveNeedSkills({
     title: input.titleRaw,
     needSummary: input.descriptionRaw,
@@ -86,8 +99,14 @@ export function categorizeVacancy(
     notes: null,
   });
 
-  const professionSlug = fromOccupation ?? derived.professionSlug;
-  const skillSlugs = derived.skillSlugs.slice(
+  // A profession-expanded skill set is only as good as the profession it was
+  // expanded FROM. When the full-text detection disagrees with the safe
+  // label/title profession, the expansion inherited the body-text pollution
+  // above — drop it rather than ship requirements from the wrong trade.
+  const expansionPolluted =
+    derived.source === "profession_expanded" &&
+    derived.professionSlug !== professionSlug;
+  const skillSlugs = (expansionPolluted ? [] : derived.skillSlugs).slice(
     0,
     VACANCY_IMPORT_BOUNDS.maxDerivedSkills,
   );
@@ -97,7 +116,7 @@ export function categorizeVacancy(
     skillSlugs,
     origin: fromOccupation !== null ? "publisher" : "derived",
     skillSource: skillSlugs.length > 0 ? derived.source : null,
-    evidence: derived.recognized,
+    evidence: expansionPolluted ? [] : derived.recognized,
     unrecognized: professionSlug === null && skillSlugs.length === 0,
   };
 }

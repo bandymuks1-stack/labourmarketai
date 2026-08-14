@@ -10,7 +10,9 @@ const REQUEST_REF = "jobstream.api.jobtechdev.se/snapshot";
 
 /** A realistically-shaped JobTech ad — nested objects, Swedish labels,
  *  `{value}`-wrapped booleans, a country label that is NOT an ISO code. */
-function jobTechAd(over: Record<string, unknown> = {}): Record<string, unknown> {
+function jobTechAd(
+  over: Record<string, unknown> = {},
+): Record<string, unknown> {
   return {
     id: "29455779",
     headline: "Snickare till byggprojekt i Stockholm",
@@ -135,12 +137,20 @@ describe("parses a real-shaped JobTech ad into the canonical contract", () => {
     const v = outcome.vacancy;
     expect(v.occupationRaw).toBe("Snickare");
     expect(v.occupationConceptId).toBe("kJx8_Gt4_TUS");
-    // Whatever the lexicon yields, the record must never claim a derived
-    // profession is a publisher-stated requirement.
-    expect(["publisher", "derived"]).toContain(v.categorizationOrigin);
-    if (v.professionSlug === null) {
-      expect(v.categorizationOrigin).toBe("derived");
-    }
+    // Un-hedged 2026-08-14: the lexicon now carries Swedish occupation-label
+    // needles, so "Snickare" MUST resolve — and as the publisher's own label.
+    expect(v.professionSlug).toBe("carpenter");
+    expect(v.categorizationOrigin).toBe("publisher");
+  });
+
+  it("pins transformVersion v2 — the re-tag lever must not silently revert", () => {
+    if (outcome.kind !== "parsed") throw new Error("expected parsed");
+    // v2 routes every re-seen ad through the update arm on the next refresh
+    // (transformVersion is inside the content hash). Reverting to v1 would
+    // make the categorizer improvement inert for all stored rows.
+    expect(outcome.vacancy.transformVersion).toBe(
+      "vacancy-arbetsformedlingen-v2",
+    );
   });
 });
 

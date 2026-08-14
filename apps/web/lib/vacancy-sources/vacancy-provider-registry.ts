@@ -285,7 +285,14 @@ const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
       },
     },
   ],
-  transformVersion: "vacancy-arbetsformedlingen-v1",
+  // v2 (2026-08-14): profession categorization rebuilt — occupation-label/
+  // title-only detection (description-text pollution fix) + Swedish needles.
+  // transformVersion is INSIDE the content hash, so this bump deliberately
+  // routes every re-seen ad through the update arm on the next refresh and
+  // re-tags the stored profession/skill columns. Without it a categorizer
+  // improvement is inert for existing rows (vacancy-repository.ts unchanged
+  // arm writes last_seen_at only).
+  transformVersion: "vacancy-arbetsformedlingen-v2",
 };
 
 export const VACANCY_PROVIDERS: readonly VacancyProviderDescriptorV1[] = [

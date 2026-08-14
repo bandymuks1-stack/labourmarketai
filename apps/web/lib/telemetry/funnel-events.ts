@@ -115,6 +115,11 @@ export const FUNNEL_EVENTS = {
   //    opened the publisher's original advertisement. Bounded scalars only
   //    (cta_id names the mounting surface); no URL, no ad id, no PII.
   externalAdOpened: "external_ad_opened",
+  // The retention loop's heartbeat: after a journal contribution genuinely
+  // added/strengthened skills, the person opened the recomputed board via
+  // the completion CTA. journal_entry_saved → this → return_visit is the
+  // measurable "contribute → benefit → inspect" chain (§14).
+  journalRematchViewed: "journal_rematch_viewed",
 } as const;
 
 export type FunnelEventName =
