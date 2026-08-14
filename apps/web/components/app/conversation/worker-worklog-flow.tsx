@@ -513,6 +513,13 @@ export function WorkerWorkLogFlow({
             href="/dashboard/opportunities"
             className="mt-1 inline-flex min-h-11 items-center self-start rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
             data-testid="worklog-view-opportunities"
+            onClick={() => {
+              // The retention loop's measurable heartbeat: journal
+              // contribution → recomputed board actually inspected.
+              trackFunnel(FUNNEL_EVENTS.journalRematchViewed, {
+                surface: "worklog_chat",
+              });
+            }}
           >
             {labels.viewOpportunities} →
           </Link>

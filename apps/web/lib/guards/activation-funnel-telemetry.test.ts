@@ -94,6 +94,9 @@ const EXPECTED_EVENTS = [
   // Sweden worker loop v1: the confirmed open of a public-source ad's
   // original advertisement — the click a worker campaign must prove.
   "external_ad_opened",
+  // Readiness loop: the retention heartbeat — after a journal contribution
+  // genuinely changed skills, the person opened the recomputed board.
+  "journal_rematch_viewed",
 ] as const;
 
 describe("activation funnel — event registry", () => {
@@ -171,7 +174,9 @@ describe("activation funnel — uses the existing RLS-safe pipe (no DB/RLS chang
     expect(action).toContain('"entity_type"');
     expect(action).toContain('"success"');
     // The free-text guard from migration 0020 still holds.
-    expect(action).not.toMatch(/"(?:profile_text|journal_text|comment_body|raw_text)"/);
+    expect(action).not.toMatch(
+      /"(?:profile_text|journal_text|comment_body|raw_text)"/,
+    );
   });
 
   it("allowlists the public-funnel + first-touch attribution keys (bounded scalars only)", () => {
@@ -190,7 +195,9 @@ describe("activation funnel — uses the existing RLS-safe pipe (no DB/RLS chang
     }
     // Attribution must never widen the allowlist to a raw query string or a
     // full referrer URL.
-    expect(action).not.toMatch(/"(?:query|query_string|referrer_url|full_url|search)"/);
+    expect(action).not.toMatch(
+      /"(?:query|query_string|referrer_url|full_url|search)"/,
+    );
   });
 
   it("first-touch attribution never overwrites the original source and keeps referrer host-only", () => {
@@ -199,7 +206,9 @@ describe("activation funnel — uses the existing RLS-safe pipe (no DB/RLS chang
     expect(attribution).toMatch(/if \(existing\) return existing/);
     // Referrer is reduced to a host, never the full URL.
     expect(attribution).toMatch(/referrerHost/);
-    expect(attribution).not.toMatch(/document\.referrer\s*\)?\s*;?\s*\/\/\s*full/i);
+    expect(attribution).not.toMatch(
+      /document\.referrer\s*\)?\s*;?\s*\/\/\s*full/i,
+    );
   });
 });
 
@@ -339,7 +348,11 @@ describe("activation funnel — key surfaces emit their events", () => {
     //    SERVER-SIDE emitters through lib/telemetry/server-funnel.ts.
     {
       file: "lib/scouting/scouting.ts",
-      mustContain: ["matchPreviewGenerated", "shortlistAdded", "candidate_count"],
+      mustContain: [
+        "matchPreviewGenerated",
+        "shortlistAdded",
+        "candidate_count",
+      ],
     },
     {
       file: "lib/communication/request-worker-conversation.ts",
