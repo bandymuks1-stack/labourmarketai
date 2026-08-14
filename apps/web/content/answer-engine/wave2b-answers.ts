@@ -783,7 +783,7 @@ const DRAFTS: readonly Draft[] = [
           "For organisations it goes further than posting a role — representing a company, describing needs, building teams and running projects. Alongside that, it helps everyone understand the labour market. The listing of opportunities is a feature, not the whole product.",
         ],
         title: "Is LabourMarket.ai only a job board?",
-        desc: "LabourMarket.ai is more than a job board: a living work profile, evidenced skills, adjacent-direction discovery, company and team tools, and market insight.",
+        desc: "LabourMarket.ai is a labour-market operating system: opportunity matching built around a living work profile, evidenced skills, adjacent-direction discovery, company and team tools, and market insight.",
       },
       lt: {
         slug: "ar-labourmarket-ai-tik-skelbimu-lenta",
@@ -794,7 +794,7 @@ const DRAFTS: readonly Draft[] = [
           "Organizacijoms ji apima daugiau nei pareigybės paskelbimą — įmonės pristatymą, poreikių aprašymą, komandų kūrimą ir projektų vykdymą. Kartu ji padeda visiems suprasti darbo rinką. Galimybių sąrašas — funkcija, o ne visas produktas.",
         ],
         title: "Ar LabourMarket.ai tik skelbimų lenta?",
-        desc: "LabourMarket.ai — daugiau nei skelbimų lenta: gyvas darbo profilis, įrodyti įgūdžiai, gretimų krypčių atradimas, įmonių ir komandų įrankiai bei rinkos įžvalgos.",
+        desc: "LabourMarket.ai — darbo rinkos operacinė sistema: galimybių sugretinimas aplink gyvą darbo profilį, įrodytus įgūdžius, gretimų krypčių atradimą, įmonių ir komandų įrankius bei rinkos įžvalgas.",
       },
       ru: {
         slug: "labourmarket-ai-tolko-doska-vakansiy",
@@ -805,7 +805,7 @@ const DRAFTS: readonly Draft[] = [
           "Для организаций это больше, чем размещение роли — представление компании, описание потребностей, сбор команд и ведение проектов. Вместе с этим она помогает всем понимать рынок труда. Список возможностей — функция, а не весь продукт.",
         ],
         title: "LabourMarket.ai только доска вакансий?",
-        desc: "LabourMarket.ai больше чем доска вакансий: живой рабочий профиль, подтверждённые навыки, открытие смежных направлений, инструменты компаний и команд и аналитика рынка.",
+        desc: "LabourMarket.ai — операционная система рынка труда: подбор возможностей вокруг живого рабочего профиля, подтверждённых навыков, смежных направлений, инструментов компаний и команд и аналитики рынка.",
       },
       nl: {
         slug: "is-labourmarket-ai-alleen-een-vacaturebank",
@@ -816,7 +816,7 @@ const DRAFTS: readonly Draft[] = [
           "Voor organisaties gaat het verder dan een rol plaatsen — een bedrijf vertegenwoordigen, behoeften beschrijven, teams bouwen en projecten draaien. Daarnaast helpt het iedereen de arbeidsmarkt te begrijpen. Het tonen van kansen is een functie, niet het hele product.",
         ],
         title: "Is LabourMarket.ai alleen een vacaturebank?",
-        desc: "LabourMarket.ai is meer dan een vacaturebank: een levend werkprofiel, onderbouwde vaardigheden, aangrenzende richtingen, bedrijfs- en teamtools en marktinzicht.",
+        desc: "LabourMarket.ai is een arbeidsmarkt-besturingssysteem: kansenmatching rond een levend werkprofiel, onderbouwde vaardigheden, aangrenzende richtingen, bedrijfs- en teamtools en marktinzicht.",
       },
       de: {
         slug: "ist-labourmarket-ai-nur-eine-jobboerse",
@@ -827,7 +827,7 @@ const DRAFTS: readonly Draft[] = [
           "Für Organisationen geht es über das Einstellen einer Rolle hinaus — ein Unternehmen darstellen, Bedarfe beschreiben, Teams bilden und Projekte umsetzen. Daneben hilft es allen, den Arbeitsmarkt zu verstehen. Die Auflistung von Möglichkeiten ist eine Funktion, nicht das ganze Produkt.",
         ],
         title: "Ist LabourMarket.ai nur eine Jobbörse?",
-        desc: "LabourMarket.ai ist mehr als eine Jobbörse: ein lebendiges Arbeitsprofil, belegte Fähigkeiten, benachbarte Richtungen, Unternehmens- und Team-Werkzeuge und Marktverständnis.",
+        desc: "LabourMarket.ai ist ein Arbeitsmarkt-Betriebssystem: Abgleich von Möglichkeiten rund um ein lebendiges Arbeitsprofil, belegte Fähigkeiten, benachbarte Richtungen, Unternehmens- und Team-Werkzeuge und Marktverständnis.",
       },
     },
   },

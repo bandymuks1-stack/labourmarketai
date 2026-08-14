@@ -19,3 +19,12 @@ verification, projects, teams, intelligence, AI). Construction is the
   first templates, not hardcoded assumptions.
 - Marketing copy and sales pitch must not narrow to construction or deny
   recruitment (see PROJECT_VISION.md §13 for the M2 sales framing nuance).
+
+## Clarified by (2026-08-14)
+
+`docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md` §1 records the boundary
+doctrine ("the product is never reducible to a recruitment platform") and
+explicitly reconciles it with this ADR: recruitment is a core function inside
+the opportunity-realization flywheel; the platform never positions itself
+against recruitment, and internal boundary vocabulary never becomes public
+negation copy (constitution §7.1).

@@ -12,6 +12,7 @@
 
 ```
 PRODUCT_VISION_LOCK_V1        ← this document (product design)
+  ├─ OPPORTUNITY_REALIZATION_LOCK_V1  (product boundary + value flywheel, 2026-08-14)
   └─ PRODUCT_CONSTITUTION      (§12 axioms, §13 Product Gate)
       └─ labour-market-os-constitution-v1, canonical product vision, UX docs
           └─ everything else

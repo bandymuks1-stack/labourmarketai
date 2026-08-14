@@ -17,7 +17,7 @@
 
 export type AxiomId =
   | "A-01" | "A-02" | "A-03" | "A-04" | "A-05" | "A-06"
-  | "A-07" | "A-08" | "A-09" | "A-10" | "A-11" | "A-12";
+  | "A-07" | "A-08" | "A-09" | "A-10" | "A-11" | "A-12" | "A-13";
 
 /** Can a CI gate prove a violation, or is it a human judgement? */
 export type AxiomEnforcement = "machine" | "heuristic" | "review";
@@ -138,6 +138,14 @@ export const AXIOMS: readonly Axiom[] = [
     enforcement: "review",
     gateCheck:
       "HUMAN GATE until PR #897 merges and brings the business-health guard with it. The honesty rule itself is binding now.",
+  },
+  {
+    id: "A-13",
+    rule:
+      "The product is never reducible to a job board / recruitment platform / CV builder / ATS / marketplace / ERP / Work Journal / chatbot / data portal — those are capabilities inside the opportunity-realization flywheel (activity history → understanding of what one can offer → matching against real demand → new activity), and the flywheel is a product invariant.",
+    source: "docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md (owner directive 2026-08-14)",
+    enforcement: "review",
+    gateCheck: "",
   },
 ] as const;
 

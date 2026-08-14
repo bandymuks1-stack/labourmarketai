@@ -115,6 +115,12 @@ reskilling and career-mobility are first-class architectural directions of the
 model, surfaced in the product only where the corresponding function actually
 exists (§5 "No fake anything").
 
+The product **boundary** (what the system is never reducible to) and the value
+**flywheel** (activity history → understanding of what one can offer → matching
+against real demand → work/orders/customers → new activity) are locked in
+`docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md` (owner directive 2026-08-14,
+axiom A-13).
+
 ## 8. WOW beta scope discipline
 
 Fewer strong, coherent, honest screens beat many weak ones. Every visible beta
@@ -231,6 +237,7 @@ stay identical to this table).
 | **A-10** | One commercial catalogue: price, LMC rule, Stripe object, entitlement. | lmc-canonical-commercial-catalogue-v1 (#894) | review — machine half ships with #895/#896 |
 | **A-11** | No feature launches without a known economic model. | PR #896 (not yet merged) | review — machine half ships with #896 |
 | **A-12** | An unmeasured metric is reported as unmeasured, never as zero. | PR #897 (not yet merged) | review — machine half ships with #897 |
+| **A-13** | The product is never reducible to a job board / recruitment platform / CV builder / ATS / marketplace / ERP / Work Journal / chatbot / data portal — those are capabilities inside the opportunity-realization flywheel (activity history → understanding of what one can offer → matching against real demand → new activity), and the flywheel is a product invariant. | docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md (owner directive 2026-08-14) | review |
 
 **Conflict rule (unchanged, restated):** where any other product, UX or
 architecture document conflicts with this constitution, **these win** — the
