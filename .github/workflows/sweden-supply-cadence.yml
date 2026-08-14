@@ -44,7 +44,14 @@ permissions:
 jobs:
   import:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 45, not 15: the snapshot endpoint offers no offset parameter, so a
+    # reconciliation-walk session at record-offset N must re-stream and skip
+    # the entire N-record prefix (~11 KB/record) before its bounded 5,000-record
+    # slice — deep-offset sessions were observed exceeding 15 minutes and being
+    # killed mid-write (runs 31815262743 / 31816633220, 2026-08-14). Stream
+    # delta sessions still finish in well under 15 minutes; the cap only needs
+    # to cover the walk's worst case.
+    timeout-minutes: 45
     steps:
       - name: Kill switch / configuration gate
         id: gate
