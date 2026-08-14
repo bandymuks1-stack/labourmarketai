@@ -83,6 +83,23 @@ const PROBES: readonly Probe[] = [
       "docs/policies/constitution-compliance-checklist-v1.md",
       "BEFORE / AFTER / URL / ACTION /",
       "real / partial / blocked / preview",
+      "docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md",
+      "A-13",
+    ],
+  },
+  {
+    file: "docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md",
+    phrases: [
+      "Parodyk, ką sugebi ir nuveiki. LabourMarket.ai padės rasti daugiau",
+      "None of them is the product boundary",
+      "recruitment is a **core function** of",
+      "MORE USEFUL ACTIVITY CONTEXT → BETTER UNDERSTANDING → BETTER OPPORTUNITIES",
+      "TEST A — Sweden",
+      "TEST B — Grandmother's cucumbers",
+      "does **not** assign a person's value",
+      "never automatically represented as legally verified proof",
+      "earning opportunities",
+      "meaningful active workspaces and recurring",
     ],
   },
 ];

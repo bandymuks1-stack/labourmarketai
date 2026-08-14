@@ -47,6 +47,14 @@ safely.
 much more) — never positioned "against" recruitment. Construction is the
 first vertical example, not a limit on the core.
 
+> **Reconciliation note (2026-08-14):** the product BOUNDARY doctrine in
+> `docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md` ("never reducible to a
+> job board / recruitment platform / …") does not conflict with this section:
+> recruitment stays a core function; the boundary rule only says recruitment
+> is not the boundary of the product. The "pirmas vertikalus pavyzdys"
+> wording here is historical — the binding universal rule is constitution
+> §7.1 (no sector priority constructs).
+
 ---
 
 ## 3. Pagrindinė formulė / The core formula

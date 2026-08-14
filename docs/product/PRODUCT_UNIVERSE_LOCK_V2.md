@@ -12,9 +12,10 @@
 
 ```
 PRODUCT_UNIVERSE_LOCK_V2      ← world architecture (this document)
-  └─ PRODUCT_VISION_LOCK_V1    (the twelve elements, under the four pillars)
-      └─ PRODUCT_CONSTITUTION   (axioms + Product Gate)
-          └─ everything else
+  ├─ PRODUCT_VISION_LOCK_V1    (the twelve elements, under the four pillars)
+  ├─ OPPORTUNITY_REALIZATION_LOCK_V1  (product boundary + value flywheel, 2026-08-14)
+  └─ PRODUCT_CONSTITUTION      (axioms + Product Gate)
+      └─ everything else
 ```
 `PLATFORM_DOCTRINE` remains supreme for technical/legal safety only.
 

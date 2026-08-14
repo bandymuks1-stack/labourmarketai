@@ -7,6 +7,11 @@
 > Techninė doktrina (saugumas, migracijos, kanoninės struktūros) lieka
 > `docs/PLATFORM_DOCTRINE.md`; konfliktų atveju doktrina saugo GRIEŽTESNĮ
 > variantą, o šis dokumentas apibrėžia PRODUKTO apimtį ir kryptį.
+> Produkto RIBA (kuo sistema niekada nesuvedama) ir vertės SMAGRATIS
+> (veiklos istorija → supratimas, ką žmogus/organizacija gali pasiūlyti →
+> atitikimas realiai paklausai → nauja veikla) užrakinti
+> `docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md` (savininko nurodymas
+> 2026-08-14, aksioma A-13).
 
 ---
 

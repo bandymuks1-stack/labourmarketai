@@ -4,6 +4,12 @@
 >
 > 🧭 Prieš planuojant ar įgyvendinant produkto funkcijas privaloma perskaityti
 > [`docs/product/LABOURMARKET_AI_CANONICAL_PRODUCT_VISION.md`](docs/product/LABOURMARKET_AI_CANONICAL_PRODUCT_VISION.md).
+>
+> 🧲 Produkto riba ir vertės smagratis (boundary + flywheel) —
+> [`docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md`](docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md)
+> (axiom A-13). Joks feature/UX/copy sprendimas negali produkto suvesti į
+> "tik job board / tik recruitment / tik CV / tik marketplace / tik ERP /
+> tik žurnalas / tik chatbot" struktūrą.
 
 ## Auto-commit policy
 

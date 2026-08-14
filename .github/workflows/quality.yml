@@ -78,6 +78,9 @@ jobs:
       - name: Worker plain-language copy guard (low-cognitive-load v1)
         run: pnpm -F web check:worker-plain-language
 
+      - name: Constitution compliance guard (pinned policy + doctrine phrases)
+        run: pnpm -F web check:constitution
+
       - name: Primary route smoke / dead-UI guard
         run: pnpm check:primary-route-smoke
 
