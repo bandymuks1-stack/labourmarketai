@@ -8100,6 +8100,9 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "bandBest": "Geriausiai tinkantys",
+      "bandPossible": "Galimai tinkantys",
+      "bandExplore": "Kiti skelbimai",
       "freshnessDelayed": "Skelbimai paskutinį kartą atnaujinti {date}. Atnaujinimai iš šio šaltinio laikinai vėluoja, todėl dalis vietų gali būti jau užimtos.",
       "freshnessStale": "Skelbimai paskutinį kartą atnaujinti {date}. Nuo tada jie nebuvo patvirtinti iš naujo, todėl dabartinį prieinamumą pasitikrinkite originaliame skelbime.",
       "freshnessUnknown": "Negalime patvirtinti, kada šie skelbimai atnaujinti paskutinį kartą. Dabartinį prieinamumą pasitikrinkite originaliame skelbime.",
@@ -11186,6 +11189,7 @@
       "pendingConfirmPrefix": "Laukia patvirtinimo",
       "cvUpdatedNote": "CV papildytas šio įrašo įgūdžiais.",
       "matchingNote": "Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint.",
+      "viewOpportunities": "Peržiūrėti atnaujintus pasiūlymus",
       "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."
     },
     "findWork": {

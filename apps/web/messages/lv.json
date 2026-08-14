@@ -2026,6 +2026,9 @@
     "external": {
       "sectionTitle": "Publiski darba sludinājumi",
       "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
+      "bandBest": "Vispiemērotākie",
+      "bandPossible": "Iespējami piemēroti",
+      "bandExplore": "Citi sludinājumi",
       "freshnessDelayed": "Sludinājumi pēdējo reizi atjaunināti {date}. Atjauninājumi no šī avota īslaicīgi aizkavējas, tāpēc dažas vietas var būt jau aizpildītas.",
       "freshnessStale": "Sludinājumi pēdējo reizi atjaunināti {date}. Kopš tā laika tie nav apstiprināti — pārbaudiet pašreizējo pieejamību oriģinālajā sludinājumā.",
       "freshnessUnknown": "Nevaram apstiprināt, kad šie sludinājumi pēdējo reizi atjaunināti. Pārbaudiet pašreizējo pieejamību oriģinālajā sludinājumā.",
@@ -3517,6 +3520,7 @@
       "pendingConfirmPrefix": "Gaida tavu apstiprinājumu",
       "cvUpdatedNote": "Tavs CV ir papildināts ar šī ieraksta prasmēm.",
       "matchingNote": "Darba ieteikumi tiek pārrēķināti pēc atjauninātajām prasmēm nākamajā skatīšanās reizē.",
+      "viewOpportunities": "Skatīt atjauninātās iespējas",
       "pipelineFailedNote": "Prasmju atpazīšana šoreiz neizdevās — ieraksts ir saglabāts; atpazīšanu var atkārtot žurnālā."
     },
     "findWork": {

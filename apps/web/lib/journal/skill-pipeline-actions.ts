@@ -145,15 +145,17 @@ export async function reprocessOwnJournalHistory(
     .order("created_at", { ascending: false })
     .limit(100);
 
-  const stale = ((entries ?? []) as {
-    id: string;
-    original_text: string | null;
-    deleted_at: string | null;
-    superseded_by: string | null;
-    journal_entry_metrics:
-      | { metric_slug: string; value_numeric: number | null }[]
-      | null;
-  }[])
+  const stale = (
+    (entries ?? []) as {
+      id: string;
+      original_text: string | null;
+      deleted_at: string | null;
+      superseded_by: string | null;
+      journal_entry_metrics:
+        | { metric_slug: string; value_numeric: number | null }[]
+        | null;
+    }[]
+  )
     .filter((e) => !e.deleted_at && !e.superseded_by)
     .filter((e) => {
       const latest = Math.max(
@@ -294,7 +296,10 @@ async function addSkillAndLink(
   workerId: string,
   entryId: string,
   slug: string,
-): Promise<{ ok: true; added: boolean } | { ok: false; code: "skill_not_found" | "write_failed" }> {
+): Promise<
+  | { ok: true; added: boolean }
+  | { ok: false; code: "skill_not_found" | "write_failed" }
+> {
   const { data: skill } = await sb
     .from("skills")
     .select("id, slug, is_active")
@@ -342,6 +347,7 @@ async function addSkillAndLink(
   try {
     revalidatePath("/[locale]/dashboard/journal", "page");
     revalidatePath("/[locale]/dashboard/profile", "page");
+    revalidatePath("/[locale]/dashboard/opportunities", "page");
   } catch {
     /* freshness hint only */
   }

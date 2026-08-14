@@ -2026,6 +2026,9 @@
     "external": {
       "sectionTitle": "Offentlige jobannoncer",
       "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
+      "bandBest": "Passer bedst",
+      "bandPossible": "Muligvis passende",
+      "bandExplore": "Øvrige annoncer",
       "freshnessDelayed": "Opslagene blev sidst opdateret {date}. Opdateringer fra denne kilde er midlertidigt forsinkede, så nogle stillinger kan allerede være besat.",
       "freshnessStale": "Opslagene blev sidst opdateret {date}. De er ikke bekræftet siden — tjek det oprindelige opslag for aktuel tilgængelighed.",
       "freshnessUnknown": "Vi kan ikke bekræfte, hvornår disse opslag sidst blev opdateret. Tjek det oprindelige opslag for aktuel tilgængelighed.",
@@ -3517,6 +3520,7 @@
       "pendingConfirmPrefix": "Afventer din bekræftelse",
       "cvUpdatedNote": "Dit CV indeholder nu færdighederne fra denne registrering.",
       "matchingNote": "Jobanbefalinger genberegnes ud fra dine opdaterede færdigheder, næste gang du ser dem.",
+      "viewOpportunities": "Se opdaterede muligheder",
       "pipelineFailedNote": "Genkendelse af færdigheder mislykkedes denne gang — registreringen er gemt; du kan gentage genkendelsen i journalen."
     },
     "findWork": {

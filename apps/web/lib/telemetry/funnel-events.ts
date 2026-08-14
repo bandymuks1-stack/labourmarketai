@@ -110,9 +110,15 @@ export const FUNNEL_EVENTS = {
   experienceSubmitted: "experience_submitted",
   experiencePublished: "experience_published",
   organizationCreated: "organization_created",
+  // ── External-supply funnel (Sweden worker loop v1). The one click that
+  //    proves a public-source ad delivered value: the person confirmed and
+  //    opened the publisher's original advertisement. Bounded scalars only
+  //    (cta_id names the mounting surface); no URL, no ad id, no PII.
+  externalAdOpened: "external_ad_opened",
 } as const;
 
-export type FunnelEventName = (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
+export type FunnelEventName =
+  (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
 
 /** Every funnel event name as a flat readonly list (used by guard tests). */
 export const FUNNEL_EVENT_NAMES: readonly FunnelEventName[] =

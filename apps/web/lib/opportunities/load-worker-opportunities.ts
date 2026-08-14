@@ -116,7 +116,20 @@ export type WorkerOpportunitiesResult =
       readonly externalVacancies: ExternalVacanciesResultV1;
     };
 
-export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResult> {
+export interface WorkerOpportunitiesOptions {
+  /** Board discovery filters forwarded to the EXTERNAL supply retrieval, so
+   *  an active profession/country chip narrows what is FETCHED, not merely
+   *  what the page hides afterwards. Values come from the closed-set
+   *  discovery params (`parseDiscoveryParams`) — never free text. */
+  readonly externalDiscovery?: {
+    readonly professionSlug?: string | null;
+    readonly country?: string | null;
+  };
+}
+
+export async function loadWorkerOpportunities(
+  options?: WorkerOpportunitiesOptions,
+): Promise<WorkerOpportunitiesResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -156,7 +169,9 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
   let needsDataAccess = true;
   let opportunities: OpportunityCard[] = [];
   try {
-    const { data, error } = await asAny(supabase).rpc("list_open_demand_for_workers");
+    const { data, error } = await asAny(supabase).rpc(
+      "list_open_demand_for_workers",
+    );
     if (!error && Array.isArray(data)) {
       needsDataAccess = false;
       opportunities = (data as Record<string, unknown>[])
@@ -243,7 +258,11 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
   const externalVacancies = await loadExternalVacancyCards(
     supabase,
     ctx.subject,
-    { nowIso: new Date().toISOString() },
+    {
+      nowIso: new Date().toISOString(),
+      professionSlug: options?.externalDiscovery?.professionSlug ?? null,
+      country: options?.externalDiscovery?.country ?? null,
+    },
   );
 
   return {

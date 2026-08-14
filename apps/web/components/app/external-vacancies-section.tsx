@@ -40,6 +40,11 @@ export interface ExternalVacanciesLabels {
   readonly confirmContinue: string;
   readonly confirmDismiss: string;
   readonly noApplicationRoute: string;
+  /** Fit-band group headings (doctrine TEST A: a shortlist grouped by how the
+   *  one engine ranked it, never a wall of listings). */
+  readonly bandBestTitle: string;
+  readonly bandPossibleTitle: string;
+  readonly bandExploreTitle: string;
   readonly publishedOn: (iso: string) => string;
   readonly positionsLabel: (n: number) => string;
   readonly payAsPublished: string;
@@ -97,117 +102,162 @@ export function ExternalVacanciesSection({
         </p>
       ) : null}
 
-      <ul className="flex flex-col gap-4">
-        {cards.map(({ key, view, capabilities, match, matchingGaps }) => (
-          <li
-            key={key}
-            className="flex flex-col gap-2 rounded-md border border-ink-500 p-3"
-            data-testid="external-vacancy-card"
+      {/* Fit bands: the engine's verdict decides the group, the shared
+          comparator already decided the order inside each. `weak` and
+          `insufficient_data` land together in "explore" — both mean "look
+          for yourself", never a hidden ad. */}
+      {(
+        [
+          {
+            band: "best",
+            title: labels.bandBestTitle,
+            list: cards.filter((c) => c.match.status === "strong"),
+          },
+          {
+            band: "possible",
+            title: labels.bandPossibleTitle,
+            list: cards.filter((c) => c.match.status === "possible"),
+          },
+          {
+            band: "explore",
+            title: labels.bandExploreTitle,
+            list: cards.filter(
+              (c) =>
+                c.match.status !== "strong" && c.match.status !== "possible",
+            ),
+          },
+        ] as const
+      )
+        .filter((g) => g.list.length > 0)
+        .map((group) => (
+          <div
+            key={group.band}
+            className="flex flex-col gap-2"
+            data-band={group.band}
           >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-sm font-semibold text-text-primary">
-                {view.title}
-              </span>
-              <span className="text-meta text-text-muted">
-                {labels.publishedOn(view.publishedAt.slice(0, 10))}
-              </span>
-            </div>
-
-            <p className="text-xs text-text-secondary">
-              {[view.employerName, view.city, view.country]
-                .filter(Boolean)
-                .join(" · ")}
-              {view.positions !== null
-                ? ` · ${labels.positionsLabel(view.positions)}`
-                : ""}
-            </p>
-
-            {/* Pay EXACTLY as published — currency preserved. Absent = absent. */}
-            {view.payCurrency && (view.payMin !== null || view.payMax !== null) ? (
-              <p className="text-xs text-text-secondary">
-                {labels.payAsPublished}:{" "}
-                <span className="tabular-nums">
-                  {[view.payMin, view.payMax]
-                    .filter((v): v is number => v !== null)
-                    .join("–")}{" "}
-                  {view.payCurrency}
-                </span>
-              </p>
-            ) : null}
-
-            {view.skillSlugs.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {view.skillSlugs.map((slug) => (
-                  <span
-                    key={slug}
-                    className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {group.title} · {group.list.length}
+            </span>
+            <ul className="flex flex-col gap-4">
+              {group.list.map(
+                ({ key, view, capabilities, match, matchingGaps }) => (
+                  <li
+                    key={key}
+                    className="flex flex-col gap-2 rounded-md border border-ink-500 p-3"
+                    data-testid="external-vacancy-card"
                   >
-                    {labels.skillLabel(slug)}
-                  </span>
-                ))}
-              </div>
-            ) : null}
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {view.title}
+                      </span>
+                      <span className="text-meta text-text-muted">
+                        {labels.publishedOn(view.publishedAt.slice(0, 10))}
+                      </span>
+                    </div>
 
-            <MatchTierExplanation
-              blocking={match.blocking}
-              strengths={match.strengths}
-              negotiables={match.negotiables}
-              missingFacts={match.missingFacts}
-              labels={labels.tierLabels}
-              testId={`external-match-${key}`}
-            />
+                    <p className="text-xs text-text-secondary">
+                      {[view.employerName, view.city, view.country]
+                        .filter(Boolean)
+                        .join(" · ")}
+                      {view.positions !== null
+                        ? ` · ${labels.positionsLabel(view.positions)}`
+                        : ""}
+                    </p>
 
-            {/* What this ad simply does not state — unknowns, not failures. */}
-            {matchingGaps.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-meta text-text-muted">
-                  {labels.gapsTitle}:
-                </span>
-                {matchingGaps.map((gap) => (
-                  <span
-                    key={gap}
-                    className="rounded-md border border-ink-500/60 px-2 py-0.5 text-meta text-text-muted"
-                  >
-                    {labels.gapLabel(gap)}
-                  </span>
-                ))}
-              </div>
-            ) : null}
+                    {/* Pay EXACTLY as published — currency preserved. Absent = absent. */}
+                    {view.payCurrency &&
+                    (view.payMin !== null || view.payMax !== null) ? (
+                      <p className="text-xs text-text-secondary">
+                        {labels.payAsPublished}:{" "}
+                        <span className="tabular-nums">
+                          {[view.payMin, view.payMax]
+                            .filter((v): v is number => v !== null)
+                            .join("–")}{" "}
+                          {view.payCurrency}
+                        </span>
+                      </p>
+                    ) : null}
 
-            {/* Provenance — always rendered, attribution first. */}
-            <div className="flex flex-col gap-0.5 border-t border-ink-600/60 pt-2">
-              <p className="text-meta text-text-muted">
-                {labels.attributionText(view.provenance.attributionCode)}
-              </p>
-              <p className="text-meta text-text-muted">
-                {labels.originNoteText(view.provenance.originNoteCode)}{" "}
-                {labels.managementNoteText(view.provenance.managementNoteCode)}
-              </p>
-            </div>
+                    {view.skillSlugs.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {view.skillSlugs.map((slug) => (
+                          <span
+                            key={slug}
+                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                          >
+                            {labels.skillLabel(slug)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
 
-            {capabilities.canApplyInternally ? null : view.provenance
-                .applicationRoute === "source_original" &&
-              view.provenance.applicationUrl ? (
-              /* Owner decision (V8 addendum §4): inform → confirm → open.
+                    <MatchTierExplanation
+                      blocking={match.blocking}
+                      strengths={match.strengths}
+                      negotiables={match.negotiables}
+                      missingFacts={match.missingFacts}
+                      labels={labels.tierLabels}
+                      testId={`external-match-${key}`}
+                    />
+
+                    {/* What this ad simply does not state — unknowns, not failures. */}
+                    {matchingGaps.length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-meta text-text-muted">
+                          {labels.gapsTitle}:
+                        </span>
+                        {matchingGaps.map((gap) => (
+                          <span
+                            key={gap}
+                            className="rounded-md border border-ink-500/60 px-2 py-0.5 text-meta text-text-muted"
+                          >
+                            {labels.gapLabel(gap)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {/* Provenance — always rendered, attribution first. */}
+                    <div className="flex flex-col gap-0.5 border-t border-ink-600/60 pt-2">
+                      <p className="text-meta text-text-muted">
+                        {labels.attributionText(
+                          view.provenance.attributionCode,
+                        )}
+                      </p>
+                      <p className="text-meta text-text-muted">
+                        {labels.originNoteText(view.provenance.originNoteCode)}{" "}
+                        {labels.managementNoteText(
+                          view.provenance.managementNoteCode,
+                        )}
+                      </p>
+                    </div>
+
+                    {capabilities.canApplyInternally ? null : view.provenance
+                        .applicationRoute === "source_original" &&
+                      view.provenance.applicationUrl ? (
+                      /* Owner decision (V8 addendum §4): inform → confirm → open.
                  The real anchor (same href/target/rel) renders only after
                  the person confirms leaving for the publisher's portal. */
-              <ExternalApplyConfirm
-                url={view.provenance.applicationUrl}
-                openLabel={labels.openOriginal}
-                noticeText={labels.confirmNotice}
-                continueLabel={labels.confirmContinue}
-                dismissLabel={labels.confirmDismiss}
-                anchorTestId="external-vacancy-original-link"
-                variant="card"
-              />
-            ) : (
-              <p className="text-meta text-text-muted">
-                {labels.noApplicationRoute}
-              </p>
-            )}
-          </li>
+                      <ExternalApplyConfirm
+                        url={view.provenance.applicationUrl}
+                        openLabel={labels.openOriginal}
+                        noticeText={labels.confirmNotice}
+                        continueLabel={labels.confirmContinue}
+                        dismissLabel={labels.confirmDismiss}
+                        anchorTestId="external-vacancy-original-link"
+                        variant="card"
+                      />
+                    ) : (
+                      <p className="text-meta text-text-muted">
+                        {labels.noApplicationRoute}
+                      </p>
+                    )}
+                  </li>
+                ),
+              )}
+            </ul>
+          </div>
         ))}
-      </ul>
     </section>
   );
 }

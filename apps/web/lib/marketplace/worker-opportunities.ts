@@ -14,7 +14,10 @@ import type {
   ExternalVacanciesResultV1,
 } from "@/lib/opportunities/external-vacancies";
 import { writeOpportunitySeen } from "@/lib/opportunities/seen";
-import { runMarkShown, type MarkShownPorts } from "./worker-opportunities-shown-core";
+import {
+  runMarkShown,
+  type MarkShownPorts,
+} from "./worker-opportunities-shown-core";
 import type {
   MarketplaceSurface,
   MarkShownInput,
@@ -59,7 +62,10 @@ import type {
  * is no aggregate "AI score" anywhere in this layer, and there must not be.
  */
 
-export type { MarketplaceSurface, MarkShownOutcome } from "./worker-opportunities-contract";
+export type {
+  MarketplaceSurface,
+  MarkShownOutcome,
+} from "./worker-opportunities-contract";
 
 /** Capability flags shared by every marketplace surface — the honest answer to
  *  "what can this environment actually do right now". */
@@ -148,8 +154,9 @@ export type MarketplaceMatchesView =
  */
 export async function loadWorkerOpportunityBoard(
   surface: MarketplaceSurface,
+  options?: Parameters<typeof loadWorkerOpportunities>[0],
 ): Promise<MarketplaceBoardView> {
-  const board = await loadWorkerOpportunities();
+  const board = await loadWorkerOpportunities(options);
   if (board.kind !== "ready") return { kind: "no-worker" };
   return {
     kind: "ready",
