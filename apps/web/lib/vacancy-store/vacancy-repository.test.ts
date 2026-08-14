@@ -189,10 +189,11 @@ describe("persistVacancies — exact accounting", () => {
     expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 2, withdrawnAbsent: 0 });
     expect(ops.filter((o) => o.kind === "upsert")).toHaveLength(0);
 
-    // The only writes are liveness touches, and they carry ONLY last_seen_at —
-    // a touch must not quietly rewrite content.
+    // The only write is ONE batched liveness touch (both rows share the run's
+    // capture clock, so they travel in one bounded statement), and it carries
+    // ONLY last_seen_at — a touch must not quietly rewrite content.
     const touches = ops.filter((o) => o.kind === "update");
-    expect(touches).toHaveLength(2);
+    expect(touches).toHaveLength(1);
     for (const touch of touches) {
       expect(Object.keys(touch.payload as object)).toEqual(["last_seen_at"]);
     }
@@ -611,7 +612,7 @@ describe("persistVacancies — write arms stay under the statement timeout", () 
    * statement timeout (57014) and aborted the run. Writes must travel in
    * bounded chunks; idempotent ON CONFLICT makes a mid-run death safe.
    */
-  it("a 1200-ad insert batch travels as 3 bounded upserts covering every row", async () => {
+  it("a 1200-ad insert batch travels as 6 bounded upserts covering every row", async () => {
     const batch = Array.from({ length: 1200 }, (_, i) =>
       vacancy({ externalId: `ad-${i}` }),
     );
@@ -621,14 +622,207 @@ describe("persistVacancies — write arms stay under the statement timeout", () 
 
     expect(result).toEqual({ inserted: 1200, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
     const upserts = ops.filter((o) => o.kind === "upsert");
-    // The naive single statement is exactly what timed out in production.
-    expect(upserts).toHaveLength(3);
+    // The naive single statement is exactly what timed out in production —
+    // and 500-row statements timed out again once the table held ~37k rows
+    // (57014, runs 31826082813 / 31827497540, 2026-08-14), hence 200.
+    expect(upserts).toHaveLength(6);
     for (const u of upserts) {
-      expect((u.payload as unknown[]).length).toBeLessThanOrEqual(500);
+      expect((u.payload as unknown[]).length).toBeLessThanOrEqual(200);
     }
     const written = upserts.flatMap((u) =>
       (u.payload as { external_id: string }[]).map((r) => r.external_id),
     );
     expect(written.sort()).toEqual(batch.map((v) => v.externalId).sort());
+  });
+});
+
+describe("persistVacancies — 57014 shrinks the statement instead of killing the run", () => {
+  /**
+   * The 2026-08-14 incident: at ~37k production rows, snapshot reconciliation
+   * sessions at record-offset 40000 died twice — run 31826082813 as
+   * `vacancy_persist_insert_failed:57014`, run 31827497540 as
+   * `vacancy_persist_touch_failed:57014`. A statement timeout is a
+   * work-per-statement problem, so the repair is smaller statements: halve
+   * the failing chunk (bounded), retry a min-size chunk once, and only then
+   * fail with the honest code. These tests script the database's answers per
+   * statement, so every retry path is deterministic.
+   */
+  function scriptedClient(opts: {
+    existing?: readonly {
+      provider_key: string;
+      external_id: string;
+      content_hash: string;
+      lifecycle: string;
+    }[];
+    /** Scripted answer per upsert statement, in call order. Null = success. */
+    upsertError?: (call: { index: number; size: number }) => { code: string } | null;
+    /** Scripted answer per UPDATE statement, in call order. Null = success. */
+    updateError?: (call: { index: number; ids: readonly string[] }) => { code: string } | null;
+  }) {
+    /** Sizes of upsert statements that SUCCEEDED — the rows actually stored. */
+    const upsertSizes: number[] = [];
+    const upsertAttempts: number[] = [];
+    /** Id batches of UPDATE statements that SUCCEEDED. */
+    const updateBatches: string[][] = [];
+    const updateAttempts: number[] = [];
+    const updatePayloads: unknown[] = [];
+    let upsertCalls = 0;
+    let updateCalls = 0;
+
+    const client = {
+      from() {
+        const chain: Record<string, unknown> = {};
+        let requestedIds: readonly string[] = [];
+        let isUpdate = false;
+        chain.select = () => chain;
+        chain.eq = () => chain;
+        chain.in = (column: string, values: readonly string[]) => {
+          if (column === "external_id") requestedIds = values;
+          return chain;
+        };
+        chain.update = (payload: unknown) => {
+          isUpdate = true;
+          updatePayloads.push(payload);
+          return chain;
+        };
+        chain.upsert = (payload: unknown[]) => {
+          const error =
+            opts.upsertError?.({ index: upsertCalls, size: payload.length }) ?? null;
+          upsertCalls += 1;
+          upsertAttempts.push(payload.length);
+          if (error === null) upsertSizes.push(payload.length);
+          return Promise.resolve({ data: null, error });
+        };
+        chain.then = (onOk: (v: unknown) => unknown, onErr?: (e: unknown) => unknown) => {
+          if (isUpdate) {
+            const error =
+              opts.updateError?.({ index: updateCalls, ids: requestedIds }) ?? null;
+            updateCalls += 1;
+            updateAttempts.push(requestedIds.length);
+            if (error === null) updateBatches.push([...requestedIds]);
+            return Promise.resolve({ data: null, error }).then(onOk, onErr);
+          }
+          return Promise.resolve({
+            data: (opts.existing ?? []).filter((r) =>
+              requestedIds.includes(r.external_id),
+            ),
+            error: null,
+          }).then(onOk, onErr);
+        };
+        return chain as never;
+      },
+    };
+
+    return {
+      client: client as never,
+      upsertSizes,
+      upsertAttempts,
+      updateBatches,
+      updateAttempts,
+      updatePayloads,
+    };
+  }
+
+  const TIMEOUT = { code: "57014" };
+
+  it("an insert statement that times out is halved and every row still lands exactly once", async () => {
+    const batch = Array.from({ length: 400 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    // The FIRST 200-row statement times out; everything after succeeds.
+    const { client, upsertSizes, upsertAttempts } = scriptedClient({
+      upsertError: ({ index }) => (index === 0 ? TIMEOUT : null),
+    });
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    // Accounting is exact and untouched by the retry.
+    expect(result).toEqual({ inserted: 400, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
+    // 200 failed -> 100 + 100 succeeded -> next 200 succeeded.
+    expect(upsertAttempts).toEqual([200, 100, 100, 200]);
+    expect(upsertSizes.reduce((a, b) => a + b, 0)).toBe(400);
+  });
+
+  it("a PERSISTENT 57014 fails honestly after a bounded number of shrinking attempts", async () => {
+    const batch = Array.from({ length: 200 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, upsertAttempts } = scriptedClient({
+      upsertError: () => TIMEOUT,
+    });
+
+    await expect(
+      persistVacancies(client, batch, SEEN_AT, SESSION_ID),
+    ).rejects.toThrow("vacancy_persist_insert_failed:57014");
+
+    // 200 -> 100 -> 50 -> 25 -> 25 retried once. Five statements, then the
+    // honest failure — never an unbounded loop against a sick database.
+    expect(upsertAttempts).toEqual([200, 100, 50, 25, 25]);
+  });
+
+  it("a non-timeout error fails immediately without any splitting", async () => {
+    const batch = Array.from({ length: 200 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, upsertAttempts } = scriptedClient({
+      upsertError: () => ({ code: "23514" }),
+    });
+
+    await expect(
+      persistVacancies(client, batch, SEEN_AT, SESSION_ID),
+    ).rejects.toThrow("vacancy_persist_insert_failed:23514");
+    expect(upsertAttempts).toEqual([200]);
+  });
+
+  it("unchanged rows are touched in bounded id batches, not one statement per row", async () => {
+    const batch = Array.from({ length: 450 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, updateBatches, updatePayloads } = scriptedClient({
+      existing: batch.map((v) => ({
+        provider_key: v.providerKey,
+        external_id: v.externalId,
+        content_hash: v.contentHash,
+        lifecycle: "published",
+      })),
+    });
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 450, withdrawnAbsent: 0 });
+    // The per-row shape was ~5 000 sequential statements per reconciliation
+    // session and is what actually failed in production. Bounded batches:
+    // every statement carries at most 200 ids, together they cover the batch.
+    expect(updateBatches.length).toBe(3);
+    for (const ids of updateBatches) {
+      expect(ids.length).toBeLessThanOrEqual(200);
+    }
+    expect(updateBatches.flat().sort()).toEqual(batch.map((v) => v.externalId).sort());
+    // A touch still carries ONLY the liveness stamp.
+    for (const payload of updatePayloads) {
+      expect(Object.keys(payload as object)).toEqual(["last_seen_at"]);
+    }
+  });
+
+  it("a touch statement that times out is halved and every row is still touched", async () => {
+    const batch = Array.from({ length: 300 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, updateBatches, updateAttempts } = scriptedClient({
+      existing: batch.map((v) => ({
+        provider_key: v.providerKey,
+        external_id: v.externalId,
+        content_hash: v.contentHash,
+        lifecycle: "published",
+      })),
+      updateError: ({ index }) => (index === 0 ? TIMEOUT : null),
+    });
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 300, withdrawnAbsent: 0 });
+    // 200 ids failed -> 100 + 100 succeeded -> final 100 succeeded.
+    expect(updateAttempts).toEqual([200, 100, 100, 100]);
+    expect(updateBatches.flat().sort()).toEqual(batch.map((v) => v.externalId).sort());
   });
 });
