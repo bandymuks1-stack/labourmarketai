@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Living World R&D · B — Gyvoji žemė (Terra Viva)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,600;62..125,800;62..125,900&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --linen:#ece4d2; --linen-2:#e2d7bf; --contour:#c9bb9c; --ink:#2b2a20;
+  --soil:#6b4f2e; --moss:#3f5d34; --moss-2:#5a7a4a; --harvest:#c78a2b; --lake:#2f5a66;
+  --card:#fbf7ec; --route:#a8641f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--linen);color:var(--ink);font-family:Archivo,sans-serif;overflow-x:hidden}
+/* engraved contour ground */
+.ground{position:fixed;inset:0;z-index:-1;
+  background:
+   radial-gradient(1200px 500px at 70% -10%, rgba(199,138,43,.12), transparent 60%),
+   radial-gradient(900px 600px at 8% 110%, rgba(63,93,52,.14), transparent 55%),
+   var(--linen);}
+.ground svg{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.ribbon{position:fixed;top:14px;right:-46px;z-index:60;transform:rotate(35deg);background:var(--moss);color:var(--card);
+  font:600 10px/1 Archivo,sans-serif;letter-spacing:.14em;padding:7px 52px;text-transform:uppercase}
+header{display:flex;justify-content:space-between;align-items:center;padding:24px clamp(18px,4vw,54px)}
+.wordmark{font:900 22px/1 Archivo,sans-serif;font-stretch:112%;letter-spacing:-.02em}
+.wordmark span{color:var(--moss)}
+.leg{font:italic 500 12px/1.5 Lora,serif;color:var(--soil)}
+.hero{padding:clamp(16px,3vh,40px) clamp(18px,4vw,54px) 6px;max-width:1180px}
+.kicker{display:inline-flex;align-items:center;gap:10px;font:800 11px/1 Archivo,sans-serif;font-stretch:120%;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--moss)}
+.kicker::before{content:"";width:34px;height:2px;background:var(--moss)}
+h1{font:900 clamp(38px,6vw,88px)/0.98 Archivo,sans-serif;font-stretch:118%;letter-spacing:-.03em;text-transform:uppercase;margin:.3em 0 .18em}
+h1 .grow{color:var(--moss)} h1 .route{color:var(--route)}
+.lede{font:italic 500 clamp(15px,1.3vw,19px)/1.6 Lora,serif;color:#4c4736;max-width:58ch}
+/* ------ THE LAND ------ */
+.land{position:relative;margin:clamp(20px,4vh,44px) auto 0;max-width:1280px;padding:0 clamp(14px,3vw,46px) 90px}
+.horizon{display:flex;gap:10px;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);
+  padding:0 8px 10px;margin-bottom:24px;flex-wrap:wrap}
+.harbor{text-align:center;font:600 10px/1.4 Archivo,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#57503d;opacity:.85}
+.harbor b{display:block;font:800 12px/1.3 Archivo,sans-serif;color:var(--ink)}
+.harbor .flagline{display:block;width:2px;height:22px;background:var(--ink);margin:6px auto 0;position:relative}
+.harbor.lit b{color:var(--route)}
+.harbor.lit .flagline::after{content:"";position:absolute;top:0;left:2px;border:6px solid transparent;border-left:12px solid var(--route);border-top:6px solid var(--route)}
+.plots{position:relative;display:grid;grid-template-columns:repeat(12,1fr);gap:0;min-height:560px}
+/* dashed engraved roads */
+.roads{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1}
+.roads path{fill:none;stroke:var(--route);stroke-width:2.2;stroke-dasharray:7 6;opacity:0;stroke-dashoffset:400}
+.roads path.on{animation:road 2.2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes road{to{opacity:.9;stroke-dashoffset:0}}
+.roads path.faint{stroke:var(--contour);opacity:.8;stroke-dashoffset:0;animation:none}
+/* parcel */
+.plot{position:relative;z-index:2;background:var(--card);border:1px solid rgba(43,42,32,.18);
+  box-shadow:0 22px 34px -22px rgba(43,42,32,.45), inset 0 0 0 5px var(--card);
+  transform:translateY(16px);opacity:0;transition:transform .5s ease}
+.plot.on{animation:settle .9s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes settle{to{transform:translateY(0);opacity:1}}
+.plot:hover{transform:translateY(-4px)}
+.plot img{width:100%;height:150px;object-fit:cover;display:block;border-bottom:1px solid rgba(43,42,32,.15)}
+.plot .name{padding:9px 12px 3px;font:800 13px/1.2 Archivo,sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.plot .deed{padding:0 12px 10px;font:italic 400 11.5px/1.5 Lora,serif;color:#5b5442}
+.plot .tag{position:absolute;top:8px;left:8px;background:var(--moss);color:var(--card);font:700 9px/1 Archivo,sans-serif;
+  letter-spacing:.12em;text-transform:uppercase;padding:5px 8px}
+.plot .tag.demand{background:var(--route)}
+.p1{grid-column:1/4;grid-row:1;margin-top:46px}
+.p2{grid-column:4/7;grid-row:1;margin-top:110px}
+.p3{grid-column:7/10;grid-row:1;margin-top:26px}
+.p4{grid-column:10/13;grid-row:1;margin-top:130px}
+.p5{grid-column:2/5;grid-row:2;margin-top:-16px}
+.p6{grid-column:8/11;grid-row:2;margin-top:-40px}
+/* my plot — foreground, bigger */
+.mine{grid-column:5/9;grid-row:2;margin-top:8px;z-index:3;border:2px solid var(--moss);
+  box-shadow:0 34px 60px -26px rgba(43,42,32,.55), inset 0 0 0 5px var(--card)}
+.mine .name{font-size:15px}
+.mine img{height:190px}
+.growth{display:flex;gap:6px;padding:0 12px 4px}
+.crate{width:26px;height:18px;background:linear-gradient(#caa25c,#a87f3e);border:1px solid #7a5a28;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.25);opacity:0;transform:scale(.6) translateY(6px)}
+.crate.on{animation:crate .5s cubic-bezier(.2,.9,.3,1.4) forwards}
+@keyframes crate{to{opacity:1;transform:none}}
+.act{margin:8px 12px 14px;display:flex;gap:8px;align-items:center}
+button.record{cursor:pointer;border:0;background:var(--moss);color:var(--card);font:800 12px/1 Archivo,sans-serif;
+  letter-spacing:.06em;text-transform:uppercase;padding:12px 16px;box-shadow:0 10px 22px -10px rgba(63,93,52,.8);transition:transform .2s}
+button.record:hover{transform:translateY(-2px)}
+button.record:disabled{opacity:.55;cursor:default;transform:none}
+.act .hinttxt{font:italic 400 11px/1.4 Lora,serif;color:#5b5442}
+/* demand bulletin that appears */
+.bulletin{position:absolute;right:clamp(8px,2vw,30px);bottom:-46px;z-index:4;background:var(--ink);color:var(--linen);
+  padding:14px 16px;max-width:300px;box-shadow:0 24px 44px -20px rgba(43,42,32,.6);
+  opacity:0;transform:translateY(14px)}
+.bulletin.on{animation:settle .7s ease forwards}
+.bulletin .h{font:800 12px/1.3 Archivo,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#e9c07a}
+.bulletin p{font:italic 400 12px/1.55 Lora,serif;color:#d8d0bc;margin-top:5px}
+.bulletin p b{color:var(--linen);font-style:normal;font-family:Archivo,sans-serif}
+/* explainer strip */
+.law{margin:110px auto 0;max-width:1180px;padding:0 clamp(18px,4vw,54px);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.law .step{background:var(--card);border:1px solid rgba(43,42,32,.15);padding:16px 16px 18px}
+.law .step .n{font:900 26px/1 Archivo,sans-serif;color:var(--contour)}
+.law .step h4{font:800 13px/1.3 Archivo,sans-serif;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 5px}
+.law .step p{font:italic 400 12px/1.55 Lora,serif;color:#5b5442}
+.cta-row{display:flex;gap:14px;align-items:center;justify-content:center;padding:44px 18px 26px;flex-wrap:wrap}
+a.cta{background:var(--route);color:#fff;text-decoration:none;font:800 15px/1 Archivo,sans-serif;letter-spacing:.04em;
+  text-transform:uppercase;padding:16px 26px;box-shadow:0 14px 30px -12px rgba(168,100,31,.75);transition:transform .25s}
+a.cta:hover{transform:translateY(-2px)}
+.cta-note{font:italic 500 12px/1.5 Lora,serif;color:#5b5442;max-width:34ch}
+.legal{padding:14px clamp(18px,4vw,54px) 22px;font:400 10px/1.6 Archivo,sans-serif;color:#7a7259}
+/* mobile */
+@media (max-width:860px){
+  .plots{display:flex;flex-direction:column;gap:16px;min-height:0}
+  .plot{margin:0!important}
+  .mine{order:-1;border-width:2px}
+  .roads{display:none}
+  .horizon{position:sticky;top:0;background:var(--linen);z-index:5;border-bottom:2px solid var(--ink);padding-top:10px}
+  .harbor{font-size:9px}.harbor b{font-size:10px}
+  .bulletin{position:static;margin:8px 0 0;max-width:none;transform:none}
+  .law{grid-template-columns:1fr 1fr;margin-top:34px}
+  h1{font-size:clamp(34px,10vw,52px)}
+}
+@media (max-width:560px){.leg{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .plot,.bulletin{opacity:1;transform:none;animation:none}
+  .roads path{opacity:.9;stroke-dashoffset:0;animation:none}
+  .crate{opacity:1;transform:none;animation:none}
+}
+</style>
+</head>
+<body>
+<div class="ground" aria-hidden="true">
+  <svg preserveAspectRatio="none" viewBox="0 0 1400 900">
+    <g fill="none" stroke="#c9bb9c" stroke-width="1">
+      <path d="M-40,120 C240,60 420,190 700,140 S1120,40 1460,120"/>
+      <path d="M-40,190 C250,130 430,260 710,210 S1130,110 1460,190"/>
+      <path d="M-40,430 C230,370 480,500 760,450 S1150,350 1460,430"/>
+      <path d="M-40,510 C240,450 490,580 770,530 S1160,430 1460,510"/>
+      <path d="M-40,760 C260,700 500,830 780,780 S1170,680 1460,760"/>
+      <path d="M-40,830 C270,770 510,900 790,850 S1180,750 1460,830"/>
+    </g>
+  </svg>
+</div>
+<div class="ribbon">R&amp;D prototipas · ne produkcija</div>
+
+<header>
+  <div class="wordmark">labourmarket<span>.ai</span></div>
+  <div class="leg">Gyvo pasaulio kryptis B · „Gyvoji žemė“ · gyvas ūkio žemėlapis</div>
+</header>
+
+<section class="hero">
+  <span class="kicker">Kiekvienas žmogus — sklypas gyvame ūkyje</span>
+  <h1>Tavo darbas <span class="grow">augina žemę</span>.<br>Paklausa <span class="route">tiesia kelius</span>.</h1>
+  <p class="lede">Slaugytoja, virėjas, elektrikas, sandėlininkas — ir močiutė su 30 kg agurkų.
+  Visi šiame žemėlapyje lygūs: užfiksuotas darbas augina tavo sklypą, o tikros paklausos keliai
+  patys ateina prie jo — iš Švedijos regionų uostų ar vietinio turgaus.</p>
+</section>
+
+<section class="land">
+  <div class="horizon" id="horizon">
+    <div class="harbor"><b>Stockholm</b>uostas · 6 741 skelb.<span class="flagline"></span></div>
+    <div class="harbor" data-h="skane"><b>Skåne</b>uostas · 4 310 skelb.<span class="flagline"></span></div>
+    <div class="harbor"><b>Västra Götaland</b>uostas · 5 190 skelb.<span class="flagline"></span></div>
+    <div class="harbor" data-h="turgus"><b>Vietinis turgus</b>pasiūlos kelias<span class="flagline"></span></div>
+    <div class="harbor"><b>Norrbotten</b>uostas · 934 skelb.<span class="flagline"></span></div>
+  </div>
+
+  <div class="plots" id="plots">
+    <svg class="roads" viewBox="0 0 1240 620" preserveAspectRatio="none" aria-hidden="true">
+      <path class="faint" d="M160,120 C200,60 260,40 320,-6"/>
+      <path class="faint" d="M980,150 C1010,90 1060,50 1090,-6"/>
+      <path class="faint" d="M480,210 C520,150 600,90 640,-6"/>
+      <path id="roadA" d="M620,430 C600,330 520,140 470,-8"/>
+      <path id="roadB" d="M700,450 C760,330 820,120 850,-8"/>
+    </svg>
+
+    <figure class="plot p1"><span class="tag">priežiūra</span>
+      <img alt="Slaugytoja padeda vyresnio amžiaus porai" src="https://images.unsplash.com/photo-1762955911431-4c44c7c3f408?q=80&w=700&auto=format&fit=crop">
+      <div class="name">Ritos sklypas</div>
+      <p class="deed">priežiūra ir pagalba · 11 užfiksuotų pamainų</p>
+    </figure>
+    <figure class="plot p2"><span class="tag">virtuvė</span>
+      <img alt="Virėjas gamina restorano virtuvėje" src="https://images.unsplash.com/photo-1577219492769-b63a779fac28?q=80&w=700&auto=format&fit=crop">
+      <div class="name">Tomo sklypas</div>
+      <p class="deed">karštas cechas · 4 sezonai istorijos</p>
+    </figure>
+    <figure class="plot p3"><span class="tag">elektra</span>
+      <img alt="Elektrikas montuoja instaliaciją" src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=700&auto=format&fit=crop">
+      <div class="name">Andriaus sklypas</div>
+      <p class="deed">instaliacijos · aktai ir sertifikatai kaupiami</p>
+    </figure>
+    <figure class="plot p4"><span class="tag">logistika</span>
+      <img alt="Sandėlio darbuotojas su šakiniu krautuvu" src="https://images.unsplash.com/photo-1532635026-d12867005472?q=80&w=700&auto=format&fit=crop">
+      <div class="name">Dariaus sklypas</div>
+      <p class="deed">sandėlis ir krautuvas · pažymėjimai pažymėti</p>
+    </figure>
+    <figure class="plot p5"><span class="tag">amatai</span>
+      <img alt="Stalius dirbtuvėse prie kėdės" src="https://images.unsplash.com/photo-1631396326646-c06a935ff3a6?q=80&w=700&auto=format&fit=crop">
+      <div class="name">Jurgio dirbtuvės</div>
+      <p class="deed">staliaus darbai · nuotraukos kaip įrodymai</p>
+    </figure>
+    <figure class="plot p6"><span class="tag demand">smulkus verslas</span>
+      <img alt="Floristė komponuoja puokštę savo krautuvėlėje" src="https://images.unsplash.com/photo-1642751652611-bb9a7cad58a3?q=80&w=700&auto=format&fit=crop">
+      <div class="name">Ievos krautuvėlė</div>
+      <p class="deed">paslaugos ir produktai · organizacijos veikla</p>
+    </figure>
+
+    <figure class="plot mine" id="mine"><span class="tag">tavo sklypas</span>
+      <img alt="Rankos su šviežiais agurkais pintame krepšyje" src="https://images.unsplash.com/photo-1628110327712-48e051f233d9?q=80&w=900&auto=format&fit=crop">
+      <div class="name">Onos šiltnamis — tavo sklypas</div>
+      <p class="deed">Šiandien: 30 kg agurkų. Užfiksuok — ir žemėlapis sužinos, ką turi pasiūlyti.</p>
+      <div class="growth" id="growth" aria-label="Derliaus dėžės — augantis sklypas"></div>
+      <div class="act">
+        <button class="record" id="recordBtn">Užfiksuok šiandienos darbą</button>
+        <span class="hinttxt" id="actHint">30 kg derliaus → pasiūla</span>
+      </div>
+    </figure>
+
+    <aside class="bulletin" id="bulletin">
+      <div class="h">Atsivėrė kelias</div>
+      <p><b>Vietinis turgus</b> — teisėtas pasiūlos kelias tavo derliui.
+      Ir dar: <b>Trädgårdsarbete — Skåne</b>, 34 aktualūs šiltnamio darbo skelbimai.
+      Keliai atsirado, nes žemėlapis sužinojo, ką moki ir turi.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="law">
+  <div class="step"><div class="n">01</div><h4>Padarei</h4><p>pamaina, aktas, derlius, servisas — tikras darbas, ne anketa.</p></div>
+  <div class="step"><div class="n">02</div><h4>Užfiksavai</h4><p>rezultatas ir tinkamas įrodymas gula į tavo sklypo istoriją.</p></div>
+  <div class="step"><div class="n">03</div><h4>Žemė auga</h4><p>geriau suprantame tavo gebėjimus, paslaugas ir pasiūlą — ne „vertę“.</p></div>
+  <div class="step"><div class="n">04</div><h4>Keliai tiesiasi</h4><p>tikra paklausa — darbo skelbimai ar pirkėjai — pati ateina prie sklypo.</p></div>
+</section>
+
+<div class="cta-row">
+  <a class="cta" href="#">Įsikurk savo sklypą</a>
+  <p class="cta-note">Nemokamai. Veikia ir dirbant: sklypas auga su kiekvienu užfiksuotu darbu.</p>
+</div>
+<p class="legal">R&amp;D prototipas — ne produkcinis puslapis. Nuotraukos: Unsplash (licencija leidžia naudojimą); galutiniam variantui — savininko patvirtinta fotografija. Skelbimų skaičiai — iliustracinė kompozicija iš tikros Švedijos pasiūlos struktūros.</p>
+
+<script>
+(function(){
+  var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function seen(el,cb){if(reduced){cb();return}
+    new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){cb();o.disconnect()}})},{threshold:.2}).observe(el)}
+  seen(document.getElementById('plots'),function(){
+    document.querySelectorAll('.plot').forEach(function(p,i){setTimeout(function(){p.classList.add('on')},i*220)});
+  });
+  var step=0, crates=document.getElementById('growth'), btn=document.getElementById('recordBtn'),
+      hint=document.getElementById('actHint');
+  var acts=[
+    {h:'30 kg derliaus → pasiūla', road:'roadA', harbor:'turgus'},
+    {h:'dar 20 kg + nuotrauka → daugiau pirkėjų', road:'roadB', harbor:'skane'},
+    {h:'sklypas gyvas — keliai lieka', road:null, harbor:null}
+  ];
+  btn.addEventListener('click',function(){
+    if(step>=3)return;
+    var c=document.createElement('span');c.className='crate';crates.appendChild(c);
+    requestAnimationFrame(function(){c.classList.add('on')});
+    var a=acts[step];
+    if(a.road){var r=document.getElementById(a.road); r.classList.remove('on'); void r.getBoundingClientRect(); r.classList.add('on');}
+    if(a.harbor){document.querySelectorAll('.harbor').forEach(function(h){
+      if(h.dataset.h===a.harbor)h.classList.add('lit')});}
+    if(step===0){document.getElementById('bulletin').classList.add('on');}
+    step++; hint.textContent=(acts[step]||{}).h||'sklypas gyvas — keliai lieka';
+    if(step>=3){btn.disabled=true;btn.textContent='Sklypas auga ✓';}
+  });
+})();
+</script>
+</body>
+</html>
