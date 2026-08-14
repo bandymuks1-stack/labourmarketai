@@ -87,13 +87,92 @@ const EXISTENCE_READ_CHUNK = 200;
  * The write arms need a bound too, learned the same day: a single upsert
  * carrying the whole batch (2 500+ full rows in one statement) tripped the
  * database's statement timeout — 57014, `vacancy_persist_insert_failed`, run
- * aborted, cursor honestly stuck. 500 rows keeps each statement's work well
- * inside the timeout while still being ~5 round trips per thousand ads.
- * Chunked upserts stay idempotent (natural-key ON CONFLICT), so a run that
- * dies between chunks re-runs safely: already-written rows re-classify as
- * unchanged and are merely touched.
+ * aborted, cursor honestly stuck. Chunked upserts stay idempotent
+ * (natural-key ON CONFLICT), so a run that dies between chunks re-runs
+ * safely: already-written rows re-classify as unchanged and are merely
+ * touched.
+ *
+ * 500 was not small enough. As production grew to ~37 000 rows the same
+ * 57014 came back (runs 31826082813 / 31827497540, 2026-08-14): every row
+ * write maintains three GIN indexes (skills, full text) plus the b-trees, so
+ * per-statement cost rises with table size and any statement can additionally
+ * be the unlucky one that pays for a GIN pending-list flush. Two defences,
+ * both below: a smaller initial chunk, and a bounded halving retry on 57014
+ * (`runStatementChunks`) so one slow statement shrinks instead of killing the
+ * whole session.
  */
-const WRITE_CHUNK = 500;
+const WRITE_CHUNK = 200;
+
+/**
+ * Touch and withdraw travel as `.in(external_id, …)` UPDATE filters, so their
+ * per-statement bound answers to the same ~8 KB URL cap as the existence read
+ * — 200 ids keeps the URL an order of magnitude under it. Batching them at
+ * all (rather than one statement per row, the shape that failed as
+ * `vacancy_persist_touch_failed:57014` on 2026-08-14) also collapses ~5 000
+ * sequential round trips per reconciliation session into ~25.
+ */
+const UPDATE_FILTER_CHUNK = 200;
+
+/** Below this size a statement is not split further — it is retried once and
+ *  then honestly failed. 25 full rows is far under any workload the timeout
+ *  was ever observed to admit, so reaching a second 57014 here means the
+ *  database itself is unwell and retrying harder would only mask it. */
+const MIN_STATEMENT_CHUNK = 25;
+
+/** Postgres SQLSTATE for "canceling statement due to statement timeout". */
+const STATEMENT_TIMEOUT_CODE = "57014";
+
+/**
+ * Run one bounded statement per chunk of `items`, splitting a chunk in half
+ * and retrying when the database answers 57014. The split is BOUNDED: depth
+ * is log2(initial/min) and a min-size chunk gets exactly one retry, so the
+ * worst case is a fixed, small statement count — never a loop. Every other
+ * error code fails immediately and verbatim.
+ *
+ * Callers pass idempotent statements only (natural-key upserts, absolute-value
+ * updates), which is what makes the retry safe: re-running a half that
+ * partially succeeded rewrites the same values it wrote the first time.
+ */
+async function runStatementChunks<T>(
+  items: readonly T[],
+  chunkSize: number,
+  runStatement: (chunk: readonly T[]) => Promise<{ code: string | null } | null>,
+  fail: (code: string | null) => never,
+): Promise<void> {
+  const runChunk = async (
+    chunk: readonly T[],
+    isRetry: boolean,
+  ): Promise<void> => {
+    const error = await runStatement(chunk);
+    if (error === null) return;
+    if (error.code !== STATEMENT_TIMEOUT_CODE) fail(error.code);
+    if (chunk.length > MIN_STATEMENT_CHUNK) {
+      const mid = Math.ceil(chunk.length / 2);
+      await runChunk(chunk.slice(0, mid), false);
+      await runChunk(chunk.slice(mid), false);
+      return;
+    }
+    if (!isRetry) return runChunk(chunk, true);
+    fail(error.code);
+  };
+
+  for (let i = 0; i < items.length; i += chunkSize) {
+    await runChunk(items.slice(i, i + chunkSize), false);
+  }
+}
+
+/** External ids per provider — the grouping the batched UPDATE arms filter
+ *  on. One batch is one provider in practice, but the grouping is read off
+ *  the data so a mixed batch cannot cross-touch another provider's rows. */
+function idsByProvider(rows: readonly PublicVacancyRowV1[]): Map<string, string[]> {
+  const grouped = new Map<string, string[]>();
+  for (const row of rows) {
+    const ids = grouped.get(row.provider_key);
+    if (ids === undefined) grouped.set(row.provider_key, [row.external_id]);
+    else ids.push(row.external_id);
+  }
+  return grouped;
+}
 
 /**
  * Store a batch of accepted vacancies idempotently.
@@ -190,61 +269,75 @@ export async function persistVacancies(
   // insert arm that is not redundancy — it is the only thing that makes two
   // concurrent runs safe. Without it, two importers that both read "absent"
   // would race and one would fail on the unique index.
-  for (let i = 0; i < toInsert.length; i += WRITE_CHUNK) {
+  const upsertChunk = async (
+    chunk: readonly PublicVacancyRowV1[],
+  ): Promise<{ code: string | null } | null> => {
     const { error } = await client
       .from(VACANCY_TABLE)
-      .upsert(toInsert.slice(i, i + WRITE_CHUNK) as never, {
-        onConflict: "provider_key,external_id",
-      });
-    if (error) {
-      throw new Error(`vacancy_persist_insert_failed:${error.code ?? "unknown"}`);
-    }
-  }
+      .upsert(chunk as never, { onConflict: "provider_key,external_id" });
+    return error ? { code: error.code ?? null } : null;
+  };
 
-  for (let i = 0; i < toUpdate.length; i += WRITE_CHUNK) {
-    const { error } = await client
-      .from(VACANCY_TABLE)
-      .upsert(toUpdate.slice(i, i + WRITE_CHUNK) as never, {
-        onConflict: "provider_key,external_id",
-      });
-    if (error) {
-      throw new Error(`vacancy_persist_update_failed:${error.code ?? "unknown"}`);
-    }
-  }
+  await runStatementChunks(toInsert, WRITE_CHUNK, upsertChunk, (code) => {
+    throw new Error(`vacancy_persist_insert_failed:${code ?? "unknown"}`);
+  });
+
+  await runStatementChunks(toUpdate, WRITE_CHUNK, upsertChunk, (code) => {
+    throw new Error(`vacancy_persist_update_failed:${code ?? "unknown"}`);
+  });
 
   // The narrow withdrawal write: lifecycle, liveness, and the run that did it.
   // Deliberately NOT the full row — a removal record's empty body must never
   // overwrite the last published content, and the table's own bounds would
-  // refuse it anyway.
-  for (const row of toWithdraw) {
-    const { error } = await client
-      .from(VACANCY_TABLE)
-      .update({
-        lifecycle: "removed",
-        is_active: false,
-        last_seen_at: row.last_seen_at,
-        updated_at: row.updated_at,
-        import_session_id: row.import_session_id,
-      } as never)
-      .eq("provider_key", row.provider_key)
-      .eq("external_id", row.external_id);
-    if (error) {
-      throw new Error(`vacancy_persist_withdraw_failed:${error.code ?? "unknown"}`);
-    }
+  // refuse it anyway. Every withdrawal in a batch carries the same transition
+  // and the same run stamps, so the arm is one bounded UPDATE per id chunk
+  // rather than one statement per row.
+  for (const [providerKey, ids] of idsByProvider(toWithdraw)) {
+    await runStatementChunks(
+      ids,
+      UPDATE_FILTER_CHUNK,
+      async (chunk) => {
+        const { error } = await client
+          .from(VACANCY_TABLE)
+          .update({
+            lifecycle: "removed",
+            is_active: false,
+            last_seen_at: seenAt,
+            updated_at: seenAt,
+            import_session_id: sessionId,
+          } as never)
+          .eq("provider_key", providerKey)
+          .in("external_id", chunk);
+        return error ? { code: error.code ?? null } : null;
+      },
+      (code) => {
+        throw new Error(`vacancy_persist_withdraw_failed:${code ?? "unknown"}`);
+      },
+    );
   }
 
   // Unchanged rows get their liveness refreshed and nothing else. This is what
   // makes "we still saw this ad today" recordable without pretending the ad
-  // was rewritten.
-  for (const row of toTouch) {
-    const { error } = await client
-      .from(VACANCY_TABLE)
-      .update({ last_seen_at: row.last_seen_at } as never)
-      .eq("provider_key", row.provider_key)
-      .eq("external_id", row.external_id);
-    if (error) {
-      throw new Error(`vacancy_persist_touch_failed:${error.code ?? "unknown"}`);
-    }
+  // was rewritten. All touched rows take the SAME capture clock, so this too
+  // is one bounded UPDATE per id chunk — the per-row shape it replaces failed
+  // as `vacancy_persist_touch_failed:57014` on 2026-08-14 and spent minutes
+  // of a capped workflow run on thousands of sequential round trips.
+  for (const [providerKey, ids] of idsByProvider(toTouch)) {
+    await runStatementChunks(
+      ids,
+      UPDATE_FILTER_CHUNK,
+      async (chunk) => {
+        const { error } = await client
+          .from(VACANCY_TABLE)
+          .update({ last_seen_at: seenAt } as never)
+          .eq("provider_key", providerKey)
+          .in("external_id", chunk);
+        return error ? { code: error.code ?? null } : null;
+      },
+      (code) => {
+        throw new Error(`vacancy_persist_touch_failed:${code ?? "unknown"}`);
+      },
+    );
   }
 
   return {
