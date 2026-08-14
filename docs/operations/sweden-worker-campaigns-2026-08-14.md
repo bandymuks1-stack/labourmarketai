@@ -121,11 +121,95 @@ ad → /create-cv?utm_source=…&utm_campaign=…  (declared acquisition route,
 
 ## Owner gates before activation
 
-1. **Sweden cadence** (freshness): GitHub console — secrets
-   `SUPABASE_SERVICE_ROLE_KEY` + `NEXT_PUBLIC_SUPABASE_URL`, variables
-   `VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED=true` +
-   `VACANCY_SCHEDULE_ENABLED=true` (workflow header marks this owner-only).
-   The first refresh after the v2 deploy also re-tags all stored rows.
-2. **Paid advertising activation** — budget + platform choice.
+1. **Sweden cadence** (freshness): ✅ **DONE 2026-08-14** — owner configured the
+   secrets/variables; the cadence is live (first real stream run
+   31809153388) and the full-market snapshot reconciliation walk was executed
+   the same day (see v3 below). This gate is closed.
+2. **Paid advertising activation** — budget + platform choice. **Still the
+   only open gate.**
 3. Optional: public anon job pages (SEO) — separate RED-class migration;
    licensed-profession taxonomy additions (nurse etc.) — migration-gated.
+
+---
+
+## v3 — OPERATOR COMPLETION (2026-08-14 evening): cadence LIVE, full market imported, re-tag DONE
+
+Everything below is measured from production AFTER the work, not projected.
+
+### What ran
+
+- **First real cadence run** (stream delta, workflow_dispatch
+  [31809153388](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/31809153388)):
+  inserted 2,011 / updated 182 / removals 2; cursor 2026-08-13T06:12Z →
+  2026-08-14T00:12Z. All earlier green scheduled runs were configuration-gated
+  no-ops — the owner's config landed after the 11:54Z run.
+- **Snapshot reconciliation walk** (new `channel=snapshot` dispatch input,
+  PR #1159): bounded 5,000-record sessions walked the publisher's full
+  active set (~40,000 ads) to record-offset 40,000; one tail session hit a
+  transient Postgres statement timeout (`57014`, honestly recorded in its
+  accounting artifact, cursor untouched) — the residual tail is recent
+  publications the delta stream ingests anyway (stream reached
+  `caughtUp: true` the same evening). This is the designed cold-start/reconciliation act;
+  it both completed the never-finished cold start AND re-tagged the stored
+  rows stranded on transform v1 after #1158 (delta stream only re-sees ads
+  the publisher touches — 6,912 rows were unreachable by cadence alone).
+- **Two real defects found and fixed during the walk:**
+  - PR #1160 — deep-offset walk sessions exceeded the 15-min job cap (the
+    snapshot endpoint has no offset parameter; a session must re-stream and
+    skip the whole prefix). Cap raised to 45 min; stream runs unaffected.
+  - PR #1161 — `runner | tee` masked runner crashes (run 31820380678 threw
+    `count_failed:unknown`, uploaded an empty artifact, stayed green).
+    `set -o pipefail` restores the documented red-run failure surface.
+
+### Production truth (queried post-walk, 2026-08-14 ~17:10Z)
+
+| Fact | Value |
+|---|---|
+| Total rows | **36,141** (all SE, one provider, **0 duplicate external ids**) |
+| Active | 36,135; lifecycle `removed`: 6 (withdrawals correctly deactivate) |
+| User-visible (active AND unexpired at read) | **36,110** across **all 21 regions** |
+| Expired-but-active source rows | 25 — filtered from every user-facing read (`vacancy-read.ts` `is_active` + `expires_at` predicate; pinned by `vacancy-read.test.ts`) |
+| Freshness | stream cursor **caught up to 2026-08-14T18:09:51Z** (run 31827132053, `caughtUp: true`); the 18:05Z cron `schedule` run also succeeded unattended — cadence proven both scheduled and dispatched |
+| Transform v2 (truthful categorizer) | **35,947 rows (99.5%)**; 188 active v1 leftovers (0.5%) = ads the walk did not re-see — publisher-absent zombies; 25 already expired, the rest age out via `expires_at`; 79 still carry pre-v2 tags |
+| Classified (user-visible) | **14,988 = 41.5%** — exactly the precision-first projection from #1158 |
+| False-positive regression | **0** cook rows without a kitchen signal in label/title · **0** driver rows without a driving signal · **0** cook rows from medical labels · licensed slugs (nurse/doctor) correctly absent (migration-gated) · 100% of tags carry `categorization_origin` |
+
+### Corrected family ranking (v2 tags, user-visible, production — not projections)
+
+| Family | Ads | Regions |
+|---|---|---|
+| Care / assistance (caregiver) | **3,613** | 21 |
+| Education (teacher) | 1,354 | 21 |
+| Kitchen / restaurant (cook 668 + kitchen_helper 615 + waiter 339 + baker 165) | **1,787** | 21 |
+| Construction trades (electrician 580 + carpenter 342 + welder 198 + concrete 122 + heavy-equipment 122) | **1,364** | ~20 |
+| Warehouse / logistics (warehouse_worker) | 836 | 21 |
+| Retail (sales_assistant) | 914 | 21 |
+| Driver (label-true) | 754 | 21 |
+| Cleaning (cleaner) | 711 | 21 |
+| Software development | 706 | 21 |
+| Production / industry | 664 | 21 |
+
+The full market roughly 5× the pre-walk inventory; every family above is
+present in essentially all regions and 100% of family rows were seen within
+48 h.
+
+### Recommended first campaigns (re-ranked on real inventory)
+
+1. **Care & assistance in Sweden** — 3,613 ads, 21 regions. Language caveat
+   unchanged: many ads state Swedish; copy must not imply otherwise.
+2. **Kitchen & restaurant** — 1,787-ad bundle, all regions; lower language
+   barrier.
+3. **Construction trades** — 1,364-ad bundle (electrician now 580 — the v1
+   "too thin" verdict reversed by full-market data).
+4. **Warehouse & logistics + driver** — 836 + 754 = 1,590 reachable ads.
+5. **Retail / shop work** — 914 ads, all regions.
+
+Education stays off the first wave (licensing) despite being family #2 by
+volume; software_developer is viable as an EN-language niche later.
+
+### Verdict
+
+**READY_FOR_WORKER_ACQUISITION** — the single blocker from the v2 loop
+(cadence configuration + first refresh + re-tag) is closed with proof. The
+only remaining gate is the owner's paid-advertising activation (budget +
+platform), which was always owner-only.
