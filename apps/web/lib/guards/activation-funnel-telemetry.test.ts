@@ -91,6 +91,9 @@ const EXPECTED_EVENTS = [
   "experience_submitted",
   "experience_published",
   "organization_created",
+  // Sweden worker loop v1: the confirmed open of a public-source ad's
+  // original advertisement — the click a worker campaign must prove.
+  "external_ad_opened",
 ] as const;
 
 describe("activation funnel — event registry", () => {

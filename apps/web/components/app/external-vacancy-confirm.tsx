@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * External-apply confirmation step (V8 W4-B item 3, owner decision V8
  * addendum §4). The application for a public-source ad continues on the
  * PUBLISHER'S portal — the person must know that before leaving. First
  * activation reveals an inline confirm block: one sentence, the REAL anchor,
- * and a dismiss control. No network read, no tracking, no state beyond one
- * boolean — the anchor the person finally clicks is an ordinary link with
- * the same href/target/rel the direct control carried before.
+ * and a dismiss control. No network read, no state beyond one boolean — the
+ * anchor the person finally clicks is an ordinary link with the same
+ * href/target/rel the direct control carried before. The final click emits
+ * the first-party `external_ad_opened` funnel event (bounded scalars, no
+ * URL/ad id/PII) — without it a worker campaign cannot prove any ad was
+ * ever reached (§19 loop telemetry).
  *
  * This component is the ONLY place an external application anchor may render
  * (guard: lib/guards/external-apply-confirm.test.ts) — both the board's card
@@ -109,6 +114,11 @@ export function ExternalApplyConfirmedBlock({
           rel="noopener noreferrer nofollow"
           className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           data-testid={anchorTestId}
+          onClick={() => {
+            trackFunnel(FUNNEL_EVENTS.externalAdOpened, {
+              cta_id: anchorTestId,
+            });
+          }}
         >
           {continueLabel} ↗
         </a>

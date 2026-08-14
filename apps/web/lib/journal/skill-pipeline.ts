@@ -705,6 +705,11 @@ export async function processJournalEntrySkills(opts: {
         revalidatePath(`/${locale}/dashboard/journal`, "page");
         revalidatePath(`/${locale}/dashboard/profile`, "page");
         revalidatePath(`/${locale}/cv`, "page");
+        // The board is where new evidence becomes VISIBLE value (doctrine
+        // flywheel: journal → understanding → opportunities). Without this,
+        // the surfaces that would show the effect of the entry are exactly
+        // the ones left stale.
+        revalidatePath(`/${locale}/dashboard/opportunities`, "page");
       } catch (e) {
         // Revalidation is a freshness hint, never a pipeline failure.
         logError(trace, "revalidate", e);

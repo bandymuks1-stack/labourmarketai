@@ -83,13 +83,26 @@ export interface ExternalVacanciesResultV1 {
  *  archive — a worker who wants more refines the search. */
 const BOARD_LIMIT = 20;
 
+/** Extra profile-directed candidates fetched beyond the newest page. Without
+ *  this, the shortlist is drawn ONLY from the newest ads overall, and a
+ *  worker whose profession sits deeper in the supply never sees it (TEST A of
+ *  the opportunity-realization doctrine: the same supply must become MORE
+ *  useful as the profile says more). Retrieval only — ranking stays the one
+ *  engine below, and the rendered shortlist stays capped at BOARD_LIMIT. */
+const PROFILE_POOL_LIMIT = 30;
+
 export async function loadExternalVacancyCards(
   client: VacancyDbClient,
   subject: MatchSubject,
-  options: Pick<VacancySearchFiltersV1, "country" | "query" | "nowIso">,
+  options: Pick<
+    VacancySearchFiltersV1,
+    "country" | "professionSlug" | "query" | "nowIso"
+  >,
 ): Promise<ExternalVacanciesResultV1> {
+  const explicitProfession = options.professionSlug ?? null;
   const result = await searchPublicVacancies(client, {
     country: options.country ?? null,
+    professionSlug: explicitProfession,
     query: options.query ?? null,
     limit: BOARD_LIMIT,
     nowIso: options.nowIso,
@@ -119,7 +132,36 @@ export async function loadExternalVacancyCards(
     unavailable: refreshed.status === "not_provisioned",
   });
 
-  const cards = result.vacancies
+  // Profile-directed pool: when the person has a declared profession and the
+  // board is not already narrowed (no explicit profession filter, no free-text
+  // query), also fetch ads IN that profession. This is what lets a profile
+  // enrichment change which ads the shortlist is drawn from, instead of the
+  // shortlist forever being "the 20 newest ads of any kind".
+  const profileProfession = subject.professionSlug ?? null;
+  let profilePool = [] as (typeof result.vacancies)[number][];
+  if (
+    !explicitProfession &&
+    !(options.query && options.query.trim().length > 0) &&
+    profileProfession
+  ) {
+    const extra = await searchPublicVacancies(client, {
+      country: options.country ?? null,
+      professionSlug: profileProfession,
+      query: null,
+      limit: PROFILE_POOL_LIMIT,
+      nowIso: options.nowIso,
+    });
+    if (extra.status === "ok") profilePool = [...extra.vacancies];
+  }
+
+  // Merge + dedupe by publisher identity — the newest page and the
+  // profile-directed pool can overlap.
+  const byKey = new Map<string, (typeof result.vacancies)[number]>();
+  for (const v of [...result.vacancies, ...profilePool]) {
+    byKey.set(`${v.providerKey}:${v.externalId}`, v);
+  }
+
+  const cards = [...byKey.values()]
     .map((vacancy): ExternalOpportunityCardV1 => {
       // Skill slugs on a stored vacancy were derived by the platform's own
       // text recognizer at import time — the categorizer's tier, declared
@@ -142,7 +184,10 @@ export async function loadExternalVacancyCards(
       };
     })
     // Same comparator as the platform board — one ranking rule, not two.
-    .sort((a, b) => compareMatches(a.match, b.match));
+    .sort((a, b) => compareMatches(a.match, b.match))
+    // The board stays a shortlist: the pool widened WHICH ads compete, the
+    // cap keeps HOW MANY render unchanged.
+    .slice(0, BOARD_LIMIT);
 
   return { available: true, cards, freshness };
 }

@@ -2026,6 +2026,9 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "bandBest": "Kõige sobivamad",
+      "bandPossible": "Võimalikud sobivused",
+      "bandExplore": "Muud kuulutused",
       "freshnessDelayed": "Kuulutusi värskendati viimati {date}. Selle allika uuendused on ajutiselt hilinenud, seega võivad mõned kohad juba täidetud olla.",
       "freshnessStale": "Kuulutusi värskendati viimati {date}. Sellest ajast pole neid uuesti kinnitatud — kontrolli praegust saadavust algsest kuulutusest.",
       "freshnessUnknown": "Me ei saa kinnitada, millal neid kuulutusi viimati värskendati. Kontrolli praegust saadavust algsest kuulutusest.",
@@ -3517,6 +3520,7 @@
       "pendingConfirmPrefix": "Ootab sinu kinnitust",
       "cvUpdatedNote": "Sinu CV sisaldab nüüd selle sissekande oskusi.",
       "matchingNote": "Töösoovitused arvutatakse uuendatud oskuste põhjal ümber järgmisel vaatamisel.",
+      "viewOpportunities": "Vaata uuendatud võimalusi",
       "pipelineFailedNote": "Oskuste tuvastamine ebaõnnestus seekord — sissekanne on salvestatud; tuvastamist saab päevikus korrata."
     },
     "findWork": {

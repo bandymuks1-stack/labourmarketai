@@ -8100,6 +8100,9 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
+      "bandBest": "Best fits",
+      "bandPossible": "Possible fits",
+      "bandExplore": "Explore",
       "freshnessDelayed": "Listings last refreshed {date}. Updates from this source are temporarily delayed, so some roles may already be filled.",
       "freshnessStale": "Listings last refreshed {date}. They have not been re-confirmed since, so check the publisher's original listing for current availability.",
       "freshnessUnknown": "We cannot confirm when these listings were last refreshed. Check the publisher's original listing for current availability.",
@@ -11186,6 +11189,7 @@
       "pendingConfirmPrefix": "Awaiting your confirmation",
       "cvUpdatedNote": "Your CV now includes the skills from this entry.",
       "matchingNote": "Job recommendations are recalculated from your updated skills the next time you view them.",
+      "viewOpportunities": "View updated opportunities",
       "pipelineFailedNote": "Skill recognition failed this time — the entry is saved; you can rerun recognition in the journal."
     },
     "findWork": {

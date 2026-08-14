@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
+import {
+  ChatAction,
+  ChatActionRow,
+} from "@/components/app/conversation/chat/chat-action";
 import { Clock, X } from "lucide-react";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { compressImageFile } from "@/lib/browser/image-compress";
@@ -11,7 +14,10 @@ import {
   uploadJournalEntryPhoto,
   type JournalPhotoUploadResult,
 } from "@/lib/journal/photo-upload";
-import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversation/dispatch";
+import {
+  prepareConfirmationAction,
+  dispatchWorkerAction,
+} from "@/lib/conversation/dispatch";
 import {
   listWorkLogEngagements,
   type WorkLogEngagement,
@@ -49,6 +55,9 @@ export type WorkLogLabels = {
   pendingConfirmPrefix: string;
   cvUpdatedNote: string;
   matchingNote: string;
+  /** Next action after real enrichment: open the board where the updated
+   *  skills are recomputed into recommendations (read-time, never pushed). */
+  viewOpportunities: string;
   pipelineFailedNote: string;
 };
 
@@ -86,7 +95,10 @@ function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
     Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
   const candidates = Array.isArray(o.pendingCandidates)
     ? o.pendingCandidates
-        .filter((c): c is Record<string, unknown> => typeof c === "object" && c !== null)
+        .filter(
+          (c): c is Record<string, unknown> =>
+            typeof c === "object" && c !== null,
+        )
         .map((c) => ({
           label: typeof c.label === "string" ? c.label : "",
           slug: typeof c.slug === "string" ? c.slug : null,
@@ -284,7 +296,10 @@ export function WorkerWorkLogFlow({
           setPhase({ kind: "blocked", reason: "not-authed" });
         }
       })
-      .catch(() => alive && setPhase({ kind: "error", message: labels.errorGeneric }));
+      .catch(
+        () =>
+          alive && setPhase({ kind: "error", message: labels.errorGeneric }),
+      );
     return () => {
       alive = false;
     };
@@ -323,7 +338,10 @@ export function WorkerWorkLogFlow({
         confirmationToken: token,
       });
       if (!res.ok) {
-        setPhase({ kind: "error", message: res.message || labels.errorGeneric });
+        setPhase({
+          kind: "error",
+          message: res.message || labels.errorGeneric,
+        });
         return;
       }
       trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
@@ -365,7 +383,10 @@ export function WorkerWorkLogFlow({
   // ── loading ───────────────────────────────────────────────────────────────
   if (phase.kind === "loading") {
     return (
-      <div className="rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3 text-support text-text-muted" data-testid="worklog-loading">
+      <div
+        className="rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3 text-support text-text-muted"
+        data-testid="worklog-loading"
+      >
         {labels.loading}
       </div>
     );
@@ -374,14 +395,26 @@ export function WorkerWorkLogFlow({
   // ── honest blocker (real precondition, no fake save) ───────────────────────
   if (phase.kind === "blocked") {
     return (
-      <div className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support text-text-primary" data-testid="worklog-blocked">
-        <p>{phase.reason === "no-context" ? labels.noContext : phase.reason === "no-worker" ? labels.noWorker : labels.notAuthed}</p>
+      <div
+        className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support text-text-primary"
+        data-testid="worklog-blocked"
+      >
+        <p>
+          {phase.reason === "no-context"
+            ? labels.noContext
+            : phase.reason === "no-worker"
+              ? labels.noWorker
+              : labels.notAuthed}
+        </p>
         {phase.reason === "no-context" && (
           // W3 rows 19/14: this pointed at /dashboard/advanced — a stale door
           // into the dying second dashboard. The spaces hub is where a work
           // context is actually established (per-space status + entry lanes),
           // and the header's workspace switcher stays one tap away besides.
-          <Link href="/dashboard/start" className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
+          <Link
+            href="/dashboard/start"
+            className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+          >
             {labels.noContextCta}
           </Link>
         )}
@@ -412,42 +445,77 @@ export function WorkerWorkLogFlow({
     const awaiting =
       skills?.pendingCandidates.filter((c) => c.kind !== "claim") ?? [];
     const skillsTouched =
-      (skills?.addedSkills.length ?? 0) + (skills?.strengthenedSkills.length ?? 0) > 0;
+      (skills?.addedSkills.length ?? 0) +
+        (skills?.strengthenedSkills.length ?? 0) >
+      0;
     return (
-      <div className="flex flex-col gap-2 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support" data-testid="worklog-done">
+      <div
+        className="flex flex-col gap-2 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support"
+        data-testid="worklog-done"
+      >
         <p className="font-semibold text-state-success">{labels.saved}</p>
-        {skills && (skillsTouched || awaiting.length > 0 || skills.status === "failed") && (
-          <ul className="flex flex-col gap-1 text-text-primary" data-testid="worklog-outcome">
-            {skills.addedSkills.map((slug) => (
-              <li key={`added-${slug}`} data-testid={`worklog-added-${slug}`}>
-                {labels.addedSkillPrefix}: {skillName(slug)}
-              </li>
-            ))}
-            {skills.strengthenedSkills.map((slug) => (
-              <li key={`str-${slug}`} data-testid={`worklog-strengthened-${slug}`}>
-                {labels.strengthenedSkillPrefix}: {skillName(slug)}
-              </li>
-            ))}
-            {awaiting.map((c) => (
-              <li key={`pend-${c.slug ?? c.label}`} className="text-text-muted" data-testid="worklog-pending-candidate">
-                {labels.pendingConfirmPrefix}: {c.slug ? skillName(c.slug) : c.label}
-              </li>
-            ))}
-            {skills.status === "failed" && (
-              <li className="text-text-muted">{labels.pipelineFailedNote}</li>
-            )}
-          </ul>
-        )}
+        {skills &&
+          (skillsTouched ||
+            awaiting.length > 0 ||
+            skills.status === "failed") && (
+            <ul
+              className="flex flex-col gap-1 text-text-primary"
+              data-testid="worklog-outcome"
+            >
+              {skills.addedSkills.map((slug) => (
+                <li key={`added-${slug}`} data-testid={`worklog-added-${slug}`}>
+                  {labels.addedSkillPrefix}: {skillName(slug)}
+                </li>
+              ))}
+              {skills.strengthenedSkills.map((slug) => (
+                <li
+                  key={`str-${slug}`}
+                  data-testid={`worklog-strengthened-${slug}`}
+                >
+                  {labels.strengthenedSkillPrefix}: {skillName(slug)}
+                </li>
+              ))}
+              {awaiting.map((c) => (
+                <li
+                  key={`pend-${c.slug ?? c.label}`}
+                  className="text-text-muted"
+                  data-testid="worklog-pending-candidate"
+                >
+                  {labels.pendingConfirmPrefix}:{" "}
+                  {c.slug ? skillName(c.slug) : c.label}
+                </li>
+              ))}
+              {skills.status === "failed" && (
+                <li className="text-text-muted">{labels.pipelineFailedNote}</li>
+              )}
+            </ul>
+          )}
         {/* "CV papildytas" is truthful: the CV export derives directly from
             worker_skills + journal_entry_skills rows this save just wrote. */}
         {skills?.cvUpdated && (
-          <p className="text-text-muted" data-testid="worklog-cv-updated">{labels.cvUpdatedNote}</p>
+          <p className="text-text-muted" data-testid="worklog-cv-updated">
+            {labels.cvUpdatedNote}
+          </p>
         )}
         {/* Honest matching phrasing: recommendations are computed from the
             worker's current skills at read time (no persisted score), so new
             skills flow into the next computation — nothing is "pushed". */}
         {skillsTouched && (
-          <p className="text-text-muted" data-testid="worklog-matching-note">{labels.matchingNote}</p>
+          <p className="text-text-muted" data-testid="worklog-matching-note">
+            {labels.matchingNote}
+          </p>
+        )}
+        {/* The return loop's next action: the board recomputes from the
+            skills this save just wrote (revalidated by the pipeline), so the
+            link leads to genuinely updated results — never a fake count. */}
+        {skillsTouched && (
+          <Link
+            href="/dashboard/opportunities"
+            className="mt-1 inline-flex min-h-11 items-center self-start rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+            data-testid="worklog-view-opportunities"
+          >
+            {labels.viewOpportunities} →
+          </Link>
         )}
         {/* PHOTO OUTCOME — the real result of the real upload, one sentence per
             state. `uploaded` is the ONLY line that claims evidence is attached;
@@ -495,7 +563,11 @@ export function WorkerWorkLogFlow({
       />
 
       {photoError ? (
-        <p className="text-meta text-state-danger" role="alert" data-testid="worklog-photo-error">
+        <p
+          className="text-meta text-state-danger"
+          role="alert"
+          data-testid="worklog-photo-error"
+        >
           {photoError}
         </p>
       ) : null}
@@ -515,7 +587,10 @@ export function WorkerWorkLogFlow({
           attach and can drop it before anything is written — nothing has been
           uploaded at this point. */}
       {photoPrep === "ready" && photoFile ? (
-        <div className="flex items-center gap-3" data-testid="worklog-photo-preview">
+        <div
+          className="flex items-center gap-3"
+          data-testid="worklog-photo-preview"
+        >
           {photoPreview?.startsWith("blob:") ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -526,7 +601,11 @@ export function WorkerWorkLogFlow({
               className="size-16 flex-none rounded-md border border-ink-500 object-cover"
             />
           ) : null}
-          <p className="min-w-0 flex-1 text-meta text-state-success" role="status" aria-live="polite">
+          <p
+            className="min-w-0 flex-1 text-meta text-state-success"
+            role="status"
+            aria-live="polite"
+          >
             {tPhoto("prepared")}
           </p>
           <button
@@ -542,16 +621,23 @@ export function WorkerWorkLogFlow({
         </div>
       ) : null}
 
-      <p className="text-meta leading-relaxed text-text-muted" data-testid="worklog-photo-free-tier-note">
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid="worklog-photo-free-tier-note"
+      >
         {tPhoto("freeTierNote")}
       </p>
     </div>
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4" data-testid="worklog-flow">
+    <div
+      className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4"
+      data-testid="worklog-flow"
+    >
       <p className="flex items-center gap-1.5 text-support font-semibold text-text-primary">
-        <Clock className="size-4 text-brand-blue" aria-hidden /> {labels.understood}
+        <Clock className="size-4 text-brand-blue" aria-hidden />{" "}
+        {labels.understood}
       </p>
 
       {photoFirst ? photoField : null}
@@ -572,7 +658,10 @@ export function WorkerWorkLogFlow({
           <Row k={labels.labelTime} v={`${draft.start}–${draft.end}`} />
         )}
         {draft.breakMinutes > 0 && (
-          <Row k={labels.labelBreak} v={`${draft.breakMinutes} ${labels.minutesUnit}`} />
+          <Row
+            k={labels.labelBreak}
+            v={`${draft.breakMinutes} ${labels.minutesUnit}`}
+          />
         )}
         {draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />}
       </dl>
@@ -624,9 +713,16 @@ export function WorkerWorkLogFlow({
 
       {confirming ? (
         <div className="flex flex-col gap-2 rounded-control border border-state-warning/40 bg-state-warning/5 p-3">
-          <p className="font-display text-card-title font-semibold text-text-primary">{labels.confirmTitle}</p>
+          <p className="font-display text-card-title font-semibold text-text-primary">
+            {labels.confirmTitle}
+          </p>
           <ChatActionRow>
-            <ChatAction tone="primary" loading={pending} testId="worklog-confirm" onClick={confirm}>
+            <ChatAction
+              tone="primary"
+              loading={pending}
+              testId="worklog-confirm"
+              onClick={confirm}
+            >
               {pending ? labels.working : labels.save}
             </ChatAction>
             <ChatAction
@@ -640,7 +736,12 @@ export function WorkerWorkLogFlow({
         </div>
       ) : (
         <ChatActionRow>
-          <ChatAction tone="primary" disabled={pending} testId="worklog-save" onClick={beginConfirm}>
+          <ChatAction
+            tone="primary"
+            disabled={pending}
+            testId="worklog-save"
+            onClick={beginConfirm}
+          >
             {labels.save}
           </ChatAction>
           {onClose && (
@@ -652,7 +753,11 @@ export function WorkerWorkLogFlow({
       )}
 
       {phase.kind === "error" && (
-        <p role="alert" className="text-support text-state-danger" data-testid="worklog-error">
+        <p
+          role="alert"
+          className="text-support text-state-danger"
+          data-testid="worklog-error"
+        >
           {phase.message}
         </p>
       )}
@@ -669,7 +774,13 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <>
       <dt className="flex items-center text-text-muted">{label}</dt>

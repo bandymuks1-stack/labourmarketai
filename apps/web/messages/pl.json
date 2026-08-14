@@ -2026,6 +2026,9 @@
     "external": {
       "sectionTitle": "Publiczne ogłoszenia o pracę",
       "sectionNote": "Ogłoszenia z oficjalnych publicznych służb zatrudnienia. Publikuje je pracodawca u źródła — labourmarket.ai je pokazuje, aby można je było znaleźć, a aplikowanie odbywa się przez oryginalne ogłoszenie.",
+      "bandBest": "Najlepiej dopasowane",
+      "bandPossible": "Możliwe dopasowania",
+      "bandExplore": "Pozostałe ogłoszenia",
       "freshnessDelayed": "Ogłoszenia ostatnio odświeżone {date}. Aktualizacje z tego źródła są chwilowo opóźnione, więc część stanowisk może być już zajęta.",
       "freshnessStale": "Ogłoszenia ostatnio odświeżone {date}. Od tego czasu nie zostały potwierdzone — sprawdź aktualną dostępność w oryginalnym ogłoszeniu.",
       "freshnessUnknown": "Nie możemy potwierdzić, kiedy te ogłoszenia były ostatnio odświeżane. Sprawdź aktualną dostępność w oryginalnym ogłoszeniu.",
@@ -3517,6 +3520,7 @@
       "pendingConfirmPrefix": "Czeka na Twoje potwierdzenie",
       "cvUpdatedNote": "Twoje CV zostało uzupełnione o umiejętności z tego wpisu.",
       "matchingNote": "Rekomendacje pracy są przeliczane na podstawie zaktualizowanych umiejętności przy następnym wyświetleniu.",
+      "viewOpportunities": "Zobacz zaktualizowane oferty",
       "pipelineFailedNote": "Rozpoznawanie umiejętności tym razem się nie powiodło — wpis został zapisany; rozpoznawanie można powtórzyć w dzienniku."
     },
     "findWork": {

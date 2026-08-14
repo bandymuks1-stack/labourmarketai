@@ -8100,6 +8100,9 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "bandBest": "Past het best",
+      "bandPossible": "Mogelijk passend",
+      "bandExplore": "Overige advertenties",
       "freshnessDelayed": "Vacatures voor het laatst ververst op {date}. Updates van deze bron zijn tijdelijk vertraagd, dus sommige functies kunnen al vervuld zijn.",
       "freshnessStale": "Vacatures voor het laatst ververst op {date}. Ze zijn sindsdien niet opnieuw bevestigd — controleer de originele vacature van de uitgever voor de actuele beschikbaarheid.",
       "freshnessUnknown": "We kunnen niet bevestigen wanneer deze vacatures voor het laatst zijn ververst. Controleer de originele vacature voor de actuele beschikbaarheid.",
@@ -11186,6 +11189,7 @@
       "pendingConfirmPrefix": "Wacht op je bevestiging",
       "cvUpdatedNote": "Je cv bevat nu de vaardigheden uit deze registratie.",
       "matchingNote": "Vacature-aanbevelingen worden bij de volgende weergave herberekend op basis van je bijgewerkte vaardigheden.",
+      "viewOpportunities": "Bekijk bijgewerkte kansen",
       "pipelineFailedNote": "Vaardigheidsherkenning is deze keer mislukt — de registratie is opgeslagen; je kunt de herkenning in het logboek opnieuw uitvoeren."
     },
     "findWork": {

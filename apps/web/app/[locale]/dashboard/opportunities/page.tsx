@@ -104,7 +104,16 @@ export default async function OpportunitiesPage({
   const tlm = await getTranslations("labourMarket");
   const tSkill = await getTranslations("skillNames");
   const tsd = await getTranslations("structuredDemand");
-  const result = await loadWorkerOpportunityBoard("opportunities_board");
+  // Discovery params parsed BEFORE the load so an active profession/country
+  // chip narrows what the external-supply retrieval FETCHES (closed-set
+  // values), not merely what the page hides afterwards.
+  const { filters, sort } = parseDiscoveryParams(sp);
+  const result = await loadWorkerOpportunityBoard("opportunities_board", {
+    externalDiscovery: {
+      professionSlug: filters.profession,
+      country: filters.country,
+    },
+  });
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
@@ -154,8 +163,8 @@ export default async function OpportunitiesPage({
   const sd = (key: string, values?: Record<string, string | number>) =>
     tsd(key as never, values as never) as string;
 
-  // ── Discovery filters + sort (PR 4) — URL params over authorized rows. ────
-  const { filters, sort } = parseDiscoveryParams(sp);
+  // ── Discovery filters + sort (PR 4) — URL params over authorized rows.
+  //    (Parsed above, before the board load.) ────────────────────────────
   const criterionLabel = (c: string) =>
     t.has(`discovery.criterion.${c}`) ? t(`discovery.criterion.${c}` as never) : c;
   const tierLabels = {
@@ -1141,6 +1150,9 @@ export default async function OpportunitiesPage({
               confirmContinue: t("external.confirmContinue"),
               confirmDismiss: t("external.confirmDismiss"),
               noApplicationRoute: t("external.noApplicationRoute"),
+              bandBestTitle: t("external.bandBest"),
+              bandPossibleTitle: t("external.bandPossible"),
+              bandExploreTitle: t("external.bandExplore"),
               publishedOn: (d) => t("external.publishedOn", { date: d }),
               positionsLabel: (n) => t("external.positions", { count: n }),
               payAsPublished: t("external.payAsPublished"),
