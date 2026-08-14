@@ -11,12 +11,28 @@
 # semantics a human operator gets. No new importer, no relaxed gate.
 # Kill switch: unset/false VACANCY_SCHEDULE_ENABLED (one console action).
 # Failure surface: red workflow run + the cursor's own consecutive_failures.
+#
+# The scheduled cron ALWAYS runs the stream (delta) channel. A manual
+# workflow_dispatch may select the snapshot channel instead — the registry's
+# documented cold-start / reconciliation act (runOnce: never on a schedule).
+# Reconciliation is required after a transformVersion bump: the delta stream
+# only re-sees ads the publisher touches, so stored rows tagged by an older
+# categorizer are otherwise unreachable (observed post-#1158: 6,912 rows
+# stranded on transform v1 with polluted profession tags).
 name: sweden-supply-cadence
 
 on:
   schedule:
     - cron: "17 5,11,17 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Import channel: stream = bounded delta poll; snapshot = one bounded session of the cold-start/reconciliation walk (repeat until caughtUp)"
+        type: choice
+        options:
+          - stream
+          - snapshot
+        default: stream
 
 concurrency:
   group: sweden-supply-cadence
@@ -68,9 +84,12 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED: "true"
+          # Schedule events carry no inputs — empty falls back to stream, so
+          # the cron can never run the snapshot channel.
+          IMPORT_CHANNEL: ${{ inputs.channel || 'stream' }}
         run: |
           pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
-            --provider arbetsformedlingen --channel stream --mode persist \
+            --provider arbetsformedlingen --channel "$IMPORT_CHANNEL" --mode persist \
             --apply --i-understand-this-writes-production | tee run-accounting.json
 
       - name: Upload accounting artifact
