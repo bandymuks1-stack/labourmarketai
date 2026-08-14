@@ -95,6 +95,11 @@ jobs:
           # the cron can never run the snapshot channel.
           IMPORT_CHANNEL: ${{ inputs.channel || 'stream' }}
         run: |
+          # pipefail is load-bearing: without it the pipeline's exit status is
+          # tee's (always 0), so a runner crash still shows a green check.
+          # Observed 2026-08-14 (run 31820380678): the runner threw
+          # count_failed:unknown, the artifact was empty, the run stayed green.
+          set -o pipefail
           pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
             --provider arbetsformedlingen --channel "$IMPORT_CHANNEL" --mode persist \
             --apply --i-understand-this-writes-production | tee run-accounting.json
