@@ -37,6 +37,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   runVacancyIngestionSession,
 } from "../lib/vacancy-runner/vacancy-ingestion";
+import { operatorRunExitCode } from "../lib/vacancy-runner/operator-run-exit";
 import { getVacancyProvider } from "../lib/vacancy-sources/vacancy-provider-registry";
 import type { VacancyImportChannel } from "../lib/vacancy-sources/vacancy-contract";
 
@@ -203,9 +204,12 @@ async function main(): Promise<void> {
     ),
   );
 
-  // A blocked or failed session is a truthful outcome, not a script error —
-  // exit 0 so the accounting above is the artefact. Only unexpected throws
-  // (caught below) exit non-zero.
+  // The accounting above is always printed; the exit code then reports
+  // whether the session completed. A `runner_exception` leaves the cursor row
+  // untouched (consecutive_failures stays 0), so without a non-zero exit here
+  // a failed session has NO failure surface at all — observed 2026-08-14
+  // (run 31826082813): status runner_exception, green check.
+  process.exitCode = operatorRunExitCode(session.status);
 }
 
 main().catch((err) => {

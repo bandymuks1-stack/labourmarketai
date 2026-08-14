@@ -99,13 +99,22 @@ jobs:
           # tee's (always 0), so a runner crash still shows a green check.
           # Observed 2026-08-14 (run 31820380678): the runner threw
           # count_failed:unknown, the artifact was empty, the run stayed green.
+          # The script itself also exits non-zero when the SESSION fails
+          # (runner_exception / fetch_failed / blocked) after printing its
+          # accounting — observed 2026-08-14 (run 31826082813): the session
+          # ended runner_exception (vacancy_persist_insert_failed:57014) with
+          # an untouched cursor, yet the check stayed green because the script
+          # exited 0.
           set -o pipefail
           pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
             --provider arbetsformedlingen --channel "$IMPORT_CHANNEL" --mode persist \
             --apply --i-understand-this-writes-production | tee run-accounting.json
 
       - name: Upload accounting artifact
-        if: steps.gate.outputs.configuration_gated == 'false'
+        # always(): the runner exits non-zero on a failed session AFTER
+        # printing its accounting — the artifact must survive red runs, since
+        # a red run is exactly when the accounting matters most.
+        if: always() && steps.gate.outputs.configuration_gated == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: sweden-run-accounting-${{ github.run_id }}
