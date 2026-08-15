@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LabourMarket.ai — Gyvas galimybių pasaulis</title>
+<meta name="robots" content="noindex, nofollow">
+<!--ARTIFACT-HEAD-START-->
+<link rel="stylesheet" href="r6.css">
+<!--ARTIFACT-HEAD-END-->
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+
+<p class="rd-ribbon">R&amp;D prototipas · ne produkcija</p>
+<a class="skip-link" href="#zmogus">Praleisti įžangą</a>
+
+<!-- the living ground: 3D world + film plates, behind everything -->
+<div class="ground" aria-hidden="true" id="ground">
+  <canvas id="worldCanvas"></canvas>
+</div>
+
+<nav class="topnav" id="topnav" aria-label="Pagrindinė navigacija">
+  <a class="wordmark" href="#ivadas">LabourMarket.ai</a>
+  <div class="actnav">
+    <a href="#ivadas" data-act="ivadas">Įėjimas</a>
+    <a href="#zmogus" data-act="zmogus">Žmogus</a>
+    <a href="#galimybes" data-act="galimybes">Galimybės</a>
+    <a href="#organizacija" data-act="organizacija">Organizacija</a>
+    <a href="#verte" data-act="verte">Vertė</a>
+    <a href="#pasaulis" data-act="pasaulis">Pasaulis</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ACT I — ĮĖJIMAS. The world is the first screen; intent is the door.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="act" id="ivadas" data-world="macro">
+  <div class="entry">
+    <div class="entry-inner">
+      <p class="kicker">Gyvas galimybių pasaulis</p>
+      <h1>Parodyk, ką sugebi ir nuveiki.</h1>
+      <p class="lede">
+        LabourMarket.ai padeda žmonėms ir organizacijoms realizuoti tai, ką
+        jie iš tikrųjų daro: darbą, gebėjimus, paslaugas, pajėgumą,
+        produkciją ir realius poreikius — viename gyvame Europos ekonomikos
+        pasaulyje.
+      </p>
+
+      <div class="intent">
+        <div class="intent-box">
+          <input id="intentInput" type="text"
+                 placeholder="Pasakyk savais žodžiais, ko atėjai…"
+                 aria-label="Įveskite savo tikslą savais žodžiais">
+          <button id="intentGo" type="button">Pradėti</button>
+        </div>
+        <ul class="intent-hints" aria-label="Pavyzdiniai tikslai">
+          <li><button data-goto="#galimybes">Ieškau darbo</button></li>
+          <li><button data-goto="#dienorastis">Noriu užrašyti, ką šiandien padariau</button></li>
+          <li><button data-goto="#istorija">Noriu suprasti savo galimybes</button></li>
+          <li><button data-goto="#org-paieska">Ieškau žmogaus projektui</button></li>
+          <li><button data-goto="#pajegumas">Mums trūksta pajėgumo</button></li>
+          <li><button data-goto="#verte">Turiu ką pasiūlyti</button></li>
+        </ul>
+      </div>
+
+      <ul class="facts">
+        <li><b>41&nbsp;432</b><span>atviros galimybės Švedijoje</span></li>
+        <li><b>290</b><span>miestų</span></li>
+        <li><b>7&nbsp;782</b><span>darbdaviai</span></li>
+      </ul>
+      <p class="entry-foot">
+        Švedija — pirmasis realių duomenų pavyzdys · Europa — tas pats pasaulis
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ACT II — ŽMOGUS. Workspace → Journal → Living history.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="act" id="zmogus">
+  <div class="scene" data-plate="inventory">
+    <div class="scene-copy">
+      <p class="kicker">II · Žmogus</p>
+      <h2>Tavo darbo erdvė.</h2>
+      <p>
+        Ne anketa ir ne skydelis. Pasakoji savais žodžiais, kas šiandien
+        buvo padaryta — sistema klauso, supranta ir kaupia.
+      </p>
+    </div>
+  </div>
+
+  <div class="sheet-zone">
+    <div class="sheet" id="darbo-erdve">
+      <p class="kicker">Asmeninė darbo erdvė</p>
+      <h2>Pokalbis yra pagrindinis įrankis.</h2>
+      <div class="soft small" style="margin-bottom:1rem">
+        <span class="prov demo">Demonstracinis asmuo — ne realus žmogus</span>
+        <span class="prov real">Galimybių skaičiai — gamybiniai</span>
+      </div>
+
+      <div class="workspace">
+        <div class="chat reveal" aria-label="Darbo erdvės pokalbis">
+          <div class="chat-head">
+            <span>E. L. · sandėlio darbuotoja · Göteborgas</span>
+            <span>šiandien</span>
+          </div>
+          <div class="chat-thread" id="chatThread">
+            <div class="msg sys">
+              <p class="who">LabourMarket.ai</p>
+              <div class="bubble"><p>Labas rytas. Vakar užrašei siuntų priėmimą — istorijoje jau 14 įrašų. Kaip praėjo diena?</p></div>
+            </div>
+            <div class="msg me">
+              <p class="who">Tu</p>
+              <div class="bubble"><p>Rytas buvo ramus, priėmiau dvi siuntas ir sutvarkiau C zoną.</p></div>
+            </div>
+            <div class="msg sys">
+              <p class="who">LabourMarket.ai</p>
+              <div class="bubble">
+                <p>Užrašiau prie „Terminalas Vėja“ objekto. C zonos tvarkymas — jau trečias kartas šį mėnesį: tai kaupiasi kaip sandėlio priežiūros patirtis.</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input">
+            <textarea id="chatBox" aria-label="Nauja žinutė">Perkėliau paletes šakiniu krautuvu, nuskenavau kiekvieną siuntą prieš sudedant į stelažą.</textarea>
+            <button id="chatSend" type="button">Siųsti</button>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <h3>Aplinka reaguoja į darbą</h3>
+          <p class="soft small">
+            Kai išsiųsi žinutę, pamatysi visą grandinę: žodžiai tampa
+            dienoraščio įrašu, įrašas — gebėjimo pagrindu, o pagrindas
+            atveria kryptį, kurios sistema anksčiau negalėjo sąžiningai
+            parodyti.
+          </p>
+          <div id="reactionSlot" hidden>
+            <div class="search-why" role="status">
+              Pasaulis ką tik sužinojo du naujus faktus apie tavo darbą —
+              <a href="#istorija">jie jau tavo istorijoje</a>, ir
+              <a href="#kryptys">viena kryptis atsivėrė</a>.
+            </div>
+          </div>
+          <ul class="facts">
+            <li><b>14<span id="entryCount"></span></b><span>įrašai istorijoje</span></li>
+            <li><b>3</b><span>objektai</span></li>
+            <li><b id="capCount">6</b><span>gebėjimai su pagrindu</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="dienorastis">
+      <p class="kicker">Darbo dienoraštis</p>
+      <h2>Diena po dienos — istorija, kuri lieka.</h2>
+      <p class="soft small">Ne žiniaraštis ir ne biurokratija: tekstas, nuotraukos, objektai, rezultatai. Kiekvienas įrašas pasako, iš kur jis atsirado.</p>
+
+      <div class="journal reveal" id="journalList">
+        <p class="j-group">Šiandien</p>
+        <div class="j-entry" data-slot="new" hidden>
+          <span class="j-time">14:20</span>
+          <div class="j-body">
+            <p>Perkėliau paletes šakiniu krautuvu, nuskenavau kiekvieną siuntą prieš sudedant į stelažą.</p>
+            <div class="j-meta">
+              <span class="j-ctx">Terminalas Vėja · priėmimas</span>
+              <span class="cap t-journal is-new">Krautuvo valdymas <span class="tier">iš dienoraščio</span></span>
+              <span class="cap t-journal is-new">Siuntų skenavimas <span class="tier">iš dienoraščio</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="j-entry">
+          <span class="j-time">09:05</span>
+          <div class="j-body">
+            <p>Priėmiau dvi siuntas, sutvarkiau C zonos stelažus.</p>
+            <div class="j-meta">
+              <span class="j-ctx">Terminalas Vėja · priėmimas</span>
+              <span class="cap t-journal">Sandėlio priežiūra <span class="tier">iš dienoraščio</span></span>
+            </div>
+          </div>
+        </div>
+
+        <p class="j-group">Šią savaitę</p>
+        <div class="j-entry">
+          <span class="j-time">Tr 16:40</span>
+          <div class="j-body">
+            <p>Inventorizacija B zonoje — suskaičiuota 340 pozicijų, rasta 6 neatitikimai, visi ištaisyti.</p>
+            <div class="j-meta">
+              <span class="j-ctx">Terminalas Vėja · inventorizacija</span>
+              <span class="cap t-confirmed">Atsargų apskaita <span class="tier">patvirtinta vadovo</span></span>
+            </div>
+          </div>
+          <img class="j-photo" data-img="pallets" alt="Inventorizuojamos paletės sandėlyje">
+        </div>
+        <div class="j-entry">
+          <span class="j-time">An 11:15</span>
+          <div class="j-body">
+            <p>Sukomplektavau 28 užsakymus rytinei siuntai.</p>
+            <div class="j-meta">
+              <span class="j-ctx">Terminalas Vėja · komplektavimas</span>
+              <span class="cap t-journal">Užsakymų rinkimas <span class="tier">iš dienoraščio</span></span>
+            </div>
+          </div>
+        </div>
+
+        <p class="j-group">Anksčiau šį mėnesį</p>
+        <div class="j-entry">
+          <span class="j-time">08-05</span>
+          <div class="j-body">
+            <p>Pakavimo linijos pertvarkymas — su komanda perkėlėme stotį, sutrumpėjo kelias iki rampos.</p>
+            <div class="j-meta">
+              <span class="j-ctx">Terminalas Vėja · pakavimas</span>
+              <span class="cap t-confirmed">Pakavimas <span class="tier">patvirtinta vadovo</span></span>
+            </div>
+          </div>
+          <img class="j-photo" data-img="aisle" alt="Sandėlio praėjimas po pertvarkymo">
+        </div>
+        <div class="j-entry">
+          <span class="j-time">08-01</span>
+          <div class="j-body">
+            <p>Pirmoji savaitė naujame objekte — priėmimas, ženklinimas, stelažavimas.</p>
+            <div class="j-meta">
+              <span class="j-ctx">Terminalas Vėja</span>
+              <span class="cap t-self">Ženklinimas <span class="tier">nurodyta paties</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="soft small" style="margin-top:0.8rem">
+        <span class="prov demo">Įrašai — R&amp;D demonstracija</span>
+        Skirtumas visada matomas: <b>nurodyta paties</b> · <b>iš dienoraščio</b> · <b>patvirtinta vadovo</b>. Įrašas nėra teisinis įrodymas ir taip niekada nevadinamas.
+      </p>
+    </div>
+
+    <div class="sheet" id="istorija">
+      <p class="kicker">Gyva darbo istorija</p>
+      <h2>Profesinė tapatybė, kuri auga iš darbo.</h2>
+      <p class="soft small">Ne CV forma. Kiekviena eilutė turi šaltinį — matai, iš kiek realių įrašų ji išaugo.</p>
+
+      <div class="cv">
+        <div class="reveal">
+          <div class="cv-panel">
+            <p class="cv-name">E. L.</p>
+            <p class="cv-sub">Sandėlio darbuotoja · Göteborgas · gali dirbti nuo spalio</p>
+            <div class="cv-row"><span class="n">2026</span><span><b>Terminalas Vėja</b> — priėmimas, komplektavimas, inventorizacija · <span class="soft">14<span id="entryCount2"></span> įrašų</span></span></div>
+            <div class="cv-row"><span class="n">2024–25</span><span><b>Mažmenos sandėlis</b> — komplektavimas · <span class="soft">nurodyta paties</span></span></div>
+            <div class="cv-row"><span class="n">Kalbos</span><span>lietuvių · anglų (darbinė) · švedų (pradedanti)</span></div>
+          </div>
+          <div class="cv-panel">
+            <h3>Iš ko tai auga</h3>
+            <p class="soft small" style="margin:0">
+              Darbas → įrašas → pagrindas → geresnis supratimas, ką žmogus
+              iš tikrųjų daro → tikslesnės galimybės. Grįžti verta ir tada,
+              kai darbą jau turi — istorija auga kasdien.
+            </p>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <h3 style="margin-bottom:0.7rem">Gebėjimai ir jų pagrindas</h3>
+          <div class="cv-caps" id="cvCaps">
+            <div class="cv-cap t-confirmed"><span>Atsargų apskaita</span><span class="ev">patvirtinta vadovo · 3 įrašai</span></div>
+            <div class="cv-cap t-confirmed"><span>Pakavimas</span><span class="ev">patvirtinta vadovo · 2 įrašai</span></div>
+            <div class="cv-cap t-journal"><span>Užsakymų rinkimas</span><span class="ev">iš dienoraščio · 6 įrašai</span></div>
+            <div class="cv-cap t-journal"><span>Sandėlio priežiūra</span><span class="ev">iš dienoraščio · 3 įrašai</span></div>
+            <div class="cv-cap t-journal"><span>Palečių tvarkymas</span><span class="ev">iš dienoraščio · 5 įrašai</span></div>
+            <div class="cv-cap t-self"><span>Ženklinimas</span><span class="ev">nurodyta paties</span></div>
+            <div class="cv-cap t-journal is-new" data-slot="newcap1" hidden><span>Krautuvo valdymas</span><span class="ev">iš dienoraščio · ką tik</span></div>
+            <div class="cv-cap t-journal is-new" data-slot="newcap2" hidden><span>Siuntų skenavimas</span><span class="ev">iš dienoraščio · ką tik</span></div>
+          </div>
+          <p class="soft small" style="margin-top:0.8rem">
+            Jokių žvaigždučių, XP ar „profilio stiprumo“. Sistema vertina ne
+            žmogų, o supranta darbą — ir visada parodo, kuo remiasi.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ACT III — GALIMYBĖS. Discovery ↔ capability, search, detail.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="act" id="galimybes">
+  <div class="scene" data-plate="cranes">
+    <div class="scene-copy">
+      <p class="kicker">III · Galimybės</p>
+      <h2>Iš istorijos — į realų pasaulį.</h2>
+      <p>Galimybė nėra sąrašo eilutė. Ji turi vietą, kontekstą ir priežastį, kodėl matoma būtent tau.</p>
+    </div>
+  </div>
+
+  <div class="sheet-zone">
+    <div class="sheet" id="atradimas">
+      <p class="kicker">Atradimas</p>
+      <h2>Du žvilgsniai į tą patį pasaulį.</h2>
+      <div class="toggle" role="group" aria-label="Atradimo rodinys">
+        <button id="tabPlaces" aria-pressed="true" type="button">Vietos</button>
+        <button id="tabDirs" aria-pressed="false" type="button">Mano kryptys</button>
+      </div>
+
+      <div id="viewPlaces">
+        <p class="soft small"><span class="prov real">Gamybiniai skaičiai · 2026-08-15</span><span class="prov src">Arbetsförmedlingen (CC0)</span></p>
+        <div class="place-list reveal">
+          <div class="place"><span>Stokholmas</span><span class="r">Stockholms län</span><span class="n">6&nbsp;523</span></div>
+          <div class="place is-here"><span>Göteborgas — tavo miestas</span><span class="r">Västra Götalands län</span><span class="n">3&nbsp;078</span></div>
+          <div class="place"><span>Malmė</span><span class="r">Skåne län</span><span class="n">1&nbsp;522</span></div>
+          <div class="place"><span>Upsala</span><span class="r">Uppsala län</span><span class="n">1&nbsp;073</span></div>
+          <div class="place"><span>Linšiopingas</span><span class="r">Östergötlands län</span><span class="n">1&nbsp;051</span></div>
+          <div class="place"><span>Jonšiopingas</span><span class="r">Jönköpings län</span><span class="n">805</span></div>
+        </div>
+        <p class="soft small" style="margin-top:0.7rem">
+          Darbo vietos koordinačių šaltinis nepateikia, todėl vieta visada
+          rodoma miesto tikslumu — niekada neapsimetama, kad žinome adresą.
+        </p>
+      </div>
+
+      <div id="viewDirs" hidden>
+        <p class="soft small"><span class="prov real">Skaičiai — gamybiniai, Göteborgas</span><span class="prov demo">Kryptys kyla iš demonstracinės istorijos</span></p>
+        <div class="dir-list reveal" id="dirList">
+          <div class="dir is-strong">
+            <h4>Sandėlio darbas</h4>
+            <div class="n">98 <span>galimybės</span></div>
+            <p class="why">Stipriausia kryptis: šešiems iš septynių dažniausiai prašomų dalykų tavo istorijoje yra pagrindas.</p>
+          </div>
+          <div class="dir" id="dirDriver">
+            <h4>Vairuotojas</h4>
+            <div class="n">78 <span>galimybės</span></div>
+            <p class="why" id="dirDriverWhy">Kol kas tolima: tavo istorijoje dar nėra nė vieno iš dalykų, kurių čia dažniausiai prašoma.</p>
+          </div>
+          <div class="dir">
+            <h4>Gamybos darbuotojas</h4>
+            <div class="n">22 <span>galimybės</span></div>
+            <p class="why">Dalinis ryšys per pakavimo patirtį — verta stebėti.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-demo" id="paieska">
+        <h3>Paieška — savais žodžiais</h3>
+        <div class="intent-box" style="max-width:44rem; box-shadow:none; border-color:var(--rule)">
+          <input id="searchInput" type="text" value="Parodyk darbus Göteborge, kuriuose praverstų mano sandėlio patirtis." aria-label="Paieškos užklausa">
+          <button id="searchGo" type="button">Ieškoti</button>
+        </div>
+        <div id="searchResult" hidden>
+          <div class="search-why">
+            Suprantu: <b>Göteborgas</b> + <b>sandėlio patirtis</b> iš tavo istorijos.
+            Rodau kryptis, kuriose ta patirtis turi realų pagrindą — ir sąžiningai sakau, kur jo dar nėra.
+          </div>
+          <div class="dir-list" style="margin-top:0.8rem">
+            <div class="dir is-strong">
+              <h4>Sandėlio darbas · Göteborgas</h4>
+              <div class="n">98 <span>galimybių</span></div>
+              <p class="why">6 / 7 prašomų dalykų su pagrindu iš tavo įrašų.</p>
+            </div>
+            <div class="dir">
+              <h4>Gamybos darbuotojas · Göteborgas</h4>
+              <div class="n">22 <span>galimybės</span></div>
+              <p class="why">Pakavimo patirtis persidengia; kita dalis — nežinoma, ne „netinkama“.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="kryptys">
+      <p class="kicker">Galimybės detalė</p>
+      <h2>Sandėlio darbuotojas — Göteborgas</h2>
+      <div class="opp reveal">
+        <div class="opp-head">
+          <div class="opp-meta">
+            <span><b>Vieta:</b> Göteborgas (miesto tikslumu)</span>
+            <span><b>Šaltinis:</b> Arbetsförmedlingen</span>
+            <span><b>Darbdavys:</b> nurodytas skelbime</span>
+          </div>
+          <p class="soft small" style="margin:0.5rem 0 0">
+            <span class="prov real">Tokių galimybių mieste: 98 · 40 darbdavių</span>
+            <span class="prov demo">Detalė sukomponuota demonstracijai — realus skelbimas atsidaro šaltinyje</span>
+          </p>
+        </div>
+        <div class="opp-cols">
+          <div>
+            <h3>Ko čia dažniausiai prašoma</h3>
+            <div class="req">
+              <div class="req-row has"><span>Palečių tvarkymas</span><span class="st">turi pagrindą</span></div>
+              <div class="req-row has"><span>Užsakymų rinkimas</span><span class="st">turi pagrindą</span></div>
+              <div class="req-row has"><span>Atsargų apskaita</span><span class="st">patvirtinta</span></div>
+              <div class="req-row has"><span>Pakavimas</span><span class="st">patvirtinta</span></div>
+              <div class="req-row" id="reqForklift"><span>Krautuvo valdymas</span><span class="st" id="reqForkliftSt">trūksta</span></div>
+              <div class="req-row" id="reqScan"><span>Siuntų skenavimas</span><span class="st" id="reqScanSt">trūksta</span></div>
+              <div class="req-row unknown"><span>Darbo grafikas pamainomis</span><span class="st">nežinoma</span></div>
+            </div>
+          </div>
+          <div>
+            <h3>Kodėl matai šią galimybę</h3>
+            <p class="small">
+              Tavo istorijoje yra 14 realių sandėlio darbo įrašų per paskutinį
+              mėnesį — keturi iš jų patvirtinti vadovo. Tai ne spėjimas apie
+              tave, o faktai apie darbą, kurį tikrai atlikai.
+            </p>
+            <h3 style="margin-top:1.1rem">Ko sistema nesako</h3>
+            <p class="small soft">
+              Jokio „atitikimo procento“: dalykai, kurių skelbimas neįvardija,
+              lieka <i>nežinomi</i> — jie nepaverčiami nei pliusu, nei minusu.
+            </p>
+            <div class="opp-actions">
+              <a class="btn" href="#" onclick="return false" aria-disabled="true">Atsidaryti skelbimą šaltinyje</a>
+              <a class="btn ghost" href="#" onclick="return false" aria-disabled="true">Išsaugoti</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ACT IV — ORGANIZACIJA. Daily operations, not episodic hiring.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="act" id="organizacija">
+  <div class="scene" data-plate="aisle">
+    <div class="scene-copy">
+      <p class="kicker">IV · Organizacija</p>
+      <h2>Kasdienis darbas, ne tik įdarbinimas.</h2>
+      <p>Organizacija čia gyvena kiekvieną dieną: žmonės, objektai, kalendorius, pajėgumas. Paieška — tik viena iš pasekmių.</p>
+    </div>
+  </div>
+
+  <div class="sheet-zone">
+    <div class="sheet" id="org-erdve">
+      <p class="kicker">Organizacijos erdvė</p>
+      <h2>„Terminalas Vėja“ — šiandien.</h2>
+      <p class="soft small"><span class="prov demo">Išgalvota demonstracinė organizacija</span><span class="prov real">Pasiūlos skaičiai — gamybiniai</span></p>
+
+      <div class="org-grid reveal">
+        <div class="org-cell"><b>12</b><span>žmonės objekte šiandien</span></div>
+        <div class="org-cell"><b>2</b><span>aktyvūs objektai</span></div>
+        <div class="org-cell"><b>31</b><span>šios savaitės darbo įrašai</span></div>
+        <div class="org-cell"><b>1</b><span>pajėgumo spraga <a href="#pajegumas">→</a></span></div>
+      </div>
+
+      <h3 style="margin-top:1.6rem">Savaitės planas</h3>
+      <div class="week-scroll reveal">
+        <div class="week" role="table" aria-label="Savaitės pamainų planas">
+          <div class="day"><span class="d">Pr</span><span class="job">Priėmimas ×4</span><span class="job">Komplektav. ×5</span></div>
+          <div class="day"><span class="d">An</span><span class="job">Priėmimas ×4</span><span class="job">Komplektav. ×5</span></div>
+          <div class="day gap"><span class="d">Tr</span><span class="job">Priėmimas ×4</span><span class="job miss">Krautuvo op. −2</span></div>
+          <div class="day gap"><span class="d">Kt</span><span class="job">Priėmimas ×4</span><span class="job miss">Krautuvo op. −2</span></div>
+          <div class="day"><span class="d">Pn</span><span class="job">Priėmimas ×3</span><span class="job">Inventoriz. ×2</span></div>
+          <div class="day"><span class="d">Št</span><span class="job">Budėjimas ×1</span></div>
+          <div class="day"><span class="d">Sk</span><span class="job">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="objektas">
+      <p class="kicker">Objektas</p>
+      <h2>Priėmimo terminalas B</h2>
+      <div class="reveal">
+        <div class="stage-line" aria-label="Objekto etapai">
+          <span class="stage done">Paruošimas</span>
+          <span class="stage done">Įranga</span>
+          <span class="stage now">Priėmimo srautas</span>
+          <span class="stage">Pilnas pajėgumas</span>
+        </div>
+        <div class="org-grid" style="margin-top:1rem">
+          <div class="org-cell"><b>8</b><span>žmonės šiame objekte</span></div>
+          <div class="org-cell"><b>19</b><span>užbaigti darbai su įrodymais</span></div>
+          <div class="org-cell"><b>3</b><span>darbai vyksta dabar</span></div>
+          <div class="org-cell"><b>Tr–Kt</b><span>artimiausia rizika grafike</span></div>
+        </div>
+        <p class="soft small" style="margin-top:0.9rem">
+          Darbuotojų dienoraščio įrašai čia tampa objekto progresu: vadovas
+          mato ne ataskaitų lenteles, o realiai užrašytą darbą su nuotraukomis
+          ir patvirtinimais.
+        </p>
+      </div>
+    </div>
+
+    <div class="sheet" id="pajegumas">
+      <p class="kicker">Pajėgumas → užklausa</p>
+      <h2>Grafikas pasikeitė. Sistema supranta, ko trūksta.</h2>
+      <p class="small">
+        Trečiadienį atvyksta papildoma siunta — plane atsirado spraga:
+        <b>2 krautuvo operatoriai, Tr–Kt, Göteborgas</b>. Tai ne skelbimo
+        forma. Tai darbo valdymo pasekmė.
+      </p>
+      <button class="btn reveal" id="makeInquiry" type="button">Sudaryti užklausą iš spragos</button>
+
+      <div id="inquiryResult" hidden>
+        <div class="inq">
+          <p class="kicker" style="color:var(--oxide)">Užklausa · juodraštis</p>
+          <p style="margin:0 0 0.3rem"><b>Krautuvo operatorius ×2</b> · Tr–Kt · Terminalas Vėja, Göteborgas</p>
+          <p class="soft small" style="margin:0">Sudaryta iš plano spragos — nieko nereikėjo pildyti. Prieš skelbiant peržiūri žmogus.</p>
+        </div>
+
+        <h3 style="margin-top:1.4rem" id="org-paieska">Kas galėtų padėti — pagal faktus, ne balus</h3>
+        <p class="soft small"><span class="prov demo">Demonstraciniai asmenys</span> Žmogus niekada nevertinamas procentais — rodomi tik jo darbo faktai.</p>
+        <div class="person-row reveal">
+          <span class="avatar">EL</span>
+          <div>
+            <h4>E. L. · Göteborgas</h4>
+            <p class="fact">Krautuvo darbas užfiksuotas dienoraštyje šiandien · 14 sandėlio įrašų per mėnesį · 4 patvirtinti vadovo · gali nuo spalio</p>
+          </div>
+        </div>
+        <div class="person-row">
+          <span class="avatar">JK</span>
+          <div>
+            <h4>J. K. · Mölndal</h4>
+            <p class="fact">Krautuvo darbas patvirtintas ankstesnio vadovo (2025) · 9 įrašai gamybos objekte · prieinamumas nežinomas — taip ir parodoma</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="org-profilis">
+      <p class="kicker">Kita kryptis</p>
+      <h2>Žmogus mato organizaciją.</h2>
+      <p class="small">Paieška simetriška: darbuotojas gali atsiversti organizaciją ir suprasti, kas ji, ką veikia ir ko jai reikia.</p>
+      <div class="cv-panel reveal" style="max-width:44rem">
+        <p class="cv-name" style="font-size:1.3rem">Terminalas Vėja</p>
+        <p class="cv-sub">Logistika · Göteborgas (Ringön) · 2 objektai · <span class="prov demo" style="margin:0">demonstracinė organizacija</span></p>
+        <div class="cv-row"><span class="n">Veikla</span><span>Siuntų priėmimas, sandėliavimas ir komplektavimas mažmenos tinklams</span></div>
+        <div class="cv-row"><span class="n">Dabar</span><span>Priėmimo terminalas B — auganti apimtis, 19 užbaigtų darbų su įrodymais</span></div>
+        <div class="cv-row"><span class="n">Ieško</span><span>Krautuvo operatorius ×2 · Tr–Kt <a href="#pajegumas">→ užklausa</a></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ACT V — VERTĖ. Beyond jobs: the 30 kg proof, in human language.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="act" id="verte">
+  <div class="scene" data-plate="vine">
+    <div class="scene-copy">
+      <p class="kicker">V · Vertė</p>
+      <h2>Ne viskas, ką žmogus sukuria, yra darbo vieta.</h2>
+      <p>Tas pats pasaulis supranta ir produktą, ir paslaugą, ir pajėgumą — arba sąžiningai pasako, kad kelio dar nėra.</p>
+    </div>
+  </div>
+
+  <div class="sheet-zone">
+    <div class="sheet" id="verte-30kg">
+      <p class="kicker">Antra sritis · trumpas įrodymas</p>
+      <h2>„Turiu 30 kg savo darže užaugintų agurkų ir noriu parduoti.“</h2>
+
+      <div class="workspace" style="margin-top:1.2rem">
+        <div class="reveal">
+          <h3>Ką sistema suprato</h3>
+          <div class="read-grid">
+            <div class="read-cell"><span class="k">Kas</span><span class="v">30 kg agurkų</span></div>
+            <div class="read-cell"><span class="k">Kieno</span><span class="v">tavo užauginta</span></div>
+            <div class="read-cell"><span class="k">Tikslas</span><span class="v">parduoti</span></div>
+            <div class="read-cell unknown"><span class="k">Kur</span><span class="v">nenurodyta — paklausiama tik jei reikia</span></div>
+          </div>
+          <p class="soft small">
+            Sistema neprašo užpildyti prekės anketos ir nebando iš derliaus
+            padaryti nei CV, nei darbo skelbimo. Produktas suprantamas kaip
+            produktas.
+          </p>
+        </div>
+
+        <div class="reveal">
+          <h3>Realizacijos keliai — tik tikri</h3>
+          <div class="route check">
+            <span class="state">reikia pasitikrinti</span>
+            <div>
+              <p><b>Parduoti tiesiogiai</b> — turgus, kaimynystė, ūkio pardavimas</p>
+              <p class="note">Teisėtai įmanoma, bet maisto pardavimui galioja taisyklės — sistema įvardija, ką reikėtų pasitikrinti, paprastais žodžiais.</p>
+            </div>
+          </div>
+          <div class="route no">
+            <span class="state">šiandien nėra</span>
+            <div>
+              <p><b>Skelbimas platformoje</b></p>
+              <p class="note">Maisto produkcijos kanalo platforma dar neturi — todėl jo ir nerodo. Pirkėjas neišgalvojamas.</p>
+            </div>
+          </div>
+          <div class="route ok">
+            <span class="state">architektūra</span>
+            <div>
+              <p><b>Tas pats pasaulis</b></p>
+              <p class="note">Jei rytoj tie patys žodžiai būtų „turiu dvi laisvas dienas“ arba „trūksta keturių suvirintojų“ — juos priimtų ta pati sistema, ne atskiras produktas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ACT VI — PASAULIS. The living economy: the Göteborg module.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="act" id="pasaulis" data-film>
+  <div class="film-beat" data-world-t="0"    data-cap="0"></div>
+  <div class="film-beat" data-world-t="0.45" data-cap="1"></div>
+  <div class="film-beat" data-world-t="1"    data-cap="2"></div>
+  <div class="film-beat" data-plate="harbor"   data-cap="3"></div>
+  <div class="film-beat" data-plate="hands"    data-cap="4"></div>
+  <div class="film-beat" data-plate="forklift" data-cap="5"></div>
+  <div class="film-beat" data-plate="street"   data-cap="6"></div>
+  <div class="film-beat" data-plate="kitchen"  data-cap="7"></div>
+  <div class="film-beat" data-plate="electric" data-cap="8"></div>
+  <div class="film-beat" data-world-t="0.35" data-cap="9"></div>
+
+  <!-- captions: one per beat, shown by the film controller; in reduced
+       motion they render in document order with full content -->
+  <div class="film-caption" data-capfor="0">
+    <p class="kicker">VI · Pasaulis — Švedija</p>
+    <h2>Žemė kyla ten, kur yra darbo.</h2>
+    <p>Reljefą formuoja tikri skaičiai: 41&nbsp;432 atviros galimybės, 21 regionas, 290 miestų.</p>
+  </div>
+  <div class="film-caption" data-capfor="1">
+    <p class="kicker">Regionas</p>
+    <h2>Vakarų pakrantė.</h2>
+    <p>Västra Götaland — 6&nbsp;289 galimybės keturiasdešimt devyniuose miestuose.</p>
+  </div>
+  <div class="film-caption" data-capfor="2">
+    <p class="kicker">Prie miesto</p>
+    <h2>Ten, kur upė pasitinka jūrą.</h2>
+    <p>Toliau pasaulį rodo tikra fotografija — ta pati vieta, ta pati šviesa.</p>
+  </div>
+  <div class="film-caption" data-capfor="3">
+    <p class="kicker">Miestas</p>
+    <h2>Göteborgas. Ekonomika, ne taškas.</h2>
+    <p>3&nbsp;078 galimybės · 1&nbsp;036 darbdaviai · 36 profesijos. Krovinys nuleidžiamas ant krantinės.</p>
+  </div>
+  <div class="film-caption" data-capfor="4">
+    <p class="kicker">Detalė</p>
+    <h2>Etiketė. Skenavimas. Rezultatas.</h2>
+    <p>Tas pats darbas, kurį matei II veiksme — čia jis gyvena savo pasaulyje.</p>
+  </div>
+  <div class="film-caption" data-capfor="5">
+    <p class="kicker">Darbo dienoraštis</p>
+    <h2>Įrašas atsiranda ten, kur padarytas darbas.</h2>
+    <p>Ir tampa istorija, kurią ką tik vartei žmogaus erdvėje.</p>
+  </div>
+  <div class="film-caption" data-capfor="6">
+    <p class="kicker">Grandinė</p>
+    <h2>Siunta išvažiuoja pro tuos pačius vartus.</h2>
+    <p>78 vairuotojo galimybės mieste — kryptis, kuri atsivėrė po tavo įrašo.</p>
+  </div>
+  <div class="film-caption" data-capfor="7">
+    <p class="kicker">Kita profesija</p>
+    <h2>Kažkieno darbas prasideda ten, kur baigėsi mano.</h2>
+    <p>72 virėjo · 55 virtuvės pagalbininko · 51 padavėjo galimybės tame pačiame mieste.</p>
+  </div>
+  <div class="film-caption" data-capfor="8">
+    <p class="kicker">Pastatas aplink</p>
+    <h2>Kiekvienas darbas egzistuoja todėl, kad buvo kitas.</h2>
+    <p>71 elektriko · 38 staliaus · 62 pardavėjo. Grandinė fizinė — ne diagrama.</p>
+  </div>
+  <div class="film-caption" data-capfor="9">
+    <p class="kicker">Europa</p>
+    <h2>Tai viena gija viename mieste.</h2>
+    <p>Švedija — pirmasis realių duomenų pavyzdys. Roterdamas, Hamburgas ar Vilnius į tą patį pasaulį įeina ta pačia gramatika — kai turės savo tikrus duomenis.</p>
+  </div>
+</section>
+
+<!-- ── provenance footer ─────────────────────────────────────────────── -->
+<footer class="provenance-foot">
+  <div class="sheet">
+    <h2>Kas čia tikra, o kas — demonstracija</h2>
+    <p><b>Tikra:</b> visi galimybių, miestų, regionų, darbdavių ir profesijų skaičiai — gamybinės duomenų bazės užklausos (2026-08-15, šaltinis Arbetsförmedlingen, CC0). Šalies kontūras — Natural Earth geografija; reljefo aukštį formuoja realūs miestų skaičiai. Gebėjimų pagrindų logika, kanalų sąžiningumo taisyklės ir „30 kg“ supratimas atitinka veikiančius gamybinius modulius ir yra prisegti testu.</p>
+    <p><b>Demonstracija (pažymėta prie kiekvieno paviršiaus):</b> asmuo E. L., organizacija „Terminalas Vėja“, dienoraščio įrašai, kalendorius ir kandidatų sąrašas — deterministinė R&amp;D būsena, niekada nerašoma į gamybą. Nuotraukos — Unsplash, tik R&amp;D; produkcijai reikalinga licencijuota fotografija. Joks darbdavys neįvardytas, jokių atlyginimų, jokių atitikimo procentų, jokio žmogaus vertinimo balais.</p>
+    <p>Produkcija nepaliesta: jokių maršrutų, landingo, navigacijos ar schemos pakeitimų. R&amp;D šaka · PR #1166.</p>
+  </div>
+</footer>
+
+<!--ARTIFACT-BODY-END-->
+<!--ARTIFACT-SCRIPTS-START-->
+<script src="r6-images.js"></script>
+<script src="../assets/world-data.js"></script>
+<script src="../assets/world3d.js"></script>
+<script src="r6.js"></script>
+<!--ARTIFACT-SCRIPTS-END-->
+</body>
+</html>
