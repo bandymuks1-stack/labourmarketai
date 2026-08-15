@@ -32,8 +32,11 @@
   /* ── the ground: world canvas + plates ─────────────────────────────── */
   var ground = document.getElementById("ground");
   var canvas = document.getElementById("worldCanvas");
+  /* The world is created even under reduced motion: one static frame is not
+     motion, and without it the entry loses its ground. Only the scroll-driven
+     camera is disabled. */
   var world = null;
-  if (window.R5World && window.R5_GEO && window.R5_DATA && !reduce) {
+  if (window.R5World && window.R5_GEO && window.R5_DATA) {
     var counts = {};
     window.R5_DATA.topCities.forEach(function (c) { counts[c.name] = c.n; });
     var activity = window.R5_GEO.cities
