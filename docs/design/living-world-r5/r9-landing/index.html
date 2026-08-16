@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LabourMarket.ai</title>
+<link rel="stylesheet" href="r9.css">
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+<div id="land">
+
+  <canvas id="world"></canvas>
+  <div id="skyfall" hidden></div>
+
+  <!-- projected world layers -->
+  <svg id="paths" aria-hidden="true"></svg>
+  <div id="markers" aria-hidden="true"></div>
+
+  <!-- chrome -->
+  <header id="top">
+    <span class="wordmark">LabourMarket<i>.ai</i></span>
+    <a class="enter" href="https://labourmarket.ai" rel="noopener">Pradėti →</a>
+  </header>
+
+  <!-- intro moment -->
+  <div id="intro">
+    <h1>LabourMarket<i>.ai</i></h1>
+    <p>Gyvas darbo ir vertės pasaulis</p>
+  </div>
+
+  <!-- scale readout -->
+  <div id="scale">
+    <b id="scaleName">Švedija</b>
+    <span><em id="scaleN" class="num">41 432</em> <i id="scaleWhat">aktyvios darbo vietos</i></span>
+  </div>
+
+  <!-- the one interaction -->
+  <div id="ask">
+    <p id="say" aria-live="polite"></p>
+    <div class="chips" id="chips">
+      <button data-say="Ieškau sandėlio darbo Göteborge">Ieškau sandėlio darbo Göteborge</button>
+      <button data-say="Kitai savaitei trūksta 4 elektrikų">Kitai savaitei trūksta 4 elektrikų</button>
+      <button data-say="Turiu 30 kg agurkų ir noriu parduoti">Turiu 30 kg agurkų — noriu parduoti</button>
+    </div>
+    <form id="askForm">
+      <input id="askInput" type="text" placeholder="Ko ieškai arba ką gali pasiūlyti?" autocomplete="off" aria-label="Pasakyk pasauliui">
+      <button type="submit" aria-label="Siųsti">→</button>
+    </form>
+    <p id="hint">slink — keisis mastelis · vesk žymeklį — pasaulis pasisuks</p>
+  </div>
+
+  <p id="src">realūs skaičiai: Arbetsförmedlingen (CC0) · 2026-08-15</p>
+</div>
+<!--ARTIFACT-BODY-END-->
+<script src="../assets/world-data.js"></script>
+<script src="../assets/world3d.js"></script>
+<script src="r9.js"></script>
+</body>
+</html>

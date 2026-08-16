@@ -442,7 +442,7 @@
     return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
   }
 
-  World.prototype.render = function (t) {
+  World.prototype.render = function (t, par) {
     var gl = this.gl;
     this.resize();
 
@@ -451,12 +451,19 @@
     var i = Math.floor(g), f = smooth(g - i);
     var a = KEYS[i], b = KEYS[Math.min(n, i + 1)];
     var eye = lerp3(a.eye, b.eye, f), at = lerp3(a.at, b.at, f);
+    if (par) {
+      // pointer parallax: shift the look-at a touch, the eye less — depth
+      var s = 0.5 + 2.2 * (1 - t);
+      at = [at[0] + par.dx * s, at[1] + par.dy * s * 0.35, at[2] + par.dy * s * 0.5];
+      eye = [eye[0] + par.dx * s * 0.35, eye[1], eye[2]];
+    }
     var fov = ((a.fov + (b.fov - a.fov) * f) * Math.PI) / 180;
 
 
     var aspect = this.canvas.width / Math.max(1, this.canvas.height);
     var view = lookAt(eye, at, [0, 1, 0]);
     var mvp = mul(perspective(fov, aspect, 0.04, 420), view);
+    this._mvp = mvp;
 
     /* The sky is drawn in screen space, so its horizon must be derived from
        the real camera — otherwise a seam appears where the painted horizon
@@ -556,6 +563,24 @@
       gl.vertexAttribPointer(lPos, 3, gl.FLOAT, false, 0, 0);
       gl.drawArrays(gl.LINES, 0, ln.count);
     }
+  };
+
+  /** Screen position (CSS px) of a lat/lng point at terrain height, from the
+   *  last rendered frame's camera. Null before the first frame or behind it. */
+  World.prototype.project = function (lng, lat, lift) {
+    var m = this._mvp;
+    if (!m) return null;
+    var x = px(lng), z = pz(lat);
+    var h = this.heightAt(x, z, true)[0] + (lift || 0);
+    var cw = m[3] * x + m[7] * h + m[11] * z + m[15];
+    if (cw <= 0.05) return null;
+    var cx = m[0] * x + m[4] * h + m[8] * z + m[12];
+    var cy = m[1] * x + m[5] * h + m[9] * z + m[13];
+    return {
+      x: (cx / cw * 0.5 + 0.5) * (this.canvas.clientWidth || this.canvas.width),
+      y: (1 - (cy / cw * 0.5 + 0.5)) * (this.canvas.clientHeight || this.canvas.height),
+      w: cw,
+    };
   };
 
   global.R5World = {
