@@ -480,6 +480,12 @@
     var hazeFar = 26 + 120 * (1 - t);
     var HAZE = [0.855, 0.879, 0.894];
     var SUNCOL = [1.0, 0.856, 0.672];
+    /* optional palette override: caller may set world.palette = {haze, sun,
+       zenith, horizon, seaNear, seaFar, landLow, landHigh} */
+    var P = this.palette || {};
+    if (P.haze) HAZE = P.haze;
+    if (P.sun) SUNCOL = P.sun;
+    function pv(key, a, b, c) { return P[key] || [a, b, c]; }
 
     gl.depthMask(false);
     gl.disable(gl.DEPTH_TEST);
@@ -489,9 +495,9 @@
     var aP = gl.getAttribLocation(sp, "aP");
     gl.enableVertexAttribArray(aP);
     gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform3f(gl.getUniformLocation(sp, "uZenith"), 0.442, 0.592, 0.712);
-    gl.uniform3f(gl.getUniformLocation(sp, "uHorizon"), 0.855, 0.879, 0.894);
-    gl.uniform3f(gl.getUniformLocation(sp, "uSunCol"), 0.46, 0.32, 0.15);
+    gl.uniform3fv(gl.getUniformLocation(sp, "uZenith"), pv("zenith", 0.442, 0.592, 0.712));
+    gl.uniform3fv(gl.getUniformLocation(sp, "uHorizon"), pv("horizon", 0.855, 0.879, 0.894));
+    gl.uniform3fv(gl.getUniformLocation(sp, "uSunCol"), pv("skySun", 0.46, 0.32, 0.15));
     gl.uniform1f(gl.getUniformLocation(sp, "uHorizonY"), horizonY);
     gl.uniform1f(gl.getUniformLocation(sp, "uSunX"), -0.42);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -519,8 +525,8 @@
     gl.uniform3fv(gl.getUniformLocation(sq, "uHaze"), HAZE);
     gl.uniform1f(gl.getUniformLocation(sq, "uHazeNear"), hazeNear);
     gl.uniform1f(gl.getUniformLocation(sq, "uHazeFar"), hazeFar);
-    gl.uniform3f(gl.getUniformLocation(sq, "uSeaNear"), 0.310, 0.408, 0.474);
-    gl.uniform3f(gl.getUniformLocation(sq, "uSeaFar"), 0.622, 0.694, 0.744);
+    gl.uniform3fv(gl.getUniformLocation(sq, "uSeaNear"), pv("seaNear", 0.310, 0.408, 0.474));
+    gl.uniform3fv(gl.getUniformLocation(sq, "uSeaFar"), pv("seaFar", 0.622, 0.694, 0.744));
     gl.uniform3fv(gl.getUniformLocation(sq, "uSunCol"), SUNCOL);
     bindMesh(sq, this.sea);
     gl.drawArrays(gl.TRIANGLES, 0, this.sea.count);
@@ -532,8 +538,8 @@
     gl.uniformMatrix4fv(gl.getUniformLocation(p, "uView"), false, view);
     gl.uniform3f(gl.getUniformLocation(p, "uSun"), -0.62, 0.30, 0.72);
     gl.uniform3fv(gl.getUniformLocation(p, "uSunCol"), SUNCOL);
-    gl.uniform3f(gl.getUniformLocation(p, "uLow"), 0.462, 0.496, 0.394);
-    gl.uniform3f(gl.getUniformLocation(p, "uHigh"), 0.936, 0.888, 0.762);
+    gl.uniform3fv(gl.getUniformLocation(p, "uLow"), pv("landLow", 0.462, 0.496, 0.394));
+    gl.uniform3fv(gl.getUniformLocation(p, "uHigh"), pv("landHigh", 0.936, 0.888, 0.762));
     gl.uniform3fv(gl.getUniformLocation(p, "uHaze"), HAZE);
     gl.uniform1f(gl.getUniformLocation(p, "uHazeNear"), hazeNear);
     gl.uniform1f(gl.getUniformLocation(p, "uHazeFar"), hazeFar);
