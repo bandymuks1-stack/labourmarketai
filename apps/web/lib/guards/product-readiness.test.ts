@@ -2124,7 +2124,6 @@ describe("no migration files added by this sprint", () => {
     // the post-merge tree with trains A/B/C/D/E/L1 on main
     // (`ls supabase/migrations/*.sql | wc -l` = 214), never summed.
     const SPRINT_BASELINE = 214;
->>>>>>> origin/main
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
