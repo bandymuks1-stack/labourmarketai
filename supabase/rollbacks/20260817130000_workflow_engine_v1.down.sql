@@ -1,4 +1,4 @@
--- Rollback for 20260817120000_workflow_engine_v1.sql
+-- Rollback for 20260817130000_workflow_engine_v1.sql
 --
 -- Restores the prior state exactly: the up-migration created SEVEN new
 -- tables, TWELVE new functions and THREE triggers and touched nothing else

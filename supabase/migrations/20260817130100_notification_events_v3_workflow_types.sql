@@ -1,9 +1,9 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
 -- Apply ONLY via Supabase MCP apply_migration, AFTER
--- 20260817120000_workflow_engine_v1.sql. Never `db push`.
+-- 20260817130000_workflow_engine_v1.sql. Never `db push`.
 -- Gate doc: docs/human-gates/workflow-engine-gate.md
--- Rollback:  supabase/rollbacks/20260817121000_notification_events_v3_workflow_types.down.sql
+-- Rollback:  supabase/rollbacks/20260817130100_notification_events_v3_workflow_types.down.sql
 --
 -- @human-gate-approved — TIER: owner-gated (constraint change on the durable
 -- notification store; the annotation states the ROUTE, not the decision).

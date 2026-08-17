@@ -4,8 +4,8 @@
 #
 # Spins up a THROWAWAY Postgres container, loads the faithful harness
 # (prelude + seed), then executes the actual files
-#   supabase/migrations/20260817120000_workflow_engine_v1.sql
-#   supabase/migrations/20260817121000_notification_events_v3_workflow_types.sql
+#   supabase/migrations/20260817130000_workflow_engine_v1.sql
+#   supabase/migrations/20260817130100_notification_events_v3_workflow_types.sql
 #   supabase/rollbacks/*.down.sql
 # each VERBATIM, and measures:
 #   * the AUTHORITY MATRIX (anon / requester / approver / delegate / owner /
@@ -32,10 +32,10 @@ CT=${CT:-workflow-engine-proof}
 IMAGE=${IMAGE:-postgres:15-alpine}
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-MIGRATION="$REPO/supabase/migrations/20260817120000_workflow_engine_v1.sql"
-MIGRATION_TYPES="$REPO/supabase/migrations/20260817121000_notification_events_v3_workflow_types.sql"
-ROLLBACK="$REPO/supabase/rollbacks/20260817120000_workflow_engine_v1.down.sql"
-ROLLBACK_TYPES="$REPO/supabase/rollbacks/20260817121000_notification_events_v3_workflow_types.down.sql"
+MIGRATION="$REPO/supabase/migrations/20260817130000_workflow_engine_v1.sql"
+MIGRATION_TYPES="$REPO/supabase/migrations/20260817130100_notification_events_v3_workflow_types.sql"
+ROLLBACK="$REPO/supabase/rollbacks/20260817130000_workflow_engine_v1.down.sql"
+ROLLBACK_TYPES="$REPO/supabase/rollbacks/20260817130100_notification_events_v3_workflow_types.down.sql"
 
 O1='01000000-0000-4000-8000-000000000001'
 OWNER1='a1000000-0000-4000-8000-00000000000a'

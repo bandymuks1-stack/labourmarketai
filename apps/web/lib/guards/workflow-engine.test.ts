@@ -43,8 +43,8 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const readRepo = (rel: string): string =>
   readFileSync(join(REPO, rel), "utf8");
 
-const ENGINE = "20260817120000_workflow_engine_v1";
-const TYPES_V3 = "20260817121000_notification_events_v3_workflow_types";
+const ENGINE = "20260817130000_workflow_engine_v1";
+const TYPES_V3 = "20260817130100_notification_events_v3_workflow_types";
 
 const MIGRATION = readRepo(`supabase/migrations/${ENGINE}.sql`);
 const MIGRATION_TYPES = readRepo(`supabase/migrations/${TYPES_V3}.sql`);

@@ -1,4 +1,4 @@
--- Rollback for 20260817121000_notification_events_v3_workflow_types.sql
+-- Rollback for 20260817130100_notification_events_v3_workflow_types.sql
 --
 -- Restores the v2 constraint set exactly (the state after
 -- 20260813100000_notification_events_v2_types.sql). Any workflow_* event

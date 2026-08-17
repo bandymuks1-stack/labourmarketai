@@ -38,7 +38,7 @@ import {
  * Workflow & Approval Engine write actions (canonical engine v1).
  *
  * The ONLY write paths are the eight gated SECURITY DEFINER commands the
- * human-gated migration 20260817120000_workflow_engine_v1 proposes:
+ * human-gated migration 20260817130000_workflow_engine_v1 proposes:
  *
  *   create_workflow_definition_v1 / publish_workflow_version_v1 /
  *   start_workflow_instance_v1 / decide_workflow_step_v1 /

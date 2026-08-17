@@ -4,8 +4,8 @@
  * UI section. No server-only imports, no IO.
  *
  * The model codes against the `workflow_*` contract the SEPARATE, human-gated
- * migration pair proposes (20260817120000_workflow_engine_v1 +
- * 20260817121000_notification_events_v3_workflow_types). Until the lead
+ * migration pair proposes (20260817130000_workflow_engine_v1 +
+ * 20260817130100_notification_events_v3_workflow_types). Until the lead
  * applies them the read/action layers degrade honestly (the established
  * tasks/finance pattern) — nothing here fakes a request or a decision.
  *

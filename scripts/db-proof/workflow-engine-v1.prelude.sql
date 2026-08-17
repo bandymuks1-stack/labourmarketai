@@ -2,10 +2,10 @@
 -- WORKFLOW & APPROVAL ENGINE v1 — PROOF HARNESS PRELUDE.
 --
 -- Builds the minimal faithful prerequisites so the REAL files
---   supabase/migrations/20260817120000_workflow_engine_v1.sql
---   supabase/migrations/20260817121000_notification_events_v3_workflow_types.sql
---   supabase/rollbacks/20260817120000_workflow_engine_v1.down.sql
---   supabase/rollbacks/20260817121000_notification_events_v3_workflow_types.down.sql
+--   supabase/migrations/20260817130000_workflow_engine_v1.sql
+--   supabase/migrations/20260817130100_notification_events_v3_workflow_types.sql
+--   supabase/rollbacks/20260817130000_workflow_engine_v1.down.sql
+--   supabase/rollbacks/20260817130100_notification_events_v3_workflow_types.down.sql
 -- can be executed VERBATIM against a throwaway Postgres and the resulting
 -- per-role behaviour measured. Nothing here re-implements them.
 --

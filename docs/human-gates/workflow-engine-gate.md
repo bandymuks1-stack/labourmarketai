@@ -7,17 +7,17 @@ Status: **PENDING APPLY BY LEAD** (not applied to production).
 Two migrations, applied IN ORDER, both via Supabase MCP `apply_migration`
 (never `db push`):
 
-1. `supabase/migrations/20260817120000_workflow_engine_v1.sql`
+1. `supabase/migrations/20260817130000_workflow_engine_v1.sql`
    — 7 new tables, 3 trigger guards, 4 helper functions, 8 SECURITY DEFINER
    commands, fail-closed SELECT-only RLS, RPC-only writes. Zero existing
    objects touched, zero DML at apply time.
-2. `supabase/migrations/20260817121000_notification_events_v3_workflow_types.sql`
+2. `supabase/migrations/20260817130100_notification_events_v3_workflow_types.sql`
    — pure widening of the two `notification_events` CHECK constraints
    (4 workflow event types + the `workflow_instance` entity type).
 
 Paired rollbacks:
-- `supabase/rollbacks/20260817120000_workflow_engine_v1.down.sql`
-- `supabase/rollbacks/20260817121000_notification_events_v3_workflow_types.down.sql`
+- `supabase/rollbacks/20260817130000_workflow_engine_v1.down.sql`
+- `supabase/rollbacks/20260817130100_notification_events_v3_workflow_types.down.sql`
 
 ## Authority
 

@@ -3,7 +3,7 @@
 -- Apply ONLY via Supabase MCP apply_migration after the lead session's
 -- verification. Never `db push`.
 -- Gate doc: docs/human-gates/workflow-engine-gate.md
--- Rollback:  supabase/rollbacks/20260817120000_workflow_engine_v1.down.sql
+-- Rollback:  supabase/rollbacks/20260817130000_workflow_engine_v1.down.sql
 --
 -- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER functions +
 -- GRANTs + new RLS-bearing tables + triggers are RED-class; there is no
@@ -15,7 +15,7 @@
 -- trigger or function is modified or recreated. ZERO DML at apply time.
 -- Prod apply stays manual by the LEAD session via Supabase MCP.
 --
--- 20260817120000 — canonical Workflow & Approval Engine v1.
+-- 20260817130000 — canonical Workflow & Approval Engine v1.
 --
 -- PROBLEM: every approval in the product is a hardcoded, single-step,
 -- domain-specific predicate (absence review, booking respond, document
@@ -75,7 +75,7 @@
 --       REVOKE — the 8 gated commands are the only write paths.
 --   service_role:   untouched default (no engine-specific widening).
 --
--- ROLLBACK: supabase/rollbacks/20260817120000_workflow_engine_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260817130000_workflow_engine_v1.down.sql
 -- restores the prior state exactly: drops ONLY the 3 triggers, 12 new
 -- functions and 7 new tables (feature-created rows live ONLY in those
 -- tables). No existing object was touched, so the down file recreates
@@ -1362,6 +1362,6 @@ grant execute on function public.mark_overdue_workflow_steps_v1(text) to authent
 
 commit;
 
--- ROLLBACK (down): supabase/rollbacks/20260817120000_workflow_engine_v1.down.sql
+-- ROLLBACK (down): supabase/rollbacks/20260817130000_workflow_engine_v1.down.sql
 -- restores the prior state exactly (drops the 3 triggers, 12 new functions
 -- and 7 new tables; feature-created rows live only in those tables).
