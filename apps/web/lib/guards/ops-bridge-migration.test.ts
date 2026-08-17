@@ -431,6 +431,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // drop below what 0030 needs — without the false coupling. Lowering it still
     // fails here, and an unexplained RAISE is still caught by the documented
     // bump-comment convention in product-readiness.test.ts itself.
+    // Cross-pin follows: 199 -> 201 for the Document & Evidence Engine v1
+    // pair (20260817120000 + 20260817121000) — floor semantics unchanged.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

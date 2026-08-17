@@ -101,6 +101,15 @@ const NATIVE_NAV = new Set([
   // disabled pending + role="status" feedback) — it is now covered by the
   // general client-async rule like the buyer setup form, so it is no longer a
   // NATIVE-NAV exemption.
+  // Document & Evidence Engine v1 — worker file upload, acknowledgement
+  // inbox and the org document register are NATIVE-NAV server-action forms
+  // that ALWAYS redirect back to /dashboard/documents with an honest
+  // ?docNotice= outcome (rendered as the page's role="status" DocNoticeBanner),
+  // exactly the tasks/finance pattern. Pure server components — no client
+  // state, no useTransition.
+  "components/app/worker-document-file-slot.tsx",
+  "components/app/document-ack-inbox.tsx",
+  "components/app/org-documents-register.tsx",
 ]);
 
 const PENDING_SIGNAL =

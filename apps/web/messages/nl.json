@@ -4100,7 +4100,10 @@
         "event_absence_rejected": "Je afwezigheid is afgewezen",
         "event_booking_withdrawn": "Het boekingsvoorstel is ingetrokken",
         "event_engagement_ended": "De samenwerking is beëindigd",
-        "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt"
+        "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt",
+        "event_document_ack_assigned": "U bent gevraagd te bevestigen dat u een document hebt gelezen.",
+        "event_document_ack_completed": "Een document dat u ter bevestiging stuurde, is bevestigd.",
+        "event_document_expiring": "De geldigheid van een document loopt binnenkort af."
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -6906,6 +6909,106 @@
       "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
       "projectAxisLink": "Gereedheidschecklists per project",
       "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Versie {n}",
+    "download": "Downloaden",
+    "noFileYet": "Nog geen bestand geüpload.",
+    "upload": {
+      "fileLabel": "Kies een bestand",
+      "submit": "Bestand uploaden",
+      "newVersion": "Nieuwe versie uploaden",
+      "limits": "PDF, Word of foto (JPG/PNG/WebP), tot 5 MB.",
+      "versionNote": "Een nieuwe upload wordt een nieuwe versie — eerdere versies blijven bewaard."
+    },
+    "ackInbox": {
+      "title": "Documenten om te bevestigen",
+      "intro": "U bent gevraagd te bevestigen dat u deze documenten hebt gelezen. Open het bestand en druk op de bevestigingsknop.",
+      "allDone": "Niets in afwachting — u hebt alle aan u toegewezen documenten bevestigd.",
+      "requiredBy": "bevestigen vóór {date}",
+      "confirm": "Ik heb dit gelezen",
+      "completedTitle": "Al bevestigd",
+      "confirmedAt": "bevestigd {date}",
+      "versionRule": "Een bevestiging geldt alleen voor de exacte versie die u hebt geopend. Bij een nieuwe versie kunt u opnieuw gevraagd worden."
+    },
+    "notice": {
+      "uploaded": "Het bestand is geüpload.",
+      "created": "De documentregistratie is aangemaakt.",
+      "archived": "Het document is gearchiveerd.",
+      "revoked": "Het document is ingetrokken.",
+      "assigned": "Het bevestigingsverzoek is verzonden.",
+      "acknowledged": "Uw bevestiging is opgeslagen.",
+      "invalid": "Een deel van de ingevoerde gegevens is ongeldig — er is niets opgeslagen.",
+      "invalid_state": "De status van dit document staat deze actie niet toe.",
+      "invalid_assignee": "Deze persoon is geen lid van deze organisatie; het verzoek is niet verzonden.",
+      "already_assigned": "Deze persoon is al gevraagd deze versie te bevestigen.",
+      "already_acknowledged": "Deze documentversie is al bevestigd.",
+      "not_current": "Er bestaat een nieuwere versie van dit document — ververs de pagina en probeer opnieuw.",
+      "not_allowed": "U hebt hiervoor geen toestemming.",
+      "not_found": "Het document is niet gevonden.",
+      "limit_reached": "De limiet van de documentenlijst is bereikt.",
+      "version_limit_reached": "Dit document heeft zijn versielimiet bereikt.",
+      "path_mismatch": "De upload kon niet worden geverifieerd — er is niets opgeslagen. Probeer opnieuw.",
+      "file_too_large": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
+      "unsupported_type": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
+      "needs_migration": "Bestandsupload is in deze omgeving nog niet ingeschakeld — er is niets opgeslagen.",
+      "error": "Er is iets misgegaan — er is niets opgeslagen."
+    }
+  },
+  "orgDocuments": {
+    "title": "Documentenregister van het bedrijf",
+    "intro": "Documenten van {org}: beleid, procedures, instructies en correspondentie, met versies en leesbevestigingen.",
+    "unavailable": "Het documentenregister kan nu niet worden geladen.",
+    "preparing": "Het documentenregister is voorbereid maar in deze omgeving nog niet ingeschakeld.",
+    "error": "Het documentenregister kon niet worden geladen — probeer het later opnieuw.",
+    "empty": "Nog geen documenten geregistreerd.",
+    "scopeNote": "Dit register bevat de documenten van de organisatie zelf. Persoonlijke documenten van werknemers blijven in hun eigen handen en worden hier nooit getoond.",
+    "types": {
+      "org_policy": "Beleid",
+      "org_procedure": "Procedure",
+      "org_instruction": "Instructie",
+      "org_correspondence_incoming": "Inkomende correspondentie",
+      "org_correspondence_outgoing": "Uitgaande correspondentie",
+      "org_internal": "Intern document",
+      "org_agreement_attachment": "Bijlage bij overeenkomst"
+    },
+    "status": {
+      "active": "Actief",
+      "archived": "Gearchiveerd",
+      "revoked": "Ingetrokken"
+    },
+    "classification": {
+      "standard": "Standaard",
+      "classified": "Beperkte toegang"
+    },
+    "currentVersion": "Versie {n}",
+    "versionHistory": "{n} versies",
+    "download": "Downloaden",
+    "noFileYet": "Nog geen bestand geüpload.",
+    "uploadNewVersion": "Nieuwe versie uploaden",
+    "uploadFirst": "Bestand uploaden",
+    "expiresOn": "geldig tot {date}",
+    "ackProgress": "{done}/{total} bevestigd",
+    "assign": {
+      "assigneeLabel": "Vragen te bevestigen:",
+      "requiredByLabel": "vóór",
+      "submit": "Verzoek verzenden"
+    },
+    "archive": "Archiveren",
+    "revoke": "Intrekken",
+    "create": {
+      "title": "Nieuw document registreren",
+      "typeLabel": "Type",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Omschrijving (optioneel)",
+      "classificationLabel": "Toegang",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Niet ingesteld",
+      "validFromLabel": "Geldig vanaf",
+      "expiresOnLabel": "Geldig tot",
+      "externalRefLabel": "Referentienummer (optioneel)",
+      "submit": "Document registreren"
     }
   },
   "trust": {

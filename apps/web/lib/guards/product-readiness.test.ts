@@ -2064,7 +2064,13 @@ describe("no migration files added by this sprint", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — recounted from the tree,
     // never summed; gate doc notification-events-v2-types-gate.md.
-    const SPRINT_BASELINE = 199;
+    // Bumped 199 -> 201 for the Document & Evidence Engine v1 pair
+    // (20260817120000_document_file_layer_v1 + 20260817121000_notification_
+    // document_types_v3; owner mandate 2026-08-17, PENDING APPLY BY LEAD) —
+    // recounted from the tree (`ls supabase/migrations/*.sql | wc -l` = 201),
+    // never summed; gate docs document-file-layer-gate.md +
+    // notification-document-types-v3-gate.md.
+    const SPRINT_BASELINE = 201;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

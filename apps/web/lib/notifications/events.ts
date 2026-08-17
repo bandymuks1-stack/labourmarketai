@@ -48,12 +48,24 @@ export type NotificationEventType =
   // label copy is deliberately neutral about visibility: whether the company
   // still sees the worker depends on other relationships (F2), and a
   // notification must not claim what it has not measured.
-  | "engagement_ended";
+  | "engagement_ended"
+  // v3 (20260817121000, Document & Evidence Engine): three durable document
+  // facts. All stay INERT until the lead applies the widened constraint —
+  // the insert fails its CHECK and the fire-and-forget wrapper reports it
+  // to the console, exactly the v2 precedent.
+  | "document_ack_assigned"
+  | "document_ack_completed"
+  | "document_expiring";
 
 export type NotificationEntityType =
   | "booking_request"
   | "worker_absence"
-  | "engagement";
+  | "engagement"
+  // v3: document engine entities — all resolve to the EXISTING documents
+  // page (no new surface).
+  | "worker_document"
+  | "org_document"
+  | "document_acknowledgement";
 
 /**
  * Where a durable event TAKES YOU.
@@ -81,6 +93,11 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   booking_request: "/dashboard/bookings",
   worker_absence: "/dashboard/absences",
   engagement: "/dashboard/bookings",
+  // The documents page is where all three document entities live: the
+  // worker inventory, the org register and the acknowledgement inbox.
+  worker_document: "/dashboard/documents",
+  org_document: "/dashboard/documents",
+  document_acknowledgement: "/dashboard/documents",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

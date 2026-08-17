@@ -506,7 +506,11 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
     // follow-up; gate doc notification-events-v2-types-gate.md.
-    expect(count).toBeLessThanOrEqual(199);
+    // Bumped 199 -> 201 for the Document & Evidence Engine v1 pair
+    // (20260817120000 + 20260817121000, owner mandate 2026-08-17, PENDING
+    // APPLY BY LEAD) — recounted from the tree, never summed. Still no
+    // migration from the market-map layer itself.
+    expect(count).toBeLessThanOrEqual(201);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

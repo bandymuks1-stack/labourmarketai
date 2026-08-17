@@ -739,6 +739,21 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/notification-events-v2-types-gate.md. Rollback
       // paired, ships UNAPPLIED.
       "20260813100000_notification_events_v2_types.sql",
+      // 2026-08-17: Document & Evidence Engine v1 pair (train C of the
+      // autonomous functional completion train V2). The markers record that
+      // the RED content (new RLS tables + SECURITY DEFINER RPCs +
+      // GRANT/REVOKE + storage bucket/policies; and the two strictly-widening
+      // constraint drop+re-adds on notification_events) is STRUCTURALLY
+      // UNAVOIDABLE / INTENTIONAL. The annotation route was pre-approved by
+      // the owner mandate 2026-08-17 (train V2 §4 migration authority); the
+      // APPLY is performed by the train LEAD, recorded as PENDING APPLY BY
+      // LEAD in docs/APPLIED_LEDGER.md. Gate records:
+      // docs/human-gates/document-file-layer-gate.md,
+      // docs/human-gates/notification-document-types-v3-gate.md. DB proof
+      // (76/76, migration + rollback verbatim):
+      // scripts/db-proof/document-file-layer.sh.
+      "20260817120000_document_file_layer_v1.sql",
+      "20260817121000_notification_document_types_v3.sql",
     ]);
   });
 
