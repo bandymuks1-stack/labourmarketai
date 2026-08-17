@@ -4627,7 +4627,10 @@
       "skip": "Izlaist",
       "reset": "Atvērt no jauna",
       "requiredBadge": "obligāts",
-      "linkedBadge": "saistīts ar īstu ierakstu"
+      "linkedBadge": "saistīts ar īstu ierakstu",
+      "responsibleLabel": "Atbildīgā persona",
+      "responsibleNone": "Bez atbildīgās personas",
+      "assign": "Piešķirt"
     },
     "kinds": {
       "task": "Uzdevums",

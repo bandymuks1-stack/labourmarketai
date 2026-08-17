@@ -4627,7 +4627,10 @@
       "skip": "Hopp over",
       "reset": "Gjenåpne",
       "requiredBadge": "obligatorisk",
-      "linkedBadge": "knyttet til en ekte post"
+      "linkedBadge": "knyttet til en ekte post",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ingen ansvarlig person",
+      "assign": "Tildel"
     },
     "kinds": {
       "task": "Oppgave",

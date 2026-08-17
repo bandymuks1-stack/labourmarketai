@@ -4627,7 +4627,10 @@
       "skip": "Jäta vahele",
       "reset": "Ava uuesti",
       "requiredBadge": "kohustuslik",
-      "linkedBadge": "seotud päris kirjega"
+      "linkedBadge": "seotud päris kirjega",
+      "responsibleLabel": "Vastutav isik",
+      "responsibleNone": "Vastutav isik puudub",
+      "assign": "Määra"
     },
     "kinds": {
       "task": "Ülesanne",

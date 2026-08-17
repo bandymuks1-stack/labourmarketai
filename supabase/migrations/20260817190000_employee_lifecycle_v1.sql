@@ -566,8 +566,8 @@ grant execute on function public.create_onboarding_template_v1(text, text, text,
 
 -- 8b. start_onboarding_run_v1 — snapshot a template onto ONE engagement.
 -- Returns the run id (uuid-as-text) on success; a short outcome otherwise
--- (the TS layer distinguishes by UUID shape — start_workflow_instance_v1
--- precedent).
+-- (the TS layer distinguishes by UUID shape — the approval engine's
+-- start-instance precedent).
 create or replace function public.start_onboarding_run_v1(
   p_engagement_context_id text,
   p_template_id           text

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { setOnboardingItemStatusAction } from "@/lib/lifecycle/lifecycle-actions";
 import {
@@ -59,9 +60,11 @@ export async function MyOnboardingSection({
   return (
     <section
       id="lifecycle"
-      className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
+      className="scroll-mt-20"
       data-testid="my-onboarding"
     >
+      <Card compact>
+        <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("worker.title")}
@@ -116,7 +119,7 @@ export async function MyOnboardingSection({
                           {item.title}
                         </span>
                         {item.description ? (
-                          <span className="text-[11px] text-text-muted">
+                          <span className="text-meta text-text-muted">
                             {item.description}
                           </span>
                         ) : null}
@@ -128,12 +131,12 @@ export async function MyOnboardingSection({
                             <input type="hidden" name="back" value="start" />
                             <input type="hidden" name="itemId" value={item.id} />
                             <input type="hidden" name="status" value="done" />
-                            <Button type="submit" size="sm" variant="outline">
+                            <Button type="submit" size="sm" variant="secondary">
                               {t("worker.done")}
                             </Button>
                           </form>
                         ) : (
-                          <span className="text-[11px] text-text-muted">
+                          <span className="text-meta text-text-muted">
                             {t("worker.managerHint")}
                           </span>
                         )
@@ -146,6 +149,8 @@ export async function MyOnboardingSection({
           );
         })
       )}
+        </div>
+      </Card>
     </section>
   );
 }

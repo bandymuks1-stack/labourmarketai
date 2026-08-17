@@ -12652,7 +12652,10 @@
       "skip": "Praleisti",
       "reset": "Atidaryti iš naujo",
       "requiredBadge": "privaloma",
-      "linkedBadge": "susieta su tikru įrašu"
+      "linkedBadge": "susieta su tikru įrašu",
+      "responsibleLabel": "Atsakingas žmogus",
+      "responsibleNone": "Be atsakingo žmogaus",
+      "assign": "Priskirti"
     },
     "kinds": {
       "task": "Užduotis",

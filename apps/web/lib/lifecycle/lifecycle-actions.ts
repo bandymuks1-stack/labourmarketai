@@ -9,7 +9,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   LIFECYCLE_EXTRA_ITEMS_MAX,
-  LIFECYCLE_ITEM_DESCRIPTION_MAX,
   LIFECYCLE_ITEM_TITLE_MAX,
   LIFECYCLE_ITEM_TITLE_MIN,
   LIFECYCLE_NOTE_MAX,
@@ -192,6 +191,32 @@ export async function startOnboardingRunAction(
       "start_onboarding_run_v1",
       { p_engagement_context_id: engagementId, p_template_id: templateId },
       "started",
+    ),
+  );
+}
+
+/** Name (or clear) the person responsible for one onboarding item. The RPC
+ *  re-checks that the target belongs to the org via either membership truth
+ *  or is the run's own worker. */
+export async function assignOnboardingItemAction(
+  formData: FormData,
+): Promise<void> {
+  const ctx = readContext(formData);
+  const itemId = String(formData.get("itemId") ?? "");
+  const responsible = String(formData.get("responsibleProfileId") ?? "").trim();
+  if (!UUID_RX.test(itemId)) finish(ctx, "invalid");
+  if (responsible.length > 0 && !UUID_RX.test(responsible)) {
+    finish(ctx, "invalid");
+  }
+  finish(
+    ctx,
+    await callRpc(
+      "assign_onboarding_item_v1",
+      {
+        p_item_id: itemId,
+        p_responsible_profile_id: responsible.length > 0 ? responsible : null,
+      },
+      "updated",
     ),
   );
 }

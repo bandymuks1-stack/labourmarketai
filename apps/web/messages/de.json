@@ -12652,7 +12652,10 @@
       "skip": "Überspringen",
       "reset": "Wieder öffnen",
       "requiredBadge": "Pflicht",
-      "linkedBadge": "mit echtem Eintrag verknüpft"
+      "linkedBadge": "mit echtem Eintrag verknüpft",
+      "responsibleLabel": "Verantwortliche Person",
+      "responsibleNone": "Keine verantwortliche Person",
+      "assign": "Zuweisen"
     },
     "kinds": {
       "task": "Aufgabe",

@@ -1,10 +1,12 @@
 import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import {
+  assignOnboardingItemAction,
   cancelOffboardingRunAction,
   cancelOnboardingRunAction,
   completeOffboardingRunAction,
@@ -107,17 +109,21 @@ export async function LifecycleSection({
     return (
       <section
         id="lifecycle"
-        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
+        className="scroll-mt-20"
         data-testid="company-lifecycle"
       >
-        {header}
-        {noticeBanner}
-        <p
-          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
-          data-testid="lifecycle-unavailable"
-        >
-          {t("unavailable")}
-        </p>
+        <Card compact>
+          <div className="flex flex-col gap-3">
+            {header}
+            {noticeBanner}
+            <p
+              className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
+              data-testid="lifecycle-unavailable"
+            >
+              {t("unavailable")}
+            </p>
+          </div>
+        </Card>
       </section>
     );
   }
@@ -205,19 +211,50 @@ export async function LifecycleSection({
                     ? t(`kinds.${item.kind}`)
                     : item.title}
                 </span>
-                <span className="text-[11px] text-text-muted">
+                <span className="text-meta text-text-muted">
                   {t(`kinds.${item.kind}`)}
                   {item.required ? ` · ${t("items.requiredBadge")}` : ""}
                   {item.linkedEntityType ? ` · ${t("items.linkedBadge")}` : ""}
                 </span>
               </div>
               {item.status !== "done" ? (
-                <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-1">
+                  {scope === "onboarding" ? (
+                    <form
+                      action={assignOnboardingItemAction}
+                      className="flex items-center gap-1"
+                    >
+                      {hiddenCtx()}
+                      <input type="hidden" name="itemId" value={item.id} />
+                      <Select
+                        name="responsibleProfileId"
+                        aria-label={t("items.responsibleLabel")}
+                        defaultValue={item.responsibleProfileId ?? ""}
+                        className="text-xs"
+                      >
+                        <option value="">{t("items.responsibleNone")}</option>
+                        {[
+                          ...new Map(
+                            members
+                              .filter((mm) => mm.engagementStatus === "active")
+                              .map((mm) => [mm.profileId, mm] as const),
+                          ).values(),
+                        ].map((mm) => (
+                          <option key={mm.profileId} value={mm.profileId}>
+                            {mm.name}
+                          </option>
+                        ))}
+                      </Select>
+                      <Button type="submit" size="sm" variant="ghost">
+                        {t("items.assign")}
+                      </Button>
+                    </form>
+                  ) : null}
                   <form action={setAction}>
                     {hiddenCtx()}
                     <input type="hidden" name="itemId" value={item.id} />
                     <input type="hidden" name="status" value="done" />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" size="sm" variant="secondary">
                       {t("items.markDone")}
                     </Button>
                   </form>
@@ -254,7 +291,7 @@ export async function LifecycleSection({
             </Button>
           </form>
           {!progress.completable ? (
-            <span className="text-[11px] text-text-muted">
+            <span className="text-meta text-text-muted">
               {t("runs.requiredOpen", { count: progress.requiredOpen })}
             </span>
           ) : null}
@@ -305,7 +342,7 @@ export async function LifecycleSection({
                   />
                   <div className="flex flex-col gap-1">
                     <Label
-                      htmlFor={`onb-tpl-${m.engagementId}`}
+                      
                       className="text-xs"
                     >
                       {t("runs.templateLabel")}
@@ -322,7 +359,7 @@ export async function LifecycleSection({
                       ))}
                     </Select>
                   </div>
-                  <Button type="submit" size="sm" variant="outline">
+                  <Button type="submit" size="sm" variant="secondary">
                     {t("runs.start")}
                   </Button>
                 </form>
@@ -341,7 +378,7 @@ export async function LifecycleSection({
                 />
                 <div className="flex flex-col gap-1">
                   <Label
-                    htmlFor={`stage-${m.engagementId}`}
+                    
                     className="text-xs"
                   >
                     {t("stageForm.stageLabel")}
@@ -366,7 +403,7 @@ export async function LifecycleSection({
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label
-                    htmlFor={`prob-${m.engagementId}`}
+                    
                     className="text-xs"
                   >
                     {t("stageForm.probationDateLabel")}
@@ -380,7 +417,7 @@ export async function LifecycleSection({
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label
-                    htmlFor={`stage-note-${m.engagementId}`}
+                    
                     className="text-xs"
                   >
                     {t("stageForm.noteLabel")}
@@ -391,7 +428,7 @@ export async function LifecycleSection({
                     maxLength={LIFECYCLE_NOTE_MAX}
                   />
                 </div>
-                <Button type="submit" size="sm" variant="outline">
+                <Button type="submit" size="sm" variant="secondary">
                   {t("stageForm.submit")}
                 </Button>
               </form>
@@ -409,7 +446,7 @@ export async function LifecycleSection({
                 />
                 <div className="flex min-w-[220px] flex-1 flex-col gap-1">
                   <Label
-                    htmlFor={`off-extra-${m.engagementId}`}
+                    
                     className="text-xs"
                   >
                     {t("runs.extraItemsLabel")}
@@ -422,7 +459,7 @@ export async function LifecycleSection({
                     placeholder={t("runs.extraItemsHint")}
                   />
                 </div>
-                <Button type="submit" size="sm" variant="outline">
+                <Button type="submit" size="sm" variant="secondary">
                   {t("runs.startOffboarding")}
                 </Button>
               </form>
@@ -443,7 +480,7 @@ export async function LifecycleSection({
                   />
                   <div className="flex flex-col gap-1">
                     <Label
-                      htmlFor={`end-reason-${m.engagementId}`}
+                      
                       className="text-xs"
                     >
                       {t("end.reasonLabel")}
@@ -462,7 +499,7 @@ export async function LifecycleSection({
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label
-                      htmlFor={`end-note-${m.engagementId}`}
+                      
                       className="text-xs"
                     >
                       {t("end.noteLabel")}
@@ -473,15 +510,15 @@ export async function LifecycleSection({
                       maxLength={LIFECYCLE_NOTE_MAX}
                     />
                   </div>
-                  <Button type="submit" size="sm" variant="destructive">
+                  <Button type="submit" size="sm" variant="secondary">
                     {t("end.submit")}
                   </Button>
-                  <span className="text-[11px] text-text-muted">
+                  <span className="text-meta text-text-muted">
                     {t("end.confirmHint")}
                   </span>
                 </form>
               ) : (
-                <p className="text-[11px] text-text-muted">
+                <p className="text-meta text-text-muted">
                   {t("members.ownerProtected")}
                 </p>
               )}
@@ -495,9 +532,11 @@ export async function LifecycleSection({
   return (
     <section
       id="lifecycle"
-      className="card-border flex flex-col gap-4 p-5 scroll-mt-20"
+      className="scroll-mt-20"
       data-testid="company-lifecycle"
     >
+      <Card compact>
+        <div className="flex flex-col gap-4">
       {header}
       {noticeBanner}
 
@@ -541,14 +580,14 @@ export async function LifecycleSection({
                   <div className="flex items-center gap-2">
                     {stageBadge(m.stage)}
                     {m.stage === "probation" && m.probationUntil ? (
-                      <span className="text-[11px] text-text-muted">
+                      <span className="text-meta text-text-muted">
                         {t("members.probationUntil", {
-                          date: dateFmt.format(new Date(m.probationUntil)),
+                          date: dateFmt(m.probationUntil) ?? m.probationUntil,
                         })}
                       </span>
                     ) : null}
                     {m.stage === "ended" && m.endedReason ? (
-                      <span className="text-[11px] text-text-muted">
+                      <span className="text-meta text-text-muted">
                         {t(`reasons.${m.endedReason}`)}
                       </span>
                     ) : null}
@@ -591,7 +630,7 @@ export async function LifecycleSection({
             {hiddenCtx()}
             <input type="hidden" name="organizationId" value={orgId} />
             <div className="flex flex-col gap-1">
-              <Label htmlFor="lifecycle-tpl-name" className="text-xs">
+              <Label  className="text-xs">
                 {t("templates.nameLabel")}
               </Label>
               <Input
@@ -608,7 +647,7 @@ export async function LifecycleSection({
             ).map((i) => (
               <div key={i} className="flex flex-wrap items-end gap-2">
                 <div className="flex min-w-[200px] flex-1 flex-col gap-1">
-                  <Label htmlFor={`tpl-item-${i}-title`} className="text-xs">
+                  <Label className="text-xs">
                     {t("templates.itemTitleLabel", { n: i })}
                   </Label>
                   <Input
@@ -618,7 +657,7 @@ export async function LifecycleSection({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label htmlFor={`tpl-item-${i}-kind`} className="text-xs">
+                  <Label className="text-xs">
                     {t("templates.kindLabel")}
                   </Label>
                   <Select id={`tpl-item-${i}-kind`} name={`item-${i}-kind`}>
@@ -661,7 +700,7 @@ export async function LifecycleSection({
                 className="flex flex-wrap items-center gap-2 text-xs text-text-secondary"
               >
                 <span className="text-text-muted">
-                  {dateFmt.format(new Date(ev.createdAt))}
+                  {dateFmt(ev.createdAt) ?? ""}
                 </span>
                 <span>{t(`events.${ev.action}`)}</span>
                 <span className="text-text-muted">
@@ -675,6 +714,8 @@ export async function LifecycleSection({
           </ol>
         )}
       </div>
+        </div>
+      </Card>
     </section>
   );
 }

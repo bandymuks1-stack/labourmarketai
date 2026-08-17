@@ -797,6 +797,23 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260817151000_work_tasks_v2_collaboration.sql",
       "20260817152000_project_responsible_v1.sql",
       "20260817153000_notification_events_v4_task_types.sql",
+      // 2026-08-17: Employee Lifecycle v1 (train G of the autonomous
+      // functional completion train V2). The marker records that the RED
+      // content (7 new RLS tables + SELECT policies + GRANT/REVOKE + 16
+      // SECURITY DEFINER functions + 1 append-only trigger guard + 4
+      // additive NULLABLE engagement_contexts columns) is STRUCTURALLY
+      // UNAVOIDABLE for a row-level-secured lifecycle engine — same class
+      // as the workflow/document-engine entries above. The engine builds ON
+      // the CANONICAL employment record engagement_contexts (lead decision,
+      // duplication-consolidation plan v1) and CALLS the applied
+      // end_org_membership_v1 rather than forking it. The annotation route
+      // is the owner mandate 2026-08-17 §4 migration authority; the APPLY
+      // belongs to the LEAD session (PENDING APPLY BY LEAD in
+      // docs/APPLIED_LEDGER.md). Gate record:
+      // docs/human-gates/employee-lifecycle-gate.md. Rollback paired;
+      // behavioural proof (85/85, migration + rollback verbatim):
+      // scripts/db-proof/employee-lifecycle.sh.
+      "20260817190000_employee_lifecycle_v1.sql",
     ]);
   });
 

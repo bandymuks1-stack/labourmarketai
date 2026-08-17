@@ -12652,7 +12652,10 @@
       "skip": "Overslaan",
       "reset": "Heropenen",
       "requiredBadge": "verplicht",
-      "linkedBadge": "gekoppeld aan een echt record"
+      "linkedBadge": "gekoppeld aan een echt record",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Geen verantwoordelijke",
+      "assign": "Toewijzen"
     },
     "kinds": {
       "task": "Taak",

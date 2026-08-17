@@ -4627,7 +4627,10 @@
       "skip": "Pomiń",
       "reset": "Otwórz ponownie",
       "requiredBadge": "wymagane",
-      "linkedBadge": "powiązane z prawdziwym zapisem"
+      "linkedBadge": "powiązane z prawdziwym zapisem",
+      "responsibleLabel": "Osoba odpowiedzialna",
+      "responsibleNone": "Brak osoby odpowiedzialnej",
+      "assign": "Przypisz"
     },
     "kinds": {
       "task": "Zadanie",

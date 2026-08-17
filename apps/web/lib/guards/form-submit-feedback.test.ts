@@ -122,6 +122,14 @@ const NATIVE_NAV = new Set([
   "components/app/worker-document-file-slot.tsx",
   "components/app/document-ack-inbox.tsx",
   "components/app/org-documents-register.tsx",
+  // Employee lifecycle v1 (train G) — the worker "my onboarding" confirm
+  // forms are NATIVE-NAV server actions that ALWAYS redirect back to
+  // /dashboard/start with an honest ?lc= outcome (rendered as the section's
+  // role="status" banner), exactly the documents/tasks pattern. Pure server
+  // component — no client state, no useTransition. (The employer-side
+  // lifecycle-section satisfies pending+feedback directly and needs no
+  // exemption.)
+  "app/[locale]/dashboard/start/my-onboarding-section.tsx",
 ]);
 
 const PENDING_SIGNAL =

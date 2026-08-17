@@ -138,7 +138,7 @@ export async function getLifecycleOverview(
 
   let loadError = false;
 
-  const [ecRes, tplRes, onbRes, offRes, evRes] = await Promise.all([
+  const [ecRes, tplRes, onbRes, offRes] = await Promise.all([
     asAny(supabase)
       .from("engagement_contexts")
       .select(
@@ -165,14 +165,23 @@ export async function getLifecycleOverview(
       .eq("organization_id", orgId)
       .eq("status", "in_progress")
       .limit(LIFECYCLE_READ_LIMIT),
-    asAny(supabase)
-      .from("engagement_lifecycle_events")
-      .select(
-        "id, engagement_context_id, action, before_stage, after_stage, note, created_at",
-      )
-      .order("created_at", { ascending: false })
-      .limit(25),
   ]);
+
+  // History is scoped to THIS organization's engagements app-side too (RLS
+  // already restricts to visible rows; without this filter a multi-org
+  // manager's timeline would interleave their other orgs' events here).
+  const memberEcIds = ((ecRes.data ?? []) as RawRow[]).map((r) => String(r.id));
+  const evRes =
+    memberEcIds.length > 0
+      ? await asAny(supabase)
+          .from("engagement_lifecycle_events")
+          .select(
+            "id, engagement_context_id, action, before_stage, after_stage, note, created_at",
+          )
+          .in("engagement_context_id", memberEcIds)
+          .order("created_at", { ascending: false })
+          .limit(25)
+      : { data: [], error: null };
 
   for (const res of [ecRes, tplRes, onbRes, offRes, evRes]) {
     if (res.error) {
