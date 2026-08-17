@@ -2131,7 +2131,16 @@ describe("no migration files added by this sprint", () => {
     // rollback + deferred APPLIED_LEDGER entry in the PR) — RECOUNTED from
     // the post-merge tree with trains A/B/C/D/E/F/L1 on main
     // (`ls supabase/migrations/*.sql | wc -l` = 216), never summed.
-    const SPRINT_BASELINE = 216;
+    // Bumped 216 -> 217 for the Employee Lifecycle v1 DRAFT
+    // (20260817190000_employee_lifecycle_v1; EC-canonical lifecycle engine —
+    // 4 additive nullable engagement_contexts columns + runs/events tables +
+    // 12 gated commands; owner mandate 2026-08-17, UNAPPLIED — PENDING APPLY
+    // BY LEAD; gate doc employee-lifecycle-gate.md; paired rollback;
+    // db-proof scripts/db-proof/employee-lifecycle.sh 85/85). RECOUNTED after
+    // merging origin/main 66c869a4 (trains C, D, E, L1, F and H all in
+    // the base): `ls supabase/migrations/*.sql | wc -l` = 217 real files,
+    // never summed.
+    const SPRINT_BASELINE = 217;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

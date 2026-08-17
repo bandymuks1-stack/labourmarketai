@@ -4925,5 +4925,145 @@
       "needs_migration": "Lepinguregister pole selles keskkonnas veel sisse lülitatud.",
       "error": "Midagi läks valesti. Midagi ei salvestatud."
     }
+  },
+  "lifecycle": {
+    "title": "Töösuhte elukaar",
+    "intro": "Sisseelamine, katseaeg, muudatused, lahkumine ja lõpetamine selle organisatsiooni töökirjete jaoks — kontrollnimekirjade ja täieliku ajalooga.",
+    "unavailable": "Töösuhte elukaar pole selles keskkonnas veel sisse lülitatud. Midagi pole kadunud — see ala avaneb, kui hoidla on üle vaadatud ja kasutusele võetud.",
+    "honestNote": "Kõik siin jääb toote sisse. Sammu tehtuks märkimine salvestab vaid, kes, mida ja millal kinnitas — kuhugi midagi ei saadeta.",
+    "loadError": "Osa elukaare andmeid ei õnnestunud praegu laadida. Nähtav on ehtne, kuid võib olla puudulik.",
+    "stage": {
+      "onboarding": "Sisseelamine",
+      "active": "Aktiivne",
+      "probation": "Katseaeg",
+      "change_pending": "Muudatus ootel",
+      "offboarding": "Lahkumine",
+      "ended": "Lõppenud"
+    },
+    "members": {
+      "title": "Inimesed ja etapid",
+      "empty": "Selles organisatsioonis pole veel töökirjeid.",
+      "actionsSummary": "Elukaare toimingud",
+      "probationUntil": "Katseaeg kuni {date}",
+      "ownerProtected": "Registreeritud omaniku enda kirjet ei saa lõpetada, kuni ta on omanik."
+    },
+    "runs": {
+      "onboardingTitle": "Sisseelamise kontrollnimekiri",
+      "offboardingTitle": "Lahkumise kontrollnimekiri",
+      "progress": "Tehtud {done} / {total}",
+      "requiredOpen": "Kohustuslikke samme veel: {count}",
+      "complete": "Lõpeta nimekiri",
+      "cancel": "Tühista nimekiri",
+      "start": "Alusta sisseelamist",
+      "startOffboarding": "Alusta lahkumist",
+      "templateLabel": "Nimekirja mall",
+      "extraItemsLabel": "Lisasammud (üks rea kohta, valikuline)",
+      "extraItemsHint": "nt Võtmete üleandmine"
+    },
+    "items": {
+      "markDone": "Märgi tehtuks",
+      "skip": "Jäta vahele",
+      "reset": "Ava uuesti",
+      "requiredBadge": "kohustuslik",
+      "linkedBadge": "seotud päris kirjega",
+      "responsibleLabel": "Vastutav isik",
+      "responsibleNone": "Vastutav isik puudub",
+      "assign": "Määra"
+    },
+    "kinds": {
+      "task": "Ülesanne",
+      "document_ack": "Dokument lugemiseks ja kinnitamiseks",
+      "asset_issue": "Väljastatud tööriist või varustus",
+      "training_note": "Koolitus",
+      "custom": "Muu samm",
+      "asset_return": "Tagastatav tööriist või varustus",
+      "access_removal": "Eemalda ligipääs",
+      "final_evidence": "Töökirjete lõppkontroll"
+    },
+    "templates": {
+      "title": "Sisseelamise mallid",
+      "empty": "Sisseelamise malle veel pole. Looge esimene allpool.",
+      "createTitle": "Uus sisseelamise mall",
+      "nameLabel": "Malli nimi",
+      "itemTitleLabel": "Samm {n}",
+      "kindLabel": "Tüüp",
+      "requiredLabel": "Kohustuslik",
+      "createSubmit": "Loo mall",
+      "itemCount": "Samme: {count}"
+    },
+    "stageForm": {
+      "stageLabel": "Etapp",
+      "probationDateLabel": "Katseaeg kuni (katseaja puhul)",
+      "noteLabel": "Märkus (valikuline)",
+      "submit": "Uuenda etappi"
+    },
+    "end": {
+      "reasonLabel": "Põhjus",
+      "noteLabel": "Märkus (valikuline)",
+      "submit": "Lõpeta töösuhe",
+      "confirmHint": "Töökirje lõpetatakse sama kaitstud teed pidi nagu liikme eemaldamine."
+    },
+    "reasons": {
+      "resignation": "Omal soovil lahkumine",
+      "termination": "Vallandamine",
+      "contract_end": "Leping lõppes",
+      "mutual_agreement": "Vastastikune kokkulepe",
+      "retirement": "Pension",
+      "other": "Muu"
+    },
+    "history": {
+      "title": "Elukaare ajalugu",
+      "empty": "Elukaare sündmusi veel pole."
+    },
+    "events": {
+      "stage_changed": "Etapp muudetud",
+      "onboarding_started": "Sisseelamine alustatud",
+      "onboarding_completed": "Sisseelamine lõpetatud",
+      "onboarding_cancelled": "Sisseelamine tühistatud",
+      "offboarding_started": "Lahkumine alustatud",
+      "offboarding_completed": "Lahkumine lõpetatud",
+      "offboarding_cancelled": "Lahkumine tühistatud",
+      "probation_set": "Katseaeg määratud",
+      "change_noted": "Muudatus fikseeritud",
+      "engagement_ended": "Töösuhe lõppenud"
+    },
+    "worker": {
+      "title": "Minu sisseelamine",
+      "intro": "Sammud, mille tööandja teie alustamiseks ette valmistas. Kinnitage need, mis on teie omad — ülejäänu korraldab tööandja.",
+      "empty": "Praegu ei oota teid miski.",
+      "done": "Tehtud",
+      "managerHint": "Selle sammu kinnitab tööandja"
+    },
+    "notice": {
+      "created": "Loodud.",
+      "started": "Nimekiri alustatud.",
+      "updated": "Salvestatud.",
+      "completed": "Nimekiri lõpetatud.",
+      "cancelled": "Nimekiri tühistatud.",
+      "ended": "Töösuhe lõpetatud ja salvestatud.",
+      "already_ended": "See töösuhe oli juba lõppenud.",
+      "already_exists": "Sellise nimega mall on juba olemas.",
+      "already_running": "Sellel inimesel nimekiri juba käib.",
+      "items_open": "Lõpetage kõigepealt kõik kohustuslikud sammud.",
+      "item_closed": "See samm on juba lahendatud.",
+      "run_closed": "See nimekiri on juba suletud.",
+      "link_invalid": "Seotud kirje ei vasta sellele sammule.",
+      "asset_not_returned": "Varustust pole veel tagastatud — registreerige kõigepealt tagastus.",
+      "offboarding_open": "Lõpetage või tühistage kõigepealt lahkumise nimekiri.",
+      "onboarding_open": "Lõpetage või tühistage kõigepealt sisseelamise nimekiri.",
+      "invalid_responsible": "See inimene ei kuulu sellesse organisatsiooni.",
+      "invalid_stage": "See toiming ei sobi praeguse etapiga.",
+      "invalid_transition": "Selline etapivahetus pole praegusest etapist lubatud.",
+      "not_active": "See töökirje pole enam aktiivne.",
+      "not_org_scoped": "See on isiklik kirje, mitte organisatsiooni töösuhe.",
+      "template_not_found": "See mall pole saadaval.",
+      "last_owner": "Viimase omaniku kirjet ei saa lõpetada — määrake enne teine omanik.",
+      "limit_reached": "Selle organisatsiooni limiit on täis.",
+      "invalid": "Vigased andmed.",
+      "needs_migration": "See võimalus pole selles keskkonnas veel sisse lülitatud.",
+      "not_authorized": "Teil pole selleks toiminguks õigust.",
+      "not_found": "Kirje pole saadaval.",
+      "error": "Ebaõnnestus — proovige uuesti."
+    }
   }
 }

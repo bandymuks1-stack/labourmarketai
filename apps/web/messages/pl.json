@@ -4925,5 +4925,145 @@
       "needs_migration": "Rejestr umów w tym środowisku nie jest jeszcze włączony.",
       "error": "Coś poszło nie tak. Niczego nie zapisano."
     }
+  },
+  "lifecycle": {
+    "title": "Cykl życia zatrudnienia",
+    "intro": "Wdrożenie, okres próbny, zmiany, odejście i zakończenie dla zapisów zatrudnienia tej organizacji — z listami kontrolnymi i pełną historią.",
+    "unavailable": "Cykl życia zatrudnienia nie jest jeszcze włączony w tym środowisku. Nic nie przepada — ta sekcja otworzy się po przeglądzie i wdrożeniu magazynu.",
+    "honestNote": "Wszystko zostaje w produkcie. Oznaczenie kroku jako wykonanego zapisuje tylko kto, co i kiedy potwierdził — nic nigdzie nie jest wysyłane.",
+    "loadError": "Części danych nie udało się teraz wczytać. To, co widzisz, jest prawdziwe, ale może być niepełne.",
+    "stage": {
+      "onboarding": "Wdrożenie",
+      "active": "Aktywny",
+      "probation": "Okres próbny",
+      "change_pending": "Oczekująca zmiana",
+      "offboarding": "Odejście",
+      "ended": "Zakończone"
+    },
+    "members": {
+      "title": "Osoby i etapy",
+      "empty": "W tej organizacji nie ma jeszcze zapisów zatrudnienia.",
+      "actionsSummary": "Działania cyklu życia",
+      "probationUntil": "Okres próbny do {date}",
+      "ownerProtected": "Zapisu zarejestrowanego właściciela nie można zakończyć, dopóki jest właścicielem."
+    },
+    "runs": {
+      "onboardingTitle": "Lista kontrolna wdrożenia",
+      "offboardingTitle": "Lista kontrolna odejścia",
+      "progress": "Wykonano {done} z {total}",
+      "requiredOpen": "Pozostały wymagane kroki: {count}",
+      "complete": "Zakończ listę",
+      "cancel": "Anuluj listę",
+      "start": "Rozpocznij wdrożenie",
+      "startOffboarding": "Rozpocznij odejście",
+      "templateLabel": "Szablon listy",
+      "extraItemsLabel": "Dodatkowe kroki (po jednym w wierszu, opcjonalnie)",
+      "extraItemsHint": "np. Przekazać klucze"
+    },
+    "items": {
+      "markDone": "Oznacz jako wykonane",
+      "skip": "Pomiń",
+      "reset": "Otwórz ponownie",
+      "requiredBadge": "wymagane",
+      "linkedBadge": "powiązane z prawdziwym zapisem",
+      "responsibleLabel": "Osoba odpowiedzialna",
+      "responsibleNone": "Brak osoby odpowiedzialnej",
+      "assign": "Przypisz"
+    },
+    "kinds": {
+      "task": "Zadanie",
+      "document_ack": "Dokument do przeczytania i potwierdzenia",
+      "asset_issue": "Wydane narzędzie lub sprzęt",
+      "training_note": "Szkolenie",
+      "custom": "Inny krok",
+      "asset_return": "Narzędzie lub sprzęt do zwrotu",
+      "access_removal": "Odbierz dostęp",
+      "final_evidence": "Końcowa kontrola zapisów pracy"
+    },
+    "templates": {
+      "title": "Szablony wdrożenia",
+      "empty": "Nie ma jeszcze szablonów wdrożenia. Utwórz pierwszy poniżej.",
+      "createTitle": "Nowy szablon wdrożenia",
+      "nameLabel": "Nazwa szablonu",
+      "itemTitleLabel": "Krok {n}",
+      "kindLabel": "Typ",
+      "requiredLabel": "Wymagany",
+      "createSubmit": "Utwórz szablon",
+      "itemCount": "Kroki: {count}"
+    },
+    "stageForm": {
+      "stageLabel": "Etap",
+      "probationDateLabel": "Okres próbny do (przy okresie próbnym)",
+      "noteLabel": "Notatka (opcjonalna)",
+      "submit": "Zaktualizuj etap"
+    },
+    "end": {
+      "reasonLabel": "Powód",
+      "noteLabel": "Notatka (opcjonalna)",
+      "submit": "Zakończ zatrudnienie",
+      "confirmHint": "Zapis zatrudnienia kończy się tą samą chronioną ścieżką co usunięcie członka."
+    },
+    "reasons": {
+      "resignation": "Rezygnacja pracownika",
+      "termination": "Zwolnienie",
+      "contract_end": "Umowa wygasła",
+      "mutual_agreement": "Porozumienie stron",
+      "retirement": "Emerytura",
+      "other": "Inne"
+    },
+    "history": {
+      "title": "Historia cyklu życia",
+      "empty": "Brak zdarzeń."
+    },
+    "events": {
+      "stage_changed": "Zmieniono etap",
+      "onboarding_started": "Rozpoczęto wdrożenie",
+      "onboarding_completed": "Zakończono wdrożenie",
+      "onboarding_cancelled": "Anulowano wdrożenie",
+      "offboarding_started": "Rozpoczęto odejście",
+      "offboarding_completed": "Zakończono odejście",
+      "offboarding_cancelled": "Anulowano odejście",
+      "probation_set": "Ustawiono okres próbny",
+      "change_noted": "Odnotowano zmianę",
+      "engagement_ended": "Zakończono zatrudnienie"
+    },
+    "worker": {
+      "title": "Moje wdrożenie",
+      "intro": "Kroki przygotowane przez pracodawcę na Twój start. Potwierdź te, które należą do Ciebie — resztą zajmuje się pracodawca.",
+      "empty": "Teraz nic na Ciebie nie czeka.",
+      "done": "Wykonane",
+      "managerHint": "Ten krok potwierdza pracodawca"
+    },
+    "notice": {
+      "created": "Utworzono.",
+      "started": "Lista rozpoczęta.",
+      "updated": "Zapisano.",
+      "completed": "Lista zakończona.",
+      "cancelled": "Lista anulowana.",
+      "ended": "Zatrudnienie zakończone i zapisane.",
+      "already_ended": "To zatrudnienie było już zakończone.",
+      "already_exists": "Szablon o tej nazwie już istnieje.",
+      "already_running": "Dla tej osoby lista już trwa.",
+      "items_open": "Najpierw ukończ wszystkie wymagane kroki.",
+      "item_closed": "Ten krok jest już załatwiony.",
+      "run_closed": "Ta lista jest już zamknięta.",
+      "link_invalid": "Powiązany zapis nie pasuje do tego kroku.",
+      "asset_not_returned": "Sprzęt nie został jeszcze zwrócony — najpierw zarejestruj zwrot.",
+      "offboarding_open": "Najpierw zakończ lub anuluj listę odejścia.",
+      "onboarding_open": "Najpierw zakończ lub anuluj listę wdrożenia.",
+      "invalid_responsible": "Ta osoba nie należy do tej organizacji.",
+      "invalid_stage": "To działanie nie pasuje do bieżącego etapu.",
+      "invalid_transition": "Taka zmiana etapu nie jest dozwolona z bieżącego etapu.",
+      "not_active": "Ten zapis zatrudnienia nie jest aktywny.",
+      "not_org_scoped": "To zapis osobisty, a nie zatrudnienie w organizacji.",
+      "template_not_found": "Ten szablon jest niedostępny.",
+      "last_owner": "Zapisu ostatniego właściciela nie można zakończyć — najpierw wyznacz innego właściciela.",
+      "limit_reached": "Osiągnięto limit tej organizacji.",
+      "invalid": "Nieprawidłowe dane.",
+      "needs_migration": "Ta funkcja nie jest jeszcze włączona w tym środowisku.",
+      "not_authorized": "Nie masz uprawnień do tego działania.",
+      "not_found": "Zapis niedostępny.",
+      "error": "Nie udało się — spróbuj ponownie."
+    }
   }
 }

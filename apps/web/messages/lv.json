@@ -4925,5 +4925,145 @@
       "needs_migration": "Līgumu reģistrs šajā vidē vēl nav iespējots.",
       "error": "Kaut kas nogāja greizi. Nekas netika saglabāts."
     }
+  },
+  "lifecycle": {
+    "title": "Darba attiecību gaita",
+    "intro": "Ievadīšana darbā, pārbaudes laiks, izmaiņas, atbrīvošana un beigas šīs organizācijas darba ierakstiem — ar kontrolsarakstiem un pilnu vēsturi.",
+    "unavailable": "Darba attiecību gaita šajā vidē vēl nav ieslēgta. Nekas nav zaudēts — šī sadaļa atvērsies, kad glabātuve būs pārskatīta un ieviesta.",
+    "honestNote": "Viss šeit paliek produktā. Atzīmējot soli kā izpildītu, tiek ierakstīts tikai kas, ko un kad apstiprināja — nekas nekur netiek sūtīts.",
+    "loadError": "Daļu gaitas datu šobrīd neizdevās ielādēt. Redzamais ir īsts, bet var būt nepilnīgs.",
+    "stage": {
+      "onboarding": "Ievadīšana darbā",
+      "active": "Aktīvs",
+      "probation": "Pārbaudes laiks",
+      "change_pending": "Gaida izmaiņas",
+      "offboarding": "Atbrīvošana",
+      "ended": "Beigts"
+    },
+    "members": {
+      "title": "Cilvēki un posmi",
+      "empty": "Šajā organizācijā darba ierakstu vēl nav.",
+      "actionsSummary": "Gaitas darbības",
+      "probationUntil": "Pārbaudes laiks līdz {date}",
+      "ownerProtected": "Reģistrētā īpašnieka ierakstu nevar beigt, kamēr viņš ir īpašnieks."
+    },
+    "runs": {
+      "onboardingTitle": "Ievadīšanas kontrolsaraksts",
+      "offboardingTitle": "Atbrīvošanas kontrolsaraksts",
+      "progress": "Izpildīti {done} no {total}",
+      "requiredOpen": "Atlikuši obligātie soļi: {count}",
+      "complete": "Pabeigt sarakstu",
+      "cancel": "Atcelt sarakstu",
+      "start": "Sākt ievadīšanu",
+      "startOffboarding": "Sākt atbrīvošanu",
+      "templateLabel": "Saraksta veidne",
+      "extraItemsLabel": "Papildu soļi (pa vienam rindā, nav obligāti)",
+      "extraItemsHint": "piem., Nodot atslēgas"
+    },
+    "items": {
+      "markDone": "Atzīmēt kā izpildītu",
+      "skip": "Izlaist",
+      "reset": "Atvērt no jauna",
+      "requiredBadge": "obligāts",
+      "linkedBadge": "saistīts ar īstu ierakstu",
+      "responsibleLabel": "Atbildīgā persona",
+      "responsibleNone": "Bez atbildīgās personas",
+      "assign": "Piešķirt"
+    },
+    "kinds": {
+      "task": "Uzdevums",
+      "document_ack": "Dokuments izlasīšanai un apstiprināšanai",
+      "asset_issue": "Izsniegts darbarīks vai aprīkojums",
+      "training_note": "Apmācība",
+      "custom": "Cits solis",
+      "asset_return": "Atdodams darbarīks vai aprīkojums",
+      "access_removal": "Noņemt piekļuvi",
+      "final_evidence": "Darba ierakstu gala pārbaude"
+    },
+    "templates": {
+      "title": "Ievadīšanas veidnes",
+      "empty": "Ievadīšanas veidņu vēl nav. Izveidojiet pirmo zemāk.",
+      "createTitle": "Jauna ievadīšanas veidne",
+      "nameLabel": "Veidnes nosaukums",
+      "itemTitleLabel": "Solis {n}",
+      "kindLabel": "Veids",
+      "requiredLabel": "Obligāts",
+      "createSubmit": "Izveidot veidni",
+      "itemCount": "Soļi: {count}"
+    },
+    "stageForm": {
+      "stageLabel": "Posms",
+      "probationDateLabel": "Pārbaudes laiks līdz (ja pārbaudes laiks)",
+      "noteLabel": "Piezīme (nav obligāta)",
+      "submit": "Atjaunināt posmu"
+    },
+    "end": {
+      "reasonLabel": "Iemesls",
+      "noteLabel": "Piezīme (nav obligāta)",
+      "submit": "Beigt darba attiecības",
+      "confirmHint": "Darba ieraksts tiek beigts pa to pašu aizsargāto ceļu kā dalībnieka noņemšana."
+    },
+    "reasons": {
+      "resignation": "Aiziešana pēc paša vēlēšanās",
+      "termination": "Atlaišana",
+      "contract_end": "Līgums beidzās",
+      "mutual_agreement": "Savstarpēja vienošanās",
+      "retirement": "Pensija",
+      "other": "Cits"
+    },
+    "history": {
+      "title": "Gaitas vēsture",
+      "empty": "Gaitas notikumu vēl nav."
+    },
+    "events": {
+      "stage_changed": "Posms mainīts",
+      "onboarding_started": "Ievadīšana sākta",
+      "onboarding_completed": "Ievadīšana pabeigta",
+      "onboarding_cancelled": "Ievadīšana atcelta",
+      "offboarding_started": "Atbrīvošana sākta",
+      "offboarding_completed": "Atbrīvošana pabeigta",
+      "offboarding_cancelled": "Atbrīvošana atcelta",
+      "probation_set": "Noteikts pārbaudes laiks",
+      "change_noted": "Fiksētas izmaiņas",
+      "engagement_ended": "Darba attiecības beigtas"
+    },
+    "worker": {
+      "title": "Mana ievadīšana darbā",
+      "intro": "Soļi, ko darba devējs sagatavoja jūsu sākumam. Apstipriniet tos, kas ir jūsu — pārējos kārto darba devējs.",
+      "empty": "Šobrīd nekas jūs negaida.",
+      "done": "Izpildīts",
+      "managerHint": "Šo soli apstiprina darba devējs"
+    },
+    "notice": {
+      "created": "Izveidots.",
+      "started": "Saraksts sākts.",
+      "updated": "Saglabāts.",
+      "completed": "Saraksts pabeigts.",
+      "cancelled": "Saraksts atcelts.",
+      "ended": "Darba attiecības beigtas un ierakstītas.",
+      "already_ended": "Šīs darba attiecības jau bija beigtas.",
+      "already_exists": "Veidne ar šādu nosaukumu jau pastāv.",
+      "already_running": "Šim cilvēkam saraksts jau darbojas.",
+      "items_open": "Vispirms pabeidziet visus obligātos soļus.",
+      "item_closed": "Šis solis jau ir nokārtots.",
+      "run_closed": "Šis saraksts jau ir slēgts.",
+      "link_invalid": "Saistītais ieraksts neatbilst šim solim.",
+      "asset_not_returned": "Aprīkojums vēl nav atdots — vispirms reģistrējiet atdošanu.",
+      "offboarding_open": "Vispirms pabeidziet vai atceliet atbrīvošanas sarakstu.",
+      "onboarding_open": "Vispirms pabeidziet vai atceliet ievadīšanas sarakstu.",
+      "invalid_responsible": "Šis cilvēks nepieder šai organizācijai.",
+      "invalid_stage": "Šī darbība neder pašreizējam posmam.",
+      "invalid_transition": "Šāda posma maiņa no pašreizējā posma nav atļauta.",
+      "not_active": "Šis darba ieraksts vairs nav aktīvs.",
+      "not_org_scoped": "Tas ir personisks ieraksts, nevis organizācijas darba attiecības.",
+      "template_not_found": "Šī veidne nav pieejama.",
+      "last_owner": "Pēdējā īpašnieka ierakstu beigt nevar — vispirms ieceliet citu īpašnieku.",
+      "limit_reached": "Sasniegts šīs organizācijas limits.",
+      "invalid": "Nederīgi dati.",
+      "needs_migration": "Šī iespēja šajā vidē vēl nav ieslēgta.",
+      "not_authorized": "Jums nav tiesību šai darbībai.",
+      "not_found": "Ieraksts nav pieejams.",
+      "error": "Neizdevās — mēģiniet vēlreiz."
+    }
   }
 }

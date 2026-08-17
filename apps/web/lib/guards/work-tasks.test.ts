@@ -114,6 +114,11 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
   // sibling. Nothing else in the repo may (re)define the table or the RPCs.
   const D2 = "20260711210000_work_tasks_v1";
   const TRAIN_D = "20260817151000_work_tasks_v2_collaboration";
+  // Train G (employee lifecycle) is a sanctioned READER, not a definer: its
+  // onboarding item link-verification SELECTs from work_tasks (assignee +
+  // status='done') and never creates/alters/drops the table or touches the
+  // task RPCs — asserted below, so the exemption cannot rot into a fork.
+  const LIFECYCLE_READER = "20260817190000_employee_lifecycle_v1";
 
   it("only the D2 + train-D migration pairs mention work_tasks or the task RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {
@@ -122,6 +127,16 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(D2) || f.startsWith(TRAIN_D)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f.startsWith(LIFECYCLE_READER)) {
+          // Read-only integration: SELECT allowed, definition forbidden.
+          expect(src, `${dir}/${f} must not (re)define work_tasks`).not.toMatch(
+            /(create table|alter table|drop table)[^;]*\bwork_tasks\b/i,
+          );
+          for (const fn of [...RPC_NAMES, ...RPC_NAMES_V2]) {
+            expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(fn);
+          }
+          continue;
+        }
         expect(src, `${dir}/${f} must not define work_tasks`).not.toMatch(
           /\bwork_tasks\b/,
         );
