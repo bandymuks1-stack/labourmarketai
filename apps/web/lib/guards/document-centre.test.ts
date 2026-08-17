@@ -147,7 +147,7 @@ describe("1. composition-only: existing reads, nothing new, nothing privileged",
 
 describe("2. file layer arrives via its OWN gated module; this layer stays composition-only", () => {
   // Document & Evidence Engine v1: real upload/download now exists behind
-  // the human-gated 20260817120000 migration — in lib/documents/
+  // the human-gated 20260817140000 migration — in lib/documents/
   // document-file-{model,actions}.ts + document-files.ts, pinned by
   // lib/guards/document-file-layer.test.ts. THIS centre layer keeps its
   // original contract: composition only, no bucket creation, no storage

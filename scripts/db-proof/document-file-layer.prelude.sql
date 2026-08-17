@@ -2,8 +2,8 @@
 -- Document & Evidence Engine v1 — PROOF HARNESS PRELUDE.
 --
 -- Builds the minimal faithful prerequisites so the REAL files
---   supabase/migrations/20260817120000_document_file_layer_v1.sql
---   supabase/rollbacks/20260817120000_document_file_layer_v1.down.sql
+--   supabase/migrations/20260817140000_document_file_layer_v1.sql
+--   supabase/rollbacks/20260817140000_document_file_layer_v1.down.sql
 -- can be executed VERBATIM against a throwaway Postgres 15 instance and the
 -- authority matrix measured per role.
 --

@@ -506,11 +506,26 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
     // follow-up; gate doc notification-events-v2-types-gate.md.
-    // Bumped 199 -> 201 for the Document & Evidence Engine v1 pair
-    // (20260817120000 + 20260817121000, owner mandate 2026-08-17, PENDING
-    // APPLY BY LEAD) — recounted from the tree, never summed. Still no
-    // migration from the market-map layer itself.
-    expect(count).toBeLessThanOrEqual(201);
+    // Bumped 199 -> 203 for security train A (2026-08-17 advisor triage):
+    // four policy-correction DRAFTs (20260817120000 catalog least-privilege,
+    // 20260817121000 invitation org authority, 20260817122000
+    // contact-disclosure org authority, 20260817123000 finance org
+    // authority), recounted from the tree, all UNAPPLIED with paired
+    // rollbacks — see product-readiness.test.ts for the full rationale.
+    // Bumped 203 -> 205 for the Workflow & Approval Engine v1 PAIR
+    // (20260817130000_workflow_engine_v1 + 20260817130100_notification_
+    // events_v3_workflow_types) — nothing from the market-map read layer.
+    // Renamed from the 20260817120000/121000 slots after security train A
+    // claimed those version prefixes on main. Owner mandate 2026-08-17,
+    // paired rollbacks, ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED
+    // against post-rebase origin/main 54067a4b: 203 .sql files there, this
+    // branch adds exactly two.
+    // Bumped 205 -> 207 for the Document & Evidence Engine v1 pair
+    // (20260817140000 + 20260817140100, owner mandate 2026-08-17, PENDING
+    // APPLY BY LEAD; renamed from 120000/121000 after trains A/B claimed
+    // 120000-130100 on main) — recounted from the post-rebase tree, never
+    // summed. Still no migration from the market-map layer itself.
+    expect(count).toBeLessThanOrEqual(207);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

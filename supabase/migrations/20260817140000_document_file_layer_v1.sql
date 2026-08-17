@@ -3,7 +3,7 @@
 -- OWNER_APPROVAL_REQUIRED_BEFORE_APPLY (apply is performed by the train LEAD
 -- via Supabase MCP apply_migration; never `db push`).
 -- Gate doc: docs/human-gates/document-file-layer-gate.md
--- Rollback:  supabase/rollbacks/20260817120000_document_file_layer_v1.down.sql
+-- Rollback:  supabase/rollbacks/20260817140000_document_file_layer_v1.down.sql
 --
 -- @human-gate-approved — TIER: owner-gated. Pre-approved by owner mandate
 -- 2026-08-17 (autonomous functional completion train V2, §4 migration
@@ -71,7 +71,7 @@
 --   Cross-org:      zero leakage — every predicate resolves through the
 --                   caller's own membership/ownership rows.
 --
--- ── ROLLBACK: supabase/rollbacks/20260817120000_document_file_layer_v1.down.sql
+-- ── ROLLBACK: supabase/rollbacks/20260817140000_document_file_layer_v1.down.sql
 -- (reverse SQL: drop new policies/bucket/functions/tables, restore the two
 -- widened constraints, delete the seeded org type slugs).
 -- ============================================================================

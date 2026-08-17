@@ -421,6 +421,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 166 -> 167 for the security-audit grant-hygiene migration
     // (20260727120000_secdef_public_grant_hygiene_v1) — audit L-01 + L-08,
     // revoke-only, paired rollback, human-gate-annotated, ships UNAPPLIED.
+    // Cross-pin follows: the Workflow & Approval Engine v1 PAIR
+    // (20260817120000 + 20260817121000) took SPRINT_BASELINE 199 -> 201 in
+    // product-readiness.test.ts (recounted from the tree). This floor
+    // assertion needs no numeric edit — it only pins the 166 minimum.
     //
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
@@ -431,8 +435,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // drop below what 0030 needs — without the false coupling. Lowering it still
     // fails here, and an unexplained RAISE is still caught by the documented
     // bump-comment convention in product-readiness.test.ts itself.
-    // Cross-pin follows: 199 -> 201 for the Document & Evidence Engine v1
-    // pair (20260817120000 + 20260817121000) — floor semantics unchanged.
+    // Cross-pin follows: 205 -> 207 for the Document & Evidence Engine v1
+    // pair (20260817140000 + 20260817140100, renamed from 120000/121000
+    // after trains A/B claimed those slots) — floor semantics unchanged.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

@@ -4101,6 +4101,10 @@
         "event_booking_withdrawn": "Het boekingsvoorstel is ingetrokken",
         "event_engagement_ended": "De samenwerking is beëindigd",
         "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt",
+        "event_workflow_step_pending": "Een goedkeuringsverzoek wacht op uw beslissing",
+        "event_workflow_decided": "Over uw goedkeuringsverzoek is beslist",
+        "event_workflow_delegated": "Een goedkeuringsronde is aan u overgedragen",
+        "event_workflow_escalated": "Een goedkeuringsronde heeft haar termijn overschreden",
         "event_document_ack_assigned": "U bent gevraagd te bevestigen dat u een document hebt gelezen.",
         "event_document_ack_completed": "Een document dat u ter bevestiging stuurde, is bevestigd.",
         "event_document_expiring": "De geldigheid van een document loopt binnenkort af."
@@ -12367,6 +12371,154 @@
       "intro": "Je bent uitgenodigd via LabourMarket.ai.",
       "open": "Open de uitnodiging:",
       "validity": "De link is 14 dagen geldig. Verwachtte je deze uitnodiging niet, negeer deze e-mail dan gewoon."
+    }
+  },
+  "approvals": {
+    "title": "Goedkeuringen",
+    "intro": "Goedkeuringsverzoeken binnen uw organisaties: dien een verzoek in, beslis over wat op u wacht en volg elke ronde.",
+    "unavailable": "Goedkeuringen zijn in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit gedeelte opent zodra de opslag voor goedkeuringen is beoordeeld en toegepast.",
+    "honestNote": "Beslissingen blijven binnen het product. Er wordt niets gemaild of verzonden — mensen zien updates op deze pagina en in de meldingenbel.",
+    "loadError": "Een deel van de goedkeuringsgegevens kon nu niet worden geladen. Wat u ziet is echt, maar mogelijk onvolledig.",
+    "inbox": {
+      "title": "Wacht op uw beslissing",
+      "empty": "Er wacht nu niets op uw beslissing.",
+      "stepLabel": "Ronde"
+    },
+    "start": {
+      "title": "Nieuw goedkeuringsverzoek",
+      "definitionLabel": "Goedkeuringssjabloon",
+      "titleLabel": "Wat vraagt u aan?",
+      "detailsLabel": "Details (optioneel)",
+      "submit": "Verzoek versturen"
+    },
+    "myRequests": {
+      "title": "Mijn verzoeken",
+      "empty": "U heeft nog geen goedkeuringsverzoeken ingediend."
+    },
+    "admin": {
+      "title": "Goedkeuringen van de organisatie",
+      "noPending": "Geen open verzoeken van anderen in uw organisaties.",
+      "overdueHint": "De termijncontrole markeert alleen verlopen rondes en informeert de verantwoordelijken. Er wordt nooit iets automatisch goedgekeurd."
+    },
+    "templates": {
+      "title": "Goedkeuringssjablonen",
+      "empty": "Nog geen sjablonen. Maak hieronder het eerste aan.",
+      "createTitle": "Nieuw goedkeuringssjabloon",
+      "orgLabel": "Organisatie",
+      "nameLabel": "Naam van het sjabloon",
+      "contextLabel": "Type verzoek",
+      "stepLegend": "Ronde {n}",
+      "optional": "optioneel",
+      "stepNameLabel": "Naam van de ronde",
+      "modeLabel": "Hoeveel moeten goedkeuren",
+      "ruleLabel": "Wie beslist",
+      "deadlineLabel": "Termijn (uren, optioneel)",
+      "escalationHint": "Als een ronde haar termijn overschrijdt, wordt zij als verlopen gemarkeerd en worden eigenaren en beheerders geïnformeerd. Er wordt nooit automatisch goedgekeurd.",
+      "createSubmit": "Sjabloon aanmaken",
+      "stepCount": "Rondes: {count}",
+      "published": "In gebruik"
+    },
+    "actions": {
+      "approve": "Goedkeuren",
+      "reject": "Afwijzen",
+      "delegate": "Overdragen aan een collega",
+      "delegateSubmit": "Overdragen",
+      "withdraw": "Terugnemen",
+      "cancel": "Verzoek annuleren",
+      "markOverdue": "Termijnen controleren",
+      "publish": "In gebruik nemen"
+    },
+    "form": {
+      "reasonLabel": "Reden",
+      "reasonOptional": "Optioneel",
+      "delegateEmailLabel": "E-mail van de collega",
+      "delegateHint": "De collega moet tot dezelfde organisatie behoren. U blijft verantwoordelijk voor deze ronde."
+    },
+    "status": {
+      "pending": "In afwachting",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "withdrawn": "Teruggenomen",
+      "cancelled": "Geannuleerd"
+    },
+    "stepStatus": {
+      "waiting": "Niet gestart",
+      "active": "Bezig",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "skipped": "Overgeslagen",
+      "escalated": "Termijn verstreken"
+    },
+    "mode": {
+      "single": "Eén persoon beslist",
+      "all": "Iedereen moet goedkeuren",
+      "any": "De eerste beslissing telt"
+    },
+    "decision": {
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen"
+    },
+    "rule": {
+      "owner_admin": "Eigenaren en beheerders",
+      "requester_manager": "De leidinggevenden van de aanvrager"
+    },
+    "contextType": {
+      "generic_request": "Algemeen verzoek",
+      "worker_absence": "Afwezigheid",
+      "expense": "Onkosten",
+      "invoice": "Factuur",
+      "document_ack": "Documentgoedkeuring",
+      "timesheet": "Urenstaat",
+      "procurement": "Inkoop",
+      "business_trip": "Zakenreis",
+      "management_decision": "Managementbesluit",
+      "agreement": "Overeenkomst"
+    },
+    "transition": {
+      "started": "Verzoek ingediend",
+      "step_activated": "Ronde gestart",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "delegated": "Overgedragen",
+      "withdrawn": "Teruggenomen",
+      "cancelled": "Geannuleerd",
+      "escalated": "Termijnoverschrijding gemarkeerd",
+      "completed": "Afgerond"
+    },
+    "timeline": {
+      "open": "Voortgang tonen",
+      "progress": "{approved} van {total} goedgekeurd",
+      "deadline": "Termijn",
+      "historyTitle": "Volledige geschiedenis",
+      "stepLabel": "ronde"
+    },
+    "notice": {
+      "created": "Sjabloon aangemaakt. Neem het in gebruik zodat mensen verzoeken kunnen indienen.",
+      "published": "Sjabloon is nu in gebruik.",
+      "started": "Verzoek verzonden naar de eerste goedkeurders.",
+      "already_pending": "Dit verzoek is al open.",
+      "already_published": "Dit sjabloon is al in gebruik.",
+      "already_exists": "Een sjabloon met deze naam bestaat al in de organisatie.",
+      "already_decided": "U heeft in deze ronde al beslist.",
+      "approved": "Verzoek goedgekeurd.",
+      "rejected": "Verzoek afgewezen.",
+      "step_approved": "Ronde goedgekeurd — de volgende ronde is gestart.",
+      "recorded": "Uw beslissing is opgeslagen. Wachten op de andere goedkeurders.",
+      "delegated": "Ronde overgedragen aan uw collega.",
+      "withdrawn": "Verzoek teruggenomen.",
+      "cancelled": "Verzoek geannuleerd.",
+      "marked_overdue": "Verlopen rondes zijn gemarkeerd en de verantwoordelijken geïnformeerd.",
+      "no_overdue": "Geen rondes over hun termijn.",
+      "no_approvers": "Dit verzoek heeft nog geen mogelijke goedkeurders. Controleer de leden en rollen van de organisatie.",
+      "not_published": "Dit sjabloon is nog niet in gebruik.",
+      "not_pending": "Dit verzoek is niet meer open.",
+      "invalid": "Controleer de ingevoerde waarden en probeer het opnieuw.",
+      "invalid_delegate": "Die collega is in deze organisatie niet gevonden.",
+      "needs_migration": "Goedkeuringen zijn in deze omgeving nog niet ingeschakeld. Er is niets opgeslagen.",
+      "not_authorized": "U mag dit niet doen.",
+      "not_found": "Dit verzoek is niet gevonden.",
+      "limit_reached": "De limiet voor open items is bereikt. Sluit eerst iets af.",
+      "error": "Er ging iets mis. Er is niets gewijzigd."
     }
   }
 }

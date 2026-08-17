@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 /**
  * DOCUMENT & EVIDENCE ENGINE v1 guards — the TS↔SQL contract of the
- * human-gated migration pair (20260817120000 + 20260817121000).
+ * human-gated migration pair (20260817140000 + 20260817140100).
  *
  * What these pins keep true:
  *   1. ONE contract: the MIME allowlist, the 5 MB cap, the version bound
@@ -32,12 +32,12 @@ const readRepo = (...p: string[]) => readFileSync(join(REPO, ...p), "utf8");
 const MIGRATION = readRepo(
   "supabase",
   "migrations",
-  "20260817120000_document_file_layer_v1.sql",
+  "20260817140000_document_file_layer_v1.sql",
 );
 const NOTIF_MIGRATION = readRepo(
   "supabase",
   "migrations",
-  "20260817121000_notification_document_types_v3.sql",
+  "20260817140100_notification_document_types_v3.sql",
 );
 const MODEL = read("lib", "documents", "document-file-model.ts");
 const READS = read("lib", "documents", "document-files.ts");
@@ -330,8 +330,8 @@ describe("8. gated-draft discipline", () => {
 
   it("paired rollbacks and gate docs exist on disk", () => {
     for (const rel of [
-      ["supabase", "rollbacks", "20260817120000_document_file_layer_v1.down.sql"],
-      ["supabase", "rollbacks", "20260817121000_notification_document_types_v3.down.sql"],
+      ["supabase", "rollbacks", "20260817140000_document_file_layer_v1.down.sql"],
+      ["supabase", "rollbacks", "20260817140100_notification_document_types_v3.down.sql"],
       ["docs", "human-gates", "document-file-layer-gate.md"],
       ["docs", "human-gates", "notification-document-types-v3-gate.md"],
     ]) {
@@ -341,8 +341,8 @@ describe("8. gated-draft discipline", () => {
 
   it("the APPLIED_LEDGER carries both PENDING APPLY BY LEAD entries", () => {
     const ledger = readRepo("docs", "APPLIED_LEDGER.md");
-    expect(ledger).toContain("20260817120000_document_file_layer_v1.sql");
-    expect(ledger).toContain("20260817121000_notification_document_types_v3.sql");
+    expect(ledger).toContain("20260817140000_document_file_layer_v1.sql");
+    expect(ledger).toContain("20260817140100_notification_document_types_v3.sql");
     expect(ledger.match(/PENDING APPLY BY LEAD/g)!.length).toBeGreaterThanOrEqual(2);
   });
 

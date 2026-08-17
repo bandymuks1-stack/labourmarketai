@@ -98,13 +98,19 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
   // rollback sibling. Nothing else in the repo may (re)define the table or
   // the RPCs.
   const I2 = "20260711230000_finance_records_v1";
+  // Security train A (2026-08-17): 20260817123000_finance_org_authority_v1
+  // legitimately re-issues fr_select + the three RPC bodies to extend the
+  // company-link authority from legacy owns_company to org owner/admin via
+  // membership_actor_role_v1. It is the ONLY other file allowed to name
+  // them; its own invariants are pinned in security-train-a-v1.test.ts.
+  const ORG_AUTHORITY = "20260817123000_finance_org_authority_v1";
 
   it("only the I2 migration and its rollback sibling mention finance_records or the three RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
-        if (f.startsWith(I2)) continue;
+        if (f.startsWith(I2) || f.startsWith(ORG_AUTHORITY)) continue;
         const src = readFileSync(join(abs, f), "utf8");
         expect(src, `${dir}/${f} must not define finance_records`).not.toMatch(
           /\bfinance_records\b/,

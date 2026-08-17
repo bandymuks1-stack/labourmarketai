@@ -23,6 +23,8 @@ import {
   MyTeamEnquiriesList,
   TeamEnquiryButton,
 } from "@/components/app/team-enquiry-entry";
+import { isWorkflowNotice } from "@/lib/approvals/approvals-model";
+import { ApprovalsSection } from "./approvals-section";
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -43,11 +45,14 @@ export default async function NetworkPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; type?: string; org?: string; project?: string }>;
+  searchParams: Promise<{ q?: string; type?: string; org?: string; project?: string; wf?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project } = await searchParams;
+  const { q, type, org, project, wf } = await searchParams;
+  // Approvals-area outcome notice (Workflow & Approval Engine v1) —
+  // validated against the closed notice vocabulary, never rendered raw.
+  const workflowNotice = wf && isWorkflowNotice(wf) ? wf : null;
 
   // W7 marketplaceHub reconciliation: the three strings the W7-S4 move
   // carried here were the LAST live keys of the `marketplaceHub` namespace —
@@ -396,6 +401,17 @@ export default async function NetworkPage({
           </ul>
         )}
       </section>
+
+      {/* Approvals area (Workflow & Approval Engine v1) — org-relationship
+          governance, expanded INSIDE this declared surface (no new route;
+          the reports?journalWindow constitution precedent). Owns its own
+          `approvals` namespace and degrades honestly until the human-gated
+          engine migration is applied. */}
+      <ApprovalsSection
+        locale={locale}
+        notice={workflowNotice}
+        organizations={organizations}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 # HUMAN GATE — Document & Evidence Engine file layer v1
 
-Migration: `supabase/migrations/20260817120000_document_file_layer_v1.sql`
-Rollback:  `supabase/rollbacks/20260817120000_document_file_layer_v1.down.sql`
+Migration: `supabase/migrations/20260817140000_document_file_layer_v1.sql`
+Rollback:  `supabase/rollbacks/20260817140000_document_file_layer_v1.down.sql`
 State: `PENDING APPLY BY LEAD` — pre-approved by owner mandate 2026-08-17
 (autonomous functional completion train V2, §4 migration authority). The
 train LEAD session applies it to production via Supabase MCP
@@ -36,7 +36,7 @@ is not available yet" note. Organizations have no document register and no
 read-confirmation mechanism at all.
 
 ## What the lead applies
-> `20260817120000_document_file_layer_v1` (this file), then
-> `20260817121000_notification_document_types_v3`.
+> `20260817140000_document_file_layer_v1` (this file), then
+> `20260817140100_notification_document_types_v3`.
 No further storage console steps are needed: the bucket + policies are
 created by this migration itself.

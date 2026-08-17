@@ -1,4 +1,4 @@
--- Rollback for 20260817120000_document_file_layer_v1.sql
+-- Rollback for 20260817140000_document_file_layer_v1.sql
 --
 -- Restores the prior state: the up-migration created four new tables, four
 -- helper functions, seven RPCs, one private bucket with four storage

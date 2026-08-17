@@ -350,6 +350,10 @@
         "event_booking_withdrawn": "Bookingforslaget ble trukket tilbake",
         "event_engagement_ended": "Engasjementet ble avsluttet",
         "event_engagement_created": "Et nytt engasjement ble opprettet",
+        "event_workflow_step_pending": "En godkjenningsforespørsel venter på din beslutning",
+        "event_workflow_decided": "Det er tatt en beslutning om godkjenningsforespørselen din",
+        "event_workflow_delegated": "En godkjenningsrunde er overlatt til deg",
+        "event_workflow_escalated": "En godkjenningsrunde har overskredet fristen",
         "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
         "event_document_expiring": "[EN] A document's validity is ending soon."
@@ -4295,6 +4299,154 @@
     "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
     "companyProfileLink": "[EN] Open company profile",
     "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
+  },
+  "approvals": {
+    "title": "Godkjenninger",
+    "intro": "Godkjenningsforespørsler i organisasjonene dine: send inn en forespørsel, avgjør det som venter på deg, og følg hver runde.",
+    "unavailable": "Godkjenninger er ikke slått på i dette miljøet ennå. Ingenting går tapt — dette området åpner når godkjenningslageret er gjennomgått og tatt i bruk.",
+    "honestNote": "Beslutninger blir inne i produktet. Ingenting sendes med e-post eller andre kanaler — oppdateringer vises på denne siden og i varselklokken.",
+    "loadError": "Deler av godkjenningsdataene kunne ikke lastes akkurat nå. Det du ser er ekte, men kan være ufullstendig.",
+    "inbox": {
+      "title": "Venter på din beslutning",
+      "empty": "Ingenting venter på din beslutning akkurat nå.",
+      "stepLabel": "Runde"
+    },
+    "start": {
+      "title": "Ny godkjenningsforespørsel",
+      "definitionLabel": "Godkjenningsmal",
+      "titleLabel": "Hva ber du om?",
+      "detailsLabel": "Detaljer (valgfritt)",
+      "submit": "Send forespørsel"
+    },
+    "myRequests": {
+      "title": "Mine forespørsler",
+      "empty": "Du har ikke sendt inn noen godkjenningsforespørsler ennå."
+    },
+    "admin": {
+      "title": "Organisasjonens godkjenninger",
+      "noPending": "Ingen åpne forespørsler fra andre i organisasjonene dine.",
+      "overdueHint": "Fristkontrollen markerer bare forsinkede runder og informerer de ansvarlige. Ingenting godkjennes noen gang automatisk."
+    },
+    "templates": {
+      "title": "Godkjenningsmaler",
+      "empty": "Ingen maler ennå. Opprett den første nedenfor.",
+      "createTitle": "Ny godkjenningsmal",
+      "orgLabel": "Organisasjon",
+      "nameLabel": "Navn på malen",
+      "contextLabel": "Forespørselstype",
+      "stepLegend": "Runde {n}",
+      "optional": "valgfritt",
+      "stepNameLabel": "Navn på runden",
+      "modeLabel": "Hvor mange må godkjenne",
+      "ruleLabel": "Hvem beslutter",
+      "deadlineLabel": "Frist (timer, valgfritt)",
+      "escalationHint": "Hvis en runde overskrider fristen, markeres den som forsinket, og eiere og administratorer informeres. Ingenting godkjennes automatisk.",
+      "createSubmit": "Opprett mal",
+      "stepCount": "Runder: {count}",
+      "published": "I bruk"
+    },
+    "actions": {
+      "approve": "Godkjenn",
+      "reject": "Avvis",
+      "delegate": "Overlat til en kollega",
+      "delegateSubmit": "Overlat",
+      "withdraw": "Trekk tilbake",
+      "cancel": "Avbryt forespørsel",
+      "markOverdue": "Sjekk frister",
+      "publish": "Ta i bruk"
+    },
+    "form": {
+      "reasonLabel": "Begrunnelse",
+      "reasonOptional": "Valgfritt",
+      "delegateEmailLabel": "Kollegaens e-post",
+      "delegateHint": "Kollegaen må tilhøre samme organisasjon. Ansvaret for denne runden forblir hos deg."
+    },
+    "status": {
+      "pending": "Venter",
+      "approved": "Godkjent",
+      "rejected": "Avvist",
+      "withdrawn": "Trukket tilbake",
+      "cancelled": "Avbrutt"
+    },
+    "stepStatus": {
+      "waiting": "Ikke startet",
+      "active": "Pågår",
+      "approved": "Godkjent",
+      "rejected": "Avvist",
+      "skipped": "Hoppet over",
+      "escalated": "Frist overskredet"
+    },
+    "mode": {
+      "single": "Én person beslutter",
+      "all": "Alle må godkjenne",
+      "any": "Første beslutning gjelder"
+    },
+    "decision": {
+      "approved": "Godkjent",
+      "rejected": "Avvist"
+    },
+    "rule": {
+      "owner_admin": "Eiere og administratorer",
+      "requester_manager": "Søkerens ledere"
+    },
+    "contextType": {
+      "generic_request": "Generell forespørsel",
+      "worker_absence": "Fravær",
+      "expense": "Utgift",
+      "invoice": "Faktura",
+      "document_ack": "Dokumentgodkjenning",
+      "timesheet": "Timeliste",
+      "procurement": "Innkjøp",
+      "business_trip": "Tjenestereise",
+      "management_decision": "Ledelsesbeslutning",
+      "agreement": "Avtale"
+    },
+    "transition": {
+      "started": "Forespørsel sendt inn",
+      "step_activated": "Runde startet",
+      "approved": "Godkjent",
+      "rejected": "Avvist",
+      "delegated": "Overlatt",
+      "withdrawn": "Trukket tilbake",
+      "cancelled": "Avbrutt",
+      "escalated": "Fristoverskridelse markert",
+      "completed": "Fullført"
+    },
+    "timeline": {
+      "open": "Vis fremdrift",
+      "progress": "{approved} av {total} har godkjent",
+      "deadline": "Frist",
+      "historyTitle": "Full historikk",
+      "stepLabel": "runde"
+    },
+    "notice": {
+      "created": "Mal opprettet. Ta den i bruk slik at folk kan sende inn forespørsler.",
+      "published": "Malen er nå i bruk.",
+      "started": "Forespørselen er sendt til den første rundens godkjennere.",
+      "already_pending": "Denne forespørselen er allerede åpen.",
+      "already_published": "Denne malen er allerede i bruk.",
+      "already_exists": "En mal med dette navnet finnes allerede i organisasjonen.",
+      "already_decided": "Du har allerede besluttet i denne runden.",
+      "approved": "Forespørsel godkjent.",
+      "rejected": "Forespørsel avvist.",
+      "step_approved": "Runden er godkjent — neste runde har startet.",
+      "recorded": "Beslutningen din er lagret. Venter på de andre godkjennerne.",
+      "delegated": "Runden er overlatt til kollegaen din.",
+      "withdrawn": "Forespørselen er trukket tilbake.",
+      "cancelled": "Forespørselen er avbrutt.",
+      "marked_overdue": "Forsinkede runder ble markert, og de ansvarlige informert.",
+      "no_overdue": "Ingen runder har overskredet fristen.",
+      "no_approvers": "Denne forespørselen har ingen mulige godkjennere ennå. Sjekk organisasjonens medlemmer og rollene deres.",
+      "not_published": "Denne malen er ikke i bruk ennå.",
+      "not_pending": "Denne forespørselen er ikke lenger åpen.",
+      "invalid": "Sjekk de angitte verdiene og prøv igjen.",
+      "invalid_delegate": "Den kollegaen ble ikke funnet i denne organisasjonen.",
+      "needs_migration": "Godkjenninger er ikke slått på i dette miljøet ennå. Ingenting ble lagret.",
+      "not_authorized": "Du har ikke lov til å gjøre dette.",
+      "not_found": "Forespørselen ble ikke funnet.",
+      "limit_reached": "Grensen for åpne elementer er nådd. Lukk noe først.",
+      "error": "Noe gikk galt. Ingenting ble endret."
+    }
   },
   "documentFiles": {
     "currentVersion": "[EN] Version {n}",

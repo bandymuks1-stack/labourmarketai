@@ -4101,6 +4101,10 @@
         "event_booking_withdrawn": "The booking proposal was withdrawn",
         "event_engagement_ended": "The engagement was ended",
         "event_engagement_created": "A new engagement was created",
+        "event_workflow_step_pending": "An approval request is waiting for your decision",
+        "event_workflow_decided": "Your approval request has been decided",
+        "event_workflow_delegated": "An approval round was handed over to you",
+        "event_workflow_escalated": "An approval round passed its deadline",
         "event_document_ack_assigned": "You were asked to confirm you have read a document.",
         "event_document_ack_completed": "A document you sent for confirmation was confirmed.",
         "event_document_expiring": "A document's validity is ending soon."
@@ -12367,6 +12371,154 @@
       "intro": "You have been invited via LabourMarket.ai.",
       "open": "Open the invitation:",
       "validity": "The link is valid for 14 days. If you were not expecting this, simply ignore this email."
+    }
+  },
+  "approvals": {
+    "title": "Approvals",
+    "intro": "Approval requests inside your organizations: file a request, decide what waits on you, and follow every round.",
+    "unavailable": "Approvals are not enabled in this environment yet. Nothing is lost — this area opens once the approvals storage is reviewed and applied.",
+    "honestNote": "Decisions here stay inside the product. Nothing is emailed or sent anywhere — people see updates on this page and in the notification bell.",
+    "loadError": "Some approvals data could not be loaded right now. What you see is real but may be incomplete.",
+    "inbox": {
+      "title": "Waiting for your decision",
+      "empty": "Nothing is waiting for your decision right now.",
+      "stepLabel": "Round"
+    },
+    "start": {
+      "title": "New approval request",
+      "definitionLabel": "Approval template",
+      "titleLabel": "What are you asking for?",
+      "detailsLabel": "Details (optional)",
+      "submit": "Send request"
+    },
+    "myRequests": {
+      "title": "My requests",
+      "empty": "You have not filed any approval requests yet."
+    },
+    "admin": {
+      "title": "Organization approvals",
+      "noPending": "No open requests from others in your organizations.",
+      "overdueHint": "Checking deadlines only marks late rounds and informs the responsible people. Nothing is ever approved automatically."
+    },
+    "templates": {
+      "title": "Approval templates",
+      "empty": "No approval templates yet. Create the first one below.",
+      "createTitle": "New approval template",
+      "orgLabel": "Organization",
+      "nameLabel": "Template name",
+      "contextLabel": "Request type",
+      "stepLegend": "Round {n}",
+      "optional": "optional",
+      "stepNameLabel": "Round name",
+      "modeLabel": "How many must approve",
+      "ruleLabel": "Who decides",
+      "deadlineLabel": "Deadline (hours, optional)",
+      "escalationHint": "If a round passes its deadline it is marked late and owners and administrators are informed. It is never approved automatically.",
+      "createSubmit": "Create template",
+      "stepCount": "Rounds: {count}",
+      "published": "In use"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "delegate": "Hand over to a colleague",
+      "delegateSubmit": "Hand over",
+      "withdraw": "Take back",
+      "cancel": "Cancel request",
+      "markOverdue": "Check deadlines",
+      "publish": "Put into use"
+    },
+    "form": {
+      "reasonLabel": "Reason",
+      "reasonOptional": "Optional",
+      "delegateEmailLabel": "Colleague's email",
+      "delegateHint": "The colleague must belong to the same organization. You stay responsible for this round."
+    },
+    "status": {
+      "pending": "Waiting",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "withdrawn": "Taken back",
+      "cancelled": "Cancelled"
+    },
+    "stepStatus": {
+      "waiting": "Not started",
+      "active": "In progress",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "skipped": "Skipped",
+      "escalated": "Past deadline"
+    },
+    "mode": {
+      "single": "One person decides",
+      "all": "Everyone must approve",
+      "any": "First decision counts"
+    },
+    "decision": {
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "rule": {
+      "owner_admin": "Owners and administrators",
+      "requester_manager": "The requester's managers"
+    },
+    "contextType": {
+      "generic_request": "General request",
+      "worker_absence": "Absence",
+      "expense": "Expense",
+      "invoice": "Invoice",
+      "document_ack": "Document sign-off",
+      "timesheet": "Timesheet",
+      "procurement": "Purchase",
+      "business_trip": "Business trip",
+      "management_decision": "Management decision",
+      "agreement": "Agreement"
+    },
+    "transition": {
+      "started": "Request filed",
+      "step_activated": "Round started",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "delegated": "Handed over",
+      "withdrawn": "Taken back",
+      "cancelled": "Cancelled",
+      "escalated": "Marked past deadline",
+      "completed": "Completed"
+    },
+    "timeline": {
+      "open": "Show progress",
+      "progress": "{approved} of {total} approved",
+      "deadline": "Deadline",
+      "historyTitle": "Full history",
+      "stepLabel": "round"
+    },
+    "notice": {
+      "created": "Template created. Put it into use so people can file requests.",
+      "published": "Template is now in use.",
+      "started": "Request sent to the first approvers.",
+      "already_pending": "This request is already open.",
+      "already_published": "This template is already in use.",
+      "already_exists": "A template with this name already exists in the organization.",
+      "already_decided": "You have already decided this round.",
+      "approved": "Request approved.",
+      "rejected": "Request rejected.",
+      "step_approved": "Round approved — the next round has started.",
+      "recorded": "Your decision is saved. Waiting for the other approvers.",
+      "delegated": "Round handed over to your colleague.",
+      "withdrawn": "Request taken back.",
+      "cancelled": "Request cancelled.",
+      "marked_overdue": "Late rounds were marked and the responsible people informed.",
+      "no_overdue": "No rounds are past their deadline.",
+      "no_approvers": "This request has no possible approvers yet. Check the organization's members and their roles.",
+      "not_published": "This template is not in use yet.",
+      "not_pending": "This request is no longer open.",
+      "invalid": "Please check the entered values and try again.",
+      "invalid_delegate": "That colleague could not be found in this organization.",
+      "needs_migration": "Approvals are not enabled in this environment yet. Nothing was saved.",
+      "not_authorized": "You are not allowed to do this.",
+      "not_found": "This request was not found.",
+      "limit_reached": "The open-items limit was reached. Close something first.",
+      "error": "Something went wrong. Nothing was changed."
     }
   }
 }

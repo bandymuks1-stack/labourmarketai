@@ -1,9 +1,12 @@
--- Rollback for 20260817121000_notification_document_types_v3.sql
+-- Rollback for 20260817140100_notification_document_types_v3.sql
 --
--- Restores the v2 (20260813100000) constraint lists. Safe only after the
--- guarded delete below removes rows carrying the v3-only values (they are
--- feature-created rows of the document engine; removing a notification row
--- removes a bell entry, nothing else).
+-- Restores the constraint lists exactly as Train B's
+-- 20260817130100_notification_events_v3_workflow_types.sql leaves them
+-- (v2's nine types + the four workflow types; entities incl.
+-- workflow_instance). Safe only after the guarded delete below removes rows
+-- carrying the document-only values (they are feature-created rows of the
+-- document engine; removing a notification row removes a bell entry,
+-- nothing else).
 
 begin;
 
@@ -24,7 +27,11 @@ alter table public.notification_events
     'absence_approved',
     'absence_rejected',
     'engagement_created',
-    'engagement_ended'
+    'engagement_ended',
+    'workflow_step_pending',
+    'workflow_decided',
+    'workflow_delegated',
+    'workflow_escalated'
   ));
 
 alter table public.notification_events
@@ -34,7 +41,8 @@ alter table public.notification_events
   add constraint notification_events_entity_type_check check (entity_type in (
     'booking_request',
     'worker_absence',
-    'engagement'
+    'engagement',
+    'workflow_instance'
   ));
 
 commit;

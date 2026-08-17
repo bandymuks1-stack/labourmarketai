@@ -4101,6 +4101,10 @@
         "event_booking_withdrawn": "Rezervacijos pasiūlymas atšauktas",
         "event_engagement_ended": "Darbo santykis baigtas",
         "event_engagement_created": "Sukurtas naujas bendradarbiavimas",
+        "event_workflow_step_pending": "Tvirtinimo prašymas laukia jūsų sprendimo",
+        "event_workflow_decided": "Dėl jūsų tvirtinimo prašymo priimtas sprendimas",
+        "event_workflow_delegated": "Jums perduotas tvirtinimo etapas",
+        "event_workflow_escalated": "Tvirtinimo etapas viršijo terminą",
         "event_document_ack_assigned": "Jūsų paprašyta patvirtinti, kad perskaitėte dokumentą.",
         "event_document_ack_completed": "Dokumentas, kurį siuntėte patvirtinti, buvo patvirtintas.",
         "event_document_expiring": "Netrukus baigsis dokumento galiojimas."
@@ -12367,6 +12371,154 @@
       "intro": "Jus pakvietė prisijungti per LabourMarket.ai.",
       "open": "Atidarykite kvietimą:",
       "validity": "Nuoroda galioja 14 dienų. Jei kvietimo nelaukėte, tiesiog ignoruokite šį laišką."
+    }
+  },
+  "approvals": {
+    "title": "Tvirtinimai",
+    "intro": "Tvirtinimo prašymai jūsų organizacijose: pateikite prašymą, priimkite jūsų laukiančius sprendimus ir sekite kiekvieną etapą.",
+    "unavailable": "Tvirtinimai šioje aplinkoje dar neįjungti. Niekas neprarasta — ši sritis atsivers, kai tvirtinimų saugykla bus peržiūrėta ir įdiegta.",
+    "honestNote": "Sprendimai lieka produkto viduje. Niekam nieko nesiunčiame el. paštu — žmonės atnaujinimus mato šiame puslapyje ir pranešimų varpelyje.",
+    "loadError": "Dalies tvirtinimų duomenų dabar nepavyko įkelti. Tai, ką matote, yra tikra, bet gali būti nepilna.",
+    "inbox": {
+      "title": "Laukia jūsų sprendimo",
+      "empty": "Šiuo metu jūsų sprendimo niekas nelaukia.",
+      "stepLabel": "Etapas"
+    },
+    "start": {
+      "title": "Naujas tvirtinimo prašymas",
+      "definitionLabel": "Tvirtinimo šablonas",
+      "titleLabel": "Ko prašote?",
+      "detailsLabel": "Detalės (nebūtina)",
+      "submit": "Pateikti prašymą"
+    },
+    "myRequests": {
+      "title": "Mano prašymai",
+      "empty": "Dar nepateikėte nė vieno tvirtinimo prašymo."
+    },
+    "admin": {
+      "title": "Organizacijos tvirtinimai",
+      "noPending": "Jūsų organizacijose atvirų kitų žmonių prašymų nėra.",
+      "overdueHint": "Terminų patikra tik pažymi vėluojančius etapus ir informuoja atsakingus žmones. Niekas niekada nepatvirtinama automatiškai."
+    },
+    "templates": {
+      "title": "Tvirtinimo šablonai",
+      "empty": "Šablonų dar nėra. Sukurkite pirmąjį žemiau.",
+      "createTitle": "Naujas tvirtinimo šablonas",
+      "orgLabel": "Organizacija",
+      "nameLabel": "Šablono pavadinimas",
+      "contextLabel": "Prašymo tipas",
+      "stepLegend": "Etapas {n}",
+      "optional": "nebūtina",
+      "stepNameLabel": "Etapo pavadinimas",
+      "modeLabel": "Kiek turi patvirtinti",
+      "ruleLabel": "Kas sprendžia",
+      "deadlineLabel": "Terminas (valandomis, nebūtina)",
+      "escalationHint": "Jei etapas viršija terminą, jis pažymimas vėluojančiu ir informuojami savininkai bei administratoriai. Automatiškai niekas nepatvirtinama.",
+      "createSubmit": "Sukurti šabloną",
+      "stepCount": "Etapų: {count}",
+      "published": "Naudojamas"
+    },
+    "actions": {
+      "approve": "Patvirtinti",
+      "reject": "Atmesti",
+      "delegate": "Perduoti kolegai",
+      "delegateSubmit": "Perduoti",
+      "withdraw": "Atsiimti",
+      "cancel": "Atšaukti prašymą",
+      "markOverdue": "Patikrinti terminus",
+      "publish": "Pradėti naudoti"
+    },
+    "form": {
+      "reasonLabel": "Priežastis",
+      "reasonOptional": "Nebūtina",
+      "delegateEmailLabel": "Kolegos el. paštas",
+      "delegateHint": "Kolega turi priklausyti tai pačiai organizacijai. Atsakomybė už šį etapą lieka jums."
+    },
+    "status": {
+      "pending": "Laukiama",
+      "approved": "Patvirtinta",
+      "rejected": "Atmesta",
+      "withdrawn": "Atsiimta",
+      "cancelled": "Atšaukta"
+    },
+    "stepStatus": {
+      "waiting": "Nepradėtas",
+      "active": "Vyksta",
+      "approved": "Patvirtintas",
+      "rejected": "Atmestas",
+      "skipped": "Praleistas",
+      "escalated": "Viršytas terminas"
+    },
+    "mode": {
+      "single": "Sprendžia vienas žmogus",
+      "all": "Turi patvirtinti visi",
+      "any": "Galioja pirmas sprendimas"
+    },
+    "decision": {
+      "approved": "Patvirtino",
+      "rejected": "Atmetė"
+    },
+    "rule": {
+      "owner_admin": "Savininkai ir administratoriai",
+      "requester_manager": "Prašančiojo vadovai"
+    },
+    "contextType": {
+      "generic_request": "Bendras prašymas",
+      "worker_absence": "Neatvykimas",
+      "expense": "Išlaidos",
+      "invoice": "Sąskaita",
+      "document_ack": "Dokumento patvirtinimas",
+      "timesheet": "Darbo laiko žiniaraštis",
+      "procurement": "Pirkimas",
+      "business_trip": "Komandiruotė",
+      "management_decision": "Vadovybės sprendimas",
+      "agreement": "Sutartis"
+    },
+    "transition": {
+      "started": "Prašymas pateiktas",
+      "step_activated": "Etapas pradėtas",
+      "approved": "Patvirtinta",
+      "rejected": "Atmesta",
+      "delegated": "Perduota",
+      "withdrawn": "Atsiimta",
+      "cancelled": "Atšaukta",
+      "escalated": "Pažymėtas viršytas terminas",
+      "completed": "Užbaigta"
+    },
+    "timeline": {
+      "open": "Rodyti eigą",
+      "progress": "Patvirtino {approved} iš {total}",
+      "deadline": "Terminas",
+      "historyTitle": "Visa istorija",
+      "stepLabel": "etapas"
+    },
+    "notice": {
+      "created": "Šablonas sukurtas. Pradėkite jį naudoti, kad žmonės galėtų teikti prašymus.",
+      "published": "Šablonas pradėtas naudoti.",
+      "started": "Prašymas išsiųstas pirmojo etapo tvirtintojams.",
+      "already_pending": "Toks prašymas jau atviras.",
+      "already_published": "Šis šablonas jau naudojamas.",
+      "already_exists": "Šablonas tokiu pavadinimu organizacijoje jau yra.",
+      "already_decided": "Šiame etape jau priėmėte sprendimą.",
+      "approved": "Prašymas patvirtintas.",
+      "rejected": "Prašymas atmestas.",
+      "step_approved": "Etapas patvirtintas — prasidėjo kitas etapas.",
+      "recorded": "Jūsų sprendimas išsaugotas. Laukiama kitų tvirtintojų.",
+      "delegated": "Etapas perduotas jūsų kolegai.",
+      "withdrawn": "Prašymas atsiimtas.",
+      "cancelled": "Prašymas atšauktas.",
+      "marked_overdue": "Vėluojantys etapai pažymėti, atsakingi žmonės informuoti.",
+      "no_overdue": "Terminą viršijusių etapų nėra.",
+      "no_approvers": "Šiam prašymui kol kas nėra galinčių tvirtinti žmonių. Patikrinkite organizacijos narius ir jų roles.",
+      "not_published": "Šis šablonas dar nenaudojamas.",
+      "not_pending": "Šis prašymas nebėra atviras.",
+      "invalid": "Patikrinkite įvestas reikšmes ir bandykite dar kartą.",
+      "invalid_delegate": "Tokio kolegos šioje organizacijoje rasti nepavyko.",
+      "needs_migration": "Tvirtinimai šioje aplinkoje dar neįjungti. Niekas nebuvo išsaugota.",
+      "not_authorized": "Jums neleidžiama to daryti.",
+      "not_found": "Prašymas nerastas.",
+      "limit_reached": "Pasiektas atvirų įrašų limitas. Pirmiausia užbaikite esamus.",
+      "error": "Įvyko klaida. Niekas nepakeista."
     }
   }
 }

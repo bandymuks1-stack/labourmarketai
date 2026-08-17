@@ -7,7 +7,7 @@
 #   docker run -d --name doc-file-proof -e POSTGRES_PASSWORD=x postgres:15
 # Loads the faithful harness (prelude + seed), then executes the ACTUAL
 # migration file
-#   supabase/migrations/20260817120000_document_file_layer_v1.sql
+#   supabase/migrations/20260817140000_document_file_layer_v1.sql
 # and the ACTUAL rollback VERBATIM, measuring per role:
 #   anon / org owner / org admin / plain member / manager / assignee /
 #   wrong-org / worker / platform admin / attacker (direct writes).
@@ -25,8 +25,8 @@ set -uo pipefail
 CT=${CT:-doc-file-proof}
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-MIGRATION="$REPO/supabase/migrations/20260817120000_document_file_layer_v1.sql"
-ROLLBACK="$REPO/supabase/rollbacks/20260817120000_document_file_layer_v1.down.sql"
+MIGRATION="$REPO/supabase/migrations/20260817140000_document_file_layer_v1.sql"
+ROLLBACK="$REPO/supabase/rollbacks/20260817140000_document_file_layer_v1.down.sql"
 
 OWNER='11111111-1111-4111-8111-111111111111'
 ADMIN2='22222222-2222-4222-8222-222222222222'
