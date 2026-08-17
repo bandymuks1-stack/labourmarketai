@@ -534,7 +534,12 @@ describe("NO new DB migration in this PR", () => {
     // owner-gated per mandate 2026-08-17, paired rollback, ships UNAPPLIED —
     // PENDING APPLY BY LEAD) — nothing from the market-map read layer.
     // RECOUNTED from the post-merge tree after trains C + D: 212 .sql files.
-    expect(count).toBeLessThanOrEqual(212);
+    // Bumped 212 -> 213 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD, paired rollback) — RECOUNTED from the post-merge tree with
+    // trains A/B/C/D/E on main (213 .sql files), never summed. Not a
+    // market-map migration either.
+    expect(count).toBeLessThanOrEqual(213);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2109,7 +2109,16 @@ describe("no migration files added by this sprint", () => {
     // owner-gated per mandate 2026-08-17, UNAPPLIED — PENDING APPLY BY LEAD)
     // — RECOUNTED from the post-merge tree after trains C + D landed
     // (`ls supabase/migrations/*.sql | wc -l` = 212), never summed.
-    const SPRINT_BASELINE = 212;
+    // Bumped 212 -> 213 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD) — RECOUNTED from the post-merge tree with trains A/B/C/D/E on
+    // main (`ls supabase/migrations/*.sql | wc -l` = 213), never summed.
+    // Supersedes the never-applied 20260714210000 draft (whose trigger
+    // predates company_memberships and would 42501-reject CM-only members);
+    // v2's trigger accepts BOTH membership truths. Paired rollback +
+    // Deferred APPLIED_LEDGER entry + db-proof scripts/db-proof/
+    // durable-workspace-pointer-v2.sh (32/32).
+    const SPRINT_BASELINE = 213;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
