@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { Card } from "@/components/ui/Card";
 import type { MyLeaveBalancesResult } from "@/lib/leave/balances";
 
 /**
@@ -26,11 +27,8 @@ export async function LeaveBalancePanel({
   }
 
   return (
-    <section
-      className="card-border flex flex-col gap-3 p-5"
-      data-testid="leave-balance-panel"
-    >
-      <header className="flex flex-col gap-1">
+    <Card className="flex flex-col gap-3">
+      <header className="flex flex-col gap-1" data-testid="leave-balance-panel">
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("balance.title", { year: data.year })}
         </h2>
@@ -79,6 +77,6 @@ export async function LeaveBalancePanel({
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
