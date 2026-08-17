@@ -834,23 +834,6 @@ describe("the migration set is exactly what this slice declared", () => {
       // lib/guards/employee-requests.test.ts.
       "20260817180000_employee_requests_v1.sql",
       "20260817181000_leave_balance_policies_v1.sql",
-      // 2026-08-17: Agreement & Rights Engine v1 (train H of the autonomous
-      // functional completion train V2). The marker records that the RED
-      // content (3 new RLS tables + SELECT policies + GRANT/REVOKE + 9
-      // SECURITY DEFINER functions + 2 append-only trigger guards) is
-      // STRUCTURALLY UNAVOIDABLE for a row-level-secured register — same
-      // class as the workflow/document entries above. Annotation authority:
-      // owner mandate 2026-08-17 (autonomous functional completion train
-      // V2, §4 migration authority); the annotation states the ROUTE, the
-      // apply act belongs to the LEAD session (PENDING APPLY BY LEAD in
-      // docs/APPLIED_LEDGER.md, apply AFTER 20260817130000 AND
-      // 20260817140000 — hard dependencies asserted in-file). Gate record:
-      // docs/human-gates/agreements-gate.md. Rollback paired (0-row
-      // guarded); behavioural proof (89/89, migration + rollback verbatim):
-      // scripts/db-proof/agreements-v1.sh. LEGAL DOCTRINE pinned in the
-      // header: no status implies signed/legal/valid/binding; signature
-      // evidence is a separate explicit field pair; no e-signature flow.
-      "20260817200000_agreements_v1.sql",
       // 2026-08-17: Employee Lifecycle v1 (train G of the autonomous
       // functional completion train V2). The marker records that the RED
       // content (7 new RLS tables + SELECT policies + GRANT/REVOKE + 16
@@ -868,6 +851,23 @@ describe("the migration set is exactly what this slice declared", () => {
       // behavioural proof (85/85, migration + rollback verbatim):
       // scripts/db-proof/employee-lifecycle.sh.
       "20260817190000_employee_lifecycle_v1.sql",
+      // 2026-08-17: Agreement & Rights Engine v1 (train H of the autonomous
+      // functional completion train V2). The marker records that the RED
+      // content (3 new RLS tables + SELECT policies + GRANT/REVOKE + 9
+      // SECURITY DEFINER functions + 2 append-only trigger guards) is
+      // STRUCTURALLY UNAVOIDABLE for a row-level-secured register — same
+      // class as the workflow/document entries above. Annotation authority:
+      // owner mandate 2026-08-17 (autonomous functional completion train
+      // V2, §4 migration authority); the annotation states the ROUTE, the
+      // apply act belongs to the LEAD session (PENDING APPLY BY LEAD in
+      // docs/APPLIED_LEDGER.md, apply AFTER 20260817130000 AND
+      // 20260817140000 — hard dependencies asserted in-file). Gate record:
+      // docs/human-gates/agreements-gate.md. Rollback paired (0-row
+      // guarded); behavioural proof (89/89, migration + rollback verbatim):
+      // scripts/db-proof/agreements-v1.sh. LEGAL DOCTRINE pinned in the
+      // header: no status implies signed/legal/valid/binding; signature
+      // evidence is a separate explicit field pair; no e-signature flow.
+      "20260817200000_agreements_v1.sql",
     ]);
   });
 
