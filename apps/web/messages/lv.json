@@ -349,7 +349,11 @@
         "event_absence_rejected": "Tava prombūtne noraidīta",
         "event_booking_withdrawn": "Rezervācijas piedāvājums tika atsaukts",
         "event_engagement_ended": "Sadarbība tika pārtraukta",
-        "event_engagement_created": "Izveidota jauna sadarbība"
+        "event_engagement_created": "Izveidota jauna sadarbība",
+        "event_workflow_step_pending": "Apstiprinājuma pieprasījums gaida jūsu lēmumu",
+        "event_workflow_decided": "Par jūsu apstiprinājuma pieprasījumu ir pieņemts lēmums",
+        "event_workflow_delegated": "Jums nodots apstiprinājuma posms",
+        "event_workflow_escalated": "Apstiprinājuma posms pārsniedza termiņu"
       }
     },
     "onboarding": {
@@ -4292,5 +4296,153 @@
     "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
     "companyProfileLink": "[EN] Open company profile",
     "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
+  },
+  "approvals": {
+    "title": "Apstiprinājumi",
+    "intro": "Apstiprinājuma pieprasījumi jūsu organizācijās: iesniedziet pieprasījumu, pieņemiet lēmumus, kas gaida jūs, un sekojiet katram posmam.",
+    "unavailable": "Apstiprinājumi šajā vidē vēl nav ieslēgti. Nekas nepazūd — šī sadaļa atvērsies, kad apstiprinājumu krātuve būs pārskatīta un ieviesta.",
+    "honestNote": "Lēmumi paliek produkta iekšienē. Nekas netiek sūtīts e-pastā vai citur — atjauninājumi redzami šajā lapā un paziņojumu zvaniņā.",
+    "loadError": "Daļu apstiprinājumu datu šobrīd neizdevās ielādēt. Redzamais ir īsts, bet var būt nepilnīgs.",
+    "inbox": {
+      "title": "Gaida jūsu lēmumu",
+      "empty": "Šobrīd nekas negaida jūsu lēmumu.",
+      "stepLabel": "Posms"
+    },
+    "start": {
+      "title": "Jauns apstiprinājuma pieprasījums",
+      "definitionLabel": "Apstiprinājuma veidne",
+      "titleLabel": "Ko jūs pieprasāt?",
+      "detailsLabel": "Detaļas (nav obligāti)",
+      "submit": "Nosūtīt pieprasījumu"
+    },
+    "myRequests": {
+      "title": "Mani pieprasījumi",
+      "empty": "Jūs vēl neesat iesniedzis nevienu apstiprinājuma pieprasījumu."
+    },
+    "admin": {
+      "title": "Organizācijas apstiprinājumi",
+      "noPending": "Jūsu organizācijās nav atvērtu citu cilvēku pieprasījumu.",
+      "overdueHint": "Termiņu pārbaude tikai atzīmē nokavētos posmus un informē atbildīgos. Nekas nekad netiek apstiprināts automātiski."
+    },
+    "templates": {
+      "title": "Apstiprinājuma veidnes",
+      "empty": "Veidņu vēl nav. Izveidojiet pirmo zemāk.",
+      "createTitle": "Jauna apstiprinājuma veidne",
+      "orgLabel": "Organizācija",
+      "nameLabel": "Veidnes nosaukums",
+      "contextLabel": "Pieprasījuma veids",
+      "stepLegend": "Posms {n}",
+      "optional": "nav obligāti",
+      "stepNameLabel": "Posma nosaukums",
+      "modeLabel": "Cik daudziem jāapstiprina",
+      "ruleLabel": "Kas lemj",
+      "deadlineLabel": "Termiņš (stundās, nav obligāti)",
+      "escalationHint": "Ja posms pārsniedz termiņu, tas tiek atzīmēts kā nokavēts, un īpašnieki un administratori tiek informēti. Automātiski nekas netiek apstiprināts.",
+      "createSubmit": "Izveidot veidni",
+      "stepCount": "Posmi: {count}",
+      "published": "Lietošanā"
+    },
+    "actions": {
+      "approve": "Apstiprināt",
+      "reject": "Noraidīt",
+      "delegate": "Nodot kolēģim",
+      "delegateSubmit": "Nodot",
+      "withdraw": "Atsaukt",
+      "cancel": "Atcelt pieprasījumu",
+      "markOverdue": "Pārbaudīt termiņus",
+      "publish": "Sākt lietot"
+    },
+    "form": {
+      "reasonLabel": "Iemesls",
+      "reasonOptional": "Nav obligāti",
+      "delegateEmailLabel": "Kolēģa e-pasts",
+      "delegateHint": "Kolēģim jāpieder tai pašai organizācijai. Atbildība par šo posmu paliek jums."
+    },
+    "status": {
+      "pending": "Gaida",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "withdrawn": "Atsaukts",
+      "cancelled": "Atcelts"
+    },
+    "stepStatus": {
+      "waiting": "Nav sākts",
+      "active": "Notiek",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "skipped": "Izlaists",
+      "escalated": "Termiņš pārsniegts"
+    },
+    "mode": {
+      "single": "Lemj viens cilvēks",
+      "all": "Jāapstiprina visiem",
+      "any": "Skaitās pirmais lēmums"
+    },
+    "decision": {
+      "approved": "Apstiprināja",
+      "rejected": "Noraidīja"
+    },
+    "rule": {
+      "owner_admin": "Īpašnieki un administratori",
+      "requester_manager": "Pieprasītāja vadītāji"
+    },
+    "contextType": {
+      "generic_request": "Vispārīgs pieprasījums",
+      "worker_absence": "Prombūtne",
+      "expense": "Izdevumi",
+      "invoice": "Rēķins",
+      "document_ack": "Dokumenta apstiprināšana",
+      "timesheet": "Darba laika uzskaite",
+      "procurement": "Iepirkums",
+      "business_trip": "Komandējums",
+      "management_decision": "Vadības lēmums",
+      "agreement": "Līgums"
+    },
+    "transition": {
+      "started": "Pieprasījums iesniegts",
+      "step_activated": "Posms sākts",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "delegated": "Nodots",
+      "withdrawn": "Atsaukts",
+      "cancelled": "Atcelts",
+      "escalated": "Atzīmēts termiņa pārsniegums",
+      "completed": "Pabeigts"
+    },
+    "timeline": {
+      "open": "Rādīt gaitu",
+      "progress": "Apstiprināja {approved} no {total}",
+      "deadline": "Termiņš",
+      "historyTitle": "Pilna vēsture",
+      "stepLabel": "posms"
+    },
+    "notice": {
+      "created": "Veidne izveidota. Sāciet to lietot, lai cilvēki varētu iesniegt pieprasījumus.",
+      "published": "Veidne tagad tiek lietota.",
+      "started": "Pieprasījums nosūtīts pirmā posma apstiprinātājiem.",
+      "already_pending": "Šāds pieprasījums jau ir atvērts.",
+      "already_published": "Šī veidne jau tiek lietota.",
+      "already_exists": "Veidne ar šādu nosaukumu organizācijā jau pastāv.",
+      "already_decided": "Šajā posmā jūs jau esat pieņēmis lēmumu.",
+      "approved": "Pieprasījums apstiprināts.",
+      "rejected": "Pieprasījums noraidīts.",
+      "step_approved": "Posms apstiprināts — sācies nākamais posms.",
+      "recorded": "Jūsu lēmums saglabāts. Gaidām pārējos apstiprinātājus.",
+      "delegated": "Posms nodots jūsu kolēģim.",
+      "withdrawn": "Pieprasījums atsaukts.",
+      "cancelled": "Pieprasījums atcelts.",
+      "marked_overdue": "Nokavētie posmi atzīmēti, atbildīgie informēti.",
+      "no_overdue": "Nav posmu, kas pārsniedz termiņu.",
+      "no_approvers": "Šim pieprasījumam pagaidām nav iespējamo apstiprinātāju. Pārbaudiet organizācijas dalībniekus un viņu lomas.",
+      "not_published": "Šī veidne vēl netiek lietota.",
+      "not_pending": "Šis pieprasījums vairs nav atvērts.",
+      "invalid": "Pārbaudiet ievadītās vērtības un mēģiniet vēlreiz.",
+      "invalid_delegate": "Šādu kolēģi šajā organizācijā neizdevās atrast.",
+      "needs_migration": "Apstiprinājumi šajā vidē vēl nav ieslēgti. Nekas netika saglabāts.",
+      "not_authorized": "Jums tas nav atļauts.",
+      "not_found": "Pieprasījums nav atrasts.",
+      "limit_reached": "Sasniegts atvērto ierakstu limits. Vispirms pabeidziet esošos.",
+      "error": "Radās kļūda. Nekas netika mainīts."
+    }
   }
 }

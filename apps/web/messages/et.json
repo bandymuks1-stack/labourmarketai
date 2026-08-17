@@ -349,7 +349,11 @@
         "event_absence_rejected": "Sinu puudumine lükati tagasi",
         "event_booking_withdrawn": "Broneeringu ettepanek võeti tagasi",
         "event_engagement_ended": "Töösuhe lõpetati",
-        "event_engagement_created": "Loodi uus koostöö"
+        "event_engagement_created": "Loodi uus koostöö",
+        "event_workflow_step_pending": "Kinnitustaotlus ootab teie otsust",
+        "event_workflow_decided": "Teie kinnitustaotluse kohta on otsus tehtud",
+        "event_workflow_delegated": "Kinnitusetapp anti teile üle",
+        "event_workflow_escalated": "Kinnitusetapp ületas tähtaja"
       }
     },
     "onboarding": {
@@ -4292,5 +4296,153 @@
     "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
     "companyProfileLink": "[EN] Open company profile",
     "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
+  },
+  "approvals": {
+    "title": "Kinnitused",
+    "intro": "Kinnitustaotlused teie organisatsioonides: esitage taotlus, otsustage teid ootavad asjad ja jälgige iga etappi.",
+    "unavailable": "Kinnitused pole selles keskkonnas veel sisse lülitatud. Midagi ei lähe kaotsi — see ala avaneb, kui kinnituste hoidla on üle vaadatud ja rakendatud.",
+    "honestNote": "Otsused jäävad toote sisse. Midagi ei saadeta e-postiga ega mujale — uuendused on näha sellel lehel ja teavituste kellas.",
+    "loadError": "Osa kinnituste andmeid ei õnnestunud praegu laadida. See, mida näete, on tõsi, kuid võib olla puudulik.",
+    "inbox": {
+      "title": "Ootab teie otsust",
+      "empty": "Praegu ei oota miski teie otsust.",
+      "stepLabel": "Etapp"
+    },
+    "start": {
+      "title": "Uus kinnitustaotlus",
+      "definitionLabel": "Kinnitusmall",
+      "titleLabel": "Mida taotlete?",
+      "detailsLabel": "Üksikasjad (valikuline)",
+      "submit": "Saada taotlus"
+    },
+    "myRequests": {
+      "title": "Minu taotlused",
+      "empty": "Te pole veel ühtegi kinnitustaotlust esitanud."
+    },
+    "admin": {
+      "title": "Organisatsiooni kinnitused",
+      "noPending": "Teie organisatsioonides pole teiste avatud taotlusi.",
+      "overdueHint": "Tähtaegade kontroll ainult märgib hilinenud etapid ja teavitab vastutajaid. Midagi ei kinnitata kunagi automaatselt."
+    },
+    "templates": {
+      "title": "Kinnitusmallid",
+      "empty": "Malle veel pole. Looge esimene allpool.",
+      "createTitle": "Uus kinnitusmall",
+      "orgLabel": "Organisatsioon",
+      "nameLabel": "Malli nimi",
+      "contextLabel": "Taotluse tüüp",
+      "stepLegend": "Etapp {n}",
+      "optional": "valikuline",
+      "stepNameLabel": "Etapi nimi",
+      "modeLabel": "Mitu peavad kinnitama",
+      "ruleLabel": "Kes otsustab",
+      "deadlineLabel": "Tähtaeg (tundides, valikuline)",
+      "escalationHint": "Kui etapp ületab tähtaja, märgitakse see hilinenuks ning omanikke ja administraatoreid teavitatakse. Automaatselt ei kinnitata kunagi.",
+      "createSubmit": "Loo mall",
+      "stepCount": "Etappe: {count}",
+      "published": "Kasutusel"
+    },
+    "actions": {
+      "approve": "Kinnita",
+      "reject": "Lükka tagasi",
+      "delegate": "Anna kolleegile üle",
+      "delegateSubmit": "Anna üle",
+      "withdraw": "Võta tagasi",
+      "cancel": "Tühista taotlus",
+      "markOverdue": "Kontrolli tähtaegu",
+      "publish": "Võta kasutusele"
+    },
+    "form": {
+      "reasonLabel": "Põhjus",
+      "reasonOptional": "Valikuline",
+      "delegateEmailLabel": "Kolleegi e-post",
+      "delegateHint": "Kolleeg peab kuuluma samasse organisatsiooni. Vastutus selle etapi eest jääb teile."
+    },
+    "status": {
+      "pending": "Ootel",
+      "approved": "Kinnitatud",
+      "rejected": "Tagasi lükatud",
+      "withdrawn": "Tagasi võetud",
+      "cancelled": "Tühistatud"
+    },
+    "stepStatus": {
+      "waiting": "Alustamata",
+      "active": "Käimas",
+      "approved": "Kinnitatud",
+      "rejected": "Tagasi lükatud",
+      "skipped": "Vahele jäetud",
+      "escalated": "Tähtaeg ületatud"
+    },
+    "mode": {
+      "single": "Otsustab üks inimene",
+      "all": "Kõik peavad kinnitama",
+      "any": "Loeb esimene otsus"
+    },
+    "decision": {
+      "approved": "Kinnitas",
+      "rejected": "Lükkas tagasi"
+    },
+    "rule": {
+      "owner_admin": "Omanikud ja administraatorid",
+      "requester_manager": "Taotleja juhid"
+    },
+    "contextType": {
+      "generic_request": "Üldine taotlus",
+      "worker_absence": "Puudumine",
+      "expense": "Kulu",
+      "invoice": "Arve",
+      "document_ack": "Dokumendi kinnitamine",
+      "timesheet": "Tööajatabel",
+      "procurement": "Ost",
+      "business_trip": "Lähetus",
+      "management_decision": "Juhtkonna otsus",
+      "agreement": "Leping"
+    },
+    "transition": {
+      "started": "Taotlus esitatud",
+      "step_activated": "Etapp alustatud",
+      "approved": "Kinnitatud",
+      "rejected": "Tagasi lükatud",
+      "delegated": "Üle antud",
+      "withdrawn": "Tagasi võetud",
+      "cancelled": "Tühistatud",
+      "escalated": "Märgitud tähtaja ületamine",
+      "completed": "Lõpetatud"
+    },
+    "timeline": {
+      "open": "Näita kulgu",
+      "progress": "Kinnitanud {approved}/{total}",
+      "deadline": "Tähtaeg",
+      "historyTitle": "Kogu ajalugu",
+      "stepLabel": "etapp"
+    },
+    "notice": {
+      "created": "Mall loodud. Võtke see kasutusele, et inimesed saaksid taotlusi esitada.",
+      "published": "Mall on nüüd kasutusel.",
+      "started": "Taotlus saadeti esimese etapi kinnitajatele.",
+      "already_pending": "Selline taotlus on juba avatud.",
+      "already_published": "See mall on juba kasutusel.",
+      "already_exists": "Sellise nimega mall on organisatsioonis juba olemas.",
+      "already_decided": "Olete selles etapis juba otsustanud.",
+      "approved": "Taotlus kinnitatud.",
+      "rejected": "Taotlus tagasi lükatud.",
+      "step_approved": "Etapp kinnitatud — algas järgmine etapp.",
+      "recorded": "Teie otsus on salvestatud. Ootame teisi kinnitajaid.",
+      "delegated": "Etapp anti üle teie kolleegile.",
+      "withdrawn": "Taotlus tagasi võetud.",
+      "cancelled": "Taotlus tühistatud.",
+      "marked_overdue": "Hilinenud etapid märgiti ja vastutajaid teavitati.",
+      "no_overdue": "Ühelgi etapil pole tähtaeg ületatud.",
+      "no_approvers": "Sellel taotlusel pole veel võimalikke kinnitajaid. Kontrollige organisatsiooni liikmeid ja nende rolle.",
+      "not_published": "See mall pole veel kasutusel.",
+      "not_pending": "See taotlus pole enam avatud.",
+      "invalid": "Kontrollige sisestatud väärtusi ja proovige uuesti.",
+      "invalid_delegate": "Sellist kolleegi selles organisatsioonis ei leitud.",
+      "needs_migration": "Kinnitused pole selles keskkonnas veel sisse lülitatud. Midagi ei salvestatud.",
+      "not_authorized": "Teil pole lubatud seda teha.",
+      "not_found": "Taotlust ei leitud.",
+      "limit_reached": "Avatud kirjete limiit on täis. Lõpetage esmalt midagi.",
+      "error": "Midagi läks valesti. Midagi ei muudetud."
+    }
   }
 }

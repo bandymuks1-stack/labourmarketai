@@ -48,12 +48,20 @@ export type NotificationEventType =
   // label copy is deliberately neutral about visibility: whether the company
   // still sees the worker depends on other relationships (F2), and a
   // notification must not claim what it has not measured.
-  | "engagement_ended";
+  | "engagement_ended"
+  // v3 (20260817130100): the Workflow & Approval Engine's four durable
+  // facts. Escalation is a marked SAFE STATE — the label may say a deadline
+  // passed, never that anything was auto-approved (nothing is).
+  | "workflow_step_pending"
+  | "workflow_decided"
+  | "workflow_delegated"
+  | "workflow_escalated";
 
 export type NotificationEntityType =
   | "booking_request"
   | "worker_absence"
-  | "engagement";
+  | "engagement"
+  | "workflow_instance";
 
 /**
  * Where a durable event TAKES YOU.
@@ -81,6 +89,11 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   booking_request: "/dashboard/bookings",
   worker_absence: "/dashboard/absences",
   engagement: "/dashboard/bookings",
+  // The approvals area lives ON the network page (constitution: expanded
+  // inside an existing surface, the reports?journalWindow precedent — no new
+  // route). The section anchor is #approvals; the stored href stays the
+  // route, which is what the route-existence guard pins.
+  workflow_instance: "/dashboard/network",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

@@ -2083,7 +2083,14 @@ describe("no migration files added by this sprint", () => {
     // Safe: policy corrections + authority extensions only; no schema change,
     // no DML, every file carries a paired rollback and the human-gate marker
     // per owner mandate 2026-08-17 §4.
-    const SPRINT_BASELINE = 203;
+    // Bumped 203 -> 205 for the Workflow & Approval Engine v1 PAIR
+    // (20260817130000_workflow_engine_v1 + 20260817130100_notification_
+    // events_v3_workflow_types; owner mandate 2026-08-17, UNAPPLIED —
+    // PENDING APPLY BY LEAD; gate doc workflow-engine-gate.md). Renamed from
+    // the 20260817120000/121000 slots after security train A claimed those
+    // version prefixes on main. RECOUNTED from the post-rebase tree
+    // (`ls supabase/migrations/*.sql` = 205), never summed.
+    const SPRINT_BASELINE = 205;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

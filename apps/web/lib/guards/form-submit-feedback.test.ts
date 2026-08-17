@@ -75,6 +75,12 @@ const NATIVE_NAV = new Set([
   // result list re-render IS the feedback. (The invite panel and invitation
   // lists are client components covered by the general client-async rule.)
   "app/[locale]/dashboard/network/page.tsx",
+  // Approvals area of the network page (Workflow & Approval Engine v1) —
+  // every form is a NATIVE-NAV server action over a gated engine command
+  // that ALWAYS redirects back to /dashboard/network with an honest ?wf=
+  // outcome (rendered as a role="status" banner by the section), exactly
+  // the tasks/finance pattern. Pure server component — no client state.
+  "app/[locale]/dashboard/network/approvals-section.tsx",
   // Invitation landing page (core-network area B) — accept/decline are
   // NATIVE-NAV server actions that ALWAYS redirect: success lands in the
   // exact accepted context; failure lands back here with an honest
