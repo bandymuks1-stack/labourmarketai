@@ -739,6 +739,22 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/notification-events-v2-types-gate.md. Rollback
       // paired, ships UNAPPLIED.
       "20260813100000_notification_events_v2_types.sql",
+      // 2026-08-17: security train A (advisor triage, PR #1168) — four
+      // migrations marked under the owner's 2026-08-17 mandate (autonomous
+      // functional completion train V2, §4 migration authority), which
+      // PRE-APPROVES safe policy corrections / org-authority extensions of
+      // existing SECDEF RPCs for autonomous application AFTER review + tests
+      // + CI green. Unlike most entries above, the approval is a standing
+      // mandate rather than a per-migration decision; each marker cites the
+      // mandate + its safety class in the migration header, all four ship
+      // UNAPPLIED (ledger: PENDING APPLY BY LEAD SESSION via Supabase MCP),
+      // and each carries a paired rollback restoring byte-exact live
+      // definitions. Markers were added in the same commit as the ledger
+      // records. Provenance guard: lib/guards/security-train-a-v1.test.ts.
+      "20260817120000_catalog_least_privilege_v1.sql",
+      "20260817121000_invitation_org_authority_v1.sql",
+      "20260817122000_contact_disclosure_org_authority_v1.sql",
+      "20260817123000_finance_org_authority_v1.sql",
     ]);
   });
 
