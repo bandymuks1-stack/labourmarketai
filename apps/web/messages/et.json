@@ -4673,5 +4673,126 @@
       "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
       "error": "[EN] Something went wrong. Nothing was saved."
     }
+  },
+  "requests": {
+    "title": "Taotlused",
+    "intro": "Paluge tööandjalt midagi ja jälgige, mis edasi saab. Iga taotlus läbib teie ettevõtte seatud kinnitusraja.",
+    "unavailable": "Taotlused pole selles keskkonnas veel sisse lülitatud. Midagi ei lähe kaduma — jaotis avaneb, kui uuendus on üle vaadatud ja paigaldatud.",
+    "honestNote": "Taotluse üle otsustavad päris inimesed teie ettevõttes. Midagi ei kinnitata automaatselt ja miski ei lahku tootest.",
+    "notice": {
+      "created": "Taotlus esitatud. Õigetel inimestel paluti see üle vaadata.",
+      "withdrawn": "Taotlus tagasi võetud.",
+      "template_ready": "Taotluste kinnitusrada on valmis.",
+      "policy_saved": "Puhkuselimiit salvestatud.",
+      "already_pending": "See taotlus ootab juba otsust.",
+      "no_definition": "Teie ettevõte pole veel taotluste kinnitusrada seadistanud.",
+      "no_approvers": "Praegu pole ettevõttes kedagi, kes saaks seda taotlust läbi vaadata, seega seda ei esitatud.",
+      "not_published": "Taotluste kinnitusrada pole veel valmis.",
+      "not_pending": "See taotlus ei oota enam — allpool on selle praegune seis.",
+      "invalid": "Kontrollige andmeid ja proovige uuesti.",
+      "needs_migration": "Pole veel saadaval — taotluste uuendus pole selles keskkonnas paigaldatud.",
+      "not_authorized": "Teil pole selleks luba.",
+      "not_found": "Ei leitud.",
+      "limit_reached": "Liiga palju avatud taotlusi. Oodake kõigepealt olemasolevate otsuseid.",
+      "error": "Midagi läks valesti. Proovige uuesti."
+    },
+    "file": {
+      "title": "Uus taotlus",
+      "orgLabel": "Ettevõte",
+      "unnamedOrg": "Nimetu ettevõte",
+      "typeLabel": "Mida palute?",
+      "titleLabel": "Lühike pealkiri",
+      "detailsLabel": "Selgitus",
+      "dateFromLabel": "Alates (valikuline)",
+      "dateToLabel": "Kuni (valikuline)",
+      "datesHint": "Kuupäevad on olulised kaugtöö või graafikumuudatuse puhul. Kui ei sobi, jätke tühjaks.",
+      "submit": "Esita taotlus",
+      "noOrganizations": "Te pole veel ühegi ettevõttega seotud, seega pole taotlust kellelegi saata."
+    },
+    "type": {
+      "remote_work": "Kaugtöö",
+      "schedule_change": "Graafiku muutmine",
+      "certificate_request": "Tõend või dokument",
+      "employment_condition_change": "Töötingimuste muutmine",
+      "benefit_request": "Hüve",
+      "equipment_request": "Varustus",
+      "other": "Muu"
+    },
+    "typeHint": {
+      "remote_work": "paluge töötada kodus või mujal valitud päevadel",
+      "schedule_change": "paluge teisi tööaegu või vahetusi",
+      "certificate_request": "paluge tõendit või dokumenti oma töö kohta",
+      "employment_condition_change": "paluge muuta kokkulepitud töötingimust",
+      "benefit_request": "paluge hüve, mida teie ettevõte pakub",
+      "equipment_request": "paluge tööks vajalikke tööriistu või varustust",
+      "other": "kõik muu, mida soovite tööandjalt paluda"
+    },
+    "status": {
+      "pending": "Ootab otsust",
+      "approved": "Kinnitatud",
+      "rejected": "Tagasi lükatud",
+      "withdrawn": "Tagasi võetud",
+      "cancelled": "Tühistatud"
+    },
+    "mine": {
+      "title": "Minu taotlused",
+      "empty": "Taotlusi veel pole.",
+      "timelineOpen": "Näita kulgu"
+    },
+    "actions": {
+      "withdraw": "Võta tagasi"
+    },
+    "register": {
+      "title": "Taotluste register",
+      "decideHint": "Kinnitamine ja tagasilükkamine toimub ülal kinnituste alas — see register näitab kõiki teie organisatsioonide taotlusi.",
+      "filterStatus": "Staatus",
+      "filterType": "Tüüp",
+      "filterAll": "Kõik",
+      "filterApply": "Filtreeri",
+      "empty": "Sobivaid taotlusi pole."
+    },
+    "seed": {
+      "title": "Seadista taotluste kinnitusrada",
+      "hint": "Loob lihtsa valmis raja: ühe läbivaatusringi, mille otsustavad ettevõtte omanikud ja administraatorid. Mitmeastmelisi radu saate ehitada ülal kinnituste alas.",
+      "orgLabel": "Ettevõte",
+      "typeLabel": "Kehtib",
+      "allTypes": "Kõigile taotlusetüüpidele",
+      "nameLabel": "Nimi",
+      "defaultName": "Standardne taotluste kinnitamine",
+      "submit": "Loo ja lülita sisse"
+    },
+    "policies": {
+      "title": "Puhkuselimiidid",
+      "honesty": "Need arvud määrab ettevõte ise. Need on ainult planeerimise abiks — kinnitamine jääb päris juhi otsuseks ja see pole õigusnõustamine.",
+      "entitlementShort": "{days} p/aastas",
+      "carryoverShort": "+{days} üle kantud",
+      "inactive": "välja lülitatud",
+      "setTitle": "Määra puhkuselimiit",
+      "orgLabel": "Ettevõte",
+      "typeLabel": "Puudumise liik",
+      "entitlementLabel": "Päevi aastas",
+      "carryoverLabel": "Ülekantud päevad",
+      "activeLabel": "Kasutusel",
+      "submit": "Salvesta"
+    },
+    "absenceType": {
+      "annual_leave": "Põhipuhkus",
+      "sickness": "Haigus",
+      "unpaid": "Palgata puhkus",
+      "training": "Koolitus",
+      "other": "Muu"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Minu puhkusejääk {year}",
+      "advisoryNote": "Jäägid on planeerimise abiks. Otsustab teie juht. Arvud tulevad teie ettevõtte seadetest, mitte seadusest.",
+      "noPolicy": "Teie ettevõte pole siin veel puhkuselimiite määranud.",
+      "remaining": "jäänud {days} p",
+      "detail": "{entitlement} aastas + {carryover} üle kantud − {used} kasutatud",
+      "requestedDays": "taotletud {days} p",
+      "remainingShort": "jäänud {days} p",
+      "exceedsNote": "Rohkem kui järelejäänud puhkus"
+    }
   }
 }

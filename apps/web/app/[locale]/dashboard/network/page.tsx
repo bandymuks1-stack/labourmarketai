@@ -24,7 +24,13 @@ import {
   TeamEnquiryButton,
 } from "@/components/app/team-enquiry-entry";
 import { isWorkflowNotice } from "@/lib/approvals/approvals-model";
+import {
+  isEmployeeRequestNotice,
+  isValidEmployeeRequestStatus,
+  isValidEmployeeRequestType,
+} from "@/lib/requests/requests-model";
 import { ApprovalsSection } from "./approvals-section";
+import { RequestsSection } from "./requests-section";
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -45,14 +51,35 @@ export default async function NetworkPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; type?: string; org?: string; project?: string; wf?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    type?: string;
+    org?: string;
+    project?: string;
+    wf?: string;
+    req?: string;
+    reqStatus?: string;
+    reqType?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, wf } = await searchParams;
+  const { q, type, org, project, wf, req, reqStatus, reqType } =
+    await searchParams;
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
   const workflowNotice = wf && isWorkflowNotice(wf) ? wf : null;
+  // Requests-area outcome notice + register filters (typed employee
+  // requests v1) — same closed-vocabulary validation, never rendered raw.
+  const requestNotice = req && isEmployeeRequestNotice(req) ? req : null;
+  const requestsFilter = {
+    ...(reqStatus && isValidEmployeeRequestStatus(reqStatus)
+      ? { status: reqStatus }
+      : {}),
+    ...(reqType && isValidEmployeeRequestType(reqType)
+      ? { requestType: reqType }
+      : {}),
+  };
 
   // W7 marketplaceHub reconciliation: the three strings the W7-S4 move
   // carried here were the LAST live keys of the `marketplaceHub` namespace —
@@ -411,6 +438,18 @@ export default async function NetworkPage({
         locale={locale}
         notice={workflowNotice}
         organizations={organizations}
+      />
+
+      {/* Typed employee requests (v1) — the register half of the same
+          engine: filing, my requests + timeline, the org register and the
+          leave-number configuration. Deciding stays in the approvals inbox
+          above. Expanded INSIDE this declared surface (no new route; the
+          approvals-section precedent). */}
+      <RequestsSection
+        locale={locale}
+        notice={requestNotice}
+        organizations={organizations}
+        filter={requestsFilter}
       />
     </div>
   );

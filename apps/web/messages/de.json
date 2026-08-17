@@ -384,7 +384,17 @@
     "managerEmpty": "Keine offenen Anträge Ihrer Mitarbeiter.",
     "unknownWorker": "Mitarbeiter",
     "approve": "Genehmigen",
-    "reject": "Ablehnen"
+    "reject": "Ablehnen",
+    "balance": {
+      "title": "Mein Urlaubskonto {year}",
+      "advisoryNote": "Kontingente sind eine Planungshilfe. Ihre Führungskraft entscheidet. Die Zahlen stammen aus den Einstellungen Ihres Unternehmens, nicht aus dem Gesetz.",
+      "noPolicy": "Ihr Unternehmen hat hier noch keine Urlaubskontingente festgelegt.",
+      "remaining": "{days} T übrig",
+      "detail": "{entitlement} pro Jahr + {carryover} übertragen − {used} verbraucht",
+      "requestedDays": "{days} T beantragt",
+      "remainingShort": "{days} T übrig",
+      "exceedsNote": "Mehr als der verbleibende Urlaub"
+    }
   },
   "projectStages": {
     "ganttTitle": "Zeitleiste (Gantt)",
@@ -12704,5 +12714,114 @@
     "errorLabel": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     "notAuthorizedLabel": "Nur Führungskräfte können Objekte ändern.",
     "savedLabel": "Gespeichert."
+  },
+  "requests": {
+    "title": "Anträge",
+    "intro": "Bitten Sie Ihren Arbeitgeber um etwas und verfolgen Sie, was danach passiert. Jeder Antrag durchläuft den Freigabeweg, den Ihr Unternehmen eingerichtet hat.",
+    "unavailable": "Anträge sind in dieser Umgebung noch nicht eingeschaltet. Nichts geht verloren — dieser Bereich öffnet sich, sobald das Antrags-Update geprüft und eingespielt ist.",
+    "honestNote": "Über einen Antrag entscheiden echte Menschen in Ihrem Unternehmen. Nichts wird automatisch genehmigt, und nichts verlässt dieses Produkt.",
+    "notice": {
+      "created": "Antrag eingereicht. Die zuständigen Personen wurden um Prüfung gebeten.",
+      "withdrawn": "Antrag zurückgezogen.",
+      "template_ready": "Der Freigabeweg für Anträge ist bereit.",
+      "policy_saved": "Urlaubskontingent gespeichert.",
+      "already_pending": "Dieser Antrag wartet bereits auf eine Entscheidung.",
+      "no_definition": "Ihr Unternehmen hat noch keinen Freigabeweg für Anträge eingerichtet.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diesen Antrag prüfen; er wurde nicht eingereicht.",
+      "not_published": "Der Freigabeweg für Anträge ist noch nicht bereit.",
+      "not_pending": "Dieser Antrag wartet nicht mehr — unten sehen Sie seinen aktuellen Stand.",
+      "invalid": "Bitte prüfen Sie die Angaben und versuchen Sie es erneut.",
+      "needs_migration": "Noch nicht verfügbar — das Antrags-Update ist hier nicht eingespielt.",
+      "not_authorized": "Das dürfen Sie nicht.",
+      "not_found": "Nicht gefunden.",
+      "limit_reached": "Zu viele offene Anträge. Warten Sie zuerst auf Entscheidungen zu den bestehenden.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
+    "file": {
+      "title": "Neuer Antrag",
+      "orgLabel": "Unternehmen",
+      "unnamedOrg": "Unternehmen ohne Namen",
+      "typeLabel": "Worum bitten Sie?",
+      "titleLabel": "Kurzer Titel",
+      "detailsLabel": "Erläuterung",
+      "dateFromLabel": "Von (optional)",
+      "dateToLabel": "Bis (optional)",
+      "datesHint": "Daten sind wichtig für Homeoffice oder Dienstplanänderungen. Lassen Sie sie leer, wenn sie nicht zutreffen.",
+      "submit": "Antrag einreichen",
+      "noOrganizations": "Sie sind noch mit keinem Unternehmen verbunden, daher gibt es niemanden, an den ein Antrag gehen kann."
+    },
+    "type": {
+      "remote_work": "Homeoffice",
+      "schedule_change": "Dienstplanänderung",
+      "certificate_request": "Bescheinigung oder Dokument",
+      "employment_condition_change": "Änderung der Arbeitsbedingungen",
+      "benefit_request": "Zusatzleistung",
+      "equipment_request": "Ausrüstung",
+      "other": "Sonstiges"
+    },
+    "typeHint": {
+      "remote_work": "bitten Sie darum, an gewählten Tagen von zu Hause oder anderswo zu arbeiten",
+      "schedule_change": "bitten Sie um andere Arbeitszeiten oder Schichten",
+      "certificate_request": "bitten Sie um eine Bescheinigung oder ein Dokument über Ihre Beschäftigung",
+      "employment_condition_change": "bitten Sie um die Änderung einer vereinbarten Arbeitsbedingung",
+      "benefit_request": "bitten Sie um eine Leistung, die Ihr Unternehmen anbietet",
+      "equipment_request": "bitten Sie um Werkzeuge oder Ausrüstung für Ihre Arbeit",
+      "other": "alles andere, worum Sie Ihren Arbeitgeber bitten möchten"
+    },
+    "status": {
+      "pending": "Wartet auf Entscheidung",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "withdrawn": "Zurückgezogen",
+      "cancelled": "Storniert"
+    },
+    "mine": {
+      "title": "Meine Anträge",
+      "empty": "Noch keine Anträge.",
+      "timelineOpen": "Verlauf anzeigen"
+    },
+    "actions": {
+      "withdraw": "Zurückziehen"
+    },
+    "register": {
+      "title": "Antragsregister",
+      "decideHint": "Genehmigen und Ablehnen geschieht im Freigabebereich oben — dieses Register listet alle Anträge Ihrer Organisationen.",
+      "filterStatus": "Status",
+      "filterType": "Typ",
+      "filterAll": "Alle",
+      "filterApply": "Filtern",
+      "empty": "Keine passenden Anträge."
+    },
+    "seed": {
+      "title": "Freigabeweg für Anträge einrichten",
+      "hint": "Erstellt einen einfachen fertigen Freigabeweg: eine Prüfrunde, entschieden von den Inhabern und Administratoren des Unternehmens. Mehrstufige Wege bauen Sie im Freigabebereich oben.",
+      "orgLabel": "Unternehmen",
+      "typeLabel": "Gilt für",
+      "allTypes": "Alle Antragstypen",
+      "nameLabel": "Name",
+      "defaultName": "Standard-Antragsfreigabe",
+      "submit": "Erstellen und einschalten"
+    },
+    "policies": {
+      "title": "Urlaubskontingente",
+      "honesty": "Diese Zahlen legt Ihr Unternehmen selbst fest. Sie sind nur eine Planungshilfe — die Genehmigung bleibt eine echte Entscheidung einer Führungskraft, und dies ist keine Rechtsberatung.",
+      "entitlementShort": "{days} T/Jahr",
+      "carryoverShort": "+{days} übertragen",
+      "inactive": "ausgeschaltet",
+      "setTitle": "Urlaubskontingent festlegen",
+      "orgLabel": "Unternehmen",
+      "typeLabel": "Urlaubsart",
+      "entitlementLabel": "Tage pro Jahr",
+      "carryoverLabel": "Übertragene Tage",
+      "activeLabel": "In Verwendung",
+      "submit": "Speichern"
+    },
+    "absenceType": {
+      "annual_leave": "Jahresurlaub",
+      "sickness": "Krankheit",
+      "unpaid": "Unbezahlter Urlaub",
+      "training": "Schulung",
+      "other": "Sonstiges"
+    }
   }
 }
