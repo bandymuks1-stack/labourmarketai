@@ -3900,6 +3900,27 @@
         "body": "[EN] A subjective +1 or −1 with text. Shown as an opinion, kept apart from facts; a run of negatives is a signal to check, never a verdict."
       },
       "noStars": "[EN] No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
+    },
+    "marketProof": {
+      "eyebrow": "Teraz na platformie",
+      "title": "Rynek pracy w liczbach",
+      "stats": {
+        "vacancies": {
+          "value": "41 000+",
+          "label": "aktywnych ofert pracy"
+        },
+        "employers": {
+          "value": "7 600+",
+          "label": "pracodawców w ogłoszeniach"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regionów z aktywnymi ogłoszeniami"
+        }
+      },
+      "asOfNote": "Na podstawie danych z ogłoszeń z 17.08.2026; liczby zmieniają się codziennie.",
+      "topTitle": "Najbardziej poszukiwane zawody obecnie",
+      "topNote": "Według aktywnych ogłoszeń na platformie. Część ogłoszeń nie jest jeszcze przypisana do zawodu."
     }
   },
   "workspace": {

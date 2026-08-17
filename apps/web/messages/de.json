@@ -12008,6 +12008,27 @@
       },
       "persistAction": "Save this result",
       "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+    },
+    "marketProof": {
+      "eyebrow": "Aktuell auf der Plattform",
+      "title": "Der Arbeitsmarkt in Zahlen",
+      "stats": {
+        "vacancies": {
+          "value": "41.000+",
+          "label": "aktive Stellenangebote"
+        },
+        "employers": {
+          "value": "7.600+",
+          "label": "Arbeitgeber hinter den Anzeigen"
+        },
+        "regions": {
+          "value": "21",
+          "label": "Regionen mit aktiven Anzeigen"
+        }
+      },
+      "asOfNote": "Auf Basis der Stellenanzeigen-Daten vom 17.08.2026; die Zahlen ändern sich täglich.",
+      "topTitle": "Aktuell gefragteste Berufe",
+      "topNote": "Nach aktiven Stellenanzeigen auf der Plattform. Ein Teil der Anzeigen ist noch keinem Beruf zugeordnet."
     }
   },
   "workspace": {

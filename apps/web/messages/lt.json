@@ -12008,6 +12008,27 @@
       },
       "persistAction": "Išsaugoti šį rezultatą",
       "persistWhy": "Paskyros reikia tik norint išsaugoti, kreiptis ar susisiekti — peržiūrėti gali ir be jos."
+    },
+    "marketProof": {
+      "eyebrow": "Šiuo metu platformoje",
+      "title": "Darbo rinka skaičiais",
+      "stats": {
+        "vacancies": {
+          "value": "41 000+",
+          "label": "aktyvių darbo galimybių"
+        },
+        "employers": {
+          "value": "7 600+",
+          "label": "darbdavių darbo pasiūloje"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regionas su aktyviais skelbimais"
+        }
+      },
+      "asOfNote": "Pagal 2026-08-17 darbo skelbimų duomenis; skaičiai kinta kasdien.",
+      "topTitle": "Šiuo metu paklausiausios profesijos",
+      "topNote": "Pagal aktyvius darbo skelbimus platformoje. Dalis skelbimų dar nepriskirta profesijai."
     }
   },
   "workspace": {

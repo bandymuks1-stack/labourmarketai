@@ -12008,6 +12008,27 @@
       },
       "persistAction": "Save this result",
       "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+    },
+    "marketProof": {
+      "eyebrow": "On the platform right now",
+      "title": "The job market in numbers",
+      "stats": {
+        "vacancies": {
+          "value": "41,000+",
+          "label": "active job opportunities"
+        },
+        "employers": {
+          "value": "7,600+",
+          "label": "employers behind the listings"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regions with active listings"
+        }
+      },
+      "asOfNote": "Based on job listing data from 2026-08-17; numbers change daily.",
+      "topTitle": "Professions most in demand right now",
+      "topNote": "Ranked by active job listings on the platform. Some listings are not yet grouped by profession."
     }
   },
   "workspace": {

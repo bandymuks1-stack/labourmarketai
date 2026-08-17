@@ -12008,6 +12008,27 @@
       },
       "persistAction": "Save this result",
       "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+    },
+    "marketProof": {
+      "eyebrow": "Сейчас на платформе",
+      "title": "Рынок труда в цифрах",
+      "stats": {
+        "vacancies": {
+          "value": "41 000+",
+          "label": "активных вакансий"
+        },
+        "employers": {
+          "value": "7 600+",
+          "label": "работодателей в объявлениях"
+        },
+        "regions": {
+          "value": "21",
+          "label": "регион с активными объявлениями"
+        }
+      },
+      "asOfNote": "По данным объявлений на 17.08.2026; цифры меняются ежедневно.",
+      "topTitle": "Самые востребованные профессии сейчас",
+      "topNote": "По активным объявлениям на платформе. Часть объявлений пока не привязана к профессии."
     }
   },
   "workspace": {
