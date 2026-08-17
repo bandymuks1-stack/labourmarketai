@@ -811,6 +811,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // LEAD SESSION via Supabase MCP), paired rollback, DB proof
       // scripts/db-proof/durable-workspace-pointer-v2.sh (32/32).
       "20260817160000_durable_workspace_pointer_v2.sql",
+      // 2026-08-17: timesheets v1 (train E of the same autonomous functional
+      // completion train V2) gained its marker under the SAME owner mandate's
+      // §4 migration authority, recorded in docs/APPLIED_LEDGER.md (Deferred,
+      // PENDING APPLY BY LEAD) and the migration's own header. Added in the
+      // same commit as that record — not spread from this branch's approval.
+      "20260817170000_timesheets_v1.sql",
     ]);
   });
 

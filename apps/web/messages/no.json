@@ -4587,5 +4587,91 @@
       "externalRefLabel": "[EN] Reference number (optional)",
       "submit": "[EN] Register document"
     }
+  },
+  "timesheets": {
+    "title": "Timelister",
+    "intro": "Timedokumenter per periode, avledet fra arbeidsjournalen din. Timer rettes alltid i journalen; en timeliste er en fastfrosset kopi som sendes til godkjenning.",
+    "needsMigration": "Timelister er ennå ikke aktivert i dette miljøet.",
+    "readError": "Deler av timelistedataene kunne ikke lastes akkurat nå.",
+    "noLines": "Ingen registrerte timer i denne perioden ennå. Noter arbeidet ditt i journalen og oppdater.",
+    "linesTitle": "Linjer ({count})",
+    "approvalTimeline": "Godkjenningsforløp",
+    "openApprovals": "Åpne godkjenningsområdet",
+    "noTemplateNote": "Denne organisasjonen har ennå ingen publisert godkjenningsmal for timelister, så innsending er ikke mulig. Be en organisasjonsadministrator om å opprette en.",
+    "totals": {
+      "hours": "{hours} t",
+      "dayUnits": "{days} dagsenheter",
+      "lines": "{count} linjer"
+    },
+    "unit": {
+      "hours": "t",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Innsendt",
+      "approved": "Godkjent",
+      "rejected": "Avvist",
+      "reopened": "Returnert"
+    },
+    "mine": {
+      "title": "Mine timelister",
+      "derivedNote": "Hver linje kommer fra journalpostene dine. For å rette timer, rett journalposten og trykk Oppdater.",
+      "empty": "Ingen timelister ennå. Velg en organisasjon og en periode for å opprette den første.",
+      "noOrganizations": "Du er ennå ikke knyttet til noen organisasjon, så det finnes ingen steder å sende inn timer."
+    },
+    "create": {
+      "organization": "Organisasjon",
+      "unnamedOrganization": "Organisasjon uten navn",
+      "periodStart": "Periodens start",
+      "periodEnd": "Periodens slutt",
+      "action": "Opprett timeliste",
+      "hint": "En periode dekker høyst 31 dager og kan ikke overlappe en annen timeliste for samme organisasjon."
+    },
+    "actions": {
+      "refresh": "Oppdater fra journalen",
+      "submit": "Send til godkjenning",
+      "sync": "Oppdater status",
+      "exportCsv": "Last ned CSV"
+    },
+    "org": {
+      "title": "Lagets timelister",
+      "decideNote": "Godkjenningsbeslutninger tas i godkjenningsområdet. Her kan du se gjennom linjer, eksportere og returnere en avgjort timeliste.",
+      "noTemplateFor": "{name} har ingen publisert godkjenningsmal for timelister.",
+      "createTemplate": "Opprett standard godkjenningsmal",
+      "unnamedWorker": "Arbeider",
+      "decideInApprovals": "Avgjør i godkjenningsområdet",
+      "reopenNote": "Returnotat",
+      "reopenNotePlaceholder": "Hvorfor returneres den?",
+      "reopen": "Returner til arbeider"
+    },
+    "notice": {
+      "created": "Timeliste opprettet.",
+      "refreshed": "Linjer oppdatert fra journalen.",
+      "submitted": "Timeliste sendt til godkjenning.",
+      "reopened": "Timeliste returnert til arbeideren.",
+      "approved": "Timeliste godkjent.",
+      "rejected": "Timeliste avvist.",
+      "synced_pending": "Godkjenningen pågår fortsatt.",
+      "no_instance": "Det finnes ennå ingen godkjenningsforespørsel for denne timelisten.",
+      "no_template": "Denne organisasjonen har ennå ingen publisert godkjenningsmal for timelister.",
+      "template_created": "Standard godkjenningsmal opprettet og publisert.",
+      "overlap": "Denne perioden overlapper en eksisterende timeliste.",
+      "invalid_period": "Perioden er ugyldig — høyst 31 dager, og slutten kan ikke ligge før starten.",
+      "no_worker": "Kontoen din har ingen arbeiderprofil.",
+      "not_editable": "Denne timelisten kan ikke lenger redigeres.",
+      "not_decided": "Bare en godkjent eller avvist timeliste kan returneres.",
+      "not_submitted": "Denne timelisten er ikke innsendt.",
+      "already_submitted": "Denne timelisten er allerede innsendt.",
+      "no_approvers": "Fant ingen godkjennere for denne organisasjonens mal.",
+      "not_published": "Godkjenningsmalen er ennå ikke publisert.",
+      "invalid": "Forespørselen var ugyldig.",
+      "needs_migration": "Timelister er ennå ikke aktivert i dette miljøet.",
+      "not_authorized": "Du har ikke lov til dette.",
+      "not_found": "Timeliste ikke funnet.",
+      "limit_reached": "For mange åpne timelister — send inn eller rydd opp i de eksisterende først.",
+      "error": "Noe gikk galt. Ingenting ble lagret."
+    }
   }
 }
