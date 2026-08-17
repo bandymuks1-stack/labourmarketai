@@ -384,7 +384,17 @@
     "managerEmpty": "Nėra laukiančių jūsų darbuotojų prašymų.",
     "unknownWorker": "Darbuotojas",
     "approve": "Patvirtinti",
-    "reject": "Atmesti"
+    "reject": "Atmesti",
+    "balance": {
+      "title": "Mano atostogų likutis {year}",
+      "advisoryNote": "Likučiai — tik orientyras planavimui. Sprendimą priima jūsų vadovas. Skaičiai — iš jūsų įmonės nustatymų, ne iš įstatymų.",
+      "noPolicy": "Jūsų įmonė čia dar nenustatė atostogų limitų.",
+      "remaining": "liko {days} d.",
+      "detail": "{entitlement} per metus + {carryover} perkelta − {used} panaudota",
+      "requestedDays": "prašoma {days} d.",
+      "remainingShort": "liko {days} d.",
+      "exceedsNote": "Daugiau nei likę atostogų"
+    }
   },
   "projectStages": {
     "ganttTitle": "Laiko juosta (Gantt)",
@@ -12704,6 +12714,115 @@
     "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
     "savedLabel": "Išsaugota."
+  },
+  "requests": {
+    "title": "Prašymai",
+    "intro": "Paprašykite darbdavio ko nors ir sekite, kas vyksta toliau. Kiekvienas prašymas keliauja į jūsų įmonės nustatytą tvirtinimo eigą.",
+    "unavailable": "Prašymai šioje aplinkoje dar neįjungti. Niekas neprarasta — ši dalis atsivers, kai prašymų atnaujinimas bus peržiūrėtas ir įdiegtas.",
+    "honestNote": "Prašymą sprendžia tikri jūsų įmonės žmonės. Niekas nepatvirtinama automatiškai ir niekas nesiunčiama už šio produkto ribų.",
+    "notice": {
+      "created": "Prašymas pateiktas. Atsakingi žmonės paprašyti jį peržiūrėti.",
+      "withdrawn": "Prašymas atšauktas.",
+      "template_ready": "Prašymų tvirtinimo eiga paruošta.",
+      "policy_saved": "Atostogų limitas išsaugotas.",
+      "already_pending": "Šis prašymas jau laukia sprendimo.",
+      "no_definition": "Jūsų įmonė dar nenustatė prašymų tvirtinimo eigos.",
+      "no_approvers": "Šiuo metu įmonėje nėra kam peržiūrėti šio prašymo, todėl jis nepateiktas.",
+      "not_published": "Prašymų tvirtinimo eiga dar neparuošta.",
+      "not_pending": "Šis prašymas nebelaukia sprendimo — žemiau matote dabartinę jo būseną.",
+      "invalid": "Patikrinkite duomenis ir bandykite dar kartą.",
+      "needs_migration": "Dar neprieinama — prašymų atnaujinimas šioje aplinkoje neįdiegtas.",
+      "not_authorized": "Jums to daryti neleidžiama.",
+      "not_found": "Nerasta.",
+      "limit_reached": "Per daug atvirų prašymų. Pirmiausia palaukite sprendimų dėl esamų.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    },
+    "file": {
+      "title": "Naujas prašymas",
+      "orgLabel": "Įmonė",
+      "unnamedOrg": "Įmonė be pavadinimo",
+      "typeLabel": "Ko prašote?",
+      "titleLabel": "Trumpas pavadinimas",
+      "detailsLabel": "Paaiškinimas",
+      "dateFromLabel": "Nuo (nebūtina)",
+      "dateToLabel": "Iki (nebūtina)",
+      "datesHint": "Datos svarbios nuotoliniam darbui ar grafiko keitimui. Jei netinka, palikite tuščias.",
+      "submit": "Pateikti prašymą",
+      "noOrganizations": "Dar nesate susietas su jokia įmone, todėl prašymo nėra kam siųsti."
+    },
+    "type": {
+      "remote_work": "Nuotolinis darbas",
+      "schedule_change": "Grafiko keitimas",
+      "certificate_request": "Pažyma ar dokumentas",
+      "employment_condition_change": "Darbo sąlygų keitimas",
+      "benefit_request": "Lengvata",
+      "equipment_request": "Įranga",
+      "other": "Kita"
+    },
+    "typeHint": {
+      "remote_work": "prašykite dirbti iš namų ar kitos vietos pasirinktomis dienomis",
+      "schedule_change": "prašykite pakeisti darbo valandas ar pamainas",
+      "certificate_request": "prašykite pažymos ar dokumento apie jūsų darbą",
+      "employment_condition_change": "prašykite pakeisti sutartą darbo sąlygą",
+      "benefit_request": "prašykite lengvatos, kurią siūlo jūsų įmonė",
+      "equipment_request": "prašykite darbui reikalingų įrankių ar įrangos",
+      "other": "bet kas kita, ko norite paprašyti darbdavio"
+    },
+    "status": {
+      "pending": "Laukia sprendimo",
+      "approved": "Patvirtinta",
+      "rejected": "Atmesta",
+      "withdrawn": "Atšaukta",
+      "cancelled": "Anuliuota"
+    },
+    "mine": {
+      "title": "Mano prašymai",
+      "empty": "Prašymų dar nėra.",
+      "timelineOpen": "Rodyti eigą"
+    },
+    "actions": {
+      "withdraw": "Atšaukti"
+    },
+    "register": {
+      "title": "Prašymų registras",
+      "decideHint": "Tvirtinama ir atmetama tvirtinimų dalyje aukščiau — šis registras rodo visus jūsų organizacijų prašymus.",
+      "filterStatus": "Būsena",
+      "filterType": "Tipas",
+      "filterAll": "Visi",
+      "filterApply": "Filtruoti",
+      "empty": "Tokių prašymų nėra."
+    },
+    "seed": {
+      "title": "Nustatyti prašymų tvirtinimo eigą",
+      "hint": "Sukuria paprastą paruoštą tvirtinimo eigą: vieną peržiūros ratą, kurį sprendžia įmonės savininkai ir administratoriai. Kelių ratų eigas galite kurti tvirtinimų dalyje aukščiau.",
+      "orgLabel": "Įmonė",
+      "typeLabel": "Kam taikoma",
+      "allTypes": "Visiems prašymų tipams",
+      "nameLabel": "Pavadinimas",
+      "defaultName": "Standartinis prašymų tvirtinimas",
+      "submit": "Sukurti ir įjungti"
+    },
+    "policies": {
+      "title": "Atostogų limitai",
+      "honesty": "Šiuos skaičius įmonė nustato pati. Tai tik orientyras planavimui — tvirtinimas lieka tikru vadovo sprendimu, ir tai nėra teisinė konsultacija.",
+      "entitlementShort": "{days} d./metus",
+      "carryoverShort": "+{days} perkelta",
+      "inactive": "išjungta",
+      "setTitle": "Nustatyti atostogų limitą",
+      "orgLabel": "Įmonė",
+      "typeLabel": "Atostogų tipas",
+      "entitlementLabel": "Dienų per metus",
+      "carryoverLabel": "Perkeltos dienos",
+      "activeLabel": "Naudojama",
+      "submit": "Išsaugoti"
+    },
+    "absenceType": {
+      "annual_leave": "Kasmetinės atostogos",
+      "sickness": "Liga",
+      "unpaid": "Nemokamos atostogos",
+      "training": "Mokymai",
+      "other": "Kita"
+    }
   },
   "agreements": {
     "title": "Sutarčių registras",

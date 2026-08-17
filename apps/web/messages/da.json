@@ -4674,6 +4674,127 @@
       "error": "Noget gik galt. Intet blev gemt."
     }
   },
+  "requests": {
+    "title": "Anmodninger",
+    "intro": "Bed din arbejdsgiver om noget og følg, hvad der sker. Hver anmodning følger den godkendelsesproces, din virksomhed har sat op.",
+    "unavailable": "Anmodninger er endnu ikke slået til i dette miljø. Intet går tabt — sektionen åbner, når opdateringen er gennemgået og installeret.",
+    "honestNote": "En anmodning afgøres af rigtige mennesker i din virksomhed. Intet godkendes automatisk, og intet forlader produktet.",
+    "notice": {
+      "created": "Anmodning sendt. De rette personer er bedt om at se på den.",
+      "withdrawn": "Anmodning trukket tilbage.",
+      "template_ready": "Godkendelsesprocessen for anmodninger er klar.",
+      "policy_saved": "Ferieramme gemt.",
+      "already_pending": "Denne anmodning venter allerede på en afgørelse.",
+      "no_definition": "Din virksomhed har endnu ikke sat en godkendelsesproces op for anmodninger.",
+      "no_approvers": "Ingen i virksomheden kan i øjeblikket behandle denne anmodning, så den blev ikke sendt.",
+      "not_published": "Godkendelsesprocessen for anmodninger er ikke klar endnu.",
+      "not_pending": "Denne anmodning venter ikke længere — nedenfor ses dens aktuelle tilstand.",
+      "invalid": "Tjek oplysningerne og prøv igen.",
+      "needs_migration": "Ikke tilgængelig endnu — opdateringen er ikke installeret i dette miljø.",
+      "not_authorized": "Det må du ikke.",
+      "not_found": "Ikke fundet.",
+      "limit_reached": "For mange åbne anmodninger. Vent først på afgørelser om de eksisterende.",
+      "error": "Noget gik galt. Prøv igen."
+    },
+    "file": {
+      "title": "Ny anmodning",
+      "orgLabel": "Virksomhed",
+      "unnamedOrg": "Virksomhed uden navn",
+      "typeLabel": "Hvad beder du om?",
+      "titleLabel": "Kort titel",
+      "detailsLabel": "Forklaring",
+      "dateFromLabel": "Fra (valgfrit)",
+      "dateToLabel": "Til (valgfrit)",
+      "datesHint": "Datoer er vigtige ved hjemmearbejde eller ændring af arbejdsplan. Lad dem stå tomme, hvis de ikke passer.",
+      "submit": "Send anmodning",
+      "noOrganizations": "Du er endnu ikke knyttet til nogen virksomhed, så der er ingen at sende en anmodning til."
+    },
+    "type": {
+      "remote_work": "Hjemmearbejde",
+      "schedule_change": "Ændring af arbejdsplan",
+      "certificate_request": "Attest eller dokument",
+      "employment_condition_change": "Ændring af ansættelsesvilkår",
+      "benefit_request": "Personalegode",
+      "equipment_request": "Udstyr",
+      "other": "Andet"
+    },
+    "typeHint": {
+      "remote_work": "bed om at arbejde hjemmefra eller et andet sted på valgte dage",
+      "schedule_change": "bed om andre arbejdstider eller vagter",
+      "certificate_request": "bed om en attest eller et dokument om din ansættelse",
+      "employment_condition_change": "bed om at ændre et aftalt ansættelsesvilkår",
+      "benefit_request": "bed om et gode, din virksomhed tilbyder",
+      "equipment_request": "bed om værktøj eller udstyr til dit arbejde",
+      "other": "alt andet, du vil bede din arbejdsgiver om"
+    },
+    "status": {
+      "pending": "Afventer afgørelse",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "withdrawn": "Trukket tilbage",
+      "cancelled": "Annulleret"
+    },
+    "mine": {
+      "title": "Mine anmodninger",
+      "empty": "Ingen anmodninger endnu.",
+      "timelineOpen": "Vis forløb"
+    },
+    "actions": {
+      "withdraw": "Træk tilbage"
+    },
+    "register": {
+      "title": "Anmodningsregister",
+      "decideHint": "Godkendelse og afvisning sker i godkendelsesområdet ovenfor — dette register viser alle anmodninger i dine organisationer.",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "filterAll": "Alle",
+      "filterApply": "Filtrér",
+      "empty": "Ingen anmodninger matcher."
+    },
+    "seed": {
+      "title": "Sæt godkendelsesproces op for anmodninger",
+      "hint": "Opretter en enkel færdig proces: én behandlingsrunde, afgjort af virksomhedens ejere og administratorer. Flertrinsprocesser bygger du i godkendelsesområdet ovenfor.",
+      "orgLabel": "Virksomhed",
+      "typeLabel": "Gælder for",
+      "allTypes": "Alle anmodningstyper",
+      "nameLabel": "Navn",
+      "defaultName": "Standardgodkendelse af anmodninger",
+      "submit": "Opret og slå til"
+    },
+    "policies": {
+      "title": "Ferierammer",
+      "honesty": "Din virksomhed fastsætter selv disse tal. De er kun vejledende til planlægning — godkendelse er fortsat en rigtig leders beslutning, og dette er ikke juridisk rådgivning.",
+      "entitlementShort": "{days} d/år",
+      "carryoverShort": "+{days} overført",
+      "inactive": "slået fra",
+      "setTitle": "Fastsæt ferieramme",
+      "orgLabel": "Virksomhed",
+      "typeLabel": "Fraværstype",
+      "entitlementLabel": "Dage pr. år",
+      "carryoverLabel": "Overførte dage",
+      "activeLabel": "I brug",
+      "submit": "Gem"
+    },
+    "absenceType": {
+      "annual_leave": "Ferie",
+      "sickness": "Sygdom",
+      "unpaid": "Ulønnet orlov",
+      "training": "Uddannelse",
+      "other": "Andet"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Min feriesaldo {year}",
+      "advisoryNote": "Saldi er vejledende til planlægning. Din leder beslutter. Tallene kommer fra din virksomheds egne indstillinger, ikke fra loven.",
+      "noPolicy": "Din virksomhed har endnu ikke fastsat ferierammer her.",
+      "remaining": "{days} d tilbage",
+      "detail": "{entitlement} pr. år + {carryover} overført − {used} brugt",
+      "requestedDays": "{days} d ønsket",
+      "remainingShort": "{days} d tilbage",
+      "exceedsNote": "Mere end den resterende ferie"
+    }
+  },
   "agreements": {
     "title": "Aftaleregister",
     "intro": "Det kanoniske register over {org}s aftaler — ansættelsesrelaterede og generelle. Kun registrering.",

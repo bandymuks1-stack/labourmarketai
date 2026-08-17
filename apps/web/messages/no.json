@@ -4674,6 +4674,127 @@
       "error": "Noe gikk galt. Ingenting ble lagret."
     }
   },
+  "requests": {
+    "title": "Forespørsler",
+    "intro": "Be arbeidsgiveren din om noe og følg med på hva som skjer. Hver forespørsel følger godkjenningsløpet bedriften din har satt opp.",
+    "unavailable": "Forespørsler er ikke slått på i dette miljøet ennå. Ingenting går tapt — delen åpner når oppdateringen er gjennomgått og installert.",
+    "honestNote": "En forespørsel avgjøres av ekte mennesker i bedriften din. Ingenting godkjennes automatisk, og ingenting forlater produktet.",
+    "notice": {
+      "created": "Forespørsel sendt. De rette personene er bedt om å vurdere den.",
+      "withdrawn": "Forespørsel trukket.",
+      "template_ready": "Godkjenningsløpet for forespørsler er klart.",
+      "policy_saved": "Feriekvote lagret.",
+      "already_pending": "Denne forespørselen venter allerede på en avgjørelse.",
+      "no_definition": "Bedriften din har ennå ikke satt opp et godkjenningsløp for forespørsler.",
+      "no_approvers": "Ingen i bedriften kan behandle denne forespørselen nå, så den ble ikke sendt.",
+      "not_published": "Godkjenningsløpet for forespørsler er ikke klart ennå.",
+      "not_pending": "Denne forespørselen venter ikke lenger — nedenfor ser du gjeldende tilstand.",
+      "invalid": "Sjekk opplysningene og prøv igjen.",
+      "needs_migration": "Ikke tilgjengelig ennå — oppdateringen er ikke installert i dette miljøet.",
+      "not_authorized": "Det har du ikke lov til.",
+      "not_found": "Ikke funnet.",
+      "limit_reached": "For mange åpne forespørsler. Vent først på avgjørelser om de eksisterende.",
+      "error": "Noe gikk galt. Prøv igjen."
+    },
+    "file": {
+      "title": "Ny forespørsel",
+      "orgLabel": "Bedrift",
+      "unnamedOrg": "Bedrift uten navn",
+      "typeLabel": "Hva ber du om?",
+      "titleLabel": "Kort tittel",
+      "detailsLabel": "Forklaring",
+      "dateFromLabel": "Fra (valgfritt)",
+      "dateToLabel": "Til (valgfritt)",
+      "datesHint": "Datoer er viktige ved hjemmekontor eller endring av arbeidsplan. La dem stå tomme hvis de ikke passer.",
+      "submit": "Send forespørsel",
+      "noOrganizations": "Du er ennå ikke knyttet til noen bedrift, så det er ingen å sende en forespørsel til."
+    },
+    "type": {
+      "remote_work": "Hjemmekontor",
+      "schedule_change": "Endring av arbeidsplan",
+      "certificate_request": "Attest eller dokument",
+      "employment_condition_change": "Endring av arbeidsvilkår",
+      "benefit_request": "Personalgode",
+      "equipment_request": "Utstyr",
+      "other": "Annet"
+    },
+    "typeHint": {
+      "remote_work": "be om å jobbe hjemmefra eller et annet sted på valgte dager",
+      "schedule_change": "be om andre arbeidstider eller skift",
+      "certificate_request": "be om en attest eller et dokument om arbeidet ditt",
+      "employment_condition_change": "be om å endre et avtalt arbeidsvilkår",
+      "benefit_request": "be om et gode bedriften din tilbyr",
+      "equipment_request": "be om verktøy eller utstyr til arbeidet ditt",
+      "other": "alt annet du vil be arbeidsgiveren din om"
+    },
+    "status": {
+      "pending": "Venter på avgjørelse",
+      "approved": "Godkjent",
+      "rejected": "Avslått",
+      "withdrawn": "Trukket",
+      "cancelled": "Kansellert"
+    },
+    "mine": {
+      "title": "Mine forespørsler",
+      "empty": "Ingen forespørsler ennå.",
+      "timelineOpen": "Vis forløp"
+    },
+    "actions": {
+      "withdraw": "Trekk tilbake"
+    },
+    "register": {
+      "title": "Forespørselsregister",
+      "decideHint": "Godkjenning og avslag skjer i godkjenningsområdet ovenfor — dette registeret viser alle forespørsler i organisasjonene dine.",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "filterAll": "Alle",
+      "filterApply": "Filtrer",
+      "empty": "Ingen forespørsler samsvarer."
+    },
+    "seed": {
+      "title": "Sett opp godkjenningsløp for forespørsler",
+      "hint": "Oppretter et enkelt ferdig løp: én vurderingsrunde, avgjort av bedriftens eiere og administratorer. Flertrinnsløp bygger du i godkjenningsområdet ovenfor.",
+      "orgLabel": "Bedrift",
+      "typeLabel": "Gjelder for",
+      "allTypes": "Alle forespørselstyper",
+      "nameLabel": "Navn",
+      "defaultName": "Standard godkjenning av forespørsler",
+      "submit": "Opprett og slå på"
+    },
+    "policies": {
+      "title": "Feriekvoter",
+      "honesty": "Bedriften din fastsetter disse tallene selv. De er bare veiledende for planlegging — godkjenning er fortsatt en ekte leders beslutning, og dette er ikke juridisk rådgivning.",
+      "entitlementShort": "{days} d/år",
+      "carryoverShort": "+{days} overført",
+      "inactive": "slått av",
+      "setTitle": "Fastsett feriekvote",
+      "orgLabel": "Bedrift",
+      "typeLabel": "Fraværstype",
+      "entitlementLabel": "Dager per år",
+      "carryoverLabel": "Overførte dager",
+      "activeLabel": "I bruk",
+      "submit": "Lagre"
+    },
+    "absenceType": {
+      "annual_leave": "Ferie",
+      "sickness": "Sykdom",
+      "unpaid": "Ulønnet permisjon",
+      "training": "Opplæring",
+      "other": "Annet"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Min feriesaldo {year}",
+      "advisoryNote": "Saldoer er veiledende for planlegging. Lederen din bestemmer. Tallene kommer fra bedriftens egne innstillinger, ikke fra loven.",
+      "noPolicy": "Bedriften din har ennå ikke fastsatt feriekvoter her.",
+      "remaining": "{days} d igjen",
+      "detail": "{entitlement} per år + {carryover} overført − {used} brukt",
+      "requestedDays": "{days} d ønsket",
+      "remainingShort": "{days} d igjen",
+      "exceedsNote": "Mer enn gjenværende ferie"
+    }
+  },
   "agreements": {
     "title": "Avtaleregister",
     "intro": "Det kanoniske registeret over {org}s avtaler — arbeidsrelaterte og generelle. Kun registrering.",

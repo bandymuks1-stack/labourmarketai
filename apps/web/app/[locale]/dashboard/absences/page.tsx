@@ -5,12 +5,17 @@ import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 import { getMyAbsences, getManagerPendingAbsences } from "@/lib/leave/absences";
 import {
+  getMyLeaveBalances,
+  getPendingAbsenceAdvisories,
+} from "@/lib/leave/balances";
+import {
   absentOn,
   absentWithinDays,
   getEmployerWorkerAvailability,
 } from "@/lib/planning/employer-availability";
 import { MyAbsencesPanel, ManagerAbsencesPanel } from "@/components/app/absence-panel";
 import { AbsentNowPanel } from "@/components/app/absent-now-panel";
+import { LeaveBalancePanel } from "./balance-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -45,11 +50,30 @@ export default async function AbsencesPage({
   const role = (profile?.active_role as Role) ?? "worker";
   const isManager = MANAGER_ROLES.has(role);
 
-  const [my, managerPending, availability] = await Promise.all([
+  const [my, managerPending, availability, myBalances] = await Promise.all([
     getMyAbsences(),
     isManager ? getManagerPendingAbsences() : Promise.resolve(null),
     isManager ? getEmployerWorkerAvailability() : Promise.resolve(null),
+    getMyLeaveBalances(),
   ]);
+
+  // ADVISORY context for the review list (derived at render time; never a
+  // block — managers decide). Plain object because the manager panel is a
+  // client component.
+  const advisories: Record<
+    string,
+    { requestedDays: number; remainingDays: number | null; exceeds: boolean }
+  > = {};
+  if (isManager && managerPending?.applied) {
+    const map = await getPendingAbsenceAdvisories(managerPending.pending);
+    for (const [id, adv] of map) {
+      advisories[id] = {
+        requestedDays: adv.requestedDays,
+        remainingDays: adv.remainingDays,
+        exceeds: adv.exceeds,
+      };
+    }
+  }
 
   // "Who is absent NOW" (V8 GAP 3): derived from the SAME minimised
   // availability read the planning zone uses; dates in this domain are
@@ -79,7 +103,10 @@ export default async function AbsencesPage({
       </header>
 
       {isManager && absentNow ? <AbsentNowPanel state={absentNow} /> : null}
-      {isManager && managerPending ? <ManagerAbsencesPanel data={managerPending} /> : null}
+      {isManager && managerPending ? (
+        <ManagerAbsencesPanel data={managerPending} advisories={advisories} />
+      ) : null}
+      <LeaveBalancePanel data={myBalances} />
       <MyAbsencesPanel data={my} />
     </div>
   );

@@ -439,6 +439,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // rollback; recounted post-merge with trains A/B/C/D/E). Cross-pin
     // follows.
     //
+    // Cross-pin follows: the typed employee requests + leave balance
+    // policies PAIR (20260817180000 + 20260817181000) took SPRINT_BASELINE
+    // 213 -> 215 in product-readiness.test.ts (recounted after merging
+    // origin/main 010547e4, trains C/D/E/L1 in base). This floor assertion
+    // again needs no numeric edit.
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
     // migration 0030 to exist; pinning the exact number meant every unrelated,
