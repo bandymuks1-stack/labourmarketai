@@ -425,6 +425,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260817120000 + 20260817121000) took SPRINT_BASELINE 199 -> 201 in
     // product-readiness.test.ts (recounted from the tree). This floor
     // assertion needs no numeric edit — it only pins the 166 minimum.
+    // Cross-pin follows: the timesheets v1 DRAFT (20260817170000) took
+    // SPRINT_BASELINE 205 -> 206 in product-readiness.test.ts (recounted
+    // from the tree). No numeric edit needed here.
     //
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for

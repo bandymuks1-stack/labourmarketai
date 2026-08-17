@@ -8962,7 +8962,13 @@
         "days": "T"
       }
     },
-    "pastLink": "Frühere Tage"
+    "pastLink": "Frühere Tage",
+    "workload": {
+      "title": "Auslastung",
+      "plannedDays": "{count} geplante Arbeitstage",
+      "actualHours": "{hours} Std. im Journal erfasst",
+      "note": "Geplante Tage stammen aus angenommenen Buchungen und Projektzuweisungen; erfasste Stunden aus Ihren Journaleinträgen. Beide werden nebeneinander gezeigt und nie ineinander umgerechnet."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Firmenbereich",
@@ -12416,6 +12422,92 @@
       "not_found": "Diese Anfrage wurde nicht gefunden.",
       "limit_reached": "Das Limit offener Einträge ist erreicht. Schließen Sie zuerst etwas ab.",
       "error": "Etwas ist schiefgelaufen. Nichts wurde geändert."
+    }
+  },
+  "timesheets": {
+    "title": "Stundenzettel",
+    "intro": "Stundendokumente pro Zeitraum, abgeleitet aus Ihrem Arbeitsjournal. Stunden werden immer im Journal bearbeitet; ein Stundenzettel ist eine eingefrorene Kopie, die zur Freigabe eingereicht wird.",
+    "needsMigration": "Stundenzettel sind in dieser Umgebung noch nicht aktiviert.",
+    "readError": "Ein Teil der Stundenzettel-Daten konnte gerade nicht geladen werden.",
+    "noLines": "In diesem Zeitraum sind noch keine Stunden erfasst. Tragen Sie Ihre Arbeit ins Journal ein und aktualisieren Sie.",
+    "linesTitle": "Zeilen ({count})",
+    "approvalTimeline": "Freigabefortschritt",
+    "openApprovals": "Freigabebereich öffnen",
+    "noTemplateNote": "Diese Organisation hat noch keine veröffentlichte Freigabevorlage für Stundenzettel, daher ist das Einreichen nicht möglich. Bitten Sie einen Organisationsadministrator, eine zu erstellen.",
+    "totals": {
+      "hours": "{hours} Std.",
+      "dayUnits": "{days} Tageseinheiten",
+      "lines": "{count} Zeilen"
+    },
+    "unit": {
+      "hours": "Std.",
+      "minutes": "Min.",
+      "days": "T."
+    },
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "approved": "Freigegeben",
+      "rejected": "Abgelehnt",
+      "reopened": "Zurückgegeben"
+    },
+    "mine": {
+      "title": "Meine Stundenzettel",
+      "derivedNote": "Jede Zeile stammt aus Ihren Journaleinträgen. Um Stunden zu korrigieren, bearbeiten Sie den Journaleintrag und drücken Sie Aktualisieren.",
+      "empty": "Noch keine Stundenzettel. Wählen Sie eine Organisation und einen Zeitraum, um den ersten zu erstellen.",
+      "noOrganizations": "Sie sind noch mit keiner Organisation verbunden, daher gibt es keinen Ort, um Stunden einzureichen."
+    },
+    "create": {
+      "organization": "Organisation",
+      "unnamedOrganization": "Organisation ohne Namen",
+      "periodStart": "Zeitraumbeginn",
+      "periodEnd": "Zeitraumende",
+      "action": "Stundenzettel erstellen",
+      "hint": "Ein Zeitraum umfasst höchstens 31 Tage und darf sich nicht mit einem anderen Stundenzettel derselben Organisation überschneiden."
+    },
+    "actions": {
+      "refresh": "Aus dem Journal aktualisieren",
+      "submit": "Zur Freigabe einreichen",
+      "sync": "Status aktualisieren",
+      "exportCsv": "CSV herunterladen"
+    },
+    "org": {
+      "title": "Stundenzettel des Teams",
+      "decideNote": "Freigabeentscheidungen fallen im Freigabebereich. Hier können Sie Zeilen prüfen, exportieren und einen entschiedenen Stundenzettel zurückgeben.",
+      "noTemplateFor": "{name} hat keine veröffentlichte Freigabevorlage für Stundenzettel.",
+      "createTemplate": "Standard-Freigabevorlage erstellen",
+      "unnamedWorker": "Arbeitskraft",
+      "decideInApprovals": "Im Freigabebereich entscheiden",
+      "reopenNote": "Rückgabenotiz",
+      "reopenNotePlaceholder": "Warum wird zurückgegeben?",
+      "reopen": "An Arbeitskraft zurückgeben"
+    },
+    "notice": {
+      "created": "Stundenzettel erstellt.",
+      "refreshed": "Zeilen aus dem Journal aktualisiert.",
+      "submitted": "Stundenzettel zur Freigabe eingereicht.",
+      "reopened": "Stundenzettel an die Arbeitskraft zurückgegeben.",
+      "approved": "Stundenzettel freigegeben.",
+      "rejected": "Stundenzettel abgelehnt.",
+      "synced_pending": "Die Freigabe läuft noch.",
+      "no_instance": "Für diesen Stundenzettel existiert noch keine Freigabeanfrage.",
+      "no_template": "Diese Organisation hat noch keine veröffentlichte Freigabevorlage für Stundenzettel.",
+      "template_created": "Standard-Freigabevorlage erstellt und veröffentlicht.",
+      "overlap": "Dieser Zeitraum überschneidet sich mit einem bestehenden Stundenzettel.",
+      "invalid_period": "Der Zeitraum ist ungültig — höchstens 31 Tage, und das Ende darf nicht vor dem Beginn liegen.",
+      "no_worker": "Ihr Konto hat kein Arbeitskraft-Profil.",
+      "not_editable": "Dieser Stundenzettel kann nicht mehr bearbeitet werden.",
+      "not_decided": "Nur ein freigegebener oder abgelehnter Stundenzettel kann zurückgegeben werden.",
+      "not_submitted": "Dieser Stundenzettel ist nicht eingereicht.",
+      "already_submitted": "Dieser Stundenzettel ist bereits eingereicht.",
+      "no_approvers": "Für die Vorlage dieser Organisation konnten keine Freigebenden gefunden werden.",
+      "not_published": "Die Freigabevorlage ist noch nicht veröffentlicht.",
+      "invalid": "Die Anfrage war ungültig.",
+      "needs_migration": "Stundenzettel sind in dieser Umgebung noch nicht aktiviert.",
+      "not_authorized": "Das dürfen Sie nicht.",
+      "not_found": "Stundenzettel nicht gefunden.",
+      "limit_reached": "Zu viele offene Stundenzettel — reichen Sie bestehende zuerst ein oder räumen Sie sie auf.",
+      "error": "Etwas ist schiefgelaufen. Nichts wurde gespeichert."
     }
   }
 }

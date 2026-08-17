@@ -4444,5 +4444,91 @@
       "limit_reached": "Osiągnięto limit otwartych pozycji. Najpierw coś zamknij.",
       "error": "Coś poszło nie tak. Nic nie zmieniono."
     }
+  },
+  "timesheets": {
+    "title": "Karty czasu pracy",
+    "intro": "Dokumenty godzin za okres, tworzone z Twojego dziennika pracy. Godziny zawsze poprawia się w dzienniku; karta czasu pracy to zamrożona kopia wysyłana do zatwierdzenia.",
+    "needsMigration": "Karty czasu pracy nie są jeszcze włączone w tym środowisku.",
+    "readError": "Części danych kart czasu pracy nie udało się teraz wczytać.",
+    "noLines": "W tym okresie nie ma jeszcze zapisanych godzin. Zapisz pracę w dzienniku i odśwież.",
+    "linesTitle": "Wiersze ({count})",
+    "approvalTimeline": "Postęp zatwierdzania",
+    "openApprovals": "Otwórz obszar zatwierdzeń",
+    "noTemplateNote": "Ta organizacja nie ma jeszcze opublikowanego szablonu zatwierdzania kart, więc wysłanie nie jest możliwe. Poproś administratora organizacji o jego utworzenie.",
+    "totals": {
+      "hours": "{hours} godz.",
+      "dayUnits": "{days} jedn. dziennych",
+      "lines": "{count} wierszy"
+    },
+    "unit": {
+      "hours": "godz.",
+      "minutes": "min",
+      "days": "dn."
+    },
+    "status": {
+      "draft": "Szkic",
+      "submitted": "Wysłana",
+      "approved": "Zatwierdzona",
+      "rejected": "Odrzucona",
+      "reopened": "Zwrócona"
+    },
+    "mine": {
+      "title": "Moje karty czasu pracy",
+      "derivedNote": "Każdy wiersz pochodzi z wpisów Twojego dziennika. Aby poprawić godziny, popraw wpis w dzienniku i naciśnij Odśwież.",
+      "empty": "Nie ma jeszcze kart czasu pracy. Wybierz organizację i okres, aby utworzyć pierwszą.",
+      "noOrganizations": "Nie jesteś jeszcze powiązany z żadną organizacją, więc nie ma gdzie wysyłać godzin."
+    },
+    "create": {
+      "organization": "Organizacja",
+      "unnamedOrganization": "Organizacja bez nazwy",
+      "periodStart": "Początek okresu",
+      "periodEnd": "Koniec okresu",
+      "action": "Utwórz kartę czasu pracy",
+      "hint": "Okres obejmuje najwyżej 31 dni i nie może nachodzić na inną kartę tej samej organizacji."
+    },
+    "actions": {
+      "refresh": "Odśwież z dziennika",
+      "submit": "Wyślij do zatwierdzenia",
+      "sync": "Odśwież status",
+      "exportCsv": "Pobierz CSV"
+    },
+    "org": {
+      "title": "Karty czasu pracy zespołu",
+      "decideNote": "Decyzje o zatwierdzeniu zapadają w obszarze zatwierdzeń. Tutaj możesz przejrzeć wiersze, wyeksportować i zwrócić już rozstrzygniętą kartę.",
+      "noTemplateFor": "{name} nie ma opublikowanego szablonu zatwierdzania kart.",
+      "createTemplate": "Utwórz standardowy szablon zatwierdzania",
+      "unnamedWorker": "Pracownik",
+      "decideInApprovals": "Zdecyduj w obszarze zatwierdzeń",
+      "reopenNote": "Notatka zwrotu",
+      "reopenNotePlaceholder": "Dlaczego zwracasz?",
+      "reopen": "Zwróć pracownikowi"
+    },
+    "notice": {
+      "created": "Karta czasu pracy utworzona.",
+      "refreshed": "Wiersze odświeżone z dziennika.",
+      "submitted": "Karta wysłana do zatwierdzenia.",
+      "reopened": "Karta zwrócona pracownikowi.",
+      "approved": "Karta zatwierdzona.",
+      "rejected": "Karta odrzucona.",
+      "synced_pending": "Zatwierdzanie wciąż trwa.",
+      "no_instance": "Dla tej karty nie istnieje jeszcze wniosek o zatwierdzenie.",
+      "no_template": "Ta organizacja nie ma jeszcze opublikowanego szablonu zatwierdzania kart.",
+      "template_created": "Standardowy szablon zatwierdzania utworzony i opublikowany.",
+      "overlap": "Ten okres nachodzi na istniejącą kartę.",
+      "invalid_period": "Okres jest nieprawidłowy — do 31 dni, a koniec nie może być przed początkiem.",
+      "no_worker": "Twoje konto nie ma profilu pracownika.",
+      "not_editable": "Tej karty nie można już edytować.",
+      "not_decided": "Zwrócić można tylko zatwierdzoną lub odrzuconą kartę.",
+      "not_submitted": "Ta karta nie została wysłana.",
+      "already_submitted": "Ta karta została już wysłana.",
+      "no_approvers": "Według szablonu tej organizacji nie znaleziono zatwierdzających.",
+      "not_published": "Szablon zatwierdzania nie jest jeszcze opublikowany.",
+      "invalid": "Żądanie było nieprawidłowe.",
+      "needs_migration": "Karty czasu pracy nie są jeszcze włączone w tym środowisku.",
+      "not_authorized": "Nie masz do tego uprawnień.",
+      "not_found": "Karty nie znaleziono.",
+      "limit_reached": "Za dużo otwartych kart — najpierw wyślij lub uporządkuj istniejące.",
+      "error": "Coś poszło nie tak. Nic nie zostało zapisane."
+    }
   }
 }
