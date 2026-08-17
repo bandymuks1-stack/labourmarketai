@@ -14,6 +14,8 @@ import {
 } from "@/lib/company/memberships";
 import { MembershipInvitationsPanel } from "@/components/app/membership-invitations-panel";
 import { OrganizationMembersSection } from "@/components/app/organization-members-section";
+import { MyOnboardingSection } from "./my-onboarding-section";
+import { isLifecycleNotice } from "@/lib/lifecycle/lifecycle-model";
 
 /**
  * Stage 2 — Activity Setup Hub.
@@ -34,11 +36,18 @@ import { OrganizationMembersSection } from "@/components/app/organization-member
 
 export default async function ActivitySetupHubPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Honest `?lc=` outcome from the worker-side onboarding confirmations
+  // (NATIVE-NAV actions); unknown values are dropped, never rendered raw.
+  const sp = (await searchParams) ?? {};
+  const rawLc = typeof sp.lc === "string" ? sp.lc : "";
+  const lifecycleNotice = isLifecycleNotice(rawLc) ? rawLc : null;
 
   const supabase = await createClient();
   const {
@@ -160,6 +169,11 @@ export default async function ActivitySetupHubPage({
           )}
         </p>
       </header>
+
+      {/* My onboarding checklist (employee lifecycle v1) — renders ONLY
+          while an employer-started run is open for one of my engagements;
+          plain-language, confirm-own-items only. */}
+      <MyOnboardingSection locale={locale} notice={lifecycleNotice} />
 
       <MembershipInvitationsPanel
         invitations={invitations}

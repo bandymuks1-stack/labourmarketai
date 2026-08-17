@@ -4547,5 +4547,142 @@
       "externalRefLabel": "[EN] Reference number (optional)",
       "submit": "[EN] Register document"
     }
+  },
+  "lifecycle": {
+    "title": "Anställningens livscykel",
+    "intro": "Onboarding, provanställning, förändringar, offboarding och avslut för organisationens anställningar — med checklistor och full historik.",
+    "unavailable": "Anställningens livscykel är ännu inte aktiverad i den här miljön. Inget går förlorat — området öppnas när lagringen är granskad och införd.",
+    "honestNote": "Allt här stannar i produkten. Att bocka av ett steg registrerar bara vem som bekräftade vad och när — inget skickas någonstans.",
+    "loadError": "Vissa data kunde inte läsas in just nu. Det du ser är äkta men kan vara ofullständigt.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Aktiv",
+      "probation": "Provanställning",
+      "change_pending": "Förändring väntar",
+      "offboarding": "Offboarding",
+      "ended": "Avslutad"
+    },
+    "members": {
+      "title": "Personer och faser",
+      "empty": "Inga anställningar i den här organisationen ännu.",
+      "actionsSummary": "Livscykelåtgärder",
+      "probationUntil": "Provanställning till {date}",
+      "ownerProtected": "Den registrerade ägarens egen anställning kan inte avslutas medan hen är ägare."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-checklista",
+      "offboardingTitle": "Offboarding-checklista",
+      "progress": "{done} av {total} klara",
+      "requiredOpen": "{count} obligatoriska steg kvar",
+      "complete": "Slutför checklista",
+      "cancel": "Avbryt checklista",
+      "start": "Starta onboarding",
+      "startOffboarding": "Starta offboarding",
+      "templateLabel": "Checklistemall",
+      "extraItemsLabel": "Extra steg (ett per rad, valfritt)",
+      "extraItemsHint": "t.ex. Lämna nycklar"
+    },
+    "items": {
+      "markDone": "Markera som klart",
+      "skip": "Hoppa över",
+      "reset": "Öppna igen",
+      "requiredBadge": "obligatoriskt",
+      "linkedBadge": "kopplat till en riktig post"
+    },
+    "kinds": {
+      "task": "Uppgift",
+      "document_ack": "Dokument att läsa och bekräfta",
+      "asset_issue": "Utlämnat verktyg eller utrustning",
+      "training_note": "Utbildning",
+      "custom": "Annat steg",
+      "asset_return": "Verktyg eller utrustning att lämna tillbaka",
+      "access_removal": "Ta bort åtkomst",
+      "final_evidence": "Slutkontroll av arbetsposter"
+    },
+    "templates": {
+      "title": "Onboarding-mallar",
+      "empty": "Inga onboarding-mallar ännu. Skapa den första nedan.",
+      "createTitle": "Ny onboarding-mall",
+      "nameLabel": "Mallnamn",
+      "itemTitleLabel": "Steg {n}",
+      "kindLabel": "Typ",
+      "requiredLabel": "Obligatoriskt",
+      "createSubmit": "Skapa mall",
+      "itemCount": "{count} steg"
+    },
+    "stageForm": {
+      "stageLabel": "Fas",
+      "probationDateLabel": "Provanställning till (vid provanställning)",
+      "noteLabel": "Anteckning (valfri)",
+      "submit": "Uppdatera fas"
+    },
+    "end": {
+      "reasonLabel": "Orsak",
+      "noteLabel": "Anteckning (valfri)",
+      "submit": "Avsluta anställning",
+      "confirmHint": "Anställningen avslutas via samma skyddade väg som borttagning av en medlem."
+    },
+    "reasons": {
+      "resignation": "Uppsägning av medarbetaren",
+      "termination": "Uppsägning av arbetsgivaren",
+      "contract_end": "Kontraktet löpte ut",
+      "mutual_agreement": "Ömsesidig överenskommelse",
+      "retirement": "Pension",
+      "other": "Annat"
+    },
+    "history": {
+      "title": "Livscykelhistorik",
+      "empty": "Inga händelser ännu."
+    },
+    "events": {
+      "stage_changed": "Fas ändrad",
+      "onboarding_started": "Onboarding startad",
+      "onboarding_completed": "Onboarding slutförd",
+      "onboarding_cancelled": "Onboarding avbruten",
+      "offboarding_started": "Offboarding startad",
+      "offboarding_completed": "Offboarding slutförd",
+      "offboarding_cancelled": "Offboarding avbruten",
+      "probation_set": "Provanställning satt",
+      "change_noted": "Förändring noterad",
+      "engagement_ended": "Anställning avslutad"
+    },
+    "worker": {
+      "title": "Min onboarding",
+      "intro": "Steg som din arbetsgivare förberett för din start. Bekräfta de som är dina — resten sköter arbetsgivaren.",
+      "empty": "Inget väntar på dig just nu.",
+      "done": "Klart",
+      "managerHint": "Din arbetsgivare bekräftar det här steget"
+    },
+    "notice": {
+      "created": "Skapad.",
+      "started": "Checklista startad.",
+      "updated": "Sparat.",
+      "completed": "Checklista slutförd.",
+      "cancelled": "Checklista avbruten.",
+      "ended": "Anställning avslutad och registrerad.",
+      "already_ended": "Den här anställningen var redan avslutad.",
+      "already_exists": "En mall med det här namnet finns redan.",
+      "already_running": "En checklista pågår redan för den här personen.",
+      "items_open": "Slutför alla obligatoriska steg först.",
+      "item_closed": "Det här steget är redan avklarat.",
+      "run_closed": "Den här checklistan är redan stängd.",
+      "link_invalid": "Den kopplade posten passar inte det här steget.",
+      "asset_not_returned": "Utrustningen är inte återlämnad ännu — registrera återlämningen först.",
+      "offboarding_open": "Slutför eller avbryt offboarding-checklistan först.",
+      "onboarding_open": "Slutför eller avbryt onboarding-checklistan först.",
+      "invalid_responsible": "Den personen tillhör inte den här organisationen.",
+      "invalid_stage": "Den här åtgärden passar inte den aktuella fasen.",
+      "invalid_transition": "Det här fasbytet är inte tillåtet från den aktuella fasen.",
+      "not_active": "Den här anställningen är inte aktiv.",
+      "not_org_scoped": "Det här är en personlig post, inte en anställning i organisationen.",
+      "template_not_found": "Mallen är inte tillgänglig.",
+      "last_owner": "Den sista ägarens anställning kan inte avslutas — utse en annan ägare först.",
+      "limit_reached": "Gränsen för den här organisationen är nådd.",
+      "invalid": "Ogiltig inmatning.",
+      "needs_migration": "Den här funktionen är ännu inte aktiverad i den här miljön.",
+      "not_authorized": "Du har inte behörighet för detta.",
+      "not_found": "Posten är inte tillgänglig.",
+      "error": "Misslyckades — försök igen."
+    }
   }
 }

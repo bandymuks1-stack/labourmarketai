@@ -12520,5 +12520,142 @@
       "limit_reached": "Das Limit offener Einträge ist erreicht. Schließen Sie zuerst etwas ab.",
       "error": "Etwas ist schiefgelaufen. Nichts wurde geändert."
     }
+  },
+  "lifecycle": {
+    "title": "Lebenszyklus des Arbeitsverhältnisses",
+    "intro": "Onboarding, Probezeit, Änderungen, Offboarding und Beendigung für die Beschäftigungsdaten dieser Organisation — mit Checklisten und vollständiger Historie.",
+    "unavailable": "Der Beschäftigungs-Lebenszyklus ist in dieser Umgebung noch nicht aktiviert. Nichts geht verloren — dieser Bereich öffnet sich, sobald der Speicher geprüft und eingespielt ist.",
+    "honestNote": "Alles hier bleibt im Produkt. Das Abhaken eines Schritts hält nur fest, wer was wann bestätigt hat — nichts wird irgendwohin gesendet.",
+    "loadError": "Ein Teil der Daten konnte gerade nicht geladen werden. Was Sie sehen, ist echt, kann aber unvollständig sein.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Aktiv",
+      "probation": "Probezeit",
+      "change_pending": "Änderung ausstehend",
+      "offboarding": "Offboarding",
+      "ended": "Beendet"
+    },
+    "members": {
+      "title": "Personen und Phasen",
+      "empty": "Noch keine Beschäftigungsdaten in dieser Organisation.",
+      "actionsSummary": "Lebenszyklus-Aktionen",
+      "probationUntil": "Probezeit bis {date}",
+      "ownerProtected": "Der Eintrag des eingetragenen Inhabers kann nicht beendet werden, solange er Inhaber ist."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-Checkliste",
+      "offboardingTitle": "Offboarding-Checkliste",
+      "progress": "{done} von {total} erledigt",
+      "requiredOpen": "Noch {count} Pflichtschritte offen",
+      "complete": "Checkliste abschließen",
+      "cancel": "Checkliste abbrechen",
+      "start": "Onboarding starten",
+      "startOffboarding": "Offboarding starten",
+      "templateLabel": "Checklisten-Vorlage",
+      "extraItemsLabel": "Zusätzliche Schritte (einer pro Zeile, optional)",
+      "extraItemsHint": "z. B. Schlüssel übergeben"
+    },
+    "items": {
+      "markDone": "Als erledigt markieren",
+      "skip": "Überspringen",
+      "reset": "Wieder öffnen",
+      "requiredBadge": "Pflicht",
+      "linkedBadge": "mit echtem Eintrag verknüpft"
+    },
+    "kinds": {
+      "task": "Aufgabe",
+      "document_ack": "Dokument lesen und bestätigen",
+      "asset_issue": "Ausgegebenes Werkzeug oder Gerät",
+      "training_note": "Schulung",
+      "custom": "Anderer Schritt",
+      "asset_return": "Zurückzugebendes Werkzeug oder Gerät",
+      "access_removal": "Zugang entfernen",
+      "final_evidence": "Abschlussprüfung der Arbeitsnachweise"
+    },
+    "templates": {
+      "title": "Onboarding-Vorlagen",
+      "empty": "Noch keine Onboarding-Vorlagen. Erstellen Sie unten die erste.",
+      "createTitle": "Neue Onboarding-Vorlage",
+      "nameLabel": "Vorlagenname",
+      "itemTitleLabel": "Schritt {n}",
+      "kindLabel": "Typ",
+      "requiredLabel": "Pflicht",
+      "createSubmit": "Vorlage erstellen",
+      "itemCount": "{count} Schritte"
+    },
+    "stageForm": {
+      "stageLabel": "Phase",
+      "probationDateLabel": "Probezeit bis (bei Probezeit)",
+      "noteLabel": "Notiz (optional)",
+      "submit": "Phase aktualisieren"
+    },
+    "end": {
+      "reasonLabel": "Grund",
+      "noteLabel": "Notiz (optional)",
+      "submit": "Arbeitsverhältnis beenden",
+      "confirmHint": "Der Beschäftigungseintrag wird über denselben geschützten Weg beendet wie das Entfernen eines Mitglieds."
+    },
+    "reasons": {
+      "resignation": "Kündigung durch Mitarbeiter",
+      "termination": "Kündigung durch Arbeitgeber",
+      "contract_end": "Vertrag ausgelaufen",
+      "mutual_agreement": "Einvernehmliche Trennung",
+      "retirement": "Ruhestand",
+      "other": "Sonstiges"
+    },
+    "history": {
+      "title": "Lebenszyklus-Historie",
+      "empty": "Noch keine Ereignisse."
+    },
+    "events": {
+      "stage_changed": "Phase geändert",
+      "onboarding_started": "Onboarding gestartet",
+      "onboarding_completed": "Onboarding abgeschlossen",
+      "onboarding_cancelled": "Onboarding abgebrochen",
+      "offboarding_started": "Offboarding gestartet",
+      "offboarding_completed": "Offboarding abgeschlossen",
+      "offboarding_cancelled": "Offboarding abgebrochen",
+      "probation_set": "Probezeit festgelegt",
+      "change_noted": "Änderung vermerkt",
+      "engagement_ended": "Arbeitsverhältnis beendet"
+    },
+    "worker": {
+      "title": "Mein Onboarding",
+      "intro": "Schritte, die Ihr Arbeitgeber für Ihren Start vorbereitet hat. Bestätigen Sie, was Ihres ist — den Rest erledigt Ihr Arbeitgeber.",
+      "empty": "Gerade wartet nichts auf Sie.",
+      "done": "Erledigt",
+      "managerHint": "Diesen Schritt bestätigt Ihr Arbeitgeber"
+    },
+    "notice": {
+      "created": "Erstellt.",
+      "started": "Checkliste gestartet.",
+      "updated": "Gespeichert.",
+      "completed": "Checkliste abgeschlossen.",
+      "cancelled": "Checkliste abgebrochen.",
+      "ended": "Arbeitsverhältnis beendet und festgehalten.",
+      "already_ended": "Dieses Arbeitsverhältnis war bereits beendet.",
+      "already_exists": "Eine Vorlage mit diesem Namen existiert bereits.",
+      "already_running": "Für diese Person läuft bereits eine Checkliste.",
+      "items_open": "Schließen Sie zuerst alle Pflichtschritte ab.",
+      "item_closed": "Dieser Schritt ist bereits erledigt.",
+      "run_closed": "Diese Checkliste ist bereits geschlossen.",
+      "link_invalid": "Der verknüpfte Eintrag passt nicht zu diesem Schritt.",
+      "asset_not_returned": "Das Gerät wurde noch nicht zurückgegeben — erfassen Sie zuerst die Rückgabe.",
+      "offboarding_open": "Schließen Sie zuerst die Offboarding-Checkliste ab oder brechen Sie sie ab.",
+      "onboarding_open": "Schließen Sie zuerst die Onboarding-Checkliste ab oder brechen Sie sie ab.",
+      "invalid_responsible": "Diese Person gehört nicht zu dieser Organisation.",
+      "invalid_stage": "Diese Aktion passt nicht zur aktuellen Phase.",
+      "invalid_transition": "Dieser Phasenwechsel ist aus der aktuellen Phase nicht erlaubt.",
+      "not_active": "Dieser Beschäftigungseintrag ist nicht aktiv.",
+      "not_org_scoped": "Dies ist ein persönlicher Eintrag, kein Arbeitsverhältnis der Organisation.",
+      "template_not_found": "Diese Vorlage ist nicht verfügbar.",
+      "last_owner": "Der Eintrag des letzten Inhabers kann nicht beendet werden — ernennen Sie zuerst einen anderen Inhaber.",
+      "limit_reached": "Das Limit dieser Organisation ist erreicht.",
+      "invalid": "Ungültige Eingabe.",
+      "needs_migration": "Diese Funktion ist in dieser Umgebung noch nicht aktiviert.",
+      "not_authorized": "Sie sind dazu nicht berechtigt.",
+      "not_found": "Eintrag nicht verfügbar.",
+      "error": "Fehlgeschlagen — bitte erneut versuchen."
+    }
   }
 }

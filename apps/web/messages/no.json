@@ -4547,5 +4547,142 @@
       "externalRefLabel": "[EN] Reference number (optional)",
       "submit": "[EN] Register document"
     }
+  },
+  "lifecycle": {
+    "title": "Ansettelsens livssyklus",
+    "intro": "Onboarding, prøvetid, endringer, offboarding og avslutning for organisasjonens ansettelser — med sjekklister og full historikk.",
+    "unavailable": "Ansettelsens livssyklus er ennå ikke slått på i dette miljøet. Ingenting går tapt — området åpner når lageret er gjennomgått og tatt i bruk.",
+    "honestNote": "Alt her blir i produktet. Å merke et trinn som utført registrerer bare hvem som bekreftet hva og når — ingenting sendes noe sted.",
+    "loadError": "Noen data kunne ikke lastes akkurat nå. Det du ser er ekte, men kan være ufullstendig.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Aktiv",
+      "probation": "Prøvetid",
+      "change_pending": "Endring venter",
+      "offboarding": "Offboarding",
+      "ended": "Avsluttet"
+    },
+    "members": {
+      "title": "Personer og faser",
+      "empty": "Ingen ansettelser i denne organisasjonen ennå.",
+      "actionsSummary": "Livssyklushandlinger",
+      "probationUntil": "Prøvetid til {date}",
+      "ownerProtected": "Den registrerte eierens egen ansettelse kan ikke avsluttes mens vedkommende er eier."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-sjekkliste",
+      "offboardingTitle": "Offboarding-sjekkliste",
+      "progress": "{done} av {total} utført",
+      "requiredOpen": "{count} obligatoriske trinn gjenstår",
+      "complete": "Fullfør sjekkliste",
+      "cancel": "Avbryt sjekkliste",
+      "start": "Start onboarding",
+      "startOffboarding": "Start offboarding",
+      "templateLabel": "Sjekklistemal",
+      "extraItemsLabel": "Ekstra trinn (ett per linje, valgfritt)",
+      "extraItemsHint": "f.eks. Lever nøkler"
+    },
+    "items": {
+      "markDone": "Merk som utført",
+      "skip": "Hopp over",
+      "reset": "Gjenåpne",
+      "requiredBadge": "obligatorisk",
+      "linkedBadge": "knyttet til en ekte post"
+    },
+    "kinds": {
+      "task": "Oppgave",
+      "document_ack": "Dokument til lesing og bekreftelse",
+      "asset_issue": "Utlevert verktøy eller utstyr",
+      "training_note": "Opplæring",
+      "custom": "Annet trinn",
+      "asset_return": "Verktøy eller utstyr til retur",
+      "access_removal": "Fjern tilgang",
+      "final_evidence": "Sluttkontroll av arbeidsposter"
+    },
+    "templates": {
+      "title": "Onboarding-maler",
+      "empty": "Ingen onboarding-maler ennå. Opprett den første nedenfor.",
+      "createTitle": "Ny onboarding-mal",
+      "nameLabel": "Malnavn",
+      "itemTitleLabel": "Trinn {n}",
+      "kindLabel": "Type",
+      "requiredLabel": "Obligatorisk",
+      "createSubmit": "Opprett mal",
+      "itemCount": "{count} trinn"
+    },
+    "stageForm": {
+      "stageLabel": "Fase",
+      "probationDateLabel": "Prøvetid til (ved prøvetid)",
+      "noteLabel": "Notat (valgfritt)",
+      "submit": "Oppdater fase"
+    },
+    "end": {
+      "reasonLabel": "Årsak",
+      "noteLabel": "Notat (valgfritt)",
+      "submit": "Avslutt ansettelse",
+      "confirmHint": "Ansettelsen avsluttes via samme beskyttede vei som fjerning av et medlem."
+    },
+    "reasons": {
+      "resignation": "Oppsigelse fra arbeidstaker",
+      "termination": "Oppsigelse fra arbeidsgiver",
+      "contract_end": "Kontrakt utløpt",
+      "mutual_agreement": "Gjensidig avtale",
+      "retirement": "Pensjon",
+      "other": "Annet"
+    },
+    "history": {
+      "title": "Livssyklushistorikk",
+      "empty": "Ingen hendelser ennå."
+    },
+    "events": {
+      "stage_changed": "Fase endret",
+      "onboarding_started": "Onboarding startet",
+      "onboarding_completed": "Onboarding fullført",
+      "onboarding_cancelled": "Onboarding avbrutt",
+      "offboarding_started": "Offboarding startet",
+      "offboarding_completed": "Offboarding fullført",
+      "offboarding_cancelled": "Offboarding avbrutt",
+      "probation_set": "Prøvetid satt",
+      "change_noted": "Endring notert",
+      "engagement_ended": "Ansettelse avsluttet"
+    },
+    "worker": {
+      "title": "Min onboarding",
+      "intro": "Trinn arbeidsgiveren din har forberedt til starten din. Bekreft de som er dine — resten håndterer arbeidsgiveren.",
+      "empty": "Ingenting venter på deg akkurat nå.",
+      "done": "Utført",
+      "managerHint": "Arbeidsgiveren din bekrefter dette trinnet"
+    },
+    "notice": {
+      "created": "Opprettet.",
+      "started": "Sjekkliste startet.",
+      "updated": "Lagret.",
+      "completed": "Sjekkliste fullført.",
+      "cancelled": "Sjekkliste avbrutt.",
+      "ended": "Ansettelse avsluttet og registrert.",
+      "already_ended": "Denne ansettelsen var allerede avsluttet.",
+      "already_exists": "En mal med dette navnet finnes allerede.",
+      "already_running": "En sjekkliste kjører allerede for denne personen.",
+      "items_open": "Fullfør alle obligatoriske trinn først.",
+      "item_closed": "Dette trinnet er allerede avklart.",
+      "run_closed": "Denne sjekklisten er allerede lukket.",
+      "link_invalid": "Den tilknyttede posten passer ikke til dette trinnet.",
+      "asset_not_returned": "Utstyret er ennå ikke levert tilbake — registrer returen først.",
+      "offboarding_open": "Fullfør eller avbryt offboarding-sjekklisten først.",
+      "onboarding_open": "Fullfør eller avbryt onboarding-sjekklisten først.",
+      "invalid_responsible": "Denne personen er ikke en del av denne organisasjonen.",
+      "invalid_stage": "Denne handlingen passer ikke til gjeldende fase.",
+      "invalid_transition": "Dette fasebyttet er ikke tillatt fra gjeldende fase.",
+      "not_active": "Denne ansettelsen er ikke aktiv.",
+      "not_org_scoped": "Dette er en personlig post, ikke en ansettelse i organisasjonen.",
+      "template_not_found": "Malen er ikke tilgjengelig.",
+      "last_owner": "Den siste eierens ansettelse kan ikke avsluttes — utnevn en annen eier først.",
+      "limit_reached": "Grensen for denne organisasjonen er nådd.",
+      "invalid": "Ugyldig inndata.",
+      "needs_migration": "Denne funksjonen er ennå ikke slått på i dette miljøet.",
+      "not_authorized": "Du har ikke tilgang til dette.",
+      "not_found": "Posten er ikke tilgjengelig.",
+      "error": "Mislyktes — prøv igjen."
+    }
   }
 }

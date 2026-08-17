@@ -31,11 +31,8 @@ drop function if exists public.set_onboarding_item_status_v1(text, text, text, t
 drop function if exists public.assign_onboarding_item_v1(text, text);
 drop function if exists public.start_onboarding_run_v1(text, text);
 drop function if exists public.create_onboarding_template_v1(text, text, text, jsonb);
-drop function if exists public.can_view_offboarding_run_v1(uuid);
-drop function if exists public.can_view_onboarding_run_v1(uuid);
-drop function if exists public.can_view_engagement_lifecycle_v1(uuid);
-drop function if exists public.engagement_lifecycle_events_guard();
 
+-- Tables first (their SELECT policies depend on the visibility helpers).
 drop table if exists public.offboarding_run_items;
 drop table if exists public.offboarding_runs;
 drop table if exists public.onboarding_run_items;
@@ -43,6 +40,11 @@ drop table if exists public.onboarding_runs;
 drop table if exists public.onboarding_template_items;
 drop table if exists public.onboarding_templates;
 drop table if exists public.engagement_lifecycle_events;
+
+drop function if exists public.can_view_offboarding_run_v1(uuid);
+drop function if exists public.can_view_onboarding_run_v1(uuid);
+drop function if exists public.can_view_engagement_lifecycle_v1(uuid);
+drop function if exists public.engagement_lifecycle_events_guard();
 
 alter table public.engagement_contexts drop column if exists ended_note;
 alter table public.engagement_contexts drop column if exists ended_reason;

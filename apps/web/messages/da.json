@@ -4547,5 +4547,142 @@
       "externalRefLabel": "Referencenummer (valgfrit)",
       "submit": "Registrér dokument"
     }
+  },
+  "lifecycle": {
+    "title": "Ansættelsens livscyklus",
+    "intro": "Onboarding, prøvetid, ændringer, offboarding og afslutning for organisationens ansættelser — med tjeklister og fuld historik.",
+    "unavailable": "Ansættelsens livscyklus er endnu ikke slået til i dette miljø. Intet går tabt — området åbner, når lageret er gennemgået og taget i brug.",
+    "honestNote": "Alt her bliver i produktet. At markere et trin som udført registrerer kun hvem der bekræftede hvad og hvornår — intet sendes nogen steder hen.",
+    "loadError": "Nogle data kunne ikke indlæses lige nu. Det, du ser, er ægte, men kan være ufuldstændigt.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Aktiv",
+      "probation": "Prøvetid",
+      "change_pending": "Ændring afventer",
+      "offboarding": "Offboarding",
+      "ended": "Afsluttet"
+    },
+    "members": {
+      "title": "Personer og faser",
+      "empty": "Ingen ansættelser i denne organisation endnu.",
+      "actionsSummary": "Livscyklushandlinger",
+      "probationUntil": "Prøvetid indtil {date}",
+      "ownerProtected": "Den registrerede ejers egen ansættelse kan ikke afsluttes, mens vedkommende er ejer."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-tjekliste",
+      "offboardingTitle": "Offboarding-tjekliste",
+      "progress": "{done} af {total} udført",
+      "requiredOpen": "{count} obligatoriske trin mangler",
+      "complete": "Afslut tjekliste",
+      "cancel": "Annuller tjekliste",
+      "start": "Start onboarding",
+      "startOffboarding": "Start offboarding",
+      "templateLabel": "Tjeklisteskabelon",
+      "extraItemsLabel": "Ekstra trin (ét pr. linje, valgfrit)",
+      "extraItemsHint": "fx Aflever nøgler"
+    },
+    "items": {
+      "markDone": "Marker som udført",
+      "skip": "Spring over",
+      "reset": "Genåbn",
+      "requiredBadge": "obligatorisk",
+      "linkedBadge": "knyttet til en rigtig post"
+    },
+    "kinds": {
+      "task": "Opgave",
+      "document_ack": "Dokument til læsning og bekræftelse",
+      "asset_issue": "Udleveret værktøj eller udstyr",
+      "training_note": "Uddannelse",
+      "custom": "Andet trin",
+      "asset_return": "Værktøj eller udstyr til aflevering",
+      "access_removal": "Fjern adgang",
+      "final_evidence": "Sluttjek af arbejdsposter"
+    },
+    "templates": {
+      "title": "Onboarding-skabeloner",
+      "empty": "Ingen onboarding-skabeloner endnu. Opret den første nedenfor.",
+      "createTitle": "Ny onboarding-skabelon",
+      "nameLabel": "Skabelonnavn",
+      "itemTitleLabel": "Trin {n}",
+      "kindLabel": "Type",
+      "requiredLabel": "Obligatorisk",
+      "createSubmit": "Opret skabelon",
+      "itemCount": "{count} trin"
+    },
+    "stageForm": {
+      "stageLabel": "Fase",
+      "probationDateLabel": "Prøvetid indtil (ved prøvetid)",
+      "noteLabel": "Note (valgfri)",
+      "submit": "Opdater fase"
+    },
+    "end": {
+      "reasonLabel": "Årsag",
+      "noteLabel": "Note (valgfri)",
+      "submit": "Afslut ansættelse",
+      "confirmHint": "Ansættelsen afsluttes ad samme beskyttede vej som fjernelse af et medlem."
+    },
+    "reasons": {
+      "resignation": "Opsigelse fra medarbejder",
+      "termination": "Opsigelse fra arbejdsgiver",
+      "contract_end": "Kontrakt udløbet",
+      "mutual_agreement": "Gensidig aftale",
+      "retirement": "Pension",
+      "other": "Andet"
+    },
+    "history": {
+      "title": "Livscyklushistorik",
+      "empty": "Ingen hændelser endnu."
+    },
+    "events": {
+      "stage_changed": "Fase ændret",
+      "onboarding_started": "Onboarding startet",
+      "onboarding_completed": "Onboarding gennemført",
+      "onboarding_cancelled": "Onboarding annulleret",
+      "offboarding_started": "Offboarding startet",
+      "offboarding_completed": "Offboarding gennemført",
+      "offboarding_cancelled": "Offboarding annulleret",
+      "probation_set": "Prøvetid fastsat",
+      "change_noted": "Ændring noteret",
+      "engagement_ended": "Ansættelse afsluttet"
+    },
+    "worker": {
+      "title": "Min onboarding",
+      "intro": "Trin, din arbejdsgiver har forberedt til din start. Bekræft dem, der er dine — resten klarer din arbejdsgiver.",
+      "empty": "Intet venter på dig lige nu.",
+      "done": "Udført",
+      "managerHint": "Din arbejdsgiver bekræfter dette trin"
+    },
+    "notice": {
+      "created": "Oprettet.",
+      "started": "Tjekliste startet.",
+      "updated": "Gemt.",
+      "completed": "Tjekliste gennemført.",
+      "cancelled": "Tjekliste annulleret.",
+      "ended": "Ansættelse afsluttet og registreret.",
+      "already_ended": "Denne ansættelse var allerede afsluttet.",
+      "already_exists": "En skabelon med dette navn findes allerede.",
+      "already_running": "Der kører allerede en tjekliste for denne person.",
+      "items_open": "Gennemfør først alle obligatoriske trin.",
+      "item_closed": "Dette trin er allerede afklaret.",
+      "run_closed": "Denne tjekliste er allerede lukket.",
+      "link_invalid": "Den tilknyttede post passer ikke til dette trin.",
+      "asset_not_returned": "Udstyret er endnu ikke afleveret — registrer først afleveringen.",
+      "offboarding_open": "Afslut eller annuller først offboarding-tjeklisten.",
+      "onboarding_open": "Afslut eller annuller først onboarding-tjeklisten.",
+      "invalid_responsible": "Den person er ikke en del af denne organisation.",
+      "invalid_stage": "Denne handling passer ikke til den aktuelle fase.",
+      "invalid_transition": "Dette faseskift er ikke tilladt fra den aktuelle fase.",
+      "not_active": "Denne ansættelse er ikke aktiv.",
+      "not_org_scoped": "Dette er en personlig post, ikke en ansættelse i organisationen.",
+      "template_not_found": "Skabelonen er ikke tilgængelig.",
+      "last_owner": "Den sidste ejers ansættelse kan ikke afsluttes — udpeg først en anden ejer.",
+      "limit_reached": "Grænsen for denne organisation er nået.",
+      "invalid": "Ugyldigt input.",
+      "needs_migration": "Denne funktion er endnu ikke slået til i dette miljø.",
+      "not_authorized": "Du har ikke rettigheder til dette.",
+      "not_found": "Posten er ikke tilgængelig.",
+      "error": "Mislykkedes — prøv igen."
+    }
   }
 }

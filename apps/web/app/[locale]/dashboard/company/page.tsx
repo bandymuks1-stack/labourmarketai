@@ -44,6 +44,8 @@ import { listManagedProjects } from "@/lib/projects/projects";
 import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
+import { LifecycleSection } from "./lifecycle-section";
+import { isLifecycleNotice } from "@/lib/lifecycle/lifecycle-model";
 import { BusinessPublicProfilePanel } from "@/components/app/business-public-profile-panel";
 import { getBusinessPublicSettings } from "@/lib/company/public-profile";
 import { getOrgMembersData } from "@/lib/operations/org-members";
@@ -80,11 +82,18 @@ const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
 
 export default async function CompanyDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Honest `?lc=` outcome from the lifecycle NATIVE-NAV actions (approvals
+  // `?wf=` precedent) — unknown values are dropped, never rendered raw.
+  const sp = (await searchParams) ?? {};
+  const rawLc = typeof sp.lc === "string" ? sp.lc : "";
+  const lifecycleNotice = isLifecycleNotice(rawLc) ? rawLc : null;
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("roleDashboards.company");
@@ -1212,6 +1221,18 @@ export default async function CompanyDashboardPage({
           members={orgMembers.members}
           addable={orgMembers.addable}
           labels={orgMembersLabels}
+        />
+      )}
+
+      {/* Employment lifecycle on the SAME canonical engagement_contexts rows
+          the members panel above manages: stage badges, onboarding /
+          offboarding checklists, probation, reason-captured ending, history.
+          Honest gated state until the lead applies 20260817190000. */}
+      {orgMembers && (
+        <LifecycleSection
+          locale={locale}
+          orgId={orgMembers.orgId}
+          notice={lifecycleNotice}
         />
       )}
 

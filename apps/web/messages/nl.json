@@ -12520,5 +12520,142 @@
       "limit_reached": "De limiet voor open items is bereikt. Sluit eerst iets af.",
       "error": "Er ging iets mis. Er is niets gewijzigd."
     }
+  },
+  "lifecycle": {
+    "title": "Levensloop van het dienstverband",
+    "intro": "Onboarding, proeftijd, wijzigingen, offboarding en beëindiging voor de arbeidsrecords van deze organisatie — met checklists en volledige geschiedenis.",
+    "unavailable": "De levensloop van het dienstverband is in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit onderdeel opent zodra de opslag is beoordeeld en toegepast.",
+    "honestNote": "Alles hier blijft binnen het product. Een stap afvinken legt alleen vast wie wat wanneer bevestigde — er wordt niets verstuurd.",
+    "loadError": "Een deel van de gegevens kon nu niet worden geladen. Wat u ziet is echt, maar kan onvolledig zijn.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Actief",
+      "probation": "Proeftijd",
+      "change_pending": "Wijziging in behandeling",
+      "offboarding": "Offboarding",
+      "ended": "Beëindigd"
+    },
+    "members": {
+      "title": "Mensen en fasen",
+      "empty": "Nog geen arbeidsrecords in deze organisatie.",
+      "actionsSummary": "Levensloopacties",
+      "probationUntil": "Proeftijd tot {date}",
+      "ownerProtected": "Het record van de geregistreerde eigenaar kan niet worden beëindigd zolang hij eigenaar is."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-checklist",
+      "offboardingTitle": "Offboarding-checklist",
+      "progress": "{done} van {total} gedaan",
+      "requiredOpen": "Nog {count} verplichte stappen open",
+      "complete": "Checklist afronden",
+      "cancel": "Checklist annuleren",
+      "start": "Onboarding starten",
+      "startOffboarding": "Offboarding starten",
+      "templateLabel": "Checklist-sjabloon",
+      "extraItemsLabel": "Extra stappen (één per regel, optioneel)",
+      "extraItemsHint": "bijv. Sleutels overdragen"
+    },
+    "items": {
+      "markDone": "Afvinken",
+      "skip": "Overslaan",
+      "reset": "Heropenen",
+      "requiredBadge": "verplicht",
+      "linkedBadge": "gekoppeld aan een echt record"
+    },
+    "kinds": {
+      "task": "Taak",
+      "document_ack": "Document lezen en bevestigen",
+      "asset_issue": "Uitgereikt gereedschap of materieel",
+      "training_note": "Training",
+      "custom": "Andere stap",
+      "asset_return": "In te leveren gereedschap of materieel",
+      "access_removal": "Toegang intrekken",
+      "final_evidence": "Eindcontrole werkrecords"
+    },
+    "templates": {
+      "title": "Onboarding-sjablonen",
+      "empty": "Nog geen onboarding-sjablonen. Maak hieronder de eerste aan.",
+      "createTitle": "Nieuw onboarding-sjabloon",
+      "nameLabel": "Sjabloonnaam",
+      "itemTitleLabel": "Stap {n}",
+      "kindLabel": "Type",
+      "requiredLabel": "Verplicht",
+      "createSubmit": "Sjabloon aanmaken",
+      "itemCount": "{count} stappen"
+    },
+    "stageForm": {
+      "stageLabel": "Fase",
+      "probationDateLabel": "Proeftijd tot (bij proeftijd)",
+      "noteLabel": "Notitie (optioneel)",
+      "submit": "Fase bijwerken"
+    },
+    "end": {
+      "reasonLabel": "Reden",
+      "noteLabel": "Notitie (optioneel)",
+      "submit": "Dienstverband beëindigen",
+      "confirmHint": "Het arbeidsrecord wordt beëindigd via hetzelfde beschermde pad als het verwijderen van een lid."
+    },
+    "reasons": {
+      "resignation": "Ontslag op eigen verzoek",
+      "termination": "Ontslag",
+      "contract_end": "Contract afgelopen",
+      "mutual_agreement": "Wederzijds akkoord",
+      "retirement": "Pensioen",
+      "other": "Anders"
+    },
+    "history": {
+      "title": "Levensloopgeschiedenis",
+      "empty": "Nog geen gebeurtenissen."
+    },
+    "events": {
+      "stage_changed": "Fase gewijzigd",
+      "onboarding_started": "Onboarding gestart",
+      "onboarding_completed": "Onboarding afgerond",
+      "onboarding_cancelled": "Onboarding geannuleerd",
+      "offboarding_started": "Offboarding gestart",
+      "offboarding_completed": "Offboarding afgerond",
+      "offboarding_cancelled": "Offboarding geannuleerd",
+      "probation_set": "Proeftijd ingesteld",
+      "change_noted": "Wijziging genoteerd",
+      "engagement_ended": "Dienstverband beëindigd"
+    },
+    "worker": {
+      "title": "Mijn onboarding",
+      "intro": "Stappen die uw werkgever voor uw start heeft klaargezet. Bevestig wat van u is — de rest regelt uw werkgever.",
+      "empty": "Er wacht nu niets op u.",
+      "done": "Gedaan",
+      "managerHint": "Uw werkgever bevestigt deze stap"
+    },
+    "notice": {
+      "created": "Aangemaakt.",
+      "started": "Checklist gestart.",
+      "updated": "Opgeslagen.",
+      "completed": "Checklist afgerond.",
+      "cancelled": "Checklist geannuleerd.",
+      "ended": "Dienstverband beëindigd en vastgelegd.",
+      "already_ended": "Dit dienstverband was al beëindigd.",
+      "already_exists": "Er bestaat al een sjabloon met deze naam.",
+      "already_running": "Voor deze persoon loopt al een checklist.",
+      "items_open": "Rond eerst alle verplichte stappen af.",
+      "item_closed": "Deze stap is al afgehandeld.",
+      "run_closed": "Deze checklist is al gesloten.",
+      "link_invalid": "Het gekoppelde record past niet bij deze stap.",
+      "asset_not_returned": "Het materieel is nog niet ingeleverd — registreer eerst de inname.",
+      "offboarding_open": "Rond eerst de offboarding-checklist af of annuleer die.",
+      "onboarding_open": "Rond eerst de onboarding-checklist af of annuleer die.",
+      "invalid_responsible": "Die persoon hoort niet bij deze organisatie.",
+      "invalid_stage": "Deze actie past niet bij de huidige fase.",
+      "invalid_transition": "Deze fasewijziging is vanuit de huidige fase niet toegestaan.",
+      "not_active": "Dit arbeidsrecord is niet actief.",
+      "not_org_scoped": "Dit is een persoonlijk record, geen dienstverband van de organisatie.",
+      "template_not_found": "Dat sjabloon is niet beschikbaar.",
+      "last_owner": "Het record van de laatste eigenaar kan niet worden beëindigd — benoem eerst een andere eigenaar.",
+      "limit_reached": "De limiet voor deze organisatie is bereikt.",
+      "invalid": "Ongeldige invoer.",
+      "needs_migration": "Deze mogelijkheid is in deze omgeving nog niet ingeschakeld.",
+      "not_authorized": "U bent hiervoor niet bevoegd.",
+      "not_found": "Record niet beschikbaar.",
+      "error": "Mislukt — probeer het opnieuw."
+    }
   }
 }

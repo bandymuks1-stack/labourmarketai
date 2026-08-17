@@ -12520,5 +12520,142 @@
       "limit_reached": "Pasiektas atvirų įrašų limitas. Pirmiausia užbaikite esamus.",
       "error": "Įvyko klaida. Niekas nepakeista."
     }
+  },
+  "lifecycle": {
+    "title": "Darbo santykių eiga",
+    "intro": "Įdarbinimas, bandomasis laikotarpis, pokyčiai, išleidimas ir pabaiga šios organizacijos darbo įrašams — su kontroliniais sąrašais ir pilna istorija.",
+    "unavailable": "Darbo santykių eiga šioje aplinkoje dar neįjungta. Niekas neprarasta — ši sritis atsivers, kai saugykla bus peržiūrėta ir įdiegta.",
+    "honestNote": "Viskas čia lieka produkte. Pažymėjus žingsnį atliktu, įrašoma tik kas, ką ir kada patvirtino — niekur nieko nesiunčiama.",
+    "loadError": "Dalies eigos duomenų dabar nepavyko įkelti. Tai, ką matote, tikra, bet gali būti nepilna.",
+    "stage": {
+      "onboarding": "Įdarbinimas",
+      "active": "Aktyvus",
+      "probation": "Bandomasis laikotarpis",
+      "change_pending": "Laukia pokytis",
+      "offboarding": "Išleidimas",
+      "ended": "Baigta"
+    },
+    "members": {
+      "title": "Žmonės ir etapai",
+      "empty": "Šioje organizacijoje darbo įrašų dar nėra.",
+      "actionsSummary": "Eigos veiksmai",
+      "probationUntil": "Bandomasis iki {date}",
+      "ownerProtected": "Registruoto savininko įrašo negalima baigti, kol jis yra savininkas."
+    },
+    "runs": {
+      "onboardingTitle": "Įdarbinimo sąrašas",
+      "offboardingTitle": "Išleidimo sąrašas",
+      "progress": "Atlikta {done} iš {total}",
+      "requiredOpen": "Liko privalomų žingsnių: {count}",
+      "complete": "Užbaigti sąrašą",
+      "cancel": "Atšaukti sąrašą",
+      "start": "Pradėti įdarbinimą",
+      "startOffboarding": "Pradėti išleidimą",
+      "templateLabel": "Sąrašo šablonas",
+      "extraItemsLabel": "Papildomi žingsniai (po vieną eilutėje, nebūtina)",
+      "extraItemsHint": "pvz., Perduoti raktus"
+    },
+    "items": {
+      "markDone": "Pažymėti atliktu",
+      "skip": "Praleisti",
+      "reset": "Atidaryti iš naujo",
+      "requiredBadge": "privaloma",
+      "linkedBadge": "susieta su tikru įrašu"
+    },
+    "kinds": {
+      "task": "Užduotis",
+      "document_ack": "Dokumentas perskaityti ir patvirtinti",
+      "asset_issue": "Išduotas įrankis ar įranga",
+      "training_note": "Mokymai",
+      "custom": "Kitas žingsnis",
+      "asset_return": "Grąžintinas įrankis ar įranga",
+      "access_removal": "Panaikinti prieigą",
+      "final_evidence": "Galutinė darbo įrašų patikra"
+    },
+    "templates": {
+      "title": "Įdarbinimo šablonai",
+      "empty": "Įdarbinimo šablonų dar nėra. Sukurkite pirmą žemiau.",
+      "createTitle": "Naujas įdarbinimo šablonas",
+      "nameLabel": "Šablono pavadinimas",
+      "itemTitleLabel": "Žingsnis {n}",
+      "kindLabel": "Tipas",
+      "requiredLabel": "Privalomas",
+      "createSubmit": "Sukurti šabloną",
+      "itemCount": "Žingsnių: {count}"
+    },
+    "stageForm": {
+      "stageLabel": "Etapas",
+      "probationDateLabel": "Bandomasis iki (jei bandomasis)",
+      "noteLabel": "Pastaba (nebūtina)",
+      "submit": "Atnaujinti etapą"
+    },
+    "end": {
+      "reasonLabel": "Priežastis",
+      "noteLabel": "Pastaba (nebūtina)",
+      "submit": "Baigti darbo santykius",
+      "confirmHint": "Darbo įrašas baigiamas tuo pačiu apsaugotu keliu kaip ir nario pašalinimas."
+    },
+    "reasons": {
+      "resignation": "Išėjimas savo noru",
+      "termination": "Atleidimas",
+      "contract_end": "Sutartis baigėsi",
+      "mutual_agreement": "Abipusis susitarimas",
+      "retirement": "Pensija",
+      "other": "Kita"
+    },
+    "history": {
+      "title": "Eigos istorija",
+      "empty": "Eigos įvykių dar nėra."
+    },
+    "events": {
+      "stage_changed": "Etapas pakeistas",
+      "onboarding_started": "Įdarbinimas pradėtas",
+      "onboarding_completed": "Įdarbinimas užbaigtas",
+      "onboarding_cancelled": "Įdarbinimas atšauktas",
+      "offboarding_started": "Išleidimas pradėtas",
+      "offboarding_completed": "Išleidimas užbaigtas",
+      "offboarding_cancelled": "Išleidimas atšauktas",
+      "probation_set": "Nustatytas bandomasis",
+      "change_noted": "Užfiksuotas pokytis",
+      "engagement_ended": "Darbo santykiai baigti"
+    },
+    "worker": {
+      "title": "Mano įdarbinimas",
+      "intro": "Žingsniai, kuriuos darbdavys paruošė jūsų startui. Patvirtinkite tuos, kurie jūsų — likusius tvarko darbdavys.",
+      "empty": "Šiuo metu jūsų niekas nelaukia.",
+      "done": "Atlikta",
+      "managerHint": "Šį žingsnį patvirtina darbdavys"
+    },
+    "notice": {
+      "created": "Sukurta.",
+      "started": "Sąrašas pradėtas.",
+      "updated": "Išsaugota.",
+      "completed": "Sąrašas užbaigtas.",
+      "cancelled": "Sąrašas atšauktas.",
+      "ended": "Darbo santykiai baigti ir įrašyti.",
+      "already_ended": "Šie darbo santykiai jau buvo baigti.",
+      "already_exists": "Šablonas tokiu pavadinimu jau yra.",
+      "already_running": "Šiam žmogui sąrašas jau vykdomas.",
+      "items_open": "Pirmiausia užbaikite visus privalomus žingsnius.",
+      "item_closed": "Šis žingsnis jau sutvarkytas.",
+      "run_closed": "Šis sąrašas jau uždarytas.",
+      "link_invalid": "Susietas įrašas neatitinka šio žingsnio.",
+      "asset_not_returned": "Įranga dar negrąžinta — pirmiausia užfiksuokite grąžinimą.",
+      "offboarding_open": "Pirmiausia užbaikite arba atšaukite išleidimo sąrašą.",
+      "onboarding_open": "Pirmiausia užbaikite arba atšaukite įdarbinimo sąrašą.",
+      "invalid_responsible": "Šis žmogus nepriklauso šiai organizacijai.",
+      "invalid_stage": "Šis veiksmas netinka dabartiniam etapui.",
+      "invalid_transition": "Toks etapo keitimas iš dabartinio etapo negalimas.",
+      "not_active": "Šis darbo įrašas nebeaktyvus.",
+      "not_org_scoped": "Tai asmeninis įrašas, ne organizacijos darbo santykiai.",
+      "template_not_found": "Šis šablonas nepasiekiamas.",
+      "last_owner": "Paskutinio savininko įrašo baigti negalima — pirmiau paskirkite kitą savininką.",
+      "limit_reached": "Pasiekta šios organizacijos riba.",
+      "invalid": "Netinkami duomenys.",
+      "needs_migration": "Ši galimybė šioje aplinkoje dar neįjungta.",
+      "not_authorized": "Neturite teisės šiam veiksmui.",
+      "not_found": "Įrašas neberastas.",
+      "error": "Nepavyko — bandykite dar kartą."
+    }
   }
 }

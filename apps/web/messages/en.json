@@ -12520,5 +12520,142 @@
       "limit_reached": "The open-items limit was reached. Close something first.",
       "error": "Something went wrong. Nothing was changed."
     }
+  },
+  "lifecycle": {
+    "title": "Employment lifecycle",
+    "intro": "Onboarding, probation, changes, offboarding and endings for this organization's employment records — with checklists and a full history.",
+    "unavailable": "The employment lifecycle is not enabled in this environment yet. Nothing is lost — this area opens once the lifecycle storage is reviewed and applied.",
+    "honestNote": "Everything here stays inside the product. Marking a step done only records who confirmed what and when — nothing is sent anywhere.",
+    "loadError": "Some lifecycle data could not be loaded right now. What you see is real but may be incomplete.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Active",
+      "probation": "Probation",
+      "change_pending": "Change pending",
+      "offboarding": "Offboarding",
+      "ended": "Ended"
+    },
+    "members": {
+      "title": "People and stages",
+      "empty": "No employment records in this organization yet.",
+      "actionsSummary": "Lifecycle actions",
+      "probationUntil": "Probation until {date}",
+      "ownerProtected": "The registered owner's own record cannot be ended while they are the owner."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding checklist",
+      "offboardingTitle": "Offboarding checklist",
+      "progress": "{done} of {total} done",
+      "requiredOpen": "{count} required steps still open",
+      "complete": "Finish checklist",
+      "cancel": "Cancel checklist",
+      "start": "Start onboarding",
+      "startOffboarding": "Start offboarding",
+      "templateLabel": "Checklist template",
+      "extraItemsLabel": "Extra steps (one per line, optional)",
+      "extraItemsHint": "e.g. Hand over keys"
+    },
+    "items": {
+      "markDone": "Mark done",
+      "skip": "Skip",
+      "reset": "Reopen",
+      "requiredBadge": "required",
+      "linkedBadge": "linked to a real record"
+    },
+    "kinds": {
+      "task": "Task",
+      "document_ack": "Document to read and confirm",
+      "asset_issue": "Tool or equipment handed out",
+      "training_note": "Training",
+      "custom": "Other step",
+      "asset_return": "Tool or equipment to return",
+      "access_removal": "Remove access",
+      "final_evidence": "Final work records check"
+    },
+    "templates": {
+      "title": "Onboarding templates",
+      "empty": "No onboarding templates yet. Create the first one below.",
+      "createTitle": "New onboarding template",
+      "nameLabel": "Template name",
+      "itemTitleLabel": "Step {n}",
+      "kindLabel": "Type",
+      "requiredLabel": "Required",
+      "createSubmit": "Create template",
+      "itemCount": "{count} steps"
+    },
+    "stageForm": {
+      "stageLabel": "Stage",
+      "probationDateLabel": "Probation until (for probation)",
+      "noteLabel": "Note (optional)",
+      "submit": "Update stage"
+    },
+    "end": {
+      "reasonLabel": "Reason",
+      "noteLabel": "Note (optional)",
+      "submit": "End employment",
+      "confirmHint": "This ends the employment record through the same protected path as removing a member."
+    },
+    "reasons": {
+      "resignation": "Resignation",
+      "termination": "Termination",
+      "contract_end": "Contract ended",
+      "mutual_agreement": "Mutual agreement",
+      "retirement": "Retirement",
+      "other": "Other"
+    },
+    "history": {
+      "title": "Lifecycle history",
+      "empty": "No lifecycle events yet."
+    },
+    "events": {
+      "stage_changed": "Stage changed",
+      "onboarding_started": "Onboarding started",
+      "onboarding_completed": "Onboarding completed",
+      "onboarding_cancelled": "Onboarding cancelled",
+      "offboarding_started": "Offboarding started",
+      "offboarding_completed": "Offboarding completed",
+      "offboarding_cancelled": "Offboarding cancelled",
+      "probation_set": "Probation set",
+      "change_noted": "Change noted",
+      "engagement_ended": "Employment ended"
+    },
+    "worker": {
+      "title": "My onboarding",
+      "intro": "Steps your employer set up for your start. Confirm the ones that are yours — the rest are handled by your employer.",
+      "empty": "Nothing waits for you right now.",
+      "done": "Done",
+      "managerHint": "Your employer confirms this step"
+    },
+    "notice": {
+      "created": "Created.",
+      "started": "Checklist started.",
+      "updated": "Saved.",
+      "completed": "Checklist finished.",
+      "cancelled": "Checklist cancelled.",
+      "ended": "Employment ended and recorded.",
+      "already_ended": "This employment was already ended.",
+      "already_exists": "A template with this name already exists.",
+      "already_running": "A checklist is already running for this person.",
+      "items_open": "Finish all required steps first.",
+      "item_closed": "This step is already settled.",
+      "run_closed": "This checklist is already closed.",
+      "link_invalid": "The linked record does not match this step.",
+      "asset_not_returned": "The equipment has not been returned yet — record the return first.",
+      "offboarding_open": "Finish or cancel the offboarding checklist first.",
+      "onboarding_open": "Finish or cancel the onboarding checklist first.",
+      "invalid_responsible": "That person is not part of this organization.",
+      "invalid_stage": "This action does not fit the current stage.",
+      "invalid_transition": "This stage change is not allowed from the current stage.",
+      "not_active": "This employment record is not active.",
+      "not_org_scoped": "This is a personal record, not an organization employment.",
+      "template_not_found": "That template is not available.",
+      "last_owner": "The last owner's record cannot be ended — appoint another owner first.",
+      "limit_reached": "The limit for this organization is reached.",
+      "invalid": "Invalid input.",
+      "needs_migration": "This capability is not enabled in this environment yet.",
+      "not_authorized": "You are not authorized for this.",
+      "not_found": "Record not available.",
+      "error": "Something failed — try again."
+    }
   }
 }
