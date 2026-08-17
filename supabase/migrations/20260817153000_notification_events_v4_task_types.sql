@@ -1,13 +1,13 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration by the LEAD session, AFTER the
--- sibling widenings (v3 workflow types, v3 document types) if those merged
--- first — whichever file is applied LAST must re-add the constraint with the
--- FULL accumulated type list. Never `db push`.
+-- Apply ONLY via Supabase MCP apply_migration by the LEAD session, AFTER
+-- 20260817130100_notification_events_v3_workflow_types.sql (this file's
+-- lists INCLUDE the v3 workflow types — reconciled after merging
+-- origin/main 08121c8d). Never `db push`.
 --
--- MERGE-ORDER NOTE (train V2): PRs #1170 / #1169 widen these same two
--- constraints. At rebase time this file's lists MUST be recounted against
--- the then-current v3 migrations so no sibling type is dropped.
+-- MERGE-ORDER NOTE (train V2): PR #1169 (document engine) may widen these
+-- same two constraints again. Whichever widening applies LAST must carry
+-- the FULL accumulated type list — recount at every merge.
 --
 -- @human-gate-approved — pre-approved by owner mandate 2026-08-17 (autonomous
 -- functional completion train V2, §4 migration authority). Safety class:
@@ -48,6 +48,10 @@ alter table public.notification_events
     'absence_rejected',
     'engagement_created',
     'engagement_ended',
+    'workflow_step_pending',
+    'workflow_decided',
+    'workflow_delegated',
+    'workflow_escalated',
     'work_task_assigned'
   ));
 
@@ -59,5 +63,6 @@ alter table public.notification_events
     'booking_request',
     'worker_absence',
     'engagement',
+    'workflow_instance',
     'work_task'
   ));

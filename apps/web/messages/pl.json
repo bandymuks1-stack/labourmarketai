@@ -350,6 +350,10 @@
         "event_booking_withdrawn": "Propozycja rezerwacji została wycofana",
         "event_engagement_ended": "Współpraca została zakończona",
         "event_engagement_created": "Utworzono nową współpracę",
+        "event_workflow_step_pending": "Wniosek o zatwierdzenie czeka na Twoją decyzję",
+        "event_workflow_decided": "Podjęto decyzję w sprawie Twojego wniosku o zatwierdzenie",
+        "event_workflow_delegated": "Przekazano Ci etap zatwierdzania",
+        "event_workflow_escalated": "Etap zatwierdzania przekroczył termin",
         "event_work_task_assigned": "Przypisano ci zadanie"
       }
     },
@@ -4332,5 +4336,153 @@
     "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
     "companyProfileLink": "[EN] Open company profile",
     "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
+  },
+  "approvals": {
+    "title": "Zatwierdzenia",
+    "intro": "Wnioski o zatwierdzenie w Twoich organizacjach: złóż wniosek, podejmij czekające na Ciebie decyzje i śledź każdy etap.",
+    "unavailable": "Zatwierdzenia nie są jeszcze włączone w tym środowisku. Nic nie przepada — ta sekcja otworzy się, gdy magazyn zatwierdzeń zostanie sprawdzony i wdrożony.",
+    "honestNote": "Decyzje pozostają wewnątrz produktu. Nic nie jest wysyłane e-mailem ani nigdzie indziej — aktualizacje widać na tej stronie i w dzwonku powiadomień.",
+    "loadError": "Części danych o zatwierdzeniach nie udało się teraz wczytać. To, co widzisz, jest prawdziwe, ale może być niepełne.",
+    "inbox": {
+      "title": "Czeka na Twoją decyzję",
+      "empty": "Nic teraz nie czeka na Twoją decyzję.",
+      "stepLabel": "Etap"
+    },
+    "start": {
+      "title": "Nowy wniosek o zatwierdzenie",
+      "definitionLabel": "Szablon zatwierdzenia",
+      "titleLabel": "O co wnioskujesz?",
+      "detailsLabel": "Szczegóły (opcjonalnie)",
+      "submit": "Wyślij wniosek"
+    },
+    "myRequests": {
+      "title": "Moje wnioski",
+      "empty": "Nie złożyłeś jeszcze żadnego wniosku o zatwierdzenie."
+    },
+    "admin": {
+      "title": "Zatwierdzenia organizacji",
+      "noPending": "Brak otwartych wniosków innych osób w Twoich organizacjach.",
+      "overdueHint": "Kontrola terminów tylko oznacza spóźnione etapy i informuje odpowiedzialnych. Nic nigdy nie jest zatwierdzane automatycznie."
+    },
+    "templates": {
+      "title": "Szablony zatwierdzeń",
+      "empty": "Nie ma jeszcze szablonów. Utwórz pierwszy poniżej.",
+      "createTitle": "Nowy szablon zatwierdzenia",
+      "orgLabel": "Organizacja",
+      "nameLabel": "Nazwa szablonu",
+      "contextLabel": "Rodzaj wniosku",
+      "stepLegend": "Etap {n}",
+      "optional": "opcjonalnie",
+      "stepNameLabel": "Nazwa etapu",
+      "modeLabel": "Ilu musi zatwierdzić",
+      "ruleLabel": "Kto decyduje",
+      "deadlineLabel": "Termin (godziny, opcjonalnie)",
+      "escalationHint": "Jeśli etap przekroczy termin, zostaje oznaczony jako spóźniony, a właściciele i administratorzy są informowani. Nic nie jest zatwierdzane automatycznie.",
+      "createSubmit": "Utwórz szablon",
+      "stepCount": "Etapy: {count}",
+      "published": "W użyciu"
+    },
+    "actions": {
+      "approve": "Zatwierdź",
+      "reject": "Odrzuć",
+      "delegate": "Przekaż koledze",
+      "delegateSubmit": "Przekaż",
+      "withdraw": "Wycofaj",
+      "cancel": "Anuluj wniosek",
+      "markOverdue": "Sprawdź terminy",
+      "publish": "Zacznij używać"
+    },
+    "form": {
+      "reasonLabel": "Powód",
+      "reasonOptional": "Opcjonalnie",
+      "delegateEmailLabel": "E-mail współpracownika",
+      "delegateHint": "Współpracownik musi należeć do tej samej organizacji. Odpowiedzialność za ten etap pozostaje przy Tobie."
+    },
+    "status": {
+      "pending": "Oczekuje",
+      "approved": "Zatwierdzony",
+      "rejected": "Odrzucony",
+      "withdrawn": "Wycofany",
+      "cancelled": "Anulowany"
+    },
+    "stepStatus": {
+      "waiting": "Nierozpoczęty",
+      "active": "W toku",
+      "approved": "Zatwierdzony",
+      "rejected": "Odrzucony",
+      "skipped": "Pominięty",
+      "escalated": "Po terminie"
+    },
+    "mode": {
+      "single": "Decyduje jedna osoba",
+      "all": "Wszyscy muszą zatwierdzić",
+      "any": "Liczy się pierwsza decyzja"
+    },
+    "decision": {
+      "approved": "Zatwierdzono",
+      "rejected": "Odrzucono"
+    },
+    "rule": {
+      "owner_admin": "Właściciele i administratorzy",
+      "requester_manager": "Przełożeni wnioskodawcy"
+    },
+    "contextType": {
+      "generic_request": "Wniosek ogólny",
+      "worker_absence": "Nieobecność",
+      "expense": "Wydatek",
+      "invoice": "Faktura",
+      "document_ack": "Zatwierdzenie dokumentu",
+      "timesheet": "Ewidencja czasu pracy",
+      "procurement": "Zakup",
+      "business_trip": "Delegacja",
+      "management_decision": "Decyzja zarządu",
+      "agreement": "Umowa"
+    },
+    "transition": {
+      "started": "Wniosek złożony",
+      "step_activated": "Etap rozpoczęty",
+      "approved": "Zatwierdzono",
+      "rejected": "Odrzucono",
+      "delegated": "Przekazano",
+      "withdrawn": "Wycofano",
+      "cancelled": "Anulowano",
+      "escalated": "Oznaczono przekroczenie terminu",
+      "completed": "Zakończono"
+    },
+    "timeline": {
+      "open": "Pokaż przebieg",
+      "progress": "Zatwierdziło {approved} z {total}",
+      "deadline": "Termin",
+      "historyTitle": "Pełna historia",
+      "stepLabel": "etap"
+    },
+    "notice": {
+      "created": "Szablon utworzony. Zacznij go używać, aby można było składać wnioski.",
+      "published": "Szablon jest teraz w użyciu.",
+      "started": "Wniosek wysłany do zatwierdzających pierwszego etapu.",
+      "already_pending": "Taki wniosek jest już otwarty.",
+      "already_published": "Ten szablon jest już w użyciu.",
+      "already_exists": "Szablon o tej nazwie już istnieje w organizacji.",
+      "already_decided": "Już podjąłeś decyzję w tym etapie.",
+      "approved": "Wniosek zatwierdzony.",
+      "rejected": "Wniosek odrzucony.",
+      "step_approved": "Etap zatwierdzony — rozpoczął się następny.",
+      "recorded": "Twoja decyzja została zapisana. Oczekiwanie na pozostałych zatwierdzających.",
+      "delegated": "Etap przekazany Twojemu koledze.",
+      "withdrawn": "Wniosek wycofany.",
+      "cancelled": "Wniosek anulowany.",
+      "marked_overdue": "Spóźnione etapy oznaczono, a odpowiedzialnych poinformowano.",
+      "no_overdue": "Żaden etap nie przekroczył terminu.",
+      "no_approvers": "Ten wniosek nie ma jeszcze możliwych zatwierdzających. Sprawdź członków organizacji i ich role.",
+      "not_published": "Ten szablon nie jest jeszcze w użyciu.",
+      "not_pending": "Ten wniosek nie jest już otwarty.",
+      "invalid": "Sprawdź wprowadzone wartości i spróbuj ponownie.",
+      "invalid_delegate": "Nie znaleziono takiego współpracownika w tej organizacji.",
+      "needs_migration": "Zatwierdzenia nie są jeszcze włączone w tym środowisku. Nic nie zapisano.",
+      "not_authorized": "Nie masz na to pozwolenia.",
+      "not_found": "Nie znaleziono tego wniosku.",
+      "limit_reached": "Osiągnięto limit otwartych pozycji. Najpierw coś zamknij.",
+      "error": "Coś poszło nie tak. Nic nie zmieniono."
+    }
   }
 }

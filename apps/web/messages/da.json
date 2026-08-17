@@ -350,6 +350,10 @@
         "event_booking_withdrawn": "Bookingforslaget blev trukket tilbage",
         "event_engagement_ended": "Engagementet blev afsluttet",
         "event_engagement_created": "Et nyt engagement blev oprettet",
+        "event_workflow_step_pending": "En godkendelsesanmodning venter på din beslutning",
+        "event_workflow_decided": "Der er truffet beslutning om din godkendelsesanmodning",
+        "event_workflow_delegated": "En godkendelsesrunde er overdraget til dig",
+        "event_workflow_escalated": "En godkendelsesrunde har overskredet sin frist",
         "event_work_task_assigned": "En opgave er blevet tildelt dig"
       }
     },
@@ -4332,5 +4336,153 @@
     "companyProfileHint": "Din organisations oplysninger findes i virksomhedsprofilen.",
     "companyProfileLink": "Åbn virksomhedsprofil",
     "addIdentityHint": "Vil du også arbejde som person, kan du tilføje personidentiteten i rolleskifteren øverst på siden. Intet oprettes eller udfyldes automatisk."
+  },
+  "approvals": {
+    "title": "Godkendelser",
+    "intro": "Godkendelsesanmodninger i dine organisationer: indsend en anmodning, afgør det der venter på dig, og følg hver runde.",
+    "unavailable": "Godkendelser er endnu ikke slået til i dette miljø. Intet går tabt — dette område åbner, når godkendelseslageret er gennemgået og taget i brug.",
+    "honestNote": "Beslutninger bliver inde i produktet. Intet sendes med e-mail eller andre kanaler — opdateringer ses på denne side og i notifikationsklokken.",
+    "loadError": "En del af godkendelsesdataene kunne ikke indlæses lige nu. Det, du ser, er ægte, men kan være ufuldstændigt.",
+    "inbox": {
+      "title": "Venter på din beslutning",
+      "empty": "Intet venter på din beslutning lige nu.",
+      "stepLabel": "Runde"
+    },
+    "start": {
+      "title": "Ny godkendelsesanmodning",
+      "definitionLabel": "Godkendelsesskabelon",
+      "titleLabel": "Hvad anmoder du om?",
+      "detailsLabel": "Detaljer (valgfrit)",
+      "submit": "Send anmodning"
+    },
+    "myRequests": {
+      "title": "Mine anmodninger",
+      "empty": "Du har endnu ikke indsendt nogen godkendelsesanmodninger."
+    },
+    "admin": {
+      "title": "Organisationens godkendelser",
+      "noPending": "Ingen åbne anmodninger fra andre i dine organisationer.",
+      "overdueHint": "Fristkontrollen markerer kun forsinkede runder og informerer de ansvarlige. Intet godkendes nogensinde automatisk."
+    },
+    "templates": {
+      "title": "Godkendelsesskabeloner",
+      "empty": "Ingen skabeloner endnu. Opret den første nedenfor.",
+      "createTitle": "Ny godkendelsesskabelon",
+      "orgLabel": "Organisation",
+      "nameLabel": "Skabelonens navn",
+      "contextLabel": "Anmodningstype",
+      "stepLegend": "Runde {n}",
+      "optional": "valgfrit",
+      "stepNameLabel": "Rundens navn",
+      "modeLabel": "Hvor mange skal godkende",
+      "ruleLabel": "Hvem beslutter",
+      "deadlineLabel": "Frist (timer, valgfrit)",
+      "escalationHint": "Hvis en runde overskrider sin frist, markeres den som forsinket, og ejere og administratorer informeres. Intet godkendes automatisk.",
+      "createSubmit": "Opret skabelon",
+      "stepCount": "Runder: {count}",
+      "published": "I brug"
+    },
+    "actions": {
+      "approve": "Godkend",
+      "reject": "Afvis",
+      "delegate": "Overdrag til en kollega",
+      "delegateSubmit": "Overdrag",
+      "withdraw": "Træk tilbage",
+      "cancel": "Annuller anmodning",
+      "markOverdue": "Tjek frister",
+      "publish": "Tag i brug"
+    },
+    "form": {
+      "reasonLabel": "Begrundelse",
+      "reasonOptional": "Valgfrit",
+      "delegateEmailLabel": "Kollegaens e-mail",
+      "delegateHint": "Kollegaen skal tilhøre samme organisation. Ansvaret for denne runde forbliver hos dig."
+    },
+    "status": {
+      "pending": "Afventer",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "withdrawn": "Trukket tilbage",
+      "cancelled": "Annulleret"
+    },
+    "stepStatus": {
+      "waiting": "Ikke startet",
+      "active": "I gang",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "skipped": "Sprunget over",
+      "escalated": "Frist overskredet"
+    },
+    "mode": {
+      "single": "Én person beslutter",
+      "all": "Alle skal godkende",
+      "any": "Første beslutning gælder"
+    },
+    "decision": {
+      "approved": "Godkendt",
+      "rejected": "Afvist"
+    },
+    "rule": {
+      "owner_admin": "Ejere og administratorer",
+      "requester_manager": "Ansøgerens ledere"
+    },
+    "contextType": {
+      "generic_request": "Generel anmodning",
+      "worker_absence": "Fravær",
+      "expense": "Udgift",
+      "invoice": "Faktura",
+      "document_ack": "Dokumentgodkendelse",
+      "timesheet": "Timeseddel",
+      "procurement": "Indkøb",
+      "business_trip": "Tjenesterejse",
+      "management_decision": "Ledelsesbeslutning",
+      "agreement": "Aftale"
+    },
+    "transition": {
+      "started": "Anmodning indsendt",
+      "step_activated": "Runde startet",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "delegated": "Overdraget",
+      "withdrawn": "Trukket tilbage",
+      "cancelled": "Annulleret",
+      "escalated": "Fristoverskridelse markeret",
+      "completed": "Afsluttet"
+    },
+    "timeline": {
+      "open": "Vis forløb",
+      "progress": "{approved} af {total} har godkendt",
+      "deadline": "Frist",
+      "historyTitle": "Fuld historik",
+      "stepLabel": "runde"
+    },
+    "notice": {
+      "created": "Skabelon oprettet. Tag den i brug, så folk kan indsende anmodninger.",
+      "published": "Skabelonen er nu i brug.",
+      "started": "Anmodningen er sendt til den første rundes godkendere.",
+      "already_pending": "Denne anmodning er allerede åben.",
+      "already_published": "Denne skabelon er allerede i brug.",
+      "already_exists": "En skabelon med dette navn findes allerede i organisationen.",
+      "already_decided": "Du har allerede besluttet i denne runde.",
+      "approved": "Anmodning godkendt.",
+      "rejected": "Anmodning afvist.",
+      "step_approved": "Runden er godkendt — næste runde er startet.",
+      "recorded": "Din beslutning er gemt. Venter på de øvrige godkendere.",
+      "delegated": "Runden er overdraget til din kollega.",
+      "withdrawn": "Anmodningen er trukket tilbage.",
+      "cancelled": "Anmodningen er annulleret.",
+      "marked_overdue": "Forsinkede runder blev markeret, og de ansvarlige informeret.",
+      "no_overdue": "Ingen runder har overskredet fristen.",
+      "no_approvers": "Denne anmodning har endnu ingen mulige godkendere. Tjek organisationens medlemmer og deres roller.",
+      "not_published": "Denne skabelon er endnu ikke i brug.",
+      "not_pending": "Denne anmodning er ikke længere åben.",
+      "invalid": "Tjek de indtastede værdier, og prøv igen.",
+      "invalid_delegate": "Den kollega kunne ikke findes i denne organisation.",
+      "needs_migration": "Godkendelser er endnu ikke slået til i dette miljø. Intet blev gemt.",
+      "not_authorized": "Du har ikke lov til at gøre dette.",
+      "not_found": "Anmodningen blev ikke fundet.",
+      "limit_reached": "Grænsen for åbne poster er nået. Luk noget først.",
+      "error": "Noget gik galt. Intet blev ændret."
+    }
   }
 }

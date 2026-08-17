@@ -350,6 +350,10 @@
         "event_booking_withdrawn": "Bokningsförslaget drogs tillbaka",
         "event_engagement_ended": "Engagemanget avslutades",
         "event_engagement_created": "Ett nytt engagemang skapades",
+        "event_workflow_step_pending": "En godkännandeförfrågan väntar på ditt beslut",
+        "event_workflow_decided": "Ett beslut har fattats om din godkännandeförfrågan",
+        "event_workflow_delegated": "En godkännanderunda har lämnats över till dig",
+        "event_workflow_escalated": "En godkännanderunda har passerat sin frist",
         "event_work_task_assigned": "En uppgift har tilldelats dig"
       }
     },
@@ -4332,5 +4336,153 @@
     "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
     "companyProfileLink": "[EN] Open company profile",
     "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
+  },
+  "approvals": {
+    "title": "Godkännanden",
+    "intro": "Godkännandeförfrågningar i dina organisationer: skicka in en förfrågan, besluta om det som väntar på dig och följ varje runda.",
+    "unavailable": "Godkännanden är inte aktiverade i den här miljön ännu. Inget går förlorat — det här området öppnas när godkännandelagret har granskats och tagits i bruk.",
+    "honestNote": "Beslut stannar inne i produkten. Inget skickas via e-post eller andra kanaler — uppdateringar syns på den här sidan och i notisklockan.",
+    "loadError": "En del av godkännandedata kunde inte läsas in just nu. Det du ser är äkta men kan vara ofullständigt.",
+    "inbox": {
+      "title": "Väntar på ditt beslut",
+      "empty": "Inget väntar på ditt beslut just nu.",
+      "stepLabel": "Runda"
+    },
+    "start": {
+      "title": "Ny godkännandeförfrågan",
+      "definitionLabel": "Godkännandemall",
+      "titleLabel": "Vad begär du?",
+      "detailsLabel": "Detaljer (valfritt)",
+      "submit": "Skicka förfrågan"
+    },
+    "myRequests": {
+      "title": "Mina förfrågningar",
+      "empty": "Du har inte skickat in några godkännandeförfrågningar ännu."
+    },
+    "admin": {
+      "title": "Organisationens godkännanden",
+      "noPending": "Inga öppna förfrågningar från andra i dina organisationer.",
+      "overdueHint": "Fristkontrollen markerar bara försenade rundor och informerar de ansvariga. Inget godkänns någonsin automatiskt."
+    },
+    "templates": {
+      "title": "Godkännandemallar",
+      "empty": "Inga mallar ännu. Skapa den första nedan.",
+      "createTitle": "Ny godkännandemall",
+      "orgLabel": "Organisation",
+      "nameLabel": "Mallens namn",
+      "contextLabel": "Typ av förfrågan",
+      "stepLegend": "Runda {n}",
+      "optional": "valfritt",
+      "stepNameLabel": "Rundans namn",
+      "modeLabel": "Hur många måste godkänna",
+      "ruleLabel": "Vem beslutar",
+      "deadlineLabel": "Frist (timmar, valfritt)",
+      "escalationHint": "Om en runda passerar sin frist markeras den som försenad och ägare och administratörer informeras. Inget godkänns automatiskt.",
+      "createSubmit": "Skapa mall",
+      "stepCount": "Rundor: {count}",
+      "published": "I bruk"
+    },
+    "actions": {
+      "approve": "Godkänn",
+      "reject": "Avslå",
+      "delegate": "Lämna över till en kollega",
+      "delegateSubmit": "Lämna över",
+      "withdraw": "Ta tillbaka",
+      "cancel": "Avbryt förfrågan",
+      "markOverdue": "Kontrollera frister",
+      "publish": "Ta i bruk"
+    },
+    "form": {
+      "reasonLabel": "Motivering",
+      "reasonOptional": "Valfritt",
+      "delegateEmailLabel": "Kollegans e-post",
+      "delegateHint": "Kollegan måste tillhöra samma organisation. Ansvaret för den här rundan är kvar hos dig."
+    },
+    "status": {
+      "pending": "Väntar",
+      "approved": "Godkänd",
+      "rejected": "Avslagen",
+      "withdrawn": "Tillbakadragen",
+      "cancelled": "Avbruten"
+    },
+    "stepStatus": {
+      "waiting": "Inte påbörjad",
+      "active": "Pågår",
+      "approved": "Godkänd",
+      "rejected": "Avslagen",
+      "skipped": "Överhoppad",
+      "escalated": "Frist passerad"
+    },
+    "mode": {
+      "single": "En person beslutar",
+      "all": "Alla måste godkänna",
+      "any": "Första beslutet gäller"
+    },
+    "decision": {
+      "approved": "Godkände",
+      "rejected": "Avslog"
+    },
+    "rule": {
+      "owner_admin": "Ägare och administratörer",
+      "requester_manager": "Den sökandes chefer"
+    },
+    "contextType": {
+      "generic_request": "Allmän förfrågan",
+      "worker_absence": "Frånvaro",
+      "expense": "Utgift",
+      "invoice": "Faktura",
+      "document_ack": "Dokumentgodkännande",
+      "timesheet": "Tidrapport",
+      "procurement": "Inköp",
+      "business_trip": "Tjänsteresa",
+      "management_decision": "Ledningsbeslut",
+      "agreement": "Avtal"
+    },
+    "transition": {
+      "started": "Förfrågan inskickad",
+      "step_activated": "Runda startad",
+      "approved": "Godkänd",
+      "rejected": "Avslagen",
+      "delegated": "Överlämnad",
+      "withdrawn": "Tillbakadragen",
+      "cancelled": "Avbruten",
+      "escalated": "Fristöverskridande markerat",
+      "completed": "Slutförd"
+    },
+    "timeline": {
+      "open": "Visa förlopp",
+      "progress": "{approved} av {total} har godkänt",
+      "deadline": "Frist",
+      "historyTitle": "Fullständig historik",
+      "stepLabel": "runda"
+    },
+    "notice": {
+      "created": "Mall skapad. Ta den i bruk så att folk kan skicka in förfrågningar.",
+      "published": "Mallen är nu i bruk.",
+      "started": "Förfrågan skickades till den första rundans godkännare.",
+      "already_pending": "Den här förfrågan är redan öppen.",
+      "already_published": "Den här mallen är redan i bruk.",
+      "already_exists": "En mall med det här namnet finns redan i organisationen.",
+      "already_decided": "Du har redan beslutat i den här rundan.",
+      "approved": "Förfrågan godkänd.",
+      "rejected": "Förfrågan avslagen.",
+      "step_approved": "Rundan godkänd — nästa runda har startat.",
+      "recorded": "Ditt beslut är sparat. Väntar på de övriga godkännarna.",
+      "delegated": "Rundan har lämnats över till din kollega.",
+      "withdrawn": "Förfrågan tillbakadragen.",
+      "cancelled": "Förfrågan avbruten.",
+      "marked_overdue": "Försenade rundor markerades och de ansvariga informerades.",
+      "no_overdue": "Inga rundor har passerat sin frist.",
+      "no_approvers": "Den här förfrågan har inga möjliga godkännare ännu. Kontrollera organisationens medlemmar och deras roller.",
+      "not_published": "Den här mallen är inte i bruk ännu.",
+      "not_pending": "Den här förfrågan är inte längre öppen.",
+      "invalid": "Kontrollera de angivna värdena och försök igen.",
+      "invalid_delegate": "Den kollegan kunde inte hittas i den här organisationen.",
+      "needs_migration": "Godkännanden är inte aktiverade i den här miljön ännu. Inget sparades.",
+      "not_authorized": "Du får inte göra det här.",
+      "not_found": "Förfrågan hittades inte.",
+      "limit_reached": "Gränsen för öppna poster har nåtts. Stäng något först.",
+      "error": "Något gick fel. Inget ändrades."
+    }
   }
 }

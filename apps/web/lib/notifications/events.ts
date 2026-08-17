@@ -49,6 +49,13 @@ export type NotificationEventType =
   // still sees the worker depends on other relationships (F2), and a
   // notification must not claim what it has not measured.
   | "engagement_ended"
+  // v3 (20260817130100): the Workflow & Approval Engine's four durable
+  // facts. Escalation is a marked SAFE STATE — the label may say a deadline
+  // passed, never that anything was auto-approved (nothing is).
+  | "workflow_step_pending"
+  | "workflow_decided"
+  | "workflow_delegated"
+  | "workflow_escalated"
   // v4 (20260817153000, train D): a managing role handed a work task to
   // another person — the NEW assignee durably learns a task landed on them.
   // Never emitted for self-assignment (you watched yourself do it).
@@ -58,6 +65,7 @@ export type NotificationEntityType =
   | "booking_request"
   | "worker_absence"
   | "engagement"
+  | "workflow_instance"
   | "work_task";
 
 /**
@@ -86,6 +94,11 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   booking_request: "/dashboard/bookings",
   worker_absence: "/dashboard/absences",
   engagement: "/dashboard/bookings",
+  // The approvals area lives ON the network page (constitution: expanded
+  // inside an existing surface, the reports?journalWindow precedent — no new
+  // route). The section anchor is #approvals; the stored href stays the
+  // route, which is what the route-existence guard pins.
+  workflow_instance: "/dashboard/network",
   // v4: the tasks surface already renders the assignee's list — the row the
   // event points at is in "my tasks" by construction (they are the assignee).
   work_task: "/dashboard/tasks",

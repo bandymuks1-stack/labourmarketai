@@ -242,11 +242,22 @@ describe("5. notification v4 — the assignment type is additive and mapped", ()
       "absence_rejected",
       "engagement_created",
       "engagement_ended",
+      // v3 (sibling #1170) — v4 applies after and must keep carrying these.
+      "workflow_step_pending",
+      "workflow_decided",
+      "workflow_delegated",
+      "workflow_escalated",
       "work_task_assigned",
     ]) {
       expect(up).toContain(`'${t}'`);
     }
-    for (const e of ["booking_request", "worker_absence", "engagement", "work_task"]) {
+    for (const e of [
+      "booking_request",
+      "worker_absence",
+      "engagement",
+      "workflow_instance",
+      "work_task",
+    ]) {
       expect(up).toContain(`'${e}'`);
     }
   });

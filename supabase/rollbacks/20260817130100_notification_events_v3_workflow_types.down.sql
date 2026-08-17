@@ -1,13 +1,14 @@
--- Restores the v3 lists (workflow types included — the state after
--- 20260817130100). Any v4-typed rows must be deleted first or the
--- constraint re-add fails — stated so the rollback is honest about its
--- cost (the v2 rollback idiom).
+-- Rollback for 20260817130100_notification_events_v3_workflow_types.sql
 --
--- MERGE NOTE (train V2): reconciled after merging origin/main 08121c8d;
--- if PR #1169 widens these constraints again, recount — never take this
--- file verbatim across a merge.
+-- Restores the v2 constraint set exactly (the state after
+-- 20260813100000_notification_events_v2_types.sql). Any workflow_* event
+-- rows written while v3 was live would block the narrowing — delete none
+-- automatically; the lead decides. This file assumes no such rows exist yet
+-- (the engine ships UNAPPLIED alongside it).
+
 alter table public.notification_events
   drop constraint notification_events_type_check;
+
 alter table public.notification_events
   add constraint notification_events_type_check check (event_type in (
     'booking_proposed',
@@ -18,19 +19,15 @@ alter table public.notification_events
     'absence_approved',
     'absence_rejected',
     'engagement_created',
-    'engagement_ended',
-    'workflow_step_pending',
-    'workflow_decided',
-    'workflow_delegated',
-    'workflow_escalated'
+    'engagement_ended'
   ));
 
 alter table public.notification_events
   drop constraint notification_events_entity_type_check;
+
 alter table public.notification_events
   add constraint notification_events_entity_type_check check (entity_type in (
     'booking_request',
     'worker_absence',
-    'engagement',
-    'workflow_instance'
+    'engagement'
   ));

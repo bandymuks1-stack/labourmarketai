@@ -2064,16 +2064,42 @@ describe("no migration files added by this sprint", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — recounted from the tree,
     // never summed; gate doc notification-events-v2-types-gate.md.
-    // Bumped 199 -> 203 for the train-D project/object/task drafts
+    // Bumped 199 -> 203 for security train A (2026-08-17 advisor triage) —
+    // FOUR policy-correction DRAFTs, recounted from the tree, all UNAPPLIED
+    // (lead session applies via MCP):
+    //   20260817120000_catalog_least_privilege_v1  — replaces the three
+    //     using(true) SELECT policies (productivity_units,
+    //     profession_templates, skill_icons) with authenticated org-scoped
+    //     reads; zero current rows change visibility (0 org rows live).
+    //   20260817121000_invitation_org_authority_v1 — org-bound authority for
+    //     select/revoke/resend/mark-delivery of org invitations (create-side
+    //     predicate reused; strictly widening; paired rollback).
+    //   20260817122000_contact_disclosure_org_authority_v1 — org demand
+    //     authority (has_org_demand_access) on employer-side select/withdraw;
+    //     worker respond stays subject-bound (paired rollback).
+    //   20260817123000_finance_org_authority_v1 — company-linked finance
+    //     authority extended from legacy owns_company to org owner/admin via
+    //     membership_actor_role_v1 (paired rollback).
+    // Safe: policy corrections + authority extensions only; no schema change,
+    // no DML, every file carries a paired rollback and the human-gate marker
+    // per owner mandate 2026-08-17 §4.
+    // Bumped 203 -> 205 for the Workflow & Approval Engine v1 PAIR
+    // (20260817130000_workflow_engine_v1 + 20260817130100_notification_
+    // events_v3_workflow_types; owner mandate 2026-08-17, UNAPPLIED —
+    // PENDING APPLY BY LEAD; gate doc workflow-engine-gate.md). Renamed from
+    // the 20260817120000/121000 slots after security train A claimed those
+    // version prefixes on main. RECOUNTED from the post-rebase tree
+    // (`ls supabase/migrations/*.sql` = 205), never summed.
+    // Bumped 205 -> 209 for the train-D project/object/task drafts
     // (20260817150000 work_objects_v1 + 20260817151000
     // work_tasks_v2_collaboration + 20260817152000 project_responsible_v1 +
     // 20260817153000 notification_events_v4_task_types; all LEAD-gated,
     // UNAPPLIED; paired rollbacks + deferred APPLIED_LEDGER entries in the
-    // PR) — recounted from the tree (203 files), never summed.
-    // MERGE-ORDER NOTE (train V2): sibling PRs #1168/#1170/#1169 move this
-    // shared ratchet too — RECOUNT the real migration files after every
-    // rebase; never take either side verbatim.
-    const SPRINT_BASELINE = 203;
+    // PR) — RECOUNTED after merging origin/main 08121c8d (security train A
+    // + workflow engine already in the base): 209 real files in the tree,
+    // never summed. Sibling PR #1169 (document engine) moves this shared
+    // ratchet too — RECOUNT again after every further merge.
+    const SPRINT_BASELINE = 209;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

@@ -506,12 +506,27 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
     // follow-up; gate doc notification-events-v2-types-gate.md.
-    // Bumped 199 -> 203 for the train-D project/object/task drafts
+    // Bumped 199 -> 203 for security train A (2026-08-17 advisor triage):
+    // four policy-correction DRAFTs (20260817120000 catalog least-privilege,
+    // 20260817121000 invitation org authority, 20260817122000
+    // contact-disclosure org authority, 20260817123000 finance org
+    // authority), recounted from the tree, all UNAPPLIED with paired
+    // rollbacks — see product-readiness.test.ts for the full rationale.
+    // Bumped 203 -> 205 for the Workflow & Approval Engine v1 PAIR
+    // (20260817130000_workflow_engine_v1 + 20260817130100_notification_
+    // events_v3_workflow_types) — nothing from the market-map read layer.
+    // Renamed from the 20260817120000/121000 slots after security train A
+    // claimed those version prefixes on main. Owner mandate 2026-08-17,
+    // paired rollbacks, ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED
+    // against post-rebase origin/main 54067a4b: 203 .sql files there, this
+    // branch adds exactly two.
+    // Bumped 205 -> 209 for the train-D project/object/task drafts
     // (20260817150000 + 20260817151000 + 20260817152000 + 20260817153000,
-    // all LEAD-gated, UNAPPLIED, paired rollbacks) — recounted from the
-    // tree (203 files). Sibling train PRs move this pin too: RECOUNT after
-    // every rebase, never take either side verbatim.
-    expect(count).toBeLessThanOrEqual(203);
+    // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
+    // merging origin/main 08121c8d: 209 real files in the tree. Sibling PR
+    // #1169 moves this pin too: RECOUNT after every further merge, never
+    // take either side verbatim.
+    expect(count).toBeLessThanOrEqual(209);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
