@@ -4694,5 +4694,126 @@
       "limit_reached": "För många öppna tidrapporter — lämna in eller städa upp de befintliga först.",
       "error": "Något gick fel. Inget sparades."
     }
+  },
+  "requests": {
+    "title": "Förfrågningar",
+    "intro": "Be din arbetsgivare om något och följ vad som händer. Varje förfrågan följer det godkännandeflöde som ditt företag har satt upp.",
+    "unavailable": "Förfrågningar är inte påslagna i den här miljön ännu. Inget går förlorat — avsnittet öppnas när uppdateringen har granskats och installerats.",
+    "honestNote": "En förfrågan avgörs av riktiga människor i ditt företag. Inget godkänns automatiskt och inget lämnar produkten.",
+    "notice": {
+      "created": "Förfrågan skickad. Rätt personer har ombetts att granska den.",
+      "withdrawn": "Förfrågan återkallad.",
+      "template_ready": "Godkännandeflödet för förfrågningar är klart.",
+      "policy_saved": "Semesterkvot sparad.",
+      "already_pending": "Den här förfrågan väntar redan på ett beslut.",
+      "no_definition": "Ditt företag har ännu inte satt upp ett godkännandeflöde för förfrågningar.",
+      "no_approvers": "Ingen i företaget kan just nu granska den här förfrågan, så den skickades inte.",
+      "not_published": "Godkännandeflödet för förfrågningar är inte klart ännu.",
+      "not_pending": "Den här förfrågan väntar inte längre — nedan visas dess aktuella läge.",
+      "invalid": "Kontrollera uppgifterna och försök igen.",
+      "needs_migration": "Inte tillgängligt ännu — uppdateringen är inte installerad i den här miljön.",
+      "not_authorized": "Det får du inte göra.",
+      "not_found": "Hittades inte.",
+      "limit_reached": "För många öppna förfrågningar. Vänta först på beslut om de befintliga.",
+      "error": "Något gick fel. Försök igen."
+    },
+    "file": {
+      "title": "Ny förfrågan",
+      "orgLabel": "Företag",
+      "unnamedOrg": "Företag utan namn",
+      "typeLabel": "Vad ber du om?",
+      "titleLabel": "Kort titel",
+      "detailsLabel": "Förklaring",
+      "dateFromLabel": "Från (valfritt)",
+      "dateToLabel": "Till (valfritt)",
+      "datesHint": "Datum är viktiga vid distansarbete eller schemaändringar. Lämna dem tomma om de inte passar.",
+      "submit": "Skicka förfrågan",
+      "noOrganizations": "Du är ännu inte kopplad till något företag, så det finns ingen att skicka en förfrågan till."
+    },
+    "type": {
+      "remote_work": "Distansarbete",
+      "schedule_change": "Schemaändring",
+      "certificate_request": "Intyg eller dokument",
+      "employment_condition_change": "Ändring av anställningsvillkor",
+      "benefit_request": "Förmån",
+      "equipment_request": "Utrustning",
+      "other": "Övrigt"
+    },
+    "typeHint": {
+      "remote_work": "be om att arbeta hemifrån eller från en annan plats valda dagar",
+      "schedule_change": "be om andra arbetstider eller skift",
+      "certificate_request": "be om ett intyg eller dokument om din anställning",
+      "employment_condition_change": "be om att ändra ett avtalat anställningsvillkor",
+      "benefit_request": "be om en förmån som ditt företag erbjuder",
+      "equipment_request": "be om verktyg eller utrustning för ditt arbete",
+      "other": "allt annat du vill be din arbetsgivare om"
+    },
+    "status": {
+      "pending": "Väntar på beslut",
+      "approved": "Godkänd",
+      "rejected": "Avslagen",
+      "withdrawn": "Återkallad",
+      "cancelled": "Annullerad"
+    },
+    "mine": {
+      "title": "Mina förfrågningar",
+      "empty": "Inga förfrågningar ännu.",
+      "timelineOpen": "Visa förlopp"
+    },
+    "actions": {
+      "withdraw": "Återkalla"
+    },
+    "register": {
+      "title": "Förfrågningsregister",
+      "decideHint": "Godkännande och avslag sker i godkännandeområdet ovan — det här registret listar alla förfrågningar i dina organisationer.",
+      "filterStatus": "Status",
+      "filterType": "Typ",
+      "filterAll": "Alla",
+      "filterApply": "Filtrera",
+      "empty": "Inga förfrågningar matchar."
+    },
+    "seed": {
+      "title": "Sätt upp godkännandeflöde för förfrågningar",
+      "hint": "Skapar ett enkelt färdigt flöde: en granskningsrunda som avgörs av företagets ägare och administratörer. Flerstegsflöden bygger du i godkännandeområdet ovan.",
+      "orgLabel": "Företag",
+      "typeLabel": "Gäller för",
+      "allTypes": "Alla förfrågningstyper",
+      "nameLabel": "Namn",
+      "defaultName": "Standardgodkännande av förfrågningar",
+      "submit": "Skapa och slå på"
+    },
+    "policies": {
+      "title": "Semesterkvoter",
+      "honesty": "Ditt företag bestämmer själv dessa tal. De är bara vägledning för planering — godkännande förblir ett riktigt chefsbeslut, och detta är inte juridisk rådgivning.",
+      "entitlementShort": "{days} d/år",
+      "carryoverShort": "+{days} överfört",
+      "inactive": "avstängd",
+      "setTitle": "Ange semesterkvot",
+      "orgLabel": "Företag",
+      "typeLabel": "Frånvarotyp",
+      "entitlementLabel": "Dagar per år",
+      "carryoverLabel": "Överförda dagar",
+      "activeLabel": "I bruk",
+      "submit": "Spara"
+    },
+    "absenceType": {
+      "annual_leave": "Semester",
+      "sickness": "Sjukdom",
+      "unpaid": "Obetald ledighet",
+      "training": "Utbildning",
+      "other": "Övrigt"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Mitt semestersaldo {year}",
+      "advisoryNote": "Saldon är vägledning för planering. Din chef beslutar. Talen kommer från företagets egna inställningar, inte från lagen.",
+      "noPolicy": "Ditt företag har ännu inte angett semesterkvoter här.",
+      "remaining": "{days} d kvar",
+      "detail": "{entitlement} per år + {carryover} överfört − {used} använt",
+      "requestedDays": "{days} d begärt",
+      "remainingShort": "{days} d kvar",
+      "exceedsNote": "Mer än kvarvarande ledighet"
+    }
   }
 }

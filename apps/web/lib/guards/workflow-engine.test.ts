@@ -146,7 +146,14 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
     // (context_entity_type='timesheet'): it asserts workflow_instances
     // exists and its sync command READS workflow_instances; the stronger
     // no-create/no-drop assertions below still apply to it.
-    const CONSUMERS = ["20260817170000_timesheets_v1"];
+    const CONSUMERS = [
+      "20260817170000_timesheets_v1",
+      // Typed employee requests (train F): create/withdraw run the engine's
+      // own start/withdraw commands in-transaction; sync READS
+      // workflow_instances; FK to workflow_instances. Never defines,
+      // replaces or triggers an engine object (asserted below).
+      "20260817180000_employee_requests_v1",
+    ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
@@ -154,11 +161,14 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
         const src = readFileSync(join(abs, f), "utf8");
         if (CONSUMERS.some((c) => f.startsWith(c))) {
           for (const tbl of TABLES) {
+            // The created/dropped table NAME appears before the first "(";
+            // an FK `references public.workflow_instances` inside a
+            // consumer's OWN create-table body is legitimate consumption.
             expect(
               src,
               `${dir}/${f} may reference but never create/drop ${tbl}`,
             ).not.toMatch(
-              new RegExp(`(create table[^;]*\\b${tbl}\\b|drop table[^;]*\\b${tbl}\\b)`, "i"),
+              new RegExp(`(create table[^(]*\\b${tbl}\\b|drop table[^;]*\\b${tbl}\\b)`, "i"),
             );
           }
           for (const fn of COMMANDS) {
@@ -169,6 +179,12 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
               new RegExp(`(create (or replace )?function[^(]*\\b${fn}\\b|drop function[^(]*\\b${fn}\\b)`, "i"),
             );
           }
+          // A consumer may trigger its OWN tables (timesheets does); the
+          // doctrine forbids triggers ON ENGINE tables only.
+          expect(
+            src,
+            `${dir}/${f} must not create a trigger on an engine table`,
+          ).not.toMatch(/create\s+trigger[^;]*\bon\s+public\.workflow_/i);
           continue;
         }
         for (const tbl of TABLES) {
@@ -477,6 +493,11 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // lib/guards/timesheets.test.ts.
       "lib/timesheets/timesheets.ts",
       "lib/timesheets/timesheets-actions.ts",
+      // Typed employee requests (v1): the register reads its instances'
+      // engine rows (status overlay + timeline) with the SAME discipline —
+      // RLS-scoped server client, bounded, read-only; writes stay engine
+      // commands. Guarded in lib/guards/employee-requests.test.ts.
+      "lib/requests/requests.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {

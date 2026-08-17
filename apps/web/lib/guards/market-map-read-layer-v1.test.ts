@@ -539,7 +539,13 @@ describe("NO new DB migration in this PR", () => {
     // LEAD, paired rollback) — RECOUNTED from the post-merge tree with
     // trains A/B/C/D/E on main (213 .sql files), never summed. Not a
     // market-map migration either.
-    expect(count).toBeLessThanOrEqual(213);
+    // Bumped 213 -> 215 for the typed employee requests + leave balance
+    // policies DRAFT pair (20260817180000 + 20260817181000; owner mandate
+    // 2026-08-17, paired rollbacks, ships UNAPPLIED, PENDING APPLY BY LEAD)
+    // — nothing from the market-map read layer. RECOUNTED after merging
+    // origin/main 010547e4 (trains C/D/E/L1 in base): 215 real files in
+    // the tree, never summed.
+    expect(count).toBeLessThanOrEqual(215);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2118,7 +2118,15 @@ describe("no migration files added by this sprint", () => {
     // v2's trigger accepts BOTH membership truths. Paired rollback +
     // Deferred APPLIED_LEDGER entry + db-proof scripts/db-proof/
     // durable-workspace-pointer-v2.sh (32/32).
-    const SPRINT_BASELINE = 213;
+    // Bumped 213 -> 215 for the typed employee requests + configurable leave
+    // balance policies DRAFT pair (20260817180000_employee_requests_v1 +
+    // 20260817181000_leave_balance_policies_v1; owner mandate 2026-08-17,
+    // UNAPPLIED — PENDING APPLY BY LEAD; requests ride the workflow engine,
+    // balances are a derived read-model with NO statutory defaults).
+    // RECOUNTED after merging origin/main 010547e4 (trains C, D, E and L1
+    // all in the base): `ls supabase/migrations/*.sql | wc -l` = 215 real
+    // files, never summed.
+    const SPRINT_BASELINE = 215;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
