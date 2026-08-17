@@ -530,7 +530,11 @@ describe("NO new DB migration in this PR", () => {
     // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
     // merging origin/main 1450ed08 (document engine included): 211 real
     // files in the tree — recounted, never summed.
-    expect(count).toBeLessThanOrEqual(211);
+    // Bumped 211 -> 212 for the timesheets v1 DRAFT (20260817170000,
+    // owner-gated per mandate 2026-08-17, paired rollback, ships UNAPPLIED —
+    // PENDING APPLY BY LEAD) — nothing from the market-map read layer.
+    // RECOUNTED from the post-merge tree after trains C + D: 212 .sql files.
+    expect(count).toBeLessThanOrEqual(212);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

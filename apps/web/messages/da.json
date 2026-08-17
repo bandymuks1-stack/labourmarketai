@@ -4587,5 +4587,91 @@
       "externalRefLabel": "Referencenummer (valgfrit)",
       "submit": "Registrér dokument"
     }
+  },
+  "timesheets": {
+    "title": "Timesedler",
+    "intro": "Timedokumenter pr. periode, afledt af din arbejdsjournal. Timer rettes altid i journalen; en timeseddel er en fastfrosset kopi, der indsendes til godkendelse.",
+    "needsMigration": "Timesedler er endnu ikke aktiveret i dette miljø.",
+    "readError": "En del af timeseddeldataene kunne ikke indlæses lige nu.",
+    "noLines": "Ingen registrerede timer i denne periode endnu. Notér dit arbejde i journalen og opdatér.",
+    "linesTitle": "Linjer ({count})",
+    "approvalTimeline": "Godkendelsesforløb",
+    "openApprovals": "Åbn godkendelsesområdet",
+    "noTemplateNote": "Denne organisation har endnu ingen offentliggjort godkendelsesskabelon for timesedler, så indsendelse er ikke mulig. Bed en organisationsadministrator om at oprette en.",
+    "totals": {
+      "hours": "{hours} t.",
+      "dayUnits": "{days} dagsenheder",
+      "lines": "{count} linjer"
+    },
+    "unit": {
+      "hours": "t.",
+      "minutes": "min.",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Kladde",
+      "submitted": "Indsendt",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "reopened": "Returneret"
+    },
+    "mine": {
+      "title": "Mine timesedler",
+      "derivedNote": "Hver linje kommer fra dine journalposter. For at rette timer skal du rette journalposten og trykke på Opdatér.",
+      "empty": "Ingen timesedler endnu. Vælg en organisation og en periode for at oprette den første.",
+      "noOrganizations": "Du er endnu ikke tilknyttet nogen organisation, så der er ingen steder at indsende timer."
+    },
+    "create": {
+      "organization": "Organisation",
+      "unnamedOrganization": "Organisation uden navn",
+      "periodStart": "Periodens start",
+      "periodEnd": "Periodens slutning",
+      "action": "Opret timeseddel",
+      "hint": "En periode dækker højst 31 dage og må ikke overlappe en anden timeseddel for samme organisation."
+    },
+    "actions": {
+      "refresh": "Opdatér fra journalen",
+      "submit": "Indsend til godkendelse",
+      "sync": "Opdatér status",
+      "exportCsv": "Hent CSV"
+    },
+    "org": {
+      "title": "Holdets timesedler",
+      "decideNote": "Godkendelsesbeslutninger træffes i godkendelsesområdet. Her kan du gennemse linjer, eksportere og returnere en afgjort timeseddel.",
+      "noTemplateFor": "{name} har ingen offentliggjort godkendelsesskabelon for timesedler.",
+      "createTemplate": "Opret standardgodkendelsesskabelon",
+      "unnamedWorker": "Medarbejder",
+      "decideInApprovals": "Afgør i godkendelsesområdet",
+      "reopenNote": "Returnote",
+      "reopenNotePlaceholder": "Hvorfor returneres den?",
+      "reopen": "Returnér til medarbejder"
+    },
+    "notice": {
+      "created": "Timeseddel oprettet.",
+      "refreshed": "Linjer opdateret fra journalen.",
+      "submitted": "Timeseddel indsendt til godkendelse.",
+      "reopened": "Timeseddel returneret til medarbejderen.",
+      "approved": "Timeseddel godkendt.",
+      "rejected": "Timeseddel afvist.",
+      "synced_pending": "Godkendelsen er stadig i gang.",
+      "no_instance": "Der findes endnu ingen godkendelsesanmodning for denne timeseddel.",
+      "no_template": "Denne organisation har endnu ingen offentliggjort godkendelsesskabelon for timesedler.",
+      "template_created": "Standardgodkendelsesskabelon oprettet og offentliggjort.",
+      "overlap": "Denne periode overlapper en eksisterende timeseddel.",
+      "invalid_period": "Perioden er ugyldig — højst 31 dage, og slutningen må ikke ligge før starten.",
+      "no_worker": "Din konto har ingen medarbejderprofil.",
+      "not_editable": "Denne timeseddel kan ikke længere redigeres.",
+      "not_decided": "Kun en godkendt eller afvist timeseddel kan returneres.",
+      "not_submitted": "Denne timeseddel er ikke indsendt.",
+      "already_submitted": "Denne timeseddel er allerede indsendt.",
+      "no_approvers": "Der kunne ikke findes godkendere for denne organisations skabelon.",
+      "not_published": "Godkendelsesskabelonen er endnu ikke offentliggjort.",
+      "invalid": "Anmodningen var ugyldig.",
+      "needs_migration": "Timesedler er endnu ikke aktiveret i dette miljø.",
+      "not_authorized": "Det må du ikke.",
+      "not_found": "Timeseddel ikke fundet.",
+      "limit_reached": "For mange åbne timesedler — indsend eller ryd op i de eksisterende først.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
   }
 }
