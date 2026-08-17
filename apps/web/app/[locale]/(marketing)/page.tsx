@@ -11,6 +11,7 @@ export async function generateMetadata({
   return buildPageMetadata({ locale, path: "" });
 }
 import { HeroLiveDemo } from "@/components/marketing/hero-live-demo";
+import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TrustBand } from "@/components/marketing/trust-band";
@@ -67,6 +68,15 @@ export default async function LandingPage({
       <div id="how-it-works" className="scroll-mt-24">
         <ProductChainBand />
       </div>
+
+      {/* ── Market proof — what the marketplace data actually holds, as
+             production-derived FLOOR numbers + the data-derived top-profession
+             ranking (landing minimal truth update, owner mandate 2026-08-17
+             §27). Coverage framing only — the four-population rule in
+             lib/analytics/market-coverage-claims.ts forbids adoption verbs
+             here; source query + read-back values are recorded in the
+             component header. Static strings, zero request-time fetches. ── */}
+      <MarketProofBand />
 
       {/* OWNER SHORTENING (audit §3.1, 2026-07-29): the landing is exactly
           the seven canonical blocks — hero + live scenario, product chain,

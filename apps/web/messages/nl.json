@@ -11998,6 +11998,27 @@
       },
       "persistAction": "Save this result",
       "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+    },
+    "marketProof": {
+      "eyebrow": "Nu op het platform",
+      "title": "De arbeidsmarkt in cijfers",
+      "stats": {
+        "vacancies": {
+          "value": "41.000+",
+          "label": "actieve vacatures"
+        },
+        "employers": {
+          "value": "7.600+",
+          "label": "werkgevers achter de vacatures"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regio's met actieve vacatures"
+        }
+      },
+      "asOfNote": "Op basis van vacaturedata van 17-08-2026; de cijfers veranderen dagelijks.",
+      "topTitle": "Meest gevraagde beroepen op dit moment",
+      "topNote": "Gerangschikt op actieve vacatures op het platform. Een deel van de vacatures is nog niet aan een beroep gekoppeld."
     }
   },
   "workspace": {

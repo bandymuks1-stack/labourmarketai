@@ -81,6 +81,23 @@ import { join } from "node:path";
  * `playercards` namespaces. The removal is guarded permanently by
  * `public-worker-card-honesty.test.ts`, so the freeze is not the only thing
  * standing between the public pages and the OVR fiction coming back.
+ *
+ * Landing minimal truth update (owner mandate 2026-08-17, functional
+ * completion train V2 §27) — the landing gained ONE new section,
+ * `market-proof-band.tsx`: production-derived market floors ("41 000+"
+ * active opportunities / "7 600+" employers / 21 regions, read back from
+ * `public_vacancies` on 2026-08-17 21:22 UTC — query + values in the
+ * component header) and the data-derived top-profession ranking (ranking
+ * only, no absolute counts — profession grouping covers part of the
+ * listings and the visible note says so). Coverage framing only; the
+ * adoption-verb separation is enforced permanently by
+ * `market-coverage-claims.test.ts` and the copy↔floor agreement by
+ * `landing-market-proof.test.ts`, so the freeze is not the only thing
+ * standing between the landing and a stale or dishonest number. The
+ * regeneration touched the page hash, the new component (added to the
+ * frozen set), and the three `*.landing` namespace hashes
+ * (`landing.marketProof` added in all 11 catalogs; lt/en/ru are the frozen
+ * three). No other frozen artefact moved.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -109,6 +126,9 @@ export const FROZEN_LANDING_FILES = [
   // follows the component that is actually rendered; freezing a deleted file
   // would only make the guard fail to load.
   "components/marketing/hero-live-demo.tsx",
+  // Landing minimal truth update (owner mandate 2026-08-17 §27): the market
+  // proof band joined the render tree and is frozen with it.
+  "components/marketing/market-proof-band.tsx",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-moment.tsx",
   "components/marketing/proof-band.tsx",
