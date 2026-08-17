@@ -545,12 +545,18 @@ describe("NO new DB migration in this PR", () => {
     // — nothing from the market-map read layer. RECOUNTED after merging
     // origin/main 010547e4 (trains C/D/E/L1 in base): 215 real files in
     // the tree, never summed.
-    // Bumped 215 -> 216 for the Employee Lifecycle v1 DRAFT
+    // Bumped 215 -> 216 for the Agreement & Rights Engine v1 DRAFT
+    // (20260817200000_agreements_v1, train H, LEAD-gated, UNAPPLIED, paired
+    // rollback) — RECOUNTED from the post-merge tree with trains
+    // A/B/C/D/E/F/L1 on main (216 .sql files), never summed. Still no
+    // migration from the market-map layer itself. Cross-pin follows.
+    // Bumped 216 -> 217 for the Employee Lifecycle v1 DRAFT
     // (20260817190000_employee_lifecycle_v1, owner mandate 2026-08-17,
     // UNAPPLIED — PENDING APPLY BY LEAD, paired rollback) — nothing from the
-    // market-map read layer. RECOUNTED after merging origin/main 39104f23
-    // (trains C/D/E/L1/F in base): 216 real files in the tree, never summed.
-    expect(count).toBeLessThanOrEqual(216);
+    // market-map read layer. RECOUNTED after merging origin/main 66c869a4
+    // (trains C/D/E/L1/F/H in base): 217 real files in the tree, never
+    // summed.
+    expect(count).toBeLessThanOrEqual(217);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

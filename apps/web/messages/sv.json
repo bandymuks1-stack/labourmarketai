@@ -4795,6 +4795,116 @@
       "exceedsNote": "Mer än kvarvarande ledighet"
     }
   },
+  "agreements": {
+    "title": "Avtalsregister",
+    "intro": "Det kanoniska registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",
+    "noSignatureNote": "Statusarna i det här registret är enbart registreringstillstånd — inget här betyder att ett avtal är undertecknat, juridiskt giltigt eller bindande. LabourMarket.ai utför ingen juridisk signering: signering sker utanför plattformen, och en bifogad fil är bara underlag du själv tillhandahåller.",
+    "relationshipNote": "Kontraktslistan ovan är det tidigare personliga kommersiella registret och fortsätter fungera oförändrat. Nya avtal hör hemma här.",
+    "unavailable": "Avtalsregistret kan inte visas just nu.",
+    "needsOrgWorkspace": "Avtalsregistret fungerar i en organisationsarbetsyta. Byt till din organisation.",
+    "preparing": "Avtalsregistret är förberett men ännu inte aktiverat i den här miljön.",
+    "error": "Avtalsregistret kunde inte läsas.",
+    "empty": "Inga avtal registrerade ännu.",
+    "emptyFiltered": "Inga avtal matchar dessa filter.",
+    "scopeNote": "Register på organisationssidan. Arbetare ser inte det här registret.",
+    "baseDocument": "Basdokument",
+    "filters": {
+      "type": "Typ",
+      "status": "Status",
+      "search": "Motpart eller titel",
+      "searchPlaceholder": "Sök…",
+      "expiringOnly": "Löper ut inom 30 dagar",
+      "apply": "Filtrera",
+      "all": "Alla"
+    },
+    "types": {
+      "employment_related": "Anställningsrelaterat",
+      "service": "Tjänst",
+      "supply": "Leverans",
+      "nda": "Sekretess (NDA)",
+      "partnership": "Partnerskap",
+      "other": "Övrigt"
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted_for_approval": "Inskickat för intern granskning",
+      "approved_internally": "Internt godkänt",
+      "active_record": "Aktiv registrering",
+      "amended": "Ändrat",
+      "terminated_record": "Avslutat (registrering)",
+      "expired": "Utgånget"
+    },
+    "expiry": {
+      "ended": "Slutdatum passerat",
+      "endsInDays": "Löper ut om {days} d."
+    },
+    "signature": {
+      "none": "Inget signeringsunderlag bifogat.",
+      "evidenceAttached": "Externt signeringsunderlag bifogat (signerat utanför plattformen).",
+      "attachLabel": "Fil med signeringsunderlag",
+      "attachSubmit": "Bifoga underlag"
+    },
+    "amendment": {
+      "label": "Ändring {n}",
+      "addTitle": "Lägg till ändring",
+      "titleLabel": "Ändringens titel",
+      "descriptionLabel": "Vad ändras",
+      "documentLabel": "Ändringsdokument",
+      "documentNone": "Inget dokument",
+      "effectiveDateLabel": "Ikraftträdandedatum",
+      "honestNote": "En ändring läggs till i registreringens historik. Den ursprungliga texten förblir oförändrad — gällande villkor är grunden plus ändringarna i ordning.",
+      "submit": "Lägg till ändring"
+    },
+    "actions": {
+      "active_record": "Markera som aktiv registrering",
+      "terminated_record": "Markera som avslutat",
+      "expired": "Markera som utgånget"
+    },
+    "submitApproval": {
+      "definitionLabel": "Godkännandeflöde",
+      "submit": "Skicka för intern granskning",
+      "noDefinition": "Inget publicerat internt godkännandeflöde för avtal — registreringen kan aktiveras direkt.",
+      "pendingNote": "Väntar på intern granskning — beslutet fattas i godkännandeområdet."
+    },
+    "edit": {
+      "title": "Redigera uppgifter",
+      "submit": "Spara"
+    },
+    "create": {
+      "title": "Registrera avtal",
+      "typeLabel": "Typ",
+      "titleLabel": "Titel",
+      "counterpartyLabel": "Motpart",
+      "orgNumberLabel": "Motpartens organisationsnummer (valfritt)",
+      "responsibleLabel": "Ansvarig person",
+      "responsibleNone": "Inte tilldelad",
+      "externalRefLabel": "Extern referens (valfritt)",
+      "effectiveFromLabel": "Giltigt från",
+      "effectiveToLabel": "Giltigt till",
+      "workerLinkNote": "Det här registret är registrering på organisationssidan — det skapar eller signerar inte själva avtalet.",
+      "submit": "Registrera"
+    },
+    "notice": {
+      "created": "Avtal registrerat.",
+      "updated": "Sparat.",
+      "submitted": "Inskickat för intern granskning.",
+      "amended": "Ändring tillagd.",
+      "attached": "Dokument bifogat.",
+      "evidence_attached": "Signeringsunderlag bifogat. Detta registrerar endast underlag — inget blir juridiskt giltigt av det.",
+      "repaired": "Granskningsresultatet tillämpat på registreringen.",
+      "no_pending_workflow": "Ingen väntande granskningsförfrågan hittades för den här registreringen.",
+      "no_approval_definition": "Inget publicerat godkännandeflöde tillgängligt — registreringen förblir ett utkast.",
+      "invalid": "Vissa fält kunde inte godtas.",
+      "invalid_transition": "Det statusbytet är inte tillåtet från nuvarande tillstånd.",
+      "invalid_state": "Ändringar kan läggas till när registreringen är godkänd eller aktiv.",
+      "not_editable": "Den här registreringen kan inte längre redigeras.",
+      "not_found": "Registreringen hittades inte.",
+      "not_allowed": "Bara organisationens ägare eller administratör kan göra detta.",
+      "limit_reached": "Registergränsen är nådd.",
+      "needs_migration": "Avtalsregistret är ännu inte aktiverat i den här miljön.",
+      "error": "Något gick fel. Inget sparades."
+    }
+  },
   "lifecycle": {
     "title": "Anställningens livscykel",
     "intro": "Onboarding, provanställning, förändringar, offboarding och avslut för organisationens anställningar — med checklistor och full historik.",

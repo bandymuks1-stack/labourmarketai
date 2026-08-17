@@ -4795,6 +4795,116 @@
       "exceedsNote": "Mere end den resterende ferie"
     }
   },
+  "agreements": {
+    "title": "Aftaleregister",
+    "intro": "Det kanoniske register over {org}s aftaler — ansættelsesrelaterede og generelle. Kun registrering.",
+    "noSignatureNote": "Statusser i dette register er kun registreringstilstande — intet her betyder, at en aftale er underskrevet, juridisk gyldig eller bindende. LabourMarket.ai udfører ingen juridisk underskrift: der underskrives uden for platformen, og en vedhæftet fil er kun dokumentation, du selv leverer.",
+    "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommercielle register og fungerer uændret. Nye aftaler hører til her.",
+    "unavailable": "Aftaleregistret kan ikke vises lige nu.",
+    "needsOrgWorkspace": "Aftaleregistret fungerer i et organisationsarbejdsområde. Skift til din organisation.",
+    "preparing": "Aftaleregistret er forberedt, men endnu ikke aktiveret i dette miljø.",
+    "error": "Aftaleregistret kunne ikke læses.",
+    "empty": "Ingen aftaler registreret endnu.",
+    "emptyFiltered": "Ingen aftaler matcher disse filtre.",
+    "scopeNote": "Register på organisationssiden. Medarbejdere ser ikke dette register.",
+    "baseDocument": "Basisdokument",
+    "filters": {
+      "type": "Type",
+      "status": "Status",
+      "search": "Modpart eller titel",
+      "searchPlaceholder": "Søg…",
+      "expiringOnly": "Udløber inden for 30 dage",
+      "apply": "Filtrér",
+      "all": "Alle"
+    },
+    "types": {
+      "employment_related": "Ansættelsesrelateret",
+      "service": "Tjenesteydelse",
+      "supply": "Levering",
+      "nda": "Fortrolighed (NDA)",
+      "partnership": "Partnerskab",
+      "other": "Andet"
+    },
+    "status": {
+      "draft": "Udkast",
+      "submitted_for_approval": "Indsendt til intern godkendelse",
+      "approved_internally": "Internt godkendt",
+      "active_record": "Aktiv registrering",
+      "amended": "Ændret",
+      "terminated_record": "Opsagt (registrering)",
+      "expired": "Udløbet"
+    },
+    "expiry": {
+      "ended": "Slutdato overskredet",
+      "endsInDays": "Udløber om {days} d."
+    },
+    "signature": {
+      "none": "Ingen underskriftsdokumentation vedhæftet.",
+      "evidenceAttached": "Ekstern underskriftsdokumentation vedhæftet (underskrevet uden for platformen).",
+      "attachLabel": "Fil med underskriftsdokumentation",
+      "attachSubmit": "Vedhæft dokumentation"
+    },
+    "amendment": {
+      "label": "Ændring {n}",
+      "addTitle": "Tilføj ændring",
+      "titleLabel": "Ændringens titel",
+      "descriptionLabel": "Hvad ændres",
+      "documentLabel": "Ændringsdokument",
+      "documentNone": "Intet dokument",
+      "effectiveDateLabel": "Ikrafttrædelsesdato",
+      "honestNote": "En ændring føjes til registreringens historik. Den oprindelige tekst forbliver uændret — de gældende vilkår er grundlaget plus ændringerne i rækkefølge.",
+      "submit": "Tilføj ændring"
+    },
+    "actions": {
+      "active_record": "Markér som aktiv registrering",
+      "terminated_record": "Markér som opsagt",
+      "expired": "Markér som udløbet"
+    },
+    "submitApproval": {
+      "definitionLabel": "Godkendelsesforløb",
+      "submit": "Indsend til intern godkendelse",
+      "noDefinition": "Intet offentliggjort internt godkendelsesforløb for aftaler — registreringen kan aktiveres direkte.",
+      "pendingNote": "Afventer intern godkendelse — beslutningen træffes i godkendelsesområdet."
+    },
+    "edit": {
+      "title": "Redigér oplysninger",
+      "submit": "Gem"
+    },
+    "create": {
+      "title": "Registrér aftale",
+      "typeLabel": "Type",
+      "titleLabel": "Titel",
+      "counterpartyLabel": "Modpart",
+      "orgNumberLabel": "Modpartens virksomhedsnummer (valgfrit)",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ikke tildelt",
+      "externalRefLabel": "Ekstern reference (valgfrit)",
+      "effectiveFromLabel": "Gyldig fra",
+      "effectiveToLabel": "Gyldig til",
+      "workerLinkNote": "Dette register er registrering på organisationssiden — det opretter eller underskriver ikke selve aftalen.",
+      "submit": "Registrér"
+    },
+    "notice": {
+      "created": "Aftale registreret.",
+      "updated": "Gemt.",
+      "submitted": "Indsendt til intern godkendelse.",
+      "amended": "Ændring tilføjet.",
+      "attached": "Dokument vedhæftet.",
+      "evidence_attached": "Underskriftsdokumentation vedhæftet. Dette registrerer kun dokumentation — intet bliver juridisk gyldigt af det.",
+      "repaired": "Godkendelsesresultat anvendt på registreringen.",
+      "no_pending_workflow": "Ingen afventende godkendelsesanmodning fundet for denne registrering.",
+      "no_approval_definition": "Intet offentliggjort godkendelsesforløb tilgængeligt — registreringen forbliver et udkast.",
+      "invalid": "Nogle felter kunne ikke accepteres.",
+      "invalid_transition": "Det statusskift er ikke tilladt fra den nuværende tilstand.",
+      "invalid_state": "Ændringer kan tilføjes, når registreringen er godkendt eller aktiv.",
+      "not_editable": "Denne registrering kan ikke længere redigeres.",
+      "not_found": "Registrering ikke fundet.",
+      "not_allowed": "Kun organisationens ejer eller administrator kan gøre dette.",
+      "limit_reached": "Registergrænsen er nået.",
+      "needs_migration": "Aftaleregistret er endnu ikke aktiveret i dette miljø.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
+  },
   "lifecycle": {
     "title": "Ansættelsens livscyklus",
     "intro": "Onboarding, prøvetid, ændringer, offboarding og afslutning for organisationens ansættelser — med tjeklister og fuld historik.",
