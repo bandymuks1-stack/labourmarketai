@@ -530,7 +530,11 @@ describe("NO new DB migration in this PR", () => {
     // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
     // merging origin/main 1450ed08 (document engine included): 211 real
     // files in the tree — recounted, never summed.
-    expect(count).toBeLessThanOrEqual(211);
+    // Bumped 211 -> 212 for the Agreement & Rights Engine v1 DRAFT
+    // (20260817200000_agreements_v1, LEAD-gated, UNAPPLIED, paired
+    // rollback) — 212 real files in the tree, recounted, never summed.
+    // Still no migration from the market-map layer itself. Cross-pin follows.
+    expect(count).toBeLessThanOrEqual(212);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

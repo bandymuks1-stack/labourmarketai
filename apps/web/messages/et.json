@@ -4587,5 +4587,115 @@
       "externalRefLabel": "[EN] Reference number (optional)",
       "submit": "[EN] Register document"
     }
+  },
+  "agreements": {
+    "title": "Lepinguregister",
+    "intro": "{org} lepingute kanooniline register — töösuhtega seotud ja üldised. Ainult arvestus.",
+    "noSignatureNote": "Selle registri staatused on üksnes arvestusseisundid — miski siin ei tähenda, et leping on allkirjastatud, juriidiliselt kehtiv või siduv. LabourMarket.ai ei teosta juriidilist allkirjastamist: allkirjastamine toimub väljaspool platvormi ja lisatud fail on vaid teie esitatud tõend.",
+    "relationshipNote": "Ülal olev lepingute loend on varasem isiklik äriregister ja töötab muutumatult edasi. Uued lepingud kuuluvad siia.",
+    "unavailable": "Lepinguregistrit ei saa praegu kuvada.",
+    "needsOrgWorkspace": "Lepinguregister töötab organisatsiooni tööruumis. Lülituge oma organisatsioonile.",
+    "preparing": "Lepinguregister on ette valmistatud, kuid selles keskkonnas veel sisse lülitamata.",
+    "error": "Lepinguregistrit ei õnnestunud lugeda.",
+    "empty": "Lepinguid pole veel registreeritud.",
+    "emptyFiltered": "Ükski leping ei vasta neile filtritele.",
+    "scopeNote": "Organisatsioonipoolne register. Töötajatele seda registrit ei kuvata.",
+    "baseDocument": "Põhidokument",
+    "filters": {
+      "type": "Tüüp",
+      "status": "Staatus",
+      "search": "Vastaspool või pealkiri",
+      "searchPlaceholder": "Otsi…",
+      "expiringOnly": "Lõpeb 30 päeva jooksul",
+      "apply": "Filtreeri",
+      "all": "Kõik"
+    },
+    "types": {
+      "employment_related": "Töösuhtega seotud",
+      "service": "Teenus",
+      "supply": "Tarne",
+      "nda": "Konfidentsiaalsus (NDA)",
+      "partnership": "Partnerlus",
+      "other": "Muu"
+    },
+    "status": {
+      "draft": "Mustand",
+      "submitted_for_approval": "Esitatud sisemiseks kinnitamiseks",
+      "approved_internally": "Sisemiselt kinnitatud",
+      "active_record": "Aktiivne kirje",
+      "amended": "Muudetud",
+      "terminated_record": "Lõpetatud (kirje)",
+      "expired": "Aegunud"
+    },
+    "expiry": {
+      "ended": "Lõppkuupäev möödas",
+      "endsInDays": "Lõpeb {days} p. pärast"
+    },
+    "signature": {
+      "none": "Allkirjastamise tõendit pole lisatud.",
+      "evidenceAttached": "Lisatud välise allkirjastamise tõend (allkirjastatud väljaspool platvormi).",
+      "attachLabel": "Allkirjastamise tõendi fail",
+      "attachSubmit": "Lisa tõend"
+    },
+    "amendment": {
+      "label": "Muudatus {n}",
+      "addTitle": "Lisa muudatus",
+      "titleLabel": "Muudatuse pealkiri",
+      "descriptionLabel": "Mis muutub",
+      "documentLabel": "Muudatuse dokument",
+      "documentNone": "Dokument puudub",
+      "effectiveDateLabel": "Jõustumise kuupäev",
+      "honestNote": "Muudatus lisatakse kirje ajalukku. Algne lepingutekst jääb muutumatuks — kehtivad tingimused on alus pluss muudatused järjekorras.",
+      "submit": "Lisa muudatus"
+    },
+    "actions": {
+      "active_record": "Märgi aktiivseks kirjeks",
+      "terminated_record": "Märgi lõpetatuks",
+      "expired": "Märgi aegunuks"
+    },
+    "submitApproval": {
+      "definitionLabel": "Kinnitusvoog",
+      "submit": "Esita sisemiseks kinnitamiseks",
+      "noDefinition": "Lepingutele pole avaldatud sisemist kinnitusvoogu — kirje saab aktiveerida otse.",
+      "pendingNote": "Ootab sisemist kinnitamist — otsus tehakse kinnituste alas."
+    },
+    "edit": {
+      "title": "Muuda andmeid",
+      "submit": "Salvesta"
+    },
+    "create": {
+      "title": "Registreeri leping",
+      "typeLabel": "Tüüp",
+      "titleLabel": "Pealkiri",
+      "counterpartyLabel": "Vastaspool",
+      "orgNumberLabel": "Vastaspoole ettevõtte number (valikuline)",
+      "responsibleLabel": "Vastutav isik",
+      "responsibleNone": "Määramata",
+      "externalRefLabel": "Väline viide (valikuline)",
+      "effectiveFromLabel": "Kehtib alates",
+      "effectiveToLabel": "Kehtib kuni",
+      "workerLinkNote": "See register on organisatsioonipoolne arvestus — leping ise siin ei sünni ega saa allkirja.",
+      "submit": "Registreeri"
+    },
+    "notice": {
+      "created": "Leping registreeritud.",
+      "updated": "Salvestatud.",
+      "submitted": "Esitatud sisemiseks kinnitamiseks.",
+      "amended": "Muudatus lisatud.",
+      "attached": "Dokument lisatud.",
+      "evidence_attached": "Allkirjastamise tõend lisatud. See on üksnes tõendi kirje — miski ei muutu selle läbi juriidiliselt kehtivaks.",
+      "repaired": "Kinnitamise tulemus rakendatud kirjele.",
+      "no_pending_workflow": "Selle kirje kohta ootel kinnitustaotlust ei leitud.",
+      "no_approval_definition": "Avaldatud kinnitusvoogu pole — kirje jääb mustandiks.",
+      "invalid": "Mõnda välja ei õnnestunud vastu võtta.",
+      "invalid_transition": "Selline staatusemuutus praegusest seisundist pole lubatud.",
+      "invalid_state": "Muudatusi saab lisada, kui kirje on kinnitatud või aktiivne.",
+      "not_editable": "Seda kirjet ei saa enam muuta.",
+      "not_found": "Kirjet ei leitud.",
+      "not_allowed": "Seda saab teha ainult organisatsiooni omanik või administraator.",
+      "limit_reached": "Registri limiit on täis.",
+      "needs_migration": "Lepinguregister pole selles keskkonnas veel sisse lülitatud.",
+      "error": "Midagi läks valesti. Midagi ei salvestatud."
+    }
   }
 }

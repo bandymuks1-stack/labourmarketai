@@ -12612,5 +12612,115 @@
     "errorLabel": "Could not save. Try again.",
     "notAuthorizedLabel": "Only managers can change objects.",
     "savedLabel": "Saved."
+  },
+  "agreements": {
+    "title": "Agreement register",
+    "intro": "The canonical register of {org} agreements — employment-related and general. Record keeping only.",
+    "noSignatureNote": "Statuses in this register are record-keeping states only — nothing here means an agreement is signed, legally valid or binding. LabourMarket.ai does not execute legal signatures: any signature happens outside the platform, and an attached file is only evidence you provide.",
+    "relationshipNote": "The contracts list above is the earlier personal commercial register and keeps working unchanged. New agreements belong here.",
+    "unavailable": "The agreement register cannot be shown right now.",
+    "needsOrgWorkspace": "The agreement register works in an organization workspace. Switch to your organization to use it.",
+    "preparing": "The agreement register is prepared but not enabled in this environment yet.",
+    "error": "The agreement register could not be read.",
+    "empty": "No agreements recorded yet.",
+    "emptyFiltered": "No agreements match these filters.",
+    "scopeNote": "Organization-side register. Workers are not shown this register.",
+    "baseDocument": "Base document",
+    "filters": {
+      "type": "Type",
+      "status": "Status",
+      "search": "Counterparty or title",
+      "searchPlaceholder": "Search…",
+      "expiringOnly": "Ending within 30 days",
+      "apply": "Filter",
+      "all": "All"
+    },
+    "types": {
+      "employment_related": "Employment-related",
+      "service": "Service",
+      "supply": "Supply",
+      "nda": "Confidentiality (NDA)",
+      "partnership": "Partnership",
+      "other": "Other"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted_for_approval": "Submitted for internal approval",
+      "approved_internally": "Approved internally",
+      "active_record": "Active record",
+      "amended": "Amended",
+      "terminated_record": "Terminated (record)",
+      "expired": "Ended"
+    },
+    "expiry": {
+      "ended": "End date passed",
+      "endsInDays": "Ends in {days} d."
+    },
+    "signature": {
+      "none": "No signature evidence attached.",
+      "evidenceAttached": "External signature evidence attached (signed outside the platform).",
+      "attachLabel": "Signature evidence file",
+      "attachSubmit": "Attach evidence"
+    },
+    "amendment": {
+      "label": "Amendment {n}",
+      "addTitle": "Add an amendment",
+      "titleLabel": "Amendment title",
+      "descriptionLabel": "What changes",
+      "documentLabel": "Amendment document",
+      "documentNone": "No document",
+      "effectiveDateLabel": "Effective date",
+      "honestNote": "An amendment is added to the record's history. The original agreement text stays unchanged — current terms are the base plus the amendments in order.",
+      "submit": "Add amendment"
+    },
+    "actions": {
+      "active_record": "Mark as active record",
+      "terminated_record": "Mark as terminated",
+      "expired": "Mark as ended"
+    },
+    "submitApproval": {
+      "definitionLabel": "Approval flow",
+      "submit": "Submit for internal approval",
+      "noDefinition": "No published internal approval flow for agreements — the record can be activated directly.",
+      "pendingNote": "Waiting for internal approval — the decision is made in the approvals area."
+    },
+    "edit": {
+      "title": "Edit details",
+      "submit": "Save"
+    },
+    "create": {
+      "title": "Register an agreement",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "counterpartyLabel": "Counterparty",
+      "orgNumberLabel": "Counterparty company code (optional)",
+      "responsibleLabel": "Responsible person",
+      "responsibleNone": "Not assigned",
+      "externalRefLabel": "External reference (optional)",
+      "effectiveFromLabel": "Effective from",
+      "effectiveToLabel": "Effective to",
+      "workerLinkNote": "This register is organization-side record keeping about agreements — it never creates or signs the agreement itself.",
+      "submit": "Register"
+    },
+    "notice": {
+      "created": "Agreement registered.",
+      "updated": "Saved.",
+      "submitted": "Submitted for internal approval.",
+      "amended": "Amendment added.",
+      "attached": "Document attached.",
+      "evidence_attached": "Signature evidence attached. This records evidence only — it does not make anything legally valid.",
+      "repaired": "Approval outcome applied to the record.",
+      "no_pending_workflow": "No pending approval request was found for this record.",
+      "no_approval_definition": "No published approval flow is available — the record stays a draft.",
+      "invalid": "Some fields could not be accepted.",
+      "invalid_transition": "That status change is not allowed from the current state.",
+      "invalid_state": "Amendments can be added once the record is approved or active.",
+      "not_editable": "This record can no longer be edited.",
+      "not_found": "Record not found.",
+      "not_allowed": "Only the organization's owner or admin can do this.",
+      "limit_reached": "The register limit was reached.",
+      "needs_migration": "The agreement register is not enabled in this environment yet.",
+      "error": "Something went wrong. Nothing was saved."
+    }
   }
 }

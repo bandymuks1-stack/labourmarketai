@@ -12612,5 +12612,115 @@
     "errorLabel": "Opslaan is niet gelukt. Probeer het opnieuw.",
     "notAuthorizedLabel": "Alleen managers kunnen objecten wijzigen.",
     "savedLabel": "Opgeslagen."
+  },
+  "agreements": {
+    "title": "Overeenkomstenregister",
+    "intro": "Het canonieke register van overeenkomsten van {org} — arbeidsgerelateerd en algemeen. Alleen registratie.",
+    "noSignatureNote": "Statussen in dit register zijn uitsluitend administratieve toestanden — niets hier betekent dat een overeenkomst ondertekend, juridisch geldig of bindend is. LabourMarket.ai voert geen juridische ondertekening uit: ondertekenen gebeurt buiten het platform en een bijgevoegd bestand is alleen door u aangeleverd bewijs.",
+    "relationshipNote": "De contractenlijst hierboven is het eerdere persoonlijke commerciële register en blijft ongewijzigd werken. Nieuwe overeenkomsten horen hier.",
+    "unavailable": "Het overeenkomstenregister kan nu niet worden getoond.",
+    "needsOrgWorkspace": "Het overeenkomstenregister werkt in een organisatiewerkruimte. Schakel over naar uw organisatie.",
+    "preparing": "Het overeenkomstenregister is voorbereid maar in deze omgeving nog niet ingeschakeld.",
+    "error": "Het overeenkomstenregister kon niet worden gelezen.",
+    "empty": "Nog geen overeenkomsten geregistreerd.",
+    "emptyFiltered": "Geen overeenkomsten voldoen aan deze filters.",
+    "scopeNote": "Register aan organisatiezijde. Werknemers zien dit register niet.",
+    "baseDocument": "Basisdocument",
+    "filters": {
+      "type": "Type",
+      "status": "Status",
+      "search": "Wederpartij of titel",
+      "searchPlaceholder": "Zoeken…",
+      "expiringOnly": "Eindigt binnen 30 dagen",
+      "apply": "Filteren",
+      "all": "Alle"
+    },
+    "types": {
+      "employment_related": "Arbeidsgerelateerd",
+      "service": "Diensten",
+      "supply": "Levering",
+      "nda": "Vertrouwelijkheid (NDA)",
+      "partnership": "Partnerschap",
+      "other": "Overig"
+    },
+    "status": {
+      "draft": "Concept",
+      "submitted_for_approval": "Ingediend voor interne goedkeuring",
+      "approved_internally": "Intern goedgekeurd",
+      "active_record": "Actieve registratie",
+      "amended": "Gewijzigd",
+      "terminated_record": "Beëindigd (registratie)",
+      "expired": "Verlopen"
+    },
+    "expiry": {
+      "ended": "Einddatum verstreken",
+      "endsInDays": "Eindigt over {days} d."
+    },
+    "signature": {
+      "none": "Geen ondertekeningsbewijs bijgevoegd.",
+      "evidenceAttached": "Extern ondertekeningsbewijs bijgevoegd (buiten het platform ondertekend).",
+      "attachLabel": "Bestand met ondertekeningsbewijs",
+      "attachSubmit": "Bewijs bijvoegen"
+    },
+    "amendment": {
+      "label": "Wijziging {n}",
+      "addTitle": "Wijziging toevoegen",
+      "titleLabel": "Titel van de wijziging",
+      "descriptionLabel": "Wat verandert er",
+      "documentLabel": "Wijzigingsdocument",
+      "documentNone": "Geen document",
+      "effectiveDateLabel": "Ingangsdatum",
+      "honestNote": "Een wijziging wordt aan de historie van de registratie toegevoegd. De oorspronkelijke tekst blijft ongewijzigd — de geldende voorwaarden zijn de basis plus de wijzigingen op volgorde.",
+      "submit": "Wijziging toevoegen"
+    },
+    "actions": {
+      "active_record": "Markeren als actieve registratie",
+      "terminated_record": "Markeren als beëindigd",
+      "expired": "Markeren als verlopen"
+    },
+    "submitApproval": {
+      "definitionLabel": "Goedkeuringsproces",
+      "submit": "Indienen voor interne goedkeuring",
+      "noDefinition": "Geen gepubliceerd intern goedkeuringsproces voor overeenkomsten — de registratie kan direct worden geactiveerd.",
+      "pendingNote": "Wacht op interne goedkeuring — de beslissing valt in het goedkeuringsgedeelte."
+    },
+    "edit": {
+      "title": "Gegevens bewerken",
+      "submit": "Opslaan"
+    },
+    "create": {
+      "title": "Overeenkomst registreren",
+      "typeLabel": "Type",
+      "titleLabel": "Titel",
+      "counterpartyLabel": "Wederpartij",
+      "orgNumberLabel": "Bedrijfsnummer wederpartij (optioneel)",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Niet toegewezen",
+      "externalRefLabel": "Externe referentie (optioneel)",
+      "effectiveFromLabel": "Geldig vanaf",
+      "effectiveToLabel": "Geldig tot",
+      "workerLinkNote": "Dit register is administratie aan organisatiezijde — het maakt of ondertekent de overeenkomst zelf niet.",
+      "submit": "Registreren"
+    },
+    "notice": {
+      "created": "Overeenkomst geregistreerd.",
+      "updated": "Opgeslagen.",
+      "submitted": "Ingediend voor interne goedkeuring.",
+      "amended": "Wijziging toegevoegd.",
+      "attached": "Document bijgevoegd.",
+      "evidence_attached": "Ondertekeningsbewijs bijgevoegd. Dit registreert alleen bewijs — het maakt niets juridisch geldig.",
+      "repaired": "Goedkeuringsresultaat toegepast op de registratie.",
+      "no_pending_workflow": "Geen lopend goedkeuringsverzoek gevonden voor deze registratie.",
+      "no_approval_definition": "Geen gepubliceerd goedkeuringsproces beschikbaar — de registratie blijft een concept.",
+      "invalid": "Sommige velden konden niet worden geaccepteerd.",
+      "invalid_transition": "Die statuswijziging is vanuit de huidige toestand niet toegestaan.",
+      "invalid_state": "Wijzigingen kunnen worden toegevoegd zodra de registratie goedgekeurd of actief is.",
+      "not_editable": "Deze registratie kan niet meer worden bewerkt.",
+      "not_found": "Registratie niet gevonden.",
+      "not_allowed": "Alleen de eigenaar of beheerder van de organisatie kan dit doen.",
+      "limit_reached": "De registerlimiet is bereikt.",
+      "needs_migration": "Het overeenkomstenregister is in deze omgeving nog niet ingeschakeld.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
+    }
   }
 }

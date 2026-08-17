@@ -4587,5 +4587,115 @@
       "externalRefLabel": "[EN] Reference number (optional)",
       "submit": "[EN] Register document"
     }
+  },
+  "agreements": {
+    "title": "Rejestr umów",
+    "intro": "Kanoniczny rejestr umów {org} — pracowniczych i ogólnych. Wyłącznie ewidencja.",
+    "noSignatureNote": "Statusy w tym rejestrze to wyłącznie stany ewidencyjne — nic tutaj nie oznacza, że umowa jest podpisana, prawnie ważna lub wiążąca. LabourMarket.ai nie wykonuje podpisów prawnych: podpisanie odbywa się poza platformą, a załączony plik to jedynie dostarczony przez Ciebie dowód.",
+    "relationshipNote": "Lista kontraktów powyżej to wcześniejszy osobisty rejestr handlowy i działa bez zmian. Nowe umowy należą tutaj.",
+    "unavailable": "Rejestru umów nie można teraz wyświetlić.",
+    "needsOrgWorkspace": "Rejestr umów działa w przestrzeni organizacji. Przełącz się na swoją organizację.",
+    "preparing": "Rejestr umów jest przygotowany, ale w tym środowisku jeszcze nie włączony.",
+    "error": "Nie udało się odczytać rejestru umów.",
+    "empty": "Nie zarejestrowano jeszcze żadnych umów.",
+    "emptyFiltered": "Żadna umowa nie pasuje do tych filtrów.",
+    "scopeNote": "Rejestr po stronie organizacji. Pracownicy nie widzą tego rejestru.",
+    "baseDocument": "Dokument bazowy",
+    "filters": {
+      "type": "Typ",
+      "status": "Status",
+      "search": "Kontrahent lub tytuł",
+      "searchPlaceholder": "Szukaj…",
+      "expiringOnly": "Kończą się w ciągu 30 dni",
+      "apply": "Filtruj",
+      "all": "Wszystkie"
+    },
+    "types": {
+      "employment_related": "Pracownicza",
+      "service": "Usługowa",
+      "supply": "Dostawy",
+      "nda": "Poufności (NDA)",
+      "partnership": "Partnerska",
+      "other": "Inna"
+    },
+    "status": {
+      "draft": "Szkic",
+      "submitted_for_approval": "Przekazana do wewnętrznego zatwierdzenia",
+      "approved_internally": "Zatwierdzona wewnętrznie",
+      "active_record": "Aktywny wpis",
+      "amended": "Ze zmianami",
+      "terminated_record": "Rozwiązana (wpis)",
+      "expired": "Wygasła"
+    },
+    "expiry": {
+      "ended": "Data zakończenia minęła",
+      "endsInDays": "Kończy się za {days} dni"
+    },
+    "signature": {
+      "none": "Nie załączono dowodu podpisania.",
+      "evidenceAttached": "Załączono dowód zewnętrznego podpisania (podpisano poza platformą).",
+      "attachLabel": "Plik dowodu podpisania",
+      "attachSubmit": "Załącz dowód"
+    },
+    "amendment": {
+      "label": "Aneks {n}",
+      "addTitle": "Dodaj aneks",
+      "titleLabel": "Tytuł aneksu",
+      "descriptionLabel": "Co się zmienia",
+      "documentLabel": "Dokument aneksu",
+      "documentNone": "Bez dokumentu",
+      "effectiveDateLabel": "Data wejścia w życie",
+      "honestNote": "Aneks jest dodawany do historii wpisu. Pierwotny tekst umowy pozostaje niezmieniony — obowiązujące warunki to podstawa plus aneksy w kolejności.",
+      "submit": "Dodaj aneks"
+    },
+    "actions": {
+      "active_record": "Oznacz jako aktywny wpis",
+      "terminated_record": "Oznacz jako rozwiązaną",
+      "expired": "Oznacz jako wygasłą"
+    },
+    "submitApproval": {
+      "definitionLabel": "Proces zatwierdzania",
+      "submit": "Przekaż do wewnętrznego zatwierdzenia",
+      "noDefinition": "Brak opublikowanego wewnętrznego procesu zatwierdzania umów — wpis można aktywować bezpośrednio.",
+      "pendingNote": "Oczekuje na wewnętrzne zatwierdzenie — decyzja zapada w sekcji zatwierdzeń."
+    },
+    "edit": {
+      "title": "Edytuj dane",
+      "submit": "Zapisz"
+    },
+    "create": {
+      "title": "Zarejestruj umowę",
+      "typeLabel": "Typ",
+      "titleLabel": "Tytuł",
+      "counterpartyLabel": "Kontrahent",
+      "orgNumberLabel": "Numer firmy kontrahenta (opcjonalnie)",
+      "responsibleLabel": "Osoba odpowiedzialna",
+      "responsibleNone": "Nieprzypisana",
+      "externalRefLabel": "Referencja zewnętrzna (opcjonalnie)",
+      "effectiveFromLabel": "Obowiązuje od",
+      "effectiveToLabel": "Obowiązuje do",
+      "workerLinkNote": "Ten rejestr to ewidencja po stronie organizacji — sam nie tworzy ani nie podpisuje umowy.",
+      "submit": "Zarejestruj"
+    },
+    "notice": {
+      "created": "Umowa zarejestrowana.",
+      "updated": "Zapisano.",
+      "submitted": "Przekazano do wewnętrznego zatwierdzenia.",
+      "amended": "Aneks dodany.",
+      "attached": "Dokument załączony.",
+      "evidence_attached": "Dowód podpisania załączony. To tylko zapis dowodu — niczego nie czyni prawnie ważnym.",
+      "repaired": "Wynik zatwierdzenia zastosowany do wpisu.",
+      "no_pending_workflow": "Nie znaleziono oczekującego wniosku o zatwierdzenie dla tego wpisu.",
+      "no_approval_definition": "Brak opublikowanego procesu zatwierdzania — wpis pozostaje szkicem.",
+      "invalid": "Niektórych pól nie udało się przyjąć.",
+      "invalid_transition": "Taka zmiana statusu z obecnego stanu jest niedozwolona.",
+      "invalid_state": "Aneksy można dodawać, gdy wpis jest zatwierdzony lub aktywny.",
+      "not_editable": "Tego wpisu nie można już edytować.",
+      "not_found": "Wpis nie znaleziony.",
+      "not_allowed": "Może to zrobić tylko właściciel lub administrator organizacji.",
+      "limit_reached": "Osiągnięto limit rejestru.",
+      "needs_migration": "Rejestr umów w tym środowisku nie jest jeszcze włączony.",
+      "error": "Coś poszło nie tak. Niczego nie zapisano."
+    }
   }
 }

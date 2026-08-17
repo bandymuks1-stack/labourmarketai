@@ -122,6 +122,14 @@ const NATIVE_NAV = new Set([
   "components/app/worker-document-file-slot.tsx",
   "components/app/document-ack-inbox.tsx",
   "components/app/org-documents-register.tsx",
+  // Agreement & Rights Engine v1 (train H) — the agreement register's
+  // create/edit/status/submit/amend/attach forms are NATIVE-NAV server
+  // actions that ALWAYS redirect back to /dashboard/commercial with an
+  // honest ?agr= outcome (rendered as the section's role="status" notice
+  // banner), exactly the org-documents-register pattern. Pure server
+  // component — no client state, no useTransition. (The filter form is a
+  // plain GET whose feedback is the filtered re-render.)
+  "components/app/agreements-register.tsx",
 ]);
 
 const PENDING_SIGNAL =

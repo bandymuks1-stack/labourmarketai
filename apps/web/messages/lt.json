@@ -12612,5 +12612,115 @@
     "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
     "savedLabel": "Išsaugota."
+  },
+  "agreements": {
+    "title": "Sutarčių registras",
+    "intro": "Kanoninis {org} sutarčių registras — darbo santykių ir bendrosios sutartys. Tik apskaita.",
+    "noSignatureNote": "Šio registro būsenos yra tik apskaitos būsenos — niekas čia nereiškia, kad sutartis pasirašyta, teisiškai galiojanti ar įpareigojanti. LabourMarket.ai nevykdo teisinių pasirašymų: pasirašoma už platformos ribų, o prisegtas failas yra tik jūsų pateiktas įrodymas.",
+    "relationshipNote": "Aukščiau esantis kontraktų sąrašas yra ankstesnis asmeninis komercinis registras — jis veikia toliau be pakeitimų. Naujos sutartys registruojamos čia.",
+    "unavailable": "Sutarčių registro šiuo metu parodyti nepavyksta.",
+    "needsOrgWorkspace": "Sutarčių registras veikia organizacijos darbo erdvėje. Persijunkite į savo organizaciją.",
+    "preparing": "Sutarčių registras paruoštas, bet šioje aplinkoje dar neįjungtas.",
+    "error": "Sutarčių registro nepavyko nuskaityti.",
+    "empty": "Sutarčių dar neužregistruota.",
+    "emptyFiltered": "Nė viena sutartis neatitinka šių filtrų.",
+    "scopeNote": "Organizacijos pusės registras. Darbuotojams šis registras nerodomas.",
+    "baseDocument": "Pagrindinis dokumentas",
+    "filters": {
+      "type": "Tipas",
+      "status": "Būsena",
+      "search": "Kita šalis arba pavadinimas",
+      "searchPlaceholder": "Ieškoti…",
+      "expiringOnly": "Baigiasi per 30 dienų",
+      "apply": "Filtruoti",
+      "all": "Visos"
+    },
+    "types": {
+      "employment_related": "Darbo santykių",
+      "service": "Paslaugų",
+      "supply": "Tiekimo",
+      "nda": "Konfidencialumo (NDA)",
+      "partnership": "Partnerystės",
+      "other": "Kita"
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "submitted_for_approval": "Pateikta vidiniam tvirtinimui",
+      "approved_internally": "Patvirtinta viduje",
+      "active_record": "Aktyvus įrašas",
+      "amended": "Su pakeitimais",
+      "terminated_record": "Nutraukta (įrašas)",
+      "expired": "Pasibaigusi"
+    },
+    "expiry": {
+      "ended": "Pabaigos data praėjo",
+      "endsInDays": "Baigiasi po {days} d."
+    },
+    "signature": {
+      "none": "Pasirašymo įrodymas neprisegtas.",
+      "evidenceAttached": "Prisegtas išorinio pasirašymo įrodymas (pasirašyta už platformos ribų).",
+      "attachLabel": "Pasirašymo įrodymo failas",
+      "attachSubmit": "Prisegti įrodymą"
+    },
+    "amendment": {
+      "label": "Pakeitimas {n}",
+      "addTitle": "Pridėti pakeitimą",
+      "titleLabel": "Pakeitimo pavadinimas",
+      "descriptionLabel": "Kas keičiasi",
+      "documentLabel": "Pakeitimo dokumentas",
+      "documentNone": "Be dokumento",
+      "effectiveDateLabel": "Įsigaliojimo data",
+      "honestNote": "Pakeitimas pridedamas prie įrašo istorijos. Pradinis sutarties tekstas lieka nepakitęs — galiojančios sąlygos yra pagrindas plius pakeitimai iš eilės.",
+      "submit": "Pridėti pakeitimą"
+    },
+    "actions": {
+      "active_record": "Žymėti aktyviu įrašu",
+      "terminated_record": "Žymėti nutraukta",
+      "expired": "Žymėti pasibaigusia"
+    },
+    "submitApproval": {
+      "definitionLabel": "Tvirtinimo eiga",
+      "submit": "Pateikti vidiniam tvirtinimui",
+      "noDefinition": "Sutartims nėra paskelbtos vidinio tvirtinimo eigos — įrašą galima aktyvuoti tiesiogiai.",
+      "pendingNote": "Laukiama vidinio tvirtinimo — sprendimas priimamas tvirtinimų srityje."
+    },
+    "edit": {
+      "title": "Redaguoti duomenis",
+      "submit": "Išsaugoti"
+    },
+    "create": {
+      "title": "Užregistruoti sutartį",
+      "typeLabel": "Tipas",
+      "titleLabel": "Pavadinimas",
+      "counterpartyLabel": "Kita šalis",
+      "orgNumberLabel": "Kitos šalies įmonės kodas (nebūtina)",
+      "responsibleLabel": "Atsakingas asmuo",
+      "responsibleNone": "Nepriskirta",
+      "externalRefLabel": "Išorinė nuoroda (nebūtina)",
+      "effectiveFromLabel": "Galioja nuo",
+      "effectiveToLabel": "Galioja iki",
+      "workerLinkNote": "Šis registras yra organizacijos pusės sutarčių apskaita — jis pats sutarties nesukuria ir nepasirašo.",
+      "submit": "Registruoti"
+    },
+    "notice": {
+      "created": "Sutartis užregistruota.",
+      "updated": "Išsaugota.",
+      "submitted": "Pateikta vidiniam tvirtinimui.",
+      "amended": "Pakeitimas pridėtas.",
+      "attached": "Dokumentas prisegtas.",
+      "evidence_attached": "Pasirašymo įrodymas prisegtas. Tai tik įrodymo įrašas — jis nieko nepadaro teisiškai galiojančiu.",
+      "repaired": "Tvirtinimo rezultatas pritaikytas įrašui.",
+      "no_pending_workflow": "Šiam įrašui laukiančio tvirtinimo prašymo nerasta.",
+      "no_approval_definition": "Paskelbtos tvirtinimo eigos nėra — įrašas lieka juodraščiu.",
+      "invalid": "Kai kurių laukų nepavyko priimti.",
+      "invalid_transition": "Toks būsenos keitimas iš dabartinės būsenos negalimas.",
+      "invalid_state": "Pakeitimus galima pridėti, kai įrašas patvirtintas arba aktyvus.",
+      "not_editable": "Šio įrašo nebegalima redaguoti.",
+      "not_found": "Įrašas nerastas.",
+      "not_allowed": "Tai gali atlikti tik organizacijos savininkas arba administratorius.",
+      "limit_reached": "Pasiektas registro limitas.",
+      "needs_migration": "Sutarčių registras šioje aplinkoje dar neįjungtas.",
+      "error": "Įvyko klaida. Niekas nebuvo išsaugota."
+    }
   }
 }

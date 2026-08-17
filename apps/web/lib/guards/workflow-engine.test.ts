@@ -139,11 +139,32 @@ function walkSource(absDir: string, acc: string[] = []): string[] {
 
 describe("1. exactly one human-gated migration pair owns the engine", () => {
   it("no other migration or rollback mentions the engine tables or commands", () => {
+    // Declared CONSUMERS (strengthened, not weakened): the Agreement &
+    // Rights Engine (train H, 20260817200000) rides this engine for its
+    // optional internal approval — its submit/sync mirror commands READ
+    // `workflow_instances` (context_entity_type = 'agreement') and its
+    // header cites start_workflow_instance_v1 as the app-layer entry point.
+    // A consumer may REFERENCE the engine; it may never DEFINE any engine
+    // object — the stricter per-consumer assertions below pin exactly that.
+    const CONSUMER_FILES = ["20260817200000_agreements_v1"] as const;
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (CONSUMER_FILES.some((c) => f.startsWith(c))) {
+          expect(
+            src,
+            `${dir}/${f} is a declared CONSUMER — it must never create an engine table`,
+          ).not.toMatch(/create table (if not exists )?public\.workflow_/);
+          expect(
+            src,
+            `${dir}/${f} is a declared CONSUMER — it must never (re)define or drop an engine command`,
+          ).not.toMatch(
+            /(create or replace function|drop function)[^;]*public\.(create_workflow_definition|publish_workflow_version|start_workflow_instance|decide_workflow_step|delegate_workflow_step|withdraw_workflow_instance|cancel_workflow_instance|mark_overdue_workflow_steps)_v1/,
+          );
+          continue;
+        }
         for (const tbl of TABLES) {
           expect(src, `${dir}/${f} must not define ${tbl}`).not.toMatch(
             new RegExp(`\\b${tbl}\\b`),
@@ -441,6 +462,14 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
     const allowed = [
       "lib/approvals/approvals.ts",
       "lib/notifications/event-emitters.ts",
+      // Declared CONSUMER (Agreement & Rights Engine, train H): the
+      // agreements read service lists the org's PUBLISHED 'agreement'
+      // workflow definitions for its submit form (RLS-scoped SELECT of
+      // workflow_definitions / workflow_definition_versions only) and never
+      // writes an engine table — the no-insert/update/delete pin below
+      // covers the approvals layer, and lib/guards/agreements.test.ts pins
+      // the agreements layer to its own eight gated commands.
+      "lib/agreements/agreements.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {
