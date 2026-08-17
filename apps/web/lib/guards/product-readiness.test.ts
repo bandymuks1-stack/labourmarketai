@@ -2083,7 +2083,15 @@ describe("no migration files added by this sprint", () => {
     // Safe: policy corrections + authority extensions only; no schema change,
     // no DML, every file carries a paired rollback and the human-gate marker
     // per owner mandate 2026-08-17 §4.
-    const SPRINT_BASELINE = 203;
+    // Bumped 203 -> 204 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD) — recounted from the tree, never summed. Supersedes the
+    // never-applied 20260714210000 draft (whose trigger predates
+    // company_memberships and would 42501-reject CM-only members); v2's
+    // trigger accepts BOTH membership truths. Paired rollback + Deferred
+    // APPLIED_LEDGER entry + db-proof scripts/db-proof/
+    // durable-workspace-pointer-v2.sh (32/32).
+    const SPRINT_BASELINE = 204;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

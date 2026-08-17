@@ -512,7 +512,10 @@ describe("NO new DB migration in this PR", () => {
     // contact-disclosure org authority, 20260817123000 finance org
     // authority), recounted from the tree, all UNAPPLIED with paired
     // rollbacks — see product-readiness.test.ts for the full rationale.
-    expect(count).toBeLessThanOrEqual(203);
+    // Bumped 203 -> 204 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD, paired rollback) — recounted from the tree, never summed.
+    expect(count).toBeLessThanOrEqual(204);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

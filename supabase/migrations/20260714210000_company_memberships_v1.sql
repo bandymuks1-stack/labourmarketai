@@ -3,6 +3,18 @@
 -- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
 -- Never `db push`.
 --
+-- ██ SUPERSEDED-BY-20260817160000 — DO NOT APPLY THIS FILE, EVER ██
+-- (consolidation train L slice 1, 2026-08-17). This draft predates the
+-- APPLIED company_memberships table (M-P0-4, 20260806090000): its validation
+-- trigger checks only organizations.owner_profile_id + engagement_contexts,
+-- so it would 42501-reject members whose governance lives only in
+-- company_memberships (production holds one such active manager, measured
+-- 2026-08-17) — and the switch action would then delete their session
+-- pointer too. The reworked replacement is
+-- supabase/migrations/20260817160000_durable_workspace_pointer_v2.sql,
+-- whose trigger accepts BOTH membership truths. This file stays in the tree
+-- only because guard company-architecture-v1.test.ts pins its content.
+--
 -- 20260714210000 — company memberships v1 (Company Architecture Completion,
 -- Sprint v2 §5: multi-company switching).
 --

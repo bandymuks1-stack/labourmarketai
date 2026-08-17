@@ -421,6 +421,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 166 -> 167 for the security-audit grant-hygiene migration
     // (20260727120000_secdef_public_grant_hygiene_v1) — audit L-01 + L-08,
     // revoke-only, paired rollback, human-gate-annotated, ships UNAPPLIED.
+    // SPRINT_BASELINE 203 -> 204 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, UNAPPLIED, paired
+    // rollback). Cross-pin follows.
     //
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for

@@ -10,7 +10,7 @@ import {
 } from "./canonical-demand-model";
 
 /**
- * THE CANONICAL DEMAND READ — one contract, two historical stores.
+ * THE CANONICAL DEMAND READ — one contract, one live store.
  *
  * THE DEFECT THIS CLOSES (W10 slice 4). The platform carried TWO independent
  * demand truths and no link between them:
@@ -23,7 +23,15 @@ import {
  *
  * So an employer could submit a real need and the map — reading the other
  * table — would show no demand at all. Two surfaces, two answers, both
- * presented as "the market". This module makes both surfaces read ONE list.
+ * presented as "the market". This module made both surfaces read ONE list.
+ *
+ * CONSOLIDATION SLICE 1 (2026-08-17): the legacy `job_demands` leg was
+ * removed from this reader. The table has held 0 rows in production for its
+ * whole life and nothing writes it, so the leg only ever contributed an empty
+ * set; its schema stays frozen and undropped
+ * (docs/audits/duplication-freeze-register-2026-08-17.md). The contract —
+ * `source` + `actionable` on every row — is unchanged, so a future second
+ * source must still declare itself honestly.
  *
  * WHY A READ MODULE AND NOT A SQL VIEW. A view would need its own migration,
  * its own RLS/security-barrier reasoning, and it still could not express the
@@ -35,7 +43,6 @@ import {
  *
  * AUTHORIZATION IS INHERITED, NEVER WIDENED. Every branch runs as the signed-in
  * user through a path that already existed:
- *   * `job_demands` — the caller's own RLS (`job_demands_select`).
  *   * worker → `list_open_demand_for_workers()` — the existing gated RPC:
  *     worker-only caller gate, `status = 'submitted'`, verified company only,
  *     closed column whitelist. Non-workers get an empty set, not an error.
@@ -70,18 +77,6 @@ export type { CanonicalDemand, CanonicalDemandResult };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
   return c;
-}
-
-/** Legacy project-scoped demand row (`job_demands` + its project geography). */
-interface JobDemandRow {
-  readonly id: string | null;
-  readonly headcount_needed: number | null;
-  readonly created_at: string | null;
-  readonly role_text: string | null;
-  readonly projects: {
-    readonly country: string | null;
-    readonly city: string | null;
-  } | null;
 }
 
 /** Worker-visible demand row, exactly the RPC's closed whitelist. */
@@ -124,31 +119,15 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
 
   const rows: CanonicalDemand[] = [];
 
-  // ── 1. Legacy project-scoped demand (`job_demands`). Historical, and NOT
-  // actionable: there is no interest/apply/booking path behind these rows.
-  const legacy = await supabase
-    .from("job_demands")
-    .select("id, headcount_needed, created_at, role_text, projects(country, city)")
-    .eq("status", "open")
-    .limit(500);
+  // NOTE (consolidation slice 1, 2026-08-17): the former leg 1 — a legacy
+  // `job_demands` read — was removed. The table has held 0 rows in production
+  // for its whole life (measured 2026-08-17) and NOTHING a customer touches
+  // writes it, so the leg only ever contributed an empty set. The schema stays
+  // frozen (docs/audits/duplication-freeze-register-2026-08-17.md); the
+  // `job_demand` source member in canonical-demand-model.ts remains as the
+  // historical vocabulary for rows that no longer arrive.
 
-  if (legacy.error) return { state: "error", errorCode: "legacy_demand_read_failed" };
-
-  for (const row of (legacy.data ?? []) as unknown as JobDemandRow[]) {
-    const mapped = toCanonicalDemand({
-      id: row.id,
-      source: "job_demand",
-      actionable: false,
-      country: row.projects?.country ?? null,
-      cityLabel: row.projects?.city ?? null,
-      quantity: row.headcount_needed,
-      roleText: row.role_text,
-      createdAt: row.created_at,
-    });
-    if (mapped) rows.push(mapped);
-  }
-
-  // ── 2. Worker-visible actionable demand, through the existing gated RPC.
+  // ── 1. Worker-visible actionable demand, through the existing gated RPC.
   // An absent RPC (migration not applied) or a non-worker caller yields no
   // rows — both are known states, never an error surface.
   const workerDemand = await asAny(supabase).rpc("list_open_demand_for_workers");
@@ -168,7 +147,7 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
     }
   }
 
-  // ── 3. The caller's OWN submitted requests. This is what makes the employer
+  // ── 2. The caller's OWN submitted requests. This is what makes the employer
   // who just created a need see it on the same map everyone else reads. RLS
   // (`profile_id = auth.uid()`) is the only thing granting this; an employer
   // reaches exactly their own rows and no other tenant's.
