@@ -788,6 +788,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // on main; the 140100 constraint union builds on 130100's list.
       "20260817140000_document_file_layer_v1.sql",
       "20260817140100_notification_document_types_v3.sql",
+      // 2026-08-17: train D (autonomous functional completion train V2).
+      // All four markers cite the owner mandate 2026-08-17 §4 migration
+      // authority — pre-approved for the train, applied ONLY by the LEAD
+      // session; deferred entries in docs/APPLIED_LEDGER.md. Rollbacks
+      // paired, all four ship UNAPPLIED.
+      "20260817150000_work_objects_v1.sql",
+      "20260817151000_work_tasks_v2_collaboration.sql",
+      "20260817152000_project_responsible_v1.sql",
+      "20260817153000_notification_events_v4_task_types.sql",
     ]);
   });
 

@@ -426,6 +426,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // product-readiness.test.ts (recounted from the tree). This floor
     // assertion needs no numeric edit — it only pins the 166 minimum.
     //
+    // Train D (2026-08-17): product-readiness moved 207 -> 211 for the four
+    // project/object/task drafts (work_objects_v1, work_tasks_v2_collaboration,
+    // project_responsible_v1, notification_events_v4_task_types). Cross-pin
+    // follows — this floor assertion needs no numeric edit.
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
     // migration 0030 to exist; pinning the exact number meant every unrelated,

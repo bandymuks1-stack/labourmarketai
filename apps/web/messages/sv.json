@@ -356,7 +356,8 @@
         "event_workflow_escalated": "En godkännanderunda har passerat sin frist",
         "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
-        "event_document_expiring": "[EN] A document's validity is ending soon."
+        "event_document_expiring": "[EN] A document's validity is ending soon.",
+        "event_work_task_assigned": "En uppgift har tilldelats dig"
       }
     },
     "onboarding": {
@@ -1785,7 +1786,14 @@
       "title": "[EN] Your projects",
       "untitled": "[EN] Untitled project",
       "teamLabel": "[EN] On the team",
-      "openArena": "[EN] Open arena"
+      "openArena": "[EN] Open arena",
+      "status": {
+        "draft": "Utkast",
+        "live": "Pågår",
+        "paused": "Pausad",
+        "completed": "Avslutad"
+      },
+      "progressNone": "Inga mätbara framsteg ännu"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1801,7 +1809,13 @@
     "myProjectsEmpty": "Du är ännu inte tilldelad något projekt. När ett företag tilldelar dig visas projektet här.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Avslutad",
-    "untitledProject": "Projekt utan titel"
+    "untitledProject": "Projekt utan titel",
+    "archiveToggle": {
+      "label": "Aktiva eller avslutade projekt",
+      "active": "Aktiva",
+      "archived": "Avslutade",
+      "empty": "Inga avslutade projekt ännu."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -1830,6 +1844,32 @@
       "journalCta": "Skriv journalinlägg",
       "chatCta": "Skicka meddelande",
       "galleryTitle": "Mina foton på detta projekt"
+    },
+    "manage": {
+      "title": "Projektstyrning",
+      "progressLabel": "Framsteg",
+      "progressNone": "Inga mätbara framsteg ännu",
+      "responsibleLabel": "Ansvarig person",
+      "responsibleNone": "Inte angiven",
+      "responsibleSave": "Spara",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Starta",
+        "paused": "Pausa",
+        "completed": "Slutför och arkivera"
+      },
+      "completedTerminal": "Avslutad — projektet är arkiverat",
+      "noTransitions": "Inga statusändringar tillgängliga",
+      "completeHint": "Att slutföra avslutar alla aktiva tilldelningar i projektet och flyttar det till listan över avslutade.",
+      "notice": {
+        "updated": "Sparat.",
+        "invalid": "Den ändringen är inte giltig.",
+        "invalid_transition": "Den statusändringen är inte möjlig från nuvarande läge.",
+        "needs_migration": "Detta är inte påslaget i den här miljön ännu.",
+        "not_authorized": "Endast projektledare kan göra detta.",
+        "not_found": "Projektet hittades inte.",
+        "error": "Något gick fel. Försök igen."
+      }
     }
   },
   "agencyPool": {

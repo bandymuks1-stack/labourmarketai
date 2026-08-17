@@ -107,6 +107,7 @@ function workerOps(over: Partial<WorkerOps> & { workerId: string }): WorkerOps {
 function task(over: Partial<WorkTask> & { id: string }): WorkTask {
   return {
     projectId: "p1",
+    objectId: null,
     title: `Task ${over.id}`,
     description: null,
     status: "todo",

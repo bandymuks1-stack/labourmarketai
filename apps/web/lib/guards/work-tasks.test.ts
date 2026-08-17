@@ -35,12 +35,12 @@ import { activeLocales } from "@/lib/i18n/config";
  * a SEPARATE, human-gated migration PR (D2) will propose. These pins keep
  * the layer honest:
  *
- *   - NO MIGRATION IN THIS PR: no repo migration defines work_tasks or the
- *     three RPC names yet — D2 gets clean names to claim.
- *   - RPC-ONLY writes app-side: the ONLY write paths are
- *     create_work_task_v1 / set_work_task_status_v1 / update_work_task_v1;
- *     no .insert/.update/.delete/.upsert anywhere in the task layer, and no
- *     other module touches work_tasks at all.
+ *   - EXACTLY TWO migration pairs own the contract: the applied D2 v1 pair
+ *     (20260711210000) and the train-D v2 collaboration pair
+ *     (20260817151000 — object link, assign-to-other, dependencies, gated
+ *     reopen, append-only history). Nothing else may (re)define them.
+ *   - RPC-ONLY writes app-side: the ONLY write paths are the gated v1/v2
+ *     RPCs; no .insert/.update/.delete/.upsert anywhere in the task layer.
  *   - HONEST lifecycle: exactly todo/in_progress/blocked/done/cancelled.
  *   - HONEST degradation: missing-relation/RPC codes (42P01/42703/42883/
  *     PGRST202) map to the calm "needs-migration" state — never a crash,
@@ -68,6 +68,18 @@ const RPC_NAMES = [
   "create_work_task_v1",
   "set_work_task_status_v1",
   "update_work_task_v1",
+] as const;
+
+/** Train-D v2 collaboration RPCs (20260817151000). The actions call v2 and
+ *  fall back to the APPLIED v1 names pre-apply (booking precedent). */
+const RPC_NAMES_V2 = [
+  "create_work_task_v2",
+  "set_work_task_status_v2",
+  "update_work_task_v2",
+  "assign_work_task_v1",
+  "reopen_work_task_v1",
+  "add_work_task_dependency_v1",
+  "remove_work_task_dependency_v1",
 ] as const;
 
 const ZERO: SpineCounts = {
@@ -101,22 +113,56 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
   // human-gated draft (20260711210000_work_tasks_v1.sql) plus its rollback
   // sibling. Nothing else in the repo may (re)define the table or the RPCs.
   const D2 = "20260711210000_work_tasks_v1";
+  const TRAIN_D = "20260817151000_work_tasks_v2_collaboration";
 
-  it("only the D2 migration and its rollback sibling mention work_tasks or the three RPCs", () => {
+  it("only the D2 + train-D migration pairs mention work_tasks or the task RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
-        if (f.startsWith(D2)) continue;
+        if (f.startsWith(D2) || f.startsWith(TRAIN_D)) continue;
         const src = readFileSync(join(abs, f), "utf8");
         expect(src, `${dir}/${f} must not define work_tasks`).not.toMatch(
           /\bwork_tasks\b/,
         );
-        for (const fn of RPC_NAMES) {
+        for (const fn of [...RPC_NAMES, ...RPC_NAMES_V2]) {
           expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(fn);
         }
       }
     }
+  });
+
+  it("the train-D v2 pair exists, stays gated, and claims exactly the v2 names", () => {
+    const up = readFileSync(
+      join(REPO, "supabase", "migrations", `${TRAIN_D}.sql`),
+      "utf8",
+    );
+    const down = readFileSync(
+      join(REPO, "supabase", "rollbacks", `${TRAIN_D}.down.sql`),
+      "utf8",
+    );
+    expect(up).toContain("needs-human-gate");
+    expect(up).toContain("@human-gate-approved");
+    // The v1 RPCs are NOT recreated — v2 are new names (rollback-chain rule).
+    for (const fn of RPC_NAMES) {
+      expect(up).not.toContain(`create or replace function public.${fn}(`);
+    }
+    for (const fn of RPC_NAMES_V2) {
+      expect(up).toContain(`create or replace function public.${fn}`);
+      expect(down).toContain(`drop function if exists public.${fn}`);
+    }
+    // Append-only history + dependencies stay client-unwritable.
+    expect(up).toMatch(
+      /revoke insert, update, delete on public\.work_task_events from authenticated/,
+    );
+    expect(up).toMatch(
+      /revoke insert, update, delete on public\.task_dependencies from authenticated/,
+    );
+    // Cycle rejection is a real recursive walk, not a comment.
+    expect(up).toMatch(/with recursive up as \(/);
+    expect(up).toContain("return 'cycle';");
+    // Reopen is its own gated act; terminal states do not move in status v2.
+    expect(up).toMatch(/if t\.status in \('done','cancelled'\) then\s*\n\s*return 'invalid_transition';/);
   });
 
   it("the D2 pair exists, stays human-gated, and defines the exact contract", () => {
@@ -149,15 +195,16 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
 });
 
 describe("2. writes are RPC-only, and only the task layer touches work_tasks", () => {
-  it("the actions call exactly the three gated RPCs", () => {
-    for (const fn of RPC_NAMES) {
-      expect(ACTIONS).toMatch(new RegExp(`\\.rpc\\("${fn}"`));
+  it("the actions call exactly the gated v2 RPCs plus the v1 fallbacks", () => {
+    // `\s*` because prettier wraps long rpc calls onto the next line.
+    for (const fn of [...RPC_NAMES, ...RPC_NAMES_V2]) {
+      expect(ACTIONS).toMatch(new RegExp(`\\.rpc\\(\\s*"${fn}"`));
     }
     // No other RPC and no direct write sneaks into the task layer.
-    const rpcCalls = [...ACTIONS.matchAll(/\.rpc\("([a-z0-9_]+)"/g)].map(
+    const rpcCalls = [...ACTIONS.matchAll(/\.rpc\(\s*"([a-z0-9_]+)"/g)].map(
       (m) => m[1],
     );
-    expect(new Set(rpcCalls)).toEqual(new Set(RPC_NAMES));
+    expect(new Set(rpcCalls)).toEqual(new Set([...RPC_NAMES, ...RPC_NAMES_V2]));
   });
 
   it("no .insert/.update/.delete/.upsert anywhere in the task layer", () => {
@@ -169,7 +216,7 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
     }
   });
 
-  it("work_tasks is read ONLY by lib/tasks/tasks.ts across the whole app", () => {
+  it("work_tasks is read by exactly the three declared modules", () => {
     const files = [
       ...walkSource(join(ROOT, "app")),
       ...walkSource(join(ROOT, "components")),
@@ -180,10 +227,20 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
       const src = readFileSync(abs, "utf8");
       if (/\.from\("work_tasks"\)/.test(src)) offenders.push(abs);
     }
-    expect(offenders.map((p) => p.split("\\").join("/"))).toEqual(
-      expect.arrayContaining([expect.stringContaining("lib/tasks/tasks.ts")]),
-    );
-    expect(offenders).toHaveLength(1);
+    // Train D widened this from one reader to exactly three:
+    //   - lib/tasks/tasks.ts             — the canonical RLS-scoped read;
+    //   - lib/projects/progress.ts       — derived progress (status only);
+    //   - lib/notifications/event-emitters.ts — the assignment emitter's
+    //     recipient resolution (admin client, AFTER the domain write).
+    const normalized = offenders
+      .map((p) => p.split("\\").join("/"))
+      .map((p) => p.slice(p.indexOf("lib/")))
+      .sort();
+    expect(normalized).toEqual([
+      "lib/notifications/event-emitters.ts",
+      "lib/projects/progress.ts",
+      "lib/tasks/tasks.ts",
+    ]);
   });
 
   it("reads are bounded and RLS-scoped (server client, never the admin client)", () => {
@@ -390,12 +447,22 @@ describe("7. accessible controls — real actions, no drag-and-drop dependency",
     );
   });
 
-  it("no people-picker: assignee stays self-assign default / unassigned", () => {
-    // v1 deliberately builds NO select over other people's profiles.
-    expect(PAGE).toMatch(/name="assignSelf"/);
-    expect(PAGE).not.toMatch(/name="assigneeProfileId"|assignee-select/);
-    expect(ACTIONS).toMatch(/p_assign_to_self/);
-    expect(ACTIONS).not.toMatch(/p_assignee/);
+  it("assign-to-other is gated: picker is org-members-only, server re-checks", () => {
+    // Train D replaced v1's self-assign-only rule with the GATED people
+    // picker: options come ONLY from the active workspace's live members
+    // (listOrganizationMembers), the RPC re-checks managing authority +
+    // target eligibility server-side, and the durable notification recipient
+    // is resolved from the task row (never caller input).
+    expect(PAGE).toMatch(/name="assigneeProfileId"/);
+    expect(PAGE).toMatch(/listOrganizationMembers/);
+    expect(PAGE).toMatch(/name="assignSelf"/); // workers keep the v1 checkbox
+    expect(ACTIONS).toMatch(/p_assignee_profile_id/);
+    expect(ACTIONS).toMatch(/p_assign_to_self/); // the v1 fallback path
+    expect(ACTIONS).toMatch(/emitWorkTaskAssignedNotification/);
+    // The emitter never trusts the caller for the recipient.
+    const EMITTERS = read("lib/notifications/event-emitters.ts");
+    expect(EMITTERS).toMatch(/from\("work_tasks"\)/);
+    expect(EMITTERS).toMatch(/assignee === actorProfileId\) return/);
   });
 });
 
@@ -444,6 +511,39 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "tasks.projectTasks.empty",
     "tasks.projectTasks.back",
     "tasks.projectSection.link",
+    // Train D — collaboration copy.
+    "tasks.objectLabel",
+    "tasks.assignee.label",
+    "tasks.assignee.you",
+    "tasks.assignee.member",
+    "tasks.assignee.unassigned",
+    "tasks.assignForm.label",
+    "tasks.assignForm.save",
+    "tasks.dependencies.waitingOn",
+    "tasks.dependencies.blockedBy",
+    "tasks.dependencies.hidden",
+    "tasks.dependencies.remove",
+    "tasks.dependencies.addLabel",
+    "tasks.dependencies.add",
+    "tasks.history.title",
+    "tasks.history.byYou",
+    "tasks.history.byMember",
+    "tasks.history.actions.created",
+    "tasks.history.actions.status_changed",
+    "tasks.history.actions.reopened",
+    "tasks.history.actions.assigned",
+    "tasks.history.actions.unassigned",
+    "tasks.history.actions.priority_changed",
+    "tasks.history.actions.due_changed",
+    "tasks.history.actions.object_changed",
+    "tasks.history.actions.dependency_added",
+    "tasks.history.actions.dependency_removed",
+    "tasks.form.objectLabel",
+    "tasks.form.objectNone",
+    "tasks.form.assigneeLabel",
+    "tasks.form.assigneeHint",
+    // Train D — the v4 durable assignment notification label.
+    "auth.notifications.types.event_work_task_assigned",
   ];
 
   const ACTION_KEYS = [
@@ -465,6 +565,7 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "not_authorized",
     "not_found",
     "limit_reached",
+    "cycle",
     "error",
   ];
 

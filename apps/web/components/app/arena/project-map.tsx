@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { MapPin, MessageSquare, Users } from "lucide-react";
 
 import type { ProjectMapCard } from "@/lib/projects/map";
+import type { ProjectProgress } from "@/lib/projects/progress-model";
 import { CountUp } from "@/components/app/today/count-up";
 import {
   WORKSPACE_ACCENT_DOT,
@@ -20,9 +21,13 @@ import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 export async function ProjectMap({
   projects,
   locale,
+  progress,
 }: {
   projects: ProjectMapCard[];
   locale: string;
+  /** Train D: per-project DERIVED progress (tasks + stages). Optional —
+   *  surfaces without the read simply render no progress row. */
+  progress?: Readonly<Record<string, ProjectProgress>>;
 }) {
   const t = await getTranslations("projects.map");
   if (projects.length === 0) return null;
@@ -50,8 +55,25 @@ export async function ProjectMap({
               data-testid="project-stadium-link"
               className="flex flex-1 flex-col gap-3"
             >
-              <span className="font-display text-lg font-semibold tracking-tightest text-text-primary">
-                {p.title ?? t("untitled")}
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="font-display text-lg font-semibold tracking-tightest text-text-primary">
+                  {p.title ?? t("untitled")}
+                </span>
+                {p.status &&
+                ["draft", "live", "paused", "completed"].includes(p.status) ? (
+                  <span
+                    className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
+                      p.status === "live"
+                        ? "border-state-success/50 text-state-success"
+                        : p.status === "completed"
+                          ? "border-ink-500 text-text-muted"
+                          : "border-ink-500 text-text-secondary"
+                    }`}
+                    data-testid={`project-status-${p.id}`}
+                  >
+                    {t(`status.${p.status}`)}
+                  </span>
+                ) : null}
               </span>
               {showOrg && p.orgName ? (
                 <span
@@ -77,6 +99,36 @@ export async function ProjectMap({
                   <MapPin className="h-3.5 w-3.5" aria-hidden />
                   {p.city}
                 </span>
+              ) : null}
+              {/* Train D: derived progress — tasks + stages done/total,
+                  computed at read time. No countable work → an honest
+                  "no measurable progress yet" line, never 0% or 100%. */}
+              {progress && progress[p.id] ? (
+                progress[p.id].percent !== null ? (
+                  <span
+                    className="flex items-center gap-2"
+                    data-testid={`project-progress-${p.id}`}
+                  >
+                    <span className="h-1.5 w-24 overflow-hidden rounded-full bg-ink-700">
+                      <span
+                        className="block h-full rounded-full bg-brand-blue"
+                        style={{ width: `${progress[p.id].percent}%` }}
+                      />
+                    </span>
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {progress[p.id].percent}% (
+                      {progress[p.id].taskDone + progress[p.id].stageDone}/
+                      {progress[p.id].taskTotal + progress[p.id].stageTotal})
+                    </span>
+                  </span>
+                ) : (
+                  <span
+                    className="font-mono text-meta uppercase tracking-label text-text-muted"
+                    data-testid={`project-progress-none-${p.id}`}
+                  >
+                    {t("progressNone")}
+                  </span>
+                )
               ) : null}
               <span className="mt-auto flex items-center gap-2">
                 <Users className="h-4 w-4 text-brand-cyan" aria-hidden />

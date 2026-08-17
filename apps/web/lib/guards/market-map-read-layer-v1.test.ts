@@ -525,7 +525,12 @@ describe("NO new DB migration in this PR", () => {
     // APPLY BY LEAD; renamed from 120000/121000 after trains A/B claimed
     // 120000-130100 on main) — recounted from the post-rebase tree, never
     // summed. Still no migration from the market-map layer itself.
-    expect(count).toBeLessThanOrEqual(207);
+    // Bumped 207 -> 211 for the train-D project/object/task drafts
+    // (20260817150000 + 20260817151000 + 20260817152000 + 20260817153000,
+    // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
+    // merging origin/main 1450ed08 (document engine included): 211 real
+    // files in the tree — recounted, never summed.
+    expect(count).toBeLessThanOrEqual(211);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

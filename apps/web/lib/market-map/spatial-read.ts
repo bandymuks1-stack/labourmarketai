@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getOwnMarketSignals } from "./signals";
-import { getCompanyLocations } from "@/lib/company/company-locations";
+import { getCompanyTerritoryFromObjects } from "@/lib/objects/objects";
 import {
   buildSpatialCollections,
   emptySpatialCollections,
@@ -13,10 +13,12 @@ import type { NormalizedSignal } from "./signal-model";
  * Owner-scoped composer for the three-entity spatial read layer.
  *
  * Composes the EXISTING owner-only sources — getOwnMarketSignals() (RLS-scoped,
- * six sources, no privileged path) and getCompanyLocations() (owner-gated
- * company_locations table with an honest needs-migration state) — into the
- * typed SpatialEntityCollections. No new DB read, no remote procedure call,
- * no privileged key, no cross-user access: only the caller's own data.
+ * six sources, no privileged path) and getCompanyTerritoryFromObjects()
+ * (the canonical work_objects entity, train D — REWIRED from the superseded,
+ * never-applied company_locations draft per the Train M verdict; honest
+ * needs-migration state until the LEAD applies 20260817150000) — into the
+ * typed SpatialEntityCollections. No new DB read beyond the caller's own
+ * RLS-scoped rows, no privileged key, no cross-user access.
  *
  * The person layer therefore aggregates only the caller's own shareable
  * signals today; a cross-user person-presence feed is a separate owner-gated
@@ -31,7 +33,7 @@ export type CompanyTerritorySourceState =
 
 export interface OwnSpatialRead {
   collections: SpatialEntityCollections;
-  /** Honest state of the company_locations source (owner-gated migration). */
+  /** Honest state of the work_objects source (LEAD-gated migration). */
   companyTerritorySource: CompanyTerritorySourceState;
 }
 
@@ -39,17 +41,12 @@ export async function getOwnSpatialCollections(): Promise<OwnSpatialRead | null>
   const signals = await getOwnMarketSignals();
   if (signals === null) return null; // unauthenticated
 
-  const companyRead = await getCompanyLocations();
-  const companyTerritorySource: CompanyTerritorySourceState =
-    companyRead.kind === "ok"
-      ? "ok"
-      : companyRead.kind === "needs-migration"
-        ? "needs-migration"
-        : "error";
+  const companyRead = await getCompanyTerritoryFromObjects();
+  const companyTerritorySource: CompanyTerritorySourceState = companyRead.state;
 
   const collections = buildSpatialCollections({
     signals,
-    companyLocations: companyRead.kind === "ok" ? companyRead.rows : [],
+    companyLocations: companyRead.rows,
     // Demand anchors require verified/manual coordinates; the owner-scoped
     // demand signals carry no coordinates (by design), so no demand anchor
     // can appear from this composer today — honest, never a fake territory.
