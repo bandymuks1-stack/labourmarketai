@@ -4104,7 +4104,10 @@
         "event_workflow_step_pending": "An approval request is waiting for your decision",
         "event_workflow_decided": "Your approval request has been decided",
         "event_workflow_delegated": "An approval round was handed over to you",
-        "event_workflow_escalated": "An approval round passed its deadline"
+        "event_workflow_escalated": "An approval round passed its deadline",
+        "event_document_ack_assigned": "You were asked to confirm you have read a document.",
+        "event_document_ack_completed": "A document you sent for confirmation was confirmed.",
+        "event_document_expiring": "A document's validity is ending soon."
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -6910,6 +6913,106 @@
       "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
       "projectAxisLink": "Project readiness checklists",
       "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Version {n}",
+    "download": "Download",
+    "noFileYet": "No file uploaded yet.",
+    "upload": {
+      "fileLabel": "Choose a file",
+      "submit": "Upload file",
+      "newVersion": "Upload new version",
+      "limits": "PDF, Word or photo (JPG/PNG/WebP), up to 5 MB.",
+      "versionNote": "A new upload becomes a new version — earlier versions are kept."
+    },
+    "ackInbox": {
+      "title": "Documents to confirm",
+      "intro": "You were asked to confirm that you have read these documents. Open the file, then press the confirm button.",
+      "allDone": "Nothing waiting — you have confirmed every document assigned to you.",
+      "requiredBy": "confirm by {date}",
+      "confirm": "I have read this",
+      "completedTitle": "Already confirmed",
+      "confirmedAt": "confirmed {date}",
+      "versionRule": "A confirmation applies only to the exact version you opened. If a new version is published, you may be asked again."
+    },
+    "notice": {
+      "uploaded": "The file was uploaded.",
+      "created": "The document entry was created.",
+      "archived": "The document was archived.",
+      "revoked": "The document was revoked.",
+      "assigned": "The confirmation request was sent.",
+      "acknowledged": "Your confirmation was saved.",
+      "invalid": "Some of the entered details are not valid — nothing was saved.",
+      "invalid_state": "This document is not in a state that allows that action.",
+      "invalid_assignee": "That person is not a member of this organization, so the request was not sent.",
+      "already_assigned": "That person was already asked to confirm this version.",
+      "already_acknowledged": "This document version was already confirmed.",
+      "not_current": "A newer version of this document exists — refresh the page and try again.",
+      "not_allowed": "You do not have permission to do that.",
+      "not_found": "That document was not found.",
+      "limit_reached": "The document list limit was reached.",
+      "version_limit_reached": "This document reached its version limit.",
+      "path_mismatch": "The upload could not be verified — nothing was saved. Please try again.",
+      "file_too_large": "The file is larger than 5 MB — nothing was saved.",
+      "unsupported_type": "This file type is not supported — use PDF, Word or a photo.",
+      "needs_migration": "File upload is not enabled in this environment yet — nothing was saved.",
+      "error": "Something went wrong — nothing was saved."
+    }
+  },
+  "orgDocuments": {
+    "title": "Company document register",
+    "intro": "Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
+    "unavailable": "The document register could not be loaded right now.",
+    "preparing": "The document register is prepared but not enabled in this environment yet.",
+    "error": "The document register could not be loaded — try again later.",
+    "empty": "No documents registered yet.",
+    "scopeNote": "This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
+    "types": {
+      "org_policy": "Policy",
+      "org_procedure": "Procedure",
+      "org_instruction": "Instruction",
+      "org_correspondence_incoming": "Incoming correspondence",
+      "org_correspondence_outgoing": "Outgoing correspondence",
+      "org_internal": "Internal document",
+      "org_agreement_attachment": "Agreement attachment"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "revoked": "Revoked"
+    },
+    "classification": {
+      "standard": "Standard",
+      "classified": "Restricted access"
+    },
+    "currentVersion": "Version {n}",
+    "versionHistory": "{n} versions",
+    "download": "Download",
+    "noFileYet": "No file uploaded yet.",
+    "uploadNewVersion": "Upload new version",
+    "uploadFirst": "Upload file",
+    "expiresOn": "valid until {date}",
+    "ackProgress": "{done}/{total} confirmed",
+    "assign": {
+      "assigneeLabel": "Ask to confirm:",
+      "requiredByLabel": "by",
+      "submit": "Send request"
+    },
+    "archive": "Archive",
+    "revoke": "Revoke",
+    "create": {
+      "title": "Register a new document",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description (optional)",
+      "classificationLabel": "Access",
+      "responsibleLabel": "Responsible person",
+      "responsibleNone": "Not set",
+      "validFromLabel": "Valid from",
+      "expiresOnLabel": "Valid until",
+      "externalRefLabel": "Reference number (optional)",
+      "submit": "Register document"
     }
   },
   "trust": {

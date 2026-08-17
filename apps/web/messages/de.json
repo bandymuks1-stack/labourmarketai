@@ -4104,7 +4104,10 @@
         "event_workflow_step_pending": "Eine Freigabeanfrage wartet auf Ihre Entscheidung",
         "event_workflow_decided": "Über Ihre Freigabeanfrage wurde entschieden",
         "event_workflow_delegated": "Eine Freigaberunde wurde an Sie übergeben",
-        "event_workflow_escalated": "Eine Freigaberunde hat ihre Frist überschritten"
+        "event_workflow_escalated": "Eine Freigaberunde hat ihre Frist überschritten",
+        "event_document_ack_assigned": "Sie wurden gebeten zu bestätigen, dass Sie ein Dokument gelesen haben.",
+        "event_document_ack_completed": "Ein von Ihnen zur Bestätigung gesendetes Dokument wurde bestätigt.",
+        "event_document_expiring": "Die Gültigkeit eines Dokuments endet bald."
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -6910,6 +6913,106 @@
       "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
       "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
       "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Version {n}",
+    "download": "Herunterladen",
+    "noFileYet": "Noch keine Datei hochgeladen.",
+    "upload": {
+      "fileLabel": "Datei auswählen",
+      "submit": "Datei hochladen",
+      "newVersion": "Neue Version hochladen",
+      "limits": "PDF, Word oder Foto (JPG/PNG/WebP), bis 5 MB.",
+      "versionNote": "Ein neuer Upload wird zu einer neuen Version — frühere Versionen bleiben erhalten."
+    },
+    "ackInbox": {
+      "title": "Zu bestätigende Dokumente",
+      "intro": "Sie wurden gebeten zu bestätigen, dass Sie diese Dokumente gelesen haben. Öffnen Sie die Datei und drücken Sie die Bestätigungstaste.",
+      "allDone": "Nichts offen — Sie haben alle Ihnen zugewiesenen Dokumente bestätigt.",
+      "requiredBy": "bestätigen bis {date}",
+      "confirm": "Ich habe das gelesen",
+      "completedTitle": "Bereits bestätigt",
+      "confirmedAt": "bestätigt {date}",
+      "versionRule": "Eine Bestätigung gilt nur für genau die Version, die Sie geöffnet haben. Bei einer neuen Version können Sie erneut gefragt werden."
+    },
+    "notice": {
+      "uploaded": "Die Datei wurde hochgeladen.",
+      "created": "Der Dokumenteintrag wurde erstellt.",
+      "archived": "Das Dokument wurde archiviert.",
+      "revoked": "Das Dokument wurde zurückgezogen.",
+      "assigned": "Die Bestätigungsanfrage wurde gesendet.",
+      "acknowledged": "Ihre Bestätigung wurde gespeichert.",
+      "invalid": "Ein Teil der eingegebenen Daten ist ungültig — nichts wurde gespeichert.",
+      "invalid_state": "Der Zustand dieses Dokuments erlaubt diese Aktion nicht.",
+      "invalid_assignee": "Diese Person ist kein Mitglied dieser Organisation; die Anfrage wurde nicht gesendet.",
+      "already_assigned": "Diese Person wurde bereits gebeten, diese Version zu bestätigen.",
+      "already_acknowledged": "Diese Dokumentversion wurde bereits bestätigt.",
+      "not_current": "Es gibt eine neuere Version dieses Dokuments — Seite aktualisieren und erneut versuchen.",
+      "not_allowed": "Sie haben dafür keine Berechtigung.",
+      "not_found": "Das Dokument wurde nicht gefunden.",
+      "limit_reached": "Das Limit der Dokumentenliste wurde erreicht.",
+      "version_limit_reached": "Dieses Dokument hat sein Versionslimit erreicht.",
+      "path_mismatch": "Der Upload konnte nicht überprüft werden — nichts wurde gespeichert. Bitte erneut versuchen.",
+      "file_too_large": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
+      "unsupported_type": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
+      "needs_migration": "Der Datei-Upload ist in dieser Umgebung noch nicht aktiviert — nichts wurde gespeichert.",
+      "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert."
+    }
+  },
+  "orgDocuments": {
+    "title": "Dokumentenregister des Unternehmens",
+    "intro": "Dokumente von {org}: Richtlinien, Verfahren, Anweisungen und Korrespondenz, mit Versionen und Lesebestätigungen.",
+    "unavailable": "Das Dokumentenregister kann gerade nicht geladen werden.",
+    "preparing": "Das Dokumentenregister ist vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+    "error": "Das Dokumentenregister konnte nicht geladen werden — bitte später erneut versuchen.",
+    "empty": "Noch keine Dokumente registriert.",
+    "scopeNote": "Dieses Register enthält die Dokumente der Organisation selbst. Persönliche Dokumente der Beschäftigten bleiben in deren Händen und werden hier nie angezeigt.",
+    "types": {
+      "org_policy": "Richtlinie",
+      "org_procedure": "Verfahren",
+      "org_instruction": "Anweisung",
+      "org_correspondence_incoming": "Eingehende Korrespondenz",
+      "org_correspondence_outgoing": "Ausgehende Korrespondenz",
+      "org_internal": "Internes Dokument",
+      "org_agreement_attachment": "Vertragsanlage"
+    },
+    "status": {
+      "active": "Aktiv",
+      "archived": "Archiviert",
+      "revoked": "Zurückgezogen"
+    },
+    "classification": {
+      "standard": "Standard",
+      "classified": "Eingeschränkter Zugriff"
+    },
+    "currentVersion": "Version {n}",
+    "versionHistory": "{n} Versionen",
+    "download": "Herunterladen",
+    "noFileYet": "Noch keine Datei hochgeladen.",
+    "uploadNewVersion": "Neue Version hochladen",
+    "uploadFirst": "Datei hochladen",
+    "expiresOn": "gültig bis {date}",
+    "ackProgress": "{done}/{total} bestätigt",
+    "assign": {
+      "assigneeLabel": "Um Bestätigung bitten:",
+      "requiredByLabel": "bis",
+      "submit": "Anfrage senden"
+    },
+    "archive": "Archivieren",
+    "revoke": "Zurückziehen",
+    "create": {
+      "title": "Neues Dokument registrieren",
+      "typeLabel": "Typ",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung (optional)",
+      "classificationLabel": "Zugriff",
+      "responsibleLabel": "Verantwortliche Person",
+      "responsibleNone": "Nicht festgelegt",
+      "validFromLabel": "Gültig ab",
+      "expiresOnLabel": "Gültig bis",
+      "externalRefLabel": "Referenznummer (optional)",
+      "submit": "Dokument registrieren"
     }
   },
   "trust": {

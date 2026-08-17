@@ -31,6 +31,7 @@ import "server-only";
  *                         about" gap the durable store exists to close.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
   emitNotificationEventInBackground,
   type NotificationEventType,
@@ -483,4 +484,169 @@ export async function emitWorkflowEscalatedNotifications(
   } catch {
     // Emission is an enhancement; the domain write already succeeded.
   }
+}
+// ── Document & Evidence Engine v3 emitters (20260817140100) ────────────────
+//
+// RECIPIENT DECISIONS, STATED (v3):
+//   document_ack_assigned  → the ASSIGNEE — someone asked them to confirm a
+//                            document version; resolved from the ack row.
+//   document_ack_completed → the ASSIGNER — their request was answered;
+//                            never emitted when assigner acknowledged their
+//                            own assignment (the actor already watched it).
+//   document_expiring      → worker scope: the WORKER whose own document
+//                            enters the 30-day window (same derivation the
+//                            documents page shows); org scope: the register
+//                            entry's responsible person (falling back to
+//                            its creator). Deduped by the store's UNIQUE
+//                            (recipient, type:entity) key, so a document is
+//                            durably announced ONCE per validity period —
+//                            a renewed document that expires again later is
+//                            a recorded v1 limitation, not a silent bug.
+// All three stay INERT until the lead applies the v3 constraint widening —
+// the CHECK rejects the insert and the fire-and-forget wrapper logs it.
+
+// The document-engine tables ship behind the human-gated 20260817140000
+// migration, so they are not in the generated Database types yet — the
+// blessed boundary cast (lib/supabase/types.ts convention). RLS/authority
+// still hold at runtime; these are admin-client reads by design (emitters).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAnyClient(c: AdminClient): any {
+  return c;
+}
+
+/** Ack lifecycle events. `ackId` is the document_acknowledgements row id. */
+export async function emitDocumentAckNotification(
+  ackId: string,
+  eventType: Extract<
+    NotificationEventType,
+    "document_ack_assigned" | "document_ack_completed"
+  >,
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await asAnyClient(admin)
+      .from("document_acknowledgements")
+      .select("assignee_profile_id, assigned_by")
+      .eq("id", ackId)
+      .maybeSingle();
+    const row = data as {
+      assignee_profile_id?: string;
+      assigned_by?: string;
+    } | null;
+    if (!row) return;
+
+    let recipient: string | null = null;
+    if (eventType === "document_ack_assigned") {
+      recipient = row.assignee_profile_id ?? null;
+    } else if (
+      row.assigned_by &&
+      row.assigned_by !== row.assignee_profile_id
+    ) {
+      // Completed → the assigner hears it; the acting assignee does not.
+      recipient = row.assigned_by;
+    }
+    if (!recipient) return;
+
+    emitNotificationEventInBackground(admin, {
+      recipientProfileId: recipient,
+      eventType,
+      entityType: "document_acknowledgement",
+      entityId: ackId,
+      metadata: {},
+    });
+  } catch {
+    // Emission is an enhancement; the domain write already succeeded.
+  }
+}
+
+/** True when a date-only string falls inside the (0, window] days-ahead
+ *  band: not yet expired, but expiring. Same semantics the documents page
+ *  derives (deriveDocumentStatus's 30-day window). */
+function isInsideExpiryWindow(dateOnly: string | null, now: Date): boolean {
+  if (!dateOnly) return false;
+  const until = new Date(`${dateOnly}T23:59:59Z`);
+  if (Number.isNaN(until.getTime())) return false;
+  const ms = until.getTime() - now.getTime();
+  return ms >= 0 && ms < DOCUMENT_EXPIRING_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** Durable "your document enters the 30-day expiry window" facts for one
+ *  worker's OWN documents. Fire-and-forget from the documents read path. */
+export function emitWorkerDocumentExpiringNotifications(workerId: string): void {
+  void (async () => {
+    try {
+      const admin = createAdminClient();
+      const { data: worker } = await admin
+        .from("workers")
+        .select("profile_id")
+        .eq("id", workerId)
+        .maybeSingle();
+      const recipient =
+        (worker as { profile_id?: string } | null)?.profile_id ?? null;
+      if (!recipient) return;
+
+      const { data } = await admin
+        .from("worker_documents")
+        .select("id, status, valid_until")
+        .eq("worker_id", workerId)
+        .eq("status", "ready")
+        .not("valid_until", "is", null)
+        .limit(200);
+      const now = new Date();
+      for (const row of (data ?? []) as {
+        id: string;
+        valid_until: string | null;
+      }[]) {
+        if (!isInsideExpiryWindow(row.valid_until, now)) continue;
+        emitNotificationEventInBackground(admin, {
+          recipientProfileId: recipient,
+          eventType: "document_expiring",
+          entityType: "worker_document",
+          entityId: row.id,
+          metadata: {},
+        });
+      }
+    } catch {
+      // Emission is an enhancement; reads must never fail because of it.
+    }
+  })();
+}
+
+/** Durable expiry facts for an org register: the responsible person (or the
+ *  creator) hears that an ACTIVE entry enters the window. */
+export function emitOrgDocumentExpiringNotifications(
+  organizationId: string,
+): void {
+  void (async () => {
+    try {
+      const admin = createAdminClient();
+      const { data } = await asAnyClient(admin)
+        .from("org_documents")
+        .select("id, expires_on, responsible_profile_id, created_by")
+        .eq("organization_id", organizationId)
+        .eq("status", "active")
+        .not("expires_on", "is", null)
+        .limit(200);
+      const now = new Date();
+      for (const row of (data ?? []) as {
+        id: string;
+        expires_on: string | null;
+        responsible_profile_id: string | null;
+        created_by: string;
+      }[]) {
+        if (!isInsideExpiryWindow(row.expires_on, now)) continue;
+        const recipient = row.responsible_profile_id ?? row.created_by;
+        if (!recipient) continue;
+        emitNotificationEventInBackground(admin, {
+          recipientProfileId: recipient,
+          eventType: "document_expiring",
+          entityType: "org_document",
+          entityId: row.id,
+          metadata: {},
+        });
+      }
+    } catch {
+      // Emission is an enhancement; reads must never fail because of it.
+    }
+  })();
 }

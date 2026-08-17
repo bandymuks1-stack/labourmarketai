@@ -353,7 +353,10 @@
         "event_workflow_step_pending": "En godkendelsesanmodning venter på din beslutning",
         "event_workflow_decided": "Der er truffet beslutning om din godkendelsesanmodning",
         "event_workflow_delegated": "En godkendelsesrunde er overdraget til dig",
-        "event_workflow_escalated": "En godkendelsesrunde har overskredet sin frist"
+        "event_workflow_escalated": "En godkendelsesrunde har overskredet sin frist",
+        "event_document_ack_assigned": "Du er blevet bedt om at bekræfte, at du har læst et dokument.",
+        "event_document_ack_completed": "Et dokument, du sendte til bekræftelse, er blevet bekræftet.",
+        "event_document_expiring": "Et dokuments gyldighed udløber snart."
       }
     },
     "onboarding": {
@@ -4443,6 +4446,106 @@
       "not_found": "Anmodningen blev ikke fundet.",
       "limit_reached": "Grænsen for åbne poster er nået. Luk noget først.",
       "error": "Noget gik galt. Intet blev ændret."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Version {n}",
+    "download": "Download",
+    "noFileYet": "Ingen fil uploadet endnu.",
+    "upload": {
+      "fileLabel": "Vælg en fil",
+      "submit": "Upload fil",
+      "newVersion": "Upload ny version",
+      "limits": "PDF, Word eller foto (JPG/PNG/WebP), op til 5 MB.",
+      "versionNote": "En ny upload bliver en ny version — tidligere versioner bevares."
+    },
+    "ackInbox": {
+      "title": "Dokumenter til bekræftelse",
+      "intro": "Du er blevet bedt om at bekræfte, at du har læst disse dokumenter. Åbn filen, og tryk på bekræftelsesknappen.",
+      "allDone": "Intet afventer — du har bekræftet alle dokumenter, der er tildelt dig.",
+      "requiredBy": "bekræft senest {date}",
+      "confirm": "Jeg har læst dette",
+      "completedTitle": "Allerede bekræftet",
+      "confirmedAt": "bekræftet {date}",
+      "versionRule": "En bekræftelse gælder kun for den version, du åbnede. Hvis en ny version udgives, kan du blive spurgt igen."
+    },
+    "notice": {
+      "uploaded": "Filen blev uploadet.",
+      "created": "Dokumentposten blev oprettet.",
+      "archived": "Dokumentet blev arkiveret.",
+      "revoked": "Dokumentet blev tilbagekaldt.",
+      "assigned": "Bekræftelsesanmodningen blev sendt.",
+      "acknowledged": "Din bekræftelse blev gemt.",
+      "invalid": "Nogle af de indtastede oplysninger er ugyldige — intet blev gemt.",
+      "invalid_state": "Dokumentets tilstand tillader ikke denne handling.",
+      "invalid_assignee": "Denne person er ikke medlem af organisationen, så anmodningen blev ikke sendt.",
+      "already_assigned": "Denne person er allerede blevet bedt om at bekræfte denne version.",
+      "already_acknowledged": "Denne dokumentversion er allerede bekræftet.",
+      "not_current": "Der findes en nyere version af dokumentet — opdater siden og prøv igen.",
+      "not_allowed": "Du har ikke tilladelse til det.",
+      "not_found": "Dokumentet blev ikke fundet.",
+      "limit_reached": "Grænsen for dokumentlisten er nået.",
+      "version_limit_reached": "Dokumentet har nået sin versionsgrænse.",
+      "path_mismatch": "Uploaden kunne ikke verificeres — intet blev gemt. Prøv igen.",
+      "file_too_large": "Filen er større end 5 MB — intet blev gemt.",
+      "unsupported_type": "Denne filtype understøttes ikke — brug PDF, Word eller et foto.",
+      "needs_migration": "Filupload er endnu ikke aktiveret i dette miljø — intet blev gemt.",
+      "error": "Noget gik galt — intet blev gemt."
+    }
+  },
+  "orgDocuments": {
+    "title": "Virksomhedens dokumentregister",
+    "intro": "Dokumenter for {org}: politikker, procedurer, instruktioner og korrespondance med versioner og læsebekræftelser.",
+    "unavailable": "Dokumentregistret kan ikke indlæses lige nu.",
+    "preparing": "Dokumentregistret er forberedt, men endnu ikke aktiveret i dette miljø.",
+    "error": "Dokumentregistret kunne ikke indlæses — prøv igen senere.",
+    "empty": "Ingen dokumenter registreret endnu.",
+    "scopeNote": "Dette register indeholder organisationens egne dokumenter. Medarbejdernes personlige dokumenter forbliver i deres egne hænder og vises aldrig her.",
+    "types": {
+      "org_policy": "Politik",
+      "org_procedure": "Procedure",
+      "org_instruction": "Instruktion",
+      "org_correspondence_incoming": "Indgående korrespondance",
+      "org_correspondence_outgoing": "Udgående korrespondance",
+      "org_internal": "Internt dokument",
+      "org_agreement_attachment": "Aftalebilag"
+    },
+    "status": {
+      "active": "Aktiv",
+      "archived": "Arkiveret",
+      "revoked": "Tilbagekaldt"
+    },
+    "classification": {
+      "standard": "Standard",
+      "classified": "Begrænset adgang"
+    },
+    "currentVersion": "Version {n}",
+    "versionHistory": "{n} versioner",
+    "download": "Download",
+    "noFileYet": "Ingen fil uploadet endnu.",
+    "uploadNewVersion": "Upload ny version",
+    "uploadFirst": "Upload fil",
+    "expiresOn": "gyldig til {date}",
+    "ackProgress": "{done}/{total} bekræftet",
+    "assign": {
+      "assigneeLabel": "Bed om bekræftelse:",
+      "requiredByLabel": "senest",
+      "submit": "Send anmodning"
+    },
+    "archive": "Arkivér",
+    "revoke": "Tilbagekald",
+    "create": {
+      "title": "Registrér et nyt dokument",
+      "typeLabel": "Type",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beskrivelse (valgfri)",
+      "classificationLabel": "Adgang",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ikke angivet",
+      "validFromLabel": "Gyldig fra",
+      "expiresOnLabel": "Gyldig til",
+      "externalRefLabel": "Referencenummer (valgfrit)",
+      "submit": "Registrér dokument"
     }
   }
 }
