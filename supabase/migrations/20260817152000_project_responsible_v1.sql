@@ -88,8 +88,9 @@ begin
   end if;
 
   -- The responsible person must have a REAL relationship with this project's
-  -- world: an active membership of its organization, or a worker the caller
-  -- manages (roster / active engagement). NULL clears the pointer.
+  -- world (BOTH membership truths + the roster): an active membership of its
+  -- organization, an active engagement_context there, or a worker the caller
+  -- manages. NULL clears the pointer.
   if v_target is not null then
     select w.id into v_worker
       from public.workers w where w.profile_id = v_target;
@@ -99,6 +100,11 @@ begin
          where m.organization_id = v_org
            and m.profile_id = v_target
            and m.status = 'active'))
+      or (v_org is not null and exists (
+        select 1 from public.engagement_contexts ec
+         where ec.organization_id = v_org
+           and ec.profile_id = v_target
+           and ec.status = 'active'))
       or (v_worker is not null and public.caller_manages_worker(v_worker))
     ) then
       return 'invalid_target';

@@ -242,11 +242,45 @@ revoke insert, update, delete on public.task_dependencies from authenticated;
 --   * admin, or
 --   * project task  → can_manage_project(project_id)   (managing roles), or
 --   * personal task → its creator.
--- Assignment TARGET eligibility (project tasks): an ACTIVE member of the
--- project's organization (company_memberships) OR a worker the caller
--- manages (caller_manages_worker — roster or active engagement). A personal
--- task can only ever be self-assigned, exactly like v1.
+-- Assignment TARGET eligibility (project tasks) covers BOTH membership
+-- truths plus the roster: an ACTIVE member of the project's organization
+-- (company_memberships), OR a person with an ACTIVE engagement_context in
+-- that organization (the employment-context spine — engaged workers rarely
+-- hold a membership row), OR a worker the caller manages
+-- (caller_manages_worker). A personal task can only ever be self-assigned,
+-- exactly like v1.
 -- Anti-oracle rule everywhere: no readable relationship → 'not_found'.
+
+-- Target-eligibility helper (SQL-internal shape, mirrored in three RPCs):
+create or replace function public.work_task_assignee_eligible_v1(
+  p_target uuid,
+  p_org    uuid
+) returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select p_target is not null and (
+    (p_org is not null and exists (
+      select 1 from public.company_memberships m
+       where m.organization_id = p_org
+         and m.profile_id = p_target
+         and m.status = 'active'))
+    or (p_org is not null and exists (
+      select 1 from public.engagement_contexts ec
+       where ec.organization_id = p_org
+         and ec.profile_id = p_target
+         and ec.status = 'active'))
+    or exists (
+      select 1 from public.workers w
+       where w.profile_id = p_target
+         and public.caller_manages_worker(w.id))
+  )
+$$;
+revoke all on function public.work_task_assignee_eligible_v1(uuid, uuid) from public;
+revoke all on function public.work_task_assignee_eligible_v1(uuid, uuid) from anon;
+revoke all on function public.work_task_assignee_eligible_v1(uuid, uuid) from authenticated;
 
 -- ── 5. create_work_task_v2 — create + object + assign-to-other ─────────────
 create or replace function public.create_work_task_v2(
@@ -274,7 +308,6 @@ declare
   v_proj_org uuid;
   v_obj_org  uuid;
   v_obj_status text;
-  v_worker   uuid;
   v_new_id   uuid;
 begin
   if uid is null then
@@ -312,16 +345,7 @@ begin
       return 'invalid_assignee';
     end if;
     -- can_manage_project already held above; now the TARGET must be real:
-    select w.id into v_worker
-      from public.workers w where w.profile_id = v_assignee;
-    if not (
-      (v_proj_org is not null and exists (
-        select 1 from public.company_memberships m
-         where m.organization_id = v_proj_org
-           and m.profile_id = v_assignee
-           and m.status = 'active'))
-      or (v_worker is not null and public.caller_manages_worker(v_worker))
-    ) then
+    if not public.work_task_assignee_eligible_v1(v_assignee, v_proj_org) then
       return 'invalid_assignee';
     end if;
   end if;
@@ -391,7 +415,6 @@ declare
   v_assignee uuid := nullif(trim(coalesce(p_assignee_profile_id, '')), '')::uuid;
   t          record;
   v_proj_org uuid;
-  v_worker   uuid;
   v_can_edit boolean;
 begin
   if uid is null then
@@ -431,16 +454,7 @@ begin
     else
       select pr.organization_id into v_proj_org
         from public.projects pr where pr.id = t.project_id;
-      select w.id into v_worker
-        from public.workers w where w.profile_id = v_assignee;
-      if not (
-        (v_proj_org is not null and exists (
-          select 1 from public.company_memberships m
-           where m.organization_id = v_proj_org
-             and m.profile_id = v_assignee
-             and m.status = 'active'))
-        or (v_worker is not null and public.caller_manages_worker(v_worker))
-      ) then
+      if not public.work_task_assignee_eligible_v1(v_assignee, v_proj_org) then
         return 'invalid_assignee';
       end if;
     end if;

@@ -31,6 +31,7 @@ drop function if exists public.set_work_task_status_v2(text, text);
 drop function if exists public.update_work_task_v2(text, text, text, text, text, text);
 drop function if exists public.assign_work_task_v1(text, text);
 drop function if exists public.create_work_task_v2(text, text, text, text, text, text, text);
+drop function if exists public.work_task_assignee_eligible_v1(uuid, uuid);
 
 drop trigger if exists trg_work_tasks_history on public.work_tasks;
 drop function if exists public.log_work_task_event();

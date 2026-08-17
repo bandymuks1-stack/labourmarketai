@@ -18,8 +18,8 @@ export async function getProjectManageFacts(
   projectId: string,
 ): Promise<ProjectManageFacts | null> {
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const run = (columns: string) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("projects")
       .select(columns)
