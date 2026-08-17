@@ -4107,7 +4107,8 @@
         "event_workflow_escalated": "An approval round passed its deadline",
         "event_document_ack_assigned": "You were asked to confirm you have read a document.",
         "event_document_ack_completed": "A document you sent for confirmation was confirmed.",
-        "event_document_expiring": "A document's validity is ending soon."
+        "event_document_expiring": "A document's validity is ending soon.",
+        "event_work_task_assigned": "A task was assigned to you"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -5276,7 +5277,14 @@
       "untitled": "Untitled project",
       "teamLabel": "On the team",
       "openArena": "Open project board",
-      "chatCta": "Message about this project"
+      "chatCta": "Message about this project",
+      "status": {
+        "draft": "Draft",
+        "live": "Live",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "progressNone": "No measurable progress yet"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -5292,7 +5300,13 @@
     "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
     "assignmentActive": "Active",
     "assignmentEnded": "Ended",
-    "untitledProject": "Untitled project"
+    "untitledProject": "Untitled project",
+    "archiveToggle": {
+      "label": "Active or finished projects",
+      "active": "Active",
+      "archived": "Finished",
+      "empty": "No finished projects yet."
+    }
   },
   "projectOps": {
     "centre": {
@@ -5526,6 +5540,32 @@
       "journalCta": "Write a journal entry",
       "chatCta": "Message",
       "galleryTitle": "My photos on this project"
+    },
+    "manage": {
+      "title": "Project management",
+      "progressLabel": "Progress",
+      "progressNone": "No measurable progress yet",
+      "responsibleLabel": "Responsible person",
+      "responsibleNone": "Not set",
+      "responsibleSave": "Save",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Set live",
+        "paused": "Pause",
+        "completed": "Complete & archive"
+      },
+      "completedTerminal": "Completed — this project is archived",
+      "noTransitions": "No status changes available",
+      "completeHint": "Completing ends every active assignment on this project and moves it to the finished list.",
+      "notice": {
+        "updated": "Saved.",
+        "invalid": "That change is not valid.",
+        "invalid_transition": "That status change is not allowed from the current state.",
+        "needs_migration": "This isn't switched on in this environment yet.",
+        "not_authorized": "Only project managers can do this.",
+        "not_found": "Project not found.",
+        "error": "Something went wrong. Try again."
+      }
     }
   },
   "setupRoleChoice": {
@@ -9225,7 +9265,11 @@
       "projectNone": "No project",
       "assignSelfLabel": "Assign to me",
       "assignSelfHint": "Untick to leave the task unassigned — visible to you and the project's managers.",
-      "submit": "Create task"
+      "submit": "Create task",
+      "objectLabel": "Object",
+      "objectNone": "No object",
+      "assigneeLabel": "Assigned to",
+      "assigneeHint": "Assigning to someone else needs a project task — the assignee sees it in their own list."
     },
     "notice": {
       "created": "Task created.",
@@ -9235,7 +9279,8 @@
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Task not found.",
       "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
-      "error": "Saving failed. Please try again."
+      "error": "Saving failed. Please try again.",
+      "cycle": "That would create a loop — a task can't wait on itself through other tasks."
     },
     "projectTasks": {
       "title": "Project tasks",
@@ -9244,6 +9289,42 @@
     },
     "projectSection": {
       "link": "Tasks for this project"
+    },
+    "objectLabel": "Object",
+    "assignee": {
+      "label": "Assigned to",
+      "you": "you",
+      "member": "team member",
+      "unassigned": "unassigned"
+    },
+    "assignForm": {
+      "label": "Assign to",
+      "save": "Assign"
+    },
+    "dependencies": {
+      "waitingOn": "Waiting on {n}",
+      "blockedBy": "Depends on",
+      "hidden": "a task you can't see",
+      "remove": "Remove",
+      "addLabel": "Add a dependency",
+      "add": "Add"
+    },
+    "history": {
+      "title": "History",
+      "byYou": "by you",
+      "byMember": "by a team member",
+      "actions": {
+        "created": "Created",
+        "status_changed": "Status changed",
+        "reopened": "Reopened",
+        "assigned": "Assigned",
+        "unassigned": "Assignment removed",
+        "priority_changed": "Priority changed",
+        "due_changed": "Deadline changed",
+        "object_changed": "Object changed",
+        "dependency_added": "Dependency added",
+        "dependency_removed": "Dependency removed"
+      }
     }
   },
   "assist": {
@@ -9890,22 +9971,6 @@
     "skillDeclared": "Self-declared",
     "skillsLegend": "With manager record — a manager record accompanies the skill. Work-backed — visible from work journal entries. Self-declared — added by the person.",
     "skillsReadError": "Skills could not be loaded right now. Try again shortly."
-  },
-  "companyLocations": {
-    "title": "Locations",
-    "subtitle": "Headquarters, operating locations and desired markets — across countries.",
-    "kindHeadquarters": "Headquarters",
-    "kindOperating": "Operating location",
-    "kindDesiredMarket": "Desired market",
-    "countryLabel": "Country",
-    "cityLabel": "City",
-    "regionLabel": "Region",
-    "addButton": "Add location",
-    "removeButton": "Remove location",
-    "empty": "No locations yet. Add your headquarters and operating locations.",
-    "gatedHeading": "Prepared — awaiting owner activation",
-    "gatedBody": "Locations are ready but not switched on yet. Switching them on is an owner decision.",
-    "errorLabel": "Could not save. Try again."
   },
   "companyGallery": {
     "title": "Gallery",
@@ -12520,5 +12585,32 @@
       "limit_reached": "The open-items limit was reached. Close something first.",
       "error": "Something went wrong. Nothing was changed."
     }
+  },
+  "workObjects": {
+    "title": "Objects & sites",
+    "subtitle": "The places where work happens — sites, buildings, areas. Linked to projects and tasks.",
+    "nameLabel": "Name",
+    "countryLabel": "Country",
+    "regionLabel": "Region",
+    "cityLabel": "City",
+    "addressLabel": "Address",
+    "projectLabel": "Project",
+    "projectNone": "No project",
+    "responsibleLabel": "Responsible person",
+    "responsibleNone": "Not set",
+    "responsibleSave": "Save",
+    "addButton": "Add object",
+    "editButton": "Edit",
+    "saveButton": "Save changes",
+    "archiveButton": "Archive",
+    "restoreButton": "Restore",
+    "archivedHeading": "Archived objects",
+    "archivedBadge": "Archived",
+    "empty": "No objects yet. Add the sites where your work happens.",
+    "gatedHeading": "Prepared — awaiting activation",
+    "gatedBody": "Objects are ready but not switched on yet. Switching them on is an owner decision.",
+    "errorLabel": "Could not save. Try again.",
+    "notAuthorizedLabel": "Only managers can change objects.",
+    "savedLabel": "Saved."
   }
 }
