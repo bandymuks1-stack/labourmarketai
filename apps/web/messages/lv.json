@@ -349,7 +349,8 @@
         "event_absence_rejected": "Tava prombūtne noraidīta",
         "event_booking_withdrawn": "Rezervācijas piedāvājums tika atsaukts",
         "event_engagement_ended": "Sadarbība tika pārtraukta",
-        "event_engagement_created": "Izveidota jauna sadarbība"
+        "event_engagement_created": "Izveidota jauna sadarbība",
+        "event_work_task_assigned": "Jums piešķirts uzdevums"
       }
     },
     "onboarding": {
@@ -1778,7 +1779,14 @@
       "title": "[EN] Your projects",
       "untitled": "[EN] Untitled project",
       "teamLabel": "[EN] On the team",
-      "openArena": "[EN] Open arena"
+      "openArena": "[EN] Open arena",
+      "status": {
+        "draft": "Melnraksts",
+        "live": "Notiek",
+        "paused": "Apturēts",
+        "completed": "Pabeigts"
+      },
+      "progressNone": "Izmērāma progresa vēl nav"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1794,7 +1802,13 @@
     "myProjectsEmpty": "Jūs vēl neesat piesaistīts nevienam projektam. Kad uzņēmums jūs piesaistīs, projekts parādīsies šeit.",
     "assignmentActive": "Aktīvs",
     "assignmentEnded": "Pabeigts",
-    "untitledProject": "Projekts bez nosaukuma"
+    "untitledProject": "Projekts bez nosaukuma",
+    "archiveToggle": {
+      "label": "Aktīvie vai pabeigtie projekti",
+      "active": "Aktīvie",
+      "archived": "Pabeigtie",
+      "empty": "Pabeigtu projektu vēl nav."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -1823,6 +1837,32 @@
       "journalCta": "Rakstīt žurnāla ierakstu",
       "chatCta": "Sūtīt ziņu",
       "galleryTitle": "Mani foto šajā projektā"
+    },
+    "manage": {
+      "title": "Projekta pārvaldība",
+      "progressLabel": "Progress",
+      "progressNone": "Izmērāma progresa vēl nav",
+      "responsibleLabel": "Atbildīgā persona",
+      "responsibleNone": "Nav norādīta",
+      "responsibleSave": "Saglabāt",
+      "lifecycleLabel": "Statuss",
+      "lifecycle": {
+        "live": "Sākt",
+        "paused": "Apturēt",
+        "completed": "Pabeigt un arhivēt"
+      },
+      "completedTerminal": "Pabeigts — projekts ir arhivēts",
+      "noTransitions": "Statusa izmaiņas nav pieejamas",
+      "completeHint": "Pabeigšana izbeidz visus aktīvos piešķīrumus projektā un pārvieto to uz pabeigto sarakstu.",
+      "notice": {
+        "updated": "Saglabāts.",
+        "invalid": "Šī izmaiņa nav derīga.",
+        "invalid_transition": "Šāda statusa maiņa no pašreizējā stāvokļa nav iespējama.",
+        "needs_migration": "Šajā vidē tas vēl nav ieslēgts.",
+        "not_authorized": "To var darīt tikai projekta vadītāji.",
+        "not_found": "Projekts nav atrasts.",
+        "error": "Kaut kas nogāja greizi. Mēģiniet vēlreiz."
+      }
     }
   },
   "agencyPool": {

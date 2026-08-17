@@ -349,7 +349,8 @@
         "event_absence_rejected": "Dit fravær blev afvist",
         "event_booking_withdrawn": "Bookingforslaget blev trukket tilbage",
         "event_engagement_ended": "Engagementet blev afsluttet",
-        "event_engagement_created": "Et nyt engagement blev oprettet"
+        "event_engagement_created": "Et nyt engagement blev oprettet",
+        "event_work_task_assigned": "En opgave er blevet tildelt dig"
       }
     },
     "onboarding": {
@@ -1778,7 +1779,14 @@
       "title": "Dine projekter",
       "untitled": "Projekt uden navn",
       "teamLabel": "På holdet",
-      "openArena": "Åbn arenaen"
+      "openArena": "Åbn arenaen",
+      "status": {
+        "draft": "Kladde",
+        "live": "I gang",
+        "paused": "På pause",
+        "completed": "Afsluttet"
+      },
+      "progressNone": "Ingen målbar fremgang endnu"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# post venter på din bekræftelse} other {# poster venter på din bekræftelse}}",
@@ -1794,7 +1802,13 @@
     "myProjectsEmpty": "Du er endnu ikke tildelt noget projekt. Når en virksomhed tildeler dig, vises projektet her.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Afsluttet",
-    "untitledProject": "Projekt uden titel"
+    "untitledProject": "Projekt uden titel",
+    "archiveToggle": {
+      "label": "Aktive eller afsluttede projekter",
+      "active": "Aktive",
+      "archived": "Afsluttede",
+      "empty": "Ingen afsluttede projekter endnu."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -1823,6 +1837,32 @@
       "journalCta": "Skriv journalindlæg",
       "chatCta": "Send besked",
       "galleryTitle": "Mine fotos på dette projekt"
+    },
+    "manage": {
+      "title": "Projektstyring",
+      "progressLabel": "Fremgang",
+      "progressNone": "Ingen målbar fremgang endnu",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ikke angivet",
+      "responsibleSave": "Gem",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Start",
+        "paused": "Sæt på pause",
+        "completed": "Afslut og arkivér"
+      },
+      "completedTerminal": "Afsluttet — projektet er arkiveret",
+      "noTransitions": "Ingen statusændringer tilgængelige",
+      "completeHint": "Afslutning stopper alle aktive tildelinger på projektet og flytter det til listen over afsluttede.",
+      "notice": {
+        "updated": "Gemt.",
+        "invalid": "Den ændring er ikke gyldig.",
+        "invalid_transition": "Den statusændring er ikke mulig fra den nuværende tilstand.",
+        "needs_migration": "Dette er endnu ikke slået til i dette miljø.",
+        "not_authorized": "Kun projektledere kan gøre dette.",
+        "not_found": "Projektet blev ikke fundet.",
+        "error": "Noget gik galt. Prøv igen."
+      }
     }
   },
   "agencyPool": {

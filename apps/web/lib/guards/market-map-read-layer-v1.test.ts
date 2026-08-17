@@ -506,7 +506,12 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
     // follow-up; gate doc notification-events-v2-types-gate.md.
-    expect(count).toBeLessThanOrEqual(199);
+    // Bumped 199 -> 203 for the train-D project/object/task drafts
+    // (20260817150000 + 20260817151000 + 20260817152000 + 20260817153000,
+    // all LEAD-gated, UNAPPLIED, paired rollbacks) — recounted from the
+    // tree (203 files). Sibling train PRs move this pin too: RECOUNT after
+    // every rebase, never take either side verbatim.
+    expect(count).toBeLessThanOrEqual(203);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

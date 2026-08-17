@@ -81,6 +81,12 @@ const NATIVE_NAV = new Set([
   // ?notice= outcome banner.
   "app/[locale]/invite/[token]/page.tsx",
   "app/[locale]/dashboard/account/page.tsx", // logout POST
+  // Project operations centre (train D) — the management strip's lifecycle /
+  // responsible forms are NATIVE-NAV server actions that ALWAYS redirect
+  // back with an honest ?notice= outcome (rendered as a role="status"
+  // banner at the top of the page), exactly the tasks/finance pattern.
+  // Pure server component — no client state.
+  "app/[locale]/dashboard/projects/[id]/operations/page.tsx",
   // Admin privacy-request review verbs (V9 phase 1) — a NATIVE-NAV server
   // action that ALWAYS redirects back to the admin control room with an
   // honest ?privacyReviewNotice= outcome (rendered as a role="status"

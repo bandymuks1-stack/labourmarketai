@@ -37,6 +37,13 @@ import { ProjectDefectsPanel } from "@/components/app/project-defects-panel";
 import { getProjectDefects } from "@/lib/quality/quality";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { type Role } from "@/lib/auth/actions";
+import {
+  projectLifecycleAction,
+  setProjectResponsibleAction,
+} from "@/lib/projects/project-admin-actions";
+import { getProjectsProgress } from "@/lib/projects/progress";
+import { getProjectManageFacts } from "@/lib/projects/responsible";
+import { listOrganizationMembers } from "@/lib/company/memberships";
 
 export const dynamic = "force-dynamic";
 
@@ -55,13 +62,27 @@ const MANAGER_ROLES = new Set<Role>(["company", "agency"]);
  * Where a real model is absent (milestones, issues, resource tables) NOTHING
  * renders — the gap map §6/§7 records the gated follow-ups.
  */
+const OPS_NOTICES = new Set([
+  "updated",
+  "invalid",
+  "invalid_transition",
+  "needs_migration",
+  "not_authorized",
+  "not_found",
+  "error",
+]);
+
 export default async function ProjectOperationsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
+  const sp = await searchParams;
+  const notice = sp.notice && OPS_NOTICES.has(sp.notice) ? sp.notice : null;
   const t = await getTranslations("projectOps");
   const tTasks = await getTranslations("tasks");
 
@@ -109,6 +130,41 @@ export default async function ProjectOperationsPage({
   }
 
   const { ops, passport, tasks, evidence, housingProvided } = centre;
+
+  // Train D — project management strip data: derived progress (never
+  // stored), the responsible pointer (gated migration → null pre-apply) and
+  // the org member list for the responsible select.
+  const progressById = await getProjectsProgress([id]);
+  const progress = progressById[id] ?? null;
+  const manageFacts = await getProjectManageFacts(id);
+  const projectOrgId: string | null = manageFacts?.organizationId ?? null;
+  const responsibleProfileId: string | null =
+    manageFacts?.responsibleProfileId ?? null;
+  const orgMembersRead = projectOrgId
+    ? await listOrganizationMembers(projectOrgId)
+    : null;
+  const responsibleOptions =
+    orgMembersRead && orgMembersRead.kind === "ok"
+      ? orgMembersRead.members
+          .filter((m) => m.status === "active")
+          .map((m) => ({
+            profileId: m.profileId,
+            name: m.fullName ?? m.email ?? m.profileId.slice(0, 8),
+          }))
+      : [];
+  const responsibleName =
+    responsibleOptions.find((m) => m.profileId === responsibleProfileId)?.name ??
+    null;
+  const projectStatus = ops.project.status ?? null;
+  const lifecycleTargets: readonly string[] =
+    projectStatus === "draft"
+      ? ["live"]
+      : projectStatus === "live"
+        ? ["paused", "completed"]
+        : projectStatus === "paused"
+          ? ["live", "completed"]
+          : [];
+
   const stages = await listProjectStages(id);
   const gantt: StageGantt = stages.applied
     ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
@@ -260,6 +316,20 @@ export default async function ProjectOperationsPage({
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      {notice ? (
+        <p
+          role="status"
+          className={`rounded-md border px-3 py-2 text-sm ${
+            notice === "updated"
+              ? "border-state-success/50 bg-state-success/10 text-state-success"
+              : "border-state-warning/50 bg-state-warning/10 text-text-primary"
+          }`}
+          data-testid={`ops-notice-${notice}`}
+        >
+          {t(`manage.notice.${notice}`)}
+        </p>
+      ) : null}
+
       {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
           pulse — the real gated reviewable count, one tap to confirm. */}
       <ConfirmPulse />
@@ -310,6 +380,124 @@ export default async function ProjectOperationsPage({
                 : tCentre("housingUnknown")}
           </span>
         </div>
+      </section>
+
+      {/* ── Train D: project management strip — derived progress (never a
+            stored number), the accountable person, and the applied W11
+            lifecycle as REAL forms (no dead buttons; completed is terminal
+            and says so instead of offering controls that would fail). ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-manage"
+      >
+        <h2 className={sectionTitleClass}>{t("manage.title")}</h2>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {progress && progress.percent !== null ? (
+            <span className={chipClass} data-testid="ops-manage-progress">
+              {t("manage.progressLabel")}: {progress.percent}% (
+              {progress.taskDone + progress.stageDone}/
+              {progress.taskTotal + progress.stageTotal})
+            </span>
+          ) : (
+            <span className={chipClass} data-testid="ops-manage-progress-none">
+              {t("manage.progressLabel")}: {t("manage.progressNone")}
+            </span>
+          )}
+          {progress && progress.percent !== null ? (
+            <span
+              className="h-2 w-40 overflow-hidden rounded-full bg-ink-700"
+              role="img"
+              aria-label={`${t("manage.progressLabel")}: ${progress.percent}%`}
+            >
+              <span
+                className="block h-full rounded-full bg-brand-blue"
+                style={{ width: `${progress.percent}%` }}
+              />
+            </span>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-text-secondary">
+            {t("manage.responsibleLabel")}:{" "}
+            <span
+              className="font-semibold text-text-primary"
+              data-testid="ops-manage-responsible-name"
+            >
+              {responsibleName ?? t("manage.responsibleNone")}
+            </span>
+          </span>
+          {responsibleOptions.length > 0 ? (
+            <form
+              action={setProjectResponsibleAction}
+              className="flex flex-wrap items-center gap-2"
+              data-testid="ops-manage-responsible-form"
+            >
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="projectId" value={id} />
+              <label className="flex items-center gap-2 text-xs text-text-secondary">
+                <span className="sr-only">{t("manage.responsibleLabel")}</span>
+                <select
+                  name="profileId"
+                  defaultValue={responsibleProfileId ?? ""}
+                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                >
+                  <option value="">{t("manage.responsibleNone")}</option>
+                  {responsibleOptions.map((m) => (
+                    <option key={m.profileId} value={m.profileId}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center rounded-lg border border-ink-500 px-3 text-xs font-semibold text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                data-testid="ops-manage-responsible-save"
+              >
+                {t("manage.responsibleSave")}
+              </button>
+            </form>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-text-secondary">
+            {t("manage.lifecycleLabel")}:
+          </span>
+          {projectStatus === "completed" ? (
+            <span className={chipClass} data-testid="ops-manage-completed">
+              {t("manage.completedTerminal")}
+            </span>
+          ) : lifecycleTargets.length === 0 ? (
+            <span className={chipClass} data-testid="ops-manage-no-transitions">
+              {t("manage.noTransitions")}
+            </span>
+          ) : (
+            lifecycleTargets.map((target) => (
+              <form key={target} action={projectLifecycleAction}>
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="projectId" value={id} />
+                <input type="hidden" name="toStatus" value={target} />
+                <button
+                  type="submit"
+                  className={`inline-flex h-9 items-center rounded-lg border px-3 text-xs font-semibold transition-colors ${
+                    target === "completed"
+                      ? "border-brand-orange/50 text-brand-orange hover:border-brand-orange"
+                      : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                  }`}
+                  data-testid={`ops-manage-lifecycle-${target}`}
+                >
+                  {t(`manage.lifecycle.${target}`)}
+                </button>
+              </form>
+            ))
+          )}
+        </div>
+        {projectStatus !== "completed" && lifecycleTargets.includes("completed") ? (
+          <p className="text-xs text-text-muted">{t("manage.completeHint")}</p>
+        ) : null}
       </section>
 
       {/* Wagon 6 — Project Operations Core: ordered stages over the SAME

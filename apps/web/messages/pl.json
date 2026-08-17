@@ -349,7 +349,8 @@
         "event_absence_rejected": "Twoja nieobecność została odrzucona",
         "event_booking_withdrawn": "Propozycja rezerwacji została wycofana",
         "event_engagement_ended": "Współpraca została zakończona",
-        "event_engagement_created": "Utworzono nową współpracę"
+        "event_engagement_created": "Utworzono nową współpracę",
+        "event_work_task_assigned": "Przypisano ci zadanie"
       }
     },
     "onboarding": {
@@ -1778,7 +1779,14 @@
       "title": "[EN] Your projects",
       "untitled": "[EN] Untitled project",
       "teamLabel": "[EN] On the team",
-      "openArena": "[EN] Open arena"
+      "openArena": "[EN] Open arena",
+      "status": {
+        "draft": "Szkic",
+        "live": "W toku",
+        "paused": "Wstrzymany",
+        "completed": "Zakończony"
+      },
+      "progressNone": "Brak mierzalnych postępów"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1794,7 +1802,13 @@
     "myProjectsEmpty": "Nie jesteś jeszcze przypisany do żadnego projektu. Gdy firma Cię przypisze, projekt pojawi się tutaj.",
     "assignmentActive": "Aktywne",
     "assignmentEnded": "Zakończone",
-    "untitledProject": "Projekt bez nazwy"
+    "untitledProject": "Projekt bez nazwy",
+    "archiveToggle": {
+      "label": "Aktywne lub zakończone projekty",
+      "active": "Aktywne",
+      "archived": "Zakończone",
+      "empty": "Nie ma jeszcze zakończonych projektów."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -1823,6 +1837,32 @@
       "journalCta": "Dodaj wpis do dziennika",
       "chatCta": "Napisz wiadomość",
       "galleryTitle": "Moje zdjęcia w tym projekcie"
+    },
+    "manage": {
+      "title": "Zarządzanie projektem",
+      "progressLabel": "Postęp",
+      "progressNone": "Brak mierzalnych postępów",
+      "responsibleLabel": "Osoba odpowiedzialna",
+      "responsibleNone": "Nie wskazano",
+      "responsibleSave": "Zapisz",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Uruchom",
+        "paused": "Wstrzymaj",
+        "completed": "Zakończ i zarchiwizuj"
+      },
+      "completedTerminal": "Zakończony — projekt jest zarchiwizowany",
+      "noTransitions": "Brak dostępnych zmian statusu",
+      "completeHint": "Zakończenie kończy wszystkie aktywne przypisania w projekcie i przenosi go na listę zakończonych.",
+      "notice": {
+        "updated": "Zapisano.",
+        "invalid": "Ta zmiana jest nieprawidłowa.",
+        "invalid_transition": "Taka zmiana statusu nie jest możliwa z obecnego stanu.",
+        "needs_migration": "To nie jest jeszcze włączone w tym środowisku.",
+        "not_authorized": "Tylko menedżerowie projektu mogą to zrobić.",
+        "not_found": "Nie znaleziono projektu.",
+        "error": "Coś poszło nie tak. Spróbuj ponownie."
+      }
     }
   },
   "agencyPool": {

@@ -4100,7 +4100,8 @@
         "event_absence_rejected": "Je afwezigheid is afgewezen",
         "event_booking_withdrawn": "Het boekingsvoorstel is ingetrokken",
         "event_engagement_ended": "De samenwerking is beëindigd",
-        "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt"
+        "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt",
+        "event_work_task_assigned": "Er is een taak aan je toegewezen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -5269,7 +5270,14 @@
       "untitled": "Naamloos project",
       "teamLabel": "In de ploeg",
       "openArena": "Projectbord openen",
-      "chatCta": "Bericht sturen over dit project"
+      "chatCta": "Bericht sturen over dit project",
+      "status": {
+        "draft": "Concept",
+        "live": "Actief",
+        "paused": "Gepauzeerd",
+        "completed": "Afgerond"
+      },
+      "progressNone": "Nog geen meetbare voortgang"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# vermelding wacht op je bevestiging} other {# vermeldingen wachten op je bevestiging}}",
@@ -5285,7 +5293,13 @@
     "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
     "assignmentActive": "Actief",
     "assignmentEnded": "Beëindigd",
-    "untitledProject": "Project zonder titel"
+    "untitledProject": "Project zonder titel",
+    "archiveToggle": {
+      "label": "Actieve of afgeronde projecten",
+      "active": "Actief",
+      "archived": "Afgerond",
+      "empty": "Nog geen afgeronde projecten."
+    }
   },
   "projectOps": {
     "centre": {
@@ -5519,6 +5533,32 @@
       "journalCta": "Journaalinvoer schrijven",
       "chatCta": "Bericht sturen",
       "galleryTitle": "Mijn foto's op dit project"
+    },
+    "manage": {
+      "title": "Projectbeheer",
+      "progressLabel": "Voortgang",
+      "progressNone": "Nog geen meetbare voortgang",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Niet ingesteld",
+      "responsibleSave": "Opslaan",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Live zetten",
+        "paused": "Pauzeren",
+        "completed": "Afronden en archiveren"
+      },
+      "completedTerminal": "Afgerond — dit project is gearchiveerd",
+      "noTransitions": "Geen statuswijzigingen beschikbaar",
+      "completeHint": "Afronden beëindigt elke actieve toewijzing op dit project en verplaatst het naar de afgeronde lijst.",
+      "notice": {
+        "updated": "Opgeslagen.",
+        "invalid": "Die wijziging is niet geldig.",
+        "invalid_transition": "Die statuswijziging kan niet vanuit de huidige status.",
+        "needs_migration": "Dit is in deze omgeving nog niet ingeschakeld.",
+        "not_authorized": "Alleen projectmanagers kunnen dit doen.",
+        "not_found": "Project niet gevonden.",
+        "error": "Er ging iets mis. Probeer het opnieuw."
+      }
     }
   },
   "setupRoleChoice": {
@@ -9118,7 +9158,11 @@
       "projectNone": "Geen project",
       "assignSelfLabel": "Aan mij toewijzen",
       "assignSelfHint": "Vink uit om de taak niet toe te wijzen — zichtbaar voor u en de projectmanagers.",
-      "submit": "Taak aanmaken"
+      "submit": "Taak aanmaken",
+      "objectLabel": "Object",
+      "objectNone": "Geen object",
+      "assigneeLabel": "Toegewezen aan",
+      "assigneeHint": "Toewijzen aan iemand anders kan alleen bij een projecttaak — de persoon ziet de taak in de eigen lijst."
     },
     "notice": {
       "created": "Taak aangemaakt.",
@@ -9128,7 +9172,8 @@
       "not_authorized": "U mag deze actie niet uitvoeren.",
       "not_found": "Taak niet gevonden.",
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
-      "error": "Opslaan mislukt. Probeer het opnieuw."
+      "error": "Opslaan mislukt. Probeer het opnieuw.",
+      "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten."
     },
     "projectTasks": {
       "title": "Projecttaken",
@@ -9137,6 +9182,42 @@
     },
     "projectSection": {
       "link": "Taken voor dit project"
+    },
+    "objectLabel": "Object",
+    "assignee": {
+      "label": "Toegewezen aan",
+      "you": "jou",
+      "member": "teamlid",
+      "unassigned": "niet toegewezen"
+    },
+    "assignForm": {
+      "label": "Toewijzen aan",
+      "save": "Toewijzen"
+    },
+    "dependencies": {
+      "waitingOn": "Wacht op {n}",
+      "blockedBy": "Hangt af van",
+      "hidden": "een taak die je niet kunt zien",
+      "remove": "Verwijderen",
+      "addLabel": "Afhankelijkheid toevoegen",
+      "add": "Toevoegen"
+    },
+    "history": {
+      "title": "Geschiedenis",
+      "byYou": "door jou",
+      "byMember": "door een teamlid",
+      "actions": {
+        "created": "Aangemaakt",
+        "status_changed": "Status gewijzigd",
+        "reopened": "Heropend",
+        "assigned": "Toegewezen",
+        "unassigned": "Toewijzing verwijderd",
+        "priority_changed": "Prioriteit gewijzigd",
+        "due_changed": "Deadline gewijzigd",
+        "object_changed": "Object gewijzigd",
+        "dependency_added": "Afhankelijkheid toegevoegd",
+        "dependency_removed": "Afhankelijkheid verwijderd"
+      }
     }
   },
   "assist": {
@@ -9783,22 +9864,6 @@
     "skillDeclared": "Zelf opgegeven",
     "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd.",
     "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw."
-  },
-  "companyLocations": {
-    "title": "Locaties",
-    "subtitle": "Hoofdkantoor, werklocaties en gewenste markten — in meerdere landen.",
-    "kindHeadquarters": "Hoofdkantoor",
-    "kindOperating": "Werklocatie",
-    "kindDesiredMarket": "Gewenste markt",
-    "countryLabel": "Land",
-    "cityLabel": "Stad",
-    "regionLabel": "Regio",
-    "addButton": "Locatie toevoegen",
-    "removeButton": "Locatie verwijderen",
-    "empty": "Nog geen locaties. Voeg je hoofdkantoor en werklocaties toe.",
-    "gatedHeading": "Voorbereid — wacht op activering door eigenaar",
-    "gatedBody": "Locaties zijn klaar maar staan nog niet aan. Aanzetten is een beslissing van de eigenaar.",
-    "errorLabel": "Opslaan mislukt. Probeer het opnieuw."
   },
   "companyGallery": {
     "title": "Galerij",
@@ -12265,5 +12330,32 @@
       "open": "Open de uitnodiging:",
       "validity": "De link is 14 dagen geldig. Verwachtte je deze uitnodiging niet, negeer deze e-mail dan gewoon."
     }
+  },
+  "workObjects": {
+    "title": "Objecten en locaties",
+    "subtitle": "De plekken waar het werk gebeurt — locaties, gebouwen, terreinen. Gekoppeld aan projecten en taken.",
+    "nameLabel": "Naam",
+    "countryLabel": "Land",
+    "regionLabel": "Regio",
+    "cityLabel": "Stad",
+    "addressLabel": "Adres",
+    "projectLabel": "Project",
+    "projectNone": "Geen project",
+    "responsibleLabel": "Verantwoordelijke",
+    "responsibleNone": "Niet ingesteld",
+    "responsibleSave": "Opslaan",
+    "addButton": "Object toevoegen",
+    "editButton": "Bewerken",
+    "saveButton": "Wijzigingen opslaan",
+    "archiveButton": "Archiveren",
+    "restoreButton": "Herstellen",
+    "archivedHeading": "Gearchiveerde objecten",
+    "archivedBadge": "Gearchiveerd",
+    "empty": "Nog geen objecten. Voeg de plekken toe waar jullie werk gebeurt.",
+    "gatedHeading": "Voorbereid — wacht op activering",
+    "gatedBody": "Objecten zijn klaar maar nog niet ingeschakeld. Inschakelen is een besluit van de eigenaar.",
+    "errorLabel": "Opslaan is niet gelukt. Probeer het opnieuw.",
+    "notAuthorizedLabel": "Alleen managers kunnen objecten wijzigen.",
+    "savedLabel": "Opgeslagen."
   }
 }

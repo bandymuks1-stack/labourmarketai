@@ -2064,7 +2064,16 @@ describe("no migration files added by this sprint", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — recounted from the tree,
     // never summed; gate doc notification-events-v2-types-gate.md.
-    const SPRINT_BASELINE = 199;
+    // Bumped 199 -> 203 for the train-D project/object/task drafts
+    // (20260817150000 work_objects_v1 + 20260817151000
+    // work_tasks_v2_collaboration + 20260817152000 project_responsible_v1 +
+    // 20260817153000 notification_events_v4_task_types; all LEAD-gated,
+    // UNAPPLIED; paired rollbacks + deferred APPLIED_LEDGER entries in the
+    // PR) — recounted from the tree (203 files), never summed.
+    // MERGE-ORDER NOTE (train V2): sibling PRs #1168/#1170/#1169 move this
+    // shared ratchet too — RECOUNT the real migration files after every
+    // rebase; never take either side verbatim.
+    const SPRINT_BASELINE = 203;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

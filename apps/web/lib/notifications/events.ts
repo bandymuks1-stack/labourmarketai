@@ -48,12 +48,17 @@ export type NotificationEventType =
   // label copy is deliberately neutral about visibility: whether the company
   // still sees the worker depends on other relationships (F2), and a
   // notification must not claim what it has not measured.
-  | "engagement_ended";
+  | "engagement_ended"
+  // v4 (20260817153000, train D): a managing role handed a work task to
+  // another person — the NEW assignee durably learns a task landed on them.
+  // Never emitted for self-assignment (you watched yourself do it).
+  | "work_task_assigned";
 
 export type NotificationEntityType =
   | "booking_request"
   | "worker_absence"
-  | "engagement";
+  | "engagement"
+  | "work_task";
 
 /**
  * Where a durable event TAKES YOU.
@@ -81,6 +86,9 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   booking_request: "/dashboard/bookings",
   worker_absence: "/dashboard/absences",
   engagement: "/dashboard/bookings",
+  // v4: the tasks surface already renders the assignee's list — the row the
+  // event points at is in "my tasks" by construction (they are the assignee).
+  work_task: "/dashboard/tasks",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

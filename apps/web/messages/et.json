@@ -349,7 +349,8 @@
         "event_absence_rejected": "Sinu puudumine lükati tagasi",
         "event_booking_withdrawn": "Broneeringu ettepanek võeti tagasi",
         "event_engagement_ended": "Töösuhe lõpetati",
-        "event_engagement_created": "Loodi uus koostöö"
+        "event_engagement_created": "Loodi uus koostöö",
+        "event_work_task_assigned": "Sulle määrati ülesanne"
       }
     },
     "onboarding": {
@@ -1778,7 +1779,14 @@
       "title": "[EN] Your projects",
       "untitled": "[EN] Untitled project",
       "teamLabel": "[EN] On the team",
-      "openArena": "[EN] Open arena"
+      "openArena": "[EN] Open arena",
+      "status": {
+        "draft": "Mustand",
+        "live": "Käimas",
+        "paused": "Peatatud",
+        "completed": "Lõpetatud"
+      },
+      "progressNone": "Mõõdetavat edenemist veel pole"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1794,7 +1802,13 @@
     "myProjectsEmpty": "Te pole veel ühelegi projektile määratud. Kui ettevõte teid määrab, ilmub projekt siia.",
     "assignmentActive": "Aktiivne",
     "assignmentEnded": "Lõppenud",
-    "untitledProject": "Pealkirjata projekt"
+    "untitledProject": "Pealkirjata projekt",
+    "archiveToggle": {
+      "label": "Aktiivsed või lõpetatud projektid",
+      "active": "Aktiivsed",
+      "archived": "Lõpetatud",
+      "empty": "Lõpetatud projekte veel pole."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -1823,6 +1837,32 @@
       "journalCta": "Kirjuta päevikusse",
       "chatCta": "Saada sõnum",
       "galleryTitle": "Minu fotod sellel projektil"
+    },
+    "manage": {
+      "title": "Projekti haldus",
+      "progressLabel": "Edenemine",
+      "progressNone": "Mõõdetavat edenemist veel pole",
+      "responsibleLabel": "Vastutav isik",
+      "responsibleNone": "Määramata",
+      "responsibleSave": "Salvesta",
+      "lifecycleLabel": "Staatus",
+      "lifecycle": {
+        "live": "Käivita",
+        "paused": "Peata",
+        "completed": "Lõpeta ja arhiveeri"
+      },
+      "completedTerminal": "Lõpetatud — projekt on arhiveeritud",
+      "noTransitions": "Staatuse muudatusi pole saadaval",
+      "completeHint": "Lõpetamine lõpetab kõik projekti aktiivsed määramised ja viib projekti lõpetatute nimekirja.",
+      "notice": {
+        "updated": "Salvestatud.",
+        "invalid": "See muudatus ei ole lubatud.",
+        "invalid_transition": "Praegusest olekust see staatusemuudatus ei ole võimalik.",
+        "needs_migration": "See ei ole selles keskkonnas veel sisse lülitatud.",
+        "not_authorized": "Seda saavad teha ainult projektijuhid.",
+        "not_found": "Projekti ei leitud.",
+        "error": "Midagi läks valesti. Proovige uuesti."
+      }
     }
   },
   "agencyPool": {
