@@ -289,6 +289,15 @@ export async function emitAbsenceNotification(
 // All three stay INERT until the lead applies the v3 constraint widening —
 // the CHECK rejects the insert and the fire-and-forget wrapper logs it.
 
+// The document-engine tables ship behind the human-gated 20260817120000
+// migration, so they are not in the generated Database types yet — the
+// blessed boundary cast (lib/supabase/types.ts convention). RLS/authority
+// still hold at runtime; these are admin-client reads by design (emitters).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAnyClient(c: AdminClient): any {
+  return c;
+}
+
 /** Ack lifecycle events. `ackId` is the document_acknowledgements row id. */
 export async function emitDocumentAckNotification(
   ackId: string,
@@ -299,7 +308,7 @@ export async function emitDocumentAckNotification(
 ): Promise<void> {
   try {
     const admin = createAdminClient();
-    const { data } = await admin
+    const { data } = await asAnyClient(admin)
       .from("document_acknowledgements")
       .select("assignee_profile_id, assigned_by")
       .eq("id", ackId)
@@ -395,7 +404,7 @@ export function emitOrgDocumentExpiringNotifications(
   void (async () => {
     try {
       const admin = createAdminClient();
-      const { data } = await admin
+      const { data } = await asAnyClient(admin)
         .from("org_documents")
         .select("id, expires_on, responsible_profile_id, created_by")
         .eq("organization_id", organizationId)
