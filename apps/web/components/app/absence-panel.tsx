@@ -147,8 +147,23 @@ export function MyAbsencesPanel({ data }: { data: MyAbsencesData }) {
   );
 }
 
+/** Advisory context beside one pending review row: how many days the
+ *  request asks for and — when exactly one org policy applies — the
+ *  worker's derived remaining balance. NEVER a block; managers decide. */
+export type AbsenceAdvisory = {
+  readonly requestedDays: number;
+  readonly remainingDays: number | null;
+  readonly exceeds: boolean;
+};
+
 /** Manager: approve / reject pending requests for workers they manage. */
-export function ManagerAbsencesPanel({ data }: { data: ManagerAbsencesData }) {
+export function ManagerAbsencesPanel({
+  data,
+  advisories = {},
+}: {
+  data: ManagerAbsencesData;
+  advisories?: Record<string, AbsenceAdvisory>;
+}) {
   const router = useRouter();
   const t = useTranslations("absences");
   const [pending, startTransition] = useTransition();
@@ -180,6 +195,19 @@ export function ManagerAbsencesPanel({ data }: { data: ManagerAbsencesData }) {
               <span className="text-sm font-semibold text-text-primary">{a.workerName ?? t("unknownWorker")}</span>
               <span className="text-sm text-text-secondary">{t(`types.${a.absenceType}`)}</span>
               <span className="font-mono text-meta text-text-muted">{a.startDate} → {a.endDate}{a.halfDay ? ` · ${t("halfDay")}` : ""}</span>
+              {advisories[a.id] ? (
+                <span className="font-mono text-meta tabular-nums text-text-muted" data-testid="absence-advisory">
+                  {t("balance.requestedDays", { days: advisories[a.id].requestedDays })}
+                  {advisories[a.id].remainingDays !== null
+                    ? ` · ${t("balance.remainingShort", { days: advisories[a.id].remainingDays as number })}`
+                    : ""}
+                </span>
+              ) : null}
+              {advisories[a.id]?.exceeds ? (
+                <span className="inline-flex items-center rounded-full border border-state-warning/50 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning" data-testid="absence-advisory-exceeds">
+                  {t("balance.exceedsNote")}
+                </span>
+              ) : null}
               <div className="ml-auto flex gap-2">
                 <Button type="button" size="sm" disabled={pending} onClick={() => review(a.id, "approved")} data-testid="absence-approve">
                   {t("approve")}
