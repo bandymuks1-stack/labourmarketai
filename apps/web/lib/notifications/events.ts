@@ -56,6 +56,13 @@ export type NotificationEventType =
   | "workflow_decided"
   | "workflow_delegated"
   | "workflow_escalated"
+  // v3 documents (20260817140100, Document & Evidence Engine): three durable
+  // document facts. All stay INERT until the lead applies the widened
+  // constraint — the insert fails its CHECK and the fire-and-forget wrapper
+  // reports it to the console, exactly the v2 precedent.
+  | "document_ack_assigned"
+  | "document_ack_completed"
+  | "document_expiring"
   // v4 (20260817153000, train D): a managing role handed a work task to
   // another person — the NEW assignee durably learns a task landed on them.
   // Never emitted for self-assignment (you watched yourself do it).
@@ -66,6 +73,11 @@ export type NotificationEntityType =
   | "worker_absence"
   | "engagement"
   | "workflow_instance"
+  // v3 documents: all resolve to the EXISTING documents page (no new
+  // surface).
+  | "worker_document"
+  | "org_document"
+  | "document_acknowledgement"
   | "work_task";
 
 /**
@@ -99,6 +111,11 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // route). The section anchor is #approvals; the stored href stays the
   // route, which is what the route-existence guard pins.
   workflow_instance: "/dashboard/network",
+  // The documents page is where all three document entities live: the
+  // worker inventory, the org register and the acknowledgement inbox.
+  worker_document: "/dashboard/documents",
+  org_document: "/dashboard/documents",
+  document_acknowledgement: "/dashboard/documents",
   // v4: the tasks surface already renders the assignee's list — the row the
   // event points at is in "my tasks" by construction (they are the assignee).
   work_task: "/dashboard/tasks",

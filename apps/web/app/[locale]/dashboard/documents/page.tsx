@@ -25,6 +25,10 @@ import {
   type DocumentVerificationState,
 } from "@/lib/documents/document-centre-model";
 import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-document-verify-request-button";
+import { WorkerDocumentFileSlot } from "@/components/app/worker-document-file-slot";
+import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
+import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
+import { getWorkerDocumentFiles } from "@/lib/documents/document-files";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 import { WorkerDocumentForm } from "@/components/app/worker-document-form";
@@ -87,17 +91,77 @@ const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
 const ORG_ROLES = new Set<Role>(["company", "agency"]);
 
+/** The honest `?docNotice=` vocabulary the document-file actions redirect
+ *  with — an unknown value renders nothing (never an error surface). */
+const DOC_NOTICE_SUCCESS = new Set([
+  "uploaded",
+  "created",
+  "archived",
+  "revoked",
+  "assigned",
+  "acknowledged",
+]);
+const DOC_NOTICE_WARN = new Set([
+  "invalid",
+  "invalid_state",
+  "invalid_assignee",
+  "already_assigned",
+  "already_acknowledged",
+  "not_current",
+  "not_allowed",
+  "not_found",
+  "limit_reached",
+  "version_limit_reached",
+  "path_mismatch",
+  "file_too_large",
+  "unsupported_type",
+  "needs_migration",
+  "error",
+]);
+
+function DocNoticeBanner({
+  notice,
+  tf,
+}: {
+  notice: string | undefined;
+  tf: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  if (!notice) return null;
+  const success = DOC_NOTICE_SUCCESS.has(notice);
+  if (!success && !DOC_NOTICE_WARN.has(notice)) return null;
+  return (
+    <p
+      role="status"
+      className={`rounded-md border px-3 py-2 text-sm ${
+        success
+          ? "border-state-success/40 bg-state-success/5 text-state-success"
+          : "border-state-warning/50 bg-state-warning/10 text-state-warning"
+      }`}
+      data-testid="doc-notice"
+      data-notice={notice}
+    >
+      {tf(`notice.${notice}` as never)}
+    </p>
+  );
+}
+
 export default async function WorkerDocumentsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ country?: string; type?: string; status?: string }>;
+  searchParams: Promise<{
+    country?: string;
+    type?: string;
+    status?: string;
+    docNotice?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("documents");
   const tc = await getTranslations("documentCentre");
+  const tf = await getTranslations("documentFiles");
 
   // Role branch (page-level active_role read, the overview's pattern): org
   // sessions get the consent-gated aggregate view — a worker document row
@@ -116,11 +180,14 @@ export default async function WorkerDocumentsPage({
     activeRole = (profile?.active_role as Role | null) ?? null;
   }
 
+  const sp = await searchParams;
+
   if (activeRole && ORG_ROLES.has(activeRole)) {
     const org = await getOrgDocumentCentre();
     return (
       <div className="flex flex-col gap-6" data-testid="documents-page">
         <Header t={t} />
+        <DocNoticeBanner notice={sp.docNotice} tf={tf} />
         <section
           className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
           data-testid="doc-centre-org"
@@ -187,6 +254,11 @@ export default async function WorkerDocumentsPage({
             {tc("org.projectAxisNote")}
           </p>
         </section>
+        {/* Document & Evidence Engine v1 — the org's OWN register (org-scope
+            rows only; worker document rows stay owner-only by RLS) and the
+            caller's own acknowledgement inbox. */}
+        <OrgDocumentsRegister locale={locale} />
+        <DocumentAckInbox locale={locale} />
         {/* WAGON 9 — LT-master guidance stays informational for every role. */}
         <LtDocumentGuidance locale={locale} />
       </div>
@@ -216,7 +288,6 @@ export default async function WorkerDocumentsPage({
     );
   }
 
-  const sp = await searchParams;
   const country = (DOCUMENT_COUNTRIES as readonly string[]).includes(
     sp.country ?? "",
   )
@@ -240,9 +311,18 @@ export default async function WorkerDocumentsPage({
       ? [...new Set(inv.documents.map((d) => d.documentTypeSlug))]
       : [];
 
+  // Document & Evidence Engine v1 — the FILE layer state. `available` only
+  // when the human-gated migration really answered here; otherwise the page
+  // keeps its truthful no-upload note and renders no file controls.
+  const fileState =
+    inv.kind === "ok"
+      ? await getWorkerDocumentFiles(inv.documents.map((d) => d.id))
+      : ({ available: false } as const);
+
   return (
     <div className="flex flex-col gap-6" data-testid="documents-page">
       <Header t={t} />
+      <DocNoticeBanner notice={sp.docNotice} tf={tf} />
 
       {/* (a) Attention strip — counts of REAL field states only (derived
           valid_until status; stored verification), each resolving into the
@@ -313,6 +393,11 @@ export default async function WorkerDocumentsPage({
       {/* (c) Work-proof section — the real exports + own journal evidence
           counts, all linking to the existing surfaces (nothing duplicated). */}
       <WorkProofExports t={t} tc={tc} locale={locale} workProof={centre.workProof} />
+
+      {/* Document & Evidence Engine v1 — documents this person was asked to
+          confirm (version-bound acks). Renders nothing while the layer is
+          absent or the inbox is empty. */}
+      <DocumentAckInbox locale={locale} />
 
       <DocsConsentToggle current={docsConsent} />
 
@@ -460,18 +545,38 @@ export default async function WorkerDocumentsPage({
                         />
                       ) : null}
                     </div>
+                    {/* Document & Evidence Engine v1 — REAL per-document
+                        file controls, rendered ONLY when the file layer
+                        actually answered in this environment. */}
+                    {fileState.available ? (
+                      <WorkerDocumentFileSlot
+                        locale={locale}
+                        workerDocumentId={d.id}
+                        info={
+                          fileState.byDocument.get(d.id) ?? {
+                            current: null,
+                            versionCount: 0,
+                          }
+                        }
+                      />
+                    ) : null}
                   </li>
                 ))}
               </ul>
             )}
-            {/* (d) Honest storage note — metadata inventory only; file upload
-                does not exist yet (no bucket) and is not pretended. */}
-            <p
-              className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-muted"
-              data-testid="doc-centre-upload-note"
-            >
-              {tc("uploadNote")}
-            </p>
+            {/* (d) Honest storage note — rendered ONLY while the file layer
+                is genuinely absent here (human-gated migration unapplied).
+                Once uploads truly work end-to-end the controls above replace
+                this note; it is never removed while the claim would be
+                false. */}
+            {!fileState.available ? (
+              <p
+                className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-muted"
+                data-testid="doc-centre-upload-note"
+              >
+                {tc("uploadNote")}
+              </p>
+            ) : null}
             {/* (e) W4 Slice 2 — the FIRST write path into worker_documents:
                 the audited upsert RPC finally has a caller. Facts about a
                 document the worker HOLDS (the note above stays honest about

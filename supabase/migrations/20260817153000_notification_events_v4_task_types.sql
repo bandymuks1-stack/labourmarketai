@@ -1,13 +1,11 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
 -- Apply ONLY via Supabase MCP apply_migration by the LEAD session, AFTER
--- 20260817130100_notification_events_v3_workflow_types.sql (this file's
--- lists INCLUDE the v3 workflow types — reconciled after merging
--- origin/main 08121c8d). Never `db push`.
---
--- MERGE-ORDER NOTE (train V2): PR #1169 (document engine) may widen these
--- same two constraints again. Whichever widening applies LAST must carry
--- the FULL accumulated type list — recount at every merge.
+-- 20260817130100_notification_events_v3_workflow_types.sql AND
+-- 20260817140100_notification_document_types_v3.sql — this file applies
+-- LAST and its lists carry the FULL accumulated set (workflow + document
+-- types included; reconciled after merging origin/main 1450ed08).
+-- Never `db push`.
 --
 -- @human-gate-approved — pre-approved by owner mandate 2026-08-17 (autonomous
 -- functional completion train V2, §4 migration authority). Safety class:
@@ -52,6 +50,9 @@ alter table public.notification_events
     'workflow_decided',
     'workflow_delegated',
     'workflow_escalated',
+    'document_ack_assigned',
+    'document_ack_completed',
+    'document_expiring',
     'work_task_assigned'
   ));
 
@@ -64,5 +65,8 @@ alter table public.notification_events
     'worker_absence',
     'engagement',
     'workflow_instance',
+    'worker_document',
+    'org_document',
+    'document_acknowledgement',
     'work_task'
   ));

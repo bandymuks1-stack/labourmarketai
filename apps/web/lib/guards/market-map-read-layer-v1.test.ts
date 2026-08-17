@@ -520,13 +520,17 @@ describe("NO new DB migration in this PR", () => {
     // paired rollbacks, ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED
     // against post-rebase origin/main 54067a4b: 203 .sql files there, this
     // branch adds exactly two.
-    // Bumped 205 -> 209 for the train-D project/object/task drafts
+    // Bumped 205 -> 207 for the Document & Evidence Engine v1 pair
+    // (20260817140000 + 20260817140100, owner mandate 2026-08-17, PENDING
+    // APPLY BY LEAD; renamed from 120000/121000 after trains A/B claimed
+    // 120000-130100 on main) — recounted from the post-rebase tree, never
+    // summed. Still no migration from the market-map layer itself.
+    // Bumped 207 -> 211 for the train-D project/object/task drafts
     // (20260817150000 + 20260817151000 + 20260817152000 + 20260817153000,
     // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
-    // merging origin/main 08121c8d: 209 real files in the tree. Sibling PR
-    // #1169 moves this pin too: RECOUNT after every further merge, never
-    // take either side verbatim.
-    expect(count).toBeLessThanOrEqual(209);
+    // merging origin/main 1450ed08 (document engine included): 211 real
+    // files in the tree — recounted, never summed.
+    expect(count).toBeLessThanOrEqual(211);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

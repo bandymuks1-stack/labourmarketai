@@ -1,12 +1,22 @@
--- Restores the accumulated v3 lists (workflow + document types — the
--- state after 20260817130100 and 20260817140100). Any v4-typed rows must
--- be deleted first or the constraint re-add fails — stated so the
--- rollback is honest about its cost (the v2 rollback idiom).
+-- Rollback for 20260817140100_notification_document_types_v3.sql
 --
--- MERGE NOTE (train V2): reconciled after merging origin/main 1450ed08 —
--- recount before use if the constraints widen again.
+-- Restores the constraint lists exactly as Train B's
+-- 20260817130100_notification_events_v3_workflow_types.sql leaves them
+-- (v2's nine types + the four workflow types; entities incl.
+-- workflow_instance). Safe only after the guarded delete below removes rows
+-- carrying the document-only values (they are feature-created rows of the
+-- document engine; removing a notification row removes a bell entry,
+-- nothing else).
+
+begin;
+
+delete from public.notification_events
+ where event_type in
+   ('document_ack_assigned','document_ack_completed','document_expiring');
+
 alter table public.notification_events
   drop constraint notification_events_type_check;
+
 alter table public.notification_events
   add constraint notification_events_type_check check (event_type in (
     'booking_proposed',
@@ -21,21 +31,18 @@ alter table public.notification_events
     'workflow_step_pending',
     'workflow_decided',
     'workflow_delegated',
-    'workflow_escalated',
-    'document_ack_assigned',
-    'document_ack_completed',
-    'document_expiring'
+    'workflow_escalated'
   ));
 
 alter table public.notification_events
   drop constraint notification_events_entity_type_check;
+
 alter table public.notification_events
   add constraint notification_events_entity_type_check check (entity_type in (
     'booking_request',
     'worker_absence',
     'engagement',
-    'workflow_instance',
-    'worker_document',
-    'org_document',
-    'document_acknowledgement'
+    'workflow_instance'
   ));
+
+commit;

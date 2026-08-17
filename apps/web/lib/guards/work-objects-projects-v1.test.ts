@@ -247,6 +247,9 @@ describe("5. notification v4 — the assignment type is additive and mapped", ()
       "workflow_decided",
       "workflow_delegated",
       "workflow_escalated",
+      "document_ack_assigned",
+      "document_ack_completed",
+      "document_expiring",
       "work_task_assigned",
     ]) {
       expect(up).toContain(`'${t}'`);
@@ -256,6 +259,9 @@ describe("5. notification v4 — the assignment type is additive and mapped", ()
       "worker_absence",
       "engagement",
       "workflow_instance",
+      "worker_document",
+      "org_document",
+      "document_acknowledgement",
       "work_task",
     ]) {
       expect(up).toContain(`'${e}'`);
