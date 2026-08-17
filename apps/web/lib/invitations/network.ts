@@ -45,14 +45,23 @@ export type SentInvitationsRead =
   | { status: "needs-migration" }
   | { status: "error" };
 
-/** The caller's own sent invitations (RLS: inviter-or-admin), newest first. */
+/** The caller's own sent invitations, newest first. "Mine" is pinned with an
+ *  explicit inviter filter rather than inherited from RLS: since the
+ *  org-bound authority migration (20260817121000) the SELECT policy also
+ *  admits org managers to their org's invitations, and this list must stay
+ *  "invitations I sent", not "invitations my colleagues sent". */
 export async function listMySentInvitations(): Promise<SentInvitationsRead> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "error" };
   const { data, error } = await asAny(supabase)
     .from("invitations")
     .select(
       "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, locale",
     )
+    .eq("inviter_profile_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) {

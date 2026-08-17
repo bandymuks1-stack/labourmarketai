@@ -506,7 +506,13 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
     // follow-up; gate doc notification-events-v2-types-gate.md.
-    expect(count).toBeLessThanOrEqual(199);
+    // Bumped 199 -> 203 for security train A (2026-08-17 advisor triage):
+    // four policy-correction DRAFTs (20260817120000 catalog least-privilege,
+    // 20260817121000 invitation org authority, 20260817122000
+    // contact-disclosure org authority, 20260817123000 finance org
+    // authority), recounted from the tree, all UNAPPLIED with paired
+    // rollbacks — see product-readiness.test.ts for the full rationale.
+    expect(count).toBeLessThanOrEqual(203);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
