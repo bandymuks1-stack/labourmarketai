@@ -506,7 +506,13 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — the V8 loop-matrix
     // follow-up; gate doc notification-events-v2-types-gate.md.
-    expect(count).toBeLessThanOrEqual(199);
+    // Bumped 199 -> 201 for the Workflow & Approval Engine v1 PAIR
+    // (20260817120000_workflow_engine_v1 + 20260817121000_notification_
+    // events_v3_workflow_types) — nothing from the market-map read layer.
+    // Owner mandate 2026-08-17, paired rollbacks, ships UNAPPLIED (PENDING
+    // APPLY BY LEAD). RECOUNTED against origin/main 7bdf6874: 199 .sql files
+    // there, this branch adds exactly two.
+    expect(count).toBeLessThanOrEqual(201);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2064,7 +2064,12 @@ describe("no migration files added by this sprint", () => {
     // Bumped 198 -> 199 for the notification event types v2 DRAFT
     // (20260813100000, owner-gated, UNAPPLIED) — recounted from the tree,
     // never summed; gate doc notification-events-v2-types-gate.md.
-    const SPRINT_BASELINE = 199;
+    // Bumped 199 -> 201 for the Workflow & Approval Engine v1 PAIR
+    // (20260817120000_workflow_engine_v1 + 20260817121000_notification_
+    // events_v3_workflow_types; owner mandate 2026-08-17, UNAPPLIED —
+    // PENDING APPLY BY LEAD; gate doc workflow-engine-gate.md). RECOUNTED
+    // from the tree (`ls supabase/migrations/*.sql` = 201), never summed.
+    const SPRINT_BASELINE = 201;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

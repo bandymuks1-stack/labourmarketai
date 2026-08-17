@@ -421,6 +421,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 166 -> 167 for the security-audit grant-hygiene migration
     // (20260727120000_secdef_public_grant_hygiene_v1) — audit L-01 + L-08,
     // revoke-only, paired rollback, human-gate-annotated, ships UNAPPLIED.
+    // Cross-pin follows: the Workflow & Approval Engine v1 PAIR
+    // (20260817120000 + 20260817121000) took SPRINT_BASELINE 199 -> 201 in
+    // product-readiness.test.ts (recounted from the tree). This floor
+    // assertion needs no numeric edit — it only pins the 166 minimum.
     //
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
