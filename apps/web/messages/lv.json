@@ -4588,6 +4588,92 @@
       "submit": "[EN] Register document"
     }
   },
+  "timesheets": {
+    "title": "[EN] Timesheets",
+    "intro": "[EN] Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
+    "needsMigration": "[EN] Timesheets are not enabled in this environment yet.",
+    "readError": "[EN] Some timesheet data could not be loaded right now.",
+    "noLines": "[EN] No recorded hours in this period yet. Log your work in the journal, then refresh.",
+    "linesTitle": "[EN] Lines ({count})",
+    "approvalTimeline": "[EN] Approval progress",
+    "openApprovals": "[EN] Open the approvals area",
+    "noTemplateNote": "[EN] This organization has no published timesheet approval template yet, so submitting is not possible. Ask an organization admin to create one.",
+    "totals": {
+      "hours": "[EN] {hours} h",
+      "dayUnits": "[EN] {days} day units",
+      "lines": "[EN] {count} lines"
+    },
+    "unit": {
+      "hours": "[EN] h",
+      "minutes": "[EN] min",
+      "days": "[EN] d."
+    },
+    "status": {
+      "draft": "[EN] Draft",
+      "submitted": "[EN] Submitted",
+      "approved": "[EN] Approved",
+      "rejected": "[EN] Rejected",
+      "reopened": "[EN] Returned"
+    },
+    "mine": {
+      "title": "[EN] My timesheets",
+      "derivedNote": "[EN] Every line comes from your journal entries. To correct hours, edit the journal entry and press Refresh.",
+      "empty": "[EN] No timesheets yet. Pick an organization and a period to create the first one.",
+      "noOrganizations": "[EN] You are not connected to any organization yet, so there is nowhere to submit hours."
+    },
+    "create": {
+      "organization": "[EN] Organization",
+      "unnamedOrganization": "[EN] Unnamed organization",
+      "periodStart": "[EN] Period start",
+      "periodEnd": "[EN] Period end",
+      "action": "[EN] Create timesheet",
+      "hint": "[EN] A period covers at most 31 days and may not overlap another timesheet for the same organization."
+    },
+    "actions": {
+      "refresh": "[EN] Refresh from journal",
+      "submit": "[EN] Submit for approval",
+      "sync": "[EN] Update status",
+      "exportCsv": "[EN] Download CSV"
+    },
+    "org": {
+      "title": "[EN] Team timesheets",
+      "decideNote": "[EN] Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
+      "noTemplateFor": "[EN] {name} has no published timesheet approval template.",
+      "createTemplate": "[EN] Create standard approval template",
+      "unnamedWorker": "[EN] Worker",
+      "decideInApprovals": "[EN] Decide in the approvals area",
+      "reopenNote": "[EN] Return note",
+      "reopenNotePlaceholder": "[EN] Why is this returned?",
+      "reopen": "[EN] Return to worker"
+    },
+    "notice": {
+      "created": "[EN] Timesheet created.",
+      "refreshed": "[EN] Lines refreshed from the journal.",
+      "submitted": "[EN] Timesheet submitted for approval.",
+      "reopened": "[EN] Timesheet returned to the worker.",
+      "approved": "[EN] Timesheet approved.",
+      "rejected": "[EN] Timesheet rejected.",
+      "synced_pending": "[EN] The approval is still in progress.",
+      "no_instance": "[EN] No approval request exists for this timesheet yet.",
+      "no_template": "[EN] This organization has no published timesheet approval template yet.",
+      "template_created": "[EN] Standard approval template created and published.",
+      "overlap": "[EN] This period overlaps an existing timesheet.",
+      "invalid_period": "[EN] The period is invalid — up to 31 days, and the end may not be before the start.",
+      "no_worker": "[EN] Your account has no worker profile.",
+      "not_editable": "[EN] This timesheet can no longer be edited.",
+      "not_decided": "[EN] Only an approved or rejected timesheet can be returned.",
+      "not_submitted": "[EN] This timesheet is not submitted.",
+      "already_submitted": "[EN] This timesheet is already submitted.",
+      "no_approvers": "[EN] No approvers could be found for this organization's template.",
+      "not_published": "[EN] The approval template is not published yet.",
+      "invalid": "[EN] The request was invalid.",
+      "needs_migration": "[EN] Timesheets are not enabled in this environment yet.",
+      "not_authorized": "[EN] You are not allowed to do this.",
+      "not_found": "[EN] Timesheet not found.",
+      "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
+      "error": "[EN] Something went wrong. Nothing was saved."
+    }
+  },
   "agreements": {
     "title": "Līgumu reģistrs",
     "intro": "Kanoniskais {org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",

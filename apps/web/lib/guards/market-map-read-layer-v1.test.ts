@@ -530,11 +530,21 @@ describe("NO new DB migration in this PR", () => {
     // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
     // merging origin/main 1450ed08 (document engine included): 211 real
     // files in the tree — recounted, never summed.
-    // Bumped 211 -> 212 for the Agreement & Rights Engine v1 DRAFT
-    // (20260817200000_agreements_v1, LEAD-gated, UNAPPLIED, paired
-    // rollback) — 212 real files in the tree, recounted, never summed.
-    // Still no migration from the market-map layer itself. Cross-pin follows.
-    expect(count).toBeLessThanOrEqual(212);
+    // Bumped 211 -> 212 for the timesheets v1 DRAFT (20260817170000,
+    // owner-gated per mandate 2026-08-17, paired rollback, ships UNAPPLIED —
+    // PENDING APPLY BY LEAD) — nothing from the market-map read layer.
+    // RECOUNTED from the post-merge tree after trains C + D: 212 .sql files.
+    // Bumped 212 -> 213 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD, paired rollback) — RECOUNTED from the post-merge tree with
+    // trains A/B/C/D/E on main (213 .sql files), never summed. Not a
+    // market-map migration either.
+    // Bumped 213 -> 214 for the Agreement & Rights Engine v1 DRAFT
+    // (20260817200000_agreements_v1, train H, LEAD-gated, UNAPPLIED, paired
+    // rollback) — RECOUNTED from the post-merge tree with trains
+    // A/B/C/D/E/L1 on main (214 .sql files), never summed. Still no
+    // migration from the market-map layer itself. Cross-pin follows.
+    expect(count).toBeLessThanOrEqual(214);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

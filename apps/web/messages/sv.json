@@ -4588,6 +4588,92 @@
       "submit": "[EN] Register document"
     }
   },
+  "timesheets": {
+    "title": "Tidrapporter",
+    "intro": "Timdokument per period, härledda ur din arbetsjournal. Timmar rättas alltid i journalen; en tidrapport är en fryst kopia som skickas för godkännande.",
+    "needsMigration": "Tidrapporter är ännu inte aktiverade i den här miljön.",
+    "readError": "En del av tidrapportdata kunde inte läsas in just nu.",
+    "noLines": "Inga registrerade timmar under den här perioden ännu. Anteckna ditt arbete i journalen och uppdatera.",
+    "linesTitle": "Rader ({count})",
+    "approvalTimeline": "Godkännandeförlopp",
+    "openApprovals": "Öppna godkännandeområdet",
+    "noTemplateNote": "Den här organisationen har ännu ingen publicerad godkännandemall för tidrapporter, så inlämning är inte möjlig. Be en organisationsadministratör att skapa en.",
+    "totals": {
+      "hours": "{hours} tim",
+      "dayUnits": "{days} dagsenheter",
+      "lines": "{count} rader"
+    },
+    "unit": {
+      "hours": "tim",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Inlämnad",
+      "approved": "Godkänd",
+      "rejected": "Avvisad",
+      "reopened": "Återlämnad"
+    },
+    "mine": {
+      "title": "Mina tidrapporter",
+      "derivedNote": "Varje rad kommer från dina journalposter. För att rätta timmar, rätta journalposten och tryck på Uppdatera.",
+      "empty": "Inga tidrapporter ännu. Välj en organisation och en period för att skapa den första.",
+      "noOrganizations": "Du är ännu inte kopplad till någon organisation, så det finns ingenstans att lämna in timmar."
+    },
+    "create": {
+      "organization": "Organisation",
+      "unnamedOrganization": "Organisation utan namn",
+      "periodStart": "Periodens början",
+      "periodEnd": "Periodens slut",
+      "action": "Skapa tidrapport",
+      "hint": "En period omfattar högst 31 dagar och får inte överlappa en annan tidrapport för samma organisation."
+    },
+    "actions": {
+      "refresh": "Uppdatera från journalen",
+      "submit": "Lämna in för godkännande",
+      "sync": "Uppdatera status",
+      "exportCsv": "Ladda ner CSV"
+    },
+    "org": {
+      "title": "Lagets tidrapporter",
+      "decideNote": "Godkännandebeslut fattas i godkännandeområdet. Här kan du granska rader, exportera och återlämna en avgjord tidrapport.",
+      "noTemplateFor": "{name} har ingen publicerad godkännandemall för tidrapporter.",
+      "createTemplate": "Skapa standardgodkännandemall",
+      "unnamedWorker": "Arbetare",
+      "decideInApprovals": "Avgör i godkännandeområdet",
+      "reopenNote": "Återlämningsnotering",
+      "reopenNotePlaceholder": "Varför återlämnas den?",
+      "reopen": "Återlämna till arbetaren"
+    },
+    "notice": {
+      "created": "Tidrapport skapad.",
+      "refreshed": "Rader uppdaterade från journalen.",
+      "submitted": "Tidrapport inlämnad för godkännande.",
+      "reopened": "Tidrapport återlämnad till arbetaren.",
+      "approved": "Tidrapport godkänd.",
+      "rejected": "Tidrapport avvisad.",
+      "synced_pending": "Godkännandet pågår fortfarande.",
+      "no_instance": "Det finns ännu ingen godkännandebegäran för den här tidrapporten.",
+      "no_template": "Den här organisationen har ännu ingen publicerad godkännandemall för tidrapporter.",
+      "template_created": "Standardgodkännandemall skapad och publicerad.",
+      "overlap": "Den här perioden överlappar en befintlig tidrapport.",
+      "invalid_period": "Perioden är ogiltig — högst 31 dagar, och slutet får inte ligga före början.",
+      "no_worker": "Ditt konto har ingen arbetarprofil.",
+      "not_editable": "Den här tidrapporten kan inte längre redigeras.",
+      "not_decided": "Endast en godkänd eller avvisad tidrapport kan återlämnas.",
+      "not_submitted": "Den här tidrapporten är inte inlämnad.",
+      "already_submitted": "Den här tidrapporten är redan inlämnad.",
+      "no_approvers": "Inga godkännare kunde hittas för organisationens mall.",
+      "not_published": "Godkännandemallen är ännu inte publicerad.",
+      "invalid": "Begäran var ogiltig.",
+      "needs_migration": "Tidrapporter är ännu inte aktiverade i den här miljön.",
+      "not_authorized": "Du får inte göra detta.",
+      "not_found": "Tidrapporten hittades inte.",
+      "limit_reached": "För många öppna tidrapporter — lämna in eller städa upp de befintliga först.",
+      "error": "Något gick fel. Inget sparades."
+    }
+  },
   "agreements": {
     "title": "Avtalsregister",
     "intro": "Det kanoniska registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",

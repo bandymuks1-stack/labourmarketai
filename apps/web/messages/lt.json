@@ -9105,7 +9105,13 @@
         "days": "d."
       }
     },
-    "pastLink": "Ankstesnės dienos"
+    "pastLink": "Ankstesnės dienos",
+    "workload": {
+      "title": "Darbo krūvis",
+      "plannedDays": "{count} suplanuotos darbo dienos",
+      "actualHours": "{hours} val. užrašyta žurnale",
+      "note": "Suplanuotos dienos ateina iš priimtų rezervacijų ir projektų priskyrimų; užrašytos valandos — iš jūsų žurnalo įrašų. Abu skaičiai rodomi greta, niekada neperskaičiuojami vienas į kitą."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Įmonės erdvė",
@@ -12584,6 +12590,92 @@
       "not_found": "Prašymas nerastas.",
       "limit_reached": "Pasiektas atvirų įrašų limitas. Pirmiausia užbaikite esamus.",
       "error": "Įvyko klaida. Niekas nepakeista."
+    }
+  },
+  "timesheets": {
+    "title": "Darbo laiko žiniaraščiai",
+    "intro": "Laikotarpio valandų dokumentai, sudaromi iš jūsų darbo žurnalo. Valandos visada taisomos žurnale; žiniaraštis — užfiksuota kopija, siunčiama tvirtinti.",
+    "needsMigration": "Žiniaraščiai šioje aplinkoje dar neįjungti.",
+    "readError": "Dalies žiniaraščių duomenų šiuo metu nepavyko įkelti.",
+    "noLines": "Šiame laikotarpyje dar nėra užrašytų valandų. Įrašykite darbą į žurnalą ir atnaujinkite.",
+    "linesTitle": "Eilutės ({count})",
+    "approvalTimeline": "Tvirtinimo eiga",
+    "openApprovals": "Atidaryti tvirtinimų sritį",
+    "noTemplateNote": "Ši organizacija dar neturi paskelbto žiniaraščių tvirtinimo šablono, todėl pateikti negalima. Paprašykite organizacijos administratoriaus jį sukurti.",
+    "totals": {
+      "hours": "{hours} val.",
+      "dayUnits": "{days} dienos vnt.",
+      "lines": "{count} eil."
+    },
+    "unit": {
+      "hours": "val.",
+      "minutes": "min.",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "submitted": "Pateiktas",
+      "approved": "Patvirtintas",
+      "rejected": "Atmestas",
+      "reopened": "Grąžintas"
+    },
+    "mine": {
+      "title": "Mano žiniaraščiai",
+      "derivedNote": "Kiekviena eilutė ateina iš jūsų žurnalo įrašų. Norėdami pataisyti valandas, pataisykite žurnalo įrašą ir spauskite „Atnaujinti“.",
+      "empty": "Žiniaraščių dar nėra. Pasirinkite organizaciją ir laikotarpį, kad sukurtumėte pirmąjį.",
+      "noOrganizations": "Dar nesate susietas su jokia organizacija, todėl nėra kam pateikti valandų."
+    },
+    "create": {
+      "organization": "Organizacija",
+      "unnamedOrganization": "Organizacija be pavadinimo",
+      "periodStart": "Laikotarpio pradžia",
+      "periodEnd": "Laikotarpio pabaiga",
+      "action": "Sukurti žiniaraštį",
+      "hint": "Laikotarpis apima daugiausia 31 dieną ir negali persidengti su kitu tos pačios organizacijos žiniaraščiu."
+    },
+    "actions": {
+      "refresh": "Atnaujinti iš žurnalo",
+      "submit": "Pateikti tvirtinti",
+      "sync": "Atnaujinti būseną",
+      "exportCsv": "Atsisiųsti CSV"
+    },
+    "org": {
+      "title": "Komandos žiniaraščiai",
+      "decideNote": "Tvirtinimo sprendimai priimami tvirtinimų srityje. Čia galite peržiūrėti eilutes, eksportuoti ir grąžinti jau nuspręstą žiniaraštį.",
+      "noTemplateFor": "{name} neturi paskelbto žiniaraščių tvirtinimo šablono.",
+      "createTemplate": "Sukurti standartinį tvirtinimo šabloną",
+      "unnamedWorker": "Darbuotojas",
+      "decideInApprovals": "Spręsti tvirtinimų srityje",
+      "reopenNote": "Grąžinimo pastaba",
+      "reopenNotePlaceholder": "Kodėl grąžinama?",
+      "reopen": "Grąžinti darbuotojui"
+    },
+    "notice": {
+      "created": "Žiniaraštis sukurtas.",
+      "refreshed": "Eilutės atnaujintos iš žurnalo.",
+      "submitted": "Žiniaraštis pateiktas tvirtinti.",
+      "reopened": "Žiniaraštis grąžintas darbuotojui.",
+      "approved": "Žiniaraštis patvirtintas.",
+      "rejected": "Žiniaraštis atmestas.",
+      "synced_pending": "Tvirtinimas dar vyksta.",
+      "no_instance": "Šiam žiniaraščiui tvirtinimo užklausos dar nėra.",
+      "no_template": "Ši organizacija dar neturi paskelbto žiniaraščių tvirtinimo šablono.",
+      "template_created": "Standartinis tvirtinimo šablonas sukurtas ir paskelbtas.",
+      "overlap": "Šis laikotarpis persidengia su esamu žiniaraščiu.",
+      "invalid_period": "Laikotarpis netinkamas — iki 31 dienos, pabaiga negali būti ankstesnė už pradžią.",
+      "no_worker": "Jūsų paskyra neturi darbuotojo profilio.",
+      "not_editable": "Šio žiniaraščio nebegalima redaguoti.",
+      "not_decided": "Grąžinti galima tik patvirtintą arba atmestą žiniaraštį.",
+      "not_submitted": "Šis žiniaraštis nepateiktas.",
+      "already_submitted": "Šis žiniaraštis jau pateiktas.",
+      "no_approvers": "Pagal šios organizacijos šabloną tvirtintojų rasti nepavyko.",
+      "not_published": "Tvirtinimo šablonas dar nepaskelbtas.",
+      "invalid": "Užklausa buvo netinkama.",
+      "needs_migration": "Žiniaraščiai šioje aplinkoje dar neįjungti.",
+      "not_authorized": "Jums to daryti neleidžiama.",
+      "not_found": "Žiniaraštis nerastas.",
+      "limit_reached": "Per daug atvirų žiniaraščių — pirmiausia pateikite arba sutvarkykite esamus.",
+      "error": "Įvyko klaida. Niekas nebuvo išsaugota."
     }
   },
   "workObjects": {

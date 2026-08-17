@@ -100,7 +100,12 @@ export interface CapabilitySignal {
   slug: string | null;
   category: string | null;
   status: CapabilityStatus;
-  selfRatedLevel: number | null;
+  // NOTE (consolidation slice 1, 2026-08-17): `selfRatedLevel` was removed.
+  // worker_skills.self_rated_level has never held a value in production
+  // (0 of 48 rows, zero writers) and a numeric self-score conflicts with the
+  // evidence-tier doctrine ("record count, never a competence score"). The
+  // column stays frozen, undropped —
+  // docs/audits/duplication-freeze-register-2026-08-17.md.
 }
 
 export interface OwnCapabilities {
@@ -129,7 +134,7 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
   // Skills the worker has self-listed (with verification flag + skill slug).
   const { data: ws } = await asAny(supabase)
     .from("worker_skills")
-    .select("skill_id, self_rated_level, verified, skills(slug, category)")
+    .select("skill_id, verified, skills(slug, category)")
     .eq("worker_id", workerId);
 
   // Skills evidenced by real journal work (distinct skill ids).
@@ -156,7 +161,6 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
       slug: (skill.slug as string | null) ?? null,
       category: (skill.category as string | null) ?? null,
       status,
-      selfRatedLevel: typeof r.self_rated_level === "number" ? r.self_rated_level : null,
     });
   }
 
@@ -174,7 +178,6 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
         slug: (s.slug as string | null) ?? null,
         category: (s.category as string | null) ?? null,
         status: "suggested",
-        selfRatedLevel: null,
       });
     }
   }

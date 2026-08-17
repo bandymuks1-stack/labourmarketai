@@ -138,9 +138,16 @@ describe("historical demand stays distinguishable from an actionable request", (
     expect(src).toMatch(/readonly actionable: boolean;/);
   });
 
-  it("job_demand rows are constructed as NOT actionable", () => {
-    const src = read(CANONICAL_IO);
-    expect(src).toMatch(/source: "job_demand",\s*\n\s*actionable: false,/);
+  it("the legacy job_demands read STAYS removed (consolidation slice 1, 2026-08-17)", () => {
+    // The leg was deleted because job_demands has held 0 rows in production
+    // for its whole life and nothing writes it — the read only ever returned
+    // an empty set. The schema stays frozen
+    // (docs/audits/duplication-freeze-register-2026-08-17.md). Re-adding a
+    // job_demands read here would resurrect the two-truths defect W10 slice 4
+    // closed; the ONE live demand store is customer_requests.
+    const src = code(CANONICAL_IO);
+    expect(src).not.toMatch(/\.from\(\s*["']job_demands["']\s*\)/);
+    expect(src).not.toMatch(/source:\s*"job_demand"/);
   });
 
   it("customer_request rows are constructed as actionable", () => {

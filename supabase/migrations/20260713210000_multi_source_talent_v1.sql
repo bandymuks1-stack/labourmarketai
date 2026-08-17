@@ -13,6 +13,18 @@
 -- table/RPCs (42P01 / PGRST205 / 42883 / PGRST202) and shows an honest
 -- "prepared, owner activation pending" state until this is applied.
 --
+-- ██ CONSUMERS PARTIALLY DELETED 2026-08-17 (consolidation slice 1) ██
+-- DO NOT APPLY AS-IS: the app modules for TWO of the three tables here —
+-- talent_source_records (lib/talent/*) and identity_resolution_events
+-- (lib/identity/identity-resolution*) — were removed as dead code (zero
+-- importers; this migration was never applied to prod, verified 2026-08-17).
+-- Only the worker_external_profiles consumer family
+-- (lib/worker/external-profiles*) still exists and feature-detects.
+-- If the owner ever wants this capability, REWORK the draft first (split
+-- out or rebuild the deleted consumers); applying it verbatim would create
+-- two tables nothing reads or writes.
+-- See docs/audits/duplication-freeze-register-2026-08-17.md.
+--
 -- WHY THE EXISTING SCHEMA IS INSUFFICIENT (investigated 2026-07-13):
 --   * NO provenance store exists anywhere: nothing records WHERE a talent
 --     profile's data came from (direct registration vs CV import vs agency
