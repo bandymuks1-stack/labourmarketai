@@ -2105,15 +2105,28 @@ describe("no migration files added by this sprint", () => {
     // PR) — RECOUNTED after merging origin/main 1450ed08 (security train A,
     // workflow engine AND document engine already in the base): 211 real
     // files in the tree, never summed.
-    // Bumped 211 -> 213 for the typed employee requests + configurable leave
+    // Bumped 211 -> 212 for the timesheets v1 DRAFT (20260817170000,
+    // owner-gated per mandate 2026-08-17, UNAPPLIED — PENDING APPLY BY LEAD)
+    // — RECOUNTED from the post-merge tree after trains C + D landed
+    // (`ls supabase/migrations/*.sql | wc -l` = 212), never summed.
+    // Bumped 212 -> 213 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD) — RECOUNTED from the post-merge tree with trains A/B/C/D/E on
+    // main (`ls supabase/migrations/*.sql | wc -l` = 213), never summed.
+    // Supersedes the never-applied 20260714210000 draft (whose trigger
+    // predates company_memberships and would 42501-reject CM-only members);
+    // v2's trigger accepts BOTH membership truths. Paired rollback +
+    // Deferred APPLIED_LEDGER entry + db-proof scripts/db-proof/
+    // durable-workspace-pointer-v2.sh (32/32).
+    // Bumped 213 -> 215 for the typed employee requests + configurable leave
     // balance policies DRAFT pair (20260817180000_employee_requests_v1 +
     // 20260817181000_leave_balance_policies_v1; owner mandate 2026-08-17,
     // UNAPPLIED — PENDING APPLY BY LEAD; requests ride the workflow engine,
     // balances are a derived read-model with NO statutory defaults).
-    // RECOUNTED after merging origin/main b6c5f71b (document engine train C
-    // and objects/tasks train D already in the base):
-    // `ls supabase/migrations/*.sql | wc -l` = 213 real files, never summed.
-    const SPRINT_BASELINE = 213;
+    // RECOUNTED after merging origin/main 010547e4 (trains C, D, E and L1
+    // all in the base): `ls supabase/migrations/*.sql | wc -l` = 215 real
+    // files, never summed.
+    const SPRINT_BASELINE = 215;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

@@ -797,6 +797,26 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260817151000_work_tasks_v2_collaboration.sql",
       "20260817152000_project_responsible_v1.sql",
       "20260817153000_notification_events_v4_task_types.sql",
+      // 2026-08-17: durable workspace pointer v2 (consolidation train L
+      // slice 1) — marked under the SAME standing owner mandate 2026-08-17
+      // (autonomous functional completion train V2, §4 migration authority)
+      // as the security-train-A entries above. The marker cites the mandate
+      // + safety class (additive column + SECURITY DEFINER validation
+      // trigger; backward-compatible — the app feature-detects 42703/
+      // PGRST204 today) in the migration header. It supersedes the OLD
+      // 20260714210000 draft, which carries its own earlier marker but is
+      // dated before this list's 20260804160000 cutoff so it never appears
+      // here; that file is now header-marked SUPERSEDED-BY-20260817160000
+      // and must never be applied. Ships UNAPPLIED (ledger: PENDING APPLY BY
+      // LEAD SESSION via Supabase MCP), paired rollback, DB proof
+      // scripts/db-proof/durable-workspace-pointer-v2.sh (32/32).
+      "20260817160000_durable_workspace_pointer_v2.sql",
+      // 2026-08-17: timesheets v1 (train E of the same autonomous functional
+      // completion train V2) gained its marker under the SAME owner mandate's
+      // §4 migration authority, recorded in docs/APPLIED_LEDGER.md (Deferred,
+      // PENDING APPLY BY LEAD) and the migration's own header. Added in the
+      // same commit as that record — not spread from this branch's approval.
+      "20260817170000_timesheets_v1.sql",
       // 2026-08-17: typed employee requests + configurable leave balance
       // policies PAIR (functional completion train V2, agent F). The markers
       // record that the RED content (2 new RLS tables + SELECT policies +

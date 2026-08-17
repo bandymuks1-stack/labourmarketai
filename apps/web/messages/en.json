@@ -9115,7 +9115,13 @@
         "days": "d"
       }
     },
-    "pastLink": "Past days"
+    "pastLink": "Past days",
+    "workload": {
+      "title": "Workload",
+      "plannedDays": "{count} planned work days",
+      "actualHours": "{hours} h recorded in the journal",
+      "note": "Planned days come from accepted bookings and project assignments; recorded hours come from your journal entries. The two are shown side by side, never converted into each other."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Company workspace",
@@ -12594,6 +12600,92 @@
       "not_found": "This request was not found.",
       "limit_reached": "The open-items limit was reached. Close something first.",
       "error": "Something went wrong. Nothing was changed."
+    }
+  },
+  "timesheets": {
+    "title": "Timesheets",
+    "intro": "Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
+    "needsMigration": "Timesheets are not enabled in this environment yet.",
+    "readError": "Some timesheet data could not be loaded right now.",
+    "noLines": "No recorded hours in this period yet. Log your work in the journal, then refresh.",
+    "linesTitle": "Lines ({count})",
+    "approvalTimeline": "Approval progress",
+    "openApprovals": "Open the approvals area",
+    "noTemplateNote": "This organization has no published timesheet approval template yet, so submitting is not possible. Ask an organization admin to create one.",
+    "totals": {
+      "hours": "{hours} h",
+      "dayUnits": "{days} day units",
+      "lines": "{count} lines"
+    },
+    "unit": {
+      "hours": "h",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "reopened": "Returned"
+    },
+    "mine": {
+      "title": "My timesheets",
+      "derivedNote": "Every line comes from your journal entries. To correct hours, edit the journal entry and press Refresh.",
+      "empty": "No timesheets yet. Pick an organization and a period to create the first one.",
+      "noOrganizations": "You are not connected to any organization yet, so there is nowhere to submit hours."
+    },
+    "create": {
+      "organization": "Organization",
+      "unnamedOrganization": "Unnamed organization",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "action": "Create timesheet",
+      "hint": "A period covers at most 31 days and may not overlap another timesheet for the same organization."
+    },
+    "actions": {
+      "refresh": "Refresh from journal",
+      "submit": "Submit for approval",
+      "sync": "Update status",
+      "exportCsv": "Download CSV"
+    },
+    "org": {
+      "title": "Team timesheets",
+      "decideNote": "Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
+      "noTemplateFor": "{name} has no published timesheet approval template.",
+      "createTemplate": "Create standard approval template",
+      "unnamedWorker": "Worker",
+      "decideInApprovals": "Decide in the approvals area",
+      "reopenNote": "Return note",
+      "reopenNotePlaceholder": "Why is this returned?",
+      "reopen": "Return to worker"
+    },
+    "notice": {
+      "created": "Timesheet created.",
+      "refreshed": "Lines refreshed from the journal.",
+      "submitted": "Timesheet submitted for approval.",
+      "reopened": "Timesheet returned to the worker.",
+      "approved": "Timesheet approved.",
+      "rejected": "Timesheet rejected.",
+      "synced_pending": "The approval is still in progress.",
+      "no_instance": "No approval request exists for this timesheet yet.",
+      "no_template": "This organization has no published timesheet approval template yet.",
+      "template_created": "Standard approval template created and published.",
+      "overlap": "This period overlaps an existing timesheet.",
+      "invalid_period": "The period is invalid — up to 31 days, and the end may not be before the start.",
+      "no_worker": "Your account has no worker profile.",
+      "not_editable": "This timesheet can no longer be edited.",
+      "not_decided": "Only an approved or rejected timesheet can be returned.",
+      "not_submitted": "This timesheet is not submitted.",
+      "already_submitted": "This timesheet is already submitted.",
+      "no_approvers": "No approvers could be found for this organization's template.",
+      "not_published": "The approval template is not published yet.",
+      "invalid": "The request was invalid.",
+      "needs_migration": "Timesheets are not enabled in this environment yet.",
+      "not_authorized": "You are not allowed to do this.",
+      "not_found": "Timesheet not found.",
+      "limit_reached": "Too many open timesheets — submit or remove existing ones first.",
+      "error": "Something went wrong. Nothing was saved."
     }
   },
   "workObjects": {

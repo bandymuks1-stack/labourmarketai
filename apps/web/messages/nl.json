@@ -9115,7 +9115,13 @@
         "days": "d"
       }
     },
-    "pastLink": "Eerdere dagen"
+    "pastLink": "Eerdere dagen",
+    "workload": {
+      "title": "Werkbelasting",
+      "plannedDays": "{count} geplande werkdagen",
+      "actualHours": "{hours} u geregistreerd in het journaal",
+      "note": "Geplande dagen komen uit geaccepteerde boekingen en projecttoewijzingen; geregistreerde uren uit uw journaalvermeldingen. Beide worden naast elkaar getoond en nooit in elkaar omgerekend."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Bedrijfsomgeving",
@@ -12594,6 +12600,92 @@
       "not_found": "Dit verzoek is niet gevonden.",
       "limit_reached": "De limiet voor open items is bereikt. Sluit eerst iets af.",
       "error": "Er ging iets mis. Er is niets gewijzigd."
+    }
+  },
+  "timesheets": {
+    "title": "Urenstaten",
+    "intro": "Urendocumenten per periode, afgeleid uit uw werkjournaal. Uren worden altijd in het journaal bewerkt; een urenstaat is een bevroren kopie die ter goedkeuring wordt ingediend.",
+    "needsMigration": "Urenstaten zijn in deze omgeving nog niet ingeschakeld.",
+    "readError": "Een deel van de urenstaatgegevens kon nu niet worden geladen.",
+    "noLines": "Nog geen geregistreerde uren in deze periode. Noteer uw werk in het journaal en vernieuw.",
+    "linesTitle": "Regels ({count})",
+    "approvalTimeline": "Goedkeuringsvoortgang",
+    "openApprovals": "Open het goedkeuringsgedeelte",
+    "noTemplateNote": "Deze organisatie heeft nog geen gepubliceerd goedkeuringssjabloon voor urenstaten, dus indienen is niet mogelijk. Vraag een organisatiebeheerder er een te maken.",
+    "totals": {
+      "hours": "{hours} u",
+      "dayUnits": "{days} dageenheden",
+      "lines": "{count} regels"
+    },
+    "unit": {
+      "hours": "u",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Concept",
+      "submitted": "Ingediend",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "reopened": "Teruggestuurd"
+    },
+    "mine": {
+      "title": "Mijn urenstaten",
+      "derivedNote": "Elke regel komt uit uw journaalvermeldingen. Om uren te corrigeren, bewerkt u de journaalvermelding en drukt u op Vernieuwen.",
+      "empty": "Nog geen urenstaten. Kies een organisatie en een periode om de eerste te maken.",
+      "noOrganizations": "U bent nog niet aan een organisatie verbonden, dus er is nergens om uren in te dienen."
+    },
+    "create": {
+      "organization": "Organisatie",
+      "unnamedOrganization": "Organisatie zonder naam",
+      "periodStart": "Begin periode",
+      "periodEnd": "Einde periode",
+      "action": "Urenstaat maken",
+      "hint": "Een periode beslaat maximaal 31 dagen en mag niet overlappen met een andere urenstaat van dezelfde organisatie."
+    },
+    "actions": {
+      "refresh": "Vernieuwen uit journaal",
+      "submit": "Indienen ter goedkeuring",
+      "sync": "Status bijwerken",
+      "exportCsv": "CSV downloaden"
+    },
+    "org": {
+      "title": "Urenstaten van het team",
+      "decideNote": "Goedkeuringsbeslissingen gebeuren in het goedkeuringsgedeelte. Hier kunt u regels bekijken, exporteren en een besliste urenstaat terugsturen.",
+      "noTemplateFor": "{name} heeft geen gepubliceerd goedkeuringssjabloon voor urenstaten.",
+      "createTemplate": "Standaard goedkeuringssjabloon maken",
+      "unnamedWorker": "Werknemer",
+      "decideInApprovals": "Beslissen in het goedkeuringsgedeelte",
+      "reopenNote": "Terugstuurnotitie",
+      "reopenNotePlaceholder": "Waarom wordt dit teruggestuurd?",
+      "reopen": "Terugsturen naar werknemer"
+    },
+    "notice": {
+      "created": "Urenstaat gemaakt.",
+      "refreshed": "Regels vernieuwd uit het journaal.",
+      "submitted": "Urenstaat ingediend ter goedkeuring.",
+      "reopened": "Urenstaat teruggestuurd naar de werknemer.",
+      "approved": "Urenstaat goedgekeurd.",
+      "rejected": "Urenstaat afgewezen.",
+      "synced_pending": "De goedkeuring loopt nog.",
+      "no_instance": "Er bestaat nog geen goedkeuringsverzoek voor deze urenstaat.",
+      "no_template": "Deze organisatie heeft nog geen gepubliceerd goedkeuringssjabloon voor urenstaten.",
+      "template_created": "Standaard goedkeuringssjabloon gemaakt en gepubliceerd.",
+      "overlap": "Deze periode overlapt met een bestaande urenstaat.",
+      "invalid_period": "De periode is ongeldig — maximaal 31 dagen, en het einde mag niet vóór het begin liggen.",
+      "no_worker": "Uw account heeft geen werknemersprofiel.",
+      "not_editable": "Deze urenstaat kan niet meer worden bewerkt.",
+      "not_decided": "Alleen een goedgekeurde of afgewezen urenstaat kan worden teruggestuurd.",
+      "not_submitted": "Deze urenstaat is niet ingediend.",
+      "already_submitted": "Deze urenstaat is al ingediend.",
+      "no_approvers": "Er konden geen goedkeurders worden gevonden voor het sjabloon van deze organisatie.",
+      "not_published": "Het goedkeuringssjabloon is nog niet gepubliceerd.",
+      "invalid": "Het verzoek was ongeldig.",
+      "needs_migration": "Urenstaten zijn in deze omgeving nog niet ingeschakeld.",
+      "not_authorized": "U mag dit niet doen.",
+      "not_found": "Urenstaat niet gevonden.",
+      "limit_reached": "Te veel open urenstaten — dien eerst bestaande in of ruim ze op.",
+      "error": "Er is iets misgegaan. Er is niets opgeslagen."
     }
   },
   "workObjects": {

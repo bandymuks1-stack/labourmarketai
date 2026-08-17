@@ -430,11 +430,20 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // project/object/task drafts (work_objects_v1, work_tasks_v2_collaboration,
     // project_responsible_v1, notification_events_v4_task_types). Cross-pin
     // follows — this floor assertion needs no numeric edit.
+    // Cross-pin follows: the timesheets v1 DRAFT (20260817170000) took
+    // SPRINT_BASELINE 211 -> 212 in product-readiness.test.ts (RECOUNTED
+    // from the post-merge tree after trains C + D landed on main). No
+    // numeric edit needed here.
+    // SPRINT_BASELINE 212 -> 213 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, UNAPPLIED, paired
+    // rollback; recounted post-merge with trains A/B/C/D/E). Cross-pin
+    // follows.
+    //
     // Cross-pin follows: the typed employee requests + leave balance
     // policies PAIR (20260817180000 + 20260817181000) took SPRINT_BASELINE
-    // 211 -> 213 in product-readiness.test.ts (recounted after merging
-    // origin/main b6c5f71b). This floor assertion again needs no numeric
-    // edit.
+    // 213 -> 215 in product-readiness.test.ts (recounted after merging
+    // origin/main 010547e4, trains C/D/E/L1 in base). This floor assertion
+    // again needs no numeric edit.
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
     // migration 0030 to exist; pinning the exact number meant every unrelated,
