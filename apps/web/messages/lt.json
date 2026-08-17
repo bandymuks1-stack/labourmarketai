@@ -7007,7 +7007,14 @@
       "file_too_large": "Failas didesnis nei 5 MB — niekas neišsaugota.",
       "unsupported_type": "Šis failo tipas nepalaikomas — naudokite PDF, Word arba nuotrauką.",
       "needs_migration": "Failų įkėlimas šioje aplinkoje dar neįjungtas — niekas neišsaugota.",
-      "error": "Įvyko klaida — niekas neišsaugota."
+      "error": "Įvyko klaida — niekas neišsaugota.",
+      "updated": "Pakeitimas išsaugotas.",
+      "submitted": "Dokumentas išsiųstas derinti.",
+      "repaired_approved": "Derinimas baigtas — dokumentas suderintas viduje.",
+      "repaired_returned": "Dokumentas grąžintas nesuderintas.",
+      "unchanged": "Niekas nepasikeitė.",
+      "no_pending_workflow": "Šiam dokumentui derinimas nelaukia — niekas neišsaugota.",
+      "no_approval_definition": "Jūsų organizacija dar neturi nustatytos derinimo eigos — niekas neišsaugota."
     }
   },
   "orgDocuments": {
@@ -7062,7 +7069,56 @@
       "validFromLabel": "Galioja nuo",
       "expiresOnLabel": "Galioja iki",
       "externalRefLabel": "Registracijos numeris (neprivaloma)",
-      "submit": "Registruoti dokumentą"
+      "submit": "Registruoti dokumentą",
+      "objectLabel": "Objektas (nebūtina)",
+      "objectNone": "Nesusieta su objektu",
+      "correspondenceLegend": "Korespondencijos duomenys",
+      "correspondenceHint": "Pildykite tik gaunamai arba siunčiamai korespondencijai. Ar raštas gaunamas, ar siunčiamas, matyti iš aukščiau pasirinkto tipo."
+    },
+    "filters": {
+      "all": "Visi",
+      "statusLabel": "Būsena",
+      "directionLabel": "Korespondencija",
+      "objectLabel": "Objektas",
+      "searchLabel": "Ieškoti registre",
+      "searchPlaceholder": "Pavadinimas, aprašymas, numeris, kita šalis",
+      "searchSubmit": "Ieškoti",
+      "searchScopeNote": "Paieška veikia tik registro įrašuose — pavadinimuose, aprašymuose, numeriuose ir kitos šalies pavadinimuose. Į įkeltų failų vidų neieškoma.",
+      "clear": "Išvalyti filtrus",
+      "noMatches": "Pagal šiuos filtrus registro įrašų nerasta."
+    },
+    "direction": {
+      "incoming": "Gaunama",
+      "outgoing": "Siunčiama"
+    },
+    "fields": {
+      "counterparty": "Kita šalis",
+      "correspondenceDate": "Rašto data",
+      "counterpartyReference": "Jų numeris",
+      "correspondenceUnrecorded": "Kita šalis ir rašto data neįrašytos",
+      "object": "Objektas",
+      "ourRef": "Mūsų numeris"
+    },
+    "retention": {
+      "legend": "Saugojimas (tik įrašas)",
+      "filterLabel": "Saugojimas",
+      "untilLabel": "Saugoti iki",
+      "noteLabel": "Saugojimo pastaba",
+      "submit": "Įrašyti saugojimą",
+      "noDeletionNote": "Tai tik įrašas apie tai, ką nusprendė jūsų organizacija. Praėjus datai niekas nėra ištrinama automatiškai.",
+      "scheduled": "Nustatytas terminas",
+      "due": "Terminas praėjęs",
+      "badge": {
+        "scheduled": "Saugoti iki {date}",
+        "due": "Terminas {date} praėjo"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Derinimo eiga",
+      "submit": "Siųsti derinti",
+      "submitted": "Laukia derinimo",
+      "approved": "Suderinta viduje",
+      "returned": "Grąžinta nesuderinus"
     }
   },
   "trust": {

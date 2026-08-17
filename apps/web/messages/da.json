@@ -4551,7 +4551,14 @@
       "file_too_large": "Filen er større end 5 MB — intet blev gemt.",
       "unsupported_type": "Denne filtype understøttes ikke — brug PDF, Word eller et foto.",
       "needs_migration": "Filupload er endnu ikke aktiveret i dette miljø — intet blev gemt.",
-      "error": "Noget gik galt — intet blev gemt."
+      "error": "Noget gik galt — intet blev gemt.",
+      "updated": "Ændringen er gemt.",
+      "submitted": "Dokumentet er sendt til godkendelse.",
+      "repaired_approved": "Godkendelsen er afsluttet — dokumentet er internt godkendt.",
+      "repaired_returned": "Dokumentet kom tilbage uden godkendelse.",
+      "unchanged": "Intet blev ændret.",
+      "no_pending_workflow": "Der venter ingen godkendelse på dette dokument — intet blev gemt.",
+      "no_approval_definition": "Jeres organisation har endnu ikke et godkendelsesforløb — intet blev gemt."
     }
   },
   "orgDocuments": {
@@ -4606,7 +4613,56 @@
       "validFromLabel": "Gyldig fra",
       "expiresOnLabel": "Gyldig til",
       "externalRefLabel": "Referencenummer (valgfrit)",
-      "submit": "Registrér dokument"
+      "submit": "Registrér dokument",
+      "objectLabel": "Sted (valgfrit)",
+      "objectNone": "Ikke knyttet til et sted",
+      "correspondenceLegend": "Korrespondanceoplysninger",
+      "correspondenceHint": "Udfyld kun for indgående eller udgående korrespondance. Om et brev er indgående eller udgående, følger af den type, du valgte ovenfor."
+    },
+    "filters": {
+      "all": "Alle",
+      "statusLabel": "Status",
+      "directionLabel": "Korrespondance",
+      "objectLabel": "Sted",
+      "searchLabel": "Søg i registeret",
+      "searchPlaceholder": "Titel, beskrivelse, reference, modpart",
+      "searchSubmit": "Søg",
+      "searchScopeNote": "Søgningen dækker kun registerposterne — titler, beskrivelser, referencer og modparter. Den kigger ikke inde i uploadede filer.",
+      "clear": "Ryd filtre",
+      "noMatches": "Ingen registerposter matcher disse filtre."
+    },
+    "direction": {
+      "incoming": "Indgående",
+      "outgoing": "Udgående"
+    },
+    "fields": {
+      "counterparty": "Modpart",
+      "correspondenceDate": "Brevdato",
+      "counterpartyReference": "Deres reference",
+      "correspondenceUnrecorded": "Modpart og brevdato er ikke registreret",
+      "object": "Sted",
+      "ourRef": "Vores reference"
+    },
+    "retention": {
+      "legend": "Opbevaring (kun notat)",
+      "filterLabel": "Opbevaring",
+      "untilLabel": "Opbevares til",
+      "noteLabel": "Opbevaringsnote",
+      "submit": "Gem opbevaring",
+      "noDeletionNote": "Dette er et notat om jeres organisations beslutning. Der slettes intet automatisk, når datoen er passeret.",
+      "scheduled": "Frist noteret",
+      "due": "Frist udløbet",
+      "badge": {
+        "scheduled": "Opbevares til {date}",
+        "due": "Frist {date} udløbet"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Godkendelsesforløb",
+      "submit": "Send til godkendelse",
+      "submitted": "Afventer godkendelse",
+      "approved": "Internt godkendt",
+      "returned": "Returneret uden godkendelse"
     }
   },
   "timesheets": {

@@ -7007,7 +7007,14 @@
       "file_too_large": "The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "This file type is not supported — use PDF, Word or a photo.",
       "needs_migration": "File upload is not enabled in this environment yet — nothing was saved.",
-      "error": "Something went wrong — nothing was saved."
+      "error": "Something went wrong — nothing was saved.",
+      "updated": "The change was saved.",
+      "submitted": "The document was sent for approval.",
+      "repaired_approved": "The approval is finished — the document is approved internally.",
+      "repaired_returned": "The document came back without approval.",
+      "unchanged": "Nothing changed.",
+      "no_pending_workflow": "No approval is waiting for this document — nothing was saved.",
+      "no_approval_definition": "Your organization has no approval route set up yet — nothing was saved."
     }
   },
   "orgDocuments": {
@@ -7062,7 +7069,56 @@
       "validFromLabel": "Valid from",
       "expiresOnLabel": "Valid until",
       "externalRefLabel": "Reference number (optional)",
-      "submit": "Register document"
+      "submit": "Register document",
+      "objectLabel": "Site (optional)",
+      "objectNone": "Not linked to a site",
+      "correspondenceLegend": "Correspondence details",
+      "correspondenceHint": "Fill these in only for incoming or outgoing correspondence. Whether a letter is incoming or outgoing comes from the type you chose above."
+    },
+    "filters": {
+      "all": "All",
+      "statusLabel": "Status",
+      "directionLabel": "Correspondence",
+      "objectLabel": "Site",
+      "searchLabel": "Search the register",
+      "searchPlaceholder": "Title, description, reference, counterparty",
+      "searchSubmit": "Search",
+      "searchScopeNote": "Search looks at the register entries only — titles, descriptions, references and counterparties. It does not look inside uploaded files.",
+      "clear": "Clear filters",
+      "noMatches": "No register entries match these filters."
+    },
+    "direction": {
+      "incoming": "Incoming",
+      "outgoing": "Outgoing"
+    },
+    "fields": {
+      "counterparty": "Counterparty",
+      "correspondenceDate": "Letter date",
+      "counterpartyReference": "Their reference",
+      "correspondenceUnrecorded": "Counterparty and letter date not recorded",
+      "object": "Site",
+      "ourRef": "Our reference"
+    },
+    "retention": {
+      "legend": "Retention (record only)",
+      "filterLabel": "Retention",
+      "untilLabel": "Keep until",
+      "noteLabel": "Retention note",
+      "submit": "Save retention",
+      "noDeletionNote": "This is a record of what your organization decided. Nothing is deleted automatically when the date passes.",
+      "scheduled": "Retention set",
+      "due": "Retention date passed",
+      "badge": {
+        "scheduled": "Keep until {date}",
+        "due": "Retention date {date} passed"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Approval route",
+      "submit": "Send for approval",
+      "submitted": "Awaiting approval",
+      "approved": "Approved internally",
+      "returned": "Returned without approval"
     }
   },
   "trust": {

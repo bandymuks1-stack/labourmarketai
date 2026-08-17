@@ -556,7 +556,13 @@ describe("NO new DB migration in this PR", () => {
     // market-map read layer. RECOUNTED after merging origin/main 66c869a4
     // (trains C/D/E/L1/F/H in base): 217 real files in the tree, never
     // summed.
-    expect(count).toBeLessThanOrEqual(217);
+    // Bumped 217 -> 218 for the org document register delta v1 DRAFT
+    // (20260817240000_org_document_register_delta_v1, train I, LEAD-gated,
+    // UNAPPLIED, paired 0-row-guarded rollback) — RECOUNTED from the
+    // post-rebase tree with train G also in the base (218 .sql files),
+    // never summed. Still nothing from the market-map read layer itself.
+    // Cross-pin follows.
+    expect(count).toBeLessThanOrEqual(218);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

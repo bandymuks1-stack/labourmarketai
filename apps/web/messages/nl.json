@@ -7007,7 +7007,14 @@
       "file_too_large": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
       "unsupported_type": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
       "needs_migration": "Bestandsupload is in deze omgeving nog niet ingeschakeld — er is niets opgeslagen.",
-      "error": "Er is iets misgegaan — er is niets opgeslagen."
+      "error": "Er is iets misgegaan — er is niets opgeslagen.",
+      "updated": "De wijziging is opgeslagen.",
+      "submitted": "Het document is ter goedkeuring gestuurd.",
+      "repaired_approved": "De goedkeuring is afgerond — het document is intern goedgekeurd.",
+      "repaired_returned": "Het document kwam terug zonder goedkeuring.",
+      "unchanged": "Er is niets veranderd.",
+      "no_pending_workflow": "Voor dit document wacht geen goedkeuring — er is niets opgeslagen.",
+      "no_approval_definition": "Uw organisatie heeft nog geen goedkeuringsroute ingesteld — er is niets opgeslagen."
     }
   },
   "orgDocuments": {
@@ -7062,7 +7069,56 @@
       "validFromLabel": "Geldig vanaf",
       "expiresOnLabel": "Geldig tot",
       "externalRefLabel": "Referentienummer (optioneel)",
-      "submit": "Document registreren"
+      "submit": "Document registreren",
+      "objectLabel": "Locatie (optioneel)",
+      "objectNone": "Niet aan een locatie gekoppeld",
+      "correspondenceLegend": "Correspondentiegegevens",
+      "correspondenceHint": "Vul dit alleen in voor inkomende of uitgaande correspondentie. Of een brief inkomend of uitgaand is, volgt uit het type dat u hierboven koos."
+    },
+    "filters": {
+      "all": "Alle",
+      "statusLabel": "Status",
+      "directionLabel": "Correspondentie",
+      "objectLabel": "Locatie",
+      "searchLabel": "Zoek in het register",
+      "searchPlaceholder": "Titel, omschrijving, referentie, tegenpartij",
+      "searchSubmit": "Zoeken",
+      "searchScopeNote": "Zoeken werkt alleen op de registerregels — titels, omschrijvingen, referenties en tegenpartijen. Er wordt niet in geüploade bestanden gezocht.",
+      "clear": "Filters wissen",
+      "noMatches": "Geen registerregels voldoen aan deze filters."
+    },
+    "direction": {
+      "incoming": "Inkomend",
+      "outgoing": "Uitgaand"
+    },
+    "fields": {
+      "counterparty": "Tegenpartij",
+      "correspondenceDate": "Briefdatum",
+      "counterpartyReference": "Hun referentie",
+      "correspondenceUnrecorded": "Tegenpartij en briefdatum niet vastgelegd",
+      "object": "Locatie",
+      "ourRef": "Onze referentie"
+    },
+    "retention": {
+      "legend": "Bewaartermijn (alleen vastlegging)",
+      "filterLabel": "Bewaartermijn",
+      "untilLabel": "Bewaren tot",
+      "noteLabel": "Notitie bewaartermijn",
+      "submit": "Bewaartermijn opslaan",
+      "noDeletionNote": "Dit is een vastlegging van wat uw organisatie besloot. Er wordt niets automatisch verwijderd wanneer de datum verstrijkt.",
+      "scheduled": "Termijn vastgelegd",
+      "due": "Termijn verstreken",
+      "badge": {
+        "scheduled": "Bewaren tot {date}",
+        "due": "Termijn {date} verstreken"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Goedkeuringsroute",
+      "submit": "Ter goedkeuring sturen",
+      "submitted": "Wacht op goedkeuring",
+      "approved": "Intern goedgekeurd",
+      "returned": "Teruggestuurd zonder goedkeuring"
     }
   },
   "trust": {

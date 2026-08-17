@@ -4551,7 +4551,14 @@
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
       "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
-      "error": "[EN] Something went wrong — nothing was saved."
+      "error": "[EN] Something went wrong — nothing was saved.",
+      "updated": "[EN] The change was saved.",
+      "submitted": "[EN] The document was sent for approval.",
+      "repaired_approved": "[EN] The approval is finished — the document is approved internally.",
+      "repaired_returned": "[EN] The document came back without approval.",
+      "unchanged": "[EN] Nothing changed.",
+      "no_pending_workflow": "[EN] No approval is waiting for this document — nothing was saved.",
+      "no_approval_definition": "[EN] Your organization has no approval route set up yet — nothing was saved."
     }
   },
   "orgDocuments": {
@@ -4606,7 +4613,56 @@
       "validFromLabel": "[EN] Valid from",
       "expiresOnLabel": "[EN] Valid until",
       "externalRefLabel": "[EN] Reference number (optional)",
-      "submit": "[EN] Register document"
+      "submit": "[EN] Register document",
+      "objectLabel": "[EN] Site (optional)",
+      "objectNone": "[EN] Not linked to a site",
+      "correspondenceLegend": "[EN] Correspondence details",
+      "correspondenceHint": "[EN] Fill these in only for incoming or outgoing correspondence. Whether a letter is incoming or outgoing comes from the type you chose above."
+    },
+    "filters": {
+      "all": "[EN] All",
+      "statusLabel": "[EN] Status",
+      "directionLabel": "[EN] Correspondence",
+      "objectLabel": "[EN] Site",
+      "searchLabel": "[EN] Search the register",
+      "searchPlaceholder": "[EN] Title, description, reference, counterparty",
+      "searchSubmit": "[EN] Search",
+      "searchScopeNote": "[EN] Search looks at the register entries only — titles, descriptions, references and counterparties. It does not look inside uploaded files.",
+      "clear": "[EN] Clear filters",
+      "noMatches": "[EN] No register entries match these filters."
+    },
+    "direction": {
+      "incoming": "[EN] Incoming",
+      "outgoing": "[EN] Outgoing"
+    },
+    "fields": {
+      "counterparty": "[EN] Counterparty",
+      "correspondenceDate": "[EN] Letter date",
+      "counterpartyReference": "[EN] Their reference",
+      "correspondenceUnrecorded": "[EN] Counterparty and letter date not recorded",
+      "object": "[EN] Site",
+      "ourRef": "[EN] Our reference"
+    },
+    "retention": {
+      "legend": "[EN] Retention (record only)",
+      "filterLabel": "[EN] Retention",
+      "untilLabel": "[EN] Keep until",
+      "noteLabel": "[EN] Retention note",
+      "submit": "[EN] Save retention",
+      "noDeletionNote": "[EN] This is a record of what your organization decided. Nothing is deleted automatically when the date passes.",
+      "scheduled": "[EN] Retention set",
+      "due": "[EN] Retention date passed",
+      "badge": {
+        "scheduled": "[EN] Keep until {date}",
+        "due": "[EN] Retention date {date} passed"
+      }
+    },
+    "approval": {
+      "definitionLabel": "[EN] Approval route",
+      "submit": "[EN] Send for approval",
+      "submitted": "[EN] Awaiting approval",
+      "approved": "[EN] Approved internally",
+      "returned": "[EN] Returned without approval"
     }
   },
   "timesheets": {

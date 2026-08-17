@@ -2140,7 +2140,16 @@ describe("no migration files added by this sprint", () => {
     // merging origin/main 66c869a4 (trains C, D, E, L1, F and H all in
     // the base): `ls supabase/migrations/*.sql | wc -l` = 217 real files,
     // never summed.
-    const SPRINT_BASELINE = 217;
+    // Bumped 217 -> 218 for the org document register delta v1 DRAFT
+    // (20260817240000_org_document_register_delta_v1, train I, LEAD-gated,
+    // UNAPPLIED; five additive nullable columns on the train C
+    // `org_documents` register + one widening event-vocabulary drop/re-add
+    // + four NEW SECURITY DEFINER commands — `create_org_document_v1` is
+    // NOT recreated; paired 0-row-guarded rollback + deferred
+    // APPLIED_LEDGER entry in the PR) — RECOUNTED from the post-rebase tree
+    // with the Employee Lifecycle draft (train G) also in the base
+    // (`ls supabase/migrations/*.sql | wc -l` = 218), never summed.
+    const SPRINT_BASELINE = 218;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
