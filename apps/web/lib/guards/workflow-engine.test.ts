@@ -179,10 +179,12 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
               new RegExp(`(create (or replace )?function[^(]*\\b${fn}\\b|drop function[^(]*\\b${fn}\\b)`, "i"),
             );
           }
+          // A consumer may trigger its OWN tables (timesheets does); the
+          // doctrine forbids triggers ON ENGINE tables only.
           expect(
-            src.toLowerCase(),
-            `${dir}/${f} must not create any trigger`,
-          ).not.toContain("create trigger");
+            src,
+            `${dir}/${f} must not create a trigger on an engine table`,
+          ).not.toMatch(/create\s+trigger[^;]*\bon\s+public\.workflow_/i);
           continue;
         }
         for (const tbl of TABLES) {
