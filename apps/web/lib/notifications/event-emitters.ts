@@ -31,6 +31,7 @@ import "server-only";
  *                         about" gap the durable store exists to close.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
   emitNotificationEventInBackground,
   type NotificationEventType,
