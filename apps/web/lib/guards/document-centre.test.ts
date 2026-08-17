@@ -69,6 +69,7 @@ function row(over: Partial<CentreDocumentRow> & { id: string }): CentreDocumentR
     documentTypeSlug: "identity_document",
     country: null,
     validUntil: null,
+    storedStatus: "ready",
     derivedStatus: "ready",
     verification: null,
     ...over,

@@ -44,9 +44,26 @@ export type CentreDocumentRow = {
   readonly documentTypeSlug: string;
   readonly country: string | null;
   readonly validUntil: string | null;
+  /** The stored base status — the verification RPC only accepts `ready`
+   *  documents, so eligibility must read this, not the derived status
+   *  (a `ready` document inside the 30-day window derives `expiring` but
+   *  is still submittable). */
+  readonly storedStatus: "missing" | "ready" | "blocked";
   readonly derivedStatus: DerivedDocumentStatus;
   readonly verification: DocumentVerificationState | null;
 };
+
+/** Pure eligibility rule for the worker-side "send for verification"
+ *  control: the stored row must be `ready` and the verification axis must
+ *  be readable AND in a state the worker can act on (`unverified` or
+ *  `rejected`). `pending`/`verified` rows and unreadable axes render
+ *  nothing — no dead buttons, no fake claims. */
+export function canRequestVerification(row: CentreDocumentRow): boolean {
+  return (
+    row.storedStatus === "ready" &&
+    (row.verification === "unverified" || row.verification === "rejected")
+  );
+}
 
 /** Attention counts — each traces to real rows with real field values. */
 export type DocumentAttention = {

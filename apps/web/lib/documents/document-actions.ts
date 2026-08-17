@@ -85,3 +85,55 @@ export async function upsertWorkerDocumentAction(
   revalidatePath(`/${locale}/dashboard/documents`);
   return { ok: true };
 }
+
+export type VerificationRequestState =
+  | { ok: true }
+  | {
+      ok: false;
+      code:
+        | "not_authenticated"
+        | "not_found"
+        | "not_ready"
+        | "needs_migration"
+        | "error";
+    };
+
+/**
+ * Worker sends their own `ready` document for admin verification
+ * (→ `pending`). This is the missing caller of
+ * `request_worker_document_verification` (20260613100200) — until now the
+ * admin review queue could never be filled by a worker, so the approval
+ * chain was broken at its first link. Ownership + the `ready` gate are
+ * re-checked inside the RPC; the transition lands in the append-only
+ * `worker_document_events` audit.
+ */
+export async function requestWorkerDocumentVerificationAction(input: {
+  documentId: string;
+  locale: string;
+}): Promise<VerificationRequestState> {
+  const documentId = String(input.documentId ?? "").trim();
+  const locale = String(input.locale ?? "lt").trim() || "lt";
+  // UUID shape check only — ownership is decided by the RPC.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(documentId)) {
+    return { ok: false, code: "not_found" };
+  }
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any).rpc(
+    "request_worker_document_verification",
+    { p_document_id: documentId },
+  );
+
+  if (error) {
+    const code = error.code ?? "";
+    if (ABSENT_CODES.has(code)) return { ok: false, code: "needs_migration" };
+    if (code === "42501") return { ok: false, code: "not_authenticated" };
+    if (code === "P0002") return { ok: false, code: "not_found" };
+    if (code === "22023") return { ok: false, code: "not_ready" };
+    return { ok: false, code: "error" };
+  }
+
+  revalidatePath(`/${locale}/dashboard/documents`);
+  return { ok: true };
+}

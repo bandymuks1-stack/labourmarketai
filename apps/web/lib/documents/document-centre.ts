@@ -204,6 +204,7 @@ export async function getWorkerDocumentCentre(): Promise<WorkerDocumentCentre> {
     documentTypeSlug: d.documentTypeSlug,
     country: d.country,
     validUntil: d.validUntil,
+    storedStatus: d.storedStatus,
     derivedStatus: deriveDocumentStatus(d, now),
     // A row missing from the (bounded) verification read carries null —
     // "no claim" — never a defaulted state.

@@ -6878,6 +6878,13 @@
       "verified": "Patikrinta",
       "rejected": "Atmesta"
     },
+    "verifyRequest": {
+      "submit": "Pateikti patikrai",
+      "sent": "Pateikta patikrai",
+      "notReady": "Patikrai galima pateikti tik parengtą dokumentą.",
+      "unavailable": "Patikra šioje aplinkoje nepasiekiama.",
+      "error": "Nepavyko pateikti — bandykite dar kartą."
+    },
     "workProof": {
       "title": "Darbo įrodymai ir eksportai",
       "journalTitle": "Darbo žurnalo įrodymai",

@@ -1,6 +1,8 @@
 "use server";
 
 import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
 import type { AiLocale } from "@/lib/ai/runtime/types";
 import {
@@ -52,6 +54,23 @@ export async function aiCvStructuringSuggestions(
 ): Promise<CvAiStructuringResult> {
   const bio = (text ?? "").trim().slice(0, 8000);
   if (bio.length < 20) return { status: "off" };
+
+  // AI boundary (2026-08-17 audit): a "use server" action with no auth check
+  // and no throttle could reach runAiAgent anonymously. The profile review
+  // is an authenticated surface — anonymous callers and over-budget callers
+  // get the same honest `off` the disabled runtime shows.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "off" };
+  const limited = rateLimit({
+    name: "ai-cv-structuring",
+    key: user.id,
+    limit: 20,
+    windowMs: 10 * 60 * 1000,
+  }).limited;
+  if (limited) return { status: "off" };
 
   const aiLocale: AiLocale = SUPPORTED.has(locale) ? (locale as AiLocale) : "en";
   try {

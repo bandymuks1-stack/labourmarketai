@@ -1,6 +1,8 @@
 "use server";
 
 import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
 import type { AiLocale } from "@/lib/ai/runtime/types";
 import {
@@ -49,6 +51,23 @@ export async function aiJournalEntrySuggestions(
 ): Promise<JournalAiSuggestionsResult> {
   const rawText = (text ?? "").trim().slice(0, 8000);
   if (rawText.length < 20) return { status: "off" };
+
+  // AI boundary (2026-08-17 audit): this is a "use server" action, callable
+  // outside the composer UI, and it used to reach runAiAgent with NO auth
+  // check and NO throttle. The journal is an authenticated surface — an
+  // anonymous caller gets the same honest `off` the disabled runtime shows.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "off" };
+  const limited = rateLimit({
+    name: "ai-journal-suggestions",
+    key: user.id,
+    limit: 20,
+    windowMs: 10 * 60 * 1000,
+  }).limited;
+  if (limited) return { status: "off" };
 
   const aiLocale: AiLocale = SUPPORTED.has(locale) ? (locale as AiLocale) : "en";
   try {

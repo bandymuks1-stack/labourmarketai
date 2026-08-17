@@ -126,6 +126,19 @@ export async function submitCompanyNeedAction(
   });
   const persisted = persist.ok;
 
+  // Rate-limited caller → the honest "prepared" fallback WITHOUT invoking
+  // the AI draft. The limiter used to guard only the DB insert, leaving the
+  // model call below as unmetered anonymous work reachable from a public
+  // page (2026-08-17 audit, AI boundary gap). No AI run for a flooded key.
+  if (!persist.ok && persist.code === "rate_limited") {
+    return {
+      ok: true,
+      persisted: false,
+      isConstruction: isConstructionWorkType(raw.profession),
+      draftStatus: "disabled",
+    };
+  }
+
   // Best-effort owner demand-signal alert (Telegram, server-only + env-gated).
   // Fires ONLY on a persisted intake. The helper never throws and no-ops when
   // the channel is unconfigured; the extra try/catch is defense-in-depth so a
