@@ -771,6 +771,23 @@ describe("the migration set is exactly what this slice declared", () => {
       // (above) claimed those version prefixes on main.
       "20260817130000_workflow_engine_v1.sql",
       "20260817130100_notification_events_v3_workflow_types.sql",
+      // 2026-08-17: typed employee requests + configurable leave balance
+      // policies PAIR (functional completion train V2, agent F). The markers
+      // record that the RED content (2 new RLS tables + SELECT policies +
+      // GRANT/REVOKE + 4 SECURITY DEFINER commands, ZERO triggers, ZERO
+      // seeded rows) is STRUCTURALLY UNAVOIDABLE for new row-level-secured,
+      // RPC-only-writable tables — same class as the engine entry above.
+      // The annotation authority is the owner mandate 2026-08-17 (autonomous
+      // functional completion train V2, §4 migration authority); the
+      // annotation states the ROUTE, and the apply act belongs to the LEAD
+      // session (PENDING APPLY BY LEAD in docs/APPLIED_LEDGER.md). The
+      // requests migration CONSUMES the engine strictly through its public
+      // commands (registered consumer in lib/guards/workflow-engine.test.ts).
+      // Rollbacks paired; behavioural proof:
+      // scripts/db-proof/employee-requests-leave-balances.sh; module guard:
+      // lib/guards/employee-requests.test.ts.
+      "20260817180000_employee_requests_v1.sql",
+      "20260817181000_leave_balance_policies_v1.sql",
     ]);
   });
 

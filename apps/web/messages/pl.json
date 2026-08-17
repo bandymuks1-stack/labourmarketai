@@ -4444,5 +4444,126 @@
       "limit_reached": "Osiągnięto limit otwartych pozycji. Najpierw coś zamknij.",
       "error": "Coś poszło nie tak. Nic nie zmieniono."
     }
+  },
+  "absences": {
+    "balance": {
+      "title": "Mój stan urlopu {year}",
+      "advisoryNote": "Stany są wskazówką do planowania. Decyduje Twój przełożony. Liczby pochodzą z ustawień Twojej firmy, nie z prawa.",
+      "noPolicy": "Twoja firma nie ustaliła tu jeszcze limitów urlopu.",
+      "remaining": "zostało {days} dni",
+      "detail": "{entitlement} rocznie + {carryover} przeniesione − {used} wykorzystane",
+      "requestedDays": "wnioskowane {days} dni",
+      "remainingShort": "zostało {days} dni",
+      "exceedsNote": "Więcej niż pozostały urlop"
+    }
+  },
+  "requests": {
+    "title": "Wnioski",
+    "intro": "Poproś pracodawcę o coś i śledź, co dzieje się dalej. Każdy wniosek przechodzi ścieżkę zatwierdzania ustawioną przez Twoją firmę.",
+    "unavailable": "Wnioski nie są jeszcze włączone w tym środowisku. Nic nie przepada — sekcja otworzy się, gdy aktualizacja zostanie sprawdzona i zainstalowana.",
+    "honestNote": "O wniosku decydują prawdziwi ludzie w Twojej firmie. Nic nie jest zatwierdzane automatycznie i nic nie opuszcza produktu.",
+    "notice": {
+      "created": "Wniosek złożony. Odpowiednie osoby zostały poproszone o jego rozpatrzenie.",
+      "withdrawn": "Wniosek wycofany.",
+      "template_ready": "Ścieżka zatwierdzania wniosków jest gotowa.",
+      "policy_saved": "Limit urlopu zapisany.",
+      "already_pending": "Ten wniosek już czeka na decyzję.",
+      "no_definition": "Twoja firma nie ustawiła jeszcze ścieżki zatwierdzania wniosków.",
+      "no_approvers": "Obecnie nikt w firmie nie może rozpatrzyć tego wniosku, więc nie został złożony.",
+      "not_published": "Ścieżka zatwierdzania wniosków nie jest jeszcze gotowa.",
+      "not_pending": "Ten wniosek już nie czeka — poniżej widać jego obecny stan.",
+      "invalid": "Sprawdź dane i spróbuj ponownie.",
+      "needs_migration": "Jeszcze niedostępne — aktualizacja wniosków nie jest zainstalowana w tym środowisku.",
+      "not_authorized": "Nie możesz tego zrobić.",
+      "not_found": "Nie znaleziono.",
+      "limit_reached": "Za dużo otwartych wniosków. Najpierw poczekaj na decyzje w sprawie istniejących.",
+      "error": "Coś poszło nie tak. Spróbuj ponownie."
+    },
+    "file": {
+      "title": "Nowy wniosek",
+      "orgLabel": "Firma",
+      "unnamedOrg": "Firma bez nazwy",
+      "typeLabel": "O co prosisz?",
+      "titleLabel": "Krótki tytuł",
+      "detailsLabel": "Wyjaśnienie",
+      "dateFromLabel": "Od (opcjonalnie)",
+      "dateToLabel": "Do (opcjonalnie)",
+      "datesHint": "Daty są ważne przy pracy zdalnej lub zmianie grafiku. Zostaw puste, jeśli nie pasują.",
+      "submit": "Złóż wniosek",
+      "noOrganizations": "Nie jesteś jeszcze powiązany z żadną firmą, więc nie ma komu wysłać wniosku."
+    },
+    "type": {
+      "remote_work": "Praca zdalna",
+      "schedule_change": "Zmiana grafiku",
+      "certificate_request": "Zaświadczenie lub dokument",
+      "employment_condition_change": "Zmiana warunków zatrudnienia",
+      "benefit_request": "Świadczenie",
+      "equipment_request": "Sprzęt",
+      "other": "Inne"
+    },
+    "typeHint": {
+      "remote_work": "poproś o pracę z domu lub innego miejsca w wybrane dni",
+      "schedule_change": "poproś o inne godziny pracy lub zmiany",
+      "certificate_request": "poproś o zaświadczenie lub dokument o Twoim zatrudnieniu",
+      "employment_condition_change": "poproś o zmianę uzgodnionego warunku zatrudnienia",
+      "benefit_request": "poproś o świadczenie oferowane przez firmę",
+      "equipment_request": "poproś o narzędzia lub sprzęt do pracy",
+      "other": "wszystko inne, o co chcesz poprosić pracodawcę"
+    },
+    "status": {
+      "pending": "Czeka na decyzję",
+      "approved": "Zatwierdzony",
+      "rejected": "Odrzucony",
+      "withdrawn": "Wycofany",
+      "cancelled": "Anulowany"
+    },
+    "mine": {
+      "title": "Moje wnioski",
+      "empty": "Brak wniosków.",
+      "timelineOpen": "Pokaż przebieg"
+    },
+    "actions": {
+      "withdraw": "Wycofaj"
+    },
+    "register": {
+      "title": "Rejestr wniosków",
+      "decideHint": "Zatwierdzanie i odrzucanie odbywa się w sekcji zatwierdzeń powyżej — ten rejestr pokazuje wszystkie wnioski w Twoich organizacjach.",
+      "filterStatus": "Status",
+      "filterType": "Typ",
+      "filterAll": "Wszystkie",
+      "filterApply": "Filtruj",
+      "empty": "Brak pasujących wniosków."
+    },
+    "seed": {
+      "title": "Ustaw ścieżkę zatwierdzania wniosków",
+      "hint": "Tworzy prostą gotową ścieżkę: jedną rundę rozpatrywania, o której decydują właściciele i administratorzy firmy. Wieloetapowe ścieżki zbudujesz w sekcji zatwierdzeń powyżej.",
+      "orgLabel": "Firma",
+      "typeLabel": "Dotyczy",
+      "allTypes": "Wszystkich typów wniosków",
+      "nameLabel": "Nazwa",
+      "defaultName": "Standardowe zatwierdzanie wniosków",
+      "submit": "Utwórz i włącz"
+    },
+    "policies": {
+      "title": "Limity urlopów",
+      "honesty": "Te liczby firma ustala sama. Służą tylko do planowania — zatwierdzenie pozostaje prawdziwą decyzją przełożonego, a to nie jest porada prawna.",
+      "entitlementShort": "{days} dni/rok",
+      "carryoverShort": "+{days} przeniesione",
+      "inactive": "wyłączone",
+      "setTitle": "Ustaw limit urlopu",
+      "orgLabel": "Firma",
+      "typeLabel": "Rodzaj nieobecności",
+      "entitlementLabel": "Dni w roku",
+      "carryoverLabel": "Dni przeniesione",
+      "activeLabel": "W użyciu",
+      "submit": "Zapisz"
+    },
+    "absenceType": {
+      "annual_leave": "Urlop wypoczynkowy",
+      "sickness": "Choroba",
+      "unpaid": "Urlop bezpłatny",
+      "training": "Szkolenie",
+      "other": "Inne"
+    }
   }
 }

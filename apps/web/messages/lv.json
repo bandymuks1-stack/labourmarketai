@@ -4444,5 +4444,126 @@
       "limit_reached": "Sasniegts atvērto ierakstu limits. Vispirms pabeidziet esošos.",
       "error": "Radās kļūda. Nekas netika mainīts."
     }
+  },
+  "absences": {
+    "balance": {
+      "title": "Mans atvaļinājuma atlikums {year}",
+      "advisoryNote": "Atlikumi ir orientieris plānošanai. Lēmumu pieņem jūsu vadītājs. Skaitļi nāk no jūsu uzņēmuma iestatījumiem, nevis no likuma.",
+      "noPolicy": "Jūsu uzņēmums šeit vēl nav noteicis atvaļinājumu limitus.",
+      "remaining": "atlicis {days} d.",
+      "detail": "{entitlement} gadā + {carryover} pārcelts − {used} izmantots",
+      "requestedDays": "pieprasītas {days} d.",
+      "remainingShort": "atlicis {days} d.",
+      "exceedsNote": "Vairāk nekā atlikušais atvaļinājums"
+    }
+  },
+  "requests": {
+    "title": "Pieprasījumi",
+    "intro": "Palūdziet darba devējam kaut ko un sekojiet, kas notiek tālāk. Katrs pieprasījums iet pa jūsu uzņēmuma iestatīto saskaņošanas ceļu.",
+    "unavailable": "Pieprasījumi šajā vidē vēl nav ieslēgti. Nekas nepazūd — sadaļa atvērsies, kad atjauninājums būs pārskatīts un uzstādīts.",
+    "honestNote": "Pieprasījumu izlemj īsti cilvēki jūsu uzņēmumā. Nekas netiek apstiprināts automātiski, un nekas neatstāj produktu.",
+    "notice": {
+      "created": "Pieprasījums iesniegts. Atbildīgie cilvēki ir lūgti to izskatīt.",
+      "withdrawn": "Pieprasījums atsaukts.",
+      "template_ready": "Pieprasījumu saskaņošanas ceļš ir gatavs.",
+      "policy_saved": "Atvaļinājuma limits saglabāts.",
+      "already_pending": "Šis pieprasījums jau gaida lēmumu.",
+      "no_definition": "Jūsu uzņēmums vēl nav iestatījis pieprasījumu saskaņošanas ceļu.",
+      "no_approvers": "Šobrīd uzņēmumā nav neviena, kas var izskatīt šo pieprasījumu, tāpēc tas netika iesniegts.",
+      "not_published": "Pieprasījumu saskaņošanas ceļš vēl nav gatavs.",
+      "not_pending": "Šis pieprasījums vairs negaida — zemāk redzams tā pašreizējais stāvoklis.",
+      "invalid": "Pārbaudiet datus un mēģiniet vēlreiz.",
+      "needs_migration": "Vēl nav pieejams — pieprasījumu atjauninājums šajā vidē nav uzstādīts.",
+      "not_authorized": "Jums to nav atļauts darīt.",
+      "not_found": "Nav atrasts.",
+      "limit_reached": "Pārāk daudz atvērtu pieprasījumu. Vispirms sagaidiet lēmumus par esošajiem.",
+      "error": "Kaut kas nogāja greizi. Mēģiniet vēlreiz."
+    },
+    "file": {
+      "title": "Jauns pieprasījums",
+      "orgLabel": "Uzņēmums",
+      "unnamedOrg": "Uzņēmums bez nosaukuma",
+      "typeLabel": "Ko jūs lūdzat?",
+      "titleLabel": "Īss nosaukums",
+      "detailsLabel": "Paskaidrojums",
+      "dateFromLabel": "No (neobligāti)",
+      "dateToLabel": "Līdz (neobligāti)",
+      "datesHint": "Datumi ir svarīgi attālinātam darbam vai grafika maiņai. Ja neattiecas, atstājiet tukšus.",
+      "submit": "Iesniegt pieprasījumu",
+      "noOrganizations": "Jūs vēl neesat saistīts ne ar vienu uzņēmumu, tāpēc pieprasījumu nav kam sūtīt."
+    },
+    "type": {
+      "remote_work": "Attālināts darbs",
+      "schedule_change": "Grafika maiņa",
+      "certificate_request": "Izziņa vai dokuments",
+      "employment_condition_change": "Darba nosacījumu maiņa",
+      "benefit_request": "Labums",
+      "equipment_request": "Aprīkojums",
+      "other": "Cits"
+    },
+    "typeHint": {
+      "remote_work": "lūdziet strādāt no mājām vai citas vietas izvēlētajās dienās",
+      "schedule_change": "lūdziet citu darba laiku vai maiņas",
+      "certificate_request": "lūdziet izziņu vai dokumentu par jūsu darbu",
+      "employment_condition_change": "lūdziet mainīt saskaņotu darba nosacījumu",
+      "benefit_request": "lūdziet labumu, ko piedāvā jūsu uzņēmums",
+      "equipment_request": "lūdziet darbam vajadzīgos rīkus vai aprīkojumu",
+      "other": "jebkas cits, ko vēlaties palūgt darba devējam"
+    },
+    "status": {
+      "pending": "Gaida lēmumu",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "withdrawn": "Atsaukts",
+      "cancelled": "Atcelts"
+    },
+    "mine": {
+      "title": "Mani pieprasījumi",
+      "empty": "Pieprasījumu vēl nav.",
+      "timelineOpen": "Rādīt gaitu"
+    },
+    "actions": {
+      "withdraw": "Atsaukt"
+    },
+    "register": {
+      "title": "Pieprasījumu reģistrs",
+      "decideHint": "Apstiprināšana un noraidīšana notiek saskaņojumu sadaļā augstāk — šis reģistrs rāda visus jūsu organizāciju pieprasījumus.",
+      "filterStatus": "Statuss",
+      "filterType": "Tips",
+      "filterAll": "Visi",
+      "filterApply": "Filtrēt",
+      "empty": "Nav atbilstošu pieprasījumu."
+    },
+    "seed": {
+      "title": "Iestatīt pieprasījumu saskaņošanas ceļu",
+      "hint": "Izveido vienkāršu gatavu ceļu: vienu izskatīšanas kārtu, ko izlemj uzņēmuma īpašnieki un administratori. Vairāku kārtu ceļus veidojiet saskaņojumu sadaļā augstāk.",
+      "orgLabel": "Uzņēmums",
+      "typeLabel": "Attiecas uz",
+      "allTypes": "Visiem pieprasījumu tipiem",
+      "nameLabel": "Nosaukums",
+      "defaultName": "Standarta pieprasījumu saskaņošana",
+      "submit": "Izveidot un ieslēgt"
+    },
+    "policies": {
+      "title": "Atvaļinājumu limiti",
+      "honesty": "Šos skaitļus uzņēmums nosaka pats. Tie ir tikai orientieris plānošanai — apstiprināšana paliek īsta vadītāja lēmums, un tā nav juridiska konsultācija.",
+      "entitlementShort": "{days} d./gadā",
+      "carryoverShort": "+{days} pārcelts",
+      "inactive": "izslēgts",
+      "setTitle": "Noteikt atvaļinājuma limitu",
+      "orgLabel": "Uzņēmums",
+      "typeLabel": "Prombūtnes veids",
+      "entitlementLabel": "Dienas gadā",
+      "carryoverLabel": "Pārceltās dienas",
+      "activeLabel": "Lietošanā",
+      "submit": "Saglabāt"
+    },
+    "absenceType": {
+      "annual_leave": "Ikgadējais atvaļinājums",
+      "sickness": "Slimība",
+      "unpaid": "Bezalgas atvaļinājums",
+      "training": "Apmācības",
+      "other": "Cits"
+    }
   }
 }

@@ -520,7 +520,13 @@ describe("NO new DB migration in this PR", () => {
     // paired rollbacks, ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED
     // against post-rebase origin/main 54067a4b: 203 .sql files there, this
     // branch adds exactly two.
-    expect(count).toBeLessThanOrEqual(205);
+    // Bumped 205 -> 207 for the typed employee requests + leave balance
+    // policies DRAFT pair (20260817180000_employee_requests_v1 +
+    // 20260817181000_leave_balance_policies_v1) — nothing from the
+    // market-map read layer. Owner mandate 2026-08-17, paired rollbacks,
+    // ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED from the tree:
+    // 205 on the base, this branch adds exactly two.
+    expect(count).toBeLessThanOrEqual(207);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

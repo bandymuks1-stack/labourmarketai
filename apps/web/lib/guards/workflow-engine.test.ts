@@ -139,11 +139,42 @@ function walkSource(absDir: string, acc: string[] = []): string[] {
 
 describe("1. exactly one human-gated migration pair owns the engine", () => {
   it("no other migration or rollback mentions the engine tables or commands", () => {
+    // Registered CONSUMERS: modules that ride the engine THROUGH its public
+    // commands (the intended growth path). They may reference engine names
+    // (FK to workflow_instances, calls to start/withdraw, reads) but the
+    // stricter definition pin below proves they never DEFINE or replace an
+    // engine object and never create a trigger (engine tables stay
+    // trigger-free for outsiders by doctrine).
+    const CONSUMERS = new Set([
+      "20260817180000_employee_requests_v1.sql", // typed employee requests
+      "20260817180000_employee_requests_v1.down.sql",
+    ]);
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (CONSUMERS.has(f)) {
+          expect(src, `${dir}/${f} must not define engine tables`).not.toMatch(
+            /create\s+table\s+(if\s+not\s+exists\s+)?public\.workflow_/i,
+          );
+          for (const name of [...TABLES, ...COMMANDS]) {
+            expect(
+              src,
+              `${dir}/${f} must not (re)define ${name}`,
+            ).not.toMatch(
+              new RegExp(
+                `create\\s+or\\s+replace\\s+function\\s+public\\.${name}\\b|drop\\s+(table|function)[^;]*\\b${name}\\b`,
+                "i",
+              ),
+            );
+          }
+          expect(
+            src.toLowerCase(),
+            `${dir}/${f} must not create any trigger`,
+          ).not.toContain("create trigger");
+          continue;
+        }
         for (const tbl of TABLES) {
           expect(src, `${dir}/${f} must not define ${tbl}`).not.toMatch(
             new RegExp(`\\b${tbl}\\b`),
@@ -437,6 +468,11 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
     const allowed = [
       "lib/approvals/approvals.ts",
       "lib/notifications/event-emitters.ts",
+      // Typed employee requests (v1): the register reads its instances'
+      // engine rows (status overlay + timeline) with the SAME discipline —
+      // RLS-scoped server client, bounded, read-only; writes stay engine
+      // commands. Guarded in lib/guards/employee-requests.test.ts.
+      "lib/requests/requests.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {
