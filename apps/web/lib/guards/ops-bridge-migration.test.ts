@@ -456,6 +456,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Cross-pin follows: 205 -> 207 for the Document & Evidence Engine v1
     // pair (20260817140000 + 20260817140100, renamed from 120000/121000
     // after trains A/B claimed those slots) — floor semantics unchanged.
+    // Cross-pin follows: 213 -> 214 for the Agreement & Rights Engine v1
+    // draft (20260817200000_agreements_v1, train H, LEAD-gated, UNAPPLIED;
+    // recounted post-merge with trains A/B/C/D/E/L1 on main) — floor
+    // semantics unchanged, no numeric edit needed here.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

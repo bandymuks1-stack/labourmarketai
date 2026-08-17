@@ -4794,5 +4794,115 @@
       "remainingShort": "atlicis {days} d.",
       "exceedsNote": "Vairāk nekā atlikušais atvaļinājums"
     }
+  },
+  "agreements": {
+    "title": "Līgumu reģistrs",
+    "intro": "Kanoniskais {org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",
+    "noSignatureNote": "Šī reģistra statusi ir tikai uzskaites stāvokļi — nekas šeit nenozīmē, ka līgums ir parakstīts, juridiski spēkā vai saistošs. LabourMarket.ai neveic juridisku parakstīšanu: parakstīšana notiek ārpus platformas, un pievienotais fails ir tikai jūsu iesniegts pierādījums.",
+    "relationshipNote": "Augstāk esošais kontraktu saraksts ir agrākais personīgais komerciālais reģistrs un turpina darboties bez izmaiņām. Jauni līgumi pieder šeit.",
+    "unavailable": "Līgumu reģistru šobrīd nevar parādīt.",
+    "needsOrgWorkspace": "Līgumu reģistrs darbojas organizācijas darba vidē. Pārslēdzieties uz savu organizāciju.",
+    "preparing": "Līgumu reģistrs ir sagatavots, bet šajā vidē vēl nav iespējots.",
+    "error": "Līgumu reģistru neizdevās nolasīt.",
+    "empty": "Līgumi vēl nav reģistrēti.",
+    "emptyFiltered": "Neviens līgums neatbilst šiem filtriem.",
+    "scopeNote": "Organizācijas puses reģistrs. Darbiniekiem šis reģistrs netiek rādīts.",
+    "baseDocument": "Pamatdokuments",
+    "filters": {
+      "type": "Tips",
+      "status": "Statuss",
+      "search": "Darījuma partneris vai nosaukums",
+      "searchPlaceholder": "Meklēt…",
+      "expiringOnly": "Beidzas 30 dienu laikā",
+      "apply": "Filtrēt",
+      "all": "Visi"
+    },
+    "types": {
+      "employment_related": "Darba attiecību",
+      "service": "Pakalpojumu",
+      "supply": "Piegādes",
+      "nda": "Konfidencialitātes (NDA)",
+      "partnership": "Partnerības",
+      "other": "Cits"
+    },
+    "status": {
+      "draft": "Melnraksts",
+      "submitted_for_approval": "Iesniegts iekšējai apstiprināšanai",
+      "approved_internally": "Iekšēji apstiprināts",
+      "active_record": "Aktīvs ieraksts",
+      "amended": "Ar grozījumiem",
+      "terminated_record": "Izbeigts (ieraksts)",
+      "expired": "Beidzies"
+    },
+    "expiry": {
+      "ended": "Beigu datums pagājis",
+      "endsInDays": "Beidzas pēc {days} d."
+    },
+    "signature": {
+      "none": "Parakstīšanas pierādījums nav pievienots.",
+      "evidenceAttached": "Pievienots ārējas parakstīšanas pierādījums (parakstīts ārpus platformas).",
+      "attachLabel": "Parakstīšanas pierādījuma fails",
+      "attachSubmit": "Pievienot pierādījumu"
+    },
+    "amendment": {
+      "label": "Grozījums {n}",
+      "addTitle": "Pievienot grozījumu",
+      "titleLabel": "Grozījuma nosaukums",
+      "descriptionLabel": "Kas mainās",
+      "documentLabel": "Grozījuma dokuments",
+      "documentNone": "Bez dokumenta",
+      "effectiveDateLabel": "Spēkā stāšanās datums",
+      "honestNote": "Grozījums tiek pievienots ieraksta vēsturei. Sākotnējais līguma teksts paliek nemainīgs — spēkā esošie noteikumi ir pamats plus grozījumi secībā.",
+      "submit": "Pievienot grozījumu"
+    },
+    "actions": {
+      "active_record": "Atzīmēt kā aktīvu ierakstu",
+      "terminated_record": "Atzīmēt kā izbeigtu",
+      "expired": "Atzīmēt kā beigušos"
+    },
+    "submitApproval": {
+      "definitionLabel": "Apstiprināšanas plūsma",
+      "submit": "Iesniegt iekšējai apstiprināšanai",
+      "noDefinition": "Līgumiem nav publicētas iekšējās apstiprināšanas plūsmas — ierakstu var aktivizēt tieši.",
+      "pendingNote": "Gaida iekšējo apstiprināšanu — lēmums tiek pieņemts apstiprināšanas sadaļā."
+    },
+    "edit": {
+      "title": "Rediģēt datus",
+      "submit": "Saglabāt"
+    },
+    "create": {
+      "title": "Reģistrēt līgumu",
+      "typeLabel": "Tips",
+      "titleLabel": "Nosaukums",
+      "counterpartyLabel": "Darījuma partneris",
+      "orgNumberLabel": "Partnera uzņēmuma numurs (neobligāti)",
+      "responsibleLabel": "Atbildīgā persona",
+      "responsibleNone": "Nav piešķirta",
+      "externalRefLabel": "Ārējā atsauce (neobligāti)",
+      "effectiveFromLabel": "Spēkā no",
+      "effectiveToLabel": "Spēkā līdz",
+      "workerLinkNote": "Šis reģistrs ir uzskaite organizācijas pusē — tas pats līgumu neizveido un neparaksta.",
+      "submit": "Reģistrēt"
+    },
+    "notice": {
+      "created": "Līgums reģistrēts.",
+      "updated": "Saglabāts.",
+      "submitted": "Iesniegts iekšējai apstiprināšanai.",
+      "amended": "Grozījums pievienots.",
+      "attached": "Dokuments pievienots.",
+      "evidence_attached": "Parakstīšanas pierādījums pievienots. Tas tikai reģistrē pierādījumu — nekas ar to nekļūst juridiski spēkā.",
+      "repaired": "Apstiprināšanas rezultāts piemērots ierakstam.",
+      "no_pending_workflow": "Šim ierakstam nav atrasts gaidošs apstiprināšanas pieprasījums.",
+      "no_approval_definition": "Publicētas apstiprināšanas plūsmas nav — ieraksts paliek melnraksts.",
+      "invalid": "Dažus laukus neizdevās pieņemt.",
+      "invalid_transition": "Šāda statusa maiņa no pašreizējā stāvokļa nav atļauta.",
+      "invalid_state": "Grozījumus var pievienot, kad ieraksts ir apstiprināts vai aktīvs.",
+      "not_editable": "Šo ierakstu vairs nevar rediģēt.",
+      "not_found": "Ieraksts nav atrasts.",
+      "not_allowed": "To var darīt tikai organizācijas īpašnieks vai administrators.",
+      "limit_reached": "Sasniegts reģistra limits.",
+      "needs_migration": "Līgumu reģistrs šajā vidē vēl nav iespējots.",
+      "error": "Kaut kas nogāja greizi. Nekas netika saglabāts."
+    }
   }
 }

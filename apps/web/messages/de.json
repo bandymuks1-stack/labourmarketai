@@ -12823,5 +12823,115 @@
       "training": "Schulung",
       "other": "Sonstiges"
     }
+  },
+  "agreements": {
+    "title": "Vertragsregister",
+    "intro": "Das kanonische Register der Vereinbarungen von {org} — arbeitsbezogen und allgemein. Nur Verwaltung.",
+    "noSignatureNote": "Die Status in diesem Register sind reine Verwaltungszustände — nichts hier bedeutet, dass eine Vereinbarung unterzeichnet, rechtsgültig oder bindend ist. LabourMarket.ai führt keine rechtliche Unterzeichnung aus: Unterschrieben wird außerhalb der Plattform, und eine angehängte Datei ist nur ein von Ihnen bereitgestellter Nachweis.",
+    "relationshipNote": "Die Vertragsliste oben ist das frühere persönliche kommerzielle Register und funktioniert unverändert weiter. Neue Vereinbarungen gehören hierher.",
+    "unavailable": "Das Vertragsregister kann gerade nicht angezeigt werden.",
+    "needsOrgWorkspace": "Das Vertragsregister funktioniert im Organisations-Arbeitsbereich. Wechseln Sie zu Ihrer Organisation.",
+    "preparing": "Das Vertragsregister ist vorbereitet, in dieser Umgebung aber noch nicht aktiviert.",
+    "error": "Das Vertragsregister konnte nicht gelesen werden.",
+    "empty": "Noch keine Vereinbarungen registriert.",
+    "emptyFiltered": "Keine Vereinbarungen entsprechen diesen Filtern.",
+    "scopeNote": "Register auf Organisationsseite. Beschäftigten wird dieses Register nicht angezeigt.",
+    "baseDocument": "Basisdokument",
+    "filters": {
+      "type": "Typ",
+      "status": "Status",
+      "search": "Vertragspartner oder Titel",
+      "searchPlaceholder": "Suchen…",
+      "expiringOnly": "Endet innerhalb von 30 Tagen",
+      "apply": "Filtern",
+      "all": "Alle"
+    },
+    "types": {
+      "employment_related": "Arbeitsbezogen",
+      "service": "Dienstleistung",
+      "supply": "Lieferung",
+      "nda": "Vertraulichkeit (NDA)",
+      "partnership": "Partnerschaft",
+      "other": "Sonstiges"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "submitted_for_approval": "Zur internen Freigabe eingereicht",
+      "approved_internally": "Intern freigegeben",
+      "active_record": "Aktiver Eintrag",
+      "amended": "Geändert",
+      "terminated_record": "Beendet (Eintrag)",
+      "expired": "Abgelaufen"
+    },
+    "expiry": {
+      "ended": "Enddatum überschritten",
+      "endsInDays": "Endet in {days} T."
+    },
+    "signature": {
+      "none": "Kein Unterzeichnungsnachweis angehängt.",
+      "evidenceAttached": "Externer Unterzeichnungsnachweis angehängt (außerhalb der Plattform unterzeichnet).",
+      "attachLabel": "Datei mit Unterzeichnungsnachweis",
+      "attachSubmit": "Nachweis anhängen"
+    },
+    "amendment": {
+      "label": "Änderung {n}",
+      "addTitle": "Änderung hinzufügen",
+      "titleLabel": "Titel der Änderung",
+      "descriptionLabel": "Was sich ändert",
+      "documentLabel": "Änderungsdokument",
+      "documentNone": "Kein Dokument",
+      "effectiveDateLabel": "Wirksamkeitsdatum",
+      "honestNote": "Eine Änderung wird der Historie des Eintrags hinzugefügt. Der ursprüngliche Text bleibt unverändert — die geltenden Bedingungen sind die Basis plus die Änderungen in Reihenfolge.",
+      "submit": "Änderung hinzufügen"
+    },
+    "actions": {
+      "active_record": "Als aktiven Eintrag markieren",
+      "terminated_record": "Als beendet markieren",
+      "expired": "Als abgelaufen markieren"
+    },
+    "submitApproval": {
+      "definitionLabel": "Freigabeprozess",
+      "submit": "Zur internen Freigabe einreichen",
+      "noDefinition": "Kein veröffentlichter interner Freigabeprozess für Vereinbarungen — der Eintrag kann direkt aktiviert werden.",
+      "pendingNote": "Wartet auf interne Freigabe — die Entscheidung fällt im Freigabebereich."
+    },
+    "edit": {
+      "title": "Daten bearbeiten",
+      "submit": "Speichern"
+    },
+    "create": {
+      "title": "Vereinbarung registrieren",
+      "typeLabel": "Typ",
+      "titleLabel": "Titel",
+      "counterpartyLabel": "Vertragspartner",
+      "orgNumberLabel": "Firmennummer des Partners (optional)",
+      "responsibleLabel": "Verantwortliche Person",
+      "responsibleNone": "Nicht zugewiesen",
+      "externalRefLabel": "Externe Referenz (optional)",
+      "effectiveFromLabel": "Gültig ab",
+      "effectiveToLabel": "Gültig bis",
+      "workerLinkNote": "Dieses Register ist Verwaltung auf Organisationsseite — es erstellt oder unterzeichnet die Vereinbarung selbst nicht.",
+      "submit": "Registrieren"
+    },
+    "notice": {
+      "created": "Vereinbarung registriert.",
+      "updated": "Gespeichert.",
+      "submitted": "Zur internen Freigabe eingereicht.",
+      "amended": "Änderung hinzugefügt.",
+      "attached": "Dokument angehängt.",
+      "evidence_attached": "Unterzeichnungsnachweis angehängt. Das erfasst nur einen Nachweis — rechtlich gültig wird dadurch nichts.",
+      "repaired": "Freigabeergebnis auf den Eintrag angewendet.",
+      "no_pending_workflow": "Keine laufende Freigabeanfrage für diesen Eintrag gefunden.",
+      "no_approval_definition": "Kein veröffentlichter Freigabeprozess verfügbar — der Eintrag bleibt ein Entwurf.",
+      "invalid": "Einige Felder konnten nicht übernommen werden.",
+      "invalid_transition": "Dieser Statuswechsel ist aus dem aktuellen Zustand nicht erlaubt.",
+      "invalid_state": "Änderungen können hinzugefügt werden, sobald der Eintrag freigegeben oder aktiv ist.",
+      "not_editable": "Dieser Eintrag kann nicht mehr bearbeitet werden.",
+      "not_found": "Eintrag nicht gefunden.",
+      "not_allowed": "Das kann nur der Eigentümer oder Administrator der Organisation tun.",
+      "limit_reached": "Das Registerlimit wurde erreicht.",
+      "needs_migration": "Das Vertragsregister ist in dieser Umgebung noch nicht aktiviert.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    }
   }
 }

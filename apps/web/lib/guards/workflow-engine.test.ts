@@ -153,6 +153,12 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // workflow_instances; FK to workflow_instances. Never defines,
       // replaces or triggers an engine object (asserted below).
       "20260817180000_employee_requests_v1",
+      // The Agreement & Rights Engine (train H, 20260817200000) is the same
+      // class of consumer (context_entity_type='agreement'): its submit/sync
+      // mirror commands READ workflow_instances and its header cites
+      // start_workflow_instance_v1 as the app-layer entry point — the same
+      // no-create/no-drop assertions apply.
+      "20260817200000_agreements_v1",
     ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -498,6 +504,14 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // RLS-scoped server client, bounded, read-only; writes stay engine
       // commands. Guarded in lib/guards/employee-requests.test.ts.
       "lib/requests/requests.ts",
+      // Declared CONSUMER (Agreement & Rights Engine, train H): the
+      // agreements read service lists the org's PUBLISHED 'agreement'
+      // workflow definitions for its submit form (RLS-scoped SELECT of
+      // workflow_definitions / workflow_definition_versions only) and never
+      // writes an engine table — the no-insert/update/delete pin below
+      // covers the approvals layer, and lib/guards/agreements.test.ts pins
+      // the agreements layer to its own eight gated commands.
+      "lib/agreements/agreements.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {

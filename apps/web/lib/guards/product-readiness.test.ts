@@ -2126,7 +2126,12 @@ describe("no migration files added by this sprint", () => {
     // RECOUNTED after merging origin/main 010547e4 (trains C, D, E and L1
     // all in the base): `ls supabase/migrations/*.sql | wc -l` = 215 real
     // files, never summed.
-    const SPRINT_BASELINE = 215;
+    // Bumped 215 -> 216 for the Agreement & Rights Engine v1 DRAFT
+    // (20260817200000_agreements_v1, train H, LEAD-gated, UNAPPLIED; paired
+    // rollback + deferred APPLIED_LEDGER entry in the PR) — RECOUNTED from
+    // the post-merge tree with trains A/B/C/D/E/F/L1 on main
+    // (`ls supabase/migrations/*.sql | wc -l` = 216), never summed.
+    const SPRINT_BASELINE = 216;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

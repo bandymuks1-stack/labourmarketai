@@ -4794,5 +4794,115 @@
       "remainingShort": "{days} d igjen",
       "exceedsNote": "Mer enn gjenværende ferie"
     }
+  },
+  "agreements": {
+    "title": "Avtaleregister",
+    "intro": "Det kanoniske registeret over {org}s avtaler — arbeidsrelaterte og generelle. Kun registrering.",
+    "noSignatureNote": "Statusene i dette registeret er kun registreringstilstander — ingenting her betyr at en avtale er signert, juridisk gyldig eller bindende. LabourMarket.ai utfører ingen juridisk signering: signering skjer utenfor plattformen, og en vedlagt fil er bare dokumentasjon du selv leverer.",
+    "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommersielle registeret og fungerer uendret. Nye avtaler hører hjemme her.",
+    "unavailable": "Avtaleregisteret kan ikke vises akkurat nå.",
+    "needsOrgWorkspace": "Avtaleregisteret fungerer i et organisasjonsarbeidsområde. Bytt til organisasjonen din.",
+    "preparing": "Avtaleregisteret er forberedt, men ennå ikke aktivert i dette miljøet.",
+    "error": "Avtaleregisteret kunne ikke leses.",
+    "empty": "Ingen avtaler registrert ennå.",
+    "emptyFiltered": "Ingen avtaler samsvarer med disse filtrene.",
+    "scopeNote": "Register på organisasjonssiden. Arbeidere ser ikke dette registeret.",
+    "baseDocument": "Basisdokument",
+    "filters": {
+      "type": "Type",
+      "status": "Status",
+      "search": "Motpart eller tittel",
+      "searchPlaceholder": "Søk…",
+      "expiringOnly": "Utløper innen 30 dager",
+      "apply": "Filtrer",
+      "all": "Alle"
+    },
+    "types": {
+      "employment_related": "Arbeidsrelatert",
+      "service": "Tjeneste",
+      "supply": "Leveranse",
+      "nda": "Konfidensialitet (NDA)",
+      "partnership": "Partnerskap",
+      "other": "Annet"
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted_for_approval": "Sendt til intern godkjenning",
+      "approved_internally": "Internt godkjent",
+      "active_record": "Aktiv registrering",
+      "amended": "Endret",
+      "terminated_record": "Avsluttet (registrering)",
+      "expired": "Utløpt"
+    },
+    "expiry": {
+      "ended": "Sluttdato passert",
+      "endsInDays": "Utløper om {days} d."
+    },
+    "signature": {
+      "none": "Ingen signaturdokumentasjon vedlagt.",
+      "evidenceAttached": "Ekstern signaturdokumentasjon vedlagt (signert utenfor plattformen).",
+      "attachLabel": "Fil med signaturdokumentasjon",
+      "attachSubmit": "Legg ved dokumentasjon"
+    },
+    "amendment": {
+      "label": "Endring {n}",
+      "addTitle": "Legg til endring",
+      "titleLabel": "Endringens tittel",
+      "descriptionLabel": "Hva endres",
+      "documentLabel": "Endringsdokument",
+      "documentNone": "Ingen dokument",
+      "effectiveDateLabel": "Ikrafttredelsesdato",
+      "honestNote": "En endring legges til registreringens historikk. Den opprinnelige teksten forblir uendret — gjeldende vilkår er grunnlaget pluss endringene i rekkefølge.",
+      "submit": "Legg til endring"
+    },
+    "actions": {
+      "active_record": "Merk som aktiv registrering",
+      "terminated_record": "Merk som avsluttet",
+      "expired": "Merk som utløpt"
+    },
+    "submitApproval": {
+      "definitionLabel": "Godkjenningsflyt",
+      "submit": "Send til intern godkjenning",
+      "noDefinition": "Ingen publisert intern godkjenningsflyt for avtaler — registreringen kan aktiveres direkte.",
+      "pendingNote": "Venter på intern godkjenning — beslutningen tas i godkjenningsområdet."
+    },
+    "edit": {
+      "title": "Rediger opplysninger",
+      "submit": "Lagre"
+    },
+    "create": {
+      "title": "Registrer avtale",
+      "typeLabel": "Type",
+      "titleLabel": "Tittel",
+      "counterpartyLabel": "Motpart",
+      "orgNumberLabel": "Motpartens organisasjonsnummer (valgfritt)",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ikke tildelt",
+      "externalRefLabel": "Ekstern referanse (valgfritt)",
+      "effectiveFromLabel": "Gyldig fra",
+      "effectiveToLabel": "Gyldig til",
+      "workerLinkNote": "Dette registeret er registrering på organisasjonssiden — det oppretter eller signerer ikke selve avtalen.",
+      "submit": "Registrer"
+    },
+    "notice": {
+      "created": "Avtale registrert.",
+      "updated": "Lagret.",
+      "submitted": "Sendt til intern godkjenning.",
+      "amended": "Endring lagt til.",
+      "attached": "Dokument vedlagt.",
+      "evidence_attached": "Signaturdokumentasjon vedlagt. Dette registrerer bare dokumentasjon — ingenting blir juridisk gyldig av det.",
+      "repaired": "Godkjenningsresultat anvendt på registreringen.",
+      "no_pending_workflow": "Ingen ventende godkjenningsforespørsel funnet for denne registreringen.",
+      "no_approval_definition": "Ingen publisert godkjenningsflyt tilgjengelig — registreringen forblir et utkast.",
+      "invalid": "Noen felt kunne ikke godtas.",
+      "invalid_transition": "Det statusskiftet er ikke tillatt fra nåværende tilstand.",
+      "invalid_state": "Endringer kan legges til når registreringen er godkjent eller aktiv.",
+      "not_editable": "Denne registreringen kan ikke lenger redigeres.",
+      "not_found": "Registrering ikke funnet.",
+      "not_allowed": "Bare organisasjonens eier eller administrator kan gjøre dette.",
+      "limit_reached": "Registergrensen er nådd.",
+      "needs_migration": "Avtaleregisteret er ennå ikke aktivert i dette miljøet.",
+      "error": "Noe gikk galt. Ingenting ble lagret."
+    }
   }
 }
