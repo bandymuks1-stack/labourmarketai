@@ -771,6 +771,23 @@ describe("the migration set is exactly what this slice declared", () => {
       // (above) claimed those version prefixes on main.
       "20260817130000_workflow_engine_v1.sql",
       "20260817130100_notification_events_v3_workflow_types.sql",
+      // 2026-08-17: Document & Evidence Engine v1 pair (train C of the
+      // autonomous functional completion train V2). The markers record that
+      // the RED content (new RLS tables + SECURITY DEFINER RPCs +
+      // GRANT/REVOKE + storage bucket/policies; and the two strictly-widening
+      // constraint drop+re-adds on notification_events) is STRUCTURALLY
+      // UNAVOIDABLE / INTENTIONAL. The annotation route was pre-approved by
+      // the owner mandate 2026-08-17 (train V2 §4 migration authority); the
+      // APPLY is performed by the train LEAD, recorded as PENDING APPLY BY
+      // LEAD in docs/APPLIED_LEDGER.md. Gate records:
+      // docs/human-gates/document-file-layer-gate.md,
+      // docs/human-gates/notification-document-types-v3-gate.md. DB proof
+      // (76/76, migration + rollback verbatim):
+      // scripts/db-proof/document-file-layer.sh. Renamed from the
+      // 20260817120000/121000 slots after trains A/B claimed 120000-130100
+      // on main; the 140100 constraint union builds on 130100's list.
+      "20260817140000_document_file_layer_v1.sql",
+      "20260817140100_notification_document_types_v3.sql",
     ]);
   });
 

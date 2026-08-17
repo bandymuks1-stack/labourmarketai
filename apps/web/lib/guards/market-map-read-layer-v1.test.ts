@@ -520,11 +520,16 @@ describe("NO new DB migration in this PR", () => {
     // paired rollbacks, ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED
     // against post-rebase origin/main 54067a4b: 203 .sql files there, this
     // branch adds exactly two.
-    // Bumped 205 -> 206 for the timesheets v1 DRAFT (20260817170000,
+    // Bumped 205 -> 207 for the Document & Evidence Engine v1 pair
+    // (20260817140000 + 20260817140100, owner mandate 2026-08-17, PENDING
+    // APPLY BY LEAD; renamed from 120000/121000 after trains A/B claimed
+    // 120000-130100 on main) — recounted from the post-rebase tree, never
+    // summed. Still no migration from the market-map layer itself.
+    // Bumped 207 -> 208 for the timesheets v1 DRAFT (20260817170000,
     // owner-gated per mandate 2026-08-17, paired rollback, ships UNAPPLIED —
     // PENDING APPLY BY LEAD) — nothing from the market-map read layer.
-    // RECOUNTED from the tree: 206 .sql files.
-    expect(count).toBeLessThanOrEqual(206);
+    // RECOUNTED from the post-merge tree: 208 .sql files.
+    expect(count).toBeLessThanOrEqual(208);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

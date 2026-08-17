@@ -54,6 +54,12 @@ const EXCLUDED_NAMESPACES = new Set<string>([
   "jobPostings",
   "billingStatus",
   "adminReadiness",
+  // Org document register — owner/admin governance surface (document
+  // "classification" is the register's own legal vocabulary, and the
+  // reader is an employer, not the low-literacy worker spine). The
+  // worker-facing half of the document engine lives in `documentFiles`,
+  // which IS scanned.
+  "orgDocuments",
 ]);
 
 type Rule = { name: string; rx: RegExp };

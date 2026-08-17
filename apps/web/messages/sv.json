@@ -353,7 +353,10 @@
         "event_workflow_step_pending": "En godkännandeförfrågan väntar på ditt beslut",
         "event_workflow_decided": "Ett beslut har fattats om din godkännandeförfrågan",
         "event_workflow_delegated": "En godkännanderunda har lämnats över till dig",
-        "event_workflow_escalated": "En godkännanderunda har passerat sin frist"
+        "event_workflow_escalated": "En godkännanderunda har passerat sin frist",
+        "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
+        "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
+        "event_document_expiring": "[EN] A document's validity is ending soon."
       }
     },
     "onboarding": {
@@ -4443,6 +4446,106 @@
       "not_found": "Förfrågan hittades inte.",
       "limit_reached": "Gränsen för öppna poster har nåtts. Stäng något först.",
       "error": "Något gick fel. Inget ändrades."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "[EN] Version {n}",
+    "download": "[EN] Download",
+    "noFileYet": "[EN] No file uploaded yet.",
+    "upload": {
+      "fileLabel": "[EN] Choose a file",
+      "submit": "[EN] Upload file",
+      "newVersion": "[EN] Upload new version",
+      "limits": "[EN] PDF, Word or photo (JPG/PNG/WebP), up to 5 MB.",
+      "versionNote": "[EN] A new upload becomes a new version — earlier versions are kept."
+    },
+    "ackInbox": {
+      "title": "[EN] Documents to confirm",
+      "intro": "[EN] You were asked to confirm that you have read these documents. Open the file, then press the confirm button.",
+      "allDone": "[EN] Nothing waiting — you have confirmed every document assigned to you.",
+      "requiredBy": "[EN] confirm by {date}",
+      "confirm": "[EN] I have read this",
+      "completedTitle": "[EN] Already confirmed",
+      "confirmedAt": "[EN] confirmed {date}",
+      "versionRule": "[EN] A confirmation applies only to the exact version you opened. If a new version is published, you may be asked again."
+    },
+    "notice": {
+      "uploaded": "[EN] The file was uploaded.",
+      "created": "[EN] The document entry was created.",
+      "archived": "[EN] The document was archived.",
+      "revoked": "[EN] The document was revoked.",
+      "assigned": "[EN] The confirmation request was sent.",
+      "acknowledged": "[EN] Your confirmation was saved.",
+      "invalid": "[EN] Some of the entered details are not valid — nothing was saved.",
+      "invalid_state": "[EN] This document is not in a state that allows that action.",
+      "invalid_assignee": "[EN] That person is not a member of this organization, so the request was not sent.",
+      "already_assigned": "[EN] That person was already asked to confirm this version.",
+      "already_acknowledged": "[EN] This document version was already confirmed.",
+      "not_current": "[EN] A newer version of this document exists — refresh the page and try again.",
+      "not_allowed": "[EN] You do not have permission to do that.",
+      "not_found": "[EN] That document was not found.",
+      "limit_reached": "[EN] The document list limit was reached.",
+      "version_limit_reached": "[EN] This document reached its version limit.",
+      "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
+      "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
+      "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
+      "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
+      "error": "[EN] Something went wrong — nothing was saved."
+    }
+  },
+  "orgDocuments": {
+    "title": "[EN] Company document register",
+    "intro": "[EN] Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
+    "unavailable": "[EN] The document register could not be loaded right now.",
+    "preparing": "[EN] The document register is prepared but not enabled in this environment yet.",
+    "error": "[EN] The document register could not be loaded — try again later.",
+    "empty": "[EN] No documents registered yet.",
+    "scopeNote": "[EN] This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
+    "types": {
+      "org_policy": "[EN] Policy",
+      "org_procedure": "[EN] Procedure",
+      "org_instruction": "[EN] Instruction",
+      "org_correspondence_incoming": "[EN] Incoming correspondence",
+      "org_correspondence_outgoing": "[EN] Outgoing correspondence",
+      "org_internal": "[EN] Internal document",
+      "org_agreement_attachment": "[EN] Agreement attachment"
+    },
+    "status": {
+      "active": "[EN] Active",
+      "archived": "[EN] Archived",
+      "revoked": "[EN] Revoked"
+    },
+    "classification": {
+      "standard": "[EN] Standard",
+      "classified": "[EN] Restricted access"
+    },
+    "currentVersion": "[EN] Version {n}",
+    "versionHistory": "[EN] {n} versions",
+    "download": "[EN] Download",
+    "noFileYet": "[EN] No file uploaded yet.",
+    "uploadNewVersion": "[EN] Upload new version",
+    "uploadFirst": "[EN] Upload file",
+    "expiresOn": "[EN] valid until {date}",
+    "ackProgress": "[EN] {done}/{total} confirmed",
+    "assign": {
+      "assigneeLabel": "[EN] Ask to confirm:",
+      "requiredByLabel": "[EN] by",
+      "submit": "[EN] Send request"
+    },
+    "archive": "[EN] Archive",
+    "revoke": "[EN] Revoke",
+    "create": {
+      "title": "[EN] Register a new document",
+      "typeLabel": "[EN] Type",
+      "titleLabel": "[EN] Title",
+      "descriptionLabel": "[EN] Description (optional)",
+      "classificationLabel": "[EN] Access",
+      "responsibleLabel": "[EN] Responsible person",
+      "responsibleNone": "[EN] Not set",
+      "validFromLabel": "[EN] Valid from",
+      "expiresOnLabel": "[EN] Valid until",
+      "externalRefLabel": "[EN] Reference number (optional)",
+      "submit": "[EN] Register document"
     }
   },
   "timesheets": {

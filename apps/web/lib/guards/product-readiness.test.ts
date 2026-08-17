@@ -2090,11 +2090,18 @@ describe("no migration files added by this sprint", () => {
     // the 20260817120000/121000 slots after security train A claimed those
     // version prefixes on main. RECOUNTED from the post-rebase tree
     // (`ls supabase/migrations/*.sql` = 205), never summed.
-    // Bumped 205 -> 206 for the timesheets v1 DRAFT (20260817170000,
+    // Bumped 205 -> 207 for the Document & Evidence Engine v1 pair
+    // (20260817140000_document_file_layer_v1 + 20260817140100_notification_
+    // document_types_v3; owner mandate 2026-08-17, PENDING APPLY BY LEAD) —
+    // renamed from the 20260817120000/121000 slots after trains A/B claimed
+    // 120000-130100 on main; RECOUNTED from the post-rebase tree
+    // (`ls supabase/migrations/*.sql | wc -l` = 207), never summed; gate
+    // docs document-file-layer-gate.md + notification-document-types-v3-gate.md.
+    // Bumped 207 -> 208 for the timesheets v1 DRAFT (20260817170000,
     // owner-gated per mandate 2026-08-17, UNAPPLIED — PENDING APPLY BY LEAD)
-    // — recounted from the tree (`ls supabase/migrations/*.sql` = 206),
-    // never summed.
-    const SPRINT_BASELINE = 206;
+    // — RECOUNTED from the post-merge tree
+    // (`ls supabase/migrations/*.sql | wc -l` = 208), never summed.
+    const SPRINT_BASELINE = 208;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

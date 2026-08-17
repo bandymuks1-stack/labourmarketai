@@ -145,30 +145,40 @@ describe("1. composition-only: existing reads, nothing new, nothing privileged",
   });
 });
 
-describe("2. no second store, no bucket, no upload UI (bucket stays migration-gated)", () => {
-  it("no worker-documents bucket literal and no bucket creation anywhere in the layer", () => {
+describe("2. file layer arrives via its OWN gated module; this layer stays composition-only", () => {
+  // Document & Evidence Engine v1: real upload/download now exists behind
+  // the human-gated 20260817140000 migration — in lib/documents/
+  // document-file-{model,actions}.ts + document-files.ts, pinned by
+  // lib/guards/document-file-layer.test.ts. THIS centre layer keeps its
+  // original contract: composition only, no bucket creation, no storage
+  // access, and the page itself carries no raw form controls (the file
+  // controls are dedicated components rendered ONLY when the layer really
+  // answered).
+  it("no bucket creation anywhere in the centre layer", () => {
     for (const src of CENTRE_LAYER.map(stripComments)) {
       expect(src).not.toMatch(/worker-documents/);
       expect(src).not.toMatch(/createBucket|storage\.buckets/);
     }
   });
 
-  it("no file input and no upload control on the page", () => {
+  it("the page file itself stays free of raw inputs (controls live in components)", () => {
     const code = stripComments(PAGE);
     expect(code).not.toMatch(/type="file"/);
     expect(code).not.toMatch(/<input\b/i);
     expect(code).not.toMatch(/FileUpload|Dropzone|uppy/i);
+    // The real controls mount ONLY when the file layer answered here.
+    expect(code).toMatch(/fileState\.available \? \(/);
   });
 
-  it("the page states the no-upload truth instead", () => {
+  it("the no-upload note is CONDITIONAL on the file layer being absent — honest both ways", () => {
+    expect(PAGE).toMatch(/\{!fileState\.available \? \(/);
     expect(PAGE).toMatch(/doc-centre-upload-note/);
     expect(PAGE).toMatch(/tc\("uploadNote"\)/);
     const en = JSON.parse(read("messages/en.json")).documentCentre as {
       uploadNote: string;
     };
-    // Same honesty pin, plain-language wording (human-first launch train v1):
-    // the copy must still say upload does not exist and files stay with the
-    // worker — it just says so without the word "metadata".
+    // The copy stays truthful FOR THE STATE IT RENDERS IN (layer absent):
+    // upload is not available there and files stay with the worker.
     expect(en.uploadNote).toMatch(/file upload is not available yet/i);
     expect(en.uploadNote).toMatch(/files themselves stay with you/i);
   });
@@ -335,9 +345,11 @@ describe("6. honest degradation per source + the preparing gate stays", () => {
     expect(PAGE).toMatch(/if \(!DOCUMENTS_READINESS_ENABLED\)/);
     expect(PAGE).toMatch(/documents-preparing/);
     // The preparing branch still carries the real work-proof exports.
+    // (End anchor: the country parse that follows the preparing return —
+    // `sp` itself moved above the role branch for the docNotice banner.)
     const preparing = PAGE.slice(
       PAGE.indexOf("if (!DOCUMENTS_READINESS_ENABLED)"),
-      PAGE.indexOf('const sp = await searchParams'),
+      PAGE.indexOf("const country = (DOCUMENT_COUNTRIES"),
     );
     expect(preparing).toMatch(/WorkProofExports/);
   });

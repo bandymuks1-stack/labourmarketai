@@ -4104,7 +4104,10 @@
         "event_workflow_step_pending": "Tvirtinimo prašymas laukia jūsų sprendimo",
         "event_workflow_decided": "Dėl jūsų tvirtinimo prašymo priimtas sprendimas",
         "event_workflow_delegated": "Jums perduotas tvirtinimo etapas",
-        "event_workflow_escalated": "Tvirtinimo etapas viršijo terminą"
+        "event_workflow_escalated": "Tvirtinimo etapas viršijo terminą",
+        "event_document_ack_assigned": "Jūsų paprašyta patvirtinti, kad perskaitėte dokumentą.",
+        "event_document_ack_completed": "Dokumentas, kurį siuntėte patvirtinti, buvo patvirtintas.",
+        "event_document_expiring": "Netrukus baigsis dokumento galiojimas."
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -6910,6 +6913,106 @@
       "unavailable": "Sutikimu pagrįstos dokumentų suvestinės šioje aplinkoje nepasiekiamos. Dokumentai priklauso darbuotojams.",
       "projectAxisLink": "Projektų parengties sąrašai",
       "projectAxisNote": "Darbuotojų parengtis pagal projektą rodoma kiekvieno projekto operacijų puslapyje."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Versija {n}",
+    "download": "Atsisiųsti",
+    "noFileYet": "Failas dar neįkeltas.",
+    "upload": {
+      "fileLabel": "Pasirinkite failą",
+      "submit": "Įkelti failą",
+      "newVersion": "Įkelti naują versiją",
+      "limits": "PDF, Word arba nuotrauka (JPG/PNG/WebP), iki 5 MB.",
+      "versionNote": "Naujas įkėlimas tampa nauja versija — ankstesnės versijos išsaugomos."
+    },
+    "ackInbox": {
+      "title": "Dokumentai patvirtinimui",
+      "intro": "Jūsų paprašyta patvirtinti, kad perskaitėte šiuos dokumentus. Atidarykite failą ir spauskite patvirtinimo mygtuką.",
+      "allDone": "Nieko nelaukia — patvirtinote visus jums priskirtus dokumentus.",
+      "requiredBy": "patvirtinti iki {date}",
+      "confirm": "Perskaičiau",
+      "completedTitle": "Jau patvirtinta",
+      "confirmedAt": "patvirtinta {date}",
+      "versionRule": "Patvirtinimas galioja tik tai versijai, kurią atidarėte. Jei paskelbiama nauja versija, jūsų gali paprašyti patvirtinti iš naujo."
+    },
+    "notice": {
+      "uploaded": "Failas įkeltas.",
+      "created": "Dokumento įrašas sukurtas.",
+      "archived": "Dokumentas perkeltas į archyvą.",
+      "revoked": "Dokumentas atšauktas.",
+      "assigned": "Patvirtinimo prašymas išsiųstas.",
+      "acknowledged": "Jūsų patvirtinimas išsaugotas.",
+      "invalid": "Dalis įvestų duomenų netinkami — niekas neišsaugota.",
+      "invalid_state": "Šio dokumento būsena neleidžia atlikti šio veiksmo.",
+      "invalid_assignee": "Šis žmogus nėra šios organizacijos narys, todėl prašymas neišsiųstas.",
+      "already_assigned": "Šio žmogaus jau paprašyta patvirtinti šią versiją.",
+      "already_acknowledged": "Ši dokumento versija jau patvirtinta.",
+      "not_current": "Yra naujesnė šio dokumento versija — atnaujinkite puslapį ir bandykite dar kartą.",
+      "not_allowed": "Neturite teisės to atlikti.",
+      "not_found": "Dokumentas nerastas.",
+      "limit_reached": "Pasiektas dokumentų sąrašo limitas.",
+      "version_limit_reached": "Šis dokumentas pasiekė versijų limitą.",
+      "path_mismatch": "Įkėlimo nepavyko patikrinti — niekas neišsaugota. Bandykite dar kartą.",
+      "file_too_large": "Failas didesnis nei 5 MB — niekas neišsaugota.",
+      "unsupported_type": "Šis failo tipas nepalaikomas — naudokite PDF, Word arba nuotrauką.",
+      "needs_migration": "Failų įkėlimas šioje aplinkoje dar neįjungtas — niekas neišsaugota.",
+      "error": "Įvyko klaida — niekas neišsaugota."
+    }
+  },
+  "orgDocuments": {
+    "title": "Įmonės dokumentų registras",
+    "intro": "{org} dokumentai: politikos, procedūros, instrukcijos ir korespondencija su versijomis bei perskaitymo patvirtinimais.",
+    "unavailable": "Dokumentų registro šiuo metu nepavyko įkelti.",
+    "preparing": "Dokumentų registras paruoštas, bet šioje aplinkoje dar neįjungtas.",
+    "error": "Dokumentų registro nepavyko įkelti — bandykite vėliau.",
+    "empty": "Registruotų dokumentų dar nėra.",
+    "scopeNote": "Šiame registre saugomi pačios organizacijos dokumentai. Darbuotojų asmeniniai dokumentai lieka jų pačių rankose ir čia nerodomi.",
+    "types": {
+      "org_policy": "Politika",
+      "org_procedure": "Procedūra",
+      "org_instruction": "Instrukcija",
+      "org_correspondence_incoming": "Gaunama korespondencija",
+      "org_correspondence_outgoing": "Siunčiama korespondencija",
+      "org_internal": "Vidinis dokumentas",
+      "org_agreement_attachment": "Sutarties priedas"
+    },
+    "status": {
+      "active": "Aktyvus",
+      "archived": "Archyvuotas",
+      "revoked": "Atšauktas"
+    },
+    "classification": {
+      "standard": "Standartinis",
+      "classified": "Ribota prieiga"
+    },
+    "currentVersion": "Versija {n}",
+    "versionHistory": "{n} versijos",
+    "download": "Atsisiųsti",
+    "noFileYet": "Failas dar neįkeltas.",
+    "uploadNewVersion": "Įkelti naują versiją",
+    "uploadFirst": "Įkelti failą",
+    "expiresOn": "galioja iki {date}",
+    "ackProgress": "{done}/{total} patvirtinta",
+    "assign": {
+      "assigneeLabel": "Prašyti patvirtinti:",
+      "requiredByLabel": "iki",
+      "submit": "Siųsti prašymą"
+    },
+    "archive": "Archyvuoti",
+    "revoke": "Atšaukti",
+    "create": {
+      "title": "Registruoti naują dokumentą",
+      "typeLabel": "Tipas",
+      "titleLabel": "Pavadinimas",
+      "descriptionLabel": "Aprašymas (neprivaloma)",
+      "classificationLabel": "Prieiga",
+      "responsibleLabel": "Atsakingas asmuo",
+      "responsibleNone": "Nenustatyta",
+      "validFromLabel": "Galioja nuo",
+      "expiresOnLabel": "Galioja iki",
+      "externalRefLabel": "Registracijos numeris (neprivaloma)",
+      "submit": "Registruoti dokumentą"
     }
   },
   "trust": {
