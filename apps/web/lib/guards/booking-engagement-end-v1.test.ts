@@ -755,6 +755,39 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260817121000_invitation_org_authority_v1.sql",
       "20260817122000_contact_disclosure_org_authority_v1.sql",
       "20260817123000_finance_org_authority_v1.sql",
+      // 2026-08-17: Workflow & Approval Engine v1 PAIR. The markers record
+      // that the RED content (7 new RLS tables + SELECT policies +
+      // GRANT/REVOKE + 12 SECURITY DEFINER functions + 3 trigger guards;
+      // and a constraint drop/re-add widening on notification_events) is
+      // STRUCTURALLY UNAVOIDABLE for a row-level-secured write engine —
+      // same class as the vacancy-persistence / notification-events entries
+      // above. The annotation authority is the owner mandate 2026-08-17
+      // (autonomous functional completion train V2, §4 migration authority);
+      // the annotation states the ROUTE, and the apply act belongs to the
+      // LEAD session (PENDING APPLY BY LEAD in docs/APPLIED_LEDGER.md).
+      // Gate record: docs/human-gates/workflow-engine-gate.md. Rollbacks
+      // paired; behavioural proof: scripts/db-proof/workflow-engine-v1.sh.
+      // Renamed from the 20260817120000/121000 slots after security train A
+      // (above) claimed those version prefixes on main.
+      "20260817130000_workflow_engine_v1.sql",
+      "20260817130100_notification_events_v3_workflow_types.sql",
+      // 2026-08-17: Document & Evidence Engine v1 pair (train C of the
+      // autonomous functional completion train V2). The markers record that
+      // the RED content (new RLS tables + SECURITY DEFINER RPCs +
+      // GRANT/REVOKE + storage bucket/policies; and the two strictly-widening
+      // constraint drop+re-adds on notification_events) is STRUCTURALLY
+      // UNAVOIDABLE / INTENTIONAL. The annotation route was pre-approved by
+      // the owner mandate 2026-08-17 (train V2 §4 migration authority); the
+      // APPLY is performed by the train LEAD, recorded as PENDING APPLY BY
+      // LEAD in docs/APPLIED_LEDGER.md. Gate records:
+      // docs/human-gates/document-file-layer-gate.md,
+      // docs/human-gates/notification-document-types-v3-gate.md. DB proof
+      // (76/76, migration + rollback verbatim):
+      // scripts/db-proof/document-file-layer.sh. Renamed from the
+      // 20260817120000/121000 slots after trains A/B claimed 120000-130100
+      // on main; the 140100 constraint union builds on 130100's list.
+      "20260817140000_document_file_layer_v1.sql",
+      "20260817140100_notification_document_types_v3.sql",
       // 2026-08-17: durable workspace pointer v2 (consolidation train L
       // slice 1) — marked under the SAME standing owner mandate 2026-08-17
       // (autonomous functional completion train V2, §4 migration authority)

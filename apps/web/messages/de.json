@@ -4100,7 +4100,14 @@
         "event_absence_rejected": "Ihre Abwesenheit wurde abgelehnt",
         "event_booking_withdrawn": "Der Buchungsvorschlag wurde zurückgezogen",
         "event_engagement_ended": "Das Arbeitsverhältnis wurde beendet",
-        "event_engagement_created": "Ein neues Engagement wurde erstellt"
+        "event_engagement_created": "Ein neues Engagement wurde erstellt",
+        "event_workflow_step_pending": "Eine Freigabeanfrage wartet auf Ihre Entscheidung",
+        "event_workflow_decided": "Über Ihre Freigabeanfrage wurde entschieden",
+        "event_workflow_delegated": "Eine Freigaberunde wurde an Sie übergeben",
+        "event_workflow_escalated": "Eine Freigaberunde hat ihre Frist überschritten",
+        "event_document_ack_assigned": "Sie wurden gebeten zu bestätigen, dass Sie ein Dokument gelesen haben.",
+        "event_document_ack_completed": "Ein von Ihnen zur Bestätigung gesendetes Dokument wurde bestätigt.",
+        "event_document_expiring": "Die Gültigkeit eines Dokuments endet bald."
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -6906,6 +6913,106 @@
       "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
       "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
       "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Version {n}",
+    "download": "Herunterladen",
+    "noFileYet": "Noch keine Datei hochgeladen.",
+    "upload": {
+      "fileLabel": "Datei auswählen",
+      "submit": "Datei hochladen",
+      "newVersion": "Neue Version hochladen",
+      "limits": "PDF, Word oder Foto (JPG/PNG/WebP), bis 5 MB.",
+      "versionNote": "Ein neuer Upload wird zu einer neuen Version — frühere Versionen bleiben erhalten."
+    },
+    "ackInbox": {
+      "title": "Zu bestätigende Dokumente",
+      "intro": "Sie wurden gebeten zu bestätigen, dass Sie diese Dokumente gelesen haben. Öffnen Sie die Datei und drücken Sie die Bestätigungstaste.",
+      "allDone": "Nichts offen — Sie haben alle Ihnen zugewiesenen Dokumente bestätigt.",
+      "requiredBy": "bestätigen bis {date}",
+      "confirm": "Ich habe das gelesen",
+      "completedTitle": "Bereits bestätigt",
+      "confirmedAt": "bestätigt {date}",
+      "versionRule": "Eine Bestätigung gilt nur für genau die Version, die Sie geöffnet haben. Bei einer neuen Version können Sie erneut gefragt werden."
+    },
+    "notice": {
+      "uploaded": "Die Datei wurde hochgeladen.",
+      "created": "Der Dokumenteintrag wurde erstellt.",
+      "archived": "Das Dokument wurde archiviert.",
+      "revoked": "Das Dokument wurde zurückgezogen.",
+      "assigned": "Die Bestätigungsanfrage wurde gesendet.",
+      "acknowledged": "Ihre Bestätigung wurde gespeichert.",
+      "invalid": "Ein Teil der eingegebenen Daten ist ungültig — nichts wurde gespeichert.",
+      "invalid_state": "Der Zustand dieses Dokuments erlaubt diese Aktion nicht.",
+      "invalid_assignee": "Diese Person ist kein Mitglied dieser Organisation; die Anfrage wurde nicht gesendet.",
+      "already_assigned": "Diese Person wurde bereits gebeten, diese Version zu bestätigen.",
+      "already_acknowledged": "Diese Dokumentversion wurde bereits bestätigt.",
+      "not_current": "Es gibt eine neuere Version dieses Dokuments — Seite aktualisieren und erneut versuchen.",
+      "not_allowed": "Sie haben dafür keine Berechtigung.",
+      "not_found": "Das Dokument wurde nicht gefunden.",
+      "limit_reached": "Das Limit der Dokumentenliste wurde erreicht.",
+      "version_limit_reached": "Dieses Dokument hat sein Versionslimit erreicht.",
+      "path_mismatch": "Der Upload konnte nicht überprüft werden — nichts wurde gespeichert. Bitte erneut versuchen.",
+      "file_too_large": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
+      "unsupported_type": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
+      "needs_migration": "Der Datei-Upload ist in dieser Umgebung noch nicht aktiviert — nichts wurde gespeichert.",
+      "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert."
+    }
+  },
+  "orgDocuments": {
+    "title": "Dokumentenregister des Unternehmens",
+    "intro": "Dokumente von {org}: Richtlinien, Verfahren, Anweisungen und Korrespondenz, mit Versionen und Lesebestätigungen.",
+    "unavailable": "Das Dokumentenregister kann gerade nicht geladen werden.",
+    "preparing": "Das Dokumentenregister ist vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+    "error": "Das Dokumentenregister konnte nicht geladen werden — bitte später erneut versuchen.",
+    "empty": "Noch keine Dokumente registriert.",
+    "scopeNote": "Dieses Register enthält die Dokumente der Organisation selbst. Persönliche Dokumente der Beschäftigten bleiben in deren Händen und werden hier nie angezeigt.",
+    "types": {
+      "org_policy": "Richtlinie",
+      "org_procedure": "Verfahren",
+      "org_instruction": "Anweisung",
+      "org_correspondence_incoming": "Eingehende Korrespondenz",
+      "org_correspondence_outgoing": "Ausgehende Korrespondenz",
+      "org_internal": "Internes Dokument",
+      "org_agreement_attachment": "Vertragsanlage"
+    },
+    "status": {
+      "active": "Aktiv",
+      "archived": "Archiviert",
+      "revoked": "Zurückgezogen"
+    },
+    "classification": {
+      "standard": "Standard",
+      "classified": "Eingeschränkter Zugriff"
+    },
+    "currentVersion": "Version {n}",
+    "versionHistory": "{n} Versionen",
+    "download": "Herunterladen",
+    "noFileYet": "Noch keine Datei hochgeladen.",
+    "uploadNewVersion": "Neue Version hochladen",
+    "uploadFirst": "Datei hochladen",
+    "expiresOn": "gültig bis {date}",
+    "ackProgress": "{done}/{total} bestätigt",
+    "assign": {
+      "assigneeLabel": "Um Bestätigung bitten:",
+      "requiredByLabel": "bis",
+      "submit": "Anfrage senden"
+    },
+    "archive": "Archivieren",
+    "revoke": "Zurückziehen",
+    "create": {
+      "title": "Neues Dokument registrieren",
+      "typeLabel": "Typ",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung (optional)",
+      "classificationLabel": "Zugriff",
+      "responsibleLabel": "Verantwortliche Person",
+      "responsibleNone": "Nicht festgelegt",
+      "validFromLabel": "Gültig ab",
+      "expiresOnLabel": "Gültig bis",
+      "externalRefLabel": "Referenznummer (optional)",
+      "submit": "Dokument registrieren"
     }
   },
   "trust": {
@@ -12264,6 +12371,154 @@
       "intro": "Sie wurden über LabourMarket.ai eingeladen.",
       "open": "Öffnen Sie die Einladung:",
       "validity": "Der Link ist 14 Tage gültig. Falls Sie diese Einladung nicht erwartet haben, ignorieren Sie diese E-Mail einfach."
+    }
+  },
+  "approvals": {
+    "title": "Freigaben",
+    "intro": "Freigabeanfragen in Ihren Organisationen: Anfrage stellen, über Wartendes entscheiden und jede Runde verfolgen.",
+    "unavailable": "Freigaben sind in dieser Umgebung noch nicht aktiviert. Nichts geht verloren — dieser Bereich öffnet sich, sobald der Freigabespeicher geprüft und eingespielt ist.",
+    "honestNote": "Entscheidungen bleiben im Produkt. Nichts wird per E-Mail oder anderweitig versendet — Aktualisierungen erscheinen auf dieser Seite und in der Benachrichtigungsglocke.",
+    "loadError": "Ein Teil der Freigabedaten konnte gerade nicht geladen werden. Was Sie sehen, ist echt, kann aber unvollständig sein.",
+    "inbox": {
+      "title": "Wartet auf Ihre Entscheidung",
+      "empty": "Derzeit wartet nichts auf Ihre Entscheidung.",
+      "stepLabel": "Runde"
+    },
+    "start": {
+      "title": "Neue Freigabeanfrage",
+      "definitionLabel": "Freigabevorlage",
+      "titleLabel": "Worum bitten Sie?",
+      "detailsLabel": "Details (optional)",
+      "submit": "Anfrage senden"
+    },
+    "myRequests": {
+      "title": "Meine Anfragen",
+      "empty": "Sie haben noch keine Freigabeanfragen gestellt."
+    },
+    "admin": {
+      "title": "Freigaben der Organisation",
+      "noPending": "Keine offenen Anfragen anderer in Ihren Organisationen.",
+      "overdueHint": "Die Fristenprüfung markiert nur überfällige Runden und informiert die Verantwortlichen. Es wird niemals automatisch genehmigt."
+    },
+    "templates": {
+      "title": "Freigabevorlagen",
+      "empty": "Noch keine Vorlagen. Erstellen Sie unten die erste.",
+      "createTitle": "Neue Freigabevorlage",
+      "orgLabel": "Organisation",
+      "nameLabel": "Name der Vorlage",
+      "contextLabel": "Anfragetyp",
+      "stepLegend": "Runde {n}",
+      "optional": "optional",
+      "stepNameLabel": "Name der Runde",
+      "modeLabel": "Wie viele müssen genehmigen",
+      "ruleLabel": "Wer entscheidet",
+      "deadlineLabel": "Frist (Stunden, optional)",
+      "escalationHint": "Überschreitet eine Runde ihre Frist, wird sie als überfällig markiert und Eigentümer sowie Administratoren werden informiert. Automatisch genehmigt wird niemals.",
+      "createSubmit": "Vorlage erstellen",
+      "stepCount": "Runden: {count}",
+      "published": "In Verwendung"
+    },
+    "actions": {
+      "approve": "Genehmigen",
+      "reject": "Ablehnen",
+      "delegate": "An Kollegen übergeben",
+      "delegateSubmit": "Übergeben",
+      "withdraw": "Zurückziehen",
+      "cancel": "Anfrage stornieren",
+      "markOverdue": "Fristen prüfen",
+      "publish": "In Verwendung nehmen"
+    },
+    "form": {
+      "reasonLabel": "Begründung",
+      "reasonOptional": "Optional",
+      "delegateEmailLabel": "E-Mail des Kollegen",
+      "delegateHint": "Der Kollege muss derselben Organisation angehören. Die Verantwortung für diese Runde bleibt bei Ihnen."
+    },
+    "status": {
+      "pending": "Wartend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "withdrawn": "Zurückgezogen",
+      "cancelled": "Storniert"
+    },
+    "stepStatus": {
+      "waiting": "Nicht begonnen",
+      "active": "Läuft",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "skipped": "Übersprungen",
+      "escalated": "Frist überschritten"
+    },
+    "mode": {
+      "single": "Eine Person entscheidet",
+      "all": "Alle müssen genehmigen",
+      "any": "Die erste Entscheidung zählt"
+    },
+    "decision": {
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "rule": {
+      "owner_admin": "Eigentümer und Administratoren",
+      "requester_manager": "Die Vorgesetzten des Antragstellers"
+    },
+    "contextType": {
+      "generic_request": "Allgemeine Anfrage",
+      "worker_absence": "Abwesenheit",
+      "expense": "Ausgabe",
+      "invoice": "Rechnung",
+      "document_ack": "Dokumentfreigabe",
+      "timesheet": "Stundenzettel",
+      "procurement": "Einkauf",
+      "business_trip": "Dienstreise",
+      "management_decision": "Managemententscheidung",
+      "agreement": "Vereinbarung"
+    },
+    "transition": {
+      "started": "Anfrage gestellt",
+      "step_activated": "Runde gestartet",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "delegated": "Übergeben",
+      "withdrawn": "Zurückgezogen",
+      "cancelled": "Storniert",
+      "escalated": "Fristüberschreitung markiert",
+      "completed": "Abgeschlossen"
+    },
+    "timeline": {
+      "open": "Fortschritt anzeigen",
+      "progress": "{approved} von {total} genehmigt",
+      "deadline": "Frist",
+      "historyTitle": "Vollständiger Verlauf",
+      "stepLabel": "Runde"
+    },
+    "notice": {
+      "created": "Vorlage erstellt. Nehmen Sie sie in Verwendung, damit Anfragen gestellt werden können.",
+      "published": "Vorlage ist jetzt in Verwendung.",
+      "started": "Anfrage an die ersten Genehmiger gesendet.",
+      "already_pending": "Diese Anfrage ist bereits offen.",
+      "already_published": "Diese Vorlage ist bereits in Verwendung.",
+      "already_exists": "Eine Vorlage mit diesem Namen existiert in der Organisation bereits.",
+      "already_decided": "Sie haben in dieser Runde bereits entschieden.",
+      "approved": "Anfrage genehmigt.",
+      "rejected": "Anfrage abgelehnt.",
+      "step_approved": "Runde genehmigt — die nächste Runde hat begonnen.",
+      "recorded": "Ihre Entscheidung ist gespeichert. Warten auf die übrigen Genehmiger.",
+      "delegated": "Runde an Ihren Kollegen übergeben.",
+      "withdrawn": "Anfrage zurückgezogen.",
+      "cancelled": "Anfrage storniert.",
+      "marked_overdue": "Überfällige Runden wurden markiert und die Verantwortlichen informiert.",
+      "no_overdue": "Keine Runden über der Frist.",
+      "no_approvers": "Für diese Anfrage gibt es noch keine möglichen Genehmiger. Prüfen Sie Mitglieder und Rollen der Organisation.",
+      "not_published": "Diese Vorlage ist noch nicht in Verwendung.",
+      "not_pending": "Diese Anfrage ist nicht mehr offen.",
+      "invalid": "Bitte prüfen Sie die eingegebenen Werte und versuchen Sie es erneut.",
+      "invalid_delegate": "Dieser Kollege wurde in dieser Organisation nicht gefunden.",
+      "needs_migration": "Freigaben sind in dieser Umgebung noch nicht aktiviert. Nichts wurde gespeichert.",
+      "not_authorized": "Das dürfen Sie nicht tun.",
+      "not_found": "Diese Anfrage wurde nicht gefunden.",
+      "limit_reached": "Das Limit offener Einträge ist erreicht. Schließen Sie zuerst etwas ab.",
+      "error": "Etwas ist schiefgelaufen. Nichts wurde geändert."
     }
   }
 }

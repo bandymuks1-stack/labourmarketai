@@ -2083,15 +2083,30 @@ describe("no migration files added by this sprint", () => {
     // Safe: policy corrections + authority extensions only; no schema change,
     // no DML, every file carries a paired rollback and the human-gate marker
     // per owner mandate 2026-08-17 §4.
-    // Bumped 203 -> 204 for the durable workspace pointer v2 DRAFT
+    // Bumped 203 -> 205 for the Workflow & Approval Engine v1 PAIR
+    // (20260817130000_workflow_engine_v1 + 20260817130100_notification_
+    // events_v3_workflow_types; owner mandate 2026-08-17, UNAPPLIED —
+    // PENDING APPLY BY LEAD; gate doc workflow-engine-gate.md). Renamed from
+    // the 20260817120000/121000 slots after security train A claimed those
+    // version prefixes on main. RECOUNTED from the post-rebase tree
+    // (`ls supabase/migrations/*.sql` = 205), never summed.
+    // Bumped 205 -> 207 for the Document & Evidence Engine v1 pair
+    // (20260817140000_document_file_layer_v1 + 20260817140100_notification_
+    // document_types_v3; owner mandate 2026-08-17, PENDING APPLY BY LEAD) —
+    // renamed from the 20260817120000/121000 slots after trains A/B claimed
+    // 120000-130100 on main; RECOUNTED from the post-rebase tree
+    // (`ls supabase/migrations/*.sql | wc -l` = 207), never summed; gate
+    // docs document-file-layer-gate.md + notification-document-types-v3-gate.md.
+    // Bumped 207 -> 208 for the durable workspace pointer v2 DRAFT
     // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
-    // LEAD) — recounted from the tree, never summed. Supersedes the
-    // never-applied 20260714210000 draft (whose trigger predates
-    // company_memberships and would 42501-reject CM-only members); v2's
-    // trigger accepts BOTH membership truths. Paired rollback + Deferred
-    // APPLIED_LEDGER entry + db-proof scripts/db-proof/
+    // LEAD) — RECOUNTED from the post-merge tree with trains A/B/C on main
+    // (`ls supabase/migrations/*.sql | wc -l` = 208), never summed.
+    // Supersedes the never-applied 20260714210000 draft (whose trigger
+    // predates company_memberships and would 42501-reject CM-only members);
+    // v2's trigger accepts BOTH membership truths. Paired rollback +
+    // Deferred APPLIED_LEDGER entry + db-proof scripts/db-proof/
     // durable-workspace-pointer-v2.sh (32/32).
-    const SPRINT_BASELINE = 204;
+    const SPRINT_BASELINE = 208;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

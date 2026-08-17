@@ -349,7 +349,14 @@
         "event_absence_rejected": "Tava prombūtne noraidīta",
         "event_booking_withdrawn": "Rezervācijas piedāvājums tika atsaukts",
         "event_engagement_ended": "Sadarbība tika pārtraukta",
-        "event_engagement_created": "Izveidota jauna sadarbība"
+        "event_engagement_created": "Izveidota jauna sadarbība",
+        "event_workflow_step_pending": "Apstiprinājuma pieprasījums gaida jūsu lēmumu",
+        "event_workflow_decided": "Par jūsu apstiprinājuma pieprasījumu ir pieņemts lēmums",
+        "event_workflow_delegated": "Jums nodots apstiprinājuma posms",
+        "event_workflow_escalated": "Apstiprinājuma posms pārsniedza termiņu",
+        "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
+        "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
+        "event_document_expiring": "[EN] A document's validity is ending soon."
       }
     },
     "onboarding": {
@@ -4292,5 +4299,253 @@
     "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
     "companyProfileLink": "[EN] Open company profile",
     "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
+  },
+  "approvals": {
+    "title": "Apstiprinājumi",
+    "intro": "Apstiprinājuma pieprasījumi jūsu organizācijās: iesniedziet pieprasījumu, pieņemiet lēmumus, kas gaida jūs, un sekojiet katram posmam.",
+    "unavailable": "Apstiprinājumi šajā vidē vēl nav ieslēgti. Nekas nepazūd — šī sadaļa atvērsies, kad apstiprinājumu krātuve būs pārskatīta un ieviesta.",
+    "honestNote": "Lēmumi paliek produkta iekšienē. Nekas netiek sūtīts e-pastā vai citur — atjauninājumi redzami šajā lapā un paziņojumu zvaniņā.",
+    "loadError": "Daļu apstiprinājumu datu šobrīd neizdevās ielādēt. Redzamais ir īsts, bet var būt nepilnīgs.",
+    "inbox": {
+      "title": "Gaida jūsu lēmumu",
+      "empty": "Šobrīd nekas negaida jūsu lēmumu.",
+      "stepLabel": "Posms"
+    },
+    "start": {
+      "title": "Jauns apstiprinājuma pieprasījums",
+      "definitionLabel": "Apstiprinājuma veidne",
+      "titleLabel": "Ko jūs pieprasāt?",
+      "detailsLabel": "Detaļas (nav obligāti)",
+      "submit": "Nosūtīt pieprasījumu"
+    },
+    "myRequests": {
+      "title": "Mani pieprasījumi",
+      "empty": "Jūs vēl neesat iesniedzis nevienu apstiprinājuma pieprasījumu."
+    },
+    "admin": {
+      "title": "Organizācijas apstiprinājumi",
+      "noPending": "Jūsu organizācijās nav atvērtu citu cilvēku pieprasījumu.",
+      "overdueHint": "Termiņu pārbaude tikai atzīmē nokavētos posmus un informē atbildīgos. Nekas nekad netiek apstiprināts automātiski."
+    },
+    "templates": {
+      "title": "Apstiprinājuma veidnes",
+      "empty": "Veidņu vēl nav. Izveidojiet pirmo zemāk.",
+      "createTitle": "Jauna apstiprinājuma veidne",
+      "orgLabel": "Organizācija",
+      "nameLabel": "Veidnes nosaukums",
+      "contextLabel": "Pieprasījuma veids",
+      "stepLegend": "Posms {n}",
+      "optional": "nav obligāti",
+      "stepNameLabel": "Posma nosaukums",
+      "modeLabel": "Cik daudziem jāapstiprina",
+      "ruleLabel": "Kas lemj",
+      "deadlineLabel": "Termiņš (stundās, nav obligāti)",
+      "escalationHint": "Ja posms pārsniedz termiņu, tas tiek atzīmēts kā nokavēts, un īpašnieki un administratori tiek informēti. Automātiski nekas netiek apstiprināts.",
+      "createSubmit": "Izveidot veidni",
+      "stepCount": "Posmi: {count}",
+      "published": "Lietošanā"
+    },
+    "actions": {
+      "approve": "Apstiprināt",
+      "reject": "Noraidīt",
+      "delegate": "Nodot kolēģim",
+      "delegateSubmit": "Nodot",
+      "withdraw": "Atsaukt",
+      "cancel": "Atcelt pieprasījumu",
+      "markOverdue": "Pārbaudīt termiņus",
+      "publish": "Sākt lietot"
+    },
+    "form": {
+      "reasonLabel": "Iemesls",
+      "reasonOptional": "Nav obligāti",
+      "delegateEmailLabel": "Kolēģa e-pasts",
+      "delegateHint": "Kolēģim jāpieder tai pašai organizācijai. Atbildība par šo posmu paliek jums."
+    },
+    "status": {
+      "pending": "Gaida",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "withdrawn": "Atsaukts",
+      "cancelled": "Atcelts"
+    },
+    "stepStatus": {
+      "waiting": "Nav sākts",
+      "active": "Notiek",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "skipped": "Izlaists",
+      "escalated": "Termiņš pārsniegts"
+    },
+    "mode": {
+      "single": "Lemj viens cilvēks",
+      "all": "Jāapstiprina visiem",
+      "any": "Skaitās pirmais lēmums"
+    },
+    "decision": {
+      "approved": "Apstiprināja",
+      "rejected": "Noraidīja"
+    },
+    "rule": {
+      "owner_admin": "Īpašnieki un administratori",
+      "requester_manager": "Pieprasītāja vadītāji"
+    },
+    "contextType": {
+      "generic_request": "Vispārīgs pieprasījums",
+      "worker_absence": "Prombūtne",
+      "expense": "Izdevumi",
+      "invoice": "Rēķins",
+      "document_ack": "Dokumenta apstiprināšana",
+      "timesheet": "Darba laika uzskaite",
+      "procurement": "Iepirkums",
+      "business_trip": "Komandējums",
+      "management_decision": "Vadības lēmums",
+      "agreement": "Līgums"
+    },
+    "transition": {
+      "started": "Pieprasījums iesniegts",
+      "step_activated": "Posms sākts",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "delegated": "Nodots",
+      "withdrawn": "Atsaukts",
+      "cancelled": "Atcelts",
+      "escalated": "Atzīmēts termiņa pārsniegums",
+      "completed": "Pabeigts"
+    },
+    "timeline": {
+      "open": "Rādīt gaitu",
+      "progress": "Apstiprināja {approved} no {total}",
+      "deadline": "Termiņš",
+      "historyTitle": "Pilna vēsture",
+      "stepLabel": "posms"
+    },
+    "notice": {
+      "created": "Veidne izveidota. Sāciet to lietot, lai cilvēki varētu iesniegt pieprasījumus.",
+      "published": "Veidne tagad tiek lietota.",
+      "started": "Pieprasījums nosūtīts pirmā posma apstiprinātājiem.",
+      "already_pending": "Šāds pieprasījums jau ir atvērts.",
+      "already_published": "Šī veidne jau tiek lietota.",
+      "already_exists": "Veidne ar šādu nosaukumu organizācijā jau pastāv.",
+      "already_decided": "Šajā posmā jūs jau esat pieņēmis lēmumu.",
+      "approved": "Pieprasījums apstiprināts.",
+      "rejected": "Pieprasījums noraidīts.",
+      "step_approved": "Posms apstiprināts — sācies nākamais posms.",
+      "recorded": "Jūsu lēmums saglabāts. Gaidām pārējos apstiprinātājus.",
+      "delegated": "Posms nodots jūsu kolēģim.",
+      "withdrawn": "Pieprasījums atsaukts.",
+      "cancelled": "Pieprasījums atcelts.",
+      "marked_overdue": "Nokavētie posmi atzīmēti, atbildīgie informēti.",
+      "no_overdue": "Nav posmu, kas pārsniedz termiņu.",
+      "no_approvers": "Šim pieprasījumam pagaidām nav iespējamo apstiprinātāju. Pārbaudiet organizācijas dalībniekus un viņu lomas.",
+      "not_published": "Šī veidne vēl netiek lietota.",
+      "not_pending": "Šis pieprasījums vairs nav atvērts.",
+      "invalid": "Pārbaudiet ievadītās vērtības un mēģiniet vēlreiz.",
+      "invalid_delegate": "Šādu kolēģi šajā organizācijā neizdevās atrast.",
+      "needs_migration": "Apstiprinājumi šajā vidē vēl nav ieslēgti. Nekas netika saglabāts.",
+      "not_authorized": "Jums tas nav atļauts.",
+      "not_found": "Pieprasījums nav atrasts.",
+      "limit_reached": "Sasniegts atvērto ierakstu limits. Vispirms pabeidziet esošos.",
+      "error": "Radās kļūda. Nekas netika mainīts."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "[EN] Version {n}",
+    "download": "[EN] Download",
+    "noFileYet": "[EN] No file uploaded yet.",
+    "upload": {
+      "fileLabel": "[EN] Choose a file",
+      "submit": "[EN] Upload file",
+      "newVersion": "[EN] Upload new version",
+      "limits": "[EN] PDF, Word or photo (JPG/PNG/WebP), up to 5 MB.",
+      "versionNote": "[EN] A new upload becomes a new version — earlier versions are kept."
+    },
+    "ackInbox": {
+      "title": "[EN] Documents to confirm",
+      "intro": "[EN] You were asked to confirm that you have read these documents. Open the file, then press the confirm button.",
+      "allDone": "[EN] Nothing waiting — you have confirmed every document assigned to you.",
+      "requiredBy": "[EN] confirm by {date}",
+      "confirm": "[EN] I have read this",
+      "completedTitle": "[EN] Already confirmed",
+      "confirmedAt": "[EN] confirmed {date}",
+      "versionRule": "[EN] A confirmation applies only to the exact version you opened. If a new version is published, you may be asked again."
+    },
+    "notice": {
+      "uploaded": "[EN] The file was uploaded.",
+      "created": "[EN] The document entry was created.",
+      "archived": "[EN] The document was archived.",
+      "revoked": "[EN] The document was revoked.",
+      "assigned": "[EN] The confirmation request was sent.",
+      "acknowledged": "[EN] Your confirmation was saved.",
+      "invalid": "[EN] Some of the entered details are not valid — nothing was saved.",
+      "invalid_state": "[EN] This document is not in a state that allows that action.",
+      "invalid_assignee": "[EN] That person is not a member of this organization, so the request was not sent.",
+      "already_assigned": "[EN] That person was already asked to confirm this version.",
+      "already_acknowledged": "[EN] This document version was already confirmed.",
+      "not_current": "[EN] A newer version of this document exists — refresh the page and try again.",
+      "not_allowed": "[EN] You do not have permission to do that.",
+      "not_found": "[EN] That document was not found.",
+      "limit_reached": "[EN] The document list limit was reached.",
+      "version_limit_reached": "[EN] This document reached its version limit.",
+      "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
+      "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
+      "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
+      "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
+      "error": "[EN] Something went wrong — nothing was saved."
+    }
+  },
+  "orgDocuments": {
+    "title": "[EN] Company document register",
+    "intro": "[EN] Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
+    "unavailable": "[EN] The document register could not be loaded right now.",
+    "preparing": "[EN] The document register is prepared but not enabled in this environment yet.",
+    "error": "[EN] The document register could not be loaded — try again later.",
+    "empty": "[EN] No documents registered yet.",
+    "scopeNote": "[EN] This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
+    "types": {
+      "org_policy": "[EN] Policy",
+      "org_procedure": "[EN] Procedure",
+      "org_instruction": "[EN] Instruction",
+      "org_correspondence_incoming": "[EN] Incoming correspondence",
+      "org_correspondence_outgoing": "[EN] Outgoing correspondence",
+      "org_internal": "[EN] Internal document",
+      "org_agreement_attachment": "[EN] Agreement attachment"
+    },
+    "status": {
+      "active": "[EN] Active",
+      "archived": "[EN] Archived",
+      "revoked": "[EN] Revoked"
+    },
+    "classification": {
+      "standard": "[EN] Standard",
+      "classified": "[EN] Restricted access"
+    },
+    "currentVersion": "[EN] Version {n}",
+    "versionHistory": "[EN] {n} versions",
+    "download": "[EN] Download",
+    "noFileYet": "[EN] No file uploaded yet.",
+    "uploadNewVersion": "[EN] Upload new version",
+    "uploadFirst": "[EN] Upload file",
+    "expiresOn": "[EN] valid until {date}",
+    "ackProgress": "[EN] {done}/{total} confirmed",
+    "assign": {
+      "assigneeLabel": "[EN] Ask to confirm:",
+      "requiredByLabel": "[EN] by",
+      "submit": "[EN] Send request"
+    },
+    "archive": "[EN] Archive",
+    "revoke": "[EN] Revoke",
+    "create": {
+      "title": "[EN] Register a new document",
+      "typeLabel": "[EN] Type",
+      "titleLabel": "[EN] Title",
+      "descriptionLabel": "[EN] Description (optional)",
+      "classificationLabel": "[EN] Access",
+      "responsibleLabel": "[EN] Responsible person",
+      "responsibleNone": "[EN] Not set",
+      "validFromLabel": "[EN] Valid from",
+      "expiresOnLabel": "[EN] Valid until",
+      "externalRefLabel": "[EN] Reference number (optional)",
+      "submit": "[EN] Register document"
+    }
   }
 }
