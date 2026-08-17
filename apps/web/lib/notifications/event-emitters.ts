@@ -212,6 +212,42 @@ export async function emitEngagementEndedNotification(
   }
 }
 
+/**
+ * Task assignment — v4 (train D). The NEW assignee hears it durably; the
+ * actor already watched the assignment happen on their own screen, so a
+ * self-assignment emits nothing. The recipient is resolved from the TASK
+ * ROW read AFTER the domain write succeeded — never from caller input.
+ */
+export async function emitWorkTaskAssignedNotification(
+  taskId: string,
+  actorProfileId: string,
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("work_tasks")
+      .select("assignee_profile_id, due_at")
+      .eq("id", taskId)
+      .maybeSingle();
+    const row = data as {
+      assignee_profile_id?: string | null;
+      due_at?: string | null;
+    } | null;
+    const assignee = row?.assignee_profile_id ?? null;
+    if (!assignee || assignee === actorProfileId) return;
+
+    emitNotificationEventInBackground(admin, {
+      recipientProfileId: assignee,
+      eventType: "work_task_assigned",
+      entityType: "work_task",
+      entityId: taskId,
+      metadata: { startDate: row?.due_at?.slice(0, 10) ?? undefined },
+    });
+  } catch {
+    // Emission is an enhancement; the domain write already succeeded.
+  }
+}
+
 /** Absence lifecycle events. `absenceId` is the worker_absences row id. */
 export async function emitAbsenceNotification(
   absenceId: string,

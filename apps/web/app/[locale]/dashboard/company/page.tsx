@@ -37,9 +37,10 @@ import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
-import { CompanyLocationsSection } from "@/components/app/company-locations-section";
+import { WorkObjectsSection } from "@/components/app/work-objects-section";
 import { CompanyGallerySection } from "@/components/app/company-gallery-section";
-import { getCompanyLocations } from "@/lib/company/company-locations";
+import { getOrgWorkObjects } from "@/lib/objects/objects";
+import { listOrganizationMembers } from "@/lib/company/memberships";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
@@ -230,9 +231,13 @@ export default async function CompanyDashboardPage({
     ? await getBusinessPublicSettings(orgMembers.orgId)
     : null;
 
-  // F12.4/5 company geography (owner-gated migration → honest gated state)
-  // + F13 company gallery (real photo counts across managed projects).
-  const companyLocations = await getCompanyLocations();
+  // Train D: objects & sites — the canonical work_objects entity (rewired
+  // from the superseded company_locations draft; Train M verdict). Honest
+  // gated state until the LEAD applies the migration.
+  const workObjectsRead = await getOrgWorkObjects();
+  const orgMembersForObjects = orgMembers
+    ? await listOrganizationMembers(orgMembers.orgId)
+    : null;
   const managedProjects = ownCompany ? await listManagedProjects() : [];
   const companyGalleryProjects = await Promise.all(
     managedProjects.slice(0, 12).map(async (p) => ({
@@ -244,25 +249,36 @@ export default async function CompanyDashboardPage({
 
   const tOrg = await getTranslations("orgMembers");
   const tOps = await getTranslations("companyOps");
-  const tLocs = await getTranslations("companyLocations");
+  const tLocs = await getTranslations("workObjects");
   const tCompanyGallery = await getTranslations("companyGallery");
   const tTabs = await getTranslations("auth.dashboard.tabs");
   const tCountries = await getTranslations("labourMarket");
-  const companyLocationsLabels = {
+  const workObjectsLabels = {
     title: tLocs("title"),
     subtitle: tLocs("subtitle"),
-    kindHeadquarters: tLocs("kindHeadquarters"),
-    kindOperating: tLocs("kindOperating"),
-    kindDesiredMarket: tLocs("kindDesiredMarket"),
+    nameLabel: tLocs("nameLabel"),
     countryLabel: tLocs("countryLabel"),
-    cityLabel: tLocs("cityLabel"),
     regionLabel: tLocs("regionLabel"),
+    cityLabel: tLocs("cityLabel"),
+    addressLabel: tLocs("addressLabel"),
+    projectLabel: tLocs("projectLabel"),
+    projectNone: tLocs("projectNone"),
+    responsibleLabel: tLocs("responsibleLabel"),
+    responsibleNone: tLocs("responsibleNone"),
+    responsibleSave: tLocs("responsibleSave"),
     addButton: tLocs("addButton"),
-    removeButton: tLocs("removeButton"),
+    editButton: tLocs("editButton"),
+    saveButton: tLocs("saveButton"),
+    archiveButton: tLocs("archiveButton"),
+    restoreButton: tLocs("restoreButton"),
+    archivedHeading: tLocs("archivedHeading"),
+    archivedBadge: tLocs("archivedBadge"),
     empty: tLocs("empty"),
     gatedHeading: tLocs("gatedHeading"),
     gatedBody: tLocs("gatedBody"),
     errorLabel: tLocs("errorLabel"),
+    notAuthorizedLabel: tLocs("notAuthorizedLabel"),
+    savedLabel: tLocs("savedLabel"),
     countries: Object.fromEntries(
       MARKET_COUNTRIES.map((c) => [c, tCountries(`countryNames.${c}`)]),
     ),
@@ -703,9 +719,7 @@ export default async function CompanyDashboardPage({
             icon: <MapPin className="h-4 w-4" aria-hidden />,
             label: tLocs("title"),
             count:
-              companyLocations.kind === "ok"
-                ? companyLocations.rows.length
-                : 0,
+              workObjectsRead.kind === "ok" ? workObjectsRead.rows.length : 0,
           },
           {
             key: "gallery",
@@ -1185,13 +1199,36 @@ export default async function CompanyDashboardPage({
         />
       </div>
 
-      {/* F12.4/5: company operating geography — HQ / operating locations /
-          desired markets. Owner-gated migration; honest gated state until
-          the owner applies it. */}
+      {/* Train D: objects & sites — the canonical work_objects entity
+          (membership-based authority; supersedes the never-applied
+          company_locations draft per the Train M verdict). Honest gated
+          state until the LEAD applies the migration. */}
       <div id="company-locations" className="scroll-mt-20">
-        <CompanyLocationsSection
-          state={companyLocations}
-          labels={companyLocationsLabels}
+        <WorkObjectsSection
+          state={
+            workObjectsRead.kind === "ok"
+              ? { kind: "ok", rows: workObjectsRead.rows }
+              : workObjectsRead.kind === "needs-migration"
+                ? { kind: "needs-migration" }
+                : workObjectsRead.kind === "no-company"
+                  ? { kind: "ok", rows: [] }
+                  : { kind: "error" }
+          }
+          projects={managedProjects.map((p) => ({
+            id: p.id,
+            title: p.title ?? p.id.slice(0, 8),
+          }))}
+          members={
+            orgMembersForObjects && orgMembersForObjects.kind === "ok"
+              ? orgMembersForObjects.members
+                  .filter((m) => m.status === "active")
+                  .map((m) => ({
+                    profileId: m.profileId,
+                    name: m.fullName ?? m.email ?? m.profileId.slice(0, 8),
+                  }))
+              : []
+          }
+          labels={workObjectsLabels}
         />
       </div>
 

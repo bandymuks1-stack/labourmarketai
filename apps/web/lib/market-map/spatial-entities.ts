@@ -200,7 +200,9 @@ export type CompanyTerritoryKind =
   /** Derived from a coordinate-verified company demand location. */
   | "demand_anchor";
 
-/** Input shape mirroring lib/company/company-locations.ts CompanyLocation. */
+/** Company-territory source row. Train D: fed from the canonical
+ *  work_objects entity (lib/objects/objects.ts, getCompanyTerritoryFromObjects)
+ *  — the superseded company_locations draft is never applied (Train M). */
 export interface CompanyTerritorySourceRow {
   id: string;
   kind: "headquarters" | "operating" | "desired_market";

@@ -62,7 +62,11 @@ export type NotificationEventType =
   // reports it to the console, exactly the v2 precedent.
   | "document_ack_assigned"
   | "document_ack_completed"
-  | "document_expiring";
+  | "document_expiring"
+  // v4 (20260817153000, train D): a managing role handed a work task to
+  // another person — the NEW assignee durably learns a task landed on them.
+  // Never emitted for self-assignment (you watched yourself do it).
+  | "work_task_assigned";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -73,7 +77,8 @@ export type NotificationEntityType =
   // surface).
   | "worker_document"
   | "org_document"
-  | "document_acknowledgement";
+  | "document_acknowledgement"
+  | "work_task";
 
 /**
  * Where a durable event TAKES YOU.
@@ -111,6 +116,9 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   worker_document: "/dashboard/documents",
   org_document: "/dashboard/documents",
   document_acknowledgement: "/dashboard/documents",
+  // v4: the tasks surface already renders the assignee's list — the row the
+  // event points at is in "my tasks" by construction (they are the assignee).
+  work_task: "/dashboard/tasks",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

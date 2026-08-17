@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
+import { getProjectsProgress } from "@/lib/projects/progress";
 import { listManagedWorkers } from "@/lib/instructions/instructions";
 import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
 import {
@@ -32,11 +33,14 @@ const MANAGER_ROLES = new Set<Role>(["company", "agency"]);
  */
 export default async function ProjectsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ archived?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const showArchived = (await searchParams).archived === "1";
   const t = await getTranslations("projects");
   const tRooms = await getTranslations("companyActionRooms");
 
@@ -107,7 +111,7 @@ export default async function ProjectsPage({
     );
   }
 
-  const [projects, workers, engagementResult] = await Promise.all([
+  const [allProjects, workers, engagementResult] = await Promise.all([
     listProjectMap(),
     listManagedWorkers(),
     // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
@@ -115,8 +119,22 @@ export default async function ProjectsPage({
     // applies migration 20260723120000.
     listBookingEngagementWorkers(),
   ]);
+
+  // Train D — archived filtering: a COMPLETED project is finished work.
+  // The map and the draft (assignment) flow show ACTIVE work by default;
+  // finished projects live behind an honest toggle (count always visible,
+  // no dead buttons — a completed project accepts no new assignments, and
+  // the RPC refuses them anyway).
+  const archivedProjects = allProjects.filter((p) => p.status === "completed");
+  const activeProjects = allProjects.filter((p) => p.status !== "completed");
+  const projects = showArchived ? archivedProjects : activeProjects;
+
+  // Train D — derived progress (tasks + stages done/total, computed at
+  // read time; no stored number anywhere).
+  const progressById = await getProjectsProgress(projects.map((p) => p.id));
+
   const withAssignments = await Promise.all(
-    projects.map(async (p) => ({
+    activeProjects.map(async (p) => ({
       ...p,
       assignments: await listProjectAssignments(p.id),
     })),
@@ -198,8 +216,45 @@ export default async function ProjectsPage({
       {/* ARENA rhythm: the real S3.5 confirm queue pulse, never a fake. */}
       <ConfirmPulse />
 
+      {/* Train D — active/archived switch: finished work stays reachable,
+          never mixed into the operating map. */}
+      <nav
+        className="flex flex-wrap items-center gap-3"
+        aria-label={t("archiveToggle.label")}
+        data-testid="projects-archive-toggle"
+      >
+        <Link
+          href="/dashboard/projects"
+          aria-current={!showArchived ? "true" : undefined}
+          className={`text-xs font-semibold ${!showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
+          data-testid="projects-view-active"
+        >
+          {t("archiveToggle.active")} ({activeProjects.length})
+        </Link>
+        <Link
+          href={"/dashboard/projects?archived=1" as "/dashboard"}
+          aria-current={showArchived ? "true" : undefined}
+          className={`text-xs font-semibold ${showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
+          data-testid="projects-view-archived"
+        >
+          {t("archiveToggle.archived")} ({archivedProjects.length})
+        </Link>
+      </nav>
+
       {/* MAP — projects → teams → people; one click into each ARENA. */}
-      <ProjectMap projects={projects} locale={locale} />
+      {showArchived && projects.length === 0 ? (
+        <p
+          className="card-border p-4 text-sm text-text-secondary"
+          data-testid="projects-archived-empty"
+        >
+          {t("archiveToggle.empty")}
+        </p>
+      ) : null}
+      <ProjectMap
+        projects={projects}
+        locale={locale}
+        progress={progressById}
+      />
 
       {/* DRAFT — the gated create/assign flow (human decision, RPC writes). */}
       <section className="flex flex-col gap-3" data-testid="draft-section">

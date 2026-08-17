@@ -4107,7 +4107,8 @@
         "event_workflow_escalated": "Eine Freigaberunde hat ihre Frist überschritten",
         "event_document_ack_assigned": "Sie wurden gebeten zu bestätigen, dass Sie ein Dokument gelesen haben.",
         "event_document_ack_completed": "Ein von Ihnen zur Bestätigung gesendetes Dokument wurde bestätigt.",
-        "event_document_expiring": "Die Gültigkeit eines Dokuments endet bald."
+        "event_document_expiring": "Die Gültigkeit eines Dokuments endet bald.",
+        "event_work_task_assigned": "Ihnen wurde eine Aufgabe zugewiesen"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -5276,7 +5277,14 @@
       "untitled": "Projekt ohne Namen",
       "teamLabel": "Im Team",
       "openArena": "Arena öffnen",
-      "chatCta": "Nachricht zu diesem Projekt"
+      "chatCta": "Nachricht zu diesem Projekt",
+      "status": {
+        "draft": "Entwurf",
+        "live": "Laufend",
+        "paused": "Pausiert",
+        "completed": "Abgeschlossen"
+      },
+      "progressNone": "Noch kein messbarer Fortschritt"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
@@ -5292,7 +5300,13 @@
     "myProjectsEmpty": "Sie sind noch keinem Projekt zugewiesen. Sobald ein Unternehmen Sie zuweist, erscheint das Projekt hier.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Beendet",
-    "untitledProject": "Projekt ohne Titel"
+    "untitledProject": "Projekt ohne Titel",
+    "archiveToggle": {
+      "label": "Aktive oder abgeschlossene Projekte",
+      "active": "Aktiv",
+      "archived": "Abgeschlossen",
+      "empty": "Noch keine abgeschlossenen Projekte."
+    }
   },
   "projectOps": {
     "centre": {
@@ -5526,6 +5540,32 @@
       "journalCta": "Journaleintrag schreiben",
       "chatCta": "Nachricht senden",
       "galleryTitle": "Meine Fotos in diesem Projekt"
+    },
+    "manage": {
+      "title": "Projektverwaltung",
+      "progressLabel": "Fortschritt",
+      "progressNone": "Noch kein messbarer Fortschritt",
+      "responsibleLabel": "Verantwortliche Person",
+      "responsibleNone": "Nicht festgelegt",
+      "responsibleSave": "Speichern",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Starten",
+        "paused": "Pausieren",
+        "completed": "Abschließen und archivieren"
+      },
+      "completedTerminal": "Abgeschlossen — dieses Projekt ist archiviert",
+      "noTransitions": "Keine Statusänderungen verfügbar",
+      "completeHint": "Der Abschluss beendet jede aktive Zuweisung in diesem Projekt und verschiebt es in die Liste der abgeschlossenen Projekte.",
+      "notice": {
+        "updated": "Gespeichert.",
+        "invalid": "Diese Änderung ist nicht gültig.",
+        "invalid_transition": "Diese Statusänderung ist aus dem aktuellen Zustand nicht möglich.",
+        "needs_migration": "Das ist in dieser Umgebung noch nicht freigeschaltet.",
+        "not_authorized": "Das können nur Projektverantwortliche tun.",
+        "not_found": "Projekt nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      }
     }
   },
   "setupRoleChoice": {
@@ -9225,7 +9265,11 @@
       "projectNone": "Kein Projekt",
       "assignSelfLabel": "Mir zuweisen",
       "assignSelfHint": "Abwählen, um die Aufgabe unzugewiesen zu lassen — sichtbar für Sie und die Projektverantwortlichen.",
-      "submit": "Aufgabe anlegen"
+      "submit": "Aufgabe anlegen",
+      "objectLabel": "Objekt",
+      "objectNone": "Kein Objekt",
+      "assigneeLabel": "Zugewiesen an",
+      "assigneeHint": "Die Zuweisung an eine andere Person geht nur bei einer Projektaufgabe — die Person sieht sie in ihrer eigenen Liste."
     },
     "notice": {
       "created": "Aufgabe angelegt.",
@@ -9235,7 +9279,8 @@
       "not_authorized": "Sie dürfen diese Aktion nicht ausführen.",
       "not_found": "Aufgabe nicht gefunden.",
       "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
-      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "cycle": "Das würde eine Schleife erzeugen — eine Aufgabe kann nicht über andere Aufgaben auf sich selbst warten."
     },
     "projectTasks": {
       "title": "Projektaufgaben",
@@ -9244,6 +9289,42 @@
     },
     "projectSection": {
       "link": "Aufgaben zu diesem Projekt"
+    },
+    "objectLabel": "Objekt",
+    "assignee": {
+      "label": "Zugewiesen an",
+      "you": "Sie",
+      "member": "Teammitglied",
+      "unassigned": "nicht zugewiesen"
+    },
+    "assignForm": {
+      "label": "Zuweisen an",
+      "save": "Zuweisen"
+    },
+    "dependencies": {
+      "waitingOn": "Wartet auf {n}",
+      "blockedBy": "Hängt ab von",
+      "hidden": "eine Aufgabe, die Sie nicht sehen können",
+      "remove": "Entfernen",
+      "addLabel": "Abhängigkeit hinzufügen",
+      "add": "Hinzufügen"
+    },
+    "history": {
+      "title": "Verlauf",
+      "byYou": "von Ihnen",
+      "byMember": "von einem Teammitglied",
+      "actions": {
+        "created": "Erstellt",
+        "status_changed": "Status geändert",
+        "reopened": "Wieder geöffnet",
+        "assigned": "Zugewiesen",
+        "unassigned": "Zuweisung entfernt",
+        "priority_changed": "Priorität geändert",
+        "due_changed": "Frist geändert",
+        "object_changed": "Objekt geändert",
+        "dependency_added": "Abhängigkeit hinzugefügt",
+        "dependency_removed": "Abhängigkeit entfernt"
+      }
     }
   },
   "assist": {
@@ -9890,22 +9971,6 @@
     "skillDeclared": "Selbst angegeben",
     "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt.",
     "skillsReadError": "Die Fähigkeiten konnten gerade nicht geladen werden. Bitte versuchen Sie es gleich erneut."
-  },
-  "companyLocations": {
-    "title": "Standorte",
-    "subtitle": "Hauptsitz, Einsatzorte und Wunschmärkte — in mehreren Ländern.",
-    "kindHeadquarters": "Hauptsitz",
-    "kindOperating": "Einsatzort",
-    "kindDesiredMarket": "Wunschmarkt",
-    "countryLabel": "Land",
-    "cityLabel": "Stadt",
-    "regionLabel": "Region",
-    "addButton": "Standort hinzufügen",
-    "removeButton": "Standort entfernen",
-    "empty": "Noch keine Standorte. Fügen Sie Hauptsitz und Einsatzorte hinzu.",
-    "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Eigentümer",
-    "gatedBody": "Standorte sind bereit, aber noch nicht freigeschaltet. Die Freischaltung ist eine Entscheidung des Eigentümers.",
-    "errorLabel": "Speichern fehlgeschlagen. Versuchen Sie es erneut."
   },
   "companyGallery": {
     "title": "Galerie",
@@ -12520,5 +12585,32 @@
       "limit_reached": "Das Limit offener Einträge ist erreicht. Schließen Sie zuerst etwas ab.",
       "error": "Etwas ist schiefgelaufen. Nichts wurde geändert."
     }
+  },
+  "workObjects": {
+    "title": "Objekte und Standorte",
+    "subtitle": "Die Orte, an denen gearbeitet wird — Baustellen, Gebäude, Bereiche. Verknüpft mit Projekten und Aufgaben.",
+    "nameLabel": "Name",
+    "countryLabel": "Land",
+    "regionLabel": "Region",
+    "cityLabel": "Stadt",
+    "addressLabel": "Adresse",
+    "projectLabel": "Projekt",
+    "projectNone": "Kein Projekt",
+    "responsibleLabel": "Verantwortliche Person",
+    "responsibleNone": "Nicht festgelegt",
+    "responsibleSave": "Speichern",
+    "addButton": "Objekt hinzufügen",
+    "editButton": "Bearbeiten",
+    "saveButton": "Änderungen speichern",
+    "archiveButton": "Archivieren",
+    "restoreButton": "Wiederherstellen",
+    "archivedHeading": "Archivierte Objekte",
+    "archivedBadge": "Archiviert",
+    "empty": "Noch keine Objekte. Fügen Sie die Orte hinzu, an denen Ihre Arbeit stattfindet.",
+    "gatedHeading": "Vorbereitet — wartet auf Aktivierung",
+    "gatedBody": "Objekte sind bereit, aber noch nicht freigeschaltet. Die Freischaltung ist eine Entscheidung des Inhabers.",
+    "errorLabel": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "notAuthorizedLabel": "Nur Führungskräfte können Objekte ändern.",
+    "savedLabel": "Gespeichert."
   }
 }

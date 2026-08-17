@@ -2097,16 +2097,24 @@ describe("no migration files added by this sprint", () => {
     // 120000-130100 on main; RECOUNTED from the post-rebase tree
     // (`ls supabase/migrations/*.sql | wc -l` = 207), never summed; gate
     // docs document-file-layer-gate.md + notification-document-types-v3-gate.md.
-    // Bumped 207 -> 208 for the durable workspace pointer v2 DRAFT
+    // Bumped 207 -> 211 for the train-D project/object/task drafts
+    // (20260817150000 work_objects_v1 + 20260817151000
+    // work_tasks_v2_collaboration + 20260817152000 project_responsible_v1 +
+    // 20260817153000 notification_events_v4_task_types; all LEAD-gated,
+    // UNAPPLIED; paired rollbacks + deferred APPLIED_LEDGER entries in the
+    // PR) — RECOUNTED after merging origin/main 1450ed08 (security train A,
+    // workflow engine AND document engine already in the base): 211 real
+    // files in the tree, never summed.
+    // Bumped 211 -> 212 for the durable workspace pointer v2 DRAFT
     // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
-    // LEAD) — RECOUNTED from the post-merge tree with trains A/B/C on main
-    // (`ls supabase/migrations/*.sql | wc -l` = 208), never summed.
+    // LEAD) — RECOUNTED from the post-merge tree with trains A/B/C/D on
+    // main (`ls supabase/migrations/*.sql | wc -l` = 212), never summed.
     // Supersedes the never-applied 20260714210000 draft (whose trigger
     // predates company_memberships and would 42501-reject CM-only members);
     // v2's trigger accepts BOTH membership truths. Paired rollback +
     // Deferred APPLIED_LEDGER entry + db-proof scripts/db-proof/
     // durable-workspace-pointer-v2.sh (32/32).
-    const SPRINT_BASELINE = 208;
+    const SPRINT_BASELINE = 212;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

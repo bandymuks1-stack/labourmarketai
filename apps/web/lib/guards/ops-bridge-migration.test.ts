@@ -425,9 +425,14 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260817120000 + 20260817121000) took SPRINT_BASELINE 199 -> 201 in
     // product-readiness.test.ts (recounted from the tree). This floor
     // assertion needs no numeric edit — it only pins the 166 minimum.
-    // SPRINT_BASELINE 207 -> 208 for the durable workspace pointer v2 DRAFT
+    //
+    // Train D (2026-08-17): product-readiness moved 207 -> 211 for the four
+    // project/object/task drafts (work_objects_v1, work_tasks_v2_collaboration,
+    // project_responsible_v1, notification_events_v4_task_types). Cross-pin
+    // follows — this floor assertion needs no numeric edit.
+    // SPRINT_BASELINE 211 -> 212 for the durable workspace pointer v2 DRAFT
     // (20260817160000, consolidation train L slice 1, UNAPPLIED, paired
-    // rollback; recounted post-merge with trains A/B/C). Cross-pin follows.
+    // rollback; recounted post-merge with trains A/B/C/D). Cross-pin follows.
     //
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
