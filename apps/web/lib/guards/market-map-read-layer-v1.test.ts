@@ -520,13 +520,22 @@ describe("NO new DB migration in this PR", () => {
     // paired rollbacks, ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED
     // against post-rebase origin/main 54067a4b: 203 .sql files there, this
     // branch adds exactly two.
-    // Bumped 205 -> 207 for the typed employee requests + leave balance
-    // policies DRAFT pair (20260817180000_employee_requests_v1 +
-    // 20260817181000_leave_balance_policies_v1) — nothing from the
-    // market-map read layer. Owner mandate 2026-08-17, paired rollbacks,
-    // ships UNAPPLIED (PENDING APPLY BY LEAD). RECOUNTED from the tree:
-    // 205 on the base, this branch adds exactly two.
-    expect(count).toBeLessThanOrEqual(207);
+    // Bumped 205 -> 207 for the Document & Evidence Engine v1 pair
+    // (20260817140000 + 20260817140100, owner mandate 2026-08-17, PENDING
+    // APPLY BY LEAD; renamed from 120000/121000 after trains A/B claimed
+    // 120000-130100 on main) — recounted from the post-rebase tree, never
+    // summed. Still no migration from the market-map layer itself.
+    // Bumped 207 -> 211 for the train-D project/object/task drafts
+    // (20260817150000 + 20260817151000 + 20260817152000 + 20260817153000,
+    // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
+    // merging origin/main 1450ed08 (document engine included): 211 real
+    // files in the tree — recounted, never summed.
+    // Bumped 211 -> 213 for the typed employee requests + leave balance
+    // policies DRAFT pair (20260817180000 + 20260817181000; owner mandate
+    // 2026-08-17, paired rollbacks, ships UNAPPLIED, PENDING APPLY BY LEAD)
+    // — nothing from the market-map read layer. RECOUNTED after merging
+    // origin/main b6c5f71b: 213 real files in the tree, never summed.
+    expect(count).toBeLessThanOrEqual(213);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

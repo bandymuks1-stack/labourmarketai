@@ -336,7 +336,9 @@ describe("4. ESCALATION NEVER APPROVES (the safe-state doctrine)", () => {
     expect(create).not.toContain("'auto_approve'");
     // Comments may legitimately SAY "never auto-approves" — executable SQL
     // is what's pinned.
-    const sql = MIGRATION.split("\n")
+    // split on \r?\n: on a Windows checkout lines end with \r, and JS `$`
+    // does not match before it — the comment strip silently no-ops there.
+    const sql = MIGRATION.split(/\r?\n/)
       .map((l) => l.replace(/--.*$/, ""))
       .join("\n");
     expect(sql).not.toMatch(/auto[_-]?approv/i);
@@ -344,7 +346,9 @@ describe("4. ESCALATION NEVER APPROVES (the safe-state doctrine)", () => {
 
   it("no AI anywhere in the engine or its app layer", () => {
     // Comments may legitimately SAY "no AI" — executable SQL is what's pinned.
-    const sql = MIGRATION.split("\n")
+    // split on \r?\n: on a Windows checkout lines end with \r, and JS `$`
+    // does not match before it — the comment strip silently no-ops there.
+    const sql = MIGRATION.split(/\r?\n/)
       .map((l) => l.replace(/--.*$/, ""))
       .join("\n");
     expect(sql).not.toMatch(/\bAI\b|\bLLM\b|openai|anthropic/i);

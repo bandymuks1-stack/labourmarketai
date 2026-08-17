@@ -4114,7 +4114,11 @@
         "event_workflow_step_pending": "Een goedkeuringsverzoek wacht op uw beslissing",
         "event_workflow_decided": "Over uw goedkeuringsverzoek is beslist",
         "event_workflow_delegated": "Een goedkeuringsronde is aan u overgedragen",
-        "event_workflow_escalated": "Een goedkeuringsronde heeft haar termijn overschreden"
+        "event_workflow_escalated": "Een goedkeuringsronde heeft haar termijn overschreden",
+        "event_document_ack_assigned": "U bent gevraagd te bevestigen dat u een document hebt gelezen.",
+        "event_document_ack_completed": "Een document dat u ter bevestiging stuurde, is bevestigd.",
+        "event_document_expiring": "De geldigheid van een document loopt binnenkort af.",
+        "event_work_task_assigned": "Er is een taak aan je toegewezen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -5283,7 +5287,14 @@
       "untitled": "Naamloos project",
       "teamLabel": "In de ploeg",
       "openArena": "Projectbord openen",
-      "chatCta": "Bericht sturen over dit project"
+      "chatCta": "Bericht sturen over dit project",
+      "status": {
+        "draft": "Concept",
+        "live": "Actief",
+        "paused": "Gepauzeerd",
+        "completed": "Afgerond"
+      },
+      "progressNone": "Nog geen meetbare voortgang"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# vermelding wacht op je bevestiging} other {# vermeldingen wachten op je bevestiging}}",
@@ -5299,7 +5310,13 @@
     "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
     "assignmentActive": "Actief",
     "assignmentEnded": "Beëindigd",
-    "untitledProject": "Project zonder titel"
+    "untitledProject": "Project zonder titel",
+    "archiveToggle": {
+      "label": "Actieve of afgeronde projecten",
+      "active": "Actief",
+      "archived": "Afgerond",
+      "empty": "Nog geen afgeronde projecten."
+    }
   },
   "projectOps": {
     "centre": {
@@ -5533,6 +5550,32 @@
       "journalCta": "Journaalinvoer schrijven",
       "chatCta": "Bericht sturen",
       "galleryTitle": "Mijn foto's op dit project"
+    },
+    "manage": {
+      "title": "Projectbeheer",
+      "progressLabel": "Voortgang",
+      "progressNone": "Nog geen meetbare voortgang",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Niet ingesteld",
+      "responsibleSave": "Opslaan",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Live zetten",
+        "paused": "Pauzeren",
+        "completed": "Afronden en archiveren"
+      },
+      "completedTerminal": "Afgerond — dit project is gearchiveerd",
+      "noTransitions": "Geen statuswijzigingen beschikbaar",
+      "completeHint": "Afronden beëindigt elke actieve toewijzing op dit project en verplaatst het naar de afgeronde lijst.",
+      "notice": {
+        "updated": "Opgeslagen.",
+        "invalid": "Die wijziging is niet geldig.",
+        "invalid_transition": "Die statuswijziging kan niet vanuit de huidige status.",
+        "needs_migration": "Dit is in deze omgeving nog niet ingeschakeld.",
+        "not_authorized": "Alleen projectmanagers kunnen dit doen.",
+        "not_found": "Project niet gevonden.",
+        "error": "Er ging iets mis. Probeer het opnieuw."
+      }
     }
   },
   "setupRoleChoice": {
@@ -6920,6 +6963,106 @@
       "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
       "projectAxisLink": "Gereedheidschecklists per project",
       "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Versie {n}",
+    "download": "Downloaden",
+    "noFileYet": "Nog geen bestand geüpload.",
+    "upload": {
+      "fileLabel": "Kies een bestand",
+      "submit": "Bestand uploaden",
+      "newVersion": "Nieuwe versie uploaden",
+      "limits": "PDF, Word of foto (JPG/PNG/WebP), tot 5 MB.",
+      "versionNote": "Een nieuwe upload wordt een nieuwe versie — eerdere versies blijven bewaard."
+    },
+    "ackInbox": {
+      "title": "Documenten om te bevestigen",
+      "intro": "U bent gevraagd te bevestigen dat u deze documenten hebt gelezen. Open het bestand en druk op de bevestigingsknop.",
+      "allDone": "Niets in afwachting — u hebt alle aan u toegewezen documenten bevestigd.",
+      "requiredBy": "bevestigen vóór {date}",
+      "confirm": "Ik heb dit gelezen",
+      "completedTitle": "Al bevestigd",
+      "confirmedAt": "bevestigd {date}",
+      "versionRule": "Een bevestiging geldt alleen voor de exacte versie die u hebt geopend. Bij een nieuwe versie kunt u opnieuw gevraagd worden."
+    },
+    "notice": {
+      "uploaded": "Het bestand is geüpload.",
+      "created": "De documentregistratie is aangemaakt.",
+      "archived": "Het document is gearchiveerd.",
+      "revoked": "Het document is ingetrokken.",
+      "assigned": "Het bevestigingsverzoek is verzonden.",
+      "acknowledged": "Uw bevestiging is opgeslagen.",
+      "invalid": "Een deel van de ingevoerde gegevens is ongeldig — er is niets opgeslagen.",
+      "invalid_state": "De status van dit document staat deze actie niet toe.",
+      "invalid_assignee": "Deze persoon is geen lid van deze organisatie; het verzoek is niet verzonden.",
+      "already_assigned": "Deze persoon is al gevraagd deze versie te bevestigen.",
+      "already_acknowledged": "Deze documentversie is al bevestigd.",
+      "not_current": "Er bestaat een nieuwere versie van dit document — ververs de pagina en probeer opnieuw.",
+      "not_allowed": "U hebt hiervoor geen toestemming.",
+      "not_found": "Het document is niet gevonden.",
+      "limit_reached": "De limiet van de documentenlijst is bereikt.",
+      "version_limit_reached": "Dit document heeft zijn versielimiet bereikt.",
+      "path_mismatch": "De upload kon niet worden geverifieerd — er is niets opgeslagen. Probeer opnieuw.",
+      "file_too_large": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
+      "unsupported_type": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
+      "needs_migration": "Bestandsupload is in deze omgeving nog niet ingeschakeld — er is niets opgeslagen.",
+      "error": "Er is iets misgegaan — er is niets opgeslagen."
+    }
+  },
+  "orgDocuments": {
+    "title": "Documentenregister van het bedrijf",
+    "intro": "Documenten van {org}: beleid, procedures, instructies en correspondentie, met versies en leesbevestigingen.",
+    "unavailable": "Het documentenregister kan nu niet worden geladen.",
+    "preparing": "Het documentenregister is voorbereid maar in deze omgeving nog niet ingeschakeld.",
+    "error": "Het documentenregister kon niet worden geladen — probeer het later opnieuw.",
+    "empty": "Nog geen documenten geregistreerd.",
+    "scopeNote": "Dit register bevat de documenten van de organisatie zelf. Persoonlijke documenten van werknemers blijven in hun eigen handen en worden hier nooit getoond.",
+    "types": {
+      "org_policy": "Beleid",
+      "org_procedure": "Procedure",
+      "org_instruction": "Instructie",
+      "org_correspondence_incoming": "Inkomende correspondentie",
+      "org_correspondence_outgoing": "Uitgaande correspondentie",
+      "org_internal": "Intern document",
+      "org_agreement_attachment": "Bijlage bij overeenkomst"
+    },
+    "status": {
+      "active": "Actief",
+      "archived": "Gearchiveerd",
+      "revoked": "Ingetrokken"
+    },
+    "classification": {
+      "standard": "Standaard",
+      "classified": "Beperkte toegang"
+    },
+    "currentVersion": "Versie {n}",
+    "versionHistory": "{n} versies",
+    "download": "Downloaden",
+    "noFileYet": "Nog geen bestand geüpload.",
+    "uploadNewVersion": "Nieuwe versie uploaden",
+    "uploadFirst": "Bestand uploaden",
+    "expiresOn": "geldig tot {date}",
+    "ackProgress": "{done}/{total} bevestigd",
+    "assign": {
+      "assigneeLabel": "Vragen te bevestigen:",
+      "requiredByLabel": "vóór",
+      "submit": "Verzoek verzenden"
+    },
+    "archive": "Archiveren",
+    "revoke": "Intrekken",
+    "create": {
+      "title": "Nieuw document registreren",
+      "typeLabel": "Type",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Omschrijving (optioneel)",
+      "classificationLabel": "Toegang",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Niet ingesteld",
+      "validFromLabel": "Geldig vanaf",
+      "expiresOnLabel": "Geldig tot",
+      "externalRefLabel": "Referentienummer (optioneel)",
+      "submit": "Document registreren"
     }
   },
   "trust": {
@@ -9132,7 +9275,11 @@
       "projectNone": "Geen project",
       "assignSelfLabel": "Aan mij toewijzen",
       "assignSelfHint": "Vink uit om de taak niet toe te wijzen — zichtbaar voor u en de projectmanagers.",
-      "submit": "Taak aanmaken"
+      "submit": "Taak aanmaken",
+      "objectLabel": "Object",
+      "objectNone": "Geen object",
+      "assigneeLabel": "Toegewezen aan",
+      "assigneeHint": "Toewijzen aan iemand anders kan alleen bij een projecttaak — de persoon ziet de taak in de eigen lijst."
     },
     "notice": {
       "created": "Taak aangemaakt.",
@@ -9142,7 +9289,8 @@
       "not_authorized": "U mag deze actie niet uitvoeren.",
       "not_found": "Taak niet gevonden.",
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
-      "error": "Opslaan mislukt. Probeer het opnieuw."
+      "error": "Opslaan mislukt. Probeer het opnieuw.",
+      "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten."
     },
     "projectTasks": {
       "title": "Projecttaken",
@@ -9151,6 +9299,42 @@
     },
     "projectSection": {
       "link": "Taken voor dit project"
+    },
+    "objectLabel": "Object",
+    "assignee": {
+      "label": "Toegewezen aan",
+      "you": "jou",
+      "member": "teamlid",
+      "unassigned": "niet toegewezen"
+    },
+    "assignForm": {
+      "label": "Toewijzen aan",
+      "save": "Toewijzen"
+    },
+    "dependencies": {
+      "waitingOn": "Wacht op {n}",
+      "blockedBy": "Hangt af van",
+      "hidden": "een taak die je niet kunt zien",
+      "remove": "Verwijderen",
+      "addLabel": "Afhankelijkheid toevoegen",
+      "add": "Toevoegen"
+    },
+    "history": {
+      "title": "Geschiedenis",
+      "byYou": "door jou",
+      "byMember": "door een teamlid",
+      "actions": {
+        "created": "Aangemaakt",
+        "status_changed": "Status gewijzigd",
+        "reopened": "Heropend",
+        "assigned": "Toegewezen",
+        "unassigned": "Toewijzing verwijderd",
+        "priority_changed": "Prioriteit gewijzigd",
+        "due_changed": "Deadline gewijzigd",
+        "object_changed": "Object gewijzigd",
+        "dependency_added": "Afhankelijkheid toegevoegd",
+        "dependency_removed": "Afhankelijkheid verwijderd"
+      }
     }
   },
   "assist": {
@@ -9797,22 +9981,6 @@
     "skillDeclared": "Zelf opgegeven",
     "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd.",
     "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw."
-  },
-  "companyLocations": {
-    "title": "Locaties",
-    "subtitle": "Hoofdkantoor, werklocaties en gewenste markten — in meerdere landen.",
-    "kindHeadquarters": "Hoofdkantoor",
-    "kindOperating": "Werklocatie",
-    "kindDesiredMarket": "Gewenste markt",
-    "countryLabel": "Land",
-    "cityLabel": "Stad",
-    "regionLabel": "Regio",
-    "addButton": "Locatie toevoegen",
-    "removeButton": "Locatie verwijderen",
-    "empty": "Nog geen locaties. Voeg je hoofdkantoor en werklocaties toe.",
-    "gatedHeading": "Voorbereid — wacht op activering door eigenaar",
-    "gatedBody": "Locaties zijn klaar maar staan nog niet aan. Aanzetten is een beslissing van de eigenaar.",
-    "errorLabel": "Opslaan mislukt. Probeer het opnieuw."
   },
   "companyGallery": {
     "title": "Galerij",
@@ -12427,6 +12595,33 @@
       "limit_reached": "De limiet voor open items is bereikt. Sluit eerst iets af.",
       "error": "Er ging iets mis. Er is niets gewijzigd."
     }
+  },
+  "workObjects": {
+    "title": "Objecten en locaties",
+    "subtitle": "De plekken waar het werk gebeurt — locaties, gebouwen, terreinen. Gekoppeld aan projecten en taken.",
+    "nameLabel": "Naam",
+    "countryLabel": "Land",
+    "regionLabel": "Regio",
+    "cityLabel": "Stad",
+    "addressLabel": "Adres",
+    "projectLabel": "Project",
+    "projectNone": "Geen project",
+    "responsibleLabel": "Verantwoordelijke",
+    "responsibleNone": "Niet ingesteld",
+    "responsibleSave": "Opslaan",
+    "addButton": "Object toevoegen",
+    "editButton": "Bewerken",
+    "saveButton": "Wijzigingen opslaan",
+    "archiveButton": "Archiveren",
+    "restoreButton": "Herstellen",
+    "archivedHeading": "Gearchiveerde objecten",
+    "archivedBadge": "Gearchiveerd",
+    "empty": "Nog geen objecten. Voeg de plekken toe waar jullie werk gebeurt.",
+    "gatedHeading": "Voorbereid — wacht op activering",
+    "gatedBody": "Objecten zijn klaar maar nog niet ingeschakeld. Inschakelen is een besluit van de eigenaar.",
+    "errorLabel": "Opslaan is niet gelukt. Probeer het opnieuw.",
+    "notAuthorizedLabel": "Alleen managers kunnen objecten wijzigen.",
+    "savedLabel": "Opgeslagen."
   },
   "requests": {
     "title": "Verzoeken",

@@ -64,6 +64,9 @@ export type WorkTask = {
   readonly id: string;
   /** Optional project linkage (RLS: managers of that project also see it). */
   readonly projectId: string | null;
+  /** Optional object/site linkage (train D — work_objects; null until the
+   *  v2 collaboration migration is applied, never fabricated). */
+  readonly objectId: string | null;
   readonly title: string;
   readonly description: string | null;
   readonly status: WorkTaskStatus;
@@ -74,6 +77,60 @@ export type WorkTask = {
   readonly createdAt: string;
   readonly resolvedAt: string | null;
 };
+
+/* ── Train D: task collaboration (v2 migration contract) ────────────────── */
+
+/** Append-only history vocabulary — mirrors the work_task_events CHECK. */
+export const WORK_TASK_EVENT_ACTIONS = [
+  "created",
+  "status_changed",
+  "reopened",
+  "assigned",
+  "unassigned",
+  "priority_changed",
+  "due_changed",
+  "object_changed",
+  "dependency_added",
+  "dependency_removed",
+] as const;
+export type WorkTaskEventAction = (typeof WORK_TASK_EVENT_ACTIONS)[number];
+
+export function isValidWorkTaskEventAction(
+  v: string,
+): v is WorkTaskEventAction {
+  return (WORK_TASK_EVENT_ACTIONS as readonly string[]).includes(v);
+}
+
+export type WorkTaskEvent = {
+  readonly id: string;
+  readonly taskId: string;
+  readonly actorProfileId: string | null;
+  readonly action: WorkTaskEventAction;
+  readonly createdAt: string;
+};
+
+export type TaskDependency = {
+  readonly id: string;
+  readonly blockerTaskId: string;
+  readonly blockedTaskId: string;
+};
+
+/** A dependency edge rendered on the blocked task's card. */
+export type TaskBlocker = {
+  readonly blockerTaskId: string;
+  /** Null when the blocker row is not visible to the caller (RLS). */
+  readonly title: string | null;
+  readonly status: WorkTaskStatus | null;
+};
+
+/** Open blockers gate a task — done/cancelled blockers do not. */
+export function isBlockingStatus(status: WorkTaskStatus | null): boolean {
+  return status !== null && isOpenStatus(status);
+}
+
+function isOpenStatus(status: WorkTaskStatus): boolean {
+  return (OPEN_WORK_TASK_STATUSES as readonly string[]).includes(status);
+}
 
 /** Read results — the bookings-page discriminant style ("needs-migration"
  *  is a calm product state, never an error surface). */

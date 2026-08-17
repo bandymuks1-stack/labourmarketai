@@ -425,11 +425,16 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260817120000 + 20260817121000) took SPRINT_BASELINE 199 -> 201 in
     // product-readiness.test.ts (recounted from the tree). This floor
     // assertion needs no numeric edit — it only pins the 166 minimum.
+    //
+    // Train D (2026-08-17): product-readiness moved 207 -> 211 for the four
+    // project/object/task drafts (work_objects_v1, work_tasks_v2_collaboration,
+    // project_responsible_v1, notification_events_v4_task_types). Cross-pin
+    // follows — this floor assertion needs no numeric edit.
     // Cross-pin follows: the typed employee requests + leave balance
     // policies PAIR (20260817180000 + 20260817181000) took SPRINT_BASELINE
-    // 205 -> 207 in product-readiness.test.ts (recounted from the tree).
-    // This floor assertion again needs no numeric edit.
-    //
+    // 211 -> 213 in product-readiness.test.ts (recounted after merging
+    // origin/main b6c5f71b). This floor assertion again needs no numeric
+    // edit.
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
     // migration 0030 to exist; pinning the exact number meant every unrelated,
@@ -439,6 +444,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // drop below what 0030 needs — without the false coupling. Lowering it still
     // fails here, and an unexplained RAISE is still caught by the documented
     // bump-comment convention in product-readiness.test.ts itself.
+    // Cross-pin follows: 205 -> 207 for the Document & Evidence Engine v1
+    // pair (20260817140000 + 20260817140100, renamed from 120000/121000
+    // after trains A/B claimed those slots) — floor semantics unchanged.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

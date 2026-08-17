@@ -4114,7 +4114,11 @@
         "event_workflow_step_pending": "An approval request is waiting for your decision",
         "event_workflow_decided": "Your approval request has been decided",
         "event_workflow_delegated": "An approval round was handed over to you",
-        "event_workflow_escalated": "An approval round passed its deadline"
+        "event_workflow_escalated": "An approval round passed its deadline",
+        "event_document_ack_assigned": "You were asked to confirm you have read a document.",
+        "event_document_ack_completed": "A document you sent for confirmation was confirmed.",
+        "event_document_expiring": "A document's validity is ending soon.",
+        "event_work_task_assigned": "A task was assigned to you"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -5283,7 +5287,14 @@
       "untitled": "Untitled project",
       "teamLabel": "On the team",
       "openArena": "Open project board",
-      "chatCta": "Message about this project"
+      "chatCta": "Message about this project",
+      "status": {
+        "draft": "Draft",
+        "live": "Live",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "progressNone": "No measurable progress yet"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -5299,7 +5310,13 @@
     "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
     "assignmentActive": "Active",
     "assignmentEnded": "Ended",
-    "untitledProject": "Untitled project"
+    "untitledProject": "Untitled project",
+    "archiveToggle": {
+      "label": "Active or finished projects",
+      "active": "Active",
+      "archived": "Finished",
+      "empty": "No finished projects yet."
+    }
   },
   "projectOps": {
     "centre": {
@@ -5533,6 +5550,32 @@
       "journalCta": "Write a journal entry",
       "chatCta": "Message",
       "galleryTitle": "My photos on this project"
+    },
+    "manage": {
+      "title": "Project management",
+      "progressLabel": "Progress",
+      "progressNone": "No measurable progress yet",
+      "responsibleLabel": "Responsible person",
+      "responsibleNone": "Not set",
+      "responsibleSave": "Save",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Set live",
+        "paused": "Pause",
+        "completed": "Complete & archive"
+      },
+      "completedTerminal": "Completed — this project is archived",
+      "noTransitions": "No status changes available",
+      "completeHint": "Completing ends every active assignment on this project and moves it to the finished list.",
+      "notice": {
+        "updated": "Saved.",
+        "invalid": "That change is not valid.",
+        "invalid_transition": "That status change is not allowed from the current state.",
+        "needs_migration": "This isn't switched on in this environment yet.",
+        "not_authorized": "Only project managers can do this.",
+        "not_found": "Project not found.",
+        "error": "Something went wrong. Try again."
+      }
     }
   },
   "setupRoleChoice": {
@@ -6920,6 +6963,106 @@
       "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
       "projectAxisLink": "Project readiness checklists",
       "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
+    }
+  },
+  "documentFiles": {
+    "currentVersion": "Version {n}",
+    "download": "Download",
+    "noFileYet": "No file uploaded yet.",
+    "upload": {
+      "fileLabel": "Choose a file",
+      "submit": "Upload file",
+      "newVersion": "Upload new version",
+      "limits": "PDF, Word or photo (JPG/PNG/WebP), up to 5 MB.",
+      "versionNote": "A new upload becomes a new version — earlier versions are kept."
+    },
+    "ackInbox": {
+      "title": "Documents to confirm",
+      "intro": "You were asked to confirm that you have read these documents. Open the file, then press the confirm button.",
+      "allDone": "Nothing waiting — you have confirmed every document assigned to you.",
+      "requiredBy": "confirm by {date}",
+      "confirm": "I have read this",
+      "completedTitle": "Already confirmed",
+      "confirmedAt": "confirmed {date}",
+      "versionRule": "A confirmation applies only to the exact version you opened. If a new version is published, you may be asked again."
+    },
+    "notice": {
+      "uploaded": "The file was uploaded.",
+      "created": "The document entry was created.",
+      "archived": "The document was archived.",
+      "revoked": "The document was revoked.",
+      "assigned": "The confirmation request was sent.",
+      "acknowledged": "Your confirmation was saved.",
+      "invalid": "Some of the entered details are not valid — nothing was saved.",
+      "invalid_state": "This document is not in a state that allows that action.",
+      "invalid_assignee": "That person is not a member of this organization, so the request was not sent.",
+      "already_assigned": "That person was already asked to confirm this version.",
+      "already_acknowledged": "This document version was already confirmed.",
+      "not_current": "A newer version of this document exists — refresh the page and try again.",
+      "not_allowed": "You do not have permission to do that.",
+      "not_found": "That document was not found.",
+      "limit_reached": "The document list limit was reached.",
+      "version_limit_reached": "This document reached its version limit.",
+      "path_mismatch": "The upload could not be verified — nothing was saved. Please try again.",
+      "file_too_large": "The file is larger than 5 MB — nothing was saved.",
+      "unsupported_type": "This file type is not supported — use PDF, Word or a photo.",
+      "needs_migration": "File upload is not enabled in this environment yet — nothing was saved.",
+      "error": "Something went wrong — nothing was saved."
+    }
+  },
+  "orgDocuments": {
+    "title": "Company document register",
+    "intro": "Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
+    "unavailable": "The document register could not be loaded right now.",
+    "preparing": "The document register is prepared but not enabled in this environment yet.",
+    "error": "The document register could not be loaded — try again later.",
+    "empty": "No documents registered yet.",
+    "scopeNote": "This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
+    "types": {
+      "org_policy": "Policy",
+      "org_procedure": "Procedure",
+      "org_instruction": "Instruction",
+      "org_correspondence_incoming": "Incoming correspondence",
+      "org_correspondence_outgoing": "Outgoing correspondence",
+      "org_internal": "Internal document",
+      "org_agreement_attachment": "Agreement attachment"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "revoked": "Revoked"
+    },
+    "classification": {
+      "standard": "Standard",
+      "classified": "Restricted access"
+    },
+    "currentVersion": "Version {n}",
+    "versionHistory": "{n} versions",
+    "download": "Download",
+    "noFileYet": "No file uploaded yet.",
+    "uploadNewVersion": "Upload new version",
+    "uploadFirst": "Upload file",
+    "expiresOn": "valid until {date}",
+    "ackProgress": "{done}/{total} confirmed",
+    "assign": {
+      "assigneeLabel": "Ask to confirm:",
+      "requiredByLabel": "by",
+      "submit": "Send request"
+    },
+    "archive": "Archive",
+    "revoke": "Revoke",
+    "create": {
+      "title": "Register a new document",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description (optional)",
+      "classificationLabel": "Access",
+      "responsibleLabel": "Responsible person",
+      "responsibleNone": "Not set",
+      "validFromLabel": "Valid from",
+      "expiresOnLabel": "Valid until",
+      "externalRefLabel": "Reference number (optional)",
+      "submit": "Register document"
     }
   },
   "trust": {
@@ -9132,7 +9275,11 @@
       "projectNone": "No project",
       "assignSelfLabel": "Assign to me",
       "assignSelfHint": "Untick to leave the task unassigned — visible to you and the project's managers.",
-      "submit": "Create task"
+      "submit": "Create task",
+      "objectLabel": "Object",
+      "objectNone": "No object",
+      "assigneeLabel": "Assigned to",
+      "assigneeHint": "Assigning to someone else needs a project task — the assignee sees it in their own list."
     },
     "notice": {
       "created": "Task created.",
@@ -9142,7 +9289,8 @@
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Task not found.",
       "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
-      "error": "Saving failed. Please try again."
+      "error": "Saving failed. Please try again.",
+      "cycle": "That would create a loop — a task can't wait on itself through other tasks."
     },
     "projectTasks": {
       "title": "Project tasks",
@@ -9151,6 +9299,42 @@
     },
     "projectSection": {
       "link": "Tasks for this project"
+    },
+    "objectLabel": "Object",
+    "assignee": {
+      "label": "Assigned to",
+      "you": "you",
+      "member": "team member",
+      "unassigned": "unassigned"
+    },
+    "assignForm": {
+      "label": "Assign to",
+      "save": "Assign"
+    },
+    "dependencies": {
+      "waitingOn": "Waiting on {n}",
+      "blockedBy": "Depends on",
+      "hidden": "a task you can't see",
+      "remove": "Remove",
+      "addLabel": "Add a dependency",
+      "add": "Add"
+    },
+    "history": {
+      "title": "History",
+      "byYou": "by you",
+      "byMember": "by a team member",
+      "actions": {
+        "created": "Created",
+        "status_changed": "Status changed",
+        "reopened": "Reopened",
+        "assigned": "Assigned",
+        "unassigned": "Assignment removed",
+        "priority_changed": "Priority changed",
+        "due_changed": "Deadline changed",
+        "object_changed": "Object changed",
+        "dependency_added": "Dependency added",
+        "dependency_removed": "Dependency removed"
+      }
     }
   },
   "assist": {
@@ -9797,22 +9981,6 @@
     "skillDeclared": "Self-declared",
     "skillsLegend": "With manager record — a manager record accompanies the skill. Work-backed — visible from work journal entries. Self-declared — added by the person.",
     "skillsReadError": "Skills could not be loaded right now. Try again shortly."
-  },
-  "companyLocations": {
-    "title": "Locations",
-    "subtitle": "Headquarters, operating locations and desired markets — across countries.",
-    "kindHeadquarters": "Headquarters",
-    "kindOperating": "Operating location",
-    "kindDesiredMarket": "Desired market",
-    "countryLabel": "Country",
-    "cityLabel": "City",
-    "regionLabel": "Region",
-    "addButton": "Add location",
-    "removeButton": "Remove location",
-    "empty": "No locations yet. Add your headquarters and operating locations.",
-    "gatedHeading": "Prepared — awaiting owner activation",
-    "gatedBody": "Locations are ready but not switched on yet. Switching them on is an owner decision.",
-    "errorLabel": "Could not save. Try again."
   },
   "companyGallery": {
     "title": "Gallery",
@@ -12427,6 +12595,33 @@
       "limit_reached": "The open-items limit was reached. Close something first.",
       "error": "Something went wrong. Nothing was changed."
     }
+  },
+  "workObjects": {
+    "title": "Objects & sites",
+    "subtitle": "The places where work happens — sites, buildings, areas. Linked to projects and tasks.",
+    "nameLabel": "Name",
+    "countryLabel": "Country",
+    "regionLabel": "Region",
+    "cityLabel": "City",
+    "addressLabel": "Address",
+    "projectLabel": "Project",
+    "projectNone": "No project",
+    "responsibleLabel": "Responsible person",
+    "responsibleNone": "Not set",
+    "responsibleSave": "Save",
+    "addButton": "Add object",
+    "editButton": "Edit",
+    "saveButton": "Save changes",
+    "archiveButton": "Archive",
+    "restoreButton": "Restore",
+    "archivedHeading": "Archived objects",
+    "archivedBadge": "Archived",
+    "empty": "No objects yet. Add the sites where your work happens.",
+    "gatedHeading": "Prepared — awaiting activation",
+    "gatedBody": "Objects are ready but not switched on yet. Switching them on is an owner decision.",
+    "errorLabel": "Could not save. Try again.",
+    "notAuthorizedLabel": "Only managers can change objects.",
+    "savedLabel": "Saved."
   },
   "requests": {
     "title": "Requests",
