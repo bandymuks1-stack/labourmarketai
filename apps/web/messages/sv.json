@@ -4588,6 +4588,213 @@
       "submit": "[EN] Register document"
     }
   },
+  "timesheets": {
+    "title": "Tidrapporter",
+    "intro": "Timdokument per period, härledda ur din arbetsjournal. Timmar rättas alltid i journalen; en tidrapport är en fryst kopia som skickas för godkännande.",
+    "needsMigration": "Tidrapporter är ännu inte aktiverade i den här miljön.",
+    "readError": "En del av tidrapportdata kunde inte läsas in just nu.",
+    "noLines": "Inga registrerade timmar under den här perioden ännu. Anteckna ditt arbete i journalen och uppdatera.",
+    "linesTitle": "Rader ({count})",
+    "approvalTimeline": "Godkännandeförlopp",
+    "openApprovals": "Öppna godkännandeområdet",
+    "noTemplateNote": "Den här organisationen har ännu ingen publicerad godkännandemall för tidrapporter, så inlämning är inte möjlig. Be en organisationsadministratör att skapa en.",
+    "totals": {
+      "hours": "{hours} tim",
+      "dayUnits": "{days} dagsenheter",
+      "lines": "{count} rader"
+    },
+    "unit": {
+      "hours": "tim",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Inlämnad",
+      "approved": "Godkänd",
+      "rejected": "Avvisad",
+      "reopened": "Återlämnad"
+    },
+    "mine": {
+      "title": "Mina tidrapporter",
+      "derivedNote": "Varje rad kommer från dina journalposter. För att rätta timmar, rätta journalposten och tryck på Uppdatera.",
+      "empty": "Inga tidrapporter ännu. Välj en organisation och en period för att skapa den första.",
+      "noOrganizations": "Du är ännu inte kopplad till någon organisation, så det finns ingenstans att lämna in timmar."
+    },
+    "create": {
+      "organization": "Organisation",
+      "unnamedOrganization": "Organisation utan namn",
+      "periodStart": "Periodens början",
+      "periodEnd": "Periodens slut",
+      "action": "Skapa tidrapport",
+      "hint": "En period omfattar högst 31 dagar och får inte överlappa en annan tidrapport för samma organisation."
+    },
+    "actions": {
+      "refresh": "Uppdatera från journalen",
+      "submit": "Lämna in för godkännande",
+      "sync": "Uppdatera status",
+      "exportCsv": "Ladda ner CSV"
+    },
+    "org": {
+      "title": "Lagets tidrapporter",
+      "decideNote": "Godkännandebeslut fattas i godkännandeområdet. Här kan du granska rader, exportera och återlämna en avgjord tidrapport.",
+      "noTemplateFor": "{name} har ingen publicerad godkännandemall för tidrapporter.",
+      "createTemplate": "Skapa standardgodkännandemall",
+      "unnamedWorker": "Arbetare",
+      "decideInApprovals": "Avgör i godkännandeområdet",
+      "reopenNote": "Återlämningsnotering",
+      "reopenNotePlaceholder": "Varför återlämnas den?",
+      "reopen": "Återlämna till arbetaren"
+    },
+    "notice": {
+      "created": "Tidrapport skapad.",
+      "refreshed": "Rader uppdaterade från journalen.",
+      "submitted": "Tidrapport inlämnad för godkännande.",
+      "reopened": "Tidrapport återlämnad till arbetaren.",
+      "approved": "Tidrapport godkänd.",
+      "rejected": "Tidrapport avvisad.",
+      "synced_pending": "Godkännandet pågår fortfarande.",
+      "no_instance": "Det finns ännu ingen godkännandebegäran för den här tidrapporten.",
+      "no_template": "Den här organisationen har ännu ingen publicerad godkännandemall för tidrapporter.",
+      "template_created": "Standardgodkännandemall skapad och publicerad.",
+      "overlap": "Den här perioden överlappar en befintlig tidrapport.",
+      "invalid_period": "Perioden är ogiltig — högst 31 dagar, och slutet får inte ligga före början.",
+      "no_worker": "Ditt konto har ingen arbetarprofil.",
+      "not_editable": "Den här tidrapporten kan inte längre redigeras.",
+      "not_decided": "Endast en godkänd eller avvisad tidrapport kan återlämnas.",
+      "not_submitted": "Den här tidrapporten är inte inlämnad.",
+      "already_submitted": "Den här tidrapporten är redan inlämnad.",
+      "no_approvers": "Inga godkännare kunde hittas för organisationens mall.",
+      "not_published": "Godkännandemallen är ännu inte publicerad.",
+      "invalid": "Begäran var ogiltig.",
+      "needs_migration": "Tidrapporter är ännu inte aktiverade i den här miljön.",
+      "not_authorized": "Du får inte göra detta.",
+      "not_found": "Tidrapporten hittades inte.",
+      "limit_reached": "För många öppna tidrapporter — lämna in eller städa upp de befintliga först.",
+      "error": "Något gick fel. Inget sparades."
+    }
+  },
+  "requests": {
+    "title": "Förfrågningar",
+    "intro": "Be din arbetsgivare om något och följ vad som händer. Varje förfrågan följer det godkännandeflöde som ditt företag har satt upp.",
+    "unavailable": "Förfrågningar är inte påslagna i den här miljön ännu. Inget går förlorat — avsnittet öppnas när uppdateringen har granskats och installerats.",
+    "honestNote": "En förfrågan avgörs av riktiga människor i ditt företag. Inget godkänns automatiskt och inget lämnar produkten.",
+    "notice": {
+      "created": "Förfrågan skickad. Rätt personer har ombetts att granska den.",
+      "withdrawn": "Förfrågan återkallad.",
+      "template_ready": "Godkännandeflödet för förfrågningar är klart.",
+      "policy_saved": "Semesterkvot sparad.",
+      "already_pending": "Den här förfrågan väntar redan på ett beslut.",
+      "no_definition": "Ditt företag har ännu inte satt upp ett godkännandeflöde för förfrågningar.",
+      "no_approvers": "Ingen i företaget kan just nu granska den här förfrågan, så den skickades inte.",
+      "not_published": "Godkännandeflödet för förfrågningar är inte klart ännu.",
+      "not_pending": "Den här förfrågan väntar inte längre — nedan visas dess aktuella läge.",
+      "invalid": "Kontrollera uppgifterna och försök igen.",
+      "needs_migration": "Inte tillgängligt ännu — uppdateringen är inte installerad i den här miljön.",
+      "not_authorized": "Det får du inte göra.",
+      "not_found": "Hittades inte.",
+      "limit_reached": "För många öppna förfrågningar. Vänta först på beslut om de befintliga.",
+      "error": "Något gick fel. Försök igen."
+    },
+    "file": {
+      "title": "Ny förfrågan",
+      "orgLabel": "Företag",
+      "unnamedOrg": "Företag utan namn",
+      "typeLabel": "Vad ber du om?",
+      "titleLabel": "Kort titel",
+      "detailsLabel": "Förklaring",
+      "dateFromLabel": "Från (valfritt)",
+      "dateToLabel": "Till (valfritt)",
+      "datesHint": "Datum är viktiga vid distansarbete eller schemaändringar. Lämna dem tomma om de inte passar.",
+      "submit": "Skicka förfrågan",
+      "noOrganizations": "Du är ännu inte kopplad till något företag, så det finns ingen att skicka en förfrågan till."
+    },
+    "type": {
+      "remote_work": "Distansarbete",
+      "schedule_change": "Schemaändring",
+      "certificate_request": "Intyg eller dokument",
+      "employment_condition_change": "Ändring av anställningsvillkor",
+      "benefit_request": "Förmån",
+      "equipment_request": "Utrustning",
+      "other": "Övrigt"
+    },
+    "typeHint": {
+      "remote_work": "be om att arbeta hemifrån eller från en annan plats valda dagar",
+      "schedule_change": "be om andra arbetstider eller skift",
+      "certificate_request": "be om ett intyg eller dokument om din anställning",
+      "employment_condition_change": "be om att ändra ett avtalat anställningsvillkor",
+      "benefit_request": "be om en förmån som ditt företag erbjuder",
+      "equipment_request": "be om verktyg eller utrustning för ditt arbete",
+      "other": "allt annat du vill be din arbetsgivare om"
+    },
+    "status": {
+      "pending": "Väntar på beslut",
+      "approved": "Godkänd",
+      "rejected": "Avslagen",
+      "withdrawn": "Återkallad",
+      "cancelled": "Annullerad"
+    },
+    "mine": {
+      "title": "Mina förfrågningar",
+      "empty": "Inga förfrågningar ännu.",
+      "timelineOpen": "Visa förlopp"
+    },
+    "actions": {
+      "withdraw": "Återkalla"
+    },
+    "register": {
+      "title": "Förfrågningsregister",
+      "decideHint": "Godkännande och avslag sker i godkännandeområdet ovan — det här registret listar alla förfrågningar i dina organisationer.",
+      "filterStatus": "Status",
+      "filterType": "Typ",
+      "filterAll": "Alla",
+      "filterApply": "Filtrera",
+      "empty": "Inga förfrågningar matchar."
+    },
+    "seed": {
+      "title": "Sätt upp godkännandeflöde för förfrågningar",
+      "hint": "Skapar ett enkelt färdigt flöde: en granskningsrunda som avgörs av företagets ägare och administratörer. Flerstegsflöden bygger du i godkännandeområdet ovan.",
+      "orgLabel": "Företag",
+      "typeLabel": "Gäller för",
+      "allTypes": "Alla förfrågningstyper",
+      "nameLabel": "Namn",
+      "defaultName": "Standardgodkännande av förfrågningar",
+      "submit": "Skapa och slå på"
+    },
+    "policies": {
+      "title": "Semesterkvoter",
+      "honesty": "Ditt företag bestämmer själv dessa tal. De är bara vägledning för planering — godkännande förblir ett riktigt chefsbeslut, och detta är inte juridisk rådgivning.",
+      "entitlementShort": "{days} d/år",
+      "carryoverShort": "+{days} överfört",
+      "inactive": "avstängd",
+      "setTitle": "Ange semesterkvot",
+      "orgLabel": "Företag",
+      "typeLabel": "Frånvarotyp",
+      "entitlementLabel": "Dagar per år",
+      "carryoverLabel": "Överförda dagar",
+      "activeLabel": "I bruk",
+      "submit": "Spara"
+    },
+    "absenceType": {
+      "annual_leave": "Semester",
+      "sickness": "Sjukdom",
+      "unpaid": "Obetald ledighet",
+      "training": "Utbildning",
+      "other": "Övrigt"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Mitt semestersaldo {year}",
+      "advisoryNote": "Saldon är vägledning för planering. Din chef beslutar. Talen kommer från företagets egna inställningar, inte från lagen.",
+      "noPolicy": "Ditt företag har ännu inte angett semesterkvoter här.",
+      "remaining": "{days} d kvar",
+      "detail": "{entitlement} per år + {carryover} överfört − {used} använt",
+      "requestedDays": "{days} d begärt",
+      "remainingShort": "{days} d kvar",
+      "exceedsNote": "Mer än kvarvarande ledighet"
+    }
+  },
   "lifecycle": {
     "title": "Anställningens livscykel",
     "intro": "Onboarding, provanställning, förändringar, offboarding och avslut för organisationens anställningar — med checklistor och full historik.",

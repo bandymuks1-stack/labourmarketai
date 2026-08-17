@@ -4588,6 +4588,213 @@
       "submit": "[EN] Register document"
     }
   },
+  "timesheets": {
+    "title": "Karty czasu pracy",
+    "intro": "Dokumenty godzin za okres, tworzone z Twojego dziennika pracy. Godziny zawsze poprawia się w dzienniku; karta czasu pracy to zamrożona kopia wysyłana do zatwierdzenia.",
+    "needsMigration": "Karty czasu pracy nie są jeszcze włączone w tym środowisku.",
+    "readError": "Części danych kart czasu pracy nie udało się teraz wczytać.",
+    "noLines": "W tym okresie nie ma jeszcze zapisanych godzin. Zapisz pracę w dzienniku i odśwież.",
+    "linesTitle": "Wiersze ({count})",
+    "approvalTimeline": "Postęp zatwierdzania",
+    "openApprovals": "Otwórz obszar zatwierdzeń",
+    "noTemplateNote": "Ta organizacja nie ma jeszcze opublikowanego szablonu zatwierdzania kart, więc wysłanie nie jest możliwe. Poproś administratora organizacji o jego utworzenie.",
+    "totals": {
+      "hours": "{hours} godz.",
+      "dayUnits": "{days} jedn. dziennych",
+      "lines": "{count} wierszy"
+    },
+    "unit": {
+      "hours": "godz.",
+      "minutes": "min",
+      "days": "dn."
+    },
+    "status": {
+      "draft": "Szkic",
+      "submitted": "Wysłana",
+      "approved": "Zatwierdzona",
+      "rejected": "Odrzucona",
+      "reopened": "Zwrócona"
+    },
+    "mine": {
+      "title": "Moje karty czasu pracy",
+      "derivedNote": "Każdy wiersz pochodzi z wpisów Twojego dziennika. Aby poprawić godziny, popraw wpis w dzienniku i naciśnij Odśwież.",
+      "empty": "Nie ma jeszcze kart czasu pracy. Wybierz organizację i okres, aby utworzyć pierwszą.",
+      "noOrganizations": "Nie jesteś jeszcze powiązany z żadną organizacją, więc nie ma gdzie wysyłać godzin."
+    },
+    "create": {
+      "organization": "Organizacja",
+      "unnamedOrganization": "Organizacja bez nazwy",
+      "periodStart": "Początek okresu",
+      "periodEnd": "Koniec okresu",
+      "action": "Utwórz kartę czasu pracy",
+      "hint": "Okres obejmuje najwyżej 31 dni i nie może nachodzić na inną kartę tej samej organizacji."
+    },
+    "actions": {
+      "refresh": "Odśwież z dziennika",
+      "submit": "Wyślij do zatwierdzenia",
+      "sync": "Odśwież status",
+      "exportCsv": "Pobierz CSV"
+    },
+    "org": {
+      "title": "Karty czasu pracy zespołu",
+      "decideNote": "Decyzje o zatwierdzeniu zapadają w obszarze zatwierdzeń. Tutaj możesz przejrzeć wiersze, wyeksportować i zwrócić już rozstrzygniętą kartę.",
+      "noTemplateFor": "{name} nie ma opublikowanego szablonu zatwierdzania kart.",
+      "createTemplate": "Utwórz standardowy szablon zatwierdzania",
+      "unnamedWorker": "Pracownik",
+      "decideInApprovals": "Zdecyduj w obszarze zatwierdzeń",
+      "reopenNote": "Notatka zwrotu",
+      "reopenNotePlaceholder": "Dlaczego zwracasz?",
+      "reopen": "Zwróć pracownikowi"
+    },
+    "notice": {
+      "created": "Karta czasu pracy utworzona.",
+      "refreshed": "Wiersze odświeżone z dziennika.",
+      "submitted": "Karta wysłana do zatwierdzenia.",
+      "reopened": "Karta zwrócona pracownikowi.",
+      "approved": "Karta zatwierdzona.",
+      "rejected": "Karta odrzucona.",
+      "synced_pending": "Zatwierdzanie wciąż trwa.",
+      "no_instance": "Dla tej karty nie istnieje jeszcze wniosek o zatwierdzenie.",
+      "no_template": "Ta organizacja nie ma jeszcze opublikowanego szablonu zatwierdzania kart.",
+      "template_created": "Standardowy szablon zatwierdzania utworzony i opublikowany.",
+      "overlap": "Ten okres nachodzi na istniejącą kartę.",
+      "invalid_period": "Okres jest nieprawidłowy — do 31 dni, a koniec nie może być przed początkiem.",
+      "no_worker": "Twoje konto nie ma profilu pracownika.",
+      "not_editable": "Tej karty nie można już edytować.",
+      "not_decided": "Zwrócić można tylko zatwierdzoną lub odrzuconą kartę.",
+      "not_submitted": "Ta karta nie została wysłana.",
+      "already_submitted": "Ta karta została już wysłana.",
+      "no_approvers": "Według szablonu tej organizacji nie znaleziono zatwierdzających.",
+      "not_published": "Szablon zatwierdzania nie jest jeszcze opublikowany.",
+      "invalid": "Żądanie było nieprawidłowe.",
+      "needs_migration": "Karty czasu pracy nie są jeszcze włączone w tym środowisku.",
+      "not_authorized": "Nie masz do tego uprawnień.",
+      "not_found": "Karty nie znaleziono.",
+      "limit_reached": "Za dużo otwartych kart — najpierw wyślij lub uporządkuj istniejące.",
+      "error": "Coś poszło nie tak. Nic nie zostało zapisane."
+    }
+  },
+  "requests": {
+    "title": "Wnioski",
+    "intro": "Poproś pracodawcę o coś i śledź, co dzieje się dalej. Każdy wniosek przechodzi ścieżkę zatwierdzania ustawioną przez Twoją firmę.",
+    "unavailable": "Wnioski nie są jeszcze włączone w tym środowisku. Nic nie przepada — sekcja otworzy się, gdy aktualizacja zostanie sprawdzona i zainstalowana.",
+    "honestNote": "O wniosku decydują prawdziwi ludzie w Twojej firmie. Nic nie jest zatwierdzane automatycznie i nic nie opuszcza produktu.",
+    "notice": {
+      "created": "Wniosek złożony. Odpowiednie osoby zostały poproszone o jego rozpatrzenie.",
+      "withdrawn": "Wniosek wycofany.",
+      "template_ready": "Ścieżka zatwierdzania wniosków jest gotowa.",
+      "policy_saved": "Limit urlopu zapisany.",
+      "already_pending": "Ten wniosek już czeka na decyzję.",
+      "no_definition": "Twoja firma nie ustawiła jeszcze ścieżki zatwierdzania wniosków.",
+      "no_approvers": "Obecnie nikt w firmie nie może rozpatrzyć tego wniosku, więc nie został złożony.",
+      "not_published": "Ścieżka zatwierdzania wniosków nie jest jeszcze gotowa.",
+      "not_pending": "Ten wniosek już nie czeka — poniżej widać jego obecny stan.",
+      "invalid": "Sprawdź dane i spróbuj ponownie.",
+      "needs_migration": "Jeszcze niedostępne — aktualizacja wniosków nie jest zainstalowana w tym środowisku.",
+      "not_authorized": "Nie możesz tego zrobić.",
+      "not_found": "Nie znaleziono.",
+      "limit_reached": "Za dużo otwartych wniosków. Najpierw poczekaj na decyzje w sprawie istniejących.",
+      "error": "Coś poszło nie tak. Spróbuj ponownie."
+    },
+    "file": {
+      "title": "Nowy wniosek",
+      "orgLabel": "Firma",
+      "unnamedOrg": "Firma bez nazwy",
+      "typeLabel": "O co prosisz?",
+      "titleLabel": "Krótki tytuł",
+      "detailsLabel": "Wyjaśnienie",
+      "dateFromLabel": "Od (opcjonalnie)",
+      "dateToLabel": "Do (opcjonalnie)",
+      "datesHint": "Daty są ważne przy pracy zdalnej lub zmianie grafiku. Zostaw puste, jeśli nie pasują.",
+      "submit": "Złóż wniosek",
+      "noOrganizations": "Nie jesteś jeszcze powiązany z żadną firmą, więc nie ma komu wysłać wniosku."
+    },
+    "type": {
+      "remote_work": "Praca zdalna",
+      "schedule_change": "Zmiana grafiku",
+      "certificate_request": "Zaświadczenie lub dokument",
+      "employment_condition_change": "Zmiana warunków zatrudnienia",
+      "benefit_request": "Świadczenie",
+      "equipment_request": "Sprzęt",
+      "other": "Inne"
+    },
+    "typeHint": {
+      "remote_work": "poproś o pracę z domu lub innego miejsca w wybrane dni",
+      "schedule_change": "poproś o inne godziny pracy lub zmiany",
+      "certificate_request": "poproś o zaświadczenie lub dokument o Twoim zatrudnieniu",
+      "employment_condition_change": "poproś o zmianę uzgodnionego warunku zatrudnienia",
+      "benefit_request": "poproś o świadczenie oferowane przez firmę",
+      "equipment_request": "poproś o narzędzia lub sprzęt do pracy",
+      "other": "wszystko inne, o co chcesz poprosić pracodawcę"
+    },
+    "status": {
+      "pending": "Czeka na decyzję",
+      "approved": "Zatwierdzony",
+      "rejected": "Odrzucony",
+      "withdrawn": "Wycofany",
+      "cancelled": "Anulowany"
+    },
+    "mine": {
+      "title": "Moje wnioski",
+      "empty": "Brak wniosków.",
+      "timelineOpen": "Pokaż przebieg"
+    },
+    "actions": {
+      "withdraw": "Wycofaj"
+    },
+    "register": {
+      "title": "Rejestr wniosków",
+      "decideHint": "Zatwierdzanie i odrzucanie odbywa się w sekcji zatwierdzeń powyżej — ten rejestr pokazuje wszystkie wnioski w Twoich organizacjach.",
+      "filterStatus": "Status",
+      "filterType": "Typ",
+      "filterAll": "Wszystkie",
+      "filterApply": "Filtruj",
+      "empty": "Brak pasujących wniosków."
+    },
+    "seed": {
+      "title": "Ustaw ścieżkę zatwierdzania wniosków",
+      "hint": "Tworzy prostą gotową ścieżkę: jedną rundę rozpatrywania, o której decydują właściciele i administratorzy firmy. Wieloetapowe ścieżki zbudujesz w sekcji zatwierdzeń powyżej.",
+      "orgLabel": "Firma",
+      "typeLabel": "Dotyczy",
+      "allTypes": "Wszystkich typów wniosków",
+      "nameLabel": "Nazwa",
+      "defaultName": "Standardowe zatwierdzanie wniosków",
+      "submit": "Utwórz i włącz"
+    },
+    "policies": {
+      "title": "Limity urlopów",
+      "honesty": "Te liczby firma ustala sama. Służą tylko do planowania — zatwierdzenie pozostaje prawdziwą decyzją przełożonego, a to nie jest porada prawna.",
+      "entitlementShort": "{days} dni/rok",
+      "carryoverShort": "+{days} przeniesione",
+      "inactive": "wyłączone",
+      "setTitle": "Ustaw limit urlopu",
+      "orgLabel": "Firma",
+      "typeLabel": "Rodzaj nieobecności",
+      "entitlementLabel": "Dni w roku",
+      "carryoverLabel": "Dni przeniesione",
+      "activeLabel": "W użyciu",
+      "submit": "Zapisz"
+    },
+    "absenceType": {
+      "annual_leave": "Urlop wypoczynkowy",
+      "sickness": "Choroba",
+      "unpaid": "Urlop bezpłatny",
+      "training": "Szkolenie",
+      "other": "Inne"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Mój stan urlopu {year}",
+      "advisoryNote": "Stany są wskazówką do planowania. Decyduje Twój przełożony. Liczby pochodzą z ustawień Twojej firmy, nie z prawa.",
+      "noPolicy": "Twoja firma nie ustaliła tu jeszcze limitów urlopu.",
+      "remaining": "zostało {days} dni",
+      "detail": "{entitlement} rocznie + {carryover} przeniesione − {used} wykorzystane",
+      "requestedDays": "wnioskowane {days} dni",
+      "remainingShort": "zostało {days} dni",
+      "exceedsNote": "Więcej niż pozostały urlop"
+    }
+  },
   "lifecycle": {
     "title": "Cykl życia zatrudnienia",
     "intro": "Wdrożenie, okres próbny, zmiany, odejście i zakończenie dla zapisów zatrudnienia tej organizacji — z listami kontrolnymi i pełną historią.",

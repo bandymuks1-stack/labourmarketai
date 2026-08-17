@@ -384,7 +384,17 @@
     "managerEmpty": "Nėra laukiančių jūsų darbuotojų prašymų.",
     "unknownWorker": "Darbuotojas",
     "approve": "Patvirtinti",
-    "reject": "Atmesti"
+    "reject": "Atmesti",
+    "balance": {
+      "title": "Mano atostogų likutis {year}",
+      "advisoryNote": "Likučiai — tik orientyras planavimui. Sprendimą priima jūsų vadovas. Skaičiai — iš jūsų įmonės nustatymų, ne iš įstatymų.",
+      "noPolicy": "Jūsų įmonė čia dar nenustatė atostogų limitų.",
+      "remaining": "liko {days} d.",
+      "detail": "{entitlement} per metus + {carryover} perkelta − {used} panaudota",
+      "requestedDays": "prašoma {days} d.",
+      "remainingShort": "liko {days} d.",
+      "exceedsNote": "Daugiau nei likę atostogų"
+    }
   },
   "projectStages": {
     "ganttTitle": "Laiko juosta (Gantt)",
@@ -9105,7 +9115,13 @@
         "days": "d."
       }
     },
-    "pastLink": "Ankstesnės dienos"
+    "pastLink": "Ankstesnės dienos",
+    "workload": {
+      "title": "Darbo krūvis",
+      "plannedDays": "{count} suplanuotos darbo dienos",
+      "actualHours": "{hours} val. užrašyta žurnale",
+      "note": "Suplanuotos dienos ateina iš priimtų rezervacijų ir projektų priskyrimų; užrašytos valandos — iš jūsų žurnalo įrašų. Abu skaičiai rodomi greta, niekada neperskaičiuojami vienas į kitą."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Įmonės erdvė",
@@ -12586,6 +12602,92 @@
       "error": "Įvyko klaida. Niekas nepakeista."
     }
   },
+  "timesheets": {
+    "title": "Darbo laiko žiniaraščiai",
+    "intro": "Laikotarpio valandų dokumentai, sudaromi iš jūsų darbo žurnalo. Valandos visada taisomos žurnale; žiniaraštis — užfiksuota kopija, siunčiama tvirtinti.",
+    "needsMigration": "Žiniaraščiai šioje aplinkoje dar neįjungti.",
+    "readError": "Dalies žiniaraščių duomenų šiuo metu nepavyko įkelti.",
+    "noLines": "Šiame laikotarpyje dar nėra užrašytų valandų. Įrašykite darbą į žurnalą ir atnaujinkite.",
+    "linesTitle": "Eilutės ({count})",
+    "approvalTimeline": "Tvirtinimo eiga",
+    "openApprovals": "Atidaryti tvirtinimų sritį",
+    "noTemplateNote": "Ši organizacija dar neturi paskelbto žiniaraščių tvirtinimo šablono, todėl pateikti negalima. Paprašykite organizacijos administratoriaus jį sukurti.",
+    "totals": {
+      "hours": "{hours} val.",
+      "dayUnits": "{days} dienos vnt.",
+      "lines": "{count} eil."
+    },
+    "unit": {
+      "hours": "val.",
+      "minutes": "min.",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "submitted": "Pateiktas",
+      "approved": "Patvirtintas",
+      "rejected": "Atmestas",
+      "reopened": "Grąžintas"
+    },
+    "mine": {
+      "title": "Mano žiniaraščiai",
+      "derivedNote": "Kiekviena eilutė ateina iš jūsų žurnalo įrašų. Norėdami pataisyti valandas, pataisykite žurnalo įrašą ir spauskite „Atnaujinti“.",
+      "empty": "Žiniaraščių dar nėra. Pasirinkite organizaciją ir laikotarpį, kad sukurtumėte pirmąjį.",
+      "noOrganizations": "Dar nesate susietas su jokia organizacija, todėl nėra kam pateikti valandų."
+    },
+    "create": {
+      "organization": "Organizacija",
+      "unnamedOrganization": "Organizacija be pavadinimo",
+      "periodStart": "Laikotarpio pradžia",
+      "periodEnd": "Laikotarpio pabaiga",
+      "action": "Sukurti žiniaraštį",
+      "hint": "Laikotarpis apima daugiausia 31 dieną ir negali persidengti su kitu tos pačios organizacijos žiniaraščiu."
+    },
+    "actions": {
+      "refresh": "Atnaujinti iš žurnalo",
+      "submit": "Pateikti tvirtinti",
+      "sync": "Atnaujinti būseną",
+      "exportCsv": "Atsisiųsti CSV"
+    },
+    "org": {
+      "title": "Komandos žiniaraščiai",
+      "decideNote": "Tvirtinimo sprendimai priimami tvirtinimų srityje. Čia galite peržiūrėti eilutes, eksportuoti ir grąžinti jau nuspręstą žiniaraštį.",
+      "noTemplateFor": "{name} neturi paskelbto žiniaraščių tvirtinimo šablono.",
+      "createTemplate": "Sukurti standartinį tvirtinimo šabloną",
+      "unnamedWorker": "Darbuotojas",
+      "decideInApprovals": "Spręsti tvirtinimų srityje",
+      "reopenNote": "Grąžinimo pastaba",
+      "reopenNotePlaceholder": "Kodėl grąžinama?",
+      "reopen": "Grąžinti darbuotojui"
+    },
+    "notice": {
+      "created": "Žiniaraštis sukurtas.",
+      "refreshed": "Eilutės atnaujintos iš žurnalo.",
+      "submitted": "Žiniaraštis pateiktas tvirtinti.",
+      "reopened": "Žiniaraštis grąžintas darbuotojui.",
+      "approved": "Žiniaraštis patvirtintas.",
+      "rejected": "Žiniaraštis atmestas.",
+      "synced_pending": "Tvirtinimas dar vyksta.",
+      "no_instance": "Šiam žiniaraščiui tvirtinimo užklausos dar nėra.",
+      "no_template": "Ši organizacija dar neturi paskelbto žiniaraščių tvirtinimo šablono.",
+      "template_created": "Standartinis tvirtinimo šablonas sukurtas ir paskelbtas.",
+      "overlap": "Šis laikotarpis persidengia su esamu žiniaraščiu.",
+      "invalid_period": "Laikotarpis netinkamas — iki 31 dienos, pabaiga negali būti ankstesnė už pradžią.",
+      "no_worker": "Jūsų paskyra neturi darbuotojo profilio.",
+      "not_editable": "Šio žiniaraščio nebegalima redaguoti.",
+      "not_decided": "Grąžinti galima tik patvirtintą arba atmestą žiniaraštį.",
+      "not_submitted": "Šis žiniaraštis nepateiktas.",
+      "already_submitted": "Šis žiniaraštis jau pateiktas.",
+      "no_approvers": "Pagal šios organizacijos šabloną tvirtintojų rasti nepavyko.",
+      "not_published": "Tvirtinimo šablonas dar nepaskelbtas.",
+      "invalid": "Užklausa buvo netinkama.",
+      "needs_migration": "Žiniaraščiai šioje aplinkoje dar neįjungti.",
+      "not_authorized": "Jums to daryti neleidžiama.",
+      "not_found": "Žiniaraštis nerastas.",
+      "limit_reached": "Per daug atvirų žiniaraščių — pirmiausia pateikite arba sutvarkykite esamus.",
+      "error": "Įvyko klaida. Niekas nebuvo išsaugota."
+    }
+  },
   "workObjects": {
     "title": "Objektai ir aikštelės",
     "subtitle": "Vietos, kur vyksta darbai — objektai, pastatai, teritorijos. Susiejamos su projektais ir užduotimis.",
@@ -12612,6 +12714,115 @@
     "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
     "savedLabel": "Išsaugota."
+  },
+  "requests": {
+    "title": "Prašymai",
+    "intro": "Paprašykite darbdavio ko nors ir sekite, kas vyksta toliau. Kiekvienas prašymas keliauja į jūsų įmonės nustatytą tvirtinimo eigą.",
+    "unavailable": "Prašymai šioje aplinkoje dar neįjungti. Niekas neprarasta — ši dalis atsivers, kai prašymų atnaujinimas bus peržiūrėtas ir įdiegtas.",
+    "honestNote": "Prašymą sprendžia tikri jūsų įmonės žmonės. Niekas nepatvirtinama automatiškai ir niekas nesiunčiama už šio produkto ribų.",
+    "notice": {
+      "created": "Prašymas pateiktas. Atsakingi žmonės paprašyti jį peržiūrėti.",
+      "withdrawn": "Prašymas atšauktas.",
+      "template_ready": "Prašymų tvirtinimo eiga paruošta.",
+      "policy_saved": "Atostogų limitas išsaugotas.",
+      "already_pending": "Šis prašymas jau laukia sprendimo.",
+      "no_definition": "Jūsų įmonė dar nenustatė prašymų tvirtinimo eigos.",
+      "no_approvers": "Šiuo metu įmonėje nėra kam peržiūrėti šio prašymo, todėl jis nepateiktas.",
+      "not_published": "Prašymų tvirtinimo eiga dar neparuošta.",
+      "not_pending": "Šis prašymas nebelaukia sprendimo — žemiau matote dabartinę jo būseną.",
+      "invalid": "Patikrinkite duomenis ir bandykite dar kartą.",
+      "needs_migration": "Dar neprieinama — prašymų atnaujinimas šioje aplinkoje neįdiegtas.",
+      "not_authorized": "Jums to daryti neleidžiama.",
+      "not_found": "Nerasta.",
+      "limit_reached": "Per daug atvirų prašymų. Pirmiausia palaukite sprendimų dėl esamų.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    },
+    "file": {
+      "title": "Naujas prašymas",
+      "orgLabel": "Įmonė",
+      "unnamedOrg": "Įmonė be pavadinimo",
+      "typeLabel": "Ko prašote?",
+      "titleLabel": "Trumpas pavadinimas",
+      "detailsLabel": "Paaiškinimas",
+      "dateFromLabel": "Nuo (nebūtina)",
+      "dateToLabel": "Iki (nebūtina)",
+      "datesHint": "Datos svarbios nuotoliniam darbui ar grafiko keitimui. Jei netinka, palikite tuščias.",
+      "submit": "Pateikti prašymą",
+      "noOrganizations": "Dar nesate susietas su jokia įmone, todėl prašymo nėra kam siųsti."
+    },
+    "type": {
+      "remote_work": "Nuotolinis darbas",
+      "schedule_change": "Grafiko keitimas",
+      "certificate_request": "Pažyma ar dokumentas",
+      "employment_condition_change": "Darbo sąlygų keitimas",
+      "benefit_request": "Lengvata",
+      "equipment_request": "Įranga",
+      "other": "Kita"
+    },
+    "typeHint": {
+      "remote_work": "prašykite dirbti iš namų ar kitos vietos pasirinktomis dienomis",
+      "schedule_change": "prašykite pakeisti darbo valandas ar pamainas",
+      "certificate_request": "prašykite pažymos ar dokumento apie jūsų darbą",
+      "employment_condition_change": "prašykite pakeisti sutartą darbo sąlygą",
+      "benefit_request": "prašykite lengvatos, kurią siūlo jūsų įmonė",
+      "equipment_request": "prašykite darbui reikalingų įrankių ar įrangos",
+      "other": "bet kas kita, ko norite paprašyti darbdavio"
+    },
+    "status": {
+      "pending": "Laukia sprendimo",
+      "approved": "Patvirtinta",
+      "rejected": "Atmesta",
+      "withdrawn": "Atšaukta",
+      "cancelled": "Anuliuota"
+    },
+    "mine": {
+      "title": "Mano prašymai",
+      "empty": "Prašymų dar nėra.",
+      "timelineOpen": "Rodyti eigą"
+    },
+    "actions": {
+      "withdraw": "Atšaukti"
+    },
+    "register": {
+      "title": "Prašymų registras",
+      "decideHint": "Tvirtinama ir atmetama tvirtinimų dalyje aukščiau — šis registras rodo visus jūsų organizacijų prašymus.",
+      "filterStatus": "Būsena",
+      "filterType": "Tipas",
+      "filterAll": "Visi",
+      "filterApply": "Filtruoti",
+      "empty": "Tokių prašymų nėra."
+    },
+    "seed": {
+      "title": "Nustatyti prašymų tvirtinimo eigą",
+      "hint": "Sukuria paprastą paruoštą tvirtinimo eigą: vieną peržiūros ratą, kurį sprendžia įmonės savininkai ir administratoriai. Kelių ratų eigas galite kurti tvirtinimų dalyje aukščiau.",
+      "orgLabel": "Įmonė",
+      "typeLabel": "Kam taikoma",
+      "allTypes": "Visiems prašymų tipams",
+      "nameLabel": "Pavadinimas",
+      "defaultName": "Standartinis prašymų tvirtinimas",
+      "submit": "Sukurti ir įjungti"
+    },
+    "policies": {
+      "title": "Atostogų limitai",
+      "honesty": "Šiuos skaičius įmonė nustato pati. Tai tik orientyras planavimui — tvirtinimas lieka tikru vadovo sprendimu, ir tai nėra teisinė konsultacija.",
+      "entitlementShort": "{days} d./metus",
+      "carryoverShort": "+{days} perkelta",
+      "inactive": "išjungta",
+      "setTitle": "Nustatyti atostogų limitą",
+      "orgLabel": "Įmonė",
+      "typeLabel": "Atostogų tipas",
+      "entitlementLabel": "Dienų per metus",
+      "carryoverLabel": "Perkeltos dienos",
+      "activeLabel": "Naudojama",
+      "submit": "Išsaugoti"
+    },
+    "absenceType": {
+      "annual_leave": "Kasmetinės atostogos",
+      "sickness": "Liga",
+      "unpaid": "Nemokamos atostogos",
+      "training": "Mokymai",
+      "other": "Kita"
+    }
   },
   "lifecycle": {
     "title": "Darbo santykių eiga",

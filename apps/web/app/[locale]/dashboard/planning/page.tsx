@@ -26,6 +26,16 @@ import {
   getPlanning,
   type PlanningSources,
 } from "@/lib/planning/planning";
+import {
+  buildWorkloadWeeks,
+  workloadHasSignal,
+} from "@/lib/planning/workload-model";
+import { getMyWorkItemHours } from "@/lib/timesheets/timesheets";
+import {
+  isTimesheetNotice,
+  type TimesheetNotice,
+} from "@/lib/timesheets/timesheets-model";
+import { TimesheetsSection } from "./timesheets-section";
 import { createUtcFormatter } from "@/lib/time/display";
 
 /**
@@ -102,12 +112,24 @@ export default async function PlanningPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ source?: string; view?: string; date?: string }>;
+  searchParams: Promise<{
+    source?: string;
+    view?: string;
+    date?: string;
+    ts?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const { source: rawSource, view: rawView, date: rawDate } = await searchParams;
+  const {
+    source: rawSource,
+    view: rawView,
+    date: rawDate,
+    ts: rawTs,
+  } = await searchParams;
+  const tsNotice: TimesheetNotice | null =
+    rawTs && isTimesheetNotice(rawTs) ? rawTs : null;
   const sourceFilter = isPlanningSourceType(rawSource) ? rawSource : null;
   const view: PlanningView = isPlanningView(rawView) ? rawView : "agenda";
   const today = new Date().toISOString().slice(0, 10);
@@ -123,6 +145,25 @@ export default async function PlanningPage({
     rangeStart: range.start,
     rangeEnd: range.end,
   });
+
+  // Workload strip (week + agenda views): planned committed DAYS vs recorded
+  // journal HOURS per Monday-started week — two facts in their own units,
+  // never converted into each other. Actual hours come from the SAME truth
+  // timesheets freeze (journal_entry_work_items), read bounded over the
+  // visible range; a failed read degrades to no strip, never to fake bars.
+  const showWorkload = view === "week" || view === "agenda";
+  const workloadActuals = showWorkload
+    ? await getMyWorkItemHours(range.start, range.end)
+    : null;
+  const workloadWeeks =
+    result.status === "ok" && workloadActuals?.status === "ok"
+      ? buildWorkloadWeeks(
+          result.items,
+          workloadActuals.days,
+          range.start,
+          range.end,
+        )
+      : [];
 
   const header = (
     <header className="flex flex-col gap-1">
@@ -528,6 +569,39 @@ export default async function PlanningPage({
         ))}
       </nav>
 
+      {/* ---------------- WORKLOAD (week + agenda) ---------------- */}
+      {showWorkload && workloadHasSignal(workloadWeeks) ? (
+        <section
+          className="flex flex-col gap-2"
+          aria-label={t("workload.title")}
+          data-testid="planning-workload"
+        >
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("workload.title")}
+          </span>
+          <ul className="flex flex-col gap-1">
+            {workloadWeeks.map((w) => (
+              <li
+                key={w.weekStart}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-ink-600 bg-ink-800/20 px-3 py-2 text-xs text-text-secondary"
+                data-testid={`planning-workload-${w.weekStart}`}
+              >
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  {fmtShort(w.weekStart)} – {fmtShort(w.weekEnd)}
+                </span>
+                <span data-testid={`planning-workload-planned-${w.weekStart}`}>
+                  {t("workload.plannedDays", { count: w.plannedDays })}
+                </span>
+                <span data-testid={`planning-workload-actual-${w.weekStart}`}>
+                  {t("workload.actualHours", { hours: w.actualHours })}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-text-muted">{t("workload.note")}</p>
+        </section>
+      ) : null}
+
       {/* ---------------- MONTH ---------------- */}
       {monthGrid ? (
         <section className="flex flex-col gap-2" data-testid="planning-month">
@@ -824,6 +898,9 @@ export default async function PlanningPage({
       {!agenda && !hasAnything && view !== "day" ? (
         <EmptyState t={t} sourceFilter={sourceFilter} />
       ) : null}
+
+      {/* ---------------- TIMESHEETS (#timesheets) ---------------- */}
+      <TimesheetsSection locale={locale} notice={tsNotice} />
     </div>
   );
 }

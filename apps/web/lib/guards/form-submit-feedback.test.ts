@@ -81,6 +81,21 @@ const NATIVE_NAV = new Set([
   // outcome (rendered as a role="status" banner by the section), exactly
   // the tasks/finance pattern. Pure server component — no client state.
   "app/[locale]/dashboard/network/approvals-section.tsx",
+  // Requests area of the network page (typed employee requests v1) — every
+  // form is a NATIVE-NAV server action over a gated command (module RPCs +
+  // the engine's own template commands) that ALWAYS redirects back to
+  // /dashboard/network with an honest ?req= outcome (rendered as a
+  // role="status" banner by the section), exactly the approvals pattern.
+  // Pure server component — no client state. The one GET filter form is
+  // plain navigation.
+  "app/[locale]/dashboard/network/requests-section.tsx",
+  // Timesheets area of the planning page (functional completion train V2) —
+  // every form is a NATIVE-NAV server action over a gated timesheet command
+  // (or the engine's own start/create/publish commands) that ALWAYS
+  // redirects back to /dashboard/planning with an honest ?ts= outcome
+  // (rendered as a role="status" banner by the section), exactly the
+  // approvals-section pattern above. Pure server component — no client state.
+  "app/[locale]/dashboard/planning/timesheets-section.tsx",
   // Invitation landing page (core-network area B) — accept/decline are
   // NATIVE-NAV server actions that ALWAYS redirect: success lands in the
   // exact accepted context; failure lands back here with an honest

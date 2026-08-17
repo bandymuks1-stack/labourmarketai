@@ -2,14 +2,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import {
-  AUTO_MERGE_ENABLED,
-  buildMergeConfirmedEvent,
-  canAutoMerge,
-  detectPotentialDuplicates,
-  type DuplicateCandidate,
-} from "@/lib/identity/identity-resolution";
-
 /**
  * Multi-source talent v1 — consent / honesty guard (Labour Market OS P5–P7).
  *
@@ -20,12 +12,17 @@ import {
  *   (b) NO employer read path exists in v1 (services + RLS policy)
  *   (c) disconnect never hard-deletes (no delete path on the table anywhere)
  *   (d) NO automatic import — no fetch of external profile hosts anywhere in
- *       lib/worker/external-profiles*, lib/talent, or the section component
- *   (e) identity module: AUTO_MERGE_ENABLED is literally false; no merge
- *       event without a human decider; weak hints are structurally excluded
- *       from auto-merge
+ *       lib/worker/external-profiles* or the section component
+ *   (e) DELETED CONSUMERS STAY DELETED (consolidation slice 1, 2026-08-17):
+ *       the talent_source_records / identity_resolution_events consumer
+ *       modules (lib/talent/*, lib/identity/identity-resolution*) were
+ *       removed as dead code — the tables were never applied to production
+ *       and the modules had zero importers. See
+ *       docs/audits/duplication-freeze-register-2026-08-17.md. Any revival
+ *       must be a deliberate owner decision, not a silent re-add.
  *   (f) identity_resolution_events is append-only: no update/delete RPC or
- *       policy in the migration, mutation-blocking trigger present
+ *       policy in the migration, mutation-blocking trigger present — the
+ *       DRAFT migration keeps these invariants even while unapplied.
  */
 
 const APP = join(__dirname, "..", "..");
@@ -52,12 +49,19 @@ const CONSUMER_FILES = [
   "lib/worker/external-profiles.ts",
   "lib/worker/external-profiles-model.ts",
   "lib/worker/external-profiles-actions.ts",
+  "components/app/external-profiles-section.tsx",
+];
+
+/** Deleted 2026-08-17 (consolidation slice 1) — zero importers, backing
+ *  tables never applied to prod. Assert they STAY deleted; see header (e). */
+const DELETED_CONSUMER_FILES = [
   "lib/talent/provenance.ts",
   "lib/talent/provenance-model.ts",
+  "lib/talent/provenance-model.test.ts",
   "lib/talent/provenance-actions.ts",
   "lib/identity/identity-resolution.ts",
+  "lib/identity/identity-resolution.test.ts",
   "lib/identity/identity-resolution-service.ts",
-  "components/app/external-profiles-section.tsx",
 ];
 
 describe("migration + rollback files", () => {
@@ -168,72 +172,33 @@ describe("(d) no automatic import — nothing fetches external profile hosts", (
   });
 });
 
-describe("(e) identity resolution — human confirms every merge", () => {
-  it("AUTO_MERGE_ENABLED is the literal false (source-pinned + runtime)", () => {
-    const src = read("lib/identity/identity-resolution.ts");
-    expect(src).toMatch(/export const AUTO_MERGE_ENABLED = false/);
-    expect(AUTO_MERGE_ENABLED).toBe(false);
+describe("(e) deleted talent/identity-resolution consumers STAY deleted", () => {
+  it.each(DELETED_CONSUMER_FILES)("%s stays deleted (dead code, consolidation slice 1)", (rel) => {
+    expect(
+      existsSync(join(APP, rel)),
+      `${rel} was deleted 2026-08-17 as dead code (zero importers; its backing ` +
+        `table was never applied to production — see ` +
+        `docs/audits/duplication-freeze-register-2026-08-17.md). Re-adding it ` +
+        `requires an explicit owner decision to wire the multi-source talent ` +
+        `draft for real, not a silent revival.`,
+    ).toBe(false);
   });
 
-  it("canAutoMerge is false even for a strong deterministic match with legal basis (v1 policy)", () => {
-    const strong: DuplicateCandidate = {
-      primaryProfileId: "a",
-      duplicateProfileId: "b",
-      matchKind: "strong_deterministic_id",
-      maskedHint: "same email (domain example.com) and same phone",
-    };
-    expect(canAutoMerge(strong, "GDPR Art. 6(1)(f) — duplicate hygiene")).toBe(false);
+  it("no app code imports the deleted modules", () => {
+    // A fresh import would fail typecheck too; this pins the intent in the
+    // guard suite so the failure names the doctrine, not a resolver error.
+    for (const rel of CONSUMER_FILES) {
+      const src = read(rel);
+      expect(src).not.toMatch(/@\/lib\/talent\/|@\/lib\/identity\/identity-resolution/);
+    }
   });
 
-  it("canAutoMerge's parameter type structurally excludes WeakHint (name similarity can never merge)", () => {
-    const src = read("lib/identity/identity-resolution.ts");
-    const fn = src.split("export function canAutoMerge")[1]?.split("{")[0] ?? "";
-    expect(fn).toMatch(/match:\s*DuplicateCandidate/);
-    expect(fn).not.toMatch(/WeakHint/);
-    // And detection itself never emits a weak-similarity kind.
-    const dupes = detectPotentialDuplicates([
-      { profileId: "p1", fullName: "Jonas Jonaitis", email: "a@x.com" },
-      { profileId: "p2", fullName: "Jonas Jonaitis", email: "b@y.com" },
-    ]);
-    expect(dupes).toEqual([]);
-  });
-
-  it("a merge_confirmed event cannot be built without a human decider", () => {
-    const match: DuplicateCandidate = {
-      primaryProfileId: "a",
-      duplicateProfileId: "b",
-      matchKind: "email_exact",
-      maskedHint: "same email (domain example.com)",
-    };
-    const noDecider = buildMergeConfirmedEvent({
-      match,
-      decidedByProfileId: null,
-      legalBasis: "basis",
-    });
-    expect(noDecider).toEqual({ ok: false, reason: "missing_human_decider" });
-  });
-
-  it("migration enforces the human decider at the table level for merge_confirmed", () => {
+  it("migration STILL enforces the human decider at the table level for merge_confirmed", () => {
+    // The unapplied DRAFT keeps its own honesty invariants: if it is ever
+    // applied (owner decision), the table refuses a machine-only merge.
     expect(sqlNoComments).toMatch(
       /check\s*\(kind\s*<>\s*'merge_confirmed'\s+or\s+decided_by\s+is\s+not\s+null\)/,
     );
-  });
-
-  it("duplicate candidate summaries carry NO contact fields", () => {
-    const dupes = detectPotentialDuplicates([
-      { profileId: "p1", email: "same@x.com", phone: "+37060000001" },
-      { profileId: "p2", email: "same@x.com", phone: "+37060000002" },
-    ]);
-    expect(dupes).toHaveLength(1);
-    const keys = Object.keys(dupes[0]).sort();
-    expect(keys).toEqual([
-      "duplicateProfileId",
-      "maskedHint",
-      "matchKind",
-      "primaryProfileId",
-    ]);
-    // Masked hint shows the domain only — never the address itself.
-    expect(dupes[0].maskedHint).not.toContain("same@x.com");
   });
 });
 
@@ -295,9 +260,9 @@ describe("provenance ledger boundaries (P5)", () => {
   });
 
   it("the source-type vocabulary has no scraping source (and never may)", () => {
+    // The TS mirror of this vocabulary (lib/talent/provenance-model.ts) was
+    // deleted with the dead consumer family — the SQL vocabulary is now the
+    // only place the rule can regress.
     expect(sqlNoComments).not.toMatch(/'scraped'|'scraping'|'crawl/);
-    const model = read("lib/talent/provenance-model.ts");
-    const list = model.split("TALENT_SOURCE_TYPES = [")[1]?.split("]")[0] ?? "";
-    expect(list).not.toMatch(/scrap|crawl/i);
   });
 });

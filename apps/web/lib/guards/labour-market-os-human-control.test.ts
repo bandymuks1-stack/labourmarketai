@@ -26,9 +26,12 @@ import { RECOMMENDED_ACTION_TYPES } from "@/lib/workforce/gap-timeline";
 
 const APP_ROOT = join(__dirname, "..", "..");
 
+// lib/talent was deleted 2026-08-17 (consolidation slice 1): the
+// talent_source_records consumer family was dead code — zero importers and
+// the backing table was never applied to production. If the directory ever
+// returns, add it back here so the P11 bans cover it again.
 const SCANNED_DIRS = [
   "lib/workforce",
-  "lib/talent",
   "lib/identity",
 ] as const;
 

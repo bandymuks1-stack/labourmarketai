@@ -384,7 +384,17 @@
     "managerEmpty": "No pending requests from your workers.",
     "unknownWorker": "Worker",
     "approve": "Approve",
-    "reject": "Reject"
+    "reject": "Reject",
+    "balance": {
+      "title": "My leave balance {year}",
+      "advisoryNote": "Balances are guidance for planning. Your manager makes the decision. The numbers come from your company's own settings, not from the law.",
+      "noPolicy": "Your company has not set leave allowances here yet.",
+      "remaining": "{days} d left",
+      "detail": "{entitlement} per year + {carryover} carried over − {used} used",
+      "requestedDays": "{days} d requested",
+      "remainingShort": "{days} d left",
+      "exceedsNote": "More than the leave left"
+    }
   },
   "projectStages": {
     "ganttTitle": "Timeline (Gantt)",
@@ -9105,7 +9115,13 @@
         "days": "d"
       }
     },
-    "pastLink": "Past days"
+    "pastLink": "Past days",
+    "workload": {
+      "title": "Workload",
+      "plannedDays": "{count} planned work days",
+      "actualHours": "{hours} h recorded in the journal",
+      "note": "Planned days come from accepted bookings and project assignments; recorded hours come from your journal entries. The two are shown side by side, never converted into each other."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Company workspace",
@@ -12586,6 +12602,92 @@
       "error": "Something went wrong. Nothing was changed."
     }
   },
+  "timesheets": {
+    "title": "Timesheets",
+    "intro": "Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
+    "needsMigration": "Timesheets are not enabled in this environment yet.",
+    "readError": "Some timesheet data could not be loaded right now.",
+    "noLines": "No recorded hours in this period yet. Log your work in the journal, then refresh.",
+    "linesTitle": "Lines ({count})",
+    "approvalTimeline": "Approval progress",
+    "openApprovals": "Open the approvals area",
+    "noTemplateNote": "This organization has no published timesheet approval template yet, so submitting is not possible. Ask an organization admin to create one.",
+    "totals": {
+      "hours": "{hours} h",
+      "dayUnits": "{days} day units",
+      "lines": "{count} lines"
+    },
+    "unit": {
+      "hours": "h",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "reopened": "Returned"
+    },
+    "mine": {
+      "title": "My timesheets",
+      "derivedNote": "Every line comes from your journal entries. To correct hours, edit the journal entry and press Refresh.",
+      "empty": "No timesheets yet. Pick an organization and a period to create the first one.",
+      "noOrganizations": "You are not connected to any organization yet, so there is nowhere to submit hours."
+    },
+    "create": {
+      "organization": "Organization",
+      "unnamedOrganization": "Unnamed organization",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "action": "Create timesheet",
+      "hint": "A period covers at most 31 days and may not overlap another timesheet for the same organization."
+    },
+    "actions": {
+      "refresh": "Refresh from journal",
+      "submit": "Submit for approval",
+      "sync": "Update status",
+      "exportCsv": "Download CSV"
+    },
+    "org": {
+      "title": "Team timesheets",
+      "decideNote": "Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
+      "noTemplateFor": "{name} has no published timesheet approval template.",
+      "createTemplate": "Create standard approval template",
+      "unnamedWorker": "Worker",
+      "decideInApprovals": "Decide in the approvals area",
+      "reopenNote": "Return note",
+      "reopenNotePlaceholder": "Why is this returned?",
+      "reopen": "Return to worker"
+    },
+    "notice": {
+      "created": "Timesheet created.",
+      "refreshed": "Lines refreshed from the journal.",
+      "submitted": "Timesheet submitted for approval.",
+      "reopened": "Timesheet returned to the worker.",
+      "approved": "Timesheet approved.",
+      "rejected": "Timesheet rejected.",
+      "synced_pending": "The approval is still in progress.",
+      "no_instance": "No approval request exists for this timesheet yet.",
+      "no_template": "This organization has no published timesheet approval template yet.",
+      "template_created": "Standard approval template created and published.",
+      "overlap": "This period overlaps an existing timesheet.",
+      "invalid_period": "The period is invalid — up to 31 days, and the end may not be before the start.",
+      "no_worker": "Your account has no worker profile.",
+      "not_editable": "This timesheet can no longer be edited.",
+      "not_decided": "Only an approved or rejected timesheet can be returned.",
+      "not_submitted": "This timesheet is not submitted.",
+      "already_submitted": "This timesheet is already submitted.",
+      "no_approvers": "No approvers could be found for this organization's template.",
+      "not_published": "The approval template is not published yet.",
+      "invalid": "The request was invalid.",
+      "needs_migration": "Timesheets are not enabled in this environment yet.",
+      "not_authorized": "You are not allowed to do this.",
+      "not_found": "Timesheet not found.",
+      "limit_reached": "Too many open timesheets — submit or remove existing ones first.",
+      "error": "Something went wrong. Nothing was saved."
+    }
+  },
   "workObjects": {
     "title": "Objects & sites",
     "subtitle": "The places where work happens — sites, buildings, areas. Linked to projects and tasks.",
@@ -12612,6 +12714,115 @@
     "errorLabel": "Could not save. Try again.",
     "notAuthorizedLabel": "Only managers can change objects.",
     "savedLabel": "Saved."
+  },
+  "requests": {
+    "title": "Requests",
+    "intro": "Ask your employer for something and follow what happens next. Each request goes to the approval flow your company set up.",
+    "unavailable": "Requests are not switched on in this environment yet. Nothing is lost — this section opens once the requests update is reviewed and applied.",
+    "honestNote": "A request is decided by real people in your company. Nothing is approved automatically, and nothing is sent outside this product.",
+    "notice": {
+      "created": "Request submitted. The right people have been asked to review it.",
+      "withdrawn": "Request withdrawn.",
+      "template_ready": "The approval flow for requests is ready.",
+      "policy_saved": "Leave allowance saved.",
+      "already_pending": "This request is already waiting for a decision.",
+      "no_definition": "Your company has not set up an approval flow for requests yet.",
+      "no_approvers": "Nobody in the company can currently review this request, so it was not submitted.",
+      "not_published": "The approval flow for requests is not ready yet.",
+      "not_pending": "This request is no longer waiting — the list below shows its current state.",
+      "invalid": "Please check the details and try again.",
+      "needs_migration": "Not available yet — the requests update is not applied in this environment.",
+      "not_authorized": "You are not allowed to do that.",
+      "not_found": "Not found.",
+      "limit_reached": "Too many open requests. Wait for a decision on the existing ones first.",
+      "error": "Something went wrong. Please try again."
+    },
+    "file": {
+      "title": "New request",
+      "orgLabel": "Company",
+      "unnamedOrg": "Unnamed company",
+      "typeLabel": "What do you ask for?",
+      "titleLabel": "Short title",
+      "detailsLabel": "Details",
+      "dateFromLabel": "From (optional)",
+      "dateToLabel": "To (optional)",
+      "datesHint": "Dates matter for remote work or schedule changes. Leave them empty when they do not apply.",
+      "submit": "Submit request",
+      "noOrganizations": "You are not connected to any company yet, so there is nowhere to send a request."
+    },
+    "type": {
+      "remote_work": "Remote work",
+      "schedule_change": "Schedule change",
+      "certificate_request": "Certificate or document",
+      "employment_condition_change": "Employment condition change",
+      "benefit_request": "Benefit",
+      "equipment_request": "Equipment",
+      "other": "Other"
+    },
+    "typeHint": {
+      "remote_work": "ask to work from home or another place on the dates you choose",
+      "schedule_change": "ask to change your working hours or shifts",
+      "certificate_request": "ask for a certificate or a paper about your employment",
+      "employment_condition_change": "ask to change an agreed condition of your employment",
+      "benefit_request": "ask for a benefit your company offers",
+      "equipment_request": "ask for tools or equipment you need for work",
+      "other": "anything else you want to ask your employer"
+    },
+    "status": {
+      "pending": "Waiting for decision",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn",
+      "cancelled": "Cancelled"
+    },
+    "mine": {
+      "title": "My requests",
+      "empty": "No requests yet.",
+      "timelineOpen": "Show progress"
+    },
+    "actions": {
+      "withdraw": "Withdraw"
+    },
+    "register": {
+      "title": "Requests register",
+      "decideHint": "Approving and rejecting happens in the approvals area above — this register lists every request in your organizations.",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "filterAll": "All",
+      "filterApply": "Filter",
+      "empty": "No requests match."
+    },
+    "seed": {
+      "title": "Set up the request approval flow",
+      "hint": "Creates a simple ready-made approval flow: one review round decided by the company's owners and admins. You can build multi-round flows in the approvals area above.",
+      "orgLabel": "Company",
+      "typeLabel": "Applies to",
+      "allTypes": "All request types",
+      "nameLabel": "Name",
+      "defaultName": "Standard request approval",
+      "submit": "Create and switch on"
+    },
+    "policies": {
+      "title": "Leave allowances",
+      "honesty": "Your company sets these numbers itself. They are guidance for planning only — approving stays a real decision by a manager, and this is not legal advice.",
+      "entitlementShort": "{days} d/year",
+      "carryoverShort": "+{days} carried over",
+      "inactive": "switched off",
+      "setTitle": "Set a leave allowance",
+      "orgLabel": "Company",
+      "typeLabel": "Leave type",
+      "entitlementLabel": "Days per year",
+      "carryoverLabel": "Carried-over days",
+      "activeLabel": "In use",
+      "submit": "Save"
+    },
+    "absenceType": {
+      "annual_leave": "Annual leave",
+      "sickness": "Sick leave",
+      "unpaid": "Unpaid leave",
+      "training": "Training",
+      "other": "Other"
+    }
   },
   "lifecycle": {
     "title": "Employment lifecycle",

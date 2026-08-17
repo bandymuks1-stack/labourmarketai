@@ -6,7 +6,9 @@
  * `demand_interest_signals` (interested/withdrawn/reviewed/contacted),
  * `booking_requests` (proposed/accepted/declined/withdrawn/expired),
  * `project_worker_operational_statuses`, `candidate_drafts` and the dormant
- * `match_actions`. This module does NOT add a 7th enum or table. Instead it
+ * `match_actions` (zero writers and zero readers repo-wide; schema frozen —
+ * docs/audits/duplication-freeze-register-2026-08-17.md). This module does
+ * NOT add a 7th enum or table. Instead it
  * derives ONE canonical human pipeline stage from the EXISTING facts, at read
  * time, with a documented precedence ladder.
  *

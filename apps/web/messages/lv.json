@@ -4588,6 +4588,213 @@
       "submit": "[EN] Register document"
     }
   },
+  "timesheets": {
+    "title": "[EN] Timesheets",
+    "intro": "[EN] Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
+    "needsMigration": "[EN] Timesheets are not enabled in this environment yet.",
+    "readError": "[EN] Some timesheet data could not be loaded right now.",
+    "noLines": "[EN] No recorded hours in this period yet. Log your work in the journal, then refresh.",
+    "linesTitle": "[EN] Lines ({count})",
+    "approvalTimeline": "[EN] Approval progress",
+    "openApprovals": "[EN] Open the approvals area",
+    "noTemplateNote": "[EN] This organization has no published timesheet approval template yet, so submitting is not possible. Ask an organization admin to create one.",
+    "totals": {
+      "hours": "[EN] {hours} h",
+      "dayUnits": "[EN] {days} day units",
+      "lines": "[EN] {count} lines"
+    },
+    "unit": {
+      "hours": "[EN] h",
+      "minutes": "[EN] min",
+      "days": "[EN] d."
+    },
+    "status": {
+      "draft": "[EN] Draft",
+      "submitted": "[EN] Submitted",
+      "approved": "[EN] Approved",
+      "rejected": "[EN] Rejected",
+      "reopened": "[EN] Returned"
+    },
+    "mine": {
+      "title": "[EN] My timesheets",
+      "derivedNote": "[EN] Every line comes from your journal entries. To correct hours, edit the journal entry and press Refresh.",
+      "empty": "[EN] No timesheets yet. Pick an organization and a period to create the first one.",
+      "noOrganizations": "[EN] You are not connected to any organization yet, so there is nowhere to submit hours."
+    },
+    "create": {
+      "organization": "[EN] Organization",
+      "unnamedOrganization": "[EN] Unnamed organization",
+      "periodStart": "[EN] Period start",
+      "periodEnd": "[EN] Period end",
+      "action": "[EN] Create timesheet",
+      "hint": "[EN] A period covers at most 31 days and may not overlap another timesheet for the same organization."
+    },
+    "actions": {
+      "refresh": "[EN] Refresh from journal",
+      "submit": "[EN] Submit for approval",
+      "sync": "[EN] Update status",
+      "exportCsv": "[EN] Download CSV"
+    },
+    "org": {
+      "title": "[EN] Team timesheets",
+      "decideNote": "[EN] Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
+      "noTemplateFor": "[EN] {name} has no published timesheet approval template.",
+      "createTemplate": "[EN] Create standard approval template",
+      "unnamedWorker": "[EN] Worker",
+      "decideInApprovals": "[EN] Decide in the approvals area",
+      "reopenNote": "[EN] Return note",
+      "reopenNotePlaceholder": "[EN] Why is this returned?",
+      "reopen": "[EN] Return to worker"
+    },
+    "notice": {
+      "created": "[EN] Timesheet created.",
+      "refreshed": "[EN] Lines refreshed from the journal.",
+      "submitted": "[EN] Timesheet submitted for approval.",
+      "reopened": "[EN] Timesheet returned to the worker.",
+      "approved": "[EN] Timesheet approved.",
+      "rejected": "[EN] Timesheet rejected.",
+      "synced_pending": "[EN] The approval is still in progress.",
+      "no_instance": "[EN] No approval request exists for this timesheet yet.",
+      "no_template": "[EN] This organization has no published timesheet approval template yet.",
+      "template_created": "[EN] Standard approval template created and published.",
+      "overlap": "[EN] This period overlaps an existing timesheet.",
+      "invalid_period": "[EN] The period is invalid — up to 31 days, and the end may not be before the start.",
+      "no_worker": "[EN] Your account has no worker profile.",
+      "not_editable": "[EN] This timesheet can no longer be edited.",
+      "not_decided": "[EN] Only an approved or rejected timesheet can be returned.",
+      "not_submitted": "[EN] This timesheet is not submitted.",
+      "already_submitted": "[EN] This timesheet is already submitted.",
+      "no_approvers": "[EN] No approvers could be found for this organization's template.",
+      "not_published": "[EN] The approval template is not published yet.",
+      "invalid": "[EN] The request was invalid.",
+      "needs_migration": "[EN] Timesheets are not enabled in this environment yet.",
+      "not_authorized": "[EN] You are not allowed to do this.",
+      "not_found": "[EN] Timesheet not found.",
+      "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
+      "error": "[EN] Something went wrong. Nothing was saved."
+    }
+  },
+  "requests": {
+    "title": "Pieprasījumi",
+    "intro": "Palūdziet darba devējam kaut ko un sekojiet, kas notiek tālāk. Katrs pieprasījums iet pa jūsu uzņēmuma iestatīto saskaņošanas ceļu.",
+    "unavailable": "Pieprasījumi šajā vidē vēl nav ieslēgti. Nekas nepazūd — sadaļa atvērsies, kad atjauninājums būs pārskatīts un uzstādīts.",
+    "honestNote": "Pieprasījumu izlemj īsti cilvēki jūsu uzņēmumā. Nekas netiek apstiprināts automātiski, un nekas neatstāj produktu.",
+    "notice": {
+      "created": "Pieprasījums iesniegts. Atbildīgie cilvēki ir lūgti to izskatīt.",
+      "withdrawn": "Pieprasījums atsaukts.",
+      "template_ready": "Pieprasījumu saskaņošanas ceļš ir gatavs.",
+      "policy_saved": "Atvaļinājuma limits saglabāts.",
+      "already_pending": "Šis pieprasījums jau gaida lēmumu.",
+      "no_definition": "Jūsu uzņēmums vēl nav iestatījis pieprasījumu saskaņošanas ceļu.",
+      "no_approvers": "Šobrīd uzņēmumā nav neviena, kas var izskatīt šo pieprasījumu, tāpēc tas netika iesniegts.",
+      "not_published": "Pieprasījumu saskaņošanas ceļš vēl nav gatavs.",
+      "not_pending": "Šis pieprasījums vairs negaida — zemāk redzams tā pašreizējais stāvoklis.",
+      "invalid": "Pārbaudiet datus un mēģiniet vēlreiz.",
+      "needs_migration": "Vēl nav pieejams — pieprasījumu atjauninājums šajā vidē nav uzstādīts.",
+      "not_authorized": "Jums to nav atļauts darīt.",
+      "not_found": "Nav atrasts.",
+      "limit_reached": "Pārāk daudz atvērtu pieprasījumu. Vispirms sagaidiet lēmumus par esošajiem.",
+      "error": "Kaut kas nogāja greizi. Mēģiniet vēlreiz."
+    },
+    "file": {
+      "title": "Jauns pieprasījums",
+      "orgLabel": "Uzņēmums",
+      "unnamedOrg": "Uzņēmums bez nosaukuma",
+      "typeLabel": "Ko jūs lūdzat?",
+      "titleLabel": "Īss nosaukums",
+      "detailsLabel": "Paskaidrojums",
+      "dateFromLabel": "No (neobligāti)",
+      "dateToLabel": "Līdz (neobligāti)",
+      "datesHint": "Datumi ir svarīgi attālinātam darbam vai grafika maiņai. Ja neattiecas, atstājiet tukšus.",
+      "submit": "Iesniegt pieprasījumu",
+      "noOrganizations": "Jūs vēl neesat saistīts ne ar vienu uzņēmumu, tāpēc pieprasījumu nav kam sūtīt."
+    },
+    "type": {
+      "remote_work": "Attālināts darbs",
+      "schedule_change": "Grafika maiņa",
+      "certificate_request": "Izziņa vai dokuments",
+      "employment_condition_change": "Darba nosacījumu maiņa",
+      "benefit_request": "Labums",
+      "equipment_request": "Aprīkojums",
+      "other": "Cits"
+    },
+    "typeHint": {
+      "remote_work": "lūdziet strādāt no mājām vai citas vietas izvēlētajās dienās",
+      "schedule_change": "lūdziet citu darba laiku vai maiņas",
+      "certificate_request": "lūdziet izziņu vai dokumentu par jūsu darbu",
+      "employment_condition_change": "lūdziet mainīt saskaņotu darba nosacījumu",
+      "benefit_request": "lūdziet labumu, ko piedāvā jūsu uzņēmums",
+      "equipment_request": "lūdziet darbam vajadzīgos rīkus vai aprīkojumu",
+      "other": "jebkas cits, ko vēlaties palūgt darba devējam"
+    },
+    "status": {
+      "pending": "Gaida lēmumu",
+      "approved": "Apstiprināts",
+      "rejected": "Noraidīts",
+      "withdrawn": "Atsaukts",
+      "cancelled": "Atcelts"
+    },
+    "mine": {
+      "title": "Mani pieprasījumi",
+      "empty": "Pieprasījumu vēl nav.",
+      "timelineOpen": "Rādīt gaitu"
+    },
+    "actions": {
+      "withdraw": "Atsaukt"
+    },
+    "register": {
+      "title": "Pieprasījumu reģistrs",
+      "decideHint": "Apstiprināšana un noraidīšana notiek saskaņojumu sadaļā augstāk — šis reģistrs rāda visus jūsu organizāciju pieprasījumus.",
+      "filterStatus": "Statuss",
+      "filterType": "Tips",
+      "filterAll": "Visi",
+      "filterApply": "Filtrēt",
+      "empty": "Nav atbilstošu pieprasījumu."
+    },
+    "seed": {
+      "title": "Iestatīt pieprasījumu saskaņošanas ceļu",
+      "hint": "Izveido vienkāršu gatavu ceļu: vienu izskatīšanas kārtu, ko izlemj uzņēmuma īpašnieki un administratori. Vairāku kārtu ceļus veidojiet saskaņojumu sadaļā augstāk.",
+      "orgLabel": "Uzņēmums",
+      "typeLabel": "Attiecas uz",
+      "allTypes": "Visiem pieprasījumu tipiem",
+      "nameLabel": "Nosaukums",
+      "defaultName": "Standarta pieprasījumu saskaņošana",
+      "submit": "Izveidot un ieslēgt"
+    },
+    "policies": {
+      "title": "Atvaļinājumu limiti",
+      "honesty": "Šos skaitļus uzņēmums nosaka pats. Tie ir tikai orientieris plānošanai — apstiprināšana paliek īsta vadītāja lēmums, un tā nav juridiska konsultācija.",
+      "entitlementShort": "{days} d./gadā",
+      "carryoverShort": "+{days} pārcelts",
+      "inactive": "izslēgts",
+      "setTitle": "Noteikt atvaļinājuma limitu",
+      "orgLabel": "Uzņēmums",
+      "typeLabel": "Prombūtnes veids",
+      "entitlementLabel": "Dienas gadā",
+      "carryoverLabel": "Pārceltās dienas",
+      "activeLabel": "Lietošanā",
+      "submit": "Saglabāt"
+    },
+    "absenceType": {
+      "annual_leave": "Ikgadējais atvaļinājums",
+      "sickness": "Slimība",
+      "unpaid": "Bezalgas atvaļinājums",
+      "training": "Apmācības",
+      "other": "Cits"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Mans atvaļinājuma atlikums {year}",
+      "advisoryNote": "Atlikumi ir orientieris plānošanai. Lēmumu pieņem jūsu vadītājs. Skaitļi nāk no jūsu uzņēmuma iestatījumiem, nevis no likuma.",
+      "noPolicy": "Jūsu uzņēmums šeit vēl nav noteicis atvaļinājumu limitus.",
+      "remaining": "atlicis {days} d.",
+      "detail": "{entitlement} gadā + {carryover} pārcelts − {used} izmantots",
+      "requestedDays": "pieprasītas {days} d.",
+      "remainingShort": "atlicis {days} d.",
+      "exceedsNote": "Vairāk nekā atlikušais atvaļinājums"
+    }
+  },
   "lifecycle": {
     "title": "Darba attiecību gaita",
     "intro": "Ievadīšana darbā, pārbaudes laiks, izmaiņas, atbrīvošana un beigas šīs organizācijas darba ierakstiem — ar kontrolsarakstiem un pilnu vēsturi.",

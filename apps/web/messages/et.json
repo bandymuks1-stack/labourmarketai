@@ -4588,6 +4588,213 @@
       "submit": "[EN] Register document"
     }
   },
+  "timesheets": {
+    "title": "[EN] Timesheets",
+    "intro": "[EN] Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
+    "needsMigration": "[EN] Timesheets are not enabled in this environment yet.",
+    "readError": "[EN] Some timesheet data could not be loaded right now.",
+    "noLines": "[EN] No recorded hours in this period yet. Log your work in the journal, then refresh.",
+    "linesTitle": "[EN] Lines ({count})",
+    "approvalTimeline": "[EN] Approval progress",
+    "openApprovals": "[EN] Open the approvals area",
+    "noTemplateNote": "[EN] This organization has no published timesheet approval template yet, so submitting is not possible. Ask an organization admin to create one.",
+    "totals": {
+      "hours": "[EN] {hours} h",
+      "dayUnits": "[EN] {days} day units",
+      "lines": "[EN] {count} lines"
+    },
+    "unit": {
+      "hours": "[EN] h",
+      "minutes": "[EN] min",
+      "days": "[EN] d."
+    },
+    "status": {
+      "draft": "[EN] Draft",
+      "submitted": "[EN] Submitted",
+      "approved": "[EN] Approved",
+      "rejected": "[EN] Rejected",
+      "reopened": "[EN] Returned"
+    },
+    "mine": {
+      "title": "[EN] My timesheets",
+      "derivedNote": "[EN] Every line comes from your journal entries. To correct hours, edit the journal entry and press Refresh.",
+      "empty": "[EN] No timesheets yet. Pick an organization and a period to create the first one.",
+      "noOrganizations": "[EN] You are not connected to any organization yet, so there is nowhere to submit hours."
+    },
+    "create": {
+      "organization": "[EN] Organization",
+      "unnamedOrganization": "[EN] Unnamed organization",
+      "periodStart": "[EN] Period start",
+      "periodEnd": "[EN] Period end",
+      "action": "[EN] Create timesheet",
+      "hint": "[EN] A period covers at most 31 days and may not overlap another timesheet for the same organization."
+    },
+    "actions": {
+      "refresh": "[EN] Refresh from journal",
+      "submit": "[EN] Submit for approval",
+      "sync": "[EN] Update status",
+      "exportCsv": "[EN] Download CSV"
+    },
+    "org": {
+      "title": "[EN] Team timesheets",
+      "decideNote": "[EN] Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
+      "noTemplateFor": "[EN] {name} has no published timesheet approval template.",
+      "createTemplate": "[EN] Create standard approval template",
+      "unnamedWorker": "[EN] Worker",
+      "decideInApprovals": "[EN] Decide in the approvals area",
+      "reopenNote": "[EN] Return note",
+      "reopenNotePlaceholder": "[EN] Why is this returned?",
+      "reopen": "[EN] Return to worker"
+    },
+    "notice": {
+      "created": "[EN] Timesheet created.",
+      "refreshed": "[EN] Lines refreshed from the journal.",
+      "submitted": "[EN] Timesheet submitted for approval.",
+      "reopened": "[EN] Timesheet returned to the worker.",
+      "approved": "[EN] Timesheet approved.",
+      "rejected": "[EN] Timesheet rejected.",
+      "synced_pending": "[EN] The approval is still in progress.",
+      "no_instance": "[EN] No approval request exists for this timesheet yet.",
+      "no_template": "[EN] This organization has no published timesheet approval template yet.",
+      "template_created": "[EN] Standard approval template created and published.",
+      "overlap": "[EN] This period overlaps an existing timesheet.",
+      "invalid_period": "[EN] The period is invalid — up to 31 days, and the end may not be before the start.",
+      "no_worker": "[EN] Your account has no worker profile.",
+      "not_editable": "[EN] This timesheet can no longer be edited.",
+      "not_decided": "[EN] Only an approved or rejected timesheet can be returned.",
+      "not_submitted": "[EN] This timesheet is not submitted.",
+      "already_submitted": "[EN] This timesheet is already submitted.",
+      "no_approvers": "[EN] No approvers could be found for this organization's template.",
+      "not_published": "[EN] The approval template is not published yet.",
+      "invalid": "[EN] The request was invalid.",
+      "needs_migration": "[EN] Timesheets are not enabled in this environment yet.",
+      "not_authorized": "[EN] You are not allowed to do this.",
+      "not_found": "[EN] Timesheet not found.",
+      "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
+      "error": "[EN] Something went wrong. Nothing was saved."
+    }
+  },
+  "requests": {
+    "title": "Taotlused",
+    "intro": "Paluge tööandjalt midagi ja jälgige, mis edasi saab. Iga taotlus läbib teie ettevõtte seatud kinnitusraja.",
+    "unavailable": "Taotlused pole selles keskkonnas veel sisse lülitatud. Midagi ei lähe kaduma — jaotis avaneb, kui uuendus on üle vaadatud ja paigaldatud.",
+    "honestNote": "Taotluse üle otsustavad päris inimesed teie ettevõttes. Midagi ei kinnitata automaatselt ja miski ei lahku tootest.",
+    "notice": {
+      "created": "Taotlus esitatud. Õigetel inimestel paluti see üle vaadata.",
+      "withdrawn": "Taotlus tagasi võetud.",
+      "template_ready": "Taotluste kinnitusrada on valmis.",
+      "policy_saved": "Puhkuselimiit salvestatud.",
+      "already_pending": "See taotlus ootab juba otsust.",
+      "no_definition": "Teie ettevõte pole veel taotluste kinnitusrada seadistanud.",
+      "no_approvers": "Praegu pole ettevõttes kedagi, kes saaks seda taotlust läbi vaadata, seega seda ei esitatud.",
+      "not_published": "Taotluste kinnitusrada pole veel valmis.",
+      "not_pending": "See taotlus ei oota enam — allpool on selle praegune seis.",
+      "invalid": "Kontrollige andmeid ja proovige uuesti.",
+      "needs_migration": "Pole veel saadaval — taotluste uuendus pole selles keskkonnas paigaldatud.",
+      "not_authorized": "Teil pole selleks luba.",
+      "not_found": "Ei leitud.",
+      "limit_reached": "Liiga palju avatud taotlusi. Oodake kõigepealt olemasolevate otsuseid.",
+      "error": "Midagi läks valesti. Proovige uuesti."
+    },
+    "file": {
+      "title": "Uus taotlus",
+      "orgLabel": "Ettevõte",
+      "unnamedOrg": "Nimetu ettevõte",
+      "typeLabel": "Mida palute?",
+      "titleLabel": "Lühike pealkiri",
+      "detailsLabel": "Selgitus",
+      "dateFromLabel": "Alates (valikuline)",
+      "dateToLabel": "Kuni (valikuline)",
+      "datesHint": "Kuupäevad on olulised kaugtöö või graafikumuudatuse puhul. Kui ei sobi, jätke tühjaks.",
+      "submit": "Esita taotlus",
+      "noOrganizations": "Te pole veel ühegi ettevõttega seotud, seega pole taotlust kellelegi saata."
+    },
+    "type": {
+      "remote_work": "Kaugtöö",
+      "schedule_change": "Graafiku muutmine",
+      "certificate_request": "Tõend või dokument",
+      "employment_condition_change": "Töötingimuste muutmine",
+      "benefit_request": "Hüve",
+      "equipment_request": "Varustus",
+      "other": "Muu"
+    },
+    "typeHint": {
+      "remote_work": "paluge töötada kodus või mujal valitud päevadel",
+      "schedule_change": "paluge teisi tööaegu või vahetusi",
+      "certificate_request": "paluge tõendit või dokumenti oma töö kohta",
+      "employment_condition_change": "paluge muuta kokkulepitud töötingimust",
+      "benefit_request": "paluge hüve, mida teie ettevõte pakub",
+      "equipment_request": "paluge tööks vajalikke tööriistu või varustust",
+      "other": "kõik muu, mida soovite tööandjalt paluda"
+    },
+    "status": {
+      "pending": "Ootab otsust",
+      "approved": "Kinnitatud",
+      "rejected": "Tagasi lükatud",
+      "withdrawn": "Tagasi võetud",
+      "cancelled": "Tühistatud"
+    },
+    "mine": {
+      "title": "Minu taotlused",
+      "empty": "Taotlusi veel pole.",
+      "timelineOpen": "Näita kulgu"
+    },
+    "actions": {
+      "withdraw": "Võta tagasi"
+    },
+    "register": {
+      "title": "Taotluste register",
+      "decideHint": "Kinnitamine ja tagasilükkamine toimub ülal kinnituste alas — see register näitab kõiki teie organisatsioonide taotlusi.",
+      "filterStatus": "Staatus",
+      "filterType": "Tüüp",
+      "filterAll": "Kõik",
+      "filterApply": "Filtreeri",
+      "empty": "Sobivaid taotlusi pole."
+    },
+    "seed": {
+      "title": "Seadista taotluste kinnitusrada",
+      "hint": "Loob lihtsa valmis raja: ühe läbivaatusringi, mille otsustavad ettevõtte omanikud ja administraatorid. Mitmeastmelisi radu saate ehitada ülal kinnituste alas.",
+      "orgLabel": "Ettevõte",
+      "typeLabel": "Kehtib",
+      "allTypes": "Kõigile taotlusetüüpidele",
+      "nameLabel": "Nimi",
+      "defaultName": "Standardne taotluste kinnitamine",
+      "submit": "Loo ja lülita sisse"
+    },
+    "policies": {
+      "title": "Puhkuselimiidid",
+      "honesty": "Need arvud määrab ettevõte ise. Need on ainult planeerimise abiks — kinnitamine jääb päris juhi otsuseks ja see pole õigusnõustamine.",
+      "entitlementShort": "{days} p/aastas",
+      "carryoverShort": "+{days} üle kantud",
+      "inactive": "välja lülitatud",
+      "setTitle": "Määra puhkuselimiit",
+      "orgLabel": "Ettevõte",
+      "typeLabel": "Puudumise liik",
+      "entitlementLabel": "Päevi aastas",
+      "carryoverLabel": "Ülekantud päevad",
+      "activeLabel": "Kasutusel",
+      "submit": "Salvesta"
+    },
+    "absenceType": {
+      "annual_leave": "Põhipuhkus",
+      "sickness": "Haigus",
+      "unpaid": "Palgata puhkus",
+      "training": "Koolitus",
+      "other": "Muu"
+    }
+  },
+  "absences": {
+    "balance": {
+      "title": "Minu puhkusejääk {year}",
+      "advisoryNote": "Jäägid on planeerimise abiks. Otsustab teie juht. Arvud tulevad teie ettevõtte seadetest, mitte seadusest.",
+      "noPolicy": "Teie ettevõte pole siin veel puhkuselimiite määranud.",
+      "remaining": "jäänud {days} p",
+      "detail": "{entitlement} aastas + {carryover} üle kantud − {used} kasutatud",
+      "requestedDays": "taotletud {days} p",
+      "remainingShort": "jäänud {days} p",
+      "exceedsNote": "Rohkem kui järelejäänud puhkus"
+    }
+  },
   "lifecycle": {
     "title": "Töösuhte elukaar",
     "intro": "Sisseelamine, katseaeg, muudatused, lahkumine ja lõpetamine selle organisatsiooni töökirjete jaoks — kontrollnimekirjade ja täieliku ajalooga.",

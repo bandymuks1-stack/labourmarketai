@@ -384,7 +384,17 @@
     "managerEmpty": "Geen openstaande aanvragen van je werknemers.",
     "unknownWorker": "Werknemer",
     "approve": "Goedkeuren",
-    "reject": "Afwijzen"
+    "reject": "Afwijzen",
+    "balance": {
+      "title": "Mijn verloftegoed {year}",
+      "advisoryNote": "Tegoeden zijn richtsnoer voor planning. Je leidinggevende beslist. De aantallen komen uit de instellingen van je bedrijf, niet uit de wet.",
+      "noPolicy": "Je bedrijf heeft hier nog geen verloftegoeden ingesteld.",
+      "remaining": "{days} d over",
+      "detail": "{entitlement} per jaar + {carryover} meegenomen − {used} gebruikt",
+      "requestedDays": "{days} d gevraagd",
+      "remainingShort": "{days} d over",
+      "exceedsNote": "Meer dan het resterende verlof"
+    }
   },
   "projectStages": {
     "ganttTitle": "Tijdlijn (Gantt)",
@@ -9105,7 +9115,13 @@
         "days": "d"
       }
     },
-    "pastLink": "Eerdere dagen"
+    "pastLink": "Eerdere dagen",
+    "workload": {
+      "title": "Werkbelasting",
+      "plannedDays": "{count} geplande werkdagen",
+      "actualHours": "{hours} u geregistreerd in het journaal",
+      "note": "Geplande dagen komen uit geaccepteerde boekingen en projecttoewijzingen; geregistreerde uren uit uw journaalvermeldingen. Beide worden naast elkaar getoond en nooit in elkaar omgerekend."
+    }
   },
   "workforcePlanning": {
     "eyebrow": "Bedrijfsomgeving",
@@ -12586,6 +12602,92 @@
       "error": "Er ging iets mis. Er is niets gewijzigd."
     }
   },
+  "timesheets": {
+    "title": "Urenstaten",
+    "intro": "Urendocumenten per periode, afgeleid uit uw werkjournaal. Uren worden altijd in het journaal bewerkt; een urenstaat is een bevroren kopie die ter goedkeuring wordt ingediend.",
+    "needsMigration": "Urenstaten zijn in deze omgeving nog niet ingeschakeld.",
+    "readError": "Een deel van de urenstaatgegevens kon nu niet worden geladen.",
+    "noLines": "Nog geen geregistreerde uren in deze periode. Noteer uw werk in het journaal en vernieuw.",
+    "linesTitle": "Regels ({count})",
+    "approvalTimeline": "Goedkeuringsvoortgang",
+    "openApprovals": "Open het goedkeuringsgedeelte",
+    "noTemplateNote": "Deze organisatie heeft nog geen gepubliceerd goedkeuringssjabloon voor urenstaten, dus indienen is niet mogelijk. Vraag een organisatiebeheerder er een te maken.",
+    "totals": {
+      "hours": "{hours} u",
+      "dayUnits": "{days} dageenheden",
+      "lines": "{count} regels"
+    },
+    "unit": {
+      "hours": "u",
+      "minutes": "min",
+      "days": "d."
+    },
+    "status": {
+      "draft": "Concept",
+      "submitted": "Ingediend",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "reopened": "Teruggestuurd"
+    },
+    "mine": {
+      "title": "Mijn urenstaten",
+      "derivedNote": "Elke regel komt uit uw journaalvermeldingen. Om uren te corrigeren, bewerkt u de journaalvermelding en drukt u op Vernieuwen.",
+      "empty": "Nog geen urenstaten. Kies een organisatie en een periode om de eerste te maken.",
+      "noOrganizations": "U bent nog niet aan een organisatie verbonden, dus er is nergens om uren in te dienen."
+    },
+    "create": {
+      "organization": "Organisatie",
+      "unnamedOrganization": "Organisatie zonder naam",
+      "periodStart": "Begin periode",
+      "periodEnd": "Einde periode",
+      "action": "Urenstaat maken",
+      "hint": "Een periode beslaat maximaal 31 dagen en mag niet overlappen met een andere urenstaat van dezelfde organisatie."
+    },
+    "actions": {
+      "refresh": "Vernieuwen uit journaal",
+      "submit": "Indienen ter goedkeuring",
+      "sync": "Status bijwerken",
+      "exportCsv": "CSV downloaden"
+    },
+    "org": {
+      "title": "Urenstaten van het team",
+      "decideNote": "Goedkeuringsbeslissingen gebeuren in het goedkeuringsgedeelte. Hier kunt u regels bekijken, exporteren en een besliste urenstaat terugsturen.",
+      "noTemplateFor": "{name} heeft geen gepubliceerd goedkeuringssjabloon voor urenstaten.",
+      "createTemplate": "Standaard goedkeuringssjabloon maken",
+      "unnamedWorker": "Werknemer",
+      "decideInApprovals": "Beslissen in het goedkeuringsgedeelte",
+      "reopenNote": "Terugstuurnotitie",
+      "reopenNotePlaceholder": "Waarom wordt dit teruggestuurd?",
+      "reopen": "Terugsturen naar werknemer"
+    },
+    "notice": {
+      "created": "Urenstaat gemaakt.",
+      "refreshed": "Regels vernieuwd uit het journaal.",
+      "submitted": "Urenstaat ingediend ter goedkeuring.",
+      "reopened": "Urenstaat teruggestuurd naar de werknemer.",
+      "approved": "Urenstaat goedgekeurd.",
+      "rejected": "Urenstaat afgewezen.",
+      "synced_pending": "De goedkeuring loopt nog.",
+      "no_instance": "Er bestaat nog geen goedkeuringsverzoek voor deze urenstaat.",
+      "no_template": "Deze organisatie heeft nog geen gepubliceerd goedkeuringssjabloon voor urenstaten.",
+      "template_created": "Standaard goedkeuringssjabloon gemaakt en gepubliceerd.",
+      "overlap": "Deze periode overlapt met een bestaande urenstaat.",
+      "invalid_period": "De periode is ongeldig — maximaal 31 dagen, en het einde mag niet vóór het begin liggen.",
+      "no_worker": "Uw account heeft geen werknemersprofiel.",
+      "not_editable": "Deze urenstaat kan niet meer worden bewerkt.",
+      "not_decided": "Alleen een goedgekeurde of afgewezen urenstaat kan worden teruggestuurd.",
+      "not_submitted": "Deze urenstaat is niet ingediend.",
+      "already_submitted": "Deze urenstaat is al ingediend.",
+      "no_approvers": "Er konden geen goedkeurders worden gevonden voor het sjabloon van deze organisatie.",
+      "not_published": "Het goedkeuringssjabloon is nog niet gepubliceerd.",
+      "invalid": "Het verzoek was ongeldig.",
+      "needs_migration": "Urenstaten zijn in deze omgeving nog niet ingeschakeld.",
+      "not_authorized": "U mag dit niet doen.",
+      "not_found": "Urenstaat niet gevonden.",
+      "limit_reached": "Te veel open urenstaten — dien eerst bestaande in of ruim ze op.",
+      "error": "Er is iets misgegaan. Er is niets opgeslagen."
+    }
+  },
   "workObjects": {
     "title": "Objecten en locaties",
     "subtitle": "De plekken waar het werk gebeurt — locaties, gebouwen, terreinen. Gekoppeld aan projecten en taken.",
@@ -12612,6 +12714,115 @@
     "errorLabel": "Opslaan is niet gelukt. Probeer het opnieuw.",
     "notAuthorizedLabel": "Alleen managers kunnen objecten wijzigen.",
     "savedLabel": "Opgeslagen."
+  },
+  "requests": {
+    "title": "Verzoeken",
+    "intro": "Vraag je werkgever iets en volg wat er daarna gebeurt. Elk verzoek volgt de goedkeuringsroute die je bedrijf heeft ingesteld.",
+    "unavailable": "Verzoeken zijn in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit onderdeel opent zodra de verzoeken-update is beoordeeld en geïnstalleerd.",
+    "honestNote": "Een verzoek wordt beslist door echte mensen in je bedrijf. Niets wordt automatisch goedgekeurd en niets verlaat dit product.",
+    "notice": {
+      "created": "Verzoek ingediend. De juiste mensen is gevraagd het te beoordelen.",
+      "withdrawn": "Verzoek ingetrokken.",
+      "template_ready": "De goedkeuringsroute voor verzoeken staat klaar.",
+      "policy_saved": "Verloftegoed opgeslagen.",
+      "already_pending": "Dit verzoek wacht al op een beslissing.",
+      "no_definition": "Je bedrijf heeft nog geen goedkeuringsroute voor verzoeken ingesteld.",
+      "no_approvers": "Er is nu niemand in het bedrijf die dit verzoek kan beoordelen; het is niet ingediend.",
+      "not_published": "De goedkeuringsroute voor verzoeken is nog niet klaar.",
+      "not_pending": "Dit verzoek wacht niet meer — hieronder zie je de huidige stand.",
+      "invalid": "Controleer de gegevens en probeer opnieuw.",
+      "needs_migration": "Nog niet beschikbaar — de verzoeken-update is hier niet geïnstalleerd.",
+      "not_authorized": "Dat mag je niet doen.",
+      "not_found": "Niet gevonden.",
+      "limit_reached": "Te veel open verzoeken. Wacht eerst op beslissingen over de bestaande.",
+      "error": "Er ging iets mis. Probeer het opnieuw."
+    },
+    "file": {
+      "title": "Nieuw verzoek",
+      "orgLabel": "Bedrijf",
+      "unnamedOrg": "Bedrijf zonder naam",
+      "typeLabel": "Wat vraag je?",
+      "titleLabel": "Korte titel",
+      "detailsLabel": "Toelichting",
+      "dateFromLabel": "Van (optioneel)",
+      "dateToLabel": "Tot (optioneel)",
+      "datesHint": "Datums zijn belangrijk voor thuiswerken of roosterwijzigingen. Laat ze leeg als ze niet van toepassing zijn.",
+      "submit": "Verzoek indienen",
+      "noOrganizations": "Je bent nog niet aan een bedrijf gekoppeld, dus er is niemand om een verzoek naar te sturen."
+    },
+    "type": {
+      "remote_work": "Thuiswerken",
+      "schedule_change": "Roosterwijziging",
+      "certificate_request": "Verklaring of document",
+      "employment_condition_change": "Wijziging arbeidsvoorwaarde",
+      "benefit_request": "Vergoeding of voordeel",
+      "equipment_request": "Apparatuur",
+      "other": "Overig"
+    },
+    "typeHint": {
+      "remote_work": "vraag om op gekozen dagen thuis of elders te werken",
+      "schedule_change": "vraag om andere werktijden of diensten",
+      "certificate_request": "vraag om een verklaring of document over je werk",
+      "employment_condition_change": "vraag om een afgesproken arbeidsvoorwaarde te wijzigen",
+      "benefit_request": "vraag om een voordeel dat je bedrijf aanbiedt",
+      "equipment_request": "vraag om gereedschap of apparatuur voor je werk",
+      "other": "al het andere dat je je werkgever wilt vragen"
+    },
+    "status": {
+      "pending": "Wacht op beslissing",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "withdrawn": "Ingetrokken",
+      "cancelled": "Geannuleerd"
+    },
+    "mine": {
+      "title": "Mijn verzoeken",
+      "empty": "Nog geen verzoeken.",
+      "timelineOpen": "Voortgang tonen"
+    },
+    "actions": {
+      "withdraw": "Intrekken"
+    },
+    "register": {
+      "title": "Verzoekenregister",
+      "decideHint": "Goedkeuren en afwijzen gebeurt in het goedkeuringsgedeelte hierboven — dit register toont alle verzoeken van je organisaties.",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "filterAll": "Alle",
+      "filterApply": "Filteren",
+      "empty": "Geen verzoeken gevonden."
+    },
+    "seed": {
+      "title": "Goedkeuringsroute voor verzoeken instellen",
+      "hint": "Maakt een eenvoudige kant-en-klare route: één beoordelingsronde, beslist door de eigenaren en beheerders van het bedrijf. Meerdere rondes bouw je in het goedkeuringsgedeelte hierboven.",
+      "orgLabel": "Bedrijf",
+      "typeLabel": "Geldt voor",
+      "allTypes": "Alle verzoektypes",
+      "nameLabel": "Naam",
+      "defaultName": "Standaard goedkeuring van verzoeken",
+      "submit": "Aanmaken en inschakelen"
+    },
+    "policies": {
+      "title": "Verloftegoeden",
+      "honesty": "Je bedrijf stelt deze aantallen zelf in. Ze zijn alleen richtsnoer voor planning — goedkeuren blijft een echte beslissing van een leidinggevende, en dit is geen juridisch advies.",
+      "entitlementShort": "{days} d/jaar",
+      "carryoverShort": "+{days} meegenomen",
+      "inactive": "uitgeschakeld",
+      "setTitle": "Verloftegoed instellen",
+      "orgLabel": "Bedrijf",
+      "typeLabel": "Verloftype",
+      "entitlementLabel": "Dagen per jaar",
+      "carryoverLabel": "Meegenomen dagen",
+      "activeLabel": "In gebruik",
+      "submit": "Opslaan"
+    },
+    "absenceType": {
+      "annual_leave": "Vakantie",
+      "sickness": "Ziekteverlof",
+      "unpaid": "Onbetaald verlof",
+      "training": "Training",
+      "other": "Overig"
+    }
   },
   "lifecycle": {
     "title": "Levensloop van het dienstverband",

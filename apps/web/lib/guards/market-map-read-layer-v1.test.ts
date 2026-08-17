@@ -530,12 +530,27 @@ describe("NO new DB migration in this PR", () => {
     // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
     // merging origin/main 1450ed08 (document engine included): 211 real
     // files in the tree — recounted, never summed.
-    // Bumped 211 -> 212 for the Employee Lifecycle v1 DRAFT
+    // Bumped 211 -> 212 for the timesheets v1 DRAFT (20260817170000,
+    // owner-gated per mandate 2026-08-17, paired rollback, ships UNAPPLIED —
+    // PENDING APPLY BY LEAD) — nothing from the market-map read layer.
+    // RECOUNTED from the post-merge tree after trains C + D: 212 .sql files.
+    // Bumped 212 -> 213 for the durable workspace pointer v2 DRAFT
+    // (20260817160000, consolidation train L slice 1, PENDING APPLY BY
+    // LEAD, paired rollback) — RECOUNTED from the post-merge tree with
+    // trains A/B/C/D/E on main (213 .sql files), never summed. Not a
+    // market-map migration either.
+    // Bumped 213 -> 215 for the typed employee requests + leave balance
+    // policies DRAFT pair (20260817180000 + 20260817181000; owner mandate
+    // 2026-08-17, paired rollbacks, ships UNAPPLIED, PENDING APPLY BY LEAD)
+    // — nothing from the market-map read layer. RECOUNTED after merging
+    // origin/main 010547e4 (trains C/D/E/L1 in base): 215 real files in
+    // the tree, never summed.
+    // Bumped 215 -> 216 for the Employee Lifecycle v1 DRAFT
     // (20260817190000_employee_lifecycle_v1, owner mandate 2026-08-17,
-    // UNAPPLIED — PENDING APPLY BY LEAD, paired rollback) — RECOUNTED after
-    // merging origin/main b6c5f71b (train D included): 212 real files in the
-    // tree — recounted, never summed. Nothing from the market-map layer.
-    expect(count).toBeLessThanOrEqual(212);
+    // UNAPPLIED — PENDING APPLY BY LEAD, paired rollback) — nothing from the
+    // market-map read layer. RECOUNTED after merging origin/main 39104f23
+    // (trains C/D/E/L1/F in base): 216 real files in the tree, never summed.
+    expect(count).toBeLessThanOrEqual(216);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
