@@ -797,6 +797,12 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260817151000_work_tasks_v2_collaboration.sql",
       "20260817152000_project_responsible_v1.sql",
       "20260817153000_notification_events_v4_task_types.sql",
+      // 2026-08-17: timesheets v1 (train E of the same autonomous functional
+      // completion train V2) gained its marker under the SAME owner mandate's
+      // §4 migration authority, recorded in docs/APPLIED_LEDGER.md (Deferred,
+      // PENDING APPLY BY LEAD) and the migration's own header. Added in the
+      // same commit as that record — not spread from this branch's approval.
+      "20260817170000_timesheets_v1.sql",
     ]);
   });
 
