@@ -356,7 +356,8 @@
         "event_workflow_escalated": "En godkjenningsrunde har overskredet fristen",
         "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
-        "event_document_expiring": "[EN] A document's validity is ending soon."
+        "event_document_expiring": "[EN] A document's validity is ending soon.",
+        "event_work_task_assigned": "En oppgave er tildelt deg"
       }
     },
     "onboarding": {
@@ -1785,7 +1786,14 @@
       "title": "[EN] Your projects",
       "untitled": "[EN] Untitled project",
       "teamLabel": "[EN] On the team",
-      "openArena": "[EN] Open arena"
+      "openArena": "[EN] Open arena",
+      "status": {
+        "draft": "Utkast",
+        "live": "Pågår",
+        "paused": "På pause",
+        "completed": "Fullført"
+      },
+      "progressNone": "Ingen målbar fremgang ennå"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1801,7 +1809,13 @@
     "myProjectsEmpty": "Du er ennå ikke tildelt noe prosjekt. Når et selskap tildeler deg, vises prosjektet her.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Avsluttet",
-    "untitledProject": "Prosjekt uten tittel"
+    "untitledProject": "Prosjekt uten tittel",
+    "archiveToggle": {
+      "label": "Aktive eller fullførte prosjekter",
+      "active": "Aktive",
+      "archived": "Fullførte",
+      "empty": "Ingen fullførte prosjekter ennå."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -1830,6 +1844,32 @@
       "journalCta": "Skriv journalinnlegg",
       "chatCta": "Send melding",
       "galleryTitle": "Mine bilder på dette prosjektet"
+    },
+    "manage": {
+      "title": "Prosjektstyring",
+      "progressLabel": "Fremgang",
+      "progressNone": "Ingen målbar fremgang ennå",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ikke angitt",
+      "responsibleSave": "Lagre",
+      "lifecycleLabel": "Status",
+      "lifecycle": {
+        "live": "Start",
+        "paused": "Sett på pause",
+        "completed": "Fullfør og arkiver"
+      },
+      "completedTerminal": "Fullført — prosjektet er arkivert",
+      "noTransitions": "Ingen statusendringer tilgjengelige",
+      "completeHint": "Fullføring avslutter alle aktive tildelinger på prosjektet og flytter det til listen over fullførte.",
+      "notice": {
+        "updated": "Lagret.",
+        "invalid": "Den endringen er ikke gyldig.",
+        "invalid_transition": "Den statusendringen er ikke mulig fra nåværende tilstand.",
+        "needs_migration": "Dette er ikke slått på i dette miljøet ennå.",
+        "not_authorized": "Bare prosjektledere kan gjøre dette.",
+        "not_found": "Prosjektet ble ikke funnet.",
+        "error": "Noe gikk galt. Prøv igjen."
+      }
     }
   },
   "agencyPool": {

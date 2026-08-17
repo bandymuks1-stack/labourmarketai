@@ -4107,7 +4107,8 @@
         "event_workflow_escalated": "Tvirtinimo etapas viršijo terminą",
         "event_document_ack_assigned": "Jūsų paprašyta patvirtinti, kad perskaitėte dokumentą.",
         "event_document_ack_completed": "Dokumentas, kurį siuntėte patvirtinti, buvo patvirtintas.",
-        "event_document_expiring": "Netrukus baigsis dokumento galiojimas."
+        "event_document_expiring": "Netrukus baigsis dokumento galiojimas.",
+        "event_work_task_assigned": "Jums priskirta užduotis"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -5276,7 +5277,14 @@
       "untitled": "Projektas be pavadinimo",
       "teamLabel": "Komandoje",
       "openArena": "Atidaryti projekto eigą",
-      "chatCta": "Pokalbis dėl projekto"
+      "chatCta": "Pokalbis dėl projekto",
+      "status": {
+        "draft": "Juodraštis",
+        "live": "Vykdomas",
+        "paused": "Pristabdytas",
+        "completed": "Užbaigtas"
+      },
+      "progressNone": "Išmatuojamos pažangos dar nėra"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
@@ -5292,7 +5300,13 @@
     "myProjectsEmpty": "Kol kas nesate priskirtas jokiam projektui. Kai įmonė jus priskirs, projektą matysite čia.",
     "assignmentActive": "Aktyvus",
     "assignmentEnded": "Užbaigtas",
-    "untitledProject": "Projektas be pavadinimo"
+    "untitledProject": "Projektas be pavadinimo",
+    "archiveToggle": {
+      "label": "Vykdomi arba užbaigti projektai",
+      "active": "Vykdomi",
+      "archived": "Užbaigti",
+      "empty": "Užbaigtų projektų dar nėra."
+    }
   },
   "projectOps": {
     "centre": {
@@ -5526,6 +5540,32 @@
       "journalCta": "Pildyti darbo žurnalą",
       "chatCta": "Susisiekti",
       "galleryTitle": "Mano nuotraukos šiame projekte"
+    },
+    "manage": {
+      "title": "Projekto valdymas",
+      "progressLabel": "Pažanga",
+      "progressNone": "Išmatuojamos pažangos dar nėra",
+      "responsibleLabel": "Atsakingas asmuo",
+      "responsibleNone": "Nenurodyta",
+      "responsibleSave": "Išsaugoti",
+      "lifecycleLabel": "Būsena",
+      "lifecycle": {
+        "live": "Paleisti",
+        "paused": "Pristabdyti",
+        "completed": "Užbaigti ir archyvuoti"
+      },
+      "completedTerminal": "Užbaigtas — projektas archyvuotas",
+      "noTransitions": "Būsenos keitimų nėra",
+      "completeHint": "Užbaigus projektą, visi aktyvūs priskyrimai jame baigiami, o projektas perkeliamas į užbaigtų sąrašą.",
+      "notice": {
+        "updated": "Išsaugota.",
+        "invalid": "Šis pakeitimas negalimas.",
+        "invalid_transition": "Iš dabartinės būsenos toks pakeitimas negalimas.",
+        "needs_migration": "Šioje aplinkoje tai dar neįjungta.",
+        "not_authorized": "Tai daryti gali tik projekto vadovai.",
+        "not_found": "Projektas nerastas.",
+        "error": "Įvyko klaida. Bandykite dar kartą."
+      }
     }
   },
   "setupRoleChoice": {
@@ -9231,7 +9271,11 @@
       "projectNone": "Be projekto",
       "assignSelfLabel": "Priskirti man",
       "assignSelfHint": "Jei nuimsite žymę, užduotis liks nepriskirta — ją matysite jūs ir projekto vadovai.",
-      "submit": "Sukurti užduotį"
+      "submit": "Sukurti užduotį",
+      "objectLabel": "Objektas",
+      "objectNone": "Be objekto",
+      "assigneeLabel": "Priskirti",
+      "assigneeHint": "Priskirti kitam žmogui galima tik projekto užduotį — priskirtas žmogus ją matys savo sąraše."
     },
     "notice": {
       "created": "Užduotis sukurta.",
@@ -9241,7 +9285,8 @@
       "not_authorized": "Neturite teisės atlikti šio veiksmo.",
       "not_found": "Užduotis nerasta.",
       "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
-      "error": "Nepavyko išsaugoti. Pabandykite dar kartą."
+      "error": "Nepavyko išsaugoti. Pabandykite dar kartą.",
+      "cycle": "Taip susidarytų ratas — užduotis negali laukti pati savęs per kitas užduotis."
     },
     "projectTasks": {
       "title": "Projekto užduotys",
@@ -9250,6 +9295,42 @@
     },
     "projectSection": {
       "link": "Šio projekto užduotys"
+    },
+    "objectLabel": "Objektas",
+    "assignee": {
+      "label": "Priskirta",
+      "you": "jums",
+      "member": "komandos nariui",
+      "unassigned": "nepriskirta"
+    },
+    "assignForm": {
+      "label": "Priskirti",
+      "save": "Priskirti"
+    },
+    "dependencies": {
+      "waitingOn": "Laukia {n}",
+      "blockedBy": "Priklauso nuo",
+      "hidden": "užduotis, kurios nematote",
+      "remove": "Pašalinti",
+      "addLabel": "Pridėti priklausomybę",
+      "add": "Pridėti"
+    },
+    "history": {
+      "title": "Istorija",
+      "byYou": "jūsų",
+      "byMember": "komandos nario",
+      "actions": {
+        "created": "Sukurta",
+        "status_changed": "Pakeista būsena",
+        "reopened": "Atidaryta iš naujo",
+        "assigned": "Priskirta",
+        "unassigned": "Priskyrimas pašalintas",
+        "priority_changed": "Pakeistas prioritetas",
+        "due_changed": "Pakeistas terminas",
+        "object_changed": "Pakeistas objektas",
+        "dependency_added": "Pridėta priklausomybė",
+        "dependency_removed": "Pašalinta priklausomybė"
+      }
     }
   },
   "assist": {
@@ -9896,22 +9977,6 @@
     "skillDeclared": "Pateikta paties",
     "skillsLegend": "Su vadovo įrašu — įgūdį lydi vadovo įrašas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta.",
     "skillsReadError": "Įgūdžių šiuo metu nepavyko įkelti. Pabandykite netrukus dar kartą."
-  },
-  "companyLocations": {
-    "title": "Vietos",
-    "subtitle": "Būstinė, veiklos vietos ir norimos rinkos — keliose šalyse.",
-    "kindHeadquarters": "Būstinė",
-    "kindOperating": "Veiklos vieta",
-    "kindDesiredMarket": "Norima rinka",
-    "countryLabel": "Šalis",
-    "cityLabel": "Miestas",
-    "regionLabel": "Regionas",
-    "addButton": "Pridėti vietą",
-    "removeButton": "Pašalinti vietą",
-    "empty": "Vietų dar nepridėta. Pridėkite būstinę ir veiklos vietas.",
-    "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
-    "gatedBody": "Vietų sąrašas paruoštas, bet dar neįjungtas. Įjungimas — savininko sprendimas.",
-    "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą."
   },
   "companyGallery": {
     "title": "Galerija",
@@ -12612,5 +12677,32 @@
       "limit_reached": "Per daug atvirų žiniaraščių — pirmiausia pateikite arba sutvarkykite esamus.",
       "error": "Įvyko klaida. Niekas nebuvo išsaugota."
     }
+  },
+  "workObjects": {
+    "title": "Objektai ir aikštelės",
+    "subtitle": "Vietos, kur vyksta darbai — objektai, pastatai, teritorijos. Susiejamos su projektais ir užduotimis.",
+    "nameLabel": "Pavadinimas",
+    "countryLabel": "Šalis",
+    "regionLabel": "Regionas",
+    "cityLabel": "Miestas",
+    "addressLabel": "Adresas",
+    "projectLabel": "Projektas",
+    "projectNone": "Be projekto",
+    "responsibleLabel": "Atsakingas asmuo",
+    "responsibleNone": "Nenurodyta",
+    "responsibleSave": "Išsaugoti",
+    "addButton": "Pridėti objektą",
+    "editButton": "Redaguoti",
+    "saveButton": "Išsaugoti pakeitimus",
+    "archiveButton": "Archyvuoti",
+    "restoreButton": "Atkurti",
+    "archivedHeading": "Archyvuoti objektai",
+    "archivedBadge": "Archyvuota",
+    "empty": "Objektų dar nėra. Pridėkite vietas, kuriose vyksta jūsų darbai.",
+    "gatedHeading": "Paruošta — laukiama įjungimo",
+    "gatedBody": "Objektai paruošti, bet dar neįjungti. Įjungimas yra savininko sprendimas.",
+    "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
+    "savedLabel": "Išsaugota."
   }
 }

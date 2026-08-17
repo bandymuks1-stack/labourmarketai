@@ -2097,11 +2097,19 @@ describe("no migration files added by this sprint", () => {
     // 120000-130100 on main; RECOUNTED from the post-rebase tree
     // (`ls supabase/migrations/*.sql | wc -l` = 207), never summed; gate
     // docs document-file-layer-gate.md + notification-document-types-v3-gate.md.
-    // Bumped 207 -> 208 for the timesheets v1 DRAFT (20260817170000,
+    // Bumped 207 -> 211 for the train-D project/object/task drafts
+    // (20260817150000 work_objects_v1 + 20260817151000
+    // work_tasks_v2_collaboration + 20260817152000 project_responsible_v1 +
+    // 20260817153000 notification_events_v4_task_types; all LEAD-gated,
+    // UNAPPLIED; paired rollbacks + deferred APPLIED_LEDGER entries in the
+    // PR) — RECOUNTED after merging origin/main 1450ed08 (security train A,
+    // workflow engine AND document engine already in the base): 211 real
+    // files in the tree, never summed.
+    // Bumped 211 -> 212 for the timesheets v1 DRAFT (20260817170000,
     // owner-gated per mandate 2026-08-17, UNAPPLIED — PENDING APPLY BY LEAD)
-    // — RECOUNTED from the post-merge tree
-    // (`ls supabase/migrations/*.sql | wc -l` = 208), never summed.
-    const SPRINT_BASELINE = 208;
+    // — RECOUNTED from the post-merge tree after trains C + D landed
+    // (`ls supabase/migrations/*.sql | wc -l` = 212), never summed.
+    const SPRINT_BASELINE = 212;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

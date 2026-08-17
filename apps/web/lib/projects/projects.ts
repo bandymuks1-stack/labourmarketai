@@ -37,6 +37,13 @@ export interface ManagedProject {
    *  without an org binding (never fabricated). */
   organizationId: string | null;
   orgName: string | null;
+  /** Lifecycle status (train D): draft/live/paused/completed — lets list
+   *  surfaces filter finished work honestly. Null only when the column read
+   *  unexpectedly failed (never fabricated). */
+  status: string | null;
+  /** Responsible person (train D, gated migration 20260817152000): null
+   *  until the LEAD applies it or when nobody is named. */
+  responsibleProfileId: string | null;
 }
 
 export interface ProjectAssignment {
@@ -57,19 +64,31 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const res = await asAny(supabase)
-    .from("projects")
-    .select(
-      "id, title, city, country, organization_id, organizations(display_name, legal_name)",
-    )
-    .order("created_at", { ascending: false })
-    .limit(100);
+  // Train D: responsible_profile_id ships in a LEAD-gated migration
+  // (20260817152000). Until applied the column is missing (42703) and the
+  // read FALLS BACK to the pre-train column set — the list never regresses.
+  const columnsV2 =
+    "id, title, city, country, status, responsible_profile_id, organization_id, organizations(display_name, legal_name)";
+  const columnsV1 =
+    "id, title, city, country, status, organization_id, organizations(display_name, legal_name)";
+  const run = (columns: string) =>
+    asAny(supabase)
+      .from("projects")
+      .select(columns)
+      .order("created_at", { ascending: false })
+      .limit(100);
+  let res = await run(columnsV2);
+  if (res.error && res.error.code === UNDEFINED_COLUMN) {
+    res = await run(columnsV1);
+  }
   if (res.error) return [];
   type Row = {
     id: string;
     title: string | null;
     city: string | null;
     country: string | null;
+    status: string | null;
+    responsible_profile_id?: string | null;
     organization_id: string | null;
     organizations: { display_name: string | null; legal_name: string | null } | null;
   };
@@ -83,6 +102,8 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
       p.organizations?.display_name?.trim() ||
       p.organizations?.legal_name?.trim() ||
       null,
+    status: p.status ?? null,
+    responsibleProfileId: p.responsible_profile_id ?? null,
   }));
 }
 

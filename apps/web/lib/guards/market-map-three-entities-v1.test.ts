@@ -91,7 +91,10 @@ describe("owner-scoped composer — RLS only, no privileged path", () => {
   it("is server-only and composes the EXISTING owner-scoped sources", () => {
     expect(COMPOSER).toMatch(/server-only/);
     expect(COMPOSER).toMatch(/getOwnMarketSignals/);
-    expect(COMPOSER).toMatch(/getCompanyLocations/);
+    // Train D: the company territory source is the canonical work_objects
+    // entity (membership-scoped RLS read) — the superseded company_locations
+    // draft is never applied (Train M verdict).
+    expect(COMPOSER).toMatch(/getCompanyTerritoryFromObjects/);
   });
   it("no service_role, no RPC, no cross-user read", () => {
     expect(COMPOSER).not.toMatch(/service_role|SERVICE_ROLE|SECURITY DEFINER/);

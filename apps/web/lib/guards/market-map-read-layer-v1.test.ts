@@ -525,11 +525,16 @@ describe("NO new DB migration in this PR", () => {
     // APPLY BY LEAD; renamed from 120000/121000 after trains A/B claimed
     // 120000-130100 on main) — recounted from the post-rebase tree, never
     // summed. Still no migration from the market-map layer itself.
-    // Bumped 207 -> 208 for the timesheets v1 DRAFT (20260817170000,
+    // Bumped 207 -> 211 for the train-D project/object/task drafts
+    // (20260817150000 + 20260817151000 + 20260817152000 + 20260817153000,
+    // all LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED after
+    // merging origin/main 1450ed08 (document engine included): 211 real
+    // files in the tree — recounted, never summed.
+    // Bumped 211 -> 212 for the timesheets v1 DRAFT (20260817170000,
     // owner-gated per mandate 2026-08-17, paired rollback, ships UNAPPLIED —
     // PENDING APPLY BY LEAD) — nothing from the market-map read layer.
-    // RECOUNTED from the post-merge tree: 208 .sql files.
-    expect(count).toBeLessThanOrEqual(208);
+    // RECOUNTED from the post-merge tree after trains C + D: 212 .sql files.
+    expect(count).toBeLessThanOrEqual(212);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
