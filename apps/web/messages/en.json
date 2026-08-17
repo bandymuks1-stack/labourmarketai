@@ -6878,6 +6878,13 @@
       "verified": "Verified",
       "rejected": "Rejected"
     },
+    "verifyRequest": {
+      "submit": "Send for verification",
+      "sent": "Sent for verification",
+      "notReady": "Only a document marked ready can be sent for verification.",
+      "unavailable": "Verification is not available in this environment.",
+      "error": "Could not send — please try again."
+    },
     "workProof": {
       "title": "Work proof & exports",
       "journalTitle": "Work journal evidence",

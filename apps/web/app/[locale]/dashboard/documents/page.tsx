@@ -18,11 +18,13 @@ import {
 import {
   DOC_CENTRE_INVENTORY_ANCHOR,
   DOCUMENT_STATUS_FILTERS,
+  canRequestVerification,
   filterCentreDocuments,
   inventoryHref,
   parseInventoryFilters,
   type DocumentVerificationState,
 } from "@/lib/documents/document-centre-model";
+import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-document-verify-request-button";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 import { WorkerDocumentForm } from "@/components/app/worker-document-form";
@@ -439,6 +441,24 @@ export default async function WorkerDocumentsPage({
                       >
                         {t(`status.${d.derivedStatus}` as never)}
                       </span>
+                      {/* Worker-side "send for verification" — the first
+                          link of the approval chain (RPC 20260613100200
+                          finally gets its caller). Rendered only for
+                          eligible rows: stored ready + unverified/rejected
+                          on a readable verification axis. */}
+                      {inv.verificationAvailable && canRequestVerification(d) ? (
+                        <WorkerDocumentVerifyRequestButton
+                          locale={locale}
+                          documentId={d.id}
+                          labels={{
+                            submit: tc("verifyRequest.submit"),
+                            sent: tc("verifyRequest.sent"),
+                            notReady: tc("verifyRequest.notReady"),
+                            unavailable: tc("verifyRequest.unavailable"),
+                            error: tc("verifyRequest.error"),
+                          }}
+                        />
+                      ) : null}
                     </div>
                   </li>
                 ))}

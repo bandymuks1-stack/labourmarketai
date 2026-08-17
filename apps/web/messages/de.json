@@ -6878,6 +6878,13 @@
       "verified": "Geprüft",
       "rejected": "Abgelehnt"
     },
+    "verifyRequest": {
+      "submit": "Zur Prüfung senden",
+      "sent": "Zur Prüfung gesendet",
+      "notReady": "Nur ein als bereit markiertes Dokument kann zur Prüfung gesendet werden.",
+      "unavailable": "Die Prüfung ist in dieser Umgebung nicht verfügbar.",
+      "error": "Senden fehlgeschlagen — bitte erneut versuchen."
+    },
     "workProof": {
       "title": "Arbeitsnachweis & Exporte",
       "journalTitle": "Nachweise aus dem Arbeitsjournal",

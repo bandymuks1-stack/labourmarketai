@@ -6878,6 +6878,13 @@
       "verified": "Geverifieerd",
       "rejected": "Afgewezen"
     },
+    "verifyRequest": {
+      "submit": "Ter verificatie versturen",
+      "sent": "Ter verificatie verstuurd",
+      "notReady": "Alleen een document met status gereed kan ter verificatie worden verstuurd.",
+      "unavailable": "Verificatie is in deze omgeving niet beschikbaar.",
+      "error": "Versturen mislukt — probeer het opnieuw."
+    },
     "workProof": {
       "title": "Werkbewijs & exports",
       "journalTitle": "Bewijs uit het werkdagboek",
