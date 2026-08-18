@@ -444,6 +444,13 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 213 -> 215 in product-readiness.test.ts (recounted after merging
     // origin/main 010547e4, trains C/D/E/L1 in base). This floor assertion
     // again needs no numeric edit.
+    //
+    // Cross-pin follows: the financial-ops train J TRIPLE (20260817220000
+    // finance invoice upgrades + 20260817221000 procurement + 20260817222000
+    // business trips) took SPRINT_BASELINE 215 -> 218 in
+    // product-readiness.test.ts (RECOUNTED after merging origin/main
+    // 39104f23, trains C/D/E/F/L1 in base). This floor assertion needs no
+    // numeric edit either.
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
     // migration 0030 to exist; pinning the exact number meant every unrelated,
@@ -464,11 +471,16 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260817190000_employee_lifecycle_v1, RECOUNTED after merging
     // origin/main 66c869a4 with trains C/D/E/L1/F/H in the base) — floor
     // semantics unchanged.
-    // Cross-pin follows: 217 -> 220 for the Training & Certification +
+    // Cross-pin follows: 217 -> 218 for the org document register delta v1
+    // draft (20260817240000_org_document_register_delta_v1, train I,
+    // LEAD-gated, UNAPPLIED; RECOUNTED from the post-rebase tree with train
+    // G also in the base) — floor semantics unchanged, no numeric edit
+    // needed here.
+    // Cross-pin follows: 221 -> 224 for the Training & Certification +
     // Development Reviews + Management Decisions v1 triple (20260817230000
     // / 231000 / 232000, train K, LEAD-gated, UNAPPLIED; RECOUNTED from the
-    // post-rebase tree with train G on main) — floor semantics unchanged,
-    // no numeric edit needed here.
+    // tree after merging origin/main dbc6b76f with trains J and I in the
+    // base) — floor semantics unchanged, no numeric edit needed here.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

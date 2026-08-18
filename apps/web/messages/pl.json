@@ -4551,7 +4551,14 @@
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
       "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
-      "error": "[EN] Something went wrong — nothing was saved."
+      "error": "[EN] Something went wrong — nothing was saved.",
+      "updated": "[EN] The change was saved.",
+      "submitted": "[EN] The document was sent for approval.",
+      "repaired_approved": "[EN] The approval is finished — the document is approved internally.",
+      "repaired_returned": "[EN] The document came back without approval.",
+      "unchanged": "[EN] Nothing changed.",
+      "no_pending_workflow": "[EN] No approval is waiting for this document — nothing was saved.",
+      "no_approval_definition": "[EN] Your organization has no approval route set up yet — nothing was saved."
     }
   },
   "orgDocuments": {
@@ -4606,7 +4613,56 @@
       "validFromLabel": "[EN] Valid from",
       "expiresOnLabel": "[EN] Valid until",
       "externalRefLabel": "[EN] Reference number (optional)",
-      "submit": "[EN] Register document"
+      "submit": "[EN] Register document",
+      "objectLabel": "[EN] Site (optional)",
+      "objectNone": "[EN] Not linked to a site",
+      "correspondenceLegend": "[EN] Correspondence details",
+      "correspondenceHint": "[EN] Fill these in only for incoming or outgoing correspondence. Whether a letter is incoming or outgoing comes from the type you chose above."
+    },
+    "filters": {
+      "all": "[EN] All",
+      "statusLabel": "[EN] Status",
+      "directionLabel": "[EN] Correspondence",
+      "objectLabel": "[EN] Site",
+      "searchLabel": "[EN] Search the register",
+      "searchPlaceholder": "[EN] Title, description, reference, counterparty",
+      "searchSubmit": "[EN] Search",
+      "searchScopeNote": "[EN] Search looks at the register entries only — titles, descriptions, references and counterparties. It does not look inside uploaded files.",
+      "clear": "[EN] Clear filters",
+      "noMatches": "[EN] No register entries match these filters."
+    },
+    "direction": {
+      "incoming": "[EN] Incoming",
+      "outgoing": "[EN] Outgoing"
+    },
+    "fields": {
+      "counterparty": "[EN] Counterparty",
+      "correspondenceDate": "[EN] Letter date",
+      "counterpartyReference": "[EN] Their reference",
+      "correspondenceUnrecorded": "[EN] Counterparty and letter date not recorded",
+      "object": "[EN] Site",
+      "ourRef": "[EN] Our reference"
+    },
+    "retention": {
+      "legend": "[EN] Retention (record only)",
+      "filterLabel": "[EN] Retention",
+      "untilLabel": "[EN] Keep until",
+      "noteLabel": "[EN] Retention note",
+      "submit": "[EN] Save retention",
+      "noDeletionNote": "[EN] This is a record of what your organization decided. Nothing is deleted automatically when the date passes.",
+      "scheduled": "[EN] Retention set",
+      "due": "[EN] Retention date passed",
+      "badge": {
+        "scheduled": "[EN] Keep until {date}",
+        "due": "[EN] Retention date {date} passed"
+      }
+    },
+    "approval": {
+      "definitionLabel": "[EN] Approval route",
+      "submit": "[EN] Send for approval",
+      "submitted": "[EN] Awaiting approval",
+      "approved": "[EN] Approved internally",
+      "returned": "[EN] Returned without approval"
     }
   },
   "timesheets": {
@@ -5064,6 +5120,185 @@
       "not_authorized": "Nie masz uprawnień do tego działania.",
       "not_found": "Zapis niedostępny.",
       "error": "Nie udało się — spróbuj ponownie."
+    }
+  },
+  "finance": {
+    "invoiceNoLabel": "Nr faktury",
+    "vatLabel": "VAT",
+    "documentLinked": "Dokument dołączony",
+    "tripLinked": "Powiązana delegacja",
+    "approval": {
+      "pending": "Oczekuje na zatwierdzenie",
+      "approved": "Zatwierdzono",
+      "rejected": "Nie zatwierdzono"
+    },
+    "form": {
+      "invoiceNoLabel": "Numer faktury (opcjonalnie)",
+      "invoiceNoPlaceholder": "np. FV-2026-014",
+      "vatLabel": "Kwota VAT (opcjonalnie)",
+      "invoiceHint": "Numer faktury i VAT są opcjonalne. Jeśli otrzymana faktura powtarza zapisany już numer tego samego kontrahenta, wpis i tak zostaje zapisany, a Ty widzisz ostrzeżenie."
+    },
+    "actions": {
+      "requestApproval": "Poproś o zatwierdzenie",
+      "checkApproval": "Sprawdź zatwierdzenie"
+    },
+    "notice": {
+      "created_possible_duplicate": "Zapisano — ale wpis z tym kontrahentem i numerem faktury już istnieje. Sprawdź, czy to nie duplikat.",
+      "approval_submitted": "Poproszono o zatwierdzenie. Zatwierdzający zostali powiadomieni.",
+      "approval_approved": "Ten wpis został zatwierdzony.",
+      "approval_rejected": "Ten wpis nie został zatwierdzony.",
+      "approval_pending": "Decyzja o zatwierdzeniu nie została jeszcze podjęta.",
+      "approval_cleared": "Prośba o zatwierdzenie została wycofana lub anulowana.",
+      "approval_none": "Nie znaleziono prośby o zatwierdzenie dla tego wpisu.",
+      "no_template": "Ta firma nie ma jeszcze opublikowanej ścieżki zatwierdzania, więc nie można poprosić o zatwierdzenie.",
+      "no_approvers": "Obecnie nikt w firmie nie może zatwierdzić tej prośby."
+    }
+  },
+  "procurement": {
+    "title": "Zakupy",
+    "intro": "Poproś o materiały lub usługi, zapisuj oferty dostawców i odnotuj, co wybrano. Nic tutaj nie kontaktuje się z dostawcą ani niczego nie zamawia — to Twoja ewidencja.",
+    "needsMigration": "Wnioski zakupowe nie są jeszcze włączone w tym środowisku.",
+    "readError": "Nie udało się wczytać wniosków zakupowych. Spróbuj ponownie.",
+    "empty": "Brak wniosków zakupowych.",
+    "noOffers": "Nie zapisano jeszcze ofert dostawców.",
+    "offerSelected": "Wybrano",
+    "orderRefLabel": "Nr zamówienia",
+    "invoiceLinked": "Faktura powiązana",
+    "status": {
+      "draft": "Szkic",
+      "submitted": "Złożono",
+      "decided": "Rozstrzygnięto",
+      "ordered": "Zamówiono",
+      "closed": "Zamknięto",
+      "cancelled": "Anulowano"
+    },
+    "approval": {
+      "pending": "Oczekuje na zatwierdzenie",
+      "approved": "Zatwierdzono",
+      "rejected": "Nie zatwierdzono"
+    },
+    "form": {
+      "open": "Nowy wniosek zakupowy",
+      "orgLabel": "Firma",
+      "descriptionLabel": "Co jest potrzebne",
+      "descriptionPlaceholder": "np. 40 worków cementu na fundament",
+      "quantityLabel": "Ilość (opcjonalnie)",
+      "quantityPlaceholder": "np. 40 worków",
+      "budgetLabel": "Szacowany budżet w EUR (opcjonalnie)",
+      "submit": "Zapisz wniosek",
+      "supplierLabel": "Nazwa dostawcy",
+      "offerAmountLabel": "Kwota oferty w EUR",
+      "offerNoteLabel": "Notatka (opcjonalnie)",
+      "orderRefPlaceholder": "Numer zamówienia (opcjonalnie)",
+      "invoiceNone": "Brak powiązanej faktury"
+    },
+    "actions": {
+      "selectOffer": "Wybierz tę ofertę",
+      "addOffer": "Zapisz ofertę dostawcy",
+      "saveOffer": "Zapisz ofertę",
+      "edit": "Edytuj",
+      "save": "Zapisz",
+      "submit": "Złóż",
+      "requestApproval": "Poproś o zatwierdzenie",
+      "checkApproval": "Sprawdź zatwierdzenie",
+      "markOrdered": "Oznacz jako zamówione",
+      "close": "Zamknij",
+      "cancel": "Anuluj",
+      "linkInvoice": "Powiąż fakturę"
+    },
+    "notice": {
+      "created": "Wniosek zakupowy zapisany.",
+      "updated": "Wniosek zakupowy zaktualizowany.",
+      "submitted": "Wniosek zakupowy złożony.",
+      "offer_added": "Oferta dostawcy zapisana.",
+      "decided": "Oferta wybrana.",
+      "linked": "Faktura powiązana.",
+      "unlinked": "Powiązanie faktury usunięte.",
+      "cancelled": "Wniosek zakupowy anulowany.",
+      "invalid": "Sprawdź wprowadzone dane.",
+      "needs_migration": "Wnioski zakupowe nie są jeszcze włączone w tym środowisku.",
+      "not_authorized": "Nie możesz tego zrobić dla tego wniosku.",
+      "not_found": "Nie znaleziono tego wniosku zakupowego.",
+      "not_editable": "W tym stanie ten krok nie jest możliwy.",
+      "limit_reached": "Osiągnięto limit otwartych wniosków.",
+      "approval_submitted": "Poproszono o zatwierdzenie. Zatwierdzający zostali powiadomieni.",
+      "approval_approved": "Ten wniosek został zatwierdzony.",
+      "approval_rejected": "Ten wniosek nie został zatwierdzony.",
+      "approval_pending": "Decyzja o zatwierdzeniu nie została jeszcze podjęta.",
+      "approval_cleared": "Prośba o zatwierdzenie została wycofana lub anulowana.",
+      "approval_none": "Nie znaleziono prośby o zatwierdzenie.",
+      "no_template": "Ta firma nie ma jeszcze opublikowanej ścieżki zatwierdzania zakupów.",
+      "no_approvers": "Obecnie nikt w firmie nie może zatwierdzić tego wniosku.",
+      "error": "Coś poszło nie tak. Nic nie zostało zapisane."
+    }
+  },
+  "trips": {
+    "title": "Delegacje",
+    "intro": "Poproś o delegację, uzyskaj zatwierdzenie i trzymaj jej koszty razem. Nic tutaj nie rezerwuje podróży ani nie wypłaca pieniędzy — to Twoja ewidencja.",
+    "needsMigration": "Delegacje nie są jeszcze włączone w tym środowisku.",
+    "readError": "Nie udało się wczytać delegacji. Spróbuj ponownie.",
+    "empty": "Brak delegacji.",
+    "orgHeading": "Delegacje osób, którymi zarządzasz",
+    "advanceLabel": "Zaliczka",
+    "expensesLabel": "Koszty",
+    "noTemplate": "Ta firma nie ma jeszcze opublikowanej ścieżki zatwierdzania delegacji, więc delegacji nie można złożyć.",
+    "status": {
+      "draft": "Szkic",
+      "submitted": "Złożono",
+      "approved": "Zatwierdzono",
+      "rejected": "Nie zatwierdzono",
+      "completed": "Zakończona",
+      "cancelled": "Anulowana"
+    },
+    "form": {
+      "open": "Nowy wniosek o delegację",
+      "orgLabel": "Firma",
+      "destinationLabel": "Cel podróży",
+      "destinationPlaceholder": "np. Oslo, Norwegia",
+      "fromLabel": "Pierwszy dzień",
+      "toLabel": "Ostatni dzień",
+      "purposeLabel": "Cel",
+      "purposePlaceholder": "np. montaż okien na budowie w Oslo",
+      "advanceLabel": "Zaliczka w EUR (opcjonalnie)",
+      "advanceHint": "Zaliczka to tylko zapis uzgodnionej kwoty, np. diety. Żadne pieniądze nie są przelewane.",
+      "submit": "Zapisz delegację",
+      "recordPick": "Wybierz wpis…"
+    },
+    "actions": {
+      "edit": "Edytuj",
+      "save": "Zapisz",
+      "submit": "Złóż do zatwierdzenia",
+      "checkDecision": "Sprawdź decyzję",
+      "complete": "Oznacz jako zakończoną",
+      "cancel": "Anuluj",
+      "linkExpense": "Dodaj do tej delegacji",
+      "unlink": "Usuń",
+      "createTemplate": "Utwórz standardową ścieżkę zatwierdzania"
+    },
+    "notice": {
+      "created": "Delegacja zapisana.",
+      "updated": "Delegacja zaktualizowana.",
+      "submitted": "Delegacja złożona do zatwierdzenia.",
+      "approved": "Delegacja została zatwierdzona.",
+      "rejected": "Delegacja nie została zatwierdzona.",
+      "reopened": "Prośba o zatwierdzenie zniknęła — delegacja jest znów szkicem.",
+      "completed": "Delegacja oznaczona jako zakończona.",
+      "cancelled": "Delegacja anulowana.",
+      "linked": "Wpis dodany do delegacji.",
+      "unlinked": "Wpis usunięty z delegacji.",
+      "invalid": "Sprawdź wprowadzone dane.",
+      "invalid_dates": "Sprawdź daty delegacji.",
+      "needs_migration": "Delegacje nie są jeszcze włączone w tym środowisku.",
+      "not_authorized": "Nie możesz tego zrobić dla tej delegacji.",
+      "not_found": "Nie znaleziono tej delegacji.",
+      "not_editable": "W tym stanie ten krok nie jest możliwy.",
+      "limit_reached": "Osiągnięto limit otwartych delegacji.",
+      "still_pending": "Decyzja o zatwierdzeniu nie została jeszcze podjęta.",
+      "no_instance": "Nie znaleziono prośby o zatwierdzenie dla tej delegacji.",
+      "no_template": "Ta firma nie ma jeszcze opublikowanej ścieżki zatwierdzania delegacji.",
+      "no_approvers": "Obecnie nikt w firmie nie może zatwierdzić tej delegacji.",
+      "template_created": "Utworzono standardową ścieżkę zatwierdzania dla firmy.",
+      "error": "Coś poszło nie tak. Nic nie zostało zapisane."
     }
   },
   "training": {

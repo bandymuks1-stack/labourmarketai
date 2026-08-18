@@ -30,6 +30,7 @@ import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
 import { getWorkerDocumentFiles } from "@/lib/documents/document-files";
+import { parseOrgRegisterFilters } from "@/lib/documents/document-file-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 import { WorkerDocumentForm } from "@/components/app/worker-document-form";
@@ -101,8 +102,16 @@ const DOC_NOTICE_SUCCESS = new Set([
   "revoked",
   "assigned",
   "acknowledged",
+  // Register delta v1 outcomes.
+  "updated",
+  "submitted",
+  "repaired_approved",
 ]);
 const DOC_NOTICE_WARN = new Set([
+  "unchanged",
+  "repaired_returned",
+  "no_pending_workflow",
+  "no_approval_definition",
   "invalid",
   "invalid_state",
   "invalid_assignee",
@@ -156,6 +165,12 @@ export default async function WorkerDocumentsPage({
     type?: string;
     status?: string;
     docNotice?: string;
+    /* Org register (delta v1) filter axes — searchParams only, no route. */
+    regStatus?: string;
+    regDirection?: string;
+    regObject?: string;
+    regRetention?: string;
+    regQ?: string;
     /** Training & Certification v1 outcome notice (closed vocabulary,
      *  validated inside the section — never rendered raw). */
     trn?: string;
@@ -261,7 +276,10 @@ export default async function WorkerDocumentsPage({
         {/* Document & Evidence Engine v1 — the org's OWN register (org-scope
             rows only; worker document rows stay owner-only by RLS) and the
             caller's own acknowledgement inbox. */}
-        <OrgDocumentsRegister locale={locale} />
+        <OrgDocumentsRegister
+          locale={locale}
+          filters={parseOrgRegisterFilters(sp)}
+        />
         <DocumentAckInbox locale={locale} />
         {/* Training & Certification v1 — programmes, assignments and the
             certificate register. The training MATERIAL is an org register

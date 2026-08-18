@@ -7007,7 +7007,14 @@
       "file_too_large": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
       "unsupported_type": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
       "needs_migration": "Der Datei-Upload ist in dieser Umgebung noch nicht aktiviert — nichts wurde gespeichert.",
-      "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert."
+      "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert.",
+      "updated": "Die Änderung wurde gespeichert.",
+      "submitted": "Das Dokument wurde zur Freigabe gesendet.",
+      "repaired_approved": "Die Freigabe ist abgeschlossen — das Dokument ist intern freigegeben.",
+      "repaired_returned": "Das Dokument kam ohne Freigabe zurück.",
+      "unchanged": "Nichts hat sich geändert.",
+      "no_pending_workflow": "Für dieses Dokument steht keine Freigabe aus — nichts wurde gespeichert.",
+      "no_approval_definition": "Ihre Organisation hat noch keinen Freigabeweg eingerichtet — nichts wurde gespeichert."
     }
   },
   "orgDocuments": {
@@ -7062,7 +7069,56 @@
       "validFromLabel": "Gültig ab",
       "expiresOnLabel": "Gültig bis",
       "externalRefLabel": "Referenznummer (optional)",
-      "submit": "Dokument registrieren"
+      "submit": "Dokument registrieren",
+      "objectLabel": "Objekt (optional)",
+      "objectNone": "Keinem Objekt zugeordnet",
+      "correspondenceLegend": "Korrespondenzangaben",
+      "correspondenceHint": "Nur für eingehende oder ausgehende Korrespondenz ausfüllen. Ob ein Schreiben ein- oder ausgeht, ergibt sich aus dem oben gewählten Typ."
+    },
+    "filters": {
+      "all": "Alle",
+      "statusLabel": "Status",
+      "directionLabel": "Korrespondenz",
+      "objectLabel": "Objekt",
+      "searchLabel": "Im Register suchen",
+      "searchPlaceholder": "Titel, Beschreibung, Referenz, Gegenpartei",
+      "searchSubmit": "Suchen",
+      "searchScopeNote": "Die Suche erfasst nur die Registereinträge — Titel, Beschreibungen, Referenzen und Gegenparteien. In hochgeladene Dateien schaut sie nicht hinein.",
+      "clear": "Filter zurücksetzen",
+      "noMatches": "Keine Registereinträge entsprechen diesen Filtern."
+    },
+    "direction": {
+      "incoming": "Eingehend",
+      "outgoing": "Ausgehend"
+    },
+    "fields": {
+      "counterparty": "Gegenpartei",
+      "correspondenceDate": "Schreibensdatum",
+      "counterpartyReference": "Deren Referenz",
+      "correspondenceUnrecorded": "Gegenpartei und Schreibensdatum nicht erfasst",
+      "object": "Objekt",
+      "ourRef": "Unsere Referenz"
+    },
+    "retention": {
+      "legend": "Aufbewahrung (nur Vermerk)",
+      "filterLabel": "Aufbewahrung",
+      "untilLabel": "Aufbewahren bis",
+      "noteLabel": "Aufbewahrungsnotiz",
+      "submit": "Aufbewahrung speichern",
+      "noDeletionNote": "Dies ist ein Vermerk über die Entscheidung Ihrer Organisation. Nach Ablauf des Datums wird nichts automatisch gelöscht.",
+      "scheduled": "Frist vermerkt",
+      "due": "Frist abgelaufen",
+      "badge": {
+        "scheduled": "Aufbewahren bis {date}",
+        "due": "Frist {date} abgelaufen"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Freigabeweg",
+      "submit": "Zur Freigabe senden",
+      "submitted": "Wartet auf Freigabe",
+      "approved": "Intern freigegeben",
+      "returned": "Ohne Freigabe zurückgegeben"
     }
   },
   "trust": {
@@ -9464,7 +9520,9 @@
       "cancel": "Stornieren",
       "reopen": "Wieder öffnen",
       "details": "Daten bearbeiten",
-      "save": "Speichern"
+      "save": "Speichern",
+      "requestApproval": "Freigabe anfragen",
+      "checkApproval": "Freigabe prüfen"
     },
     "form": {
       "title": "Neuer Eintrag",
@@ -9481,7 +9539,11 @@
       "projectNone": "Kein Projekt",
       "companyLinkLabel": "Mit meiner Firma verknüpfen (deren Inhaber sieht diesen Eintrag)",
       "noteLabel": "Notiz (optional)",
-      "submit": "Eintrag hinzufügen"
+      "submit": "Eintrag hinzufügen",
+      "invoiceNoLabel": "Rechnungsnummer (optional)",
+      "invoiceNoPlaceholder": "z. B. RE-2026-014",
+      "vatLabel": "MwSt.-Betrag (optional)",
+      "invoiceHint": "Rechnungsnummer und MwSt. sind optional. Wiederholt eine erhaltene Rechnung eine bereits gespeicherte Nummer desselben Geschäftspartners, wird der Eintrag trotzdem gespeichert und Sie sehen eine Warnung."
     },
     "notice": {
       "created": "Eintrag hinzugefügt.",
@@ -9491,7 +9553,25 @@
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Eintrag nicht gefunden.",
       "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
-      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "created_possible_duplicate": "Gespeichert — aber ein Eintrag mit diesem Geschäftspartner und dieser Rechnungsnummer existiert bereits. Bitte auf ein Duplikat prüfen.",
+      "approval_submitted": "Freigabe angefragt. Die Freigebenden wurden benachrichtigt.",
+      "approval_approved": "Dieser Eintrag wurde freigegeben.",
+      "approval_rejected": "Dieser Eintrag wurde nicht freigegeben.",
+      "approval_pending": "Die Freigabeentscheidung steht noch aus.",
+      "approval_cleared": "Die Freigabeanfrage wurde zurückgezogen oder storniert.",
+      "approval_none": "Für diesen Eintrag wurde keine Freigabeanfrage gefunden.",
+      "no_template": "Dieses Unternehmen hat dafür noch keinen veröffentlichten Freigabeablauf, daher kann keine Freigabe angefragt werden.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diese Anfrage freigeben."
+    },
+    "invoiceNoLabel": "Rechnungsnr.",
+    "vatLabel": "MwSt.",
+    "documentLinked": "Dokument angehängt",
+    "tripLinked": "Dienstreise verknüpft",
+    "approval": {
+      "pending": "Freigabe ausstehend",
+      "approved": "Freigegeben",
+      "rejected": "Nicht freigegeben"
     }
   },
   "structuredDemand": {
@@ -13093,6 +13173,153 @@
       "not_authorized": "Sie sind dazu nicht berechtigt.",
       "not_found": "Eintrag nicht verfügbar.",
       "error": "Fehlgeschlagen — bitte erneut versuchen."
+    }
+  },
+  "procurement": {
+    "title": "Einkäufe",
+    "intro": "Fragen Sie Material oder Leistungen an, notieren Sie Lieferantenangebote und halten Sie fest, was gewählt wurde. Nichts hier kontaktiert einen Lieferanten oder bestellt etwas — es ist Ihre Aufzeichnung.",
+    "needsMigration": "Einkaufsanfragen sind in dieser Umgebung noch nicht aktiviert.",
+    "readError": "Einkaufsanfragen konnten nicht geladen werden. Bitte erneut versuchen.",
+    "empty": "Noch keine Einkaufsanfragen.",
+    "noOffers": "Noch keine Lieferantenangebote notiert.",
+    "offerSelected": "Gewählt",
+    "orderRefLabel": "Bestellnr.",
+    "invoiceLinked": "Rechnung verknüpft",
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "decided": "Entschieden",
+      "ordered": "Bestellt",
+      "closed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "approval": {
+      "pending": "Freigabe ausstehend",
+      "approved": "Freigegeben",
+      "rejected": "Nicht freigegeben"
+    },
+    "form": {
+      "open": "Neue Einkaufsanfrage",
+      "orgLabel": "Unternehmen",
+      "descriptionLabel": "Was wird benötigt",
+      "descriptionPlaceholder": "z. B. 40 Sack Zement für das Fundament",
+      "quantityLabel": "Menge (optional)",
+      "quantityPlaceholder": "z. B. 40 Sack",
+      "budgetLabel": "Geschätztes Budget in EUR (optional)",
+      "submit": "Anfrage speichern",
+      "supplierLabel": "Lieferantenname",
+      "offerAmountLabel": "Angebotsbetrag in EUR",
+      "offerNoteLabel": "Notiz (optional)",
+      "orderRefPlaceholder": "Bestellnummer (optional)",
+      "invoiceNone": "Keine Rechnung verknüpft"
+    },
+    "actions": {
+      "selectOffer": "Dieses Angebot wählen",
+      "addOffer": "Lieferantenangebot notieren",
+      "saveOffer": "Angebot speichern",
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "submit": "Einreichen",
+      "requestApproval": "Freigabe anfragen",
+      "checkApproval": "Freigabe prüfen",
+      "markOrdered": "Als bestellt markieren",
+      "close": "Abschließen",
+      "cancel": "Stornieren",
+      "linkInvoice": "Rechnung verknüpfen"
+    },
+    "notice": {
+      "created": "Einkaufsanfrage gespeichert.",
+      "updated": "Einkaufsanfrage aktualisiert.",
+      "submitted": "Einkaufsanfrage eingereicht.",
+      "offer_added": "Lieferantenangebot notiert.",
+      "decided": "Angebot gewählt.",
+      "linked": "Rechnung verknüpft.",
+      "unlinked": "Rechnungsverknüpfung entfernt.",
+      "cancelled": "Einkaufsanfrage storniert.",
+      "invalid": "Bitte die eingegebenen Angaben prüfen.",
+      "needs_migration": "Einkaufsanfragen sind in dieser Umgebung noch nicht aktiviert.",
+      "not_authorized": "Das können Sie für diese Anfrage nicht tun.",
+      "not_found": "Diese Einkaufsanfrage wurde nicht gefunden.",
+      "not_editable": "In diesem Zustand ist dieser Schritt nicht möglich.",
+      "limit_reached": "Das Limit offener Anfragen wurde erreicht.",
+      "approval_submitted": "Freigabe angefragt. Die Freigebenden wurden benachrichtigt.",
+      "approval_approved": "Diese Anfrage wurde freigegeben.",
+      "approval_rejected": "Diese Anfrage wurde nicht freigegeben.",
+      "approval_pending": "Die Freigabeentscheidung steht noch aus.",
+      "approval_cleared": "Die Freigabeanfrage wurde zurückgezogen oder storniert.",
+      "approval_none": "Keine Freigabeanfrage gefunden.",
+      "no_template": "Dieses Unternehmen hat noch keinen veröffentlichten Freigabeablauf für Einkäufe.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diese Anfrage freigeben.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    }
+  },
+  "trips": {
+    "title": "Dienstreisen",
+    "intro": "Beantragen Sie eine Reise, lassen Sie sie freigeben und halten Sie ihre Kosten zusammen. Nichts hier bucht Reisen oder zahlt Geld aus — es ist Ihre Aufzeichnung.",
+    "needsMigration": "Dienstreisen sind in dieser Umgebung noch nicht aktiviert.",
+    "readError": "Dienstreisen konnten nicht geladen werden. Bitte erneut versuchen.",
+    "empty": "Noch keine Dienstreisen.",
+    "orgHeading": "Reisen der von Ihnen betreuten Personen",
+    "advanceLabel": "Vorschuss",
+    "expensesLabel": "Kosten",
+    "noTemplate": "Dieses Unternehmen hat noch keinen veröffentlichten Freigabeablauf für Reisen, daher kann keine Reise eingereicht werden.",
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "approved": "Freigegeben",
+      "rejected": "Nicht freigegeben",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "form": {
+      "open": "Neuer Reiseantrag",
+      "orgLabel": "Unternehmen",
+      "destinationLabel": "Ziel",
+      "destinationPlaceholder": "z. B. Oslo, Norwegen",
+      "fromLabel": "Erster Tag",
+      "toLabel": "Letzter Tag",
+      "purposeLabel": "Zweck",
+      "purposePlaceholder": "z. B. Fenstermontage auf der Baustelle Oslo",
+      "advanceLabel": "Vorschuss in EUR (optional)",
+      "advanceHint": "Der Vorschuss ist nur eine Notiz des vereinbarten Betrags, z. B. Tagegeld. Es wird kein Geld bewegt.",
+      "submit": "Reise speichern",
+      "recordPick": "Eintrag wählen…"
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "submit": "Zur Freigabe einreichen",
+      "checkDecision": "Entscheidung prüfen",
+      "complete": "Als abgeschlossen markieren",
+      "cancel": "Stornieren",
+      "linkExpense": "Zu dieser Reise hinzufügen",
+      "unlink": "Entfernen",
+      "createTemplate": "Standard-Freigabeablauf anlegen"
+    },
+    "notice": {
+      "created": "Reise gespeichert.",
+      "updated": "Reise aktualisiert.",
+      "submitted": "Reise zur Freigabe eingereicht.",
+      "approved": "Die Reise wurde freigegeben.",
+      "rejected": "Die Reise wurde nicht freigegeben.",
+      "reopened": "Die Freigabeanfrage entfiel — die Reise ist wieder ein Entwurf.",
+      "completed": "Die Reise wurde als abgeschlossen markiert.",
+      "cancelled": "Die Reise wurde storniert.",
+      "linked": "Eintrag zur Reise hinzugefügt.",
+      "unlinked": "Eintrag von der Reise entfernt.",
+      "invalid": "Bitte die eingegebenen Angaben prüfen.",
+      "invalid_dates": "Bitte die Reisedaten prüfen.",
+      "needs_migration": "Dienstreisen sind in dieser Umgebung noch nicht aktiviert.",
+      "not_authorized": "Das können Sie für diese Reise nicht tun.",
+      "not_found": "Diese Reise wurde nicht gefunden.",
+      "not_editable": "In diesem Zustand ist dieser Schritt nicht möglich.",
+      "limit_reached": "Das Limit offener Reisen wurde erreicht.",
+      "still_pending": "Die Freigabeentscheidung steht noch aus.",
+      "no_instance": "Für diese Reise wurde keine Freigabeanfrage gefunden.",
+      "no_template": "Dieses Unternehmen hat noch keinen veröffentlichten Freigabeablauf für Reisen.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diese Reise freigeben.",
+      "template_created": "Ein Standard-Freigabeablauf wurde für das Unternehmen angelegt.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
     }
   },
   "training": {

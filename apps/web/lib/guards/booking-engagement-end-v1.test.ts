@@ -868,6 +868,38 @@ describe("the migration set is exactly what this slice declared", () => {
       // header: no status implies signed/legal/valid/binding; signature
       // evidence is a separate explicit field pair; no e-signature flow.
       "20260817200000_agreements_v1.sql",
+      // 2026-08-17: financial ops (train J of the same autonomous functional
+      // completion train V2). All three markers cite the SAME owner mandate
+      // 2026-08-17 §4 migration authority + safety class in their headers.
+      // The RED content is structurally unavoidable: gated SECURITY DEFINER
+      // commands + EXECUTE grants (invoice upgrades), and additionally new
+      // RLS-bearing tables + an append-only trigger guard (procurement,
+      // business trips). All three ship UNAPPLIED (ledger: PENDING APPLY BY
+      // LEAD), with paired rollbacks. They CONSUME the workflow + document
+      // engines and fork neither; the v1 finance RPCs are left byte-untouched
+      // (a changed contract is a NEW _v2 name — rollback-chain rule). DB
+      // proof: scripts/db-proof/financial-ops-v1.sh; module guard:
+      // lib/guards/financial-ops.test.ts.
+      "20260817220000_finance_invoice_upgrades_v1.sql",
+      "20260817221000_procurement_v1.sql",
+      "20260817222000_business_trips_v1.sql",
+      // Org document register delta v1 (train I): the RED class here is
+      // 4 SECURITY DEFINER commands + their GRANT/REVOKE pairs + one
+      // widening drop/re-add of the org_document_events event vocabulary —
+      // STRUCTURALLY UNAVOIDABLE for RPC-only writes on an RLS-bearing
+      // register. No new table, no policy touched, no train C function
+      // recreated (create_org_document_v1 stays as merged; the extended
+      // contract is create_org_document_v2). Annotation authority: owner
+      // mandate 2026-08-17 (autonomous functional completion train V2, §4
+      // migration authority); the annotation states the ROUTE, the apply
+      // act belongs to the LEAD session (PENDING APPLY BY LEAD in
+      // docs/APPLIED_LEDGER.md, apply AFTER 20260817130000, 20260817140000
+      // AND 20260817150000 — all three asserted in-file). Gate record:
+      // docs/human-gates/org-document-register-delta-gate.md. Rollback
+      // paired (0-row guarded: refuses while any added column or delta
+      // event row holds real data). Retention doctrine pinned in the
+      // header: nothing is ever deleted on a retention date.
+      "20260817240000_org_document_register_delta_v1.sql",
       // 2026-08-17: Training & Certification + Development Reviews +
       // Management Decisions v1 (train K of the autonomous functional
       // completion train V2). Each marker records that the RED content

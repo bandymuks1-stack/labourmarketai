@@ -4551,7 +4551,14 @@
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
       "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
-      "error": "[EN] Something went wrong — nothing was saved."
+      "error": "[EN] Something went wrong — nothing was saved.",
+      "updated": "[EN] The change was saved.",
+      "submitted": "[EN] The document was sent for approval.",
+      "repaired_approved": "[EN] The approval is finished — the document is approved internally.",
+      "repaired_returned": "[EN] The document came back without approval.",
+      "unchanged": "[EN] Nothing changed.",
+      "no_pending_workflow": "[EN] No approval is waiting for this document — nothing was saved.",
+      "no_approval_definition": "[EN] Your organization has no approval route set up yet — nothing was saved."
     }
   },
   "orgDocuments": {
@@ -4606,7 +4613,56 @@
       "validFromLabel": "[EN] Valid from",
       "expiresOnLabel": "[EN] Valid until",
       "externalRefLabel": "[EN] Reference number (optional)",
-      "submit": "[EN] Register document"
+      "submit": "[EN] Register document",
+      "objectLabel": "[EN] Site (optional)",
+      "objectNone": "[EN] Not linked to a site",
+      "correspondenceLegend": "[EN] Correspondence details",
+      "correspondenceHint": "[EN] Fill these in only for incoming or outgoing correspondence. Whether a letter is incoming or outgoing comes from the type you chose above."
+    },
+    "filters": {
+      "all": "[EN] All",
+      "statusLabel": "[EN] Status",
+      "directionLabel": "[EN] Correspondence",
+      "objectLabel": "[EN] Site",
+      "searchLabel": "[EN] Search the register",
+      "searchPlaceholder": "[EN] Title, description, reference, counterparty",
+      "searchSubmit": "[EN] Search",
+      "searchScopeNote": "[EN] Search looks at the register entries only — titles, descriptions, references and counterparties. It does not look inside uploaded files.",
+      "clear": "[EN] Clear filters",
+      "noMatches": "[EN] No register entries match these filters."
+    },
+    "direction": {
+      "incoming": "[EN] Incoming",
+      "outgoing": "[EN] Outgoing"
+    },
+    "fields": {
+      "counterparty": "[EN] Counterparty",
+      "correspondenceDate": "[EN] Letter date",
+      "counterpartyReference": "[EN] Their reference",
+      "correspondenceUnrecorded": "[EN] Counterparty and letter date not recorded",
+      "object": "[EN] Site",
+      "ourRef": "[EN] Our reference"
+    },
+    "retention": {
+      "legend": "[EN] Retention (record only)",
+      "filterLabel": "[EN] Retention",
+      "untilLabel": "[EN] Keep until",
+      "noteLabel": "[EN] Retention note",
+      "submit": "[EN] Save retention",
+      "noDeletionNote": "[EN] This is a record of what your organization decided. Nothing is deleted automatically when the date passes.",
+      "scheduled": "[EN] Retention set",
+      "due": "[EN] Retention date passed",
+      "badge": {
+        "scheduled": "[EN] Keep until {date}",
+        "due": "[EN] Retention date {date} passed"
+      }
+    },
+    "approval": {
+      "definitionLabel": "[EN] Approval route",
+      "submit": "[EN] Send for approval",
+      "submitted": "[EN] Awaiting approval",
+      "approved": "[EN] Approved internally",
+      "returned": "[EN] Returned without approval"
     }
   },
   "timesheets": {
@@ -5064,6 +5120,185 @@
       "not_authorized": "Teil pole selleks toiminguks õigust.",
       "not_found": "Kirje pole saadaval.",
       "error": "Ebaõnnestus — proovige uuesti."
+    }
+  },
+  "finance": {
+    "invoiceNoLabel": "Arve nr",
+    "vatLabel": "KM",
+    "documentLinked": "Dokument lisatud",
+    "tripLinked": "Lähetus seotud",
+    "approval": {
+      "pending": "Ootab kinnitust",
+      "approved": "Kinnitatud",
+      "rejected": "Kinnitamata"
+    },
+    "form": {
+      "invoiceNoLabel": "Arve number (valikuline)",
+      "invoiceNoPlaceholder": "nt ARV-2026-014",
+      "vatLabel": "Käibemaksu summa (valikuline)",
+      "invoiceHint": "Arve number ja käibemaks on valikulised. Kui saabunud arve kordab sama partneri juba salvestatud numbrit, salvestatakse kirje siiski ja näete hoiatust."
+    },
+    "actions": {
+      "requestApproval": "Küsi kinnitust",
+      "checkApproval": "Kontrolli kinnitust"
+    },
+    "notice": {
+      "created_possible_duplicate": "Salvestatud — kuid selle partneri ja arve numbriga kirje on juba olemas. Kontrollige, kas tegu pole duplikaadiga.",
+      "approval_submitted": "Kinnitust küsitud. Kinnitajaid on teavitatud.",
+      "approval_approved": "See kirje kinnitati.",
+      "approval_rejected": "Seda kirjet ei kinnitatud.",
+      "approval_pending": "Kinnitusotsust pole veel tehtud.",
+      "approval_cleared": "Kinnitustaotlus võeti tagasi või tühistati.",
+      "approval_none": "Selle kirje kohta kinnitustaotlust ei leitud.",
+      "no_template": "Sellel ettevõttel pole veel avaldatud kinnitamise korda, seega kinnitust küsida ei saa.",
+      "no_approvers": "Praegu ei saa ettevõttes keegi seda taotlust kinnitada."
+    }
+  },
+  "procurement": {
+    "title": "Ostud",
+    "intro": "Küsige materjale või teenuseid, märkige üles tarnijate pakkumised ja pange kirja, mis valiti. Miski siin ei võta tarnijaga ühendust ega telli midagi — see on teie arvestus.",
+    "needsMigration": "Ostutaotlused pole selles keskkonnas veel lubatud.",
+    "readError": "Ostutaotlusi ei õnnestunud laadida. Proovige uuesti.",
+    "empty": "Ostutaotlusi veel pole.",
+    "noOffers": "Tarnijate pakkumisi pole veel kirja pandud.",
+    "offerSelected": "Valitud",
+    "orderRefLabel": "Tellimuse nr",
+    "invoiceLinked": "Arve seotud",
+    "status": {
+      "draft": "Mustand",
+      "submitted": "Esitatud",
+      "decided": "Otsustatud",
+      "ordered": "Tellitud",
+      "closed": "Suletud",
+      "cancelled": "Tühistatud"
+    },
+    "approval": {
+      "pending": "Ootab kinnitust",
+      "approved": "Kinnitatud",
+      "rejected": "Kinnitamata"
+    },
+    "form": {
+      "open": "Uus ostutaotlus",
+      "orgLabel": "Ettevõte",
+      "descriptionLabel": "Mida on vaja",
+      "descriptionPlaceholder": "nt 40 kotti tsementi vundamendi jaoks",
+      "quantityLabel": "Kogus (valikuline)",
+      "quantityPlaceholder": "nt 40 kotti",
+      "budgetLabel": "Hinnanguline eelarve EUR (valikuline)",
+      "submit": "Salvesta taotlus",
+      "supplierLabel": "Tarnija nimi",
+      "offerAmountLabel": "Pakkumise summa EUR",
+      "offerNoteLabel": "Märkus (valikuline)",
+      "orderRefPlaceholder": "Tellimuse number (valikuline)",
+      "invoiceNone": "Arvet pole seotud"
+    },
+    "actions": {
+      "selectOffer": "Vali see pakkumine",
+      "addOffer": "Pane tarnija pakkumine kirja",
+      "saveOffer": "Salvesta pakkumine",
+      "edit": "Muuda",
+      "save": "Salvesta",
+      "submit": "Esita",
+      "requestApproval": "Küsi kinnitust",
+      "checkApproval": "Kontrolli kinnitust",
+      "markOrdered": "Märgi tellituks",
+      "close": "Sulge",
+      "cancel": "Tühista",
+      "linkInvoice": "Seo arve"
+    },
+    "notice": {
+      "created": "Ostutaotlus salvestatud.",
+      "updated": "Ostutaotlus uuendatud.",
+      "submitted": "Ostutaotlus esitatud.",
+      "offer_added": "Tarnija pakkumine kirja pandud.",
+      "decided": "Pakkumine valitud.",
+      "linked": "Arve seotud.",
+      "unlinked": "Arve seos eemaldatud.",
+      "cancelled": "Ostutaotlus tühistatud.",
+      "invalid": "Kontrollige sisestatud andmeid.",
+      "needs_migration": "Ostutaotlused pole selles keskkonnas veel lubatud.",
+      "not_authorized": "Te ei saa seda selle taotluse puhul teha.",
+      "not_found": "Seda ostutaotlust ei leitud.",
+      "not_editable": "Selles olekus pole see samm võimalik.",
+      "limit_reached": "Avatud taotluste piir on saavutatud.",
+      "approval_submitted": "Kinnitust küsitud. Kinnitajaid on teavitatud.",
+      "approval_approved": "See taotlus kinnitati.",
+      "approval_rejected": "Seda taotlust ei kinnitatud.",
+      "approval_pending": "Kinnitusotsust pole veel tehtud.",
+      "approval_cleared": "Kinnitustaotlus võeti tagasi või tühistati.",
+      "approval_none": "Kinnitustaotlust ei leitud.",
+      "no_template": "Sellel ettevõttel pole veel avaldatud ostude kinnitamise korda.",
+      "no_approvers": "Praegu ei saa ettevõttes keegi seda taotlust kinnitada.",
+      "error": "Midagi läks valesti. Midagi ei salvestatud."
+    }
+  },
+  "trips": {
+    "title": "Lähetused",
+    "intro": "Taotlege lähetust, saage kinnitus ja hoidke selle kulud koos. Miski siin ei broneeri reise ega maksa raha välja — see on teie arvestus.",
+    "needsMigration": "Lähetused pole selles keskkonnas veel lubatud.",
+    "readError": "Lähetusi ei õnnestunud laadida. Proovige uuesti.",
+    "empty": "Lähetusi veel pole.",
+    "orgHeading": "Teie juhitavate inimeste lähetused",
+    "advanceLabel": "Avanss",
+    "expensesLabel": "Kulud",
+    "noTemplate": "Sellel ettevõttel pole veel avaldatud lähetuste kinnitamise korda, seega lähetust esitada ei saa.",
+    "status": {
+      "draft": "Mustand",
+      "submitted": "Esitatud",
+      "approved": "Kinnitatud",
+      "rejected": "Kinnitamata",
+      "completed": "Lõpetatud",
+      "cancelled": "Tühistatud"
+    },
+    "form": {
+      "open": "Uus lähetuse taotlus",
+      "orgLabel": "Ettevõte",
+      "destinationLabel": "Sihtkoht",
+      "destinationPlaceholder": "nt Oslo, Norra",
+      "fromLabel": "Esimene päev",
+      "toLabel": "Viimane päev",
+      "purposeLabel": "Eesmärk",
+      "purposePlaceholder": "nt akende paigaldus Oslo objektil",
+      "advanceLabel": "Avanss EUR (valikuline)",
+      "advanceHint": "Avanss on ainult kokkulepitud summa märge, näiteks päevaraha. Raha ei liigutata.",
+      "submit": "Salvesta lähetus",
+      "recordPick": "Valige kirje…"
+    },
+    "actions": {
+      "edit": "Muuda",
+      "save": "Salvesta",
+      "submit": "Esita kinnitamiseks",
+      "checkDecision": "Kontrolli otsust",
+      "complete": "Märgi lõpetatuks",
+      "cancel": "Tühista",
+      "linkExpense": "Lisa sellele lähetusele",
+      "unlink": "Eemalda",
+      "createTemplate": "Loo standardne kinnitamise kord"
+    },
+    "notice": {
+      "created": "Lähetus salvestatud.",
+      "updated": "Lähetus uuendatud.",
+      "submitted": "Lähetus esitatud kinnitamiseks.",
+      "approved": "Lähetus kinnitati.",
+      "rejected": "Lähetust ei kinnitatud.",
+      "reopened": "Kinnitustaotlust enam pole — lähetus on taas mustand.",
+      "completed": "Lähetus märgiti lõpetatuks.",
+      "cancelled": "Lähetus tühistati.",
+      "linked": "Kirje lisati lähetusele.",
+      "unlinked": "Kirje eemaldati lähetuselt.",
+      "invalid": "Kontrollige sisestatud andmeid.",
+      "invalid_dates": "Kontrollige lähetuse kuupäevi.",
+      "needs_migration": "Lähetused pole selles keskkonnas veel lubatud.",
+      "not_authorized": "Te ei saa seda selle lähetuse puhul teha.",
+      "not_found": "Seda lähetust ei leitud.",
+      "not_editable": "Selles olekus pole see samm võimalik.",
+      "limit_reached": "Avatud lähetuste piir on saavutatud.",
+      "still_pending": "Kinnitusotsust pole veel tehtud.",
+      "no_instance": "Selle lähetuse kohta kinnitustaotlust ei leitud.",
+      "no_template": "Sellel ettevõttel pole veel avaldatud lähetuste kinnitamise korda.",
+      "no_approvers": "Praegu ei saa ettevõttes keegi seda lähetust kinnitada.",
+      "template_created": "Ettevõttele loodi standardne kinnitamise kord.",
+      "error": "Midagi läks valesti. Midagi ei salvestatud."
     }
   },
   "training": {

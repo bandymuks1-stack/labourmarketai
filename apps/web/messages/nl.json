@@ -7007,7 +7007,14 @@
       "file_too_large": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
       "unsupported_type": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
       "needs_migration": "Bestandsupload is in deze omgeving nog niet ingeschakeld — er is niets opgeslagen.",
-      "error": "Er is iets misgegaan — er is niets opgeslagen."
+      "error": "Er is iets misgegaan — er is niets opgeslagen.",
+      "updated": "De wijziging is opgeslagen.",
+      "submitted": "Het document is ter goedkeuring gestuurd.",
+      "repaired_approved": "De goedkeuring is afgerond — het document is intern goedgekeurd.",
+      "repaired_returned": "Het document kwam terug zonder goedkeuring.",
+      "unchanged": "Er is niets veranderd.",
+      "no_pending_workflow": "Voor dit document wacht geen goedkeuring — er is niets opgeslagen.",
+      "no_approval_definition": "Uw organisatie heeft nog geen goedkeuringsroute ingesteld — er is niets opgeslagen."
     }
   },
   "orgDocuments": {
@@ -7062,7 +7069,56 @@
       "validFromLabel": "Geldig vanaf",
       "expiresOnLabel": "Geldig tot",
       "externalRefLabel": "Referentienummer (optioneel)",
-      "submit": "Document registreren"
+      "submit": "Document registreren",
+      "objectLabel": "Locatie (optioneel)",
+      "objectNone": "Niet aan een locatie gekoppeld",
+      "correspondenceLegend": "Correspondentiegegevens",
+      "correspondenceHint": "Vul dit alleen in voor inkomende of uitgaande correspondentie. Of een brief inkomend of uitgaand is, volgt uit het type dat u hierboven koos."
+    },
+    "filters": {
+      "all": "Alle",
+      "statusLabel": "Status",
+      "directionLabel": "Correspondentie",
+      "objectLabel": "Locatie",
+      "searchLabel": "Zoek in het register",
+      "searchPlaceholder": "Titel, omschrijving, referentie, tegenpartij",
+      "searchSubmit": "Zoeken",
+      "searchScopeNote": "Zoeken werkt alleen op de registerregels — titels, omschrijvingen, referenties en tegenpartijen. Er wordt niet in geüploade bestanden gezocht.",
+      "clear": "Filters wissen",
+      "noMatches": "Geen registerregels voldoen aan deze filters."
+    },
+    "direction": {
+      "incoming": "Inkomend",
+      "outgoing": "Uitgaand"
+    },
+    "fields": {
+      "counterparty": "Tegenpartij",
+      "correspondenceDate": "Briefdatum",
+      "counterpartyReference": "Hun referentie",
+      "correspondenceUnrecorded": "Tegenpartij en briefdatum niet vastgelegd",
+      "object": "Locatie",
+      "ourRef": "Onze referentie"
+    },
+    "retention": {
+      "legend": "Bewaartermijn (alleen vastlegging)",
+      "filterLabel": "Bewaartermijn",
+      "untilLabel": "Bewaren tot",
+      "noteLabel": "Notitie bewaartermijn",
+      "submit": "Bewaartermijn opslaan",
+      "noDeletionNote": "Dit is een vastlegging van wat uw organisatie besloot. Er wordt niets automatisch verwijderd wanneer de datum verstrijkt.",
+      "scheduled": "Termijn vastgelegd",
+      "due": "Termijn verstreken",
+      "badge": {
+        "scheduled": "Bewaren tot {date}",
+        "due": "Termijn {date} verstreken"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Goedkeuringsroute",
+      "submit": "Ter goedkeuring sturen",
+      "submitted": "Wacht op goedkeuring",
+      "approved": "Intern goedgekeurd",
+      "returned": "Teruggestuurd zonder goedkeuring"
     }
   },
   "trust": {
@@ -9464,7 +9520,9 @@
       "cancel": "Annuleren",
       "reopen": "Heropenen",
       "details": "Gegevens bewerken",
-      "save": "Opslaan"
+      "save": "Opslaan",
+      "requestApproval": "Goedkeuring aanvragen",
+      "checkApproval": "Goedkeuring controleren"
     },
     "form": {
       "title": "Nieuwe registratie",
@@ -9481,7 +9539,11 @@
       "projectNone": "Geen project",
       "companyLinkLabel": "Koppelen aan mijn bedrijf (de eigenaar ziet deze registratie)",
       "noteLabel": "Notitie (optioneel)",
-      "submit": "Registratie toevoegen"
+      "submit": "Registratie toevoegen",
+      "invoiceNoLabel": "Factuurnummer (optioneel)",
+      "invoiceNoPlaceholder": "bijv. F-2026-014",
+      "vatLabel": "Btw-bedrag (optioneel)",
+      "invoiceHint": "Factuurnummer en btw zijn optioneel. Herhaalt een ontvangen factuur een al opgeslagen nummer van dezelfde partij, dan wordt de regel toch opgeslagen en ziet u een waarschuwing."
     },
     "notice": {
       "created": "Registratie toegevoegd.",
@@ -9491,7 +9553,25 @@
       "not_authorized": "Dat mag je niet doen.",
       "not_found": "Registratie niet gevonden.",
       "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
-      "error": "Opslaan mislukt. Probeer het opnieuw."
+      "error": "Opslaan mislukt. Probeer het opnieuw.",
+      "created_possible_duplicate": "Opgeslagen — maar er bestaat al een regel met deze partij en dit factuurnummer. Controleer op een duplicaat.",
+      "approval_submitted": "Goedkeuring aangevraagd. De goedkeurders zijn op de hoogte gebracht.",
+      "approval_approved": "Deze regel is goedgekeurd.",
+      "approval_rejected": "Deze regel is niet goedgekeurd.",
+      "approval_pending": "De goedkeuringsbeslissing is nog niet genomen.",
+      "approval_cleared": "De goedkeuringsaanvraag is ingetrokken of geannuleerd.",
+      "approval_none": "Voor deze regel is geen goedkeuringsaanvraag gevonden.",
+      "no_template": "Dit bedrijf heeft hiervoor nog geen gepubliceerde goedkeuringsroute, dus goedkeuring kan niet worden aangevraagd.",
+      "no_approvers": "Niemand in het bedrijf kan deze aanvraag momenteel goedkeuren."
+    },
+    "invoiceNoLabel": "Factuurnr.",
+    "vatLabel": "Btw",
+    "documentLinked": "Document bijgevoegd",
+    "tripLinked": "Dienstreis gekoppeld",
+    "approval": {
+      "pending": "Goedkeuring in behandeling",
+      "approved": "Goedgekeurd",
+      "rejected": "Niet goedgekeurd"
     }
   },
   "structuredDemand": {
@@ -13093,6 +13173,153 @@
       "not_authorized": "U bent hiervoor niet bevoegd.",
       "not_found": "Record niet beschikbaar.",
       "error": "Mislukt — probeer het opnieuw."
+    }
+  },
+  "procurement": {
+    "title": "Inkoop",
+    "intro": "Vraag materialen of diensten aan, noteer leveranciersoffertes en leg vast wat er gekozen is. Niets hier neemt contact op met een leverancier of bestelt iets — het is uw administratie.",
+    "needsMigration": "Inkoopaanvragen zijn in deze omgeving nog niet ingeschakeld.",
+    "readError": "Inkoopaanvragen konden niet worden geladen. Probeer het opnieuw.",
+    "empty": "Nog geen inkoopaanvragen.",
+    "noOffers": "Nog geen leveranciersoffertes genoteerd.",
+    "offerSelected": "Gekozen",
+    "orderRefLabel": "Bestelnr.",
+    "invoiceLinked": "Factuur gekoppeld",
+    "status": {
+      "draft": "Concept",
+      "submitted": "Ingediend",
+      "decided": "Besloten",
+      "ordered": "Besteld",
+      "closed": "Afgerond",
+      "cancelled": "Geannuleerd"
+    },
+    "approval": {
+      "pending": "Goedkeuring in behandeling",
+      "approved": "Goedgekeurd",
+      "rejected": "Niet goedgekeurd"
+    },
+    "form": {
+      "open": "Nieuwe inkoopaanvraag",
+      "orgLabel": "Bedrijf",
+      "descriptionLabel": "Wat is er nodig",
+      "descriptionPlaceholder": "bijv. 40 zakken cement voor de fundering",
+      "quantityLabel": "Hoeveelheid (optioneel)",
+      "quantityPlaceholder": "bijv. 40 zakken",
+      "budgetLabel": "Geschat budget in EUR (optioneel)",
+      "submit": "Aanvraag opslaan",
+      "supplierLabel": "Naam leverancier",
+      "offerAmountLabel": "Offertebedrag in EUR",
+      "offerNoteLabel": "Notitie (optioneel)",
+      "orderRefPlaceholder": "Bestelnummer (optioneel)",
+      "invoiceNone": "Geen factuur gekoppeld"
+    },
+    "actions": {
+      "selectOffer": "Deze offerte kiezen",
+      "addOffer": "Leveranciersofferte noteren",
+      "saveOffer": "Offerte opslaan",
+      "edit": "Bewerken",
+      "save": "Opslaan",
+      "submit": "Indienen",
+      "requestApproval": "Goedkeuring aanvragen",
+      "checkApproval": "Goedkeuring controleren",
+      "markOrdered": "Markeren als besteld",
+      "close": "Afronden",
+      "cancel": "Annuleren",
+      "linkInvoice": "Factuur koppelen"
+    },
+    "notice": {
+      "created": "Inkoopaanvraag opgeslagen.",
+      "updated": "Inkoopaanvraag bijgewerkt.",
+      "submitted": "Inkoopaanvraag ingediend.",
+      "offer_added": "Leveranciersofferte genoteerd.",
+      "decided": "Offerte gekozen.",
+      "linked": "Factuur gekoppeld.",
+      "unlinked": "Factuurkoppeling verwijderd.",
+      "cancelled": "Inkoopaanvraag geannuleerd.",
+      "invalid": "Controleer de ingevoerde gegevens.",
+      "needs_migration": "Inkoopaanvragen zijn in deze omgeving nog niet ingeschakeld.",
+      "not_authorized": "Dat kunt u voor deze aanvraag niet doen.",
+      "not_found": "Deze inkoopaanvraag is niet gevonden.",
+      "not_editable": "In deze status is die stap niet mogelijk.",
+      "limit_reached": "De limiet van openstaande aanvragen is bereikt.",
+      "approval_submitted": "Goedkeuring aangevraagd. De goedkeurders zijn op de hoogte gebracht.",
+      "approval_approved": "Deze aanvraag is goedgekeurd.",
+      "approval_rejected": "Deze aanvraag is niet goedgekeurd.",
+      "approval_pending": "De goedkeuringsbeslissing is nog niet genomen.",
+      "approval_cleared": "De goedkeuringsaanvraag is ingetrokken of geannuleerd.",
+      "approval_none": "Geen goedkeuringsaanvraag gevonden.",
+      "no_template": "Dit bedrijf heeft nog geen gepubliceerde goedkeuringsroute voor inkoop.",
+      "no_approvers": "Niemand in het bedrijf kan deze aanvraag momenteel goedkeuren.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
+    }
+  },
+  "trips": {
+    "title": "Dienstreizen",
+    "intro": "Vraag een reis aan, laat hem goedkeuren en houd de kosten bij elkaar. Niets hier boekt reizen of betaalt geld uit — het is uw administratie.",
+    "needsMigration": "Dienstreizen zijn in deze omgeving nog niet ingeschakeld.",
+    "readError": "Dienstreizen konden niet worden geladen. Probeer het opnieuw.",
+    "empty": "Nog geen dienstreizen.",
+    "orgHeading": "Reizen van mensen die u beheert",
+    "advanceLabel": "Voorschot",
+    "expensesLabel": "Kosten",
+    "noTemplate": "Dit bedrijf heeft nog geen gepubliceerde goedkeuringsroute voor reizen, dus een reis kan niet worden ingediend.",
+    "status": {
+      "draft": "Concept",
+      "submitted": "Ingediend",
+      "approved": "Goedgekeurd",
+      "rejected": "Niet goedgekeurd",
+      "completed": "Afgerond",
+      "cancelled": "Geannuleerd"
+    },
+    "form": {
+      "open": "Nieuwe reisaanvraag",
+      "orgLabel": "Bedrijf",
+      "destinationLabel": "Bestemming",
+      "destinationPlaceholder": "bijv. Oslo, Noorwegen",
+      "fromLabel": "Eerste dag",
+      "toLabel": "Laatste dag",
+      "purposeLabel": "Doel",
+      "purposePlaceholder": "bijv. kozijnen plaatsen op de bouwplaats in Oslo",
+      "advanceLabel": "Voorschot in EUR (optioneel)",
+      "advanceHint": "Het voorschot is alleen een notitie van het afgesproken bedrag, bijvoorbeeld een dagvergoeding. Er wordt geen geld verplaatst.",
+      "submit": "Reis opslaan",
+      "recordPick": "Kies een regel…"
+    },
+    "actions": {
+      "edit": "Bewerken",
+      "save": "Opslaan",
+      "submit": "Indienen ter goedkeuring",
+      "checkDecision": "Beslissing controleren",
+      "complete": "Markeren als afgerond",
+      "cancel": "Annuleren",
+      "linkExpense": "Aan deze reis toevoegen",
+      "unlink": "Verwijderen",
+      "createTemplate": "Standaard goedkeuringsroute aanmaken"
+    },
+    "notice": {
+      "created": "Reis opgeslagen.",
+      "updated": "Reis bijgewerkt.",
+      "submitted": "Reis ingediend ter goedkeuring.",
+      "approved": "De reis is goedgekeurd.",
+      "rejected": "De reis is niet goedgekeurd.",
+      "reopened": "De goedkeuringsaanvraag verviel — de reis is weer een concept.",
+      "completed": "De reis is gemarkeerd als afgerond.",
+      "cancelled": "De reis is geannuleerd.",
+      "linked": "Regel toegevoegd aan de reis.",
+      "unlinked": "Regel verwijderd van de reis.",
+      "invalid": "Controleer de ingevoerde gegevens.",
+      "invalid_dates": "Controleer de reisdata.",
+      "needs_migration": "Dienstreizen zijn in deze omgeving nog niet ingeschakeld.",
+      "not_authorized": "Dat kunt u voor deze reis niet doen.",
+      "not_found": "Deze reis is niet gevonden.",
+      "not_editable": "In deze status is die stap niet mogelijk.",
+      "limit_reached": "De limiet van openstaande reizen is bereikt.",
+      "still_pending": "De goedkeuringsbeslissing is nog niet genomen.",
+      "no_instance": "Voor deze reis is geen goedkeuringsaanvraag gevonden.",
+      "no_template": "Dit bedrijf heeft nog geen gepubliceerde goedkeuringsroute voor reizen.",
+      "no_approvers": "Niemand in het bedrijf kan deze reis momenteel goedkeuren.",
+      "template_created": "Een standaard goedkeuringsroute is aangemaakt voor het bedrijf.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
     }
   },
   "training": {

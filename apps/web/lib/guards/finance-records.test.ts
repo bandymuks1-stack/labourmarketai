@@ -9,7 +9,9 @@ import {
 import { COMMAND_REGISTRY } from "@/lib/navigation/command-registry";
 import { SPINE_SIGNALS } from "@/lib/notifications/spine-signals";
 import {
+  FINANCE_APPROVAL_STATUSES,
   FINANCE_CREATE_STATUSES,
+  FINANCE_CSV_HEADER,
   FINANCE_MAX_AMOUNT_CENTS,
   FINANCE_READ_LIMIT,
   FINANCE_RECORD_STATUSES,
@@ -17,7 +19,9 @@ import {
   MIGRATION_MISSING_ERROR_CODES,
   UNPAID_FINANCE_STATUSES,
   buildFinanceCsv,
+  buildFinanceCsvRow,
   deriveFinanceSummary,
+  financeApprovalContext,
   formatCentsAsEur,
   isOverdueRecord,
   parseAmountInputToCents,
@@ -78,6 +82,26 @@ const RPC_NAMES = [
   "set_finance_record_status_v1",
 ] as const;
 
+/**
+ * Every RPC name the finance ACTIONS layer may call after financial-ops
+ * train J. Three groups, all gated, none of them a direct table write:
+ *   - the v1 status command (unchanged);
+ *   - the v2 create/update commands (invoice number, VAT, receipt document
+ *     link, duplicate warning) — v1 stays defined and untouched in the DB;
+ *   - the approval SEAM: the module's own mirror commands plus the ENGINE's
+ *     own start/withdraw commands (the engine is consumed, never forked —
+ *     cross-pinned in lib/guards/workflow-engine.test.ts).
+ */
+const ACTION_RPC_NAMES = [
+  "create_finance_record_v2",
+  "update_finance_record_v2",
+  "set_finance_record_status_v1",
+  "submit_finance_record_approval_v1",
+  "sync_finance_record_approval_v1",
+  "start_workflow_instance_v1",
+  "withdraw_workflow_instance_v1",
+] as const;
+
 /** Walk a source dir collecting ts/tsx files (skips tests). */
 function walkSource(absDir: string, acc: string[] = []): string[] {
   if (!existsSync(absDir)) return acc;
@@ -104,14 +128,48 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
   // membership_actor_role_v1. It is the ONLY other file allowed to name
   // them; its own invariants are pinned in security-train-a-v1.test.ts.
   const ORG_AUTHORITY = "20260817123000_finance_org_authority_v1";
+  // Financial ops (train J, 2026-08-17) EXTENDS finance_records additively:
+  // the invoice-upgrades pair adds four nullable columns + _v2 create/update
+  // commands + the engine approval mirror; the business-trips pair adds the
+  // nullable trip_id column + its single gated writer; the procurement pair
+  // holds an FK to a finance record and re-checks finance authority when
+  // linking. NONE of them recreates the three v1 RPCs (asserted below) —
+  // a changed contract is a NEW _v2 name, the rollback-chain rule.
+  const TRAIN_J = [
+    "20260817220000_finance_invoice_upgrades_v1",
+    "20260817221000_procurement_v1",
+    "20260817222000_business_trips_v1",
+  ];
 
-  it("only the I2 migration and its rollback sibling mention finance_records or the three RPCs", () => {
+  it("only the I2 pair, the org-authority fix and the train-J extensions mention finance_records — and none of them recreates a v1 RPC", () => {
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(I2) || f.startsWith(ORG_AUTHORITY)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (TRAIN_J.some((p) => f.startsWith(p))) {
+          // An EXTENSION may name the table (alter/insert/select) but must
+          // never create or drop it, and must never (re)define a v1 RPC.
+          expect(
+            src,
+            `${dir}/${f} may extend but never create/drop finance_records`,
+          ).not.toMatch(
+            /(create table[^(]*\bfinance_records\b|drop table[^;]*\bfinance_records\b)/i,
+          );
+          for (const fn of RPC_NAMES) {
+            expect(
+              src,
+              `${dir}/${f} must not (re)define the v1 RPC ${fn}`,
+            ).not.toMatch(
+              new RegExp(
+                `(create (or replace )?function[^(]*\\b${fn}\\b|drop function[^(]*\\b${fn}\\b)`,
+                "i",
+              ),
+            );
+          }
+          continue;
+        }
         expect(src, `${dir}/${f} must not define finance_records`).not.toMatch(
           /\bfinance_records\b/,
         );
@@ -152,14 +210,16 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
 });
 
 describe("2. writes are RPC-only, and only the finance read service touches finance_records", () => {
-  it("the actions call exactly the three gated RPCs", () => {
-    for (const fn of RPC_NAMES) {
-      expect(ACTIONS).toMatch(new RegExp(`\\.rpc\\(\\s*"${fn}"`));
-    }
-    const rpcCalls = [...ACTIONS.matchAll(/\.rpc\(\s*"([a-z0-9_]+)"/g)].map(
-      (m) => m[1],
-    );
-    expect(new Set(rpcCalls)).toEqual(new Set(RPC_NAMES));
+  it("the actions call exactly the gated commands — module RPCs plus the engine's own", () => {
+    const rpcCalls = [
+      ...ACTIONS.matchAll(/\.rpc\(\s*\n?\s*"([a-z0-9_]+)"/g),
+    ].map((m) => m[1]);
+    expect(new Set(rpcCalls)).toEqual(new Set(ACTION_RPC_NAMES));
+    // The v1 create/update commands are NOT called any more (v2 supersedes
+    // them app-side) but they stay DEFINED in the database — the rollback
+    // chain never recreates or drops a shipped contract.
+    expect(ACTIONS).not.toMatch(/\.rpc\(\s*\n?\s*"create_finance_record_v1"/);
+    expect(ACTIONS).not.toMatch(/\.rpc\(\s*\n?\s*"update_finance_record_v1"/);
   });
 
   it("no .insert/.update/.delete/.upsert anywhere in the finance layer", () => {
@@ -371,6 +431,11 @@ describe("4. cents-only math — no floats, no parseFloat, no toFixed", () => {
       projectId: null,
       companyId: null,
       note: null,
+      invoiceNumber: null,
+      vatAmountCents: null,
+      orgDocumentId: null,
+      approvalStatus: null,
+      tripId: null,
       createdBy: "u1",
       createdAt: "2026-06-01T00:00:00Z",
     };
@@ -383,6 +448,77 @@ describe("4. cents-only math — no floats, no parseFloat, no toFixed", () => {
     expect(lines[1]).toContain('"Scaffolding, June"'); // comma escaped
     // Empty input → header only, nothing invented.
     expect(buildFinanceCsv([], now).trimEnd().split("\r\n")).toHaveLength(1);
+  });
+
+  it("the export carries the train-J columns HONESTLY (absent stays empty, the document column is an indicator)", () => {
+    const now = new Date("2026-07-11T10:00:00Z");
+    const base: FinanceRecord = {
+      id: "r2",
+      recordType: "invoice_received",
+      title: "Cement delivery",
+      counterpartyName: "Baltic Build",
+      amountCents: 100_00,
+      currency: "EUR",
+      status: "issued",
+      dueDate: null,
+      paidAt: null,
+      projectId: null,
+      companyId: null,
+      note: null,
+      invoiceNumber: "INV-2026-014",
+      vatAmountCents: 21_00,
+      // The FILE is never exported — only the fact that one is registered
+      // behind the document engine.
+      orgDocumentId: "11111111-1111-4111-8111-111111111111",
+      approvalStatus: "approved",
+      tripId: null,
+      createdBy: "u1",
+      createdAt: "2026-06-01T00:00:00Z",
+    };
+    expect([...FINANCE_CSV_HEADER]).toEqual([
+      "record_type",
+      "status",
+      "overdue",
+      "title",
+      "counterparty",
+      "amount_eur",
+      "currency",
+      "invoice_number",
+      "vat_eur",
+      "approval_status",
+      "has_document",
+      "trip_id",
+      "due_date",
+      "paid_at",
+      "project_id",
+      "company_id",
+      "note",
+      "created_at",
+    ]);
+    const row = buildFinanceCsvRow(base, now);
+    expect(row).toHaveLength(FINANCE_CSV_HEADER.length);
+    expect(row[7]).toBe("INV-2026-014");
+    expect(row[8]).toBe("21.00"); // cents → exact EUR, no float math
+    expect(row[9]).toBe("approved");
+    expect(row[10]).toBe("yes"); // indicator only — never a URL or a file
+    expect(row[11]).toBe("");
+    // Absent optional facts stay EMPTY — never a zero, never a "no".
+    const bare = buildFinanceCsvRow(
+      {
+        ...base,
+        invoiceNumber: null,
+        vatAmountCents: null,
+        orgDocumentId: null,
+        approvalStatus: null,
+      },
+      now,
+    );
+    expect(bare[7]).toBe("");
+    expect(bare[8]).toBe("");
+    expect(bare[9]).toBe("");
+    expect(bare[10]).toBe("");
+    // The export never leaks a document path/URL, only the indicator.
+    expect(buildFinanceCsv([base], now)).not.toMatch(/document-files|https?:/);
   });
 });
 
@@ -561,6 +697,15 @@ describe("9. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "finance.form.companyLinkLabel",
     "finance.form.noteLabel",
     "finance.form.submit",
+    // Financial ops train J — invoice metadata, receipt link, engine mirror.
+    "finance.invoiceNoLabel",
+    "finance.vatLabel",
+    "finance.documentLinked",
+    "finance.tripLinked",
+    "finance.form.invoiceNoLabel",
+    "finance.form.invoiceNoPlaceholder",
+    "finance.form.vatLabel",
+    "finance.form.invoiceHint",
   ];
 
   const ACTION_KEYS = [
@@ -572,6 +717,9 @@ describe("9. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "reopen",
     "details",
     "save",
+    // Approval seam (train J) — the engine decides, these only route/read.
+    "requestApproval",
+    "checkApproval",
   ];
 
   const NOTICE_KEYS = [
@@ -583,6 +731,16 @@ describe("9. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "not_found",
     "limit_reached",
     "error",
+    // Train J outcomes — duplicate WARNING + the engine mirror states.
+    "created_possible_duplicate",
+    "approval_submitted",
+    "approval_approved",
+    "approval_rejected",
+    "approval_pending",
+    "approval_cleared",
+    "approval_none",
+    "no_template",
+    "no_approvers",
   ];
 
   for (const loc of activeLocales) {
@@ -592,6 +750,7 @@ describe("9. copy resolves in every ACTIVE locale (frozen-subset convention)", (
         ...STATIC_KEYS,
         ...FINANCE_RECORD_STATUSES.map((s) => `finance.status.${s}`),
         ...FINANCE_RECORD_TYPES.map((t) => `finance.type.${t}`),
+        ...FINANCE_APPROVAL_STATUSES.map((a) => `finance.approval.${a}`),
         ...ACTION_KEYS.map((a) => `finance.actions.${a}`),
         ...NOTICE_KEYS.map((n) => `finance.notice.${n}`),
       ];
