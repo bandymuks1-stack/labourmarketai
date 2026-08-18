@@ -71,6 +71,19 @@
 -- `management_decision` was rejected as a guess at another module's
 -- semantics. `generic_request` is the vocabulary's own honest default.
 --
+-- RE-VERIFIED 2026-08-18 against the merged consumer set. `generic_request`
+-- is a SHARED context: typed employee requests (20260817180000) already ride
+-- it, and the financial-ops train (20260817220000 / 221000 / 222000) rides
+-- `expense` / `invoice` / `procurement` / `business_trip`. Sharing the
+-- context is safe here because the uniqueness the engine enforces is on the
+-- PAIR (context_entity_type, context_entity_id) while pending: an employee
+-- request id and an org_document id are `gen_random_uuid()` values from
+-- different tables and never coincide, and both mirror commands below scope
+-- their lookup by `organization_id` as well. The `document_ack` argument
+-- above is unaffected by that sharing — it is about ONE document needing two
+-- pending instances under the SAME entity id, which is exactly the pair the
+-- index forbids.
+--
 -- ── WHAT IS DELIBERATELY NOT ADDED ──────────────────────────────────────────
 -- NO retention auto-deletion, NO scheduled purge, NO destructive job of any
 -- kind — retention is RECORD-KEEPING metadata only and deletion stays an

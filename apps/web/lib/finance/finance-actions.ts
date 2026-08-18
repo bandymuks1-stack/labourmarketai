@@ -10,14 +10,18 @@ import { createClient } from "@/lib/supabase/server";
 import {
   FINANCE_COUNTERPARTY_MAX,
   FINANCE_COUNTERPARTY_MIN,
+  FINANCE_INVOICE_NUMBER_MAX,
   FINANCE_NOTE_MAX,
   FINANCE_TITLE_MAX,
   FINANCE_TITLE_MIN,
+  financeApprovalContext,
   isMigrationMissingCode,
   isValidFinanceRecordStatus,
   isValidFinanceRecordType,
   parseAmountInputToCents,
 } from "@/lib/finance/finance-model";
+import { getFinanceRecordForApproval } from "@/lib/finance/finance";
+import { emitWorkflowStepPendingNotifications } from "@/lib/notifications/event-emitters";
 
 /**
  * Operational-finance write actions (control room PR I, capability gap map
@@ -77,12 +81,21 @@ const STATUS_FILTERS = new Set([
 
 type Notice =
   | "created"
+  | "created_possible_duplicate"
   | "updated"
   | "invalid"
   | "needs_migration"
   | "not_authorized"
   | "not_found"
   | "limit_reached"
+  | "approval_submitted"
+  | "approval_approved"
+  | "approval_rejected"
+  | "approval_pending"
+  | "approval_cleared"
+  | "approval_none"
+  | "no_template"
+  | "no_approvers"
   | "error";
 
 /** Rebuild the finance-page URL from VALIDATED parts only (never raw input). */
@@ -122,14 +135,29 @@ function noticeForRpcError(error: { code?: string }): Notice {
 
 function noticeForOutcome(outcome: string, okNotice: Notice): Notice {
   if (outcome === "created" || outcome === "updated") return okNotice;
+  // Duplicate detection (finance invoice upgrades v1): the record IS
+  // created; the notice is an honest warning, never a block.
+  if (outcome === "created_possible_duplicate") {
+    return "created_possible_duplicate";
+  }
   if (outcome === "not_allowed") return "not_authorized";
   if (outcome === "not_found") return "not_found";
   if (outcome === "record_limit_reached") return "limit_reached";
   return "invalid";
 }
 
+const SUCCESS_NOTICES: readonly Notice[] = [
+  "created",
+  "created_possible_duplicate",
+  "updated",
+  "approval_submitted",
+  "approval_approved",
+  "approval_rejected",
+  "approval_cleared",
+];
+
 function finish(ctx: FormContext, notice: Notice): never {
-  if (notice === "created" || notice === "updated") {
+  if ((SUCCESS_NOTICES as readonly string[]).includes(notice)) {
     revalidatePath("/", "layout");
   }
   redirect(financeUrl(ctx.locale, notice, ctx.type, ctx.status));
@@ -143,6 +171,10 @@ function readBoundedFields(formData: FormData): {
   amountCents: number;
   dueDate: string;
   note: string;
+  invoiceNumber: string;
+  /** Empty string = no VAT recorded (the RPC treats blank as null). */
+  vatCents: string;
+  orgDocumentId: string;
 } | null {
   const title = String(formData.get("title") ?? "").trim();
   if (title.length < FINANCE_TITLE_MIN || title.length > FINANCE_TITLE_MAX) {
@@ -163,7 +195,27 @@ function readBoundedFields(formData: FormData): {
   if (dueDate && !DATE_RX.test(dueDate)) return null;
   const note = String(formData.get("note") ?? "").trim();
   if (note.length > FINANCE_NOTE_MAX) return null;
-  return { title, counterparty, amountCents, dueDate, note };
+  const invoiceNumber = String(formData.get("invoiceNumber") ?? "").trim();
+  if (invoiceNumber.length > FINANCE_INVOICE_NUMBER_MAX) return null;
+  const vatInput = String(formData.get("vatAmount") ?? "").trim();
+  let vatCents = "";
+  if (vatInput) {
+    const parsed = parseAmountInputToCents(vatInput);
+    if (parsed === null) return null;
+    vatCents = String(parsed);
+  }
+  const orgDocumentId = String(formData.get("orgDocumentId") ?? "").trim();
+  if (orgDocumentId && !UUID_RX.test(orgDocumentId)) return null;
+  return {
+    title,
+    counterparty,
+    amountCents,
+    dueDate,
+    note,
+    invoiceNumber,
+    vatCents,
+    orgDocumentId,
+  };
 }
 
 /** Record an invoice/expense through create_finance_record_v1 (RPC-only). */
@@ -197,7 +249,7 @@ export async function createFinanceRecordAction(
   if (companyId && !UUID_RX.test(companyId)) finish(ctx, "invalid");
 
   const { data, error } = await asAny(supabase).rpc(
-    "create_finance_record_v1",
+    "create_finance_record_v2",
     {
       p_record_type: recordType,
       p_title: fields.title,
@@ -208,6 +260,9 @@ export async function createFinanceRecordAction(
       p_project_id: projectId,
       p_company_id: linkCompany ? companyId : "",
       p_note: fields.note,
+      p_invoice_number: fields.invoiceNumber,
+      p_vat_amount_cents: fields.vatCents,
+      p_org_document_id: fields.orgDocumentId,
     },
   );
   if (error) finish(ctx, noticeForRpcError(error));
@@ -233,7 +288,7 @@ export async function updateFinanceRecordAction(
   if (!fields) finish(ctx, "invalid");
 
   const { data, error } = await asAny(supabase).rpc(
-    "update_finance_record_v1",
+    "update_finance_record_v2",
     {
       p_record_id: recordId,
       p_title: fields.title,
@@ -241,6 +296,9 @@ export async function updateFinanceRecordAction(
       p_amount_cents: String(fields.amountCents),
       p_due_date: fields.dueDate,
       p_note: fields.note,
+      p_invoice_number: fields.invoiceNumber,
+      p_vat_amount_cents: fields.vatCents,
+      p_org_document_id: fields.orgDocumentId,
     },
   );
   if (error) finish(ctx, noticeForRpcError(error));
@@ -274,4 +332,151 @@ export async function setFinanceRecordStatusAction(
   );
   if (error) finish(ctx, noticeForRpcError(error));
   finish(ctx, noticeForOutcome(String(data ?? ""), "updated"));
+}
+
+/**
+ * Submit a record for approval THROUGH THE ENGINE (the timesheets pattern —
+ * nothing re-implemented): find the bridged organization's ACTIVE, PUBLISHED
+ * template for this record's context ('expense'/'invoice'), start an
+ * instance via the engine's own start RPC (context id = record id), then
+ * flip the record's MIRROR to pending. If flipping fails after the instance
+ * started, the instance is withdrawn again (compensation). Only company-
+ * linked records can route: without an organization there is no approver
+ * set, and the action stops honestly BEFORE any write.
+ */
+export async function submitFinanceApprovalAction(
+  formData: FormData,
+): Promise<void> {
+  const ctx = readContext(formData);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) finish(ctx, "not_authorized");
+
+  const recordId = String(formData.get("recordId") ?? "").trim();
+  if (!UUID_RX.test(recordId)) finish(ctx, "invalid");
+
+  // The record (RLS-scoped read via the ONE finance read module; the RPCs
+  // re-check everything anyway).
+  const recRes = await getFinanceRecordForApproval(recordId);
+  if (recRes.status === "not-authed") finish(ctx, "not_authorized");
+  if (recRes.status === "needs-migration") finish(ctx, "needs_migration");
+  if (recRes.status === "not-found") finish(ctx, "not_found");
+  const record = recRes.record;
+  if (record.approvalStatus === "pending") finish(ctx, "approval_pending");
+  if (!record.companyId) finish(ctx, "no_template");
+
+  // The organization bridged from the company link (RLS-scoped read).
+  const orgRes = await asAny(supabase)
+    .from("organizations")
+    .select("id")
+    .eq("legacy_company_id", record.companyId)
+    .limit(1)
+    .maybeSingle();
+  if (orgRes.error || !orgRes.data) finish(ctx, "no_template");
+  const organizationId = String((orgRes.data as { id: string }).id);
+
+  // The org's ACTIVE template with a PUBLISHED version for this context —
+  // the honest-degradation seam. No template → no submit, clearly said.
+  const context = financeApprovalContext(record.recordType);
+  const defRes = await asAny(supabase)
+    .from("workflow_definitions")
+    .select("id, workflow_definition_versions(id, published_at)")
+    .eq("organization_id", organizationId)
+    .eq("context_entity_type", context)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(5);
+  if (defRes.error) finish(ctx, noticeForRpcError(defRes.error));
+  type DefRow = {
+    id: string;
+    workflow_definition_versions:
+      | { id: string; published_at: string | null }[]
+      | null;
+  };
+  const published = ((defRes.data ?? []) as DefRow[]).find((d) =>
+    (d.workflow_definition_versions ?? []).some((v) => v.published_at !== null),
+  );
+  if (!published) finish(ctx, "no_template");
+
+  // 1. Start the approval instance THROUGH THE ENGINE (idempotent on the
+  //    context entity).
+  const title = record.title.slice(0, 160);
+  // (record.recordType/title come from the RLS-scoped read above.)
+  const startRes = await asAny(supabase).rpc("start_workflow_instance_v1", {
+    p_definition_id: published!.id,
+    p_title: title.length >= 3 ? title : `Record ${recordId.slice(0, 8)}`,
+    p_payload: { recordId, recordType: record.recordType },
+    p_context_entity_id: recordId,
+  });
+  if (startRes.error) finish(ctx, noticeForRpcError(startRes.error));
+  const startOutcome = String(startRes.data ?? "");
+  const instanceId = UUID_RX.test(startOutcome) ? startOutcome : null;
+  if (!instanceId && startOutcome !== "already_pending") {
+    if (startOutcome === "no_approvers") finish(ctx, "no_approvers");
+    if (startOutcome === "not_published") finish(ctx, "no_template");
+    finish(ctx, "error");
+  }
+
+  // 2. Flip the MIRROR to pending.
+  const submitRes = await asAny(supabase).rpc(
+    "submit_finance_record_approval_v1",
+    { p_record_id: recordId },
+  );
+  const submitOutcome = submitRes.error ? null : String(submitRes.data ?? "");
+  if (submitOutcome !== "submitted" && submitOutcome !== "already_pending") {
+    // Compensation: withdraw the instance this call just started so no
+    // orphaned approval request lingers. (A pre-existing already_pending
+    // instance is left alone: it belongs to a prior submit.)
+    if (instanceId) {
+      await asAny(supabase)
+        .rpc("withdraw_workflow_instance_v1", {
+          p_instance_id: instanceId,
+          p_reason: "finance approval submit failed",
+        })
+        .catch(() => undefined);
+    }
+    if (submitRes.error) finish(ctx, noticeForRpcError(submitRes.error));
+    finish(ctx, "error");
+  }
+
+  // 3. The step-1 approvers durably hear a request awaits them (EXISTING
+  //    engine notification type; fire-and-forget).
+  if (instanceId) {
+    await emitWorkflowStepPendingNotifications(instanceId);
+  }
+  finish(ctx, "approval_submitted");
+}
+
+/** Copy the engine's terminal outcome onto the record's mirror (the RPC
+ *  never decides anything — see the migration header). */
+export async function syncFinanceApprovalAction(
+  formData: FormData,
+): Promise<void> {
+  const ctx = readContext(formData);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) finish(ctx, "not_authorized");
+
+  const recordId = String(formData.get("recordId") ?? "").trim();
+  if (!UUID_RX.test(recordId)) finish(ctx, "invalid");
+
+  const { data, error } = await asAny(supabase).rpc(
+    "sync_finance_record_approval_v1",
+    { p_record_id: recordId },
+  );
+  if (error) finish(ctx, noticeForRpcError(error));
+  const outcome = String(data ?? "");
+  if (outcome === "approved") finish(ctx, "approval_approved");
+  if (outcome === "rejected") finish(ctx, "approval_rejected");
+  if (outcome === "cleared") finish(ctx, "approval_cleared");
+  if (outcome === "still_pending") finish(ctx, "approval_pending");
+  if (outcome === "no_instance") finish(ctx, "approval_none");
+  if (outcome === "not_found") finish(ctx, "not_found");
+  finish(ctx, "error");
 }

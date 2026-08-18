@@ -9520,7 +9520,9 @@
       "cancel": "Cancel",
       "reopen": "Reopen",
       "details": "Edit details",
-      "save": "Save"
+      "save": "Save",
+      "requestApproval": "Request approval",
+      "checkApproval": "Check approval"
     },
     "form": {
       "title": "New record",
@@ -9537,7 +9539,11 @@
       "projectNone": "No project",
       "companyLinkLabel": "Link to my company (its owner sees this record)",
       "noteLabel": "Note (optional)",
-      "submit": "Add record"
+      "submit": "Add record",
+      "invoiceNoLabel": "Invoice number (optional)",
+      "invoiceNoPlaceholder": "e.g. INV-2026-014",
+      "vatLabel": "VAT amount (optional)",
+      "invoiceHint": "Invoice number and VAT are optional. If a received invoice repeats a saved number from the same counterparty, the record is still saved and you see a warning."
     },
     "notice": {
       "created": "Record added.",
@@ -9547,7 +9553,25 @@
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Record not found.",
       "limit_reached": "Record limit reached — this manual list is capped.",
-      "error": "Saving failed. Please try again."
+      "error": "Saving failed. Please try again.",
+      "created_possible_duplicate": "Saved — but a record with this counterparty and invoice number already exists. Please check for a duplicate.",
+      "approval_submitted": "Approval requested. The approvers have been notified.",
+      "approval_approved": "This record was approved.",
+      "approval_rejected": "This record was not approved.",
+      "approval_pending": "The approval decision has not been made yet.",
+      "approval_cleared": "The approval request was withdrawn or cancelled.",
+      "approval_none": "No approval request was found for this record.",
+      "no_template": "This company has no published approval flow for this yet, so approval cannot be requested.",
+      "no_approvers": "Nobody in the company can currently approve this request."
+    },
+    "invoiceNoLabel": "Invoice no.",
+    "vatLabel": "VAT",
+    "documentLinked": "Document attached",
+    "tripLinked": "Trip linked",
+    "approval": {
+      "pending": "Approval pending",
+      "approved": "Approval granted",
+      "rejected": "Approval declined"
     }
   },
   "structuredDemand": {
@@ -13149,6 +13173,153 @@
       "not_authorized": "You are not authorized for this.",
       "not_found": "Record not available.",
       "error": "Something failed — try again."
+    }
+  },
+  "procurement": {
+    "title": "Purchases",
+    "intro": "Ask for materials or services, note supplier offers, and record what was chosen. Nothing here contacts a supplier or orders anything — it is your record.",
+    "needsMigration": "Purchase requests are not enabled in this environment yet.",
+    "readError": "Purchase requests could not be loaded. Please try again.",
+    "empty": "No purchase requests yet.",
+    "noOffers": "No supplier offers noted yet.",
+    "offerSelected": "Chosen",
+    "orderRefLabel": "Order ref.",
+    "invoiceLinked": "Invoice linked",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "decided": "Decided",
+      "ordered": "Ordered",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
+    "approval": {
+      "pending": "Approval pending",
+      "approved": "Approval granted",
+      "rejected": "Approval declined"
+    },
+    "form": {
+      "open": "New purchase request",
+      "orgLabel": "Company",
+      "descriptionLabel": "What is needed",
+      "descriptionPlaceholder": "e.g. 40 bags of cement for the foundation",
+      "quantityLabel": "Amount (optional)",
+      "quantityPlaceholder": "e.g. 40 bags",
+      "budgetLabel": "Estimated budget in EUR (optional)",
+      "submit": "Save request",
+      "supplierLabel": "Supplier name",
+      "offerAmountLabel": "Offer amount in EUR",
+      "offerNoteLabel": "Note (optional)",
+      "orderRefPlaceholder": "Order number (optional)",
+      "invoiceNone": "No invoice linked"
+    },
+    "actions": {
+      "selectOffer": "Choose this offer",
+      "addOffer": "Note a supplier offer",
+      "saveOffer": "Save offer",
+      "edit": "Edit",
+      "save": "Save",
+      "submit": "Submit",
+      "requestApproval": "Request approval",
+      "checkApproval": "Check approval",
+      "markOrdered": "Mark as ordered",
+      "close": "Close",
+      "cancel": "Cancel",
+      "linkInvoice": "Link invoice"
+    },
+    "notice": {
+      "created": "Purchase request saved.",
+      "updated": "Purchase request updated.",
+      "submitted": "Purchase request submitted.",
+      "offer_added": "Supplier offer noted.",
+      "decided": "Offer chosen.",
+      "linked": "Invoice linked.",
+      "unlinked": "Invoice unlinked.",
+      "cancelled": "Purchase request cancelled.",
+      "invalid": "Please check the entered details.",
+      "needs_migration": "Purchase requests are not enabled in this environment yet.",
+      "not_authorized": "You cannot do that for this request.",
+      "not_found": "This purchase request was not found.",
+      "not_editable": "This request is in a state where that step is not possible.",
+      "limit_reached": "The limit of open requests was reached.",
+      "approval_submitted": "Approval requested. The approvers have been notified.",
+      "approval_approved": "This request was approved.",
+      "approval_rejected": "This request was not approved.",
+      "approval_pending": "The approval decision has not been made yet.",
+      "approval_cleared": "The approval request was withdrawn or cancelled.",
+      "approval_none": "No approval request was found.",
+      "no_template": "This company has no published approval flow for purchases yet.",
+      "no_approvers": "Nobody in the company can currently approve this request.",
+      "error": "Something went wrong. Nothing was saved."
+    }
+  },
+  "trips": {
+    "title": "Business trips",
+    "intro": "Request a trip, get it approved, and keep its costs together. Nothing here books travel or pays money out — it is your record.",
+    "needsMigration": "Business trips are not enabled in this environment yet.",
+    "readError": "Business trips could not be loaded. Please try again.",
+    "empty": "No business trips yet.",
+    "orgHeading": "Trips of people you manage",
+    "advanceLabel": "Advance",
+    "expensesLabel": "Costs",
+    "noTemplate": "This company has no published approval flow for trips yet, so a trip cannot be submitted.",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Not approved",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "form": {
+      "open": "New trip request",
+      "orgLabel": "Company",
+      "destinationLabel": "Destination",
+      "destinationPlaceholder": "e.g. Oslo, Norway",
+      "fromLabel": "First day",
+      "toLabel": "Last day",
+      "purposeLabel": "Purpose",
+      "purposePlaceholder": "e.g. installing windows at the Oslo site",
+      "advanceLabel": "Advance in EUR (optional)",
+      "advanceHint": "The advance is only a note of the agreed amount, for example a daily allowance. No money is moved.",
+      "submit": "Save trip",
+      "recordPick": "Choose a record…"
+    },
+    "actions": {
+      "edit": "Edit",
+      "save": "Save",
+      "submit": "Submit for approval",
+      "checkDecision": "Check decision",
+      "complete": "Mark as completed",
+      "cancel": "Cancel",
+      "linkExpense": "Add to this trip",
+      "unlink": "Remove",
+      "createTemplate": "Create a standard approval flow"
+    },
+    "notice": {
+      "created": "Trip saved.",
+      "updated": "Trip updated.",
+      "submitted": "Trip submitted for approval.",
+      "approved": "The trip was approved.",
+      "rejected": "The trip was not approved.",
+      "reopened": "The approval request went away — the trip is a draft again.",
+      "completed": "The trip was marked as completed.",
+      "cancelled": "The trip was cancelled.",
+      "linked": "Record added to the trip.",
+      "unlinked": "Record removed from the trip.",
+      "invalid": "Please check the entered details.",
+      "invalid_dates": "Please check the trip dates.",
+      "needs_migration": "Business trips are not enabled in this environment yet.",
+      "not_authorized": "You cannot do that for this trip.",
+      "not_found": "This trip was not found.",
+      "not_editable": "This trip is in a state where that step is not possible.",
+      "limit_reached": "The limit of open trips was reached.",
+      "still_pending": "The approval decision has not been made yet.",
+      "no_instance": "No approval request was found for this trip.",
+      "no_template": "This company has no published approval flow for trips yet.",
+      "no_approvers": "Nobody in the company can currently approve this trip.",
+      "template_created": "A standard approval flow was created for the company.",
+      "error": "Something went wrong. Nothing was saved."
     }
   }
 }

@@ -159,6 +159,17 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // start_workflow_instance_v1 as the app-layer entry point — the same
       // no-create/no-drop assertions apply.
       "20260817200000_agreements_v1",
+      // Financial ops (train J): expense/invoice approval, procurement
+      // approval and business-trip approval all ride the engine
+      // (context_entity_type 'expense'|'invoice'|'procurement'|
+      // 'business_trip' — all four already in the engine's own vocabulary).
+      // Each migration asserts workflow_instances exists and its sync
+      // command READS workflow_instances to COPY a terminal outcome onto a
+      // module-local mirror column. None defines, replaces or triggers an
+      // engine object (asserted below).
+      "20260817220000_finance_invoice_upgrades_v1",
+      "20260817221000_procurement_v1",
+      "20260817222000_business_trips_v1",
       // The org document register delta (train I, 20260817240000) is the
       // same class of consumer (context_entity_type='generic_request'): its
       // submit/sync mirror commands READ workflow_instances and its header
@@ -519,6 +530,20 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // covers the approvals layer, and lib/guards/agreements.test.ts pins
       // the agreements layer to its own eight gated commands.
       "lib/agreements/agreements.ts",
+      // Financial ops (train J) — expense/invoice approval, procurement
+      // approval and business-trip approval, all on the SAME engine with
+      // the SAME discipline: the actions read workflow_definitions (+ their
+      // versions) to find the org's PUBLISHED template before calling the
+      // engine's own start RPC, and the read services read
+      // workflow_instances to detect a TERMINAL outcome so the gated sync
+      // RPC can copy it onto a module-local mirror. Reads only — every
+      // write is an engine command or the module's own gated RPC, pinned by
+      // lib/guards/financial-ops.test.ts.
+      "lib/finance/finance-actions.ts",
+      "lib/procurement/procurement.ts",
+      "lib/procurement/procurement-actions.ts",
+      "lib/trips/trips.ts",
+      "lib/trips/trips-actions.ts",
       // Declared CONSUMER (org document register delta, train I): the
       // document read layer lists the org's PUBLISHED 'generic_request'
       // workflow definitions for the register's optional approval control

@@ -556,13 +556,22 @@ describe("NO new DB migration in this PR", () => {
     // market-map read layer. RECOUNTED after merging origin/main 66c869a4
     // (trains C/D/E/L1/F/H in base): 217 real files in the tree, never
     // summed.
-    // Bumped 217 -> 218 for the org document register delta v1 DRAFT
+    // Bumped 217 -> 220 for the financial-ops train J TRIPLE
+    // (20260817220000 finance invoice upgrades + 20260817221000 procurement
+    // + 20260817222000 business trips; owner mandate 2026-08-17, paired
+    // rollbacks, ships UNAPPLIED, PENDING APPLY BY LEAD) — again nothing
+    // from the market-map read layer. RECOUNTED from the tree after merging
+    // origin/main 900284f2 (trains C/D/E/L1/F/H/G + landing in base): 220
+    // real files, never summed — an earlier count of 218 on an older base
+    // was recounted, not adjusted.
+    // Bumped 220 -> 221 for the org document register delta v1 DRAFT
     // (20260817240000_org_document_register_delta_v1, train I, LEAD-gated,
-    // UNAPPLIED, paired 0-row-guarded rollback) — RECOUNTED from the
-    // post-rebase tree with train G also in the base (218 .sql files),
-    // never summed. Still nothing from the market-map read layer itself.
-    // Cross-pin follows.
-    expect(count).toBeLessThanOrEqual(218);
+    // UNAPPLIED, paired 0-row-guarded rollback) — still nothing from the
+    // market-map read layer itself. RECOUNTED from the tree after merging
+    // origin/main 64f27c7b (train J's three finance migrations in the base):
+    // 221 real files, never summed — my earlier 218 was against the pre-J
+    // base and was RECOUNTED, not adjusted. Cross-pin follows.
+    expect(count).toBeLessThanOrEqual(221);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -5121,5 +5121,184 @@
       "not_found": "Posten är inte tillgänglig.",
       "error": "Misslyckades — försök igen."
     }
+  },
+  "finance": {
+    "invoiceNoLabel": "Fakturanr",
+    "vatLabel": "Moms",
+    "documentLinked": "Dokument bifogat",
+    "tripLinked": "Tjänsteresa kopplad",
+    "approval": {
+      "pending": "Väntar på godkännande",
+      "approved": "Godkänd",
+      "rejected": "Ej godkänd"
+    },
+    "form": {
+      "invoiceNoLabel": "Fakturanummer (valfritt)",
+      "invoiceNoPlaceholder": "t.ex. FA-2026-014",
+      "vatLabel": "Momsbelopp (valfritt)",
+      "invoiceHint": "Fakturanummer och moms är valfria. Om en mottagen faktura upprepar ett redan sparat nummer från samma motpart sparas posten ändå och du ser en varning."
+    },
+    "actions": {
+      "requestApproval": "Begär godkännande",
+      "checkApproval": "Kontrollera godkännande"
+    },
+    "notice": {
+      "created_possible_duplicate": "Sparat — men en post med denna motpart och detta fakturanummer finns redan. Kontrollera om det är en dubblett.",
+      "approval_submitted": "Godkännande begärt. Godkännarna har underrättats.",
+      "approval_approved": "Denna post godkändes.",
+      "approval_rejected": "Denna post godkändes inte.",
+      "approval_pending": "Beslutet om godkännande har inte fattats än.",
+      "approval_cleared": "Begäran om godkännande drogs tillbaka eller avbröts.",
+      "approval_none": "Ingen begäran om godkännande hittades för denna post.",
+      "no_template": "Företaget har ännu inget publicerat godkännandeflöde, så godkännande kan inte begäras.",
+      "no_approvers": "Ingen i företaget kan för närvarande godkänna denna begäran."
+    }
+  },
+  "procurement": {
+    "title": "Inköp",
+    "intro": "Be om material eller tjänster, anteckna leverantörsofferter och registrera vad som valdes. Inget här kontaktar en leverantör eller beställer något — det är din dokumentation.",
+    "needsMigration": "Inköpsförfrågningar är ännu inte aktiverade i denna miljö.",
+    "readError": "Inköpsförfrågningar kunde inte läsas in. Försök igen.",
+    "empty": "Inga inköpsförfrågningar än.",
+    "noOffers": "Inga leverantörsofferter antecknade än.",
+    "offerSelected": "Vald",
+    "orderRefLabel": "Ordernr",
+    "invoiceLinked": "Faktura kopplad",
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Inskickad",
+      "decided": "Beslutad",
+      "ordered": "Beställd",
+      "closed": "Avslutad",
+      "cancelled": "Avbruten"
+    },
+    "approval": {
+      "pending": "Väntar på godkännande",
+      "approved": "Godkänd",
+      "rejected": "Ej godkänd"
+    },
+    "form": {
+      "open": "Ny inköpsförfrågan",
+      "orgLabel": "Företag",
+      "descriptionLabel": "Vad behövs",
+      "descriptionPlaceholder": "t.ex. 40 säckar cement till grunden",
+      "quantityLabel": "Mängd (valfritt)",
+      "quantityPlaceholder": "t.ex. 40 säckar",
+      "budgetLabel": "Uppskattad budget i EUR (valfritt)",
+      "submit": "Spara förfrågan",
+      "supplierLabel": "Leverantörens namn",
+      "offerAmountLabel": "Offertbelopp i EUR",
+      "offerNoteLabel": "Anteckning (valfritt)",
+      "orderRefPlaceholder": "Ordernummer (valfritt)",
+      "invoiceNone": "Ingen faktura kopplad"
+    },
+    "actions": {
+      "selectOffer": "Välj denna offert",
+      "addOffer": "Anteckna leverantörsoffert",
+      "saveOffer": "Spara offert",
+      "edit": "Redigera",
+      "save": "Spara",
+      "submit": "Skicka in",
+      "requestApproval": "Begär godkännande",
+      "checkApproval": "Kontrollera godkännande",
+      "markOrdered": "Markera som beställd",
+      "close": "Avsluta",
+      "cancel": "Avbryt",
+      "linkInvoice": "Koppla faktura"
+    },
+    "notice": {
+      "created": "Inköpsförfrågan sparad.",
+      "updated": "Inköpsförfrågan uppdaterad.",
+      "submitted": "Inköpsförfrågan inskickad.",
+      "offer_added": "Leverantörsoffert antecknad.",
+      "decided": "Offert vald.",
+      "linked": "Faktura kopplad.",
+      "unlinked": "Fakturakopplingen borttagen.",
+      "cancelled": "Inköpsförfrågan avbruten.",
+      "invalid": "Kontrollera de angivna uppgifterna.",
+      "needs_migration": "Inköpsförfrågningar är ännu inte aktiverade i denna miljö.",
+      "not_authorized": "Det kan du inte göra för denna förfrågan.",
+      "not_found": "Denna inköpsförfrågan hittades inte.",
+      "not_editable": "I detta läge är det steget inte möjligt.",
+      "limit_reached": "Gränsen för öppna förfrågningar har nåtts.",
+      "approval_submitted": "Godkännande begärt. Godkännarna har underrättats.",
+      "approval_approved": "Denna förfrågan godkändes.",
+      "approval_rejected": "Denna förfrågan godkändes inte.",
+      "approval_pending": "Beslutet om godkännande har inte fattats än.",
+      "approval_cleared": "Begäran om godkännande drogs tillbaka eller avbröts.",
+      "approval_none": "Ingen begäran om godkännande hittades.",
+      "no_template": "Företaget har ännu inget publicerat godkännandeflöde för inköp.",
+      "no_approvers": "Ingen i företaget kan för närvarande godkänna denna förfrågan.",
+      "error": "Något gick fel. Inget sparades."
+    }
+  },
+  "trips": {
+    "title": "Tjänsteresor",
+    "intro": "Begär en resa, få den godkänd och håll ihop dess kostnader. Inget här bokar resor eller betalar ut pengar — det är din dokumentation.",
+    "needsMigration": "Tjänsteresor är ännu inte aktiverade i denna miljö.",
+    "readError": "Tjänsteresor kunde inte läsas in. Försök igen.",
+    "empty": "Inga tjänsteresor än.",
+    "orgHeading": "Resor för personer du leder",
+    "advanceLabel": "Förskott",
+    "expensesLabel": "Kostnader",
+    "noTemplate": "Företaget har ännu inget publicerat godkännandeflöde för resor, så en resa kan inte skickas in.",
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Inskickad",
+      "approved": "Godkänd",
+      "rejected": "Ej godkänd",
+      "completed": "Genomförd",
+      "cancelled": "Avbruten"
+    },
+    "form": {
+      "open": "Ny reseförfrågan",
+      "orgLabel": "Företag",
+      "destinationLabel": "Destination",
+      "destinationPlaceholder": "t.ex. Oslo, Norge",
+      "fromLabel": "Första dagen",
+      "toLabel": "Sista dagen",
+      "purposeLabel": "Syfte",
+      "purposePlaceholder": "t.ex. fönstermontering på byggarbetsplatsen i Oslo",
+      "advanceLabel": "Förskott i EUR (valfritt)",
+      "advanceHint": "Förskottet är bara en anteckning om det avtalade beloppet, t.ex. traktamente. Inga pengar flyttas.",
+      "submit": "Spara resa",
+      "recordPick": "Välj en post…"
+    },
+    "actions": {
+      "edit": "Redigera",
+      "save": "Spara",
+      "submit": "Skicka in för godkännande",
+      "checkDecision": "Kontrollera beslut",
+      "complete": "Markera som genomförd",
+      "cancel": "Avbryt",
+      "linkExpense": "Lägg till i denna resa",
+      "unlink": "Ta bort",
+      "createTemplate": "Skapa ett standardgodkännandeflöde"
+    },
+    "notice": {
+      "created": "Resa sparad.",
+      "updated": "Resa uppdaterad.",
+      "submitted": "Resa inskickad för godkännande.",
+      "approved": "Resan godkändes.",
+      "rejected": "Resan godkändes inte.",
+      "reopened": "Begäran om godkännande försvann — resan är ett utkast igen.",
+      "completed": "Resan markerades som genomförd.",
+      "cancelled": "Resan avbröts.",
+      "linked": "Post tillagd i resan.",
+      "unlinked": "Post borttagen från resan.",
+      "invalid": "Kontrollera de angivna uppgifterna.",
+      "invalid_dates": "Kontrollera resedatumen.",
+      "needs_migration": "Tjänsteresor är ännu inte aktiverade i denna miljö.",
+      "not_authorized": "Det kan du inte göra för denna resa.",
+      "not_found": "Denna resa hittades inte.",
+      "not_editable": "I detta läge är det steget inte möjligt.",
+      "limit_reached": "Gränsen för öppna resor har nåtts.",
+      "still_pending": "Beslutet om godkännande har inte fattats än.",
+      "no_instance": "Ingen begäran om godkännande hittades för denna resa.",
+      "no_template": "Företaget har ännu inget publicerat godkännandeflöde för resor.",
+      "no_approvers": "Ingen i företaget kan för närvarande godkänna denna resa.",
+      "template_created": "Ett standardgodkännandeflöde skapades för företaget.",
+      "error": "Något gick fel. Inget sparades."
+    }
   }
 }

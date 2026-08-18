@@ -2140,16 +2140,30 @@ describe("no migration files added by this sprint", () => {
     // merging origin/main 66c869a4 (trains C, D, E, L1, F and H all in
     // the base): `ls supabase/migrations/*.sql | wc -l` = 217 real files,
     // never summed.
-    // Bumped 217 -> 218 for the org document register delta v1 DRAFT
+    // Bumped 217 -> 220 for the financial-ops train J TRIPLE
+    // (20260817220000_finance_invoice_upgrades_v1 +
+    // 20260817221000_procurement_v1 + 20260817222000_business_trips_v1;
+    // owner mandate 2026-08-17, UNAPPLIED — PENDING APPLY BY LEAD; all three
+    // ride the EXISTING workflow + document engines and fork neither; paired
+    // rollbacks + deferred APPLIED_LEDGER entries in the PR; db-proof
+    // scripts/db-proof/financial-ops-v1.sh 176/176). RECOUNTED from the tree
+    // after merging origin/main 900284f2 (trains C, D, E, L1, F, H, G and the
+    // landing slice all in the base): `ls supabase/migrations/*.sql | wc -l`
+    // = 220 real files, never summed — the first count of this line said 218
+    // against an older base and was recounted rather than adjusted.
+    // Bumped 220 -> 221 for the org document register delta v1 DRAFT
     // (20260817240000_org_document_register_delta_v1, train I, LEAD-gated,
     // UNAPPLIED; five additive nullable columns on the train C
     // `org_documents` register + one widening event-vocabulary drop/re-add
     // + four NEW SECURITY DEFINER commands — `create_org_document_v1` is
     // NOT recreated; paired 0-row-guarded rollback + deferred
-    // APPLIED_LEDGER entry in the PR) — RECOUNTED from the post-rebase tree
-    // with the Employee Lifecycle draft (train G) also in the base
-    // (`ls supabase/migrations/*.sql | wc -l` = 218), never summed.
-    const SPRINT_BASELINE = 218;
+    // APPLIED_LEDGER entry in the PR; db-proof
+    // scripts/db-proof/org-document-register-delta.sh 87/87). RECOUNTED from
+    // the tree after merging origin/main 64f27c7b (train J's three finance
+    // migrations now in the base): `ls supabase/migrations/*.sql | wc -l`
+    // = 221 real files, never summed — my earlier 218 was against the
+    // pre-J base and was RECOUNTED, not adjusted.
+    const SPRINT_BASELINE = 221;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
