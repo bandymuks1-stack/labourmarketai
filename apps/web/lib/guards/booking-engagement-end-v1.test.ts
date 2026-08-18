@@ -963,6 +963,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // zero: `timesheets` has 0 rows and 0 lifetime inserts in production, so
       // no frozen snapshot exists that the new body could change.
       "20260818150000_journal_canonical_work_time_v1.sql",
+      // 2026-08-18: the public vacancy SITEMAP projection gained its marker
+      // under the owner directive that job supply must be publicly
+      // discoverable AND INDEXABLE — the same ruling that approved the
+      // anonymous preview functions in 20260818140000. It is strictly
+      // narrower than those: one read-only SECURITY DEFINER function whose
+      // RETURNS TABLE exposes `id` and `last_modified` and nothing else.
+      // Added in the same commit as the migration, not spread from this
+      // branch's approval.
+      "20260818160000_public_vacancy_sitemap_v1.sql",
     ]);
   });
 

@@ -81,6 +81,67 @@ describe("public job board is discoverable by crawlers", () => {
   });
 });
 
+describe("public job board is reachable by a human", () => {
+  /**
+   * The other half of the same defect. A sitemap gets crawlers to the board;
+   * it does nothing for a person on the homepage. `/jobs` shipped with no link
+   * from anywhere on the site — the only route in was the vacancy card ON the
+   * board — so the board was unreachable by navigation, and it had no internal
+   * inbound link for PageRank either.
+   */
+  it("the site nav links to /jobs", () => {
+    const nav = read("components/layouts/site-nav.tsx");
+    expect(nav).toMatch(/key:\s*"jobs",\s*href:\s*"\/jobs"/);
+  });
+
+  it("the footer links to /jobs", () => {
+    const footer = read("components/layouts/site-footer.tsx");
+    expect(footer).toContain('href="/jobs"');
+  });
+
+  // ALL_LINKS is the single source for the desktop nav AND the mobile
+  // disclosure, so one entry covers both. Assert that stays true — if the
+  // mobile menu ever grows its own list, a phone visitor silently loses the
+  // board again, which is exactly the state this PR is fixing.
+  it("the mobile menu is fed from the same link list, not its own copy", () => {
+    const nav = read("components/layouts/site-nav.tsx");
+    expect(nav).toMatch(/<MobileNavMenu[\s\S]*?items=\{links\.map\(/);
+  });
+
+  it("every active locale has a real, non-English nav.jobs label", () => {
+    const en = JSON.parse(read("messages/en.json")) as {
+      nav: Record<string, string>;
+    };
+    expect(en.nav.jobs, "en nav.jobs missing").toBeTruthy();
+
+    for (const locale of ["lt", "ru", "nl", "de"]) {
+      const messages = JSON.parse(read(`messages/${locale}.json`)) as {
+        nav: Record<string, string>;
+      };
+      expect(messages.nav.jobs, `${locale} nav.jobs missing`).toBeTruthy();
+      // A key copied from English is the exact defect the untranslated
+      // ratchet exists for — catch it here too, at the point of use.
+      expect(
+        messages.nav.jobs,
+        `${locale} nav.jobs is raw English`,
+      ).not.toBe(en.nav.jobs);
+    }
+  });
+
+  // Doctrine §2.4: the 11 catalogues never drift apart, even the inactive six.
+  it("all 11 message catalogues carry nav.jobs", () => {
+    for (const locale of [
+      "en", "lt", "ru", "nl", "de", "lv", "et", "da", "no", "sv", "pl",
+    ]) {
+      const messages = JSON.parse(read(`messages/${locale}.json`)) as {
+        nav: Record<string, string>;
+      };
+      expect(messages.nav.jobs, `${locale} nav.jobs missing`).toBeTruthy();
+      expect(messages.nav.jobs).not.toContain("[EN]");
+    }
+  });
+});
+
 describe("the sitemap projection cannot leak restricted vacancy fields", () => {
   /** Exactly the columns the owner ruled restricted for anonymous callers. */
   const RESTRICTED = [

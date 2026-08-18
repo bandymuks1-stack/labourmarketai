@@ -27,6 +27,9 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
   const nav = read("components/layouts/site-nav.tsx");
 
   it.each([
+    // The public job board — the highest-intent destination on the marketing
+    // site, and one that shipped with no nav entry at all.
+    ["jobs", "/jobs"],
     ["workers", "/for-workers"],
     ["companies", "/for-companies"],
     ["agencies", "/for-agencies"],
@@ -73,6 +76,10 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
           "agencies",
           "companies",
           "how",
+          // jobs: the public job board link (2026-08-18). A real label for a
+          // real route over 39,241 live vacancies — the opposite of the
+          // template leftovers this list exists to keep out.
+          "jobs",
           "login",
           "menuClose",
           "menuOpen",
