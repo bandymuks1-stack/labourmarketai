@@ -23,6 +23,20 @@ describe("the public job page unlocks for a member", () => {
     expect(page).toContain("auth.getUser()");
   });
 
+  /**
+   * This page is the indexable unit of a 39,241-page public surface.
+   * `getUser()` validates the token against the auth server — a network round
+   * trip — so calling it unconditionally would put one Supabase auth request
+   * behind every crawler hit, for callers who provably have no session.
+   * `middleware.ts` already refuses to do that; this asserts the server
+   * component follows the same rule. It is a fast path, not an authorisation
+   * decision: the unlock is still decided by getUser() and then by RLS.
+   */
+  it("skips the auth round trip when no session cookie is present", () => {
+    expect(page).toContain("hasSessionCookie");
+    expect(page).toMatch(/await hasSessionCookie\(\)\)\s*\n?\s*\?\s*\(await supabase\.auth\.getUser\(\)\)/);
+  });
+
   it("reads the member projection only when a user exists", () => {
     // The ternary is the contract: no session → no member read at all.
     expect(page).toMatch(/const member = user\s*\n?\s*\?\s*await getPublicVacancyById/);

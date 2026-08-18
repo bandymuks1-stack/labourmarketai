@@ -7,6 +7,7 @@ import { resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { getPublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { formatUtcDate } from "@/lib/time/display";
 
@@ -217,6 +218,30 @@ const NEXT_PROFILE: L = {
   de: "Profil vervollständigen",
 };
 
+/**
+ * Does this request carry a Supabase session cookie at all?
+ *
+ * `supabase.auth.getUser()` VALIDATES the token against the auth server, which
+ * is a network round trip. This page is the indexable unit of a 39,241-page
+ * public surface, so calling it unconditionally would put one Supabase auth
+ * request behind every crawler hit and every anonymous visit — for a caller who
+ * provably has no session.
+ *
+ * `middleware.ts` already refuses to do that (`hasSupabaseAuthCookie`, "so
+ * anonymous public/marketing traffic stays fast and never hits Supabase"); this
+ * is the same rule applied on the server-component side, matching the cookie
+ * shape `@supabase/ssr` writes (`sb-<ref>-auth-token`, possibly chunked).
+ *
+ * It is a FAST PATH, never an authorisation decision: a forged cookie buys
+ * nothing, because the unlock is decided by `getUser()` and then by RLS.
+ */
+async function hasSessionCookie(): Promise<boolean> {
+  const store = await cookies();
+  return store
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+}
+
 function joinLocation(
   city: string | null,
   region: string | null,
@@ -238,9 +263,10 @@ export default async function JobDetailPage({
   const active = resolveActiveLocale(locale);
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // No session cookie → provably anonymous, so skip the auth round trip.
+  const user = (await hasSessionCookie())
+    ? (await supabase.auth.getUser()).data.user
+    : null;
 
   // The anonymous projection is fetched for EVERY caller: it is what the
   // heading, the publication date and the licence attribution render from, and
