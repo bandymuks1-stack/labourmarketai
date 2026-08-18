@@ -44,11 +44,10 @@ const MESSAGES = resolve(__dirname, "../../messages");
  * untranslated string ships. Keying on the set closes that — a key that
  * BECOMES identical fails even when the total falls.
  *
- * Recorded 2026-08-18 at `origin/main` `a9594af2`, after the Russian
- * `landing.hero.*` block was translated under OWNER DECISION U-15 (RU 107→66).
- * NL and DE are at their CURRENT, UNIMPROVED values on purpose: their
- * translation ships separately so U-15 does not implicitly approve marketing
- * wording the owner has not read.
+ * Recorded 2026-08-18 at `origin/main` `ef25e0f6`, after the Russian
+ * `landing.hero.*` block was translated under OWNER DECISION U-15 (RU 107→66)
+ * and the Dutch/German hero was translated in this change (NL 329→289,
+ * DE 276→236).
  *
  * Every key in this file is a debt to pay down, not a target.
  */
@@ -64,8 +63,8 @@ const BASELINE_SETS: Readonly<Record<string, readonly string[]>> = JSON.parse(
 const HERO_BASELINE: Readonly<Record<string, number>> = {
   lt: 4, // previewName "Jonas P." + the three bare numbers 14 / 3 / 7
   ru: 3, // the three bare numbers — the persona name IS transliterated ("Йонас П.")
-  nl: 44, // untranslated; the NL translation is in a separate, owner-review PR
-  de: 45, // untranslated; same
+  nl: 4, // previewName + the three bare numbers
+  de: 5, // previewName + the three numbers + "Demonstration", a real German word
 };
 
 type Catalogue = Record<string, string>;
