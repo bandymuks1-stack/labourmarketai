@@ -65,6 +65,57 @@ export type AnonSecdefContract = {
  */
 export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
   {
+    name: "search_public_vacancy_previews_v1",
+    identityArgs: "p_query text, p_profession_slug text, p_limit integer, p_offset integer",
+    mutates: false,
+    publicCaller:
+      "The public job board (app/[locale]/(marketing)/jobs). Reachable logged-out by design — this is the acquisition surface for 38,142 live imported vacancies.",
+    authorization:
+      "No caller identity is consulted, because the projection itself is the authorization: the RETURNS TABLE clause enumerates only fields the owner ruled public (title, category, employment form, working time, positions, publication date, compensation where genuinely supplied, licence attribution). Employer identity, homepage, country, region, city, coordinates, application URL, full description and the compensation note are never selected. Row filter `is_active AND (expires_at is null OR expires_at > now())` so withdrawn and expired ads are invisible.",
+    inputValidation:
+      "`p_query` is trimmed and its LIKE metacharacters (`%`, `_`) are escaped before interpolation into an ILIKE pattern, so a caller cannot turn the search box into a wildcard scan. Matching is restricted to `title_raw`; the description is deliberately NOT searched, because probing a restricted field is a disclosure by another route. `p_limit` is clamped to 1..50 and `p_offset` floored at 0.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent; the abuse ceiling is scraping of a deliberately public projection of already-public employment-service ads. Page size is hard-capped at 50 in SQL, so the endpoint cannot be asked for the whole table in one call.",
+    definerJustification:
+      "`public_vacancies` grants SELECT to `authenticated` only and has no anon policy — proven in production: a direct anon read fails with 42501. DEFINER is what allows a NARROWER public projection without weakening that policy, which is the explicit requirement (expose by projection, never by widening RLS).",
+    residualRisk:
+      "Attribution is returned because the source licence requires it wherever the content is shown. Since today's only provider is a national employment service, attribution makes the source — and therefore the country — inferable even though no country column is returned. Accepted as a licence obligation; recorded for the owner.",
+  },
+  {
+    name: "get_public_vacancy_preview_v1",
+    identityArgs: "p_id uuid",
+    mutates: false,
+    publicCaller:
+      "One public job page (app/[locale]/(marketing)/jobs/[id]) — the indexable unit of the acquisition funnel.",
+    authorization:
+      "Same projection contract as the search function: only the allowlisted public columns are selected, and the row filter `is_active AND (expires_at is null OR expires_at > now())` applies. Proven in production: a withdrawn id and an expired id each return 0 rows to anon, a live id returns 1.",
+    inputValidation:
+      "`p_id` is uuid-typed, so malformed input is rejected by the type system before the function body runs.",
+    abuseControls:
+      "No DB-level rate limit. Read-only, returns at most one row, and requires knowing a vacancy uuid — which the function itself never discloses beyond the ids already listed on the public board.",
+    definerJustification:
+      "Identical to the search function: the base table has no anon grant, and DEFINER is what narrows anon access to the published columns instead of opening the table.",
+    residualRisk:
+      "Same attribution/country inference as the search function. No JobPosting JSON-LD is emitted on the page, because that schema requires hiringOrganization and jobLocation, which are restricted fields.",
+  },
+  {
+    name: "count_public_vacancies_v1",
+    identityArgs: "",
+    mutates: false,
+    publicCaller:
+      "Landing market-proof band. Replaces a PINNED CONSTANT with a live governed count, so a number a visitor reads is the number the database currently holds.",
+    authorization:
+      "Returns aggregates ONLY — active vacancy count, distinct employer count, last refresh timestamp. No row, no employer name, no location is returned in any form. Counts the same live-row filter as the other two functions.",
+    inputValidation:
+      "No parameters, so there is no input surface.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and returns exactly one row of three scalars; there is nothing to enumerate.",
+    definerJustification:
+      "`public_vacancies` has no anon grant, so an anonymous visitor cannot count it. DEFINER exposes the aggregate without exposing any row.",
+    residualRisk:
+      "Discloses the size and freshness of the imported corpus and the number of distinct employers in it. Both are already stated publicly as market-coverage claims, and neither identifies an employer.",
+  },
+  {
     name: "get_public_business_profile_v1",
     identityArgs: "p_slug text",
     mutates: false,

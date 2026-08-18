@@ -173,12 +173,68 @@ describe("secdef migration: no application RPC relies on an inherited/default gr
   }
 });
 
-describe("secdef migration: anon allowlist stays exactly four signatures", () => {
-  it("the migration allowlist matches anon-secdef-allowlist.ts exactly", () => {
-    expect(ANON_SECDEF_ALLOWLIST).toHaveLength(4);
-    for (const entry of ANON_SECDEF_ALLOWLIST) {
-      const sig = signatureOf(entry);
-      expect(src, `migration must exclude ${sig}`).toContain(sig);
+/**
+ * The four signatures this 2026-07-22 CLOSURE migration knows about. Its §4b
+ * block revokes anon from every secdef function outside this list, so the list
+ * is a statement about the state of the schema AT CLOSURE TIME — not a cap on
+ * the product forever.
+ *
+ * A function created by a LATER migration is not covered by, and must not be
+ * added to, this file: the closure runs first in timestamp order and the later
+ * migration re-grants afterwards, which is exactly why a fresh `supabase db
+ * reset` still ends with the right ACLs. Widened 2026-08-18 when the public
+ * vacancy preview functions (20260818140000) became the first legitimately
+ * anon-reachable functions added after closure.
+ *
+ * The security property is NOT weakened: every allowlist entry — closure-era or
+ * later — still has to carry a written contract (condition 6 of
+ * check-anon-secdef-allowlist.mts), still has to be granted explicitly by a real
+ * migration (lib/guards/secdef-anon-allowlist.test.ts), and is still diffed
+ * against the live catalog in both directions by that same live guard.
+ */
+// Keyed by NAME, not by full signature: the argument list is the migration's
+// business to state, and pinning it twice invites a copy that drifts from the
+// real one (it did — an earlier revision of this guard hardcoded a wrong
+// argument list for submit_company_need_public_v1).
+const CLOSURE_ERA_NAMES: ReadonlySet<string> = new Set([
+  "get_public_business_profile_v1",
+  "get_public_business_listings_v1",
+  "get_public_business_services_v1",
+  "submit_company_need_public_v1",
+]);
+
+describe("secdef migration: the closure-era anon allowlist is intact", () => {
+  it("every closure-era signature is still named by the migration", () => {
+    const closure = ANON_SECDEF_ALLOWLIST.filter((e) =>
+      CLOSURE_ERA_NAMES.has(e.name),
+    ).map(signatureOf);
+    // None of the four may quietly leave the allowlist: the migration would
+    // then revoke a function the public product still calls.
+    expect(closure).toHaveLength(CLOSURE_ERA_NAMES.size);
+    for (const sig of closure) {
+      expect(src, `migration must name ${sig}`).toContain(sig);
+    }
+  });
+
+  it("post-closure additions are granted by their OWN migration, not this one", () => {
+    const later = ANON_SECDEF_ALLOWLIST.filter(
+      (e) => !CLOSURE_ERA_NAMES.has(e.name),
+    ).map(signatureOf);
+    const migrationsDir = join(MIG, "..");
+    for (const sig of later) {
+      const name = sig.slice(0, sig.indexOf("("));
+      const grantedSomewhere = readdirSync(migrationsDir)
+        .filter((f) => f.endsWith(".sql") && f > "20260722160000")
+        .some((f) =>
+          new RegExp(
+            `grant\\s+execute\\s+on\\s+function\\s+public\\.${name}\\s*\\([^)]*\\)\\s+to[^;]*\\banon\\b`,
+            "i",
+          ).test(readFileSync(join(migrationsDir, f), "utf8")),
+        );
+      expect(
+        grantedSomewhere,
+        `${sig} is allowlisted for anon but no migration after the closure grants it — it would rely on an inherited grant`,
+      ).toBe(true);
     }
   });
 

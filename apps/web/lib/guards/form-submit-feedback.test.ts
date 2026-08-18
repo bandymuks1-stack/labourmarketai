@@ -180,6 +180,12 @@ const NATIVE_NAV = new Set([
   "components/app/training-register.tsx",
   "components/app/development-reviews-section.tsx",
   "components/app/management-decisions-section.tsx",
+  // Public job board (train A) — the ONE form on this page is a plain GET
+  // search (`method="get"`, no server action, no client state) whose feedback
+  // is the re-rendered result list and its role="status" result count. There is
+  // no async submit to show a pending state for: the browser performs a full
+  // navigation. Same reasoning as the agreements-register filter form above.
+  "app/[locale]/(marketing)/jobs/page.tsx",
 ]);
 
 const PENDING_SIGNAL =

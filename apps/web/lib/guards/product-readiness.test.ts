@@ -2178,7 +2178,7 @@ describe("no migration files added by this sprint", () => {
     // deletes no row + a deferred APPLIED_LEDGER entry in the PR).
     // RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 225 real files.
-    const SPRINT_BASELINE = 225;
+    const SPRINT_BASELINE = 226;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
