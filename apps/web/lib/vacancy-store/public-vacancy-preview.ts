@@ -227,3 +227,55 @@ export async function readPublicVacancySupplyCounts(): Promise<PublicVacancySupp
     lastRefreshedAt: row?.last_refreshed_at ?? null,
   };
 }
+
+/**
+ * SITEMAP PROJECTION — the crawler-discovery path.
+ *
+ * Deliberately separate from the two preview readers above, and narrower than
+ * both: a sitemap may contain a URL and a date, so this returns exactly `id`
+ * and `lastModified` and nothing else. `lastModified` is the publisher's own
+ * `published_at`, never an ingestion timestamp — `updated_at` / `last_seen_at`
+ * move when the importer re-reads an ad, so publishing either as <lastmod>
+ * would claim 39k pages changed on six days when their content did not.
+ */
+export interface PublicVacancySitemapEntry {
+  readonly id: string;
+  /** ISO timestamp of the publisher's own publication date, or null. */
+  readonly lastModified: string | null;
+}
+
+export interface PublicVacancySitemapPage {
+  readonly status: PublicVacancyPreviewStatus;
+  readonly entries: readonly PublicVacancySitemapEntry[];
+}
+
+/** Rows per sitemap shard. Well under the sitemaps.org 50,000-per-file ceiling. */
+export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 5000;
+
+export async function listPublicVacancySitemapEntries(input: {
+  shard: number;
+}): Promise<PublicVacancySitemapPage> {
+  const shard = Math.max(0, Math.floor(input.shard));
+  const limit = PUBLIC_VACANCY_SITEMAP_SHARD_SIZE;
+  const offset = shard * limit;
+
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc(
+    "list_public_vacancy_sitemap_v1",
+    { p_limit: limit, p_offset: offset },
+  );
+
+  if (error) {
+    // A missing function means the feature is not switched on. The route then
+    // emits a valid EMPTY sitemap rather than a 500 — a crawler must never be
+    // served an error page at a sitemap URL.
+    if (isNotProvisioned(error.code)) return { status: "not_provisioned", entries: [] };
+    throw error;
+  }
+
+  const rows = (data ?? []) as { id: string; last_modified: string | null }[];
+  return {
+    status: "ok",
+    entries: rows.map((r) => ({ id: r.id, lastModified: r.last_modified })),
+  };
+}

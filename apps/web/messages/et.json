@@ -747,6 +747,7 @@
     }
   },
   "nav": {
+    "jobs": "Töökuulutused",
     "workers": "Töötajatele",
     "companies": "Ettevõtetele",
     "agencies": "Agentuuridele",

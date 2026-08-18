@@ -116,6 +116,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Discloses the size and freshness of the imported corpus and the number of distinct employers in it. Both are already stated publicly as market-coverage claims, and neither identifies an employer.",
   },
   {
+    name: "list_public_vacancy_sitemap_v1",
+    identityArgs: "p_limit integer, p_offset integer",
+    mutates: false,
+    publicCaller:
+      "The public job sitemap (app/jobs-sitemap.xml + app/jobs-sitemap/[shard]). Read by search-engine crawlers, which are anonymous by definition — a sitemap that required a session would be unreadable by the only clients it exists for.",
+    authorization:
+      "The projection IS the authorization, and it is strictly NARROWER than the already-approved preview functions: the RETURNS TABLE clause exposes only `id` and `last_modified`. `id` is already public — it is the /jobs/[id] URL itself. No title, employer, location, compensation, description or application URL is selected, so none can leak through the XML. Same live-row filter as the sibling functions (`is_active` AND not expired), so a withdrawn or expired ad is never advertised to a crawler.",
+    inputValidation:
+      "`p_limit` is clamped to 1..50000 (the sitemaps.org per-file ceiling) and `p_offset` floored at 0, both inside the SQL body. Both are integer-typed, so malformed input is rejected before the body runs.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent. The page size is larger than the search function's 50 because a sitemap must enumerate — that is its purpose — but it enumerates ONLY opaque uuids and dates, which carry no vacancy content. Reading every shard yields a list of public URLs and nothing a scraper could not get by crawling the board.",
+    definerJustification:
+      "`public_vacancies` has no anon SELECT grant and no anon RLS policy. DEFINER is what narrows anon access to the two sitemap columns instead of opening the table.",
+    residualRisk:
+      "Discloses the exact count and publication-date distribution of the live corpus by allowing full enumeration of public job URLs. Those URLs are intended to be public and indexed, so this is the requirement rather than a side effect. `last_modified` is `published_at` and never an ingestion timestamp, so the sitemap cannot make a false freshness claim.",
+  },
+  {
     name: "get_public_business_profile_v1",
     identityArgs: "p_slug text",
     mutates: false,

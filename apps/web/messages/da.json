@@ -747,6 +747,7 @@
     }
   },
   "nav": {
+    "jobs": "Ledige job",
     "workers": "For arbejdstagere",
     "companies": "For virksomheder",
     "agencies": "For bureauer",

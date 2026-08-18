@@ -73,13 +73,17 @@ export async function SiteFooter() {
             </p>
           </div>
 
-          {/* Product column mirrors the canonical public nav IA: the three
-              audience pages + pricing. No template labels, no duplicate
-              "about" destinations (about lives in the company column only). */}
+          {/* Product column mirrors the canonical public nav IA: the public
+              job board + the three audience pages + pricing. No template
+              labels, no duplicate "about" destinations (about lives in the
+              company column only). */}
           <div className="flex flex-col gap-3">
             <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("product")}
             </p>
+            <Link href="/jobs" className="text-sm text-text-secondary hover:text-text-primary">
+              {nav("jobs")}
+            </Link>
             <Link href="/for-workers" className="text-sm text-text-secondary hover:text-text-primary">
               {nav("workers")}
             </Link>
