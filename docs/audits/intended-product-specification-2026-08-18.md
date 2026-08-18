@@ -1300,3 +1300,104 @@ classified.
 
 Steps 1–4 are owner actions. Step 5 is the only code change, and it is the one
 that must never happen quietly.
+
+---
+
+## PRODUCTION CENSUS — the "ACTUALLY USED" column, measured (2026-08-18, evening)
+
+Every earlier pass measured whether a capability was BUILT. This one measures
+whether any human has ever used it, by counting rows in all 190 public tables
+on production `gorgitwvdzxbnaxhrsrw`. That is the column the roll-up never had,
+and it changes how several rows should be read.
+
+### The shape, in one table
+
+| Capability | Table(s) | Rows | Reading |
+|---|---|---:|---|
+| Imported supply | `public_vacancies` | **46,217** | live, growing (45,217 six hours earlier) |
+| ESCO taxonomy | `esco_labels` | **1,045,186** | reference data, loaded |
+| Telemetry | `pilot_events` | **1,343** | the product is being exercised |
+| Work Journal | `journal_entries` | **36** | real entries by real people |
+| Journal → skills | `journal_entry_skills` / `journal_entry_metrics` | **46 / 114** | the evidence loop RUNS |
+| Manager confirmation | `journal_entry_confirmations` | **12** | the confirm step RUNS |
+| Identity | `profiles` / `workers` | **36 / 36** | every user has both |
+| Skills | `worker_skills` / `profile_skill_claims` | **48 / 28** | real |
+| Organizations | `organizations` / `company_memberships` | **13 / 14** | real |
+| Engagements | `engagement_contexts` | **53** | real |
+| Audit | `audit_logs` | **50** | **13 distinct action types — see correction below** |
+| Projects | `projects` / `project_worker_assignments` | **6 / 2** | real but thin |
+| Conversations | `conversation_messages` | **16** | real |
+| Workflow **definitions** | `workflow_definitions` / `_versions` / `_steps` | **16 / 16 / 16** | defined |
+
+### The zeros that matter — built, connected, and never once exercised
+
+| Capability | Table | Rows |
+|---|---|---:|
+| **AI action layer** | `ai_runs` | **0** |
+| **Matching** | `matches`, `match_actions` | **0, 0** |
+| **Workflow execution** | `workflow_instances`, `_steps`, `_approvers`, `workflow_transitions` | **0** |
+| **Notifications** | `notification_events` | **0** |
+| **Employer demand** | `job_demands` | **0** |
+| **Documents / evidence** | `org_documents`, `document_files`, `worker_documents`, `document_acknowledgements` | **0** |
+| **Tasks / work objects** | `work_tasks`, `work_objects`, `task_dependencies` | **0** |
+| **Timesheets** | `timesheets`, `timesheet_events` | **0** |
+| **Agreements / contracts** | `agreements`, `contracts` | **0** |
+| **Bookings** | `booking_requests` | **0** |
+| **Payments / LMC** | `billing_*`, `subscriptions`, `lmc_*`, `payment_webhook_events` | **0** |
+| **Saved opportunities** | `worker_saved_opportunities` | **0** |
+| **Skill aggregates** | `platform_skill_aggregates` | **0** |
+| Onboarding / offboarding | `onboarding_runs`, `offboarding_runs` | **0** |
+| Training | `training_programs`, `training_assignments` | **0** |
+| Procurement / trips / reviews | `procurement_*`, `business_trips`, `performance_reviews` | **0** |
+
+**The single most important line above is `ai_runs = 0`.** The AI layer has
+never performed one action in production. `workflow_instances = 0` is the
+second: 16 workflow definitions exist and not one instance has ever run, so the
+approval engine is defined but unexecuted. `notification_events = 0` is the
+third: nothing has ever notified anyone, which is a plausible reason several
+other loops never start.
+
+### CORRECTION — REQ-GOV-003 was wrong; the audit log DOES have writers
+
+The matrix records *"No general audit log writer"* and ranks it in the top ten
+losses. **Production disproves it.** `audit_logs` holds 50 rows across **13
+distinct action types**, written between 2026-05-30 and 2026-08-06 by ordinary
+use:
+
+`admin_set_company_verification` (11) · `review_journal_entry` (10) ·
+`assign_company_worker_role` (5) · `accept_company_worker_invitation` (5) ·
+`set_engagement_journal_review` (4) · `add_org_member` (4) ·
+`confirm_entry_and_verify_skills` (2) · `experience_submitted` (2) ·
+`moderation_started` (2) · `moderation_decided` (2) · `membership_invite` (1) ·
+`membership_accept` (1) · `response_submitted` (1)
+
+Against the requirement's own list — permission grants, position changes,
+manager confirmations, proof acceptances, document approvals, role changes,
+membership changes — role changes, membership changes, manager confirmations and
+moderation decisions are all covered by a real writer. Only document approvals
+are absent, and `org_documents` has 0 rows, so there has been nothing to approve.
+
+`REQ-GOV-003` moves **MISSING → PARTIAL**. What is true is narrower than what
+was written: there is no *single generic* writer, and coverage is per-path.
+
+### AUTH — measured, not assumed
+
+| provider | identities | last sign-in |
+|---|---:|---|
+| `email` | **32** | 2026-08-09 |
+| `google` | **8** | 2026-08-07 |
+
+Facebook and LinkedIn have **zero identities and no provider rows** — not
+configured, never used. Email/password and Google are the only two methods, and
+both are `VERIFIED_PRODUCTION` by real sign-ins. Nothing here changed; it is now
+measured rather than inherited.
+
+### How to read the roll-up after this
+
+The distribution is unchanged in shape and now has a cause. 110 requirements sit
+at `IMPLEMENTED_NOT_PROVEN` or `PARTIAL` because **36 registered people** have
+exercised a product built for organizations, and the loops that would generate
+the missing evidence — matching, notifications, workflow instances, documents —
+each need a first real user to start them. This is not an unfinished product. It
+is a finished, largely unexercised one whose binding constraint is users, not
+code.
