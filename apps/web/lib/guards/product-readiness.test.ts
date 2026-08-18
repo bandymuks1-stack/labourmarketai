@@ -2183,7 +2183,12 @@ describe("no migration files added by this sprint", () => {
     // existing function body, no table/policy/grant/trigger change, no DML,
     // paired rollback). RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 227 real files.
-    const SPRINT_BASELINE = 227;
+    // Bumped 227 -> 228 for 20260705240000_agency_legacy_retype — NOT a new
+    // migration: it was applied to production on 2026-07-05 and its file was
+    // never committed. RESTORED from schema_migrations.statements for history
+    // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
+    // RECOUNTED from the tree, never summed: 228 real files.
+    const SPRINT_BASELINE = 228;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

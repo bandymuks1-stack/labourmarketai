@@ -415,7 +415,7 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 | REQ-PLAT-014 | An unmeasured metric is reported as unmeasured, never as zero | APPROVED_CURRENT_INTENT — axiom **A-12** | — | — | — | UNKNOWN | — | **MISSING (enforcement)** | Constitution itself records "machine half ships with #897" — #897 not merged | yes | no |
 | REQ-PLAT-015 | One function has ONE home; no duplicate objects; no re-entering data another path captured | APPROVED_CURRENT_INTENT — axioms A-02, A-08 | canonical resolvers | — | — | UNKNOWN | `canonical-paths-integrity.test.ts`, `consolidation-no-new-truth.test.ts` | **PARTIAL** | Data layer holds 3 invitation systems, 2 membership truths, 3 employment models, 6 candidate-stage stores | no | yes (consolidation migrations) |
 | REQ-PLAT-016 | Migration naming forward-only `YYYYMMDDHHMMSS_*`; applied migrations never renamed; every DB migration reversible | APPROVED_CURRENT_INTENT — doctrine §16 | — | 225 files | — | VERIFIED_PRODUCTION (213 applied) | migration-safety CI | VERIFIED_PRODUCTION | — | no | no |
-| REQ-PLAT-017 | `APPLIED_LEDGER.md` reflects production truth | IMPLEMENTED_CURRENT_BEHAVIOR — `docs/APPLIED_LEDGER.md` | doc | — | — | **CONTRADICTED** | — | **BROKEN** | 43 entries falsely read `PENDING APPLY`/`Deferred`, incl. ≥6 applied migrations | **yes** | no |
+| REQ-PLAT-017 | `APPLIED_LEDGER.md` reflects production truth | IMPLEMENTED_CURRENT_BEHAVIOR — `docs/APPLIED_LEDGER.md` | `scripts/check-migration-parity.mts` + `lib/migrations/parity-model.ts` | reads production `supabase_migrations.schema_migrations` live | — | **PARTIAL** — the machine-checked register is production-verified (225 applied, 0 orphans); the prose entries are still stale | 14 parity-model tests | **PARTIAL** | The 43 false `PENDING APPLY`/`Deferred` prose entries are deliberately NOT rewritten — they are the historical record of what each session believed, and rewriting them would destroy the audit trail. Instead the file now opens with a correction banner naming the ≥6 known-false entries and pointing at `docs/migrations/production-parity-register.md`, which is generated from a live read and gated. Where the two conflict, the register wins | yes | no |
 | REQ-PLAT-018 | Chat-first is the primary interface; `/dashboard` IS the conversation | APPROVED_CURRENT_INTENT — axiom **A-01** | `components/app/conversation/*` (~2,100-line chat) | conversations tables | yes | UNKNOWN | `conversation-canonical-delegation.test.ts`, `chat_importance_reduced` gate rule | PARTIAL | Real chat UI over real data, **zero model calls in any turn**; deterministic router only | no | yes (AI activation) |
 
 ### 5.2 Public marketplace (REQ-MKT)
@@ -650,8 +650,8 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 | REQ-GOV-011 | Every PR touching user-facing surfaces, schema, RLS, auth, roles, onboarding or signal-classified visuals pastes the constitution compliance checklist | APPROVED_CURRENT_INTENT — constitution §11 | `pnpm -F web check:constitution` (6 probes) | — | — | UNKNOWN | yes | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-GOV-012 | Seven-line Definition of Done (BEFORE/AFTER/URL/ACTION/RESULT/RELOAD/BLOCKER) with a declared progression state | APPROVED_CURRENT_INTENT — constitution §11; `docs/policies/feature-definition-of-done-v1.md` | policy doc | — | — | UNKNOWN | `check:constitution` | **PARTIAL** | The modules in §5.5 shipped without a DoD that could pass (no URL/ACTION/RESULT with real data) | no | no |
 | REQ-GOV-013 | No foreign product name embedded in shipped schema | IMPLEMENTED_CURRENT_BEHAVIOR — brand purity | — | `supabase/migrations/20260817130000_workflow_engine_v1.sql` contains `vecticum` | — | **CONTRADICTED** | — | **BROKEN (cosmetic)** | Applied migration must not be rewritten; remedy is a comment-only follow-up | yes (doc note) | no |
-| REQ-GOV-014 | The repository is the audit trail: docs reflect production truth | IMPLEMENTED_CURRENT_BEHAVIOR | — | — | 774 markdown files | **CONTRADICTED** | — | **BROKEN** | `APPLIED_LEDGER.md` 43 false entries; 28 stale worktrees registered; **and 105 of 225 migration files still carry `PENDING APPLY` / `NOT YET APPLIED` headers, including the entire 2026-08-17 train that the live ledger proves applied** — a reader trusting file headers will believe shipped modules are switched off | yes | no |
-| REQ-GOV-016 | Every production migration has a corresponding repo file | APPROVED_CURRENT_INTENT — doctrine §16 (ledger integrity, never `db push`) | — | Production ledger holds `20260705240000_agency_legacy_retype` with **no file in this repo** (recorded in the header of `20260705250000_journal_photos_project_gallery.sql`, which was renumbered to avoid the collision). Repo 225 files vs production 213 applied | — | **CONTRADICTED** | migration-safety CI | **BROKEN** | At least one applied production migration is unreproducible from the repo — a rebuild-from-scratch would not reach the current schema | no | **yes** |
+| REQ-GOV-014 | The repository is the audit trail: docs reflect production truth | IMPLEMENTED_CURRENT_BEHAVIOR | `check:migration-parity` (live gate) | — | 776 markdown files | **PARTIAL** — migration truth is now machine-checked against production; worktree and header staleness remain | parity model tests | **PARTIAL** | Migration truth closed (register + live gate + 0 orphans). Still open, and deliberately so: **105 migration FILE headers still say `PENDING APPLY`/`NOT YET APPLIED`** while the ledger proves them applied. Those files are NOT edited — an applied migration's SQL must not change (doctrine §16) and its LF-SHA256 is pinned in the human-gate records. The banner tells readers to trust the register, not the header. 28 stale worktrees also remain | partly | no |
+| REQ-GOV-016 | Every production migration has a corresponding repo file | APPROVED_CURRENT_INTENT — doctrine §16 (ledger integrity, never `db push`) | `scripts/check-migration-parity.mts` — fails on any applied migration with no file, and on any stale reviewed excuse | the one genuine orphan `20260705240000_agency_legacy_retype` RESTORED byte-exact from `schema_migrations.statements`, with a paired rollback | — | **VERIFIED_PRODUCTION 2026-08-18** — 225 applied vs 228 repo files, **0 orphans**, checked live | 14 tests incl. stale-excuse and duplicate-slug cases | **VERIFIED_PRODUCTION** | CLOSED. The audit's severity was overstated: 8 of 9 apparent orphans were split/union/follow-up applies of files that DO exist, and the single genuine orphan was a DML data migration, so schema reproducibility was never actually broken — provenance was. Register: `docs/migrations/production-parity-register.md` | yes | no |
 | REQ-GOV-015 | Roles are a fixed RBAC set (worker/company/agency/customer/admin); `team_leader` and `hr_personnel` are future/vision only, modelled as org positions, never new RBAC entries | APPROVED_CURRENT_INTENT — `PROJECT_VISION` §7 owner decision 2026-06-10; doctrine §5.2/§10 boundary note | `Role` union | `active_role` CHECK | RoleSwitcher | VERIFIED_PRODUCTION | `role-dashboards.test.ts` | VERIFIED_PRODUCTION | Depends on REQ-ORG-004 (positions registry) which is MISSING | no | no |
 
 ---
@@ -911,3 +911,83 @@ REQ-OPS-031 MISSING → PARTIAL with this ruling.)
 | U-11 | REQ-OPS-007 | Should a worker be able to produce a timesheet for work logged on their **personal** engagement? `timesheets.organization_id` is `NOT NULL`, which is the single reason the org sheet is empty despite real recorded hours. |
 | U-12 | REQ-OPS-007 | Do we want **per-activity** reviewer decisions (the one semantic `journal_entry_work_items` carried), or is per-entry confirmation sufficient? |
 | U-13 | REQ-SKILL / journal | `extract-journal-suggestions` loses composite durations: *"valandą dvidešimt minučių"* (1 h 20 min) stored as `20 minutes`, *"valandą su puse"* (1.5 h) stored as `1 hours`, on real production rows. Correcting the stored values would be a silent migration of the worker's evidence and was deliberately NOT done. |
+
+---
+
+## MIGRATION-TRUTH CLUSTER CLOSED (2026-08-18) — REQ-GOV-016 / REQ-PLAT-017 / REQ-GOV-014
+
+Register: `docs/migrations/production-parity-register.md` · gate:
+`pnpm check:migration-parity` · model: `apps/web/lib/migrations/parity-model.ts`.
+
+**Live result:** 225 migrations applied to production, 228 files in the repo,
+**0 applied with no file**, 9 files not yet applied (all genuinely pending or a
+documented superseded draft).
+
+### The audit's severity on REQ-GOV-016 was overstated — corrected
+
+The audit read: *"Repo 225 files vs production 213 applied … at least one
+applied production migration is unreproducible from the repo — a
+rebuild-from-scratch would not reach the current schema."* Checked row by row:
+
+* **8 of the 9 apparent orphans are not missing files** — they are split, union
+  or follow-up applies whose content already lives in an existing repo file.
+  Each was verified against that file's contents, not assumed.
+* **1 was a genuine orphan**, `20260705240000_agency_legacy_retype`, recovered
+  byte-exact from `schema_migrations.statements` and restored with a rollback.
+* **That orphan is DML, not DDL.** It retyped 3 `companies` rows. A
+  rebuild-from-scratch has no such rows, so **schema reproducibility was never
+  broken.** What was broken is provenance — a data change to production with no
+  record in the repo. That is now closed.
+
+A live-data finding recorded rather than smoothed over: one of the three rows
+has since been changed back by a later legitimate action, so replaying that
+statement against production today would overwrite it. The restored file says
+so and is marked DO-NOT-RE-APPLY.
+
+### What was deliberately NOT done
+
+**105 migration file headers still read `PENDING APPLY` / `NOT YET APPLIED`
+while the ledger proves them applied — and they are left alone.** Editing an
+applied migration is forbidden (doctrine §16) and their LF-SHA256 values are
+pinned in the human-gate records. Correcting the banners would mean editing
+applied SQL files to make a document look tidy. The register is the answer
+instead, and `APPLIED_LEDGER.md` now opens with a banner saying so.
+
+Likewise the ledger's 43 false `PENDING APPLY` / `Deferred` prose entries are
+**not** rewritten: they record what each session believed at the time, which is
+what an audit trail is for. The banner names the ≥6 known-false ones and states
+that where prose and register conflict, the register wins.
+
+### Matrix delta
+
+| ID | Was | Now | Why |
+|---|---|---|---|
+| REQ-GOV-016 | **BROKEN** | **VERIFIED_PRODUCTION** | 0 orphans, checked live against production, with a gate that fails on a new one and on a stale excuse |
+| REQ-PLAT-017 | **BROKEN** | **PARTIAL** | machine-checked register is production-verified; the prose entries are still stale by deliberate choice |
+| REQ-GOV-014 | **BROKEN** | **PARTIAL** | migration truth closed; 105 stale file headers and 28 stale worktrees remain |
+
+### Roll-up (194 rows, unchanged total)
+
+| Status | Count |
+|---|---:|
+| IMPLEMENTED_NOT_PROVEN | 72 |
+| PARTIAL | 42 |
+| VERIFIED_PRODUCTION | 39 |
+| MISSING | 18 |
+| BROKEN | 7 |
+| NOT_REQUIRED | 9 |
+| VERIFIED_TEST_ENVIRONMENT | 5 |
+| UNKNOWN_OWNER_DECISION_REQUIRED | 2 |
+| **Total** | **194** |
+
+### Remaining BROKEN (7)
+
+`REQ-PLAT-010` (RU/NL/DE landing hero is raw English) · `REQ-SKILL-006` (ESCO
+concept ids never persist) · `REQ-PAY-001` + `REQ-PAY-002` (no real payment
+path — **owner-gated**: billing activation and payment keys) · `REQ-GOV-003`
+(no general `audit_logs` writer) · `REQ-GOV-007` (leaked-password protection /
+OTP expiry — **owner-gated**: a Supabase dashboard setting, not code) ·
+`REQ-GOV-013` (cosmetic foreign product name in a shipped migration comment —
+remedy is documentation-only; an applied migration is never edited).
+
+Autonomously actionable next: `REQ-GOV-003`, `REQ-SKILL-006`, `REQ-PLAT-010`.

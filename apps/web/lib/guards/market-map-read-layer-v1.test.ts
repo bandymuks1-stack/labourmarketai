@@ -595,7 +595,10 @@ describe("NO new DB migration in this PR", () => {
     // 2026-08-18: 227 after 20260818150000_journal_canonical_work_time_v1
     // (the canonical work-time train). Still nothing from the market-map read
     // layer itself — recount, never take a rebase side verbatim.
-    expect(count).toBeLessThanOrEqual(227);
+    // 2026-08-18: 228 after restoring 20260705240000_agency_legacy_retype, an
+    // ALREADY-APPLIED production migration whose file was never committed.
+    // Still nothing from the market-map read layer itself.
+    expect(count).toBeLessThanOrEqual(228);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
