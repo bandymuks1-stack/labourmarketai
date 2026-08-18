@@ -149,3 +149,49 @@ Non-negotiable principles for the sequence:
 - No unlabeled fake data — placeholders allowed only when visually marked as `preview` / `concept` / `not live yet`; the word "demo" is banned from all product copy (doctrine §18, enforced by `lib/guards/product-copy-forbidden-terms.test.ts`); no fake verification; no fake AI (§7)
 
 See the strategic doc for full rationale.
+
+---
+
+## CANONICAL WORKSPACE ROOTS — path guard (installed 2026-08-14)
+
+Exactly ONE directory per project is canonical. Never create a second full clone of a project.
+
+| Project | Canonical root |
+|---|---|
+| AGENTAI | `C:\Users\Mano\Documents\agantai` |
+| LABOURMARKET.AI | `C:\Users\Mano\Documents\labourmarketai` |
+| REXORA | `C:\Users\Mano\Documents\rexora-ai-automation-storefront` |
+| VISMANTAS | `C:\Users\Mano\Documents\naujas vismanto` |
+
+### Pre-flight check — run BEFORE any file change
+
+Establish and agree on all five values:
+
+- `EXPECTED_PROJECT`
+- `EXPECTED_CANONICAL_ROOT`
+- `ACTUAL_REPO_ROOT`  — `git rev-parse --show-toplevel`
+- `REMOTE`            — `git remote get-url origin`
+- `HEAD`              — `git rev-parse --abbrev-ref HEAD`
+
+On ANY mismatch: **STOP** and ask the owner. Do not "helpfully" switch directories,
+re-clone, or create a new working copy.
+
+### Temporary worktree lifecycle
+
+    temporary worktree -> work -> PR -> merge/close -> verify -> git worktree remove -> git worktree prune
+
+A worktree is TEMPORARY by default. Do not leave merged worktrees on disk; they are how
+this workspace reached 200+ directories and 226 GB.
+
+### Before deleting any worktree directory
+
+All four must hold, checked file-by-file:
+
+1. working tree clean            — `git diff HEAD --name-only` empty
+2. zero untracked                — `git ls-files --others --exclude-standard` empty
+3. nothing unpushed              — `git rev-list --count HEAD --not --remotes` = 0
+4. no unique gitignored files    — `git ls-files --others --ignored --exclude-standard`
+
+Gitignored files (`.env.local`, `runtime/` artifacts, `.playwright-proofs/`, screenshots)
+are **destroyed** by directory deletion and are NOT recoverable from git. Archive them
+with hash verification first, or keep the directory. If a remaining file is unclear: **KEEP**.
