@@ -787,3 +787,60 @@ reachability, not a call graph — a table written through a runtime-constructed
 be missed. No browser journey, mobile width or UX coherence was verified. Migration
 *apply* state was taken from the master report's live-ledger read of 2026-08-18 04:13 UTC,
 **not** from migration file headers, which are demonstrably stale (REQ-GOV-014).
+
+---
+
+## CHECKPOINT DELTA — 2026-08-18, after PR #1184 and #1185 merged
+
+Baseline at reconstruction: 37 VERIFIED_PRODUCTION · 72 IMPLEMENTED_NOT_PROVEN ·
+38 PARTIAL · 11 BROKEN · 20 MISSING · 5 VERIFIED_TEST_ENVIRONMENT ·
+9 NOT_REQUIRED · 2 UNKNOWN (194 total).
+
+### Moved to VERIFIED_PRODUCTION
+
+**Public job discovery / anonymous job preview / SEO-addressable vacancy URL**
+(MISSING → VERIFIED_PRODUCTION). Merged as #1184 (`ec1a5941`), live at
+`https://labourmarket.ai/{lt,en,ru}/jobs` (all HTTP 200).
+
+Evidence, gathered on the REAL production site in an anonymous session:
+- the 95 KB payload of a live job page contains NONE of the restricted values
+  (employer name, city, region, application URL, external id, description head),
+  each checked against the values read from that row first;
+- title and licence attribution ARE present; the locked section renders;
+- no JobPosting schema is emitted (it would require restricted fields);
+- as the `anon` role, a direct read of `public_vacancies` still fails 42501 —
+  the projection is what changed, not the RLS.
+
+### Confirmed BROKEN with production evidence (unchanged status, now diagnosed)
+
+**Timesheets, and workload/capacity.** `journal_entry_work_items` has **0 lifetime
+inserts** — it has never received a row — and no writer exists in any migration or
+any TypeScript path. `timesheet_compute_lines_v1` derives lines only from it, so
+every timesheet can only ever be empty; `lib/planning/workload-model.ts` reads the
+same empty table.
+
+The hours DO exist, in `journal_entry_metrics`: `fragment_time`/hours 10 rows
+totalling 27, `quantity`/hours 6 rows totalling 42, `fragment_time`/minutes 2 rows
+totalling 35, plus `work_date` on 32 entries. The seam is half-wired — the same
+function already reads `work_date` from metrics while reading HOURS from the empty
+table. This is the duplicated-truth-store problem the principle test flagged, not a
+simple bug, so which store is canonical is an owner-level call. Blast radius today
+is zero (`timesheets` also has 0 lifetime inserts).
+
+### Correction to a previously reported finding
+
+`main` was reported as carrying a red `financial-ops` guard. **That was wrong** —
+`main`'s Quality Gates runs are green and this never failed on CI. It reproduced
+only on a Windows checkout: no `.gitattributes`, so `*.sql` materialises with CRLF
+(957 CR characters in the procurement migration) against a `\n`-exact assertion.
+Fixed in #1185 (`d699e273`) by normalising at the read — the applied migration was
+not touched. Local suite went from 1 failed/12,214 passed to 678 files and
+12,213 tests green.
+
+### Process finding worth recording
+
+Applying the preview migration to production BEFORE merging made the live
+`check-anon-secdef-allowlist` gate fail on every unrelated branch, because the
+allowlist entries only existed on the feature branch. PR #1185 was blocked by a
+condition it did not cause until #1184 merged. Apply-before-merge has this cost;
+merge order is not optional once a live catalog gate exists.
