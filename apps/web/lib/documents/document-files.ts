@@ -4,14 +4,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  EMPTY_ORG_REGISTER_FILTERS,
+  ORG_DOCUMENT_WORKFLOW_CONTEXT,
   currentDocumentFile,
   deriveAckProgress,
   isDocumentFileAbsentCode,
   type AckProgress,
   type DocumentFileRow,
+  type OrgDocumentApprovalState,
   type OrgDocumentClassification,
   type OrgDocumentRow,
   type OrgDocumentStatus,
+  type OrgRegisterFilters,
 } from "@/lib/documents/document-file-model";
 import {
   emitOrgDocumentExpiringNotifications,
@@ -138,30 +142,116 @@ export type OrgDocumentRegisterResult =
   | {
       readonly kind: "ok";
       readonly entries: readonly OrgRegisterEntry[];
+      /** True only when the register DELTA migration (20260817240000) really
+       *  answered here. False ⇒ the correspondence / object / retention /
+       *  approval affordances render nothing at all — never an empty column
+       *  pretending the data exists. */
+      readonly deltaAvailable: boolean;
+      /** The filters actually applied (echoed so the UI cannot claim a
+       *  filter that the environment could not honour). */
+      readonly filters: OrgRegisterFilters;
     }
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
 
+/** Train C column list — the contract that exists once 20260817140000 is
+ *  applied. `retention_until` / `retention_note` are train C columns whose
+ *  first WRITER arrives with the delta migration. */
+const REGISTER_BASE_COLUMNS =
+  "id, organization_id, document_type_slug, title, description, status, classification, responsible_profile_id, worker_id, project_id, external_ref, valid_from, expires_on, retention_until, retention_note, created_at";
+
+/** …plus the delta columns (20260817240000). */
+const REGISTER_DELTA_COLUMNS = `${REGISTER_BASE_COLUMNS}, object_id, counterparty_name, correspondence_date, counterparty_reference, approval_state`;
+
+/** PostgREST answers 42703 when a COLUMN is unknown — that is precisely the
+ *  "train C applied, delta not applied yet" state, and it must NOT hide the
+ *  whole register the way a missing TABLE does. */
+const UNDEFINED_COLUMN_CODE = "42703";
+
 /** The org register for ONE organization (the caller's RLS decides which
- *  rows answer — managers see everything, members see active standard). */
+ *  rows answer — managers see everything, members see active standard).
+ *
+ *  Filters are applied SERVER-SIDE (so the row cap is spent on matches, not
+ *  on rows the caller filtered away); `q` is a bounded ILIKE over register
+ *  METADATA only — never inside a file. */
 export async function getOrgDocumentRegister(
   organizationId: string,
+  filters: OrgRegisterFilters = EMPTY_ORG_REGISTER_FILTERS,
 ): Promise<OrgDocumentRegisterResult> {
   try {
     const supabase = await createClient();
-    const { data, error } = await asAny(supabase)
-      .from("org_documents")
-      .select(
-        "id, organization_id, document_type_slug, title, description, status, classification, responsible_profile_id, worker_id, project_id, external_ref, valid_from, expires_on, created_at",
-      )
-      .eq("organization_id", organizationId)
-      .order("created_at", { ascending: false })
-      .limit(REGISTER_READ_LIMIT);
+
+    const todayIso = new Date().toISOString().slice(0, 10);
+
+    // Filters are applied BEFORE order/limit so the row cap is spent on
+    // matches, and so the chain never depends on a transform builder still
+    // exposing filter methods.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const applyFilters = (q: any, delta: boolean) => {
+      let out = q.eq("organization_id", organizationId);
+      if (filters.status) out = out.eq("status", filters.status);
+      if (delta) {
+        if (filters.direction) {
+          out = out.eq(
+            "document_type_slug",
+            filters.direction === "incoming"
+              ? "org_correspondence_incoming"
+              : "org_correspondence_outgoing",
+          );
+        }
+        if (filters.objectId) out = out.eq("object_id", filters.objectId);
+        if (filters.retention === "scheduled") {
+          out = out.gt("retention_until", todayIso);
+        } else if (filters.retention === "due") {
+          out = out.lte("retention_until", todayIso);
+        }
+      }
+      if (filters.q) {
+        // `filters.q` is sanitized by parseOrgRegisterFilters: no comma,
+        // parenthesis, dot or star can reach the `or=` grammar.
+        const like = `*${filters.q}*`;
+        const cols = delta
+          ? [
+              `title.ilike.${like}`,
+              `description.ilike.${like}`,
+              `external_ref.ilike.${like}`,
+              `counterparty_name.ilike.${like}`,
+              `counterparty_reference.ilike.${like}`,
+            ]
+          : [
+              `title.ilike.${like}`,
+              `description.ilike.${like}`,
+              `external_ref.ilike.${like}`,
+            ];
+        out = out.or(cols.join(","));
+      }
+      return out.order("created_at", { ascending: false }).limit(REGISTER_READ_LIMIT);
+    };
+
+    let deltaAvailable = true;
+    let res = await applyFilters(
+      asAny(supabase).from("org_documents").select(REGISTER_DELTA_COLUMNS),
+      true,
+    );
+    if (res.error && res.error.code === UNDEFINED_COLUMN_CODE) {
+      // Train C is live, the delta is not applied here yet. Fall back to the
+      // train C contract and tell the UI the delta axes are unavailable.
+      deltaAvailable = false;
+      res = await applyFilters(
+        asAny(supabase).from("org_documents").select(REGISTER_BASE_COLUMNS),
+        false,
+      );
+    }
+    const { data, error } = res;
     if (error) {
       return isDocumentFileAbsentCode(error.code)
         ? { kind: "needs-migration" }
         : { kind: "error" };
     }
+
+    const appliedFilters: OrgRegisterFilters = deltaAvailable
+      ? filters
+      : { ...filters, direction: null, objectId: null, retention: null };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const docs: OrgDocumentRow[] = ((data ?? []) as any[]).map((r) => ({
@@ -179,7 +269,37 @@ export async function getOrgDocumentRegister(
       validFrom: (r.valid_from as string | null) ?? null,
       expiresOn: (r.expires_on as string | null) ?? null,
       createdAt: r.created_at as string,
+      objectId: (r.object_id as string | null) ?? null,
+      counterpartyName: (r.counterparty_name as string | null) ?? null,
+      correspondenceDate: (r.correspondence_date as string | null) ?? null,
+      counterpartyReference:
+        (r.counterparty_reference as string | null) ?? null,
+      retentionUntil: (r.retention_until as string | null) ?? null,
+      retentionNote: (r.retention_note as string | null) ?? null,
+      approvalState: (r.approval_state as OrgDocumentApprovalState | null) ?? null,
     }));
+
+    // READ-REPAIR of the approval mirror: converge every 'submitted' row
+    // onto the workflow engine's terminal truth. Idempotent gated RPC; a
+    // still-pending instance answers 'unchanged'. Never decides anything.
+    if (deltaAvailable) {
+      const submitted = docs.filter((d) => d.approvalState === "submitted");
+      for (const row of submitted) {
+        const sync = await asAny(supabase).rpc(
+          "sync_org_document_approval_v1",
+          { p_org_document_id: row.id },
+        );
+        const outcome = sync.error ? "" : String(sync.data ?? "");
+        if (outcome === "repaired_approved") {
+          // Mutating the local copy is the same convergence the DB just did.
+          const i = docs.findIndex((d) => d.id === row.id);
+          if (i >= 0) docs[i] = { ...docs[i], approvalState: "approved" };
+        } else if (outcome === "repaired_returned") {
+          const i = docs.findIndex((d) => d.id === row.id);
+          if (i >= 0) docs[i] = { ...docs[i], approvalState: "returned" };
+        }
+      }
+    }
 
     let files: DocumentFileRow[] = [];
     if (docs.length > 0) {
@@ -236,9 +356,61 @@ export async function getOrgDocumentRegister(
     // Durable expiry facts for the register's responsible people.
     emitOrgDocumentExpiringNotifications(organizationId);
 
-    return { kind: "ok", entries };
+    return { kind: "ok", entries, deltaAvailable, filters: appliedFilters };
   } catch {
     return { kind: "error" };
+  }
+}
+
+export type OrgDocumentApprovalDefinition = {
+  readonly id: string;
+  readonly name: string;
+};
+
+/**
+ * PUBLISHED workflow definitions of the acting org carrying the context
+ * this module rides ('generic_request'). An empty list is honest
+ * degradation: the register still works, the approval control simply does
+ * not render (no approval is ever faked). Mirrors
+ * `listAgreementApprovalDefinitions`.
+ */
+export async function listOrgDocumentApprovalDefinitions(
+  organizationId: string,
+): Promise<readonly OrgDocumentApprovalDefinition[]> {
+  try {
+    const supabase = await createClient();
+    const defRes = await asAny(supabase)
+      .from("workflow_definitions")
+      .select("id, name")
+      .eq("organization_id", organizationId)
+      .eq("context_entity_type", ORG_DOCUMENT_WORKFLOW_CONTEXT)
+      .eq("is_active", true)
+      .limit(50);
+    if (defRes.error) return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const defs = (defRes.data ?? []) as any[];
+    if (defs.length === 0) return [];
+
+    const verRes = await asAny(supabase)
+      .from("workflow_definition_versions")
+      .select("definition_id, published_at")
+      .in(
+        "definition_id",
+        defs.map((d) => String(d.id)),
+      )
+      .not("published_at", "is", null)
+      .limit(100);
+    const published = new Set(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((verRes.error ? [] : (verRes.data ?? [])) as any[]).map((v) =>
+        String(v.definition_id),
+      ),
+    );
+    return defs
+      .filter((d) => published.has(String(d.id)))
+      .map((d) => ({ id: String(d.id), name: String(d.name ?? "") }));
+  } catch {
+    return [];
   }
 }
 

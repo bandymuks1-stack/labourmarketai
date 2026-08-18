@@ -471,6 +471,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260817190000_employee_lifecycle_v1, RECOUNTED after merging
     // origin/main 66c869a4 with trains C/D/E/L1/F/H in the base) — floor
     // semantics unchanged.
+    // Cross-pin follows: 217 -> 218 for the org document register delta v1
+    // draft (20260817240000_org_document_register_delta_v1, train I,
+    // LEAD-gated, UNAPPLIED; RECOUNTED from the post-rebase tree with train
+    // G also in the base) — floor semantics unchanged, no numeric edit
+    // needed here.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,
