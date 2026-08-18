@@ -399,10 +399,44 @@ That check was not run this train, so no directory was removed.
 | Signed-in user can execute SECURITY DEFINER function | 353 | **By design** — the architecture is RPC-only writes; not a defect |
 | Public (anon) can execute SECURITY DEFINER function | 4 | **By design** — public business profile/listings/services + public company-need intake |
 | RLS enabled, no policy | 3 | **By design** — operator-only tables (`vacancy_import_cursors`, `company_need_public_intakes`, a backfill ledger) fail closed |
-| **Security Definer VIEW** `worker_absence_scheduling` | **1 (ERROR)** | **REAL — needs review.** A definer view bypasses the querying user's RLS |
+| **Security Definer VIEW** `worker_absence_scheduling` | **1 (ERROR)** | ~~**REAL — needs review.**~~ **REVIEWED 2026-08-18 evening — intentional and correct.** See below |
 | Function search_path mutable | 2 | Low — both are `usage_cost_events` guard triggers |
 | **Leaked password protection disabled** | 1 | **REAL — one-click owner fix** |
 | Auth OTP long expiry | 1 | REAL — owner fix |
+
+### RE-SWEEP 2026-08-18 evening — 373 advisors (was 365)
+
+Re-read live from `gorgitwvdzxbnaxhrsrw`. The delta is **+8 → 357 authenticated
+secdef and 4 → 8 anon secdef**, entirely accounted for by the job-board train
+(#1184, #1190): `count_public_vacancies_v1`, `get_public_vacancy_preview_v1`,
+`search_public_vacancy_previews_v1`, `list_public_vacancy_sitemap_v1`.
+
+**All 8 anon-executable definer functions are exactly the 8 entries in
+`apps/web/lib/security/anon-secdef-allowlist.ts`** — set equality, checked
+name by name. Nothing anon-reachable is ungoverned.
+
+### `worker_absence_scheduling` — the one ERROR, closed
+
+The advisor is correct that the view is `SECURITY DEFINER`, and that is
+**deliberate, owner-approved and documented**, not an oversight:
+
+- `supabase/migrations/20260808120000_worker_absence_scheduling_view_v1.sql`
+  rejects `security_invoker = true` explicitly and on the merits — such a view
+  inherits the base table's RLS, so an employer who can read the row through
+  the view can still read the base table with every column. It is *"ergonomics,
+  not a boundary."*
+- The view is the boundary: it carries `caller_manages_worker() OR is_admin()
+  OR self` as its **own** predicate — the same function the base policy used, so
+  there is one authorization rule, not two — and selects only
+  `id, worker_id, start_date, end_date, half_day, status`. **There is no `note`
+  and no `absence_type` column to leak.**
+- Grants are narrow: `revoke all … from anon`, `grant select … to authenticated`.
+- Owner decision recorded 2026-08-08 in
+  `docs/human-gates/w12-absence-privacy-hardening-gate.md`, with the SQL pinned
+  by sha256.
+
+**No code change is warranted.** A future advisor sweep will raise this ERROR
+again; this section is the standing answer.
 
 Positives worth recording: append-only ledgers are **trigger-enforced against `service_role` itself**
 (consent, disclosures, workflow transitions, timesheet/agreement/procurement/trip/training/review/
@@ -415,6 +449,30 @@ decision events). The rolled-back E2E confirms these guards hold in production.
 No mobile or responsive verification was performed. This is stated as a gap rather than guessed at.
 Priority journeys still needing real mobile proof: landing, signup, Google login, onboarding, profile,
 avatar, CV, job browsing (once it exists), workspace/chat, journal, approvals.
+
+**2026-08-18 evening — why this is still open, precisely.** It was attempted, not
+skipped. A production build was served locally and Chromium is available in the
+session, so the browser side is not the obstacle. The obstacle is one setting:
+the session's **network egress allowlist does not include
+`gorgitwvdzxbnaxhrsrw.supabase.co`**, so every data-backed route fails at the
+first query:
+
+```
+Host not in allowlist: gorgitwvdzxbnaxhrsrw.supabase.co.
+Add this host to your network egress settings to allow access.
+```
+
+Measured against the locally-served production build with that block in place:
+`/lt` **200**, `/lt/about` **200**, `/robots.txt` **200** — the static surface
+renders fine. `/lt/jobs` **500** and `/jobs-sitemap.xml` **500**, both purely
+because the database is unreachable from here. `/lt/jobs` does render the
+localised `[locale]/error.tsx` boundary rather than a blank page.
+
+**This is an environment permission, not a repo defect, and it is the single
+thing standing between this repo and real mobile evidence.** Adding that host
+(and the Vercel preview host) to the environment's egress settings converts
+every "NOT VERIFIED" row in §O and in the coverage section into something an
+agent can actually prove.
 
 ---
 
@@ -431,14 +489,25 @@ AI cost per user (`usage_cost_events` empty); job-view and application rates (no
 
 ## Q. GO-LIVE BLOCKERS
 
+> **STATUS RE-VERIFIED 2026-08-18 evening against `main` @ `b596df8a` and live
+> production. Four of these seven were already closed when this list was
+> written or shortly after; leaving them standing was costing every later
+> session a re-investigation. Struck items below are done — the evidence is
+> named inline, not asserted.**
+
 **P0 — must fix before inviting the public**
-1. **No job browsing surface.** Wire `searchPublicVacancies` to a real page. *(Safe, unambiguous, no owner decision needed.)*
-2. **Job supply invisible to anonymous visitors and search engines** — needs an explicit owner decision on whether public job browsing is allowed without login (product + legal choice).
-3. **Payments cannot run** — owner action required (live Stripe account + keys).
-4. **`APPLIED_LEDGER.md` stale** — 43 false `PENDING APPLY` entries. *(Safe to fix.)*
-5. **Leaked-password protection disabled** — owner action, one click.
-6. `worker_absence_scheduling` SECURITY DEFINER view — needs review.
-7. Mobile journeys unverified.
+1. ~~**No job browsing surface.**~~ **DONE (#1184, #1190).** `app/[locale]/(marketing)/jobs/page.tsx` and `jobs/[id]/page.tsx` exist and read the public projection; `nav.jobs` is in all 11 catalogues.
+2. ~~**Job supply invisible to anonymous visitors and search engines.**~~ **DONE (#1184, #1190).** The owner decision was taken (directive §5: publicly discoverable, anonymous callers get a projection only). Anonymous access runs through 4 allowlisted definer functions, plus `/jobs-sitemap.xml` and sharded sitemaps.
+3. **Payments cannot run** — owner action required (live Stripe account + keys). **STILL OPEN — owner-gated.**
+4. ~~**`APPLIED_LEDGER.md` stale** — 43 false `PENDING APPLY` entries.~~ **DONE (#1187), and the fix was better than "correct the entries".** The ledger now opens with a warning header naming itself a secondary record, and the machine-checked answer lives in `docs/migrations/production-parity-register.md`, generated from a live read and pinned by `apps/web/lib/migrations/parity-model.ts`. The old entries stay **deliberately** unrewritten — they are the audit trail of what each session believed. *Independently re-checked this evening:* of the 31 file names still carrying `PENDING APPLY`, **28 are applied in production** (name-matched, then confirmed object-by-object — `work_tasks`, `timesheets`, `agreements`, `procurement_inquiries`, `business_trips`, `training_programs`, `review_cycles`, `management_decisions`, `work_objects`, `workflow_definitions`, `org_documents` and the rest all exist), 2 are the reviewed notification union, and exactly **1 is genuinely pending: `company_locations_v1` — `to_regclass('public.company_locations')` returns NULL.** The parity model already knew something the raw name match did not: `20260714210000_company_memberships_v1` is a superseded draft, and the applied file is `20260806090000`. **Read the register, not the banners — and not a hand-rolled name match either.**
+5. **Leaked-password protection disabled** — owner action, one click. **STILL OPEN — owner-gated** (advisor `auth_leaked_password_protection` still fires).
+6. ~~`worker_absence_scheduling` SECURITY DEFINER view — needs review.~~ **REVIEWED, no change warranted.** The definer property is the deliberate privacy boundary, owner-approved 2026-08-08 with the SQL pinned by sha256. Full reasoning in §N.
+7. **Mobile journeys unverified.** **STILL OPEN, and now blocked on one environment setting, not on the repo** — the session's egress allowlist excludes the Supabase host. See §O for the measured route-by-route result and the exact error.
+
+**So the real P0 remainder is three items, and all three are owner actions:**
+Stripe keys (#3), the leaked-password toggle (#5), and adding
+`gorgitwvdzxbnaxhrsrw.supabase.co` to the environment's egress allowlist so
+mobile/browser journeys (#7) can be proven at all.
 
 **P1 — business growth**
 Second job market; employer canonicalisation from 8,124 employer names; contact funnel; AI switched
