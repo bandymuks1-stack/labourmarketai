@@ -408,7 +408,7 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 | REQ-PLAT-007 | Dynamic user content is **translated on read** and cached with TTL | APPROVED_CURRENT_INTENT — doctrine §2.1 "Translated on read, cached in Redis/edge, TTL ~30 days" | `lib/translation/translation-service.ts` is an honest **interface**, no provider connected | `public_vacancies` carries `translation_target_language/status/title_text/description_text/provider`; work instructions carry `original_language` + `translated_text` | honest degradation | **UNKNOWN — status resolves to `unavailable`, publisher's own words shown** | `translation-service-honesty.test.ts`, `conversations-language.test.ts` | **PARTIAL** | Schema and degradation path exist; **no provider is wired**, so 44,113 Swedish ads render in Swedish to an lt/en/ru/nl/de audience. Wiring a provider is an owner-gated RED action | no | **yes** (cost/provider) |
 | REQ-PLAT-008 | Platform taxonomy is slug + per-locale JSON; no hardcoded enums for extensible taxonomy | APPROVED_CURRENT_INTENT — doctrine §10 | `messages/{locale}/*.json` | slug registries | — | VERIFIED_PRODUCTION | `skill-installation-chain.test.ts` | VERIFIED_PRODUCTION | — | no | no |
 | REQ-PLAT-009 | 11 full-UI locales exist at all times; FI as taxonomy-only; no PR may remove a locale | APPROVED_CURRENT_INTENT — doctrine §2.4 | `lib/i18n/config.ts` | — | 5 routed | PARTIAL (5 of 11 routed) | `i18n-lt-en-parity.test.ts`, `i18n-debt.test.ts` | PARTIAL | 6 catalogue locales at ~40% key coverage, correctly not routed | no | yes (activation) |
-| REQ-PLAT-010 | ACTIVE locales (lt/en/ru) receive real translations in the same PR | APPROVED_CURRENT_INTENT — doctrine §2.4 | catalogues | — | — | VERIFIED_PRODUCTION (99.33% RU) | parity guards | **BROKEN** | 37 `landing.hero.*` keys are raw English for RU/NL/DE — the first screen a Russian visitor sees; invisible to every existing guard | **yes** | no |
+| REQ-PLAT-010 | ACTIVE locales (lt/en/ru) receive real translations in the same PR | APPROVED_CURRENT_INTENT — doctrine §2.4; **OWNER DECISION U-15** (RU approved) | catalogues + **`i18n-untranslated-ratchet.test.ts`** — the first guard that measures untranslated-ness at all | — | — | **RU landing hero translated 44→3** under U-15, through the repo's own governed baseline mechanism | parity guards + 11 ratchet tests + landing-freeze green | **PARTIAL** | **RU closed** — the requirement names lt/en/ru, and all three are now real. The freeze was NOT bypassed: the baseline moved by exactly one hash (`ru.landing`) via `scripts/generate-landing-freeze-baseline.ts`, recorded in `docs/audits/landing-freeze-baseline-update-2026-08-18.md`. NL/DE hero (44/45 English values) are translated but held in a separate PR so U-15 does not implicitly approve unrelated marketing wording | yes (NL/DE pending owner wording review) | no |
 | REQ-PLAT-011 | Adding a launch market must not require core schema migration or UI rework | APPROVED_CURRENT_INTENT — `PROJECT_VISION` §4; ADR 0010 | `countries`, provider registry | yes | — | UNKNOWN | — | IMPLEMENTED_NOT_PROVEN | Never exercised — one country of supply | no | no |
 | REQ-PLAT-012 | No demo/pilot/intermediate layer; honest empty states framed as a founder moment; only an honest "RUOŠIAMA" roadmap allowed | APPROVED_CURRENT_INTENT — doctrine §18 | copy + empty states | — | yes | VERIFIED_PRODUCTION | `product-copy-forbidden-terms.test.ts`, `dashboard-empty-state-clarity.test.ts` | VERIFIED_PRODUCTION | — | no | no |
 | REQ-PLAT-013 | No fake AI, matching, verification, ratings, candidates, companies, jobs or metrics | APPROVED_CURRENT_INTENT — constitution §5, axiom A-06 | placeholder governance | — | `<Placeholder>` | VERIFIED_PRODUCTION (159 entries) | `placeholders:check`, `marketing-copy-no-evidence.test.ts` | VERIFIED_PRODUCTION | — | no | no |
@@ -502,7 +502,7 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 | REQ-OPS-004 | Tasks link to Work Journal entries | APPROVED_CURRENT_INTENT — flywheel §3 (activity context) | **absent** | no link column | — | **MISSING** | — | **MISSING** | Journal auto-links to project only; task link absent, no picker | yes | no |
 | REQ-OPS-005 | Project stages with Gantt and calendar feed | IMPLEMENTED_CURRENT_BEHAVIOR | 3 RPCs | `project_stages` | Gantt | UNKNOWN | — | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-006 | A calendar is a real entity, not only a projection | APPROVED_CURRENT_INTENT — axiom **A-03** (chat → journal → **calendar** → messages) | projection over 8 sources + conflict detection | **no calendar entity** | calendar views | UNKNOWN | `calendar-full-detail.test.ts` | **PARTIAL** | Read-only by construction; cannot own scheduling truth; no shift/roster entity | no | yes |
-| REQ-OPS-007 | Timesheets are a period document **derived** from the Work Journal, with no second hours store | APPROVED_CURRENT_INTENT — Vecticum parity P1 ("no new hours store"); `20260817170000` header; **OWNER RULING 2026-08-18** (`journal_entry_metrics` is canonical) | canonical rule in `lib/journal/work-time.ts` ⇄ `timesheet_compute_lines_v1` (`20260818150000`); export at `planning/timesheets/[id]/export/route.ts` | `timesheets`, `timesheet_events`; source is now `journal_entry_metrics` — `journal_entry_work_items` is DEPRECATED (0 rows, 0 writers, 0 readers, `comment on table`) | `/dashboard/planning/timesheets` | **derivation PROVEN on real production evidence** — 9 real lines where the old code produced 0 (read-only, no synthetic row); the org DOCUMENT is still 0 rows | 30 unit tests + SQL⇄TS guard | **PARTIAL** | BROKEN CHAIN is CLOSED: hours now come from the canonical metrics, double counting is structurally impossible, conflicts are reported not dropped. What remains is NOT a code defect — every hour ever recorded sits on a PERSONAL (org-less) engagement, and `timesheets.organization_id` is NOT NULL, so no org sheet can be non-empty yet. See `docs/audit/journal-canonical-work-time-v1.md` §5 | partly (needs real org-scoped journal usage) | **yes** (allow a personal timesheet? — §6.1) |
+| REQ-OPS-007 | Timesheets are a period document **derived** from the Work Journal, with no second hours store | APPROVED_CURRENT_INTENT — Vecticum parity P1; `20260817170000` header; **OWNER RULING 2026-08-18** (`journal_entry_metrics` canonical) + **OWNER DECISION U-11** (no personal timesheet) | canonical rule `lib/journal/work-time.ts` ⇄ `timesheet_compute_lines_v1` (`20260818150000`, APPLIED to production) | `timesheets`, `timesheet_events`; source `journal_entry_metrics`; `journal_entry_work_items` DEPRECATED (0 rows, 0 writers, 0 readers) | `/dashboard/planning/timesheets` | derivation PROVEN on real production evidence — 9 real lines where the old code produced 0; org documents legitimately 0 | 30 unit tests + SQL⇄TS guard | **IMPLEMENTED_NOT_PROVEN** | BROKEN CHAIN closed. **U-11 settled what "empty" means here**: the Work Journal is the canonical PERSONAL work/evidence surface and org timesheets apply only to work belonging to an organizational engagement. All recorded hours currently sit on personal engagements, so an empty org timesheet is CORRECT BEHAVIOUR, not a gap — and duplicating that truth to make a personal sheet non-empty is explicitly refused. Awaiting a real org-scoped journal entry to become VERIFIED_PRODUCTION | no | **no — settled by U-11** |
 | REQ-OPS-008 | Typed employee requests whose approval lifecycle IS a workflow instance (no per-type approval tables) | APPROVED_CURRENT_INTENT — `20260817180000` header; Vecticum parity P0 | `lib/requests/*` | `employee_requests` (7-type closed vocab) | `/dashboard/network` requests-section | **UNKNOWN — 0 rows** | `employee-requests.test.ts` | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-009 | Leave/absence request → approve/reject/cancel with notifications and manager visibility | APPROVED_CURRENT_INTENT — `PROJECT_VISION` §8 | `lib/leave/absences-actions.ts` | `worker_absences` | `/dashboard/absences` | UNKNOWN | absence guards | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-010 | Leave balances are configurable per org × absence type, derived at read time, **advisory only** — a warning, never a block, no statutory defaults | APPROVED_CURRENT_INTENT — `20260817181000` header | derived | `leave_balance_policies` (0 seeded rows by design) | chip | UNKNOWN | guards | IMPLEMENTED_NOT_PROVEN | — | no | no |
@@ -1067,3 +1067,82 @@ Remaining BROKEN (6): `REQ-PLAT-010`, `REQ-SKILL-006`, `REQ-PAY-001`,
 `REQ-PAY-002`, `REQ-GOV-007`, `REQ-GOV-013` — of which `REQ-PAY-001`,
 `REQ-PAY-002` and `REQ-GOV-007` are owner-gated, and `REQ-GOV-013` is cosmetic
 text inside an applied migration (documentation-only remedy).
+
+
+---
+
+## OWNER DECISIONS RECEIVED 2026-08-18 — U-11 and U-15
+
+### U-11 — personal timesheet: NO (settled)
+
+> Do NOT introduce a separate personal timesheet at this stage. Personal Work
+> Journal remains the canonical personal work/evidence surface. Organization
+> timesheets apply when recorded work belongs to an organization/organizational
+> engagement. Do not duplicate the same work-time truth merely to make a
+> personal timesheet non-empty.
+
+**This resolves the open question from the canonical work-time slice, and it
+changes how the empty org timesheet should be read.** It is not a gap awaiting
+a fix — it is correct behaviour. All work time recorded in production today
+sits on personal (org-less) engagements, and `timesheets.organization_id` is
+`NOT NULL` by design. The document stays empty until a real worker logs hours
+against an organizational engagement, and nothing may be duplicated to make it
+look otherwise.
+
+REQ-OPS-007 moves **PARTIAL → IMPLEMENTED_NOT_PROVEN**: the chain is built,
+proven correct on real evidence, and simply not yet exercised by org-scoped
+usage. No further work is warranted or wanted here.
+
+### U-15 — Russian landing localization: APPROVED, executed
+
+> APPROVED to fix the Russian landing localization properly. Russian is a
+> first-class product language and must not expose raw English where a Russian
+> translation is expected. Do NOT bypass, weaken or silently regenerate the
+> landing-freeze guard/baseline.
+
+Executed exactly that way:
+
+1. **41 `landing.hero.*` values translated** in `ru.json` (44 were byte-identical
+   to English; 3 are bare numbers and legitimately stay).
+2. **The guard was not touched.** `landing-freeze.ts` and its test are
+   unmodified and still hash all 30 files and all 27 namespaces.
+3. **The baseline was regenerated through the repository's own script**
+   (`apps/web/scripts/generate-landing-freeze-baseline.ts`), moving **exactly
+   one hash** — `ru.landing`. Zero files and zero other namespaces changed.
+4. **The regeneration is recorded** in
+   `docs/audits/landing-freeze-baseline-update-2026-08-18.md`, in the same
+   format as the 2026-08-09 precedent: what moved, why, why it is not a
+   redesign, the translation decisions, and how to revert.
+5. **NL/DE are deliberately split out.** Their translation is written but sits
+   in its own PR, so approving the Russian localization does not implicitly
+   approve marketing wording the owner has not read.
+
+REQ-PLAT-010 moves **BROKEN → PARTIAL** — the requirement as written names
+`lt/en/ru`, and all three are now genuinely translated. It stays PARTIAL only
+because NL and DE, which are also active locales, await the separate wording
+review.
+
+### Roll-up after both decisions (194 rows)
+
+| Status | Count |
+|---|---:|
+| IMPLEMENTED_NOT_PROVEN | 73 |
+| PARTIAL | 44 |
+| VERIFIED_PRODUCTION | 39 |
+| MISSING | 18 |
+| BROKEN | 4 |
+| NOT_REQUIRED | 9 |
+| VERIFIED_TEST_ENVIRONMENT | 5 |
+| UNKNOWN_OWNER_DECISION_REQUIRED | 2 |
+| **Total** | **194** |
+
+**Remaining BROKEN (4), none of them code work an agent can do:**
+`REQ-PAY-001` + `REQ-PAY-002` (billing activation and payment keys —
+owner-gated), `REQ-GOV-007` (a Supabase dashboard setting), `REQ-GOV-013`
+(cosmetic text inside an applied migration; applied migrations are never
+edited, so the remedy is documentation-only).
+
+**Still-open owner questions, none blocking:** U-12 (per-activity reviewer
+decisions), U-13 (parser drops composite durations), U-14 (doctrine §3.4 vs
+per-domain event tables), U-16 (is ESCO still the intended canonical matching
+id, or did Matching PR4 supersede it).
