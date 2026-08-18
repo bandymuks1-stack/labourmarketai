@@ -129,7 +129,38 @@ Until that decision is made, this module stays a read-side building block.
 Nothing in the product calls it yet, and nothing should call it in a way that
 renders a registry id to a user.
 
-## 5. How the production numbers here were obtained
+## 5. First consequence found — and deliberately NOT fixed
+
+`count_public_vacancies_v1` computes its employer figure as
+`count(distinct v.employer_name)`. By the finding above that is the wrong key:
+letter-case variants and branch labels each count as a separate employer.
+
+Measured on the live active set (`is_active and (expires_at is null or
+expires_at > now())`) on 2026-08-18:
+
+| | |
+|---|---:|
+| Active vacancies | 40,234 |
+| `distinct_employers` as the function reports it | **7,778** |
+| Distinct employers by identity (registry id, else folded name) | **7,632** |
+| Distinct registry ids | 7,328 |
+
+The function **overstates employers by 146 (+1.91%)**.
+
+**No migration is proposed for this, on purpose.** `readPublicVacancySupplyCounts`
+is called from exactly one place — `app/jobs-sitemap.xml/route.ts` — and that
+route uses only `activeVacancies`, for shard arithmetic. **`distinctEmployers`
+reaches no user-facing surface today**, so the inaccuracy is latent: nobody is
+being told 7,778. Changing a function body means a production migration and the
+owner gate, and spending that gate on a number nothing renders is not a good
+trade.
+
+**This is recorded so the trade is made knowingly.** The moment an employer
+count is put in front of a visitor — a landing proof band, a `/jobs` header, a
+pitch deck — it must be counted by identity, not by name, and this becomes a
+correctness fix worth the migration rather than a latent one.
+
+## 6. How the production numbers here were obtained
 
 Read-only `select` statements through the Supabase MCP connection against
 `gorgitwvdzxbnaxhrsrw`. No writes, no DDL, no migration.
