@@ -153,6 +153,16 @@ const NATIVE_NAV = new Set([
   // lifecycle-section satisfies pending+feedback directly and needs no
   // exemption.)
   "app/[locale]/dashboard/start/my-onboarding-section.tsx",
+  // Training & Certification + Development Reviews + Management Decisions
+  // v1 (train K) — every form in these three sections is a NATIVE-NAV
+  // server action that ALWAYS redirects back to its host page with an
+  // honest `?trn=` / `?rev=` / `?dec=` outcome (rendered as the section's
+  // role="status" notice banner), exactly the org-documents-register and
+  // agreements-register pattern. Pure server components — no client state,
+  // no useTransition.
+  "components/app/training-register.tsx",
+  "components/app/development-reviews-section.tsx",
+  "components/app/management-decisions-section.tsx",
 ]);
 
 const PENDING_SIGNAL =

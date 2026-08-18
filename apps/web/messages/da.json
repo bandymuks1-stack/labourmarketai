@@ -5065,5 +5065,213 @@
       "not_found": "Posten er ikke tilgængelig.",
       "error": "Mislykkedes — prøv igen."
     }
+  },
+  "training": {
+    "title": "Kurser og beviser",
+    "intro": "Kurser, som din organisation beder folk gennemføre, og de beviser, der følger efter.",
+    "evidenceNote": "Et bevis viser, at et kursus er gennemført. Det siger ikke noget om, hvor godt nogen arbejder — det bliver i dine arbejdsnoter og din leders bekræftelser.",
+    "notAvailable": "Kurser er ikke slået til i dette arbejdsrum endnu.",
+    "status": {
+      "assigned": "Skal gøres",
+      "completed": "Færdig",
+      "expired": "Udløbet"
+    },
+    "mine": {
+      "heading": "Dine kurser",
+      "requiredBy": "Inden {date}",
+      "complete": "Marker som færdig",
+      "notePlaceholder": "Kort note (valgfrit)",
+      "completedNote": "Du har markeret det som færdigt."
+    },
+    "org": {
+      "heading": "Din organisations kurser",
+      "programTitle": "Kursets navn",
+      "programDescription": "Hvad kurset dækker",
+      "materialNote": "Kursusmaterialet er et dokument fra listen ovenfor. Bekræftelsen af, at nogen har læst det, bliver i bekræftelseslisten — den gentages ikke her.",
+      "createProgram": "Tilføj kursus",
+      "noPrograms": "Ingen kurser endnu.",
+      "assigneePlaceholder": "Personens e-mail",
+      "requiredByLabel": "Færdig inden",
+      "assign": "Bed denne person",
+      "certificateFilePlaceholder": "Id på beviset",
+      "issuedOnLabel": "Udstedt",
+      "expiresOnLabel": "Gyldigt til",
+      "attachCertificate": "Gem bevis",
+      "markExpired": "Marker som udløbet"
+    },
+    "certificates": {
+      "heading": "Beviser",
+      "note": "Beviser, som folk allerede har, med slutdato. Der gættes ikke — er der ingen dato, vises der ingen.",
+      "none": "Ingen slutdato",
+      "valid": "Gyldigt",
+      "expiring": "Udløber snart",
+      "lapsed": "Udløbet"
+    },
+    "notice": {
+      "created": "Kursus tilføjet.",
+      "updated": "Kursus opdateret.",
+      "assigned": "Sendt til personen.",
+      "already_assigned": "Personen har allerede dette kursus.",
+      "completed": "Markeret som færdig.",
+      "already_completed": "Det var allerede markeret som færdigt.",
+      "attached": "Bevis gemt.",
+      "expired": "Markeret som udløbet.",
+      "already_expired": "Det var allerede udløbet.",
+      "linked": "Færdighed forbundet.",
+      "already_linked": "Den færdighed er allerede forbundet.",
+      "inactive_program": "Det kursus er slået fra.",
+      "invalid": "Tjek det, du har skrevet.",
+      "invalid_material": "Det materiale hører ikke til din organisation.",
+      "invalid_assignee": "Personen hører ikke til din organisation.",
+      "invalid_file": "Den fil hører ikke til din organisation.",
+      "invalid_skill": "Færdigheden blev ikke fundet.",
+      "invalid_state": "Det kan ikke lade sig gøre i dette trin.",
+      "needs_migration": "Kurser er ikke slået til i dette arbejdsrum endnu.",
+      "not_authorized": "Du har ikke rettigheder til det.",
+      "not_found": "Ikke fundet.",
+      "limit_reached": "Der er allerede for meget her.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
+  },
+  "developmentReviews": {
+    "title": "Udviklingssamtaler",
+    "intro": "En nedskrevet samtale mellem to navngivne personer om arbejdet og om, hvad der kommer nu.",
+    "noScoreNote": "Der er ingen karakter, ingen point og ingen rangliste her — det er med vilje. Alt nedenfor er enten et nedskrevet faktum, en henvisning til rigtigt arbejde eller én persons egne ord, tydeligt markeret som sådan.",
+    "notAvailable": "Udviklingssamtaler er ikke slået til i dette arbejdsrum endnu.",
+    "empty": "Der er endnu ingen samtale, der handler om dig.",
+    "cycles": {
+      "heading": "Perioder",
+      "name": "Periodens navn",
+      "from": "Fra",
+      "to": "Til",
+      "create": "Åbn periode",
+      "empty": "Ingen perioder endnu.",
+      "open": "Åbn",
+      "close": "Luk"
+    },
+    "cycleStatus": {
+      "draft": "Kladde",
+      "open": "Åben",
+      "closed": "Lukket"
+    },
+    "create": {
+      "cycle": "Periode",
+      "subject": "Person",
+      "reviewer": "Hvem der fører samtalen (valgfrit)",
+      "submit": "Start samtale"
+    },
+    "reviewStatus": {
+      "draft": "Kladde",
+      "open": "I gang",
+      "closed": "Lukket"
+    },
+    "workerVoiceLabel": "Personens egne ord",
+    "workerVoiceMissing": "Ikke skrevet endnu.",
+    "saveWorkerInput": "Gem mine ord",
+    "managerVoiceLabel": "Samtalelederens egne ord",
+    "managerVoiceMissing": "Ikke skrevet endnu.",
+    "saveManagerInput": "Gem mine ord",
+    "planLabel": "Plan",
+    "planPlaceholder": "Hvad vi aftalte at gøre nu",
+    "followUpLabel": "Vend tilbage til det",
+    "evidenceLabel": "Forbundet arbejde",
+    "evidenceEmpty": "Intet forbundet endnu.",
+    "evidenceKind": {
+      "journal_entry": "Arbejdsnote",
+      "skill": "Færdighed",
+      "project": "Projekt",
+      "training_assignment": "Kursus"
+    },
+    "evidenceRefPlaceholder": "Id på noten, færdigheden, projektet eller kurset",
+    "evidenceNotePlaceholder": "Kort note (valgfrit)",
+    "addEvidence": "Forbind",
+    "close": "Luk samtale",
+    "closeBlocked": "Begge skal skrive først",
+    "notice": {
+      "created": "Periode åbnet.",
+      "updated": "Periode opdateret.",
+      "unchanged": "Intet blev ændret.",
+      "saved": "Gemt.",
+      "linked": "Forbundet.",
+      "already_linked": "Det er allerede forbundet.",
+      "closed": "Samtale lukket.",
+      "already_closed": "Den var allerede lukket.",
+      "already_exists": "Den findes allerede.",
+      "inputs_missing": "Begge personer skal skrive deres egne ord først.",
+      "invalid": "Tjek det, du har skrevet.",
+      "invalid_state": "Det kan ikke lade sig gøre i dette trin.",
+      "invalid_subject": "Personen hører ikke til din organisation.",
+      "invalid_reviewer": "Den person kan ikke føre samtalen.",
+      "invalid_reference": "Den henvisning peger ikke på rigtigt arbejde fra denne person.",
+      "needs_migration": "Udviklingssamtaler er ikke slået til i dette arbejdsrum endnu.",
+      "not_authorized": "Du har ikke rettigheder til det.",
+      "not_found": "Ikke fundet.",
+      "limit_reached": "Der er allerede for meget her.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
+  },
+  "managementDecisions": {
+    "title": "Ledelsesbeslutninger",
+    "intro": "Hvad der blev lagt frem for ledelsen, hvad der blev besluttet, hvem der er ansvarlig og hvornår.",
+    "engineNote": "Afstemningen sker i godkendelseslisten ovenfor: en skabelon, der kræver alle godkendere, er en enstemmig afstemning, og en, der kun kræver én, afgøres af det første svar. Her tælles der ingen stemmer.",
+    "notAvailable": "Ledelsesbeslutninger er ikke slået til i dette arbejdsrum endnu.",
+    "empty": "Ingen beslutninger nedskrevet endnu.",
+    "form": {
+      "title": "Spørgsmål",
+      "agenda": "Hvad der skal besluttes",
+      "responsible": "Ansvarlig person (valgfrit)",
+      "deadline": "Hvornår",
+      "create": "Tilføj beslutning"
+    },
+    "status": {
+      "draft": "Kladde",
+      "submitted_for_approval": "Venter på godkendelse",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "withdrawn": "Trukket tilbage",
+      "cancelled": "Annulleret",
+      "recorded": "Nedskrevet"
+    },
+    "submit": {
+      "template": "Godkendelsesskabelon",
+      "action": "Læg frem for ledelsen",
+      "noTemplate": "Der findes endnu ingen godkendelsesskabelon til ledelsesbeslutninger. Opret en i godkendelsesområdet først."
+    },
+    "resultLabel": "Beslutning",
+    "resultPlaceholder": "Hvad der blev besluttet",
+    "recordResult": "Nedskriv beslutningen",
+    "links": {
+      "label": "Forbundet",
+      "empty": "Intet forbundet endnu.",
+      "document": "Dokument",
+      "task": "Opgave",
+      "documentPlaceholder": "Dokument-id",
+      "taskPlaceholder": "Opgave-id",
+      "addDocument": "Forbind dokument",
+      "addTask": "Forbind opgave",
+      "taskNote": "Opfølgende arbejde er en rigtig opgave, der oprettes i opgaveområdet — her gemmes kun forbindelsen."
+    },
+    "notice": {
+      "created": "Beslutning tilføjet.",
+      "updated": "Beslutning opdateret.",
+      "submitted": "Lagt frem for ledelsen.",
+      "synced": "Bragt i overensstemmelse med godkendelseslisten.",
+      "unchanged": "Intet blev ændret.",
+      "recorded": "Beslutning nedskrevet.",
+      "already_recorded": "Beslutningen var allerede nedskrevet.",
+      "linked": "Forbundet.",
+      "already_linked": "Det er allerede forbundet.",
+      "no_instance": "Ingen godkendelse blev startet, så intet blev sendt.",
+      "invalid": "Tjek det, du har skrevet.",
+      "invalid_state": "Det kan ikke lade sig gøre i dette trin.",
+      "invalid_document": "Det dokument hører ikke til din organisation.",
+      "invalid_task": "Den opgave er ikke din.",
+      "invalid_responsible": "Personen hører ikke til din organisation.",
+      "needs_migration": "Ledelsesbeslutninger er ikke slået til i dette arbejdsrum endnu.",
+      "not_authorized": "Du har ikke rettigheder til det.",
+      "not_found": "Ikke fundet.",
+      "limit_reached": "Der er allerede for meget her.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
   }
 }

@@ -868,6 +868,31 @@ describe("the migration set is exactly what this slice declared", () => {
       // header: no status implies signed/legal/valid/binding; signature
       // evidence is a separate explicit field pair; no e-signature flow.
       "20260817200000_agreements_v1.sql",
+      // 2026-08-17: Training & Certification + Development Reviews +
+      // Management Decisions v1 (train K of the autonomous functional
+      // completion train V2). Each marker records that the RED content
+      // (4 new RLS tables + SELECT policies + GRANT/REVOKE + 8 SECURITY
+      // DEFINER functions + append-only / fill-once trigger guards per
+      // file) is STRUCTURALLY UNAVOIDABLE for a row-level-secured
+      // register — the same class as the workflow / document / agreement
+      // entries above. Annotation authority: owner mandate 2026-08-17
+      // (autonomous functional completion train V2, §4 migration
+      // authority); the annotation states the ROUTE, the apply act belongs
+      // to the LEAD session (PENDING APPLY BY LEAD in
+      // docs/APPLIED_LEDGER.md; 230000 applies AFTER 20260817140000,
+      // 232000 AFTER 20260817130000 AND 20260817140000 AND the applied
+      // work_tasks migration — hard dependencies asserted in-file). Gate
+      // records: docs/human-gates/{training-certification,
+      // performance-reviews,management-decisions}-gate.md. Rollbacks
+      // paired and 0-row guarded; behavioural proof (127/127, migrations +
+      // rollbacks verbatim): scripts/db-proof/training-development-v1.sh.
+      // DOCTRINE pinned in the headers: a certificate is evidence a course
+      // was completed, never a competence claim; NO rating/score/grade/rank
+      // column exists in the review schema; the workflow engine's
+      // multi-approver step IS the vote.
+      "20260817230000_training_certification_v1.sql",
+      "20260817231000_performance_reviews_v1.sql",
+      "20260817232000_management_decisions_v1.sql",
     ]);
   });
 

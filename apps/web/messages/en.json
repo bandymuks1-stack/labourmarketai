@@ -13094,5 +13094,213 @@
       "not_found": "Record not available.",
       "error": "Something failed — try again."
     }
+  },
+  "training": {
+    "title": "Training and certificates",
+    "intro": "Courses your organization asks people to complete, and the certificates that follow.",
+    "evidenceNote": "A certificate here shows that a course was finished. It does not say how well someone works — that stays your work entries and your manager's confirmations.",
+    "notAvailable": "Training is not switched on in this workspace yet.",
+    "status": {
+      "assigned": "To do",
+      "completed": "Done",
+      "expired": "Out of date"
+    },
+    "mine": {
+      "heading": "Your training",
+      "requiredBy": "By {date}",
+      "complete": "Mark as done",
+      "notePlaceholder": "Short note (optional)",
+      "completedNote": "You marked this as done."
+    },
+    "org": {
+      "heading": "Training your organization runs",
+      "programTitle": "Course name",
+      "programDescription": "What the course covers",
+      "materialNote": "The course material is a document from the register above. Confirming that someone read it stays in the confirmation list — it is not repeated here.",
+      "createProgram": "Add course",
+      "noPrograms": "No courses added yet.",
+      "assigneePlaceholder": "Person's email",
+      "requiredByLabel": "Complete by",
+      "assign": "Ask this person",
+      "certificateFilePlaceholder": "Certificate file id",
+      "issuedOnLabel": "Issued on",
+      "expiresOnLabel": "Valid until",
+      "attachCertificate": "Save certificate",
+      "markExpired": "Mark out of date"
+    },
+    "certificates": {
+      "heading": "Certificates",
+      "note": "Certificates already held, with the date they run out. Nothing is guessed — a record without a date simply shows no date.",
+      "none": "No end date",
+      "valid": "Valid",
+      "expiring": "Ends soon",
+      "lapsed": "Out of date"
+    },
+    "notice": {
+      "created": "Course added.",
+      "updated": "Course updated.",
+      "assigned": "Sent to that person.",
+      "already_assigned": "That person already has this course.",
+      "completed": "Marked as done.",
+      "already_completed": "This was already marked as done.",
+      "attached": "Certificate saved.",
+      "expired": "Marked out of date.",
+      "already_expired": "This was already out of date.",
+      "linked": "Skill linked.",
+      "already_linked": "That skill is already linked.",
+      "inactive_program": "That course is switched off.",
+      "invalid": "Please check what you typed.",
+      "invalid_material": "That material is not in your organization.",
+      "invalid_assignee": "That person is not in your organization.",
+      "invalid_file": "That file is not in your organization.",
+      "invalid_skill": "That skill was not found.",
+      "invalid_state": "That cannot be done at this step.",
+      "needs_migration": "Training is not switched on in this workspace yet.",
+      "not_authorized": "You do not have the rights for this.",
+      "not_found": "Not found.",
+      "limit_reached": "There is too much here already.",
+      "error": "Something went wrong. Nothing was saved."
+    }
+  },
+  "developmentReviews": {
+    "title": "Development conversations",
+    "intro": "A recorded conversation between two named people about work and what comes next.",
+    "noScoreNote": "There is no rating, no score and no ranking here — by design. Everything below is either a recorded fact, a link to real work, or one person's own words, clearly labelled.",
+    "notAvailable": "Development conversations are not switched on in this workspace yet.",
+    "empty": "No conversation involves you yet.",
+    "cycles": {
+      "heading": "Periods",
+      "name": "Period name",
+      "from": "From",
+      "to": "To",
+      "create": "Open period",
+      "empty": "No periods yet.",
+      "open": "Open",
+      "close": "Close"
+    },
+    "cycleStatus": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "create": {
+      "cycle": "Period",
+      "subject": "Person",
+      "reviewer": "Who will talk with them (optional)",
+      "submit": "Start conversation"
+    },
+    "reviewStatus": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "workerVoiceLabel": "The person's own words",
+    "workerVoiceMissing": "Not written yet.",
+    "saveWorkerInput": "Save my words",
+    "managerVoiceLabel": "The reviewer's own words",
+    "managerVoiceMissing": "Not written yet.",
+    "saveManagerInput": "Save my words",
+    "planLabel": "Plan",
+    "planPlaceholder": "What we agreed to do next",
+    "followUpLabel": "Follow up on",
+    "evidenceLabel": "Linked work",
+    "evidenceEmpty": "Nothing linked yet.",
+    "evidenceKind": {
+      "journal_entry": "Work entry",
+      "skill": "Skill",
+      "project": "Project",
+      "training_assignment": "Training"
+    },
+    "evidenceRefPlaceholder": "Id of the entry, skill, project or training",
+    "evidenceNotePlaceholder": "Short note (optional)",
+    "addEvidence": "Link it",
+    "close": "Close conversation",
+    "closeBlocked": "Both people must write first",
+    "notice": {
+      "created": "Period opened.",
+      "updated": "Period updated.",
+      "unchanged": "Nothing changed.",
+      "saved": "Saved.",
+      "linked": "Linked.",
+      "already_linked": "That is already linked.",
+      "closed": "Conversation closed.",
+      "already_closed": "It was already closed.",
+      "already_exists": "That already exists.",
+      "inputs_missing": "Both people must write their own words first.",
+      "invalid": "Please check what you typed.",
+      "invalid_state": "That cannot be done at this step.",
+      "invalid_subject": "That person is not in your organization.",
+      "invalid_reviewer": "That person cannot be the reviewer.",
+      "invalid_reference": "That link does not point at real work of this person.",
+      "needs_migration": "Development conversations are not switched on in this workspace yet.",
+      "not_authorized": "You do not have the rights for this.",
+      "not_found": "Not found.",
+      "limit_reached": "There is too much here already.",
+      "error": "Something went wrong. Nothing was saved."
+    }
+  },
+  "managementDecisions": {
+    "title": "Management decisions",
+    "intro": "What was put to the management team, what was decided, who is responsible and by when.",
+    "engineNote": "The vote happens in the approvals list above: a template that needs every approver is a unanimous vote, one that needs any approver is decided by the first answer. Nothing here counts votes.",
+    "notAvailable": "Management decisions are not switched on in this workspace yet.",
+    "empty": "No decisions recorded yet.",
+    "form": {
+      "title": "Question",
+      "agenda": "What is being decided",
+      "responsible": "Responsible person (optional)",
+      "deadline": "By when",
+      "create": "Add decision"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted_for_approval": "Waiting for approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn",
+      "cancelled": "Cancelled",
+      "recorded": "Recorded"
+    },
+    "submit": {
+      "template": "Approval template",
+      "action": "Put to the management team",
+      "noTemplate": "No approval template exists for management decisions yet. Create one in the approvals area first."
+    },
+    "resultLabel": "Decision",
+    "resultPlaceholder": "What was decided",
+    "recordResult": "Record the decision",
+    "links": {
+      "label": "Linked",
+      "empty": "Nothing linked yet.",
+      "document": "Document",
+      "task": "Task",
+      "documentPlaceholder": "Document id",
+      "taskPlaceholder": "Task id",
+      "addDocument": "Link document",
+      "addTask": "Link task",
+      "taskNote": "Follow-up work is a real task created in the tasks surface — only the link is kept here."
+    },
+    "notice": {
+      "created": "Decision added.",
+      "updated": "Decision updated.",
+      "submitted": "Sent to the management team.",
+      "synced": "Brought up to date with the approvals list.",
+      "unchanged": "Nothing changed.",
+      "recorded": "Decision recorded.",
+      "already_recorded": "The decision was already recorded.",
+      "linked": "Linked.",
+      "already_linked": "That is already linked.",
+      "no_instance": "No approval was started, so nothing was sent.",
+      "invalid": "Please check what you typed.",
+      "invalid_state": "That cannot be done at this step.",
+      "invalid_document": "That document is not in your organization.",
+      "invalid_task": "That task is not yours.",
+      "invalid_responsible": "That person is not in your organization.",
+      "needs_migration": "Management decisions are not switched on in this workspace yet.",
+      "not_authorized": "You do not have the rights for this.",
+      "not_found": "Not found.",
+      "limit_reached": "There is too much here already.",
+      "error": "Something went wrong. Nothing was saved."
+    }
   }
 }

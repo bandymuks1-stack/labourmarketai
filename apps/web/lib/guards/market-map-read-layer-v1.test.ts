@@ -556,7 +556,13 @@ describe("NO new DB migration in this PR", () => {
     // market-map read layer. RECOUNTED after merging origin/main 66c869a4
     // (trains C/D/E/L1/F/H in base): 217 real files in the tree, never
     // summed.
-    expect(count).toBeLessThanOrEqual(217);
+    // Bumped 217 -> 220 for the Training & Certification + Development
+    // Reviews + Management Decisions v1 TRIPLE (20260817230000 / 231000 /
+    // 232000, train K, LEAD-gated, UNAPPLIED, paired rollbacks) — RECOUNTED
+    // from the post-rebase tree with train G on main
+    // (`ls supabase/migrations/*.sql | wc -l` = 220), never summed. Still no
+    // migration from the market-map read layer itself. Cross-pin follows.
+    expect(count).toBeLessThanOrEqual(220);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

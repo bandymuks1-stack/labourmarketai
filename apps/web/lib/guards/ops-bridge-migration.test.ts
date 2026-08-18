@@ -464,6 +464,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260817190000_employee_lifecycle_v1, RECOUNTED after merging
     // origin/main 66c869a4 with trains C/D/E/L1/F/H in the base) — floor
     // semantics unchanged.
+    // Cross-pin follows: 217 -> 220 for the Training & Certification +
+    // Development Reviews + Management Decisions v1 triple (20260817230000
+    // / 231000 / 232000, train K, LEAD-gated, UNAPPLIED; RECOUNTED from the
+    // post-rebase tree with train G on main) — floor semantics unchanged,
+    // no numeric edit needed here.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,
