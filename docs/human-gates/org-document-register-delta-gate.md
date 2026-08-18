@@ -71,6 +71,31 @@ is NOT widened by this migration — it is the engine owner's schema.
   search extension (register search is a bounded, sanitized ILIKE over
   metadata columns only — never inside file contents).
 
+## Behavioural proof
+
+`scripts/db-proof/org-document-register-delta.sh` — **87/87 passing** on a
+throwaway Postgres 15. It applies `20260817130000`, `20260817140000`,
+`20260817150000`, this migration and its rollback **verbatim**, and every
+probe runs under `set local role authenticated` (or `anon`), never as the
+superuser, so RLS and grants genuinely decide:
+
+- authority matrix on all four commands (anon / owner / admin / manager /
+  member / wrong-org / platform admin);
+- `object_id` same-organization validation (a wrong-org or unknown object
+  answers `invalid` and no row is created);
+- correspondence facts refused on non-correspondence types, accepted on the
+  two correspondence types, and direction recoverable from the slug alone —
+  neither `correspondence_direction` nor `our_reference` exists as a column;
+- retention recorded, re-recorded and cleared, the document still present
+  after a **passed** retention date, and every direct table write refused;
+- the approval mirror: refused without a pending instance, `submitted` only
+  after the engine's own `start_workflow_instance_v1`, `repaired_approved`
+  after an engine approval and `repaired_returned` after an engine
+  rejection, with sync idempotent in both directions;
+- `create_org_document_v1` still callable and unchanged beside v2;
+- rollback → re-apply at 0 delta rows, and rollback **refusal** once a delta
+  column holds real data.
+
 ## Authority
 
 Owner mandate 2026-08-17 (autonomous functional completion train V2, §4
