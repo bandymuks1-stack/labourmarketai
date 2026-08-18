@@ -3900,6 +3900,27 @@
         "body": "[EN] A subjective +1 or −1 with text. Shown as an opinion, kept apart from facts; a run of negatives is a signal to check, never a verdict."
       },
       "noStars": "[EN] No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
+    },
+    "marketProof": {
+      "eyebrow": "Šobrīd platformā",
+      "title": "Darba tirgus skaitļos",
+      "stats": {
+        "vacancies": {
+          "value": "41 000+",
+          "label": "aktīvu darba iespēju"
+        },
+        "employers": {
+          "value": "7 600+",
+          "label": "darba devēju sludinājumos"
+        },
+        "regions": {
+          "value": "21",
+          "label": "reģions ar aktīviem sludinājumiem"
+        }
+      },
+      "asOfNote": "Pēc 2026-08-17 sludinājumu datiem; skaitļi mainās katru dienu.",
+      "topTitle": "Šobrīd pieprasītākās profesijas",
+      "topNote": "Pēc aktīvajiem darba sludinājumiem platformā. Daļa sludinājumu vēl nav piesaistīta profesijai."
     }
   },
   "workspace": {
@@ -4793,6 +4814,256 @@
       "requestedDays": "pieprasītas {days} d.",
       "remainingShort": "atlicis {days} d.",
       "exceedsNote": "Vairāk nekā atlikušais atvaļinājums"
+    }
+  },
+  "agreements": {
+    "title": "Līgumu reģistrs",
+    "intro": "Kanoniskais {org} līgumu reģistrs — darba attiecību un vispārīgie. Tikai uzskaite.",
+    "noSignatureNote": "Šī reģistra statusi ir tikai uzskaites stāvokļi — nekas šeit nenozīmē, ka līgums ir parakstīts, juridiski spēkā vai saistošs. LabourMarket.ai neveic juridisku parakstīšanu: parakstīšana notiek ārpus platformas, un pievienotais fails ir tikai jūsu iesniegts pierādījums.",
+    "relationshipNote": "Augstāk esošais kontraktu saraksts ir agrākais personīgais komerciālais reģistrs un turpina darboties bez izmaiņām. Jauni līgumi pieder šeit.",
+    "unavailable": "Līgumu reģistru šobrīd nevar parādīt.",
+    "needsOrgWorkspace": "Līgumu reģistrs darbojas organizācijas darba vidē. Pārslēdzieties uz savu organizāciju.",
+    "preparing": "Līgumu reģistrs ir sagatavots, bet šajā vidē vēl nav iespējots.",
+    "error": "Līgumu reģistru neizdevās nolasīt.",
+    "empty": "Līgumi vēl nav reģistrēti.",
+    "emptyFiltered": "Neviens līgums neatbilst šiem filtriem.",
+    "scopeNote": "Organizācijas puses reģistrs. Darbiniekiem šis reģistrs netiek rādīts.",
+    "baseDocument": "Pamatdokuments",
+    "filters": {
+      "type": "Tips",
+      "status": "Statuss",
+      "search": "Darījuma partneris vai nosaukums",
+      "searchPlaceholder": "Meklēt…",
+      "expiringOnly": "Beidzas 30 dienu laikā",
+      "apply": "Filtrēt",
+      "all": "Visi"
+    },
+    "types": {
+      "employment_related": "Darba attiecību",
+      "service": "Pakalpojumu",
+      "supply": "Piegādes",
+      "nda": "Konfidencialitātes (NDA)",
+      "partnership": "Partnerības",
+      "other": "Cits"
+    },
+    "status": {
+      "draft": "Melnraksts",
+      "submitted_for_approval": "Iesniegts iekšējai apstiprināšanai",
+      "approved_internally": "Iekšēji apstiprināts",
+      "active_record": "Aktīvs ieraksts",
+      "amended": "Ar grozījumiem",
+      "terminated_record": "Izbeigts (ieraksts)",
+      "expired": "Beidzies"
+    },
+    "expiry": {
+      "ended": "Beigu datums pagājis",
+      "endsInDays": "Beidzas pēc {days} d."
+    },
+    "signature": {
+      "none": "Parakstīšanas pierādījums nav pievienots.",
+      "evidenceAttached": "Pievienots ārējas parakstīšanas pierādījums (parakstīts ārpus platformas).",
+      "attachLabel": "Parakstīšanas pierādījuma fails",
+      "attachSubmit": "Pievienot pierādījumu"
+    },
+    "amendment": {
+      "label": "Grozījums {n}",
+      "addTitle": "Pievienot grozījumu",
+      "titleLabel": "Grozījuma nosaukums",
+      "descriptionLabel": "Kas mainās",
+      "documentLabel": "Grozījuma dokuments",
+      "documentNone": "Bez dokumenta",
+      "effectiveDateLabel": "Spēkā stāšanās datums",
+      "honestNote": "Grozījums tiek pievienots ieraksta vēsturei. Sākotnējais līguma teksts paliek nemainīgs — spēkā esošie noteikumi ir pamats plus grozījumi secībā.",
+      "submit": "Pievienot grozījumu"
+    },
+    "actions": {
+      "active_record": "Atzīmēt kā aktīvu ierakstu",
+      "terminated_record": "Atzīmēt kā izbeigtu",
+      "expired": "Atzīmēt kā beigušos"
+    },
+    "submitApproval": {
+      "definitionLabel": "Apstiprināšanas plūsma",
+      "submit": "Iesniegt iekšējai apstiprināšanai",
+      "noDefinition": "Līgumiem nav publicētas iekšējās apstiprināšanas plūsmas — ierakstu var aktivizēt tieši.",
+      "pendingNote": "Gaida iekšējo apstiprināšanu — lēmums tiek pieņemts apstiprināšanas sadaļā."
+    },
+    "edit": {
+      "title": "Rediģēt datus",
+      "submit": "Saglabāt"
+    },
+    "create": {
+      "title": "Reģistrēt līgumu",
+      "typeLabel": "Tips",
+      "titleLabel": "Nosaukums",
+      "counterpartyLabel": "Darījuma partneris",
+      "orgNumberLabel": "Partnera uzņēmuma numurs (neobligāti)",
+      "responsibleLabel": "Atbildīgā persona",
+      "responsibleNone": "Nav piešķirta",
+      "externalRefLabel": "Ārējā atsauce (neobligāti)",
+      "effectiveFromLabel": "Spēkā no",
+      "effectiveToLabel": "Spēkā līdz",
+      "workerLinkNote": "Šis reģistrs ir uzskaite organizācijas pusē — tas pats līgumu neizveido un neparaksta.",
+      "submit": "Reģistrēt"
+    },
+    "notice": {
+      "created": "Līgums reģistrēts.",
+      "updated": "Saglabāts.",
+      "submitted": "Iesniegts iekšējai apstiprināšanai.",
+      "amended": "Grozījums pievienots.",
+      "attached": "Dokuments pievienots.",
+      "evidence_attached": "Parakstīšanas pierādījums pievienots. Tas tikai reģistrē pierādījumu — nekas ar to nekļūst juridiski spēkā.",
+      "repaired": "Apstiprināšanas rezultāts piemērots ierakstam.",
+      "no_pending_workflow": "Šim ierakstam nav atrasts gaidošs apstiprināšanas pieprasījums.",
+      "no_approval_definition": "Publicētas apstiprināšanas plūsmas nav — ieraksts paliek melnraksts.",
+      "invalid": "Dažus laukus neizdevās pieņemt.",
+      "invalid_transition": "Šāda statusa maiņa no pašreizējā stāvokļa nav atļauta.",
+      "invalid_state": "Grozījumus var pievienot, kad ieraksts ir apstiprināts vai aktīvs.",
+      "not_editable": "Šo ierakstu vairs nevar rediģēt.",
+      "not_found": "Ieraksts nav atrasts.",
+      "not_allowed": "To var darīt tikai organizācijas īpašnieks vai administrators.",
+      "limit_reached": "Sasniegts reģistra limits.",
+      "needs_migration": "Līgumu reģistrs šajā vidē vēl nav iespējots.",
+      "error": "Kaut kas nogāja greizi. Nekas netika saglabāts."
+    }
+  },
+  "lifecycle": {
+    "title": "Darba attiecību gaita",
+    "intro": "Ievadīšana darbā, pārbaudes laiks, izmaiņas, atbrīvošana un beigas šīs organizācijas darba ierakstiem — ar kontrolsarakstiem un pilnu vēsturi.",
+    "unavailable": "Darba attiecību gaita šajā vidē vēl nav ieslēgta. Nekas nav zaudēts — šī sadaļa atvērsies, kad glabātuve būs pārskatīta un ieviesta.",
+    "honestNote": "Viss šeit paliek produktā. Atzīmējot soli kā izpildītu, tiek ierakstīts tikai kas, ko un kad apstiprināja — nekas nekur netiek sūtīts.",
+    "loadError": "Daļu gaitas datu šobrīd neizdevās ielādēt. Redzamais ir īsts, bet var būt nepilnīgs.",
+    "stage": {
+      "onboarding": "Ievadīšana darbā",
+      "active": "Aktīvs",
+      "probation": "Pārbaudes laiks",
+      "change_pending": "Gaida izmaiņas",
+      "offboarding": "Atbrīvošana",
+      "ended": "Beigts"
+    },
+    "members": {
+      "title": "Cilvēki un posmi",
+      "empty": "Šajā organizācijā darba ierakstu vēl nav.",
+      "actionsSummary": "Gaitas darbības",
+      "probationUntil": "Pārbaudes laiks līdz {date}",
+      "ownerProtected": "Reģistrētā īpašnieka ierakstu nevar beigt, kamēr viņš ir īpašnieks."
+    },
+    "runs": {
+      "onboardingTitle": "Ievadīšanas kontrolsaraksts",
+      "offboardingTitle": "Atbrīvošanas kontrolsaraksts",
+      "progress": "Izpildīti {done} no {total}",
+      "requiredOpen": "Atlikuši obligātie soļi: {count}",
+      "complete": "Pabeigt sarakstu",
+      "cancel": "Atcelt sarakstu",
+      "start": "Sākt ievadīšanu",
+      "startOffboarding": "Sākt atbrīvošanu",
+      "templateLabel": "Saraksta veidne",
+      "extraItemsLabel": "Papildu soļi (pa vienam rindā, nav obligāti)",
+      "extraItemsHint": "piem., Nodot atslēgas"
+    },
+    "items": {
+      "markDone": "Atzīmēt kā izpildītu",
+      "skip": "Izlaist",
+      "reset": "Atvērt no jauna",
+      "requiredBadge": "obligāts",
+      "linkedBadge": "saistīts ar īstu ierakstu",
+      "responsibleLabel": "Atbildīgā persona",
+      "responsibleNone": "Bez atbildīgās personas",
+      "assign": "Piešķirt"
+    },
+    "kinds": {
+      "task": "Uzdevums",
+      "document_ack": "Dokuments izlasīšanai un apstiprināšanai",
+      "asset_issue": "Izsniegts darbarīks vai aprīkojums",
+      "training_note": "Apmācība",
+      "custom": "Cits solis",
+      "asset_return": "Atdodams darbarīks vai aprīkojums",
+      "access_removal": "Noņemt piekļuvi",
+      "final_evidence": "Darba ierakstu gala pārbaude"
+    },
+    "templates": {
+      "title": "Ievadīšanas veidnes",
+      "empty": "Ievadīšanas veidņu vēl nav. Izveidojiet pirmo zemāk.",
+      "createTitle": "Jauna ievadīšanas veidne",
+      "nameLabel": "Veidnes nosaukums",
+      "itemTitleLabel": "Solis {n}",
+      "kindLabel": "Veids",
+      "requiredLabel": "Obligāts",
+      "createSubmit": "Izveidot veidni",
+      "itemCount": "Soļi: {count}"
+    },
+    "stageForm": {
+      "stageLabel": "Posms",
+      "probationDateLabel": "Pārbaudes laiks līdz (ja pārbaudes laiks)",
+      "noteLabel": "Piezīme (nav obligāta)",
+      "submit": "Atjaunināt posmu"
+    },
+    "end": {
+      "reasonLabel": "Iemesls",
+      "noteLabel": "Piezīme (nav obligāta)",
+      "submit": "Beigt darba attiecības",
+      "confirmHint": "Darba ieraksts tiek beigts pa to pašu aizsargāto ceļu kā dalībnieka noņemšana."
+    },
+    "reasons": {
+      "resignation": "Aiziešana pēc paša vēlēšanās",
+      "termination": "Atlaišana",
+      "contract_end": "Līgums beidzās",
+      "mutual_agreement": "Savstarpēja vienošanās",
+      "retirement": "Pensija",
+      "other": "Cits"
+    },
+    "history": {
+      "title": "Gaitas vēsture",
+      "empty": "Gaitas notikumu vēl nav."
+    },
+    "events": {
+      "stage_changed": "Posms mainīts",
+      "onboarding_started": "Ievadīšana sākta",
+      "onboarding_completed": "Ievadīšana pabeigta",
+      "onboarding_cancelled": "Ievadīšana atcelta",
+      "offboarding_started": "Atbrīvošana sākta",
+      "offboarding_completed": "Atbrīvošana pabeigta",
+      "offboarding_cancelled": "Atbrīvošana atcelta",
+      "probation_set": "Noteikts pārbaudes laiks",
+      "change_noted": "Fiksētas izmaiņas",
+      "engagement_ended": "Darba attiecības beigtas"
+    },
+    "worker": {
+      "title": "Mana ievadīšana darbā",
+      "intro": "Soļi, ko darba devējs sagatavoja jūsu sākumam. Apstipriniet tos, kas ir jūsu — pārējos kārto darba devējs.",
+      "empty": "Šobrīd nekas jūs negaida.",
+      "done": "Izpildīts",
+      "managerHint": "Šo soli apstiprina darba devējs"
+    },
+    "notice": {
+      "created": "Izveidots.",
+      "started": "Saraksts sākts.",
+      "updated": "Saglabāts.",
+      "completed": "Saraksts pabeigts.",
+      "cancelled": "Saraksts atcelts.",
+      "ended": "Darba attiecības beigtas un ierakstītas.",
+      "already_ended": "Šīs darba attiecības jau bija beigtas.",
+      "already_exists": "Veidne ar šādu nosaukumu jau pastāv.",
+      "already_running": "Šim cilvēkam saraksts jau darbojas.",
+      "items_open": "Vispirms pabeidziet visus obligātos soļus.",
+      "item_closed": "Šis solis jau ir nokārtots.",
+      "run_closed": "Šis saraksts jau ir slēgts.",
+      "link_invalid": "Saistītais ieraksts neatbilst šim solim.",
+      "asset_not_returned": "Aprīkojums vēl nav atdots — vispirms reģistrējiet atdošanu.",
+      "offboarding_open": "Vispirms pabeidziet vai atceliet atbrīvošanas sarakstu.",
+      "onboarding_open": "Vispirms pabeidziet vai atceliet ievadīšanas sarakstu.",
+      "invalid_responsible": "Šis cilvēks nepieder šai organizācijai.",
+      "invalid_stage": "Šī darbība neder pašreizējam posmam.",
+      "invalid_transition": "Šāda posma maiņa no pašreizējā posma nav atļauta.",
+      "not_active": "Šis darba ieraksts vairs nav aktīvs.",
+      "not_org_scoped": "Tas ir personisks ieraksts, nevis organizācijas darba attiecības.",
+      "template_not_found": "Šī veidne nav pieejama.",
+      "last_owner": "Pēdējā īpašnieka ierakstu beigt nevar — vispirms ieceliet citu īpašnieku.",
+      "limit_reached": "Sasniegts šīs organizācijas limits.",
+      "invalid": "Nederīgi dati.",
+      "needs_migration": "Šī iespēja šajā vidē vēl nav ieslēgta.",
+      "not_authorized": "Jums nav tiesību šai darbībai.",
+      "not_found": "Ieraksts nav pieejams.",
+      "error": "Neizdevās — mēģiniet vēlreiz."
     }
   },
   "finance": {

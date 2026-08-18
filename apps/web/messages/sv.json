@@ -3900,6 +3900,27 @@
         "body": "[EN] A subjective +1 or −1 with text. Shown as an opinion, kept apart from facts; a run of negatives is a signal to check, never a verdict."
       },
       "noStars": "[EN] No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
+    },
+    "marketProof": {
+      "eyebrow": "Just nu på plattformen",
+      "title": "Arbetsmarknaden i siffror",
+      "stats": {
+        "vacancies": {
+          "value": "41 000+",
+          "label": "aktiva platsannonser"
+        },
+        "employers": {
+          "value": "7 600+",
+          "label": "arbetsgivare bakom annonserna"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regioner med aktiva annonser"
+        }
+      },
+      "asOfNote": "Baserat på annonsdata från 2026-08-17; siffrorna ändras dagligen.",
+      "topTitle": "Mest efterfrågade yrken just nu",
+      "topNote": "Rankat efter aktiva platsannonser på plattformen. En del annonser är ännu inte kopplade till ett yrke."
     }
   },
   "workspace": {
@@ -4793,6 +4814,256 @@
       "requestedDays": "{days} d begärt",
       "remainingShort": "{days} d kvar",
       "exceedsNote": "Mer än kvarvarande ledighet"
+    }
+  },
+  "agreements": {
+    "title": "Avtalsregister",
+    "intro": "Det kanoniska registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",
+    "noSignatureNote": "Statusarna i det här registret är enbart registreringstillstånd — inget här betyder att ett avtal är undertecknat, juridiskt giltigt eller bindande. LabourMarket.ai utför ingen juridisk signering: signering sker utanför plattformen, och en bifogad fil är bara underlag du själv tillhandahåller.",
+    "relationshipNote": "Kontraktslistan ovan är det tidigare personliga kommersiella registret och fortsätter fungera oförändrat. Nya avtal hör hemma här.",
+    "unavailable": "Avtalsregistret kan inte visas just nu.",
+    "needsOrgWorkspace": "Avtalsregistret fungerar i en organisationsarbetsyta. Byt till din organisation.",
+    "preparing": "Avtalsregistret är förberett men ännu inte aktiverat i den här miljön.",
+    "error": "Avtalsregistret kunde inte läsas.",
+    "empty": "Inga avtal registrerade ännu.",
+    "emptyFiltered": "Inga avtal matchar dessa filter.",
+    "scopeNote": "Register på organisationssidan. Arbetare ser inte det här registret.",
+    "baseDocument": "Basdokument",
+    "filters": {
+      "type": "Typ",
+      "status": "Status",
+      "search": "Motpart eller titel",
+      "searchPlaceholder": "Sök…",
+      "expiringOnly": "Löper ut inom 30 dagar",
+      "apply": "Filtrera",
+      "all": "Alla"
+    },
+    "types": {
+      "employment_related": "Anställningsrelaterat",
+      "service": "Tjänst",
+      "supply": "Leverans",
+      "nda": "Sekretess (NDA)",
+      "partnership": "Partnerskap",
+      "other": "Övrigt"
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted_for_approval": "Inskickat för intern granskning",
+      "approved_internally": "Internt godkänt",
+      "active_record": "Aktiv registrering",
+      "amended": "Ändrat",
+      "terminated_record": "Avslutat (registrering)",
+      "expired": "Utgånget"
+    },
+    "expiry": {
+      "ended": "Slutdatum passerat",
+      "endsInDays": "Löper ut om {days} d."
+    },
+    "signature": {
+      "none": "Inget signeringsunderlag bifogat.",
+      "evidenceAttached": "Externt signeringsunderlag bifogat (signerat utanför plattformen).",
+      "attachLabel": "Fil med signeringsunderlag",
+      "attachSubmit": "Bifoga underlag"
+    },
+    "amendment": {
+      "label": "Ändring {n}",
+      "addTitle": "Lägg till ändring",
+      "titleLabel": "Ändringens titel",
+      "descriptionLabel": "Vad ändras",
+      "documentLabel": "Ändringsdokument",
+      "documentNone": "Inget dokument",
+      "effectiveDateLabel": "Ikraftträdandedatum",
+      "honestNote": "En ändring läggs till i registreringens historik. Den ursprungliga texten förblir oförändrad — gällande villkor är grunden plus ändringarna i ordning.",
+      "submit": "Lägg till ändring"
+    },
+    "actions": {
+      "active_record": "Markera som aktiv registrering",
+      "terminated_record": "Markera som avslutat",
+      "expired": "Markera som utgånget"
+    },
+    "submitApproval": {
+      "definitionLabel": "Godkännandeflöde",
+      "submit": "Skicka för intern granskning",
+      "noDefinition": "Inget publicerat internt godkännandeflöde för avtal — registreringen kan aktiveras direkt.",
+      "pendingNote": "Väntar på intern granskning — beslutet fattas i godkännandeområdet."
+    },
+    "edit": {
+      "title": "Redigera uppgifter",
+      "submit": "Spara"
+    },
+    "create": {
+      "title": "Registrera avtal",
+      "typeLabel": "Typ",
+      "titleLabel": "Titel",
+      "counterpartyLabel": "Motpart",
+      "orgNumberLabel": "Motpartens organisationsnummer (valfritt)",
+      "responsibleLabel": "Ansvarig person",
+      "responsibleNone": "Inte tilldelad",
+      "externalRefLabel": "Extern referens (valfritt)",
+      "effectiveFromLabel": "Giltigt från",
+      "effectiveToLabel": "Giltigt till",
+      "workerLinkNote": "Det här registret är registrering på organisationssidan — det skapar eller signerar inte själva avtalet.",
+      "submit": "Registrera"
+    },
+    "notice": {
+      "created": "Avtal registrerat.",
+      "updated": "Sparat.",
+      "submitted": "Inskickat för intern granskning.",
+      "amended": "Ändring tillagd.",
+      "attached": "Dokument bifogat.",
+      "evidence_attached": "Signeringsunderlag bifogat. Detta registrerar endast underlag — inget blir juridiskt giltigt av det.",
+      "repaired": "Granskningsresultatet tillämpat på registreringen.",
+      "no_pending_workflow": "Ingen väntande granskningsförfrågan hittades för den här registreringen.",
+      "no_approval_definition": "Inget publicerat godkännandeflöde tillgängligt — registreringen förblir ett utkast.",
+      "invalid": "Vissa fält kunde inte godtas.",
+      "invalid_transition": "Det statusbytet är inte tillåtet från nuvarande tillstånd.",
+      "invalid_state": "Ändringar kan läggas till när registreringen är godkänd eller aktiv.",
+      "not_editable": "Den här registreringen kan inte längre redigeras.",
+      "not_found": "Registreringen hittades inte.",
+      "not_allowed": "Bara organisationens ägare eller administratör kan göra detta.",
+      "limit_reached": "Registergränsen är nådd.",
+      "needs_migration": "Avtalsregistret är ännu inte aktiverat i den här miljön.",
+      "error": "Något gick fel. Inget sparades."
+    }
+  },
+  "lifecycle": {
+    "title": "Anställningens livscykel",
+    "intro": "Onboarding, provanställning, förändringar, offboarding och avslut för organisationens anställningar — med checklistor och full historik.",
+    "unavailable": "Anställningens livscykel är ännu inte aktiverad i den här miljön. Inget går förlorat — området öppnas när lagringen är granskad och införd.",
+    "honestNote": "Allt här stannar i produkten. Att bocka av ett steg registrerar bara vem som bekräftade vad och när — inget skickas någonstans.",
+    "loadError": "Vissa data kunde inte läsas in just nu. Det du ser är äkta men kan vara ofullständigt.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Aktiv",
+      "probation": "Provanställning",
+      "change_pending": "Förändring väntar",
+      "offboarding": "Offboarding",
+      "ended": "Avslutad"
+    },
+    "members": {
+      "title": "Personer och faser",
+      "empty": "Inga anställningar i den här organisationen ännu.",
+      "actionsSummary": "Livscykelåtgärder",
+      "probationUntil": "Provanställning till {date}",
+      "ownerProtected": "Den registrerade ägarens egen anställning kan inte avslutas medan hen är ägare."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-checklista",
+      "offboardingTitle": "Offboarding-checklista",
+      "progress": "{done} av {total} klara",
+      "requiredOpen": "{count} obligatoriska steg kvar",
+      "complete": "Slutför checklista",
+      "cancel": "Avbryt checklista",
+      "start": "Starta onboarding",
+      "startOffboarding": "Starta offboarding",
+      "templateLabel": "Checklistemall",
+      "extraItemsLabel": "Extra steg (ett per rad, valfritt)",
+      "extraItemsHint": "t.ex. Lämna nycklar"
+    },
+    "items": {
+      "markDone": "Markera som klart",
+      "skip": "Hoppa över",
+      "reset": "Öppna igen",
+      "requiredBadge": "obligatoriskt",
+      "linkedBadge": "kopplat till en riktig post",
+      "responsibleLabel": "Ansvarig person",
+      "responsibleNone": "Ingen ansvarig person",
+      "assign": "Tilldela"
+    },
+    "kinds": {
+      "task": "Uppgift",
+      "document_ack": "Dokument att läsa och bekräfta",
+      "asset_issue": "Utlämnat verktyg eller utrustning",
+      "training_note": "Utbildning",
+      "custom": "Annat steg",
+      "asset_return": "Verktyg eller utrustning att lämna tillbaka",
+      "access_removal": "Ta bort åtkomst",
+      "final_evidence": "Slutkontroll av arbetsposter"
+    },
+    "templates": {
+      "title": "Onboarding-mallar",
+      "empty": "Inga onboarding-mallar ännu. Skapa den första nedan.",
+      "createTitle": "Ny onboarding-mall",
+      "nameLabel": "Mallnamn",
+      "itemTitleLabel": "Steg {n}",
+      "kindLabel": "Typ",
+      "requiredLabel": "Obligatoriskt",
+      "createSubmit": "Skapa mall",
+      "itemCount": "{count} steg"
+    },
+    "stageForm": {
+      "stageLabel": "Fas",
+      "probationDateLabel": "Provanställning till (vid provanställning)",
+      "noteLabel": "Anteckning (valfri)",
+      "submit": "Uppdatera fas"
+    },
+    "end": {
+      "reasonLabel": "Orsak",
+      "noteLabel": "Anteckning (valfri)",
+      "submit": "Avsluta anställning",
+      "confirmHint": "Anställningen avslutas via samma skyddade väg som borttagning av en medlem."
+    },
+    "reasons": {
+      "resignation": "Uppsägning av medarbetaren",
+      "termination": "Uppsägning av arbetsgivaren",
+      "contract_end": "Kontraktet löpte ut",
+      "mutual_agreement": "Ömsesidig överenskommelse",
+      "retirement": "Pension",
+      "other": "Annat"
+    },
+    "history": {
+      "title": "Livscykelhistorik",
+      "empty": "Inga händelser ännu."
+    },
+    "events": {
+      "stage_changed": "Fas ändrad",
+      "onboarding_started": "Onboarding startad",
+      "onboarding_completed": "Onboarding slutförd",
+      "onboarding_cancelled": "Onboarding avbruten",
+      "offboarding_started": "Offboarding startad",
+      "offboarding_completed": "Offboarding slutförd",
+      "offboarding_cancelled": "Offboarding avbruten",
+      "probation_set": "Provanställning satt",
+      "change_noted": "Förändring noterad",
+      "engagement_ended": "Anställning avslutad"
+    },
+    "worker": {
+      "title": "Min onboarding",
+      "intro": "Steg som din arbetsgivare förberett för din start. Bekräfta de som är dina — resten sköter arbetsgivaren.",
+      "empty": "Inget väntar på dig just nu.",
+      "done": "Klart",
+      "managerHint": "Din arbetsgivare bekräftar det här steget"
+    },
+    "notice": {
+      "created": "Skapad.",
+      "started": "Checklista startad.",
+      "updated": "Sparat.",
+      "completed": "Checklista slutförd.",
+      "cancelled": "Checklista avbruten.",
+      "ended": "Anställning avslutad och registrerad.",
+      "already_ended": "Den här anställningen var redan avslutad.",
+      "already_exists": "En mall med det här namnet finns redan.",
+      "already_running": "En checklista pågår redan för den här personen.",
+      "items_open": "Slutför alla obligatoriska steg först.",
+      "item_closed": "Det här steget är redan avklarat.",
+      "run_closed": "Den här checklistan är redan stängd.",
+      "link_invalid": "Den kopplade posten passar inte det här steget.",
+      "asset_not_returned": "Utrustningen är inte återlämnad ännu — registrera återlämningen först.",
+      "offboarding_open": "Slutför eller avbryt offboarding-checklistan först.",
+      "onboarding_open": "Slutför eller avbryt onboarding-checklistan först.",
+      "invalid_responsible": "Den personen tillhör inte den här organisationen.",
+      "invalid_stage": "Den här åtgärden passar inte den aktuella fasen.",
+      "invalid_transition": "Det här fasbytet är inte tillåtet från den aktuella fasen.",
+      "not_active": "Den här anställningen är inte aktiv.",
+      "not_org_scoped": "Det här är en personlig post, inte en anställning i organisationen.",
+      "template_not_found": "Mallen är inte tillgänglig.",
+      "last_owner": "Den sista ägarens anställning kan inte avslutas — utse en annan ägare först.",
+      "limit_reached": "Gränsen för den här organisationen är nådd.",
+      "invalid": "Ogiltig inmatning.",
+      "needs_migration": "Den här funktionen är ännu inte aktiverad i den här miljön.",
+      "not_authorized": "Du har inte behörighet för detta.",
+      "not_found": "Posten är inte tillgänglig.",
+      "error": "Misslyckades — försök igen."
     }
   },
   "finance": {

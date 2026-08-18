@@ -12032,6 +12032,27 @@
       },
       "persistAction": "Save this result",
       "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+    },
+    "marketProof": {
+      "eyebrow": "Nu op het platform",
+      "title": "De arbeidsmarkt in cijfers",
+      "stats": {
+        "vacancies": {
+          "value": "41.000+",
+          "label": "actieve vacatures"
+        },
+        "employers": {
+          "value": "7.600+",
+          "label": "werkgevers achter de vacatures"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regio's met actieve vacatures"
+        }
+      },
+      "asOfNote": "Op basis van vacaturedata van 17-08-2026; de cijfers veranderen dagelijks.",
+      "topTitle": "Meest gevraagde beroepen op dit moment",
+      "topNote": "Gerangschikt op actieve vacatures op het platform. Een deel van de vacatures is nog niet aan een beroep gekoppeld."
     }
   },
   "workspace": {
@@ -12846,6 +12867,256 @@
       "unpaid": "Onbetaald verlof",
       "training": "Training",
       "other": "Overig"
+    }
+  },
+  "agreements": {
+    "title": "Overeenkomstenregister",
+    "intro": "Het canonieke register van overeenkomsten van {org} — arbeidsgerelateerd en algemeen. Alleen registratie.",
+    "noSignatureNote": "Statussen in dit register zijn uitsluitend administratieve toestanden — niets hier betekent dat een overeenkomst ondertekend, juridisch geldig of bindend is. LabourMarket.ai voert geen juridische ondertekening uit: ondertekenen gebeurt buiten het platform en een bijgevoegd bestand is alleen door u aangeleverd bewijs.",
+    "relationshipNote": "De contractenlijst hierboven is het eerdere persoonlijke commerciële register en blijft ongewijzigd werken. Nieuwe overeenkomsten horen hier.",
+    "unavailable": "Het overeenkomstenregister kan nu niet worden getoond.",
+    "needsOrgWorkspace": "Het overeenkomstenregister werkt in een organisatiewerkruimte. Schakel over naar uw organisatie.",
+    "preparing": "Het overeenkomstenregister is voorbereid maar in deze omgeving nog niet ingeschakeld.",
+    "error": "Het overeenkomstenregister kon niet worden gelezen.",
+    "empty": "Nog geen overeenkomsten geregistreerd.",
+    "emptyFiltered": "Geen overeenkomsten voldoen aan deze filters.",
+    "scopeNote": "Register aan organisatiezijde. Werknemers zien dit register niet.",
+    "baseDocument": "Basisdocument",
+    "filters": {
+      "type": "Type",
+      "status": "Status",
+      "search": "Wederpartij of titel",
+      "searchPlaceholder": "Zoeken…",
+      "expiringOnly": "Eindigt binnen 30 dagen",
+      "apply": "Filteren",
+      "all": "Alle"
+    },
+    "types": {
+      "employment_related": "Arbeidsgerelateerd",
+      "service": "Diensten",
+      "supply": "Levering",
+      "nda": "Vertrouwelijkheid (NDA)",
+      "partnership": "Partnerschap",
+      "other": "Overig"
+    },
+    "status": {
+      "draft": "Concept",
+      "submitted_for_approval": "Ingediend voor interne goedkeuring",
+      "approved_internally": "Intern goedgekeurd",
+      "active_record": "Actieve registratie",
+      "amended": "Gewijzigd",
+      "terminated_record": "Beëindigd (registratie)",
+      "expired": "Verlopen"
+    },
+    "expiry": {
+      "ended": "Einddatum verstreken",
+      "endsInDays": "Eindigt over {days} d."
+    },
+    "signature": {
+      "none": "Geen ondertekeningsbewijs bijgevoegd.",
+      "evidenceAttached": "Extern ondertekeningsbewijs bijgevoegd (buiten het platform ondertekend).",
+      "attachLabel": "Bestand met ondertekeningsbewijs",
+      "attachSubmit": "Bewijs bijvoegen"
+    },
+    "amendment": {
+      "label": "Wijziging {n}",
+      "addTitle": "Wijziging toevoegen",
+      "titleLabel": "Titel van de wijziging",
+      "descriptionLabel": "Wat verandert er",
+      "documentLabel": "Wijzigingsdocument",
+      "documentNone": "Geen document",
+      "effectiveDateLabel": "Ingangsdatum",
+      "honestNote": "Een wijziging wordt aan de historie van de registratie toegevoegd. De oorspronkelijke tekst blijft ongewijzigd — de geldende voorwaarden zijn de basis plus de wijzigingen op volgorde.",
+      "submit": "Wijziging toevoegen"
+    },
+    "actions": {
+      "active_record": "Markeren als actieve registratie",
+      "terminated_record": "Markeren als beëindigd",
+      "expired": "Markeren als verlopen"
+    },
+    "submitApproval": {
+      "definitionLabel": "Goedkeuringsproces",
+      "submit": "Indienen voor interne goedkeuring",
+      "noDefinition": "Geen gepubliceerd intern goedkeuringsproces voor overeenkomsten — de registratie kan direct worden geactiveerd.",
+      "pendingNote": "Wacht op interne goedkeuring — de beslissing valt in het goedkeuringsgedeelte."
+    },
+    "edit": {
+      "title": "Gegevens bewerken",
+      "submit": "Opslaan"
+    },
+    "create": {
+      "title": "Overeenkomst registreren",
+      "typeLabel": "Type",
+      "titleLabel": "Titel",
+      "counterpartyLabel": "Wederpartij",
+      "orgNumberLabel": "Bedrijfsnummer wederpartij (optioneel)",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Niet toegewezen",
+      "externalRefLabel": "Externe referentie (optioneel)",
+      "effectiveFromLabel": "Geldig vanaf",
+      "effectiveToLabel": "Geldig tot",
+      "workerLinkNote": "Dit register is administratie aan organisatiezijde — het maakt of ondertekent de overeenkomst zelf niet.",
+      "submit": "Registreren"
+    },
+    "notice": {
+      "created": "Overeenkomst geregistreerd.",
+      "updated": "Opgeslagen.",
+      "submitted": "Ingediend voor interne goedkeuring.",
+      "amended": "Wijziging toegevoegd.",
+      "attached": "Document bijgevoegd.",
+      "evidence_attached": "Ondertekeningsbewijs bijgevoegd. Dit registreert alleen bewijs — het maakt niets juridisch geldig.",
+      "repaired": "Goedkeuringsresultaat toegepast op de registratie.",
+      "no_pending_workflow": "Geen lopend goedkeuringsverzoek gevonden voor deze registratie.",
+      "no_approval_definition": "Geen gepubliceerd goedkeuringsproces beschikbaar — de registratie blijft een concept.",
+      "invalid": "Sommige velden konden niet worden geaccepteerd.",
+      "invalid_transition": "Die statuswijziging is vanuit de huidige toestand niet toegestaan.",
+      "invalid_state": "Wijzigingen kunnen worden toegevoegd zodra de registratie goedgekeurd of actief is.",
+      "not_editable": "Deze registratie kan niet meer worden bewerkt.",
+      "not_found": "Registratie niet gevonden.",
+      "not_allowed": "Alleen de eigenaar of beheerder van de organisatie kan dit doen.",
+      "limit_reached": "De registerlimiet is bereikt.",
+      "needs_migration": "Het overeenkomstenregister is in deze omgeving nog niet ingeschakeld.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
+    }
+  },
+  "lifecycle": {
+    "title": "Levensloop van het dienstverband",
+    "intro": "Onboarding, proeftijd, wijzigingen, offboarding en beëindiging voor de arbeidsrecords van deze organisatie — met checklists en volledige geschiedenis.",
+    "unavailable": "De levensloop van het dienstverband is in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit onderdeel opent zodra de opslag is beoordeeld en toegepast.",
+    "honestNote": "Alles hier blijft binnen het product. Een stap afvinken legt alleen vast wie wat wanneer bevestigde — er wordt niets verstuurd.",
+    "loadError": "Een deel van de gegevens kon nu niet worden geladen. Wat u ziet is echt, maar kan onvolledig zijn.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Actief",
+      "probation": "Proeftijd",
+      "change_pending": "Wijziging in behandeling",
+      "offboarding": "Offboarding",
+      "ended": "Beëindigd"
+    },
+    "members": {
+      "title": "Mensen en fasen",
+      "empty": "Nog geen arbeidsrecords in deze organisatie.",
+      "actionsSummary": "Levensloopacties",
+      "probationUntil": "Proeftijd tot {date}",
+      "ownerProtected": "Het record van de geregistreerde eigenaar kan niet worden beëindigd zolang hij eigenaar is."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-checklist",
+      "offboardingTitle": "Offboarding-checklist",
+      "progress": "{done} van {total} gedaan",
+      "requiredOpen": "Nog {count} verplichte stappen open",
+      "complete": "Checklist afronden",
+      "cancel": "Checklist annuleren",
+      "start": "Onboarding starten",
+      "startOffboarding": "Offboarding starten",
+      "templateLabel": "Checklist-sjabloon",
+      "extraItemsLabel": "Extra stappen (één per regel, optioneel)",
+      "extraItemsHint": "bijv. Sleutels overdragen"
+    },
+    "items": {
+      "markDone": "Afvinken",
+      "skip": "Overslaan",
+      "reset": "Heropenen",
+      "requiredBadge": "verplicht",
+      "linkedBadge": "gekoppeld aan een echt record",
+      "responsibleLabel": "Verantwoordelijke",
+      "responsibleNone": "Geen verantwoordelijke",
+      "assign": "Toewijzen"
+    },
+    "kinds": {
+      "task": "Taak",
+      "document_ack": "Document lezen en bevestigen",
+      "asset_issue": "Uitgereikt gereedschap of materieel",
+      "training_note": "Training",
+      "custom": "Andere stap",
+      "asset_return": "In te leveren gereedschap of materieel",
+      "access_removal": "Toegang intrekken",
+      "final_evidence": "Eindcontrole werkrecords"
+    },
+    "templates": {
+      "title": "Onboarding-sjablonen",
+      "empty": "Nog geen onboarding-sjablonen. Maak hieronder de eerste aan.",
+      "createTitle": "Nieuw onboarding-sjabloon",
+      "nameLabel": "Sjabloonnaam",
+      "itemTitleLabel": "Stap {n}",
+      "kindLabel": "Type",
+      "requiredLabel": "Verplicht",
+      "createSubmit": "Sjabloon aanmaken",
+      "itemCount": "{count} stappen"
+    },
+    "stageForm": {
+      "stageLabel": "Fase",
+      "probationDateLabel": "Proeftijd tot (bij proeftijd)",
+      "noteLabel": "Notitie (optioneel)",
+      "submit": "Fase bijwerken"
+    },
+    "end": {
+      "reasonLabel": "Reden",
+      "noteLabel": "Notitie (optioneel)",
+      "submit": "Dienstverband beëindigen",
+      "confirmHint": "Het arbeidsrecord wordt beëindigd via hetzelfde beschermde pad als het verwijderen van een lid."
+    },
+    "reasons": {
+      "resignation": "Ontslag op eigen verzoek",
+      "termination": "Ontslag",
+      "contract_end": "Contract afgelopen",
+      "mutual_agreement": "Wederzijds akkoord",
+      "retirement": "Pensioen",
+      "other": "Anders"
+    },
+    "history": {
+      "title": "Levensloopgeschiedenis",
+      "empty": "Nog geen gebeurtenissen."
+    },
+    "events": {
+      "stage_changed": "Fase gewijzigd",
+      "onboarding_started": "Onboarding gestart",
+      "onboarding_completed": "Onboarding afgerond",
+      "onboarding_cancelled": "Onboarding geannuleerd",
+      "offboarding_started": "Offboarding gestart",
+      "offboarding_completed": "Offboarding afgerond",
+      "offboarding_cancelled": "Offboarding geannuleerd",
+      "probation_set": "Proeftijd ingesteld",
+      "change_noted": "Wijziging genoteerd",
+      "engagement_ended": "Dienstverband beëindigd"
+    },
+    "worker": {
+      "title": "Mijn onboarding",
+      "intro": "Stappen die uw werkgever voor uw start heeft klaargezet. Bevestig wat van u is — de rest regelt uw werkgever.",
+      "empty": "Er wacht nu niets op u.",
+      "done": "Gedaan",
+      "managerHint": "Uw werkgever bevestigt deze stap"
+    },
+    "notice": {
+      "created": "Aangemaakt.",
+      "started": "Checklist gestart.",
+      "updated": "Opgeslagen.",
+      "completed": "Checklist afgerond.",
+      "cancelled": "Checklist geannuleerd.",
+      "ended": "Dienstverband beëindigd en vastgelegd.",
+      "already_ended": "Dit dienstverband was al beëindigd.",
+      "already_exists": "Er bestaat al een sjabloon met deze naam.",
+      "already_running": "Voor deze persoon loopt al een checklist.",
+      "items_open": "Rond eerst alle verplichte stappen af.",
+      "item_closed": "Deze stap is al afgehandeld.",
+      "run_closed": "Deze checklist is al gesloten.",
+      "link_invalid": "Het gekoppelde record past niet bij deze stap.",
+      "asset_not_returned": "Het materieel is nog niet ingeleverd — registreer eerst de inname.",
+      "offboarding_open": "Rond eerst de offboarding-checklist af of annuleer die.",
+      "onboarding_open": "Rond eerst de onboarding-checklist af of annuleer die.",
+      "invalid_responsible": "Die persoon hoort niet bij deze organisatie.",
+      "invalid_stage": "Deze actie past niet bij de huidige fase.",
+      "invalid_transition": "Deze fasewijziging is vanuit de huidige fase niet toegestaan.",
+      "not_active": "Dit arbeidsrecord is niet actief.",
+      "not_org_scoped": "Dit is een persoonlijk record, geen dienstverband van de organisatie.",
+      "template_not_found": "Dat sjabloon is niet beschikbaar.",
+      "last_owner": "Het record van de laatste eigenaar kan niet worden beëindigd — benoem eerst een andere eigenaar.",
+      "limit_reached": "De limiet voor deze organisatie is bereikt.",
+      "invalid": "Ongeldige invoer.",
+      "needs_migration": "Deze mogelijkheid is in deze omgeving nog niet ingeschakeld.",
+      "not_authorized": "U bent hiervoor niet bevoegd.",
+      "not_found": "Record niet beschikbaar.",
+      "error": "Mislukt — probeer het opnieuw."
     }
   },
   "procurement": {

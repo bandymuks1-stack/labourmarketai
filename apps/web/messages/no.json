@@ -3900,6 +3900,27 @@
         "body": "[EN] A subjective +1 or −1 with text. Shown as an opinion, kept apart from facts; a run of negatives is a signal to check, never a verdict."
       },
       "noStars": "[EN] No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
+    },
+    "marketProof": {
+      "eyebrow": "Akkurat nå på plattformen",
+      "title": "Arbeidsmarkedet i tall",
+      "stats": {
+        "vacancies": {
+          "value": "41 000+",
+          "label": "aktive stillingsannonser"
+        },
+        "employers": {
+          "value": "7 600+",
+          "label": "arbeidsgivere bak annonsene"
+        },
+        "regions": {
+          "value": "21",
+          "label": "regioner med aktive annonser"
+        }
+      },
+      "asOfNote": "Basert på annonsedata fra 17.08.2026; tallene endrer seg daglig.",
+      "topTitle": "Mest etterspurte yrker akkurat nå",
+      "topNote": "Rangert etter aktive stillingsannonser på plattformen. En del av annonsene er ennå ikke knyttet til et yrke."
     }
   },
   "workspace": {
@@ -4793,6 +4814,256 @@
       "requestedDays": "{days} d ønsket",
       "remainingShort": "{days} d igjen",
       "exceedsNote": "Mer enn gjenværende ferie"
+    }
+  },
+  "agreements": {
+    "title": "Avtaleregister",
+    "intro": "Det kanoniske registeret over {org}s avtaler — arbeidsrelaterte og generelle. Kun registrering.",
+    "noSignatureNote": "Statusene i dette registeret er kun registreringstilstander — ingenting her betyr at en avtale er signert, juridisk gyldig eller bindende. LabourMarket.ai utfører ingen juridisk signering: signering skjer utenfor plattformen, og en vedlagt fil er bare dokumentasjon du selv leverer.",
+    "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommersielle registeret og fungerer uendret. Nye avtaler hører hjemme her.",
+    "unavailable": "Avtaleregisteret kan ikke vises akkurat nå.",
+    "needsOrgWorkspace": "Avtaleregisteret fungerer i et organisasjonsarbeidsområde. Bytt til organisasjonen din.",
+    "preparing": "Avtaleregisteret er forberedt, men ennå ikke aktivert i dette miljøet.",
+    "error": "Avtaleregisteret kunne ikke leses.",
+    "empty": "Ingen avtaler registrert ennå.",
+    "emptyFiltered": "Ingen avtaler samsvarer med disse filtrene.",
+    "scopeNote": "Register på organisasjonssiden. Arbeidere ser ikke dette registeret.",
+    "baseDocument": "Basisdokument",
+    "filters": {
+      "type": "Type",
+      "status": "Status",
+      "search": "Motpart eller tittel",
+      "searchPlaceholder": "Søk…",
+      "expiringOnly": "Utløper innen 30 dager",
+      "apply": "Filtrer",
+      "all": "Alle"
+    },
+    "types": {
+      "employment_related": "Arbeidsrelatert",
+      "service": "Tjeneste",
+      "supply": "Leveranse",
+      "nda": "Konfidensialitet (NDA)",
+      "partnership": "Partnerskap",
+      "other": "Annet"
+    },
+    "status": {
+      "draft": "Utkast",
+      "submitted_for_approval": "Sendt til intern godkjenning",
+      "approved_internally": "Internt godkjent",
+      "active_record": "Aktiv registrering",
+      "amended": "Endret",
+      "terminated_record": "Avsluttet (registrering)",
+      "expired": "Utløpt"
+    },
+    "expiry": {
+      "ended": "Sluttdato passert",
+      "endsInDays": "Utløper om {days} d."
+    },
+    "signature": {
+      "none": "Ingen signaturdokumentasjon vedlagt.",
+      "evidenceAttached": "Ekstern signaturdokumentasjon vedlagt (signert utenfor plattformen).",
+      "attachLabel": "Fil med signaturdokumentasjon",
+      "attachSubmit": "Legg ved dokumentasjon"
+    },
+    "amendment": {
+      "label": "Endring {n}",
+      "addTitle": "Legg til endring",
+      "titleLabel": "Endringens tittel",
+      "descriptionLabel": "Hva endres",
+      "documentLabel": "Endringsdokument",
+      "documentNone": "Ingen dokument",
+      "effectiveDateLabel": "Ikrafttredelsesdato",
+      "honestNote": "En endring legges til registreringens historikk. Den opprinnelige teksten forblir uendret — gjeldende vilkår er grunnlaget pluss endringene i rekkefølge.",
+      "submit": "Legg til endring"
+    },
+    "actions": {
+      "active_record": "Merk som aktiv registrering",
+      "terminated_record": "Merk som avsluttet",
+      "expired": "Merk som utløpt"
+    },
+    "submitApproval": {
+      "definitionLabel": "Godkjenningsflyt",
+      "submit": "Send til intern godkjenning",
+      "noDefinition": "Ingen publisert intern godkjenningsflyt for avtaler — registreringen kan aktiveres direkte.",
+      "pendingNote": "Venter på intern godkjenning — beslutningen tas i godkjenningsområdet."
+    },
+    "edit": {
+      "title": "Rediger opplysninger",
+      "submit": "Lagre"
+    },
+    "create": {
+      "title": "Registrer avtale",
+      "typeLabel": "Type",
+      "titleLabel": "Tittel",
+      "counterpartyLabel": "Motpart",
+      "orgNumberLabel": "Motpartens organisasjonsnummer (valgfritt)",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ikke tildelt",
+      "externalRefLabel": "Ekstern referanse (valgfritt)",
+      "effectiveFromLabel": "Gyldig fra",
+      "effectiveToLabel": "Gyldig til",
+      "workerLinkNote": "Dette registeret er registrering på organisasjonssiden — det oppretter eller signerer ikke selve avtalen.",
+      "submit": "Registrer"
+    },
+    "notice": {
+      "created": "Avtale registrert.",
+      "updated": "Lagret.",
+      "submitted": "Sendt til intern godkjenning.",
+      "amended": "Endring lagt til.",
+      "attached": "Dokument vedlagt.",
+      "evidence_attached": "Signaturdokumentasjon vedlagt. Dette registrerer bare dokumentasjon — ingenting blir juridisk gyldig av det.",
+      "repaired": "Godkjenningsresultat anvendt på registreringen.",
+      "no_pending_workflow": "Ingen ventende godkjenningsforespørsel funnet for denne registreringen.",
+      "no_approval_definition": "Ingen publisert godkjenningsflyt tilgjengelig — registreringen forblir et utkast.",
+      "invalid": "Noen felt kunne ikke godtas.",
+      "invalid_transition": "Det statusskiftet er ikke tillatt fra nåværende tilstand.",
+      "invalid_state": "Endringer kan legges til når registreringen er godkjent eller aktiv.",
+      "not_editable": "Denne registreringen kan ikke lenger redigeres.",
+      "not_found": "Registrering ikke funnet.",
+      "not_allowed": "Bare organisasjonens eier eller administrator kan gjøre dette.",
+      "limit_reached": "Registergrensen er nådd.",
+      "needs_migration": "Avtaleregisteret er ennå ikke aktivert i dette miljøet.",
+      "error": "Noe gikk galt. Ingenting ble lagret."
+    }
+  },
+  "lifecycle": {
+    "title": "Ansettelsens livssyklus",
+    "intro": "Onboarding, prøvetid, endringer, offboarding og avslutning for organisasjonens ansettelser — med sjekklister og full historikk.",
+    "unavailable": "Ansettelsens livssyklus er ennå ikke slått på i dette miljøet. Ingenting går tapt — området åpner når lageret er gjennomgått og tatt i bruk.",
+    "honestNote": "Alt her blir i produktet. Å merke et trinn som utført registrerer bare hvem som bekreftet hva og når — ingenting sendes noe sted.",
+    "loadError": "Noen data kunne ikke lastes akkurat nå. Det du ser er ekte, men kan være ufullstendig.",
+    "stage": {
+      "onboarding": "Onboarding",
+      "active": "Aktiv",
+      "probation": "Prøvetid",
+      "change_pending": "Endring venter",
+      "offboarding": "Offboarding",
+      "ended": "Avsluttet"
+    },
+    "members": {
+      "title": "Personer og faser",
+      "empty": "Ingen ansettelser i denne organisasjonen ennå.",
+      "actionsSummary": "Livssyklushandlinger",
+      "probationUntil": "Prøvetid til {date}",
+      "ownerProtected": "Den registrerte eierens egen ansettelse kan ikke avsluttes mens vedkommende er eier."
+    },
+    "runs": {
+      "onboardingTitle": "Onboarding-sjekkliste",
+      "offboardingTitle": "Offboarding-sjekkliste",
+      "progress": "{done} av {total} utført",
+      "requiredOpen": "{count} obligatoriske trinn gjenstår",
+      "complete": "Fullfør sjekkliste",
+      "cancel": "Avbryt sjekkliste",
+      "start": "Start onboarding",
+      "startOffboarding": "Start offboarding",
+      "templateLabel": "Sjekklistemal",
+      "extraItemsLabel": "Ekstra trinn (ett per linje, valgfritt)",
+      "extraItemsHint": "f.eks. Lever nøkler"
+    },
+    "items": {
+      "markDone": "Merk som utført",
+      "skip": "Hopp over",
+      "reset": "Gjenåpne",
+      "requiredBadge": "obligatorisk",
+      "linkedBadge": "knyttet til en ekte post",
+      "responsibleLabel": "Ansvarlig person",
+      "responsibleNone": "Ingen ansvarlig person",
+      "assign": "Tildel"
+    },
+    "kinds": {
+      "task": "Oppgave",
+      "document_ack": "Dokument til lesing og bekreftelse",
+      "asset_issue": "Utlevert verktøy eller utstyr",
+      "training_note": "Opplæring",
+      "custom": "Annet trinn",
+      "asset_return": "Verktøy eller utstyr til retur",
+      "access_removal": "Fjern tilgang",
+      "final_evidence": "Sluttkontroll av arbeidsposter"
+    },
+    "templates": {
+      "title": "Onboarding-maler",
+      "empty": "Ingen onboarding-maler ennå. Opprett den første nedenfor.",
+      "createTitle": "Ny onboarding-mal",
+      "nameLabel": "Malnavn",
+      "itemTitleLabel": "Trinn {n}",
+      "kindLabel": "Type",
+      "requiredLabel": "Obligatorisk",
+      "createSubmit": "Opprett mal",
+      "itemCount": "{count} trinn"
+    },
+    "stageForm": {
+      "stageLabel": "Fase",
+      "probationDateLabel": "Prøvetid til (ved prøvetid)",
+      "noteLabel": "Notat (valgfritt)",
+      "submit": "Oppdater fase"
+    },
+    "end": {
+      "reasonLabel": "Årsak",
+      "noteLabel": "Notat (valgfritt)",
+      "submit": "Avslutt ansettelse",
+      "confirmHint": "Ansettelsen avsluttes via samme beskyttede vei som fjerning av et medlem."
+    },
+    "reasons": {
+      "resignation": "Oppsigelse fra arbeidstaker",
+      "termination": "Oppsigelse fra arbeidsgiver",
+      "contract_end": "Kontrakt utløpt",
+      "mutual_agreement": "Gjensidig avtale",
+      "retirement": "Pensjon",
+      "other": "Annet"
+    },
+    "history": {
+      "title": "Livssyklushistorikk",
+      "empty": "Ingen hendelser ennå."
+    },
+    "events": {
+      "stage_changed": "Fase endret",
+      "onboarding_started": "Onboarding startet",
+      "onboarding_completed": "Onboarding fullført",
+      "onboarding_cancelled": "Onboarding avbrutt",
+      "offboarding_started": "Offboarding startet",
+      "offboarding_completed": "Offboarding fullført",
+      "offboarding_cancelled": "Offboarding avbrutt",
+      "probation_set": "Prøvetid satt",
+      "change_noted": "Endring notert",
+      "engagement_ended": "Ansettelse avsluttet"
+    },
+    "worker": {
+      "title": "Min onboarding",
+      "intro": "Trinn arbeidsgiveren din har forberedt til starten din. Bekreft de som er dine — resten håndterer arbeidsgiveren.",
+      "empty": "Ingenting venter på deg akkurat nå.",
+      "done": "Utført",
+      "managerHint": "Arbeidsgiveren din bekrefter dette trinnet"
+    },
+    "notice": {
+      "created": "Opprettet.",
+      "started": "Sjekkliste startet.",
+      "updated": "Lagret.",
+      "completed": "Sjekkliste fullført.",
+      "cancelled": "Sjekkliste avbrutt.",
+      "ended": "Ansettelse avsluttet og registrert.",
+      "already_ended": "Denne ansettelsen var allerede avsluttet.",
+      "already_exists": "En mal med dette navnet finnes allerede.",
+      "already_running": "En sjekkliste kjører allerede for denne personen.",
+      "items_open": "Fullfør alle obligatoriske trinn først.",
+      "item_closed": "Dette trinnet er allerede avklart.",
+      "run_closed": "Denne sjekklisten er allerede lukket.",
+      "link_invalid": "Den tilknyttede posten passer ikke til dette trinnet.",
+      "asset_not_returned": "Utstyret er ennå ikke levert tilbake — registrer returen først.",
+      "offboarding_open": "Fullfør eller avbryt offboarding-sjekklisten først.",
+      "onboarding_open": "Fullfør eller avbryt onboarding-sjekklisten først.",
+      "invalid_responsible": "Denne personen er ikke en del av denne organisasjonen.",
+      "invalid_stage": "Denne handlingen passer ikke til gjeldende fase.",
+      "invalid_transition": "Dette fasebyttet er ikke tillatt fra gjeldende fase.",
+      "not_active": "Denne ansettelsen er ikke aktiv.",
+      "not_org_scoped": "Dette er en personlig post, ikke en ansettelse i organisasjonen.",
+      "template_not_found": "Malen er ikke tilgjengelig.",
+      "last_owner": "Den siste eierens ansettelse kan ikke avsluttes — utnevn en annen eier først.",
+      "limit_reached": "Grensen for denne organisasjonen er nådd.",
+      "invalid": "Ugyldig inndata.",
+      "needs_migration": "Denne funksjonen er ennå ikke slått på i dette miljøet.",
+      "not_authorized": "Du har ikke tilgang til dette.",
+      "not_found": "Posten er ikke tilgjengelig.",
+      "error": "Mislyktes — prøv igjen."
     }
   },
   "finance": {

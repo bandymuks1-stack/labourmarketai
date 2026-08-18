@@ -203,14 +203,77 @@ describe("no new invitation system", () => {
 // ops-role / journal-review payload already lives on engagement_contexts).
 
 describe("no new employment-record model", () => {
-  it("engagement-shaped tables are the known two", () => {
+  // STRENGTHENED, never weakened. `engagement_lifecycle_events`
+  // (20260817190000, train G) matches the name shape but is NOT a fourth
+  // employment model: it is the APPEND-ONLY HISTORY of the canonical spine —
+  // exactly the "extend engagement_contexts instead" outcome this rule asks
+  // for. It is admitted only under the four structural assertions below, so
+  // a real employment model could never enter through this door.
+  const LIFECYCLE_LEDGER = "engagement_lifecycle_events";
+
+  it("engagement-shaped tables are the known two + the append-only history", () => {
     expect(
       tablesMatching(/engagement/),
-      "Closed set: engagement_contexts (THE canonical employment spine) and " +
-        "company_worker_engagements (booking-provenance ledger only). A new " +
-        "employment model must extend engagement_contexts instead. " +
-        `See ${FREEZE_REGISTER} §3.`,
-    ).toEqual(["company_worker_engagements", "engagement_contexts"]);
+      "Closed set: engagement_contexts (THE canonical employment spine), " +
+        "company_worker_engagements (booking-provenance ledger only) and " +
+        "engagement_lifecycle_events (append-only HISTORY of the spine — " +
+        "holds no employment state). A new employment model must extend " +
+        `engagement_contexts instead. See ${FREEZE_REGISTER} §3.`,
+    ).toEqual([
+      "company_worker_engagements",
+      "engagement_contexts",
+      LIFECYCLE_LEDGER,
+    ]);
+  });
+
+  it("the lifecycle ledger is history, not a rival employment record", () => {
+    const sql = readFileSync(
+      join(REPO_ROOT, "supabase/migrations/20260817190000_employee_lifecycle_v1.sql"),
+      "utf8",
+    );
+    const create = /create table if not exists public\.engagement_lifecycle_events \(([\s\S]*?)\n\);/.exec(
+      sql,
+    )?.[1];
+    expect(create, "the lifecycle ledger create statement must be findable").toBeTruthy();
+    const body = create ?? "";
+    // (a) It POINTS AT the canonical spine rather than duplicating it.
+    expect(
+      body,
+      "the ledger must reference engagement_contexts — history OF the spine",
+    ).toMatch(/engagement_context_id\s+uuid not null references public\.engagement_contexts\(id\)/);
+    // (b) It carries NO employment-state columns (that state lives on the
+    //     spine's own additive columns, which is the sanctioned extension).
+    for (const forbidden of [
+      "organization_id",
+      "profile_id",
+      "relationship_slug",
+      "started_at",
+      "ended_at",
+      "is_primary",
+    ]) {
+      expect(
+        body,
+        `the ledger must not carry the employment-state column ${forbidden} — ` +
+          "that would make it a rival employment record",
+      ).not.toMatch(new RegExp(`^\\s*${forbidden}\\s`, "m"));
+    }
+    // (c) Append-only for every role, trigger-enforced.
+    expect(sql).toMatch(
+      /create trigger engagement_lifecycle_events_append_only[\s\S]*?before update or delete on public\.engagement_lifecycle_events/,
+    );
+    // (d) The lifecycle stage/probation/ending state is stored ON the spine.
+    for (const col of [
+      "lifecycle_stage",
+      "probation_until",
+      "ended_reason",
+      "ended_note",
+    ]) {
+      expect(sql).toMatch(
+        new RegExp(
+          `alter table public\\.engagement_contexts\\s*\\n\\s*add column if not exists ${col}\\b`,
+        ),
+      );
+    }
   });
 
   it("roster-shaped tables are the known two (legacy, frozen)", () => {
