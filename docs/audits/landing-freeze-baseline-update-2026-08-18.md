@@ -110,5 +110,26 @@ and to showing English on its first screen.
   change.
 - `landing-freeze.test.ts` — green against the regenerated baseline.
 - Local full run with this change: 968 files / 16,003 tests green.
-- Production browser verification of `https://labourmarket.ai/ru` is recorded
-  in this file's companion section below once the deploy lands.
+- **Production browser verification: NOT performed by the session that made
+  this change, and here is why.** U-15 requires it, and this environment cannot
+  do it: the egress policy refuses `CONNECT` to `labourmarket.ai:443` and to
+  the Vercel preview host, both answered `403` by the gateway
+  (`recentRelayFailures` in `$HTTPS_PROXY/__agentproxy/status`, 2026-08-18
+  13:50 and 13:59 UTC). No page could be loaded, so no verification is claimed.
+
+  Rather than leave that as a hand-wave, the verification is **committed and
+  runnable**: `apps/web/tests/e2e/ru-landing-localization.spec.ts`.
+
+  ```
+  E2E_BASE_URL=https://labourmarket.ai pnpm -F web e2e ru-landing-localization
+  ```
+
+  It asserts the specific first-screen strings that were English now render in
+  Russian, that their English originals are **gone** from the page (not merely
+  that "some Russian is present", which would pass on a page where only the nav
+  was translated), and that the `{count}` ICU placeholder did not leak as a
+  literal. It also writes evidence screenshots at 390 / 768 / 1440 into
+  `docs/audits/evidence/ru-landing-localization/`.
+
+  **This is the one part of U-15 still outstanding.** It needs running from an
+  environment with egress to `labourmarket.ai` once the deploy lands.
