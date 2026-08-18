@@ -59,6 +59,35 @@ export const FINANCE_TITLE_MAX = 160;
 export const FINANCE_COUNTERPARTY_MIN = 2;
 export const FINANCE_COUNTERPARTY_MAX = 160;
 export const FINANCE_NOTE_MAX = 1000;
+/** Invoice-upgrade bound (20260817220000_finance_invoice_upgrades_v1). */
+export const FINANCE_INVOICE_NUMBER_MAX = 60;
+
+/**
+ * Engine-MIRROR approval states (finance invoice upgrades v1). The decision
+ * itself lives in the Workflow & Approval Engine (context 'expense' /
+ * 'invoice', context id = record id); this column only reflects it — written
+ * by submit_finance_record_approval_v1 / sync_finance_record_approval_v1,
+ * never decided app-side. `null` = approval was never requested.
+ */
+export const FINANCE_APPROVAL_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+] as const;
+export type FinanceApprovalStatus = (typeof FINANCE_APPROVAL_STATUSES)[number];
+
+export function isValidFinanceApprovalStatus(
+  v: string,
+): v is FinanceApprovalStatus {
+  return (FINANCE_APPROVAL_STATUSES as readonly string[]).includes(v);
+}
+
+/** Engine context for a record type (single mapping, guard-pinned). */
+export function financeApprovalContext(
+  recordType: FinanceRecordType,
+): "expense" | "invoice" {
+  return recordType === "expense" ? "expense" : "invoice";
+}
 
 /** Amount bounds in integer cents (EUR-only v1): 0 .. €1,000,000,000.00. */
 export const FINANCE_MAX_AMOUNT_CENTS = 100_000_000_000;
@@ -102,6 +131,16 @@ export type FinanceRecord = {
   readonly projectId: string | null;
   readonly companyId: string | null;
   readonly note: string | null;
+  /** Invoice upgrades v1 — additive nullable fields (honest null = absent). */
+  readonly invoiceNumber: string | null;
+  /** Integer cents or null. Never a float anywhere in this layer. */
+  readonly vatAmountCents: number | null;
+  /** Document-engine register row (org_documents) the receipt lives behind. */
+  readonly orgDocumentId: string | null;
+  /** Engine MIRROR — null when approval was never requested. */
+  readonly approvalStatus: FinanceApprovalStatus | null;
+  /** Business trip this record belongs to (business trips v1). */
+  readonly tripId: string | null;
   readonly createdBy: string;
   readonly createdAt: string;
 };
@@ -321,6 +360,11 @@ export const FINANCE_CSV_HEADER = [
   "counterparty",
   "amount_eur",
   "currency",
+  "invoice_number",
+  "vat_eur",
+  "approval_status",
+  "has_document",
+  "trip_id",
   "due_date",
   "paid_at",
   "project_id",
@@ -330,7 +374,9 @@ export const FINANCE_CSV_HEADER = [
 ] as const;
 
 /** One CSV row for one record (pure). Overdue is the same derivation the
- *  page shows — the export can never disagree with the screen. */
+ *  page shows — the export can never disagree with the screen. The document
+ *  column is an honest INDICATOR (yes/empty): the file itself lives behind
+ *  the document engine and is not exported here. */
 export function buildFinanceCsvRow(record: FinanceRecord, now: Date): string[] {
   return [
     record.recordType,
@@ -340,6 +386,11 @@ export function buildFinanceCsvRow(record: FinanceRecord, now: Date): string[] {
     record.counterpartyName,
     formatCentsAsEur(record.amountCents),
     record.currency,
+    record.invoiceNumber ?? "",
+    record.vatAmountCents === null ? "" : formatCentsAsEur(record.vatAmountCents),
+    record.approvalStatus ?? "",
+    record.orgDocumentId ? "yes" : "",
+    record.tripId ?? "",
     record.dueDate ?? "",
     record.paidAt ?? "",
     record.projectId ?? "",

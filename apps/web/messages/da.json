@@ -5065,5 +5065,184 @@
       "not_found": "Posten er ikke tilgængelig.",
       "error": "Mislykkedes — prøv igen."
     }
+  },
+  "finance": {
+    "invoiceNoLabel": "Fakturanr.",
+    "vatLabel": "Moms",
+    "documentLinked": "Dokument vedhæftet",
+    "tripLinked": "Tjenesterejse tilknyttet",
+    "approval": {
+      "pending": "Afventer godkendelse",
+      "approved": "Godkendt",
+      "rejected": "Ikke godkendt"
+    },
+    "form": {
+      "invoiceNoLabel": "Fakturanummer (valgfrit)",
+      "invoiceNoPlaceholder": "f.eks. FA-2026-014",
+      "vatLabel": "Momsbeløb (valgfrit)",
+      "invoiceHint": "Fakturanummer og moms er valgfrie. Hvis en modtaget faktura gentager et allerede gemt nummer fra samme modpart, gemmes posten alligevel, og du ser en advarsel."
+    },
+    "actions": {
+      "requestApproval": "Anmod om godkendelse",
+      "checkApproval": "Tjek godkendelse"
+    },
+    "notice": {
+      "created_possible_duplicate": "Gemt — men en post med denne modpart og dette fakturanummer findes allerede. Tjek for en dublet.",
+      "approval_submitted": "Godkendelse anmodet. Godkenderne er blevet underrettet.",
+      "approval_approved": "Denne post blev godkendt.",
+      "approval_rejected": "Denne post blev ikke godkendt.",
+      "approval_pending": "Godkendelsesbeslutningen er endnu ikke truffet.",
+      "approval_cleared": "Godkendelsesanmodningen blev trukket tilbage eller annulleret.",
+      "approval_none": "Ingen godkendelsesanmodning fundet for denne post.",
+      "no_template": "Denne virksomhed har endnu ingen offentliggjort godkendelsesproces, så godkendelse kan ikke anmodes.",
+      "no_approvers": "Ingen i virksomheden kan i øjeblikket godkende denne anmodning."
+    }
+  },
+  "procurement": {
+    "title": "Indkøb",
+    "intro": "Bed om materialer eller ydelser, notér leverandørtilbud, og registrér hvad der blev valgt. Intet her kontakter en leverandør eller bestiller noget — det er din registrering.",
+    "needsMigration": "Indkøbsanmodninger er endnu ikke aktiveret i dette miljø.",
+    "readError": "Indkøbsanmodninger kunne ikke indlæses. Prøv igen.",
+    "empty": "Ingen indkøbsanmodninger endnu.",
+    "noOffers": "Ingen leverandørtilbud noteret endnu.",
+    "offerSelected": "Valgt",
+    "orderRefLabel": "Ordrenr.",
+    "invoiceLinked": "Faktura tilknyttet",
+    "status": {
+      "draft": "Kladde",
+      "submitted": "Indsendt",
+      "decided": "Besluttet",
+      "ordered": "Bestilt",
+      "closed": "Lukket",
+      "cancelled": "Annulleret"
+    },
+    "approval": {
+      "pending": "Afventer godkendelse",
+      "approved": "Godkendt",
+      "rejected": "Ikke godkendt"
+    },
+    "form": {
+      "open": "Ny indkøbsanmodning",
+      "orgLabel": "Virksomhed",
+      "descriptionLabel": "Hvad er der brug for",
+      "descriptionPlaceholder": "f.eks. 40 sække cement til fundamentet",
+      "quantityLabel": "Mængde (valgfrit)",
+      "quantityPlaceholder": "f.eks. 40 sække",
+      "budgetLabel": "Anslået budget i EUR (valgfrit)",
+      "submit": "Gem anmodning",
+      "supplierLabel": "Leverandørnavn",
+      "offerAmountLabel": "Tilbudsbeløb i EUR",
+      "offerNoteLabel": "Note (valgfrit)",
+      "orderRefPlaceholder": "Ordrenummer (valgfrit)",
+      "invoiceNone": "Ingen faktura tilknyttet"
+    },
+    "actions": {
+      "selectOffer": "Vælg dette tilbud",
+      "addOffer": "Notér leverandørtilbud",
+      "saveOffer": "Gem tilbud",
+      "edit": "Redigér",
+      "save": "Gem",
+      "submit": "Indsend",
+      "requestApproval": "Anmod om godkendelse",
+      "checkApproval": "Tjek godkendelse",
+      "markOrdered": "Markér som bestilt",
+      "close": "Luk",
+      "cancel": "Annullér",
+      "linkInvoice": "Tilknyt faktura"
+    },
+    "notice": {
+      "created": "Indkøbsanmodning gemt.",
+      "updated": "Indkøbsanmodning opdateret.",
+      "submitted": "Indkøbsanmodning indsendt.",
+      "offer_added": "Leverandørtilbud noteret.",
+      "decided": "Tilbud valgt.",
+      "linked": "Faktura tilknyttet.",
+      "unlinked": "Fakturatilknytning fjernet.",
+      "cancelled": "Indkøbsanmodning annulleret.",
+      "invalid": "Tjek de indtastede oplysninger.",
+      "needs_migration": "Indkøbsanmodninger er endnu ikke aktiveret i dette miljø.",
+      "not_authorized": "Det kan du ikke gøre for denne anmodning.",
+      "not_found": "Denne indkøbsanmodning blev ikke fundet.",
+      "not_editable": "I denne tilstand er det trin ikke muligt.",
+      "limit_reached": "Grænsen for åbne anmodninger er nået.",
+      "approval_submitted": "Godkendelse anmodet. Godkenderne er blevet underrettet.",
+      "approval_approved": "Denne anmodning blev godkendt.",
+      "approval_rejected": "Denne anmodning blev ikke godkendt.",
+      "approval_pending": "Godkendelsesbeslutningen er endnu ikke truffet.",
+      "approval_cleared": "Godkendelsesanmodningen blev trukket tilbage eller annulleret.",
+      "approval_none": "Ingen godkendelsesanmodning fundet.",
+      "no_template": "Denne virksomhed har endnu ingen offentliggjort godkendelsesproces for indkøb.",
+      "no_approvers": "Ingen i virksomheden kan i øjeblikket godkende denne anmodning.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
+  },
+  "trips": {
+    "title": "Tjenesterejser",
+    "intro": "Anmod om en rejse, få den godkendt, og hold dens udgifter samlet. Intet her booker rejser eller udbetaler penge — det er din registrering.",
+    "needsMigration": "Tjenesterejser er endnu ikke aktiveret i dette miljø.",
+    "readError": "Tjenesterejser kunne ikke indlæses. Prøv igen.",
+    "empty": "Ingen tjenesterejser endnu.",
+    "orgHeading": "Rejser for personer, du leder",
+    "advanceLabel": "Forskud",
+    "expensesLabel": "Udgifter",
+    "noTemplate": "Denne virksomhed har endnu ingen offentliggjort godkendelsesproces for rejser, så en rejse kan ikke indsendes.",
+    "status": {
+      "draft": "Kladde",
+      "submitted": "Indsendt",
+      "approved": "Godkendt",
+      "rejected": "Ikke godkendt",
+      "completed": "Gennemført",
+      "cancelled": "Annulleret"
+    },
+    "form": {
+      "open": "Ny rejseanmodning",
+      "orgLabel": "Virksomhed",
+      "destinationLabel": "Destination",
+      "destinationPlaceholder": "f.eks. Oslo, Norge",
+      "fromLabel": "Første dag",
+      "toLabel": "Sidste dag",
+      "purposeLabel": "Formål",
+      "purposePlaceholder": "f.eks. montering af vinduer på byggepladsen i Oslo",
+      "advanceLabel": "Forskud i EUR (valgfrit)",
+      "advanceHint": "Forskuddet er kun en note om det aftalte beløb, f.eks. diæter. Ingen penge flyttes.",
+      "submit": "Gem rejse",
+      "recordPick": "Vælg en post…"
+    },
+    "actions": {
+      "edit": "Redigér",
+      "save": "Gem",
+      "submit": "Indsend til godkendelse",
+      "checkDecision": "Tjek beslutning",
+      "complete": "Markér som gennemført",
+      "cancel": "Annullér",
+      "linkExpense": "Tilføj til denne rejse",
+      "unlink": "Fjern",
+      "createTemplate": "Opret en standard godkendelsesproces"
+    },
+    "notice": {
+      "created": "Rejse gemt.",
+      "updated": "Rejse opdateret.",
+      "submitted": "Rejse indsendt til godkendelse.",
+      "approved": "Rejsen blev godkendt.",
+      "rejected": "Rejsen blev ikke godkendt.",
+      "reopened": "Godkendelsesanmodningen bortfaldt — rejsen er en kladde igen.",
+      "completed": "Rejsen blev markeret som gennemført.",
+      "cancelled": "Rejsen blev annulleret.",
+      "linked": "Post tilføjet til rejsen.",
+      "unlinked": "Post fjernet fra rejsen.",
+      "invalid": "Tjek de indtastede oplysninger.",
+      "invalid_dates": "Tjek rejsedatoerne.",
+      "needs_migration": "Tjenesterejser er endnu ikke aktiveret i dette miljø.",
+      "not_authorized": "Det kan du ikke gøre for denne rejse.",
+      "not_found": "Denne rejse blev ikke fundet.",
+      "not_editable": "I denne tilstand er det trin ikke muligt.",
+      "limit_reached": "Grænsen for åbne rejser er nået.",
+      "still_pending": "Godkendelsesbeslutningen er endnu ikke truffet.",
+      "no_instance": "Ingen godkendelsesanmodning fundet for denne rejse.",
+      "no_template": "Denne virksomhed har endnu ingen offentliggjort godkendelsesproces for rejser.",
+      "no_approvers": "Ingen i virksomheden kan i øjeblikket godkende denne rejse.",
+      "template_created": "En standard godkendelsesproces blev oprettet for virksomheden.",
+      "error": "Noget gik galt. Intet blev gemt."
+    }
   }
 }

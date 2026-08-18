@@ -96,6 +96,15 @@ const NATIVE_NAV = new Set([
   // (rendered as a role="status" banner by the section), exactly the
   // approvals-section pattern above. Pure server component — no client state.
   "app/[locale]/dashboard/planning/timesheets-section.tsx",
+  // Procurement + business-trip areas of the finance page (financial ops
+  // train J) — every form is a NATIVE-NAV server action over a gated module
+  // command (or the engine's own start/withdraw/create/publish commands)
+  // that ALWAYS redirects back to /dashboard/finance with an honest
+  // ?proc= / ?trip= outcome (rendered as a role="status" banner by each
+  // section), exactly the timesheets/requests pattern above. Pure server
+  // components — no client state.
+  "app/[locale]/dashboard/finance/procurement-section.tsx",
+  "app/[locale]/dashboard/finance/trips-section.tsx",
   // Invitation landing page (core-network area B) — accept/decline are
   // NATIVE-NAV server actions that ALWAYS redirect: success lands in the
   // exact accepted context; failure lands back here with an honest

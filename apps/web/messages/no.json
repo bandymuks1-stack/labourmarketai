@@ -5065,5 +5065,184 @@
       "not_found": "Posten er ikke tilgjengelig.",
       "error": "Mislyktes — prøv igjen."
     }
+  },
+  "finance": {
+    "invoiceNoLabel": "Fakturanr.",
+    "vatLabel": "MVA",
+    "documentLinked": "Dokument vedlagt",
+    "tripLinked": "Tjenestereise koblet",
+    "approval": {
+      "pending": "Venter på godkjenning",
+      "approved": "Godkjent",
+      "rejected": "Ikke godkjent"
+    },
+    "form": {
+      "invoiceNoLabel": "Fakturanummer (valgfritt)",
+      "invoiceNoPlaceholder": "f.eks. FA-2026-014",
+      "vatLabel": "MVA-beløp (valgfritt)",
+      "invoiceHint": "Fakturanummer og MVA er valgfrie. Hvis en mottatt faktura gjentar et allerede lagret nummer fra samme motpart, lagres posten likevel, og du ser en advarsel."
+    },
+    "actions": {
+      "requestApproval": "Be om godkjenning",
+      "checkApproval": "Sjekk godkjenning"
+    },
+    "notice": {
+      "created_possible_duplicate": "Lagret — men en post med denne motparten og dette fakturanummeret finnes allerede. Sjekk om det er en dublett.",
+      "approval_submitted": "Godkjenning forespurt. Godkjennerne er varslet.",
+      "approval_approved": "Denne posten ble godkjent.",
+      "approval_rejected": "Denne posten ble ikke godkjent.",
+      "approval_pending": "Godkjenningsbeslutningen er ikke tatt ennå.",
+      "approval_cleared": "Godkjenningsforespørselen ble trukket eller avbrutt.",
+      "approval_none": "Ingen godkjenningsforespørsel funnet for denne posten.",
+      "no_template": "Dette selskapet har ennå ingen publisert godkjenningsflyt, så godkjenning kan ikke forespørres.",
+      "no_approvers": "Ingen i selskapet kan for øyeblikket godkjenne denne forespørselen."
+    }
+  },
+  "procurement": {
+    "title": "Innkjøp",
+    "intro": "Be om materialer eller tjenester, noter leverandørtilbud, og registrer hva som ble valgt. Ingenting her kontakter en leverandør eller bestiller noe — det er din registrering.",
+    "needsMigration": "Innkjøpsforespørsler er ennå ikke aktivert i dette miljøet.",
+    "readError": "Innkjøpsforespørsler kunne ikke lastes. Prøv igjen.",
+    "empty": "Ingen innkjøpsforespørsler ennå.",
+    "noOffers": "Ingen leverandørtilbud notert ennå.",
+    "offerSelected": "Valgt",
+    "orderRefLabel": "Ordrenr.",
+    "invoiceLinked": "Faktura koblet",
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Innsendt",
+      "decided": "Besluttet",
+      "ordered": "Bestilt",
+      "closed": "Lukket",
+      "cancelled": "Avbrutt"
+    },
+    "approval": {
+      "pending": "Venter på godkjenning",
+      "approved": "Godkjent",
+      "rejected": "Ikke godkjent"
+    },
+    "form": {
+      "open": "Ny innkjøpsforespørsel",
+      "orgLabel": "Selskap",
+      "descriptionLabel": "Hva trengs",
+      "descriptionPlaceholder": "f.eks. 40 sekker sement til fundamentet",
+      "quantityLabel": "Mengde (valgfritt)",
+      "quantityPlaceholder": "f.eks. 40 sekker",
+      "budgetLabel": "Estimert budsjett i EUR (valgfritt)",
+      "submit": "Lagre forespørsel",
+      "supplierLabel": "Leverandørnavn",
+      "offerAmountLabel": "Tilbudsbeløp i EUR",
+      "offerNoteLabel": "Notat (valgfritt)",
+      "orderRefPlaceholder": "Ordrenummer (valgfritt)",
+      "invoiceNone": "Ingen faktura koblet"
+    },
+    "actions": {
+      "selectOffer": "Velg dette tilbudet",
+      "addOffer": "Noter leverandørtilbud",
+      "saveOffer": "Lagre tilbud",
+      "edit": "Rediger",
+      "save": "Lagre",
+      "submit": "Send inn",
+      "requestApproval": "Be om godkjenning",
+      "checkApproval": "Sjekk godkjenning",
+      "markOrdered": "Merk som bestilt",
+      "close": "Lukk",
+      "cancel": "Avbryt",
+      "linkInvoice": "Koble faktura"
+    },
+    "notice": {
+      "created": "Innkjøpsforespørsel lagret.",
+      "updated": "Innkjøpsforespørsel oppdatert.",
+      "submitted": "Innkjøpsforespørsel innsendt.",
+      "offer_added": "Leverandørtilbud notert.",
+      "decided": "Tilbud valgt.",
+      "linked": "Faktura koblet.",
+      "unlinked": "Fakturakoblingen fjernet.",
+      "cancelled": "Innkjøpsforespørsel avbrutt.",
+      "invalid": "Sjekk de angitte opplysningene.",
+      "needs_migration": "Innkjøpsforespørsler er ennå ikke aktivert i dette miljøet.",
+      "not_authorized": "Det kan du ikke gjøre for denne forespørselen.",
+      "not_found": "Denne innkjøpsforespørselen ble ikke funnet.",
+      "not_editable": "I denne tilstanden er det trinnet ikke mulig.",
+      "limit_reached": "Grensen for åpne forespørsler er nådd.",
+      "approval_submitted": "Godkjenning forespurt. Godkjennerne er varslet.",
+      "approval_approved": "Denne forespørselen ble godkjent.",
+      "approval_rejected": "Denne forespørselen ble ikke godkjent.",
+      "approval_pending": "Godkjenningsbeslutningen er ikke tatt ennå.",
+      "approval_cleared": "Godkjenningsforespørselen ble trukket eller avbrutt.",
+      "approval_none": "Ingen godkjenningsforespørsel funnet.",
+      "no_template": "Dette selskapet har ennå ingen publisert godkjenningsflyt for innkjøp.",
+      "no_approvers": "Ingen i selskapet kan for øyeblikket godkjenne denne forespørselen.",
+      "error": "Noe gikk galt. Ingenting ble lagret."
+    }
+  },
+  "trips": {
+    "title": "Tjenestereiser",
+    "intro": "Be om en reise, få den godkjent, og hold kostnadene samlet. Ingenting her booker reiser eller betaler ut penger — det er din registrering.",
+    "needsMigration": "Tjenestereiser er ennå ikke aktivert i dette miljøet.",
+    "readError": "Tjenestereiser kunne ikke lastes. Prøv igjen.",
+    "empty": "Ingen tjenestereiser ennå.",
+    "orgHeading": "Reiser for personer du leder",
+    "advanceLabel": "Forskudd",
+    "expensesLabel": "Kostnader",
+    "noTemplate": "Dette selskapet har ennå ingen publisert godkjenningsflyt for reiser, så en reise kan ikke sendes inn.",
+    "status": {
+      "draft": "Utkast",
+      "submitted": "Innsendt",
+      "approved": "Godkjent",
+      "rejected": "Ikke godkjent",
+      "completed": "Gjennomført",
+      "cancelled": "Avbrutt"
+    },
+    "form": {
+      "open": "Ny reiseforespørsel",
+      "orgLabel": "Selskap",
+      "destinationLabel": "Destinasjon",
+      "destinationPlaceholder": "f.eks. Oslo, Norge",
+      "fromLabel": "Første dag",
+      "toLabel": "Siste dag",
+      "purposeLabel": "Formål",
+      "purposePlaceholder": "f.eks. vindusmontering på byggeplassen i Oslo",
+      "advanceLabel": "Forskudd i EUR (valgfritt)",
+      "advanceHint": "Forskuddet er bare et notat om det avtalte beløpet, f.eks. diett. Ingen penger flyttes.",
+      "submit": "Lagre reise",
+      "recordPick": "Velg en post…"
+    },
+    "actions": {
+      "edit": "Rediger",
+      "save": "Lagre",
+      "submit": "Send inn til godkjenning",
+      "checkDecision": "Sjekk beslutning",
+      "complete": "Merk som gjennomført",
+      "cancel": "Avbryt",
+      "linkExpense": "Legg til denne reisen",
+      "unlink": "Fjern",
+      "createTemplate": "Opprett en standard godkjenningsflyt"
+    },
+    "notice": {
+      "created": "Reise lagret.",
+      "updated": "Reise oppdatert.",
+      "submitted": "Reise sendt inn til godkjenning.",
+      "approved": "Reisen ble godkjent.",
+      "rejected": "Reisen ble ikke godkjent.",
+      "reopened": "Godkjenningsforespørselen bortfalt — reisen er et utkast igjen.",
+      "completed": "Reisen ble merket som gjennomført.",
+      "cancelled": "Reisen ble avbrutt.",
+      "linked": "Post lagt til reisen.",
+      "unlinked": "Post fjernet fra reisen.",
+      "invalid": "Sjekk de angitte opplysningene.",
+      "invalid_dates": "Sjekk reisedatoene.",
+      "needs_migration": "Tjenestereiser er ennå ikke aktivert i dette miljøet.",
+      "not_authorized": "Det kan du ikke gjøre for denne reisen.",
+      "not_found": "Denne reisen ble ikke funnet.",
+      "not_editable": "I denne tilstanden er det trinnet ikke mulig.",
+      "limit_reached": "Grensen for åpne reiser er nådd.",
+      "still_pending": "Godkjenningsbeslutningen er ikke tatt ennå.",
+      "no_instance": "Ingen godkjenningsforespørsel funnet for denne reisen.",
+      "no_template": "Dette selskapet har ennå ingen publisert godkjenningsflyt for reiser.",
+      "no_approvers": "Ingen i selskapet kan for øyeblikket godkjenne denne reisen.",
+      "template_created": "En standard godkjenningsflyt ble opprettet for selskapet.",
+      "error": "Noe gikk galt. Ingenting ble lagret."
+    }
   }
 }

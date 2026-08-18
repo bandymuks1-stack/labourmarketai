@@ -9,12 +9,15 @@ import { callerCompanyId, listManagedProjects } from "@/lib/projects/projects";
 import {
   createFinanceRecordAction,
   setFinanceRecordStatusAction,
+  submitFinanceApprovalAction,
+  syncFinanceApprovalAction,
   updateFinanceRecordAction,
 } from "@/lib/finance/finance-actions";
 import {
   FINANCE_COUNTERPARTY_MAX,
   FINANCE_COUNTERPARTY_MIN,
   FINANCE_CREATE_STATUSES,
+  FINANCE_INVOICE_NUMBER_MAX,
   FINANCE_NOTE_MAX,
   FINANCE_RECORD_TYPES,
   FINANCE_TITLE_MAX,
@@ -28,6 +31,10 @@ import {
 } from "@/lib/finance/finance-model";
 import { listMyFinanceRecords } from "@/lib/finance/finance";
 import { createUtcFormatter } from "@/lib/time/display";
+import { ProcurementSection } from "./procurement-section";
+import { TripsSection } from "./trips-section";
+import type { ProcurementNotice } from "@/lib/procurement/procurement-model";
+import type { TripNotice } from "@/lib/trips/trips-model";
 
 /**
  * Operational finance records (control room PR I, capability gap map §9) —
@@ -56,12 +63,81 @@ export const dynamic = "force-dynamic";
 
 const NOTICES = new Set([
   "created",
+  "created_possible_duplicate",
   "updated",
   "invalid",
   "needs_migration",
   "not_authorized",
   "not_found",
   "limit_reached",
+  "approval_submitted",
+  "approval_approved",
+  "approval_rejected",
+  "approval_pending",
+  "approval_cleared",
+  "approval_none",
+  "no_template",
+  "no_approvers",
+  "error",
+]);
+
+const SUCCESS_NOTICES = new Set([
+  "created",
+  "updated",
+  "approval_submitted",
+  "approval_approved",
+  "approval_cleared",
+]);
+
+const PROC_NOTICES = new Set([
+  "created",
+  "updated",
+  "submitted",
+  "offer_added",
+  "decided",
+  "linked",
+  "unlinked",
+  "cancelled",
+  "invalid",
+  "needs_migration",
+  "not_authorized",
+  "not_found",
+  "not_editable",
+  "limit_reached",
+  "approval_submitted",
+  "approval_approved",
+  "approval_rejected",
+  "approval_pending",
+  "approval_cleared",
+  "approval_none",
+  "no_template",
+  "no_approvers",
+  "error",
+]);
+
+const TRIP_NOTICES = new Set([
+  "created",
+  "updated",
+  "submitted",
+  "approved",
+  "rejected",
+  "reopened",
+  "completed",
+  "cancelled",
+  "linked",
+  "unlinked",
+  "invalid",
+  "invalid_dates",
+  "needs_migration",
+  "not_authorized",
+  "not_found",
+  "not_editable",
+  "limit_reached",
+  "still_pending",
+  "no_instance",
+  "no_template",
+  "no_approvers",
+  "template_created",
   "error",
 ]);
 
@@ -124,6 +200,8 @@ export default async function FinancePage({
     type?: string;
     status?: string;
     notice?: string;
+    proc?: string;
+    trip?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -139,6 +217,12 @@ export default async function FinancePage({
       ? (sp.status as StatusFilter)
       : null;
   const notice = sp.notice && NOTICES.has(sp.notice) ? sp.notice : null;
+  const procNotice: ProcurementNotice | null =
+    sp.proc && PROC_NOTICES.has(sp.proc)
+      ? (sp.proc as ProcurementNotice)
+      : null;
+  const tripNotice: TripNotice | null =
+    sp.trip && TRIP_NOTICES.has(sp.trip) ? (sp.trip as TripNotice) : null;
 
   const t = await getTranslations("finance");
 
@@ -182,6 +266,7 @@ export default async function FinancePage({
   if (result.status === "needs-migration") {
     // Calm honest pre-apply state (the tasks/bookings pattern): the
     // owner-gated I2 migration is not applied yet — no fake UI, no controls.
+    // The procurement/trips areas carry their own honest degradation.
     return (
       <div className="flex flex-col gap-6" data-testid="finance-page">
         {header}
@@ -192,6 +277,12 @@ export default async function FinancePage({
         >
           {t("unavailable")}
         </p>
+        <ProcurementSection
+          locale={locale}
+          notice={procNotice}
+          financeRecords={[]}
+        />
+        <TripsSection locale={locale} notice={tripNotice} financeRecords={[]} />
       </div>
     );
   }
@@ -306,6 +397,36 @@ export default async function FinancePage({
           ) : null}
           {record.projectId ? <span>{t("projectLinked")}</span> : null}
           {record.companyId ? <span>{t("companyLinked")}</span> : null}
+          {record.invoiceNumber ? (
+            <span data-testid="finance-invoice-number">
+              {t("invoiceNoLabel")}: {record.invoiceNumber}
+            </span>
+          ) : null}
+          {record.vatAmountCents !== null ? (
+            <span data-testid="finance-vat">
+              {t("vatLabel")}: {formatCentsAsEur(record.vatAmountCents)} €
+            </span>
+          ) : null}
+          {record.approvalStatus ? (
+            <span
+              className={
+                record.approvalStatus === "approved"
+                  ? "text-state-success"
+                  : record.approvalStatus === "rejected"
+                    ? "text-state-danger"
+                    : "text-brand-blue"
+              }
+              data-testid={`finance-approval-${record.approvalStatus}`}
+            >
+              {t(`approval.${record.approvalStatus}`)}
+            </span>
+          ) : null}
+          {record.orgDocumentId ? (
+            <span data-testid="finance-doc-linked">{t("documentLinked")}</span>
+          ) : null}
+          {record.tripId ? (
+            <span data-testid="finance-trip-linked">{t("tripLinked")}</span>
+          ) : null}
         </div>
 
         {record.note ? (
@@ -331,6 +452,41 @@ export default async function FinancePage({
               </Button>
             </form>
           ))}
+          {/* Approval seam (invoice upgrades v1): submit routes through the
+              Workflow & Approval Engine; sync only copies the outcome. Only
+              company-linked records can route — the action says so honestly
+              when no template exists. */}
+          {record.companyId &&
+          record.status !== "cancelled" &&
+          (record.approvalStatus === null ||
+            record.approvalStatus === "rejected") ? (
+            <form action={submitFinanceApprovalAction}>
+              {hiddenContext()}
+              <input type="hidden" name="recordId" value={record.id} />
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                data-testid={`finance-action-requestApproval-${record.id}`}
+              >
+                {t("actions.requestApproval")}
+              </Button>
+            </form>
+          ) : null}
+          {record.approvalStatus === "pending" ? (
+            <form action={syncFinanceApprovalAction}>
+              {hiddenContext()}
+              <input type="hidden" name="recordId" value={record.id} />
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                data-testid={`finance-action-checkApproval-${record.id}`}
+              >
+                {t("actions.checkApproval")}
+              </Button>
+            </form>
+          ) : null}
         </div>
 
         {/* Bounded field edit — native <details>, keyboard accessible. */}
@@ -382,6 +538,36 @@ export default async function FinancePage({
                 defaultValue={record.dueDate ?? ""}
               />
             </label>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <Label>{t("form.invoiceNoLabel")}</Label>
+                <Input
+                  name="invoiceNumber"
+                  defaultValue={record.invoiceNumber ?? ""}
+                  maxLength={FINANCE_INVOICE_NUMBER_MAX}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <Label>{t("form.vatLabel")}</Label>
+                <Input
+                  name="vatAmount"
+                  inputMode="decimal"
+                  defaultValue={
+                    record.vatAmountCents === null
+                      ? ""
+                      : formatCentsAsEur(record.vatAmountCents)
+                  }
+                  placeholder="0.00"
+                />
+              </label>
+            </div>
+            {record.orgDocumentId ? (
+              <input
+                type="hidden"
+                name="orgDocumentId"
+                value={record.orgDocumentId}
+              />
+            ) : null}
             <label className="flex flex-col gap-1">
               <Label>{t("form.noteLabel")}</Label>
               <textarea
@@ -409,7 +595,7 @@ export default async function FinancePage({
         <p
           role="status"
           className={`rounded-md border px-3 py-2 text-sm ${
-            notice === "created" || notice === "updated"
+            SUCCESS_NOTICES.has(notice)
               ? "border-state-success/50 bg-state-success/10 text-state-success"
               : "border-state-warning/50 bg-state-warning/10 text-text-primary"
           }`}
@@ -604,6 +790,21 @@ export default async function FinancePage({
             </label>
           </div>
           <p className="text-xs text-text-muted">{t("form.amountHint")}</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1">
+              <Label>{t("form.invoiceNoLabel")}</Label>
+              <Input
+                name="invoiceNumber"
+                maxLength={FINANCE_INVOICE_NUMBER_MAX}
+                placeholder={t("form.invoiceNoPlaceholder")}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <Label>{t("form.vatLabel")}</Label>
+              <Input name="vatAmount" inputMode="decimal" placeholder="0.00" />
+            </label>
+          </div>
+          <p className="text-xs text-text-muted">{t("form.invoiceHint")}</p>
           {managedProjects.length > 0 ? (
             <label className="flex flex-col gap-1">
               <Label>{t("form.projectLabel")}</Label>
@@ -664,6 +865,20 @@ export default async function FinancePage({
           </ul>
         )}
       </section>
+
+      {/* Procurement + business trips — the audit's MISSING rows, hosted on
+          this declared surface (no new route; the #timesheets precedent).
+          Each area reads and degrades independently. */}
+      <ProcurementSection
+        locale={locale}
+        notice={procNotice}
+        financeRecords={records}
+      />
+      <TripsSection
+        locale={locale}
+        notice={tripNotice}
+        financeRecords={records}
+      />
     </div>
   );
 }
