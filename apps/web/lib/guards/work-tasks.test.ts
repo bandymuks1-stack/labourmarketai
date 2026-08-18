@@ -120,20 +120,43 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
   // task RPCs — asserted below, so the exemption cannot rot into a fork.
   const LIFECYCLE_READER = "20260817190000_employee_lifecycle_v1";
 
-  it("only the D2 + train-D migration pairs mention work_tasks or the task RPCs", () => {
+  /**
+   * Declared CONSUMERS: migrations that may REFERENCE work_tasks (an FK to it,
+   * or a read of it) but never define, recreate, alter or drop the table or
+   * any task RPC. This is a UNION — add a prefix here together with the
+   * narrower assertions below, never by relaxing the rule for everyone.
+   *
+   *   20260817190000 — Employee Lifecycle v1 (train G), the LIFECYCLE_READER
+   *   above: its onboarding item link-verification SELECTs from work_tasks.
+   *   20260817232000 — Management Decisions v1 (train K): `decision_task_links`
+   *   holds an FK to public.work_tasks and `link_decision_task_v1` reads it to
+   *   verify the caller genuinely owns the task. No task field is copied and
+   *   no task is ever created; the existing task RPCs stay the only writers.
+   */
+  const CONSUMERS = [LIFECYCLE_READER, "20260817232000_management_decisions_v1"];
+
+  it("only the D2 + train-D migration pairs DEFINE work_tasks or the task RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(D2) || f.startsWith(TRAIN_D)) continue;
         const src = readFileSync(join(abs, f), "utf8");
-        if (f.startsWith(LIFECYCLE_READER)) {
-          // Read-only integration: SELECT allowed, definition forbidden.
-          expect(src, `${dir}/${f} must not (re)define work_tasks`).not.toMatch(
-            /(create table|alter table|drop table)[^;]*\bwork_tasks\b/i,
+        if (CONSUMERS.some((c) => f.startsWith(c))) {
+          // A consumer may reference the table, and NOTHING more.
+          expect(src, `${dir}/${f} must not create/alter/drop work_tasks`).not.toMatch(
+            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?public\.work_tasks\b/i,
+          );
+          expect(src, `${dir}/${f} must not write work_tasks`).not.toMatch(
+            /(insert\s+into|update|delete\s+from)\s+public\.work_tasks\b/i,
+          );
+          expect(src, `${dir}/${f} must not policy work_tasks`).not.toMatch(
+            /(create|drop)\s+policy[\s\S]{0,80}on public\.work_tasks\b/i,
           );
           for (const fn of [...RPC_NAMES, ...RPC_NAMES_V2]) {
-            expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(fn);
+            expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(
+              `function public.${fn}(`,
+            );
           }
           continue;
         }

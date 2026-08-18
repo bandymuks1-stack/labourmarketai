@@ -2163,7 +2163,16 @@ describe("no migration files added by this sprint", () => {
     // migrations now in the base): `ls supabase/migrations/*.sql | wc -l`
     // = 221 real files, never summed — my earlier 218 was against the
     // pre-J base and was RECOUNTED, not adjusted.
-    const SPRINT_BASELINE = 221;
+    // Bumped 221 -> 224 for the Training & Certification + Development
+    // Reviews + Management Decisions v1 TRIPLE (20260817230000 +
+    // 20260817231000 + 20260817232000, train K, LEAD-gated, UNAPPLIED;
+    // paired 0-row-guarded rollbacks + deferred APPLIED_LEDGER entries in
+    // the PR). RECOUNTED from the tree after merging origin/main dbc6b76f
+    // (train J's three finance migrations AND train I's register delta all
+    // in the base): `ls supabase/migrations/*.sql | wc -l` = 224 real
+    // files, never summed — my earlier 220 was against the pre-J/I base and
+    // was RECOUNTED, not adjusted.
+    const SPRINT_BASELINE = 224;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

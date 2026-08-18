@@ -5300,5 +5300,213 @@
       "template_created": "Ett standardgodkännandeflöde skapades för företaget.",
       "error": "Något gick fel. Inget sparades."
     }
+  },
+  "training": {
+    "title": "[EN] Training and certificates",
+    "intro": "[EN] Courses your organization asks people to complete, and the certificates that follow.",
+    "evidenceNote": "[EN] A certificate here shows that a course was finished. It does not say how well someone works — that stays your work entries and your manager's confirmations.",
+    "notAvailable": "[EN] Training is not switched on in this workspace yet.",
+    "status": {
+      "assigned": "[EN] To do",
+      "completed": "[EN] Done",
+      "expired": "[EN] Out of date"
+    },
+    "mine": {
+      "heading": "[EN] Your training",
+      "requiredBy": "[EN] By {date}",
+      "complete": "[EN] Mark as done",
+      "notePlaceholder": "[EN] Short note (optional)",
+      "completedNote": "[EN] You marked this as done."
+    },
+    "org": {
+      "heading": "[EN] Training your organization runs",
+      "programTitle": "[EN] Course name",
+      "programDescription": "[EN] What the course covers",
+      "materialNote": "[EN] The course material is a document from the register above. Confirming that someone read it stays in the confirmation list — it is not repeated here.",
+      "createProgram": "[EN] Add course",
+      "noPrograms": "[EN] No courses added yet.",
+      "assigneePlaceholder": "[EN] Person's email",
+      "requiredByLabel": "[EN] Complete by",
+      "assign": "[EN] Ask this person",
+      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "issuedOnLabel": "[EN] Issued on",
+      "expiresOnLabel": "[EN] Valid until",
+      "attachCertificate": "[EN] Save certificate",
+      "markExpired": "[EN] Mark out of date"
+    },
+    "certificates": {
+      "heading": "[EN] Certificates",
+      "note": "[EN] Certificates already held, with the date they run out. Nothing is guessed — a record without a date simply shows no date.",
+      "none": "[EN] No end date",
+      "valid": "[EN] Valid",
+      "expiring": "[EN] Ends soon",
+      "lapsed": "[EN] Out of date"
+    },
+    "notice": {
+      "created": "[EN] Course added.",
+      "updated": "[EN] Course updated.",
+      "assigned": "[EN] Sent to that person.",
+      "already_assigned": "[EN] That person already has this course.",
+      "completed": "[EN] Marked as done.",
+      "already_completed": "[EN] This was already marked as done.",
+      "attached": "[EN] Certificate saved.",
+      "expired": "[EN] Marked out of date.",
+      "already_expired": "[EN] This was already out of date.",
+      "linked": "[EN] Skill linked.",
+      "already_linked": "[EN] That skill is already linked.",
+      "inactive_program": "[EN] That course is switched off.",
+      "invalid": "[EN] Please check what you typed.",
+      "invalid_material": "[EN] That material is not in your organization.",
+      "invalid_assignee": "[EN] That person is not in your organization.",
+      "invalid_file": "[EN] That file is not in your organization.",
+      "invalid_skill": "[EN] That skill was not found.",
+      "invalid_state": "[EN] That cannot be done at this step.",
+      "needs_migration": "[EN] Training is not switched on in this workspace yet.",
+      "not_authorized": "[EN] You do not have the rights for this.",
+      "not_found": "[EN] Not found.",
+      "limit_reached": "[EN] There is too much here already.",
+      "error": "[EN] Something went wrong. Nothing was saved."
+    }
+  },
+  "developmentReviews": {
+    "title": "[EN] Development conversations",
+    "intro": "[EN] A recorded conversation between two named people about work and what comes next.",
+    "noScoreNote": "[EN] There is no rating, no score and no ranking here — by design. Everything below is either a recorded fact, a link to real work, or one person's own words, clearly labelled.",
+    "notAvailable": "[EN] Development conversations are not switched on in this workspace yet.",
+    "empty": "[EN] No conversation involves you yet.",
+    "cycles": {
+      "heading": "[EN] Periods",
+      "name": "[EN] Period name",
+      "from": "[EN] From",
+      "to": "[EN] To",
+      "create": "[EN] Open period",
+      "empty": "[EN] No periods yet.",
+      "open": "[EN] Open",
+      "close": "[EN] Close"
+    },
+    "cycleStatus": {
+      "draft": "[EN] Draft",
+      "open": "[EN] Open",
+      "closed": "[EN] Closed"
+    },
+    "create": {
+      "cycle": "[EN] Period",
+      "subject": "[EN] Person",
+      "reviewer": "[EN] Who will talk with them (optional)",
+      "submit": "[EN] Start conversation"
+    },
+    "reviewStatus": {
+      "draft": "[EN] Draft",
+      "open": "[EN] Open",
+      "closed": "[EN] Closed"
+    },
+    "workerVoiceLabel": "[EN] The person's own words",
+    "workerVoiceMissing": "[EN] Not written yet.",
+    "saveWorkerInput": "[EN] Save my words",
+    "managerVoiceLabel": "[EN] The reviewer's own words",
+    "managerVoiceMissing": "[EN] Not written yet.",
+    "saveManagerInput": "[EN] Save my words",
+    "planLabel": "[EN] Plan",
+    "planPlaceholder": "[EN] What we agreed to do next",
+    "followUpLabel": "[EN] Follow up on",
+    "evidenceLabel": "[EN] Linked work",
+    "evidenceEmpty": "[EN] Nothing linked yet.",
+    "evidenceKind": {
+      "journal_entry": "[EN] Work entry",
+      "skill": "[EN] Skill",
+      "project": "[EN] Project",
+      "training_assignment": "[EN] Training"
+    },
+    "evidenceRefPlaceholder": "[EN] Id of the entry, skill, project or training",
+    "evidenceNotePlaceholder": "[EN] Short note (optional)",
+    "addEvidence": "[EN] Link it",
+    "close": "[EN] Close conversation",
+    "closeBlocked": "[EN] Both people must write first",
+    "notice": {
+      "created": "[EN] Period opened.",
+      "updated": "[EN] Period updated.",
+      "unchanged": "[EN] Nothing changed.",
+      "saved": "[EN] Saved.",
+      "linked": "[EN] Linked.",
+      "already_linked": "[EN] That is already linked.",
+      "closed": "[EN] Conversation closed.",
+      "already_closed": "[EN] It was already closed.",
+      "already_exists": "[EN] That already exists.",
+      "inputs_missing": "[EN] Both people must write their own words first.",
+      "invalid": "[EN] Please check what you typed.",
+      "invalid_state": "[EN] That cannot be done at this step.",
+      "invalid_subject": "[EN] That person is not in your organization.",
+      "invalid_reviewer": "[EN] That person cannot be the reviewer.",
+      "invalid_reference": "[EN] That link does not point at real work of this person.",
+      "needs_migration": "[EN] Development conversations are not switched on in this workspace yet.",
+      "not_authorized": "[EN] You do not have the rights for this.",
+      "not_found": "[EN] Not found.",
+      "limit_reached": "[EN] There is too much here already.",
+      "error": "[EN] Something went wrong. Nothing was saved."
+    }
+  },
+  "managementDecisions": {
+    "title": "[EN] Management decisions",
+    "intro": "[EN] What was put to the management team, what was decided, who is responsible and by when.",
+    "engineNote": "[EN] The vote happens in the approvals list above: a template that needs every approver is a unanimous vote, one that needs any approver is decided by the first answer. Nothing here counts votes.",
+    "notAvailable": "[EN] Management decisions are not switched on in this workspace yet.",
+    "empty": "[EN] No decisions recorded yet.",
+    "form": {
+      "title": "[EN] Question",
+      "agenda": "[EN] What is being decided",
+      "responsible": "[EN] Responsible person (optional)",
+      "deadline": "[EN] By when",
+      "create": "[EN] Add decision"
+    },
+    "status": {
+      "draft": "[EN] Draft",
+      "submitted_for_approval": "[EN] Waiting for approval",
+      "approved": "[EN] Approved",
+      "rejected": "[EN] Rejected",
+      "withdrawn": "[EN] Withdrawn",
+      "cancelled": "[EN] Cancelled",
+      "recorded": "[EN] Recorded"
+    },
+    "submit": {
+      "template": "[EN] Approval template",
+      "action": "[EN] Put to the management team",
+      "noTemplate": "[EN] No approval template exists for management decisions yet. Create one in the approvals area first."
+    },
+    "resultLabel": "[EN] Decision",
+    "resultPlaceholder": "[EN] What was decided",
+    "recordResult": "[EN] Record the decision",
+    "links": {
+      "label": "[EN] Linked",
+      "empty": "[EN] Nothing linked yet.",
+      "document": "[EN] Document",
+      "task": "[EN] Task",
+      "documentPlaceholder": "[EN] Document id",
+      "taskPlaceholder": "[EN] Task id",
+      "addDocument": "[EN] Link document",
+      "addTask": "[EN] Link task",
+      "taskNote": "[EN] Follow-up work is a real task created in the tasks surface — only the link is kept here."
+    },
+    "notice": {
+      "created": "[EN] Decision added.",
+      "updated": "[EN] Decision updated.",
+      "submitted": "[EN] Sent to the management team.",
+      "synced": "[EN] Brought up to date with the approvals list.",
+      "unchanged": "[EN] Nothing changed.",
+      "recorded": "[EN] Decision recorded.",
+      "already_recorded": "[EN] The decision was already recorded.",
+      "linked": "[EN] Linked.",
+      "already_linked": "[EN] That is already linked.",
+      "no_instance": "[EN] No approval was started, so nothing was sent.",
+      "invalid": "[EN] Please check what you typed.",
+      "invalid_state": "[EN] That cannot be done at this step.",
+      "invalid_document": "[EN] That document is not in your organization.",
+      "invalid_task": "[EN] That task is not yours.",
+      "invalid_responsible": "[EN] That person is not in your organization.",
+      "needs_migration": "[EN] Management decisions are not switched on in this workspace yet.",
+      "not_authorized": "[EN] You do not have the rights for this.",
+      "not_found": "[EN] Not found.",
+      "limit_reached": "[EN] There is too much here already.",
+      "error": "[EN] Something went wrong. Nothing was saved."
+    }
   }
 }

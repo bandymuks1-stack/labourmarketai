@@ -13321,5 +13321,213 @@
       "template_created": "Ein Standard-Freigabeablauf wurde für das Unternehmen angelegt.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
     }
+  },
+  "training": {
+    "title": "Schulungen und Zertifikate",
+    "intro": "Kurse, die deine Organisation abschließen lässt, und die Zertifikate danach.",
+    "evidenceNote": "Ein Zertifikat zeigt, dass ein Kurs abgeschlossen wurde. Es sagt nicht, wie gut jemand arbeitet — das bleibt bei deinen Arbeitseinträgen und den Bestätigungen deiner Führungskraft.",
+    "notAvailable": "Schulungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+    "status": {
+      "assigned": "Zu erledigen",
+      "completed": "Erledigt",
+      "expired": "Abgelaufen"
+    },
+    "mine": {
+      "heading": "Deine Schulungen",
+      "requiredBy": "Bis {date}",
+      "complete": "Als erledigt markieren",
+      "notePlaceholder": "Kurze Notiz (optional)",
+      "completedNote": "Du hast das als erledigt markiert."
+    },
+    "org": {
+      "heading": "Schulungen deiner Organisation",
+      "programTitle": "Kursname",
+      "programDescription": "Was der Kurs behandelt",
+      "materialNote": "Das Kursmaterial ist ein Dokument aus dem Verzeichnis oben. Die Bestätigung, dass jemand es gelesen hat, bleibt in der Bestätigungsliste — sie wird hier nicht wiederholt.",
+      "createProgram": "Kurs hinzufügen",
+      "noPrograms": "Noch keine Kurse.",
+      "assigneePlaceholder": "E-Mail der Person",
+      "requiredByLabel": "Abschließen bis",
+      "assign": "Diese Person bitten",
+      "certificateFilePlaceholder": "Id der Zertifikatsdatei",
+      "issuedOnLabel": "Ausgestellt am",
+      "expiresOnLabel": "Gültig bis",
+      "attachCertificate": "Zertifikat speichern",
+      "markExpired": "Als abgelaufen markieren"
+    },
+    "certificates": {
+      "heading": "Zertifikate",
+      "note": "Vorhandene Zertifikate mit dem Ablaufdatum. Nichts wird geraten — ohne Datum wird auch keines angezeigt.",
+      "none": "Kein Enddatum",
+      "valid": "Gültig",
+      "expiring": "Läuft bald ab",
+      "lapsed": "Abgelaufen"
+    },
+    "notice": {
+      "created": "Kurs hinzugefügt.",
+      "updated": "Kurs aktualisiert.",
+      "assigned": "An diese Person gesendet.",
+      "already_assigned": "Diese Person hat diesen Kurs bereits.",
+      "completed": "Als erledigt markiert.",
+      "already_completed": "Das war bereits als erledigt markiert.",
+      "attached": "Zertifikat gespeichert.",
+      "expired": "Als abgelaufen markiert.",
+      "already_expired": "Das war bereits abgelaufen.",
+      "linked": "Fähigkeit verknüpft.",
+      "already_linked": "Diese Fähigkeit ist bereits verknüpft.",
+      "inactive_program": "Dieser Kurs ist ausgeschaltet.",
+      "invalid": "Bitte prüfe deine Eingabe.",
+      "invalid_material": "Dieses Material gehört nicht zu deiner Organisation.",
+      "invalid_assignee": "Diese Person gehört nicht zu deiner Organisation.",
+      "invalid_file": "Diese Datei gehört nicht zu deiner Organisation.",
+      "invalid_skill": "Diese Fähigkeit wurde nicht gefunden.",
+      "invalid_state": "Das ist in diesem Schritt nicht möglich.",
+      "needs_migration": "Schulungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+      "not_authorized": "Dafür fehlen dir die Rechte.",
+      "not_found": "Nicht gefunden.",
+      "limit_reached": "Hier steht bereits zu viel.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    }
+  },
+  "developmentReviews": {
+    "title": "Entwicklungsgespräche",
+    "intro": "Ein festgehaltenes Gespräch zwischen zwei namentlich genannten Personen über die Arbeit und darüber, was als Nächstes kommt.",
+    "noScoreNote": "Hier gibt es keine Note, keinen Punktwert und keine Rangliste — mit Absicht. Alles unten ist entweder ein festgehaltener Fakt, ein Verweis auf echte Arbeit oder die eigenen Worte einer Person, klar als solche gekennzeichnet.",
+    "notAvailable": "Entwicklungsgespräche sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+    "empty": "Es gibt noch kein Gespräch, das dich betrifft.",
+    "cycles": {
+      "heading": "Zeiträume",
+      "name": "Name des Zeitraums",
+      "from": "Von",
+      "to": "Bis",
+      "create": "Zeitraum öffnen",
+      "empty": "Noch keine Zeiträume.",
+      "open": "Öffnen",
+      "close": "Schließen"
+    },
+    "cycleStatus": {
+      "draft": "Entwurf",
+      "open": "Offen",
+      "closed": "Geschlossen"
+    },
+    "create": {
+      "cycle": "Zeitraum",
+      "subject": "Person",
+      "reviewer": "Wer das Gespräch führt (optional)",
+      "submit": "Gespräch beginnen"
+    },
+    "reviewStatus": {
+      "draft": "Entwurf",
+      "open": "Läuft",
+      "closed": "Geschlossen"
+    },
+    "workerVoiceLabel": "Die eigenen Worte der Person",
+    "workerVoiceMissing": "Noch nicht geschrieben.",
+    "saveWorkerInput": "Meine Worte speichern",
+    "managerVoiceLabel": "Die eigenen Worte der gesprächsführenden Person",
+    "managerVoiceMissing": "Noch nicht geschrieben.",
+    "saveManagerInput": "Meine Worte speichern",
+    "planLabel": "Plan",
+    "planPlaceholder": "Was wir als Nächstes vereinbart haben",
+    "followUpLabel": "Wieder aufgreifen am",
+    "evidenceLabel": "Verknüpfte Arbeit",
+    "evidenceEmpty": "Noch nichts verknüpft.",
+    "evidenceKind": {
+      "journal_entry": "Arbeitseintrag",
+      "skill": "Fähigkeit",
+      "project": "Projekt",
+      "training_assignment": "Schulung"
+    },
+    "evidenceRefPlaceholder": "Id des Eintrags, der Fähigkeit, des Projekts oder der Schulung",
+    "evidenceNotePlaceholder": "Kurze Notiz (optional)",
+    "addEvidence": "Verknüpfen",
+    "close": "Gespräch schließen",
+    "closeBlocked": "Zuerst müssen beide schreiben",
+    "notice": {
+      "created": "Zeitraum geöffnet.",
+      "updated": "Zeitraum aktualisiert.",
+      "unchanged": "Nichts hat sich geändert.",
+      "saved": "Gespeichert.",
+      "linked": "Verknüpft.",
+      "already_linked": "Das ist bereits verknüpft.",
+      "closed": "Gespräch geschlossen.",
+      "already_closed": "Es war bereits geschlossen.",
+      "already_exists": "Das gibt es bereits.",
+      "inputs_missing": "Zuerst müssen beide Personen ihre eigenen Worte schreiben.",
+      "invalid": "Bitte prüfe deine Eingabe.",
+      "invalid_state": "Das ist in diesem Schritt nicht möglich.",
+      "invalid_subject": "Diese Person gehört nicht zu deiner Organisation.",
+      "invalid_reviewer": "Diese Person kann das Gespräch nicht führen.",
+      "invalid_reference": "Dieser Verweis zeigt nicht auf echte Arbeit dieser Person.",
+      "needs_migration": "Entwicklungsgespräche sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+      "not_authorized": "Dafür fehlen dir die Rechte.",
+      "not_found": "Nicht gefunden.",
+      "limit_reached": "Hier steht bereits zu viel.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    }
+  },
+  "managementDecisions": {
+    "title": "Managemententscheidungen",
+    "intro": "Was der Geschäftsleitung vorgelegt wurde, was entschieden wurde, wer verantwortlich ist und bis wann.",
+    "engineNote": "Abgestimmt wird in der Freigabeliste oben: eine Vorlage, die jede freigebende Person braucht, ist eine einstimmige Abstimmung; eine, der eine beliebige Person genügt, entscheidet die erste Antwort. Hier werden keine Stimmen gezählt.",
+    "notAvailable": "Managemententscheidungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+    "empty": "Noch keine Entscheidungen festgehalten.",
+    "form": {
+      "title": "Frage",
+      "agenda": "Worüber entschieden wird",
+      "responsible": "Verantwortliche Person (optional)",
+      "deadline": "Bis wann",
+      "create": "Entscheidung hinzufügen"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "submitted_for_approval": "Wartet auf Freigabe",
+      "approved": "Freigegeben",
+      "rejected": "Abgelehnt",
+      "withdrawn": "Zurückgezogen",
+      "cancelled": "Abgebrochen",
+      "recorded": "Festgehalten"
+    },
+    "submit": {
+      "template": "Freigabevorlage",
+      "action": "Der Geschäftsleitung vorlegen",
+      "noTemplate": "Für Managemententscheidungen gibt es noch keine Freigabevorlage. Lege sie zuerst im Freigabebereich an."
+    },
+    "resultLabel": "Entscheidung",
+    "resultPlaceholder": "Was entschieden wurde",
+    "recordResult": "Entscheidung festhalten",
+    "links": {
+      "label": "Verknüpft",
+      "empty": "Noch nichts verknüpft.",
+      "document": "Dokument",
+      "task": "Aufgabe",
+      "documentPlaceholder": "Dokument-Id",
+      "taskPlaceholder": "Aufgaben-Id",
+      "addDocument": "Dokument verknüpfen",
+      "addTask": "Aufgabe verknüpfen",
+      "taskNote": "Folgearbeit ist eine echte Aufgabe, die im Aufgabenbereich angelegt wird — hier wird nur die Verknüpfung gespeichert."
+    },
+    "notice": {
+      "created": "Entscheidung hinzugefügt.",
+      "updated": "Entscheidung aktualisiert.",
+      "submitted": "Der Geschäftsleitung vorgelegt.",
+      "synced": "Mit der Freigabeliste abgeglichen.",
+      "unchanged": "Nichts hat sich geändert.",
+      "recorded": "Entscheidung festgehalten.",
+      "already_recorded": "Die Entscheidung war bereits festgehalten.",
+      "linked": "Verknüpft.",
+      "already_linked": "Das ist bereits verknüpft.",
+      "no_instance": "Es wurde keine Freigabe gestartet, also wurde nichts gesendet.",
+      "invalid": "Bitte prüfe deine Eingabe.",
+      "invalid_state": "Das ist in diesem Schritt nicht möglich.",
+      "invalid_document": "Dieses Dokument gehört nicht zu deiner Organisation.",
+      "invalid_task": "Diese Aufgabe gehört nicht dir.",
+      "invalid_responsible": "Diese Person gehört nicht zu deiner Organisation.",
+      "needs_migration": "Managemententscheidungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+      "not_authorized": "Dafür fehlen dir die Rechte.",
+      "not_found": "Nicht gefunden.",
+      "limit_reached": "Hier steht bereits zu viel.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    }
   }
 }

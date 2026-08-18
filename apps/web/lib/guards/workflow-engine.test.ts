@@ -177,6 +177,14 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // deliberately does NOT widen the engine's context vocabulary — the
       // same no-create/no-drop assertions apply.
       "20260817240000_org_document_register_delta_v1",
+      // Management Decisions (train K, 20260817232000) is the same class of
+      // consumer (context_entity_type='management_decision', a value the
+      // engine's closed CHECK already admits): its submit/sync mirror
+      // commands READ workflow_instances and its header cites
+      // start_workflow_instance_v1 as the app-layer entry point. It defines,
+      // replaces and triggers NO engine object — the same no-create/no-drop
+      // assertions apply.
+      "20260817232000_management_decisions_v1",
     ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -553,6 +561,15 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // lib/guards/org-document-register-delta.test.ts pins the module to
       // its own gated commands plus the engine's own start command.
       "lib/documents/document-files.ts",
+      // Declared CONSUMER (Management Decisions, train K): the decisions
+      // read service lists the org's ACTIVE 'management_decision' workflow
+      // definitions for its submit form (RLS-scoped SELECT of
+      // workflow_definitions only) and never writes an engine table — the
+      // no-insert/update/delete pin below covers the approvals layer, and
+      // lib/guards/management-decisions.test.ts pins the decisions layer to
+      // its own seven gated commands plus the engine's OWN
+      // start_workflow_instance_v1.
+      "lib/decisions/decisions.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {
