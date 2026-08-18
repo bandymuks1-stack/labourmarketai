@@ -188,6 +188,103 @@ export const SCOPED_OWNER_WAIVERS = [
     owner:
       "Owner ruling, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10) — APPROVED: dedicated public /create-cv route.",
   },
+
+  {
+    id: "public-acquisition-route-jobs",
+    axioms: ["A-01"],
+    /**
+     * PUBLIC JOB BOARD — `/jobs`, `/jobs/[id]`, and the row card.
+     *
+     * OWNER RULING, 2026-08-18 directive §5 "CANONICAL JOB VISIBILITY POLICY",
+     * verbatim:
+     *   "Owner decision is final. Jobs must be publicly discoverable."
+     *   "Every eligible active vacancy should have a stable indexable public URL
+     *    where source terms permit."
+     *   "But anonymous users MUST NOT receive the complete vacancy."
+     * and the funnel it mandates (§6): "SEARCH ENGINE / SOCIAL / DIRECT → PUBLIC
+     * JOB SEARCH → PUBLIC JOB PREVIEW → REGISTER / LOGIN → RETURN TO SAME JOB".
+     *
+     * This is a NEW owner ruling about a NEW surface. It does not inherit
+     * anything from `public-acquisition-route-create-cv`, whose own record
+     * states its approvals were "NOT a general authority to self-approve future
+     * waivers" — that constraint is respected here by citing the owner's own
+     * 2026-08-18 words rather than the 2026-08-10 ones.
+     *
+     * WHAT IS ACTUALLY BEING EXCUSED — the same CATEGORY ERROR as /create-cv,
+     * not the axiom. A-01's five World-State questions describe a surface INSIDE
+     * the authenticated workspace. The audience for this one is a person with no
+     * account arriving from a search engine: no World State, no avatar, no map,
+     * no assistant. All five answers are therefore honestly "no", and
+     * `worldStateCanControlIt` is "no" for the same reason. The declarations in
+     * `surface-registry.ts` record them as "no" rather than rewriting them to
+     * green — A-06 forbids that lie more strongly than A-01 forbids the page.
+     *
+     * WHY THE PRODUCT ANSWER IS NOT "PUT IT IN THE CHAT". Members already reach
+     * these vacancies inside the workspace via /dashboard/opportunities, which
+     * the assistant does drive. This adds no second board: it adds the pre-auth
+     * doorway to the same supply, and hands off with `?next=` so the workspace
+     * resumes the visitor's actual intent.
+     *
+     * WHY THIS IS BOUNDED AND NOT A HOLE. All six gate constraints bind: the six
+     * codes, axiom A-01, the five file entries, PR #1184, the expiry, and the
+     * subset rule. A nineteenth finding anywhere — including on these three
+     * surfaces — un-waives the whole run. No other route, PR or axiom inherits
+     * anything.
+     *
+     * WHAT REMOVES IT (`resolvedBy`) — identical to the /create-cv record: the
+     * gate does not model a pre-auth public acquisition route as a distinct
+     * kind, so it judges one by workspace rules. Teaching it that category is a
+     * CONSTITUTION change and therefore an owner decision. This train had
+     * authority over the product surface (the owner ordered it explicitly), not
+     * over the constitution.
+     */
+    pullRequests: [1184],
+    // Empty for the same reason as the record above: the waiver must live IN
+    // the branch whose CI honours it, so writing the head SHA down changes it.
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    // Route ids are what `decideWaiver` matches (`files.includes(finding.what)`);
+    // the real paths are what `touchesWaivedFile` compares against the diff.
+    // Both halves are load-bearing — see the /create-cv note above.
+    files: [
+      "/jobs",
+      "/jobs/[id]",
+      "components/marketing/public-vacancy-card.tsx",
+      "apps/web/app/[locale]/(marketing)/jobs/page.tsx",
+      "apps/web/app/[locale]/(marketing)/jobs/[id]/page.tsx",
+    ],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=1184 node .github/scripts/product-gate.mjs
+    // on 2026-08-18, AFTER the three declarations were added (which is what
+    // removed the four `undeclared_surface` findings). Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/jobs" },
+      { code: "not_reflected_on_map", file: "/jobs" },
+      { code: "not_ai_controlled", file: "/jobs" },
+      { code: "requires_leaving_workspace", file: "/jobs" },
+      { code: "requires_new_page", file: "/jobs" },
+      { code: "world_state_cannot_control_it", file: "/jobs" },
+      { code: "not_world_state_driven", file: "/jobs/[id]" },
+      { code: "not_reflected_on_map", file: "/jobs/[id]" },
+      { code: "not_ai_controlled", file: "/jobs/[id]" },
+      { code: "requires_leaving_workspace", file: "/jobs/[id]" },
+      { code: "requires_new_page", file: "/jobs/[id]" },
+      { code: "world_state_cannot_control_it", file: "/jobs/[id]" },
+      { code: "not_world_state_driven", file: "components/marketing/public-vacancy-card.tsx" },
+      { code: "not_reflected_on_map", file: "components/marketing/public-vacancy-card.tsx" },
+      { code: "not_ai_controlled", file: "components/marketing/public-vacancy-card.tsx" },
+      { code: "requires_leaving_workspace", file: "components/marketing/public-vacancy-card.tsx" },
+      { code: "requires_new_page", file: "components/marketing/public-vacancy-card.tsx" },
+      { code: "world_state_cannot_control_it", file: "components/marketing/public-vacancy-card.tsx" },
+    ],
+    reason:
+      "A pre-authentication public acquisition route cannot satisfy questions that presuppose an authenticated workspace. The owner ordered the surface in the 2026-08-18 directive §5; the declarations answer all six 'no' honestly; this record excuses those six answers on these three surfaces and nothing else.",
+    resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner directive 2026-08-18 §5 — 'Owner decision is final. Jobs must be publicly discoverable.' with the anonymous-field restriction it mandates.",
+  },
 ];
 
 /** Is this ONE finding excused? Every constraint must hold. */

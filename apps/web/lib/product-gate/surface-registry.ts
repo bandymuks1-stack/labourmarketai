@@ -316,6 +316,166 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     // World State cannot control a page that renders before World State exists.
     worldStateCanControlIt: false,
   },
+
+  // ══ PUBLIC JOB BOARD (owner directive 2026-08-18 §5) ══════════════════════
+  // Three surfaces, one job: make the imported supply discoverable to people
+  // who have not signed up. They share the same honest World-State answers as
+  // `/create-cv` above and the same category error behind them — see the
+  // scoped owner waiver in `.github/scripts/owner-waivers.mjs`.
+  {
+    id: "/jobs",
+    kind: "screen",
+    // A-04: multiple valid entry points, suggestions not coercion. This is an
+    // entry point that coerces nothing — browsing is free and anonymous, and
+    // the account is asked for only when the visitor wants the restricted half.
+    originAxiom: "A-04",
+    purpose:
+      "The public, indexable front door to the imported job supply: an anonymous visitor searches 38,142 live vacancies by title and sees the safe half of each ad (title, occupation, employment form, working time, positions, publication date, and pay where the publisher genuinely supplied it) without an account.",
+    whyNotChat:
+      "There is no conversation before authentication. The assistant cannot reach an anonymous visitor arriving from a search result, and that visitor is exactly who this surface exists for. Members already meet the same vacancies inside the workspace through /dashboard/opportunities, which the assistant does operate — this adds a pre-auth doorway to the same supply, not a second board.",
+    whyNotExistingComponent:
+      "Every existing vacancy surface sits behind authentication because `public_vacancies` grants SELECT to `authenticated` only; an anonymous read of that table fails with 42501, proven in production. `/dashboard/opportunities` therefore cannot be indexed or linked from an advert, and it renders the COMPLETE ad, which an anonymous caller may not receive.",
+    owner:
+      "Product / worker acquisition — owner directive 2026-08-18 §5 (jobs must be publicly discoverable; anonymous must not receive the complete vacancy)",
+    // A pure read surface: it owns no write. The search box is a GET filter.
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends no new element. Imported vacancies are already market-world supply; what did not exist was a doorway an anonymous person could walk through. The element was reachable only from inside.",
+    chatIntegration:
+      "One-way by design: the surface hands off to signup/login carrying `?next=` back to the same job, after which the authenticated workspace and its assistant own the journey. It dispatches nothing and holds no conversation state.",
+    avatarEffect:
+      "None. Browsing anonymously changes no avatar; there is no avatar yet. That is the point of the surface.",
+    mapEffect:
+      "None. A pre-auth acquisition route draws nothing on the World Map — recorded as `reflectedOnMap: false` rather than dressed up as a map effect.",
+    journalRelation:
+      "None. An imported advert is somebody else's published offer, never evidence of work done; the Work Journal remains the only source of proven skills.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "job"
+    hasTimeline: true, // published_at / expires_at decide liveness at read time
+    hasHistory: true, // first_seen_at / last_seen_at are recorded per import
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // Honestly "no", all five — a pre-auth public route has no World State to
+    // change, no map to appear on, no assistant to be driven by, no workspace
+    // to stay inside, and it is by definition a new page. A-06 forbids
+    // rewriting these to green more strongly than A-01 forbids the page.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    id: "/jobs/[id]",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "One indexable page per live vacancy — the addressable unit of the acquisition funnel, showing the safe half of the ad and asking for a free account to reveal the employer, the location and how to apply.",
+    whyNotChat:
+      "Same reason as /jobs: this page's whole audience is people the assistant cannot talk to yet, arriving on a single URL from a search engine or a shared link.",
+    whyNotExistingComponent:
+      "No existing route renders a single vacancy at all, for members or anyone else, and none could be indexed: the member surface is a list inside an authenticated dashboard.",
+    owner:
+      "Product / worker acquisition — owner directive 2026-08-18 §5",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "Same element as /jobs — one row of it, addressably. No new element is introduced.",
+    chatIntegration:
+      "One-way: both CTAs carry `?next=` back to this exact job, so the workspace resumes the visitor's actual intent instead of dropping them on a generic dashboard.",
+    avatarEffect: "None until the visitor creates an account; the page itself writes nothing.",
+    mapEffect: "None — recorded honestly rather than invented.",
+    journalRelation:
+      "None. A published advert is not evidence of work; the journal is untouched.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    id: "components/marketing/public-vacancy-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-04",
+    purpose:
+      "The one row shape of the public board: title, occupation, and the few honest chips the anonymous projection actually carries, linking to that vacancy's own page.",
+    whyNotChat:
+      "It is the repeated unit of a pre-auth list; there is no conversation to render it in.",
+    whyNotExistingComponent:
+      "The member-side vacancy card renders employer, location and an apply link — every one of which is a restricted field here. Reusing it would hand a component the anonymous data it must never show, and the leak would be one prop away.",
+    owner: "Product / worker acquisition — owner directive 2026-08-18 §5",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement: "Same element, rendered for an anonymous reader.",
+    chatIntegration:
+      "None, deliberately: the card is a link, not a dispatcher. It holds no conversation state and cannot start an action — the visitor either opens the job page or does nothing.",
+    avatarEffect:
+      "None. An anonymous reader has no avatar, and the card writes nothing anywhere; rendering it changes no profile, no skill and no state.",
+    mapEffect:
+      "None. A pre-auth list row draws nothing on the World Map — recorded as false rather than dressed up as a map effect.",
+    journalRelation:
+      "None. The card shows somebody else's published advert, which is never evidence of work done; the Work Journal remains the only source of proven skills and is untouched.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
 ] as const;
 
 /**

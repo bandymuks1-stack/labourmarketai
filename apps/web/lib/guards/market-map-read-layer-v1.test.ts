@@ -585,8 +585,14 @@ describe("NO new DB migration in this PR", () => {
     // UNAPPLIED; paired rollback + deferred APPLIED_LEDGER entry in the
     // PR). RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 225 real files.
+    // Bumped 225 -> 226 for the public vacancy PREVIEW v1 migration
+    // (20260818140000_public_vacancy_preview_v1, APPLIED to production
+    // 2026-08-18; paired rollback in the PR). Three read-only SECURITY
+    // DEFINER projection functions, zero tables/columns/policies, zero DML.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 226 real files.
     // Still nothing from the market-map read layer itself. Cross-pin follows.
-    expect(count).toBeLessThanOrEqual(225);
+    expect(count).toBeLessThanOrEqual(226);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

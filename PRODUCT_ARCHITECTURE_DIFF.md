@@ -9,7 +9,9 @@
 
 | What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
 |---|---|---|---|---|---|
-| `/create-cv` | screen | The public, indexable, advert-addressable front door of the free CV chain: a visitor who has never heard of labourmarket.ai learns in one screen that they can build or import a CV for free, export it as a PDF, and — only if they choose — turn the facts they have reviewed into a work profile that improves the jobs they are shown. | There is no conversation before authentication. This surface exists precisely where the assistant cannot reach: an anonymous visitor arriving from a search result or an advert, who has not signed up and has nothing for an assistant to operate on. The moment that person starts, the surface hands off into the authenticated CV flow the assistant does drive — it adds no second flow of its own. | A-04 | yes |
+| `/jobs/[id]` | screen | One indexable page per live vacancy — the addressable unit of the acquisition funnel, showing the safe half of the ad and asking for a free account to reveal the employer, the location and how to apply. | Same reason as /jobs: this page | A-04 | yes |
+| `/jobs` | screen | The public, indexable front door to the imported job supply: an anonymous visitor searches 38,142 live vacancies by title and sees the safe half of each ad (title, occupation, employment form, working time, positions, publication date, and pay where the publisher genuinely supplied it) without an account. | There is no conversation before authentication. The assistant cannot reach an anonymous visitor arriving from a search result, and that visitor is exactly who this surface exists for. Members already meet the same vacancies inside the workspace through /dashboard/opportunities, which the assistant does operate — this adds a pre-auth doorway to the same supply, not a second board. | A-04 | yes |
+| `components/marketing/public-vacancy-card.tsx` | persistent_card | The one row shape of the public board: title, occupation, and the few honest chips the anonymous projection actually carries, linking to that vacancy | It is the repeated unit of a pre-auth list; there is no conversation to render it in. | A-04 | yes |
 
 ## Axiom checks
 
@@ -20,7 +22,25 @@
 | `not_ai_controlled` | A-01 | `/create-cv` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
 | `requires_leaving_workspace` | A-01 | `/create-cv` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
 | `requires_new_page` | A-01 | `/create-cv` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `/jobs` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/jobs` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/jobs` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_leaving_workspace` | A-01 | `/jobs` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/jobs` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `/jobs/[id]` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/jobs/[id]` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/jobs/[id]` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_leaving_workspace` | A-01 | `/jobs/[id]` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/jobs/[id]` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_leaving_workspace` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `world_state_cannot_control_it` | A-01 | `/create-cv` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `/jobs` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `/jobs/[id]` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 
 ## Rules that were checked
 

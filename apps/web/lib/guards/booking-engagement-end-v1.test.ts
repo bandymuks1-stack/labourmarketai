@@ -941,6 +941,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // commands and deletes no row, because deleting a definition would
       // destroy the approval history of every instance that ran on it.
       "20260818120000_workflow_template_management_v1.sql",
+      // 2026-08-18: public vacancy PREVIEW v1 (train A). The marker records
+      // that the RED content (three SECURITY DEFINER projection functions plus
+      // their REVOKE-from-PUBLIC/GRANT-to-anon posture) is INTENTIONAL — an
+      // allowlisted anonymous projection IS the mechanism, and it is what lets
+      // the public job board exist WITHOUT weakening the `authenticated`-only
+      // RLS on public_vacancies. Applied to production 2026-08-18 under the
+      // owner directive of the same day (§5: jobs must be publicly
+      // discoverable, restricted fields must not reach anonymous callers).
+      // All three signatures are registered in
+      // apps/web/lib/security/anon-secdef-allowlist.ts with written contracts.
+      "20260818140000_public_vacancy_preview_v1.sql",
     ]);
   });
 
