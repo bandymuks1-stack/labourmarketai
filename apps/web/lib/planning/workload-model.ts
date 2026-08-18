@@ -9,8 +9,9 @@
  *     predicate: the caller's accepted incoming bookings + personally
  *     assigned projects — the same rule the month grid's "unfilled" mark
  *     uses, so the two surfaces cannot disagree);
- *   - actualHours  — the caller's recorded journal work-item hours on those
- *     days (journal_entry_work_items — the SAME truth timesheets freeze).
+ *   - actualHours  — the caller's recorded journal work hours on those days,
+ *     derived from `journal_entry_metrics` through the canonical rule in
+ *     lib/journal/work-time (the SAME truth timesheets freeze).
  *
  * DELIBERATELY NOT CONVERTED INTO EACH OTHER: planned days are never
  * multiplied by an invented workday length, and hours are never divided

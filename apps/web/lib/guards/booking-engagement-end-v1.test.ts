@@ -952,6 +952,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // All three signatures are registered in
       // apps/web/lib/security/anon-secdef-allowlist.ts with written contracts.
       "20260818140000_public_vacancy_preview_v1.sql",
+      // 2026-08-18: canonical work-time truth (train B). The marker records
+      // that the RED content is a `create or replace` of ONE existing
+      // SECURITY DEFINER function body — `timesheet_compute_lines_v1` — plus a
+      // re-assertion of its already-reviewed REVOKEs and two COMMENTs. No
+      // table, policy, grant, trigger or column changes; no DML. Approved by
+      // the owner ruling of 2026-08-18 ("TIMESHEET / WORK HOURS CANONICAL
+      // TRUTH": journal_entry_metrics is canonical; journal_entry_work_items
+      // must not be populated to satisfy readers). Blast radius measured at
+      // zero: `timesheets` has 0 rows and 0 lifetime inserts in production, so
+      // no frozen snapshot exists that the new body could change.
+      "20260818150000_journal_canonical_work_time_v1.sql",
     ]);
   });
 

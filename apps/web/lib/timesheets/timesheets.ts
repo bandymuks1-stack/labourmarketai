@@ -12,6 +12,12 @@ import {
   type TimesheetRow,
 } from "@/lib/timesheets/timesheets-model";
 import {
+  deriveEntryWorkTime,
+  workTimeHoursByDay,
+  type WorkTimeDayHours,
+  type WorkTimeMetricRow,
+} from "@/lib/journal/work-time";
+import {
   isValidWorkflowInstanceStatus,
   type WorkflowApproverSlotRow,
   type WorkflowInstanceStatus,
@@ -474,24 +480,33 @@ export async function getTimesheetForExport(
 
 /* ------------------------------------------------------------------ */
 /* Workload actuals — the caller's own journal-derived hours by day.   */
-/* SAME truth the timesheet snapshot derives from                      */
-/* (journal_entry_work_items), so the strip and the sheet can never    */
-/* disagree about the same day.                                        */
+/* SAME canonical truth the timesheet snapshot derives from            */
+/* (journal_entry_metrics, via lib/journal/work-time), so the strip and */
+/* the sheet can never disagree about the same day.                    */
 /* ------------------------------------------------------------------ */
 
-export type DayHours = { readonly day: string; readonly hours: number };
+export type DayHours = WorkTimeDayHours;
 
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
 const WORKLOAD_READ_LIMIT = 500;
+/** Metric rows per entry are small (a handful); this bound keeps the second
+ *  read proportional to the first without truncating a real worker's day. */
+const WORKLOAD_METRIC_READ_LIMIT = WORKLOAD_READ_LIMIT * 8;
 
 /**
- * The caller's OWN recorded work-item hours inside [rangeStart, rangeEnd],
- * grouped by the day the work happened (the entry's own work_date metric,
- * falling back to the created UTC day — the same rule as the SQL derivation
- * and the calendar projection). 'days'-unit items are excluded here (the
- * strip states hours only; day-unit totals live on the timesheet).
+ * The caller's OWN recorded work hours inside [rangeStart, rangeEnd], grouped
+ * by the day the work HAPPENED (the entry's own `work_date` metric, falling
+ * back to the created UTC day — the same rule the SQL derivation and the
+ * calendar projection use).
+ *
+ * OWNER RULING 2026-08-18: the hours come from `journal_entry_metrics`, the
+ * canonical persisted work-time source. This read previously asked
+ * `journal_entry_work_items` — a table with zero lifetime inserts and no
+ * writer — so the workload strip reported 0 h for every worker who had in
+ * fact recorded hours. `days`-unit work is excluded here (the strip states
+ * hours only; day-unit totals live on the timesheet).
  */
-export async function getMyWorkItemHours(
+export async function getMyJournalWorkHours(
   rangeStart: string,
   rangeEnd: string,
 ): Promise<
@@ -505,70 +520,58 @@ export async function getMyWorkItemHours(
   if (!workerId) return { status: "unavailable" };
   const supabase = await createClient();
 
-  const itemsRes = await asAny(supabase)
-    .from("journal_entry_work_items")
-    .select("journal_entry_id, hours_numeric, unit")
+  // The caller's own LIVE entries. Deleted and superseded rows are excluded
+  // here; entries replaced by a live correction are dropped below, so an
+  // edited entry is counted once — never twice.
+  const entriesRes = await asAny(supabase)
+    .from("journal_entries")
+    .select("id, created_at, original_text, correction_of")
     .eq("worker_id", workerId)
-    .not("hours_numeric", "is", null)
-    .neq("status", "rejected")
+    .is("deleted_at", null)
+    .is("superseded_by", null)
     .limit(WORKLOAD_READ_LIMIT);
-  if (itemsRes.error) return { status: "unavailable" };
-  type ItemRow = {
-    journal_entry_id: string;
-    hours_numeric: number | null;
-    unit: string | null;
+  if (entriesRes.error) return { status: "unavailable" };
+
+  type EntryRow = {
+    id: string;
+    created_at: string;
+    original_text: string | null;
+    correction_of: string | null;
   };
-  const items = (itemsRes.data ?? []) as ItemRow[];
-  if (items.length === 0) return { status: "ok", days: [] };
+  const rows = (entriesRes.data ?? []) as EntryRow[];
+  if (rows.length === 0) return { status: "ok", days: [] };
+  const correctedIds = new Set(
+    rows.map((r) => r.correction_of).filter((v): v is string => Boolean(v)),
+  );
+  const liveRows = rows.filter((r) => !correctedIds.has(r.id));
+  const entryIds = liveRows.map((r) => r.id);
+  if (entryIds.length === 0) return { status: "ok", days: [] };
 
-  const entryIds = [...new Set(items.map((i) => i.journal_entry_id))];
-  const [entryRes, metricRes] = await Promise.all([
-    asAny(supabase)
-      .from("journal_entries")
-      .select("id, created_at, deleted_at, superseded_by")
-      .in("id", entryIds)
-      .is("deleted_at", null)
-      .is("superseded_by", null)
-      .limit(WORKLOAD_READ_LIMIT),
-    asAny(supabase)
-      .from("journal_entry_metrics")
-      .select("entry_id, value_text")
-      .eq("metric_slug", "work_date")
-      .in("entry_id", entryIds)
-      .limit(WORKLOAD_READ_LIMIT),
-  ]);
-  if (entryRes.error) return { status: "unavailable" };
+  const metricsRes = await asAny(supabase)
+    .from("journal_entry_metrics")
+    .select("id, entry_id, metric_slug, value_text, value_numeric, unit_slug, source, created_at")
+    .in("entry_id", entryIds)
+    .limit(WORKLOAD_METRIC_READ_LIMIT);
+  // A failed metric read must NOT degrade to a confident "0 hours" — that is
+  // exactly the shape of the defect this function was fixed for.
+  if (metricsRes.error) return { status: "unavailable" };
 
-  const workDateByEntry = new Map<string, string>();
-  if (!metricRes.error) {
-    for (const m of (metricRes.data ?? []) as RawRow[]) {
-      const v = typeof m.value_text === "string" ? m.value_text.trim() : "";
-      if (DAY_RX.test(v)) workDateByEntry.set(String(m.entry_id), v);
-    }
-  }
-  const dayByEntry = new Map<string, string>();
-  for (const e of (entryRes.data ?? []) as RawRow[]) {
-    const id = String(e.id);
-    const day =
-      workDateByEntry.get(id) ?? String(e.created_at ?? "").slice(0, 10);
-    if (DAY_RX.test(day)) dayByEntry.set(id, day);
+  type MetricRow = WorkTimeMetricRow & { entry_id: string };
+  const metricsByEntry = new Map<string, WorkTimeMetricRow[]>();
+  for (const m of (metricsRes.data ?? []) as MetricRow[]) {
+    const list = metricsByEntry.get(m.entry_id);
+    if (list) list.push(m);
+    else metricsByEntry.set(m.entry_id, [m]);
   }
 
-  const hoursByDay = new Map<string, number>();
-  for (const item of items) {
-    const day = dayByEntry.get(item.journal_entry_id);
-    if (!day || day < rangeStart || day > rangeEnd) continue;
-    const value = typeof item.hours_numeric === "number" ? item.hours_numeric : 0;
-    const unit = item.unit ?? "hours";
-    const hours =
-      unit === "hours" ? value : unit === "minutes" ? value / 60 : 0;
-    if (hours <= 0) continue;
-    hoursByDay.set(day, (hoursByDay.get(day) ?? 0) + hours);
-  }
-  return {
-    status: "ok",
-    days: [...hoursByDay.entries()]
-      .map(([day, hours]) => ({ day, hours: Math.round(hours * 100) / 100 }))
-      .sort((a, b) => a.day.localeCompare(b.day)),
-  };
+  const derived = liveRows.map((row) =>
+    deriveEntryWorkTime({
+      entryId: row.id,
+      createdAt: row.created_at,
+      originalText: row.original_text,
+      metrics: metricsByEntry.get(row.id) ?? [],
+    }),
+  );
+
+  return { status: "ok", days: workTimeHoursByDay(derived, rangeStart, rangeEnd) };
 }

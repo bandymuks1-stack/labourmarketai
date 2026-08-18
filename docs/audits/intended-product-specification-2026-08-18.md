@@ -502,7 +502,7 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 | REQ-OPS-004 | Tasks link to Work Journal entries | APPROVED_CURRENT_INTENT — flywheel §3 (activity context) | **absent** | no link column | — | **MISSING** | — | **MISSING** | Journal auto-links to project only; task link absent, no picker | yes | no |
 | REQ-OPS-005 | Project stages with Gantt and calendar feed | IMPLEMENTED_CURRENT_BEHAVIOR | 3 RPCs | `project_stages` | Gantt | UNKNOWN | — | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-006 | A calendar is a real entity, not only a projection | APPROVED_CURRENT_INTENT — axiom **A-03** (chat → journal → **calendar** → messages) | projection over 8 sources + conflict detection | **no calendar entity** | calendar views | UNKNOWN | `calendar-full-detail.test.ts` | **PARTIAL** | Read-only by construction; cannot own scheduling truth; no shift/roster entity | no | yes |
-| REQ-OPS-007 | Timesheets are a period document **derived** from the Work Journal, with no second hours store | APPROVED_CURRENT_INTENT — Vecticum parity P1 ("no new hours store"); `20260817170000` header | derivation SQL + advisory lock; export at `planning/timesheets/[id]/export/route.ts` | `timesheets`, `timesheet_events` — **but the source table `journal_entry_work_items` has ZERO application writers** (only read, `lib/timesheets/timesheets.ts:509`) | `/dashboard/planning/timesheets` | **UNKNOWN — 0 rows** | timesheet guards; **no e2e** | **BROKEN CHAIN** | A timesheet derives its lines from `journal_entry_work_items`, which nothing ever inserts (`20260601090000` built it to replace display-time computation; adoption never happened). Timesheets can therefore never produce a non-empty line — this is upstream of the 0-row count, not explained by it | **yes** | no |
+| REQ-OPS-007 | Timesheets are a period document **derived** from the Work Journal, with no second hours store | APPROVED_CURRENT_INTENT — Vecticum parity P1 ("no new hours store"); `20260817170000` header; **OWNER RULING 2026-08-18** (`journal_entry_metrics` is canonical) | canonical rule in `lib/journal/work-time.ts` ⇄ `timesheet_compute_lines_v1` (`20260818150000`); export at `planning/timesheets/[id]/export/route.ts` | `timesheets`, `timesheet_events`; source is now `journal_entry_metrics` — `journal_entry_work_items` is DEPRECATED (0 rows, 0 writers, 0 readers, `comment on table`) | `/dashboard/planning/timesheets` | **derivation PROVEN on real production evidence** — 9 real lines where the old code produced 0 (read-only, no synthetic row); the org DOCUMENT is still 0 rows | 30 unit tests + SQL⇄TS guard | **PARTIAL** | BROKEN CHAIN is CLOSED: hours now come from the canonical metrics, double counting is structurally impossible, conflicts are reported not dropped. What remains is NOT a code defect — every hour ever recorded sits on a PERSONAL (org-less) engagement, and `timesheets.organization_id` is NOT NULL, so no org sheet can be non-empty yet. See `docs/audit/journal-canonical-work-time-v1.md` §5 | partly (needs real org-scoped journal usage) | **yes** (allow a personal timesheet? — §6.1) |
 | REQ-OPS-008 | Typed employee requests whose approval lifecycle IS a workflow instance (no per-type approval tables) | APPROVED_CURRENT_INTENT — `20260817180000` header; Vecticum parity P0 | `lib/requests/*` | `employee_requests` (7-type closed vocab) | `/dashboard/network` requests-section | **UNKNOWN — 0 rows** | `employee-requests.test.ts` | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-009 | Leave/absence request → approve/reject/cancel with notifications and manager visibility | APPROVED_CURRENT_INTENT — `PROJECT_VISION` §8 | `lib/leave/absences-actions.ts` | `worker_absences` | `/dashboard/absences` | UNKNOWN | absence guards | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-010 | Leave balances are configurable per org × absence type, derived at read time, **advisory only** — a warning, never a block, no statutory defaults | APPROVED_CURRENT_INTENT — `20260817181000` header | derived | `leave_balance_policies` (0 seeded rows by design) | chip | UNKNOWN | guards | IMPLEMENTED_NOT_PROVEN | — | no | no |
@@ -524,9 +524,9 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 | REQ-OPS-026 | Management decisions with agenda, result, responsible, deadline, workflow instance and links to executing tasks | APPROVED_CURRENT_INTENT — `20260817232000` header | `lib/decisions/*` | `management_decisions`, `decision_task_links`, `decision_document_links` | `management-decisions-section.tsx` | **UNKNOWN — 0 rows** | guards | IMPLEMENTED_NOT_PROVEN | — | no | no |
 | REQ-OPS-027 | A first-class **decision queue**, ranked by urgency, scoped by RLS to the actor who must act | APPROVED_CURRENT_INTENT — `PROJECT_VISION` §8 module 10 ("pirmos klasės UI … ne tik sąrašas"); `DATA_MODEL.md` M2 sketch | `lib/approvals/approvals-model.ts` | derived | `dashboard/network/approvals-section.tsx` | UNKNOWN | approvals guards | **PARTIAL** | Shipped as a section, not a first-class urgency-ranked surface; the approved shape was never built | no | yes (accept or build) |
 | REQ-OPS-028 | Generic Workflow & Approval engine: 1–20 ordered rounds, `single\|all\|any` modes, closed approver-rule vocabulary, deadlines, escalation, frozen published versions, one live instance per context entity | APPROVED_CURRENT_INTENT — `20260817130000` header (named the #1 architectural gap) | 4 helpers, 8 SECDEF commands, 3 trigger guards | 7 tables + `20260818120000_workflow_template_management_v1.sql` | `workflow-templates-panel.tsx`, `workflow-timeline.tsx` | **VERIFIED_TEST_ENVIRONMENT** — prod E2E ran (4 instances, 10 transitions) then rolled back; 16 templates installed, **0 live instances** | guards | **VERIFIED_TEST_ENVIRONMENT** | Never used by a real person | no | no |
-| REQ-OPS-029 | Capacity / skill-gap modelling with 8 gap types | IMPLEMENTED_CURRENT_BEHAVIOR — `docs/product/workforce-capacity-skill-gap-contract-v1.md` | deterministic engine | **ZERO persistence** | planning page | UNKNOWN | `workforce-canonical.test.ts` | **PARTIAL** | Computed and rendered, never stored — cannot be trended or audited | yes | no |
+| REQ-OPS-029 | Capacity / skill-gap modelling with 8 gap types | IMPLEMENTED_CURRENT_BEHAVIOR — `docs/product/workforce-capacity-skill-gap-contract-v1.md` | deterministic engine | **ZERO persistence** | planning page | UNKNOWN | `workforce-canonical.test.ts` | **PARTIAL** | Computed and rendered, never stored — cannot be trended or audited. Its ACTUALS input was re-pointed to the canonical metrics on 2026-08-18 (it previously read the empty `journal_entry_work_items` and reported 0 h for workers who had recorded hours) | yes | no |
 | REQ-OPS-030 | Workforce planning produces a human-readable plan | APPROVED_CURRENT_INTENT — `docs/product/future-work-planning-contract-v1.md` | compute pipeline → planning page | — | `/dashboard/planning` | UNKNOWN | — | **PARTIAL** | The "human plan" payload key has **no writer** | yes | no |
-| REQ-OPS-031 | Workload as a modelled concept | UNKNOWN_OWNER_DECISION_REQUIRED — named in the reality audit as MISSING with "zero matches repo-wide"; no approving artefact found | — | — | — | **MISSING** | — | **MISSING** | Not clear it was ever approved as distinct from capacity | no | **yes** |
+| REQ-OPS-031 | Workload as a modelled concept | UNKNOWN_OWNER_DECISION_REQUIRED — named in the reality audit as MISSING with "zero matches repo-wide"; no approving artefact found | `lib/planning/workload-model.ts` (pure) + `getMyJournalWorkHours` | **no workload entity** — derived over `journal_entry_metrics` | workload strip on `/dashboard/planning` (week + agenda) | **PROVEN 2026-08-18** — real journal hours per day on real production rows | `workload-model` + `work-time` tests | **PARTIAL** | The workload STRIP exists (`lib/planning/workload-model.ts`) and its actual-hours half is now real: planned committed DAYS vs canonical journal HOURS per week, proven end-to-end on production data 2026-08-18. Whether workload is a modelled ENTITY distinct from capacity is still unanswered | no | **yes** |
 | REQ-OPS-032 | Shift / roster entity | UNKNOWN_OWNER_DECISION_REQUIRED — implied by `PROJECT_VISION` §5 ("gamyboj = pamaina"), never specified | — | — | — | **MISSING** | — | **MISSING** | Scheduling has no owned entity | no | **yes** |
 | REQ-OPS-033 | Housing / accommodation: listings, worker housing, short and long lets, bed/room/flat/house booking, link to project or workplace, company-paid housing, allocation, prices and occupancy, contracts and payments, reviews and incidents | APPROVED_CURRENT_INTENT — canonical vision §8 (full itemised spec) | **absent** | **absent** | **absent** | **MISSING** | — | **MISSING** | Entire family unbuilt despite an explicit approved spec | no | no |
 | REQ-OPS-034 | Automations created by conversation, each with ID, owner, active context, schedule/condition, state, run history, error history, pause/resume | APPROVED_CURRENT_INTENT — canonical vision §12 (full itemised spec) | **absent** | **absent** | **absent** | **MISSING** | — | **MISSING** | Entire family unbuilt despite an explicit approved spec | no | no |
@@ -727,7 +727,7 @@ otherwise-classified requirements — 30 total in §6).
 | 2 | REQ-PAY-001 | No money can be taken: test provider only, and no reachable checkout button |
 | 3 | REQ-MKT-004 | Supply is one country in a locale the product does not serve — Swedish ads, `lt/en/ru/nl/de` UI |
 | 4 | REQ-PLAT-007 | No read-time translation provider, so that same supply is unreadable to its audience |
-| 5 | REQ-OPS-007 | Timesheets can never produce a line: their source table `journal_entry_work_items` has zero writers |
+| 5 | REQ-OPS-007 | ~~Timesheets can never produce a line: their source table `journal_entry_work_items` has zero writers~~ — **CLOSED 2026-08-18** by the canonical work-time ruling. What remains is a usage gap, not a defect: no hours have yet been logged against an ORG engagement |
 | 6 | REQ-INTEL-008 | 8,124 known employer names never become company entities — the employer funnel has no population |
 | 7 | REQ-OPS-019 | Invoices cannot be generated from Work Journals, removing the most concrete recurring value an employer would pay for |
 | 8 | REQ-SKILL-006 | ESCO concept ids never persist, so matching is label-matching across a 1.03M-label taxonomy |
@@ -844,3 +844,70 @@ Applying the preview migration to production BEFORE merging made the live
 allowlist entries only existed on the feature branch. PR #1185 was blocked by a
 condition it did not cause until #1184 merged. Apply-before-merge has this cost;
 merge order is not optional once a live catalog gate exists.
+
+---
+
+## OWNER RULING — TIMESHEET / WORK HOURS CANONICAL TRUTH (2026-08-18)
+
+Binding, recorded here because §5's REQ-OPS-007 could not be resolved without it.
+
+> Use the existing Work Journal-derived data as the canonical source.
+> `journal_entry_metrics` is the canonical persisted source for derived /
+> structured work-time metrics where the current Work Journal extraction
+> pipeline already writes real production data. Do NOT create a second
+> equivalent hours truth merely to populate `journal_entry_work_items`.
+
+Canonical chain (now implemented, not merely stated):
+
+```
+WORK JOURNAL ENTRY → ORIGINAL USER EVIDENCE / FACT → STRUCTURED DERIVED METRICS
+  → CANONICAL WORK-TIME VALUE → TIMESHEET → WORKLOAD / CAPACITY → REPORTING
+```
+
+**`journal_entry_work_items` is classified DEPRECATED — duplicate truth.** It has
+0 lifetime inserts, no writer, and after this change no reader. Everything it
+was designed to hold for work time is already expressed by
+`journal_entry_metrics` (`fragment_time` / `fragment_activity` /
+`parsed_fragment` / `quantity`), and expressed as the worker's own evidence
+rather than a derived copy. The one semantic it carried that metrics do not — a
+**per-item reviewer decision** — was never built and is escalated as an owner
+question rather than silently inherited. The table is not dropped (destructive
+DDL stays owner-gated) and is not populated; the deprecation is recorded in the
+database via `comment on table`.
+
+Full classification, the deterministic rule, and the production evidence:
+`docs/audit/journal-canonical-work-time-v1.md`.
+
+### Matrix delta from this ruling
+
+| ID | Was | Now | Why |
+|---|---|---|---|
+| REQ-OPS-007 (timesheets) | **BROKEN CHAIN** | **PARTIAL** | The chain is closed and the derivation is proven on real production evidence (9 real lines where the old code produced 0). It is not `VERIFIED_PRODUCTION` because no non-empty org timesheet exists yet — every recorded hour sits on a personal, org-less engagement. |
+| REQ-OPS-031 (workload) | **MISSING** | **PARTIAL** | The workload strip's actual-hours half is real and proven end-to-end on production data. Whether workload is a modelled ENTITY distinct from capacity remains U-10. |
+| REQ-OPS-029 (capacity) | PARTIAL | PARTIAL | Unchanged status; its actuals input was re-pointed from the empty table to the canonical metrics. |
+
+### Roll-up after this ruling (194 rows, unchanged total)
+
+| Status | Count |
+|---|---:|
+| IMPLEMENTED_NOT_PROVEN | 72 |
+| PARTIAL | 40 |
+| VERIFIED_PRODUCTION | 38 |
+| MISSING | 18 |
+| BROKEN | 10 |
+| NOT_REQUIRED | 9 |
+| VERIFIED_TEST_ENVIRONMENT | 5 |
+| UNKNOWN_OWNER_DECISION_REQUIRED | 2 |
+| **Total** | **194** |
+
+(Baseline was 37 / 72 / 38 / 11 / 20 / 5 / 9 / 2. Public job discovery moved
+MISSING → VERIFIED_PRODUCTION with #1184; REQ-OPS-007 BROKEN → PARTIAL and
+REQ-OPS-031 MISSING → PARTIAL with this ruling.)
+
+### New owner questions raised
+
+| ID | Requirement | Question |
+|---|---|---|
+| U-11 | REQ-OPS-007 | Should a worker be able to produce a timesheet for work logged on their **personal** engagement? `timesheets.organization_id` is `NOT NULL`, which is the single reason the org sheet is empty despite real recorded hours. |
+| U-12 | REQ-OPS-007 | Do we want **per-activity** reviewer decisions (the one semantic `journal_entry_work_items` carried), or is per-entry confirmation sufficient? |
+| U-13 | REQ-SKILL / journal | `extract-journal-suggestions` loses composite durations: *"valandą dvidešimt minučių"* (1 h 20 min) stored as `20 minutes`, *"valandą su puse"* (1.5 h) stored as `1 hours`, on real production rows. Correcting the stored values would be a silent migration of the worker's evidence and was deliberately NOT done. |

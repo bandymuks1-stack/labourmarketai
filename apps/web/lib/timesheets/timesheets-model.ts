@@ -134,20 +134,39 @@ export type TimesheetRow = {
   readonly snapshot: TimesheetSnapshot;
 };
 
-/** One derived line — a frozen COPY of a journal work item row. */
+/** One derived line — a frozen COPY of a canonical work-time value derived
+ *  from the entry's own `journal_entry_metrics` (owner ruling 2026-08-18). */
 export type TimesheetLine = {
-  readonly workItemId: string;
+  /** Deterministic identity of the derived line: `<entryId>#f<index>` for a
+   *  per-activity line, `<entryId>#entry` for an entry-level one. */
+  readonly lineKey: string;
   readonly journalEntryId: string;
+  /** 1-based activity index within the entry; null for an entry-level line. */
+  readonly fragmentIndex: number | null;
   readonly day: string;
   readonly title: string;
+  /** The worker's own phrase this duration was recorded against. */
+  readonly evidencePhrase: string | null;
   readonly workTypeKey: string | null;
   /** The recorded numeric value in its RECORDED unit — never converted by
    *  invention. */
   readonly value: number;
   readonly unit: "hours" | "minutes" | "days";
-  readonly itemStatus: string;
+  /** Which canonical rule produced this line. */
+  readonly derivedFrom: "fragment_time" | "entry_quantity";
+  /** `journal_entry_metrics.source` of the row behind this line. */
+  readonly metricSource: string | null;
   readonly projectId: string | null;
   readonly projectTitle: string | null;
+};
+
+/** An entry-level duration the per-activity rule superseded. Reported so the
+ *  ambiguity is visible on the document, never silently dropped. */
+export type TimesheetConflict = {
+  readonly journalEntryId: string;
+  readonly reason: string;
+  readonly value: number;
+  readonly unit: string;
 };
 
 export type TimesheetTotals = {
@@ -160,7 +179,13 @@ export type TimesheetTotals = {
 
 export type TimesheetSnapshot = {
   readonly computedAt: string | null;
+  /** Which store the lines were derived from. `journal_entry_metrics` is the
+   *  canonical answer; anything else means an old snapshot. */
+  readonly source: string | null;
   readonly lines: readonly TimesheetLine[];
+  /** Entries whose entry-level duration was NOT counted because the worker
+   *  also recorded per-activity times. */
+  readonly conflicts: readonly TimesheetConflict[];
   readonly totals: TimesheetTotals;
 };
 
@@ -194,22 +219,47 @@ export function parseTimesheetSnapshot(raw: unknown): TimesheetSnapshot {
       continue;
     }
     lines.push({
-      workItemId: String(l.workItemId ?? ""),
+      lineKey: String(l.lineKey ?? ""),
       journalEntryId: String(l.journalEntryId ?? ""),
+      fragmentIndex:
+        typeof l.fragmentIndex === "number" && Number.isInteger(l.fragmentIndex)
+          ? l.fragmentIndex
+          : null,
       day,
       title: typeof l.title === "string" ? l.title : "",
+      evidencePhrase:
+        typeof l.evidencePhrase === "string" ? l.evidencePhrase : null,
       workTypeKey: typeof l.workTypeKey === "string" ? l.workTypeKey : null,
       value,
       unit: unit as TimesheetLine["unit"],
-      itemStatus: typeof l.itemStatus === "string" ? l.itemStatus : "suggested",
+      derivedFrom:
+        l.derivedFrom === "entry_quantity" ? "entry_quantity" : "fragment_time",
+      metricSource:
+        typeof l.metricSource === "string" ? l.metricSource : null,
       projectId: typeof l.projectId === "string" ? l.projectId : null,
       projectTitle:
         typeof l.projectTitle === "string" ? l.projectTitle : null,
     });
   }
+  const rawConflicts = Array.isArray(obj.conflicts) ? obj.conflicts : [];
+  const conflicts: TimesheetConflict[] = [];
+  for (const entry of rawConflicts) {
+    if (!entry || typeof entry !== "object") continue;
+    const c = entry as Record<string, unknown>;
+    const value = typeof c.value === "number" ? c.value : Number.NaN;
+    if (!Number.isFinite(value)) continue;
+    conflicts.push({
+      journalEntryId: String(c.journalEntryId ?? ""),
+      reason: typeof c.reason === "string" ? c.reason : "",
+      value,
+      unit: typeof c.unit === "string" ? c.unit : "",
+    });
+  }
   return {
     computedAt: typeof obj.computedAt === "string" ? obj.computedAt : null,
+    source: typeof obj.source === "string" ? obj.source : null,
     lines,
+    conflicts,
     totals: deriveTimesheetTotals(lines),
   };
 }
@@ -255,7 +305,8 @@ export const TIMESHEET_CSV_COLUMNS = [
   "value",
   "unit",
   "hours",
-  "item_status",
+  "derived_from",
+  "evidence",
 ] as const;
 
 function csvCell(value: string): string {
@@ -286,7 +337,8 @@ export function buildTimesheetCsv(sheet: TimesheetRow): string {
         String(line.value),
         line.unit,
         String(lineHours(line)),
-        line.itemStatus,
+        line.derivedFrom,
+        line.evidencePhrase ?? "",
       ]),
     );
   }
@@ -304,6 +356,7 @@ export function buildTimesheetCsv(sheet: TimesheetRow): string {
       "hours",
       String(totals.totalHours),
       "",
+      "",
     ]),
   );
   if (totals.totalDayUnits > 0) {
@@ -319,6 +372,7 @@ export function buildTimesheetCsv(sheet: TimesheetRow): string {
         "",
         "days",
         String(totals.totalDayUnits),
+        "",
         "",
       ]),
     );

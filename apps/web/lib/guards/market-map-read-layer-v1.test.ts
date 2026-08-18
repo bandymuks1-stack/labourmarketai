@@ -592,7 +592,10 @@ describe("NO new DB migration in this PR", () => {
     // RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 226 real files.
     // Still nothing from the market-map read layer itself. Cross-pin follows.
-    expect(count).toBeLessThanOrEqual(226);
+    // 2026-08-18: 227 after 20260818150000_journal_canonical_work_time_v1
+    // (the canonical work-time train). Still nothing from the market-map read
+    // layer itself — recount, never take a rebase side verbatim.
+    expect(count).toBeLessThanOrEqual(227);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

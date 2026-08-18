@@ -2178,7 +2178,12 @@ describe("no migration files added by this sprint", () => {
     // deletes no row + a deferred APPLIED_LEDGER entry in the PR).
     // RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 225 real files.
-    const SPRINT_BASELINE = 226;
+    // Bumped 226 -> 227 for the canonical work-time migration
+    // (20260818150000_journal_canonical_work_time_v1, LEAD-gated; replaces ONE
+    // existing function body, no table/policy/grant/trigger change, no DML,
+    // paired rollback). RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 227 real files.
+    const SPRINT_BASELINE = 227;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
