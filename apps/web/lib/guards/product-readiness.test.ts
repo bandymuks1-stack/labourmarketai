@@ -2188,7 +2188,7 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 228;
+    const SPRINT_BASELINE = 229;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
@@ -2238,6 +2238,16 @@ describe("no migration files added by this sprint", () => {
     // #976 took it 169 -> 170 (both already on main); this PR takes it to 171.
     // Never take either side of a rebase verbatim — recount the real migration
     // files under supabase/migrations after every rebase.
+    //
+    // Bumped 228 -> 229 for the public vacancy SITEMAP v1 migration
+    // (20260818160000_public_vacancy_sitemap_v1, paired rollback). ONE
+    // read-only SECURITY DEFINER projection returning exactly `id` and
+    // `last_modified` — strictly narrower than the preview functions the
+    // 20260818140000 migration already ships, and the thing the
+    // /jobs-sitemap.xml route needs so 39,241 live public job pages stop being
+    // orphaned from every crawler. ZERO tables, columns, policies, triggers,
+    // indexes or DML. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 229 real files.
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -26,6 +26,12 @@ const STATIC_PATHS: readonly string[] = [
   "/worker-intake",
   // Free CV builder — worker acquisition entry (beta train v2 §12).
   "/create-cv",
+  // The public job board. It shipped live with the anonymous projection
+  // (migration 20260818140000) but was never advertised here, so the largest
+  // public surface the product owns — 39,241 live ads — had no crawler entry
+  // point at all. The individual /jobs/[id] pages are far too many for this
+  // hand-maintained list and ride /jobs-sitemap.xml instead.
+  "/jobs",
   "/labour-market",
   "/match-preview",
   "/pricing",
@@ -68,6 +74,8 @@ const CORE_PATHS: readonly string[] = [
   "/work-opportunities",
   "/skills",
   "/professions",
+  // Highest-intent public surface: real vacancies a visitor can search.
+  "/jobs",
 ];
 
 function priorityFor(path: string): number {

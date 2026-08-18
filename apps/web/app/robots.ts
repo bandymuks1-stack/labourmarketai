@@ -18,10 +18,34 @@ import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
  * crawlers may visit is unchanged; AI-crawler rules are unchanged (single
  * `*` rule). The sitemap/host entries are declared before the rule block so
  * the crawlable answer surface is never confused with a blocked path.
+ *
+ * The public job board ships a THIRD sitemap the same way
+ * (/jobs-sitemap.xml) — see sitemapUrls() below.
  */
+
+/**
+ * The sitemaps advertised to crawlers, all on the apex origin.
+ *
+ * `/jobs-sitemap.xml` is the public job board's own sharded index. Its
+ * `/jobs/[id]` pages are far too many (39,241 live) for the curated
+ * `sitemap.xml` list, and the board's own pagination is ~1,963 hops deep, so
+ * without this entry every one of those pages is orphaned from a crawler's
+ * point of view — which is exactly the state the board shipped in.
+ */
+function sitemapUrls(origin: string): string[] {
+  return [
+    `${origin}/sitemap.xml`,
+    `${origin}/questions-sitemap.xml`,
+    `${origin}/jobs-sitemap.xml`,
+  ];
+}
+
 export default function robots(): MetadataRoute.Robots {
   return {
-    sitemap: [`${MARKETING_ORIGIN}/sitemap.xml`, `${MARKETING_ORIGIN}/questions-sitemap.xml`],
+    // Every sitemap URL is built on MARKETING_ORIGIN (the apex), which the
+    // public-SEO guard asserts on this line. Keep the binding here so wrapping
+    // the array below can never move it out of the guard's sight.
+    sitemap: sitemapUrls(MARKETING_ORIGIN),
     host: MARKETING_ORIGIN,
     rules: [
       {
