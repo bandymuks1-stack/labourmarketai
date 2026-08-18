@@ -181,12 +181,14 @@ export async function getOrgDocumentRegister(
   try {
     const supabase = await createClient();
 
+    const todayIso = new Date().toISOString().slice(0, 10);
+
+    // Filters are applied BEFORE order/limit so the row cap is spent on
+    // matches, and so the chain never depends on a transform builder still
+    // exposing filter methods.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const applyFilters = (q: any, delta: boolean) => {
-      let out = q
-        .eq("organization_id", organizationId)
-        .order("created_at", { ascending: false })
-        .limit(REGISTER_READ_LIMIT);
+      let out = q.eq("organization_id", organizationId);
       if (filters.status) out = out.eq("status", filters.status);
       if (delta) {
         if (filters.direction) {
@@ -199,9 +201,9 @@ export async function getOrgDocumentRegister(
         }
         if (filters.objectId) out = out.eq("object_id", filters.objectId);
         if (filters.retention === "scheduled") {
-          out = out.gt("retention_until", new Date().toISOString().slice(0, 10));
+          out = out.gt("retention_until", todayIso);
         } else if (filters.retention === "due") {
-          out = out.lte("retention_until", new Date().toISOString().slice(0, 10));
+          out = out.lte("retention_until", todayIso);
         }
       }
       if (filters.q) {
@@ -223,7 +225,7 @@ export async function getOrgDocumentRegister(
             ];
         out = out.or(cols.join(","));
       }
-      return out;
+      return out.order("created_at", { ascending: false }).limit(REGISTER_READ_LIMIT);
     };
 
     let deltaAvailable = true;

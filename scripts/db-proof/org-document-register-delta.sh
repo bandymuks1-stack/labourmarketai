@@ -140,21 +140,27 @@ insert into public.work_objects (id, organization_id, name, created_by) values
   ('$OBJ_A', '$O_A', 'Site A', '$OWNER'),
   ('$OBJ_B', '$O_B', 'Site B', '$OUTSIDER');
 SQL
-docker exec -i "$CT" psql -U postgres -tA -v ON_ERROR_STOP=0 >/dev/null 2>&1 <<SQL
-begin;
-set local role authenticated;
-set local app.uid = '$OWNER';
-select public.create_workflow_definition_v1('$O_A','doc_approval','Document approval','','generic_request',
-  '[{"step_order":1,"name":"Owner review","approval_mode":"single","approver_rule":{"kind":"profiles","profile_ids":["$OWNER"]}}]'::jsonb);
-commit;
-SQL
-DEF_GR=$(q "select id from public.workflow_definitions where slug='doc_approval' limit 1;")
-docker exec -i "$CT" psql -U postgres -tA -v ON_ERROR_STOP=0 >/dev/null 2>&1 <<SQL
-begin;
-set local role authenticated;
-set local app.uid = '$OWNER';
-select public.publish_workflow_version_v1('$DEF_GR');
-commit;
+# A published one-step 'generic_request' workflow for ORG_A. Seeded as the
+# superuser in the engine's own order (steps BEFORE publish — the
+# frozen-steps trigger forbids the reverse), exactly like
+# scripts/db-proof/agreements-v1.seed2.sql.
+VER_GR='e1e1e1e1-e1e1-4e1e-8e1e-e1e1e1e1e1e1'
+docker exec -i "$CT" psql -U postgres -q -v ON_ERROR_STOP=1 >/dev/null <<SQL
+insert into public.workflow_definitions
+  (id, organization_id, slug, name, context_entity_type, created_by) values
+  ('$DEF_GR', '$O_A', 'doc_approval', 'Document approval', 'generic_request', '$OWNER')
+on conflict do nothing;
+insert into public.workflow_definition_versions (id, definition_id, version, created_by) values
+  ('$VER_GR', '$DEF_GR', 1, '$OWNER')
+on conflict do nothing;
+insert into public.workflow_version_steps
+  (version_id, step_order, name, approval_mode, approver_rule) values
+  ('$VER_GR', 1, 'Internal review', 'single',
+   '{"kind":"org_role","roles":["owner","admin"]}'::jsonb)
+on conflict do nothing;
+update public.workflow_definition_versions
+   set published_at = now()
+ where id = '$VER_GR' and published_at is null;
 SQL
 check "a published generic_request definition exists" "1" "$(q "select count(*) from public.workflow_definition_versions where published_at is not null;")"
 
@@ -233,8 +239,8 @@ check "the engine started an instance" "1" "$(q "select count(*) from public.wor
 check "the mirror flips to submitted"  "submitted" "$(as authenticated "$OWNER" "select public.submit_org_document_for_approval_v1('$DOC');" | tok)"
 check "a second submit is refused"     "invalid_state" "$(as authenticated "$OWNER" "select public.submit_org_document_for_approval_v1('$DOC');" | tok)"
 check "sync is a no-op while pending"  "unchanged" "$(as authenticated "$OWNER" "select public.sync_org_document_approval_v1('$DOC');" | tok)"
-STEP=$(q "select id from public.workflow_instance_steps where instance_id='$INST' order by step_order limit 1;")
-as authenticated "$OWNER" "select public.decide_workflow_step_v1('$STEP','approve','ok');" >/dev/null
+# decide_workflow_step_v1 takes the INSTANCE id (it resolves the active step).
+check "the approver decides approve" "approved" "$(as authenticated "$OWNER" "select public.decide_workflow_step_v1('$INST','approved','ok');" | tok)"
 check "the engine recorded approval"   "approved" "$(q "select status from public.workflow_instances where id='$INST';")"
 check "read-repair converges to approved" "repaired_approved" "$(as authenticated "$OWNER" "select public.sync_org_document_approval_v1('$DOC');" | tok)"
 check "the mirror is approved"         "approved" "$(q "select approval_state from public.org_documents where id='$DOC';")"
@@ -247,8 +253,7 @@ echo "--- I. approval mirror: the REJECTED path returns, never approves ---"
 DOC2=$(doc_id 'Procedure One')
 INST2=$(as authenticated "$OWNER" "select public.start_workflow_instance_v1('$DEF_GR','Document: Procedure One','{}'::jsonb,'$DOC2');" | tok)
 as authenticated "$OWNER" "select public.submit_org_document_for_approval_v1('$DOC2');" >/dev/null
-STEP2=$(q "select id from public.workflow_instance_steps where instance_id='$INST2' order by step_order limit 1;")
-as authenticated "$OWNER" "select public.decide_workflow_step_v1('$STEP2','reject','no');" >/dev/null
+check "the approver decides reject" "rejected" "$(as authenticated "$OWNER" "select public.decide_workflow_step_v1('$INST2','rejected','no');" | tok)"
 check "the engine recorded rejection"     "rejected" "$(q "select status from public.workflow_instances where id='$INST2';")"
 check "read-repair returns, never approves" "repaired_returned" "$(as authenticated "$OWNER" "select public.sync_org_document_approval_v1('$DOC2');" | tok)"
 check "the mirror is returned"            "returned" "$(q "select approval_state from public.org_documents where id='$DOC2';")"

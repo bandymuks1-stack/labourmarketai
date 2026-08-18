@@ -447,7 +447,8 @@ describe("8. gated draft hygiene", () => {
   it("the migration carries the owner-mandate annotation and the gate pointer", () => {
     expect(MIGRATION).toMatch(/^-- DRAFT — needs-human-gate/m);
     expect(MIGRATION).toMatch(/--\s*@human-gate-approved/);
-    expect(MIGRATION).toContain("owner mandate\n-- 2026-08-17");
+    // Line-ending agnostic: the working copy may be checked out CRLF.
+    expect(MIGRATION).toMatch(/owner mandate\r?\n-- 2026-08-17/);
     expect(MIGRATION).toContain(
       "docs/human-gates/org-document-register-delta-gate.md",
     );
