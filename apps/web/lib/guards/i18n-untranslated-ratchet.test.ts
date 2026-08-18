@@ -32,23 +32,29 @@ import { activeLocales } from "@/lib/i18n/config";
 const MESSAGES = resolve(__dirname, "../../messages");
 
 /**
- * Measured on 2026-08-18 at `origin/main` `a9594af2`, after the Russian
- * `landing.hero.*` block was translated under OWNER DECISION U-15 (RU 44→3).
+ * The RECORDED SET of keys whose value is byte-identical to English, per
+ * locale — not a count. Regenerate with
+ * `pnpm -F web exec tsx scripts/generate-i18n-untranslated-baseline.ts`, and
+ * only ever to record debt you have PAID DOWN.
  *
- * NL and DE are recorded at their CURRENT, UNIMPROVED values on purpose. Their
- * translation is written but sits in a separate PR, because U-15 approved the
- * Russian localization specifically and merging both together would implicitly
- * approve marketing wording the owner has not read. When that PR lands it
- * lowers nl to 289 and de to 236.
+ * WHY A SET AND NOT A COUNT. A count-only ratchet has a hole that is very
+ * likely to be hit exactly while debt is being paid down: translate one
+ * existing English value and simultaneously add a NEW one copied from English,
+ * and the total is unchanged, so a count comparison passes while an
+ * untranslated string ships. Keying on the set closes that — a key that
+ * BECOMES identical fails even when the total falls.
  *
- * Every one of these numbers is a debt to pay down, not a target.
+ * Recorded 2026-08-18 at `origin/main` `a9594af2`, after the Russian
+ * `landing.hero.*` block was translated under OWNER DECISION U-15 (RU 107→66).
+ * NL and DE are at their CURRENT, UNIMPROVED values on purpose: their
+ * translation ships separately so U-15 does not implicitly approve marketing
+ * wording the owner has not read.
+ *
+ * Every key in this file is a debt to pay down, not a target.
  */
-const BASELINE: Readonly<Record<string, number>> = {
-  lt: 83,
-  ru: 66,
-  nl: 329,
-  de: 276,
-};
+const BASELINE_SETS: Readonly<Record<string, readonly string[]>> = JSON.parse(
+  readFileSync(resolve(__dirname, "i18n-untranslated-baseline.json"), "utf8"),
+);
 
 /**
  * The landing hero is pinned tighter than the catalogue as a whole: it is the
@@ -95,20 +101,33 @@ describe("untranslated-string ratchet (active locales)", () => {
   it("covers every active non-English locale, so a new locale cannot slip in unmeasured", () => {
     for (const locale of nonEnglish) {
       expect(
-        BASELINE[locale],
-        `${locale} is an active locale with no ratchet baseline — add one`,
-      ).toBeTypeOf("number");
+        BASELINE_SETS[locale],
+        `${locale} is an active locale with no recorded baseline — regenerate it`,
+      ).toBeDefined();
     }
   });
 
   for (const locale of nonEnglish) {
-    it(`${locale}: no MORE English strings than the recorded baseline`, () => {
-      const found = identicalKeys(load(locale));
+    it(`${locale}: no key has BECOME English since the baseline`, () => {
+      const recorded = new Set(BASELINE_SETS[locale] ?? []);
+      const regressions = identicalKeys(load(locale)).filter((k) => !recorded.has(k));
       expect(
-        found.length,
-        `${locale} has ${found.length} values identical to English, baseline ${BASELINE[locale]}. ` +
-          `Translate the new ones — do not raise the baseline. Sample: ${found.slice(0, 8).join(", ")}`,
-      ).toBeLessThanOrEqual(BASELINE[locale]!);
+        regressions,
+        `${locale}: these keys are now byte-identical to English and were not before. ` +
+          `Translate them — do NOT regenerate the baseline to make this pass.`,
+      ).toEqual([]);
+    });
+
+    it(`${locale}: the baseline records no debt that is already paid`, () => {
+      // Keeps the record honest in the other direction: a key that HAS been
+      // translated must not linger in the baseline pretending to be debt.
+      const current = new Set(identicalKeys(load(locale)));
+      const stale = (BASELINE_SETS[locale] ?? []).filter((k) => !current.has(k));
+      expect(
+        stale,
+        `${locale}: these keys are translated but still recorded as untranslated. ` +
+          `Regenerate: pnpm -F web exec tsx scripts/generate-i18n-untranslated-baseline.ts`,
+      ).toEqual([]);
     });
   }
 });
