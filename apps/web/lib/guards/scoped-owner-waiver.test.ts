@@ -240,7 +240,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
-  it("the LIVE waiver list holds exactly ONE record, and it is the /create-cv ruling", () => {
+  it("the LIVE waiver list holds exactly TWO records, each with its own owner ruling", () => {
     // "waiver negali likti vien todėl, kad CI žalias" — the W3/W4 record died
     // with its debt in W6, leaving the list empty. The entry below is a NEW
     // owner ruling (PUBLIC BETA TRAIN V3 §2.1, 2026-08-10), not a leftover.
@@ -248,7 +248,25 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // Pinning the COUNT is the point: a second record may only ever appear
     // with a second owner ruling, and this assertion is what forces that
     // conversation instead of letting the list grow quietly.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(1);
+    //
+    // 1 -> 2 on 2026-08-18. The second record is the PUBLIC JOB BOARD
+    // (`/jobs`, `/jobs/[id]`, the row card), and it exists because a SECOND
+    // owner ruling exists — the 2026-08-18 directive §5 "CANONICAL JOB
+    // VISIBILITY POLICY", verbatim: "Owner decision is final. Jobs must be
+    // publicly discoverable." plus the restriction that anonymous callers
+    // "MUST NOT receive the complete vacancy".
+    //
+    // This is exactly the conversation the count pin exists to force, and it
+    // happened BEFORE the record was written. The new record deliberately does
+    // NOT extend the /create-cv waiver, whose own text records that its
+    // approvals were "NOT a general authority to self-approve future waivers":
+    // a different surface under a different ruling gets its own bounded record,
+    // not a widened old one.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(2);
+    expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
+      "public-acquisition-route-create-cv",
+      "public-acquisition-route-jobs",
+    ]);
     const w = SCOPED_OWNER_WAIVERS[0];
     expect(w.id).toBe("public-acquisition-route-create-cv");
     expect(w.axioms).toEqual(["A-01"]);
@@ -300,6 +318,45 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       "world_state_cannot_control_it",
     ]);
     for (const f of w.expectedFindings) expect(f.file).toBe("/create-cv");
+  });
+
+  it("the /jobs record excuses the SAME six codes on its three surfaces and nothing else", () => {
+    // The exact set the gate produced on 2026-08-18 for PR #1184, captured by
+    // RUNNING it (BASE_SHA=origin/main PR_NUMBER=1184 node
+    // .github/scripts/product-gate.mjs) after the three declarations landed —
+    // the declarations are what removed the four `undeclared_surface` findings,
+    // so only the A-01 category error remains.
+    //
+    // Six codes x three surfaces = 18. A nineteenth finding anywhere, including
+    // on these surfaces, un-waives the entire run under the subset rule.
+    const jobs = SCOPED_OWNER_WAIVERS[1];
+    expect(jobs.id).toBe("public-acquisition-route-jobs");
+    expect(jobs.axioms).toEqual(["A-01"]);
+    expect(jobs.pullRequests).toEqual([1184]);
+    expect(jobs.owner).toMatch(/2026-08-18/);
+    expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
+    expect(jobs.expiresAt).toBe("2026-12-31");
+
+    expect([...new Set(jobs.expectedFindings.map((f) => f.code))].sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+    expect([...new Set(jobs.expectedFindings.map((f) => f.file))].sort()).toEqual([
+      "/jobs",
+      "/jobs/[id]",
+      "components/marketing/public-vacancy-card.tsx",
+    ]);
+    expect(jobs.expectedFindings).toHaveLength(18);
+
+    // Same leak this file already pins for /create-cv: the route ids are what
+    // `decideWaiver` matches, the real page paths are what `touchesWaivedFile`
+    // compares against the diff. Both halves must be listed.
+    expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/page.tsx");
+    expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/[id]/page.tsx");
   });
 
   it("the live record lists the page PATH, not only the route id — else it leaks", () => {
