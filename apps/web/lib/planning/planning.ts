@@ -14,7 +14,11 @@ import {
 } from "@/lib/invitations/network";
 import { getMyAbsences } from "@/lib/leave/absences";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
-import { TIME_UNIT_SLUGS } from "@/lib/journal/edit-entry";
+import {
+  deriveEntryWorkTime,
+  workTimeDurationLabel,
+  type WorkTimeMetricRow,
+} from "@/lib/journal/work-time";
 import {
   PLANNING_PROJECT_READ_LIMIT,
   clockTime,
@@ -609,7 +613,9 @@ async function readJournalItems(
         // this block exists to show were silently never rendered. An honest
         // degradation path hides a typo forever; the column name is pinned by
         // a test now.
-        .select("entry_id, metric_slug, value_text, value_numeric, unit_slug")
+        .select(
+          "id, entry_id, metric_slug, value_text, value_numeric, unit_slug, source, created_at",
+        )
         .in("entry_id", entryIds)
         .limit(PLANNING_JOURNAL_READ_LIMIT * 8),
       (async () => {
@@ -628,14 +634,12 @@ async function readJournalItems(
       })(),
     ]);
     if (!metricsRes.error) {
-      type MetricRow = {
-        entry_id: string;
-        metric_slug: string;
-        value_text: string | null;
-        value_numeric: number | null;
-        unit_slug: string | null;
-      };
+      type MetricRow = WorkTimeMetricRow & { entry_id: string };
+      const rowsByEntry = new Map<string, WorkTimeMetricRow[]>();
       for (const m of (metricsRes.data ?? []) as MetricRow[]) {
+        const list = rowsByEntry.get(m.entry_id);
+        if (list) list.push(m);
+        else rowsByEntry.set(m.entry_id, [m]);
         const cur = metricsByEntry.get(m.entry_id) ?? {
           hours: null,
           site: null,
@@ -653,16 +657,27 @@ async function readJournalItems(
         if (m.metric_slug === "work_date" && m.value_text?.trim()) {
           cur.workDate = m.value_text.trim();
         }
-        // A TIME unit on the quantity metric means the number IS a duration.
-        if (
-          m.metric_slug === "quantity" &&
-          m.unit_slug !== null &&
-          TIME_UNIT_SLUGS.has(m.unit_slug) &&
-          typeof m.value_numeric === "number"
-        ) {
-          cur.hours = `${m.value_numeric}|${m.unit_slug}`;
-        }
         metricsByEntry.set(m.entry_id, cur);
+      }
+      // THE DURATION — one canonical rule, not a second opinion. This block
+      // used to read ONLY the entry-level `quantity` metric when it carried a
+      // time unit, so an entry whose worker recorded 5 h + 1 h + 3 h across
+      // three activities was labelled "5 h" on the calendar while the reviewer
+      // inbox said 9 h and the timesheet said nothing at all. All three now
+      // resolve through `deriveEntryWorkTime` (owner ruling 2026-08-18): the
+      // per-fragment times win when present, the entry-level duration applies
+      // only when there are none, and the two are never summed.
+      for (const row of liveRows) {
+        const cur = metricsByEntry.get(row.id);
+        if (!cur) continue;
+        cur.hours = workTimeDurationLabel(
+          deriveEntryWorkTime({
+            entryId: row.id,
+            createdAt: row.created_at,
+            originalText: row.original_text,
+            metrics: rowsByEntry.get(row.id) ?? [],
+          }),
+        );
       }
     }
     if (!ecRes.error) {

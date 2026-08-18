@@ -30,7 +30,7 @@ import {
   buildWorkloadWeeks,
   workloadHasSignal,
 } from "@/lib/planning/workload-model";
-import { getMyWorkItemHours } from "@/lib/timesheets/timesheets";
+import { getMyJournalWorkHours } from "@/lib/timesheets/timesheets";
 import {
   isTimesheetNotice,
   type TimesheetNotice,
@@ -148,12 +148,13 @@ export default async function PlanningPage({
 
   // Workload strip (week + agenda views): planned committed DAYS vs recorded
   // journal HOURS per Monday-started week — two facts in their own units,
-  // never converted into each other. Actual hours come from the SAME truth
-  // timesheets freeze (journal_entry_work_items), read bounded over the
+  // never converted into each other. Actual hours come from the SAME canonical
+  // truth timesheets freeze (`journal_entry_metrics`, via
+  // lib/journal/work-time — owner ruling 2026-08-18), read bounded over the
   // visible range; a failed read degrades to no strip, never to fake bars.
   const showWorkload = view === "week" || view === "agenda";
   const workloadActuals = showWorkload
-    ? await getMyWorkItemHours(range.start, range.end)
+    ? await getMyJournalWorkHours(range.start, range.end)
     : null;
   const workloadWeeks =
     result.status === "ok" && workloadActuals?.status === "ok"

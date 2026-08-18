@@ -147,7 +147,7 @@ export async function TimesheetsSection({
       <ul className="flex flex-col gap-1" data-testid={`timesheet-lines-${sheet.id}`}>
         {sheet.snapshot.lines.map((line) => (
           <li
-            key={line.workItemId}
+            key={line.lineKey}
             className="flex flex-wrap items-center gap-2 text-xs text-text-secondary"
           >
             <span className="font-mono text-meta text-text-muted">{line.day}</span>

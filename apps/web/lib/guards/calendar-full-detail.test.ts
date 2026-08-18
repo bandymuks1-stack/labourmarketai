@@ -160,7 +160,13 @@ describe("§7.2 every agreed source is really composed", () => {
     // metrics carry the hours + site, engagement_contexts the workspace.
     expect(COMPOSE).toContain("journal_entry_metrics");
     expect(COMPOSE).toContain("engagement_contexts");
-    expect(COMPOSE).toMatch(/TIME_UNIT_SLUGS\.has\(m\.unit_slug\)/);
+    // THE HOURS come from the CANONICAL rule (owner ruling 2026-08-18), not
+    // from this file's own reading of one metric. The old assertion pinned a
+    // quantity-only read that reported "5 h" for an entry whose worker had
+    // recorded 5 h + 1 h + 3 h across three activities — the calendar and the
+    // timesheet disagreed by construction. Both now call the same derivation.
+    expect(COMPOSE).toMatch(/deriveEntryWorkTime\(/);
+    expect(COMPOSE).toMatch(/workTimeDurationLabel\(/);
     expect(COMPOSE).toMatch(/site_name/);
   });
 });

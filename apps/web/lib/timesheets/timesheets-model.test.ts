@@ -19,14 +19,17 @@ import {
 
 function line(partial: Partial<TimesheetLine>): TimesheetLine {
   return {
-    workItemId: "wi-1",
+    lineKey: "je-1#f1",
     journalEntryId: "je-1",
+    fragmentIndex: 1,
     day: "2026-08-03",
     title: "Poured concrete",
+    evidencePhrase: null,
     workTypeKey: null,
     value: 8,
     unit: "hours",
-    itemStatus: "confirmed",
+    derivedFrom: "fragment_time",
+    metricSource: "worker_input",
     projectId: null,
     projectTitle: null,
     ...partial,
@@ -60,8 +63,8 @@ describe("snapshot parsing (defensive, never guessing)", () => {
       computedAt: "2026-08-17T10:00:00Z",
       lines: [
         line({ value: 8, unit: "hours" }),
-        line({ workItemId: "wi-2", value: 90, unit: "minutes" }),
-        line({ workItemId: "wi-3", value: 1, unit: "days" }),
+        line({ lineKey: "je-1#f2", value: 90, unit: "minutes" }),
+        line({ lineKey: "je-1#f3", value: 1, unit: "days" }),
         { day: "not-a-day", value: 5, unit: "hours" }, // dropped
         { day: "2026-08-03", value: "x", unit: "hours" }, // dropped
         { day: "2026-08-03", value: 2, unit: "weeks" }, // dropped
@@ -109,13 +112,15 @@ describe("CSV export carries REAL hours", () => {
     createdAt: "2026-08-19T10:00:00Z",
     snapshot: {
       computedAt: "2026-08-20T10:00:00Z",
+      source: "journal_entry_metrics",
+      conflicts: [],
       lines: [
         line({ value: 8, unit: "hours", projectTitle: 'Site "A", hall' }),
-        line({ workItemId: "wi-2", value: 90, unit: "minutes" }),
+        line({ lineKey: "je-1#f2", value: 90, unit: "minutes" }),
       ],
       totals: deriveTimesheetTotals([
         line({ value: 8, unit: "hours" }),
-        line({ workItemId: "wi-2", value: 90, unit: "minutes" }),
+        line({ lineKey: "je-1#f2", value: 90, unit: "minutes" }),
       ]),
     },
   };
@@ -134,7 +139,13 @@ describe("CSV export carries REAL hours", () => {
   it("an empty sheet exports honestly: header + zero total, no fake rows", () => {
     const empty: TimesheetRow = {
       ...sheet,
-      snapshot: { computedAt: null, lines: [], totals: deriveTimesheetTotals([]) },
+      snapshot: {
+        computedAt: null,
+        source: null,
+        conflicts: [],
+        lines: [],
+        totals: deriveTimesheetTotals([]),
+      },
     };
     const rows = buildTimesheetCsv(empty).trim().split("\r\n");
     expect(rows).toHaveLength(2);

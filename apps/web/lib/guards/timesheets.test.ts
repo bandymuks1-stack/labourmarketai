@@ -177,9 +177,13 @@ describe("timesheets migration — safety shape", () => {
   });
 
   it("derivation reads ONLY journal truth and never invents a workday", () => {
-    expect(migration).toContain("journal_entry_work_items");
+    // The ORIGINAL v1 body derived from `journal_entry_work_items`. That table
+    // never received a row, so 20260818150000 replaced this function body with
+    // the canonical `journal_entry_metrics` derivation (owner ruling
+    // 2026-08-18) — see journal-canonical-work-time.test.ts, which owns the
+    // current contract. What is pinned HERE is that the v1 file itself is
+    // never edited after apply, and that neither file invents a workday.
     expect(migration).toContain("metric_slug = 'work_date'");
-    // hours + minutes/60; 'days' totalled separately, never multiplied.
     expect(migration).toContain("round(hours_numeric / 60.0, 2)");
     expect(migration).toMatch(/when unit = 'days' then hours_numeric else 0/);
     expect(migration).not.toMatch(/\* *8/);
