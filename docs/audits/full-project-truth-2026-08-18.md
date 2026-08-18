@@ -1,5 +1,46 @@
 # LABOURMARKET.AI — FULL PROJECT TRUTH REPORT
 
+> ## ⚠️ CORRECTIONS ISSUED 2026-08-18 (same day) — READ BEFORE THE BODY
+>
+> Four findings below were checked by follow-up trains and **three did not survive**.
+> They are corrected here rather than quietly edited out, because the body text is
+> what a later session would otherwise trust.
+>
+> **C-01 — the report's #1 finding was WRONG.** §A.2 and §I claim
+> `vacancy-read.ts` "has zero importers" and that no page renders the supply.
+> **False, and the cause was a methodological error in this report**: the grep used
+> `grep -v "lib/vacancy-store"`, which filtered out the very import lines that
+> prove the chain. Members DO reach the vacancies today:
+> `dashboard/opportunities/page.tsx` → `components/app/external-vacancies-section.tsx`
+> → `lib/opportunities/external-vacancies.ts:33` → `searchPublicVacancies` (called
+> at :103 and :147). **The real gap was always ANONYMOUS / SEO access** — the table
+> grants SELECT to `authenticated` only. That gap is real, was the right thing to
+> fix, and is now closed by PR #1184 (public projection, proven in production).
+> The correct status for member-facing job browsing is IMPLEMENTED_NOT_PROVEN
+> (production usage unproven at 36 users), not MISSING.
+>
+> **C-02 — "matching has never produced a row" is misleading.** `matches` = 0 is
+> CORRECT BEHAVIOUR, not a defect: `lib/matching/match-v1.ts` computes matches at
+> read time and deliberately never persists them (doctrine §19(d)). Status should
+> be read as "not persisted by design", not "never worked".
+>
+> **C-03 — `vecticum` is NOT accidental contamination.** §L guessed
+> "ACCIDENTAL_CONTAMINATION (probable)". It is `SOURCE_PROVENANCE`: the migration
+> line is a design-rationale comment citing a competitor audit. Remedy remains
+> documentation-only (never edit an applied migration). Likewise `wavi` needs no
+> owner review — 11 of 13 hits are the cross-project "do not touch Vismantas"
+> scope guard. **User-visible brand contamination is 0**, not "needs review".
+>
+> **C-04 — one NEW defect this report missed entirely**, found by the spec train:
+> **timesheets can never produce a line.** Their only source table,
+> `journal_entry_work_items`, has ZERO writers anywhere in the codebase. The
+> feature is structurally inert, not merely unused.
+>
+> Everything else in this report was re-checked and stands, including the
+> production counts, the auth verdict, the payments verdict, the avatar verdict,
+> the rolled-back #1182 E2E finding, and the stale `APPLIED_LEDGER`.
+
+
 **Date:** 2026-08-18
 **Baseline audited:** `origin/main` @ `49734c63` (PR #1182)
 **Production DB:** Supabase `gorgitwvdzxbnaxhrsrw` (labourmarket.ai, eu-west-1, ACTIVE_HEALTHY)
