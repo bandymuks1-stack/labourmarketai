@@ -639,7 +639,7 @@ Column key — **Intent**: intent class · **Code / DB / UI**: implementation co
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | REQ-GOV-001 | Deny-by-default RLS on every table is the only tenant isolation | APPROVED_CURRENT_INTENT — `DATA_MODEL.md` §RLS | RPC-only writes | 0 tables without RLS | — | **VERIFIED_PRODUCTION** (advisors) | RLS guards | VERIFIED_PRODUCTION | — | no | no |
 | REQ-GOV-002 | Author content is append-only: no UPDATE/DELETE via API, soft-hide only, enforced at policy level including for platform admin | APPROVED_CURRENT_INTENT — doctrine §3.1 | RPC-only | trigger-enforced **against `service_role` itself** | — | VERIFIED_PRODUCTION (rolled-back E2E confirmed guards hold) | integrity guards | VERIFIED_PRODUCTION | — | no | no |
-| REQ-GOV-003 | Sensitive actions write to an append-only audit log (permission grants, position changes, manager confirmations, proof acceptances, document approvals, role changes, membership changes) | APPROVED_CURRENT_INTENT — doctrine §3.4 (7 named mandatory action types) | **no TS write helper for `audit_logs` exists** — the only references are placeholder copy and a comment noting the table is admin-only | `audit_logs` (`0001`) has **ZERO application writers**; real trails are per-domain `*_events` tables | admin | **MISSING** | — | **BROKEN** | The doctrine's single general audit log was never wired. Per-domain append-only event tables (trigger-enforced even against `service_role`) cover much of the same ground, but no artefact records that substitution as the accepted design | no | **yes** (accept per-domain trails, or wire `audit_logs`) |
+| REQ-GOV-003 | Sensitive actions write to an append-only audit log (permission grants, position changes, manager confirmations, proof acceptances, document approvals, role changes, membership changes) | APPROVED_CURRENT_INTENT — doctrine §3.4 (7 named mandatory action types) | **29 migrations write `audit_logs` via SECURITY DEFINER RPCs** — the writers are in SQL, which is correct: the table is admin-only and RLS-protected, so a TS client cannot write it | `audit_logs` (`0001`) — **50 rows, 85 lifetime inserts, 13 distinct action types in production** | admin | **VERIFIED_PRODUCTION for 5 of 7 categories** | — | **PARTIAL** | **The earlier `ZERO application writers` / MISSING reading was measured by grepping TypeScript only and is FALSE** — see the production counts. Real gap, narrower and different: the whole 2026-08-17 operational train (workflow engine, timesheets, documents, agreements, management decisions) writes **0** rows to the general log and uses per-domain `*_events` tables instead, so **work proof acceptances** and **document approvals** are absent from `audit_logs`. Those per-domain tables carry `*_append_only` triggers; `audit_logs` carries only `set_updated_at`, so they are in fact MORE tamper-resistant than the log doctrine mandates | no | **yes** (does §3.4's single audit_log stand, or do trigger-immutable per-domain event tables satisfy it? — U-14) |
 | REQ-GOV-004 | Permission grants are revocable **rows** with `granted_by/at`, scope, `revoked_by/at`, reason — never flags | APPROVED_CURRENT_INTENT — doctrine §4.3 | membership + consent ledgers | `privacy_consent_events`, `personal_data_disclosures`, `20260802160000_org_membership_revocation_v1.sql` | — | VERIFIED_PRODUCTION | `consent-fail-closed.test.ts` | VERIFIED_PRODUCTION | — | no | no |
 | REQ-GOV-005 | Per-participant scope `full` / `reports_only` / `custom` (M4+) | APPROVED_CURRENT_INTENT — doctrine §4.2 | partial | — | — | UNKNOWN | — | **PARTIAL** | The three-value scope vocabulary is not implemented as such | no | yes |
 | REQ-GOV-006 | Admin control room: verification, telemetry, support, matching workbench, readiness, pilots | IMPLEMENTED_CURRENT_BEHAVIOR | admin modules | — | 20 `/dashboard/admin/*` routes | UNKNOWN | `admin-control-room.test.ts`, `superadmin.test.ts` | IMPLEMENTED_NOT_PROVEN | UI never browsed in an audit | no | no |
@@ -991,3 +991,79 @@ OTP expiry — **owner-gated**: a Supabase dashboard setting, not code) ·
 remedy is documentation-only; an applied migration is never edited).
 
 Autonomously actionable next: `REQ-GOV-003`, `REQ-SKILL-006`, `REQ-PLAT-010`.
+
+---
+
+## CORRECTION — REQ-GOV-003 was measured wrong (2026-08-18)
+
+The requirement was recorded **BROKEN** on the grounds that `audit_logs` has
+"**ZERO** application writers … the only references are placeholder copy and a
+comment". That was measured by grepping `*.ts` / `*.tsx` only.
+
+**Production says otherwise.** `audit_logs` holds **50 rows** with **85 lifetime
+inserts** across **13 distinct action types**: `accept_company_worker_invitation`,
+`add_org_member`, `admin_set_company_verification`, `assign_company_worker_role`,
+`confirm_entry_and_verify_skills`, `experience_submitted`, `membership_accept`,
+`membership_invite`, `moderation_decided`, `moderation_started`,
+`response_submitted`, `review_journal_entry`, `set_engagement_journal_review`.
+
+**29 migrations write to it** through SECURITY DEFINER RPCs — which is the
+correct place for the writer, not an oversight: the table is admin-only and
+RLS-protected, so a TypeScript client *cannot* write it. A TS-only grep was
+guaranteed to find nothing.
+
+### The real gap, stated precisely
+
+Mapping doctrine §3.4's seven mandatory categories to actual writers:
+
+| Category | Writer in `audit_logs`? |
+|---|---|
+| permission grants / revocations | ✅ `grant_org_manager`, `conversation_participant_revoked`, `set_engagement_journal_review` |
+| position assignments / changes | ✅ `assign_company_worker_role`, `assign_agency_worker_role`, `end_project_assignment` |
+| manager confirmations | ✅ `confirm_entry_and_verify_skills`, `review_journal_entry`, `journal_entry_review_batch` |
+| role changes | ✅ `assign_*_role`, `add_org_member` |
+| organization membership changes | ✅ `add_org_member`, `end_org_membership`, `membership_accept`, `membership_invite` |
+| **work proof acceptances** | ❌ **absent** — workflow decisions and timesheet approvals write only `workflow_transitions` / `timesheet_events` |
+| **document approvals** | ❌ **absent** — acknowledgements write only their own table |
+
+The entire 2026-08-17 operational train writes **0** rows to the general log:
+`workflow_engine_v1`, `timesheets_v1`, `document_file_layer_v1`,
+`agreements_v1`, `management_decisions_v1` — all measured at zero
+`insert into public.audit_logs`.
+
+### The finding that makes this an owner question, not a bug
+
+The per-domain event tables are **trigger-enforced append-only**
+(`workflow_transitions_append_only`, `timesheet_events_append_only`,
+`agreement_events_append_only`). `audit_logs` carries only `set_updated_at` —
+it has **no immutability trigger at all**.
+
+So the newer modules are not skipping the audit trail; they are writing to a
+**more tamper-resistant** one than doctrine §3.4 mandates. Deciding whether
+that satisfies §3.4 — or whether both must be written — is a change to
+`PLATFORM_DOCTRINE.md`, which is an owner decision, not an autonomous one.
+
+**Status: BROKEN → PARTIAL.** New owner question:
+
+| ID | Requirement | Question |
+|---|---|---|
+| U-14 | REQ-GOV-003 | Does doctrine §3.4's single `audit_log` stand as written, or do trigger-immutable per-domain `*_events` tables satisfy its intent? If §3.4 stands, the workflow-decision and document-approval paths need an `audit_logs` write added (a RED `create or replace` on applied SECURITY DEFINER functions). If per-domain tables satisfy it, §3.4 should say so — and `audit_logs` itself should gain the append-only trigger the others already have. |
+
+### Roll-up after this correction (194 rows)
+
+| Status | Count |
+|---|---:|
+| IMPLEMENTED_NOT_PROVEN | 72 |
+| PARTIAL | 43 |
+| VERIFIED_PRODUCTION | 39 |
+| MISSING | 18 |
+| BROKEN | 6 |
+| NOT_REQUIRED | 9 |
+| VERIFIED_TEST_ENVIRONMENT | 5 |
+| UNKNOWN_OWNER_DECISION_REQUIRED | 2 |
+| **Total** | **194** |
+
+Remaining BROKEN (6): `REQ-PLAT-010`, `REQ-SKILL-006`, `REQ-PAY-001`,
+`REQ-PAY-002`, `REQ-GOV-007`, `REQ-GOV-013` — of which `REQ-PAY-001`,
+`REQ-PAY-002` and `REQ-GOV-007` are owner-gated, and `REQ-GOV-013` is cosmetic
+text inside an applied migration (documentation-only remedy).
