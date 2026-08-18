@@ -64,10 +64,31 @@ const PROCUREMENT_MIGRATION = "20260817221000_procurement_v1";
 const TRIPS_MIGRATION = "20260817222000_business_trips_v1";
 const TRAIN_J = [INVOICE_MIGRATION, PROCUREMENT_MIGRATION, TRIPS_MIGRATION];
 
+/**
+ * CRLF IS NORMALISED AT THE READ, deliberately.
+ *
+ * This repository ships no `.gitattributes`, so a Windows checkout materialises
+ * these `.sql` files with CRLF while a Linux CI runner gets LF. Several
+ * assertions below compare against multi-line string literals written with a
+ * bare newline escape — `PROCUREMENT_SQL` must contain the `check (status in`
+ * clause across two lines — and a carriage return before every newline makes
+ * those literals unmatchable.
+ *
+ * The result was the worst possible failure mode: a guard that passes on CI and
+ * fails on every Windows machine, which trains a developer to ignore a red
+ * guard and hides the next real regression behind the noise.
+ *
+ * The migration itself is CORRECT and is NOT touched — it is applied in
+ * production, and an applied migration must never be edited to satisfy a test.
+ * The same normalisation idiom is already used by
+ * `secdef-local-reset-reproducibility.test.ts`, for exactly this reason.
+ */
+const readNormalized = (path: string): string =>
+  readFileSync(path, "utf8").replace(/\r/g, "");
 const sql = (name: string): string =>
-  readFileSync(join(MIGRATIONS, `${name}.sql`), "utf8");
+  readNormalized(join(MIGRATIONS, `${name}.sql`));
 const down = (name: string): string =>
-  readFileSync(join(ROLLBACKS, `${name}.down.sql`), "utf8");
+  readNormalized(join(ROLLBACKS, `${name}.down.sql`));
 
 const INVOICE_SQL = sql(INVOICE_MIGRATION);
 const PROCUREMENT_SQL = sql(PROCUREMENT_MIGRATION);
