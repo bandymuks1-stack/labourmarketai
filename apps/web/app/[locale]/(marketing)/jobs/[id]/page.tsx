@@ -6,27 +6,55 @@ import { buttonLinkClassName } from "@/components/ui/Button";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { getPublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
+import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
+import { createClient } from "@/lib/supabase/server";
 import { formatUtcDate } from "@/lib/time/display";
 
 /**
- * ONE PUBLIC JOB PAGE — the indexable unit of the acquisition funnel.
+ * ONE PUBLIC JOB PAGE — the indexable unit of the acquisition funnel, and the
+ * place it used to dead-end.
  *
- * Shows the anonymous projection and then asks for an account to reveal the
- * rest. The restricted half (employer, location, full description, application
- * URL) is never fetched on this route, so "locked" is a statement of fact about
- * this request, not a CSS overlay hiding data that was already sent.
+ * ── THE DEFECT THIS CLOSES ─────────────────────────────────────────────────
+ * This page was AUTH-BLIND. It always rendered the anonymous projection and
+ * always ended with "These details are available to members. Creating an
+ * account is free." So the funnel ran:
  *
- * ── WHY THERE IS NO JobPosting JSON-LD HERE ────────────────────────────────
- * Google's JobPosting schema REQUIRES `hiringOrganization` and `jobLocation`.
- * Both are restricted fields under the owner's anonymous-visibility rule, so a
- * schema block on this page could only be built by either leaking them or
- * fabricating them. Emitting an incomplete JobPosting would also produce
- * structured-data errors and could be read as a false claim about the ad. The
- * page is therefore indexable as ordinary content with correct metadata, and
- * carries no JobPosting markup. Turning rich job results on is a product
- * decision about what may appear anonymously — recorded, not silently taken.
+ *   anonymous → locked card → "Create a free account" → signup → ?next= back
+ *   here → THE IDENTICAL LOCKED CARD, telling a person who had just registered
+ *   to register.
+ *
+ * The `?next=` round trip was never broken — `getSafeReturnPath` preserves
+ * `/{locale}/jobs/{id}` correctly. What was missing is that arriving back here
+ * changed nothing. There is also no per-vacancy member route and no deep link
+ * on the opportunities board, so a registered worker had NO path to the ad they
+ * came for. Owner directive: public vacancy → registration/login → the EXACT
+ * SAME vacancy → authenticated safe unlock → useful next action.
+ *
+ * ── TWO PROJECTIONS, CHOSEN BY WHO IS ASKING ───────────────────────────────
+ * anonymous  → `get_public_vacancy_preview_v1` (SECURITY DEFINER, safe columns
+ *              enumerated in SQL; employer, location, description and apply URL
+ *              are never selected, so they cannot leak)
+ * member     → `getPublicVacancyById` through the caller's OWN client, so the
+ *              row arrives via RLS policy `public_vacancies_read_active`
+ *
+ * The unlock is therefore enforced by the DATABASE, not by this component. If
+ * this file had a bug and called the member reader for an anonymous visitor,
+ * the anonymous client has no policy and no grant on `public_vacancies` and
+ * would receive nothing.
+ *
+ * ── CACHE ISOLATION (mandatory, and the reason `revalidate` is gone) ────────
+ * This page previously carried `export const revalidate = 3600`. A page whose
+ * CONTENT depends on the caller's session must never be stored in a shared
+ * cache: one member's full ad — employer, location, apply URL — could be
+ * replayed to an anonymous visitor, which is precisely the leak the whole
+ * projection design exists to prevent. `force-dynamic` renders per request, so
+ * no cross-visitor cache entry exists at any layer.
+ *
+ * The cost is real and accepted: the anonymous render is no longer cached for
+ * an hour. Crawlers still receive byte-identical anonymous output — no
+ * cloaking — and the sitemap and board are unaffected.
  */
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -35,14 +63,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const active = resolveActiveLocale(locale);
+  // METADATA IS ALWAYS THE ANONYMOUS PROJECTION, for every caller. A title or
+  // OpenGraph description built from member-only fields would publish the
+  // employer into a <head> that is shared, scraped and previewed.
   const preview = await getPublicVacancyPreview(id);
 
   if (preview === "not_provisioned" || preview === null) {
     return { title: "—", robots: { index: false, follow: false } };
   }
 
-  // Title and category only. No employer, no location — the same restriction
-  // that governs the body governs the metadata, OpenGraph and the tab title.
   const title = preview.occupation
     ? `${preview.title} — ${preview.occupation}`
     : preview.title;
@@ -113,6 +142,92 @@ const PUBLISHED: L = {
   de: "Veröffentlicht",
 };
 
+// ── Member-only labels ─────────────────────────────────────────────────────
+
+const EMPLOYER: L = {
+  en: "Employer",
+  lt: "Darbdavys",
+  ru: "Работодатель",
+  nl: "Werkgever",
+  de: "Arbeitgeber",
+};
+
+const LOCATION: L = {
+  en: "Location",
+  lt: "Vietovė",
+  ru: "Местоположение",
+  nl: "Locatie",
+  de: "Ort",
+};
+
+const DESCRIPTION_HEADING: L = {
+  en: "Job description",
+  lt: "Darbo aprašymas",
+  ru: "Описание вакансии",
+  nl: "Functieomschrijving",
+  de: "Stellenbeschreibung",
+};
+
+const APPLY: L = {
+  en: "Apply on the source site",
+  lt: "Kandidatuoti šaltinio svetainėje",
+  ru: "Откликнуться на сайте источника",
+  nl: "Solliciteer op de bronsite",
+  de: "Auf der Quellseite bewerben",
+};
+
+/** Honest: we hand the worker onward, we do not apply for them. */
+const APPLY_NOTE: L = {
+  en: "Applications are handled by the publisher, not by LabourMarket.ai.",
+  lt: "Kandidatavimą tvarko skelbėjas, ne LabourMarket.ai.",
+  ru: "Отклики обрабатывает источник объявления, а не LabourMarket.ai.",
+  nl: "Sollicitaties worden afgehandeld door de aanbieder, niet door LabourMarket.ai.",
+  de: "Bewerbungen bearbeitet die ausschreibende Stelle, nicht LabourMarket.ai.",
+};
+
+const NEXT_HEADING: L = {
+  en: "Get matched to work like this",
+  lt: "Gauk pasiūlymų, panašių į šį",
+  ru: "Получайте подходящие предложения",
+  nl: "Word gematcht met werk zoals dit",
+  de: "Passende Stellen erhalten",
+};
+
+const NEXT_BODY: L = {
+  en: "Your profile and skills decide which opportunities reach you. The more complete they are, the better the match.",
+  lt: "Tavo profilis ir įgūdžiai lemia, kokios galimybės tave pasieks. Kuo jie išsamesni, tuo tikslesnis atitikimas.",
+  ru: "Ваш профиль и навыки определяют, какие возможности до вас доходят. Чем они полнее, тем точнее подбор.",
+  nl: "Je profiel en vaardigheden bepalen welke kansen je bereiken. Hoe vollediger, hoe beter de match.",
+  de: "Ihr Profil und Ihre Fähigkeiten bestimmen, welche Angebote Sie erreichen. Je vollständiger, desto besser die Übereinstimmung.",
+};
+
+const NEXT_OPPORTUNITIES: L = {
+  en: "See your opportunities",
+  lt: "Žiūrėti savo galimybes",
+  ru: "Смотреть возможности",
+  nl: "Bekijk je kansen",
+  de: "Ihre Angebote ansehen",
+};
+
+const NEXT_PROFILE: L = {
+  en: "Complete your profile",
+  lt: "Užpildyti profilį",
+  ru: "Заполнить профиль",
+  nl: "Profiel aanvullen",
+  de: "Profil vervollständigen",
+};
+
+function joinLocation(
+  city: string | null,
+  region: string | null,
+  country: string | null,
+): string | null {
+  const parts = [city, region, country].filter(
+    (p): p is string => typeof p === "string" && p.trim().length > 0,
+  );
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
 export default async function JobDetailPage({
   params,
 }: {
@@ -122,14 +237,28 @@ export default async function JobDetailPage({
   setRequestLocale(locale);
   const active = resolveActiveLocale(locale);
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // The anonymous projection is fetched for EVERY caller: it is what the
+  // heading, the publication date and the licence attribution render from, and
+  // it is the only thing an anonymous visitor ever receives.
   const preview = await getPublicVacancyPreview(id);
   if (preview === null || preview === "not_provisioned") notFound();
 
-  // The locale-prefixed return path, consumed by the auth forms' existing
-  // `?next=` handling (which passes it through getSafeReturnPath, so this
-  // cannot become an open redirect).
-  const next = encodeURIComponent(`/${active}/jobs/${id}`);
+  // The member projection is fetched ONLY when a session exists, through the
+  // caller's own client so RLS is what authorises it. `null` here means the
+  // reader declined — an expired ad, a missing table, or no policy match — and
+  // the page then renders exactly the anonymous half rather than a broken one.
+  const member = user
+    ? await getPublicVacancyById(supabase, id).then((r) =>
+        r.status === "ok" ? r.vacancy : null,
+      )
+    : null;
 
+  const next = encodeURIComponent(`/${active}/jobs/${id}`);
   const published = formatUtcDate(preview.publishedAt, active);
 
   const t = await getTranslations({ locale: active });
@@ -141,6 +270,14 @@ export default async function JobDetailPage({
       attribution = null;
     }
   }
+
+  const locationLabel = member
+    ? joinLocation(
+        member.location.city,
+        member.location.region,
+        member.location.country,
+      )
+    : null;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
@@ -162,28 +299,105 @@ export default async function JobDetailPage({
         </p>
       )}
 
-      <section className="mt-8 rounded-lg border border-dashed p-5">
-        <h2 className="text-base font-medium">{LOCKED_TITLE[active]}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{LOCKED_BODY[active]}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            href={`/auth/signup?next=${next}`}
-            className={buttonLinkClassName("primary")}
-          >
-            {CTA_SIGNUP[active]}
-          </Link>
-          <Link
-            href={`/auth/login?next=${next}`}
-            className={buttonLinkClassName("secondary")}
-          >
-            {CTA_LOGIN[active]}
-          </Link>
-        </div>
-      </section>
+      {member ? (
+        <>
+          <section className="mt-8 space-y-4 rounded-lg border p-5">
+            {member.employer.name && (
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground">
+                  {EMPLOYER[active]}
+                </h2>
+                <p className="mt-1 text-base">{member.employer.name}</p>
+              </div>
+            )}
+
+            {locationLabel && (
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground">
+                  {LOCATION[active]}
+                </h2>
+                <p className="mt-1 text-base">{locationLabel}</p>
+              </div>
+            )}
+          </section>
+
+          {member.descriptionRaw.trim().length > 0 && (
+            <section className="mt-8">
+              <h2 className="text-base font-medium">
+                {DESCRIPTION_HEADING[active]}
+              </h2>
+              {/* The publisher's own words, rendered as TEXT. `whitespace-pre-line`
+                  keeps their paragraph breaks without interpreting anything in
+                  the string as markup — this is third-party content. */}
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {member.descriptionRaw}
+              </p>
+            </section>
+          )}
+
+          {member.applicationUrl && (
+            <section className="mt-8">
+              <a
+                href={member.applicationUrl}
+                // Third-party destination: no referrer, no window.opener handle.
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className={buttonLinkClassName("primary")}
+              >
+                {APPLY[active]}
+              </a>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {APPLY_NOTE[active]}
+              </p>
+            </section>
+          )}
+
+          {/* The useful next action the directive asks for: the funnel does not
+              end at one ad, it ends inside the matching loop. Both destinations
+              are surfaces that already exist. */}
+          <section className="mt-10 rounded-lg border border-dashed p-5">
+            <h2 className="text-base font-medium">{NEXT_HEADING[active]}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {NEXT_BODY[active]}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href="/dashboard/opportunities"
+                className={buttonLinkClassName("primary")}
+              >
+                {NEXT_OPPORTUNITIES[active]}
+              </Link>
+              <Link
+                href="/dashboard/profile"
+                className={buttonLinkClassName("secondary")}
+              >
+                {NEXT_PROFILE[active]}
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : (
+        <section className="mt-8 rounded-lg border border-dashed p-5">
+          <h2 className="text-base font-medium">{LOCKED_TITLE[active]}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{LOCKED_BODY[active]}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`/auth/signup?next=${next}`}
+              className={buttonLinkClassName("primary")}
+            >
+              {CTA_SIGNUP[active]}
+            </Link>
+            <Link
+              href={`/auth/login?next=${next}`}
+              className={buttonLinkClassName("secondary")}
+            >
+              {CTA_LOGIN[active]}
+            </Link>
+          </div>
+        </section>
+      )}
 
       {attribution && (
-        // The catalogue string already opens with its own "Source:" label,
-        // so prefixing it again renders "Šaltinis: Šaltinis: …".
         <p className="mt-8 text-xs text-muted-foreground">{attribution}</p>
       )}
     </main>

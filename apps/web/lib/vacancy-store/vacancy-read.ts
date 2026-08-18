@@ -183,6 +183,59 @@ export async function getPublicVacancy(
 }
 
 /**
+ * MEMBER READ BY PLATFORM ID — the authenticated half of the public job page.
+ *
+ * The sibling `getPublicVacancy` keys on (providerKey, externalId) because an
+ * importer thinks in publisher identity. The PUBLIC job page keys on our own
+ * uuid, because that is what its URL carries and what the anonymous projection
+ * returns. Both reach the same row through the same converter; only the lookup
+ * key differs.
+ *
+ * WHAT MAKES THIS SAFE. There is no `SECURITY DEFINER` here on purpose. The
+ * caller passes an AUTHENTICATED user's own client, so the row arrives through
+ * RLS policy `public_vacancies_read_active` (SELECT, role `authenticated`),
+ * which is the platform's existing statement about who may read a whole ad.
+ * An anonymous caller has no such policy and no table grant, so this function
+ * simply returns nothing for them — the unlock cannot be spoofed from the app
+ * layer, because the app layer is not what is enforcing it.
+ *
+ * LIVENESS. The policy checks `is_active` only, so expiry is applied here to
+ * match the anonymous projection exactly. Without it a member could open an
+ * expired ad that an anonymous visitor is correctly refused, and the two halves
+ * of one page would disagree about whether the job still exists.
+ */
+export async function getPublicVacancyById(
+  client: VacancyDbClient,
+  id: string,
+): Promise<
+  | { readonly status: "ok"; readonly vacancy: PublicVacancyV1 }
+  | { readonly status: "not_found" }
+  | { readonly status: "not_provisioned" }
+> {
+  const { data, error } = await client
+    .from(VACANCY_TABLE)
+    .select("*")
+    .eq("id", id)
+    .eq("is_active", true)
+    .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
+    .maybeSingle();
+
+  if (error) {
+    if (error.code === UNDEFINED_TABLE) return { status: "not_provisioned" };
+    // A malformed uuid is a bad URL, not a server fault — same treatment the
+    // anonymous reader gives it.
+    if (error.code === "22P02") return { status: "not_found" };
+    throw new Error(`vacancy_get_by_id_failed:${error.code ?? "unknown"}`);
+  }
+  if (!data) return { status: "not_found" };
+
+  return {
+    status: "ok",
+    vacancy: fromPublicVacancyRow(data as Record<string, unknown>),
+  };
+}
+
+/**
  * Strip the characters PostgREST treats structurally from a user-supplied
  * term.
  *
