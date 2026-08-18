@@ -7007,7 +7007,14 @@
       "file_too_large": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
       "unsupported_type": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
       "needs_migration": "Der Datei-Upload ist in dieser Umgebung noch nicht aktiviert — nichts wurde gespeichert.",
-      "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert."
+      "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert.",
+      "updated": "Die Änderung wurde gespeichert.",
+      "submitted": "Das Dokument wurde zur Freigabe gesendet.",
+      "repaired_approved": "Die Freigabe ist abgeschlossen — das Dokument ist intern freigegeben.",
+      "repaired_returned": "Das Dokument kam ohne Freigabe zurück.",
+      "unchanged": "Nichts hat sich geändert.",
+      "no_pending_workflow": "Für dieses Dokument steht keine Freigabe aus — nichts wurde gespeichert.",
+      "no_approval_definition": "Ihre Organisation hat noch keinen Freigabeweg eingerichtet — nichts wurde gespeichert."
     }
   },
   "orgDocuments": {
@@ -7062,7 +7069,56 @@
       "validFromLabel": "Gültig ab",
       "expiresOnLabel": "Gültig bis",
       "externalRefLabel": "Referenznummer (optional)",
-      "submit": "Dokument registrieren"
+      "submit": "Dokument registrieren",
+      "objectLabel": "Objekt (optional)",
+      "objectNone": "Keinem Objekt zugeordnet",
+      "correspondenceLegend": "Korrespondenzangaben",
+      "correspondenceHint": "Nur für eingehende oder ausgehende Korrespondenz ausfüllen. Ob ein Schreiben ein- oder ausgeht, ergibt sich aus dem oben gewählten Typ."
+    },
+    "filters": {
+      "all": "Alle",
+      "statusLabel": "Status",
+      "directionLabel": "Korrespondenz",
+      "objectLabel": "Objekt",
+      "searchLabel": "Im Register suchen",
+      "searchPlaceholder": "Titel, Beschreibung, Referenz, Gegenpartei",
+      "searchSubmit": "Suchen",
+      "searchScopeNote": "Die Suche erfasst nur die Registereinträge — Titel, Beschreibungen, Referenzen und Gegenparteien. In hochgeladene Dateien schaut sie nicht hinein.",
+      "clear": "Filter zurücksetzen",
+      "noMatches": "Keine Registereinträge entsprechen diesen Filtern."
+    },
+    "direction": {
+      "incoming": "Eingehend",
+      "outgoing": "Ausgehend"
+    },
+    "fields": {
+      "counterparty": "Gegenpartei",
+      "correspondenceDate": "Schreibensdatum",
+      "counterpartyReference": "Deren Referenz",
+      "correspondenceUnrecorded": "Gegenpartei und Schreibensdatum nicht erfasst",
+      "object": "Objekt",
+      "ourRef": "Unsere Referenz"
+    },
+    "retention": {
+      "legend": "Aufbewahrung (nur Vermerk)",
+      "filterLabel": "Aufbewahrung",
+      "untilLabel": "Aufbewahren bis",
+      "noteLabel": "Aufbewahrungsnotiz",
+      "submit": "Aufbewahrung speichern",
+      "noDeletionNote": "Dies ist ein Vermerk über die Entscheidung Ihrer Organisation. Nach Ablauf des Datums wird nichts automatisch gelöscht.",
+      "scheduled": "Frist vermerkt",
+      "due": "Frist abgelaufen",
+      "badge": {
+        "scheduled": "Aufbewahren bis {date}",
+        "due": "Frist {date} abgelaufen"
+      }
+    },
+    "approval": {
+      "definitionLabel": "Freigabeweg",
+      "submit": "Zur Freigabe senden",
+      "submitted": "Wartet auf Freigabe",
+      "approved": "Intern freigegeben",
+      "returned": "Ohne Freigabe zurückgegeben"
     }
   },
   "trust": {

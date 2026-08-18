@@ -170,6 +170,13 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       "20260817220000_finance_invoice_upgrades_v1",
       "20260817221000_procurement_v1",
       "20260817222000_business_trips_v1",
+      // The org document register delta (train I, 20260817240000) is the
+      // same class of consumer (context_entity_type='generic_request'): its
+      // submit/sync mirror commands READ workflow_instances and its header
+      // cites start_workflow_instance_v1 as the app-layer entry point. It
+      // deliberately does NOT widen the engine's context vocabulary — the
+      // same no-create/no-drop assertions apply.
+      "20260817240000_org_document_register_delta_v1",
     ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -537,6 +544,15 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       "lib/procurement/procurement-actions.ts",
       "lib/trips/trips.ts",
       "lib/trips/trips-actions.ts",
+      // Declared CONSUMER (org document register delta, train I): the
+      // document read layer lists the org's PUBLISHED 'generic_request'
+      // workflow definitions for the register's optional approval control
+      // (RLS-scoped SELECT of workflow_definitions /
+      // workflow_definition_versions only) and never writes an engine
+      // table — the no-insert/update/delete pin below covers it, and
+      // lib/guards/org-document-register-delta.test.ts pins the module to
+      // its own gated commands plus the engine's own start command.
+      "lib/documents/document-files.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {

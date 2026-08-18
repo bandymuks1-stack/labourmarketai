@@ -2151,7 +2151,19 @@ describe("no migration files added by this sprint", () => {
     // landing slice all in the base): `ls supabase/migrations/*.sql | wc -l`
     // = 220 real files, never summed — the first count of this line said 218
     // against an older base and was recounted rather than adjusted.
-    const SPRINT_BASELINE = 220;
+    // Bumped 220 -> 221 for the org document register delta v1 DRAFT
+    // (20260817240000_org_document_register_delta_v1, train I, LEAD-gated,
+    // UNAPPLIED; five additive nullable columns on the train C
+    // `org_documents` register + one widening event-vocabulary drop/re-add
+    // + four NEW SECURITY DEFINER commands — `create_org_document_v1` is
+    // NOT recreated; paired 0-row-guarded rollback + deferred
+    // APPLIED_LEDGER entry in the PR; db-proof
+    // scripts/db-proof/org-document-register-delta.sh 87/87). RECOUNTED from
+    // the tree after merging origin/main 64f27c7b (train J's three finance
+    // migrations now in the base): `ls supabase/migrations/*.sql | wc -l`
+    // = 221 real files, never summed — my earlier 218 was against the
+    // pre-J base and was RECOUNTED, not adjusted.
+    const SPRINT_BASELINE = 221;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
