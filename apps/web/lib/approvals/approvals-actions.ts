@@ -12,6 +12,7 @@ import {
   WORKFLOW_DEADLINE_HOURS_MIN,
   WORKFLOW_DETAILS_MAX,
   WORKFLOW_MAX_FORM_STEPS,
+  WORKFLOW_MAX_VERSION_STEPS,
   WORKFLOW_NAME_MAX,
   WORKFLOW_NAME_MIN,
   WORKFLOW_REASON_MAX,
@@ -23,6 +24,8 @@ import {
   isValidWorkflowContextEntityType,
   isValidWorkflowDecision,
   isValidWorkflowFormRule,
+  isValidWorkflowRuleKind,
+  isValidWorkflowRuleRole,
   isWorkflowMigrationMissingCode,
   workflowSlugFromName,
   type WorkflowNotice,
@@ -94,6 +97,11 @@ const SUCCESS_NOTICES: readonly WorkflowNotice[] = [
   "withdrawn",
   "cancelled",
   "marked_overdue",
+  // Template management v1 — a real configuration change happened.
+  "installed",
+  "version_created",
+  "activated",
+  "deactivated",
 ];
 
 function finish(ctx: FormContext, notice: WorkflowNotice): never {
@@ -133,6 +141,13 @@ function noticeForOutcome(outcome: string): WorkflowNotice {
     case "invalid_delegate":
     case "not_authorized":
     case "not_found":
+    // Template management v1 outcomes (1:1 words again).
+    case "installed":
+    case "all_skipped":
+    case "activated":
+    case "deactivated":
+    case "already_active":
+    case "already_inactive":
       return outcome;
     case "task_limit_reached":
     case "limit_reached":
@@ -235,6 +250,174 @@ export async function createWorkflowDefinitionAction(
       p_context_entity_type: contextEntityType,
       p_steps: steps,
     },
+  );
+  if (error) finish(ctx, noticeForRpcError(error));
+  finish(ctx, noticeForOutcome(String(data ?? "")));
+}
+
+/**
+ * One-click install of the default approval template pack through
+ * install_default_workflow_pack_v1.
+ *
+ * The action posts an organization id and NOTHING else — the pack's eight
+ * definitions, their single step, the approver rule, the deadlines and the
+ * escalation action are all constructed inside the gated command, so this
+ * form cannot be used to inject a rule. The command is idempotent: a repeat
+ * install is all-skips and answers `all_skipped`.
+ */
+export async function installDefaultWorkflowPackAction(
+  formData: FormData,
+): Promise<void> {
+  const ctx = readContext(formData);
+  const { supabase } = await requireUser(ctx);
+
+  const organizationId = String(formData.get("organizationId") ?? "").trim();
+  if (!UUID_RX.test(organizationId)) finish(ctx, "invalid");
+
+  const { data, error } = await asAny(supabase).rpc(
+    "install_default_workflow_pack_v1",
+    { p_organization_id: organizationId },
+  );
+  if (error) finish(ctx, noticeForRpcError(error));
+
+  const summary = (data ?? null) as { outcome?: unknown } | null;
+  finish(ctx, noticeForOutcome(String(summary?.outcome ?? "")));
+}
+
+/**
+ * Author a NEW VERSION of an existing template through
+ * create_workflow_definition_version_v1. The new version is a DRAFT — it
+ * changes nothing until it is published, and publishing it changes NEW
+ * instances only (a running request carries its own step snapshot).
+ *
+ * On success the RPC returns the new version id (uuid shape); everything
+ * else is an outcome string.
+ */
+export async function createWorkflowVersionAction(
+  formData: FormData,
+): Promise<void> {
+  const ctx = readContext(formData);
+  const { supabase } = await requireUser(ctx);
+
+  const definitionId = String(formData.get("definitionId") ?? "").trim();
+  if (!UUID_RX.test(definitionId)) finish(ctx, "invalid");
+
+  const steps: Record<string, unknown>[] = [];
+  for (let i = 1; i <= WORKFLOW_MAX_VERSION_STEPS; i++) {
+    const stepName = String(formData.get(`step${i}Name`) ?? "").trim();
+    if (i > 1 && stepName.length === 0) continue; // optional trailing rounds
+    if (
+      stepName.length < WORKFLOW_STEP_NAME_MIN ||
+      stepName.length > WORKFLOW_STEP_NAME_MAX
+    ) {
+      finish(ctx, "invalid");
+    }
+    const mode = String(formData.get(`step${i}Mode`) ?? "single");
+    if (!isValidWorkflowApprovalMode(mode)) finish(ctx, "invalid");
+
+    const ruleKind = String(formData.get(`step${i}RuleKind`) ?? "org_role");
+    if (!isValidWorkflowRuleKind(ruleKind)) finish(ctx, "invalid");
+
+    let approverRule: Record<string, unknown>;
+    if (ruleKind === "org_role") {
+      const roles = formData
+        .getAll(`step${i}Roles`)
+        .map((r) => String(r))
+        .filter((r) => r.length > 0);
+      if (roles.length === 0 || !roles.every(isValidWorkflowRuleRole)) {
+        finish(ctx, "invalid");
+      }
+      approverRule = { kind: "org_role", roles: [...new Set(roles)] };
+    } else if (ruleKind === "profiles") {
+      // People are picked from the org's OWN member list, so the form posts
+      // profile ids — never an email to be resolved here (that would be an
+      // account oracle). The gated command re-checks each id against the
+      // organization's membership truths.
+      const profileIds = [
+        ...new Set(
+          formData
+            .getAll(`step${i}ProfileIds`)
+            .map((r) => String(r).trim())
+            .filter((r) => r.length > 0),
+        ),
+      ];
+      if (
+        profileIds.length === 0 ||
+        profileIds.length > 20 ||
+        !profileIds.every((id) => UUID_RX.test(id))
+      ) {
+        finish(ctx, "invalid");
+      }
+      approverRule = { kind: "profiles", profile_ids: profileIds };
+    } else {
+      approverRule = { kind: "requester_manager" };
+    }
+
+    const deadlineRaw = String(
+      formData.get(`step${i}DeadlineHours`) ?? "",
+    ).trim();
+    let deadlineHours: number | null = null;
+    if (deadlineRaw.length > 0) {
+      if (!/^\d{1,4}$/.test(deadlineRaw)) finish(ctx, "invalid");
+      deadlineHours = Number(deadlineRaw);
+      if (
+        deadlineHours < WORKFLOW_DEADLINE_HOURS_MIN ||
+        deadlineHours > WORKFLOW_DEADLINE_HOURS_MAX
+      ) {
+        finish(ctx, "invalid");
+      }
+    }
+    const escalate = String(formData.get(`step${i}Escalation`) ?? "") === "on";
+
+    steps.push({
+      name: stepName,
+      approval_mode: mode,
+      approver_rule: approverRule,
+      ...(deadlineHours !== null ? { deadline_hours: deadlineHours } : {}),
+      ...(escalate
+        ? {
+            // Escalation only ever MARKS + notifies. Never an approval.
+            escalation_rule: {
+              action: "mark_escalated",
+              notify_roles: ["owner", "admin"],
+            },
+          }
+        : {}),
+    });
+  }
+  if (steps.length === 0) finish(ctx, "invalid");
+
+  const { data, error } = await asAny(supabase).rpc(
+    "create_workflow_definition_version_v1",
+    { p_definition_id: definitionId, p_steps: steps },
+  );
+  if (error) finish(ctx, noticeForRpcError(error));
+
+  const outcome = String(data ?? "");
+  if (UUID_RX.test(outcome)) finish(ctx, "version_created");
+  finish(ctx, noticeForOutcome(outcome));
+}
+
+/**
+ * Activate or retire a template through set_workflow_definition_active_v1.
+ * The command touches the definition row and nothing else: requests already
+ * in flight keep their own snapshot and their own approvers, so retiring a
+ * template only stops NEW requests from starting on it.
+ */
+export async function setWorkflowDefinitionActiveAction(
+  formData: FormData,
+): Promise<void> {
+  const ctx = readContext(formData);
+  const { supabase } = await requireUser(ctx);
+
+  const definitionId = String(formData.get("definitionId") ?? "").trim();
+  if (!UUID_RX.test(definitionId)) finish(ctx, "invalid");
+  const isActive = String(formData.get("isActive") ?? "").trim();
+  if (isActive !== "true" && isActive !== "false") finish(ctx, "invalid");
+
+  const { data, error } = await asAny(supabase).rpc(
+    "set_workflow_definition_active_v1",
+    { p_definition_id: definitionId, p_is_active: isActive },
   );
   if (error) finish(ctx, noticeForRpcError(error));
   finish(ctx, noticeForOutcome(String(data ?? "")));

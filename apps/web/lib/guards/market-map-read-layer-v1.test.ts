@@ -580,8 +580,13 @@ describe("NO new DB migration in this PR", () => {
     // in the base): `ls supabase/migrations/*.sql | wc -l` = 224 real
     // files, never summed — my earlier 220 was against the pre-J/I base and
     // was RECOUNTED, not adjusted.
+    // Bumped 224 -> 225 for the workflow template MANAGEMENT v1 migration
+    // (20260818120000_workflow_template_management_v1, LEAD-gated,
+    // UNAPPLIED; paired rollback + deferred APPLIED_LEDGER entry in the
+    // PR). RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 225 real files.
     // Still nothing from the market-map read layer itself. Cross-pin follows.
-    expect(count).toBeLessThanOrEqual(224);
+    expect(count).toBeLessThanOrEqual(225);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

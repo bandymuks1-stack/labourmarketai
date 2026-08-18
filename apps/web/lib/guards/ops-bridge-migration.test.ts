@@ -481,6 +481,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // / 231000 / 232000, train K, LEAD-gated, UNAPPLIED; RECOUNTED from the
     // tree after merging origin/main dbc6b76f with trains J and I in the
     // base) — floor semantics unchanged, no numeric edit needed here.
+    // Cross-pin follows: 224 -> 225 for the workflow template MANAGEMENT v1
+    // migration (20260818120000_workflow_template_management_v1, LEAD-gated,
+    // UNAPPLIED; RECOUNTED from the tree — 225 real files) — floor
+    // semantics unchanged, no numeric edit needed here.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

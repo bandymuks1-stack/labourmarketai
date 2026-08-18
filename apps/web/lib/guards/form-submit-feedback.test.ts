@@ -81,6 +81,14 @@ const NATIVE_NAV = new Set([
   // outcome (rendered as a role="status" banner by the section), exactly
   // the tasks/finance pattern. Pure server component — no client state.
   "app/[locale]/dashboard/network/approvals-section.tsx",
+  // Workflow templates administration panel (template management v1) —
+  // renders INSIDE the approvals area above and follows it exactly: the
+  // install / new-version / publish / activate forms are NATIVE-NAV server
+  // actions over gated commands that ALWAYS redirect back to
+  // /dashboard/network with an honest ?wf= outcome, rendered as the
+  // approvals section's role="status" banner. Pure server component — no
+  // client state.
+  "app/[locale]/dashboard/network/workflow-templates-panel.tsx",
   // Requests area of the network page (typed employee requests v1) — every
   // form is a NATIVE-NAV server action over a gated command (module RPCs +
   // the engine's own template commands) that ALWAYS redirects back to
