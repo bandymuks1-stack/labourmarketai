@@ -1401,3 +1401,49 @@ the missing evidence — matching, notifications, workflow instances, documents 
 each need a first real user to start them. This is not an unfinished product. It
 is a finished, largely unexercised one whose binding constraint is users, not
 code.
+
+### A SECOND READ-PATH-WITHOUT-A-WRITER — `job_demands` (found by the census)
+
+The census reported `job_demands = 0`, which reads at first like "no employer has
+posted demand". **That reading is wrong, and the truth is worse in one way and
+better in another.**
+
+Employer demand IS real and flowing:
+
+| table | rows | lifetime inserts (`pg_stat_user_tables.n_tup_ins`) |
+|---|---:|---:|
+| `customer_requests` | 17 | **49** |
+| `company_need_public_intakes` | 2 | — |
+| `job_demands` | 0 | **0** |
+
+`job_demands` has **never received a single row since it was created**. Its
+grants exist (`0023_job_postings_grants.sql` grants insert to `authenticated`),
+but nothing writes it: repo-wide, the only references are two `.from("job_demands")`
+SELECTs in `lib/market-map/project-results.ts`, and no migration inserts into it
+or triggers a write.
+
+**This is the same defect class as `journal_entry_work_items`**, closed earlier
+today by the canonical work-time ruling: a read path aimed at a table that has no
+writer, so the surface above it can only ever render empty. Here the surface is
+the Market World Map's demand layer (`/dashboard/market-map`), which is a shipped
+route.
+
+`REQ-MKT-005` (the Market World Map and its layers) therefore has a concrete,
+measured reason to stay **PARTIAL** that the matrix did not previously name: one
+of its layers is not merely sparse, it is structurally unfillable on the current
+code path.
+
+**Not fixed here, deliberately.** The fix is a product decision, not a mechanical
+one: either the map's demand layer should read the intake tables that actually
+carry demand (`customer_requests` / `company_need_public_intakes`), or
+`job_demands` should gain a writer, or the layer should be retired. Choosing
+among those three is exactly the kind of call the owner's U-series questions
+exist for, and picking one silently would be inventing product intent. Recorded
+as a new owner question:
+
+**U-18 — the Market Map demand layer reads `job_demands`, which has zero lifetime
+inserts. Should it read the real intake tables, should `job_demands` gain a
+writer, or should the layer be retired?** Safe default if postponed: leave it —
+an empty layer is honest, and nothing regresses. Work that continues regardless:
+everything else in the map and the whole employer intake path, which is
+unaffected.
