@@ -13594,5 +13594,22 @@
       "limit_reached": "Hier steht bereits zu viel.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Vorschau",
+    "intro": "Vorschau zur Eigentümerprüfung · Richtung Visual Dashboard OS. Alle Einträge unten sind Beispieldaten.",
+    "badge": "Vorschau / Eigentümerprüfung · nur Beispieldaten",
+    "workers": {
+      "title": "Karten für Arbeitskräfte",
+      "description": "Hochwertige Kacheln für Arbeitskräfte im Spielerkarten-Stil. Geometrisches Monogramm als Rückfallebene — es wird nie ein Gesicht erfunden.",
+      "listLabel": "Beispielkarten für Arbeitskräfte"
+    },
+    "jobs": {
+      "title": "Karten zur Arbeitsnachfrage",
+      "description": "Nachfrage-Kacheln im Branchenkarten-Stil. Ohne Freigabe zeigt die Karte den ehrlichen Hinweis „Eigentümerfreigabe steht aus“.",
+      "listLabel": "Beispielkarten zur Arbeitsnachfrage",
+      "awaitingOwnerApproval": "Eigentümerfreigabe steht aus"
+    },
+    "footer": "Ehrliche Vorschau · Keine vorgetäuschte KI · Keine vorgetäuschte Verifizierung · Keine erfundenen Gesichter von Arbeitskräften · Jeder Eintrag beginnt mit „Sample · …“ und liest sich daher nie wie echte Daten."
   }
 }

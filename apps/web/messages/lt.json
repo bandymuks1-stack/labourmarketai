@@ -13594,5 +13594,22 @@
       "limit_reached": "Čia jau per daug įrašų.",
       "error": "Kažkas nepavyko. Nieko neišsaugota."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Peržiūra",
+    "intro": "Savininko peržiūros vaizdas · vizualinio valdymo skydelio OS kryptis. Visi žemiau pateikti įrašai yra pavyzdiniai duomenys.",
+    "badge": "Peržiūra / savininko apžiūra · tik pavyzdiniai duomenys",
+    "workers": {
+      "title": "Darbuotojų kortelės",
+      "description": "Aukščiausios klasės žaidėjo kortelės stiliaus darbuotojų plytelės. Geometrinė monogramos atsarga — veidas niekada negeneruojamas.",
+      "listLabel": "Pavyzdinės darbuotojų kortelės"
+    },
+    "jobs": {
+      "title": "Darbo poreikio kortelės",
+      "description": "Pramonės kortelės stiliaus poreikio plytelės. Nesant savininko patvirtinimo, kortelėje rodomas sąžiningas užrašas „laukiama savininko patvirtinimo“.",
+      "listLabel": "Pavyzdinės darbo poreikio kortelės",
+      "awaitingOwnerApproval": "laukiama savininko patvirtinimo"
+    },
+    "footer": "Sąžininga peržiūra · Jokio netikro DI · Jokio netikro patvirtinimo · Jokių netikrų darbuotojų veidų · Kiekvienas įrašas prasideda „Sample · …“, todėl niekada neatrodo kaip tikri duomenys."
   }
 }

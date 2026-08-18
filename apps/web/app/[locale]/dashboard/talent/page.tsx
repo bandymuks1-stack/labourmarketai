@@ -24,8 +24,8 @@ import { requireSuperadmin } from "@/lib/auth/superadmin";
  *     never synthesises a face.
  *   - No fake activity counts beyond a small honest range.
  *   - Owner-approved stamps are intentionally left null on the
- *     job cards so the card renders its honest fallback
- *     ("owner-approved laukia").
+ *     job cards so the card renders its honest, localised
+ *     "awaiting owner approval" fallback.
  */
 
 const SAMPLE_WORKERS: readonly WorkerCardEntity[] = [
@@ -114,21 +114,27 @@ export default async function TalentPage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const t = await getTranslations("auth.dashboard");
+  // Localization repair v1: this surface rendered English prose and two
+  // English aria-labels for every locale, and the job card's approval
+  // fallback mixed English with a Lithuanian literal ("owner-approved
+  // laukia"). The page is superadmin-gated, so the blast radius is the
+  // owner's own screen — but a mixed-language string is a defect at any
+  // audience size, and the aria-labels were unreachable for a non-English
+  // screen reader.
+  const tp = await getTranslations("talentPreview");
 
   return (
     <div className="flex flex-col gap-6" data-testid="talent-preview-page">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("tabs.discover")} · Preview
+          {t("tabs.discover")} · {tp("previewSuffix")}
         </h1>
-        <p className="text-sm text-text-secondary">
-          Owner-review preview · Visual Dashboard OS direction. Every entity below is sample data.
-        </p>
+        <p className="text-sm text-text-secondary">{tp("intro")}</p>
         <div
           className="card-border inline-flex w-fit items-center gap-2 px-3 py-1 text-xs"
           data-testid="talent-preview-banner"
         >
-          <span>Preview / Owner review · sample data only</span>
+          <span>{tp("badge")}</span>
         </div>
       </header>
 
@@ -138,16 +144,14 @@ export default async function TalentPage({
       >
         <header className="flex flex-col gap-1">
           <h2 className="font-display text-lg font-semibold text-text-primary">
-            Worker cards (slice 1 · PR #88)
+            {tp("workers.title")} <span className="font-normal text-text-secondary">· PR #88</span>
           </h2>
-          <p className="text-sm text-text-secondary">
-            Premium player-card-style worker tiles. Geometric monogram fallback — never synthesises a face.
-          </p>
+          <p className="text-sm text-text-secondary">{tp("workers.description")}</p>
         </header>
         <div
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           role="list"
-          aria-label="Sample worker cards"
+          aria-label={tp("workers.listLabel")}
         >
           {SAMPLE_WORKERS.map((w) => (
             <WorkerCard key={w.id} worker={w} />
@@ -161,27 +165,27 @@ export default async function TalentPage({
       >
         <header className="flex flex-col gap-1">
           <h2 className="font-display text-lg font-semibold text-text-primary">
-            Job demand cards (slice 2 · PR #89)
+            {tp("jobs.title")} <span className="font-normal text-text-secondary">· PR #89</span>
           </h2>
-          <p className="text-sm text-text-secondary">
-            Industry-card-style demand tiles. Owner-approved stamp falls back to honest &quot;owner-approved laukia&quot;.
-          </p>
+          <p className="text-sm text-text-secondary">{tp("jobs.description")}</p>
         </header>
         <div
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           role="list"
-          aria-label="Sample job demand cards"
+          aria-label={tp("jobs.listLabel")}
         >
           {SAMPLE_JOBS.map((j) => (
-            <JobDemandCard key={j.id} job={j} />
+            <JobDemandCard
+              key={j.id}
+              job={j}
+              awaitingApprovalLabel={tp("jobs.awaitingOwnerApproval")}
+            />
           ))}
         </div>
       </section>
 
       <footer className="flex flex-col gap-1 text-xs text-text-secondary">
-        <p>
-          Honest preview · No fake AI · No fake verification · No fake worker faces · Each entity is prefixed &quot;Sample · …&quot; so it never reads as live data.
-        </p>
+        <p>{tp("footer")}</p>
       </footer>
     </div>
   );

@@ -5573,5 +5573,22 @@
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Podgląd",
+    "intro": "Podgląd do przeglądu przez właściciela · kierunek Visual Dashboard OS. Wszystkie pozycje poniżej to dane przykładowe.",
+    "badge": "Podgląd / przegląd właściciela · wyłącznie dane przykładowe",
+    "workers": {
+      "title": "Karty pracowników",
+      "description": "Dopracowane kafelki pracowników w stylu karty zawodnika. Geometryczny monogram jako element zastępczy — twarz nigdy nie jest generowana.",
+      "listLabel": "Przykładowe karty pracowników"
+    },
+    "jobs": {
+      "title": "Karty zapotrzebowania na pracę",
+      "description": "Kafelki zapotrzebowania w stylu karty branżowej. Bez zatwierdzenia właściciela karta pokazuje uczciwy komunikat „oczekuje na zatwierdzenie właściciela”.",
+      "listLabel": "Przykładowe karty zapotrzebowania na pracę",
+      "awaitingOwnerApproval": "oczekuje na zatwierdzenie właściciela"
+    },
+    "footer": "Uczciwy podgląd · Bez udawanej SI · Bez udawanej weryfikacji · Bez zmyślonych twarzy pracowników · Każda pozycja zaczyna się od „Sample · …”, więc nigdy nie wygląda jak dane rzeczywiste."
   }
 }

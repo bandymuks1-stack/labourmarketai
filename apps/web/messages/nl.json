@@ -13594,5 +13594,22 @@
       "limit_reached": "Er staat hier al te veel.",
       "error": "Er ging iets mis. Er is niets opgeslagen."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Voorbeeld",
+    "intro": "Voorbeeld voor beoordeling door de eigenaar · richting Visual Dashboard OS. Elk item hieronder is voorbeelddata.",
+    "badge": "Voorbeeld / beoordeling door de eigenaar · alleen voorbeelddata",
+    "workers": {
+      "title": "Werknemerskaarten",
+      "description": "Premium tegels voor werknemers in spelerskaartstijl. Geometrisch monogram als terugval — er wordt nooit een gezicht verzonnen.",
+      "listLabel": "Voorbeeldkaarten van werknemers"
+    },
+    "jobs": {
+      "title": "Kaarten met werkvraag",
+      "description": "Vraagtegels in branchekaartstijl. Zonder goedkeuring van de eigenaar toont de kaart het eerlijke „wacht op goedkeuring van de eigenaar”.",
+      "listLabel": "Voorbeeldkaarten met werkvraag",
+      "awaitingOwnerApproval": "wacht op goedkeuring van de eigenaar"
+    },
+    "footer": "Eerlijk voorbeeld · Geen nep-AI · Geen nepverificatie · Geen verzonnen gezichten van werknemers · Elk item begint met „Sample · …”, zodat het nooit als echte data leest."
   }
 }
