@@ -113,14 +113,6 @@ const PUBLISHED: L = {
   de: "Veröffentlicht",
 };
 
-const SOURCE: L = {
-  en: "Source",
-  lt: "Šaltinis",
-  ru: "Источник",
-  nl: "Bron",
-  de: "Quelle",
-};
-
 export default async function JobDetailPage({
   params,
 }: {
@@ -190,9 +182,9 @@ export default async function JobDetailPage({
       </section>
 
       {attribution && (
-        <p className="mt-8 text-xs text-muted-foreground">
-          {SOURCE[active]}: {attribution}
-        </p>
+        // The catalogue string already opens with its own "Source:" label,
+        // so prefixing it again renders "Šaltinis: Šaltinis: …".
+        <p className="mt-8 text-xs text-muted-foreground">{attribution}</p>
       )}
     </main>
   );

@@ -4,19 +4,18 @@ import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import {
-  searchPublicVacancyPreviews,
-  PUBLIC_VACANCY_PAGE_SIZE,
-} from "@/lib/vacancy-store/public-vacancy-preview";
+import { searchPublicVacancyPreviews } from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
 
 /**
  * THE PUBLIC JOB BOARD.
  *
- * 38,142 live ads existed in production for weeks with no surface at all: the
- * read layer had zero importers and the table is `authenticated`-only, so the
- * largest asset in the product was invisible to every visitor and every crawler.
- * This page is that missing surface.
+ * 38,142 live ads existed in production with no PUBLIC surface at all. Members
+ * already reach them via /dashboard/opportunities (external-vacancies.ts calls
+ * searchPublicVacancies), so the gap was never wiring: `public_vacancies` grants
+ * SELECT to `authenticated` only, so every anonymous visitor and every crawler
+ * saw nothing and the supply produced zero acquisition. This page is that
+ * missing public surface.
  *
  * It shows the ANONYMOUS PROJECTION only (owner directive §5): title, category,
  * employment form, working time, positions, publication date, and compensation
@@ -216,5 +215,3 @@ export default async function JobsPage({
   );
 }
 
-export const revalidate = 0;
-export { PUBLIC_VACANCY_PAGE_SIZE };
