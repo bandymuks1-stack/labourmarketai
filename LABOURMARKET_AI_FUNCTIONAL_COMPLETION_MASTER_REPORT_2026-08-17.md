@@ -1,19 +1,21 @@
 # LabourMarket.ai — Functional Completion Train V2, master report (2026-08-17/18)
 
 **START SHA** `7bdf6874` (PR #1167 baseline)
-**END SHA** `dbc6b76f` (`origin/main`, PR #1179, merged 2026-08-18T03:47:48Z)
+**END SHA** `95af44c9` (`origin/main`, PR #1180, merged 2026-08-18T04:07:11Z)
 **Report author** final-report agent (read-only; no product code changed, nothing merged, production touched with SELECTs only)
 **Production project** `gorgitwvdzxbnaxhrsrw`
-**Production measured** market truth 2026-08-18 03:34:42 UTC; migration ledger + schema re-verified 2026-08-18 03:57:03 UTC
+**Production measured** market truth 2026-08-18 03:34:42 UTC; migration ledger + schema finalised 2026-08-18 04:13:28 UTC
+**Migrations** 21 applied · 3 unapplied (§2.3)
 
 > **Measurement-window correction.** An earlier draft of this report measured
 > the migration ledger at 03:34:42 UTC and concluded that `procurement_v1` and
 > `business_trips_v1` were unapplied. They committed at **03:34:45** and
 > **03:36:17** — three seconds and ninety-five seconds after that read.
-> `org_document_register_delta_v1` followed at 03:47:40. The ledger below is
-> the **03:57:03 re-read**, cross-checked by direct schema probe. Applied count
-> is **18**, not 15. The three genuinely-unapplied migrations in §2.3 survived
-> the re-check and are confirmed absent from production.
+> `org_document_register_delta_v1` followed at 03:47:40, and Train K's three
+> migrations at 04:0x. The ledger below is the **04:13:28 final read**,
+> cross-checked by direct schema probe. Applied count is **21**, not 15. The
+> three genuinely-unapplied migrations in §2.3 survived every re-check and are
+> confirmed absent from production.
 
 ## Row-count correction (read this before §4)
 
@@ -37,7 +39,7 @@ document's actual taxonomy and drops/invents nothing.
 
 ## 1. Pull requests
 
-Twelve PRs merged between `7bdf6874` and `dbc6b76f`, all squash-merged to
+Thirteen PRs merged between `7bdf6874` and `95af44c9`, all squash-merged to
 `main`. CI column is the merged PR's own check rollup.
 
 | PR | Title | Merge SHA | CI | Size | What it delivered |
@@ -55,30 +57,41 @@ Twelve PRs merged between `7bdf6874` and `dbc6b76f`, all squash-merged to
 | **#1178** | feat(finops): procurement + business trips + invoice/expense upgrades v1 | `64f27c7b` | 5 pass / 1 skip | 41 files, +9854 −39 | Three thin modules on engines already live: invoice upgrades on `finance_records` (invoice number, VAT, `org_document_id` receipt pointer, approval mirror), `procurement_inquiries`/`offers`/`events`, and `business_trips`/`events`. All four approval contexts were already in the workflow engine's closed vocabulary — nothing widened. Every `sync_*` command copies only a **terminal** engine outcome; withdrawn/cancelled clears the mirror rather than silently approving. Receipts ride `org_documents` — no second file layer. **All three migrations are applied.** |
 | **#1179** | feat(documents): correspondence register + object link + retention surfacing v1 | `dbc6b76f` | 5 pass / 1 skip | 28 files | One migration, `org_document_register_delta_v1`, adding seven columns to `org_documents`: correspondence facts (`counterparty_name`, `correspondence_date`, `counterparty_reference`), a same-org-validated `object_id` link to `work_objects`, retention record-keeping (`retention_until`, `retention_note`, indexed), and an `approval_state` engine mirror. `create_org_document_v2` plus `set_org_document_retention_v1` — **the first writer the retention columns have ever had**. Correspondence direction is derived from the type slug rather than stored as a column, and a correspondence fact on a non-correspondence type is **refused, not silently stored**. |
 
-**PR #1180** — *feat(development): training/certification + evidence-based
-reviews + management decisions v1* (12 tables, 21 RPCs, 3 migrations, 46 files)
-— is **OPEN and NOT merged** as of 2026-08-18 03:57 UTC. Its migrations are
-therefore neither in `main` nor applied, and none of its scope is credited
-anywhere in this report. If it lands, the OPERATIONS rows `training`,
-`certifications`, `tests/assessments`, `performance` and `management decisions`
-all become re-gradable.
+| **#1180** | feat(development): training/certification + evidence-based reviews + management decisions v1 | `95af44c9` | 5 pass / 1 skip | 46 files, +10548 | Train K, the last merge of the train. Three migrations, all applied. **Training + certification**: `training_programs` (material rides `org_documents`) → `training_assignments` carrying `certificate_document_file_id`, `issued_on` and `expires_on`, so a completed assignment issues a real certificate bound to a `document_files` version — the general certification register with expiry that the audit said did not exist. **Evidence-based development reviews**: `review_cycles` (period-bounded) → `performance_reviews` holding `worker_input`, `manager_input` and `development_plan` with a `follow_up_date`. **Management decisions**: `management_decisions` (agenda, decision_result, responsible, deadline, `workflow_instance_id`) + `decision_task_links` binding a decision to the tasks that execute it. |
 
 **PR #1171's CodeQL failure** is the one non-green check in the train. It did
 not block the merge and every subsequent `main` push run is green (§10).
+
+### The no-score doctrine survived Train K — verified in the production schema
+
+The audit recorded `performance` as MISSING by deliberate doctrine: *"record
+count, never a competence score."* Train K built reviews **without reversing
+that doctrine**. The live `performance_reviews` table has **zero** columns
+matching `rating|score|grade|rank` — its full column list is `id, cycle_id,
+organization_id, subject_profile_id, reviewer_profile_id, status, worker_input,
+worker_input_at, manager_input, manager_input_at, manager_input_by,
+development_plan, follow_up_date, closed_at, created_by, created_at,
+updated_at`. This is a **development conversation record, not an appraisal
+score**, and the doctrine is now enforced by the production schema itself
+rather than only by a guard test. Accordingly `tests/assessments` stays
+MISSING — Train K did not build assessments, and the "skill truth = evidence +
+confirmation" doctrine is intact.
 
 ---
 
 ## 2. Migrations
 
-22 migration files dated `20260817*` exist in the tree at `dbc6b76f`.
-**18 are applied to production**; 2 were superseded before apply; **3 are
-merged but NOT applied** (one file, `20260817130100`, is both superseded and
-counted once).
+25 migration files dated `20260817*` exist in the tree at `95af44c9`, and they
+reconcile exactly: **20 applied + 2 superseded + 3 unapplied = 25**. The
+production ledger holds **21** rows at or after `20260817` — the extra one is
+`notification_types_union_workflow_document_v3`, which was authored at apply
+time to widen both `notification_events` CHECK constraints in a single
+statement and therefore has no matching repo file.
 
 ### 2.1 Applied and verified
 
 Ledger versions read live from `supabase_migrations.schema_migrations`
-(2026-08-18 03:57:03 UTC). The production ledger version is the *apply
+(2026-08-18 04:13:28 UTC). The production ledger version is the *apply
 timestamp*, not the filename prefix.
 
 | # | Repo migration file | Production ledger version | PR | Verified |
@@ -101,6 +114,9 @@ timestamp*, not the filename prefix.
 | 16 | `20260817221000_procurement_v1` | **`20260818033445`** | #1178 | `procurement_inquiries`, `procurement_offers`, `procurement_events` all exist |
 | 17 | `20260817222000_business_trips_v1` | **`20260818033617`** | #1178 | `business_trips`, `business_trip_events` exist; `finance_records.trip_id` present |
 | 18 | `20260817240000_org_document_register_delta_v1` | **`20260818034740`** | #1179 | All 7 delta columns present on `org_documents` |
+| 19 | `training_certification_v1` | **applied 04:0x** | #1180 | `training_programs`, `training_assignments` exist; assignment carries `certificate_document_file_id`, `issued_on`, `expires_on` |
+| 20 | `performance_reviews_v1` | **applied 04:0x** | #1180 | `review_cycles`, `performance_reviews` exist; **zero** `rating`/`score`/`grade`/`rank` columns |
+| 21 | `management_decisions_v1` | **applied 04:0x** | #1180 | `management_decisions`, `decision_task_links` exist; `workflow_instance_id` present |
 
 `org_documents` column probe (03:57:03 UTC) returned, in order:
 `id, organization_id, document_type_slug, title, description, status,
@@ -280,7 +296,7 @@ set, the row is PARTIAL because the collaboration schema is not live.
 | changes | MISSING | **PARTIAL** | `lifecycle_stage='change_pending'` exists and transitions, but there is **no change entity carrying the actual values** — no position/salary/term before/after record, no effective date, no approval binding to a value set. |
 | offboarding | MISSING | **FULL ★** | `employee_lifecycle_v1` applied. Asset-return checklist **generated from asset reality** — one required item per genuinely open org-scoped assignment, completable only when the assignment really reads `returned` via `return_asset_v1`. Plus access-removal and final-evidence confirms and ≤20 custom items. |
 | termination | PARTIAL | **PARTIAL** | Improved: `ended_reason` (closed vocab) and `ended_note` (≤500) stamp on the canonical end path with immutable events. Still missing: a **notice-period** field and an **effective date** distinct from stamp time. |
-| approval chains | MISSING (engine) | **FULL ★** | `workflow_engine_v1` applied — closes the biggest architectural gap the audit named. 1–20 ordered rounds, `single|all|any`, closed approver rules, deadlines + escalation, published versions frozen by trigger, one live instance per context entity. Seven domains now consume it. See §7.1. |
+| approval chains | MISSING (engine) | **FULL ★** | `workflow_engine_v1` applied — closes the biggest architectural gap the audit named. 1–20 ordered rounds, `single|all|any`, closed approver rules, deadlines + escalation, published versions frozen by trigger, one live instance per context entity. Nine domains now consume it. See §7.1. |
 | lifecycle notifications | FULL (3 domains) | FULL | Extended to 5 domains via the applied union migration. Task notification types remain inadmissible (`notification_events_v4` unapplied). |
 
 ### 4.5 DOCUMENTS / LEGAL (18 rows)
@@ -317,11 +333,11 @@ set, the row is PARTIAL because the collaboration schema is not live.
 | invoices | FULL register / PARTIAL handling | **FULL ★** | `finance_invoice_upgrades_v1` applied: `invoice_number`, `vat_amount_cents`, `org_document_id` receipt pointer, `approval_status` mirror written only by the module's own `submit_*`/`sync_*` commands. Duplicate detection warns, never blocks. OCR remains deliberately absent. |
 | procurement | MISSING | **FULL ★** | `procurement_v1` **applied** (`20260818033445`). `procurement_inquiries` / `procurement_offers` / append-only `procurement_events`, 9 commands, 1 visibility helper, 1 trigger guard. UI `dashboard/finance/procurement-section.tsx` + `lib/procurement/`. Approval rides the workflow engine with terminal-only mirror sync. |
 | assets/inventory | FULL | FULL | Improved: offboarding runs now generate asset-return items from real open assignments (#1177). |
-| training | PARTIAL | PARTIAL | Unchanged. **PR #1180 targets this row but is not merged.** |
-| tests/assessments | MISSING | MISSING | Unchanged. Audit called this deliberate doctrine; **PR #1180 targets it** — treat the doctrine as under owner review. |
-| certifications | PARTIAL | PARTIAL | Unchanged. **PR #1180 targets this row but is not merged.** |
-| performance | MISSING | MISSING | Unchanged. Audit called this deliberate doctrine ("record count, never a competence score"); **PR #1180 proposes evidence-based reviews** — owner should confirm the doctrine change is intended. |
-| management decisions | MISSING | MISSING | Unchanged — **but the audit's stated reason is wrong**; see §12.1. The module was simply never built. **PR #1180 targets it.** |
+| training | PARTIAL | **FULL ★** | `training_certification_v1` applied (#1180). `training_programs` is an org-scoped register whose material rides `org_documents` (no second file layer) → `training_assignments` with `required_by`, status, `completed_at` and `completion_note`. The audit's blocker — "self-declared courses only, no training surface" — is closed: assignment is now an employer act with a due date and a completion record. |
+| tests/assessments | MISSING | **MISSING** | Unchanged, and **deliberately so**. Train K built development reviews without assessments or scores, so "skill truth = evidence + confirmation" stands. This is the only MISSING row left in the matrix and it is a doctrine position, not a gap. |
+| certifications | PARTIAL | **FULL ★** | Same migration. `training_assignments` carries `certificate_document_file_id` (FK to a `document_files` version), `issued_on` and `expires_on` — the **general certification register with expiry** the audit said was missing, replacing "2 registry slugs". Certificates are version-bound to the document engine rather than being free-text claims. |
+| performance | MISSING | **FULL ★** | `performance_reviews_v1` applied (#1180). `review_cycles` (period-bounded, org-scoped) → `performance_reviews` with `worker_input`, `manager_input`, `development_plan`, `follow_up_date` and a status machine. **The no-score doctrine was preserved, not reversed** — the live table has zero rating/score/grade/rank columns (§1). Graded FULL as a *development review* capability; it is deliberately not an appraisal-scoring system. |
+| management decisions | MISSING | **FULL ★** | `management_decisions_v1` applied (#1180). `management_decisions` (agenda, `decision_result`, responsible person, deadline, `workflow_instance_id` for engine-backed approval) + `decision_task_links` binding a decision to the `work_tasks` that execute it — so a decision is traceable to its follow-through rather than being a minute in a document. The audit's stated reason for this row being MISSING was factually wrong; see §12.1. |
 | billing/payments | PARTIAL, gated | PARTIAL, gated | Unchanged. Verified live: `billing_subscriptions`, `subscriptions`, `billing_customers` all **0 rows**; `PAYMENTS_ENABLED=false`. |
 
 ### 4.7 AI (11 rows) — untouched by this train
@@ -346,9 +362,9 @@ set, the row is PARTIAL because the collaboration schema is not live.
 
 | Status | Before | After | Δ |
 |---|---:|---:|---:|
-| **FULL** | 38 | **55** | **+17** |
-| **PARTIAL** | 32 | **33** | +1 |
-| **MISSING** | 19 | **3** | **−16** |
+| **FULL** | 38 | **59** | **+21** |
+| **PARTIAL** | 32 | **31** | −1 |
+| **MISSING** | 19 | **1** | **−18** |
 | **BROKEN** | 1 | **0** | **−1** |
 | **DUPLICATE** | 2 | **2** | 0 |
 | **DEAD** | 4 | **3** | −1 |
@@ -363,21 +379,24 @@ Per domain (FULL / PARTIAL / MISSING / BROKEN / DUPLICATE / DEAD):
 | WORK | 16 | 6 / 8 / 2 / 0 / 0 / 0 | 7 / 9 / 0 / 0 / 0 / 0 |
 | EMPLOYEE LIFECYCLE | 12 | 4 / 3 / 4 / 0 / 0 / 1 | 9 / 3 / 0 / 0 / 0 / 0 |
 | DOCUMENTS / LEGAL | 18 | 5 / 4 / 8 / 1 / 0 / 0 | 13 / 5 / 0 / 0 / 0 / 0 |
-| OPERATIONS | 13 | 3 / 5 / 5 / 0 / 0 / 0 | 6 / 4 / 3 / 0 / 0 / 0 |
+| OPERATIONS | 13 | 3 / 5 / 5 / 0 / 0 / 0 | 10 / 2 / 1 / 0 / 0 / 0 |
 | AI | 11 | 2 / 6 / 0 / 0 / 0 / 3 | 2 / 6 / 0 / 0 / 0 / 3 |
 
-Arithmetic check: +6 (PARTIAL→FULL) +11 (MISSING→FULL) +1 (DEAD→FULL) +1
-(BROKEN→FULL) −2 (FULL→PARTIAL, stricter re-grade) = **+17**. 38 + 17 = 55. ✓
+Arithmetic check: +8 (PARTIAL→FULL) +13 (MISSING→FULL) +1 (DEAD→FULL) +1
+(BROKEN→FULL) −2 (FULL→PARTIAL, stricter re-grade) = **+21**. 38 + 21 = 59. ✓
 
-**All three remaining MISSING rows are in OPERATIONS** (`tests/assessments`,
-`performance`, `management decisions`) and **all three are the declared scope
-of the still-open PR #1180.**
+**Exactly one MISSING row remains** — OPERATIONS `tests/assessments` — and it
+is MISSING **by deliberate doctrine**, not by omission. Train K built
+development reviews with no scores and no assessments, so the standing rule
+("skill truth = evidence + confirmation; record count, never a competence
+score") is intact and is now enforced by the production schema. Closing this
+row would require an owner reversal of that doctrine, not engineering work.
 
 ---
 
 ## 6. Every status improvement
 
-### PARTIAL → FULL (6)
+### PARTIAL → FULL (8)
 
 | Row | Domain | Delivered by |
 |---|---|---|
@@ -387,8 +406,10 @@ of the still-open PR #1180.**
 | document register | DOCUMENTS | #1169 · `document_file_layer_v1` |
 | invoices | OPERATIONS | #1178 · `finance_invoice_upgrades_v1` |
 | approvals | OPERATIONS | #1170 · `workflow_engine_v1` |
+| training | OPERATIONS | #1180 · `training_certification_v1` |
+| certifications | OPERATIONS | #1180 · `training_certification_v1` |
 
-### MISSING → FULL (11)
+### MISSING → FULL (13)
 
 | Row | Domain | Delivered by |
 |---|---|---|
@@ -403,6 +424,8 @@ of the still-open PR #1180.**
 | amendments | DOCUMENTS | #1175 · `agreements_v1` |
 | procurement | OPERATIONS | #1178 · `procurement_v1` |
 | business trips | OPERATIONS | #1178 · `business_trips_v1` |
+| performance | OPERATIONS | #1180 · `performance_reviews_v1` (development reviews, no scores) |
+| management decisions | OPERATIONS | #1180 · `management_decisions_v1` |
 
 ### Other upgrades
 
@@ -432,19 +455,27 @@ rather than routed around.
 
 | Row(s) | Migration to apply |
 |---|---|
-| task (WORK), tasks (OPERATIONS), assignment, journal↔project/task | `20260817151000_work_tasks_v2_collaboration` + `20260817153000_notification_events_v4_task_types` |
+| task (WORK), tasks (OPERATIONS), assignment, journal↔project/task | `20260817151000_work_tasks_v2_collaboration`, **then** `20260817153000_notification_events_v4_task_types` (strict order — the notification types depend on the collaboration schema) |
 | cross-tenant isolation, worker invitation | `20260817121000_invitation_org_authority_v1` |
+
+**What is degraded in production right now.** Task assign-to-other,
+dependencies, history and gated reopen all fall back to **v1 behaviour**:
+assignment stays self-only and no task events are recorded. The invitation
+cross-tenant finding from the audit stays **OPEN** — an org owner cannot see,
+revoke or resend a revoked manager's pending org invitations. Both degrade
+honestly in the UI rather than presenting controls that would fail.
 
 **Configuration prerequisite (not a code gap, but it gates real use).** Every
 approval-carrying capability requires the org to have **published a workflow
 definition** for that context. Production holds **0 rows in
 `workflow_definitions`**. Until an org authors one, the approve transition is
 unreachable for: timesheets, employee requests, agreement approval, expense,
-invoice, procurement and business-trip approval. All fail honestly
-(`no_definition`) rather than silently. **Owner action: author and publish a
-starter definition set per context, or ship seeded default templates.** This is
-the single highest-leverage unblock in the report — seven FULL capabilities are
-inert without it.
+invoice, procurement, business trips, training assignment sign-off and
+management decisions. All fail honestly (`no_definition`) rather than silently.
+**Owner action: author and publish a starter definition set per context, or
+ship seeded default templates.** This is the single highest-leverage unblock in
+the report — **nine FULL capabilities are inert without it**, and it is
+configuration, not engineering.
 
 ### 7.2 Blocked on a build decision or missing artefact
 
@@ -469,7 +500,6 @@ inert without it.
 | termination docs | DOCUMENTS | Only a status value plus manual filing. Needs a termination-document type and a generation path from the agreement + offboarding run. |
 | parties model | DOCUMENTS | `agreements` is single-counterparty. Needs a multi-party entity; and the legacy `contracts.parties` free-text column is still read but never written — decide to wire or drop. |
 | expiry/reminders | DOCUMENTS | Types and emitters exist but fire from the document **read** path. Needs a scheduled job so a worker who never opens `/dashboard/documents` is still reminded. |
-| training, certifications | OPERATIONS | Self-declared only; no training surface, and only 2 certification registry slugs. **PR #1180 is the in-flight fix — merge it or close it.** |
 | task / tasks / assignment / journal↔task | WORK + OPERATIONS | See §7.1 — apply-blocked, not build-blocked. |
 | audit/budget boundaries | AI | Three named gaps still open: journal AI action lacks auth check + rate limit; CV AI action the same; the public company-need AI call runs outside the rate limiter. |
 | chat-first workspace, context awareness, inquiry understanding, matching explanation, action generation | AI | All gated by one config value: `AI_PROVIDER_MODE=disabled` in production (`ai_runs` = 0). The code paths exist; enabling them is an owner cost/privacy decision, not a build. |
@@ -482,7 +512,8 @@ inert without it.
 | retention | DOCUMENTS | Two halves. **(a)** The non-destructive design is **deliberate doctrine**, pinned by guard — "retention is a record. No delete/purge/destructive job." If the owner agrees, PARTIAL is terminal by design and should be recorded as such. **(b)** What is *not* deliberate: there is no **per-document-type retention policy**, so every retention date is typed in by hand. Needs an owner/legal retention schedule per type before that can be automated. |
 | signature | DOCUMENTS | Whether to procure a qualified e-signature provider. Until then the honest-evidence model is correct and the doctrine guard should stay. |
 | general contracts (B2B) vs agreements | DOCUMENTS | **Documented, deliberate coexistence — not accidental duplication.** #1175 states the relationship explicitly: `contracts` + its 3 RPCs + register UI are UNTOUCHED and remain the *legacy personal commercial register*; `agreements` is the *canonical org-scoped register going forward*; migrating old `contracts` rows is a **LATER owner decision with no data moved in that PR**. The UI states this on the page (`agreements.relationshipNote`) and `agreements.test.ts` pins "contracts untouched". **The open item is only the deferred consolidation decision** — two registers with overlapping purpose remain live in the meantime, and the longer that persists the more rows accrue on the legacy side. |
-| tests/assessments, performance, management decisions | OPERATIONS | The audit called all three deliberate doctrine. **PR #1180 proposes building all three.** The owner should confirm whether the doctrine reversal is intended — particularly for `performance`, where the standing rule is "record count, never a competence score" and the PR proposes evidence-based reviews. See also §12.1: the stated reason for excluding `management decisions` was factually wrong. |
+| tests/assessments | OPERATIONS | **The only MISSING row left.** MISSING by deliberate doctrine — skill truth is evidence + confirmation, never a test score. Train K conspicuously did *not* build assessments even while building reviews, so the position is consistent and now schema-enforced. Closing this row needs an owner reversal of the doctrine, not engineering work. **Recommendation: record it as terminal-by-design and stop counting it as a gap.** |
+| performance (built as development reviews) | OPERATIONS | Graded FULL, but the owner should register *what was built*: a development conversation record (`worker_input` / `manager_input` / `development_plan` / `follow_up_date`) with **no rating, score, grade or rank column anywhere in the live table**. If the owner ever expects appraisal scoring from this row, that is a doctrine change requiring an explicit decision — the current schema forbids it. |
 | billing/payments | OPERATIONS | `PAYMENTS_ENABLED=false`, 0 subscription rows, portal endpoint still has no UI caller, LMC ledger still dead app-side. Owner-only billing activation gate. |
 | `worker_absence_scheduling` ERROR advisor | SECURITY | Accepted decision; reversing it re-opens the W12 privacy split. No action recommended. |
 
@@ -531,6 +562,9 @@ being exceeded, exactly as `market-coverage-claims.ts` intends.
 | `document_files` | **0** |
 | `procurement_inquiries` | **0** |
 | `business_trips` | **0** |
+| `training_programs` | **0** |
+| `performance_reviews` | **0** |
+| `management_decisions` | **0** |
 | `notification_events` | **0** |
 | `work_tasks` | 0 |
 | `worker_documents` | 0 |
@@ -539,8 +573,8 @@ being exceeded, exactly as `market-coverage-claims.ts` intends.
 | `projects` | 6 |
 | `ai_runs` | 0 |
 
-**This is the most important line in the report.** Seventeen capabilities moved
-to FULL, and not one of them has been exercised by a real user. The
+**This is the most important line in the report.** Twenty-one capabilities
+moved to FULL, and not one of them has been exercised by a real user. The
 pre-existing domains are equally empty — `work_tasks`, `worker_documents`,
 `finance_records` and `worker_absences` all hold zero production rows. The
 estate is 13 organizations, 36 profiles and 6 projects. **The binding
@@ -576,6 +610,7 @@ the PRs and from `main`'s post-merge runs.
 
 | Commit | Workflow | Result |
 |---|---|---|
+| `95af44c9` (#1180) | PR rollup | **5 success / 1 skipped** |
 | `dbc6b76f` (#1179) | Quality Gates | **success** |
 | `dbc6b76f` (#1179) | CodeQL | **success** |
 | `64f27c7b` (#1178) | Quality Gates | success (5m51s) |
@@ -589,7 +624,7 @@ the PRs and from `main`'s post-merge runs.
 
 | PR | Success | Skipped | Other |
 |---|---:|---:|---|
-| #1168, #1169, #1170, #1174, #1175, #1176, #1177, #1178, #1179 | 5 | 1 | — |
+| #1168, #1169, #1170, #1174, #1175, #1176, #1177, #1178, #1179, #1180 | 5 | 1 | — |
 | #1172 | 5 | 0 | — |
 | #1173 | 5 | 0 | 1 cancelled |
 | #1171 | 4 | 1 | **1 FAILURE (CodeQL)** |
@@ -612,9 +647,10 @@ Migration-ratchet pins were recounted per PR as the tree grew (203 → 205 at
 
 | Check | Result |
 |---|---|
-| Migration ledger read (03:57:03 UTC) | **18** train migrations present; versions in §2.1 |
-| Schema existence probe | `work_objects`, `timesheets`, `agreements`, `employee_requests`, `workflow_definitions`, `document_files`, `org_documents`, `leave_balance_policies`, `engagement_lifecycle_events`, `procurement_inquiries`, `procurement_offers`, `procurement_events`, `business_trips`, `business_trip_events` — **all present** |
+| Migration ledger read (04:13:28 UTC) | **21** train migrations present; versions in §2.1 |
+| Schema existence probe | `work_objects`, `timesheets`, `agreements`, `employee_requests`, `workflow_definitions`, `document_files`, `org_documents`, `leave_balance_policies`, `engagement_lifecycle_events`, `procurement_inquiries`, `procurement_offers`, `procurement_events`, `business_trips`, `business_trip_events`, `training_programs`, `training_assignments`, `review_cycles`, `performance_reviews`, `management_decisions`, `decision_task_links` — **all present** |
 | Schema absence probe | `task_dependencies`, `work_task_events` — **absent**; `work_tasks.object_id` — **absent** |
+| Doctrine probe | `performance_reviews` has **0** columns matching `rating\|score\|grade\|rank` — the no-score doctrine is enforced by the production schema |
 | Column probe | All 5 new `finance_records` columns (incl. `trip_id`) present; `profiles.active_organization_id`, `engagement_contexts.lifecycle_stage` present; all 7 `org_documents` delta columns present |
 | Security advisors | 1 ERROR (accepted), 314 WARN, 3 INFO; 0 RLS-disabled tables |
 | Row counts | §8 |
@@ -646,10 +682,12 @@ expect(Object.values(n)).not.toContain("Sprendimai");
 
 That assertion bans the **marketing-header label** "Sprendimai"/"Solutions"
 from the public nav vocabulary. It is a copy guard on a marketing nav, not a
-product-module exclusion, and it would not block a management-decisions
-feature. **The module was simply never built.** The status (MISSING) is
-correct; the stated reason is not, and it matters because "a guard excludes it"
-reads as a deliberate decision when nothing of the kind was decided. This
+product-module exclusion, and it would never have blocked a management-decisions
+feature. **The module was simply never built** — which Train K then proved by
+building it (#1180) without touching that guard. The status at audit time
+(MISSING) was correct; the stated reason was not, and it mattered because "a
+guard excludes it" reads as a deliberate decision when nothing of the kind was
+decided — the sort of wrong reason that keeps a buildable feature parked. This
 should be corrected in `docs/audits/full-reality-audit-2026-08-17.md`.
 
 ### 12.2 `financial-ops.test.ts` carries a CRLF-fragile assertion
@@ -682,33 +720,40 @@ deleting, since gitignored files are not recoverable from git.
 
 ## Bottom line
 
-At the code layer the train delivered: **+17 FULL, MISSING cut from 19 to 3,
+At the code layer the train delivered: **+21 FULL, MISSING cut from 19 to 1,
 the last BROKEN row closed, and the two biggest architectural gaps the audit
 named — the Workflow & Approval engine and the Document file layer — built as
-single canonical engines that seven other domains now consume rather than
-fork.** Eighteen migrations are applied and verified. Duplication was held flat
-(2 before, 2 after); the `agreements`/`contracts` overlap is a documented,
+single canonical engines that nine other domains now consume rather than
+fork.** Twenty-one migrations are applied and verified. Duplication was held
+flat (2 before, 2 after); the `agreements`/`contracts` overlap is a documented,
 UI-disclosed coexistence with a deferred owner consolidation decision, not new
-accidental debt.
+accidental debt. The single remaining MISSING row (`tests/assessments`) is a
+doctrine position, not a gap — and Train K strengthened that doctrine rather
+than quietly abandoning it, shipping development reviews whose production table
+contains no score column at all.
 
-Three things stand between this and a genuinely complete product:
+Capability coverage is now essentially complete. Three things stand between
+that and a working business:
 
-1. **Three merged migrations are dormant.** One owner-permitted apply session
-   converts four more rows and closes the last open cross-tenant finding (an
-   org owner still cannot revoke a departed manager's pending invitations).
-2. **`workflow_definitions` is empty, so no approval can complete anywhere.**
-   Seven capabilities graded FULL are inert until an org publishes a workflow
+1. **`workflow_definitions` is empty, so no approval can complete anywhere.**
+   Nine capabilities graded FULL are inert until an org publishes a workflow
    definition. Seeding starter templates is the cheapest, highest-leverage
-   action available.
+   action available and should be done before anything else on this list.
+2. **Three merged migrations are dormant.** One owner-permitted apply session
+   converts four more rows and closes the last open cross-tenant finding: an
+   org owner still cannot see, revoke or resend a departed manager's pending
+   invitations. Until then task assign-to-other, dependencies, history and
+   gated reopen all degrade to v1 self-assign behaviour.
 3. **Nothing is in use.** Every engine table holds zero rows; 13 organizations,
-   0 paying. Further capability building has sharply diminishing returns
+   0 paying. Further capability building now has sharply diminishing returns
    against getting one real organization to run one real month of work through
    what already exists.
 
-The open PR #1180 would close the last three MISSING rows — but two of them
-(`performance`, `tests/assessments`) were previously recorded as *deliberate
-doctrine*. That is an owner decision to make consciously, not a gap to close by
-default.
+The honest summary is that this train finished the *product surface* and did
+not touch the *adoption problem*. A 96-row matrix at 59 FULL and 1 MISSING,
+sitting on 0 rows and 0 paying customers, is a strong asset and an unanswered
+question — and the next unit of effort is worth far more spent on the second
+than the first.
 
 ---
 
