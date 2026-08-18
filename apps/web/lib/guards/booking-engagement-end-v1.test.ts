@@ -925,6 +925,22 @@ describe("the migration set is exactly what this slice declared", () => {
       // event row holds real data). Retention doctrine pinned in the
       // header: nothing is ever deleted on a retention date.
       "20260817240000_org_document_register_delta_v1.sql",
+      // 2026-08-18: workflow template MANAGEMENT v1. The RED class here is
+      // 3 SECURITY DEFINER commands + their GRANT/REVOKE pairs — the
+      // smallest possible shape for a gated write path, and structurally
+      // unavoidable: the engine's write surface is RPC-only by design. NO
+      // new table, NO column, NO policy, NO trigger, NO existing object
+      // recreated, NO DML at apply time. Annotation authority: owner
+      // mandate 2026-08-17 (autonomous functional completion train V2, §4
+      // migration authority); the annotation states the ROUTE, the apply
+      // act belongs to the LEAD session (PENDING APPLY BY LEAD in
+      // docs/APPLIED_LEDGER.md, apply AFTER 20260817130000 — asserted
+      // in-file). Gate record:
+      // docs/human-gates/workflow-template-management-gate.md. Rollback
+      // paired and deliberately data-preserving: it drops the three
+      // commands and deletes no row, because deleting a definition would
+      // destroy the approval history of every instance that ran on it.
+      "20260818120000_workflow_template_management_v1.sql",
     ]);
   });
 

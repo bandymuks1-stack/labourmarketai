@@ -32,10 +32,12 @@ import {
 } from "@/lib/approvals/approvals-model";
 import {
   getApprovalsOverview,
+  getWorkflowTemplateAdministration,
   listVisibleWorkflowDefinitions,
   type ApprovalsOverviewResult,
 } from "@/lib/approvals/approvals";
 import { createUtcFormatter } from "@/lib/time/display";
+import { WorkflowTemplatesPanel } from "./workflow-templates-panel";
 
 /**
  * Approvals area of the network page (Workflow & Approval Engine v1).
@@ -78,9 +80,10 @@ export async function ApprovalsSection({
   const t = await getTranslations("approvals");
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
 
-  const [overview, definitionsResult] = await Promise.all([
+  const [overview, definitionsResult, templateAdmin] = await Promise.all([
     getApprovalsOverview(organizations.map((o) => o.id)),
     listVisibleWorkflowDefinitions(),
+    getWorkflowTemplateAdministration(organizations.map((o) => o.id)),
   ]);
 
   const header = (
@@ -547,6 +550,17 @@ export async function ApprovalsSection({
               </ul>
             )}
           </div>
+
+          {/* Template administration (template management v1): the default
+              pack in one click, the live approver resolution per step, new
+              versions and activate/retire — for the organizations this
+              person governs. The list above stays the plain read-only
+              overview of every template they can SEE. */}
+          <WorkflowTemplatesPanel
+            locale={locale}
+            organizations={organizations}
+            admin={templateAdmin}
+          />
 
           {/* Create a template (1..3 ordered approval rounds). */}
           <details

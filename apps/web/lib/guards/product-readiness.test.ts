@@ -2172,7 +2172,13 @@ describe("no migration files added by this sprint", () => {
     // in the base): `ls supabase/migrations/*.sql | wc -l` = 224 real
     // files, never summed — my earlier 220 was against the pre-J/I base and
     // was RECOUNTED, not adjusted.
-    const SPRINT_BASELINE = 224;
+    // Bumped 224 -> 225 for the workflow template MANAGEMENT v1 migration
+    // (20260818120000_workflow_template_management_v1, LEAD-gated,
+    // UNAPPLIED; paired rollback that drops only its 3 functions and
+    // deletes no row + a deferred APPLIED_LEDGER entry in the PR).
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 225 real files.
+    const SPRINT_BASELINE = 225;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

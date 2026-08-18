@@ -29,11 +29,18 @@ import {
   isValidWorkflowInstanceStatus,
   isValidWorkflowStepStatus,
   isWorkflowMigrationMissingCode,
+  parseWorkflowApproverRule,
+  parseWorkflowEscalationEnabled,
+  resolveApproverCount,
   type WorkflowApproverSlotRow,
   type WorkflowDefinitionRow,
   type WorkflowInstanceRow,
   type WorkflowInstanceStepRow,
+  type WorkflowOrgApproverContext,
+  type WorkflowTemplateAdminRow,
   type WorkflowTransitionRow,
+  type WorkflowVersionRow,
+  type WorkflowVersionStepRow,
 } from "@/lib/approvals/approvals-model";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -418,4 +425,253 @@ export async function listVisibleWorkflowDefinitions(): Promise<WorkflowDefiniti
     });
   }
   return { status: "ok", definitions, error: null };
+}
+
+export type WorkflowTemplateAdminResult =
+  | { readonly status: "not-authed" }
+  | { readonly status: "needs-migration" }
+  | {
+      readonly status: "ok";
+      /** Every template of the given organizations, newest definition first. */
+      readonly templates: readonly WorkflowTemplateAdminRow[];
+      /** Active members per organization — the pick-list the "specific
+       *  people" rule authors from (no email→profile oracle anywhere). */
+      readonly members: ReadonlyMap<
+        string,
+        readonly {
+          readonly profileId: string;
+          readonly role: string;
+          readonly label: string;
+        }[]
+      >;
+      readonly error: string | null;
+    };
+
+/**
+ * Template administration read (workflow template management v1).
+ *
+ * One bounded, RLS-scoped pass over the definition family plus the two
+ * membership truths, assembling — per template — the version history, the
+ * steps of the version NEW instances would use, and how many approvers each
+ * step rule resolves to in that organization today.
+ *
+ * It reads the ENGINE's definition tables only. It never reads or touches
+ * workflow_instances / _instance_steps / _instance_approvers: a running
+ * request carries its own step snapshot and its own resolved approver slots
+ * and is unaffected by anything this panel can do.
+ */
+export async function getWorkflowTemplateAdministration(
+  organizationIds: readonly string[],
+): Promise<WorkflowTemplateAdminResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "not-authed" };
+
+  const orgIds = [...new Set(organizationIds.filter((id) => UUID_RX.test(id)))];
+  if (orgIds.length === 0) {
+    return { status: "ok", templates: [], members: new Map(), error: null };
+  }
+
+  const defRes = await asAny(supabase)
+    .from("workflow_definitions")
+    .select(
+      "id, organization_id, slug, name, context_entity_type, is_active, created_at",
+    )
+    .in("organization_id", orgIds)
+    .order("created_at", { ascending: false })
+    .limit(WORKFLOW_READ_LIMIT);
+  if (defRes.error) {
+    if (isWorkflowMigrationMissingCode(defRes.error.code)) {
+      return { status: "needs-migration" };
+    }
+    return {
+      status: "ok",
+      templates: [],
+      members: new Map(),
+      error: String(defRes.error.message ?? "read failed"),
+    };
+  }
+  const defs = (defRes.data ?? []) as RawRow[];
+
+  // The two membership truths behind approver resolution. Both are
+  // RLS-scoped: an org owner/admin reads their own org's rows, nobody else
+  // sees anything. A read failure degrades to an empty context — the panel
+  // then shows the honest zero-approver warning rather than a wrong number.
+  const [memberRes, engagementRes] = await Promise.all([
+    asAny(supabase)
+      .from("company_memberships")
+      .select(
+        "profile_id, organization_id, role, profiles!company_memberships_profile_id_fkey(full_name, email)",
+      )
+      .in("organization_id", orgIds)
+      .eq("status", "active")
+      .limit(WORKFLOW_READ_LIMIT * 5),
+    asAny(supabase)
+      .from("engagement_contexts")
+      .select("profile_id, organization_id")
+      .in("organization_id", orgIds)
+      .eq("status", "active")
+      .limit(WORKFLOW_READ_LIMIT * 5),
+  ]);
+
+  const membersByOrg = new Map<
+    string,
+    { profileId: string; role: string; label: string }[]
+  >();
+  for (const raw of (memberRes.error ? [] : memberRes.data ?? []) as RawRow[]) {
+    const orgId = String(raw.organization_id);
+    const profile = (raw.profiles ?? null) as {
+      full_name?: string | null;
+      email?: string | null;
+    } | null;
+    const list = membersByOrg.get(orgId) ?? [];
+    list.push({
+      profileId: String(raw.profile_id),
+      role: String(raw.role ?? ""),
+      label: String(profile?.full_name ?? profile?.email ?? "").trim(),
+    });
+    membersByOrg.set(orgId, list);
+  }
+  const engagementsByOrg = new Map<string, string[]>();
+  for (const raw of (engagementRes.error
+    ? []
+    : engagementRes.data ?? []) as RawRow[]) {
+    const orgId = String(raw.organization_id);
+    const list = engagementsByOrg.get(orgId) ?? [];
+    list.push(String(raw.profile_id));
+    engagementsByOrg.set(orgId, list);
+  }
+  const approverContext = new Map<string, WorkflowOrgApproverContext>();
+  for (const orgId of orgIds) {
+    approverContext.set(orgId, {
+      members: (membersByOrg.get(orgId) ?? []).map((m) => ({
+        profileId: m.profileId,
+        role: m.role,
+      })),
+      engagementProfileIds: engagementsByOrg.get(orgId) ?? [],
+    });
+  }
+
+  if (defs.length === 0) {
+    return { status: "ok", templates: [], members: membersByOrg, error: null };
+  }
+
+  const defIds = defs.map((d) => String(d.id));
+  const verRes = await asAny(supabase)
+    .from("workflow_definition_versions")
+    .select("id, definition_id, version, published_at")
+    .in("definition_id", defIds)
+    .order("version", { ascending: false })
+    .limit(WORKFLOW_READ_LIMIT * 5);
+  const versionsByDef = new Map<string, WorkflowVersionRow[]>();
+  for (const raw of (verRes.error ? [] : verRes.data ?? []) as RawRow[]) {
+    const defId = String(raw.definition_id);
+    const list = versionsByDef.get(defId) ?? [];
+    list.push({
+      id: String(raw.id),
+      definitionId: defId,
+      version: Number(raw.version),
+      publishedAt: (raw.published_at as string | null) ?? null,
+    });
+    versionsByDef.set(defId, list);
+  }
+
+  // The version NEW instances would use = the highest PUBLISHED one (the
+  // engine's own `order by version desc limit 1` over published versions).
+  // With none published nothing is in force; the newest DRAFT is shown
+  // instead, clearly labelled as not yet in use.
+  const effectiveVersionIds: string[] = [];
+  const effectiveByDef = new Map<
+    string,
+    { id: string; isDraft: boolean; publishedVersion: number | null }
+  >();
+  for (const defId of defIds) {
+    const versions = (versionsByDef.get(defId) ?? [])
+      .slice()
+      .sort((a, b) => b.version - a.version);
+    const published = versions.find((v) => v.publishedAt !== null) ?? null;
+    const chosen = published ?? versions[0] ?? null;
+    if (!chosen) continue;
+    effectiveVersionIds.push(chosen.id);
+    effectiveByDef.set(defId, {
+      id: chosen.id,
+      isDraft: published === null,
+      publishedVersion: published?.version ?? null,
+    });
+  }
+
+  const stepsByVersion = new Map<string, WorkflowVersionStepRow[]>();
+  if (effectiveVersionIds.length > 0) {
+    const stepRes = await asAny(supabase)
+      .from("workflow_version_steps")
+      .select(
+        "id, version_id, step_order, name, approval_mode, approver_rule, deadline_hours, escalation_rule",
+      )
+      .in("version_id", effectiveVersionIds)
+      .order("step_order", { ascending: true })
+      .limit(WORKFLOW_READ_LIMIT * 10);
+    for (const raw of (stepRes.error ? [] : stepRes.data ?? []) as RawRow[]) {
+      const mode = String(raw.approval_mode ?? "");
+      if (!isValidWorkflowApprovalMode(mode)) continue;
+      const versionId = String(raw.version_id);
+      const list = stepsByVersion.get(versionId) ?? [];
+      list.push({
+        id: String(raw.id),
+        versionId,
+        stepOrder: Number(raw.step_order),
+        name: String(raw.name ?? ""),
+        approvalMode: mode,
+        rule: parseWorkflowApproverRule(raw.approver_rule),
+        deadlineHours:
+          raw.deadline_hours === null || raw.deadline_hours === undefined
+            ? null
+            : Number(raw.deadline_hours),
+        escalationEnabled: parseWorkflowEscalationEnabled(raw.escalation_rule),
+      });
+      stepsByVersion.set(versionId, list);
+    }
+  }
+
+  const templates: WorkflowTemplateAdminRow[] = [];
+  for (const raw of defs) {
+    const ctx = String(raw.context_entity_type ?? "");
+    if (!isValidWorkflowContextEntityType(ctx)) continue;
+    const defId = String(raw.id);
+    const orgId = String(raw.organization_id);
+    const effective = effectiveByDef.get(defId) ?? null;
+    const versions = (versionsByDef.get(defId) ?? [])
+      .slice()
+      .sort((a, b) => b.version - a.version);
+    const steps = effective ? stepsByVersion.get(effective.id) ?? [] : [];
+    const orgCtx = approverContext.get(orgId) ?? {
+      members: [],
+      engagementProfileIds: [],
+    };
+    const definition: WorkflowDefinitionRow = {
+      id: defId,
+      organizationId: orgId,
+      slug: String(raw.slug ?? ""),
+      name: String(raw.name ?? ""),
+      contextEntityType: ctx,
+      isActive: raw.is_active === true,
+      latestVersionId: versions[0]?.id ?? null,
+      latestVersionPublished: (versions[0]?.publishedAt ?? null) !== null,
+      stepCount: steps.length,
+    };
+    templates.push({
+      definition,
+      versions,
+      publishedVersion: effective?.publishedVersion ?? null,
+      effectiveVersionId: effective?.id ?? null,
+      effectiveVersionIsDraft: effective?.isDraft ?? false,
+      steps: steps.map((s) => ({
+        ...s,
+        resolved: resolveApproverCount(s.rule, orgCtx),
+      })),
+    });
+  }
+
+  return { status: "ok", templates, members: membersByOrg, error: null };
 }

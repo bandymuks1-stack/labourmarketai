@@ -55,12 +55,22 @@ const MODEL = read("lib/approvals/approvals-model.ts");
 const READS = read("lib/approvals/approvals.ts");
 const ACTIONS = read("lib/approvals/approvals-actions.ts");
 const SECTION = read("app/[locale]/dashboard/network/approvals-section.tsx");
+const TEMPLATES_PANEL = read(
+  "app/[locale]/dashboard/network/workflow-templates-panel.tsx",
+);
 const NETWORK_PAGE = read("app/[locale]/dashboard/network/page.tsx");
 const TIMELINE = read("components/app/workflow-timeline.tsx");
 const EVENTS = read("lib/notifications/events.ts");
 const EMITTERS = read("lib/notifications/event-emitters.ts");
 
-const APPROVALS_LAYER = [MODEL, READS, ACTIONS, SECTION, TIMELINE];
+const APPROVALS_LAYER = [
+  MODEL,
+  READS,
+  ACTIONS,
+  SECTION,
+  TEMPLATES_PANEL,
+  TIMELINE,
+];
 
 const TABLES = [
   "workflow_definitions",
@@ -81,6 +91,15 @@ const COMMANDS = [
   "withdraw_workflow_instance_v1",
   "cancel_workflow_instance_v1",
   "mark_overdue_workflow_steps_v1",
+] as const;
+
+/** The three template-MANAGEMENT commands (20260818120000). They live in a
+ *  separate human-gated migration and are called from the SAME actions file,
+ *  so the "exactly these RPCs" pin below is the union of both sets. */
+const MANAGEMENT_COMMANDS = [
+  "create_workflow_definition_version_v1",
+  "set_workflow_definition_active_v1",
+  "install_default_workflow_pack_v1",
 ] as const;
 
 const HELPERS = [
@@ -185,6 +204,15 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // replaces and triggers NO engine object — the same no-create/no-drop
       // assertions apply.
       "20260817232000_management_decisions_v1",
+      // Workflow template MANAGEMENT v1 (20260818120000) is the engine's own
+      // administration extension, not a domain consumer — but it is held to
+      // the SAME no-create/no-drop rule, which is what actually matters: it
+      // adds THREE new command names (create_workflow_definition_version_v1,
+      // set_workflow_definition_active_v1, install_default_workflow_pack_v1)
+      // and creates, drops or triggers NO engine table and NO engine command
+      // (all three assertions below apply to it unchanged). Its own contract
+      // is pinned by lib/guards/workflow-template-management.test.ts.
+      "20260818120000_workflow_template_management_v1",
     ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -484,11 +512,13 @@ describe("5. authority matrix (static SQL pins per caller class)", () => {
 });
 
 describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", () => {
-  it("the actions call exactly the eight gated commands", () => {
+  it("the actions call exactly the eight engine commands plus the three gated management commands", () => {
     const rpcCalls = [...ACTIONS.matchAll(/\.rpc\(\s*\n?\s*"([a-z0-9_]+)"/g)].map(
       (m) => m[1],
     );
-    expect(new Set(rpcCalls)).toEqual(new Set(COMMANDS));
+    expect(new Set(rpcCalls)).toEqual(
+      new Set([...COMMANDS, ...MANAGEMENT_COMMANDS]),
+    );
   });
 
   it("no .insert/.update/.delete/.upsert anywhere in the approvals layer", () => {
@@ -618,7 +648,7 @@ describe("7. no new route — the constitution-compliant expansion", () => {
   });
 
   it("the section and timeline are server components with native-nav forms only", () => {
-    for (const src of [SECTION, TIMELINE]) {
+    for (const src of [SECTION, TEMPLATES_PANEL, TIMELINE]) {
       expect(src).not.toMatch(/"use client"/);
       expect(src).not.toMatch(/useTransition|startTransition|useState/);
     }
@@ -766,6 +796,58 @@ describe("9. copy resolves in every catalogue (all 11 — no [EN] debt added)", 
     "approvals.timeline.stepLabel",
     "approvals.decision.approved",
     "approvals.decision.rejected",
+    // Template management v1 — the administration panel's own copy.
+    "approvals.tpl.title",
+    "approvals.tpl.intro",
+    "approvals.tpl.unavailable",
+    "approvals.tpl.runningImmuneNote",
+    "approvals.tpl.templateCount",
+    "approvals.tpl.installTitle",
+    "approvals.tpl.installIntro",
+    "approvals.tpl.installRule",
+    "approvals.tpl.installIdempotent",
+    "approvals.tpl.installSubmit",
+    "approvals.tpl.selfApprovalNote",
+    "approvals.tpl.active",
+    "approvals.tpl.inactive",
+    "approvals.tpl.inUseVersion",
+    "approvals.tpl.noPublishedVersion",
+    "approvals.tpl.showingDraft",
+    "approvals.tpl.roundLabel",
+    "approvals.tpl.noDeadline",
+    "approvals.tpl.deadlineHours",
+    "approvals.tpl.escalationOn",
+    "approvals.tpl.escalationOff",
+    "approvals.tpl.resolvedExact",
+    "approvals.tpl.resolvedRange",
+    "approvals.tpl.zeroWarning",
+    "approvals.tpl.zeroWarningManager",
+    "approvals.tpl.noSteps",
+    "approvals.tpl.namedPeople",
+    "approvals.tpl.versionsTitle",
+    "approvals.tpl.versionLabel",
+    "approvals.tpl.versionDraft",
+    "approvals.tpl.versionPublished",
+    "approvals.tpl.publishVersion",
+    "approvals.tpl.activate",
+    "approvals.tpl.deactivate",
+    "approvals.tpl.newVersionTitle",
+    "approvals.tpl.newVersionHint",
+    "approvals.tpl.ruleKindLabel",
+    "approvals.tpl.rolesLabel",
+    "approvals.tpl.peopleLabel",
+    "approvals.tpl.peopleHint",
+    "approvals.tpl.escalationLabel",
+    "approvals.tpl.createVersionSubmit",
+    "approvals.tpl.ruleValue.org_role",
+    "approvals.tpl.ruleValue.profiles",
+    "approvals.tpl.ruleValue.requester_manager",
+    "approvals.tpl.ruleValue.unknown",
+    "approvals.tpl.role.owner",
+    "approvals.tpl.role.admin",
+    "approvals.tpl.role.manager",
+    "approvals.tpl.role.external_manager",
+    "approvals.tpl.role.member",
   ];
 
   for (const loc of CATALOGUE) {
