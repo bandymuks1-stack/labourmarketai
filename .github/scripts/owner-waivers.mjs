@@ -238,7 +238,37 @@ export const SCOPED_OWNER_WAIVERS = [
      * authority over the product surface (the owner ordered it explicitly), not
      * over the constitution.
      */
-    pullRequests: [1184],
+    /**
+     * #1184 OPENED the surface. #1193 completes the funnel the SAME owner
+     * ruling mandated, and stops it dead-ending.
+     *
+     * OWNER RULING, 2026-08-18 priority override, verbatim:
+     *   "The only vacancy work that remains P0 now is the PRODUCT FUNNEL:
+     *    public vacancy → registration/login → exact same vacancy →
+     *    authenticated safe unlock → useful next action"
+     *   "Security and cache isolation remain mandatory."
+     *
+     * That is the same funnel §6 already described ("REGISTER / LOGIN → RETURN
+     * TO SAME JOB"), and #1193 implements its last step: the page was
+     * auth-blind, so a visitor who registered was returned to the identical
+     * "create an account" card.
+     *
+     * NOTHING ELSE ABOUT THIS RECORD CHANGES — not the axiom, not the six
+     * codes, not the five files, not the expiry, not the reason. Only the PR
+     * binding widens, and the finding set #1193 produces is byte-identical to
+     * `expectedFindings` below: verified by running
+     *   BASE_SHA=origin/main PR_NUMBER=1193 node .github/scripts/product-gate.mjs
+     * which rejected all 18 for `pr-not-covered` and for NO other reason. The
+     * subset rule therefore still binds — one new violation anywhere, including
+     * on these three surfaces, re-blocks the run.
+     *
+     * THE CATEGORY ERROR BEING EXCUSED IS UNCHANGED. #1193 adds an
+     * authenticated branch to a pre-auth acquisition route, so the five
+     * World-State answers stay honestly "no" for the anonymous caller this
+     * surface exists for, and the authenticated caller is handed into the
+     * workspace — which is what `chatIntegration` above already promised.
+     */
+    pullRequests: [1184, 1193],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
