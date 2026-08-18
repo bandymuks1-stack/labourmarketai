@@ -598,7 +598,12 @@ describe("NO new DB migration in this PR", () => {
     // 2026-08-18: 228 after restoring 20260705240000_agency_legacy_retype, an
     // ALREADY-APPLIED production migration whose file was never committed.
     // Still nothing from the market-map read layer itself.
-    expect(count).toBeLessThanOrEqual(228);
+    // 2026-08-18: 229 after 20260818160000_public_vacancy_sitemap_v1 (the
+    // public job board's crawler-discovery train — one read-only SECURITY
+    // DEFINER projection returning only `id` + `last_modified`). Still nothing
+    // from the market-map read layer itself. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 229.
+    expect(count).toBeLessThanOrEqual(229);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

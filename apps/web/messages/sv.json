@@ -747,6 +747,7 @@
     }
   },
   "nav": {
+    "jobs": "Lediga jobb",
     "workers": "För arbetstagare",
     "companies": "För företag",
     "agencies": "För bemanningsföretag",

@@ -15,6 +15,7 @@ import { isVisionPublic } from "@/lib/config/vision-publication";
 type LinkVisibility = "always" | "vision-gate";
 type NavLink = {
   key:
+    | "jobs"
     | "workers"
     | "companies"
     | "agencies"
@@ -41,6 +42,13 @@ type NavLink = {
 // page behind "Agentūroms" (/for-agencies). A nav item that goes nowhere is a
 // dead CTA, and the shortest honest fix is to stop offering it.
 const ALL_LINKS: readonly NavLink[] = [
+  // FIRST, deliberately. `/jobs` is the public board over 39,241 live imported
+  // vacancies and the highest-intent destination on the marketing site — a
+  // visitor looking for work wants the ads, not an audience page about them.
+  // It shipped with NO link from anywhere: the only route in was the card on
+  // the board itself, so a person landing on the homepage could not reach it
+  // at all and a crawler had no internal path to it either.
+  { key: "jobs", href: "/jobs", visibility: "always" },
   { key: "workers", href: "/for-workers", visibility: "always" },
   { key: "companies", href: "/for-companies", visibility: "always" },
   { key: "agencies", href: "/for-agencies", visibility: "always" },

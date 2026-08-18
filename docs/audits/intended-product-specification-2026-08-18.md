@@ -1146,3 +1146,157 @@ edited, so the remedy is documentation-only).
 decisions), U-13 (parser drops composite durations), U-14 (doctrine §3.4 vs
 per-domain event tables), U-16 (is ESCO still the intended canonical matching
 id, or did Matching PR4 supersede it).
+
+---
+
+## CORRECTION — REQ-MKT-003 was measured wrong (2026-08-18, second pass)
+
+### The matrix's #1 business loss named the wrong defect
+
+§7 ranks `REQ-MKT-003` first: *"38,142 apply-ready jobs are invisible to
+anonymous visitors and search engines — the only free acquisition asset the
+product owns generates nothing."* The §5.2 row records it `MISSING` with the
+gap *"the only public page (`/work-opportunities`) is static copy"*.
+
+**Both halves of that row are now false, and they were already false when it
+was written.** Verified this pass:
+
+| claim in the matrix | measured reality |
+|---|---|
+| no public job surface exists | `/jobs` and `/jobs/[id]` exist in `app/[locale]/(marketing)/jobs/` |
+| `RLS grants SELECT to authenticated only, no anon policy` | still true, and deliberately so — the anon path is three SECURITY DEFINER projections, not an RLS widening |
+| anonymous visitors see nothing | `search_public_vacancy_previews_v1`, `get_public_vacancy_preview_v1`, `count_public_vacancies_v1` are APPLIED in production with `anon` EXECUTE (`prosecdef = true`, `has_function_privilege('anon', …) = true`), and `set local role anon; select … ` returns rows |
+
+The board shipped under migration `20260818140000` and the row was never
+updated. **Correcting a matrix claim before verifying its premise would have
+rebuilt a page that already existed.**
+
+### The real defect, stated precisely
+
+The board is readable by anonymous callers and was **reachable by nobody**:
+
+- `/jobs` absent from `app/sitemap.ts`;
+- no sitemap listed any `/jobs/[id]` URL;
+- `robots.txt` advertised only the marketing and answer sitemaps;
+- no nav link, no footer link, no inbound internal link from any page — the
+  only route in was the vacancy card **on the board itself**, making the
+  shallowest crawl path to the last ad ~1,963 pagination hops.
+
+So the supply produced zero organic discovery **and** zero navigational
+discovery. The business loss §7 describes is real; its cause was a missing
+discovery layer, not a missing page.
+
+### Production supply — recounted, not inherited
+
+| measure | handoff | measured 2026-08-18 |
+|---|---:|---:|
+| live public vacancies | 38,142 | **39,241** |
+| total rows | 44,113 | **45,217** |
+| distinct live employers | 8,124 | **7,682** |
+| countries | 1 (SE) | **1 (SE)** — unchanged |
+| last refresh | 05:44 UTC | **11:38 UTC** |
+
+Ingestion is healthy and growing. `REQ-MKT-004` (one country, one provider)
+is unchanged and remains the next supply gap.
+
+### Status change
+
+`REQ-MKT-003` **MISSING → PARTIAL**. The anonymous read path is
+`VERIFIED_PRODUCTION`; the discovery layer is implemented but
+`IMPLEMENTED_NOT_PROVEN` until the migration is applied and a crawler is
+observed fetching the sitemap. It does not reach `VERIFIED_PRODUCTION` on merge
+— see the evidence note below.
+
+Its `UNKNOWN_OWNER_DECISION_REQUIRED` intent classification is also resolved:
+the owner directive of 2026-08-18 rules that job supply must be publicly
+discoverable **and indexable**, with anonymous callers receiving a safe
+projection only. `U-01` is therefore **CLOSED**.
+
+### Roll-up after this correction (194 rows)
+
+| Status | Count |
+|---|---:|
+| IMPLEMENTED_NOT_PROVEN | 73 |
+| PARTIAL | 45 |
+| VERIFIED_PRODUCTION | 39 |
+| MISSING | 17 |
+| BROKEN | 4 |
+| NOT_REQUIRED | 9 |
+| VERIFIED_TEST_ENVIRONMENT | 5 |
+| UNKNOWN_OWNER_DECISION_REQUIRED | 1 |
+| **Total** | **194** |
+
+### Evidence note — nothing here is BROWSER_PROVEN
+
+The session that made this correction had **no HTTP egress**: the proxy
+answered 403 to CONNECT for both `labourmarket.ai` and the Vercel preview host.
+Every statement above is `CODE_PROVEN`, `TEST_PROVEN` or `DB_PROVEN` against
+the production catalog. No page was fetched. The production check remains:
+
+```
+curl -s https://labourmarket.ai/robots.txt | grep jobs-sitemap
+curl -s https://labourmarket.ai/jobs-sitemap.xml | head -c 400
+curl -s https://labourmarket.ai/jobs-sitemap/0.xml | grep -c "<url>"
+```
+
+---
+
+## PAYMENTS — the exact edge, answered (2026-08-18)
+
+### Can labourmarket.ai accept real money today? **No.**
+
+Not "Stripe is missing" — Stripe *is* integrated, in test mode, and live
+capture is **blocked by construction at four independent layers**. Traced end
+to end:
+
+| step | state | classification |
+|---|---|---|
+| provider | `lib/billing/providers/stripe-test.ts` only; `provider.ts` returns NOOP otherwise | blocked by design |
+| account | owner's Stripe account | `OWNER_CONFIGURATION` |
+| live/test mode | `config-core.ts` hard-blocks: `mode === "live"` **or** any `sk_live_`/`pk_live_`/`rk_live_` key shape → `stripe_live_blocked`, `paymentsEnabled = false` | blocked by design |
+| credentials | live keys absent, and would be rejected if present | `CREDENTIAL_REQUIRED` |
+| product catalogue | `plans` — 4 rows in production | ready |
+| prices | `PRICING_READINESS_STATE = "draft_pricing"` — never owner-confirmed | `OWNER_COMMERCIAL_DECISION` |
+| checkout | `/api/billing/test-checkout` only; no live checkout route exists | blocked by design |
+| subscription persistence | `billing_subscriptions`, `subscriptions` tables exist — **0 rows** | ready, unexercised |
+| webhook | `/api/billing/webhook` exists and **rejects live events** | blocked by design |
+| entitlement | `entitlements-v1.ts` seam exists, deliberately permissive while payments are off | ready, unexercised |
+| invoice / receipt | provider-side only; `REQ-OPS-019` (invoices **from Work Journals**) remains MISSING | `MISSING` (product) |
+| tax / VAT | not configured | `LEGAL_TAX_DECISION` |
+| cancellation / refund | portal route exists (test mode) | ready, unexercised |
+| audit | `payment_webhook_events` exists — **0 rows** | ready, unexercised |
+| production E2E | never run; no customer, no subscription, no webhook event has ever existed | `NOT_PROVEN` |
+
+Production confirms the code: `billing_customers` 0, `billing_subscriptions` 0,
+`subscriptions` 0, `payment_webhook_events` 0, `lmc_accounts` 0,
+`lmc_transactions` 0. `plans` 4, `lmc_settings` 6.
+
+### There is no AGENT_FIXABLE work left in this chain
+
+This is the finding, and it is worth stating plainly: the remaining steps are
+**not** engineering gaps. The block is intentional, documented, and guarded
+(`no-live-payments.test.ts` + `billing-readiness.test.ts`, 39 assertions,
+verified passing this pass). Writing a live adapter would mean deleting a
+safety guard the owner put there, which §AG forbids and which no directive
+authorizes.
+
+`REQ-PAY-001` and `REQ-PAY-002` stay **BROKEN / owner-gated**, correctly
+classified.
+
+### The irreducible owner steps, in order
+
+1. Decide the prices, then flip `PRICING_READINESS_STATE` to `"owner_confirmed"`
+   (`apps/web/lib/billing/readiness.ts`) — this alone still charges nobody.
+2. Create the live products/prices in Stripe and record their ids against the
+   4 `plans` rows.
+3. Decide VAT/tax handling and invoicing entity — a legal question, not a code
+   one.
+4. Add live credentials as deployment secrets.
+5. Lift the live hard-block in `config-core.ts` **deliberately**, as its own
+   reviewed change with the kill-switch story rewritten — never as a side
+   effect of another PR.
+6. Run one real end-to-end purchase and confirm a row lands in
+   `billing_subscriptions` and `payment_webhook_events`.
+
+Steps 1–4 are owner actions. Step 5 is the only code change, and it is the one
+that must never happen quietly.
