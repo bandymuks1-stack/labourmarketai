@@ -2126,7 +2126,15 @@ describe("no migration files added by this sprint", () => {
     // RECOUNTED after merging origin/main 010547e4 (trains C, D, E and L1
     // all in the base): `ls supabase/migrations/*.sql | wc -l` = 215 real
     // files, never summed.
-    const SPRINT_BASELINE = 215;
+    // Bumped 215 -> 218 for the financial-ops train J TRIPLE
+    // (20260817220000_finance_invoice_upgrades_v1 +
+    // 20260817221000_procurement_v1 + 20260817222000_business_trips_v1;
+    // owner mandate 2026-08-17, UNAPPLIED — PENDING APPLY BY LEAD; all
+    // three ride the EXISTING workflow + document engines, none forks
+    // either). RECOUNTED after merging origin/main 39104f23 (trains C/D/E/F
+    // and L1 all in the base): `ls supabase/migrations/*.sql | wc -l` = 218
+    // real files, never summed.
+    const SPRINT_BASELINE = 218;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

@@ -9464,7 +9464,9 @@
       "cancel": "Atšaukti",
       "reopen": "Atidaryti iš naujo",
       "details": "Redaguoti duomenis",
-      "save": "Išsaugoti"
+      "save": "Išsaugoti",
+      "requestApproval": "Prašyti patvirtinimo",
+      "checkApproval": "Tikrinti patvirtinimą"
     },
     "form": {
       "title": "Naujas įrašas",
@@ -9481,7 +9483,11 @@
       "projectNone": "Be projekto",
       "companyLinkLabel": "Susieti su mano įmone (jos savininkas matys šį įrašą)",
       "noteLabel": "Pastaba (nebūtina)",
-      "submit": "Pridėti įrašą"
+      "submit": "Pridėti įrašą",
+      "invoiceNoLabel": "Sąskaitos numeris (nebūtina)",
+      "invoiceNoPlaceholder": "pvz., SF-2026-014",
+      "vatLabel": "PVM suma (nebūtina)",
+      "invoiceHint": "Sąskaitos numeris ir PVM nebūtini. Jei gauta sąskaita kartoja jau išsaugotą to paties tiekėjo numerį, įrašas vis tiek išsaugomas, o jūs matote įspėjimą."
     },
     "notice": {
       "created": "Įrašas pridėtas.",
@@ -9491,7 +9497,25 @@
       "not_authorized": "Jums neleidžiama to daryti.",
       "not_found": "Įrašas nerastas.",
       "limit_reached": "Pasiektas įrašų limitas — šis rankinis sąrašas yra ribojamas.",
-      "error": "Išsaugoti nepavyko. Pabandykite dar kartą."
+      "error": "Išsaugoti nepavyko. Pabandykite dar kartą.",
+      "created_possible_duplicate": "Išsaugota, bet įrašas su šiuo tiekėju ir sąskaitos numeriu jau yra. Patikrinkite, ar tai ne dublikatas.",
+      "approval_submitted": "Patvirtinimo paprašyta. Tvirtintojai informuoti.",
+      "approval_approved": "Šis įrašas patvirtintas.",
+      "approval_rejected": "Šis įrašas nepatvirtintas.",
+      "approval_pending": "Sprendimas dėl patvirtinimo dar nepriimtas.",
+      "approval_cleared": "Patvirtinimo prašymas atšauktas.",
+      "approval_none": "Šiam įrašui patvirtinimo prašymo nerasta.",
+      "no_template": "Ši įmonė dar neturi paskelbtos patvirtinimo eigos, todėl patvirtinimo paprašyti negalima.",
+      "no_approvers": "Šiuo metu įmonėje nėra kam patvirtinti šio prašymo."
+    },
+    "invoiceNoLabel": "Sąskaitos nr.",
+    "vatLabel": "PVM",
+    "documentLinked": "Pridėtas dokumentas",
+    "tripLinked": "Susieta komandiruotė",
+    "approval": {
+      "pending": "Laukiama patvirtinimo",
+      "approved": "Patvirtinta",
+      "rejected": "Nepatvirtinta"
     }
   },
   "structuredDemand": {
@@ -12822,6 +12846,153 @@
       "unpaid": "Nemokamos atostogos",
       "training": "Mokymai",
       "other": "Kita"
+    }
+  },
+  "procurement": {
+    "title": "Pirkimai",
+    "intro": "Paprašykite medžiagų ar paslaugų, užsirašykite tiekėjų pasiūlymus ir pažymėkite, kas pasirinkta. Niekas čia nesusisiekia su tiekėju ir nieko neužsako — tai jūsų įrašai.",
+    "needsMigration": "Pirkimų prašymai šioje aplinkoje dar neįjungti.",
+    "readError": "Pirkimų prašymų nepavyko įkelti. Bandykite dar kartą.",
+    "empty": "Pirkimų prašymų dar nėra.",
+    "noOffers": "Tiekėjų pasiūlymų dar neužrašyta.",
+    "offerSelected": "Pasirinkta",
+    "orderRefLabel": "Užsakymo nr.",
+    "invoiceLinked": "Susieta sąskaita",
+    "status": {
+      "draft": "Juodraštis",
+      "submitted": "Pateikta",
+      "decided": "Nuspręsta",
+      "ordered": "Užsakyta",
+      "closed": "Užbaigta",
+      "cancelled": "Atšaukta"
+    },
+    "approval": {
+      "pending": "Laukiama patvirtinimo",
+      "approved": "Patvirtinta",
+      "rejected": "Nepatvirtinta"
+    },
+    "form": {
+      "open": "Naujas pirkimo prašymas",
+      "orgLabel": "Įmonė",
+      "descriptionLabel": "Ko reikia",
+      "descriptionPlaceholder": "pvz., 40 maišų cemento pamatams",
+      "quantityLabel": "Kiekis (nebūtina)",
+      "quantityPlaceholder": "pvz., 40 maišų",
+      "budgetLabel": "Numatomas biudžetas EUR (nebūtina)",
+      "submit": "Išsaugoti prašymą",
+      "supplierLabel": "Tiekėjo pavadinimas",
+      "offerAmountLabel": "Pasiūlymo suma EUR",
+      "offerNoteLabel": "Pastaba (nebūtina)",
+      "orderRefPlaceholder": "Užsakymo numeris (nebūtina)",
+      "invoiceNone": "Sąskaita nesusieta"
+    },
+    "actions": {
+      "selectOffer": "Pasirinkti šį pasiūlymą",
+      "addOffer": "Užrašyti tiekėjo pasiūlymą",
+      "saveOffer": "Išsaugoti pasiūlymą",
+      "edit": "Redaguoti",
+      "save": "Išsaugoti",
+      "submit": "Pateikti",
+      "requestApproval": "Prašyti patvirtinimo",
+      "checkApproval": "Tikrinti patvirtinimą",
+      "markOrdered": "Pažymėti kaip užsakytą",
+      "close": "Užbaigti",
+      "cancel": "Atšaukti",
+      "linkInvoice": "Susieti sąskaitą"
+    },
+    "notice": {
+      "created": "Pirkimo prašymas išsaugotas.",
+      "updated": "Pirkimo prašymas atnaujintas.",
+      "submitted": "Pirkimo prašymas pateiktas.",
+      "offer_added": "Tiekėjo pasiūlymas užrašytas.",
+      "decided": "Pasiūlymas pasirinktas.",
+      "linked": "Sąskaita susieta.",
+      "unlinked": "Sąskaitos susiejimas pašalintas.",
+      "cancelled": "Pirkimo prašymas atšauktas.",
+      "invalid": "Patikrinkite įvestus duomenis.",
+      "needs_migration": "Pirkimų prašymai šioje aplinkoje dar neįjungti.",
+      "not_authorized": "Šio veiksmo atlikti negalite.",
+      "not_found": "Šis pirkimo prašymas nerastas.",
+      "not_editable": "Šioje būsenoje šis žingsnis negalimas.",
+      "limit_reached": "Pasiektas atvirų prašymų limitas.",
+      "approval_submitted": "Patvirtinimo paprašyta. Tvirtintojai informuoti.",
+      "approval_approved": "Šis prašymas patvirtintas.",
+      "approval_rejected": "Šis prašymas nepatvirtintas.",
+      "approval_pending": "Sprendimas dėl patvirtinimo dar nepriimtas.",
+      "approval_cleared": "Patvirtinimo prašymas atšauktas.",
+      "approval_none": "Patvirtinimo prašymo nerasta.",
+      "no_template": "Ši įmonė dar neturi paskelbtos pirkimų patvirtinimo eigos.",
+      "no_approvers": "Šiuo metu įmonėje nėra kam patvirtinti šio prašymo.",
+      "error": "Įvyko klaida. Niekas neišsaugota."
+    }
+  },
+  "trips": {
+    "title": "Komandiruotės",
+    "intro": "Paprašykite komandiruotės, gaukite patvirtinimą ir laikykite jos išlaidas vienoje vietoje. Niekas čia neužsako kelionių ir nemoka pinigų — tai jūsų įrašai.",
+    "needsMigration": "Komandiruotės šioje aplinkoje dar neįjungtos.",
+    "readError": "Komandiruočių nepavyko įkelti. Bandykite dar kartą.",
+    "empty": "Komandiruočių dar nėra.",
+    "orgHeading": "Jūsų valdomų žmonių komandiruotės",
+    "advanceLabel": "Avansas",
+    "expensesLabel": "Išlaidos",
+    "noTemplate": "Ši įmonė dar neturi paskelbtos komandiruočių patvirtinimo eigos, todėl komandiruotės pateikti negalima.",
+    "status": {
+      "draft": "Juodraštis",
+      "submitted": "Pateikta",
+      "approved": "Patvirtinta",
+      "rejected": "Nepatvirtinta",
+      "completed": "Įvykusi",
+      "cancelled": "Atšaukta"
+    },
+    "form": {
+      "open": "Naujas komandiruotės prašymas",
+      "orgLabel": "Įmonė",
+      "destinationLabel": "Kryptis",
+      "destinationPlaceholder": "pvz., Oslas, Norvegija",
+      "fromLabel": "Pirma diena",
+      "toLabel": "Paskutinė diena",
+      "purposeLabel": "Tikslas",
+      "purposePlaceholder": "pvz., langų montavimas Oslo objekte",
+      "advanceLabel": "Avansas EUR (nebūtina)",
+      "advanceHint": "Avansas — tik sutartos sumos užrašas, pavyzdžiui, dienpinigiai. Pinigai nejudinami.",
+      "submit": "Išsaugoti komandiruotę",
+      "recordPick": "Pasirinkite įrašą…"
+    },
+    "actions": {
+      "edit": "Redaguoti",
+      "save": "Išsaugoti",
+      "submit": "Pateikti patvirtinti",
+      "checkDecision": "Tikrinti sprendimą",
+      "complete": "Pažymėti kaip įvykusią",
+      "cancel": "Atšaukti",
+      "linkExpense": "Pridėti prie šios komandiruotės",
+      "unlink": "Pašalinti",
+      "createTemplate": "Sukurti standartinę patvirtinimo eigą"
+    },
+    "notice": {
+      "created": "Komandiruotė išsaugota.",
+      "updated": "Komandiruotė atnaujinta.",
+      "submitted": "Komandiruotė pateikta patvirtinti.",
+      "approved": "Komandiruotė patvirtinta.",
+      "rejected": "Komandiruotė nepatvirtinta.",
+      "reopened": "Patvirtinimo prašymo nebeliko — komandiruotė vėl juodraštis.",
+      "completed": "Komandiruotė pažymėta kaip įvykusi.",
+      "cancelled": "Komandiruotė atšaukta.",
+      "linked": "Įrašas pridėtas prie komandiruotės.",
+      "unlinked": "Įrašas pašalintas iš komandiruotės.",
+      "invalid": "Patikrinkite įvestus duomenis.",
+      "invalid_dates": "Patikrinkite komandiruotės datas.",
+      "needs_migration": "Komandiruotės šioje aplinkoje dar neįjungtos.",
+      "not_authorized": "Šio veiksmo atlikti negalite.",
+      "not_found": "Ši komandiruotė nerasta.",
+      "not_editable": "Šioje būsenoje šis žingsnis negalimas.",
+      "limit_reached": "Pasiektas atvirų komandiruočių limitas.",
+      "still_pending": "Sprendimas dėl patvirtinimo dar nepriimtas.",
+      "no_instance": "Šiai komandiruotei patvirtinimo prašymo nerasta.",
+      "no_template": "Ši įmonė dar neturi paskelbtos komandiruočių patvirtinimo eigos.",
+      "no_approvers": "Šiuo metu įmonėje nėra kam patvirtinti šios komandiruotės.",
+      "template_created": "Įmonei sukurta standartinė patvirtinimo eiga.",
+      "error": "Įvyko klaida. Niekas neišsaugota."
     }
   }
 }

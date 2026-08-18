@@ -4794,5 +4794,184 @@
       "remainingShort": "jäänud {days} p",
       "exceedsNote": "Rohkem kui järelejäänud puhkus"
     }
+  },
+  "finance": {
+    "invoiceNoLabel": "Arve nr",
+    "vatLabel": "KM",
+    "documentLinked": "Dokument lisatud",
+    "tripLinked": "Lähetus seotud",
+    "approval": {
+      "pending": "Ootab kinnitust",
+      "approved": "Kinnitatud",
+      "rejected": "Kinnitamata"
+    },
+    "form": {
+      "invoiceNoLabel": "Arve number (valikuline)",
+      "invoiceNoPlaceholder": "nt ARV-2026-014",
+      "vatLabel": "Käibemaksu summa (valikuline)",
+      "invoiceHint": "Arve number ja käibemaks on valikulised. Kui saabunud arve kordab sama partneri juba salvestatud numbrit, salvestatakse kirje siiski ja näete hoiatust."
+    },
+    "actions": {
+      "requestApproval": "Küsi kinnitust",
+      "checkApproval": "Kontrolli kinnitust"
+    },
+    "notice": {
+      "created_possible_duplicate": "Salvestatud — kuid selle partneri ja arve numbriga kirje on juba olemas. Kontrollige, kas tegu pole duplikaadiga.",
+      "approval_submitted": "Kinnitust küsitud. Kinnitajaid on teavitatud.",
+      "approval_approved": "See kirje kinnitati.",
+      "approval_rejected": "Seda kirjet ei kinnitatud.",
+      "approval_pending": "Kinnitusotsust pole veel tehtud.",
+      "approval_cleared": "Kinnitustaotlus võeti tagasi või tühistati.",
+      "approval_none": "Selle kirje kohta kinnitustaotlust ei leitud.",
+      "no_template": "Sellel ettevõttel pole veel avaldatud kinnitamise korda, seega kinnitust küsida ei saa.",
+      "no_approvers": "Praegu ei saa ettevõttes keegi seda taotlust kinnitada."
+    }
+  },
+  "procurement": {
+    "title": "Ostud",
+    "intro": "Küsige materjale või teenuseid, märkige üles tarnijate pakkumised ja pange kirja, mis valiti. Miski siin ei võta tarnijaga ühendust ega telli midagi — see on teie arvestus.",
+    "needsMigration": "Ostutaotlused pole selles keskkonnas veel lubatud.",
+    "readError": "Ostutaotlusi ei õnnestunud laadida. Proovige uuesti.",
+    "empty": "Ostutaotlusi veel pole.",
+    "noOffers": "Tarnijate pakkumisi pole veel kirja pandud.",
+    "offerSelected": "Valitud",
+    "orderRefLabel": "Tellimuse nr",
+    "invoiceLinked": "Arve seotud",
+    "status": {
+      "draft": "Mustand",
+      "submitted": "Esitatud",
+      "decided": "Otsustatud",
+      "ordered": "Tellitud",
+      "closed": "Suletud",
+      "cancelled": "Tühistatud"
+    },
+    "approval": {
+      "pending": "Ootab kinnitust",
+      "approved": "Kinnitatud",
+      "rejected": "Kinnitamata"
+    },
+    "form": {
+      "open": "Uus ostutaotlus",
+      "orgLabel": "Ettevõte",
+      "descriptionLabel": "Mida on vaja",
+      "descriptionPlaceholder": "nt 40 kotti tsementi vundamendi jaoks",
+      "quantityLabel": "Kogus (valikuline)",
+      "quantityPlaceholder": "nt 40 kotti",
+      "budgetLabel": "Hinnanguline eelarve EUR (valikuline)",
+      "submit": "Salvesta taotlus",
+      "supplierLabel": "Tarnija nimi",
+      "offerAmountLabel": "Pakkumise summa EUR",
+      "offerNoteLabel": "Märkus (valikuline)",
+      "orderRefPlaceholder": "Tellimuse number (valikuline)",
+      "invoiceNone": "Arvet pole seotud"
+    },
+    "actions": {
+      "selectOffer": "Vali see pakkumine",
+      "addOffer": "Pane tarnija pakkumine kirja",
+      "saveOffer": "Salvesta pakkumine",
+      "edit": "Muuda",
+      "save": "Salvesta",
+      "submit": "Esita",
+      "requestApproval": "Küsi kinnitust",
+      "checkApproval": "Kontrolli kinnitust",
+      "markOrdered": "Märgi tellituks",
+      "close": "Sulge",
+      "cancel": "Tühista",
+      "linkInvoice": "Seo arve"
+    },
+    "notice": {
+      "created": "Ostutaotlus salvestatud.",
+      "updated": "Ostutaotlus uuendatud.",
+      "submitted": "Ostutaotlus esitatud.",
+      "offer_added": "Tarnija pakkumine kirja pandud.",
+      "decided": "Pakkumine valitud.",
+      "linked": "Arve seotud.",
+      "unlinked": "Arve seos eemaldatud.",
+      "cancelled": "Ostutaotlus tühistatud.",
+      "invalid": "Kontrollige sisestatud andmeid.",
+      "needs_migration": "Ostutaotlused pole selles keskkonnas veel lubatud.",
+      "not_authorized": "Te ei saa seda selle taotluse puhul teha.",
+      "not_found": "Seda ostutaotlust ei leitud.",
+      "not_editable": "Selles olekus pole see samm võimalik.",
+      "limit_reached": "Avatud taotluste piir on saavutatud.",
+      "approval_submitted": "Kinnitust küsitud. Kinnitajaid on teavitatud.",
+      "approval_approved": "See taotlus kinnitati.",
+      "approval_rejected": "Seda taotlust ei kinnitatud.",
+      "approval_pending": "Kinnitusotsust pole veel tehtud.",
+      "approval_cleared": "Kinnitustaotlus võeti tagasi või tühistati.",
+      "approval_none": "Kinnitustaotlust ei leitud.",
+      "no_template": "Sellel ettevõttel pole veel avaldatud ostude kinnitamise korda.",
+      "no_approvers": "Praegu ei saa ettevõttes keegi seda taotlust kinnitada.",
+      "error": "Midagi läks valesti. Midagi ei salvestatud."
+    }
+  },
+  "trips": {
+    "title": "Lähetused",
+    "intro": "Taotlege lähetust, saage kinnitus ja hoidke selle kulud koos. Miski siin ei broneeri reise ega maksa raha välja — see on teie arvestus.",
+    "needsMigration": "Lähetused pole selles keskkonnas veel lubatud.",
+    "readError": "Lähetusi ei õnnestunud laadida. Proovige uuesti.",
+    "empty": "Lähetusi veel pole.",
+    "orgHeading": "Teie juhitavate inimeste lähetused",
+    "advanceLabel": "Avanss",
+    "expensesLabel": "Kulud",
+    "noTemplate": "Sellel ettevõttel pole veel avaldatud lähetuste kinnitamise korda, seega lähetust esitada ei saa.",
+    "status": {
+      "draft": "Mustand",
+      "submitted": "Esitatud",
+      "approved": "Kinnitatud",
+      "rejected": "Kinnitamata",
+      "completed": "Lõpetatud",
+      "cancelled": "Tühistatud"
+    },
+    "form": {
+      "open": "Uus lähetuse taotlus",
+      "orgLabel": "Ettevõte",
+      "destinationLabel": "Sihtkoht",
+      "destinationPlaceholder": "nt Oslo, Norra",
+      "fromLabel": "Esimene päev",
+      "toLabel": "Viimane päev",
+      "purposeLabel": "Eesmärk",
+      "purposePlaceholder": "nt akende paigaldus Oslo objektil",
+      "advanceLabel": "Avanss EUR (valikuline)",
+      "advanceHint": "Avanss on ainult kokkulepitud summa märge, näiteks päevaraha. Raha ei liigutata.",
+      "submit": "Salvesta lähetus",
+      "recordPick": "Valige kirje…"
+    },
+    "actions": {
+      "edit": "Muuda",
+      "save": "Salvesta",
+      "submit": "Esita kinnitamiseks",
+      "checkDecision": "Kontrolli otsust",
+      "complete": "Märgi lõpetatuks",
+      "cancel": "Tühista",
+      "linkExpense": "Lisa sellele lähetusele",
+      "unlink": "Eemalda",
+      "createTemplate": "Loo standardne kinnitamise kord"
+    },
+    "notice": {
+      "created": "Lähetus salvestatud.",
+      "updated": "Lähetus uuendatud.",
+      "submitted": "Lähetus esitatud kinnitamiseks.",
+      "approved": "Lähetus kinnitati.",
+      "rejected": "Lähetust ei kinnitatud.",
+      "reopened": "Kinnitustaotlust enam pole — lähetus on taas mustand.",
+      "completed": "Lähetus märgiti lõpetatuks.",
+      "cancelled": "Lähetus tühistati.",
+      "linked": "Kirje lisati lähetusele.",
+      "unlinked": "Kirje eemaldati lähetuselt.",
+      "invalid": "Kontrollige sisestatud andmeid.",
+      "invalid_dates": "Kontrollige lähetuse kuupäevi.",
+      "needs_migration": "Lähetused pole selles keskkonnas veel lubatud.",
+      "not_authorized": "Te ei saa seda selle lähetuse puhul teha.",
+      "not_found": "Seda lähetust ei leitud.",
+      "not_editable": "Selles olekus pole see samm võimalik.",
+      "limit_reached": "Avatud lähetuste piir on saavutatud.",
+      "still_pending": "Kinnitusotsust pole veel tehtud.",
+      "no_instance": "Selle lähetuse kohta kinnitustaotlust ei leitud.",
+      "no_template": "Sellel ettevõttel pole veel avaldatud lähetuste kinnitamise korda.",
+      "no_approvers": "Praegu ei saa ettevõttes keegi seda lähetust kinnitada.",
+      "template_created": "Ettevõttele loodi standardne kinnitamise kord.",
+      "error": "Midagi läks valesti. Midagi ei salvestatud."
+    }
   }
 }

@@ -545,7 +545,13 @@ describe("NO new DB migration in this PR", () => {
     // — nothing from the market-map read layer. RECOUNTED after merging
     // origin/main 010547e4 (trains C/D/E/L1 in base): 215 real files in
     // the tree, never summed.
-    expect(count).toBeLessThanOrEqual(215);
+    // Bumped 215 -> 218 for the financial-ops train J TRIPLE
+    // (20260817220000 finance invoice upgrades + 20260817221000 procurement
+    // + 20260817222000 business trips; owner mandate 2026-08-17, paired
+    // rollbacks, ships UNAPPLIED, PENDING APPLY BY LEAD) — again nothing
+    // from the market-map read layer. RECOUNTED after merging origin/main
+    // 39104f23 (trains C/D/E/F/L1 in base): 218 real files, never summed.
+    expect(count).toBeLessThanOrEqual(218);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

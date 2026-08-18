@@ -408,7 +408,7 @@ export async function submitFinanceApprovalAction(
   const startRes = await asAny(supabase).rpc("start_workflow_instance_v1", {
     p_definition_id: published!.id,
     p_title: title.length >= 3 ? title : `Record ${recordId.slice(0, 8)}`,
-    p_payload: { recordId, recordType: record.record_type },
+    p_payload: { recordId, recordType: record.recordType },
     p_context_entity_id: recordId,
   });
   if (startRes.error) finish(ctx, noticeForRpcError(startRes.error));

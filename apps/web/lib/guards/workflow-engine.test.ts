@@ -153,6 +153,17 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // workflow_instances; FK to workflow_instances. Never defines,
       // replaces or triggers an engine object (asserted below).
       "20260817180000_employee_requests_v1",
+      // Financial ops (train J): expense/invoice approval, procurement
+      // approval and business-trip approval all ride the engine
+      // (context_entity_type 'expense'|'invoice'|'procurement'|
+      // 'business_trip' — all four already in the engine's own vocabulary).
+      // Each migration asserts workflow_instances exists and its sync
+      // command READS workflow_instances to COPY a terminal outcome onto a
+      // module-local mirror column. None defines, replaces or triggers an
+      // engine object (asserted below).
+      "20260817220000_finance_invoice_upgrades_v1",
+      "20260817221000_procurement_v1",
+      "20260817222000_business_trips_v1",
     ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -498,6 +509,20 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // RLS-scoped server client, bounded, read-only; writes stay engine
       // commands. Guarded in lib/guards/employee-requests.test.ts.
       "lib/requests/requests.ts",
+      // Financial ops (train J) — expense/invoice approval, procurement
+      // approval and business-trip approval, all on the SAME engine with
+      // the SAME discipline: the actions read workflow_definitions (+ their
+      // versions) to find the org's PUBLISHED template before calling the
+      // engine's own start RPC, and the read services read
+      // workflow_instances to detect a TERMINAL outcome so the gated sync
+      // RPC can copy it onto a module-local mirror. Reads only — every
+      // write is an engine command or the module's own gated RPC, pinned by
+      // lib/guards/financial-ops.test.ts.
+      "lib/finance/finance-actions.ts",
+      "lib/procurement/procurement.ts",
+      "lib/procurement/procurement-actions.ts",
+      "lib/trips/trips.ts",
+      "lib/trips/trips-actions.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {

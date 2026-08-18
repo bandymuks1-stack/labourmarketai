@@ -444,6 +444,13 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 213 -> 215 in product-readiness.test.ts (recounted after merging
     // origin/main 010547e4, trains C/D/E/L1 in base). This floor assertion
     // again needs no numeric edit.
+    //
+    // Cross-pin follows: the financial-ops train J TRIPLE (20260817220000
+    // finance invoice upgrades + 20260817221000 procurement + 20260817222000
+    // business trips) took SPRINT_BASELINE 215 -> 218 in
+    // product-readiness.test.ts (RECOUNTED after merging origin/main
+    // 39104f23, trains C/D/E/F/L1 in base). This floor assertion needs no
+    // numeric edit either.
     // ...and changed from an EXACT literal match to a numeric floor while doing
     // so. This assertion exists to prove the baseline is high enough for
     // migration 0030 to exist; pinning the exact number meant every unrelated,

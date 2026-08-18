@@ -4794,5 +4794,184 @@
       "remainingShort": "atlicis {days} d.",
       "exceedsNote": "Vairāk nekā atlikušais atvaļinājums"
     }
+  },
+  "finance": {
+    "invoiceNoLabel": "Rēķina nr.",
+    "vatLabel": "PVN",
+    "documentLinked": "Dokuments pievienots",
+    "tripLinked": "Saistīts komandējums",
+    "approval": {
+      "pending": "Gaida apstiprinājumu",
+      "approved": "Apstiprināts",
+      "rejected": "Nav apstiprināts"
+    },
+    "form": {
+      "invoiceNoLabel": "Rēķina numurs (nav obligāts)",
+      "invoiceNoPlaceholder": "piem., RE-2026-014",
+      "vatLabel": "PVN summa (nav obligāta)",
+      "invoiceHint": "Rēķina numurs un PVN nav obligāti. Ja saņemtais rēķins atkārto jau saglabātu tā paša partnera numuru, ieraksts tomēr tiek saglabāts, un jūs redzat brīdinājumu."
+    },
+    "actions": {
+      "requestApproval": "Pieprasīt apstiprinājumu",
+      "checkApproval": "Pārbaudīt apstiprinājumu"
+    },
+    "notice": {
+      "created_possible_duplicate": "Saglabāts — bet ieraksts ar šo partneri un rēķina numuru jau pastāv. Pārbaudiet, vai tas nav dublikāts.",
+      "approval_submitted": "Apstiprinājums pieprasīts. Apstiprinātāji ir informēti.",
+      "approval_approved": "Šis ieraksts tika apstiprināts.",
+      "approval_rejected": "Šis ieraksts netika apstiprināts.",
+      "approval_pending": "Lēmums par apstiprinājumu vēl nav pieņemts.",
+      "approval_cleared": "Apstiprinājuma pieprasījums tika atsaukts vai atcelts.",
+      "approval_none": "Šim ierakstam apstiprinājuma pieprasījums nav atrasts.",
+      "no_template": "Šim uzņēmumam vēl nav publicētas apstiprināšanas kārtības, tāpēc apstiprinājumu nevar pieprasīt.",
+      "no_approvers": "Pašlaik uzņēmumā neviens nevar apstiprināt šo pieprasījumu."
+    }
+  },
+  "procurement": {
+    "title": "Iepirkumi",
+    "intro": "Pieprasiet materiālus vai pakalpojumus, pierakstiet piegādātāju piedāvājumus un atzīmējiet izvēlēto. Nekas šeit nesazinās ar piegādātāju un neko nepasūta — tie ir jūsu ieraksti.",
+    "needsMigration": "Iepirkumu pieprasījumi šajā vidē vēl nav iespējoti.",
+    "readError": "Neizdevās ielādēt iepirkumu pieprasījumus. Mēģiniet vēlreiz.",
+    "empty": "Iepirkumu pieprasījumu vēl nav.",
+    "noOffers": "Piegādātāju piedāvājumi vēl nav pierakstīti.",
+    "offerSelected": "Izvēlēts",
+    "orderRefLabel": "Pasūtījuma nr.",
+    "invoiceLinked": "Rēķins saistīts",
+    "status": {
+      "draft": "Melnraksts",
+      "submitted": "Iesniegts",
+      "decided": "Izlemts",
+      "ordered": "Pasūtīts",
+      "closed": "Slēgts",
+      "cancelled": "Atcelts"
+    },
+    "approval": {
+      "pending": "Gaida apstiprinājumu",
+      "approved": "Apstiprināts",
+      "rejected": "Nav apstiprināts"
+    },
+    "form": {
+      "open": "Jauns iepirkuma pieprasījums",
+      "orgLabel": "Uzņēmums",
+      "descriptionLabel": "Kas vajadzīgs",
+      "descriptionPlaceholder": "piem., 40 maisi cementa pamatiem",
+      "quantityLabel": "Daudzums (nav obligāts)",
+      "quantityPlaceholder": "piem., 40 maisi",
+      "budgetLabel": "Plānotais budžets EUR (nav obligāts)",
+      "submit": "Saglabāt pieprasījumu",
+      "supplierLabel": "Piegādātāja nosaukums",
+      "offerAmountLabel": "Piedāvājuma summa EUR",
+      "offerNoteLabel": "Piezīme (nav obligāta)",
+      "orderRefPlaceholder": "Pasūtījuma numurs (nav obligāts)",
+      "invoiceNone": "Rēķins nav saistīts"
+    },
+    "actions": {
+      "selectOffer": "Izvēlēties šo piedāvājumu",
+      "addOffer": "Pierakstīt piegādātāja piedāvājumu",
+      "saveOffer": "Saglabāt piedāvājumu",
+      "edit": "Rediģēt",
+      "save": "Saglabāt",
+      "submit": "Iesniegt",
+      "requestApproval": "Pieprasīt apstiprinājumu",
+      "checkApproval": "Pārbaudīt apstiprinājumu",
+      "markOrdered": "Atzīmēt kā pasūtītu",
+      "close": "Slēgt",
+      "cancel": "Atcelt",
+      "linkInvoice": "Saistīt rēķinu"
+    },
+    "notice": {
+      "created": "Iepirkuma pieprasījums saglabāts.",
+      "updated": "Iepirkuma pieprasījums atjaunināts.",
+      "submitted": "Iepirkuma pieprasījums iesniegts.",
+      "offer_added": "Piegādātāja piedāvājums pierakstīts.",
+      "decided": "Piedāvājums izvēlēts.",
+      "linked": "Rēķins saistīts.",
+      "unlinked": "Rēķina saistījums noņemts.",
+      "cancelled": "Iepirkuma pieprasījums atcelts.",
+      "invalid": "Pārbaudiet ievadītos datus.",
+      "needs_migration": "Iepirkumu pieprasījumi šajā vidē vēl nav iespējoti.",
+      "not_authorized": "Jūs nevarat to izdarīt šim pieprasījumam.",
+      "not_found": "Šis iepirkuma pieprasījums nav atrasts.",
+      "not_editable": "Šajā stāvoklī šis solis nav iespējams.",
+      "limit_reached": "Sasniegts atvērto pieprasījumu limits.",
+      "approval_submitted": "Apstiprinājums pieprasīts. Apstiprinātāji ir informēti.",
+      "approval_approved": "Šis pieprasījums tika apstiprināts.",
+      "approval_rejected": "Šis pieprasījums netika apstiprināts.",
+      "approval_pending": "Lēmums par apstiprinājumu vēl nav pieņemts.",
+      "approval_cleared": "Apstiprinājuma pieprasījums tika atsaukts vai atcelts.",
+      "approval_none": "Apstiprinājuma pieprasījums nav atrasts.",
+      "no_template": "Šim uzņēmumam vēl nav publicētas iepirkumu apstiprināšanas kārtības.",
+      "no_approvers": "Pašlaik uzņēmumā neviens nevar apstiprināt šo pieprasījumu.",
+      "error": "Kaut kas nogāja greizi. Nekas netika saglabāts."
+    }
+  },
+  "trips": {
+    "title": "Komandējumi",
+    "intro": "Pieprasiet komandējumu, saņemiet apstiprinājumu un turiet tā izmaksas kopā. Nekas šeit nerezervē ceļojumus un nemaksā naudu — tie ir jūsu ieraksti.",
+    "needsMigration": "Komandējumi šajā vidē vēl nav iespējoti.",
+    "readError": "Neizdevās ielādēt komandējumus. Mēģiniet vēlreiz.",
+    "empty": "Komandējumu vēl nav.",
+    "orgHeading": "Jūsu vadīto cilvēku komandējumi",
+    "advanceLabel": "Avanss",
+    "expensesLabel": "Izmaksas",
+    "noTemplate": "Šim uzņēmumam vēl nav publicētas komandējumu apstiprināšanas kārtības, tāpēc komandējumu nevar iesniegt.",
+    "status": {
+      "draft": "Melnraksts",
+      "submitted": "Iesniegts",
+      "approved": "Apstiprināts",
+      "rejected": "Nav apstiprināts",
+      "completed": "Pabeigts",
+      "cancelled": "Atcelts"
+    },
+    "form": {
+      "open": "Jauns komandējuma pieprasījums",
+      "orgLabel": "Uzņēmums",
+      "destinationLabel": "Galamērķis",
+      "destinationPlaceholder": "piem., Oslo, Norvēģija",
+      "fromLabel": "Pirmā diena",
+      "toLabel": "Pēdējā diena",
+      "purposeLabel": "Mērķis",
+      "purposePlaceholder": "piem., logu montāža Oslo objektā",
+      "advanceLabel": "Avanss EUR (nav obligāts)",
+      "advanceHint": "Avanss ir tikai piezīme par saskaņoto summu, piemēram, dienas naudu. Nauda netiek pārvietota.",
+      "submit": "Saglabāt komandējumu",
+      "recordPick": "Izvēlieties ierakstu…"
+    },
+    "actions": {
+      "edit": "Rediģēt",
+      "save": "Saglabāt",
+      "submit": "Iesniegt apstiprināšanai",
+      "checkDecision": "Pārbaudīt lēmumu",
+      "complete": "Atzīmēt kā pabeigtu",
+      "cancel": "Atcelt",
+      "linkExpense": "Pievienot šim komandējumam",
+      "unlink": "Noņemt",
+      "createTemplate": "Izveidot standarta apstiprināšanas kārtību"
+    },
+    "notice": {
+      "created": "Komandējums saglabāts.",
+      "updated": "Komandējums atjaunināts.",
+      "submitted": "Komandējums iesniegts apstiprināšanai.",
+      "approved": "Komandējums tika apstiprināts.",
+      "rejected": "Komandējums netika apstiprināts.",
+      "reopened": "Apstiprinājuma pieprasījuma vairs nav — komandējums atkal ir melnraksts.",
+      "completed": "Komandējums atzīmēts kā pabeigts.",
+      "cancelled": "Komandējums atcelts.",
+      "linked": "Ieraksts pievienots komandējumam.",
+      "unlinked": "Ieraksts noņemts no komandējuma.",
+      "invalid": "Pārbaudiet ievadītos datus.",
+      "invalid_dates": "Pārbaudiet komandējuma datumus.",
+      "needs_migration": "Komandējumi šajā vidē vēl nav iespējoti.",
+      "not_authorized": "Jūs nevarat to izdarīt šim komandējumam.",
+      "not_found": "Šis komandējums nav atrasts.",
+      "not_editable": "Šajā stāvoklī šis solis nav iespējams.",
+      "limit_reached": "Sasniegts atvērto komandējumu limits.",
+      "still_pending": "Lēmums par apstiprinājumu vēl nav pieņemts.",
+      "no_instance": "Šim komandējumam apstiprinājuma pieprasījums nav atrasts.",
+      "no_template": "Šim uzņēmumam vēl nav publicētas komandējumu apstiprināšanas kārtības.",
+      "no_approvers": "Pašlaik uzņēmumā neviens nevar apstiprināt šo komandējumu.",
+      "template_created": "Uzņēmumam izveidota standarta apstiprināšanas kārtība.",
+      "error": "Kaut kas nogāja greizi. Nekas netika saglabāts."
+    }
   }
 }

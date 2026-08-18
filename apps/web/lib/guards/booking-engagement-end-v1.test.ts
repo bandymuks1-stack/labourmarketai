@@ -834,6 +834,21 @@ describe("the migration set is exactly what this slice declared", () => {
       // lib/guards/employee-requests.test.ts.
       "20260817180000_employee_requests_v1.sql",
       "20260817181000_leave_balance_policies_v1.sql",
+      // 2026-08-17: financial ops (train J of the same autonomous functional
+      // completion train V2). All three markers cite the SAME owner mandate
+      // 2026-08-17 §4 migration authority + safety class in their headers.
+      // The RED content is structurally unavoidable: gated SECURITY DEFINER
+      // commands + EXECUTE grants (invoice upgrades), and additionally new
+      // RLS-bearing tables + an append-only trigger guard (procurement,
+      // business trips). All three ship UNAPPLIED (ledger: PENDING APPLY BY
+      // LEAD), with paired rollbacks. They CONSUME the workflow + document
+      // engines and fork neither; the v1 finance RPCs are left byte-untouched
+      // (a changed contract is a NEW _v2 name — rollback-chain rule). DB
+      // proof: scripts/db-proof/financial-ops-v1.sh; module guard:
+      // lib/guards/financial-ops.test.ts.
+      "20260817220000_finance_invoice_upgrades_v1.sql",
+      "20260817221000_procurement_v1.sql",
+      "20260817222000_business_trips_v1.sql",
     ]);
   });
 

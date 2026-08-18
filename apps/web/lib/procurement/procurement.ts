@@ -202,12 +202,17 @@ export async function getProcurementOverview(): Promise<ProcurementOverviewResul
       .order("created_at", { ascending: true })
       .limit(PROCUREMENT_READ_LIMIT);
     if (!wfRes.error) {
-      const terminal = new Set<string>();
+      // Ascending order means the LAST instance per context wins; a context
+      // whose latest instance is still pending is not terminal.
+      const latest = new Map<string, string>();
       for (const w of (wfRes.data ?? []) as RawRow[]) {
-        const id = String(w.context_entity_id);
-        if (String(w.status) === "pending") terminal.delete(id);
-        else terminal.add(id);
+        latest.set(String(w.context_entity_id), String(w.status));
       }
+      const terminal = new Set(
+        [...latest.entries()]
+          .filter(([, status]) => status !== "pending")
+          .map(([id]) => id),
+      );
       if (terminal.size > 0) {
         await Promise.all(
           [...terminal].map((id) =>

@@ -9464,7 +9464,9 @@
       "cancel": "Stornieren",
       "reopen": "Wieder öffnen",
       "details": "Daten bearbeiten",
-      "save": "Speichern"
+      "save": "Speichern",
+      "requestApproval": "Freigabe anfragen",
+      "checkApproval": "Freigabe prüfen"
     },
     "form": {
       "title": "Neuer Eintrag",
@@ -9481,7 +9483,11 @@
       "projectNone": "Kein Projekt",
       "companyLinkLabel": "Mit meiner Firma verknüpfen (deren Inhaber sieht diesen Eintrag)",
       "noteLabel": "Notiz (optional)",
-      "submit": "Eintrag hinzufügen"
+      "submit": "Eintrag hinzufügen",
+      "invoiceNoLabel": "Rechnungsnummer (optional)",
+      "invoiceNoPlaceholder": "z. B. RE-2026-014",
+      "vatLabel": "MwSt.-Betrag (optional)",
+      "invoiceHint": "Rechnungsnummer und MwSt. sind optional. Wiederholt eine erhaltene Rechnung eine bereits gespeicherte Nummer desselben Geschäftspartners, wird der Eintrag trotzdem gespeichert und Sie sehen eine Warnung."
     },
     "notice": {
       "created": "Eintrag hinzugefügt.",
@@ -9491,7 +9497,25 @@
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Eintrag nicht gefunden.",
       "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
-      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+      "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "created_possible_duplicate": "Gespeichert — aber ein Eintrag mit diesem Geschäftspartner und dieser Rechnungsnummer existiert bereits. Bitte auf ein Duplikat prüfen.",
+      "approval_submitted": "Freigabe angefragt. Die Freigebenden wurden benachrichtigt.",
+      "approval_approved": "Dieser Eintrag wurde freigegeben.",
+      "approval_rejected": "Dieser Eintrag wurde nicht freigegeben.",
+      "approval_pending": "Die Freigabeentscheidung steht noch aus.",
+      "approval_cleared": "Die Freigabeanfrage wurde zurückgezogen oder storniert.",
+      "approval_none": "Für diesen Eintrag wurde keine Freigabeanfrage gefunden.",
+      "no_template": "Dieses Unternehmen hat dafür noch keinen veröffentlichten Freigabeablauf, daher kann keine Freigabe angefragt werden.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diese Anfrage freigeben."
+    },
+    "invoiceNoLabel": "Rechnungsnr.",
+    "vatLabel": "MwSt.",
+    "documentLinked": "Dokument angehängt",
+    "tripLinked": "Dienstreise verknüpft",
+    "approval": {
+      "pending": "Freigabe ausstehend",
+      "approved": "Freigegeben",
+      "rejected": "Nicht freigegeben"
     }
   },
   "structuredDemand": {
@@ -12822,6 +12846,153 @@
       "unpaid": "Unbezahlter Urlaub",
       "training": "Schulung",
       "other": "Sonstiges"
+    }
+  },
+  "procurement": {
+    "title": "Einkäufe",
+    "intro": "Fragen Sie Material oder Leistungen an, notieren Sie Lieferantenangebote und halten Sie fest, was gewählt wurde. Nichts hier kontaktiert einen Lieferanten oder bestellt etwas — es ist Ihre Aufzeichnung.",
+    "needsMigration": "Einkaufsanfragen sind in dieser Umgebung noch nicht aktiviert.",
+    "readError": "Einkaufsanfragen konnten nicht geladen werden. Bitte erneut versuchen.",
+    "empty": "Noch keine Einkaufsanfragen.",
+    "noOffers": "Noch keine Lieferantenangebote notiert.",
+    "offerSelected": "Gewählt",
+    "orderRefLabel": "Bestellnr.",
+    "invoiceLinked": "Rechnung verknüpft",
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "decided": "Entschieden",
+      "ordered": "Bestellt",
+      "closed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "approval": {
+      "pending": "Freigabe ausstehend",
+      "approved": "Freigegeben",
+      "rejected": "Nicht freigegeben"
+    },
+    "form": {
+      "open": "Neue Einkaufsanfrage",
+      "orgLabel": "Unternehmen",
+      "descriptionLabel": "Was wird benötigt",
+      "descriptionPlaceholder": "z. B. 40 Sack Zement für das Fundament",
+      "quantityLabel": "Menge (optional)",
+      "quantityPlaceholder": "z. B. 40 Sack",
+      "budgetLabel": "Geschätztes Budget in EUR (optional)",
+      "submit": "Anfrage speichern",
+      "supplierLabel": "Lieferantenname",
+      "offerAmountLabel": "Angebotsbetrag in EUR",
+      "offerNoteLabel": "Notiz (optional)",
+      "orderRefPlaceholder": "Bestellnummer (optional)",
+      "invoiceNone": "Keine Rechnung verknüpft"
+    },
+    "actions": {
+      "selectOffer": "Dieses Angebot wählen",
+      "addOffer": "Lieferantenangebot notieren",
+      "saveOffer": "Angebot speichern",
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "submit": "Einreichen",
+      "requestApproval": "Freigabe anfragen",
+      "checkApproval": "Freigabe prüfen",
+      "markOrdered": "Als bestellt markieren",
+      "close": "Abschließen",
+      "cancel": "Stornieren",
+      "linkInvoice": "Rechnung verknüpfen"
+    },
+    "notice": {
+      "created": "Einkaufsanfrage gespeichert.",
+      "updated": "Einkaufsanfrage aktualisiert.",
+      "submitted": "Einkaufsanfrage eingereicht.",
+      "offer_added": "Lieferantenangebot notiert.",
+      "decided": "Angebot gewählt.",
+      "linked": "Rechnung verknüpft.",
+      "unlinked": "Rechnungsverknüpfung entfernt.",
+      "cancelled": "Einkaufsanfrage storniert.",
+      "invalid": "Bitte die eingegebenen Angaben prüfen.",
+      "needs_migration": "Einkaufsanfragen sind in dieser Umgebung noch nicht aktiviert.",
+      "not_authorized": "Das können Sie für diese Anfrage nicht tun.",
+      "not_found": "Diese Einkaufsanfrage wurde nicht gefunden.",
+      "not_editable": "In diesem Zustand ist dieser Schritt nicht möglich.",
+      "limit_reached": "Das Limit offener Anfragen wurde erreicht.",
+      "approval_submitted": "Freigabe angefragt. Die Freigebenden wurden benachrichtigt.",
+      "approval_approved": "Diese Anfrage wurde freigegeben.",
+      "approval_rejected": "Diese Anfrage wurde nicht freigegeben.",
+      "approval_pending": "Die Freigabeentscheidung steht noch aus.",
+      "approval_cleared": "Die Freigabeanfrage wurde zurückgezogen oder storniert.",
+      "approval_none": "Keine Freigabeanfrage gefunden.",
+      "no_template": "Dieses Unternehmen hat noch keinen veröffentlichten Freigabeablauf für Einkäufe.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diese Anfrage freigeben.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+    }
+  },
+  "trips": {
+    "title": "Dienstreisen",
+    "intro": "Beantragen Sie eine Reise, lassen Sie sie freigeben und halten Sie ihre Kosten zusammen. Nichts hier bucht Reisen oder zahlt Geld aus — es ist Ihre Aufzeichnung.",
+    "needsMigration": "Dienstreisen sind in dieser Umgebung noch nicht aktiviert.",
+    "readError": "Dienstreisen konnten nicht geladen werden. Bitte erneut versuchen.",
+    "empty": "Noch keine Dienstreisen.",
+    "orgHeading": "Reisen der von Ihnen betreuten Personen",
+    "advanceLabel": "Vorschuss",
+    "expensesLabel": "Kosten",
+    "noTemplate": "Dieses Unternehmen hat noch keinen veröffentlichten Freigabeablauf für Reisen, daher kann keine Reise eingereicht werden.",
+    "status": {
+      "draft": "Entwurf",
+      "submitted": "Eingereicht",
+      "approved": "Freigegeben",
+      "rejected": "Nicht freigegeben",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "form": {
+      "open": "Neuer Reiseantrag",
+      "orgLabel": "Unternehmen",
+      "destinationLabel": "Ziel",
+      "destinationPlaceholder": "z. B. Oslo, Norwegen",
+      "fromLabel": "Erster Tag",
+      "toLabel": "Letzter Tag",
+      "purposeLabel": "Zweck",
+      "purposePlaceholder": "z. B. Fenstermontage auf der Baustelle Oslo",
+      "advanceLabel": "Vorschuss in EUR (optional)",
+      "advanceHint": "Der Vorschuss ist nur eine Notiz des vereinbarten Betrags, z. B. Tagegeld. Es wird kein Geld bewegt.",
+      "submit": "Reise speichern",
+      "recordPick": "Eintrag wählen…"
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "submit": "Zur Freigabe einreichen",
+      "checkDecision": "Entscheidung prüfen",
+      "complete": "Als abgeschlossen markieren",
+      "cancel": "Stornieren",
+      "linkExpense": "Zu dieser Reise hinzufügen",
+      "unlink": "Entfernen",
+      "createTemplate": "Standard-Freigabeablauf anlegen"
+    },
+    "notice": {
+      "created": "Reise gespeichert.",
+      "updated": "Reise aktualisiert.",
+      "submitted": "Reise zur Freigabe eingereicht.",
+      "approved": "Die Reise wurde freigegeben.",
+      "rejected": "Die Reise wurde nicht freigegeben.",
+      "reopened": "Die Freigabeanfrage entfiel — die Reise ist wieder ein Entwurf.",
+      "completed": "Die Reise wurde als abgeschlossen markiert.",
+      "cancelled": "Die Reise wurde storniert.",
+      "linked": "Eintrag zur Reise hinzugefügt.",
+      "unlinked": "Eintrag von der Reise entfernt.",
+      "invalid": "Bitte die eingegebenen Angaben prüfen.",
+      "invalid_dates": "Bitte die Reisedaten prüfen.",
+      "needs_migration": "Dienstreisen sind in dieser Umgebung noch nicht aktiviert.",
+      "not_authorized": "Das können Sie für diese Reise nicht tun.",
+      "not_found": "Diese Reise wurde nicht gefunden.",
+      "not_editable": "In diesem Zustand ist dieser Schritt nicht möglich.",
+      "limit_reached": "Das Limit offener Reisen wurde erreicht.",
+      "still_pending": "Die Freigabeentscheidung steht noch aus.",
+      "no_instance": "Für diese Reise wurde keine Freigabeanfrage gefunden.",
+      "no_template": "Dieses Unternehmen hat noch keinen veröffentlichten Freigabeablauf für Reisen.",
+      "no_approvers": "Derzeit kann niemand im Unternehmen diese Reise freigeben.",
+      "template_created": "Ein Standard-Freigabeablauf wurde für das Unternehmen angelegt.",
+      "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
     }
   }
 }
