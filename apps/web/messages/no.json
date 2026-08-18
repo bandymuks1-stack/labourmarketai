@@ -5573,5 +5573,22 @@
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Forhåndsvisning",
+    "intro": "Forhåndsvisning for eierens gjennomgang · retningen Visual Dashboard OS. Alle oppføringene nedenfor er eksempeldata.",
+    "badge": "Forhåndsvisning / eierens gjennomgang · kun eksempeldata",
+    "workers": {
+      "title": "Arbeiderkort",
+      "description": "Gjennomarbeidede arbeiderfelt i spillerkortstil. Geometrisk monogram som reserve — det dikter aldri opp et ansikt.",
+      "listLabel": "Eksempler på arbeiderkort"
+    },
+    "jobs": {
+      "title": "Kort over arbeidsbehov",
+      "description": "Behovsfelt i bransjekortstil. Uten eierens godkjenning viser kortet den ærlige teksten «venter på eierens godkjenning».",
+      "listLabel": "Eksempler på kort over arbeidsbehov",
+      "awaitingOwnerApproval": "venter på eierens godkjenning"
+    },
+    "footer": "Ærlig forhåndsvisning · Ingen falsk KI · Ingen falsk verifisering · Ingen oppdiktede arbeideransikter · Hver oppføring starter med «Sample · …», så den leses aldri som ekte data."
   }
 }

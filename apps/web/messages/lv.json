@@ -5573,5 +5573,22 @@
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Priekšskatījums",
+    "intro": "Priekšskatījums īpašnieka pārskatam · Visual Dashboard OS virziens. Visi tālāk redzamie ieraksti ir paraugdati.",
+    "badge": "Priekšskatījums / īpašnieka pārskats · tikai paraugdati",
+    "workers": {
+      "title": "Darbinieku kartes",
+      "description": "Augstvērtīgas darbinieku kartītes spēlētāja kartes stilā. Ģeometriska monogramma kā rezerves variants — seja nekad netiek ģenerēta.",
+      "listLabel": "Darbinieku karšu paraugi"
+    },
+    "jobs": {
+      "title": "Darba pieprasījuma kartes",
+      "description": "Pieprasījuma kartītes nozares kartes stilā. Bez īpašnieka apstiprinājuma karte rāda godīgu norādi „gaida īpašnieka apstiprinājumu”.",
+      "listLabel": "Darba pieprasījuma karšu paraugi",
+      "awaitingOwnerApproval": "gaida īpašnieka apstiprinājumu"
+    },
+    "footer": "Godīgs priekšskatījums · Nekāda viltus MI · Nekādas viltus verifikācijas · Nekādu izdomātu darbinieku seju · Katrs ieraksts sākas ar „Sample · …”, tāpēc tas nekad neizskatās pēc reāliem datiem."
   }
 }

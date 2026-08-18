@@ -223,14 +223,39 @@ English-by-design. Worst offenders:
 | 24 | `…/admin/telemetry/page.tsx:383` | jsx-text | "AI cost and usage" |
 | 25 | `…/admin/telemetry/page.tsx:424` | jsx-text | "Actual run cost, USD (costed runs only)" |
 
-Remaining, outside the top 25 but worth naming because they are **not** admin-only:
+Remaining, outside the top 25:
 
 - `apps/web/app/[locale]/dashboard/admin/telemetry/page.tsx:444, 450, 457, 463` — four more English-only status/empty-state lines.
-- `apps/web/app/[locale]/dashboard/talent/page.tsx:103, 110, 145, 161` — the talent
-  preview page is English-only prose plus `aria-label="Sample worker cards"` (150)
-  and `aria-label="Sample job demand cards"` (173). Line 145 mixes English with a
-  Lithuanian literal (`owner-approved laukia`) — a RU or DE user sees both.
+- ~~`apps/web/app/[locale]/dashboard/talent/page.tsx:103, 110, 145, 161`~~ — **FIXED
+  2026-08-18**, see the correction below.
 - `apps/web/app/global-error.tsx:33, 50` — see §5; deliberate and documented.
+
+### CORRECTION 2026-08-18 — the talent preview finding was mis-scoped, and is now fixed
+
+This section originally introduced its entries as *"**not** admin-only"*. For the
+talent preview page that was **wrong at the time of writing**: `page.tsx` calls
+`requireSuperadmin(locale)` before it renders anything, so the surface has always
+been owner-only, and `preview-surfaces-unlinked.test.ts` keeps it out of the nav.
+No worker or employer could reach the mixed-language string. The audit's severity
+was overstated; the finding itself was real.
+
+What was actually there, and is now repaired:
+
+| What | Was | Now |
+|---|---|---|
+| Page prose, badge, section headings | English for every locale | `talentPreview.*`, all 11 catalogues |
+| `aria-label="Sample worker cards"` / `"Sample job demand cards"` | English, unreachable for a non-English screen reader | `talentPreview.workers.listLabel` / `jobs.listLabel` |
+| `<JobDemandCard/>` approval fallback | hardcoded `owner-approved laukia` — English *and* Lithuanian in one string | `awaitingApprovalLabel` prop, supplied by the caller |
+
+The card keeps its presentational contract (the same reason `postedAtLabel` is a
+caller-formatted string), so the next surface that renders it cannot inherit a
+hardcoded label — the prop is required. Locked by
+`apps/web/lib/guards/talent-preview-i18n.test.ts`.
+
+The two admin diagnostic pages in the top-25 table (`project-truth`, `telemetry`)
+are deliberately left English: the audit itself classifies them as
+*"English-by-design"* admin diagnostics, and translating 45 diagnostic strings
+into 11 catalogues buys nothing for any worker or employer.
 
 False positives excluded after inspection: `components/app/live-map.tsx:29`,
 `components/app/live-world-map.tsx:30`, `components/app/workspace/opportunities-result.tsx:155,177`,

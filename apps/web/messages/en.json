@@ -13594,5 +13594,22 @@
       "limit_reached": "There is too much here already.",
       "error": "Something went wrong. Nothing was saved."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Preview",
+    "intro": "Owner-review preview · Visual Dashboard OS direction. Every entity below is sample data.",
+    "badge": "Preview / Owner review · sample data only",
+    "workers": {
+      "title": "Worker cards",
+      "description": "Premium player-card-style worker tiles. Geometric monogram fallback — never synthesises a face.",
+      "listLabel": "Sample worker cards"
+    },
+    "jobs": {
+      "title": "Job demand cards",
+      "description": "Industry-card-style demand tiles. Without an owner stamp the card shows the honest “awaiting owner approval”.",
+      "listLabel": "Sample job demand cards",
+      "awaitingOwnerApproval": "awaiting owner approval"
+    },
+    "footer": "Honest preview · No fake AI · No fake verification · No fake worker faces · Each entity is prefixed “Sample · …” so it never reads as live data."
   }
 }

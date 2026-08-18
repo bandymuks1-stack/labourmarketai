@@ -5573,5 +5573,22 @@
       "limit_reached": "Der er allerede for meget her.",
       "error": "Noget gik galt. Intet blev gemt."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Forhåndsvisning",
+    "intro": "Forhåndsvisning til ejerens gennemgang · retningen Visual Dashboard OS. Alle poster nedenfor er eksempeldata.",
+    "badge": "Forhåndsvisning / ejerens gennemgang · kun eksempeldata",
+    "workers": {
+      "title": "Medarbejderkort",
+      "description": "Gennemarbejdede medarbejderfelter i spillerkortstil. Geometrisk monogram som reserve — der opdigtes aldrig et ansigt.",
+      "listLabel": "Eksempler på medarbejderkort"
+    },
+    "jobs": {
+      "title": "Kort over arbejdsbehov",
+      "description": "Behovsfelter i branchekortstil. Uden ejerens godkendelse viser kortet den ærlige tekst ”afventer ejerens godkendelse”.",
+      "listLabel": "Eksempler på kort over arbejdsbehov",
+      "awaitingOwnerApproval": "afventer ejerens godkendelse"
+    },
+    "footer": "Ærlig forhåndsvisning · Ingen falsk AI · Ingen falsk verificering · Ingen opdigtede medarbejderansigter · Hver post begynder med ”Sample · …”, så den aldrig læses som rigtige data."
   }
 }

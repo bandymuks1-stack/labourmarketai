@@ -5573,5 +5573,22 @@
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Eelvaade",
+    "intro": "Eelvaade omaniku ülevaatuseks · Visual Dashboard OS suund. Kõik allolevad kirjed on näidisandmed.",
+    "badge": "Eelvaade / omaniku ülevaatus · ainult näidisandmed",
+    "workers": {
+      "title": "Töötajakaardid",
+      "description": "Kvaliteetsed mängijakaardi stiilis töötajapaanid. Geomeetriline monogramm varuvariandina — nägu ei genereerita kunagi.",
+      "listLabel": "Töötajakaartide näidised"
+    },
+    "jobs": {
+      "title": "Tööjõuvajaduse kaardid",
+      "description": "Vajaduse paanid valdkonnakaardi stiilis. Ilma omaniku kinnituseta näitab kaart ausat märget „ootab omaniku kinnitust“.",
+      "listLabel": "Tööjõuvajaduse kaartide näidised",
+      "awaitingOwnerApproval": "ootab omaniku kinnitust"
+    },
+    "footer": "Aus eelvaade · Ei mingit võltsitud tehisintellekti · Ei mingit võltsitud kinnitamist · Ei mingeid väljamõeldud töötajanägusid · Iga kirje algab sõnadega „Sample · …“, seega ei loe see kunagi päris andmetena."
   }
 }

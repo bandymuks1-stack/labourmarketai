@@ -5573,5 +5573,22 @@
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
     }
+  },
+  "talentPreview": {
+    "previewSuffix": "Förhandsvisning",
+    "intro": "Förhandsvisning för ägarens granskning · riktningen Visual Dashboard OS. Alla poster nedan är exempeldata.",
+    "badge": "Förhandsvisning / ägarens granskning · endast exempeldata",
+    "workers": {
+      "title": "Arbetarkort",
+      "description": "Genomarbetade arbetarrutor i spelarkortsstil. Geometriskt monogram som reserv — ett ansikte hittas aldrig på.",
+      "listLabel": "Exempel på arbetarkort"
+    },
+    "jobs": {
+      "title": "Kort över arbetsbehov",
+      "description": "Behovsrutor i branschkortsstil. Utan ägarens godkännande visar kortet den ärliga texten ”väntar på ägarens godkännande”.",
+      "listLabel": "Exempel på kort över arbetsbehov",
+      "awaitingOwnerApproval": "väntar på ägarens godkännande"
+    },
+    "footer": "Ärlig förhandsvisning · Ingen fejkad AI · Ingen fejkad verifiering · Inga påhittade arbetaransikten · Varje post börjar med ”Sample · …” och läses därför aldrig som riktiga data."
   }
 }

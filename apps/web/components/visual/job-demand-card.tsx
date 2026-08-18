@@ -44,15 +44,24 @@ export interface JobDemandCardEntity {
    *  renders it verbatim — the caller formats / localises. */
   readonly postedAtLabel: string;
   /** Owner-consent stamp from the data layer; null when the
-   *  posting has not been owner-approved (then the card shows
-   *  "owner-approved laukia"). Avoids fabricating approval. */
+   *  posting has not been owner-approved (then the card shows the
+   *  caller-supplied `awaitingApprovalLabel`). Avoids fabricating
+   *  approval. */
   readonly ownerApprovedBy: string | null;
 }
 
 export function JobDemandCard({
   job,
+  awaitingApprovalLabel,
 }: {
   readonly job: JobDemandCardEntity;
+  /** Localised fallback shown when `ownerApprovedBy` is null. Passed in
+   *  rather than translated here, for the same reason as `postedAtLabel`:
+   *  this component is purely presentational and the caller owns the
+   *  locale. It used to be the hardcoded literal "owner-approved laukia",
+   *  which mixed English and Lithuanian in one string and stayed
+   *  Lithuanian for every RU / NL / DE reader. */
+  readonly awaitingApprovalLabel: string;
 }) {
   const Glyph = INDUSTRY_GLYPH[job.industryKey] ?? INDUSTRY_GLYPH.other;
   const skills = job.requiredSkills.slice(0, 4);
@@ -108,7 +117,7 @@ export function JobDemandCard({
             <>✓ {job.ownerApprovedBy}</>
           ) : (
             <span className="italic text-zinc-500 dark:text-zinc-400">
-              owner-approved laukia
+              {awaitingApprovalLabel}
             </span>
           )}
         </span>
