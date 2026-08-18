@@ -13321,5 +13321,213 @@
       "template_created": "Įmonei sukurta standartinė patvirtinimo eiga.",
       "error": "Įvyko klaida. Niekas neišsaugota."
     }
+  },
+  "training": {
+    "title": "Mokymai ir pažymėjimai",
+    "intro": "Kursai, kuriuos organizacija prašo baigti, ir po jų gaunami pažymėjimai.",
+    "evidenceNote": "Pažymėjimas rodo, kad kursai baigti. Jis nesako, kaip gerai žmogus dirba — tai lieka darbo įrašuose ir vadovo patvirtinimuose.",
+    "notAvailable": "Mokymai šioje erdvėje dar neįjungti.",
+    "status": {
+      "assigned": "Reikia atlikti",
+      "completed": "Atlikta",
+      "expired": "Nebegalioja"
+    },
+    "mine": {
+      "heading": "Jūsų mokymai",
+      "requiredBy": "Iki {date}",
+      "complete": "Pažymėti kaip atlikta",
+      "notePlaceholder": "Trumpas užrašas (nebūtina)",
+      "completedNote": "Pažymėjote, kad atlikta."
+    },
+    "org": {
+      "heading": "Organizacijos mokymai",
+      "programTitle": "Kurso pavadinimas",
+      "programDescription": "Ką apima kursas",
+      "materialNote": "Kurso medžiaga yra dokumentas iš aukščiau esančio sąrašo. Patvirtinimas, kad žmogus jį perskaitė, lieka patvirtinimų sąraše — čia nekartojamas.",
+      "createProgram": "Pridėti kursą",
+      "noPrograms": "Kursų dar nėra.",
+      "assigneePlaceholder": "Žmogaus el. paštas",
+      "requiredByLabel": "Atlikti iki",
+      "assign": "Paprašyti šio žmogaus",
+      "certificateFilePlaceholder": "Pažymėjimo failo id",
+      "issuedOnLabel": "Išduota",
+      "expiresOnLabel": "Galioja iki",
+      "attachCertificate": "Įrašyti pažymėjimą",
+      "markExpired": "Pažymėti kaip nebegaliojantį"
+    },
+    "certificates": {
+      "heading": "Pažymėjimai",
+      "note": "Turimi pažymėjimai ir jų galiojimo pabaiga. Nieko nespėliojama — jei datos nėra, ji tiesiog nerodoma.",
+      "none": "Datos nėra",
+      "valid": "Galioja",
+      "expiring": "Netrukus baigsis",
+      "lapsed": "Nebegalioja"
+    },
+    "notice": {
+      "created": "Kursas pridėtas.",
+      "updated": "Kursas atnaujintas.",
+      "assigned": "Išsiųsta tam žmogui.",
+      "already_assigned": "Tas žmogus jau turi šį kursą.",
+      "completed": "Pažymėta kaip atlikta.",
+      "already_completed": "Jau buvo pažymėta kaip atlikta.",
+      "attached": "Pažymėjimas įrašytas.",
+      "expired": "Pažymėta kaip nebegaliojantis.",
+      "already_expired": "Jau buvo nebegaliojantis.",
+      "linked": "Gebėjimas susietas.",
+      "already_linked": "Tas gebėjimas jau susietas.",
+      "inactive_program": "Tas kursas išjungtas.",
+      "invalid": "Patikrinkite, ką įvedėte.",
+      "invalid_material": "Tos medžiagos jūsų organizacijoje nėra.",
+      "invalid_assignee": "To žmogaus jūsų organizacijoje nėra.",
+      "invalid_file": "To failo jūsų organizacijoje nėra.",
+      "invalid_skill": "Toks gebėjimas nerastas.",
+      "invalid_state": "Šiame žingsnyje to padaryti negalima.",
+      "needs_migration": "Mokymai šioje erdvėje dar neįjungti.",
+      "not_authorized": "Neturite tam teisių.",
+      "not_found": "Nerasta.",
+      "limit_reached": "Čia jau per daug įrašų.",
+      "error": "Kažkas nepavyko. Nieko neišsaugota."
+    }
+  },
+  "developmentReviews": {
+    "title": "Pokalbiai apie tobulėjimą",
+    "intro": "Įrašytas dviejų įvardytų žmonių pokalbis apie darbą ir tai, kas toliau.",
+    "noScoreNote": "Čia nėra jokių balų, įvertinimų ar reitingų — taip sukurta sąmoningai. Viskas žemiau yra arba įrašytas faktas, arba nuoroda į tikrą darbą, arba vieno žmogaus asmeninė nuomonė su aiškiu užrašu.",
+    "notAvailable": "Pokalbiai apie tobulėjimą šioje erdvėje dar neįjungti.",
+    "empty": "Kol kas jūsų neliečia nė vienas pokalbis.",
+    "cycles": {
+      "heading": "Laikotarpiai",
+      "name": "Laikotarpio pavadinimas",
+      "from": "Nuo",
+      "to": "Iki",
+      "create": "Atidaryti laikotarpį",
+      "empty": "Laikotarpių dar nėra.",
+      "open": "Atidaryti",
+      "close": "Užverti"
+    },
+    "cycleStatus": {
+      "draft": "Juodraštis",
+      "open": "Atidarytas",
+      "closed": "Užvertas"
+    },
+    "create": {
+      "cycle": "Laikotarpis",
+      "subject": "Žmogus",
+      "reviewer": "Kas su juo kalbės (nebūtina)",
+      "submit": "Pradėti pokalbį"
+    },
+    "reviewStatus": {
+      "draft": "Juodraštis",
+      "open": "Vyksta",
+      "closed": "Užvertas"
+    },
+    "workerVoiceLabel": "Žmogaus paties žodžiai",
+    "workerVoiceMissing": "Dar neparašyta.",
+    "saveWorkerInput": "Įrašyti mano žodžius",
+    "managerVoiceLabel": "Pokalbį vedančio žmogaus žodžiai",
+    "managerVoiceMissing": "Dar neparašyta.",
+    "saveManagerInput": "Įrašyti mano žodžius",
+    "planLabel": "Planas",
+    "planPlaceholder": "Ką sutarėme daryti toliau",
+    "followUpLabel": "Grįžti prie to",
+    "evidenceLabel": "Susietas darbas",
+    "evidenceEmpty": "Kol kas nieko nesusieta.",
+    "evidenceKind": {
+      "journal_entry": "Darbo įrašas",
+      "skill": "Gebėjimas",
+      "project": "Projektas",
+      "training_assignment": "Mokymai"
+    },
+    "evidenceRefPlaceholder": "Įrašo, gebėjimo, projekto ar mokymų id",
+    "evidenceNotePlaceholder": "Trumpas užrašas (nebūtina)",
+    "addEvidence": "Susieti",
+    "close": "Užverti pokalbį",
+    "closeBlocked": "Pirma turi parašyti abu žmonės",
+    "notice": {
+      "created": "Laikotarpis atidarytas.",
+      "updated": "Laikotarpis atnaujintas.",
+      "unchanged": "Niekas nepasikeitė.",
+      "saved": "Išsaugota.",
+      "linked": "Susieta.",
+      "already_linked": "Tai jau susieta.",
+      "closed": "Pokalbis užvertas.",
+      "already_closed": "Jau buvo užvertas.",
+      "already_exists": "Toks jau yra.",
+      "inputs_missing": "Pirma abu žmonės turi parašyti savo žodžius.",
+      "invalid": "Patikrinkite, ką įvedėte.",
+      "invalid_state": "Šiame žingsnyje to padaryti negalima.",
+      "invalid_subject": "To žmogaus jūsų organizacijoje nėra.",
+      "invalid_reviewer": "Tas žmogus negali vesti pokalbio.",
+      "invalid_reference": "Ta nuoroda nerodo į tikrą šio žmogaus darbą.",
+      "needs_migration": "Pokalbiai apie tobulėjimą šioje erdvėje dar neįjungti.",
+      "not_authorized": "Neturite tam teisių.",
+      "not_found": "Nerasta.",
+      "limit_reached": "Čia jau per daug įrašų.",
+      "error": "Kažkas nepavyko. Nieko neišsaugota."
+    }
+  },
+  "managementDecisions": {
+    "title": "Vadovybės sprendimai",
+    "intro": "Kas buvo pateikta vadovybei, kas nuspręsta, kas atsakingas ir iki kada.",
+    "engineNote": "Balsuojama aukščiau esančiame patvirtinimų sąraše: šablonas, kuriam reikia visų tvirtintojų, yra vieningas balsavimas, o tas, kuriam užtenka bet kurio, nusprendžiamas pirmu atsakymu. Čia balsai neskaičiuojami.",
+    "notAvailable": "Vadovybės sprendimai šioje erdvėje dar neįjungti.",
+    "empty": "Sprendimų dar nėra.",
+    "form": {
+      "title": "Klausimas",
+      "agenda": "Dėl ko sprendžiama",
+      "responsible": "Atsakingas žmogus (nebūtina)",
+      "deadline": "Iki kada",
+      "create": "Pridėti sprendimą"
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "submitted_for_approval": "Laukia patvirtinimo",
+      "approved": "Patvirtinta",
+      "rejected": "Atmesta",
+      "withdrawn": "Atsiimta",
+      "cancelled": "Atšaukta",
+      "recorded": "Įrašyta"
+    },
+    "submit": {
+      "template": "Patvirtinimo šablonas",
+      "action": "Pateikti vadovybei",
+      "noTemplate": "Vadovybės sprendimams dar nėra patvirtinimo šablono. Pirma sukurkite jį patvirtinimų srityje."
+    },
+    "resultLabel": "Sprendimas",
+    "resultPlaceholder": "Kas nuspręsta",
+    "recordResult": "Įrašyti sprendimą",
+    "links": {
+      "label": "Susieta",
+      "empty": "Kol kas nieko nesusieta.",
+      "document": "Dokumentas",
+      "task": "Užduotis",
+      "documentPlaceholder": "Dokumento id",
+      "taskPlaceholder": "Užduoties id",
+      "addDocument": "Susieti dokumentą",
+      "addTask": "Susieti užduotį",
+      "taskNote": "Tolesnis darbas yra tikra užduotis, sukurta užduočių srityje — čia laikoma tik nuoroda."
+    },
+    "notice": {
+      "created": "Sprendimas pridėtas.",
+      "updated": "Sprendimas atnaujintas.",
+      "submitted": "Pateikta vadovybei.",
+      "synced": "Suderinta su patvirtinimų sąrašu.",
+      "unchanged": "Niekas nepasikeitė.",
+      "recorded": "Sprendimas įrašytas.",
+      "already_recorded": "Sprendimas jau buvo įrašytas.",
+      "linked": "Susieta.",
+      "already_linked": "Tai jau susieta.",
+      "no_instance": "Patvirtinimas nebuvo pradėtas, todėl niekas neišsiųsta.",
+      "invalid": "Patikrinkite, ką įvedėte.",
+      "invalid_state": "Šiame žingsnyje to padaryti negalima.",
+      "invalid_document": "To dokumento jūsų organizacijoje nėra.",
+      "invalid_task": "Ta užduotis ne jūsų.",
+      "invalid_responsible": "To žmogaus jūsų organizacijoje nėra.",
+      "needs_migration": "Vadovybės sprendimai šioje erdvėje dar neįjungti.",
+      "not_authorized": "Neturite tam teisių.",
+      "not_found": "Nerasta.",
+      "limit_reached": "Čia jau per daug įrašų.",
+      "error": "Kažkas nepavyko. Nieko neišsaugota."
+    }
   }
 }

@@ -571,7 +571,17 @@ describe("NO new DB migration in this PR", () => {
     // origin/main 64f27c7b (train J's three finance migrations in the base):
     // 221 real files, never summed — my earlier 218 was against the pre-J
     // base and was RECOUNTED, not adjusted. Cross-pin follows.
-    expect(count).toBeLessThanOrEqual(221);
+    // Bumped 221 -> 224 for the Training & Certification + Development
+    // Reviews + Management Decisions v1 TRIPLE (20260817230000 +
+    // 20260817231000 + 20260817232000, train K, LEAD-gated, UNAPPLIED;
+    // paired 0-row-guarded rollbacks + deferred APPLIED_LEDGER entries in
+    // the PR). RECOUNTED from the tree after merging origin/main dbc6b76f
+    // (train J's three finance migrations AND train I's register delta all
+    // in the base): `ls supabase/migrations/*.sql | wc -l` = 224 real
+    // files, never summed — my earlier 220 was against the pre-J/I base and
+    // was RECOUNTED, not adjusted.
+    // Still nothing from the market-map read layer itself. Cross-pin follows.
+    expect(count).toBeLessThanOrEqual(224);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

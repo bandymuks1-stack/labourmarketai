@@ -13321,5 +13321,213 @@
       "template_created": "Een standaard goedkeuringsroute is aangemaakt voor het bedrijf.",
       "error": "Er ging iets mis. Er is niets opgeslagen."
     }
+  },
+  "training": {
+    "title": "Trainingen en certificaten",
+    "intro": "Cursussen die je organisatie mensen vraagt af te ronden, en de certificaten die daarop volgen.",
+    "evidenceNote": "Een certificaat laat zien dat een cursus is afgerond. Het zegt niet hoe goed iemand werkt — dat blijft bij je werknotities en de bevestigingen van je leidinggevende.",
+    "notAvailable": "Trainingen zijn in deze werkruimte nog niet aangezet.",
+    "status": {
+      "assigned": "Te doen",
+      "completed": "Klaar",
+      "expired": "Verlopen"
+    },
+    "mine": {
+      "heading": "Jouw trainingen",
+      "requiredBy": "Vóór {date}",
+      "complete": "Markeer als klaar",
+      "notePlaceholder": "Korte notitie (optioneel)",
+      "completedNote": "Je hebt dit als klaar gemarkeerd."
+    },
+    "org": {
+      "heading": "Trainingen van je organisatie",
+      "programTitle": "Naam van de cursus",
+      "programDescription": "Wat de cursus behandelt",
+      "materialNote": "Het cursusmateriaal is een document uit het register hierboven. Bevestigen dat iemand het gelezen heeft blijft in de bevestigingenlijst — dat wordt hier niet herhaald.",
+      "createProgram": "Cursus toevoegen",
+      "noPrograms": "Nog geen cursussen.",
+      "assigneePlaceholder": "E-mail van de persoon",
+      "requiredByLabel": "Afronden vóór",
+      "assign": "Vraag deze persoon",
+      "certificateFilePlaceholder": "Id van het certificaatbestand",
+      "issuedOnLabel": "Afgegeven op",
+      "expiresOnLabel": "Geldig tot",
+      "attachCertificate": "Certificaat opslaan",
+      "markExpired": "Als verlopen markeren"
+    },
+    "certificates": {
+      "heading": "Certificaten",
+      "note": "Certificaten die iemand al heeft, met de einddatum. Er wordt niets geraden — staat er geen datum, dan wordt er geen getoond.",
+      "none": "Geen einddatum",
+      "valid": "Geldig",
+      "expiring": "Loopt bijna af",
+      "lapsed": "Verlopen"
+    },
+    "notice": {
+      "created": "Cursus toegevoegd.",
+      "updated": "Cursus bijgewerkt.",
+      "assigned": "Naar die persoon gestuurd.",
+      "already_assigned": "Die persoon heeft deze cursus al.",
+      "completed": "Als klaar gemarkeerd.",
+      "already_completed": "Dit was al als klaar gemarkeerd.",
+      "attached": "Certificaat opgeslagen.",
+      "expired": "Als verlopen gemarkeerd.",
+      "already_expired": "Dit was al verlopen.",
+      "linked": "Vaardigheid gekoppeld.",
+      "already_linked": "Die vaardigheid is al gekoppeld.",
+      "inactive_program": "Die cursus staat uit.",
+      "invalid": "Controleer wat je hebt ingevuld.",
+      "invalid_material": "Dat materiaal hoort niet bij je organisatie.",
+      "invalid_assignee": "Die persoon hoort niet bij je organisatie.",
+      "invalid_file": "Dat bestand hoort niet bij je organisatie.",
+      "invalid_skill": "Die vaardigheid is niet gevonden.",
+      "invalid_state": "Dat kan in deze stap niet.",
+      "needs_migration": "Trainingen zijn in deze werkruimte nog niet aangezet.",
+      "not_authorized": "Je hebt hier geen rechten voor.",
+      "not_found": "Niet gevonden.",
+      "limit_reached": "Er staat hier al te veel.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
+    }
+  },
+  "developmentReviews": {
+    "title": "Ontwikkelgesprekken",
+    "intro": "Een vastgelegd gesprek tussen twee met naam genoemde mensen over het werk en over wat er nu komt.",
+    "noScoreNote": "Er is hier geen cijfer, geen score en geen ranglijst — met opzet. Alles hieronder is een vastgelegd feit, een verwijzing naar echt werk, of de eigen woorden van één persoon, duidelijk als zodanig gemarkeerd.",
+    "notAvailable": "Ontwikkelgesprekken zijn in deze werkruimte nog niet aangezet.",
+    "empty": "Er is nog geen gesprek waar jij bij hoort.",
+    "cycles": {
+      "heading": "Periodes",
+      "name": "Naam van de periode",
+      "from": "Van",
+      "to": "Tot",
+      "create": "Periode openen",
+      "empty": "Nog geen periodes.",
+      "open": "Openen",
+      "close": "Sluiten"
+    },
+    "cycleStatus": {
+      "draft": "Concept",
+      "open": "Open",
+      "closed": "Gesloten"
+    },
+    "create": {
+      "cycle": "Periode",
+      "subject": "Persoon",
+      "reviewer": "Wie het gesprek voert (optioneel)",
+      "submit": "Gesprek starten"
+    },
+    "reviewStatus": {
+      "draft": "Concept",
+      "open": "Loopt",
+      "closed": "Gesloten"
+    },
+    "workerVoiceLabel": "De eigen woorden van de persoon",
+    "workerVoiceMissing": "Nog niet geschreven.",
+    "saveWorkerInput": "Mijn woorden opslaan",
+    "managerVoiceLabel": "De eigen woorden van de gespreksvoerder",
+    "managerVoiceMissing": "Nog niet geschreven.",
+    "saveManagerInput": "Mijn woorden opslaan",
+    "planLabel": "Plan",
+    "planPlaceholder": "Wat we hierna gaan doen",
+    "followUpLabel": "Terugkomen op",
+    "evidenceLabel": "Gekoppeld werk",
+    "evidenceEmpty": "Nog niets gekoppeld.",
+    "evidenceKind": {
+      "journal_entry": "Werknotitie",
+      "skill": "Vaardigheid",
+      "project": "Project",
+      "training_assignment": "Training"
+    },
+    "evidenceRefPlaceholder": "Id van de notitie, vaardigheid, project of training",
+    "evidenceNotePlaceholder": "Korte notitie (optioneel)",
+    "addEvidence": "Koppelen",
+    "close": "Gesprek sluiten",
+    "closeBlocked": "Eerst moeten beiden schrijven",
+    "notice": {
+      "created": "Periode geopend.",
+      "updated": "Periode bijgewerkt.",
+      "unchanged": "Er is niets veranderd.",
+      "saved": "Opgeslagen.",
+      "linked": "Gekoppeld.",
+      "already_linked": "Dat is al gekoppeld.",
+      "closed": "Gesprek gesloten.",
+      "already_closed": "Het was al gesloten.",
+      "already_exists": "Dat bestaat al.",
+      "inputs_missing": "Eerst moeten beide mensen hun eigen woorden schrijven.",
+      "invalid": "Controleer wat je hebt ingevuld.",
+      "invalid_state": "Dat kan in deze stap niet.",
+      "invalid_subject": "Die persoon hoort niet bij je organisatie.",
+      "invalid_reviewer": "Die persoon kan het gesprek niet voeren.",
+      "invalid_reference": "Die verwijzing wijst niet naar echt werk van deze persoon.",
+      "needs_migration": "Ontwikkelgesprekken zijn in deze werkruimte nog niet aangezet.",
+      "not_authorized": "Je hebt hier geen rechten voor.",
+      "not_found": "Niet gevonden.",
+      "limit_reached": "Er staat hier al te veel.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
+    }
+  },
+  "managementDecisions": {
+    "title": "Managementbesluiten",
+    "intro": "Wat aan het management is voorgelegd, wat er is besloten, wie verantwoordelijk is en vóór wanneer.",
+    "engineNote": "De stemming gebeurt in de goedkeuringenlijst hierboven: een sjabloon dat iedere goedkeurder nodig heeft is een unanieme stemming, een sjabloon waarbij één goedkeurder volstaat wordt beslist door het eerste antwoord. Hier worden geen stemmen geteld.",
+    "notAvailable": "Managementbesluiten zijn in deze werkruimte nog niet aangezet.",
+    "empty": "Nog geen besluiten vastgelegd.",
+    "form": {
+      "title": "Vraag",
+      "agenda": "Waarover wordt besloten",
+      "responsible": "Verantwoordelijke (optioneel)",
+      "deadline": "Vóór wanneer",
+      "create": "Besluit toevoegen"
+    },
+    "status": {
+      "draft": "Concept",
+      "submitted_for_approval": "Wacht op goedkeuring",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "withdrawn": "Ingetrokken",
+      "cancelled": "Geannuleerd",
+      "recorded": "Vastgelegd"
+    },
+    "submit": {
+      "template": "Goedkeuringssjabloon",
+      "action": "Aan het management voorleggen",
+      "noTemplate": "Er bestaat nog geen goedkeuringssjabloon voor managementbesluiten. Maak er eerst een aan bij de goedkeuringen."
+    },
+    "resultLabel": "Besluit",
+    "resultPlaceholder": "Wat er is besloten",
+    "recordResult": "Besluit vastleggen",
+    "links": {
+      "label": "Gekoppeld",
+      "empty": "Nog niets gekoppeld.",
+      "document": "Document",
+      "task": "Taak",
+      "documentPlaceholder": "Document-id",
+      "taskPlaceholder": "Taak-id",
+      "addDocument": "Document koppelen",
+      "addTask": "Taak koppelen",
+      "taskNote": "Vervolgwerk is een echte taak die je bij de taken aanmaakt — hier wordt alleen de koppeling bewaard."
+    },
+    "notice": {
+      "created": "Besluit toegevoegd.",
+      "updated": "Besluit bijgewerkt.",
+      "submitted": "Aan het management voorgelegd.",
+      "synced": "Bijgewerkt met de goedkeuringenlijst.",
+      "unchanged": "Er is niets veranderd.",
+      "recorded": "Besluit vastgelegd.",
+      "already_recorded": "Het besluit was al vastgelegd.",
+      "linked": "Gekoppeld.",
+      "already_linked": "Dat is al gekoppeld.",
+      "no_instance": "Er is geen goedkeuring gestart, dus er is niets verstuurd.",
+      "invalid": "Controleer wat je hebt ingevuld.",
+      "invalid_state": "Dat kan in deze stap niet.",
+      "invalid_document": "Dat document hoort niet bij je organisatie.",
+      "invalid_task": "Die taak is niet van jou.",
+      "invalid_responsible": "Die persoon hoort niet bij je organisatie.",
+      "needs_migration": "Managementbesluiten zijn in deze werkruimte nog niet aangezet.",
+      "not_authorized": "Je hebt hier geen rechten voor.",
+      "not_found": "Niet gevonden.",
+      "limit_reached": "Er staat hier al te veel.",
+      "error": "Er ging iets mis. Er is niets opgeslagen."
+    }
   }
 }

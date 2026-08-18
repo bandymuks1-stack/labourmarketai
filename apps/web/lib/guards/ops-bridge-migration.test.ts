@@ -476,6 +476,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // LEAD-gated, UNAPPLIED; RECOUNTED from the post-rebase tree with train
     // G also in the base) — floor semantics unchanged, no numeric edit
     // needed here.
+    // Cross-pin follows: 221 -> 224 for the Training & Certification +
+    // Development Reviews + Management Decisions v1 triple (20260817230000
+    // / 231000 / 232000, train K, LEAD-gated, UNAPPLIED; RECOUNTED from the
+    // tree after merging origin/main dbc6b76f with trains J and I in the
+    // base) — floor semantics unchanged, no numeric edit needed here.
     const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
     expect(
       baseline,

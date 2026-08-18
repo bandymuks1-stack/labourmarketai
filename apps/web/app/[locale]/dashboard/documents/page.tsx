@@ -28,6 +28,7 @@ import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-docum
 import { WorkerDocumentFileSlot } from "@/components/app/worker-document-file-slot";
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
+import { TrainingRegister } from "@/components/app/training-register";
 import { getWorkerDocumentFiles } from "@/lib/documents/document-files";
 import { parseOrgRegisterFilters } from "@/lib/documents/document-file-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
@@ -170,6 +171,9 @@ export default async function WorkerDocumentsPage({
     regObject?: string;
     regRetention?: string;
     regQ?: string;
+    /** Training & Certification v1 outcome notice (closed vocabulary,
+     *  validated inside the section — never rendered raw). */
+    trn?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -277,6 +281,11 @@ export default async function WorkerDocumentsPage({
           filters={parseOrgRegisterFilters(sp)}
         />
         <DocumentAckInbox locale={locale} />
+        {/* Training & Certification v1 — programmes, assignments and the
+            certificate register. The training MATERIAL is an org register
+            document above, and confirming it was read stays the
+            acknowledgement inbox's job — never duplicated here. */}
+        <TrainingRegister locale={locale} notice={sp.trn} />
         {/* WAGON 9 — LT-master guidance stays informational for every role. */}
         <LtDocumentGuidance locale={locale} />
       </div>
@@ -416,6 +425,10 @@ export default async function WorkerDocumentsPage({
           confirm (version-bound acks). Renders nothing while the layer is
           absent or the inbox is empty. */}
       <DocumentAckInbox locale={locale} />
+
+      {/* Training & Certification v1 — the person's own training and their
+          certificates. Completing is self-only; nobody records it for them. */}
+      <TrainingRegister locale={locale} notice={sp.trn} />
 
       <DocsConsentToggle current={docsConsent} />
 

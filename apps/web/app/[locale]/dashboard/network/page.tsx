@@ -29,6 +29,8 @@ import {
   isValidEmployeeRequestStatus,
   isValidEmployeeRequestType,
 } from "@/lib/requests/requests-model";
+import { DevelopmentReviewsSection } from "@/components/app/development-reviews-section";
+import { ManagementDecisionsSection } from "@/components/app/management-decisions-section";
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
 
@@ -60,11 +62,15 @@ export default async function NetworkPage({
     req?: string;
     reqStatus?: string;
     reqType?: string;
+    /** Development-review and management-decision outcome notices (closed
+     *  vocabularies, validated inside each section — never rendered raw). */
+    rev?: string;
+    dec?: string;
   }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, wf, req, reqStatus, reqType } =
+  const { q, type, org, project, wf, req, reqStatus, reqType, rev, dec } =
     await searchParams;
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
@@ -451,6 +457,19 @@ export default async function NetworkPage({
         organizations={organizations}
         filter={requestsFilter}
       />
+
+      {/* Development & performance reviews (v1) — the recorded development
+          conversation between two named people, with evidence links to real
+          entries. No rating, no score, no ranking exists on this surface or
+          in its schema. Expanded INSIDE this declared surface (no new
+          route; the approvals-section precedent). */}
+      <DevelopmentReviewsSection locale={locale} notice={rev} />
+
+      {/* Management decisions (v1) — a thin register over the SAME workflow
+          engine the approvals section above serves: the engine's
+          multi-approver step IS the vote, cast up there. Nothing here
+          tallies or decides. */}
+      <ManagementDecisionsSection locale={locale} notice={dec} />
     </div>
   );
 }
