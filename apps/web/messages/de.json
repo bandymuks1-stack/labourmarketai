@@ -12026,68 +12026,68 @@
         "r2": "Schweißer fehlen an der norwegischen Küste",
         "r3": "Die meisten verfügbaren Menschen — das Baltikum"
       },
-      "reacting": "Market reacting… {count} signals",
-      "decisionLabel": "AI DECISION",
+      "reacting": "Markt reagiert… {count} Signale",
+      "decisionLabel": "KI-ENTSCHEIDUNG",
       "decisionField": {
-        "whyHere": "Why here",
-        "whyNow": "Why now",
-        "whyYou": "Why you",
-        "whyNotElsewhere": "Why not elsewhere"
+        "whyHere": "Warum hier",
+        "whyNow": "Warum jetzt",
+        "whyYou": "Warum Sie",
+        "whyNotElsewhere": "Warum nicht anderswo"
       },
       "reason": {
-        "r1a": "Checking open needs by role and region…",
-        "r1b": "Comparing against available people in each area…",
-        "r1c": "Weighing travel distance and start dates…",
-        "r2a": "Searching welding needs in offshore industry…",
-        "r2b": "Checking certification requirements…",
-        "r2c": "Weighing the seasonal project cycle…",
-        "r3a": "Collecting availability signals by region…",
-        "r3b": "Checking skills evidenced in work journals…",
-        "r3c": "Assessing readiness to start…"
+        "r1a": "Ich prüfe offene Bedarfe nach Rolle und Region…",
+        "r1b": "Ich vergleiche mit verfügbaren Menschen in jedem Gebiet…",
+        "r1c": "Ich gewichte Anfahrtsweg und Starttermine…",
+        "r2a": "Ich suche Schweißbedarfe in der Offshore-Industrie…",
+        "r2b": "Ich prüfe Zertifizierungsanforderungen…",
+        "r2c": "Ich gewichte den saisonalen Projektzyklus…",
+        "r3a": "Ich sammle Verfügbarkeitssignale nach Region…",
+        "r3b": "Ich prüfe Fähigkeiten, die in Arbeitsjournalen belegt sind…",
+        "r3c": "Ich bewerte die Startbereitschaft…"
       },
       "decision": {
         "d1": {
-          "whyHere": "Rotterdam and Eindhoven have more open needs than available electricians.",
-          "whyNow": "Projects start within the next 4 weeks.",
-          "whyYou": "Your work journal holds 14 entries backing electrical work.",
-          "next": "Review these needs",
-          "whyNotElsewhere": "Belgium and Germany show lower demand and more competition for the same people."
+          "whyHere": "In Rotterdam und Eindhoven gibt es mehr offene Bedarfe als verfügbare Elektriker.",
+          "whyNow": "Die Projekte starten in den nächsten 4 Wochen.",
+          "whyYou": "Ihr Arbeitsjournal enthält 14 Einträge, die Elektroarbeiten belegen.",
+          "next": "Diese Bedarfe ansehen",
+          "whyNotElsewhere": "Belgien und Deutschland zeigen weniger Nachfrage und mehr Wettbewerb um dieselben Menschen."
         },
         "d2": {
-          "whyHere": "Offshore industry in Stavanger and Bergen is short of certified welders.",
-          "whyNow": "The contracting cycle opens before the winter season.",
-          "whyYou": "You have welding evidence and are ready to travel.",
-          "next": "See the requirements",
-          "whyNotElsewhere": "Denmark has fewer projects; Poland has more local candidates for the same role."
+          "whyHere": "Der Offshore-Industrie in Stavanger und Bergen fehlen zertifizierte Schweißer.",
+          "whyNow": "Der Vergabezyklus öffnet vor der Wintersaison.",
+          "whyYou": "Sie haben Schweißnachweise und sind reisebereit.",
+          "next": "Anforderungen ansehen",
+          "whyNotElsewhere": "Dänemark hat weniger Projekte; Polen hat mehr lokale Kandidaten für dieselbe Rolle."
         },
         "d3": {
-          "whyHere": "Vilnius and Kaunas hold the most people ready to start.",
-          "whyNow": "Their availability was confirmed in the last 2 weeks.",
-          "whyYou": "Your need matches their evidenced skills.",
-          "next": "Review these people",
-          "whyNotElsewhere": "Latvia and Estonia hold fewer available people and later start dates."
+          "whyHere": "In Vilnius und Kaunas sind die meisten Menschen startbereit.",
+          "whyNow": "Ihre Verfügbarkeit wurde in den letzten 2 Wochen bestätigt.",
+          "whyYou": "Ihr Bedarf passt zu deren belegten Fähigkeiten.",
+          "next": "Diese Menschen ansehen",
+          "whyNotElsewhere": "Lettland und Estland haben weniger verfügbare Menschen und spätere Starttermine."
         }
       },
-      "askPlaceholder": "Ask your own question…",
-      "askSubmit": "Ask",
-      "unmatched": "In this demonstration I answer about electricians, welders and available people.",
+      "askPlaceholder": "Stellen Sie Ihre eigene Frage…",
+      "askSubmit": "Fragen",
+      "unmatched": "In dieser Demonstration beantworte ich nur Fragen zu Elektrikern, Schweißern und verfügbaren Menschen.",
       "basisLabel": "Worauf das beruht",
       "basisNote": "Auf den {count} oben abgewogenen Signalen, mit illustrativen Mengen — dies ist eine Demonstration, nicht der heutige Markt.",
-      "previewLabel": "Best matching person",
+      "previewLabel": "Am besten passende Person",
       "previewName": "Jonas P.",
-      "previewRole": "Electrician · Vilnius · Available from September",
+      "previewRole": "Elektriker · Vilnius · Verfügbar ab September",
       "previewMetric": {
-        "entries": "Work records",
-        "skills": "Evidenced skills",
-        "years": "Years"
+        "entries": "Arbeitseinträge",
+        "skills": "Belegte Fähigkeiten",
+        "years": "Jahre"
       },
       "previewValue": {
         "entries": "14",
         "skills": "3",
         "years": "7"
       },
-      "persistAction": "Save this result",
-      "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+      "persistAction": "Dieses Ergebnis speichern",
+      "persistWhy": "Ein Konto brauchen Sie nur zum Speichern, Bewerben oder Kontaktieren — Ansehen ist frei."
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",
