@@ -12095,11 +12095,11 @@
       "title": "Der Arbeitsmarkt in Zahlen",
       "stats": {
         "vacancies": {
-          "value": "41.000+",
+          "value": "35.000+",
           "label": "aktive Stellenangebote"
         },
         "employers": {
-          "value": "7.600+",
+          "value": "7.000+",
           "label": "Arbeitgeber hinter den Anzeigen"
         },
         "regions": {
@@ -12107,7 +12107,7 @@
           "label": "Regionen mit aktiven Anzeigen"
         }
       },
-      "asOfNote": "Auf Basis der Stellenanzeigen-Daten vom 17.08.2026; die Zahlen ändern sich täglich.",
+      "asOfNote": "Auf Basis der Stellenanzeigen-Daten vom 19.08.2026; die Zahlen ändern sich täglich.",
       "topTitle": "Aktuell gefragteste Berufe",
       "topNote": "Nach aktiven Stellenanzeigen auf der Plattform. Ein Teil der Anzeigen ist noch keinem Beruf zugeordnet."
     }

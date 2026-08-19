@@ -3907,11 +3907,11 @@
       "title": "Arbejdsmarkedet i tal",
       "stats": {
         "vacancies": {
-          "value": "41.000+",
+          "value": "35.000+",
           "label": "aktive jobopslag"
         },
         "employers": {
-          "value": "7.600+",
+          "value": "7.000+",
           "label": "arbejdsgivere bag opslagene"
         },
         "regions": {
@@ -3919,7 +3919,7 @@
           "label": "regioner med aktive opslag"
         }
       },
-      "asOfNote": "Baseret på opslagsdata fra 17.08.2026; tallene ændrer sig dagligt.",
+      "asOfNote": "Baseret på opslagsdata fra 19.08.2026; tallene ændrer sig dagligt.",
       "topTitle": "Mest efterspurgte fag lige nu",
       "topNote": "Rangeret efter aktive jobopslag på platformen. En del af opslagene er endnu ikke knyttet til et fag."
     }

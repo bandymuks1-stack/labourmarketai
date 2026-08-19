@@ -12095,11 +12095,11 @@
       "title": "The job market in numbers",
       "stats": {
         "vacancies": {
-          "value": "41,000+",
+          "value": "35,000+",
           "label": "active job opportunities"
         },
         "employers": {
-          "value": "7,600+",
+          "value": "7,000+",
           "label": "employers behind the listings"
         },
         "regions": {
@@ -12107,7 +12107,7 @@
           "label": "regions with active listings"
         }
       },
-      "asOfNote": "Based on job listing data from 2026-08-17; numbers change daily.",
+      "asOfNote": "Based on job listing data from 2026-08-19; numbers change daily.",
       "topTitle": "Professions most in demand right now",
       "topNote": "Ranked by active job listings on the platform. Some listings are not yet grouped by profession."
     }

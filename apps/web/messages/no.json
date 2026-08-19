@@ -3907,11 +3907,11 @@
       "title": "Arbeidsmarkedet i tall",
       "stats": {
         "vacancies": {
-          "value": "41 000+",
+          "value": "35 000+",
           "label": "aktive stillingsannonser"
         },
         "employers": {
-          "value": "7 600+",
+          "value": "7 000+",
           "label": "arbeidsgivere bak annonsene"
         },
         "regions": {
@@ -3919,7 +3919,7 @@
           "label": "regioner med aktive annonser"
         }
       },
-      "asOfNote": "Basert på annonsedata fra 17.08.2026; tallene endrer seg daglig.",
+      "asOfNote": "Basert på annonsedata fra 19.08.2026; tallene endrer seg daglig.",
       "topTitle": "Mest etterspurte yrker akkurat nå",
       "topNote": "Rangert etter aktive stillingsannonser på plattformen. En del av annonsene er ennå ikke knyttet til et yrke."
     }

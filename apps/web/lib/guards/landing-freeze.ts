@@ -98,6 +98,34 @@ import { join } from "node:path";
  * frozen set), and the three `*.landing` namespace hashes
  * (`landing.marketProof` added in all 11 catalogs; lt/en/ru are the frozen
  * three). No other frozen artefact moved.
+ *
+ * Market-proof honest browsable basis (OWNER APPROVAL 2026-08-19, numbers-only
+ * correction; finding in docs/audits/landing-coverage-claim-basis-2026-08-18.md)
+ * — the band advertised "41 000+ active job opportunities" and "7 600+
+ * employers" under "On the platform right now". Those floors were read on
+ * `is_active AND lifecycle = 'published'`. The public job board shipped a day
+ * later (#1184/#1190) and selects on a NARROWER predicate — the one in
+ * `count_public_vacancies_v1` and its three siblings — so /jobs renders a
+ * smaller number than the landing promises, and a visitor could disprove the
+ * landing in one click.
+ *
+ * Re-measured over a five-day window (2026-08-15..19) rather than one moment,
+ * because a floor from a single reading is a spot price: browsable vacancies
+ * ran 40,460 · 40,089 · 37,105 · 38,181 · 39,795 and identified employers
+ * 7,482 · 7,416 · 7,252 · 7,433 · 7,628. So "7 600+" was false on FOUR of those
+ * five days — a second defect the original finding had not caught. New floors
+ * clear the window trough with headroom: 35 000+ / 7 000+ / 21.
+ *
+ * Numbers and the as-of date ONLY. No layout, no wording, no new claim, no new
+ * surface. The regeneration touched EXACTLY ONE file hash —
+ * market-proof-band.tsx, whose header comment carries the measurement
+ * provenance — and the three `*.landing` namespace hashes. Zero other frozen
+ * artefacts moved, which is the proof that this stayed a numbers correction.
+ * Permanently guarded by `floorsAreSupportedBy` in
+ * `lib/analytics/market-coverage-claims.ts`: a public floor may only derive
+ * from the job board's own predicate, over a multi-day window, and must clear
+ * the window LOW with at least 3% headroom. The freeze is not the only thing
+ * standing between the landing and an unbacked number.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

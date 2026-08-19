@@ -3907,11 +3907,11 @@
       "title": "Darba tirgus skaitļos",
       "stats": {
         "vacancies": {
-          "value": "41 000+",
+          "value": "35 000+",
           "label": "aktīvu darba iespēju"
         },
         "employers": {
-          "value": "7 600+",
+          "value": "7 000+",
           "label": "darba devēju sludinājumos"
         },
         "regions": {
@@ -3919,7 +3919,7 @@
           "label": "reģions ar aktīviem sludinājumiem"
         }
       },
-      "asOfNote": "Pēc 2026-08-17 sludinājumu datiem; skaitļi mainās katru dienu.",
+      "asOfNote": "Pēc 2026-08-19 sludinājumu datiem; skaitļi mainās katru dienu.",
       "topTitle": "Šobrīd pieprasītākās profesijas",
       "topNote": "Pēc aktīvajiem darba sludinājumiem platformā. Daļa sludinājumu vēl nav piesaistīta profesijai."
     }

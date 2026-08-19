@@ -4,7 +4,9 @@ import { join } from "node:path";
 
 import {
   ADOPTION_VERBS,
-  SWEDEN_COVERAGE_2026_08_17,
+  SWEDEN_COVERAGE_CURRENT,
+  SWEDEN_MEASUREMENT_CURRENT,
+  floorsAreSupportedBy,
   violatesAdoptionClaimRule,
 } from "@/lib/analytics/market-coverage-claims";
 import {
@@ -20,8 +22,11 @@ import {
  * a data-derived profession ranking. These pins keep it honest permanently:
  *
  *   1. every locale's displayed numbers ARE the proven floors from
- *      `market-coverage-claims.ts` (41 000 / 7 600 / 21) — not a re-typed
- *      number that can silently drift from the claim module;
+ *      `market-coverage-claims.ts` — not a re-typed number that can silently
+ *      drift from the claim module — and those floors are themselves
+ *      supported by a dated, browsable-basis, multi-day production window
+ *      (owner-approved correction 2026-08-19: the band advertised 41 000+ /
+ *      7 600+ derived on a predicate the public job board does not use);
  *   2. no marketProof string attaches an adoption verb to a company count,
  *      and none claims a country-total or an "all Europe" scope;
  *   3. every ranked profession slug resolves in every locale's canonical
@@ -85,13 +90,13 @@ describe("landing market-proof band honesty", () => {
 
       it("displays exactly the proven floors from the claim module", () => {
         expect(numeric(mp.stats.vacancies.value)).toBe(
-          SWEDEN_COVERAGE_2026_08_17.activeVacanciesFloor,
+          SWEDEN_COVERAGE_CURRENT.activeVacanciesFloor,
         );
         expect(numeric(mp.stats.employers.value)).toBe(
-          SWEDEN_COVERAGE_2026_08_17.identifiedEmployersFloor,
+          SWEDEN_COVERAGE_CURRENT.identifiedEmployersFloor,
         );
         expect(numeric(mp.stats.regions.value)).toBe(
-          SWEDEN_COVERAGE_2026_08_17.regions,
+          SWEDEN_COVERAGE_CURRENT.regions,
         );
         // Vacancy + employer floors stay marked as floors, never as exact.
         expect(mp.stats.vacancies.value.endsWith("+")).toBe(true);
@@ -134,11 +139,26 @@ describe("landing market-proof band honesty", () => {
       it("carries the honest basis notes and no per-profession counts", () => {
         expect(mp.asOfNote.length).toBeGreaterThan(10);
         expect(mp.topNote.length).toBeGreaterThan(10);
-        // The as-of note is dated so the reader can see how fresh it is.
-        expect(mp.asOfNote).toMatch(/2026|17\.08|17-08/);
+        // The as-of note carries the measurement's OWN date, in this
+        // locale's format — a stale date on a daily-moving number is the
+        // defect this band already shipped once.
+        const [y, m, d] = SWEDEN_MEASUREMENT_CURRENT.measuredAt.split("-");
+        const accepted = [`${y}-${m}-${d}`, `${d}.${m}.${y}`, `${d}-${m}-${y}`];
+        expect(
+          accepted.some((form) => mp.asOfNote.includes(form)),
+          `${locale}: asOfNote must carry ${accepted.join(" / ")} — got: ${mp.asOfNote}`,
+        ).toBe(true);
       });
     });
   }
+
+  it("the rendered floors are supported by a dated browsable-basis window", () => {
+    // The landing may never advertise more than the public job board can
+    // serve. This is the pin that the 2026-08-17 floors would have failed.
+    expect(
+      floorsAreSupportedBy(SWEDEN_COVERAGE_CURRENT, SWEDEN_MEASUREMENT_CURRENT),
+    ).toBe(true);
+  });
 
   it("the band renders the ranking without absolute per-profession numbers", () => {
     const src = readFileSync(

@@ -3907,11 +3907,11 @@
       "title": "Arbetsmarknaden i siffror",
       "stats": {
         "vacancies": {
-          "value": "41 000+",
+          "value": "35 000+",
           "label": "aktiva platsannonser"
         },
         "employers": {
-          "value": "7 600+",
+          "value": "7 000+",
           "label": "arbetsgivare bakom annonserna"
         },
         "regions": {
@@ -3919,7 +3919,7 @@
           "label": "regioner med aktiva annonser"
         }
       },
-      "asOfNote": "Baserat på annonsdata från 2026-08-17; siffrorna ändras dagligen.",
+      "asOfNote": "Baserat på annonsdata från 2026-08-19; siffrorna ändras dagligen.",
       "topTitle": "Mest efterfrågade yrken just nu",
       "topNote": "Rankat efter aktiva platsannonser på plattformen. En del annonser är ännu inte kopplade till ett yrke."
     }
