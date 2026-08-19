@@ -2188,7 +2188,12 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 230;
+    const SPRINT_BASELINE = 231;
+    // Bumped 230 -> 231 for notification events v5 (20260819110000_
+    // notification_events_v5_demand_interest) — GREEN constraint WIDENING via
+    // the drop + re-add idiom, so the durable store can finally carry the one
+    // event the marketplace is for: a worker raised their hand at a demand.
+    // Four such signals sat in production with no notification ever written.
     // Bumped 229 -> 230 for the worker saved PUBLIC VACANCIES v1 DRAFT
     // (20260819094500_worker_saved_public_vacancies_v1) — extends the canonical
     // worker_saved_opportunities with a second source rather than adding a

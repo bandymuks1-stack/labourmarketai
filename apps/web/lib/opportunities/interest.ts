@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
+import {
+  emitDemandInterestNotification,
+  emitDemandInterestResponseNotification,
+} from "@/lib/notifications/event-emitters";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
@@ -22,6 +26,15 @@ import {
  * anything anywhere — no email, no messaging, no webhook, no external call of
  * any kind (guard-pinned). The demand's owning company sees the signal on its
  * own scouting view through RLS; the worker keeps full control of their row.
+ *
+ * v5 (2026-08-19): the loop is no longer one-way. A successful express writes
+ * a durable in-product notification for the demand owner, and a successful
+ * acknowledgement writes one back for the worker (`notification_events`).
+ * Still nothing leaves the platform — a durable row is the same bell these
+ * views already answer to, and each recipient is exactly whom the signal's RLS
+ * policy already admits. Four real signals sat unheard before this existed,
+ * and a worker who raised their hand had no way to learn the company had even
+ * looked.
  *
  * VISIBILITY RULE: a worker can only express interest in a demand they can
  * currently SEE — validated by re-running the exact board pipeline
@@ -115,7 +128,13 @@ export async function expressInterest(input: {
     }),
   };
 
-  const { error } = await asAny(supabase)
+  // `select("id")` is not decoration: the durable notification is keyed on the
+  // SIGNAL row id, which is what makes one worker's interest in one demand a
+  // single event. Keying it on the request id instead would notify the owner
+  // about the FIRST worker only, and keying it on nothing would re-notify on
+  // every idempotent re-express. The row comes back under the worker's own
+  // RLS policy (`demand_interest_signals_worker_all`) — no widened read.
+  const { data: signalRow, error } = await asAny(supabase)
     .from("demand_interest_signals")
     .upsert(
       {
@@ -127,11 +146,28 @@ export async function expressInterest(input: {
         updated_at: new Date().toISOString(),
       },
       { onConflict: "worker_id,request_id" },
-    );
+    )
+    .select("id")
+    .maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
   }
+
+  // THE SIGNAL NOW REACHES SOMEONE — after the domain write succeeded and
+  // never in front of it. Recipient resolution lives entirely in the emitter,
+  // off the signal's own rows.
+  //
+  // AWAITED, not detached. The sibling emitters use `void` because they were
+  // written for a server that outlives the response; this runs on a serverless
+  // runtime that can freeze the invocation the instant the action returns,
+  // which would kill the emitter mid-read and drop the notification — the
+  // exact silence this change exists to end. The safety the `void` was
+  // protecting is preserved by the emitter itself: it never throws, so a
+  // failed emission still cannot fail a worker's interest.
+  const signalId = (signalRow as { id?: string } | null)?.id ?? null;
+  if (signalId) await emitDemandInterestNotification(signalId);
+
   return { kind: "ok", status: "interested" };
 }
 
@@ -264,6 +300,19 @@ export async function acknowledgeInterest(input: {
       return { kind: "error", message: error.message };
     }
     if (data !== true) return { kind: "no-signal" };
+
+    // THE ANSWER REACHES THE WORKER. Only past the `data !== true` branch, so
+    // an acknowledgement that changed nothing never manufactures news. Awaited
+    // for the same reason the outbound half is (a detached write can be frozen
+    // at return) and equally unable to fail the acknowledgement, because the
+    // emitter never throws.
+    await emitDemandInterestResponseNotification({
+      requestId: input.requestId,
+      workerId: input.workerId,
+      status: input.status as "reviewed" | "contacted",
+      actorProfileId: user.id,
+    });
+
     return { kind: "ok", status: input.status as InterestStatus };
   } catch {
     return { kind: "needs-migration" };

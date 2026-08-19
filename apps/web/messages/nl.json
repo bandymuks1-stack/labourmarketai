@@ -4118,7 +4118,9 @@
         "event_document_ack_assigned": "U bent gevraagd te bevestigen dat u een document hebt gelezen.",
         "event_document_ack_completed": "Een document dat u ter bevestiging stuurde, is bevestigd.",
         "event_document_expiring": "De geldigheid van een document loopt binnenkort af.",
-        "event_work_task_assigned": "Er is een taak aan je toegewezen"
+        "event_work_task_assigned": "Er is een taak aan je toegewezen",
+        "event_demand_interest_expressed": "Een werknemer heeft interesse getoond in je aanvraag",
+        "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",

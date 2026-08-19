@@ -66,7 +66,22 @@ export type NotificationEventType =
   // v4 (20260817153000, train D): a managing role handed a work task to
   // another person — the NEW assignee durably learns a task landed on them.
   // Never emitted for self-assignment (you watched yourself do it).
-  | "work_task_assigned";
+  | "work_task_assigned"
+  // v5 (20260819110000): a worker raised their hand at a company's demand.
+  // Production held four such signals with nothing to carry them — the
+  // demand owner learned a candidate existed only by opening the scouting
+  // page unprompted. Recipient is the demand owner and only the demand
+  // owner, which is exactly whom the signal's RLS policy already admits.
+  | "demand_interest_expressed"
+  // v5, the return direction: the company deliberately marked the interest
+  // reviewed. Recipient is the WORKER who raised their hand — the difference
+  // between silence and "someone actually looked".
+  //
+  // There is no 'contacted' counterpart on purpose: that status is set only
+  // after a real conversation thread exists, and a new thread already reaches
+  // the worker through the unread-message signal. The message is the better
+  // notification; a second bell for one act is noise.
+  | "demand_interest_reviewed";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -78,7 +93,15 @@ export type NotificationEntityType =
   | "worker_document"
   | "org_document"
   | "document_acknowledgement"
-  | "work_task";
+  | "work_task"
+  // v5: the interest signal resolves to the EXISTING scouting surface, where
+  // the demand owner already reviews and acknowledges who raised their hand.
+  | "demand_interest_signal"
+  // v5: the SAME signal row seen from the worker's side. A second entity type
+  // rather than a second table, because the destination differs and nothing
+  // else does — routing both directions through one type would send a worker
+  // to a company page they cannot open.
+  | "demand_interest_response";
 
 /**
  * Where a durable event TAKES YOU.
@@ -119,6 +142,14 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v4: the tasks surface already renders the assignee's list — the row the
   // event points at is in "my tasks" by construction (they are the assignee).
   work_task: "/dashboard/tasks",
+  // v5: scouting is where a demand owner already sees interest signals on
+  // their own demands (listDemandInterestForCompany feeds it), so the
+  // notification lands the reader on the row it is about.
+  demand_interest_signal: "/dashboard/company/scouting",
+  // v5: "Mano susidomėjimai" already renders the worker's own interests and
+  // their current status on the opportunities board — the answer they were
+  // notified about is on the page the notification opens.
+  demand_interest_response: "/dashboard/opportunities",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

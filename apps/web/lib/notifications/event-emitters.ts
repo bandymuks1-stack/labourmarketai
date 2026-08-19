@@ -29,10 +29,18 @@ import "server-only";
  *   absence_rejected    → the WORKER (and the requester, if different) — the
  *                         exact "outcome the offline worker never learns
  *                         about" gap the durable store exists to close.
+ *   demand_interest_expressed
+ *                       → the DEMAND OWNER (v5) — the same gap on the
+ *                         employer side; never the worker who acted.
+ *   demand_interest_reviewed
+ *                       → the WORKER who raised their hand (v5) — the return
+ *                         direction, so the smaller party is not the one left
+ *                         guessing. Never the person who did the answering.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
+  emitNotificationEvent,
   emitNotificationEventInBackground,
   type NotificationEventType,
 } from "./events";
@@ -245,6 +253,166 @@ export async function emitWorkTaskAssignedNotification(
     });
   } catch {
     // Emission is an enhancement; the domain write already succeeded.
+  }
+}
+
+/**
+ * DEMAND INTEREST — a worker raised their hand at a company's demand.
+ *
+ * WHY THIS IS THE ONE THAT MATTERED MOST. Production held four real
+ * `demand_interest_signals` rows from 2026-07-05 and `notification_events` had
+ * zero inserts ever: the marketplace's defining event was the only domain
+ * write on the platform with no emitter. The demand owner learned a candidate
+ * existed only by opening /dashboard/company/scouting unprompted, which is the
+ * exact "outcome the offline party never learns about" gap this store exists
+ * to close — here on the EMPLOYER side rather than the worker side.
+ *
+ * RECIPIENT: the demand owner (`customer_requests.profile_id`), read from the
+ * signal's own request row, never from caller input. That is precisely the set
+ * `demand_interest_signals_demand_owner_select` already admits, so this
+ * notification discloses nothing the recipient could not already read.
+ *
+ * NOT EMITTED when the demand owner and the interested worker are the same
+ * person — you do not need telling that you raised your own hand (the
+ * work_task_assigned self-assignment precedent).
+ *
+ * METADATA: the demand's own `country`, and only when it is an ISO-3166
+ * alpha-2 code. The worker's `note` is free text and never leaves the signal
+ * row — a notification must be safe to render in a preview.
+ *
+ * AWAITED, UNLIKE ITS SIBLINGS — and deliberately. The other emitters here
+ * detach their insert through `emitNotificationEventInBackground`, which is
+ * safe on a long-lived server and NOT safe on a serverless runtime: the
+ * invocation can be frozen the moment the action returns, killing a detached
+ * insert mid-flight. The whole point of this emitter is that the signal stops
+ * being silent, so an emission that survives only when the platform feels like
+ * it would reintroduce the defect it was written to fix. It is awaited end to
+ * end instead, and it CANNOT fail the domain write because it never throws:
+ * the try/catch below and `emitNotificationEvent`'s own outcome union between
+ * them turn every failure into a logged outcome rather than an exception.
+ */
+export async function emitDemandInterestNotification(
+  signalId: string,
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data: signal } = await admin
+      .from("demand_interest_signals")
+      .select("request_id, worker_id")
+      .eq("id", signalId)
+      .maybeSingle();
+    const row = signal as {
+      request_id?: string | null;
+      worker_id?: string | null;
+    } | null;
+    if (!row?.request_id || !row.worker_id) return;
+
+    const { data: demand } = await admin
+      .from("customer_requests")
+      .select("profile_id, country")
+      .eq("id", row.request_id)
+      .maybeSingle();
+    const req = demand as {
+      profile_id?: string | null;
+      country?: string | null;
+    } | null;
+    const owner = req?.profile_id ?? null;
+    if (!owner) return;
+
+    const actor = await workerProfileId(admin, row.worker_id);
+    if (actor && actor === owner) return;
+
+    const country = req?.country ?? null;
+    const outcome = await emitNotificationEvent(admin, {
+      recipientProfileId: owner,
+      eventType: "demand_interest_expressed",
+      entityType: "demand_interest_signal",
+      entityId: signalId,
+      metadata: /^[A-Z]{2}$/.test(country ?? "")
+        ? { country: country as string }
+        : {},
+    });
+    if (outcome.kind === "unexpected_error") {
+      // `duplicate` and `feature_unavailable` are approved outcomes and stay
+      // quiet; this line only fires on something real.
+      console.error(
+        `[notifications] demand_interest_expressed emit failed: ${outcome.code}`,
+      );
+    }
+  } catch {
+    // Emission is an enhancement; the signal itself is already stored.
+  }
+}
+
+/**
+ * DEMAND INTEREST, THE RETURN DIRECTION — the company answered.
+ *
+ * The sibling above closes the employer's silence; this closes the worker's,
+ * and shipping only the first would have been the worse asymmetry. A worker
+ * who raises their hand and hears nothing is the most common way a labour
+ * market wastes a person's hope, and doctrine §1 exists precisely so the
+ * smaller party is not the one left guessing.
+ *
+ * RECIPIENT: the worker who expressed the interest, resolved from the signal
+ * row's own `worker_id`. Emitted only when `acknowledge_demand_interest`
+ * actually changed something, so a no-op acknowledgement never manufactures
+ * news.
+ *
+ * ONLY 'reviewed'. The 'contacted' status is set exclusively by
+ * `contact-interested-worker`, and only AFTER a real conversation thread has
+ * been opened — which already reaches the worker through the existing
+ * unread-message signal. The message itself is the better notification, so a
+ * second bell for the same act would be noise. 'reviewed' is the status that
+ * had no carrier at all.
+ *
+ * WHAT IT DOES NOT COVER, deliberately: shortlist status. `setShortlist`
+ * records an employer-internal judgement (including a rejection), and turning
+ * that into a notification is a product decision about telling someone they
+ * were passed over — not a gap to close silently. Acknowledgement is different
+ * in kind: the company chose to say something.
+ *
+ * METADATA: empty. The demand's country is the WORKER's counterparty data
+ * here, not their own, and nothing about the answer needs a render hint.
+ */
+export async function emitDemandInterestResponseNotification(input: {
+  readonly requestId: string;
+  readonly workerId: string;
+  /** Only "reviewed" emits; "contacted" returns without a write (see above). */
+  readonly status: "reviewed" | "contacted";
+  /** The acting profile — never notified about answering themselves. */
+  readonly actorProfileId: string;
+}): Promise<void> {
+  if (input.status !== "reviewed") return;
+  try {
+    const admin = createAdminClient();
+    // The event is keyed on the SIGNAL row, exactly like the outbound half, so
+    // one answer per (worker, demand).
+    const { data: signal } = await admin
+      .from("demand_interest_signals")
+      .select("id")
+      .eq("request_id", input.requestId)
+      .eq("worker_id", input.workerId)
+      .maybeSingle();
+    const signalId = (signal as { id?: string } | null)?.id ?? null;
+    if (!signalId) return;
+
+    const recipient = await workerProfileId(admin, input.workerId);
+    if (!recipient || recipient === input.actorProfileId) return;
+
+    const outcome = await emitNotificationEvent(admin, {
+      recipientProfileId: recipient,
+      eventType: "demand_interest_reviewed",
+      entityType: "demand_interest_response",
+      entityId: signalId,
+      metadata: {},
+    });
+    if (outcome.kind === "unexpected_error") {
+      console.error(
+        `[notifications] demand_interest_reviewed emit failed: ${outcome.code}`,
+      );
+    }
+  } catch {
+    // Emission is an enhancement; the acknowledgement already succeeded.
   }
 }
 
