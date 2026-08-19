@@ -40,6 +40,7 @@ import { disabledCompletionProvider } from "./providers/disabled";
 import { mockCompletionProvider } from "./providers/mock";
 import { anthropicCompletionProvider } from "./providers/anthropic";
 import { xaiCompletionProvider } from "./providers/xai";
+import type { AiEgressGrant } from "./data-egress";
 import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
 import { deeplCompletionProvider } from "./providers/deepl";
@@ -133,6 +134,14 @@ export interface ChainDispatchContext {
    * and could not be proven at the dispatch/adapter-invocation level at all.
    */
   readonly profiles?: readonly AiProviderProfile[];
+  /**
+   * Egress-grant override. Production always uses the shipped
+   * `AI_EGRESS_GRANTS`, which is EMPTY by owner decision — so without this a
+   * test could not reach a cloud adapter at all, and the dispatch-level
+   * mechanics (fallback ordering, adapter invocation) would be unprovable.
+   * Injecting a grant here is the counterpart of injecting a profile above.
+   */
+  readonly grants?: readonly AiEgressGrant[];
 }
 
 /**
@@ -177,6 +186,7 @@ export async function dispatchAiCompletion(
     chain.decision,
     chain.states,
     chain.profiles ?? AI_PROVIDER_PROFILES,
+    chain.grants,
   );
 
   if (outcome.kind === "deterministic") {

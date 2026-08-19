@@ -25,6 +25,7 @@
  */
 import type { AiTaskType } from "./task-routing";
 import type { AiProviderProfile } from "./provider-chain";
+import { egressPermitted, type AiEgressGrant } from "./data-egress";
 
 /**
  * What the payload of a task carries.
@@ -113,46 +114,33 @@ export type SensitivityEligibility =
 /**
  * May this provider receive a payload of this sensitivity?
  *
- * The rules, and why each one:
+ * DELEGATED 2026-08-19 to `./data-egress.ts` under the owner's AI DATA BOUNDARY
+ * decision. This function keeps its name and shape — the chain calls it in its
+ * first pass and nothing about that changes — but the RULE it applies moved,
+ * because the old rule sorted on the wrong axis.
  *
- *   LOCAL is always eligible. The prompt never leaves a network the operator
- *   controls, so there is no disclosure to assess. This is what makes the
- *   free-local-first ordering safe rather than merely cheap.
+ * It used to say: a FREE cloud tier may not receive personal data, and a PAID
+ * cloud provider may, "because reaching it already required the owner to enable
+ * that provider under commercial terms". That treated an ENABLEMENT decision as
+ * if it were a DATA-TRANSFER decision. They are different acts: paying a vendor
+ * is not the same as permitting it to process a worker's journal entry. Under
+ * the owner's decision the axis is INTERNAL vs EXTERNAL and permission is
+ * explicit and default-deny — €0 never grants permission to send data, and
+ * neither does a paid invoice.
  *
- *   A FREE CLOUD TIER may not receive PERSONAL or SENSITIVE_FREE_TEXT. This is
- *   the rule the matrix bought. It is deliberately a property of the CLASS, not
- *   a list of vendors: a provider is only ever placed in `free_tier` by an
- *   explicit edit, and that edit must not silently also grant it people's CVs.
- *   A vendor whose CURRENT terms genuinely permit this processing is not
- *   unblocked by arguing about it here — it is unblocked by verifying the terms
- *   and moving it out of `free_tier`, with the source, in the matrix.
- *
- *   PAID CLOUD is eligible. Not because money purifies anything, but because
- *   reaching it already required the owner to enable that provider under
- *   commercial terms — a decision with a human in it, recorded elsewhere.
- *
- * NOTE ON TODAY'S EFFECT: no provider in `AI_PROVIDER_PROFILES` is currently
- * classed `free_tier`, so this veto fires zero times in production right now.
- * That is precisely why its test injects a synthetic free-tier provider — a
- * rule with no live subject is otherwise indistinguishable from a rule that
- * does not work.
+ * The free-tier rule is not lost: it survives as `MAX_GRANTABLE_FOR_FREE_TIER`,
+ * a ceiling a grant cannot exceed.
  */
 export function providerEligibleForSensitivity(
   profile: Pick<AiProviderProfile, "id" | "costClass" | "locality">,
   sensitivity: AiDataSensitivity,
+  grants?: readonly AiEgressGrant[],
 ): SensitivityEligibility {
-  if (profile.locality === "local") return { eligible: true };
-
   if (profile.costClass === "disabled") {
     return { eligible: false, reason: "provider is disabled" };
   }
-
-  if (profile.costClass === "free_tier" && carriesPersonalData(sensitivity)) {
-    return {
-      eligible: false,
-      reason: `free cloud tier may not receive ${sensitivity} data — a free tier's consideration can be the content itself (see docs/ai/free-provider-matrix-2026-08-09.md)`,
-    };
-  }
-
-  return { eligible: true };
+  const verdict = egressPermitted(profile, sensitivity, grants);
+  return verdict.permitted
+    ? { eligible: true }
+    : { eligible: false, reason: verdict.reason };
 }

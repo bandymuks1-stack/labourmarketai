@@ -21,6 +21,7 @@ import {
   type AiDataSensitivity,
 } from "./data-sensitivity";
 import { AI_PROVIDER_PROFILES, type AiProviderProfile } from "./provider-chain";
+import type { AiEgressGrant } from "./data-egress";
 import { AI_TASK_TYPES, TASK_POLICIES } from "./task-routing";
 
 const LOCAL = { id: "local", costClass: "free_local", locality: "local" } as const;
@@ -79,50 +80,127 @@ describe("every task is classified, and the table matches the shipped profiles",
   });
 });
 
-describe("a free cloud tier may not receive personal data", () => {
-  it.each(["PERSONAL", "SENSITIVE_FREE_TEXT"] as AiDataSensitivity[])(
-    "%s is refused to an injected free_tier provider",
+describe("default deny: an external provider with no grant gets PUBLIC only", () => {
+  /**
+   * OWNER DECISION 2026-08-19 (AI DATA BOUNDARY) replaced the rule these tests
+   * used to assert. The old rule sorted providers by PRICE — free tiers refused
+   * personal data, paid cloud allowed it, on the ground that enabling a paid
+   * vendor was already an owner decision. The owner has separated the two acts:
+   * paying a vendor is not permitting it to process a worker's journal. The
+   * axis is now INTERNAL vs EXTERNAL, and permission is explicit.
+   *
+   * So the cases below are inverted on purpose, not relaxed: PAID cloud is now
+   * refused personal data too, because it holds no egress grant.
+   */
+  it.each(["LOW_RISK_PROJECT_DATA", "PERSONAL", "SENSITIVE_FREE_TEXT"] as AiDataSensitivity[])(
+    "%s is refused to a PAID external provider with no grant",
     (sensitivity) => {
-      const verdict = providerEligibleForSensitivity(FREE_CLOUD, sensitivity);
+      const verdict = providerEligibleForSensitivity(PAID_CLOUD, sensitivity);
       expect(verdict.eligible).toBe(false);
-      expect(!verdict.eligible && verdict.reason).toMatch(/free cloud tier/i);
+      expect(!verdict.eligible && verdict.reason).toMatch(/egress grant/i);
     },
   );
 
-  it.each(["PUBLIC", "LOW_RISK_PROJECT_DATA"] as AiDataSensitivity[])(
-    "%s IS allowed to a free_tier provider — the veto is not a blanket ban",
+  it.each(["LOW_RISK_PROJECT_DATA", "PERSONAL", "SENSITIVE_FREE_TEXT"] as AiDataSensitivity[])(
+    "%s is refused to a FREE external provider with no grant",
     (sensitivity) => {
-      expect(providerEligibleForSensitivity(FREE_CLOUD, sensitivity).eligible).toBe(
-        true,
-      );
+      expect(
+        providerEligibleForSensitivity(FREE_CLOUD, sensitivity).eligible,
+      ).toBe(false);
     },
   );
 
-  it("NEGATIVE CONTROL: reclassifying the same provider as paid lets it through", () => {
-    // Same id, same locality — only the cost class differs. If this did not
-    // flip, the rule would be keyed on the vendor rather than on the class,
-    // and a new free provider would slip past it.
-    const asFree = providerEligibleForSensitivity(FREE_CLOUD, "PERSONAL");
-    const asPaid = providerEligibleForSensitivity(
-      { ...FREE_CLOUD, costClass: "paid" },
+  it("PUBLIC reaches an external provider — the gate is not a blanket ban", () => {
+    expect(providerEligibleForSensitivity(PAID_CLOUD, "PUBLIC").eligible).toBe(
+      true,
+    );
+    expect(providerEligibleForSensitivity(FREE_CLOUD, "PUBLIC").eligible).toBe(
+      true,
+    );
+  });
+
+  it("EUR 0 grants nothing, and neither does an invoice", () => {
+    // The owner's sentence, as a test: cost class must not move the verdict.
+    // Same id, same locality, only the price differs — both refused.
+    const free = providerEligibleForSensitivity(
+      { id: "v", costClass: "free_tier", locality: "cloud" },
       "PERSONAL",
     );
-    expect(asFree.eligible).toBe(false);
-    expect(asPaid.eligible).toBe(true);
+    const paid = providerEligibleForSensitivity(
+      { id: "v", costClass: "paid", locality: "cloud" },
+      "PERSONAL",
+    );
+    expect(free.eligible).toBe(false);
+    expect(paid.eligible).toBe(false);
   });
 });
 
-describe("local is always eligible; paid cloud is eligible; disabled never is", () => {
+describe("an explicit grant opens the gate, and only as far as it says", () => {
+  // The grant table ships EMPTY, so these inject one — the same reason the
+  // free-tier cases used to inject a synthetic provider: a rule with no live
+  // subject is indistinguishable from a rule that does not work.
+  const grantTo = (
+    provider: string,
+    maxSensitivity: AiDataSensitivity,
+  ): AiEgressGrant[] => [
+    { provider, maxSensitivity, basis: "test fixture", grantedOn: "2026-08-19" },
+  ];
+
+  it("a grant permits up to its ceiling", () => {
+    const grants = grantTo("anthropic", "PERSONAL");
+    expect(
+      providerEligibleForSensitivity(PAID_CLOUD, "PERSONAL", grants).eligible,
+    ).toBe(true);
+    expect(
+      providerEligibleForSensitivity(PAID_CLOUD, "LOW_RISK_PROJECT_DATA", grants)
+        .eligible,
+    ).toBe(true);
+  });
+
+  it("a grant does NOT permit above its ceiling", () => {
+    const grants = grantTo("anthropic", "PERSONAL");
+    expect(
+      providerEligibleForSensitivity(PAID_CLOUD, "SENSITIVE_FREE_TEXT", grants)
+        .eligible,
+    ).toBe(false);
+  });
+
+  it("a grant is per provider — it never leaks to another vendor", () => {
+    const grants = grantTo("anthropic", "SENSITIVE_FREE_TEXT");
+    expect(
+      providerEligibleForSensitivity(
+        { id: "openai", costClass: "paid", locality: "cloud" },
+        "PERSONAL",
+        grants,
+      ).eligible,
+    ).toBe(false);
+  });
+
+  it("a free tier cannot be granted personal data, whatever the grant claims", () => {
+    // MAX_GRANTABLE_FOR_FREE_TIER survives from the old rule: when a service is
+    // free the consideration is sometimes the content itself.
+    const grants = grantTo("gemini", "SENSITIVE_FREE_TEXT");
+    expect(
+      providerEligibleForSensitivity(FREE_CLOUD, "PERSONAL", grants).eligible,
+    ).toBe(false);
+    // ...but the grant still works up to the capped ceiling.
+    expect(
+      providerEligibleForSensitivity(
+        FREE_CLOUD,
+        "LOW_RISK_PROJECT_DATA",
+        grants,
+      ).eligible,
+    ).toBe(true);
+  });
+});
+
+describe("local is unrestricted; disabled never is", () => {
   it.each(AI_DATA_SENSITIVITY_CLASSES)(
-    "local may receive %s — the prompt never leaves the operator's network",
+    "local may receive %s — no egress occurs, so there is nothing to permit",
     (s) => {
       expect(providerEligibleForSensitivity(LOCAL, s).eligible).toBe(true);
     },
   );
-
-  it.each(AI_DATA_SENSITIVITY_CLASSES)("paid cloud may receive %s", (s) => {
-    expect(providerEligibleForSensitivity(PAID_CLOUD, s).eligible).toBe(true);
-  });
 
   it("a disabled provider is refused everything", () => {
     for (const s of AI_DATA_SENSITIVITY_CLASSES) {

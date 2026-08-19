@@ -9,6 +9,7 @@ import {
   type AiProviderState,
 } from "./provider-chain";
 import { resolveTaskRoute, type AiTaskType } from "./task-routing";
+import type { AiEgressGrant } from "./data-egress";
 
 /**
  * FREE-FIRST PROVIDER CHAIN.
@@ -34,6 +35,19 @@ const unconfigured = (
 /** A real routed decision, so the chain is tested against the actual router. */
 const decisionFor = (taskType: AiTaskType) =>
   resolveTaskRoute(taskType, { attempt: 1 });
+
+/**
+ * OWNER DECISION 2026-08-19 (AI DATA BOUNDARY): an external provider with no
+ * egress grant may receive PUBLIC data only, and no task is classed PUBLIC. So
+ * the cloud-fallthrough MECHANICS below would otherwise be untestable — not
+ * because they broke, but because nothing is permitted to reach a cloud
+ * provider by default. These tests inject a grant to exercise the ordering, and
+ * the tests immediately after them prove the gate closes without one.
+ */
+const GRANTED: readonly AiEgressGrant[] = [
+  { provider: "anthropic", maxSensitivity: "SENSITIVE_FREE_TEXT", basis: "test fixture", grantedOn: "2026-08-19" },
+  { provider: "openai", maxSensitivity: "SENSITIVE_FREE_TEXT", basis: "test fixture", grantedOn: "2026-08-19" },
+];
 
 describe("ordering is cheapest-class-first", () => {
   it("puts the local runtime ahead of every cloud vendor", () => {
@@ -90,14 +104,23 @@ describe("selection", () => {
     if (out.kind !== "provider") return;
     expect(out.selected.id).toBe("local");
     expect(out.selected.costClass).toBe("free_local");
-    expect(out.skipped).toEqual([]);
+    // `skipped` is no longer empty: the ready cloud provider is now reported as
+    // passed over BECAUSE it holds no egress grant, which is more informative
+    // than the old silence. Local still wins, and nothing is skipped mutely.
+    expect(out.skipped.map((s) => s.id)).not.toContain("local");
+    for (const s of out.skipped) expect(s.reason).not.toBe("");
   });
 
-  it("falls through to a cloud provider when local is not configured", () => {
-    const out = resolveProviderChain(decisionFor("explain_match"), [
-      unconfigured("local", "AI_LOCAL_BASE_URL is not set"),
-      ready("anthropic"),
-    ]);
+  it("falls through to a GRANTED cloud provider when local is not configured", () => {
+    const out = resolveProviderChain(
+      decisionFor("explain_match"),
+      [
+        unconfigured("local", "AI_LOCAL_BASE_URL is not set"),
+        ready("anthropic"),
+      ],
+      undefined,
+      GRANTED,
+    );
     expect(out.kind).toBe("provider");
     if (out.kind !== "provider") return;
     expect(out.selected.id).toBe("anthropic");
@@ -112,11 +135,12 @@ describe("selection", () => {
   });
 
   it("hands back the rest of the chain so a failure can retry down it", () => {
-    const out = resolveProviderChain(decisionFor("explain_match"), [
-      ready("local"),
-      ready("anthropic"),
-      ready("openai"),
-    ]);
+    const out = resolveProviderChain(
+      decisionFor("explain_match"),
+      [ready("local"), ready("anthropic"), ready("openai")],
+      undefined,
+      GRANTED,
+    );
     if (out.kind !== "provider") throw new Error("expected a provider");
     expect(out.remaining.length).toBeGreaterThan(0);
     expect(out.remaining.map((r) => r.id)).not.toContain("local");
@@ -128,12 +152,59 @@ describe("selection", () => {
   });
 });
 
+describe("the data egress gate: BLOCK external, try local, else fail safely", () => {
+  it("personal data never reaches an ungranted cloud provider, even when it is the ONLY one ready", () => {
+    // The owner's rule in one assertion. anthropic is ready and would have been
+    // selected under the old price-based rule; it holds no egress grant, so the
+    // run degrades instead.
+    const out = resolveProviderChain(decisionFor("explain_match"), [
+      unconfigured("local", "AI_LOCAL_BASE_URL is not set"),
+      ready("anthropic"),
+    ]);
+    expect(out.kind).toBe("unavailable");
+    if (out.kind !== "unavailable") return;
+    expect(
+      out.skipped.find((s) => s.id === "anthropic")?.reason,
+    ).toMatch(/egress grant/i);
+  });
+
+  it("local is preferred over a granted cloud provider — internal stays internal", () => {
+    const out = resolveProviderChain(
+      decisionFor("explain_match"),
+      [ready("local"), ready("anthropic")],
+      undefined,
+      GRANTED,
+    );
+    expect(out.kind).toBe("provider");
+    if (out.kind !== "provider") return;
+    expect(out.selected.id).toBe("local");
+  });
+
+  it("no sideways fallback: an ungranted provider is not even in `remaining`", () => {
+    // It must be impossible to REACH it after another candidate fails, which is
+    // why the veto runs in pass 1 rather than at selection time.
+    const out = resolveProviderChain(
+      decisionFor("explain_match"),
+      [ready("local"), ready("anthropic"), ready("openai")],
+      undefined,
+      [GRANTED[0]], // anthropic granted, openai NOT
+    );
+    if (out.kind !== "provider") throw new Error("expected a provider");
+    expect(out.remaining.map((r) => r.id)).not.toContain("openai");
+  });
+});
+
 describe("degradation is honest and never a throw", () => {
   it("names every provider it skipped, and why", () => {
-    const out = resolveProviderChain(decisionFor("explain_match"), [
-      unconfigured("local", "no base URL"),
-      unconfigured("anthropic", "no api key"),
-    ]);
+    const out = resolveProviderChain(
+      decisionFor("explain_match"),
+      [
+        unconfigured("local", "no base URL"),
+        unconfigured("anthropic", "no api key"),
+      ],
+      undefined,
+      GRANTED,
+    );
     expect(out.kind).toBe("unavailable");
     if (out.kind !== "unavailable") return;
     const reasons = Object.fromEntries(

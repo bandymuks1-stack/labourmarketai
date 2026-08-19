@@ -33,6 +33,7 @@
  * Pure. No IO, no env, no server-only, no SDK import.
  */
 import type { AiTaskType, TaskRouteDecision } from "./task-routing";
+import type { AiEgressGrant } from "./data-egress";
 import {
   providerEligibleForSensitivity,
   sensitivityForTask,
@@ -318,6 +319,7 @@ export function resolveProviderChain(
   decision: TaskRouteDecision,
   states: readonly AiProviderState[],
   profiles: readonly AiProviderProfile[] = AI_PROVIDER_PROFILES,
+  grants?: readonly AiEgressGrant[],
 ): ChainOutcome {
   if (decision.tier === "deterministic") {
     return {
@@ -343,7 +345,7 @@ export function resolveProviderChain(
   // Pass 1 — the privacy veto. Ineligible providers leave the chain entirely;
   // they are not candidates for the first attempt OR for a later retry.
   for (const p of ordered) {
-    const verdict = providerEligibleForSensitivity(p, sensitivity);
+    const verdict = providerEligibleForSensitivity(p, sensitivity, grants);
     if (verdict.eligible) {
       eligible.push(p);
     } else {
