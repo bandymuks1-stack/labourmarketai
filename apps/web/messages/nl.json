@@ -9355,7 +9355,9 @@
       "not_found": "Taak niet gevonden.",
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
       "error": "Opslaan mislukt. Probeer het opnieuw.",
-      "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten."
+      "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten.",
+      "evidence_linked": "Bewijs aan de taak gekoppeld.",
+      "evidence_unlinked": "Koppeling ingetrokken. Het record zelf is ongewijzigd."
     },
     "projectTasks": {
       "title": "Projecttaken",
@@ -9399,6 +9401,32 @@
         "object_changed": "Object gewijzigd",
         "dependency_added": "Afhankelijkheid toegevoegd",
         "dependency_removed": "Afhankelijkheid verwijderd"
+      }
+    },
+    "evidence": {
+      "title": "Bewijs",
+      "intro": "Werkjournaal-records die aan deze taak zijn gekoppeld. Koppelen wijzigt een record nooit — het geeft alleen aan welke taak het aantoont.",
+      "empty": "Er is nog geen werkjournaal-record aan deze taak gekoppeld.",
+      "unavailable": "Bewijs koppelen is nog niet ingeschakeld.",
+      "summary": "{total} gekoppeld · {confirmed} door leidinggevende bevestigd",
+      "confirmed": "Door leidinggevende bevestigd",
+      "unconfirmed": "Niet bevestigd",
+      "photos": "Foto's: {count}",
+      "linkCta": "Koppel een werkjournaal-record",
+      "linkSubmit": "Koppelen",
+      "unlink": "Intrekken",
+      "unlinkReason": "Reden (optioneel)",
+      "alreadyLinked": "Al gekoppeld",
+      "noLinkable": "U hebt nog geen werkjournaal-records om te koppelen.",
+      "result": {
+        "ok": "Bewijs gekoppeld.",
+        "already_linked": "Dat record is al gekoppeld.",
+        "not_found": "Niet gevonden.",
+        "not_allowed": "U mag dit niet doen.",
+        "invalid": "Controleer de velden.",
+        "limit_reached": "Koppellimiet bereikt.",
+        "entry_not_current": "Dat record is gecorrigeerd of ingetrokken — koppel de actuele versie.",
+        "already_unlinked": "Die koppeling is al ingetrokken."
       }
     }
   },

@@ -9355,7 +9355,9 @@
       "not_found": "Aufgabe nicht gefunden.",
       "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-      "cycle": "Das würde eine Schleife erzeugen — eine Aufgabe kann nicht über andere Aufgaben auf sich selbst warten."
+      "cycle": "Das würde eine Schleife erzeugen — eine Aufgabe kann nicht über andere Aufgaben auf sich selbst warten.",
+      "evidence_linked": "Nachweis mit der Aufgabe verknüpft.",
+      "evidence_unlinked": "Verknüpfung zurückgezogen. Der Eintrag selbst bleibt unverändert."
     },
     "projectTasks": {
       "title": "Projektaufgaben",
@@ -9399,6 +9401,32 @@
         "object_changed": "Objekt geändert",
         "dependency_added": "Abhängigkeit hinzugefügt",
         "dependency_removed": "Abhängigkeit entfernt"
+      }
+    },
+    "evidence": {
+      "title": "Nachweise",
+      "intro": "Arbeitsjournal-Einträge, die mit dieser Aufgabe verknüpft sind. Das Verknüpfen ändert einen Eintrag nie — es zeigt nur, welche Aufgabe er belegt.",
+      "empty": "Mit dieser Aufgabe ist noch kein Arbeitsjournal-Eintrag verknüpft.",
+      "unavailable": "Die Nachweis-Verknüpfung ist noch nicht aktiviert.",
+      "summary": "{total} verknüpft · {confirmed} von der Führungskraft bestätigt",
+      "confirmed": "Von der Führungskraft bestätigt",
+      "unconfirmed": "Nicht bestätigt",
+      "photos": "Fotos: {count}",
+      "linkCta": "Arbeitsjournal-Eintrag verknüpfen",
+      "linkSubmit": "Verknüpfen",
+      "unlink": "Zurückziehen",
+      "unlinkReason": "Grund (optional)",
+      "alreadyLinked": "Bereits verknüpft",
+      "noLinkable": "Sie haben noch keine Arbeitsjournal-Einträge zum Verknüpfen.",
+      "result": {
+        "ok": "Nachweis verknüpft.",
+        "already_linked": "Dieser Eintrag ist bereits verknüpft.",
+        "not_found": "Nicht gefunden.",
+        "not_allowed": "Dazu sind Sie nicht berechtigt.",
+        "invalid": "Bitte prüfen Sie die Felder.",
+        "limit_reached": "Limit für Verknüpfungen erreicht.",
+        "entry_not_current": "Dieser Eintrag wurde korrigiert oder zurückgezogen — verknüpfen Sie die aktuelle Version.",
+        "already_unlinked": "Diese Verknüpfung wurde bereits zurückgezogen."
       }
     }
   },

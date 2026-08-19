@@ -9355,7 +9355,9 @@
       "not_found": "Užduotis nerasta.",
       "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
       "error": "Nepavyko išsaugoti. Pabandykite dar kartą.",
-      "cycle": "Taip susidarytų ratas — užduotis negali laukti pati savęs per kitas užduotis."
+      "cycle": "Taip susidarytų ratas — užduotis negali laukti pati savęs per kitas užduotis.",
+      "evidence_linked": "Įrodymas susietas su užduotimi.",
+      "evidence_unlinked": "Susiejimas atšauktas. Pats įrašas nepakito."
     },
     "projectTasks": {
       "title": "Projekto užduotys",
@@ -9399,6 +9401,32 @@
         "object_changed": "Pakeistas objektas",
         "dependency_added": "Pridėta priklausomybė",
         "dependency_removed": "Pašalinta priklausomybė"
+      }
+    },
+    "evidence": {
+      "title": "Įrodymai",
+      "intro": "Darbo dienoraščio įrašai, susieti su šia užduotimi. Susiejimas nekeičia įrašo — jis tik nurodo, kurią užduotį įrašas įrodo.",
+      "empty": "Su šia užduotimi dar nesusietas nė vienas Darbo dienoraščio įrašas.",
+      "unavailable": "Įrodymų susiejimas dar neįjungtas.",
+      "summary": "Susieta: {total} · vadovo patvirtinta: {confirmed}",
+      "confirmed": "Vadovo patvirtinta",
+      "unconfirmed": "Nepatvirtinta",
+      "photos": "Nuotraukos: {count}",
+      "linkCta": "Susieti Darbo dienoraščio įrašą",
+      "linkSubmit": "Susieti",
+      "unlink": "Atšaukti susiejimą",
+      "unlinkReason": "Priežastis (neprivaloma)",
+      "alreadyLinked": "Jau susieta",
+      "noLinkable": "Kol kas neturite Darbo dienoraščio įrašų, kuriuos galėtumėte susieti.",
+      "result": {
+        "ok": "Įrodymas susietas.",
+        "already_linked": "Šis įrašas jau susietas.",
+        "not_found": "Nerasta.",
+        "not_allowed": "Neturite teisės to atlikti.",
+        "invalid": "Patikrinkite laukus.",
+        "limit_reached": "Pasiektas susiejimų limitas.",
+        "entry_not_current": "Šis įrašas buvo pataisytas arba atšauktas — susiekite aktualią versiją.",
+        "already_unlinked": "Šis susiejimas jau atšauktas."
       }
     }
   },
