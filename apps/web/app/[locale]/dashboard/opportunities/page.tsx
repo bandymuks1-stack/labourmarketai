@@ -641,14 +641,17 @@ export default async function OpportunitiesPage({
                       ONLY when the owner-gated store exists. Private
                       bookmark: the hint says the company never sees it. */}
                   {result.capabilities.savedAvailable &&
-                  (savedLive.length > 0 || savedStaleCount > 0) ? (
+                  (savedLive.length > 0 ||
+                    savedStaleCount > 0 ||
+                    result.savedVacancies.length > 0) ? (
                     <section
                       className="flex flex-col gap-2 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
                       data-testid="opportunities-saved"
                       aria-label={t("saved.sectionTitle")}
                     >
                       <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                        {t("saved.sectionTitle")} · {savedLive.length}
+                        {t("saved.sectionTitle")} ·{" "}
+                        {savedLive.length + result.savedVacancies.length}
                       </span>
                       {savedLive.length > 0 ? (
                         <ul className="flex flex-wrap gap-1.5">
@@ -667,6 +670,37 @@ export default async function OpportunitiesPage({
                                   {scanLine(need)}
                                 </span>
                               </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {/* The SAME saved list, second source: public vacancies
+                          the worker kept from the job board. One group, not a
+                          second saved section — the store is one table and the
+                          concept is one concept. Ids are joined against live
+                          ads by the loader, so an expired bookmark is simply
+                          absent rather than rendered from stale facts. */}
+                      {result.savedVacancies.length > 0 ? (
+                        <ul
+                          className="flex flex-wrap gap-1.5"
+                          data-testid="opportunities-saved-vacancies"
+                        >
+                          {result.savedVacancies.map((v) => (
+                            <li key={v.id}>
+                              <Link
+                                href={`/${locale}/jobs/${v.id}`}
+                                className="inline-flex min-h-[2.75rem] flex-col justify-center rounded-md border border-ink-500 px-3 py-1.5 transition-colors hover:border-brand-blue"
+                                data-testid="opportunities-saved-vacancy-item"
+                              >
+                                <span className="text-xs font-semibold text-text-primary">
+                                  {v.title}
+                                </span>
+                                {v.occupation ? (
+                                  <span className="text-meta text-text-muted">
+                                    {v.occupation}
+                                  </span>
+                                ) : null}
+                              </Link>
                             </li>
                           ))}
                         </ul>

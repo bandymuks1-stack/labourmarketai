@@ -3,6 +3,7 @@ import "server-only";
 import {
   loadWorkerOpportunities,
   type OpportunityCard,
+  type SavedVacancyRow,
   type WorkerReadiness,
 } from "@/lib/opportunities/load-worker-opportunities";
 import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
@@ -100,6 +101,9 @@ export type MarketplaceBoardView =
       /** Ranked, explained cards — best first (shared §19 comparator). */
       readonly opportunities: readonly OpportunityCard[];
       readonly savedRequestIds: readonly string[];
+      /** The SAME private bookmark, second source: public vacancies the
+       *  worker saved from the job board, already joined against live rows. */
+      readonly savedVacancies: readonly SavedVacancyRow[];
       readonly myInterestRows: readonly MyInterestViewRow[];
       /** External public-source ads (real-supply train) — same board, same
        *  engine, provenance carried. Empty until a source is activated. */
@@ -169,6 +173,7 @@ export async function loadWorkerOpportunityBoard(
     readiness: board.readiness,
     opportunities: board.opportunities,
     savedRequestIds: board.savedRequestIds,
+    savedVacancies: board.savedVacancies,
     myInterestRows: board.myInterestRows,
     externalVacancies: board.externalVacancies,
   };
