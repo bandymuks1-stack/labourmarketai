@@ -369,7 +369,7 @@
       "error_country_required": "Vennligst velg et land.",
       "profession_label": "Hvilket arbeid gjør du?",
       "profession_placeholder": "Velg arbeidet ditt",
-      "profession_hint": "Jobbmatchingen bygger på dette. Du kan endre det senere i profilen din.",
+      "profession_hint": "Vi bruker dette til å finne arbeid som ditt. Deretter oppgir du ferdighetene dine — matchingen trenger begge. Du kan endre det senere.",
       "error_profession_required": "Velg arbeidet du gjør.",
       "nextSteps": {
         "eyebrow": "Etter dette — din ekte profil",

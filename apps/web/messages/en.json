@@ -3551,7 +3551,7 @@
       "error_country_required": "Please choose a country.",
       "profession_label": "What work do you do?",
       "profession_placeholder": "Select your work",
-      "profession_hint": "This is what job matching uses. You can change it later in your profile.",
+      "profession_hint": "We use this to find work like yours. Next you'll add your skills — matching needs both. You can change either later.",
       "error_profession_required": "Please choose the work you do.",
       "back": "Back",
       "saving": "Saving...",

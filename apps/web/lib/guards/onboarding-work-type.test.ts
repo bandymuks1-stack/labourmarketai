@@ -31,6 +31,13 @@ const MESSAGES = join(web, "messages");
 
 const read = (p: string) => readFileSync(p, "utf8");
 
+const onboardingCopy = (locale: string): Record<string, string> => {
+  const messages = JSON.parse(read(join(MESSAGES, `${locale}.json`))) as {
+    auth: { onboarding: Record<string, string> };
+  };
+  return messages.auth.onboarding;
+};
+
 describe("onboarding asks what work the person does", () => {
   it("the worker step renders a REQUIRED work-type select", () => {
     const src = read(WIZARD);
@@ -113,6 +120,22 @@ describe("onboarding asks what work the person does", () => {
         ).toBe(true);
       }
     }
+  });
+
+  it("the hint does not promise that a profession alone produces a match", () => {
+    // HONESTY, and the reason this pin exists rather than a style note.
+    // `match-v1.ts` decides MatchStatus from skill coverage alone —
+    //   if (skillFit.matchedTotal === 0)
+    //     status = subject.skills.length === 0 ? "insufficient_data" : "weak"
+    // — while the profession contributes a weighted REASON that can never lift
+    // that status. So a hint reading "this is what job matching uses" would
+    // send someone who just answered into a board that says insufficient data
+    // on every card: the #1193 defect (a funnel that looked like it worked)
+    // with a friendlier label. The copy must hand off to the skills step.
+    const enHint = onboardingCopy("en").profession_hint;
+    const ltHint = onboardingCopy("lt").profession_hint;
+    expect(enHint.toLowerCase()).toContain("skills");
+    expect(ltHint.toLowerCase()).toContain("įgūdži");
   });
 
   it("every offered slug has a label in every locale", () => {
