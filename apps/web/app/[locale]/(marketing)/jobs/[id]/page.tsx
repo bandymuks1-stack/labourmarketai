@@ -352,18 +352,37 @@ export default async function JobDetailPage({
       )
     : null;
 
+  // LANGUAGE OF PARTS (WCAG 3.1.2). Everything below that came from the
+  // PUBLISHER — the title, the occupation label and the full description — is
+  // Swedish today, inside a page whose document language is the reader's. Left
+  // unmarked, a screen reader reads it with the reader's phonetics, which is
+  // not an accent but unintelligible speech; the description is the worst case
+  // because it is the longest run of it. Only a plausible subtag is emitted:
+  // `undefined` honestly means "we do not know", which is different from
+  // "it is the page's language".
+  const sourceLang = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(
+    preview.sourceLanguage ?? "",
+  )
+    ? (preview.sourceLanguage as string)
+    : undefined;
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <Link href="/jobs" className="text-sm text-muted-foreground hover:underline">
         {BACK[active]}
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
+      <h1
+        lang={sourceLang}
+        className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
+      >
         {preview.title}
       </h1>
 
       {preview.occupation && (
-        <p className="mt-2 text-base text-muted-foreground">{preview.occupation}</p>
+        <p lang={sourceLang} className="mt-2 text-base text-muted-foreground">
+          {preview.occupation}
+        </p>
       )}
 
       {published && (
@@ -402,7 +421,10 @@ export default async function JobDetailPage({
               {/* The publisher's own words, rendered as TEXT. `whitespace-pre-line`
                   keeps their paragraph breaks without interpreting anything in
                   the string as markup — this is third-party content. */}
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              <p
+                lang={sourceLang}
+                className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground"
+              >
                 {member.descriptionRaw}
               </p>
             </section>

@@ -344,12 +344,20 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // approval, quoted verbatim in the record: "Įtrauk tik #1203 į jau
     // egzistuojančią /jobs waiver taisyklę, nekeisk pačių product-gate
     // kriterijų ir jų nesilpnink."
+    // #1208 adds the PROFESSION FILTER the board could always have passed
+    // (`p_profession_slug` existed from day one; 17,145 rows carry a slug, so
+    // a Lithuanian worker had to guess the Swedish word) plus `lang` on the
+    // publisher's own text, under the owner's 2026-08-19 approval, quoted
+    // verbatim in the record: "pridėk tik `1208` prie esamo `pullRequests`
+    // sąrašo. Nekeisk ir nesilpnink pačių gate kriterijų."
     //
     // Widening the PR binding is the ONLY change each time: same axiom, same
     // six codes, same three surfaces, same expiry, same reason. Each PR's
     // finding set is byte-identical to `expectedFindings`, so the subset rule
-    // still bites.
-    expect(jobs.pullRequests).toEqual([1184, 1193, 1203]);
+    // still bites. This stays an EXACT list — a `toContain` here would let the
+    // next number drift in without a decision, which is the whole thing this
+    // pin exists to prevent.
+    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

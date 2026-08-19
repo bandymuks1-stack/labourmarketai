@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
@@ -16,6 +16,10 @@ import {
   resolveOwnWorkerId,
 } from "@/lib/opportunities/saved-opportunities";
 import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
+import {
+  PUBLIC_VACANCY_PROFESSION_SLUGS,
+  readProfessionSlugParam,
+} from "@/lib/vacancy-store/public-vacancy-professions";
 
 /**
  * THE PUBLIC JOB BOARD.
@@ -78,12 +82,77 @@ const SEARCH_BUTTON: L = {
   de: "Suchen",
 };
 
+const PROFESSION_LABEL: L = {
+  en: "Profession",
+  lt: "Profesija",
+  ru: "Профессия",
+  nl: "Beroep",
+  de: "Beruf",
+};
+
+const PROFESSION_ANY: L = {
+  en: "All professions",
+  lt: "Visos profesijos",
+  ru: "Все профессии",
+  nl: "Alle beroepen",
+  de: "Alle Berufe",
+};
+
+const CLEAR_FILTER: L = {
+  en: "Clear filter",
+  lt: "Išvalyti filtrą",
+  ru: "Сбросить фильтр",
+  nl: "Filter wissen",
+  de: "Filter zurücksetzen",
+};
+
+/** The supply is published in the employer's own language. Say so once, rather
+ *  than letting a visitor wonder why a Lithuanian page lists Swedish titles. */
+const ORIGINAL_LANGUAGE_NOTE: L = {
+  en: "Job titles are shown in the language the employer published them in. Filter by profession to search in your own language.",
+  lt: "Skelbimų pavadinimai rodomi ta kalba, kuria juos paskelbė darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba.",
+  ru: "Названия вакансий показаны на языке, на котором их опубликовал работодатель. Фильтруйте по профессии, чтобы искать на своём языке.",
+  nl: "Vacaturetitels staan in de taal waarin de werkgever ze publiceerde. Filter op beroep om in je eigen taal te zoeken.",
+  de: "Stellentitel erscheinen in der Sprache, in der der Arbeitgeber sie veröffentlicht hat. Filtern Sie nach Beruf, um in Ihrer Sprache zu suchen.",
+};
+
 const RESULTS: L = {
   en: "vacancies found",
   lt: "rasta darbo vietų",
   ru: "найдено вакансий",
   nl: "vacatures gevonden",
   de: "Stellen gefunden",
+};
+
+/** Named, so a zero result is an answer about THIS filter rather than a
+ *  vague nothing. {profession} is the catalogue name in the reader's locale. */
+const EMPTY_FOR_PROFESSION: Record<ActiveLocale, (p: string) => string> = {
+  en: (p) => `No open jobs for ${p} right now.`,
+  lt: (p) => `Šiuo metu nėra laisvų darbo vietų: ${p}.`,
+  ru: (p) => `Сейчас нет открытых вакансий: ${p}.`,
+  nl: (p) => `Momenteel geen openstaande vacatures voor ${p}.`,
+  de: (p) => `Derzeit keine offenen Stellen für ${p}.`,
+};
+
+/**
+ * BOTH filters were applied, so both are named.
+ *
+ * The RPC ANDs the profession and the search term. Reporting only the
+ * profession would state "there are no welder jobs" when the truth is "no
+ * welder job also matched your words" — a false claim about the supply,
+ * produced by an empty state that forgot half of what was asked. The two
+ * predicates are stated together for the same reason the filtered message
+ * names the profession at all.
+ */
+const EMPTY_FOR_PROFESSION_AND_QUERY: Record<
+  ActiveLocale,
+  (p: string, q: string) => string
+> = {
+  en: (p, q) => `No open jobs for ${p} matching “${q}” right now.`,
+  lt: (p, q) => `Šiuo metu nėra laisvų darbo vietų: ${p} pagal „${q}“.`,
+  ru: (p, q) => `Сейчас нет открытых вакансий: ${p} по запросу «${q}».`,
+  nl: (p, q) => `Momenteel geen openstaande vacatures voor ${p} met “${q}”.`,
+  de: (p, q) => `Derzeit keine offenen Stellen für ${p} mit „${q}“.`,
 };
 
 const EMPTY: L = {
@@ -167,7 +236,12 @@ export default async function JobsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; page?: string; saved?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+    saved?: string;
+    profession?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -175,6 +249,19 @@ export default async function JobsPage({
   const sp = await searchParams;
 
   const query = typeof sp.q === "string" ? sp.q.slice(0, 120) : "";
+  // Closed set: an unknown slug becomes "no filter" rather than reaching the
+  // SQL function as free text.
+  const profession = readProfessionSlugParam(sp.profession);
+  // The ONE registry — slug → name in the reader's language. 17,145 browsable
+  // ads carry a slug the categorizer derived, so this is how a worker searches
+  // Swedish supply in Lithuanian without knowing a word of Swedish.
+  const tProfession = await getTranslations("professions");
+  const professionName = (slug: string): string =>
+    tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  const professionOptions = PUBLIC_VACANCY_PROFESSION_SLUGS.map((slug) => ({
+    slug,
+    label: professionName(slug),
+  })).sort((a, b) => a.label.localeCompare(b.label, active));
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
   const wantsSaved = sp.saved === "1";
 
@@ -212,11 +299,18 @@ export default async function JobsPage({
 
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
-    : await searchPublicVacancyPreviews({ query, page });
+    : await searchPublicVacancyPreviews({
+        query,
+        professionSlug: profession,
+        page,
+      });
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();
     if (query) qs.set("q", query);
+    // Dropping the filter on page 2 would silently widen the result set under
+    // the reader — the same bug class as a search box that forgets its term.
+    if (profession) qs.set("profession", profession);
     if (p > 1) qs.set("page", String(p));
     const s = qs.toString();
     return s ? `/jobs?${s}` : "/jobs";
@@ -231,6 +325,10 @@ export default async function JobsPage({
         {INTRO[active]}
       </p>
 
+      {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing
+          surface and the first thing a worker with a poor connection loads;
+          every filter state is therefore a real URL that can be linked,
+          shared and indexed. */}
       <form action={`/${active}/jobs`} method="get" className="mt-6 flex flex-wrap gap-2">
         <label htmlFor="q" className="sr-only">
           {SEARCH_LABEL[active]}
@@ -244,10 +342,34 @@ export default async function JobsPage({
           maxLength={120}
           className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
+        {/* THE FILTER THAT LETS A WORKER SEARCH IN THEIR OWN LANGUAGE. The
+            free-text box matches the publisher's own words, so on a supply
+            that is 100% Swedish it only answers Swedish. The slug does not
+            care what language the ad is in. */}
+        <label htmlFor="profession" className="sr-only">
+          {PROFESSION_LABEL[active]}
+        </label>
+        <select
+          id="profession"
+          name="profession"
+          defaultValue={profession ?? ""}
+          className="min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm"
+        >
+          <option value="">{PROFESSION_ANY[active]}</option>
+          {professionOptions.map((o) => (
+            <option key={o.slug} value={o.slug}>
+              {o.label}
+            </option>
+          ))}
+        </select>
         <button type="submit" className={buttonLinkClassName("primary")}>
           {SEARCH_BUTTON[active]}
         </button>
       </form>
+
+      <p className="mt-2 text-xs text-muted-foreground">
+        {ORIGINAL_LANGUAGE_NOTE[active]}
+      </p>
 
       {/* The saved view exists only for a signed-in worker whose bookmark read
           succeeded. Anonymous visitors and non-workers see no tab at all —
@@ -315,9 +437,29 @@ export default async function JobsPage({
           </p>
 
           {result.vacancies.length === 0 ? (
-            <p className="mt-8 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
-              {EMPTY[active]}
-            </p>
+            <div className="mt-8 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+              {/* A zero result NAMES the filter that produced it. Ten catalogue
+                  professions have no live ad today, and "nothing found" without
+                  saying what was asked reads as "the board is broken". */}
+              <p>
+                {profession && query
+                  ? EMPTY_FOR_PROFESSION_AND_QUERY[active](
+                      professionName(profession),
+                      query,
+                    )
+                  : profession
+                    ? EMPTY_FOR_PROFESSION[active](professionName(profession))
+                    : EMPTY[active]}
+              </p>
+              {profession && (
+                <Link
+                  href={query ? `/jobs?q=${encodeURIComponent(query)}` : "/jobs"}
+                  className="mt-3 inline-block underline underline-offset-4"
+                >
+                  {CLEAR_FILTER[active]}
+                </Link>
+              )}
+            </div>
           ) : (
             <ul className="mt-6 space-y-3">
               {result.vacancies.map((v) => (
