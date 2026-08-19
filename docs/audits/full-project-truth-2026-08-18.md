@@ -155,13 +155,33 @@
 > employer-internal judgement including rejection is a product decision, not a gap
 > to close silently).
 >
-> **Status: the four existing signals remain unnotified.** Emitting for them would
-> be true — all four are still `interested`, all four demands still `submitted` —
-> but it is a DML write landing in two real people's notification bells about
-> something six weeks old. **OWNER DECISION**, deliberately not taken
-> autonomously. Note for whoever decides: **2 of the 4 are self-interest** (the
-> same person owns the demand and the worker row), so a backfill should cover the
-> other two only.
+> **Status: BACKFILLED under owner approval 2026-08-19, and it is the first real
+> data `notification_events` has ever held.** The owner approved exactly the two
+> non-self-interest signals and no synthetic events. Rows were derived from an
+> auditable predicate (`status='interested'` AND demand owner ≠ worker AND
+> created in 2026-07), never from hardcoded ids, and shaped byte-for-byte like
+> the live emitter. `created_at` was **backdated to each signal's own timestamp**
+> rather than set to `now()`: every emitter runs immediately after its domain
+> write, so `created_at` here means *when the fact happened*, and `now()` would
+> have told the recipient a worker raised their hand today. They learn now; the
+> row still says 2026-07-05.
+>
+> Read-back, all four checks the owner asked for, plus RLS proven live by
+> reading as each party rather than as `postgres`:
+>
+> | Check | Result |
+> |---|---|
+> | Rows inserted | **2**, both to the demand owner |
+> | Synthetic / orphan rows | **0** — every row maps to a real signal; `total_events` = 2 |
+> | Idempotency | identical statement re-run → **0 rows**; 2 rows / 2 distinct dedupe keys |
+> | Recipient correctness | `recipient_is_demand_owner` **true** for both, re-derived independently from `customer_requests.profile_id`; `wrongly_sent_to_worker` **false** |
+> | Self-interest left silent | 2 self-interest signals exist, **0** carry a notification |
+> | RLS — the demand owner (the recipient) | **2 visible, 2 unread** |
+> | RLS — the interested worker (not the recipient) | **0 visible** |
+> | RLS — `anon` | `42501 permission denied`, refused at the GRANT level before RLS applies |
+>
+> So `notification_events` moved from 0 lifetime inserts to 2, and both are
+> true statements about events that really happened.
 >
 > **C-11 — §B's "Matching · IMPLEMENTED_NOT_PROVEN · never produced a row" is
 > still misleading, and C-02 above did not go far enough.** C-02 correctly said
@@ -204,19 +224,19 @@
 > in the anonymous projection and no surface set `lang` on the publisher's text,
 > so a screen reader spoke Swedish with the reader's phonetics.
 >
-> **Authored in #1208 and PARKED — not merged.** `product-gate` blocks it because
-> the `/jobs` waiver `public-acquisition-route-jobs` lists PRs 1184, 1193 and
-> 1203, and adding a PR number to that record is an owner decision by its own
-> history. Evidence posted on the PR, produced by running the gate rather than
-> reasoning about it: the same head passes as PR 1203 and, as PR 1208, all 24
-> findings are rejected **solely** for `pr-not-covered` — the diff adds zero new
-> findings.
+> **SHIPPED in #1208** (merged 2026-08-19 13:30 UTC), after the owner approved
+> extending the `/jobs` `product-gate` waiver to that PR — only the number was
+> added, no criterion changed or weakened, and the guard pinning that list stays
+> an exact equality so the next number still needs a decision. Verified by
+> running the gate on the merged head, not by reasoning about it:
+> `PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER`.
 >
-> **Standing consequence worth naming:** every future improvement to `/jobs`,
-> `/jobs/[id]` or the vacancy card hits this same gate and needs a fresh owner
-> line. The waiver's own `resolvedBy` says the real fix is teaching the gate that
-> a pre-auth public acquisition route is its own category — a constitution change,
-> and therefore also an owner decision.
+> **Standing consequence, unchanged and worth re-stating:** every future
+> improvement to `/jobs`, `/jobs/[id]` or the vacancy card hits this same gate
+> and needs a fresh owner line. The waiver's own `resolvedBy` says the real fix
+> is teaching the gate that a pre-auth public acquisition route is its own
+> category — a constitution change, and therefore also an owner decision. Until
+> then this is a recurring per-PR toll on the only public acquisition surface.
 >
 > **C-15 — a verification method used in this repo produces FALSE NEGATIVES on
 > column-level grants.** The #1203 ledger entry records, as a virtue, that
@@ -244,6 +264,76 @@
 > all verification traffic). The #1204 matrix row is right to say
 > IMPLEMENTED_NOT_PROVEN and it stays there.
 >
+> ## ⚠️ CLOSING STATE 2026-08-19 13:35 UTC — FOUR CLASSES, NOT ONE PERCENTAGE
+>
+> Owner instruction, 2026-08-19: report `VERIFIED_PRODUCTION` /
+> `IMPLEMENTED_NOT_YET_USED` / `OWNER_GATED` / `REAL_MISSING` separately, and do
+> not treat a shortage of users as an engineering defect. The four classes mean
+> different things and must never be blended into a single completeness number.
+>
+> **VERIFIED_PRODUCTION — real rows written by real people.**
+>
+> | Capability | Production evidence |
+> |---|---|
+> | Job ingestion (SE) | 46,396 vacancies, refreshed daily |
+> | Public job board + preview | anonymous projection live; profession filter + `lang` shipped #1208 |
+> | Registration (email + Google) | 36 profiles, 32 + 8 identities |
+> | Avatar upload → storage → render | 7 objects, all storage paths |
+> | Work Journal | 36 entries, 46 entry-skills, 12 confirmations, 8 photos |
+> | Journal → work-time metrics | 114 metric rows incl. 18 hour-valued, from real entries |
+> | Demand interest signals | 4 real signals |
+> | **Durable notifications** | **2 rows, first ever; RLS proven per-party** |
+> | Matching engine | runs at read time; 4 stored `match_snapshot`s prove it executed |
+> | Telemetry | 1,346 `pilot_events` |
+> | Localization (lt/en/ru/nl/de) | live |
+>
+> **IMPLEMENTED_NOT_YET_USED — code, schema, RLS, guards and a reachable entry
+> point all exist; nobody has used it yet.** Timesheets (source data now exists,
+> 0 timesheets), employee requests / lifecycle / agreements / procurement /
+> business trips / training / performance reviews / management decisions,
+> documents + acknowledgements, workflow instances (16 templates, 0 live),
+> public-vacancy bookmarks (0 live rows), structured demand v2 (0 of 17 demands
+> carry a cluster). **These are not defects and must not be scheduled as
+> engineering work.** Each was checked this session for a broken link and none
+> was found — what is missing is usage, which code cannot supply.
+>
+> **OWNER_GATED — blocked on a decision or a secret, not on engineering.**
+>
+> | Item | What unblocks it |
+> |---|---|
+> | AI activation | **PARKED by owner 2026-08-19.** Architecture preserved: provider-neutral registry, free/local-first routing, default-deny egress gate. Blocked twice over — every adapter is env-gated (secrets), and `TASK_SENSITIVITY` classes no task `PUBLIC`, so external providers stay unreachable even with a key. **No private worker, company, project or Work Journal data may be sent to an external AI.** |
+> | Live payments | Stripe keys (owner) |
+> | Leaked-password protection, OTP expiry | Supabase auth toggles (owner) |
+> | `/jobs` gate toll | Teaching `product-gate` that a pre-auth acquisition route is its own category — a constitution change |
+> | 26 stale ledger rows | Content re-audit of each record (status corrected; see C-16) |
+>
+> **REAL_MISSING — genuinely absent. None of it is an agent-doable P0/P1
+> DEFECT, which is a narrower claim than "nothing here is important".**
+>
+> - **Facebook / LinkedIn auth** — absent from code entirely, no product need
+>   established. **Instagram is NOT in this list**: §E classifies it
+>   `NOT_APPROPRIATE` because it offers no general-purpose third-party login for
+>   this use case, and that verdict stands. Listing it here would turn a
+>   deliberately rejected capability into an apparent backlog item.
+> - **Job supply outside Sweden** — the provider registry exists; there is no
+>   second source. **§Q classifies this P1 under "business growth" and that
+>   classification STANDS — it is not superseded by this block.** The two
+>   statements do not conflict once the scope is read: §Q ranks business
+>   priorities, this block ranks *defects an agent can fix*. A second market is
+>   not something broken; it is a sourcing, legal and commercial decision (which
+>   provider, which country, on what licence terms) that must precede any code.
+> - **Swedish ad text in a product with no Swedish UI** — the profession filter
+>   now bridges this for SEARCH, but the ad body stays in the publisher's
+>   language. A real fix is translation → AI → **parked by owner decision**.
+>
+> **No agent-doable P0/P1 product DEFECT remains open** — meaning nothing is
+> broken that an agent can fix without an owner decision. This does not claim
+> the product is finished, and it does not reprioritise §Q's business-growth
+> P1 list, which stands unchanged. Every chain this session traced end-to-end — browse → save → retrieve → apply-onward; express interest →
+> notify owner → acknowledge → notify worker; journal → metrics → timesheet;
+> journal → confirmation → tiered matching — is complete in code and, where
+> real users have touched it, verified in production.
+
 > **C-16 — finding #11 is still true, and worse than it said.** §A.11 called
 > `APPLIED_LEDGER.md` "materially and dangerously stale", with "at least six
 > migrations that ARE applied still reading PENDING APPLY". Re-measured today by
