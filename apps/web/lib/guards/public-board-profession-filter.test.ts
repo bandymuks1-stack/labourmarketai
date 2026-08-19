@@ -84,9 +84,24 @@ describe("a zero result is an answer, not a blank", () => {
     expect(page).toContain("CLEAR_FILTER[active]");
   });
 
+  it("when BOTH filters are applied, both are named", () => {
+    // The RPC ANDs them. Naming only the profession would claim "there are no
+    // welder jobs" when the truth is "no welder job also matched your words" —
+    // a false statement about the supply, from an empty state that forgot half
+    // of what was asked.
+    const page = read(...BOARD);
+    expect(page).toContain("profession && query");
+    expect(page).toContain("EMPTY_FOR_PROFESSION_AND_QUERY[active](");
+  });
+
   it("both empty states exist in all five active locales", () => {
     const page = read(...BOARD);
-    for (const block of ["EMPTY_FOR_PROFESSION", "PROFESSION_ANY", "CLEAR_FILTER"]) {
+    for (const block of [
+      "EMPTY_FOR_PROFESSION",
+      "EMPTY_FOR_PROFESSION_AND_QUERY",
+      "PROFESSION_ANY",
+      "CLEAR_FILTER",
+    ]) {
       const start = page.indexOf(`const ${block}`);
       expect(start, `${block} not found`).toBeGreaterThan(-1);
       const body = page.slice(start, page.indexOf("};", start));
@@ -110,6 +125,19 @@ describe("publisher text is marked with the language it is written in", () => {
     const card = read("components", "marketing", "public-vacancy-card.tsx");
     expect(card).toContain(": undefined;");
     expect(card).toMatch(/\^\[a-z\]\{2,3\}/);
+  });
+
+  it("the DETAIL page marks the same three fields, description included", () => {
+    // The description is the longest run of publisher text on the platform and
+    // therefore the worst case for a screen reader — fixing only the card
+    // would leave the half that matters most unmarked.
+    const page = readFileSync(
+      join(WEB, "app", "[locale]", "(marketing)", "jobs", "[id]", "page.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("preview.sourceLanguage");
+    const marked = page.match(/lang=\{sourceLang\}/g) ?? [];
+    expect(marked.length, "title, occupation and description").toBe(3);
   });
 
   it("OUR text is not mislabelled as the publisher's language", () => {

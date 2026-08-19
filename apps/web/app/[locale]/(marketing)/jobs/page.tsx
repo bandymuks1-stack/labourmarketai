@@ -134,6 +134,27 @@ const EMPTY_FOR_PROFESSION: Record<ActiveLocale, (p: string) => string> = {
   de: (p) => `Derzeit keine offenen Stellen für ${p}.`,
 };
 
+/**
+ * BOTH filters were applied, so both are named.
+ *
+ * The RPC ANDs the profession and the search term. Reporting only the
+ * profession would state "there are no welder jobs" when the truth is "no
+ * welder job also matched your words" — a false claim about the supply,
+ * produced by an empty state that forgot half of what was asked. The two
+ * predicates are stated together for the same reason the filtered message
+ * names the profession at all.
+ */
+const EMPTY_FOR_PROFESSION_AND_QUERY: Record<
+  ActiveLocale,
+  (p: string, q: string) => string
+> = {
+  en: (p, q) => `No open jobs for ${p} matching “${q}” right now.`,
+  lt: (p, q) => `Šiuo metu nėra laisvų darbo vietų: ${p} pagal „${q}“.`,
+  ru: (p, q) => `Сейчас нет открытых вакансий: ${p} по запросу «${q}».`,
+  nl: (p, q) => `Momenteel geen openstaande vacatures voor ${p} met “${q}”.`,
+  de: (p, q) => `Derzeit keine offenen Stellen für ${p} mit „${q}“.`,
+};
+
 const EMPTY: L = {
   en: "No vacancies match this search right now. Try a broader job title.",
   lt: "Pagal šią paiešką darbo vietų nerasta. Pabandyk platesnį pareigų pavadinimą.",
@@ -421,9 +442,14 @@ export default async function JobsPage({
                   professions have no live ad today, and "nothing found" without
                   saying what was asked reads as "the board is broken". */}
               <p>
-                {profession
-                  ? EMPTY_FOR_PROFESSION[active](professionName(profession))
-                  : EMPTY[active]}
+                {profession && query
+                  ? EMPTY_FOR_PROFESSION_AND_QUERY[active](
+                      professionName(profession),
+                      query,
+                    )
+                  : profession
+                    ? EMPTY_FOR_PROFESSION[active](professionName(profession))
+                    : EMPTY[active]}
               </p>
               {profession && (
                 <Link
