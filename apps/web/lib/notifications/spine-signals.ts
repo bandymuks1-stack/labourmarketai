@@ -91,11 +91,22 @@ export interface SpineSignalDef {
 /**
  * Order = display order in the bell panel. Mirrors the top-slot priority
  * ladder (lib/dashboard/top-slot.ts): a person waiting on you outranks
- * passive news (new-job-matches therefore sits last). Deferred (no honest
- * backing yet, see PR notes): contacted-conversation / interest-response
- * signals — no seen-model exists for interest signals, so a count could
- * never clear by visiting. (New matching JOBS gained their seen model in
- * the worker_opportunity_seen migration and joined the catalogue.)
+ * passive news (new-job-matches therefore sits last). (New matching JOBS
+ * gained their seen model in the worker_opportunity_seen migration and
+ * joined the catalogue.)
+ *
+ * INTEREST SIGNALS ARE STILL NOT HERE, AND NOW FOR A BETTER REASON (#1206).
+ * This list used to say they were "deferred, no honest backing yet — no
+ * seen-model exists for interest signals, so a count could never clear by
+ * visiting". That reasoning was right about a DERIVED COUNT and is the exact
+ * argument for putting them in the OTHER channel: a durable
+ * `notification_events` row clears by being marked read, not by visiting, so
+ * it never needed a seen-model. `demand_interest_expressed` (to the demand
+ * owner) and `demand_interest_reviewed` (to the worker) live there now.
+ *
+ * So this is no longer an open gap waiting for a seen-model to be built — it
+ * is a settled split. Adding a derived count here would put the same fact in
+ * front of the same person twice, in two surfaces that clear differently.
  */
 export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
   {
