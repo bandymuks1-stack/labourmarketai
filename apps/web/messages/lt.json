@@ -4118,7 +4118,8 @@
         "event_document_ack_assigned": "Jūsų paprašyta patvirtinti, kad perskaitėte dokumentą.",
         "event_document_ack_completed": "Dokumentas, kurį siuntėte patvirtinti, buvo patvirtintas.",
         "event_document_expiring": "Netrukus baigsis dokumento galiojimas.",
-        "event_work_task_assigned": "Jums priskirta užduotis"
+        "event_work_task_assigned": "Jums priskirta užduotis",
+        "event_demand_interest_expressed": "Darbuotojas pareiškė susidomėjimą jūsų poreikiu"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",

@@ -29,6 +29,9 @@ import "server-only";
  *   absence_rejected    → the WORKER (and the requester, if different) — the
  *                         exact "outcome the offline worker never learns
  *                         about" gap the durable store exists to close.
+ *   demand_interest_expressed
+ *                       → the DEMAND OWNER (v5) — the same gap on the
+ *                         employer side; never the worker who acted.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
@@ -245,6 +248,76 @@ export async function emitWorkTaskAssignedNotification(
     });
   } catch {
     // Emission is an enhancement; the domain write already succeeded.
+  }
+}
+
+/**
+ * DEMAND INTEREST — a worker raised their hand at a company's demand.
+ *
+ * WHY THIS IS THE ONE THAT MATTERED MOST. Production held four real
+ * `demand_interest_signals` rows from 2026-07-05 and `notification_events` had
+ * zero inserts ever: the marketplace's defining event was the only domain
+ * write on the platform with no emitter. The demand owner learned a candidate
+ * existed only by opening /dashboard/company/scouting unprompted, which is the
+ * exact "outcome the offline party never learns about" gap this store exists
+ * to close — here on the EMPLOYER side rather than the worker side.
+ *
+ * RECIPIENT: the demand owner (`customer_requests.profile_id`), read from the
+ * signal's own request row, never from caller input. That is precisely the set
+ * `demand_interest_signals_demand_owner_select` already admits, so this
+ * notification discloses nothing the recipient could not already read.
+ *
+ * NOT EMITTED when the demand owner and the interested worker are the same
+ * person — you do not need telling that you raised your own hand (the
+ * work_task_assigned self-assignment precedent).
+ *
+ * METADATA: the demand's own `country`, and only when it is an ISO-3166
+ * alpha-2 code. The worker's `note` is free text and never leaves the signal
+ * row — a notification must be safe to render in a preview.
+ */
+export async function emitDemandInterestNotification(
+  signalId: string,
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data: signal } = await admin
+      .from("demand_interest_signals")
+      .select("request_id, worker_id")
+      .eq("id", signalId)
+      .maybeSingle();
+    const row = signal as {
+      request_id?: string | null;
+      worker_id?: string | null;
+    } | null;
+    if (!row?.request_id || !row.worker_id) return;
+
+    const { data: demand } = await admin
+      .from("customer_requests")
+      .select("profile_id, country")
+      .eq("id", row.request_id)
+      .maybeSingle();
+    const req = demand as {
+      profile_id?: string | null;
+      country?: string | null;
+    } | null;
+    const owner = req?.profile_id ?? null;
+    if (!owner) return;
+
+    const actor = await workerProfileId(admin, row.worker_id);
+    if (actor && actor === owner) return;
+
+    const country = req?.country ?? null;
+    emitNotificationEventInBackground(admin, {
+      recipientProfileId: owner,
+      eventType: "demand_interest_expressed",
+      entityType: "demand_interest_signal",
+      entityId: signalId,
+      metadata: /^[A-Z]{2}$/.test(country ?? "")
+        ? { country: country as string }
+        : {},
+    });
+  } catch {
+    // Emission is an enhancement; the signal itself is already stored.
   }
 }
 

@@ -610,7 +610,10 @@ describe("NO new DB migration in this PR", () => {
     // none. It is the THIRD such baseline (with product-readiness
     // SPRINT_BASELINE and booking-engagement-end's approved-marker allowlist),
     // and every new migration must move all three or CI goes red.
-    expect(count).toBeLessThanOrEqual(230);
+    // Bumped 230 -> 231 for notification events v5 (20260819110000) — a GREEN
+    // CHECK widening on notification_events; still nothing from the market-map
+    // read layer itself.
+    expect(count).toBeLessThanOrEqual(231);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
+import { emitDemandInterestNotification } from "@/lib/notifications/event-emitters";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
@@ -22,6 +23,12 @@ import {
  * anything anywhere — no email, no messaging, no webhook, no external call of
  * any kind (guard-pinned). The demand's owning company sees the signal on its
  * own scouting view through RLS; the worker keeps full control of their row.
+ *
+ * v5 (2026-08-19): a successful express ALSO writes a durable in-product
+ * notification for the demand owner (`notification_events`). Still nothing
+ * leaves the platform — a durable row is the same bell the scouting view
+ * already answers to, and its recipient is exactly whom the signal's RLS
+ * policy already admits. Four real signals sat unheard before this existed.
  *
  * VISIBILITY RULE: a worker can only express interest in a demand they can
  * currently SEE — validated by re-running the exact board pipeline
@@ -115,7 +122,13 @@ export async function expressInterest(input: {
     }),
   };
 
-  const { error } = await asAny(supabase)
+  // `select("id")` is not decoration: the durable notification is keyed on the
+  // SIGNAL row id, which is what makes one worker's interest in one demand a
+  // single event. Keying it on the request id instead would notify the owner
+  // about the FIRST worker only, and keying it on nothing would re-notify on
+  // every idempotent re-express. The row comes back under the worker's own
+  // RLS policy (`demand_interest_signals_worker_all`) — no widened read.
+  const { data: signalRow, error } = await asAny(supabase)
     .from("demand_interest_signals")
     .upsert(
       {
@@ -127,11 +140,22 @@ export async function expressInterest(input: {
         updated_at: new Date().toISOString(),
       },
       { onConflict: "worker_id,request_id" },
-    );
+    )
+    .select("id")
+    .maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
   }
+
+  // THE SIGNAL NOW REACHES SOMEONE. Fire-and-forget, after the domain write
+  // succeeded and never in front of it: a worker's interest must not fail to
+  // record because its notification could not be written (the booking/absence
+  // precedent). Recipient resolution lives entirely in the emitter, off the
+  // signal's own rows.
+  const signalId = (signalRow as { id?: string } | null)?.id ?? null;
+  if (signalId) void emitDemandInterestNotification(signalId);
+
   return { kind: "ok", status: "interested" };
 }
 

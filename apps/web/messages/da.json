@@ -357,7 +357,8 @@
         "event_document_ack_assigned": "Du er blevet bedt om at bekræfte, at du har læst et dokument.",
         "event_document_ack_completed": "Et dokument, du sendte til bekræftelse, er blevet bekræftet.",
         "event_document_expiring": "Et dokuments gyldighed udløber snart.",
-        "event_work_task_assigned": "En opgave er blevet tildelt dig"
+        "event_work_task_assigned": "En opgave er blevet tildelt dig",
+        "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov"
       }
     },
     "onboarding": {

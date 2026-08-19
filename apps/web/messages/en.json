@@ -4118,7 +4118,8 @@
         "event_document_ack_assigned": "You were asked to confirm you have read a document.",
         "event_document_ack_completed": "A document you sent for confirmation was confirmed.",
         "event_document_expiring": "A document's validity is ending soon.",
-        "event_work_task_assigned": "A task was assigned to you"
+        "event_work_task_assigned": "A task was assigned to you",
+        "event_demand_interest_expressed": "A worker expressed interest in your demand"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",

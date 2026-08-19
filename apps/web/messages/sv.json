@@ -357,7 +357,8 @@
         "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
         "event_document_expiring": "[EN] A document's validity is ending soon.",
-        "event_work_task_assigned": "En uppgift har tilldelats dig"
+        "event_work_task_assigned": "En uppgift har tilldelats dig",
+        "event_demand_interest_expressed": "En arbetstagare har visat intresse för ditt behov"
       }
     },
     "onboarding": {
