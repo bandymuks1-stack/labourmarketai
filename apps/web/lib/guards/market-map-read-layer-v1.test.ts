@@ -603,7 +603,14 @@ describe("NO new DB migration in this PR", () => {
     // DEFINER projection returning only `id` + `last_modified`). Still nothing
     // from the market-map read layer itself. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 229.
-    expect(count).toBeLessThanOrEqual(229);
+    // Bumped 229 -> 230 for the worker saved PUBLIC VACANCIES v1 DRAFT
+    // (20260819094500) — RED-class, human-gate-annotated, ships UNAPPLIED.
+    // NOTE for whoever reads this next: despite the describe() title, this is a
+    // GLOBAL migration-count baseline, not a check that the current PR adds
+    // none. It is the THIRD such baseline (with product-readiness
+    // SPRINT_BASELINE and booking-engagement-end's approved-marker allowlist),
+    // and every new migration must move all three or CI goes red.
+    expect(count).toBeLessThanOrEqual(230);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

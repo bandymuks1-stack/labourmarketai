@@ -2188,7 +2188,13 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 229;
+    const SPRINT_BASELINE = 230;
+    // Bumped 229 -> 230 for the worker saved PUBLIC VACANCIES v1 DRAFT
+    // (20260819094500_worker_saved_public_vacancies_v1) — extends the canonical
+    // worker_saved_opportunities with a second source rather than adding a
+    // parallel table; RED-class (DROP NOT NULL on request_id + two SECURITY
+    // DEFINER functions + grants), paired rollback, human-gate-annotated,
+    // ships UNAPPLIED.
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

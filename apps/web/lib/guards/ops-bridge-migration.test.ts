@@ -445,6 +445,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // origin/main 010547e4, trains C/D/E/L1 in base). This floor assertion
     // again needs no numeric edit.
     //
+    // Cross-pin follows: the worker saved PUBLIC VACANCIES v1 DRAFT
+    // (20260819094500) took SPRINT_BASELINE 229 -> 230 in
+    // product-readiness.test.ts. This floor assertion needs no numeric edit —
+    // it only pins the 166 minimum.
+    //
     // Cross-pin follows: the financial-ops train J TRIPLE (20260817220000
     // finance invoice upgrades + 20260817221000 procurement + 20260817222000
     // business trips) took SPRINT_BASELINE 215 -> 218 in
