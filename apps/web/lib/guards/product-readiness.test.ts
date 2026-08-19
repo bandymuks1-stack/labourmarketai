@@ -2188,7 +2188,17 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 231;
+    const SPRINT_BASELINE = 232;
+    // Bumped 231 -> 232 for the Work Journal <-> work_task EVIDENCE LINK v1
+    // (20260819190000_journal_task_evidence_link_v1) — RED-class by ROUTE
+    // (SECURITY DEFINER + grants), proposed for the owner gate, NOT
+    // pre-approved. ADDITIVE: one append-only link table + one read helper +
+    // two write RPCs; journal_entries, work_tasks, create_journal_entry_full
+    // and every existing policy/grant are untouched. Closes the break the
+    // field-work audit measured on prod: 36 real journal entries with 12
+    // manager confirmations, 0 work_tasks, and no way for finished work to
+    // produce durable evidence. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 232 real files.
     // Bumped 230 -> 231 for notification events v5 (20260819110000_
     // notification_events_v5_demand_interest) — GREEN constraint WIDENING via
     // the drop + re-add idiom, so the durable store can finally carry the one

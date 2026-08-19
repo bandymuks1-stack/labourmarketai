@@ -133,7 +133,19 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
    *   verify the caller genuinely owns the task. No task field is copied and
    *   no task is ever created; the existing task RPCs stay the only writers.
    */
-  const CONSUMERS = [LIFECYCLE_READER, "20260817232000_management_decisions_v1"];
+  /**
+   *   20260819190000 — Work Journal ↔ work_task evidence link v1 (field-work
+   *   audit v1 P0): `journal_entry_tasks` holds an FK to public.work_tasks and
+   *   the two link RPCs SELECT it to re-check that the caller may see the task
+   *   under the existing wt_select predicate. No task field is copied, no task
+   *   is created, updated or deleted, and no task RPC is redefined — the
+   *   existing task RPCs stay the only writers.
+   */
+  const CONSUMERS = [
+    LIFECYCLE_READER,
+    "20260817232000_management_decisions_v1",
+    "20260819190000_journal_task_evidence_link_v1",
+  ];
 
   it("only the D2 + train-D migration pairs DEFINE work_tasks or the task RPCs", () => {
     for (const dir of ["migrations", "rollbacks"]) {

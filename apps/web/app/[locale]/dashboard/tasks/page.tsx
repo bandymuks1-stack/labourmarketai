@@ -33,6 +33,18 @@ import {
   listProjectTasks,
   type MyTasksResult,
 } from "@/lib/tasks/tasks";
+import {
+  getTaskEvidenceByTask,
+  listWorkerLinkableEntries,
+} from "@/lib/journal/task-evidence";
+import {
+  deriveEvidenceSummary,
+  evidencePreview,
+} from "@/lib/journal/task-evidence-model";
+import {
+  linkTaskEvidenceAction,
+  unlinkTaskEvidenceAction,
+} from "@/lib/journal/task-evidence-actions";
 import { listVisibleActiveObjects } from "@/lib/objects/objects";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { listOrganizationMembers } from "@/lib/company/memberships";
@@ -71,6 +83,8 @@ const NOTICES = new Set([
   "limit_reached",
   "cycle",
   "error",
+  "evidence_linked",
+  "evidence_unlinked",
 ]);
 
 const OPEN_GROUPS: readonly WorkTaskStatus[] = [
@@ -212,6 +226,13 @@ export default async function TasksPage({
   ];
   const collaboration = await getTaskCollaboration(listedIds);
 
+  // Evidence for every listed task + the caller's own attachable journal
+  // entries — two bounded reads for the whole page, never per card.
+  const [evidence, linkableEntries] = await Promise.all([
+    getTaskEvidenceByTask(listedIds),
+    listWorkerLinkableEntries(),
+  ]);
+
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
   const now = new Date();
 
@@ -236,6 +257,146 @@ export default async function TasksPage({
           <input type="hidden" name="project" value={projectFilter} />
         ) : null}
       </>
+    );
+  }
+
+  /**
+   * Evidence attached to one task. Three honest states:
+   *  - the migration is unapplied  → one calm line, no controls;
+   *  - nothing attached yet        → the real empty state;
+   *  - attached records            → counts, never a score (§19), with
+   *    confirmed / not-confirmed shown per record exactly as the journal
+   *    reports it.
+   */
+  function EvidenceBlock({ task }: { task: WorkTask }) {
+    if (evidence.status === "needs-migration") {
+      return (
+        <p
+          className="text-xs text-text-muted"
+          data-testid={`task-evidence-unavailable-${task.id}`}
+        >
+          {t("evidence.unavailable")}
+        </p>
+      );
+    }
+
+    const items = evidence.itemsByTask[task.id] ?? [];
+    const summary = deriveEvidenceSummary(items);
+    const attachedIds = new Set(items.map((i) => i.entryId));
+    const attachable = linkableEntries.filter(
+      (e) => !attachedIds.has(e.entryId),
+    );
+
+    return (
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-2"
+        data-testid={`task-evidence-${task.id}`}
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h4 className="text-xs font-medium text-text-secondary">
+            {t("evidence.title")}
+          </h4>
+          {summary.total > 0 ? (
+            <span className="text-xs text-text-muted">
+              {t("evidence.summary", {
+                total: summary.total,
+                confirmed: summary.confirmed,
+              })}
+            </span>
+          ) : null}
+        </div>
+
+        {items.length === 0 ? (
+          <p className="text-xs text-text-muted">{t("evidence.empty")}</p>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {items.map((item) => (
+              <li
+                key={item.linkId}
+                className="flex flex-wrap items-start justify-between gap-2 text-xs text-text-secondary"
+              >
+                <span className="min-w-0 break-words">
+                  <span
+                    className={
+                      item.confirmedAt
+                        ? "text-state-success"
+                        : "text-text-muted"
+                    }
+                  >
+                    {item.confirmedAt
+                      ? t("evidence.confirmed")
+                      : t("evidence.unconfirmed")}
+                  </span>
+                  {" · "}
+                  {dateFmt(item.entryCreatedAt)}
+                  {item.photoCount > 0 ? (
+                    <>
+                      {" · "}
+                      {t("evidence.photos", { count: item.photoCount })}
+                    </>
+                  ) : null}
+                  <br />
+                  {evidencePreview(item.originalText)}
+                </span>
+                <form action={unlinkTaskEvidenceAction}>
+                  {hiddenContext()}
+                  <input type="hidden" name="linkId" value={item.linkId} />
+                  <button
+                    type="submit"
+                    className="text-text-muted underline decoration-dotted underline-offset-2 hover:text-state-danger"
+                    data-testid={`task-evidence-unlink-${item.linkId}`}
+                  >
+                    {t("evidence.unlink")}
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Attach one of MY OWN journal records. Somebody else's work is
+            never attachable from here — that claim belongs in the manager
+            review chain, not in a picker. */}
+        {attachable.length > 0 ? (
+          <form
+            action={linkTaskEvidenceAction}
+            className="flex flex-wrap items-center gap-2"
+          >
+            {hiddenContext()}
+            <input type="hidden" name="taskId" value={task.id} />
+            <label className="sr-only" htmlFor={`evidence-entry-${task.id}`}>
+              {t("evidence.linkCta")}
+            </label>
+            <select
+              id={`evidence-entry-${task.id}`}
+              name="entryId"
+              required
+              defaultValue=""
+              className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+              data-testid={`task-evidence-select-${task.id}`}
+            >
+              <option value="" disabled>
+                {t("evidence.linkCta")}
+              </option>
+              {attachable.map((e) => (
+                <option key={e.entryId} value={e.entryId}>
+                  {dateFmt(e.createdAt)} —{" "}
+                  {evidencePreview(e.originalText, 60)}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-md border border-ink-500 px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
+              data-testid={`task-evidence-link-${task.id}`}
+            >
+              {t("evidence.linkSubmit")}
+            </button>
+          </form>
+        ) : linkableEntries.length === 0 ? (
+          <p className="text-xs text-text-muted">{t("evidence.noLinkable")}</p>
+        ) : null}
+      </section>
     );
   }
 
@@ -398,6 +559,12 @@ export default async function TasksPage({
             ))}
           </ul>
         ) : null}
+
+        {/* Evidence — Work Journal records attached to this task. The journal
+            stays the ONE place work evidence is born; this only shows which
+            task a record proves. Confirmation state is READ from the journal
+            and never inferred here (§7): attaching proves nothing on its own. */}
+        <EvidenceBlock task={task} />
 
         {/* Status transitions — every control a real RPC-backed action. */}
         <div className="flex flex-wrap items-center gap-2">

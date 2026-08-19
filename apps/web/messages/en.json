@@ -9355,7 +9355,9 @@
       "not_found": "Task not found.",
       "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
       "error": "Saving failed. Please try again.",
-      "cycle": "That would create a loop — a task can't wait on itself through other tasks."
+      "cycle": "That would create a loop — a task can't wait on itself through other tasks.",
+      "evidence_linked": "Evidence attached to the task.",
+      "evidence_unlinked": "Attachment withdrawn. The record itself is unchanged."
     },
     "projectTasks": {
       "title": "Project tasks",
@@ -9399,6 +9401,32 @@
         "object_changed": "Object changed",
         "dependency_added": "Dependency added",
         "dependency_removed": "Dependency removed"
+      }
+    },
+    "evidence": {
+      "title": "Evidence",
+      "intro": "Work Journal records attached to this task. Attaching never changes a record — it only says which task it proves.",
+      "empty": "No Work Journal record is attached to this task yet.",
+      "unavailable": "Evidence attachment is not switched on yet.",
+      "summary": "{total} attached · {confirmed} manager-confirmed",
+      "confirmed": "Manager-confirmed",
+      "unconfirmed": "Not confirmed",
+      "photos": "Photos: {count}",
+      "linkCta": "Attach a Work Journal record",
+      "linkSubmit": "Attach",
+      "unlink": "Withdraw",
+      "unlinkReason": "Reason (optional)",
+      "alreadyLinked": "Already attached",
+      "noLinkable": "You have no Work Journal records to attach yet.",
+      "result": {
+        "ok": "Evidence attached.",
+        "already_linked": "That record is already attached.",
+        "not_found": "Not found.",
+        "not_allowed": "You are not allowed to do that.",
+        "invalid": "Check the fields.",
+        "limit_reached": "Attachment limit reached.",
+        "entry_not_current": "That record was corrected or withdrawn — attach the current version.",
+        "already_unlinked": "That attachment was already withdrawn."
       }
     }
   },

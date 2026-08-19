@@ -613,7 +613,12 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 230 -> 231 for notification events v5 (20260819110000) — a GREEN
     // CHECK widening on notification_events; still nothing from the market-map
     // read layer itself.
-    expect(count).toBeLessThanOrEqual(231);
+    // Bumped 231 -> 232 for the Work Journal <-> work_task evidence link v1
+    // (20260819190000_journal_task_evidence_link_v1, paired rollback). ONE
+    // append-only link table + read helper + two write RPCs; RED by route
+    // (SECURITY DEFINER + grants), deliberately NOT human-gate-annotated,
+    // ships UNAPPLIED. Still nothing from the market-map read layer itself.
+    expect(count).toBeLessThanOrEqual(232);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
