@@ -43,6 +43,7 @@ import {
   type AiRoutingAuditRecord,
   type AiRoutingRunOutcome,
   type AiTaskRouteContext,
+  type AiCostProvider,
   type TaskRouteDecision,
 } from "./runtime/task-routing";
 
@@ -194,9 +195,19 @@ export async function runAiAgentCore<T = unknown>(
   const expectedInputTokens =
     estimateTokensFromText(entry.system) +
     estimateTokensFromText(safeJsonForSizing(parsedInput.data));
+  // The provider that will actually serve the run — the router prices its
+  // CONCRETE model, never the tier alias (an alias resolves to Anthropic's
+  // table and would quote the wrong vendor's rates). mock/disabled runs stay
+  // on anthropic so tests remain deterministic.
+  const costProvider: AiCostProvider =
+    cfg.state === "live" ? cfg.provider : "anthropic";
   const routeCtx: AiTaskRouteContext = {
     attempt: 1,
     expectedInputTokens,
+    provider: costProvider,
+    // What the run is PERMITTED to emit, not merely what we expect — a
+    // provider allowed more output can spend past a ceiling priced for less.
+    maxOutputTokens: opts.maxOutputTokens ?? cfg.maxOutputTokens,
     ...opts.route,
     language: opts.route?.language ?? opts.language,
   };
@@ -217,7 +228,10 @@ export async function runAiAgentCore<T = unknown>(
   > = {
     humanReviewState: policy.humanReview ? "pending" : "not_required",
     dataCategoriesSent,
-    estimatedCostUsd: routeCtx.estimatedCostUsd ?? null,
+    // The estimate the router actually enforced. Reading it back off the
+    // decision keeps the audit truthful on the automatic-sizing path, where
+    // routeCtx carries only token size and no cost.
+    estimatedCostUsd: decision.estimatedCostUsd ?? routeCtx.estimatedCostUsd ?? null,
     promptVersion: entry.version,
     inputSource: opts.inputSource ?? null,
   };

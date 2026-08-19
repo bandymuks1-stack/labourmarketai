@@ -50,11 +50,21 @@ describe("every task policy can actually be costed before it runs", () => {
 
   it("the token estimate never under-counts — an under-estimate defeats the budget", () => {
     expect(estimateTokensFromText("")).toBe(0);
-    // 4 chars/token, rounded UP.
-    expect(estimateTokensFromText("abcd")).toBe(1);
-    expect(estimateTokensFromText("abcde")).toBe(2);
+    // max(chars/4, utf8Bytes/3), rounded UP. For ASCII the byte term wins, so
+    // plain text is costed ~1.33x above the familiar chars/4 ratio — the safe
+    // direction, and deliberate: a budget can absorb over-counting, never
+    // under-counting.
+    expect(estimateTokensFromText("abcd")).toBe(2);
+    expect(estimateTokensFromText("abcdef")).toBe(2);
     // Any non-empty text costs at least one token.
     expect(estimateTokensFromText("a")).toBe(1);
+    // Never below the plain chars/4 reading, for any input.
+    for (const sample of ["hello world", "фф", "🙂🙂", "日本語テキスト"]) {
+      expect(
+        estimateTokensFromText(sample),
+        sample,
+      ).toBeGreaterThanOrEqual(Math.ceil(sample.length / 4));
+    }
   });
 
   it("an unpriced model yields null rather than a guessed price", () => {
@@ -141,6 +151,41 @@ describe("an uncheckable ceiling blocks instead of spending", () => {
     }
   });
 
+  it("an unpriced PROVIDER actually reaches the block — not just the price table", () => {
+    // The regression this pins: pricing the tier ALIAS instead of the concrete
+    // provider model. Aliases live in Anthropic's price table, so an alias
+    // always resolves — `cost_unpriced` could never fire for the very
+    // providers it exists to stop, and a GPT run got quoted Anthropic rates.
+    for (const provider of ["openai", "gemini", "xai"] as const) {
+      const d = resolveTaskRoute(COSTED_TASK, {
+        attempt: 1,
+        expectedInputTokens: 2_000,
+        provider,
+      });
+      expect(d.blocked, provider).toBe("cost_unpriced");
+      expect(d.reason, provider).toContain(provider);
+    }
+  });
+
+  it("a self-hosted local run is free, never blocked on someone else's price", () => {
+    const d = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 5_000_000,
+      provider: "local",
+    });
+    expect(d.blocked).toBeUndefined();
+    expect(d.estimatedCostUsd).toBe(0);
+  });
+
+  it("deepl is unpriceable by tokens — it bills per character", () => {
+    const d = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 2_000,
+      provider: "deepl",
+    });
+    expect(d.blocked).toBe("cost_unpriced");
+  });
+
   it("`cost_unpriced` is a distinct outcome from `cost_ceiling`", () => {
     // Two different operator fixes: add a price vs. shrink the request. They
     // must never collapse into one reason string.
@@ -154,6 +199,66 @@ describe("an uncheckable ceiling blocks instead of spending", () => {
   });
 });
 
+describe("the estimate bounds what the run may actually emit", () => {
+  it("prices the permitted output, not merely the expected output", () => {
+    const policy = TASK_POLICIES[COSTED_TASK];
+    const generous = policy.expectedOutputTokens * 50;
+    const modest = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 1_000,
+      provider: "anthropic",
+    });
+    const permissive = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 1_000,
+      provider: "anthropic",
+      maxOutputTokens: generous,
+    });
+    // A run allowed far more output must be priced higher, or a provider can
+    // legitimately generate its way past a ceiling priced for less.
+    expect(permissive.estimatedCostUsd).toBeGreaterThan(
+      modest.estimatedCostUsd ?? 0,
+    );
+  });
+
+  it("a token-dense script is not under-counted", () => {
+    // chars/4 alone under-counts Cyrillic, CJK and emoji — and an under-count
+    // is the one error a budget cannot absorb.
+    const ascii = "aaaaaaaaaaaaaaaa"; // 16 chars, 16 bytes
+    const cyrillic = "фффффффффффффффф".slice(0, 16); // 16 chars, 32 bytes
+    const emoji = "🙂".repeat(8); // 16 UTF-16 units, 32 bytes
+    expect(estimateTokensFromText(cyrillic)).toBeGreaterThan(
+      estimateTokensFromText(ascii),
+    );
+    expect(estimateTokensFromText(emoji)).toBeGreaterThan(
+      estimateTokensFromText(ascii),
+    );
+  });
+});
+
+describe("the enforced estimate reaches the audit trail", () => {
+  it("the decision carries the number the ceiling was judged on", () => {
+    const d = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 10_000,
+      provider: "anthropic",
+    });
+    expect(d.estimatedCostUsd).toBeTypeOf("number");
+    expect(d.estimatedCostUsd).toBeGreaterThan(0);
+  });
+
+  it("run-agent records the DECISION's estimate, not the empty context one", () => {
+    // Regression: auditBase read routeCtx.estimatedCostUsd, which is undefined
+    // on the automatic-sizing path, so ai_runs stored null for every run the
+    // router had just costed and enforced.
+    const src = readFileSync(
+      join(__dirname, "..", "ai", "run-agent.ts"),
+      "utf8",
+    );
+    expect(src).toContain("decision.estimatedCostUsd");
+  });
+});
+
 describe("the run path supplies the size automatically", () => {
   it("run-agent derives expectedInputTokens — not left to call sites", () => {
     const src = readFileSync(
@@ -162,6 +267,9 @@ describe("the run path supplies the size automatically", () => {
     );
     expect(src).toContain("expectedInputTokens");
     expect(src).toContain("estimateTokensFromText");
+    // The provider must reach the router, or it prices the wrong vendor.
+    expect(src).toContain("provider: costProvider");
+    expect(src).toContain("maxOutputTokens:");
     // Both halves that go on the wire are counted.
     expect(src).toContain("entry.system");
   });

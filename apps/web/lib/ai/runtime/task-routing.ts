@@ -90,6 +90,14 @@ export const TIER_MODEL_ALIAS: Record<AiModelTier, AiModelAlias | null> = {
 /** Providers with a per-alias candidate table (AI_MODEL_CANDIDATES keys). */
 export type AiModelProvider = "anthropic" | "openai" | "gemini" | "xai";
 
+/**
+ * Every provider a run can be costed against — the candidate-table providers
+ * plus the two that have no per-alias model id:
+ *   `local`  — self-hosted, no per-token vendor price. Free by construction.
+ *   `deepl`  — bills per CHARACTER, so a token price would be a category error.
+ */
+export type AiCostProvider = AiModelProvider | "local" | "deepl";
+
 /** Alias → concrete model id. The ONLY alias→id mapping outside config-core.
  *  Defaults to anthropic; a live non-anthropic primary provider resolves its
  *  own candidate for the SAME tier alias (cheapest-sufficient is preserved). */
@@ -402,6 +410,21 @@ export interface AiTaskRouteContext {
    * routing layer prices them against the tier it actually resolved.
    */
   readonly expectedInputTokens?: number;
+  /**
+   * The provider that will actually serve the run. REQUIRED for a meaningful
+   * estimate: a tier alias alone resolves to Anthropic prices, so pricing by
+   * alias would quote Anthropic rates for a GPT run and would never yield the
+   * null that `cost_unpriced` depends on. Absent → treated as anthropic, which
+   * is what mock/disabled runs use.
+   */
+  readonly provider?: AiCostProvider;
+  /**
+   * Output tokens the run is actually PERMITTED to emit (request/config cap).
+   * The estimate prices the larger of this and the policy's expected size —
+   * pricing only the smaller expectation would let a provider legitimately
+   * generate its way past the ceiling.
+   */
+  readonly maxOutputTokens?: number;
   /** Language of the run (routing dimension — recorded on the decision;
    *  activates a policy's languageRouting preference when present). */
   readonly language?: string;
@@ -427,6 +450,13 @@ export interface TaskRouteDecision {
   /** Task-policy preferred provider (e.g. "deepl") — tried first when
    *  configured; the LLM tier stays the fallback. Null = no preference. */
   readonly preferredProvider: "deepl" | null;
+  /**
+   * The pre-run estimate the ceiling was judged on, in USD. `null` when it
+   * could not be computed (unpriced model). Carried on the decision so the
+   * `ai_runs` audit row records the number that was actually enforced instead
+   * of losing it to the reason string.
+   */
+  readonly estimatedCostUsd?: number | null;
   /** Set → the run must NOT proceed (cost ceiling / missing human gate). */
   readonly blocked?: RouteBlockReason;
 }
@@ -528,16 +558,40 @@ export function resolveRouteForPolicy(
    * ai-task-routing). The caller supplies token SIZE; the router prices it.
    */
   const modelAliasForTier = TIER_MODEL_ALIAS[tier];
-  // `modelAliasForTier` is non-null for every LLM tier; the deterministic tier
-  // returned above, before any model was involved.
+  const costProvider: AiCostProvider = ctx.provider ?? "anthropic";
+
+  /* Price the CONCRETE model that will run, never the tier alias.
+   *
+   * The alias table is Anthropic's, so pricing `sonnet` while OpenAI serves the
+   * run would quote the wrong vendor's rates AND would always resolve — making
+   * `cost_unpriced` unreachable for exactly the unpriced providers it exists to
+   * stop. Resolving alias → provider model id first is what makes both the
+   * ceiling and the unpriced block mean anything.
+   *
+   * Output is priced at the LARGER of the policy's expected size and what the
+   * run is actually permitted to emit: a provider allowed 2,000 tokens can
+   * spend its way past a ceiling that only priced 600.
+   */
+  const outputBound = Math.max(
+    policy.expectedOutputTokens,
+    ctx.maxOutputTokens ?? 0,
+  );
   const derivedEstimate =
-    ctx.expectedInputTokens !== undefined && modelAliasForTier !== null
-      ? estimateCostUsd(
-          modelAliasForTier,
-          ctx.expectedInputTokens,
-          policy.expectedOutputTokens,
-        )
-      : undefined;
+    ctx.expectedInputTokens === undefined || modelAliasForTier === null
+      ? undefined
+      : costProvider === "local"
+        ? // Self-hosted: the operator already paid for the hardware. Free by
+          // construction — never blocked on an irrelevant vendor price.
+          0
+        : costProvider === "deepl"
+          ? // Character-billed. A token price would be a category error, so it
+            // is honestly unpriceable here rather than wrong.
+            null
+          : estimateCostUsd(
+              modelIdForAlias(modelAliasForTier, costProvider),
+              ctx.expectedInputTokens,
+              outputBound,
+            );
   const estimate = ctx.estimatedCostUsd ?? derivedEstimate;
 
   // An unpriced model makes the ceiling UNCHECKABLE. A budget that cannot be
@@ -554,11 +608,12 @@ export function resolveRouteForPolicy(
       taskType: policy.taskType,
       tier,
       modelAlias: modelAliasForTier,
-      reason: `${reason}; model "${modelAliasForTier}" carries no owner-reviewed price, so the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} cannot be evaluated — run blocked`,
+      reason: `${reason}; provider "${costProvider}" model "${modelAliasForTier}" carries no owner-reviewed price, so the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} cannot be evaluated — run blocked`,
       escalated,
       fallbackApplied,
       secondModelReview,
       languageConsidered,
+      estimatedCostUsd: null,
       preferredProvider: null, // blocked — no provider may run
       blocked: "cost_unpriced",
     };
@@ -574,11 +629,12 @@ export function resolveRouteForPolicy(
       taskType: policy.taskType,
       tier,
       modelAlias: modelAliasForTier,
-      reason: `estimated cost ${estimate.toFixed(4)} USD on tier "${tier}" exceeds the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} — run blocked`,
+      reason: `estimated cost ${estimate.toFixed(4)} USD on tier "${tier}" (provider "${costProvider}") exceeds the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} — run blocked`,
       escalated,
       fallbackApplied,
       secondModelReview,
       languageConsidered,
+      estimatedCostUsd: estimate ?? null,
       preferredProvider: null, // blocked — no provider may run
       blocked: "cost_ceiling",
     };
@@ -614,6 +670,9 @@ export function resolveRouteForPolicy(
     fallbackApplied,
     secondModelReview,
     languageConsidered,
+    // The number the ceiling was judged on, so `ai_runs` records the estimate
+    // that was actually enforced rather than a null beside a reason string.
+    estimatedCostUsd: estimate ?? null,
     preferredProvider,
   };
 }
