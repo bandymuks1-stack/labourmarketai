@@ -69,9 +69,14 @@ const POSITIONS: L = {
 export function PublicVacancyCard({
   vacancy,
   locale,
+  savedLabel,
 }: {
   readonly vacancy: PublicVacancyPreview;
   readonly locale: ActiveLocale;
+  /** Rendered only when the viewer has this ad in their OWN private bookmark
+   *  list. It is a note to the person looking at their own screen — it reaches
+   *  no employer and is never rendered for anyone else. */
+  readonly savedLabel?: string;
 }) {
   const chips: string[] = [];
 
@@ -96,7 +101,14 @@ export function PublicVacancyCard({
       href={`/jobs/${vacancy.id}`}
       className="block rounded-lg border p-4 transition-colors hover:bg-accent/40 focus-visible:outline focus-visible:outline-2"
     >
-      <h2 className="text-base font-medium sm:text-lg">{vacancy.title}</h2>
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="text-base font-medium sm:text-lg">{vacancy.title}</h2>
+        {savedLabel && (
+          <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+            {savedLabel}
+          </span>
+        )}
+      </div>
 
       {vacancy.occupation && (
         <p className="mt-1 text-sm text-muted-foreground">{vacancy.occupation}</p>

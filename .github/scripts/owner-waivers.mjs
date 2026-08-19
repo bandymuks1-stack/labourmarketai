@@ -267,8 +267,40 @@ export const SCOPED_OWNER_WAIVERS = [
      * World-State answers stay honestly "no" for the anonymous caller this
      * surface exists for, and the authenticated caller is handed into the
      * workspace — which is what `chatIntegration` above already promised.
+     *
+     * ── #1203 (2026-08-19) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-08-19):
+     *   "OWNER APPROVAL: patvirtinu scoped product-gate waiver išplėtimą
+     *    PR #1203. Įtrauk tik #1203 į jau egzistuojančią /jobs waiver
+     *    taisyklę, nekeisk pačių product-gate kriterijų ir jų nesilpnink."
+     * ("I approve extending the scoped product-gate waiver to PR #1203.
+     *  Add ONLY #1203 to the existing /jobs waiver rule; do not change the
+     *  product-gate criteria themselves and do not weaken them.")
+     *
+     * Exactly that was done: one number added to `pullRequests`. The axiom,
+     * the six codes per surface, the three surfaces, the file list, the
+     * expected finding set, the expiry and the subset rule are byte-unchanged,
+     * and `product-gate.mjs` itself is not touched by this PR at all.
+     *
+     * The pre-conditions were checked by RUNNING the gate on this head rather
+     * than reasoning about it — the same head, twice, differing only in the PR
+     * number:
+     *   BASE_SHA=origin/main PR_NUMBER=1193 → PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER
+     *   BASE_SHA=origin/main PR_NUMBER=1203 → 24 violations, every one rejected
+     *                                         for `pr-not-covered` and no other
+     *                                         reason.
+     * So the diff adds ZERO findings; the waiver was working correctly and
+     * simply did not list this PR.
+     *
+     * WHAT #1203 ACTUALLY DOES to these surfaces: a signed-in worker gets a
+     * PRIVATE BOOKMARK — Save/Saved/Unsave on `/jobs/[id]`, and the return path
+     * that makes a bookmark a bookmark: a saved tab on `/jobs` plus a "Saved"
+     * marker on the card. It is not an application, not a shortlist, not
+     * employer interest and not candidate disclosure — nobody but the saving
+     * worker ever learns a save happened. The route's existence, purpose and
+     * anonymous copy are untouched, which is the same class of change as #1193.
      */
-    pullRequests: [1184, 1193],
+    pullRequests: [1184, 1193, 1203],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
