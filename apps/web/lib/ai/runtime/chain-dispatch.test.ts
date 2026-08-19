@@ -15,6 +15,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { dispatchAiCompletion, type ChainDispatchContext } from "./run-core";
+import type { AiEgressGrant } from "./data-egress";
 import { resolveAiRuntimeConfig, type AiRuntimeConfig } from "./config-core";
 import {
   advancePolicyFor,
@@ -111,11 +112,29 @@ const chain = (
   task: AiTaskType,
   states: AiProviderState[],
   profiles?: readonly AiProviderProfile[],
+  grants?: readonly AiEgressGrant[],
 ): ChainDispatchContext => ({
   decision: resolveTaskRoute(task, { attempt: 1 }),
   states,
   profiles,
+  grants,
 });
+
+/**
+ * OWNER DECISION 2026-08-19 (AI DATA BOUNDARY): an external provider with no
+ * egress grant may receive PUBLIC data only, and no task is classed PUBLIC.
+ * Reaching a cloud ADAPTER therefore requires an injected grant — otherwise the
+ * dispatch-level mechanics below (fallback ordering, adapter invocation) have
+ * no subject and could not be proven at all. The gate's own behaviour is pinned
+ * separately, without a grant.
+ */
+const GRANT_ALL = (...providers: string[]): AiEgressGrant[] =>
+  providers.map((provider) => ({
+    provider,
+    maxSensitivity: "SENSITIVE_FREE_TEXT" as const,
+    basis: "test fixture",
+    grantedOn: "2026-08-19",
+  }));
 
 const READY = (id: AiProviderState["id"]): AiProviderState => ({ id, health: "ready" });
 const DOWN = (id: AiProviderState["id"], reason: string): AiProviderState => ({
@@ -141,7 +160,7 @@ describe("FREE_LOCAL healthy → selected, keyless, before anything paid", () =>
       request(),
       cfg,
       // anthropic is ALSO ready — local must still win on cost class.
-      chain("explain_match", [READY("local"), READY("anthropic")]),
+      chain("explain_match", [READY("local"), READY("anthropic")], undefined, GRANT_ALL("anthropic")),
     );
 
     expect(r.status).toBe("ok");
@@ -190,7 +209,7 @@ describe("FREE_LOCAL unavailable → the next eligible candidate", () => {
     const r = await dispatchAiCompletion(
       request(),
       cfg,
-      chain("explain_match", [READY("local"), READY("anthropic")]),
+      chain("explain_match", [READY("local"), READY("anthropic")], undefined, GRANT_ALL("anthropic")),
     );
 
     // anthropic is env-gated and keyless here, so it cannot answer either —
@@ -208,7 +227,7 @@ describe("FREE_LOCAL unavailable → the next eligible candidate", () => {
     await dispatchAiCompletion(
       request(),
       cfgFor(),
-      chain("explain_match", [UNCONFIGURED("local"), READY("anthropic")]),
+      chain("explain_match", [UNCONFIGURED("local"), READY("anthropic")], undefined, GRANT_ALL("anthropic")),
     );
     expect(spy).not.toHaveBeenCalled();
   });
@@ -219,13 +238,18 @@ describe("every provider unusable → an honest unavailable, never a crash", () 
     const r = await dispatchAiCompletion(
       request(),
       cfgFor(),
-      chain("explain_match", [
-        DOWN("local", "runtime is switched off"),
-        DOWN("anthropic", "no key"),
-        UNCONFIGURED("openai"),
-        UNCONFIGURED("gemini"),
-        UNCONFIGURED("xai"),
-      ]),
+      chain(
+        "explain_match",
+        [
+          DOWN("local", "runtime is switched off"),
+          DOWN("anthropic", "no key"),
+          UNCONFIGURED("openai"),
+          UNCONFIGURED("gemini"),
+          UNCONFIGURED("xai"),
+        ],
+        undefined,
+        GRANT_ALL("anthropic", "openai", "gemini", "xai"),
+      ),
     );
     expect(r.status).toBe("error");
     expect(r.status === "error" && r.code).toBe("unsupported");
@@ -255,7 +279,7 @@ describe("provider failures are classified, not merged", () => {
     const r = await dispatchAiCompletion(
       request(),
       cfgFor(),
-      chain("explain_match", [READY("local"), READY("anthropic")]),
+      chain("explain_match", [READY("local"), READY("anthropic")], undefined, GRANT_ALL("anthropic")),
     );
     // The local runtime's 500 did not end the run; anthropic was reached and
     // reported its own (unconfigured) state.
@@ -375,7 +399,7 @@ const syntheticFreeTier = (
   },
 ];
 
-describe("a privacy-ineligible free tier never RECEIVES the payload", () => {
+describe("an ungranted external provider never RECEIVES the payload", () => {
   it("PERSONAL data: the adapter is never invoked", async () => {
     vi.stubEnv("AI_LOCAL_ENABLED", "true");
     const spy = vi.spyOn(globalThis, "fetch");
@@ -390,14 +414,15 @@ describe("a privacy-ineligible free tier never RECEIVES the payload", () => {
     expect(spy).not.toHaveBeenCalled();
     expect(received).toHaveLength(0);
     expect(r.status).toBe("error");
-    expect(r.status === "error" && r.message).toMatch(/free cloud tier/i);
+    expect(r.status === "error" && r.message).toMatch(/egress grant/i);
   });
 
-  it("NEGATIVE CONTROL: marking the SAME provider paid makes the call happen", async () => {
-    // The control that makes the test above mean something. Only the cost
-    // class changes — same id, same wire, same payload. If this did not fire,
-    // the assertion above would be proving that nothing works, not that the
-    // veto works.
+  it("EUR 0 grants nothing: marking the SAME provider paid changes nothing", async () => {
+    // Under the OLD price-based rule this was the negative control — flipping
+    // the cost class to `paid` made the call happen. The owner's AI DATA
+    // BOUNDARY decision reversed exactly that: paying a vendor is not
+    // permitting it to process a worker's evidence. Same id, same wire, same
+    // payload, now still refused.
     vi.stubEnv("AI_LOCAL_ENABLED", "true");
     const spy = vi.spyOn(globalThis, "fetch");
 
@@ -407,13 +432,41 @@ describe("a privacy-ineligible free tier never RECEIVES the payload", () => {
       chain("explain_match", [READY("local")], syntheticFreeTier("paid")),
     );
 
+    expect(spy).not.toHaveBeenCalled();
+    expect(received).toHaveLength(0);
+    expect(r.status).toBe("error");
+  });
+
+  it("NEGATIVE CONTROL: an explicit egress grant DOES make the call happen", async () => {
+    // The control that keeps the assertions above meaningful — without it they
+    // would prove that nothing works, not that the gate works. The grant is the
+    // only thing that changes.
+    vi.stubEnv("AI_LOCAL_ENABLED", "true");
+    const spy = vi.spyOn(globalThis, "fetch");
+
+    const r = await dispatchAiCompletion(
+      request(),
+      cfgFor(),
+      chain(
+        "explain_match",
+        [READY("local")],
+        syntheticFreeTier("paid"),
+        // The synthetic profile reuses the id "local" with locality "cloud",
+        // so the grant is keyed on that id.
+        GRANT_ALL("local"),
+      ),
+    );
+
     expect(spy).toHaveBeenCalled();
     expect(received).toHaveLength(1);
     expect(r.status).toBe("ok");
   });
 
-  it("NON-personal data DOES reach the same free tier", async () => {
-    // The veto is scoped to what the payload carries, not to the provider.
+  it("a business's own project data is ALSO refused without a grant", async () => {
+    // This used to assert the opposite: LOW_RISK_PROJECT_DATA reached a free
+    // tier because the veto only guarded personal data. The owner's AI DATA
+    // BOUNDARY decision lists organisations' internal information and project
+    // / task data as non-exportable by default too, so the gate now covers it.
     vi.stubEnv("AI_LOCAL_ENABLED", "true");
     const r = await dispatchAiCompletion(
       request("structure_future_work"),
@@ -424,8 +477,49 @@ describe("a privacy-ineligible free tier never RECEIVES the payload", () => {
         syntheticFreeTier("free_tier"),
       ),
     );
+    expect(received).toHaveLength(0);
+    expect(r.status).toBe("error");
+  });
+
+  it("a grant capped at LOW_RISK lets project data through, but nothing above it", async () => {
+    // The free-tier ceiling in one test: granted, so project data flows; the
+    // cap still refuses anything personal to the same provider.
+    vi.stubEnv("AI_LOCAL_ENABLED", "true");
+    const grants = [
+      {
+        provider: "local",
+        maxSensitivity: "LOW_RISK_PROJECT_DATA" as const,
+        basis: "test fixture",
+        grantedOn: "2026-08-19",
+      },
+    ];
+
+    const projectRun = await dispatchAiCompletion(
+      request("structure_future_work"),
+      cfgFor(),
+      chain(
+        "structure_future_work",
+        [READY("local")],
+        syntheticFreeTier("free_tier"),
+        grants,
+      ),
+    );
     expect(received).toHaveLength(1);
-    expect(r.status).toBe("ok");
+    expect(projectRun.status).toBe("ok");
+
+    received = [];
+    const personalRun = await dispatchAiCompletion(
+      request(),
+      cfgFor(),
+      chain(
+        "explain_match",
+        [READY("local")],
+        syntheticFreeTier("free_tier"),
+        grants,
+      ),
+    );
+    expect(received).toHaveLength(0);
+    expect(personalRun.status).toBe("error");
   });
 });
 
