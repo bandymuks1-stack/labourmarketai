@@ -4463,7 +4463,8 @@
       "procurement": "Ost",
       "business_trip": "Lähetus",
       "management_decision": "Juhtkonna otsus",
-      "agreement": "Leping"
+      "agreement": "Leping",
+      "work_task": "Tööülesanne"
     },
     "transition": {
       "started": "Taotlus esitatud",

@@ -4463,7 +4463,8 @@
       "procurement": "Zakup",
       "business_trip": "Delegacja",
       "management_decision": "Decyzja zarządu",
-      "agreement": "Umowa"
+      "agreement": "Umowa",
+      "work_task": "Zadanie robocze"
     },
     "transition": {
       "started": "Wniosek złożony",

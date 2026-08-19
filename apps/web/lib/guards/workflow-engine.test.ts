@@ -213,6 +213,19 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // (all three assertions below apply to it unchanged). Its own contract
       // is pinned by lib/guards/workflow-template-management.test.ts.
       "20260818120000_workflow_template_management_v1",
+      // work_task context widening (20260819210000, field-work audit chain
+      // step B) is a DIFFERENT CLASS from every entry above, and says so:
+      // the others consume a vocabulary value the engine already admitted,
+      // while this one WIDENS the vocabulary itself. It adds 'work_task' to
+      // the context_entity_type CHECK on workflow_definitions AND
+      // workflow_instances via the drop+re-add idiom, so it necessarily
+      // ALTERs two engine tables — and the no-create/no-drop assertions
+      // below still hold unchanged, which is the property that matters: it
+      // creates no engine table, drops no engine table, defines no engine
+      // command and triggers nothing. Every one of the original ten values
+      // survives (pinned by lib/guards/task-approval-context.test.ts).
+      // It is GREEN and deliberately un-annotated.
+      "20260819210000_workflow_work_task_context_v1",
     ];
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -600,6 +613,16 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // its own seven gated commands plus the engine's OWN
       // start_workflow_instance_v1.
       "lib/decisions/decisions.ts",
+      // Declared CONSUMER (work_task approval, field-work audit chain step
+      // B): the task approval read lists the org's ACTIVE 'work_task'
+      // definitions for the tasks page and reads workflow_instances scoped
+      // to context_entity_type='work_task' to show a task's approval state.
+      // RLS-scoped SELECT only — it never writes an engine table and never
+      // decides anything. The write path is the engine's OWN
+      // start_workflow_instance_v1, called from
+      // lib/tasks/task-approval-actions.ts and pinned by
+      // lib/guards/task-approval-context.test.ts.
+      "lib/approvals/task-approvals.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {

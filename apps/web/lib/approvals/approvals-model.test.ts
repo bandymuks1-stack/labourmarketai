@@ -107,7 +107,14 @@ describe("honest vocabularies (pinned — a new value is a reviewed act)", () =>
     ]);
     expect([...WORKFLOW_APPROVAL_MODES]).toEqual(["single", "all", "any"]);
     expect([...WORKFLOW_DECISIONS]).toEqual(["approved", "rejected"]);
-    expect(WORKFLOW_CONTEXT_ENTITY_TYPES).toHaveLength(10);
+    // 10 -> 11: 'work_task' added by the field-work audit chain step B
+    // (migration 20260819210000). This length is pinned precisely so that
+    // widening the vocabulary stays a REVIEWED act — the value must also
+    // exist in the DB CHECK on workflow_definitions AND workflow_instances,
+    // which lib/guards/task-approval-context.test.ts asserts against the
+    // migration file itself.
+    expect(WORKFLOW_CONTEXT_ENTITY_TYPES).toHaveLength(11);
+    expect(WORKFLOW_CONTEXT_ENTITY_TYPES).toContain("work_task");
     expect(WORKFLOW_CONTEXT_ENTITY_TYPES[0]).toBe("generic_request");
   });
 

@@ -4463,7 +4463,8 @@
       "procurement": "Innkjøp",
       "business_trip": "Tjenestereise",
       "management_decision": "Ledelsesbeslutning",
-      "agreement": "Avtale"
+      "agreement": "Avtale",
+      "work_task": "Arbeidsoppgave"
     },
     "transition": {
       "started": "Forespørsel sendt inn",

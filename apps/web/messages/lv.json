@@ -4463,7 +4463,8 @@
       "procurement": "Iepirkums",
       "business_trip": "Komandējums",
       "management_decision": "Vadības lēmums",
-      "agreement": "Līgums"
+      "agreement": "Līgums",
+      "work_task": "Darba uzdevums"
     },
     "transition": {
       "started": "Pieprasījums iesniegts",

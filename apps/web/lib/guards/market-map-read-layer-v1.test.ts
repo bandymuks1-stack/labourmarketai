@@ -618,7 +618,10 @@ describe("NO new DB migration in this PR", () => {
     // append-only link table + read helper + two write RPCs; RED by route
     // (SECURITY DEFINER + grants), deliberately NOT human-gate-annotated,
     // ships UNAPPLIED. Still nothing from the market-map read layer itself.
-    expect(count).toBeLessThanOrEqual(232);
+    // Bumped 232 -> 233 for the work_task approval context widening
+    // (20260819210000_workflow_work_task_context_v1, paired rollback).
+    // GREEN CHECK widening; still nothing from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(233);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

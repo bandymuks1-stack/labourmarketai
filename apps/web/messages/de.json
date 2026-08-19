@@ -9357,7 +9357,8 @@
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "cycle": "Das würde eine Schleife erzeugen — eine Aufgabe kann nicht über andere Aufgaben auf sich selbst warten.",
       "evidence_linked": "Nachweis mit der Aufgabe verknüpft.",
-      "evidence_unlinked": "Verknüpfung zurückgezogen. Der Eintrag selbst bleibt unverändert."
+      "evidence_unlinked": "Verknüpfung zurückgezogen. Der Eintrag selbst bleibt unverändert.",
+      "approval_requested": "Zur Freigabe gesendet."
     },
     "projectTasks": {
       "title": "Projektaufgaben",
@@ -9427,6 +9428,20 @@
         "limit_reached": "Limit für Verknüpfungen erreicht.",
         "entry_not_current": "Dieser Eintrag wurde korrigiert oder zurückgezogen — verknüpfen Sie die aktuelle Version.",
         "already_unlinked": "Diese Verknüpfung wurde bereits zurückgezogen."
+      }
+    },
+    "approval": {
+      "label": "Freigabe",
+      "request": "Zur Freigabe senden",
+      "chooseFlow": "Freigabeprozess wählen",
+      "noFlow": "Für Aufgaben ist noch kein Freigabeprozess eingerichtet.",
+      "atStep": "Schritt {step}",
+      "status": {
+        "pending": "Wartet auf Entscheidung",
+        "approved": "Freigegeben",
+        "rejected": "Abgelehnt",
+        "withdrawn": "Zurückgezogen",
+        "cancelled": "Storniert"
       }
     }
   },
@@ -12685,7 +12700,8 @@
       "procurement": "Einkauf",
       "business_trip": "Dienstreise",
       "management_decision": "Managemententscheidung",
-      "agreement": "Vereinbarung"
+      "agreement": "Vereinbarung",
+      "work_task": "Arbeitsaufgabe"
     },
     "transition": {
       "started": "Anfrage gestellt",

@@ -9357,7 +9357,8 @@
       "error": "Nepavyko išsaugoti. Pabandykite dar kartą.",
       "cycle": "Taip susidarytų ratas — užduotis negali laukti pati savęs per kitas užduotis.",
       "evidence_linked": "Įrodymas susietas su užduotimi.",
-      "evidence_unlinked": "Susiejimas atšauktas. Pats įrašas nepakito."
+      "evidence_unlinked": "Susiejimas atšauktas. Pats įrašas nepakito.",
+      "approval_requested": "Išsiųsta tvirtinti."
     },
     "projectTasks": {
       "title": "Projekto užduotys",
@@ -9427,6 +9428,20 @@
         "limit_reached": "Pasiektas susiejimų limitas.",
         "entry_not_current": "Šis įrašas buvo pataisytas arba atšauktas — susiekite aktualią versiją.",
         "already_unlinked": "Šis susiejimas jau atšauktas."
+      }
+    },
+    "approval": {
+      "label": "Patvirtinimas",
+      "request": "Siųsti tvirtinti",
+      "chooseFlow": "Pasirinkite tvirtinimo eigą",
+      "noFlow": "Užduočių tvirtinimo eiga dar nesukurta.",
+      "atStep": "{step} žingsnis",
+      "status": {
+        "pending": "Laukiama sprendimo",
+        "approved": "Patvirtinta",
+        "rejected": "Atmesta",
+        "withdrawn": "Atšaukta",
+        "cancelled": "Nutraukta"
       }
     }
   },
@@ -12685,7 +12700,8 @@
       "procurement": "Pirkimas",
       "business_trip": "Komandiruotė",
       "management_decision": "Vadovybės sprendimas",
-      "agreement": "Sutartis"
+      "agreement": "Sutartis",
+      "work_task": "Darbo užduotis"
     },
     "transition": {
       "started": "Prašymas pateiktas",
