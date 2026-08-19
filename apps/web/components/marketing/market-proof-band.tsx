@@ -16,24 +16,31 @@ import { Card } from "@/components/ui/Card";
  * `execute_sql` (read-only SELECTs) against the production project (the one
  * documented in docs/audits/sweden-market-truth-2026-08-17.md — the ref
  * string itself must not appear in user-facing source, per
- * lib/guards/single-domain-origin.test.ts), table `public.public_vacancies`,
- * measured 2026-08-17 21:22 UTC:
+ * lib/guards/single-domain-origin.test.ts), table `public.public_vacancies`.
  *
- *   - active visible vacancies (is_active AND lifecycle='published'): 43,781
- *   - distinct identified employers = org-number identities (7,591) +
- *     name-only identities with no org number (316) − overlap (1) = 7,906
- *     (the documented normalization rule from
- *     docs/audits/sweden-market-truth-2026-08-17.md §B — no fuzzy merge)
- *   - regions with active ads: 21
+ * CORRECTED 2026-08-19 (owner approval, docs/audits/landing-coverage-claim-basis-2026-08-18.md).
+ * The original floors were read on `is_active AND lifecycle='published'` — a
+ * predicate that counts ads the public job board refuses to serve. The band now
+ * quotes `SWEDEN_COVERAGE_2026_08_19`, derived on the job board's OWN predicate
+ * (`BROWSABLE_VACANCY_PREDICATE`) over a five-day window rather than one
+ * reading, because the browsable pool oscillates ~8% inside a week:
  *
- * The rendered copy uses FLOOR values ("41 000+", "7 600+", "21") — the same
- * proven floors as `SWEDEN_COVERAGE_2026_08_17` — because the counts move
- * daily and a floor can only be exceeded while the import cadence is live.
- * Precise counts would go stale; floors stay true.
+ *   - browsable vacancies 2026-08-15..19: 40,460 · 40,089 · 37,105 · 38,181 ·
+ *     39,795 → window low 37,105, floor 35,000+
+ *   - identified employers (registry-id identity, no fuzzy name merge — see
+ *     lib/employers/employer-identity.ts): 7,482 · 7,416 · 7,252 · 7,433 ·
+ *     7,628 → window low 7,252, floor 7,000+
+ *   - regions with browsable ads: 21, stable across the window, quoted exactly
+ *
+ * A floor must survive the TROUGH, not the day it was measured — the shipped
+ * "7 600+" was false on four of those five days. `floorsAreSupportedBy` in the
+ * claim module now enforces that, and the guard test pins it.
  *
  * TOP PROFESSIONS: top profession families by active-ad count among ads with
  * a canonical `profession_slug` (post-cleanup v2 categorization; 18,192 of
- * 43,781 active ads carried a canonical tag at measurement time, ~41.6%).
+ * 43,781 active ads carried a canonical tag at the 2026-08-17 measurement,
+ * ~41.6%). Re-derived on the browsable basis 2026-08-18 the ORDER is
+ * unchanged, so the ranking below still holds.
  * Because coverage is partial, the block shows the RANKING ONLY — no absolute
  * counts — and the visible note says some listings are not yet grouped by
  * profession. Measured order (ads): caregiver 4,415 · teacher 1,643 ·
