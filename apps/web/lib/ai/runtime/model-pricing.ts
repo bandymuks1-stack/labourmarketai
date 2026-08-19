@@ -75,3 +75,67 @@ export function computeActualCostUsd(
     1_000_000;
   return Math.round(cost * 1_000_000) / 1_000_000;
 }
+
+// ── Pre-run estimation (AI Router: cost ceilings must be enforceable) ────────
+
+/**
+ * Conservative token estimate from text.
+ *
+ * WHY A HEURISTIC IS THE HONEST CHOICE HERE. A real tokenizer is
+ * provider-specific: importing one would put a vendor's tokenizer in the
+ * routing layer and re-couple the architecture to a provider, which is exactly
+ * what the owner's multi-provider requirement forbids. A ceiling only needs to
+ * know the ORDER OF MAGNITUDE of a run before it happens, and it must never
+ * UNDER-estimate — an under-estimate lets a run through the budget it should
+ * have been blocked by.
+ *
+ * So: 4 characters per token, rounded UP, with a floor of 1 for non-empty
+ * text. Across the Latin and Cyrillic scripts this product ships, real
+ * tokenizers land at or below that ratio, so the estimate errs high — the safe
+ * direction for a budget.
+ *
+ * This is an ESTIMATE and is only ever compared against a ceiling. Billing and
+ * the `ai_runs` audit row use {@link computeActualCostUsd} on REAL usage
+ * reported by the provider; the two are never mixed.
+ *
+ * HONEST LIMIT: this is a conservative estimate, not a proof. Without a
+ * vendor tokenizer no pure function can guarantee an upper bound for every
+ * string, so a pathological input could still tokenise above it. The residual
+ * risk is bounded on the other side: `ai_runs` records the REAL cost of every
+ * run, so an estimate that proved too low is visible after the fact rather
+ * than invisible.
+ */
+export function estimateTokensFromText(text: string): number {
+  if (typeof text !== "string" || text.length === 0) return 0;
+  // Two views of the same string, and we take the LARGER token count:
+  //   chars/4  — the familiar ratio, right for ASCII-heavy Latin text;
+  //   bytes/3  — the safety net for token-dense input. UTF-8 spends 2 bytes on
+  //              Cyrillic/Greek, 3 on CJK and 4 on emoji, all of which tokenise
+  //              far denser than 4 chars per token. Judged on characters alone
+  //              an emoji-heavy or Cyrillic string UNDER-counts, and an
+  //              under-count is the one error a budget cannot absorb: it lets a
+  //              run through the ceiling that should have stopped it.
+  const utf8Bytes = new TextEncoder().encode(text).length;
+  return Math.max(1, Math.ceil(Math.max(text.length / 4, utf8Bytes / 3)));
+}
+
+/**
+ * Pre-run cost estimate in USD for a model and an expected token shape.
+ *
+ * Returns `null` when the model carries no OWNER-REVIEWED price — the same
+ * honesty rule as {@link computeActualCostUsd}: an unpriced model yields no
+ * number rather than a guessed one. The routing layer treats `null` as "this
+ * ceiling cannot be evaluated" and blocks, because a budget that cannot be
+ * checked is not a budget.
+ */
+export function estimateCostUsd(
+  modelIdOrAlias: string,
+  expectedInputTokens: number,
+  expectedOutputTokens: number,
+): number | null {
+  return computeActualCostUsd(
+    modelIdOrAlias,
+    expectedInputTokens,
+    expectedOutputTokens,
+  );
+}

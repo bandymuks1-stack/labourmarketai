@@ -27,7 +27,10 @@ import type { AiProviderState } from "./runtime/provider-chain";
 import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./runtime/config-core";
 import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
-import { computeActualCostUsd } from "./runtime/model-pricing";
+import {
+  computeActualCostUsd,
+  estimateTokensFromText,
+} from "./runtime/model-pricing";
 import {
   AI_RUN_OUTPUT_EXCERPT_MAX,
   TASK_POLICIES,
@@ -40,6 +43,7 @@ import {
   type AiRoutingAuditRecord,
   type AiRoutingRunOutcome,
   type AiTaskRouteContext,
+  type AiCostProvider,
   type TaskRouteDecision,
 } from "./runtime/task-routing";
 
@@ -147,6 +151,16 @@ export async function withLatencyTimeout(
 }
 
 /** Field NAMES sent to the model — categories only, never values (audit). */
+/** Serialise for SIZING only. Never throws — a circular or exotic value must
+ *  degrade the estimate, never the run. */
+function safeJsonForSizing(input: unknown): string {
+  try {
+    return JSON.stringify(input) ?? "";
+  } catch {
+    return String(input);
+  }
+}
+
 function dataCategoriesOf(input: unknown): readonly string[] {
   return input !== null && typeof input === "object" && !Array.isArray(input)
     ? Object.keys(input as Record<string, unknown>)
@@ -167,8 +181,33 @@ export async function runAiAgentCore<T = unknown>(
 
   // 2. Resolve the task route — call sites never pick a model/provider.
   const taskType = taskTypeForAgent(entry.agent);
+  /* Pre-run size, so the policy's cost ceiling is actually enforceable.
+   *
+   * The ceiling was unreachable before this: `estimatedCostUsd` was only ever
+   * read from `opts.route` and no call site set it, so every
+   * `maxEstimatedCostUsd` in TASK_POLICIES was decorative. We supply SIZE, not
+   * cost — the router prices it against the tier it actually resolves, because
+   * pricing needs the model and this layer must not know the model.
+   *
+   * Both halves of what goes on the wire are counted: the system prompt and
+   * the validated input. An explicit `opts.route.estimatedCostUsd` still wins.
+   */
+  const expectedInputTokens =
+    estimateTokensFromText(entry.system) +
+    estimateTokensFromText(safeJsonForSizing(parsedInput.data));
+  // The provider that will actually serve the run — the router prices its
+  // CONCRETE model, never the tier alias (an alias resolves to Anthropic's
+  // table and would quote the wrong vendor's rates). mock/disabled runs stay
+  // on anthropic so tests remain deterministic.
+  const costProvider: AiCostProvider =
+    cfg.state === "live" ? cfg.provider : "anthropic";
   const routeCtx: AiTaskRouteContext = {
     attempt: 1,
+    expectedInputTokens,
+    provider: costProvider,
+    // What the run is PERMITTED to emit, not merely what we expect — a
+    // provider allowed more output can spend past a ceiling priced for less.
+    maxOutputTokens: opts.maxOutputTokens ?? cfg.maxOutputTokens,
     ...opts.route,
     language: opts.route?.language ?? opts.language,
   };
@@ -189,7 +228,10 @@ export async function runAiAgentCore<T = unknown>(
   > = {
     humanReviewState: policy.humanReview ? "pending" : "not_required",
     dataCategoriesSent,
-    estimatedCostUsd: routeCtx.estimatedCostUsd ?? null,
+    // The estimate the router actually enforced. Reading it back off the
+    // decision keeps the audit truthful on the automatic-sizing path, where
+    // routeCtx carries only token size and no cost.
+    estimatedCostUsd: decision.estimatedCostUsd ?? routeCtx.estimatedCostUsd ?? null,
     promptVersion: entry.version,
     inputSource: opts.inputSource ?? null,
   };
@@ -206,6 +248,18 @@ export async function runAiAgentCore<T = unknown>(
       outputExcerpt: null,
       fallbackReason: null,
     });
+
+  if (decision.blocked === "cost_unpriced") {
+    // The model has no owner-reviewed price, so the ceiling cannot be
+    // evaluated. Honest block rather than unbounded spend — fixed by adding a
+    // reviewed price in runtime/model-pricing.ts, never by dropping the limit.
+    return {
+      status: "needs_review",
+      reason: "budget_exceeded",
+      detail: decision.reason,
+      routing: skippedAudit(decision),
+    };
+  }
 
   if (decision.blocked === "cost_ceiling") {
     return {
