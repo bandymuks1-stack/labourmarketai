@@ -16,15 +16,25 @@
  *
  * SCOPE, updated 2026-08-19 (second pass). The first pass opened this
  * projection but left the road out of it closed, and said so. That is now
- * fixed: `AiChainProviderId` is registry-driven, `adapterForChainId` maps by
- * WIRE PROTOCOL rather than vendor, and `observeProviderStates` takes an open
- * map, so a registered provider can be observed, ordered and dispatched.
+ * fixed: `AiChainProviderId` is registry-driven, `adapterForChainId` is a total
+ * lookup that fails closed, and `observeProviderStates` takes an open map, so a
+ * registered provider can be observed and ordered rather than rejected by a
+ * type.
  *
  * What still requires work outside the registry, stated so it is not
  * overclaimed again: a new provider needs a `AI_PROVIDER_PROFILES` entry (cost
  * class, locality, capabilities — provider-level data, not a type), an
- * observation wired from env, and — for a metered one — owner-reviewed prices
- * before it is selectable at all.
+ * observation wired from env, an ADAPTER BINDING in run-core, and — for a
+ * metered one — owner-reviewed prices before it is selectable at all.
+ *
+ * On that adapter binding: a first attempt dispatched by wire protocol, so
+ * every `openai-compatible` provider shared one adapter. That was wrong and was
+ * caught in review — each adapter hardcodes its own endpoint, key env and model
+ * map, so sharing one would have sent an xAI-selected payload to OpenAI. The
+ * registry's `transport` records protocol compatibility, which is real; it is
+ * not permission to reuse another vendor's credentials. Making the
+ * openai-compatible adapter take its base URL, key and model map PER PROVIDER
+ * is the change that would finally make a new entrant pure registry data.
  *
  * DERIVED SINCE 2026-08-19: the ids now come from `./model-registry.ts`,
  * which is the single place a (provider, model) fact is written. The values are

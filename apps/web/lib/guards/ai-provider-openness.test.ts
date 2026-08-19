@@ -5,6 +5,9 @@ import {
   MODEL_TRANSPORTS,
   transportForProvider,
 } from "@/lib/ai/runtime/model-registry";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { observeProviderStates } from "@/lib/ai/runtime/provider-health";
 import {
   AI_PROVIDER_PROFILES,
@@ -31,7 +34,7 @@ import { resolveTaskRoute } from "@/lib/ai/runtime/task-routing";
  *     crashed at `.complete()`; "no adapter" and "the adapter failed" must stay
  *     different sentences.
  */
-describe("transport, not vendor, decides the adapter", () => {
+describe("transport records protocol, the binding decides the adapter", () => {
   it("every registry entry declares a known wire protocol", () => {
     for (const e of MODEL_REGISTRY) {
       expect(MODEL_TRANSPORTS, `${e.provider}/${e.model}`).toContain(
@@ -40,12 +43,38 @@ describe("transport, not vendor, decides the adapter", () => {
     }
   });
 
-  it("the OpenAI protocol family shares one adapter", () => {
-    // The property that makes a new entrant cheap: Qwen, xAI and OpenAI all
-    // speak the same protocol, so none of them needs its own adapter.
+  it("records protocol compatibility — which is NOT permission to share an adapter", () => {
     expect(transportForProvider("openai")).toBe("openai-compatible");
     expect(transportForProvider("xai")).toBe("openai-compatible");
     expect(transportForProvider("qwen")).toBe("openai-compatible");
+  });
+
+  it("a shared protocol never means a shared endpoint or key", () => {
+    // The mistake this pins, because it was made and caught in review: an
+    // earlier version dispatched by transport, so every openai-compatible
+    // provider got `openaiCompletionProvider` — which hardcodes
+    // api.openai.com and OPENAI_API_KEY. An xAI-selected payload would have
+    // gone to OpenAI. Same protocol, different vendor, different credential.
+    const openai = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "providers", "openai.ts"),
+      "utf8",
+    );
+    const xai = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "providers", "xai.ts"),
+      "utf8",
+    );
+    expect(openai).toContain("api.openai.com");
+    expect(openai).toContain("OPENAI_API_KEY");
+    expect(xai).toContain("api.x.ai");
+    expect(xai).toContain("XAI_API_KEY");
+    // Each provider therefore needs its OWN binding in run-core.
+    const core = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
+    );
+    expect(core).toContain("ADAPTER_BY_PROVIDER");
+    expect(core).toContain("xai: xaiCompletionProvider");
+    expect(core).toContain("openai: openaiCompletionProvider");
   });
 
   it("a vendor with its own protocol keeps its own adapter", () => {
@@ -67,17 +96,15 @@ describe("an unknown provider fails closed, never crashes", () => {
       "@/lib/ai/runtime/run-core"
     );
     expect(typeof dispatchAiCompletion).toBe("function");
-    const src = await import("node:fs").then((fs) =>
-      fs.readFileSync(
-        new URL("../ai/runtime/run-core.ts", import.meta.url),
-        "utf8",
-      ),
+    const src = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
     );
     // The adapter lookup is total and its null case is handled at the call
     // site — the two halves that stop an opened union from crashing.
     expect(src).toContain("AiCompletionProvider | null");
     expect(src).toContain("adapter === null");
-    expect(src).toContain("no adapter for provider");
+    expect(src).toContain("no adapter bound for provider");
   });
 
   it("a provider with no profile is never ordered as a candidate", () => {
@@ -93,13 +120,36 @@ describe("an unknown provider fails closed, never crashes", () => {
     expect(outcome.kind).toBe("unavailable");
   });
 
-  it("every profiled provider is one the runtime can actually reach", () => {
-    // Guards the reverse mistake: a profile for something with no transport
-    // and no local handling would be orderable but undispatchable.
+  it("every profiled provider has an adapter binding", () => {
+    // Guards the reverse mistake: a profile for something with no binding
+    // would be orderable but undispatchable.
+    const core = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
+    );
+    const bindings = core.slice(
+      core.indexOf("ADAPTER_BY_PROVIDER"),
+      core.indexOf("function adapterForChainId"),
+    );
     for (const p of AI_PROVIDER_PROFILES) {
-      const reachable = p.id === "local" || transportForProvider(p.id) !== null;
-      expect(reachable, `${p.id} has a profile but no way to run`).toBe(true);
+      expect(bindings, `${p.id} has a profile but no adapter binding`).toContain(
+        `${p.id}:`,
+      );
     }
+  });
+
+  it("a registered provider with no binding is refused, not misrouted", () => {
+    // Qwen's honest end state today: in the registry, priced nowhere, bound to
+    // no adapter. It must get a refusal rather than another vendor's endpoint.
+    const core = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
+    );
+    const bindings = core.slice(
+      core.indexOf("ADAPTER_BY_PROVIDER"),
+      core.indexOf("function adapterForChainId"),
+    );
+    expect(bindings).not.toContain("qwen");
   });
 });
 

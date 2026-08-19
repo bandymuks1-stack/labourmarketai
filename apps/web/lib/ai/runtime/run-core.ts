@@ -40,7 +40,6 @@ import { disabledCompletionProvider } from "./providers/disabled";
 import { mockCompletionProvider } from "./providers/mock";
 import { anthropicCompletionProvider } from "./providers/anthropic";
 import { xaiCompletionProvider } from "./providers/xai";
-import { transportForProvider } from "./model-registry";
 import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
 import { deeplCompletionProvider } from "./providers/deepl";
@@ -84,35 +83,42 @@ export function selectCompletionProvider(
 /**
  * Adapter for a chain provider, or null when nothing can serve it.
  *
- * TRANSPORT, NOT VENDOR. This used to be an exhaustive switch over a closed
- * five-value union, which is why a newly registered provider could be priced
- * and ordered yet have no way to run. It now asks the registry which WIRE
- * PROTOCOL the provider speaks and returns the adapter for that protocol, so
- * every OpenAI-compatible entrant — Qwen via Model Studio, and the rest —
- * reaches an existing adapter as registry data rather than a new case here.
+ * AN EXPLICIT PER-PROVIDER BINDING, and it has to be. An earlier version of
+ * this dispatched by WIRE PROTOCOL — every `openai-compatible` provider
+ * returning `openaiCompletionProvider` — on the reasoning that one protocol
+ * needs one implementation. That was wrong in a way worth recording: each
+ * adapter hardcodes its OWN endpoint, key env var, enable flag and model map
+ * (`api.openai.com` + `OPENAI_API_KEY` vs `api.x.ai` + `XAI_API_KEY`). Sharing
+ * the adapter would have sent an xAI-selected payload to OpenAI's endpoint
+ * under OpenAI's key — a different vendor than the chain chose — and would have
+ * reported an xAI-only deployment as disabled.
  *
- * TOTAL, AND FAILS CLOSED. Returning null rather than falling through to
- * `undefined` is the whole point: with the union opened, an unrecognised id
- * would otherwise have crashed at `.complete()`. The caller degrades honestly
- * instead — "no adapter" and "the adapter failed" stay different sentences.
+ * `transport` on the registry entry still records protocol compatibility, which
+ * is true and useful: it says a future parameterised adapter COULD serve that
+ * provider. It does not by itself say credentials exist for it. Until the
+ * openai-compatible adapter takes its base URL, key and model map per provider,
+ * a newly registered provider needs a binding here before it can run — and
+ * gets an honest refusal, not another vendor's endpoint, until it has one.
+ *
+ * TOTAL, AND FAILS CLOSED. A lookup rather than an exhaustive switch, because
+ * `AiChainProviderId` is now open: an unrecognised id must degrade honestly,
+ * never fall through to `undefined` and crash at `.complete()`. "No adapter"
+ * and "the adapter failed" stay different sentences.
  */
-function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
+const ADAPTER_BY_PROVIDER: Readonly<Record<string, AiCompletionProvider>> = {
   // `local` is not registry-bound: it serves whatever model the operator
   // pulled, so it has no fixed model id and is matched by provider directly.
-  if (id === "local") return localCompletionProvider;
-  switch (transportForProvider(id)) {
-    case "anthropic":
-      return anthropicCompletionProvider;
-    case "gemini":
-      return geminiCompletionProvider;
-    case "openai-compatible":
-      // One adapter for the whole OpenAI-protocol family. Which vendor it
-      // reaches is a base-URL/env concern owned by the adapter, not a branch.
-      return openaiCompletionProvider;
-    default:
-      return null;
-  }
+  local: localCompletionProvider,
+  anthropic: anthropicCompletionProvider,
+  openai: openaiCompletionProvider,
+  gemini: geminiCompletionProvider,
+  xai: xaiCompletionProvider,
+};
+
+function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
+  return ADAPTER_BY_PROVIDER[id] ?? null;
 }
+
 
 /** What the chain path needs that the legacy path does not. */
 export interface ChainDispatchContext {
@@ -215,7 +221,7 @@ export async function dispatchAiCompletion(
       last = {
         status: "error",
         code: "unsupported",
-        message: `no adapter for provider "${candidate.id}" — its transport is unknown to this runtime`,
+        message: `no adapter bound for provider "${candidate.id}" — it needs an endpoint/key binding before it can run`,
         provider: candidate.id,
       };
       continue;
