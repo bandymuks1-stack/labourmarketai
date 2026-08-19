@@ -3551,7 +3551,7 @@
       "error_country_required": "Bitte wählen Sie ein Land.",
       "profession_label": "Welche Arbeit machen Sie?",
       "profession_placeholder": "Arbeit auswählen",
-      "profession_hint": "Danach werden passende Stellen gesucht. Später im Profil änderbar.",
+      "profession_hint": "Damit suchen wir Arbeit wie Ihre. Als Nächstes geben Sie Ihre Fähigkeiten an — das Matching braucht beides. Beides ist später änderbar.",
       "error_profession_required": "Bitte wählen Sie Ihre Arbeit aus.",
       "back": "Zurück",
       "saving": "Wird gespeichert...",
