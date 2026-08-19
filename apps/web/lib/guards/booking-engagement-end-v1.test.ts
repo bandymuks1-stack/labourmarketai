@@ -972,6 +972,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // Added in the same commit as the migration, not spread from this
       // branch's approval.
       "20260818160000_public_vacancy_sitemap_v1.sql",
+      // 2026-08-19: worker saved PUBLIC VACANCIES v1 (20260819094500) carries
+      // the marker because it is RED-class — it drops a NOT NULL on
+      // worker_saved_opportunities.request_id and adds two SECURITY DEFINER
+      // functions. The annotation lets CI classify it; it does NOT approve an
+      // apply. The migration ships UNAPPLIED behind needs-human-gate, exactly
+      // as the v1 table's own migration did.
+      "20260819094500_worker_saved_public_vacancies_v1.sql",
     ]);
   });
 
