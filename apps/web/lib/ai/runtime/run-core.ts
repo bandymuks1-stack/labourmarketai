@@ -39,9 +39,9 @@ import type {
 import { disabledCompletionProvider } from "./providers/disabled";
 import { mockCompletionProvider } from "./providers/mock";
 import { anthropicCompletionProvider } from "./providers/anthropic";
+import { xaiCompletionProvider } from "./providers/xai";
 import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
-import { xaiCompletionProvider } from "./providers/xai";
 import { deeplCompletionProvider } from "./providers/deepl";
 import { localCompletionProvider } from "./providers/local";
 import {
@@ -80,20 +80,45 @@ export function selectCompletionProvider(
 
 /** Chain id → adapter. Separate from `selectCompletionProvider` because the
  *  chain addresses a provider directly, not through `cfg.provider`. */
-function adapterForChainId(id: AiChainProviderId): AiCompletionProvider {
-  switch (id) {
-    case "local":
-      return localCompletionProvider;
-    case "anthropic":
-      return anthropicCompletionProvider;
-    case "openai":
-      return openaiCompletionProvider;
-    case "gemini":
-      return geminiCompletionProvider;
-    case "xai":
-      return xaiCompletionProvider;
-  }
+/**
+ * Adapter for a chain provider, or null when nothing can serve it.
+ *
+ * AN EXPLICIT PER-PROVIDER BINDING, and it has to be. An earlier version of
+ * this dispatched by WIRE PROTOCOL — every `openai-compatible` provider
+ * returning `openaiCompletionProvider` — on the reasoning that one protocol
+ * needs one implementation. That was wrong in a way worth recording: each
+ * adapter hardcodes its OWN endpoint, key env var, enable flag and model map
+ * (`api.openai.com` + `OPENAI_API_KEY` vs `api.x.ai` + `XAI_API_KEY`). Sharing
+ * the adapter would have sent an xAI-selected payload to OpenAI's endpoint
+ * under OpenAI's key — a different vendor than the chain chose — and would have
+ * reported an xAI-only deployment as disabled.
+ *
+ * `transport` on the registry entry still records protocol compatibility, which
+ * is true and useful: it says a future parameterised adapter COULD serve that
+ * provider. It does not by itself say credentials exist for it. Until the
+ * openai-compatible adapter takes its base URL, key and model map per provider,
+ * a newly registered provider needs a binding here before it can run — and
+ * gets an honest refusal, not another vendor's endpoint, until it has one.
+ *
+ * TOTAL, AND FAILS CLOSED. A lookup rather than an exhaustive switch, because
+ * `AiChainProviderId` is now open: an unrecognised id must degrade honestly,
+ * never fall through to `undefined` and crash at `.complete()`. "No adapter"
+ * and "the adapter failed" stay different sentences.
+ */
+const ADAPTER_BY_PROVIDER: Readonly<Record<string, AiCompletionProvider>> = {
+  // `local` is not registry-bound: it serves whatever model the operator
+  // pulled, so it has no fixed model id and is matched by provider directly.
+  local: localCompletionProvider,
+  anthropic: anthropicCompletionProvider,
+  openai: openaiCompletionProvider,
+  gemini: geminiCompletionProvider,
+  xai: xaiCompletionProvider,
+};
+
+function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
+  return ADAPTER_BY_PROVIDER[id] ?? null;
 }
+
 
 /** What the chain path needs that the legacy path does not. */
 export interface ChainDispatchContext {
@@ -189,7 +214,19 @@ export async function dispatchAiCompletion(
   };
 
   for (const candidate of candidates) {
-    const result = await adapterForChainId(candidate.id).complete(request, cfg);
+    const adapter = adapterForChainId(candidate.id);
+    if (adapter === null) {
+      // Registered and ordered, but nothing speaks its protocol. Skip it with
+      // an honest reason rather than crashing — the next candidate may serve.
+      last = {
+        status: "error",
+        code: "unsupported",
+        message: `no adapter bound for provider "${candidate.id}" — it needs an endpoint/key binding before it can run`,
+        provider: candidate.id,
+      };
+      continue;
+    }
+    const result = await adapter.complete(request, cfg);
     if (result.status === "ok") return result;
 
     // Attribute the failure to the provider that produced it, so an audit
