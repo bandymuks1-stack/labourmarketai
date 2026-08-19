@@ -45,7 +45,7 @@ Each of the 12 was traced to its declaring migration and classified.
 | `worker_external_profiles` | `20260713210000_multi_source_talent_v1.sql` | **GATED BY DESIGN** |
 | `talent_source_records` | same | **GATED BY DESIGN** |
 | `identity_resolution_events` | same | **GATED BY DESIGN** |
-| `ai_runs` | `20260714150000_ai_runs_audit_v1.sql` | **GATED BY DESIGN** |
+| `ai_runs` | `20260714150000_ai_runs_audit_v1.sql` | **APPLIED 2026-08-03** (prod ledger `20260803061937`) — was *GATED BY DESIGN* when this audit was written; corrected 2026-08-19 after re-verifying against production. The other rows in this table are unchanged and still correct. |
 | `worker_opportunity_seen` | `20260714170000_worker_opportunity_seen_v1.sql` | **GATED BY DESIGN** |
 | `journal_profession_templates` | `20260714180000_journal_profession_templates_v1.sql` | **GATED BY DESIGN** |
 | `dashboard_preferences` | `20260714211000_dashboard_preferences_v1.sql` | **GATED BY DESIGN** |
