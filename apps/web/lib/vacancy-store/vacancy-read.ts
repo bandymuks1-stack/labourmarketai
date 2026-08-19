@@ -30,6 +30,7 @@ import "server-only";
  * the same code starts returning real ads with no further deploy.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { PublicVacancyPreview } from "./public-vacancy-preview";
 import type {
   PublicVacancyV1,
   VacancyEmploymentForm,
@@ -232,6 +233,97 @@ export async function getPublicVacancyById(
   return {
     status: "ok",
     vacancy: fromPublicVacancyRow(data as Record<string, unknown>),
+  };
+}
+
+/**
+ * The signed-in worker's OWN saved ads, by id, projected down to the PREVIEW
+ * fields.
+ *
+ * WHY THIS LIVES ON THE MEMBER PATH. Only a signed-in worker has a saved list,
+ * and a member is already allowed the whole ad (`select *` above), so returning
+ * a SUBSET of it is strictly narrower than what this module already grants —
+ * never wider. The anonymous path stays where it is: `public-vacancy-preview.ts`
+ * reaches the same rows only through the SECURITY DEFINER functions, because
+ * `anon` holds no grant on this table at all.
+ *
+ * The projection is spelled out column by column so the saved list renders the
+ * SAME card as the public board — no employer, no location, no description, no
+ * application url — rather than quietly becoming a second, richer surface.
+ *
+ * LIVENESS: the BROWSABLE predicate, identical to `getPublicVacancyById` and to
+ * the save RPC's own check. A bookmark whose ad has since expired or been
+ * withdrawn simply does not come back — the list never shows a job the board
+ * itself refuses to show.
+ */
+export async function listPublicVacancyPreviewsByIds(
+  client: VacancyDbClient,
+  ids: readonly string[],
+  nowIso: string,
+): Promise<
+  | { readonly status: "ok"; readonly previews: readonly PublicVacancyPreview[] }
+  | { readonly status: "not_provisioned" }
+> {
+  const wanted = [...new Set(ids)].slice(0, PREVIEW_BY_ID_MAX);
+  if (wanted.length === 0) return { status: "ok", previews: [] };
+
+  const { data, error } = await client
+    .from(VACANCY_TABLE)
+    .select(PREVIEW_COLUMNS)
+    .in("id", wanted)
+    .eq("is_active", true)
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+    .order("published_at", { ascending: false });
+
+  if (error) {
+    if (error.code === UNDEFINED_TABLE) return { status: "not_provisioned" };
+    // A malformed uuid in the saved set is bad data, not a server fault.
+    if (error.code === "22P02") return { status: "ok", previews: [] };
+    throw new Error(`vacancy_previews_by_ids_failed:${error.code ?? "unknown"}`);
+  }
+
+  const rows = (data ?? []) as readonly Record<string, unknown>[];
+  return { status: "ok", previews: rows.map(toPreviewRow) };
+}
+
+/** Hard cap: the save RPC allows 200 bookmarks across both sources, so this
+ *  can never be asked for more than the whole list. */
+const PREVIEW_BY_ID_MAX = 200;
+
+/** EXACTLY the columns `search_public_vacancy_previews_v1` returns. */
+const PREVIEW_COLUMNS =
+  "id,title_raw,profession_slug,occupation_raw,employment_form,working_time,positions,compensation_currency,compensation_min,compensation_max,source_language,attribution_code,published_at";
+
+function toPreviewRow(row: Record<string, unknown>): PublicVacancyPreview {
+  const str = (k: string): string | null =>
+    typeof row[k] === "string" ? (row[k] as string) : null;
+  const num = (k: string): number | null => {
+    const v = row[k];
+    if (v === null || v === undefined) return null;
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const compensationMin = num("compensation_min");
+  const compensationMax = num("compensation_max");
+  return {
+    id: String(row.id ?? ""),
+    title: str("title_raw") ?? "",
+    professionSlug: str("profession_slug"),
+    occupation: str("occupation_raw"),
+    employmentForm: str("employment_form"),
+    workingTime: str("working_time"),
+    positions: num("positions"),
+    // Same suppression rule as the SQL function: a currency with no amount is
+    // noise, so both are withheld together.
+    compensationCurrency:
+      compensationMin !== null || compensationMax !== null
+        ? str("compensation_currency")
+        : null,
+    compensationMin,
+    compensationMax,
+    sourceLanguage: str("source_language"),
+    attributionCode: str("attribution_code"),
+    publishedAt: str("published_at"),
   };
 }
 

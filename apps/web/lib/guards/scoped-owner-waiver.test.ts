@@ -332,18 +332,24 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     const jobs = SCOPED_OWNER_WAIVERS[1];
     expect(jobs.id).toBe("public-acquisition-route-jobs");
     expect(jobs.axioms).toEqual(["A-01"]);
-    // [1184, 1193] — and this pin is WHY the second number had to be added
+    // [1184, 1193, 1203] — and this pin is WHY each number had to be added
     // deliberately rather than drifting in. #1184 opened the public surface;
     // #1193 completes the funnel the same owner ruling mandated (§6 "REGISTER /
     // LOGIN → RETURN TO SAME JOB", restated in the 2026-08-18 priority override
     // as "public vacancy → registration/login → exact same vacancy →
     // authenticated safe unlock"), because the page was auth-blind and returned
     // a freshly registered visitor to the identical "create an account" card.
+    // #1203 adds the PRIVATE BOOKMARK (Save / Saved / Unsave plus the saved
+    // list that makes a bookmark retrievable) under the owner's 2026-08-19
+    // approval, quoted verbatim in the record: "Įtrauk tik #1203 į jau
+    // egzistuojančią /jobs waiver taisyklę, nekeisk pačių product-gate
+    // kriterijų ir jų nesilpnink."
     //
-    // Widening the PR binding is the ONLY change: same axiom, same six codes,
-    // same three surfaces, same expiry, same reason. #1193's finding set is
-    // byte-identical to `expectedFindings`, so the subset rule still bites.
-    expect(jobs.pullRequests).toEqual([1184, 1193]);
+    // Widening the PR binding is the ONLY change each time: same axiom, same
+    // six codes, same three surfaces, same expiry, same reason. Each PR's
+    // finding set is byte-identical to `expectedFindings`, so the subset rule
+    // still bites.
+    expect(jobs.pullRequests).toEqual([1184, 1193, 1203]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

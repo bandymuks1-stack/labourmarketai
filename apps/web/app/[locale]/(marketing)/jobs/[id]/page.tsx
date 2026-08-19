@@ -7,9 +7,12 @@ import { resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { getPublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
-import { cookies } from "next/headers";
+import { hasSessionCookie } from "@/lib/supabase/session-cookie";
 import { createClient } from "@/lib/supabase/server";
-import { isPublicVacancySaved } from "@/lib/opportunities/saved-opportunities";
+import {
+  isPublicVacancySaved,
+  resolveOwnWorkerId,
+} from "@/lib/opportunities/saved-opportunities";
 import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
 
@@ -274,30 +277,6 @@ const NEXT_PROFILE: L = {
   de: "Profil vervollständigen",
 };
 
-/**
- * Does this request carry a Supabase session cookie at all?
- *
- * `supabase.auth.getUser()` VALIDATES the token against the auth server, which
- * is a network round trip. This page is the indexable unit of a 39,241-page
- * public surface, so calling it unconditionally would put one Supabase auth
- * request behind every crawler hit and every anonymous visit — for a caller who
- * provably has no session.
- *
- * `middleware.ts` already refuses to do that (`hasSupabaseAuthCookie`, "so
- * anonymous public/marketing traffic stays fast and never hits Supabase"); this
- * is the same rule applied on the server-component side, matching the cookie
- * shape `@supabase/ssr` writes (`sb-<ref>-auth-token`, possibly chunked).
- *
- * It is a FAST PATH, never an authorisation decision: a forged cookie buys
- * nothing, because the unlock is decided by `getUser()` and then by RLS.
- */
-async function hasSessionCookie(): Promise<boolean> {
-  const store = await cookies();
-  return store
-    .getAll()
-    .some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
-}
-
 function joinLocation(
   city: string | null,
   region: string | null,
@@ -341,12 +320,16 @@ export default async function JobDetailPage({
     : null;
 
   // Saved state for the signed-in worker, read through the CALLER's own client
-  // so RLS decides visibility. `available:false` (table/RPC missing, or any
-  // read error) renders no control at all — honest invisibility, never a dead
-  // button. Anonymous visitors never reach this.
-  const savedState = member
-    ? await isPublicVacancySaved(supabase, id)
-    : { saved: false, available: false };
+  // AND filtered to their own worker row. RLS alone is not enough here: the
+  // select policy also admits `is_admin()`, so a vacancy-only lookup would show
+  // an admin another worker's private bookmark. `available:false` (no worker
+  // profile, table/RPC missing, or any read error) renders no control at all —
+  // honest invisibility, never a dead button. Anonymous visitors never reach it.
+  const workerId = user ? await resolveOwnWorkerId(supabase, user.id) : null;
+  const savedState =
+    member && workerId
+      ? await isPublicVacancySaved(supabase, id, workerId)
+      : { saved: false, available: false };
 
   const next = encodeURIComponent(`/${active}/jobs/${id}`);
   const published = formatUtcDate(preview.publishedAt, active);

@@ -178,17 +178,52 @@ export async function listSavedPublicVacancyIds(
   }
 }
 
-/** Is THIS vacancy bookmarked by the signed-in worker? Read through the
- *  caller's own client, so RLS — not this function — decides visibility. */
+/** The caller's OWN worker row id, read through their own client. `null` when
+ *  the account has no worker profile — which is also what the write RPCs say
+ *  (P0002), so the toggle simply never renders for a non-worker. */
+export async function resolveOwnWorkerId(
+  supabase: SupabaseClient,
+  profileId: string,
+): Promise<string | null> {
+  if (!profileId) return null;
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("workers")
+      .select("id")
+      .eq("profile_id", profileId)
+      .maybeSingle();
+    if (error) return null;
+    return (data?.id as string | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Is THIS vacancy bookmarked by THIS worker?
+ *
+ * The worker_id filter is NOT redundant with RLS, and removing it would be a
+ * disclosure. `worker_saved_opportunities_select` reads
+ * `... where w.profile_id = auth.uid() ... OR public.is_admin()`, so an ADMIN
+ * session sees every worker's rows. A vacancy-only filter would therefore tell
+ * an admin who never saved anything that the ad is "Saved" — reading another
+ * worker's private bookmark out of the table and rendering it — while the
+ * unsave RPC would delete only the admin's own (non-existent) row, leaving a
+ * control that lies in both directions. A private bookmark is private from
+ * EVERY other session, so the query names the owner rather than leaning on the
+ * policy alone.
+ */
 export async function isPublicVacancySaved(
   supabase: SupabaseClient,
   vacancyId: string,
+  workerId: string,
 ): Promise<{ saved: boolean; available: boolean }> {
-  if (!vacancyId) return { saved: false, available: false };
+  if (!vacancyId || !workerId) return { saved: false, available: false };
   try {
     const { data, error } = await asAny(supabase)
       .from("worker_saved_opportunities")
       .select("id")
+      .eq("worker_id", workerId)
       .eq("public_vacancy_id", vacancyId)
       .limit(1);
     if (error) return { saved: false, available: false };

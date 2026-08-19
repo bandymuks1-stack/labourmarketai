@@ -27,6 +27,8 @@ const PAGE = join(web, "app", "[locale]", "(marketing)", "jobs", "[id]", "page.t
 const ACTIONS = join(web, "app", "[locale]", "(marketing)", "jobs", "[id]", "actions.ts");
 const BUTTON = join(web, "components", "marketing", "save-vacancy-button.tsx");
 const LIB = join(web, "lib", "opportunities", "saved-opportunities.ts");
+const BOARD = join(web, "app", "[locale]", "(marketing)", "jobs", "page.tsx");
+const VACANCY_READ = join(web, "lib", "vacancy-store", "vacancy-read.ts");
 
 const read = (p: string) => readFileSync(p, "utf8");
 
@@ -118,10 +120,80 @@ describe("the save control cannot become an application", () => {
 
   it("the control is not rendered for an anonymous visitor", () => {
     const page = read(PAGE);
-    // It hangs off `savedState`, which is only populated when `member` exists,
-    // and `member` requires a validated session.
+    // It hangs off `savedState`, which is only populated when `member` AND the
+    // caller's own worker row exist; `member` requires a validated session.
     expect(page).toContain("savedState.available && (");
-    expect(page).toContain("member\n    ? await isPublicVacancySaved");
+    expect(page).toContain("member && workerId");
+    expect(page).toContain("await isPublicVacancySaved(supabase, id, workerId)");
+  });
+
+  it("every bookmark read names the OWNER, not just the vacancy", () => {
+    // NOT redundant with RLS, and this is the exact hole that was shipped and
+    // then caught in review. `worker_saved_opportunities_select` reads
+    //   ... where w.profile_id = auth.uid() ... OR public.is_admin()
+    // so an ADMIN session sees EVERY worker's rows. A vacancy-only lookup
+    // therefore reads another worker's private bookmark and renders it as the
+    // admin's own "Saved" — disclosure of exactly the thing the owner ruled can
+    // never be disclosed — while Unsave would delete a row that does not exist.
+    // So both readers must filter on worker_id.
+    const lib = read(LIB);
+    const vacancyHalf = lib.slice(lib.indexOf("PUBLIC VACANCY bookmarks"));
+    const reads = vacancyHalf.split('.from("worker_saved_opportunities")').slice(1);
+    expect(reads.length).toBeGreaterThanOrEqual(2);
+    for (const [i, tail] of reads.entries()) {
+      // The query ends at the statement terminator; look no further, so a
+      // filter belonging to the NEXT query can never satisfy this one.
+      const q = tail.slice(0, tail.indexOf(";"));
+      expect(
+        q.includes('.eq("worker_id", workerId)'),
+        `bookmark read #${i + 1} does not filter by worker_id: ${q}`,
+      ).toBe(true);
+    }
+  });
+
+  it("the saved list is reachable — a bookmark you cannot get back to is none", () => {
+    // Save without retrieval is a half-feature: the worker could only reach a
+    // bookmark by re-finding the exact URL. The return path is the SAME board,
+    // not a second surface.
+    const board = read(BOARD);
+    expect(board).toContain("listSavedPublicVacancyIds");
+    expect(board).toContain("listPublicVacancyPreviewsByIds");
+    // Member-only, and invisible when the read did not succeed.
+    expect(board).toContain("mySaved.available && (");
+    // No anonymous cost: the whole block is behind the session-cookie fast path.
+    expect(board).toContain("const signedIn = await hasSessionCookie();");
+  });
+
+  it("the saved list renders the anonymous projection, never a richer one", () => {
+    // The saved view reads through the MEMBER path (a member may see the whole
+    // ad), so the projection is what keeps it the same card as the public
+    // board rather than a quietly richer surface. Employer identity, location,
+    // description and the application url are not selected at all.
+    const reader = read(VACANCY_READ);
+    const block = reader.slice(
+      reader.indexOf("const PREVIEW_COLUMNS ="),
+      reader.indexOf("function toPreviewRow("),
+    );
+    expect(block.length).toBeGreaterThan(50);
+    for (const forbidden of [
+      "employer",
+      "city",
+      "region",
+      "country",
+      "latitude",
+      "longitude",
+      "description_raw",
+      "application_url",
+    ]) {
+      expect(block.includes(forbidden), `saved projection leaks ${forbidden}`).toBe(
+        false,
+      );
+    }
+    // And it applies the same browsable predicate the save RPC itself uses, so
+    // an expired bookmark cannot resurface a job the board refuses to show.
+    const fn = reader.slice(reader.indexOf("export async function listPublicVacancyPreviewsByIds"));
+    expect(fn).toContain('.eq("is_active", true)');
+    expect(fn).toContain("expires_at.is.null,expires_at.gt.");
   });
 
   it("a failed write reverts the button instead of showing a false Saved", () => {

@@ -4,8 +4,18 @@ import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { searchPublicVacancyPreviews } from "@/lib/vacancy-store/public-vacancy-preview";
+import {
+  searchPublicVacancyPreviews,
+  type PublicVacancyPreview,
+} from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
+import { createClient } from "@/lib/supabase/server";
+import { hasSessionCookie } from "@/lib/supabase/session-cookie";
+import {
+  listSavedPublicVacancyIds,
+  resolveOwnWorkerId,
+} from "@/lib/opportunities/saved-opportunities";
+import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
 
 /**
  * THE PUBLIC JOB BOARD.
@@ -93,6 +103,49 @@ const NOT_PROVISIONED: L = {
   de: "Das öffentliche Stellenboard ist noch nicht aktiviert.",
 };
 
+const SAVED_TAB: L = {
+  en: "Saved",
+  lt: "Išsaugoti",
+  ru: "Сохранённые",
+  nl: "Bewaard",
+  de: "Gemerkt",
+};
+
+const ALL_TAB: L = {
+  en: "All jobs",
+  lt: "Visos darbo vietos",
+  ru: "Все вакансии",
+  nl: "Alle vacatures",
+  de: "Alle Stellen",
+};
+
+/** The saved list is a PRIVATE bookmark list: nobody but this worker ever sees
+ *  it, and saving tells no employer anything. Say so, so it is not read as an
+ *  application or an expression of interest. */
+const SAVED_NOTE: L = {
+  en: "Your private bookmarks. Only you can see this list — saving tells the employer nothing.",
+  lt: "Tavo privatūs žymekliai. Šį sąrašą matai tik tu — išsaugojimas darbdaviui nieko nepraneša.",
+  ru: "Ваши личные закладки. Этот список видите только вы — сохранение ничего не сообщает работодателю.",
+  nl: "Je privé-bladwijzers. Alleen jij ziet deze lijst — bewaren laat de werkgever niets weten.",
+  de: "Ihre privaten Lesezeichen. Nur Sie sehen diese Liste — das Merken teilt dem Arbeitgeber nichts mit.",
+};
+
+const SAVED_EMPTY: L = {
+  en: "You have not saved any job yet. Open a job and use Save to keep it here.",
+  lt: "Kol kas neišsaugojai nė vienos darbo vietos. Atidaryk skelbimą ir paspausk „Išsaugoti“.",
+  ru: "Вы ещё ничего не сохранили. Откройте вакансию и нажмите «Сохранить».",
+  nl: "Je hebt nog niets bewaard. Open een vacature en gebruik Bewaren.",
+  de: "Sie haben noch nichts gemerkt. Öffnen Sie eine Stelle und nutzen Sie Merken.",
+};
+
+const SAVED_BADGE: L = {
+  en: "Saved",
+  lt: "Išsaugota",
+  ru: "Сохранено",
+  nl: "Bewaard",
+  de: "Gemerkt",
+};
+
 const PREV: L = {
   en: "Previous",
   lt: "Ankstesnis",
@@ -114,7 +167,7 @@ export default async function JobsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; saved?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -123,8 +176,43 @@ export default async function JobsPage({
 
   const query = typeof sp.q === "string" ? sp.q.slice(0, 120) : "";
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
+  const wantsSaved = sp.saved === "1";
 
-  const result = await searchPublicVacancyPreviews({ query, page });
+  // ── THE RETURN PATH ────────────────────────────────────────────────────────
+  // A bookmark a worker cannot get back to is not a bookmark. Saving lives on
+  // /jobs/[id]; this is where the saved ads are READ back, on the same board,
+  // in the same card — one list, not a second product surface.
+  //
+  // The whole block is skipped for a caller with no session cookie, so the
+  // anonymous board (and every crawler hit) still costs exactly one query and
+  // never touches the auth server.
+  const signedIn = await hasSessionCookie();
+  const supabase = signedIn ? await createClient() : null;
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const workerId =
+    supabase && user ? await resolveOwnWorkerId(supabase, user.id) : null;
+  const mySaved =
+    supabase && workerId
+      ? await listSavedPublicVacancyIds(supabase, workerId)
+      : { vacancyIds: new Set<string>(), available: false };
+
+  // Saved view: the worker's own ids, resolved to previews through the member
+  // read path under their OWN client. Expired/withdrawn bookmarks drop out
+  // there, so this list can never show a job the board itself refuses to show.
+  let savedPreviews: readonly PublicVacancyPreview[] = [];
+  const showSaved = wantsSaved && mySaved.available;
+  if (showSaved && supabase) {
+    const r = await listPublicVacancyPreviewsByIds(
+      supabase,
+      [...mySaved.vacancyIds],
+      new Date().toISOString(),
+    );
+    if (r.status === "ok") savedPreviews = r.previews;
+  }
+
+  const result = showSaved
+    ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
+    : await searchPublicVacancyPreviews({ query, page });
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();
@@ -161,7 +249,60 @@ export default async function JobsPage({
         </button>
       </form>
 
-      {result.status === "not_provisioned" ? (
+      {/* The saved view exists only for a signed-in worker whose bookmark read
+          succeeded. Anonymous visitors and non-workers see no tab at all —
+          honest invisibility rather than a control that leads nowhere. */}
+      {mySaved.available && (
+        <nav className="mt-6 flex flex-wrap gap-2 text-sm">
+          <Link
+            href="/jobs"
+            aria-current={showSaved ? undefined : "page"}
+            className={
+              showSaved
+                ? "rounded-full border px-3 py-1 text-muted-foreground"
+                : "rounded-full border border-foreground px-3 py-1 font-medium"
+            }
+          >
+            {ALL_TAB[active]}
+          </Link>
+          <Link
+            href="/jobs?saved=1"
+            aria-current={showSaved ? "page" : undefined}
+            className={
+              showSaved
+                ? "rounded-full border border-foreground px-3 py-1 font-medium"
+                : "rounded-full border px-3 py-1 text-muted-foreground"
+            }
+          >
+            {SAVED_TAB[active]} ({mySaved.vacancyIds.size})
+          </Link>
+        </nav>
+      )}
+
+      {showSaved ? (
+        <>
+          <p className="mt-6 text-sm text-muted-foreground">
+            {SAVED_NOTE[active]}
+          </p>
+          {savedPreviews.length === 0 ? (
+            <p className="mt-8 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+              {SAVED_EMPTY[active]}
+            </p>
+          ) : (
+            <ul className="mt-6 space-y-3">
+              {savedPreviews.map((v) => (
+                <li key={v.id}>
+                  <PublicVacancyCard
+                    vacancy={v}
+                    locale={active}
+                    savedLabel={SAVED_BADGE[active]}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : result.status === "not_provisioned" ? (
         <p className="mt-10 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
           {NOT_PROVISIONED[active]}
         </p>
@@ -181,7 +322,15 @@ export default async function JobsPage({
             <ul className="mt-6 space-y-3">
               {result.vacancies.map((v) => (
                 <li key={v.id}>
-                  <PublicVacancyCard vacancy={v} locale={active} />
+                  <PublicVacancyCard
+                    vacancy={v}
+                    locale={active}
+                    savedLabel={
+                      mySaved.vacancyIds.has(v.id)
+                        ? SAVED_BADGE[active]
+                        : undefined
+                    }
+                  />
                 </li>
               ))}
             </ul>
