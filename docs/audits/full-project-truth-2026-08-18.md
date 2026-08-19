@@ -124,7 +124,12 @@
 > engagements, absences, workflows, documents and work tasks each had one; the
 > single event the marketplace exists for did not. A demand owner learned a
 > candidate existed only by opening `/dashboard/company/scouting` unprompted, and
-> the worker never learned the company had looked.
+> the worker learned the company had reviewed them only by returning to the
+> opportunities board and looking — `loadWorkerOpportunities` passes their own
+> signal status through and `WorkerInterestButton` already renders a distinct
+> `reviewed` state, so the visibility existed; what did not exist on either side
+> was anything that REACHES the person. The defect was the absence of a
+> proactive channel, not the absence of the information.
 >
 > The repo had already NAMED this gap and deferred it. `lib/notifications/spine-signals.ts`:
 > *"Deferred (no honest backing yet): contacted-conversation / interest-response
