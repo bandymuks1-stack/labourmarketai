@@ -109,6 +109,120 @@
 > pre-existing), and the go-live blockers in §Q that remain owner-gated.
 
 
+> ## ⚠️ CORRECTIONS ISSUED 2026-08-19, SECOND PASS (11:55 UTC) — READ BEFORE THE BODY
+>
+> Same rule as the two blocks above: corrected here rather than quietly edited
+> out, because the body is what a later session trusts. Every number is a
+> production read against `gorgitwvdzxbnaxhrsrw` taken **2026-08-19 between 10:56
+> and 11:55 UTC**, or a merged PR named by number.
+>
+> **C-10 — the matrix had no row for the defect that mattered most, and it was in
+> the data the whole time.** `demand_interest_signals` held **4 live rows**,
+> written **2026-07-05** by workers who read a company's demand and raised their
+> hand. `notification_events` held **0 rows and 0 lifetime inserts**, and there
+> was **no emitter for demand interest anywhere in the codebase** — bookings,
+> engagements, absences, workflows, documents and work tasks each had one; the
+> single event the marketplace exists for did not. A demand owner learned a
+> candidate existed only by opening `/dashboard/company/scouting` unprompted, and
+> the worker never learned the company had looked.
+>
+> The repo had already NAMED this gap and deferred it. `lib/notifications/spine-signals.ts`:
+> *"Deferred (no honest backing yet): contacted-conversation / interest-response
+> signals — no seen-model exists for interest signals, so a count could never
+> clear by visiting."* That reasoning is right about a derived COUNT and is
+> exactly what a durable row solves, because a stored event clears by being
+> marked read rather than by visiting. The deferred signal never needed a
+> seen-model; it needed the other channel.
+>
+> **CLOSED by #1206** (merged 2026-08-19 11:38 UTC). `demand_interest_expressed`
+> → the demand owner; `demand_interest_reviewed` → the worker. Recipients are
+> resolved from the signal's own rows and are exactly whom the signal's existing
+> RLS policy already admits, so nothing is disclosed that was not already
+> readable. Migration `20260819110000_notification_events_v5_demand_interest`
+> **APPLIED TO PRODUCTION 2026-08-19 11:37 UTC**, verified by reading both
+> constraint definitions back (all 17 prior event types and 8 prior entity types
+> intact). Rollback:
+> `supabase/rollbacks/20260819110000_notification_events_v5_demand_interest.down.sql`.
+>
+> Two things this deliberately does NOT do, both pinned by guards: `contacted`
+> emits nothing (that status is set only after a real conversation thread exists,
+> which already reaches the worker as a message), and shortlist emits nothing (an
+> employer-internal judgement including rejection is a product decision, not a gap
+> to close silently).
+>
+> **Status: the four existing signals remain unnotified.** Emitting for them would
+> be true — all four are still `interested`, all four demands still `submitted` —
+> but it is a DML write landing in two real people's notification bells about
+> something six weeks old. **OWNER DECISION**, deliberately not taken
+> autonomously. Note for whoever decides: **2 of the 4 are self-interest** (the
+> same person owns the demand and the worker row), so a backfill should cover the
+> other two only.
+>
+> **C-11 — §B's "Matching · IMPLEMENTED_NOT_PROVEN · never produced a row" is
+> still misleading, and C-02 above did not go far enough.** C-02 correctly said
+> `matches = 0` is by design. The stronger fact, checked today: `matches` and
+> `job_demands` have **no writer and no reader anywhere** — not in `apps/web`
+> (they appear only in the generated `lib/supabase/types.ts`), and not in any
+> database function (`pg_proc.prosrc` scanned for inserts into either: **zero
+> hits**). They are vestigial tables. The live engine is
+> `lib/market/match-v1.ts` → `matchWorkerToNeed`, called at read time by scouting,
+> the opportunities board and external vacancies — and it **has run in
+> production**: all four `demand_interest_signals` rows carry a stored
+> `match_snapshot` computed by it. Matching is PROVEN; the zero row count
+> describes two dead tables, not the feature. (C-02's file path is also wrong —
+> it is `lib/market/match-v1.ts`, not `lib/matching/`.)
+>
+> **C-12 — §G says the AI chain "has never served a request"; the sharper
+> statement is that it currently CANNOT, for two independent reasons.** First,
+> every provider adapter is env-gated (`AI_LOCAL_ENABLED`, `AI_DEEPL_ENABLED` +
+> `DEEPL_API_KEY`, and the cloud keys), so enabling any of them is an owner action
+> on secrets — RED class, not something an agent may do. Second, and independently
+> of any key: `TASK_SENSITIVITY` in `lib/ai/runtime/data-sensitivity.ts` classes
+> **no task as `PUBLIC`**, and under the egress gate added by #1200 an external
+> provider receives PUBLIC only. So even with a cloud key set, every one of the
+> ten task types would still be local-or-nothing. **What actually unblocks a first
+> production run** is therefore either (a) an owner-set local model endpoint, or
+> (b) a task genuinely classifiable as PUBLIC. A published external job ad is the
+> obvious candidate for (b) — it is already public at the source — and would also
+> address §A.5, since 100% of supply is Swedish in a product with no Swedish UI.
+> Neither is claimed as done here.
+>
+> **C-13 — the public board could only be searched in Swedish.** `/jobs` free-text
+> search matches `title_raw` / `description_raw`, i.e. the publisher's own words,
+> against a supply that is 100% Swedish — so a Lithuanian worker typing
+> *suvirintojas* got zero results while **252** ads classified `welder` sat in the
+> table. Every piece to fix it existed and was unused:
+> `search_public_vacancy_previews_v1` has taken `p_profession_slug` since it
+> shipped, `searchPublicVacancyPreviews` forwards it, **17,145** browsable rows
+> carry a derived slug, and all **49** professions are named in all five active
+> locales. The board never passed the argument. Also unused: `sourceLanguage` is
+> in the anonymous projection and no surface set `lang` on the publisher's text,
+> so a screen reader spoke Swedish with the reader's phonetics.
+>
+> **Authored in #1208 and PARKED — not merged.** `product-gate` blocks it because
+> the `/jobs` waiver `public-acquisition-route-jobs` lists PRs 1184, 1193 and
+> 1203, and adding a PR number to that record is an owner decision by its own
+> history. Evidence posted on the PR, produced by running the gate rather than
+> reasoning about it: the same head passes as PR 1203 and, as PR 1208, all 24
+> findings are rejected **solely** for `pr-not-covered` — the diff adds zero new
+> findings.
+>
+> **Standing consequence worth naming:** every future improvement to `/jobs`,
+> `/jobs/[id]` or the vacancy card hits this same gate and needs a fresh owner
+> line. The waiver's own `resolvedBy` says the real fix is teaching the gate that
+> a pre-auth public acquisition route is its own category — a constitution change,
+> and therefore also an owner decision.
+>
+> **C-14 — the public-vacancy bookmark still has no real user.**
+> `worker_saved_opportunities`: **0 live rows** (7 inserted, 5 deleted lifetime —
+> all verification traffic). The #1204 matrix row is right to say
+> IMPLEMENTED_NOT_PROVEN and it stays there.
+>
+> Everything else in the body and in the two blocks above was re-checked and
+> stands, including the payments verdict, the auth verdict and the §Q go-live
+> blockers.
+
+
 **Date:** 2026-08-18
 **Baseline audited:** `origin/main` @ `49734c63` (PR #1182)
 **Production DB:** Supabase `gorgitwvdzxbnaxhrsrw` (labourmarket.ai, eu-west-1, ACTIVE_HEALTHY)
