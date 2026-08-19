@@ -213,6 +213,27 @@
 > a pre-auth public acquisition route is its own category — a constitution change,
 > and therefore also an owner decision.
 >
+> **C-15 — a verification method used in this repo produces FALSE NEGATIVES on
+> column-level grants.** The #1203 ledger entry records, as a virtue, that
+> "GRANTS proven by `has_function_privilege`/`has_table_privilege`, not by
+> reading the diff". That is the right instinct and the wrong function for one
+> case. `has_table_privilege('authenticated', 'public.notification_events',
+> 'UPDATE')` returns **false** — while
+> `has_column_privilege('authenticated', 'public.notification_events',
+> 'read_at', 'UPDATE')` returns **true**. Both are correct: `notification_events`
+> was deliberately granted UPDATE on the `read_at` COLUMN only, so a crafted
+> request can move a read marker and nothing else.
+>
+> Read with the table-level function alone, the evidence says "mark-all-read
+> cannot work, `authenticated` has no UPDATE" — which is false, and the obvious
+> "fix" would be a RED grant migration that production does not need. This was
+> caught today only because the applied statement was pulled from
+> `supabase_migrations.schema_migrations.statements` and read directly. **When a
+> grant is column-scoped, `has_column_privilege` is the only honest check.**
+> `notification_events` is verified correct: `read_at` UPDATE true;
+> `event_type` and `recipient_profile_id` UPDATE **false**; INSERT false; SELECT
+> true; RLS on with own-rows-only SELECT and UPDATE policies.
+
 > **C-14 — the public-vacancy bookmark still has no real user.**
 > `worker_saved_opportunities`: **0 live rows** (7 inserted, 5 deleted lifetime —
 > all verification traffic). The #1204 matrix row is right to say
