@@ -41,6 +41,74 @@
 > the rolled-back #1182 E2E finding, and the stale `APPLIED_LEDGER`.
 
 
+> ## ⚠️ CORRECTIONS ISSUED 2026-08-19 (next day) — READ BEFORE THE BODY
+>
+> Eight PRs merged after the corrections above (#1196–#1203). They falsified five
+> more statements in this body. Same rule as the 2026-08-18 block: corrected here
+> rather than quietly edited out, because the body is what a later session trusts.
+> Every number below is DB_PROVEN — `count(*)` against `gorgitwvdzxbnaxhrsrw` on
+> **2026-08-19 10:36 UTC**, not an estimate and not carried forward from yesterday.
+>
+> **C-05 — every supply number in §I has moved, and one of them was never right.**
+> Re-measured today:
+>
+> | §I metric | Reported 2026-08-18 | Actual 2026-08-19 |
+> |---|---|---|
+> | Total vacancies | 44,113 | **46,396** |
+> | Active | 43,952 | **46,208** |
+> | Active **and unexpired** (browsable) | 38,142 | **39,743** |
+> | Distinct employers | 8,124 (all rows) | **7,765** (browsable rows) |
+> | Classified to a profession | 18,315 | **17,145** (browsable) |
+> | Newest published | 2026-08-18 | **2026-08-19 07:43 UTC** |
+>
+> The employer figure is not a drop — it is a different question. 8,124 counted
+> distinct names across EVERY row including expired ones; 7,765 counts them across
+> the rows a visitor can actually browse. Only the second number can back a public
+> claim, which is what PR #1196 established.
+>
+> **C-06 — §I's "blocking defect" is closed, and §A.2's version of it was already
+> withdrawn by C-01.** `vacancy-read.ts` now has three non-test importers:
+> `external-vacancies.ts` (the member board), `(marketing)/jobs/[id]/page.tsx` and
+> `(marketing)/jobs/page.tsx`. Anonymous access — the gap C-01 identified as the
+> real one — is served by the SECURITY DEFINER preview functions. The supply is no
+> longer "jobs that no worker and no search engine can see": it is publicly
+> browsable, indexable, and a signed-in worker can now keep one (#1202/#1203).
+>
+> **C-07 — the landing constant named in §I is superseded, and the old floors were
+> false.** `SWEDEN_COVERAGE_2026_08_17` → `SWEDEN_COVERAGE_2026_08_19`. §I is
+> right that the band renders a PINNED number rather than a live count (the values
+> are literal strings in the frozen landing locale files, by design). What §I could
+> not know is that the pinned floors were **wrong**: "41 000+ vacancies" and
+> "7 600+ employers" did not hold on four of the five measured days. PR #1196
+> re-based them on a five-day measured trough (37,105 browsable / 7,252 employers)
+> and shipped 35 000+ / 7 000+ across all eleven locales — a claim the supply
+> supports on its worst measured day, not its best.
+>
+> **C-08 — §G's "the router does not need more building" understated it; four
+> defects were found in the runtime it praises.** Fixed in #1197–#1200:
+> every task declared a cost ceiling and **none of them could fire** (the check ran
+> before tier resolution and priced a tier alias, not a concrete model — so a GPT
+> run was judged at Anthropic rates); dispatch was chosen by TRANSPORT, so an xAI
+> payload would have been sent to `api.openai.com` under `OPENAI_API_KEY`; and
+> there was no data-egress boundary at all. There is now a versioned model
+> registry (adding a provider is registry data, not new code — Qwen is registered
+> and `enabled: false` pending prices), a provider→adapter map, and a
+> default-deny egress gate: an external provider receives PUBLIC data only unless
+> an explicit grant exists, and `AI_EGRESS_GRANTS` is empty. §G's headline finding
+> stands unchanged: **0 runs, 0 cost events — the chain has still never served a
+> request.** Switching it on remains owner-gated (a provider key + `AI_PROVIDER_MODE`).
+>
+> **C-09 — this report's own §A/§N `ai_runs` claim was already false when written.**
+> Corrected in #1201 across ten places: `ai_runs` has been applied in production
+> since **2026-08-03**, not "unapplied". The table being EMPTY (C-08) and the table
+> being ABSENT are different facts, and only the first one is true.
+>
+> Everything else in the body was re-checked against production and stands —
+> including the payments verdict (still cannot take money), the auth verdict, the
+> `worker_absence_scheduling` advisor ERROR (still the only one, still
+> pre-existing), and the go-live blockers in §Q that remain owner-gated.
+
+
 **Date:** 2026-08-18
 **Baseline audited:** `origin/main` @ `49734c63` (PR #1182)
 **Production DB:** Supabase `gorgitwvdzxbnaxhrsrw` (labourmarket.ai, eu-west-1, ACTIVE_HEALTHY)
