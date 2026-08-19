@@ -37,11 +37,24 @@
 > `workflow_escalated`, `document_ack_assigned`, `document_ack_completed` and
 > `document_expiring`, which is precisely what those two files add.
 >
+> **THE ERROR RUNS IN ONLY ONE DIRECTION — checked, not assumed.** The inverse
+> and far more dangerous case is a row presenting a migration as applied when
+> production does not have it: code would then depend on schema that is not
+> there. Every row was tested for that too. **Zero** such rows. The eight the
+> first pass flagged (`open_markets_countries_draft_v1`, `company_locations_v1`,
+> `agency_clients_v1`, `multi_source_talent_v1`, `worker_opportunity_seen_v1`,
+> `journal_profession_templates_v1`, `dashboard_preferences_v1`,
+> `demand_interest_seen_v1`) turned out to be a limitation of the search, not of
+> the ledger: each says "HUMAN GATE: do NOT apply without explicit owner OK" or
+> "SUPERSEDED, MUST NOT BE APPLIED" — phrasings the first pattern did not count
+> as pending. All eight are correctly absent from production. So this ledger
+> under-reports what has shipped and never over-reports it.
+>
 > **What is NOT corrected here.** Each row's substantive content — what the
 > migration does, its rollback, its gate reasoning — was not re-audited and is
 > not endorsed by this note. Only the apply STATUS is corrected, and only for
-> the 26 named above. Every other row's status was checked by the same method
-> and is consistent with production.
+> the 26 named above. Every other row's status was checked by the same method,
+> in both directions, and is consistent with production.
 
 # Applied Migration Ledger
 

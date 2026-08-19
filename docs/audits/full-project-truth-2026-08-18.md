@@ -264,6 +264,11 @@
 > it instead of believing it. Every other ledger row's status was checked the
 > same way and is consistent with production.
 >
+> The inverse and more dangerous direction was checked too and is **clean**: no
+> ledger row presents a migration as applied that production does not have, so
+> no code can be depending on schema that is not there. This ledger under-reports
+> what has shipped and never over-reports it.
+>
 > Why this one matters more than a documentation tidy: a session trusting those
 > rows believes shipped features are switched off, and may try to apply them
 > again — which is the exact re-run hazard that makes `db push` forbidden here.
