@@ -30,7 +30,7 @@
  * Pure-ish: no env read, no server-only. The adapters own their own env gates,
  * and the states come in from the server boundary.
  */
-import { providerKindFor, type AiRuntimeConfig } from "./config-core";
+import { providerKindFor, type AiRuntimeConfig, type AiProviderKind } from "./config-core";
 import type {
   AiCompletionProvider,
   AiCompletionRequest,
@@ -40,7 +40,8 @@ import { disabledCompletionProvider } from "./providers/disabled";
 import { mockCompletionProvider } from "./providers/mock";
 import { anthropicCompletionProvider } from "./providers/anthropic";
 import { xaiCompletionProvider } from "./providers/xai";
-import type { AiEgressGrant } from "./data-egress";
+import { egressPermitted, type AiEgressGrant } from "./data-egress";
+import { sensitivityForTask, type AiDataSensitivity } from "./data-sensitivity";
 import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
 import { deeplCompletionProvider } from "./providers/deepl";
@@ -55,7 +56,8 @@ import {
   type AiProviderState,
   type ChainCandidate,
 } from "./provider-chain";
-import type { TaskRouteDecision } from "./task-routing";
+import { taskTypeForAgent, type TaskRouteDecision, type AiTaskType } from "./task-routing";
+import type { AiAgentKey } from "../registry/types";
 
 export function selectCompletionProvider(
   kind: ReturnType<typeof providerKindFor>,
@@ -153,10 +155,55 @@ export interface ChainDispatchContext {
 async function tryPreferredSecondary(
   request: AiCompletionRequest,
   cfg: AiRuntimeConfig,
+  grants?: readonly AiEgressGrant[],
 ): Promise<AiCompletionResult | null> {
   if (request.preferredProvider !== "deepl") return null;
+  // DeepL is an EXTERNAL provider and this call sits ahead of the chain's
+  // candidate loop, so the chain's veto never saw it. Without this check the
+  // one task that prefers DeepL — `translate_message`, the only
+  // SENSITIVE_FREE_TEXT task there is — had a direct route off the platform.
+  const verdict = egressPermitted(DEEPL_PROFILE, sensitivityForRequest(request), grants);
+  if (!verdict.permitted) return null;
   const preferred = await deeplCompletionProvider.complete(request, cfg);
   return preferred.status === "ok" ? preferred : null;
+}
+
+/** DeepL has no `AI_PROVIDER_PROFILES` row — it is a secondary, not a chain
+ *  candidate — so the gate needs its shape stated here. Cloud, and priced per
+ *  character, which `data-egress` treats as unpriceable rather than free. */
+const DEEPL_PROFILE = {
+  id: "deepl",
+  locality: "cloud",
+  costClass: "paid",
+} as const;
+
+/**
+ * What this request's payload carries, for the egress gate.
+ *
+ * FAILS CLOSED. An `agentKey` this runtime does not recognise yields no task
+ * type, and an unknown payload is treated as the most restricted class rather
+ * than the least — the opposite default would make an unrecognised agent the
+ * way around the boundary.
+ */
+function sensitivityForRequest(request: AiCompletionRequest): AiDataSensitivity {
+  const task = taskTypeForAgent(request.agentKey as AiAgentKey) as
+    | AiTaskType
+    | undefined;
+  return task ? sensitivityForTask(task) : "SENSITIVE_FREE_TEXT";
+}
+
+/** The gate for a single configured provider, used by the legacy path. */
+function legacyEgressVerdict(
+  request: AiCompletionRequest,
+  kind: AiProviderKind,
+  grants?: readonly AiEgressGrant[],
+) {
+  const profile = AI_PROVIDER_PROFILES.find((p) => p.id === kind);
+  return egressPermitted(
+    profile ?? { id: kind, locality: kind === "local" ? "local" : "cloud", costClass: "paid" },
+    sensitivityForRequest(request),
+    grants,
+  );
 }
 
 export async function dispatchAiCompletion(
@@ -175,7 +222,20 @@ export async function dispatchAiCompletion(
   }
 
   if (!chain) {
-    // ── Legacy path — one provider, exactly as before. ────────────────────
+    /* ── Legacy path — one provider, and now the SAME boundary. ────────────
+     *
+     * This branch used to dispatch straight to the configured provider. With
+     * the egress gate living only in the optional `ChainDispatchContext`, every
+     * caller that omitted a chain — `runtime/run.ts` among them — sent the
+     * payload to a live cloud provider with no check at all. A boundary a
+     * caller can skip by not passing an argument is not a boundary, so the
+     * check moved onto the PATH: it now runs whether or not a chain was
+     * supplied, and the grant table is consulted either way.
+     */
+    const verdict = legacyEgressVerdict(request, kind);
+    if (!verdict.permitted) {
+      return { status: "error", code: "unsupported", message: verdict.reason, provider: kind };
+    }
     const preferred = await tryPreferredSecondary(request, cfg);
     if (preferred) return preferred;
     return selectCompletionProvider(kind).complete(request, cfg);
@@ -212,7 +272,7 @@ export async function dispatchAiCompletion(
     };
   }
 
-  const preferred = await tryPreferredSecondary(request, cfg);
+  const preferred = await tryPreferredSecondary(request, cfg, chain.grants);
   if (preferred) return preferred;
 
   const candidates: ChainCandidate[] = [outcome.selected, ...outcome.remaining];

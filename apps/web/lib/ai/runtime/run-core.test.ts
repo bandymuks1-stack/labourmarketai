@@ -7,6 +7,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { resolveAiRuntimeConfig, type AiRuntimeConfigInput } from "./config-core";
 import { dispatchAiCompletion, selectCompletionProvider } from "./run-core";
 import type { AiCompletionRequest } from "./types";
+import { resolveTaskRoute } from "./task-routing";
 
 const base: AiRuntimeConfigInput = {
   mode: undefined, provider: undefined, apiKey: undefined, model: undefined,
@@ -74,12 +75,45 @@ describe("live adapter self-gates on a missing key (no network)", () => {
   beforeEach(() => {
     delete process.env.AI_API_KEY;
   });
-  it("a live config with no AI_API_KEY in env errors no_api_key before any SDK call", async () => {
+  it("the legacy no-chain path is refused by the egress gate before any provider work", async () => {
+    // OWNER DECISION 2026-08-19 (AI DATA BOUNDARY). This used to reach the
+    // adapter and fail on the missing key. It no longer gets that far: the
+    // egress gate now runs ON THE DISPATCH PATH rather than in the optional
+    // chain context, so a no-chain caller cannot skip it by omitting an
+    // argument. `worker_profile` carries PERSONAL data and anthropic holds no
+    // egress grant, so the refusal comes first — which is the correct order.
     const cfg = resolveAiRuntimeConfig({
       ...base, mode: "live", provider: "anthropic", apiKey: "sk-ant-presence-only",
     });
     expect(cfg.state).toBe("live");
     const r = await dispatchAiCompletion(req(), cfg);
+    expect(r.status).toBe("error");
+    if (r.status === "error") {
+      expect(r.code).toBe("unsupported");
+      expect(r.message).toMatch(/egress grant/i);
+    }
+  });
+
+  it("once egress IS permitted, the adapter still self-gates on a missing key", async () => {
+    // The original property, preserved rather than dropped: reaching the live
+    // branch must fail on the key WITHOUT importing the SDK or touching the
+    // network. A grant is injected so the run gets past the boundary at all —
+    // otherwise this coverage would have been lost to the gate.
+    const cfg = resolveAiRuntimeConfig({
+      ...base, mode: "live", provider: "anthropic", apiKey: "sk-ant-presence-only",
+    });
+    const r = await dispatchAiCompletion(req(), cfg, {
+      decision: resolveTaskRoute("normalize_external_profile", { attempt: 1 }),
+      states: [{ id: "anthropic", health: "ready" }],
+      grants: [
+        {
+          provider: "anthropic",
+          maxSensitivity: "SENSITIVE_FREE_TEXT",
+          basis: "test fixture",
+          grantedOn: "2026-08-19",
+        },
+      ],
+    });
     expect(r.status).toBe("error");
     if (r.status === "error") expect(r.code).toBe("no_api_key");
   });

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   AI_EGRESS_GRANTS,
@@ -173,5 +175,67 @@ describe("the classification the gate depends on stays honest", () => {
       publicTasks,
       "a task became PUBLIC — verify its payload really carries no project or personal data",
     ).toEqual([]);
+  });
+});
+
+describe("the gate is on the PATH, not in an optional argument", () => {
+  it("the legacy no-chain branch checks egress before dispatching", () => {
+    // The hole this closes: the gate lived only in `ChainDispatchContext`, so
+    // any caller that omitted a chain — `runtime/run.ts` among them — sent the
+    // payload to a live cloud provider with no check at all. A boundary a
+    // caller can skip by not passing an argument is not a boundary.
+    const src = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
+    );
+    const legacy = src.slice(
+      src.indexOf("if (!chain) {"),
+      src.indexOf("// ── Chain path"),
+    );
+    expect(legacy).toContain("legacyEgressVerdict");
+    expect(legacy).toContain("verdict.permitted");
+  });
+
+  it("DeepL is gated before its adapter is invoked, on BOTH paths", () => {
+    // `tryPreferredSecondary` runs AHEAD of the chain's candidate loop, so the
+    // chain veto never saw it. `translate_message` prefers DeepL and is the
+    // only SENSITIVE_FREE_TEXT task there is — this was a direct route off the
+    // platform for the most sensitive payload the runtime handles.
+    const src = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
+    );
+    const secondary = src.slice(
+      src.indexOf("function tryPreferredSecondary"),
+      src.indexOf("const DEEPL_PROFILE"),
+    );
+    expect(secondary).toContain("egressPermitted");
+    expect(secondary).toContain("DEEPL_PROFILE");
+    // The refusal must happen BEFORE the adapter call, not after it.
+    expect(secondary.indexOf("egressPermitted")).toBeLessThan(
+      secondary.indexOf("deeplCompletionProvider.complete"),
+    );
+  });
+
+  it("DeepL holds no grant, so translation cannot leave today", () => {
+    const deepl = { id: "deepl", locality: "cloud" as const, costClass: "paid" };
+    expect(
+      egressPermitted(deepl, sensitivityForTask("translate_message")).permitted,
+    ).toBe(false);
+  });
+
+  it("an unrecognised agent key is treated as the MOST restricted class", () => {
+    // Fails closed: if an unknown agent yielded no sensitivity and that were
+    // read as "nothing sensitive", an unrecognised agent would become the way
+    // around the boundary.
+    const src = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "run-core.ts"),
+      "utf8",
+    );
+    const fn = src.slice(
+      src.indexOf("function sensitivityForRequest"),
+      src.indexOf("/** The gate for a single configured provider"),
+    );
+    expect(fn).toContain('"SENSITIVE_FREE_TEXT"');
   });
 });
