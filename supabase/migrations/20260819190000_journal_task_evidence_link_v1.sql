@@ -3,12 +3,18 @@
 -- Apply ONLY via Supabase MCP apply_migration by the LEAD session, AFTER
 -- 20260711210000_work_tasks_v1 (work_tasks must exist). Never `db push`.
 --
--- Safety class: ADDITIVE (one new RLS-bearing table, one SECURITY DEFINER
--- read helper, two SECURITY DEFINER write RPCs; NO existing table, column,
+-- @human-gate-approved — approved by explicit owner decision 2026-08-19
+-- ("OWNER DECISION — APPROVED WITH STRICT SCOPE", PR #1212), scoped to the
+-- P0 capability ONLY: existing Work Journal evidence <-> canonical work task
+-- linkage. The approval explicitly does NOT extend to GPS tracking, QR,
+-- offline mode, a client portal, biometric attendance, a second task store,
+-- any new surveillance capability, or unrelated schema expansion. Safety
+-- class: ADDITIVE (one new RLS-bearing table, one SECURITY DEFINER read
+-- helper, two SECURITY DEFINER write RPCs; NO existing table, column,
 -- function, policy, grant or constraint is recreated or dropped).
--- SECURITY DEFINER + GRANT/REVOKE are RED-class by construction, so this
--- migration is human-gated by ROUTE. It carries NO `@human-gate-approved`
--- annotation: it is proposed for owner review, not pre-approved.
+-- SECURITY DEFINER + GRANT/REVOKE are RED-class by construction; the
+-- annotation states the ROUTE (draft + needs-human-gate + owner approval),
+-- not an auto-merge pass.
 --
 -- 20260819190000 — Work Journal ↔ work_task evidence link v1
 -- (field-work operating platform audit v1, §1.2 "the single most important

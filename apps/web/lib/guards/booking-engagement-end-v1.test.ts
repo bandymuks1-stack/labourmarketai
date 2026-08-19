@@ -979,6 +979,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // apply. The migration ships UNAPPLIED behind needs-human-gate, exactly
       // as the v1 table's own migration did.
       "20260819094500_worker_saved_public_vacancies_v1.sql",
+      // 2026-08-19: Work Journal <-> work_task evidence link v1
+      // (20260819190000) carries the marker on an EXPLICIT owner decision
+      // recorded on PR #1212, scoped to the P0 link capability only. RED-class
+      // by route — one SECURITY DEFINER read helper, two SECURITY DEFINER
+      // write RPCs and their grants; it creates ONE table and recreates no
+      // existing function, policy, grant or constraint. The marker lets CI
+      // classify it; the PR still ships as a draft behind needs-human-gate,
+      // exactly as every structural migration before it.
+      "20260819190000_journal_task_evidence_link_v1.sql",
     ]);
   });
 

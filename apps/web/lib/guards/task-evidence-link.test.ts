@@ -178,16 +178,33 @@ describe("task evidence link — the migration keeps the doctrine", () => {
     expect(migrationSql).toContain(`<= ${UNLINK_REASON_MAX}`);
   });
 
-  it("is proposed for the owner gate, not self-approved", () => {
-    // RED by route (SECURITY DEFINER + grants). It must NOT carry the
-    // pre-approval annotation — that would move it to auto-merge-eligible
-    // CI while still being a privilege change.
-    // Asserted with the migration-safety gate's OWN annotation regex, so this
-    // guard and CI can never disagree about whether the file is annotated.
-    // (The header names the annotation in prose to say it is absent — that is
-    // not an annotation, and this regex correctly does not match it.)
+  it("carries the owner approval AND still states the gated route", () => {
+    // Owner decision 2026-08-19 (PR #1212) approved this RED migration for
+    // the P0 link capability ONLY. The annotation makes CI pass; it is NOT an
+    // auto-merge pass — the PR still ships as a draft with needs-human-gate
+    // (CLAUDE.md: "an acknowledgement, not an auto-merge pass"). Asserted
+    // with the migration-safety gate's OWN regex so this guard and CI can
+    // never disagree about whether the file is annotated.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(migrationSql)).toBe(false);
+    expect(ANNOTATION.test(migrationSql)).toBe(true);
     expect(migrationSql).toMatch(/needs-human-gate/i);
+    // The approval is scope-bound, and the file must say so — the next agent
+    // must not read this annotation as a licence for the parked capabilities.
+    expect(migrationSql).toMatch(/GPS/);
+    expect(migrationSql).toMatch(/does NOT extend/i);
   });
+
+  it("stays ADDITIVE — the approval covers no destructive operation", () => {
+    // Scope lock: the owner approved a link table, not a schema expansion.
+    // No DROP of any pre-existing object, no table/column removal.
+    expect(migrationCode).not.toMatch(/drop\s+table/i);
+    expect(migrationCode).not.toMatch(/drop\s+column/i);
+    expect(migrationCode).not.toMatch(/drop\s+policy/i);
+    expect(migrationCode).not.toMatch(/alter\s+policy/i);
+    // Nothing outside the approved P0 surface is created.
+    const created = [...migrationCode.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.(\w+)/gi)]
+      .map((m) => m[1]);
+    expect(created).toEqual(["journal_entry_tasks"]);
+  });
+
 });
