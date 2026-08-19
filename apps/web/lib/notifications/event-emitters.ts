@@ -36,6 +36,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
+  emitNotificationEvent,
   emitNotificationEventInBackground,
   type NotificationEventType,
 } from "./events";
@@ -274,6 +275,17 @@ export async function emitWorkTaskAssignedNotification(
  * METADATA: the demand's own `country`, and only when it is an ISO-3166
  * alpha-2 code. The worker's `note` is free text and never leaves the signal
  * row — a notification must be safe to render in a preview.
+ *
+ * AWAITED, UNLIKE ITS SIBLINGS — and deliberately. The other emitters here
+ * detach their insert through `emitNotificationEventInBackground`, which is
+ * safe on a long-lived server and NOT safe on a serverless runtime: the
+ * invocation can be frozen the moment the action returns, killing a detached
+ * insert mid-flight. The whole point of this emitter is that the signal stops
+ * being silent, so an emission that survives only when the platform feels like
+ * it would reintroduce the defect it was written to fix. It is awaited end to
+ * end instead, and it CANNOT fail the domain write because it never throws:
+ * the try/catch below and `emitNotificationEvent`'s own outcome union between
+ * them turn every failure into a logged outcome rather than an exception.
  */
 export async function emitDemandInterestNotification(
   signalId: string,
@@ -307,7 +319,7 @@ export async function emitDemandInterestNotification(
     if (actor && actor === owner) return;
 
     const country = req?.country ?? null;
-    emitNotificationEventInBackground(admin, {
+    const outcome = await emitNotificationEvent(admin, {
       recipientProfileId: owner,
       eventType: "demand_interest_expressed",
       entityType: "demand_interest_signal",
@@ -316,6 +328,13 @@ export async function emitDemandInterestNotification(
         ? { country: country as string }
         : {},
     });
+    if (outcome.kind === "unexpected_error") {
+      // `duplicate` and `feature_unavailable` are approved outcomes and stay
+      // quiet; this line only fires on something real.
+      console.error(
+        `[notifications] demand_interest_expressed emit failed: ${outcome.code}`,
+      );
+    }
   } catch {
     // Emission is an enhancement; the signal itself is already stored.
   }

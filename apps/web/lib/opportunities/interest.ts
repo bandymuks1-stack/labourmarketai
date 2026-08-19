@@ -148,13 +148,19 @@ export async function expressInterest(input: {
     return { kind: "error", message: error.message };
   }
 
-  // THE SIGNAL NOW REACHES SOMEONE. Fire-and-forget, after the domain write
-  // succeeded and never in front of it: a worker's interest must not fail to
-  // record because its notification could not be written (the booking/absence
-  // precedent). Recipient resolution lives entirely in the emitter, off the
-  // signal's own rows.
+  // THE SIGNAL NOW REACHES SOMEONE — after the domain write succeeded and
+  // never in front of it. Recipient resolution lives entirely in the emitter,
+  // off the signal's own rows.
+  //
+  // AWAITED, not detached. The sibling emitters use `void` because they were
+  // written for a server that outlives the response; this runs on a serverless
+  // runtime that can freeze the invocation the instant the action returns,
+  // which would kill the emitter mid-read and drop the notification — the
+  // exact silence this change exists to end. The safety the `void` was
+  // protecting is preserved by the emitter itself: it never throws, so a
+  // failed emission still cannot fail a worker's interest.
   const signalId = (signalRow as { id?: string } | null)?.id ?? null;
-  if (signalId) void emitDemandInterestNotification(signalId);
+  if (signalId) await emitDemandInterestNotification(signalId);
 
   return { kind: "ok", status: "interested" };
 }

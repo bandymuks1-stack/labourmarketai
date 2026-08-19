@@ -37,8 +37,12 @@ describe("expressing interest emits a durable event", () => {
     expect(fn.indexOf("return { kind: \"needs-migration\" }")).toBeLessThan(
       fn.indexOf("emitDemandInterestNotification(signalId)"),
     );
-    // Fire-and-forget: the domain write must never fail on the notification.
-    expect(fn).toMatch(/void emitDemandInterestNotification/);
+    // AWAITED on purpose: a detached promise can be killed when the serverless
+    // invocation freezes at return, dropping the very notification this exists
+    // to send. Safety is preserved by the emitter never throwing, not by
+    // detaching it — so a `void` here is a regression, not a style choice.
+    expect(fn).toMatch(/await emitDemandInterestNotification\(signalId\)/);
+    expect(fn).not.toMatch(/void emitDemandInterestNotification/);
   });
 
   it("the signal id is read back, because the event is keyed on the ROW", () => {
@@ -75,6 +79,16 @@ describe("the recipient is the demand owner, resolved from the rows", () => {
       src.indexOf("export async function emitDemandInterestNotification"),
     );
     expect(body).toMatch(/actor === owner\)\s*return;/);
+  });
+
+  it("the insert itself is awaited, not detached into the background", () => {
+    const src = read("lib", "notifications", "event-emitters.ts");
+    const body = src.slice(
+      src.indexOf("export async function emitDemandInterestNotification"),
+      src.indexOf("/** Absence lifecycle"),
+    );
+    expect(body).toContain("await emitNotificationEvent(admin, {");
+    expect(body).not.toContain("emitNotificationEventInBackground");
   });
 
   it("carries no free text — the worker's note never reaches the event", () => {
