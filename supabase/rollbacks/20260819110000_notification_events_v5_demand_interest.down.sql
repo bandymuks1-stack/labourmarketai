@@ -1,10 +1,11 @@
 -- Restores the v4 lists (the state after 20260817153000). Any row typed
--- 'demand_interest_expressed' / 'demand_interest_signal' must be deleted
+-- 'demand_interest_expressed' / 'demand_interest_reviewed' must be deleted
 -- first or the constraint re-add fails — stated so the rollback is honest
 -- about its cost (the v2/v3/v4 rollback idiom).
 --
 --   delete from public.notification_events
---    where event_type = 'demand_interest_expressed';
+--    where event_type in ('demand_interest_expressed',
+--                         'demand_interest_reviewed');
 --
 -- is the operator's explicit step; this file does NOT delete data on its own.
 alter table public.notification_events

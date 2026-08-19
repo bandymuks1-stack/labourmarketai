@@ -4119,7 +4119,8 @@
         "event_document_ack_completed": "Документ, отправленный вами на подтверждение, был подтверждён.",
         "event_document_expiring": "Срок действия документа скоро закончится.",
         "event_work_task_assigned": "Вам назначена задача",
-        "event_demand_interest_expressed": "Работник проявил интерес к вашей заявке"
+        "event_demand_interest_expressed": "Работник проявил интерес к вашей заявке",
+        "event_demand_interest_reviewed": "Компания отметила ваш интерес как рассмотренный"
       },
       "label": "Мои уведомления",
       "emptyTitle": "Сейчас ничего не требует вашего внимания.",

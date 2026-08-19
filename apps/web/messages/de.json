@@ -4119,7 +4119,8 @@
         "event_document_ack_completed": "Ein von Ihnen zur Bestätigung gesendetes Dokument wurde bestätigt.",
         "event_document_expiring": "Die Gültigkeit eines Dokuments endet bald.",
         "event_work_task_assigned": "Ihnen wurde eine Aufgabe zugewiesen",
-        "event_demand_interest_expressed": "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet"
+        "event_demand_interest_expressed": "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
+        "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",

@@ -32,6 +32,10 @@ import "server-only";
  *   demand_interest_expressed
  *                       → the DEMAND OWNER (v5) — the same gap on the
  *                         employer side; never the worker who acted.
+ *   demand_interest_reviewed
+ *                       → the WORKER who raised their hand (v5) — the return
+ *                         direction, so the smaller party is not the one left
+ *                         guessing. Never the person who did the answering.
  */
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
@@ -337,6 +341,78 @@ export async function emitDemandInterestNotification(
     }
   } catch {
     // Emission is an enhancement; the signal itself is already stored.
+  }
+}
+
+/**
+ * DEMAND INTEREST, THE RETURN DIRECTION — the company answered.
+ *
+ * The sibling above closes the employer's silence; this closes the worker's,
+ * and shipping only the first would have been the worse asymmetry. A worker
+ * who raises their hand and hears nothing is the most common way a labour
+ * market wastes a person's hope, and doctrine §1 exists precisely so the
+ * smaller party is not the one left guessing.
+ *
+ * RECIPIENT: the worker who expressed the interest, resolved from the signal
+ * row's own `worker_id`. Emitted only when `acknowledge_demand_interest`
+ * actually changed something, so a no-op acknowledgement never manufactures
+ * news.
+ *
+ * ONLY 'reviewed'. The 'contacted' status is set exclusively by
+ * `contact-interested-worker`, and only AFTER a real conversation thread has
+ * been opened — which already reaches the worker through the existing
+ * unread-message signal. The message itself is the better notification, so a
+ * second bell for the same act would be noise. 'reviewed' is the status that
+ * had no carrier at all.
+ *
+ * WHAT IT DOES NOT COVER, deliberately: shortlist status. `setShortlist`
+ * records an employer-internal judgement (including a rejection), and turning
+ * that into a notification is a product decision about telling someone they
+ * were passed over — not a gap to close silently. Acknowledgement is different
+ * in kind: the company chose to say something.
+ *
+ * METADATA: empty. The demand's country is the WORKER's counterparty data
+ * here, not their own, and nothing about the answer needs a render hint.
+ */
+export async function emitDemandInterestResponseNotification(input: {
+  readonly requestId: string;
+  readonly workerId: string;
+  /** Only "reviewed" emits; "contacted" returns without a write (see above). */
+  readonly status: "reviewed" | "contacted";
+  /** The acting profile — never notified about answering themselves. */
+  readonly actorProfileId: string;
+}): Promise<void> {
+  if (input.status !== "reviewed") return;
+  try {
+    const admin = createAdminClient();
+    // The event is keyed on the SIGNAL row, exactly like the outbound half, so
+    // one answer per (worker, demand).
+    const { data: signal } = await admin
+      .from("demand_interest_signals")
+      .select("id")
+      .eq("request_id", input.requestId)
+      .eq("worker_id", input.workerId)
+      .maybeSingle();
+    const signalId = (signal as { id?: string } | null)?.id ?? null;
+    if (!signalId) return;
+
+    const recipient = await workerProfileId(admin, input.workerId);
+    if (!recipient || recipient === input.actorProfileId) return;
+
+    const outcome = await emitNotificationEvent(admin, {
+      recipientProfileId: recipient,
+      eventType: "demand_interest_reviewed",
+      entityType: "demand_interest_response",
+      entityId: signalId,
+      metadata: {},
+    });
+    if (outcome.kind === "unexpected_error") {
+      console.error(
+        `[notifications] demand_interest_reviewed emit failed: ${outcome.code}`,
+      );
+    }
+  } catch {
+    // Emission is an enhancement; the acknowledgement already succeeded.
   }
 }
 

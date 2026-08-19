@@ -358,7 +358,8 @@
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
         "event_document_expiring": "[EN] A document's validity is ending soon.",
         "event_work_task_assigned": "Jums piešķirts uzdevums",
-        "event_demand_interest_expressed": "Darbinieks izrādīja interesi par jūsu pieprasījumu"
+        "event_demand_interest_expressed": "Darbinieks izrādīja interesi par jūsu pieprasījumu",
+        "event_demand_interest_reviewed": "Uzņēmums atzīmēja jūsu interesi kā izskatītu"
       }
     },
     "onboarding": {

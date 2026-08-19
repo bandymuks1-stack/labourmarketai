@@ -72,7 +72,16 @@ export type NotificationEventType =
   // demand owner learned a candidate existed only by opening the scouting
   // page unprompted. Recipient is the demand owner and only the demand
   // owner, which is exactly whom the signal's RLS policy already admits.
-  | "demand_interest_expressed";
+  | "demand_interest_expressed"
+  // v5, the return direction: the company deliberately marked the interest
+  // reviewed. Recipient is the WORKER who raised their hand — the difference
+  // between silence and "someone actually looked".
+  //
+  // There is no 'contacted' counterpart on purpose: that status is set only
+  // after a real conversation thread exists, and a new thread already reaches
+  // the worker through the unread-message signal. The message is the better
+  // notification; a second bell for one act is noise.
+  | "demand_interest_reviewed";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -87,7 +96,12 @@ export type NotificationEntityType =
   | "work_task"
   // v5: the interest signal resolves to the EXISTING scouting surface, where
   // the demand owner already reviews and acknowledges who raised their hand.
-  | "demand_interest_signal";
+  | "demand_interest_signal"
+  // v5: the SAME signal row seen from the worker's side. A second entity type
+  // rather than a second table, because the destination differs and nothing
+  // else does — routing both directions through one type would send a worker
+  // to a company page they cannot open.
+  | "demand_interest_response";
 
 /**
  * Where a durable event TAKES YOU.
@@ -132,6 +146,10 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // their own demands (listDemandInterestForCompany feeds it), so the
   // notification lands the reader on the row it is about.
   demand_interest_signal: "/dashboard/company/scouting",
+  // v5: "Mano susidomėjimai" already renders the worker's own interests and
+  // their current status on the opportunities board — the answer they were
+  // notified about is on the page the notification opens.
+  demand_interest_response: "/dashboard/opportunities",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

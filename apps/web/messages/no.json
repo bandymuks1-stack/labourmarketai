@@ -358,7 +358,8 @@
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
         "event_document_expiring": "[EN] A document's validity is ending soon.",
         "event_work_task_assigned": "En oppgave er tildelt deg",
-        "event_demand_interest_expressed": "En arbeidstaker har vist interesse for behovet ditt"
+        "event_demand_interest_expressed": "En arbeidstaker har vist interesse for behovet ditt",
+        "event_demand_interest_reviewed": "En bedrift har markert interessen din som gjennomgått"
       }
     },
     "onboarding": {

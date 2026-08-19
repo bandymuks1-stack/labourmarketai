@@ -9,14 +9,37 @@
 -- FOR does not. The demand owner learns a candidate exists only if they happen
 -- to open /dashboard/company/scouting. A signal nobody hears is not a signal.
 --
+-- THE LOOP RUNS BOTH WAYS. Three types ship together on purpose: telling the
+-- company a candidate appeared while leaving the candidate in silence would be
+-- an asymmetry in favour of the larger party, which is the one thing doctrine
+-- §1 exists to prevent. A worker who raises their hand and hears nothing is the
+-- most common way a labour market wastes a person's hope.
+--
 --   + event_type  'demand_interest_expressed' — recipient: the DEMAND OWNER
 --     (`customer_requests.profile_id`), resolved by the emitter from the
 --     signal row, never from caller input. That is EXACTLY the set of people
 --     `demand_interest_signals_demand_owner_select` already lets read the
 --     signal, so the notification tells nobody anything RLS did not already
 --     permit them to see.
+--   + event_type  'demand_interest_reviewed' — recipient: the WORKER who
+--     raised their hand, resolved from the signal's own worker row. Emitted
+--     only when `acknowledge_demand_interest` actually changed something, so
+--     the worker is never told about a no-op.
+--
+--     NOT the 'contacted' status, deliberately. That status is set only after
+--     `contact-interested-worker` has opened a REAL conversation thread, and a
+--     new thread already reaches the worker through the existing unread-message
+--     signal. A second bell for one act is noise, and the message itself is the
+--     better notification. 'reviewed' is the one that had no carrier: it is the
+--     difference between silence and "someone actually looked".
 --   + entity_type 'demand_interest_signal' — href resolves to the EXISTING
 --     /dashboard/company/scouting surface (no new route).
+--   + entity_type 'demand_interest_response' — the SAME signal row seen from
+--     the worker's side, which is why it is a second entity type rather than a
+--     second table: href resolves to the EXISTING /dashboard/opportunities,
+--     where "Mano susidomėjimai" already renders their own interests. Routing
+--     both directions through one entity type would send the worker to a
+--     company page they cannot open.
 --
 -- WHAT IT CARRIES. The dedupe key is (event, signal id), so one event per
 -- (worker, demand): a worker toggling interest off and on again re-uses the
@@ -55,7 +78,8 @@ alter table public.notification_events
     'document_ack_completed',
     'document_expiring',
     'work_task_assigned',
-    'demand_interest_expressed'
+    'demand_interest_expressed',
+    'demand_interest_reviewed'
   ));
 
 alter table public.notification_events
@@ -71,5 +95,6 @@ alter table public.notification_events
     'org_document',
     'document_acknowledgement',
     'work_task',
-    'demand_interest_signal'
+    'demand_interest_signal',
+    'demand_interest_response'
   ));

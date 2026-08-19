@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
-import { emitDemandInterestNotification } from "@/lib/notifications/event-emitters";
+import {
+  emitDemandInterestNotification,
+  emitDemandInterestResponseNotification,
+} from "@/lib/notifications/event-emitters";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
@@ -24,11 +27,14 @@ import {
  * any kind (guard-pinned). The demand's owning company sees the signal on its
  * own scouting view through RLS; the worker keeps full control of their row.
  *
- * v5 (2026-08-19): a successful express ALSO writes a durable in-product
- * notification for the demand owner (`notification_events`). Still nothing
- * leaves the platform — a durable row is the same bell the scouting view
- * already answers to, and its recipient is exactly whom the signal's RLS
- * policy already admits. Four real signals sat unheard before this existed.
+ * v5 (2026-08-19): the loop is no longer one-way. A successful express writes
+ * a durable in-product notification for the demand owner, and a successful
+ * acknowledgement writes one back for the worker (`notification_events`).
+ * Still nothing leaves the platform — a durable row is the same bell these
+ * views already answer to, and each recipient is exactly whom the signal's RLS
+ * policy already admits. Four real signals sat unheard before this existed,
+ * and a worker who raised their hand had no way to learn the company had even
+ * looked.
  *
  * VISIBILITY RULE: a worker can only express interest in a demand they can
  * currently SEE — validated by re-running the exact board pipeline
@@ -294,6 +300,19 @@ export async function acknowledgeInterest(input: {
       return { kind: "error", message: error.message };
     }
     if (data !== true) return { kind: "no-signal" };
+
+    // THE ANSWER REACHES THE WORKER. Only past the `data !== true` branch, so
+    // an acknowledgement that changed nothing never manufactures news. Awaited
+    // for the same reason the outbound half is (a detached write can be frozen
+    // at return) and equally unable to fail the acknowledgement, because the
+    // emitter never throws.
+    await emitDemandInterestResponseNotification({
+      requestId: input.requestId,
+      workerId: input.workerId,
+      status: input.status as "reviewed" | "contacted",
+      actorProfileId: user.id,
+    });
+
     return { kind: "ok", status: input.status as InterestStatus };
   } catch {
     return { kind: "needs-migration" };

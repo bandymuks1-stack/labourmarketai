@@ -358,7 +358,8 @@
         "event_document_ack_completed": "Et dokument, du sendte til bekræftelse, er blevet bekræftet.",
         "event_document_expiring": "Et dokuments gyldighed udløber snart.",
         "event_work_task_assigned": "En opgave er blevet tildelt dig",
-        "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov"
+        "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov",
+        "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået"
       }
     },
     "onboarding": {

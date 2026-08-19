@@ -110,9 +110,12 @@ describe("the type is admitted, routed and labelled everywhere", () => {
     expect(src).toContain('"demand_interest_signal"');
   });
 
-  it("the entity resolves to the scouting surface", () => {
+  it("each direction resolves to the surface its RECIPIENT can open", () => {
+    // The employer half points at scouting; the worker half must NOT, or the
+    // notification lands a worker on a company page they cannot read.
     const src = read("lib", "notifications", "events.ts");
     expect(src).toContain('demand_interest_signal: "/dashboard/company/scouting"');
+    expect(src).toContain('demand_interest_response: "/dashboard/opportunities"');
   });
 
   it("the migration widens both CHECKs as a strict superset", () => {
@@ -124,7 +127,9 @@ describe("the type is admitted, routed and labelled everywhere", () => {
       "utf8",
     );
     expect(sql).toContain("'demand_interest_expressed'");
+    expect(sql).toContain("'demand_interest_reviewed'");
     expect(sql).toContain("'demand_interest_signal'");
+    expect(sql).toContain("'demand_interest_response'");
     // Every v4 type must survive the re-add — a widening that quietly drops a
     // type would invalidate stored rows.
     for (const t of [
@@ -149,7 +154,72 @@ describe("the type is admitted, routed and labelled everywhere", () => {
         (json.auth as Record<string, Record<string, Record<string, string>>>)
           ?.notifications
       )?.types;
-      expect(types?.event_demand_interest_expressed, `missing in ${loc}`).toBeTruthy();
+      for (const key of [
+        "event_demand_interest_expressed",
+        "event_demand_interest_reviewed",
+      ]) {
+        expect(types?.[key], `${key} missing in ${loc}`).toBeTruthy();
+      }
     }
+  });
+});
+
+describe("the return direction — the worker hears the answer", () => {
+  it("acknowledge emits, and only past the no-op branch", () => {
+    const src = read("lib", "opportunities", "interest.ts");
+    const fn = src.slice(src.indexOf("export async function acknowledgeInterest"));
+    const body = fn.slice(0, fn.indexOf("export async function listDemandInterestForCompany"));
+    expect(body).toContain("await emitDemandInterestResponseNotification({");
+    // An acknowledgement that changed nothing must never manufacture news.
+    expect(body.indexOf('return { kind: "no-signal" }')).toBeLessThan(
+      body.indexOf("await emitDemandInterestResponseNotification"),
+    );
+  });
+
+  it("the recipient is the WORKER, and never the person who answered", () => {
+    const src = read("lib", "notifications", "event-emitters.ts");
+    const body = src.slice(
+      src.indexOf("export async function emitDemandInterestResponseNotification"),
+      src.indexOf("/** Absence lifecycle"),
+    );
+    expect(body).toContain("workerProfileId(admin, input.workerId)");
+    expect(body).toMatch(/recipient === input\.actorProfileId\)\s*return;/);
+  });
+
+  it("'contacted' emits nothing — the conversation is its own notification", () => {
+    // That status is set only after contact-interested-worker opened a real
+    // thread, which already reaches the worker through unread-messages. A
+    // second bell for one act is noise, so the emitter returns before any write.
+    const src = read("lib", "notifications", "event-emitters.ts");
+    const body = src.slice(
+      src.indexOf("export async function emitDemandInterestResponseNotification"),
+      src.indexOf("/** Absence lifecycle"),
+    );
+    expect(body).toMatch(/if \(input\.status !== "reviewed"\) return;/);
+    expect(body).not.toContain('"demand_interest_contacted"');
+    expect(body).toContain("await emitNotificationEvent(admin, {");
+  });
+
+  it("the worker-facing copy never adopts 'someone viewed you' framing", () => {
+    // worker-notifications-framing.test.ts bans the engagement-bait pattern
+    // across the whole notifications catalogue; this pins the reason THIS copy
+    // is phrased as a status the company deliberately set, not as a view.
+    for (const loc of ["en", "lt"] as const) {
+      const json = JSON.parse(read("messages", `${loc}.json`)) as Record<string, unknown>;
+      const label = (
+        (json.auth as Record<string, Record<string, Record<string, string>>>)
+          .notifications
+      ).types.event_demand_interest_reviewed;
+      expect(label).not.toMatch(/viewed you|someone viewed|peržiūrėjo jūs/i);
+    }
+  });
+
+  it("shortlist is deliberately NOT a notification", () => {
+    // setShortlist records an employer-internal judgement including rejection;
+    // turning that into a bell is a product decision, not a gap to close
+    // silently. Pinned so a later slice makes it deliberately, not by drift.
+    const src = read("lib", "scouting", "scouting.ts");
+    expect(src).not.toContain("emitDemandInterestResponseNotification");
+    expect(src).not.toContain("demand_interest_contacted");
   });
 });
