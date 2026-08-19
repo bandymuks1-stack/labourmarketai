@@ -13,6 +13,8 @@ import {
   MODEL_PRICING_USD_PER_MTOK,
   pricingForModel,
 } from "@/lib/ai/runtime/model-pricing";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * MODEL REGISTRY (owner requirement 2026-08-19: global provider-neutrality).
@@ -109,6 +111,41 @@ describe("an unsourced price can never authorise spend", () => {
       expect(pricingForModel(e.model), e.model).toBeNull();
     }
   });
+
+  it("ONLY a fully selectable model exports a price", () => {
+    // The hole this closes: filtering the price table on "has two numbers"
+    // alone meant a half-finished entry — prices typed in during staged
+    // enablement, `enabled` still false or `pricingSource` still empty —
+    // would publish its price. A published price is exactly what stops
+    // `cost_unpriced` from firing, so an incomplete edit could authorise paid
+    // API use. Selectability is one predicate; it must not be half-applied.
+    for (const e of MODEL_REGISTRY) {
+      if (isSelectable(e)) continue;
+      expect(pricingForModel(e.model), `${e.provider}/${e.model}`).toBeNull();
+    }
+  });
+
+  it("prices with no source never reach the table, even priced and disabled", () => {
+    // Direct simulation of the staged-enablement mistake.
+    const halfFinished = {
+      provider: "example",
+      model: "example-model-1",
+      alias: "sonnet" as const,
+      capabilities: [],
+      qualityScore: null,
+      inputUsdPerMTok: 3,
+      outputUsdPerMTok: 15,
+      freeTier: false,
+      contextTokens: null,
+      maxOutputTokens: null,
+      latencyP50Ms: null,
+      dataRestrictions: [],
+      effectiveFrom: null,
+      pricingSource: null,
+      enabled: true,
+    };
+    expect(isSelectable(halfFinished)).toBe(false);
+  });
 });
 
 describe("the derived tables did not change any shipped value", () => {
@@ -164,14 +201,41 @@ describe("the derived tables did not change any shipped value", () => {
   });
 });
 
-describe("a new provider is data, not a type change", () => {
+describe("the registry projection is open to any provider", () => {
+  it("EVERY registry provider appears in the candidates projection", () => {
+    // Regression: the projection hand-listed the original four providers, so a
+    // newly registered fifth (Qwen) was registered but invisible downstream.
+    for (const p of registryProviders()) {
+      expect(Object.keys(AI_MODEL_CANDIDATES), p).toContain(p);
+    }
+    expect(Object.keys(AI_MODEL_CANDIDATES)).toContain("qwen");
+  });
+});
+
+describe("a new provider is registry data — dispatch is a separate migration", () => {
   it("providers are derived from the registry, not a hand-kept union", () => {
     const providers = registryProviders();
     expect(providers).toContain("anthropic");
     expect(providers).toContain("openai");
-    // The proof that the structure is open: a provider that was not in any of
-    // the original closed unions is present without a type edit.
+    // The registry surface is open: a provider absent from every original
+    // closed union is present here without a type edit.
     expect(providers).toContain("qwen");
+  });
+
+  it("states honestly that the DISPATCH surface is still closed", () => {
+    // Scope pin, so the contract is not overclaimed. `AiModelProvider`,
+    // `AiProviderKind` and `AiChainProviderId` remain closed unions: a newly
+    // registered provider is visible and priceable but not yet dispatchable.
+    // Migrating those three is its own slice, and this comment is the record.
+    const src = readFileSync(
+      join(__dirname, "..", "ai", "runtime", "model-candidates.ts"),
+      "utf8",
+    );
+    // Match on tokens rather than a phrase — comment reflow must not break
+    // the pin, only the removal of the scope note itself should.
+    expect(src).toContain("AiChainProviderId");
+    expect(src).toContain("AiProviderKind");
+    expect(src).toContain("its own slice");
   });
 
   it("Qwen is registered as a real candidate", () => {

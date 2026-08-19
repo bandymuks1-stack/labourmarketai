@@ -17,7 +17,7 @@
  * Pure. No IO, no env, no fetch.
  */
 
-import { MODEL_REGISTRY } from "./model-registry";
+import { MODEL_REGISTRY, isSelectable } from "./model-registry";
 
 export interface ModelPricingUsdPerMTok {
   readonly inputUsdPerMTok: number;
@@ -39,6 +39,14 @@ export const MODEL_PRICING_USD_PER_MTOK: Readonly<
   Record<string, ModelPricingUsdPerMTok>
 > = Object.freeze(
   MODEL_REGISTRY.reduce<Record<string, ModelPricingUsdPerMTok>>((acc, e) => {
+    // The FULL selectability predicate, not merely "has two numbers". Filtering
+    // on the numbers alone left a hole: half-finishing a registry entry during
+    // staged enablement — prices typed in, `enabled` still false or
+    // `pricingSource` still empty — would publish the price here, and a
+    // published price is what stops `cost_unpriced` from firing. An incomplete
+    // edit could therefore authorise paid API use through the env gates.
+    // Selectability is one predicate so it cannot be half-applied.
+    if (!isSelectable(e)) return acc;
     if (e.inputUsdPerMTok === null || e.outputUsdPerMTok === null) return acc;
     const price: ModelPricingUsdPerMTok = {
       inputUsdPerMTok: e.inputUsdPerMTok,
