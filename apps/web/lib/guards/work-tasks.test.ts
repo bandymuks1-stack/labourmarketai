@@ -145,6 +145,14 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
     LIFECYCLE_READER,
     "20260817232000_management_decisions_v1",
     "20260819190000_journal_task_evidence_link_v1",
+    /**
+     *   20260819220000 — task attribution of canonical work-time (chain step
+     *   A): timesheet_compute_lines_v1 LEFT JOINs public.work_tasks purely to
+     *   read a task's title for an already-attributed line. It creates,
+     *   alters, drops, writes and policies nothing on work_tasks, and defines
+     *   no task RPC — the existing task RPCs stay the only writers.
+     */
+    "20260819220000_timesheet_task_attribution_v1",
   ];
 
   it("only the D2 + train-D migration pairs DEFINE work_tasks or the task RPCs", () => {

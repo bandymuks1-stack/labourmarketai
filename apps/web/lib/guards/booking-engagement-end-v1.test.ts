@@ -988,6 +988,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // classify it; the PR still ships as a draft behind needs-human-gate,
       // exactly as every structural migration before it.
       "20260819190000_journal_task_evidence_link_v1.sql",
+      // 2026-08-19: task attribution of canonical work-time (20260819220000)
+      // carries the marker on an EXPLICIT owner decision approving chain step
+      // A and this exact attribution rule. RED by route — it replaces the
+      // timesheet_compute_lines_v1 SECURITY DEFINER body — while creating and
+      // dropping nothing and running no DML. The marker lets CI classify it;
+      // the owner said BUILD IT AND STOP BEFORE APPLYING, so it ships
+      // UNAPPLIED behind needs-human-gate.
+      "20260819220000_timesheet_task_attribution_v1.sql",
     ]);
   });
 

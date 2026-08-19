@@ -32,6 +32,10 @@ function line(partial: Partial<TimesheetLine>): TimesheetLine {
     metricSource: "worker_input",
     projectId: null,
     projectTitle: null,
+    // Chain step A defaults: unattributed, no live task link.
+    taskId: null,
+    taskTitle: null,
+    taskLinkCount: 0,
     ...partial,
   };
 }

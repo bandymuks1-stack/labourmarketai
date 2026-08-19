@@ -158,6 +158,15 @@ export async function TimesheetsSection({
             {line.projectTitle ? (
               <span className="text-text-muted">{line.projectTitle}</span>
             ) : null}
+            {/* Chain step A. Attributed only when exactly one live task link
+                exists; more than one is stated plainly rather than guessed. */}
+            {line.taskTitle ? (
+              <span className="text-text-secondary">{line.taskTitle}</span>
+            ) : line.taskLinkCount > 1 ? (
+              <span className="text-text-muted">
+                {t("taskAmbiguous", { count: line.taskLinkCount })}
+              </span>
+            ) : null}
           </li>
         ))}
       </ul>

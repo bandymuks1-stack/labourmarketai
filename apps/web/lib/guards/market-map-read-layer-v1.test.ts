@@ -621,7 +621,11 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 232 -> 233 for the work_task approval context widening
     // (20260819210000_workflow_work_task_context_v1, paired rollback).
     // GREEN CHECK widening; still nothing from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(233);
+    // Bumped 233 -> 234 for task attribution of canonical work-time
+    // (20260819220000_timesheet_task_attribution_v1, paired rollback).
+    // RED by route, owner-approved, ships UNAPPLIED; still nothing from
+    // the market-map read layer.
+    expect(count).toBeLessThanOrEqual(234);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
