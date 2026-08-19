@@ -1,0 +1,153 @@
+<!doctype html><html><head><meta charset="utf-8"><title>A — Living Section</title>
+<style>
+:root{--void:#06070d;--haze:#101425;--steel:#8b97ad;--machine:#c2884a;--timber:#8a6a42;
+--warm:#ffb066;--ember:#ff7a2f;--glass:#7fb2d8;--linen:#cfd8e2;--sap:#5f9a63;--skin:#ffcf9e;--sky:#16203a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);font-family:Inter,system-ui,sans-serif;overflow-x:hidden}
+.stage{position:relative;width:100%;height:100vh;overflow:hidden;background:
+ radial-gradient(120% 70% at 50% 108%, #21304f 0%, rgba(33,48,79,0) 62%),
+ linear-gradient(#0a0f1e 0%, #070a14 46%, #05070e 100%)}
+svg{position:absolute;inset:0;width:100%;height:100%}
+.ui{position:absolute;left:5vw;top:15vh;z-index:9;max-width:34ch}
+.eyebrow{font:600 11px/1 ui-monospace,monospace;letter-spacing:.22em;color:#9fb0c8;text-transform:uppercase;
+ border:1px solid #2b3racing;border:1px solid #2b3548;border-radius:3px;padding:7px 11px;display:inline-block}
+h1{font:800 clamp(38px,4.4vw,66px)/1.02 Inter,sans-serif;color:#fff;letter-spacing:-.03em;margin:22px 0 0}
+h1 em{font-style:normal;color:#6ea8ff}
+p{color:#aab6cc;font-size:16px;line-height:1.6;margin-top:16px}
+.cta{margin-top:26px;display:inline-block;background:#2f6df0;color:#fff;font-weight:600;font-size:15px;
+ padding:13px 22px;border-radius:9px;box-shadow:0 0 34px rgba(47,109,240,.5)}
+@media(max-width:520px){.ui{left:6vw;top:9vh;max-width:88vw}}
+</style></head><body>
+<div class="stage"><svg id="s" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+<div class="ui"><span class="eyebrow">Living labour market</span>
+<h1>Work is one <em>system.</em></h1>
+<p>A need enters. It travels until it finds the people who can answer it.</p>
+<span class="cta">Start now →</span></div></div>
+<script src="world-kit.js"></script><script>
+const DEFS=`<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#060a14"/><stop offset=".6" stop-color="#0c1730"/><stop offset="1" stop-color="#1b2b4c"/></linearGradient>
+ <radialGradient id="glowh"><stop offset="0" stop-color="#93b8ff" stop-opacity=".38"/>
+  <stop offset=".55" stop-color="#4d70b4" stop-opacity=".13"/><stop offset="1" stop-color="#4d70b4" stop-opacity="0"/></radialGradient>
+ <linearGradient id="hz" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#080d1a" stop-opacity="0"/><stop offset="1" stop-color="#080d1a" stop-opacity=".9"/>
+ </linearGradient></defs>`;
+const MOBILE = window.matchMedia("(max-width: 620px)").matches;
+const P=[];
+/* TEXT SAFE ZONE: x < 560 stays quiet. The world is composed AROUND the
+   words rather than the words being dropped on top of a picture. */
+
+/* ── SKY, HORIZON GLOW, DISTANT CITY ──────────────────────────────── */
+P.push(`<rect x="0" y="0" width="1600" height="420" fill="url(#sky)"/>`);
+P.push(`<ellipse cx="1120" cy="430" rx="520" ry="170" fill="url(#glowh)"/>`);
+for(let i=0;i<22;i++){const x=600+i*46,h=50+((i*97)%140),y=430;
+ P.push(`<rect x="${x}" y="${y-h}" width="${26+(i%3)*8}" height="${h}" fill="#141e36" opacity=".9"/>`);
+ for(let r=0;r<Math.floor(h/17);r++)for(let c=0;c<2;c++) if((i*7+r*3+c)%3===0)
+  P.push(`<rect x="${x+5+c*11}" y="${y-h+7+r*17}" width="5" height="6" fill="var(--warm)" opacity=".42"/>`);}
+P.push(towerCrane(760,430,120,95,'#233150'),towerCrane(1480,430,150,120,'#233150'));
+
+/* ── GREEN BELT + INFRASTRUCTURE behind the structure ─────────────── */
+P.push(`<g opacity=".6">`,greenhouse(1170,470,330,86,.9),`</g>`);
+P.push(`<rect x="0" y="424" width="1600" height="90" fill="url(#hz)"/>`);
+
+/* ══ THE STRUCTURE — one continuous building carrying every trade ══
+   Under construction at the top, fully working in the middle, shipping at
+   its base. One object, so the eye reads ONE economy instead of a set of
+   scenes placed near each other. */
+const BX=620,BW=700,GY=930,FH=112;
+
+/* ground it: excavated plinth + earth, so it is not a rectangle in space */
+P.push(`<path d="M${BX-120} ${GY+34} L${BX-40} ${GY} L${BX+BW+40} ${GY} L${BX+BW+150} ${GY+34} Z" fill="#0d1425"/>`);
+P.push(`<rect x="0" y="${GY+34}" width="1600" height="${1000-GY-34}" fill="#0a1020"/>`);
+
+/* TOP: under construction — open frame, crane, workers on the slab */
+const TOPY=GY-FH*4;
+for(let l=0;l<2;l++){const y=TOPY-l*54;
+ P.push(`<rect x="${BX+20}" y="${y-54}" width="${BW-40}" height="6" fill="#33415f"/>`);
+ for(let c=0;c<9;c++)P.push(`<rect x="${BX+40+c*72}" y="${y-54}" width="6" height="54" fill="#2c3a58"/>`);}
+P.push(towerCrane(BX-30,GY,470,330,'#7b8aa8'));
+P.push(figure(BX+150,TOPY,1.0,1),figure(BX+300,TOPY-54,.95,3),figure(BX+520,TOPY,1.0,0));
+
+/* the four working floors */
+const floors=[
+ {tint:'var(--glass)',op:.11,draw:y=>desks(BX+50,y-24,5,1.05)},          /* office     */
+ {tint:'var(--linen)',op:.10,draw:y=>beds(BX+50,y-26,4,1.0)},            /* care       */
+ {tint:'var(--ember)',op:.13,draw:y=>kitchen(BX+56,y-30,580,1.05)},      /* kitchen    */
+ {tint:'var(--machine)',op:.11,draw:y=>{let o="";for(let m=0;m<4;m++){const mx=BX+56+m*168;
+   o+=`<rect x="${mx}" y="${y-54}" width="92" height="36" rx="4" fill="#3a4866"/>
+       <rect x="${mx+18}" y="${y-74}" width="22" height="22" fill="#4a5a7c"/>
+       <circle cx="${mx+66}" cy="${y-36}" r="7" fill="var(--ember)" opacity=".6"/>`;
+   o+=figure(mx+116,y-18,.78,m%4);} return o;}},                          /* workshop   */
+];
+floors.forEach((f,i)=>{const y=GY-FH*(4-i);
+ P.push(room(BX,y,BW,FH,f.tint,f.op)); P.push(f.draw(y+FH));});
+for(let f=0;f<=4;f++) P.push(`<rect x="${BX-16}" y="${GY-FH*f-6}" width="${BW+32}" height="7" fill="#2e3d60"/>`);
+P.push(`<rect x="${BX-16}" y="${TOPY-6}" width="6" height="${FH*4+6}" fill="#2e3d60"/>`);
+P.push(`<rect x="${BX+BW+10}" y="${TOPY-6}" width="6" height="${FH*4+6}" fill="#2e3d60"/>`);
+
+/* ── BASE: logistics — the structure ships what it makes ──────────── */
+P.push(truck(1360,GY+34,1.15),forklift(1240,GY+34,1.05));
+P.push(racking(1130,GY+20,2,2,52,30));
+P.push(figure(1330,GY+34,1.05,1),figure(1200,GY+34,1.0,3));
+
+/* ── FOREGROUND LEFT: an active site, low enough to leave the text clear */
+P.push(excavator(230,GY+34,1.2));
+P.push(figure(400,GY+34,1.15,0),figure(440,GY+34,1.15,2));
+P.push(`<rect x="60" y="${GY+18}" width="300" height="16" fill="#131c31"/>`);
+
+/* ── SIGNALS: person → project → opportunity, threading the structure ─ */
+[[420,940,700,700],[760,690,1290,930],[1300,900,1420,520],[300,930,1150,560]].forEach((p,i)=>{
+ const d=`M${p[0]} ${p[1]} Q ${(p[0]+p[2])/2} ${Math.min(p[1],p[3])-130} ${p[2]} ${p[3]}`;
+ P.push(`<path d="${d}" fill="none" stroke="#39d98a" stroke-width="1.5" opacity=".34" stroke-dasharray="5 15">
+  <animate attributeName="stroke-dashoffset" from="0" to="-200" dur="${7+i}s" repeatCount="indefinite"/></path>
+  <circle r="3.6" fill="#8affd0" opacity=".9"><animateMotion dur="${7+i}s" repeatCount="indefinite" path="${d}"/></circle>`)});
+
+if (MOBILE) {
+  /* ── PORTRAIT COMPOSITION — re-staged, not cropped ──────────────────
+     A vertical cutaway is natively portrait: the structure simply stands
+     taller and the city sits above it instead of beside it. The desktop
+     frame is 1600x1000 and this one is 800x1400, so every coordinate is
+     authored for the tall frame rather than scaled down from the wide one. */
+  const M=[],BX=90,BW=620,GY=1210,FH=118;
+  M.push(`<rect x="0" y="0" width="800" height="560" fill="url(#sky)"/>`);
+  M.push(`<ellipse cx="400" cy="560" rx="420" ry="180" fill="url(#glowh)"/>`);
+  for(let i=0;i<16;i++){const x=20+i*50,h=60+((i*97)%150),y=560;
+    M.push(`<rect x="${x}" y="${y-h}" width="${24+(i%3)*8}" height="${h}" fill="#141e36" opacity=".9"/>`);
+    for(let r=0;r<Math.floor(h/18);r++) if((i*7+r*3)%3===0)
+      M.push(`<rect x="${x+6}" y="${y-h+8+r*18}" width="5" height="6" fill="var(--warm)" opacity=".45"/>`);}
+  M.push(towerCrane(210,560,110,88,'#233150'));
+  M.push(`<rect x="0" y="554" width="800" height="80" fill="url(#hz)"/>`);
+  /* structure: under construction on top */
+  const TOP=GY-FH*4;
+  for(let l=0;l<2;l++){const y=TOP-l*52;
+    M.push(`<rect x="${BX+16}" y="${y-52}" width="${BW-32}" height="6" fill="#33415f"/>`);
+    for(let c=0;c<7;c++)M.push(`<rect x="${BX+34+c*88}" y="${y-52}" width="6" height="52" fill="#2c3a58"/>`);}
+  M.push(towerCrane(BX-24,GY,430,300,'#7b8aa8'));
+  M.push(figure(BX+150,TOP,1.0,1),figure(BX+400,TOP-52,.95,3));
+  const mf=[
+    {t:'var(--glass)',o:.11,d:y=>desks(BX+40,y-24,3,1.05)},
+    {t:'var(--linen)',o:.10,d:y=>beds(BX+40,y-26,2,1.0)},
+    {t:'var(--ember)',o:.13,d:y=>kitchen(BX+46,y-30,500,1.0)},
+    {t:'var(--machine)',o:.11,d:y=>{let o="";for(let m=0;m<3;m++){const mx=BX+46+m*190;
+      o+=`<rect x="${mx}" y="${y-54}" width="92" height="36" rx="4" fill="#3a4866"/>
+          <circle cx="${mx+66}" cy="${y-36}" r="7" fill="var(--ember)" opacity=".6"/>`;
+      o+=figure(mx+120,y-18,.8,m%4);}return o;}},
+  ];
+  mf.forEach((f,i)=>{const y=GY-FH*(4-i); M.push(room(BX,y,BW,FH,f.t,f.o)); M.push(f.d(y+FH));});
+  for(let f=0;f<=4;f++) M.push(`<rect x="${BX-14}" y="${GY-FH*f-6}" width="${BW+28}" height="7" fill="#2e3d60"/>`);
+  /* base: logistics + site */
+  M.push(`<rect x="0" y="${GY}" width="800" height="${1400-GY}" fill="#0a1020"/>`);
+  M.push(truck(430,GY+60,1.0),forklift(300,GY+60,.95));
+  M.push(excavator(120,GY+60,1.0));
+  M.push(figure(250,GY+60,1.0,0),figure(600,GY+60,1.0,2));
+  [[180,GY+50,420,760],[520,720,240,980]].forEach((q,i)=>{
+    const d=`M${q[0]} ${q[1]} Q ${(q[0]+q[2])/2} ${Math.min(q[1],q[3])-120} ${q[2]} ${q[3]}`;
+    M.push(`<path d="${d}" fill="none" stroke="#39d98a" stroke-width="1.6" opacity=".36" stroke-dasharray="5 14">
+      <animate attributeName="stroke-dashoffset" from="0" to="-190" dur="${7+i}s" repeatCount="indefinite"/></path>
+      <circle r="3.8" fill="#8affd0"><animateMotion dur="${7+i}s" repeatCount="indefinite" path="${d}"/></circle>`)});
+  const svg=document.getElementById('s');
+  svg.setAttribute("viewBox","0 0 800 1400");
+  svg.innerHTML=DEFS+M.join("");
+}
+if(!MOBILE) document.getElementById("s").innerHTML=DEFS+P.join("");
+</script></body></html>

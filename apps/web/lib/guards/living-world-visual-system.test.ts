@@ -84,25 +84,30 @@ describe("the scene renders identically on the server and in the browser", () =>
     // screenshot review meaningless, because the scene under critique would
     // not be the scene that shipped.
     for (let i = 0; i < STRATA.length; i += 1) {
-      expect(presencePoints(i, STRATA[i].depth)).toEqual(
-        presencePoints(i, STRATA[i].depth),
+      expect(presencePoints(i, STRATA[i].depth, STRATA[i].horizonY)).toEqual(
+        presencePoints(i, STRATA[i].depth, STRATA[i].horizonY),
       );
     }
   });
 
   it("presence thins with depth, and no layer is ever empty", () => {
-    const near = presencePoints(0, 0).length;
-    const far = presencePoints(6, 1).length;
+    const near = presencePoints(0, 0, 0.6).length;
+    const far = presencePoints(6, 1, 0.84).length;
     expect(near).toBeGreaterThan(far);
     expect(far).toBeGreaterThanOrEqual(3);
   });
 
-  it("every presence point lands inside its layer", () => {
-    for (const pt of presencePoints(2, 0.33)) {
-      expect(pt.x).toBeGreaterThanOrEqual(0);
-      expect(pt.x).toBeLessThanOrEqual(1);
-      expect(pt.y).toBeGreaterThanOrEqual(0);
-      expect(pt.y).toBeLessThanOrEqual(1);
+  it("presence stands ON its layer's ground line, never in the sky above it", () => {
+    // The first cut derived y from the layer box and put workers at y 26–134
+    // while the horizons live at y 190–268 — people floating above the
+    // workplaces they were supposed to be standing in.
+    for (const s of STRATA) {
+      const i = STRATA.indexOf(s);
+      for (const pt of presencePoints(i, s.depth, s.horizonY)) {
+        expect(pt.x).toBeGreaterThanOrEqual(0);
+        expect(pt.x).toBeLessThanOrEqual(1);
+        expect(Math.abs(pt.y - s.horizonY)).toBeLessThan(0.06);
+      }
     }
   });
 
@@ -130,6 +135,23 @@ describe("the signal travels, and still means something at rest", () => {
   it("a stratum stages its own entrance rather than all moving at once", () => {
     expect(stratumProgress(0, 3)).toBe(0);
     expect(stratumProgress(1, STRATA.length - 1)).toBe(1);
+  });
+
+  it("the renderer actually USES the per-layer progress", () => {
+    // It was written, documented and guarded while the renderer multiplied
+    // the document-wide scroll — so all seven layers moved together and the
+    // helper was dead code the guard claimed was live.
+    const field = code("components", "world", "world-field.tsx");
+    expect(field).toContain("stratumProgress(progress, index)");
+    expect(field).toMatch(/travel\s*=\s*tier === "still" \? 0 : local \*/);
+  });
+
+  it("the scrim and the signal paint ABOVE the strata", () => {
+    // Every stratum is a stacking context (transform + opacity), so anything
+    // left at z-auto is painted under all of them regardless of DOM order.
+    const field = code("components", "world", "world-field.tsx");
+    expect(field).toMatch(/world-scrim[^"]*z-20/);
+    expect(field).toMatch(/absolute inset-x-0 z-30/);
   });
 });
 

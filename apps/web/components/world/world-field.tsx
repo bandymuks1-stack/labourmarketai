@@ -37,6 +37,7 @@ import {
   depthCue,
   presencePoints,
   signalAt,
+  stratumProgress,
   type Stratum,
 } from "@/lib/visual/strata";
 import {
@@ -114,7 +115,7 @@ export function WorldField({ intensity = 1 }: WorldFieldProps) {
           visible at the edges — the difference between a background and an
           obstruction. It is also what keeps text contrast audited-safe
           without dimming the whole scene into greyness. */}
-      <div className="world-scrim absolute inset-0" />
+      <div className="world-scrim absolute inset-0 z-20" />
 
       {layers.map((s, i) => (
         <StratumLayer key={s.id} stratum={s} index={i} progress={progress} tier={tier} />
@@ -144,7 +145,15 @@ function StratumLayer({
   tier: VisualTier;
 }) {
   const cue = depthCue(stratum.depth);
-  const travel = tier === "still" ? 0 : progress * cue.parallax * 100;
+  /**
+   * Staged by the layer's OWN slice of the descent, not by the document-wide
+   * scroll. Multiplying the global progress made all seven start together,
+   * which is a page that reacts to the wheel rather than a world that reveals
+   * itself — and it left `stratumProgress` as dead code the guard claimed was
+   * in use.
+   */
+  const local = stratumProgress(progress, index);
+  const travel = tier === "still" ? 0 : local * cue.parallax * 100;
 
   /**
    * A LAYER IS A HORIZON, NOT A BLOCK.
@@ -186,6 +195,12 @@ function StratumLayer({
         filter: cue.blurPx > 0.05 ? `blur(${cue.blurPx}px)` : undefined,
         transform: `translate3d(0, ${-travel}%, 0) scale(${cue.scale})`,
         transformOrigin: "50% 100%",
+        /* Strata occupy 1..7. The scrim and the signal sit ABOVE them
+           (z-20 / z-30): every layer here is already a stacking context via
+           its transform and opacity, so anything left at `auto` is painted
+           UNDER all of them no matter what the DOM order says. That is why
+           the signal was invisible in every early render — it was behind the
+           world the whole time. */
         zIndex: STRATA.length - index,
         // The mask is what removes the bottom edge. Without it the ground
         // ends in a line and the whole illusion collapses.
@@ -254,7 +269,7 @@ function StratumArt({ stratum, index }: { stratum: Stratum; index: number }) {
           <stop
             offset="0%"
             stopColor={`rgb(var(--c-strata-${stratum.id}))`}
-            stopOpacity="0.42"
+            stopOpacity="0.6"
           />
           <stop
             offset="100%"
@@ -278,7 +293,7 @@ function StratumArt({ stratum, index }: { stratum: Stratum; index: number }) {
       {/* PRESENCE — people at work in this layer. Warm points against the
           cool depth, because a lit human is the one thing in this scene that
           should read as alive rather than as structure. */}
-      {presencePoints(index, stratum.depth).map((pt, i) => (
+      {presencePoints(index, stratum.depth, stratum.horizonY).map((pt, i) => (
         <circle
           key={i}
           cx={pt.x * 1200}
@@ -307,7 +322,7 @@ function Signal({ progress, tier }: { progress: number; tier: VisualTier }) {
 
   return (
     <div
-      className="absolute inset-x-0"
+      className="absolute inset-x-0 z-30"
       style={{
         top: `${26 + depth * 58}%`,
         opacity: 0.35 + intensity * 0.65,

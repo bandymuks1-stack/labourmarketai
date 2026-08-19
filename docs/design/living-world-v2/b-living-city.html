@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset="utf-8"><title>B — Living City</title>
+<style>
+:root{--void:#06070d;--steel:#8b97ad;--machine:#c2884a;--timber:#8a6a42;--warm:#ffb066;--ember:#ff7a2f;
+--glass:#7fb2d8;--linen:#cfd8e2;--sap:#5f9a63;--skin:#ffcf9e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);font-family:Inter,system-ui,sans-serif;overflow-x:hidden}
+.stage{position:relative;width:100%;height:100vh;overflow:hidden;background:
+ radial-gradient(140% 80% at 50% 8%, #1a2440 0%, rgba(26,36,64,0) 55%),
+ linear-gradient(#0c1striking 0%, #070a14 100%);background-color:#070a14}
+svg{position:absolute;inset:0;width:100%;height:100%}
+.ui{position:absolute;left:5vw;top:12vh;z-index:9;max-width:33ch}
+.eyebrow{font:600 11px/1 ui-monospace,monospace;letter-spacing:.22em;color:#9fb0c8;text-transform:uppercase;
+ border:1px solid #2b3548;border-radius:3px;padding:7px 11px;display:inline-block}
+h1{font:800 clamp(38px,4.4vw,64px)/1.02 Inter,sans-serif;color:#fff;letter-spacing:-.03em;margin:20px 0 0}
+h1 em{font-style:normal;color:#6ea8ff}
+p{color:#aab6cc;font-size:16px;line-height:1.6;margin-top:14px}
+.cta{margin-top:24px;display:inline-block;background:#2f6df0;color:#fff;font-weight:600;font-size:15px;
+ padding:13px 22px;border-radius:9px;box-shadow:0 0 34px rgba(47,109,240,.5)}
+</style></head><body>
+<div class="stage"><svg id="s" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+<div class="ui"><span class="eyebrow">Living labour market</span>
+<h1>One working <em>region.</em></h1>
+<p>Every site, floor and depot in one economy — and the people moving through it.</p>
+<span class="cta">Start now →</span></div></div>
+<script src="world-kit.js"></script><script>
+const P=[];
+/* Ground plane: a wide valley of districts receding. Districts sit on bands
+   that get higher + hazier with distance — one continuous region, not tiles. */
+function band(y,scale,op){return {y:y,s:scale,o:op};}
+const B=[band(950,1.0,1),band(830,.82,.92),band(720,.66,.8),band(628,.54,.66),band(552,.44,.52),band(492,.36,.4)];
+
+/* far belt: green economy + infrastructure */
+P.push(`<g opacity="${B[5].o}">`);
+P.push(greenhouse(120,B[5].y,300,70,B[5].s),greenhouse(470,B[5].y,300,70,B[5].s));
+for(let i=0;i<7;i++)P.push(`<path d="M${900+i*95} ${B[5].y} l0 -${40+i%3*14}" stroke="#2b3a58" stroke-width="3"/>
+ <circle cx="${900+i*95}" cy="${B[5].y-(40+i%3*14)}" r="7" fill="none" stroke="#2b3a58" stroke-width="2"/>`);
+P.push(`</g>`);
+
+/* office core — towers with lit floors */
+P.push(`<g opacity="${B[4].o}">`);
+for(let i=0;i<9;i++){const x=520+i*84,h=90+((i*67)%130);
+ P.push(`<rect x="${x}" y="${B[4].y-h}" width="52" height="${h}" fill="#18233c"/>`);
+ for(let r=0;r<Math.floor(h/15);r++)for(let c=0;c<3;c++) if((i*5+r*7+c)%3!==0)
+  P.push(`<rect x="${x+7+c*15}" y="${B[4].y-h+6+r*15}" width="8" height="8" fill="var(--glass)" opacity=".45"/>`);}
+P.push(towerCrane(430,B[4].y,140,110,'#33456a'));
+P.push(`</g>`);
+
+/* hospitality + care district */
+P.push(`<g opacity="${B[3].o}">`);
+P.push(`<rect x="130" y="${B[3].y-96}" width="420" height="96" fill="#141d33" stroke="#26324e"/>`);
+P.push(kitchen(170,B[3].y-8,220,.8));
+P.push(beds(400,B[3].y-8,2,.75));
+P.push(`<rect x="620" y="${B[3].y-110}" width="360" height="110" fill="#141d33" stroke="#26324e"/>`);
+P.push(desks(650,B[3].y-14,4,.8));
+P.push(`</g>`);
+
+/* manufacturing / workshop — sawtooth roofs, the classic factory silhouette */
+P.push(`<g opacity="${B[2].o}">`);
+let saw="";for(let i=0;i<8;i++){const x=1010+i*74;saw+=`M${x} ${B[2].y-60} L${x+38} ${B[2].y-104} L${x+38} ${B[2].y-60} `;}
+P.push(`<path d="${saw}" fill="#16203a" stroke="#2a3a5c" stroke-width="1.6"/>`);
+P.push(`<rect x="1010" y="${B[2].y-60}" width="600" height="60" fill="#111a2f" stroke="#2a3a5c"/>`);
+for(let m=0;m<4;m++){const mx=1050+m*140;
+ P.push(`<rect x="${mx}" y="${B[2].y-34}" width="72" height="30" rx="4" fill="#33415e"/>
+         <circle cx="${mx+52}" cy="${B[2].y-20}" r="6" fill="var(--ember)" opacity=".7"/>`);
+ P.push(figure(mx+92,B[2].y-4,.8,m%4));}
+P.push(`</g>`);
+
+/* logistics hub */
+P.push(`<g opacity="${B[1].o}">`);
+P.push(`<rect x="60" y="${B[1].y-120}" width="640" height="120" fill="#0f1729" stroke="#26324e"/>`);
+P.push(racking(90,B[1].y-14,5,3,54,32));
+P.push(forklift(600,B[1].y-8,1.0));
+P.push(truck(760,B[1].y,1.0),truck(940,B[1].y,1.0));
+P.push(figure(700,B[1].y,.95,1),figure(880,B[1].y,.95,3));
+/* rail line linking the region */
+P.push(`<path d="M0 ${B[1].y+16} L1600 ${B[1].y+16}" stroke="#2b3a58" stroke-width="3"/>`);
+P.push(`</g>`);
+
+/* FOREGROUND: active construction project */
+P.push(`<g opacity="1">`);
+P.push(`<rect x="0" y="${B[0].y}" width="1600" height="60" fill="#0b1120"/>`);
+for(let l=0;l<3;l++){const y=B[0].y-l*54;
+ P.push(`<rect x="1020" y="${y-54}" width="440" height="6" fill="#31405f"/>`);
+ for(let c=0;c<8;c++)P.push(`<rect x="${1035+c*54}" y="${y-54}" width="6" height="54" fill="#2b3752"/>`);}
+P.push(towerCrane(1080,B[0].y,330,300,'#68779a'));
+P.push(excavator(240,B[0].y,1.25));
+P.push(figure(430,B[0].y,1.25,0),figure(470,B[0].y,1.25,2),figure(1290,B[0].y-108,1.1,1),figure(1200,B[0].y-54,1.1,3));
+P.push(`</g>`);
+
+/* opportunity signals threading the whole region */
+[[300,930,760,700],[900,690,1240,560],[560,600,1180,830],[1300,520,420,600]].forEach((p,i)=>{
+ const d=`M${p[0]} ${p[1]} Q ${(p[0]+p[2])/2} ${Math.min(p[1],p[3])-140} ${p[2]} ${p[3]}`;
+ P.push(`<path d="${d}" fill="none" stroke="#39d98a" stroke-width="1.5" opacity=".42" stroke-dasharray="6 13">
+  <animate attributeName="stroke-dashoffset" from="0" to="-200" dur="${6+i}s" repeatCount="indefinite"/></path>
+  <circle r="3.6" fill="#7dffc0"><animateMotion dur="${6+i}s" repeatCount="indefinite" path="${d}"/></circle>`)});
+
+document.getElementById('s').innerHTML=P.join("");
+</script></body></html>

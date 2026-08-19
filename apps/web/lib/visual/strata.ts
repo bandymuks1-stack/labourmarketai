@@ -45,6 +45,14 @@ export interface Stratum {
    * own depth — the single number that keeps the world coherent.
    */
   readonly depth: number;
+  /**
+   * Where this layer's ground line sits, as a fraction of the 320-unit
+   * viewBox height. Presence is placed against THIS, not against the layer
+   * box: the first cut derived worker positions from the band alone and put
+   * them at y 26–134 while the horizons live at y 190–268, so the people
+   * floated in the sky above the workplaces they were supposed to be in.
+   */
+  readonly horizonY: number;
 }
 
 export type StratumId =
@@ -67,13 +75,13 @@ export type StratumId =
  * that is where it composes.
  */
 export const STRATA: readonly Stratum[] = [
-  { id: "site", environment: "construction", depth: 0.0 },
-  { id: "assembly", environment: "manufacturing", depth: 0.16 },
-  { id: "logistics", environment: "warehouse-transport", depth: 0.33 },
-  { id: "kitchen", environment: "food-hospitality", depth: 0.5 },
-  { id: "care", environment: "healthcare-care", depth: 0.66 },
-  { id: "cultivation", environment: "green-economy", depth: 0.83 },
-  { id: "studio", environment: "office-technical", depth: 1.0 },
+  { id: "site", environment: "construction", depth: 0.0, horizonY: 190 / 320 },
+  { id: "assembly", environment: "manufacturing", depth: 0.16, horizonY: 210 / 320 },
+  { id: "logistics", environment: "warehouse-transport", depth: 0.33, horizonY: 220 / 320 },
+  { id: "kitchen", environment: "food-hospitality", depth: 0.5, horizonY: 236 / 320 },
+  { id: "care", environment: "healthcare-care", depth: 0.66, horizonY: 244 / 320 },
+  { id: "cultivation", environment: "green-economy", depth: 0.83, horizonY: 258 / 320 },
+  { id: "studio", environment: "office-technical", depth: 1.0, horizonY: 268 / 320 },
 ] as const;
 
 /** Depth-derived visual properties. One source, so depth can never disagree
@@ -178,8 +186,13 @@ export interface PresencePoint {
   readonly glow: number;
 }
 
-export function presencePoints(stratumIndex: number, depth: number): readonly PresencePoint[] {
+export function presencePoints(
+  stratumIndex: number,
+  depth: number,
+  horizonY: number,
+): readonly PresencePoint[] {
   const count = Math.max(3, Math.round(14 * (1 - clamp01(depth) * 0.72)));
+  const line = clamp01(horizonY);
   const out: PresencePoint[] = [];
   for (let i = 0; i < count; i += 1) {
     const a = hash(stratumIndex * 977 + i * 131);
@@ -187,9 +200,11 @@ export function presencePoints(stratumIndex: number, depth: number): readonly Pr
     const c = hash(stratumIndex * 613 + i * 251);
     out.push({
       x: round(a, 4),
-      // Kept in the upper band of the layer so presence sits ON the horizon
-      // line rather than floating in the ground fill below it.
-      y: round(0.08 + b * 0.34, 4),
+      // ON the ground line: a narrow band straddling it, never the open sky
+      // above it. `b` spreads them across roughly ±4% of the frame so a row
+      // of workers reads as standing at slightly different distances rather
+      // than ruled along a wire.
+      y: round(clamp01(line - 0.045 + b * 0.075), 4),
       glow: round(0.35 + c * 0.65, 4),
     });
   }
