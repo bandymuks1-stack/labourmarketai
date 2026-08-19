@@ -40,12 +40,22 @@ import {
 } from "./data-sensitivity";
 
 /** Provider ids the chain can order. `local` is the keyless self-hosted seam. */
-export type AiChainProviderId =
-  | "local"
-  | "anthropic"
-  | "openai"
-  | "gemini"
-  | "xai";
+/**
+ * Provider ids the chain can order.
+ *
+ * OPEN BY DESIGN since 2026-08-19. This was a closed union of five, which meant
+ * a provider registered in `model-registry.ts` could be priced and listed yet
+ * never ordered or dispatched — the registry was open while the road out of it
+ * was not. Providers are now DATA: the set of real ones is whatever the
+ * registry and `AI_PROVIDER_PROFILES` contain, validated at runtime rather than
+ * fixed at compile time.
+ *
+ * The safety that the union used to give is replaced, not dropped: an id with
+ * no profile is never a candidate (`profileFor` returns undefined), and an id
+ * with no adapter fails closed with an honest reason instead of crashing —
+ * see `adapterForChainId` in run-core.ts.
+ */
+export type AiChainProviderId = string;
 
 /**
  * What running this provider costs the owner.

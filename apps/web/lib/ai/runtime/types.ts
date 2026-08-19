@@ -102,11 +102,14 @@ export type AiCompletionResult =
  * `cfg.provider` by construction. Present on the chain path, where it is the
  * only way the audit trail can avoid blaming the primary provider for a
  * failure that happened three candidates later.
+ *
+ * WIDENED 2026-08-19 alongside `AiChainProviderId`: attribution must be able to
+ * name a provider the registry knows but this union predates. A failure that
+ * cannot be attributed is worse than one attributed to an id the type did not
+ * anticipate — the known members stay listed as documentation of the common
+ * cases.
  */
-export type AiAttributedProvider =
-  | "mock"
-  | AiProviderKind
-  | AiSecondaryProviderKind;
+export type AiAttributedProvider = "mock" | AiProviderKind | AiSecondaryProviderKind | string;
 
 export function isAiOk(
   r: AiCompletionResult,

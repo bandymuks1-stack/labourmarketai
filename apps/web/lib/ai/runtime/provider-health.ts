@@ -49,6 +49,18 @@ export interface ProviderObservation {
   readonly openai: CloudProviderObservation;
   readonly gemini: CloudProviderObservation;
   readonly xai: CloudProviderObservation;
+  /**
+   * ANY other cloud provider, keyed by registry id. The open extension point:
+   * the four named fields above predate the model registry, and a provider
+   * that cannot be OBSERVED can never be reported ready, so opening dispatch
+   * without opening observation would have left a newly registered provider
+   * dispatchable in theory and unreachable in fact.
+   *
+   * Named fields are kept rather than replaced so existing callers are
+   * untouched; a key here that duplicates one of them is ignored in favour of
+   * the named field, so there is exactly one answer per provider.
+   */
+  readonly cloud?: Readonly<Record<string, CloudProviderObservation>>;
 }
 
 function cloudState(
@@ -104,11 +116,18 @@ function localState(o: LocalProviderObservation): AiProviderState {
 export function observeProviderStates(
   o: ProviderObservation,
 ): readonly AiProviderState[] {
+  const NAMED = ["local", "anthropic", "openai", "gemini", "xai"] as const;
+  const extraIds = Object.keys(o.cloud ?? {}).filter(
+    (id) => !NAMED.includes(id as (typeof NAMED)[number]),
+  );
+
   if (o.runtimeState !== "live") {
     const reason = `AI runtime is "${o.runtimeState}", not live`;
-    return (
-      ["local", "anthropic", "openai", "gemini", "xai"] as AiChainProviderId[]
-    ).map((id) => ({ id, health: "disabled" as const, reason }));
+    return [...NAMED, ...extraIds].map((id) => ({
+      id,
+      health: "disabled" as const,
+      reason,
+    }));
   }
   return [
     localState(o.local),
@@ -116,5 +135,6 @@ export function observeProviderStates(
     cloudState("openai", o.openai),
     cloudState("gemini", o.gemini),
     cloudState("xai", o.xai),
+    ...extraIds.map((id) => cloudState(id, o.cloud![id])),
   ];
 }

@@ -39,9 +39,10 @@ import type {
 import { disabledCompletionProvider } from "./providers/disabled";
 import { mockCompletionProvider } from "./providers/mock";
 import { anthropicCompletionProvider } from "./providers/anthropic";
+import { xaiCompletionProvider } from "./providers/xai";
+import { transportForProvider } from "./model-registry";
 import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
-import { xaiCompletionProvider } from "./providers/xai";
 import { deeplCompletionProvider } from "./providers/deepl";
 import { localCompletionProvider } from "./providers/local";
 import {
@@ -80,18 +81,36 @@ export function selectCompletionProvider(
 
 /** Chain id → adapter. Separate from `selectCompletionProvider` because the
  *  chain addresses a provider directly, not through `cfg.provider`. */
-function adapterForChainId(id: AiChainProviderId): AiCompletionProvider {
-  switch (id) {
-    case "local":
-      return localCompletionProvider;
+/**
+ * Adapter for a chain provider, or null when nothing can serve it.
+ *
+ * TRANSPORT, NOT VENDOR. This used to be an exhaustive switch over a closed
+ * five-value union, which is why a newly registered provider could be priced
+ * and ordered yet have no way to run. It now asks the registry which WIRE
+ * PROTOCOL the provider speaks and returns the adapter for that protocol, so
+ * every OpenAI-compatible entrant — Qwen via Model Studio, and the rest —
+ * reaches an existing adapter as registry data rather than a new case here.
+ *
+ * TOTAL, AND FAILS CLOSED. Returning null rather than falling through to
+ * `undefined` is the whole point: with the union opened, an unrecognised id
+ * would otherwise have crashed at `.complete()`. The caller degrades honestly
+ * instead — "no adapter" and "the adapter failed" stay different sentences.
+ */
+function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
+  // `local` is not registry-bound: it serves whatever model the operator
+  // pulled, so it has no fixed model id and is matched by provider directly.
+  if (id === "local") return localCompletionProvider;
+  switch (transportForProvider(id)) {
     case "anthropic":
       return anthropicCompletionProvider;
-    case "openai":
-      return openaiCompletionProvider;
     case "gemini":
       return geminiCompletionProvider;
-    case "xai":
-      return xaiCompletionProvider;
+    case "openai-compatible":
+      // One adapter for the whole OpenAI-protocol family. Which vendor it
+      // reaches is a base-URL/env concern owned by the adapter, not a branch.
+      return openaiCompletionProvider;
+    default:
+      return null;
   }
 }
 
@@ -189,7 +208,19 @@ export async function dispatchAiCompletion(
   };
 
   for (const candidate of candidates) {
-    const result = await adapterForChainId(candidate.id).complete(request, cfg);
+    const adapter = adapterForChainId(candidate.id);
+    if (adapter === null) {
+      // Registered and ordered, but nothing speaks its protocol. Skip it with
+      // an honest reason rather than crashing — the next candidate may serve.
+      last = {
+        status: "error",
+        code: "unsupported",
+        message: `no adapter for provider "${candidate.id}" — its transport is unknown to this runtime`,
+        provider: candidate.id,
+      };
+      continue;
+    }
+    const result = await adapter.complete(request, cfg);
     if (result.status === "ok") return result;
 
     // Attribute the failure to the provider that produced it, so an audit

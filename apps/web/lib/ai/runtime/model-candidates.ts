@@ -14,23 +14,17 @@
  * `lib/ai/runtime/` alone, which is strictly stronger — model choice cannot
  * leak into any module outside the routing layer, including the legacy island.
  *
- * SCOPE, stated precisely because it is easy to overclaim: this projection is
- * now open — EVERY provider in the registry appears here, including ones that
- * were never in the original four. What is NOT yet open is the dispatch
- * surface: `AiModelProvider` (task-routing), `AiProviderKind` (config-core) and
- * `AiChainProviderId` (provider-chain) remain closed unions, so a newly
- * registered provider is visible and priced but cannot yet be PASSED to
- * `modelIdForAlias` or dispatched without migrating those three types. That
- * migration touches dispatch and is its own slice.
+ * SCOPE, updated 2026-08-19 (second pass). The first pass opened this
+ * projection but left the road out of it closed, and said so. That is now
+ * fixed: `AiChainProviderId` is registry-driven, `adapterForChainId` maps by
+ * WIRE PROTOCOL rather than vendor, and `observeProviderStates` takes an open
+ * map, so a registered provider can be observed, ordered and dispatched.
  *
- * SCOPE, stated precisely because it is easy to overclaim: this projection is
- * now open — EVERY provider in the registry appears here, including ones that
- * were never among the original four. What is NOT yet open is the dispatch
- * surface: `AiModelProvider` (task-routing), `AiProviderKind` (config-core) and
- * `AiChainProviderId` (provider-chain) are still closed unions, so a newly
- * registered provider is visible and priceable but cannot yet be PASSED to
- * `modelIdForAlias` or dispatched without migrating those three types. That
- * migration touches dispatch and is its own slice.
+ * What still requires work outside the registry, stated so it is not
+ * overclaimed again: a new provider needs a `AI_PROVIDER_PROFILES` entry (cost
+ * class, locality, capabilities — provider-level data, not a type), an
+ * observation wired from env, and — for a metered one — owner-reviewed prices
+ * before it is selectable at all.
  *
  * DERIVED SINCE 2026-08-19: the ids now come from `./model-registry.ts`,
  * which is the single place a (provider, model) fact is written. The values are

@@ -60,9 +60,29 @@ export const MODEL_REGISTRY_VERSION = 1;
 export const MODEL_ALIASES = ["haiku", "sonnet", "opus", "fable"] as const;
 export type ModelAlias = (typeof MODEL_ALIASES)[number];
 
+/**
+ * The WIRE PROTOCOL a model speaks — deliberately not the vendor's name.
+ *
+ * This is the field that makes the architecture globally provider-neutral in
+ * practice rather than in principle. Most new entrants (Qwen via Alibaba Cloud
+ * Model Studio, DeepSeek, Mistral, OpenRouter, vLLM, Ollama, LM Studio) expose
+ * an OpenAI-COMPATIBLE endpoint. Mapping transport -> adapter instead of
+ * provider -> adapter means every one of those is reachable with an existing
+ * adapter and a base URL: a registry entry, not a new adapter and not a new
+ * switch case.
+ */
+export const MODEL_TRANSPORTS = [
+  "anthropic",
+  "openai-compatible",
+  "gemini",
+] as const;
+export type ModelTransport = (typeof MODEL_TRANSPORTS)[number];
+
 export interface ModelRegistryEntry {
   /** Provider id. Free-form BY DESIGN — a new provider is data, not a type. */
   readonly provider: string;
+  /** Wire protocol. Decides which ADAPTER serves it — see {@link ModelTransport}. */
+  readonly transport: ModelTransport;
   /** The concrete model id sent on the wire. */
   readonly model: string;
   /** Tier alias this model serves for its provider, or null if unbound. */
@@ -110,6 +130,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // ── Anthropic — the only prices the owner has reviewed. ───────────────────
   {
     provider: "anthropic",
+    transport: "anthropic" as const,
     model: "claude-haiku-4-5-20251001",
     alias: "haiku",
     capabilities: GENERAL_TASKS,
@@ -127,6 +148,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   },
   {
     provider: "anthropic",
+    transport: "anthropic" as const,
     model: "claude-sonnet-4-6",
     alias: "sonnet",
     capabilities: GENERAL_TASKS,
@@ -144,6 +166,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   },
   {
     provider: "anthropic",
+    transport: "anthropic" as const,
     model: "claude-opus-4-8",
     alias: "opus",
     capabilities: GENERAL_TASKS,
@@ -161,6 +184,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   },
   {
     provider: "anthropic",
+    transport: "anthropic" as const,
     model: "claude-fable-5",
     alias: "fable",
     capabilities: [],
@@ -182,6 +206,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // registered and disabled rather than quietly reachable.
   ...(["gpt-5-nano", "gpt-5-mini", "gpt-5"] as const).map((model, i) => ({
     provider: "openai",
+    transport: "openai-compatible" as const,
     model,
     alias: (["haiku", "sonnet", "opus"] as const)[i],
     capabilities: GENERAL_TASKS,
@@ -200,6 +225,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   ...(["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"] as const).map(
     (model, i) => ({
       provider: "gemini",
+      transport: "gemini" as const,
       model,
       alias: (["haiku", "sonnet", "opus"] as const)[i],
       capabilities: GENERAL_TASKS,
@@ -221,6 +247,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   ),
   ...(["grok-3-mini", "grok-3", "grok-4"] as const).map((model, i) => ({
     provider: "xai",
+    transport: "openai-compatible" as const,
     model,
     alias: (["haiku", "sonnet", "opus"] as const)[i],
     capabilities: GENERAL_TASKS,
@@ -258,6 +285,9 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // new one. That is a separate slice and is not assumed here.
   ...(["qwen-flash", "qwen-plus", "qwen-max"] as const).map((model, i) => ({
     provider: "qwen",
+    // Model Studio speaks the OpenAI protocol, so no new adapter is needed —
+    // only a base URL, once the owner verifies terms and pricing.
+    transport: "openai-compatible" as const,
     model,
     alias: (["haiku", "sonnet", "opus"] as const)[i],
     // Unassessed against our own evals — capabilities stay empty rather than
@@ -311,4 +341,15 @@ export function registryEntryForModel(
   model: string,
 ): ModelRegistryEntry | null {
   return MODEL_REGISTRY.find((e) => e.model === model) ?? null;
+}
+
+/**
+ * Wire protocol for a provider, or null when the provider is unknown here.
+ *
+ * `local` is deliberately ABSENT from the registry: it hosts whatever model the
+ * operator pulled, so it has no fixed model id to register. Callers handle it
+ * explicitly rather than the registry inventing an entry for it.
+ */
+export function transportForProvider(provider: string): ModelTransport | null {
+  return MODEL_REGISTRY.find((e) => e.provider === provider)?.transport ?? null;
 }

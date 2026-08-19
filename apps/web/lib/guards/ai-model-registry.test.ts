@@ -129,6 +129,7 @@ describe("an unsourced price can never authorise spend", () => {
     // Direct simulation of the staged-enablement mistake.
     const halfFinished = {
       provider: "example",
+      transport: "openai-compatible" as const,
       model: "example-model-1",
       alias: "sonnet" as const,
       capabilities: [],
@@ -222,20 +223,19 @@ describe("a new provider is registry data — dispatch is a separate migration",
     expect(providers).toContain("qwen");
   });
 
-  it("states honestly that the DISPATCH surface is still closed", () => {
-    // Scope pin, so the contract is not overclaimed. `AiModelProvider`,
-    // `AiProviderKind` and `AiChainProviderId` remain closed unions: a newly
-    // registered provider is visible and priceable but not yet dispatchable.
-    // Migrating those three is its own slice, and this comment is the record.
+  it("keeps stating what still needs work outside the registry", () => {
+    // Scope pin. The first pass overclaimed ("a new provider is data, not a
+    // type change") while the dispatch surface was still closed. Dispatch is
+    // open now, but a new provider still needs a profile, an observation and —
+    // if metered — owner-reviewed prices. The note must survive so the next
+    // reader inherits the real remaining work rather than a fresh overclaim.
     const src = readFileSync(
       join(__dirname, "..", "ai", "runtime", "model-candidates.ts"),
       "utf8",
     );
-    // Match on tokens rather than a phrase — comment reflow must not break
-    // the pin, only the removal of the scope note itself should.
-    expect(src).toContain("AiChainProviderId");
-    expect(src).toContain("AiProviderKind");
-    expect(src).toContain("its own slice");
+    expect(src).toContain("AI_PROVIDER_PROFILES");
+    expect(src).toContain("owner-reviewed prices");
+    expect(src).toContain("overclaimed");
   });
 
   it("Qwen is registered as a real candidate", () => {
