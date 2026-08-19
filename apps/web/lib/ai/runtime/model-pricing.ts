@@ -75,3 +75,51 @@ export function computeActualCostUsd(
     1_000_000;
   return Math.round(cost * 1_000_000) / 1_000_000;
 }
+
+// ── Pre-run estimation (AI Router: cost ceilings must be enforceable) ────────
+
+/**
+ * Conservative token estimate from text.
+ *
+ * WHY A HEURISTIC IS THE HONEST CHOICE HERE. A real tokenizer is
+ * provider-specific: importing one would put a vendor's tokenizer in the
+ * routing layer and re-couple the architecture to a provider, which is exactly
+ * what the owner's multi-provider requirement forbids. A ceiling only needs to
+ * know the ORDER OF MAGNITUDE of a run before it happens, and it must never
+ * UNDER-estimate — an under-estimate lets a run through the budget it should
+ * have been blocked by.
+ *
+ * So: 4 characters per token, rounded UP, with a floor of 1 for non-empty
+ * text. Across the Latin and Cyrillic scripts this product ships, real
+ * tokenizers land at or below that ratio, so the estimate errs high — the safe
+ * direction for a budget.
+ *
+ * This is an ESTIMATE and is only ever compared against a ceiling. Billing and
+ * the `ai_runs` audit row use {@link computeActualCostUsd} on REAL usage
+ * reported by the provider; the two are never mixed.
+ */
+export function estimateTokensFromText(text: string): number {
+  if (typeof text !== "string" || text.length === 0) return 0;
+  return Math.max(1, Math.ceil(text.length / 4));
+}
+
+/**
+ * Pre-run cost estimate in USD for a model and an expected token shape.
+ *
+ * Returns `null` when the model carries no OWNER-REVIEWED price — the same
+ * honesty rule as {@link computeActualCostUsd}: an unpriced model yields no
+ * number rather than a guessed one. The routing layer treats `null` as "this
+ * ceiling cannot be evaluated" and blocks, because a budget that cannot be
+ * checked is not a budget.
+ */
+export function estimateCostUsd(
+  modelIdOrAlias: string,
+  expectedInputTokens: number,
+  expectedOutputTokens: number,
+): number | null {
+  return computeActualCostUsd(
+    modelIdOrAlias,
+    expectedInputTokens,
+    expectedOutputTokens,
+  );
+}

@@ -15,8 +15,12 @@
  *     is riskLevel "high" — and a high-risk policy must also require human
  *     review; enforced by task-routing.test.ts).
  *   - Escalate ONE tier only, and only on a condition the policy lists.
- *   - Cost ceiling → blocked "cost_ceiling". A run over budget NEVER silently
- *     proceeds.
+ *   - Cost ceiling → blocked "cost_ceiling", evaluated on the tier that will
+ *     ACTUALLY run (after escalation/fallback) and priced by this layer from
+ *     the token SIZE the caller supplies — call sites never know the model.
+ *     A run over budget NEVER silently proceeds. A model with no
+ *     owner-reviewed price makes the ceiling uncheckable → blocked
+ *     "cost_unpriced" rather than unbounded spend.
  *   - Provider-failure fallback may go DOWN a tier only with
  *     fallbackApplied=true and an honest reason — no silent quality drop.
  *   - The "high_risk_verified" tier requires a pre-run human confirmation
@@ -25,13 +29,16 @@
  *
  * Audit-record persistence: {@link buildRoutingAuditRecord} stays the PURE
  * builder; the server boundary (run-agent-server.ts → runtime/audit-store.ts)
- * persists the record best-effort into the `ai_runs` table (gated draft
- * migration 20260714150000_ai_runs_audit_v1.sql — applying it to prod is an
- * owner gate; until then persistence fails soft and the run is unaffected).
+ * persists the record best-effort into the `ai_runs` table. That table IS
+ * APPLIED in production (verified 2026-08-19: 27 columns, matching the
+ * audit-store writer); the earlier note here calling it an unapplied gated
+ * draft was stale and misled readers into thinking telemetry had nowhere to
+ * land. Persistence still fails soft, so a logging outage never breaks a run.
  *
  * Pure. No server-only, no env, no IO, no fetch.
  */
 import { AI_MODEL_CANDIDATES } from "./model-candidates";
+import { estimateCostUsd } from "./model-pricing";
 import type { AiRuntimeConfig } from "./config-core";
 import type { AiAgentKey } from "../registry/types";
 
@@ -108,6 +115,13 @@ export interface AiTaskPolicy {
   readonly minQuality: number;
   /** Hard per-run cost ceiling (USD). Over ceiling → blocked, never run. */
   readonly maxEstimatedCostUsd: number;
+  /**
+   * Output tokens this task is expected to produce. Half of the pre-run cost
+   * estimate (the other half is the caller's input size), so the ceiling can
+   * be evaluated BEFORE a provider is called rather than discovered after.
+   * A budget without an expected output size is not checkable.
+   */
+  readonly expectedOutputTokens: number;
   readonly maxLatencyMs: number;
   readonly preferredTier: AiModelTier;
   /** Tier used on provider failure (surfaced via fallbackApplied). */
@@ -155,6 +169,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "companyNeedOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.15,
+    expectedOutputTokens: 900,
     maxLatencyMs: 30_000,
     preferredTier: "standard",
     fallbackTier: "low_cost",
@@ -176,6 +191,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "countryReadinessOutputSchema | documentAssistantOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.15,
+    expectedOutputTokens: 900,
     maxLatencyMs: 30_000,
     preferredTier: "standard",
     fallbackTier: "low_cost",
@@ -191,6 +207,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "workJournalOutputSchema",
     minQuality: 0.55,
     maxEstimatedCostUsd: 0.05,
+    expectedOutputTokens: 400,
     maxLatencyMs: 20_000,
     preferredTier: "low_cost",
     fallbackTier: "low_cost",
@@ -211,6 +228,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "deterministic capacity-gap model output (pure workforce model)",
     minQuality: 1,
     maxEstimatedCostUsd: 0,
+    expectedOutputTokens: 0,
     maxLatencyMs: 5_000,
     preferredTier: "deterministic",
     fallbackTier: "deterministic",
@@ -226,6 +244,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "deterministic skill-gap model output (pure workforce model)",
     minQuality: 1,
     maxEstimatedCostUsd: 0,
+    expectedOutputTokens: 0,
     maxLatencyMs: 5_000,
     preferredTier: "deterministic",
     fallbackTier: "deterministic",
@@ -241,6 +260,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "workerProfileOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.12,
+    expectedOutputTokens: 600,
     maxLatencyMs: 30_000,
     preferredTier: "standard",
     fallbackTier: "low_cost",
@@ -258,6 +278,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "workerProfileOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.2,
+    expectedOutputTokens: 1200,
     maxLatencyMs: 45_000,
     preferredTier: "standard",
     fallbackTier: "low_cost",
@@ -285,6 +306,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "matchingExplanationOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.15,
+    expectedOutputTokens: 700,
     maxLatencyMs: 30_000,
     preferredTier: "standard",
     fallbackTier: "low_cost",
@@ -300,6 +322,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "translationCopyOutputSchema",
     minQuality: 0.55,
     maxEstimatedCostUsd: 0.03,
+    expectedOutputTokens: 600,
     maxLatencyMs: 15_000,
     preferredTier: "low_cost",
     fallbackTier: "low_cost",
@@ -319,6 +342,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     expectedSchema: "supportOnboardingOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.05,
+    expectedOutputTokens: 500,
     maxLatencyMs: 20_000,
     preferredTier: "low_cost",
     fallbackTier: "low_cost",
@@ -367,14 +391,26 @@ export interface AiTaskRouteContext {
   readonly previousFailure?: EscalationReason;
   /** The previous attempt failed at the PROVIDER (outage/timeout) — fallback. */
   readonly previousProviderFailure?: boolean;
-  /** Pre-run cost estimate, when the caller can compute one. */
+  /**
+   * Explicit pre-run cost estimate. Overrides the derived one — kept for
+   * callers (and tests) that compute cost themselves.
+   */
   readonly estimatedCostUsd?: number;
+  /**
+   * Expected INPUT tokens for this run. The call site knows the size of what
+   * it is sending; it must never know the model, so it supplies tokens and the
+   * routing layer prices them against the tier it actually resolved.
+   */
+  readonly expectedInputTokens?: number;
   /** Language of the run (routing dimension — recorded on the decision;
    *  activates a policy's languageRouting preference when present). */
   readonly language?: string;
 }
 
-export type RouteBlockReason = "cost_ceiling" | "needs_human_confirmation";
+export type RouteBlockReason =
+  | "cost_ceiling"
+  | "cost_unpriced"
+  | "needs_human_confirmation";
 
 export interface TaskRouteDecision {
   readonly taskType: AiTaskType;
@@ -441,25 +477,6 @@ export function resolveRouteForPolicy(
     };
   }
 
-  // Cost ceiling: over budget NEVER silently proceeds.
-  if (
-    ctx.estimatedCostUsd !== undefined &&
-    ctx.estimatedCostUsd > policy.maxEstimatedCostUsd
-  ) {
-    return {
-      taskType: policy.taskType,
-      tier: policy.preferredTier,
-      modelAlias: TIER_MODEL_ALIAS[policy.preferredTier],
-      reason: `estimated cost ${ctx.estimatedCostUsd.toFixed(4)} USD exceeds the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} — run blocked`,
-      escalated: false,
-      fallbackApplied: false,
-      secondModelReview: policy.secondModelReview,
-      languageConsidered,
-      preferredProvider: null, // blocked — no provider may run
-      blocked: "cost_ceiling",
-    };
-  }
-
   let tier: AiModelTier = policy.preferredTier;
   let escalated = false;
   let fallbackApplied = false;
@@ -491,6 +508,81 @@ export function resolveRouteForPolicy(
 
   const secondModelReview =
     policy.secondModelReview || tier === "high_risk_verified";
+
+  /* ── Cost ceiling — evaluated on the tier that will ACTUALLY run ──────────
+   *
+   * This check used to sit above, against `policy.preferredTier`, and only
+   * fired when a caller had passed `estimatedCostUsd` by hand. Two defects
+   * followed, and both are closed here:
+   *
+   *   1. NOTHING EVER PASSED IT. No production call site supplied an estimate
+   *      and the pricing module had no pre-run estimator at all, so every
+   *      `maxEstimatedCostUsd` in TASK_POLICIES was decorative — the ceiling
+   *      could not fire for any provider, Anthropic included.
+   *   2. IT PRICED THE WRONG TIER. Escalation happens BELOW the old position,
+   *      so a run could be cleared at the preferred tier and then execute one
+   *      tier up — past the budget it had just been checked against.
+   *
+   * The estimate is derived here rather than at the call site because pricing
+   * needs the MODEL and call sites must never know the model (guard:
+   * ai-task-routing). The caller supplies token SIZE; the router prices it.
+   */
+  const modelAliasForTier = TIER_MODEL_ALIAS[tier];
+  // `modelAliasForTier` is non-null for every LLM tier; the deterministic tier
+  // returned above, before any model was involved.
+  const derivedEstimate =
+    ctx.expectedInputTokens !== undefined && modelAliasForTier !== null
+      ? estimateCostUsd(
+          modelAliasForTier,
+          ctx.expectedInputTokens,
+          policy.expectedOutputTokens,
+        )
+      : undefined;
+  const estimate = ctx.estimatedCostUsd ?? derivedEstimate;
+
+  // An unpriced model makes the ceiling UNCHECKABLE. A budget that cannot be
+  // evaluated is not a budget, so this blocks rather than proceeding into
+  // unbounded spend — the same honesty as the human-confirmation seam below.
+  // Fix by adding an owner-reviewed price to model-pricing.ts, never by
+  // dropping the ceiling.
+  if (
+    ctx.estimatedCostUsd === undefined &&
+    ctx.expectedInputTokens !== undefined &&
+    derivedEstimate === null
+  ) {
+    return {
+      taskType: policy.taskType,
+      tier,
+      modelAlias: modelAliasForTier,
+      reason: `${reason}; model "${modelAliasForTier}" carries no owner-reviewed price, so the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} cannot be evaluated — run blocked`,
+      escalated,
+      fallbackApplied,
+      secondModelReview,
+      languageConsidered,
+      preferredProvider: null, // blocked — no provider may run
+      blocked: "cost_unpriced",
+    };
+  }
+
+  // Over budget NEVER silently proceeds.
+  if (
+    estimate !== undefined &&
+    estimate !== null &&
+    estimate > policy.maxEstimatedCostUsd
+  ) {
+    return {
+      taskType: policy.taskType,
+      tier,
+      modelAlias: modelAliasForTier,
+      reason: `estimated cost ${estimate.toFixed(4)} USD on tier "${tier}" exceeds the ${policy.maxEstimatedCostUsd.toFixed(4)} USD ceiling for ${policy.taskType} — run blocked`,
+      escalated,
+      fallbackApplied,
+      secondModelReview,
+      languageConsidered,
+      preferredProvider: null, // blocked — no provider may run
+      blocked: "cost_ceiling",
+    };
+  }
 
   // The high_risk_verified tier needs a pre-run human confirmation flow that
   // does not exist yet → honest block, never a fake approval.
