@@ -9,6 +9,8 @@ import { getPublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-prev
 import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { isPublicVacancySaved } from "@/lib/opportunities/saved-opportunities";
+import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
 
 /**
@@ -186,6 +188,60 @@ const APPLY_NOTE: L = {
   de: "Bewerbungen bearbeitet die ausschreibende Stelle, nicht LabourMarket.ai.",
 };
 
+/* ── SAVE (private bookmark) ────────────────────────────────────────────────
+   Owner decision 2026-08-19: a save is NOT an application, NOT a shortlist,
+   NOT employer interest and NOT candidate disclosure. SAVE_NOTE is the line
+   that carries that to the worker, so it is not optional decoration — a
+   "Save" mistaken for "Apply" would repeat the #1193 defect with a new
+   label. Every locale states it explicitly. */
+const SAVE: L = {
+  en: "Save this job",
+  lt: "Išsaugoti šį skelbimą",
+  ru: "Сохранить вакансию",
+  nl: "Vacature bewaren",
+  de: "Stelle merken",
+};
+
+const SAVED: L = {
+  en: "Saved",
+  lt: "Išsaugota",
+  ru: "Сохранено",
+  nl: "Bewaard",
+  de: "Gemerkt",
+};
+
+const UNSAVE: L = {
+  en: "Remove from saved",
+  lt: "Pašalinti iš išsaugotų",
+  ru: "Убрать из сохранённых",
+  nl: "Uit bewaard verwijderen",
+  de: "Aus Gemerkt entfernen",
+};
+
+const SAVE_NOTE: L = {
+  en: "Only you can see your saved jobs. Saving is not an application — the employer is not notified.",
+  lt: "Išsaugotus skelbimus matai tik tu. Išsaugojimas nėra kandidatavimas — darbdavys apie tai neinformuojamas.",
+  ru: "Сохранённые вакансии видите только вы. Сохранение — это не отклик: работодатель не получает уведомления.",
+  nl: "Alleen jij ziet je bewaarde vacatures. Bewaren is geen sollicitatie — de werkgever krijgt geen melding.",
+  de: "Nur du siehst deine gemerkten Stellen. Merken ist keine Bewerbung — der Arbeitgeber wird nicht benachrichtigt.",
+};
+
+const SAVE_FAILED: L = {
+  en: "That did not save. Please try again.",
+  lt: "Nepavyko išsaugoti. Bandyk dar kartą.",
+  ru: "Не удалось сохранить. Попробуйте ещё раз.",
+  nl: "Bewaren is niet gelukt. Probeer het opnieuw.",
+  de: "Das Merken hat nicht geklappt. Bitte versuche es erneut.",
+};
+
+const SAVE_CLOSED: L = {
+  en: "This job is no longer open, so it cannot be saved.",
+  lt: "Šis skelbimas nebegalioja, todėl jo išsaugoti negalima.",
+  ru: "Эта вакансия больше не активна, сохранить её нельзя.",
+  nl: "Deze vacature is niet meer open en kan niet worden bewaard.",
+  de: "Diese Stelle ist nicht mehr offen und kann nicht gemerkt werden.",
+};
+
 const NEXT_HEADING: L = {
   en: "Get matched to work like this",
   lt: "Gauk pasiūlymų, panašių į šį",
@@ -284,6 +340,14 @@ export default async function JobDetailPage({
       )
     : null;
 
+  // Saved state for the signed-in worker, read through the CALLER's own client
+  // so RLS decides visibility. `available:false` (table/RPC missing, or any
+  // read error) renders no control at all — honest invisibility, never a dead
+  // button. Anonymous visitors never reach this.
+  const savedState = member
+    ? await isPublicVacancySaved(supabase, id)
+    : { saved: false, available: false };
+
   const next = encodeURIComponent(`/${active}/jobs/${id}`);
   const published = formatUtcDate(preview.publishedAt, active);
 
@@ -376,6 +440,23 @@ export default async function JobDetailPage({
                 {APPLY_NOTE[active]}
               </p>
             </section>
+          )}
+
+          {/* PRIVATE BOOKMARK. Rendered only for a signed-in worker whose read
+              succeeded — see `savedState.available`. */}
+          {savedState.available && (
+            <SaveVacancyButton
+              vacancyId={id}
+              initiallySaved={savedState.saved}
+              copy={{
+                save: SAVE[active],
+                saved: SAVED[active],
+                unsave: UNSAVE[active],
+                note: SAVE_NOTE[active],
+                failed: SAVE_FAILED[active],
+                closed: SAVE_CLOSED[active],
+              }}
+            />
           )}
 
           {/* The useful next action the directive asks for: the funnel does not
