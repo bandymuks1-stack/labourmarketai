@@ -299,8 +299,46 @@ export const SCOPED_OWNER_WAIVERS = [
      * employer interest and not candidate disclosure — nobody but the saving
      * worker ever learns a save happened. The route's existence, purpose and
      * anonymous copy are untouched, which is the same class of change as #1193.
+     *
+     * ── #1208 (2026-08-19) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-08-19):
+     *   "Patvirtinu scoped /jobs product-gate waiver PR #1208: pridėk tik
+     *    `1208` prie esamo `pullRequests` sąrašo. Nekeisk ir nesilpnink pačių
+     *    gate kriterijų. Drive-to-green ir merge tik su visais required checks
+     *    GREEN."
+     * ("I approve the scoped /jobs product-gate waiver for PR #1208: add ONLY
+     *  `1208` to the existing `pullRequests` list. Do not change or weaken the
+     *  gate criteria themselves. Drive to green and merge only with every
+     *  required check GREEN.")
+     *
+     * Exactly that was done, and nothing else: ONE number added to
+     * `pullRequests`. The axiom, the six codes per surface, the three
+     * surfaces, the file list, the expected finding set, the expiry and the
+     * subset rule are byte-unchanged, and `product-gate.mjs` is not touched by
+     * this PR at all.
+     *
+     * The pre-conditions were checked by RUNNING the gate on this head, not by
+     * reasoning about it — the same head, twice, differing only in the PR
+     * number:
+     *   BASE_SHA=origin/main PR_NUMBER=1203 → PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER
+     *   BASE_SHA=origin/main PR_NUMBER=1208 → 24 violations, 18 `not waived`
+     *                                         lines, every one `pr-not-covered`
+     *                                         and no other reason.
+     * So the diff adds ZERO findings; the waiver was working correctly and
+     * simply did not list this PR.
+     *
+     * WHAT #1208 ACTUALLY DOES to these surfaces: a profession filter the
+     * board could always have passed. `search_public_vacancy_previews_v1` has
+     * taken `p_profession_slug` since it shipped and 17,145 browsable rows
+     * carry a slug, so a Lithuanian worker had to guess the Swedish word to
+     * reach ads the platform had already classified. Plus `lang` on the
+     * publisher's own words (WCAG 3.1.2), which were being read aloud with the
+     * reader's phonetics. No new route, no new page, no new component family,
+     * no auth change, no schema. The five World-State answers stay honestly
+     * "no" for the anonymous visitor this surface exists for — same class of
+     * change as #1193 and #1203.
      */
-    pullRequests: [1184, 1193, 1203],
+    pullRequests: [1184, 1193, 1203, 1208],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
