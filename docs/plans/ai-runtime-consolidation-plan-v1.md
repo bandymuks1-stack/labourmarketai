@@ -277,7 +277,24 @@ Phases 0 → 1 → 2 → 3 are safe and can ship as one PR. Phases 4, 5, 6 each 
 
 ### 5.1 The one thing consolidation cannot fix — restated because it still matters
 
-`lib/ai/run-agent.ts:206` skips the daily-run budget guard when `runsToday === undefined`, and `countAiRunsTodayBestEffort()` returns `null` because `ai_runs` is owner-gated and absent from production. **If `AI_PROVIDER_MODE=live` is ever set before migration `20260714150000` is applied, there is no spend ceiling and no audit trail.** No phase in this plan changes that; it is an owner decision recorded in `docs/audits/p0-stabilization-verification-v1.md` §4.1.
+> **CORRECTED 2026-08-19 — BOTH HALVES OF THE PARAGRAPH BELOW ARE NOW FALSE.**
+> `ai_runs` **is applied in production** (prod ledger version `20260803061937`,
+> applied 2026-08-03 under explicit owner approval; verified again 2026-08-19 —
+> 27 columns, matching the repo file). And there **is** a per-run spend ceiling:
+> PR #1197 found that every task policy declared a `maxEstimatedCostUsd` which
+> could never fire — no call site supplied an estimate and no pre-run estimator
+> existed — and wired it so it fires, on the tier that actually runs.
+>
+> The original text is kept below rather than deleted, because it is the record
+> of what was true when this plan was written. It must not be read as current
+> guidance: a reader acting on it today would either block AI activation as
+> unsafe when it is not, or believe enabling AI means unbounded spend.
+>
+> Activation is still gated — on `AI_PROVIDER_MODE`, on a provider key, and
+> since PR #1200 on an explicit **data-egress grant**. Those are owner
+> decisions, not missing infrastructure.
+
+*(Original text, 2026-07, superseded:)* `lib/ai/run-agent.ts:206` skips the daily-run budget guard when `runsToday === undefined`, and `countAiRunsTodayBestEffort()` returns `null` because `ai_runs` is owner-gated and absent from production. **If `AI_PROVIDER_MODE=live` is ever set before migration `20260714150000` is applied, there is no spend ceiling and no audit trail.** No phase in this plan changes that; it is an owner decision recorded in `docs/audits/p0-stabilization-verification-v1.md` §4.1.
 
 ---
 

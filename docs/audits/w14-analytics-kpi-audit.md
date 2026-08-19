@@ -10,6 +10,23 @@
 
 # W14 — Analytics & KPI, read-only audit
 
+> ## CORRECTED 2026-08-19 — `ai_runs` IS APPLIED IN PRODUCTION
+>
+> This document was written while migration `20260714150000_ai_runs_audit_v1`
+> was still unapplied, and says so in several places. It was applied on
+> **2026-08-03** (prod ledger version `20260803061937`) under explicit owner
+> approval, and re-verified against production on 2026-08-19: the table exists
+> with 27 columns matching the repo file.
+>
+> Every "`ai_runs` not applied" statement below is therefore **historical, not
+> current**. They are left in place rather than rewritten, because this is an
+> audit and what it observed at the time is the record. Read them as "was true
+> when written".
+>
+> What still holds: `ai_runs` is **empty**. `AI_PROVIDER_MODE` is `disabled`, so
+> no live AI run has ever been logged — the KPIs sourced from it remain unwired,
+> for that reason rather than for a missing table.
+
 - **Worktree:** `C:\Users\Mano\Documents\labourmarketai-w14-audit`
 - **Branch:** `audit/w14-analytics-kpi`
 - **Base:** `origin/main` @ `c05a48026b945c14a42a76a34cb1c90ce9113e87`
@@ -407,7 +424,7 @@ The **in-scope (usage/cost) subset — 13 metrics** — with status:
 |---|---|---|---|---|
 | 11 | `acpu` | `:178` | `usage_events`, `infrastructure_billing`, `profiles` | **UNWIRED** — 2 of 3 sources MISSING |
 | 15 | `cost_total` | `:198` | `usage_events`, `infrastructure_billing` | **UNWIRED** — both MISSING |
-| 16 | `cost_ai` | `:202` | `ai_runs` | **UNWIRED** — source MISSING; table not applied to prod |
+| 16 | `cost_ai` | `:202` | `ai_runs` | **CORRECTED 2026-08-19** — the table IS applied to prod (ledger `20260803061937`, 2026-08-03); this row read *table not applied* and was accurate only until then. The KPI is still unwired, but for a different reason: `ai_runs` is empty because `AI_PROVIDER_MODE` is `disabled`, so there is no cost to report yet. |
 | 17 | `cost_storage` | `:206` | `infrastructure_billing`, `usage_events` | **UNWIRED** |
 | 18 | `cost_api` | `:209` | `usage_events`, `infrastructure_billing` | **UNWIRED** |
 | 19 | `cost_email` | `:212` | `usage_events`, `infrastructure_billing` | **UNWIRED** |
@@ -593,7 +610,12 @@ A second, independent deletion happened at commit **`c5e129f6`** ("ARCHITECTURE 
 ### P0-2 — AI usage and cost are computed and thrown away — **DEAD**
 
 - Tokens captured (`lib/ai/runtime/providers/anthropic.ts:115-116` + 3 siblings), USD computed (`lib/ai/runtime/model-pricing.ts:53`, `lib/ai/run-agent.ts:287-301`), write attempted (`lib/ai/runtime/audit-store.ts:154`).
-- `ai_runs` is **not applied to production** (`docs/APPLIED_LEDGER.md:398`, `:371`).
+- ~~`ai_runs` is **not applied to production**~~ — **CORRECTED 2026-08-19.** It was
+  applied on 2026-08-03 (prod ledger `20260803061937`), after this audit was
+  written; re-verified against production 2026-08-19 (27 columns). The original
+  claim is struck rather than deleted because it records what was true at the
+  time. What still holds is that the table is EMPTY — `AI_PROVIDER_MODE` is
+  `disabled`, so no run has ever been logged.
 - The write is best-effort and never throws (`audit-store.ts:158-170`) — the failure is silent.
 - **Zero readers:** `grep -rn "ai_runs" apps/web/app apps/web/components` → 0 hits.
 

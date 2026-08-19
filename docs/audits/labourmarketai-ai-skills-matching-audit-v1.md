@@ -1,5 +1,22 @@
 # Labourmarket.ai — AI, Skills Recognition & Matching audit v1
 
+> ## CORRECTED 2026-08-19 — `ai_runs` IS APPLIED IN PRODUCTION
+>
+> This document was written while migration `20260714150000_ai_runs_audit_v1`
+> was still unapplied, and says so in several places. It was applied on
+> **2026-08-03** (prod ledger version `20260803061937`) under explicit owner
+> approval, and re-verified against production on 2026-08-19: the table exists
+> with 27 columns matching the repo file.
+>
+> Every "`ai_runs` not applied" statement below is therefore **historical, not
+> current**. They are left in place rather than rewritten, because this is an
+> audit and what it observed at the time is the record. Read them as "was true
+> when written".
+>
+> What still holds: `ai_runs` is **empty**. `AI_PROVIDER_MODE` is `disabled`, so
+> no live AI run has ever been logged — the KPIs sourced from it remain unwired,
+> for that reason rather than for a missing table.
+
 | Field | Value |
 |---|---|
 | Date | 2026-07-22 |
