@@ -15,7 +15,11 @@ import {
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
-import { listMySavedOpportunities } from "./saved-opportunities";
+import {
+  listMySavedOpportunities,
+  listSavedPublicVacancyIds,
+} from "./saved-opportunities";
+import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
 import type { InterestStatus } from "./interest-snapshot";
 import {
   buildMyInterestView,
@@ -85,6 +89,14 @@ export interface OpportunityCard {
   readonly structured: StructuredDemandPublic | null;
 }
 
+/** The few fields the saved group renders. Deliberately NOT the whole ad:
+ *  the workspace list is a way back to a bookmark, not a second job page. */
+export interface SavedVacancyRow {
+  readonly id: string;
+  readonly title: string;
+  readonly occupation: string | null;
+}
+
 export type WorkerOpportunitiesResult =
   | { readonly kind: "no-worker" }
   | {
@@ -102,6 +114,12 @@ export type WorkerOpportunitiesResult =
        *  joins these against live rows; a saved id with no live row renders
        *  one honest "no longer open" line — facts are never copied. */
       readonly savedRequestIds: readonly string[];
+      /** The worker's own saved PUBLIC VACANCIES, already joined against the
+       *  live rows. Same private bookmark, second source — the workspace shows
+       *  ONE saved list, not one per source. A bookmark whose ad has expired
+       *  simply does not come back from the reader, so nothing stale renders.
+       *  Empty (and the group hidden) when the worker has none. */
+      readonly savedVacancies: readonly SavedVacancyRow[];
       /** "Mano susidomėjimai" (extension A): the worker's OWN interest
        *  signals as display rows, INDEPENDENT of board visibility — a signal
        *  on a closed demand stays, honestly labelled. Empty while the
@@ -265,6 +283,30 @@ export async function loadWorkerOpportunities(
     },
   );
 
+  // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
+  // ids come from the worker's own rows; the titles come from the live ads
+  // through the same browsable predicate the board uses, so an expired
+  // bookmark drops out instead of rendering a job that no longer exists.
+  let savedVacancies: readonly SavedVacancyRow[] = [];
+  const mySavedVacancies = await listSavedPublicVacancyIds(
+    supabase,
+    ctx.workerId,
+  );
+  if (mySavedVacancies.available && mySavedVacancies.vacancyIds.size > 0) {
+    const previews = await listPublicVacancyPreviewsByIds(
+      supabase,
+      [...mySavedVacancies.vacancyIds],
+      new Date().toISOString(),
+    );
+    if (previews.status === "ok") {
+      savedVacancies = previews.previews.map((v) => ({
+        id: v.id,
+        title: v.title,
+        occupation: v.occupation,
+      }));
+    }
+  }
+
   return {
     kind: "ready",
     readiness,
@@ -272,6 +314,7 @@ export async function loadWorkerOpportunities(
     interestAvailable: myInterest.available,
     savedAvailable: mySaved.available,
     savedRequestIds: [...mySaved.requestIds],
+    savedVacancies,
     myInterestRows,
     opportunities,
     externalVacancies,

@@ -29,6 +29,8 @@ const BUTTON = join(web, "components", "marketing", "save-vacancy-button.tsx");
 const LIB = join(web, "lib", "opportunities", "saved-opportunities.ts");
 const BOARD = join(web, "app", "[locale]", "(marketing)", "jobs", "page.tsx");
 const VACANCY_READ = join(web, "lib", "vacancy-store", "vacancy-read.ts");
+const LOADER = join(web, "lib", "opportunities", "load-worker-opportunities.ts");
+const WORKSPACE = join(web, "app", "[locale]", "dashboard", "opportunities", "page.tsx");
 
 const read = (p: string) => readFileSync(p, "utf8");
 
@@ -194,6 +196,51 @@ describe("the save control cannot become an application", () => {
     const fn = reader.slice(reader.indexOf("export async function listPublicVacancyPreviewsByIds"));
     expect(fn).toContain('.eq("is_active", true)');
     expect(fn).toContain("expires_at.is.null,expires_at.gt.");
+  });
+
+  it("the workspace shows ONE saved list, not one per source", () => {
+    // A worker who registers from a job page lands in the workspace, not back
+    // on /jobs — so a bookmark that only exists on the public board is a
+    // bookmark they cannot find. The board loader reads both sources and the
+    // workspace renders them in the SAME saved section, which is also what
+    // stops a second "saved jobs" surface from appearing next to this one.
+    const loader = read(LOADER);
+    expect(loader).toContain("listSavedPublicVacancyIds(\n    supabase,");
+    expect(loader).toContain("listPublicVacancyPreviewsByIds(");
+    const page = read(WORKSPACE);
+    expect(page).toContain("result.savedVacancies.length > 0");
+    // Rendered inside the existing saved section, never as its own section.
+    const savedSection = page.slice(
+      page.indexOf('data-testid="opportunities-saved"'),
+      page.indexOf('data-testid="opportunities-filters"'),
+    );
+    expect(savedSection.length).toBeGreaterThan(200);
+    expect(savedSection).toContain("opportunities-saved-vacancies");
+  });
+
+  it("the workspace list carries no fact the live ad did not supply", () => {
+    // The saved row is id + title + occupation, read from the live ad at
+    // render time. Copying pay, employer or location into the saved list
+    // would recreate the stale-facts problem the store was designed to avoid.
+    const loader = read(LOADER);
+    const rowType = loader.slice(
+      loader.indexOf("export interface SavedVacancyRow {"),
+      loader.indexOf("export type WorkerOpportunitiesResult"),
+    );
+    expect(rowType.length).toBeGreaterThan(50);
+    for (const forbidden of [
+      "employer",
+      "compensation",
+      "location",
+      "city",
+      "applicationUrl",
+      "description",
+    ]) {
+      expect(
+        rowType.toLowerCase().includes(forbidden.toLowerCase()),
+        `saved row copies ${forbidden}`,
+      ).toBe(false);
+    }
   });
 
   it("a failed write reverts the button instead of showing a false Saved", () => {
