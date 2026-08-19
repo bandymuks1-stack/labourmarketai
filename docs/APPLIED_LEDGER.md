@@ -1,3 +1,48 @@
+> ## ⚠️ CORRECTION 2026-08-19 12:10 UTC — 26 ENTRIES BELOW SAY "PENDING APPLY" AND ARE APPLIED
+>
+> The 2026-08-18 truth report's finding #11 ("this ledger is materially and
+> dangerously stale ... at least six migrations that ARE applied still read
+> PENDING APPLY") is **still true, and the real number is 26.** Corrected at the
+> top rather than by rewriting 26 carefully-written records, which is this
+> project's established convention for exactly this situation.
+>
+> **A session trusting the rows below would believe these features are switched
+> off, and could try to apply them again.** The re-run hazard is the whole reason
+> `db push` is forbidden here.
+>
+> **Method, so it can be re-run rather than believed.** Every ledger entry's own
+> filename stem was matched against `supabase_migrations.schema_migrations.name`
+> in production — matching on `name`, never on `version`, which is the rule this
+> ledger already states. 228 applied rows read 2026-08-19 12:08 UTC.
+>
+> **24 match a production `name` exactly:**
+> `workflow_template_management_v1`, `workflow_engine_v1`, `document_file_layer_v1`,
+> `work_objects_v1`, `work_tasks_v2_collaboration`, `project_responsible_v1`,
+> `timesheets_v1`, `durable_workspace_pointer_v2`, `employee_requests_v1`,
+> `employee_lifecycle_v1`, `leave_balance_policies_v1`, `agreements_v1`,
+> `catalog_least_privilege_v1`, `invitation_org_authority_v1`,
+> `contact_disclosure_org_authority_v1`, `finance_org_authority_v1`,
+> `notification_events_v4_task_types`, `org_document_register_delta_v1`,
+> `training_certification_v1`, `performance_reviews_v1`,
+> `management_decisions_v1`, `finance_invoice_upgrades_v1`, `procurement_v1`,
+> `business_trips_v1`.
+>
+> **2 more are applied under a COMBINED production name** — the exact
+> filename-vs-ledger drift this repository keeps warning about:
+> `20260817130100_notification_events_v3_workflow_types.sql` and
+> `20260817140100_notification_document_types_v3.sql` were applied together as
+> `notification_types_union_workflow_document_v3`. Proven by content rather than
+> by name: `notification_events_type_check` in production currently admits
+> `workflow_step_pending`, `workflow_decided`, `workflow_delegated`,
+> `workflow_escalated`, `document_ack_assigned`, `document_ack_completed` and
+> `document_expiring`, which is precisely what those two files add.
+>
+> **What is NOT corrected here.** Each row's substantive content — what the
+> migration does, its rollback, its gate reasoning — was not re-audited and is
+> not endorsed by this note. Only the apply STATUS is corrected, and only for
+> the 26 named above. Every other row's status was checked by the same method
+> and is consistent with production.
+
 # Applied Migration Ledger
 
 > ## ⚠️ READ THIS BEFORE TRUSTING ANY ENTRY BELOW (added 2026-08-18)

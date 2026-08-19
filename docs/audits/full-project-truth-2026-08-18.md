@@ -244,6 +244,30 @@
 > all verification traffic). The #1204 matrix row is right to say
 > IMPLEMENTED_NOT_PROVEN and it stays there.
 >
+> **C-16 — finding #11 is still true, and worse than it said.** §A.11 called
+> `APPLIED_LEDGER.md` "materially and dangerously stale", with "at least six
+> migrations that ARE applied still reading PENDING APPLY". Re-measured today by
+> matching every ledger entry's own filename stem against
+> `supabase_migrations.schema_migrations.name` (228 applied rows, read 12:08
+> UTC — matching on `name`, never on `version`, which is the rule the ledger
+> itself states): **26 entries claim PENDING APPLY for migrations that are
+> applied.** 24 match a production name exactly; 2 more
+> (`notification_events_v3_workflow_types`, `notification_document_types_v3`)
+> were applied together under the combined name
+> `notification_types_union_workflow_document_v3`, proven by content — the live
+> `notification_events_type_check` admits exactly the seven workflow/document
+> types those two files add.
+>
+> Corrected with a header block at the top of `APPLIED_LEDGER.md` rather than by
+> rewriting 26 carefully-written records, which is the convention this report
+> itself uses. The method is written down there so the next session can re-run
+> it instead of believing it. Every other ledger row's status was checked the
+> same way and is consistent with production.
+>
+> Why this one matters more than a documentation tidy: a session trusting those
+> rows believes shipped features are switched off, and may try to apply them
+> again — which is the exact re-run hazard that makes `db push` forbidden here.
+
 > Everything else in the body and in the two blocks above was re-checked and
 > stands, including the payments verdict, the auth verdict and the §Q go-live
 > blockers.
