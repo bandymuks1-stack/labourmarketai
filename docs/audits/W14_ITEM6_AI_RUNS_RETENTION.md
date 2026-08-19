@@ -1,6 +1,16 @@
 # W14 item 6 — `ai_runs` retention (owner decisions supplied, mechanism implemented)
 
-`OWNER_APPROVAL_REQUIRED_BEFORE_APPLY`. Migration + rollback written, every
+> **CORRECTED 2026-08-19 — this retention migration IS applied.** Verified
+> against production: `public.ai_runs_retention_days()` returns **90** and
+> `ai_runs_retention_sweeps` holds **11** recorded sweeps. The status line below
+> was accurate when written and is kept as the record of that moment.
+>
+> This matters beyond tidiness: the 90-day retention policy is the REQUIRED
+> BLOCK that `docs/human-gates/ai-runs-cost-accounting-gate.md` places before
+> `AI_PROVIDER_MODE` activation. Reading the line below as current would suggest
+> activation is still blocked on it. It is not — that precondition is met.
+
+*(Original status, superseded:)* `OWNER_APPROVAL_REQUIRED_BEFORE_APPLY`. Migration + rollback written, every
 required property proven on a local stack. **Not applied to production.**
 
 > Note: PR #1089 (W12 privacy, still owner-gated) carries an earlier

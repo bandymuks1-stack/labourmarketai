@@ -145,7 +145,7 @@ confirmation flow exists.
 `run-agent-server.ts` counts today's (UTC) non-blocked `ai_runs` rows before
 dispatch on live runs and feeds the count into `assessRunBudget`. Over budget
 → honest `budget_exceeded` block (no silent skip). Best-effort: if the count
-query fails (table not applied / outage), the run proceeds and the failure is
+query fails (permission error / outage), the run proceeds and the failure is
 logged — the budget guard then only applies to caller-supplied counts.
 
 ## 7. Latency enforcement

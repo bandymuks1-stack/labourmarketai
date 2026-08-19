@@ -1507,7 +1507,12 @@ dependencies · effort · suggested loop.
   → 136. The only push channel is `lib/notifications/telegram-owner-alerts.ts`, gated on
   `OWNER_TELEGRAM_ALERTS_ENABLED`. The one place with a genuine error-recording design
   (`lib/ai/runtime/audit-store.ts` → `ai_runs`) writes to a table that **does not exist in
-  production** (T-04).
+  production** (T-04). — **CORRECTED 2026-08-19:** `ai_runs` IS in production
+  (applied 2026-08-03, prod ledger `20260803061937`; 27 columns verified
+  2026-08-19). The original sentence is kept because it was true when this audit
+  ran. The finding it supports still stands for a different reason: the table is
+  EMPTY, because `AI_PROVIDER_MODE` is `disabled`, so no error has ever been
+  recorded through that path.
 - **Affected user.** Everyone — a user hitting a 500 has no path to being noticed.
 - **Affected paths.** Whole app.
 - **Business impact.** Compounds T-01 catastrophically: with no anon analytics **and** no error
