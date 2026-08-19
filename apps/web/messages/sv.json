@@ -4463,7 +4463,8 @@
       "procurement": "Inköp",
       "business_trip": "Tjänsteresa",
       "management_decision": "Ledningsbeslut",
-      "agreement": "Avtal"
+      "agreement": "Avtal",
+      "work_task": "Arbetsuppgift"
     },
     "transition": {
       "started": "Förfrågan inskickad",

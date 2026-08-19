@@ -45,6 +45,11 @@ import {
   linkTaskEvidenceAction,
   unlinkTaskEvidenceAction,
 } from "@/lib/journal/task-evidence-actions";
+import {
+  getTaskApprovalStates,
+  listTaskApprovalDefinitions,
+} from "@/lib/approvals/task-approvals";
+import { requestTaskApprovalAction } from "@/lib/tasks/task-approval-actions";
 import { listVisibleActiveObjects } from "@/lib/objects/objects";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { listOrganizationMembers } from "@/lib/company/memberships";
@@ -85,6 +90,7 @@ const NOTICES = new Set([
   "error",
   "evidence_linked",
   "evidence_unlinked",
+  "approval_requested",
 ]);
 
 const OPEN_GROUPS: readonly WorkTaskStatus[] = [
@@ -228,10 +234,15 @@ export default async function TasksPage({
 
   // Evidence for every listed task + the caller's own attachable journal
   // entries — two bounded reads for the whole page, never per card.
-  const [evidence, linkableEntries] = await Promise.all([
-    getTaskEvidenceByTask(listedIds),
-    listWorkerLinkableEntries(),
-  ]);
+  const [evidence, linkableEntries, approvals, approvalDefinitions] =
+    await Promise.all([
+      getTaskEvidenceByTask(listedIds),
+      listWorkerLinkableEntries(),
+      // Chain step B: a task's approval is a NORMAL workflow instance
+      // (context_entity_type='work_task'). No task-specific approval store.
+      getTaskApprovalStates(listedIds),
+      listTaskApprovalDefinitions(),
+    ]);
 
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
   const now = new Date();
@@ -400,6 +411,97 @@ export default async function TasksPage({
     );
   }
 
+  /**
+   * A task's approval, read from the canonical workflow engine. Four honest
+   * states, no invented fifth:
+   *  - the context-widening migration is unapplied → nothing is offered;
+   *  - the org has authored no work_task flow → say exactly that, never
+   *    invent a default approver;
+   *  - an approval exists → show ITS status, which is the only truth;
+   *  - otherwise → offer to send this task for approval.
+   */
+  function ApprovalBlock({ task }: { task: WorkTask }) {
+    if (approvals.status === "needs-migration") return null;
+
+    const state = approvals.byTask[task.id];
+
+    if (state) {
+      const tone =
+        state.status === "approved"
+          ? "text-state-success"
+          : state.status === "rejected"
+            ? "text-state-danger"
+            : "text-text-secondary";
+      return (
+        <p
+          className="text-xs text-text-muted"
+          data-testid={`task-approval-${task.id}`}
+        >
+          {t("approval.label")}:{" "}
+          <span className={tone}>{t(`approval.status.${state.status}`)}</span>
+          {state.status === "pending" && state.currentStepOrder !== null ? (
+            <> · {t("approval.atStep", { step: state.currentStepOrder })}</>
+          ) : null}
+        </p>
+      );
+    }
+
+    // Only work that is finished is worth approving — offering it on a todo
+    // would be asking an approver to sign off on nothing.
+    if (task.status !== "done") return null;
+
+    if (approvalDefinitions.length === 0) {
+      return (
+        <p
+          className="text-xs text-text-muted"
+          data-testid={`task-approval-none-${task.id}`}
+        >
+          {t("approval.noFlow")}
+        </p>
+      );
+    }
+
+    return (
+      <form
+        action={requestTaskApprovalAction}
+        className="flex flex-wrap items-center gap-2"
+      >
+        {hiddenContext()}
+        <input type="hidden" name="taskId" value={task.id} />
+        <input type="hidden" name="taskTitle" value={task.title} />
+        <label className="sr-only" htmlFor={`approval-def-${task.id}`}>
+          {t("approval.request")}
+        </label>
+        <select
+          id={`approval-def-${task.id}`}
+          name="definitionId"
+          required
+          defaultValue={
+            approvalDefinitions.length === 1 ? approvalDefinitions[0].id : ""
+          }
+          className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+          data-testid={`task-approval-select-${task.id}`}
+        >
+          <option value="" disabled>
+            {t("approval.chooseFlow")}
+          </option>
+          {approvalDefinitions.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="rounded-md border border-ink-500 px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
+          data-testid={`task-approval-request-${task.id}`}
+        >
+          {t("approval.request")}
+        </button>
+      </form>
+    );
+  }
+
   function TaskCard({ task }: { task: WorkTask }) {
     const overdue = isOpen(task.status) && isOverdue(task.dueAt, now);
     const blockers = collaboration.blockersByTask[task.id] ?? [];
@@ -565,6 +667,10 @@ export default async function TasksPage({
             task a record proves. Confirmation state is READ from the journal
             and never inferred here (§7): attaching proves nothing on its own. */}
         <EvidenceBlock task={task} />
+
+        {/* Approval — the canonical workflow engine, not a task-local status.
+            If the instance says approved, the task is approved. */}
+        <ApprovalBlock task={task} />
 
         {/* Status transitions — every control a real RPC-backed action. */}
         <div className="flex flex-wrap items-center gap-2">

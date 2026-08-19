@@ -2188,7 +2188,14 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 232;
+    const SPRINT_BASELINE = 233;
+    // Bumped 232 -> 233 for the work_task approval context widening
+    // (20260819210000_workflow_work_task_context_v1) — GREEN: a pure
+    // drop+re-add CHECK widening on workflow_definitions/instances, the
+    // ru-locale idiom. No table, function, policy, grant or DML. Lets the
+    // ALREADY-BUILT workflow engine accept the one entity it could not:
+    // a work task. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 233 real files.
     // Bumped 231 -> 232 for the Work Journal <-> work_task EVIDENCE LINK v1
     // (20260819190000_journal_task_evidence_link_v1) — RED-class by ROUTE
     // (SECURITY DEFINER + grants), proposed for the owner gate, NOT

@@ -63,6 +63,10 @@ export const WORKFLOW_CONTEXT_ENTITY_TYPES = [
   "business_trip",
   "management_decision",
   "agreement",
+  // Chain step B (field-work audit v1): the ONE object the field-work chain
+  // revolves around was the one object that could not be sent for approval.
+  // Routed through THIS engine — no task-specific approval store.
+  "work_task",
 ] as const;
 export type WorkflowContextEntityType =
   (typeof WORKFLOW_CONTEXT_ENTITY_TYPES)[number];

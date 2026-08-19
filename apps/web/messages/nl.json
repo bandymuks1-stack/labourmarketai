@@ -9357,7 +9357,8 @@
       "error": "Opslaan mislukt. Probeer het opnieuw.",
       "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten.",
       "evidence_linked": "Bewijs aan de taak gekoppeld.",
-      "evidence_unlinked": "Koppeling ingetrokken. Het record zelf is ongewijzigd."
+      "evidence_unlinked": "Koppeling ingetrokken. Het record zelf is ongewijzigd.",
+      "approval_requested": "Ter goedkeuring verstuurd."
     },
     "projectTasks": {
       "title": "Projecttaken",
@@ -9427,6 +9428,20 @@
         "limit_reached": "Koppellimiet bereikt.",
         "entry_not_current": "Dat record is gecorrigeerd of ingetrokken — koppel de actuele versie.",
         "already_unlinked": "Die koppeling is al ingetrokken."
+      }
+    },
+    "approval": {
+      "label": "Goedkeuring",
+      "request": "Ter goedkeuring sturen",
+      "chooseFlow": "Kies een goedkeuringsstroom",
+      "noFlow": "Er is nog geen goedkeuringsstroom voor taken ingesteld.",
+      "atStep": "stap {step}",
+      "status": {
+        "pending": "Wacht op beslissing",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "withdrawn": "Ingetrokken",
+        "cancelled": "Geannuleerd"
       }
     }
   },
@@ -12685,7 +12700,8 @@
       "procurement": "Inkoop",
       "business_trip": "Zakenreis",
       "management_decision": "Managementbesluit",
-      "agreement": "Overeenkomst"
+      "agreement": "Overeenkomst",
+      "work_task": "Werktaak"
     },
     "transition": {
       "started": "Verzoek ingediend",

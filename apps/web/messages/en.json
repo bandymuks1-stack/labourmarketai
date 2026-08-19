@@ -9357,7 +9357,8 @@
       "error": "Saving failed. Please try again.",
       "cycle": "That would create a loop — a task can't wait on itself through other tasks.",
       "evidence_linked": "Evidence attached to the task.",
-      "evidence_unlinked": "Attachment withdrawn. The record itself is unchanged."
+      "evidence_unlinked": "Attachment withdrawn. The record itself is unchanged.",
+      "approval_requested": "Sent for approval."
     },
     "projectTasks": {
       "title": "Project tasks",
@@ -9427,6 +9428,20 @@
         "limit_reached": "Attachment limit reached.",
         "entry_not_current": "That record was corrected or withdrawn — attach the current version.",
         "already_unlinked": "That attachment was already withdrawn."
+      }
+    },
+    "approval": {
+      "label": "Approval",
+      "request": "Send for approval",
+      "chooseFlow": "Choose an approval flow",
+      "noFlow": "No task approval flow is set up yet.",
+      "atStep": "step {step}",
+      "status": {
+        "pending": "Awaiting decision",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "withdrawn": "Withdrawn",
+        "cancelled": "Cancelled"
       }
     }
   },
@@ -12685,7 +12700,8 @@
       "procurement": "Purchase",
       "business_trip": "Business trip",
       "management_decision": "Management decision",
-      "agreement": "Agreement"
+      "agreement": "Agreement",
+      "work_task": "Work task"
     },
     "transition": {
       "started": "Request filed",
