@@ -365,6 +365,10 @@
       "country_label": "[EN] Country",
       "country_placeholder": "Valige riik",
       "error_country_required": "Palun valige riik.",
+      "profession_label": "Mis tööd sa teed?",
+      "profession_placeholder": "Vali oma töö",
+      "profession_hint": "Tööpakkumiste sobitamine lähtub sellest. Saad seda hiljem profiilis muuta.",
+      "error_profession_required": "Vali töö, mida sa teed.",
       "nextSteps": {
         "eyebrow": "Pärast seda — sinu tegelik profiil",
         "s1": "Impordi oma CV (valikuline), et profiil kiiremini täita",

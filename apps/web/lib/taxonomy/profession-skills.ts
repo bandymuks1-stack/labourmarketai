@@ -64,6 +64,23 @@ export const PROFESSION_SKILLS: Readonly<Record<string, readonly string[]>> = {
   laundry_worker: ["cleaning-services", "housekeeping", "laundry"],
 };
 
+/**
+ * Every profession slug the platform knows, alphabetical.
+ *
+ * These are the SAME 49 slugs as `public.professions` in production (verified
+ * 2026-08-19), which is what makes this list safe to offer as a choice: the
+ * onboarding step below resolves the picked slug back to that table's row, so
+ * a slug that drifted out of the registry would resolve to nothing rather than
+ * silently record a profession the rest of the product does not know.
+ *
+ * Derived rather than re-typed, so it cannot fall out of step with the map
+ * above — which `lib/guards/matching-canonical.test.ts` already re-derives from
+ * the seed migrations link by link.
+ */
+export const PROFESSION_SLUGS: readonly string[] = Object.keys(
+  PROFESSION_SKILLS,
+).sort();
+
 /** Skills a profession implies (empty for unknown professions — honest). */
 export function skillsForProfession(professionSlug: string | null | undefined): readonly string[] {
   if (!professionSlug) return [];
