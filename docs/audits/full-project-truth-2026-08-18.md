@@ -176,8 +176,8 @@
 > | Idempotency | identical statement re-run → **0 rows**; 2 rows / 2 distinct dedupe keys |
 > | Recipient correctness | `recipient_is_demand_owner` **true** for both, re-derived independently from `customer_requests.profile_id`; `wrongly_sent_to_worker` **false** |
 > | Self-interest left silent | 2 self-interest signals exist, **0** carry a notification |
-> | RLS — demand owner `dc3284ea` | **2 visible, 2 unread** |
-> | RLS — interested worker `01353767` | **0 visible** |
+> | RLS — the demand owner (the recipient) | **2 visible, 2 unread** |
+> | RLS — the interested worker (not the recipient) | **0 visible** |
 > | RLS — `anon` | `42501 permission denied`, refused at the GRANT level before RLS applies |
 >
 > So `notification_events` moved from 0 lifetime inserts to 2, and both are
@@ -307,16 +307,29 @@
 > | `/jobs` gate toll | Teaching `product-gate` that a pre-auth acquisition route is its own category — a constitution change |
 > | 26 stale ledger rows | Content re-audit of each record (status corrected; see C-16) |
 >
-> **REAL_MISSING — genuinely absent, agent-doable, and none is P0/P1.**
-> Facebook / LinkedIn / Instagram auth (absent from code entirely; no product
-> need established). Job supply outside Sweden (provider registry exists, zero
-> other sources). Swedish is not a routable UI locale while 100% of supply is
-> Swedish — the profession filter now bridges this for search, but ad text stays
-> in the publisher's language; a real fix needs translation, which is AI, which
-> is parked.
+> **REAL_MISSING — genuinely absent. None of it is an agent-doable P0/P1
+> DEFECT, which is a narrower claim than "nothing here is important".**
 >
-> **No agent-doable P0/P1 product defect remains open.** Every chain this session
-> traced end-to-end — browse → save → retrieve → apply-onward; express interest →
+> - **Facebook / LinkedIn auth** — absent from code entirely, no product need
+>   established. **Instagram is NOT in this list**: §E classifies it
+>   `NOT_APPROPRIATE` because it offers no general-purpose third-party login for
+>   this use case, and that verdict stands. Listing it here would turn a
+>   deliberately rejected capability into an apparent backlog item.
+> - **Job supply outside Sweden** — the provider registry exists; there is no
+>   second source. **§Q classifies this P1 under "business growth" and that
+>   classification STANDS — it is not superseded by this block.** The two
+>   statements do not conflict once the scope is read: §Q ranks business
+>   priorities, this block ranks *defects an agent can fix*. A second market is
+>   not something broken; it is a sourcing, legal and commercial decision (which
+>   provider, which country, on what licence terms) that must precede any code.
+> - **Swedish ad text in a product with no Swedish UI** — the profession filter
+>   now bridges this for SEARCH, but the ad body stays in the publisher's
+>   language. A real fix is translation → AI → **parked by owner decision**.
+>
+> **No agent-doable P0/P1 product DEFECT remains open** — meaning nothing is
+> broken that an agent can fix without an owner decision. This does not claim
+> the product is finished, and it does not reprioritise §Q's business-growth
+> P1 list, which stands unchanged. Every chain this session traced end-to-end — browse → save → retrieve → apply-onward; express interest →
 > notify owner → acknowledge → notify worker; journal → metrics → timesheet;
 > journal → confirmation → tiered matching — is complete in code and, where
 > real users have touched it, verified in production.
