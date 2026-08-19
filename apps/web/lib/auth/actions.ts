@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
+import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 
 export type Role = "worker" | "company" | "agency" | "customer";
 
@@ -42,6 +43,14 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
 
   const display_name = String(formData.get("display_name") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
+  // WHAT WORK THIS PERSON DOES. Closed set — the value must be one of the
+  // slugs the platform's own registry holds, so a hand-crafted POST cannot
+  // record a profession nothing else in the product understands.
+  const rawProfession = String(formData.get("profession_slug") ?? "").trim();
+  const professionSlug =
+    rawProfession.length > 0 && PROFESSION_SLUGS.includes(rawProfession)
+      ? rawProfession
+      : null;
   const locale = String(formData.get("locale") ?? "lt");
 
   // First-login bootstrap resilience (auth-owner-access-bootstrap-p0): ensure
@@ -71,14 +80,37 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       ? { name: `${display_name} UAB` }
       : {};
 
+  // The RPC takes the registry ROW id, not the slug — resolve it here (same
+  // idiom as `lib/journal/actions.ts`) so the client never handles a uuid and
+  // an unknown slug simply yields null rather than a failed onboarding.
+  //
+  // WHY THIS MATTERS MORE THAN IT LOOKS. `complete_onboarding` has accepted
+  // `p_profession_id` since the M1 C-scope migration and writes the primary
+  // `worker_professions` row from it — the client had never sent it. Measured
+  // in production 2026-08-19: 36 workers, 26 with a country (onboarding asks),
+  // 4 with a profession (onboarding did not). Everything downstream — the
+  // match engine's subject, the profile-directed external ad pool, the CV's
+  // work direction — reads that one field, so 32 of 36 people could not be
+  // matched to anything, however good the engine was.
+  let professionId: string | null = null;
+  if (primary === "worker" && professionSlug) {
+    const { data: prof } = await supabase
+      .from("professions")
+      .select("id")
+      .eq("slug", professionSlug)
+      .eq("is_active", true)
+      .maybeSingle();
+    professionId = (prof?.id as string | null) ?? null;
+  }
+
   const { error } = await supabase.rpc("complete_onboarding", {
     p_role: primary,
     // RPC nullif()s empty strings; pass the (possibly empty) string rather
-    // than null to match the generated arg types. p_profession_id is optional
-    // (SQL default null) so it's omitted.
+    // than null to match the generated arg types.
     p_display_name: display_name,
     p_country: country,
     p_role_data: roleData(primary),
+    ...(professionId ? { p_profession_id: professionId } : {}),
   });
   if (error) {
     console.error("[completeOnboarding] RPC failed", {
