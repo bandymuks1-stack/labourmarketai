@@ -634,6 +634,8 @@
     "workerCta": "Es meklēju darbu",
     "employerCta": "Man vajag cilvēkus",
     "currentSupply": "Pašreizējais pārbaudītais piedāvājums",
+    "verifiedMarketData": "Pārbaudīti tirgus dati",
+    "dataSourceLabel": "Datu avots",
     "opportunityStream": "Iespēju plūsma",
     "evidenceVerifiedTitle": "Pierādījums pārbaudīts",
     "evidenceVerifiedBody": "Cilvēka apstiprinājums pārvērš ierakstu uzticamā pierādījumā.",

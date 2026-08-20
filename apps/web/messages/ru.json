@@ -4474,6 +4474,8 @@
     "workerCta": "Я ищу работу",
     "employerCta": "Мне нужны люди",
     "currentSupply": "Текущее подтверждённое предложение",
+    "verifiedMarketData": "Проверенные рыночные данные",
+    "dataSourceLabel": "Источник данных",
     "opportunityStream": "Поток возможностей",
     "evidenceVerifiedTitle": "Подтверждение проверено",
     "evidenceVerifiedBody": "Проверка человеком превращает запись в достоверное подтверждение.",

@@ -4474,6 +4474,8 @@
     "workerCta": "Ik zoek werk",
     "employerCta": "Ik heb mensen nodig",
     "currentSupply": "Huidig geverifieerd aanbod",
+    "verifiedMarketData": "Geverifieerde marktgegevens",
+    "dataSourceLabel": "Gegevensbron",
     "opportunityStream": "Kansenstroom",
     "evidenceVerifiedTitle": "Bewijs geverifieerd",
     "evidenceVerifiedBody": "Menselijke bevestiging maakt van de registratie betrouwbaar bewijs.",

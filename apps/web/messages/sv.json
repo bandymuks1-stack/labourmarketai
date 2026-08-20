@@ -634,6 +634,8 @@
     "workerCta": "Jag söker arbete",
     "employerCta": "Jag behöver personal",
     "currentSupply": "Nuvarande verifierat utbud",
+    "verifiedMarketData": "Verifierade marknadsdata",
+    "dataSourceLabel": "Datakälla",
     "opportunityStream": "Möjlighetsflöde",
     "evidenceVerifiedTitle": "Bevis verifierat",
     "evidenceVerifiedBody": "Mänsklig bekräftelse gör registreringen till tillförlitligt bevis.",

@@ -634,6 +634,8 @@
     "workerCta": "Szukam pracy",
     "employerCta": "Potrzebuję ludzi",
     "currentSupply": "Aktualna zweryfikowana podaż",
+    "verifiedMarketData": "Zweryfikowane dane rynkowe",
+    "dataSourceLabel": "Źródło danych",
     "opportunityStream": "Strumień możliwości",
     "evidenceVerifiedTitle": "Dowód zweryfikowany",
     "evidenceVerifiedBody": "Potwierdzenie przez człowieka zmienia zapis w wiarygodny dowód.",

@@ -601,15 +601,27 @@
   backdrop-filter: blur(13px);
 }
 
+/* Demoted from the mint accent to muted: this panel is a secondary
+   data-source layer, not a hero-level claim about the product's scope. The
+   status dot keeps the accent so the "verified" signal itself survives. */
 .supplyTitle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  color: var(--mint);
+  color: var(--muted);
   font-size: 8px;
   font-weight: 750;
   letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.supplySource {
+  margin: 6px 0 0;
+  color: #718588;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 

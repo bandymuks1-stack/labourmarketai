@@ -4474,6 +4474,8 @@
     "workerCta": "Ieškau darbo",
     "employerCta": "Man reikia žmonių",
     "currentSupply": "Dabartinė patvirtinta pasiūla",
+    "verifiedMarketData": "Patvirtinti rinkos duomenys",
+    "dataSourceLabel": "Duomenų šaltinis",
     "opportunityStream": "Galimybių srautas",
     "evidenceVerifiedTitle": "Įrodymai patvirtinti",
     "evidenceVerifiedBody": "Žmogaus patvirtinimas paverčia įrašą patikimu įrodymu.",

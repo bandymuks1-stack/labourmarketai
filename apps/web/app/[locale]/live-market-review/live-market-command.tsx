@@ -103,6 +103,8 @@ type LabelSet = {
   readonly menuClose: string;
   readonly live: string;
   readonly currentSupply: string;
+  readonly verifiedMarketData: string;
+  readonly dataSourceLabel: string;
   readonly visualNote: string;
   readonly vacancies: string;
   readonly employers: string;
@@ -806,7 +808,7 @@ export function LiveMarketCommand({
         <aside className={styles.supplyPanel} data-testid="real-supply-panel">
           <div className={styles.supplyTitle}>
             <span>
-              <i aria-hidden /> {labels.currentSupply} · {swedenName}
+              <i aria-hidden /> {labels.verifiedMarketData}
             </span>
             {market.lastRefreshedAt ? (
               <time>
@@ -814,6 +816,12 @@ export function LiveMarketCommand({
               </time>
             ) : null}
           </div>
+          {/* Sweden is the SOURCE of these measured numbers, never the scope of
+              the product. It stays a coverage label inside the panel so the
+              European product is not read as a Swedish one. */}
+          <p className={styles.supplySource}>
+            {labels.dataSourceLabel} · {swedenName}
+          </p>
           <div className={styles.supplyStats}>
             <div>
               <strong>{formatter.format(market.activeVacancies)}</strong>
