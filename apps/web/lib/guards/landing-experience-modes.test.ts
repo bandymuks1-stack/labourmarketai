@@ -99,7 +99,9 @@ describe("canonical landing LIVE / FOCUS experiment", () => {
     expect(command).toContain("styles.supplyPanel");
     expect(command).toContain("market.activeVacancies");
     expect(command).toContain("market.distinctEmployers");
-    expect(command).toContain("market.regions");
+    // `regions` was a static coverage fact, not a live count from the public
+    // vacancy contract, so it may not sit inside VERIFIED MARKET DATA.
+    expect(command).not.toContain("market.regions");
     expect(styles).toContain('.root[data-mode="focus"] .supplyPanel');
   });
 });

@@ -1,10 +1,10 @@
 {
   "files": {
     "app/[locale]/page.tsx": "c86be947c76d6e92970633570b95040874f033bd0df092f273550b00b119d0a9",
-    "app/[locale]/live-market-review/live-market-page.tsx": "680ede5c1b6bc75b8f2be608da3d9a009b2f91b49056fe72c3a4068bbad3d790",
-    "app/[locale]/live-market-review/live-market-command.tsx": "bb29aaf2a3188bebdc68ad092d7a2dddc7daa6b56d4bd382d32ef6104c771b93",
+    "app/[locale]/live-market-review/live-market-page.tsx": "fae0ab6c1b4e41ba6760482cf935e3777e915bbf7a80f207d4cc50dc433f7e9a",
+    "app/[locale]/live-market-review/live-market-command.tsx": "10063ee904a5fd15456984afa915b745453bf7f50050b6e4ec09bf31cd988742",
     "app/[locale]/live-market-review/live-market-command.module.css": "686aae3983346345f6064e70df790d6f03fc05c897bb44f3e4e236811f676382",
-    "lib/market/live-market-landing.ts": "9fb9b13ed3c9332ed0ee11186405b41a9b7680938e5f87142bb8965d26407ba1",
+    "lib/market/live-market-landing.ts": "fd392153172b796707bd1dfab332436838fa63e85543211267859c4e942733c4",
     "lib/telemetry/landing-experience.ts": "b90d4a8d13aa50c26c988158f35740b0d9b2436ebe25ac739e51a05e614d3c7c"
   },
   "namespaces": {

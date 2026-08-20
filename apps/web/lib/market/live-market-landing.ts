@@ -2,7 +2,6 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { SWEDEN_COVERAGE_CURRENT } from "@/lib/analytics/market-coverage-claims";
 import { requireSupabaseClientEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/types";
 import {
@@ -22,12 +21,19 @@ export type LiveMarketProfession = {
   readonly basis: "live" | "unavailable";
 };
 
+/**
+ * VERIFIED MARKET DATA carries only what the canonical public reader actually
+ * returned. `null` means "the live count is unavailable right now", never a
+ * substituted constant: a measured floor rendered under a "verified" heading
+ * would present an old, rounded number as current truth. There is no `regions`
+ * field, because the public vacancy contract exposes no region count — the
+ * former value was a static coverage fact, not live data.
+ */
 export type LiveMarketLandingSnapshot = {
-  readonly activeVacancies: number;
-  readonly distinctEmployers: number;
-  readonly regions: number;
+  readonly activeVacancies: number | null;
+  readonly distinctEmployers: number | null;
   readonly lastRefreshedAt: string | null;
-  readonly basis: "live" | "measured-floor";
+  readonly basis: "live" | "unavailable";
   readonly professions: readonly LiveMarketProfession[];
 };
 
@@ -63,13 +69,12 @@ async function readWithOneRetry<T>(
   }
 }
 
-function measuredFloorSnapshot(): LiveMarketLandingSnapshot {
+function unavailableSnapshot(): LiveMarketLandingSnapshot {
   return {
-    activeVacancies: SWEDEN_COVERAGE_CURRENT.activeVacanciesFloor,
-    distinctEmployers: SWEDEN_COVERAGE_CURRENT.identifiedEmployersFloor,
-    regions: SWEDEN_COVERAGE_CURRENT.regions,
+    activeVacancies: null,
+    distinctEmployers: null,
     lastRefreshedAt: null,
-    basis: "measured-floor",
+    basis: "unavailable",
     professions: PROFESSION_FILTER_SLUGS.map((slug) => ({
       slug,
       totalCount: null,
@@ -93,9 +98,9 @@ async function readFreshLiveMarketLandingSnapshot(): Promise<LiveMarketLandingSn
     publicEnv = requireSupabaseClientEnv();
   } catch {
     // Local/CI prerenders may intentionally have no public Supabase env. The
-    // governed multi-day floor is the only allowed fallback; production with
-    // env continues through the live readers below.
-    return measuredFloorSnapshot();
+    // panel then renders no counts at all; production with env continues
+    // through the live readers below.
+    return unavailableSnapshot();
   }
   const { url, anonKey } = publicEnv;
   const publicClient = createSupabaseClient<Database>(url, anonKey, {
@@ -127,15 +132,14 @@ async function readFreshLiveMarketLandingSnapshot(): Promise<LiveMarketLandingSn
           basis: "live" as const,
         }
       : {
-          activeVacancies: SWEDEN_COVERAGE_CURRENT.activeVacanciesFloor,
-          distinctEmployers: SWEDEN_COVERAGE_CURRENT.identifiedEmployersFloor,
+          activeVacancies: null,
+          distinctEmployers: null,
           lastRefreshedAt: null,
-          basis: "measured-floor" as const,
+          basis: "unavailable" as const,
         };
 
   return {
     ...supply,
-    regions: SWEDEN_COVERAGE_CURRENT.regions,
     professions: PROFESSION_FILTER_SLUGS.map((slug, index) => {
       const result = professionResults[index];
       return {

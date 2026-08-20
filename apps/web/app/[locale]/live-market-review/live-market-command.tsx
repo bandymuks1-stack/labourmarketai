@@ -56,11 +56,10 @@ type PublicProfession = {
 };
 
 type PublicMarket = {
-  readonly activeVacancies: number;
-  readonly distinctEmployers: number;
-  readonly regions: number;
+  readonly activeVacancies: number | null;
+  readonly distinctEmployers: number | null;
   readonly lastRefreshedAt: string | null;
-  readonly basis: "live" | "measured-floor";
+  readonly basis: "live" | "unavailable";
   readonly professions: readonly PublicProfession[];
 };
 
@@ -108,8 +107,6 @@ type LabelSet = {
   readonly visualNote: string;
   readonly vacancies: string;
   readonly employers: string;
-  readonly regions: string;
-  readonly basisNote: string;
   readonly professionsTitle: string;
   readonly opportunityStream: string;
   readonly sectorTitle: string;
@@ -822,20 +819,22 @@ export function LiveMarketCommand({
           <p className={styles.supplySource}>
             {labels.dataSourceLabel} · {swedenName}
           </p>
-          <div className={styles.supplyStats}>
-            <div>
-              <strong>{formatter.format(market.activeVacancies)}</strong>
-              <span>{labels.vacancies}</span>
+          {/* Exact current counts straight from count_public_vacancies_v1 —
+              never rounded, never substituted. A count the reader could not
+              return is omitted rather than filled with a constant. */}
+          {market.activeVacancies !== null &&
+          market.distinctEmployers !== null ? (
+            <div className={styles.supplyStats} data-basis={market.basis}>
+              <div>
+                <strong>{formatter.format(market.activeVacancies)}</strong>
+                <span>{labels.vacancies}</span>
+              </div>
+              <div>
+                <strong>{formatter.format(market.distinctEmployers)}</strong>
+                <span>{labels.employers}</span>
+              </div>
             </div>
-            <div>
-              <strong>{formatter.format(market.distinctEmployers)}</strong>
-              <span>{labels.employers}</span>
-            </div>
-            <div>
-              <strong>{formatter.format(market.regions)}</strong>
-              <span>{labels.regions}</span>
-            </div>
-          </div>
+          ) : null}
           <div className={styles.liveProfessions}>
             <p>{labels.professionsTitle}</p>
             {market.professions.slice(0, 4).map((profession) => (
@@ -865,7 +864,6 @@ export function LiveMarketCommand({
               ))}
             </div>
           ) : null}
-          <small>{labels.basisNote}</small>
         </aside>
 
         {liveWorkloadActive ? (
