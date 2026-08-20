@@ -71,6 +71,33 @@ export const WORKFLOW_CONTEXT_ENTITY_TYPES = [
 export type WorkflowContextEntityType =
   (typeof WORKFLOW_CONTEXT_ENTITY_TYPES)[number];
 
+/**
+ * Context types the template-AUTHORING form offers, derived from the canonical
+ * vocabulary above minus one reasoned exclusion.
+ *
+ * It is derived rather than re-listed because a hardcoded second list is
+ * exactly how `work_task` became unreachable: the engine accepted it, the
+ * server action validated it, every one of the 11 locales carried its label —
+ * and the picker's literal simply did not name it, so no organization could
+ * author the flow and chain step B had a route with no on-ramp.
+ *
+ * EXCLUDED — `worker_absence`. Leave already has its own review path
+ * (`worker_absences.requested_by` / `reviewed_by`, `cancel_worker_absence_v1`).
+ * Offering a second approval route for the same decision would create two
+ * disagreeing truths about whether leave was granted. The ENGINE keeps the
+ * value — instances may exist and must stay readable — but the authoring form
+ * must not invite new ones.
+ */
+export const WORKFLOW_NON_AUTHORABLE_CONTEXT_TYPES = [
+  "worker_absence",
+] as const satisfies readonly WorkflowContextEntityType[];
+
+export const WORKFLOW_AUTHORABLE_CONTEXT_TYPES: readonly WorkflowContextEntityType[] =
+  WORKFLOW_CONTEXT_ENTITY_TYPES.filter(
+    (t) =>
+      !(WORKFLOW_NON_AUTHORABLE_CONTEXT_TYPES as readonly string[]).includes(t),
+  );
+
 /** The two approver-rule shapes the v1 authoring form offers. The SQL rule
  *  vocabulary additionally accepts explicit profile lists ('profiles') — the
  *  version authoring panel (template management v1) offers all three. */
