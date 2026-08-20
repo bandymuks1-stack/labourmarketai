@@ -12898,7 +12898,8 @@
       "not_found": "Stundenzettel nicht gefunden.",
       "limit_reached": "Zu viele offene Stundenzettel — reichen Sie bestehende zuerst ein oder räumen Sie sie auf.",
       "error": "Etwas ist schiefgelaufen. Nichts wurde gespeichert."
-    }
+    },
+    "taskAmbiguous": "{count} Aufgaben verknüpft — Stunden keiner einzelnen zugeordnet"
   },
   "workObjects": {
     "title": "Objekte und Standorte",

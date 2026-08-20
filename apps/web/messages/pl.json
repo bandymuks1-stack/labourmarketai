@@ -4817,7 +4817,8 @@
       "not_found": "Karty nie znaleziono.",
       "limit_reached": "Za dużo otwartych kart — najpierw wyślij lub uporządkuj istniejące.",
       "error": "Coś poszło nie tak. Nic nie zostało zapisane."
-    }
+    },
+    "taskAmbiguous": "powiązane zadania: {count} — godziny nieprzypisane do jednego"
   },
   "requests": {
     "title": "Wnioski",

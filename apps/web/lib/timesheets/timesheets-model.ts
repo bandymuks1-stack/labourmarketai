@@ -158,6 +158,21 @@ export type TimesheetLine = {
   readonly metricSource: string | null;
   readonly projectId: string | null;
   readonly projectTitle: string | null;
+  /**
+   * Chain step A — the task these hours evidence, attributed ONLY when the
+   * journal entry has EXACTLY ONE live task link. Two or more links leave
+   * this null: the hours still count in full, exactly once, they are simply
+   * not claimed for any one task. Never a guess.
+   */
+  readonly taskId: string | null;
+  readonly taskTitle: string | null;
+  /**
+   * How many live task links the entry carries. Emitted so the ambiguity is
+   * VISIBLE rather than silent — a reader sees "3 linked, so not attributed"
+   * instead of wondering why taskId is empty. 0 on snapshots frozen before
+   * attribution existed.
+   */
+  readonly taskLinkCount: number;
 };
 
 /** An entry-level duration the per-activity rule superseded. Reported so the
@@ -239,6 +254,15 @@ export function parseTimesheetSnapshot(raw: unknown): TimesheetSnapshot {
       projectId: typeof l.projectId === "string" ? l.projectId : null,
       projectTitle:
         typeof l.projectTitle === "string" ? l.projectTitle : null,
+      // Absent on every snapshot frozen before chain step A. A missing field
+      // reads as "not attributed", never as an error — a historic timesheet
+      // must keep parsing exactly as it did.
+      taskId: typeof l.taskId === "string" ? l.taskId : null,
+      taskTitle: typeof l.taskTitle === "string" ? l.taskTitle : null,
+      taskLinkCount:
+        typeof l.taskLinkCount === "number" && Number.isInteger(l.taskLinkCount)
+          ? l.taskLinkCount
+          : 0,
     });
   }
   const rawConflicts = Array.isArray(obj.conflicts) ? obj.conflicts : [];
@@ -302,6 +326,7 @@ export const TIMESHEET_CSV_COLUMNS = [
   "title",
   "work_type",
   "project",
+  "task",
   "value",
   "unit",
   "hours",
@@ -334,6 +359,9 @@ export function buildTimesheetCsv(sheet: TimesheetRow): string {
         line.title,
         line.workTypeKey ?? "",
         line.projectTitle ?? "",
+        // Empty when the entry's task link was ambiguous — an unattributed
+        // hour is exported as unattributed, never as a guess.
+        line.taskTitle ?? "",
         String(line.value),
         line.unit,
         String(lineHours(line)),

@@ -12898,7 +12898,8 @@
       "not_found": "Timesheet not found.",
       "limit_reached": "Too many open timesheets — submit or remove existing ones first.",
       "error": "Something went wrong. Nothing was saved."
-    }
+    },
+    "taskAmbiguous": "{count} tasks linked — hours not attributed to one"
   },
   "workObjects": {
     "title": "Objects & sites",

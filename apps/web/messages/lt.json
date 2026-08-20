@@ -12898,7 +12898,8 @@
       "not_found": "Žiniaraštis nerastas.",
       "limit_reached": "Per daug atvirų žiniaraščių — pirmiausia pateikite arba sutvarkykite esamus.",
       "error": "Įvyko klaida. Niekas nebuvo išsaugota."
-    }
+    },
+    "taskAmbiguous": "susietos {count} užduotys — valandos nepriskirtos vienai"
   },
   "workObjects": {
     "title": "Objektai ir aikštelės",

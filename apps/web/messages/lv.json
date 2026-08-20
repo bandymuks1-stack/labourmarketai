@@ -4817,7 +4817,8 @@
       "not_found": "[EN] Timesheet not found.",
       "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
       "error": "[EN] Something went wrong. Nothing was saved."
-    }
+    },
+    "taskAmbiguous": "saistīti {count} uzdevumi — stundas nav attiecinātas uz vienu"
   },
   "requests": {
     "title": "Pieprasījumi",

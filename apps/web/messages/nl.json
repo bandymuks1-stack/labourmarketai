@@ -12898,7 +12898,8 @@
       "not_found": "Urenstaat niet gevonden.",
       "limit_reached": "Te veel open urenstaten — dien eerst bestaande in of ruim ze op.",
       "error": "Er is iets misgegaan. Er is niets opgeslagen."
-    }
+    },
+    "taskAmbiguous": "{count} taken gekoppeld — uren niet aan één toegewezen"
   },
   "workObjects": {
     "title": "Objecten en locaties",

@@ -2188,7 +2188,15 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 233;
+    const SPRINT_BASELINE = 234;
+    // Bumped 233 -> 234 for task attribution of canonical work-time
+    // (20260819220000_timesheet_task_attribution_v1) — RED by route (it
+    // replaces the timesheet_compute_lines_v1 SECURITY DEFINER body),
+    // owner-approved 2026-08-19 for this exact attribution rule. Adds
+    // three OUTPUT fields and changes no arithmetic: totals, line count
+    // and conflicts are byte-identical across the two bodies, proven by
+    // scripts/db-proof/timesheet-task-attribution.sh. RECOUNTED from the
+    // tree: `ls supabase/migrations/*.sql | wc -l` = 234 real files.
     // Bumped 232 -> 233 for the work_task approval context widening
     // (20260819210000_workflow_work_task_context_v1) — GREEN: a pure
     // drop+re-add CHECK widening on workflow_definitions/instances, the
