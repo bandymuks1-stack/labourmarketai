@@ -112,6 +112,10 @@ const WORKLOG_KEYS = [
   "labelSite",
   "labelNotes",
   "labelContext",
+  // Rule C of the engagement-context hierarchy: several are legitimately
+  // possible, so the flow asks instead of preselecting one.
+  "contextChoose",
+  "contextAmbiguous",
   "save",
   "cancel",
   "working",

@@ -74,6 +74,8 @@
   },
   "date": "Дата",
   "engagement": "Контекст",
+  "engagementChoose": "Выберите занятость…",
+  "engagementAmbiguous": "Эта работа может относиться более чем к одной занятости. Выберите нужную перед сохранением.",
   "entry": {
     "reviewedBy": "Проверил(а)",
     "confirmerRole": {

@@ -40,6 +40,8 @@ export type WorkLogLabels = {
   labelSite: string;
   labelNotes: string;
   labelContext: string;
+  contextChoose: string;
+  contextAmbiguous: string;
   save: string;
   cancel: string;
   working: string;
@@ -185,6 +187,9 @@ export function WorkerWorkLogFlow({
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
   const [engagements, setEngagements] = useState<WorkLogEngagement[]>([]);
   const [engagementId, setEngagementId] = useState<string>("");
+  /** Rule C: several engagements are legitimately possible, so the flow must
+   *  ask instead of preselecting one. */
+  const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
   const [workDate, setWorkDate] = useState(draft.date);
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
@@ -282,11 +287,14 @@ export function WorkerWorkLogFlow({
         if (!alive) return;
         if (res.kind === "ok") {
           setEngagements(res.engagements);
-          // Context Intelligence (rebuild phase 3): the server orders the
-          // list ACTIVE-WORKSPACE-first (then primary), so the first entry IS
-          // the resolved default context — the user re-picks only on real
-          // ambiguity, never re-states what the workspace already says.
-          setEngagementId(res.engagements[0].id);
+          // The server RESOLVES the default (see
+          // lib/journal/engagement-context-selection): source-determined, or
+          // the single applicable organization context, or — when several are
+          // legitimately possible — NOTHING, because guessing between
+          // employers is what put 15 production entries where no employer
+          // could ever read them. An empty id makes the picker a question.
+          setEngagementId(res.resolution.selectedId ?? "");
+          setMustChooseEngagement(res.resolution.rule === "C");
           setPhase({ kind: "ready", token: null });
         } else if (res.kind === "no-context") {
           setPhase({ kind: "blocked", reason: "no-context" });
@@ -707,12 +715,25 @@ export function WorkerWorkLogFlow({
             data-testid="worklog-context"
             className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
           >
+            {/* Rule C: an explicit unchosen option, so the field reads as a
+                question rather than as an answer someone already gave. */}
+            {mustChooseEngagement && (
+              <option value="">{labels.contextChoose}</option>
+            )}
             {engagements.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.label}
               </option>
             ))}
           </select>
+          {mustChooseEngagement && !engagementId ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-context-must-choose"
+            >
+              {labels.contextAmbiguous}
+            </span>
+          ) : null}
         </label>
       )}
 

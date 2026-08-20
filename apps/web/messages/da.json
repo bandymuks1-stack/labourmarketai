@@ -3562,6 +3562,8 @@
       "labelSite": "[EN] Site",
       "labelNotes": "[EN] What you did (the entry evidence)",
       "labelContext": "[EN] Work context",
+      "contextChoose": "Vælg arbejdskontekst…",
+      "contextAmbiguous": "Dette arbejde kan høre til mere end én kontekst. Vælg hvilken, før du gemmer.",
       "save": "[EN] Save",
       "cancel": "[EN] Edit",
       "working": "[EN] Saving…",

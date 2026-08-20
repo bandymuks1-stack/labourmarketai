@@ -11494,6 +11494,8 @@
       "labelSite": "Locatie",
       "labelNotes": "Wat je hebt gedaan (het bewijs)",
       "labelContext": "Werkcontext",
+      "contextChoose": "Kies de werkcontext…",
+      "contextAmbiguous": "Dit werk kan bij meer dan één context horen. Kies vóór het opslaan bij welke.",
       "save": "Opslaan",
       "cancel": "Bewerken",
       "working": "Opslaan…",

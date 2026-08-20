@@ -25,6 +25,8 @@
   },
   "date": "[EN] Date",
   "engagement": "[EN] Context",
+  "engagementChoose": "Velg tilknytning…",
+  "engagementAmbiguous": "Dette arbeidet kan høre til mer enn én tilknytning. Velg hvilken før du lagrer.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",

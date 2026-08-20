@@ -74,6 +74,8 @@
   },
   "date": "Datum",
   "engagement": "Kontext",
+  "engagementChoose": "Beschäftigung wählen…",
+  "engagementAmbiguous": "Diese Arbeit könnte zu mehr als einer Beschäftigung gehören. Wählen Sie vor dem Speichern aus, zu welcher.",
   "entry": {
     "reviewedBy": "Überprüft von",
     "confirmerRole": {

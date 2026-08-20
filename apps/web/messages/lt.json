@@ -11494,6 +11494,8 @@
       "labelSite": "Objektas",
       "labelNotes": "Ką dirbai (įrašo įrodymas)",
       "labelContext": "Darbo kontekstas",
+      "contextChoose": "Pasirinkite darbo kontekstą…",
+      "contextAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam kontekstui. Prieš išsaugant pasirinkite, kuriam.",
       "save": "Išsaugoti",
       "cancel": "Taisyti",
       "working": "Saugoma…",

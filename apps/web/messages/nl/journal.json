@@ -74,6 +74,8 @@
   },
   "date": "Datum",
   "engagement": "Context",
+  "engagementChoose": "Kies de betrekking…",
+  "engagementAmbiguous": "Dit werk kan bij meer dan één betrekking horen. Kies vóór het opslaan bij welke.",
   "entry": {
     "reviewedBy": "Beoordeeld door",
     "confirmerRole": {

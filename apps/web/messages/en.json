@@ -11494,6 +11494,8 @@
       "labelSite": "Site",
       "labelNotes": "What you did (the entry evidence)",
       "labelContext": "Work context",
+      "contextChoose": "Choose the work context…",
+      "contextAmbiguous": "This work could belong to more than one context. Choose which one before saving.",
       "save": "Save",
       "cancel": "Edit",
       "working": "Saving…",

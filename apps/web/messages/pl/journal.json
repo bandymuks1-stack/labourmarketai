@@ -25,6 +25,8 @@
   },
   "date": "[EN] Date",
   "engagement": "[EN] Context",
+  "engagementChoose": "Wybierz zaangażowanie…",
+  "engagementAmbiguous": "Ta praca może należeć do więcej niż jednego zaangażowania. Wybierz, do którego, przed zapisaniem.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
