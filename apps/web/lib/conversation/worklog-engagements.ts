@@ -7,6 +7,10 @@ import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import {
+  resolveEngagementContext,
+  type ContextResolution,
+} from "@/lib/journal/engagement-context-selection";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -35,7 +39,14 @@ export type WorkLogEngagement = {
 };
 
 export type WorkLogEngagementsResult =
-  | { kind: "ok"; engagements: WorkLogEngagement[] }
+  | {
+      kind: "ok";
+      engagements: WorkLogEngagement[];
+      /** How the default was decided. `rule: "C"` means several engagements
+       *  are legitimately possible and `selectedId` is null — the flow must
+       *  ASK rather than preselect. */
+      resolution: ContextResolution;
+    }
   | { kind: "no-worker" }
   | { kind: "no-context" }
   | { kind: "not-authed" };
@@ -57,7 +68,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   const { data: ecRows } = await supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, organization_id, organizations(display_name, legal_name, organization_type)",
+      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
@@ -109,8 +120,38 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       Number(a.organizationId === activeOrgId),
   );
 
+  // The DEFAULT is the resolution, not the first row. Ordering above only
+  // decides how the list reads; which context the work belongs to is decided
+  // by the hierarchy — and on real ambiguity it decides NOTHING, so the flow
+  // asks. This is the second of the two work-log entry points; the journal
+  // composer is the other, and both must resolve identically or the same
+  // hours land in different places depending on where they were typed.
+  const resolution = resolveEngagementContext({
+    candidates: (ecRows ?? []).map((e) => {
+      const r = e as {
+        id: string;
+        relationship_slug: string;
+        organization_id?: string | null;
+        status?: string | null;
+        started_at?: string | null;
+        ended_at?: string | null;
+        is_primary?: boolean | null;
+      };
+      return {
+        id: r.id,
+        relationshipSlug: r.relationship_slug,
+        organizationId: r.organization_id ?? null,
+        status: r.status ?? "active",
+        startedAt: r.started_at ?? null,
+        endedAt: r.ended_at ?? null,
+        isPrimary: r.is_primary === true,
+      };
+    }),
+  });
+
   return {
     kind: "ok",
     engagements: ordered.map(({ id, label, isPrimary }) => ({ id, label, isPrimary })),
+    resolution,
   };
 }

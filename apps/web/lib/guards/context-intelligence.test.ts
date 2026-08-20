@@ -180,15 +180,48 @@ describe("CIE integration — the workspace resolves defaults, the user re-picks
     expect(src).toMatch(/organization_id/);
   });
 
-  it("both work-log entry points default to the server-resolved FIRST context", () => {
-    expect(read("components/app/conversation/worker-worklog-flow.tsx")).toMatch(
-      /setEngagementId\(res\.engagements\[0\]\.id\)/,
-    );
-    expect(read("components/app/journal-entry-composer.tsx")).toMatch(
-      /const primaryId = engagements\[0\]\?\.id \?\? ""/,
-    );
+  it("both work-log entry points default to the RESOLVED context, and ASK on ambiguity", () => {
+    // SUPERSEDES "default to the server-resolved FIRST context".
+    //
+    // Defaulting to the first row is what created the FIRST_BROKEN_LINK: when
+    // the active workspace was *person*, the worker's own org-less context
+    // sorted first, so a worker WITH an employer logged into their personal
+    // context by default — and `timesheet_compute_lines_v1` scopes by
+    // organization, so those hours could reach nobody. Measured in production:
+    // 15 of the 18 live entries in an org-less context were written by people
+    // who also hold an active org-scoped one.
+    //
+    // Both entry points must now take the DEFAULT from
+    // `resolveEngagementContext`, and both must preselect NOTHING on rule C.
+    // If they diverge, identical hours land in different places depending on
+    // where they were typed.
+    const flow = read("components/app/conversation/worker-worklog-flow.tsx");
+    expect(flow).toMatch(/setEngagementId\(res\.resolution\.selectedId \?\? ""\)/);
+    expect(flow).toMatch(/setMustChooseEngagement\(res\.resolution\.rule === "C"\)/);
+    // ...and it must not silently fall back to the first row again.
+    expect(flow).not.toMatch(/setEngagementId\(res\.engagements\[0\]\.id\)/);
+
+    const composer = read("components/app/journal-entry-composer.tsx");
+    expect(composer).toMatch(/contextResolution\?\.selectedId/);
+    expect(composer).toMatch(/mustChooseContext/);
+    // The save path refuses an unmade choice rather than picking one.
+    expect(composer).toMatch(/if \(mustChooseContext && !engagementId\)/);
+
     const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
     expect(journalPage).toMatch(/getWorkspaceContext\("person"\)/);
+    expect(journalPage).toMatch(/resolveEngagementContext\(/);
+
+    // Both resolvers read the SAME pure model — no second copy of the rules.
+    const resolver = read("lib/conversation/worklog-engagements.ts");
+    expect(resolver).toMatch(/from "@\/lib\/journal\/engagement-context-selection"/);
+    expect(journalPage).toMatch(/from "@\/lib\/journal\/engagement-context-selection"/);
+
+    // Both must fetch the fields the model needs to judge applicability.
+    for (const src of [resolver, journalPage]) {
+      for (const col of ["status", "started_at", "ended_at", "organization_id"]) {
+        expect(src).toContain(col);
+      }
+    }
   });
 
   it("the brief's suggestions render through EXISTING chip mechanisms only", () => {

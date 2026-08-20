@@ -25,6 +25,8 @@
   },
   "date": "[EN] Date",
   "engagement": "[EN] Context",
+  "engagementChoose": "Valige seotus…",
+  "engagementAmbiguous": "See töö võib kuuluda rohkem kui ühe seotuse alla. Valige enne salvestamist, millise.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",

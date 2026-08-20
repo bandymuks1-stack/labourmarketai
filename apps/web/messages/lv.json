@@ -3562,6 +3562,8 @@
       "labelSite": "[EN] Site",
       "labelNotes": "[EN] What you did (the entry evidence)",
       "labelContext": "[EN] Work context",
+      "contextChoose": "Izvēlieties darba kontekstu…",
+      "contextAmbiguous": "Šis darbs var piederēt vairāk nekā vienam kontekstam. Pirms saglabāšanas izvēlieties, kuram.",
       "save": "[EN] Save",
       "cancel": "[EN] Edit",
       "working": "[EN] Saving…",

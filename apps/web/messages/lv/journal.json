@@ -25,6 +25,8 @@
   },
   "date": "[EN] Date",
   "engagement": "[EN] Context",
+  "engagementChoose": "Izvēlieties iesaisti…",
+  "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",

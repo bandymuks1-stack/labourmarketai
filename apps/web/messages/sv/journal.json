@@ -25,6 +25,8 @@
   },
   "date": "[EN] Date",
   "engagement": "[EN] Context",
+  "engagementChoose": "Välj engagemang…",
+  "engagementAmbiguous": "Det här arbetet kan höra till mer än ett engagemang. Välj vilket innan du sparar.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",

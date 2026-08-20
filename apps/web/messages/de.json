@@ -11494,6 +11494,8 @@
       "labelSite": "Baustelle",
       "labelNotes": "Was du getan hast (der Nachweis)",
       "labelContext": "Arbeitskontext",
+      "contextChoose": "Arbeitskontext wählen…",
+      "contextAmbiguous": "Diese Arbeit könnte zu mehr als einem Kontext gehören. Wählen Sie vor dem Speichern aus, zu welchem.",
       "save": "Speichern",
       "cancel": "Bearbeiten",
       "working": "Wird gespeichert…",

@@ -12,6 +12,7 @@ import {
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
+import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
 import {
@@ -129,7 +130,7 @@ export default async function JournalPage({
   const { data: ecRows } = await supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, organizations(display_name, legal_name, organization_type)",
+      "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
@@ -144,10 +145,21 @@ export default async function JournalPage({
       true,
   );
 
-  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
-  // default engagement — rows are ordered workspace-match first (stable sort
-  // keeps is_primary as the tie-break), and the composer defaults to the
-  // FIRST entry. The user re-picks only on real ambiguity.
+  // WHICH CONTEXT DOES THIS WORK BELONG TO? (audit v1 FIRST_BROKEN_LINK)
+  //
+  // This used to order by active-workspace match then `is_primary` and default
+  // to the first row. When the workspace was *person* that ranked the worker's
+  // own org-less context first, so a worker WITH an employer, browsing as
+  // themselves, logged into their personal context by default — and
+  // `timesheet_compute_lines_v1` scopes by organization, so those hours could
+  // reach nobody. Measured: 15 of the 18 live entries in an org-less context
+  // were written by people who also hold an active org-scoped one.
+  //
+  // The hierarchy now decides (see lib/journal/engagement-context-selection):
+  //   A source-determined · B exactly one org context · C several → ASK ·
+  //   D none → personal is correct.
+  // Ordering still puts the active workspace first so the list reads sensibly,
+  // but the DEFAULT is the resolution, and on ambiguity there is none.
   const workspaceForDefault = await getWorkspaceContext("person");
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
   const ecOrdered = [...(ecRows ?? [])].sort(
@@ -161,6 +173,31 @@ export default async function JournalPage({
           activeWorkspaceOrgId,
       ),
   );
+
+  const contextResolution = resolveEngagementContext({
+    candidates: (ecRows ?? []).map((e) => {
+      const r = e as {
+        id: string;
+        relationship_slug: string;
+        organization_id?: string | null;
+        status?: string | null;
+        started_at?: string | null;
+        ended_at?: string | null;
+        is_primary?: boolean | null;
+      };
+      return {
+        id: r.id,
+        relationshipSlug: r.relationship_slug,
+        organizationId: r.organization_id ?? null,
+        // The query already filters to status='active'; carry it explicitly so
+        // the pure model needs no knowledge of how it was fetched.
+        status: r.status ?? "active",
+        startedAt: r.started_at ?? null,
+        endedAt: r.ended_at ?? null,
+        isPrimary: r.is_primary === true,
+      };
+    }),
+  });
 
   const engagements: JournalEngagement[] = ecOrdered.map((e) => {
     const org = e.organizations as {
@@ -799,6 +836,7 @@ export default async function JournalPage({
               // navigation).
               key={editingId ?? "new"}
               engagements={engagements}
+              contextResolution={contextResolution}
               directions={directions}
               workerSkills={workerSkills}
               editingEntry={editingEntry}

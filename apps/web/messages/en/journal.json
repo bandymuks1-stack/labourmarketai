@@ -74,6 +74,8 @@
   },
   "date": "Date",
   "engagement": "Context",
+  "engagementChoose": "Choose the engagement…",
+  "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
   "entry": {
     "reviewedBy": "Reviewed by",
     "confirmerRole": {

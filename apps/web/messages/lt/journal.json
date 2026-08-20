@@ -74,6 +74,8 @@
   },
   "date": "Data",
   "engagement": "Kontekstas",
+  "engagementChoose": "Pasirinkite santykį…",
+  "engagementAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam santykiui. Prieš išsaugant pasirinkite, kuriam.",
   "entry": {
     "reviewedBy": "Peržiūrėjo",
     "confirmerRole": {

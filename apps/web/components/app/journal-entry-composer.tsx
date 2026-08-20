@@ -80,6 +80,15 @@ export type JournalEngagement = {
   label: string;
   isPrimary: boolean;
 };
+
+/** How the entry's engagement context was decided — see
+ *  `lib/journal/engagement-context-selection`. `rule: "C"` means SEVERAL are
+ *  legitimately possible, so nothing is preselected and the worker must pick
+ *  before the entry can be submitted. */
+export type JournalContextResolution = {
+  rule: "A" | "B" | "C" | "D" | "NONE";
+  selectedId: string | null;
+};
 export type JournalDirection = { slug: string; name: string };
 export type JournalSkill = { slug: string; name: string };
 /** A worker skill matched to the entry, carrying why it was suggested and how
@@ -144,6 +153,7 @@ export type { JournalEditingEntry };
 
 export function JournalEntryComposer({
   engagements,
+  contextResolution,
   directions,
   workerSkills,
   editingEntry,
@@ -152,6 +162,7 @@ export function JournalEntryComposer({
   onCancelEdit,
 }: {
   engagements: JournalEngagement[];
+  contextResolution?: JournalContextResolution;
   directions: JournalDirection[];
   workerSkills: JournalSkill[];
   /** When set, the composer opens in EDIT mode: textarea is prefilled
@@ -188,7 +199,13 @@ export function JournalEntryComposer({
   // Context Intelligence (rebuild phase 3): the page hands the list ordered
   // ACTIVE-WORKSPACE-first (then primary) — the first entry IS the resolved
   // default context, so the picker only matters on real ambiguity.
-  const primaryId = engagements[0]?.id ?? "";
+  // The DEFAULT context. On rule C the resolution deliberately selects
+  // nothing: several employers are legitimately possible and guessing between
+  // them is what put 15 production entries somewhere they could never be read.
+  // An empty default makes the picker required rather than pre-answered.
+  const primaryId =
+    contextResolution?.selectedId ?? (contextResolution ? "" : engagements[0]?.id ?? "");
+  const mustChooseContext = contextResolution?.rule === "C";
   const today = new Date().toISOString().slice(0, 10);
 
   // EDIT-mode preload (v5): when editing, reconstruct the saved structured
@@ -815,6 +832,13 @@ export function JournalEntryComposer({
   async function submit() {
     if (!text.trim()) {
       setError(t("notesRequiredCopy"));
+      return;
+    }
+    // Rule C: several engagement contexts are legitimately possible. Saving
+    // without a choice would put the work somewhere nobody decided on — which
+    // is how hours end up in a context no employer can ever read.
+    if (mustChooseContext && !engagementId) {
+      setError(t("engagementAmbiguous"));
       return;
     }
     setError(null);
@@ -1969,10 +1993,25 @@ export function JournalEntryComposer({
           <DarkListbox
             value={engagementId}
             onChange={setEngagementId}
-            options={engagements.map((e) => ({ value: e.id, label: e.label }))}
+            options={[
+              // Rule C: an explicit unchosen option, so the field reads as a
+              // question rather than as an answer someone already gave.
+              ...(mustChooseContext
+                ? [{ value: "", label: t("engagementChoose") }]
+                : []),
+              ...engagements.map((e) => ({ value: e.id, label: e.label })),
+            ]}
             ariaLabel={t("engagement")}
             testId="journal-engagement-switcher"
           />
+          {mustChooseContext && engagementId === "" ? (
+            <p
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="journal-engagement-must-choose"
+            >
+              {t("engagementAmbiguous")}
+            </p>
+          ) : null}
         </label>
 
         {mode === "photo" && !editingEntry && photoField}
