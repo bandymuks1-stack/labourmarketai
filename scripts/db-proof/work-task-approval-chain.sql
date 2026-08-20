@@ -156,8 +156,12 @@ begin
     values ('9 version PUBLISHED', 'published', v_out, v_out in ('ok','published'));
 
   -- 10. SEND FOR APPROVAL
+  -- A DELIBERATELY DIFFERENT caller title: the engine must ignore it and
+  -- store the task's own, so assertion 19f proves the override rather than
+  -- passing by coincidence.
   v_out := public.start_workflow_instance_v1(
-    v_def::text, 'Install cable run, floor 3', '{}'::jsonb, v_task::text);
+    v_def::text, 'REQUESTER SUPPLIED TITLE THAT MUST NOT BE STORED',
+    '{}'::jsonb, v_task::text);
   select id into v_inst from public.workflow_instances
    where context_entity_type = 'work_task' and context_entity_id = v_task;
   insert into proof(step, expected, got, ok) values
@@ -225,6 +229,82 @@ begin
     ('19 the transition ledger is unchanged by the withdrawal', 'same count',
       (select count(*)::text from public.workflow_transitions where instance_id = v_inst),
       (select count(*) from public.workflow_transitions where instance_id = v_inst) = v_ta);
+
+  -- 19b-19e. TENANT SCOPE — a task may travel ONLY through a flow of its own
+  -- organization, and the title an approver reads is the TASK's, never text
+  -- the requester typed.
+  --
+  -- Measured against the UNPATCHED engine, this attack SUCCEEDS: org A's task
+  -- goes through org B's flow, an org B approver slot is created for a task
+  -- they cannot see, and the instance carries a caller-invented title. That is
+  -- what 20260820070000 closes.
+  declare
+    v_org_b   uuid := gen_random_uuid();
+    v_proj_b  uuid := gen_random_uuid();
+    v_appr_b  uuid := gen_random_uuid();
+    v_def_b   uuid;
+    v_ver_b   uuid;
+    v_orphan  uuid;
+  begin
+    insert into auth.users (id) values (v_appr_b);
+    insert into public.profiles (id) values (v_appr_b) on conflict (id) do nothing;
+    insert into public.organizations (id, organization_type, legal_name, owner_profile_id)
+      values (v_org_b, 'company', 'CHAIN PROOF ORG B (rolled back)', v_prof);
+    insert into public.projects (id, organization_id, title)
+      values (v_proj_b, v_org_b, 'Org B project');
+    insert into public.company_memberships (organization_id, profile_id, role, status, accepted_at)
+      values (v_org_b, v_appr_b, 'admin', 'active', now());
+
+    perform set_config('request.jwt.claim.sub', v_prof::text, true);
+    v_out := public.create_work_task_v1('Orphan task with no org spine', null,
+                                        'normal', null, null, true);
+    select id into v_orphan from public.work_tasks
+     where created_by = v_prof order by created_at desc limit 1;
+
+    v_out := public.create_workflow_definition_v1(
+      v_org_b::text, 'B signoff', 'b_signoff', 'work_task',
+      jsonb_build_array(jsonb_build_object(
+        'name', 'Sign off', 'approval_mode', 'single',
+        'approver_rule', jsonb_build_object(
+          'kind', 'profiles', 'profile_ids', jsonb_build_array(v_appr_b::text)))));
+    select id into v_def_b from public.workflow_definitions
+     where organization_id = v_org_b and slug = 'b_signoff';
+    select id into v_ver_b from public.workflow_definition_versions
+     where definition_id = v_def_b order by version desc limit 1;
+    v_out := public.publish_workflow_version_v1(v_ver_b::text);
+
+    -- The task under test already has a live org-A approval, so use a second
+    -- org-A task for the cross-org attempt to keep the cases independent.
+    v_out := public.start_workflow_instance_v1(
+      v_def_b::text, 'Totally unrelated invented title', '{}'::jsonb, v_orphan::text);
+    insert into proof(step, expected, got, ok) values
+      ('19b a task with NO organization spine is refused', 'not_allowed',
+        v_out, v_out = 'not_allowed');
+
+    v_out := public.start_workflow_instance_v1(
+      v_def_b::text, 'Invented', '{}'::jsonb, gen_random_uuid()::text);
+    insert into proof(step, expected, got, ok) values
+      ('19c a nonexistent task uuid is refused', 'not_found',
+        v_out, v_out = 'not_found');
+
+    v_out := public.start_workflow_instance_v1(
+      v_def_b::text, 'Invented', '{}'::jsonb, null);
+    insert into proof(step, expected, got, ok) values
+      ('19d a work_task flow with NO task at all is refused', 'invalid',
+        v_out, v_out = 'invalid');
+
+    insert into proof(step, expected, got, ok) values
+      ('19e org B holds no instance for any org A task', '0',
+        (select count(*)::text from public.workflow_instances
+          where organization_id = v_org_b),
+        (select count(*) from public.workflow_instances
+          where organization_id = v_org_b) = 0),
+      ('19f the approval title is the TASK''s own, not the requester''s',
+        'Install cable run, floor 3',
+        (select title from public.workflow_instances where id = v_inst),
+        (select title from public.workflow_instances where id = v_inst)
+          = 'Install cable run, floor 3');
+  end;
 
   -- 20. ANON GAINS NOTHING from any of it.
   insert into proof(step, expected, got, ok) values

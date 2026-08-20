@@ -1,8 +1,11 @@
 -- ============================================================================
 -- ROLLBACK for 20260820070000_workflow_work_task_definition_v1.
 --
--- Restores the 20260817130000 allowlist verbatim: 'work_task' is removed from
--- the contexts an organization may author a definition for.
+-- Restores BOTH 20260817130000 command bodies verbatim: 'work_task' is removed
+-- from the contexts an organization may author a definition for, and
+-- start_workflow_instance_v1 returns to taking p_context_entity_id as an opaque
+-- uuid. Safe in that order because with the allowlist closed no NEW work_task
+-- definition can be authored, so no new work_task instance can be started.
 --
 -- IT REFUSES while any work_task definition exists. Removing the value would
 -- not delete those rows — the TABLE check constraint widened by 20260819210000
@@ -21,12 +24,25 @@ begin;
 do $guard$
 declare v_n int;
 begin
+  -- Counts only ACTIVE definitions, so the remedy this message names is one an
+  -- operator can actually carry out. `set_workflow_definition_active_v1` flips
+  -- `is_active` and nothing else, and there is no supported definition-delete
+  -- command — so a guard that counted retired rows too would make the first
+  -- legitimate use of the feature permanently un-rollbackable.
+  --
+  -- A RETIRED definition is safe to strand: it can start no new instance, and
+  -- removing 'work_task' from the authoring allowlist takes nothing else from
+  -- it. Instances already in flight are unaffected either way — they carry
+  -- their own version snapshot and their own approvers, and
+  -- `decide_workflow_step_v1` never consults this allowlist, so a pending
+  -- approval stays decidable after the rollback.
   select count(*) into v_n
     from public.workflow_definitions
-   where context_entity_type = 'work_task';
+   where context_entity_type = 'work_task'
+     and is_active;
   if v_n > 0 then
     raise exception
-      'refusing rollback: % work_task workflow definition(s) exist. Retire them first (set_workflow_definition_active_v1), then re-run.', v_n;
+      'refusing rollback: % ACTIVE work_task workflow definition(s) exist. Retire them first (set_workflow_definition_active_v1 with p_is_active false), then re-run.', v_n;
   end if;
 end $guard$;
 
@@ -192,6 +208,146 @@ begin
   return 'created';
 end;
 $$;
+
+create or replace function public.start_workflow_instance_v1(
+  p_definition_id     text,
+  p_title             text,
+  p_payload           jsonb,
+  p_context_entity_id text default null
+) returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid       uuid := auth.uid();
+  v_def_id  uuid;
+  v_ctx_id  uuid;
+  v_title   text := nullif(trim(coalesce(p_title, '')), '');
+  v_payload jsonb := coalesce(p_payload, '{}'::jsonb);
+  v_def     record;
+  v_ver     record;
+  v_step    record;
+  v_inst    uuid;
+  v_step_id uuid;
+  v_n       int;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  begin
+    v_def_id := nullif(trim(coalesce(p_definition_id, '')), '')::uuid;
+    v_ctx_id := nullif(trim(coalesce(p_context_entity_id, '')), '')::uuid;
+  exception when invalid_text_representation then
+    return 'invalid';
+  end;
+  if v_def_id is null then return 'invalid'; end if;
+  if v_title is null or char_length(v_title) < 3 or char_length(v_title) > 160 then
+    return 'invalid';
+  end if;
+  if jsonb_typeof(v_payload) <> 'object' or pg_column_size(v_payload) > 8192 then
+    return 'invalid';
+  end if;
+
+  select d.id, d.organization_id, d.context_entity_type, d.is_active
+    into v_def
+    from public.workflow_definitions d
+   where d.id = v_def_id;
+  -- Merged: missing definition and non-member answer the same — no oracle.
+  if v_def.id is null
+     or not (public.belongs_to_organization(v_def.organization_id) or public.is_admin()) then
+    return 'not_found';
+  end if;
+  if not v_def.is_active then return 'not_found'; end if;
+
+  select v.id into v_ver
+    from public.workflow_definition_versions v
+   where v.definition_id = v_def.id and v.published_at is not null
+   order by v.version desc
+   limit 1;
+  if v_ver.id is null then return 'not_published'; end if;
+
+  -- Idempotent starts on an external context entity.
+  if v_ctx_id is not null and exists (
+    select 1 from public.workflow_instances i
+     where i.context_entity_type = v_def.context_entity_type
+       and i.context_entity_id = v_ctx_id
+       and i.status = 'pending'
+  ) then
+    return 'already_pending';
+  end if;
+
+  -- Abuse cap: open requests per requester.
+  if (select count(*) from public.workflow_instances i
+       where i.requester_profile_id = uid and i.status = 'pending') >= 100 then
+    return 'limit_reached';
+  end if;
+
+  -- EVERY step must resolve to at least one approver at start (design rule:
+  -- approver sets are resolved at instance start; an unapprovable request is
+  -- refused, never auto-approved).
+  for v_step in
+    select s.step_order, s.approver_rule
+      from public.workflow_version_steps s
+     where s.version_id = v_ver.id
+     order by s.step_order
+  loop
+    select count(*) into v_n
+      from public.workflow_resolve_step_approvers_v1(v_def.organization_id, uid, v_step.approver_rule);
+    if v_n = 0 then
+      return 'no_approvers';
+    end if;
+  end loop;
+
+  begin
+    insert into public.workflow_instances
+      (version_id, organization_id, context_entity_type, context_entity_id,
+       requester_profile_id, title, payload, status, current_step_order)
+    values
+      (v_ver.id, v_def.organization_id, v_def.context_entity_type, v_ctx_id,
+       uid, v_title, v_payload, 'pending', 1)
+    returning id into v_inst;
+  exception when unique_violation then
+    return 'already_pending';
+  end;
+
+  for v_step in
+    select s.step_order, s.name, s.approval_mode, s.approver_rule, s.deadline_hours
+      from public.workflow_version_steps s
+     where s.version_id = v_ver.id
+     order by s.step_order
+  loop
+    insert into public.workflow_instance_steps
+      (instance_id, step_order, name, approval_mode, status, deadline_hours,
+       deadline_at, activated_at)
+    values
+      (v_inst, v_step.step_order, v_step.name, v_step.approval_mode,
+       case when v_step.step_order = 1 then 'active' else 'waiting' end,
+       v_step.deadline_hours,
+       case when v_step.step_order = 1 and v_step.deadline_hours is not null
+            then now() + make_interval(hours => v_step.deadline_hours) else null end,
+       case when v_step.step_order = 1 then now() else null end)
+    returning id into v_step_id;
+
+    insert into public.workflow_instance_approvers
+      (instance_step_id, instance_id, approver_profile_id)
+    select v_step_id, v_inst, r
+      from public.workflow_resolve_step_approvers_v1(v_def.organization_id, uid, v_step.approver_rule) r;
+  end loop;
+
+  insert into public.workflow_transitions
+    (instance_id, actor_profile_id, action, step_order, from_status, to_status)
+  values
+    (v_inst, uid, 'started', null, null, 'pending'),
+    (v_inst, uid, 'step_activated', 1, null, 'active');
+
+  return v_inst::text;
+end;
+$$;
+
+revoke all on function public.start_workflow_instance_v1(text, text, jsonb, text) from public;
+revoke all on function public.start_workflow_instance_v1(text, text, jsonb, text) from anon;
+grant execute on function public.start_workflow_instance_v1(text, text, jsonb, text) to authenticated;
 
 revoke all on function public.create_workflow_definition_v1(text, text, text, text, jsonb) from public;
 revoke all on function public.create_workflow_definition_v1(text, text, text, text, jsonb) from anon;

@@ -40,12 +40,32 @@
 -- steps 1-7 passed, step 8 returned 'invalid'.
 --
 -- ── WHAT THIS CHANGES ──────────────────────────────────────────────────────
--- ONE value, 'work_task', added to ONE allowlist. A strict SUPERSET: every
--- context that was authorable before is still authorable, with identical
--- validation. Nothing is loosened — the authorisation check
--- (`membership_actor_role_v1` must be owner or admin), the slug rule, the step
--- validation, the approver-rule vocabulary, the 50-definition cap and the
--- duplicate-slug guard are all untouched.
+-- TWO engine command bodies are replaced. Neither creates, drops or alters any
+-- table, column, policy, index, trigger or grant, and neither runs DML at
+-- apply time.
+--
+-- 1. `create_workflow_definition_v1` — ONE value, 'work_task', added to ONE
+--    allowlist. A strict SUPERSET: every context authorable before is still
+--    authorable with identical validation. Nothing is loosened: the
+--    authorisation check (`membership_actor_role_v1` must be owner or admin),
+--    the slug rule, the step validation, the approver-rule vocabulary, the
+--    50-definition cap and the duplicate-slug guard are all untouched.
+--
+-- 2. `start_workflow_instance_v1` — CONTEXT ENTITY VALIDATION for work_task,
+--    added after review of the first draft. The engine has always taken
+--    p_context_entity_id as an opaque uuid, checking only that the caller
+--    belongs to the DEFINITION's organization. Admitting work_task without
+--    more would have let someone who belongs to two organizations send org A's
+--    task through org B's flow, or pass any uuid at all — and the
+--    CLIENT-SUPPLIED title would then be read by approvers who cannot see the
+--    task. So for this context type the task must exist, must be VISIBLE to
+--    the caller under the same v1 `wt_select` predicate, and must belong to
+--    the definition's organization through its project or object spine with no
+--    spine pointing elsewhere. The title is then taken FROM THE TASK, never
+--    from the caller, which removes the injection surface entirely.
+--
+--    Strictly narrowing, and scoped to `work_task` alone: every other context
+--    type takes exactly the path it took before, byte for byte.
 --
 -- ── WHAT THIS DELIBERATELY DOES NOT DO ─────────────────────────────────────
 -- It does NOT seed a work_task template into the default pack. Seeding one
@@ -240,6 +260,202 @@ begin
   return 'created';
 end;
 $$;
+
+create or replace function public.start_workflow_instance_v1(
+  p_definition_id     text,
+  p_title             text,
+  p_payload           jsonb,
+  p_context_entity_id text default null
+) returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid       uuid := auth.uid();
+  v_def_id  uuid;
+  v_ctx_id  uuid;
+  v_title   text := nullif(trim(coalesce(p_title, '')), '');
+  v_payload jsonb := coalesce(p_payload, '{}'::jsonb);
+  v_def     record;
+  v_ver     record;
+  v_step    record;
+  v_inst    uuid;
+  v_step_id uuid;
+  v_n       int;
+  v_task    record;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  begin
+    v_def_id := nullif(trim(coalesce(p_definition_id, '')), '')::uuid;
+    v_ctx_id := nullif(trim(coalesce(p_context_entity_id, '')), '')::uuid;
+  exception when invalid_text_representation then
+    return 'invalid';
+  end;
+  if v_def_id is null then return 'invalid'; end if;
+  if v_title is null or char_length(v_title) < 3 or char_length(v_title) > 160 then
+    return 'invalid';
+  end if;
+  if jsonb_typeof(v_payload) <> 'object' or pg_column_size(v_payload) > 8192 then
+    return 'invalid';
+  end if;
+
+  select d.id, d.organization_id, d.context_entity_type, d.is_active
+    into v_def
+    from public.workflow_definitions d
+   where d.id = v_def_id;
+  -- Merged: missing definition and non-member answer the same — no oracle.
+  if v_def.id is null
+     or not (public.belongs_to_organization(v_def.organization_id) or public.is_admin()) then
+    return 'not_found';
+  end if;
+  if not v_def.is_active then return 'not_found'; end if;
+
+  -- ── CONTEXT ENTITY VALIDATION for work_task (chain step B) ───────────────
+  -- The engine has always accepted p_context_entity_id as an opaque uuid and
+  -- checked only that the caller belongs to the DEFINITION's organization.
+  -- With work_task admitted, that is not enough: a person who belongs to two
+  -- organizations could send org A's task through org B's flow, or pass any
+  -- uuid at all, and the client-supplied title would then be read by approvers
+  -- who cannot see the task. So for this context type the entity is checked,
+  -- and the TITLE IS TAKEN FROM THE TASK rather than from the caller.
+  if v_def.context_entity_type = 'work_task' then
+    if v_ctx_id is null then return 'invalid'; end if;
+
+    select wt.id, wt.title, wt.created_by, wt.assignee_profile_id,
+           wt.project_id, wt.object_id
+      into v_task
+      from public.work_tasks wt
+     where wt.id = v_ctx_id;
+
+    -- The caller must be able to SEE the task — the same v1 wt_select
+    -- predicate link_journal_entry_to_task_v1 re-checks. A task the caller
+    -- cannot see answers exactly like one that does not exist: no oracle.
+    if v_task.id is null or not (
+         v_task.created_by = uid
+         or v_task.assignee_profile_id = uid
+         or public.is_admin()
+         or (v_task.project_id is not null and public.can_manage_project(v_task.project_id))
+       ) then
+      return 'not_found';
+    end if;
+
+    -- The task must belong to the DEFINITION's organization. work_tasks has no
+    -- organization_id of its own: its organization is reached through
+    -- project -> projects.organization_id or object -> work_objects
+    -- .organization_id. At least one spine must name this organization, and no
+    -- spine may name a different one. A task with both spines null belongs to
+    -- no organization and can never be routed through an organization's flow.
+    if not exists (
+      select 1
+        from public.work_tasks wt
+        left join public.projects pr     on pr.id = wt.project_id
+        left join public.work_objects wo on wo.id = wt.object_id
+       where wt.id = v_ctx_id
+         and (pr.organization_id = v_def.organization_id
+              or wo.organization_id = v_def.organization_id)
+         and coalesce(pr.organization_id, v_def.organization_id) = v_def.organization_id
+         and coalesce(wo.organization_id, v_def.organization_id) = v_def.organization_id
+    ) then
+      return 'not_allowed';
+    end if;
+
+    -- One name for the work: approvers read the task's OWN title, never text
+    -- the requester typed. This also removes the injection surface entirely.
+    v_title := left(btrim(v_task.title), 160);
+    if v_title is null or char_length(v_title) < 3 then return 'invalid'; end if;
+  end if;
+
+  select v.id into v_ver
+    from public.workflow_definition_versions v
+   where v.definition_id = v_def.id and v.published_at is not null
+   order by v.version desc
+   limit 1;
+  if v_ver.id is null then return 'not_published'; end if;
+
+  -- Idempotent starts on an external context entity.
+  if v_ctx_id is not null and exists (
+    select 1 from public.workflow_instances i
+     where i.context_entity_type = v_def.context_entity_type
+       and i.context_entity_id = v_ctx_id
+       and i.status = 'pending'
+  ) then
+    return 'already_pending';
+  end if;
+
+  -- Abuse cap: open requests per requester.
+  if (select count(*) from public.workflow_instances i
+       where i.requester_profile_id = uid and i.status = 'pending') >= 100 then
+    return 'limit_reached';
+  end if;
+
+  -- EVERY step must resolve to at least one approver at start (design rule:
+  -- approver sets are resolved at instance start; an unapprovable request is
+  -- refused, never auto-approved).
+  for v_step in
+    select s.step_order, s.approver_rule
+      from public.workflow_version_steps s
+     where s.version_id = v_ver.id
+     order by s.step_order
+  loop
+    select count(*) into v_n
+      from public.workflow_resolve_step_approvers_v1(v_def.organization_id, uid, v_step.approver_rule);
+    if v_n = 0 then
+      return 'no_approvers';
+    end if;
+  end loop;
+
+  begin
+    insert into public.workflow_instances
+      (version_id, organization_id, context_entity_type, context_entity_id,
+       requester_profile_id, title, payload, status, current_step_order)
+    values
+      (v_ver.id, v_def.organization_id, v_def.context_entity_type, v_ctx_id,
+       uid, v_title, v_payload, 'pending', 1)
+    returning id into v_inst;
+  exception when unique_violation then
+    return 'already_pending';
+  end;
+
+  for v_step in
+    select s.step_order, s.name, s.approval_mode, s.approver_rule, s.deadline_hours
+      from public.workflow_version_steps s
+     where s.version_id = v_ver.id
+     order by s.step_order
+  loop
+    insert into public.workflow_instance_steps
+      (instance_id, step_order, name, approval_mode, status, deadline_hours,
+       deadline_at, activated_at)
+    values
+      (v_inst, v_step.step_order, v_step.name, v_step.approval_mode,
+       case when v_step.step_order = 1 then 'active' else 'waiting' end,
+       v_step.deadline_hours,
+       case when v_step.step_order = 1 and v_step.deadline_hours is not null
+            then now() + make_interval(hours => v_step.deadline_hours) else null end,
+       case when v_step.step_order = 1 then now() else null end)
+    returning id into v_step_id;
+
+    insert into public.workflow_instance_approvers
+      (instance_step_id, instance_id, approver_profile_id)
+    select v_step_id, v_inst, r
+      from public.workflow_resolve_step_approvers_v1(v_def.organization_id, uid, v_step.approver_rule) r;
+  end loop;
+
+  insert into public.workflow_transitions
+    (instance_id, actor_profile_id, action, step_order, from_status, to_status)
+  values
+    (v_inst, uid, 'started', null, null, 'pending'),
+    (v_inst, uid, 'step_activated', 1, null, 'active');
+
+  return v_inst::text;
+end;
+$$;
+
+revoke all on function public.start_workflow_instance_v1(text, text, jsonb, text) from public;
+revoke all on function public.start_workflow_instance_v1(text, text, jsonb, text) from anon;
+grant execute on function public.start_workflow_instance_v1(text, text, jsonb, text) to authenticated;
 
 -- Privileges of a `create or replace`d function are preserved, so the grants
 -- written by 20260817130000 still stand. Re-asserted for the same reason they

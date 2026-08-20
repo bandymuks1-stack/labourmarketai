@@ -259,11 +259,19 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
               new RegExp(`(create table[^(]*\\b${tbl}\\b|drop table[^;]*\\b${tbl}\\b)`, "i"),
             );
           }
+          // TWO commands may be replaced by this migration, and no others.
+          // The second was added after a review found that admitting
+          // work_task without validating the context entity would let a
+          // multi-organization caller send org A's task through org B's flow.
+          const REPLACEABLE = new Set([
+            "create_workflow_definition_v1",
+            "start_workflow_instance_v1",
+          ]);
           for (const fn of [...COMMANDS, ...HELPERS]) {
-            if (fn === "create_workflow_definition_v1") continue;
+            if (REPLACEABLE.has(fn)) continue;
             expect(
               src,
-              `${dir}/${f} may replace ONLY create_workflow_definition_v1, not ${fn}`,
+              `${dir}/${f} may replace ONLY the two declared commands, not ${fn}`,
             ).not.toMatch(
               new RegExp(`create (or replace )?function[^(]*\\b${fn}\\b`, "i"),
             );
@@ -382,6 +390,55 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
     // It creates and drops nothing at all.
     expect(fwd).not.toMatch(/create\s+table|drop\s+table|alter\s+table/i);
     expect(fwd).not.toMatch(/create\s+policy|drop\s+policy/i);
+  });
+
+  it("admitting work_task also VALIDATES the context entity", () => {
+    // The engine has always taken p_context_entity_id as an opaque uuid and
+    // checked only that the caller belongs to the DEFINITION's organization.
+    // Proven against production: with that alone, org A's task went through
+    // org B's flow carrying a caller-invented title, and an org B approver
+    // slot was created for a task they cannot see. Admitting work_task
+    // without this block would ship that hole.
+    const fwd = readFileSync(
+      join(
+        REPO,
+        "supabase/migrations/20260820070000_workflow_work_task_definition_v1.sql",
+      ),
+      "utf8",
+    );
+    const code = fwd
+      .split(/\r?\n/)
+      .filter((l) => !l.trimStart().startsWith("--"))
+      .join("\n");
+
+    // Scoped to work_task alone — every other context keeps its old path.
+    expect(code).toMatch(/if v_def\.context_entity_type = 'work_task' then/);
+    // The task must exist AND be visible under the v1 wt_select predicate.
+    expect(code).toContain("v_task.created_by = uid");
+    expect(code).toContain("v_task.assignee_profile_id = uid");
+    expect(code).toContain("public.can_manage_project(v_task.project_id)");
+    // Both organization spines are resolved, and neither may disagree.
+    expect(code).toContain("left join public.projects pr     on pr.id = wt.project_id");
+    expect(code).toContain("left join public.work_objects wo on wo.id = wt.object_id");
+    expect(code).toContain(
+      "coalesce(pr.organization_id, v_def.organization_id) = v_def.organization_id",
+    );
+    expect(code).toContain(
+      "coalesce(wo.organization_id, v_def.organization_id) = v_def.organization_id",
+    );
+    // The title comes from the TASK, never from the caller.
+    expect(code).toMatch(/v_title := left\(btrim\(v_task\.title\), 160\);/);
+    // ...and the app no longer posts one.
+    const page = readFileSync(
+      join(REPO, "apps/web/app/[locale]/dashboard/tasks/page.tsx"),
+      "utf8",
+    );
+    expect(page).not.toContain('name="taskTitle"');
+    const action = readFileSync(
+      join(REPO, "apps/web/lib/tasks/task-approval-actions.ts"),
+      "utf8",
+    );
+    expect(action).not.toMatch(/formData\.get\("taskTitle"\)/);
   });
 
   it("both files stay human-gated with the owner-mandate citation and rollback pairs", () => {

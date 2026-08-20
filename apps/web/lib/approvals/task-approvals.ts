@@ -68,6 +68,9 @@ export const EMPTY_TASK_APPROVALS: TaskApprovalBatch = {
 export type TaskApprovalDefinition = {
   readonly id: string;
   readonly name: string;
+  /** The organization that owns the flow. A task may only be sent through a
+   *  flow of its OWN organization — see `getTaskOrganizations`. */
+  readonly organizationId: string | null;
 };
 
 /**
@@ -152,15 +155,69 @@ export async function listTaskApprovalDefinitions(): Promise<
 
   const res = await asAny(supabase)
     .from("workflow_definitions")
-    .select("id, name, is_active, context_entity_type")
+    .select("id, name, is_active, context_entity_type, organization_id")
     .eq("context_entity_type", "work_task")
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(50);
   if (res.error) return [];
 
-  return ((res.data ?? []) as { id: string; name: string }[]).map((d) => ({
+  return (
+    (res.data ?? []) as {
+      id: string;
+      name: string;
+      organization_id: string | null;
+    }[]
+  ).map((d) => ({
     id: d.id,
     name: d.name,
+    organizationId: d.organization_id ?? null,
   }));
+}
+
+/**
+ * The organization each task belongs to, for the tasks a caller can see.
+ *
+ * `work_tasks` carries no `organization_id`: a task reaches its organization
+ * through `project_id -> projects.organization_id` or through
+ * `object_id -> work_objects.organization_id`. A task with both spines null
+ * belongs to no organization.
+ *
+ * This exists so the UI offers a task ONLY the approval flows of its OWN
+ * organization. A review found that the previous list returned every
+ * work_task definition the caller could read across all their memberships, so
+ * a person in two organizations was offered org B's flow for an org A task.
+ * `20260820070000` refuses that combination in the engine; this keeps the UI
+ * from presenting it in the first place.
+ *
+ * If both spines resolve and DISAGREE, the task is treated as belonging to
+ * neither — the same "unambiguous or nothing" rule the rest of the chain uses.
+ */
+export async function getTaskOrganizations(
+  taskIds: readonly string[],
+): Promise<ReadonlyMap<string, string>> {
+  const out = new Map<string, string>();
+  const ids = [...new Set(taskIds)].filter((id) => id.length > 0);
+  if (ids.length === 0) return out;
+
+  const supabase = await createClient();
+  const res = await asAny(supabase)
+    .from("work_tasks")
+    .select("id, projects(organization_id), work_objects(organization_id)")
+    .in("id", ids);
+  if (res.error) return out;
+
+  type Row = {
+    id: string;
+    projects: { organization_id: string | null } | null;
+    work_objects: { organization_id: string | null } | null;
+  };
+  for (const row of (res.data ?? []) as Row[]) {
+    const viaProject = row.projects?.organization_id ?? null;
+    const viaObject = row.work_objects?.organization_id ?? null;
+    if (viaProject && viaObject && viaProject !== viaObject) continue;
+    const org = viaProject ?? viaObject;
+    if (org) out.set(row.id, org);
+  }
+  return out;
 }

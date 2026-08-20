@@ -105,13 +105,63 @@ entries with no `work_task`.
 
 ## Identity gate before apply
 
-- migration sha256 `cd0c43fc433667dee6b350322b76d34213b4463011bdd97c3d67fae5a23a02c1`;
-- rollback sha256 `8287abe94057fa80b9dba9548e608f81b240ff3dcc863d4c91bbb3458a503f79`;
+- migration sha256 `ecb70974dc0ba9b9bf0aa07dce7765599b2be2685ff94e687840767fdfded338`;
+- rollback sha256 `0b6a97297a3137143de6b1ceaf92f3b45652afa527629de3f7d16a31edadc3f3`;
 - comment-stripped EXECUTABLE sha256
-  `89935025d4f809d59dd8c3a4931f7e1343021cf0ab4267fe6f8ab76d4be292f1`;
+  `b843118e557d52bd476bf9a753b26a76815097c2af2d29e7dfa49f5881df6033`;
 - production target verified: `gorgitwvdzxbnaxhrsrw` / labourmarket.ai /
   eu-west-1 / `ACTIVE_HEALTHY`;
 - deployed body == repo body before the change (hash above).
+
+## AMENDMENT — a cross-organization hole found after the approval, and closed
+
+A review of the approved migration raised two findings. Both were verified
+against production and both were real, so the migration was extended before
+applying. It now replaces **two** engine command bodies rather than one.
+
+### P1 — a task could be sent through another organization's approval flow
+
+`start_workflow_instance_v1` has always taken `p_context_entity_id` as an
+**opaque uuid**, checking only that the caller belongs to the DEFINITION's
+organization. Admitting `work_task` without more would have meant: a person who
+belongs to two organizations could send **org A's task through org B's flow**,
+or pass any uuid at all, and the **caller-supplied title** would then be stored
+on the instance and read by approvers who cannot see the task.
+
+**Measured, not argued.** Against production's currently deployed RPC the
+attack SUCCEEDS: the instance was created, its title was
+`"Totally unrelated invented title"`, and an org B approver slot was created
+for a task that approver cannot see.
+
+**The fix.** For `context_entity_type = 'work_task'` only, the engine now
+requires the task to exist, to be **visible to the caller** under the same v1
+`wt_select` predicate `link_journal_entry_to_task_v1` uses, and to belong to
+the definition's organization through its project or object spine with no spine
+naming a different one. The title is then taken **from the task**, never from
+the caller — which removes the injection surface entirely. Every other context
+type takes exactly the path it took before.
+
+**Re-measured with the fix: 7/7.** Cross-org start → `not_allowed`, leaving no
+instance. Nonexistent task uuid → `not_found`. No task at all → `invalid`. Task
+with no organization spine → `not_allowed`. The legitimate same-organization
+start still succeeds, and the stored title is the task's own.
+
+The app layer was hardened alongside (defence in depth — the RPC is directly
+callable by `authenticated`, so the SQL is the real boundary): the hidden
+`taskTitle` form field is gone, the action reads the task's title under the
+caller's RLS, and the tasks page offers a task only the flows of its **own**
+organization.
+
+### P2 — the rollback's documented remedy was impossible to follow
+
+The refusal guard counted every `work_task` definition, active or retired,
+while the remedy it named (`set_workflow_definition_active_v1`) only flips
+`is_active` and no definition-delete command exists. The first legitimate use
+of the feature would therefore have made the rollback permanently un-runnable.
+The guard now counts **active** definitions only. A retired definition is safe
+to strand: it can start no new instance, and instances already in flight carry
+their own version snapshot and stay decidable — `decide_workflow_step_v1` never
+consults this allowlist.
 
 ## Proof — the complete chain, 24/24, against production
 

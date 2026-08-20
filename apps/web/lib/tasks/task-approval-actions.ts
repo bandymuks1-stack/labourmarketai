@@ -122,11 +122,25 @@ export async function requestTaskApprovalAction(
     finish(ctx, "invalid");
   }
 
-  // The approval's title is the task's own title — one name for the work, so
-  // an approver reads the same words the worker did. Bounded to the engine's
-  // own limits; a task title is already 3..160 by its own CHECK.
-  const rawTitle = String(formData.get("taskTitle") ?? "").trim();
-  const title = rawTitle.slice(0, WORKFLOW_TITLE_MAX);
+  // The approval's title is the task's OWN title, read from the database under
+  // the caller's RLS — never a string the client posted.
+  //
+  // This used to take a hidden `taskTitle` form field. A review found that a
+  // caller could post any text at all, and it would be stored on the instance
+  // and read by the approvers. `20260820070000` now overrides the title inside
+  // `start_workflow_instance_v1` for this context type, which is the real
+  // boundary (the RPC is directly callable by `authenticated`); this read is
+  // defence in depth and gives an honest error before the round trip.
+  const taskRes = await asAny(supabase)
+    .from("work_tasks")
+    .select("id, title")
+    .eq("id", taskId)
+    .maybeSingle();
+  // A task the caller cannot see reads exactly like one that does not exist.
+  if (taskRes.error || !taskRes.data) finish(ctx, "not_found");
+  const title = String(taskRes.data.title ?? "")
+    .trim()
+    .slice(0, WORKFLOW_TITLE_MAX);
   if (title.length < WORKFLOW_TITLE_MIN) finish(ctx, "invalid");
 
   const { data, error } = await asAny(supabase).rpc(
