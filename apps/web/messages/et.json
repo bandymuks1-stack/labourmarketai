@@ -634,6 +634,8 @@
     "workerCta": "Otsin tööd",
     "employerCta": "Vajan inimesi",
     "currentSupply": "Praegune kontrollitud pakkumine",
+    "verifiedMarketData": "Kontrollitud turuandmed",
+    "dataSourceLabel": "Andmeallikas",
     "opportunityStream": "Võimaluste voog",
     "evidenceVerifiedTitle": "Tõend kontrollitud",
     "evidenceVerifiedBody": "Inimese kinnitus muudab kirje usaldusväärseks tõendiks.",

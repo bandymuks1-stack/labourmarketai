@@ -634,6 +634,8 @@
     "workerCta": "Jeg søger arbejde",
     "employerCta": "Jeg har brug for folk",
     "currentSupply": "Aktuelt verificeret udbud",
+    "verifiedMarketData": "Verificerede markedsdata",
+    "dataSourceLabel": "Datakilde",
     "opportunityStream": "Mulighedsstrøm",
     "evidenceVerifiedTitle": "Dokumentation verificeret",
     "evidenceVerifiedBody": "Menneskelig bekræftelse gør registreringen til pålidelig dokumentation.",

@@ -49,6 +49,8 @@ export async function LiveMarketLanding({
     menuClose: nav("menuClose"),
     live: landing("marketProof.eyebrow"),
     currentSupply: review("currentSupply"),
+    verifiedMarketData: review("verifiedMarketData"),
+    dataSourceLabel: review("dataSourceLabel"),
     visualNote: live("counters.previewNote"),
     vacancies: landing("marketProof.stats.vacancies.label"),
     employers: landing("marketProof.stats.employers.label"),

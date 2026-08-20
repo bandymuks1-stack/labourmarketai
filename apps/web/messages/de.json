@@ -4474,6 +4474,8 @@
     "workerCta": "Ich suche Arbeit",
     "employerCta": "Ich brauche Personal",
     "currentSupply": "Aktuell verifiziertes Angebot",
+    "verifiedMarketData": "Verifizierte Marktdaten",
+    "dataSourceLabel": "Datenquelle",
     "opportunityStream": "Chancenstrom",
     "evidenceVerifiedTitle": "Nachweis verifiziert",
     "evidenceVerifiedBody": "Menschliche Bestätigung macht den Eintrag zu einem verlässlichen Nachweis.",

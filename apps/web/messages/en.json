@@ -4474,6 +4474,8 @@
     "workerCta": "I'm looking for work",
     "employerCta": "I need people",
     "currentSupply": "Current verified supply",
+    "verifiedMarketData": "Verified market data",
+    "dataSourceLabel": "Data source",
     "opportunityStream": "Opportunity stream",
     "evidenceVerifiedTitle": "Evidence verified",
     "evidenceVerifiedBody": "Human confirmation turns the record into trusted evidence.",
