@@ -36,12 +36,37 @@ export function readLandingMode(): LandingMode | null {
   }
 }
 
+/**
+ * The same bounded choice, readable by the SERVER.
+ *
+ * LIVE and FOCUS are no longer two presentations of one component tree —
+ * FOCUS is the previous production landing, with its own chrome and its own
+ * (map-bearing) component tree. Deciding client-side would mean shipping both
+ * landings in every response and flashing one before the other, so the choice
+ * has to be known before render. localStorage stays the persistence record
+ * (unchanged contract); this cookie is how the server learns it.
+ *
+ * It carries a single bounded token — "live" or "focus" — and no identity,
+ * so it is not a tracking cookie and needs no consent gate. Lax keeps it off
+ * cross-site requests; it is deliberately not HttpOnly because the same value
+ * is written by the client control that sets it.
+ */
+export const LANDING_MODE_COOKIE = "lm_landing_mode";
+
+const LANDING_MODE_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
+
 export function persistLandingMode(mode: LandingMode): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(LANDING_MODE_STORAGE_KEY, mode);
   } catch {
     // A blocked localStorage must never make the landing unusable.
+  }
+  try {
+    document.cookie = `${LANDING_MODE_COOKIE}=${mode}; path=/; max-age=${LANDING_MODE_COOKIE_MAX_AGE}; samesite=lax`;
+  } catch {
+    // Same contract as above: a blocked cookie jar degrades to LIVE, never
+    // to a broken landing.
   }
 }
 

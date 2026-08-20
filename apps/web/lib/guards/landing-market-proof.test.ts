@@ -78,7 +78,6 @@ describe("landing market-proof band honesty", () => {
     expect([...MARKET_PROOF_STATS]).toEqual([
       "vacancies",
       "employers",
-      "regions",
     ]);
     expect(TOP_PROFESSION_FAMILY_SLUGS.length).toBeGreaterThanOrEqual(5);
     expect(TOP_PROFESSION_FAMILY_SLUGS.length).toBeLessThanOrEqual(8);
@@ -88,17 +87,24 @@ describe("landing market-proof band honesty", () => {
     describe(locale, () => {
       const mp = loadMarketProof(locale);
 
-      it("displays exactly the proven floors from the claim module", () => {
+      /**
+       * The band no longer RENDERS these message values. It reads the exact
+       * current counts from count_public_vacancies_v1, so a floor string can
+       * never again be shown as the current market (owner rule: reuse
+       * canonical data, never restore a stale number).
+       *
+       * The strings stay in messages/ as the provenance record and are still
+       * pinned to the claim module, so they cannot silently drift into
+       * something a future surface might render as fresh.
+       */
+      it("keeps the retained floor strings pinned to the claim module", () => {
         expect(numeric(mp.stats.vacancies.value)).toBe(
           SWEDEN_COVERAGE_CURRENT.activeVacanciesFloor,
         );
         expect(numeric(mp.stats.employers.value)).toBe(
           SWEDEN_COVERAGE_CURRENT.identifiedEmployersFloor,
         );
-        expect(numeric(mp.stats.regions.value)).toBe(
-          SWEDEN_COVERAGE_CURRENT.regions,
-        );
-        // Vacancy + employer floors stay marked as floors, never as exact.
+        // Floors stay marked as floors, never as exact.
         expect(mp.stats.vacancies.value.endsWith("+")).toBe(true);
         expect(mp.stats.employers.value.endsWith("+")).toBe(true);
       });
@@ -170,5 +176,32 @@ describe("landing market-proof band honesty", () => {
     // grouped subset understates the market and would read as a total.
     expect(src).toMatch(/professions\(slug\)/);
     expect(src).not.toMatch(/adsCount|employerCount|perProfession/);
+  });
+});
+
+/**
+ * The restored FOCUS baseline must not reintroduce the static numbers the
+ * band originally shipped with.
+ */
+describe("market-proof band renders live counts, not message values", () => {
+  const band = readFileSync(
+    join(__dirname, "..", "..", "components", "marketing", "market-proof-band.tsx"),
+    "utf8",
+  );
+
+  it("reads the canonical snapshot instead of landing.marketProof values", () => {
+    expect(band).toContain("readLiveMarketLandingSnapshot");
+    expect(band).toContain("market.activeVacancies");
+    expect(band).toContain("market.distinctEmployers");
+    expect(band).not.toContain("stats.${key}.value");
+    // The import, not the word — the header prose still records which floors
+    // the band used to quote and why they were replaced.
+    expect(band).not.toMatch(/import[^;]*market-coverage-claims/);
+  });
+
+  it("drops the statistic that has no current source, and the pinned date", () => {
+    expect(MARKET_PROOF_STATS).not.toContain("regions");
+    expect(band).not.toContain('t("asOfNote")');
+    expect(band).toContain("lastRefreshedAt");
   });
 });

@@ -1,6 +1,8 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 import { Card } from "@/components/ui/Card";
+import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * MARKET PROOF BAND (landing minimal truth update, owner mandate 2026-08-17,
@@ -55,12 +57,17 @@ import { Card } from "@/components/ui/Card";
  * request time. No new blocking work on the landing route.
  */
 
-/** Stat keys, in display order. Values live in `landing.marketProof.stats.*`. */
-export const MARKET_PROOF_STATS = [
-  "vacancies",
-  "employers",
-  "regions",
-] as const;
+/**
+ * Stat keys, in display order. LABELS live in `landing.marketProof.stats.*`;
+ * the VALUES are read live (see below), never from messages.
+ *
+ * `regions` is gone. The historical band quoted a static "21", and the public
+ * vacancy contract exposes no region count, so there is no current source to
+ * re-derive it from. Owner rule for the restored baseline: reuse canonical
+ * data where the statistic still exists, remove the statistic where it does
+ * not — never restore a stale number.
+ */
+export const MARKET_PROOF_STATS = ["vacancies", "employers"] as const;
 
 /**
  * Top profession families by active-ad count (production read-back
@@ -80,6 +87,20 @@ export const TOP_PROFESSION_FAMILY_SLUGS = [
 export async function MarketProofBand() {
   const t = await getTranslations("landing.marketProof");
   const professions = await getTranslations("professions");
+  const locale = await getLocale();
+
+  // The SAME canonical reader the LIVE landing uses — count_public_vacancies_v1
+  // through readPublicVacancySupplyCounts. One aggregation truth, not a
+  // baseline-specific one, and no hard-coded floors.
+  const market = await readLiveMarketLandingSnapshot();
+  const formatter = new Intl.NumberFormat(locale);
+  const values: Record<(typeof MARKET_PROOF_STATS)[number], number | null> = {
+    vacancies: market.activeVacancies,
+    employers: market.distinctEmployers,
+  };
+  const refreshedAt = market.lastRefreshedAt
+    ? formatUtcDateTime(market.lastRefreshedAt, locale)
+    : null;
 
   return (
     <section className="mt-16" aria-labelledby="market-proof-title">
@@ -98,12 +119,12 @@ export async function MarketProofBand() {
       <Reveal delay={0.06}>
         {/* Canonical <Card> primitive — the visual-contract ratchet forbids
             new raw card-class call sites (visual-contract-v1.test.ts). */}
-        <div className="mt-8 grid gap-5 sm:grid-cols-3">
-          {MARKET_PROOF_STATS.map((key) => (
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          {MARKET_PROOF_STATS.filter((key) => values[key] !== null).map((key) => (
             <Card key={key} className="flex flex-col gap-1.5">
               <div data-testid={`market-proof-${key}`}>
                 <p className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
-                  {t(`stats.${key}.value`)}
+                  {formatter.format(values[key] as number)}
                 </p>
                 <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">
                   {t(`stats.${key}.label`)}
@@ -114,12 +135,18 @@ export async function MarketProofBand() {
         </div>
       </Reveal>
 
-      {/* The honest basis line: floors, dated, changing daily. */}
-      <Reveal delay={0.1}>
-        <p className="mt-4 text-meta text-text-muted" data-testid="market-proof-basis">
-          {t("asOfNote")}
-        </p>
-      </Reveal>
+      {/* Provenance is the reader's OWN refresh timestamp, not a date pinned
+          in messages that the data has already moved past. */}
+      {refreshedAt ? (
+        <Reveal delay={0.1}>
+          <p
+            className="mt-4 text-meta text-text-muted"
+            data-testid="market-proof-basis"
+          >
+            {refreshedAt}
+          </p>
+        </Reveal>
+      ) : null}
 
       {/* ── Top professions in demand — ranking only, no absolute counts:
              profession grouping covers part of the listings, so counts over
