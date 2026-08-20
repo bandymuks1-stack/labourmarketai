@@ -51,7 +51,8 @@
 -- would choose an approver for every organization on the platform without
 -- anyone deciding it — exactly the invented organizational authority the owner
 -- ruled out. An organization authors its own flow and names its own approver.
--- It creates no approval table, no `approval_status` column on `work_tasks`,
+-- It creates no approval table, no `approval_status` column on the canonical
+-- task table,
 -- no second engine, and no automatic approval.
 --
 -- ── PROVEN, END TO END, AGAINST PRODUCTION ─────────────────────────────────

@@ -227,11 +227,66 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // It is GREEN and deliberately un-annotated.
       "20260819210000_workflow_work_task_context_v1",
     ];
+    /**
+     * 20260820070000 — chain step B on-ramp. The ONE later migration that
+     * legitimately REPLACES an engine command body, rather than merely
+     * consuming it.
+     *
+     * 20260819210000 widened the context_entity_type CHECK constraints to
+     * accept 'work_task', but create_workflow_definition_v1 carries its own
+     * hardcoded allowlist and was not widened with them — so authoring a
+     * work_task flow returned 'invalid' and chain step B had a route with no
+     * on-ramp. Fixing that requires replacing that ONE command body.
+     *
+     * It is NOT exempted wholesale: the block below is STRICTER than the
+     * consumer rules — it may replace exactly that one command and no other,
+     * may create or drop no engine object, and must WIDEN the allowlist
+     * rather than narrow it.
+     */
+    const COMMAND_REDEFINER = "20260820070000_workflow_work_task_definition_v1";
+
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f.startsWith(COMMAND_REDEFINER)) {
+          for (const tbl of TABLES) {
+            expect(
+              src,
+              `${dir}/${f} must not create or drop ${tbl}`,
+            ).not.toMatch(
+              new RegExp(`(create table[^(]*\\b${tbl}\\b|drop table[^;]*\\b${tbl}\\b)`, "i"),
+            );
+          }
+          for (const fn of [...COMMANDS, ...HELPERS]) {
+            if (fn === "create_workflow_definition_v1") continue;
+            expect(
+              src,
+              `${dir}/${f} may replace ONLY create_workflow_definition_v1, not ${fn}`,
+            ).not.toMatch(
+              new RegExp(`create (or replace )?function[^(]*\\b${fn}\\b`, "i"),
+            );
+            expect(
+              src,
+              `${dir}/${f} must not drop ${fn}`,
+            ).not.toMatch(new RegExp(`drop function[^(]*\\b${fn}\\b`, "i"));
+          }
+          expect(
+            src,
+            `${dir}/${f} must not create a trigger on an engine table`,
+          ).not.toMatch(/create\s+trigger[^;]*\bon\s+public\.workflow_/i);
+          // DML at APPLY time is forbidden. DML *inside the replaced command
+          // body* is the command doing its job at CALL time, so the body is
+          // excluded before the check — otherwise this would forbid the very
+          // function being shipped.
+          const applyTime = src.split("$$")[0] + (src.split("$$").pop() ?? "");
+          expect(
+            applyTime,
+            `${dir}/${f} must not touch engine data at apply time`,
+          ).not.toMatch(/(insert\s+into|update|delete\s+from)\s+public\.workflow_/i);
+          continue;
+        }
         if (CONSUMERS.some((c) => f.startsWith(c))) {
           for (const tbl of TABLES) {
             // The created/dropped table NAME appears before the first "(";
@@ -270,6 +325,63 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
         }
       }
     }
+  });
+
+  it("the work_task widening is a STRICT SUPERSET, and reversible", () => {
+    // The one later migration allowed to replace an engine command body must
+    // keep every context that was authorable before authorable, with the same
+    // validation. A narrowing here would silently break live flows.
+    const REDEF = join(
+      REPO,
+      "supabase/migrations/20260820070000_workflow_work_task_definition_v1.sql",
+    );
+    const DOWN = join(
+      REPO,
+      "supabase/rollbacks/20260820070000_workflow_work_task_definition_v1.down.sql",
+    );
+    const fwd = readFileSync(REDEF, "utf8");
+    const back = readFileSync(DOWN, "utf8");
+
+    const PREVIOUS_CONTEXTS = [
+      "generic_request", "worker_absence", "expense", "invoice",
+      "document_ack", "timesheet", "procurement", "business_trip",
+      "management_decision", "agreement",
+    ];
+    for (const c of PREVIOUS_CONTEXTS) {
+      expect(fwd, `${c} must stay authorable`).toContain(`'${c}'`);
+      expect(back, `${c} must survive the rollback`).toContain(`'${c}'`);
+    }
+    /** The executable allowlist only — the surrounding prose and the
+     *  rollback's refusal guard both name work_task legitimately, so a
+     *  whole-file check would be a false positive in one direction and a
+     *  false negative in the other. */
+    const allowlist = (sql: string) => {
+      const i = sql.indexOf("v_ctx not in (");
+      expect(i, "allowlist not found").toBeGreaterThan(-1);
+      return sql.slice(i, sql.indexOf(") then", i));
+    };
+    expect(allowlist(fwd)).toContain("'work_task'");
+    // The rollback returns to the previous set — work_task stops being
+    // authorable, even though the refusal guard still names it.
+    expect(allowlist(back)).not.toContain("'work_task'");
+    for (const c of PREVIOUS_CONTEXTS) {
+      expect(allowlist(fwd), `${c} in the forward allowlist`).toContain(`'${c}'`);
+      expect(allowlist(back), `${c} in the rollback allowlist`).toContain(`'${c}'`);
+    }
+
+    // ...and it refuses rather than orphaning a live flow.
+    expect(back).toMatch(/refusing rollback/i);
+    expect(back).toContain("context_entity_type = 'work_task'");
+
+    // It stays human-gated and cites its own record.
+    expect(fwd).toContain("@human-gate-approved");
+    expect(fwd).toContain(
+      "docs/human-gates/workflow-work-task-definition-v1-gate.md",
+    );
+
+    // It creates and drops nothing at all.
+    expect(fwd).not.toMatch(/create\s+table|drop\s+table|alter\s+table/i);
+    expect(fwd).not.toMatch(/create\s+policy|drop\s+policy/i);
   });
 
   it("both files stay human-gated with the owner-mandate citation and rollback pairs", () => {

@@ -2188,7 +2188,19 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 234;
+    const SPRINT_BASELINE = 235;
+    // Bumped 234 -> 235 for the chain step B on-ramp
+    // (20260820070000_workflow_work_task_definition_v1) — RED by route (it
+    // replaces the create_workflow_definition_v1 SECURITY DEFINER body),
+    // owner-approved 2026-08-20 under "SLICE B — CREATE THE MINIMUM REAL
+    // WORK_TASK APPROVAL FLOW". ONE value added to ONE allowlist: 20260819210000
+    // widened the TABLE check constraints to accept 'work_task' but this RPC
+    // kept its own unwidened copy, so authoring a work_task flow returned
+    // 'invalid' and the route had no on-ramp. Strict superset, zero DDL, zero
+    // DML at apply time; the deployed body was verified byte-identical to the
+    // repo source before the change. Proven end to end by
+    // scripts/db-proof/work-task-approval-chain.sql (24/24, rolled back).
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 235.
     // Bumped 233 -> 234 for task attribution of canonical work-time
     // (20260819220000_timesheet_task_attribution_v1) — RED by route (it
     // replaces the timesheet_compute_lines_v1 SECURITY DEFINER body),
@@ -2196,7 +2208,7 @@ describe("no migration files added by this sprint", () => {
     // three OUTPUT fields and changes no arithmetic: totals, line count
     // and conflicts are byte-identical across the two bodies, proven by
     // scripts/db-proof/timesheet-task-attribution.sh. RECOUNTED from the
-    // tree: `ls supabase/migrations/*.sql | wc -l` = 234 real files.
+    // tree at that time: `ls supabase/migrations/*.sql | wc -l` = 234 files.
     // Bumped 232 -> 233 for the work_task approval context widening
     // (20260819210000_workflow_work_task_context_v1) — GREEN: a pure
     // drop+re-add CHECK widening on workflow_definitions/instances, the
