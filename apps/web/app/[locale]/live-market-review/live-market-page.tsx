@@ -54,10 +54,8 @@ export async function LiveMarketLanding({
     visualNote: live("counters.previewNote"),
     vacancies: landing("marketProof.stats.vacancies.label"),
     employers: landing("marketProof.stats.employers.label"),
-    regions: landing("marketProof.stats.regions.label"),
     professionsTitle: landing("marketProof.topTitle"),
     opportunityStream: review("opportunityStream"),
-    basisNote: landing("marketProof.asOfNote"),
     sectorTitle: landing("loop.sectorsLabel"),
     sectors: {
       construction: domains("construction"),
