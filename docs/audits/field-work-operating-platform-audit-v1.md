@@ -659,3 +659,61 @@ proven *used*.
 
 That distinction is the whole point of this audit, and it is the one thing this
 register refuses to blur.
+
+---
+
+# ADDENDUM v5 — 2026-08-20: the funnel, measured, seven stages, not collapsed
+
+Owner directive: measure where real usage actually stops, and never reduce it to
+one "working" percentage. Script:
+[`scripts/db-proof/work-hours-funnel.sql`](../../scripts/db-proof/work-hours-funnel.sql)
+(read-only, repeatable).
+
+| Stage | | Count | Unit |
+|---|---|---|---|
+| 1 | worker wrote a duration | **21** | entries |
+| 2 | structured time metric kept | **3** | entries |
+| 3 | **in an EMPLOYER context** | **0** | entries |
+| 4 | attributed to a work task | 0 | entries |
+| 5 | timesheet lines computed | 0 | lines |
+| 6 | submitted for review | 0 | lines |
+| 7 | approved | 0 | lines |
+
+Stages 5–7 count timesheet LINES, not entries — one entry can yield several
+lines, and a timesheet freezes its own snapshot. They are reported in their own
+unit rather than merged, because mixing units is how a funnel starts lying.
+
+## The observed bottleneck is stage 3, and it is not what stage 2 suggested
+
+Stage 1→2 is the loss ADDENDUM v3 diagnosed and #1218 closed; it is forward-only,
+so the historical entries still show it.
+
+But stage 3 is the harder fact: **every entry that kept its hours sits in an
+org-less engagement context.** All four entries in production carrying a
+positive time metric are `relationship_slug = 'employee'` with
+`organization_id IS NULL`. `timesheet_compute_lines_v1` scopes by organization,
+so not one recorded hour in the database can reach any employer.
+
+Both halves are now fixed forward — #1217 routes new entries to an employer
+context (and refuses to guess between several), #1218 stops the durations being
+dropped. Neither is retroactive, by design.
+
+## A correction to ADDENDUM v3's arithmetic
+
+v3 reported "4 reached a time metric" against all live entries. The funnel's
+stage 2 reports **3**, because it counts the INTERSECTION — entries that both
+stated a duration and kept one. Both numbers are true of different questions;
+the funnel's is the one that belongs in a funnel. The fourth entry carries a
+time metric without stating a duration in its text.
+
+## What this means for the vocabulary
+
+- **CAPABILITY_PROVEN** — yes. 36/36 against the applied production functions.
+- **REAL_USER_DATA_FLOWING** — **no.** Stage 3 is zero.
+- **HUMAN_REVIEW_PROVEN** — **no.** Stage 6–7 are zero; the only human decision
+  observed was inside a rolled-back proof, which demonstrates capability and
+  nothing about adoption.
+- **REPEATED_USAGE_PROVEN** — **no.**
+
+A `begin … rollback` proof can never advance any of the last three. Only a
+person logging real work can.

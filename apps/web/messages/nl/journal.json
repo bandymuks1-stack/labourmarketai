@@ -109,6 +109,7 @@
     "restoring": "Herstellen…",
     "edit": "Bewerken",
     "textLabel": "Itemtekst",
+    "unrecordedHours": "De hier genoemde uren ({mentions}) zijn niet als gestructureerde tijd vastgelegd. Bekijk dit item en voeg ze toe.",
     "locationLabel": "Locatie",
     "locationUnset": "Locatie niet opgegeven",
     "understoodLabel": "Wat het systeem heeft begrepen",
