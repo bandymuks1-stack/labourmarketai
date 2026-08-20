@@ -126,6 +126,18 @@ import { join } from "node:path";
  * from the job board's own predicate, over a multi-day window, and must clear
  * the window LOW with at least 3% headroom. The freeze is not the only thing
  * standing between the landing and an unbacked number.
+ *
+ * LIVE / FOCUS modes (OWNER ADDENDUM 2026-08-20, PR #1221) — the approved
+ * command remains LIVE v1 and gains one user-selectable, locally persisted
+ * FOCUS presentation on the SAME canonical `/` acquisition surface. FOCUS
+ * reuses the shared image, content, governed reader, routes and SEO, while
+ * LIVE-only duplicate image layers, activity DOM and motion listeners are
+ * mounted only after the stored mode resolves to LIVE. The existing
+ * first-party telemetry boundary gained bounded `mode` attribution and the
+ * five owner-specified landing events; no provider, PII, route or public
+ * surface was added. The pure landing-experience contract joins this frozen
+ * set, and `landing-experience-modes.test.ts` permanently guards canonical
+ * integrity, persistence, workload deferral and analytics dimensions.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -141,6 +153,7 @@ export const FROZEN_LANDING_FILES = [
   "app/[locale]/live-market-review/live-market-command.tsx",
   "app/[locale]/live-market-review/live-market-command.module.css",
   "lib/market/live-market-landing.ts",
+  "lib/telemetry/landing-experience.ts",
 ] as const;
 
 /**

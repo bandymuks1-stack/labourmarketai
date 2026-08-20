@@ -40,6 +40,7 @@ export async function LiveMarketLanding({
     employerLead: landing("employers.lead"),
     workerAction: hero("ctaPrimary"),
     employerAction: hero("businessLink"),
+    jobs: nav("jobs"),
     workers: nav("workers"),
     companies: nav("companies"),
     how: nav("how"),

@@ -1,10 +1,11 @@
 {
   "files": {
     "app/[locale]/page.tsx": "c86be947c76d6e92970633570b95040874f033bd0df092f273550b00b119d0a9",
-    "app/[locale]/live-market-review/live-market-page.tsx": "30a3fbc3966254f86944713033ea91777d07351493529ac468f4c90b0bf0cb14",
-    "app/[locale]/live-market-review/live-market-command.tsx": "fb55bf09464391b53a7883a4bc053b5da65ebc5c508e1299f361840b153dd88f",
-    "app/[locale]/live-market-review/live-market-command.module.css": "4bd79e4fb1bd64f063df46ab4604a299f80804d06883d7b3ccb0a79341a2b346",
-    "lib/market/live-market-landing.ts": "9fb9b13ed3c9332ed0ee11186405b41a9b7680938e5f87142bb8965d26407ba1"
+    "app/[locale]/live-market-review/live-market-page.tsx": "d1399c6acd61e1878ad62430c66fece589a84331419e33ec7e896cd45fcb7dfd",
+    "app/[locale]/live-market-review/live-market-command.tsx": "e893f4a2c2aafc4d4392b685149d299f006c8d068cd546ae33e2454207e237a5",
+    "app/[locale]/live-market-review/live-market-command.module.css": "a82bbabce903940408785c8d94833f148a4447d61e8e48281eddc0c58c7fe2df",
+    "lib/market/live-market-landing.ts": "9fb9b13ed3c9332ed0ee11186405b41a9b7680938e5f87142bb8965d26407ba1",
+    "lib/telemetry/landing-experience.ts": "b90d4a8d13aa50c26c988158f35740b0d9b2436ebe25ac739e51a05e614d3c7c"
   },
   "namespaces": {
     "lt.livingMarketReview": "123cb9519f15288f6623ef327588efffcea64563307d4a6b4bf7c86e4b14288c",

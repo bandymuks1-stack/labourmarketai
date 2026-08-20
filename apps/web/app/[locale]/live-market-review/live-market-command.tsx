@@ -33,6 +33,16 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
+import {
+  LANDING_EVENTS,
+  landingEventMetadata,
+  persistLandingMode,
+  readLandingMode,
+  type LandingAudience,
+  type LandingEventName,
+  type LandingMode,
+} from "@/lib/telemetry/landing-experience";
+import { recordEvent } from "@/lib/telemetry/task";
 import styles from "./live-market-command.module.css";
 
 type PublicJob = { readonly id: string; readonly title: string };
@@ -86,6 +96,7 @@ type LabelSet = {
   readonly employerAction: string;
   readonly workers: string;
   readonly companies: string;
+  readonly jobs: string;
   readonly how: string;
   readonly login: string;
   readonly menuOpen: string;
@@ -365,12 +376,15 @@ export function LiveMarketCommand({
 }) {
   const rootRef = useRef<HTMLElement>(null);
   const pointerFrame = useRef<number | null>(null);
+  const seenModes = useRef<Set<LandingMode>>(new Set());
   const [selectedSector, setSelectedSector] = useState<SectorKey | null>(null);
   const [eventPhase, setEventPhase] = useState(0);
   const [pulseSite, setPulseSite] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mode, setMode] = useState<LandingMode>("live");
+  const [modeReady, setModeReady] = useState(false);
 
   const formatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const dateFormatter = useMemo(
@@ -405,6 +419,42 @@ export function LiveMarketCommand({
   );
   const currentEvent = labels.eventSteps[eventPhase] ?? labels.eventSteps[0];
   const EventIcon = EVENT_ICONS[eventPhase] ?? EVENT_ICONS[0];
+  const liveWorkloadActive = modeReady && mode === "live";
+
+  const trackLanding = useCallback(
+    (event: LandingEventName, audience: LandingAudience) => {
+      recordEvent(event, landingEventMetadata(mode, audience));
+    },
+    [mode],
+  );
+
+  const changeMode = useCallback(
+    (nextMode: LandingMode) => {
+      if (nextMode === mode) return;
+      persistLandingMode(nextMode);
+      recordEvent(
+        LANDING_EVENTS.modeChanged,
+        landingEventMetadata(nextMode, "unknown"),
+      );
+      setMode(nextMode);
+      setMenuOpen(false);
+    },
+    [mode],
+  );
+
+  useEffect(() => {
+    setMode(readLandingMode() ?? "live");
+    setModeReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!modeReady || seenModes.current.has(mode)) return;
+    seenModes.current.add(mode);
+    recordEvent(
+      LANDING_EVENTS.modeSeen,
+      landingEventMetadata(mode, "unknown"),
+    );
+  }, [mode, modeReady]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -421,7 +471,7 @@ export function LiveMarketCommand({
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || !pageVisible) return;
+    if (!liveWorkloadActive || reducedMotion || !pageVisible) return;
     const eventTimer = window.setInterval(
       () => setEventPhase((phase) => (phase + 1) % labels.eventSteps.length),
       2100,
@@ -434,29 +484,38 @@ export function LiveMarketCommand({
       window.clearInterval(eventTimer);
       window.clearInterval(pulseTimer);
     };
-  }, [labels.eventSteps.length, pageVisible, reducedMotion]);
+  }, [labels.eventSteps.length, liveWorkloadActive, pageVisible, reducedMotion]);
 
   useEffect(() => {
+    const root = rootRef.current;
+    if (!liveWorkloadActive) {
+      root?.removeAttribute("data-journey");
+      root?.style.setProperty("--scroll-fade", "1");
+      root?.style.setProperty("--journey-opacity", "1");
+      root?.style.setProperty("--journey-y", "0px");
+      root?.style.setProperty("--event-opacity", "1");
+      return;
+    }
     let scrollFrame = 0;
     const update = () => {
       scrollFrame = 0;
-      const root = rootRef.current;
-      if (!root) return;
-      const rect = root.getBoundingClientRect();
+      const currentRoot = rootRef.current;
+      if (!currentRoot) return;
+      const rect = currentRoot.getBoundingClientRect();
       const travel = Math.max(1, rect.height - window.innerHeight);
       const progress = Math.min(1, Math.max(0, -rect.top / travel));
-      root.style.setProperty("--base-scroll-y", `${progress * 2.88}px`);
-      root.style.setProperty("--middle-scroll-y", `${progress * -5.04}px`);
-      root.style.setProperty("--front-scroll-y", `${progress * -10.44}px`);
-      root.style.setProperty(
+      currentRoot.style.setProperty("--base-scroll-y", `${progress * 2.88}px`);
+      currentRoot.style.setProperty("--middle-scroll-y", `${progress * -5.04}px`);
+      currentRoot.style.setProperty("--front-scroll-y", `${progress * -10.44}px`);
+      currentRoot.style.setProperty(
         "--scroll-fade",
         `${Math.max(0, 1 - progress * 1.35)}`,
       );
       const journey = Math.min(1, Math.max(0, (progress - 0.34) / 0.36));
-      root.style.setProperty("--journey-opacity", `${journey}`);
-      root.style.setProperty("--journey-y", `${(1 - journey) * 18}px`);
-      root.style.setProperty("--event-opacity", `${1 - journey}`);
-      root.dataset.journey = journey > 0.35 ? "true" : "false";
+      currentRoot.style.setProperty("--journey-opacity", `${journey}`);
+      currentRoot.style.setProperty("--journey-y", `${(1 - journey) * 18}px`);
+      currentRoot.style.setProperty("--event-opacity", `${1 - journey}`);
+      currentRoot.dataset.journey = journey > 0.35 ? "true" : "false";
     };
     const schedule = () => {
       if (!scrollFrame) scrollFrame = window.requestAnimationFrame(update);
@@ -469,11 +528,11 @@ export function LiveMarketCommand({
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [liveWorkloadActive]);
 
   const handlePointerMove = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
-      if (reducedMotion || pointerFrame.current) return;
+      if (!liveWorkloadActive || reducedMotion || pointerFrame.current) return;
       const { clientX, clientY, currentTarget } = event;
       pointerFrame.current = window.requestAnimationFrame(() => {
         pointerFrame.current = null;
@@ -490,7 +549,7 @@ export function LiveMarketCommand({
         root.style.setProperty("--front-y", `${y * 0.52}px`);
       });
     },
-    [reducedMotion],
+    [liveWorkloadActive, reducedMotion],
   );
 
   const clearPointer = useCallback(() => {
@@ -520,91 +579,102 @@ export function LiveMarketCommand({
       data-event-phase={eventPhase}
       data-reduced-motion={reducedMotion}
       data-paused={!pageVisible}
+      data-mode={mode}
+      data-mode-ready={modeReady}
+      data-live-workload={liveWorkloadActive}
     >
       <div
         className={styles.viewport}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={clearPointer}
+        onPointerMove={liveWorkloadActive ? handlePointerMove : undefined}
+        onPointerLeave={liveWorkloadActive ? clearPointer : undefined}
       >
         <div className={styles.world} data-testid="living-market-world">
           <WorldPicture
             className={`${styles.worldLayer} ${styles.worldBase}`}
             primary
           />
-          <WorldPicture
-            className={`${styles.worldLayer} ${styles.worldMiddle}`}
-          />
-          <WorldPicture
-            className={`${styles.worldLayer} ${styles.worldFront}`}
-          />
+          {liveWorkloadActive ? (
+            <>
+              <WorldPicture
+                className={`${styles.worldLayer} ${styles.worldMiddle}`}
+              />
+              <WorldPicture
+                className={`${styles.worldLayer} ${styles.worldFront}`}
+              />
+            </>
+          ) : null}
           <div className={styles.worldTone} aria-hidden />
           <div className={styles.chromeMaskLeft} aria-hidden />
           <div className={styles.chromeMaskRight} aria-hidden />
           <div className={styles.chromeMaskBottom} aria-hidden />
           <div className={styles.depthGrid} aria-hidden />
-          <svg
-            className={styles.network}
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            aria-hidden
-          >
-            <path data-sector="logistics" d="M34 18 C28 34 31 44 36 55" />
-            <path data-sector="construction" d="M34 18 C39 18 43 20 46 23" />
-            <path data-sector="care" d="M46 23 C53 19 59 20 63 23" />
-            <path data-sector="hospitality" d="M46 23 C55 29 61 34 65 38" />
-            <path data-sector="technology" d="M36 55 C39 50 41 45 42 40" />
-            <path data-sector="agriculture" d="M65 38 C69 43 71 48 71 53" />
-          </svg>
+          {liveWorkloadActive ? (
+            <>
+              <svg
+                className={styles.network}
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path data-sector="logistics" d="M34 18 C28 34 31 44 36 55" />
+                <path data-sector="construction" d="M34 18 C39 18 43 20 46 23" />
+                <path data-sector="care" d="M46 23 C53 19 59 20 63 23" />
+                <path data-sector="hospitality" d="M46 23 C55 29 61 34 65 38" />
+                <path data-sector="technology" d="M36 55 C39 50 41 45 42 40" />
+                <path data-sector="agriculture" d="M65 38 C69 43 71 48 71 53" />
+              </svg>
 
-          <div className={styles.motionLayer} aria-hidden>
-            <span className={styles.logisticsRun}>
-              <i />
-              <i />
-            </span>
-            <span className={styles.constructionCrane}>
-              <i />
-              <b />
-            </span>
-            <span className={styles.careShift}>
-              <i />
-              <b />
-            </span>
-            <span className={styles.factoryRhythm}>
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className={styles.hospitalityShift}>
-              <i />
-              <i />
-            </span>
-            <span className={styles.agricultureRun}>
-              <i />
-              <i />
-            </span>
-            <span className={styles.energyRotor}>
-              <i />
-              <i />
-              <i />
-            </span>
-          </div>
+              <div className={styles.motionLayer} aria-hidden>
+                <span className={styles.logisticsRun}>
+                  <i />
+                  <i />
+                </span>
+                <span className={styles.constructionCrane}>
+                  <i />
+                  <b />
+                </span>
+                <span className={styles.careShift}>
+                  <i />
+                  <b />
+                </span>
+                <span className={styles.factoryRhythm}>
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className={styles.hospitalityShift}>
+                  <i />
+                  <i />
+                </span>
+                <span className={styles.agricultureRun}>
+                  <i />
+                  <i />
+                </span>
+                <span className={styles.energyRotor}>
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              </div>
 
-          <div
-            className={styles.hotspotLayer}
-            data-layer="conceptual-sector-activity"
-            aria-label={labels.sectorTitle}
-          >
-            {ACTIVITY_NODES.map((node, index) => (
-              <ActivityHotspot
-                key={node.id}
-                node={node}
-                label={labels.sectors[node.sector]}
-                active={selectedSector === node.sector}
-                pulsing={index === pulseSite}
-                onSelect={selectSector}
-              />
-            ))}
-          </div>
+              <div
+                className={styles.hotspotLayer}
+                data-layer="conceptual-sector-activity"
+                aria-label={labels.sectorTitle}
+              >
+                {ACTIVITY_NODES.map((node, index) => (
+                  <ActivityHotspot
+                    key={node.id}
+                    node={node}
+                    label={labels.sectors[node.sector]}
+                    active={selectedSector === node.sector}
+                    pulsing={index === pulseSite}
+                    onSelect={selectSector}
+                  />
+                ))}
+              </div>
+            </>
+          ) : null}
 
           <div className={styles.visualTruth}>
             <span>{labels.tagline}</span>
@@ -620,6 +690,23 @@ export function LiveMarketCommand({
           <div className={styles.liveStatus}>
             <i aria-hidden /> {labels.live}
           </div>
+          <div
+            className={styles.modeSwitcher}
+            role="group"
+            aria-label="LIVE / FOCUS"
+            data-testid="landing-mode-switcher"
+          >
+            {(["live", "focus"] as const).map((candidate) => (
+              <button
+                type="button"
+                key={candidate}
+                aria-pressed={mode === candidate}
+                onClick={() => changeMode(candidate)}
+              >
+                {candidate.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             className={styles.menuButton}
@@ -630,6 +717,12 @@ export function LiveMarketCommand({
             {menuOpen ? <X aria-hidden /> : <Menu aria-hidden />}
           </button>
           <nav data-open={menuOpen} aria-label={labels.tagline}>
+            <Link
+              href="/jobs"
+              onClick={() => trackLanding(LANDING_EVENTS.jobsOpened, "unknown")}
+            >
+              {labels.jobs}
+            </Link>
             <Link href="/for-workers">{labels.workers}</Link>
             <Link href="/for-companies">{labels.companies}</Link>
             <Link href="/#how-it-works">{labels.how}</Link>
@@ -649,10 +742,23 @@ export function LiveMarketCommand({
           <strong>{labels.support}</strong>
           <small>{labels.evidence}</small>
           <div className={styles.heroActions}>
-            <Link href="/auth/signup">
+            <Link
+              href="/auth/signup"
+              onClick={() => {
+                trackLanding(LANDING_EVENTS.primaryCtaClicked, "worker");
+                trackLanding(LANDING_EVENTS.signupStarted, "worker");
+              }}
+            >
               {labels.workerCta} <ArrowRight aria-hidden />
             </Link>
-            <Link href="/company-need">{labels.employerCta}</Link>
+            <Link
+              href="/company-need"
+              onClick={() =>
+                trackLanding(LANDING_EVENTS.primaryCtaClicked, "employer")
+              }
+            >
+              {labels.employerCta}
+            </Link>
           </div>
         </section>
 
@@ -667,7 +773,13 @@ export function LiveMarketCommand({
             <div>
               <small>{labels.workers}</small>
               <p>{labels.workerLead}</p>
-              <Link href="/auth/signup">
+              <Link
+                href="/auth/signup"
+                onClick={() => {
+                  trackLanding(LANDING_EVENTS.primaryCtaClicked, "worker");
+                  trackLanding(LANDING_EVENTS.signupStarted, "worker");
+                }}
+              >
                 {labels.workerAction} <ArrowRight aria-hidden />
               </Link>
             </div>
@@ -679,7 +791,12 @@ export function LiveMarketCommand({
             <div>
               <small>{labels.companies}</small>
               <p>{labels.employerLead}</p>
-              <Link href="/company-need">
+              <Link
+                href="/company-need"
+                onClick={() =>
+                  trackLanding(LANDING_EVENTS.primaryCtaClicked, "employer")
+                }
+              >
                 {labels.employerAction} <ArrowRight aria-hidden />
               </Link>
             </div>
@@ -726,7 +843,13 @@ export function LiveMarketCommand({
             <div className={styles.opportunityStream}>
               <p>{labels.opportunityStream}</p>
               {opportunityStream.map((job) => (
-                <Link href={`/jobs/${job.id}`} key={job.id}>
+                <Link
+                  href={`/jobs/${job.id}`}
+                  key={job.id}
+                  onClick={() =>
+                    trackLanding(LANDING_EVENTS.jobsOpened, "worker")
+                  }
+                >
                   <span>{job.profession}</span>
                   <strong>{job.title}</strong>
                   <ArrowRight aria-hidden />
@@ -737,30 +860,32 @@ export function LiveMarketCommand({
           <small>{labels.basisNote}</small>
         </aside>
 
-        <section
-          className={styles.eventCard}
-          data-testid="work-event"
-          aria-live="polite"
-        >
-          <span className={styles.eventIcon}>
-            <EventIcon aria-hidden />
-          </span>
-          <div>
-            <small>
-              {labels.sectors[activeSector]} · {eventPhase + 1}/
-              {labels.eventSteps.length}
-            </small>
-            <h2>{currentEvent.title}</h2>
-            <p>{currentEvent.body}</p>
-          </div>
-          <span className={styles.eventProgress} aria-hidden>
-            {labels.eventSteps.map((step, index) => (
-              <i key={step.title} data-done={index <= eventPhase} />
-            ))}
-          </span>
-        </section>
+        {liveWorkloadActive ? (
+          <section
+            className={styles.eventCard}
+            data-testid="work-event"
+            aria-live="polite"
+          >
+            <span className={styles.eventIcon}>
+              <EventIcon aria-hidden />
+            </span>
+            <div>
+              <small>
+                {labels.sectors[activeSector]} · {eventPhase + 1}/
+                {labels.eventSteps.length}
+              </small>
+              <h2>{currentEvent.title}</h2>
+              <p>{currentEvent.body}</p>
+            </div>
+            <span className={styles.eventProgress} aria-hidden>
+              {labels.eventSteps.map((step, index) => (
+                <i key={step.title} data-done={index <= eventPhase} />
+              ))}
+            </span>
+          </section>
+        ) : null}
 
-        {eventPhase === labels.eventSteps.length - 1 ? (
+        {liveWorkloadActive && eventPhase === labels.eventSteps.length - 1 ? (
           <div className={styles.opportunityEcho} aria-hidden>
             <BadgeCheck />
           </div>
@@ -789,34 +914,37 @@ export function LiveMarketCommand({
           })}
         </section>
 
-        <section className={styles.sectorDock} aria-label={labels.sectorTitle}>
-          <p>{labels.sectorTitle}</p>
-          <div>
-            {SECTOR_ORDER.map((sector) => {
-              const Icon = SECTORS[sector].icon;
-              const active = selectedSector === sector;
-              return (
-                <button
-                  type="button"
-                  key={sector}
-                  data-selected={active}
-                  aria-pressed={active}
-                  onClick={() => selectSector(sector)}
-                >
-                  <span>
-                    <Icon aria-hidden />
-                  </span>
-                  <strong>{labels.sectors[sector]}</strong>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        {liveWorkloadActive ? (
+          <section className={styles.sectorDock} aria-label={labels.sectorTitle}>
+            <p>{labels.sectorTitle}</p>
+            <div>
+              {SECTOR_ORDER.map((sector) => {
+                const Icon = SECTORS[sector].icon;
+                const active = selectedSector === sector;
+                return (
+                  <button
+                    type="button"
+                    key={sector}
+                    data-selected={active}
+                    aria-pressed={active}
+                    onClick={() => selectSector(sector)}
+                  >
+                    <span>
+                      <Icon aria-hidden />
+                    </span>
+                    <strong>{labels.sectors[sector]}</strong>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         {selectedSector && activeProfession?.jobs[0] ? (
           <Link
             href={`/jobs/${activeProfession.jobs[0].id}`}
             className={styles.realOpportunity}
+            onClick={() => trackLanding(LANDING_EVENTS.jobsOpened, "worker")}
           >
             <span>
               {labels.currentSupply} · {swedenName}

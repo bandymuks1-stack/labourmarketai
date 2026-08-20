@@ -297,6 +297,47 @@
   animation: live-pulse 2.4s ease-in-out infinite;
 }
 
+.modeSwitcher {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+  background: rgba(2, 14, 20, 0.52);
+  backdrop-filter: blur(12px);
+}
+
+.modeSwitcher button {
+  min-width: 47px;
+  min-height: 24px;
+  border: 0;
+  border-radius: 3px;
+  padding: 0 8px;
+  color: rgba(226, 235, 233, 0.58);
+  background: transparent;
+  font-size: 7px;
+  font-weight: 780;
+  letter-spacing: 0.11em;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.modeSwitcher button[aria-pressed="true"] {
+  color: #f7fbfa;
+  background: rgba(89, 223, 180, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(89, 223, 180, 0.25);
+}
+
+.modeSwitcher button:hover,
+.modeSwitcher button:focus-visible {
+  color: var(--mint);
+}
+
 @keyframes live-pulse {
   50% {
     opacity: 0.48;
@@ -1951,4 +1992,207 @@
 .root[data-reduced-motion="true"] .worldFront,
 .root[data-reduced-motion="true"] .motionLayer {
   display: none;
+}
+
+/*
+ * FOCUS v1 is the restrained presentation of the same canonical landing.
+ * It keeps the shared image, content, real-data panel and routes, while the
+ * LIVE-only layers are never mounted by the component in this mode.
+ */
+.root[data-mode="focus"] {
+  min-height: 100svh;
+  --scroll-fade: 1;
+  --journey-opacity: 1;
+  --journey-y: 0px;
+}
+
+.root[data-mode="focus"] .worldBase {
+  transform: none;
+  filter: saturate(0.72) contrast(1.04) brightness(0.61);
+}
+
+.root[data-mode="focus"] .worldTone {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 12, 18, 0.96) 0%,
+      rgba(2, 12, 18, 0.77) 31%,
+      rgba(2, 12, 18, 0.18) 61%,
+      rgba(2, 12, 18, 0.7) 100%
+    ),
+    linear-gradient(180deg, rgba(2, 12, 18, 0.35), rgba(2, 12, 18, 0.86));
+}
+
+.root[data-mode="focus"] .depthGrid,
+.root[data-mode="focus"] .visualTruth,
+.root[data-mode="focus"] .sectorDock,
+.root[data-mode="focus"] .realOpportunity {
+  display: none;
+}
+
+.root[data-mode="focus"] .liveStatus i,
+.root[data-mode="focus"] .supplyTitle i {
+  animation: none;
+  box-shadow: 0 0 10px rgba(89, 223, 180, 0.55);
+}
+
+.root[data-mode="focus"] .hero {
+  top: 116px;
+  left: clamp(24px, 4vw, 64px);
+  width: min(470px, 39vw);
+  opacity: 1;
+}
+
+.root[data-mode="focus"] .hero::before {
+  inset: -46px -90px -48px -36px;
+  background: radial-gradient(
+    ellipse at 18% 48%,
+    rgba(2, 12, 18, 0.94),
+    rgba(2, 12, 18, 0.56) 57%,
+    transparent 83%
+  );
+}
+
+.root[data-mode="focus"] .hero h1 {
+  font-size: clamp(50px, 5vw, 74px);
+}
+
+.root[data-mode="focus"] .hero > strong,
+.root[data-mode="focus"] .hero > small {
+  max-width: 390px;
+}
+
+.root[data-mode="focus"] .entryBand {
+  top: 510px;
+  left: clamp(24px, 4vw, 64px);
+  width: min(470px, 39vw);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.root[data-mode="focus"] .entryBand article {
+  grid-template-columns: 34px 1fr;
+  padding: 12px;
+}
+
+.root[data-mode="focus"] .supplyPanel {
+  top: 106px;
+  right: clamp(24px, 3vw, 48px);
+  width: min(340px, 27vw);
+  display: block;
+  background: rgba(2, 14, 20, 0.86);
+}
+
+.root[data-mode="focus"] .processRail {
+  right: clamp(380px, 31vw, 450px);
+  bottom: 20px;
+  left: clamp(24px, 4vw, 64px);
+  width: auto;
+  background: rgba(2, 14, 20, 0.86);
+}
+
+.root[data-mode="focus"] .processRail > div {
+  opacity: 0.82;
+}
+
+.root[data-mode="focus"] .processRail > div[data-active="true"],
+.root[data-mode="focus"] .processRail > div[data-done="true"] {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .root[data-mode="focus"] .hero {
+    top: 94px;
+    left: 24px;
+    width: calc(100% - 48px);
+  }
+
+  .root[data-mode="focus"] .hero h1 {
+    max-width: 560px;
+  }
+
+  .root[data-mode="focus"] .entryBand {
+    top: 430px;
+    left: 24px;
+    width: calc(52% - 32px);
+    grid-template-columns: 1fr;
+  }
+
+  .root[data-mode="focus"] .supplyPanel {
+    top: 430px;
+    right: 24px;
+    width: calc(48% - 32px);
+  }
+
+  .root[data-mode="focus"] .processRail {
+    right: 24px;
+    bottom: 20px;
+    left: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    gap: 8px;
+  }
+
+  .modeSwitcher {
+    margin-left: auto;
+  }
+
+  .modeSwitcher button {
+    min-width: 40px;
+    padding-inline: 6px;
+    font-size: 6px;
+  }
+
+  .root[data-mode="focus"] {
+    min-height: 1040px;
+  }
+
+  .root[data-mode="focus"] .viewport {
+    position: absolute;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .root[data-mode="focus"] .worldTone {
+    background: linear-gradient(
+      180deg,
+      rgba(2, 12, 18, 0.94) 0%,
+      rgba(2, 12, 18, 0.6) 31%,
+      rgba(2, 12, 18, 0.72) 56%,
+      rgba(2, 12, 18, 0.96) 100%
+    );
+  }
+
+  .root[data-mode="focus"] .hero {
+    top: 86px;
+    left: 16px;
+    width: calc(100% - 32px);
+  }
+
+  .root[data-mode="focus"] .hero h1 {
+    font-size: clamp(41px, 12vw, 51px);
+  }
+
+  .root[data-mode="focus"] .entryBand {
+    top: 405px;
+    left: 16px;
+    width: calc(100% - 32px);
+  }
+
+  .root[data-mode="focus"] .supplyPanel {
+    top: 626px;
+    right: 16px;
+    width: calc(100% - 32px);
+  }
+
+  .root[data-mode="focus"] .processRail {
+    right: 12px;
+    bottom: 24px;
+    left: 12px;
+  }
 }
