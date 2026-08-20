@@ -109,6 +109,7 @@
     "restoring": "Atkuriama…",
     "edit": "Redaguoti",
     "textLabel": "Įrašo tekstas",
+    "unrecordedHours": "Čia paminėtos valandos ({mentions}) nebuvo įrašytos kaip struktūrizuotas laikas. Peržiūrėkite šį įrašą ir jas pridėkite.",
     "locationLabel": "Vieta",
     "locationUnset": "Vieta nenurodyta",
     "understoodLabel": "Sistema suprato",

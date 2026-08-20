@@ -109,6 +109,7 @@
     "restoring": "Wird wiederhergestellt…",
     "edit": "Bearbeiten",
     "textLabel": "Eintragstext",
+    "unrecordedHours": "Die hier genannten Stunden ({mentions}) wurden nicht als strukturierte Zeit erfasst. Sehen Sie diesen Eintrag durch und fügen Sie sie hinzu.",
     "locationLabel": "Ort",
     "locationUnset": "Ort nicht angegeben",
     "understoodLabel": "Was das System verstanden hat",

@@ -13,6 +13,7 @@ import {
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
+import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
 import {
@@ -1250,6 +1251,40 @@ export default async function JournalPage({
                             <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
                               {e.original_text}
                             </p>
+                            {/* RECOVERY HINT (audit v1). Until 2026-08-20 a
+                                parsed duration the worker had not yet reviewed
+                                was dropped silently while the entry saved: 14
+                                live entries lost hours that way. The composer
+                                can no longer do that, but those entries keep
+                                their words and their missing time until their
+                                OWN worker acts.
+
+                                This TELLS, it does not repair. No value is
+                                pre-filled and nothing is submitted — the
+                                worker's own words are shown back as evidence
+                                and they confirm their hours through the normal
+                                edit flow, which supersedes rather than
+                                overwrites. Reading only: this adds no query
+                                and widens no visibility, because the journal
+                                page already lists the worker's OWN entries
+                                under their own RLS. */}
+                            {(() => {
+                              const unrecorded = detectUnrecordedHours(
+                                e.original_text,
+                                e.journal_entry_metrics,
+                              );
+                              if (!unrecorded.hasUnrecordedHours) return null;
+                              return (
+                                <p
+                                  className="text-meta leading-relaxed text-state-warning"
+                                  data-testid={`journal-unrecorded-hours-${e.id}`}
+                                >
+                                  {t("entry.unrecordedHours", {
+                                    mentions: unrecorded.mentions.join(", "),
+                                  })}
+                                </p>
+                              );
+                            })()}
                             {/* Entry location — the entry's own saved snapshot only.
                                 No snapshot → honest "Vieta nenurodyta" (never the
                                 worker's current or profile location). */}

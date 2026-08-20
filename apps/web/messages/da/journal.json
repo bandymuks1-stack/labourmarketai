@@ -33,7 +33,8 @@
       "confirmed": "[EN] Confirmed",
       "rejected": "[EN] Rejected",
       "submitted": "[EN] Submitted"
-    }
+    },
+    "unrecordedHours": "Timerne nævnt her ({mentions}) blev ikke registreret som struktureret tid. Gennemgå denne post, og tilføj dem."
   },
   "field": {
     "work_direction": "[EN] Work direction",
