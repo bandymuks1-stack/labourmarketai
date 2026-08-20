@@ -1,6 +1,6 @@
 {
   "files": {
-    "app/[locale]/(home)/page.tsx": "97c9c2ca1df84aa3c7d630a01fbfa35e1c6404a50482c4b8ef6a2b211bcbcba4",
+    "app/[locale]/page.tsx": "c86be947c76d6e92970633570b95040874f033bd0df092f273550b00b119d0a9",
     "app/[locale]/live-market-review/live-market-page.tsx": "30a3fbc3966254f86944713033ea91777d07351493529ac468f4c90b0bf0cb14",
     "app/[locale]/live-market-review/live-market-command.tsx": "fb55bf09464391b53a7883a4bc053b5da65ebc5c508e1299f361840b153dd88f",
     "app/[locale]/live-market-review/live-market-command.module.css": "4bd79e4fb1bd64f063df46ab4604a299f80804d06883d7b3ccb0a79341a2b346",

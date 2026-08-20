@@ -240,7 +240,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
-  it("the LIVE waiver list holds exactly TWO records, each with its own owner ruling", () => {
+  it("the LIVE waiver list holds exactly THREE records, each with its own owner ruling", () => {
     // "waiver negali likti vien todėl, kad CI žalias" — the W3/W4 record died
     // with its debt in W6, leaving the list empty. The entry below is a NEW
     // owner ruling (PUBLIC BETA TRAIN V3 §2.1, 2026-08-10), not a leftover.
@@ -262,10 +262,15 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // approvals were "NOT a general authority to self-approve future waivers":
     // a different surface under a different ruling gets its own bounded record,
     // not a widened old one.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(2);
+    // 2 -> 3 on 2026-08-20. The third record is the canonical public landing,
+    // added only after the explicit owner decision "SHIP THIS LANDING AS V1".
+    // It has its own route, PR binding and exact six-finding subset; neither
+    // earlier public-acquisition waiver was widened.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(3);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
+      "public-acquisition-route-landing-v1",
     ]);
     const w = SCOPED_OWNER_WAIVERS[0];
     expect(w.id).toBe("public-acquisition-route-create-cv");
@@ -382,6 +387,27 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // compares against the diff. Both halves must be listed.
     expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/page.tsx");
     expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/[id]/page.tsx");
+  });
+
+  it("the landing V1 record is bound to PR #1221 and exactly six findings on root", () => {
+    const landing = SCOPED_OWNER_WAIVERS[2];
+    expect(landing.id).toBe("public-acquisition-route-landing-v1");
+    expect(landing.axioms).toEqual(["A-01"]);
+    expect(landing.pullRequests).toEqual([1221]);
+    expect(landing.owner).toMatch(/SHIP THIS LANDING AS V1/);
+    expect(landing.files).toEqual(["/", "apps/web/app/[locale]/page.tsx"]);
+    expect(landing.expectedFindings).toHaveLength(6);
+    expect(landing.expectedFindings.map((f) => f.file)).toEqual(
+      Array(6).fill("/"),
+    );
+    expect(landing.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
   });
 
   it("the live record lists the page PATH, not only the route id — else it leaks", () => {

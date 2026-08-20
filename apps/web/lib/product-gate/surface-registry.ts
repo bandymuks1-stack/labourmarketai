@@ -476,6 +476,62 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: false,
   },
+  {
+    // PUBLIC LANDING V1 — owner decision 2026-08-20.
+    //
+    // This is the canonical anonymous front door, not a second authenticated
+    // workspace. The six World-State answers are therefore recorded as honest
+    // "no" values and covered only by the PR-scoped owner waiver in
+    // `.github/scripts/owner-waivers.mjs`.
+    id: "/",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "The public Europe-first front door to LabourMarket.ai: it explains the Work → Evidence → Opportunity loop, presents governed current Sweden supply as secondary evidence, and hands workers and employers into the existing canonical signup and workforce-inquiry paths.",
+    whyNotChat:
+      "The audience is an anonymous visitor arriving before authentication, when no AI conversation, avatar or World State exists. The surface explains the product and routes intent into the existing flows; after authentication the AI-first workspace remains the operating interface.",
+    whyNotExistingComponent:
+      "The previous public homepage did not expose the approved living-market V1 composition or its governed supply reader. This route reuses one shared LiveMarketLanding component with the review alias and creates no duplicate workflow, write path or authenticated workspace.",
+    owner:
+      "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends the existing Market World Map idea as a public, conceptual acquisition view; it introduces no thirteenth world element and does not alter the authenticated map architecture.",
+    chatIntegration:
+      "One-way at the pre-auth boundary: worker and employer intent is handed to the existing signup or workforce-inquiry entry, after which the authenticated AI conversation owns the journey. The landing dispatches no competing product action.",
+    avatarEffect:
+      "None on the page itself. Anonymous viewing changes no avatar, and the worker CTA enters the existing profile path where confirmed facts are handled under the avatar rules.",
+    mapEffect:
+      "The page shows conceptual Europe-wide sector activity and labels it as illustrative; it does not claim to be the authenticated World Map or mutate map state, so reflectedOnMap remains honestly false.",
+    journalRelation:
+      "It explains the canonical chain in which completed work becomes journal evidence and later opportunity; the landing writes no journal entry and never presents anonymous browsing as work evidence.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
 ] as const;
 
 /**

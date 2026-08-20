@@ -136,7 +136,7 @@ export const FROZEN_LANDING_FILES = [
   // Owner decision 2026-08-20: the living European labour-market command is
   // the production V1. Freeze the actual root composition, its shared server
   // assembler, cinematic client, styling and governed public-data reader.
-  "app/[locale]/(home)/page.tsx",
+  "app/[locale]/page.tsx",
   "app/[locale]/live-market-review/live-market-page.tsx",
   "app/[locale]/live-market-review/live-market-command.tsx",
   "app/[locale]/live-market-review/live-market-command.module.css",

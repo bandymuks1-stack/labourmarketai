@@ -94,7 +94,7 @@ const read = (rel: string) => {
 
 const LANDING_TS = [
   "content/placeholders.ts",
-  "app/[locale]/(home)/page.tsx",
+  "app/[locale]/page.tsx",
   "app/[locale]/live-market-review/live-market-page.tsx",
   "app/[locale]/live-market-review/live-market-command.tsx",
   "lib/market/live-market-landing.ts",

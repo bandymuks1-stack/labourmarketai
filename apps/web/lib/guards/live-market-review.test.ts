@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 const webRoot = join(__dirname, "..", "..");
 const reviewRoot = join(webRoot, "app", "[locale]", "live-market-review");
-const homeRoot = join(webRoot, "app", "[locale]", "(home)");
+const homeRoot = join(webRoot, "app", "[locale]");
 
 const pageSource = readFileSync(join(reviewRoot, "page.tsx"), "utf8");
 const homeSource = readFileSync(join(homeRoot, "page.tsx"), "utf8");
@@ -57,7 +57,7 @@ describe("live market owner-review surface", () => {
   it("ships the approved command surface as the canonical indexed landing", () => {
     expect(homeSource).toContain("buildPageMetadata");
     expect(homeSource).toContain("LiveMarketLanding");
-    expect(pageSource).toContain("index: false");
+    expect(pageSource).toContain("redirect(`/${locale}`)");
   });
 
   it("keeps automatic movement optional", () => {

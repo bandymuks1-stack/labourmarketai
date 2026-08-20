@@ -15,7 +15,7 @@ import { landingTreeFiles, landingTreeSource } from "./landing-composition";
 
 const WEB_ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(WEB_ROOT, rel), "utf8");
-const HOME_PAGE = "app/[locale]/(home)/page.tsx";
+const HOME_PAGE = "app/[locale]/page.tsx";
 const COMMAND = "app/[locale]/live-market-review/live-market-command.tsx";
 const STYLES = "app/[locale]/live-market-review/live-market-command.module.css";
 const DATA = "lib/market/live-market-landing.ts";

@@ -16,7 +16,7 @@ import { join, relative, sep } from "node:path";
  * It also pins the always-visible "Example" frame on the three /for-* demo
  * previews so fabricated preview data can never render unlabelled again.
  *
- * The landing page (app/[locale]/(home)/page.tsx) is FROZEN and guarded
+ * The landing page (app/[locale]/page.tsx) is FROZEN and guarded
  * separately by landing-freeze.test.ts — it is exempt here.
  */
 

@@ -269,7 +269,6 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     // added here (no client i18n) or given its own provider layout.
     const usage = deriveClientUsage([
       ...treeEntries(
-        join(LOCALE_DIR, "(home)"),
         join(LOCALE_DIR, "business"),
         join(LOCALE_DIR, "cv"),
         join(LOCALE_DIR, "invite"),
@@ -277,6 +276,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         join(LOCALE_DIR, "live-market-review"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
+      join(LOCALE_DIR, "page.tsx"),
       join(LOCALE_DIR, "error.tsx"),
       join(LOCALE_DIR, "not-found.tsx"),
     ]);
@@ -291,7 +291,6 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       .filter((e) => statSync(join(LOCALE_DIR, e)).isDirectory())
       .sort();
     expect(children).toEqual([
-      "(home)",
       "(marketing)",
       "[...rest]",
       "auth",

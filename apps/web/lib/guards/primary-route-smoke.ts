@@ -50,7 +50,7 @@ export interface PrimaryRoute {
  */
 export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // Public / marketing
-  { id: "landing", urlPattern: "/", sourceFile: "app/[locale]/(home)/page.tsx", requiresAuth: false, kind: "public" },
+  { id: "landing", urlPattern: "/", sourceFile: "app/[locale]/page.tsx", requiresAuth: false, kind: "public" },
   { id: "for-workers", urlPattern: "/for-workers", sourceFile: "app/[locale]/(marketing)/for-workers/page.tsx", requiresAuth: false, kind: "public" },
   { id: "for-companies", urlPattern: "/for-companies", sourceFile: "app/[locale]/(marketing)/for-companies/page.tsx", requiresAuth: false, kind: "public" },
   { id: "for-agencies", urlPattern: "/for-agencies", sourceFile: "app/[locale]/(marketing)/for-agencies/page.tsx", requiresAuth: false, kind: "public" },

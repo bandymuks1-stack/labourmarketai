@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import { LiveMarketLanding } from "../live-market-review/live-market-page";
+import { LiveMarketLanding } from "./live-market-review/live-market-page";
 
 export const revalidate = 300;
 
