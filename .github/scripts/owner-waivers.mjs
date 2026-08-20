@@ -385,6 +385,51 @@ export const SCOPED_OWNER_WAIVERS = [
     owner:
       "Owner directive 2026-08-18 §5 — 'Owner decision is final. Jobs must be publicly discoverable.' with the anonymous-field restriction it mandates.",
   },
+
+  /**
+   * PUBLIC LANDING V1 — canonical `/` acquisition surface.
+   *
+   * OWNER RULING, 2026-08-20, verbatim title and decision:
+   *   "OWNER DECISION — SHIP THIS LANDING AS V1."
+   * The same ruling requires the Europe-first living-market composition,
+   * Work → Evidence → Opportunity chain, real-data panel, canonical CTAs,
+   * responsive QA and shipping through the normal safe merge/deploy workflow.
+   *
+   * WHAT IS EXCUSED. Only the gate's existing category mismatch: an anonymous
+   * acquisition page exists before World State, the avatar, the map workspace
+   * and AI conversation exist, so its six workspace answers are honestly no.
+   * The declaration records those no values; this waiver does not rewrite the
+   * answers, alter the gate, or cover the `/live-market-review` alias (which is
+   * a redirect and therefore not a second product surface).
+   *
+   * WHY THIS CANNOT LEAK. It is bound to one route, one implementation file,
+   * PR #1221, A-01, the exact six findings below and a fixed expiry. Any extra
+   * finding remains blocking through the existing subset rule.
+   */
+  {
+    id: "public-acquisition-route-landing-v1",
+    axioms: ["A-01"],
+    scope:
+      "The canonical public living-market V1 landing at / approved by the owner on 2026-08-20",
+    pullRequests: [1221],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: ["/", "apps/web/app/[locale]/page.tsx"],
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/" },
+      { code: "not_reflected_on_map", file: "/" },
+      { code: "not_ai_controlled", file: "/" },
+      { code: "requires_leaving_workspace", file: "/" },
+      { code: "requires_new_page", file: "/" },
+      { code: "world_state_cannot_control_it", file: "/" },
+    ],
+    reason:
+      "A pre-authentication public landing cannot satisfy workspace-only questions. The owner explicitly approved and ordered this V1 to ship; the declaration answers all six no honestly; this record excuses those six findings for this one route and nothing else.",
+    resolvedBy:
+      "gate-learns-public-acquisition-route-category (owner constitution decision)",
+    expiresAt: "2026-12-31",
+    owner: "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
+  },
 ];
 
 /** Is this ONE finding excused? Every constraint must hold. */

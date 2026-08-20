@@ -625,6 +625,21 @@
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
+  "livingMarketReview": {
+    "tagline": "Europas levende arbejdsmarked",
+    "headline": "Arbejde forbinder",
+    "headlineAccent": "alt.",
+    "support": "Reelle behov. Rigtige mennesker. Rigtigt arbejde.",
+    "evidence": "Dit arbejde bliver til dokumentation. Din dokumentation skaber bedre muligheder.",
+    "workerCta": "Jeg søger arbejde",
+    "employerCta": "Jeg har brug for folk",
+    "currentSupply": "Aktuelt verificeret udbud",
+    "opportunityStream": "Mulighedsstrøm",
+    "evidenceVerifiedTitle": "Dokumentation verificeret",
+    "evidenceVerifiedBody": "Menneskelig bekræftelse gør registreringen til pålidelig dokumentation.",
+    "capabilityGrowsTitle": "Kapaciteten vokser",
+    "capabilityGrowsBody": "Kompetencer og kapacitet vokser gennem bekræftet arbejde."
+  },
   "hero": {
     "chip": "Generel arbejdsmarkedsplatform",
     "headline": "Ikke bare et CV.",

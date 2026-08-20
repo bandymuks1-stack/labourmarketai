@@ -167,6 +167,8 @@ export type FunnelMetadata = {
   referrer_host?: string;
   /** The path (no query) the visitor first landed on, e.g. '/for-workers'. */
   landing_path?: string;
+  /** User-selected canonical landing presentation: 'live' | 'focus'. */
+  mode?: "live" | "focus";
   /** How many candidates a match preview produced (a COUNT, never ids —
    *  W14 mid-funnel `match_preview_generated`). */
   candidate_count?: number;

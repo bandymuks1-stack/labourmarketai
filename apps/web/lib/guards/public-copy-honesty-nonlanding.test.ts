@@ -16,7 +16,7 @@ import { join, relative, sep } from "node:path";
  * It also pins the always-visible "Example" frame on the three /for-* demo
  * previews so fabricated preview data can never render unlabelled again.
  *
- * The landing page (app/[locale]/(marketing)/page.tsx) is FROZEN and guarded
+ * The landing page (app/[locale]/page.tsx) is FROZEN and guarded
  * separately by landing-freeze.test.ts — it is exempt here.
  */
 
@@ -84,9 +84,6 @@ describe("public marketing i18n copy makes no false capability claims", () => {
 
 describe("inline copy in non-landing marketing pages is clean", () => {
   const marketingDir = join(WEB_ROOT, "app", "[locale]", "(marketing)");
-  // Landing page is frozen and guarded by landing-freeze.test.ts.
-  const FROZEN = new Set(["page.tsx"]);
-
   const collect = (dir: string): string[] => {
     const out: string[] = [];
     for (const entry of readdirSync(dir)) {
@@ -109,7 +106,6 @@ describe("inline copy in non-landing marketing pages is clean", () => {
     const offenders: string[] = [];
     for (const file of collect(marketingDir)) {
       const rel = relative(marketingDir, file).split(sep).join("/");
-      if (FROZEN.has(rel)) continue;
       const src = readFileSync(file, "utf8");
       for (const re of BANNED_INLINE) {
         if (re.test(src)) offenders.push(`${rel} ~ ${re}`);

@@ -4465,6 +4465,21 @@
     "menuOpen": "Menü",
     "menuClose": "Menü schließen"
   },
+  "livingMarketReview": {
+    "tagline": "Europas lebendiger Arbeitsmarkt",
+    "headline": "Arbeit verbindet",
+    "headlineAccent": "alles.",
+    "support": "Echte Bedarfe. Echte Menschen. Echte Arbeit.",
+    "evidence": "Ihre Arbeit wird zum Nachweis. Ihre Nachweise schaffen bessere Chancen.",
+    "workerCta": "Ich suche Arbeit",
+    "employerCta": "Ich brauche Personal",
+    "currentSupply": "Aktuell verifiziertes Angebot",
+    "opportunityStream": "Chancenstrom",
+    "evidenceVerifiedTitle": "Nachweis verifiziert",
+    "evidenceVerifiedBody": "Menschliche Bestätigung macht den Eintrag zu einem verlässlichen Nachweis.",
+    "capabilityGrowsTitle": "Fähigkeiten wachsen",
+    "capabilityGrowsBody": "Kompetenzen und Kapazität wachsen durch bestätigte Arbeit."
+  },
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",
     "headline": "Nicht nur ein Lebenslauf.",
@@ -4695,11 +4710,7 @@
       "free": {
         "name": "Free",
         "tagline": "Auf den Markt kommen.",
-        "features": [
-          "1 Projekt",
-          "1 Personalbedarf",
-          "Community-Support"
-        ]
+        "features": ["1 Projekt", "1 Personalbedarf", "Community-Support"]
       },
       "business": {
         "name": "Business",

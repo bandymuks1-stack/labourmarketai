@@ -625,6 +625,21 @@
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
+  "livingMarketReview": {
+    "tagline": "Euroopa elav tööturg",
+    "headline": "Töö ühendab",
+    "headlineAccent": "kõike.",
+    "support": "Tegelikud vajadused. Tegelikud inimesed. Tegelik töö.",
+    "evidence": "Sinu töö muutub tõendiks. Sinu tõendid loovad paremaid võimalusi.",
+    "workerCta": "Otsin tööd",
+    "employerCta": "Vajan inimesi",
+    "currentSupply": "Praegune kontrollitud pakkumine",
+    "opportunityStream": "Võimaluste voog",
+    "evidenceVerifiedTitle": "Tõend kontrollitud",
+    "evidenceVerifiedBody": "Inimese kinnitus muudab kirje usaldusväärseks tõendiks.",
+    "capabilityGrowsTitle": "Võimekus kasvab",
+    "capabilityGrowsBody": "Oskused ja suutlikkus arenevad kinnitatud töö põhjal."
+  },
   "hero": {
     "chip": "Üldine tööturu platvorm",
     "headline": "Mitte ainult CV.",

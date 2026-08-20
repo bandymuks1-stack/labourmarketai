@@ -4465,6 +4465,21 @@
     "menuOpen": "Meniu",
     "menuClose": "Uždaryti meniu"
   },
+  "livingMarketReview": {
+    "tagline": "Gyvoji Europos darbo rinka",
+    "headline": "Darbas sujungia",
+    "headlineAccent": "viską.",
+    "support": "Tikri poreikiai. Tikri žmonės. Tikras darbas.",
+    "evidence": "Jūsų darbas tampa įrodymu. Jūsų įrodymai kuria geresnes galimybes.",
+    "workerCta": "Ieškau darbo",
+    "employerCta": "Man reikia žmonių",
+    "currentSupply": "Dabartinė patvirtinta pasiūla",
+    "opportunityStream": "Galimybių srautas",
+    "evidenceVerifiedTitle": "Įrodymai patvirtinti",
+    "evidenceVerifiedBody": "Žmogaus patvirtinimas paverčia įrašą patikimu įrodymu.",
+    "capabilityGrowsTitle": "Gebėjimai auga",
+    "capabilityGrowsBody": "Įgūdžiai ir pajėgumai gerėja iš patvirtinto darbo."
+  },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
     "headline": "Ne paprastas CV.",
@@ -4695,11 +4710,7 @@
       "free": {
         "name": "Nemokamas",
         "tagline": "Pradėkite rinkoje.",
-        "features": [
-          "1 projektas",
-          "1 darbo poreikis",
-          "Bendruomenės pagalba"
-        ]
+        "features": ["1 projektas", "1 darbo poreikis", "Bendruomenės pagalba"]
       },
       "business": {
         "name": "Verslo",
@@ -4724,12 +4735,7 @@
       "enterprise": {
         "name": "Įmonių",
         "tagline": "Mastui ir kontrolei.",
-        "features": [
-          "Neriboti projektai",
-          "SSO",
-          "SLA",
-          "Skirta pagalba"
-        ]
+        "features": ["Neriboti projektai", "SSO", "SLA", "Skirta pagalba"]
       }
     },
     "faqTitle": "Kainų DUK",
