@@ -5,16 +5,14 @@ import { join } from "node:path";
 import { landingTreeSource } from "./landing-composition";
 
 /**
- * Guard: productized service offers ride the EXISTING cinematic baseline, and
- * their price CTAs stay honest.
+ * Guard: productized service offers coexist with the owner-approved V1
+ * cinematic baseline, and their price CTAs stay honest.
  *
  * Two failure modes this guard locks out:
  *
- *  1. A future agent "rebuilds" the landing/marketing visual language into a new
- *     concept. The cinematic baseline (gradient-accent word, `card-border` /
- *     `wow-card` shells, live-dot eyebrow, the LiveMap / PlayerCardShowcase /
- *     DraftBoard / MarketPulse cluster) is the agreed look — it must be
- *     preserved, not re-invented.
+ *  1. A future agent replaces the approved living-market command surface.
+ *     V1's responsive cinematic world, conceptual sector activity and complete
+ *     Work → Evidence → Opportunity event are the agreed baseline.
  *
  *  2. The offer prices grow a fake commerce flow — Stripe, a checkout, an
  *     add-to-cart, a "buy now" — or claim self-serve payment the product does
@@ -43,24 +41,14 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
   });
 
   it("the landing page still renders the cinematic baseline components", () => {
-    // The landing's COMPOSED sections, not page.tsx alone: the page was
-    // legitimately split into section components, and `text-gradient-accent`
-    // now lives inside them. Depth 1 keeps this an assertion about the landing
-    // rather than a whole-repo grep. See `landing-composition.ts`.
-    const page = landingTreeSource(APP_ROOT, 1);
+    // The canonical page delegates through the V1 server assembler; depth 2
+    // reaches the command surface without turning this into a whole-repo grep.
+    const page = landingTreeSource(APP_ROOT, 2);
     for (const sym of [
-      "PlayerCardShowcase",
-      // Landing rebuild (owner directive 2026-07-29): the hero visual is the
-      // LIVE PRODUCT DEMO — the same cinematic baseline, now showing the
-      // product's real core loop instead of a static map (LiveProductDemo
-      // superseded LiveWorldMap; enforced by lib/guards/global-landing.test.ts).
-      // Owner shortening (visual acceptance §3.1, 2026-07-29): MarketPulse and
-      // DraftBoard LEFT the landing — interior dashboards re-rendered as
-      // brochure duplicated the product instead of showing it once.
-      // Premium rebuild 2026-07-31: HeroLiveDemo SUPERSEDED LiveProductDemo —
-      // same cinematic role, now driving the canonical <MarketMap>.
-      "HeroLiveDemo",
-      "text-gradient-accent",
+      "LiveMarketCommand",
+      "world-desktop.webp",
+      'data-layer="conceptual-sector-activity"',
+      "styles.entryBand",
     ]) {
       expect(page, `landing must keep the cinematic baseline marker ${sym}`).toContain(
         sym,

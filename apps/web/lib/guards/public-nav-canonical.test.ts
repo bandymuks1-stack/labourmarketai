@@ -117,16 +117,18 @@ describe("footer matches the public IA and never duplicates 'about'", () => {
 
 describe("canonical demand funnel — action CTAs route to /company-need only", () => {
   it("landing employer-path card routes to /company-need (not /for-companies)", () => {
-    // The landing's own SECTIONS (depth 1), not page.tsx alone — the employer
-    // CTA moved into <FinalCtaBand> when the page was recomposed. Depth 1 is
-    // deliberate: a deeper walk would pull in shared chrome that may link to
-    // the educational /for-companies page for legitimate reasons, and this
-    // guard is about the landing's own ACTION CTA.
+    // The canonical page delegates through the shared V1 server assembler to
+    // the command surface, so depth 2 reaches the CTA without walking into
+    // unrelated application chrome.
     // Both href forms — the JSX attribute and the CTA descriptor object. See
     // the note in `public-market-entry.test.ts`.
-    const landing = landingTreeSource(APP_ROOT, 1);
-    expect(landing).not.toMatch(/href[=:]\s*"\/for-companies"/);
-    expect(landing).toMatch(/href[=:]\s*"\/company-need"/);
+    const landing = landingTreeSource(APP_ROOT, 2);
+    const entryStart = landing.indexOf("className={styles.entryBand}");
+    const entryEnd = landing.indexOf("</section>", entryStart);
+    const employerPath = landing.slice(entryStart, entryEnd);
+    expect(entryStart).toBeGreaterThan(-1);
+    expect(employerPath).not.toMatch(/href[=:]\s*"\/for-companies"/);
+    expect(employerPath).toMatch(/href[=:]\s*"\/company-need"/);
   });
 
   it("for-companies hero CTA routes into /company-need (educational page, canonical action)", () => {

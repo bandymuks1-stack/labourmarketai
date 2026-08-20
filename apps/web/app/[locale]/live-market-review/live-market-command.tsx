@@ -298,8 +298,8 @@ function WorldPicture({
       <img
         src="/visuals/living-market/world-desktop.webp"
         alt={primary ? "" : ""}
-        width={1536}
-        height={1024}
+        width={1717}
+        height={916}
         loading="eager"
         decoding="async"
         fetchPriority={primary ? "high" : "auto"}
@@ -374,7 +374,11 @@ export function LiveMarketCommand({
 
   const formatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }),
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeZone: "UTC",
+      }),
     [locale],
   );
   const swedenName = useMemo(

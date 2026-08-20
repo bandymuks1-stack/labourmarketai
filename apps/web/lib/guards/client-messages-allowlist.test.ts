@@ -262,17 +262,19 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     assertGroupCovered(usage, AUTH_CLIENT_MESSAGE_ROOTS, "onboarding");
   });
 
-  it("provider-less trees (cv, invite, [...rest], root shell) ⊆ BASE_CLIENT_MESSAGE_ROOTS", () => {
+  it("provider-less trees (home, review, cv, invite, [...rest], root shell) ⊆ BASE_CLIENT_MESSAGE_ROOTS", () => {
     // Every [locale] child WITHOUT its own provider must stay within the
     // root layout's minimal pick. Enumerated explicitly so a NEW top-level
     // route directory fails the inventory check below until it is either
     // added here (no client i18n) or given its own provider layout.
     const usage = deriveClientUsage([
       ...treeEntries(
+        join(LOCALE_DIR, "(home)"),
         join(LOCALE_DIR, "business"),
         join(LOCALE_DIR, "cv"),
         join(LOCALE_DIR, "invite"),
         join(LOCALE_DIR, "[...rest]"),
+        join(LOCALE_DIR, "live-market-review"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
       join(LOCALE_DIR, "error.tsx"),
@@ -283,12 +285,13 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
 
   it("every [locale] child route tree is accounted for", () => {
     // Inventory pin: full-pick trees (dashboard, design) + subset trees
-    // (marketing, auth, onboarding) + provider-less trees (cv, invite,
-    // [...rest]). A new top-level directory must be classified here.
+    // (marketing, auth, onboarding) + provider-less trees (home, review, cv,
+    // invite, [...rest]). A new top-level directory must be classified here.
     const children = readdirSync(LOCALE_DIR)
       .filter((e) => statSync(join(LOCALE_DIR, e)).isDirectory())
       .sort();
     expect(children).toEqual([
+      "(home)",
       "(marketing)",
       "[...rest]",
       "auth",
@@ -296,6 +299,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "cv",
       "dashboard",
       "invite",
+      "live-market-review",
       "onboarding",
     ]);
   });
