@@ -1,0 +1,2313 @@
+.prototypeRoot {
+  --paper: #f1eee5;
+  --muted: rgba(241, 238, 229, 0.56);
+  --line: rgba(241, 238, 229, 0.15);
+  --gold: #e0bb68;
+  --gold-soft: rgba(224, 187, 104, 0.22);
+  --teal: #87c9c4;
+  --teal-soft: rgba(135, 201, 196, 0.2);
+  --ground: #0a0c0b;
+  position: relative;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: var(--ground);
+  color: var(--paper);
+  font-family: Arial, Helvetica, sans-serif;
+  isolation: isolate;
+}
+
+.prototypeRoot,
+.prototypeRoot * {
+  box-sizing: border-box;
+}
+
+.prototypeRoot button,
+.prototypeRoot a {
+  color: inherit;
+}
+
+.prototypeRoot button:focus-visible,
+.prototypeRoot a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.prototypeRoot[data-world-only="true"] .productCopy,
+.prototypeRoot[data-world-only="true"] .realityLegend {
+  display: none !important;
+}
+
+.masthead {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 100%;
+  height: 4.75rem;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 3.75rem;
+  border-bottom: 1px solid rgba(241, 238, 229, 0.1);
+  background: linear-gradient(180deg, rgba(7, 9, 8, 0.92), rgba(7, 9, 8, 0));
+  pointer-events: none;
+}
+
+.masthead a {
+  pointer-events: auto;
+}
+
+.wordmark {
+  width: max-content;
+  color: var(--paper);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  text-decoration: none;
+}
+
+.masthead p {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin: 0;
+  color: rgba(241, 238, 229, 0.44);
+  font: 0.58rem/1.2 "Courier New", monospace;
+  letter-spacing: 0.18em;
+}
+
+.masthead p b {
+  position: relative;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.masthead p b::before {
+  position: absolute;
+  top: 50%;
+  left: -0.75rem;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0.8rem var(--gold);
+  content: "";
+  transform: translateY(-50%);
+}
+
+.jobsLink {
+  justify-self: end;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.jobsLink span {
+  color: var(--gold);
+}
+
+.realityLegend {
+  position: fixed;
+  z-index: 70;
+  right: 3.75rem;
+  bottom: 1rem;
+  display: flex;
+  gap: 1.2rem;
+  color: rgba(241, 238, 229, 0.38);
+  font: 0.52rem/1.3 "Courier New", monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.realityLegend span {
+  position: relative;
+  padding-left: 0.68rem;
+}
+
+.realityLegend span::before {
+  position: absolute;
+  top: 0.25rem;
+  left: 0;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: rgba(241, 238, 229, 0.35);
+  content: "";
+}
+
+.realityLegend span[data-kind="live"]::before {
+  background: var(--teal);
+  box-shadow: 0 0 0.5rem var(--teal);
+}
+
+.realityLegend span[data-kind="process"]::before {
+  background: var(--gold);
+  box-shadow: 0 0 0.5rem var(--gold);
+}
+
+.directionIntro {
+  position: absolute;
+  z-index: 12;
+  top: 8.2rem;
+  left: 3.75rem;
+  width: min(31rem, 36vw);
+  pointer-events: none;
+}
+
+.directionIntro > span,
+.journeyCopy > span {
+  color: var(--gold);
+  font: 0.62rem/1.3 "Courier New", monospace;
+  letter-spacing: 0.18em;
+}
+
+.directionIntro h1,
+.journeyCopy h1 {
+  max-width: 12ch;
+  margin: 1rem 0 0;
+  font-size: clamp(2.2rem, 4vw, 4.8rem);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+}
+
+.directionIntro p {
+  max-width: 28rem;
+  margin: 1.25rem 0 0;
+  color: rgba(241, 238, 229, 0.55);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.phaseCaption {
+  position: absolute;
+  z-index: 20;
+  top: 17rem;
+  left: 3.75rem;
+  margin: 0;
+  color: rgba(241, 238, 229, 0.56);
+  font: 0.58rem/1.2 "Courier New", monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.phaseCaption span {
+  margin-right: 0.7rem;
+  color: var(--gold);
+}
+
+.opportunityReadout {
+  position: absolute;
+  z-index: 35;
+  right: 3.75rem;
+  bottom: 3.4rem;
+  display: grid;
+  width: min(48rem, 58vw);
+  grid-template-columns: 1.15fr 1.8fr auto;
+  gap: 1.3rem;
+  align-items: end;
+  padding: 1rem 0 0;
+  border-top: 1px solid rgba(241, 238, 229, 0.2);
+  background: linear-gradient(90deg, rgba(8, 10, 9, 0), rgba(8, 10, 9, 0.62));
+}
+
+.readoutIdentity {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.readoutIdentity > span {
+  color: var(--gold);
+  font: 0.52rem/1.2 "Courier New", monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.readoutIdentity strong {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.readoutIdentity b {
+  font-size: 1.55rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.readoutIdentity b small {
+  display: block;
+  color: rgba(241, 238, 229, 0.42);
+  font: 0.55rem/1.3 "Courier New", monospace;
+  letter-spacing: 0.03em;
+}
+
+.readoutJobs {
+  display: grid;
+  min-width: 0;
+  border-left: 1px solid rgba(241, 238, 229, 0.13);
+}
+
+.readoutJobs a,
+.readoutJobs > span {
+  overflow: hidden;
+  padding: 0.45rem 0.75rem;
+  color: rgba(241, 238, 229, 0.72);
+  font-size: 0.68rem;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readoutJobs a + a {
+  border-top: 1px solid rgba(241, 238, 229, 0.09);
+}
+
+.readoutJobs a span {
+  color: var(--gold);
+}
+
+.readoutAction {
+  padding-bottom: 0.42rem;
+  color: var(--gold) !important;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sectorRail {
+  position: absolute;
+  z-index: 24;
+  bottom: 3.4rem;
+  left: 3.75rem;
+  display: grid;
+  width: 14.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.sectorRail button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1.4rem 1fr auto;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  border: 0;
+  border-top: 1px solid rgba(241, 238, 229, 0.09);
+  background: transparent;
+  color: rgba(241, 238, 229, 0.46);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sectorRail button:nth-child(odd) {
+  padding-right: 0.55rem;
+}
+
+.sectorRail button:nth-child(even) {
+  padding-left: 0.55rem;
+}
+
+.sectorRail button span:not(.sectorGlyph) {
+  overflow: hidden;
+  font-size: 0.55rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sectorRail button small {
+  color: rgba(241, 238, 229, 0.26);
+  font: 0.48rem/1 "Courier New", monospace;
+}
+
+.sectorRail .selectedSector {
+  color: var(--paper);
+}
+
+.sectorRail .selectedSector small {
+  color: var(--gold);
+}
+
+/* Sector glyphs are miniature working silhouettes, not UI icons. */
+.sectorGlyph {
+  position: relative;
+  display: inline-block;
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: 0 0 auto;
+  color: currentColor;
+}
+
+.sectorRail .sectorGlyph,
+.districtLabel .sectorGlyph {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.sectorGlyph i {
+  position: absolute;
+  display: block;
+  background: currentColor;
+}
+
+.sectorGlyph[data-sector-glyph="construction"] i:nth-child(1) {
+  right: 18%;
+  bottom: 12%;
+  width: 34%;
+  height: 45%;
+  background: repeating-linear-gradient(180deg, currentColor 0 3px, transparent 3px 7px);
+  border: 1px solid currentColor;
+}
+
+.sectorGlyph[data-sector-glyph="construction"] i:nth-child(2) {
+  top: 12%;
+  left: 14%;
+  width: 4%;
+  height: 70%;
+}
+
+.sectorGlyph[data-sector-glyph="construction"] i:nth-child(3) {
+  top: 12%;
+  left: 14%;
+  width: 58%;
+  height: 3%;
+  transform-origin: left;
+}
+
+.sectorGlyph[data-sector-glyph="construction"] i:nth-child(4) {
+  top: 16%;
+  left: 59%;
+  width: 2%;
+  height: 31%;
+  animation: glyphHook 5s ease-in-out infinite;
+}
+
+.sectorGlyph[data-sector-glyph="logistics"] i:nth-child(1) {
+  left: 10%;
+  bottom: 22%;
+  width: 55%;
+  height: 31%;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+
+.sectorGlyph[data-sector-glyph="logistics"] i:nth-child(2) {
+  right: 10%;
+  bottom: 22%;
+  width: 25%;
+  height: 24%;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+
+.sectorGlyph[data-sector-glyph="logistics"] i:nth-child(3),
+.sectorGlyph[data-sector-glyph="logistics"] i:nth-child(4) {
+  bottom: 12%;
+  width: 15%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.sectorGlyph[data-sector-glyph="logistics"] i:nth-child(3) { left: 23%; }
+.sectorGlyph[data-sector-glyph="logistics"] i:nth-child(4) { right: 19%; }
+
+.sectorGlyph[data-sector-glyph="manufacturing"] i:nth-child(1) {
+  right: 10%;
+  bottom: 12%;
+  width: 44%;
+  height: 47%;
+  border: 1px solid currentColor;
+  background: repeating-linear-gradient(90deg, transparent 0 7px, currentColor 7px 9px);
+}
+
+.sectorGlyph[data-sector-glyph="manufacturing"] i:nth-child(2) {
+  left: 12%;
+  bottom: 18%;
+  width: 38%;
+  height: 4%;
+}
+
+.sectorGlyph[data-sector-glyph="manufacturing"] i:nth-child(3),
+.sectorGlyph[data-sector-glyph="manufacturing"] i:nth-child(4) {
+  bottom: 10%;
+  width: 10%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.sectorGlyph[data-sector-glyph="manufacturing"] i:nth-child(3) { left: 18%; }
+.sectorGlyph[data-sector-glyph="manufacturing"] i:nth-child(4) { left: 38%; }
+
+.sectorGlyph[data-sector-glyph="care"] i:nth-child(1) {
+  top: 10%;
+  left: 43%;
+  width: 14%;
+  height: 48%;
+}
+
+.sectorGlyph[data-sector-glyph="care"] i:nth-child(2) {
+  top: 27%;
+  left: 26%;
+  width: 48%;
+  height: 14%;
+}
+
+.sectorGlyph[data-sector-glyph="care"] i:nth-child(3) {
+  bottom: 10%;
+  left: 18%;
+  width: 16%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.sectorGlyph[data-sector-glyph="care"] i:nth-child(4) {
+  right: 14%;
+  bottom: 10%;
+  width: 30%;
+  height: 16%;
+  border-radius: 50% 50% 0 0;
+}
+
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(1) {
+  bottom: 16%;
+  left: 14%;
+  width: 72%;
+  height: 28%;
+  border: 1px solid currentColor;
+  border-radius: 0 0 50% 50%;
+  background: transparent;
+}
+
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(2),
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(3),
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(4) {
+  top: 15%;
+  width: 2px;
+  height: 25%;
+  animation: glyphSteam 3s ease-in-out infinite;
+}
+
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(2) { left: 31%; }
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(3) { left: 49%; animation-delay: -1s; }
+.sectorGlyph[data-sector-glyph="hospitality"] i:nth-child(4) { left: 67%; animation-delay: -2s; }
+
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(1),
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(2),
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(3) {
+  bottom: 11%;
+  width: 2px;
+  height: 58%;
+  transform-origin: bottom;
+}
+
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(1) { left: 24%; transform: rotate(-14deg); }
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(2) { left: 49%; }
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(3) { right: 24%; transform: rotate(14deg); }
+.sectorGlyph[data-sector-glyph="agriculture"] i:nth-child(4) {
+  right: 10%;
+  bottom: 14%;
+  width: 25%;
+  height: 15%;
+}
+
+.sectorGlyph[data-sector-glyph="technology"] i:nth-child(1) {
+  inset: 14% 11% 24%;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+
+.sectorGlyph[data-sector-glyph="technology"] i:nth-child(2) {
+  bottom: 13%;
+  left: 37%;
+  width: 26%;
+  height: 2px;
+}
+
+.sectorGlyph[data-sector-glyph="technology"] i:nth-child(3),
+.sectorGlyph[data-sector-glyph="technology"] i:nth-child(4) {
+  top: 32%;
+  width: 16%;
+  height: 2px;
+}
+
+.sectorGlyph[data-sector-glyph="technology"] i:nth-child(3) { left: 25%; transform: rotate(38deg); }
+.sectorGlyph[data-sector-glyph="technology"] i:nth-child(4) { right: 25%; transform: rotate(-38deg); }
+
+.sectorGlyph[data-sector-glyph="services"] i:nth-child(1) {
+  top: 10%;
+  left: 22%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.sectorGlyph[data-sector-glyph="services"] i:nth-child(2) {
+  bottom: 12%;
+  left: 28%;
+  width: 12%;
+  height: 48%;
+}
+
+.sectorGlyph[data-sector-glyph="services"] i:nth-child(3) {
+  right: 20%;
+  bottom: 14%;
+  width: 4%;
+  height: 62%;
+  transform: rotate(28deg);
+}
+
+.sectorGlyph[data-sector-glyph="services"] i:nth-child(4) {
+  right: 9%;
+  bottom: 12%;
+  width: 32%;
+  height: 7%;
+  transform: rotate(-12deg);
+}
+
+@keyframes glyphHook {
+  0%, 25%, 100% { height: 20%; }
+  45%, 72% { height: 43%; }
+}
+
+@keyframes glyphSteam {
+  0%, 100% { opacity: 0; transform: translateY(4px); }
+  45% { opacity: 0.8; transform: translateY(-3px); }
+}
+
+/* ───────────────────────── A / LIVING EUROPE */
+.europeRoot {
+  height: 100svh;
+  background:
+    radial-gradient(circle at 72% 38%, rgba(59, 74, 67, 0.2), transparent 36%),
+    radial-gradient(circle at 36% 72%, rgba(85, 66, 36, 0.15), transparent 40%),
+    #090b0a;
+  overflow: hidden;
+}
+
+.europeStage {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.europeStage::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(241, 238, 229, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 238, 229, 0.025) 1px, transparent 1px);
+  background-size: 5vw 5vw;
+  content: "";
+  mask-image: radial-gradient(circle at 67% 46%, #000, transparent 70%);
+}
+
+.europeAtmosphere i {
+  position: absolute;
+  z-index: 0;
+  width: 30vw;
+  aspect-ratio: 1;
+  border: 1px solid rgba(224, 187, 104, 0.07);
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: atmosphereOrbit 24s linear infinite;
+}
+
+.europeAtmosphere i:nth-child(1) { top: 12%; right: 4%; }
+.europeAtmosphere i:nth-child(2) { right: 18%; bottom: -18%; width: 44vw; animation-duration: 36s; animation-direction: reverse; }
+.europeAtmosphere i:nth-child(3) { top: 42%; left: 30%; width: 16vw; animation-duration: 18s; }
+
+@keyframes atmosphereOrbit {
+  to { transform: rotate(360deg) scale(1.04); }
+}
+
+.europeField {
+  position: absolute;
+  z-index: 3;
+  top: 2.8rem;
+  right: -3vw;
+  width: min(78vw, 72rem);
+  height: calc(100svh - 5.5rem);
+}
+
+.europeMap {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2rem 5rem rgba(0, 0, 0, 0.6));
+  overflow: visible;
+}
+
+.countryMembrane {
+  transform-origin: 62% 44%;
+  animation: membraneBreath 11s ease-in-out infinite alternate;
+}
+
+.countryMembrane path {
+  stroke: rgba(241, 238, 229, 0.16);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.countryMembrane path[data-tier="target"] {
+  fill: rgba(133, 148, 136, 0.16);
+  stroke: rgba(241, 238, 229, 0.28);
+}
+
+.countryMembrane path[data-country="SE"] {
+  fill: rgba(224, 187, 104, 0.3);
+  stroke: rgba(239, 209, 139, 0.85);
+  stroke-width: 1.3;
+}
+
+@keyframes membraneBreath {
+  to { transform: scale(1.008) translate3d(-0.25%, 0.35%, 0); }
+}
+
+.swedenAura {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: swedenPulse 5s ease-in-out infinite;
+}
+
+@keyframes swedenPulse {
+  0%, 100% { opacity: 0.42; transform: scale(0.75); }
+  50% { opacity: 0.9; transform: scale(1.16); }
+}
+
+.labourCurrents path {
+  fill: none;
+  stroke: rgba(135, 201, 196, 0.26);
+  stroke-dasharray: 2 12;
+  stroke-linecap: round;
+  stroke-width: 1.4;
+  animation: currentTravel 12s linear infinite;
+}
+
+.labourCurrents path:nth-child(2) { animation-duration: 17s; animation-direction: reverse; }
+.labourCurrents path:nth-child(3) { animation-duration: 21s; }
+
+@keyframes currentTravel { to { stroke-dashoffset: -140; } }
+
+.workCells {
+  position: absolute;
+  inset: 0;
+}
+
+.workCell {
+  --cell-scale: calc(0.78 + var(--cell-strength) * 0.22);
+  position: absolute;
+  top: var(--cell-y);
+  left: var(--cell-x);
+  display: grid;
+  width: 4.6rem;
+  height: 4.6rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(8, 10, 9, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(241, 238, 229, 0.14),
+    0 0 calc(1.2rem + var(--cell-strength) * 1.5rem) rgba(135, 201, 196, 0.09);
+  color: rgba(241, 238, 229, 0.72);
+  cursor: pointer;
+  transform: translate(-50%, -50%) scale(var(--cell-scale));
+  transition: color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+  animation: workCellBreathe 6s calc(var(--cell-index) * -0.68s) ease-in-out infinite;
+}
+
+.workCell > span:not(.sectorGlyph) {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  color: rgba(241, 238, 229, 0.44);
+  font: 0.48rem/1 "Courier New", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.workCell > i {
+  position: absolute;
+  inset: -0.65rem;
+  border: 1px solid rgba(135, 201, 196, 0.15);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.workCell[data-selected="true"] {
+  z-index: 4;
+  color: var(--gold);
+  box-shadow:
+    0 0 0 1px rgba(224, 187, 104, 0.7),
+    0 0 2.8rem rgba(224, 187, 104, 0.24);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.workCell[data-selected="true"] > i {
+  opacity: 1;
+  animation: cellWave 3.2s ease-out infinite;
+}
+
+@keyframes workCellBreathe {
+  0%, 100% { filter: brightness(0.78); }
+  50% { filter: brightness(1.16); }
+}
+
+@keyframes cellWave {
+  from { opacity: 0.75; transform: scale(0.72); }
+  to { opacity: 0; transform: scale(1.45); }
+}
+
+.swedenSource {
+  position: absolute;
+  top: 11%;
+  right: 14%;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid rgba(224, 187, 104, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 2rem rgba(224, 187, 104, 0.48);
+}
+
+.swedenSource i,
+.swedenSource b {
+  position: absolute;
+  inset: -0.65rem;
+  border: 1px solid rgba(224, 187, 104, 0.2);
+  border-radius: 50%;
+  animation: sourceRing 3s ease-out infinite;
+}
+
+.swedenSource b { animation-delay: 1.5s; }
+
+.swedenSource span {
+  position: absolute;
+  top: -0.1rem;
+  right: 1.7rem;
+  width: max-content;
+  color: rgba(224, 187, 104, 0.68);
+  font: 0.48rem/1.2 "Courier New", monospace;
+  letter-spacing: 0.12em;
+}
+
+@keyframes sourceRing {
+  from { opacity: 0.8; transform: scale(0.4); }
+  to { opacity: 0; transform: scale(1.7); }
+}
+
+.europeProcess {
+  position: absolute;
+  right: 4%;
+  bottom: 18%;
+  display: flex;
+  width: 28rem;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.europeProcess::before {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(224, 187, 104, 0.55), rgba(135, 201, 196, 0.52));
+  content: "";
+}
+
+.europeProcess span {
+  position: relative;
+  width: 0.6rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(241, 238, 229, 0.36);
+  border-radius: 50%;
+  background: #0a0c0b;
+}
+
+.europeProcess span i {
+  position: absolute;
+  inset: -0.4rem;
+  border: 1px solid rgba(224, 187, 104, 0.2);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.europeRoot[data-phase="0"] .europeProcess span[data-step="need"],
+.europeRoot[data-phase="1"] .europeProcess span[data-step="person"],
+.europeRoot[data-phase="2"] .europeProcess span[data-step="team"],
+.europeRoot[data-phase="3"] .europeProcess span[data-step="work"],
+.europeRoot[data-phase="4"] .europeProcess span[data-step="evidence"],
+.europeRoot[data-phase="5"] .europeProcess span[data-step="return"] {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 1.2rem var(--gold);
+}
+
+.europeRoot[data-phase="0"] .europeProcess span[data-step="need"] i,
+.europeRoot[data-phase="1"] .europeProcess span[data-step="person"] i,
+.europeRoot[data-phase="2"] .europeProcess span[data-step="team"] i,
+.europeRoot[data-phase="3"] .europeProcess span[data-step="work"] i,
+.europeRoot[data-phase="4"] .europeProcess span[data-step="evidence"] i,
+.europeRoot[data-phase="5"] .europeProcess span[data-step="return"] i {
+  animation: cellWave 2.3s ease-out infinite;
+}
+
+.mobileProcessRail { display: none; }
+
+/* ───────────────────────── B / LIVING WORK WORLD */
+.workWorldRoot {
+  height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 52% 50%, rgba(58, 56, 48, 0.28), transparent 42%),
+    #090a09;
+}
+
+.workWorldStage {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.workWorldIntro {
+  top: 7.4rem;
+  width: min(28rem, 30vw);
+}
+
+.workWorldIntro h1 {
+  font-size: clamp(2rem, 3.2vw, 3.8rem);
+}
+
+.worldViewport {
+  --world-tilt-x: 0deg;
+  --world-tilt-y: 0deg;
+  position: absolute;
+  top: 4.75rem;
+  right: -4vw;
+  width: 88vw;
+  height: calc(100svh - 7rem);
+  perspective: 1300px;
+}
+
+.worldPlane {
+  position: absolute;
+  top: 50%;
+  left: 52%;
+  width: min(1180px, 87vw);
+  aspect-ratio: 1000 / 650;
+  border: 1px solid rgba(241, 238, 229, 0.13);
+  border-radius: 2.2rem;
+  background:
+    radial-gradient(circle at 46% 44%, rgba(224, 187, 104, 0.06), transparent 38%),
+    linear-gradient(140deg, #20241f, #101310 68%);
+  box-shadow: 0 4rem 8rem rgba(0, 0, 0, 0.72);
+  transform: translate(-50%, -50%) rotateX(calc(47deg + var(--world-tilt-y))) rotateZ(calc(-6deg + var(--world-tilt-x)));
+  transform-style: preserve-3d;
+  transition: transform 250ms ease-out;
+}
+
+.terrainPlate {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(rgba(241, 238, 229, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 238, 229, 0.035) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  mask-image: linear-gradient(130deg, #000, rgba(0, 0, 0, 0.25));
+  transform: translateZ(1px);
+}
+
+.worldRoads {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: translateZ(3px);
+}
+
+.worldRoads path {
+  fill: none;
+  stroke: rgba(197, 191, 173, 0.15);
+  stroke-dasharray: 3 9;
+  stroke-linecap: round;
+  stroke-width: 6;
+  animation: roadFlow 24s linear infinite;
+}
+
+.worldRoads path:nth-child(2) { animation-direction: reverse; animation-duration: 31s; }
+.worldRoads path:nth-child(3) { animation-duration: 19s; }
+.worldRoads path:nth-child(4) { animation-direction: reverse; animation-duration: 27s; }
+
+@keyframes roadFlow { to { stroke-dashoffset: -160; } }
+
+.districts {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.district {
+  position: absolute;
+  top: var(--district-y);
+  left: var(--district-x);
+  width: 22%;
+  height: 27%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(241, 238, 229, 0.58);
+  cursor: pointer;
+  transform: translateZ(calc(8px + var(--district-z) * 0.35px));
+  transform-style: preserve-3d;
+}
+
+.district[data-selected="true"] {
+  z-index: 5;
+  color: var(--gold);
+}
+
+.districtScene {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+}
+
+.sceneGround {
+  position: absolute;
+  inset: 9%;
+  border: 1px solid rgba(241, 238, 229, 0.16);
+  border-radius: 42% 58% 45% 55%;
+  background: radial-gradient(circle, rgba(241, 238, 229, 0.1), transparent 70%);
+  transform: translateZ(1px);
+}
+
+.sceneBuilding,
+.sceneMachine,
+.sceneVehicle,
+.scenePeople,
+.sceneOutput {
+  position: absolute;
+  display: block;
+  transform-style: preserve-3d;
+}
+
+.sceneBuilding {
+  top: 18%;
+  left: 22%;
+  width: 45%;
+  height: 54%;
+  border: 1px solid rgba(241, 238, 229, 0.48);
+  background: rgba(157, 154, 137, 0.22);
+  box-shadow: inset 0 0 1.5rem rgba(241, 238, 229, 0.04);
+  transform: translateZ(18px) rotateX(-47deg);
+  transform-origin: bottom;
+}
+
+.sceneBuilding i,
+.sceneMachine i,
+.sceneVehicle i,
+.scenePeople i {
+  position: absolute;
+  display: block;
+}
+
+.sceneBuilding i {
+  width: 0.42rem;
+  height: 0.42rem;
+  background: rgba(224, 187, 104, 0.36);
+  box-shadow: 0 0 0.7rem rgba(224, 187, 104, 0.28);
+  animation: windowWork 5s ease-in-out infinite;
+}
+
+.sceneBuilding i:nth-child(1) { top: 24%; left: 22%; }
+.sceneBuilding i:nth-child(2) { top: 24%; right: 22%; animation-delay: -1.4s; }
+.sceneBuilding i:nth-child(3) { bottom: 20%; left: 44%; animation-delay: -2.8s; }
+
+@keyframes windowWork {
+  0%, 100% { opacity: 0.2; }
+  35%, 72% { opacity: 1; }
+}
+
+.sceneMachine {
+  top: 12%;
+  right: 10%;
+  width: 32%;
+  height: 58%;
+  transform: translateZ(26px) rotateX(-47deg);
+  transform-origin: bottom;
+}
+
+.sceneVehicle {
+  right: 8%;
+  bottom: 15%;
+  width: 34%;
+  height: 17%;
+  border: 1px solid currentColor;
+  transform: translateZ(15px);
+}
+
+.sceneVehicle i {
+  bottom: -0.28rem;
+  width: 0.5rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.sceneVehicle i:first-child { left: 17%; }
+.sceneVehicle i:last-child { right: 17%; }
+
+.scenePeople {
+  bottom: 15%;
+  left: 14%;
+  width: 35%;
+  height: 42%;
+  transform: translateZ(22px) rotateX(-47deg);
+  transform-origin: bottom;
+}
+
+.scenePeople i {
+  bottom: 0;
+  width: 0.32rem;
+  height: 1.3rem;
+  border-radius: 50% 50% 0 0;
+  background: currentColor;
+  transform-origin: bottom;
+  animation: personWork 6s ease-in-out infinite;
+}
+
+.scenePeople i:nth-child(1) { left: 12%; }
+.scenePeople i:nth-child(2) { left: 46%; animation-delay: -1.8s; }
+.scenePeople i:nth-child(3) { right: 8%; animation-delay: -3.6s; }
+
+@keyframes personWork {
+  0%, 22%, 100% { transform: translateX(0) rotate(0); }
+  45%, 72% { transform: translateX(0.45rem) rotate(8deg); }
+}
+
+.sceneOutput {
+  right: 5%;
+  bottom: 4%;
+  width: 0.55rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--teal);
+  border-radius: 50%;
+  box-shadow: 0 0 1.3rem rgba(135, 201, 196, 0.35);
+  transform: translateZ(10px);
+  animation: outputPulse 4.8s ease-in-out infinite;
+}
+
+@keyframes outputPulse {
+  0%, 100% { opacity: 0.25; transform: translateZ(10px) scale(0.8); }
+  52% { opacity: 1; transform: translateZ(10px) scale(1.3); }
+}
+
+.districtSignal {
+  position: absolute;
+  top: 8%;
+  left: 14%;
+  width: 2.2rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(224, 187, 104, calc(0.08 + var(--district-strength) * 0.42));
+  border-radius: 50%;
+  box-shadow: 0 0 calc(1rem + var(--district-strength) * 1.8rem) rgba(224, 187, 104, 0.14);
+  transform: translateZ(28px);
+  animation: districtDemand 5.6s calc(var(--district-z) * -0.63s) ease-out infinite;
+}
+
+@keyframes districtDemand {
+  0%, 100% { opacity: 0.18; transform: translateZ(28px) scale(0.65); }
+  36% { opacity: 0.9; transform: translateZ(28px) scale(1.3); }
+  62% { opacity: 0.1; transform: translateZ(28px) scale(1.75); }
+}
+
+.districtLabel {
+  position: absolute;
+  top: 75%;
+  left: 12%;
+  display: grid;
+  grid-template-columns: 1.25rem auto;
+  gap: 0 0.45rem;
+  text-align: left;
+  transform: translateZ(32px) rotateZ(8deg) rotateX(-54deg);
+  transform-origin: left;
+}
+
+.districtLabel .sectorGlyph { grid-row: 1 / span 2; }
+.districtLabel b { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; }
+.districtLabel small { color: rgba(241, 238, 229, 0.38); font: 0.48rem/1.3 "Courier New", monospace; }
+
+/* Each district uses the same material language but performs a distinct job. */
+[data-sector-scene="construction"] .sceneBuilding {
+  top: 30%;
+  left: 30%;
+  width: 44%;
+  height: 44%;
+  background: repeating-linear-gradient(90deg, rgba(241, 238, 229, 0.04) 0 14px, transparent 14px 20px);
+}
+
+[data-sector-scene="construction"] .sceneMachine i:nth-child(1) {
+  top: 0;
+  right: 42%;
+  width: 3px;
+  height: 92%;
+  background: currentColor;
+}
+
+[data-sector-scene="construction"] .sceneMachine i:nth-child(2) {
+  top: 0;
+  right: 42%;
+  width: 110%;
+  height: 3px;
+  background: currentColor;
+  transform-origin: right;
+  animation: craneTurn 12s ease-in-out infinite;
+}
+
+[data-sector-scene="construction"] .sceneMachine i:nth-child(3) {
+  top: 3px;
+  left: -44%;
+  width: 2px;
+  height: 45%;
+  background: currentColor;
+  animation: craneLift 7s ease-in-out infinite;
+}
+
+@keyframes craneTurn { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(9deg); } }
+@keyframes craneLift { 0%, 25%, 100% { height: 25%; } 52%, 78% { height: 72%; } }
+
+[data-sector-scene="logistics"] .sceneBuilding {
+  top: 22%;
+  left: 10%;
+  width: 62%;
+  height: 42%;
+  background: repeating-linear-gradient(90deg, rgba(241, 238, 229, 0.05) 0 18px, transparent 18px 25px);
+}
+
+[data-sector-scene="logistics"] .sceneVehicle {
+  animation: vehicleArrive 9s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+@keyframes vehicleArrive {
+  0%, 18% { transform: translate3d(3.5rem, 0, 15px); opacity: 0; }
+  35%, 72% { transform: translate3d(0, 0, 15px); opacity: 1; }
+  90%, 100% { transform: translate3d(-1.5rem, 0, 15px); opacity: 0; }
+}
+
+[data-sector-scene="manufacturing"] .sceneMachine {
+  top: 20%;
+  right: 14%;
+  width: 24%;
+  height: 54%;
+  border: 1px solid currentColor;
+}
+
+[data-sector-scene="manufacturing"] .sceneMachine i:nth-child(1) {
+  top: 0;
+  left: 45%;
+  width: 10%;
+  height: 50%;
+  background: currentColor;
+  animation: pressCycle 3.8s ease-in-out infinite;
+}
+
+[data-sector-scene="manufacturing"] .sceneVehicle {
+  right: 36%;
+  bottom: 21%;
+  width: 42%;
+  height: 3px;
+  border: 0;
+  background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 10px);
+  animation: conveyorRun 4s linear infinite;
+}
+
+@keyframes pressCycle { 0%, 36%, 100% { height: 27%; } 52%, 72% { height: 78%; } }
+@keyframes conveyorRun { to { background-position: 30px 0; } }
+
+[data-sector-scene="care"] .sceneBuilding {
+  inset: 14% 18% 18%;
+  border-radius: 45% 45% 18% 18%;
+}
+
+[data-sector-scene="care"] .sceneMachine::before,
+[data-sector-scene="care"] .sceneMachine::after {
+  position: absolute;
+  top: 22%;
+  left: 18%;
+  background: currentColor;
+  content: "";
+}
+
+[data-sector-scene="care"] .sceneMachine::before { width: 54%; height: 8%; }
+[data-sector-scene="care"] .sceneMachine::after { top: 2%; left: 40%; width: 8%; height: 48%; }
+
+[data-sector-scene="hospitality"] .sceneBuilding {
+  top: 22%;
+  left: 18%;
+  width: 58%;
+  height: 45%;
+  border-radius: 45% 45% 8% 8%;
+}
+
+[data-sector-scene="hospitality"] .sceneMachine i {
+  bottom: 20%;
+  width: 2px;
+  height: 33%;
+  background: currentColor;
+  animation: glyphSteam 3s ease-in-out infinite;
+}
+
+[data-sector-scene="hospitality"] .sceneMachine i:nth-child(1) { left: 15%; }
+[data-sector-scene="hospitality"] .sceneMachine i:nth-child(2) { left: 43%; animation-delay: -1s; }
+[data-sector-scene="hospitality"] .sceneMachine i:nth-child(3) { left: 71%; animation-delay: -2s; }
+
+[data-sector-scene="agriculture"] .sceneGround {
+  background: repeating-linear-gradient(90deg, rgba(135, 201, 196, 0.12) 0 2px, transparent 2px 15px);
+}
+
+[data-sector-scene="agriculture"] .sceneBuilding {
+  top: 42%;
+  left: 12%;
+  width: 34%;
+  height: 31%;
+  transform: translateZ(12px) rotateX(-47deg) skewX(-10deg);
+}
+
+[data-sector-scene="agriculture"] .sceneVehicle {
+  animation: tractorPass 11s ease-in-out infinite;
+}
+
+@keyframes tractorPass {
+  0%, 15% { transform: translate3d(-2rem, 0, 15px); opacity: 0; }
+  32%, 74% { opacity: 1; }
+  90%, 100% { transform: translate3d(2.5rem, 0, 15px); opacity: 0; }
+}
+
+[data-sector-scene="technology"] .sceneBuilding {
+  top: 10%;
+  left: 18%;
+  width: 22%;
+  height: 66%;
+  box-shadow: 2.3rem 1rem 0 rgba(117, 117, 104, 0.13), 2.3rem 1rem 0 1px rgba(241, 238, 229, 0.2);
+}
+
+[data-sector-scene="technology"] .sceneMachine {
+  top: 28%;
+  right: 8%;
+  width: 37%;
+  height: 34%;
+  border: 1px solid currentColor;
+  animation: screenWake 5s ease-in-out infinite;
+}
+
+@keyframes screenWake { 0%, 100% { box-shadow: inset 0 0 0 rgba(135, 201, 196, 0); } 45% { box-shadow: inset 0 0 1.2rem rgba(135, 201, 196, 0.25); } }
+
+[data-sector-scene="services"] .sceneBuilding {
+  top: 35%;
+  left: 12%;
+  width: 31%;
+  height: 38%;
+  box-shadow: 2.8rem -0.7rem 0 rgba(117, 117, 104, 0.13), 2.8rem -0.7rem 0 1px rgba(241, 238, 229, 0.18);
+}
+
+[data-sector-scene="services"] .scenePeople i:nth-child(2) {
+  animation-name: serviceWalk;
+}
+
+@keyframes serviceWalk { 0%, 100% { transform: translateX(-0.6rem); } 50% { transform: translateX(1.4rem); } }
+
+.processChain i,
+.processChain span {
+  position: absolute;
+  z-index: 12;
+  display: block;
+  width: 0.72rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: #101310;
+  box-shadow: 0 0 1.2rem rgba(224, 187, 104, 0.42);
+  transform: translateZ(36px);
+}
+
+.processChain i[data-process="need"] { top: 22%; left: 74%; }
+.processChain i[data-process="worker"] { top: 69%; left: 70%; }
+.processChain i[data-process="material"] { top: 62%; left: 20%; }
+.processChain i[data-process="evidence"] { top: 48%; left: 48%; border-color: var(--teal); }
+.processChain i[data-process="approval"] { top: 45%; left: 56%; border-color: var(--teal); }
+.processChain span[data-process="journal"] { top: 42%; left: 51%; width: 3.1rem; border-radius: 50%; border-color: rgba(135, 201, 196, 0.4); }
+
+.workWorldRoot[data-phase="0"] [data-process="need"],
+.workWorldRoot[data-phase="1"] [data-process="worker"],
+.workWorldRoot[data-phase="2"] [data-process="material"],
+.workWorldRoot[data-phase="3"] [data-sector="construction"] .sceneOutput,
+.workWorldRoot[data-phase="4"] [data-process="evidence"],
+.workWorldRoot[data-phase="5"] [data-process="approval"],
+.workWorldRoot[data-phase="6"] [data-process="journal"] {
+  background: var(--gold);
+  box-shadow: 0 0 2.3rem var(--gold);
+  animation: processCause 2.1s ease-out infinite;
+}
+
+.workWorldRoot[data-phase="4"] [data-process="evidence"],
+.workWorldRoot[data-phase="5"] [data-process="approval"],
+.workWorldRoot[data-phase="6"] [data-process="journal"] {
+  background: var(--teal);
+  box-shadow: 0 0 2.3rem var(--teal);
+}
+
+@keyframes processCause {
+  0% { opacity: 0.2; transform: translateZ(36px) scale(0.6); }
+  45% { opacity: 1; transform: translateZ(40px) scale(1.5); }
+  100% { opacity: 0.25; transform: translateZ(36px) scale(0.8); }
+}
+
+.workPhaseCaption {
+  top: auto;
+  bottom: 13.7rem;
+}
+
+.worldSectorIndex {
+  position: absolute;
+  z-index: 34;
+  bottom: 3.5rem;
+  left: 3.75rem;
+  display: none;
+  width: 12.5rem;
+}
+
+.worldSectorIndex button {
+  display: flex;
+  height: 1.45rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(241, 238, 229, 0.08);
+  background: transparent;
+  color: rgba(241, 238, 229, 0.36);
+  cursor: pointer;
+  font: 0.52rem/1 "Courier New", monospace;
+  text-transform: uppercase;
+}
+
+.worldSectorIndex button i {
+  width: 1.5rem;
+  height: 1px;
+  background: currentColor;
+}
+
+.worldSectorIndex button[data-selected="true"] {
+  color: var(--gold);
+}
+
+/* ───────────────────────── C / MARKET ↔ WORK */
+:global(html):has(.marketWorkRoot),
+:global(body):has(.marketWorkRoot) {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  background: #080a09;
+  scrollbar-color: rgba(224, 187, 104, 0.28) #080a09;
+}
+
+.marketWorkRoot {
+  overflow: visible;
+  background:
+    radial-gradient(circle at 52% 48%, rgba(53, 61, 56, 0.22), transparent 38%),
+    #080a09;
+}
+
+.zoomTrack {
+  position: relative;
+  height: 560svh;
+}
+
+.zoomStage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(241, 238, 229, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 238, 229, 0.018) 1px, transparent 1px);
+  background-size: 5vw 5vw;
+}
+
+.zoomStage::after {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  background: radial-gradient(circle at 55% 52%, transparent 38%, rgba(5, 7, 6, 0.72) 88%);
+  content: "";
+  pointer-events: none;
+}
+
+.zoomCamera {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.macroLayer,
+.regionLayer,
+.siteLayer,
+.evidenceLayer {
+  position: absolute;
+  top: 50%;
+  left: 56%;
+  transform-origin: 50% 50%;
+}
+
+.macroLayer {
+  width: min(69vw, 66rem);
+  height: min(72vh, 47rem);
+  margin: min(-36vh, -23.5rem) 0 0 min(-34.5vw, -33rem);
+}
+
+.macroLayer svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3rem 5rem rgba(0, 0, 0, 0.72));
+  overflow: visible;
+}
+
+.macroLayer path {
+  fill: rgba(163, 158, 143, 0.08);
+  stroke: rgba(241, 238, 229, 0.18);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.macroLayer path[data-tier="target"] {
+  fill: rgba(224, 187, 104, 0.13);
+  stroke: rgba(224, 187, 104, 0.38);
+}
+
+.macroLayer path[data-country="SE"] {
+  fill: rgba(224, 187, 104, 0.5);
+  stroke: var(--gold);
+}
+
+.macroSignals i {
+  --angle: calc(var(--signal-index) * 45deg);
+  position: absolute;
+  top: calc(50% + sin(var(--angle)) * 31%);
+  left: calc(50% + cos(var(--angle)) * 39%);
+  width: 0.42rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 1.2rem rgba(135, 201, 196, 0.66);
+  animation: macroSignal 5s calc(var(--signal-index) * -0.56s) ease-in-out infinite;
+}
+
+@keyframes macroSignal {
+  0%, 100% { opacity: 0.18; transform: scale(0.7); }
+  47% { opacity: 1; transform: scale(1.45); }
+}
+
+.regionLayer {
+  width: min(64vmin, 42rem);
+  aspect-ratio: 1;
+  margin: min(-32vmin, -21rem) 0 0 min(-32vmin, -21rem);
+  border: 1px solid rgba(241, 238, 229, 0.09);
+  border-radius: 50%;
+}
+
+.regionTerrain {
+  position: absolute;
+  inset: 8%;
+  border-radius: 46% 54% 52% 48%;
+  background:
+    radial-gradient(circle at 45% 52%, rgba(224, 187, 104, 0.1), transparent 28%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(241, 238, 229, 0.04) 0 1px, transparent 1px 2rem);
+  animation: regionRotate 32s linear infinite;
+}
+
+@keyframes regionRotate { to { transform: rotate(360deg); } }
+
+.regionCore {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15%;
+  aspect-ratio: 1;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 3rem rgba(224, 187, 104, 0.28);
+  transform: translate(-50%, -50%);
+}
+
+.regionCore i {
+  position: absolute;
+  inset: -30%;
+  border: 1px solid rgba(224, 187, 104, 0.16);
+  border-radius: 50%;
+  animation: sourceRing 4s ease-out infinite;
+}
+
+.regionCore i:last-child { animation-delay: 2s; }
+
+.regionSectors {
+  position: absolute;
+  inset: 0;
+}
+
+.regionSectors button {
+  position: absolute;
+  top: var(--region-y);
+  left: var(--region-x);
+  display: grid;
+  width: 4.1rem;
+  height: 4.1rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(241, 238, 229, 0.14);
+  border-radius: 50%;
+  background: rgba(9, 11, 10, 0.82);
+  color: rgba(241, 238, 229, 0.55);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.regionSectors button[data-selected="true"] {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 2rem rgba(224, 187, 104, 0.26);
+}
+
+.regionSectors .sectorGlyph {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.regionSectors button > span:not(.sectorGlyph) {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  font: 0.46rem/1 "Courier New", monospace;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.matchingCurrent i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.45rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 1rem var(--teal);
+  animation: matchConverge 5s ease-in-out infinite;
+}
+
+.matchingCurrent i:nth-child(2) { animation-delay: -1.65s; }
+.matchingCurrent i:nth-child(3) { animation-delay: -3.3s; }
+
+@keyframes matchConverge {
+  0% { opacity: 0; transform: translate(-14rem, -6rem); }
+  25% { opacity: 1; }
+  70% { opacity: 1; transform: translate(0, 0); }
+  100% { opacity: 0; transform: translate(0, 0) scale(2); }
+}
+
+.siteLayer {
+  width: min(72vmin, 49rem);
+  aspect-ratio: 1.25;
+  margin: min(-29vmin, -19.5rem) 0 0 min(-36vmin, -24.5rem);
+  perspective: 1000px;
+}
+
+.siteFloor {
+  position: absolute;
+  inset: 12% 8%;
+  border: 1px solid rgba(241, 238, 229, 0.13);
+  border-radius: 8%;
+  background:
+    linear-gradient(rgba(241, 238, 229, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 238, 229, 0.035) 1px, transparent 1px),
+    rgba(45, 49, 45, 0.18);
+  background-size: 2rem 2rem;
+  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.65);
+  transform: rotateX(58deg) rotateZ(-7deg);
+}
+
+.siteStructure {
+  position: absolute;
+  top: 26%;
+  left: 36%;
+  width: 35%;
+  height: 42%;
+  border: 1px solid rgba(241, 238, 229, 0.35);
+  background: repeating-linear-gradient(90deg, rgba(241, 238, 229, 0.05) 0 1.5rem, transparent 1.5rem 2rem);
+  transform: skewY(-7deg);
+}
+
+.siteStructure i {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: rgba(241, 238, 229, 0.26);
+}
+
+.siteStructure i:nth-child(1) { top: 20%; }
+.siteStructure i:nth-child(2) { top: 40%; }
+.siteStructure i:nth-child(3) { top: 60%; }
+.siteStructure i:nth-child(4) { top: 80%; }
+
+.siteCrane {
+  position: absolute;
+  top: 12%;
+  right: 16%;
+  width: 31%;
+  height: 54%;
+  border-right: 3px solid var(--gold);
+}
+
+.siteCrane::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 118%;
+  height: 3px;
+  background: var(--gold);
+  content: "";
+  transform-origin: right;
+  animation: craneTurn 12s ease-in-out infinite;
+}
+
+.siteCrane i:first-child {
+  position: absolute;
+  top: 3px;
+  left: -10%;
+  width: 2px;
+  height: 42%;
+  background: var(--gold);
+  animation: craneLift 7s ease-in-out infinite;
+}
+
+.siteCrane i:last-child {
+  position: absolute;
+  top: 44%;
+  left: -12%;
+  width: 1.5rem;
+  height: 0.7rem;
+  border: 1px solid var(--gold);
+  animation: loadMove 7s ease-in-out infinite;
+}
+
+@keyframes loadMove { 0%, 25%, 100% { transform: translateY(-1.2rem); } 52%, 78% { transform: translateY(3rem); } }
+
+.siteCrew {
+  position: absolute;
+  right: 31%;
+  bottom: 20%;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.siteCrew i {
+  width: 0.55rem;
+  height: 2.4rem;
+  border-radius: 50% 50% 0 0;
+  background: var(--paper);
+  transform-origin: bottom;
+  animation: personWork 5.4s ease-in-out infinite;
+}
+
+.siteCrew i:nth-child(2) { animation-delay: -1.8s; }
+.siteCrew i:nth-child(3) { animation-delay: -3.6s; }
+
+.siteTask {
+  position: absolute;
+  bottom: 18%;
+  left: 16%;
+  width: 11rem;
+  height: 1px;
+  background: rgba(241, 238, 229, 0.22);
+}
+
+.siteTask i {
+  position: absolute;
+  top: -0.24rem;
+  left: 0;
+  width: 0.5rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 1rem var(--gold);
+  animation: taskAdvance 5s ease-in-out infinite;
+}
+
+.siteTask b {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.7rem;
+  width: 0.72rem;
+  height: 0.45rem;
+  border-right: 2px solid var(--teal);
+  border-bottom: 2px solid var(--teal);
+  opacity: 0;
+  transform: rotate(45deg);
+  animation: taskDone 5s ease-in-out infinite;
+}
+
+@keyframes taskAdvance { 0%, 18% { transform: translateX(0); } 75%, 100% { transform: translateX(11rem); } }
+@keyframes taskDone { 0%, 68% { opacity: 0; } 82%, 100% { opacity: 1; } }
+
+.siteJournalPort {
+  position: absolute;
+  bottom: 11%;
+  left: 45%;
+  width: 3rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--teal);
+  border-radius: 50%;
+  box-shadow: 0 0 2rem rgba(135, 201, 196, 0.25);
+}
+
+.siteJournalPort i {
+  position: absolute;
+  inset: 0.7rem;
+  border: 1px solid rgba(135, 201, 196, 0.55);
+  animation: outputPulse 3s ease-in-out infinite;
+}
+
+.evidenceLayer {
+  width: min(68vmin, 46rem);
+  aspect-ratio: 1.2;
+  margin: min(-28vmin, -19rem) 0 0 min(-34vmin, -23rem);
+}
+
+.evidencePerson {
+  position: absolute;
+  top: 27%;
+  left: 14%;
+  width: 5rem;
+  height: 11rem;
+  border: 1px solid rgba(241, 238, 229, 0.22);
+  border-radius: 48% 48% 28% 28%;
+  background: radial-gradient(circle at 50% 18%, rgba(241, 238, 229, 0.18), transparent 20%);
+}
+
+.evidencePerson i {
+  position: absolute;
+  right: -0.45rem;
+  bottom: 18%;
+  width: 0.8rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 1.4rem var(--gold);
+}
+
+.evidenceRibbon {
+  position: absolute;
+  top: 48%;
+  left: 25%;
+  width: 45%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), var(--teal));
+}
+
+.evidenceRibbon i {
+  position: absolute;
+  top: -0.28rem;
+  width: 0.6rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 1rem var(--teal);
+  animation: evidenceTravel 4.5s linear infinite;
+}
+
+.evidenceRibbon i:nth-child(2) { animation-delay: -1.5s; }
+.evidenceRibbon i:nth-child(3) { animation-delay: -3s; }
+
+@keyframes evidenceTravel { from { left: 0; opacity: 0; } 20%, 80% { opacity: 1; } to { left: 100%; opacity: 0; } }
+
+.evidenceRecord {
+  position: absolute;
+  top: 23%;
+  right: 17%;
+  width: 10rem;
+  height: 13rem;
+  border: 1px solid rgba(135, 201, 196, 0.35);
+  background: linear-gradient(145deg, rgba(135, 201, 196, 0.08), transparent);
+}
+
+.evidenceRecord i {
+  position: absolute;
+  right: 15%;
+  left: 15%;
+  height: 1px;
+  background: rgba(135, 201, 196, 0.32);
+  transform-origin: left;
+  animation: recordWrite 4.8s ease-in-out infinite;
+}
+
+.evidenceRecord i:nth-child(1) { top: 29%; }
+.evidenceRecord i:nth-child(2) { top: 49%; animation-delay: -1.6s; }
+.evidenceRecord i:nth-child(3) { top: 69%; animation-delay: -3.2s; }
+
+@keyframes recordWrite { 0%, 100% { transform: scaleX(0.2); opacity: 0.25; } 55% { transform: scaleX(1); opacity: 1; } }
+
+.humanDecision {
+  position: absolute;
+  right: 5%;
+  bottom: 14%;
+  width: 4rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(241, 238, 229, 0.2);
+  border-radius: 50%;
+}
+
+.humanDecision i {
+  position: absolute;
+  top: 37%;
+  left: 29%;
+  width: 42%;
+  height: 20%;
+  border-bottom: 2px solid var(--teal);
+  border-left: 2px solid var(--teal);
+  opacity: 0;
+  transform: rotate(-45deg);
+  animation: decisionConfirm 5s ease-in-out infinite;
+}
+
+@keyframes decisionConfirm { 0%, 55% { opacity: 0; transform: rotate(-45deg) scale(0.4); } 72%, 100% { opacity: 1; transform: rotate(-45deg) scale(1); } }
+
+.returnCurrent {
+  position: absolute;
+  bottom: 10%;
+  left: 45%;
+  width: 2rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  animation: returnMarket 5s ease-in-out infinite;
+}
+
+@keyframes returnMarket { 0%, 50% { opacity: 0.2; transform: scale(0.6); } 80%, 100% { opacity: 1; transform: scale(2.2); } }
+
+.journeyCopy {
+  position: absolute;
+  z-index: 30;
+  top: 9.5rem;
+  left: 3.75rem;
+  width: min(27rem, 32vw);
+}
+
+.journeyCopy p {
+  margin: 2.2rem 0 0.5rem;
+  color: var(--gold);
+  font: 0.62rem/1.2 "Courier New", monospace;
+  letter-spacing: 0.15em;
+}
+
+.journeyCopy h1 {
+  min-height: 3.7em;
+  font-size: clamp(2rem, 3.4vw, 4rem);
+}
+
+.journeyCopy ol {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journeyCopy li {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  color: rgba(241, 238, 229, 0.25);
+  font: 0.48rem/1 "Courier New", monospace;
+  letter-spacing: 0.11em;
+  transition: color 250ms ease;
+}
+
+.journeyCopy li i {
+  width: 1.5rem;
+  height: 1px;
+  background: currentColor;
+  transition: width 250ms ease;
+}
+
+.journeyCopy li[data-active="true"] {
+  color: var(--paper);
+}
+
+.journeyCopy li[data-active="true"] i {
+  width: 3rem;
+  background: var(--gold);
+}
+
+.marketWorkRoot .opportunityReadout {
+  z-index: 35;
+  right: 3.75rem;
+  width: min(42rem, 53vw);
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 350ms ease, transform 350ms ease;
+  pointer-events: none;
+}
+
+.marketWorkRoot[data-journey="1"] .opportunityReadout,
+.marketWorkRoot[data-journey="2"] .opportunityReadout {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.zoomTruth {
+  position: absolute;
+  z-index: 30;
+  top: 6rem;
+  right: 3.75rem;
+  color: rgba(241, 238, 229, 0.36);
+  font: 0.5rem/1.3 "Courier New", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.zoomTruth span {
+  margin-left: 1rem;
+  color: var(--teal);
+}
+
+.zoomTruth span:nth-child(2) { color: var(--gold); }
+
+.scrollCue {
+  position: absolute;
+  z-index: 30;
+  right: 3.75rem;
+  bottom: 2.9rem;
+  margin: 0;
+  color: rgba(241, 238, 229, 0.42);
+  font: 0.5rem/1 "Courier New", monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.scrollCue i {
+  display: inline-block;
+  width: 0.3rem;
+  height: 0.8rem;
+  margin-right: 0.6rem;
+  border: 1px solid var(--gold);
+  border-radius: 1rem;
+  vertical-align: middle;
+  animation: scrollTick 2s ease-in-out infinite;
+}
+
+@keyframes scrollTick { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
+
+/* ───────────────────────── TABLET */
+@media (max-width: 900px) {
+  .masthead { padding: 0 1.5rem; }
+  .masthead p span { display: none; }
+  .directionIntro,
+  .journeyCopy { left: 1.5rem; }
+  .directionIntro { width: 43vw; }
+  .directionIntro h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+  .phaseCaption { left: 1.5rem; }
+  .sectorRail,
+  .worldSectorIndex { left: 1.5rem; }
+  .opportunityReadout { right: 1.5rem; width: 62vw; grid-template-columns: 1fr 1.5fr; }
+  .readoutAction { display: none; }
+  .realityLegend { right: 1.5rem; }
+
+  .europeField { right: -14vw; width: 92vw; }
+  .workCell { width: 4rem; height: 4rem; }
+  .europeProcess { right: 8%; width: 22rem; }
+
+  .worldViewport { right: -6vw; width: 88vw; }
+  .worldPlane { width: 83vw; }
+  .workWorldIntro { width: 34vw; }
+  .districtLabel { display: none; }
+
+  .macroLayer,
+  .regionLayer,
+  .siteLayer,
+  .evidenceLayer { left: 61%; }
+  .journeyCopy { width: 34vw; }
+  .marketWorkRoot .opportunityReadout { right: 1.5rem; width: 58vw; }
+  .zoomTruth { right: 1.5rem; }
+}
+
+/* ───────────────────────── MOBILE: independent portrait choreographies */
+@media (max-width: 600px) {
+  .masthead {
+    height: 4rem;
+    grid-template-columns: 1fr auto;
+    padding: 0 1rem;
+  }
+
+  .masthead p { display: none; }
+  .jobsLink { font-size: 0.58rem; }
+  .realityLegend { display: none; }
+  .directionIntro {
+    top: 5.8rem;
+    left: 1rem;
+    width: calc(100% - 2rem);
+  }
+  .directionIntro > span { font-size: 0.52rem; }
+  .directionIntro h1 {
+    max-width: 12ch;
+    margin-top: 0.65rem;
+    font-size: clamp(1.75rem, 8vw, 2.1rem);
+  }
+  .directionIntro p {
+    max-width: 19rem;
+    margin-top: 0.7rem;
+    font-size: 0.68rem;
+  }
+  .phaseCaption {
+    top: 15.2rem;
+    left: 1rem;
+    font-size: 0.48rem;
+  }
+
+  .opportunityReadout {
+    right: 1rem;
+    bottom: 2.8rem;
+    left: 1rem;
+    width: auto;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0.65rem;
+    padding-top: 0.7rem;
+  }
+  .readoutIdentity > span { font-size: 0.44rem; }
+  .readoutIdentity strong { font-size: 0.76rem; }
+  .readoutIdentity b { font-size: 1.25rem; }
+  .readoutIdentity b small { font-size: 0.42rem; }
+  .readoutJobs a,
+  .readoutJobs > span { padding: 0.34rem 0.5rem; font-size: 0.55rem; }
+  .readoutJobs a:nth-child(2) { display: none; }
+  .readoutAction { display: none; }
+
+  /* A becomes a vertical labour current; the desktop map is only a faint field. */
+  .europeRoot { height: 100svh; }
+  .europeField {
+    top: 12rem;
+    right: 0;
+    width: 100%;
+    height: calc(100svh - 15rem);
+  }
+  .europeMap {
+    position: absolute;
+    top: -13%;
+    left: -70%;
+    width: 235%;
+    height: 102%;
+    opacity: 0.2;
+    transform: rotate(5deg);
+  }
+  .workCells,
+  .swedenSource,
+  .europeProcess,
+  .sectorRail { display: none; }
+  .mobileProcessRail {
+    position: absolute;
+    top: 2%;
+    right: 0.7rem;
+    bottom: 7rem;
+    left: 0.7rem;
+    display: block;
+  }
+  .mobileCurrent {
+    position: absolute;
+    top: 2%;
+    bottom: 2%;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(224, 187, 104, 0.62), rgba(135, 201, 196, 0.6), transparent);
+  }
+  .mobileProcessRail > span {
+    position: absolute;
+    top: calc(5% + var(--mobile-index) * 17%);
+    left: var(--mobile-side);
+    display: grid;
+    width: 4.6rem;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid rgba(241, 238, 229, 0.14);
+    border-radius: 50%;
+    background: rgba(10, 12, 11, 0.82);
+    color: rgba(241, 238, 229, 0.5);
+    transform: translateX(-50%);
+    transition: color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+  }
+  .mobileProcessRail > span[data-active="true"] {
+    color: var(--gold);
+    box-shadow: 0 0 2.4rem rgba(224, 187, 104, 0.34);
+    transform: translateX(-50%) scale(1.12);
+  }
+  .mobileProcessRail .sectorGlyph { width: 2.5rem; height: 2.5rem; }
+  .mobileWorker {
+    position: absolute;
+    top: 4%;
+    left: calc(50% - 0.25rem);
+    width: 0.5rem;
+    height: 1.8rem;
+    border-radius: 50% 50% 0 0;
+    background: var(--paper);
+    animation: mobileWorkerTravel 11.75s ease-in-out infinite;
+  }
+  .mobileEvidence {
+    position: absolute;
+    right: 1.2rem;
+    bottom: 0.8rem;
+    width: 2.3rem;
+    height: 3rem;
+    border: 1px solid var(--teal);
+    box-shadow: 0 0 1.5rem rgba(135, 201, 196, 0.25);
+  }
+  @keyframes mobileWorkerTravel { 0%, 12% { top: 4%; } 88%, 100% { top: 83%; } }
+
+  /* B is a close vertical walk through four districts, not a shrunken slab. */
+  .workWorldIntro { width: calc(100% - 2rem); }
+  .workWorldStage .directionIntro h1 {
+    max-width: 14ch;
+    font-size: 1.65rem;
+  }
+  .worldViewport {
+    top: 16.5rem;
+    right: 0;
+    width: 100%;
+    height: calc(100svh - 20.5rem);
+    perspective: none;
+  }
+  .worldPlane {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(180deg, rgba(33, 37, 33, 0.3), transparent);
+    box-shadow: none;
+    transform: none !important;
+  }
+  .terrainPlate { background-size: 3rem 3rem; }
+  .worldRoads { opacity: 0.3; transform: rotate(90deg) scale(1.5); }
+  .district {
+    top: auto;
+    left: auto;
+    width: 49%;
+    height: 34%;
+    transform: none;
+  }
+  .district[data-sector="logistics"] { top: 2%; left: 1%; }
+  .district[data-sector="care"] { top: 2%; right: 1%; }
+  .district[data-sector="hospitality"] { top: 37%; left: 1%; }
+  .district[data-sector="technology"] { top: 37%; right: 1%; }
+  .district[data-sector="construction"] { top: 67%; left: 1%; }
+  .district[data-sector="services"] { top: 67%; right: 1%; }
+  .district[data-sector="agriculture"],
+  .district[data-sector="manufacturing"] { display: none; }
+  .districtScene { transform: scale(0.88); }
+  .districtLabel {
+    top: auto;
+    bottom: 0;
+    display: grid;
+    transform: none;
+  }
+  .processChain { display: none; }
+  .worldSectorIndex { display: none; }
+  .workPhaseCaption { top: 15.2rem; bottom: auto; }
+  .workWorldRoot .opportunityReadout { bottom: 2.4rem; }
+
+  /* C uses a narrow portrait lens with fewer labels and closer physical layers. */
+  .zoomTrack { height: 620svh; }
+  .zoomStage { background-size: 3rem 3rem; }
+  .macroLayer,
+  .regionLayer,
+  .siteLayer,
+  .evidenceLayer { left: 50%; }
+  .macroLayer {
+    width: 140vw;
+    height: 66vh;
+    margin: -33vh 0 0 -70vw;
+  }
+  .regionLayer {
+    width: 88vw;
+    margin: -44vw 0 0 -44vw;
+  }
+  .regionSectors button { width: 3.25rem; height: 3.25rem; }
+  .regionSectors .sectorGlyph { width: 1.7rem; height: 1.7rem; }
+  .regionSectors button > span:not(.sectorGlyph) { display: none; }
+  .siteLayer {
+    width: 105vw;
+    margin: -42vw 0 0 -52.5vw;
+  }
+  .evidenceLayer {
+    width: 108vw;
+    margin: -45vw 0 0 -54vw;
+  }
+  .journeyCopy {
+    top: 5.6rem;
+    left: 1rem;
+    width: calc(100% - 2rem);
+    pointer-events: none;
+  }
+  .journeyCopy > span { font-size: 0.48rem; }
+  .journeyCopy p { margin-top: 0.8rem; font-size: 0.5rem; }
+  .journeyCopy h1 {
+    min-height: 2.4em;
+    max-width: 10ch;
+    margin-top: 0.25rem;
+    font-size: 2.25rem;
+  }
+  .journeyCopy ol {
+    position: absolute;
+    top: 0;
+    right: 0;
+    gap: 0.35rem;
+  }
+  .journeyCopy li span { display: none; }
+  .journeyCopy li i { width: 0.8rem; }
+  .journeyCopy li[data-active="true"] i { width: 2.2rem; }
+  .zoomTruth { display: none; }
+  .marketWorkRoot .opportunityReadout {
+    right: 1rem;
+    bottom: 3.1rem;
+    left: 1rem;
+    width: auto;
+  }
+  .scrollCue { right: 1rem; bottom: 1.1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prototypeRoot *,
+  .prototypeRoot *::before,
+  .prototypeRoot *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .worldPlane {
+    transform: translate(-50%, -50%) rotateX(47deg) rotateZ(-6deg) !important;
+  }
+
+  .zoomTrack { height: 100svh; }
+  .macroLayer {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .regionLayer,
+  .siteLayer,
+  .evidenceLayer { display: none; }
+  .zoomCamera { transform: none !important; }
+}
