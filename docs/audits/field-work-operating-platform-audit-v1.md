@@ -588,3 +588,74 @@ bottleneck until real hours arrive.
 | C — task → cost | REAL_MISSING, still downstream of actuals existing |
 | D — work → skills | VERIFIED_PRODUCTION |
 | E — actuals → capacity | UNUSED_BUT_REAL, still downstream of actuals existing |
+
+---
+
+# ADDENDUM v4 — 2026-08-20: neither C nor E is next, and the evidence says why
+
+The owner's instruction was to reassess after the chain was verified and then
+continue with whichever of C (task → cost) or E (actuals → capacity) is
+genuinely first. Reassessed:
+
+## The chain is now whole
+
+Every link between a worker typing and an employer approving is verified:
+
+| Link | Evidence |
+|---|---|
+| task → journal → evidence → hours → attribution → approval → history | 36/36 against the applied production functions |
+| engagement context routing | #1217, proven 6/6 in production |
+| hours surviving the review step | #1218 |
+| draft timesheet recomputation | `create/refresh/submit_timesheet_v1` all recompute from `timesheet_compute_lines_v1` and are `EXECUTE`-granted to `authenticated` — verified, not assumed |
+
+No further structural break was found between logging work and an employer
+seeing it.
+
+## And it carries no data
+
+| | |
+|---|---|
+| Journal entries whose hours reached a time metric | **4** of 26 |
+| `journal_entry_tasks` (evidence links) | 0 |
+| `work_tasks` | 0 |
+| `finance_records` | 0 |
+| `procurement_inquiries` | 0 |
+| Timesheets | 1, computing **0.00 hours** |
+
+## Therefore: neither C nor E
+
+**C is disqualified outright.** `finance_records` and `procurement_inquiries`
+are both empty and **no pipeline anywhere produces them**. Attributing costs to
+tasks would be a new module over two empty tables — precisely
+"do not build from zero-row counts alone".
+
+**E is disqualified by dependency, not by design.** The capacity engine is real
+and its own comment names the gap honestly: *"No per-worker hour ledger exists
+— documented approximation."* That ledger is exactly what chain step A now
+produces, so E is a genuine CONNECT. But with zero attributed hours in
+production it would connect to nothing and change no number on any screen. It
+becomes worth doing the moment real actuals exist — not before.
+
+## What IS first: the 14 recoverable entries
+
+Fourteen entries across four workers carry hours the worker wrote and the
+composer never kept — **eleven of them already in an organization-scoped
+context, one worker-edit away from becoming real, employer-visible work-time**.
+Registered with a repeatable classifier at
+[`docs/reconciliation/recoverable-logged-hours-v1.md`](../reconciliation/recoverable-logged-hours-v1.md).
+
+They are not corrected automatically, and must not be: re-parsing a person's
+text and writing hours that will be approved and may be paid manufactures a
+claim they never made (doctrine §7). Recovery is the worker's act, one entry at
+a time, through the normal edit flow — which supersedes rather than overwrites,
+so the original stays readable.
+
+## The honest next step
+
+Not more code. **Real usage.** Until those hours exist, C and E are consumers
+of an empty table, and any measurement of "does the chain work in the wild"
+has nothing to measure. The chain has been proven capable; it has not yet been
+proven *used*.
+
+That distinction is the whole point of this audit, and it is the one thing this
+register refuses to blur.
