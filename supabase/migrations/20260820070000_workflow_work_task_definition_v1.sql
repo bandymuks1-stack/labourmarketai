@@ -1,16 +1,17 @@
 -- ============================================================================
--- RED — human gate. Apply ONLY via Supabase MCP apply_migration.
+-- RED — human gate SATISFIED. Apply ONLY via Supabase MCP apply_migration.
 -- Never `db push` (repo filenames do not match ledger versions; a push would
 -- re-run already-applied migrations).
 --
--- @human-gate-approved — owner decision 2026-08-20 ("SLICE B — CREATE THE
--- MINIMUM REAL WORK_TASK APPROVAL FLOW"), recorded in full at
--- docs/human-gates/workflow-work-task-definition-v1-gate.md. The owner
--- approved creating ONE minimal canonical work_task approval flow, reusing the
--- existing Workflow & Approval Engine, with approver selection kept explicit
--- and configurable. This migration is the minimum required to make that
--- possible at all — see below. The annotation states the ROUTE, not an
--- auto-merge or auto-apply pass.
+-- @human-gate-approved — the owner approved THIS MIGRATION BY NAME on
+-- 2026-08-20 ("PR #1216 / workflow_work_task_definition_v1 — APPROVED"),
+-- granting the merge, the apply and the production verification. It had been
+-- presented for its own gate because it did not exist when the earlier slice B
+-- approval was written. Both decisions are recorded in full at
+-- docs/human-gates/workflow-work-task-definition-v1-gate.md.
+--
+-- The annotation states the ROUTE (draft + needs-human-gate + owner approval),
+-- never an auto-merge or auto-apply pass.
 --
 -- Safety class: RED by classification ONLY because it replaces the body of an
 -- existing SECURITY DEFINER function. ZERO tables, columns, policies, grants,

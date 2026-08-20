@@ -21,7 +21,23 @@ already-applied chain step B end to end, with these explicit conditions:
 This migration is the **minimum required for that flow to be creatable at all**.
 Without it the capability does not exist in any form.
 
-State: `SLICE_B_APPROVED_MIGRATION_IS_THE_MINIMUM_MEANS`
+State: `APPROVED_APPLY_GRANTED`
+
+## OWNER DECISION — GRANTED 2026-08-20 (second decision, on this migration by name)
+
+The migration was presented for its own gate because it did not exist when the
+slice B approval was written. The owner then approved it **by name**:
+
+> "PR #1216 / workflow_work_task_definition_v1 — APPROVED … merge only after
+> all required checks remain green; apply using the canonical Supabase
+> migration procedure; verify production after apply; prove the real work_task
+> approval path end-to-end; preserve the canonical Workflow & Approval Engine;
+> no second approval store; no `approval_status` on work_tasks; no automatic
+> approval; no synthetic production truth left behind; record the production
+> apply in the canonical ledger."
+
+Every one of those conditions is a property this migration already has or a
+step recorded below. Nothing in it is loosened by the approval.
 
 ### Why this is inside the slice B approval, not a new gate
 
@@ -89,7 +105,7 @@ entries with no `work_task`.
 
 ## Identity gate before apply
 
-- migration sha256 `d254ceb79e8baba662d5938742c1df89c98cb224fc77ece563518170a38af3aa`;
+- migration sha256 `cd0c43fc433667dee6b350322b76d34213b4463011bdd97c3d67fae5a23a02c1`;
 - rollback sha256 `8287abe94057fa80b9dba9548e608f81b240ff3dcc863d4c91bbb3458a503f79`;
 - comment-stripped EXECUTABLE sha256
   `89935025d4f809d59dd8c3a4931f7e1343021cf0ab4267fe6f8ab76d4be292f1`;
