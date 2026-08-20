@@ -129,16 +129,19 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
   };
 }
 
-export async function searchPublicVacancyPreviews(input: {
-  query?: string | null;
-  professionSlug?: string | null;
-  page?: number;
-}): Promise<PublicVacancySearchResult> {
+export async function searchPublicVacancyPreviews(
+  input: {
+    query?: string | null;
+    professionSlug?: string | null;
+    page?: number;
+  },
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancySearchResult> {
   const page = Math.max(1, Math.floor(input.page ?? 1));
   const limit = PUBLIC_VACANCY_PAGE_SIZE;
   const offset = (page - 1) * limit;
 
-  const supabase = await createClient();
+  const supabase = suppliedClient ?? (await createClient());
   const { data, error } = await asAny(supabase).rpc(
     "search_public_vacancy_previews_v1",
     {
@@ -196,9 +199,13 @@ export async function getPublicVacancyPreview(
  * Live governed supply counts. Replaces the pinned landing constant: a number
  * a visitor reads should be the number the database currently holds.
  */
-export async function readPublicVacancySupplyCounts(): Promise<PublicVacancySupplyCounts> {
-  const supabase = await createClient();
-  const { data, error } = await asAny(supabase).rpc("count_public_vacancies_v1");
+export async function readPublicVacancySupplyCounts(
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancySupplyCounts> {
+  const supabase = suppliedClient ?? (await createClient());
+  const { data, error } = await asAny(supabase).rpc(
+    "count_public_vacancies_v1",
+  );
 
   if (error) {
     if (isNotProvisioned(error.code)) {
