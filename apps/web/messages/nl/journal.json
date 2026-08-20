@@ -76,6 +76,7 @@
   "engagement": "Context",
   "engagementChoose": "Kies de betrekking…",
   "engagementAmbiguous": "Dit werk kan bij meer dan één betrekking horen. Kies vóór het opslaan bij welke.",
+  "unconfirmedTimeBlocked": "{count} geregistreerde duur(en) wachten nog op je beoordeling en zouden niet worden opgeslagen. Behoud of verwijder ze eerst.",
   "entry": {
     "reviewedBy": "Beoordeeld door",
     "confirmerRole": {
@@ -108,6 +109,7 @@
     "restoring": "Herstellen…",
     "edit": "Bewerken",
     "textLabel": "Itemtekst",
+    "unrecordedHours": "De hier genoemde uren ({mentions}) zijn niet als gestructureerde tijd vastgelegd. Bekijk dit item en voeg ze toe.",
     "locationLabel": "Locatie",
     "locationUnset": "Locatie niet opgegeven",
     "understoodLabel": "Wat het systeem heeft begrepen",

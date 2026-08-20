@@ -76,6 +76,7 @@
   "engagement": "Context",
   "engagementChoose": "Choose the engagement…",
   "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
+  "unconfirmedTimeBlocked": "{count} logged duration(s) still await your review and would not be saved. Keep or remove them first.",
   "entry": {
     "reviewedBy": "Reviewed by",
     "confirmerRole": {
@@ -108,6 +109,7 @@
     "restoring": "Restoring…",
     "edit": "Edit",
     "textLabel": "Entry text",
+    "unrecordedHours": "Hours mentioned here ({mentions}) were not recorded as structured time. Review this entry to add them.",
     "locationLabel": "Location",
     "locationUnset": "Location not specified",
     "understoodLabel": "What the system understood",

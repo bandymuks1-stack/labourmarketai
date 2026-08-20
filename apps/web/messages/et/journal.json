@@ -27,12 +27,14 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Valige seotus…",
   "engagementAmbiguous": "See töö võib kuuluda rohkem kui ühe seotuse alla. Valige enne salvestamist, millise.",
+  "unconfirmedTimeBlocked": "{count} registreeritud kestust ootab veel ülevaatamist ega salvestuks. Jätke need alles või eemaldage.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
       "rejected": "[EN] Rejected",
       "submitted": "[EN] Submitted"
-    }
+    },
+    "unrecordedHours": "Siin mainitud tunde ({mentions}) ei salvestatud struktureeritud ajana. Vaadake see kanne üle ja lisage need."
   },
   "field": {
     "work_direction": "[EN] Work direction",

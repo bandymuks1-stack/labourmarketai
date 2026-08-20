@@ -27,12 +27,14 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Velg tilknytning…",
   "engagementAmbiguous": "Dette arbeidet kan høre til mer enn én tilknytning. Velg hvilken før du lagrer.",
+  "unconfirmedTimeBlocked": "{count} registrerte varigheter venter fortsatt på gjennomgang og ville ikke bli lagret. Behold eller fjern dem først.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
       "rejected": "[EN] Rejected",
       "submitted": "[EN] Submitted"
-    }
+    },
+    "unrecordedHours": "Timene nevnt her ({mentions}) ble ikke registrert som strukturert tid. Gå gjennom denne oppføringen og legg dem til."
   },
   "field": {
     "work_direction": "[EN] Work direction",

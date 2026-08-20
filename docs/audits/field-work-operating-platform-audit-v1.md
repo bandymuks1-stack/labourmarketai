@@ -502,3 +502,218 @@ The gap register stands: GPS/geofence, QR, offline mode, client portal,
 variations, notification delivery and safety forms remain **recorded, not
 built**, and are not to be reconsidered until the canonical
 task/evidence/actuals chain carries real production traffic.
+
+---
+
+# ADDENDUM v3 — 2026-08-20: the chain works; the hours were never reaching it
+
+ADDENDUM v2 named the engagement context as the FIRST_BROKEN_LINK. That was
+real and is fixed (#1217). Re-running the audit afterwards found a **larger**
+one immediately upstream of it, and this one was invisible from schema, from
+row counts and from the chain proof — because the chain proof supplies its own
+metrics and therefore never exercised the step where they are lost.
+
+## What real usage revealed
+
+A real timesheet appeared in production (`2026-08-20 06:39`, org
+`19f47e78`, period 2026-08). It computed **0.00 hours**.
+
+Its worker holds **no** org-less context, so the ADDENDUM v2 defect does not
+apply to them. All **twelve** of their entries sit in the correct organization
+context. Every one states hours in plain words:
+
+> `Kasiau smėli 9h` · `10h / 3h dažiau sienas / 4h tapetavau` ·
+> `3h staliaus darbai / 6,5h betonavimas` · `4h tinkuoyi / 3,5h dažyti /
+> 2,25h nešti smėli` · `Kasiau žemes su ekskavatoriumi 10h` ·
+> `9h viniojau grindinio šildymo vamzdukus`
+
+Not one produced a time metric.
+
+## The measurement
+
+Over all 26 live journal entries:
+
+| | |
+|---|---|
+| State hours in the worker's own text | **16** |
+| Reached a time metric | **4** |
+| **Wrote hours that were LOST** | **14** |
+| …of those, with zero confirmed fragments | **14 / 14** |
+| Entries in the entire database that ever had a confirmed fragment | **2** |
+
+**87.5% of the hours workers actually wrote never became data.**
+
+## The cause — not parsing
+
+The pipeline reads the durations correctly. The composer posts
+`fragments_json` filtered to `status === "confirmed"`, and posts the
+entry-level duration only when its own status is `confirmed`. Everything still
+at `pending` is dropped — **silently**, while the entry saves and looks
+successful. A one-tap "confirm all" control exists; nothing tells the worker
+that skipping it discards what they wrote.
+
+The discriminator is exact: entries that kept their hours carry
+`parsed_fragment` metrics; the fourteen that lost them carry none.
+
+## The fix, and why it is not "confirm it for them"
+
+Doctrine §7: the platform never presents inferred data as though a human had
+asserted it. A parsed duration is a machine reading of free text — the worker
+confirming it is what makes it their claim. Auto-confirming would manufacture
+assertions nobody made: a worse failure than losing them.
+
+So the save now **refuses to discard quietly**. When durations the worker wrote
+are still unreviewed, the composer names how many and stops; keeping them is
+one tap, and discarding them deliberately remains a real answer that never
+blocks. `lib/journal/unconfirmed-work-time.ts` holds the rule,
+`lib/guards/logged-hours-not-silently-dropped.test.ts` pins it — including that
+the save path may not promote a pending suggestion to confirmed, and that the
+`confirmed`-only filter was not loosened.
+
+## Why this outranked C and E
+
+Both C (task → cost) and E (actuals → capacity) consume actuals. With 87.5% of
+actuals lost at entry, either would have been correct code over an empty input
+— the failure this audit was commissioned to stop. Neither is the next
+bottleneck until real hours arrive.
+
+## Status after this addendum
+
+| Step | Status |
+|---|---|
+| A — task → hours/timesheet | VERIFIED_PRODUCTION |
+| B — task → approval | VERIFIED_PRODUCTION (36/36 against the applied functions) |
+| Engagement context routing | VERIFIED_PRODUCTION (#1217) |
+| **Hours surviving entry** | **fixed here; needs real usage to confirm in the wild** |
+| C — task → cost | REAL_MISSING, still downstream of actuals existing |
+| D — work → skills | VERIFIED_PRODUCTION |
+| E — actuals → capacity | UNUSED_BUT_REAL, still downstream of actuals existing |
+
+---
+
+# ADDENDUM v4 — 2026-08-20: neither C nor E is next, and the evidence says why
+
+The owner's instruction was to reassess after the chain was verified and then
+continue with whichever of C (task → cost) or E (actuals → capacity) is
+genuinely first. Reassessed:
+
+## The chain is now whole
+
+Every link between a worker typing and an employer approving is verified:
+
+| Link | Evidence |
+|---|---|
+| task → journal → evidence → hours → attribution → approval → history | 36/36 against the applied production functions |
+| engagement context routing | #1217, proven 6/6 in production |
+| hours surviving the review step | #1218 |
+| draft timesheet recomputation | `create/refresh/submit_timesheet_v1` all recompute from `timesheet_compute_lines_v1` and are `EXECUTE`-granted to `authenticated` — verified, not assumed |
+
+No further structural break was found between logging work and an employer
+seeing it.
+
+## And it carries no data
+
+| | |
+|---|---|
+| Journal entries whose hours reached a time metric | **4** of 26 |
+| `journal_entry_tasks` (evidence links) | 0 |
+| `work_tasks` | 0 |
+| `finance_records` | 0 |
+| `procurement_inquiries` | 0 |
+| Timesheets | 1, computing **0.00 hours** |
+
+## Therefore: neither C nor E
+
+**C is disqualified outright.** `finance_records` and `procurement_inquiries`
+are both empty and **no pipeline anywhere produces them**. Attributing costs to
+tasks would be a new module over two empty tables — precisely
+"do not build from zero-row counts alone".
+
+**E is disqualified by dependency, not by design.** The capacity engine is real
+and its own comment names the gap honestly: *"No per-worker hour ledger exists
+— documented approximation."* That ledger is exactly what chain step A now
+produces, so E is a genuine CONNECT. But with zero attributed hours in
+production it would connect to nothing and change no number on any screen. It
+becomes worth doing the moment real actuals exist — not before.
+
+## What IS first: the 14 recoverable entries
+
+Fourteen entries across four workers carry hours the worker wrote and the
+composer never kept — **eleven of them already in an organization-scoped
+context, one worker-edit away from becoming real, employer-visible work-time**.
+Registered with a repeatable classifier at
+[`docs/reconciliation/recoverable-logged-hours-v1.md`](../reconciliation/recoverable-logged-hours-v1.md).
+
+They are not corrected automatically, and must not be: re-parsing a person's
+text and writing hours that will be approved and may be paid manufactures a
+claim they never made (doctrine §7). Recovery is the worker's act, one entry at
+a time, through the normal edit flow — which supersedes rather than overwrites,
+so the original stays readable.
+
+## The honest next step
+
+Not more code. **Real usage.** Until those hours exist, C and E are consumers
+of an empty table, and any measurement of "does the chain work in the wild"
+has nothing to measure. The chain has been proven capable; it has not yet been
+proven *used*.
+
+That distinction is the whole point of this audit, and it is the one thing this
+register refuses to blur.
+
+---
+
+# ADDENDUM v5 — 2026-08-20: the funnel, measured, seven stages, not collapsed
+
+Owner directive: measure where real usage actually stops, and never reduce it to
+one "working" percentage. Script:
+[`scripts/db-proof/work-hours-funnel.sql`](../../scripts/db-proof/work-hours-funnel.sql)
+(read-only, repeatable).
+
+| Stage | | Count | Unit |
+|---|---|---|---|
+| 1 | worker wrote a duration | **21** | entries |
+| 2 | structured time metric kept | **3** | entries |
+| 3 | **in an EMPLOYER context** | **0** | entries |
+| 4 | attributed to a work task | 0 | entries |
+| 5 | timesheet lines computed | 0 | lines |
+| 6 | submitted for review | 0 | lines |
+| 7 | approved | 0 | lines |
+
+Stages 5–7 count timesheet LINES, not entries — one entry can yield several
+lines, and a timesheet freezes its own snapshot. They are reported in their own
+unit rather than merged, because mixing units is how a funnel starts lying.
+
+## The observed bottleneck is stage 3, and it is not what stage 2 suggested
+
+Stage 1→2 is the loss ADDENDUM v3 diagnosed and #1218 closed; it is forward-only,
+so the historical entries still show it.
+
+But stage 3 is the harder fact: **every entry that kept its hours sits in an
+org-less engagement context.** All four entries in production carrying a
+positive time metric are `relationship_slug = 'employee'` with
+`organization_id IS NULL`. `timesheet_compute_lines_v1` scopes by organization,
+so not one recorded hour in the database can reach any employer.
+
+Both halves are now fixed forward — #1217 routes new entries to an employer
+context (and refuses to guess between several), #1218 stops the durations being
+dropped. Neither is retroactive, by design.
+
+## A correction to ADDENDUM v3's arithmetic
+
+v3 reported "4 reached a time metric" against all live entries. The funnel's
+stage 2 reports **3**, because it counts the INTERSECTION — entries that both
+stated a duration and kept one. Both numbers are true of different questions;
+the funnel's is the one that belongs in a funnel. The fourth entry carries a
+time metric without stating a duration in its text.
+
+## What this means for the vocabulary
+
+- **CAPABILITY_PROVEN** — yes. 36/36 against the applied production functions.
+- **REAL_USER_DATA_FLOWING** — **no.** Stage 3 is zero.
+- **HUMAN_REVIEW_PROVEN** — **no.** Stage 6–7 are zero; the only human decision
+  observed was inside a rolled-back proof, which demonstrates capability and
+  nothing about adoption.
+- **REPEATED_USAGE_PROVEN** — **no.**
+
+A `begin … rollback` proof can never advance any of the last three. Only a
+person logging real work can.

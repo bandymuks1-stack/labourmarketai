@@ -27,12 +27,14 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "unconfirmedTimeBlocked": "{count} reģistrētie ilgumi vēl gaida jūsu pārskatīšanu un netiktu saglabāti. Vispirms paturiet vai noņemiet tos.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
       "rejected": "[EN] Rejected",
       "submitted": "[EN] Submitted"
-    }
+    },
+    "unrecordedHours": "Šeit minētās stundas ({mentions}) netika reģistrētas kā strukturēts laiks. Pārskatiet šo ierakstu un pievienojiet tās."
   },
   "field": {
     "work_direction": "[EN] Work direction",

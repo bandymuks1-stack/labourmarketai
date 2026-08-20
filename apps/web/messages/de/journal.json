@@ -76,6 +76,7 @@
   "engagement": "Kontext",
   "engagementChoose": "Beschäftigung wählen…",
   "engagementAmbiguous": "Diese Arbeit könnte zu mehr als einer Beschäftigung gehören. Wählen Sie vor dem Speichern aus, zu welcher.",
+  "unconfirmedTimeBlocked": "{count} erfasste Dauer(n) warten noch auf Ihre Durchsicht und würden nicht gespeichert. Behalten oder entfernen Sie sie zuerst.",
   "entry": {
     "reviewedBy": "Überprüft von",
     "confirmerRole": {
@@ -108,6 +109,7 @@
     "restoring": "Wird wiederhergestellt…",
     "edit": "Bearbeiten",
     "textLabel": "Eintragstext",
+    "unrecordedHours": "Die hier genannten Stunden ({mentions}) wurden nicht als strukturierte Zeit erfasst. Sehen Sie diesen Eintrag durch und fügen Sie sie hinzu.",
     "locationLabel": "Ort",
     "locationUnset": "Ort nicht angegeben",
     "understoodLabel": "Was das System verstanden hat",

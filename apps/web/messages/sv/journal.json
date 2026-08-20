@@ -27,12 +27,14 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Välj engagemang…",
   "engagementAmbiguous": "Det här arbetet kan höra till mer än ett engagemang. Välj vilket innan du sparar.",
+  "unconfirmedTimeBlocked": "{count} registrerade varaktigheter väntar fortfarande på granskning och skulle inte sparas. Behåll eller ta bort dem först.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
       "rejected": "[EN] Rejected",
       "submitted": "[EN] Submitted"
-    }
+    },
+    "unrecordedHours": "Timmarna som nämns här ({mentions}) registrerades inte som strukturerad tid. Granska posten och lägg till dem."
   },
   "field": {
     "work_direction": "[EN] Work direction",

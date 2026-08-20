@@ -27,12 +27,14 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Wybierz zaangażowanie…",
   "engagementAmbiguous": "Ta praca może należeć do więcej niż jednego zaangażowania. Wybierz, do którego, przed zapisaniem.",
+  "unconfirmedTimeBlocked": "{count} zarejestrowanych czasów wciąż czeka na Twój przegląd i nie zostałoby zapisanych. Najpierw zachowaj je lub usuń.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
       "rejected": "[EN] Rejected",
       "submitted": "[EN] Submitted"
-    }
+    },
+    "unrecordedHours": "Wspomniane tu godziny ({mentions}) nie zostały zapisane jako czas strukturalny. Przejrzyj ten wpis i dodaj je."
   },
   "field": {
     "work_direction": "[EN] Work direction",
