@@ -17,6 +17,7 @@ import {
 } from "@/lib/approvals/approvals-actions";
 import {
   WORKFLOW_APPROVAL_MODES,
+  WORKFLOW_AUTHORABLE_CONTEXT_TYPES,
   WORKFLOW_FORM_RULES,
   WORKFLOW_MAX_FORM_STEPS,
   WORKFLOW_NAME_MAX,
@@ -602,20 +603,12 @@ export async function ApprovalsSection({
               </label>
               <label className="flex flex-col gap-1">
                 <Label>{t("templates.contextLabel")}</Label>
+                {/* Derived from the canonical vocabulary, never re-listed:
+                    a second hardcoded list is how `work_task` stayed
+                    unreachable while the engine, the action and all 11 locales
+                    already supported it. */}
                 <Select name="contextEntityType" defaultValue="generic_request">
-                  {(
-                    [
-                      "generic_request",
-                      "expense",
-                      "invoice",
-                      "document_ack",
-                      "timesheet",
-                      "procurement",
-                      "business_trip",
-                      "management_decision",
-                      "agreement",
-                    ] as const
-                  ).map((c) => (
+                  {WORKFLOW_AUTHORABLE_CONTEXT_TYPES.map((c) => (
                     <option key={c} value={c}>
                       {t(`contextType.${c}`)}
                     </option>

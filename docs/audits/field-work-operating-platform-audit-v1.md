@@ -400,3 +400,105 @@ variations, worker-facing notification delivery, safety forms/permits/incidents.
 - WorkerNU — [worker.nu](https://worker.nu/en/welcome-en/) / [workernu.com](https://workernu.com/en/construction-management-and-time-tracking-system/) (direct fetch blocked by egress proxy; claims taken from indexed vendor page content, flagged as unverified)
 - **FieldScout** — no field-workforce product of that name was found in current sources; the
   name resolves to agronomy sensing hardware. Excluded rather than guessed.
+
+---
+
+# ADDENDUM v2 — 2026-08-20: what running the chain changed
+
+The audit above was written from schema, code and row counts. This addendum
+records what changed once the chain was **executed** rather than read. Two of
+its conclusions were wrong in the optimistic direction, and both were only
+visible from execution.
+
+The vehicle is `scripts/db-proof/work-task-approval-chain.sql`: the whole chain
+against the **real production database**, inside `begin … rollback`. It
+exercises the real deployed functions, the real constraints and the real RLS,
+and leaves nothing behind (verified by recount).
+
+## Status by chain step
+
+| Step | Status | Evidence |
+|---|---|---|
+| A — task → hours/timesheet | **VERIFIED_PRODUCTION** | `timesheet_task_attribution_v1` applied `20260820060427`; 44/44 harness + 24/24 production chain |
+| B — task → approval | **OWNER_GATED** | route existed with no on-ramp; needs `20260820070000` (PR #1216) |
+| C — task → cost | **REAL_MISSING**, unstarted | `finance_records` / `procurement_inquiries` carry `project_id` + `object_id`, no task link |
+| D — work → skills | **VERIFIED_PRODUCTION** | `journal_entry_skills.provenance` since `20260727180000`; needs nothing |
+| E — actuals → capacity | **UNUSED_BUT_REAL**, blocked upstream | engines exist; starved by the FIRST_BROKEN_LINK below |
+
+## Correction 1 — chain step B was not "implemented, unproven". It was unreachable.
+
+The audit recorded B as IMPLEMENTED_NOT_PROVEN after `20260819210000` widened
+the `context_entity_type` CHECK constraints. That was necessary and **not
+sufficient**.
+
+There were **three** independent lists of context types, not one:
+
+1. the table CHECK constraints — widened in #1213;
+2. the TypeScript vocabulary **and a second hardcoded copy inside the
+   authoring form** — widened in #1216;
+3. **`create_workflow_definition_v1`'s own allowlist** — not widened.
+
+So the engine accepted the context, the table accepted the row, the server
+action validated the value, and all 11 locales carried the label — while the
+only command that can create a definition returned `'invalid'`. No
+organization could author a `work_task` flow at all.
+
+**No static signal could see this.** Schema was right, types were right, guards
+passed. Steps 1–7 of the chain passed; step 8 returned `invalid`.
+
+*Lesson for this register: a capability is not reachable because its schema
+admits it. Duplicate allowlists are the failure mode — count them.*
+
+## Correction 2 — the audit under-read the zero-row cluster
+
+The audit treated the zero rows in `timesheets` as "nobody has used it yet".
+Measurement says otherwise: production holds **12 `fragment_time` and 8
+`quantity`** metric rows in the `time` unit category across **7** journal
+entries, and derives **zero** timesheet hours. The work was logged. It cannot
+be reached.
+
+## THE FIRST_BROKEN_LINK — work is recorded against the wrong engagement context
+
+Upstream of every remaining slice, and the reason C and E would stay starved
+even if built.
+
+**The measurement.** Of the 18 live journal entries sitting in an engagement
+context with `organization_id IS NULL`, **15 were written by people who also
+hold an active organization-scoped context**. Nine profiles hold both kinds.
+This is not solo workers logging personal work — it is employed workers logging
+into their org-less personal context.
+
+**Why those hours are unreachable.** `timesheet_compute_lines_v1` scopes by
+`ec.organization_id = p_organization_id`. A NULL-org context matches no
+organization, ever. So the hours exist, carry real durations and real
+provenance, and can never become work-time for any employer.
+
+**The mechanism** (`app/[locale]/dashboard/journal/page.tsx`). Contexts are
+ordered `is_primary desc`, then re-sorted so contexts matching the **active
+workspace** come first, and the composer defaults to the first row. When the
+active workspace is *person* — no organization selected — the comparator ranks
+the org-less primary context first. A worker with an employer, browsing as
+themselves, logs into the personal context by default.
+
+**Why it is not fixed here.** The remedy is a product decision, not a patch:
+
+- should the composer prefer an employer context when one exists, or is
+  logging-to-self the correct default with a visible indicator?
+- should the picker be explicit rather than defaulted, given the consequence?
+- what happens to the 15 existing entries? They are hash-chained (§3), so
+  re-pointing one is a **correction with provenance**, never an edit.
+
+That is exactly the "genuinely ambiguous product/business decision" class. It
+is recorded, measured and left for the owner.
+
+**Until it is resolved,** slices C and E can be built and will still show
+nothing, because the actuals never arrive. Building them first would produce
+correct code over an empty input — the failure mode this audit was
+commissioned to stop.
+
+## Unchanged
+
+The gap register stands: GPS/geofence, QR, offline mode, client portal,
+variations, notification delivery and safety forms remain **recorded, not
+built**, and are not to be reconsidered until the canonical
+task/evidence/actuals chain carries real production traffic.

@@ -47,6 +47,7 @@ import {
 } from "@/lib/journal/task-evidence-actions";
 import {
   getTaskApprovalStates,
+  getTaskOrganizations,
   listTaskApprovalDefinitions,
 } from "@/lib/approvals/task-approvals";
 import { requestTaskApprovalAction } from "@/lib/tasks/task-approval-actions";
@@ -234,15 +235,22 @@ export default async function TasksPage({
 
   // Evidence for every listed task + the caller's own attachable journal
   // entries — two bounded reads for the whole page, never per card.
-  const [evidence, linkableEntries, approvals, approvalDefinitions] =
-    await Promise.all([
-      getTaskEvidenceByTask(listedIds),
-      listWorkerLinkableEntries(),
-      // Chain step B: a task's approval is a NORMAL workflow instance
-      // (context_entity_type='work_task'). No task-specific approval store.
-      getTaskApprovalStates(listedIds),
-      listTaskApprovalDefinitions(),
-    ]);
+  const [
+    evidence,
+    linkableEntries,
+    approvals,
+    approvalDefinitions,
+    taskOrganizations,
+  ] = await Promise.all([
+    getTaskEvidenceByTask(listedIds),
+    listWorkerLinkableEntries(),
+    // Chain step B: a task's approval is a NORMAL workflow instance
+    // (context_entity_type='work_task'). No task-specific approval store.
+    getTaskApprovalStates(listedIds),
+    listTaskApprovalDefinitions(),
+    // A task may only travel through a flow of its OWN organization.
+    getTaskOrganizations(listedIds),
+  ]);
 
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
   const now = new Date();
@@ -450,7 +458,14 @@ export default async function TasksPage({
     // would be asking an approver to sign off on nothing.
     if (task.status !== "done") return null;
 
-    if (approvalDefinitions.length === 0) {
+    // Only this task's OWN organization's flows. A task with no organization
+    // spine has none, and is offered none — the engine refuses it anyway.
+    const taskOrg = taskOrganizations.get(task.id) ?? null;
+    const flowsForTask = taskOrg
+      ? approvalDefinitions.filter((d) => d.organizationId === taskOrg)
+      : [];
+
+    if (flowsForTask.length === 0) {
       return (
         <p
           className="text-xs text-text-muted"
@@ -468,7 +483,6 @@ export default async function TasksPage({
       >
         {hiddenContext()}
         <input type="hidden" name="taskId" value={task.id} />
-        <input type="hidden" name="taskTitle" value={task.title} />
         <label className="sr-only" htmlFor={`approval-def-${task.id}`}>
           {t("approval.request")}
         </label>
@@ -476,16 +490,14 @@ export default async function TasksPage({
           id={`approval-def-${task.id}`}
           name="definitionId"
           required
-          defaultValue={
-            approvalDefinitions.length === 1 ? approvalDefinitions[0].id : ""
-          }
+          defaultValue={flowsForTask.length === 1 ? flowsForTask[0].id : ""}
           className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-900 px-2 py-1 text-xs text-text-primary"
           data-testid={`task-approval-select-${task.id}`}
         >
           <option value="" disabled>
             {t("approval.chooseFlow")}
           </option>
-          {approvalDefinitions.map((d) => (
+          {flowsForTask.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name}
             </option>

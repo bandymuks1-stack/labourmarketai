@@ -996,6 +996,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // the owner said BUILD IT AND STOP BEFORE APPLYING, so it ships
       // UNAPPLIED behind needs-human-gate.
       "20260819220000_timesheet_task_attribution_v1.sql",
+      // 2026-08-20: the chain step B on-ramp (20260820070000) carries the
+      // marker on an EXPLICIT owner decision approving the minimum real
+      // work_task approval flow. RED by route — it replaces the
+      // create_workflow_definition_v1 SECURITY DEFINER body — while creating
+      // and dropping nothing and running no DML at apply time. It adds ONE
+      // value to ONE allowlist, a strict superset, because 20260819210000
+      // widened the table CHECK constraints but not this RPC's own copy.
+      "20260820070000_workflow_work_task_definition_v1.sql",
     ]);
   });
 

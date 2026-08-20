@@ -625,7 +625,11 @@ describe("NO new DB migration in this PR", () => {
     // (20260819220000_timesheet_task_attribution_v1, paired rollback).
     // RED by route, owner-approved, ships UNAPPLIED; still nothing from
     // the market-map read layer.
-    expect(count).toBeLessThanOrEqual(234);
+    // Bumped 234 -> 235 for the chain step B on-ramp
+    // (20260820070000_workflow_work_task_definition_v1, paired rollback).
+    // RED by route, owner-approved; one value added to one RPC allowlist.
+    // Still nothing from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(235);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -153,6 +153,15 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
      *   no task RPC — the existing task RPCs stay the only writers.
      */
     "20260819220000_timesheet_task_attribution_v1",
+    /**
+     *   20260820070000 — chain step B on-ramp: start_workflow_instance_v1
+     *   SELECTs public.work_tasks to check that a task sent for approval is
+     *   VISIBLE to the caller and belongs to the flow's organization, and to
+     *   read its title so approvers never see caller-supplied text. It
+     *   creates, alters, drops, writes and policies nothing on work_tasks and
+     *   defines no task RPC — the existing task RPCs stay the only writers.
+     */
+    "20260820070000_workflow_work_task_definition_v1",
   ];
 
   it("only the D2 + train-D migration pairs DEFINE work_tasks or the task RPCs", () => {
@@ -290,15 +299,40 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
     //   - lib/projects/progress.ts       — derived progress (status only);
     //   - lib/notifications/event-emitters.ts — the assignment emitter's
     //     recipient resolution (admin client, AFTER the domain write).
+    //
+    // Chain step B adds two, both READ-ONLY and both there to keep an
+    // approval inside the task's OWN organization:
+    //   - lib/approvals/task-approvals.ts — `getTaskOrganizations` resolves a
+    //     task's organization through its project/object spine so the UI can
+    //     offer only that organization's flows. Copies no task field.
+    //   - lib/tasks/task-approval-actions.ts — reads the task's own title
+    //     under the caller's RLS instead of trusting a posted one. The engine
+    //     overrides the title anyway; this is defence in depth and an honest
+    //     early error.
     const normalized = offenders
       .map((p) => p.split("\\").join("/"))
       .map((p) => p.slice(p.indexOf("lib/")))
       .sort();
     expect(normalized).toEqual([
+      "lib/approvals/task-approvals.ts",
       "lib/notifications/event-emitters.ts",
       "lib/projects/progress.ts",
+      "lib/tasks/task-approval-actions.ts",
       "lib/tasks/tasks.ts",
     ]);
+    // Neither new reader may WRITE, and neither may escape RLS.
+    for (const rel of [
+      "lib/approvals/task-approvals.ts",
+      "lib/tasks/task-approval-actions.ts",
+    ]) {
+      const src = readFileSync(join(ROOT, rel), "utf8");
+      expect(src, `${rel} must not write work_tasks`).not.toMatch(
+        /from\("work_tasks"\)[\s\S]{0,120}\.(insert|update|delete|upsert)\(/,
+      );
+      expect(src, `${rel} must not use the admin client`).not.toMatch(
+        /supabase\/admin|createAdminClient|service_role/,
+      );
+    }
   });
 
   it("reads are bounded and RLS-scoped (server client, never the admin client)", () => {
