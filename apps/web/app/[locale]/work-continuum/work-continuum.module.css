@@ -1,0 +1,2697 @@
+:global(html):has(.root),
+:global(body):has(.root) {
+  overflow-x: clip;
+  overflow-y: visible;
+  background: #050706;
+}
+
+.root {
+  --amber: #ffb94d;
+  --amber-bright: #ffd184;
+  --cold: #8fe4df;
+  --cold-bright: #d2fffa;
+  --ink: #050706;
+  --paper: #fffaf0;
+  --muted: rgba(255, 250, 240, 0.62);
+  min-height: 100%;
+  overflow: clip;
+  background: var(--ink);
+  color: var(--paper);
+  color-scheme: dark;
+}
+
+.root *,
+.root *::before,
+.root *::after {
+  box-sizing: border-box;
+}
+
+.root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.root button,
+.root a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  margin: -1px;
+  white-space: nowrap;
+}
+
+.worldTrack {
+  position: relative;
+  width: 100%;
+}
+
+.worldStage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100svh;
+  min-height: 39rem;
+  overflow: hidden;
+  isolation: isolate;
+  background: #070a08;
+}
+
+.photographicWorld {
+  position: absolute;
+  z-index: -5;
+  inset: -7%;
+  transform: translate3d(0, 0, 0) scale(1.02);
+  transform-origin: 50% 52%;
+  transition: transform 1.25s cubic-bezier(0.2, 0.74, 0.25, 1);
+  will-change: transform;
+}
+
+.worldCamera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 54% 48%;
+  will-change: transform;
+}
+
+.photographicWorld img {
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.86) contrast(1.06) brightness(0.73);
+  animation: environmentBreath 12s ease-in-out infinite alternate;
+}
+
+.livingWorldLayers,
+.livingWorldLayers > div,
+.livingWorldLayers > span {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cityDepthPlane,
+.industryDepthPlane,
+.roadDepthPlane,
+.logisticsTruckActor,
+.forkliftActor,
+.constructionCrewActor {
+  background-image: url("/images/work-continuum/work-continuum-city.webp");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.cityDepthPlane {
+  z-index: 1;
+  opacity: 0.2;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 42%);
+  mask-image: linear-gradient(180deg, #000 0 72%, transparent 100%);
+  animation: cityPlaneDrift 18s ease-in-out infinite alternate;
+}
+
+.industryDepthPlane {
+  z-index: 2;
+  opacity: 0.18;
+  clip-path: polygon(27% 24%, 88% 17%, 100% 67%, 38% 72%);
+  mask-image: radial-gradient(ellipse at 62% 48%, #000 25%, transparent 76%);
+  animation: industryPlaneDrift 18s ease-in-out infinite alternate;
+}
+
+.roadDepthPlane {
+  z-index: 3;
+  opacity: 0.2;
+  clip-path: polygon(22% 30%, 48% 38%, 89% 84%, 56% 88%, 35% 55%);
+  mask-image: radial-gradient(ellipse at 53% 58%, #000 18%, transparent 69%);
+  animation: roadPlaneDrift 14s ease-in-out infinite alternate;
+}
+
+@keyframes cityPlaneDrift {
+  from {
+    transform: translate3d(0.1%, -0.15%, 0) scale(1.001);
+  }
+  to {
+    transform: translate3d(-0.35%, 0.25%, 0) scale(1.006);
+  }
+}
+
+@keyframes industryPlaneDrift {
+  from {
+    transform: translate3d(-0.15%, 0.1%, 0) scale(1.002);
+  }
+  to {
+    transform: translate3d(0.55%, -0.35%, 0) scale(1.009);
+  }
+}
+
+@keyframes roadPlaneDrift {
+  from {
+    transform: translate3d(-0.25%, 0.12%, 0) scale(1.003);
+  }
+  to {
+    transform: translate3d(0.75%, -0.5%, 0) scale(1.012);
+  }
+}
+
+.logisticsTruckActor {
+  z-index: 7;
+  mask-image: radial-gradient(
+    ellipse 8.5% 9.5% at 42% 50%,
+    #000 0 42%,
+    rgba(0, 0, 0, 0.92) 58%,
+    transparent 100%
+  );
+  filter: brightness(1.03) saturate(0.96)
+    drop-shadow(0 0.35rem 0.45rem rgba(0, 0, 0, 0.38));
+  transform-origin: 42% 50%;
+  animation: logisticsTruckRun 18s cubic-bezier(0.45, 0, 0.22, 1) infinite;
+}
+
+.truckHeadlamp {
+  z-index: 8;
+  top: 51.4% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 46.2% !important;
+  width: 0.28rem;
+  height: 0.18rem;
+  border-radius: 50%;
+  background: #fff4bf;
+  box-shadow:
+    0 0 0.35rem #fff4bf,
+    0 0 1.2rem rgba(255, 185, 77, 0.78);
+  animation: truckLampRun 18s cubic-bezier(0.45, 0, 0.22, 1) infinite;
+}
+
+@keyframes logisticsTruckRun {
+  0%,
+  8% {
+    transform: translate3d(-0.2%, -0.05%, 0) scale(0.997);
+  }
+  28%,
+  55% {
+    transform: translate3d(0.65%, 0.24%, 0) scale(1.004);
+  }
+  74%,
+  100% {
+    transform: translate3d(1.45%, 0.52%, 0) scale(1.011);
+  }
+}
+
+@keyframes truckLampRun {
+  0%,
+  8% {
+    opacity: 0.45;
+    transform: translate3d(-0.2vw, -0.05vh, 0);
+  }
+  28%,
+  55% {
+    opacity: 1;
+    transform: translate3d(0.65vw, 0.24vh, 0);
+  }
+  74%,
+  100% {
+    opacity: 0.65;
+    transform: translate3d(1.45vw, 0.52vh, 0);
+  }
+}
+
+.forkliftActor {
+  z-index: 9;
+  mask-image: radial-gradient(
+    ellipse 7% 9% at 56.5% 56%,
+    #000 0 44%,
+    rgba(0, 0, 0, 0.9) 61%,
+    transparent 100%
+  );
+  filter: brightness(1.1) saturate(1.08)
+    drop-shadow(0 0.3rem 0.35rem rgba(0, 0, 0, 0.42));
+  animation: forkliftShift 18s cubic-bezier(0.33, 0, 0.2, 1) infinite;
+}
+
+.forkliftBeacon {
+  z-index: 10;
+  top: 51.4% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 56.5% !important;
+  width: 0.22rem;
+  height: 0.22rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 0.8rem rgba(255, 185, 77, 0.95);
+  animation: forkliftBeaconRun 18s linear infinite;
+}
+
+@keyframes forkliftShift {
+  0%,
+  20% {
+    transform: translate3d(0, 0, 0);
+  }
+  38%,
+  64% {
+    transform: translate3d(0.72%, -0.16%, 0);
+  }
+  78%,
+  100% {
+    transform: translate3d(0.22%, 0.06%, 0);
+  }
+}
+
+@keyframes forkliftBeaconRun {
+  0%,
+  20%,
+  38%,
+  64%,
+  78%,
+  100% {
+    opacity: 0.22;
+  }
+  8%,
+  30%,
+  52%,
+  86% {
+    opacity: 1;
+  }
+}
+
+.constructionCrewActor {
+  z-index: 8;
+  mask-image: radial-gradient(
+    ellipse 7% 9% at 93% 27%,
+    #000 0 42%,
+    rgba(0, 0, 0, 0.88) 58%,
+    transparent 100%
+  );
+  filter: brightness(1.08) saturate(1.04);
+  animation: crewShift 16s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+@keyframes crewShift {
+  0%,
+  18% {
+    transform: translate3d(-0.05%, 0, 0);
+  }
+  34%,
+  59% {
+    transform: translate3d(0.22%, -0.04%, 0);
+  }
+  76%,
+  100% {
+    transform: translate3d(0.06%, 0.05%, 0);
+  }
+}
+
+.craneRig {
+  z-index: 11;
+  pointer-events: none;
+}
+
+.craneCable {
+  position: absolute;
+  top: 10.6%;
+  left: 76.15%;
+  width: 1px;
+  height: 16%;
+  background: linear-gradient(
+    180deg,
+    rgba(33, 25, 14, 0.9),
+    rgba(255, 193, 88, 0.72)
+  );
+  transform-origin: 50% 0;
+  animation: craneCableCycle 18s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.craneCable i {
+  position: absolute;
+  right: -0.9rem;
+  bottom: -0.22rem;
+  width: 1.8rem;
+  height: 0.22rem;
+  background: linear-gradient(90deg, #1b1a16, #b39255 46%, #24211a);
+  box-shadow:
+    0 0.18rem 0 #332c21,
+    0 0.36rem 0 #171714,
+    0 0.55rem 0.7rem rgba(0, 0, 0, 0.48);
+}
+
+@keyframes craneCableCycle {
+  0%,
+  14% {
+    height: 11%;
+    transform: rotate(-0.7deg);
+  }
+  34%,
+  58% {
+    height: 20%;
+    transform: rotate(1deg);
+  }
+  78%,
+  100% {
+    height: 14%;
+    transform: rotate(-0.35deg);
+  }
+}
+
+.workplaceLights {
+  z-index: 6;
+  top: 42.6% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 52.4% !important;
+  display: grid;
+  grid-template-columns: repeat(4, 0.25rem);
+  gap: 0.28rem 0.48rem;
+  width: auto;
+  height: auto;
+  transform: skewY(-1.5deg);
+}
+
+.workplaceLights i {
+  width: 0.24rem;
+  height: 0.12rem;
+  background: rgba(255, 214, 145, 0.75);
+  box-shadow: 0 0 0.45rem rgba(255, 185, 77, 0.58);
+  animation: workplaceWindow 7s ease-in-out infinite;
+  animation-delay: calc(var(--light-index) * -0.73s);
+}
+
+@keyframes workplaceWindow {
+  0%,
+  100% {
+    opacity: 0.16;
+  }
+  35%,
+  68% {
+    opacity: 0.92;
+  }
+}
+
+.activityOrigin {
+  z-index: 12;
+  top: 55.5% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 58% !important;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 0 0 rgba(255, 185, 77, 0.55);
+  animation: activityOriginPulse 18s ease-out infinite;
+}
+
+.activityDemandPath {
+  z-index: 11;
+  top: 55.7% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 42% !important;
+  width: 16% !important;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(143, 228, 223, 0.55),
+    rgba(255, 185, 77, 0.68)
+  );
+  transform-origin: 100% 50%;
+  animation: demandPathReveal 18s ease-in-out infinite;
+}
+
+.activityDemandPath i {
+  position: absolute;
+  top: -0.22rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 0.8rem rgba(143, 228, 223, 0.9);
+  animation: demandSignalTravel 18s ease-in-out infinite;
+}
+
+@keyframes activityOriginPulse {
+  0%,
+  47% {
+    opacity: 0.15;
+    box-shadow: 0 0 0 0 rgba(255, 185, 77, 0.55);
+  }
+  54% {
+    opacity: 1;
+    box-shadow: 0 0 0 1.1rem rgba(255, 185, 77, 0);
+  }
+  66%,
+  100% {
+    opacity: 0.32;
+  }
+}
+
+@keyframes demandPathReveal {
+  0%,
+  50% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  58%,
+  78% {
+    opacity: 0.86;
+    transform: scaleX(1);
+  }
+  90%,
+  100% {
+    opacity: 0.12;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes demandSignalTravel {
+  0%,
+  56% {
+    left: 100%;
+    opacity: 0;
+  }
+  61% {
+    opacity: 1;
+  }
+  78% {
+    left: 0;
+    opacity: 1;
+  }
+  84%,
+  100% {
+    left: 0;
+    opacity: 0;
+  }
+}
+
+.root[data-proof="true"] .photographicWorld {
+  inset: -4%;
+  transform: none !important;
+  transition: none;
+}
+
+.root[data-proof="true"] .photographicWorld img {
+  animation-duration: 18s;
+}
+
+.root[data-world-only="true"] .marketNetwork,
+.root[data-world-only="true"] .sectorReadout,
+.root[data-world-only="true"] .worldHeader,
+.root[data-world-only="true"] .worldLegend,
+.root[data-world-only="true"] .worldContext,
+.root[data-world-only="true"] .journeyRail,
+.root[data-world-only="true"] .nextState,
+.root[data-world-only="true"] .opportunityStream,
+.root[data-world-only="true"] .dataDisclosure,
+.root[data-world-only="true"] .marketHorizon,
+.root[data-world-only="true"] .ambientSignals,
+.root[data-world-only="true"] .mechanismLayer,
+.root[data-world-only="true"] .activityOrigin,
+.root[data-world-only="true"] .activityDemandPath {
+  display: none;
+}
+
+@keyframes environmentBreath {
+  from {
+    filter: saturate(0.82) contrast(1.06) brightness(0.7);
+  }
+  to {
+    filter: saturate(0.92) contrast(1.08) brightness(0.77);
+  }
+}
+
+.worldStage[data-world-state="opportunity"] .photographicWorld {
+  transform: translate3d(-4%, 1%, 0) scale(1.13);
+}
+
+.worldStage[data-world-state="worker"] .photographicWorld {
+  transform: translate3d(13%, -4%, 0) scale(1.3);
+}
+
+.worldStage[data-world-state="employer"] .photographicWorld {
+  transform: translate3d(-13%, -7%, 0) scale(1.31);
+}
+
+.worldStage[data-world-state="work"] .photographicWorld {
+  transform: translate3d(-7%, -3%, 0) scale(1.38);
+}
+
+.worldStage[data-world-state="project"] .photographicWorld {
+  transform: translate3d(-4%, 1%, 0) scale(1.25);
+}
+
+.worldStage[data-world-state="journal"] .photographicWorld {
+  transform: translate3d(5%, -7%, 0) scale(1.28);
+}
+
+.worldStage[data-world-state="planning"] .photographicWorld {
+  transform: translate3d(-2%, 2%, 0) scale(1.14);
+}
+
+.worldStage[data-world-state="ai"] .photographicWorld {
+  transform: translate3d(-13%, 12%, 0) scale(1.32);
+}
+
+.worldStage[data-world-state="return"] .photographicWorld {
+  transform: translate3d(0, 0, 0) scale(1.035);
+}
+
+.environmentDepth {
+  position: absolute;
+  z-index: -4;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(2, 4, 3, 0.58), transparent 22%),
+    radial-gradient(
+      circle at 52% 43%,
+      transparent 20%,
+      rgba(2, 5, 4, 0.13) 55%,
+      rgba(2, 4, 3, 0.84) 104%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(4, 6, 5, 0.56),
+      transparent 34%,
+      transparent 68%,
+      rgba(4, 6, 5, 0.32)
+    );
+  pointer-events: none;
+  transition: background 800ms ease;
+}
+
+.worldStage:not([data-world-state="market"]):not(
+    [data-world-state="opportunity"]
+  ):not([data-world-state="return"])
+  .environmentDepth {
+  background:
+    linear-gradient(180deg, rgba(2, 4, 3, 0.68), transparent 22%),
+    radial-gradient(
+      circle at 54% 48%,
+      rgba(4, 8, 7, 0.08),
+      rgba(2, 5, 4, 0.82) 74%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(4, 6, 5, 0.68),
+      transparent 43%,
+      rgba(4, 6, 5, 0.52)
+    );
+}
+
+.marketHorizon {
+  position: absolute;
+  z-index: -1;
+  top: 21%;
+  left: 8%;
+  width: 78%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(143, 228, 223, 0.1) 15%,
+    rgba(143, 228, 223, 0.38) 50%,
+    transparent
+  );
+  box-shadow: 0 0 25px rgba(143, 228, 223, 0.15);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.marketHorizon i {
+  position: absolute;
+  top: -0.18rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 16px rgba(143, 228, 223, 0.8);
+  animation: horizonTravel 8s linear infinite;
+}
+
+.marketHorizon i:nth-child(2) {
+  animation-delay: -2.8s;
+}
+
+.marketHorizon i:nth-child(3) {
+  animation-delay: -5.6s;
+}
+
+@keyframes horizonTravel {
+  from {
+    left: 0;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.8;
+  }
+  88% {
+    opacity: 0.8;
+  }
+  to {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.ambientSignals {
+  position: absolute;
+  z-index: -1;
+  inset: 12% 4% 8%;
+  pointer-events: none;
+}
+
+.ambientSignals i {
+  position: absolute;
+  top: var(--ambient-y);
+  left: var(--ambient-x);
+  width: 0.18rem;
+  height: 0.18rem;
+  border-radius: 50%;
+  background: rgba(255, 209, 132, 0.86);
+  box-shadow: 0 0 12px rgba(255, 185, 77, 0.7);
+  animation: ambientRise 5.2s ease-in-out infinite;
+  animation-delay: calc(var(--ambient-index) * -0.41s);
+}
+
+@keyframes ambientRise {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: translate3d(0, 9px, 0) scale(0.7);
+  }
+  45% {
+    opacity: 0.9;
+    transform: translate3d(3px, -8px, 0) scale(1.2);
+  }
+}
+
+.worldHeader {
+  position: absolute;
+  z-index: 40;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: grid;
+  min-height: 4.8rem;
+  padding: 1.25rem clamp(1.5rem, 4.2vw, 4.6rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(4, 6, 5, 0.78), rgba(4, 6, 5, 0.08));
+}
+
+.wordmark {
+  width: fit-content;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(1rem, 1.35vw, 1.28rem);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+}
+
+.liveStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: rgba(255, 255, 255, 0.56);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.11em;
+}
+
+.liveStatus i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 14px rgba(255, 185, 77, 0.75);
+  animation: liveBlink 2.2s ease-in-out infinite;
+}
+
+@keyframes liveBlink {
+  50% {
+    opacity: 0.34;
+    transform: scale(0.7);
+  }
+}
+
+.liveStatus b {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+}
+
+.worldHeader nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.6rem;
+  font-size: 0.66rem;
+  font-weight: 720;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.worldHeader nav a {
+  position: relative;
+}
+
+.worldHeader nav a::after {
+  position: absolute;
+  right: 0;
+  bottom: -0.35rem;
+  left: 0;
+  height: 1px;
+  background: var(--amber-bright);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 180ms ease;
+}
+
+.worldHeader nav a:hover::after,
+.worldHeader nav a:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.marketNetwork {
+  position: absolute;
+  z-index: 26;
+  inset: 5rem 0 0;
+  pointer-events: none;
+}
+
+.flowField {
+  position: absolute;
+  inset: 0;
+  opacity: 0.82;
+  transition: opacity 550ms ease;
+}
+
+.marketNetwork[data-field-open="false"] .flowField {
+  opacity: 0.2;
+}
+
+.flowLine {
+  position: absolute;
+  top: var(--flow-y);
+  left: var(--flow-x);
+  width: var(--flow-width);
+  height: 1px;
+  overflow: visible;
+  background: linear-gradient(
+    90deg,
+    rgba(143, 228, 223, 0.05),
+    rgba(143, 228, 223, 0.5),
+    rgba(255, 185, 77, 0.08)
+  );
+  box-shadow: 0 0 12px rgba(143, 228, 223, 0.14);
+  opacity: 0.62;
+  transform: rotate(var(--flow-angle));
+  transform-origin: left center;
+}
+
+.flowLine::before {
+  position: absolute;
+  top: -0.13rem;
+  left: 0;
+  width: 0.26rem;
+  height: 0.26rem;
+  border-radius: 50%;
+  background: rgba(143, 228, 223, 0.8);
+  box-shadow: 0 0 14px rgba(143, 228, 223, 0.8);
+  content: "";
+}
+
+.flowLine i {
+  position: absolute;
+  top: -0.17rem;
+  left: 0;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 16px rgba(255, 185, 77, 0.9);
+  animation: flowTravel 4.4s ease-in-out infinite;
+  animation-delay: var(--flow-delay);
+}
+
+@keyframes flowTravel {
+  0% {
+    left: 0;
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  14% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0.8;
+  }
+  100% {
+    left: calc(100% - 0.35rem);
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+
+.sectorSignal {
+  position: absolute;
+  top: var(--signal-y);
+  left: var(--signal-x);
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  outline: 0;
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  transition: opacity 450ms ease;
+}
+
+.marketNetwork[data-field-open="false"]
+  .sectorSignal:not([data-selected="true"]) {
+  opacity: 0.16;
+}
+
+.signalRings,
+.signalRings i {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(143, 228, 223, 0.52);
+  border-radius: 50%;
+}
+
+.signalRings {
+  box-shadow:
+    inset 0 0 18px rgba(143, 228, 223, 0.12),
+    0 0 18px rgba(143, 228, 223, 0.13);
+  animation: signalBreathe 3.4s ease-in-out infinite;
+}
+
+.signalRings i:first-child {
+  inset: -0.65rem;
+  border-color: rgba(143, 228, 223, 0.18);
+  animation: signalWave 3.4s ease-out infinite;
+}
+
+.signalRings i:last-child {
+  inset: -1.3rem;
+  border-color: rgba(143, 228, 223, 0.08);
+  animation: signalWave 3.4s 1.15s ease-out infinite;
+}
+
+@keyframes signalBreathe {
+  50% {
+    transform: scale(1.12);
+    box-shadow:
+      inset 0 0 22px rgba(143, 228, 223, 0.2),
+      0 0 25px rgba(143, 228, 223, 0.24);
+  }
+}
+
+@keyframes signalWave {
+  from {
+    opacity: 0.75;
+    transform: scale(0.72);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.28);
+  }
+}
+
+.signalCore {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 14px rgba(143, 228, 223, 0.95);
+  transform: translate(-50%, -50%);
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.sectorSignal[data-selected="true"] .signalRings,
+.sectorSignal:hover .signalRings,
+.sectorSignal:focus-visible .signalRings {
+  border-color: rgba(255, 209, 132, 0.85);
+}
+
+.sectorSignal[data-selected="true"] .signalCore,
+.sectorSignal:hover .signalCore,
+.sectorSignal:focus-visible .signalCore {
+  background: var(--amber-bright);
+  box-shadow: 0 0 19px rgba(255, 185, 77, 1);
+  transform: translate(-50%, -50%) scale(1.35);
+}
+
+.sectorSignal:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 0.8rem;
+}
+
+.signalText {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 0.8rem);
+  display: grid;
+  min-width: 7.5rem;
+  text-align: left;
+  text-shadow: 0 2px 9px rgba(0, 0, 0, 0.95);
+  transform: translateY(-50%);
+  transition: transform 180ms ease;
+}
+
+.sectorSignal[data-sector="construction"] .signalText,
+.sectorSignal[data-sector="care"] .signalText,
+.sectorSignal[data-sector="technology"] .signalText {
+  right: calc(100% + 0.8rem);
+  left: auto;
+  text-align: right;
+}
+
+.signalText small {
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+}
+
+.signalText strong {
+  margin-top: 0.1rem;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(0.82rem, 1.05vw, 1rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.signalText em {
+  margin-top: 0.05rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  font-style: normal;
+  letter-spacing: 0.04em;
+}
+
+.sectorSignal:hover .signalText,
+.sectorSignal:focus-visible .signalText,
+.sectorSignal[data-selected="true"] .signalText {
+  transform: translateY(-50%) translateX(0.25rem);
+}
+
+.sectorSignal[data-sector="construction"]:hover .signalText,
+.sectorSignal[data-sector="construction"]:focus-visible .signalText,
+.sectorSignal[data-sector="construction"][data-selected="true"] .signalText,
+.sectorSignal[data-sector="care"]:hover .signalText,
+.sectorSignal[data-sector="care"]:focus-visible .signalText,
+.sectorSignal[data-sector="care"][data-selected="true"] .signalText,
+.sectorSignal[data-sector="technology"]:hover .signalText,
+.sectorSignal[data-sector="technology"]:focus-visible .signalText,
+.sectorSignal[data-sector="technology"][data-selected="true"] .signalText {
+  transform: translateY(-50%) translateX(-0.25rem);
+}
+
+/* The care and technology anchors sit inside the same visual depth as the
+   live readout. Once selected, the readout replaces their redundant label so
+   vacancy titles remain legible while the spatial anchor stays visible. */
+.sectorSignal[data-sector="care"][data-selected="true"] .signalText,
+.sectorSignal[data-sector="technology"][data-selected="true"] .signalText {
+  opacity: 0;
+}
+
+.worldStage[data-world-state="ai"]
+  .sectorSignal[data-selected="true"]
+  .signalText {
+  opacity: 0;
+}
+
+.sectorReadout {
+  position: absolute;
+  z-index: 25;
+  right: clamp(22rem, 27vw, 28rem);
+  bottom: clamp(5.8rem, 10vh, 8.5rem);
+  width: min(25rem, 32vw);
+  padding: 1rem 0 0 1.25rem;
+  border-left: 1px solid rgba(255, 209, 132, 0.7);
+  background: linear-gradient(90deg, rgba(4, 7, 6, 0.72), transparent 96%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(1rem);
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sectorReadout[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.readoutTopline {
+  display: flex;
+  padding-bottom: 0.6rem;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.47rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.readoutTopline span:last-child {
+  color: rgba(255, 255, 255, 0.42);
+  text-align: right;
+}
+
+.readoutMeasure {
+  display: flex;
+  padding: 0.7rem 0 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.17);
+  align-items: baseline;
+  gap: 0.8rem;
+}
+
+.readoutMeasure strong {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(2.4rem, 4vw, 4.6rem);
+  font-weight: 560;
+  letter-spacing: -0.07em;
+  line-height: 0.88;
+}
+
+.readoutMeasure span {
+  max-width: 7rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.62rem;
+  line-height: 1.3;
+}
+
+.sectorReadout ol {
+  list-style: none;
+}
+
+.sectorReadout li {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.sectorReadout li a {
+  display: grid;
+  min-height: 2.7rem;
+  padding: 0.62rem 0;
+  grid-template-columns: 0.55rem 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1.32;
+  transition:
+    color 160ms ease,
+    padding 160ms ease;
+}
+
+.sectorReadout li a:hover,
+.sectorReadout li a:focus-visible {
+  padding-left: 0.25rem;
+  color: var(--amber-bright);
+}
+
+.sectorReadout li a > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sectorReadout li a i {
+  color: var(--amber-bright);
+  font-style: normal;
+}
+
+.jobPulse {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 10px rgba(255, 185, 77, 0.75);
+  animation: liveBlink 2.4s ease-in-out infinite;
+}
+
+.readoutAction {
+  display: inline-flex;
+  min-height: 2.8rem;
+  margin-top: 0.5rem;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--amber-bright) !important;
+  font-size: 0.65rem;
+  font-weight: 720;
+  letter-spacing: 0.02em;
+}
+
+.noSectorJobs {
+  padding: 0.7rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.worldLegend {
+  position: absolute;
+  z-index: 30;
+  top: 5.9rem;
+  left: clamp(1.5rem, 4.2vw, 4.6rem);
+  display: flex;
+  gap: 1.05rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.worldLegend span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.worldLegend i {
+  width: 0.33rem;
+  height: 0.33rem;
+  border-radius: 50%;
+}
+
+.worldLegend i[data-kind="demand"] {
+  background: var(--cold-bright);
+  box-shadow: 0 0 8px rgba(143, 228, 223, 0.7);
+}
+
+.worldLegend i[data-kind="flow"] {
+  background: var(--amber-bright);
+}
+
+.worldLegend i[data-kind="private"] {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.worldContext {
+  position: absolute;
+  z-index: 28;
+  bottom: clamp(5.5rem, 9vh, 7.8rem);
+  left: clamp(1.5rem, 4.2vw, 4.6rem);
+  width: min(37rem, 44vw);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.92);
+}
+
+.contextIndex {
+  display: flex;
+  width: 6.4rem;
+  margin-bottom: 0.8rem;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.46);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.09em;
+}
+
+.contextIndex i {
+  height: 1px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.worldContext > p {
+  color: var(--amber-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.worldContext h2 {
+  max-width: 19ch;
+  margin-top: 0.5rem;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(1.7rem, 2.65vw, 2.95rem);
+  font-weight: 560;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.worldContext > a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  margin-top: 0.8rem;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 209, 132, 0.58);
+  color: var(--paper);
+  font-size: 0.68rem;
+  font-weight: 700;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.worldContext > a:hover,
+.worldContext > a:focus-visible {
+  border-color: var(--amber-bright);
+  color: var(--amber-bright);
+}
+
+.mechanismLayer {
+  position: absolute;
+  z-index: 18;
+  inset: 5rem 0 0;
+  pointer-events: none;
+}
+
+.workerMechanism {
+  position: absolute;
+  top: 45%;
+  left: 59%;
+  width: 24rem;
+  height: 24rem;
+  transform: translate(-50%, -50%);
+}
+
+.workerCore {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 0.5rem rgba(255, 255, 255, 0.08),
+    0 0 25px rgba(255, 255, 255, 0.45);
+  transform: translate(-50%, -50%);
+}
+
+.workerCore::after {
+  position: absolute;
+  top: 1.2rem;
+  left: 50%;
+  width: 1.45rem;
+  height: 2.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-top: 0;
+  border-radius: 0 0 50% 50%;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.workerOrbit {
+  position: absolute;
+  inset: 8%;
+  border: 1px solid rgba(143, 228, 223, 0.36);
+  border-radius: 50%;
+  box-shadow: 0 0 70px rgba(143, 228, 223, 0.12);
+  animation: workerOrbit 16s linear infinite;
+}
+
+.workerOrbit::before,
+.workerOrbit::after {
+  position: absolute;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 16px rgba(143, 228, 223, 0.8);
+  content: "";
+}
+
+.workerOrbit::before {
+  left: -0.28rem;
+}
+.workerOrbit::after {
+  right: -0.28rem;
+}
+
+@keyframes workerOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.workerMechanism b {
+  position: absolute;
+  padding: 0.35rem 0.5rem;
+  background: rgba(4, 8, 7, 0.58);
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.workerMechanism b:nth-of-type(1) {
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.workerMechanism b:nth-of-type(2) {
+  right: -10%;
+  bottom: 22%;
+}
+.workerMechanism b:nth-of-type(3) {
+  bottom: 10%;
+  left: 2%;
+}
+
+.employerMechanism {
+  position: absolute;
+  top: 35%;
+  right: 14%;
+  width: min(30rem, 35vw);
+  height: 18rem;
+}
+
+.needBeacon {
+  position: absolute;
+  top: 35%;
+  right: 12%;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow:
+    0 0 0 1rem rgba(255, 185, 77, 0.08),
+    0 0 45px rgba(255, 185, 77, 0.68);
+  animation: employerCall 2.7s ease-out infinite;
+}
+
+@keyframes employerCall {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 185, 77, 0.3),
+      0 0 35px rgba(255, 185, 77, 0.55);
+  }
+  70% {
+    box-shadow:
+      0 0 0 5rem rgba(255, 185, 77, 0),
+      0 0 55px rgba(255, 185, 77, 0.72);
+  }
+}
+
+.employerMechanism > div {
+  position: absolute;
+  top: 30%;
+  right: 20%;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.employerMechanism b {
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(255, 209, 132, 0.65);
+  color: var(--paper);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.54rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.employerMechanism small {
+  position: absolute;
+  top: calc(30% + 2.2rem);
+  left: 0;
+  color: var(--amber-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.12em;
+}
+
+.workMechanism {
+  position: absolute;
+  top: 45%;
+  left: 54%;
+  width: min(38rem, 55vw);
+  height: 17rem;
+  transform: translate(-50%, -50%);
+}
+
+.workPerson,
+.workplace {
+  position: absolute;
+  top: 43%;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+}
+
+.workPerson {
+  left: 2%;
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.55);
+}
+
+.workplace {
+  right: 2%;
+  border-radius: 0.08rem;
+  background: var(--amber-bright);
+  box-shadow: 0 0 24px rgba(255, 185, 77, 0.8);
+}
+
+.workPath {
+  position: absolute;
+  top: calc(43% + 0.5rem);
+  right: 5%;
+  left: 5%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(143, 228, 223, 0.8),
+    rgba(255, 209, 132, 0.85)
+  );
+  box-shadow: 0 0 16px rgba(143, 228, 223, 0.26);
+}
+
+.workPath i {
+  position: absolute;
+  top: -0.27rem;
+  width: 0.56rem;
+  height: 0.56rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 16px rgba(143, 228, 223, 0.95);
+  animation: workTravel 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes workTravel {
+  from {
+    left: 0;
+  }
+  to {
+    left: calc(100% - 0.56rem);
+  }
+}
+
+.projectSignals {
+  position: absolute;
+  right: 5%;
+  bottom: 17%;
+  left: 5%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.projectSignals b {
+  color: rgba(255, 255, 255, 0.62);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.workMechanism[data-project="true"] .workPath {
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--amber-bright) 0 3rem,
+    rgba(143, 228, 223, 0.65) 3rem 6rem
+  );
+}
+
+.journalMechanism {
+  position: absolute;
+  top: 42%;
+  right: 11%;
+  width: min(34rem, 44vw);
+  height: 21rem;
+}
+
+.recordSource {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 24px rgba(255, 185, 77, 0.8);
+}
+
+.recordTrail {
+  position: absolute;
+  top: calc(50% + 0.38rem);
+  right: 55%;
+  left: 0.8rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--amber-bright),
+    rgba(143, 228, 223, 0.58)
+  );
+}
+
+.recordTrail i {
+  position: absolute;
+  top: -0.19rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 12px rgba(143, 228, 223, 0.8);
+  animation: recordMove 4s linear infinite;
+}
+
+.recordTrail i:nth-child(2) {
+  animation-delay: -1s;
+}
+.recordTrail i:nth-child(3) {
+  animation-delay: -2s;
+}
+.recordTrail i:nth-child(4) {
+  animation-delay: -3s;
+}
+
+@keyframes recordMove {
+  from {
+    left: 0;
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  to {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.recordLedger {
+  position: absolute;
+  top: 18%;
+  right: 0;
+  width: 54%;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(143, 228, 223, 0.58);
+}
+
+.recordLedger small {
+  display: block;
+  padding-bottom: 0.8rem;
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+}
+
+.recordLedger b {
+  display: block;
+  padding: 0.6rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 1rem;
+  font-weight: 540;
+}
+
+.planningMechanism {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: min(46rem, 60vw);
+  transform: translate(-50%, -50%);
+}
+
+.planningViews {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.planningBand {
+  position: relative;
+  display: block;
+  height: 4rem;
+  margin-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(25% - 1px),
+    rgba(255, 255, 255, 0.13) calc(25% - 1px) 25%
+  );
+}
+
+.planningBand i {
+  position: absolute;
+  top: 50%;
+  left: 12%;
+  width: 61%;
+  height: 0.44rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--amber), var(--cold-bright));
+  box-shadow: 0 0 18px rgba(143, 228, 223, 0.35);
+  transform: translateY(-50%);
+  animation: planningPulse 3.8s ease-in-out infinite;
+}
+
+@keyframes planningPulse {
+  50% {
+    width: 72%;
+    opacity: 0.72;
+  }
+}
+
+.approvalSignals {
+  display: grid;
+  margin-top: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.approvalSignals span {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.62rem;
+}
+
+.approvalSignals span > i {
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 9px rgba(255, 185, 77, 0.7);
+}
+
+.approvalSignals b {
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.43rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  grid-column: 2;
+  text-transform: uppercase;
+}
+
+.aiMechanism {
+  position: absolute;
+  top: 45%;
+  left: 57%;
+  width: min(38rem, 52vw);
+  height: 22rem;
+  transform: translate(-50%, -50%);
+}
+
+.aiInputs {
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 0;
+  width: 42%;
+}
+
+.aiInputs span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(143, 228, 223, 0.8));
+  transform-origin: right;
+}
+
+.aiInputs span:nth-child(1) {
+  top: 10%;
+  transform: rotate(18deg);
+}
+.aiInputs span:nth-child(2) {
+  top: 36%;
+  transform: rotate(6deg);
+}
+.aiInputs span:nth-child(3) {
+  top: 62%;
+  transform: rotate(-6deg);
+}
+.aiInputs span:nth-child(4) {
+  top: 88%;
+  transform: rotate(-18deg);
+}
+
+.aiInputs span::after {
+  position: absolute;
+  top: -0.2rem;
+  right: 0;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--cold-bright);
+  box-shadow: 0 0 12px rgba(143, 228, 223, 0.85);
+  content: "";
+  animation: liveBlink 2.2s ease-in-out infinite;
+}
+
+.aiCore {
+  position: absolute;
+  top: 50%;
+  left: 45%;
+  display: grid;
+  width: 4.2rem;
+  height: 4.2rem;
+  border: 1px solid rgba(143, 228, 223, 0.78);
+  border-radius: 50%;
+  place-items: center;
+  background: rgba(4, 9, 8, 0.48);
+  box-shadow:
+    0 0 0 1.2rem rgba(143, 228, 223, 0.05),
+    0 0 45px rgba(143, 228, 223, 0.35);
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  transform: translate(-50%, -50%);
+  animation: aiBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes aiBreathe {
+  50% {
+    box-shadow:
+      0 0 0 2.1rem rgba(143, 228, 223, 0.02),
+      0 0 70px rgba(143, 228, 223, 0.55);
+  }
+}
+
+.aiDecision {
+  position: absolute;
+  top: 31%;
+  right: 0;
+  width: 43%;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 209, 132, 0.6);
+}
+
+.aiDecision small,
+.aiDecision span {
+  display: block;
+  color: var(--cold-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.09em;
+}
+
+.aiDecision b {
+  display: block;
+  margin: 0.5rem 0 1rem;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(1.8rem, 3.2vw, 3.4rem);
+  font-weight: 540;
+  letter-spacing: -0.055em;
+}
+
+.aiDecision span {
+  color: var(--amber-bright);
+}
+
+.journeyRail {
+  position: absolute;
+  z-index: 34;
+  top: 50%;
+  right: 1.45rem;
+  display: grid;
+  gap: 0.25rem;
+  transform: translateY(-50%);
+}
+
+.journeyRail button {
+  position: relative;
+  display: grid;
+  width: 2.3rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  place-items: center;
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.journeyRail button > i {
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transition:
+    width 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.journeyRail button[aria-current="step"] > i {
+  width: 1.35rem;
+  border-radius: 99px;
+  background: var(--amber-bright);
+  box-shadow: 0 0 13px rgba(255, 185, 77, 0.6);
+}
+
+.journeyRail button > span {
+  position: absolute;
+  top: 50%;
+  right: 2.2rem;
+  visibility: hidden;
+  padding: 0.3rem 0.45rem;
+  background: rgba(4, 7, 6, 0.82);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.07em;
+  opacity: 0;
+  text-transform: uppercase;
+  transform: translateY(-50%);
+  transition: opacity 160ms ease;
+  white-space: nowrap;
+}
+
+.journeyRail button:hover > span,
+.journeyRail button:focus-visible > span {
+  visibility: visible;
+  opacity: 1;
+}
+
+.nextState {
+  position: absolute;
+  z-index: 35;
+  bottom: 1.35rem;
+  left: 50%;
+  display: grid;
+  width: 11rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 0;
+  place-items: center;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.13em;
+  transform: translateX(-50%);
+}
+
+.nextState:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nextState i {
+  position: absolute;
+  top: 2.25rem;
+  width: 1px;
+  height: 1.6rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.nextState i::after {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--amber-bright);
+  content: "";
+  animation: scrollSignal 2s ease-in-out infinite;
+}
+
+@keyframes scrollSignal {
+  to {
+    top: 100%;
+  }
+}
+
+.opportunityStream {
+  position: absolute;
+  z-index: 27;
+  right: 0;
+  bottom: 4.2rem;
+  left: 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(4, 7, 6, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+
+.worldStage[data-world-state="return"] .opportunityStream {
+  opacity: 1;
+}
+
+.opportunityStream > div {
+  display: flex;
+  width: max-content;
+  animation: opportunityTravel 38s linear infinite;
+}
+
+.opportunityStream span {
+  display: flex;
+  min-height: 3rem;
+  padding: 0.7rem 1.7rem;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.opportunityStream i {
+  color: var(--amber-bright);
+  font-style: normal;
+}
+
+@keyframes opportunityTravel {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.dataDisclosure {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  margin: -1px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1050px) {
+  .worldHeader {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .liveStatus {
+    display: none;
+  }
+
+  .worldContext {
+    width: min(33rem, 48vw);
+  }
+
+  .sectorReadout {
+    right: 4rem;
+    width: min(23rem, 39vw);
+  }
+
+  .signalText {
+    min-width: 6.6rem;
+  }
+}
+
+@media (max-width: 820px) {
+  .worldStage {
+    min-height: 42rem;
+  }
+
+  .worldHeader {
+    min-height: 4.4rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .marketNetwork {
+    inset: 4.4rem 0 0;
+  }
+
+  .worldLegend {
+    top: 5.2rem;
+    left: 1.25rem;
+  }
+
+  .worldContext {
+    bottom: 5.4rem;
+    left: 1.5rem;
+    width: 44vw;
+  }
+
+  .worldContext h2 {
+    font-size: clamp(1.65rem, 4.2vw, 2.5rem);
+  }
+
+  .sectorReadout {
+    top: 7.5rem;
+    right: auto;
+    bottom: auto;
+    left: 1.5rem;
+    width: 43vw;
+  }
+
+  .readoutTopline span:last-child {
+    display: none;
+  }
+
+  .readoutMeasure strong {
+    font-size: 3rem;
+  }
+
+  .journeyRail {
+    right: 0.55rem;
+  }
+
+  .signalText strong {
+    font-size: 0.78rem;
+  }
+
+  .signalText em {
+    font-size: 0.43rem;
+  }
+
+  .workerMechanism {
+    left: 53%;
+  }
+  .employerMechanism {
+    right: 10%;
+    width: 52vw;
+  }
+  .journalMechanism {
+    right: 8%;
+    width: 52vw;
+  }
+  .planningMechanism {
+    width: 72vw;
+  }
+  .aiMechanism {
+    left: 55%;
+    width: 68vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .worldStage {
+    min-height: 36rem;
+  }
+
+  .photographicWorld {
+    inset: -8%;
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+
+  .photographicWorld img {
+    object-position: 82% center;
+    transition: object-position 1.15s cubic-bezier(0.2, 0.74, 0.25, 1);
+  }
+
+  .root[data-proof="true"] .photographicWorld {
+    inset: -12%;
+  }
+
+  .root[data-proof="true"] .worldCamera {
+    transform-origin: 64% 52%;
+  }
+
+  .root[data-proof="true"] .worldCamera > img {
+    object-position: 69% center !important;
+  }
+
+  .root[data-proof="true"] .cityDepthPlane,
+  .root[data-proof="true"] .industryDepthPlane,
+  .root[data-proof="true"] .roadDepthPlane,
+  .root[data-proof="true"] .logisticsTruckActor,
+  .root[data-proof="true"] .forkliftActor,
+  .root[data-proof="true"] .constructionCrewActor {
+    background-position: 69% center;
+  }
+
+  .root[data-proof="true"] .cityDepthPlane {
+    clip-path: polygon(0 0, 100% 0, 100% 29%, 0 37%);
+  }
+
+  .root[data-proof="true"] .industryDepthPlane {
+    clip-path: polygon(0 20%, 100% 14%, 100% 66%, 0 74%);
+  }
+
+  .root[data-proof="true"] .roadDepthPlane {
+    clip-path: polygon(0 30%, 38% 31%, 100% 83%, 20% 91%, 0 66%);
+  }
+
+  .root[data-proof="true"] .logisticsTruckActor {
+    mask-image: radial-gradient(
+      ellipse 27% 11% at 27% 51%,
+      #000 0 40%,
+      rgba(0, 0, 0, 0.9) 58%,
+      transparent 100%
+    );
+  }
+
+  .root[data-proof="true"] .forkliftActor {
+    mask-image: radial-gradient(
+      ellipse 25% 12% at 51% 58%,
+      #000 0 40%,
+      rgba(0, 0, 0, 0.88) 58%,
+      transparent 100%
+    );
+  }
+
+  .root[data-proof="true"] .constructionCrewActor {
+    mask-image: radial-gradient(
+      ellipse 25% 11% at 82% 27%,
+      #000 0 40%,
+      rgba(0, 0, 0, 0.86) 58%,
+      transparent 100%
+    );
+  }
+
+  .root[data-proof="true"] .truckHeadlamp {
+    top: 55% !important;
+    left: 37% !important;
+  }
+
+  .root[data-proof="true"] .forkliftBeacon {
+    top: 54% !important;
+    left: 55% !important;
+  }
+
+  .root[data-proof="true"] .craneCable {
+    top: 8%;
+    left: 70%;
+  }
+
+  .root[data-proof="true"] .workplaceLights {
+    top: 38% !important;
+    left: 29% !important;
+    grid-template-columns: repeat(4, 0.34rem);
+    gap: 0.3rem 0.48rem;
+  }
+
+  .root[data-proof="true"] .workplaceLights i {
+    width: 0.3rem;
+    height: 0.13rem;
+  }
+
+  .root[data-proof="true"] .activityOrigin {
+    top: 57% !important;
+    left: 52% !important;
+  }
+
+  .root[data-proof="true"] .activityDemandPath {
+    top: 56% !important;
+    left: 32% !important;
+    width: 20% !important;
+  }
+
+  .worldStage[data-world-state="opportunity"] .photographicWorld {
+    transform: translate3d(-3%, -2%, 0) scale(1.16);
+  }
+
+  .worldStage[data-world-state="opportunity"] .photographicWorld img {
+    object-position: 77% center;
+  }
+
+  .worldStage[data-world-state="worker"] .photographicWorld {
+    transform: translate3d(4%, 2%, 0) scale(1.25);
+  }
+
+  .worldStage[data-world-state="worker"] .photographicWorld img {
+    object-position: 8% center;
+  }
+
+  .worldStage[data-world-state="employer"] .photographicWorld {
+    transform: translate3d(-5%, -5%, 0) scale(1.26);
+  }
+
+  .worldStage[data-world-state="employer"] .photographicWorld img {
+    object-position: 94% center;
+  }
+
+  .worldStage[data-world-state="work"] .photographicWorld {
+    transform: translate3d(-2%, 2%, 0) scale(1.3);
+  }
+
+  .worldStage[data-world-state="work"] .photographicWorld img {
+    object-position: 67% center;
+  }
+
+  .worldStage[data-world-state="project"] .photographicWorld {
+    transform: translate3d(-3%, 0, 0) scale(1.2);
+  }
+
+  .worldStage[data-world-state="project"] .photographicWorld img {
+    object-position: 77% center;
+  }
+
+  .worldStage[data-world-state="journal"] .photographicWorld {
+    transform: translate3d(3%, -3%, 0) scale(1.23);
+  }
+
+  .worldStage[data-world-state="journal"] .photographicWorld img {
+    object-position: 61% center;
+  }
+
+  .worldStage[data-world-state="planning"] .photographicWorld {
+    transform: translate3d(0, 1%, 0) scale(1.12);
+  }
+
+  .worldStage[data-world-state="planning"] .photographicWorld img {
+    object-position: 53% center;
+  }
+
+  .worldStage[data-world-state="ai"] .photographicWorld {
+    transform: translate3d(-3%, 9%, 0) scale(1.3);
+  }
+
+  .worldStage[data-world-state="ai"] .photographicWorld img {
+    object-position: 91% 78%;
+  }
+
+  .worldStage[data-world-state="return"] .photographicWorld {
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+
+  .worldStage[data-world-state="return"] .photographicWorld img {
+    object-position: 72% center;
+  }
+
+  .environmentDepth {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(2, 4, 3, 0.66),
+        transparent 18%,
+        rgba(2, 4, 3, 0.1) 52%,
+        rgba(2, 4, 3, 0.9) 100%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(2, 4, 3, 0.35),
+        transparent 62%,
+        rgba(2, 4, 3, 0.28)
+      );
+  }
+
+  .worldHeader {
+    min-height: 4.1rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .wordmark {
+    font-size: 1rem;
+  }
+
+  .worldHeader nav {
+    gap: 1rem;
+    font-size: 0.57rem;
+  }
+
+  .worldHeader nav a:first-child {
+    display: none;
+  }
+
+  .marketHorizon {
+    top: 18%;
+    left: 0;
+    width: 100%;
+  }
+
+  .marketNetwork {
+    inset: 4.1rem 0 0;
+  }
+
+  .flowLine {
+    top: var(--mobile-flow-y);
+    left: var(--mobile-flow-x);
+    width: var(--mobile-flow-width);
+    opacity: 0.5;
+    transform: rotate(var(--mobile-flow-angle));
+  }
+
+  .sectorSignal {
+    top: var(--mobile-y);
+    left: var(--mobile-x);
+    width: 2.15rem;
+    height: 2.15rem;
+  }
+
+  .signalRings i:first-child {
+    inset: -0.42rem;
+  }
+  .signalRings i:last-child {
+    inset: -0.83rem;
+  }
+
+  .signalCore {
+    width: 0.4rem;
+    height: 0.4rem;
+  }
+
+  .signalText {
+    left: calc(100% + 0.55rem);
+    min-width: 5.4rem;
+  }
+
+  .sectorSignal[data-sector="construction"] .signalText,
+  .sectorSignal[data-sector="care"] .signalText,
+  .sectorSignal[data-sector="technology"] .signalText {
+    right: calc(100% + 0.55rem);
+  }
+
+  .signalText small {
+    font-size: 0.4rem;
+  }
+
+  .signalText strong {
+    font-size: 0.66rem;
+  }
+
+  .signalText em {
+    font-size: 0.37rem;
+  }
+
+  .marketNetwork[data-field-open="false"]
+    .sectorSignal:not([data-selected="true"]) {
+    opacity: 0.08;
+  }
+
+  .worldLegend {
+    top: 4.8rem;
+    right: 1rem;
+    left: 1rem;
+    justify-content: space-between;
+    gap: 0.35rem;
+    font-size: 0.38rem;
+  }
+
+  .worldLegend span {
+    gap: 0.22rem;
+  }
+
+  .sectorReadout {
+    top: auto;
+    right: 1rem;
+    bottom: 4.7rem;
+    left: 1rem;
+    width: auto;
+    max-height: 31vh;
+    padding: 0.7rem 0 0 0.85rem;
+    overflow: hidden;
+    background: linear-gradient(
+      90deg,
+      rgba(4, 7, 6, 0.85),
+      rgba(4, 7, 6, 0.18)
+    );
+  }
+
+  .sectorReadout[data-engaged="false"] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(1rem);
+  }
+
+  .worldStage:has(.sectorReadout[data-visible="true"][data-engaged="true"])
+    .sectorSignal[data-sector="agriculture"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .readoutTopline {
+    padding-bottom: 0.4rem;
+    font-size: 0.4rem;
+  }
+
+  .readoutMeasure {
+    padding: 0.45rem 0 0.55rem;
+  }
+
+  .readoutMeasure strong {
+    font-size: 2.4rem;
+  }
+
+  .readoutMeasure span {
+    max-width: 6rem;
+    font-size: 0.52rem;
+  }
+
+  .sectorReadout li a {
+    min-height: 2.1rem;
+    padding: 0.38rem 0;
+    font-size: 0.58rem;
+  }
+
+  .sectorReadout li:nth-child(n + 2) {
+    display: none;
+  }
+
+  .readoutAction {
+    min-height: 2.1rem;
+    margin-top: 0.2rem;
+    font-size: 0.56rem;
+  }
+
+  .worldContext {
+    right: 2.5rem;
+    bottom: 4.7rem;
+    left: 1rem;
+    width: auto;
+  }
+
+  .worldStage[data-world-state="market"] .worldContext,
+  .worldStage[data-world-state="opportunity"] .worldContext,
+  .worldStage[data-world-state="return"] .worldContext {
+    top: 7rem;
+    bottom: auto;
+    width: 74vw;
+  }
+
+  .contextIndex {
+    width: 4.8rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.4rem;
+  }
+
+  .worldContext > p {
+    font-size: 0.48rem;
+  }
+
+  .worldContext h2 {
+    max-width: 18ch;
+    margin-top: 0.35rem;
+    font-size: clamp(1.45rem, 7vw, 2rem);
+  }
+
+  .worldContext > a {
+    min-height: 2.2rem;
+    margin-top: 0.45rem;
+    font-size: 0.58rem;
+  }
+
+  .worldStage[data-world-state="market"] .worldContext > a,
+  .worldStage[data-world-state="opportunity"] .worldContext > a,
+  .worldStage[data-world-state="return"] .worldContext > a {
+    display: none;
+  }
+
+  .mechanismLayer {
+    inset: 4.1rem 0 0;
+  }
+
+  .workerMechanism {
+    top: 42%;
+    left: 50%;
+    width: 17rem;
+    height: 17rem;
+  }
+
+  .workerMechanism b {
+    font-size: 0.42rem;
+  }
+
+  .employerMechanism {
+    top: 34%;
+    right: 7%;
+    width: 78vw;
+    height: 14rem;
+  }
+
+  .employerMechanism > div {
+    right: 17%;
+  }
+
+  .employerMechanism b {
+    font-size: 0.43rem;
+  }
+
+  .workMechanism {
+    top: 40%;
+    left: 50%;
+    width: 82vw;
+    height: 13rem;
+  }
+
+  .journalMechanism {
+    top: 37%;
+    right: 8%;
+    width: 84vw;
+    height: 17rem;
+  }
+
+  .recordLedger {
+    width: 57%;
+  }
+
+  .recordLedger b {
+    padding: 0.43rem 0;
+    font-size: 0.82rem;
+  }
+
+  .planningMechanism {
+    top: 37%;
+    width: 84vw;
+  }
+
+  .planningViews {
+    font-size: 0.42rem;
+  }
+
+  .approvalSignals {
+    gap: 0.4rem;
+  }
+
+  .approvalSignals span {
+    display: block;
+    font-size: 0.5rem;
+  }
+
+  .approvalSignals span > i {
+    display: inline-block;
+    margin-right: 0.25rem;
+  }
+
+  .approvalSignals b {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.36rem;
+  }
+
+  .aiMechanism {
+    top: 40%;
+    left: 50%;
+    width: 86vw;
+    height: 17rem;
+  }
+
+  .aiCore {
+    width: 3.4rem;
+    height: 3.4rem;
+  }
+
+  .aiDecision b {
+    font-size: 1.65rem;
+  }
+
+  .journeyRail {
+    right: 0.25rem;
+  }
+
+  .journeyRail button {
+    width: 1.9rem;
+    height: 1.75rem;
+  }
+
+  .journeyRail button > span {
+    display: none;
+  }
+
+  .nextState {
+    bottom: 0.7rem;
+    width: 9rem;
+    font-size: 0.4rem;
+  }
+
+  .nextState i {
+    top: 2rem;
+    height: 1.1rem;
+  }
+
+  .opportunityStream {
+    bottom: 3.65rem;
+  }
+
+  .opportunityStream span {
+    min-height: 2.55rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.67rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photographicWorld,
+  .photographicWorld img,
+  .environmentDepth,
+  .marketNetwork,
+  .sectorSignal,
+  .signalCore,
+  .signalText,
+  .sectorReadout,
+  .journeyRail button > i {
+    transition: none;
+  }
+
+  .photographicWorld img,
+  .marketHorizon i,
+  .ambientSignals i,
+  .liveStatus i,
+  .flowLine i,
+  .signalRings,
+  .signalRings i,
+  .jobPulse,
+  .workerOrbit,
+  .needBeacon,
+  .workPath i,
+  .recordTrail i,
+  .planningBand i,
+  .aiInputs span::after,
+  .aiCore,
+  .nextState i::after,
+  .opportunityStream > div {
+    animation: none;
+  }
+
+  .cityDepthPlane,
+  .industryDepthPlane,
+  .roadDepthPlane,
+  .logisticsTruckActor,
+  .truckHeadlamp,
+  .forkliftActor,
+  .forkliftBeacon,
+  .constructionCrewActor,
+  .craneCable,
+  .workplaceLights i,
+  .activityOrigin,
+  .activityDemandPath,
+  .activityDemandPath i {
+    animation: none;
+  }
+}
