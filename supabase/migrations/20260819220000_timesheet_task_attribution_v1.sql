@@ -51,6 +51,17 @@
 -- attributed to one of them" instead of wondering why the field is empty.
 -- Nothing is hidden and nothing is invented.
 --
+-- ── TENANT SCOPE (added after review of the first draft) ───────────────────
+-- The link table is not a tenant boundary. `link_journal_entry_to_task_v1`
+-- asks only that the caller can see the entry and can see the task — never
+-- that the two share an organization. Since this function is SECURITY
+-- DEFINER, an unscoped title join would let a worker who is the assignee of a
+-- task in org B freeze that task's TITLE into org A's timesheet, where org A's
+-- managers read it. The `task_link` CTE therefore requires the task to resolve
+-- to THIS timesheet's organization through its project or its object spine,
+-- with no spine pointing elsewhere. Strictly narrowing: it can only ever
+-- DECLINE an attribution, never create one, and it touches no hour.
+--
 -- ── WHY DOUBLE COUNTING REMAINS STRUCTURALLY IMPOSSIBLE ────────────────────
 -- The `task_link` CTE is GROUPED BY entry_id, so it yields AT MOST ONE row
 -- per entry. Both new joins in `agg` are therefore 1:1 (`task_link` unique by
@@ -121,13 +132,42 @@ as $$
   -- TASK ATTRIBUTION (chain step A). GROUPED to at most ONE row per entry, so
   -- the join in `agg` can never multiply a line. Exactly one live link wins;
   -- zero or many leave task_id NULL — never a guess.
+  --
+  -- TENANT SCOPE — cross-organization disclosure defence. This function is
+  -- SECURITY DEFINER, so it reads `work_tasks` with RLS bypassed; the link
+  -- table alone is NOT a tenant boundary. `link_journal_entry_to_task_v1`
+  -- requires the caller to see the entry AND to see the task, but never that
+  -- the two share an organization — so a worker who is the assignee of a task
+  -- in org B could link their org-A entry to it, and org A's managers would
+  -- then read org B's task TITLE frozen into the timesheet snapshot.
+  --
+  -- `work_tasks` has no organization_id of its own. Its organization is
+  -- reached through project → projects.organization_id, or through
+  -- object → work_objects.organization_id (NOT NULL there). So:
+  --   * at least one spine must resolve to THIS timesheet's organization, and
+  --   * no spine may resolve to a DIFFERENT one.
+  -- A task with both spines NULL belongs to no organization and can never be
+  -- claimed on an organization's timesheet.
+  --
+  -- The predicate lives in the CTE rather than the title join on purpose: it
+  -- filters BEFORE the count, so a link into another organization neither
+  -- attributes nor suppresses attribution here — org A's reader learns
+  -- nothing at all about the worker's tasks elsewhere, not even that they
+  -- exist.
   task_link as (
     select jet.entry_id,
            count(*)::int as link_count,
            case when count(*) = 1 then min(jet.task_id::text)::uuid end as task_id
       from public.journal_entry_tasks jet
+      join public.work_tasks wt          on wt.id = jet.task_id
+      left join public.projects pr       on pr.id = wt.project_id
+      left join public.work_objects wo   on wo.id = wt.object_id
      where jet.entry_id in (select id from period)
        and jet.unlinked_at is null
+       and (pr.organization_id = p_organization_id
+            or wo.organization_id = p_organization_id)
+       and coalesce(pr.organization_id, p_organization_id) = p_organization_id
+       and coalesce(wo.organization_id, p_organization_id) = p_organization_id
      group by jet.entry_id
   ),
   -- RULE A — per-activity durations. First row per (entry, index) wins, so a

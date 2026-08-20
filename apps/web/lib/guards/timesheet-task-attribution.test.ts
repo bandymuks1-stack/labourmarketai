@@ -187,6 +187,61 @@ describe("the migration keeps the no-double-count invariant", () => {
     expect(code).toMatch(/jet\.unlinked_at is null/);
   });
 
+  it("attribution is TENANT SCOPED — another org's task can never leak in", () => {
+    // The link table is not a tenant boundary: link_journal_entry_to_task_v1
+    // requires the caller to see the entry AND the task, never that the two
+    // share an organization. This function is SECURITY DEFINER, so an
+    // unscoped title join would freeze org B's task title into org A's
+    // timesheet, where org A's managers read it.
+    const cte = code.slice(
+      code.indexOf("task_link as ("),
+      code.indexOf("frag as ("),
+    );
+    // work_tasks has no organization_id: both spines must be resolved.
+    expect(cte).toMatch(/join public\.work_tasks wt\s+on wt\.id = jet\.task_id/);
+    expect(cte).toMatch(/left join public\.projects pr\s+on pr\.id = wt\.project_id/);
+    expect(cte).toMatch(/left join public\.work_objects wo\s+on wo\.id = wt\.object_id/);
+    // At least one spine must be THIS organization...
+    expect(cte).toMatch(
+      /\(pr\.organization_id = p_organization_id\s*\n?\s*or wo\.organization_id = p_organization_id\)/,
+    );
+    // ...and no spine may point at a different one.
+    expect(cte).toContain(
+      "coalesce(pr.organization_id, p_organization_id) = p_organization_id",
+    );
+    expect(cte).toContain(
+      "coalesce(wo.organization_id, p_organization_id) = p_organization_id",
+    );
+  });
+
+  it("the scope filters BEFORE the count, so it leaks nothing by omission", () => {
+    // If the predicate sat in the title join instead, a link into another
+    // organization would still be COUNTED — turning a 1-link entry into an
+    // unattributed 2-link one and telling org A's reader that the worker has
+    // tasks elsewhere. Both the count and the pick must sit inside the
+    // filtered CTE.
+    const cte = code.slice(
+      code.indexOf("task_link as ("),
+      code.indexOf("frag as ("),
+    );
+    expect(cte).toMatch(/count\(\*\)::int as link_count/);
+    expect(cte).toMatch(/organization_id/);
+    // The title join stays a plain 1:1 lookup on the already-scoped id.
+    expect(code).toContain("left join public.work_tasks wt on wt.id = tl.task_id");
+  });
+
+  it("the tenant scope can only DECLINE — it touches no hour", () => {
+    // Proven at runtime by scripts/db-proof/timesheet-task-attribution.sh
+    // (totalHours identical across both bodies). Pinned statically here: the
+    // scope appears only in the attribution CTE, never in the hours CTEs.
+    for (const c of ["frag as (", "qty as (", "raw_lines as (", "shaped as ("]) {
+      const start = code.indexOf(c);
+      expect(start).toBeGreaterThan(-1);
+      const slice = code.slice(start, code.indexOf("),", start));
+      expect(slice).not.toContain("organization_id");
+    }
+  });
+
   it("the arithmetic is untouched: rule A still excludes rule B", () => {
     expect(code).toContain(
       "where not exists (select 1 from frag f where f.entry_id = e.id)",

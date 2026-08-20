@@ -105,6 +105,35 @@ check "E5 (one link + fragments) attributes BOTH fragment lines to the task" \
 
 echo ""
 echo "=============================================================="
+echo " TENANT SCOPE — another organization's task never leaks in"
+echo "=============================================================="
+# The link table is not a tenant boundary: link_journal_entry_to_task_v1 asks
+# only that the caller sees the entry and sees the task, never that they share
+# an organization. This function is SECURITY DEFINER, so without an explicit
+# predicate org B's task TITLE would be frozen into org A's timesheet.
+check "E6 (link to an ORG B task) is NOT attributed on org A's sheet" \
+  "" "$(q e0000006-0000-0000-0000-000000000006 taskId)"
+check "E6 reports linkCount 0 — org A learns nothing about org B's task" \
+  "0" "$(q e0000006-0000-0000-0000-000000000006 taskLinkCount)"
+check "E6's hours still count IN FULL (the worker did work them)" \
+  "8.00" "$($PSQL -c "select l->>'hours' from jsonb_array_elements(($CALL)->'lines') l where l->>'journalEntryId'='e0000006-0000-0000-0000-000000000006';")"
+check "ORG B's task TITLE appears NOWHERE in the whole payload" \
+  "0" "$($PSQL -c "select case when ($CALL)::text like '%ORG B SECRET TASK TITLE%' then 1 else 0 end;")"
+
+check "E7 (task with NO organization spine) is NOT attributed" \
+  "" "$(q e0000007-0000-0000-0000-000000000007 taskId)"
+check "E7 reports linkCount 0 — a task owned by nobody is claimable by nobody" \
+  "0" "$(q e0000007-0000-0000-0000-000000000007 taskLinkCount)"
+check "the orphan task's title appears nowhere either" \
+  "0" "$($PSQL -c "select case when ($CALL)::text like '%Orphan personal task%' then 1 else 0 end;")"
+
+# The OBJECT spine must work, not just the project spine — E5's task reaches
+# org A through work_objects with no project at all.
+check "E5's task reaches org A through the OBJECT spine and IS attributed" \
+  "Third task" "$(q e0000005-0000-0000-0000-000000000005 taskTitle)"
+
+echo ""
+echo "=============================================================="
 echo " PROVENANCE — every pre-existing field still travels"
 echo "=============================================================="
 # Derived, never hardcoded: EVERY line must carry EVERY pre-existing field,

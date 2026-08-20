@@ -10,6 +10,19 @@
 
 create extension if not exists pgcrypto;
 
+-- Supabase's roles. The migration REVOKEs from them, so they must exist for
+-- it to load at all. Created here so this proof runs on a CLEAN cluster
+-- rather than silently depending on a sibling proof having made them first.
+do $$
+begin
+  if not exists (select 1 from pg_roles where rolname = 'anon') then
+    create role anon nologin;
+  end if;
+  if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+    create role authenticated nologin;
+  end if;
+end $$;
+
 create table public.organizations (id uuid primary key);
 create table public.projects (
   id uuid primary key default gen_random_uuid(),
@@ -53,10 +66,22 @@ create table public.journal_entry_metrics (
   created_at timestamptz not null default now()
 );
 
+-- work_tasks has NO organization_id in production. Its organization is
+-- reached through project -> projects.organization_id or through
+-- object -> work_objects.organization_id. Both spines are modelled here
+-- because the tenant-scope predicate under test reads both.
+create table public.work_objects (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id),
+  project_id uuid references public.projects(id)
+);
+
 create table public.work_tasks (
   id uuid primary key default gen_random_uuid(),
   title text not null,
-  status text not null default 'todo'
+  status text not null default 'todo',
+  project_id uuid references public.projects(id),
+  object_id uuid references public.work_objects(id)
 );
 
 -- The link this whole slice reads (shipped by 20260819190000, applied).
