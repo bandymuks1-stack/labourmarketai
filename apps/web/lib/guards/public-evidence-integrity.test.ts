@@ -34,7 +34,8 @@ describe("public homepage evidence integrity", () => {
     expect(command).not.toMatch(
       /Rotterdam|Berlin|Helsinki|Paris|Warsaw|Milan|Antwerp|Bucharest|Copenhagen|Valencia/,
     );
-    expect(styles).toContain("filter: blur(1.8px)");
+    expect(command).toContain("/visuals/living-market/world-desktop.webp");
+    expect(styles).not.toContain("filter: blur(1.8px)");
   });
 
   it("spans sectors without making construction the product boundary", () => {
