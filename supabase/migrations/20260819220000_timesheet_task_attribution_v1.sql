@@ -1,16 +1,21 @@
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after owner sign-off.
--- Never `db push`.
+-- RED — human gate SATISFIED. Apply ONLY via Supabase MCP apply_migration.
+-- Never `db push` (repo filenames do not match ledger versions; a push would
+-- re-run already-applied migrations).
 --
--- @human-gate-approved — the owner approved chain step A and this exact
--- attribution rule on 2026-08-19 ("Yes — build A, exactly-one rule"). The
--- annotation states the ROUTE (draft + needs-human-gate + owner approval), not
--- an auto-merge or auto-apply pass: the owner explicitly said BUILD IT AND STOP
--- BEFORE APPLYING. Safety class: RED by classification — it replaces the body
--- of an existing SECURITY DEFINER function. ZERO tables, columns, policies,
--- grants, triggers or indexes are created, dropped or modified. ZERO DML at
--- apply time. ONE function body is replaced, with its signature unchanged.
+-- @human-gate-approved — owner decision 2026-08-20, recorded in full at
+-- docs/human-gates/timesheet-task-attribution-v1-gate.md ("SLICE A —
+-- APPROVED"). The prior owner decision of 2026-08-19 approved BUILDING this
+-- rule and explicitly withheld the apply; the 2026-08-20 decision grants the
+-- apply, the merge and the production verification, bound to the exactly-one
+-- attribution invariant recorded in that gate file.
+--
+-- The annotation states the ROUTE (draft + needs-human-gate + owner approval),
+-- never an auto-merge or auto-apply pass. Safety class: RED by classification
+-- — it replaces the body of an existing SECURITY DEFINER function. ZERO
+-- tables, columns, policies, grants, triggers or indexes are created, dropped
+-- or modified. ZERO DML at apply time. ONE function body is replaced, with its
+-- signature unchanged.
 --
 -- 20260819220000 — attribute canonical work-time to the task it evidences
 -- (field-work operating platform audit v1, chain step A).
