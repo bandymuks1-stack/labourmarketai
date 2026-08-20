@@ -625,6 +625,21 @@
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
+  "livingMarketReview": {
+    "tagline": "Dzīvais Eiropas darba tirgus",
+    "headline": "Darbs savieno",
+    "headlineAccent": "visu.",
+    "support": "Reālas vajadzības. Reāli cilvēki. Reāls darbs.",
+    "evidence": "Jūsu darbs kļūst par pierādījumu. Jūsu pierādījumi rada labākas iespējas.",
+    "workerCta": "Es meklēju darbu",
+    "employerCta": "Man vajag cilvēkus",
+    "currentSupply": "Pašreizējais pārbaudītais piedāvājums",
+    "opportunityStream": "Iespēju plūsma",
+    "evidenceVerifiedTitle": "Pierādījums pārbaudīts",
+    "evidenceVerifiedBody": "Cilvēka apstiprinājums pārvērš ierakstu uzticamā pierādījumā.",
+    "capabilityGrowsTitle": "Spējas aug",
+    "capabilityGrowsBody": "Prasmes un kapacitāte uzlabojas no apstiprināta darba."
+  },
   "hero": {
     "chip": "Vispārēja darba tirgus platforma",
     "headline": "Ne tikai CV.",

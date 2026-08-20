@@ -2,20 +2,40 @@
 
 import {
   type CSSProperties,
+  type ComponentType,
+  type PointerEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  BriefcaseBusiness,
+  Check,
+  Factory,
+  HardHat,
+  HeartPulse,
+  Menu,
+  MonitorCog,
+  NotebookPen,
+  Search,
+  Sparkles,
+  Sprout,
+  Truck,
+  UsersRound,
+  Utensils,
+  Warehouse,
+  Wind,
+  Wrench,
+  X,
+} from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
-import { EUROPE_GEO, MAP_H, MAP_W } from "@/components/app/europe-geo";
 import styles from "./live-market-command.module.css";
 
-type PublicJob = {
-  readonly id: string;
-  readonly title: string;
-};
+type PublicJob = { readonly id: string; readonly title: string };
 
 type PublicProfession = {
   readonly slug: string;
@@ -34,80 +54,309 @@ type PublicMarket = {
   readonly professions: readonly PublicProfession[];
 };
 
-export type LiveMarketCommandLabels = {
+type SectorKey =
+  | "construction"
+  | "logistics"
+  | "care"
+  | "hospitality"
+  | "manufacturing"
+  | "technology"
+  | "agriculture"
+  | "warehousing"
+  | "services"
+  | "energy";
+
+type EventStep = {
+  readonly title: string;
+  readonly body: string;
+};
+
+type LabelSet = {
   readonly brand: string;
+  readonly tagline: string;
   readonly headline: string;
-  readonly eyebrow: string;
-  readonly mapLabel: string;
-  readonly conceptual: string;
-  readonly jobs: string;
-  readonly workers: string;
-  readonly companies: string;
-  readonly vacancies: string;
-  readonly employers: string;
-  readonly regions: string;
-  readonly professionsTitle: string;
-  readonly jobsAction: string;
-  readonly basisNote: string;
+  readonly headlineAccent: string;
+  readonly support: string;
+  readonly evidence: string;
   readonly workerCta: string;
   readonly employerCta: string;
   readonly workerLead: string;
   readonly employerLead: string;
-  readonly stages: readonly string[];
-  readonly evidenceSteps: readonly string[];
+  readonly workerAction: string;
+  readonly employerAction: string;
+  readonly workers: string;
+  readonly companies: string;
+  readonly how: string;
+  readonly login: string;
+  readonly menuOpen: string;
+  readonly menuClose: string;
+  readonly live: string;
+  readonly currentSupply: string;
+  readonly visualNote: string;
+  readonly vacancies: string;
+  readonly employers: string;
+  readonly regions: string;
+  readonly basisNote: string;
+  readonly professionsTitle: string;
+  readonly opportunityStream: string;
+  readonly sectorTitle: string;
+  readonly sectors: Readonly<Record<SectorKey, string>>;
+  readonly eventSteps: readonly EventStep[];
 };
 
-type CameraFrame = {
-  readonly progress: number;
-  readonly scale: number;
+export type LiveMarketCommandLabels = LabelSet;
+
+type IconType = ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+
+const SECTORS: Readonly<
+  Record<SectorKey, { readonly profession: string; readonly icon: IconType }>
+> = {
+  construction: { profession: "electrician", icon: HardHat },
+  logistics: { profession: "driver", icon: Truck },
+  care: { profession: "caregiver", icon: HeartPulse },
+  hospitality: { profession: "cook", icon: Utensils },
+  manufacturing: { profession: "production_worker", icon: Factory },
+  technology: { profession: "software_developer", icon: MonitorCog },
+  agriculture: { profession: "farm_worker", icon: Sprout },
+  warehousing: { profession: "warehouse_worker", icon: Warehouse },
+  services: { profession: "cleaner", icon: Wrench },
+  energy: { profession: "electrician", icon: Wind },
+};
+
+const SECTOR_ORDER: readonly SectorKey[] = [
+  "construction",
+  "manufacturing",
+  "logistics",
+  "care",
+  "hospitality",
+  "technology",
+  "agriculture",
+  "warehousing",
+  "services",
+  "energy",
+];
+
+type Site = {
+  readonly id: string;
+  readonly city: string;
+  readonly sector: SectorKey;
   readonly x: number;
   readonly y: number;
+  readonly tabletX: number;
+  readonly tabletY: number;
+  readonly mobileX: number;
+  readonly mobileY: number;
+  readonly mobile: boolean;
 };
 
-const DESKTOP_CAMERA: readonly CameraFrame[] = [
-  { progress: 0, scale: 1, x: 0, y: 0 },
-  { progress: 0.28, scale: 1.72, x: -32, y: 118 },
-  { progress: 0.57, scale: 2.34, x: -55, y: 204 },
-  { progress: 0.75, scale: 1.92, x: -35, y: 154 },
-  { progress: 1, scale: 1.04, x: 0, y: 0 },
+const SITES: readonly Site[] = [
+  {
+    id: "rotterdam-port",
+    city: "Rotterdam",
+    sector: "logistics",
+    x: 34,
+    y: 16,
+    tabletX: 8.5,
+    tabletY: 15.5,
+    mobileX: 4,
+    mobileY: 16,
+    mobile: true,
+  },
+  {
+    id: "berlin-build",
+    city: "Berlin",
+    sector: "construction",
+    x: 46,
+    y: 18,
+    tabletX: 38,
+    tabletY: 18.5,
+    mobileX: 37,
+    mobileY: 18.5,
+    mobile: true,
+  },
+  {
+    id: "helsinki-care",
+    city: "Helsinki",
+    sector: "care",
+    x: 63,
+    y: 17,
+    tabletX: 67.5,
+    tabletY: 16.5,
+    mobileX: 88,
+    mobileY: 16.5,
+    mobile: true,
+  },
+  {
+    id: "warsaw-factory",
+    city: "Warsaw",
+    sector: "manufacturing",
+    x: 25,
+    y: 34,
+    tabletX: 4,
+    tabletY: 30,
+    mobileX: 8,
+    mobileY: 41,
+    mobile: false,
+  },
+  {
+    id: "paris-hospitality",
+    city: "Paris",
+    sector: "hospitality",
+    x: 65,
+    y: 36,
+    tabletX: 72.5,
+    tabletY: 35,
+    mobileX: 93,
+    mobileY: 35,
+    mobile: true,
+  },
+  {
+    id: "milan-tech",
+    city: "Milan",
+    sector: "technology",
+    x: 42,
+    y: 39,
+    tabletX: 27,
+    tabletY: 36,
+    mobileX: 19,
+    mobileY: 36,
+    mobile: true,
+  },
+  {
+    id: "antwerp-warehouse",
+    city: "Antwerp",
+    sector: "warehousing",
+    x: 36,
+    y: 56,
+    tabletX: 14,
+    tabletY: 51,
+    mobileX: 8,
+    mobileY: 66,
+    mobile: true,
+  },
+  {
+    id: "bucharest-services",
+    city: "Bucharest",
+    sector: "services",
+    x: 44,
+    y: 61,
+    tabletX: 31,
+    tabletY: 60,
+    mobileX: 25,
+    mobileY: 59,
+    mobile: true,
+  },
+  {
+    id: "valencia-agriculture",
+    city: "Valencia",
+    sector: "agriculture",
+    x: 71,
+    y: 52,
+    tabletX: 84,
+    tabletY: 49,
+    mobileX: 92,
+    mobileY: 64,
+    mobile: false,
+  },
+  {
+    id: "copenhagen-energy",
+    city: "Copenhagen",
+    sector: "energy",
+    x: 61,
+    y: 61,
+    tabletX: 66,
+    tabletY: 60,
+    mobileX: 82,
+    mobileY: 59,
+    mobile: true,
+  },
 ];
 
-const MOBILE_CAMERA: readonly CameraFrame[] = [
-  { progress: 0, scale: 1.42, x: 0, y: 38 },
-  { progress: 0.28, scale: 2.08, x: -10, y: 150 },
-  { progress: 0.57, scale: 2.72, x: -18, y: 235 },
-  { progress: 0.75, scale: 2.18, x: -12, y: 175 },
-  { progress: 1, scale: 1.48, x: 0, y: 42 },
-];
+const EVENT_ICONS = [
+  BriefcaseBusiness,
+  Search,
+  UsersRound,
+  NotebookPen,
+  BadgeCheck,
+  Sparkles,
+  ArrowRight,
+] as const;
 
-const clamp = (value: number, min = 0, max = 1) =>
-  Math.min(max, Math.max(min, value));
-const lerp = (from: number, to: number, amount: number) =>
-  from + (to - from) * amount;
-
-function cameraAt(progress: number, mobile: boolean) {
-  const frames = mobile ? MOBILE_CAMERA : DESKTOP_CAMERA;
-  for (let index = 0; index < frames.length - 1; index += 1) {
-    const from = frames[index];
-    const to = frames[index + 1];
-    if (progress <= to.progress) {
-      const local = clamp(
-        (progress - from.progress) / (to.progress - from.progress),
-      );
-      const eased = local * local * (3 - 2 * local);
-      return {
-        scale: lerp(from.scale, to.scale, eased),
-        x: lerp(from.x, to.x, eased),
-        y: lerp(from.y, to.y, eased),
-      };
-    }
-  }
-  return frames[frames.length - 1];
+function WorldPicture({
+  className,
+  primary = false,
+}: {
+  readonly className: string;
+  readonly primary?: boolean;
+}) {
+  return (
+    <picture className={className}>
+      <source
+        media="(max-width: 600px)"
+        srcSet="/visuals/living-market/world-mobile.webp"
+      />
+      <source
+        media="(max-width: 1024px)"
+        srcSet="/visuals/living-market/world-tablet.webp"
+      />
+      <img
+        src="/visuals/living-market/world-desktop.webp"
+        alt={primary ? "" : ""}
+        width={1536}
+        height={1024}
+        loading="eager"
+        decoding="async"
+        fetchPriority={primary ? "high" : "auto"}
+      />
+    </picture>
+  );
 }
 
-function rankWidth(value: number | null, maximum: number) {
-  if (value === null || value <= 0) return 0;
-  return Math.max(5, (Math.log1p(value) / Math.log1p(maximum)) * 100);
+function ActivityHotspot({
+  site,
+  label,
+  active,
+  pulsing,
+  onSelect,
+}: {
+  readonly site: Site;
+  readonly label: string;
+  readonly active: boolean;
+  readonly pulsing: boolean;
+  readonly onSelect: (sector: SectorKey) => void;
+}) {
+  const Icon = SECTORS[site.sector].icon;
+  const style = {
+    "--site-x": `${site.x}%`,
+    "--site-y": `${site.y}%`,
+    "--site-tablet-x": `${site.tabletX}%`,
+    "--site-tablet-y": `${site.tabletY}%`,
+    "--site-mobile-x": `${site.mobileX}%`,
+    "--site-mobile-y": `${site.mobileY}%`,
+  } as CSSProperties;
+
+  return (
+    <button
+      type="button"
+      className={styles.hotspot}
+      style={style}
+      data-sector={site.sector}
+      data-active={active}
+      data-pulsing={pulsing}
+      data-mobile={site.mobile}
+      aria-pressed={active}
+      onClick={() => onSelect(site.sector)}
+    >
+      <span className={styles.hotspotSignal} aria-hidden />
+      <span className={styles.hotspotIcon}>
+        <Icon aria-hidden />
+      </span>
+      <span className={styles.hotspotCopy}>
+        <small>{site.city}</small>
+        <strong>{label}</strong>
+      </span>
+    </button>
+  );
 }
 
 export function LiveMarketCommand({
@@ -117,428 +366,458 @@ export function LiveMarketCommand({
 }: {
   readonly locale: string;
   readonly market: PublicMarket;
-  readonly labels: LiveMarketCommandLabels;
+  readonly labels: LabelSet;
 }) {
   const rootRef = useRef<HTMLElement>(null);
-  const progressRef = useRef(0);
-  const userSelectedRef = useRef(false);
-  const [selectedSlug, setSelectedSlug] = useState(
-    market.professions[0]?.slug ?? "",
-  );
-  const [chapter, setChapter] = useState(0);
+  const pointerFrame = useRef<number | null>(null);
+  const [selectedSector, setSelectedSector] = useState<SectorKey | null>(null);
+  const [eventPhase, setEventPhase] = useState(0);
+  const [pulseSite, setPulseSite] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [interactionOpen, setInteractionOpen] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const formatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }),
     [locale],
   );
-  const selected =
-    market.professions.find((profession) => profession.slug === selectedSlug) ??
-    market.professions[0];
-  const maximum = Math.max(
-    1,
-    ...market.professions.map((profession) => profession.totalCount ?? 0),
+  const swedenName = useMemo(
+    () => new Intl.DisplayNames([locale], { type: "region" }).of("SE") ?? "SE",
+    [locale],
   );
-  const selectedCount = selected?.totalCount ?? 0;
-  const signalStrength = selected
-    ? 0.36 + 0.64 * (selectedCount / maximum)
-    : 0.36;
+  const opportunityStream = useMemo(
+    () =>
+      market.professions
+        .flatMap((profession) =>
+          profession.jobs.slice(0, 1).map((job) => ({
+            ...job,
+            profession: profession.label,
+          })),
+        )
+        .slice(0, 3),
+    [market.professions],
+  );
 
-  const selectProfession = useCallback((slug: string, lock = true) => {
-    if (lock) {
-      userSelectedRef.current = true;
-      setInteractionOpen(true);
-    }
-    setSelectedSlug(slug);
-  }, []);
-
-  const detailVisible =
-    chapter === 1 || (chapter === 0 && (interactionOpen || reducedMotion));
+  const activeSector =
+    selectedSector ?? SITES[pulseSite]?.sector ?? "construction";
+  const activeProfession = market.professions.find(
+    (profession) => profession.slug === SECTORS[activeSector].profession,
+  );
+  const currentEvent = labels.eventSteps[eventPhase] ?? labels.eventSteps[0];
+  const EventIcon = EVENT_ICONS[eventPhase] ?? EVENT_ICONS[0];
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReducedMotion(query.matches);
-    sync();
-    query.addEventListener("change", sync);
-    return () => query.removeEventListener("change", sync);
+    const syncMotion = () => setReducedMotion(query.matches);
+    const syncVisibility = () => setPageVisible(!document.hidden);
+    syncMotion();
+    syncVisibility();
+    query.addEventListener("change", syncMotion);
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () => {
+      query.removeEventListener("change", syncMotion);
+      document.removeEventListener("visibilitychange", syncVisibility);
+    };
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || market.professions.length < 2) return;
-    let index = Math.max(
-      0,
-      market.professions.findIndex(
-        (profession) => profession.slug === selectedSlug,
-      ),
+    if (reducedMotion || !pageVisible) return;
+    const eventTimer = window.setInterval(
+      () => setEventPhase((phase) => (phase + 1) % labels.eventSteps.length),
+      2100,
     );
-    const timer = window.setInterval(() => {
-      if (userSelectedRef.current || progressRef.current > 0.33) return;
-      index = (index + 1) % market.professions.length;
-      setSelectedSlug(market.professions[index].slug);
-    }, 8000);
-    return () => window.clearInterval(timer);
-  }, [market.professions, reducedMotion, selectedSlug]);
+    const pulseTimer = window.setInterval(
+      () => setPulseSite((site) => (site + 1) % SITES.length),
+      1700,
+    );
+    return () => {
+      window.clearInterval(eventTimer);
+      window.clearInterval(pulseTimer);
+    };
+  }, [labels.eventSteps.length, pageVisible, reducedMotion]);
 
   useEffect(() => {
-    let raf = 0;
+    let scrollFrame = 0;
     const update = () => {
-      raf = 0;
+      scrollFrame = 0;
       const root = rootRef.current;
       if (!root) return;
       const rect = root.getBoundingClientRect();
-      const distance = Math.max(1, rect.height - window.innerHeight);
-      const progress = reducedMotion ? 0 : clamp(-rect.top / distance);
-      const camera = cameraAt(progress, window.innerWidth <= 600);
-      progressRef.current = progress;
-      root.style.setProperty("--camera-x", `${camera.x}px`);
-      root.style.setProperty("--camera-y", `${camera.y}px`);
-      root.style.setProperty("--camera-scale", `${camera.scale}`);
-      root.style.setProperty("--story-progress", `${progress}`);
-      const nextChapter = reducedMotion
-        ? 0
-        : Math.min(3, Math.floor(progress * 4));
-      setChapter((current) =>
-        current === nextChapter ? current : nextChapter,
+      const travel = Math.max(1, rect.height - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, -rect.top / travel));
+      root.style.setProperty("--base-scroll-y", `${progress * 2.88}px`);
+      root.style.setProperty("--middle-scroll-y", `${progress * -5.04}px`);
+      root.style.setProperty("--front-scroll-y", `${progress * -10.44}px`);
+      root.style.setProperty(
+        "--scroll-fade",
+        `${Math.max(0, 1 - progress * 1.35)}`,
       );
+      const journey = Math.min(1, Math.max(0, (progress - 0.34) / 0.36));
+      root.style.setProperty("--journey-opacity", `${journey}`);
+      root.style.setProperty("--journey-y", `${(1 - journey) * 18}px`);
+      root.style.setProperty("--event-opacity", `${1 - journey}`);
+      root.dataset.journey = journey > 0.35 ? "true" : "false";
     };
     const schedule = () => {
-      if (!raf) raf = window.requestAnimationFrame(update);
+      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(update);
     };
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     return () => {
-      if (raf) window.cancelAnimationFrame(raf);
+      if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, [reducedMotion]);
+  }, []);
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (reducedMotion) return;
+  const handlePointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (reducedMotion || pointerFrame.current) return;
+      const { clientX, clientY, currentTarget } = event;
+      pointerFrame.current = window.requestAnimationFrame(() => {
+        pointerFrame.current = null;
+        const root = rootRef.current;
+        if (!root) return;
+        const rect = currentTarget.getBoundingClientRect();
+        const x = ((clientX - rect.left) / rect.width - 0.5) * 14;
+        const y = ((clientY - rect.top) / rect.height - 0.5) * 10;
+        root.style.setProperty("--base-x", `${x * -0.12}px`);
+        root.style.setProperty("--base-y", `${y * -0.1}px`);
+        root.style.setProperty("--middle-x", `${x * 0.34}px`);
+        root.style.setProperty("--middle-y", `${y * 0.24}px`);
+        root.style.setProperty("--front-x", `${x * 0.72}px`);
+        root.style.setProperty("--front-y", `${y * 0.52}px`);
+      });
+    },
+    [reducedMotion],
+  );
+
+  const clearPointer = useCallback(() => {
     const root = rootRef.current;
     if (!root) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
-    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 6;
-    root.style.setProperty("--depth-x", `${x}px`);
-    root.style.setProperty("--depth-y", `${y}px`);
-  };
+    for (const property of [
+      "--base-x",
+      "--base-y",
+      "--middle-x",
+      "--middle-y",
+      "--front-x",
+      "--front-y",
+    ]) {
+      root.style.setProperty(property, "0px");
+    }
+  }, []);
 
-  const mapStyle = {
-    "--signal-strength": signalStrength,
-  } as CSSProperties;
+  const selectSector = useCallback((sector: SectorKey) => {
+    setSelectedSector((current) => (current === sector ? null : sector));
+  }, []);
 
   return (
     <main
       ref={rootRef}
-      className={styles.journey}
-      data-chapter={chapter}
-      data-interacted={interactionOpen}
+      className={styles.root}
+      data-sector={selectedSector ?? "all"}
+      data-event-phase={eventPhase}
       data-reduced-motion={reducedMotion}
-      style={mapStyle}
+      data-paused={!pageVisible}
     >
-      <div className={styles.stage} onPointerMove={handlePointerMove}>
-        <div className={styles.atmosphere} aria-hidden />
+      <div
+        className={styles.viewport}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={clearPointer}
+      >
+        <div className={styles.world} data-testid="living-market-world">
+          <WorldPicture
+            className={`${styles.worldLayer} ${styles.worldBase}`}
+            primary
+          />
+          <WorldPicture
+            className={`${styles.worldLayer} ${styles.worldMiddle}`}
+          />
+          <WorldPicture
+            className={`${styles.worldLayer} ${styles.worldFront}`}
+          />
+          <div className={styles.worldTone} aria-hidden />
+          <div className={styles.chromeMaskLeft} aria-hidden />
+          <div className={styles.chromeMaskRight} aria-hidden />
+          <div className={styles.chromeMaskBottom} aria-hidden />
+          <div className={styles.depthGrid} aria-hidden />
+          <svg
+            className={styles.network}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden
+          >
+            <path data-sector="logistics" d="M34 18 C28 34 31 44 36 55" />
+            <path data-sector="construction" d="M34 18 C39 18 43 20 46 23" />
+            <path data-sector="care" d="M46 23 C53 19 59 20 63 23" />
+            <path data-sector="hospitality" d="M46 23 C55 29 61 34 65 38" />
+            <path data-sector="technology" d="M36 55 C39 50 41 45 42 40" />
+            <path data-sector="agriculture" d="M65 38 C69 43 71 48 71 53" />
+          </svg>
 
-        <div className={styles.mapViewport}>
-          <div className={styles.mapCamera}>
-            <svg
-              viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-              role="img"
-              aria-label={labels.mapLabel}
-              className={styles.map}
-            >
-              <defs>
-                <linearGradient id="market-sea" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#0b1e27" />
-                  <stop offset="1" stopColor="#071218" />
-                </linearGradient>
-                <radialGradient id="supply-field" cx="50%" cy="42%" r="68%">
-                  <stop offset="0" stopColor="#71d8d0" stopOpacity="0.92" />
-                  <stop offset="0.36" stopColor="#269b9a" stopOpacity="0.6" />
-                  <stop offset="1" stopColor="#14313a" stopOpacity="0.86" />
-                </radialGradient>
-                <filter
-                  id="supply-glow"
-                  x="-80%"
-                  y="-80%"
-                  width="260%"
-                  height="260%"
-                >
-                  <feGaussianBlur stdDeviation="12" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <clipPath id="sweden-clip">
-                  {EUROPE_GEO.filter((country) => country.code === "SE").map(
-                    (country) => (
-                      <path key={country.name} d={country.d} />
-                    ),
-                  )}
-                </clipPath>
-              </defs>
+          <div className={styles.motionLayer} aria-hidden>
+            <span className={styles.logisticsRun}>
+              <i />
+              <i />
+            </span>
+            <span className={styles.constructionCrane}>
+              <i />
+              <b />
+            </span>
+            <span className={styles.careShift}>
+              <i />
+              <b />
+            </span>
+            <span className={styles.factoryRhythm}>
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className={styles.hospitalityShift}>
+              <i />
+              <i />
+            </span>
+            <span className={styles.agricultureRun}>
+              <i />
+              <i />
+            </span>
+            <span className={styles.energyRotor}>
+              <i />
+              <i />
+              <i />
+            </span>
+          </div>
 
-              <rect width={MAP_W} height={MAP_H} fill="url(#market-sea)" />
+          <div className={styles.hotspotLayer} aria-label={labels.sectorTitle}>
+            {SITES.map((site, index) => (
+              <ActivityHotspot
+                key={site.id}
+                site={site}
+                label={labels.sectors[site.sector]}
+                active={selectedSector === site.sector}
+                pulsing={index === pulseSite}
+                onSelect={selectSector}
+              />
+            ))}
+          </div>
 
-              <g className={styles.frameCountries}>
-                {EUROPE_GEO.filter((country) => country.tier === "frame").map(
-                  (country) => (
-                    <path key={country.name} d={country.d} />
-                  ),
-                )}
-              </g>
-              <g className={styles.contextCountries}>
-                {EUROPE_GEO.filter(
-                  (country) =>
-                    country.tier === "context" ||
-                    (country.tier === "target" && country.code !== "SE"),
-                ).map((country) => (
-                  <path key={country.name} d={country.d} />
-                ))}
-              </g>
-
-              <g className={styles.swedenField}>
-                {EUROPE_GEO.filter((country) => country.code === "SE").map(
-                  (country) => (
-                    <path
-                      key={country.name}
-                      d={country.d}
-                      className={styles.swedenGlow}
-                      filter="url(#supply-glow)"
-                    />
-                  ),
-                )}
-                {EUROPE_GEO.filter((country) => country.code === "SE").map(
-                  (country) => (
-                    <path
-                      key={`${country.name}-field`}
-                      d={country.d}
-                      className={styles.swedenCountry}
-                    />
-                  ),
-                )}
-                <g clipPath="url(#sweden-clip)" className={styles.densityBands}>
-                  <path d="M390 254 C468 183 565 115 705 64" />
-                  <path d="M402 294 C492 231 582 166 714 108" />
-                  <path d="M418 327 C515 274 608 216 725 158" />
-                </g>
-              </g>
-
-              <g className={styles.aggregateSignal}>
-                <circle cx="550" cy="176" r="4" />
-                <circle
-                  cx="550"
-                  cy="176"
-                  r="12"
-                  className={styles.arrivalOne}
-                />
-                <circle
-                  cx="550"
-                  cy="176"
-                  r="19"
-                  className={styles.arrivalTwo}
-                />
-              </g>
-
-              <g className={styles.marketFlows} aria-hidden>
-                <path d="M286 419 C357 336 438 250 544 183" />
-                <path d="M777 392 C712 311 641 235 557 181" />
-                <path d="M484 575 C476 426 503 294 548 188" />
-              </g>
-
-              <g className={styles.marketLabel}>
-                <text x="550" y="339" textAnchor="middle">
-                  SE
-                </text>
-                <text x="550" y="362" textAnchor="middle">
-                  {selected?.totalCount === null
-                    ? "—"
-                    : formatter.format(selected?.totalCount ?? 0)}
-                </text>
-              </g>
-            </svg>
+          <div className={styles.visualTruth}>
+            <span>{labels.tagline}</span>
+            <small>{labels.visualNote}</small>
           </div>
         </div>
 
         <header className={styles.header}>
-          <Link href="/" className={styles.brand}>
-            <span aria-hidden>◒</span>
-            {labels.brand}
+          <Link href="/" className={styles.brand} aria-label={labels.brand}>
+            <span aria-hidden />
+            <strong>{labels.brand}</strong>
           </Link>
-          <nav aria-label={labels.mapLabel}>
-            <Link href="/jobs">{labels.jobs}</Link>
+          <div className={styles.liveStatus}>
+            <i aria-hidden /> {labels.live}
+          </div>
+          <button
+            type="button"
+            className={styles.menuButton}
+            aria-label={menuOpen ? labels.menuClose : labels.menuOpen}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X aria-hidden /> : <Menu aria-hidden />}
+          </button>
+          <nav data-open={menuOpen} aria-label={labels.tagline}>
             <Link href="/for-workers">{labels.workers}</Link>
             <Link href="/for-companies">{labels.companies}</Link>
+            <Link href="/#how-it-works">{labels.how}</Link>
+            <Link href="/auth/login" className={styles.login}>
+              {labels.login}
+            </Link>
           </nav>
         </header>
 
-        <section className={styles.intro} aria-labelledby="live-market-title">
-          <p>{labels.eyebrow}</p>
-          <h1 id="live-market-title">{labels.headline}</h1>
-        </section>
-
-        <div className={styles.truthLegend} aria-label={labels.eyebrow}>
-          <span data-kind="live">{labels.eyebrow}</span>
-          <span data-kind="concept">{labels.conceptual}</span>
-        </div>
-
-        <section className={styles.marketPulse} aria-label={labels.eyebrow}>
-          <span>
-            <b>{formatter.format(market.activeVacancies)}</b>
-            {labels.vacancies}
-          </span>
-          <span>
-            <b>{formatter.format(market.distinctEmployers)}</b>
-            {labels.employers}
-          </span>
-          <span>
-            <b>{formatter.format(market.regions)}</b>
-            {labels.regions}
-          </span>
-          <small>
-            {market.lastRefreshedAt ? (
-              <time dateTime={market.lastRefreshedAt}>
-                {dateFormatter.format(new Date(market.lastRefreshedAt))}
-              </time>
-            ) : (
-              labels.basisNote
-            )}
-          </small>
-        </section>
-
-        <section
-          className={styles.professions}
-          aria-labelledby="profession-title"
-          aria-hidden={chapter >= 2}
-        >
-          <h2 id="profession-title">{labels.professionsTitle}</h2>
-          <ol>
-            {market.professions.slice(0, 6).map((profession, index) => (
-              <li key={profession.slug}>
-                <button
-                  type="button"
-                  tabIndex={chapter <= 1 ? 0 : -1}
-                  aria-pressed={selected?.slug === profession.slug}
-                  data-selected={selected?.slug === profession.slug}
-                  onPointerEnter={() => {
-                    if (!userSelectedRef.current && chapter <= 1) {
-                      selectProfession(profession.slug, false);
-                    }
-                  }}
-                  onClick={() => selectProfession(profession.slug)}
-                >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{profession.label}</strong>
-                  <i aria-hidden>
-                    <em
-                      style={{
-                        width: `${rankWidth(profession.totalCount, maximum)}%`,
-                      }}
-                    />
-                  </i>
-                  <b>
-                    {profession.totalCount === null
-                      ? "—"
-                      : formatter.format(profession.totalCount)}
-                  </b>
-                </button>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {selected ? (
-          <aside
-            className={styles.professionDetail}
-            aria-live="polite"
-            aria-hidden={!detailVisible}
-          >
-            <p>{labels.mapLabel} / SE</p>
-            <div>
-              <strong>{selected.label}</strong>
-              <b>
-                {selected.totalCount === null
-                  ? "—"
-                  : formatter.format(selected.totalCount)}
-              </b>
-              <span>{labels.vacancies}</span>
-            </div>
-            <ul>
-              {selected.jobs.slice(0, 2).map((job) => (
-                <li key={job.id}>
-                  <Link
-                    href={`/jobs/${job.id}`}
-                    tabIndex={detailVisible ? 0 : -1}
-                  >
-                    {job.title} ↗
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href={`/jobs?profession=${selected.slug}`}
-              tabIndex={detailVisible ? 0 : -1}
-            >
-              {labels.jobsAction} →
+        <section className={styles.hero} aria-labelledby="living-market-title">
+          <p>{labels.tagline}</p>
+          <h1 id="living-market-title">
+            {labels.headline}
+            <br />
+            <span>{labels.headlineAccent}</span>
+          </h1>
+          <strong>{labels.support}</strong>
+          <small>{labels.evidence}</small>
+          <div className={styles.heroActions}>
+            <Link href="/auth/signup">
+              {labels.workerCta} <ArrowRight aria-hidden />
             </Link>
-          </aside>
-        ) : null}
-
-        <section
-          className={styles.evidenceLoop}
-          aria-label={labels.headline}
-          aria-hidden={chapter !== 2}
-        >
-          <p>{labels.conceptual}</p>
-          <ol>
-            {labels.evidenceSteps.map((step, index) => (
-              <li key={step} style={{ "--step": index } as CSSProperties}>
-                <i aria-hidden />
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section
-          className={styles.finalChoice}
-          aria-labelledby="market-response-title"
-          aria-hidden={chapter !== 3}
-        >
-          <p>{labels.stages[3]}</p>
-          <h2 id="market-response-title">{labels.headline}</h2>
-          <div>
-            <Link href="/auth/signup" tabIndex={chapter === 3 ? 0 : -1}>
-              <span>{labels.workerCta}</span>
-              <small>{labels.workerLead}</small>
-              <b aria-hidden>↗</b>
-            </Link>
-            <Link href="/company-need" tabIndex={chapter === 3 ? 0 : -1}>
-              <span>{labels.employerCta}</span>
-              <small>{labels.employerLead}</small>
-              <b aria-hidden>↗</b>
-            </Link>
+            <Link href="/company-need">{labels.employerCta}</Link>
           </div>
         </section>
 
-        <ol className={styles.storyRail} aria-label={labels.mapLabel}>
-          {labels.stages.map((stage, index) => (
-            <li key={stage} data-active={chapter === index}>
-              <i aria-hidden />
-              <span>{stage}</span>
-            </li>
-          ))}
-        </ol>
+        <section
+          className={styles.entryBand}
+          aria-label={`${labels.workers} / ${labels.companies}`}
+        >
+          <article>
+            <span aria-hidden>
+              <UsersRound />
+            </span>
+            <div>
+              <small>{labels.workers}</small>
+              <p>{labels.workerLead}</p>
+              <Link href="/auth/signup">
+                {labels.workerAction} <ArrowRight aria-hidden />
+              </Link>
+            </div>
+          </article>
+          <article>
+            <span aria-hidden>
+              <HardHat />
+            </span>
+            <div>
+              <small>{labels.companies}</small>
+              <p>{labels.employerLead}</p>
+              <Link href="/company-need">
+                {labels.employerAction} <ArrowRight aria-hidden />
+              </Link>
+            </div>
+          </article>
+        </section>
 
-        <p className={styles.scrollCue}>
-          <i aria-hidden />
-          {labels.stages[Math.min(3, chapter + 1)]}
-        </p>
+        <aside className={styles.supplyPanel} data-testid="real-supply-panel">
+          <div className={styles.supplyTitle}>
+            <span>
+              <i aria-hidden /> {labels.currentSupply} · {swedenName}
+            </span>
+            {market.lastRefreshedAt ? (
+              <time>
+                {dateFormatter.format(new Date(market.lastRefreshedAt))}
+              </time>
+            ) : null}
+          </div>
+          <div className={styles.supplyStats}>
+            <div>
+              <strong>{formatter.format(market.activeVacancies)}</strong>
+              <span>{labels.vacancies}</span>
+            </div>
+            <div>
+              <strong>{formatter.format(market.distinctEmployers)}</strong>
+              <span>{labels.employers}</span>
+            </div>
+            <div>
+              <strong>{formatter.format(market.regions)}</strong>
+              <span>{labels.regions}</span>
+            </div>
+          </div>
+          <div className={styles.liveProfessions}>
+            <p>{labels.professionsTitle}</p>
+            {market.professions.slice(0, 4).map((profession) => (
+              <div key={profession.slug}>
+                <span>{profession.label}</span>
+                {profession.totalCount !== null ? (
+                  <strong>{formatter.format(profession.totalCount)}</strong>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          {opportunityStream.length ? (
+            <div className={styles.opportunityStream}>
+              <p>{labels.opportunityStream}</p>
+              {opportunityStream.map((job) => (
+                <Link href={`/jobs/${job.id}`} key={job.id}>
+                  <span>{job.profession}</span>
+                  <strong>{job.title}</strong>
+                  <ArrowRight aria-hidden />
+                </Link>
+              ))}
+            </div>
+          ) : null}
+          <small>{labels.basisNote}</small>
+        </aside>
+
+        <section
+          className={styles.eventCard}
+          data-testid="work-event"
+          aria-live="polite"
+        >
+          <span className={styles.eventIcon}>
+            <EventIcon aria-hidden />
+          </span>
+          <div>
+            <small>
+              {labels.sectors[activeSector]} · {eventPhase + 1}/
+              {labels.eventSteps.length}
+            </small>
+            <h2>{currentEvent.title}</h2>
+            <p>{currentEvent.body}</p>
+          </div>
+          <span className={styles.eventProgress} aria-hidden>
+            {labels.eventSteps.map((step, index) => (
+              <i key={step.title} data-done={index <= eventPhase} />
+            ))}
+          </span>
+        </section>
+
+        {eventPhase === labels.eventSteps.length - 1 ? (
+          <div className={styles.opportunityEcho} aria-hidden>
+            <BadgeCheck />
+          </div>
+        ) : null}
+
+        <section className={styles.processRail} data-testid="evidence-sequence">
+          {labels.eventSteps.map((step, index) => {
+            const Icon = EVENT_ICONS[index] ?? Check;
+            return (
+              <div
+                key={step.title}
+                data-active={index === eventPhase}
+                data-done={index < eventPhase}
+              >
+                <span>
+                  <Icon aria-hidden />
+                </span>
+                <small>0{index + 1}</small>
+                <strong>{step.title}</strong>
+              </div>
+            );
+          })}
+        </section>
+
+        <section className={styles.sectorDock} aria-label={labels.sectorTitle}>
+          <p>{labels.sectorTitle}</p>
+          <div>
+            {SECTOR_ORDER.map((sector) => {
+              const Icon = SECTORS[sector].icon;
+              const active = selectedSector === sector;
+              return (
+                <button
+                  type="button"
+                  key={sector}
+                  data-selected={active}
+                  aria-pressed={active}
+                  onClick={() => selectSector(sector)}
+                >
+                  <span>
+                    <Icon aria-hidden />
+                  </span>
+                  <strong>{labels.sectors[sector]}</strong>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {selectedSector && activeProfession?.jobs[0] ? (
+          <Link
+            href={`/jobs/${activeProfession.jobs[0].id}`}
+            className={styles.realOpportunity}
+          >
+            <span>
+              {labels.currentSupply} · {swedenName}
+            </span>
+            <strong>{activeProfession.jobs[0].title}</strong>
+            <ArrowRight aria-hidden />
+          </Link>
+        ) : null}
       </div>
     </main>
   );

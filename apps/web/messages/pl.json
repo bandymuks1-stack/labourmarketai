@@ -625,6 +625,21 @@
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
+  "livingMarketReview": {
+    "tagline": "Żywy rynek pracy Europy",
+    "headline": "Praca łączy",
+    "headlineAccent": "wszystko.",
+    "support": "Realne potrzeby. Prawdziwi ludzie. Prawdziwa praca.",
+    "evidence": "Twoja praca staje się dowodem. Twoje dowody tworzą lepsze możliwości.",
+    "workerCta": "Szukam pracy",
+    "employerCta": "Potrzebuję ludzi",
+    "currentSupply": "Aktualna zweryfikowana podaż",
+    "opportunityStream": "Strumień możliwości",
+    "evidenceVerifiedTitle": "Dowód zweryfikowany",
+    "evidenceVerifiedBody": "Potwierdzenie przez człowieka zmienia zapis w wiarygodny dowód.",
+    "capabilityGrowsTitle": "Możliwości rosną",
+    "capabilityGrowsBody": "Umiejętności i potencjał rosną dzięki potwierdzonej pracy."
+  },
   "hero": {
     "chip": "Ogólna platforma rynku pracy",
     "headline": "To nie tylko CV.",

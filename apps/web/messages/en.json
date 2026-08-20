@@ -4465,6 +4465,21 @@
     "menuOpen": "Menu",
     "menuClose": "Close menu"
   },
+  "livingMarketReview": {
+    "tagline": "The living labour market of Europe",
+    "headline": "Work connects",
+    "headlineAccent": "everything.",
+    "support": "Real needs. Real people. Real work.",
+    "evidence": "Your work becomes evidence. Your evidence creates better opportunities.",
+    "workerCta": "I'm looking for work",
+    "employerCta": "I need people",
+    "currentSupply": "Current verified supply",
+    "opportunityStream": "Opportunity stream",
+    "evidenceVerifiedTitle": "Evidence verified",
+    "evidenceVerifiedBody": "Human confirmation turns the record into trusted evidence.",
+    "capabilityGrowsTitle": "Capability grows",
+    "capabilityGrowsBody": "Skills and capacity improve through confirmed work."
+  },
   "hero": {
     "chip": "General labour-market platform",
     "headline": "Not just a CV.",
@@ -4695,11 +4710,7 @@
       "free": {
         "name": "Free",
         "tagline": "Get on the market.",
-        "features": [
-          "1 project",
-          "1 job demand",
-          "Community support"
-        ]
+        "features": ["1 project", "1 job demand", "Community support"]
       },
       "business": {
         "name": "Business",
@@ -4724,12 +4735,7 @@
       "enterprise": {
         "name": "Enterprise",
         "tagline": "For scale and control.",
-        "features": [
-          "Unlimited projects",
-          "SSO",
-          "SLA",
-          "Dedicated support"
-        ]
+        "features": ["Unlimited projects", "SSO", "SLA", "Dedicated support"]
       }
     },
     "faqTitle": "Pricing FAQ",

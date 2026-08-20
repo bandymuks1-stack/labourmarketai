@@ -37,14 +37,16 @@ export type LiveMarketLandingSnapshot = {
  * is not a ranking and does not pin a statistic.
  */
 const PROFESSION_FILTER_SLUGS = [
+  "electrician",
   "caregiver",
-  "teacher",
-  "sales_assistant",
-  "warehouse_worker",
   "driver",
-  "cleaner",
+  "cook",
   "production_worker",
+  "software_developer",
+  "warehouse_worker",
+  "cleaner",
   "carpenter",
+  "farm_worker",
 ] as const;
 
 async function readWithOneRetry<T>(
