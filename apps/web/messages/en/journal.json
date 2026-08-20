@@ -76,6 +76,7 @@
   "engagement": "Context",
   "engagementChoose": "Choose the engagement…",
   "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
+  "unconfirmedTimeBlocked": "{count} logged duration(s) still await your review and would not be saved. Keep or remove them first.",
   "entry": {
     "reviewedBy": "Reviewed by",
     "confirmerRole": {
