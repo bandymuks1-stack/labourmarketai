@@ -27,6 +27,7 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Vælg tilknytning…",
   "engagementAmbiguous": "Dette arbejde kan høre til mere end én tilknytning. Vælg hvilken, før du gemmer.",
+  "unconfirmedTimeBlocked": "{count} registrerede varigheder afventer stadig gennemgang og ville ikke blive gemt. Behold eller fjern dem først.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",

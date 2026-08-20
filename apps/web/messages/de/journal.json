@@ -76,6 +76,7 @@
   "engagement": "Kontext",
   "engagementChoose": "Beschäftigung wählen…",
   "engagementAmbiguous": "Diese Arbeit könnte zu mehr als einer Beschäftigung gehören. Wählen Sie vor dem Speichern aus, zu welcher.",
+  "unconfirmedTimeBlocked": "{count} erfasste Dauer(n) warten noch auf Ihre Durchsicht und würden nicht gespeichert. Behalten oder entfernen Sie sie zuerst.",
   "entry": {
     "reviewedBy": "Überprüft von",
     "confirmerRole": {

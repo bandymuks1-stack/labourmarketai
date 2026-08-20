@@ -76,6 +76,7 @@
   "engagement": "Kontekstas",
   "engagementChoose": "Pasirinkite santykį…",
   "engagementAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam santykiui. Prieš išsaugant pasirinkite, kuriam.",
+  "unconfirmedTimeBlocked": "{count} užfiksuota (-os) trukmė (-ės) dar laukia jūsų peržiūros ir nebūtų išsaugota (-os). Pirma palikite arba pašalinkite.",
   "entry": {
     "reviewedBy": "Peržiūrėjo",
     "confirmerRole": {

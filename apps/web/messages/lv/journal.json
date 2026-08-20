@@ -27,6 +27,7 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "unconfirmedTimeBlocked": "{count} reģistrētie ilgumi vēl gaida jūsu pārskatīšanu un netiktu saglabāti. Vispirms paturiet vai noņemiet tos.",
   "entry": {
     "status": {
       "confirmed": "[EN] Confirmed",
