@@ -136,9 +136,8 @@ const SECTOR_ORDER: readonly SectorKey[] = [
   "energy",
 ];
 
-type Site = {
+type ActivityNode = {
   readonly id: string;
-  readonly city: string;
   readonly sector: SectorKey;
   readonly x: number;
   readonly y: number;
@@ -149,10 +148,16 @@ type Site = {
   readonly mobile: boolean;
 };
 
-const SITES: readonly Site[] = [
+/**
+ * Conceptual sector activity over the cinematic Europe world.
+ *
+ * These positions are composition coordinates, not geographic coordinates
+ * and never carry place names or local market claims. Verified geography and
+ * counts remain confined to the Sweden supply panel.
+ */
+const ACTIVITY_NODES: readonly ActivityNode[] = [
   {
-    id: "rotterdam-port",
-    city: "Rotterdam",
+    id: "activity-logistics-01",
     sector: "logistics",
     x: 34,
     y: 16,
@@ -163,8 +168,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "berlin-build",
-    city: "Berlin",
+    id: "activity-construction-01",
     sector: "construction",
     x: 46,
     y: 18,
@@ -175,8 +179,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "helsinki-care",
-    city: "Helsinki",
+    id: "activity-care-01",
     sector: "care",
     x: 63,
     y: 17,
@@ -187,8 +190,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "warsaw-factory",
-    city: "Warsaw",
+    id: "activity-manufacturing-01",
     sector: "manufacturing",
     x: 25,
     y: 34,
@@ -199,8 +201,7 @@ const SITES: readonly Site[] = [
     mobile: false,
   },
   {
-    id: "paris-hospitality",
-    city: "Paris",
+    id: "activity-hospitality-01",
     sector: "hospitality",
     x: 65,
     y: 36,
@@ -211,8 +212,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "milan-tech",
-    city: "Milan",
+    id: "activity-technology-01",
     sector: "technology",
     x: 42,
     y: 39,
@@ -223,8 +223,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "antwerp-warehouse",
-    city: "Antwerp",
+    id: "activity-warehousing-01",
     sector: "warehousing",
     x: 36,
     y: 56,
@@ -235,8 +234,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "bucharest-services",
-    city: "Bucharest",
+    id: "activity-services-01",
     sector: "services",
     x: 44,
     y: 61,
@@ -247,8 +245,7 @@ const SITES: readonly Site[] = [
     mobile: true,
   },
   {
-    id: "valencia-agriculture",
-    city: "Valencia",
+    id: "activity-agriculture-01",
     sector: "agriculture",
     x: 71,
     y: 52,
@@ -259,8 +256,7 @@ const SITES: readonly Site[] = [
     mobile: false,
   },
   {
-    id: "copenhagen-energy",
-    city: "Copenhagen",
+    id: "activity-energy-01",
     sector: "energy",
     x: 61,
     y: 61,
@@ -313,26 +309,26 @@ function WorldPicture({
 }
 
 function ActivityHotspot({
-  site,
+  node,
   label,
   active,
   pulsing,
   onSelect,
 }: {
-  readonly site: Site;
+  readonly node: ActivityNode;
   readonly label: string;
   readonly active: boolean;
   readonly pulsing: boolean;
   readonly onSelect: (sector: SectorKey) => void;
 }) {
-  const Icon = SECTORS[site.sector].icon;
+  const Icon = SECTORS[node.sector].icon;
   const style = {
-    "--site-x": `${site.x}%`,
-    "--site-y": `${site.y}%`,
-    "--site-tablet-x": `${site.tabletX}%`,
-    "--site-tablet-y": `${site.tabletY}%`,
-    "--site-mobile-x": `${site.mobileX}%`,
-    "--site-mobile-y": `${site.mobileY}%`,
+    "--site-x": `${node.x}%`,
+    "--site-y": `${node.y}%`,
+    "--site-tablet-x": `${node.tabletX}%`,
+    "--site-tablet-y": `${node.tabletY}%`,
+    "--site-mobile-x": `${node.mobileX}%`,
+    "--site-mobile-y": `${node.mobileY}%`,
   } as CSSProperties;
 
   return (
@@ -340,19 +336,18 @@ function ActivityHotspot({
       type="button"
       className={styles.hotspot}
       style={style}
-      data-sector={site.sector}
+      data-sector={node.sector}
       data-active={active}
       data-pulsing={pulsing}
-      data-mobile={site.mobile}
+      data-mobile={node.mobile}
       aria-pressed={active}
-      onClick={() => onSelect(site.sector)}
+      onClick={() => onSelect(node.sector)}
     >
       <span className={styles.hotspotSignal} aria-hidden />
       <span className={styles.hotspotIcon}>
         <Icon aria-hidden />
       </span>
       <span className={styles.hotspotCopy}>
-        <small>{site.city}</small>
         <strong>{label}</strong>
       </span>
     </button>
@@ -400,7 +395,7 @@ export function LiveMarketCommand({
   );
 
   const activeSector =
-    selectedSector ?? SITES[pulseSite]?.sector ?? "construction";
+    selectedSector ?? ACTIVITY_NODES[pulseSite]?.sector ?? "construction";
   const activeProfession = market.professions.find(
     (profession) => profession.slug === SECTORS[activeSector].profession,
   );
@@ -428,7 +423,7 @@ export function LiveMarketCommand({
       2100,
     );
     const pulseTimer = window.setInterval(
-      () => setPulseSite((site) => (site + 1) % SITES.length),
+      () => setPulseSite((site) => (site + 1) % ACTIVITY_NODES.length),
       1700,
     );
     return () => {
@@ -590,13 +585,17 @@ export function LiveMarketCommand({
             </span>
           </div>
 
-          <div className={styles.hotspotLayer} aria-label={labels.sectorTitle}>
-            {SITES.map((site, index) => (
+          <div
+            className={styles.hotspotLayer}
+            data-layer="conceptual-sector-activity"
+            aria-label={labels.sectorTitle}
+          >
+            {ACTIVITY_NODES.map((node, index) => (
               <ActivityHotspot
-                key={site.id}
-                site={site}
-                label={labels.sectors[site.sector]}
-                active={selectedSector === site.sector}
+                key={node.id}
+                node={node}
+                label={labels.sectors[node.sector]}
+                active={selectedSector === node.sector}
                 pulsing={index === pulseSite}
                 onSelect={selectSector}
               />
@@ -763,7 +762,11 @@ export function LiveMarketCommand({
           </div>
         ) : null}
 
-        <section className={styles.processRail} data-testid="evidence-sequence">
+        <section
+          id="how-it-works"
+          className={styles.processRail}
+          data-testid="evidence-sequence"
+        >
           {labels.eventSteps.map((step, index) => {
             const Icon = EVENT_ICONS[index] ?? Check;
             return (

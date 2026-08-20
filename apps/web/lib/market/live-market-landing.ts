@@ -63,6 +63,22 @@ async function readWithOneRetry<T>(
   }
 }
 
+function measuredFloorSnapshot(): LiveMarketLandingSnapshot {
+  return {
+    activeVacancies: SWEDEN_COVERAGE_CURRENT.activeVacanciesFloor,
+    distinctEmployers: SWEDEN_COVERAGE_CURRENT.identifiedEmployersFloor,
+    regions: SWEDEN_COVERAGE_CURRENT.regions,
+    lastRefreshedAt: null,
+    basis: "measured-floor",
+    professions: PROFESSION_FILTER_SLUGS.map((slug) => ({
+      slug,
+      totalCount: null,
+      jobs: [],
+      basis: "unavailable",
+    })),
+  };
+}
+
 /**
  * The one anonymous-safe projection for the live-map owner review.
  *
@@ -72,7 +88,16 @@ async function readWithOneRetry<T>(
  * region distribution inside Sweden.
  */
 async function readFreshLiveMarketLandingSnapshot(): Promise<LiveMarketLandingSnapshot> {
-  const { url, anonKey } = requireSupabaseClientEnv();
+  let publicEnv: ReturnType<typeof requireSupabaseClientEnv>;
+  try {
+    publicEnv = requireSupabaseClientEnv();
+  } catch {
+    // Local/CI prerenders may intentionally have no public Supabase env. The
+    // governed multi-day floor is the only allowed fallback; production with
+    // env continues through the live readers below.
+    return measuredFloorSnapshot();
+  }
+  const { url, anonKey } = publicEnv;
   const publicClient = createSupabaseClient<Database>(url, anonKey, {
     auth: {
       autoRefreshToken: false,

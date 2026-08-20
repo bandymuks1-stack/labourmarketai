@@ -133,48 +133,14 @@ import { join } from "node:path";
  *  map + the new section components joined the render tree and are frozen
  *  with it; live-map.tsx stays frozen (still in the repo, restorable). */
 export const FROZEN_LANDING_FILES = [
-  "app/[locale]/(marketing)/page.tsx",
-  "components/app/preview-chip.tsx",
-  "components/app/live-map.tsx",
-  "components/app/live-world-map.tsx",
-  "components/app/world-geo.ts",
-  "components/app/live-ticker.tsx",
-  "components/app/market-counters.tsx",
-  "components/app/draft-board-columns.tsx",
-  "components/app/recent-matches-feed.tsx",
-  "components/app/regional-heatmap.tsx",
-  "components/app/skills-demand-list.tsx",
-  "components/app/supply-demand-chart.tsx",
-  // Landing rebuild (owner directive 2026-07-29): the narrative chain —
-  // hero demo, six-link product chain, the map moment, the proof band.
-  //
-  // Premium rebuild (owner directive 2026-07-31): `live-product-demo.tsx` was
-  // superseded by `hero-live-demo.tsx` — the same cinematic role, now driving
-  // the canonical <MarketMap> — and the dead file was deleted. The freeze
-  // follows the component that is actually rendered; freezing a deleted file
-  // would only make the guard fail to load.
-  "components/marketing/hero-live-demo.tsx",
-  // Landing minimal truth update (owner mandate 2026-08-17 §27): the market
-  // proof band joined the render tree and is frozen with it.
-  "components/marketing/market-proof-band.tsx",
-  "components/marketing/product-chain-band.tsx",
-  "components/marketing/market-moment.tsx",
-  "components/marketing/proof-band.tsx",
-  "lib/use-mounted.ts",
-  "components/marketing/draft-board.tsx",
-  "components/marketing/market-pulse.tsx",
-  "components/marketing/player-card-showcase.tsx",
-  "components/marketing/labour-market-evidence.tsx",
-  "components/marketing/reveal.tsx",
-  "components/marketing/how-it-works-band.tsx",
-  "components/marketing/conversation-os-panel.tsx",
-  "components/marketing/audience-value-sections.tsx",
-  "components/marketing/trust-band.tsx",
-  "components/marketing/final-cta-band.tsx",
-  "components/decor/constellation-bg.tsx",
-  // Placeholder feed: landing demo values (counters, personas, board rows)
-  // live here, so the whole governed file is part of the freeze.
-  "content/placeholders.ts",
+  // Owner decision 2026-08-20: the living European labour-market command is
+  // the production V1. Freeze the actual root composition, its shared server
+  // assembler, cinematic client, styling and governed public-data reader.
+  "app/[locale]/(home)/page.tsx",
+  "app/[locale]/live-market-review/live-market-page.tsx",
+  "app/[locale]/live-market-review/live-market-command.tsx",
+  "app/[locale]/live-market-review/live-market-command.module.css",
+  "lib/market/live-market-landing.ts",
 ] as const;
 
 /**
@@ -183,15 +149,13 @@ export const FROZEN_LANDING_FILES = [
  * (nl/de) ADD these namespaces without changing the frozen ones.
  */
 export const FROZEN_LANDING_NAMESPACES = [
-  "hero",
-  "journey",
-  "labourMarket",
+  "livingMarketReview",
   "landing",
+  "hero",
+  "nav",
+  "professions",
+  "workEntryReview",
   "live",
-  "map",
-  "draft",
-  "marketPulse",
-  "playercards",
 ] as const;
 
 export const FROZEN_LOCALES = ["lt", "en", "ru"] as const;

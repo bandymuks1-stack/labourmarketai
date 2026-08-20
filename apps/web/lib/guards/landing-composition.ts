@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
  * THE LANDING, AS THE BROWSER SEES IT — page.tsx plus everything it renders.
  *
  * WHY THIS EXISTS. Four guards asserted things about the landing by grepping
- * `app/[locale]/(marketing)/page.tsx` for a literal string. That worked while
+ * `app/[locale]/(home)/page.tsx` for a literal string. That worked while
  * the page was one long file. When the landing was recomposed into
  * `<HeroLiveDemo>`, `<FinalCtaBand>` and friends, every one of those guards went
  * red — not because a CTA had been removed, but because it had moved one file
@@ -45,7 +45,7 @@ function importsOf(webRoot: string, rel: string, src: string): string[] {
   return out;
 }
 
-export const LANDING_PAGE = "app/[locale]/(marketing)/page.tsx";
+export const LANDING_PAGE = "app/[locale]/(home)/page.tsx";
 
 /**
  * Every file in the landing's render tree, page first, deduped and depth-capped.

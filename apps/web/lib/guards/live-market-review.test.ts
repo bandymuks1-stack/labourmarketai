@@ -4,8 +4,14 @@ import { join } from "node:path";
 
 const webRoot = join(__dirname, "..", "..");
 const reviewRoot = join(webRoot, "app", "[locale]", "live-market-review");
+const homeRoot = join(webRoot, "app", "[locale]", "(home)");
 
 const pageSource = readFileSync(join(reviewRoot, "page.tsx"), "utf8");
+const homeSource = readFileSync(join(homeRoot, "page.tsx"), "utf8");
+const landingSource = readFileSync(
+  join(reviewRoot, "live-market-page.tsx"),
+  "utf8",
+);
 const commandSource = readFileSync(
   join(reviewRoot, "live-market-command.tsx"),
   "utf8",
@@ -21,7 +27,7 @@ const dataSource = readFileSync(
 
 describe("live market owner-review surface", () => {
   it("uses the governed current vacancy projection instead of pinned UI numbers", () => {
-    expect(pageSource).toContain("readLiveMarketLandingSnapshot");
+    expect(landingSource).toContain("readLiveMarketLandingSnapshot");
     expect(dataSource).toContain("readPublicVacancySupplyCounts");
     expect(dataSource).toContain("searchPublicVacancyPreviews");
     expect(commandSource).not.toMatch(/41[,.]272|7[,.]920|4[,.]289/);
@@ -48,6 +54,12 @@ describe("live market owner-review surface", () => {
     expect(commandSource).toContain("/company-need");
   });
 
+  it("ships the approved command surface as the canonical indexed landing", () => {
+    expect(homeSource).toContain("buildPageMetadata");
+    expect(homeSource).toContain("LiveMarketLanding");
+    expect(pageSource).toContain("index: false");
+  });
+
   it("keeps automatic movement optional", () => {
     expect(commandSource).toContain("prefers-reduced-motion: reduce");
     expect(commandSource).toContain("visibilitychange");
@@ -56,7 +68,7 @@ describe("live market owner-review surface", () => {
     expect(stylesSource).toContain('data-paused="true"');
   });
 
-  it("shows Europe-wide profession activity and the complete evidence event", () => {
+  it("keeps city geography out of conceptual profession activity", () => {
     for (const city of [
       "Rotterdam",
       "Berlin",
@@ -65,8 +77,13 @@ describe("live market owner-review surface", () => {
       "Milan",
       "Valencia",
     ]) {
-      expect(commandSource).toContain(city);
+      expect(commandSource).not.toContain(city);
     }
+    expect(commandSource).toContain('data-layer="conceptual-sector-activity"');
+    expect(commandSource).toContain("Conceptual sector activity");
+  });
+
+  it("shows Europe-wide profession activity and the complete evidence event", () => {
     for (const profession of [
       "electrician",
       "driver",
@@ -77,13 +94,13 @@ describe("live market owner-review surface", () => {
     ]) {
       expect(dataSource).toContain(profession);
     }
-    expect(pageSource).toContain("chain.steps.need.title");
-    expect(pageSource).toContain("chain.steps.person.title");
-    expect(pageSource).toContain("chain.steps.work.title");
-    expect(pageSource).toContain("chain.steps.journal.title");
-    expect(pageSource).toContain("evidenceVerifiedTitle");
-    expect(pageSource).toContain("capabilityGrowsTitle");
-    expect(pageSource).toContain("chain.steps.next.title");
+    expect(landingSource).toContain("chain.steps.need.title");
+    expect(landingSource).toContain("chain.steps.person.title");
+    expect(landingSource).toContain("chain.steps.work.title");
+    expect(landingSource).toContain("chain.steps.journal.title");
+    expect(landingSource).toContain("evidenceVerifiedTitle");
+    expect(landingSource).toContain("capabilityGrowsTitle");
+    expect(landingSource).toContain("chain.steps.next.title");
     expect(commandSource).toContain("styles.entryBand");
     expect(commandSource).toContain("styles.opportunityStream");
   });
