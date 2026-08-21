@@ -389,11 +389,17 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/[id]/page.tsx");
   });
 
-  it("the landing V1 record is bound to PR #1221 and exactly six findings on root", () => {
+  it("the landing V1 record is bound to PRs #1221/#1225 and exactly six findings on root", () => {
     const landing = SCOPED_OWNER_WAIVERS[2];
     expect(landing.id).toBe("public-acquisition-route-landing-v1");
     expect(landing.axioms).toEqual(["A-01"]);
-    expect(landing.pullRequests).toEqual([1221]);
+    // #1225 (FOCUS = the recovered previous landing) modifies the same root
+    // route, so it needs its own owner decision — the PR binding is what makes
+    // that mandatory rather than inherited. Owner granted it explicitly for
+    // #1225 ONLY, 2026-08-21. Every other field below is unchanged, which is
+    // the evidence the waiver was extended and not widened: same six findings,
+    // same two files, same branch list, same expiry.
+    expect(landing.pullRequests).toEqual([1221, 1225]);
     expect(landing.owner).toMatch(/SHIP THIS LANDING AS V1/);
     expect(landing.files).toEqual(["/", "apps/web/app/[locale]/page.tsx"]);
     expect(landing.expectedFindings).toHaveLength(6);

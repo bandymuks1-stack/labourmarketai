@@ -411,7 +411,7 @@ export const SCOPED_OWNER_WAIVERS = [
     axioms: ["A-01"],
     scope:
       "The canonical public living-market V1 landing at / approved by the owner on 2026-08-20",
-    pullRequests: [1221],
+    pullRequests: [1221, 1225],
     approvedHeadShas: [],
     postMergeBranches: ["main"],
     files: ["/", "apps/web/app/[locale]/page.tsx"],
