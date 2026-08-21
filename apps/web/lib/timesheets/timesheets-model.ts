@@ -5,12 +5,22 @@
  * timesheets section. No server-only imports, no IO.
  *
  * The model codes against the `public.timesheets` contract the SEPARATE,
- * human-gated migration 20260817170000_timesheets_v1 proposes. Until the
- * lead applies it the read/action layers degrade honestly (the established
- * tasks/finance/approvals pattern) — nothing here fakes an hour.
+ * human-gated migration 20260817170000_timesheets_v1 proposes. That migration
+ * IS APPLIED in production (and its derivation was replaced by
+ * 20260818150000_journal_canonical_work_time_v1); the read/action layers keep
+ * their honest degradation path for stacks where it is absent — nothing here
+ * fakes an hour.
  *
  * DERIVED, NEVER A SECOND HOURS STORE: a timesheet's lines are a frozen COPY
- * of journal-derived rows (journal_entry_work_items hours). The Work Journal
+ * of journal-derived rows — the CANONICAL source is `journal_entry_metrics`
+ * (`fragment_time`, or entry-level `quantity` in a time unit), resolved by
+ * `lib/journal/work-time` and by `timesheet_compute_lines_v1`.
+ *
+ * It is NOT `journal_entry_work_items`. That table has zero lifetime inserts
+ * and no writer anywhere; an earlier revision of this comment named it, and a
+ * later audit re-diagnosed the whole feature from this sentence rather than
+ * from the deployed function. The deployed function reports its own source as
+ * `journal_entry_metrics` — trust that, not this comment. The Work Journal
  * stays the only live hours truth; correcting hours happens in the journal,
  * then refresh + resubmit. Approval runs on the canonical Workflow & Approval
  * Engine (context_entity_type = 'timesheet') — nothing re-implemented here.
