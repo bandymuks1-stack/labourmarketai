@@ -8239,6 +8239,12 @@
     },
     "possibleNote": "Sobald Ihr Profil bereit ist, können Arbeitgeber Sie finden und über Ihr Konto Kontakt aufnehmen.",
     "footnote": "Dies sind ehrliche Signale aus Ihrem Profil — keine Bewertung und kein Versprechen. Über die endgültige Passung entscheiden immer Menschen.",
+    "noWorkType": {
+      "title": "Wir wissen nicht, welche Arbeit Sie machen",
+      "body": "Nennen Sie Ihren Beruf, dann zeigen wir Stellen in Ihrem Fach statt einfach der neuesten Anzeigen.",
+      "cta": "Beruf hinzufügen",
+      "dismiss": "Jetzt nicht"
+    },
     "noSkills": {
       "title": "Ihre Fähigkeiten sind noch nicht erfasst",
       "body": "Fähigkeits-Matching braucht Nachweise. Fügen Sie Ihrem Arbeitsjournal Arbeitseinträge hinzu — aus echter Arbeit erkannte Fähigkeiten machen Ihre Matches aussagekräftig.",

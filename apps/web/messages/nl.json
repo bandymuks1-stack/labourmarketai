@@ -8234,6 +8234,12 @@
     },
     "possibleNote": "Zodra je profiel klaar is, kunnen werkgevers je vinden en via je account contact opnemen.",
     "footnote": "Dit zijn eerlijke signalen uit je profiel — geen beoordeling en geen belofte. De uiteindelijke match wordt altijd door mensen bepaald.",
+    "noWorkType": {
+      "title": "We weten niet welk werk je doet",
+      "body": "Vertel ons je vak, dan tonen we vacatures in jouw werk in plaats van simpelweg de nieuwste advertenties.",
+      "cta": "Mijn beroep toevoegen",
+      "dismiss": "Niet nu"
+    },
     "noSkills": {
       "title": "Je vaardigheden zijn nog niet vastgelegd",
       "body": "Vaardighedenmatching heeft bewijs nodig. Voeg werkregistraties toe aan je werkjournaal — erkende vaardigheden uit echt werk maken je matches betekenisvol.",

@@ -1955,6 +1955,12 @@
     "cta": "Tagasi algusesse"
   },
   "opportunities": {
+    "noWorkType": {
+      "title": "Me ei tea, mis tööd sa teed",
+      "body": "Ütle oma amet ja näitame sinu ala töökohti, mitte lihtsalt kõige uuemaid kuulutusi.",
+      "cta": "Lisa amet",
+      "dismiss": "Mitte praegu"
+    },
     "saved": {
       "save": "[EN] Save",
       "saved": "[EN] Saved",

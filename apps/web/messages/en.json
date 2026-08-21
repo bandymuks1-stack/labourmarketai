@@ -8234,6 +8234,12 @@
     },
     "possibleNote": "Once your profile is ready, employers can find you and reach out through your account.",
     "footnote": "These are honest signals from your profile — not a rating or a promise. Final fit is always decided by people.",
+    "noWorkType": {
+      "title": "We don't know what work you do",
+      "body": "Tell us your trade and we'll show you opportunities in your work — not just the newest ads of any kind.",
+      "cta": "Add my profession",
+      "dismiss": "Not now"
+    },
     "noSkills": {
       "title": "Your skills aren't recorded yet",
       "body": "Skill matching needs evidence. Add work entries to your Work Journal — recognized skills from real work make your matches meaningful.",
