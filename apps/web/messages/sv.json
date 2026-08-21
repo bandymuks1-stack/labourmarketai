@@ -367,6 +367,10 @@
       "country_label": "[EN] Country",
       "country_placeholder": "Välj land",
       "error_country_required": "Välj ett land.",
+      "profession_label": "Vilket arbete utför du?",
+      "profession_placeholder": "Välj ditt arbete",
+      "profession_hint": "Vi använder detta för att hitta arbete som ditt. Sedan anger du dina färdigheter — matchningen behöver båda. Du kan ändra det senare.",
+      "error_profession_required": "Välj vilket arbete du utför.",
       "nextSteps": {
         "eyebrow": "Efter detta — din riktiga profil",
         "s1": "Importera ditt CV (valfritt) för att fylla i profilen snabbare",

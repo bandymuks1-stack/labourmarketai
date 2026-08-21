@@ -367,6 +367,10 @@
       "country_label": "[EN] Country",
       "country_placeholder": "Izvēlieties valsti",
       "error_country_required": "Lūdzu, izvēlieties valsti.",
+      "profession_label": "Kādu darbu tu dari?",
+      "profession_placeholder": "Izvēlies savu darbu",
+      "profession_hint": "Pēc tā meklējam tev piemērotu darbu. Tālāk norādīsi savas prasmes — atbilstībai vajadzīgas abas. Vēlāk to vari mainīt.",
+      "error_profession_required": "Izvēlies darbu, ko dari.",
       "nextSteps": {
         "eyebrow": "Pēc tam — tavs reālais profils",
         "s1": "Importē savu CV (pēc izvēles), lai ātrāk aizpildītu profilu",

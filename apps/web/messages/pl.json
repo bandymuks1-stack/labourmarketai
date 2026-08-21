@@ -367,6 +367,10 @@
       "country_label": "[EN] Country",
       "country_placeholder": "Wybierz kraj",
       "error_country_required": "Proszę wybrać kraj.",
+      "profession_label": "Jaką pracę wykonujesz?",
+      "profession_placeholder": "Wybierz swoją pracę",
+      "profession_hint": "Na tej podstawie szukamy pracy takiej jak Twoja. Dalej podasz swoje umiejętności — dopasowanie potrzebuje obu. Możesz to później zmienić.",
+      "error_profession_required": "Wybierz pracę, którą wykonujesz.",
       "nextSteps": {
         "eyebrow": "Po tym kroku — Twój realny profil",
         "s1": "Zaimportuj CV (opcjonalnie), aby szybciej uzupełnić profil",

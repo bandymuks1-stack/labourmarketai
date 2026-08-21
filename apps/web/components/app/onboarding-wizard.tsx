@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
@@ -10,6 +10,7 @@ import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
 import { countryDisplayName } from "@/lib/location/country-model";
+import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -38,12 +39,28 @@ export function OnboardingWizard({
   returnTo?: string | null;
 }) {
   const t = useTranslations("auth.onboarding");
+  const tProfession = useTranslations("professions");
   const locale = useLocale();
+
+  // Registry slugs → the label in the language on screen, ordered by that
+  // label. `useMemo` because the collator and 49 lookups should not re-run on
+  // every keystroke in the name field.
+  const professionOptions = useMemo(() => {
+    const collator = new Intl.Collator(locale);
+    return PROFESSION_SLUGS.map((slug) => ({
+      slug,
+      label: tProfession(slug),
+    })).sort((a, b) => collator.compare(a.label, b.label));
+  }, [locale, tProfession]);
   const [step, setStep] = useState<1 | 2>(1);
   const [roles, setRoles] = useState<Set<Role>>(() => new Set());
   const [displayName, setDisplayName] = useState(defaultName);
   // No pre-selected country — the user chooses (placeholder until they do).
   const [country, setCountry] = useState<string>("");
+  // Same rule for the work type: no default, because a defaulted profession
+  // would be a fact nobody stated (§7 — nothing is auto-declared on a person's
+  // behalf). Asked only of a worker; a company-only signup never sees it.
+  const [professionSlug, setProfessionSlug] = useState<string>("");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -81,6 +98,10 @@ export function OnboardingWizard({
       setError(t("error_country_required"));
       return;
     }
+    if (roles.has("worker") && !professionSlug) {
+      setError(t("error_profession_required"));
+      return;
+    }
     const form = new FormData();
     // canonical order keeps the chosen primary deterministic server-side
     form.set(
@@ -90,6 +111,9 @@ export function OnboardingWizard({
     form.set("locale", locale);
     form.set("display_name", displayName.trim());
     form.set("country", country);
+    if (roles.has("worker") && professionSlug) {
+      form.set("profession_slug", professionSlug);
+    }
     if (returnTo) form.set("next", returnTo);
     // Primary role = first selected in canonical order (mirrors the
     // server-side primary derivation). Coarse, non-identifying.
@@ -271,6 +295,43 @@ export function OnboardingWizard({
           ))}
         </select>
       </label>
+
+      {/* WHAT WORK THIS PERSON DOES — asked here because this is the moment
+          of highest intent, and because it is the single field the rest of the
+          product needs: the match engine's subject, the profile-directed pool
+          of external ads and the CV work direction all read it. The RPC has
+          accepted it since the M1 C-scope migration; the form simply never
+          asked, and production shows the result — 26 of 36 workers have a
+          country (asked) and 4 have a profession (not asked).
+
+          Closed set, from the platform's own registry. Sorted by the LOCALIZED
+          label, so the list reads alphabetically in the language on screen
+          rather than in slug order. */}
+      {roles.has("worker") && (
+        <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+          {t("profession_label")}
+          <select
+            name="profession_slug"
+            value={professionSlug}
+            onChange={(e) => setProfessionSlug(e.target.value)}
+            required
+            data-testid="onboarding-profession"
+            className={inputCls}
+          >
+            <option value="" disabled>
+              {t("profession_placeholder")}
+            </option>
+            {professionOptions.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+          <span className="text-meta leading-relaxed text-text-muted">
+            {t("profession_hint")}
+          </span>
+        </label>
+      )}
 
       {/* Landing→profile continuity (DESIGN.md): honestly preview the real
           profile the user builds next, so the first post-CTA screen does not
