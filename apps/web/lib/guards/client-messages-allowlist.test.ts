@@ -250,6 +250,20 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     assertGroupCovered(usage, MARKETING_CLIENT_MESSAGE_ROOTS, "(marketing)");
   });
 
+  // The FOCUS arm is the recovered production landing, so it mounts the same
+  // public chrome the (marketing) layout mounted and ships the SAME marketing
+  // pick from its own provider — not the union, and not the minimal base.
+  it("stable-landing (FOCUS baseline) tree ⊆ MARKETING_CLIENT_MESSAGE_ROOTS", () => {
+    const usage = deriveClientUsage(
+      treeEntries(join(LOCALE_DIR, "stable-landing")),
+    );
+    assertGroupCovered(
+      usage,
+      MARKETING_CLIENT_MESSAGE_ROOTS,
+      "stable-landing",
+    );
+  });
+
   it("auth tree ⊆ AUTH_CLIENT_MESSAGE_ROOTS", () => {
     const usage = deriveClientUsage(treeEntries(join(LOCALE_DIR, "auth")));
     assertGroupCovered(usage, AUTH_CLIENT_MESSAGE_ROOTS, "auth");
@@ -276,7 +290,9 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         join(LOCALE_DIR, "live-market-review"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
-      join(LOCALE_DIR, "page.tsx"),
+      // `page.tsx` is deliberately absent: it is a two-line arm selector whose
+      // FOCUS branch mounts its own marketing provider (asserted above) and
+      // whose LIVE branch is the review tree already enumerated here.
       join(LOCALE_DIR, "error.tsx"),
       join(LOCALE_DIR, "not-found.tsx"),
     ]);
@@ -300,6 +316,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "invite",
       "live-market-review",
       "onboarding",
+      "stable-landing",
     ]);
   });
 });

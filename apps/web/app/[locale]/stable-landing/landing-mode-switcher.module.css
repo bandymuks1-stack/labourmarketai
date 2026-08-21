@@ -1,0 +1,45 @@
+/* Floating experiment control. It sits above the baseline rather than inside
+   its layout, so the recovered landing keeps its historical composition. */
+.switcher {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(177, 208, 204, 0.22);
+  border-radius: 999px;
+  background: rgba(2, 14, 20, 0.9);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.switcher button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #9ba9a8;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+}
+
+.switcher button[aria-pressed="true"] {
+  background: rgba(89, 223, 180, 0.14);
+  color: #59dfb4;
+}
+
+.switcher button:focus-visible {
+  outline: 2px solid #59dfb4;
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .switcher {
+    right: 12px;
+    bottom: 12px;
+  }
+}

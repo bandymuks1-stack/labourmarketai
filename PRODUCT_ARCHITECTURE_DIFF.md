@@ -33,10 +33,16 @@ _No new product surface was added by this PR._
 | `not_ai_controlled` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
 | `requires_leaving_workspace` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
 | `requires_new_page` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `/` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_leaving_workspace` | A-01 | `/` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `world_state_cannot_control_it` | A-01 | `/create-cv` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/jobs` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/jobs/[id]` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `/` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 
 ## Rules that were checked
 
