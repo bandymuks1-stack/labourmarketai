@@ -1955,6 +1955,12 @@
     "cta": "Tilbage til start"
   },
   "opportunities": {
+    "noWorkType": {
+      "title": "Vi ved ikke, hvilket arbejde du laver",
+      "body": "Fortæl os dit fag, så viser vi job inden for dit arbejde i stedet for blot de nyeste annoncer.",
+      "cta": "Tilføj mit fag",
+      "dismiss": "Ikke nu"
+    },
     "saved": {
       "save": "Gem",
       "saved": "Gemt",

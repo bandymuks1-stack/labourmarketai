@@ -120,6 +120,23 @@ export const FUNNEL_EVENTS = {
   // the completion CTA. journal_entry_saved → this → return_visit is the
   // measurable "contribute → benefit → inspect" chain (§14).
   journalRematchViewed: "journal_rematch_viewed",
+  // ── Profession recovery (2026-08-21). Onboarding now asks what work the
+  //    person does, but the people already PAST that screen never were: 25 of
+  //    29 onboarded workers hold no profession, so their board cannot be
+  //    directed at their trade. These three measure whether one dismissible
+  //    prompt actually recovers them, and `dismissed` is the honest
+  //    denominator that stops "opened" from looking like consent. Bounded
+  //    names only, NO metadata: which trade a person selected is profile data
+  //    and never belongs in an event.
+  //
+  //    There is deliberately NO `profession_added` event. The conversion is
+  //    already visible as real state — a `worker_professions` row — and a row
+  //    cannot drift from the thing it measures the way a fire-and-forget
+  //    client event can. Declaring an event nothing emits would be a dead
+  //    constant wearing the costume of measurement.
+  professionRecoveryPromptSeen: "profession_recovery_prompt_seen",
+  professionRecoveryPromptOpened: "profession_recovery_prompt_opened",
+  professionRecoveryPromptDismissed: "profession_recovery_prompt_dismissed",
 } as const;
 
 export type FunnelEventName =

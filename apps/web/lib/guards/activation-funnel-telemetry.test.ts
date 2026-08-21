@@ -97,6 +97,16 @@ const EXPECTED_EVENTS = [
   // Readiness loop: the retention heartbeat — after a journal contribution
   // genuinely changed skills, the person opened the recomputed board.
   "journal_rematch_viewed",
+  // Profession recovery (2026-08-21): onboarding began asking what work a
+  // person does, but everyone who joined earlier is past that screen — 25 of
+  // 29 onboarded workers held no profession, so their board could not be
+  // directed at their trade. These measure whether one dismissible prompt
+  // recovers them. `dismissed` is deliberately part of the set: without it
+  // `opened` would look like consent, and the denominator would flatter the
+  // funnel.
+  "profession_recovery_prompt_seen",
+  "profession_recovery_prompt_opened",
+  "profession_recovery_prompt_dismissed",
 ] as const;
 
 describe("activation funnel — event registry", () => {

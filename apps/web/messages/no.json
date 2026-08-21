@@ -1955,6 +1955,12 @@
     "cta": "Tilbake til start"
   },
   "opportunities": {
+    "noWorkType": {
+      "title": "Vi vet ikke hvilket arbeid du gjør",
+      "body": "Fortell oss faget ditt, så viser vi jobber innen arbeidet ditt i stedet for bare de nyeste annonsene.",
+      "cta": "Legg til yrke",
+      "dismiss": "Ikke nå"
+    },
     "saved": {
       "save": "[EN] Save",
       "saved": "[EN] Saved",

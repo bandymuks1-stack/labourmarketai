@@ -1955,6 +1955,12 @@
     "cta": "Atpakaļ uz sākumu"
   },
   "opportunities": {
+    "noWorkType": {
+      "title": "Mēs nezinām, kādu darbu tu dari",
+      "body": "Norādi savu profesiju, un mēs rādīsim darbus tavā jomā, nevis vienkārši jaunākos sludinājumus.",
+      "cta": "Pievienot profesiju",
+      "dismiss": "Ne tagad"
+    },
     "saved": {
       "save": "[EN] Save",
       "saved": "[EN] Saved",

@@ -8234,6 +8234,12 @@
     },
     "possibleNote": "Kai profilis paruoštas, darbdaviai gali jus rasti ir susisiekti per paskyrą.",
     "footnote": "Tai sąžiningi signalai pagal jūsų profilį — ne įvertinimas ir ne pažadas. Galutinį tinkamumą visada nusprendžia žmonės.",
+    "noWorkType": {
+      "title": "Nežinome, kokį darbą dirbi",
+      "body": "Pasakyk savo profesiją ir rodysime darbus tavo srityje, o ne tiesiog naujausius skelbimus.",
+      "cta": "Pridėti profesiją",
+      "dismiss": "Ne dabar"
+    },
     "noSkills": {
       "title": "Jūsų įgūdžiai dar neužfiksuoti",
       "body": "Įgūdžių atitikimui reikia įrodymų. Pridėkite darbo įrašus į darbo žurnalą — iš tikro darbo atpažinti įgūdžiai daro atitikmenis prasmingus.",

@@ -1955,6 +1955,12 @@
     "cta": "Wróć na początek"
   },
   "opportunities": {
+    "noWorkType": {
+      "title": "Nie wiemy, jaką pracę wykonujesz",
+      "body": "Podaj swój zawód, a pokażemy oferty w Twojej branży zamiast po prostu najnowszych ogłoszeń.",
+      "cta": "Dodaj zawód",
+      "dismiss": "Nie teraz"
+    },
     "saved": {
       "save": "[EN] Save",
       "saved": "[EN] Saved",

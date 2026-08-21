@@ -7,6 +7,7 @@ import { FeatureNote } from "@/components/app/feature-note";
 import { MatchSignals } from "@/components/app/match-signals";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { ExternalVacanciesSection } from "@/components/app/external-vacancies-section";
+import { ProfessionRecoveryPrompt } from "@/components/app/profession-recovery-prompt";
 import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-details-disclosure";
 import {
   OpportunityStructuredChips,
@@ -474,6 +475,24 @@ export default async function OpportunitiesPage({
                 ))}
               </div>
             </section>
+          ) : null}
+
+          {/* No work type: onboarding only started asking on 2026-08-21, so
+              everyone who joined before that is past the one screen that asks.
+              Without it `subject.professionSlug` is null, the profile-directed
+              pool never runs, and this board is the newest ads of any kind.
+              The signal is already loaded (`hasWorkType` is
+              `Boolean(subject.professionSlug)`), so this costs no query, and
+              the prompt is dismissible — it invites, it never blocks. */}
+          {result.kind === "ready" && !result.readiness.hasWorkType ? (
+            <ProfessionRecoveryPrompt
+              labels={{
+                title: t("noWorkType.title"),
+                body: t("noWorkType.body"),
+                cta: t("noWorkType.cta"),
+                dismiss: t("noWorkType.dismiss"),
+              }}
+            />
           ) : null}
 
           {/* No-evidence improvement state (PR5): skill matching needs skill
