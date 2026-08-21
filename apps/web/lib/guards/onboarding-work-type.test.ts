@@ -29,7 +29,14 @@ const WIZARD = join(web, "components", "app", "onboarding-wizard.tsx");
 const ACTION = join(web, "lib", "auth", "actions.ts");
 const MESSAGES = join(web, "messages");
 
-const read = (p: string) => readFileSync(p, "utf8");
+// CRLF-normalised at the read. This repository ships no `.gitattributes`, so a
+// Windows checkout materialises these sources with carriage returns while a
+// Linux CI runner gets bare newlines. The source assertions below compare
+// against multi-line literals, which a carriage return makes unmatchable — the
+// result is a guard that passes on CI and fails on every Windows machine, which
+// trains people to ignore a red guard. Same idiom as financial-ops.test.ts and
+// secdef-local-reset-reproducibility.test.ts.
+const read = (p: string) => readFileSync(p, "utf8").replace(/\r/g, "");
 
 const onboardingCopy = (locale: string): Record<string, string> => {
   const messages = JSON.parse(read(join(MESSAGES, `${locale}.json`))) as {
