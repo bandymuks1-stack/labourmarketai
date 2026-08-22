@@ -410,8 +410,8 @@ export const SCOPED_OWNER_WAIVERS = [
     id: "public-acquisition-route-landing-v1",
     axioms: ["A-01"],
     scope:
-      "The canonical public living-market V1 landing at / approved by the owner on 2026-08-20",
-    pullRequests: [1221],
+      "The canonical public landing at / approved by the owner — the living-market V1 (2026-08-20) and, from 2026-08-22, the restored previous production landing served as its FOCUS arm",
+    pullRequests: [1221, 1231],
     approvedHeadShas: [],
     postMergeBranches: ["main"],
     files: ["/", "apps/web/app/[locale]/page.tsx"],
@@ -424,7 +424,7 @@ export const SCOPED_OWNER_WAIVERS = [
       { code: "world_state_cannot_control_it", file: "/" },
     ],
     reason:
-      "A pre-authentication public landing cannot satisfy workspace-only questions. The owner explicitly approved and ordered this V1 to ship; the declaration answers all six no honestly; this record excuses those six findings for this one route and nothing else.",
+      "A pre-authentication public landing cannot satisfy workspace-only questions. The owner explicitly approved and ordered this V1 to ship; the declaration answers all six no honestly; this record excuses those six findings for this one route and nothing else. Extended to #1231 on 2026-08-22: the owner approved restoring the ACTUAL previous production landing as the FOCUS arm of this same canonical route, while LIVE stays unchanged. That adds no route, no seventh finding and no new axiom — both arms answer the same six workspace questions the same honest no, and a crawler still receives exactly one indexed landing at /. The waiver is NOT broadened to anything else.",
     resolvedBy:
       "gate-learns-public-acquisition-route-category (owner constitution decision)",
     expiresAt: "2026-12-31",
