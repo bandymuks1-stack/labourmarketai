@@ -16,6 +16,14 @@ import { describe, expect, it } from "vitest";
  *   count_public_vacancies_v1
  *     -> readPublicVacancySupplyCounts   (lib/vacancy-store/public-vacancy-preview.ts)
  *     -> readLiveMarketLandingSnapshot   (lib/market/live-market-landing.ts)
+ *
+ * ONE MARKET TRUTH, TWO PRESENTATIONS (owner command 2026-08-22 §9). FOCUS
+ * used to state typed marketing floors while LIVE stated real counts — the
+ * exact "static counters here, real counters there" split the owner forbade.
+ * Both arms now read the SAME snapshot through the SAME cache entry, so this
+ * file pins the FOCUS band alongside the LIVE panel: neither may hard-code a
+ * total, invent a second reader, or substitute a constant when the reader is
+ * unavailable.
  */
 
 const WEB = join(__dirname, "..", "..");
@@ -26,6 +34,11 @@ const command = read(
   "app/[locale]/live-market-review/live-market-command.tsx",
 );
 const page = read("app/[locale]/live-market-review/live-market-page.tsx");
+const focusBand = read("components/marketing/market-proof-band.tsx");
+const focusPage = read("app/[locale]/focus-landing/focus-landing.tsx");
+
+/** Every surface that renders a market count, in either presentation. */
+const ALL_MARKET_SURFACES = [reader, command, page, focusBand, focusPage];
 
 /** The floors that were previously rendered as if they were current. */
 const BANNED_TOTALS = [
@@ -47,7 +60,7 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
   });
 
   it("does not import or render a static coverage claim in the panel", () => {
-    for (const source of [reader, command, page]) {
+    for (const source of ALL_MARKET_SURFACES) {
       expect(source).not.toContain("SWEDEN_COVERAGE_CURRENT");
       expect(source).not.toContain("market-coverage-claims");
       expect(source).not.toContain("activeVacanciesFloor");
@@ -57,7 +70,7 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
   });
 
   it("contains no hard-coded vacancy or employer total anywhere in the panel", () => {
-    for (const source of [reader, command, page]) {
+    for (const source of ALL_MARKET_SURFACES) {
       for (const banned of BANNED_TOTALS) {
         expect(source).not.toContain(banned);
       }
@@ -104,9 +117,51 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
     expect(command).toContain("labels.verifiedMarketData");
   });
 
+  it("serves BOTH presentations from the one canonical reader", () => {
+    // FOCUS must not grow its own reader, its own RPC or client polling: it
+    // receives the snapshot the page already resolved, so both arms converge
+    // inside the same 300 s freshness window.
+    expect(focusPage).toContain("readLiveMarketLandingSnapshot");
+    expect(focusBand).toContain("LiveMarketLandingSnapshot");
+    expect(focusBand).toContain("market.activeVacancies");
+    expect(focusBand).toContain("market.distinctEmployers");
+    expect(reader).toContain("unstable_cache");
+    expect(reader).toContain("revalidate: 300");
+    // One reader for the whole product surface.
+    expect(focusBand).not.toContain("createClient");
+    expect(focusBand).not.toContain("useEffect");
+    expect(focusBand).not.toContain("setInterval");
+    expect(focusPage).not.toContain("setInterval");
+  });
+
+  it("omits the FOCUS counts too, rather than falling back to a floor", () => {
+    expect(focusBand).toContain("market.activeVacancies !== null");
+    expect(focusBand).toContain("market.distinctEmployers !== null");
+    expect(focusBand).not.toContain("asOfNote");
+    // The catalogs may no longer carry a value for either stat.
+    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+      const catalog = JSON.parse(
+        read(`messages/${locale}.json`),
+      ) as {
+        landing: {
+          marketProof: { stats: Record<string, { value?: string }> };
+          [k: string]: unknown;
+        };
+      };
+      const stats = catalog.landing.marketProof.stats;
+      expect(stats.regions, `${locale}: regions`).toBeUndefined();
+      for (const key of ["vacancies", "employers"]) {
+        expect(stats[key].value, `${locale}: ${key}.value`).toBeUndefined();
+      }
+    }
+  });
+
   it("shows the reader's own refresh timestamp as provenance", () => {
     expect(reader).toContain("lastRefreshedAt");
     expect(command).toContain("market.lastRefreshedAt");
+    expect(focusBand).toContain("market.lastRefreshedAt");
+    expect(focusBand).toContain('review("verifiedMarketData")');
+    expect(focusBand).toContain('review("dataSourceLabel")');
     // The stale hard-coded "as of <date>" note must not come back.
     expect(command).not.toContain("basisNote");
   });

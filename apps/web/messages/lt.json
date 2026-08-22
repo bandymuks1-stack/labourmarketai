@@ -12160,19 +12160,12 @@
       "title": "Darbo rinka skaičiais",
       "stats": {
         "vacancies": {
-          "value": "35 000+",
           "label": "aktyvių darbo galimybių"
         },
         "employers": {
-          "value": "7 000+",
           "label": "darbdavių darbo pasiūloje"
-        },
-        "regions": {
-          "value": "21",
-          "label": "regionas su aktyviais skelbimais"
         }
       },
-      "asOfNote": "Pagal 2026-08-19 darbo skelbimų duomenis; skaičiai kinta kasdien.",
       "topTitle": "Šiuo metu paklausiausios profesijos",
       "topNote": "Pagal aktyvius darbo skelbimus platformoje. Dalis skelbimų dar nepriskirta profesijai."
     }

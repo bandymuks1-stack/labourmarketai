@@ -18,6 +18,7 @@ import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
   pickMessages,
 } from "@/lib/i18n/client-messages";
+import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { LandingModeSwitcher } from "./landing-mode-switcher";
 
 /**
@@ -64,8 +65,14 @@ export async function FocusLanding({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("common");
-  const tHero = await getTranslations("landing.hero");
+  // The SAME canonical snapshot LIVE reads, through the SAME 300 s
+  // `unstable_cache` entry — one market truth, one freshness window, no
+  // FOCUS-only reader (owner command §9/§12).
+  const [market, t, tHero] = await Promise.all([
+    readLiveMarketLandingSnapshot(),
+    getTranslations("common"),
+    getTranslations("landing.hero"),
+  ]);
 
   return (
     <NextIntlClientProvider
@@ -108,10 +115,12 @@ export async function FocusLanding({
               <ProductChainBand />
             </div>
 
-            {/* ── Market proof — production-derived FLOOR numbers + the
-                   data-derived top-profession ranking. Coverage framing
-                   only. Static strings, zero request-time fetches. ─────── */}
-            <MarketProofBand />
+            {/* ── Market proof — the CURRENT verified counts from the
+                   canonical public vacancy contract, the same projection the
+                   LIVE panel renders, plus the data-derived top-profession
+                   ranking. Coverage framing only; Sweden is named as the
+                   source of the figures, never as the product's scope. ──── */}
+            <MarketProofBand market={market} locale={locale} />
 
             {/* ── Player Card + the proof system: fact vs proven skill vs
                    opinion, and the source-backed market evidence. ──────── */}

@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 
 const WEB = join(__dirname, "..", "..");
 const read = (path: string) => readFileSync(join(WEB, path), "utf8");
+/** Source with comments stripped — these pins are about CODE, not prose. */
+const code = (source: string) =>
+  source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
 const command = read(
   "app/[locale]/live-market-review/live-market-command.tsx",
@@ -27,10 +30,16 @@ const focusSwitcherStyles = read(
 /**
  * LIVE / FOCUS — two ALTERNATIVE landing experiences behind one URL.
  *
- * FOCUS is no longer a calmer restyling of the LIVE tree (which made the
- * comparison a landing against itself). It is the previous production
- * landing, restored from `(marketing)/page.tsx` at 7179882 — the commit
- * immediately before #1221 deleted it. This guard pins that separation.
+ * FOCUS is the previous production landing, restored from
+ * `(marketing)/page.tsx` at 7179882 — the commit immediately before #1221
+ * deleted it — and, since owner command 2026-08-22, the PRIMARY landing:
+ * every visitor without an explicit choice receives it. LIVE is the optional
+ * interactive experience, reachable only by explicitly selecting it.
+ *
+ * This guard pins the separation, the default, and the two properties that
+ * make the default trustworthy: persistence is written ONLY by an explicit
+ * click, and the LIVE control carries a discovery signal that survives
+ * reduced motion.
  */
 describe("canonical landing LIVE / FOCUS experiences", () => {
   it("keeps one indexed landing and no mode-specific product surface", () => {
@@ -52,7 +61,7 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
 
   it("resolves the arm on the SERVER so only one landing is shipped", () => {
     expect(rootPage).toContain("LANDING_MODE_COOKIE");
-    expect(rootPage).toContain('isLandingMode(value) ? value : "live"');
+    expect(rootPage).toContain('isLandingMode(value) ? value : "focus"');
     expect(rootPage).toMatch(/mode === "focus" \? \(\s*<FocusLanding/);
     expect(contract).toContain('LANDING_MODE_COOKIE = "lm_landing_mode"');
     // localStorage stays the persistence record; the cookie only lets the
@@ -62,10 +71,84 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
     expect(contract).toContain("samesite=lax");
   });
 
-  it("defaults an unknown visitor and every crawler to LIVE", () => {
+  it("defaults an unknown visitor and every crawler to FOCUS", () => {
+    // The fallback IS the whole default mechanism: no cookie, no explicit
+    // choice, therefore FOCUS. A crawler sends no cookie, so the indexed
+    // landing is the same one a fresh human gets.
+    expect(rootPage).toContain('return isLandingMode(value) ? value : "focus"');
+    // No heuristic may override it — nothing may branch on device, locale,
+    // geography or user agent to pick an arm.
+    const rootCode = code(rootPage);
+    for (const heuristic of [
+      "userAgent",
+      "navigator.",
+      "matchMedia",
+      "headers(",
+      "isMobile",
+      "geolocation",
+    ]) {
+      expect(rootCode, heuristic).not.toContain(heuristic);
+    }
+    // Reaching the LIVE tree already means LIVE was explicitly chosen.
     expect(command).toContain('useState<LandingMode>("live")');
-    // A crawler sends no cookie, so the fallback IS the indexed landing.
-    expect(rootPage).toContain('return isLandingMode(value) ? value : "live"');
+  });
+
+  it("persists ONLY an explicit choice, so the default stays honest", () => {
+    // Neither arm may write the record on mount: doing so would forge an
+    // explicit choice for a visitor who merely arrived, and would make a real
+    // LIVE choice indistinguishable from the old automatic default.
+    for (const source of [command, focusSwitcher]) {
+      expect(source).not.toMatch(
+        /useEffect\([\s\S]{0,400}?persistLandingMode\(\s*"(live|focus)"\s*\)/,
+      );
+    }
+    // The only writer is the explicit handler.
+    expect(command).toContain("persistLandingMode(nextMode)");
+    expect(focusSwitcher).toContain("persistLandingMode(next)");
+    expect(focusSwitcher).toContain('if (next === "focus") return;');
+  });
+
+  it("gives LIVE a restrained discovery signal on the FOCUS landing", () => {
+    // The switch itself is the invitation — never a popup, banner or toast,
+    // and never a word added to the restored composition.
+    expect(focusSwitcher).toContain("styles.liveDot");
+    expect(focusSwitcher).toContain('candidate === "live"');
+    expect(focusSwitcherStyles).toContain(".liveDot");
+    expect(focusSwitcherStyles).toContain("live-dot-breathe");
+    expect(focusSwitcherStyles).toContain("live-dot-attention");
+    // Bounded attention: a finite iteration count, never `infinite`.
+    expect(focusSwitcherStyles).toMatch(
+      /animation: live-dot-attention [^;]*\s\d+;/,
+    );
+    const switcherCode = code(focusSwitcher).toLowerCase();
+    for (const banned of ["dialog", "modal", "toast", "banner", "tooltip"]) {
+      expect(switcherCode, banned).not.toContain(banned);
+    }
+    // The restored landing must not gain LIVE advertising copy.
+    expect(focus).not.toMatch(/try live|discover live|new:/i);
+  });
+
+  it("keeps the signal accessible without motion", () => {
+    expect(focusSwitcherStyles).toContain(
+      "@media (prefers-reduced-motion: reduce)",
+    );
+    const reduced = focusSwitcherStyles.slice(
+      focusSwitcherStyles.indexOf("@media (prefers-reduced-motion: reduce)"),
+    );
+    expect(reduced).toContain("animation: none");
+    // The dot itself is never hidden — it is the static status indicator.
+    expect(reduced).not.toMatch(/\.liveDot[^}]*display:\s*none/);
+    // Keyboard affordances survive the transparent control.
+    expect(focusSwitcherStyles).toContain(":focus-visible");
+    expect(focusSwitcherStyles).toContain("outline");
+    // The floor is measured on the BUTTON rule, not on a container that
+    // merely happens to be tall enough.
+    const buttonRule = focusSwitcherStyles.slice(
+      focusSwitcherStyles.indexOf(".modeSwitcher button {"),
+    );
+    expect(buttonRule.slice(0, buttonRule.indexOf("}"))).toMatch(
+      /min-height: 44px/,
+    );
   });
 
   it("switches by reloading into the other tree, never by restyling", () => {
@@ -117,7 +200,7 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
       "PlayerCardShowcase",
       "TrustBand",
       "FinalCtaBand",
-    ].map((c) => focus.indexOf(`<${c} />`));
+    ].map((c) => focus.indexOf(`<${c} `));
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.

@@ -37,7 +37,6 @@ import {
   LANDING_EVENTS,
   landingEventMetadata,
   persistLandingMode,
-  readLandingMode,
   type LandingAudience,
   type LandingEventName,
   type LandingMode,
@@ -451,10 +450,12 @@ export function LiveMarketCommand({
   );
 
   useEffect(() => {
-    // The server already resolved the arm; reaching this component means LIVE.
-    // Re-align the persisted record so a stale localStorage value cannot
-    // disagree with what the visitor is actually looking at.
-    if (readLandingMode() !== "live") persistLandingMode("live");
+    // Deliberately writes NOTHING. Reaching this tree means the visitor
+    // explicitly chose LIVE, so the record already says so; writing it here
+    // anyway would manufacture an "explicit choice" for anyone who merely
+    // arrived, and the FOCUS default depends on that record staying honest
+    // (owner command §3). This effect only unblocks the LIVE workload once
+    // the client has hydrated.
     setModeReady(true);
   }, []);
 

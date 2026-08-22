@@ -1,34 +1,40 @@
 /**
- * The LIVE / FOCUS control on the restored landing.
+ * The LIVE / FOCUS control on the primary (FOCUS) landing.
  *
- * Floating rather than inline: the restored landing IS the historical
- * production layout, and the control did not exist in it. Docking it to the
- * viewport corner keeps the restored composition byte-for-byte intact while
- * still giving the visitor a way back to LIVE. Styling mirrors the LIVE
- * header switcher so the two arms present the same control.
+ * Floating rather than inline: FOCUS IS the historical production layout, and
+ * this control did not exist in it. Docking it to the viewport corner keeps
+ * the restored composition intact while still giving the visitor the one
+ * invitation to discover LIVE. Styling mirrors the LIVE header switcher so
+ * both arms present the same control.
  */
 .modeSwitcher {
   position: fixed;
   right: clamp(12px, 2.5vw, 28px);
   bottom: clamp(12px, 2.5vw, 28px);
   z-index: 60;
-  min-height: 30px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 3px;
+  padding: 4px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 5px;
+  border-radius: 7px;
   background: rgba(2, 14, 20, 0.72);
   backdrop-filter: blur(12px);
 }
 
+/* >=44px touch target on BOTH controls (§8) — measured on the button, not
+   on the container. The label stays the same size as the LIVE header
+   switcher's; only the hit area grows. */
 .modeSwitcher button {
-  min-width: 47px;
-  min-height: 24px;
+  min-width: 62px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 0;
-  border-radius: 3px;
-  padding: 0 8px;
+  border-radius: 4px;
+  padding: 0 10px;
   color: rgba(226, 235, 233, 0.58);
   background: transparent;
   font-size: 7px;
@@ -50,6 +56,77 @@
 .modeSwitcher button:hover,
 .modeSwitcher button:focus-visible {
   color: #59dfb4;
+}
+
+/* The visible focus ring must survive the transparent background. */
+.modeSwitcher button:focus-visible {
+  outline: 2px solid #59dfb4;
+  outline-offset: 2px;
+}
+
+/**
+ * The LIVE discovery signal.
+ *
+ * A 6px status dot, always painted — that is the static half of the signal,
+ * and the half that survives reduced motion. On top of it sit two restrained
+ * motions: `live-dot-breathe`, a slow continuous opacity drift that reads as
+ * "something is running here", and `live-dot-attention`, ONE short ring pulse
+ * that starts after the hero has settled and stops after three cycles. There
+ * is no repeat, no colour flash and no scale bounce, so it never competes
+ * with the FOCUS hero or behaves like advertising.
+ */
+.liveDot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #59dfb4;
+  animation: live-dot-breathe 3.2s ease-in-out infinite;
+}
+
+.liveDot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(89, 223, 180, 0.55);
+  /* 1.4s settle delay, then exactly three cycles, then permanently calm. */
+  animation: live-dot-attention 1.9s ease-out 1.4s 3;
+}
+
+.modeSwitcher button[aria-pressed="true"] .liveDot {
+  background: #7ff0cb;
+}
+
+@keyframes live-dot-breathe {
+  50% {
+    opacity: 0.42;
+  }
+}
+
+@keyframes live-dot-attention {
+  0% {
+    box-shadow: 0 0 0 0 rgba(89, 223, 180, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(89, 223, 180, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(89, 223, 180, 0);
+  }
+}
+
+/* Reduced motion: no breathing, no attention pulse. The dot stays, so LIVE
+   still carries a clear static status indicator (§8). */
+@media (prefers-reduced-motion: reduce) {
+  .liveDot,
+  .liveDot::after {
+    animation: none;
+  }
+  .liveDot::after {
+    box-shadow: none;
+  }
 }
 
 @media (max-width: 600px) {

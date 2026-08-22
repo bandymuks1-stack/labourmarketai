@@ -1,66 +1,65 @@
 import { getTranslations } from "next-intl/server";
+import type { LiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { Reveal } from "@/components/marketing/reveal";
 import { Card } from "@/components/ui/Card";
 
 /**
- * MARKET PROOF BAND (landing minimal truth update, owner mandate 2026-08-17,
- * functional completion train V2 §27).
+ * MARKET PROOF BAND — FOCUS's view of the ONE canonical market truth.
  *
- * A compact, static block stating what the marketplace data actually holds —
- * coverage framing ONLY, never adoption framing (the four-population rule in
- * `lib/analytics/market-coverage-claims.ts`; guard:
- * `lib/guards/market-coverage-claims.test.ts`).
+ * ONE CANONICAL SOURCE (owner command 2026-08-22 §9): this band no longer
+ * renders the rounded, plus-suffixed floors it shipped with, nor the static
+ * region count beside them. A floor is a dated marketing approximation; the
+ * platform KNOWS the current counts, so showing an August 2026 reading as the
+ * market right now was the drift the owner ended. The figures are deliberately
+ * not repeated here — the guard forbids a market total appearing in this file
+ * at all, comments included. FOCUS and LIVE now read the SAME projection:
  *
- * DATA SOURCE (recorded per the claim-invariant "any re-quote must re-derive
- * from `public_vacancies`"): production read-back via Supabase MCP
- * `execute_sql` (read-only SELECTs) against the production project (the one
- * documented in docs/audits/sweden-market-truth-2026-08-17.md — the ref
- * string itself must not appear in user-facing source, per
- * lib/guards/single-domain-origin.test.ts), table `public.public_vacancies`.
+ *   count_public_vacancies_v1
+ *     -> readPublicVacancySupplyCounts  (lib/vacancy-store/public-vacancy-preview.ts)
+ *     -> readLiveMarketLandingSnapshot  (lib/market/live-market-landing.ts)
  *
- * CORRECTED 2026-08-19 (owner approval, docs/audits/landing-coverage-claim-basis-2026-08-18.md).
- * The original floors were read on `is_active AND lifecycle='published'` — a
- * predicate that counts ads the public job board refuses to serve. The band now
- * quotes `SWEDEN_COVERAGE_2026_08_19`, derived on the job board's OWN predicate
- * (`BROWSABLE_VACANCY_PREDICATE`) over a five-day window rather than one
- * reading, because the browsable pool oscillates ~8% inside a week:
+ * The snapshot is passed in rather than read here, so FOCUS resolves it once
+ * per render and shares the SAME `unstable_cache` (300 s) entry LIVE uses.
+ * No second reader, no second RPC, no client polling: when supply moves, both
+ * presentations converge inside one freshness window.
  *
- *   - browsable vacancies 2026-08-15..19: 40,460 · 40,089 · 37,105 · 38,181 ·
- *     39,795 → window low 37,105, floor 35,000+
- *   - identified employers (registry-id identity, no fuzzy name merge — see
- *     lib/employers/employer-identity.ts): 7,482 · 7,416 · 7,252 · 7,433 ·
- *     7,628 → window low 7,252, floor 7,000+
- *   - regions with browsable ads: 21, stable across the window, quoted exactly
+ * EXACT, NEVER SUBSTITUTED. The counts render verbatim through
+ * `Intl.NumberFormat` — never rounded, never re-bucketed, never floored. When
+ * the reader cannot answer, the counts are OMITTED (owner command §16): a
+ * stale floor under a "verified market data" heading is worse than no number.
+ * The provenance line is omitted with them — it describes those figures, and
+ * claiming verified data beside no data would be its own small dishonesty.
  *
- * A floor must survive the TROUGH, not the day it was measured — the shipped
- * "7 600+" was false on four of those five days. `floorsAreSupportedBy` in the
- * claim module now enforces that, and the guard test pins it.
+ * SCOPE HONESTY (§13). labourmarket.ai is a European platform; these exact
+ * figures describe only the coverage currently connected. Sweden is therefore
+ * the SOURCE of the numbers, carried as a subordinate provenance line — never
+ * a country-total claim, never the product identity. The coverage framing
+ * rule (no adoption verbs, no "all Europe" totals) still holds and is
+ * enforced by the coverage-claim module under lib/analytics.
  *
- * TOP PROFESSIONS: top profession families by active-ad count among ads with
- * a canonical `profession_slug` (post-cleanup v2 categorization; 18,192 of
- * 43,781 active ads carried a canonical tag at the 2026-08-17 measurement,
- * ~41.6%). Re-derived on the browsable basis 2026-08-18 the ORDER is
- * unchanged, so the ranking below still holds.
- * Because coverage is partial, the block shows the RANKING ONLY — no absolute
- * counts — and the visible note says some listings are not yet grouped by
- * profession. Measured order (ads): caregiver 4,415 · teacher 1,643 ·
- * sales_assistant 1,120 · warehouse_worker 964 · driver 924 · cleaner 880.
- * A ranking over the classified subset is a safe claim: these families lead
- * by a wide margin, and per-family employer counts corroborate the order.
+ * REGIONS, AUDITED AND REMOVED (§15). The third stat was a static Sweden
+ * coverage fact ("21 regions"), not a live measure — the public vacancy
+ * contract exposes no region count, and inventing one is forbidden. Inside a
+ * band that now states current verified data it could only ever read as a
+ * current European statistic while silently going stale, so the metric is
+ * removed rather than demoted; the grid drops to two columns and nothing else
+ * about the composition moves.
  *
- * Names render from the canonical `professions` taxonomy catalogs
- * (messages/<locale>/professions.json) — never new ad-hoc labels.
+ * TOP PROFESSIONS: unchanged. The ranking is a bounded, data-derived ordering
+ * of profession families, shown WITHOUT absolute counts because grouping
+ * covers only part of the listings (the visible note says so). Names render
+ * from the canonical `professions` taxonomy catalogs — never ad-hoc labels.
  *
- * LCP: server component, static translated strings, zero data fetches at
- * request time. No new blocking work on the landing route.
+ * LCP: server component. Its one data dependency is the shared cached
+ * snapshot the page already awaited, so this adds no request-time work.
  */
 
-/** Stat keys, in display order. Values live in `landing.marketProof.stats.*`. */
-export const MARKET_PROOF_STATS = [
-  "vacancies",
-  "employers",
-  "regions",
-] as const;
+/**
+ * Stat keys, in display order. Only the LABEL lives in
+ * `landing.marketProof.stats.*` now — the value comes from the canonical
+ * snapshot, so no message catalog can carry a market total again.
+ */
+export const MARKET_PROOF_STATS = ["vacancies", "employers"] as const;
 
 /**
  * Top profession families by active-ad count (production read-back
@@ -77,9 +76,36 @@ export const TOP_PROFESSION_FAMILY_SLUGS = [
   "cleaner",
 ] as const;
 
-export async function MarketProofBand() {
+export async function MarketProofBand({
+  market,
+  locale,
+}: {
+  /** The SAME canonical snapshot LIVE renders — resolved once by the page. */
+  readonly market: LiveMarketLandingSnapshot;
+  readonly locale: string;
+}) {
   const t = await getTranslations("landing.marketProof");
+  const review = await getTranslations("livingMarketReview");
   const professions = await getTranslations("professions");
+
+  // Exact counts or nothing: a count the canonical reader could not return is
+  // omitted, never filled with a constant (owner command §16).
+  const supply =
+    market.activeVacancies !== null && market.distinctEmployers !== null
+      ? {
+          vacancies: market.activeVacancies,
+          employers: market.distinctEmployers,
+        }
+      : null;
+  const numbers = new Intl.NumberFormat(locale);
+  const swedenName =
+    new Intl.DisplayNames([locale], { type: "region" }).of("SE") ?? "SE";
+  const refreshedAt = market.lastRefreshedAt
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeZone: "UTC",
+      }).format(new Date(market.lastRefreshedAt))
+    : null;
 
   return (
     <section className="mt-16" aria-labelledby="market-proof-title">
@@ -98,28 +124,43 @@ export async function MarketProofBand() {
       <Reveal delay={0.06}>
         {/* Canonical <Card> primitive — the visual-contract ratchet forbids
             new raw card-class call sites (visual-contract-v1.test.ts). */}
-        <div className="mt-8 grid gap-5 sm:grid-cols-3">
-          {MARKET_PROOF_STATS.map((key) => (
-            <Card key={key} className="flex flex-col gap-1.5">
-              <div data-testid={`market-proof-${key}`}>
-                <p className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
-                  {t(`stats.${key}.value`)}
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">
-                  {t(`stats.${key}.label`)}
-                </p>
-              </div>
-            </Card>
-          ))}
-        </div>
+        {supply ? (
+          <div
+            className="mt-8 grid gap-5 sm:grid-cols-2"
+            data-basis={market.basis}
+          >
+            {MARKET_PROOF_STATS.map((key) => (
+              <Card key={key} className="flex flex-col gap-1.5">
+                <div data-testid={`market-proof-${key}`}>
+                  <p className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
+                    {numbers.format(supply[key])}
+                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">
+                    {t(`stats.${key}.label`)}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : null}
       </Reveal>
 
-      {/* The honest basis line: floors, dated, changing daily. */}
-      <Reveal delay={0.1}>
-        <p className="mt-4 text-meta text-text-muted" data-testid="market-proof-basis">
-          {t("asOfNote")}
-        </p>
-      </Reveal>
+      {/* Provenance, subordinate by construction (§13/§14): the European
+             product identity stays in the heading above; Sweden is named only
+             as the SOURCE of these exact figures, alongside the reader's own
+             refresh stamp. No pinned "as of <date>" string can go stale here. */}
+      {supply ? (
+        <Reveal delay={0.1}>
+          <p
+            className="mt-4 text-meta text-text-muted"
+            data-testid="market-proof-basis"
+          >
+            {review("verifiedMarketData")}
+            {refreshedAt ? ` · ${refreshedAt}` : ""}
+            {` · ${review("dataSourceLabel")} · ${swedenName}`}
+          </p>
+        </Reveal>
+      ) : null}
 
       {/* ── Top professions in demand — ranking only, no absolute counts:
              profession grouping covers part of the listings, so counts over
