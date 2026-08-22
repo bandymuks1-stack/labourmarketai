@@ -38,9 +38,11 @@ import { activeLocales } from "@/lib/i18n/config";
  * reachable from that tree:
  *
  *  6. (marketing) tree  ⊆ MARKETING_CLIENT_MESSAGE_ROOTS;
+ *     focus-landing     ⊆ MARKETING_CLIENT_MESSAGE_ROOTS (own provider);
  *  7. auth + onboarding ⊆ AUTH_CLIENT_MESSAGE_ROOTS;
  *  8. everything under [locale] WITHOUT a group provider (cv, invite,
- *     [...rest], the root layout/error/not-found) ⊆ BASE_CLIENT_MESSAGE_ROOTS;
+ *     [...rest], the root layout/error/not-found) ⊆ BASE_CLIENT_MESSAGE_ROOTS,
+ *     and the canonical landing dispatcher ⊆ the union of its two arms;
  *  9. a client file with a NON-literal useTranslations() call (whole-tree
  *     or variable namespace) must NOT be reachable from a subset tree —
  *     only from trees that ship the FULL pick (dashboard, design);
@@ -250,6 +252,35 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     assertGroupCovered(usage, MARKETING_CLIENT_MESSAGE_ROOTS, "(marketing)");
   });
 
+  it("the canonical landing dispatcher stays inside its arms' picks", () => {
+    // `app/[locale]/page.tsx` mounts NO provider of its own: it resolves the
+    // arm on the server and renders either LIVE (provider-less, BASE pick
+    // from the root shell) or FOCUS (its own marketing pick). So everything
+    // reachable through it must be covered by the union of those two picks —
+    // a namespace that escapes BOTH would render raw keys in one arm.
+    const usage = deriveClientUsage([join(LOCALE_DIR, "page.tsx")]);
+    assertGroupCovered(
+      usage,
+      [...BASE_CLIENT_MESSAGE_ROOTS, ...MARKETING_CLIENT_MESSAGE_ROOTS],
+      "canonical landing dispatcher",
+    );
+  });
+
+  it("focus-landing tree ⊆ MARKETING_CLIENT_MESSAGE_ROOTS", () => {
+    // FOCUS is the restored previous production landing. It rendered inside
+    // the (marketing) route group, whose layout supplied the provider; at
+    // `/{locale}` it mounts that SAME marketing pick itself, so it is a
+    // subset tree in its own right rather than a provider-less one.
+    const usage = deriveClientUsage(
+      treeEntries(join(LOCALE_DIR, "focus-landing")),
+    );
+    assertGroupCovered(
+      usage,
+      MARKETING_CLIENT_MESSAGE_ROOTS,
+      "focus-landing",
+    );
+  });
+
   it("auth tree ⊆ AUTH_CLIENT_MESSAGE_ROOTS", () => {
     const usage = deriveClientUsage(treeEntries(join(LOCALE_DIR, "auth")));
     assertGroupCovered(usage, AUTH_CLIENT_MESSAGE_ROOTS, "auth");
@@ -262,7 +293,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     assertGroupCovered(usage, AUTH_CLIENT_MESSAGE_ROOTS, "onboarding");
   });
 
-  it("provider-less trees (home, review, cv, invite, [...rest], root shell) ⊆ BASE_CLIENT_MESSAGE_ROOTS", () => {
+  it("provider-less trees (review, cv, invite, [...rest], root shell) ⊆ BASE_CLIENT_MESSAGE_ROOTS", () => {
     // Every [locale] child WITHOUT its own provider must stay within the
     // root layout's minimal pick. Enumerated explicitly so a NEW top-level
     // route directory fails the inventory check below until it is either
@@ -276,7 +307,6 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         join(LOCALE_DIR, "live-market-review"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
-      join(LOCALE_DIR, "page.tsx"),
       join(LOCALE_DIR, "error.tsx"),
       join(LOCALE_DIR, "not-found.tsx"),
     ]);
@@ -285,8 +315,9 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
 
   it("every [locale] child route tree is accounted for", () => {
     // Inventory pin: full-pick trees (dashboard, design) + subset trees
-    // (marketing, auth, onboarding) + provider-less trees (home, review, cv,
-    // invite, [...rest]). A new top-level directory must be classified here.
+    // (marketing, focus-landing, auth, onboarding) + provider-less trees
+    // (home, review, cv, invite, [...rest]). A new top-level directory must
+    // be classified here.
     const children = readdirSync(LOCALE_DIR)
       .filter((e) => statSync(join(LOCALE_DIR, e)).isDirectory())
       .sort();
@@ -297,6 +328,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "business",
       "cv",
       "dashboard",
+      "focus-landing",
       "invite",
       "live-market-review",
       "onboarding",

@@ -138,6 +138,36 @@ import { join } from "node:path";
  * surface was added. The pure landing-experience contract joins this frozen
  * set, and `landing-experience-modes.test.ts` permanently guards canonical
  * integrity, persistence, workload deferral and analytics dimensions.
+ *
+ * FOCUS = the RESTORED previous production landing (OWNER APPROVAL 2026-08-22,
+ * granted verbatim for "restore the actual previous production
+ * labourmarket.ai landing as FOCUS, while keeping the current LIVE landing
+ * unchanged") — the FOCUS shipped by #1221 was a calmer RESTYLING of the LIVE
+ * tree, so the canonical surface was being compared against itself. FOCUS is
+ * now the landing production actually served immediately before #1221:
+ * `app/[locale]/(marketing)/page.tsx` at 7179882, recovered from git rather
+ * than rebuilt. That file is the only one that has ever served `/{locale}`
+ * and `git log --diff-filter=D` shows 5c78ac5 deleted it, so 7179882 is its
+ * final production state by definition rather than by judgement.
+ *
+ * The six components it composes are the ORIGINALS, unmodified: `git diff
+ * 7179882 main -- components/marketing/` is EMPTY, so restoring the
+ * composition restores the rendered landing. They join this frozen set for
+ * the first time since #1221 narrowed it to the live tree, together with the
+ * restored composition and its switcher. `market-proof-band.tsx` is
+ * DELIBERATELY re-frozen at its existing hash: its production-derived floors
+ * are owner-approved truth (see the 2026-08-19 entry above) and restoring the
+ * landing means restoring them, not re-deriving them.
+ *
+ * The regeneration moved exactly three existing hashes —
+ * `app/[locale]/page.tsx` (now a server dispatcher between the two arms),
+ * `live-market-command.tsx` (its switcher reloads instead of restyling) and
+ * `landing-experience.ts` (the bounded mode cookie the server reads) — and
+ * ZERO namespace hashes, which is the proof that no copy moved in either
+ * arm. LIVE's composition, motion, data panels and CTAs are untouched.
+ * Permanently guarded by `landing-experience-modes.test.ts`, which now pins
+ * the restoration itself: the six components, their order, the historical
+ * wrapper and `#how-it-works` anchor, and the reproduced (marketing) chrome.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -154,6 +184,18 @@ export const FROZEN_LANDING_FILES = [
   "app/[locale]/live-market-review/live-market-command.module.css",
   "lib/market/live-market-landing.ts",
   "lib/telemetry/landing-experience.ts",
+  // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
+  // landing, so its composition, its switcher and the six original
+  // components it renders are part of the landing render tree again.
+  "app/[locale]/focus-landing/focus-landing.tsx",
+  "app/[locale]/focus-landing/landing-mode-switcher.tsx",
+  "app/[locale]/focus-landing/landing-mode-switcher.module.css",
+  "components/marketing/hero-live-demo.tsx",
+  "components/marketing/product-chain-band.tsx",
+  "components/marketing/market-proof-band.tsx",
+  "components/marketing/player-card-showcase.tsx",
+  "components/marketing/trust-band.tsx",
+  "components/marketing/final-cta-band.tsx",
 ] as const;
 
 /**
