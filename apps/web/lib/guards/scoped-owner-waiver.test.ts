@@ -389,11 +389,16 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/[id]/page.tsx");
   });
 
-  it("the landing V1 record is bound to PR #1221 and exactly six findings on root", () => {
+  it("the landing record is bound to the reviewed PRs and exactly six findings on root", () => {
     const landing = SCOPED_OWNER_WAIVERS[2];
     expect(landing.id).toBe("public-acquisition-route-landing-v1");
     expect(landing.axioms).toEqual(["A-01"]);
-    expect(landing.pullRequests).toEqual([1221]);
+    // #1221 shipped LIVE V1; #1231 restored the previous production landing
+    // as the FOCUS arm of the SAME canonical route (owner approval
+    // 2026-08-22). Both arms answer the same six questions the same honest
+    // no — the finding set below is unchanged, which is what keeps this an
+    // extension rather than a broadening.
+    expect(landing.pullRequests).toEqual([1221, 1231]);
     expect(landing.owner).toMatch(/SHIP THIS LANDING AS V1/);
     expect(landing.files).toEqual(["/", "apps/web/app/[locale]/page.tsx"]);
     expect(landing.expectedFindings).toHaveLength(6);
