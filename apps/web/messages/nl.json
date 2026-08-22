@@ -12160,19 +12160,12 @@
       "title": "De arbeidsmarkt in cijfers",
       "stats": {
         "vacancies": {
-          "value": "35.000+",
           "label": "actieve vacatures"
         },
         "employers": {
-          "value": "7.000+",
           "label": "werkgevers achter de vacatures"
-        },
-        "regions": {
-          "value": "21",
-          "label": "regio's met actieve vacatures"
         }
       },
-      "asOfNote": "Op basis van vacaturedata van 19-08-2026; de cijfers veranderen dagelijks.",
       "topTitle": "Meest gevraagde beroepen op dit moment",
       "topNote": "Gerangschikt op actieve vacatures op het platform. Een deel van de vacatures is nog niet aan een beroep gekoppeld."
     }

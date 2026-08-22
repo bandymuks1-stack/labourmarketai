@@ -3938,19 +3938,12 @@
       "title": "Tööturg numbrites",
       "stats": {
         "vacancies": {
-          "value": "35 000+",
           "label": "aktiivset tööpakkumist"
         },
         "employers": {
-          "value": "7 000+",
           "label": "tööandjat kuulutuste taga"
-        },
-        "regions": {
-          "value": "21",
-          "label": "piirkonda aktiivsete kuulutustega"
         }
       },
-      "asOfNote": "Kuulutuste andmete põhjal seisuga 19.08.2026; numbrid muutuvad iga päev.",
       "topTitle": "Praegu nõutuimad ametid",
       "topNote": "Järjestatud platvormi aktiivsete töökuulutuste järgi. Osa kuulutusi pole veel ametiga seotud."
     }

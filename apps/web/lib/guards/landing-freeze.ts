@@ -168,6 +168,44 @@ import { join } from "node:path";
  * Permanently guarded by `landing-experience-modes.test.ts`, which now pins
  * the restoration itself: the six components, their order, the historical
  * wrapper and `#how-it-works` anchor, and the reproduced (marketing) chrome.
+ *
+ * FOCUS BECOMES THE DEFAULT + ONE MARKET TRUTH (OWNER COMMAND 2026-08-22,
+ * approval granted verbatim for this exact change) — three bindings, no
+ * redesign of either arm:
+ *
+ *   1. DEFAULT. `page.tsx` now falls back to FOCUS, so a visitor without an
+ *      explicit choice gets the stable landing and LIVE opens only when it is
+ *      chosen. Persistence became explicit-only: both arms stopped writing
+ *      the record on mount, because a mount-write forges an "explicit choice"
+ *      for anyone who merely arrived and makes a real LIVE choice
+ *      indistinguishable from the old automatic default. Ambiguous or absent
+ *      state therefore resolves to FOCUS, as the command requires.
+ *   2. DISCOVERY. The FOCUS switcher's LIVE control gained a 6 px status dot
+ *      with a slow breathe and ONE bounded three-cycle attention pulse after
+ *      the hero settles. No popup, banner, toast or tooltip, and not one word
+ *      added to the restored composition — the switch itself is the
+ *      invitation. Under `prefers-reduced-motion` both animations drop and
+ *      the dot remains, so the signal never depends on motion alone.
+ *   3. ONE MARKET TRUTH. `market-proof-band.tsx` no longer renders typed
+ *      floors. It receives the SAME `readLiveMarketLandingSnapshot` result
+ *      LIVE renders — same projection, same 300 s cache entry — and prints
+ *      the exact counts, omitting them entirely when the reader cannot
+ *      answer. Provenance is the reader's own refresh stamp plus a
+ *      subordinate `Data source · Sweden`, never a pinned date. The static
+ *      `regions` stat was audited and REMOVED: the public vacancy contract
+ *      exposes no region count, so inside a band stating current verified
+ *      data it could only read as a live European statistic while silently
+ *      going stale. The grid drops to two columns; nothing else moves.
+ *
+ * The i18n regeneration is the proof that this stayed a data change: the
+ * three frozen `*.landing` namespace hashes moved ONLY because the stale
+ * `stats.*.value`, `stats.regions` and `asOfNote` keys were deleted from all
+ * eleven catalogs — no copy was rewritten, and the labels, eyebrow, title and
+ * ranking notes are byte-identical. `verified-market-data-live.test.ts` now
+ * pins BOTH presentations to the one canonical reader, and
+ * `landing-market-proof.test.ts` was inverted: it used to prove the typed
+ * numbers equalled the claim module, and now proves no catalog carries a
+ * market total at all.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

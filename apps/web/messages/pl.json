@@ -3938,19 +3938,12 @@
       "title": "Rynek pracy w liczbach",
       "stats": {
         "vacancies": {
-          "value": "35 000+",
           "label": "aktywnych ofert pracy"
         },
         "employers": {
-          "value": "7 000+",
           "label": "pracodawców w ogłoszeniach"
-        },
-        "regions": {
-          "value": "21",
-          "label": "regionów z aktywnymi ogłoszeniami"
         }
       },
-      "asOfNote": "Na podstawie danych z ogłoszeń z 19.08.2026; liczby zmieniają się codziennie.",
       "topTitle": "Najbardziej poszukiwane zawody obecnie",
       "topNote": "Według aktywnych ogłoszeń na platformie. Część ogłoszeń nie jest jeszcze przypisana do zawodu."
     }

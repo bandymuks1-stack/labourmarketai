@@ -11,17 +11,25 @@ import { recordEvent } from "@/lib/telemetry/task";
 import styles from "./landing-mode-switcher.module.css";
 
 /**
- * The LIVE / FOCUS control on the restored landing.
+ * The LIVE / FOCUS control on the primary (FOCUS) landing.
  *
- * FOCUS is a different component tree with different chrome, so the mode is
- * resolved on the SERVER from the bounded cookie. Changing it therefore needs
- * a document load rather than a client re-render — the cookie is written
- * first, then `location.reload()`, so the visitor lands on the other landing
- * whole rather than on a half-swapped one.
+ * FOCUS is the default, so this control's job is no longer just "go back" —
+ * it is the ONLY invitation to discover that a living market exists here
+ * (owner command §6). The invitation is the control itself: a small status
+ * dot beside LIVE that breathes, plus one short attention sequence once the
+ * page has settled. No popup, no banner, no toast, no tooltip, no glow, and
+ * not one word added to the restored composition, which stays untouched.
  *
- * Deliberately floating and self-contained: the restored landing's layout is
- * the historical one and must not be edited to make room for a control that
- * did not exist in it.
+ * PERSISTENCE IS EXPLICIT-ONLY. This component deliberately writes nothing on
+ * mount. The server resolves the arm from the cookie, and the cookie's whole
+ * meaning is "the visitor chose this" — so recording FOCUS merely because
+ * FOCUS rendered would forge an explicit choice for every fresh visitor and
+ * make an explicit LIVE choice indistinguishable from a default. Only
+ * `choose()` writes.
+ *
+ * Switching needs a document load, not a re-render: the two arms are separate
+ * component trees with their own chrome, so the cookie is written first and
+ * the page reloads into the other landing whole.
  */
 export function LandingModeSwitcher() {
   const seen = useRef(false);
@@ -29,10 +37,6 @@ export function LandingModeSwitcher() {
   useEffect(() => {
     if (seen.current) return;
     seen.current = true;
-    // The server resolved this arm from the cookie; re-align the persistence
-    // record so a stale localStorage value cannot disagree with what the
-    // visitor is actually looking at.
-    persistLandingMode("focus");
     recordEvent(
       LANDING_EVENTS.modeSeen,
       landingEventMetadata("focus", "unknown"),
@@ -63,6 +67,12 @@ export function LandingModeSwitcher() {
           aria-pressed={candidate === "focus"}
           onClick={() => choose(candidate)}
         >
+          {/* The status dot is a STATIC indicator that happens to breathe:
+              under prefers-reduced-motion the animation is dropped and the dot
+              remains, so the signal never depends on motion alone (§8). */}
+          {candidate === "live" ? (
+            <span className={styles.liveDot} aria-hidden />
+          ) : null}
           {candidate.toUpperCase()}
         </button>
       ))}
