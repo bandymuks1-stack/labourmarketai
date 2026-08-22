@@ -382,7 +382,10 @@ export function LiveMarketCommand({
   const [reducedMotion, setReducedMotion] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mode, setMode] = useState<LandingMode>("live");
+  // The server resolved the arm from the bounded cookie; reaching this tree
+  // means LIVE. Kept as state only because telemetry and the data
+  // attributes below read it.
+  const [mode] = useState<LandingMode>("live");
   const [modeReady, setModeReady] = useState(false);
 
   const formatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
@@ -427,6 +430,12 @@ export function LiveMarketCommand({
     [mode],
   );
 
+  /**
+   * FOCUS is the RESTORED previous production landing — a different component
+   * tree with its own chrome — and the server picks the arm from the bounded
+   * cookie. Switching therefore writes the cookie and reloads, rather than
+   * re-styling this tree in place.
+   */
   const changeMode = useCallback(
     (nextMode: LandingMode) => {
       if (nextMode === mode) return;
@@ -435,14 +444,17 @@ export function LiveMarketCommand({
         LANDING_EVENTS.modeChanged,
         landingEventMetadata(nextMode, "unknown"),
       );
-      setMode(nextMode);
       setMenuOpen(false);
+      window.location.reload();
     },
     [mode],
   );
 
   useEffect(() => {
-    setMode(readLandingMode() ?? "live");
+    // The server already resolved the arm; reaching this component means LIVE.
+    // Re-align the persisted record so a stale localStorage value cannot
+    // disagree with what the visitor is actually looking at.
+    if (readLandingMode() !== "live") persistLandingMode("live");
     setModeReady(true);
   }, []);
 

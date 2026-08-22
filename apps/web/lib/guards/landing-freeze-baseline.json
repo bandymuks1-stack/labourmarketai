@@ -1,11 +1,20 @@
 {
   "files": {
-    "app/[locale]/page.tsx": "c86be947c76d6e92970633570b95040874f033bd0df092f273550b00b119d0a9",
+    "app/[locale]/page.tsx": "799abe396fc2aa37413c8f891c7f9bc14e8c439ae417129b0a2fb0af6b5260da",
     "app/[locale]/live-market-review/live-market-page.tsx": "fae0ab6c1b4e41ba6760482cf935e3777e915bbf7a80f207d4cc50dc433f7e9a",
-    "app/[locale]/live-market-review/live-market-command.tsx": "10063ee904a5fd15456984afa915b745453bf7f50050b6e4ec09bf31cd988742",
+    "app/[locale]/live-market-review/live-market-command.tsx": "96ea9a1fa96f47f24cd03ef0412cec6a8ca245439ec2a48a65a7668102f507be",
     "app/[locale]/live-market-review/live-market-command.module.css": "686aae3983346345f6064e70df790d6f03fc05c897bb44f3e4e236811f676382",
     "lib/market/live-market-landing.ts": "fd392153172b796707bd1dfab332436838fa63e85543211267859c4e942733c4",
-    "lib/telemetry/landing-experience.ts": "b90d4a8d13aa50c26c988158f35740b0d9b2436ebe25ac739e51a05e614d3c7c"
+    "lib/telemetry/landing-experience.ts": "5691bb61b38b49a8904f870ce028418e931873939c16e075f9d773e244c648e7",
+    "app/[locale]/focus-landing/focus-landing.tsx": "263cdb3b3440a0e49eca7445888a9b8e4b8033de9bcadd5500182f7fea68eb16",
+    "app/[locale]/focus-landing/landing-mode-switcher.tsx": "127d58c2811bccd4b8ffe6e9bb966e3afdc8dd993153dba375b4ab0d0041f60a",
+    "app/[locale]/focus-landing/landing-mode-switcher.module.css": "7c995987dbe8f5819c6f25d86fbb6fad4ef3e2a2e49ce0c0aef172ff42d4c15f",
+    "components/marketing/hero-live-demo.tsx": "bba95221644db253bf9e2ef231e0a165c6af2392c10b44d352f052135abc5c0d",
+    "components/marketing/product-chain-band.tsx": "1eb683851a35252c7a51114c935921fa05a834f2a27f1ead00c53642c572cf60",
+    "components/marketing/market-proof-band.tsx": "c80be93f988cf1964d37fed915f5fb052e2ccf0cd1cd1b3ba35e3aa7c8d64ed1",
+    "components/marketing/player-card-showcase.tsx": "7904a26bc154412c5d65956f3a49730065b5d40ca0328cdf122a4a6d80b53a09",
+    "components/marketing/trust-band.tsx": "7388ea7d9e0e0dfe7741aaa3b7028ccbf3dc11c20ef4db6310f1708784c99c6a",
+    "components/marketing/final-cta-band.tsx": "b5329587b21e1f595f5dd07dd811ccb9d37eda9452b552a1276078f966f12caf"
   },
   "namespaces": {
     "lt.livingMarketReview": "7e79b4ab60b68a23c1d16246cd39348b34cc8e38bbb58fb66ee3b40f2ee8a1a0",
