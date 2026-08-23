@@ -6878,6 +6878,12 @@
     "types": {
       "cv": "CV",
       "id_document": "Asmens dokumentas",
+      "posting_notification": "Komandiravimo pranešimas",
+      "residence_permit": "Leidimas gyventi",
+      "work_permit": "Leidimas dirbti",
+      "tax_registration": "Mokesčių registracija",
+      "social_security_registration": "Socialinio draudimo registracija",
+      "health_safety_card": "Darbų saugos kortelė",
       "a1_certificate": "A1 pažymėjimas",
       "employment_contract": "Darbo sutartis",
       "posted_worker_package": "Komandiruoto darbuotojo paketas",
@@ -8060,6 +8066,7 @@
       "noMatching": "Šiuo metu atvirų užklausų, tinkančių jūsų profiliui, nėra. Tai keičiasi atsirandant naujoms užklausoms.",
       "opportunitiesUnavailable": "Galimybių apžvalgos šiuo metu nepavyko nuskaityti.",
       "newOpportunities": "Nauja nuo paskutinio jūsų žvilgsnio: {count}.",
+      "journalUnavailable": "Jūsų darbo žurnalo šiuo metu nepavyko nuskaityti.",
       "skillsToAdd": "Įgūdžiai, kurių prašo artimiausios jūsų galimybės: {skills}."
     },
     "saved": {
@@ -12273,6 +12280,7 @@
       "blockedNoPlan": "Nepavyko perskaityti tavo plano.",
       "blockedNoProjects": "Šioje paskyroje nevaldai jokių projektų.",
       "blockedNotEmployer": "Tai darbdavio veiksmas. Persijunk į įmonės erdvę ir paklausk dar kartą.",
+      "unsupportedDimension": "Pagal {dimension} filtruoti dar negaliu.",
       "noSuchValue": "Supratau „{asked}“, bet ten dabar tau nieko nematoma.",
       "noSuchValueWithAlternatives": "Supratau „{asked}“, bet ten dabar tau nieko nematoma. Matoma: {available}.",
       "skillGapIntro": "Tavo profilyje trūksta {count} reikalaujamų įgūdžių. Dažniausiai prašomi:",
@@ -13075,6 +13083,7 @@
     "empty": "Sutarčių dar neužregistruota.",
     "emptyFiltered": "Nė viena sutartis neatitinka šių filtrų.",
     "scopeNote": "Organizacijos pusės registras. Darbuotojams šis registras nerodomas.",
+    "attach": { "documentLabel": "Prisegamas dokumentas", "submit": "Prisegti dokumentą" },
     "baseDocument": "Pagrindinis dokumentas",
     "filters": {
       "type": "Tipas",

@@ -66,6 +66,8 @@
   "otherWorkType": "Sonstige / allgemeine Arbeit",
   "composeTiler": "{area} {unit} Fliesen bei {site} verlegt.",
   "cv": {
+    "verified": "Bestätigt",
+    "declared": "Angegeben",
     "journalBacked": "Journalgestützt",
     "present": "heute",
     "primary": "Primär",

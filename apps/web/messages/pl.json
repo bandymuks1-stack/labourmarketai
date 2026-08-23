@@ -1593,6 +1593,12 @@
     "types": {
       "cv": "[EN] CV",
       "id_document": "[EN] ID document",
+      "posting_notification": "Zgłoszenie delegowania",
+      "residence_permit": "Zezwolenie na pobyt",
+      "work_permit": "Zezwolenie na pracę",
+      "tax_registration": "Rejestracja podatkowa",
+      "social_security_registration": "Rejestracja ubezpieczenia społecznego",
+      "health_safety_card": "Karta BHP",
       "a1_certificate": "[EN] A1 certificate",
       "employment_contract": "[EN] Employment contract",
       "posted_worker_package": "[EN] Posted worker package",
@@ -1966,6 +1972,7 @@
       "noMatching": "Obecnie żadne otwarte zapytania nie pasują do Twojego profilu. To się zmienia, gdy pojawiają się nowe zapytania.",
       "opportunitiesUnavailable": "Nie udało się teraz odczytać przeglądu możliwości.",
       "newOpportunities": "Nowe od Twojego ostatniego spojrzenia: {count}.",
+      "journalUnavailable": "Nie udało się teraz odczytać Twojego dziennika pracy.",
       "skillsToAdd": "Umiejętności, o które proszą Twoje najbliższe możliwości: {skills}."
     },
     "noWorkType": {
@@ -4051,6 +4058,7 @@
       "blockedNoPlan": "[EN] I could not read your plan just now.",
       "blockedNoProjects": "[EN] You do not manage any projects on this account.",
       "blockedNotEmployer": "[EN] That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "Nie potrafię jeszcze filtrować według {dimension}.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
@@ -4988,6 +4996,7 @@
     "empty": "Nie zarejestrowano jeszcze żadnych umów.",
     "emptyFiltered": "Żadna umowa nie pasuje do tych filtrów.",
     "scopeNote": "Rejestr po stronie organizacji. Pracownicy nie widzą tego rejestru.",
+    "attach": { "documentLabel": "Dokument do załączenia", "submit": "Załącz dokument" },
     "baseDocument": "Dokument bazowy",
     "filters": {
       "type": "Typ",

@@ -1593,6 +1593,12 @@
     "types": {
       "cv": "[EN] CV",
       "id_document": "[EN] ID document",
+      "posting_notification": "Utsendingsmelding",
+      "residence_permit": "Oppholdstillatelse",
+      "work_permit": "Arbeidstillatelse",
+      "tax_registration": "Skatteregistrering",
+      "social_security_registration": "Trygderegistrering",
+      "health_safety_card": "HMS-kort",
       "a1_certificate": "[EN] A1 certificate",
       "employment_contract": "[EN] Employment contract",
       "posted_worker_package": "[EN] Posted worker package",
@@ -1966,6 +1972,7 @@
       "noMatching": "Akkurat nå passer ingen åpne forespørsler til profilen din. Dette endrer seg når nye forespørsler dukker opp.",
       "opportunitiesUnavailable": "Oversikten over muligheter kunne ikke leses nå.",
       "newOpportunities": "Nytt siden sist du så: {count}.",
+      "journalUnavailable": "Arbeidsjournalen din kunne ikke leses nå.",
       "skillsToAdd": "Ferdigheter dine nærmeste muligheter spør etter: {skills}."
     },
     "noWorkType": {
@@ -4051,6 +4058,7 @@
       "blockedNoPlan": "[EN] I could not read your plan just now.",
       "blockedNoProjects": "[EN] You do not manage any projects on this account.",
       "blockedNotEmployer": "[EN] That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "Jeg kan ikke filtrere etter {dimension} ennå.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
@@ -4988,6 +4996,7 @@
     "empty": "Ingen avtaler registrert ennå.",
     "emptyFiltered": "Ingen avtaler samsvarer med disse filtrene.",
     "scopeNote": "Register på organisasjonssiden. Arbeidere ser ikke dette registeret.",
+    "attach": { "documentLabel": "Dokument som legges ved", "submit": "Legg ved dokument" },
     "baseDocument": "Basisdokument",
     "filters": {
       "type": "Type",

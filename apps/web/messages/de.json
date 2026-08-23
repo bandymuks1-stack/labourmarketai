@@ -6563,8 +6563,8 @@
       }
     },
     "cv": {
-      "verified": "Confirmed",
-      "declared": "Declared"
+      "verified": "Bestätigt",
+      "declared": "Angegeben"
     }
   },
   "orgMembers": {
@@ -6883,6 +6883,12 @@
     "types": {
       "cv": "Lebenslauf",
       "id_document": "Ausweisdokument",
+      "posting_notification": "Entsendemeldung",
+      "residence_permit": "Aufenthaltserlaubnis",
+      "work_permit": "Arbeitserlaubnis",
+      "tax_registration": "Steuerliche Registrierung",
+      "social_security_registration": "Sozialversicherungsanmeldung",
+      "health_safety_card": "Arbeitsschutzkarte",
       "a1_certificate": "A1-Bescheinigung",
       "employment_contract": "Arbeitsvertrag",
       "posted_worker_package": "Entsendungsunterlagen",
@@ -8065,6 +8071,7 @@
       "noMatching": "Derzeit passt keine offene Anfrage zu Ihrem Profil. Das ändert sich, sobald neue Anfragen erscheinen.",
       "opportunitiesUnavailable": "Die Gelegenheitsübersicht konnte gerade nicht gelesen werden.",
       "newOpportunities": "Neu seit Ihrem letzten Blick: {count}.",
+      "journalUnavailable": "Ihr Arbeitsjournal konnte gerade nicht gelesen werden.",
       "skillsToAdd": "Fähigkeiten, nach denen Ihre nächstgelegenen Gelegenheiten fragen: {skills}."
     },
     "saved": {
@@ -12278,6 +12285,7 @@
       "blockedNoPlan": "Ich konnte deine Planung nicht lesen.",
       "blockedNoProjects": "Du verwaltest in diesem Konto keine Projekte.",
       "blockedNotEmployer": "Das ist eine Arbeitgeber-Aktion. Wechsle in deinen Unternehmensbereich und frag noch einmal.",
+      "unsupportedDimension": "Nach {dimension} kann ich noch nicht filtern.",
       "noSuchValue": "Ich habe „{asked}“ verstanden, aber dort ist dir gerade nichts sichtbar.",
       "noSuchValueWithAlternatives": "Ich habe „{asked}“ verstanden, aber dort ist dir gerade nichts sichtbar. Sichtbar ist: {available}.",
       "skillGapIntro": "In deinem Profil fehlen {count} geforderte Fähigkeiten. Am häufigsten verlangt:",
@@ -13080,6 +13088,7 @@
     "empty": "Noch keine Vereinbarungen registriert.",
     "emptyFiltered": "Keine Vereinbarungen entsprechen diesen Filtern.",
     "scopeNote": "Register auf Organisationsseite. Beschäftigten wird dieses Register nicht angezeigt.",
+    "attach": { "documentLabel": "Anzuhängendes Dokument", "submit": "Dokument anhängen" },
     "baseDocument": "Basisdokument",
     "filters": {
       "type": "Typ",

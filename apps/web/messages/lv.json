@@ -1593,6 +1593,12 @@
     "types": {
       "cv": "[EN] CV",
       "id_document": "[EN] ID document",
+      "posting_notification": "Norīkošanas paziņojums",
+      "residence_permit": "Uzturēšanās atļauja",
+      "work_permit": "Darba atļauja",
+      "tax_registration": "Nodokļu reģistrācija",
+      "social_security_registration": "Sociālās apdrošināšanas reģistrācija",
+      "health_safety_card": "Darba drošības karte",
       "a1_certificate": "[EN] A1 certificate",
       "employment_contract": "[EN] Employment contract",
       "posted_worker_package": "[EN] Posted worker package",
@@ -1966,6 +1972,7 @@
       "noMatching": "Šobrīd nav atvērtu pieprasījumu, kas atbilst jūsu profilam. Tas mainās, parādoties jauniem pieprasījumiem.",
       "opportunitiesUnavailable": "Iespēju pārskatu šobrīd neizdevās nolasīt.",
       "newOpportunities": "Jauns kopš jūsu pēdējā skatījuma: {count}.",
+      "journalUnavailable": "Jūsu darba žurnālu šobrīd neizdevās nolasīt.",
       "skillsToAdd": "Prasmes, ko prasa jums tuvākās iespējas: {skills}."
     },
     "noWorkType": {
@@ -4051,6 +4058,7 @@
       "blockedNoPlan": "[EN] I could not read your plan just now.",
       "blockedNoProjects": "[EN] You do not manage any projects on this account.",
       "blockedNotEmployer": "[EN] That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "Pēc {dimension} filtrēt vēl nevaru.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
@@ -4988,6 +4996,7 @@
     "empty": "Līgumi vēl nav reģistrēti.",
     "emptyFiltered": "Neviens līgums neatbilst šiem filtriem.",
     "scopeNote": "Organizācijas puses reģistrs. Darbiniekiem šis reģistrs netiek rādīts.",
+    "attach": { "documentLabel": "Pievienojamais dokuments", "submit": "Pievienot dokumentu" },
     "baseDocument": "Pamatdokuments",
     "filters": {
       "type": "Tips",
