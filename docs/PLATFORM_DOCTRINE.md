@@ -1,4 +1,4 @@
-# PLATFORM DOCTRINE — LABMA OS
+# PLATFORM DOCTRINE — labourmarket.ai
 
 > **Status:** Canonical. Permanent. Binding on all agents (Claude Code, Antigravity, Codex) and human contributors.
 > **Location:** `docs/PLATFORM_DOCTRINE.md`

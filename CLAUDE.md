@@ -1,4 +1,4 @@
-# Agent Operating Contract — LabourMarket.ai / LABMA OS
+# Agent Operating Contract — labourmarket.ai
 
 > 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
 >
