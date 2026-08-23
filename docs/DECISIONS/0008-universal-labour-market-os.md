@@ -8,7 +8,7 @@ software", and (2) positioning "against" recruitment ("we're not a
 recruitment system"). Both shrink the vision and are factually wrong.
 
 ## Decision
-LABMA is a **universal** labour-market operating system across all
+labourmarket.ai is a **universal** labour-market operating system across all
 sectors. **Recruitment is a core function** (plus workforce management,
 verification, projects, teams, intelligence, AI). Construction is the
 **first vertical example**, never a boundary on the core. Never say

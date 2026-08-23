@@ -8,7 +8,7 @@
 > knyga"). Each chapter ends with a short English summary for
 > international agents.
 
-# LABMA OS — Projekto vizija / Project Vision
+# labourmarket.ai — Projekto vizija / Project Vision
 
 > Pilna produkto apžvalga ir įgyvendinimo planas (human-first):
 > [`docs/product/labourmarketai-full-product-overview-and-implementation-plan.md`](product/labourmarketai-full-product-overview-and-implementation-plan.md)
@@ -17,13 +17,13 @@
 
 ## 1. Vienas sakinys / One sentence
 
-LabourMarket.ai / LABMA OS yra gyva, universali darbo rinkos operacinė
+labourmarket.ai yra gyva, universali darbo rinkos operacinė
 sistema, kuri sujungia žmones, įgūdžius, darbo įrodymus, įmonių poreikius,
 projektus, komandas, įdarbinimą ir AI pagalbą, kad bet kuris verslas bet
 kuriame sektoriuje galėtų greičiau, tiksliau ir saugiau rasti, patikrinti,
 valdyti ir auginti reikalingą darbo jėgą.
 
-**EN:** LABMA OS is a living, universal labour-market operating system
+**EN:** labourmarket.ai is a living, universal labour-market operating system
 connecting people, skills, work evidence, company needs, projects, teams,
 recruitment and AI assistance so any business in any sector can find,
 verify, manage and grow its workforce faster, more precisely and more
