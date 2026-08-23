@@ -49,10 +49,21 @@ async function main() {
   // The environment pre-installs chromium at /opt/pw-browsers/chromium; the
   // repo's pinned @playwright/test expects a different build id, so launch by
   // explicit executablePath (the documented fallback for this environment).
+  // Behind a managed egress proxy (HTTPS_PROXY set) chromium must be given
+  // the proxy explicitly, with localhost bypassed so :3100 stays direct.
+  const proxy = process.env.HTTPS_PROXY ?? process.env.https_proxy;
   const browser = await chromium.launch({
     executablePath: process.env.PW_CHROMIUM ?? "/opt/pw-browsers/chromium",
+    proxy: proxy
+      ? { server: proxy, bypass: "127.0.0.1,localhost" }
+      : undefined,
   });
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 960 } });
+  const ctx = await browser.newContext({
+    viewport: { width: 1440, height: 960 },
+    // The managed proxy re-signs TLS with its own CA; chromium does not read
+    // NODE_EXTRA_CA_CERTS, so accept it here (evidence runs only).
+    ignoreHTTPSErrors: Boolean(proxy),
+  });
   const page = await ctx.newPage();
   page.on("console", (m) => {
     if (m.type() === "error") consoleErrors.push(m.text().slice(0, 300));
