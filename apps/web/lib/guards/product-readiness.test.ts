@@ -2188,7 +2188,13 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 236;
+    const SPRINT_BASELINE = 237;
+    // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
+    // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
+    // RED by route (table grants; fail-closed), deliberately NOT
+    // human-gate-annotated because the owner has not approved it; paired
+    // rollback; ships UNAPPLIED. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 237 real files.
     // Bumped 235 -> 236 for the notification-events v6 weekly-digest widening
     // (20260823150500_notification_events_v6_weekly_digest, value train 2
     // Wagon B2) — the canonical GREEN drop+re-add CHECK-widening idiom on the
