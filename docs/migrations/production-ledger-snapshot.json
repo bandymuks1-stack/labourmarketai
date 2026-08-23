@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-08-23T12:30:00Z",
-  "method": "Supabase MCP execute_sql (read-only) by the lead session: select version, name from supabase_migrations.schema_migrations order by version",
+  "read_at": "2026-08-23T17:18:49Z",
+  "method": "Supabase MCP execute_sql (read-only): select version, name from supabase_migrations.schema_migrations order by version. Refreshed after two applies (notification_events_v6_weekly_digest, notification_preferences_v1) landed in production without updating this snapshot. read_at is the confirming read: count(*) = 234, max(version) = 20260823170908, taken at that instant — never stamped later than the read it describes.",
   "project_ref": "gorgitwvdzxbnaxhrsrw",
-  "row_count": 232,
+  "row_count": 234,
   "rows": [
     {
       "version": "0001",
@@ -931,6 +931,14 @@
     {
       "version": "20260820083309",
       "name": "workflow_work_task_definition_v1"
+    },
+    {
+      "version": "20260823152727",
+      "name": "notification_events_v6_weekly_digest"
+    },
+    {
+      "version": "20260823170908",
+      "name": "notification_preferences_v1"
     }
   ]
 }
