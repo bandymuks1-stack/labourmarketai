@@ -4,6 +4,62 @@
 
 ---
 
+## Capability pre-flight — before changing ANY product capability
+
+**This repository is PUBLIC.** Detailed capability truth — the functionality
+registry, production evidence, capability graph, strategy and security analysis
+— is deliberately NOT kept here. It lives in the owner's private Agentai OS
+Internal Brain, namespaced per project. Ask the owner for access; do not
+reconstruct it from guesses, and do not copy it back into this repo.
+
+Before you modify or create a material product capability:
+
+1. identify the affected capability (`FUNCTION_ID`) in the private registry;
+2. consult that registry — it records canonical data sources and known breakage;
+3. determine the **canonical truth source** for every fact you touch;
+4. trace upstream dependencies;
+5. trace downstream dependencies;
+6. identify existing production evidence (rows, not intentions);
+7. identify the privacy/security boundary;
+8. identify the regression guards that already protect it;
+9. classify the change: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW`;
+10. **search for an existing implementation before creating a new one.**
+
+Hard rules:
+
+- `NEW` is permitted **only** after proving no equivalent capability exists.
+  This repository already contains far more capability than is exercised —
+  a parallel implementation is the most expensive mistake available here.
+- `REPLACE` requires explicit justification plus a rollback/migration strategy.
+- Functionality proven in production is never casually rewritten.
+- Prefer `CONNECT` and `FIX` over building something new.
+
+If the private registry is unavailable to you, say so and proceed with extra
+care — do not treat an old audit document in this repo as current truth. Those
+are point-in-time snapshots, and several are months stale.
+
+### Production data is not development material
+
+Never silently: rewrite Work Journal history · delete evidence · reinterpret
+approved hours · change employer/worker attribution · repair historical records
+by inference · manufacture approvals, hires or payments · change consent · change
+discoverability.
+
+Where historical recovery is genuinely required:
+**preserve the original → create an attributable superseding action → preserve
+provenance.** The Work Journal and its evidence are permanent professional and
+project history, not a scratch table.
+
+### Public communication sells outcomes, not mechanisms
+
+Outcomes may be described publicly ("each completed job can strengthen your
+professional profile"). The mechanics behind matching, ranking, scoring,
+verification, provenance calculation, trust, market-signal generation, AI
+orchestration and commercial prioritization are not public material — in copy,
+in docs, or in this repository.
+
+---
+
 ## Universal Engineering Graph Protocol v1
 
 This repository follows the **Universal Engineering Graph Protocol v1**.
