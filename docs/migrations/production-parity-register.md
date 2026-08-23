@@ -191,9 +191,19 @@ make it useless exactly on the branches that need it.
 * It cannot see a production change made **outside** a migration (a hand-run
   `alter table` in the SQL editor leaves no ledger row). Nothing in the repo
   can see that; only a schema diff could.
-* It is not wired into `quality.yml`, because that workflow has no production
-  `DB_URL` and the existing live gate (`check-anon-secdef-allowlist`) is run
-  the same way — deliberately, by a lead session against production.
+* ~~It is not wired into `quality.yml`~~ — **CORRECTED 2026-08-23. It is.**
+  PR #1236 added a `Migration parity (live ledger gate)` step to
+  `.github/workflows/quality.yml`. The step is **inert, not absent**: it reads
+  `secrets.SUPABASE_DB_URL`, and when that is empty it prints a `::warning`
+  and `exit 0`, so the job goes green having verified nothing. On main's run
+  for `608b0836` the step completed in about two seconds, which is what the
+  skip path looks like; the definitive signal in any run is whether that
+  warning was printed.
+
+  **The remedy is one owner action, and the step already names it:** *"Owner
+  action required to activate this gate: add a read-only `SUPABASE_DB_URL`
+  secret."* Until that exists, every green `quality` run is silent about
+  repo↔production migration parity.
 * **A snapshot run is only as true as its snapshot, and this bit already.**
   On 2026-08-23 two migrations were applied to production
   (`notification_events_v6_weekly_digest`, `notification_preferences_v1`)
@@ -204,8 +214,18 @@ make it useless exactly on the branches that need it.
 
   The gate already prints the warning that would have caught this ("Refresh the
   snapshot from the production ledger before trusting a PASS for an apply
-  decision"). What is missing is not a check but a **habit**: refreshing this
-  snapshot is part of applying a migration, in the same commit as the
-  `APPLIED_LEDGER.md` row — not a separate errand. Both were corrected on
-  2026-08-23 by a verifying session reading
+  decision"). Refreshing this snapshot is part of applying a migration, in the
+  same commit as the `APPLIED_LEDGER.md` row — not a separate errand. Both were
+  corrected on 2026-08-23 by a verifying session reading
   `supabase_migrations.schema_migrations` directly.
+
+  **CORRECTED, same day, by the session that wrote the paragraph above.** It
+  originally ended "what is missing is not a check but a habit". That was half
+  right and the wrong half was the actionable one. A check *does* exist —
+  #1236 wired the parity step into `quality.yml` — and it is inert for want of
+  a `SUPABASE_DB_URL` secret (see the corrected bullet above). The habit still
+  matters for snapshot mode, but calling the whole gap "a habit problem"
+  buried the one thing an owner can fix in a minute. The paragraph was written
+  from the register's own stale line rather than from `quality.yml`, which is
+  the same mistake — trusting a document over the artifact — that both this
+  register and the entry above exist to correct.
