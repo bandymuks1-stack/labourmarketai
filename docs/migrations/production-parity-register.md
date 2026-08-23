@@ -194,3 +194,18 @@ make it useless exactly on the branches that need it.
 * It is not wired into `quality.yml`, because that workflow has no production
   `DB_URL` and the existing live gate (`check-anon-secdef-allowlist`) is run
   the same way — deliberately, by a lead session against production.
+* **A snapshot run is only as true as its snapshot, and this bit already.**
+  On 2026-08-23 two migrations were applied to production
+  (`notification_events_v6_weekly_digest`, `notification_preferences_v1`)
+  without refreshing `production-ledger-snapshot.json`. The gate then read a
+  snapshot taken before those applies, classed both as "in the repo, not yet in
+  production", and returned **PASS** — correct for its input, wrong about the
+  world. Production held 234 ledger rows; the snapshot held 232.
+
+  The gate already prints the warning that would have caught this ("Refresh the
+  snapshot from the production ledger before trusting a PASS for an apply
+  decision"). What is missing is not a check but a **habit**: refreshing this
+  snapshot is part of applying a migration, in the same commit as the
+  `APPLIED_LEDGER.md` row — not a separate errand. Both were corrected on
+  2026-08-23 by a verifying session reading
+  `supabase_migrations.schema_migrations` directly.

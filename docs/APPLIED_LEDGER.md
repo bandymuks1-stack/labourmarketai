@@ -95,6 +95,28 @@
 > the audit trail this file exists to be. Where an entry conflicts with the
 > register, **the register wins.**
 
+## Applied 2026-08-23 — notification consent primitives (recorded 2026-08-23 by a verifying session)
+
+> **These two rows were added AFTER the fact.** Both migrations were applied to
+> production on 2026-08-23 and neither was recorded here, in
+> [`docs/migrations/production-parity-register.md`](migrations/production-parity-register.md),
+> or in the committed ledger snapshot. Found by reading
+> `supabase_migrations.schema_migrations` directly: production held **234** rows
+> while `docs/migrations/production-ledger-snapshot.json` held **232**.
+>
+> **Why nothing caught it.** The parity gate is not wired into `quality.yml` —
+> the register says so itself, because that workflow has no production `DB_URL`.
+> In snapshot mode the gate read a snapshot taken *before* these applies, so it
+> classed both as "in the repo, not yet in production" and returned PASS. The
+> gate was not wrong about its input; its input was stale, which is exactly what
+> its own warning line says to check before trusting a PASS for an apply
+> decision. The snapshot is refreshed in the same commit as this entry.
+
+- **`20260823150500_notification_events_v6_weekly_digest.sql` — APPLIED TO PRODUCTION 2026-08-23.** Ledger identity: name **`notification_events_v6_weekly_digest`**, version **`20260823152727`** (apply time). Repo file stem is `20260823150500_notification_events_v6_weekly_digest` — the usual drift. **Match on `name`, never on `version`.** Merged as PR #1239.
+- **`20260823160000_notification_preferences_v1.sql` — APPLIED TO PRODUCTION 2026-08-23.** Ledger identity: name **`notification_preferences_v1`**, version **`20260823170908`** (apply time). Repo file stem is `20260823160000_notification_preferences_v1`. Merged as PR #1243. RED-class, applied under the owner's D7 approval recorded in `docs/human-gates/value-train-2-owner-decisions-v1.md`.
+- **Post-apply verification (read-only, 2026-08-23, by the session recording this):** `notification_preferences` exists; RLS enabled with **exactly four** policies, every one scoped `profile_id = auth.uid()`, and the UPDATE policy carries **both** `USING` and `WITH CHECK` (a `USING`-only UPDATE would let a row be moved to another profile). `anon` SELECT is **false**. That matches the migration text and the §4 default-closed rule. No reader exists yet — the only repository reference to the table outside its own migration is a comment in `lib/notifications/event-emitters.ts`, so no email can be sent on the strength of a missing row.
+- **Rollbacks:** `supabase/rollbacks/20260823150500_notification_events_v6_weekly_digest.down.sql`, `supabase/rollbacks/20260823160000_notification_preferences_v1.down.sql`.
+
 ## Applied 2026-08-20 — work_task approval on-ramp + tenant binding (field-work audit chain B)
 
 - **`20260820070000_workflow_work_task_definition_v1.sql` — APPLIED TO PRODUCTION 2026-08-20** on prod `gorgitwvdzxbnaxhrsrw` via Supabase MCP `apply_migration`, under an explicit owner decision naming this migration ("PR #1216 / workflow_work_task_definition_v1 — APPROVED"), recorded in full at [`docs/human-gates/workflow-work-task-definition-v1-gate.md`](human-gates/workflow-work-task-definition-v1-gate.md). Merged first as PR #1216, squash `bc77ecbd84f612cacba62bb1abfb5e6af7b78b29`.
