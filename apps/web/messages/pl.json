@@ -359,7 +359,8 @@
         "event_document_expiring": "[EN] A document's validity is ending soon.",
         "event_work_task_assigned": "Przypisano ci zadanie",
         "event_demand_interest_expressed": "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
-        "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone"
+        "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
+        "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe"
       }
     },
     "onboarding": {

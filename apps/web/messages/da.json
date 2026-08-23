@@ -359,7 +359,8 @@
         "event_document_expiring": "Et dokuments gyldighed udløber snart.",
         "event_work_task_assigned": "En opgave er blevet tildelt dig",
         "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov",
-        "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået"
+        "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået",
+        "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar"
       }
     },
     "onboarding": {

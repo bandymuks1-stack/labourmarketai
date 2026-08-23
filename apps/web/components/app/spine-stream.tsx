@@ -5,6 +5,7 @@ import {
   getSpineCounts,
 } from "@/lib/notifications/spine";
 import { buildSpineNotifications } from "@/lib/notifications/spine-signals";
+import { maybeEmitWeeklyDigestInBackground } from "@/lib/notifications/event-emitters";
 import { SpineHydrator } from "@/components/app/spine-hydrator";
 import type { Notification } from "@/lib/auth/context";
 
@@ -35,6 +36,11 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
   ]);
   const navBadges = buildNavBadges(spineCounts);
   const derived = buildSpineNotifications(spineCounts, activeRole ?? "worker");
+  // Weekly personal digest — materialized read-time, at most once per ISO
+  // week (skip check on the feed just fetched; UNIQUE dedupe key is the
+  // authority). Fire-and-forget: never gates this render; the row appears in
+  // the bell on the next visit.
+  maybeEmitWeeklyDigestInBackground(durable);
   // Durable rows render under the SAME bell — one attention surface, two
   // honest row kinds. They clear by marking read (`durable: true`), and they
   // ALSO carry the surface their entity lives on (`href`), so "your absence
