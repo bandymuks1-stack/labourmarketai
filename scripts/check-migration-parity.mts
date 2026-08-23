@@ -178,9 +178,26 @@ try {
     console.log("\nPASS — every production migration has a repository file.");
   }
 } catch (error) {
-  failed = true;
-  console.error("check-migration-parity: FAILED to complete the check.");
-  console.error(error instanceof Error ? error.message : String(error));
+  const message = error instanceof Error ? error.message : String(error);
+  // One specific, owner-actionable case is a WARN-AND-SKIP rather than a
+  // failure: the configured read-only role can reach the database (so the
+  // sibling anon-SECDEF gate runs) but has no USAGE on the ledger schema.
+  // Failing the whole quality gate for a grant only the owner can add would
+  // turn a missing privilege into a permanent red; passing silently would be
+  // worse. So: loud warning naming the exact grant, then skip — the same
+  // posture as the unconfigured-secret case in quality.yml.
+  if (client && /permission denied for schema supabase_migrations/i.test(message)) {
+    console.log(
+      "::warning title=Live migration-parity gate NOT active::the configured DB_URL role has no USAGE on schema supabase_migrations, so repo↔production parity was NOT verified. Owner action: run `grant usage on schema supabase_migrations to <ci_role>; grant select on supabase_migrations.schema_migrations to <ci_role>;` for the read-only CI role. Snapshot-mode runs remain available to lead sessions.",
+    );
+    console.log(
+      "SKIPPED — DB reachable but supabase_migrations is not readable by this role. Nothing was verified.",
+    );
+  } else {
+    failed = true;
+    console.error("check-migration-parity: FAILED to complete the check.");
+    console.error(message);
+  }
 } finally {
   if (client) await client.end().catch(() => {});
 }

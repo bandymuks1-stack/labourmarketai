@@ -12,18 +12,22 @@ Verification evidence for the claims below: read-only SQL against production
 
 ---
 
-## D1 — Add a read-only `SUPABASE_DB_URL` Actions secret (~1 minute, console)
+## D1 — Grant the CI role read access to the migration ledger (~1 minute)
 
-One secret arms TWO already-shipped CI gates that currently warn-and-skip:
+**CORRECTED 2026-08-23 (evidence: PR #1236 CI run):** the `SUPABASE_DB_URL`
+secret is **already configured** — the anon-SECDEF live catalog gate ran and
+PASSED on this PR (396 SECDEF functions checked, 8/8 allowlisted). The one
+remaining owner action is narrower: the configured read-only role has **no
+USAGE on schema `supabase_migrations`**, so the new migration-parity live
+gate warns and skips. To arm it, run as the database owner:
 
-1. **Anon SECURITY DEFINER live catalog gate** (`quality.yml`) — the only
-   check that can see the defect class behind the 2026-07-22 P0 (a leftover
-   default PUBLIC EXECUTE grant no migration diff reveals).
-2. **Migration parity live ledger gate** (`quality.yml`, added in this train) —
-   proves every production migration still has a repo file on every PR,
-   instead of at manual refresh time.
+```sql
+grant usage on schema supabase_migrations to <ci_role>;
+grant select on supabase_migrations.schema_migrations to <ci_role>;
+```
 
-Use a **read-only** connection string. No code change needed after adding it.
+(`<ci_role>` = the role the read-only `SUPABASE_DB_URL` connects as.)
+No code change needed after granting.
 
 ## D2 — Public employer count: registry identity, not name spelling (T-1)
 
