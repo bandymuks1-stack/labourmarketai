@@ -4623,6 +4623,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Udkast til journalnotat",
+      "title": "Fra dokument til Arbejdsjournal",
+      "understoodNote": "Nedenfor er teksten læst fra “{filename}”. Gennemgå, ret og bekræft — først da bliver den en del af din journalhistorik.",
+      "detectedSkills": "Registrerede kompetenceomtaler: {count}",
+      "notesLabel": "Notatets tekst (fra dit dokument — ret før du gemmer)",
+      "engagementLabel": "Arbejdskontekst",
+      "save": "Bekræft og gem i journalen",
+      "saving": "Gemmer…",
+      "saved": "Gemt i din Arbejdsjournal med dokumentproveniens.",
+      "savedLink": "Åbn journalen",
+      "error": "Kunne ikke gemme. Intet blev gemt.",
+      "notFound": "Dette dokument blev ikke fundet blandt dine dokumenter.",
+      "refusedClassified": "Fortrolige dokumenter læses ikke automatisk — download forbliver et logget manuelt trin.",
+      "refusedNoOcr": "Fotos læses ikke — tekstgenkendelse findes ikke endnu.",
+      "refusedType": "Denne filtype kan ikke læses som tekst.",
+      "empty": "Ingen læsbar tekst fundet i dette dokument.",
+      "failed": "Dokumentet kunne ikke læses.",
+      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en."
+    },
     "currentVersion": "Version {n}",
     "download": "Download",
     "noFileYet": "Ingen fil uploadet endnu.",
