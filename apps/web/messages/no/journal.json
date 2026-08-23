@@ -239,6 +239,7 @@
     "notesRequired": "Beskriv hva du jobbet med — friteksten er kjernen i oppføringen.",
     "quantityInvalid": "Mengden må være et ikke-negativt tall.",
     "unitSlugUnknown": "Finnes ennå ikke i enhetsregisteret: {units}. Be en administrator om å kjøre migrasjon 0017 (productivity_units-seedet), og prøv igjen.",
+    "sourceDocumentInvalid": "Det angitte kildedokumentet ble ikke funnet blant dokumentene dine.",
     "saveFailed": "Kunne ikke lagre oppføringen: {reason}",
     "unknownReason": "ukjent feil",
     "missingOldEntryId": "Identifikatoren til oppføringen som endres mangler.",

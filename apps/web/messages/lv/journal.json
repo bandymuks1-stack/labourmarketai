@@ -239,6 +239,7 @@
     "notesRequired": "Aprakstiet, ko darījāt — brīvais teksts ir ieraksta pamats.",
     "quantityInvalid": "Daudzumam jābūt nenegatīvam skaitlim.",
     "unitSlugUnknown": "Vienību reģistrā vēl nav: {units}. Palūdziet administratoram piemērot migrāciju 0017 (productivity_units sēklu) un mēģiniet vēlreiz.",
+    "sourceDocumentInvalid": "Norādītais avota dokuments nav atrasts starp taviem dokumentiem.",
     "saveFailed": "Neizdevās saglabāt ierakstu: {reason}",
     "unknownReason": "nezināma kļūda",
     "missingOldEntryId": "Trūkst maināmā ieraksta identifikatora.",

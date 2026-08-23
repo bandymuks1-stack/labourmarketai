@@ -473,6 +473,7 @@
     "notesRequired": "Beschreibe, was du gearbeitet hast — der Freitext ist der Kern dieses Eintrags.",
     "quantityInvalid": "Die Menge muss eine nicht negative Zahl sein.",
     "unitSlugUnknown": "Noch nicht im Einheitenregister: {units}. Bitte einen Administrator, Migration 0017 (den productivity_units-Seed) anzuwenden, und versuche es erneut.",
+    "sourceDocumentInvalid": "Das angegebene Quelldokument wurde in deinen Dokumenten nicht gefunden.",
     "saveFailed": "Der Eintrag konnte nicht gespeichert werden: {reason}",
     "unknownReason": "unbekannter Fehler",
     "missingOldEntryId": "Die Kennung des zu ändernden Eintrags fehlt.",

@@ -239,6 +239,7 @@
     "notesRequired": "Beskriv vad du arbetade med — fritexten är kärnan i posten.",
     "quantityInvalid": "Mängden måste vara ett icke-negativt tal.",
     "unitSlugUnknown": "Finns ännu inte i enhetsregistret: {units}. Be en administratör tillämpa migration 0017 (productivity_units-seedet) och försök igen.",
+    "sourceDocumentInvalid": "Det angivna källdokumentet hittades inte bland dina dokument.",
     "saveFailed": "Det gick inte att spara posten: {reason}",
     "unknownReason": "okänt fel",
     "missingOldEntryId": "Identifieraren för posten som ändras saknas.",

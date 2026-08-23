@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { documentProvenanceMetrics } from "./document-journal-draft-model";
 import {
   failedPipelineResult,
   processJournalEntrySkills,
@@ -80,6 +81,10 @@ export type JournalSaveErrorCode =
   | "notes_required"
   | "quantity_invalid"
   | "unit_slug_unknown"
+  /** Wagon C2a: a `source_document_file_id` was supplied but names no
+   *  document the caller can read — a provenance claim that cannot be
+   *  verified is refused, never silently dropped and never stored. */
+  | "source_document_invalid"
   | "entry_insert_failed"
   | "metrics_insert_failed"
   /** P1-B — the target entry was already superseded (stale tab/deep link);
@@ -203,6 +208,14 @@ export async function createJournalEntry(
     .trim()
     .slice(0, 200);
   const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
+  // Wagon C2a — document-import provenance (value train 2). When the entry
+  // was drafted from an uploaded work report, the review form carries the
+  // source `document_files` id; the save verifies it under the CALLER'S RLS
+  // and records the provenance metric rows. The extractor version is stamped
+  // server-side from the model constant — never trusted from the client.
+  const sourceDocumentFileId = String(
+    formData.get("source_document_file_id") ?? "",
+  ).trim();
   const fragments = parseFragments(String(formData.get("fragments_json") ?? "") || null);
   // P0 Track B: slugs the worker explicitly REJECTED in the review step — the
   // pipeline must leave no trace for them (not even an evidence link).
@@ -265,6 +278,29 @@ export async function createJournalEntry(
       ].join("|"),
     )
     .digest("hex");
+
+  // Provenance verification (C2a): a claimed source document must be a real
+  // uuid AND readable by this caller, or the save refuses honestly — a
+  // provenance claim that cannot be verified is never stored. RLS answers
+  // with one silence for "missing" and "not yours".
+  if (sourceDocumentFileId) {
+    const UUID_RX =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const { data: srcDoc, error: srcErr } = UUID_RX.test(sourceDocumentFileId)
+      ? await supabase
+          .from("document_files" as never)
+          .select("id")
+          .eq("id", sourceDocumentFileId)
+          .maybeSingle()
+      : { data: null, error: null };
+    if (srcErr || !srcDoc) {
+      return {
+        ok: false,
+        code: "source_document_invalid",
+        message: t("sourceDocumentInvalid"),
+      };
+    }
+  }
 
   const hasStructured =
     quantity !== null || workDirection !== "" || fragments.length > 0;
@@ -387,6 +423,12 @@ export async function createJournalEntry(
       }
       return rows;
     }),
+    // C2a — document-import provenance: the verified source file id + the
+    // server-stamped extractor identity (deterministic-structuring@…) ride
+    // the same atomic save, so an imported entry stays attributable forever.
+    ...(sourceDocumentFileId
+      ? documentProvenanceMetrics(sourceDocumentFileId)
+      : []),
   ];
 
   // Atomic save — the RPC inserts the entry and all metric rows inside one
@@ -1070,7 +1112,10 @@ function mapJournalRpcError(
 
 type RpcMetricRow = {
   metric_slug: string;
-  source: "worker_input";
+  /** DB CHECK vocabulary (0013). `ai_extracted` is the machine-origin value —
+   *  used here ONLY for document-import provenance rows, whose extractor row
+   *  spells `deterministic-…` so this can never read as a vendor-AI claim. */
+  source: "worker_input" | "ai_extracted";
   value_text?: string | null;
   value_numeric?: number | null;
   unit_slug?: string | null;

@@ -239,6 +239,7 @@
     "notesRequired": "Opisz, co robiłeś — wolny tekst jest podstawą tego wpisu.",
     "quantityInvalid": "Ilość musi być liczbą nieujemną.",
     "unitSlugUnknown": "Brak w rejestrze jednostek: {units}. Poproś administratora o zastosowanie migracji 0017 (seed productivity_units) i spróbuj ponownie.",
+    "sourceDocumentInvalid": "Wskazany dokument źródłowy nie został znaleziony wśród Twoich dokumentów.",
     "saveFailed": "Nie udało się zapisać wpisu: {reason}",
     "unknownReason": "nieznany błąd",
     "missingOldEntryId": "Brak identyfikatora zmienianego wpisu.",

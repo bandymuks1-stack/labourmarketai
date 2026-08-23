@@ -239,6 +239,7 @@
     "notesRequired": "Beskriv hvad du arbejdede med — friteksten er kernen i posten.",
     "quantityInvalid": "Mængden skal være et ikke-negativt tal.",
     "unitSlugUnknown": "Findes endnu ikke i enhedsregistret: {units}. Bed en administrator om at anvende migration 0017 (productivity_units-seedet), og prøv igen.",
+    "sourceDocumentInvalid": "Det angivne kildedokument blev ikke fundet blandt dine dokumenter.",
     "saveFailed": "Posten kunne ikke gemmes: {reason}",
     "unknownReason": "ukendt fejl",
     "missingOldEntryId": "Identifikatoren for posten, der ændres, mangler.",

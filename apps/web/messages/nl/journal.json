@@ -473,6 +473,7 @@
     "notesRequired": "Beschrijf wat je hebt gedaan — de vrije tekst vormt de kern van deze registratie.",
     "quantityInvalid": "De hoeveelheid moet een niet-negatief getal zijn.",
     "unitSlugUnknown": "Nog niet in het eenhedenregister: {units}. Vraag een beheerder migratie 0017 (de productivity_units-seed) toe te passen en probeer het opnieuw.",
+    "sourceDocumentInvalid": "Het opgegeven brondocument is niet gevonden tussen je documenten.",
     "saveFailed": "Opslaan van de registratie is mislukt: {reason}",
     "unknownReason": "onbekende fout",
     "missingOldEntryId": "De identificatie van de te wijzigen registratie ontbreekt.",

@@ -473,6 +473,7 @@
     "notesRequired": "Describe what you worked on — the free text is the core of the entry.",
     "quantityInvalid": "Quantity must be a non-negative number.",
     "unitSlugUnknown": "Not yet in the unit registry: {units}. Ask an administrator to apply migration 0017 (the productivity_units seed), then try again.",
+    "sourceDocumentInvalid": "The referenced source document was not found among your documents.",
     "saveFailed": "Failed to save the entry: {reason}",
     "unknownReason": "unknown error",
     "missingOldEntryId": "The identifier of the entry being edited is missing.",
