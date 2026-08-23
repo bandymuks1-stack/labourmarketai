@@ -6988,6 +6988,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Journaalconcept maken",
+      "title": "Van document naar Werkjournaal",
+      "understoodNote": "Hieronder staat de tekst die uit “{filename}” is gelezen. Controleer, bewerk en bevestig — pas dan wordt hij deel van je journaalgeschiedenis.",
+      "detectedSkills": "Gedetecteerde vaardigheidsvermeldingen: {count}",
+      "notesLabel": "Tekst van de invoer (uit je document — bewerk vóór het opslaan)",
+      "engagementLabel": "Werkcontext",
+      "save": "Bevestigen en opslaan in journaal",
+      "saving": "Opslaan…",
+      "saved": "Opgeslagen in je Werkjournaal met documentherkomst.",
+      "savedLink": "Journaal openen",
+      "error": "Opslaan mislukt. Er is niets bewaard.",
+      "notFound": "Dit document is niet gevonden tussen je documenten.",
+      "refusedClassified": "Vertrouwelijke documenten worden niet automatisch gelezen — downloaden blijft een gelogde handmatige stap.",
+      "refusedNoOcr": "Foto's worden niet gelezen — tekstherkenning bestaat nog niet.",
+      "refusedType": "Dit bestandstype kan niet als tekst worden gelezen.",
+      "empty": "Geen leesbare tekst gevonden in dit document.",
+      "failed": "Het document kon niet worden gelezen.",
+      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken."
+    },
     "currentVersion": "Versie {n}",
     "download": "Downloaden",
     "noFileYet": "Nog geen bestand geüpload.",

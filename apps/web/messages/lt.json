@@ -6988,6 +6988,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Ruošti žurnalo įrašą",
+      "title": "Iš dokumento į Darbo žurnalą",
+      "understoodNote": "Žemiau — tekstas, nuskaitytas iš „{filename}“. Peržiūrėk, pataisyk ir patvirtink — tik tada jis taps tavo žurnalo istorijos dalimi.",
+      "detectedSkills": "Aptikta įgūdžių paminėjimų: {count}",
+      "notesLabel": "Įrašo tekstas (iš tavo dokumento — pataisyk prieš išsaugant)",
+      "engagementLabel": "Darbo kontekstas",
+      "save": "Patvirtinti ir išsaugoti žurnale",
+      "saving": "Saugoma…",
+      "saved": "Išsaugota tavo Darbo žurnale su dokumento kilme.",
+      "savedLink": "Atidaryti žurnalą",
+      "error": "Išsaugoti nepavyko. Niekas nebuvo įrašyta.",
+      "notFound": "Šis dokumentas nerastas tarp tavo dokumentų.",
+      "refusedClassified": "Konfidencialūs dokumentai automatiškai neskaitomi — atsisiuntimas lieka registruojamu rankiniu veiksmu.",
+      "refusedNoOcr": "Nuotraukos neskaitomos — teksto atpažinimo dar nėra.",
+      "refusedType": "Šio tipo failo neįmanoma perskaityti kaip teksto.",
+      "empty": "Šiame dokumente skaitomo teksto nerasta.",
+      "failed": "Dokumento perskaityti nepavyko.",
+      "noEngagement": "Pirmiausia reikia darbo konteksto — atsidaryk skydelį ir jį susikurk."
+    },
     "currentVersion": "Versija {n}",
     "download": "Atsisiųsti",
     "noFileYet": "Failas dar neįkeltas.",
