@@ -173,11 +173,16 @@ export default async function VerifiedCvPage({
   const priv = cv.privateDetails;
   const privateRows: { label: string; value: string }[] = [];
   if (priv.salaryMinEur !== null || priv.salaryMaxEur !== null) {
+    // A one-sided expectation must keep its direction — a bare "1800" says
+    // nothing about whether it is a floor or a ceiling.
     privateRows.push({
       label: t("privateDetails.salary"),
-      value: [priv.salaryMinEur, priv.salaryMaxEur]
-        .filter((v): v is number => v !== null)
-        .join("–"),
+      value:
+        priv.salaryMinEur !== null && priv.salaryMaxEur !== null
+          ? `${priv.salaryMinEur}–${priv.salaryMaxEur}`
+          : priv.salaryMinEur !== null
+            ? t("privateDetails.salaryFrom", { amount: priv.salaryMinEur })
+            : t("privateDetails.salaryTo", { amount: priv.salaryMaxEur ?? 0 }),
     });
   }
   if (priv.availabilityStatus) {

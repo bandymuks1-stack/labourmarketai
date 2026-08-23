@@ -6844,7 +6844,7 @@
       "needsLegalReview": "Awaiting legal review",
       "whoProvides": "Who usually arranges it",
       "groupAll": "General (all countries)",
-      "helpInfoNote": "For now this is informational guidance only. A way to request document, accounting or legal help through the platform is being prepared.",
+      "helpInfoNote": "This is informational guidance. Requests for document, accounting or legal help can be submitted from the company workspace.",
       "dimensions": {
         "worker_country": "Worker country",
         "company_country": "Company country",
@@ -7206,6 +7206,8 @@
     "privateDetails": {
       "toggle": "Include salary expectation & availability in the printout",
       "title": "Salary expectation & availability",
+      "salaryFrom": "From {amount}",
+      "salaryTo": "Up to {amount}",
       "salary": "Salary expectation (EUR/month)",
       "availability": "Availability",
       "availableFrom": "Available from",

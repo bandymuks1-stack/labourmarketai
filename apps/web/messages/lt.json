@@ -6844,7 +6844,7 @@
       "needsLegalReview": "Laukia teisininko peržiūros",
       "whoProvides": "Kas dažniausiai pasirūpina",
       "groupAll": "Bendra (visos šalys)",
-      "helpInfoNote": "Kol kas tai tik informacinės gairės. Galimybė per platformą paprašyti dokumentų, buhalterijos ar teisinės pagalbos dar ruošiama.",
+      "helpInfoNote": "Tai informacinės gairės. Dokumentų, buhalterijos ar teisinės pagalbos užklausą galima pateikti iš įmonės darbo aplinkos.",
       "dimensions": {
         "worker_country": "Darbuotojo šalis",
         "company_country": "Įmonės šalis",
@@ -7206,6 +7206,8 @@
     "privateDetails": {
       "toggle": "Įtraukti atlyginimo lūkestį ir prieinamumą į spausdinamą CV",
       "title": "Atlyginimo lūkestis ir prieinamumas",
+      "salaryFrom": "Nuo {amount}",
+      "salaryTo": "Iki {amount}",
       "salary": "Atlyginimo lūkestis (EUR/mėn.)",
       "availability": "Prieinamumas",
       "availableFrom": "Gali pradėti nuo",
@@ -7799,7 +7801,7 @@
     }
   },
   "billingTest": {
-    "badge": "TEST MODE",
+    "badge": "TESTO REŽIMAS",
     "title": "Testinis apmokėjimas (vidiniam testavimui)",
     "body": "Stripe test mode įjungtas. Šie mygtukai atidaro TESTINĮ apmokėjimą — jokių realių pinigų, jokio realaus nuskaitymo. Naudok tik Stripe test korteles.",
     "start": "Pradėti testinį apmokėjimą",
@@ -7974,7 +7976,7 @@
   "billingStatus": {
     "badge": {
       "disabled": "MOKĖJIMAI IŠJUNGTI",
-      "stripe_test": "TEST MODE",
+      "stripe_test": "TESTO REŽIMAS",
       "stripe_live_blocked": "LIVE BLOKUOJAMAS"
     },
     "body": {

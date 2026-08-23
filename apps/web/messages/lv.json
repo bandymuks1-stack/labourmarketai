@@ -703,7 +703,7 @@
     },
     "counters": {
       "activeWorkers": "[EN] Active workers",
-      "previewNote": "Pre-alpha priekšskatījums — paraugu signāli, nevis reāli platformas skaitļi.",
+      "previewNote": "Ilustratīva platformas tīkla aktivitāte — nevis reāllaika kopsummas.",
       "avgOvr": "[EN] Avg readiness · preview",
       "liveDemand": "[EN] Open demand",
       "matchesToday": "[EN] Activity today"
@@ -1016,7 +1016,7 @@
       },
       "more": "[EN] +{n} more",
       "poolSize": "[EN] Pool size",
-      "conceptChip": "Koncepta priekšskatījums · pre-alpha",
+      "conceptChip": "Paraugs",
       "rankedMatches": "[EN] fit direction",
       "status": {
         "active": "[EN] Active",

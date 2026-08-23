@@ -3293,7 +3293,7 @@
       "activeWorkers": "Werknemersprofielen",
       "liveDemand": "Werkkansen",
       "matchesToday": "Nieuwe acties",
-      "previewNote": "Pre-alpha preview — voorbeeldsignalen, geen echte platformcijfers.",
+      "previewNote": "Illustratieve platformnetwerk-activiteit — geen live realtime totalen.",
       "avgOvr": "Profielvoltooiing"
     }
   },
@@ -4141,7 +4141,7 @@
       "expand_aria": "Antwoord uitklappen"
     },
     "preview": {
-      "conceptChip": "Conceptvoorbeeld · pre-alpha",
+      "conceptChip": "Voorbeeld",
       "conceptNote": "Illustratief voorbeeld van hoe een record eruit zal zien — geen echte persoon en geen echte gegevens.",
       "rankedMatches": "fit-richting",
       "headcount": "Aantal mensen",
@@ -6844,7 +6844,7 @@
       "needsLegalReview": "Wacht op juridische beoordeling",
       "whoProvides": "Wie het meestal regelt",
       "groupAll": "Algemeen (alle landen)",
-      "helpInfoNote": "Voorlopig is dit alleen informatieve begeleiding. Een manier om via het platform document-, boekhoud- of juridische hulp aan te vragen wordt voorbereid.",
+      "helpInfoNote": "Dit is informatieve begeleiding. Een verzoek om hulp bij documenten, boekhouding of juridische zaken kan vanuit de bedrijfsomgeving worden ingediend.",
       "dimensions": {
         "worker_country": "Land van de werknemer",
         "company_country": "Land van het bedrijf",
@@ -7206,6 +7206,8 @@
     "privateDetails": {
       "toggle": "Salarisverwachting en beschikbaarheid opnemen in de afdruk",
       "title": "Salarisverwachting en beschikbaarheid",
+      "salaryFrom": "Vanaf {amount}",
+      "salaryTo": "Tot {amount}",
       "salary": "Salarisverwachting (EUR/maand)",
       "availability": "Beschikbaarheid",
       "availableFrom": "Beschikbaar vanaf",
