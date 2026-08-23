@@ -5,7 +5,9 @@
 > `docs/DECISIONS/0008-universal-labour-market-os.md` (universal-OS ADR). Where a
 > product/UX decision conflicts with these principles, these win — flag the conflict.
 > **Active product name:** labourmarket.ai. Candidate future name: *Retis*.
-> "LABMA / LABMA OS" is historical / product-family context only — never the active name.
+> "LABMA" is an unrelated, permanently retired project — not a name, alias,
+> predecessor, architecture name or product family of labourmarket.ai. See the
+> owner ruling in `AGENTS.md` → *Naming*.
 
 This constitution locks the non-negotiables for the WOW Public Beta and beyond.
 
