@@ -113,6 +113,47 @@ and must never be applied (details in the parity register Refresh section):
 Applies happen only via Supabase MCP `apply_migration` after this decision,
 never `db push`, each with its rollback file verified first.
 
+## D5 — /jobs board search throttle (code written, withdrawn pending waiver)
+
+An app-layer per-client throttle on the public board's free-text search
+(30/min, text queries only; browsing/pagination/profession filter and
+crawlers never limited; honest SEARCH_BUSY notice instead of a fake
+"0 results") was implemented and then **withdrawn from PR #1236**: the
+scoped product-gate waiver `public-acquisition-route-jobs` binds by PR
+number, and its history shows every extension (#1193, #1203, #1208)
+carried a verbatim owner approval. Self-extending it would breach that
+precedent.
+
+The implementation is preserved in this branch's history (commit
+`136e677`, reverted by `7cc5104`) and re-applies as one cherry-pick.
+
+**Decision:** approve the waiver extension for the follow-up PR that
+re-applies it (the approval formula used for #1208: "add ONLY `<PR>` to
+the existing `pullRequests` list; do not change or weaken the gate
+criteria"), or decline and rely on the DB-side fix (D3) alone.
+
+## D6 — AI activation route (from the 2026-08-23 AI-reality audit)
+
+AI is structurally dormant by your own design: the egress-grant list is
+empty, so **no cloud provider can be activated by environment variables
+alone** — this is working as intended, not a bug. Two honest activation
+routes exist:
+
+- **Route A — local-first (no egress decision needed):** deploy a
+  self-hosted OpenAI-compatible runtime and set the `AI_LOCAL_*` /
+  `AI_PROVIDER_MODE=live` variables. The only env-only path today;
+  satisfies the stated "local/free first" order.
+- **Route B — cloud:** an owner-level source edit adding one egress-grant
+  row (with a real legal basis + date), plus small code fixes an agent can
+  ship first (model-aware thinking parameter, canonical Haiku model id,
+  schema hint wiring, output-token ceiling) and rate limits on the three
+  public marketing-route AI actions.
+
+Either route ends with the same proof: one `ai_runs` row with
+`schema_validation='passed'` + its paired `usage_cost_events` row.
+
+**Decision:** Route A / Route B / defer AI activation.
+
 ---
 
 *This document intentionally contains no matching/scoring/verification
