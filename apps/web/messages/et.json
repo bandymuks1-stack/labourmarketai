@@ -703,7 +703,7 @@
     },
     "counters": {
       "activeWorkers": "[EN] Active workers",
-      "previewNote": "Pre-alpha eelvaade — näidissignaalid, mitte reaalsed platvormi arvud.",
+      "previewNote": "Illustratiivne platvormivõrgu aktiivsus — mitte reaalajas olevad kogusummad.",
       "avgOvr": "[EN] Avg readiness · preview",
       "liveDemand": "[EN] Open demand",
       "matchesToday": "[EN] Activity today"
@@ -1016,7 +1016,7 @@
       },
       "more": "[EN] +{n} more",
       "poolSize": "[EN] Pool size",
-      "conceptChip": "Kontseptsiooni eelvaade · pre-alpha",
+      "conceptChip": "Näidis",
       "rankedMatches": "[EN] fit direction",
       "status": {
         "active": "[EN] Active",

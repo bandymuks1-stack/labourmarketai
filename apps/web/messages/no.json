@@ -703,7 +703,7 @@
     },
     "counters": {
       "activeWorkers": "[EN] Active workers",
-      "previewNote": "Pre-alpha-forhåndsvisning — eksempelsignaler, ikke reelle plattformtall.",
+      "previewNote": "Illustrativ plattformnettverksaktivitet — ikke levende sanntidstall.",
       "avgOvr": "[EN] Avg readiness · preview",
       "liveDemand": "[EN] Open demand",
       "matchesToday": "[EN] Activity today"
@@ -1016,7 +1016,7 @@
       },
       "more": "[EN] +{n} more",
       "poolSize": "[EN] Pool size",
-      "conceptChip": "Konseptforhåndsvisning · pre-alpha",
+      "conceptChip": "Eksempel",
       "rankedMatches": "[EN] fit direction",
       "status": {
         "active": "[EN] Active",

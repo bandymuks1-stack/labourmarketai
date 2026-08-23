@@ -3293,7 +3293,7 @@
       "activeWorkers": "Arbeitskräfte-Profile",
       "liveDemand": "Arbeitsmöglichkeiten",
       "matchesToday": "Neue Aktionen",
-      "previewNote": "Pre-Alpha-Vorschau — Beispielsignale, keine echten Plattformzahlen.",
+      "previewNote": "Illustrative Plattformnetzwerk-Aktivität — keine echten Echtzeit-Summen.",
       "avgOvr": "Profilvollständigkeit"
     }
   },
@@ -4141,7 +4141,7 @@
       "expand_aria": "Antwort ausklappen"
     },
     "preview": {
-      "conceptChip": "Konzeptvorschau · Pre-Alpha",
+      "conceptChip": "Beispiel",
       "conceptNote": "Anschauliches Beispiel, wie ein Eintrag aussehen wird — keine echte Person und keine echten Daten.",
       "rankedMatches": "Passungsrichtung",
       "headcount": "Personalstärke",
@@ -6849,7 +6849,7 @@
       "needsLegalReview": "Rechtliche Prüfung ausstehend",
       "whoProvides": "Wer es üblicherweise organisiert",
       "groupAll": "Allgemein (alle Länder)",
-      "helpInfoNote": "Derzeit sind dies nur informative Hinweise. Eine Möglichkeit, über die Plattform Hilfe bei Dokumenten, Buchhaltung oder Rechtsfragen anzufordern, wird vorbereitet.",
+      "helpInfoNote": "Dies sind informative Hinweise. Anfragen zu Dokumenten, Buchhaltung oder rechtlicher Hilfe können aus dem Unternehmensbereich gestellt werden.",
       "dimensions": {
         "worker_country": "Land der Arbeitskraft",
         "company_country": "Land des Unternehmens",
@@ -7211,6 +7211,8 @@
     "privateDetails": {
       "toggle": "Gehaltsvorstellung & Verfügbarkeit im Ausdruck aufnehmen",
       "title": "Gehaltsvorstellung & Verfügbarkeit",
+      "salaryFrom": "Ab {amount}",
+      "salaryTo": "Bis {amount}",
       "salary": "Gehaltsvorstellung (EUR/Monat)",
       "availability": "Verfügbarkeit",
       "availableFrom": "Verfügbar ab",
