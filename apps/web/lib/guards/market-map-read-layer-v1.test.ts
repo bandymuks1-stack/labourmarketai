@@ -629,7 +629,11 @@ describe("NO new DB migration in this PR", () => {
     // (20260820070000_workflow_work_task_definition_v1, paired rollback).
     // RED by route, owner-approved; one value added to one RPC allowlist.
     // Still nothing from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(235);
+    // Bumped 235 -> 236 for notification events v6 weekly digest
+    // (20260823150500_notification_events_v6_weekly_digest, paired rollback).
+    // GREEN CHECK widening (the v2..v5 idiom); still nothing from the
+    // market-map read layer itself.
+    expect(count).toBeLessThanOrEqual(236);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

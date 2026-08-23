@@ -4124,7 +4124,8 @@
         "event_document_expiring": "Die Gültigkeit eines Dokuments endet bald.",
         "event_work_task_assigned": "Ihnen wurde eine Aufgabe zugewiesen",
         "event_demand_interest_expressed": "Eine Arbeitskraft hat Interesse an Ihrem Bedarf bekundet",
-        "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert"
+        "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
+        "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",

@@ -81,7 +81,16 @@ export type NotificationEventType =
   // after a real conversation thread exists, and a new thread already reaches
   // the worker through the unread-message signal. The message is the better
   // notification; a second bell for one act is noise.
-  | "demand_interest_reviewed";
+  | "demand_interest_reviewed"
+  // v6 (20260823150500): the weekly personal digest — the carrier of the ONE
+  // personal intelligence loop (lib/worker/weekly-intelligence-model.ts).
+  // Recipient is the worker themselves. The row is a POINTER, never a
+  // payload: §19(d) forbids persisting computed fit counts, so metadata stays
+  // empty and the numbers live where the href lands (the opportunities board
+  // recomputes them at read time). entity_id is a deterministic uuid of the
+  // ISO week, which with the UNIQUE (recipient, dedupe_key) constraint makes
+  // the digest exactly-once per recipient per week.
+  | "weekly_digest";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -101,7 +110,10 @@ export type NotificationEntityType =
   // rather than a second table, because the destination differs and nothing
   // else does — routing both directions through one type would send a worker
   // to a company page they cannot open.
-  | "demand_interest_response";
+  | "demand_interest_response"
+  // v6: the weekly digest points at the opportunities board — the surface
+  // that recomputes every number the digest is about, at read time.
+  | "weekly_digest";
 
 /**
  * Where a durable event TAKES YOU.
@@ -150,6 +162,10 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // their current status on the opportunities board — the answer they were
   // notified about is on the page the notification opens.
   demand_interest_response: "/dashboard/opportunities",
+  // v6: the weekly digest's numbers (matching count, basis, gaps) are
+  // recomputed live on the opportunities board — the digest row is only the
+  // pointer to them (§19: no persisted fit values).
+  weekly_digest: "/dashboard/opportunities",
 };
 
 /** The canonical surface for a stored event, or undefined for an unknown

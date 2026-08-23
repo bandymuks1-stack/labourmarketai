@@ -2188,7 +2188,14 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
-    const SPRINT_BASELINE = 235;
+    const SPRINT_BASELINE = 236;
+    // Bumped 235 -> 236 for the notification-events v6 weekly-digest widening
+    // (20260823150500_notification_events_v6_weekly_digest, value train 2
+    // Wagon B2) — the canonical GREEN drop+re-add CHECK-widening idiom on the
+    // same table as v2..v5, one event type + one entity type added, strict
+    // superset, paired rollback restoring the v5 lists. RECOUNTED from the
+    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 236 real
+    // files.
     // Bumped 234 -> 235 for the chain step B on-ramp
     // (20260820070000_workflow_work_task_definition_v1) — RED by route (it
     // replaces the create_workflow_definition_v1 SECURITY DEFINER body),

@@ -286,6 +286,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    chat table, sends nothing outbound. Owner-gated store
     //    (docs/human-gates/notification-events-gate.md) — every call
     //    degrades to feature_unavailable until applied.
+    //    v6 (value train 2, B2) adds ONE more emitter in this same file: the
+    //    weekly personal digest, materialized read-time on a dashboard visit
+    //    at most once per ISO week (deterministic per-week entity id + the
+    //    UNIQUE dedupe key). Recipient is the signed-in worker themselves,
+    //    the row carries NO metadata (§19(d): computed fit values are never
+    //    persisted), and the same fire-and-forget/service-role posture
+    //    applies — no new caller file, no new bypass.
     //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only

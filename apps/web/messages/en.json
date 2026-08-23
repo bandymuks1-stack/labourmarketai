@@ -4124,7 +4124,8 @@
         "event_document_expiring": "A document's validity is ending soon.",
         "event_work_task_assigned": "A task was assigned to you",
         "event_demand_interest_expressed": "A worker expressed interest in your demand",
-        "event_demand_interest_reviewed": "A company marked your interest as reviewed"
+        "event_demand_interest_reviewed": "A company marked your interest as reviewed",
+        "event_weekly_digest": "Your weekly work and opportunities summary is ready"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",

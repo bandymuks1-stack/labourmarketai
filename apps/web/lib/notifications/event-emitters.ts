@@ -44,6 +44,13 @@ import {
   emitNotificationEventInBackground,
   type NotificationEventType,
 } from "./events";
+import {
+  hasCurrentWeekDigest,
+  weeklyDigestEntityId,
+  type WeeklyDigestSkipRow,
+} from "./weekly-digest-emitter";
+import { getWorkerCoreRow } from "../data/worker-core";
+import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -851,6 +858,57 @@ export function emitOrgDocumentExpiringNotifications(
       }
     } catch {
       // Emission is an enhancement; reads must never fail because of it.
+    }
+  })();
+}
+
+/**
+ * v6 — weekly personal digest, materialized READ-TIME (value train 2, B2).
+ *
+ * Unlike every emitter above, this is not triggered by a domain write: it
+ * fires on an authenticated dashboard visit (SpineStream), at most once per
+ * ISO week. The skip check runs over the durable feed the caller already
+ * fetched; the authority is the store's UNIQUE (recipient, dedupe_key) with
+ * a deterministic per-week entity id, so races and re-renders are
+ * duplicate-conflict no-ops.
+ *
+ * WHY NO SCHEDULER: a cron would be a second notification path for people
+ * who are present anyway; reaching ABSENT workers needs the email channel,
+ * which is deliberately owner-gated behind the notification_preferences
+ * decision (consent/unsubscribe first) and will ride this same event row.
+ *
+ * POINTER-ONLY by doctrine: §19(d) forbids persisting computed fit values,
+ * so the row carries NO metadata — the numbers live where the href lands
+ * (the opportunities board recomputes them at read time). Nothing is
+ * emitted when neither the journal nor the market block could be read: a
+ * digest that can say nothing true says nothing.
+ */
+export function maybeEmitWeeklyDigestInBackground(
+  durable: readonly WeeklyDigestSkipRow[],
+): void {
+  void (async () => {
+    try {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      if (hasCurrentWeekDigest(durable, todayIso)) return;
+
+      const worker = await getWorkerCoreRow();
+      if (!worker?.profile_id) return;
+
+      const result = await getWeeklyPersonalIntelligence();
+      if (result.kind !== "ready") return;
+      const { journal, opportunities } = result.intelligence;
+      if (!journal.available && !opportunities.available) return;
+
+      const admin = createAdminClient();
+      emitNotificationEventInBackground(admin, {
+        recipientProfileId: worker.profile_id,
+        eventType: "weekly_digest",
+        entityType: "weekly_digest",
+        entityId: weeklyDigestEntityId(todayIso),
+      });
+    } catch {
+      // Missing service env / transient read failure — observability only,
+      // never the page. The next visit tries again.
     }
   })();
 }
