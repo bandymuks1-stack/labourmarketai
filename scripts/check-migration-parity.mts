@@ -30,7 +30,7 @@
  * table, so it is safe to point at production — which is the intended use.
  */
 
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -44,16 +44,36 @@ import {
 /**
  * NO SILENT DEFAULT — the `check-anon-secdef-allowlist` precedent. A gate that
  * passes because it checked an empty local database is worse than no gate.
+ *
+ * TWO INPUT MODES, both explicit:
+ *   live:     DB_URL=postgresql://...            (read-only catalog read)
+ *   snapshot: LEDGER_SNAPSHOT=<path to .json>    (a committed MCP-read snapshot
+ *             of `supabase_migrations.schema_migrations`, produced by a lead
+ *             session that has Supabase MCP access but no DB credentials —
+ *             docs/migrations/production-ledger-snapshot.json)
+ *
+ * Snapshot mode exists because the remote lead sessions that actually APPLY
+ * migrations reach production only through MCP, never a connection string —
+ * without it the parity gate is unrunnable exactly where applies happen.
+ * A snapshot run is honest about being as-of its read time, never "live".
  */
 const DB_URL = process.env.DB_URL;
-if (!DB_URL) {
+const LEDGER_SNAPSHOT = process.env.LEDGER_SNAPSHOT;
+if (!DB_URL && !LEDGER_SNAPSHOT) {
   console.error(
     [
-      "check-migration-parity: DB_URL is not set.",
+      "check-migration-parity: neither DB_URL nor LEDGER_SNAPSHOT is set.",
       "This guard asserts something about a REAL database and refuses to guess which one.",
       "  local:      DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres pnpm check:migration-parity",
       "  production: DB_URL=<production connection string> pnpm check:migration-parity",
+      "  snapshot:   LEDGER_SNAPSHOT=docs/migrations/production-ledger-snapshot.json pnpm check:migration-parity",
     ].join("\n"),
+  );
+  process.exit(2);
+}
+if (DB_URL && LEDGER_SNAPSHOT) {
+  console.error(
+    "check-migration-parity: set DB_URL or LEDGER_SNAPSHOT, not both — a run must have one unambiguous source.",
   );
   process.exit(2);
 }
@@ -66,16 +86,59 @@ const repoStems = readdirSync(MIGRATIONS)
   .map((f) => f.slice(0, -4))
   .sort((a, b) => a.localeCompare(b));
 
-const client = new Client({ connectionString: DB_URL });
+/** Shape of the committed snapshot file (see docs/migrations/). */
+type LedgerSnapshot = {
+  readonly read_at: string;
+  readonly method: string;
+  readonly project_ref: string;
+  readonly row_count: number;
+  readonly rows: readonly ProductionMigration[];
+};
+
+function readSnapshotRows(path: string): ProductionMigration[] {
+  const raw = JSON.parse(
+    readFileSync(resolve(ROOT, path), "utf8"),
+  ) as LedgerSnapshot;
+  if (!Array.isArray(raw.rows) || raw.rows.length === 0) {
+    throw new Error(`snapshot at ${path} has no rows`);
+  }
+  if (raw.row_count !== raw.rows.length) {
+    throw new Error(
+      `snapshot at ${path} is internally inconsistent: row_count=${raw.row_count} but rows=${raw.rows.length}`,
+    );
+  }
+  for (const r of raw.rows) {
+    if (typeof r?.version !== "string" || typeof r?.name !== "string") {
+      throw new Error(`snapshot at ${path} has a malformed row`);
+    }
+  }
+  console.log(
+    [
+      "check-migration-parity: SNAPSHOT MODE — NOT a live read.",
+      `  source: ${path} (project ${raw.project_ref}, read ${raw.read_at})`,
+      "  The result is as-of that read time; migrations applied since are invisible here.",
+      "  Refresh the snapshot from the production ledger before trusting a PASS for an apply decision.",
+    ].join("\n"),
+  );
+  return [...raw.rows];
+}
+
+const client = DB_URL ? new Client({ connectionString: DB_URL }) : null;
 let failed = false;
 
 try {
-  await client.connect();
-  await client.query("begin read only");
-  const { rows } = await client.query<ProductionMigration>(
-    "select version, name from supabase_migrations.schema_migrations order by version",
-  );
-  await client.query("rollback");
+  let rows: ProductionMigration[];
+  if (client) {
+    await client.connect();
+    await client.query("begin read only");
+    const res = await client.query<ProductionMigration>(
+      "select version, name from supabase_migrations.schema_migrations order by version",
+    );
+    await client.query("rollback");
+    rows = res.rows;
+  } else {
+    rows = readSnapshotRows(LEDGER_SNAPSHOT as string);
+  }
 
   const result = checkMigrationParity(rows, repoStems);
 
@@ -119,7 +182,7 @@ try {
   console.error("check-migration-parity: FAILED to complete the check.");
   console.error(error instanceof Error ? error.message : String(error));
 } finally {
-  await client.end().catch(() => {});
+  if (client) await client.end().catch(() => {});
 }
 
 process.exit(failed ? 1 : 0);

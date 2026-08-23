@@ -1,0 +1,936 @@
+{
+  "read_at": "2026-08-23T12:30:00Z",
+  "method": "Supabase MCP execute_sql (read-only) by the lead session: select version, name from supabase_migrations.schema_migrations order by version",
+  "project_ref": "gorgitwvdzxbnaxhrsrw",
+  "row_count": 232,
+  "rows": [
+    {
+      "version": "0001",
+      "name": "initial_schema"
+    },
+    {
+      "version": "0002",
+      "name": "reference_data"
+    },
+    {
+      "version": "0003",
+      "name": "multi_role"
+    },
+    {
+      "version": "0004",
+      "name": "authenticated_grants"
+    },
+    {
+      "version": "0005",
+      "name": "waitlist"
+    },
+    {
+      "version": "0006",
+      "name": "complete_onboarding_rpc"
+    },
+    {
+      "version": "0007",
+      "name": "add_role_rpc"
+    },
+    {
+      "version": "0008",
+      "name": "professions"
+    },
+    {
+      "version": "0009",
+      "name": "auth_role_architecture_v1"
+    },
+    {
+      "version": "0010",
+      "name": "skills_and_worker_skills"
+    },
+    {
+      "version": "0011",
+      "name": "seed_skills"
+    },
+    {
+      "version": "0012",
+      "name": "drop_taxonomy_name_columns"
+    },
+    {
+      "version": "0013",
+      "name": "work_journal_m1"
+    },
+    {
+      "version": "20260524060556",
+      "name": "profile_text_column"
+    },
+    {
+      "version": "20260524075523",
+      "name": "profile_skill_claims"
+    },
+    {
+      "version": "20260524154059",
+      "name": "pilot_drafts"
+    },
+    {
+      "version": "20260525052545",
+      "name": "seed_platform_productivity_units"
+    },
+    {
+      "version": "20260525061459",
+      "name": "journal_correction_lifecycle"
+    },
+    {
+      "version": "20260525074126",
+      "name": "language_feedback"
+    },
+    {
+      "version": "20260525092209",
+      "name": "pilot_events"
+    },
+    {
+      "version": "20260525102714",
+      "name": "communication"
+    },
+    {
+      "version": "20260527073015",
+      "name": "job_postings_grants"
+    },
+    {
+      "version": "20260528184526",
+      "name": "0024_is_admin_dual_signal"
+    },
+    {
+      "version": "20260528205930",
+      "name": "0025_agency_worker_invitations"
+    },
+    {
+      "version": "20260528212558",
+      "name": "0026_customer_entity"
+    },
+    {
+      "version": "20260528215621",
+      "name": "0027_company_workers"
+    },
+    {
+      "version": "20260529033641",
+      "name": "0028_customer_requests"
+    },
+    {
+      "version": "20260529042431",
+      "name": "0029_customer_request_attachments"
+    },
+    {
+      "version": "20260529170326",
+      "name": "company_agency_worker_ops_bridge"
+    },
+    {
+      "version": "20260529175547",
+      "name": "assign_operations_role_rpcs"
+    },
+    {
+      "version": "20260529191324",
+      "name": "engagement_context_provisioning_rpc"
+    },
+    {
+      "version": "20260530034528",
+      "name": "journal_review_enable_toggle"
+    },
+    {
+      "version": "20260530034556",
+      "name": "manager_review_evidence_result"
+    },
+    {
+      "version": "20260530040716",
+      "name": "org_owner_engagement_backfill"
+    },
+    {
+      "version": "20260530041847",
+      "name": "accept_worker_invitation_rpc"
+    },
+    {
+      "version": "20260530084241",
+      "name": "journal_integrity_guards"
+    },
+    {
+      "version": "20260530090717",
+      "name": "membership_engagement_reroute"
+    },
+    {
+      "version": "20260530120000",
+      "name": "drop_legacy_threads_messages"
+    },
+    {
+      "version": "20260530120100",
+      "name": "projects_company_to_organization"
+    },
+    {
+      "version": "20260530192609",
+      "name": "demand_intake_consolidation"
+    },
+    {
+      "version": "20260531213432",
+      "name": "journal_entry_work_items"
+    },
+    {
+      "version": "20260531215058",
+      "name": "project_object_client_context"
+    },
+    {
+      "version": "20260602071849",
+      "name": "journal_entry_skills"
+    },
+    {
+      "version": "20260604085415",
+      "name": "company_profile_request"
+    },
+    {
+      "version": "20260604104622",
+      "name": "admin_company_verification"
+    },
+    {
+      "version": "20260604104645",
+      "name": "company_automatic_first"
+    },
+    {
+      "version": "20260608073506",
+      "name": "worker_work_card"
+    },
+    {
+      "version": "20260608163455",
+      "name": "worker_work_card_execute_hardening"
+    },
+    {
+      "version": "20260609054433",
+      "name": "work_instructions"
+    },
+    {
+      "version": "20260609084006",
+      "name": "project_worker_assignment_gate"
+    },
+    {
+      "version": "20260609094725",
+      "name": "work_instruction_project_scope"
+    },
+    {
+      "version": "20260609105216",
+      "name": "skill_candidate_clarifications"
+    },
+    {
+      "version": "20260609172439",
+      "name": "pilot_ops_v2_status_readiness"
+    },
+    {
+      "version": "20260609180535",
+      "name": "candidate_provider_drafts"
+    },
+    {
+      "version": "20260610172207",
+      "name": "esco_taxonomy_core"
+    },
+    {
+      "version": "20260610172226",
+      "name": "esco_uri_refs"
+    },
+    {
+      "version": "20260610172251",
+      "name": "candidate_skills"
+    },
+    {
+      "version": "20260610172333",
+      "name": "worker_documents_readiness"
+    },
+    {
+      "version": "20260610195017",
+      "name": "esco_labels_all_official_languages"
+    },
+    {
+      "version": "20260610195942",
+      "name": "esco_service_role_grants"
+    },
+    {
+      "version": "20260610204051",
+      "name": "conversation_message_language"
+    },
+    {
+      "version": "20260610204215",
+      "name": "conversation_message_language_check"
+    },
+    {
+      "version": "20260611064312",
+      "name": "journal_entry_project_autolink"
+    },
+    {
+      "version": "20260611064340",
+      "name": "market_rate_averages"
+    },
+    {
+      "version": "20260611064355",
+      "name": "conversation_message_language"
+    },
+    {
+      "version": "20260611064423",
+      "name": "batch_journal_review"
+    },
+    {
+      "version": "20260611091820",
+      "name": "s5_agency_demand_visibility"
+    },
+    {
+      "version": "20260611091834",
+      "name": "confirmation_role_check"
+    },
+    {
+      "version": "20260612072513",
+      "name": "company_type_and_country_safety"
+    },
+    {
+      "version": "20260612072652",
+      "name": "journal_entry_photos_table"
+    },
+    {
+      "version": "20260612072736",
+      "name": "journal_entry_photos_rpc"
+    },
+    {
+      "version": "20260612075300",
+      "name": "journal_entry_photos_storage"
+    },
+    {
+      "version": "20260612102609",
+      "name": "widen_original_language_ru"
+    },
+    {
+      "version": "20260612125609",
+      "name": "conversation_participant_revocation"
+    },
+    {
+      "version": "20260612144015",
+      "name": "pin_function_search_path"
+    },
+    {
+      "version": "20260612154306",
+      "name": "phase_b1_fk_indexes"
+    },
+    {
+      "version": "20260612160719",
+      "name": "phase_b2_fk_indexes"
+    },
+    {
+      "version": "20260612162558",
+      "name": "phase_b3_fk_indexes"
+    },
+    {
+      "version": "20260612173012",
+      "name": "demand_shortlist"
+    },
+    {
+      "version": "20260613184013",
+      "name": "worker_availability_preferences"
+    },
+    {
+      "version": "20260613184106",
+      "name": "booking_requests"
+    },
+    {
+      "version": "20260613184151",
+      "name": "worker_document_verification"
+    },
+    {
+      "version": "20260613202244",
+      "name": "billing_test_mode_records"
+    },
+    {
+      "version": "20260614201637",
+      "name": "worker_demand_visibility"
+    },
+    {
+      "version": "20260615194110",
+      "name": "20260615120000_company_demand_locations"
+    },
+    {
+      "version": "20260615204903",
+      "name": "20260615210000_company_demand_locations_signal_only_write"
+    },
+    {
+      "version": "20260616204739",
+      "name": "s6_worker_docs_consent"
+    },
+    {
+      "version": "20260617180711",
+      "name": "market_map_data_model_v1"
+    },
+    {
+      "version": "20260623204727",
+      "name": "20260623200000_profile_avatar"
+    },
+    {
+      "version": "20260627124926",
+      "name": "service_offerings"
+    },
+    {
+      "version": "20260627135708",
+      "name": "human_in_loop_learning"
+    },
+    {
+      "version": "20260627143138",
+      "name": "w10_projects_org_backfill"
+    },
+    {
+      "version": "20260627152318",
+      "name": "20260627145318_service_offering_requests"
+    },
+    {
+      "version": "20260627191521",
+      "name": "20260627174500_requester_identity_for_provider"
+    },
+    {
+      "version": "20260627200639",
+      "name": "20260627181500_service_requests_seen"
+    },
+    {
+      "version": "20260702125934",
+      "name": "20260702130000_admin_grant_guard"
+    },
+    {
+      "version": "20260702131046",
+      "name": "20260702140000_worker_personal_engagement"
+    },
+    {
+      "version": "20260702131913",
+      "name": "20260702150000_pilot_events_anon_insert_grant"
+    },
+    {
+      "version": "20260702133837",
+      "name": "20260702170000_worker_demand_approved_route_model_a"
+    },
+    {
+      "version": "20260702171912",
+      "name": "20260702200000_pilot_events_service_role_report_read"
+    },
+    {
+      "version": "20260704143455",
+      "name": "universal_profession_skill_catalogue"
+    },
+    {
+      "version": "20260704143516",
+      "name": "seed_missing_legacy_professions"
+    },
+    {
+      "version": "20260704154905",
+      "name": "universal_catalogue_expansion_wave2"
+    },
+    {
+      "version": "20260704210727",
+      "name": "demand_interest_signals"
+    },
+    {
+      "version": "20260704220712",
+      "name": "demand_interest_company_ack"
+    },
+    {
+      "version": "20260704220732",
+      "name": "worker_demand_location_label"
+    },
+    {
+      "version": "20260705061012",
+      "name": "20260705150000_customer_requests_status_transition_guard"
+    },
+    {
+      "version": "20260705072326",
+      "name": "20260705170000_conversation_counterpart_identity"
+    },
+    {
+      "version": "20260705080625",
+      "name": "20260705200000_worker_demand_transport"
+    },
+    {
+      "version": "20260705083120",
+      "name": "20260705210000_worker_demand_required_tools"
+    },
+    {
+      "version": "20260705085611",
+      "name": "20260705220000_team_brigade_org_spine"
+    },
+    {
+      "version": "20260705092111",
+      "name": "20260705230000_project_handover_passport"
+    },
+    {
+      "version": "20260705094731",
+      "name": "20260705235000_follow_up_tasks"
+    },
+    {
+      "version": "20260705111011",
+      "name": "20260705240000_agency_legacy_retype"
+    },
+    {
+      "version": "20260705160046",
+      "name": "20260705250000_journal_photos_project_gallery"
+    },
+    {
+      "version": "20260705163135",
+      "name": "20260705260000_help_request_intake"
+    },
+    {
+      "version": "20260706092909",
+      "name": "booking_requests_seen"
+    },
+    {
+      "version": "20260706160157",
+      "name": "20260706150000_privacy_request_intake"
+    },
+    {
+      "version": "20260706203715",
+      "name": "20260706210000_conversation_source_relation"
+    },
+    {
+      "version": "20260707105900",
+      "name": "company_need_public_intake"
+    },
+    {
+      "version": "20260711064506",
+      "name": "privacy_consent_and_disclosure_v1"
+    },
+    {
+      "version": "20260711064759",
+      "name": "privacy_consent_event_ordering_fix_v1"
+    },
+    {
+      "version": "20260711081250",
+      "name": "privacy_consent_text_v2_controller_identity"
+    },
+    {
+      "version": "20260711203058",
+      "name": "worker_demand_structured_v2_exposure"
+    },
+    {
+      "version": "20260711203623",
+      "name": "worker_languages_v1"
+    },
+    {
+      "version": "20260711204006",
+      "name": "worker_preference_columns_v2"
+    },
+    {
+      "version": "20260711204106",
+      "name": "worker_saved_opportunities_v1"
+    },
+    {
+      "version": "20260711204354",
+      "name": "booking_lifecycle_v2"
+    },
+    {
+      "version": "20260711204521",
+      "name": "work_tasks_v1"
+    },
+    {
+      "version": "20260711204634",
+      "name": "finance_records_v1"
+    },
+    {
+      "version": "20260712092115",
+      "name": "journal_entry_restore"
+    },
+    {
+      "version": "20260712092332",
+      "name": "conversation_message_attachments"
+    },
+    {
+      "version": "20260712113216",
+      "name": "canonical_invitations_v1"
+    },
+    {
+      "version": "20260715064810",
+      "name": "market_intelligence_observations_v1"
+    },
+    {
+      "version": "20260716063308",
+      "name": "company_need_intake_service_grants"
+    },
+    {
+      "version": "20260716063515",
+      "name": "self_declared_work_history_v1"
+    },
+    {
+      "version": "20260716194948",
+      "name": "contact_disclosure_requests_v1"
+    },
+    {
+      "version": "20260716195042",
+      "name": "request_rate_limits_v3"
+    },
+    {
+      "version": "20260716195121",
+      "name": "team_profile_details_v1"
+    },
+    {
+      "version": "20260716195230",
+      "name": "team_enquiries_v1"
+    },
+    {
+      "version": "20260716195326",
+      "name": "pilots_cohort_v1"
+    },
+    {
+      "version": "20260716195418",
+      "name": "worker_education_achievements_v1"
+    },
+    {
+      "version": "20260718124203",
+      "name": "project_operations_stages"
+    },
+    {
+      "version": "20260718141602",
+      "name": "leave_absence"
+    },
+    {
+      "version": "20260718151052",
+      "name": "project_budgets"
+    },
+    {
+      "version": "20260718160954",
+      "name": "assets_logistics"
+    },
+    {
+      "version": "20260718161235",
+      "name": "assets_rls_recursion_fix"
+    },
+    {
+      "version": "20260718181812",
+      "name": "commercial_crm"
+    },
+    {
+      "version": "20260718191614",
+      "name": "delivery_quality"
+    },
+    {
+      "version": "20260718210411",
+      "name": "marketplace_listings"
+    },
+    {
+      "version": "20260718213641",
+      "name": "business_public_profile"
+    },
+    {
+      "version": "20260719154125",
+      "name": "vehicle_cleaning_skill"
+    },
+    {
+      "version": "20260720035240",
+      "name": "journal_atomic_supersede_v1"
+    },
+    {
+      "version": "20260721041150",
+      "name": "journal_photo_continuity_v1"
+    },
+    {
+      "version": "20260721041309",
+      "name": "learning_stale_lifecycle_v1"
+    },
+    {
+      "version": "20260721133338",
+      "name": "20260720190000_lmc_ledger_foundation_v1"
+    },
+    {
+      "version": "20260722074749",
+      "name": "20260722120000_secdef_anon_authz_bypass_fix_v1"
+    },
+    {
+      "version": "20260722093138",
+      "name": "secdef_anon_reach_revoke_v1"
+    },
+    {
+      "version": "20260723060348",
+      "name": "20260723053000_contact_demand_owner_v1"
+    },
+    {
+      "version": "20260723155658",
+      "name": "20260723180000_agency_real_client_bridge_v1"
+    },
+    {
+      "version": "20260723182516",
+      "name": "20260723120000_company_worker_engagements_v1"
+    },
+    {
+      "version": "20260727125759",
+      "name": "20260727120000_secdef_public_grant_hygiene_v1"
+    },
+    {
+      "version": "20260727183554",
+      "name": "20260727180000_journal_entry_skill_provenance_v1"
+    },
+    {
+      "version": "20260728114008",
+      "name": "usage_cost_events_v1"
+    },
+    {
+      "version": "20260728114254",
+      "name": "usage_cost_events_v1_reapply"
+    },
+    {
+      "version": "20260728114301",
+      "name": "usage_cost_events_truncate_guard_v1"
+    },
+    {
+      "version": "20260728114353",
+      "name": "usage_cost_events_v1_clean_start"
+    },
+    {
+      "version": "20260802193558",
+      "name": "20260802160000_org_membership_revocation_v1"
+    },
+    {
+      "version": "20260802193843",
+      "name": "20260802170000_organization_rls_hardening_v1"
+    },
+    {
+      "version": "20260803061937",
+      "name": "20260714150000_ai_runs_audit_v1"
+    },
+    {
+      "version": "20260803200712",
+      "name": "20260803090000_project_assigned_worker_read_v1"
+    },
+    {
+      "version": "20260803203723",
+      "name": "20260802150000_booking_atomic_double_booking_v1"
+    },
+    {
+      "version": "20260804133959",
+      "name": "20260804120000_project_lifecycle_v1"
+    },
+    {
+      "version": "20260804151214",
+      "name": "20260802120000_experience_records_v1"
+    },
+    {
+      "version": "20260804190940",
+      "name": "20260804160000_booking_engagement_end_v2"
+    },
+    {
+      "version": "20260805155514",
+      "name": "worker_display_name_write_path_v1"
+    },
+    {
+      "version": "20260805155601",
+      "name": "worker_display_name_backfill_v1"
+    },
+    {
+      "version": "20260805171825",
+      "name": "multi_org_company_ownership_cap_removal_v1"
+    },
+    {
+      "version": "20260805180836",
+      "name": "save_company_setup_v3_multi_org"
+    },
+    {
+      "version": "20260805195716",
+      "name": "company_memberships_v1"
+    },
+    {
+      "version": "20260805200417",
+      "name": "company_memberships_v1_trigger_fn_revoke"
+    },
+    {
+      "version": "20260806052445",
+      "name": "company_membership_commands_v1"
+    },
+    {
+      "version": "20260806090258",
+      "name": "membership_authority_widening_v1"
+    },
+    {
+      "version": "20260806092429",
+      "name": "org_demand_spine_v2"
+    },
+    {
+      "version": "20260806135649",
+      "name": "20260806230000_experience_author_subject_v1"
+    },
+    {
+      "version": "20260806153128",
+      "name": "20260806220000_stripe_multi_subject_v2"
+    },
+    {
+      "version": "20260806173650",
+      "name": "org_owner_membership_seed_v1"
+    },
+    {
+      "version": "20260808154745",
+      "name": "worker_absence_scheduling_view_v1"
+    },
+    {
+      "version": "20260808162217",
+      "name": "ai_runs_retention_redaction_v1"
+    },
+    {
+      "version": "20260808174932",
+      "name": "booking_engagement_org_resolution_v1"
+    },
+    {
+      "version": "20260808180613",
+      "name": "ai_runs_retention_schedule_v1"
+    },
+    {
+      "version": "20260809175828",
+      "name": "public_vacancy_persistence_v1"
+    },
+    {
+      "version": "20260812180224",
+      "name": "caller_manages_worker_engagements_v1"
+    },
+    {
+      "version": "20260812214302",
+      "name": "can_view_worker_booking_engagement_v1"
+    },
+    {
+      "version": "20260813065236",
+      "name": "notification_events_v1"
+    },
+    {
+      "version": "20260813072402",
+      "name": "notification_events_v2_types"
+    },
+    {
+      "version": "20260817065038",
+      "name": "catalog_least_privilege_v1"
+    },
+    {
+      "version": "20260817065249",
+      "name": "contact_disclosure_org_authority_v1"
+    },
+    {
+      "version": "20260817065407",
+      "name": "finance_org_authority_v1"
+    },
+    {
+      "version": "20260817164010",
+      "name": "workflow_engine_v1"
+    },
+    {
+      "version": "20260817172108",
+      "name": "document_file_layer_v1"
+    },
+    {
+      "version": "20260817172306",
+      "name": "notification_types_union_workflow_document_v3"
+    },
+    {
+      "version": "20260817204529",
+      "name": "work_objects_v1"
+    },
+    {
+      "version": "20260817204807",
+      "name": "project_responsible_v1"
+    },
+    {
+      "version": "20260817211538",
+      "name": "timesheets_v1"
+    },
+    {
+      "version": "20260817214201",
+      "name": "durable_workspace_pointer_v2"
+    },
+    {
+      "version": "20260817221335",
+      "name": "employee_requests_v1"
+    },
+    {
+      "version": "20260817221407",
+      "name": "leave_balance_policies_v1"
+    },
+    {
+      "version": "20260817223514",
+      "name": "agreements_v1"
+    },
+    {
+      "version": "20260817230652",
+      "name": "employee_lifecycle_v1"
+    },
+    {
+      "version": "20260818033211",
+      "name": "finance_invoice_upgrades_v1"
+    },
+    {
+      "version": "20260818033445",
+      "name": "procurement_v1"
+    },
+    {
+      "version": "20260818033617",
+      "name": "business_trips_v1"
+    },
+    {
+      "version": "20260818034740",
+      "name": "org_document_register_delta_v1"
+    },
+    {
+      "version": "20260818040903",
+      "name": "training_certification_v1"
+    },
+    {
+      "version": "20260818041103",
+      "name": "performance_reviews_v1"
+    },
+    {
+      "version": "20260818041237",
+      "name": "management_decisions_v1"
+    },
+    {
+      "version": "20260818043943",
+      "name": "invitation_org_authority_v1"
+    },
+    {
+      "version": "20260818044005",
+      "name": "invitation_org_authority_v1_resend_completion"
+    },
+    {
+      "version": "20260818044131",
+      "name": "work_tasks_v2_collaboration"
+    },
+    {
+      "version": "20260818044145",
+      "name": "notification_events_v4_task_types"
+    },
+    {
+      "version": "20260818053537",
+      "name": "workflow_template_management_v1"
+    },
+    {
+      "version": "20260818063252",
+      "name": "public_vacancy_preview_v1"
+    },
+    {
+      "version": "20260818063919",
+      "name": "public_vacancy_preview_v1_revoke_public"
+    },
+    {
+      "version": "20260818115229",
+      "name": "journal_canonical_work_time_v1"
+    },
+    {
+      "version": "20260818152632",
+      "name": "public_vacancy_sitemap_v1"
+    },
+    {
+      "version": "20260819095812",
+      "name": "worker_saved_public_vacancies_v1"
+    },
+    {
+      "version": "20260819113817",
+      "name": "notification_events_v5_demand_interest"
+    },
+    {
+      "version": "20260819200110",
+      "name": "journal_task_evidence_link_v1"
+    },
+    {
+      "version": "20260819204056",
+      "name": "workflow_work_task_context_v1"
+    },
+    {
+      "version": "20260820060427",
+      "name": "timesheet_task_attribution_v1"
+    },
+    {
+      "version": "20260820083309",
+      "name": "workflow_work_task_definition_v1"
+    }
+  ]
+}

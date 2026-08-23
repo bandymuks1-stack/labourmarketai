@@ -148,5 +148,30 @@ jobs:
           fi
           pnpm check:anon-secdef-allowlist
 
+      # Migration parity — LIVE half (same owner gate as the secdef step above).
+      #
+      # `pnpm check:migration-parity` proves every migration applied to
+      # production has a repository file (doctrine §16 / REQ-GOV-016). Static
+      # analysis cannot see this defect class either: an orphan is defined by
+      # its ABSENCE from the repo, and only production's own
+      # `supabase_migrations.schema_migrations` knows what was applied. The
+      # 2026-08-18 audit found one orphan invisible for six weeks; the
+      # 2026-08-23 refresh ran in snapshot mode (an MCP-read ledger snapshot,
+      # docs/migrations/production-ledger-snapshot.json) because lead sessions
+      # have MCP access but no connection string. This step activates the LIVE
+      # check the moment the owner adds the same read-only SUPABASE_DB_URL
+      # secret — one owner action arms both gates.
+      - name: Migration parity (live ledger gate)
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DB_URL}" ]; then
+            echo "::warning title=Live migration-parity gate NOT active::secrets.SUPABASE_DB_URL is not configured, so repo↔production migration parity was NOT verified against the real ledger. The latest committed snapshot run is recorded in docs/migrations/production-parity-register.md. Owner action required to activate this gate: add a read-only SUPABASE_DB_URL secret."
+            echo "SKIPPED — no SUPABASE_DB_URL secret. Snapshot-mode runs remain available to lead sessions."
+            exit 0
+          fi
+          pnpm check:migration-parity
+
       - name: Build (env-independent; Vercel remains deploy authority)
         run: pnpm -F web build

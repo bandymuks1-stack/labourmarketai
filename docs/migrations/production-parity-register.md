@@ -14,6 +14,53 @@
 
 ---
 
+## Refresh — 2026-08-23 (supersedes the Result table below; that table is kept as the 2026-08-18 record)
+
+**Method:** the gate's new **snapshot mode** — a lead session with Supabase MCP
+access (read-only `execute_sql`) but no DB connection string exported the
+production ledger to `docs/migrations/production-ledger-snapshot.json`
+(232 rows, read 2026-08-23T12:30Z, project `gorgitwvdzxbnaxhrsrw`) and ran:
+
+```
+LEDGER_SNAPSHOT=docs/migrations/production-ledger-snapshot.json pnpm check:migration-parity
+```
+
+A snapshot run states loudly that it is as-of its read time, never "live".
+Live mode (`DB_URL=…`) is unchanged and remains the preferred form where a
+connection string exists.
+
+| | 2026-08-18 | **2026-08-23** |
+|---|---:|---:|
+| Applied in production | 225 | **232** |
+| Files in `supabase/migrations` | 228 | **235** |
+| Matched by name | 216 | **223** |
+| Accounted for by a reviewed apply shape | 9 | **9** |
+| **Applied with no repo file (orphans)** | **0** | **0** |
+| Repo files not yet applied | 9 | **9** |
+
+**PASS — every production migration still has a repository file.** The 7
+migrations applied since 2026-08-18 (`workflow_template_management_v1` …
+`workflow_work_task_definition_v1`) all match repo files by name. The 9
+unapplied files are the same gated/superseded set listed below — unchanged.
+
+Cross-checked the same day by per-object inspection (read-only SQL): the
+"absent despite repo migration" set reduces entirely to (a) tables from the
+gated DRAFT files below, (b) intentionally dropped legacy (`threads`,
+`messages`), and (c) repo DRAFT files whose slug was applied under a
+applied ledger row of the same slug but **different content** — the gate's
+stated identity-not-content limitation, so noted here for the reader:
+`worker_saved_public_vacancies_v1` was applied as a column extension of
+`worker_saved_opportunities` (column verified present on prod), not the
+DRAFT file's separate table; `request_rate_limits_v3` was applied as the
+`propose_booking_request_v3` wrapper (function verified present), the DRAFT
+header in the repo file notwithstanding. Those two repo files are satisfied
+by the applied designs and must not be applied again. (`worker_work_card`,
+sometimes reported as an absent table, was never a table — its repo file
+matches the applied columns + RPCs on `workers`.) **Zero silent schema
+drift.**
+
+---
+
 ## Result
 
 | | |
