@@ -1,6 +1,28 @@
-# Agent Operating Contract — LabourMarket.ai / LABMA OS
+# Agent Operating Contract — labourmarket.ai
 
 > 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
+
+---
+
+## Naming — labourmarket.ai only
+
+Owner ruling 2026-08-23: **"LABMA" is not a name, alias, predecessor,
+architecture name or shorthand for labourmarket.ai.** The two are unrelated
+projects and must not be associated. Use labourmarket.ai's own terminology
+everywhere — titles, architecture names, capability names, copy, commands.
+
+Identity, in the owner's words: labourmarket.ai is a **European labour-market
+platform** connecting people, employers, real work, capabilities, skills,
+evidence, market demand, opportunities, projects/objects/tasks, and ongoing
+employer operations. **Recruitment is a core pillar** — never describe the
+product as anti-recruitment — and it is at the same time broader than a
+conventional job board. Employer value includes daily operational value that
+holds even when hirings are zero. Construction may be an important early
+market without defining the product's scope.
+
+The three binding doctrine headers were corrected under this ruling. Historical
+audit and decision documents still contain the old name; they are point-in-time
+records and were deliberately left intact rather than rewritten.
 
 ---
 
@@ -67,7 +89,7 @@ Portfolio reference copy: `C:\Users\Mano\Documents\AI_ENGINEERING_PROTOCOL.md`
 (kept local by owner decision). **The version-controlled source of truth for
 this product is this file plus `CLAUDE.md` and `docs/PLATFORM_DOCTRINE.md`** —
 they stay authoritative wherever they are more specific. The protocol sets a
-floor; it never loosens a LABMA rule.
+floor; it never loosens a labourmarket.ai rule.
 
 The purpose is not "an agent completed a task". The purpose is **"the system is
 demonstrably better, safely, with evidence."**
