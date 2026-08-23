@@ -1956,6 +1956,18 @@
     "cta": "Tilbage til start"
   },
   "opportunities": {
+    "weekly": {
+      "title": "Din uge",
+      "journalActive": "Arbejdsregistreringer i denne uge: {entries} · bekræftet af leder: {confirmed}.",
+      "journalInactive": "Ingen arbejdsregistreringer i denne uge. Registreringer fra rigtigt arbejde holder dit færdighedsbillede aktuelt.",
+      "journalCta": "Tilføj registrering",
+      "matching": "Muligheder, der passer til dig lige nu: {count}.",
+      "matchingExemplar": "Nærmeste: {role} — {matched} af {total} færdigheder, {confirmed} bekræftet.",
+      "noMatching": "Lige nu passer ingen åbne forespørgsler til din profil. Det ændrer sig, når nye forespørgsler dukker op.",
+      "opportunitiesUnavailable": "Overblikket over muligheder kunne ikke læses lige nu.",
+      "newOpportunities": "Nyt siden dit seneste kig: {count}.",
+      "skillsToAdd": "Færdigheder, som dine nærmeste muligheder spørger efter: {skills}."
+    },
     "noWorkType": {
       "title": "Vi ved ikke, hvilket arbejde du laver",
       "body": "Fortæl os dit fag, så viser vi job inden for dit arbejde i stedet for blot de nyeste annoncer.",

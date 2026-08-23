@@ -8050,6 +8050,18 @@
     "applyNotAdmin": "Admin rights required."
   },
   "opportunities": {
+    "weekly": {
+      "title": "Your week",
+      "journalActive": "Work entries this week: {entries} · confirmed by a manager: {confirmed}.",
+      "journalInactive": "No work entries recorded this week. Entries from real work keep your skill picture current.",
+      "journalCta": "Add an entry",
+      "matching": "Opportunities that currently fit you: {count}.",
+      "matchingExemplar": "Closest: {role} — {matched} of {total} skills, {confirmed} confirmed.",
+      "noMatching": "Right now no open inquiries fit your profile. This changes as new inquiries appear.",
+      "opportunitiesUnavailable": "The opportunities overview could not be read right now.",
+      "newOpportunities": "New since you last looked: {count}.",
+      "skillsToAdd": "Skills your closest opportunities ask about: {skills}."
+    },
     "saved": {
       "save": "Save",
       "saved": "Saved",

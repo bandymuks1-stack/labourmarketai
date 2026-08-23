@@ -1956,6 +1956,18 @@
     "cta": "Tillbaka till start"
   },
   "opportunities": {
+    "weekly": {
+      "title": "Din vecka",
+      "journalActive": "Arbetsregistreringar denna vecka: {entries} · bekräftade av chef: {confirmed}.",
+      "journalInactive": "Inga arbetsregistreringar denna vecka. Registreringar från riktigt arbete håller din kompetensbild aktuell.",
+      "journalCta": "Lägg till registrering",
+      "matching": "Möjligheter som passar dig just nu: {count}.",
+      "matchingExemplar": "Närmast: {role} — {matched} av {total} färdigheter, {confirmed} bekräftade.",
+      "noMatching": "Just nu passar inga öppna förfrågningar din profil. Det ändras när nya förfrågningar dyker upp.",
+      "opportunitiesUnavailable": "Översikten över möjligheter kunde inte läsas just nu.",
+      "newOpportunities": "Nytt sedan du senast tittade: {count}.",
+      "skillsToAdd": "Färdigheter som dina närmaste möjligheter frågar efter: {skills}."
+    },
     "noWorkType": {
       "title": "Vi vet inte vilket arbete du gör",
       "body": "Berätta ditt yrke, så visar vi jobb inom ditt arbete i stället för bara de nyaste annonserna.",

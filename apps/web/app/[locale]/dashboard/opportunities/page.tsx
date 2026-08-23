@@ -43,6 +43,8 @@ import { buildOpportunityInsightRow } from "@/lib/intelligence/trust-card-model"
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-read";
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
+import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
+import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -137,6 +139,11 @@ export default async function OpportunitiesPage({
       : null,
     Date.now(),
   );
+
+  // Weekly personal intelligence (C-r1): the SAME request-cached read the
+  // digest emitter uses — the bell row's href lands here, so this is where
+  // the summary it points at finally renders. No second derivation.
+  const weekly = await getWeeklyPersonalIntelligence();
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
@@ -450,6 +457,13 @@ export default async function OpportunitiesPage({
               {t("ctaProfile")} →
             </Link>
           </section>
+
+          {/* Weekly personal intelligence (C-r1) — the summary the weekly
+              digest bell row points at. Renders only when at least one of
+              the two reads answered (emitter rule mirrored). */}
+          {weekly.kind === "ready" ? (
+            <WeeklyIntelligenceSection intel={weekly.intelligence} locale={locale} />
+          ) : null}
 
           {/* Market context row (Contextual Intelligence UI v1): the ONE
               trust-card engine renders the worker's salary-vs-benchmark

@@ -131,7 +131,25 @@ export function makePdf(text: string): Uint8Array {
     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
   ];
-  const stream = `BT /F1 24 Tf 72 700 Td (${safe}) Tj ET`;
+  // Wrap at word boundaries so every glyph stays inside the MediaBox —
+  // pdf.js drops text positioned past the page edge, so a single long line
+  // would come back truncated from extraction.
+  const words = safe.split(" ");
+  const lines: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    const next = cur ? `${cur} ${w}` : w;
+    if (next.length > 70 && cur) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = next;
+    }
+  }
+  if (cur) lines.push(cur);
+  const stream = `BT /F1 12 Tf 14 TL 72 720 Td ${lines
+    .map((l) => `(${l}) Tj T*`)
+    .join(" ")} ET`;
   const streamObj = `<< /Length ${enc(stream).length} >>\nstream\n${stream}\nendstream`;
   objects.push(streamObj);
 

@@ -8050,6 +8050,18 @@
     "applyNotAdmin": "Reikia administratoriaus teisių."
   },
   "opportunities": {
+    "weekly": {
+      "title": "Jūsų savaitė",
+      "journalActive": "Darbo įrašai šią savaitę: {entries} · vadovo patvirtinti: {confirmed}.",
+      "journalInactive": "Šią savaitę darbo įrašų neužfiksuota. Įrašai iš tikro darbo palaiko jūsų įgūdžių vaizdą aktualų.",
+      "journalCta": "Pridėti įrašą",
+      "matching": "Šiuo metu jums tinkančių galimybių: {count}.",
+      "matchingExemplar": "Artimiausia: {role} — {matched} iš {total} įgūdžių, {confirmed} patvirtinti.",
+      "noMatching": "Šiuo metu atvirų užklausų, tinkančių jūsų profiliui, nėra. Tai keičiasi atsirandant naujoms užklausoms.",
+      "opportunitiesUnavailable": "Galimybių apžvalgos šiuo metu nepavyko nuskaityti.",
+      "newOpportunities": "Nauja nuo paskutinio jūsų žvilgsnio: {count}.",
+      "skillsToAdd": "Įgūdžiai, kurių prašo artimiausios jūsų galimybės: {skills}."
+    },
     "saved": {
       "save": "Išsaugoti",
       "saved": "Išsaugota",
