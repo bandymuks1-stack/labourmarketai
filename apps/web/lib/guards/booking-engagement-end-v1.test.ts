@@ -1004,6 +1004,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // value to ONE allowlist, a strict superset, because 20260819210000
       // widened the table CHECK constraints but not this RPC's own copy.
       "20260820070000_workflow_work_task_definition_v1.sql",
+      // 2026-08-23: notification channel preferences v1 gained its marker on
+      // the owner's EXPLICIT D7 approval ("OWNER CONTINUATION — TRAIN 2+
+      // CLOSE THE OPEN VALUE LOOP" §1–§2: consent model approved — per-type
+      // explicit consent, privacy-safe defaults, marketing never silently
+      // opt-in), recorded in docs/human-gates/value-train-2-owner-decisions-v1.md
+      // → D7. RED by route (table grants to authenticated); one new own-row
+      // RLS table, no existing object touched, no DML. Marker added in the
+      // same commit as the recorded decision, per this gate's procedure.
+      "20260823160000_notification_preferences_v1.sql",
     ]);
   });
 
