@@ -6982,6 +6982,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Draft journal entry",
+      "title": "From document to Work Journal",
+      "understoodNote": "Below is the text read from “{filename}”. Review it, edit it, and confirm — only then does it become part of your journal history.",
+      "detectedSkills": "Detected skill mentions: {count}",
+      "notesLabel": "Entry text (from your document — edit before saving)",
+      "engagementLabel": "Work context",
+      "save": "Confirm and save to journal",
+      "saving": "Saving…",
+      "saved": "Saved to your Work Journal with document provenance.",
+      "savedLink": "Open journal",
+      "error": "Saving failed. Nothing was stored.",
+      "notFound": "This document was not found among your documents.",
+      "refusedClassified": "Classified documents are not auto-read — download stays a logged manual step.",
+      "refusedNoOcr": "Photos are not read — no text recognition exists yet.",
+      "refusedType": "This file type cannot be read as text.",
+      "empty": "No readable text was found in this document.",
+      "failed": "The document could not be read.",
+      "noEngagement": "You need a work context first — open the dashboard to set one up."
+    },
     "currentVersion": "Version {n}",
     "download": "Download",
     "noFileYet": "No file uploaded yet.",

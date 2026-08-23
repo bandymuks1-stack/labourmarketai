@@ -26,6 +26,7 @@ import {
 } from "@/lib/documents/document-centre-model";
 import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-document-verify-request-button";
 import { WorkerDocumentFileSlot } from "@/components/app/worker-document-file-slot";
+import { DocumentJournalDraftReview } from "@/components/app/document-journal-draft-review";
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
@@ -174,6 +175,9 @@ export default async function WorkerDocumentsPage({
     /** Training & Certification v1 outcome notice (closed vocabulary,
      *  validated inside the section — never rendered raw). */
     trn?: string;
+    /** C2b — structure a registered document into a journal draft (the
+     *  document_files id; RLS answers ownership inside the seam). */
+    draftFrom?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -431,6 +435,16 @@ export default async function WorkerDocumentsPage({
       <TrainingRegister locale={locale} notice={sp.trn} />
 
       <DocsConsentToggle current={docsConsent} />
+
+      {/* C2b — document → journal draft review. Mounted ONLY under
+          ?draftFrom= (searchParams only, no route — this page's stated
+          pattern); the seam re-answers ownership under the caller's RLS. */}
+      {sp.draftFrom ? (
+        <DocumentJournalDraftReview
+          locale={locale}
+          documentFileId={sp.draftFrom}
+        />
+      ) : null}
 
       {inv.kind === "needs-migration" ? (
         <p className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning">
