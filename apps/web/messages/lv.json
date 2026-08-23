@@ -1956,6 +1956,18 @@
     "cta": "Atpakaļ uz sākumu"
   },
   "opportunities": {
+    "weekly": {
+      "title": "Jūsu nedēļa",
+      "journalActive": "Darba ieraksti šonedēļ: {entries} · vadītāja apstiprināti: {confirmed}.",
+      "journalInactive": "Šonedēļ darba ierakstu nav. Ieraksti no reāla darba uztur jūsu prasmju ainu aktuālu.",
+      "journalCta": "Pievienot ierakstu",
+      "matching": "Iespējas, kas šobrīd jums atbilst: {count}.",
+      "matchingExemplar": "Tuvākā: {role} — {matched} no {total} prasmēm, {confirmed} apstiprinātas.",
+      "noMatching": "Šobrīd nav atvērtu pieprasījumu, kas atbilst jūsu profilam. Tas mainās, parādoties jauniem pieprasījumiem.",
+      "opportunitiesUnavailable": "Iespēju pārskatu šobrīd neizdevās nolasīt.",
+      "newOpportunities": "Jauns kopš jūsu pēdējā skatījuma: {count}.",
+      "skillsToAdd": "Prasmes, ko prasa jums tuvākās iespējas: {skills}."
+    },
     "noWorkType": {
       "title": "Mēs nezinām, kādu darbu tu dari",
       "body": "Norādi savu profesiju, un mēs rādīsim darbus tavā jomā, nevis vienkārši jaunākos sludinājumus.",

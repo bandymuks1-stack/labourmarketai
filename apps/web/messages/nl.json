@@ -8050,6 +8050,18 @@
     "applyNotAdmin": "Beheerdersrechten vereist."
   },
   "opportunities": {
+    "weekly": {
+      "title": "Jouw week",
+      "journalActive": "Werkregistraties deze week: {entries} · door manager bevestigd: {confirmed}.",
+      "journalInactive": "Deze week zijn er geen werkregistraties. Registraties van echt werk houden je vaardighedenbeeld actueel.",
+      "journalCta": "Registratie toevoegen",
+      "matching": "Kansen die nu bij je passen: {count}.",
+      "matchingExemplar": "Dichtstbij: {role} — {matched} van {total} vaardigheden, {confirmed} bevestigd.",
+      "noMatching": "Op dit moment passen er geen open aanvragen bij je profiel. Dit verandert zodra nieuwe aanvragen verschijnen.",
+      "opportunitiesUnavailable": "Het kansenoverzicht kon nu niet worden gelezen.",
+      "newOpportunities": "Nieuw sinds je laatste bezoek: {count}.",
+      "skillsToAdd": "Vaardigheden waar je dichtstbijzijnde kansen om vragen: {skills}."
+    },
     "saved": {
       "save": "Opslaan",
       "saved": "Opgeslagen",

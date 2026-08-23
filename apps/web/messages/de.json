@@ -8055,6 +8055,18 @@
     "applyNotAdmin": "Admin-Rechte erforderlich."
   },
   "opportunities": {
+    "weekly": {
+      "title": "Ihre Woche",
+      "journalActive": "Arbeitseinträge diese Woche: {entries} · vom Manager bestätigt: {confirmed}.",
+      "journalInactive": "Diese Woche wurden keine Arbeitseinträge erfasst. Einträge aus echter Arbeit halten Ihr Fähigkeitsbild aktuell.",
+      "journalCta": "Eintrag hinzufügen",
+      "matching": "Gelegenheiten, die aktuell zu Ihnen passen: {count}.",
+      "matchingExemplar": "Nächstgelegen: {role} — {matched} von {total} Fähigkeiten, {confirmed} bestätigt.",
+      "noMatching": "Derzeit passt keine offene Anfrage zu Ihrem Profil. Das ändert sich, sobald neue Anfragen erscheinen.",
+      "opportunitiesUnavailable": "Die Gelegenheitsübersicht konnte gerade nicht gelesen werden.",
+      "newOpportunities": "Neu seit Ihrem letzten Blick: {count}.",
+      "skillsToAdd": "Fähigkeiten, nach denen Ihre nächstgelegenen Gelegenheiten fragen: {skills}."
+    },
     "saved": {
       "save": "Speichern",
       "saved": "Gespeichert",

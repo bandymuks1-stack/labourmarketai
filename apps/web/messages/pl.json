@@ -1956,6 +1956,18 @@
     "cta": "Wróć na początek"
   },
   "opportunities": {
+    "weekly": {
+      "title": "Twój tydzień",
+      "journalActive": "Wpisy pracy w tym tygodniu: {entries} · potwierdzone przez kierownika: {confirmed}.",
+      "journalInactive": "W tym tygodniu nie zarejestrowano wpisów pracy. Wpisy z prawdziwej pracy utrzymują aktualny obraz Twoich umiejętności.",
+      "journalCta": "Dodaj wpis",
+      "matching": "Możliwości, które teraz do Ciebie pasują: {count}.",
+      "matchingExemplar": "Najbliższa: {role} — {matched} z {total} umiejętności, {confirmed} potwierdzone.",
+      "noMatching": "Obecnie żadne otwarte zapytania nie pasują do Twojego profilu. To się zmienia, gdy pojawiają się nowe zapytania.",
+      "opportunitiesUnavailable": "Nie udało się teraz odczytać przeglądu możliwości.",
+      "newOpportunities": "Nowe od Twojego ostatniego spojrzenia: {count}.",
+      "skillsToAdd": "Umiejętności, o które proszą Twoje najbliższe możliwości: {skills}."
+    },
     "noWorkType": {
       "title": "Nie wiemy, jaką pracę wykonujesz",
       "body": "Podaj swój zawód, a pokażemy oferty w Twojej branży zamiast po prostu najnowszych ogłoszeń.",

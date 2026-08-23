@@ -1956,6 +1956,18 @@
     "cta": "Tagasi algusesse"
   },
   "opportunities": {
+    "weekly": {
+      "title": "Sinu nädal",
+      "journalActive": "Töökirjeid sel nädalal: {entries} · juhi kinnitatud: {confirmed}.",
+      "journalInactive": "Sel nädalal töökirjeid ei ole. Päris tööst tehtud kirjed hoiavad sinu oskuste pildi ajakohasena.",
+      "journalCta": "Lisa kirje",
+      "matching": "Võimalusi, mis sulle praegu sobivad: {count}.",
+      "matchingExemplar": "Lähim: {role} — {matched} / {total} oskust, {confirmed} kinnitatud.",
+      "noMatching": "Praegu ei sobi ükski avatud päring sinu profiiliga. See muutub uute päringute ilmumisel.",
+      "opportunitiesUnavailable": "Võimaluste ülevaadet ei õnnestunud praegu lugeda.",
+      "newOpportunities": "Uut alates sinu viimasest vaatamisest: {count}.",
+      "skillsToAdd": "Oskused, mida sinu lähimad võimalused küsivad: {skills}."
+    },
     "noWorkType": {
       "title": "Me ei tea, mis tööd sa teed",
       "body": "Ütle oma amet ja näitame sinu ala töökohti, mitte lihtsalt kõige uuemaid kuulutusi.",
