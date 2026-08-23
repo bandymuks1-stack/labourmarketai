@@ -14,10 +14,16 @@
 | B2 — weekly digest carrier | #1239 | `bf383492` | `weekly_digest` event/entity type (v6 widening, canonical GREEN idiom), read-time materializer in `event-emitters.ts` (no new service-role caller), pointer-only row (§19(d)), copy in 11 locales (real translations), 3 baselines 235→236. |
 | C1 — document→journal draft seam | #1241 | `99fed66c` | The import chain's missing middle: RLS-scoped `document_files` bytes read + deterministic offline extraction (works with AI DORMANT) + provenance metric vocabulary. Honest refusals: classified / images (no OCR exists). |
 | C2a — provenance on entry save | #1242 | `da29a89c` | `createJournalEntry` accepts a caller-RLS-verified `source_document_file_id`, refuses unverifiable claims (`source_document_invalid`, 11 locales), appends provenance rows atomically; extractor version server-stamped. |
+| B3 — notification_preferences (D7) | #1243 | `cf7d641f` | Owner APPROVED D7 2026-08-23 → migration annotated `-- @human-gate-approved`, merged through the RED route, **APPLIED TO PROD via MCP** and read-verified (table exists, RLS enabled, 4 own-row policies, 0 rows). Semantic categories at the slug layer; no global agree-all; marketing never silently opt-in. |
 
 **APPLIED TO PROD: notification_events_v6_weekly_digest** (rollback:
 `supabase/rollbacks/20260823150500_notification_events_v6_weekly_digest.down.sql`)
 — post-apply MCP read verified both CHECK constraints include `weekly_digest`.
+
+**APPLIED TO PROD: notification_preferences_v1** (rollback:
+`supabase/rollbacks/20260823160000_notification_preferences_v1.down.sql`)
+— post-apply MCP read verified: table_exists=true, rls_enabled=true,
+policy_count=4 (all `auth.uid()` own-row), row_count=0.
 
 ## Production evidence gathered (read-only, 2026-08-23)
 
@@ -27,41 +33,57 @@ active `public_vacancies` 43,817 · `document_files` 0 · `customer_requests` 17
 
 ## In flight
 
-Wagon B3 (this PR — RE-OPENED at the train tail after the owner's WAKE
-directive "an OWNER_GATED block stops only its dependent wagon"; the first
-draft #1240 was closed to free the single train branch for the GREEN C
-wagons, content byte-identical): `notification_preferences_v1` DRAFT
-migration + rollback (RED by route — grants; ships UNAPPLIED; deliberately
-not human-gate-annotated), owner decisions package v2 (D7–D9), this
-checkpoint. CI `migration-safety` red on this PR is **by design**; it waits
-for the owner.
+**Wagon C2b — IMPLEMENTED, draft PR #1244** (blueprint fully executed):
+documents page gains a per-file "draft journal entry" link (extractable
+mimes only — images honestly get none), inline `?draftFrom=` review section
+(no new route/modal — product gate 0 surfaces), worker edits + explicitly
+confirms → canonical journal entry with C2a provenance. 18 copy keys ×
+11 locales. Evidence: typecheck 0 / lint 0 / full suite 16,489+ green /
+all five honesty scripts clean. Offline capability proof (safe fixture):
+PDF + DOCX → full-text extraction → time 6 h, quantity 20 m², skill
+`roofing`, site "Vilniuje" — **CAPABILITY_PROVEN**;
+REAL_OWNER_DOCUMENT_E2E = NOT_YET_PROVEN.
 
-Wagon C2b (parked, fully designed): the visible document→journal review UI
-+ §27 browser proof. Blueprint:
-`docs/handoffs/value-train-2-wagon-c2-blueprint.md`. Not shipped from the
-2026-08-23 managed session — no Docker daemon there, so no local Supabase
-and no real browser pass, and doctrine-guard §5 (browser verification
-before merging user-visible changes) is not negotiable.
+**Why #1244 stays draft (doctrine §5):** the browser pass is
+environmentally impossible in the 2026-08-23 managed session — (a) no
+Docker daemon → no local Supabase stack, AND (b) org egress policy answers
+**403 to CONNECT `*.supabase.co`** for every tool (agentproxy status is the
+primary source), so even a locally served production build cannot log in.
+Needs either a Docker-capable session (docs/TESTING.md stack +
+`tests/e2e/document-journal-draft.spec.ts`) or supabase.co egress; the
+committed `apps/web/scripts/c2b-browser-acceptance.ts` driver is
+proxy-ready. En route, a real fixture bug was fixed (`a187f16`): `makePdf`
+drew one long 24pt line off the page edge and pdf.js truncated extraction
+at ~50 chars.
+
+**Cleanup done:** the marked synthetic prod test account
+(`train2.c2b.e2e.worker@example.com`, never logged in) was deleted and
+verified gone (0 rows everywhere). Both stale PR check-in triggers
+(#1240, #1243) deleted; the session watches #1244 only.
 
 ## Open owner gates
 
 Train 1: D1 (CI ledger grant) · D2 (employer-count registry identity, RED
 SQL drafted in the package) · D3 (search index option A/B) · D4 (draft-queue
 per-file verdicts) · D5 (/jobs throttle waiver) · D6 (AI activation route).
-Train 2: D7 (email channel + preferences apply) · D8 (gemini costClass) ·
-D9 (Telegram env secrets). TELEGRAM_STATUS = UNAVAILABLE this environment.
+Train 2: **D7 CLOSED** (approved 2026-08-23 → merged `cf7d641f` → applied to
+prod → verified) · D8 (gemini costClass) · D9 (Telegram env secrets).
+TELEGRAM_STATUS = UNAVAILABLE this environment.
+NEW environmental gate: browser acceptance for #1244 (Docker OR supabase.co
+egress — see "In flight").
 
 ## Next highest-value seams (in priority order, per the train's bias)
 
 1. **After D6:** one harmless E2E AI proof (one `ai_runs` row,
    `schema_validation='passed'` + paired cost event) → AI_RUNTIME =
    CAPABILITY_PROVEN/VERIFIED_PRODUCTION.
-2. **After D7:** email dispatch wagon (reuse `lib/email/transactional.ts`,
-   invitation delivery-ledger pattern, GH-Actions kill-switched cron) —
-   closes the loop for absent workers.
-3. **Wagon C2b:** execute the parked blueprint in a browser-capable
-   environment — the first real `document_files` rows and the full §27
-   proof land there (C1 + C2a already merged).
+2. **D7 is closed →** email dispatch wagon is now unblocked (reuse
+   `lib/email/transactional.ts`, invitation delivery-ledger pattern,
+   GH-Actions kill-switched cron; per-type consent rows live in
+   `notification_preferences`) — closes the loop for absent workers.
+3. **Wagon C2b:** run the browser pass for draft #1244 in a
+   browser-capable environment (everything else is done and green) — the
+   first real `document_files` rows and the full §27 proof land there.
 4. **D2 → Market Pulse (Wagon E):** canonical employer count unblocks the
    public aggregate surface.
 5. `worker_opportunity_seen` apply (D4 "APPLY" recommendation) unlocks the
@@ -72,4 +94,9 @@ D9 (Telegram env secrets). TELEGRAM_STATUS = UNAVAILABLE this environment.
 AI_RUNTIME = IMPLEMENTED_NOT_PROVEN (activation-ready; owner-gated).
 WEEKLY_DIGEST_IN_APP = SHIPPED (merged + deployed + prod constraint
 verified; first real rows require real worker visits — REAL_USER_DATA not
-yet claimed). NOTIFICATION_EMAIL = MISSING (gated, D7).
+yet claimed). NOTIFICATION_PREFERENCES_SCHEMA = VERIFIED_PRODUCTION (D7).
+NOTIFICATION_EMAIL = IMPLEMENTED-BLOCKED-ON-NOTHING code-wise but not
+built yet (next train candidate; D7 consent layer ready).
+DOCUMENT_IMPORT_CHAIN = CAPABILITY_PROVEN offline (pdf+docx, safe
+fixture); UI in draft #1244; REAL_OWNER_DOCUMENT_E2E = NOT_YET_PROVEN;
+images/OCR = NOT_SUPPORTED (honestly refused, no dead links).
