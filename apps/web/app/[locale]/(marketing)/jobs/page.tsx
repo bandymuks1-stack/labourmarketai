@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
@@ -9,6 +10,7 @@ import {
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
+import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { hasSessionCookie } from "@/lib/supabase/session-cookie";
 import {
@@ -163,6 +165,16 @@ const EMPTY: L = {
   de: "Keine Stellen für diese Suche. Versuchen Sie eine breitere Bezeichnung.",
 };
 
+/** Honest throttle state — NOT "0 results". The text search was not run;
+ *  the list below ignores the typed words (a profession filter still applies). */
+const SEARCH_BUSY: L = {
+  en: "Too many searches from your connection right now, so the typed words were not applied to the list below. Please retry in a moment.",
+  lt: "Šiuo metu iš jūsų ryšio atlikta per daug paieškų, todėl įvesti žodžiai sąrašui žemiau nepritaikyti. Pakartokite po akimirkos.",
+  ru: "Слишком много поисковых запросов с вашего подключения, поэтому введённые слова к списку ниже не применены. Повторите через минуту.",
+  nl: "Te veel zoekopdrachten vanaf uw verbinding, dus de getypte woorden zijn niet toegepast op de lijst hieronder. Probeer het zo weer.",
+  de: "Zu viele Suchanfragen von Ihrer Verbindung, daher wurden die eingegebenen Wörter unten nicht angewendet. Bitte gleich erneut versuchen.",
+};
+
 /** Honest state: the feature is not switched on — NOT "there are no jobs". */
 const NOT_PROVISIONED: L = {
   en: "The public job board is not enabled yet.",
@@ -297,10 +309,27 @@ export default async function JobsPage({
     if (r.status === "ok") savedPreviews = r.previews;
   }
 
+  // Free-text search is the board's one expensive path (an unindexable
+  // ILIKE inside the anonymous RPC — see the DB-hardening decision doc), so
+  // scripted hammering of it is throttled per client here. The throttle NEVER
+  // fakes "0 results": when it fires, the typed words are dropped, the cheap
+  // indexed listing still renders, and SEARCH_BUSY says so. Browsing without
+  // a text query (crawlers, pagination, profession filter) is never limited.
+  // In-memory per-instance — a brake on naive abuse, not a distributed quota.
+  const wantsTextSearch = !showSaved && query.trim().length > 0;
+  const searchThrottled =
+    wantsTextSearch &&
+    rateLimit({
+      name: "public-jobs-search",
+      key: clientKeyFromHeaders(await headers()),
+      limit: 30,
+      windowMs: 60 * 1000,
+    }).limited;
+
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
     : await searchPublicVacancyPreviews({
-        query,
+        query: searchThrottled ? "" : query,
         professionSlug: profession,
         page,
       });
@@ -430,6 +459,15 @@ export default async function JobsPage({
         </p>
       ) : (
         <>
+          {searchThrottled && (
+            <p
+              role="status"
+              className="mt-6 rounded-md border border-dashed p-4 text-sm text-muted-foreground"
+            >
+              {SEARCH_BUSY[active]}
+            </p>
+          )}
+
           {/* role="status": a search is a full navigation, so the result count
               is the one thing a screen reader must hear after it lands. */}
           <p role="status" className="mt-6 text-sm text-muted-foreground">
@@ -442,7 +480,10 @@ export default async function JobsPage({
                   professions have no live ad today, and "nothing found" without
                   saying what was asked reads as "the board is broken". */}
               <p>
-                {profession && query
+                {/* A throttled request never applied the typed words, so the
+                    empty state must not blame them (searchThrottled → treat
+                    the query as absent here). */}
+                {profession && query && !searchThrottled
                   ? EMPTY_FOR_PROFESSION_AND_QUERY[active](
                       professionName(profession),
                       query,

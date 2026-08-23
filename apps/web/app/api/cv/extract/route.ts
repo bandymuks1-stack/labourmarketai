@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractCvText, MAX_CV_BYTES } from "@/lib/cv/extract";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,8 +17,13 @@ export const dynamic = "force-dynamic";
  *   - requires an authenticated session (401 otherwise);
  *   - hard 5 MB size cap (413 otherwise) — checked before reading the body fully;
  *   - never logs the CV text (only a coarse error code);
- *   - returns a typed error code, never the underlying parser message.
+ *   - returns a typed error code, never the underlying parser message;
+ *   - per-user rate limit (SEC-16): each call runs a PDF/DOCX parser, which is
+ *     CPU amplification an authenticated caller could otherwise drive freely.
+ *     In-memory per-instance — a brake on naive abuse, not a distributed quota.
  */
+const RATE_LIMIT = { limit: 10, windowMs: 10 * 60 * 1000 } as const;
+
 export async function POST(req: Request) {
   const supabase = await createClient();
   const {
@@ -25,6 +31,17 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ ok: false, code: "unauthorized" }, { status: 401 });
+  }
+
+  const decision = rateLimit({ name: "cv-extract", key: user.id, ...RATE_LIMIT });
+  if (decision.limited) {
+    return NextResponse.json(
+      { ok: false, code: "rate-limited" },
+      {
+        status: 429,
+        headers: { "retry-after": String(decision.retryAfterSeconds) },
+      },
+    );
   }
 
   // Cheap pre-check via Content-Length so an oversized upload is rejected

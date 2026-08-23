@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getDashboardSearchGroups } from "@/lib/search/dashboard-search";
 import { normalizeSearchQuery } from "@/lib/search/dashboard-search-model";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -23,6 +24,11 @@ export const dynamic = "force-dynamic";
  *
  * NO people search: finding people stays the deterministic scouting flow.
  */
+/** Generous for a debounced finder, hard stop for a scripted caller. Each
+ *  request fans out to several RLS reads, so it must not be free to hammer.
+ *  In-memory per-instance — a brake on naive abuse, not a distributed quota. */
+const RATE_LIMIT = { limit: 60, windowMs: 60 * 1000 } as const;
+
 export async function GET(req: Request) {
   const supabase = await createClient();
   const {
@@ -32,6 +38,21 @@ export async function GET(req: Request) {
     return NextResponse.json(
       { ok: false, code: "unauthorized" },
       { status: 401 },
+    );
+  }
+
+  const decision = rateLimit({
+    name: "dashboard-search",
+    key: user.id,
+    ...RATE_LIMIT,
+  });
+  if (decision.limited) {
+    return NextResponse.json(
+      { ok: false, code: "rate-limited" },
+      {
+        status: 429,
+        headers: { "retry-after": String(decision.retryAfterSeconds) },
+      },
     );
   }
 
