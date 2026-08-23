@@ -71,6 +71,10 @@ export type AiErrorCode =
   | "provider_error"
   | "no_api_key"
   | "malformed_output"
+  /** The model hit the output-token ceiling mid-answer. Distinct from
+   *  `malformed_output` because retrying the SAME request on another provider
+   *  reproduces it — the ceiling belongs to the request, not the vendor. */
+  | "truncated"
   | "budget_exceeded"
   | "unsupported";
 

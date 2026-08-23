@@ -23,7 +23,7 @@ function liveRecord(over: Partial<AiRoutingAuditRecord> = {}): AiRoutingAuditRec
     selectedTier: "low_cost",
     providerAdapter: "anthropic",
     modelAlias: "fast",
-    modelId: "claude-haiku-4-5-20251001",
+    modelId: "claude-haiku-4-5",
     promptVersion: "v3",
     reason: "tier matched",
     languageConsidered: "lt",
@@ -77,7 +77,7 @@ describe("buildUsageCostEventRow — the full mapping", () => {
     expect(row.status).toBe("success");
     expect(row.provider).toBe("anthropic");
     expect(row.service).toBe("llm_completion");
-    expect(row.resource).toBe("claude-haiku-4-5-20251001"); // per-model
+    expect(row.resource).toBe("claude-haiku-4-5"); // per-model
     expect(row.feature_code).toBe("journal_suggestions"); // per-feature
     expect(row.profile_id).toBe("11111111-1111-1111-1111-111111111111");
     expect(row.organization_id).toBeNull();

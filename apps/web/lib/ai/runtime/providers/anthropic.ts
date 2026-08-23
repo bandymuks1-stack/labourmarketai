@@ -21,6 +21,7 @@ import type {
   AiCompletionResult,
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
+import { supportsAdaptiveThinking } from "../model-registry";
 
 /** Read the live key from server env at call time (never imported into client). */
 function liveApiKey(): string | undefined {
@@ -89,7 +90,13 @@ export const anthropicCompletionProvider: AiCompletionProvider = {
       const res = await client.messages.create({
         model,
         max_tokens: maxTokens,
-        thinking: { type: "adaptive" },
+        // Model-aware: adaptive thinking is valid only on 4.6+ generations;
+        // pre-4.6 models (the routed `haiku` alias among them) reject it with
+        // a 400. Omitting the parameter is valid everywhere, so omit is the
+        // fail-safe for any model the registry does not affirm.
+        ...(supportsAdaptiveThinking(model)
+          ? { thinking: { type: "adaptive" as const } }
+          : {}),
         system: request.system + schemaHint,
         messages: [
           {
@@ -104,6 +111,16 @@ export const anthropicCompletionProvider: AiCompletionProvider = {
       );
       const raw = textBlock ? extractJson(textBlock.text) : undefined;
       if (raw === undefined) {
+        // A response cut at the token ceiling is not the model failing the
+        // schema — the same request truncates identically on any provider, so
+        // it must be attributed to the request, never retried as INVALID_OUTPUT.
+        if (res.stop_reason === "max_tokens") {
+          return {
+            status: "error",
+            code: "truncated",
+            message: `output truncated at max_tokens=${maxTokens}`,
+          };
+        }
         return { status: "error", code: "malformed_output", message: "no JSON in response" };
       }
       return {

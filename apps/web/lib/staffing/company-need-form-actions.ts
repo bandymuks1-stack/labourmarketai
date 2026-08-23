@@ -11,6 +11,7 @@
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
+import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import type { AiLocale } from "../ai/runtime/types";
@@ -166,6 +167,21 @@ export async function submitCompanyNeedAction(
   }
 
   const isConstruction = isConstructionWorkType(raw.profession);
+
+  // The model call gets its OWN throttle. The intake limiter above guards the
+  // DB insert, but its `rate_limited` early-return is the ONLY branch that
+  // skipped the AI draft — a persist that failed with `unavailable`/`error`
+  // still fell through to unmetered anonymous AI work (Wagon A audit). This
+  // check covers every path to the draft, whatever the persist outcome.
+  if (
+    await aiActionRateLimited({
+      name: "ai-company-need-draft",
+      limit: 5,
+      windowMs: 10 * 60 * 1000,
+    })
+  ) {
+    return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
+  }
 
   const result = await draftVacancyFromNeed(raw, locale);
 

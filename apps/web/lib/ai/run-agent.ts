@@ -19,6 +19,7 @@
  * is unit/eval-tested via the mock provider with no env, key, or network. The
  * server wrapper `runAiAgent` resolves env config + the prompt entry.
  */
+import { z } from "zod";
 import {
   dispatchAiCompletion,
   type ChainDispatchContext,
@@ -167,6 +168,36 @@ function dataCategoriesOf(input: unknown): readonly string[] {
     : [];
 }
 
+/**
+ * JSON-Schema projection of the entry's strict zod OUTPUT schema, so the
+ * providers' structured-output hint carries the actual contract instead of a
+ * generic "return a JSON object". Before this, `AiCompletionRequest.jsonSchema`
+ * existed but nothing ever set it — every adapter's schema plumbing was dead.
+ *
+ * Best-effort BY DESIGN: a schema zod cannot project (transforms, custom
+ * checks) degrades to `undefined` — the downstream zod validation in step 4
+ * remains the enforcement either way. Cached per entry object; the registry
+ * entries are module constants so the cache is effectively per agent.
+ */
+const jsonSchemaCache = new WeakMap<object, Record<string, unknown> | null>();
+function jsonSchemaForEntry(
+  entry: PromptRegistryEntry,
+): Record<string, unknown> | undefined {
+  const cached = jsonSchemaCache.get(entry);
+  if (cached !== undefined) return cached ?? undefined;
+  let projected: Record<string, unknown> | null = null;
+  try {
+    projected = z.toJSONSchema(entry.outputSchema, {
+      io: "output",
+      unrepresentable: "any",
+    }) as Record<string, unknown>;
+  } catch {
+    projected = null;
+  }
+  jsonSchemaCache.set(entry, projected);
+  return projected ?? undefined;
+}
+
 export async function runAiAgentCore<T = unknown>(
   entry: PromptRegistryEntry,
   input: unknown,
@@ -303,6 +334,7 @@ export async function runAiAgentCore<T = unknown>(
     promptVersion: entry.version,
     system: entry.system,
     input: parsedInput.data,
+    jsonSchema: jsonSchemaForEntry(entry),
     locale: opts.locale,
     maxOutputTokens: opts.maxOutputTokens,
     model: d.modelAlias ? modelIdForAlias(d.modelAlias, modelProvider) : undefined,

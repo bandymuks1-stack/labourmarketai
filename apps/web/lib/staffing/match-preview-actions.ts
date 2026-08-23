@@ -16,6 +16,7 @@
  */
 import { getLocale } from "next-intl/server";
 import { runAiAgent } from "../ai/run-agent-server";
+import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { workerIntakeSchema } from "./worker-intake";
 import { companyNeedSchema } from "./company-need";
 import {
@@ -93,20 +94,32 @@ export async function previewMatchAction(
   const preview = buildMatchPreview(workerParsed.data, needParsed.data);
   const locale = toAiLocale(await getLocale());
 
-  const explainOutcome = await runAiAgent(
-    "matching_explanation",
-    buildMatchingExplanationInput(workerParsed.data, needParsed.data, preview.fit),
-    { locale },
-  );
+  // Unauthenticated marketing surface → the model call is metered per client.
+  // The deterministic preview above stays available when throttled; only the
+  // AI explanation degrades, honestly, to the existing "disabled" state.
+  const limited = await aiActionRateLimited({
+    name: "ai-match-preview",
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
 
   let explanation: string | null = null;
   let explanationStatus: MatchPreviewState["explanationStatus"];
-  if (explainOutcome.status === "suggestion") {
-    const v = explainOutcome.value as { data: { fit_summary: string | null } };
-    explanation = v.data.fit_summary;
-    explanationStatus = "suggestion";
+  if (limited) {
+    explanationStatus = "disabled";
   } else {
-    explanationStatus = explainOutcome.status === "disabled" ? "disabled" : "needs_review";
+    const explainOutcome = await runAiAgent(
+      "matching_explanation",
+      buildMatchingExplanationInput(workerParsed.data, needParsed.data, preview.fit),
+      { locale },
+    );
+    if (explainOutcome.status === "suggestion") {
+      const v = explainOutcome.value as { data: { fit_summary: string | null } };
+      explanation = v.data.fit_summary;
+      explanationStatus = "suggestion";
+    } else {
+      explanationStatus = explainOutcome.status === "disabled" ? "disabled" : "needs_review";
+    }
   }
 
   return {

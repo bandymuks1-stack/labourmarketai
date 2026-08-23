@@ -33,7 +33,12 @@ import type {
   AiCompletionResult,
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
-import { extractJson, fetchErrorResult, jsonSchemaHint } from "./extract-json";
+import {
+  extractJson,
+  fetchErrorResult,
+  jsonSchemaHint,
+  malformedOrTruncated,
+} from "./extract-json";
 
 function enabled(): boolean {
   return process.env.AI_LOCAL_ENABLED === "true";
@@ -123,17 +128,16 @@ export const localCompletionProvider: AiCompletionProvider = {
         };
       }
       const json = (await res.json()) as {
-        choices?: { message?: { content?: string } }[];
+        choices?: { message?: { content?: string }; finish_reason?: string }[];
         usage?: { prompt_tokens?: number; completion_tokens?: number };
       };
       const text = json.choices?.[0]?.message?.content;
       const raw = typeof text === "string" ? extractJson(text) : undefined;
       if (raw === undefined) {
-        return {
-          status: "error",
-          code: "malformed_output",
-          message: "no JSON in local runtime response",
-        };
+        return malformedOrTruncated(
+          json.choices?.[0]?.finish_reason === "length",
+          "local runtime",
+        );
       }
       return {
         status: "ok",

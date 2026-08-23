@@ -30,6 +30,33 @@ export function jsonSchemaHint(jsonSchema?: Record<string, unknown>): string {
     : "\n\nReturn ONLY a single JSON object (no prose, no code fence).";
 }
 
+/**
+ * Honest failure for an unusable answer: a response cut at the output-token
+ * ceiling is attributed to the REQUEST (`truncated` — it reproduces on every
+ * provider with the same ceiling), anything else to the model's output shape
+ * (`malformed_output`).
+ */
+export function malformedOrTruncated(
+  hitTokenCeiling: boolean,
+  where: string,
+): {
+  status: "error";
+  code: "truncated" | "malformed_output";
+  message: string;
+} {
+  return hitTokenCeiling
+    ? {
+        status: "error",
+        code: "truncated",
+        message: `output truncated at token ceiling (${where})`,
+      }
+    : {
+        status: "error",
+        code: "malformed_output",
+        message: `no JSON in ${where} response`,
+      };
+}
+
 /** Map a fetch/abort failure to an honest error code + bounded message. */
 export function fetchErrorResult(err: unknown): {
   code: "timeout" | "provider_error";

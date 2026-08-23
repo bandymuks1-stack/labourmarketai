@@ -19,7 +19,12 @@ import type {
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
 import { AI_MODEL_CANDIDATES } from "../model-candidates";
-import { extractJson, fetchErrorResult, jsonSchemaHint } from "./extract-json";
+import {
+  extractJson,
+  fetchErrorResult,
+  jsonSchemaHint,
+  malformedOrTruncated,
+} from "./extract-json";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
@@ -91,13 +96,19 @@ export const geminiCompletionProvider: AiCompletionProvider = {
         };
       }
       const json = (await res.json()) as {
-        candidates?: { content?: { parts?: { text?: string }[] } }[];
+        candidates?: {
+          content?: { parts?: { text?: string }[] };
+          finishReason?: string;
+        }[];
         usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
       };
       const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
       const raw = typeof text === "string" ? extractJson(text) : undefined;
       if (raw === undefined) {
-        return { status: "error", code: "malformed_output", message: "no JSON in response" };
+        return malformedOrTruncated(
+          json.candidates?.[0]?.finishReason === "MAX_TOKENS",
+          "gemini",
+        );
       }
       return {
         status: "ok",

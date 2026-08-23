@@ -35,7 +35,7 @@ function sampleRecord(
       humanReviewState: "not_required",
       dataCategoriesSent: ["canonicalMessage", "locale"],
       estimatedCostUsd: 0.01,
-      modelId: "claude-haiku-4-5-20251001",
+      modelId: "claude-haiku-4-5",
       promptVersion: "1.0.0",
       inputSource: "conversation_message",
       outputExcerpt: JSON.stringify({ localized_copy: "Hallo" }),
@@ -54,7 +54,7 @@ describe("buildAiRunRow (pure mapping)", () => {
     expect(row.task_type).toBe("translate_message");
     expect(row.provider).toBe("anthropic");
     expect(row.model_alias).toBe("haiku");
-    expect(row.model_id).toBe("claude-haiku-4-5-20251001");
+    expect(row.model_id).toBe("claude-haiku-4-5");
     expect(row.prompt_version).toBe("1.0.0");
     expect(row.tier).toBe("low_cost");
     expect(row.locale).toBe("de");
