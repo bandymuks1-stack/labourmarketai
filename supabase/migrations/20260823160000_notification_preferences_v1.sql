@@ -1,12 +1,15 @@
+-- @human-gate-approved
 -- ============================================================================
--- 20260823160000 — notification channel preferences v1 (OWNER-GATED DRAFT).
+-- 20260823160000 — notification channel preferences v1.
 --
--- ⚠ RED BY DESIGN, SHIPS UNAPPLIED. This migration carries GRANTs, so the
--- migration-safety gate classifies it RED (fail-closed) and the PR opens as a
--- draft with `needs-human-gate`. It is deliberately NOT annotated
--- `-- @human-gate-approved` — the owner has not approved it; the annotation
--- is applied only on the owner's instruction (repo precedent). Apply, after
--- approval, ONLY via Supabase MCP `apply_migration`.
+-- RED CLASS, OWNER-APPROVED. The annotation above is applied on the owner's
+-- explicit D7 approval (2026-08-23, "OWNER CONTINUATION — TRAIN 2+ CLOSE THE
+-- OPEN VALUE LOOP" §1–§2: consent/preferences direction approved — per-type
+-- explicit consent, privacy-safe defaults, marketing never silently opt-in,
+-- no second consent system; recorded in
+-- docs/human-gates/value-train-2-owner-decisions-v1.md → D7). It lets CI
+-- evaluate the file; the PR stays RED-class (draft + needs-human-gate) and
+-- the apply happens ONLY via Supabase MCP `apply_migration`.
 --
 -- WHY THIS EXISTS. The weekly personal digest (v6, applied) reaches workers
 -- who VISIT. Reaching absent workers needs the email channel, and email

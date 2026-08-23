@@ -28,12 +28,22 @@ rows, own-row RLS, **email default OFF (opt-in, consent-first)**, in-app
 default unchanged (on). RED by route (table grants, fail-closed classifier);
 deliberately NOT `-- @human-gate-approved`.
 
-**Decision (three parts):**
+**DECIDED — OWNER APPROVED 2026-08-23** ("OWNER CONTINUATION — TRAIN 2+
+CLOSE THE OPEN VALUE LOOP" §1): in-app product notifications may run on
+privacy-safe defaults when directly product-related; email/push/marketing
+require explicit per-type consent (no global agree-all switch; marketing
+never silently opt-in); semantic categories (essential/product
+intelligence/reminders/opportunities/marketing) live at the §10 slug layer,
+mapped app-side when the settings UI ships; preference changes deterministic
+and auditable. The drafted opt-in email model CONFORMS and stands. Migration
+merged + applied via MCP per §2 of the same instruction.
+
+**Original decision points (for the record):**
 1. APPROVE / AMEND the consent model — notably: email **opt-in** (drafted,
    cautious) vs opt-out-with-unsubscribe (reaches more people, weaker
    consent posture; lawful basis review is the owner's call).
 2. APPROVE applying the migration (via MCP `apply_migration` after merge).
-3. APPROVE the email dispatch design for a follow-up wagon: reuse the ONE
+3. STILL OPEN: the email dispatch design for a follow-up wagon: reuse the ONE
    existing transactional sender (`lib/email/transactional.ts`,
    resend|postmark — today invitation-scoped env names `INVITE_EMAIL_*`),
    stateless signed unsubscribe links (no token column), delivery-state
