@@ -1593,6 +1593,12 @@
     "types": {
       "cv": "[EN] CV",
       "id_document": "[EN] ID document",
+      "posting_notification": "Udstationeringsanmeldelse",
+      "residence_permit": "Opholdstilladelse",
+      "work_permit": "Arbejdstilladelse",
+      "tax_registration": "Skatteregistrering",
+      "social_security_registration": "Socialsikringsregistrering",
+      "health_safety_card": "Sikkerhedskort",
       "a1_certificate": "[EN] A1 certificate",
       "employment_contract": "[EN] Employment contract",
       "posted_worker_package": "[EN] Posted worker package",
@@ -1966,6 +1972,7 @@
       "noMatching": "Lige nu passer ingen åbne forespørgsler til din profil. Det ændrer sig, når nye forespørgsler dukker op.",
       "opportunitiesUnavailable": "Overblikket over muligheder kunne ikke læses lige nu.",
       "newOpportunities": "Nyt siden dit seneste kig: {count}.",
+      "journalUnavailable": "Din arbejdsjournal kunne ikke læses lige nu.",
       "skillsToAdd": "Færdigheder, som dine nærmeste muligheder spørger efter: {skills}."
     },
     "noWorkType": {
@@ -4051,6 +4058,7 @@
       "blockedNoPlan": "[EN] I could not read your plan just now.",
       "blockedNoProjects": "[EN] You do not manage any projects on this account.",
       "blockedNotEmployer": "[EN] That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "Jeg kan endnu ikke filtrere efter {dimension}.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
@@ -4988,6 +4996,7 @@
     "empty": "Ingen aftaler registreret endnu.",
     "emptyFiltered": "Ingen aftaler matcher disse filtre.",
     "scopeNote": "Register på organisationssiden. Medarbejdere ser ikke dette register.",
+    "attach": { "documentLabel": "Dokument til vedhæftning", "submit": "Vedhæft dokument" },
     "baseDocument": "Basisdokument",
     "filters": {
       "type": "Type",

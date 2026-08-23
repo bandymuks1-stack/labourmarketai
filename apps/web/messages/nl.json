@@ -6558,8 +6558,8 @@
       }
     },
     "cv": {
-      "verified": "Confirmed",
-      "declared": "Declared"
+      "verified": "Bevestigd",
+      "declared": "Opgegeven"
     }
   },
   "orgMembers": {
@@ -6878,6 +6878,12 @@
     "types": {
       "cv": "CV",
       "id_document": "Identiteitsbewijs",
+      "posting_notification": "Detacheringsmelding",
+      "residence_permit": "Verblijfsvergunning",
+      "work_permit": "Werkvergunning",
+      "tax_registration": "Belastingregistratie",
+      "social_security_registration": "Registratie sociale zekerheid",
+      "health_safety_card": "Veiligheidspas",
       "a1_certificate": "A1-verklaring",
       "employment_contract": "Arbeidsovereenkomst",
       "posted_worker_package": "Pakket gedetacheerde werknemer",
@@ -8060,6 +8066,7 @@
       "noMatching": "Op dit moment passen er geen open aanvragen bij je profiel. Dit verandert zodra nieuwe aanvragen verschijnen.",
       "opportunitiesUnavailable": "Het kansenoverzicht kon nu niet worden gelezen.",
       "newOpportunities": "Nieuw sinds je laatste bezoek: {count}.",
+      "journalUnavailable": "Je werkjournaal kon nu niet worden gelezen.",
       "skillsToAdd": "Vaardigheden waar je dichtstbijzijnde kansen om vragen: {skills}."
     },
     "saved": {
@@ -12273,6 +12280,7 @@
       "blockedNoPlan": "Ik kon je planning niet lezen.",
       "blockedNoProjects": "Je beheert geen projecten op dit account.",
       "blockedNotEmployer": "Dat is een werkgeversactie. Schakel naar je bedrijfsruimte en vraag het opnieuw.",
+      "unsupportedDimension": "Op {dimension} kan ik nog niet filteren.",
       "noSuchValue": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar.",
       "noSuchValueWithAlternatives": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar. Wel: {available}.",
       "skillGapIntro": "Er ontbreken {count} gevraagde vaardigheden in je profiel. Het vaakst gevraagd:",
@@ -13075,6 +13083,7 @@
     "empty": "Nog geen overeenkomsten geregistreerd.",
     "emptyFiltered": "Geen overeenkomsten voldoen aan deze filters.",
     "scopeNote": "Register aan organisatiezijde. Werknemers zien dit register niet.",
+    "attach": { "documentLabel": "Bij te voegen document", "submit": "Document bijvoegen" },
     "baseDocument": "Basisdocument",
     "filters": {
       "type": "Type",

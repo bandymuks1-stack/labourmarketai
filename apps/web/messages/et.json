@@ -1593,6 +1593,12 @@
     "types": {
       "cv": "[EN] CV",
       "id_document": "[EN] ID document",
+      "posting_notification": "Lähetusteade",
+      "residence_permit": "Elamisluba",
+      "work_permit": "Tööluba",
+      "tax_registration": "Maksuregistreering",
+      "social_security_registration": "Sotsiaalkindlustuse registreering",
+      "health_safety_card": "Tööohutuskaart",
       "a1_certificate": "[EN] A1 certificate",
       "employment_contract": "[EN] Employment contract",
       "posted_worker_package": "[EN] Posted worker package",
@@ -1966,6 +1972,7 @@
       "noMatching": "Praegu ei sobi ükski avatud päring sinu profiiliga. See muutub uute päringute ilmumisel.",
       "opportunitiesUnavailable": "Võimaluste ülevaadet ei õnnestunud praegu lugeda.",
       "newOpportunities": "Uut alates sinu viimasest vaatamisest: {count}.",
+      "journalUnavailable": "Sinu tööpäevikut ei õnnestunud praegu lugeda.",
       "skillsToAdd": "Oskused, mida sinu lähimad võimalused küsivad: {skills}."
     },
     "noWorkType": {
@@ -4051,6 +4058,7 @@
       "blockedNoPlan": "[EN] I could not read your plan just now.",
       "blockedNoProjects": "[EN] You do not manage any projects on this account.",
       "blockedNotEmployer": "[EN] That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "Selle mõõtme ({dimension}) järgi ma veel filtreerida ei oska.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
@@ -4988,6 +4996,7 @@
     "empty": "Lepinguid pole veel registreeritud.",
     "emptyFiltered": "Ükski leping ei vasta neile filtritele.",
     "scopeNote": "Organisatsioonipoolne register. Töötajatele seda registrit ei kuvata.",
+    "attach": { "documentLabel": "Lisatav dokument", "submit": "Lisa dokument" },
     "baseDocument": "Põhidokument",
     "filters": {
       "type": "Tüüp",

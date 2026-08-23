@@ -1593,6 +1593,12 @@
     "types": {
       "cv": "[EN] CV",
       "id_document": "[EN] ID document",
+      "posting_notification": "Utstationeringsanmälan",
+      "residence_permit": "Uppehållstillstånd",
+      "work_permit": "Arbetstillstånd",
+      "tax_registration": "Skatteregistrering",
+      "social_security_registration": "Socialförsäkringsregistrering",
+      "health_safety_card": "Arbetsmiljökort",
       "a1_certificate": "[EN] A1 certificate",
       "employment_contract": "[EN] Employment contract",
       "posted_worker_package": "[EN] Posted worker package",
@@ -1966,6 +1972,7 @@
       "noMatching": "Just nu passar inga öppna förfrågningar din profil. Det ändras när nya förfrågningar dyker upp.",
       "opportunitiesUnavailable": "Översikten över möjligheter kunde inte läsas just nu.",
       "newOpportunities": "Nytt sedan du senast tittade: {count}.",
+      "journalUnavailable": "Din arbetsjournal kunde inte läsas just nu.",
       "skillsToAdd": "Färdigheter som dina närmaste möjligheter frågar efter: {skills}."
     },
     "noWorkType": {
@@ -4051,6 +4058,7 @@
       "blockedNoPlan": "[EN] I could not read your plan just now.",
       "blockedNoProjects": "[EN] You do not manage any projects on this account.",
       "blockedNotEmployer": "[EN] That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "Jag kan inte filtrera på {dimension} ännu.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
@@ -4988,6 +4996,7 @@
     "empty": "Inga avtal registrerade ännu.",
     "emptyFiltered": "Inga avtal matchar dessa filter.",
     "scopeNote": "Register på organisationssidan. Arbetare ser inte det här registret.",
+    "attach": { "documentLabel": "Dokument att bifoga", "submit": "Bifoga dokument" },
     "baseDocument": "Basdokument",
     "filters": {
       "type": "Typ",

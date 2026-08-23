@@ -66,6 +66,8 @@
   "otherWorkType": "Kita / bendri darbai",
   "composeTiler": "Padariau {area} {unit} plytelių objektui {site}.",
   "cv": {
+    "verified": "Vadovo patvirtinta",
+    "declared": "Nurodyta",
     "journalBacked": "Iš žurnalo",
     "present": "dabar",
     "primary": "Pagrindinis",

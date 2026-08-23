@@ -66,6 +66,8 @@
   "otherWorkType": "Other / general work",
   "composeTiler": "Laid {area} {unit} of tiling at {site}.",
   "cv": {
+    "verified": "Manager-confirmed",
+    "declared": "Declared",
     "journalBacked": "Journal-backed",
     "present": "present",
     "primary": "Primary",

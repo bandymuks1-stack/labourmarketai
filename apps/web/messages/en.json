@@ -6878,6 +6878,12 @@
     "types": {
       "cv": "CV",
       "id_document": "ID document",
+      "posting_notification": "Posting notification",
+      "residence_permit": "Residence permit",
+      "work_permit": "Work permit",
+      "tax_registration": "Tax registration",
+      "social_security_registration": "Social security registration",
+      "health_safety_card": "Health & safety card",
       "a1_certificate": "A1 certificate",
       "employment_contract": "Employment contract",
       "posted_worker_package": "Posted worker package",
@@ -8060,6 +8066,7 @@
       "noMatching": "Right now no open inquiries fit your profile. This changes as new inquiries appear.",
       "opportunitiesUnavailable": "The opportunities overview could not be read right now.",
       "newOpportunities": "New since you last looked: {count}.",
+      "journalUnavailable": "Your work journal could not be read right now.",
       "skillsToAdd": "Skills your closest opportunities ask about: {skills}."
     },
     "saved": {
@@ -12273,6 +12280,7 @@
       "blockedNoPlan": "I could not read your plan just now.",
       "blockedNoProjects": "You do not manage any projects on this account.",
       "blockedNotEmployer": "That is an employer action. Switch to your company space and ask again.",
+      "unsupportedDimension": "I can't filter by {dimension} yet.",
       "noSuchValue": "I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
       "skillGapIntro": "{count} required skills are missing from your profile. The ones asked for most:",
@@ -13075,6 +13083,7 @@
     "empty": "No agreements recorded yet.",
     "emptyFiltered": "No agreements match these filters.",
     "scopeNote": "Organization-side register. Workers are not shown this register.",
+    "attach": { "documentLabel": "Document to attach", "submit": "Attach document" },
     "baseDocument": "Base document",
     "filters": {
       "type": "Type",

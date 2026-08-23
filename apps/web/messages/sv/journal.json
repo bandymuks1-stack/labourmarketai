@@ -18,6 +18,9 @@
   "otherWorkType": "[EN] Other / general work",
   "composeTiler": "[EN] Laid {area} {unit} of tiling at {site}.",
   "cv": {
+    "verified": "Bekräftad",
+    "declared": "Angiven",
+    "journalBacked": "Journalstödd",
     "present": "[EN] present",
     "primary": "[EN] Primary",
     "skills": "[EN] Skills",

@@ -66,6 +66,8 @@
   "otherWorkType": "Другая / общая работа",
   "composeTiler": "Уложено {area} {unit} плитки на объекте {site}.",
   "cv": {
+    "verified": "Подтверждено руководителем",
+    "declared": "Заявлено",
     "journalBacked": "Подкреплено журналом",
     "present": "по настоящее время",
     "primary": "Основной",

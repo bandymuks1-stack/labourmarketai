@@ -66,6 +66,8 @@
   "otherWorkType": "Overig / algemeen werk",
   "composeTiler": "{area} {unit} tegelwerk gelegd op {site}.",
   "cv": {
+    "verified": "Bevestigd",
+    "declared": "Opgegeven",
     "journalBacked": "Journaal-onderbouwd",
     "present": "heden",
     "primary": "Primair",
