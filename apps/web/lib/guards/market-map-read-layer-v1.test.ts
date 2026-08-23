@@ -633,7 +633,11 @@ describe("NO new DB migration in this PR", () => {
     // (20260823150500_notification_events_v6_weekly_digest, paired rollback).
     // GREEN CHECK widening (the v2..v5 idiom); still nothing from the
     // market-map read layer itself.
-    expect(count).toBeLessThanOrEqual(236);
+    // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
+    // (20260823160000, paired rollback). RED by route (grants), deliberately
+    // NOT human-gate-annotated, ships UNAPPLIED. Still nothing from the
+    // market-map read layer itself.
+    expect(count).toBeLessThanOrEqual(237);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
