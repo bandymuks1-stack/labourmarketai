@@ -155,7 +155,7 @@ describe("the derived tables did not change any shipped value", () => {
       fable: "claude-fable-5",
       opus: "claude-opus-4-8",
       sonnet: "claude-sonnet-4-6",
-      haiku: "claude-haiku-4-5-20251001",
+      haiku: "claude-haiku-4-5",
     });
     expect(AI_MODEL_CANDIDATES.openai).toEqual({
       opus: "gpt-5",

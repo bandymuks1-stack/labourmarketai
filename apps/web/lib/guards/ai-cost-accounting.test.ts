@@ -51,7 +51,7 @@ function liveRecord(over: Partial<AiRoutingAuditRecord> = {}): AiRoutingAuditRec
     selectedTier: "low_cost",
     providerAdapter: "anthropic",
     modelAlias: "fast",
-    modelId: "claude-haiku-4-5-20251001",
+    modelId: "claude-haiku-4-5",
     promptVersion: "v3",
     reason: "tier matched",
     languageConsidered: "lt",
@@ -92,7 +92,7 @@ describe("a computed cost survives the whole chain into the row", () => {
       profileId: "11111111-1111-1111-1111-111111111111",
       requestContext: "journal_suggestions",
     });
-    expect(row.model_id).toBe("claude-haiku-4-5-20251001"); // per-model
+    expect(row.model_id).toBe("claude-haiku-4-5"); // per-model
     expect(row.model_alias).toBe("fast");
     expect(row.tier).toBe("low_cost");
     expect(row.task_type).toBe("journal_suggestions"); // per-feature

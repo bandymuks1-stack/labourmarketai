@@ -104,6 +104,14 @@ export interface ModelRegistryEntry {
   /** Data-handling constraints worth carrying at model level (jurisdiction,
    *  training-on-input terms). Free text, reviewed by the owner. */
   readonly dataRestrictions: readonly string[];
+  /**
+   * True when the model accepts `thinking: { type: "adaptive" }` on the wire
+   * (Anthropic 4.6+ generations). False/absent means the parameter must be
+   * OMITTED — pre-4.6 models (e.g. Haiku 4.5) reject adaptive thinking with a
+   * 400, and omitting the parameter is valid on every model. Fail-safe default
+   * is therefore "omit". Anthropic-transport only; other transports ignore it.
+   */
+  readonly adaptiveThinking?: boolean;
   /** ISO date the pricing took effect. */
   readonly effectiveFrom: string | null;
   /** Where the price came from. null = UNVERIFIED; cannot be enabled. */
@@ -131,7 +139,10 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   {
     provider: "anthropic",
     transport: "anthropic" as const,
-    model: "claude-haiku-4-5-20251001",
+    // Canonical id carries NO date suffix (claude-api skill: "use only the
+    // exact model ID strings — never append date suffixes"). The previous
+    // `claude-haiku-4-5-20251001` was a non-canonical variant.
+    model: "claude-haiku-4-5",
     alias: "haiku",
     capabilities: GENERAL_TASKS,
     qualityScore: null,
@@ -142,6 +153,8 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     maxOutputTokens: 64_000,
     latencyP50Ms: null,
     dataRestrictions: [],
+    // Pre-4.6 model: adaptive thinking is rejected with a 400 — omit it.
+    adaptiveThinking: false,
     effectiveFrom: "2026-06-01",
     pricingSource: ANTHROPIC_SOURCE,
     enabled: true,
@@ -160,6 +173,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     maxOutputTokens: 64_000,
     latencyP50Ms: null,
     dataRestrictions: [],
+    adaptiveThinking: true,
     effectiveFrom: "2026-06-01",
     pricingSource: ANTHROPIC_SOURCE,
     enabled: true,
@@ -178,6 +192,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     maxOutputTokens: 64_000,
     latencyP50Ms: null,
     dataRestrictions: [],
+    adaptiveThinking: true,
     effectiveFrom: "2026-06-01",
     pricingSource: ANTHROPIC_SOURCE,
     enabled: true,
@@ -196,6 +211,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     maxOutputTokens: null,
     latencyP50Ms: null,
     dataRestrictions: [],
+    adaptiveThinking: true,
     effectiveFrom: null,
     pricingSource: null,
     enabled: false,
@@ -341,6 +357,17 @@ export function registryEntryForModel(
   model: string,
 ): ModelRegistryEntry | null {
   return MODEL_REGISTRY.find((e) => e.model === model) ?? null;
+}
+
+/**
+ * May `thinking: { type: "adaptive" }` be sent for this model?
+ *
+ * FAIL-SAFE: an unknown model (e.g. a config override the registry has never
+ * seen) gets `false`, because omitting the parameter is valid on every
+ * Anthropic model while sending it to a pre-4.6 model is a 400.
+ */
+export function supportsAdaptiveThinking(model: string): boolean {
+  return registryEntryForModel(model)?.adaptiveThinking === true;
 }
 
 /**

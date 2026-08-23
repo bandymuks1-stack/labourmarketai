@@ -11,6 +11,7 @@
  */
 import { getLocale } from "next-intl/server";
 import { draftWorkerProfileFromIntake } from "./worker-intake-actions";
+import { aiActionRateLimited } from "../security/ai-action-throttle";
 import type { AiLocale } from "../ai/runtime/types";
 
 export interface WorkerIntakeFormState {
@@ -63,6 +64,19 @@ export async function submitWorkerIntakeAction(
     invoiceReady: formData.get("invoice_ready") === "yes",
     comment: str(formData.get("comment")),
   };
+
+  // Unauthenticated marketing surface → the model call is metered per client.
+  // A throttled caller gets the same honest "disabled" state the action
+  // already renders when the AI runtime is off — never a fake draft.
+  if (
+    await aiActionRateLimited({
+      name: "ai-worker-intake-draft",
+      limit: 5,
+      windowMs: 10 * 60 * 1000,
+    })
+  ) {
+    return { ok: true, draftStatus: "disabled" };
+  }
 
   const locale = toAiLocale(await getLocale());
   const result = await draftWorkerProfileFromIntake(raw, locale);

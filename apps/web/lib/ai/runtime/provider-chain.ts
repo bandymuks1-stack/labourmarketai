@@ -430,6 +430,10 @@ export type ChainFailureClass =
   | "PROVIDER_ERROR"
   /** It answered, but the output was not the shape the schema requires. */
   | "INVALID_OUTPUT"
+  /** The answer was cut at the output-token ceiling. Request-attributed: the
+   *  SAME ceiling truncates identically on every provider, so advancing pays
+   *  (and, for personal payloads, discloses) repeatedly for the same failure. */
+  | "TRUNCATED"
   /** Excluded by the sensitivity veto. Not a failure — a refusal. */
   | "PRIVACY_BLOCK"
   /** No provider declares this task at all. */
@@ -467,6 +471,7 @@ export function advancePolicyFor(
       return "advance";
     case "INVALID_OUTPUT":
       return "advance_once";
+    case "TRUNCATED":
     case "PRIVACY_BLOCK":
     case "UNSUPPORTED_CAPABILITY":
       return "stop";
@@ -496,6 +501,8 @@ export function classifyCompletionFailure(result: {
       return "CONFIGURATION";
     case "malformed_output":
       return "INVALID_OUTPUT";
+    case "truncated":
+      return "TRUNCATED";
     case "unsupported":
       return "UNSUPPORTED_CAPABILITY";
     case "budget_exceeded":

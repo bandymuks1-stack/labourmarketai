@@ -166,4 +166,30 @@ describe("anonymous write paths are actually throttled (audit M-03)", () => {
       [],
     );
   });
+
+  /**
+   * Wagon A (value train 2): every PUBLIC server action that can invoke the AI
+   * runtime is metered. These are `"use server"` actions POST-reachable from
+   * unauthenticated marketing routes — the moment the owner activates a
+   * provider, an unthrottled one becomes unmetered anonymous spend. A NEW
+   * public AI action added without `aiActionRateLimited(` is the regression.
+   */
+  it("every public AI server action is throttled", () => {
+    const surfaces = [
+      "lib/staffing/match-preview-actions.ts",
+      "lib/staffing/worker-intake-form-actions.ts",
+      "lib/staffing/company-need-form-actions.ts",
+    ] as const;
+    const missing = surfaces.filter(
+      (s) => !read(s).includes("aiActionRateLimited("),
+    );
+    expect(
+      missing,
+      `public AI actions with no throttle: ${missing.join(", ")}`,
+    ).toEqual([]);
+    // The helper itself must really meter and really key by client.
+    const helper = read("lib/security/ai-action-throttle.ts");
+    expect(helper).toContain("rateLimit(");
+    expect(helper).toContain("clientKeyFromHeaders");
+  });
 });

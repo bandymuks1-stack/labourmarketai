@@ -57,6 +57,8 @@ import {
   type ChainCandidate,
 } from "./provider-chain";
 import { taskTypeForAgent, type TaskRouteDecision, type AiTaskType } from "./task-routing";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
+import { registryEntryForModel } from "./model-registry";
 import type { AiAgentKey } from "../registry/types";
 
 export function selectCompletionProvider(
@@ -283,6 +285,33 @@ export async function dispatchAiCompletion(
     message: "chain produced no candidate",
   };
 
+  /**
+   * The request re-addressed to ONE candidate, or null when no honest model
+   * exists for it. `request.model` was resolved against the PRIMARY provider
+   * (run-agent.ts), so handing the unmodified request down the chain sent an
+   * anthropic-shaped id to whichever vendor came next. Now each candidate gets
+   * its OWN registry model for the routed alias, and a candidate with no such
+   * model is skipped with a reason — never dispatched with another vendor's id
+   * (or `undefined`) on the wire.
+   */
+  const requestForCandidate = (
+    candidate: ChainCandidate,
+  ): AiCompletionRequest | null => {
+    // Local hosts exactly the model the operator pulled (cfg.localModel);
+    // the adapter ignores request.model by design.
+    if (candidate.id === "local") return request;
+    if (request.modelAlias) {
+      const model = AI_MODEL_CANDIDATES[candidate.id]?.[request.modelAlias];
+      if (!model) return null;
+      return model === request.model ? request : { ...request, model };
+    }
+    // No routed alias: pass a concrete model only to the provider it belongs
+    // to; an unrecognised model rides through unchanged (legacy behaviour).
+    const entry = request.model ? registryEntryForModel(request.model) : null;
+    if (entry && entry.provider !== candidate.id) return null;
+    return request;
+  };
+
   for (const candidate of candidates) {
     const adapter = adapterForChainId(candidate.id);
     if (adapter === null) {
@@ -296,7 +325,17 @@ export async function dispatchAiCompletion(
       };
       continue;
     }
-    const result = await adapter.complete(request, cfg);
+    const candidateRequest = requestForCandidate(candidate);
+    if (candidateRequest === null) {
+      last = {
+        status: "error",
+        code: "unsupported",
+        message: `provider "${candidate.id}" has no registry model for this route — skipped rather than dispatched with another vendor's model id`,
+        provider: candidate.id,
+      };
+      continue;
+    }
+    const result = await adapter.complete(candidateRequest, cfg);
     if (result.status === "ok") return result;
 
     // Attribute the failure to the provider that produced it, so an audit

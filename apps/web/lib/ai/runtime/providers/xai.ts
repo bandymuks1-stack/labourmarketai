@@ -19,7 +19,12 @@ import type {
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
 import { AI_MODEL_CANDIDATES } from "../model-candidates";
-import { extractJson, fetchErrorResult, jsonSchemaHint } from "./extract-json";
+import {
+  extractJson,
+  fetchErrorResult,
+  jsonSchemaHint,
+  malformedOrTruncated,
+} from "./extract-json";
 
 const XAI_CHAT_COMPLETIONS_URL = "https://api.x.ai/v1/chat/completions";
 
@@ -80,13 +85,16 @@ export const xaiCompletionProvider: AiCompletionProvider = {
         };
       }
       const json = (await res.json()) as {
-        choices?: { message?: { content?: string } }[];
+        choices?: { message?: { content?: string }; finish_reason?: string }[];
         usage?: { prompt_tokens?: number; completion_tokens?: number };
       };
       const text = json.choices?.[0]?.message?.content;
       const raw = typeof text === "string" ? extractJson(text) : undefined;
       if (raw === undefined) {
-        return { status: "error", code: "malformed_output", message: "no JSON in response" };
+        return malformedOrTruncated(
+          json.choices?.[0]?.finish_reason === "length",
+          "xai",
+        );
       }
       return {
         status: "ok",
