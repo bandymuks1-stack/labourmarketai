@@ -1023,14 +1023,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // restores v1 verbatim. Marker added in the same commit as the change.
       "20260824120000_public_vacancy_anon_boundary_v2.sql",
       // 2026-08-24: NULL-safe owner guards v2 gained its marker on the owner's
-      // MASTER ORDER §4 security directive — a security agent proved a dormant
-      // NULL-flip authorization bypass still lives in six SECURITY DEFINER
-      // functions (organizations.owner_profile_id is nullable with ON DELETE
-      // SET NULL, so deleting an owner's auth account arms it). RED by route —
-      // it replaces six SECURITY DEFINER bodies with one NULL-safe guard each
-      // (v_owner = uid → (v_owner is not null and v_owner = uid)), creating and
-      // dropping nothing and running no DML. The marker lets CI classify it;
-      // owner-approved and APPLIED to production 2026-08-24 (PR #1256).
+      // MASTER ORDER §4 security directive — a correctness fix that makes the
+      // six SECURITY DEFINER functions compare the nullable owner column
+      // NULL-safely (v_owner = uid → (v_owner is not null and v_owner = uid)),
+      // creating and dropping nothing and running no DML. The marker lets CI
+      // classify it; owner-approved and APPLIED to production 2026-08-24
+      // (PR #1256). Detailed risk analysis is in the private Internal Brain
+      // per AGENTS.md, not here.
       "20260824130000_null_safe_owner_guards_v2.sql",
     ]);
   });
