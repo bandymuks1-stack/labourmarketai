@@ -13711,5 +13711,32 @@
       "awaitingOwnerApproval": "wacht op goedkeuring van de eigenaar"
     },
     "footer": "Eerlijk voorbeeld · Geen nep-AI · Geen nepverificatie · Geen verzonnen gezichten van werknemers · Elk item begint met „Sample · …”, zodat het nooit als echte data leest."
+  },
+  "marketExplanation": {
+    "title": "Markt voor {profession}",
+    "source": "Geteld uit openbare vacatures die in LabourMarket.ai zijn geïmporteerd, gelezen op {measuredAt}. Dit is niet de hele arbeidsmarkt en niet het eigen vraagbord van dit platform.",
+    "statOpen": "Open vacatures",
+    "statNew7d": "Geplaatst in 7 dagen",
+    "statNew30d": "Geplaatst in 30 dagen",
+    "noneOpen": "Er wordt op dit moment niets geadverteerd voor {profession} in deze verzameling.",
+    "skillsTitleAll": "Gevraagde vaardigheden, in alle open vacatures",
+    "skillsTitleWindow": "Gevraagde vaardigheden, in de {window} meest recent geplaatste",
+    "citiesTitleAll": "Waar ze zijn, in alle open vacatures",
+    "citiesTitleWindow": "Waar ze zijn, in de {window} meest recent geplaatste",
+    "noPayStated": "Geen van deze vacatures noemt een salarisbedrag, dus hier wordt geen salaris getoond of geschat.",
+    "cta": "Leg deze markt uit",
+    "pending": "De cijfers worden gelezen...",
+    "resultTitle": "AI-lezing van de cijfers hierboven",
+    "attribution": "Geschreven door {provider} {model} op basis van de cijfers hierboven. Een suggestie, geen vastgelegd feit.",
+    "whereTitle": "Waar de vraag zit",
+    "aiSkillsTitle": "Gevraagde vaardigheden",
+    "actionsTitle": "Wat u hierna zou kunnen doen",
+    "limitationsTitle": "Wat deze cijfers niet kunnen zeggen",
+    "reviewNote": "Deze aantallen zijn klein, lees deze uitleg dus met voorzichtigheid.",
+    "offNotAuthenticated": "Log in om een uitleg te vragen.",
+    "offRateLimited": "U heeft dit zojuist een paar keer gevraagd. Probeer het over enkele minuten opnieuw.",
+    "offFactsUnavailable": "De markttellingen konden nu niet worden gelezen, dus er valt niets uit te leggen.",
+    "offMarketTooSmall": "Minder dan {min} open vacatures — te weinig om een uitleg meer waard te maken dan de cijfers hierboven.",
+    "offAiUnavailable": "De uitlegdienst is nu niet beschikbaar. De cijfers hierboven blijven ongewijzigd."
   }
 }

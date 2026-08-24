@@ -13,6 +13,10 @@ import {
   MODEL_PRICING_USD_PER_MTOK,
   pricingForModel,
 } from "@/lib/ai/runtime/model-pricing";
+import {
+  AI_EGRESS_GRANTS,
+  egressPermitted,
+} from "@/lib/ai/runtime/data-egress";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -168,12 +172,43 @@ describe("a verified price is not permission to run", () => {
     }
   });
 
-  it("pricing them did NOT make any of them selectable", () => {
+  it("EXACTLY ONE gemini model is enabled — the cheapest, and no other", () => {
+    // #1265 priced all three and enabled none, because pricing is not
+    // permission and the remaining blocker was a data-transfer decision.
+    // 2026-08-24: that decision is answered for ONE task classed PUBLIC, which
+    // needs no egress grant. `gemini-2.5-flash-lite` serves the `haiku` alias
+    // and therefore the `low_cost` tier the task prefers.
+    //
+    // `flash` and `pro` stay disabled and this pins that they do. The public
+    // task cannot escalate (`escalationConditions: []`), so they would be
+    // unreachable models wearing a live enablement flag — and the next, more
+    // sensitive task to want them would find the enablement already done and
+    // looking reviewed.
+    const enabled = gemini.filter((e) => e.enabled).map((e) => e.model);
+    expect(enabled).toEqual(["gemini-2.5-flash-lite"]);
+
     for (const e of gemini) {
-      expect(e.enabled, e.model).toBe(false);
-      expect(isSelectable(e), e.model).toBe(false);
-      expect(pricingForModel(e.model), e.model).toBeNull();
+      const shouldRun = e.model === "gemini-2.5-flash-lite";
+      expect(isSelectable(e), e.model).toBe(shouldRun);
+      if (shouldRun) {
+        expect(pricingForModel(e.model), e.model).not.toBeNull();
+      } else {
+        expect(pricingForModel(e.model), e.model).toBeNull();
+      }
     }
+  });
+
+  it("enabling it did NOT open the egress gate", () => {
+    // The load-bearing separation, asserted where someone flipping the next
+    // `enabled` flag will read it: a selectable model is still refused every
+    // payload above PUBLIC, because selectability and permission are different
+    // decisions owned by different files.
+    expect(AI_EGRESS_GRANTS).toEqual([]);
+    const geminiProfile = { id: "gemini", locality: "cloud" as const, costClass: "paid" };
+    expect(egressPermitted(geminiProfile, "PUBLIC").permitted).toBe(true);
+    expect(egressPermitted(geminiProfile, "LOW_RISK_PROJECT_DATA").permitted).toBe(false);
+    expect(egressPermitted(geminiProfile, "PERSONAL").permitted).toBe(false);
+    expect(egressPermitted(geminiProfile, "SENSITIVE_FREE_TEXT").permitted).toBe(false);
   });
 
   it("the recorded price is the metered rate, never the free allowance", () => {

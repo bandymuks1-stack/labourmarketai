@@ -13711,5 +13711,32 @@
       "awaitingOwnerApproval": "Eigentümerfreigabe steht aus"
     },
     "footer": "Ehrliche Vorschau · Keine vorgetäuschte KI · Keine vorgetäuschte Verifizierung · Keine erfundenen Gesichter von Arbeitskräften · Jeder Eintrag beginnt mit „Sample · …“ und liest sich daher nie wie echte Daten."
+  },
+  "marketExplanation": {
+    "title": "Markt für {profession}",
+    "source": "Gezählt aus öffentlichen Stellenanzeigen, die in LabourMarket.ai importiert wurden, gelesen am {measuredAt}. Das ist nicht der gesamte Arbeitsmarkt und nicht das eigene Bedarfsboard dieser Plattform.",
+    "statOpen": "Offene Anzeigen",
+    "statNew7d": "In 7 Tagen veröffentlicht",
+    "statNew30d": "In 30 Tagen veröffentlicht",
+    "noneOpen": "Für {profession} wird in dieser Sammlung derzeit nichts ausgeschrieben.",
+    "skillsTitleAll": "Gefragte Fähigkeiten über alle offenen Anzeigen",
+    "skillsTitleWindow": "Gefragte Fähigkeiten in den {window} zuletzt veröffentlichten",
+    "citiesTitleAll": "Wo sie sind, über alle offenen Anzeigen",
+    "citiesTitleWindow": "Wo sie sind, in den {window} zuletzt veröffentlichten",
+    "noPayStated": "Keine dieser Anzeigen nennt einen Vergütungsbetrag, deshalb wird hier keine Vergütung gezeigt oder geschätzt.",
+    "cta": "Diesen Markt erklären",
+    "pending": "Die Zahlen werden gelesen...",
+    "resultTitle": "KI-Lesart der Zahlen oben",
+    "attribution": "Geschrieben von {provider} {model} auf Basis der Zahlen oben. Ein Vorschlag, keine feststehende Tatsache.",
+    "whereTitle": "Wo die Nachfrage ist",
+    "aiSkillsTitle": "Gefragte Fähigkeiten",
+    "actionsTitle": "Was Sie als Nächstes tun könnten",
+    "limitationsTitle": "Was diese Zahlen nicht sagen können",
+    "reviewNote": "Die Zahlen sind dünn, lesen Sie diese Deutung daher mit Vorsicht.",
+    "offNotAuthenticated": "Melden Sie sich an, um eine Erklärung anzufordern.",
+    "offRateLimited": "Sie haben das gerade mehrfach angefragt. Versuchen Sie es in ein paar Minuten erneut.",
+    "offFactsUnavailable": "Die Marktzahlen konnten gerade nicht gelesen werden, es gibt also nichts zu erklären.",
+    "offMarketTooSmall": "Weniger als {min} offene Anzeigen — zu wenige, als dass eine Erklärung mehr wert wäre als die Zahlen oben.",
+    "offAiUnavailable": "Der Erklärungsdienst ist derzeit nicht verfügbar. Die Zahlen oben bleiben davon unberührt."
   }
 }

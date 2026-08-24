@@ -13711,5 +13711,32 @@
       "awaitingOwnerApproval": "awaiting owner approval"
     },
     "footer": "Honest preview · No fake AI · No fake verification · No fake worker faces · Each entity is prefixed “Sample · …” so it never reads as live data."
+  },
+  "marketExplanation": {
+    "title": "Market for {profession}",
+    "source": "Counted from public job advertisements imported into LabourMarket.ai, read {measuredAt}. This is not the whole labour market, and it is not this platform's own demand board.",
+    "statOpen": "Open advertisements",
+    "statNew7d": "Published in 7 days",
+    "statNew30d": "Published in 30 days",
+    "noneOpen": "Nothing is being advertised for {profession} in this pool right now.",
+    "skillsTitleAll": "Skills asked for, across every open advertisement",
+    "skillsTitleWindow": "Skills asked for, across the {window} most recently published",
+    "citiesTitleAll": "Where they are, across every open advertisement",
+    "citiesTitleWindow": "Where they are, across the {window} most recently published",
+    "noPayStated": "None of these advertisements states a pay figure, so no pay is shown or estimated anywhere here.",
+    "cta": "Explain this market",
+    "pending": "Reading the numbers...",
+    "resultTitle": "AI reading of the numbers above",
+    "attribution": "Written by {provider} {model} from the counts above. A suggestion, not a fact of record.",
+    "whereTitle": "Where demand is",
+    "aiSkillsTitle": "Skills in demand",
+    "actionsTitle": "What you could do next",
+    "limitationsTitle": "What these numbers cannot tell you",
+    "reviewNote": "These counts are thin, so read this reading with caution.",
+    "offNotAuthenticated": "Sign in to ask for an explanation.",
+    "offRateLimited": "You have asked for this a few times just now. Try again in a few minutes.",
+    "offFactsUnavailable": "The market counts could not be read just now, so there is nothing to explain.",
+    "offMarketTooSmall": "Fewer than {min} open advertisements — too few for an explanation to be worth more than the counts above.",
+    "offAiUnavailable": "The explanation service is not available right now. The counts above are unaffected."
   }
 }

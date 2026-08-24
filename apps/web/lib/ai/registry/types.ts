@@ -10,7 +10,7 @@
  */
 import type { z } from "zod";
 
-/** The eleven product agents (the 12th — audit/registry/eval — is infra). */
+/** The twelve product agents (the 13th — audit/registry/eval — is infra). */
 export type AiAgentKey =
   | "worker_profile"
   | "skill_evidence"
@@ -22,7 +22,10 @@ export type AiAgentKey =
   | "booking_risk"
   | "admin_risk"
   | "translation_copy"
-  | "support_onboarding";
+  | "support_onboarding"
+  /** The first agent whose payload carries no data subject — aggregate
+   *  public labour-market statistics. See agents/market-explanation.ts. */
+  | "market_explanation";
 
 export interface PromptRegistryEntry {
   readonly agent: AiAgentKey;
