@@ -2,41 +2,23 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- NULL-SAFE OWNER GUARDS v2 — RED (SECURITY DEFINER replace).
 --
--- Closes a dormant authorization-bypass class in six SECURITY DEFINER
--- functions. Each authorizes with a disjunct of the shape
---   if not (public.is_admin() or v_owner = uid or public.manages_organization(...)) then <deny>
--- where `v_owner` comes from `organizations.owner_profile_id`, which is
--- NULLABLE. When the owner is NULL and the other disjuncts are false, the
--- expression is `not (false or NULL or false)` = NULL; plpgsql treats
--- `IF NULL THEN` as false, so the deny branch is SKIPPED and execution falls
--- through to the privileged effect.
---
--- The precondition is reachable through an ordinary lifecycle event, NOT an
--- exotic one: `organizations.owner_profile_id` has
---   FOREIGN KEY ... REFERENCES profiles(id) ON DELETE SET NULL
--- and `profiles.id REFERENCES auth.users(id) ON DELETE CASCADE`, so deleting
--- any owner's auth account (dashboard delete, GDPR erasure) silently NULLs
--- `owner_profile_id` on every org they owned. From that moment any
--- AUTHENTICATED user can, via `grant_org_manager`, make themselves a manager
--- of that org (persistent takeover). Anonymous callers are NOT affected — all
--- six revoke EXECUTE from PUBLIC and hard-fail on `auth.uid() is null`.
---
--- Prod at write time: 13 orgs, 0 NULL-owner, 0 team orgs — so the bypass is
--- dormant today, but one owner-account deletion arms it.
---
--- THE FIX: wrap only the NULL-source comparison in each function so a NULL
--- owner can never satisfy the owner disjunct:
+-- Correctness fix for six SECURITY DEFINER functions that authorize on
+-- `organizations.owner_profile_id`, which is NULLABLE. Their owner check
+-- compared it directly (`v_owner = uid`); when that column is NULL the SQL
+-- boolean is NULL, and plpgsql treats `IF NULL THEN` as non-true, so the deny
+-- branch could be skipped. The fix makes the comparison NULL-safe:
 --   v_owner = uid   →   (v_owner is not null and v_owner = uid)
 -- `is_admin()` and `manages_organization()` are `exists(...)` and can never
 -- return NULL, so they are untouched. No signature, ACL, table, column, policy
--- or DML change — CREATE OR REPLACE preserves grants. Every other line of each
--- body is byte-identical to the live catalog definition (pg_get_functiondef,
--- 2026-08-24). Rollback restores the six pre-fix bodies verbatim.
+-- or DML change — CREATE OR REPLACE preserves grants; every other line of each
+-- body is byte-identical to the live catalog definition. Rollback restores the
+-- six pre-fix bodies verbatim.
 --
--- NOTE (owner decision, not in this migration): the durable root-cause fix is
--- changing the FK to ON DELETE RESTRICT (or a re-owner trigger) so the NULL
--- can never appear. That changes account-deletion behaviour and is a separate
--- RED decision; these function guards make the bypass impossible regardless.
+-- Detailed risk analysis and production observations are deliberately NOT kept
+-- in this public repository — they live in the private Internal Brain per
+-- AGENTS.md. A separate owner decision (a stricter FK / re-owner trigger so the
+-- column can never be NULL) is tracked there; these guards are correct
+-- regardless of that decision.
 -- ─────────────────────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION public.grant_org_manager(p_org_id uuid, p_profile_id uuid, p_operations_role text DEFAULT NULL::text)
