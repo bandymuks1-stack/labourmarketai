@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { ScrollText } from "lucide-react";
 
+import { isSuperadmin } from "@/lib/auth/superadmin";
+
 import {
   guidanceByCountry,
   guidanceStatusCounts,
@@ -60,6 +62,14 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
     );
   }
 
+  // Pipeline-state telemetry (per-item review status + the counts summary)
+  // is OPERATOR visibility, not worker/company information — it renders only
+  // for admins. The needs-legal-review flag stays visible to everyone: that
+  // one is an honesty marker about the content itself (§18), not telemetry.
+  // Looked up only on the LT branch — the other ten locales early-return a
+  // pending notice above and must not pay the extra profile reads.
+  const operatorView = await isSuperadmin();
+
   const counts = guidanceStatusCounts();
   const grouped = guidanceByCountry();
   const total = LT_MASTER_GUIDANCE.length;
@@ -93,26 +103,29 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
       </p>
 
       {/* Honest review-state summary (operator/owner visibility — counts,
-          never a fake approval). */}
-      <div
-        className="flex flex-wrap items-center gap-2"
-        data-testid="documents-guidance-status-summary"
-      >
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("statusSummary", { total, awaiting: awaitingReview })}
-        </span>
-        {(Object.keys(counts) as GuidanceStatus[])
-          .filter((s) => counts[s] > 0)
-          .map((s) => (
-            <span
-              key={s}
-              className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[s]}`}
-              data-testid={`guidance-status-count-${s}`}
-            >
-              {t(`status.${s}` as never)}: {counts[s]}
-            </span>
-          ))}
-      </div>
+          never a fake approval). ADMIN-ONLY: pipeline states are internal
+          telemetry a worker cannot act on. */}
+      {operatorView ? (
+        <div
+          className="flex flex-wrap items-center gap-2"
+          data-testid="documents-guidance-status-summary"
+        >
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("statusSummary", { total, awaiting: awaitingReview })}
+          </span>
+          {(Object.keys(counts) as GuidanceStatus[])
+            .filter((s) => counts[s] > 0)
+            .map((s) => (
+              <span
+                key={s}
+                className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[s]}`}
+                data-testid={`guidance-status-count-${s}`}
+              >
+                {t(`status.${s}` as never)}: {counts[s]}
+              </span>
+            ))}
+        </div>
+      ) : null}
 
       {/* Density pass (worker-workspace UX audit v2): the full registry made
           the documents page end in a very long always-open list. Each country
@@ -139,11 +152,13 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
                     {item.titleLt}
                   </span>
                   <span className="flex flex-wrap gap-1.5">
-                    <span
-                      className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[item.status]}`}
-                    >
-                      {t(`status.${item.status}` as never)}
-                    </span>
+                    {operatorView ? (
+                      <span
+                        className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[item.status]}`}
+                      >
+                        {t(`status.${item.status}` as never)}
+                      </span>
+                    ) : null}
                     {item.needsLegalReview ? (
                       <span
                         className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
