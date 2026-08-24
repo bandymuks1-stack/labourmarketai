@@ -13,6 +13,7 @@
 | B1 — weekly intelligence read model | #1238 | `86c2cfdc` | Pure codes-only weekly view model on canonical reads (`journalReportWindow`, `getWorkerJobRecommendations`, §19 basis carried whole). Honesty rules tested: unavailable ≠ zero, unknowable omitted, factual inactivity coding. |
 | B2 — weekly digest carrier | #1239 | `bf383492` | `weekly_digest` event/entity type (v6 widening, canonical GREEN idiom), read-time materializer in `event-emitters.ts` (no new service-role caller), pointer-only row (§19(d)), copy in 11 locales (real translations), 3 baselines 235→236. |
 | C1 — document→journal draft seam | #1241 | `99fed66c` | The import chain's missing middle: RLS-scoped `document_files` bytes read + deterministic offline extraction (works with AI DORMANT) + provenance metric vocabulary. Honest refusals: classified / images (no OCR exists). |
+| C-r2 — appeared-this-week market fact | #1250 | `8fa8ee99` | WAGON=C-r2 · STATUS=MERGED · USER_VALUE=weekly section now answers "what changed this week" with the store-independent half: inquiries created in the last 7 days, counts rendered as "N+" when the 100-row board page is full (no silent caps) · REUSED=recentlyCreated already derived for isNew; canonical board read · NEW_PRIMITIVES=none · TESTS=16,507 green · Review findings (created_at semantics, RPC cap) verified and fixed in-PR; submitted_at column + uncapped count RPC recorded as owner-gated follow-ups. |
 | E-w1 — no raw i18n key reaches a user | #1248 | `c1e03320` | WAGON=E-w1 · STATUS=MERGED · USER_VALUE=six raw-key-path defects killed: documents checklist could demand a document the UI made unaddable (posting_notification dead-end), profile skill chips, weekly journal-unavailable line, agreements attach form, AI chat tail; verified label now names its origin · REUSED=merged-catalog resolution exactly as lib/i18n/request.ts ships it · NEW_PRIMITIVES=guard i18n-key-resolution.test.ts (seed ⊆ labels; repaired keys resolve; weekly.* literals × 11) · TESTS=16,503 green · SECURITY=copy only. |
 | E-w2 — truth-drift copy repairs | #1249 | `be003540` | WAGON=E-w2 · STATUS=MERGED · USER_VALUE=helpInfoNote no longer hides the shipped help-request path; "pre-alpha" gone from 8 locales; /cv one-sided salary keeps its direction (From/Up to); TEST MODE badges localized lt/ru · REUSED=existing row/render patterns · NEW_PRIMITIVES=none · TESTS=16,503 green. |
 | C-r1 — weekly intelligence rendered | #1247 | `a155e188` | WAGON=C-r1 · STATUS=MERGED · USER_VALUE=the weekly digest bell finally points at a real summary: journal facts, matching count with whole §19 basis, context-bound skill gaps, honest unavailable states, on /dashboard/opportunities · REUSED=getWeeklyPersonalIntelligence, B1 signals, buildWorkTypeLabelMap, skillNames, createUtcFormatter · NEW_PRIMITIVES=none (render-only section + render guard) · SECURITY=no schema, own-session reads only · TESTS=16,492 green + weekly-intelligence-render guard · PRODUCTION_PROOF=deploys with main (render-only; §5 browser debt recorded below) · Also ships the makePdf page-edge fixture fix (pdf.js truncation at ~50 chars). |
@@ -51,8 +52,10 @@ questions until train end. Consequences executed:
   open) — PARKED. Trends/EUR/employer-identity — PARKED (D2, no FX code, no
   history data). Weekly intelligence rendered = wagon C-r1 (merged, above).
 
-**Wagon C2b — IMPLEMENTED, PR #1244 (temporarily closed, re-open at tail)**
-(blueprint fully executed):
+**Wagon C2b — IMPLEMENTED, re-opened as a fresh draft PR at the train tail**
+(the closed #1244's content cherry-picked onto latest main; the weekly
+section and E-wagon fixes it now sits on are all merged). Blueprint fully
+executed:
 documents page gains a per-file "draft journal entry" link (extractable
 mimes only — images honestly get none), inline `?draftFrom=` review section
 (no new route/modal — product gate 0 surfaces), worker edits + explicitly
@@ -88,8 +91,18 @@ per-file verdicts) · D5 (/jobs throttle waiver) · D6 (AI activation route).
 Train 2: **D7 CLOSED** (approved 2026-08-23 → merged `cf7d641f` → applied to
 prod → verified) · D8 (gemini costClass) · D9 (Telegram env secrets).
 TELEGRAM_STATUS = UNAVAILABLE this environment.
-NEW environmental gate: browser acceptance for #1244 (Docker OR supabase.co
-egress — see "In flight").
+NEW environmental gate: browser acceptance for the C2b draft PR (Docker OR
+supabase.co egress — see "In flight").
+**H (public landing top-15 professions) PARKED — owner gate:** the landing
+is frozen by owner directive (`lib/guards/landing-freeze.test.ts`:
+"Do NOT regenerate the baseline unless the change is part of the explicit,
+owner-approved landing plan"). The 10→15 slug extension is prepared
+(welder, plumber, painter, teacher, sales_assistant — all with 11-locale
+catalog coverage) and waits for that plan; it was deliberately NOT forced
+past the freeze. Also parked: submitted_at timestamp for demands +
+uncapped board count RPC (both RED-route schema/RPC changes, from #1250
+review), pilot-framing copy replacement on /pricing (owner wording),
+LT-only legal guidance bodies (owner/legal).
 
 ## Next highest-value seams (in priority order, per the train's bias)
 
