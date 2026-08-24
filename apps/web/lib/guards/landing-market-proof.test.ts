@@ -122,9 +122,10 @@ describe("landing market-proof band honesty", () => {
     expect(band).toContain('review("verifiedMarketData")');
     expect(band).toContain('review("dataSourceLabel")');
     expect(band).not.toContain("asOfNote");
-    // Sweden is named through Intl from the region code — the source of the
-    // figures, never a hard-coded scope claim.
-    expect(band).toContain('type: "region" }).of("SE")');
+    // Owner directive 2026-08-24: the anonymous surface may not name the
+    // source country at all — the generic source label carries provenance.
+    expect(band).toContain('review("dataSourceGeneric")');
+    expect(band).not.toContain('of("SE")');
   });
 
   it("carries no hard-coded market total in the band or the page", () => {

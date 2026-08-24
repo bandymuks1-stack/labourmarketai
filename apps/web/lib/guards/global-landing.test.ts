@@ -80,7 +80,10 @@ describe("(b) Europe is primary while geography and numbers remain truthful", ()
     const command = read(COMMAND);
     const data = read(DATA);
     expect(command).toContain("labels.currentSupply");
-    expect(command).toContain('of("SE")');
+    // Owner directive 2026-08-24: no country naming on the anonymous
+    // surface — the generic source label replaces the Intl region name.
+    expect(command).toContain("labels.dataSourceGeneric");
+    expect(command).not.toContain('of("SE")');
     expect(data).toContain("readPublicVacancySupplyCounts");
     expect(data).toContain("searchPublicVacancyPreviews");
     expect(data).toContain("no vacancy coordinates");

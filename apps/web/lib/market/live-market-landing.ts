@@ -13,7 +13,7 @@ export type LiveMarketJob = {
   readonly id: string;
   /** The source OCCUPATION label, not the raw ad title: the anonymous
    *  projection withholds titles because they embed employer and location
-   *  wording (owner directive 2026-08-24). */
+   *  wording (owner anonymous-boundary directive). */
   readonly title: string;
 };
 
