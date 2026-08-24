@@ -149,3 +149,25 @@ Rationale: start with the change that adds the least risk (an invariant the code
 already enforces), prove the gated-migration pipeline, then add the one broad
 confirmer (buyer) that needs no minor-safety work, before touching anything
 involving minors.
+
+## §6 — Authority-model addendum (preserved from #511, 2026-08-24)
+
+Two DESIGN ideas from the closed Approval-Authority-Model PR #511, preserved at
+design level (detailed implementation/security mechanics stay in the Internal
+Brain, AGENTS.md). Context: the core defect #511 reported is already FIXED on
+main — the list gate and the action gate now share one predicate — so what
+remains is design guidance, not a shipped contract:
+
+1. **Honest operator identity.** A platform operator confirms *as* an operator,
+   never disguised as a company manager. Any confirmation an operator makes is
+   attributed to the operator role, not silently rendered as employer
+   confirmation.
+
+2. **Confirmer tier.** Distinguish an employer-verified confirmation from a
+   merely-observed one. Only an employer-verified confirmation may flip a
+   worker skill to the confirmed tier; client/observed confirmations strengthen
+   evidence but never masquerade as employer verification. Same fit-not-rating
+   discipline (§19) applied to *who* stands behind a confirmation.
+
+Both are guidance for a future `can_confirm()` generalization, not a shipped
+contract. Branch `audit/approval-permission-readiness-v1` is preserved.
