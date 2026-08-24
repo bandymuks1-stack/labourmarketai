@@ -85,6 +85,8 @@ export async function WeeklyIntelligenceSection({
         return t("weekly.opportunitiesUnavailable");
       case "new_opportunities":
         return t("weekly.newOpportunities", { count: signal.count });
+      case "appeared_this_week":
+        return t("weekly.appearedThisWeek", { count: signal.count });
       case "missing_evidence":
         return t("weekly.skillsToAdd", {
           skills: signal.skillSlugs.map(skillLabel).join(", "),

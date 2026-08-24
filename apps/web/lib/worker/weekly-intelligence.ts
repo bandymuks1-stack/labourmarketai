@@ -135,6 +135,7 @@ export const getWeeklyPersonalIntelligence = cache(
             totalRecommendable: recs.totalRecommendable,
             seenAvailable: recs.seenAvailable,
             newCount: recs.newCount,
+            appearedThisWeekCount: recs.appearedThisWeekCount,
             top: recs.recommendations,
           }
         : {
@@ -142,6 +143,7 @@ export const getWeeklyPersonalIntelligence = cache(
             totalRecommendable: 0,
             seenAvailable: false,
             newCount: 0,
+            appearedThisWeekCount: 0,
             top: [],
           };
 

@@ -139,6 +139,10 @@ export interface WorkerJobRecommendations {
   /** Total recommendable matches behind the top-N slice. */
   readonly totalRecommendable: number;
   readonly newCount: number;
+  /** Recommendable matches whose demand was posted within the last
+   *  NEW_WINDOW_DAYS — a market fact, valid with or without the seen store
+   *  (never to be labelled "new since you last looked"). */
+  readonly appearedThisWeekCount: number;
   /** External public-source ads from the SAME board read, narrowed by the
    *  same active filters (an unknown never satisfies a stated filter —
    *  `externalAdMatchesFilters`). NOT sliced to the platform top-N: the
@@ -191,6 +195,7 @@ export async function getWorkerJobRecommendations(options?: {
     recommendations: filtered.slice(0, limit),
     totalRecommendable: filtered.length,
     newCount: result.newCount,
+    appearedThisWeekCount: filtered.filter((r) => r.recentlyCreated).length,
     externalCards,
     totalExternal: externalCards.length,
   };

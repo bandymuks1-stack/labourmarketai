@@ -1973,6 +1973,7 @@
       "opportunitiesUnavailable": "Iespēju pārskatu šobrīd neizdevās nolasīt.",
       "newOpportunities": "Jauns kopš jūsu pēdējā skatījuma: {count}.",
       "journalUnavailable": "Jūsu darba žurnālu šobrīd neizdevās nolasīt.",
+      "appearedThisWeek": "Publicēts pēdējo 7 dienu laikā: {count}.",
       "skillsToAdd": "Prasmes, ko prasa jums tuvākās iespējas: {skills}."
     },
     "noWorkType": {

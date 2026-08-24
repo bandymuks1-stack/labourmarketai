@@ -103,6 +103,9 @@ export interface JobRecommendation {
   /** Posted within the last 7 days OR unseen (spec: created recently OR not
    *  yet seen). With the seen store absent this falls back to recency only. */
   readonly isNew: boolean;
+  /** Posted within the last NEW_WINDOW_DAYS — a market fact independent of
+   *  the seen store ("appeared this week" ≠ "new for you"). */
+  readonly recentlyCreated: boolean;
 }
 
 /**
@@ -178,6 +181,7 @@ export function deriveJobRecommendations(
         missingSkillSlugs: fit.missingUris,
         unseen,
         isNew: recentlyCreated || unseen,
+        recentlyCreated,
       };
     });
 }

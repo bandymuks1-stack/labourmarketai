@@ -8069,6 +8069,7 @@
       "opportunitiesUnavailable": "Het kansenoverzicht kon nu niet worden gelezen.",
       "newOpportunities": "Nieuw sinds je laatste bezoek: {count}.",
       "journalUnavailable": "Je werkjournaal kon nu niet worden gelezen.",
+      "appearedThisWeek": "Geplaatst in de afgelopen 7 dagen: {count}.",
       "skillsToAdd": "Vaardigheden waar je dichtstbijzijnde kansen om vragen: {skills}."
     },
     "saved": {

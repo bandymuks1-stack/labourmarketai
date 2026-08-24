@@ -1973,6 +1973,7 @@
       "opportunitiesUnavailable": "Nie udało się teraz odczytać przeglądu możliwości.",
       "newOpportunities": "Nowe od Twojego ostatniego spojrzenia: {count}.",
       "journalUnavailable": "Nie udało się teraz odczytać Twojego dziennika pracy.",
+      "appearedThisWeek": "Opublikowane w ciągu ostatnich 7 dni: {count}.",
       "skillsToAdd": "Umiejętności, o które proszą Twoje najbliższe możliwości: {skills}."
     },
     "noWorkType": {

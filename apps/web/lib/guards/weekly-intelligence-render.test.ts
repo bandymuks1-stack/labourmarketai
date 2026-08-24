@@ -85,7 +85,9 @@ function rec(p: {
       needTotal: p.total,
       matchedConfirmed: p.confirmed,
     },
+    matchedSkillSlugs: [],
     missingSkillSlugs: p.missing ?? [],
+    recentlyCreated: false,
   } as unknown as JobRecommendation;
 }
 
@@ -95,6 +97,7 @@ function oppFacts(p: Partial<WeeklyOpportunityFacts>): WeeklyOpportunityFacts {
     totalRecommendable: 0,
     seenAvailable: false,
     newCount: 0,
+    appearedThisWeekCount: 0,
     top: [],
     ...p,
   };
@@ -164,6 +167,22 @@ describe("weekly intelligence render guard", () => {
         newCount: 2,
         top: [rec({ requestId: "r1", matched: 1, total: 2, confirmed: 0 })],
       }),
+    );
+    expect(html).not.toContain("newOpportunities");
+  });
+
+  it("renders the appeared-this-week market fact without the seen store", async () => {
+    const html = await render(
+      journalFacts({ entryCount: 1 }),
+      oppFacts({
+        totalRecommendable: 3,
+        seenAvailable: false,
+        appearedThisWeekCount: 2,
+        top: [rec({ requestId: "r1", matched: 1, total: 2, confirmed: 0 })],
+      }),
+    );
+    expect(html).toContain(
+      esc('opportunities.weekly.appearedThisWeek|{"count":2}'),
     );
     expect(html).not.toContain("newOpportunities");
   });

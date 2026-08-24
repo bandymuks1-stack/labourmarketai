@@ -37,6 +37,7 @@ function oppFacts(over: Partial<WeeklyOpportunityFacts> = {}): WeeklyOpportunity
     totalRecommendable: 0,
     seenAvailable: false,
     newCount: 0,
+    appearedThisWeekCount: 0,
     top: [],
     ...over,
   };
@@ -58,6 +59,7 @@ function rec(over: Partial<JobRecommendation> = {}): JobRecommendation {
     missingSkillSlugs: [],
     unseen: false,
     isNew: false,
+    recentlyCreated: false,
     ...over,
   };
 }
@@ -188,6 +190,34 @@ describe("deriveWeeklyPersonalIntelligence — honesty rules", () => {
   it("zero matches is an honest signal of its own", () => {
     const out = deriveWeeklyPersonalIntelligence(journalFacts(), oppFacts());
     expect(out.signals).toContainEqual({ code: "no_matching_opportunities" });
+  });
+
+  it("appeared_this_week is a market fact — present without the seen store", () => {
+    const out = deriveWeeklyPersonalIntelligence(
+      journalFacts(),
+      oppFacts({
+        totalRecommendable: 3,
+        seenAvailable: false,
+        appearedThisWeekCount: 2,
+        top: [rec()],
+      }),
+    );
+    expect(out.signals).toContainEqual({ code: "appeared_this_week", count: 2 });
+    // Still NEVER the seen-based signal without the store.
+    expect(out.signals.map((s) => s.code)).not.toContain("new_opportunities");
+  });
+
+  it("appeared_this_week is omitted at zero and when the board is unavailable", () => {
+    const zero = deriveWeeklyPersonalIntelligence(
+      journalFacts(),
+      oppFacts({ totalRecommendable: 1, appearedThisWeekCount: 0, top: [rec()] }),
+    );
+    expect(zero.signals.map((s) => s.code)).not.toContain("appeared_this_week");
+    const down = deriveWeeklyPersonalIntelligence(
+      journalFacts(),
+      oppFacts({ available: false, appearedThisWeekCount: 5 }),
+    );
+    expect(down.signals.map((s) => s.code)).not.toContain("appeared_this_week");
   });
 
   it("stamps the window and the weekly dedupe key", () => {
