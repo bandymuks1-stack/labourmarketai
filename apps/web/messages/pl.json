@@ -641,6 +641,7 @@
     "currentSupply": "Aktualna zweryfikowana podaż",
     "verifiedMarketData": "Zweryfikowane dane rynkowe",
     "dataSourceLabel": "Źródło danych",
+    "dataSourceGeneric": "official public employment source",
     "opportunityStream": "Strumień możliwości",
     "evidenceVerifiedTitle": "Dowód zweryfikowany",
     "evidenceVerifiedBody": "Potwierdzenie przez człowieka zmienia zapis w wiarygodny dowód.",
@@ -4998,7 +4999,10 @@
     "empty": "Nie zarejestrowano jeszcze żadnych umów.",
     "emptyFiltered": "Żadna umowa nie pasuje do tych filtrów.",
     "scopeNote": "Rejestr po stronie organizacji. Pracownicy nie widzą tego rejestru.",
-    "attach": { "documentLabel": "Dokument do załączenia", "submit": "Załącz dokument" },
+    "attach": {
+      "documentLabel": "Dokument do załączenia",
+      "submit": "Załącz dokument"
+    },
     "baseDocument": "Dokument bazowy",
     "filters": {
       "type": "Typ",

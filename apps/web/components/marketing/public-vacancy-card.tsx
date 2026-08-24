@@ -79,9 +79,15 @@ export function PublicVacancyCard({
   vacancy,
   locale,
   savedLabel,
+  headingFallback,
 }: {
   readonly vacancy: PublicVacancyPreview;
   readonly locale: ActiveLocale;
+  /** Localized profession name for the anonymous heading (owner directive
+   *  2026-08-24): the raw title is member-only because it embeds employer and
+   *  location wording, so anonymous cards head with the profession in the
+   *  reader's language, falling back to the source occupation label. */
+  readonly headingFallback?: string;
   /** Rendered only when the viewer has this ad in their OWN private bookmark
    *  list. It is a note to the person looking at their own screen — it reaches
    *  no employer and is never rendered for anyone else. */
@@ -113,14 +119,29 @@ export function PublicVacancyCard({
     ? (vacancy.sourceLanguage as string)
     : undefined;
 
+  // Anonymous rows carry no title (member-only since 2026-08-24). The heading
+  // is then the localized profession, or the source occupation label. When the
+  // occupation had to become the heading, repeating it as the subline below
+  // would say the same thing twice, so it is suppressed there.
+  const heading =
+    vacancy.title ?? headingFallback ?? vacancy.occupation ?? "—";
+  const headingIsPublisherText = vacancy.title !== null || !headingFallback;
+  const occupationSubline =
+    vacancy.occupation && heading !== vacancy.occupation
+      ? vacancy.occupation
+      : null;
+
   return (
     <Link
       href={`/jobs/${vacancy.id}`}
       className="block rounded-lg border p-4 transition-colors hover:bg-accent/40 focus-visible:outline focus-visible:outline-2"
     >
       <div className="flex items-start justify-between gap-3">
-        <h2 lang={sourceLang} className="text-base font-medium sm:text-lg">
-          {vacancy.title}
+        <h2
+          lang={headingIsPublisherText ? sourceLang : undefined}
+          className="text-base font-medium sm:text-lg"
+        >
+          {heading}
         </h2>
         {savedLabel && (
           <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
@@ -129,9 +150,9 @@ export function PublicVacancyCard({
         )}
       </div>
 
-      {vacancy.occupation && (
+      {occupationSubline && (
         <p lang={sourceLang} className="mt-1 text-sm text-muted-foreground">
-          {vacancy.occupation}
+          {occupationSubline}
         </p>
       )}
 

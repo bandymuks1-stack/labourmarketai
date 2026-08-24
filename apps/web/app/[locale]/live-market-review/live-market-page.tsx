@@ -51,6 +51,7 @@ export async function LiveMarketLanding({
     currentSupply: review("currentSupply"),
     verifiedMarketData: review("verifiedMarketData"),
     dataSourceLabel: review("dataSourceLabel"),
+    dataSourceGeneric: review("dataSourceGeneric"),
     visualNote: live("counters.previewNote"),
     vacancies: landing("marketProof.stats.vacancies.label"),
     employers: landing("marketProof.stats.employers.label"),

@@ -103,6 +103,7 @@ type LabelSet = {
   readonly currentSupply: string;
   readonly verifiedMarketData: string;
   readonly dataSourceLabel: string;
+  readonly dataSourceGeneric: string;
   readonly visualNote: string;
   readonly vacancies: string;
   readonly employers: string;
@@ -396,10 +397,9 @@ export function LiveMarketCommand({
       }),
     [locale],
   );
-  const swedenName = useMemo(
-    () => new Intl.DisplayNames([locale], { type: "region" }).of("SE") ?? "SE",
-    [locale],
-  );
+  // Owner directive 2026-08-24: anonymous surfaces name only the KIND of
+  // source, never the country.
+  const sourceName = labels.dataSourceGeneric;
   const opportunityStream = useMemo(
     () =>
       market.professions
@@ -830,7 +830,7 @@ export function LiveMarketCommand({
               the product. It stays a coverage label inside the panel so the
               European product is not read as a Swedish one. */}
           <p className={styles.supplySource}>
-            {labels.dataSourceLabel} · {swedenName}
+            {labels.dataSourceLabel} · {sourceName}
           </p>
           {/* Exact current counts straight from count_public_vacancies_v1 —
               never rounded, never substituted. A count the reader could not
@@ -966,7 +966,7 @@ export function LiveMarketCommand({
             onClick={() => trackLanding(LANDING_EVENTS.jobsOpened, "worker")}
           >
             <span>
-              {labels.currentSupply} · {swedenName}
+              {labels.currentSupply} · {sourceName}
             </span>
             <strong>{activeProfession.jobs[0].title}</strong>
             <ArrowRight aria-hidden />

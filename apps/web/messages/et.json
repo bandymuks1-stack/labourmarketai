@@ -641,6 +641,7 @@
     "currentSupply": "Praegune kontrollitud pakkumine",
     "verifiedMarketData": "Kontrollitud turuandmed",
     "dataSourceLabel": "Andmeallikas",
+    "dataSourceGeneric": "official public employment source",
     "opportunityStream": "Võimaluste voog",
     "evidenceVerifiedTitle": "Tõend kontrollitud",
     "evidenceVerifiedBody": "Inimese kinnitus muudab kirje usaldusväärseks tõendiks.",
@@ -4998,7 +4999,10 @@
     "empty": "Lepinguid pole veel registreeritud.",
     "emptyFiltered": "Ükski leping ei vasta neile filtritele.",
     "scopeNote": "Organisatsioonipoolne register. Töötajatele seda registrit ei kuvata.",
-    "attach": { "documentLabel": "Lisatav dokument", "submit": "Lisa dokument" },
+    "attach": {
+      "documentLabel": "Lisatav dokument",
+      "submit": "Lisa dokument"
+    },
     "baseDocument": "Põhidokument",
     "filters": {
       "type": "Tüüp",

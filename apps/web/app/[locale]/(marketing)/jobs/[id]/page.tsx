@@ -78,9 +78,10 @@ export async function generateMetadata({
     return { title: "—", robots: { index: false, follow: false } };
   }
 
-  const title = preview.occupation
-    ? `${preview.title} — ${preview.occupation}`
-    : preview.title;
+  // Owner directive 2026-08-24: the raw title is member-only (it embeds
+  // employer and location wording), so shared metadata is built from the
+  // occupation label — the same anonymous projection every caller receives.
+  const title = preview.occupation ?? GENERIC_TITLE[active];
 
   return {
     title,
@@ -98,6 +99,26 @@ const DESCRIPTION: L = {
   ru: "Открытая вакансия на LabourMarket.ai. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
   nl: "Openstaande vacature op LabourMarket.ai. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Offene Stelle auf LabourMarket.ai. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+};
+
+/** Metadata/heading fallback when even the occupation label is missing. */
+const GENERIC_TITLE: L = {
+  en: "Open vacancy",
+  lt: "Laisva darbo vieta",
+  ru: "Открытая вакансия",
+  nl: "Openstaande vacature",
+  de: "Offene Stelle",
+};
+
+/** Anonymous source line. Deliberately generic: naming the source employment
+ *  service identifies the country (owner directive 2026-08-24). Members see
+ *  the full named licence attribution below instead. */
+const ANONYMOUS_SOURCE: L = {
+  en: "Source: an official public employment service. The ad's content belongs to the employer who published it.",
+  lt: "Šaltinis: oficialus viešas užimtumo šaltinis. Skelbimo turinys priklauso jį paskelbusiam darbdaviui.",
+  ru: "Источник: официальная публичная служба занятости. Содержание объявления принадлежит опубликовавшему его работодателю.",
+  nl: "Bron: een officiële openbare arbeidsbemiddelingsdienst. De inhoud van de advertentie is van de werkgever die haar publiceerde.",
+  de: "Quelle: eine offizielle öffentliche Arbeitsvermittlung. Der Inhalt der Anzeige gehört dem veröffentlichenden Arbeitgeber.",
 };
 
 const LOCKED_TITLE: L = {
@@ -335,12 +356,16 @@ export default async function JobDetailPage({
   const published = formatUtcDate(preview.publishedAt, active);
 
   const t = await getTranslations({ locale: active });
-  let attribution: string | null = null;
-  if (preview.attributionCode) {
+  // Named licence attribution is a MEMBER line: the name identifies the source
+  // country, and the licensed content (title, description, employer, apply
+  // URL) is only displayed to members anyway. Anonymous visitors get the
+  // generic source line.
+  let attribution: string | null = ANONYMOUS_SOURCE[active];
+  if (member?.attributionCode) {
     try {
-      attribution = t(preview.attributionCode);
+      attribution = t(member.attributionCode);
     } catch {
-      attribution = null;
+      attribution = ANONYMOUS_SOURCE[active];
     }
   }
 
@@ -372,14 +397,17 @@ export default async function JobDetailPage({
         {BACK[active]}
       </Link>
 
+      {/* Members see the publisher's own title; anonymous visitors see the
+          occupation label — the raw title embeds employer and location wording
+          (owner directive 2026-08-24). */}
       <h1
         lang={sourceLang}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {preview.title}
+        {member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
       </h1>
 
-      {preview.occupation && (
+      {member?.titleRaw && preview.occupation && (
         <p lang={sourceLang} className="mt-2 text-base text-muted-foreground">
           {preview.occupation}
         </p>
