@@ -221,3 +221,29 @@ Auth/RLS/grant changes, no key material in output, guards never merged.
 ```text
 PROD_QA_MULTI_W_PROOF_PACKAGE_READY_PENDING_OWNER_APPROVAL
 ```
+
+---
+
+## Preservation note (hygiene pass 2026-08-24, closing #1042)
+
+PR #1042 (multi-W production journey) is closed as SUPERSEDED for its 149-file
+code diff (the defects it found are already canonical on main: the
+fresh-organization-owner-membership gate, and the booking engagement-bridge
+`ambiguous_company` invariant + guard + human-gate doc). Its **production-QA
+evidence** is not on main and is preserved here as facts, plus the branch ref
+`feat/prod-qa-multi-w-journey-v1` for the raw `journey-log.json`.
+
+**Independently re-verified read-only against production 2026-08-24 (this
+session):** `public.experience_records` holds **2 rows** (the W6 write proof —
+see `docs/audits/W6_EXPERIENCE_SURFACE_CURRENT_TRUTH.md`), `public.booking_requests`
+holds 0. So the "PROVISIONED: NO … experience_records 0 rows / booking_requests
+0 rows" status at the top of this file is **stale** for experience_records — the
+account was provisioned and a multi-W journey executed (16 steps per #1042,
+including a retained synthetic cast, closed demands, and booking `88a43ead`).
+The primary status line is left for a reviewer holding the #1042 branch to
+reconcile fully; this note records the independently-confirmed correction so the
+"0 rows" claim is not mistaken for current truth.
+
+The refuted #1049 claim is dropped, not preserved: project-completion control
+DOES exist on main (`components/app/workspace/project-result.tsx` `LifecycleControls`
+→ `setProjectStatusAction` → `set_project_status_v1`).
