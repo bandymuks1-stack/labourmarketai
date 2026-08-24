@@ -187,11 +187,25 @@ bounded by the ceilings already in place.
 
 **Route B — the `local` provider.** `data-egress.ts` exempts it outright:
 `locality: "local"` means no egress occurs, so there is nothing to permit, and
-it may serve `SENSITIVE_FREE_TEXT`. No grant, no vendor terms, no per-run cost,
-and it is what the free-first doctrine actually points at — *"free local → free
-tier → paid"* is the chain's own ordering. It needs a machine to run on and
-`AI_LOCAL_BASE_URL` + `AI_LOCAL_MODEL` set; `config-core.ts` already supports
-it keylessly and validates both.
+it may serve `SENSITIVE_FREE_TEXT` — including the two surfaces that are
+actually wired. No grant, no vendor terms, no per-run cost, and it is what the
+free-first doctrine actually points at: *free_local → free_tier → paid* is the
+chain's own ordering, so a ready local runtime is tried **before** any cloud
+vendor.
+
+Checked rather than assumed, 2026-08-24 — this route is **code-complete**:
+`AI_LOCAL_ENABLED` / `AI_LOCAL_BASE_URL` / `AI_LOCAL_MODEL` / `AI_LOCAL_API_KEY`
+are declared and read in `lib/env.ts`; `config-core.checkLocalBaseUrl` validates
+the URL (http/https only, no embedded credentials, plaintext confined to
+loopback); `providers/local.ts` speaks the OpenAI chat-completions shape against
+whatever the operator runs — Ollama, LM Studio, vLLM, llama.cpp — and handles
+both the `…/v1` and bare-origin spellings; `provider-health.ts` observes it; and
+`config-core.ts` supports it **keylessly**, so it needs no secret and a
+placeholder one would be refused as configuration.
+
+What it needs is a machine and three env values. There is no code gap between
+here and a working private assistant, which is the part that makes this route
+different from the other two.
 
 **Route C — build a surface for the tasks the free tier may serve.** Wire
 `company_need` or `document_assistant` to a real employer-facing flow. This is
