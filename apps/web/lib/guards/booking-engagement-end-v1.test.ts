@@ -1032,6 +1032,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // dropping nothing and running no DML. The marker lets CI classify it;
       // owner-approved and APPLIED to production 2026-08-24 (PR #1256).
       "20260824130000_null_safe_owner_guards_v2.sql",
+      // 2026-08-24: ai_runs retention redaction v1 gained its marker as the
+      // required 90-day retention block before AI provider activation
+      // (docs/APPLIED_LEDGER.md ai_runs row). RED by route — a SECURITY DEFINER
+      // function that UPDATEs (nulls) output_excerpt/profile_id/request_context
+      // on ai_runs rows older than 90 days, service_role-only, plus a grant. No
+      // table/policy DDL and no other table touched. Ships UNAPPLIED behind
+      // needs-human-gate for a separate owner apply approval.
+      "20260824140000_ai_runs_retention_redaction_v1.sql",
     ]);
   });
 

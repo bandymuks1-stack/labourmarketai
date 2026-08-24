@@ -2188,6 +2188,12 @@ describe("no migration files added by this sprint", () => {
     // never committed. RESTORED from schema_migrations.statements for history
     // parity (REQ-GOV-016). See docs/migrations/production-parity-register.md.
     // RECOUNTED from the tree, never summed: 228 real files.
+    // Bumped 239 -> 240 for the ai_runs retention redaction v1 — a SECURITY
+    // DEFINER function that nulls output_excerpt/profile_id/request_context on
+    // ai_runs rows older than 90 days (the required retention block before AI
+    // provider activation). RED by route (SECDEF + data UPDATE + grant); ships
+    // UNAPPLIED behind needs-human-gate. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 240.
     // Bumped 238 -> 239 for the NULL-safe owner guards v2 — a SECURITY DEFINER
     // replace of six functions (v_owner = uid → (v_owner is not null and
     // v_owner = uid)); owner MASTER ORDER §4 apply approval + production apply
@@ -2195,7 +2201,7 @@ describe("no migration files added by this sprint", () => {
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 239.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    const SPRINT_BASELINE = 239;
+    const SPRINT_BASELINE = 240;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
