@@ -38,11 +38,6 @@ const STATUS_TONE: Record<GuidanceStatus, string> = {
 
 export async function LtDocumentGuidance({ locale }: { locale: string }) {
   const t = await getTranslations("documents.guidance");
-  // Pipeline-state telemetry (per-item review status + the counts summary)
-  // is OPERATOR visibility, not worker/company information — it renders only
-  // for admins. The needs-legal-review flag stays visible to everyone: that
-  // one is an honesty marker about the content itself (§18), not telemetry.
-  const operatorView = await isSuperadmin();
 
   if (locale !== "lt") {
     // Non-LT locales: short pending notice ONLY — no guidance bodies exist
@@ -66,6 +61,14 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
       </section>
     );
   }
+
+  // Pipeline-state telemetry (per-item review status + the counts summary)
+  // is OPERATOR visibility, not worker/company information — it renders only
+  // for admins. The needs-legal-review flag stays visible to everyone: that
+  // one is an honesty marker about the content itself (§18), not telemetry.
+  // Looked up only on the LT branch — the other ten locales early-return a
+  // pending notice above and must not pay the extra profile reads.
+  const operatorView = await isSuperadmin();
 
   const counts = guidanceStatusCounts();
   const grouped = guidanceByCountry();
