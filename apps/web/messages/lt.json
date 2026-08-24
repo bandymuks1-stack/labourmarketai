@@ -13711,5 +13711,32 @@
       "awaitingOwnerApproval": "laukiama savininko patvirtinimo"
     },
     "footer": "Sąžininga peržiūra · Jokio netikro DI · Jokio netikro patvirtinimo · Jokių netikrų darbuotojų veidų · Kiekvienas įrašas prasideda „Sample · …“, todėl niekada neatrodo kaip tikri duomenys."
+  },
+  "marketExplanation": {
+    "title": "{profession} rinka",
+    "source": "Suskaičiuota iš viešų darbo skelbimų, importuotų į LabourMarket.ai, nuskaityta {measuredAt}. Tai nėra visa darbo rinka ir tai nėra šios platformos poreikių lenta.",
+    "statOpen": "Atviri skelbimai",
+    "statNew7d": "Paskelbta per 7 d.",
+    "statNew30d": "Paskelbta per 30 d.",
+    "noneOpen": "Šiuo metu šiame rinkinyje {profession} skelbimų nėra.",
+    "skillsTitleAll": "Prašomi įgūdžiai visuose atviruose skelbimuose",
+    "skillsTitleWindow": "Prašomi įgūdžiai {window} naujausiuose skelbimuose",
+    "citiesTitleAll": "Kur jie yra – visuose atviruose skelbimuose",
+    "citiesTitleWindow": "Kur jie yra – {window} naujausiuose skelbimuose",
+    "noPayStated": "Nė viename iš šių skelbimų nenurodytas atlygis, todėl čia joks atlygis nerodomas ir nespėjamas.",
+    "cta": "Paaiškinti šią rinką",
+    "pending": "Skaitomi skaičiai...",
+    "resultTitle": "DI perskaityti aukščiau esantys skaičiai",
+    "attribution": "Parašė {provider} {model} pagal aukščiau esančius skaičius. Tai pasiūlymas, ne oficialus faktas.",
+    "whereTitle": "Kur yra paklausa",
+    "aiSkillsTitle": "Paklausūs įgūdžiai",
+    "actionsTitle": "Ką galėtumėte daryti toliau",
+    "limitationsTitle": "Ko šie skaičiai nepasako",
+    "reviewNote": "Skaičių nedaug, todėl šį perskaitymą vertinkite atsargiai.",
+    "offNotAuthenticated": "Prisijunkite, kad galėtumėte paprašyti paaiškinimo.",
+    "offRateLimited": "Ką tik to prašėte kelis kartus. Pabandykite po kelių minučių.",
+    "offFactsUnavailable": "Šiuo metu nepavyko nuskaityti rinkos skaičių, todėl nėra ko paaiškinti.",
+    "offMarketTooSmall": "Mažiau nei {min} atvirų skelbimų – per mažai, kad paaiškinimas duotų daugiau nei aukščiau esantys skaičiai.",
+    "offAiUnavailable": "Paaiškinimo paslauga šiuo metu neveikia. Aukščiau esantiems skaičiams tai neturi įtakos."
   }
 }

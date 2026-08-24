@@ -105,8 +105,8 @@ describe("(a) no product code outside lib/ai/runtime picks a model", () => {
 // ── (b) TASK_POLICIES covers every task type ────────────────────────────────
 
 describe("(b) TASK_POLICIES exists and covers every AiTaskType", () => {
-  it("has a policy for each of the 10 task types", () => {
-    expect(AI_TASK_TYPES.length).toBe(10);
+  it("has a policy for each of the 11 task types", () => {
+    expect(AI_TASK_TYPES.length).toBe(11);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_POLICIES[t], `missing policy for ${t}`).toBeDefined();
       expect(TASK_POLICIES[t].taskType).toBe(t);

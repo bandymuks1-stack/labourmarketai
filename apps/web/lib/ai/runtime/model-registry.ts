@@ -130,6 +130,7 @@ const GENERAL_TASKS: readonly AiTaskType[] = [
   "explain_match",
   "translate_message",
   "draft_follow_up",
+  "explain_market_demand",
 ];
 
 const ANTHROPIC_SOURCE = "Anthropic public pricing, reviewed by owner 2026-06";
@@ -268,16 +269,28 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // $10.00). The registry holds one price per model and the ceiling is only
   // sound if that price is the higher of the two.
   //
-  // `enabled` stays FALSE, and that is not an oversight. A price is one of the
-  // four things `isSelectable` requires, and it is the only one this edit is
-  // entitled to supply. The other blocker is a DATA-TRANSFER decision — see
-  // `data-egress.ts`, whose grant table is empty by owner decision — and no
-  // amount of correct pricing is permission to send anyone's data anywhere.
+  // ENABLED: exactly ONE of the three — `gemini-2.5-flash-lite`, the cheapest,
+  // which serves the `haiku` alias and therefore the `low_cost` tier.
+  //
+  // #1265 shipped all three priced and all three `enabled: false`, and said
+  // why: pricing is not permission, and the remaining blocker was a
+  // DATA-TRANSFER question. That question has since been answered in the ONE
+  // direction that needs no grant. `explain_market_demand` is classed `PUBLIC`
+  // on the evidence of its own field list, `AI_EGRESS_GRANTS` is still empty,
+  // and an ungranted external provider may already receive `PUBLIC` — so the
+  // gate opens for exactly one task and stays shut for every other.
+  //
+  // The other two stay FALSE. `explain_market_demand` prefers `low_cost` and
+  // cannot escalate (`escalationConditions: []`), so `flash` and `pro` would
+  // be unreachable models carrying a live enablement flag — and the moment a
+  // second, more sensitive task wanted them, the enablement would already be
+  // in place and would look like it had been reviewed. Enabling a model is
+  // cheap to do and expensive to notice.
   ...(
     [
-      { model: "gemini-2.5-flash-lite", input: 0.1, output: 0.4 },
-      { model: "gemini-2.5-flash", input: 0.3, output: 2.5 },
-      { model: "gemini-2.5-pro", input: 2.5, output: 15 },
+      { model: "gemini-2.5-flash-lite", input: 0.1, output: 0.4, enabled: true },
+      { model: "gemini-2.5-flash", input: 0.3, output: 2.5, enabled: false },
+      { model: "gemini-2.5-pro", input: 2.5, output: 15, enabled: false },
     ] as const
   ).map((entry, i) => ({
     provider: "gemini",
@@ -301,7 +314,7 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     ],
     effectiveFrom: "2026-08-24",
     pricingSource: GEMINI_SOURCE,
-    enabled: false,
+    enabled: entry.enabled,
   })),
   ...(["grok-3-mini", "grok-3", "grok-4"] as const).map((model, i) => ({
     provider: "xai",

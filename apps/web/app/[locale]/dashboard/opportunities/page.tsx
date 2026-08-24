@@ -45,6 +45,7 @@ import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-rea
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
+import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -457,6 +458,19 @@ export default async function OpportunitiesPage({
               {t("ctaProfile")} →
             </Link>
           </section>
+
+          {/* Market for the worker's own occupation — exact counts over the
+              imported public advertisement pool, plus the optional AI
+              reading of them. Placed ABOVE the weekly summary because it is
+              the one signal on this page that does not depend on the
+              internal demand board having rows in it. Renders nothing when
+              the profile carries no work type. */}
+          {result.kind === "ready" ? (
+            <MarketExplanationPanel
+              professionSlug={result.readiness.professionSlug}
+              locale={locale}
+            />
+          ) : null}
 
           {/* Weekly personal intelligence (C-r1) — the summary the weekly
               digest bell row points at. Renders only when at least one of

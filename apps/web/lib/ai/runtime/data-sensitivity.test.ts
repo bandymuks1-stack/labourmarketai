@@ -30,8 +30,8 @@ const PAID_CLOUD = { id: "anthropic", costClass: "paid", locality: "cloud" } as 
 const FREE_CLOUD = { id: "gemini", costClass: "free_tier", locality: "cloud" } as const;
 
 describe("every task is classified, and the table matches the shipped profiles", () => {
-  it("covers all 10 task types", () => {
-    expect(AI_TASK_TYPES.length).toBe(10);
+  it("covers all 11 task types", () => {
+    expect(AI_TASK_TYPES.length).toBe(11);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_SENSITIVITY[t], `missing sensitivity for ${t}`).toBeDefined();
       expect(AI_DATA_SENSITIVITY_CLASSES).toContain(TASK_SENSITIVITY[t]);
@@ -70,13 +70,23 @@ describe("every task is classified, and the table matches the shipped profiles",
     }
   });
 
-  it("no task claims PUBLIC — that is a finding, not an omission", () => {
-    // If a genuinely public reference task is ever added, this expectation is
-    // the thing that must be changed deliberately, with the task named.
+  it("the PUBLIC set is exactly the one task that was reviewed for it", () => {
+    // SUPERSEDES "no task claims PUBLIC — that is a finding, not an omission",
+    // which said: if a genuinely public reference task is ever added, THIS is
+    // the expectation that must change deliberately, with the task named.
+    //
+    // 2026-08-24: `explain_market_demand` is that task, and it is named here.
+    // Its payload is aggregate counts of externally published advertisements —
+    // no data subject, no employer identity, no advertisement text — and the
+    // field list backing the claim is its own `TASK_POLICIES` entry.
+    //
+    // Still an equality against a NAMED list rather than a count, for the same
+    // reason as before: the risk is a second task being relabelled quietly,
+    // and a count would go green on a swap.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     );
-    expect(publicTasks).toEqual([]);
+    expect(publicTasks).toEqual(["explain_market_demand"]);
   });
 });
 

@@ -1,6 +1,60 @@
 # HUMAN GATE — activating Google Gemini as a live provider
 
-State: `AWAITING_OWNER_DATA_TRANSFER_DECISION`
+State: `SUPERSEDED_FOR_THE_PUBLIC_PATH` — see "2026-08-24: the gate was
+answered by a fourth route" immediately below. The `PERSONAL` question this
+document was written about remains **open and unanswered**; nothing here has
+been granted.
+
+Original state: `AWAITING_OWNER_DATA_TRANSFER_DECISION`
+
+---
+
+## 2026-08-24: the gate was answered by a fourth route
+
+This document listed three routes to a user-visible AI feature (A: paid-tier
+Gemini granted `PERSONAL`; B: a local runtime; C: build a surface for the two
+`LOW_RISK_PROJECT_DATA` tasks). The owner picked none of them, and the reason
+turns out to be that a fourth existed and this document did not see it.
+
+**The route taken.** `data-egress.ts` has always permitted an ungranted
+external provider to receive `PUBLIC` — the gate was total only because
+`TASK_SENSITIVITY` contained no `PUBLIC` task. So the smallest unblock was
+never the grant row proposed below. It was **a task whose payload genuinely
+carries no data subject**, and the product had the data for one all along:
+43,026 browsable rows in `public_vacancies`, externally published job
+advertisements.
+
+`explain_market_demand` is that task. Its payload is aggregate counts, taxonomy
+slugs, city names and dates for ONE occupation. It is wired to a real worker
+surface on `/dashboard/opportunities`.
+
+**What this means for the decision below, precisely:**
+
+- The proposed grant row is **NOT needed and was NOT added**. `AI_EGRESS_GRANTS`
+  is still empty, and a guard still asserts that it is.
+- `MAX_GRANTABLE_FOR_FREE_TIER` is untouched.
+- **D8 is off the critical path entirely.** It asked whether the key is on the
+  free or a billed tier, because the free tier's terms permit training on
+  content. At the `PUBLIC` class the question is moot in a stronger way than
+  this document previously argued: the content is a count of public
+  advertisements, so it is already public and there is nothing to protect from
+  training. D8 becomes load-bearing again the moment anyone proposes a grant.
+- The warning box below — *"it lights up nothing a user can see"* — was
+  accurate about the grant it was written about, and **is not accurate about
+  this route.** The two wired `PERSONAL` surfaces are unchanged and still
+  refused; a third, new surface is what became visible.
+- One model was enabled: `gemini-2.5-flash-lite`. `flash` and `pro` stay
+  disabled.
+
+**What did NOT change, and must not be read as having changed:** CV extraction,
+journal normalisation, match explanation, follow-up drafting and message
+translation are refused by the identical rule that refused them yesterday. No
+person's data has been permitted to leave. Routes A and B below are still the
+only two ways those surfaces ever run, and route B (a local runtime) remains
+the recommended one.
+
+---
+
 
 PR: gemini-provider-activation-v1 (registry pricing only — see "What already landed")
 

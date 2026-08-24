@@ -55,6 +55,9 @@ export const AI_TASK_TYPES = [
   "explain_match",
   "translate_message",
   "draft_follow_up",
+  /** Aggregate PUBLIC labour-market statistics → a plain-language reading.
+   *  The only task in this program whose payload carries no data subject. */
+  "explain_market_demand",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -342,6 +345,65 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // the low_cost LLM tier serves the task exactly as before.
     languageRouting: { preferredProvider: "deepl" },
   },
+  /**
+   * THE PUBLIC TASK.
+   *
+   * `allowedFields` is the whole classification argument, because
+   * `TASK_SENSITIVITY` is derived from the fields a policy admits rather than
+   * from the task's name. Every field below is an aggregate COUNT, a taxonomy
+   * SLUG, a place NAME or a DATE, assembled by
+   * `lib/market/public-market-facts.ts` from externally published job
+   * advertisements. No data subject, no employer identity, no advertisement
+   * text — so `PUBLIC` here is a statement about the payload, checkable
+   * against this list, not a convenient label.
+   *
+   * `low_cost` on both tiers and NO escalation conditions: reading numbers
+   * back is not a task that gets better with a frontier model, and an
+   * explanation surface that can silently escalate is an explanation surface
+   * with an unbounded bill. The ceiling is set accordingly.
+   */
+  explain_market_demand: {
+    taskType: "explain_market_demand",
+    riskLevel: "low",
+    allowedFields: [
+      "profession_slug",
+      "measured_at_iso",
+      "active_ads",
+      "new_ads_7d",
+      "new_ads_30d",
+      "ads_stating_pay",
+      "ranking_window_ads",
+      "ranking_window_covers_all",
+      "top_skills",
+      "top_cities",
+      "countries",
+      "locale",
+    ],
+    prohibitedFields: [
+      "full_cv",
+      "worker_profile",
+      "journal_entry_text",
+      "employer_name",
+      "vacancy_title",
+      "vacancy_description",
+      "application_url",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "marketExplanationOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.02,
+    expectedOutputTokens: 700,
+    maxLatencyMs: 30_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // The output is a suggestion rendered beside the deterministic facts it
+    // explains, never persisted and never a record. The human decision it
+    // supports is the reader's own next move, which is why this is false
+    // while every person-describing task here is true.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
@@ -384,6 +446,7 @@ export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   admin_risk: "explain_match", // same explanation-class task, admin audience
   support_onboarding: "draft_follow_up", // guidance / next-step message drafts
   translation_copy: "translate_message",
+  market_explanation: "explain_market_demand",
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {
