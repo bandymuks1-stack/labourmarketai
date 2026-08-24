@@ -98,6 +98,7 @@ function oppFacts(p: Partial<WeeklyOpportunityFacts>): WeeklyOpportunityFacts {
     seenAvailable: false,
     newCount: 0,
     appearedThisWeekCount: 0,
+    boardTruncated: false,
     top: [],
     ...p,
   };
@@ -137,7 +138,7 @@ describe("weekly intelligence render guard", () => {
     expect(html).toContain(
       esc('opportunities.weekly.journalActive|{"entries":3,"confirmed":2}'),
     );
-    expect(html).toContain(esc('opportunities.weekly.matching|{"count":4}'));
+    expect(html).toContain(esc('opportunities.weekly.matching|{"count":"4"}'));
     // §19: the exemplar carries matched/total/confirmed together, never bare.
     expect(html).toContain(esc('"matched":5'));
     expect(html).toContain(esc('"total":7'));
@@ -182,9 +183,25 @@ describe("weekly intelligence render guard", () => {
       }),
     );
     expect(html).toContain(
-      esc('opportunities.weekly.appearedThisWeek|{"count":2}'),
+      esc('opportunities.weekly.appearedThisWeek|{"count":"2"}'),
     );
     expect(html).not.toContain("newOpportunities");
+  });
+
+  it("a full RPC page renders counts as lower bounds (N+), never unqualified", async () => {
+    const html = await render(
+      journalFacts({ entryCount: 1 }),
+      oppFacts({
+        totalRecommendable: 100,
+        appearedThisWeekCount: 12,
+        boardTruncated: true,
+        top: [rec({ requestId: "r1", matched: 1, total: 2, confirmed: 0 })],
+      }),
+    );
+    expect(html).toContain(esc('opportunities.weekly.matching|{"count":"100+"}'));
+    expect(html).toContain(
+      esc('opportunities.weekly.appearedThisWeek|{"count":"12+"}'),
+    );
   });
 
   it("unavailable reads degrade to their honest lines — never zeros", async () => {

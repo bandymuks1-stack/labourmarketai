@@ -1973,7 +1973,7 @@
       "opportunitiesUnavailable": "Overblikket over muligheder kunne ikke læses lige nu.",
       "newOpportunities": "Nyt siden dit seneste kig: {count}.",
       "journalUnavailable": "Din arbejdsjournal kunne ikke læses lige nu.",
-      "appearedThisWeek": "Slået op inden for de seneste 7 dage: {count}.",
+      "appearedThisWeek": "Forespørgsler oprettet inden for de seneste 7 dage: {count}.",
       "skillsToAdd": "Færdigheder, som dine nærmeste muligheder spørger efter: {skills}."
     },
     "noWorkType": {

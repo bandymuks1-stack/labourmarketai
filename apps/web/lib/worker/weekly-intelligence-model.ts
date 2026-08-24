@@ -56,10 +56,14 @@ export interface WeeklyOpportunityFacts {
   readonly seenAvailable: boolean;
   /** Unseen recommendations — meaningful ONLY when `seenAvailable`. */
   readonly newCount: number;
-  /** Recommendable demands POSTED in the last 7 days — a market fact that
-   *  needs no seen store. Distinct from `newCount` ("new for you"): this is
-   *  "appeared this week", and the copy layer must keep that distinction. */
+  /** Recommendable demands whose row was CREATED in the last 7 days — a
+   *  market fact that needs no seen store. Distinct from `newCount` ("new
+   *  for you"). `created_at` is the only worker-visible timestamp, so a
+   *  late-submitted draft is omitted (understated, never over-claimed). */
   readonly appearedThisWeekCount: number;
+  /** The board read returned its full RPC page — counts are lower bounds
+   *  and the copy layer must render them as "N+" (no silent caps). */
+  readonly boardTruncated: boolean;
   /** Top recommendations, best first, basis carried whole. */
   readonly top: readonly JobRecommendation[];
 }

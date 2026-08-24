@@ -8074,7 +8074,7 @@
       "opportunitiesUnavailable": "Обзор возможностей сейчас недоступен.",
       "newOpportunities": "Новое с вашего последнего просмотра: {count}.",
       "journalUnavailable": "Ваш рабочий журнал сейчас не удалось прочитать.",
-      "appearedThisWeek": "Опубликовано за последние 7 дней: {count}.",
+      "appearedThisWeek": "Запросов, созданных за последние 7 дней: {count}.",
       "skillsToAdd": "Навыки, которые запрашивают ближайшие к вам возможности: {skills}."
     },
     "saved": {

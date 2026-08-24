@@ -38,6 +38,7 @@ function oppFacts(over: Partial<WeeklyOpportunityFacts> = {}): WeeklyOpportunity
     seenAvailable: false,
     newCount: 0,
     appearedThisWeekCount: 0,
+    boardTruncated: false,
     top: [],
     ...over,
   };

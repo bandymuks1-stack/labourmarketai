@@ -40,6 +40,11 @@ export async function WeeklyIntelligenceSection({
   const roleLabel = (slug: string | null) =>
     (slug && workLabels[slug]) || t("fieldRoleUnknown");
 
+  // A full RPC page means board-derived counts are lower bounds — say so
+  // ("12+"), never an unqualified total (no silent caps).
+  const count = (n: number): string =>
+    intel.opportunities.boardTruncated ? `${n}+` : String(n);
+
   const line = (signal: WeeklyIntelligenceSignal): ReactNode => {
     switch (signal.code) {
       case "journal_active":
@@ -65,7 +70,7 @@ export async function WeeklyIntelligenceSection({
       case "matching_opportunities":
         return (
           <>
-            {t("weekly.matching", { count: signal.count })}
+            {t("weekly.matching", { count: count(signal.count) })}
             {signal.exemplar ? (
               <span className="text-text-muted">
                 {" "}
@@ -86,7 +91,7 @@ export async function WeeklyIntelligenceSection({
       case "new_opportunities":
         return t("weekly.newOpportunities", { count: signal.count });
       case "appeared_this_week":
-        return t("weekly.appearedThisWeek", { count: signal.count });
+        return t("weekly.appearedThisWeek", { count: count(signal.count) });
       case "missing_evidence":
         return t("weekly.skillsToAdd", {
           skills: signal.skillSlugs.map(skillLabel).join(", "),
