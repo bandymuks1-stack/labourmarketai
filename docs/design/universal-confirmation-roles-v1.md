@@ -152,26 +152,22 @@ involving minors.
 
 ## §6 — Authority-model addendum (preserved from #511, 2026-08-24)
 
-Two ideas from the closed Approval-Authority-Model PR #511 that exist in neither
-this doc nor the code, preserved on the hygiene pass. Context: the core defect
-#511 reported is already FIXED on main — `20260720150000_journal_photo_continuity_v1.sql`
-gives the list gate and the action gate the identical predicate
-`public.is_admin() or public.manages_organization(...)`, so the old
-list/action disagreement is gone. What remains worth keeping:
+Two DESIGN ideas from the closed Approval-Authority-Model PR #511, preserved at
+design level (detailed implementation/security mechanics stay in the Internal
+Brain, AGENTS.md). Context: the core defect #511 reported is already FIXED on
+main — the list gate and the action gate now share one predicate — so what
+remains is design guidance, not a shipped contract:
 
-1. **Honest operator identity.** When a platform operator confirms a record,
-   they confirm *as* `platform_operator`, never disguised as a company manager.
-   Main kept the `is_admin()` shortcut in the guard predicate rather than
-   removing it; the honest resolution is that any confirmation an operator makes
-   is attributed to the operator role, not silently rendered as employer
+1. **Honest operator identity.** A platform operator confirms *as* an operator,
+   never disguised as a company manager. Any confirmation an operator makes is
+   attributed to the operator role, not silently rendered as employer
    confirmation.
 
-2. **Confirmer tier rule.** Distinguish `employer_verified` from `observed`.
-   **Only `employer_verified` may flip `worker_skills.verified`.** Client,
-   property-owner, or merely-observed confirmations can strengthen evidence but
-   must never masquerade as employer verification — the tier is carried, never
-   collapsed. This is the same fit-not-rating discipline (§19) applied to *who*
-   stands behind a confirmation.
+2. **Confirmer tier.** Distinguish an employer-verified confirmation from a
+   merely-observed one. Only an employer-verified confirmation may flip a
+   worker skill to the confirmed tier; client/observed confirmations strengthen
+   evidence but never masquerade as employer verification. Same fit-not-rating
+   discipline (§19) applied to *who* stands behind a confirmation.
 
-Both are design guidance for any future `can_confirm()` generalization, not a
-shipped contract. Branch `audit/approval-permission-readiness-v1` is preserved.
+Both are guidance for a future `can_confirm()` generalization, not a shipped
+contract. Branch `audit/approval-permission-readiness-v1` is preserved.
