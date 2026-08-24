@@ -2195,7 +2195,16 @@ describe("no migration files added by this sprint", () => {
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 239.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    const SPRINT_BASELINE = 239;
+    // Bumped 239 -> 240 for the ai_runs subject de-linking DRAFT
+    // (20260824170000_ai_runs_retention_delink_subject_v1) — a SECURITY
+    // DEFINER replace of the ONE canonical retention function so that past
+    // the 90-day horizon it also nulls profile_id and request_context. RED by
+    // route; deliberately NOT @human-gate-annotated because the owner gave the
+    // direction but has approved no SQL; paired rollback that RESTORES the
+    // one-column body rather than dropping the function; ships UNAPPLIED.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 240 real files.
+    const SPRINT_BASELINE = 240;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

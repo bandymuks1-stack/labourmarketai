@@ -95,6 +95,27 @@
 > the audit trail this file exists to be. Where an entry conflicts with the
 > register, **the register wins.**
 
+## NOT applied 2026-08-24 — ai_runs subject de-linking (DRAFT, owner gate open)
+
+- **`20260824170000_ai_runs_retention_delink_subject_v1.sql` — NOT APPLIED. Ships as a DRAFT.** SECURITY DEFINER replace of the ONE canonical retention function, `redact_expired_ai_run_content`, so that past the same 90-day horizon it also nulls `profile_id` and `request_context`. Owner direction 2026-08-24: *"AI technical telemetry must not become a second permanent copy of a person's professional history."* Gate: [`docs/human-gates/ai-runs-subject-delinking-gate.md`](human-gates/ai-runs-subject-delinking-gate.md). Rollback: `supabase/rollbacks/20260824170000_ai_runs_retention_delink_subject_v1.down.sql`, which RESTORES the one-column body rather than dropping the function — a drop would leave the live cron job calling something that no longer exists.
+- **Deliberately NOT annotated `@human-gate-approved`.** The direction exists; no approval has been recorded against this SQL. Annotating it would be the authoring session approving its own privacy change.
+- **Extends, does not duplicate.** #1259 introduced a second function, `ai_runs_apply_retention`, doing very nearly this. It was closed and its orphan production function reverted. The capability was right and the second home was not, so this replaces the canonical body instead.
+
+### Correction to the production ledger, found 2026-08-24 (read-only verification)
+
+`supabase_migrations.schema_migrations` on prod `gorgitwvdzxbnaxhrsrw` holds the name **`ai_runs_retention_redaction_v1` TWICE**:
+
+- `20260808162217` — canonical, matches `supabase/migrations/20260808130000_*.sql`;
+- `20260824114251` — **the #1259 duplicate, with no backing repo file**.
+
+The function that row created (`ai_runs_apply_retention`) **is gone** — the revert landed and a full scan for `%retention%`/`%redact%`/`%purge%`/`%expire%` functions confirms only the four canonical `ai_run*` ones exist. So the SCHEMA is clean; the LEDGER carries a name recorded twice.
+
+**What this does NOT break, stated so nobody re-investigates it:** `check-migration-parity` still PASSes, because it matches on `name` and the duplicate row's name has a repository file — the canonical one. The residue is a duplicate ledger identity, not a missing file. Two other 2026-08-24 rows initially looked file-less for the same reason and are not: `20260824075738_public_vacancy_anon_boundary_v2` and `20260824100938_null_safe_owner_guards_v2` match the repo stems `20260824120000_*` and `20260824130000_*` by name, which is the rule this document states two sections above — *match on `name`, never on `version`*. Version drift between the repo stem and the apply-time version is normal here and is not evidence of anything.
+
+Worth knowing what that duplicate would have done: it nulled the same three columns as this DRAFT, but guarded only `p_older_than >= interval '1 day'`. The canonical function's floor is a hard 90 days and cannot be shortened by a caller. Same intent, weaker guard.
+
+**Verified same day (read-only):** the daily cron `ai-runs-retention-daily` (`17 3 * * *`) is the only job in the database, has run **16/16 consecutive days with zero failures** (first 2026-08-09, last 2026-08-24), and has redacted **0 rows** — because `ai_runs` holds 0 rows while `AI_PROVIDER_MODE` is disabled. So the mechanism is proven to RUN and its correctness on real data is **UNVERIFIED**, which is the honest state of it.
+
 ## Applied 2026-08-23 — notification consent primitives (recorded 2026-08-23 by a verifying session)
 
 > **These two rows were added AFTER the fact.** Both migrations were applied to
