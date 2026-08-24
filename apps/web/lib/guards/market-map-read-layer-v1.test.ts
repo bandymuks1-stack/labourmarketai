@@ -642,7 +642,11 @@ describe("NO new DB migration in this PR", () => {
     // the market-map read layer itself.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    expect(count).toBeLessThanOrEqual(239);
+    // Bumped 239 -> 240 for the ai_runs subject de-linking DRAFT
+    // (20260824170000, paired rollback). RED by route (SECURITY DEFINER
+    // replace), deliberately NOT human-gate-annotated, ships UNAPPLIED. Still
+    // nothing from the market-map read layer itself.
+    expect(count).toBeLessThanOrEqual(240);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
