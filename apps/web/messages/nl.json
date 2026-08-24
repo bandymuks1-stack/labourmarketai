@@ -2485,6 +2485,7 @@
         "invalid": "Ongeldige aanvraag.",
         "notFound": "Bedrijf niet gevonden.",
         "needsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
+        "saving": "Opslaan…",
         "error": "Er is iets misgegaan. Probeer het opnieuw."
       }
     },
