@@ -149,6 +149,62 @@ describe("an unsourced price can never authorise spend", () => {
   });
 });
 
+describe("a verified price is not permission to run", () => {
+  // Gemini's prices were read first-hand from the vendor's pricing page on
+  // 2026-08-24 and recorded in the registry. That closed ONE of the reasons the
+  // provider could not run, and these pins exist so it is not mistaken for
+  // having closed the others. The remaining blocker is a DATA-TRANSFER
+  // decision (`data-egress.ts`, grant table empty by owner decision), which no
+  // pricing edit is entitled to touch.
+  const gemini = MODEL_REGISTRY.filter((e) => e.provider === "gemini");
+
+  it("every gemini model carries a first-hand source and a date", () => {
+    expect(gemini.length).toBeGreaterThan(0);
+    for (const e of gemini) {
+      expect(e.inputUsdPerMTok, e.model).not.toBeNull();
+      expect(e.outputUsdPerMTok, e.model).not.toBeNull();
+      expect(e.pricingSource, e.model).toContain("ai.google.dev");
+      expect(e.effectiveFrom, e.model).toBe("2026-08-24");
+    }
+  });
+
+  it("pricing them did NOT make any of them selectable", () => {
+    for (const e of gemini) {
+      expect(e.enabled, e.model).toBe(false);
+      expect(isSelectable(e), e.model).toBe(false);
+      expect(pricingForModel(e.model), e.model).toBeNull();
+    }
+  });
+
+  it("the recorded price is the metered rate, never the free allowance", () => {
+    // A €0 here would be the one error a ceiling cannot absorb: the key can be
+    // moved onto billing by an owner action that changes nothing in this repo,
+    // and the ceiling would then be judged against a price that had quietly
+    // stopped being true.
+    for (const e of gemini) {
+      expect(e.inputUsdPerMTok, e.model).toBeGreaterThan(0);
+      expect(e.outputUsdPerMTok, e.model).toBeGreaterThan(0);
+    }
+  });
+
+  it("gemini-2.5-pro is priced at its LONG-prompt tier", () => {
+    // The vendor charges $1.25/$10.00 up to a 200k-token prompt and
+    // $2.50/$15.00 above it. One price per model means it must be the higher
+    // one, or every long prompt is judged against a ceiling it cannot exceed.
+    const pro = registryEntryForModel("gemini-2.5-pro");
+    expect(pro).not.toBeNull();
+    expect(pro?.inputUsdPerMTok).toBe(2.5);
+    expect(pro?.outputUsdPerMTok).toBe(15);
+  });
+
+  it("the free-tier training term is recorded as CURRENT, not historical", () => {
+    for (const e of gemini) {
+      expect(e.freeTier, e.model).toBe(true);
+      expect(e.dataRestrictions.join(" "), e.model).toContain("2026-08-24");
+    }
+  });
+});
+
 describe("the derived tables did not change any shipped value", () => {
   it("model ids are byte-identical to the pre-registry literals", () => {
     expect(AI_MODEL_CANDIDATES.anthropic).toEqual({

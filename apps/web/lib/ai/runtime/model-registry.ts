@@ -134,6 +134,11 @@ const GENERAL_TASKS: readonly AiTaskType[] = [
 
 const ANTHROPIC_SOURCE = "Anthropic public pricing, reviewed by owner 2026-06";
 
+/** Read first-hand from the vendor's own pricing page, not an aggregator —
+ *  the distinction #1197 made load-bearing. */
+const GEMINI_SOURCE =
+  "Google Gemini API pricing, https://ai.google.dev/gemini-api/docs/pricing, standard paid tier, read 2026-08-24";
+
 export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // ── Anthropic — the only prices the owner has reviewed. ───────────────────
   {
@@ -238,29 +243,66 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     pricingSource: null,
     enabled: false,
   })),
-  ...(["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"] as const).map(
-    (model, i) => ({
-      provider: "gemini",
-      transport: "gemini" as const,
-      model,
-      alias: (["haiku", "sonnet", "opus"] as const)[i],
-      capabilities: GENERAL_TASKS,
-      qualityScore: null,
-      inputUsdPerMTok: null,
-      outputUsdPerMTok: null,
-      freeTier: true,
-      contextTokens: null,
-      maxOutputTokens: null,
-      latencyP50Ms: null,
-      // The finding that drove data-sensitivity.ts, carried at model level.
-      dataRestrictions: [
-        "free tier documents that content may be used to improve vendor products",
-      ],
-      effectiveFrom: null,
-      pricingSource: null,
-      enabled: false,
-    }),
-  ),
+  // ── Gemini — prices VERIFIED 2026-08-24, still NOT enabled. ──────────────
+  //
+  // The figures below are the STANDARD PAID-TIER prices read first-hand from
+  // Google's own pricing page on 2026-08-24, not from an aggregator. They are
+  // recorded here so that "we have no verified price" stops being one of the
+  // reasons this provider cannot run — that reason was real, and it is now
+  // answered with a source and a date.
+  //
+  // WHY PAID PRICES ON ENTRIES MARKED `freeTier: true`. The ceiling must never
+  // UNDER-estimate. A key sitting on the free allowance today can be moved onto
+  // billing by an owner action that touches nothing in this repo, and if the
+  // registry had recorded €0 for that model the per-run ceiling would have been
+  // computed against a price that stopped being true without a single line
+  // changing here. Pricing the models at the metered rate means a tier change
+  // can never silently spend past a budget. It also means that IF a run is ever
+  // served by the free allowance, the cost written to `ai_runs` is the standard
+  // rate rather than the €0 actually charged — an over-statement, in the one
+  // direction a budget can absorb. Which tier this deployment's key is on is an
+  // owner fact this repo cannot observe; see the human gate.
+  //
+  // gemini-2.5-pro is priced at its LONG-PROMPT tier ($2.50 / $15.00, prompts
+  // over 200k tokens) rather than its cheaper short-prompt tier ($1.25 /
+  // $10.00). The registry holds one price per model and the ceiling is only
+  // sound if that price is the higher of the two.
+  //
+  // `enabled` stays FALSE, and that is not an oversight. A price is one of the
+  // four things `isSelectable` requires, and it is the only one this edit is
+  // entitled to supply. The other blocker is a DATA-TRANSFER decision — see
+  // `data-egress.ts`, whose grant table is empty by owner decision — and no
+  // amount of correct pricing is permission to send anyone's data anywhere.
+  ...(
+    [
+      { model: "gemini-2.5-flash-lite", input: 0.1, output: 0.4 },
+      { model: "gemini-2.5-flash", input: 0.3, output: 2.5 },
+      { model: "gemini-2.5-pro", input: 2.5, output: 15 },
+    ] as const
+  ).map((entry, i) => ({
+    provider: "gemini",
+    transport: "gemini" as const,
+    model: entry.model,
+    alias: (["haiku", "sonnet", "opus"] as const)[i],
+    capabilities: GENERAL_TASKS,
+    qualityScore: null,
+    inputUsdPerMTok: entry.input,
+    outputUsdPerMTok: entry.output,
+    freeTier: true,
+    contextTokens: null,
+    maxOutputTokens: null,
+    latencyP50Ms: null,
+    // The finding that drove data-sensitivity.ts, carried at model level —
+    // and re-confirmed against the same page the prices came from: the free
+    // tier's row reads "used to improve our products", the paid tier's reads
+    // "not used". The restriction is therefore CURRENT, not historical.
+    dataRestrictions: [
+      "free tier documents that content may be used to improve vendor products (re-verified 2026-08-24)",
+    ],
+    effectiveFrom: "2026-08-24",
+    pricingSource: GEMINI_SOURCE,
+    enabled: false,
+  })),
   ...(["grok-3-mini", "grok-3", "grok-4"] as const).map((model, i) => ({
     provider: "xai",
     transport: "openai-compatible" as const,
