@@ -107,6 +107,63 @@ test pins that absence.
 3. If approved: add `@human-gate-approved` to the migration header and apply via
    Supabase MCP `apply_migration`. Never `db push`.
 
+## 2026-08-24 — the owner answered 1 and 2. 3 is still open.
+
+Recorded verbatim from the owner's written direction of 2026-08-24
+(AI ACTIVATION + PRIVACY + REAL USER VALUE order, decision 1):
+
+> APPROVE the D1 direction represented by #1266: after the canonical 90-day AI
+> telemetry retention period, de-link profile_id and clear request_context,
+> unless audit finds a specific binding legal/accounting/security requirement
+> requiring either field longer.
+
+**Question 1 — answered: approved as implemented.** Three columns, 90 days, the
+existing `redact_expired_ai_run_content`, no deletion, no second function, no
+second cron. Re-verified against production the same day: `pg_get_functiondef`
+of the live function is byte-equivalent to this change's own rollback file, so
+the migration is a subtraction from exactly the body that is running, and the
+#1259 duplicate function is confirmed absent from `pg_proc`.
+
+**Question 2 — the audit the owner conditioned approval on, and its answer: no
+such requirement exists.** Enumerated rather than assumed, 2026-08-24:
+
+- `request_context` on `ai_runs` is **written and never read**. Its only
+  producer is `lib/ai/runtime/audit-store.ts`; no `select` anywhere in `app/`
+  or `lib/` names it.
+- `profile_id` on `ai_runs` is likewise write-only. The table's single reader,
+  `getAiRunsSummary` in `lib/admin/ai-cost.ts`, selects
+  `created_at, task_type, provider, input_tokens, output_tokens,
+  actual_cost_usd` — six columns, none of them the two being cleared.
+- **The accounting obligation is satisfied by a different table.**
+  `usage_cost_events` is the canonical cost ledger and carries its own
+  `profile_id`, `organization_id`, `payer`, `plan_key` and `cost`. This
+  migration does not touch it. So "who was this spend for" survives
+  de-linking, in the table that was built to answer it.
+
+### A gap this change does NOT close, found while answering question 2
+
+De-linking `ai_runs` ends the person-linked AI history in `ai_runs` **only**.
+`usage_cost_events` carries `profile_id` and a `metadata.request_context` copy
+written by `lib/usage/usage-cost-store.ts`, and production has **no retention
+function for it at all** — `pg_proc` holds `ai_runs_retention_days`,
+`ai_runs_retention_health`, `redact_expired_ai_run_content` and
+`run_ai_runs_retention_sweep`, and nothing equivalent for the cost ledger.
+
+That table is additionally append-only at the trigger level
+(`usage_cost_events_forbid_mutation`, `usage_cost_events_forbid_truncate`), so
+de-linking it is not a matching one-line widening — it needs its own
+owner-gated mechanism with a deliberate exemption. It is therefore correctly
+out of scope here, and it means **D1 is not finished when this migration
+applies.**
+
+Urgency, stated plainly: both tables hold **0 rows today** only because
+`AI_PROVIDER_MODE` is unset. The first live AI run writes to **both**. So the
+window in which this gap costs nothing is the window before AI is switched on.
+
+Not built in this train, and deliberately not started as a second privacy
+framework. Recorded here so the next session inherits the finding instead of
+re-deriving it.
+
 ## Separately — a production ledger row needs cleaning
 
 `supabase_migrations.schema_migrations` still holds the #1259 duplicate row
