@@ -98,8 +98,6 @@ export async function MarketProofBand({
         }
       : null;
   const numbers = new Intl.NumberFormat(locale);
-  const swedenName =
-    new Intl.DisplayNames([locale], { type: "region" }).of("SE") ?? "SE";
   const refreshedAt = market.lastRefreshedAt
     ? new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
@@ -146,9 +144,11 @@ export async function MarketProofBand({
       </Reveal>
 
       {/* Provenance, subordinate by construction (§13/§14): the European
-             product identity stays in the heading above; Sweden is named only
-             as the SOURCE of these exact figures, alongside the reader's own
-             refresh stamp. No pinned "as of <date>" string can go stale here. */}
+             product identity stays in the heading above. Owner directive
+             2026-08-24: the anonymous surface may not name the source
+             COUNTRY, so provenance names only the KIND of source ("official
+             public employment source"), alongside the reader's own refresh
+             stamp. No pinned "as of <date>" string can go stale here. */}
       {supply ? (
         <Reveal delay={0.1}>
           <p
@@ -157,7 +157,7 @@ export async function MarketProofBand({
           >
             {review("verifiedMarketData")}
             {refreshedAt ? ` · ${refreshedAt}` : ""}
-            {` · ${review("dataSourceLabel")} · ${swedenName}`}
+            {` · ${review("dataSourceLabel")} · ${review("dataSourceGeneric")}`}
           </p>
         </Reveal>
       ) : null}

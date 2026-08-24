@@ -641,6 +641,7 @@
     "currentSupply": "Nuvarande verifierat utbud",
     "verifiedMarketData": "Verifierade marknadsdata",
     "dataSourceLabel": "Datakälla",
+    "dataSourceGeneric": "official public employment source",
     "opportunityStream": "Möjlighetsflöde",
     "evidenceVerifiedTitle": "Bevis verifierat",
     "evidenceVerifiedBody": "Mänsklig bekräftelse gör registreringen till tillförlitligt bevis.",
@@ -4998,7 +4999,10 @@
     "empty": "Inga avtal registrerade ännu.",
     "emptyFiltered": "Inga avtal matchar dessa filter.",
     "scopeNote": "Register på organisationssidan. Arbetare ser inte det här registret.",
-    "attach": { "documentLabel": "Dokument att bifoga", "submit": "Bifoga dokument" },
+    "attach": {
+      "documentLabel": "Dokument att bifoga",
+      "submit": "Bifoga dokument"
+    },
     "baseDocument": "Basdokument",
     "filters": {
       "type": "Typ",

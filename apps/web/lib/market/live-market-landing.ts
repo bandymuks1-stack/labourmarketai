@@ -11,6 +11,9 @@ import {
 
 export type LiveMarketJob = {
   readonly id: string;
+  /** The source OCCUPATION label, not the raw ad title: the anonymous
+   *  projection withholds titles because they embed employer and location
+   *  wording (owner anonymous-boundary directive). */
   readonly title: string;
 };
 
@@ -147,10 +150,15 @@ async function readFreshLiveMarketLandingSnapshot(): Promise<LiveMarketLandingSn
         totalCount: result?.status === "ok" ? result.totalCount : null,
         jobs:
           result?.status === "ok"
-            ? result.vacancies.slice(0, 3).map((vacancy) => ({
-                id: vacancy.id,
-                title: vacancy.title,
-              }))
+            ? result.vacancies
+                .slice(0, 3)
+                .map((vacancy) => ({
+                  id: vacancy.id,
+                  // Anonymous boundary: title is NULL by design; the
+                  // occupation label is the public-safe display line.
+                  title: vacancy.occupation ?? "",
+                }))
+                .filter((job) => job.title.length > 0)
             : [],
         basis: result?.status === "ok" ? "live" : "unavailable",
       } satisfies LiveMarketProfession;

@@ -641,6 +641,7 @@
     "currentSupply": "Pašreizējais pārbaudītais piedāvājums",
     "verifiedMarketData": "Pārbaudīti tirgus dati",
     "dataSourceLabel": "Datu avots",
+    "dataSourceGeneric": "official public employment source",
     "opportunityStream": "Iespēju plūsma",
     "evidenceVerifiedTitle": "Pierādījums pārbaudīts",
     "evidenceVerifiedBody": "Cilvēka apstiprinājums pārvērš ierakstu uzticamā pierādījumā.",
@@ -4998,7 +4999,10 @@
     "empty": "Līgumi vēl nav reģistrēti.",
     "emptyFiltered": "Neviens līgums neatbilst šiem filtriem.",
     "scopeNote": "Organizācijas puses reģistrs. Darbiniekiem šis reģistrs netiek rādīts.",
-    "attach": { "documentLabel": "Pievienojamais dokuments", "submit": "Pievienot dokumentu" },
+    "attach": {
+      "documentLabel": "Pievienojamais dokuments",
+      "submit": "Pievienot dokumentu"
+    },
     "baseDocument": "Pamatdokuments",
     "filters": {
       "type": "Tips",

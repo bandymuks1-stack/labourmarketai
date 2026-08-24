@@ -51,11 +51,19 @@ export type PublicVacancyPreviewStatus = "ok" | "not_provisioned";
 /**
  * Exactly the fields an anonymous caller may receive. There is intentionally no
  * employerName, country, region, city, lat, lng, applicationUrl or description:
- * those are member-only and the SQL function never returns them.
+ * those are member-only and the SQL function never returns them. Since
+ * 20260824120000_public_vacancy_anon_boundary_v2 the raw title and the named
+ * source attribution are withheld too (both NULL): titles embed employer and
+ * location wording, and the named source identifies the country.
  */
 export interface PublicVacancyPreview {
   readonly id: string;
-  readonly title: string;
+  /** ALWAYS NULL on the anonymous path since 2026-08-24: the publisher's
+   *  free-text title routinely embeds the employer name and the workplace
+   *  location ("Väktare till Lunds Universitet"), so the SQL functions return
+   *  NULL here for anonymous callers. The member read path
+   *  (`vacancy-read.ts`) still supplies the real title. */
+  readonly title: string | null;
   readonly professionSlug: string | null;
   readonly occupation: string | null;
   readonly employmentForm: string | null;
@@ -65,7 +73,10 @@ export interface PublicVacancyPreview {
   readonly compensationMin: number | null;
   readonly compensationMax: number | null;
   readonly sourceLanguage: string | null;
-  /** i18n key for the source's licence attribution. Rendering it is a licence obligation. */
+  /** ALWAYS NULL on the anonymous path since 2026-08-24: the named source is
+   *  a national employment service and therefore identifies the country. The
+   *  UI renders a generic source line anonymously; members receive the full
+   *  named attribution via their own read path. */
   readonly attributionCode: string | null;
   readonly publishedAt: string | null;
 }
@@ -114,7 +125,12 @@ function toNumber(v: number | string | null | undefined): number | null {
 function toPreview(row: PreviewRow): PublicVacancyPreview {
   return {
     id: row.id,
-    title: row.title_raw ?? "",
+    // Defense-in-depth for the anonymous boundary (owner directive
+    // 2026-08-24): even if the SQL projection ever regressed and returned the
+    // raw title or the named attribution again, this module — the ONLY
+    // anonymous read path — drops them before they can reach a component,
+    // an RSC payload or generated metadata.
+    title: null,
     professionSlug: row.profession_slug,
     occupation: row.occupation_raw,
     employmentForm: row.employment_form,
@@ -124,7 +140,7 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
     compensationMin: toNumber(row.compensation_min),
     compensationMax: toNumber(row.compensation_max),
     sourceLanguage: row.source_language,
-    attributionCode: row.attribution_code,
+    attributionCode: null,
     publishedAt: row.published_at,
   };
 }

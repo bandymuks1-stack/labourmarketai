@@ -301,7 +301,10 @@ export async function loadWorkerOpportunities(
     if (previews.status === "ok") {
       savedVacancies = previews.previews.map((v) => ({
         id: v.id,
-        title: v.title,
+        // Member read path: the real title is present. The `?? ""` only
+        // satisfies the shared preview type, whose title is nullable because
+        // the ANONYMOUS projection withholds it (owner directive 2026-08-24).
+        title: v.title ?? v.occupation ?? "",
         occupation: v.occupation,
       }));
     }

@@ -472,6 +472,12 @@ export function HeroLiveDemo() {
           </span>
         </div>
 
+        {/* On desktop the AI column is the taller sibling, and a fixed-height
+            map leaves a dead band under it inside the stretched grid track.
+            `lg:flex-1` + `lg:h-auto` let the map absorb the column's remaining
+            height instead (the ResizeObserver inside MarketMap re-measures the
+            tile grid as the AI card animates); below lg the clamp height from
+            MODE_HEIGHT stays exactly as before. */}
         <MarketMap
           view={scenario.view}
           mode="landing"
@@ -480,6 +486,7 @@ export function HeroLiveDemo() {
             phase === "reacting" || decided ? scenario.focusCode : null
           }
           revealCount={reveal}
+          className="lg:h-auto lg:min-h-[24rem] lg:flex-1"
         />
 
         <p

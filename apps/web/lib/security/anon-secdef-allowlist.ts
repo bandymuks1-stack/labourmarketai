@@ -71,15 +71,15 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     publicCaller:
       "The public job board (app/[locale]/(marketing)/jobs). Reachable logged-out by design — this is the acquisition surface for 38,142 live imported vacancies.",
     authorization:
-      "No caller identity is consulted, because the projection itself is the authorization: the RETURNS TABLE clause enumerates only fields the owner ruled public (title, category, employment form, working time, positions, publication date, compensation where genuinely supplied, licence attribution). Employer identity, homepage, country, region, city, coordinates, application URL, full description and the compensation note are never selected. Row filter `is_active AND (expires_at is null OR expires_at > now())` so withdrawn and expired ads are invisible.",
+      "No caller identity is consulted, because the projection itself is the authorization: since 20260824120000 the function returns only fields the owner ruled public (category/occupation, employment form, working time, positions, publication date, compensation where genuinely supplied, source language). `title_raw` and `attribution_code` are returned as NULL — the raw title embeds employer and location wording, and the named source identifies the country (owner directive 2026-08-24). Employer identity, homepage, country, region, city, coordinates, application URL, full description and the compensation note are never selected. Row filter `is_active AND (expires_at is null OR expires_at > now())` so withdrawn and expired ads are invisible.",
     inputValidation:
-      "`p_query` is trimmed and its LIKE metacharacters (`%`, `_`) are escaped before interpolation into an ILIKE pattern, so a caller cannot turn the search box into a wildcard scan. Matching is restricted to `title_raw`; the description is deliberately NOT searched, because probing a restricted field is a disclosure by another route. `p_limit` is clamped to 1..50 and `p_offset` floored at 0.",
+      "`p_query` is trimmed and its LIKE metacharacters (`%`, `_`) are escaped before interpolation into an ILIKE pattern, so a caller cannot turn the search box into a wildcard scan. Matching is restricted to `occupation_raw` — the field the card displays; the title and description are deliberately NOT searched, because probing a restricted field is a disclosure by another route. `p_limit` is clamped to 1..50 and `p_offset` floored at 0.",
     abuseControls:
       "No DB-level rate limit. Read-only and idempotent; the abuse ceiling is scraping of a deliberately public projection of already-public employment-service ads. Page size is hard-capped at 50 in SQL, so the endpoint cannot be asked for the whole table in one call.",
     definerJustification:
       "`public_vacancies` grants SELECT to `authenticated` only and has no anon policy — proven in production: a direct anon read fails with 42501. DEFINER is what allows a NARROWER public projection without weakening that policy, which is the explicit requirement (expose by projection, never by widening RLS).",
     residualRisk:
-      "Attribution is returned because the source licence requires it wherever the content is shown. Since today's only provider is a national employment service, attribution makes the source — and therefore the country — inferable even though no country column is returned. Accepted as a licence obligation; recorded for the owner.",
+      "Owner directive 2026-08-24 reversed the v1 attribution decision: the named source identified the country, so `attribution_code` is now NULL for anonymous callers and the UI renders a generic source line. The full named licence attribution is rendered for members, where the licensed content (title, description, employer, apply URL) is actually displayed. Whether the source licence also requires named attribution beside the anonymous occupation-only projection is recorded as an open owner/legal question.",
   },
   {
     name: "get_public_vacancy_preview_v1",
@@ -96,7 +96,7 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     definerJustification:
       "Identical to the search function: the base table has no anon grant, and DEFINER is what narrows anon access to the published columns instead of opening the table.",
     residualRisk:
-      "Same attribution/country inference as the search function. No JobPosting JSON-LD is emitted on the page, because that schema requires hiringOrganization and jobLocation, which are restricted fields.",
+      "Same NULLed title/attribution boundary as the search function since 20260824120000. No JobPosting JSON-LD is emitted on the page, because that schema requires hiringOrganization and jobLocation, which are restricted fields.",
   },
   {
     name: "count_public_vacancies_v1",

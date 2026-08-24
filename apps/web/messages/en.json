@@ -2485,6 +2485,7 @@
         "invalid": "Invalid request.",
         "notFound": "Company not found.",
         "needsMigration": "Couldn’t complete the action. Please try again.",
+        "saving": "Saving…",
         "error": "Something went wrong. Please try again."
       }
     },
@@ -4481,6 +4482,7 @@
     "currentSupply": "Current verified supply",
     "verifiedMarketData": "Verified market data",
     "dataSourceLabel": "Data source",
+    "dataSourceGeneric": "official public employment source",
     "opportunityStream": "Opportunity stream",
     "evidenceVerifiedTitle": "Evidence verified",
     "evidenceVerifiedBody": "Human confirmation turns the record into trusted evidence.",
@@ -4717,7 +4719,11 @@
       "free": {
         "name": "Free",
         "tagline": "Get on the market.",
-        "features": ["1 project", "1 job demand", "Community support"]
+        "features": [
+          "1 project",
+          "1 job demand",
+          "Community support"
+        ]
       },
       "business": {
         "name": "Business",
@@ -4742,7 +4748,12 @@
       "enterprise": {
         "name": "Enterprise",
         "tagline": "For scale and control.",
-        "features": ["Unlimited projects", "SSO", "SLA", "Dedicated support"]
+        "features": [
+          "Unlimited projects",
+          "SSO",
+          "SLA",
+          "Dedicated support"
+        ]
       }
     },
     "faqTitle": "Pricing FAQ",
@@ -13087,7 +13098,10 @@
     "empty": "No agreements recorded yet.",
     "emptyFiltered": "No agreements match these filters.",
     "scopeNote": "Organization-side register. Workers are not shown this register.",
-    "attach": { "documentLabel": "Document to attach", "submit": "Attach document" },
+    "attach": {
+      "documentLabel": "Document to attach",
+      "submit": "Attach document"
+    },
     "baseDocument": "Base document",
     "filters": {
       "type": "Type",

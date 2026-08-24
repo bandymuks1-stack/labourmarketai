@@ -66,12 +66,15 @@ const INTRO: L = {
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
 };
 
+/** The anonymous search matches the OCCUPATION label (the field the card
+ *  shows), never the hidden raw title — matching a hidden field would let a
+ *  visitor probe for employer or city names (owner directive 2026-08-24). */
 const SEARCH_LABEL: L = {
-  en: "Search by job title",
-  lt: "Ieškoti pagal pareigas",
-  ru: "Поиск по названию вакансии",
-  nl: "Zoeken op functietitel",
-  de: "Nach Stellenbezeichnung suchen",
+  en: "Search by occupation",
+  lt: "Ieškoti pagal profesiją",
+  ru: "Поиск по профессии",
+  nl: "Zoeken op beroep",
+  de: "Nach Beruf suchen",
 };
 
 const SEARCH_BUTTON: L = {
@@ -107,13 +110,14 @@ const CLEAR_FILTER: L = {
 };
 
 /** The supply is published in the employer's own language. Say so once, rather
- *  than letting a visitor wonder why a Lithuanian page lists Swedish titles. */
+ *  than letting a visitor wonder why a Lithuanian page lists Swedish
+ *  occupation labels. */
 const ORIGINAL_LANGUAGE_NOTE: L = {
-  en: "Job titles are shown in the language the employer published them in. Filter by profession to search in your own language.",
-  lt: "Skelbimų pavadinimai rodomi ta kalba, kuria juos paskelbė darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba.",
-  ru: "Названия вакансий показаны на языке, на котором их опубликовал работодатель. Фильтруйте по профессии, чтобы искать на своём языке.",
-  nl: "Vacaturetitels staan in de taal waarin de werkgever ze publiceerde. Filter op beroep om in je eigen taal te zoeken.",
-  de: "Stellentitel erscheinen in der Sprache, in der der Arbeitgeber sie veröffentlicht hat. Filtern Sie nach Beruf, um in Ihrer Sprache zu suchen.",
+  en: "Occupation labels are shown in the language the employer published them in. Filter by profession to search in your own language.",
+  lt: "Profesijų pavadinimai rodomi ta kalba, kuria juos paskelbė darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba.",
+  ru: "Названия профессий показаны на языке, на котором их опубликовал работодатель. Фильтруйте по профессии, чтобы искать на своём языке.",
+  nl: "Beroepslabels staan in de taal waarin de werkgever ze publiceerde. Filter op beroep om in je eigen taal te zoeken.",
+  de: "Berufsbezeichnungen erscheinen in der Sprache, in der der Arbeitgeber sie veröffentlicht hat. Filtern Sie nach Beruf, um in Ihrer Sprache zu suchen.",
 };
 
 const RESULTS: L = {
@@ -417,6 +421,9 @@ export default async function JobsPage({
                   <PublicVacancyCard
                     vacancy={v}
                     locale={active}
+                    headingFallback={
+                      v.professionSlug ? professionName(v.professionSlug) : undefined
+                    }
                     savedLabel={SAVED_BADGE[active]}
                   />
                 </li>
@@ -467,6 +474,9 @@ export default async function JobsPage({
                   <PublicVacancyCard
                     vacancy={v}
                     locale={active}
+                    headingFallback={
+                      v.professionSlug ? professionName(v.professionSlug) : undefined
+                    }
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
                         ? SAVED_BADGE[active]

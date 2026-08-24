@@ -118,8 +118,26 @@ export function MarketMap({
       setReady(true);
     })();
 
+    // The container's height is not fixed everywhere any more: on the landing
+    // hero the map stretches to balance the AI column, whose own height
+    // changes as the conversation phases animate. Leaflet sizes its tile grid
+    // once at mount, so a container that grows afterwards leaves dead grey
+    // space until `invalidateSize()` re-measures — the same reason
+    // `location-map.tsx` calls it after animating in. rAF coalesces observer
+    // bursts to one re-measure per frame.
+    let raf = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        mapRef.current?.invalidateSize();
+      });
+    });
+    if (hostRef.current) observer.observe(hostRef.current);
+
     return () => {
       cancelled = true;
+      observer.disconnect();
+      cancelAnimationFrame(raf);
       mapRef.current?.remove();
       mapRef.current = null;
       layerGroupRef.current = null;

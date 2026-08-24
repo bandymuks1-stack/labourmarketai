@@ -31,6 +31,7 @@ export interface CompanyVerificationReviewLabels {
   readonly statusNotFound: string;
   readonly statusNeedsMigration: string;
   readonly statusError: string;
+  readonly saving: string;
 }
 
 export function CompanyVerificationReview({
@@ -121,7 +122,15 @@ export function CompanyVerificationReview({
         </button>
       </div>
 
-      {banner ? (
+      {isPending ? (
+        <p
+          className="rounded-md border border-border-default bg-surface-1 px-2 py-1 text-meta text-text-muted"
+          role="status"
+          data-testid={`company-verification-saving-${companyId}`}
+        >
+          {labels.saving}
+        </p>
+      ) : banner ? (
         <p
           className={
             banner.tone === "success"

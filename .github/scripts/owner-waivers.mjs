@@ -337,8 +337,40 @@ export const SCOPED_OWNER_WAIVERS = [
      * no auth change, no schema. The five World-State answers stay honestly
      * "no" for the anonymous visitor this surface exists for — same class of
      * change as #1193 and #1203.
+     *
+     * ── #1255 (2026-08-24) ──────────────────────────────────────────────────
+     * OWNER APPROVAL (MASTER ORDER, 2026-08-24): "WAIVER APPROVAL IS STRICTLY
+     * SCOPED: Push ONLY the described #1255 extension to the ... EXISTING
+     * owner-waiver records ... Allowed: add PR #1255 to those existing scoped
+     * waiver PR lists; add the dated explanatory comments ... NOT allowed:
+     * changing Product Constitution axioms; creating a global waiver;
+     * broadening the affected surfaces; deleting findings; suppressing new
+     * findings; weakening the product gate."
+     *
+     * Exactly that was done, and nothing else: ONE number added to
+     * `pullRequests`. The axiom, the six codes per surface, the file list,
+     * the expected finding set, the expiry and the subset rule are
+     * byte-unchanged, and `product-gate.mjs` is not touched by this PR.
+     *
+     * Pre-condition from the ACTUAL CI run on head `21c813d` (quality job
+     * 97363265872): 30 violations — the six codes on exactly these five file
+     * entries — and every `not waived` line carried the single reason
+     * `pr-not-covered` ("covers PR 1184, 1193, 1203, 1208 and branch main;
+     * this run is PR 1255"). The diff adds ZERO findings; the waiver was
+     * working correctly and simply did not list this PR.
+     *
+     * WHAT #1255 ACTUALLY DOES to these surfaces: it NARROWS what an
+     * anonymous visitor can see — the P0 identity/location boundary (owner
+     * directive 2026-08-24): anonymous cards/detail stop echoing raw titles
+     * that leaked employer names, cities and street addresses, attribution
+     * stops naming the source country, and search stops matching the hidden
+     * title (a probe oracle). Members keep the full detail via their own RLS
+     * read path. No new route, no new page, no new component family, no auth
+     * change; the DB half is the already-applied `20260824120000` SECDEF
+     * narrowing. Same surfaces, strictly less exposure — the World-State
+     * answers stay honestly "no" for the anonymous visitor.
      */
-    pullRequests: [1184, 1193, 1203, 1208],
+    pullRequests: [1184, 1193, 1203, 1208, 1255],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
