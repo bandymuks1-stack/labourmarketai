@@ -67,6 +67,13 @@ export type ReactivationSignal =
        * fresh-market/evidence reasons (then `opportunities_waiting` is absent).
        */
       readonly opportunityCount: number;
+      /**
+       * True when the board read returned its full page, so `opportunityCount`
+       * is a LOWER BOUND (`intelligence.opportunities.boardTruncated`). The copy
+       * layer must then render it as "N+" — never "exactly N" (§19 no silent
+       * caps). Always false when `opportunityCount` is 0.
+       */
+      readonly opportunityCountIsLowerBound: boolean;
       /** The best concrete match WITH its §19 basis, or null. */
       readonly exemplar: WeeklyMatchExemplar | null;
     };
@@ -128,6 +135,10 @@ export function deriveReactivationSignal(
     bucket, // "recent" | "dormant" — "active" already returned above
     reasons,
     opportunityCount,
+    // Preserve the board's lower-bound state so the copy layer renders "N+"
+    // rather than an exact count when the read was truncated (§19).
+    opportunityCountIsLowerBound:
+      opportunityCount > 0 && intelligence.opportunities.boardTruncated === true,
     exemplar,
   };
 }

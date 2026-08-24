@@ -14,8 +14,11 @@ import type {
  * WeeklyPersonalIntelligence carrying just the signal list under test (the full
  * shape is covered by weekly-intelligence-model.test.ts).
  */
-const intel = (signals: WeeklyIntelligenceSignal[]): WeeklyPersonalIntelligence =>
-  ({ signals } as unknown as WeeklyPersonalIntelligence);
+const intel = (
+  signals: WeeklyIntelligenceSignal[],
+  boardTruncated = false,
+): WeeklyPersonalIntelligence =>
+  ({ signals, opportunities: { boardTruncated } } as unknown as WeeklyPersonalIntelligence);
 
 const OPP = (count: number): WeeklyIntelligenceSignal => ({
   code: "matching_opportunities",
@@ -36,8 +39,30 @@ describe("deriveReactivationSignal", () => {
     if (r.code === "reactivation_candidate") {
       expect(r.reasons).toContain("opportunities_waiting");
       expect(r.opportunityCount).toBe(7); // exactly the signal's count
+      expect(r.opportunityCountIsLowerBound).toBe(false); // not truncated
       expect(r.exemplar?.requestId).toBe("req-1");
       expect(r.bucket).toBe("dormant");
+    }
+  });
+
+  it("a truncated board read marks the count as a lower bound (render N+, never exact)", () => {
+    const r = deriveReactivationSignal("dormant", intel([OPP(100)], true));
+    expect(r.code).toBe("reactivation_candidate");
+    if (r.code === "reactivation_candidate") {
+      expect(r.opportunityCount).toBe(100);
+      expect(r.opportunityCountIsLowerBound).toBe(true);
+    }
+  });
+
+  it("lower-bound is false when there is no opportunity count to qualify", () => {
+    const r = deriveReactivationSignal(
+      "dormant",
+      intel([{ code: "appeared_this_week", count: 4 }], true),
+    );
+    expect(r.code).toBe("reactivation_candidate");
+    if (r.code === "reactivation_candidate") {
+      expect(r.opportunityCount).toBe(0);
+      expect(r.opportunityCountIsLowerBound).toBe(false);
     }
   });
 
