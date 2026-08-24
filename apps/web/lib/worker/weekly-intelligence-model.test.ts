@@ -221,6 +221,55 @@ describe("deriveWeeklyPersonalIntelligence — honesty rules", () => {
     expect(down.signals.map((s) => s.code)).not.toContain("appeared_this_week");
   });
 
+  it("journal-backed matches: emitted only for a real, non-empty intersection", () => {
+    const top = [rec({ matchedSkillSlugs: ["welding-mig", "forklift"] })];
+    const out = deriveWeeklyPersonalIntelligence(
+      journalFacts(),
+      oppFacts({ totalRecommendable: 1, top }),
+      new Set(["welding-mig", "unrelated_skill"]),
+    );
+    expect(out.signals).toContainEqual({
+      code: "journal_backed_matches",
+      skillSlugs: ["welding-mig"],
+    });
+  });
+
+  it("journal-backed matches: omitted when unavailable (null), empty, or board down", () => {
+    const top = [rec({ matchedSkillSlugs: ["welding-mig"] })];
+    const codes = (s: ReturnType<typeof deriveWeeklyPersonalIntelligence>) =>
+      s.signals.map((x) => x.code);
+    // null = the skills read is unavailable — omitted, never guessed.
+    expect(
+      codes(
+        deriveWeeklyPersonalIntelligence(
+          journalFacts(),
+          oppFacts({ totalRecommendable: 1, top }),
+          null,
+        ),
+      ),
+    ).not.toContain("journal_backed_matches");
+    // Empty intersection — omitted.
+    expect(
+      codes(
+        deriveWeeklyPersonalIntelligence(
+          journalFacts(),
+          oppFacts({ totalRecommendable: 1, top }),
+          new Set(["something_else"]),
+        ),
+      ),
+    ).not.toContain("journal_backed_matches");
+    // Unavailable board suppresses ALL market claims, this one included.
+    expect(
+      codes(
+        deriveWeeklyPersonalIntelligence(
+          journalFacts(),
+          oppFacts({ available: false, top }),
+          new Set(["welding-mig"]),
+        ),
+      ),
+    ).not.toContain("journal_backed_matches");
+  });
+
   it("stamps the window and the weekly dedupe key", () => {
     const out = deriveWeeklyPersonalIntelligence(journalFacts(), oppFacts());
     expect(out.window).toEqual(WINDOW);

@@ -8070,6 +8070,7 @@
       "newOpportunities": "Nauja nuo paskutinio jūsų žvilgsnio: {count}.",
       "journalUnavailable": "Jūsų darbo žurnalo šiuo metu nepavyko nuskaityti.",
       "appearedThisWeek": "Užklausų, sukurtų per pastarąsias 7 dienas: {count}.",
+      "journalBackedMatches": "Jūsų darbo įrašai jau paremia šiuos įgūdžius artimiausiose galimybėse: {skills}.",
       "skillsToAdd": "Įgūdžiai, kurių prašo artimiausios jūsų galimybės: {skills}."
     },
     "saved": {

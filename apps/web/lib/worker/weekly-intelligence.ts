@@ -23,7 +23,8 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getWorkerCoreRow } from "../data/worker-core";
+import { getWorkerCoreRow, getWorkerSkillRows } from "../data/worker-core";
+import { isSkillSupportedByWork } from "../profile/skill-evidence";
 import { getWorkerJobRecommendations } from "../opportunities/recommendations";
 import {
   journalReportWindow,
@@ -123,10 +124,29 @@ export const getWeeklyPersonalIntelligence = cache(
     const supabase = await createClient();
     const todayIso = new Date().toISOString().slice(0, 10);
 
-    const [journal, recs] = await Promise.all([
+    const [journal, recs, skillRows] = await Promise.all([
       readOwnWeeklyJournalFacts(supabase, worker.id, todayIso),
       getWorkerJobRecommendations(),
+      // Request-cached canonical worker_skills read (own rows) — feeds the
+      // journal-backed-matches signal. [] on error collapses to "no signal"
+      // (the deriver emits it only when the intersection is non-empty).
+      getWorkerSkillRows(),
     ]);
+
+    const journalBackedSlugs = new Set<string>();
+    for (const row of skillRows) {
+      const slug = row.skills?.slug;
+      if (
+        typeof slug === "string" &&
+        slug &&
+        isSkillSupportedByWork({
+          source: row.source,
+          verified: row.verified === true,
+        })
+      ) {
+        journalBackedSlugs.add(slug);
+      }
+    }
 
     const opportunities =
       recs.kind === "ready"
@@ -151,7 +171,11 @@ export const getWeeklyPersonalIntelligence = cache(
 
     return {
       kind: "ready",
-      intelligence: deriveWeeklyPersonalIntelligence(journal, opportunities),
+      intelligence: deriveWeeklyPersonalIntelligence(
+        journal,
+        opportunities,
+        journalBackedSlugs,
+      ),
     };
   },
 );

@@ -8075,6 +8075,7 @@
       "newOpportunities": "Neu seit Ihrem letzten Blick: {count}.",
       "journalUnavailable": "Ihr Arbeitsjournal konnte gerade nicht gelesen werden.",
       "appearedThisWeek": "In den letzten 7 Tagen erstellte Anfragen: {count}.",
+      "journalBackedMatches": "Ihre Arbeitseinträge stützen diese Fähigkeiten in Ihren nächstgelegenen Gelegenheiten bereits: {skills}.",
       "skillsToAdd": "Fähigkeiten, nach denen Ihre nächstgelegenen Gelegenheiten fragen: {skills}."
     },
     "saved": {

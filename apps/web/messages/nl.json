@@ -8070,6 +8070,7 @@
       "newOpportunities": "Nieuw sinds je laatste bezoek: {count}.",
       "journalUnavailable": "Je werkjournaal kon nu niet worden gelezen.",
       "appearedThisWeek": "Aanvragen aangemaakt in de afgelopen 7 dagen: {count}.",
+      "journalBackedMatches": "Je werkregistraties onderbouwen deze vaardigheden in je dichtstbijzijnde kansen al: {skills}.",
       "skillsToAdd": "Vaardigheden waar je dichtstbijzijnde kansen om vragen: {skills}."
     },
     "saved": {

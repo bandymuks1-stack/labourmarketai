@@ -1974,6 +1974,7 @@
       "newOpportunities": "Nytt sedan du senast tittade: {count}.",
       "journalUnavailable": "Din arbetsjournal kunde inte läsas just nu.",
       "appearedThisWeek": "Förfrågningar skapade under de senaste 7 dagarna: {count}.",
+      "journalBackedMatches": "Dina arbetsregistreringar stödjer redan dessa färdigheter i dina närmaste möjligheter: {skills}.",
       "skillsToAdd": "Färdigheter som dina närmaste möjligheter frågar efter: {skills}."
     },
     "noWorkType": {
