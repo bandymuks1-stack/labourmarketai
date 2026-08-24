@@ -1973,6 +1973,7 @@
       "opportunitiesUnavailable": "Översikten över möjligheter kunde inte läsas just nu.",
       "newOpportunities": "Nytt sedan du senast tittade: {count}.",
       "journalUnavailable": "Din arbetsjournal kunde inte läsas just nu.",
+      "appearedThisWeek": "Förfrågningar skapade under de senaste 7 dagarna: {count}.",
       "skillsToAdd": "Färdigheter som dina närmaste möjligheter frågar efter: {skills}."
     },
     "noWorkType": {

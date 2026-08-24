@@ -56,6 +56,14 @@ export interface WeeklyOpportunityFacts {
   readonly seenAvailable: boolean;
   /** Unseen recommendations — meaningful ONLY when `seenAvailable`. */
   readonly newCount: number;
+  /** Recommendable demands whose row was CREATED in the last 7 days — a
+   *  market fact that needs no seen store. Distinct from `newCount` ("new
+   *  for you"). `created_at` is the only worker-visible timestamp, so a
+   *  late-submitted draft is omitted (understated, never over-claimed). */
+  readonly appearedThisWeekCount: number;
+  /** The board read returned its full RPC page — counts are lower bounds
+   *  and the copy layer must render them as "N+" (no silent caps). */
+  readonly boardTruncated: boolean;
   /** Top recommendations, best first, basis carried whole. */
   readonly top: readonly JobRecommendation[];
 }
@@ -81,6 +89,9 @@ export type WeeklyIntelligenceSignal =
   | { readonly code: "opportunities_unavailable" }
   /** Present ONLY when the seen store is applied and the count is positive. */
   | { readonly code: "new_opportunities"; readonly count: number }
+  /** Demands posted in the trailing 7 days ("appeared this week" — a market
+   *  fact, NEVER phrased as "new since you last looked"). */
+  | { readonly code: "appeared_this_week"; readonly count: number }
   /** Evidence gaps in the CURRENT top matches (context-bound, §19). */
   | { readonly code: "missing_evidence"; readonly skillSlugs: readonly string[] };
 
@@ -165,6 +176,12 @@ export function deriveWeeklyPersonalIntelligence(
     });
     if (opportunities.seenAvailable && opportunities.newCount > 0) {
       signals.push({ code: "new_opportunities", count: opportunities.newCount });
+    }
+    if (opportunities.appearedThisWeekCount > 0) {
+      signals.push({
+        code: "appeared_this_week",
+        count: opportunities.appearedThisWeekCount,
+      });
     }
     const missing = topMissingEvidenceSlugs(opportunities.top);
     if (missing.length > 0) {

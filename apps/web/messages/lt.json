@@ -8069,6 +8069,7 @@
       "opportunitiesUnavailable": "Galimybių apžvalgos šiuo metu nepavyko nuskaityti.",
       "newOpportunities": "Nauja nuo paskutinio jūsų žvilgsnio: {count}.",
       "journalUnavailable": "Jūsų darbo žurnalo šiuo metu nepavyko nuskaityti.",
+      "appearedThisWeek": "Užklausų, sukurtų per pastarąsias 7 dienas: {count}.",
       "skillsToAdd": "Įgūdžiai, kurių prašo artimiausios jūsų galimybės: {skills}."
     },
     "saved": {

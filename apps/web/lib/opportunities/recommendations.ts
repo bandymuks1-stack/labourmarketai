@@ -127,6 +127,11 @@ const loadRecommendationsResult = cache(
 
 const DEFAULT_LIMIT = 3;
 
+/** `list_open_demand_for_workers()` ends in `limit 100` — a full page means
+ *  the read MAY be truncated and every count derived from it is a lower
+ *  bound. Kept in one place so the honesty rule can't drift from the RPC. */
+const BOARD_READ_LIMIT = 100;
+
 export interface WorkerJobRecommendations {
   readonly kind: "ready";
   readonly boardAvailable: boolean;
@@ -139,6 +144,18 @@ export interface WorkerJobRecommendations {
   /** Total recommendable matches behind the top-N slice. */
   readonly totalRecommendable: number;
   readonly newCount: number;
+  /** Recommendable matches whose demand row was CREATED within the last
+   *  NEW_WINDOW_DAYS — a market fact, valid with or without the seen store
+   *  (never to be labelled "new since you last looked"). `created_at` is the
+   *  only timestamp the worker-visible RPC exposes; a draft submitted late
+   *  is therefore OMITTED (understated), never over-claimed. A true
+   *  submission timestamp needs a schema+RPC change (owner-gated route). */
+  readonly appearedThisWeekCount: number;
+  /** True when the board read returned the RPC's full page
+   *  (`list_open_demand_for_workers` caps at 100 rows) — every derived
+   *  count is then a LOWER BOUND and must render as "N+", never as an
+   *  unqualified total (no silent caps). */
+  readonly boardTruncated: boolean;
   /** External public-source ads from the SAME board read, narrowed by the
    *  same active filters (an unknown never satisfies a stated filter —
    *  `externalAdMatchesFilters`). NOT sliced to the platform top-N: the
@@ -191,6 +208,8 @@ export async function getWorkerJobRecommendations(options?: {
     recommendations: filtered.slice(0, limit),
     totalRecommendable: filtered.length,
     newCount: result.newCount,
+    appearedThisWeekCount: filtered.filter((r) => r.recentlyCreated).length,
+    boardTruncated: result.boardOpportunities.length >= BOARD_READ_LIMIT,
     externalCards,
     totalExternal: externalCards.length,
   };

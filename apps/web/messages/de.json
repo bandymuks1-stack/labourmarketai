@@ -8074,6 +8074,7 @@
       "opportunitiesUnavailable": "Die Gelegenheitsübersicht konnte gerade nicht gelesen werden.",
       "newOpportunities": "Neu seit Ihrem letzten Blick: {count}.",
       "journalUnavailable": "Ihr Arbeitsjournal konnte gerade nicht gelesen werden.",
+      "appearedThisWeek": "In den letzten 7 Tagen erstellte Anfragen: {count}.",
       "skillsToAdd": "Fähigkeiten, nach denen Ihre nächstgelegenen Gelegenheiten fragen: {skills}."
     },
     "saved": {
