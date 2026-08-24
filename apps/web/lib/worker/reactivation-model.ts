@@ -42,13 +42,49 @@ import type {
   WeeklyMatchExemplar,
 } from "./weekly-intelligence-model";
 
+declare const ACTIVITY_BRAND: unique symbol;
+
 /**
  * How recently the ACCOUNT was actually active (last session / sign-in) —
- * NOT profile-edit recency. Deliberately a local vocabulary, not the
- * `profile-freshness` `LastActiveBucket`, so a caller cannot accidentally feed
- * the employer-discovery signal (see the module docblock).
+ * NOT profile-edit recency. BRANDED on purpose: a plain active/recent/dormant
+ * string (e.g. the `profile-freshness` `LastActiveBucket`) is structurally
+ * NOT assignable to this type, so the only way to obtain one is through
+ * `accountActivityBucket`, which derives it from a real last-active timestamp.
+ * That makes the "must be account activity" rule a compile-time guarantee, not
+ * just a docblock (Codex #1263 review).
  */
-export type ActivityBucket = "active" | "recent" | "dormant";
+export type ActivityBucket = ("active" | "recent" | "dormant") & {
+  readonly [ACTIVITY_BRAND]: true;
+};
+
+/** How long since the last account activity still counts as active / recent. */
+export const ACTIVITY_ACTIVE_MAX_DAYS = 30;
+export const ACTIVITY_RECENT_MAX_DAYS = 90;
+
+/**
+ * The ONLY constructor of an `ActivityBucket`: derive it from the account's
+ * real last-active timestamp (last session / sign-in — e.g.
+ * `auth.users.last_sign_in_at`, read by the service-role dispatcher). Null /
+ * unparseable / future-garbage → `dormant` (fail conservative, never active).
+ * A `profile-freshness` result cannot be passed here — it is a plain string,
+ * and this function takes a timestamp, not a bucket.
+ */
+export function accountActivityBucket(
+  lastActiveAtIso: string | null | undefined,
+  now: Date = new Date(),
+): ActivityBucket {
+  const brand = (v: "active" | "recent" | "dormant"): ActivityBucket =>
+    v as ActivityBucket;
+  if (typeof lastActiveAtIso !== "string" || lastActiveAtIso.trim() === "") {
+    return brand("dormant");
+  }
+  const ts = Date.parse(lastActiveAtIso);
+  if (!Number.isFinite(ts)) return brand("dormant");
+  const ageDays = (now.getTime() - ts) / (24 * 60 * 60 * 1000);
+  if (ageDays <= ACTIVITY_ACTIVE_MAX_DAYS) return brand("active");
+  if (ageDays <= ACTIVITY_RECENT_MAX_DAYS) return brand("recent");
+  return brand("dormant");
+}
 
 /** Honest, codes-only reasons a worker is worth a reactivation nudge. */
 export type ReactivationReason =
@@ -73,7 +109,7 @@ export type ReactivationSignal =
   | {
       readonly code: "reactivation_candidate";
       /** Only the away band reaches here — never "active". */
-      readonly bucket: Exclude<ActivityBucket, "active">;
+      readonly bucket: "recent" | "dormant";
       /** At least one; the copy layer localizes each. */
       readonly reasons: readonly ReactivationReason[];
       /**
