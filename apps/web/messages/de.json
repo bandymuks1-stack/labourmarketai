@@ -2485,6 +2485,7 @@
         "invalid": "Ungültige Anfrage.",
         "notFound": "Unternehmen nicht gefunden.",
         "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+        "saving": "Wird gespeichert…",
         "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
       }
     },

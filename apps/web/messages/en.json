@@ -2485,6 +2485,7 @@
         "invalid": "Invalid request.",
         "notFound": "Company not found.",
         "needsMigration": "Couldn’t complete the action. Please try again.",
+        "saving": "Saving…",
         "error": "Something went wrong. Please try again."
       }
     },

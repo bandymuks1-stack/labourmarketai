@@ -60,6 +60,7 @@ export default async function AdminCompanyVerificationPage({
     statusNotFound: t("result.notFound"),
     statusNeedsMigration: t("result.needsMigration"),
     statusError: t("result.error"),
+    saving: t("result.saving"),
   };
 
   const requesterRoleLabel = (role: string | null): string => {

@@ -2485,6 +2485,7 @@
         "invalid": "Neteisinga užklausa.",
         "notFound": "Įmonė nerasta.",
         "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
+        "saving": "Išsaugoma…",
         "error": "Įvyko klaida. Pabandykite dar kartą."
       }
     },
