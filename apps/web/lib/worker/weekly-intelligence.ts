@@ -23,7 +23,8 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getWorkerCoreRow } from "../data/worker-core";
+import { getWorkerCoreRow, getWorkerSkillRows } from "../data/worker-core";
+import { readWorkerEntrySkillLinks } from "../journal/entry-skill-link-read";
 import { getWorkerJobRecommendations } from "../opportunities/recommendations";
 import {
   journalReportWindow,
@@ -123,10 +124,41 @@ export const getWeeklyPersonalIntelligence = cache(
     const supabase = await createClient();
     const todayIso = new Date().toISOString().slice(0, 10);
 
-    const [journal, recs] = await Promise.all([
+    const [journal, recs, skillRows, linkRead] = await Promise.all([
       readOwnWeeklyJournalFacts(supabase, worker.id, todayIso),
       getWorkerJobRecommendations(),
+      // Request-cached canonical worker_skills read (own rows) — carries the
+      // slug identity plus verified/source provenance.
+      getWorkerSkillRows(),
+      // DURABLE journal→skill links (own rows). `worker_skills.source` can
+      // stay 'work_journal' after the last link was removed (the source
+      // reconciliation is best-effort — skill-source-apply.ts names the link
+      // rows as the remaining truth), so backing is derived from the links,
+      // never from the loose source value.
+      readWorkerEntrySkillLinks(supabase, worker.id),
     ]);
+
+    // A failed link read is NOT an empty result: the signal becomes
+    // unavailable (null → omitted), never a guess.
+    let journalBackedSlugs: ReadonlySet<string> | null = null;
+    if (linkRead.ok) {
+      const linkedSkillIds = new Set(linkRead.rows.map((r) => r.skill_id));
+      const backed = new Set<string>();
+      for (const row of skillRows) {
+        const slug = row.skills?.slug;
+        if (typeof slug !== "string" || !slug) continue;
+        // Backed = a durable journal link exists, OR a manager really
+        // confirmed it (a recorded event, not a link-dependent flag).
+        if (
+          (row.skill_id !== null && linkedSkillIds.has(row.skill_id)) ||
+          row.verified === true ||
+          row.source === "manager_confirmed"
+        ) {
+          backed.add(slug);
+        }
+      }
+      journalBackedSlugs = backed;
+    }
 
     const opportunities =
       recs.kind === "ready"
@@ -151,7 +183,11 @@ export const getWeeklyPersonalIntelligence = cache(
 
     return {
       kind: "ready",
-      intelligence: deriveWeeklyPersonalIntelligence(journal, opportunities),
+      intelligence: deriveWeeklyPersonalIntelligence(
+        journal,
+        opportunities,
+        journalBackedSlugs,
+      ),
     };
   },
 );

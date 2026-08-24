@@ -1974,6 +1974,7 @@
       "newOpportunities": "Uut alates sinu viimasest vaatamisest: {count}.",
       "journalUnavailable": "Sinu tööpäevikut ei õnnestunud praegu lugeda.",
       "appearedThisWeek": "Viimase 7 päeva jooksul loodud päringud: {count}.",
+      "journalBackedMatches": "Sinu töökirjed toetavad juba neid oskusi sinu lähimates võimalustes: {skills}.",
       "skillsToAdd": "Oskused, mida sinu lähimad võimalused küsivad: {skills}."
     },
     "noWorkType": {

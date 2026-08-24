@@ -96,6 +96,10 @@ export async function WeeklyIntelligenceSection({
         return t("weekly.skillsToAdd", {
           skills: signal.skillSlugs.map(skillLabel).join(", "),
         });
+      case "journal_backed_matches":
+        return t("weekly.journalBackedMatches", {
+          skills: signal.skillSlugs.map(skillLabel).join(", "),
+        });
     }
   };
 

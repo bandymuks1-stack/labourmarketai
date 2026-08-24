@@ -92,6 +92,11 @@ export type WeeklyIntelligenceSignal =
   /** Demands posted in the trailing 7 days ("appeared this week" — a market
    *  fact, NEVER phrased as "new since you last looked"). */
   | { readonly code: "appeared_this_week"; readonly count: number }
+  /** Skills in the CURRENT top matches that the worker's own recorded work
+   *  already backs (worker_skills provenance: work_journal /
+   *  manager_confirmed / verified). Context-bound like missing_evidence —
+   *  the mechanism working, never a score. */
+  | { readonly code: "journal_backed_matches"; readonly skillSlugs: readonly string[] }
   /** Evidence gaps in the CURRENT top matches (context-bound, §19). */
   | { readonly code: "missing_evidence"; readonly skillSlugs: readonly string[] };
 
@@ -143,9 +148,35 @@ export function topMissingEvidenceSlugs(
   return out;
 }
 
+/**
+ * Distinct matched-skill slugs across the top recommendations that the
+ * worker's journal-backed skills already cover, basis order, capped (the
+ * same context-bound construction as `topMissingEvidenceSlugs`).
+ */
+export function topJournalBackedSlugs(
+  top: readonly JobRecommendation[],
+  journalBackedSkillSlugs: ReadonlySet<string>,
+  max: number = WEEKLY_TOP_MISSING_SKILLS_MAX,
+): readonly string[] {
+  const out: string[] = [];
+  for (const rec of top) {
+    for (const slug of rec.matchedSkillSlugs) {
+      if (journalBackedSkillSlugs.has(slug) && !out.includes(slug)) {
+        out.push(slug);
+      }
+      if (out.length >= max) return out;
+    }
+  }
+  return out;
+}
+
 export function deriveWeeklyPersonalIntelligence(
   journal: WeeklyJournalFacts,
   opportunities: WeeklyOpportunityFacts,
+  /** Slugs of the worker's skills with real work-journal backing (canonical
+   *  worker_skills provenance). `null` = the read is unavailable — the
+   *  signal is then omitted, never guessed. */
+  journalBackedSkillSlugs: ReadonlySet<string> | null = null,
 ): WeeklyPersonalIntelligence {
   const signals: WeeklyIntelligenceSignal[] = [];
 
@@ -186,6 +217,15 @@ export function deriveWeeklyPersonalIntelligence(
     const missing = topMissingEvidenceSlugs(opportunities.top);
     if (missing.length > 0) {
       signals.push({ code: "missing_evidence", skillSlugs: missing });
+    }
+    if (journalBackedSkillSlugs) {
+      const backed = topJournalBackedSlugs(
+        opportunities.top,
+        journalBackedSkillSlugs,
+      );
+      if (backed.length > 0) {
+        signals.push({ code: "journal_backed_matches", skillSlugs: backed });
+      }
     }
   }
 

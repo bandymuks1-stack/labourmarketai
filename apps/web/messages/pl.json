@@ -1974,6 +1974,7 @@
       "newOpportunities": "Nowe od Twojego ostatniego spojrzenia: {count}.",
       "journalUnavailable": "Nie udało się teraz odczytać Twojego dziennika pracy.",
       "appearedThisWeek": "Zapytania utworzone w ciągu ostatnich 7 dni: {count}.",
+      "journalBackedMatches": "Twoje wpisy pracy już wspierają te umiejętności w Twoich najbliższych możliwościach: {skills}.",
       "skillsToAdd": "Umiejętności, o które proszą Twoje najbliższe możliwości: {skills}."
     },
     "noWorkType": {

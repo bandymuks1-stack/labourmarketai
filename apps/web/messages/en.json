@@ -8070,6 +8070,7 @@
       "newOpportunities": "New since you last looked: {count}.",
       "journalUnavailable": "Your work journal could not be read right now.",
       "appearedThisWeek": "Inquiries created in the last 7 days: {count}.",
+      "journalBackedMatches": "Your recorded work already supports these skills in your closest matches: {skills}.",
       "skillsToAdd": "Skills your closest opportunities ask about: {skills}."
     },
     "saved": {
