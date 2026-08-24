@@ -355,6 +355,13 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // publisher's own text, under the owner's 2026-08-19 approval, quoted
     // verbatim in the record: "pridėk tik `1208` prie esamo `pullRequests`
     // sąrašo. Nekeisk ir nesilpnink pačių gate kriterijų."
+    // #1255 NARROWS the anonymous surface — the P0 identity/location boundary
+    // (owner MASTER ORDER 2026-08-24, quoted verbatim in the record: "add PR
+    // #1255 to those existing scoped waiver PR lists; add the dated
+    // explanatory comments" and nothing else). Anonymous cards/detail stop
+    // echoing raw titles that leaked employer names, cities and street
+    // addresses; attribution stops naming the source country; search stops
+    // matching the hidden title. Same surfaces, strictly less exposure.
     //
     // Widening the PR binding is the ONLY change each time: same axiom, same
     // six codes, same three surfaces, same expiry, same reason. Each PR's
@@ -362,7 +369,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // still bites. This stays an EXACT list — a `toContain` here would let the
     // next number drift in without a decision, which is the whole thing this
     // pin exists to prevent.
-    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208]);
+    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

@@ -641,6 +641,7 @@
     "currentSupply": "Nåværende verifiserte tilbud",
     "verifiedMarketData": "Verifiserte markedsdata",
     "dataSourceLabel": "Datakilde",
+    "dataSourceGeneric": "official public employment source",
     "opportunityStream": "Mulighetsstrøm",
     "evidenceVerifiedTitle": "Dokumentasjon verifisert",
     "evidenceVerifiedBody": "Menneskelig bekreftelse gjør registreringen til pålitelig dokumentasjon.",
@@ -4998,7 +4999,10 @@
     "empty": "Ingen avtaler registrert ennå.",
     "emptyFiltered": "Ingen avtaler samsvarer med disse filtrene.",
     "scopeNote": "Register på organisasjonssiden. Arbeidere ser ikke dette registeret.",
-    "attach": { "documentLabel": "Dokument som legges ved", "submit": "Legg ved dokument" },
+    "attach": {
+      "documentLabel": "Dokument som legges ved",
+      "submit": "Legg ved dokument"
+    },
     "baseDocument": "Basisdokument",
     "filters": {
       "type": "Type",

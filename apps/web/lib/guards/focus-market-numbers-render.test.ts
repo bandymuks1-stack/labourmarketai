@@ -111,8 +111,10 @@ describe("FOCUS market numbers come from the canonical snapshot", () => {
     const html = await render(LIVE_FIXTURE);
     expect(html).toContain("livingMarketReview.verifiedMarketData");
     expect(html).toContain("livingMarketReview.dataSourceLabel");
-    // Sweden appears as the SOURCE, resolved from the region code.
-    expect(html).toContain("Sweden");
+    // Owner directive 2026-08-24: the anonymous surface names only the KIND
+    // of source, never the country. The country name must NOT render.
+    expect(html).toContain("livingMarketReview.dataSourceGeneric");
+    expect(html).not.toContain("Sweden");
     // The reader's own stamp, not a date typed into a catalog.
     expect(html).toContain("2026");
     expect(html).not.toContain("landing.marketProof.asOfNote");

@@ -4481,6 +4481,7 @@
     "currentSupply": "Dabartinė patvirtinta pasiūla",
     "verifiedMarketData": "Patvirtinti rinkos duomenys",
     "dataSourceLabel": "Duomenų šaltinis",
+    "dataSourceGeneric": "oficialus viešas užimtumo šaltinis",
     "opportunityStream": "Galimybių srautas",
     "evidenceVerifiedTitle": "Įrodymai patvirtinti",
     "evidenceVerifiedBody": "Žmogaus patvirtinimas paverčia įrašą patikimu įrodymu.",
@@ -4717,7 +4718,11 @@
       "free": {
         "name": "Nemokamas",
         "tagline": "Pradėkite rinkoje.",
-        "features": ["1 projektas", "1 darbo poreikis", "Bendruomenės pagalba"]
+        "features": [
+          "1 projektas",
+          "1 darbo poreikis",
+          "Bendruomenės pagalba"
+        ]
       },
       "business": {
         "name": "Verslo",
@@ -4742,7 +4747,12 @@
       "enterprise": {
         "name": "Įmonių",
         "tagline": "Mastui ir kontrolei.",
-        "features": ["Neriboti projektai", "SSO", "SLA", "Skirta pagalba"]
+        "features": [
+          "Neriboti projektai",
+          "SSO",
+          "SLA",
+          "Skirta pagalba"
+        ]
       }
     },
     "faqTitle": "Kainų DUK",
@@ -13087,7 +13097,10 @@
     "empty": "Sutarčių dar neužregistruota.",
     "emptyFiltered": "Nė viena sutartis neatitinka šių filtrų.",
     "scopeNote": "Organizacijos pusės registras. Darbuotojams šis registras nerodomas.",
-    "attach": { "documentLabel": "Prisegamas dokumentas", "submit": "Prisegti dokumentą" },
+    "attach": {
+      "documentLabel": "Prisegamas dokumentas",
+      "submit": "Prisegti dokumentą"
+    },
     "baseDocument": "Pagrindinis dokumentas",
     "filters": {
       "type": "Tipas",

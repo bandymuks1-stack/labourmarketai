@@ -4481,6 +4481,7 @@
     "currentSupply": "Huidig geverifieerd aanbod",
     "verifiedMarketData": "Geverifieerde marktgegevens",
     "dataSourceLabel": "Gegevensbron",
+    "dataSourceGeneric": "officiële openbare arbeidsbron",
     "opportunityStream": "Kansenstroom",
     "evidenceVerifiedTitle": "Bewijs geverifieerd",
     "evidenceVerifiedBody": "Menselijke bevestiging maakt van de registratie betrouwbaar bewijs.",
@@ -4717,7 +4718,11 @@
       "free": {
         "name": "Gratis",
         "tagline": "Kom op de markt.",
-        "features": ["1 project", "1 personeelsvraag", "Communitysupport"]
+        "features": [
+          "1 project",
+          "1 personeelsvraag",
+          "Communitysupport"
+        ]
       },
       "business": {
         "name": "Business",
@@ -4742,7 +4747,12 @@
       "enterprise": {
         "name": "Enterprise",
         "tagline": "Voor schaal en controle.",
-        "features": ["Onbeperkt projecten", "SSO", "SLA", "Toegewijde support"]
+        "features": [
+          "Onbeperkt projecten",
+          "SSO",
+          "SLA",
+          "Toegewijde support"
+        ]
       }
     },
     "faqTitle": "Prijzen-FAQ",
@@ -13087,7 +13097,10 @@
     "empty": "Nog geen overeenkomsten geregistreerd.",
     "emptyFiltered": "Geen overeenkomsten voldoen aan deze filters.",
     "scopeNote": "Register aan organisatiezijde. Werknemers zien dit register niet.",
-    "attach": { "documentLabel": "Bij te voegen document", "submit": "Document bijvoegen" },
+    "attach": {
+      "documentLabel": "Bij te voegen document",
+      "submit": "Document bijvoegen"
+    },
     "baseDocument": "Basisdocument",
     "filters": {
       "type": "Type",

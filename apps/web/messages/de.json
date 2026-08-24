@@ -4481,6 +4481,7 @@
     "currentSupply": "Aktuell verifiziertes Angebot",
     "verifiedMarketData": "Verifizierte Marktdaten",
     "dataSourceLabel": "Datenquelle",
+    "dataSourceGeneric": "offizielle öffentliche Arbeitsmarktquelle",
     "opportunityStream": "Chancenstrom",
     "evidenceVerifiedTitle": "Nachweis verifiziert",
     "evidenceVerifiedBody": "Menschliche Bestätigung macht den Eintrag zu einem verlässlichen Nachweis.",
@@ -4717,7 +4718,11 @@
       "free": {
         "name": "Free",
         "tagline": "Auf den Markt kommen.",
-        "features": ["1 Projekt", "1 Personalbedarf", "Community-Support"]
+        "features": [
+          "1 Projekt",
+          "1 Personalbedarf",
+          "Community-Support"
+        ]
       },
       "business": {
         "name": "Business",
@@ -13092,7 +13097,10 @@
     "empty": "Noch keine Vereinbarungen registriert.",
     "emptyFiltered": "Keine Vereinbarungen entsprechen diesen Filtern.",
     "scopeNote": "Register auf Organisationsseite. Beschäftigten wird dieses Register nicht angezeigt.",
-    "attach": { "documentLabel": "Anzuhängendes Dokument", "submit": "Dokument anhängen" },
+    "attach": {
+      "documentLabel": "Anzuhängendes Dokument",
+      "submit": "Dokument anhängen"
+    },
     "baseDocument": "Basisdokument",
     "filters": {
       "type": "Typ",
