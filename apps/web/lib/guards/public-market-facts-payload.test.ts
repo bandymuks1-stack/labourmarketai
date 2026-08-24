@@ -104,6 +104,15 @@ describe("the read never fetches a column the payload must not carry", () => {
     ]);
   });
 
+  it("cannot take the opportunities board down with it", () => {
+    // The panel is ADDITIVE on a page real workers use to find work. A
+    // rejected promise in a server component takes the whole page with it, so
+    // an outage in an optional market section would cost someone their board.
+    // Every failure must be a named `unavailable` instead.
+    expect(src).toContain("try {");
+    expect(src).toContain('reason: "read_threw"');
+  });
+
   it("restates the browsable predicate rather than trusting RLS alone", () => {
     // RLS enforces `is_active` only. An expired-but-active ad is in the policy
     // and out of the board — the exact gap that made a landing-page count

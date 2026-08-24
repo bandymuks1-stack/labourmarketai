@@ -91,6 +91,25 @@ export async function getPublicMarketFacts(
   professionSlug: string,
   nowIso?: string,
 ): Promise<PublicMarketFactsResult> {
+  // THIS FUNCTION NEVER THROWS, and that is a hard requirement rather than
+  // defensiveness. Its one caller is an ADDITIVE panel on the opportunities
+  // board — a page that already works and that real workers use to find work.
+  // A rejected promise inside a server component takes the WHOLE page down, so
+  // an outage in an optional market panel would cost a worker their board.
+  //
+  // Every failure is therefore a named `unavailable`, and the panel renders
+  // nothing. The page loses a section and keeps everything else.
+  try {
+    return await readPublicMarketFacts(professionSlug, nowIso);
+  } catch {
+    return { kind: "unavailable", reason: "read_threw" };
+  }
+}
+
+async function readPublicMarketFacts(
+  professionSlug: string,
+  nowIso?: string,
+): Promise<PublicMarketFactsResult> {
   const slug = professionSlug.trim();
   if (slug === "") return { kind: "unavailable", reason: "no_profession" };
 
