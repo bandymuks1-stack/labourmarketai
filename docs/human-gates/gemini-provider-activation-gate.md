@@ -23,6 +23,12 @@ The smallest owner action that unblocks a first real run is **one grant row**,
 reproduced verbatim in "The decision" below. It unlocks **two** of the ten AI
 tasks. Everything else stays blocked, deliberately.
 
+And it will not make the product visibly do anything — **both** of the
+product's only two AI call sites carry `PERSONAL` data and stay refused by that
+same row. The grant buys a provable first run, not a working feature. The
+warning box under "The decision" has the evidence, and "What would actually put
+AI in front of a user" has the three routes that do.
+
 ---
 
 ## What already landed (no owner decision needed)
@@ -94,6 +100,30 @@ Adding this row to `AI_EGRESS_GRANTS` is the whole unblock:
 scope of work, headcount, timeframe, region. No natural person is described in
 either payload.
 
+> ### ⚠️ Read this before granting: it lights up nothing a user can see
+>
+> Verified 2026-08-24 by tracing every caller of the runtime. **The whole
+> product reaches AI through exactly two call sites:**
+>
+> | Call site | Agent key | Task type | Sensitivity |
+> |---|---|---|---|
+> | `lib/profile/cv-ai-structuring-actions.ts` | `worker_profile` | `extract_cv` | `PERSONAL` |
+> | `lib/journal/journal-ai-suggestions-actions.ts` | `work_journal` | `normalize_work_scope` | `PERSONAL` |
+>
+> Both are `PERSONAL`. **This grant refuses both.**
+>
+> And the two tasks it *does* permit have **no product caller at all**. Their
+> agent keys — `company_need`, `country_readiness`, `document_assistant` —
+> exist in the registry and in `AGENT_TASK_TYPES`, and nothing in `app/` or
+> `lib/` invokes them. They are modules without importers, which is a pattern
+> this repo has hit before and keeps mistaking for a shipped feature.
+>
+> So the honest consequence of adding this row alone is: **a first real Gemini
+> run becomes possible, and no user-visible AI feature starts working.**
+>
+> That is still worth doing — see below — but it must not be granted in the
+> expectation that the assistant switches on.
+
 **What it still refuses.** Everything at `PERSONAL` or above: CV extraction,
 match explanations, work-scope normalisation from journal entries, follow-up
 drafting, and message translation. Those stay blocked by the same row, because
@@ -142,6 +172,36 @@ profile, precisely so the promotion is conscious.
 
 ---
 
+## What would actually put AI in front of a user
+
+Since both wired surfaces are `PERSONAL`, exactly two routes reach them, and
+they are genuinely different decisions rather than two versions of one.
+
+**Route A — paid-tier Gemini, granted `PERSONAL`.** The vendor's own page says
+paid-tier content is *not* used to improve their products, which removes the
+objection that caps the free tier. This needs: confirmation the key is on a
+billed project (that is D8), a `PERSONAL` grant with a real legal basis — a DPA
+reference, since the platform is the GDPR controller for CVs and journal
+entries — and the accompanying `costClass` correction. It costs money per run,
+bounded by the ceilings already in place.
+
+**Route B — the `local` provider.** `data-egress.ts` exempts it outright:
+`locality: "local"` means no egress occurs, so there is nothing to permit, and
+it may serve `SENSITIVE_FREE_TEXT`. No grant, no vendor terms, no per-run cost,
+and it is what the free-first doctrine actually points at — *"free local → free
+tier → paid"* is the chain's own ordering. It needs a machine to run on and
+`AI_LOCAL_BASE_URL` + `AI_LOCAL_MODEL` set; `config-core.ts` already supports
+it keylessly and validates both.
+
+**Route C — build a surface for the tasks the free tier may serve.** Wire
+`company_need` or `document_assistant` to a real employer-facing flow. This is
+product work rather than a decision, and it is the only route where the free
+Gemini tier reaches a user at all.
+
+These are not ranked here. Which one is right depends on whether the owner
+wants AI value fastest (A), cheapest and most private (B), or wants the free
+tier to earn its place (C).
+
 ## After the grant — the remaining steps, in order
 
 None of these needs a further decision once the row is in.
@@ -156,11 +216,16 @@ None of these needs a further decision once the row is in.
    **Sequence matters.** `AI_PROVIDER_MODE=live` before the grant lands would
    move the runtime from `disabled` to live-and-refusing — every task erroring
    at the egress gate instead of degrading quietly. Set it last.
-4. Run `structure_future_work` through the canonical runtime
-   (`runAiCompletion` → `run-core` dispatch → the Gemini adapter). Not a direct
-   API script: the proof has to exercise the router, the sensitivity gate, the
-   cost ceiling and the `ai_runs` audit write, or it proves only that a key
-   exists.
+4. Run `structure_future_work` through the canonical runtime —
+   `runAiAgent("company_need", …)` → `run-core` dispatch → the Gemini adapter.
+   Not a direct API script: the proof has to exercise the router, the
+   sensitivity gate, the cost ceiling and the `ai_runs` audit write, or it
+   proves only that a key exists.
+
+   Be precise about what this proves. `company_need` has no UI, so this is a
+   genuine end-to-end proof of the **runtime** — real provider, real router,
+   real audit row — and it is *not* a user-facing feature working. Both
+   statements are true and neither should be reported as the other.
 5. Read the resulting `ai_runs` row for the real evidence: `provider`, `model_id`,
    `input_tokens`, `output_tokens`, `actual_cost_usd`, `latency_ms`,
    `blocked_reason IS NULL`.
