@@ -120,22 +120,25 @@ Nothing in this repository can observe that, and it changes two things:
 - *Billed* → content is not used for training, and a higher grant ceiling
   becomes arguable (a separate decision; not proposed here).
 
-### A latent gap this surfaced, worth knowing before granting
+That question is **already open and already recorded** — it is decision **D8**
+in `value-train-2-owner-decisions-v1.md`, which reached the same conclusion
+independently: `AI_PROVIDER_PROFILES` classes Gemini `paid` while the registry
+marks its models `freeTier: true`, the free-tier privacy cap keys off
+`costClass`, and *"which is correct depends on the actual billing arrangement,
+which is an owner fact, not derivable in code"*. D8 already states the decision
+as (a) confirm the paid arrangement and leave the profile `paid`, or
+(b) reclassify it `free_tier` so the cap binds.
 
-`data-egress.ts` documents a safety net: *"A free tier's ceiling is capped
-regardless of what the grant claims."* That net currently has **no live
-subject**. Every cloud provider in `AI_PROVIDER_PROFILES` is classed `paid`,
-including Gemini — its own test suite says so out loud
-(`data-sensitivity.test.ts`: *"nothing in the shipped profile table is
-free_tier today"*, so the free-tier cases have to inject their subject).
+This document does not re-open D8; it records that D8 is now **on the critical
+path** rather than latent. Two things changed: the credential is in place, and
+the price is verified — so D8 and the grant row are the only things left.
 
-Consequence: if the key is on the free allowance and a future grant ever raised
-Gemini above `LOW_RISK_PROJECT_DATA`, the free-tier cap would **not** engage,
-because the profile says `paid`. At the ceiling proposed here it makes no
-difference — `LOW_RISK_PROJECT_DATA` is exactly the cap either way — so this is
-not a reason to delay the grant. It is a reason to fix the classification in the
-same change if the owner confirms the free tier, and two guard tests are written
-to go red when someone does, precisely so the promotion is conscious.
+Worth stating plainly for whoever answers it: at the ceiling proposed here the
+two branches of D8 make **no difference**, because `LOW_RISK_PROJECT_DATA` is
+the cap either way. So D8 is not a reason to delay this grant. It becomes
+load-bearing only if a later grant tries to raise Gemini above that class, and
+two guard tests are written to go red the moment someone reclassifies the
+profile, precisely so the promotion is conscious.
 
 ---
 
