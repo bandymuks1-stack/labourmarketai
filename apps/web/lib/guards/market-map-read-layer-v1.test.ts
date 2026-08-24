@@ -637,7 +637,7 @@ describe("NO new DB migration in this PR", () => {
     // (20260823160000, paired rollback). RED by route (grants), deliberately
     // NOT human-gate-annotated, ships UNAPPLIED. Still nothing from the
     // market-map read layer itself.
-    expect(count).toBeLessThanOrEqual(237);
+    expect(count).toBeLessThanOrEqual(238);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -1013,6 +1013,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // RLS table, no existing object touched, no DML. Marker added in the
       // same commit as the recorded decision, per this gate's procedure.
       "20260823160000_notification_preferences_v1.sql",
+      // 2026-08-24: NULL-safe owner guards v2 gained its marker on the owner's
+      // MASTER ORDER §4 security directive — a security agent proved a dormant
+      // NULL-flip authorization bypass still lives in six SECURITY DEFINER
+      // functions (organizations.owner_profile_id is nullable with ON DELETE
+      // SET NULL, so deleting an owner's auth account arms it). RED by route —
+      // it replaces six SECURITY DEFINER bodies with one NULL-safe guard each
+      // (v_owner = uid → (v_owner is not null and v_owner = uid)), creating and
+      // dropping nothing and running no DML. The marker lets CI classify it;
+      // it ships UNAPPLIED behind needs-human-gate for the narrow RED apply
+      // approval the master order §4 prescribes.
+      "20260824130000_null_safe_owner_guards_v2.sql",
     ]);
   });
 

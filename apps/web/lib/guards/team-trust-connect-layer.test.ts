@@ -241,7 +241,16 @@ describe("team enquiries migration (20260716131000) — booking-pattern clone, n
 
   it("all seven new function names are NEW to the repo — never defined by a prior migration", () => {
     const others = readdirSync(MIGRATIONS_DIR).filter(
-      (f) => f.endsWith(".sql") && f !== DETAILS_FILE && f !== ENQUIRIES_FILE,
+      (f) =>
+        f.endsWith(".sql") &&
+        f !== DETAILS_FILE &&
+        f !== ENQUIRIES_FILE &&
+        // 2026-08-24 NULL-safe owner guards v2 re-defines respond_team_enquiry_v1,
+        // save_team_details_v1 and get_team_capability_summary_v1 to close a
+        // NULL-flip authorization bypass (owner MASTER ORDER §4). A CREATE OR
+        // REPLACE that only hardens the owner comparison is the legitimate,
+        // documented second definition point — not a parallel implementation.
+        f !== "20260824130000_null_safe_owner_guards_v2.sql",
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {

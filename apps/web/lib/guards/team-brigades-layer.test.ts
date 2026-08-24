@@ -99,7 +99,14 @@ describe("teams migration — additive typed rows on the EXISTING organizations 
 
   it("both function names are NEW to the repo — never defined by a prior migration", () => {
     const others = readdirSync(MIGRATIONS_DIR).filter(
-      (f) => f.endsWith(".sql") && f !== MIGRATION_FILE,
+      (f) =>
+        f.endsWith(".sql") &&
+        f !== MIGRATION_FILE &&
+        // 2026-08-24 NULL-safe owner guards v2 re-defines
+        // get_team_capability_summary_v1 (among six) to close a NULL-flip
+        // authorization bypass (owner MASTER ORDER §4). The documented
+        // hardening re-definition is not a parallel implementation.
+        f !== "20260824130000_null_safe_owner_guards_v2.sql",
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {
