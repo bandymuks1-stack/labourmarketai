@@ -23,8 +23,6 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { NotificationEventType } from "./events";
-
 type DbClient = Pick<SupabaseClient, "from">;
 
 export type NotificationChannel = "in_app" | "email";
@@ -70,17 +68,22 @@ export function resolveChannelEnabled(
 }
 
 /** The effective on/off for every channel of one type — the shape a settings
- *  row renders and a dispatcher checks. */
+ *  row renders and a dispatcher checks. `notificationType` is a free slug: the
+ *  known code-side types are `NotificationEventType`, but the resolver also
+ *  carries digest-family / registry-derived slugs the free-slug column allows
+ *  (§10), so it is typed as `string`. */
 export interface EffectiveTypePreference {
-  readonly notificationType: NotificationEventType;
+  readonly notificationType: string;
   readonly channels: Readonly<Record<NotificationChannel, boolean>>;
 }
 
 /** Resolve the effective preference for each requested type across all
- *  channels, applying the defaults where no row exists. Pure. */
+ *  channels, applying the defaults where no row exists. Pure. Accepts any slug
+ *  the caller derives (the code-side `NotificationEventType` set OR a
+ *  registry/digest-family slug), never a hardcoded enum of its own. */
 export function resolveEffectivePreferences(
   rows: readonly NotificationPreferenceRow[],
-  types: readonly NotificationEventType[],
+  types: readonly string[],
 ): EffectiveTypePreference[] {
   return types.map((notificationType) => ({
     notificationType,
@@ -101,17 +104,26 @@ export type PreferencesReadResult =
   | { readonly kind: "unexpected_error"; readonly code: string };
 
 /**
- * The caller's OWN preference rows (RLS scopes the read to `auth.uid()`).
- * Degrades honestly if the table is somehow absent — never throws, never
- * fabricates a default row (the resolver applies defaults for missing rows).
+ * A single profile's preference rows, ALWAYS filtered by `profileId`.
+ *
+ * The explicit filter is load-bearing, not redundant: under an RLS-scoped
+ * (own-rows) client it simply matches the policy, but the email dispatcher
+ * reads with a SERVICE-ROLE client that BYPASSES RLS — an unfiltered select
+ * would then return every profile's rows, and because the mapper drops
+ * `profile_id`, `resolveChannelEnabled` could read a STRANGER'S `enabled=true`
+ * as this recipient's consent and email someone who never opted in. So the
+ * scope is enforced here, on both paths. Degrades honestly if the table is
+ * absent; never throws; never fabricates a default row.
  */
-export async function readMyNotificationPreferences(
+export async function readNotificationPreferencesFor(
   client: DbClient,
+  profileId: string,
 ): Promise<PreferencesReadResult> {
   try {
     const { data, error } = await client
       .from("notification_preferences")
-      .select("notification_type, channel, enabled");
+      .select("notification_type, channel, enabled")
+      .eq("profile_id", profileId);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };

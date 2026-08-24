@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   NOTIFICATION_CHANNEL_DEFAULTS,
-  readMyNotificationPreferences,
+  readNotificationPreferencesFor,
   resolveChannelEnabled,
   resolveEffectivePreferences,
   setNotificationPreference,
@@ -49,19 +49,21 @@ function fakeClient(opts: {
   selectResult?: { data: unknown; error: { code?: string } | null };
   upsertResult?: { error: { code?: string } | null };
 }) {
+  const selectResult = opts.selectResult ?? { data: [], error: null };
   return {
     from() {
       return {
-        select: () => Promise.resolve(opts.selectResult ?? { data: [], error: null }),
+        // reader chains .select(...).eq("profile_id", id)
+        select: () => ({ eq: () => Promise.resolve(selectResult) }),
         upsert: () => Promise.resolve(opts.upsertResult ?? { error: null }),
       };
     },
   } as never;
 }
 
-describe("readMyNotificationPreferences", () => {
+describe("readNotificationPreferencesFor", () => {
   it("maps rows and drops any row with an unknown channel", async () => {
-    const r = await readMyNotificationPreferences(
+    const r = await readNotificationPreferencesFor(
       fakeClient({
         selectResult: {
           data: [
@@ -71,6 +73,7 @@ describe("readMyNotificationPreferences", () => {
           error: null,
         },
       }),
+      "p1",
     );
     expect(r.kind).toBe("ok");
     if (r.kind === "ok") {
@@ -81,10 +84,29 @@ describe("readMyNotificationPreferences", () => {
   });
 
   it("a missing table degrades to feature_unavailable, never throws", async () => {
-    const r = await readMyNotificationPreferences(
+    const r = await readNotificationPreferencesFor(
       fakeClient({ selectResult: { data: null, error: { code: "42P01" } } }),
+      "p1",
     );
     expect(r.kind).toBe("feature_unavailable");
+  });
+
+  it("always filters by the given profile id (safe under service-role too)", async () => {
+    // The fake asserts .eq is the terminal call; a reader that forgot the
+    // filter would call .select() and await it directly, throwing here.
+    let eqArg: unknown = null;
+    const client = {
+      from: () => ({
+        select: () => ({
+          eq: (_col: string, id: string) => {
+            eqArg = id;
+            return Promise.resolve({ data: [], error: null });
+          },
+        }),
+      }),
+    } as never;
+    await readNotificationPreferencesFor(client, "profile-42");
+    expect(eqArg).toBe("profile-42");
   });
 });
 
