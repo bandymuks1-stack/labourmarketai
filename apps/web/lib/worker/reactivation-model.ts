@@ -5,20 +5,28 @@
  *   REGISTERED → PROFILE CHECK → STALE/MISSING SIGNAL → PERSONALIZED NUDGE →
  *   RETURN → UPDATE → JOURNAL → FRESH MATCHING → OPPORTUNITY.
  * This module is the decision core of the first three steps: given who is away
- * (the `profile-freshness` bucket) and what is REALLY true for them (the
+ * (a real ACCOUNT-ACTIVITY bucket) and what is REALLY true for them (the
  * already-derived `WeeklyPersonalIntelligence`), it decides whether the worker
  * is worth a reactivation nudge and, if so, carries only HONEST signals for the
  * copy layer to localize.
  *
- * It creates no second matching engine, no second journal read, and no second
- * freshness computation — it composes the two canonical pure modules
- * (`lib/scouting/profile-freshness`, `lib/worker/weekly-intelligence-model`).
+ * THE AUDIENCE SIGNAL (binding). `bucket` MUST come from real account activity
+ * — last session / sign-in (e.g. `auth.users.last_sign_in_at`, read by the
+ * service-role dispatcher). It must NOT be the `lib/scouting/profile-freshness`
+ * bucket: that reads `workers.updated_at` (profile-EDIT recency), an
+ * employer-discovery signal — a frequent visitor who has not edited their
+ * profile would read "dormant" and be nudged wrongly, and a recent edit would
+ * suppress a genuinely-absent account. The type is a plain active/recent/
+ * dormant vocabulary; the SOURCE is what must be an activity signal.
+ *
+ * It creates no second matching engine and no second journal read — the "what
+ * is true" half composes the canonical `lib/worker/weekly-intelligence-model`.
  * Delivery is NOT here: a nudge rides the existing notification spine
  * (`lib/notifications/weekly-digest-emitter` pattern) once consent + a channel
  * exist; this module only decides the payload.
  *
  * HONESTY RULES (binding, tested):
- *  - `active` profiles are NEVER a reactivation audience — the weekly digest is
+ *  - `active` accounts are NEVER a reactivation audience — the weekly digest is
  *    theirs; reactivation targets the away band (`recent`/`dormant`).
  *  - Every reason is backed by a REAL weekly signal. `opportunityCount` is
  *    copied straight from the `matching_opportunities` signal — never invented,
@@ -29,11 +37,54 @@
  *
  * Pure. No IO, no env, no server-only. Types only from other pure modules.
  */
-import type { LastActiveBucket } from "../scouting/profile-freshness";
 import type {
   WeeklyPersonalIntelligence,
   WeeklyMatchExemplar,
 } from "./weekly-intelligence-model";
+
+declare const ACTIVITY_BRAND: unique symbol;
+
+/**
+ * How recently the ACCOUNT was actually active (last session / sign-in) —
+ * NOT profile-edit recency. BRANDED on purpose: a plain active/recent/dormant
+ * string (e.g. the `profile-freshness` `LastActiveBucket`) is structurally
+ * NOT assignable to this type, so the only way to obtain one is through
+ * `accountActivityBucket`, which derives it from a real last-active timestamp.
+ * That makes the "must be account activity" rule a compile-time guarantee, not
+ * just a docblock (Codex #1263 review).
+ */
+export type ActivityBucket = ("active" | "recent" | "dormant") & {
+  readonly [ACTIVITY_BRAND]: true;
+};
+
+/** How long since the last account activity still counts as active / recent. */
+export const ACTIVITY_ACTIVE_MAX_DAYS = 30;
+export const ACTIVITY_RECENT_MAX_DAYS = 90;
+
+/**
+ * The ONLY constructor of an `ActivityBucket`: derive it from the account's
+ * real last-active timestamp (last session / sign-in — e.g.
+ * `auth.users.last_sign_in_at`, read by the service-role dispatcher). Null /
+ * unparseable / future-garbage → `dormant` (fail conservative, never active).
+ * A `profile-freshness` result cannot be passed here — it is a plain string,
+ * and this function takes a timestamp, not a bucket.
+ */
+export function accountActivityBucket(
+  lastActiveAtIso: string | null | undefined,
+  now: Date = new Date(),
+): ActivityBucket {
+  const brand = (v: "active" | "recent" | "dormant"): ActivityBucket =>
+    v as ActivityBucket;
+  if (typeof lastActiveAtIso !== "string" || lastActiveAtIso.trim() === "") {
+    return brand("dormant");
+  }
+  const ts = Date.parse(lastActiveAtIso);
+  if (!Number.isFinite(ts)) return brand("dormant");
+  const ageDays = (now.getTime() - ts) / (24 * 60 * 60 * 1000);
+  if (ageDays <= ACTIVITY_ACTIVE_MAX_DAYS) return brand("active");
+  if (ageDays <= ACTIVITY_RECENT_MAX_DAYS) return brand("recent");
+  return brand("dormant");
+}
 
 /** Honest, codes-only reasons a worker is worth a reactivation nudge. */
 export type ReactivationReason =
@@ -58,7 +109,7 @@ export type ReactivationSignal =
   | {
       readonly code: "reactivation_candidate";
       /** Only the away band reaches here — never "active". */
-      readonly bucket: Exclude<LastActiveBucket, "active">;
+      readonly bucket: "recent" | "dormant";
       /** At least one; the copy layer localizes each. */
       readonly reasons: readonly ReactivationReason[];
       /**
@@ -80,12 +131,12 @@ export type ReactivationSignal =
 
 /**
  * Decide whether a registered worker is a reactivation candidate, and with what
- * honest signals. Composes the freshness bucket (who is away) with the already
+ * honest signals. Composes the account-activity bucket (who is away) with the already
  * derived weekly intelligence (what is really true). No IO; no fabricated
  * numbers — every reason is backed by a real weekly signal.
  */
 export function deriveReactivationSignal(
-  bucket: LastActiveBucket,
+  bucket: ActivityBucket,
   intelligence: WeeklyPersonalIntelligence,
 ): ReactivationSignal {
   // Active users are not a reactivation audience — the weekly digest is theirs.
