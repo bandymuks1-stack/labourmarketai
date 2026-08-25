@@ -75,16 +75,7 @@ export async function generateMetadata({
   const preview = await getPublicVacancyPreview(id);
 
   if (preview === "not_provisioned" || preview === null) {
-    // Still noindex — but the browser tab, the share card and the history
-    // entry are user-visible surfaces, and an em-dash is not a title. The
-    // localized generic label says the same "nothing specific to show here"
-    // in words a person can read (§11: no raw placeholder glyphs in public
-    // surfaces). Reveals nothing: it is the same anonymous label a live
-    // vacancy without an occupation already carries.
-    return {
-      title: GENERIC_TITLE[active],
-      robots: { index: false, follow: false },
-    };
+    return { title: "—", robots: { index: false, follow: false } };
   }
 
   // Owner directive 2026-08-24: the raw title is member-only (it embeds
