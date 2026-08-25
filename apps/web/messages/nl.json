@@ -11537,7 +11537,10 @@
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",
         "changeInsteadOf": "{next} (in plaats van {previous})"
-      }
+      },
+      "adminRouteHint": "Hier wordt dat geregeld:",
+      "adminApprovalsChip": "Goedkeuringen",
+      "adminRequestsChip": "Verzoeken"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

@@ -54,6 +54,13 @@ const CHAT_KEYS = [
   "messagesHint",
   "reminderBlocked",
   "translateBlocked",
+  // The administration areas that now open on an explicit ?area= instead
+  // of unrolling under every visit to /dashboard/network. Gating a surface
+  // is only half the job: these are how the sentences that mean them still
+  // reach them.
+  "adminRouteHint",
+  "adminApprovalsChip",
+  "adminRequestsChip",
   "writeEmployerHint",
   // W7 slice 2 — intent-aware attach.
   "attachChoice",

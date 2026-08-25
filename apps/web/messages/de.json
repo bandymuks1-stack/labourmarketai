@@ -11537,7 +11537,10 @@
         "chipServices": "Dienstleistungen öffnen",
         "corrected": "Aktualisiert: {changes}.",
         "changeInsteadOf": "{next} (statt {previous})"
-      }
+      },
+      "adminRouteHint": "Hier wird das verwaltet:",
+      "adminApprovalsChip": "Freigaben",
+      "adminRequestsChip": "Anträge"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
