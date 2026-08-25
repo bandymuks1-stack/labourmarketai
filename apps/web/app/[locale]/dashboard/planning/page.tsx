@@ -141,21 +141,22 @@ export default async function PlanningPage({
   // carry (bookings.status.*, tasks.status.*, planning.*Status.*).
   const tAll = await getTranslations();
 
-  const result = await getPlanning({
-    rangeStart: range.start,
-    rangeEnd: range.end,
-  });
-
   // Workload strip (week + agenda views): planned committed DAYS vs recorded
   // journal HOURS per Monday-started week — two facts in their own units,
   // never converted into each other. Actual hours come from the SAME canonical
   // truth timesheets freeze (`journal_entry_metrics`, via
   // lib/journal/work-time — owner ruling 2026-08-18), read bounded over the
   // visible range; a failed read degrades to no strip, never to fake bars.
+  //
+  // Both reads take ONLY `range`, which is derived from the URL above — the
+  // hours read never consulted the plan — and `showWorkload` is decided by
+  // `view` alone. So they travel together instead of one after the other, and
+  // the strip is still not fetched at all on the views that do not show it.
   const showWorkload = view === "week" || view === "agenda";
-  const workloadActuals = showWorkload
-    ? await getMyJournalWorkHours(range.start, range.end)
-    : null;
+  const [result, workloadActuals] = await Promise.all([
+    getPlanning({ rangeStart: range.start, rangeEnd: range.end }),
+    showWorkload ? getMyJournalWorkHours(range.start, range.end) : null,
+  ]);
   const workloadWeeks =
     result.status === "ok" && workloadActuals?.status === "ok"
       ? buildWorkloadWeeks(

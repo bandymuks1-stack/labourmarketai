@@ -32,7 +32,15 @@ const VACANCY_READ = join(web, "lib", "vacancy-store", "vacancy-read.ts");
 const LOADER = join(web, "lib", "opportunities", "load-worker-opportunities.ts");
 const WORKSPACE = join(web, "app", "[locale]", "dashboard", "opportunities", "page.tsx");
 
-const read = (p: string) => readFileSync(p, "utf8");
+/**
+ * LINE ENDINGS NORMALISED. These assertions match source text that spans a
+ * newline (`"listSavedPublicVacancyIds(\n    supabase,"`). Every file in this
+ * repo is checked out CRLF on Windows, so the literal never matched there and
+ * this guard failed for every Windows developer while CI (Linux) stayed
+ * green — a guard that only runs in one place is not a guard. What is being
+ * asserted is the CODE, never the line-ending style.
+ */
+const read = (p: string) => readFileSync(p, "utf8").replace(/\r\n/g, "\n");
 
 /**
  * Code and rendered strings only — COMMENTS STRIPPED.
@@ -45,6 +53,7 @@ const read = (p: string) => readFileSync(p, "utf8");
  */
 const readCode = (p: string) =>
   readFileSync(p, "utf8")
+    .replace(/\r\n/g, "\n")
     .replace(/\/\*[\s\S]*?\*\//g, " ")
     .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
 

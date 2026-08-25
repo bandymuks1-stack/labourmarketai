@@ -48,6 +48,7 @@ export type ConversationIntent =
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
   | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
+  | "company-overview" // "kas vyksta mano įmonėje?" — the company hub
   // ── V9 value-intent: a stated OFFER of value (goods to sell, free
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
   //    refines it; the router only opens the door. ─────────────────────────
@@ -150,6 +151,21 @@ const RULES: IntentRule[] = [
       // hours/worked pairing outweighs log-work's verb+today signals.
       p("(kiek|how\\s+(many|much)|сколько)\\s*.{0,24}(valand|hour|час)", 7),
       p("(kiek|how\\s+(many|much)|сколько)\\s*.{0,24}(dirbau|dirbome|worked|работал)", 7),
+      // The same rule for the WHAT question. "Ką šiandien dariau?" asks what
+      // was RECORDED; it matched calendar-view's (ką + šiandien) pairing and
+      // came back with the day's PLAN — the future answering a question about
+      // the past. Same shape as the hours question above: an interrogative
+      // plus a past-tense doing-verb is a journal read, and it outweighs the
+      // today-pairing. "Ką šiandien turiu padaryti" has no past-tense verb
+      // and still reads the day.
+      // The interrogative is WORD-BOUNDED on both sides. Folded, "ką" is
+      // "ka" — an unbounded alternative matches inside "va|ka|r", so
+      // "vakar dirbau 8 valandas" (a plain work log) was pulled into the
+      // journal read. The boundary is what makes this a question test.
+      p(
+        "\\b(ką|what|что)\\b\\s*.{0,24}(dariau|dirbau|dirbome|nuveikiau|did\\s+i\\s+do|делал|сделал)",
+        7,
+      ),
     ],
   },
   {
@@ -182,6 +198,16 @@ const RULES: IntentRule[] = [
       // never a reason to tell somebody their projects do not exist.
       p("(parodyk|rodyk|show|list|\\u043f\\u043e\\u043a\\u0430\\u0436\\u0438|zeig)\\s*.{0,15}(projekt|project|\\u043f\\u0440\\u043e\\u0435\\u043a\\u0442)", 5),
       p("(mano|my|\\u043c\\u043e\\u0438|meine)\\s+(projekt|project|\\u043f\\u0440\\u043e\\u0435\\u043a\\u0442)", 5),
+      // "Kas vyksta mano objekte?" — an OBJEKTAS is a project in this
+      // product, and the sentence is a QUESTION about it. It used to reach
+      // log-work on the bare `objekt` stem (weight 1) and open the work-log
+      // flow: the person asked what is happening and was handed a form to
+      // write down hours. Asking about a site is opening it. The "kas vyksta"
+      // prefix is required, so "dirbau objekte" still records work.
+      p(
+        "(kas\\s+vyksta|kas\\s+naujo|what.{0,12}(happening|going\\s+on)|что\\s+происходит|was\\s+passiert)\\s*.{0,20}(objekt|statyb|projekt|project|объект|проект)",
+        6,
+      ),
       p("\\bprojekt(ai|us|ų|uose)\\b", 3),
       p("\\bprojects\\b", 3),
       p("\\b\\u043f\\u0440\\u043e\\u0435\\u043a\\u0442(\\u044b|\\u043e\\u0432|\\u0430\\u0445)\\b", 3),
@@ -199,9 +225,41 @@ const RULES: IntentRule[] = [
       p("кандидат", 5),
       p("\\bcandidates?\\b", 5),
       p("(find|search\\s+for|show|list)\\s+(me\\s+)?(the\\s+)?(workers|people)", 6),
-      p("(surask|parodyk|rodyk|peržiūrėk)\\s*.{0,12}(darbuotoj|žmoni)", 6),
-      p("(найди|покажи)\\s*.{0,12}(работник)", 6),
+      // The gap between the verb and the noun was 12 characters, which fits
+      // "man " but not an adjective: "parodyk tinkamiausius žmones šitam
+      // darbui" — the employer's most natural way to ask — put 15 characters
+      // between "parodyk" and "žmones" and classified as `unknown`. One
+      // qualifier is normal speech, so the window holds one.
+      // …and the noun stem was `žmoni`, which does not occur in "žmones" —
+      // the ordinary plural. Only "žmonių"/"žmonėms" ever matched, so the
+      // most natural phrasing missed on the stem as well as on the gap.
+      p("(surask|parodyk|rodyk|peržiūrėk)\\s*.{0,24}(darbuotoj|žmon)", 6),
+      p("(найди|покажи)\\s*.{0,24}(работник)", 6),
       p("\\bscouting\\b", 4),
+    ],
+  },
+  {
+    /**
+     * "Kas vyksta mano įmonėje?" — the owner named this sentence and it
+     * scored 0 on every rule, so the product's own operator asking about
+     * their own company got the not-understood menu.
+     *
+     * It resolves the way `admin-approvals` does: a hint plus ONE chip to the
+     * canonical screen that already answers it (/dashboard/company). Chat is
+     * a navigation layer over the same product, not a second company view —
+     * so no new surface, no new read model, and no new strings (the chip
+     * label `chipCompanyHub` already exists in all eleven locales).
+     *
+     * The company noun is REQUIRED, so "kas vyksta mano objekte" still opens
+     * the project and "kas šiandien pasikeitė" still reads the day.
+     */
+    intent: "company-overview",
+    patterns: [
+      p(
+        "(kas\\s+vyksta|kas\\s+naujo|what.{0,12}(happening|going\\s+on)|что\\s+происходит|was\\s+passiert)\\s*.{0,20}(įmon|organizacij|company|компани|firma)",
+        6,
+      ),
+      p("(kaip\\s+sekasi|how\\s+is)\\s*.{0,16}(įmon|company|компани)", 5),
     ],
   },
   {
@@ -327,6 +385,15 @@ const RULES: IntentRule[] = [
       // the journal belong here for the same reason.
       p("(žurnal|journal|журнал|tagebuch|dagboek)", 2),
       p("(įrašyk\\s+darb|log\\s+work|record\\s+work|записать\\s+работу)", 2),
+      // ADDING work is recording it, not searching for it. "Pridėk šiandienos
+      // darbą" scored 0 here and 1 on find-work (whose noun list holds a bare
+      // "darbą"), so a person asking to write down what they did today was
+      // answered with a JOB SEARCH — the opposite of the request, on the
+      // product's most-used worker action. The add-verbs carry weight 4 so
+      // the sentence cannot be pulled back by a bare noun match.
+      p("(pridėk|pridėti|pridedu|įdėk|įtrauk)\\s*.{0,20}darb", 4),
+      p("(add|enter)\\s*.{0,20}(work|hours)", 4),
+      p("(добавь|добавить)\\s*.{0,20}(работ|час)", 4),
     ],
   },
   {
