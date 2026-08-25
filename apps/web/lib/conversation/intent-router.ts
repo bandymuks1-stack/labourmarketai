@@ -40,6 +40,8 @@ export type ConversationIntent =
   | "open-project" // "atidaryk šį projektą"
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "context" // "ką tu apie mane žinai?"
+  | "opportunities" // "kokias galimybes man gali pasiūlyti?" — the OWN board
+  | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
@@ -168,6 +170,19 @@ const RULES: IntentRule[] = [
       // needed, or "Open this project" silently classifies as unknown.
       p("(atidaryk|atidaryti|atverk|open|открой|öffne)\\s*.{0,15}(projekt|project|проект)", 5),
       p("(šį|šitą|this|этот)\\s+(projekt|project|проект)", 4),
+      // ASKING TO SEE THEM IS THE SAME INTENT AS OPENING ONE. "Parodyk mano
+      // projektus" / "mano projektai" / "show my projects" scored 0 and hit
+      // the generic fallback (owner audit defect D) because only the OPEN
+      // verbs were listed. `runOpenProject` already answers a nameless
+      // request by listing the real candidates, and `listManagedProjects` is
+      // RLS-scoped, NOT workspace-scoped -- so the answer spans every
+      // organization the person may manage. Being in the personal space is
+      // never a reason to tell somebody their projects do not exist.
+      p("(parodyk|rodyk|show|list|\\u043f\\u043e\\u043a\\u0430\\u0436\\u0438|zeig)\\s*.{0,15}(projekt|project|\\u043f\\u0440\\u043e\\u0435\\u043a\\u0442)", 5),
+      p("(mano|my|\\u043c\\u043e\\u0438|meine)\\s+(projekt|project|\\u043f\\u0440\\u043e\\u0435\\u043a\\u0442)", 5),
+      p("\\bprojekt(ai|us|ų|uose)\\b", 3),
+      p("\\bprojects\\b", 3),
+      p("\\b\\u043f\\u0440\\u043e\\u0435\\u043a\\u0442(\\u044b|\\u043e\\u0432|\\u0430\\u0445)\\b", 3),
     ],
   },
   {
@@ -193,6 +208,53 @@ const RULES: IntentRule[] = [
       p("(ką\\s+tu\\s+(apie\\s+mane\\s+)?žinai|what\\s+do\\s+you\\s+know|что\\s+ты\\s+знаешь)", 5),
       p("(kokiame\\s+kontekst|current\\s+context|мой\\s+контекст)", 4),
       p("(kur\\s+aš\\s+dabar\\s+esu|where\\s+am\\s+i\\s+now)", 4),
+    ],
+  },
+  {
+    // THE PRODUCT'S OWN CENTRAL NOUN. The worker board is literally called
+    // "Man tinkamos galimybės", yet "galimybė" / "opportunity" appeared
+    // NOWHERE in this table — so "kokias galimybes man gali pasiūlyti?"
+    // scored 0 and fell through to the generic four-item fallback, which is
+    // exactly the reply the owner audit recorded (defect E). A person must
+    // never have to learn our internal wording to reach the board that
+    // carries their matches. Routed to the SAME `runFindWork` workflow the
+    // search sentence uses — one matching engine, one result surface.
+    intent: "opportunities",
+    patterns: [
+      p("\\bgalimyb", 4), // lt — galimybė / galimybės / galimybių
+      p("\\bopportunit", 4), // en
+      p("возможност", 4), // ru
+      p("\\bmöglichkeit", 4), // de
+      p("(mogelijkhed|\\bkansen\\b)", 4), // nl
+      p("\\bmuligheder\\b", 4), // da/no
+      p("\\bvõimalus", 4), // et
+      p("\\biespēj", 4), // lv
+      p("\\bmożliwoś", 4), // pl
+      // "what suits me / what is there for me" — the same question without
+      // the noun. Deliberately NOT "tinkamus darbus", which is a SEARCH and
+      // stays in find-work.
+      p("(kas|ką)\\s+man\\s+tinka", 3),
+      p("(what|which)\\s+.{0,12}(suits?|fits?)\\s+me", 3),
+      p("что\\s+мне\\s+подходит", 3),
+    ],
+  },
+  {
+    // "Kas susidomėjo mano poreikiu?" — the employer's half of the interest
+    // loop. Before this rule the sentence matched `need-workers` on the bare
+    // stem `poreik` (weight 2) and OPENED THE DEMAND-CREATION FORM: an
+    // employer asking who raised a hand was handed a blank new-demand form
+    // (owner audit defect C). The interest stems outweigh that decisively.
+    // Both sides say it: a worker asking the same thing gets their own board,
+    // where "Mano susidomėjimai" carries the company's answer.
+    intent: "interest-inbox",
+    patterns: [
+      p("susidomėj", 6), // lt — susidomėjo / susidomėjimas / susidomėjimų
+      p("заинтересовал", 6), // ru
+      p("(who|kas)\\s+.{0,24}(interested|responded)", 6),
+      p("\\binterested\\s+in\\s+(my|our)\\b", 6),
+      p("\\binteresse\\s+(an|für)\\b", 5), // de
+      p("\\bshowed\\s+interest", 6),
+      p("(kas|ar\\s+kas)\\s+.{0,24}(atsakė|atsiliepė)", 5),
     ],
   },
   {
@@ -300,6 +362,13 @@ const RULES: IntentRule[] = [
       p("найди", 3),
       p("ищу", 3),
       p("(darbo|darbą)\\b", 1),
+      // "Surask man tinkamus darbus" scored 0: `\brask\b` does not fire
+      // inside "surask", and the noun list covered only the singular
+      // "darbo/darba". The employer-side stem is `darbuotoj`, which the
+      // need-workers / find-workers rules weight far higher, so widening the
+      // WORKER-side noun here cannot steal an employer sentence.
+      p("\\bsurask\\b", 3),
+      p("\\bdarb(us|ai|ų|ams|uose)\\b", 2),
       p("\\bjob\\b", 1),
       p("работу", 2),
       p("\\bvacancy|vacature|vakans", 1),

@@ -10039,6 +10039,7 @@
     },
     "organizations": {
       "title": "Meine Unternehmen",
+      "unnamed": "Unternehmen ohne Namen",
       "noCompanyCta": "Unternehmen hinzufügen",
       "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten.",
       "individualDesc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil."
@@ -10150,7 +10151,12 @@
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
     },
-    "teamEnquiriesTitle": "Meine Anfragen an Kolonnen"
+    "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
+    "admin": {
+      "title": "Verwaltung",
+      "hint": "Freigaben, Anträge und Organisationsregeln — werden bei Bedarf geöffnet.",
+      "back": "Zurück zu den Beziehungen"
+    }
   },
   "people": {
     "eyebrow": "Personenprofil",

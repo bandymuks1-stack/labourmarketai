@@ -47,6 +47,26 @@ export function InvitePanel({
   defaultProjectId?: string;
 }) {
   const t = useTranslations("network.invite");
+  /**
+   * THE FORM OPENS WHEN SOMEBODY ASKS FOR IT.
+   *
+   * Eight controls — type, addresses, recipient language, invited name,
+   * proposed role, message, organization, project — used to be unrolled on
+   * every visit to a page whose job is to show existing relationships. Owner
+   * rule for this train: "Forms should open only after an explicit action
+   * such as Pakviesti"; and "an empty feature should normally consume only a
+   * few lines".
+   *
+   * A deep link that already names what to invite (`?invite=1&type=…&org=…`,
+   * used from the company workspace and project operations) is itself the
+   * explicit action, so it still lands on the open form — closing it for
+   * those callers would break a real entry point to make a screenshot
+   * tidier. Nothing is removed and no state is reset: this is the same panel,
+   * behind its own heading.
+   */
+  const [open, setOpen] = useState(
+    Boolean(defaultType || defaultOrganizationId || defaultProjectId),
+  );
   const [type, setType] = useState<InvitationType>(
     (INVITATION_TYPES as readonly string[]).includes(defaultType ?? "")
       ? (defaultType as InvitationType)
@@ -140,12 +160,28 @@ export function InvitePanel({
       data-testid="invite-panel"
     >
       <header className="flex flex-col gap-1">
-        <h2 className="font-display text-lg font-bold text-text-primary">
-          {t("title")}
-        </h2>
+        {/* Closed, the heading IS the trigger — the panel's own title is
+            already the word the owner named for this action ("Pakviesti"), so
+            the compact state needs no new string in any locale, and the
+            reader sees the same word whether it is open or shut. */}
+        {open ? (
+          <h2 className="font-display text-lg font-bold text-text-primary">
+            {t("title")}
+          </h2>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            data-testid="invite-panel-open"
+            className="flex min-h-11 items-center gap-2 self-start rounded-md border border-ink-500 px-3 py-1.5 font-display text-lg font-bold text-text-primary transition-colors hover:border-brand-blue"
+          >
+            {t("title")}
+          </button>
+        )}
         <p className="text-xs text-text-secondary">{t("intro")}</p>
       </header>
 
+      {open && (
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("typeLabel")}
@@ -272,6 +308,7 @@ export function InvitePanel({
           {sending ? t("sending") : t("send")}
         </button>
       </form>
+      )}
 
       {result && (
         <div

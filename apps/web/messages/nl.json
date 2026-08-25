@@ -10039,6 +10039,7 @@
     },
     "organizations": {
       "title": "Mijn bedrijven",
+      "unnamed": "Naamloos bedrijf",
       "noCompanyCta": "Bedrijf toevoegen",
       "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen.",
       "individualDesc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel."
@@ -10150,7 +10151,12 @@
         "error": "Er ging iets mis. Probeer het opnieuw."
       }
     },
-    "teamEnquiriesTitle": "Mijn aanvragen aan ploegen"
+    "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
+    "admin": {
+      "title": "Beheer",
+      "hint": "Goedkeuringen, verzoeken en organisatieregels — open je wanneer je ze nodig hebt.",
+      "back": "Terug naar relaties"
+    }
   },
   "people": {
     "eyebrow": "Persoonsprofiel",

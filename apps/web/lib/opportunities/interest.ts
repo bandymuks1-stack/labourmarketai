@@ -364,3 +364,59 @@ export async function listDemandInterestForCompany(
     return { kind: "needs-migration" };
   }
 }
+
+/**
+ * WHICH OF MY DEMANDS HAS SOMEBODY WAITING ON IT — across all of them.
+ *
+ * The notification "Darbuotojas pareiškė susidomėjimą jūsų poreikiu" already
+ * lands the employer on the scouting page, and the scouting page already
+ * renders interest per demand. Between those two true statements sat a dead
+ * end (owner audit defect C): the notification's href is per ENTITY TYPE, not
+ * per row, so it arrives with no `?request=`, and the page then auto-selected
+ * `demands.find(structured) ?? demands[0]` — an arbitrary demand, almost never
+ * the one somebody had just raised a hand on. Production holds four interest
+ * signals, all still `interested`, none ever marked reviewed. The employer was
+ * told something happened and then shown somewhere else.
+ *
+ * `listDemandInterestForCompany` could not answer this: it takes ONE
+ * requestId, which is the question the employer cannot yet answer. This reads
+ * the same table across the caller's own demands and returns the pending count
+ * per demand, so the page can open on the demand that is actually waiting.
+ *
+ * Own-rows only. `demand_interest_signals` SELECT is already fenced to the
+ * demand owner, so an unscoped read returns exactly the caller's rows; the
+ * explicit employer-workspace gate mirrors the sibling reader rather than
+ * widening anything. Counts `interested` ONLY — a signal the company already
+ * reviewed or acted on is not somebody still waiting, and `withdrawn` is not a
+ * hand at all. An absent (owner-gated) table degrades to an EMPTY map, never
+ * to an error: the page keeps its existing selection rule.
+ */
+export async function listPendingInterestCountsForCompany(): Promise<
+  ReadonlyMap<string, number>
+> {
+  const empty: ReadonlyMap<string, number> = new Map();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return empty;
+
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return empty;
+
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("demand_interest_signals")
+      .select("request_id, status")
+      .eq("status", "interested");
+    if (error || !Array.isArray(data)) return empty;
+    const counts = new Map<string, number>();
+    for (const r of data as { request_id: string | null }[]) {
+      if (!r.request_id) continue;
+      counts.set(r.request_id, (counts.get(r.request_id) ?? 0) + 1);
+    }
+    return counts;
+  } catch {
+    return empty;
+  }
+}
