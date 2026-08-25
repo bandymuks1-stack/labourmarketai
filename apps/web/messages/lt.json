@@ -13721,6 +13721,7 @@
   "marketExplanation": {
     "title": "{profession} rinka",
     "source": "Suskaičiuota iš viešų darbo skelbimų, importuotų į LabourMarket.ai, nuskaityta {measuredAt}. Tai nėra visa darbo rinka ir tai nėra šios platformos poreikių lenta.",
+    "derivedFromWork": "Profesijos nenurodei — ši rinka parinkta pagal įgūdžius, kuriuos rodo tavo užfiksuoti darbai. Nurodyk profesiją, jei nori kitos.",
     "statOpen": "Atviri skelbimai",
     "statNew7d": "Paskelbta per 7 d.",
     "statNew30d": "Paskelbta per 30 d.",

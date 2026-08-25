@@ -13721,6 +13721,7 @@
   "marketExplanation": {
     "title": "Markt voor {profession}",
     "source": "Geteld uit openbare vacatures die in LabourMarket.ai zijn geïmporteerd, gelezen op {measuredAt}. Dit is niet de hele arbeidsmarkt en niet het eigen vraagbord van dit platform.",
+    "derivedFromWork": "Je hebt geen beroep opgegeven — deze markt is gekozen op basis van de vaardigheden die uit je vastgelegde werk blijken. Geef een beroep op als je een andere wilt.",
     "statOpen": "Open vacatures",
     "statNew7d": "Geplaatst in 7 dagen",
     "statNew30d": "Geplaatst in 30 dagen",

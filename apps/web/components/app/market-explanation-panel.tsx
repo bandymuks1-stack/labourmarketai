@@ -39,19 +39,39 @@ import { MarketExplanationRequest } from "./market-explanation-request";
  *   advertisements states pay" is a genuinely useful market fact and is also
  *   the reason no figure appears anywhere on this panel.
  *
- * Renders nothing at all when the worker has no profession on their profile
- * (there is no occupation to be about) or when the store is not provisioned.
+ * ── WHICH OCCUPATION THIS IS ABOUT ────────────────────────────────────────
+ *
+ * The worker's DECLARED profession, and failing that the one their recorded
+ * work evidences (`evidencedProfessionSlug`). The panel used to require the
+ * declared field, which made the product's only user-visible AI surface
+ * unreachable for the 32 of 36 production workers who never filled it in —
+ * a mandatory-profession dependency in the one place it was least defensible.
+ * A derived occupation is always labelled as derived; a declared one always
+ * wins. Still renders nothing when neither exists (there is no occupation to
+ * be about) or when the store is not provisioned.
  */
 export async function MarketExplanationPanel({
   professionSlug,
+  evidencedProfessionSlug,
   locale,
 }: {
   professionSlug: string | null;
+  /**
+   * The profession the worker's RECORDED WORK evidences, supplied only when
+   * they declared none (see `bestEvidencedProfession`). Without it this panel
+   * — and with it the product's only user-visible AI surface — did not exist
+   * for the 32 of 36 production workers who never filled in a profession,
+   * which is precisely the mandatory-profession dependency the product is not
+   * supposed to have. When it is used, the panel SAYS it was derived.
+   */
+  evidencedProfessionSlug?: string | null;
   locale: string;
 }) {
-  if (!professionSlug) return null;
+  const derived = !professionSlug && Boolean(evidencedProfessionSlug);
+  const slug = professionSlug ?? evidencedProfessionSlug ?? null;
+  if (!slug) return null;
 
-  const read = await getPublicMarketFacts(professionSlug);
+  const read = await getPublicMarketFacts(slug);
   // `not_provisioned` and `unavailable` both render nothing HERE — this is an
   // additive panel on a page that already works, and an honest empty state for
   // a store that does not exist on this stack would be noise, not information.
@@ -63,9 +83,7 @@ export async function MarketExplanationPanel({
   const tSkill = await getTranslations("skillNames");
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
 
-  const professionLabel = tProf.has(professionSlug)
-    ? tProf(professionSlug)
-    : professionSlug;
+  const professionLabel = tProf.has(slug) ? tProf(slug) : slug;
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   return (
@@ -81,6 +99,20 @@ export async function MarketExplanationPanel({
         <p className="text-xs leading-relaxed text-text-secondary">
           {t("source", { measuredAt: dateFmt(facts.measuredAtIso) ?? facts.measuredAtIso })}
         </p>
+        {/* WHERE THIS OCCUPATION CAME FROM. Rendered only when the panel
+            is standing on a DERIVED profession: the reader is told the
+            product read it off their recorded work rather than their
+            profile, and how to change it. A derived reading that does not
+            announce itself would be the product putting words in
+            somebody's mouth. */}
+        {derived ? (
+          <p
+            className="text-xs leading-relaxed text-text-muted"
+            data-testid="market-explanation-derived"
+          >
+            {t("derivedFromWork")}
+          </p>
+        ) : null}
       </header>
 
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -126,7 +158,11 @@ export async function MarketExplanationPanel({
 
       {marketIsExplainable(facts) ? (
         <MarketExplanationRequest
-          professionSlug={professionSlug}
+          // The RESOLVED occupation, not the declared one — otherwise the AI
+          // request would go out with `null` for exactly the workers this
+          // panel was just extended to serve, and the surface would render a
+          // control that cannot work.
+          professionSlug={slug}
           locale={locale}
           labels={{
             cta: t("cta"),

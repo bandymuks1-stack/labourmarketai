@@ -13721,6 +13721,7 @@
   "marketExplanation": {
     "title": "Market for {profession}",
     "source": "Counted from public job advertisements imported into LabourMarket.ai, read {measuredAt}. This is not the whole labour market, and it is not this platform's own demand board.",
+    "derivedFromWork": "You have not stated a profession — this market was chosen from the skills your recorded work shows. State a profession if you want a different one.",
     "statOpen": "Open advertisements",
     "statNew7d": "Published in 7 days",
     "statNew30d": "Published in 30 days",

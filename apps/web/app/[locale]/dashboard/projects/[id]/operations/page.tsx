@@ -131,12 +131,33 @@ export default async function ProjectOperationsPage({
 
   const { ops, passport, tasks, evidence, housingProvided } = centre;
 
-  // Train D — project management strip data: derived progress (never
-  // stored), the responsible pointer (gated migration → null pre-apply) and
-  // the org member list for the responsible select.
-  const progressById = await getProjectsProgress([id]);
+  /**
+   * SIX ROUND-TRIPS FOR ONE PROJECT, TAKEN ONE AT A TIME.
+   *
+   * The owner audit reports project windows feeling slow, and this is the
+   * measurable reason: progress, the manage facts, the stages, the economics,
+   * the assets and the defects were each `await`ed on their own line, so the
+   * page paid the sum of six latencies before rendering. All six are keyed on
+   * the SAME project id and none consumes another — they were serial only
+   * because they were written on consecutive lines.
+   *
+   * `listOrganizationMembers` is the one that genuinely cannot join them: it
+   * needs `manageFacts.organizationId`, so it stays below, after its input.
+   *
+   * Train D — project management strip data: derived progress (never stored),
+   * the responsible pointer (gated migration → null pre-apply) and the org
+   * member list for the responsible select.
+   */
+  const [progressById, manageFacts, stages, economics, projectAssets, defects] =
+    await Promise.all([
+      getProjectsProgress([id]),
+      getProjectManageFacts(id),
+      listProjectStages(id),
+      getProjectEconomics(id),
+      getProjectAssets(id),
+      getProjectDefects(id),
+    ]);
   const progress = progressById[id] ?? null;
-  const manageFacts = await getProjectManageFacts(id);
   const projectOrgId: string | null = manageFacts?.organizationId ?? null;
   const responsibleProfileId: string | null =
     manageFacts?.responsibleProfileId ?? null;
@@ -165,13 +186,9 @@ export default async function ProjectOperationsPage({
           ? ["live", "completed"]
           : [];
 
-  const stages = await listProjectStages(id);
   const gantt: StageGantt = stages.applied
     ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
     : { hasTimeline: false };
-  const economics = await getProjectEconomics(id);
-  const projectAssets = await getProjectAssets(id);
-  const defects = await getProjectDefects(id);
   const tAssets = await getTranslations("assets");
 
   const labels: OperationsBoardLabels = {

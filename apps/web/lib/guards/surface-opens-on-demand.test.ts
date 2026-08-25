@@ -180,3 +180,67 @@ describe("the heaviest dashboard does not queue its reads", () => {
     expect(batches.length).toBeGreaterThanOrEqual(3);
   });
 });
+
+/**
+ * AN UNNAMED ORGANIZATION MUST NOT BECOME AN EMPTY ONE.
+ *
+ * `getOwnedOrganizations` reports a missing name as the EMPTY STRING — right
+ * for a data module, and the fix for the literal "—" it used to substitute.
+ * But this page hands that array straight to the approvals and requests
+ * sections, which put the name in a `<select>` option, in a
+ * "mark overdue — {org}" button and in a per-template suffix. Passing "" down
+ * turns those into a blank option and a trailing dash: a different defect
+ * wearing the fix's clothes.
+ *
+ * It is also why the owner audit reported "duplicated approval templates".
+ * Production holds 16 workflow definitions = eight defaults x TWO
+ * organizations, and both of those organizations are the owner's own unnamed
+ * ones. The rows were never duplicates — their two owners were
+ * indistinguishable.
+ */
+describe("an organization with no name still has a label", () => {
+  const src = read(NETWORK_PAGE);
+
+  it("resolves the label once, before any section receives the list", () => {
+    const build = src.slice(
+      src.indexOf("const organizations ="),
+      src.indexOf("const organizations =") + 900,
+    );
+    expect(build).toContain('t("organizations.unnamed")');
+  });
+
+  it("numbers them only when more than one is nameless", () => {
+    // A single unnamed company must read plainly, with no stray "1" — the
+    // same rule the workspace switcher uses.
+    expect(src).toContain("filter((x) => !x.name).length > 1");
+  });
+
+  it("carries the fallback sentence in every active locale", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const messages = JSON.parse(read(`messages/${loc}.json`));
+      const value = messages.network?.organizations?.unnamed;
+      expect(
+        typeof value,
+        `${loc} is missing network.organizations.unnamed`,
+      ).toBe("string");
+      expect(value.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it("no longer hardcodes a punctuation glyph as a company name", () => {
+    const data = read("lib/company/owned-organizations.ts");
+    // Assert the MAPPER, not the whole file — the module's own comment
+    // explains the old em-dash fallback and must stay quotable.
+    const mapper = data.slice(
+      data.indexOf("const organizations: OwnedOrganization[] = rows.map"),
+      data.indexOf('return { kind: "ok", organizations };'),
+    );
+    expect(mapper.length, "mapper not found — re-anchor this guard").toBeGreaterThan(50);
+    expect(
+      mapper,
+      'the em-dash fallback is what produced the "—" rows in the switcher',
+    ).not.toContain('"\u2014"');
+    // Absence is reported as absence; each surface localizes it.
+    expect(mapper).toContain('""');
+  });
+});

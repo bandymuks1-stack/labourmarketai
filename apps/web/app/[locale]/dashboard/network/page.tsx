@@ -153,9 +153,38 @@ export default async function NetworkPage({
   // not pay for the governance stack (which is the regression this whole
   // change exists to remove).
   const orgsResult = await getOwnedOrganizations();
+  /**
+   * ONE LABEL, RESOLVED ONCE, FOR EVERY CONSUMER OF THIS LIST.
+   *
+   * `getOwnedOrganizations` reports a missing name as the EMPTY STRING (it
+   * used to substitute a literal "—", which is where the dash rows in the
+   * switcher came from). That is right for a data module, but every surface
+   * downstream renders this array directly — the company list here, and the
+   * approvals and requests sections, which put the name in a select option, a
+   * "mark overdue — {org}" button and a per-template suffix. Passing "" down
+   * would turn those into a blank option and a trailing dash: a different
+   * defect, not a fixed one.
+   *
+   * So the honest label is applied HERE, once, where the translator is in
+   * scope. It also matters for a reason that is not cosmetic: the owner's
+   * account owns TWO unnamed organizations, each with its own correct set of
+   * eight default approval templates — which is exactly why that section
+   * appeared to show "duplicated approval templates". The rows were never
+   * duplicates; the two owners of them were indistinguishable.
+   */
   const organizations =
     orgsResult.kind === "ok"
-      ? orgsResult.organizations.map((o) => ({ id: o.id, name: o.name }))
+      ? orgsResult.organizations.map((o, i, all) => ({
+          id: o.id,
+          name:
+            o.name ||
+            // Numbered only when more than one is unnamed, so a single
+            // nameless company reads plainly. Same rule as the workspace
+            // switcher (workspaceDisplayLabels).
+            (all.filter((x) => !x.name).length > 1
+              ? `${t("organizations.unnamed")} ${all.filter((x, j) => !x.name && j <= i).length}`
+              : t("organizations.unnamed")),
+        }))
       : [];
 
   // The strip reads each area its OWN title, from the namespace that section
@@ -433,13 +462,11 @@ export default async function NetworkPage({
                     className="flex min-h-11 items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
                     data-testid={`network-org-${o.id}`}
                   >
-                    {/* An organization with neither display_name nor
-                        legal_name reaches here with an EMPTY name — the
-                        reader used to get a bare "—" row, because the data
-                        module substituted that glyph itself. The absence is
-                        stated in the reader's own language now, and the row
-                        keeps its link, which is where the name gets fixed. */}
-                    {o.name || t("organizations.unnamed")}
+                    {/* Already resolved above — an organization with neither
+                        display_name nor legal_name carries the localized
+                        fallback by the time it reaches any renderer, so this
+                        row can never be the bare "—" it used to be. */}
+                    {o.name}
                   </Link>
                 </li>
               ))}

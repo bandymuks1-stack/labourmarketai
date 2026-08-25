@@ -468,6 +468,7 @@ export default async function OpportunitiesPage({
           {result.kind === "ready" ? (
             <MarketExplanationPanel
               professionSlug={result.readiness.professionSlug}
+              evidencedProfessionSlug={result.readiness.evidencedProfessionSlug}
               locale={locale}
             />
           ) : null}
@@ -507,11 +508,14 @@ export default async function OpportunitiesPage({
 
           {/* No work type: onboarding only started asking on 2026-08-21, so
               everyone who joined before that is past the one screen that asks.
-              Without it `subject.professionSlug` is null, the profile-directed
-              pool never runs, and this board is the newest ads of any kind.
-              The signal is already loaded (`hasWorkType` is
-              `Boolean(subject.professionSlug)`), so this costs no query, and
-              the prompt is dismissible — it invites, it never blocks. */}
+              Without it the profile-directed pool never runs and this board is
+              the newest ads of any kind.
+              `hasWorkType` is no longer `Boolean(subject.professionSlug)` — it
+              is satisfied by a DECLARED profession or one their recorded work
+              evidences, so this prompt now appears only for someone we
+              genuinely cannot read, instead of nagging every worker whose
+              journal already answered the question. Still no query, still
+              dismissible — it invites, it never blocks. */}
           {result.kind === "ready" && !result.readiness.hasWorkType ? (
             <ProfessionRecoveryPrompt
               labels={{
@@ -865,7 +869,21 @@ export default async function OpportunitiesPage({
                       </Link>
                     </section>
                   ) : (
-                    <ul className="flex flex-col gap-3" data-testid="opportunities-list">
+                    /* ONE COLUMN WAS THE WHOLE DEFECT. The owner audit
+                       described "tiny cards in a narrow central column
+                       extending vertically through a huge mostly-empty desktop
+                       page" — this `flex flex-col` is that column. Below xl
+                       nothing changes (a phone has no spare width to give);
+                       from 1280px the list uses the width it already occupies,
+                       which halves the scroll instead of leaving the right half
+                       of the screen empty. `items-start` keeps a card that
+                       expands its details from stretching its neighbour. DOM
+                       order is untouched, so the strongest match is still
+                       first — top-left, then across. */
+                    <ul
+                      className="grid grid-cols-1 items-start gap-3 xl:grid-cols-2"
+                      data-testid="opportunities-list"
+                    >
                       {/* Rendering IS the read event — and the board renders
                           `filtered`, not everything the RPC returned. Marking
                           the loaded set would silently retire matches the
@@ -874,7 +892,7 @@ export default async function OpportunitiesPage({
                         surface="opportunities_board"
                         requestIds={filtered.map((o) => o.need.id)}
                       />
-                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured, saved }) => (
+                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured, saved }, rankIndex) => (
                         <li
                           key={need.id}
                           id={`opp-${need.id}`}
@@ -883,8 +901,30 @@ export default async function OpportunitiesPage({
                         >
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="flex min-w-0 flex-col gap-0.5">
-                              <p className="font-display text-base font-bold text-text-primary">
-                                {roleLabel(need.roleText)}
+                              <p className="flex items-baseline gap-1.5 font-display text-base font-bold text-text-primary">
+                                {/* POSITION, NOT A SCORE. The board already
+                                    orders by `compareMatches` (status →
+                                    coverage → confirmed evidence →
+                                    availability), but nothing said so, and the
+                                    order is invisible once the cards sit in a
+                                    grid. A rank states what the product can
+                                    honestly claim — "this is the strongest
+                                    evidence we currently hold" — where a
+                                    percentage would invent a precision no
+                                    calibration backs (§19).
+
+                                    Rendered ONLY under the relevance sort: on
+                                    "newest" the position means recency, and a
+                                    "#1" there would be a lie about fit. */}
+                                {sort === "relevance" ? (
+                                  <span
+                                    className="font-mono text-meta text-text-muted"
+                                    data-testid={`opportunity-rank-${rankIndex + 1}`}
+                                  >
+                                    #{rankIndex + 1}
+                                  </span>
+                                ) : null}
+                                <span className="min-w-0">{roleLabel(need.roleText)}</span>
                               </p>
                               {/* Compact scan line — full facts in details. */}
                               <p className="text-xs text-text-secondary">
