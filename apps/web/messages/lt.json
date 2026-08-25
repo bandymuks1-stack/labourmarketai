@@ -11537,7 +11537,10 @@
         "chipServices": "Atidaryti paslaugas",
         "corrected": "Atnaujinau: {changes}.",
         "changeInsteadOf": "{next} (vietoj {previous})"
-      }
+      },
+      "adminRouteHint": "Štai kur tai tvarkoma:",
+      "adminApprovalsChip": "Tvirtinimai",
+      "adminRequestsChip": "Prašymai"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

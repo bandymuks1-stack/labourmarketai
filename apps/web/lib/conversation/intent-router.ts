@@ -42,6 +42,8 @@ export type ConversationIntent =
   | "context" // "ką tu apie mane žinai?"
   | "opportunities" // "kokias galimybes man gali pasiūlyti?" — the OWN board
   | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
+  | "admin-approvals" // "ką turiu patvirtinti?" — the approvals area
+  | "admin-requests" // "noriu pateikti atostogų prašymą" — the requests area
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
@@ -255,6 +257,46 @@ const RULES: IntentRule[] = [
       p("\\binteresse\\s+(an|für)\\b", 5), // de
       p("\\bshowed\\s+interest", 6),
       p("(kas|ar\\s+kas)\\s+.{0,24}(atsakė|atsiliepė)", 5),
+    ],
+  },
+  {
+    // THE SURFACES THAT MOVED MUST STILL BE REACHABLE IN WORDS.
+    // Approvals, employee requests and leave limits now open on an explicit
+    // ?area= instead of unrolling under every visit to /dashboard/network
+    // (owner audit: "unacceptable information architecture"). Gating a surface
+    // is only half the job — the owner named the other half in the same
+    // breath: "Chat must also be able to route users to these functions
+    // naturally". So the sentences that mean them route to them, through the
+    // EXISTING `link:` chip, which navigates to the one canonical screen and
+    // never grows a second view of it.
+    intent: "admin-approvals",
+    patterns: [
+      p("(ką|ka)\\s+(tur(iu|ėsiu)|reikia)\\s*.{0,12}patvirtin", 6),
+      p("\\bpatvirtin(ti|imai|imo|imus)\\b", 4),
+      p("\\btvirtinim", 4),
+      p("(what|which)\\s+.{0,16}(approve|approvals?)\\b", 6),
+      p("\\bapprovals?\\b", 4),
+      p("(что|чего)\\s+.{0,16}(утвердить|согласовать)", 6),
+      p("согласован", 4),
+      p("(laukianči(us|ų)|pending)\\s+(sprendim|decision)", 5),
+      p("\\bfreigab", 4), // de
+      p("\\bgoedkeuring", 4), // nl
+    ],
+  },
+  {
+    // The worker's half of the same engine: filing a request (leave, trip,
+    // expense) rather than deciding one.
+    intent: "admin-requests",
+    patterns: [
+      p("\\batostog", 5), // lt — atostogos / atostogų prašymas
+      p("\\bprašym(ą|a|as|ai|ų)\\b", 4),
+      p("(pateikti|parašyti|noriu)\\s*.{0,16}prašym", 6),
+      p("\\bleave\\s+(request|application)", 6),
+      p("\\b(holiday|vacation|time\\s*off)\\b", 5),
+      p("\\bотпуск", 5),
+      p("\\bзаявлени", 4),
+      p("\\burlaub", 5), // de
+      p("\\bverlof", 5), // nl
     ],
   },
   {

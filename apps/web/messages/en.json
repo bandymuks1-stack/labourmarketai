@@ -11537,7 +11537,10 @@
         "chipServices": "Open the services board",
         "corrected": "Updated: {changes}.",
         "changeInsteadOf": "{next} (instead of {previous})"
-      }
+      },
+      "adminRouteHint": "Here is where that is handled:",
+      "adminApprovalsChip": "Approvals",
+      "adminRequestsChip": "Requests"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

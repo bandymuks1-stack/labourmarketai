@@ -178,6 +178,11 @@ export type ChatLabels = {
   messagesHint: string;
   reminderBlocked: string;
   translateBlocked: string;
+  /** Routing to the administration areas — see the router's
+   *  `admin-approvals` / `admin-requests` rules. */
+  adminRouteHint: string;
+  adminApprovalsChip: string;
+  adminRequestsChip: string;
   writeEmployerHint: string;
   /** W7 slice 2 — the paperclip's one-off "what is this file for?" turn, shown
    *  ONLY when no flow that owns files is open. */
@@ -1964,6 +1969,28 @@ export function ConversationChat({
           // four-item menu under every one of them taught users to ignore the
           // chips entirely. The menu stays where it is a menu: the greeting
           // and the not-understood fallback.
+          case "admin-approvals":
+            // "Ką turiu patvirtinti?" — the approvals area, which no longer
+            // unrolls under every visit to /dashboard/network. A `link:` chip
+            // is the sanctioned move here: it routes to the ONE canonical
+            // screen and never grows a second view of it.
+            assistant(labels.adminRouteHint, [
+              {
+                id: "link:/dashboard/network?area=approvals",
+                label: labels.adminApprovalsChip,
+              },
+            ]);
+            break;
+          case "admin-requests":
+            // "Noriu pateikti atostogų prašymą" — the filing half of the same
+            // engine (leave, trip, expense), same routing rule.
+            assistant(labels.adminRouteHint, [
+              {
+                id: "link:/dashboard/network?area=requests",
+                label: labels.adminRequestsChip,
+              },
+            ]);
+            break;
           case "reminder":
             // No scheduler exists — never a fake reminder (honest degradation).
             assistant(labels.reminderBlocked);

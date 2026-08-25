@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { classifyIntent } from "@/lib/conversation/intent-router";
+
 /**
  * "WE BUILT A CAPABILITY, THEREFORE WE RENDER ITS ENTIRE UI."
  *
@@ -242,5 +244,69 @@ describe("an organization with no name still has a label", () => {
     ).not.toContain('"\u2014"');
     // Absence is reported as absence; each surface localizes it.
     expect(mapper).toContain('""');
+  });
+});
+
+/**
+ * GATING A SURFACE IS ONLY HALF THE JOB.
+ *
+ * Approvals, employee requests and leave limits now open on an explicit
+ * `?area=` instead of unrolling under every visit to /dashboard/network. The
+ * owner named the other half in the same breath: "Chat must also be able to
+ * route users to these functions naturally", with three literal examples.
+ * Those three are pinned here, because a capability that is one click away but
+ * unreachable in words has been hidden, not rehomed.
+ *
+ * The routing uses the EXISTING `link:` chip, which the conversation layer
+ * already sanctions for "contextual navigation to a REAL canonical surface" —
+ * it goes to the one screen and never grows a second view of it.
+ */
+describe("the surfaces that moved are still reachable in words", () => {
+  const OWNER_EXAMPLES: readonly (readonly [string, string])[] = [
+    ["noriu pateikti atostogų prašymą", "admin-requests"],
+    ["noriu pateikti atostogu prasyma", "admin-requests"], // no diacritics
+    ["ką turiu patvirtinti?", "admin-approvals"],
+    ["parodyk laukiančius sprendimus", "admin-approvals"],
+    ["what do i need to approve", "admin-approvals"],
+    ["leave request", "admin-requests"],
+    ["хочу подать заявление на отпуск", "admin-requests"],
+  ];
+
+  for (const [sentence, intent] of OWNER_EXAMPLES) {
+    it(`"${sentence}" → ${intent}`, () => {
+      expect(classifyIntent(sentence).intent).toBe(intent);
+    });
+  }
+
+  it("routes to the gated area, not to a second copy of the screen", () => {
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toContain("link:/dashboard/network?area=approvals");
+    expect(chat).toContain("link:/dashboard/network?area=requests");
+  });
+
+  it("steals none of the intents that already worked", () => {
+    const UNCHANGED: readonly (readonly [string, string])[] = [
+      ["reikia darbuotojų", "need-workers"],
+      ["ieškau darbo", "find-work"],
+      ["kokias galimybes man gali pasiūlyti?", "opportunities"],
+      ["kas susidomėjo mano poreikiu?", "interest-inbox"],
+      ["parodyk mano projektus", "open-project"],
+    ];
+    for (const [sentence, intent] of UNCHANGED) {
+      expect(classifyIntent(sentence).intent, sentence).toBe(intent);
+    }
+  });
+
+  it("carries all three routing strings in every active locale", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+      const messages = JSON.parse(read(`messages/${loc}.json`));
+      const chat = messages.conversation?.chat ?? {};
+      for (const key of ["adminRouteHint", "adminApprovalsChip", "adminRequestsChip"]) {
+        expect(typeof chat[key], `${loc} is missing conversation.chat.${key}`).toBe(
+          "string",
+        );
+        expect(chat[key].trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 });

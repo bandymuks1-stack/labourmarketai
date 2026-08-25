@@ -11537,7 +11537,10 @@
         "chipServices": "Открыть услуги",
         "corrected": "Обновил: {changes}.",
         "changeInsteadOf": "{next} (вместо {previous})"
-      }
+      },
+      "adminRouteHint": "Вот где это управляется:",
+      "adminApprovalsChip": "Согласования",
+      "adminRequestsChip": "Заявки"
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",
