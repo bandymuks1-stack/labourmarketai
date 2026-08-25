@@ -1869,6 +1869,19 @@ export function ConversationChat({
         "open-project": () => runOpenProject(text),
         "find-workers": () => runFindWorkers(),
         context: () => runContextReadback(),
+        // "Kokias galimybes man gali pasiūlyti?" — the product's own central
+        // noun, which used to score 0 and land on the generic fallback. It is
+        // the SAME question as "rask man darbą", so it runs the SAME engine:
+        // one matching pipeline, one result surface, no second stack.
+        opportunities: () => runFindWork(text),
+        // "Kas susidomėjo mano poreikiu?" — routed by IDENTITY, because the
+        // sentence means two different real things. For the employer it is
+        // "which of my demands, and who is on them" (the demand list whose
+        // chips run scouting in-panel). For the worker it is their own board,
+        // where "Mano susidomėjimai" carries the company's answer. Neither
+        // branch invents a candidate the reader is not allowed to see.
+        "interest-inbox": () =>
+          identity === "company" ? runFindWorkers() : runFindWork(text),
       };
       const workflow = WORKFLOWS[intent];
       if (workflow) {

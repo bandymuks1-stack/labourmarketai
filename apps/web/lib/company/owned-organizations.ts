@@ -34,7 +34,25 @@ function asAny(supabase: SupabaseClient): any {
 
 export type OwnedOrganization = {
   id: string;
-  /** Human label for the company context — display_name, else legal_name. */
+  /**
+   * Human label for the company context — display_name, else legal_name, else
+   * THE EMPTY STRING.
+   *
+   * It used to be the literal em-dash `"—"`, and that one character was the
+   * source of the "—" rows the owner audit found in the workspace switcher
+   * and in the network page's company list. Five production organizations
+   * carry neither name (all created 2026-05-21/22, before `saveCompanySetup`
+   * began rejecting a name under 2 characters — the intake is already closed,
+   * the rows remain), so this fallback was reached for real, by the owner's
+   * own account, on every page load.
+   *
+   * A reader cannot tell a punctuation placeholder from a company actually
+   * called "—", and a glyph chosen in a data module is a presentation
+   * decision made in the wrong layer: it is not localizable and it silently
+   * outvotes every caller's own fallback. The absence is now reported as
+   * absence, and each render site says what it means in the reader's own
+   * language.
+   */
   name: string;
   organizationType: "company" | "agency" | "other";
   /** The legacy companies.id this org mirrors, if any — used to deep-link the
@@ -77,7 +95,7 @@ export async function getOwnedOrganizations(): Promise<OwnedOrganizationsResult>
     name:
       (r.display_name as string | null)?.trim() ||
       (r.legal_name as string | null)?.trim() ||
-      "—",
+      "",
     organizationType:
       (r.organization_type as OwnedOrganization["organizationType"] | null) ??
       "other",

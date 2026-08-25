@@ -160,3 +160,62 @@ export function resolveActiveOrganizationId(
   }
   return organizations.length === 1 ? organizations[0].id : null;
 }
+
+/**
+ * THE LABEL A PERSON ACTUALLY READS in the workspace switcher.
+ *
+ * WHY THIS IS NOT `w.name || fallback`. Five production organizations carry
+ * neither a `display_name` nor a `legal_name` (all created 2026-05-21/22,
+ * before `saveCompanySetup` began rejecting a name shorter than 2 characters —
+ * the intake path is already closed, the rows remain). The owner's own account
+ * is a member of exactly two of them, so the switcher rendered:
+ *
+ *     Asmenine erdve
+ *     Imones erdve      <- organization A
+ *     Imones erdve      <- organization B
+ *
+ * Two rows, identical text, no way to tell which one is active or what
+ * switching would change (owner audit defects A and B). The single shared
+ * fallback string was itself the defect: it made distinct workspaces
+ * indistinguishable.
+ *
+ * The rule: an unnamed workspace keeps the honest fallback, and gets a
+ * positional suffix ONLY when it would otherwise collide with another
+ * workspace bearing the same text. Nothing is invented — a number is not a
+ * name, it is a way to say "this is the second one". A single unnamed
+ * organization therefore reads exactly as before, with no stray "1".
+ *
+ * Pure so the ordering is identical everywhere the context is rendered, and so
+ * the collision rule is unit-testable without a browser.
+ */
+export function workspaceDisplayLabels(
+  workspaces: readonly WorkspaceInfo[],
+  labels: { readonly personal: string; readonly unnamedOrganization: string },
+): Map<string, string> {
+  const base = new Map<string, string>();
+  for (const w of workspaces) {
+    base.set(
+      w.id,
+      w.kind === "personal"
+        ? labels.personal
+        : w.name.trim() || labels.unnamedOrganization,
+    );
+  }
+  // Which texts are claimed by more than one workspace?
+  const counts = new Map<string, number>();
+  for (const text of base.values()) counts.set(text, (counts.get(text) ?? 0) + 1);
+
+  const seen = new Map<string, number>();
+  const out = new Map<string, string>();
+  for (const w of workspaces) {
+    const text = base.get(w.id)!;
+    if ((counts.get(text) ?? 0) < 2) {
+      out.set(w.id, text);
+      continue;
+    }
+    const n = (seen.get(text) ?? 0) + 1;
+    seen.set(text, n);
+    out.set(w.id, `${text} ${n}`);
+  }
+  return out;
+}

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
 import {
   PERSONAL_WORKSPACE_ID,
+  workspaceDisplayLabels,
   type WorkspaceInfo,
 } from "@/lib/company/organization-switch";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
@@ -79,11 +80,16 @@ export function WorkspaceChip() {
 
   const active =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
-  const nameOf = (w: WorkspaceInfo) =>
-    w.kind === "personal"
-      ? t("workspacePersonal")
-      : // Unnamed organization → localized fallback, never a dash row.
-        w.name || t("workspaceUnnamed");
+  // Unnamed organizations → the localized fallback, never a dash row — and
+  // never the SAME row twice: two unnamed organizations used to render as two
+  // identical entries, so the switcher could not answer "where am I?" at all
+  // (owner audit defects A/B). The resolver appends a positional suffix only
+  // on a genuine collision; see workspaceDisplayLabels.
+  const labelById = workspaceDisplayLabels(workspaces, {
+    personal: t("workspacePersonal"),
+    unnamedOrganization: t("workspaceUnnamed"),
+  });
+  const nameOf = (w: WorkspaceInfo) => labelById.get(w.id) ?? w.name;
 
   // Single-workspace person → a pure indicator, no fake multi-tenancy chrome.
   if (workspaces.length === 1) {

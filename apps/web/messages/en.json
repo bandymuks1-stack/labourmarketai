@@ -10039,6 +10039,7 @@
     },
     "organizations": {
       "title": "My companies",
+      "unnamed": "Unnamed company",
       "noCompanyCta": "Add company",
       "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel.",
       "individualDesc": "Act as an independent provider — managed in your personal profile."
@@ -10150,7 +10151,12 @@
         "error": "Something went wrong. Please try again."
       }
     },
-    "teamEnquiriesTitle": "My enquiries to teams"
+    "teamEnquiriesTitle": "My enquiries to teams",
+    "admin": {
+      "title": "Administration",
+      "hint": "Approvals, requests and organization rules — opened when you need them.",
+      "back": "Back to relationships"
+    }
   },
   "people": {
     "eyebrow": "Person profile",

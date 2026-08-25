@@ -10039,6 +10039,7 @@
     },
     "organizations": {
       "title": "Mano įmonės",
+      "unnamed": "Įmonė be pavadinimo",
       "noCompanyCta": "Pridėti įmonę",
       "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.",
       "individualDesc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje."
@@ -10150,7 +10151,12 @@
         "error": "Nepavyko. Bandykite dar kartą."
       }
     },
-    "teamEnquiriesTitle": "Mano užklausos komandoms"
+    "teamEnquiriesTitle": "Mano užklausos komandoms",
+    "admin": {
+      "title": "Administravimas",
+      "hint": "Tvirtinimai, prašymai ir organizacijos taisyklės — atidaroma tada, kai reikia.",
+      "back": "Grįžti į ryšius"
+    }
   },
   "people": {
     "eyebrow": "Asmens profilis",

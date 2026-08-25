@@ -137,23 +137,95 @@ export default async function CompanyDashboardPage({
   }
   const companyRow =
     companyProfile.kind === "ok" ? companyProfile.row : null;
+  const isStaffingAgency = companyRow?.companyType === "staffing_agency";
+  const isCompanyOwner = !!companyRow;
+
+  // M-P0-3: one workspace-scoped read serves the whole page — the roster,
+  // bridge and projects below all act on the SAME company the header names.
+  // Hoisted here (it is a pure projection of `companyProfile`, no IO) so the
+  // reads that need it can START together — see the batch below.
+  const ownCompany =
+    companyProfile.kind === "ok" && companyProfile.row
+      ? {
+          id: companyProfile.row.id,
+          legalName: companyProfile.row.legalName,
+          displayName: companyProfile.row.displayName,
+          country: companyProfile.row.country,
+        }
+      : null;
+
+  /**
+   * FOURTEEN ROUND-TRIPS THAT WERE WAITING IN LINE FOR NO REASON.
+   *
+   * Every read below was already `await`ed on its own line, one after another,
+   * so the page paid the sum of fourteen latencies before it could render —
+   * the measured reason this dashboard "feels slow" (owner audit §12: measure,
+   * do not guess). None of them feeds any other: each depends only on
+   * `companyRow` / `isStaffingAgency` / `ownCompany`, all of which are known
+   * above without IO.
+   *
+   * Batching them is not a rewrite — same functions, same arguments, the same
+   * conditional guards, and every value is still assigned at the line it was
+   * declared on, so declaration order and every downstream use are untouched.
+   * Only the waiting changed: it overlaps now instead of stacking.
+   *
+   * `Promise.all` rather than "create now, await later": the latter leaves a
+   * window in which a rejected read has no handler attached yet, which Node
+   * reports as an unhandled rejection. `Promise.all` subscribes to all
+   * fourteen in the same tick, so a failing read still surfaces exactly where
+   * it did before — at the line that consumes it.
+   *
+   * The three reads that genuinely DO depend on one of these (business
+   * settings, org members for objects, the gallery summaries) stay after
+   * their input, in their own second batch.
+   */
+  const [
+    rAgencyClients,
+    rAgencyDemands,
+    rDemandReadback,
+    rClaimableIntakes,
+    rBridgeConnections,
+    rBridgeShared,
+    rBridgeProgress,
+    rClientInvites,
+    rClientDemands,
+    rWorkers,
+    rInvitations,
+    rOrgMembers,
+    rWorkObjects,
+    rManagedProjects,
+  ] = await Promise.all([
+    isStaffingAgency ? listAgencyClients() : null,
+    isStaffingAgency ? listAgencyDemands() : null,
+    listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
+    listClaimablePublicIntakes(),
+    isStaffingAgency && ownCompany ? listAgencyConnections(ownCompany.id) : null,
+    isStaffingAgency ? listSharedRequestsForAgency() : null,
+    isStaffingAgency ? listAgencyOfferProgress() : null,
+    isCompanyOwner && !isStaffingAgency ? listMyConnectionInvites() : null,
+    isCompanyOwner && !isStaffingAgency ? listAgencyDemands() : null,
+    ownCompany ? listActiveCompanyWorkers(ownCompany.id) : null,
+    ownCompany ? listCompanyWorkerInvitations(ownCompany.id) : null,
+    ownCompany ? getOrgMembersData("company", ownCompany.id) : null,
+    getOrgWorkObjects(),
+    ownCompany ? listManagedProjects() : null,
+  ] as const);
 
   // P5 agency client management — staffing-agency mode ONLY. Reads the
   // caller's own agency_clients (owner-gated migration → honest gated state)
   // + their OWN canonical customer_requests rows. Never fetched for other
   // company types.
-  const isStaffingAgency = companyRow?.companyType === "staffing_agency";
-  const agencyClientsState = isStaffingAgency ? await listAgencyClients() : null;
-  const agencyDemandsState = isStaffingAgency ? await listAgencyDemands() : null;
+  const agencyClientsState = rAgencyClients;
+  const agencyDemandsState = rAgencyDemands;
 
   const tWorkers = await getTranslations("roleDashboards.company.workers");
   // W3 rows 7/8/25 — the ONE owner readback (moved from /dashboard/advanced),
   // scoped to the employer demand kinds. Same RLS-scoped own-rows read.
-  const demandReadback = await listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS);
+  const demandReadback = rDemandReadback;
   // Canonical-journey P3 — the caller's own claimable public intakes
   // (authenticated-email match; [] on any missing state, never an error).
   const tClaim = await getTranslations("companyClaimIntake");
-  const claimableIntakes = await listClaimablePublicIntakes();
+  const claimableIntakes = rClaimableIntakes;
 
   // W3 rows 7/8/25 — the FULL demand wizard now lives HERE (the action's own
   // advancedRoute), not on the dying advanced page. Intent follows the
@@ -201,60 +273,46 @@ export default async function CompanyDashboardPage({
     },
   };
 
-  // M-P0-3: one workspace-scoped read serves the whole page — the roster,
-  // bridge and projects below all act on the SAME company the header names.
-  const ownCompany =
-    companyProfile.kind === "ok" && companyProfile.row
-      ? {
-          id: companyProfile.row.id,
-          legalName: companyProfile.row.legalName,
-          displayName: companyProfile.row.displayName,
-          country: companyProfile.row.country,
-        }
-      : null;
   // Real two-subject bridge (issue #859): agency side reads its connections /
   // shared requests / offer progress; the non-agency company side reads its
   // inbound connection invites. Both degrade to needs-migration honestly.
-  const isCompanyOwner = !!companyRow;
-  const bridgeConnections =
-    isStaffingAgency && ownCompany ? await listAgencyConnections(ownCompany.id) : null;
-  const bridgeShared = isStaffingAgency ? await listSharedRequestsForAgency() : null;
-  const bridgeProgress = isStaffingAgency ? await listAgencyOfferProgress() : null;
-  const clientInvites =
-    isCompanyOwner && !isStaffingAgency ? await listMyConnectionInvites() : null;
-  const clientDemands =
-    isCompanyOwner && !isStaffingAgency ? await listAgencyDemands() : null;
-  const workersResult = ownCompany
-    ? await listActiveCompanyWorkers(ownCompany.id)
-    : ({ kind: "ok", rows: [] } as const);
-  const invitationsResult = ownCompany
-    ? await listCompanyWorkerInvitations(ownCompany.id)
-    : ({ kind: "ok", rows: [] } as const);
-  const orgMembers = ownCompany
-    ? await getOrgMembersData("company", ownCompany.id)
-    : null;
-
-  // W13 slice 2 — public business showcase profile publication settings
-  // (owner/manager gated; default private; honest gated state pre-migration).
-  const businessPublicSettings = orgMembers
-    ? await getBusinessPublicSettings(orgMembers.orgId)
-    : null;
+  const bridgeConnections = rBridgeConnections;
+  const bridgeShared = rBridgeShared;
+  const bridgeProgress = rBridgeProgress;
+  const clientInvites = rClientInvites;
+  const clientDemands = rClientDemands;
+  const workersResult = rWorkers ?? ({ kind: "ok", rows: [] } as const);
+  const invitationsResult = rInvitations ?? ({ kind: "ok", rows: [] } as const);
+  const orgMembers = rOrgMembers;
 
   // Train D: objects & sites — the canonical work_objects entity (rewired
   // from the superseded company_locations draft; Train M verdict). Honest
   // gated state until the LEAD applies the migration.
-  const workObjectsRead = await getOrgWorkObjects();
-  const orgMembersForObjects = orgMembers
-    ? await listOrganizationMembers(orgMembers.orgId)
-    : null;
-  const managedProjects = ownCompany ? await listManagedProjects() : [];
-  const companyGalleryProjects = await Promise.all(
-    managedProjects.slice(0, 12).map(async (p) => ({
-      projectId: p.id,
-      title: p.title,
-      photoCount: (await getProjectGallerySummary(p.id)).photoCount,
-    })),
-  );
+  const workObjectsRead = rWorkObjects;
+  const managedProjects = rManagedProjects ?? [];
+
+  /**
+   * SECOND BATCH — the three reads that genuinely depend on the first.
+   * `businessPublicSettings` and `orgMembersForObjects` both need
+   * `orgMembers.orgId`, and the gallery summaries need the project list, so
+   * these could not join the batch above. They were still three serial
+   * round-trips between themselves, and they are independent of each other.
+   *
+   * W13 slice 2 — public business showcase profile publication settings
+   * (owner/manager gated; default private; honest gated state pre-migration).
+   */
+  const [businessPublicSettings, orgMembersForObjects, companyGalleryProjects] =
+    await Promise.all([
+      orgMembers ? getBusinessPublicSettings(orgMembers.orgId) : null,
+      orgMembers ? listOrganizationMembers(orgMembers.orgId) : null,
+      Promise.all(
+        managedProjects.slice(0, 12).map(async (p) => ({
+          projectId: p.id,
+          title: p.title,
+          photoCount: (await getProjectGallerySummary(p.id)).photoCount,
+        })),
+      ),
+    ]);
 
   const tOrg = await getTranslations("orgMembers");
   const tOps = await getTranslations("companyOps");
@@ -396,9 +454,31 @@ export default async function CompanyDashboardPage({
   // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
   // existing RLS-readable data (worker_skills + journal_entries + reviewable set).
   const activeWorkerRows = workersResult.kind === "ok" ? workersResult.rows : [];
-  const readinessMap = await getWorkerReadiness(
-    activeWorkerRows.map((w) => w.workerId),
-  );
+  /**
+   * THE SECOND WATERFALL ON THIS PAGE — five more reads that were queued
+   * behind each other for no reason. `getWorkerReadiness` needs the roster
+   * (resolved above); the other four need only `ownCompany`, which has been
+   * known since before the first batch. Nothing here consumes anything else
+   * here, so the five ran serially purely because they were written on
+   * consecutive lines. Same calls, same guards, same values — batched.
+   */
+  const [readinessMap, reviewPendingCount, projectContext, managerEvidence, teamBrigades] =
+    await Promise.all([
+      getWorkerReadiness(activeWorkerRows.map((w) => w.workerId)),
+      // Slice 3 — pending entries the owner can review now (gated RPC; 0 if none).
+      ownCompany ? countReviewablePendingEntries() : Promise.resolve(0),
+      // Project/client context readiness (read-only): the data model is live
+      // but empty — show a truthful empty state, never a fabricated project.
+      getCompanyProjectContext(ownCompany?.id ?? null),
+      // System-evidenced management activity (computed from the caller's own
+      // recorded review actions — read-only, never an external verification).
+      getManagerEvidence(),
+      // Teams/brigades minimum (§8.3): probe + read-only load. Reports
+      // { applied: false } until the owner applies 20260705220000.
+      ownCompany
+        ? getTeamBrigadesData()
+        : Promise.resolve({ applied: false } as const),
+    ] as const);
   const readinessRows = activeWorkerRows.map((w) => ({
     workerName: w.displayName ?? (w.email ? w.email.split("@")[0] : "—"),
     readiness: readinessMap.get(w.workerId) ?? {
@@ -416,19 +496,6 @@ export default async function CompanyDashboardPage({
   const memberCount = orgMembers?.members.length ?? 0;
   const reviewCount =
     orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
-  // Slice 3 — pending entries the owner can review now (gated RPC; 0 if none).
-  const reviewPendingCount = ownCompany ? await countReviewablePendingEntries() : 0;
-  // Project/client context readiness (read-only): the data model is live but
-  // empty — show a truthful empty state, never a fabricated project/client.
-  const projectContext = await getCompanyProjectContext(ownCompany?.id ?? null);
-  // System-evidenced management activity (computed from the caller's own
-  // recorded review actions — read-only, never an external verification).
-  const managerEvidence = await getManagerEvidence();
-  // Teams/brigades minimum (§8.3): probe + read-only load. Reports
-  // { applied: false } until the owner applies 20260705220000.
-  const teamBrigades = ownCompany
-    ? await getTeamBrigadesData()
-    : ({ applied: false } as const);
   const orgMembersLabels = {
     title: tOrg("title"),
     intro: tOrg("intro"),
