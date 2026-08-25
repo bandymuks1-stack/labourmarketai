@@ -117,26 +117,37 @@ export default async function JournalPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // Worker row + the submitter's own display name (owner UX recovery v1:
-  // every journal entry names who submitted it) — independent reads, one batch.
-  const [{ data: worker }, { data: ownProfile }] = await Promise.all([
+  // Worker row, the submitter's own display name (owner UX recovery v1: every
+  // journal entry names who submitted it), the active worker-side engagements
+  // (the journal is only meaningful with one) and the active workspace.
+  //
+  // All four depend ONLY on `user.id` — none reads another's result — so they
+  // travel as one round trip instead of four. `workspaceForDefault` in
+  // particular is called with the literal "person" and is consumed further
+  // down purely to ORDER `ecRows`; ordering after the batch is identical to
+  // ordering after a serial await.
+  const [
+    { data: worker },
+    { data: ownProfile },
+    { data: ecRows },
+    workspaceForDefault,
+  ] = await Promise.all([
     supabase.from("workers").select("id").eq("profile_id", user.id).maybeSingle(),
     supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("engagement_contexts")
+      .select(
+        "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+      )
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .in("relationship_slug", WORKER_RELATIONSHIPS)
+      .order("is_primary", { ascending: false }),
+    getWorkspaceContext("person"),
   ]);
   const submitterName =
     ownProfile?.full_name ??
     (ownProfile?.email ? ownProfile.email.split("@")[0] : null);
-
-  // Active worker-side engagements — the journal is only meaningful with one.
-  const { data: ecRows } = await supabase
-    .from("engagement_contexts")
-    .select(
-      "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
-    )
-    .eq("profile_id", user.id)
-    .eq("status", "active")
-    .in("relationship_slug", WORKER_RELATIONSHIPS)
-    .order("is_primary", { ascending: false });
   // State 4 vs 5: the worker has a context but review may not be enabled by
   // the owner yet. Honest signal — they can log work, but it won't be
   // confirmable until review is enabled for them.
@@ -161,7 +172,6 @@ export default async function JournalPage({
   //   D none → personal is correct.
   // Ordering still puts the active workspace first so the list reads sensibly,
   // but the DEFAULT is the resolution, and on ambiguity there is none.
-  const workspaceForDefault = await getWorkspaceContext("person");
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
   const ecOrdered = [...(ecRows ?? [])].sort(
     (a, b) =>
@@ -220,9 +230,22 @@ export default async function JournalPage({
       org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—";
     // A personal worker engagement (no organization) reads clearer as a
     // named personal entry than a bare "— · Darbuotojas". Role model unchanged.
+    //
+    // …but when the person GAVE it a title, that title is what tells two of
+    // them apart. This branch used to return the same constant for every
+    // org-less context, so an account holding more than one rendered the
+    // identical row twice and the chooser asked the worker to pick between
+    // two things it had just made indistinguishable. Production holds exactly
+    // this case: one untitled personal context carrying entries, and one
+    // titled "Darbų vadovas". Same defect the network page already fixed for
+    // unnamed organizations — the rows were never duplicates, their labels
+    // were. Their own words, no invented data, no new i18n key.
+    const personalTitle = e.title?.trim();
     const label = org
       ? `${orgName} · ${tRel(e.relationship_slug)}`
-      : t("personalEntry");
+      : personalTitle
+        ? `${t("personalEntry")} · ${personalTitle}`
+        : t("personalEntry");
     return {
       id: e.id,
       label,
@@ -349,12 +372,26 @@ export default async function JournalPage({
   }
 
   // The worker's work directions (primary + additional) for the entry form —
-  // so the journal is no longer locked to one tiler template.
-  const { data: dirRows } = await supabase
-    .from("worker_professions")
-    .select("is_primary, professions(slug)")
-    .eq("worker_id", worker.id)
-    .order("is_primary", { ascending: false });
+  // so the journal is no longer locked to one tiler template — and the
+  // worker's declared skills.
+  //
+  // ONE read of `worker_skills`, not two. This page used to issue the same
+  // query twice against the same table with the same `worker_id` filter: once
+  // selecting `skills(slug)` and once selecting `skill_id, verified,
+  // skills(slug)`. The second is a strict superset of the first, so both the
+  // composer's suggestion list and the entry↔skill link UI are derived from
+  // it. Both reads depend only on `worker.id`, so they batch with `dirRows`.
+  const [{ data: dirRows }, { data: skillIdRows }] = await Promise.all([
+    supabase
+      .from("worker_professions")
+      .select("is_primary, professions(slug)")
+      .eq("worker_id", worker.id)
+      .order("is_primary", { ascending: false }),
+    supabase
+      .from("worker_skills")
+      .select("skill_id, verified, skills(slug)")
+      .eq("worker_id", worker.id),
+  ]);
   const directions = (dirRows ?? [])
     .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
     .filter((s): s is string => s !== null)
@@ -371,12 +408,9 @@ export default async function JournalPage({
 
   // Worker's saved skills — used by the composer to surface
   // "this entry could strengthen X" suggestions for the rule-based parser.
+  // Derived from the single `worker_skills` read above.
   const tSkillName = await getTranslations("skillNames");
-  const { data: workerSkillRows } = await supabase
-    .from("worker_skills")
-    .select("skills(slug)")
-    .eq("worker_id", worker.id);
-  const workerSkills = (workerSkillRows ?? [])
+  const workerSkills = (skillIdRows ?? [])
     .map((r) => (r.skills as { slug: string | null } | null)?.slug ?? null)
     .filter((slug): slug is string => !!slug)
     .map((slug) => ({ slug, name: tSkillName(slug) }));
@@ -385,10 +419,7 @@ export default async function JournalPage({
   // they can mark an entry as supporting, plus their current durable links.
   // `verified` rides along so a manager/client-confirmed skill can read as
   // "confirmed" on the entry chip (stale-skill review state, PR B).
-  const { data: skillIdRows } = await supabase
-    .from("worker_skills")
-    .select("skill_id, verified, skills(slug)")
-    .eq("worker_id", worker.id);
+  //
   // `slug` rides along for the render-time detected-signal computation (it is
   // structurally invisible to the {id,name} link-UI props).
   const availableSkillsForLinks = (skillIdRows ?? [])
@@ -698,14 +729,21 @@ export default async function JournalPage({
   // CV surface, above the work records. Worker-scoped real data only (null for
   // non-worker accounts, which never reach this branch). The same premium card
   // used elsewhere; `/dashboard/player-card` redirects here.
-  const manoCard = await getWorkerPlayerCard();
-  const manoCardLabels = manoCard
-    ? await buildPlayerCardLabels(manoCard)
-    : null;
-  const manoThermometer = manoCard
-    ? toThermometerView(await getOwnThermometer())
-    : null;
-  const manoAvatar = await getOwnAvatar();
+  //
+  // Four serial reads become two round trips, issuing exactly the same set of
+  // reads as before: the avatar never depended on the card, and the labels and
+  // the thermometer are both gated on the SAME `manoCard` non-null check — so
+  // they resolve together, and neither is fetched when there is no card.
+  const [manoCard, manoAvatar] = await Promise.all([
+    getWorkerPlayerCard(),
+    getOwnAvatar(),
+  ]);
+  const [manoCardLabels, manoThermometer] = manoCard
+    ? await Promise.all([
+        buildPlayerCardLabels(manoCard),
+        getOwnThermometer().then(toThermometerView),
+      ])
+    : [null, null];
 
   return (
     <div className="flex flex-col gap-6">

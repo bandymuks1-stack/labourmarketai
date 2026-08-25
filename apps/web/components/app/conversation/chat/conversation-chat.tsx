@@ -1969,6 +1969,22 @@ export function ConversationChat({
           // four-item menu under every one of them taught users to ignore the
           // chips entirely. The menu stays where it is a menu: the greeting
           // and the not-understood fallback.
+          case "company-overview":
+            // "Kas vyksta mano įmonėje?" — the same link-chip move as the
+            // admin areas: route to the ONE canonical company screen rather
+            // than grow a second company view inside the chat.
+            //
+            // Identity-gated exactly like `need-workers`: a person in their
+            // personal space has no company hub to open, and sending them to
+            // an empty one would be the dead end this pass exists to remove.
+            if (identity === "company") {
+              assistant(labels.adminRouteHint, [
+                { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+              ]);
+            } else {
+              assistant(labels.fallback, starterChips);
+            }
+            break;
           case "admin-approvals":
             // "Ką turiu patvirtinti?" — the approvals area, which no longer
             // unrolls under every visit to /dashboard/network. A `link:` chip

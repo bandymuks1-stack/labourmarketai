@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, extname, join, relative, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve, sep } from "node:path";
 
 /**
  * PRIVATE DOCUMENTATION NEVER REACHES THE PUBLIC RUNTIME.
@@ -102,7 +102,13 @@ describe("private documentation cannot reach the public runtime", () => {
 
   it("nothing served from public/ is a document", () => {
     const publicDir = join(WEB, "public");
-    const served = walk(publicDir).map((f) => relative(publicDir, f));
+    // POSIX-normalised: `relative()` yields "\" on Windows, so the
+    // `.well-known/` exemption below silently never matched there and the
+    // guard failed for every Windows developer while CI (Linux) stayed
+    // green. Compare one separator on every platform.
+    const served = walk(publicDir).map((f) =>
+      relative(publicDir, f).split(sep).join("/"),
+    );
     const docs = served.filter((f) => {
       // `.well-known/` is a standards-defined public surface — security.txt
       // (RFC 9116) is MEANT to be served, and suppressing it would be worse

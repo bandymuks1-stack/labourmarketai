@@ -362,47 +362,6 @@ export default async function OpportunitiesPage({
         {t("marketMapLink")} →
       </Link>
 
-      {/* Next-step bridge (§8.10 / §6 system loop): a fit doesn't dead-end — it
-          moves through the marketplace (request/offer) and the plan (a confirmed
-          match becomes a booking). Existing routes only; navigation, no fake
-          matching action, mobile-first tap targets. */}
-      <section
-        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
-        data-testid="opportunities-next-step"
-      >
-        {/* Density pass (worker-workspace UX audit v2): the intro sentence
-            restated what the two link cards below already say — removed. */}
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("nextStep.title")}
-        </span>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            {
-              key: "marketplace",
-              href: `/${locale}/dashboard/service-requests`,
-              label: t("nextStep.marketplace"),
-              note: t("nextStep.marketplaceNote"),
-            },
-            {
-              key: "bookings",
-              href: `/${locale}/dashboard/bookings`,
-              label: t("nextStep.bookings"),
-              note: t("nextStep.bookingsNote"),
-            },
-          ].map((l) => (
-            <Link
-              key={l.key}
-              href={l.href}
-              data-testid={`opportunities-next-step-${l.key}`}
-              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-            >
-              <span className="font-semibold">{l.label}</span>
-              <span className="text-xs text-text-muted">{l.note}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       {result.kind === "no-worker" ? (
         <section className="rounded-lg border border-dashed border-ink-500 px-4 py-6">
           <p className="text-sm text-text-secondary">{t("noWorkerBody")}</p>
@@ -1293,6 +1252,55 @@ export default async function OpportunitiesPage({
           <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
         </>
       )}
+
+      {/* Next-step bridge (§8.10 / §6 system loop): a fit doesn't dead-end — it
+          moves through the marketplace (request/offer) and the plan (a confirmed
+          match becomes a booking). Existing routes only; navigation, no fake
+          matching action, mobile-first tap targets.
+
+          It sits AFTER the board, not before it. This block used to be the
+          first thing on the page: a worker who opened "Galimybės" met two
+          links to OTHER surfaces before a single opportunity. A next step is
+          only a next step once there is something to step on from — and the
+          page now answers "what matters now?" before "what else can I do?".
+          Still outside the no-worker branch, so it renders exactly as often
+          as it did before. */}
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="opportunities-next-step"
+      >
+        {/* Density pass (worker-workspace UX audit v2): the intro sentence
+            restated what the two link cards below already say — removed. */}
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("nextStep.title")}
+        </span>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {[
+            {
+              key: "marketplace",
+              href: `/${locale}/dashboard/service-requests`,
+              label: t("nextStep.marketplace"),
+              note: t("nextStep.marketplaceNote"),
+            },
+            {
+              key: "bookings",
+              href: `/${locale}/dashboard/bookings`,
+              label: t("nextStep.bookings"),
+              note: t("nextStep.bookingsNote"),
+            },
+          ].map((l) => (
+            <Link
+              key={l.key}
+              href={l.href}
+              data-testid={`opportunities-next-step-${l.key}`}
+              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+            >
+              <span className="font-semibold">{l.label}</span>
+              <span className="text-xs text-text-muted">{l.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
