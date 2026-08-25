@@ -128,6 +128,47 @@ export function computeAdjacentDirections(input: {
   };
 }
 
+/**
+ * THE PROFESSION THE WORKER'S WORK ALREADY SHOWS, when they never named one.
+ *
+ * Owner directive, and the product's own principle: a person does not have to
+ * declare a profession to be understood. Matching already honours that —
+ * `match-v1` treats `professionSlug` as a weighted criterion that fires only
+ * when BOTH sides state it, never a gate. One surface did not: the market
+ * panel on the opportunities board renders nothing at all without a declared
+ * profession, and that panel is the host of the product's only user-visible AI
+ * surface. In production 32 of 36 workers have no `worker_professions` row, so
+ * for them the panel — and the AI with it — did not exist. One of them
+ * (`8af3e334`) holds 12 skills and 12 journal entries: the plumber who never
+ * typed "plumber".
+ *
+ * This is deliberately NOT a new inference engine. It is the EXISTING
+ * `computeAdjacentDirections` asked with no primary profession, which makes
+ * every profession a candidate and ranks them on real held-skill evidence
+ * (shared count, then coverage, then a stable slug tiebreak). The strongest is
+ * the answer. Same map, same ranking, same MIN_SHARED floor — so a worker with
+ * one stray skill still gets `null` rather than a guess, and the caller shows
+ * nothing instead of something invented.
+ *
+ * Returns null when a profession IS declared: a derived reading must never
+ * override what the person actually said about themselves.
+ *
+ * The caller must label the result as derived from recorded work rather than
+ * stated — see the market panel. Pure; no IO.
+ */
+export function bestEvidencedProfession(input: {
+  readonly workerSkillSlugs: readonly string[];
+  readonly declaredProfessionSlug: string | null;
+}): string | null {
+  if (input.declaredProfessionSlug) return null;
+  const result = computeAdjacentDirections({
+    workerSkillSlugs: input.workerSkillSlugs,
+    primaryProfessionSlug: null,
+  });
+  if (result.limitationState !== "ok") return null;
+  return result.directions[0]?.professionId ?? null;
+}
+
 /** Read the worker's real held skill slugs from `worker_skills` (canonical
  *  `skills.slug`). Returns [] on any missing worker / read error — honest, never
  *  throws. */

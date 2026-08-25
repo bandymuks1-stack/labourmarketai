@@ -13721,6 +13721,7 @@
   "marketExplanation": {
     "title": "Markt für {profession}",
     "source": "Gezählt aus öffentlichen Stellenanzeigen, die in LabourMarket.ai importiert wurden, gelesen am {measuredAt}. Das ist nicht der gesamte Arbeitsmarkt und nicht das eigene Bedarfsboard dieser Plattform.",
+    "derivedFromWork": "Du hast keinen Beruf angegeben — dieser Markt wurde aus den Fähigkeiten gewählt, die deine erfasste Arbeit zeigt. Gib einen Beruf an, wenn du einen anderen möchtest.",
     "statOpen": "Offene Anzeigen",
     "statNew7d": "In 7 Tagen veröffentlicht",
     "statNew30d": "In 30 Tagen veröffentlicht",
