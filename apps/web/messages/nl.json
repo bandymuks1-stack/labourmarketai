@@ -11550,7 +11550,9 @@
       "adminRouteHint": "Hier wordt dat geregeld:",
       "adminApprovalsChip": "Goedkeuringen",
       "adminRequestsChip": "Verzoeken",
-      "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier."
+      "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
+      "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
+      "chipServiceRequests": "Een dienst zoeken"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

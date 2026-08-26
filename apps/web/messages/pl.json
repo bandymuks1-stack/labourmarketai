@@ -3603,7 +3603,9 @@
       "engagementsNone": "Nie ma zapisanych relacji roboczych.",
       "engagementsNoCompany": "Nie działasz teraz w imieniu organizacji, więc nie ma listy do pokazania.",
       "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
-      "employerBridgeHint": "Możesz opublikować to jako swoja firma — otworzę formularz zapotrzebowania."
+      "employerBridgeHint": "Możesz opublikować to jako swoja firma — otworzę formularz zapotrzebowania.",
+      "serviceNeedHint": "To zadanie do wykonania — pokażę, kto oferuje taką usługę.",
+      "chipServiceRequests": "Znajdź usługę"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

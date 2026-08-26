@@ -62,6 +62,9 @@ const CHAT_KEYS = [
   // employer even while their active workspace is personal, so a sentence
   // about hiring must not die in the not-understood fallback.
   "employerBridgeHint",
+  // §33 — a request for a JOB TO BE DONE is not a request to fill a job.
+  "serviceNeedHint",
+  "chipServiceRequests",
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",

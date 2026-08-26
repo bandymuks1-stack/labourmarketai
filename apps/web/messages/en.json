@@ -11550,7 +11550,9 @@
       "adminRouteHint": "Here is where that is handled:",
       "adminApprovalsChip": "Approvals",
       "adminRequestsChip": "Requests",
-      "employerBridgeHint": "You can post this as your company — I will open the need form."
+      "employerBridgeHint": "You can post this as your company — I will open the need form.",
+      "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
+      "chipServiceRequests": "Find a service"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
