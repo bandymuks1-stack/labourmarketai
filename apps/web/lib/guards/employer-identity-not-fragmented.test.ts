@@ -127,3 +127,53 @@ describe("the bridge line ships in every routable locale", () => {
     }
   });
 });
+
+describe("a workforce statement is not called ambiguous", () => {
+  /**
+   * Fourth instance. `structureValueStatement` had already decided the
+   * sentence was about workforce — `v.subject === "workforce"` is its own
+   * verdict — and the chat then told a person holding the company role "I am
+   * not sure whether you are offering something or looking for something".
+   * The product understood them and then said it did not.
+   */
+  it("an employer in their personal space gets the door, not a shrug", () => {
+    const i = CHAT.indexOf('v.subject === "workforce" || v.axis === "seek"');
+    expect(i).toBeGreaterThan(0);
+    // The SECOND occurrence is the bridge — the first is the employer
+    // workspace arm that opens the real form and must stay untouched.
+    const j = CHAT.indexOf(
+      'v.subject === "workforce" || v.axis === "seek"',
+      i + 1,
+    );
+    expect(j, "the bridge branch is missing").toBeGreaterThan(i);
+
+    // The CONDITION itself, not a window around it. A wide slice reached the
+    // callback dependency array — which also names `canActAsEmployer` — so an
+    // earlier version of this test passed with the branch hard-disabled to
+    // `false`. Read to the `) {` that closes this condition and no further.
+    const condition = CHAT.slice(j, CHAT.indexOf(") {", j));
+    expect(condition, "the bridge is not gated on held roles").toMatch(
+      /canActAsEmployer/,
+    );
+
+    // The body, bounded by the `return;` that ends it.
+    const bodyStart = CHAT.indexOf(") {", j);
+    const body = CHAT.slice(bodyStart, CHAT.indexOf("return;", bodyStart));
+    expect(body).toMatch(/employerBridgeHint/);
+    expect(body).toMatch(/link:\/dashboard\/company#demand-intake/);
+  });
+
+  it("the employer workspace still opens the real intake form", () => {
+    const i = CHAT.indexOf('v.subject === "workforce" || v.axis === "seek"');
+    const first = CHAT.slice(i, i + 400);
+    expect(first).toMatch(/identity === "company"/);
+    expect(first).toMatch(/openForm\(\s*"company\.create-demand"/);
+  });
+
+  it("somebody with no company role still gets the honest question", () => {
+    // The ambiguity path must survive: for a person who cannot act as an
+    // employer the reading really is unclear, and inventing a demand form for
+    // them would be the wrong-audience form this all exists to avoid.
+    expect(CHAT).toMatch(/valueIntent\.unclear/);
+  });
+});

@@ -1826,6 +1826,34 @@ export function ConversationChat({
         return;
       }
 
+      /**
+       * §2, fourth instance. The statement was READ as a workforce need —
+       * `v.subject === "workforce"` is the structurer's own verdict — and then
+       * a person who holds the company role but is standing in their personal
+       * space was told "I am not sure whether you are offering something or
+       * looking for something". The product understood them and then said it
+       * did not.
+       *
+       * Same correction as #1278 and the same two labels: say what was read,
+       * then hand them the door. Nothing is switched on their behalf and a
+       * person with no company role still falls through to the honest
+       * ambiguity question below, because for them the reading really is
+       * unclear.
+       */
+      if (
+        (v.subject === "workforce" || v.axis === "seek") &&
+        canActAsEmployer
+      ) {
+        if (understood) assistant(understood);
+        assistant(labels.employerBridgeHint, [
+          {
+            id: "link:/dashboard/company#demand-intake",
+            label: labels.chipNeedWorkers,
+          },
+        ]);
+        return;
+      }
+
       // Ambiguous — say what WAS read, ask what would disambiguate.
       assistant(
         [understood, t("valueIntent.unclear"), ...questions]
@@ -1840,8 +1868,11 @@ export function ConversationChat({
       valueSummary,
       demandPrefill,
       identity,
+      canActAsEmployer,
       labels.chipCard,
       labels.chipJobs,
+      labels.employerBridgeHint,
+      labels.chipNeedWorkers,
       openForm,
       starterChips,
     ],
