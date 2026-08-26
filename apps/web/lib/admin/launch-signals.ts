@@ -22,6 +22,20 @@ export interface LaunchSignals {
   readonly interestActive: number | null;
   readonly interestReviewed: number | null;
   readonly interestContacted: number | null;
+  /**
+   * How many of those raised hands actually reached the demand owner as a
+   * durable notification.
+   *
+   * WHY THIS IS A SIGNAL AND NOT A DETAIL. The emitter cannot fail loudly by
+   * design — it swallows every error so a failed notification can never fail a
+   * worker's interest — which means a permanent delivery failure is invisible
+   * from inside the product. Production on 2026-08-26 held five interest
+   * signals and two `demand_interest_expressed` events, both of them carrying
+   * `created_at` identical to their signal rows to the microsecond, which this
+   * emitter cannot produce because it never sets `created_at`. Read beside the
+   * interest counts, that gap is legible; alone, neither number says anything.
+   */
+  readonly interestNotified: number | null;
 }
 
 async function count(
@@ -49,6 +63,7 @@ export async function getLaunchSignals(supabase: SupabaseClient): Promise<Launch
     interestActive,
     interestReviewed,
     interestContacted,
+    interestNotified,
   ] = await Promise.all([
     count(supabase, "workers"),
     count(supabase, "companies"),
@@ -64,6 +79,13 @@ export async function getLaunchSignals(supabase: SupabaseClient): Promise<Launch
     count(supabase, "demand_interest_signals", (q) => (q as any).eq("status", "reviewed")),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     count(supabase, "demand_interest_signals", (q) => (q as any).eq("status", "contacted")),
+    // The delivery side of the same event. Null (unknown) if the store is not
+    // readable here — never 0, which would read as "delivered nothing" when it
+    // means "could not look".
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    count(supabase, "notification_events", (q) =>
+      (q as any).eq("event_type", "demand_interest_expressed"),
+    ),
   ]);
   return {
     workers,
@@ -73,5 +95,6 @@ export async function getLaunchSignals(supabase: SupabaseClient): Promise<Launch
     interestActive,
     interestReviewed,
     interestContacted,
+    interestNotified,
   };
 }

@@ -2801,7 +2801,8 @@
         "openDemands": "Открытые заявки",
         "interestActive": "Интерес: новые",
         "interestReviewed": "Интерес: просмотрено",
-        "interestContacted": "Интерес: связались"
+        "interestContacted": "Интерес: связались",
+        "interestNotified": "Интерес: уведомлено"
       },
       "status": {
         "green_scoped": "green scoped",

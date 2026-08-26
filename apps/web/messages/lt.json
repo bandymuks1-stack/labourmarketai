@@ -2801,7 +2801,8 @@
         "openDemands": "Atviri poreikiai",
         "interestActive": "Susidomėjimas: nauji",
         "interestReviewed": "Susidomėjimas: peržiūrėti",
-        "interestContacted": "Susidomėjimas: susisiekta"
+        "interestContacted": "Susidomėjimas: susisiekta",
+        "interestNotified": "Susidomėjimas: pranešta"
       },
       "status": {
         "green_scoped": "green scoped",

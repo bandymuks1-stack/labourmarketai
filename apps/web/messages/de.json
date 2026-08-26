@@ -2801,7 +2801,8 @@
         "openDemands": "Offene Bedarfe",
         "interestActive": "Interesse: neu",
         "interestReviewed": "Interesse: geprüft",
-        "interestContacted": "Interesse: kontaktiert"
+        "interestContacted": "Interesse: kontaktiert",
+        "interestNotified": "Interesse: benachrichtigt"
       },
       "status": {
         "green_scoped": "grün (begrenzt)",

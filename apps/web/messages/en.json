@@ -2801,7 +2801,8 @@
         "openDemands": "Open demands",
         "interestActive": "Interest: new",
         "interestReviewed": "Interest: reviewed",
-        "interestContacted": "Interest: contacted"
+        "interestContacted": "Interest: contacted",
+        "interestNotified": "Interest: notified"
       },
       "status": {
         "green_scoped": "green scoped",

@@ -28,6 +28,9 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
     { key: "interestActive", value: num(signals.interestActive) },
     { key: "interestReviewed", value: num(signals.interestReviewed) },
     { key: "interestContacted", value: num(signals.interestContacted) },
+    // Sits next to the interest counts on purpose: the two numbers only mean
+    // something read together.
+    { key: "interestNotified", value: num(signals.interestNotified) },
   ];
 
   return (
@@ -41,7 +44,7 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
 
       {/* Real launch signals — unknown renders as "—", never invented. */}
       <ul
-        className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8"
         data-testid="admin-launch-signals"
       >
         {signalTiles.map((s) => (

@@ -2801,7 +2801,8 @@
         "openDemands": "Open behoeften",
         "interestActive": "Interesse: nieuw",
         "interestReviewed": "Interesse: beoordeeld",
-        "interestContacted": "Interesse: gecontacteerd"
+        "interestContacted": "Interesse: gecontacteerd",
+        "interestNotified": "Interesse: gemeld"
       },
       "status": {
         "green_scoped": "groen afgebakend",
