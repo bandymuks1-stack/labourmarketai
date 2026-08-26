@@ -3603,7 +3603,9 @@
       "engagementsNone": "Registreeritud töösuhteid ei ole.",
       "engagementsNoCompany": "Sa ei tegutse praegu organisatsiooni nimel, seega pole nimekirja, mida näidata.",
       "engagementsUnavailable": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks.",
-      "employerBridgeHint": "Saad selle avaldada oma ettevõttena — avan vajaduse vormi."
+      "employerBridgeHint": "Saad selle avaldada oma ettevõttena — avan vajaduse vormi.",
+      "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
+      "chipServiceRequests": "Leia teenus"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

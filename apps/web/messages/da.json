@@ -3603,7 +3603,9 @@
       "engagementsNone": "Der er ingen registrerede arbejdsrelationer.",
       "engagementsNoCompany": "Du handler ikke på vegne af en organisation lige nu, så der er ingen liste at vise.",
       "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
-      "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen."
+      "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen.",
+      "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
+      "chipServiceRequests": "Find en ydelse"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

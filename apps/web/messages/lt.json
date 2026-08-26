@@ -11550,7 +11550,9 @@
       "adminRouteHint": "Štai kur tai tvarkoma:",
       "adminApprovalsChip": "Tvirtinimai",
       "adminRequestsChip": "Prašymai",
-      "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą."
+      "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą.",
+      "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
+      "chipServiceRequests": "Rasti paslaugą"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

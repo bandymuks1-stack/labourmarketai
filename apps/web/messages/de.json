@@ -11550,7 +11550,9 @@
       "adminRouteHint": "Hier wird das verwaltet:",
       "adminApprovalsChip": "Freigaben",
       "adminRequestsChip": "Anträge",
-      "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular."
+      "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular.",
+      "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
+      "chipServiceRequests": "Leistung finden"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

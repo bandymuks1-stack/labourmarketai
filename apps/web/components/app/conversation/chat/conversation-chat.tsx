@@ -183,6 +183,9 @@ export type ChatLabels = {
   /** §2 bridge: shown to somebody who HOLDS the company role while
    *  standing in their personal workspace. */
   employerBridgeHint: string;
+  /** §33 service need: somebody to DO a job, not to fill one. */
+  serviceNeedHint: string;
+  chipServiceRequests: string;
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
@@ -1977,6 +1980,24 @@ export function ConversationChat({
             } else {
               assistant(labels.fallback, starterChips);
             }
+            break;
+          case "need-service":
+            // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a
+            // JOB TO BE DONE, not for somebody to fill a job. Before this it
+            // classified `unknown`, and "ieškau, kas galėtų nuvalyti langus"
+            // classified `find-work` — handing somebody who wants to HIRE a
+            // window cleaner a job search, the opposite direction.
+            //
+            // Routes to the surface that already exists for exactly this (a
+            // buyer discovering active offerings and requesting one) rather
+            // than growing a second intake inside the chat. Not identity
+            // gated: needing a service is not a workspace role.
+            assistant(labels.serviceNeedHint, [
+              {
+                id: "link:/dashboard/service-requests",
+                label: labels.chipServiceRequests,
+              },
+            ]);
             break;
           case "offer-value":
             // V9/V10: read the statement, run channel DISCOVERY, render the

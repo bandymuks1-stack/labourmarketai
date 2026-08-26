@@ -3603,7 +3603,9 @@
       "engagementsNone": "Reģistrētu darba attiecību nav.",
       "engagementsNoCompany": "Pašlaik tu nerīkojies organizācijas vārdā, tāpēc nav saraksta, ko parādīt.",
       "engagementsUnavailable": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav.",
-      "employerBridgeHint": "To vari publicēt kā savs uzņēmums — atvēršu pieprasījuma formu."
+      "employerBridgeHint": "To vari publicēt kā savs uzņēmums — atvēršu pieprasījuma formu.",
+      "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
+      "chipServiceRequests": "Atrast pakalpojumu"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

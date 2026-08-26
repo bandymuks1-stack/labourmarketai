@@ -3603,7 +3603,9 @@
       "engagementsNone": "Det finns inga registrerade arbetsrelationer.",
       "engagementsNoCompany": "Du agerar inte för en organisation just nu, så det finns ingen lista att visa.",
       "engagementsUnavailable": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några.",
-      "employerBridgeHint": "Du kan publicera detta som ditt företag — jag öppnar behovsformuläret."
+      "employerBridgeHint": "Du kan publicera detta som ditt företag — jag öppnar behovsformuläret.",
+      "serviceNeedHint": "Det är ett jobb som ska göras — jag visar vem som erbjuder den tjänsten.",
+      "chipServiceRequests": "Hitta en tjänst"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

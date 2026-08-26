@@ -39,6 +39,7 @@ export type ConversationIntent =
   | "figures" // "parodyk patvirtintas valandas" / "paruošk ataskaitą"
   | "open-project" // "atidaryk šį projektą"
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
+  | "need-service" // "reikia, kad kas nors sutaisytų stogą" — a JOB done, not a job
   | "context" // "ką tu apie mane žinai?"
   | "opportunities" // "kokias galimybes man gali pasiūlyti?" — the OWN board
   | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
@@ -451,6 +452,49 @@ const RULES: IntentRule[] = [
         "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|требу(ется|ются))\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик)",
         6,
       ),
+    ],
+  },
+  {
+    /**
+     * SOMEBODY TO DO A JOB — not somebody to fill a job (§33, services are
+     * first-class).
+     *
+     * Measured before writing this: "Reikia, kad kas nors sutaisytų stogą",
+     * "Reikia meistro rytoj suremontuoti dušą" and "Need someone to repair the
+     * roof" all classified `unknown`, and "Ieškau, kas galėtų nuvalyti langus"
+     * classified `find-work` — sending somebody who wants to HIRE a window
+     * cleaner into a job search, the opposite direction.
+     *
+     * Every pattern binds an INDEFINITE AGENT to a WORK VERB in one regex
+     * rather than scoring the two independently. That is deliberate: a bare
+     * verb stem would fire on "šiandien taisiau stogą", which is a journal
+     * entry, and additive scoring would have let it outrank `log-work`.
+     *
+     * No occupation stem appears here, so a sentence that NAMES a trade
+     * ("reikia dviejų santechnikų") keeps scoring 6 on `need-workers` and is
+     * untouched — employment intake is the one path that already works and
+     * this must not quietly reroute it.
+     */
+    intent: "need-service",
+    patterns: [
+      // LT: "kad kas nors sutaisytu / kas galetu nuvalyti"
+      p(
+        "(kas\\s+nors|kazkas|kas\\s+galetu)\\s*.{0,25}(sutais|suremont|remontuo|taisyt|nuvalyt|valyt|dazyt|montuot|pajungt|pakeist|nupjaut|iskast)",
+        6,
+      ),
+      // LT: "reikia meistro ..." - a handyman is the work, not a hire.
+      p("\\breikia\\s+meistr", 5),
+      // EN
+      p(
+        "\\b(need|looking\\s+for)\\s+(some(one|body)|a\\s+person)\\s+to\\s+(repair|fix|clean|paint|install|mount|replace|mow|move)",
+        6,
+      ),
+      // RU
+      p("(кто|кого)-нибудь\\s*.{0,25}(почин|отремонт|убра|покрас|устано)", 6),
+      // NL
+      p("\\biemand\\s*.{0,20}(repareren|schoonmaken|schilderen|installeren)", 6),
+      // DE
+      p("jemand(en)?\\s*.{0,20}(reparier|putz|streich|installier)", 6),
     ],
   },
   {
