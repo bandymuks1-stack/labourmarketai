@@ -11544,7 +11544,8 @@
       },
       "adminRouteHint": "Štai kur tai tvarkoma:",
       "adminApprovalsChip": "Tvirtinimai",
-      "adminRequestsChip": "Prašymai"
+      "adminRequestsChip": "Prašymai",
+      "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

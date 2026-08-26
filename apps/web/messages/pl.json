@@ -3600,7 +3600,8 @@
       "engagementsOpened": "Oto zapisane relacje robocze. Jedną z nich możesz zakończyć w panelu.",
       "engagementsNone": "Nie ma zapisanych relacji roboczych.",
       "engagementsNoCompany": "Nie działasz teraz w imieniu organizacji, więc nie ma listy do pokazania.",
-      "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak."
+      "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
+      "employerBridgeHint": "Możesz opublikować to jako swoja firma — otworzę formularz zapotrzebowania."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

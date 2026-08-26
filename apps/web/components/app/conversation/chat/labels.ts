@@ -58,6 +58,10 @@ const CHAT_KEYS = [
   // of unrolling under every visit to /dashboard/network. Gating a surface
   // is only half the job: these are how the sentences that mean them still
   // reach them.
+  // §2 — the person is ONE. Somebody who HOLDS the company role is an
+  // employer even while their active workspace is personal, so a sentence
+  // about hiring must not die in the not-understood fallback.
+  "employerBridgeHint",
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",

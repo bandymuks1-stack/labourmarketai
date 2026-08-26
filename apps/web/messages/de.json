@@ -11544,7 +11544,8 @@
       },
       "adminRouteHint": "Hier wird das verwaltet:",
       "adminApprovalsChip": "Freigaben",
-      "adminRequestsChip": "Anträge"
+      "adminRequestsChip": "Anträge",
+      "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
