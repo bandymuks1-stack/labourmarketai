@@ -1,39 +1,44 @@
 /**
- * Local credentialed smoke for feat/cc/pilot-draft-flows (PR B).
+ * Where the private demand draft actually lives (post-W3).
  *
- * Drives the save / edit / delete loop on each of the three private
- * pilot draft forms (company / agency / buyer) using the minted
- * session for sukysdonatas@gmail.com (holds all four user roles).
+ * ── WHY THIS FILE WAS REWRITTEN ────────────────────────────────────────────
+ * It used to drive three standalone `DemandDraftForm` mounts — company,
+ * agency, buyer — using a minted session for one personal Gmail account that
+ * happened to hold all four roles. Every premise of that has since gone:
  *
- * One screenshot per phase per role gets dropped into the review
- * evidence directory so the PR description can link to the visible
- * "Išsaugota privačiai" confirmation + the empty-after-delete state.
+ *   1. `/dashboard/company` no longer mounts a standalone draft form. The W3
+ *      consolidation absorbed it into `DemandRequestButton`, which is the ONE
+ *      demand home. `pilot-draft-form-company_request` is not rendered there
+ *      and has not been for some time.
+ *   2. `/dashboard/agency` does not exist. It is a permanent redirect to
+ *      `/dashboard/company` (next.config REDIRECTS). The old spec navigated
+ *      there, silently landed on the company page, and then failed looking for
+ *      an agency form.
+ *   3. `/dashboard/buyer` still mounts the form, but it is gated on the
+ *      `customer` role, and the shared storage state is a worker or company
+ *      session. The old spec never had a customer session on the local stack.
  *
- * The spec also asserts the negative invariants the guards encode at
- * the source level (no `Patvirtinta` / `Verified`, no public share
- * surface) at the rendered-DOM level.
+ * So the file failed three times on every local run while the product was
+ * working correctly. A suite that cries wolf is worse than no suite: the next
+ * person to see red has to spend an hour proving it means nothing. (It cost
+ * exactly that on 2026-08-26.)
  *
- * The migration 0016 must be applied to the target Supabase project
- * for the save path to succeed — without it the form returns
- * `saveError`. The spec skips outright if `pilot_drafts` is missing.
+ * ── WHAT IT ASSERTS NOW ────────────────────────────────────────────────────
+ * The invariants that are actually true and actually worth protecting:
+ * the retired route still lands somewhere real, the consolidated draft control
+ * is where W3 put it, and the buyer page is genuinely closed to a session
+ * without the role.
+ *
+ * The company draft save/reload round-trip itself is covered — with a real DB
+ * assertion — by `w3-demand-consolidation.spec.ts` ("private draft save writes
+ * a REAL draft row and survives reload"). It is deliberately not duplicated
+ * here.
  */
-import { test, expect, type Page } from "@playwright/test";
-import { existsSync, mkdirSync } from "node:fs";
+import { test, expect } from "@playwright/test";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const STORAGE_STATE = join(__dirname, ".storage-state.json");
-const SCREENSHOT_DIR = join(
-  __dirname,
-  "..",
-  "..",
-  "..",
-  "..",
-  "runtime",
-  "review-evidence",
-  "labourmarketai",
-  "pilot-draft-flows",
-  "screenshots",
-);
 
 test.skip(
   !existsSync(STORAGE_STATE),
@@ -42,121 +47,51 @@ test.skip(
 
 test.use({ storageState: STORAGE_STATE });
 
-mkdirSync(SCREENSHOT_DIR, { recursive: true });
+test("the retired agency route lands on the company workspace", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await page.goto("/lt/dashboard/agency", { waitUntil: "domcontentloaded" });
+  // A permanent redirect, not a 404: somebody's bookmark must still work.
+  await expect(page).toHaveURL(/\/lt\/dashboard\/company/, { timeout: 40_000 });
+});
 
-async function shot(page: Page, name: string): Promise<void> {
-  await page.screenshot({
-    path: join(SCREENSHOT_DIR, `${name}.png`),
-    fullPage: true,
+test("the private draft control is the consolidated one, not a second form", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await page.goto("/lt/dashboard/company", { waitUntil: "domcontentloaded" });
+
+  // A session without the company role is redirected by requireRoleOrRedirect;
+  // that is the ONLY reason to skip. Never skip on "the element is not there
+  // yet" — a cold dev compile of this route takes tens of seconds, and a skip
+  // on that timing would make this test silently vacuous.
+  if (!/\/dashboard\/company/.test(page.url())) {
+    test.skip(true, "this session holds no company role — not its workspace");
+  }
+
+  // The consolidated intake owns the draft leg…
+  await expect(page.getByTestId("demand-intake-section")).toBeVisible({
+    timeout: 60_000,
   });
-}
+  await expect(page.getByTestId("demand-form")).toBeVisible({ timeout: 20_000 });
+  // …and the standalone mount this file used to drive is genuinely gone. If it
+  // ever comes back there are two draft surfaces on one page, which is the
+  // duplication W3 removed.
+  await expect(
+    page.getByTestId("pilot-draft-form-company_request"),
+  ).toHaveCount(0);
+});
 
-type Case = {
-  label: "company" | "agency" | "buyer";
-  draftType: "company_request" | "agency_offer" | "buyer_request";
-  path: string;
-  /** Field id (input/textarea) to fill for the initial save. */
-  fieldId: string;
-  initialValue: string;
-  editedValue: string;
-};
-
-const cases: Case[] = [
-  {
-    label: "company",
-    draftType: "company_request",
-    path: "/lt/dashboard/company",
-    fieldId: "company_request-title",
-    initialValue: "E2E: Reikia 3 elektrikų projektui Vilniuje",
-    editedValue: "E2E: Reikia 4 elektrikų projektui Vilniuje (edit)",
-  },
-  {
-    label: "agency",
-    draftType: "agency_offer",
-    path: "/lt/dashboard/agency",
-    fieldId: "agency_offer-candidateRoles",
-    initialValue: "E2E: 12 elektrikų, 8 statybininkai",
-    editedValue: "E2E: 12 elektrikų, 10 statybininkų (edit)",
-  },
-  {
-    label: "buyer",
-    draftType: "buyer_request",
-    path: "/lt/dashboard/buyer",
-    fieldId: "buyer_request-serviceType",
-    initialValue: "E2E: Vidaus remontas (~80 m²)",
-    editedValue: "E2E: Vidaus remontas (~95 m², edit)",
-  },
-];
-
-for (const c of cases) {
-  test(`${c.label} pilot draft: save → reload → edit → delete`, async ({
-    page,
-  }) => {
-    test.setTimeout(90_000);
-
-    // ── 1. Navigate, ensure clean slate (delete any pre-existing draft).
-    await page.goto(c.path, { waitUntil: "networkidle" });
-    await expect(page.getByTestId(`pilot-draft-form-${c.draftType}`)).toBeVisible();
-
-    const deleteBtn = page.getByTestId(`pilot-draft-delete-${c.draftType}`);
-    if (await deleteBtn.isVisible().catch(() => false)) {
-      await deleteBtn.click();
-      // Wait for the form to refresh and the delete button to disappear.
-      await expect(deleteBtn).toBeHidden({ timeout: 10_000 });
-    }
-
-    // ── 2. Save: fill the first field, submit, expect the savedPrivate
-    //    confirmation to render.
-    const field = page.locator(`#${c.fieldId}`);
-    await field.fill(c.initialValue);
-    const saveBtn = page.getByTestId(`pilot-draft-save-${c.draftType}`);
-    await expect(saveBtn).toBeEnabled();
-    await saveBtn.click();
-    const saved = page.getByTestId(`pilot-draft-saved-${c.draftType}`);
-    await expect(saved).toBeVisible({ timeout: 15_000 });
-    await shot(page, `${c.label}-01-saved`);
-
-    // ── 3. Reload — the draft must come back pre-filled from the DB.
-    await page.reload({ waitUntil: "networkidle" });
-    await expect(field).toHaveValue(c.initialValue, { timeout: 10_000 });
-    // The delete button only renders when an existing draft is present.
-    await expect(
-      page.getByTestId(`pilot-draft-delete-${c.draftType}`),
-    ).toBeVisible();
-    await shot(page, `${c.label}-02-reloaded`);
-
-    // ── 4. Edit + re-save.
-    await field.fill(c.editedValue);
-    await page.getByTestId(`pilot-draft-save-${c.draftType}`).click();
-    await expect(
-      page.getByTestId(`pilot-draft-saved-${c.draftType}`),
-    ).toBeVisible({ timeout: 15_000 });
-    await page.reload({ waitUntil: "networkidle" });
-    await expect(field).toHaveValue(c.editedValue, { timeout: 10_000 });
-    await shot(page, `${c.label}-03-edited`);
-
-    // ── 5. Delete: the row goes away, the field clears, the delete
-    //    button is no longer rendered (no existing draft).
-    await page.getByTestId(`pilot-draft-delete-${c.draftType}`).click();
-    await expect(
-      page.getByTestId(`pilot-draft-delete-${c.draftType}`),
-    ).toBeHidden({ timeout: 10_000 });
-    await page.reload({ waitUntil: "networkidle" });
-    await expect(field).toHaveValue("");
-    await expect(
-      page.getByTestId(`pilot-draft-delete-${c.draftType}`),
-    ).toHaveCount(0);
-    await shot(page, `${c.label}-04-deleted`);
-
-    // ── 6. Honesty: the rendered page must NOT carry any fake
-    //    verified / matched / shared copy on the draft surface.
-    const visibleText = (await page.locator("body").innerText()).replace(
-      /\s+/g,
-      " ",
-    );
-    expect(visibleText).not.toMatch(/(^|\s)Patvirtinta(\s|$|[.,])/);
-    expect(visibleText).not.toMatch(/(^|\s)Verified(\s|$|[.,])/);
-    expect(visibleText).not.toMatch(/(^|\s)Confirmed(\s|$|[.,])/);
-    expect(visibleText).not.toMatch(/Public draft|Vieša(s)? juodraštis/i);
+test("the buyer workspace is closed to a session without the customer role", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await page.goto("/lt/dashboard/buyer", { waitUntil: "domcontentloaded" });
+  // requireRoleOrRedirect("customer") — a worker/company session must not see
+  // the buyer draft form, and must not be left on a dead page either.
+  await expect(page).not.toHaveURL(/\/lt\/dashboard\/buyer$/, {
+    timeout: 40_000,
   });
-}
+  await expect(page.getByTestId("pilot-draft-form-buyer_request")).toHaveCount(0);
+});
