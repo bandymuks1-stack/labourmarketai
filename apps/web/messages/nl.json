@@ -11545,7 +11545,8 @@
       },
       "adminRouteHint": "Hier wordt dat geregeld:",
       "adminApprovalsChip": "Goedkeuringen",
-      "adminRequestsChip": "Verzoeken"
+      "adminRequestsChip": "Verzoeken",
+      "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

@@ -3601,7 +3601,8 @@
       "engagementsOpened": "Her er de registrerede arbejdsrelationer. Du kan afslutte en af dem i panelet.",
       "engagementsNone": "Der er ingen registrerede arbejdsrelationer.",
       "engagementsNoCompany": "Du handler ikke på vegne af en organisation lige nu, så der er ingen liste at vise.",
-      "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have."
+      "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
+      "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

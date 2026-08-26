@@ -11545,7 +11545,8 @@
       },
       "adminRouteHint": "Вот где это управляется:",
       "adminApprovalsChip": "Согласования",
-      "adminRequestsChip": "Заявки"
+      "adminRequestsChip": "Заявки",
+      "employerBridgeHint": "Вы можете разместить это от имени своей компании — открою форму заявки."
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",

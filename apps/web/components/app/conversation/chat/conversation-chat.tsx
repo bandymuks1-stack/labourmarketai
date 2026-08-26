@@ -180,6 +180,9 @@ export type ChatLabels = {
   translateBlocked: string;
   /** Routing to the administration areas — see the router's
    *  `admin-approvals` / `admin-requests` rules. */
+  /** §2 bridge: shown to somebody who HOLDS the company role while
+   *  standing in their personal workspace. */
+  employerBridgeHint: string;
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
@@ -310,6 +313,21 @@ export function ConversationChat({
   const identity = auth0?.activeRole
     ? (baseIdentityForRole(auth0.activeRole) ?? "person")
     : "person";
+
+  /**
+   * §2 — THE PERSON IS ONE. `identity` above is the ACTIVE workspace, not who
+   * the person is: production has five profiles that hold the company role
+   * while sitting in `worker`, exactly as many as are currently in `company`.
+   * Half the employer-capable people on the platform were therefore telling a
+   * chat that plays dumb about hiring.
+   *
+   * `roles` is the HELD catalogue (`profile_roles`, is_active) — the same set
+   * `requireRoleOrRedirect` checks — so holding `company` means the company
+   * hub will genuinely open. No role is switched on their behalf: the chip is
+   * the confirmation, and a person without the role still gets the honest
+   * fallback because for them the surface really is closed.
+   */
+  const canActAsEmployer = Boolean(auth0?.roles?.includes("company"));
 
   const starterChips: ChoiceChip[] = useMemo(
     () =>
@@ -1946,6 +1964,16 @@ export function ConversationChat({
                 undefined,
                 demandPrefill(structureValueStatement(text), text),
               );
+            } else if (canActAsEmployer) {
+              // They ARE an employer, just not in that workspace right now.
+              // Say so and hand them the door rather than pretending not to
+              // understand a sentence the product understood perfectly.
+              assistant(labels.employerBridgeHint, [
+                {
+                  id: "link:/dashboard/company#demand-intake",
+                  label: labels.chipNeedWorkers,
+                },
+              ]);
             } else {
               assistant(labels.fallback, starterChips);
             }
@@ -1977,7 +2005,10 @@ export function ConversationChat({
             // Identity-gated exactly like `need-workers`: a person in their
             // personal space has no company hub to open, and sending them to
             // an empty one would be the dead end this pass exists to remove.
-            if (identity === "company") {
+            if (identity === "company" || canActAsEmployer) {
+              // Same §2 correction: a company owner asking what is happening
+              // in their company gets their company, not a shrug, whichever
+              // workspace they happen to be standing in.
               assistant(labels.adminRouteHint, [
                 { id: "link:/dashboard/company", label: labels.chipCompanyHub },
               ]);

@@ -3601,7 +3601,8 @@
       "engagementsOpened": "Her er de registrerte arbeidsforholdene. Du kan avslutte ett av dem i panelet.",
       "engagementsNone": "Det er ingen registrerte arbeidsforhold.",
       "engagementsNoCompany": "Du handler ikke på vegne av en organisasjon nå, så det finnes ingen liste å vise.",
-      "engagementsUnavailable": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen."
+      "engagementsUnavailable": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen.",
+      "employerBridgeHint": "Du kan legge dette ut som bedriften din — jeg åpner behovsskjemaet."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
