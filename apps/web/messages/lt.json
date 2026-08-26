@@ -7216,10 +7216,30 @@
     "projectsTitle": "Projektai",
     "projectsHint": "Iš darbo įrašų",
     "confirmedByManager": "Patvirtinta vadovo",
+    "euFormat": {
+
+      "notOfficial": "Šis CV parengtas pagal Europass struktūrą, kad Europos darbdaviai jį perskaitytų įprastu formatu. Tai nėra Europos Sąjungos išduotas Europass dokumentas.",
+
+      "personal": "Asmeninė informacija",
+
+      "workExperience": "Darbo patirtis",
+
+      "educationAndTraining": "Išsilavinimas ir mokymai",
+
+      "personalSkills": "Asmeniniai gebėjimai",
+
+      "jobRelatedSkills": "Su darbu susiję gebėjimai",
+
+      "additionalInformation": "Papildoma informacija"
+
+    },
+
     "templates": {
       "label": "Šablonas",
       "standard": "Standartinis",
-      "compact": "Kompaktiškas"
+      "compact": "Kompaktiškas",
+
+      "eu": "ES formatas"
     },
     "privateDetails": {
       "toggle": "Įtraukti atlyginimo lūkestį ir prieinamumą į spausdinamą CV",

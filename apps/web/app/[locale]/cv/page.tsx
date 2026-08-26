@@ -16,6 +16,12 @@ import {
   type TailoredNeedResult,
 } from "@/lib/cv-export/tailored";
 import { formatUtcDate } from "@/lib/time/display";
+import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
+import {
+  buildEuFormatCv,
+  resolveEuFormatDocument,
+} from "@/lib/cv-export/eu-format";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
 /**
  * Verified CV — PDF export (S3.5 + Full CV System v1). A print-clean sheet of
@@ -282,6 +288,53 @@ export default async function VerifiedCvPage({
           </p>
         ) : null}
 
+        {/* The EU-format export is a VIEW over the SAME `cv` object — a
+            different document for a different reader, never a second store of
+            the person (§4B). Everything below this branch is the platform's
+            own layout. */}
+        {template === "eu" ? (
+          <EuFormatCv
+            doc={resolveEuFormatDocument(buildEuFormatCv(cv), {
+              relationship: (slug) => (tRel.has(slug) ? tRel(slug) : slug),
+              educationType: (slug) => tEduTypes(slug),
+              skill: (slug) => tSkill(slug),
+              profession: (slug) => tProf(slug),
+              // The standard export prints the bare code; the native name is
+              // friendlier and falls back to the same code, so the two
+              // documents never disagree about which language it is.
+              language: (code) =>
+                WORKER_LANGUAGE_NATIVE_NAMES[
+                  code as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES
+                ] ?? code.toUpperCase(),
+              certificateType: (slug) =>
+                tDocTypes.has(slug) ? tDocTypes(slug) : slug,
+              date: (iso) => formatUtcDate(iso, locale),
+              present: t("present"),
+            })}
+            labels={{
+              documentTitle: t("templates.eu"),
+              notAnOfficialEuropass: t("euFormat.notOfficial"),
+              nameNotProvided: t("nameNotProvided"),
+              personal: t("euFormat.personal"),
+              workExperience: t("euFormat.workExperience"),
+              educationAndTraining: t("euFormat.educationAndTraining"),
+              personalSkills: t("euFormat.personalSkills"),
+              languages: t("languagesTitle"),
+              languagesSelfStated: t("languagesSelfStated"),
+              jobRelatedSkills: t("euFormat.jobRelatedSkills"),
+              drivingLicences: t("drivingLicences"),
+              additionalInformation: t("euFormat.additionalInformation"),
+              summary: t("summaryTitle"),
+              generatedAt: `${t("generatedAt")}: ${generatedAt}`,
+              tiers: {
+                confirmed: t("tiers.confirmed"),
+                evidence: t("tiers.evidence"),
+                declared: t("tiers.declared"),
+              },
+            }}
+          />
+        ) : (
+          <>
         {/* Player-card style header — identity + honest counters. */}
         <header className={`rounded-xl border-2 border-zinc-900 ${compact ? "p-4" : "p-6"}`}>
           <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
@@ -699,6 +752,8 @@ export default async function VerifiedCvPage({
             {t("generatedAt")}: {generatedAt}
           </p>
         </footer>
+          </>
+        )}
       </div>
     </div>
   );

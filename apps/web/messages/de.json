@@ -7216,10 +7216,30 @@
     "projectsTitle": "Projekte",
     "projectsHint": "Aus Arbeitseinträgen",
     "confirmedByManager": "Vom Manager bestätigt",
+    "euFormat": {
+
+      "notOfficial": "Dieser Lebenslauf folgt der Europass-Struktur, damit europäische Arbeitgeber ihn im erwarteten Format lesen können. Er ist kein von der Europäischen Union ausgestelltes Europass-Dokument.",
+
+      "personal": "Persönliche Daten",
+
+      "workExperience": "Berufserfahrung",
+
+      "educationAndTraining": "Schul- und Berufsbildung",
+
+      "personalSkills": "Persönliche Fähigkeiten",
+
+      "jobRelatedSkills": "Berufsbezogene Fähigkeiten",
+
+      "additionalInformation": "Weitere Angaben"
+
+    },
+
     "templates": {
       "label": "Vorlage",
       "standard": "Standard",
-      "compact": "Kompakt"
+      "compact": "Kompakt",
+
+      "eu": "EU-Format"
     },
     "privateDetails": {
       "toggle": "Gehaltsvorstellung & Verfügbarkeit im Ausdruck aufnehmen",

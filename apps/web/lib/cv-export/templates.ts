@@ -15,6 +15,13 @@ export interface CvTemplate {
 export const CV_TEMPLATES: readonly CvTemplate[] = [
   { id: "standard" },
   { id: "compact" },
+  // Follows the official Europass CV structure as an interoperability
+  // reference (§4B) — Personal information → Work experience → Education and
+  // training → Personal skills → Additional information. A VIEW over the same
+  // Living CV data, never a second store of the person; see
+  // lib/cv-export/eu-format.ts for what is deliberately left blank rather
+  // than guessed.
+  { id: "eu" },
 ];
 
 export const DEFAULT_CV_TEMPLATE = "standard";
