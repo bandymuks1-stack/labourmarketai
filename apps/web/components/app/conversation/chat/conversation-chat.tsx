@@ -2006,15 +2006,16 @@ export function ConversationChat({
             // picking one silently would be wrong half the time — and the old
             // behaviour picked a third thing, a job search, which was right
             // neither time. Both readings are real surfaces, so it offers both.
+            // BOTH readings answer INSIDE the workspace (W8). The first
+            // version of this used `link:` chips to scouting and the board,
+            // which `w8-employer-chat-workspace` refuses by name: the
+            // employer's second step must not navigate out of the chat-first
+            // workspace, and that decision predates this change. These are the
+            // existing in-chat results — the same ones the starter chips run —
+            // carrying labels that name the two readings.
             assistant(labels.interestInboxAmbiguous, [
-              {
-                id: "link:/dashboard/company/scouting",
-                label: labels.chipInterestOnMyNeeds,
-              },
-              {
-                id: "link:/dashboard/opportunities",
-                label: labels.chipMyOwnInterest,
-              },
+              { id: "candidates", label: labels.chipInterestOnMyNeeds },
+              { id: "jobs", label: labels.chipMyOwnInterest },
             ]);
             break;
           case "need-service":

@@ -59,20 +59,27 @@ describe("the dual-role reading is asked, never guessed", () => {
     );
     expect(branch.length).toBeGreaterThan(0);
     expect(branch).toMatch(/interestInboxAmbiguous/);
-    // The employer reading and the worker reading, both real routes.
-    expect(branch).toMatch(/link:\/dashboard\/company\/scouting/);
-    expect(branch).toMatch(/link:\/dashboard\/opportunities/);
+    // Both readings answer INSIDE the workspace. `w8-employer-chat-workspace`
+    // refuses `link:/dashboard/company/scouting` by name — the employer's
+    // second step must not navigate out of the chat — so these are the
+    // existing in-chat results, not routes.
+    expect(branch).toMatch(/\{ id: "candidates", label: labels\.chipInterestOnMyNeeds \}/);
+    expect(branch).toMatch(/\{ id: "jobs", label: labels\.chipMyOwnInterest \}/);
+    // Comments stripped: the note above explains WHY `link:` is refused here,
+    // so asserting on raw text would fail on its own explanation.
+    const code = branch
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    expect(code).not.toMatch(/link:/);
     // And it must not quietly run a search instead of answering.
     expect(branch).not.toMatch(/runFindWork\(/);
   });
 
-  it("both offered routes are real pages", () => {
-    expect(() =>
-      read("app", "[locale]", "dashboard", "company", "scouting", "page.tsx"),
-    ).not.toThrow();
-    expect(() =>
-      read("app", "[locale]", "dashboard", "opportunities", "page.tsx"),
-    ).not.toThrow();
+  it("both chips are ids the handler actually understands", () => {
+    // A chip whose id no branch handles is a dead end that looks like an
+    // action. These two are the same ids the starter chips use.
+    expect(CHAT).toMatch(/case "candidates":/);
+    expect(CHAT).toMatch(/case "jobs":/);
   });
 });
 
