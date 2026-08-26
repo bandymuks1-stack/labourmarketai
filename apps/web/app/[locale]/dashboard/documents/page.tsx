@@ -292,7 +292,16 @@ export default async function WorkerDocumentsPage({
     );
   }
 
-  const centre = await getWorkerDocumentCentre();
+  // The document centre and the docs-aggregate consent both resolve their own
+  // worker from the session — neither reads the other's result — so they cost
+  // one round trip instead of two. The consent read stays behind the readiness
+  // constant so the disabled branch issues exactly the queries it issued
+  // before (today the constant is `true`, so that arm is unreachable; guarding
+  // it keeps this change semantics-preserving if it is ever flipped).
+  const [centre, docsConsent] = await Promise.all([
+    getWorkerDocumentCentre(),
+    DOCUMENTS_READINESS_ENABLED ? getDocsConsent() : Promise.resolve(null),
+  ]);
 
   if (!DOCUMENTS_READINESS_ENABLED) {
     return (
@@ -323,8 +332,8 @@ export default async function WorkerDocumentsPage({
 
   const now = new Date();
   // S6 — the worker's documents-aggregate consent (null until the gated
-  // draft is applied → honest needs-gate state inside the toggle).
-  const docsConsent = await getDocsConsent();
+  // draft is applied → honest needs-gate state inside the toggle). Read in
+  // the batch above; nothing between here and there depends on it.
 
   const inv = centre.inventory;
   const filters =
