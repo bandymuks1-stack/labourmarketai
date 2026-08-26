@@ -7216,10 +7216,30 @@
     "projectsTitle": "Projects",
     "projectsHint": "From work records",
     "confirmedByManager": "Confirmed by a manager",
+    "euFormat": {
+
+      "notOfficial": "This CV follows the Europass structure so European employers can read it in the format they expect. It is not a Europass document issued by the European Union.",
+
+      "personal": "Personal information",
+
+      "workExperience": "Work experience",
+
+      "educationAndTraining": "Education and training",
+
+      "personalSkills": "Personal skills",
+
+      "jobRelatedSkills": "Job-related skills",
+
+      "additionalInformation": "Additional information"
+
+    },
+
     "templates": {
       "label": "Template",
       "standard": "Standard",
-      "compact": "Compact"
+      "compact": "Compact",
+
+      "eu": "EU format"
     },
     "privateDetails": {
       "toggle": "Include salary expectation & availability in the printout",

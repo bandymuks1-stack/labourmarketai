@@ -7216,10 +7216,30 @@
     "projectsTitle": "Проекты",
     "projectsHint": "Из рабочих записей",
     "confirmedByManager": "Подтверждено руководителем",
+    "euFormat": {
+
+      "notOfficial": "Это резюме составлено по структуре Europass, чтобы европейские работодатели читали его в привычном формате. Это не документ Europass, выданный Европейским союзом.",
+
+      "personal": "Личные данные",
+
+      "workExperience": "Опыт работы",
+
+      "educationAndTraining": "Образование и обучение",
+
+      "personalSkills": "Личные навыки",
+
+      "jobRelatedSkills": "Профессиональные навыки",
+
+      "additionalInformation": "Дополнительная информация"
+
+    },
+
     "templates": {
       "label": "Шаблон",
       "standard": "Стандартный",
-      "compact": "Компактный"
+      "compact": "Компактный",
+
+      "eu": "Формат ЕС"
     },
     "privateDetails": {
       "toggle": "Включить ожидания по зарплате и доступность в печатную версию",

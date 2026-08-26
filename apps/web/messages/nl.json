@@ -7216,10 +7216,30 @@
     "projectsTitle": "Projecten",
     "projectsHint": "Uit werkregistraties",
     "confirmedByManager": "Bevestigd door een manager",
+    "euFormat": {
+
+      "notOfficial": "Dit cv volgt de Europass-structuur, zodat Europese werkgevers het in het verwachte formaat kunnen lezen. Het is geen Europass-document dat door de Europese Unie is afgegeven.",
+
+      "personal": "Persoonlijke gegevens",
+
+      "workExperience": "Werkervaring",
+
+      "educationAndTraining": "Opleiding en training",
+
+      "personalSkills": "Persoonlijke vaardigheden",
+
+      "jobRelatedSkills": "Vakgerelateerde vaardigheden",
+
+      "additionalInformation": "Aanvullende informatie"
+
+    },
+
     "templates": {
       "label": "Sjabloon",
       "standard": "Standaard",
-      "compact": "Compact"
+      "compact": "Compact",
+
+      "eu": "EU-format"
     },
     "privateDetails": {
       "toggle": "Salarisverwachting en beschikbaarheid opnemen in de afdruk",
