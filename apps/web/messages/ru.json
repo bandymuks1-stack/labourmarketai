@@ -11552,7 +11552,10 @@
       "adminRequestsChip": "Заявки",
       "employerBridgeHint": "Вы можете разместить это от имени своей компании — открою форму заявки.",
       "serviceNeedHint": "Это работа, которую нужно выполнить — покажу, кто предлагает такую услугу.",
-      "chipServiceRequests": "Найти услугу"
+      "chipServiceRequests": "Найти услугу",
+      "interestInboxAmbiguous": "Это может означать два разных запроса — что показать?",
+      "chipInterestOnMyNeeds": "Интерес к моим заявкам",
+      "chipMyOwnInterest": "Мои отклики"
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",

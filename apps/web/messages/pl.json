@@ -3605,7 +3605,10 @@
       "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
       "employerBridgeHint": "Możesz opublikować to jako swoja firma — otworzę formularz zapotrzebowania.",
       "serviceNeedHint": "To zadanie do wykonania — pokażę, kto oferuje taką usługę.",
-      "chipServiceRequests": "Znajdź usługę"
+      "chipServiceRequests": "Znajdź usługę",
+      "interestInboxAmbiguous": "To może znaczyć dwie rzeczy — co chcesz zobaczyć?",
+      "chipInterestOnMyNeeds": "Zainteresowanie moimi zapytaniami",
+      "chipMyOwnInterest": "Moje zgłoszenia"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

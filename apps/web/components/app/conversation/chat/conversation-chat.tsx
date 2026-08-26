@@ -186,6 +186,10 @@ export type ChatLabels = {
   /** §33 service need: somebody to DO a job, not to fill one. */
   serviceNeedHint: string;
   chipServiceRequests: string;
+  /** §2: the dual-role reading of "kas susidomėjo?" — asked, never guessed. */
+  interestInboxAmbiguous: string;
+  chipInterestOnMyNeeds: string;
+  chipMyOwnInterest: string;
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
@@ -1906,8 +1910,17 @@ export function ConversationChat({
         // chips run scouting in-panel). For the worker it is their own board,
         // where "Mano susidomėjimai" carries the company's answer. Neither
         // branch invents a candidate the reader is not allowed to see.
-        "interest-inbox": () =>
-          identity === "company" ? runFindWorkers() : runFindWork(text),
+        // A person who can act as an employer but is standing in their
+        // personal space used to fall to the worker arm and get a JOB SEARCH —
+        // an answer to neither reading of the question. That case is handled
+        // outside this map, because the honest answer there is to ASK rather
+        // than to guess (see the `interest-inbox` branch below).
+        ...(identity === "company" || !canActAsEmployer
+          ? {
+              "interest-inbox": () =>
+                identity === "company" ? runFindWorkers() : runFindWork(text),
+            }
+          : {}),
       };
       const workflow = WORKFLOWS[intent];
       if (workflow) {
@@ -1980,6 +1993,30 @@ export function ConversationChat({
             } else {
               assistant(labels.fallback, starterChips);
             }
+            break;
+          case "interest-inbox":
+            // Only reached by a person who HOLDS the company role while
+            // standing in their personal space — the map above answers
+            // everybody else.
+            //
+            // "Kas susidomėjo?" genuinely means two different things for this
+            // person: who raised a hand on THEIR demand, and what came of the
+            // interest THEY expressed. The patterns lean employer ("interested
+            // in MY need") but "susidomėjimai" is the worker's own word, so
+            // picking one silently would be wrong half the time — and the old
+            // behaviour picked a third thing, a job search, which was right
+            // neither time. Both readings are real surfaces, so it offers both.
+            // BOTH readings answer INSIDE the workspace (W8). The first
+            // version of this used `link:` chips to scouting and the board,
+            // which `w8-employer-chat-workspace` refuses by name: the
+            // employer's second step must not navigate out of the chat-first
+            // workspace, and that decision predates this change. These are the
+            // existing in-chat results — the same ones the starter chips run —
+            // carrying labels that name the two readings.
+            assistant(labels.interestInboxAmbiguous, [
+              { id: "candidates", label: labels.chipInterestOnMyNeeds },
+              { id: "jobs", label: labels.chipMyOwnInterest },
+            ]);
             break;
           case "need-service":
             // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a

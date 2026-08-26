@@ -3605,7 +3605,10 @@
       "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
       "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen.",
       "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
-      "chipServiceRequests": "Find en ydelse"
+      "chipServiceRequests": "Find en ydelse",
+      "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
+      "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
+      "chipMyOwnInterest": "Min egen interesse"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

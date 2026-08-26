@@ -11552,7 +11552,10 @@
       "adminRequestsChip": "Requests",
       "employerBridgeHint": "You can post this as your company — I will open the need form.",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
-      "chipServiceRequests": "Find a service"
+      "chipServiceRequests": "Find a service",
+      "interestInboxAmbiguous": "That can mean two things — which one do you want?",
+      "chipInterestOnMyNeeds": "Interest in my needs",
+      "chipMyOwnInterest": "My own interest"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
