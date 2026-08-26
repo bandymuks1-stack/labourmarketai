@@ -88,10 +88,10 @@ const KNOWN_SLUGS = new Set(ALL_WORK_TYPE_SLUGS);
 export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilnius", "kaunas", "klaipėd", "klaiped"] },
   { code: "LV", needles: ["latvia", "latvij", "латв", "riga", "ryga"] },
-  { code: "EE", needles: ["estonia", "eston", "эстон", "tallinn", "talin"] },
+  { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
   { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "krak", "wroc", "gdansk", "gdańsk"] },
   { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "hamburg", "munich", "münchen", "munchen", "frankfurt", "cologne", "köln", "koln", "stuttgart"] },
-  { code: "NL", needles: ["netherlands", "holland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "hague", "haag", "eindhoven", "utrecht"] },
+  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "hague", "haag", "eindhoven", "utrecht"] },
   { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus"] },
   { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "bergen", "trondheim"] },
   { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "gothenburg", "göteborg", "malmö", "malmo"] },
