@@ -20,6 +20,7 @@ import type {
   BookingActionLabels,
   BookingOffer,
 } from "@/components/app/conversation/worker-booking-action";
+import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
@@ -76,6 +77,23 @@ export default async function DashboardHomePage({
     await getTranslations("conversation.worklog"),
   );
 
+  /**
+   * Localized country names for the demand prefill.
+   *
+   * The structurer already reads the country out of "…Nyderlanduose", but the
+   * intake form then asked for the location anyway, because `demandPrefill`
+   * had no way to turn `NL` into a word. The code itself must never reach the
+   * field — that is an internal value in a box the person is about to read
+   * (§23) — so the NAME is resolved here, where the catalogue lives.
+   *
+   * `labourMarket.countryNames` is the same node the company page uses; this
+   * adds no second source.
+   */
+  const tCountryNames = await getTranslations("labourMarket");
+  const countryLabels = Object.fromEntries(
+    MARKET_COUNTRIES.map((c) => [c, tCountryNames(`countryNames.${c}`)]),
+  ) as Record<string, string>;
+
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
   // the (full) group and is never mounted here.
@@ -97,6 +115,7 @@ export default async function DashboardHomePage({
         bookingOffers={offers}
         bookingLabels={bookingLabels}
         personalIntroPayload={personalIntroPayload}
+        countryLabels={countryLabels}
       />
     </>
   );
