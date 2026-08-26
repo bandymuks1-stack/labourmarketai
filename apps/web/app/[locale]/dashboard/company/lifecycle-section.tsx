@@ -75,6 +75,11 @@ export async function LifecycleSection({
   notice: LifecycleNotice | null;
 }) {
   const t = await getTranslations("lifecycle");
+  // Relationship labels live in the `network` namespace — the same
+  // localized vocabulary /dashboard/network already renders. Without it
+  // this section printed the raw stored slug ("employee", "owner") at
+  // the user, which is exactly the internal word doctrine §23 forbids.
+  const tRel = await getTranslations("network");
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
 
   const overview = await getLifecycleOverview(orgId);
@@ -573,9 +578,15 @@ export async function LifecycleSection({
                     <span className="truncate text-sm font-medium text-text-primary">
                       {m.name}
                     </span>
-                    <span className="text-xs text-text-muted">
-                      {m.relationshipSlug}
-                    </span>
+                    {tRel.has(
+                      `relationships.slug.${m.relationshipSlug}` as never,
+                    ) ? (
+                      <span className="text-xs text-text-muted">
+                        {tRel(
+                          `relationships.slug.${m.relationshipSlug}` as never,
+                        )}
+                      </span>
+                    ) : null}
                   </div>
                   <div className="flex items-center gap-2">
                     {stageBadge(m.stage)}

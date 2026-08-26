@@ -381,17 +381,33 @@ export default async function JournalPage({
   // skills(slug)`. The second is a strict superset of the first, so both the
   // composer's suggestion list and the entry↔skill link UI are derived from
   // it. Both reads depend only on `worker.id`, so they batch with `dirRows`.
-  const [{ data: dirRows }, { data: skillIdRows }] = await Promise.all([
-    supabase
-      .from("worker_professions")
-      .select("is_primary, professions(slug)")
-      .eq("worker_id", worker.id)
-      .order("is_primary", { ascending: false }),
-    supabase
-      .from("worker_skills")
-      .select("skill_id, verified, skills(slug)")
-      .eq("worker_id", worker.id),
-  ]);
+  //
+  // The entry-skill link read and the entries read below depend only on
+  // `worker.id` too, so they ride in this same round trip. Both used to await
+  // serially further down, which put four DB round trips on the critical path
+  // where two suffice: this batch, then the templates read that genuinely
+  // needs `directions`. Read ORDER is unchanged where it matters — the links
+  // are still read before the lazy heal writes to `journal_entry_skills`.
+  const [{ data: dirRows }, { data: skillIdRows }, linkRead, v3] =
+    await Promise.all([
+      supabase
+        .from("worker_professions")
+        .select("is_primary, professions(slug)")
+        .eq("worker_id", worker.id)
+        .order("is_primary", { ascending: false }),
+      supabase
+        .from("worker_skills")
+        .select("skill_id, verified, skills(slug)")
+        .eq("worker_id", worker.id),
+      readWorkerEntrySkillLinks(supabase, worker.id),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase.from("journal_entries") as any)
+        .select(
+          "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
+        )
+        .eq("worker_id", worker.id)
+        .order("created_at", { ascending: false }),
+    ]);
   const directions = (dirRows ?? [])
     .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
     .filter((s): s is string => s !== null)
@@ -466,7 +482,6 @@ export default async function JournalPage({
   // with an automatic pre-migration fallback (lib/journal/entry-skill-link-read).
   let linksByEntry = new Map<string, string[]>();
   let skillLinksReady = false;
-  const linkRead = await readWorkerEntrySkillLinks(supabase, worker.id);
   const provenanceByEntry = linkRead.provenanceByEntry;
   if (linkRead.ok) {
     skillLinksReady = true;
@@ -499,18 +514,11 @@ export default async function JournalPage({
       | null;
   };
   let entries: JournalEntryRow[] | null = null;
-  // Cast the supabase client through `any` for the v3 select — the
-  // `deleted_at` / `superseded_by` columns are present at runtime after
-  // migration 0018 but aren't in the generated Supabase types until those
-  // are regenerated. The runtime path falls back to the legacy projection
-  // when the v3 columns are still missing on the target DB.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const v3 = await (supabase.from("journal_entries") as any)
-    .select(
-      "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
-    )
-    .eq("worker_id", worker.id)
-    .order("created_at", { ascending: false });
+  // The v3 select is issued in the `worker.id` batch above (cast through
+  // `any` there because `deleted_at` / `superseded_by` are present at runtime
+  // after migration 0018 but absent from the generated Supabase types). Only
+  // the pre-migration fallback below stays serial — it runs solely when the
+  // v3 columns are missing on the target DB.
   if (v3.error) {
     const legacy = await supabase
       .from("journal_entries")
