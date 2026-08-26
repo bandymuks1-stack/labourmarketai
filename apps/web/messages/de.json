@@ -11552,7 +11552,10 @@
       "adminRequestsChip": "Anträge",
       "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular.",
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
-      "chipServiceRequests": "Leistung finden"
+      "chipServiceRequests": "Leistung finden",
+      "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
+      "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
+      "chipMyOwnInterest": "Mein eigenes Interesse"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

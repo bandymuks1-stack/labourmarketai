@@ -11552,7 +11552,10 @@
       "adminRequestsChip": "Prašymai",
       "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą.",
       "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
-      "chipServiceRequests": "Rasti paslaugą"
+      "chipServiceRequests": "Rasti paslaugą",
+      "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",
+      "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
+      "chipMyOwnInterest": "Mano susidomėjimai"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

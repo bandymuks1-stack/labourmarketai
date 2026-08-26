@@ -3605,7 +3605,10 @@
       "engagementsUnavailable": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav.",
       "employerBridgeHint": "To vari publicēt kā savs uzņēmums — atvēršu pieprasījuma formu.",
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
-      "chipServiceRequests": "Atrast pakalpojumu"
+      "chipServiceRequests": "Atrast pakalpojumu",
+      "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",
+      "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",
+      "chipMyOwnInterest": "Manas intereses"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

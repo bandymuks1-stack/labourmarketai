@@ -3605,7 +3605,10 @@
       "engagementsUnavailable": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks.",
       "employerBridgeHint": "Saad selle avaldada oma ettevõttena — avan vajaduse vormi.",
       "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
-      "chipServiceRequests": "Leia teenus"
+      "chipServiceRequests": "Leia teenus",
+      "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
+      "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
+      "chipMyOwnInterest": "Minu enda huvi"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

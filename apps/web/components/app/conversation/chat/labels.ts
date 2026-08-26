@@ -65,6 +65,10 @@ const CHAT_KEYS = [
   // §33 — a request for a JOB TO BE DONE is not a request to fill a job.
   "serviceNeedHint",
   "chipServiceRequests",
+  // §2: "kas susidomėjo?" means two real things for a dual-role person.
+  "interestInboxAmbiguous",
+  "chipInterestOnMyNeeds",
+  "chipMyOwnInterest",
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",

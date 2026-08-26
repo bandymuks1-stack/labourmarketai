@@ -3605,7 +3605,10 @@
       "engagementsUnavailable": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen.",
       "employerBridgeHint": "Du kan legge dette ut som bedriften din — jeg åpner behovsskjemaet.",
       "serviceNeedHint": "Det er en jobb som skal gjøres — jeg viser deg hvem som tilbyr den tjenesten.",
-      "chipServiceRequests": "Finn en tjeneste"
+      "chipServiceRequests": "Finn en tjeneste",
+      "interestInboxAmbiguous": "Det kan bety to ting — hva vil du se?",
+      "chipInterestOnMyNeeds": "Interesse for mine forespørsler",
+      "chipMyOwnInterest": "Min egen interesse"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
