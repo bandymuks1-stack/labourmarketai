@@ -68,6 +68,64 @@ export interface WorkHistorySourceRow {
 const ACTIVE_STATUS = "active";
 
 /**
+ * Does this engagement row say ANYTHING about the person's work?
+ *
+ * ── THE DEFECT THIS EXISTS TO FIX ──────────────────────────────────────────
+ * `ensure_worker_personal_engagement` (20260702140000) gives every worker a
+ * personal engagement the moment their `workers` row is created, because the
+ * journal composer requires a context to write against. That row is pure
+ * scaffolding: no organization, no title, no start date, no end date — just
+ * `relationship_slug = 'employee'`, `is_primary`, `active`.
+ *
+ * It is also, by that same shape, indistinguishable from a real employment
+ * row to every history reader. So the CV printed it: a work-history entry
+ * whose employer fell back to the word "Employee" and which carried no dates.
+ * The profile card counted it as a current engagement.
+ *
+ * Measured in production on 2026-08-26: 35 of 36 profiles carry exactly this
+ * row (organization NULL, title NULL, started_at NULL, active, primary). Every
+ * one of those people had a phantom job on their CV.
+ *
+ * ── WHY THIS PREDICATE IS SAFE ─────────────────────────────────────────────
+ * It drops a row ONLY when the row asserts nothing at all — no organization,
+ * no title, and neither date. Every path that records something real fails
+ * that test and survives:
+ *
+ *   - self-declared history → `save_self_declared_work_history_v1` requires a
+ *     title of at least 3 characters;
+ *   - invitation acceptance → carries `organization_id`;
+ *   - org membership / ownership → carries `organization_id`.
+ *
+ * A single recorded date is enough to keep a row: someone who typed only "I
+ * started in 2019" stated a fact, and facts are not tidied away.
+ *
+ * ── WHAT THIS DOES NOT TOUCH ───────────────────────────────────────────────
+ * The scaffold row stays exactly where it is and keeps doing its job. The
+ * work-log context picker still offers it — case D in
+ * `engagement-context-selection.ts` is the personal, org-less context, and a
+ * person logging their own work needs it. This is a rule about what counts as
+ * HISTORY, not a rule about what counts as a context.
+ */
+export function isRecordedEngagement(
+  row: Pick<WorkHistorySourceRow, "title" | "started_at" | "ended_at"> & {
+    readonly organizations?: WorkHistorySourceRow["organizations"];
+    readonly organizationName?: string | null;
+  },
+): boolean {
+  const org =
+    row.organizationName ??
+    row.organizations?.display_name ??
+    row.organizations?.legal_name ??
+    null;
+  return (
+    nonEmpty(org) !== null ||
+    nonEmpty(row.title) !== null ||
+    nonEmpty(row.started_at) !== null ||
+    nonEmpty(row.ended_at) !== null
+  );
+}
+
+/**
  * Derive the history, newest first.
  *
  * Ordering is by real dates only: a row with no start date sorts last rather
@@ -77,7 +135,7 @@ const ACTIVE_STATUS = "active";
 export function deriveWorkHistory(
   rows: readonly WorkHistorySourceRow[],
 ): WorkHistoryEntry[] {
-  const entries = rows.map((r) => ({
+  const entries = rows.filter(isRecordedEngagement).map((r) => ({
     id: r.id,
     title: nonEmpty(r.title),
     // The org's own display name, then its legal name — never a fabricated
