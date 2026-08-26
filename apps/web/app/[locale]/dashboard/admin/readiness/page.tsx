@@ -21,6 +21,20 @@ export default async function AdminReadinessPage({
   await requireSuperadmin(locale);
 
   const t = await getTranslations("adminReadiness");
+  // Document types have real names in the catalogue the worker-facing centre
+  // already uses. This queue printed the stored slug instead, so an admin read
+  // "posting_notification" where every other surface says "Posting
+  // notification" (§23).
+  //
+  // Production holds 19 types and the catalogue names 12, so the fallback
+  // matters: an unnamed type renders as an explicitly-marked IDENTIFIER rather
+  // than as a label pretending to be a name — and never as the echoed key path
+  // a bare `t()` would produce.
+  const tDocs = await getTranslations("documents");
+  const typeLabel = (slug: string): string | null =>
+    tDocs.has(`types.${slug}` as never)
+      ? (tDocs(`types.${slug}` as never) as string)
+      : null;
   const o = await getAdminReadinessOverview();
 
   return (
@@ -71,7 +85,11 @@ export default async function AdminReadinessPage({
                 className="card-border flex flex-wrap items-center justify-between gap-3 p-3"
               >
                 <span className="text-sm text-text-primary">
-                  {d.documentTypeSlug}
+                  {typeLabel(d.documentTypeSlug) ?? (
+                    <code className="font-mono text-xs text-text-secondary">
+                      {d.documentTypeSlug}
+                    </code>
+                  )}
                   {d.country ? ` · ${d.country}` : ""}
                   <span className="ml-2 font-mono text-meta uppercase tracking-label text-text-muted">
                     {d.workerId.slice(0, 8)}
