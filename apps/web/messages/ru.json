@@ -1468,7 +1468,8 @@
       "hiringWorkers": "Требуются работники",
       "agencyPartnership": "Предложение о партнёрстве"
     },
-    "interestWaiting": "{count, plural, one {# человек ждёт ответа} few {# человека ждут ответа} many {# человек ждут ответа} other {# человека ждут ответа}}"
+    "interestWaiting": "{count, plural, one {# человек ждёт ответа} few {# человека ждут ответа} many {# человек ждут ответа} other {# человека ждут ответа}}",
+    "untitledInquiry": "Запрос без названия"
   },
   "journey": {
     "eyebrow": "Как это работает",

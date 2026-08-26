@@ -1468,7 +1468,8 @@
       "hiringWorkers": "Hiring workers",
       "agencyPartnership": "Agency partnership"
     },
-    "interestWaiting": "{count, plural, one {# person is waiting for a reply} other {# people are waiting for a reply}}"
+    "interestWaiting": "{count, plural, one {# person is waiting for a reply} other {# people are waiting for a reply}}",
+    "untitledInquiry": "Untitled inquiry"
   },
   "journey": {
     "eyebrow": "How it works",

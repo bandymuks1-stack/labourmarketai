@@ -1468,7 +1468,8 @@
       "hiringWorkers": "Mitarbeiter gesucht",
       "agencyPartnership": "Partnerschaftsangebot"
     },
-    "interestWaiting": "{count, plural, one {# Person wartet auf eine Antwort} other {# Personen warten auf eine Antwort}}"
+    "interestWaiting": "{count, plural, one {# Person wartet auf eine Antwort} other {# Personen warten auf eine Antwort}}",
+    "untitledInquiry": "Anfrage ohne Titel"
   },
   "journey": {
     "eyebrow": "So funktioniert es",

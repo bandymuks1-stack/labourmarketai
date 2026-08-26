@@ -10,7 +10,8 @@
       "hiringWorkers": "Otsitakse töötajaid",
       "agencyPartnership": "Partnerluspakkumine"
     },
-    "interestWaiting": "{count, plural, one {# inimene ootab vastust} other {# inimest ootab vastust}}"
+    "interestWaiting": "{count, plural, one {# inimene ootab vastust} other {# inimest ootab vastust}}",
+    "untitledInquiry": "Nimeta päring"
   },
   "journey": {
     "eyebrow": "Kuidas see töötab",

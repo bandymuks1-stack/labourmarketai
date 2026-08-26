@@ -6,6 +6,7 @@ import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-co
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 // Real two-subject bridge (issue #859): candidates a connected agency proposed
@@ -158,6 +159,13 @@ export default async function CompanyScoutingPage({
   // returns rows only to the request owner). Empty until the owner-gated bridge
   // migration is applied.
   const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  // ONE source of truth for the synthetic-title labels — the same catalogue
+  // node the company hub and the buyer surface already read.
+  const tDemandReadback = await getTranslations("demandReadback");
+  const demandTitleLabels = {
+    hiringWorkers: tDemandReadback("syntheticTitle.hiringWorkers"),
+    agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
+  };
   const tOffered = await getTranslations("scoutingAgencyOffers");
 
   // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
@@ -307,7 +315,8 @@ export default async function CompanyScoutingPage({
                   : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
               }`}
             >
-              {d.title}
+              {resolveDemandTitle(d.title, demandTitleLabels) ||
+                tDemandReadback("untitledInquiry")}
               {/* HOW MANY PEOPLE ARE WAITING ON THIS ONE. Without it the
                   employer had to open each demand in turn to discover where
                   the hands were — the count is a real row count from

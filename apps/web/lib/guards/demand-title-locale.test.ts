@@ -96,3 +96,44 @@ describe("demand title is localized only when it is synthetic", () => {
     }
   });
 });
+
+describe("every surface that shows a stored demand title uses the seam", () => {
+  /**
+   * The first pass covered the two read-back surfaces and MISSED scouting —
+   * the screen the employer is on when they actually answer somebody. It was
+   * rendering `{d.title}` straight from the row, so the English synthetic
+   * title showed there too, and its data layer had hardcoded `?? "—"`: an
+   * internal placeholder chosen inside a query.
+   */
+  const read = (rel: string) =>
+    fs.readFileSync(path.join(process.cwd(), rel), "utf-8");
+
+  it("the scouting demand list resolves the title", () => {
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(page).toMatch(/resolveDemandTitle\(d\.title, demandTitleLabels\)/);
+    // Never the bare stored value.
+    expect(page).not.toMatch(/\{d\.title\}/);
+  });
+
+  it("the scouting data layer picks no display string", () => {
+    const src = read("lib/scouting/scouting.ts");
+    expect(src).not.toMatch(/title: r\.title \?\? "—"/);
+    expect(src).toMatch(/title: r\.title \?\? ""/);
+  });
+
+  it("an empty title falls back to a localized label, never a dash", () => {
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(page).toMatch(/tDemandReadback\("untitledInquiry"\)/);
+  });
+
+  it("untitledInquiry ships in every catalogue file", () => {
+    const dir = path.join(process.cwd(), "messages");
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".json"))) {
+      const msgs = JSON.parse(fs.readFileSync(path.join(dir, f), "utf-8"));
+      const v = msgs?.demandReadback?.untitledInquiry;
+      expect(typeof v, `${f} untitledInquiry`).toBe("string");
+      expect(v.trim().length, `${f} untitledInquiry empty`).toBeGreaterThan(0);
+      expect(v.trim(), `${f} untitledInquiry is a dash`).not.toBe("—");
+    }
+  });
+});
