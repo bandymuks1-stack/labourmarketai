@@ -36,6 +36,10 @@ export interface WorkerOpportunityProfile {
   readonly hasWorkType: boolean;
   /** At least one skill is recorded. */
   readonly hasSkills: boolean;
+  /** The worker has recorded work in the journal. Distinguishes "has not
+   *  started" from "has worked but not yet confirmed what it evidences" —
+   *  the two states need opposite next steps. Never gates the fit. */
+  readonly hasRecordedWork?: boolean;
   /** ISO-2 country codes the worker is in / targets (uppercased). */
   readonly countries: readonly string[];
   /** Availability is stated (status "available" or an available-from date). */

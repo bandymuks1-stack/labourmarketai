@@ -493,18 +493,30 @@ export default async function OpportunitiesPage({
               className="flex flex-col items-start gap-2 rounded-md border border-state-amber/40 bg-state-amber/10 px-4 py-3"
               data-testid="opportunities-no-skills"
             >
+              {/* Two different silences, opposite next steps. Somebody who
+                  has never recorded work needs to start; somebody whose
+                  journal is already full needs to CONFIRM what it describes —
+                  telling them to "add a work entry" is asking them to redo
+                  the thing they did. Same section, same honesty, no fake fit. */}
               <p className="text-sm font-semibold text-text-primary">
-                {t("noSkills.title")}
+                {result.readiness.hasRecordedWork
+                  ? t("noSkills.confirmTitle")
+                  : t("noSkills.title")}
               </p>
               <p className="text-xs leading-relaxed text-text-secondary">
-                {t("noSkills.body")}
+                {result.readiness.hasRecordedWork
+                  ? t("noSkills.confirmBody")
+                  : t("noSkills.body")}
               </p>
               <Link
                 href={`/${locale}/dashboard/journal`}
                 className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80"
                 data-testid="opportunities-no-skills-cta"
               >
-                {t("noSkills.cta")} →
+                {result.readiness.hasRecordedWork
+                  ? t("noSkills.confirmCta")
+                  : t("noSkills.cta")}{" "}
+                →
               </Link>
             </section>
           ) : null}

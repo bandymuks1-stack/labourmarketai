@@ -8283,7 +8283,10 @@
     "noSkills": {
       "title": "Your skills aren't recorded yet",
       "body": "Skill matching needs evidence. Add work entries to your Work Journal — recognized skills from real work make your matches meaningful.",
-      "cta": "Add a work entry"
+      "cta": "Add a work entry",
+      "confirmTitle": "Confirm what your work entries show",
+      "confirmBody": "Your Work Journal already has entries. Review the skills recognised in them and confirm the ones you really have — then we can match you.",
+      "confirmCta": "Review recognised skills"
     },
     "skillMatch": {
       "title": "Skill match",
