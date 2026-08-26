@@ -1467,7 +1467,8 @@
     "syntheticTitle": {
       "hiringWorkers": "Ieškoma darbuotojų",
       "agencyPartnership": "Partnerystės pasiūlymas"
-    }
+    },
+    "interestWaiting": "{count, plural, one {# žmogus laukia atsakymo} few {# žmonės laukia atsakymo} other {# žmonių laukia atsakymo}}"
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",

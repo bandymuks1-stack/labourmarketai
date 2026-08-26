@@ -9,7 +9,8 @@
     "syntheticTitle": {
       "hiringWorkers": "Meklē darbiniekus",
       "agencyPartnership": "Sadarbības piedāvājums"
-    }
+    },
+    "interestWaiting": "{count, plural, zero {# cilvēku gaida atbildi} one {# cilvēks gaida atbildi} other {# cilvēki gaida atbildi}}"
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",

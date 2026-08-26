@@ -17,6 +17,7 @@ import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
+import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
@@ -194,6 +195,7 @@ export default async function CompanyDashboardPage({
     rOrgMembers,
     rWorkObjects,
     rManagedProjects,
+    rPendingInterest,
   ] = await Promise.all([
     isStaffingAgency ? listAgencyClients() : null,
     isStaffingAgency ? listAgencyDemands() : null,
@@ -209,6 +211,10 @@ export default async function CompanyDashboardPage({
     ownCompany ? getOrgMembersData("company", ownCompany.id) : null,
     getOrgWorkObjects(),
     ownCompany ? listManagedProjects() : null,
+    // WHO IS WAITING. The count resolves its own employer workspace from the
+    // session, so it depends on nothing above and joins this batch rather
+    // than adding a round trip to a page that already reads fourteen.
+    listPendingInterestCountsForCompany(),
   ] as const);
 
   // P5 agency client management — staffing-agency mode ONLY. Reads the
@@ -240,6 +246,29 @@ export default async function CompanyDashboardPage({
   const tReqStatus = await getTranslations(
     "roleDashboards.buyer.requests.understanding.requestStatus",
   );
+  // WHO IS WAITING — one localized line per demand that has hands raised.
+  //
+  // Production evidence for this: five real `demand_interest_signals`, every
+  // one still `interested`, none reviewed or contacted. The data was always
+  // readable (the demand owner's own RLS admits it) but the only surface that
+  // counted it was /dashboard/company/scouting — a page the employer has to
+  // already know to open. The durable notification that was built to close
+  // that gap has emitted nothing in production since it shipped, so the hub
+  // the employer actually lands on said nothing at all.
+  //
+  // Resolved HERE rather than in the component because the plural form is a
+  // locale rule, not a render concern: the server owns the message catalogue.
+  // A demand with nobody waiting gets no entry, so the row is unchanged.
+  const pendingInterest = new Map<string, { count: number; label: string }>();
+  for (const [requestId, count] of rPendingInterest) {
+    if (count > 0) {
+      pendingInterest.set(requestId, {
+        count,
+        label: tReadback("interestWaiting", { count }),
+      });
+    }
+  }
+
   const readbackLabels = {
     syntheticTitle: {
       hiringWorkers: tReadback("syntheticTitle.hiringWorkers"),
@@ -1408,6 +1437,7 @@ export default async function CompanyDashboardPage({
         result={demandReadback}
         labels={readbackLabels}
         locale={locale}
+        pendingInterest={pendingInterest}
       />
 
       {/* WAGON 10 (areas 18+19) — typed INTERNAL help requests: recruiter /
