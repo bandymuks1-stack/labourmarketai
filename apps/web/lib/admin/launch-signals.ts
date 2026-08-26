@@ -82,8 +82,8 @@ export async function getLaunchSignals(supabase: SupabaseClient): Promise<Launch
     // The delivery side of the same event. Null (unknown) if the store is not
     // readable here — never 0, which would read as "delivered nothing" when it
     // means "could not look".
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     count(supabase, "notification_events", (q) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (q as any).eq("event_type", "demand_interest_expressed"),
     ),
   ]);
