@@ -86,6 +86,7 @@ export function buildSampleWorkerPlayerCard(opts: {
         title: null,
         organizationName: sampleOrganization,
         relationshipSlug: "employee",
+        kind: "employment",
         startedAt: "2025-03-01",
         endedAt: null,
         current: true,

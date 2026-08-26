@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+
 /**
  * Zod input schemas for the executable worker conversation actions (Phase B).
  * Every dispatched write is validated against one of these server-side BEFORE
@@ -16,6 +18,9 @@ const uuid = z.string().uuid();
 export const workerAddWorkHistorySchema = z
   .object({
     title: z.string().trim().min(3).max(200),
+    /** Employment, placement or volunteering. Defaults to `employee` so an
+     *  older client that never sent the field keeps working unchanged. */
+    relationship: z.enum(SELF_DECLARED_RELATIONSHIPS).default("employee"),
     startYear: year,
     startMonth: month.nullable().optional(),
     endYear: year.nullable().optional(),

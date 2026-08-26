@@ -7203,6 +7203,8 @@
     "generatedAt": "Gegenereerd",
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
+    "practiceHistoryTitle": "Stage en vrijwilligerswerk",
+
     "workHistoryTitle": "Werkervaring",
     "present": "Heden",
     "languagesTitle": "Talen",
@@ -11329,6 +11331,8 @@
         "language": "Taal",
         "level": "Niveau",
         "jobTitle": "Functie",
+
+        "engagementKind": "Soort dienstverband",
         "jobTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
         "startMonth": "Startmaand",
         "startYear": "Startjaar",

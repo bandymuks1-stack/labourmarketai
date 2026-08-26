@@ -642,7 +642,15 @@ describe("NO new DB migration in this PR", () => {
     // the market-map read layer itself.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    expect(count).toBeLessThanOrEqual(239);
+    // Bumped 239 -> 240 for the practice work-history widening
+    // (20260826182421_practice_work_history_v1) — CREATE OR REPLACE of ONE
+    // existing SECURITY DEFINER function to add 'student' and 'volunteer' to
+    // its closed relationship set, plus the explicit anon revoke the secdef
+    // closure cannot reach. No table, policy, trigger or DML change; paired
+    // rollback. RED by route (secdef replace + grants); ships UNAPPLIED,
+    // owner-gated. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 240.
+    expect(count).toBeLessThanOrEqual(240);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
