@@ -115,3 +115,44 @@ describe("the copy resolves in every routable locale", () => {
     }
   });
 });
+
+describe("naming no trade does not mean naming no need", () => {
+  /**
+   * "Reikia, kad kas nors dirbtų sandėlyje" carries no occupation stem and no
+   * worker-plural stem, so it scored 0 on every rule and landed in the
+   * not-understood fallback — on the demand-intake path that has produced
+   * nothing since 13 July. The WORK verb is what makes it employment.
+   *
+   * This lives beside the service tests on purpose: the two readings are
+   * separated by ONE stem list, and the boundary is the thing worth pinning.
+   */
+  it.each([
+    "Reikia, kad kas nors dirbtų sandėlyje",
+    "Reikia kad kas nors dirbtu sandelyje",
+    "Need someone to work in the warehouse",
+  ])("%s is employment", (phrase) => {
+    expect(classifyIntent(phrase).intent).toBe("need-workers");
+  });
+
+  it.each([
+    "Reikia, kad kas nors sutaisytų stogą",
+    "Reikia, kad kas nors sumontuotų baldus",
+  ])("%s is still a service", (phrase) => {
+    expect(classifyIntent(phrase).intent).toBe("need-service");
+  });
+
+  it("the two rules share no verb stem", () => {
+    // If `dirb` ever appeared in the service rule, or a repair stem in the
+    // employment rule, the sentences above would start trading places and the
+    // scores would decide it rather than the meaning.
+    const src = readFileSync(
+      join(__dirname, "..", "conversation", "intent-router.ts"),
+      "utf8",
+    );
+    const service = src.slice(
+      src.indexOf('intent: "need-service"'),
+      src.indexOf('intent: "find-work"'),
+    );
+    expect(service).not.toMatch(/dirbt|dirba/);
+  });
+});
