@@ -165,10 +165,26 @@ export async function loadWorkerOpportunities(
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
 
-  const { data: docs } = await asAny(supabase)
-    .from("worker_documents")
-    .select("id")
-    .eq("worker_id", ctx.workerId);
+  // Both depend only on `ctx.workerId`, so they travel as one round trip.
+  //
+  // The entry count exists to tell two different silences apart. `hasSkills`
+  // still gates the fit — with no skill evidence there is genuinely nothing to
+  // compare — but "record some work" is the WRONG next step to hand somebody
+  // who already did: production has two workers with journal entries and no
+  // confirmed skills, and the board was telling them to start writing. Their
+  // real next step is confirming what their entries already describe.
+  const [{ data: docs }, entryCountRes] = await Promise.all([
+    asAny(supabase)
+      .from("worker_documents")
+      .select("id")
+      .eq("worker_id", ctx.workerId),
+    asAny(supabase)
+      .from("journal_entries")
+      .select("id", { count: "exact", head: true })
+      .eq("worker_id", ctx.workerId),
+  ]);
+  const journalEntryCount =
+    typeof entryCountRes?.count === "number" ? entryCountRes.count : 0;
 
   /**
    * What kind of work does this person do? Declared, or — failing that —
@@ -200,6 +216,7 @@ export async function loadWorkerOpportunities(
   const readiness: WorkerReadiness = {
     hasWorkType: Boolean(ctx.subject.professionSlug || evidencedProfessionSlug),
     hasSkills: ctx.skillRowCount > 0,
+    hasRecordedWork: journalEntryCount > 0,
     countries: ctx.worker.current_location_country
       ? [ctx.worker.current_location_country]
       : [],

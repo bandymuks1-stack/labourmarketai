@@ -8283,7 +8283,10 @@
     "noSkills": {
       "title": "Je vaardigheden zijn nog niet vastgelegd",
       "body": "Vaardighedenmatching heeft bewijs nodig. Voeg werkregistraties toe aan je werkjournaal — erkende vaardigheden uit echt werk maken je matches betekenisvol.",
-      "cta": "Voeg een werkregistratie toe"
+      "cta": "Voeg een werkregistratie toe",
+      "confirmTitle": "Bevestig wat je werknotities laten zien",
+      "confirmBody": "Je werkjournaal bevat al notities. Bekijk de daarin herkende vaardigheden en bevestig de vaardigheden die je echt hebt — dan kunnen we je matchen.",
+      "confirmCta": "Herkende vaardigheden bekijken"
     },
     "skillMatch": {
       "title": "Vaardighedenmatch",

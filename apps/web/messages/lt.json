@@ -8283,7 +8283,10 @@
     "noSkills": {
       "title": "Jūsų įgūdžiai dar neužfiksuoti",
       "body": "Įgūdžių atitikimui reikia įrodymų. Pridėkite darbo įrašus į darbo žurnalą — iš tikro darbo atpažinti įgūdžiai daro atitikmenis prasmingus.",
-      "cta": "Pridėti darbo įrašą"
+      "cta": "Pridėti darbo įrašą",
+      "confirmTitle": "Patvirtinkite, ką rodo jūsų darbo įrašai",
+      "confirmBody": "Jūsų darbo žurnale jau yra įrašų. Peržiūrėkite juose atpažintus įgūdžius ir patvirtinkite tuos, kuriuos tikrai mokate — tada galėsime derinti pasiūlymus.",
+      "confirmCta": "Peržiūrėti atpažintus įgūdžius"
     },
     "skillMatch": {
       "title": "Įgūdžių atitikimas",
