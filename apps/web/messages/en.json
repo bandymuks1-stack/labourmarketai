@@ -1463,7 +1463,11 @@
       "urgency": "When needed",
       "notes": "Notes"
     },
-    "scoutLink": "Matched workers & interest for this inquiry"
+    "scoutLink": "Matched workers & interest for this inquiry",
+    "syntheticTitle": {
+      "hiringWorkers": "Hiring workers",
+      "agencyPartnership": "Agency partnership"
+    }
   },
   "journey": {
     "eyebrow": "How it works",

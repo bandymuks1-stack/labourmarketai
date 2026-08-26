@@ -31,6 +31,9 @@ export default async function BuyerDashboardPage({
   const tSpaces = await getTranslations("spaces");
   const tSetup = await getTranslations("roleDashboards.buyer.setup");
   const tRequests = await getTranslations("roleDashboards.buyer.requests");
+  // The two synthetic placeholder titles are shared with the company
+  // read-back, so both surfaces render them from ONE source of truth.
+  const tDemandReadback = await getTranslations("demandReadback");
   const existingDraft = await getDemandDraft("buyer_request");
   const customerRead = await getOwnCustomer();
   const customer = customerRead.kind === "ok" ? customerRead.row : null;
@@ -75,6 +78,10 @@ export default async function BuyerDashboardPage({
   );
 
   const requestsLabels = {
+    syntheticTitle: {
+      hiringWorkers: tDemandReadback("syntheticTitle.hiringWorkers"),
+      agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
+    },
     heading: tRequests("heading"),
     subheading: tRequests("subheading"),
     newRequestHeading: tRequests("newRequestHeading"),

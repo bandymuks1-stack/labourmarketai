@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 
 import {
   saveBuyerRequestAction,
@@ -42,6 +42,13 @@ import {
  */
 
 export interface BuyerRequestsSectionLabels {
+  /** Localized stand-ins for the two ENGLISH placeholder titles the write
+   *  path stamps when an employer submits a need without naming the role.
+   *  Optional: omitted → the stored string renders exactly as before. */
+  readonly syntheticTitle?: {
+    readonly hiringWorkers: string;
+    readonly agencyPartnership: string;
+  };
   readonly heading: string;
   readonly subheading: string;
   readonly newRequestHeading: string;
@@ -339,7 +346,7 @@ export function BuyerRequestsSection({
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-col gap-0.5">
                       <span className="font-display text-sm font-semibold text-text-primary">
-                        {sanitizeDemandTitle(r.title)}
+                        {resolveDemandTitle(r.title, labels.syntheticTitle)}
                       </span>
                       <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {u.labelCreated}: {r.createdAt.slice(0, 10)}

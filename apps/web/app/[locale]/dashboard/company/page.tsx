@@ -241,6 +241,10 @@ export default async function CompanyDashboardPage({
     "roleDashboards.buyer.requests.understanding.requestStatus",
   );
   const readbackLabels = {
+    syntheticTitle: {
+      hiringWorkers: tReadback("syntheticTitle.hiringWorkers"),
+      agencyPartnership: tReadback("syntheticTitle.agencyPartnership"),
+    },
     heading: tReadback("heading"),
     note: tReadback("note"),
     workerVisibilityNote: tReadback("workerVisibilityNote"),
