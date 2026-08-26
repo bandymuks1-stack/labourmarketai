@@ -9,7 +9,8 @@
     "syntheticTitle": {
       "hiringWorkers": "Søger medarbejdere",
       "agencyPartnership": "Partnerskabstilbud"
-    }
+    },
+    "interestWaiting": "{count, plural, one {# person venter på svar} other {# personer venter på svar}}"
   },
   "journey": {
     "eyebrow": "Sådan fungerer det",

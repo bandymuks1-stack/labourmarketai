@@ -85,10 +85,14 @@ function str(v: unknown): string {
 export function DemandRequestsReadback({
   result,
   labels,
+  pendingInterest,
   locale,
 }: {
   result: CustomerRequestsListResult;
   labels: DemandRequestsReadbackLabels;
+  /** requestId → how many people are still waiting, with the localized line.
+   *  Absent entry = nobody waiting; the row renders exactly as before. */
+  pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
   locale: string;
 }) {
   // needs-migration / error → render nothing (graceful; on prod the
@@ -150,6 +154,7 @@ export function DemandRequestsReadback({
               [labels.fields.urgency, urgency],
               [labels.fields.notes, notes],
             ].filter(([, v]) => v.length > 0) as Array<[string, string]>;
+            const waiting = pendingInterest?.get(r.id) ?? null;
             // Tolerant: older requests have no estimate → null, section omitted.
             const estimate = parseStoredEstimate(r.payload);
             return (
@@ -171,12 +176,29 @@ export function DemandRequestsReadback({
                     {labels.status[r.status] ?? labels.statusOther}
                   </span>
                 </div>
+                {/* Somebody raised their hand on THIS demand and is still
+                    waiting. Without this the row looked identical whether five
+                    people had applied or nobody had, and the only surface that
+                    knew was a page the employer had to open unprompted. */}
+                {waiting ? (
+                  <p
+                    className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/50 bg-state-warning/10 px-2 py-1 text-xs font-medium text-state-warning"
+                    data-testid="demand-readback-interest-waiting"
+                    data-count={waiting.count}
+                  >
+                    {waiting.label}
+                  </p>
+                ) : null}
                 {/* PR10: every demand row deep-links its OWN scouting view —
                     matched workers, interest signals, acknowledgement and the
                     confirm/close lifecycle controls. Real route, no new page. */}
                 <Link
                   href={`/${locale}/dashboard/company/scouting?request=${r.id}`}
-                  className="inline-flex w-fit items-center gap-1 text-xs font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+                  className={
+                    waiting
+                      ? "inline-flex w-fit items-center gap-1 text-xs font-semibold text-brand-blue underline underline-offset-2 transition-colors hover:text-brand-cyan"
+                      : "inline-flex w-fit items-center gap-1 text-xs font-medium text-brand-blue transition-colors hover:text-brand-cyan"
+                  }
                   data-testid="demand-readback-scout-link"
                 >
                   {labels.scoutLink} →

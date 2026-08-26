@@ -9,7 +9,8 @@
     "syntheticTitle": {
       "hiringWorkers": "Otsitakse töötajaid",
       "agencyPartnership": "Partnerluspakkumine"
-    }
+    },
+    "interestWaiting": "{count, plural, one {# inimene ootab vastust} other {# inimest ootab vastust}}"
   },
   "journey": {
     "eyebrow": "Kuidas see töötab",

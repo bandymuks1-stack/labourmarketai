@@ -1467,7 +1467,8 @@
     "syntheticTitle": {
       "hiringWorkers": "Требуются работники",
       "agencyPartnership": "Предложение о партнёрстве"
-    }
+    },
+    "interestWaiting": "{count, plural, one {# человек ждёт ответа} few {# человека ждут ответа} many {# человек ждут ответа} other {# человека ждут ответа}}"
   },
   "journey": {
     "eyebrow": "Как это работает",
