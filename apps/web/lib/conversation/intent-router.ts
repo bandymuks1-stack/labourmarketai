@@ -448,6 +448,15 @@ const RULES: IntentRule[] = [
       // with an occupation stem (the most common WORK_TYPE_RULES needles) is
       // employer demand — while a bare "esu suvirintojas" (no seek verb)
       // deliberately stays out of this intent.
+      // SOMEBODY TO WORK, WITHOUT NAMING A TRADE. "Reikia, kad kas nors
+      // dirbtu sandelyje" carries no occupation stem and no worker-plural
+      // stem, so it scored 0 on every rule and landed in the not-understood
+      // fallback - on the demand-intake path that has produced nothing since
+      // 13 July. The WORK verb is what makes it employment; `need-service`
+      // deliberately holds no `dirb` stem, so the two cannot collide.
+      p("(kas\\s+nors|kazkas|kas\\s+galetu)\\s*.{0,25}(dirbt|dirba)", 6),
+      p("\\b(some(one|body))\\s+to\\s+work\\b", 6),
+      p("(кто|кого)-нибудь\\s*.{0,25}(работа)", 6),
       p(
         "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|требу(ется|ются))\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик)",
         6,
