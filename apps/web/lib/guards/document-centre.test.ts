@@ -359,10 +359,17 @@ describe("6. honest degradation per source + the preparing gate stays", () => {
     expect(PAGE).toMatch(/doc-centre-org-empty/);
     expect(PAGE).toMatch(/doc-centre-org-project-link/);
     // The org branch renders no document list and no verification badges.
+    // End marker is the CALL, not one assignment form: the worker path now
+    // batches that read with the consent read, and pinning the exact
+    // `const centre = await …` spelling made this slice silently empty
+    // (indexOf → -1) rather than fail loudly.
+    const orgEnd = PAGE.indexOf("getWorkerDocumentCentre()");
+    expect(orgEnd).toBeGreaterThan(0);
     const orgBranch = PAGE.slice(
       PAGE.indexOf("ORG_ROLES.has(activeRole)"),
-      PAGE.indexOf("const centre = await getWorkerDocumentCentre()"),
+      orgEnd,
     );
+    expect(orgBranch.length).toBeGreaterThan(0);
     expect(orgBranch).not.toMatch(/documents-list|doc-centre-verification/);
   });
 
