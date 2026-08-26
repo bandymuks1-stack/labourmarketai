@@ -1463,7 +1463,11 @@
       "urgency": "Kada reikia",
       "notes": "Pastabos"
     },
-    "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas"
+    "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas",
+    "syntheticTitle": {
+      "hiringWorkers": "Ieškoma darbuotojų",
+      "agencyPartnership": "Partnerystės pasiūlymas"
+    }
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",

@@ -4,7 +4,7 @@ import type {
   CustomerRequestStatus,
   CustomerRequestsListResult,
 } from "@/lib/buyer/customer-requests";
-import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import { DemandLocationCapture } from "@/components/app/demand-location-capture";
@@ -27,6 +27,13 @@ import { DemandLocationCapture } from "@/components/app/demand-location-capture"
  */
 
 export interface DemandRequestsReadbackLabels {
+  /** Localized stand-ins for the two ENGLISH placeholder titles the write
+   *  path stamps when an employer submits a need without naming the role.
+   *  Optional: omitted → the stored string renders exactly as before. */
+  readonly syntheticTitle?: {
+    readonly hiringWorkers: string;
+    readonly agencyPartnership: string;
+  };
   readonly heading: string;
   readonly note: string;
   /** Honest gap statement: workers cannot see submitted needs until the
@@ -154,7 +161,7 @@ export function DemandRequestsReadback({
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-text-primary">
-                      {sanitizeDemandTitle(r.title)}
+                      {resolveDemandTitle(r.title, labels.syntheticTitle)}
                     </span>
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels.created}: {r.createdAt.slice(0, 10)}

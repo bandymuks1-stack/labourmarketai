@@ -48,14 +48,25 @@ describe("E — legacy pilot demand titles are sanitized at display", () => {
   it("leaves clean titles untouched", () => {
     expect(sanitizeDemandTitle("Hiring workers — demand")).toBe("Hiring workers — demand");
   });
-  it("the product display surfaces run titles through the sanitizer", () => {
+  it("the product display surfaces run titles through the sanitizing seam", () => {
+    // The seam gained a localizing entry point (`resolveDemandTitle`, which
+    // calls `sanitizeDemandTitle` internally) so a stored ENGLISH placeholder
+    // title does not reach a reader in another language. Either entry point
+    // satisfies the de-piloting intent this guard exists to protect — what
+    // must never happen is the RAW stored title reaching the screen, so that
+    // is now asserted directly rather than inferred from one call shape.
     for (const rel of [
       "components/app/demand-requests-readback.tsx",
       "components/app/buyer-requests-section.tsx",
     ]) {
       const src = read(rel);
       expect(src).toMatch(/from\s+["']@\/lib\/demand\/sanitize-demand-title["']/);
-      expect(src).toMatch(/sanitizeDemandTitle\(r\.title\)/);
+      expect(src).toMatch(
+        /(sanitizeDemandTitle|resolveDemandTitle)\(\s*r\.title/,
+      );
+      expect(src, `${rel} renders the raw stored title`).not.toMatch(
+        /\{\s*r\.title\s*\}/,
+      );
     }
   });
 });

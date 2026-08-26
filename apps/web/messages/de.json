@@ -1463,7 +1463,11 @@
       "urgency": "Wann benötigt",
       "notes": "Notizen"
     },
-    "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage"
+    "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage",
+    "syntheticTitle": {
+      "hiringWorkers": "Mitarbeiter gesucht",
+      "agencyPartnership": "Partnerschaftsangebot"
+    }
   },
   "journey": {
     "eyebrow": "So funktioniert es",

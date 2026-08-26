@@ -1463,7 +1463,11 @@
       "urgency": "Wanneer nodig",
       "notes": "Notities"
     },
-    "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag"
+    "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag",
+    "syntheticTitle": {
+      "hiringWorkers": "Medewerkers gezocht",
+      "agencyPartnership": "Samenwerkingsvoorstel"
+    }
   },
   "journey": {
     "eyebrow": "Hoe het werkt",
