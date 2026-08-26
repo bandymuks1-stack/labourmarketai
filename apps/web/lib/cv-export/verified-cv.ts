@@ -20,7 +20,10 @@ import {
   type CvCertificateDoc,
   type CvProject,
 } from "./cv-sections";
-import { WORKER_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import {
+  isRecordedEngagement,
+  WORKER_RELATIONSHIPS,
+} from "@/lib/player-card/work-history-model";
 
 /**
  * Verified CV export (S3.5) — the worker's OWN portable, honest history.
@@ -283,7 +286,20 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       startedAt: e.started_at,
       endedAt: e.ended_at,
     };
-  });
+  })
+    // The trigger-provisioned personal context (20260702140000) carries no
+    // organization, no title and no dates — it exists so the journal composer
+    // has something to write against, and it is not a job. Printing it gave
+    // 35 of 36 production profiles a phantom "Employee" with no employer.
+    // Same rule as the profile card, so the two never disagree.
+    .filter((e) =>
+      isRecordedEngagement({
+        title: e.title,
+        started_at: e.startedAt,
+        ended_at: e.endedAt,
+        organizationName: e.orgName,
+      }),
+    );
 
   const personName =
     profileRes.data?.full_name ??
