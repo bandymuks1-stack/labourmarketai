@@ -1468,7 +1468,8 @@
       "hiringWorkers": "Medewerkers gezocht",
       "agencyPartnership": "Samenwerkingsvoorstel"
     },
-    "interestWaiting": "{count, plural, one {# persoon wacht op een reactie} other {# personen wachten op een reactie}}"
+    "interestWaiting": "{count, plural, one {# persoon wacht op een reactie} other {# personen wachten op een reactie}}",
+    "untitledInquiry": "Naamloze aanvraag"
   },
   "journey": {
     "eyebrow": "Hoe het werkt",

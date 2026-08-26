@@ -10,7 +10,8 @@
       "hiringWorkers": "Søger medarbejdere",
       "agencyPartnership": "Partnerskabstilbud"
     },
-    "interestWaiting": "{count, plural, one {# person venter på svar} other {# personer venter på svar}}"
+    "interestWaiting": "{count, plural, one {# person venter på svar} other {# personer venter på svar}}",
+    "untitledInquiry": "Forespørgsel uden titel"
   },
   "journey": {
     "eyebrow": "Sådan fungerer det",

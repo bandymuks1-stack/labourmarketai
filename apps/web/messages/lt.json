@@ -1468,7 +1468,8 @@
       "hiringWorkers": "Ieškoma darbuotojų",
       "agencyPartnership": "Partnerystės pasiūlymas"
     },
-    "interestWaiting": "{count, plural, one {# žmogus laukia atsakymo} few {# žmonės laukia atsakymo} other {# žmonių laukia atsakymo}}"
+    "interestWaiting": "{count, plural, one {# žmogus laukia atsakymo} few {# žmonės laukia atsakymo} other {# žmonių laukia atsakymo}}",
+    "untitledInquiry": "Užklausa be pavadinimo"
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",

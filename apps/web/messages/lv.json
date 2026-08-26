@@ -10,7 +10,8 @@
       "hiringWorkers": "Meklē darbiniekus",
       "agencyPartnership": "Sadarbības piedāvājums"
     },
-    "interestWaiting": "{count, plural, zero {# cilvēku gaida atbildi} one {# cilvēks gaida atbildi} other {# cilvēki gaida atbildi}}"
+    "interestWaiting": "{count, plural, zero {# cilvēku gaida atbildi} one {# cilvēks gaida atbildi} other {# cilvēki gaida atbildi}}",
+    "untitledInquiry": "Pieprasījums bez nosaukuma"
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",

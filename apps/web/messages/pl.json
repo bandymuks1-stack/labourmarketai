@@ -10,7 +10,8 @@
       "hiringWorkers": "Poszukiwani pracownicy",
       "agencyPartnership": "Oferta współpracy"
     },
-    "interestWaiting": "{count, plural, one {# osoba czeka na odpowiedź} few {# osoby czekają na odpowiedź} many {# osób czeka na odpowiedź} other {# osoby czeka na odpowiedź}}"
+    "interestWaiting": "{count, plural, one {# osoba czeka na odpowiedź} few {# osoby czekają na odpowiedź} many {# osób czeka na odpowiedź} other {# osoby czeka na odpowiedź}}",
+    "untitledInquiry": "Zapytanie bez nazwy"
   },
   "journey": {
     "eyebrow": "Jak to działa",
