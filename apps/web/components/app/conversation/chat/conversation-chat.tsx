@@ -294,6 +294,7 @@ export function ConversationChat({
   script,
   mobile = false,
   personalIntroPayload = null,
+  countryLabels,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -311,6 +312,9 @@ export function ConversationChat({
    *  (the design preview) renders nothing at all; a resolved `hidden`
    *  model renders nothing either — exactly as before. */
   personalIntroPayload?: Promise<PersonalIntroPayload> | null;
+  /** Localized country names, resolved server-side. The demand prefill needs a
+   *  WORD for the location field — the ISO code is an internal value (§23). */
+  countryLabels?: Record<string, string>;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -1672,13 +1676,19 @@ export function ConversationChat({
       const out: Record<string, string | boolean> = { description: original };
       const roleLabel = v.workType ? workTypeLabels[v.workType] : undefined;
       if (roleLabel) out.role = roleLabel;
+      // The structurer already read the country out of the sentence; without
+      // this the form asked for a location the person had just given. The NAME
+      // goes in, never the ISO code — the field is something they are about to
+      // read and edit.
+      const countryLabel = v.country ? countryLabels?.[v.country] : undefined;
+      if (countryLabel) out.location = countryLabel;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
       if (v.window) {
         out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";
       }
       return out;
     },
-    [workTypeLabels],
+    [workTypeLabels, countryLabels],
   );
 
   /** V10 §36: the LAST value interpretation, held for explicit corrections.
