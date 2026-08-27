@@ -33,6 +33,9 @@ export type StageHooks = {
   readonly frame: (stage: Stage, dt: number, elapsed: number) => void;
   /** called on every resize, after camera aspect is updated */
   readonly resize?: (stage: Stage) => void;
+  /** replaces the default renderer.render — used by scenes that draw through
+   *  a post-processing composer instead of straight to the canvas */
+  readonly renderFrame?: (stage: Stage) => void;
 };
 
 export function useThreeStage(
@@ -133,8 +136,20 @@ export function useThreeStage(
       if (!running) return;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      hooksRef.current.frame(stage, dt, (now - start) / 1000);
-      renderer.render(scene, camera);
+      try {
+        hooksRef.current.frame(stage, dt, (now - start) / 1000);
+      } catch (err) {
+        // A throw inside the frame callback used to leave a live canvas that
+        // simply stopped updating, with nothing anywhere to say why. Surface
+        // it on the host element and stop, rather than burn a rAF loop.
+        host.dataset.frameError =
+          err instanceof Error ? `${err.message}` : String(err);
+        running = false;
+        return;
+      }
+      const custom = hooksRef.current.renderFrame;
+      if (custom) custom(stage);
+      else renderer.render(scene, camera);
       frames += 1;
       if (now - fpsMark >= 1000) {
         host.dataset.fps = (frames / ((now - fpsMark) / 1000)).toFixed(0);

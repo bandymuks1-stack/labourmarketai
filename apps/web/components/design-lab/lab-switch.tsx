@@ -3,10 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const CONCEPTS = [
+const ROUND1 = [
   { id: "a", slug: "premium-a", name: "Record" },
   { id: "b", slug: "premium-b", name: "Field" },
   { id: "c", slug: "premium-c", name: "Composition" },
+] as const;
+
+/** Round 2 — the three evolutions of the selected direction. Round 1 stays
+ *  reachable so the owner can compare rather than remember. */
+const ROUND2 = [
+  { id: "c1", slug: "premium-c1", name: "Presence" },
+  { id: "c2", slug: "premium-c2", name: "Weather" },
+  { id: "c3", slug: "premium-c3", name: "Assembly" },
 ] as const;
 
 /**
@@ -39,9 +47,9 @@ export function LabSwitch({
           className="hidden px-2.5 text-[9px] uppercase tracking-[0.24em] opacity-55 sm:inline"
           style={{ letterSpacing: "0.24em" }}
         >
-          Concept
+          R2
         </span>
-        {CONCEPTS.map((c) => {
+        {ROUND2.map((c) => {
           const href = `/${locale}/design/${c.slug}`;
           const active = pathname === href;
           return (
@@ -56,6 +64,26 @@ export function LabSwitch({
               }}
             >
               {c.id} · {c.name}
+            </Link>
+          );
+        })}
+        <span aria-hidden className="mx-1 opacity-25">|</span>
+        {ROUND1.map((c) => {
+          const href = `/${locale}/design/${c.slug}`;
+          const active = pathname === href;
+          return (
+            <Link
+              key={c.id}
+              href={href}
+              title={`Round 1 — ${c.name}`}
+              className="rounded-full px-2 py-1.5 text-[9px] uppercase tracking-[0.14em] transition-colors duration-200"
+              style={{
+                background: active ? fg : "transparent",
+                color: active ? (tone === "dark" ? "#0C0C0E" : "#FFFFFF") : fg,
+                opacity: active ? 1 : 0.4,
+              }}
+            >
+              {c.id}
             </Link>
           );
         })}

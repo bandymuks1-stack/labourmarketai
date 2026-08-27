@@ -1,0 +1,34 @@
+[
+  {
+    "id": "welder",
+    "lic": "CC0",
+    "artist": "Chetan Menaria chetanmenaria",
+    "credit": "https://unsplash.com/photos/SBXETTZe768\n\narchive copy at the Wayback Machine",
+    "page": "https://commons.wikimedia.org/wiki/File%3AWelder%20at%20work%20(Unsplash).jpg",
+    "kb": 177
+  },
+  {
+    "id": "workshop",
+    "lic": "Public domain",
+    "artist": "Photo: Andreas Praefcke",
+    "credit": "Self-photographed",
+    "page": "https://commons.wikimedia.org/wiki/File%3ASchreinerwerkstatt%20Boos%20Aulendorf.jpg",
+    "kb": 314
+  },
+  {
+    "id": "lab",
+    "lic": "Public domain",
+    "artist": "Johnston, Frances Benjamin, 1864-1952, photographer",
+    "credit": "Library of Congress\n\nCatalog: https://lccn.loc.gov/2002695163\nImage download: https://cdn.loc.gov/service/pnp/cph/3g00000/3g09000/3g09600/3g09680v.jpg\nOriginal url: https://www.loc.gov/pictures/item/2002695163/",
+    "page": "https://commons.wikimedia.org/wiki/File%3AStudents%20conducting%20experiments%20in%20laboratory%2C%20Western%20High%20School%2C%20Washington%2C%20D.C.%20LCCN2002695163.jpg",
+    "kb": 212
+  },
+  {
+    "id": "portrait",
+    "lic": "Public domain",
+    "artist": "David Lucas",
+    "credit": "This file was contributed to Wikimedia Commons by Columbus Metropolitan Library as part of a cooperation project. The donation was facilitated by the Digital Public Library of America, via its partner Ohio Digital Network.\nRecord in source catalog\nDPLA identifier: 5396c70d14b5301de45577a6debb1ea2\nColumbus Metropolitan Library identifier: DL_B15_DQX_011.tif",
+    "page": "https://commons.wikimedia.org/wiki/File%3AConstruction%20worker%20portrait%20-%20DPLA%20-%205396c70d14b5301de45577a6debb1ea2.jpg",
+    "kb": 374
+  }
+]
