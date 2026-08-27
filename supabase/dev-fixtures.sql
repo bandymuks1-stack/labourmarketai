@@ -160,6 +160,22 @@ select 'cccccccc-0000-0000-0000-000000000001', w.id, 'active', true
 on conflict (company_id, worker_id)
 do update set status = 'active', journal_review_enabled = true;
 
+-- ── FIXTURE UUIDs MUST BE RFC-4122 VALID ───────────────────────────────────
+-- The engagement_context ids below carry an explicit version nibble (4) and
+-- variant nibble (8). That is not decoration.
+--
+-- These ids travel into `workerLogWorkSchema.engagementContextId`, which is
+-- `z.uuid()`. Zod v4 enforces the RFC version/variant, so the old synthetic
+-- form `99999999-0000-0000-0000-000000000001` was REJECTED — and the whole
+-- chat-first work-log save failed locally with a generic "Nepavyko išsaugoti",
+-- for every developer, on the product's flagship journey.
+--
+-- Production was never affected: all 53 real engagement_contexts come from
+-- gen_random_uuid() and are v4 (verified 2026-08-27). The fixture simply could
+-- not exercise the path it existed to exercise, which is the worst kind of
+-- test data — it fails in a way that looks like a product defect.
+--
+-- Guard: apps/web/lib/guards/fixture-uuid-validity.test.ts
 -- Worker "employee" engagement on the company's mirrored organization
 -- (companies insert above auto-created it via the 0013 mirror trigger).
 -- Primary + review-enabled so the journal composer renders AND the entry is
@@ -168,7 +184,7 @@ insert into public.engagement_contexts
   (id, profile_id, organization_id, relationship_slug, status, is_primary,
    journal_review_enabled, hash_self)
 select
-  '99999999-0000-0000-0000-000000000001',
+  '99999999-0000-4000-8000-000000000001',
   'aaaaaaaa-0000-0000-0000-000000000001', o.id, 'employee', 'active', true,
   true,
   encode(extensions.digest(
@@ -179,7 +195,7 @@ where o.legacy_company_id = 'cccccccc-0000-0000-0000-000000000001'
 on conflict (id) do nothing;
 update public.engagement_contexts
    set status = 'active', journal_review_enabled = true
- where id = '99999999-0000-0000-0000-000000000001';
+ where id = '99999999-0000-4000-8000-000000000001';
 
 -- Company owner "owner" engagement — manages_organization() (0013) requires
 -- an active manager/owner/external_manager engagement row; owning the
@@ -188,7 +204,7 @@ insert into public.engagement_contexts
   (id, profile_id, organization_id, relationship_slug, status, is_primary,
    hash_self)
 select
-  '99999999-0000-0000-0000-000000000002',
+  '99999999-0000-4000-8000-000000000002',
   'aaaaaaaa-0000-0000-0000-000000000002', o.id, 'owner', 'active', false,
   encode(extensions.digest(
     'aaaaaaaa-0000-0000-0000-000000000002:owner:' || o.id::text,
@@ -231,7 +247,7 @@ insert into public.journal_entries
 select
   ('1e111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
   w.id,
-  '99999999-0000-0000-0000-000000000001',
+  '99999999-0000-4000-8000-000000000001',
   'freeform',
   (array[
     'Klojau plyteles antrame aukste, 8 valandos.',

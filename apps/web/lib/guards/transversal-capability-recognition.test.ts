@@ -125,6 +125,32 @@ describe("the trade recogniser is untouched", () => {
   });
 });
 
+describe("participation is not a leadership claim", () => {
+  // Found by browser E2E, not by reading code: the student case produced
+  // `team-coordination` instead of `teamwork`, because that role's needle was
+  // the bare stem "komand" and matched every form of the word. So a student
+  // writing "universiteto KOMANDINIS projektas" — I took part in a team
+  // project — was credited with COORDINATING a team. That is a skill the
+  // person never claimed, which is the fabricated-skill failure doctrine §7
+  // forbids, and it would have gone onto their CV.
+  it("taking part in a team project is teamwork, never team coordination", () => {
+    const got = recognize(
+      "Universiteto komandinis projektas: parasiau ataskaita ir pristaciau ji komisijai",
+    );
+    expect(got).toContain("teamwork");
+    expect(
+      got,
+      "participation was credited as team COORDINATION — a leadership claim",
+    ).not.toContain("team-coordination");
+  });
+
+  it("actually leading a team is still recognised as coordination", () => {
+    // The narrowing must not delete the role — only stop it over-reaching.
+    const got = recognize("Koordinavau komanda statybvieteje ir vadovavau brigadai");
+    expect(got).toContain("team-coordination");
+  });
+});
+
 describe("the family is wired into the one catalogue", () => {
   it("every capability is a real hint row tagged cross-sector", () => {
     for (const slug of TRANSVERSAL) {
