@@ -1,5 +1,19 @@
 # Agent Operating Contract — labourmarket.ai
 
+> 🧭 **START HERE: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — the ONE
+> canonical architecture entry point (owner directive 2026-08-27). It carries
+> the authority order, the product invariants, the three loops, the capability
+> inventory and the **extensibility contract**.
+>
+> Before ANY change, run its §7 process. Two review questions, not one:
+> **(A) did we break something that worked?** and **(B) did we make impossible
+> something the architecture previously allowed?** A change can pass every test
+> and still fail B — that is an architecture regression.
+>
+> The canonical architecture is the **minimum known possibility space, not its
+> maximum boundary**. Preserve what exists, add what is now known, keep the
+> extension points.
+
 > 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
 >
 > 🧭 Prieš planuojant ar įgyvendinant produkto funkcijas privaloma perskaityti
