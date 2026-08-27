@@ -532,6 +532,64 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: false,
   },
+  {
+    // ORGANIZATION CAPABILITIES — "What does your organization do?"
+    //
+    // The screen that made an already-applied table reachable. Two of the five
+    // World-State answers are recorded as honest NO below, and they are not
+    // dressed up: the capability set is not drawn on the World Map yet, and the
+    // AI cannot yet set it by conversation. Recording those as "yes" to clear
+    // the gate would be exactly the fabrication the gate exists to catch.
+    id: "components/app/organization-capabilities-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Lets an organization state what it actually does — educate/train, employ, supply workers, recruit, run projects, commission work — as several simultaneous capabilities, so an education institution can register honestly instead of calling itself a company.",
+    whyNotChat:
+      "It is a settled identity claim about an organization, not a request. Each answer is a durable, owner-only statement that others rely on for matching and discovery, and the RPC behind it is additive — a capability cannot be withdrawn. A conversational turn is the wrong shape for a decision that is hard to reverse and must be reviewable at a glance; chat may later OPEN this card, which is the extension recorded below.",
+    whyNotExistingComponent:
+      "The company setup form already answers a different question — companies.company_type, which is the INDUSTRY and holds exactly one value. Capabilities are what the organization DOES and are many-valued; a vocational school that also employs people needs both. Extending the industry control to carry capabilities would collapse the two axes and rebuild the single-value trap ORGANIZATION_ROLE_ORCHESTRATION_V1 exists to forbid.",
+    owner:
+      "Product owner — education pilot P0.1, owner directive 2026-08-27 (institution capability UI)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "Same element. This states what an existing organization is, and creates no new world element.",
+    chatIntegration:
+      "None today, and that is recorded as a NO rather than implied. The capability question is reachable only from the organization page. Making the assistant able to open it — 'we also train people' — is the natural next step and needs no schema change, because add_organization_role_v1 already accepts it.",
+    avatarEffect:
+      "None on a person. This describes an organization, not a human, and writes nothing to any profile, skill or journal.",
+    mapEffect:
+      "None yet — recorded honestly. A training capability is exactly the kind of fact the market map should eventually show (where education supply actually is), but nothing renders it today and claiming otherwise would be a fabricated map effect.",
+    journalRelation:
+      "None. An organization declaring what it does is a statement about itself, never evidence of work performed; the Work Journal remains the only source of proven capability for a person.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // The five mandatory answers, honestly.
+    changesWorldState: true,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+  },
 ] as const;
 
 /**
