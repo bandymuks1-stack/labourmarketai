@@ -462,6 +462,84 @@ export const SCOPED_OWNER_WAIVERS = [
     expiresAt: "2026-12-31",
     owner: "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
   },
+
+  /**
+   * ORGANIZATION MULTI-CAPABILITY CARD — the education pilot's registration
+   * surface.
+   *
+   * OWNER RULING, 2026-08-27, verbatim:
+   *   "APPROVED as a temporary PR-scoped waiver ONLY for: not_reflected_on_map,
+   *    not_ai_controlled. Scope: components/app/organization-capabilities-card.tsx.
+   *    Axiom: A-01. PR: 1299."
+   *   "The organization multi-capability UI is required to close the
+   *    education/institution pilot cycle now. The underlying multi-role
+   *    architecture is canonical and already production-backed. World Map
+   *    reflection and conversational AI control remain required follow-up
+   *    integrations; absence of those two secondary representations must not
+   *    block the real organization capability workflow."
+   *   "This waiver MUST NOT waive any other Product Gate finding. Do not
+   *    broaden its scope."
+   *
+   * WHAT IS BEING EXCUSED — two SECONDARY REPRESENTATIONS, not the surface.
+   * The card's declaration answers `reflectedOnMap: false` and
+   * `aiControlled: false` HONESTLY (A-06 outranks the temptation to rewrite
+   * them green): nothing renders an organization's training capability on the
+   * market map today, and the assistant cannot yet open the card. The three
+   * remaining World-State answers — `changesWorldState`,
+   * `usableWithoutLeavingWorkspace`, `needsNoNewPage` — are real YES, so this
+   * is a partial, two-answer debt on an existing surface, not a new page
+   * escaping the lock.
+   *
+   * WHY IT CANNOT LEAK. All six gate constraints bind: the two codes, axiom
+   * A-01, the single file, PR #1299, the expiry, and the subset rule. A third
+   * finding anywhere — including on this same card — un-waives the entire run.
+   * No other surface, PR or axiom inherits anything.
+   *
+   * ENABLING STEPS (owner-required; either one landing removes half of this
+   * record, both remove it entirely):
+   *   1. MAP — reflect organization capabilities on the canonical World Map /
+   *      state representation, so declared education supply is visible where
+   *      the market is read. `mapEffect` in the declaration then becomes a real
+   *      effect and `reflectedOnMap` a real yes.
+   *   2. CONVERSATION — make capability declaration and change reachable
+   *      through the canonical conversational action layer WITHOUT creating a
+   *      parallel write path: the assistant must call the SAME
+   *      `add_organization_role_v1` the card calls. A second writer would be a
+   *      doctrine violation that costs more than the waiver it removes.
+   *
+   * WHY THE ARCHITECTURE ALREADY SUPPORTS BOTH. `organization_roles`
+   * (20260827050000, applied) is a registry-keyed, many-valued fact — neither
+   * enabling step needs a schema change, which is why they are integrations
+   * and not redesigns.
+   */
+  {
+    id: "organization-multi-capability-card",
+    axioms: ["A-01"],
+    scope:
+      "The organization multi-capability declaration card (education pilot P0.1) — its map reflection and conversational control ONLY",
+    pullRequests: [1299],
+    approvedHeadShas: [],
+    /**
+     * Once #1299 merges the debt lives in `main`, and the gate validates the
+     * whole registry on every run rather than only the diff. Without this the
+     * merged waiver would turn `main` red and block every later PR — the exact
+     * failure the mechanism exists to remove. Every other constraint still
+     * binds; only `main` is listed.
+     */
+    postMergeBranches: ["main"],
+    files: ["components/app/organization-capabilities-card.tsx"],
+    expectedFindings: [
+      { code: "not_reflected_on_map", file: "components/app/organization-capabilities-card.tsx" },
+      { code: "not_ai_controlled", file: "components/app/organization-capabilities-card.tsx" },
+    ],
+    reason:
+      "An education institution cannot register honestly without a way to state that it educates, and the single-value company_type field cannot carry it. The multi-role architecture behind the card is canonical and production-backed. The two failing answers are missing SECONDARY representations of a fact the card records truthfully — a map layer and a conversational entry point — and the owner ruled that their absence must not block the real organization capability workflow. Both are recorded as NO in the declaration rather than rewritten to YES.",
+    resolvedBy:
+      "organization-capabilities-on-map + capability-declaration-via-canonical-conversational-action-layer (the two enabling steps above; no schema change needed for either)",
+    expiresAt: "2026-11-30",
+    owner:
+      "Product owner — OWNER RULING 2026-08-27 §3, PR-scoped waiver for #1299, axiom A-01, codes not_reflected_on_map + not_ai_controlled only",
+  },
 ];
 
 /** Is this ONE finding excused? Every constraint must hold. */

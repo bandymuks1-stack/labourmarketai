@@ -266,12 +266,49 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // added only after the explicit owner decision "SHIP THIS LANDING AS V1".
     // It has its own route, PR binding and exact six-finding subset; neither
     // earlier public-acquisition waiver was widened.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(3);
+    // 3 -> 4 on 2026-08-27. The fourth record is the ORGANIZATION
+    // MULTI-CAPABILITY CARD, and it is the first record here that is NOT a
+    // public-acquisition route — so it could not have joined any existing one
+    // even if someone wanted to. It exists because of a fourth owner ruling
+    // (2026-08-27 §3), verbatim: "APPROVED as a temporary PR-scoped waiver
+    // ONLY for: not_reflected_on_map, not_ai_controlled ... This waiver MUST
+    // NOT waive any other Product Gate finding. Do not broaden its scope."
+    //
+    // What differs from the three above, and is worth seeing in one place: it
+    // excuses TWO findings, not six, on an AUTHENTICATED workspace card whose
+    // other three World-State answers are real YES. It is a partial debt on a
+    // compliant surface — a missing map layer and a missing conversational
+    // entry point — not a category mismatch. It also carries the shortest
+    // expiry of the four (2026-11-30) and two named enabling steps, because
+    // both are integrations that need no schema change.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(4);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
       "public-acquisition-route-landing-v1",
+      "organization-multi-capability-card",
     ]);
+
+    // The owner's boundary, executable rather than trusted: this record
+    // excuses exactly two codes, on exactly one file, for exactly one PR.
+    const cap = SCOPED_OWNER_WAIVERS[3];
+    expect(cap.axioms).toEqual(["A-01"]);
+    expect(cap.pullRequests).toEqual([1299]);
+    expect(cap.files).toEqual(["components/app/organization-capabilities-card.tsx"]);
+    expect(cap.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+    ]);
+    // "Do not broaden its scope" — every excused finding names the one file.
+    for (const f of cap.expectedFindings) {
+      expect(f.file).toBe("components/app/organization-capabilities-card.tsx");
+    }
+    // The two enabling steps the ruling required are recorded where the
+    // mechanism actually reads them, so the debt names its own removal.
+    expect(cap.resolvedBy).toMatch(/map/i);
+    expect(cap.resolvedBy).toMatch(/conversational/i);
+    // Tighter than the three public-route records, on purpose.
+    expect(cap.expiresAt < "2026-12-31").toBe(true);
     const w = SCOPED_OWNER_WAIVERS[0];
     expect(w.id).toBe("public-acquisition-route-create-cv");
     expect(w.axioms).toEqual(["A-01"]);
