@@ -10128,9 +10128,15 @@
         "limit_reached": "Pasiektas kvietimų limitas",
         "rate_limited": "Per daug kvietimų šiandien",
         "not_authorized": "Neturite teisės",
-        "error": "Nepavyko"
+        "error": "Nepavyko",
+        "invalid_relationship": "Netinkamas ryšio tipas",
+        "organization_capability_required": "Organizacija to dar nenurodė"
       },
-      "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)"
+      "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)",
+      "capacityLabel": "Kuo pakviestas asmuo bus jūsų organizacijoje?",
+      "capacityHint": "Praktika ar studijos nėra įdarbinimas — tai bus užrašyta tiksliai taip, kaip pasirinksite.",
+      "capacityNeedsCapability": "Jūsų organizacija dar nenurodė, kad vykdo mokymus. Nurodykite tai organizacijos puslapyje, tada galėsite pakviesti besimokantįjį.",
+      "capacityNeedsCapabilityCta": "Atidaryti organizacijos puslapį"
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
@@ -10170,7 +10176,9 @@
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
         "not_found": "Kvietimas nerastas.",
         "error": "Nepavyko. Bandykite dar kartą."
-      }
+      },
+      "capacity": "Ryšys: {capacity}",
+      "capacityNotEmployment": "Tai nėra darbo pasiūlymas ir nesukuria įdarbinimo."
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {

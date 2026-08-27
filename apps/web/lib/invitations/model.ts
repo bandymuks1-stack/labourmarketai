@@ -103,3 +103,91 @@ export function acceptedDestination(input: {
   }
   return "/dashboard";
 }
+
+/**
+ * IN WHAT CAPACITY? — the human half of relationship invitations.
+ *
+ * `accept_invitation_v1` used to be able to create exactly two relationships:
+ * `employee`, or `collaborator` for a partner invitation. That is why an
+ * education institution could declare it provides training and still had no way
+ * to connect a single learner — the invitation model had the whole lifecycle
+ * and no vocabulary. Migration 20260827200000 moved the relationship into DATA
+ * (`invitations.relationship_slug` → `relationship_types`), and this list is
+ * what the sender picks from.
+ *
+ * ── WHY THIS IS A LIST AND NOT A NEW invitation_type ───────────────────────
+ * Adding `join_as_student` to INVITATION_TYPES would have been smaller today
+ * and wrong tomorrow: the next relationship (mentor, apprentice, trainee) would
+ * need another type, another CASE arm and another migration. ARCHITECTURE §6.2
+ * names that exact move — "hardcoding today's actor/relationship taxonomy as
+ * exhaustive" — as a narrowing failure to reject in review. So INVITATION_TYPES
+ * is UNCHANGED, and a learner invitation is `join_organization` carrying
+ * `relationshipSlug: "student"`.
+ *
+ * ── THE NAMES ARE NOT DEFINED HERE ─────────────────────────────────────────
+ * Every slug below is already localized in `messages/<loc>/relationship-types.json`
+ * (namespace `relationshipTypes`) — the same words the CV prints. Defining a
+ * second set of labels for the same vocabulary would be the duplication the
+ * doctrine's canonical check exists to prevent, and the two copies would drift.
+ *
+ * ── ADDING ONE LATER ───────────────────────────────────────────────────────
+ * `update relationship_types set invitable = true where slug = '<new>'`, then
+ * one entry here. No migration, no schema change — which is the promise
+ * 20260827050000 made for organization capabilities, kept for relationships.
+ *
+ * Pure data. No IO.
+ */
+export interface RelationshipInviteChoice {
+  /** The stored slug. Localized through `relationshipTypes`, never rendered raw. */
+  readonly slug: string;
+  /**
+   * The organization capability the org must have declared first, or null.
+   * MIRRORS `relationship_types.requires_organization_role` — the DATABASE is
+   * the authority and refuses the write regardless of what this says; this copy
+   * exists only so the screen can explain the refusal BEFORE the send instead
+   * of after it.
+   */
+  readonly requiresOrganizationRole: string | null;
+}
+
+/**
+ * The capacities a sender may offer, in the order they are offered.
+ *
+ * `employee` leads because it is the historical default and every existing
+ * caller means it; education follows because it is the capability the product
+ * previously had no way to express at all.
+ *
+ * DELIBERATELY ABSENT (see the migration's seed for the full reasoning):
+ * `owner` (a transfer, not an invitation), `manager` (administrative authority
+ * over other people's records — granted through the audited membership path,
+ * never through a mailed token), `viewer` and `unemployed` (not relationships
+ * to an organization).
+ */
+export const RELATIONSHIP_INVITE_CHOICES: readonly RelationshipInviteChoice[] = [
+  { slug: "employee", requiresOrganizationRole: null },
+  { slug: "student", requiresOrganizationRole: "training_provider" },
+  { slug: "volunteer", requiresOrganizationRole: null },
+  { slug: "collaborator", requiresOrganizationRole: null },
+  { slug: "freelancer", requiresOrganizationRole: null },
+  { slug: "consultant", requiresOrganizationRole: null },
+] as const;
+
+/** The capacity a sender gets when they express no preference — the historical
+ *  default, so an untouched form behaves exactly as it did before. */
+export const DEFAULT_RELATIONSHIP_SLUG = "employee";
+
+export function isRelationshipInviteSlug(v: string | null | undefined): boolean {
+  return RELATIONSHIP_INVITE_CHOICES.some((c) => c.slug === (v ?? ""));
+}
+
+/** What an organization holding `capabilities` may actually offer. Never used
+ *  as the enforcement point — `create_invitation_v1` re-checks server-side. */
+export function relationshipChoiceBlocked(
+  choice: RelationshipInviteChoice,
+  capabilities: readonly string[],
+): boolean {
+  return (
+    choice.requiresOrganizationRole !== null &&
+    !capabilities.includes(choice.requiresOrganizationRole)
+  );
+}

@@ -10128,9 +10128,15 @@
         "limit_reached": "Invitation limit reached",
         "rate_limited": "Too many invitations today",
         "not_authorized": "Not allowed",
-        "error": "Failed"
+        "error": "Failed",
+        "invalid_relationship": "Not an offerable relationship",
+        "organization_capability_required": "Organization has not declared this yet"
       },
-      "recipientLanguageLabel": "Recipient's language (email and invitation)"
+      "recipientLanguageLabel": "Recipient's language (email and invitation)",
+      "capacityLabel": "What will the invited person be in your organization?",
+      "capacityHint": "A placement or studies are not employment — it will be recorded exactly as you choose here.",
+      "capacityNeedsCapability": "Your organization has not said it provides education yet. State that on the organization page, then you can invite a learner.",
+      "capacityNeedsCapabilityCta": "Open the organization page"
     },
     "invitePage": {
       "eyebrow": "INVITATION",
@@ -10170,7 +10176,9 @@
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
         "not_found": "Invitation not found.",
         "error": "Something went wrong. Please try again."
-      }
+      },
+      "capacity": "Relationship: {capacity}",
+      "capacityNotEmployment": "This is not a job offer and does not create employment."
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {

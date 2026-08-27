@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
   listInvitationsForMe,
@@ -186,6 +187,26 @@ export default async function NetworkPage({
               : t("organizations.unnamed")),
         }))
       : [];
+
+  /**
+   * What each organization has DECLARED it does, for the invite panel's
+   * capacity control: an organization that has never said it provides
+   * education must be told so before it tries to invite a learner, rather than
+   * after `create_invitation_v1` refuses the send.
+   *
+   * Read under the caller's OWN RLS (`organization_roles_select` already fences
+   * it to owners/members) and per organization the caller already owns, so this
+   * discloses nothing the page did not already show. A failed read returns an
+   * empty list, which fails CLOSED — the capacity shows as unavailable rather
+   * than being silently offered.
+   */
+  const organizationCapabilities = await Promise.all(
+    organizations.map((o) => readOrganizationCapabilities(o.id)),
+  );
+  const organizationsWithCapabilities = organizations.map((o, i) => ({
+    ...o,
+    capabilities: organizationCapabilities[i] ?? [],
+  }));
 
   // The strip reads each area its OWN title, from the namespace that section
   // already owns — so a link can never drift from the heading it opens, and
@@ -397,7 +418,7 @@ export default async function NetworkPage({
       {/* The canonical Pakviesti action. */}
       <InvitePanel
         locale={locale}
-        organizations={organizations}
+        organizations={organizationsWithCapabilities}
         projects={projects.map((p) => ({ id: p.id, title: p.title }))}
         defaultType={type}
         defaultOrganizationId={org}

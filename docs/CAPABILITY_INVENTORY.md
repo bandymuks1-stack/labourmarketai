@@ -63,20 +63,20 @@
 | Worker board visibility | `PROVEN` | requires `companies.verification_status='verified'` |
 | Sees waiting candidate + can review | `PROVEN` | browser + DB; status → `reviewed` |
 | Contact / next action | `UNPROVEN` | code exists (`contact_demand_owner_v1`); not exercised |
-| **Need → matching → ranked shortlist** | `UNPROVEN` | **not E2E this round — a pilot blocker** |
+| **Need → matching → ranked shortlist** | `PROVEN` | browser, 2026-08-27: a seeded LT demand recognised its own skills, retrieved and ranked 2 candidates with evidence-tier basis (`2/4 skills, 0 manager-confirmed`), disclosed missing facts, and offered shortlist + review actions. |
 
 ### Education
 | capability | status | evidence |
 |---|---|---|
 | Institution declares capabilities | `PROVEN` | browser + DB, fresh database |
 | `student` / `volunteer` relationship writable | `PROVEN` | RPC under RLS; `manager` correctly rejected |
-| **Institution ↔ learner link** | `MISSING` | no invite/join flow exists |
+| **Institution ↔ learner link** | `IMPLEMENTED`, `OWNER-GATED` | browser + DB on a local stack (`education-pilot-institution-learner`): institution invites → learner is told the relationship → accepts → `student` engagement, employment untouched. Needs migration 20260827200000 (RED, not applied to production). |
 | Transversal capability recognition | `PARTIAL` | LT/EN/RU only, classified `deferred` |
 
 ### Cross-cutting
 | capability | status | evidence |
 |---|---|---|
-| Matching engine | `UNPROVEN` | keyed on canonical slugs; not E2E |
+| Matching engine | `PROVEN` | browser 2026-08-27 via employer scouting; deterministic, evidence-tiered, no fabricated score |
 | Interest → notification | `PARTIAL` | **works on current main** (browser+DB); 1 production miss not reproducible |
 | Notifications delivery (email) | `MISSING` | rows only; no channel configured |
 | Projects / objects / tasks | `UNPROVEN` | 6 rows, substantial code, no E2E this round |
@@ -115,10 +115,23 @@
 
 ## 4. THE HONEST BLOCKERS TO PILOT_READY
 
-1. **Institution ↔ learner link is MISSING.** An institution can now declare
-   what it is, and still cannot connect a student. No invite/join flow exists.
-2. **Employer need → matching → shortlist is UNPROVEN.** The loop the
-   marketplace turns on has not been exercised end to end this round.
+1. **Institution ↔ learner link — BUILT, awaiting an owner apply.** Closed by
+   making the relationship an invitation establishes into DATA
+   (`invitations.relationship_slug` → `relationship_types`), rather than adding
+   a `join_as_student` type. Proven browser + DB on a local stack, including
+   the negative control (an organization that never declared it educates is
+   refused) and multi-role survival (the learner stays an employee too).
+   **Blocked only on the owner applying migration 20260827200000**, which is
+   RED (SECURITY DEFINER replacements) and carries a disclosed
+   `can_view_worker` consequence for the owner to rule on.
+2. **Employer need → matching → shortlist — PROVEN 2026-08-27.** Exercised in
+   a browser against a real demand: the LT demand text was recognised into
+   skills, candidates were retrieved and ranked with an evidence-tier basis
+   rather than a fabricated percentage, missing facts were disclosed on both
+   sides, and shortlist/review actions were reachable. What remains UNPROVEN is
+   the step BEFORE it — an employer typing a need in natural language and
+   getting a structured demand (`customer_requests` intake), which this round
+   seeded rather than drove.
 3. **Cross-actor scenario unproven.** Each actor has been proven separately;
    institution → student → employer has not been run as one chain.
 4. **Languages: 5 of 26 routed, Georgian absent entirely.**

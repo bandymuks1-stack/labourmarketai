@@ -10128,9 +10128,15 @@
         "limit_reached": "Einladungslimit erreicht",
         "rate_limited": "Zu viele Einladungen heute",
         "not_authorized": "Nicht erlaubt",
-        "error": "Fehlgeschlagen"
+        "error": "Fehlgeschlagen",
+        "invalid_relationship": "Keine zulässige Beziehung",
+        "organization_capability_required": "Organisation hat dies noch nicht angegeben"
       },
-      "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)"
+      "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)",
+      "capacityLabel": "Was wird die eingeladene Person in Ihrer Organisation sein?",
+      "capacityHint": "Ein Praktikum oder ein Studium ist kein Arbeitsverhältnis — es wird genau so erfasst, wie Sie es hier wählen.",
+      "capacityNeedsCapability": "Ihre Organisation hat noch nicht angegeben, dass sie ausbildet. Geben Sie das auf der Organisationsseite an, danach können Sie eine lernende Person einladen.",
+      "capacityNeedsCapabilityCta": "Organisationsseite öffnen"
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
@@ -10170,7 +10176,9 @@
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
-      }
+      },
+      "capacity": "Beziehung: {capacity}",
+      "capacityNotEmployment": "Dies ist kein Stellenangebot und begründet kein Arbeitsverhältnis."
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {
