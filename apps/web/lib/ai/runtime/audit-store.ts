@@ -20,11 +20,46 @@ import {
   AI_RUN_OUTPUT_EXCERPT_MAX,
   type AiRoutingAuditRecord,
 } from "./task-routing";
+import type { AiRuntimeState } from "./config-core";
+
+/**
+ * What KIND of event a finished route is, for the audit trail.
+ *
+ * The original writer asked one question — "did a vendor answer?" — and
+ * discarded everything else. That made `ai_runs` silent about the majority of
+ * what actually happens on a stack with no provider configured: a real person
+ * really reached an AI surface, the router really resolved a route, and no
+ * vendor ever saw the payload. Those runs are not nothing, and they are not
+ * synthetic either. They are the ZERO-VENDOR resolutions the cost doctrine
+ * wants counted first (docs: cost-aware AI task routing — deterministic-first).
+ *
+ *   `vendor_run`       a provider really answered. Persisted, priced.
+ *   `vendorless_route` really decided, no vendor engaged (runtime disabled,
+ *                      deterministic tier, or a pre-dispatch block). Persisted,
+ *                      NEVER priced — see `buildAiRunRow`.
+ *   `synthetic`        the mock provider fabricated the output. NEVER persisted:
+ *                      a synthetic row in a cost log is worse than a missing
+ *                      one, because it produces a confident wrong number.
+ */
+export type AiRunDisposition = "vendor_run" | "vendorless_route" | "synthetic";
+
+/** Pure disposition of a finished route. */
+export function auditDispositionFor(state: AiRuntimeState): AiRunDisposition {
+  if (state === "mock") return "synthetic";
+  if (state === "live") return "vendor_run";
+  return "vendorless_route";
+}
 
 export interface AiRunPersistExtras {
   readonly profileId?: string | null;
   /** Short label of the calling surface (e.g. the agent key). */
   readonly requestContext?: string | null;
+  /**
+   * What kind of event this is. Defaults to `vendor_run` so every existing
+   * caller keeps its exact behaviour. A `vendorless_route` row carries NO
+   * money (see below); `synthetic` never reaches this builder at all.
+   */
+  readonly disposition?: AiRunDisposition;
 }
 
 /** Row shape for public.ai_runs — kept in sync with the gated migration. */
@@ -57,11 +92,20 @@ export interface AiRunRow {
 }
 
 /** Pure record → row mapping (exported for tests). Bounds every free-text
- *  field to the migration's CHECK limits so an insert can never fail on size. */
+ *  field to the migration's CHECK limits so an insert can never fail on size.
+ *
+ *  A `vendorless_route` row is also SUBJECT-FREE — see `profile_id` below.
+ *
+ *  COST HONESTY. A `vendorless_route` row reports NULL for both cost columns,
+ *  never 0 and never the pre-run estimate. No vendor was engaged, so there is
+ *  no money — and an estimate for a model that never ran would sum, at month
+ *  end, into spend that never happened. The route's reasoning survives in
+ *  `tier`, `route_reason` and `blocked_reason`; only the money is dropped. */
 export function buildAiRunRow(
   record: AiRoutingAuditRecord,
   extras: AiRunPersistExtras = {},
 ): AiRunRow {
+  const vendorless = (extras.disposition ?? "vendor_run") === "vendorless_route";
   return {
     task_type: record.taskType.slice(0, 64),
     provider: record.providerAdapter.slice(0, 32),
@@ -82,8 +126,8 @@ export function buildAiRunRow(
       : null,
     schema_validation: record.schemaValidation,
     confidence: record.confidence ? record.confidence.slice(0, 16) : null,
-    estimated_cost_usd: record.estimatedCostUsd,
-    actual_cost_usd: record.actualCostUsd,
+    estimated_cost_usd: vendorless ? null : record.estimatedCostUsd,
+    actual_cost_usd: vendorless ? null : record.actualCostUsd,
     input_tokens: record.usage?.inputTokens ?? null,
     output_tokens: record.usage?.outputTokens ?? null,
     latency_ms: record.latencyMs,
@@ -94,7 +138,13 @@ export function buildAiRunRow(
     escalation_applied: record.escalation,
     blocked_reason: record.blocked,
     human_review_state: record.humanReviewState,
-    profile_id: extras.profileId ?? null,
+    // DATA MINIMISATION. A vendorless row exists to be COUNTED, not to be
+    // attributed: there is no spend to allocate to a person, so the person is
+    // not recorded. `ai_runs` is already the subject of open retention/
+    // de-linking work, and counting zero-vendor routes must not enlarge the
+    // index of who asked what to buy an operational metric that never needed
+    // a subject.
+    profile_id: vendorless ? null : (extras.profileId ?? null),
     request_context: extras.requestContext
       ? extras.requestContext.slice(0, 120)
       : null,

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { buildAiRunRow } from "@/lib/ai/runtime/audit-store";
+import { auditDispositionFor, buildAiRunRow } from "@/lib/ai/runtime/audit-store";
 import type { AiRoutingAuditRecord } from "@/lib/ai/runtime/task-routing";
 
 /**
@@ -155,10 +155,69 @@ describe("a failed persist is never reported as a success", () => {
 });
 
 describe("only real runs are persisted", () => {
-  it("mock and disabled runs are never written to the audit trail", () => {
+  it("a MOCK run is never written to the audit trail", () => {
     // A synthetic row in a cost log is worse than a missing one: it produces a
-    // confident wrong number at month end.
-    expect(RUN_AGENT_SERVER).toMatch(/cfg\.state === "live"/);
+    // confident wrong number at month end. Mock output is fabricated, so it is
+    // the one disposition that must never reach a row.
+    expect(auditDispositionFor("mock")).toBe("synthetic");
+    expect(RUN_AGENT_SERVER).toMatch(/disposition !== "synthetic"/);
+  });
+
+  it("a VENDORLESS route is recorded rather than dropped", () => {
+    // The defect this closes: persistence asked only "did a vendor answer?",
+    // so on a stack with no provider configured NOTHING was ever recorded —
+    // and an empty `ai_runs` read as "nobody wants AI" when it really meant
+    // "we never wrote down that they did". A route decided without a vendor
+    // still really happened.
+    expect(auditDispositionFor("disabled")).toBe("vendorless_route");
+    expect(auditDispositionFor("live")).toBe("vendor_run");
+  });
+
+  it("a vendorless row carries NO money — not a zero, not an estimate", () => {
+    // No vendor was engaged, so there is nothing to pay. Keeping the pre-run
+    // estimate would sum, at month end, into spend that never happened.
+    const row = buildAiRunRow(liveRecord(), {
+      requestContext: "journal_suggestions",
+      disposition: "vendorless_route",
+    });
+    expect(row.actual_cost_usd).toBeNull();
+    expect(row.estimated_cost_usd).toBeNull();
+    // Everything that explains the ROUTE survives — only the money is dropped.
+    expect(row.task_type).toBe("journal_suggestions");
+    expect(row.tier).toBe("low_cost");
+  });
+
+  it("a vendorless row records no PERSON — it is counted, not attributed", () => {
+    // No spend to allocate means no subject is needed. `ai_runs` is already
+    // under retention/de-linking work; an operational counter must not enlarge
+    // the index of who asked what.
+    const row = buildAiRunRow(liveRecord(), {
+      profileId: "11111111-1111-1111-1111-111111111111",
+      requestContext: "journal_suggestions",
+      disposition: "vendorless_route",
+    });
+    expect(row.profile_id).toBeNull();
+    // …while a real vendor run still attributes its real money.
+    expect(
+      buildAiRunRow(liveRecord(), {
+        profileId: "11111111-1111-1111-1111-111111111111",
+        disposition: "vendor_run",
+      }).profile_id,
+    ).toBe("11111111-1111-1111-1111-111111111111");
+  });
+
+  it("a vendor run still carries its real cost", () => {
+    const row = buildAiRunRow(liveRecord(), { disposition: "vendor_run" });
+    expect(row.actual_cost_usd).toBe(0.0035);
+    expect(row.estimated_cost_usd).toBe(0.01);
+  });
+
+  it("the MONEY ledger stays vendor-only", () => {
+    // `usage_cost_events` records spend and its own CHECKs forbid a fabricated
+    // zero, so a vendorless route must not reach it.
+    expect(RUN_AGENT_SERVER).toMatch(
+      /if \(disposition === "vendor_run"\)[\s\S]{0,400}persistUsageCostEvent/,
+    );
   });
 });
 
