@@ -22,6 +22,7 @@ import { computeContextFit } from "@/lib/market/fit";
 const EMPTY: CvSectionData = {
   professionalSummary: null,
   workHistoryCount: 0,
+  practiceHistoryCount: 0,
   languagesCount: 0,
   certificateDocsCount: 0,
   drivingLicenceCategoriesCount: 0,

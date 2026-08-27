@@ -7203,6 +7203,8 @@
     "generatedAt": "Erstellt",
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
+    "practiceHistoryTitle": "Praktikum und Ehrenamt",
+
     "workHistoryTitle": "Beruflicher Werdegang",
     "present": "Heute",
     "languagesTitle": "Sprachen",
@@ -11329,6 +11331,8 @@
         "language": "Sprache",
         "level": "Niveau",
         "jobTitle": "Position",
+
+        "engagementKind": "Art der Tätigkeit",
         "jobTitlePlaceholder": "z. B. Schweißer, Krankenpfleger, Lagerarbeiter, Entwickler",
         "startMonth": "Startmonat",
         "startYear": "Startjahr",

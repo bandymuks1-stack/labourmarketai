@@ -20,9 +20,7 @@
 
 import { orgDisplayName } from "@/lib/company/org-display";
 
-/** The relationship slugs that count as WORK history — the ONE list every
- *  history surface filters by (W4: the card timeline used to skip this filter
- *  and showed manager/student/volunteer rows the CV and profile omit). */
+/** The relationship slugs that count as PAID / CONTRACTED work. */
 export const WORKER_RELATIONSHIPS = [
   "employee",
   "freelancer",
@@ -30,6 +28,56 @@ export const WORKER_RELATIONSHIPS = [
   "owner",
   "collaborator",
 ] as const;
+
+/**
+ * Relationships under which a person really works, but not as an employee:
+ * a study placement and unpaid volunteering.
+ *
+ * These used to be filtered out of every history surface alongside `manager`.
+ * That is right for `manager` — an administrative relationship to an org, not
+ * the person's own work — and wrong for these two. A student who completed a
+ * real placement at a real organization had that placement removed from their
+ * own CV, and the education pilot's premise is precisely that such a person is
+ * NOT "someone with no experience".
+ *
+ * They stay a SEPARATE list rather than becoming extra members of
+ * WORKER_RELATIONSHIPS, because the honest statement is "this happened, and it
+ * was a placement" — never "this was a job". Every surface renders them under
+ * their own heading.
+ */
+export const PRACTICE_RELATIONSHIPS = ["student", "volunteer"] as const;
+
+/** The ONE list every history surface filters by. `manager` stays out. */
+export const PROFESSIONAL_HISTORY_RELATIONSHIPS = [
+  ...WORKER_RELATIONSHIPS,
+  ...PRACTICE_RELATIONSHIPS,
+] as const;
+
+/**
+ * What a person may declare about their OWN past, with no organization to
+ * confirm it. Mirrors the closed set inside
+ * `save_self_declared_work_history_v1` — keep the two in step.
+ *
+ * `owner` is absent on purpose: owning an organization is not something a
+ * person types into their history, it follows from really owning one.
+ */
+export const SELF_DECLARED_RELATIONSHIPS = [
+  "employee",
+  "freelancer",
+  "consultant",
+  "collaborator",
+  "student",
+  "volunteer",
+] as const;
+
+/** Employment or practice — decided by the relationship, never guessed. */
+export type WorkHistoryKind = "employment" | "practice";
+
+export function historyKindOf(relationshipSlug: string): WorkHistoryKind {
+  return (PRACTICE_RELATIONSHIPS as readonly string[]).includes(relationshipSlug)
+    ? "practice"
+    : "employment";
+}
 
 /** One real engagement in the person's history. */
 export interface WorkHistoryEntry {
@@ -40,6 +88,9 @@ export interface WorkHistoryEntry {
   readonly organizationName: string | null;
   /** Canonical relationship slug (employee / manager / owner …). */
   readonly relationshipSlug: string;
+  /** Paid/contracted work or a placement — derived from the relationship, so
+   *  a placement can never be printed as employment (§7). */
+  readonly kind: WorkHistoryKind;
   /** ISO date the engagement started, or null when never recorded. */
   readonly startedAt: string | null;
   /** ISO date it ended; null while it is still running. */
@@ -143,6 +194,7 @@ export function deriveWorkHistory(
     organizationName:
       orgDisplayName(r.organizations?.display_name, r.organizations?.legal_name),
     relationshipSlug: r.relationship_slug,
+    kind: historyKindOf(r.relationship_slug),
     startedAt: nonEmpty(r.started_at),
     endedAt: nonEmpty(r.ended_at),
     current: r.status === ACTIVE_STATUS && !nonEmpty(r.ended_at),

@@ -2201,15 +2201,21 @@ describe("no migration files added by this sprint", () => {
     // presentations and teamwork can become evidence at all; the catalogue was
     // 153 rows of which exactly ONE was professional. RECOUNTED from the tree,
     // never summed: `ls supabase/migrations/*.sql | wc -l` = 240.
-    // Bumped 240 -> 241 for organization roles v1
+    // Bumped 240 -> 241 for practice work history v1
+    // (20260826182421_practice_work_history_v1) — widens the EXISTING
+    // save_self_declared_work_history_v1 allowlist by two slugs that already
+    // exist in relationship_types ('student','volunteer'). No new table, no new
+    // function, no grant, no RLS change, no signature change. Owner-approved
+    // 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 241.
+    // Bumped 241 -> 242 for organization roles v1
     // (20260827050000_organization_roles_v1) — the multi-capability foundation
     // that lets an education institution register honestly instead of calling
     // itself a company. Two NEW tables + registry seed + a conservative
-    // company/agency backfill; the legacy organizations.organization_type
-    // column is untouched. DRAFT, needs-human-gate (grants + SECURITY DEFINER
-    // writer), owner-gated apply. RECOUNTED from the tree, never summed:
-    // `ls supabase/migrations/*.sql | wc -l` = 241.
-    const SPRINT_BASELINE = 241;
+    // company/agency backfill; organizations.organization_type is untouched.
+    // Owner-approved 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 242.
+    const SPRINT_BASELINE = 242;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

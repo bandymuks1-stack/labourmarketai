@@ -17,6 +17,7 @@ const engagement = (o: Partial<WorkHistoryEntry> = {}): WorkHistoryEntry => ({
   title: null,
   organizationName: "Restoranas",
   relationshipSlug: "employee",
+  kind: "employment",
   startedAt: "2025-03-01",
   endedAt: null,
   current: true,

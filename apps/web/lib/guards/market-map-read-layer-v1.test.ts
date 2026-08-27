@@ -645,10 +645,13 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 239 -> 240 for the transversal capability catalogue
     // (20260827060000) — INSERT-only seed, nothing to do with the market-map
     // read layer.
-    // Bumped 240 -> 241 for organization roles v1 (20260827050000) — the
-    // multi-capability foundation. DRAFT, needs-human-gate, owner-gated apply.
-    // Still nothing to do with the market-map read layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(241);
+    // Bumped 240 -> 241 for practice work history v1 (20260826182421) — a
+    // secdef allowlist widening, owner-approved. Nothing to do with the
+    // market-map read layer, which stays pure TS.
+    // Bumped 241 -> 242 for organization roles v1 (20260827050000) — the
+    // multi-capability foundation, owner-approved. Still nothing to do with
+    // the market-map read layer, which stays pure TS.
+    expect(count).toBeLessThanOrEqual(242);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

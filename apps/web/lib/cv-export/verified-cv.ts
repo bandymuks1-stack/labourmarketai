@@ -21,8 +21,10 @@ import {
   type CvProject,
 } from "./cv-sections";
 import {
+  historyKindOf,
   isRecordedEngagement,
-  WORKER_RELATIONSHIPS,
+  PROFESSIONAL_HISTORY_RELATIONSHIPS,
+  type WorkHistoryKind,
 } from "@/lib/player-card/work-history-model";
 
 /**
@@ -54,6 +56,10 @@ export type VerifiedCvEngagement = {
   organizationType: string | null;
   /** engagement relationship slug (employee / freelancer / …). */
   relationship: string;
+  /** Paid/contracted work vs a study placement or volunteering — decided by
+   *  the relationship. The page prints the two under separate headings so a
+   *  placement is never presented as a job. */
+  kind: WorkHistoryKind;
   /** Free-text engagement title, if the worker gave one. */
   title: string | null;
   startedAt: string | null;
@@ -201,7 +207,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
           "relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
-        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
         .order("started_at", { ascending: false, nullsFirst: false }),
     ]);
@@ -282,6 +288,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       orgName: orgDisplayName(org?.display_name, org?.legal_name),
       organizationType: org?.organization_type ?? null,
       relationship: e.relationship_slug,
+      kind: historyKindOf(e.relationship_slug),
       title: (e.title as string | null) ?? null,
       startedAt: e.started_at,
       endedAt: e.ended_at,

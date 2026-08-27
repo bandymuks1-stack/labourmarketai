@@ -1031,7 +1031,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // (PR #1256). Detailed risk analysis is in the private Internal Brain
       // per AGENTS.md, not here.
       "20260824130000_null_safe_owner_guards_v2.sql",
-    ]);
+          // 2026-08-26: the practice work-history widening
+      // (20260826182421) carries the marker because a CREATE OR REPLACE of a
+      // SECURITY DEFINER function is RED by classification and cannot reach
+      // CI green without it. The marker is an ACKNOWLEDGEMENT, not an
+      // approval: the PR is a draft carrying needs-human-gate and the
+      // migration ships UNAPPLIED until the owner applies it.
+      "20260826182421_practice_work_history_v1.sql",
+]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

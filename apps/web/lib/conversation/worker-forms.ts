@@ -4,6 +4,7 @@ import {
   WORKER_LANGUAGE_NATIVE_NAMES,
 } from "@/lib/worker/worker-languages-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * Declarative inline-form specs for the reversible worker conversation actions
@@ -50,6 +51,13 @@ const educationTypeOptions = EDUCATION_TYPE_SLUGS.map((slug) => ({
   value: slug,
   labelKey: `cvSections.educationTypes.${slug}`,
 }));
+/** How the person was engaged. Labels reuse the canonical relationship-type
+ *  catalogue (`relationship-types.json`) — the same words the CV prints, so a
+ *  placement is named the same way everywhere it appears. */
+const relationshipOptions = SELF_DECLARED_RELATIONSHIPS.map((slug) => ({
+  value: slug,
+  labelKey: `relationshipTypes.${slug}`,
+}));
 const availabilityOptions = [
   { value: "available", labelKey: "conversation.forms.availability.available" },
   { value: "busy", labelKey: "conversation.forms.availability.busy" },
@@ -71,6 +79,7 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
     titleKey: "conversation.actions.worker.addWorkHistory.label",
     fields: [
       { name: "title", kind: "text", labelKey: "conversation.forms.fields.jobTitle", placeholderKey: "conversation.forms.fields.jobTitlePlaceholder", required: true, maxLength: 200 },
+      { name: "relationship", kind: "select", labelKey: "conversation.forms.fields.engagementKind", required: true, options: relationshipOptions },
       { name: "startMonth", kind: "number", labelKey: "conversation.forms.fields.startMonth", placeholderKey: "conversation.forms.fields.mm", min: 1, max: 12 },
       { name: "startYear", kind: "number", labelKey: "conversation.forms.fields.startYear", placeholderKey: "conversation.forms.fields.yyyy", min: 1900, max: 2100, required: true },
       { name: "isCurrent", kind: "checkbox", labelKey: "conversation.forms.fields.ongoing" },
@@ -79,6 +88,7 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
     ],
     build: (st) => ({
       title: s(st.title),
+      relationship: s(st.relationship) || "employee",
       startYear: numOrNull(st.startYear),
       startMonth: numOrNull(st.startMonth),
       isCurrent: st.isCurrent === true,

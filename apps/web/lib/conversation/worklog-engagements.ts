@@ -11,6 +11,7 @@ import {
   resolveEngagementContext,
   type ContextResolution,
 } from "@/lib/journal/engagement-context-selection";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -24,13 +25,11 @@ import {
  * still goes through the canonical `createJournalEntry`.
  */
 
-const WORKER_RELATIONSHIPS = [
-  "employee",
-  "freelancer",
-  "consultant",
-  "owner",
-  "collaborator",
-];
+// The canonical list, imported rather than re-declared: this file used to keep
+// its own copy, which is exactly how the CV, the profile card and this selector
+// drifted apart before. A placement context (student/volunteer) is writable
+// too — a student on placement logs real work, and refusing them a context
+// meant the journal could not record it at all.
 
 export type WorkLogEngagement = {
   id: string;
@@ -72,7 +71,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
-    .in("relationship_slug", WORKER_RELATIONSHIPS)
+    .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS])
     .order("is_primary", { ascending: false });
 
   // A context with no org and no title used to fall back to the RAW
