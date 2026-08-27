@@ -67,7 +67,40 @@ describe("work-log context labels", () => {
     // The owner once saw a literal "employee" in a Lithuanian dropdown. The
     // fallback chain must survive.
     expect(flat).toContain("relationshipLabel(slug)");
-    expect(flat).toContain("relationshipLabel(e.relationship_slug)");
+  });
+
+  it("names the BASE label from the canonical catalogue too, not just the qualifier", () => {
+    // The gap this closes: a placement with no organization display name and
+    // no title used to resolve its base label through
+    // `conversation.worklog.relationship.*`, which carries neither `student`
+    // nor `volunteer` — so it printed "Kita" / "Other" for precisely the
+    // education case. Both the base and the qualifier now ask the one
+    // canonical catalogue first, and the old wording remains the fallback.
+    expect(flat).toContain("base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug)");
+    expect(flat).not.toContain("base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug)");
+  });
+
+  it("NEGATIVE CONTROL — the superseded spelling is detectable", () => {
+    // A guard that would pass against the old code proves nothing.
+    const old = "base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug),";
+    expect(old).toContain("base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug)");
+  });
+
+  it("the canonical catalogue really carries the two practice slugs", () => {
+    // If it did not, the fix above would silently fall through to the same
+    // "other" it exists to replace.
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const n = JSON.parse(
+        readFileSync(
+          join(__dirname, "..", "..", "messages", loc, "relationship-types.json"),
+          "utf8",
+        ),
+      );
+      for (const slug of ["student", "volunteer"]) {
+        expect(typeof n[slug], `${loc}.${slug}`).toBe("string");
+        expect(String(n[slug]).trim().length, `${loc}.${slug}`).toBeGreaterThan(0);
+      }
+    }
   });
 });
 

@@ -83,12 +83,26 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     t.has(`relationship.${slug}`) ? t(`relationship.${slug}`) : t("relationship.other");
 
   /**
-   * The CANONICAL relationship vocabulary, used only to tell two otherwise
-   * identical rows apart (see the disambiguation below). It is a different
-   * catalogue from `conversation.worklog.relationship.*` on purpose: that one
-   * is this flow's own fallback wording and does not carry every slug, while
-   * `relationshipTypes` is the one list the CV, the profile and the invitation
-   * screens already print — and it has `student` and `volunteer`.
+   * The CANONICAL relationship vocabulary — the one list the CV, the profile
+   * and the invitation screens already print, and the only one that carries
+   * every registry slug including `student` and `volunteer`.
+   *
+   * It is asked FIRST everywhere a relationship is named in this flow, with
+   * `conversation.worklog.relationship.*` kept only as this flow's own older
+   * fallback wording. That order matters and used to be the other way around
+   * for the base label:
+   *
+   *   a learner whose placement has no organization display name and no title
+   *   fell through to `relationship.student`, which does not exist in that
+   *   catalogue, and therefore printed "Kita" / "Other" — for exactly the
+   *   education case the selector exists to name. The row was reachable and
+   *   loggable; it just refused to say what it was.
+   *
+   * Resolving through the canonical catalogue fixes `student` and `volunteer`
+   * in all five active locales at once and adds no sixth copy of the
+   * relationship names, which is the whole reason this catalogue exists.
+   * The fallback chain is unchanged and still ends at `relationship.other`, so
+   * a genuinely unknown slug can still never reach a reader raw.
    */
   const tRelationships = await getTranslations("relationshipTypes");
   const canonicalRelationship = (slug: string): string =>
@@ -103,7 +117,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     const orgName = orgDisplayName(org?.display_name, org?.legal_name);
     return {
       row: e,
-      base: orgName ?? e.title ?? relationshipLabel(e.relationship_slug),
+      base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug),
     };
   });
 
