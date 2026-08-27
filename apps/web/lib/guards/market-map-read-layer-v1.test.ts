@@ -647,7 +647,10 @@ describe("NO new DB migration in this PR", () => {
     // company/agency backfill) that lets an education institution register
     // honestly. DRAFT, needs-human-gate, owner-gated apply. Still nothing to
     // do with the market-map read layer, which remains pure TS.
-    expect(count).toBeLessThanOrEqual(240);
+    // Bumped 240 -> 241 for the transversal capability catalogue
+    // (20260827060000) — INSERT-only seed, still nothing to do with the
+    // market-map read layer.
+    expect(count).toBeLessThanOrEqual(241);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

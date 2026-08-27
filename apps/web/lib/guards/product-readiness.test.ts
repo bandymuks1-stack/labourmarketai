@@ -2203,7 +2203,13 @@ describe("no migration files added by this sprint", () => {
     // column is untouched. DRAFT, needs-human-gate (grants + SECURITY DEFINER
     // writer), owner-gated apply. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 240.
-    const SPRINT_BASELINE = 240;
+    // Bumped 240 -> 241 for the transversal capability catalogue
+    // (20260827060000_transversal_capability_skills_v1) — INSERT-only, GREEN,
+    // idempotent. Eight professional capability slugs so a student's projects,
+    // presentations and teamwork can become evidence at all; the catalogue was
+    // 153 rows of which exactly ONE was professional. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 241.
+    const SPRINT_BASELINE = 241;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

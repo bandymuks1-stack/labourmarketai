@@ -1764,6 +1764,152 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
       ],
     },
   ]),
+  // ── Transversal professional capabilities ─────────────────────────────────
+  //
+  // WHY THIS FAMILY EXISTS. Measured 2026-08-27: the catalogue held 153 skills
+  // and exactly ONE of them was professional rather than occupational. Run the
+  // owner's own example sentence through the recogniser before this block and
+  // it produced NOTHING —
+  //
+  //   "Susitikau su svietimo ir politikos atstovais, pristaciau projekta ir
+  //    aptariau bendradarbiavimo galimybes"
+  //   → recognized: []  candidates: []  claims: []
+  //     unresolved: 3 of 3 fragments
+  //
+  // while "Klojau plyteles ir daziau sienas" resolved cleanly to tiling +
+  // painting. The engine was never the problem; the VOCABULARY was. It could
+  // see trades and nothing else.
+  //
+  // That is the education pilot's real blocker. A student's evidence is
+  // overwhelmingly projects, presentations, teamwork, volunteering and
+  // competitions — not tiling. Without this family the flywheel
+  // (journal → evidence → skills → Living CV → matching) runs for a
+  // construction worker and returns an empty CV for a student, which is
+  // exactly the "person with no experience" verdict the product exists to
+  // refuse.
+  //
+  // `sector: "other"` is where the type doc already says cross-sector
+  // transferable abilities belong — this is the existing design, populated.
+  //
+  // NEEDLE DISCIPLINE. An exact needle match becomes a real (unverified,
+  // yellow-confidence) worker_skills row, so a loose needle manufactures a
+  // capability nobody claimed. Every needle below is anchored on a PHRASE that
+  // asserts the capability, never on a bare common word: `bendradarbiavimo
+  // galimyb` (exploring cooperation) not `bendradarbiav` (worked with
+  // colleagues); `komandinis darb` not `komand`.
+  ...asSector("other", [
+    {
+      slug: "presenting",
+      needles: [
+        // Bare LT verb: "pristačiau" IS "I presented" — the object may be any
+        // noun ("projektą", "rezultatus", "ataskaitą"), so anchoring on
+        // "projekt" missed most real sentences.
+        "pristaciau",
+        "pristačiau",
+        "prezentac",
+        "pristatym",
+        "skaidri",
+        "present the project",
+        "presented the project",
+        "presented it to",
+        "presented to the",
+        "gave a presentation",
+        "public speaking",
+        "презентац",
+        "представил проект",
+      ],
+    },
+    {
+      slug: "stakeholder-engagement",
+      needles: [
+        // Instrumental plural, matched on its own: LT inserts the qualifier
+        // between the preposition and the noun ("su ŠVIETIMO IR POLITIKOS
+        // atstovais"), so any needle spanning "su … atstov" cannot match.
+        "atstovais",
+        "atstovybi",
+        "susitikimas su atstov",
+        "suinteresuot sal",
+        "suinteresuotomis sal",
+        "stakeholder",
+        "met with representatives",
+        "met with education",
+        "встретился с представител",
+      ],
+    },
+    {
+      slug: "partnership-development",
+      needles: [
+        "bendradarbiavimo galimyb",
+        "partneryst",
+        "partnership",
+        "cooperation opportunit",
+        "explore cooperation",
+        "возможности сотрудничеств",
+        "партнерств",
+      ],
+    },
+    {
+      slug: "negotiation",
+      needles: [
+        "deryb",
+        "derejaus",
+        "derėjaus",
+        "negotiat",
+        "переговор",
+      ],
+    },
+    {
+      slug: "project-coordination",
+      needles: [
+        "koordinavau projekt",
+        "projekto koordinav",
+        "projekto valdym",
+        "project coordination",
+        "project management",
+        "managed the project",
+        "координировал проект",
+        "управление проектом",
+      ],
+    },
+    {
+      slug: "report-writing",
+      needles: [
+        "ataskait",
+        "parasiau ataskait",
+        "parašiau ataskait",
+        "wrote the report",
+        "report writing",
+        "отчет",
+        "отчёт",
+      ],
+    },
+    {
+      slug: "teamwork",
+      needles: [
+        "komandinis darb",
+        "komandinio darb",
+        "dirbau komandoje",
+        "komandos projekt",
+        "teamwork",
+        "team project",
+        "worked in a team",
+        "команднoй работ",
+        "работал в команде",
+      ],
+    },
+    {
+      slug: "research",
+      needles: [
+        "tyrim",
+        "atlikau tyrim",
+        "literaturos apzvalg",
+        "literatūros apžvalg",
+        "research",
+        "исследован",
+      ],
+    },
+  ]),
+
 ];
 
 /** slug → sector for every first-class recognisable skill. When a slug appears
