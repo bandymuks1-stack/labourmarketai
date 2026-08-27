@@ -85,6 +85,19 @@ test.describe("education pilot — an institution connects a learner", () => {
     await db("DELETE", `invitations?invited_email=eq.${LEARNER.email}`);
   });
 
+  test.afterAll(async () => {
+    // Remove ONLY what these tests created. The learner link changes the
+    // work-log context fixture for every later spec (two contexts at one
+    // organization make the form ask which), so this spec puts it back rather
+    // than leaving the next failure to be diagnosed from scratch.
+    await db(
+      "DELETE",
+      `engagement_contexts?profile_id=eq.${LEARNER_PROFILE}` +
+        `&organization_id=eq.${ORG_WITH_EDUCATION}&relationship_slug=eq.student`,
+    );
+    await db("DELETE", `invitations?invited_email=eq.${LEARNER.email}`);
+  });
+
   test("the learner is invited as a learner, told so, and stays an employee too", async ({
     page,
   }) => {

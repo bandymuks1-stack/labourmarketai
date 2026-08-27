@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 import { db, HAS_LOCAL_STACK } from "./market-map-db-state";
+import { chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
  * THE LIVING LABOUR MARKET LOOP, CLOSED ACROSS THREE ACTORS.
@@ -132,6 +133,28 @@ test.describe("pilot — the loop closes across institution, learner and employe
     );
   });
 
+  test.afterAll(async () => {
+    /**
+     * BEST-EFFORT, AND HONEST ABOUT WHY IT CANNOT BE MORE.
+     *
+     * This spec creates a SECOND engagement for `dev.worker` at the
+     * organization that already employs them, then files a journal entry
+     * against it. The invitation rows can be cleaned up. **The engagement
+     * cannot** — `journal_entries.engagement_context_id` has a foreign key to
+     * it, so once the learner has logged real work the relationship is
+     * undeletable. That refusal is CORRECT: evidence must stay attributable,
+     * and a placement that produced a journal entry is not a row to be tidied
+     * away (ARCHITECTURE I-3, and §9 on destructive cleanup).
+     *
+     * So the fixture does NOT return to one-context-per-organization, and no
+     * later spec may assume it does. That is exactly why the journal specs
+     * answer the work-context question through `chooseWorkContextIfAsked`
+     * instead of depending on this cleanup — a learner who also works for the
+     * same organization is an ordinary person, not a test artifact.
+     */
+    await db("DELETE", `invitations?invited_email=eq.${LEARNER.email}`);
+  });
+
   test("institution → learner → evidence → employer need → mutual action", async ({
     page,
   }) => {
@@ -207,29 +230,11 @@ test.describe("pilot — the loop closes across institution, learner and employe
        * job they already had and the placement they just accepted — so the
        * flow refuses to guess and asks. That refusal is correct: a journal
        * entry is evidence, and filing it against the wrong relationship is a
-       * false statement. The test answers the question the way a person would.
-       *
-       * It also asserts the two options are TELLABLE APART. Before the
-       * disambiguation fix both read "Dev Construction", and this step is the
-       * E2E that found it.
+       * false statement. The helper answers it and, on the way, asserts the
+       * options are TELLABLE APART — before the disambiguation fix both read
+       * "Dev Construction", and this step is the E2E that found it.
        */
-      const context = page.locator('[data-testid="worklog-context"]');
-      if ((await context.count()) > 0) {
-        const optionLabels = await context.locator("option").allTextContents();
-        const distinct = new Set(optionLabels.map((s) => s.trim()));
-        expect(
-          distinct.size,
-          `the context selector offers indistinguishable options: ${optionLabels.join(" | ")}`,
-        ).toBe(optionLabels.length);
-
-        // The placement must be nameable — pick it by its relationship name.
-        const placement = optionLabels.find((l) => /Studentas/i.test(l));
-        expect(
-          placement,
-          `no placement context on offer: ${optionLabels.join(" | ")}`,
-        ).toBeTruthy();
-        await context.selectOption({ label: (placement as string).trim() });
-      }
+      await chooseWorkContextIfAsked(page, /Studentas/i);
 
       await saveThroughConfirm(page);
       await page.waitForTimeout(4_000);

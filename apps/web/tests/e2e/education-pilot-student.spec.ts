@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
+import { chooseWorkContextIfAsked } from "./worklog-context";
+
 /**
  * EDUCATION PILOT — the student half of the chain, in a real browser.
  *
@@ -108,6 +110,9 @@ test.describe("education pilot — a learner's journal becomes a Living CV", () 
       await workLogDateField(page).fill("2026-08-20");
       await page.locator('input[type="text"]').first().fill("Vilnius");
       await page.locator("textarea").first().fill(`${c.text} ${marker}`);
+      // The form pins the entry to a context and, when the worker holds more
+      // than one that legitimately fits, refuses to guess. Answer it.
+      await chooseWorkContextIfAsked(page);
       await saveThroughConfirm(page);
 
       // A FULL server round trip — not the optimistic client state that

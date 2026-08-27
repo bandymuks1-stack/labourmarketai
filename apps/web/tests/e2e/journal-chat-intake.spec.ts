@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
+import { chooseWorkContextIfAsked } from "./worklog-context";
+
 /**
  * THE WORK JOURNAL MUST BE FILLABLE — the journey a real external tester could
  * not complete (mobile, Lithuanian, 2026-08-08).
@@ -125,6 +127,9 @@ test.describe("Work Journal — chat-first intake actually accepts an entry", ()
       .locator("textarea")
       .first()
       .fill(`Betonavau pamatus. ${marker}`);
+    // The form pins the entry to a context and, when the worker holds more
+    // than one that legitimately fits, refuses to guess. Answer it.
+    await chooseWorkContextIfAsked(page);
     await saveThroughConfirm(page);
 
     // Reopen the journal from scratch — a full server round trip, not the
