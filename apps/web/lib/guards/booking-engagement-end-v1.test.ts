@@ -1051,6 +1051,38 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval applies only to the exact reviewed/tested scopes"), and the
       // marker was added in the same commit as that recorded decision.
       "20260827050000_organization_roles_v1.sql",
+      // 2026-08-27: relationship invitations v1 — the institution↔learner
+      // link. The marker records that the RED content is INTENTIONAL and
+      // reviewed: CREATE OR REPLACE of five existing SECURITY DEFINER
+      // functions, their re-asserted REVOKE/GRANT floor, seed DML on the
+      // relationship registry, and one DROP that is not a removal of
+      // capability — Postgres treats `create_invitation_v1` with an added
+      // defaulted parameter as a NEW function, so leaving both would make
+      // every 9-positional-argument call ambiguous. Nothing is dropped
+      // otherwise, no policy changes, no grant widens. APPLIED to production
+      // 2026-08-27 under owner ruling §1 ("APPROVED: Apply migration
+      // 20260827200000 using the canonical Supabase MCP apply_migration path
+      // only"), ledger 20260827132137; the marker was added in the same commit
+      // as that record. Provenance guard:
+      // lib/guards/relationship-invitations.test.ts.
+      "20260827200000_relationship_invitations_v1.sql",
+      // 2026-08-27: learner visibility, least privilege — the answer to the
+      // consequence 20260827200000 disclosed rather than hid. The marker
+      // records that the RED content is a CREATE OR REPLACE of ONE auth-core
+      // SECURITY DEFINER predicate, `can_view_worker`, which the envelope
+      // classes RED in either direction. This one NARROWS: the
+      // engagement_contexts branch gains a single conjunct joining a new
+      // fail-closed registry column, and every other arm is byte-identical.
+      // Every relationship slug except `student` is seeded true, so employer,
+      // company, agency, booking and project visibility are unchanged by
+      // construction. Owner ruling 2026-08-27 §2 ("implement the smallest
+      // architecture-consistent fix … Regression-prove employee/employer
+      // visibility remains unchanged"), applied the same day and proven by a
+      // controlled comparison on production with a NON-ADMIN organization
+      // owner: one engagement row, employee -> visible, the same row as
+      // student -> not visible. Provenance guard:
+      // lib/guards/learner-visibility-least-privilege.test.ts.
+      "20260827210000_learner_visibility_least_privilege_v1.sql",
 ]);
   });
 

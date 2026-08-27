@@ -658,7 +658,14 @@ describe("NO new DB migration in this PR", () => {
     // SECURITY DEFINER functions. No table/column dropped, no RLS policy
     // changed, no grant widened. RED, owner-gated, NOT applied to production
     // (PR #1301, draft + needs-human-gate).
-    expect(count).toBeLessThanOrEqual(243);
+    // Bumped 243 -> 244 for learner visibility least privilege
+    // (20260827210000) — the owner's 2026-08-27 ruling that a learner must not
+    // inherit employer-grade worker visibility. It NARROWS `can_view_worker`
+    // by one conjunct and adds one fail-closed registry column. Applied to
+    // production, regression-proven by a controlled comparison (employee
+    // true / student false on one otherwise identical row). Still nothing to
+    // do with the market-map read layer, which stays pure TS.
+    expect(count).toBeLessThanOrEqual(244);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

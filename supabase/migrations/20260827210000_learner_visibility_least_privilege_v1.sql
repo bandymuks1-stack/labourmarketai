@@ -1,20 +1,50 @@
 -- @human-gate-approved
 -- ============================================================================
--- GATE STATUS, stated exactly. The owner RULED that this change be made
--- (2026-08-27 §2: "implement the smallest architecture-consistent fix that
--- prevents student/learner relationships from accidentally inheriting
--- employee-level visibility"), so it is an intentional, human-reviewed RED
--- change and the annotation above says so.
+-- OWNER-APPROVED AND APPLIED. The owner RULED the change (2026-08-27 §2:
+-- "implement the smallest architecture-consistent fix that prevents student/
+-- learner relationships from accidentally inheriting employee-level
+-- visibility ... Regression-prove employee/employer visibility remains
+-- unchanged") and then approved running it.
 --
--- IT IS NOT YET APPLIED. Approval to RUN it against production has not been
--- given, and the annotation is an acknowledgement, never an auto-merge pass:
--- this PR stays draft with `needs-human-gate`.
+-- APPLIED to production 2026-08-27 via Supabase MCP `apply_migration`
+-- (name `learner_visibility_least_privilege_v1`). The annotation above lets CI
+-- classify it as an intentional, human-reviewed RED change; it is an
+-- acknowledgement, NOT an auto-merge pass.
 --
--- ORDERING THAT MATTERS: 20260827200000 IS already applied (ledger
--- 20260827132137), so the learner relationship is reachable in the production
--- database today. Nothing is exposed while the learner-invite UI is unmerged.
--- The moment that UI deploys without this file applied, the product ships the
--- exact behaviour the owner ruled against — so #1301 MUST NOT DEPLOY FIRST.
+-- ── POST-APPLY PROOF, run against production, rolled back ──────────────────
+-- A CONTROLLED COMPARISON, because a before/after pair is worthless if some
+-- other branch of the predicate is doing the work. Identity: a NON-ADMIN
+-- organization owner. Asserted first, so no earlier branch can fire:
+--   is_admin              false
+--   target discoverable   false   (kills the employer-consent branch)
+--   manages_organization  true
+-- Then ONE engagement row, whose only changing field is the relationship:
+--   baseline, no relationship at all   ->  false
+--   the identical row as `employee`    ->  true    (employer path INTACT)
+--   the same row changed to `student`  ->  false   (the ruling enforced)
+--   worker rows the manager can list   ->  3, unchanged by the learner link
+--
+-- Registry after apply: student false; collaborator, consultant, employee,
+-- freelancer, manager, owner, unemployed, viewer, volunteer all true.
+--
+-- FULL-CHAIN regression on production, same day, also rolled back: a legacy
+-- 9-argument invitation still accepts into `employee`; an organization holding
+-- `training_provider` invites and a learner accepts into `student`; an
+-- organization without it is refused `organization_capability_required`; and
+-- `manager` is refused `invalid_relationship`.
+--
+-- CORRECTION KEPT ON PURPOSE: the FIRST probe of this used an organization
+-- owner who is an ADMIN. `is_admin()` sits near the top of `can_view_worker`,
+-- so that identity saw all 36 workers regardless, returned `true` for both the
+-- learner and the employee control, and proved nothing. It was briefly written
+-- up as if it had. When probing an authorization predicate, assert that the
+-- identity satisfies NO earlier branch before trusting the result.
+--
+-- ORDERING NOTE, now satisfied: 20260827200000 was applied first (ledger
+-- 20260827132137), so the learner relationship became reachable in the
+-- production database before this file closed the visibility question. Nothing
+-- was exposed in between — the learner-invite UI was unmerged throughout, and
+-- production held zero `student` engagements.
 -- ============================================================================
 --
 -- 20260827210000 — learner visibility, least privilege (owner ruling

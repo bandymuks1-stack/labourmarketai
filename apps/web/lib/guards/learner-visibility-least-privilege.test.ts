@@ -11,14 +11,33 @@ import { join } from "node:path";
  * alike, so a school enrolling a student would have inherited exactly the scope
  * an employer holds over an employee.
  *
- * That was not theoretical. Measured on PRODUCTION, 2026-08-27, inside a
- * rolled-back transaction with a real organization owner and a real worker:
- *
- *     BEFORE_FIX__learner_visible_to_institution  ->  true
- *     BEFORE_FIX__employee_visible (control)      ->  true
- *
  * The owner ruled: least privilege, without weakening existing worker privacy
  * and without redesigning the authorization system. 20260827210000 is that fix.
+ *
+ * ── HOW IT WAS PROVEN, AND A CORRECTION WORTH KEEPING ──────────────────────
+ * The FIRST production probe of this used an organization owner who turned out
+ * to be an ADMIN. `is_admin()` sits near the top of `can_view_worker`, so that
+ * identity saw every worker in the database — all 36 — whatever the engagement
+ * branch did. It returned `true` for the learner and `true` for the employee
+ * control, and it proved NOTHING about the branch under test. A before/after
+ * pair that both read `true` because of a different branch is not evidence, and
+ * it was briefly recorded here as if it were.
+ *
+ * What replaced it is a CONTROLLED COMPARISON on production, 2026-08-27, in a
+ * rolled-back transaction, with a NON-ADMIN organization owner
+ * (`is_admin` false, target worker not discoverable, so no other branch can
+ * fire) and ONE engagement row whose only changing field is the relationship:
+ *
+ *     baseline, no relationship at all      ->  false
+ *     the identical row as `employee`       ->  true    (employer path intact)
+ *     the same row changed to `student`     ->  false   (the ruling enforced)
+ *     worker rows the manager can list      ->  3, unchanged by the link
+ *
+ * One field differs between `true` and `false`, so the engagement branch is
+ * isolated and the fix is demonstrated rather than argued. The lesson is
+ * general enough to keep: when probing an authorization predicate, first assert
+ * that the identity does NOT satisfy any earlier branch — otherwise the probe
+ * measures the wrong thing and reads like success.
  *
  * THE THREE WAYS IT COULD ROT, each guarded below with a NEGATIVE CONTROL
  * (a guard that would pass against an empty file proves nothing — the
