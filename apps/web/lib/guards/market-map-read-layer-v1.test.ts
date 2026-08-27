@@ -642,7 +642,10 @@ describe("NO new DB migration in this PR", () => {
     // the market-map read layer itself.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    expect(count).toBeLessThanOrEqual(239);
+    // Bumped 239 -> 240 for the transversal capability catalogue
+    // (20260827060000) — INSERT-only seed, nothing to do with the market-map
+    // read layer.
+    expect(count).toBeLessThanOrEqual(240);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
