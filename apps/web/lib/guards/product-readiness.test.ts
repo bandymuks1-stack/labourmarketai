@@ -2215,7 +2215,14 @@ describe("no migration files added by this sprint", () => {
     // company/agency backfill; organizations.organization_type is untouched.
     // Owner-approved 2026-08-27. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 242.
-    const SPRINT_BASELINE = 242;
+    // Bumped 242 -> 243 for the relationship-invitations migration
+    // (20260827200000_relationship_invitations_v1) — the institution↔learner
+    // link. Additive: two nullable/defaulted columns on relationship_types, one
+    // nullable column on invitations, and CREATE OR REPLACE of five existing
+    // SECURITY DEFINER functions. No table/column dropped, no RLS policy
+    // changed, no grant widened. RED, owner-gated, NOT applied to production
+    // (PR #1301, draft + needs-human-gate).
+    const SPRINT_BASELINE = 243;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

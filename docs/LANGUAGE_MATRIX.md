@@ -100,6 +100,58 @@ language-specific expression
 The needle lists stay valid as the deterministic fast path. They must stop
 being the *only* path.
 
+### 4.1 THE CONCRETE MIGRATION PLAN (measured 2026-08-27, local stack)
+
+What the direction above actually rests on today — checked, not assumed:
+
+| prerequisite | state |
+|---|---|
+| `skills.esco_uri` (language-independent concept id) | column EXISTS, **0 of 161 rows populated (0%)** |
+| embeddings anywhere in `lib/` | **none** |
+| `pgvector` extension | **not installed** |
+| hand-written needle packs | 9 files, ~235 lines each (~2,100 lines) for 9 languages |
+| AI router | implemented, `ENV-GATED`, `ai_runs = 0` |
+
+So the recorded pipeline has **one asset with no data** (`esco_uri`) and **two
+absent layers** (embeddings, vector store). That is why "add a language" still
+costs a needle pack: there is currently no other way for an expression to reach
+a concept.
+
+**The order this has to happen in — each step is useful on its own, and none
+of them blocks the pilot:**
+
+1. **Populate `esco_uri` for the 161 skills.** This is the whole unlock: it is
+   the only language-independent identity the schema already has, and it is
+   empty. Curation, not engineering. Until it holds data, every later step has
+   nothing to resolve *to*. Leave the slug as the join key — matching was
+   re-keyed onto slugs precisely because ESCO was inert, and that must not be
+   reversed until ESCO is real.
+2. **Make concept resolution a named seam** — one function
+   `expression → concept`, with the needle packs as its first and default
+   implementation. Nothing changes behaviourally; it stops the needle list from
+   being the only *callable* path. This is the step that makes 3 and 4
+   additive rather than a rewrite.
+3. **Add ESCO's own multilingual labels as a second resolver** behind that
+   seam. ESCO publishes preferred/alternative labels in all 24 EU languages —
+   which means languages 6–24 stop needing a hand-written pack and start
+   needing a data import. This is the step that breaks the linear cost.
+4. **Only then consider embeddings** (needs `pgvector` + a provider, i.e. the
+   AI runtime gate) for the residue steps 1–3 cannot resolve. Not before: an
+   embedding layer over a taxonomy with no canonical ids resolves to nothing.
+5. **Georgian (`ka`) is not covered by step 3** — it is outside ESCO's EU
+   language set and outside the current catalogs. It needs its own decision:
+   a curated pack (the current cost model) or a translation layer into a
+   resolved concept. Recording it here so it is not silently assumed to fall
+   out of the EU work.
+
+**What must NOT be done meanwhile:** adding more hand-written needle packs for
+languages 13–26. That is the cost curve this plan exists to leave, and each
+pack is also ~235 more chances to over- or under-claim a capability.
+
+**Scope note:** any new recognition or extraction logic must be written behind
+the step-2 seam even before that seam exists — i.e. never call a language pack
+directly from a workflow. That keeps the eventual migration mechanical.
+
 ---
 
 ## 5. DELIVERY PRIORITY (§29 — do not block the pilot on obscure screens)

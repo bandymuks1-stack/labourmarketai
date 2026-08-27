@@ -651,7 +651,14 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 241 -> 242 for organization roles v1 (20260827050000) — the
     // multi-capability foundation, owner-approved. Still nothing to do with
     // the market-map read layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(242);
+    // Bumped 242 -> 243 for the relationship-invitations migration
+    // (20260827200000_relationship_invitations_v1) — the institution↔learner
+    // link. Additive: two nullable/defaulted columns on relationship_types, one
+    // nullable column on invitations, and CREATE OR REPLACE of five existing
+    // SECURITY DEFINER functions. No table/column dropped, no RLS policy
+    // changed, no grant widened. RED, owner-gated, NOT applied to production
+    // (PR #1301, draft + needs-human-gate).
+    expect(count).toBeLessThanOrEqual(243);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
