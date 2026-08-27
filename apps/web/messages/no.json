@@ -5657,5 +5657,40 @@
       "awaitingOwnerApproval": "venter på eierens godkjenning"
     },
     "footer": "Ærlig forhåndsvisning · Ingen falsk KI · Ingen falsk verifisering · Ingen oppdiktede arbeideransikter · Hver oppføring starter med «Sample · …», så den leses aldri som ekte data."
+  },
+  "organizationCapabilities": {
+    "title": "Hva gjør organisasjonen deres?",
+    "help": "Kryss av for alt som passer — en organisasjon kan gjøre flere ting samtidig.",
+    "save": "Lagre",
+    "saved": "Lagret",
+    "notPermitted": "Du kan ikke endre denne organisasjonen.",
+    "error": "Kunne ikke lagre. Prøv igjen.",
+    "allDeclared": "Alt tilgjengelig er allerede oppgitt.",
+    "choices": {
+      "training": {
+        "label": "Vi utdanner og lærer opp folk",
+        "hint": "Skole, universitet eller opplæringssenter; vi tar imot praktikanter."
+      },
+      "employer": {
+        "label": "Vi ansetter folk",
+        "hint": "Vi rekrutterer til oss selv."
+      },
+      "workforce": {
+        "label": "Vi leverer arbeidstakere til andre organisasjoner",
+        "hint": "Bemanning, kontraktslag."
+      },
+      "recruitment": {
+        "label": "Vi hjelper med å finne og velge folk",
+        "hint": "Rekruttering og utvelgelse."
+      },
+      "project": {
+        "label": "Vi driver prosjekter",
+        "hint": "Vi deltar som utfører eller partner."
+      },
+      "client": {
+        "label": "Vi bestiller arbeid eller tjenester",
+        "hint": "Vi er oppdragsgiver."
+      }
+    }
   }
 }

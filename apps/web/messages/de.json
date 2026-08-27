@@ -7204,7 +7204,6 @@
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
     "practiceHistoryTitle": "Praktikum und Ehrenamt",
-
     "workHistoryTitle": "Beruflicher Werdegang",
     "present": "Heute",
     "languagesTitle": "Sprachen",
@@ -7219,28 +7218,18 @@
     "projectsHint": "Aus Arbeitseinträgen",
     "confirmedByManager": "Vom Manager bestätigt",
     "euFormat": {
-
       "notOfficial": "Dieser Lebenslauf folgt der Europass-Struktur, damit europäische Arbeitgeber ihn im erwarteten Format lesen können. Er ist kein von der Europäischen Union ausgestelltes Europass-Dokument.",
-
       "personal": "Persönliche Daten",
-
       "workExperience": "Berufserfahrung",
-
       "educationAndTraining": "Schul- und Berufsbildung",
-
       "personalSkills": "Persönliche Fähigkeiten",
-
       "jobRelatedSkills": "Berufsbezogene Fähigkeiten",
-
       "additionalInformation": "Weitere Angaben"
-
     },
-
     "templates": {
       "label": "Vorlage",
       "standard": "Standard",
       "compact": "Kompakt",
-
       "eu": "EU-Format"
     },
     "privateDetails": {
@@ -11331,7 +11320,6 @@
         "language": "Sprache",
         "level": "Niveau",
         "jobTitle": "Position",
-
         "engagementKind": "Art der Tätigkeit",
         "jobTitlePlaceholder": "z. B. Schweißer, Krankenpfleger, Lagerarbeiter, Entwickler",
         "startMonth": "Startmonat",
@@ -13788,5 +13776,40 @@
     "offFactsUnavailable": "Die Marktzahlen konnten gerade nicht gelesen werden, es gibt also nichts zu erklären.",
     "offMarketTooSmall": "Weniger als {min} offene Anzeigen — zu wenige, als dass eine Erklärung mehr wert wäre als die Zahlen oben.",
     "offAiUnavailable": "Der Erklärungsdienst ist derzeit nicht verfügbar. Die Zahlen oben bleiben davon unberührt."
+  },
+  "organizationCapabilities": {
+    "title": "Was macht Ihre Organisation?",
+    "help": "Wählen Sie alles Zutreffende — eine Organisation kann mehreres zugleich tun.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "notPermitted": "Sie können diese Organisation nicht ändern.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "allDeclared": "Alles Verfügbare ist bereits angegeben.",
+    "choices": {
+      "training": {
+        "label": "Wir bilden Menschen aus",
+        "hint": "Schule, Hochschule oder Bildungszentrum; wir nehmen Praktikanten auf."
+      },
+      "employer": {
+        "label": "Wir beschäftigen Menschen",
+        "hint": "Wir stellen für uns selbst ein."
+      },
+      "workforce": {
+        "label": "Wir stellen anderen Organisationen Personal",
+        "hint": "Personalbereitstellung, Vertragskolonnen."
+      },
+      "recruitment": {
+        "label": "Wir helfen, Menschen zu finden und auszuwählen",
+        "hint": "Rekrutierung und Auswahl."
+      },
+      "project": {
+        "label": "Wir führen Projekte durch",
+        "hint": "Wir wirken als Betreiber oder Partner mit."
+      },
+      "client": {
+        "label": "Wir vergeben Arbeiten oder Leistungen",
+        "hint": "Wir sind Auftraggeber."
+      }
+    }
   }
 }

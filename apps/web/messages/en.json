@@ -7204,7 +7204,6 @@
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary",
     "practiceHistoryTitle": "Practice and volunteering",
-
     "workHistoryTitle": "Work history",
     "present": "Present",
     "languagesTitle": "Languages",
@@ -7219,28 +7218,18 @@
     "projectsHint": "From work records",
     "confirmedByManager": "Confirmed by a manager",
     "euFormat": {
-
       "notOfficial": "This CV follows the Europass structure so European employers can read it in the format they expect. It is not a Europass document issued by the European Union.",
-
       "personal": "Personal information",
-
       "workExperience": "Work experience",
-
       "educationAndTraining": "Education and training",
-
       "personalSkills": "Personal skills",
-
       "jobRelatedSkills": "Job-related skills",
-
       "additionalInformation": "Additional information"
-
     },
-
     "templates": {
       "label": "Template",
       "standard": "Standard",
       "compact": "Compact",
-
       "eu": "EU format"
     },
     "privateDetails": {
@@ -11331,7 +11320,6 @@
         "language": "Language",
         "level": "Level",
         "jobTitle": "Job title",
-
         "engagementKind": "Kind of engagement",
         "jobTitlePlaceholder": "e.g. welder, nurse, warehouse worker, developer",
         "startMonth": "Start month",
@@ -13788,5 +13776,40 @@
     "offFactsUnavailable": "The market counts could not be read just now, so there is nothing to explain.",
     "offMarketTooSmall": "Fewer than {min} open advertisements — too few for an explanation to be worth more than the counts above.",
     "offAiUnavailable": "The explanation service is not available right now. The counts above are unaffected."
+  },
+  "organizationCapabilities": {
+    "title": "What does your organization do?",
+    "help": "Tick everything that applies — an organization can do several of these at once.",
+    "save": "Save",
+    "saved": "Saved",
+    "notPermitted": "You cannot change this organization.",
+    "error": "Could not save. Please try again.",
+    "allDeclared": "Everything available has already been stated.",
+    "choices": {
+      "training": {
+        "label": "We educate and train people",
+        "hint": "School, university or training centre; we host students on placements."
+      },
+      "employer": {
+        "label": "We employ people",
+        "hint": "We hire for ourselves."
+      },
+      "workforce": {
+        "label": "We supply workers to other organizations",
+        "hint": "Workforce provision, contracted crews."
+      },
+      "recruitment": {
+        "label": "We help find and select people",
+        "hint": "Recruitment and selection partnership."
+      },
+      "project": {
+        "label": "We run projects",
+        "hint": "We take part in projects as an operator or partner."
+      },
+      "client": {
+        "label": "We commission work or services",
+        "hint": "We are the client."
+      }
+    }
   }
 }

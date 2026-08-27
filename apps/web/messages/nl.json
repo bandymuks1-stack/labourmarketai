@@ -7204,7 +7204,6 @@
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
     "practiceHistoryTitle": "Stage en vrijwilligerswerk",
-
     "workHistoryTitle": "Werkervaring",
     "present": "Heden",
     "languagesTitle": "Talen",
@@ -7219,28 +7218,18 @@
     "projectsHint": "Uit werkregistraties",
     "confirmedByManager": "Bevestigd door een manager",
     "euFormat": {
-
       "notOfficial": "Dit cv volgt de Europass-structuur, zodat Europese werkgevers het in het verwachte formaat kunnen lezen. Het is geen Europass-document dat door de Europese Unie is afgegeven.",
-
       "personal": "Persoonlijke gegevens",
-
       "workExperience": "Werkervaring",
-
       "educationAndTraining": "Opleiding en training",
-
       "personalSkills": "Persoonlijke vaardigheden",
-
       "jobRelatedSkills": "Vakgerelateerde vaardigheden",
-
       "additionalInformation": "Aanvullende informatie"
-
     },
-
     "templates": {
       "label": "Sjabloon",
       "standard": "Standaard",
       "compact": "Compact",
-
       "eu": "EU-format"
     },
     "privateDetails": {
@@ -11331,7 +11320,6 @@
         "language": "Taal",
         "level": "Niveau",
         "jobTitle": "Functie",
-
         "engagementKind": "Soort dienstverband",
         "jobTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
         "startMonth": "Startmaand",
@@ -13788,5 +13776,40 @@
     "offFactsUnavailable": "De markttellingen konden nu niet worden gelezen, dus er valt niets uit te leggen.",
     "offMarketTooSmall": "Minder dan {min} open vacatures — te weinig om een uitleg meer waard te maken dan de cijfers hierboven.",
     "offAiUnavailable": "De uitlegdienst is nu niet beschikbaar. De cijfers hierboven blijven ongewijzigd."
+  },
+  "organizationCapabilities": {
+    "title": "Wat doet uw organisatie?",
+    "help": "Vink alles aan wat van toepassing is — een organisatie kan meerdere dingen tegelijk doen.",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "notPermitted": "U kunt deze organisatie niet wijzigen.",
+    "error": "Opslaan mislukt. Probeer het opnieuw.",
+    "allDeclared": "Alles wat beschikbaar is, is al opgegeven.",
+    "choices": {
+      "training": {
+        "label": "Wij leiden mensen op",
+        "hint": "School, universiteit of opleidingscentrum; wij bieden stageplaatsen."
+      },
+      "employer": {
+        "label": "Wij nemen mensen in dienst",
+        "hint": "Wij werven voor onszelf."
+      },
+      "workforce": {
+        "label": "Wij leveren werknemers aan andere organisaties",
+        "hint": "Arbeidsbemiddeling, ploegen op contract."
+      },
+      "recruitment": {
+        "label": "Wij helpen mensen te vinden en te selecteren",
+        "hint": "Werving en selectie."
+      },
+      "project": {
+        "label": "Wij voeren projecten uit",
+        "hint": "Wij doen mee als uitvoerder of partner."
+      },
+      "client": {
+        "label": "Wij besteden werk of diensten uit",
+        "hint": "Wij zijn opdrachtgever."
+      }
+    }
   }
 }

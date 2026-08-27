@@ -5657,5 +5657,40 @@
       "awaitingOwnerApproval": "väntar på ägarens godkännande"
     },
     "footer": "Ärlig förhandsvisning · Ingen fejkad AI · Ingen fejkad verifiering · Inga påhittade arbetaransikten · Varje post börjar med ”Sample · …” och läses därför aldrig som riktiga data."
+  },
+  "organizationCapabilities": {
+    "title": "Vad gör er organisation?",
+    "help": "Kryssa i allt som stämmer — en organisation kan göra flera saker samtidigt.",
+    "save": "Spara",
+    "saved": "Sparat",
+    "notPermitted": "Du kan inte ändra denna organisation.",
+    "error": "Kunde inte spara. Försök igen.",
+    "allDeclared": "Allt tillgängligt är redan angivet.",
+    "choices": {
+      "training": {
+        "label": "Vi utbildar människor",
+        "hint": "Skola, universitet eller utbildningscenter; vi tar emot praktikanter."
+      },
+      "employer": {
+        "label": "Vi anställer människor",
+        "hint": "Vi rekryterar till oss själva."
+      },
+      "workforce": {
+        "label": "Vi tillhandahåller arbetstagare till andra organisationer",
+        "hint": "Bemanning, kontrakterade lag."
+      },
+      "recruitment": {
+        "label": "Vi hjälper till att hitta och välja människor",
+        "hint": "Rekrytering och urval."
+      },
+      "project": {
+        "label": "Vi driver projekt",
+        "hint": "Vi deltar som utförare eller partner."
+      },
+      "client": {
+        "label": "Vi beställer arbeten eller tjänster",
+        "hint": "Vi är beställare."
+      }
+    }
   }
 }

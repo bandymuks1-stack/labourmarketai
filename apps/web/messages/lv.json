@@ -5657,5 +5657,40 @@
       "awaitingOwnerApproval": "gaida īpašnieka apstiprinājumu"
     },
     "footer": "Godīgs priekšskatījums · Nekāda viltus MI · Nekādas viltus verifikācijas · Nekādu izdomātu darbinieku seju · Katrs ieraksts sākas ar „Sample · …”, tāpēc tas nekad neizskatās pēc reāliem datiem."
+  },
+  "organizationCapabilities": {
+    "title": "Ko dara jūsu organizācija?",
+    "help": "Atzīmējiet visu, kas attiecas — organizācija var darīt vairākas lietas vienlaikus.",
+    "save": "Saglabāt",
+    "saved": "Saglabāts",
+    "notPermitted": "Jūs nevarat mainīt šo organizāciju.",
+    "error": "Neizdevās saglabāt. Mēģiniet vēlreiz.",
+    "allDeclared": "Viss pieejamais jau ir norādīts.",
+    "choices": {
+      "training": {
+        "label": "Mēs izglītojam un apmācām cilvēkus",
+        "hint": "Skola, augstskola vai mācību centrs; uzņemam praksē."
+      },
+      "employer": {
+        "label": "Mēs nodarbinām cilvēkus",
+        "hint": "Meklējam darbiniekus sev."
+      },
+      "workforce": {
+        "label": "Mēs nodrošinām darbiniekus citām organizācijām",
+        "hint": "Darbaspēka nodrošināšana, līgumbrigādes."
+      },
+      "recruitment": {
+        "label": "Mēs palīdzam atrast un atlasīt cilvēkus",
+        "hint": "Personāla atlase."
+      },
+      "project": {
+        "label": "Mēs īstenojam projektus",
+        "hint": "Piedalāmies kā izpildītājs vai partneris."
+      },
+      "client": {
+        "label": "Mēs pasūtām darbus vai pakalpojumus",
+        "hint": "Mēs esam pasūtītājs."
+      }
+    }
   }
 }

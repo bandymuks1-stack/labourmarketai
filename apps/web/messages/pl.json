@@ -5657,5 +5657,40 @@
       "awaitingOwnerApproval": "oczekuje na zatwierdzenie właściciela"
     },
     "footer": "Uczciwy podgląd · Bez udawanej SI · Bez udawanej weryfikacji · Bez zmyślonych twarzy pracowników · Każda pozycja zaczyna się od „Sample · …”, więc nigdy nie wygląda jak dane rzeczywiste."
+  },
+  "organizationCapabilities": {
+    "title": "Czym zajmuje się Twoja organizacja?",
+    "help": "Zaznacz wszystko, co pasuje — organizacja może robić kilka rzeczy naraz.",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "notPermitted": "Nie możesz zmieniać tej organizacji.",
+    "error": "Nie udało się zapisać. Spróbuj ponownie.",
+    "allDeclared": "Wszystko, co dostępne, zostało już podane.",
+    "choices": {
+      "training": {
+        "label": "Kształcimy i szkolimy ludzi",
+        "hint": "Szkoła, uczelnia lub centrum szkoleniowe; przyjmujemy na praktyki."
+      },
+      "employer": {
+        "label": "Zatrudniamy ludzi",
+        "hint": "Rekrutujemy dla siebie."
+      },
+      "workforce": {
+        "label": "Dostarczamy pracowników innym organizacjom",
+        "hint": "Udostępnianie pracowników, brygady kontraktowe."
+      },
+      "recruitment": {
+        "label": "Pomagamy znaleźć i wybrać ludzi",
+        "hint": "Rekrutacja i selekcja."
+      },
+      "project": {
+        "label": "Prowadzimy projekty",
+        "hint": "Bierzemy udział jako wykonawca lub partner."
+      },
+      "client": {
+        "label": "Zlecamy prace lub usługi",
+        "hint": "Jesteśmy zamawiającym."
+      }
+    }
   }
 }
