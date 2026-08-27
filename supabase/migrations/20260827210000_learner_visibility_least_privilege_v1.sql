@@ -1,4 +1,22 @@
+-- @human-gate-approved
 -- ============================================================================
+-- GATE STATUS, stated exactly. The owner RULED that this change be made
+-- (2026-08-27 §2: "implement the smallest architecture-consistent fix that
+-- prevents student/learner relationships from accidentally inheriting
+-- employee-level visibility"), so it is an intentional, human-reviewed RED
+-- change and the annotation above says so.
+--
+-- IT IS NOT YET APPLIED. Approval to RUN it against production has not been
+-- given, and the annotation is an acknowledgement, never an auto-merge pass:
+-- this PR stays draft with `needs-human-gate`.
+--
+-- ORDERING THAT MATTERS: 20260827200000 IS already applied (ledger
+-- 20260827132137), so the learner relationship is reachable in the production
+-- database today. Nothing is exposed while the learner-invite UI is unmerged.
+-- The moment that UI deploys without this file applied, the product ships the
+-- exact behaviour the owner ruled against — so #1301 MUST NOT DEPLOY FIRST.
+-- ============================================================================
+--
 -- 20260827210000 — learner visibility, least privilege (owner ruling
 -- 2026-08-27, education pilot P0-C follow-up).
 --

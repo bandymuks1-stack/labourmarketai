@@ -1,7 +1,38 @@
+-- @human-gate-approved
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`.
+-- OWNER-APPROVED AND APPLIED. Owner ruling 2026-08-27 §1, verbatim:
+--   "APPROVED: Apply migration 20260827200000 using the canonical Supabase MCP
+--    apply_migration path only. Do NOT use db push."
+--
+-- APPLIED to production 2026-08-27 via Supabase MCP `apply_migration`
+-- (name `relationship_invitations_v1`), recorded in the ledger as version
+-- 20260827132137 — the ledger version differs from this filename because the
+-- MCP path stamps its own, which is the repo's normal, expected behaviour.
+--
+-- POST-APPLY VERIFICATION, run against production and recorded here rather
+-- than promised (the block at the end of this file is what was executed):
+--   registry            student t/training_provider · volunteer t · employee t
+--                       collaborator t · freelancer t · consultant t ·
+--                       manager f · owner f · viewer f · unemployed f
+--   invitations         0 rows total, 0 carrying relationship_slug — so NO
+--                       existing invitation changed meaning
+--   create_invitation_v1  exactly ONE definition, 10 arguments — the 9-argument
+--                       predecessor is gone, so no call is ambiguous
+--   engagement_contexts 40 employee + 13 owner active, unchanged
+--
+-- ROLLBACK READINESS re-checked at apply time and still valid:
+-- supabase/rollbacks/20260827200000_relationship_invitations_v1.down.sql
+-- restores the 9-argument creator and the two-slug acceptance CASE, and leaves
+-- real relationships in place.
+--
+-- The annotation above lets CI classify this as an intentional, human-reviewed
+-- RED change. It is an acknowledgement, NOT an auto-merge pass: the PR stays
+-- draft with `needs-human-gate`.
+--
+-- The `can_view_worker` consequence disclosed below was ruled on separately by
+-- the owner the same day and is answered by 20260827210000. Read that file
+-- before reading the DISCLOSED CONSEQUENCE section here — it is no longer the
+-- final word.
 --
 -- 20260827200000 — relationship invitations v1 (education pilot P0-C).
 --
