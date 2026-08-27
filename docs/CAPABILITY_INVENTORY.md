@@ -70,7 +70,8 @@
 |---|---|---|
 | Institution declares capabilities | `PROVEN` | browser + DB, fresh database |
 | `student` / `volunteer` relationship writable | `PROVEN` | RPC under RLS; `manager` correctly rejected |
-| **Institution ↔ learner link** | `IMPLEMENTED`, `OWNER-GATED` | browser + DB on a local stack (`education-pilot-institution-learner`): institution invites → learner is told the relationship → accepts → `student` engagement, employment untouched. Needs migration 20260827200000 (RED, not applied to production). |
+| **Institution ↔ learner link** | `APPLIED`, `PROD-PROVEN (server chain)` | Migration 20260827200000 applied 2026-08-27 (ledger `20260827132137`). Re-proven on PRODUCTION in rolled-back transactions: capable org invites → learner accepts → `student` engagement alongside the existing employment; org without `training_provider` refused; `manager` refused; legacy invitation still → `employee`. Browser chain against the deployed app NOT yet run. |
+| Learner visibility is NOT employer visibility | `APPLIED`, `PROD-PROVEN` | 20260827210000. Controlled comparison, non-admin org owner: one engagement row, `employee` → visible, same row as `student` → not visible. |
 | Transversal capability recognition | `PARTIAL` | LT/EN/RU only, classified `deferred` |
 
 ### Cross-cutting
@@ -115,15 +116,26 @@
 
 ## 4. THE HONEST BLOCKERS TO PILOT_READY
 
-1. **Institution ↔ learner link — BUILT, awaiting an owner apply.** Closed by
+1. **Institution ↔ learner link — APPLIED to production 2026-08-27.** Closed by
    making the relationship an invitation establishes into DATA
    (`invitations.relationship_slug` → `relationship_types`), rather than adding
-   a `join_as_student` type. Proven browser + DB on a local stack, including
-   the negative control (an organization that never declared it educates is
-   refused) and multi-role survival (the learner stays an employee too).
-   **Blocked only on the owner applying migration 20260827200000**, which is
-   RED (SECURITY DEFINER replacements) and carries a disclosed
-   `can_view_worker` consequence for the owner to rule on.
+   a `join_as_student` type. Migration 20260827200000 applied via Supabase MCP
+   `apply_migration` under owner ruling §1 (ledger `20260827132137`).
+
+   Re-proven **on production**, inside rolled-back transactions: a legacy
+   9-argument invitation still accepts into `employee`; an organization holding
+   `training_provider` invites and a learner accepts into `student` alongside
+   the employment it already had; an organization without the capability is
+   refused `organization_capability_required`; `manager` is refused
+   `invalid_relationship`.
+
+   The disclosed `can_view_worker` consequence was **ruled on and closed** the
+   same day — see blocker 6 below, which is now a resolved entry rather than an
+   open one.
+
+   What is still MISSING is not code: **0 production organizations hold
+   `training_provider`**, so no institution exists in production yet, and the
+   user-facing browser chain has not been run against the deployed app.
 2. **Employer need → matching → shortlist — PROVEN 2026-08-27.** Exercised in
    a browser against a real demand: the LT demand text was recognised into
    skills, candidates were retrieved and ranked with an evidence-tier basis
@@ -134,8 +146,31 @@
    seeded rather than drove.
 3. **Cross-actor scenario unproven.** Each actor has been proven separately;
    institution → student → employer has not been run as one chain.
-4. **Languages: 5 of 26 routed, Georgian absent entirely.**
-5. **AI is `ENV-GATED`** — honest and acceptable, but must never be described
-   as operational.
+4. **Languages: 5 of 26 routed, Georgian absent entirely.** One narrower gap
+   inside this was closed on 2026-08-27: the work-log context selector could
+   not NAME a placement, because its base label resolved through
+   `conversation.worklog.relationship.*`, which carries neither `student` nor
+   `volunteer` — so a learner's placement printed "Kita" / "Other". It now
+   resolves through the canonical `relationshipTypes` catalogue in all five
+   active locales. The architectural dependence on hand-maintained needle lists
+   is UNCHANGED and remains the real language blocker.
+5. **AI is not env-gated — it is CODE-gated, which is a stronger statement.**
+   `apps/web/lib/ai/provider.ts` unconditionally returns the inert no-op
+   provider; there is no real branch to select, so no environment variable can
+   turn it on. `ai_runs` = 0. Activating it is an owner decision about provider,
+   budget and key, not a deploy setting. It must never be described as
+   operational.
+6. **Learner visibility — RULED AND CLOSED 2026-08-27 (kept for the record).**
+   `can_view_worker` treated every active engagement alike, so an education
+   relationship would have carried the same scope an employer holds over an
+   employee — including `salary_min_eur`, `willing_to_relocate` and
+   `needs_accommodation` on `workers`. Owner ruling §2 required least privilege;
+   `20260827210000` makes the rule DATA
+   (`relationship_types.grants_worker_visibility`, fail-closed, seeded true for
+   every slug except `student`) and is applied. Regression-proven on production
+   by a controlled comparison with a NON-ADMIN organization owner: one
+   engagement row, `employee` → visible, the same row as `student` → not
+   visible, worker rows listable unchanged. The institution reaches a learner
+   through the purpose-bound project path instead.
 
 Nothing above is fixed by more code existing. Each needs a real journey run.
