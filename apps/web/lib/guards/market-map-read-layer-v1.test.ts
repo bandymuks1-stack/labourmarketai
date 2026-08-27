@@ -642,7 +642,12 @@ describe("NO new DB migration in this PR", () => {
     // the market-map read layer itself.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    expect(count).toBeLessThanOrEqual(239);
+    // Bumped 239 -> 240 for organization roles v1 (20260827050000) — the
+    // multi-capability foundation (two new tables + registry seed +
+    // company/agency backfill) that lets an education institution register
+    // honestly. DRAFT, needs-human-gate, owner-gated apply. Still nothing to
+    // do with the market-map read layer, which remains pure TS.
+    expect(count).toBeLessThanOrEqual(240);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

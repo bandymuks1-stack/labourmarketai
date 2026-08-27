@@ -134,7 +134,11 @@ describe("the migration is additive and reversible", () => {
   });
 
   it("it mutates no existing row — inserts only", () => {
-    const sql = MIGRATION.toLowerCase();
+    // Comment-stripped: this must judge the SQL, not the prose ABOUT the SQL.
+    // (The docblock legitimately names UPDATE/DELETE/TRUNCATE while explaining
+    // that none of them occur — a raw substring check fails on its own
+    // explanation.)
+    const sql = MIGRATION.replace(/--.*$/gm, "").toLowerCase();
     expect(sql).not.toMatch(/(^|;)\s*update\s+\w/m);
     expect(sql).not.toMatch(/(^|;)\s*delete\s+from\s+\w/m);
     expect(sql).not.toContain("truncate");
@@ -162,6 +166,36 @@ describe("the migration is additive and reversible", () => {
     expect(fn).toContain("Invalid role");
     // Additive only: no removal path hides in the writer.
     expect(fn.toLowerCase()).not.toMatch(/delete\s+from/);
+  });
+
+  it("privileges are EXPLICIT, so local and production cannot disagree", () => {
+    // Measured on a local `db reset` before this was added: the new table came
+    // up with `anon` holding INSERT/UPDATE/DELETE, because the local stack
+    // still carries Supabase's stock ALTER DEFAULT PRIVILEGES while this
+    // project's production `pg_default_acl` for schema public is EMPTY. A
+    // local test would then exercise a privilege surface production lacks.
+    // Regex LITERALS, not a template-built RegExp: inside a template literal
+    // `\.` collapses to `.` and `\s` to `s`, which would quietly turn these
+    // into assertions that pass on the wrong text.
+    expect(
+      MIGRATION,
+      "organization_role_types does not revoke inherited default privileges",
+    ).toMatch(
+      /revoke all on public\.organization_role_types\s+from public, anon, authenticated, service_role/,
+    );
+    expect(
+      MIGRATION,
+      "organization_roles does not revoke inherited default privileges",
+    ).toMatch(
+      /revoke all on public\.organization_roles\s+from public, anon, authenticated, service_role/,
+    );
+    // …and then grants back exactly one thing: read.
+    expect(MIGRATION).toMatch(/grant select on public\.organization_roles\s+to authenticated/);
+    expect(MIGRATION).not.toMatch(/grant (insert|update|delete)/i);
+    // The SECURITY DEFINER writer must not be reachable by anon.
+    expect(MIGRATION).toMatch(
+      /revoke all on function public\.add_organization_role_v1\(uuid, text\) from public, anon/,
+    );
   });
 
   it("the rollback refuses to silently discard a declared capability", () => {

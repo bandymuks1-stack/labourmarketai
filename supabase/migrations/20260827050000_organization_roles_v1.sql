@@ -155,7 +155,24 @@ create policy organization_roles_select on public.organization_roles
 create policy organization_roles_write on public.organization_roles
   for all using (is_admin()) with check (is_admin());
 
--- ── 6. Grants ──────────────────────────────────────────────────────────────
+-- ── 6. Grants — EXPLICIT ONLY, so local and production agree ────────────────
+-- REVOKE FIRST, and this is not ceremony. Measured on a local `db reset`
+-- 2026-08-27, BEFORE these revokes existed: the new table came up with
+-- `anon` holding INSERT, SELECT, UPDATE, DELETE and TRUNCATE, and
+-- `authenticated` holding the same. Production would grant NONE of that —
+-- `pg_default_acl` for schema public is EMPTY there, while the local stack
+-- still carries Supabase's stock ALTER DEFAULT PRIVILEGES.
+--
+-- Left alone, the two environments disagree about who may write this table.
+-- RLS still refuses the write in both (the policies below are scoped, and
+-- `is_admin()` is false for anon), so nothing is exposed — but a local test
+-- would be exercising a privilege surface production does not have, which is
+-- precisely the reproducibility trap 20260722160000 closed for FUNCTIONS.
+-- This closes it for these TABLES: after the revoke, both environments hold
+-- exactly what the next two lines grant, and nothing else.
+revoke all on public.organization_role_types from public, anon, authenticated, service_role;
+revoke all on public.organization_roles      from public, anon, authenticated, service_role;
+
 -- Read-only for authenticated; writes go through the RPC below, exactly like
 -- engagement_contexts (authenticated holds SELECT only there too).
 grant select on public.organization_role_types to authenticated;
@@ -215,6 +232,12 @@ begin
 end;
 $function$;
 
+-- Reachable by a signed-in user only. A SECURITY DEFINER function bypasses
+-- RLS, so `anon` is revoked EXPLICITLY rather than left to default privileges:
+-- this project's `pg_default_acl` for schema public is empty, and a local
+-- `db reset` would otherwise leave the anon grant in a different state than
+-- production (the reproducibility trap closed by 20260722160000).
+revoke all on function public.add_organization_role_v1(uuid, text) from public, anon;
 grant execute on function public.add_organization_role_v1(uuid, text) to authenticated;
 
 -- ── POST-APPLY VERIFICATION (run as owner, record the output) ──────────────
