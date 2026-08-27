@@ -319,7 +319,26 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ...asSector("other", [
     {
       slug: "team-coordination",
-      needles: ["komand", "brigad", "vadovav", "бригад"],
+      // NARROWED 2026-08-27. The bare stem "komand" matched every form of the
+      // word, so "universiteto KOMANDINIS projektas" — a student saying they
+      // took part in a team project — was recognised as team COORDINATION,
+      // i.e. a leadership claim they never made. Proven in a browser E2E:
+      // the student case produced `team-coordination` and not `teamwork`.
+      //
+      // This role is about LEADING a team (its own siblings are `vadovav`
+      // and `brigad`), so it now needs a leading verb or an explicit
+      // coordination phrase. Plain participation belongs to `teamwork`, and
+      // over-claiming it is exactly the fabricated-skill failure doctrine §7
+      // forbids.
+      needles: [
+        "koordinavau komand",
+        "vadovavau komand",
+        "komandos koordinav",
+        "brigad",
+        "vadovav",
+        "бригад",
+        "координировал команд",
+      ],
     },
     { slug: "quality-control", needles: ["kokyb", "качеств"] },
     {
@@ -1886,8 +1905,12 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     {
       slug: "teamwork",
       needles: [
-        "komandinis darb",
-        "komandinio darb",
+        // The LT adjectival stem: "komandinis/komandinė/komandiniame …" is
+        // the team-BASED form and always describes participation, never
+        // leadership (leading is `koordinavau`/`vadovavau`, which belong to
+        // team-coordination). Anchoring on "komandinis darb" alone missed
+        // "komandinis PROJEKTAS", which is the exact shape a student writes.
+        "komandin",
         "dirbau komandoje",
         "komandos projekt",
         "teamwork",
