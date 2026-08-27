@@ -2195,7 +2195,15 @@ describe("no migration files added by this sprint", () => {
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 239.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    const SPRINT_BASELINE = 239;
+    // Bumped 239 -> 240 for organization roles v1
+    // (20260827050000_organization_roles_v1) — the multi-capability foundation
+    // that lets an education institution register honestly instead of calling
+    // itself a company. Two NEW tables + registry seed + a conservative
+    // company/agency backfill; the legacy organizations.organization_type
+    // column is untouched. DRAFT, needs-human-gate (grants + SECURITY DEFINER
+    // writer), owner-gated apply. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 240.
+    const SPRINT_BASELINE = 240;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
