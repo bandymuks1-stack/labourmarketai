@@ -298,6 +298,26 @@ export async function emitWorkTaskAssignedNotification(
  * the try/catch below and `emitNotificationEvent`'s own outcome union between
  * them turn every failure into a logged outcome rather than an exception.
  */
+/**
+ * ONE greppable marker for "a worker raised their hand and the owner was not
+ * told". Production evidence (2026-08-27): five `demand_interest_signals`, two
+ * `demand_interest_expressed` rows — and both of those carry a `created_at`
+ * identical to their signal to the microsecond, which this emitter cannot
+ * produce because it never sets `created_at`. They are backfill artifacts, so
+ * the LIVE emitter has delivered nothing since it shipped, and every path by
+ * which it could fail was silent. Correct suppressions (self-interest,
+ * duplicate) deliberately do NOT come through here, so a hit is always
+ * something to look at.
+ *
+ * Carries a REASON only — never the worker's free text, the ids, the payload
+ * or the person.
+ */
+export const INTEREST_UNDELIVERED = "[notifications/interest] owner not told";
+
+function undelivered(reason: string, detail?: string): void {
+  console.warn(INTEREST_UNDELIVERED, detail ? { reason, detail } : { reason });
+}
+
 export async function emitDemandInterestNotification(
   signalId: string,
 ): Promise<void> {
@@ -312,7 +332,10 @@ export async function emitDemandInterestNotification(
       request_id?: string | null;
       worker_id?: string | null;
     } | null;
-    if (!row?.request_id || !row.worker_id) return;
+    if (!row?.request_id || !row.worker_id) {
+      undelivered("signal_unreadable");
+      return;
+    }
 
     const { data: demand } = await admin
       .from("customer_requests")
@@ -324,9 +347,14 @@ export async function emitDemandInterestNotification(
       country?: string | null;
     } | null;
     const owner = req?.profile_id ?? null;
-    if (!owner) return;
+    if (!owner) {
+      undelivered("owner_unresolved");
+      return;
+    }
 
     const actor = await workerProfileId(admin, row.worker_id);
+    // APPROVED silence, not a failure: you do not need telling that you raised
+    // your own hand. Deliberately unlogged so the marker below stays a signal.
     if (actor && actor === owner) return;
 
     const country = req?.country ?? null;
@@ -342,12 +370,19 @@ export async function emitDemandInterestNotification(
     if (outcome.kind === "unexpected_error") {
       // `duplicate` and `feature_unavailable` are approved outcomes and stay
       // quiet; this line only fires on something real.
-      console.error(
-        `[notifications] demand_interest_expressed emit failed: ${outcome.code}`,
-      );
+      undelivered("insert_failed", outcome.code);
     }
-  } catch {
-    // Emission is an enhancement; the signal itself is already stored.
+  } catch (err) {
+    // Emission is an enhancement; the signal itself is already stored — the
+    // worker's action still succeeded. But this catch used to be BARE, which
+    // is why a permanent delivery failure was undiagnosable from outside the
+    // database: nothing threw, nothing logged, and the employer simply never
+    // heard anything. The failure is now named. Bounded and secret-free: no
+    // free text, no ids, no payload.
+    undelivered(
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
