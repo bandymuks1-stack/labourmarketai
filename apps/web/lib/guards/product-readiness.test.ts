@@ -2208,7 +2208,14 @@ describe("no migration files added by this sprint", () => {
     // function, no grant, no RLS change, no signature change. Owner-approved
     // 2026-08-27. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 241.
-    const SPRINT_BASELINE = 241;
+    // Bumped 241 -> 242 for organization roles v1
+    // (20260827050000_organization_roles_v1) — the multi-capability foundation
+    // that lets an education institution register honestly instead of calling
+    // itself a company. Two NEW tables + registry seed + a conservative
+    // company/agency backfill; organizations.organization_type is untouched.
+    // Owner-approved 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 242.
+    const SPRINT_BASELINE = 242;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

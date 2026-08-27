@@ -648,7 +648,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 240 -> 241 for practice work history v1 (20260826182421) — a
     // secdef allowlist widening, owner-approved. Nothing to do with the
     // market-map read layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(241);
+    // Bumped 241 -> 242 for organization roles v1 (20260827050000) — the
+    // multi-capability foundation, owner-approved. Still nothing to do with
+    // the market-map read layer, which stays pure TS.
+    expect(count).toBeLessThanOrEqual(242);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

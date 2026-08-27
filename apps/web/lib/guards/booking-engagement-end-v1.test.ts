@@ -1038,6 +1038,19 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval: the PR is a draft carrying needs-human-gate and the
       // migration ships UNAPPLIED until the owner applies it.
       "20260826182421_practice_work_history_v1.sql",
+      // 2026-08-27: organization roles v1 — the multi-capability foundation
+      // that lets an education institution register honestly instead of
+      // calling itself a company. The marker records that the RED content is
+      // INTENTIONAL and reviewed: grants on two NEW tables (this project's
+      // pg_default_acl for schema public is empty, so a new table is otherwise
+      // unreadable by `authenticated`), a SECURITY DEFINER writer RPC, and
+      // `using (true)` on the VOCABULARY table only — identical to the
+      // existing relationship_types_select precedent. The assignment table is
+      // scoped, not permissive. Owner approval given in-session 2026-08-27
+      // ("I approve proceeding with BOTH prepared owner-gated changes… This
+      // approval applies only to the exact reviewed/tested scopes"), and the
+      // marker was added in the same commit as that recorded decision.
+      "20260827050000_organization_roles_v1.sql",
 ]);
   });
 
