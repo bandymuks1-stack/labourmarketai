@@ -642,14 +642,12 @@ describe("NO new DB migration in this PR", () => {
     // the market-map read layer itself.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    // Bumped 239 -> 240 for organization roles v1 (20260827050000) — the
-    // multi-capability foundation (two new tables + registry seed +
-    // company/agency backfill) that lets an education institution register
-    // honestly. DRAFT, needs-human-gate, owner-gated apply. Still nothing to
-    // do with the market-map read layer, which remains pure TS.
-    // Bumped 240 -> 241 for the transversal capability catalogue
-    // (20260827060000) — INSERT-only seed, still nothing to do with the
-    // market-map read layer.
+    // Bumped 239 -> 240 for the transversal capability catalogue
+    // (20260827060000) — INSERT-only seed, nothing to do with the market-map
+    // read layer.
+    // Bumped 240 -> 241 for organization roles v1 (20260827050000) — the
+    // multi-capability foundation. DRAFT, needs-human-gate, owner-gated apply.
+    // Still nothing to do with the market-map read layer, which stays pure TS.
     expect(count).toBeLessThanOrEqual(241);
   });
 });

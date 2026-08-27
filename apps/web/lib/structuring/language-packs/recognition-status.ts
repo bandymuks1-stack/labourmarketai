@@ -33,6 +33,14 @@ const CONSTRUCTION_DEPTH = deferred(
   "specialist construction sub-trade — full LT/EN/RU needles kept; other-language needles tracked in runtime/audits/offline-multilingual-skill-recognition-audit-2026-07-04.md",
 );
 
+/** Transversal professional capabilities (presenting, teamwork, …) added for
+ *  the education pilot. LT/EN/RU needles ship with the family; the nine
+ *  offline pack languages are not covered yet, so these stay DEFERRED rather
+ *  than claiming a multilingual reach they do not have. */
+const TRANSVERSAL_LT_EN_RU = deferred(
+  "transversal professional capability — LT/EN/RU needles ship with the education-pilot family; the 9 offline pack languages arrive with the next language wave",
+);
+
 export const SKILL_RECOGNITION_STATUS: Readonly<Record<string, SkillRecognitionStatus>> = {
   // ── Core cross-language set (must exist in EVERY pack — see core-slugs) ──
   "data-entry": CORE,
@@ -242,4 +250,19 @@ export const SKILL_RECOGNITION_STATUS: Readonly<Record<string, SkillRecognitionS
   "waterproofing-tiles": deferred(
     "wet-room niche — real phrases resolve to the parent waterproofing needles (hidroizoli/гидроизоляц); a dedicated needle would double-suggest",
   ),
+
+  // ── Transversal professional capabilities (2026-08-27) ───────────────────
+  // The education-pilot family. DEFERRED, not core, and deliberately so: the
+  // needles are LT/EN/RU only, and `core` is guard-enforced to mean "has
+  // needles in EVERY registered offline pack". Claiming core here would be a
+  // false multilingual claim — the honest YELLOW this file exists to keep
+  // visible. The nine pack languages arrive with the next language wave.
+  presenting: TRANSVERSAL_LT_EN_RU,
+  "stakeholder-engagement": TRANSVERSAL_LT_EN_RU,
+  "partnership-development": TRANSVERSAL_LT_EN_RU,
+  negotiation: TRANSVERSAL_LT_EN_RU,
+  "project-coordination": TRANSVERSAL_LT_EN_RU,
+  "report-writing": TRANSVERSAL_LT_EN_RU,
+  teamwork: TRANSVERSAL_LT_EN_RU,
+  research: TRANSVERSAL_LT_EN_RU,
 };
