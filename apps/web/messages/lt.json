@@ -7204,7 +7204,6 @@
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas",
     "practiceHistoryTitle": "Praktika ir savanorystė",
-
     "workHistoryTitle": "Darbo istorija",
     "present": "Dabar",
     "languagesTitle": "Kalbos",
@@ -7219,28 +7218,18 @@
     "projectsHint": "Iš darbo įrašų",
     "confirmedByManager": "Patvirtinta vadovo",
     "euFormat": {
-
       "notOfficial": "Šis CV parengtas pagal Europass struktūrą, kad Europos darbdaviai jį perskaitytų įprastu formatu. Tai nėra Europos Sąjungos išduotas Europass dokumentas.",
-
       "personal": "Asmeninė informacija",
-
       "workExperience": "Darbo patirtis",
-
       "educationAndTraining": "Išsilavinimas ir mokymai",
-
       "personalSkills": "Asmeniniai gebėjimai",
-
       "jobRelatedSkills": "Su darbu susiję gebėjimai",
-
       "additionalInformation": "Papildoma informacija"
-
     },
-
     "templates": {
       "label": "Šablonas",
       "standard": "Standartinis",
       "compact": "Kompaktiškas",
-
       "eu": "ES formatas"
     },
     "privateDetails": {
@@ -11331,7 +11320,6 @@
         "language": "Kalba",
         "level": "Lygis",
         "jobTitle": "Pareigos",
-
         "engagementKind": "Kokia tai buvo veikla",
         "jobTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlininkas, programuotojas",
         "startMonth": "Pradžios mėnuo",
@@ -13788,5 +13776,40 @@
     "offFactsUnavailable": "Šiuo metu nepavyko nuskaityti rinkos skaičių, todėl nėra ko paaiškinti.",
     "offMarketTooSmall": "Mažiau nei {min} atvirų skelbimų – per mažai, kad paaiškinimas duotų daugiau nei aukščiau esantys skaičiai.",
     "offAiUnavailable": "Paaiškinimo paslauga šiuo metu neveikia. Aukščiau esantiems skaičiams tai neturi įtakos."
+  },
+  "organizationCapabilities": {
+    "title": "Ką veikia jūsų organizacija?",
+    "help": "Pažymėkite viską, kas tinka — organizacija gali daryti kelis dalykus vienu metu.",
+    "save": "Išsaugoti",
+    "saved": "Išsaugota",
+    "notPermitted": "Šios organizacijos keisti negalite.",
+    "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "allDeclared": "Viskas, ką galima nurodyti, jau nurodyta.",
+    "choices": {
+      "training": {
+        "label": "Mokome ir rengiame žmones",
+        "hint": "Mokykla, universitetas, mokymo centras; priimame studentus praktikai."
+      },
+      "employer": {
+        "label": "Įdarbiname žmones",
+        "hint": "Ieškome darbuotojų sau."
+      },
+      "workforce": {
+        "label": "Teikiame darbuotojus kitoms organizacijoms",
+        "hint": "Darbo jėgos nuoma, rangos brigados."
+      },
+      "recruitment": {
+        "label": "Padedame surasti ir atrinkti žmones",
+        "hint": "Atranka, įdarbinimo partnerystė."
+      },
+      "project": {
+        "label": "Vykdome projektus",
+        "hint": "Dalyvaujame projektuose kaip vykdytojas ar partneris."
+      },
+      "client": {
+        "label": "Užsakome darbus ar paslaugas",
+        "hint": "Esame užsakovas."
+      }
+    }
   }
 }

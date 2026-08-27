@@ -5657,5 +5657,40 @@
       "awaitingOwnerApproval": "ootab omaniku kinnitust"
     },
     "footer": "Aus eelvaade · Ei mingit võltsitud tehisintellekti · Ei mingit võltsitud kinnitamist · Ei mingeid väljamõeldud töötajanägusid · Iga kirje algab sõnadega „Sample · …“, seega ei loe see kunagi päris andmetena."
+  },
+  "organizationCapabilities": {
+    "title": "Millega teie organisatsioon tegeleb?",
+    "help": "Märkige kõik, mis sobib — organisatsioon võib teha mitut asja korraga.",
+    "save": "Salvesta",
+    "saved": "Salvestatud",
+    "notPermitted": "Te ei saa seda organisatsiooni muuta.",
+    "error": "Salvestamine ebaõnnestus. Proovige uuesti.",
+    "allDeclared": "Kõik võimalik on juba märgitud.",
+    "choices": {
+      "training": {
+        "label": "Me õpetame ja koolitame inimesi",
+        "hint": "Kool, ülikool või koolituskeskus; võtame praktikale."
+      },
+      "employer": {
+        "label": "Me võtame inimesi tööle",
+        "hint": "Värbame endale."
+      },
+      "workforce": {
+        "label": "Me pakume töötajaid teistele organisatsioonidele",
+        "hint": "Tööjõu vahendamine, lepingubrigaadid."
+      },
+      "recruitment": {
+        "label": "Me aitame inimesi leida ja valida",
+        "hint": "Värbamine ja valik."
+      },
+      "project": {
+        "label": "Me viime ellu projekte",
+        "hint": "Osaleme teostaja või partnerina."
+      },
+      "client": {
+        "label": "Me tellime töid või teenuseid",
+        "hint": "Oleme tellija."
+      }
+    }
   }
 }

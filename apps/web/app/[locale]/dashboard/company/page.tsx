@@ -16,6 +16,9 @@ import { CompanyActionNextActions } from "@/components/app/company-action-next-a
 import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
+import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
@@ -140,6 +143,26 @@ export default async function CompanyDashboardPage({
     companyProfile.kind === "ok" ? companyProfile.row : null;
   const isStaffingAgency = companyRow?.companyType === "staffing_agency";
   const isCompanyOwner = !!companyRow;
+
+  // WHAT DOES THIS ORGANIZATION DO? — the capability question, answered
+  // against the `organizations` row this company mirrors (0013 mirror
+  // trigger), not against `companies`. `organization_roles` is keyed on the
+  // organization, and `legacyCompanyId` is the canonical bridge between the
+  // two; the active-workspace id is the fallback for an org with no legacy
+  // company behind it.
+  //
+  // NOTE this is a SEPARATE axis from `companyType` rendered above. That says
+  // which INDUSTRY the organization is in and holds one value; this says what
+  // it DOES and holds many. An education institution that also employs people
+  // needs both, which is exactly what a single column could never express.
+  const orgContext = await getActiveOrganizationContext();
+  const capabilityOrgId =
+    orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)
+      ?.id ??
+    orgContext.activeOrganizationId;
+  const declaredCapabilities = capabilityOrgId
+    ? await readOrganizationCapabilities(capabilityOrgId)
+    : [];
 
   // M-P0-3: one workspace-scoped read serves the whole page — the roster,
   // bridge and projects below all act on the SAME company the header names.
@@ -926,6 +949,16 @@ export default async function CompanyDashboardPage({
           fix) — consolidated next to the ONE action center below
           (canonical-user-journey v1). */}
       {companyRow ? <CompanyNextActions company={companyRow} /> : null}
+
+      {/* One plain question, several honest answers. Placed with the identity
+          block because that is what it is — what this organization DOES — and
+          not buried in an administration console. */}
+      {capabilityOrgId ? (
+        <OrganizationCapabilitiesCard
+          organizationId={capabilityOrgId}
+          declared={declaredCapabilities}
+        />
+      ) : null}
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
           /company-need submissions (matched by their authenticated email)
