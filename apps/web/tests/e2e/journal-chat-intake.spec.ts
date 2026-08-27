@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
+import { chooseWorkContextIfAsked } from "./worklog-context";
+
 /**
  * THE WORK JOURNAL MUST BE FILLABLE — the journey a real external tester could
  * not complete (mobile, Lithuanian, 2026-08-08).
@@ -125,13 +127,47 @@ test.describe("Work Journal — chat-first intake actually accepts an entry", ()
       .locator("textarea")
       .first()
       .fill(`Betonavau pamatus. ${marker}`);
+    // The form pins the entry to a context and, when the worker holds more
+    // than one that legitimately fits, refuses to guess. Answer it.
+    await chooseWorkContextIfAsked(page);
     await saveThroughConfirm(page);
 
     // Reopen the journal from scratch — a full server round trip, not the
     // optimistic client state that produced the save.
     await page.goto("/lt/dashboard/journal");
-    await expect(page.getByText(marker, { exact: false })).toBeVisible({
-      timeout: 30_000,
-    });
+
+    /**
+     * TWO ASSERTIONS, BECAUSE THE DIARY IS A DATED DIARY.
+     *
+     * The entry above is deliberately BACK-DATED to 2026-08-07 ("yesterday's
+     * shift logged tonight" is the ordinary case). The journal groups entries
+     * by the day WORKED and renders `<details open={idx === 0}>` — the newest
+     * day open, older days collapsed. So a back-dated entry is present in the
+     * DOM and correctly `hidden` whenever the fixtures contain a NEWER day,
+     * which they now do (2026-08-14 and 2026-08-20).
+     *
+     * A bare `toBeVisible` here therefore fails for a reason that has nothing
+     * to do with data loss — and it did, once the fixtures grew past the
+     * hard-coded date. That is a fixture-drift trap, not a product defect: the
+     * row was in the database, unsuperseded and undeleted, the whole time.
+     *
+     * What the test actually means is asserted properly instead:
+     *   1. the text SURVIVED the round trip at all (no silent data loss), and
+     *   2. it is genuinely REACHABLE — visible on its own day, through the
+     *      product's own day navigation rather than by hoping it landed in the
+     *      one group that happens to be expanded.
+     * Both are now independent of which days the fixtures happen to hold.
+     */
+    const saved = page.getByText(marker, { exact: false });
+    await expect(
+      saved,
+      "the entry did not survive the reload at all — real data loss",
+    ).toBeAttached({ timeout: 30_000 });
+
+    await page.goto("/lt/dashboard/journal?date=2026-08-07#journal-entries");
+    await expect(
+      page.getByText(marker, { exact: false }),
+      "the entry exists but is not reachable on the day it was worked",
+    ).toBeVisible({ timeout: 30_000 });
   });
 });

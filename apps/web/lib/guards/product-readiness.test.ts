@@ -2215,7 +2215,24 @@ describe("no migration files added by this sprint", () => {
     // company/agency backfill; organizations.organization_type is untouched.
     // Owner-approved 2026-08-27. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 242.
-    const SPRINT_BASELINE = 242;
+    // Bumped 242 -> 243 for the relationship-invitations migration
+    // (20260827200000_relationship_invitations_v1) — the institution↔learner
+    // link. Additive: two nullable/defaulted columns on relationship_types, one
+    // nullable column on invitations, and CREATE OR REPLACE of five existing
+    // SECURITY DEFINER functions. No table/column dropped, no RLS policy
+    // changed, no grant widened. RED, owner-gated, NOT applied to production
+    // (PR #1301, draft + needs-human-gate).
+    // Bumped 243 -> 244 for learner visibility least privilege
+    // (20260827210000_learner_visibility_least_privilege_v1) — the owner's
+    // 2026-08-27 ruling that an education relationship must not inherit the
+    // employer-grade worker scope. One fail-closed registry column plus a
+    // CREATE OR REPLACE of can_view_worker that adds ONE conjunct: it narrows
+    // and never widens, and every slug except `student` is seeded true so
+    // nothing that worked before stops working. Applied to production and
+    // regression-proven by a controlled comparison on one otherwise identical
+    // engagement row (employee true / student false). RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 244.
+    const SPRINT_BASELINE = 244;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

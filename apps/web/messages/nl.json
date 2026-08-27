@@ -10128,9 +10128,15 @@
         "limit_reached": "Uitnodigingslimiet bereikt",
         "rate_limited": "Te veel uitnodigingen vandaag",
         "not_authorized": "Niet toegestaan",
-        "error": "Mislukt"
+        "error": "Mislukt",
+        "invalid_relationship": "Geen toegestane relatie",
+        "organization_capability_required": "Organisatie heeft dit nog niet aangegeven"
       },
-      "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)"
+      "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)",
+      "capacityLabel": "Wat wordt de uitgenodigde persoon in uw organisatie?",
+      "capacityHint": "Een stage of studie is geen dienstverband — het wordt vastgelegd precies zoals u hier kiest.",
+      "capacityNeedsCapability": "Uw organisatie heeft nog niet aangegeven dat zij opleidt. Geef dat aan op de organisatiepagina, daarna kunt u een lerende uitnodigen.",
+      "capacityNeedsCapabilityCta": "Organisatiepagina openen"
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
@@ -10170,7 +10176,9 @@
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw."
-      }
+      },
+      "capacity": "Relatie: {capacity}",
+      "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband."
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {

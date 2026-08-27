@@ -9,6 +9,8 @@ import {
   declineInviteFormAction,
 } from "@/lib/invitations/invite-page-actions";
 import { formatUtcDate } from "@/lib/time/display";
+// The ONE list that says "this happened and it was a placement, not a job".
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * Invitation landing page (core-network area B) — the destination of every
@@ -40,6 +42,9 @@ type Preview = {
   organization_name?: string | null;
   project_title?: string | null;
   inviter_name?: string | null;
+  /** WHAT the invited person is being asked to become. Absent on every
+   *  invitation created before 20260827200000 — the historical default. */
+  relationship_slug?: string | null;
 };
 
 export default async function InvitePage({
@@ -53,6 +58,8 @@ export default async function InvitePage({
   const { notice } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("network.invitePage");
+  // The ONE localized relationship vocabulary — the words the CV also prints.
+  const tRelationships = await getTranslations("relationshipTypes");
 
   const supabase = await createClient();
   const {
@@ -106,6 +113,7 @@ export default async function InvitePage({
 
   const status = preview.status ?? "pending";
   const closed = status !== "pending";
+  const relationshipSlug = preview.relationship_slug ?? null;
 
   return shell(
     <>
@@ -127,6 +135,29 @@ export default async function InvitePage({
         )}
         {preview.proposed_role && (
           <p data-testid="invite-role">{t("role", { role: preview.proposed_role })}</p>
+        )}
+        {/* WHAT YOU ARE AGREEING TO. Acceptance creates a real, attributable
+            relationship, and until 20260827200000 this screen could not say
+            which one — so a learner would have accepted without being told
+            whether they were about to become a STUDENT or an EMPLOYEE of the
+            organization. The name is resolved through the localized
+            `relationshipTypes` catalogue; the slug itself never renders.
+            Absent on every invitation created before that migration, which is
+            exactly when the historical default applies. */}
+        {relationshipSlug && (
+          <p data-testid="invite-relationship">
+            {t("capacity", { capacity: tRelationships(relationshipSlug) })}
+            {(PRACTICE_RELATIONSHIPS as readonly string[]).includes(
+              relationshipSlug,
+            ) && (
+              <span
+                className="ml-1 text-text-muted"
+                data-testid="invite-relationship-not-employment"
+              >
+                {t("capacityNotEmployment")}
+              </span>
+            )}
+          </p>
         )}
         {preview.personal_message && (
           <p className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs">

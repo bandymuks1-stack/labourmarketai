@@ -15,6 +15,8 @@ import type {
   SentInvitationRow,
 } from "@/lib/invitations/network";
 import { formatUtcDate } from "@/lib/time/display";
+// The ONE list that says "this happened and it was a placement, not a job".
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * Sent-invitation manager + incoming-invitation cards (core-network area B).
@@ -197,6 +199,9 @@ export function IncomingInvitationList({
 }) {
   const t = useTranslations("network.incoming");
   const tTypes = useTranslations("network.invite.types");
+  const tPage = useTranslations("network.invitePage");
+  // The ONE localized relationship vocabulary — the words the CV also prints.
+  const tRelationships = useTranslations("relationshipTypes");
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -246,6 +251,30 @@ export function IncomingInvitationList({
                 </span>
               )}
             </div>
+            {/* WHAT YOU ARE ABOUT TO BECOME. Accepting creates a real,
+                attributable relationship, and the type alone ("Join my
+                company") does not say whether that is employment or a
+                placement. Resolved through the shared `relationshipTypes`
+                catalogue so no slug reaches the reader. Absent on invitations
+                created before 20260827200000, which is exactly when the
+                historical default applies. */}
+            {row.relationshipSlug && (
+              <p
+                className="text-xs text-text-secondary"
+                data-testid={`incoming-invitation-relationship-${row.id}`}
+              >
+                {tPage("capacity", {
+                  capacity: tRelationships(row.relationshipSlug),
+                })}
+                {(PRACTICE_RELATIONSHIPS as readonly string[]).includes(
+                  row.relationshipSlug,
+                ) && (
+                  <span className="ml-1 text-text-muted">
+                    {tPage("capacityNotEmployment")}
+                  </span>
+                )}
+              </p>
+            )}
             {row.personalMessage && (
               <p className="text-xs text-text-secondary">
                 &ldquo;{row.personalMessage}&rdquo;

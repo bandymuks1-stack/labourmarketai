@@ -82,26 +82,81 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   const relationshipLabel = (slug: string): string =>
     t.has(`relationship.${slug}`) ? t(`relationship.${slug}`) : t("relationship.other");
 
-  const engagements: (WorkLogEngagement & { organizationId: string | null })[] = (
-    ecRows ?? []
-  ).map((e) => {
+  /**
+   * The CANONICAL relationship vocabulary — the one list the CV, the profile
+   * and the invitation screens already print, and the only one that carries
+   * every registry slug including `student` and `volunteer`.
+   *
+   * It is asked FIRST everywhere a relationship is named in this flow, with
+   * `conversation.worklog.relationship.*` kept only as this flow's own older
+   * fallback wording. That order matters and used to be the other way around
+   * for the base label:
+   *
+   *   a learner whose placement has no organization display name and no title
+   *   fell through to `relationship.student`, which does not exist in that
+   *   catalogue, and therefore printed "Kita" / "Other" — for exactly the
+   *   education case the selector exists to name. The row was reachable and
+   *   loggable; it just refused to say what it was.
+   *
+   * Resolving through the canonical catalogue fixes `student` and `volunteer`
+   * in all five active locales at once and adds no sixth copy of the
+   * relationship names, which is the whole reason this catalogue exists.
+   * The fallback chain is unchanged and still ends at `relationship.other`, so
+   * a genuinely unknown slug can still never reach a reader raw.
+   */
+  const tRelationships = await getTranslations("relationshipTypes");
+  const canonicalRelationship = (slug: string): string =>
+    tRelationships.has(slug) ? tRelationships(slug) : relationshipLabel(slug);
+
+  const withBase = (ecRows ?? []).map((e) => {
     const org = e.organizations as {
       display_name: string | null;
       legal_name: string | null;
       organization_type: string | null;
     } | null;
     const orgName = orgDisplayName(org?.display_name, org?.legal_name);
-    const label = orgName ?? e.title ?? relationshipLabel(e.relationship_slug);
     return {
-      id: e.id,
-      label,
-      isPrimary: Boolean(e.is_primary),
-      organizationId:
-        ((e as { organization_id?: string | null }).organization_id as
-          | string
-          | null) ?? null,
+      row: e,
+      base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug),
     };
   });
+
+  /**
+   * ONE PERSON, TWO RELATIONSHIPS WITH THE SAME ORGANIZATION.
+   *
+   * The label used to be the organization name alone, which was unambiguous
+   * only while a person could hold exactly one engagement per organization.
+   * They can now hold several — a learner on placement at the company that
+   * also employs them is the ordinary education case — and the selector then
+   * offered "Dev Construction" TWICE, with no way to tell which was the job
+   * and which was the placement. Choosing wrong files the work against the
+   * wrong relationship, and the journal is evidence: it must not be a guess.
+   *
+   * So a base label that occurs more than once is qualified by its
+   * relationship, and one that is already unique is left exactly as it was —
+   * no existing label changes wording.
+   */
+  const baseCounts = new Map<string, number>();
+  for (const { base } of withBase) {
+    baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+  }
+
+  const engagements: (WorkLogEngagement & { organizationId: string | null })[] =
+    withBase.map(({ row: e, base }) => {
+      const ambiguous = (baseCounts.get(base) ?? 0) > 1;
+      const label = ambiguous
+        ? `${base} — ${canonicalRelationship(e.relationship_slug)}`
+        : base;
+      return {
+        id: e.id,
+        label,
+        isPrimary: Boolean(e.is_primary),
+        organizationId:
+          ((e as { organization_id?: string | null }).organization_id as
+            | string
+            | null) ?? null,
+      };
+    });
 
   if (engagements.length === 0) return { kind: "no-context" };
 
