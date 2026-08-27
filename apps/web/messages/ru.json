@@ -7203,6 +7203,8 @@
     "generatedAt": "Сформировано",
     "notWorker": "Экспорт резюме доступен только для профилей работников.",
     "summaryTitle": "Профессиональное резюме",
+    "practiceHistoryTitle": "Практика и волонтёрство",
+
     "workHistoryTitle": "История работы",
     "present": "Сейчас",
     "languagesTitle": "Языки",
@@ -11329,6 +11331,8 @@
         "language": "Язык",
         "level": "Уровень",
         "jobTitle": "Должность",
+
+        "engagementKind": "Тип занятости",
         "jobTitlePlaceholder": "Напр., сварщик, медсестра, кладовщик, программист",
         "startMonth": "Месяц начала",
         "startYear": "Год начала",

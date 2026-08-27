@@ -2201,7 +2201,14 @@ describe("no migration files added by this sprint", () => {
     // presentations and teamwork can become evidence at all; the catalogue was
     // 153 rows of which exactly ONE was professional. RECOUNTED from the tree,
     // never summed: `ls supabase/migrations/*.sql | wc -l` = 240.
-    const SPRINT_BASELINE = 240;
+    // Bumped 240 -> 241 for practice work history v1
+    // (20260826182421_practice_work_history_v1) — widens the EXISTING
+    // save_self_declared_work_history_v1 allowlist by two slugs that already
+    // exist in relationship_types ('student','volunteer'). No new table, no new
+    // function, no grant, no RLS change, no signature change. Owner-approved
+    // 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 241.
+    const SPRINT_BASELINE = 241;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

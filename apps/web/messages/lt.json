@@ -7203,6 +7203,8 @@
     "generatedAt": "Sugeneruota",
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas",
+    "practiceHistoryTitle": "Praktika ir savanorystė",
+
     "workHistoryTitle": "Darbo istorija",
     "present": "Dabar",
     "languagesTitle": "Kalbos",
@@ -11329,6 +11331,8 @@
         "language": "Kalba",
         "level": "Lygis",
         "jobTitle": "Pareigos",
+
+        "engagementKind": "Kokia tai buvo veikla",
         "jobTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlininkas, programuotojas",
         "startMonth": "Pradžios mėnuo",
         "startYear": "Pradžios metai",

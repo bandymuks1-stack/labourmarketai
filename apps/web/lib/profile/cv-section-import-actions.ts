@@ -22,6 +22,10 @@ import {
 import { getOwnAvailabilityPrefs } from "@/lib/worker/availability-prefs";
 import type { CvAvailabilityHintKey, CvDatePart } from "@/lib/cv/structured-parse";
 import { periodEndIso, periodStartIso } from "@/lib/cv/period-dates";
+import {
+  historyKindOf,
+  SELF_DECLARED_RELATIONSHIPS,
+} from "@/lib/player-card/work-history-model";
 
 /**
  * Confirm actions for the structured CV import review panel (Full CV System
@@ -94,12 +98,21 @@ export async function confirmCvWorkHistoryAction(input: {
   start?: CvDatePart | null;
   end?: CvDatePart | null;
   isCurrent: boolean;
+  /** What the engagement WAS. Omitted → `employee`, which is what every
+   *  caller meant before placements existed. A caller that knows better (the
+   *  person said "practice" / "volunteering") passes it, so a placement is
+   *  never recorded as employment. Validated here AND by the RPC. */
+  relationship?: string | null;
 }): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, code: "unauthenticated" };
 
   const title = (input.title ?? "").trim();
   if (title.length < 3 || title.length > 200) return { ok: false, code: "invalid" };
+  const relationship = (input.relationship ?? "employee").trim();
+  if (!(SELF_DECLARED_RELATIONSHIPS as readonly string[]).includes(relationship)) {
+    return { ok: false, code: "invalid" };
+  }
   const startPart =
     input.start ??
     (input.startYear ? { year: input.startYear, month: null, day: null } : null);
@@ -115,7 +128,7 @@ export async function confirmCvWorkHistoryAction(input: {
     "save_self_declared_work_history_v1",
     {
       p_title: title,
-      p_relationship_slug: "employee",
+      p_relationship_slug: relationship,
       p_started_at: startedAt,
       p_ended_at: endedAt,
     },
@@ -124,7 +137,17 @@ export async function confirmCvWorkHistoryAction(input: {
     if (["42883", "PGRST202"].includes(error.code ?? "")) {
       return { ok: false, code: "needs_migration" };
     }
-    if (error.code === "22023") return { ok: false, code: "invalid" };
+    if (error.code === "22023") {
+      // The relationship passed our own allowlist, so a rejection from the
+      // RPC on a PLACEMENT means only one thing: the widening migration
+      // (20260826182421) is not applied on this database. Say "not available
+      // yet" rather than "invalid" — the person's input was fine.
+      return {
+        ok: false,
+        code:
+          historyKindOf(relationship) === "practice" ? "needs_migration" : "invalid",
+      };
+    }
     console.error("[cv-import] work-history save failed:", error.code, error.message);
     return { ok: false, code: "error" };
   }

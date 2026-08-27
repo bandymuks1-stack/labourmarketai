@@ -35,6 +35,7 @@ describe("work history — facts only", () => {
       title: "Mūrininkas",
       organizationName: "Dev Construction",
       relationshipSlug: "employee",
+      kind: "employment",
       startedAt: "2026-01-10",
       endedAt: null,
       current: true,

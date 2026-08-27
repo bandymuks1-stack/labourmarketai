@@ -48,6 +48,7 @@ export const WORKER_EXECUTORS: {
   "worker.add-work-history": async (input) => {
     const r = await confirmCvWorkHistoryAction({
       title: input.title,
+      relationship: input.relationship,
       startYear: input.startYear,
       endYear: input.endYear ?? null,
       start: { year: input.startYear, month: input.startMonth ?? null, day: null },

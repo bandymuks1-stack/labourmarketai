@@ -7203,6 +7203,8 @@
     "generatedAt": "Generated",
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary",
+    "practiceHistoryTitle": "Practice and volunteering",
+
     "workHistoryTitle": "Work history",
     "present": "Present",
     "languagesTitle": "Languages",
@@ -11329,6 +11331,8 @@
         "language": "Language",
         "level": "Level",
         "jobTitle": "Job title",
+
+        "engagementKind": "Kind of engagement",
         "jobTitlePlaceholder": "e.g. welder, nurse, warehouse worker, developer",
         "startMonth": "Start month",
         "startYear": "Start year",
