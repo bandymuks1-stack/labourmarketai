@@ -204,10 +204,27 @@ describe("the migration is additive and reversible", () => {
     expect(ROLLBACK).toContain("drop function if exists public.add_organization_role_v1");
   });
 
-  it("it is marked RED and never self-applies", () => {
-    expect(MIGRATION).toContain("needs-human-gate");
-    expect(MIGRATION).toContain("DO NOT APPLY automatically");
-    // Self-approving the gate is the one thing that is never allowed.
-    expect(MIGRATION).not.toContain("@human-gate-approved");
+  it("the human gate is never SELF-approved", () => {
+    // The annotation is what lets a RED migration pass CI, so the thing that
+    // must never happen is it appearing ON ITS OWN. It acknowledges an
+    // approval that really occurred — so if it is present, the file must also
+    // record WHOSE approval and WHEN.
+    //
+    // "the annotation is absent" was the wrong invariant to pin: it forbids
+    // the legitimate case (a real owner approval) as well as the illegitimate
+    // one, so it would have to be deleted the moment an owner said yes —
+    // which is precisely when a guard should still be watching.
+    if (MIGRATION.includes("@human-gate-approved")) {
+      expect(
+        MIGRATION,
+        "@human-gate-approved present with no recorded approval",
+      ).toContain("HUMAN GATE SATISFIED — owner approval");
+      expect(MIGRATION).toMatch(/owner approval 20\d\d-\d\d-\d\d/);
+      // The approval that was given must still forbid widening.
+      expect(MIGRATION).toContain("Do NOT broaden");
+    }
+    // Either way the apply path stays owner-channel only.
+    expect(MIGRATION).toContain("Never `db push`");
+    expect(MIGRATION).toContain("Apply ONLY via Supabase MCP apply_migration");
   });
 });

@@ -1,7 +1,19 @@
+-- @human-gate-approved
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`.
+-- HUMAN GATE SATISFIED — owner approval 2026-08-27, in-session and explicit:
+--   "OWNER APPROVAL — #1290 + #1296 … I approve proceeding with BOTH prepared
+--    owner-gated changes … This approval applies only to the exact
+--    reviewed/tested scopes you described. Do NOT broaden either migration
+--    while using this authorization."
+--
+-- The annotation above is an ACKNOWLEDGEMENT of that approval, not a
+-- self-grant: it lets CI record the three RED findings below as reviewed and
+-- accepted rather than unexamined. The findings themselves are unchanged and
+-- are enumerated in the SAFETY CLASS block. Nothing in this file was widened
+-- after approval — the scope is byte-identical to the reviewed version except
+-- for this header and the migration-count baselines.
+--
+-- Apply ONLY via Supabase MCP apply_migration. Never `db push`.
 --
 -- 20260827050000 — organization roles v1 (multi-capability foundation).
 --
