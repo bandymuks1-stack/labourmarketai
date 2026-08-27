@@ -2195,15 +2195,20 @@ describe("no migration files added by this sprint", () => {
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 239.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    // Bumped 239 -> 240 for the practice work-history widening
-    // (20260826182421_practice_work_history_v1) — CREATE OR REPLACE of ONE
-    // existing SECURITY DEFINER function to add 'student' and 'volunteer' to
-    // its closed relationship set, plus the explicit anon revoke the secdef
-    // closure cannot reach. No table, policy, trigger or DML change; paired
-    // rollback. RED by route (secdef replace + grants); ships UNAPPLIED,
-    // owner-gated. RECOUNTED from the tree, never summed:
-    // `ls supabase/migrations/*.sql | wc -l` = 240.
-    const SPRINT_BASELINE = 240;
+    // Bumped 239 -> 240 for the transversal capability catalogue
+    // (20260827060000_transversal_capability_skills_v1) — INSERT-only, GREEN,
+    // idempotent. Eight professional capability slugs so a student's projects,
+    // presentations and teamwork can become evidence at all; the catalogue was
+    // 153 rows of which exactly ONE was professional. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 240.
+    // Bumped 240 -> 241 for practice work history v1
+    // (20260826182421_practice_work_history_v1) — widens the EXISTING
+    // save_self_declared_work_history_v1 allowlist by two slugs that already
+    // exist in relationship_types ('student','volunteer'). No new table, no new
+    // function, no grant, no RLS change, no signature change. Owner-approved
+    // 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 241.
+    const SPRINT_BASELINE = 241;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

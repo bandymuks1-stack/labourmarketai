@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
 import {
+  INTEREST_UNDELIVERED,
   emitDemandInterestNotification,
   emitDemandInterestResponseNotification,
 } from "@/lib/notifications/event-emitters";
@@ -166,7 +167,19 @@ export async function expressInterest(input: {
   // protecting is preserved by the emitter itself: it never throws, so a
   // failed emission still cannot fail a worker's interest.
   const signalId = (signalRow as { id?: string } | null)?.id ?? null;
-  if (signalId) await emitDemandInterestNotification(signalId);
+  if (signalId) {
+    await emitDemandInterestNotification(signalId);
+  } else {
+    // THE SILENT SKIP. The upsert reported no error, so the interest IS
+    // stored — but `.select("id")` came back empty, so there is no signal id
+    // to key the notification on and the owner is never told. That branch was
+    // unmarked, which made it indistinguishable from a delivered notification
+    // from anywhere outside the database, and it is a leading candidate for
+    // why the live emitter has produced nothing in production. It stays
+    // non-fatal (the worker's action succeeded and must not fail on a bell),
+    // but it no longer stays quiet.
+    console.warn(INTEREST_UNDELIVERED, { reason: "no_signal_id" });
+  }
 
   return { kind: "ok", status: "interested" };
 }
