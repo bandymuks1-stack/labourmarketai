@@ -116,6 +116,7 @@ export function OfferDemandRecognizer() {
             type="button"
             onClick={() => chooseIntent(i)}
             data-active={i === intent ? "yes" : "no"}
+            data-testid={`recognizer-intent-${i}`}
             className={
               "min-h-[2.75rem] rounded-md border px-3 py-2 text-sm font-medium transition-colors " +
               (i === intent
@@ -148,6 +149,7 @@ export function OfferDemandRecognizer() {
           type="button"
           onClick={() => setCard(recognizeIntent(intent, { rawText: text }))}
           disabled={text.trim().length === 0}
+          data-testid="recognizer-recognize"
           className="self-start rounded-md border border-brand-blue bg-brand-blue/10 px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("recognizeCta")}
