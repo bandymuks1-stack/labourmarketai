@@ -432,6 +432,17 @@ export async function runAiAgentCore<T = unknown>(
       modelId: result.status === "ok" ? result.model : (request.model ?? null),
       outputExcerpt,
       fallbackReason,
+      // ADAPTER-level failures only. `result.message` on an `error` is built by
+      // the adapter and is structural by construction ("gemini http 404",
+      // "anthropic http 401", a timeout) — it never carries payload. A
+      // schema-rejection detail is NOT routed here: that one echoes model
+      // output, and an audit record never carries content.
+      providerFailure:
+        result.status === "error"
+          ? `${result.code}: ${result.message ?? "no detail"}`
+          : result.status === "disabled"
+            ? `provider disabled: ${result.reason}`
+            : null,
     });
 
   if (result.status === "disabled") {
