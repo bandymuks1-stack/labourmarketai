@@ -82,17 +82,53 @@ Through Supabase MCP `apply_migration`. **Never `db push`** — ledger versions
 are assigned at apply time and do not match repository filenames, so a push
 would re-run migrations that are already applied.
 
-Applied ledger version: **`20260828142124`**, name
+Applied ledger version: **`20260828155923`**, name
 `lmc_spend_compensation_v1`.
+
+> The first version of this record carried `20260828142124`, which was a
+> PREDICTION written before the apply. Supabase assigns the ledger version at
+> apply time, so it could not have been known in advance and should not have
+> been written as though it were. Corrected from the ledger itself.
 
 ## 5. POST-APPLY VERIFICATION
 
 Every item the owner required, in order. The behavioural checks ran inside a
 transaction that was **rolled back**, so no row and no flag persisted.
 
+Raw output of the behavioural block, which ended in a deliberate
+`raise exception` so that everything it created was rolled back:
+
+```
+(a) flag-off gate ....... REFUSED: lmc_compensation_disabled
+(b) foreign actor ....... REFUSED: lmc_actor_not_authorized: the initiating
+                                   actor must own the affected account or be
+                                   an admin
+(c) non-spend ........... REFUSED: lmc_not_a_spend: promotional_activity
+                                   cannot be compensated — only a spend can
+(d) over-compensation ... REFUSED: lmc_over_compensation: 401 cents requested
+                                   but only 400 remain of a 400 cent spend
+(e) compensation ........ OK amount=400 expiry_mirrored=true
+                            already_processed=false
+(f) idempotency ......... same_tx=true already_processed=true
+                            compensation_rows=1
+(g) second full ......... REFUSED: lmc_already_compensated: spend … is fully
+                                   compensated (400 of 400 cents)
+(h) append-only ......... REFUSED: lmc_append_only: UPDATE on
+                                   public.lmc_transactions is forbidden —
+                                   the LMC ledger is immutable
+(i) balance view ........ available=1000 promotional=1000
+```
+
+The balance line is the arithmetic proof: 1000 granted − 400 spent + 400
+compensated = 1000, read back through `lmc_account_balances`.
+
+**Post-rollback state re-read:** `lmc_accounts` 0, `lmc_transactions` 0,
+`lmc_lots` 0, `lmc_lot_consumptions` 0, `audit_logs` compensation rows 0,
+`lmc_compensation_enabled` `false` with `updated_by` NULL. Nothing persisted.
+
 | # | required | result |
 |---|---|---|
-| 1 | production migration ledger | `20260828142124` present |
+| 1 | production migration ledger | `20260828155923` present |
 | 2 | feature flag DISABLED by default | `lmc_compensation_enabled = false`; policy class `admin` |
 | 3 | anon cannot execute | `anon` holds **no** EXECUTE; `service_role` only |
 | 4 | foreign actor cannot execute | `lmc_actor_not_authorized` (42501) |
@@ -101,7 +137,8 @@ transaction that was **rolled back**, so no row and no flag persisted.
 | 7 | idempotency | same key returns the same transaction, `already_processed: true`, balance unmoved |
 | 8 | append-only | `UPDATE` on `lmc_transactions` refused by `lmc_forbid_mutation` |
 | 9 | balance/history surface still works | `lmc_account_balances` / `lmc_lot_balances` unchanged in shape and readable |
-| 10 | no existing ledger semantics changed | all pre-existing kinds still admitted; `lmc_reverse_v1`, `lmc_spend_v1`, `lmc_record_purchase_v1` unchanged |
+| 10 | no existing ledger semantics changed | all 10 pre-existing kinds still admitted; 7 core LMC RPCs present; 5 ledger triggers still attached; both balance views resolve; `authenticated` SELECT yes / INSERT no; `anon` SELECT no; `service_role` INSERT **no** (ledger writes stay RPC-only even for it) |
+| 11 | flag gate is enforced, not merely defaulted | with the flag off the RPC refuses `lmc_compensation_disabled` — check (a) above |
 
 ## 6. WHAT REMAINS BLOCKED
 
