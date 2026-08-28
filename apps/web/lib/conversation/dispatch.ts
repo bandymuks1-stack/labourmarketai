@@ -4,6 +4,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 
 import { createClient } from "@/lib/supabase/server";
+import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { env } from "@/lib/env";
 import { type Role } from "@/lib/auth/actions";
 import { getConversationAction } from "@/lib/conversation/action-registry";
@@ -92,21 +93,30 @@ function tokenSecret(): string {
   return createHash("sha256").update(`conversation-confirmation:v1:${material}`).digest("hex");
 }
 
+/**
+ * The roles this dispatch may act on.
+ *
+ * The `worker` default is for a read that ANSWERED with no rows — a brand-new
+ * account must still be able to act. It is NOT for a read that failed: an
+ * unreadable role table used to be handed to `authorizeDispatch` as the worker
+ * role, so a database hiccup GRANTED worker-tier conversation actions (#1314).
+ * `readActiveProfileRoles` retries once and then throws, and the throw is
+ * deliberately not caught here — an unknown role state grants nothing and is
+ * never passed downstream disguised as an answer.
+ */
 async function heldRolesOf(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
 ): Promise<Set<Role>> {
-  try {
-    const { data } = await supabase
+  const rows = await readActiveProfileRoles(() =>
+    supabase
       .from("profile_roles")
       .select("role")
       .eq("profile_id", userId)
-      .eq("is_active", true);
-    const set = new Set<Role>((data ?? []).map((r) => r.role as Role));
-    return set.size > 0 ? set : new Set<Role>(["worker"]);
-  } catch {
-    return new Set<Role>(["worker"]);
-  }
+      .eq("is_active", true),
+  );
+  const set = new Set<Role>(rows.map((r) => r.role as Role));
+  return set.size > 0 ? set : new Set<Role>(["worker"]);
 }
 
 /** Opaque state fingerprint bound into a confirmation token so a card that was

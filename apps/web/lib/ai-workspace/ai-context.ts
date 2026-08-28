@@ -132,10 +132,12 @@ export const loadAiWorkspaceContext = cache(
       company,
       project,
       journal,
-      roles: [...roles],
-      // The reader fails closed, so an empty set is only trustworthy when the
-      // person really has a profile row to have roles against.
-      permissionsKnown: roles.size > 0,
+      roles: [...roles.roles],
+      // The READER now answers this, not a proxy for it (#1314). It used to be
+      // `roles.size > 0`, which called a person who genuinely holds no roles
+      // "unknown" and could only tell a failed read apart from a real empty by
+      // accident. `known` is false exactly when the read did not answer.
+      permissionsKnown: roles.known,
       identity,
       hasWorkerProfile: Boolean(workerRow.data?.id),
     };

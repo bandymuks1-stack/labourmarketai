@@ -28,6 +28,7 @@ import type {
   SkillDot,
 } from "@/components/app/cv-engagement-cards";
 import { type Role } from "@/lib/auth/actions";
+import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { DOCUMENTS_READINESS_ENABLED } from "@/lib/config/documents";
 import { createClient } from "@/lib/supabase/server";
 import { TrustBlock } from "@/components/app/trust-block";
@@ -194,7 +195,7 @@ export default async function ProfilePage({
   const [
     profileRes,
     savedSkillClaims,
-    roleRowsRes,
+    roleRows,
     workerRes,
     profRowsRes,
     avatar,
@@ -205,11 +206,17 @@ export default async function ProfilePage({
       .eq("id", user.id)
       .single(),
     listProfileSkillClaims(),
-    supabase
-      .from("profile_roles")
-      .select("role")
-      .eq("profile_id", user.id)
-      .eq("is_active", true),
+    // Feeds `deriveNonWorkerIdentityNotice` below, which tells the user which
+    // identity they are missing. A swallowed read error made that notice fire
+    // on a database hiccup (#1314) — the shared reader retries once and then
+    // throws instead of deriving a notice from an answer it never got.
+    readActiveProfileRoles(() =>
+      supabase
+        .from("profile_roles")
+        .select("role")
+        .eq("profile_id", user.id)
+        .eq("is_active", true),
+    ),
     supabase
       .from("workers")
       .select(
@@ -221,7 +228,6 @@ export default async function ProfilePage({
     getOwnAvatar(),
   ]);
   const profile = profileRes.data;
-  const roleRows = roleRowsRes.data;
   const worker = workerRes.data;
   const profRows = profRowsRes.data;
 

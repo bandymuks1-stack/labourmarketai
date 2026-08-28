@@ -15,6 +15,7 @@ import {
 import { RoleIcon } from "@/components/app/role-icon";
 import { IdCard } from "lucide-react";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -55,11 +56,17 @@ export default async function AccountPage({
     .select("email, active_role")
     .eq("id", user.id)
     .single();
-  const { data: rolesRows } = await supabase
-    .from("profile_roles")
-    .select("role, added_at, is_active")
-    .eq("profile_id", user.id)
-    .order("added_at", { ascending: true });
+  // This page RENDERS the list below as "your roles". A swallowed read error
+  // used to render that list empty — telling the user their account holds no
+  // roles because a query hiccupped (#1314). The shared reader retries once and
+  // then throws to the error boundary instead of printing a false answer.
+  const rolesRows = await readActiveProfileRoles(() =>
+    supabase
+      .from("profile_roles")
+      .select("role, added_at, is_active")
+      .eq("profile_id", user.id)
+      .order("added_at", { ascending: true }),
+  );
 
   const isAdmin = deriveIsAdmin({
     activeRole: profile?.active_role ?? null,

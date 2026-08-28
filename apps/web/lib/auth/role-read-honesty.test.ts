@@ -46,6 +46,7 @@ vi.mock("@/lib/auth/actions", () => ({}));
 const { requireRoleOrRedirect } = await import("./require-role");
 const { isSuperadmin, requireSuperadmin } = await import("./superadmin");
 const { RoleSignalUnavailableError } = await import("./profile-roles");
+const { readHeldRoles } = await import("./held-roles");
 
 const USER = { id: "11111111-1111-4111-8111-111111111111" };
 const READ_FAILED = {
@@ -218,5 +219,77 @@ describe("the authenticated shell reads roles the same honest way", () => {
     // let a failed read reach the shell as "this user holds no roles".
     expect(layout).not.toMatch(/rolesRes\.data/);
     expect(layout).not.toMatch(/\{\s*data:\s*null\s*\}/);
+  });
+});
+
+describe("readHeldRoles: 'no roles' and 'no answer' are different values", () => {
+  it("an unanswered read is `known: false` with an EMPTY set (grants nothing)", async () => {
+    const client = stub({ profile_roles: [READ_FAILED] });
+
+    const held = await readHeldRoles(
+      client as unknown as Parameters<typeof readHeldRoles>[0],
+      USER.id,
+    );
+
+    expect(held.known).toBe(false);
+    expect(held.roles.size).toBe(0);
+    expect(client.reads("profile_roles")).toBe(2);
+  });
+
+  it("an answered-empty read is `known: true` — a real 'holds nothing'", async () => {
+    const client = stub({ profile_roles: [{ data: [], error: null }] });
+
+    const held = await readHeldRoles(
+      client as unknown as Parameters<typeof readHeldRoles>[0],
+      USER.id,
+    );
+
+    expect(held.known).toBe(true);
+    expect(held.roles.size).toBe(0);
+  });
+
+  it("answered rows come back as held roles", async () => {
+    const client = stub({
+      profile_roles: [{ data: [{ role: "worker" }], error: null }],
+    });
+
+    const held = await readHeldRoles(
+      client as unknown as Parameters<typeof readHeldRoles>[0],
+      USER.id,
+    );
+
+    expect(held.known).toBe(true);
+    expect([...held.roles]).toEqual(["worker"]);
+  });
+});
+
+describe("no downstream reader turns an unreadable role table into a grant", () => {
+  const src = (rel: string) =>
+    readFileSync(join(__dirname, "..", "..", rel), "utf8");
+
+  it("the conversation dispatcher no longer defaults to `worker` on a FAILED read", () => {
+    const dispatch = src("lib/conversation/dispatch.ts");
+    // The fail-open shape: a catch that hands back a worker role.
+    expect(dispatch).not.toMatch(
+      /catch[\s\S]{0,60}return new Set<Role>\(\["worker"\]\)/,
+    );
+    // The answered-empty default (a brand-new account can still act) stays.
+    expect(dispatch).toMatch(/set\.size > 0 \? set : new Set<Role>\(\["worker"\]\)/);
+    expect(dispatch).toMatch(/readActiveProfileRoles\(/);
+  });
+
+  it("the AI context takes knownness from the READER, not from set size", () => {
+    const ctx = src("lib/ai-workspace/ai-context.ts");
+    expect(ctx).toMatch(/permissionsKnown:\s*roles\.known/);
+    expect(ctx).not.toMatch(/permissionsKnown:\s*roles\.size\s*>\s*0/);
+  });
+
+  it("the two pages that RENDER the user's roles read them honestly", () => {
+    for (const rel of [
+      "app/[locale]/dashboard/account/page.tsx",
+      "app/[locale]/dashboard/profile/page.tsx",
+    ]) {
+      expect(src(rel), rel).toMatch(/readActiveProfileRoles\(/);
+    }
   });
 });
