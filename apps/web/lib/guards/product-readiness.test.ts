@@ -2232,7 +2232,17 @@ describe("no migration files added by this sprint", () => {
     // regression-proven by a controlled comparison on one otherwise identical
     // engagement row (employee true / student false). RECOUNTED from the tree,
     // never summed: `ls supabase/migrations/*.sql | wc -l` = 244.
-    const SPRINT_BASELINE = 244;
+    //
+    // Bumped 244 -> 245 for the LMC spend-compensation migration
+    // (20260828090000_lmc_spend_compensation_v1, paired rollback). Adds ONE
+    // transaction kind, ONE lot source, ONE default-false flag and ONE
+    // SECURITY DEFINER RPC that issues a compensating credit against a spend.
+    // No table is dropped, no column removed, no RLS loosened, append-only is
+    // untouched. RED by classification (money ledger + SECURITY DEFINER +
+    // grants): it ships UNAPPLIED behind `lmc_compensation_enabled = false`
+    // and production apply stays owner-gated. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 245 real files.
+    const SPRINT_BASELINE = 245;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

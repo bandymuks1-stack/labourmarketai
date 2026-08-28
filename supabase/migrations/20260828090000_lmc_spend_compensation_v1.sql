@@ -312,7 +312,26 @@ end;
 $$;
 
 -- ── 4. Grants — server-side monetary write, service_role only ──────────────
-revoke all on function public.lmc_compensate_spend_v1(uuid, text, text, uuid, bigint) from public;
+--
+-- `from public` alone is NOT enough in this database, and the difference is the
+-- whole security posture of this function. PUBLIC carries the default EXECUTE
+-- Postgres grants on every new function, so revoking it closes that door. But
+-- this project ALSO holds privileges granted directly to the `anon` role, and a
+-- revoke from PUBLIC does not touch a grant held by a named role. The
+-- 20260722160000 secdef closure swept every function that existed AT THAT
+-- VERSION; anything created afterwards is past its reach and must revoke anon
+-- for itself. This function was created afterwards.
+--
+-- Left as it was, an unauthenticated caller could REACH a SECURITY DEFINER
+-- function that creates ledger credit. The authority check inside would have
+-- refused it (`p_actor_profile_id` must own the account or be an admin), so
+-- this is defence in depth rather than a proven exploit - but "the body would
+-- have caught it" is not a reason to leave the door open on a money RPC.
+--
+-- Pinned by lib/guards/secdef-local-reset-reproducibility.test.ts, which fails
+-- any SECURITY DEFINER function added after the closure that does not name anon
+-- explicitly.
+revoke all on function public.lmc_compensate_spend_v1(uuid, text, text, uuid, bigint) from public, anon;
 grant execute on function public.lmc_compensate_spend_v1(uuid, text, text, uuid, bigint) to service_role;
 
 commit;

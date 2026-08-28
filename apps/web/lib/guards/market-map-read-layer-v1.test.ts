@@ -665,7 +665,17 @@ describe("NO new DB migration in this PR", () => {
     // production, regression-proven by a controlled comparison (employee
     // true / student false on one otherwise identical row). Still nothing to
     // do with the market-map read layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(244);
+    //
+    // Bumped 244 -> 245 for the LMC spend-compensation migration
+    // (20260828090000_lmc_spend_compensation_v1, paired rollback). Adds ONE
+    // transaction kind, ONE lot source, ONE default-false flag and ONE
+    // SECURITY DEFINER RPC that issues a compensating credit against a spend.
+    // No table is dropped, no column removed, no RLS loosened, append-only is
+    // untouched. RED by classification (money ledger + SECURITY DEFINER +
+    // grants): it ships UNAPPLIED behind `lmc_compensation_enabled = false`
+    // and production apply stays owner-gated. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 245 real files.
+    expect(count).toBeLessThanOrEqual(245);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
