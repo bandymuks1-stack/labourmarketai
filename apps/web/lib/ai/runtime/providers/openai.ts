@@ -27,6 +27,7 @@ import {
   fetchErrorResult,
   jsonSchemaHint,
   malformedOrTruncated,
+  httpErrorResult,
 } from "./extract-json";
 
 const OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions";
@@ -84,11 +85,7 @@ export const openaiCompletionProvider: AiCompletionProvider = {
         signal: AbortSignal.timeout(cfg.timeoutMs),
       });
       if (!res.ok) {
-        return {
-          status: "error",
-          code: "provider_error",
-          message: `openai http ${res.status}`,
-        };
+        return { status: "error", ...(await httpErrorResult("openai", res)) };
       }
       const json = (await res.json()) as {
         choices?: { message?: { content?: string }; finish_reason?: string }[];

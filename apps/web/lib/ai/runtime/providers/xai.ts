@@ -24,6 +24,7 @@ import {
   fetchErrorResult,
   jsonSchemaHint,
   malformedOrTruncated,
+  httpErrorResult,
 } from "./extract-json";
 
 const XAI_CHAT_COMPLETIONS_URL = "https://api.x.ai/v1/chat/completions";
@@ -78,11 +79,7 @@ export const xaiCompletionProvider: AiCompletionProvider = {
         signal: AbortSignal.timeout(cfg.timeoutMs),
       });
       if (!res.ok) {
-        return {
-          status: "error",
-          code: "provider_error",
-          message: `xai http ${res.status}`,
-        };
+        return { status: "error", ...(await httpErrorResult("xai", res)) };
       }
       const json = (await res.json()) as {
         choices?: { message?: { content?: string }; finish_reason?: string }[];
