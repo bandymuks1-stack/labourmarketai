@@ -11582,7 +11582,9 @@
       "chipServiceRequests": "Leistung finden",
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
-      "chipMyOwnInterest": "Mein eigenes Interesse"
+      "chipMyOwnInterest": "Mein eigenes Interesse",
+      "lmcHint": "Ihr LMC-Guthaben und die vollständige Bewegungshistorie stehen an einer Stelle.",
+      "chipLmc": "LMC öffnen"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

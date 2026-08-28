@@ -11582,7 +11582,9 @@
       "chipServiceRequests": "Rasti paslaugą",
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
-      "chipMyOwnInterest": "Mano susidomėjimai"
+      "chipMyOwnInterest": "Mano susidomėjimai",
+      "lmcHint": "Jūsų LMC likutį ir visą judėjimų istoriją rodome vienoje vietoje.",
+      "chipLmc": "Atidaryti LMC"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

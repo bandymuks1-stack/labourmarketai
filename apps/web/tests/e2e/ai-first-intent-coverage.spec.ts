@@ -76,6 +76,39 @@ test("«Sukurk įmonės profilį» offers the organization setup, not the person
   await page.waitForURL(/\/dashboard\/start\/company/, { timeout: 30_000 });
 });
 
+/**
+ * The LMC ledger, reachable by ASKING rather than only by searching.
+ *
+ * The command finder already answered the short query ("lmc"), and the unit
+ * measurement showed why that was not enough: it is a search matcher, so
+ * "Parodyk mano LMC istoriją" and "How much LMC do I have?" both matched
+ * nothing while the bare term matched fine. Sentences are what people type at a
+ * conversation, and the conversation had no LMC intent at all — so a ledger
+ * that was proven correct on production was reachable by search and unreachable
+ * by asking.
+ *
+ * This pins the CONSEQUENCE rather than the classification: the sentence
+ * produces a real door, and the door opens the section — not the top of a
+ * settings page, which is not an answer to "how much do I have".
+ */
+test("«Kiek turiu LMC?» offers the credit surface and the door opens it", async ({
+  page,
+}) => {
+  await openChat(page);
+  await say(page, "Kiek turiu LMC?");
+
+  const chip = page.getByTestId("chat-chip-link:/dashboard/account#lmc");
+  await expect(chip).toBeVisible({ timeout: 20_000 });
+  await expect(chip).toHaveText(LT.conversation.chat.chipLmc);
+
+  await chip.click();
+  await page.waitForURL(/\/dashboard\/account/, { timeout: 30_000 });
+  // The ANCHOR is the point: the balance itself, not a page top.
+  await expect(page.getByTestId("lmc-balance-section")).toBeVisible({
+    timeout: 30_000,
+  });
+});
+
 test("«Įrašyti šiandienos darbą» opens the work journal, not a job search", async ({
   page,
 }) => {

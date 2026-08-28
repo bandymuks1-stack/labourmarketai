@@ -51,6 +51,7 @@ export type ConversationIntent =
   | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
   | "company-overview" // "kas vyksta mano įmonėje?" — the company hub
   | "create-organization" // "sukurk įmonę" — START one, not look at one
+  | "lmc" // "kiek turiu LMC?" / "už ką buvo nuskaičiuota?" — the credit ledger
   // ── V9 value-intent: a stated OFFER of value (goods to sell, free
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
   //    refines it; the router only opens the door. ─────────────────────────
@@ -727,12 +728,48 @@ const RULES: IntentRule[] = [
     patterns: [
       p("\\bprofil", 2),
       p("\\bprofile\\b", 2),
+      // Cyrillic `профиль` shares no letters with the Latin `profil`, so the
+      // stem above could never reach it. Measured: "Покажи мой профиль"
+      // classified as `unknown` while the LT and EN forms both resolved — a
+      // Russian-speaking worker asking for their profile in the most ordinary
+      // way got the generic fallback.
+      p("профил", 2),
       p("\\bįgūd", 2),
       p("\\bskill", 2),
       p("навык", 2),
       p("(pridėk|add|добавь)\\s+.{0,12}(kalb|language|язык|patirt|experience|опыт|išsilavin|education|образовани)", 2),
       p("\\bkalb(a|ą|as|os)\\b", 1),
       p("\\blanguage", 1),
+    ],
+  },
+  /**
+   * LMC — the platform credit a person holds.
+   *
+   * DELIBERATELY DETERMINISTIC, and the reason is doctrine rather than thrift:
+   * "how much LMC do I have" is a balance lookup. There is nothing for a model
+   * to interpret, the answer comes from `lmc_account_balances`, and a regex
+   * resolves it in every locale at zero cost and zero egress.
+   *
+   * WHY AN INTENT AND NOT JUST A SEARCH TERM. The command registry already
+   * carries an `lmc_balance` entry, and it answers a SHORT query — "lmc",
+   * "kiek turiu lmc". It is a search matcher, so a full sentence walks past it:
+   * measured, "Parodyk mano LMC istoriją" and "How much LMC do I have?" both
+   * matched nothing while the bare terms matched fine. Sentences are what
+   * people type at a conversation, and the conversation had no LMC intent at
+   * all — so the ledger was reachable by search and unreachable by asking.
+   */
+  {
+    intent: "lmc",
+    patterns: [
+      // The unit itself is the strongest possible signal and is
+      // language-invariant, which is exactly why it is not in the message
+      // catalogue either.
+      p("\\blmc\\b", 5),
+      p("(kiek|how\\s+much|сколько)\\s*.{0,20}(kredit|credit|likut|balans|баланс)", 4),
+      p("(kredit|credit|likut|balans|баланс)\\s*.{0,20}(istorij|history|истори)", 4),
+      p("(papildy|top\\s*up|пополн)", 4),
+      // "what was I charged for" — the question a debited user actually asks.
+      p("(už\\s+ką|for\\s+what|за\\s+что)\\s*.{0,20}(nuskait|charg|списал|сняли)", 5),
     ],
   },
   {
