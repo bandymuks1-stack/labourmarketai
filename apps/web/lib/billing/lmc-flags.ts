@@ -25,6 +25,16 @@ export const STRIPE_LMC_TOPUPS_ENABLED = false as const;
 export const LIVE_PAYMENTS_ENABLED = false as const;
 /** Spend kill-switch: while false, even already-issued LMC is frozen. */
 export const LMC_SPENDING_ENABLED = false as const;
+/**
+ * Compensation kill-switch: while false, a spend cannot be given back.
+ *
+ * Class `admin`, not `owner_only`, and the distinction is deliberate.
+ * Compensation returns a user's OWN credit after an action this platform
+ * charged for and failed to deliver. It moves no external money and creates no
+ * financial commitment, so putting it behind the owner-only class would make
+ * the remedy for our own outage harder to reach than the outage itself.
+ */
+export const LMC_COMPENSATION_ENABLED = false as const;
 
 /**
  * Canonical flag authorization classes — the TS mirror of
@@ -43,6 +53,7 @@ export const LMC_FLAG_POLICY = {
   lmc_promotional_grants_enabled: "admin",
   lmc_referrals_enabled: "admin",
   lmc_spending_enabled: "admin",
+  lmc_compensation_enabled: "admin",
   stripe_lmc_topups_enabled: "owner_only",
   live_payments_enabled: "owner_only",
 } as const satisfies Record<string, "admin" | "owner_only" | "system_locked">;
@@ -62,6 +73,7 @@ export function lmcCommerceEnabled(): boolean {
     LMC_REFERRALS_ENABLED ||
     STRIPE_LMC_TOPUPS_ENABLED ||
     LIVE_PAYMENTS_ENABLED ||
-    LMC_SPENDING_ENABLED
+    LMC_SPENDING_ENABLED ||
+    LMC_COMPENSATION_ENABLED
   );
 }

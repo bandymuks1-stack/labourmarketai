@@ -1083,6 +1083,22 @@ describe("the migration set is exactly what this slice declared", () => {
       // student -> not visible. Provenance guard:
       // lib/guards/learner-visibility-least-privilege.test.ts.
       "20260827210000_learner_visibility_least_privilege_v1.sql",
+      // 2026-08-28: LMC spend compensation (#1305) gained its marker under an
+      // explicit owner approval whose scope was recorded VERBATIM, because an
+      // approval remembered loosely is an approval that grows. Full record -
+      // the wording, the reviewed HEAD 3f0e2ce7, the reviewed migration
+      // sha256, the production pre-state and every post-apply check - lives in
+      // docs/human-gates/lmc-spend-compensation-gate.md. Marker added in the
+      // SAME commit as that record, per the procedure the worker display-name
+      // gate above established.
+      //
+      // Worth stating plainly because it is a money ledger: the approval
+      // covers the two findings this file actually raises
+      // (security-definer-function, grant-or-revoke) and nothing else, and it
+      // explicitly does NOT approve live payments, live-money activation, new
+      // pricing, or any weakening of LMC authorization. The capability ships
+      // switched OFF (`lmc_compensation_enabled` defaults false).
+      "20260828090000_lmc_spend_compensation_v1.sql",
 ]);
   });
 
