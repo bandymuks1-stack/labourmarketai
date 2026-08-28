@@ -49,6 +49,7 @@ const BASE: AiRoutingAuditRecord = {
   outputExcerpt: null,
   fallbackReason: null,
   languageConsidered: "lt",
+  preferredProvider: null,
 };
 
 describe("usage_cost_events status distinguishes all three outcomes", () => {
