@@ -138,7 +138,7 @@ const ANTHROPIC_SOURCE = "Anthropic public pricing, reviewed by owner 2026-06";
 /** Read first-hand from the vendor's own pricing page, not an aggregator —
  *  the distinction #1197 made load-bearing. */
 const GEMINI_SOURCE =
-  "Google Gemini API pricing, https://ai.google.dev/gemini-api/docs/pricing, standard paid tier, read 2026-08-24";
+  "Google Gemini API pricing, https://ai.google.dev/gemini-api/docs/pricing, standard paid tier, read 2026-08-28 (gemini-3.5-flash-lite $0.30 in / $2.50 out per 1M tokens; earlier 2.5-series figures read 2026-08-24)";
 
 export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // ── Anthropic — the only prices the owner has reviewed. ───────────────────
@@ -288,7 +288,34 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // cheap to do and expensive to notice.
   ...(
     [
-      { model: "gemini-2.5-flash-lite", input: 0.1, output: 0.4, enabled: true },
+      // RETIRED MODEL REPLACED 2026-08-28, on the vendor's own instruction.
+      // `gemini-2.5-flash-lite` was the ONE enabled entry, and the first real
+      // production call against it returned:
+      //
+      //   404 NOT_FOUND: This model models/gemini-2.5-flash-lite is no longer
+      //   available to new users. Please update your code to use
+      //   models/gemini-3.5-flash-lite for the latest features and
+      //   improvements.
+      //
+      // So the AI path was not blocked by a key, an env var, a code gate or a
+      // privacy rule — every one of those was already correct and proven. It
+      // was blocked by a model id that Google retired for new API keys. That
+      // is worth recording because four earlier rounds of investigation
+      // concluded otherwise.
+      //
+      // Prices are the PAID-tier figures published for gemini-3.5-flash-lite
+      // ($0.30 in / $2.50 out per 1M tokens), read from the source below on
+      // 2026-08-28 — same rule as the rest of this table: never the free-tier
+      // €0, so a key moved onto billing cannot silently spend past a ceiling.
+      // The rise from $0.10/$0.40 keeps `explain_market_demand` far inside its
+      // $0.02 per-run ceiling (~$0.0035 at the observed payload size).
+      { model: "gemini-3.5-flash-lite", input: 0.3, output: 2.5, enabled: true },
+      // The other two are UNCHANGED and stay `enabled: false`. They are almost
+      // certainly retired the same way, but an id nobody can reach cannot be
+      // verified by reaching it — and guessing a replacement plus a price for a
+      // disabled model would put two unverified numbers into the one table
+      // whose entire job is to hold verified ones. They are corrected when a
+      // task actually needs them, which requires an owner enablement anyway.
       { model: "gemini-2.5-flash", input: 0.3, output: 2.5, enabled: false },
       { model: "gemini-2.5-pro", input: 2.5, output: 15, enabled: false },
     ] as const

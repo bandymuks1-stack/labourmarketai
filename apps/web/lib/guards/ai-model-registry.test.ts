@@ -168,7 +168,9 @@ describe("a verified price is not permission to run", () => {
       expect(e.inputUsdPerMTok, e.model).not.toBeNull();
       expect(e.outputUsdPerMTok, e.model).not.toBeNull();
       expect(e.pricingSource, e.model).toContain("ai.google.dev");
-      expect(e.effectiveFrom, e.model).toBe("2026-08-24");
+      // The 2.5-series rows keep their original date; the replacement lite
+      // model is dated the day its price was read.
+      expect(["2026-08-24", "2026-08-28"], e.model).toContain(e.effectiveFrom);
     }
   });
 
@@ -176,8 +178,15 @@ describe("a verified price is not permission to run", () => {
     // #1265 priced all three and enabled none, because pricing is not
     // permission and the remaining blocker was a data-transfer decision.
     // 2026-08-24: that decision is answered for ONE task classed PUBLIC, which
-    // needs no egress grant. `gemini-2.5-flash-lite` serves the `haiku` alias
-    // and therefore the `low_cost` tier the task prefers.
+    // needs no egress grant. That model serves the `haiku` alias and therefore
+    // the `low_cost` tier the task prefers.
+    //
+    // 2026-08-28: the id CHANGED, and the reason is the point. The first real
+    // production call returned 404 NOT_FOUND — `gemini-2.5-flash-lite` "is no
+    // longer available to new users. Please update your code to use
+    // models/gemini-3.5-flash-lite". The vendor named its own replacement, so
+    // the enabled entry follows it. What is pinned here is unchanged: exactly
+    // ONE, and it is the cheapest.
     //
     // `flash` and `pro` stay disabled and this pins that they do. The public
     // task cannot escalate (`escalationConditions: []`), so they would be
@@ -185,10 +194,10 @@ describe("a verified price is not permission to run", () => {
     // sensitive task to want them would find the enablement already done and
     // looking reviewed.
     const enabled = gemini.filter((e) => e.enabled).map((e) => e.model);
-    expect(enabled).toEqual(["gemini-2.5-flash-lite"]);
+    expect(enabled).toEqual(["gemini-3.5-flash-lite"]);
 
     for (const e of gemini) {
-      const shouldRun = e.model === "gemini-2.5-flash-lite";
+      const shouldRun = e.model === "gemini-3.5-flash-lite";
       expect(isSelectable(e), e.model).toBe(shouldRun);
       if (shouldRun) {
         expect(pricingForModel(e.model), e.model).not.toBeNull();
@@ -253,10 +262,17 @@ describe("the derived tables did not change any shipped value", () => {
       sonnet: "gpt-5-mini",
       haiku: "gpt-5-nano",
     });
+    // `haiku` is the ONE id in this file that is no longer the pre-registry
+    // literal, and it is deliberate: Google retired `gemini-2.5-flash-lite`
+    // for new keys and named `gemini-3.5-flash-lite` as its replacement (see
+    // the enablement test above). The other two are untouched — a retired id
+    // nobody can reach cannot be verified by reaching it, and guessing a
+    // replacement for a DISABLED model would put an unverified value into the
+    // one table whose job is to hold verified ones.
     expect(AI_MODEL_CANDIDATES.gemini).toEqual({
       opus: "gemini-2.5-pro",
       sonnet: "gemini-2.5-flash",
-      haiku: "gemini-2.5-flash-lite",
+      haiku: "gemini-3.5-flash-lite",
     });
     expect(AI_MODEL_CANDIDATES.xai).toEqual({
       opus: "grok-4",
