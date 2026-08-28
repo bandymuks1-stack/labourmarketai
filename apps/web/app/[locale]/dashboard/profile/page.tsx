@@ -740,6 +740,10 @@ export default async function ProfilePage({
           // longer on the page is a dead control, and this bar is in-page
           // anchors only. The route link lives in the header action row.
           { href: "#profile-edit", label: tQuick("skills") },
+          // The CV detail editors moved into one disclosure below; without a
+          // chip they would be discoverable only by scrolling past the skills
+          // composer. `DetailsHashOpener` opens the disclosure on the jump.
+          { href: "#cv-details", label: tQuick("details") },
         ]}
       />
 
@@ -839,19 +843,6 @@ export default async function ProfilePage({
           read went with the block; it had no other consumer here, so the
           profile does one fewer DB round trip. */}
 
-      {/* W7-S5b: "Your professional passport: CV, skills and work journal…"
-          was rendered unconditionally — worker-framed copy shown verbatim to
-          accounts holding no person identity. Keyed on identity (roles), NOT
-          `workerId`: the 0009 trigger makes `workerId` non-null for every
-          normal account, so a workerId gate would never fire. A non-worker
-          identity gets the two-identities model note instead; the identity
-          notice above carries the full explanation. */}
-      <FeatureNote testId="feature-note-profile">
-        {identityNotice.kind === "hidden"
-          ? tFeatureNotes("workerProfile")
-          : tFeatureNotes("identityModel")}
-      </FeatureNote>
-
       {/* Workstream C: the trust chain made VISIBLE on the person — counts
           straight from canonical tables (verified skills, manager
           confirmations, journal entries). Honest zeros with a growth hint. */}
@@ -869,6 +860,90 @@ export default async function ProfilePage({
         />
       ) : null}
 
+      {/* W7-S5b: "Your professional passport: CV, skills and work journal…"
+          was rendered unconditionally — worker-framed copy shown verbatim to
+          accounts holding no person identity. Keyed on identity (roles), NOT
+          `workerId`: the 0009 trigger makes `workerId` non-null for every
+          normal account, so a workerId gate would never fire. A non-worker
+          identity gets the two-identities model note instead; the identity
+          notice above carries the full explanation. */}
+      <FeatureNote testId="feature-note-profile">
+        {identityNotice.kind === "hidden"
+          ? tFeatureNotes("workerProfile")
+          : tFeatureNotes("identityModel")}
+      </FeatureNote>
+      {/* Consolidated (P0 profile rescue): the ProfileHubOverview above is the
+          SINGLE output summary — CV + skills + journal-evidence pillars (which
+          also show what's missing), the compact "Supported by work entries: N",
+          the not-verified disclaimer, and ONE next action. The former duplicate
+          panels (ProfileCvClarityCard checklist, WorkerEvidenceCard, and the
+          standalone ProfileProcessAssistant) were removed so the profile no
+          longer splits into competing summary/evidence/helper panels. */}
+
+      {/* W7-S4 — the worker→employer "Rašyti įmonei" entry MOVED to
+          `/dashboard/communication`. It opened a conversation and navigated
+          away from this page, and its one failure state
+          (`?notice=cannot_open`) already renders THERE — so the control lived
+          on the person-identity surface while both its success and its failure
+          belonged to the communication surface. Same button, same
+          `getEmployerOwnerProfileId()` resolution, same no-dead-button rule;
+          only the page changed. */}
+
+      {/* Text-first composer — universal. Available to every authenticated
+          user regardless of role. The catalogued worker_skills picker
+          (manualSlot) only renders for users with a worker row; pure
+          company/agency/customer accounts see only the self-declared
+          composer + chips, which is the right canonical surface for
+          their narrative-derived skills. The wrapper id is the anchor target
+          for the hub overview's single "Complete profile" primary action. */}
+      <div id="profile-edit" className="scroll-mt-4">
+        <ProfileTextFirstFlow
+        initialText={savedProfileText}
+        savedClaimNormalizedLabels={savedSkillClaims.map(
+          (c) => c.normalized_label,
+        )}
+        manualSlot={
+          workerId ? (
+            <WorkerTradeProfile
+              workerId={workerId}
+              professions={professions}
+              currentProfessionId={currentProfessionId}
+              directions={workerDirections}
+              initialSkillIds={initialSkillIds}
+              personName={personName}
+              roles={roles}
+              activeRole={activeRole}
+              savedSkills={savedSkills}
+            />
+          ) : undefined
+        }
+        />
+      </div>
+
+      {/* IA (profile hierarchy): these five CV detail editors — work
+          preferences, languages, education, achievements and external
+          profiles — stood BETWEEN the identity summary and the one surface
+          this page exists to edit, and measured 2 195 px on a 1280×900
+          viewport. Every one of them is filled in once and revisited rarely.
+          Same editors, same order, same anchors, same reads — one disclosure,
+          so they are opened when they are being written and scrolled past
+          never. The summary reuses `quickNav.details`, which already exists
+          in every ACTIVE locale, so no new product string is introduced.
+          `DetailsHashOpener` opens this wrapper for `#cv-details` AND for a
+          hash targeting a section INSIDE it (`#cv-availability` is a hub
+          readiness step's deep link), so no deep link lands on a closed bar. */}
+      <DetailsHashOpener targetId="cv-details" />
+      <details
+        id="cv-details"
+        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+      >
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            {tQuick("details")}
+          </span>
+        </summary>
+        <div className="flex flex-col gap-6 px-4 pb-4">
       {/* Structured work preferences (PR 3) — after the trust/availability
           area, worker-only (needs a workers row: the RPC targets it). Saves go
           through the owner-scoped save_worker_availability_prefs RPC; every
@@ -1037,54 +1112,9 @@ export default async function ProfilePage({
           }
         />
       ) : null}
+        </div>
+      </details>
 
-      {/* Consolidated (P0 profile rescue): the ProfileHubOverview above is the
-          SINGLE output summary — CV + skills + journal-evidence pillars (which
-          also show what's missing), the compact "Supported by work entries: N",
-          the not-verified disclaimer, and ONE next action. The former duplicate
-          panels (ProfileCvClarityCard checklist, WorkerEvidenceCard, and the
-          standalone ProfileProcessAssistant) were removed so the profile no
-          longer splits into competing summary/evidence/helper panels. */}
-
-      {/* W7-S4 — the worker→employer "Rašyti įmonei" entry MOVED to
-          `/dashboard/communication`. It opened a conversation and navigated
-          away from this page, and its one failure state
-          (`?notice=cannot_open`) already renders THERE — so the control lived
-          on the person-identity surface while both its success and its failure
-          belonged to the communication surface. Same button, same
-          `getEmployerOwnerProfileId()` resolution, same no-dead-button rule;
-          only the page changed. */}
-
-      {/* Text-first composer — universal. Available to every authenticated
-          user regardless of role. The catalogued worker_skills picker
-          (manualSlot) only renders for users with a worker row; pure
-          company/agency/customer accounts see only the self-declared
-          composer + chips, which is the right canonical surface for
-          their narrative-derived skills. The wrapper id is the anchor target
-          for the hub overview's single "Complete profile" primary action. */}
-      <div id="profile-edit" className="scroll-mt-4">
-        <ProfileTextFirstFlow
-        initialText={savedProfileText}
-        savedClaimNormalizedLabels={savedSkillClaims.map(
-          (c) => c.normalized_label,
-        )}
-        manualSlot={
-          workerId ? (
-            <WorkerTradeProfile
-              workerId={workerId}
-              professions={professions}
-              currentProfessionId={currentProfessionId}
-              directions={workerDirections}
-              initialSkillIds={initialSkillIds}
-              personName={personName}
-              roles={roles}
-              activeRole={activeRole}
-              savedSkills={savedSkills}
-            />
-          ) : undefined
-        }
-        />
-      </div>
 
       {/* Unified CAPABILITY surface — the canonical home for self-declared
           skills (`profile_skill_claims`) and worker work history. Always
