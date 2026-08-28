@@ -44,6 +44,7 @@ import { Link } from "@/lib/i18n/navigation";
 // Mano CV identity lead — the player-card/avatar identity is the visual layer
 // at the TOP of the Mano CV surface (this work-records surface), with the work
 // records below (owner IA: Mano CV = marketplace identity + work records).
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
@@ -110,6 +111,11 @@ export default async function JournalPage({
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tQuick = await getTranslations("quickNav");
+  // The COLLAPSED card row is now the only thing naming the card on this page,
+  // so it names it the way every other entry point does. `quickNav.identity`
+  // stays shared with the profile hub's own `#profile-identity` anchor — one
+  // target, one label, and no second vocabulary for the same object.
+  const tTabs = await getTranslations("auth.dashboard.tabs");
 
   const supabase = await createClient();
   const {
@@ -787,7 +793,7 @@ export default async function JournalPage({
         ariaLabel={tQuick("ariaLabel")}
         items={[
           { href: "#mano-cv-top", label: tQuick("top") },
-          { href: "#mano-cv-identity", label: tQuick("identity") },
+          { href: "#mano-cv-identity", label: tTabs("playerCard") },
           { href: "#journal-entries", label: tQuick("records") },
           // §6.1: "add entry" is the conversation's job now; the quick nav
           // keeps only the projection's own regions.
@@ -804,19 +810,22 @@ export default async function JournalPage({
           the CV identity. The player card (and its readiness detail) stays
           one tap away in a single disclosure — the diary is no longer pushed
           below a full identity block on every visit. */}
-      {/* §5.1 REGRESSION FOUND IN AUTHENTICATED PRODUCTION (2026-07-30, after
-          the false-completion postmortem): this disclosure shipped CLOSED, so
-          the avatar menu's "Mano kortelė" deep-link landed on a 40px summary
-          row — literally the defect the owner's audit §5.1 reported ("kortelė —
-          sulankstytas akordeonas žurnalo apačioje"), while the traceability
-          recorded §5.1 as LIVE. The canonical Player Card is the person's main
-          object (GOAL), so it now opens by default. It stays collapsible, so
-          the work-records-first reading of Owner UX recovery v1 is still one
-          click away — but the card is never HIDDEN (addendum §2). */}
+      {/* OWNER RULING 2026-08-28 — SUPERSEDES the 2026-07-30 always-open rule.
+          That rule existed for ONE reason: a closed disclosure made the avatar
+          menu's "Mano kortelė" deep-link land on a 40px summary row. The link
+          was the casualty, not the collapse. #1317 removed that limitation by
+          generalising `DetailsHashOpener` — it opens the disclosure for its own
+          id AND for any id nested inside it — so the deep link now arrives at an
+          OPEN card whether or not the default is open.
+          With the technical reason gone, the default reverts to what the page is
+          for: the Journal's first viewport is the work RECORDS and the composer,
+          not 2118px of identity block the visitor did not ask for on every
+          visit. Nothing is hidden and nothing moves: the same card, the same
+          readiness panel, the same anchor, the same quick-nav entry and the same
+          avatar-menu link — one tap, or zero taps when you arrived by link. */}
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
-          open
           className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
@@ -828,9 +837,13 @@ export default async function JournalPage({
               >
                 ›
               </span>
-              {tQuick("identity")}
+              {tTabs("playerCard")}
             </span>
           </summary>
+          {/* The deep link is what made this disclosure open-by-default; this
+              is the mechanism that replaces it. Mounted INSIDE the disclosure
+              so it can never be separated from the element it answers for. */}
+          <DetailsHashOpener targetId="mano-cv-identity" />
           <div className="flex flex-col gap-4 px-4 pb-4">
             <WorkerPlayerCard
               card={manoCard}

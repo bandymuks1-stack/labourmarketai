@@ -180,18 +180,67 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
 
   /**
    * Found in AUTHENTICATED production on 2026-07-30: the deep-link target was a
-   * CLOSED <details>, so "Mano kortelė" landed on a 40px summary row — the exact
-   * §5.1 defect the owner reported, while the traceability said LIVE. The card
-   * may be collapsible, but it may never arrive collapsed.
+   * CLOSED <details>, so "Mano kortele" landed on a 40px summary row - the exact
+   * S5.1 defect the owner reported, while the traceability said LIVE.
+   *
+   * The FIX at the time was the `open` attribute, because nothing else could
+   * open a disclosure a hash pointed at. That is no longer true: #1317
+   * generalised `DetailsHashOpener` to open a disclosure for its OWN id and for
+   * any id nested inside it. Owner ruling 2026-08-28 therefore superseded the
+   * always-open default - the Journal's first viewport belongs to the work
+   * records, not to 2118px of identity block - and the invariant this test
+   * protects moved with it.
+   *
+   * The invariant was never "the attribute `open` is present". It was: THE DEEP
+   * LINK MUST NOT LAND ON A CLOSED GREY BAR. That is what is asserted now, and
+   * it is asserted the only way that cannot pass vacuously - the disclosure and
+   * its opener must both exist, the opener must name THIS disclosure, and it
+   * must be mounted inside it. Deleting any one of the three fails.
    */
-  it("the card's disclosure on the journal page is OPEN by default", () => {
+  it("the card's journal disclosure arrives OPEN when deep-linked", () => {
     const journal = read("app/[locale]/dashboard/journal/page.tsx");
-    const block = journal.slice(journal.indexOf("<details"));
-    const details = block.slice(0, block.indexOf(">") + 1);
-    expect(details, "the mano-cv-identity disclosure").toContain(
-      'id="mano-cv-identity"',
+    // Anchored on the id alone, never on a multi-line literal: this repository
+    // is edited on Windows, and a guard that matches across a line break passes
+    // in CI and fails locally for a reason that has nothing to do with the code.
+    const at = journal.indexOf('id="mano-cv-identity"');
+    expect(at, "the mano-cv-identity disclosure must exist").toBeGreaterThan(-1);
+    const block = journal.slice(at, journal.indexOf("</details>", at));
+    // The opener is what makes the deep link land on an OPEN card, and it is
+    // mounted INSIDE the disclosure so it cannot drift away from it.
+    expect(
+      block,
+      "the deep link's opener must be mounted inside the disclosure",
+    ).toContain('<DetailsHashOpener targetId="mano-cv-identity" />');
+    expect(journal, "...and the component must actually be imported").toContain(
+      'import { DetailsHashOpener } from "@/components/app/details-hash-opener"',
     );
-    expect(details, "must carry `open`").toMatch(/\bopen\b/);
+  });
+
+  /**
+   * Negative control for the test above. The opener only helps because it
+   * handles a hash naming the disclosure ITSELF - the `#mano-cv-identity` case,
+   * which is what every entry point sends. A refactor that reduced it to
+   * nested-id handling only would leave the guard above green and the deep link
+   * broken, so the branch is pinned here rather than assumed.
+   */
+  it("DetailsHashOpener opens a disclosure whose own id is the hash", () => {
+    const opener = read("components/app/details-hash-opener.tsx");
+    expect(opener).toContain("hash === `#${targetId}`");
+    expect(opener).toContain("if (!el.open) el.open = true;");
+  });
+
+  /**
+   * The collapsed row is now the ONLY thing naming the card on the journal
+   * page, so it names it the way the avatar menu does. Two labels for one
+   * object is the duplicate-vocabulary failure the shell cleanup removed.
+   */
+  it("the collapsed row and the avatar menu name the card identically", () => {
+    const journal = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(journal).toContain('label: tTabs("playerCard")');
+    expect(journal).toContain('{tTabs("playerCard")}');
+    expect(read("components/app/account-menu.tsx")).toContain(
+      't("tabs.playerCard")',
+    );
   });
 
   it('"show my card" still resolves to the canonical card projection', () => {
