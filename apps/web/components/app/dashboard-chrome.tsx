@@ -2,53 +2,85 @@
 
 import { useEffect } from "react";
 import { usePathname } from "@/lib/i18n/navigation";
+import { ADMIN_NAV_ITEM } from "@/lib/config/navigation";
 import {
   ConversationHeader,
   type ConversationNavLabels,
 } from "@/components/app/conversation/chat/conversation-header";
 
 /**
- * Dashboard chrome selector — the real replacement for the old `fixed inset-0`
- * overlay. Instead of painting the conversation OVER a still-mounted wide navbar
- * (a CSS trick), this chooses WHICH chrome to actually render by route, so the
- * wide navbar is simply NOT in the DOM in simple mode. Three modes:
+ * Dashboard chrome selector. It chooses WHICH chrome is actually in the DOM per
+ * route — never an overlay painted over a still-mounted navbar. Three modes:
  *
- *   • conversation (`/dashboard`) — renders the children bare; the conversation
- *     surface supplies its own full-height simple header + bottom nav. No wide
- *     navbar exists here at all.
- *   • panel (`/dashboard/communication|planning|profile`) — the simple-mode
- *     shell (the SAME 5-item nav the conversation uses), NOT the module navbar.
- *   • full (every other module route — detail/admin surfaces) — the full
- *     module chrome, verbatim. (`/dashboard/advanced` itself was deleted by
- *     W3 Package 4; "full" now serves only the legitimate detail routes.)
+ *   • conversation (`/dashboard`) — children bare; the conversation surface is
+ *     self-contained (`h-[100dvh]`, its own header).
+ *   • panel (EVERY other product route) — the canonical ONE TOP BAR
+ *     (`<ConversationHeader>`): back-to-chat · identity · the active workspace
+ *     chip · search · language · notifications · one avatar menu.
+ *   • full (`/dashboard/admin/*` only) — the legacy module chrome (wide tab
+ *     row + role switcher + bottom nav), kept for the INTERNAL operator
+ *     console, which is not the user-facing product.
+ *
+ * WHY panel is now the default, not a four-route exception
+ * -------------------------------------------------------
+ * The conversation header's own contract already calls itself "THE ONE TOP BAR
+ * (owner audit §4.4 + §13)", and records that the tab row and the Advanced
+ * entry are gone by owner ruling. That ruling was only ever applied to four
+ * route prefixes. Everywhere else — opportunities, the company hub, bookings,
+ * projects, network, the map — the user left the conversation and landed back
+ * in the pre-ruling module chrome. The product read as "AI on the homepage,
+ * old SaaS everywhere else", and the owner's production screenshot of
+ * `/lt/dashboard/opportunities` showed what that chrome costs:
+ *
+ *   • a 6-7 item tab row that scrolls sideways inside the header;
+ *   • the role switcher sitting two controls from the workspace chip — TWO
+ *     permanent context controls naming the SAME active organization, in two
+ *     different vocabularies ("role" vs "workspace"), with two switch menus;
+ *   • the bottom nav, a third navigation system, on phones.
+ *
+ * Capability is preserved; the redundant presentation is not:
+ *   • every tab destination (overview · journal · planning · communication ·
+ *     market map · network) has a command in `lib/navigation/command-registry`,
+ *     reachable from the search control this header carries at EVERY width and
+ *     from the conversation's own intent router;
+ *   • switching person to organization is the workspace chip, which is not the
+ *     lesser control: `switchWorkspace` in `lib/auth/context` already moves the
+ *     BASE IDENTITY with the workspace ("the workspace IS the acting context",
+ *     owner audit P0.1), so the chip does everything the role switcher's
+ *     organization list did;
+ *   • ACQUIRING an identity you do not hold yet — the role switcher's one
+ *     genuinely unique power — is `/dashboard/start/company`, reached from the
+ *     `create-organization` intent and from the registry;
+ *   • the admin console link lives in the avatar menu (`account-menu-admin-link`).
  *
  * `usePathname()` (locale-stripped) is client-reactive, so switching modes on a
  * client navigation flips the chrome correctly — no overlay, no file moves.
  *
- * The FULL-mode chrome (header + main wrapper + bottom nav + Rexora credit) is
- * authored in `dashboard/layout.tsx` and handed in as slots (`fullHeader`,
- * `fullBottomNav`, `fullMain`). This keeps the chrome markup where the guard
- * suite pins it (the layout source) while this client component only decides
- * WHICH chrome renders per route.
+ * The FULL-mode chrome is still authored in `dashboard/layout.tsx` and handed
+ * in as slots, so the chrome markup stays where the guard suite pins it; this
+ * component only decides WHICH chrome renders.
  */
-const PANEL_PREFIXES = [
-  "/dashboard/communication",
-  "/dashboard/planning",
-  "/dashboard/profile",
-  // Rebuild W5: the journal joins the simple shell — the whole core work loop
-  // (chat → journal → calendar → messages) now lives in ONE chrome, so the
-  // primary tabs never change identity mid-flow.
-  "/dashboard/journal",
-];
+/** The ONLY subtree that keeps the legacy module chrome: the internal operator
+ *  console. It is admin-gated (`dashboard/admin/layout.tsx` fail-closes), so no
+ *  ordinary user can reach the wide tab row at all.
+ *
+ *  Taken from the canonical admin nav item rather than spelled out again: the
+ *  admin route has ONE source, and a route PREDICATE written as a literal here
+ *  is indistinguishable — to `admin-visibility.test.ts` and to a reader — from
+ *  an ungated admin LINK. Deriving it keeps both honest. */
+const FULL_CHROME_PREFIX = ADMIN_NAV_ITEM.href;
 
 type Mode = "conversation" | "panel" | "full";
 
 function modeFor(pathname: string): Mode {
   if (pathname === "/dashboard") return "conversation";
-  if (PANEL_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
-    return "panel";
+  if (
+    pathname === FULL_CHROME_PREFIX ||
+    pathname.startsWith(`${FULL_CHROME_PREFIX}/`)
+  ) {
+    return "full";
   }
-  return "full";
+  return "panel";
 }
 
 export function DashboardChrome({
@@ -95,6 +127,12 @@ export function DashboardChrome({
         <ConversationHeader title={headerTitle} nav={nav} />
         <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
           {children}
+          {/* The Rexora product credit (owner directive 2026-07-14, pinned by
+              legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
+              that full serves only the admin console it would have vanished
+              from every user-facing surface, so it hangs here instead — the
+              same one-line credit, in the shell the product actually uses. */}
+          {rexora}
         </main>
       </div>
     );
