@@ -11582,7 +11582,9 @@
       "chipServiceRequests": "Een dienst zoeken",
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
-      "chipMyOwnInterest": "Mijn eigen interesse"
+      "chipMyOwnInterest": "Mijn eigen interesse",
+      "lmcHint": "Uw LMC-saldo en de volledige mutatiehistorie staan op één plek.",
+      "chipLmc": "LMC openen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

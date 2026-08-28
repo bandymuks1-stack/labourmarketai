@@ -192,6 +192,8 @@ export type ChatLabels = {
   chipMyOwnInterest: string;
   createOrganizationHint: string;
   chipCreateOrganization: string;
+  lmcHint: string;
+  chipLmc: string;
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
@@ -2153,6 +2155,22 @@ export function ConversationChat({
                     },
                   ],
             );
+            break;
+          case "lmc":
+            // "Kiek turiu LMC?" / "Už ką buvo nuskaičiuota?" — the platform
+            // credit the person holds.
+            //
+            // A `link:` chip to the ONE canonical surface, not a second balance
+            // rendered in the thread. The figure comes from
+            // `lmc_account_balances` under the caller's own RLS, and a number
+            // repeated in two places is a number that will eventually disagree
+            // with itself — on money, that is not a cosmetic problem.
+            //
+            // The anchor matters as much as the route: dropping somebody at the
+            // top of a settings page is not an answer to "how much do I have".
+            assistant(labels.lmcHint, [
+              { id: "link:/dashboard/account#lmc", label: labels.chipLmc },
+            ]);
             break;
           case "admin-approvals":
             // "Ką turiu patvirtinti?" — the approvals area, which no longer

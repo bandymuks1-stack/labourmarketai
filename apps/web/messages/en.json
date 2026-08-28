@@ -11582,7 +11582,9 @@
       "chipServiceRequests": "Find a service",
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",
-      "chipMyOwnInterest": "My own interest"
+      "chipMyOwnInterest": "My own interest",
+      "lmcHint": "Your LMC balance and the full history of movements live in one place.",
+      "chipLmc": "Open LMC"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
