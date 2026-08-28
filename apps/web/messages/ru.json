@@ -11582,7 +11582,9 @@
       "chipServiceRequests": "Найти услугу",
       "interestInboxAmbiguous": "Это может означать два разных запроса — что показать?",
       "chipInterestOnMyNeeds": "Интерес к моим заявкам",
-      "chipMyOwnInterest": "Мои отклики"
+      "chipMyOwnInterest": "Мои отклики",
+      "lmcHint": "Ваш баланс LMC и вся история движений — в одном месте.",
+      "chipLmc": "Открыть LMC"
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",

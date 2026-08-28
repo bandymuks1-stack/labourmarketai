@@ -73,6 +73,11 @@ const CHAT_KEYS = [
   // `company-overview`, which means LOOK AT one).
   "createOrganizationHint",
   "chipCreateOrganization",
+  // The credit ledger, reachable by asking rather than only by searching.
+  // The command finder already answered the SHORT query ("lmc"); a sentence
+  // walked past it, because that matcher is a search box and not a router.
+  "lmcHint",
+  "chipLmc",
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",
