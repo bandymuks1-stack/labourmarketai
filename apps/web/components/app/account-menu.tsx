@@ -5,9 +5,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, MessageSquareWarning, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, Globe, MessageSquareWarning, type LucideIcon } from "lucide-react";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -29,6 +30,7 @@ export function AccountMenu() {
   // outside the dashboard shell, so the account menu carries a permanent link
   // to it — a worker can always find their CV from any dashboard page.
   const tCv = useTranslations("cvExport");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const { user, profile, isAdmin, adminUiHidden } = useAuth();
   const [open, setOpen] = useState(false);
@@ -150,6 +152,27 @@ export function AccountMenu() {
             )}
             {nextTheme === "dark" ? t("account.theme.toDark") : t("account.theme.toLight")}
           </button>
+          {/* UI LANGUAGE - mobile only, and deliberately not a second switcher.
+              The canonical control is the ONE in the shell header, which is
+              `hidden md:flex` because the phone header has no room for it. That
+              is precisely where language stopped being reachable on a phone, so
+              the SAME component is mounted here for exactly the widths the
+              header cannot serve. `md:hidden` and `hidden md:flex` are
+              complements: exactly one language control is visible at any width,
+              never two, never zero.
+              Its popover is a DOM descendant of this menu's portal panel, so
+              AnchoredOverlay's outside-close (`panelRef.contains`) treats a tap
+              on a language as inside and does not unmount the link mid-tap. */}
+          <div
+            className="flex min-h-[2.75rem] items-center justify-between gap-2 rounded-sm px-2 py-2 md:hidden"
+            data-testid="account-menu-locale"
+          >
+            <span className="flex items-center gap-2 text-sm text-text-primary">
+              <Globe className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+              {tCommon("localeSwitch")}
+            </span>
+            <LocaleSwitcher />
+          </div>
           <Link
             href="/cv"
             role="menuitem"
