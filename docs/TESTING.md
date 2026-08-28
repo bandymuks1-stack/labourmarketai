@@ -68,6 +68,29 @@ SUPABASE_SERVICE_ROLE_KEY=<local service key from `npx supabase status`>
 E2E_BASE_URL=http://127.0.0.1:3100
 ```
 
+### `E2E_REQUIRE_AUTH=1` — when a skip must be a failure
+
+The runtime skips above are right for a machine without the local stack, but
+they mean a run that exercised NONE of the authenticated journey still exits 0.
+That is how `tests/e2e/conversation-authenticated.spec.ts` kept "passing" while
+five of its selectors pointed at deleted UI.
+
+Set `E2E_REQUIRE_AUTH=1` whenever the run is SUPPOSED to be authenticated (CI,
+a release check, verifying a chat-surface change). A missing
+`tests/e2e/.storage-state.json` is then a hard error and the run exits non-zero
+instead of reporting a green skip:
+
+```
+E2E_OWNER_EMAIL=dev.worker@local.test pnpm -C apps/web tsx scripts/e2e-mint-session.ts
+E2E_REQUIRE_AUTH=1 pnpm -C apps/web e2e:local
+```
+
+The static half of the same problem — a spec waiting on a testid the product
+can no longer render — is caught in CI by
+`apps/web/lib/guards/e2e-testid-orphans.test.ts`, which understands generated
+testids (``data-testid={`opportunities-row-${id}`}``) and destructured defaults,
+so live dynamic controls are never reported as orphans.
+
 The production project (`gorgitwvdzxbnaxhrsrw`) stays real-data-only
 (brief §10.2) — it is never a test target, and both `db:fixtures:local` and
 `e2e:local` hard-refuse non-local URLs.
