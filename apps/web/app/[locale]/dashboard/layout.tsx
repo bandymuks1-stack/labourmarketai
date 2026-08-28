@@ -23,6 +23,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -81,17 +82,26 @@ export default async function DashboardLayout({
   // user id), so the layout costs ONE parallel stage. (The profile row comes
   // from the ONE request-cached session-profile reader shared with the pages.)
   const userPromise = supabase.auth.getUser();
-  const rolesPromise: Promise<{ data: { role: string }[] | null }> =
-    userPromise.then(async ({ data: { user } }) =>
+  // HONESTY (2026-08-28): the roles read used to drop its PostgREST error and
+  // hand `null` down, so a transient failure (cold DB connection, pooler
+  // hiccup) silently stripped EVERY role from the authenticated shell — the
+  // role switcher, the nav and `deriveIsAdmin` all read an empty list as the
+  // fact "this user holds no roles". `readActiveProfileRoles` retries once and
+  // then throws, so an unanswered read reaches the route error boundary
+  // instead of being rendered as a confident, wrong role state.
+  const rolesPromise: Promise<{ role: string }[] | null> = userPromise.then(
+    async ({ data: { user } }) =>
       user
-        ? await supabase
-            .from("profile_roles")
-            .select("role")
-            .eq("profile_id", user.id)
-            .eq("is_active", true)
-        : { data: null },
-    );
-  const [userRes, session, rolesRes] = await Promise.all([
+        ? await readActiveProfileRoles(() =>
+            supabase
+              .from("profile_roles")
+              .select("role")
+              .eq("profile_id", user.id)
+              .eq("is_active", true),
+          )
+        : null,
+  );
+  const [userRes, session, rolesRows] = await Promise.all([
     userPromise,
     getSessionProfile(),
     rolesPromise,
@@ -99,7 +109,6 @@ export default async function DashboardLayout({
   const user = userRes.data.user;
   if (!user) redirect(`/${locale}/auth/login`);
   const profile = session.profile;
-  const rolesRows = rolesRes.data;
   console.info("[perf] dashboard-layout", {
     ms: Date.now() - layoutStart,
   });
