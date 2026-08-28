@@ -2,8 +2,45 @@
 -- LMC SPEND COMPENSATION v1 — giving credit back when a paid action failed.
 --
 -- CLASS: RED. It alters money-ledger CHECK constraints and adds a credit-
--- creating RPC. It ships DISABLED (new flag defaults false) and must not be
--- applied without explicit owner approval.
+-- creating RPC. It ships DISABLED (new flag defaults false).
+--
+-- @human-gate-approved
+--
+-- WHAT THIS MARKER COVERS, and nothing else. Two findings, both raised by
+-- `.github/scripts/migration-safety.mjs` against this file:
+--   * security-definer-function — `lmc_compensate_spend_v1` is SECURITY
+--     DEFINER, because it must write the ledger, which no client role may.
+--   * grant-or-revoke — it revokes the function from `public, anon` and grants
+--     EXECUTE to `service_role` only.
+-- There is no data-dml finding: this migration inserts exactly one
+-- `lmc_settings` row, and that row is the kill-switch, default FALSE.
+--
+-- Reviewed HEAD: 3f0e2ce73b1c1efd409f10170ce1c01a335398e0
+-- Given for production project `gorgitwvdzxbnaxhrsrw`.
+-- Full record: docs/human-gates/lmc-spend-compensation-gate.md
+--
+-- OWNER APPROVAL RECORDED 2026-08-28. Verbatim scope, because an approval that
+-- is remembered loosely is an approval that grows:
+--
+--   "APPROVE #1305 MIGRATION. This approval applies ONLY to the reviewed #1305
+--    LMC spend-compensation migration in its CURRENT verified GREEN
+--    implementation. It does NOT approve: live payments; live-money activation;
+--    new pricing; new paid infrastructure; unrelated financial migrations;
+--    weakening LMC authorization; any broader financial functionality."
+--
+-- This annotation is an ACKNOWLEDGEMENT, not an auto-merge pass (doctrine
+-- §Merge model). The PR stays draft + `needs-human-gate`; auto-merge is not
+-- enabled; the production apply is a separate manual act through Supabase MCP
+-- `apply_migration`, never `db push` — the ledger's versions are assigned at
+-- apply time and do not match repository filenames, so a push would re-run
+-- migrations that are already applied.
+--
+-- Pre-apply verification performed against production `gorgitwvdzxbnaxhrsrw`
+-- BEFORE this was applied: the function did not exist, the flag row did not
+-- exist, all four CHECK constraints were at exactly the pre-migration
+-- definitions this file expects to replace, and the ledger held ZERO rows
+-- (`lmc_transactions`, `lmc_accounts`, `lmc_lots` all 0) — so no real user
+-- financial data was in scope.
 --
 -- ── THE GAP THIS CLOSES (measured on production 2026-08-28) ─────────────────
 --
