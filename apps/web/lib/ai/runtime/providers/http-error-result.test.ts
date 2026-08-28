@@ -96,8 +96,13 @@ describe("SAFETY: an unrecognised body is never repeated", () => {
       "gemini",
       response(400, JSON.stringify({ error: { status: "INVALID", message: "x".repeat(9000) } })),
     );
-    // status prefix + " — " + at most 180 chars of detail.
-    expect(r.message.length).toBeLessThan(240);
+    // status prefix + " — " + at most 300 chars of detail. The bound is wide
+    // enough to carry a vendor's full remediation sentence — a diagnosis
+    // truncated exactly where the FIX would appear is the failure mode this
+    // number was widened to remove (production, 2026-08-28: Google's
+    // "no longer available to new users. Please update your code to use
+    // models/…" was cut off at the model id).
+    expect(r.message.length).toBeLessThan(360);
   });
 
   it("only reads a bounded slice of a huge body", async () => {
