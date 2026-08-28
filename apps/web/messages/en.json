@@ -13821,5 +13821,30 @@
         "hint": "We are the client."
       }
     }
+  },
+  "lmc": {
+    "title": "LMC credit",
+    "noAccount": "No LMC account yet. One appears with the first credit or charge — nothing has happened so far.",
+    "unavailable": "We could not read your LMC balance just now. That does not mean it is zero — we simply cannot show it at this moment. Please try again later.",
+    "breakdown": "Purchased: {purchased} · granted: {promotional}",
+    "expired": "Expired: {amount} (past its validity date)",
+    "latest": "Last change: {kind} {amount} LMC · {when}",
+    "noMovements": "No movements yet.",
+    "topUpClosed": "Top-up is not open yet. When it is, you will be able to top up right here.",
+    "historyTitle": "Full history",
+    "kind": {
+      "purchased": "Purchased",
+      "promotional_signup": "Sign-up grant",
+      "promotional_activity": "Activity grant",
+      "admin_grant": "Granted by an administrator",
+      "referral_reward": "Referral reward",
+      "spend": "Spent",
+      "expiry": "Expired",
+      "reversal": "Reversed",
+      "refund_reversal": "Refund",
+      "chargeback_reversal": "Chargeback",
+      "spend_compensation": "Compensated for a failed action",
+      "other": "Other movement"
+    }
   }
 }

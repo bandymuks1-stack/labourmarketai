@@ -1015,6 +1015,57 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: ["konto", "einstellungen", "rollen", "sprache"],
     },
   },
+  // LMC — the platform credit a person actually holds. Deliberately its OWN
+  // entry rather than a synonym on `account_settings`: "kiek turiu LMC" is a
+  // question about a NUMBER, and landing on the top of a settings page and
+  // scrolling is not the answer. The anchor is the section itself.
+  //
+  // Deterministic on purpose (doctrine: rules/DB before a model). This is a
+  // balance lookup; there is nothing for an LLM to interpret, and a text match
+  // answers it in every locale at zero cost and zero egress.
+  {
+    id: "lmc_balance",
+    route: "/dashboard/account#lmc",
+    audience: "public",
+    labels: {
+      en: "My LMC credit",
+      lt: "Mano LMC kreditas",
+      ru: "Мой кредит LMC",
+      nl: "Mijn LMC-tegoed",
+      de: "Mein LMC-Guthaben",
+    },
+    synonyms: {
+      en: [
+        "lmc",
+        "credit",
+        "balance",
+        "how much lmc",
+        "lmc history",
+        "top up",
+        "what was charged",
+      ],
+      lt: [
+        "lmc",
+        "kreditas",
+        "likutis",
+        "kiek turiu lmc",
+        "lmc istorija",
+        "papildyti",
+        "uz ka buvo nuskaiciuota",
+      ],
+      ru: [
+        "lmc",
+        "кредит",
+        "баланс",
+        "сколько lmc",
+        "история lmc",
+        "пополнить",
+        "за что списали",
+      ],
+      nl: ["lmc", "tegoed", "saldo", "hoeveel lmc", "lmc historie", "opwaarderen"],
+      de: ["lmc", "guthaben", "saldo", "wie viel lmc", "lmc historie", "aufladen"],
+    },
+  },
   // Canonical privacy CONTROL screen (consent-and-disclosure v1) — consents,
   // discoverability, disclosure ledger, export & deletion. Distinct from the
   // public /legal/privacy POLICY text below.

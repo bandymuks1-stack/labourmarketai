@@ -13821,5 +13821,30 @@
         "hint": "Esame užsakovas."
       }
     }
+  },
+  "lmc": {
+    "title": "LMC kreditas",
+    "noAccount": "LMC sąskaita dar nesukurta. Ji atsiranda su pirmuoju kreditu arba nuskaitymu — kol kas nieko neįvyko.",
+    "unavailable": "Šiuo metu nepavyko nuskaityti jūsų LMC likučio. Tai nereiškia, kad likutis nulinis — tiesiog dabar jo parodyti negalime. Pabandykite vėliau.",
+    "breakdown": "Įsigyta: {purchased} · dovanota: {promotional}",
+    "expired": "Nebegalioja: {amount} (pasibaigė galiojimo laikas)",
+    "latest": "Paskutinis pokytis: {kind} {amount} LMC · {when}",
+    "noMovements": "Judėjimų dar nebuvo.",
+    "topUpClosed": "Papildymas dar neatidarytas. Kai jis veiks, papildyti galėsite čia pat.",
+    "historyTitle": "Visa istorija",
+    "kind": {
+      "purchased": "Įsigyta",
+      "promotional_signup": "Dovana už registraciją",
+      "promotional_activity": "Dovana už veiklą",
+      "admin_grant": "Administratoriaus skirta",
+      "referral_reward": "Atlygis už rekomendaciją",
+      "spend": "Panaudota",
+      "expiry": "Nustojo galioti",
+      "reversal": "Grąžinta atgal",
+      "refund_reversal": "Pinigų grąžinimas",
+      "chargeback_reversal": "Mokėjimo ginčas",
+      "spend_compensation": "Kompensuota už nepavykusį veiksmą",
+      "other": "Kitas judėjimas"
+    }
   }
 }

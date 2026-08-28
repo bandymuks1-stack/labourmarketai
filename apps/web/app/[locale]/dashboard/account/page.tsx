@@ -16,6 +16,7 @@ import { IdCard } from "lucide-react";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
+import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 
@@ -143,6 +144,13 @@ export default async function AccountPage({
           <span aria-hidden className="text-text-muted">→</span>
         </Link>
       </section>
+
+      {/* LMC — placed directly under the plan line because they answer the same
+          question at two depths: what this account is entitled to, and what it
+          actually holds. The ledger was proven correct on production months ago
+          and no screen showed a single number of it; this is that number, read
+          server-side under the caller's own RLS. */}
+      <LmcBalanceSection locale={locale} />
 
       <section className="card-border p-5">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
