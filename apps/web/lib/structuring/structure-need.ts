@@ -86,7 +86,13 @@ const KNOWN_SLUGS = new Set(ALL_WORK_TYPE_SLUGS);
 
 /** Country needles (codes, names, major cities) → ISO-2 market. */
 export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
-  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilnius", "kaunas", "klaipėd", "klaiped"] },
+  // City needles are STEMS, like the country names beside them. They were
+  // nominative forms ("vilnius", "kaunas"), and Lithuanian names a place in the
+  // locative — an employer writes "Vilniuje", never "Vilnius". So the one
+  // country whose own language this product leads in was the one country a bare
+  // city name failed to resolve. `lietuv` already caught "Lietuvoje"; the cities
+  // now behave the same way.
+  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "kaun", "klaipėd", "klaiped"] },
   { code: "LV", needles: ["latvia", "latvij", "латв", "riga", "ryga"] },
   { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
   { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "krak", "wroc", "gdansk", "gdańsk"] },
@@ -117,20 +123,81 @@ function firstMatch<T extends { needles: string[] }>(
   rules: T[],
   hay: string,
 ): T | null {
+  return firstMatchWithNeedle(rules, hay)?.rule ?? null;
+}
+
+/** Same scan, but it also reports WHICH needle matched. The count detector
+ *  needs the needle itself: it is the occupation word the employer actually
+ *  typed, in their own language, and a number sitting immediately before it is
+ *  that occupation's headcount. */
+function firstMatchWithNeedle<T extends { needles: string[] }>(
+  rules: T[],
+  hay: string,
+): { rule: T; needle: string } | null {
   for (const r of rules) {
     for (const n of r.needles) {
-      if (hay.includes(n)) return r;
+      if (hay.includes(n)) return { rule: r, needle: n };
     }
   }
   return null;
 }
 
-function detectTeamSize(hay: string): number | null {
+/** Regex-escape a needle before it is spliced into a pattern. The work-type
+ *  needles are letters and spaces today, so this changes nothing — it exists so
+ *  that a future needle containing a metacharacter cannot silently corrupt the
+ *  count pattern into matching something else. */
+function escapeForRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * How many people the need is for.
+ *
+ * THE BUG THIS SHAPE FIXES. The count used to be recognised in two ways, and
+ * both were hand-written lists in one language:
+ *
+ *   - a number before an occupation noun — but the nouns were English
+ *     (`welders? drivers? cleaners? cooks? pickers?`) plus four generic
+ *     person-words. So "4 welders" counted and "4 suvirintojų" did not, in a
+ *     Lithuanian-first product;
+ *   - a number after a demand verb — but the verb list held the Russian
+ *     "ищем" and not its Lithuanian equivalent "ieškome". So
+ *     "Нужны 5 сварщиков" kept its 5 and "Ieškome 6 betonuotojų" lost its 6.
+ *     Measured, not hypothetical: that exact asymmetry is what sent an
+ *     employer to a form with the headcount silently blank.
+ *
+ * The engine already knows every occupation it supports, in every language it
+ * supports — that is what `WORK_TYPE_RULES` is. So the multilingual case is not
+ * another list to maintain: a number sitting immediately before the needle that
+ * IDENTIFIED this need's occupation is that occupation's headcount, whatever
+ * language the employer wrote it in. Adding an occupation or a language to the
+ * taxonomy now improves counting for free, instead of requiring a matching edit
+ * here that nobody remembers to make.
+ *
+ * It stays deliberately narrow. The derived pattern fires ONLY for the needle
+ * that produced the recognised work type — not for every needle in the table —
+ * so an unrelated noun that happens to be countable ("we have 3 warehouses")
+ * cannot become a headcount unless the need is actually about that occupation.
+ * And nothing here is asserted: `structureNeed` returns a SUGGESTION the
+ * employer reviews, and the form only ever pre-fills a field the employer left
+ * empty.
+ */
+function detectTeamSize(hay: string, occupationNeedle: string | null): number | null {
   // A number directly tied to people/workers, OR right after a "need" verb.
   const patterns = [
     /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i,
-    /(?:need|require|looking for|reikia|нужно|требуется|ищем)\s+(?:about\s+|apie\s+)?(\d{1,4})\b/i,
+    // Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
+    // halves of pairs whose other half was already here.
+    /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i,
   ];
+  if (occupationNeedle) {
+    // Immediately adjacent only (one optional space, one optional "x"), so the
+    // number has to be counting THIS occupation rather than merely appearing
+    // somewhere in the same sentence as it.
+    patterns.push(
+      new RegExp(`\\b(\\d{1,4})\\s*(?:x\\s*)?${escapeForRegex(occupationNeedle)}`, "i"),
+    );
+  }
   for (const re of patterns) {
     const m = hay.match(re);
     if (m) {
@@ -171,15 +238,17 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   const roleHay = `${norm(input.role)} ${norm(input.description)} ${norm(input.notes)}`.trim();
   const locHay = `${norm(input.location)} ${roleHay}`.trim();
 
-  const wt = firstMatch(WORK_TYPE_RULES, roleHay);
-  const workType = wt && KNOWN_SLUGS.has(wt.slug) ? wt.slug : null;
+  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, roleHay);
+  const workType = wtHit && KNOWN_SLUGS.has(wtHit.rule.slug) ? wtHit.rule.slug : null;
   if (workType) reasons.push(`work_type:${workType}`);
 
   const cc = firstMatch(COUNTRY_RULES, locHay);
   const country = cc && KNOWN_COUNTRIES.has(cc.code) ? cc.code : null;
   if (country) reasons.push(`country:${country}`);
 
-  const teamSize = detectTeamSize(roleHay);
+  // Only the needle of a RECOGNISED work type is handed to the counter — an
+  // unrecognised occupation must not silently lend its noun to a headcount.
+  const teamSize = detectTeamSize(roleHay, workType ? wtHit?.needle ?? null : null);
   if (teamSize != null) reasons.push(`team_size:${teamSize}`);
 
   const startPeriod = detectStartPeriod(roleHay);
