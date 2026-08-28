@@ -103,7 +103,7 @@ export default async function CompanyScoutingPage({
   const employerContext = await resolveEmployerCompanyContext();
   if (employerContext.kind !== "ok") {
     return (
-      <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-6">
         <header className="flex flex-col gap-1">
           <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
             {t("title")}
@@ -114,7 +114,7 @@ export default async function CompanyScoutingPage({
           reason={employerContext.reason}
           activeWorkspaceName={employerContext.activeWorkspaceName}
         />
-      </main>
+      </div>
     );
   }
   // Contract-v2 criterion vocabulary is localized ONCE, in the shared
@@ -227,7 +227,7 @@ export default async function CompanyScoutingPage({
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("title")}
@@ -617,7 +617,13 @@ export default async function CompanyScoutingPage({
                       </span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  {/* `flex-wrap`, measured: three status badges on one line
+                      rendered 355px wide inside a 309px parent at 375px, which
+                      is the 13px of body overflow this page carried. They are
+                      independent labels with no reading order between them, so
+                      wrapping costs nothing and a second line is the honest
+                      answer on a phone. */}
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {/* Worker-initiated interest — a REAL internal signal
                         (demand_interest_signals row), never fabricated. */}
                     {result.interestByWorker[c.workerId] ? (
@@ -1037,6 +1043,6 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
-    </main>
+    </div>
   );
 }

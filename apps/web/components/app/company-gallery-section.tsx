@@ -51,7 +51,15 @@ export function CompanyGallerySection({
       ) : (
         <ul className="grid gap-2 sm:grid-cols-2">
           {projects.map((p) => (
-            <li key={p.projectId}>
+            // `min-w-0` is LOAD-BEARING and its absence was measured, not
+            // guessed: a grid item's default `min-width: auto` floors it at
+            // max-content, so this <li> rendered 427px wide inside a 301px
+            // grid at 375px and pushed `document.body.scrollWidth` to 464 —
+            // 89px of horizontal overflow on the whole company page. The
+            // `truncate` on the title below could never engage, because the
+            // item it lives in never shrank. Same defect the dashboard nav row
+            // documents at length; same one-class fix.
+            <li key={p.projectId} className="min-w-0">
               <Link
                 href={
                   `/dashboard/projects/${p.projectId}#project-gallery` as "/dashboard"
