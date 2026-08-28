@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 import { db, HAS_LOCAL_STACK } from "./market-map-db-state";
+import { fixtureCompanyOrgId, fixtureWorkerId } from "./fixture-ids";
 import { chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
@@ -33,9 +34,18 @@ import { chooseWorkContextIfAsked } from "./worklog-context";
  *
  * Local stack only (`pnpm e2e:local`); needs migration 20260827200000.
  */
-const ORG = "589620e6-4e36-4369-8cc7-0bb35b202ce3"; // Dev Construction: employer + training_provider
+/**
+ * RESOLVED at run time, never written down - `organizations.id` and
+ * `workers.id` are generated, so a literal here made this spec unpassable on a
+ * freshly reset database. That is the mirror of #1319: there a selector could
+ * never fail, here a whole chain could never pass, and both left a blocker
+ * everybody believed was covered. See `fixture-ids.ts`.
+ */
+let ORG = ""; // Dev Construction: employer + training_provider
+/** The fixture employer/institution owner — hand-written in dev-fixtures.sql. */
+const EMPLOYER_PROFILE = "aaaaaaaa-0000-0000-0000-000000000002";
 const LEARNER_PROFILE = "aaaaaaaa-0000-0000-0000-000000000001";
-const LEARNER_WORKER = "b43c82a1-153b-4c38-bbde-9840f3c61986";
+let LEARNER_WORKER = "";
 const EDUCATION_DEMAND = "99999999-0000-0000-0000-000000000002";
 
 const INSTITUTION = { email: "dev.company@local.test", password: "password" };
@@ -81,12 +91,75 @@ async function saveThroughConfirm(page: Page): Promise<void> {
   }
 }
 
+/**
+ * Grant the fixture employer the admin role, verify its company through a real
+ * authenticated session, then take the role back.
+ *
+ * `is_admin()` reads `auth.uid()`, so this cannot be done with the service key
+ * — which is the point of the guard. The role grant is a LOCAL fixture
+ * operation on a database that is reset before every run.
+ */
+async function verifyFixtureCompany(on: boolean): Promise<void> {
+  if (!on) {
+    await db(
+      "DELETE",
+      `profile_roles?profile_id=eq.${EMPLOYER_PROFILE}&role=eq.admin`,
+    );
+    return;
+  }
+  await db("POST", "profile_roles?on_conflict=profile_id,role", {
+    profile_id: EMPLOYER_PROFILE,
+    role: "admin",
+    is_active: true,
+  });
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const client = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+    { auth: { persistSession: false } },
+  );
+  const { error: signInError } = await client.auth.signInWithPassword({
+    email: INSTITUTION.email,
+    password: INSTITUTION.password,
+  });
+  if (signInError) throw new Error(`admin sign-in: ${signInError.message}`);
+  const { error } = await client
+    .from("companies")
+    .update({ verification_status: "verified" })
+    .eq("profile_id", EMPLOYER_PROFILE);
+  if (error) throw new Error(`verify company: ${error.message}`);
+}
+
 test.describe("pilot — the loop closes across institution, learner and employer", () => {
   test.skip(!HAS_LOCAL_STACK, "needs the local stack (pnpm e2e:local)");
   // Six browser journeys across two accounts, plus the journal pipeline.
   test.setTimeout(600_000);
 
   test.beforeAll(async () => {
+    // Resolve the generated ids BEFORE anything filters on them: an undefined
+    // organization id in a PostgREST filter returns an empty set, which reads
+    // as "the fixture is missing" and sends the next reader hunting the wrong
+    // problem.
+    ORG = await fixtureCompanyOrgId();
+    LEARNER_WORKER = await fixtureWorkerId(LEARNER_PROFILE);
+
+    // THE STEP THE CHAIN WAS MISSING, and it is a real one rather than a
+    // fixture convenience: a demand only reaches a worker's board once an
+    // ADMIN has verified the employer. That gate is deliberate - it is what
+    // stands between a stranger and a jobseeker - and it is enforced by
+    // `enforce_company_verification_guard`, which refuses even service_role
+    // (measured: 42501 "Only an admin can mark a company verified").
+    //
+    // So the spec performs the real act instead of routing around it: the
+    // fixture company owner is given the admin role for the length of the run,
+    // signs in, marks their company verified through the ordinary client -
+    // where `is_admin()` sees a real `auth.uid()` - and hands the role back in
+    // afterAll. Without this the loop failed at its last leg with "the
+    // employer's need never reached the learner's board", which was true and
+    // said nothing about why.
+    await verifyFixtureCompany(true);
+
     // The employer's need, in ordinary language. Seeded rather than typed
     // because the NL→structured intake is a separate unproven surface, and
     // this spec must fail for a matching reason, never for an intake one.
@@ -134,6 +207,10 @@ test.describe("pilot — the loop closes across institution, learner and employe
   });
 
   test.afterAll(async () => {
+    // Hand the admin role back first — it exists only for the verification act
+    // above and must not outlive this file.
+    await verifyFixtureCompany(false);
+
     /**
      * BEST-EFFORT, AND HONEST ABOUT WHY IT CANNOT BE MORE.
      *
@@ -160,9 +237,43 @@ test.describe("pilot — the loop closes across institution, learner and employe
   }) => {
     const marker = `E2E-LOOP-${Date.now()}`;
 
+    // ─── 0. THE INSTITUTION SAYS WHAT IT DOES ───────────────────────────
+    // The chain's own first sentence, and it was missing: the loop asserted
+    // "institution declares what it does" in its docstring and then relied on
+    // some OTHER spec having done it. On a freshly reset database nothing had,
+    // so step 1 failed with `relationship_slug: undefined` — a message about
+    // an invitation that was never allowed to exist.
+    //
+    // An organization may only call somebody a learner once it has said it
+    // provides education. That is the capability model working, so the chain
+    // performs the declaration rather than assuming it.
+    await test.step("the institution declares that it educates", async () => {
+      await loginAs(page, INSTITUTION);
+      await page.goto("/lt/dashboard/company", { waitUntil: "domcontentloaded" });
+      const education = page.locator(
+        '[data-testid="org-capability-checkbox-training_provider"]',
+      );
+      // Already settled on a re-run against a stack this spec has touched —
+      // the declaration is additive and cannot be withdrawn, so a second run
+      // finds the checkbox gone and that is the correct state, not a failure.
+      if ((await education.count()) > 0) {
+        await education.check();
+        await page.locator('[data-testid="org-capabilities-save"]').click();
+        await expect(
+          page.locator('[data-testid="org-capabilities-saved"]'),
+        ).toBeVisible({ timeout: 60_000 });
+      }
+      // A full server round trip: the declaration must SURVIVE, not merely
+      // render — the next step depends on the database, not on the screen.
+      await page.goto("/lt/dashboard/company", { waitUntil: "domcontentloaded" });
+      await expect(
+        page.locator('[data-testid="org-capability-settled-training_provider"]'),
+        "the organization still does not hold the education capability",
+      ).toBeVisible({ timeout: 60_000 });
+    });
+
     // ─── 1. THE INSTITUTION CONNECTS A LEARNER ──────────────────────────
     await test.step("the institution invites a person as a learner", async () => {
-      await loginAs(page, INSTITUTION);
       await page.goto(
         `/lt/dashboard/network?type=join_organization&org=${ORG}`,
         { waitUntil: "domcontentloaded" },

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 import { db, HAS_LOCAL_STACK } from "./market-map-db-state";
+import { fixtureAgencyOrgId, fixtureCompanyOrgId } from "./fixture-ids";
 
 /**
  * EDUCATION PILOT — an institution connects a LEARNER, and the learner stays a
@@ -40,8 +41,17 @@ import { db, HAS_LOCAL_STACK } from "./market-map-db-state";
  *
  * Local stack only (`pnpm e2e:local`), and it needs migration 20260827200000.
  */
-const ORG_WITH_EDUCATION = "589620e6-4e36-4369-8cc7-0bb35b202ce3"; // Dev Construction
-const ORG_WITHOUT_EDUCATION = "80472197-1c36-431b-9f78-04c0c1ed6966"; // Dev Staffing UAB
+/**
+ * RESOLVED, never written down. These ids are GENERATED - `organizations` rows
+ * are backfilled from `companies`/`agencies`, so every `db reset` mints new
+ * ones. They used to be string literals here, which meant this spec could not
+ * pass on ANY freshly reset database: the filters matched a nonexistent
+ * organization, returned an empty set, and the spec reported "fixture drift:
+ * the learner must already be an employee" - a true sentence about the wrong
+ * thing. See `fixture-ids.ts` for the full account.
+ */
+let ORG_WITH_EDUCATION = "";
+let ORG_WITHOUT_EDUCATION = "";
 
 const INSTITUTION = { email: "dev.company@local.test", password: "password" };
 const AGENCY = { email: "dev.agency@local.test", password: "password" };
@@ -71,6 +81,11 @@ async function rows(path: string): Promise<Record<string, unknown>[]> {
 
 test.describe("education pilot — an institution connects a learner", () => {
   test.skip(!HAS_LOCAL_STACK, "needs the local stack (pnpm e2e:local)");
+
+  test.beforeAll(async () => {
+    ORG_WITH_EDUCATION = await fixtureCompanyOrgId();
+    ORG_WITHOUT_EDUCATION = await fixtureAgencyOrgId();
+  });
 
   test.beforeEach(async () => {
     // Start from no learner link, whatever an earlier run left behind, so what
@@ -114,8 +129,37 @@ test.describe("education pilot — an institution connects a learner", () => {
       (r) => r.relationship_slug === "employee",
     )?.id;
 
-    // ── The institution invites, in plain language ────────────────────────
+    // ── The institution first SAYS it educates ───────────────────────────
+    // This spec used to assume the capability was already declared, which made
+    // it depend on another file having run first. Playwright orders specs
+    // alphabetically, and `education-pilot-institution-learner` sorts BEFORE
+    // `education-pilot-institution`, so on a freshly reset database the
+    // declaration had not happened and the invite was correctly refused. The
+    // spec then reported "the institution declared education and is still being
+    // refused" — an accusation against working code.
+    //
+    // A spec must establish its own preconditions. The declaration is additive
+    // and cannot be withdrawn, so this is a no-op on a stack that already has
+    // it, and the assertion below holds either way.
     await loginAs(page, INSTITUTION);
+    await page.goto("/lt/dashboard/company", { waitUntil: "domcontentloaded" });
+    const educationBox = page.locator(
+      '[data-testid="org-capability-checkbox-training_provider"]',
+    );
+    if ((await educationBox.count()) > 0) {
+      await educationBox.check();
+      await page.locator('[data-testid="org-capabilities-save"]').click();
+      await expect(
+        page.locator('[data-testid="org-capabilities-saved"]'),
+      ).toBeVisible({ timeout: 60_000 });
+      await page.goto("/lt/dashboard/company", { waitUntil: "domcontentloaded" });
+    }
+    await expect(
+      page.locator('[data-testid="org-capability-settled-training_provider"]'),
+      "the institution never got the education capability",
+    ).toBeVisible({ timeout: 60_000 });
+
+    // ── The institution invites, in plain language ────────────────────────
     await page.goto(
       `/lt/dashboard/network?type=join_organization&org=${ORG_WITH_EDUCATION}`,
       { waitUntil: "domcontentloaded" },
