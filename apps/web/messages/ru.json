@@ -11568,6 +11568,8 @@
         "corrected": "Обновил: {changes}.",
         "changeInsteadOf": "{next} (вместо {previous})"
       },
+      "createOrganizationHint": "Помогу создать организацию — данные и проверка находятся на одной странице.",
+      "chipCreateOrganization": "Создать организацию",
       "adminRouteHint": "Вот где это управляется:",
       "adminApprovalsChip": "Согласования",
       "adminRequestsChip": "Заявки",

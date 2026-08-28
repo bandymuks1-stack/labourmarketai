@@ -3609,7 +3609,9 @@
       "chipServiceRequests": "Leia teenus",
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
-      "chipMyOwnInterest": "Minu enda huvi"
+      "chipMyOwnInterest": "Minu enda huvi",
+      "createOrganizationHint": "Saan koos teiega organisatsiooni luua — andmed ja kontroll on ühel lehel.",
+      "chipCreateOrganization": "Loo organisatsioon"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

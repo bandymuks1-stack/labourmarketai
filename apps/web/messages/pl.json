@@ -3609,7 +3609,9 @@
       "chipServiceRequests": "Znajdź usługę",
       "interestInboxAmbiguous": "To może znaczyć dwie rzeczy — co chcesz zobaczyć?",
       "chipInterestOnMyNeeds": "Zainteresowanie moimi zapytaniami",
-      "chipMyOwnInterest": "Moje zgłoszenia"
+      "chipMyOwnInterest": "Moje zgłoszenia",
+      "createOrganizationHint": "Mogę razem z Tobą utworzyć organizację — dane i weryfikacja są na jednej stronie.",
+      "chipCreateOrganization": "Utwórz organizację"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

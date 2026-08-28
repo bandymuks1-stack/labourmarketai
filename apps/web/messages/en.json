@@ -11568,6 +11568,8 @@
         "corrected": "Updated: {changes}.",
         "changeInsteadOf": "{next} (instead of {previous})"
       },
+      "createOrganizationHint": "I can set up an organization with you — the details and the verification live on one page.",
+      "chipCreateOrganization": "Create an organization",
       "adminRouteHint": "Here is where that is handled:",
       "adminApprovalsChip": "Approvals",
       "adminRequestsChip": "Requests",

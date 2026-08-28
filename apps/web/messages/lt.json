@@ -11568,6 +11568,8 @@
         "corrected": "Atnaujinau: {changes}.",
         "changeInsteadOf": "{next} (vietoj {previous})"
       },
+      "createOrganizationHint": "Galiu kartu su jumis sukurti organizaciją — duomenys ir patvirtinimas yra viename puslapyje.",
+      "chipCreateOrganization": "Sukurti organizaciją",
       "adminRouteHint": "Štai kur tai tvarkoma:",
       "adminApprovalsChip": "Tvirtinimai",
       "adminRequestsChip": "Prašymai",
