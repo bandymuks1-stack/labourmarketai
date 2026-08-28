@@ -339,7 +339,7 @@ export default async function OpportunitiesPage({
       : [];
 
   return (
-    <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "opportunities", role_context: "worker" }}
@@ -1362,6 +1362,6 @@ export default async function OpportunitiesPage({
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }
