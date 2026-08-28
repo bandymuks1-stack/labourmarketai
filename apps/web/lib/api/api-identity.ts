@@ -1,8 +1,5 @@
 import "server-only";
-import {
-  createClient as createSupabaseJsClient,
-  type SupabaseClient,
-} from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireSupabaseClientEnv } from "@/lib/env";
 import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
@@ -145,6 +142,14 @@ async function identityFromBearer(
   token: string,
 ): Promise<ApiIdentityResult> {
   const { url, anonKey } = requireSupabaseClientEnv();
+
+  // Loaded only when a bearer request actually arrives (the same pattern
+  // lib/cv/extract.ts uses for its parsers). The cookie path — which is every
+  // browser request — must not pay for a library it never touches, in bundle
+  // size or in dev-server compile time.
+  const { createClient: createSupabaseJsClient } = await import(
+    "@supabase/supabase-js"
+  );
 
   const supabase = createSupabaseJsClient<Database>(url, anonKey, {
     global: { headers: { Authorization: `Bearer ${token}` } },
