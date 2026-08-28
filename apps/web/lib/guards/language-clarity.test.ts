@@ -205,12 +205,70 @@ describe("UI language status stays honest and discoverable", () => {
     expect(switcher).toMatch(/localePreview/);
   });
 
-  it("the account page shows the UI language line on all viewports", () => {
+  /**
+   * Owner ruling 2026-08-28: ONE canonical global UI-language control, in the
+   * authenticated shell. The account page's copy is removed - it was the second
+   * presentation of the same control, in a second place, for the same setting.
+   *
+   * The 2026-07-11 version of this test asserted the account line existed on all
+   * viewports, and it was right to: at that time the shell control was
+   * `hidden md:flex`, so deleting the account line would have left a phone with
+   * NO way to change language at all. The requirement was never "the account
+   * page carries a switcher" - it was "language is reachable at every width".
+   *
+   * That is what is asserted here, as a partition rather than a presence check:
+   * the header serves md and up, the avatar menu serves below md, the two
+   * classes are exact complements, and the account page carries neither.
+   * Exactly one control is visible at any width - never two, never zero.
+   */
+  it("exactly one UI-language control is reachable at every width", () => {
+    const header = read(
+      "components/app/conversation/chat/conversation-header.tsx",
+    );
+    const menu = read("components/app/account-menu.tsx");
     const account = read("app/[locale]/dashboard/account/page.tsx");
-    expect(account).toMatch(/data-testid="account-ui-language"/);
-    expect(account).toMatch(/<LocaleSwitcher\s*\/>/);
-    // The section must not be hidden away from desktop users again.
-    const section = account.slice(account.indexOf('data-testid="account-ui-language"') - 200);
-    expect(section.slice(0, 400)).not.toMatch(/md:hidden/);
+
+    // md and up: the canonical shell header.
+    expect(header).toContain("<LocaleSwitcher");
+    expect(header).toContain('mobile ? "hidden" : "hidden md:flex"');
+
+    // below md: the avatar menu, which the header renders at every width.
+    expect(menu).toContain("<LocaleSwitcher />");
+    expect(menu).toContain('data-testid="account-menu-locale"');
+    expect(menu).toContain("md:hidden");
+    expect(header).toContain("<AccountMenu />");
+
+    // and nowhere else: the account page no longer presents the same control.
+    expect(account).not.toContain("LocaleSwitcher");
+    expect(account).not.toContain("account-ui-language");
+  });
+
+  /**
+   * Negative control for the partition above. `md:hidden` and `hidden md:flex`
+   * are complements only while BOTH use the same breakpoint. If either side
+   * were moved to `sm:` or `lg:` the assertions above would still pass while
+   * leaving a band of widths with two language controls, or none.
+   */
+  it("the two language controls switch at the SAME breakpoint", () => {
+    const header = read(
+      "components/app/conversation/chat/conversation-header.tsx",
+    );
+    const menu = read("components/app/account-menu.tsx");
+    // Sliced on plain markers, never on a line-splitting regex: escape
+    // sequences do not survive every editing path this repository uses, and a
+    // guard whose regex silently degrades is worse than no guard.
+    const headerAt = header.indexOf("<LocaleSwitcher");
+    expect(headerAt).toBeGreaterThan(-1);
+    const headerTag = header.slice(headerAt, header.indexOf("/>", headerAt) + 2);
+    const menuAt = menu.indexOf('data-testid="account-menu-locale"');
+    expect(menuAt).toBeGreaterThan(-1);
+    const menuRow = menu.slice(menuAt - 400, menuAt);
+
+    expect(headerTag).toContain("md:flex");
+    expect(menuRow).toContain("md:hidden");
+    for (const bp of ["sm:", "lg:", "xl:"]) {
+      expect(headerTag, `header must switch at md, not ${bp}`).not.toContain(bp);
+      expect(menuRow, `menu must switch at md, not ${bp}`).not.toContain(bp);
+    }
   });
 });

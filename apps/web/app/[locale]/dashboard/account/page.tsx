@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
@@ -42,7 +41,6 @@ export default async function AccountPage({
   const tRoot = await getTranslations();
   const tRole = await getTranslations("auth.signup.role");
   const tSwitcher = await getTranslations("auth.roleSwitcher");
-  const tCommon = await getTranslations("common");
   const tProfile = await getTranslations("auth.dashboard.tabs");
 
   const supabase = await createClient();
@@ -401,19 +399,6 @@ export default async function AccountPage({
           })}
         </ul>
       </details>
-
-      {/* UI language — visible on ALL viewports (WAGON 5): the account page is
-          where users expect a language setting, so the line is no longer
-          mobile-only. Reuses the existing locale architecture (lt/en/ru active,
-          RU preview-tagged) — no new locales, no new switcher system. */}
-      <section className="card-border p-5" data-testid="account-ui-language">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {tCommon("localeSwitch")}
-        </p>
-        <div className="mt-3">
-          <LocaleSwitcher />
-        </div>
-      </section>
 
       <section className="card-border p-5">
         <form action={`/${locale}/auth/logout`} method="post">
