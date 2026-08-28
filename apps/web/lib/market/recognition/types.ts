@@ -96,6 +96,18 @@ export interface NextAction {
   readonly code: NextActionCode;
   /** Existing route the action opens, when it lives on another page. */
   readonly href?: string;
+  /**
+   * Whether the employer's own need text travels with this action.
+   *
+   * A plain `href` opens the destination EMPTY, which is why the employer used
+   * to describe their need here and then describe it again on the demand form.
+   * When this is true the surface first writes the canonical draft
+   * (`customer_requests`, status='draft', owner-scoped) that the destination
+   * already auto-continues from, and only then navigates. The flag lives on the
+   * action rather than in the component so the pure layer stays the one place
+   * that decides which hand-offs carry context.
+   */
+  readonly carriesNeedText?: boolean;
 }
 
 export type RecognitionConfidence = "high" | "medium" | "low";

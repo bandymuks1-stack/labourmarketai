@@ -719,6 +719,10 @@
       "needsClear": "{n} Anfragen wurden klar genug für besseres Matching.",
       "projectsClarified": "{n} Projekte wurden zu einer Top-Shortlist geklärt.",
       "topTrades": "Diese Woche am meisten gefragt: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Ihr Text wurde nicht gespeichert: ohne Unternehmens-Arbeitsbereich hat ein Entwurf keine Zugehörigkeit. Das Bedarfsformular öffnet leer — das Unternehmen können Sie dort anlegen.",
+      "failed": "Ihr Text konnte nicht gespeichert werden, daher öffnet das Bedarfsformular leer. Die Beschreibung müssen Sie erneut eingeben."
     }
   },
   "quickNav": {
