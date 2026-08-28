@@ -50,7 +50,8 @@
 | Journal **without an employer** | `PROVEN` | 35/36 profiles hold an active org-less personal context |
 | Work Journal entry (chat-first form) | `PROVEN` | browser + DB, `education-pilot-student` |
 | Journal → capabilities → worker_skills | `PROVEN` | 3 cases browser+DB; 100% propagation in prod |
-| Living CV / Player Card | `PARTIAL` | renders; EU export shipped (#1291); not fully E2E |
+| Living CV / Player Card | `PROVEN` (import chain) | Browser-proven end to end 2026-08-28: in the chat, "Įkelk mano CV" produces the import control, a real DOCX goes through `/api/cv/extract` (mammoth), `parseCvSections` proposes the job, and only the explicit per-item confirm writes it — a fresh navigation to `/lt/cv` finds it in `cv-work-history`. Carries a negative control (nothing in the CV **before** the confirm). Renders + EU export unchanged (#1291). |
+| CV import from **PDF** | `PROVEN` (was silently broken) | `extract.ts` passed unpdf `mergePages: true`, which collapses all whitespace including newlines. `parseCvSections` splits on newlines, so every PDF CV arrived as ONE line: zero work-history proposals, one nonsense education row. Fixed and guarded behaviourally at both the unit and browser levels; both guards observed failing when the flag is reintroduced. |
 | Practice / volunteering as experience | `PARTIAL` | RPC proven under RLS; **no browser proof** (form trigger phrase unknown) |
 | Opportunities board | `PROVEN` | browser, `pilot-interest-loop` |
 | Express interest | `PROVEN` | browser + DB, state-independent |

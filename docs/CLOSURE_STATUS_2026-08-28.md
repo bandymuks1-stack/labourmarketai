@@ -57,37 +57,76 @@ every caller for them by design.
 
 ---
 
-## 2. LIVING_CV — a measured reason, and a rotted spec
+## 2. LIVING_CV — closed, and it was hiding a real defect
 
-Three CV specs exist. Run against the local stack with a real session:
-**4 passed, 2 failed, 1 skipped.**
+The spec was wrong about WHERE, and repointing it at the right surface
+uncovered something the old spec could never have seen.
 
-The two failures are `cv-upload-authenticated`, and they fail for the same
-reason:
+### The rotted spec (as diagnosed)
+
+`cv-upload-authenticated` navigated to `/lt/dashboard/profile` and waited for a
+file input. Measured there: **0 `cv-import-upload`, 0 file inputs**. That page
+has never hosted a CV upload control; `CvImportUpload` is mounted in the chat CV
+flow and in the marketing `/create-cv` panel. This is the #1319 class in its
+second form — #1319 found selectors that could never FAIL, this one could never
+PASS.
+
+The fix was NOT to restore an obsolete profile control to satisfy a test. The
+spec now drives what a person actually does:
 
 ```
-/dashboard/profile  →  [data-testid="cv-import-upload"]   count 0
-/dashboard/profile  →  input[type=file]                   count 0
+/lt/dashboard → "Įkelk mano CV" in the composer
+  → the import control APPEARS in the conversation (intent → surface)
+  → a real DOCX → POST /api/cv/extract (mammoth)
+  → parseCvSections proposes the job as its own reviewable row
+  → NOTHING saved yet
+  → one explicit per-item confirm → confirmCvWorkHistoryAction
+  → a FRESH navigation to /lt/cv finds it in cv-work-history
 ```
 
-The spec navigates to `/lt/dashboard/profile` and waits for a file input that
-**that page has never hosted**. `CvImportUpload` is mounted in exactly two
-places, and neither is the profile page:
+Both tests pass against the local stack.
 
-* `components/app/conversation/worker-cv-flow.tsx` — the chat CV flow;
-* `components/app/cv-input-panel.tsx` — used by the marketing `/create-cv` page.
+### The defect the repoint exposed: every PDF CV lost its line structure
 
-So the CAPABILITY exists and the SPEC is wrong about where. This is the #1319
-class in its second form: not a selector that cannot fail, but a spec asserting
-a surface the product does not have. In CI it never even reported, because the
-authenticated specs skip without a storage state.
+`lib/cv/extract.ts` called unpdf's `extractText(pdf, { mergePages: true })`.
+That option does not merely join pages — it runs `.replace(/\s+/g, " ")` over
+the joined result, **destroying every newline pdf.js produced**. Downstream,
+`parseCvSections` splits on newlines.
 
-**Status: `LIVING_CV = PARTIAL`, with the exact remaining work:** repoint
-`cv-upload-authenticated` at the chat CV flow (the surface that really mounts
-the control), confirm the DOCX and PDF paths end-to-end there, and identify the
-one skipped test's condition. The upload capability itself is **not** shown to
-be broken by anything measured here — only unproven on the surface the spec
-chose.
+So a PDF CV reached the parser as ONE line. Measured on a four-line CV:
+
+| | with `mergePages: true` | without it |
+|---|---|---|
+| lines reaching the parser | **1** | 4 |
+| work-history proposals | **0** | 1, correct |
+| education proposals | 1, institution `"Jonas Petraitis UAB Statybos meistrai"` | 1, correct |
+
+PDF is the commonest CV format there is, and no job could be imported from one.
+Text arrived, so nothing looked broken — only structure was gone, and only a
+structural assertion can see that. It was invisible to every existing test
+because the one PDF assertion in the suite checked that a *word* came back.
+
+Fixed by requesting the per-page array (`extractText(pdf)`) and joining the
+pages ourselves — the call site already handled that shape.
+
+### Guarded, and the guards were observed failing
+
+Neither guard is a grep, and neither is taken on trust:
+
+* `lib/cv/extract.test.ts` — a four-line PDF must reach the parser as four
+  lines and yield the job. It carries its own **negative control**: the same
+  text with newlines collapsed must yield **zero** jobs, otherwise the
+  assertion would be measuring nothing. Reintroducing the flag: *"a 4-line CV
+  must not arrive as 1 line: expected 1 to be 4"*.
+* `tests/e2e/cv-upload-authenticated.spec.ts` — the PDF test asserts a
+  work-history ROW at the real HTTP boundary. Reintroducing the flag:
+  *"a PDF CV must yield a work-history proposal, not one collapsed line"*.
+
+**Status: `LIVING_CV = YES` for the import chain.** The one remaining skip in
+the CV specs is identified and is not a rot: `quick-confirm-cv-export.spec.ts`
+carries an unconditional `test.skip(true, …)` with a written six-step plan,
+blocked on a manager+worker session pair sharing an org with
+`journal_review_enabled` — cross-actor work, not CV work.
 
 ---
 
