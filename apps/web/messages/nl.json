@@ -719,6 +719,10 @@
       "needsClear": "{n} aanvragen werden duidelijk genoeg voor betere matching.",
       "projectsClarified": "{n} projecten werden verduidelijkt tot een top-shortlist.",
       "topTrades": "Meest gevraagd deze week: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Uw tekst is niet opgeslagen: zonder bedrijfswerkruimte hoort een concept nergens bij. Het behoefteformulier opent leeg — u kunt het bedrijf daar aanmaken.",
+      "failed": "Uw tekst kon niet worden opgeslagen, dus het behoefteformulier opent leeg. U moet de omschrijving opnieuw invoeren."
     }
   },
   "quickNav": {

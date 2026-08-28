@@ -719,6 +719,10 @@
       "needsClear": "{n} užklausų tapo pakankamai aiškios geresniam sutapimui.",
       "projectsClarified": "{n} projektų patikslinti iki geriausių variantų sąrašo.",
       "topTrades": "Daugiausia ieškota šią savaitę: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Jūsų tekstas neišsaugotas: kol neturite įmonės darbo srities, juodraštis neturi kam priklausyti. Poreikio formą atidarome tuščią — įmonę galite sukurti ten pat.",
+      "failed": "Jūsų teksto išsaugoti nepavyko, todėl poreikio formą atidarome tuščią. Aprašymą teks suvesti iš naujo."
     }
   },
   "quickNav": {

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 import { Link } from "@/lib/i18n/navigation";
+import { startDemandFromNeedTextAction } from "@/lib/demand/demand-drafts-actions";
 import { recognizeIntent } from "@/lib/market/recognition";
 import type {
   RecognitionIntent,
@@ -16,8 +18,16 @@ import type {
  * need or offer?". It is the PREPARATION step before search/request: for any of the
  * four intents it asks the right questions, recognizes what is known, shows what is
  * missing + risks + readiness, and hands off to the EXISTING real surface with up
- * to 3 working next actions. Pure & non-persisted — it saves nothing and contacts
- * no one (handoff targets are real existing routes).
+ * to 3 working next actions. The hand-off targets are real existing routes.
+ *
+ * ONE action persists, and only one: the employer's "continue to the demand
+ * form". It writes the canonical draft (`customer_requests`, status='draft',
+ * owner-scoped, through the existing `save_demand_draft` RPC) so the sentence
+ * the employer just typed HERE arrives in the demand wizard instead of being
+ * read, scored and discarded. A draft is not a demand: nothing is published,
+ * nothing is matched, nobody is contacted, and the wizard's own three steps and
+ * explicit create still stand between it and a real request. Everything else on
+ * this screen stays pure and non-persisted.
  */
 
 const INTENTS: readonly RecognitionIntent[] = [
@@ -39,6 +49,39 @@ export function OfferDemandRecognizer() {
   const [intent, setIntent] = useState<RecognitionIntent>("need_work");
   const [text, setText] = useState("");
   const [card, setCard] = useState<RecognizedCard | null>(null);
+  const router = useRouter();
+  const locale = useLocale();
+  /** The action code currently writing its draft, so only the pressed control
+   *  shows a pending state. */
+  const [carrying, setCarrying] = useState<string | null>(null);
+  /** Honest degradation. `no_company` is an EXPECTED state - a signed-in person
+   *  with no employer workspace yet - not an error, so it explains itself and
+   *  the navigation still happens rather than trapping the user here. */
+  const [carryNote, setCarryNote] = useState<"no_company" | "failed" | null>(
+    null,
+  );
+
+  /**
+   * Carry the need into the canonical draft, then open the demand form.
+   *
+   * Navigation happens either way. If the draft could not be written the
+   * employer is told why and lands on the same form the plain link would have
+   * reached - never worse off than before, and never told something was saved
+   * when it was not.
+   */
+  async function carryToDemand(href: string) {
+    setCarrying("continue_to_demand");
+    setCarryNote(null);
+    try {
+      const res = await startDemandFromNeedTextAction(text, locale);
+      if (!res.ok && res.reason !== "empty") setCarryNote(res.reason);
+    } catch {
+      setCarryNote("failed");
+    } finally {
+      setCarrying(null);
+    }
+    router.push(`/${locale}${href}`);
+  }
 
   const chooseIntent = (next: RecognitionIntent) => {
     setIntent(next);
@@ -208,19 +251,54 @@ export function OfferDemandRecognizer() {
             <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
               {t("nextActionTitle")}
             </span>
-            {card.nextActions.map((a) => (
-              <Link
-                key={a.code}
-                href={(a.href ?? "/dashboard/profile") as "/dashboard"}
-                data-testid={`recognizer-next-${a.code}`}
-                className="flex min-h-[2.75rem] items-center justify-between gap-3 rounded-md border border-brand-blue bg-brand-blue/10 px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/20"
+            {card.nextActions.map((a) => {
+              const href = a.href ?? "/dashboard/profile";
+              const style =
+                "flex min-h-[2.75rem] w-full items-center justify-between gap-3 rounded-md border border-brand-blue bg-brand-blue/10 px-4 py-2 text-left text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/20 disabled:cursor-not-allowed disabled:opacity-60";
+              const label = (
+                <>
+                  <span className="truncate">{t(`action.${a.code}`)}</span>
+                  <span aria-hidden className="shrink-0 text-text-muted">
+                    →
+                  </span>
+                </>
+              );
+              // A carrying hand-off must WRITE before it navigates, so it is a
+              // button. Every other action stays a real <Link> - same look, same
+              // testid, and still a plain navigable anchor for the middle-click
+              // and open-in-new-tab that a link is expected to support.
+              return a.carriesNeedText ? (
+                <button
+                  key={a.code}
+                  type="button"
+                  onClick={() => void carryToDemand(href)}
+                  disabled={carrying === a.code}
+                  data-testid={`recognizer-next-${a.code}`}
+                  data-carries-need-text="yes"
+                  className={style}
+                >
+                  {label}
+                </button>
+              ) : (
+                <Link
+                  key={a.code}
+                  href={href as "/dashboard"}
+                  data-testid={`recognizer-next-${a.code}`}
+                  className={style}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+            {carryNote && (
+              <p
+                className="text-basis leading-relaxed text-state-warning"
+                data-testid="recognizer-carry-note"
+                data-reason={carryNote}
               >
-                <span className="truncate">{t(`action.${a.code}`)}</span>
-                <span aria-hidden className="shrink-0 text-text-muted">
-                  →
-                </span>
-              </Link>
-            ))}
+                {t(`carryNote.${carryNote}`)}
+              </p>
+            )}
           </div>
         </div>
       ) : (

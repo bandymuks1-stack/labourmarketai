@@ -719,6 +719,10 @@
       "needsClear": "{n} requests became clear enough for better matching.",
       "projectsClarified": "{n} projects were clarified into a top shortlist.",
       "topTrades": "Most requested this week: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Your text was not saved: without a company workspace a draft has nothing to belong to. The demand form opens empty — you can create the company there.",
+      "failed": "Your text could not be saved, so the demand form opens empty. You will need to enter the description again."
     }
   },
   "quickNav": {

@@ -148,7 +148,14 @@ function buildNextActions(
       const actions: NextAction[] = [];
       if (importantMissing.length > 0)
         actions.push({ code: "complete_missing_fields", href: COMPANY_HREF });
-      actions.push({ code: "continue_to_demand", href: COMPANY_HREF });
+      // The ONE hand-off that carries the employer's sentence with it. Without
+      // this the recognizer read the need, scored it, and dropped it on the
+      // floor - the demand form opened blank and the employer typed it twice.
+      actions.push({
+        code: "continue_to_demand",
+        href: COMPANY_HREF,
+        carriesNeedText: true,
+      });
       // NOTE: a top 1–3 candidate preview is intentionally NOT a user action here
       // — the live worker pool is not wired (audit §10). No dead-end button.
       return actions.slice(0, 3);
