@@ -875,7 +875,7 @@ export function buildRoutingAuditRecord(
     // three-member vocabulary and `fallback_reason` describes a retry that did
     // happen, not a call that failed.
     reason: outcome.providerFailure
-      ? `${decision.reason} — vendor call failed: ${outcome.providerFailure.slice(0, 160)}`
+      ? `${decision.reason} — vendor call failed: ${outcome.providerFailure.slice(0, 400)}`
       : decision.reason,
     fallback: decision.fallbackApplied,
     escalation: decision.escalated,

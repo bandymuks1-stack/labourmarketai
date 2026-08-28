@@ -106,7 +106,7 @@ export async function httpErrorResult(
   return {
     code: "provider_error",
     message: detail
-      ? `${vendor} http ${res.status} — ${detail.slice(0, 180)}`
+      ? `${vendor} http ${res.status} — ${detail.slice(0, 300)}`
       : `${vendor} http ${res.status}`,
   };
 }
