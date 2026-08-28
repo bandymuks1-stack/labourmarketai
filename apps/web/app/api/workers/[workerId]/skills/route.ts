@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { resolveApiIdentity } from "@/lib/api/api-identity";
 import {
   ownsWorker,
   workerProfessionSkillIds,
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 /** GET /api/workers/:workerId/skills — the worker's declared skills. */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ workerId: string }> },
 ) {
   const { workerId } = await params;
@@ -20,14 +20,14 @@ export async function GET(
     return NextResponse.json({ ok: false, message: "Invalid worker id" }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
+  // Authority is unchanged below: ownsWorker + RLS still decide.
+  const auth = await resolveApiIdentity(req);
+  if (!auth.ok) {
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }
-  if (!(await ownsWorker(supabase, workerId, user.id))) {
+  const { userId, supabase } = auth.identity;
+  if (!(await ownsWorker(supabase, workerId, userId))) {
     return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
@@ -82,14 +82,14 @@ export async function POST(
   }
   const requested = [...new Set(parsed.data.skillIds)];
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
+  // Authority is unchanged below: ownsWorker + RLS still decide.
+  const auth = await resolveApiIdentity(req);
+  if (!auth.ok) {
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }
-  if (!(await ownsWorker(supabase, workerId, user.id))) {
+  const { userId, supabase } = auth.identity;
+  if (!(await ownsWorker(supabase, workerId, userId))) {
     return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 

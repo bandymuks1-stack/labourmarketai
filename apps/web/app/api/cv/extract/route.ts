@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { resolveApiIdentity } from "@/lib/api/api-identity";
 import { extractCvText, MAX_CV_BYTES } from "@/lib/cv/extract";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -25,15 +25,16 @@ export const dynamic = "force-dynamic";
 const RATE_LIMIT = { limit: 10, windowMs: 10 * 60 * 1000 } as const;
 
 export async function POST(req: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  // SHARED AUTHENTICATED API: cookie session OR `Authorization: Bearer`.
+  // One resolver for every route (lib/api/api-identity.ts) — the header is
+  // never parsed here, and a failed resolution is 401, never anonymous.
+  const auth = await resolveApiIdentity(req);
+  if (!auth.ok) {
     return NextResponse.json({ ok: false, code: "unauthorized" }, { status: 401 });
   }
+  const { userId } = auth.identity;
 
-  const decision = rateLimit({ name: "cv-extract", key: user.id, ...RATE_LIMIT });
+  const decision = rateLimit({ name: "cv-extract", key: userId, ...RATE_LIMIT });
   if (decision.limited) {
     return NextResponse.json(
       { ok: false, code: "rate-limited" },

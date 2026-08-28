@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { createClient } from "@/lib/supabase/server";
+import { resolveApiIdentity } from "@/lib/api/api-identity";
 import {
   DOCUMENT_FILES_BUCKET,
   DOCUMENT_FILE_SIGNED_URL_TTL_SECONDS,
@@ -38,7 +38,7 @@ const UUID_RX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ) {
   const { fileId } = await params;
@@ -46,13 +46,14 @@ export async function GET(
     return NextResponse.json({ ok: false }, { status: 404 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
+  // Every authority below (the RLS read, the gated download recording, the
+  // signed-URL mint) is untouched and still runs as the CALLER.
+  const auth = await resolveApiIdentity(req);
+  if (!auth.ok) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+  const { supabase } = auth.identity;
 
   // RLS answers or it does not — one 404 for "missing" and "not yours".
   const { data, error } = await asAny(supabase)

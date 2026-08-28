@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { resolveApiIdentity } from "@/lib/api/api-identity";
 import { uuidSchema } from "@/lib/skills";
 
 export const runtime = "nodejs";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  * profession_skills + skills readable to any authenticated user.
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ professionId: string }> },
 ) {
   const { professionId } = await params;
@@ -23,16 +23,17 @@ export async function GET(
     );
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
+  const auth = await resolveApiIdentity(req);
+  if (!auth.ok) {
     return NextResponse.json(
       { ok: false, message: "Unauthorized" },
       { status: 401 },
     );
   }
+  // RLS decides what this taxonomy read returns, exactly as before; the
+  // transport only decided WHO is asking.
+  const { supabase } = auth.identity;
 
   // Names are NOT returned — they live in JSON keyed by slug
   // (PLATFORM_DOCTRINE §2). The client renders t(`skillNames.${slug}`).
