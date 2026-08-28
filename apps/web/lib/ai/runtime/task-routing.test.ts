@@ -239,6 +239,10 @@ describe("routing audit record — every program field, honest nulls", () => {
       fallback: false,
       escalation: false,
       blocked: null,
+      // A clean route carries no vendor failure. The field is structural (the
+      // money ledger branches on it to tell a refusal from a success) so it
+      // appears here as an explicit null rather than being absent.
+      providerFailure: null,
       secondModelReview: false,
       estimatedCostUsd: null,
       actualCostUsd: null,

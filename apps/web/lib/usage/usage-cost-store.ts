@@ -152,7 +152,18 @@ export function buildUsageCostEventRow(
     event_type: "usage",
     // A blocked run performed no billable work — recorded as `rejected` so a
     // refusal is countable but never sums into spend as a success.
-    status: record.blocked ? "rejected" : "success",
+    // THREE outcomes, not two. `blocked` means the ROUTER refused to dispatch
+    // (cost ceiling, unpriced model, missing human gate). `providerFailure`
+    // means it DID dispatch and the vendor refused — a different event, and
+    // one this line used to record as `success`. Production, 2026-08-28: a
+    // Gemini 404 landed here as a successful usage event carrying a pre-run
+    // estimate, which at month end is spend that never happened attached to a
+    // delivery that never happened.
+    status: record.blocked
+      ? "rejected"
+      : record.providerFailure
+        ? "error"
+        : "success",
     provider: record.providerAdapter.slice(0, 64),
     service: "llm_completion",
     resource: record.modelId
