@@ -86,11 +86,15 @@
 | Documents / approvals | `UNPROVEN` | substantial code |
 | Mobility | `PARTIAL` | country/location signals exist; radius YELLOW by design |
 | Market intelligence | `PARTIAL` | market map + Eurostat import |
-| **AI router** | `IMPLEMENTED`, `ENV-GATED` | one router, chain, privacy gate, cost model — **`ai_runs = 0`, no provider configured** |
-| AI vendorless accounting | `UNPROVEN` | #1294 deployed; needs a user to hit an AI surface |
-| Pricing / LMC / billing | `OWNER-GATED` | canonical catalogue exists; paid chain gated |
+| **AI router** | `IMPLEMENTED`, `ENV-GATED` | one router, chain, privacy gate, cost model — **`ai_runs = 0`, no provider configured**. Reachable from 4 production routes (blocker 4.5); the gate is `AI_PROVIDER_MODE`, not code |
+| AI vendorless accounting | `UNPROVEN` | #1294 deployed; needs a user to hit an AI surface. `ai_runs = 0` is now ambiguous between "unused" and "write failing silently" — see blocker 4.5 |
+| **LMC ledger engine** | `PROD-PROVEN (rolled back)` | 2026-08-28, production, inside a transaction that was rolled back so no row and no flag persisted: top-up credits · idempotent replay credits nothing twice · spend debits · idempotent replay debits nothing twice · overspend refused with the balance unchanged (no phantom charge) · a foreign actor cannot debit an account · purchase refund claws back only what is left, recording the already-spent remainder honestly · the ledger refuses UPDATE (append-only) |
+| **LMC spend reversal** | `MISSING` | `lmc_reverse_v1` reverses CREDIT transactions only — it resolves the original's lot, and a `spend` has none (`lmc_original_not_reversible: spend has no credit lot`). There is therefore **no in-product remedy for a debited user whose paid action failed or was not delivered** |
+| Pricing / LMC / billing (commercial activation) | `OWNER-GATED` | canonical catalogue exists; all six `lmc_settings` flags are false in production and `stripe_lmc_topups_enabled` / `live_payments_enabled` are `owner_only` — the shared setter refuses **every** caller by design, so no agent path can enable them |
+| Stripe / payments chain | `UNPROVEN` | webhook + checkout + subscription store exist with signature and idempotency tests; `billing_customers`, `billing_subscriptions`, `payment_webhook_events`, `subscriptions` are all **0 rows** — nothing has ever run |
 | Public vacancies / SEO | `UNPROVEN` | live |
 | **Languages** | `PARTIAL` | **routes 5 of 26 required** — see [`LANGUAGE_MATRIX.md`](LANGUAGE_MATRIX.md) |
+| **Concept-resolution seam** | `IMPLEMENTED` | `lib/structuring/concept-resolution/` — LANGUAGE_MATRIX §4.1 step 2 is done: the needle pack is no longer the only implementation of `expression → concept`, a language may arrive as DATA, and coverage is measured from terms instead of declared in a tuple. Georgian is now REPRESENTABLE and honestly reports 0 coverage |
 
 ### Recorded architecture, deliberately unimplemented
 | capability | status |
@@ -154,12 +158,62 @@
    resolves through the canonical `relationshipTypes` catalogue in all five
    active locales. The architectural dependence on hand-maintained needle lists
    is UNCHANGED and remains the real language blocker.
-5. **AI is not env-gated — it is CODE-gated, which is a stronger statement.**
-   `apps/web/lib/ai/provider.ts` unconditionally returns the inert no-op
-   provider; there is no real branch to select, so no environment variable can
-   turn it on. `ai_runs` = 0. Activating it is an owner decision about provider,
-   budget and key, not a deploy setting. It must never be described as
-   operational.
+5. **AI — CORRECTED 2026-08-28. The previous entry here read the wrong file
+   and understated what is built.** It said `apps/web/lib/ai/provider.ts`
+   unconditionally returns the inert no-op, therefore AI is CODE-gated and no
+   environment variable can turn it on. The first half is true and the
+   conclusion does not follow, because that file is the LEGACY assist skeleton
+   and it serves exactly ONE surface (`estimate-clarify`). It is not the
+   runtime.
+
+   The runtime is `apps/web/lib/ai/runtime/`, and it is **env-gated**:
+   `runtime/config.ts` reads `AI_PROVIDER_MODE`, `AI_PROVIDER`, the per-provider
+   keys and the local base URL, and `resolveAiRuntimeConfig` returns
+   `disabled` / `mock` / `live` from them. Five real adapters exist (anthropic,
+   openai, gemini, xai, local) plus DeepL as a secondary, behind a provider
+   chain, a cost model, a daily-run budget and the egress gate.
+
+   It is **reachable from four production routes** (verified by import chain,
+   2026-08-28), so the surfaces are live and the router really resolves a route
+   for every visitor who uses them:
+
+   | route | component chain | agent |
+   |---|---|---|
+   | `/dashboard/journal` | composer → `journal-ai-suggestions` | `work_journal` |
+   | `/dashboard/opportunities` | panel → `market-explanation-request` | `market_explanation` |
+   | `/dashboard/profile` | `profile-text-first-flow` | `worker_profile` |
+   | `/match-preview` (public) | `match-preview-form` | `matching_explanation` |
+
+   So `ai_runs = 0` does **not** mean "the code cannot run". With
+   `AI_PROVIDER_MODE` unset every one of those routes resolves as
+   `vendorless_route` and **should already be writing an `ai_runs` row**
+   (#1294). Zero rows therefore means one of two things, and they are not the
+   same finding: nobody has used those four surfaces since #1294 deployed
+   (2026-08-25), or the best-effort audit write is failing silently. That
+   question is now the honest open item — not "AI is dead code".
+
+   **What activation actually costs.** Two gates, and only one of them is about
+   a key:
+
+   - a **provider**: either a cloud key (`AI_PROVIDER_MODE=live` +
+     `AI_PROVIDER=<vendor>` + that vendor's key + its `AI_<VENDOR>_ENABLED`
+     flag), or the keyless `local` seam (`AI_LOCAL_BASE_URL` +
+     `AI_LOCAL_MODEL`, both validated, plaintext http confined to loopback);
+   - the **egress gate** (`runtime/data-egress.ts`), whose grant table is
+     EMPTY by owner decision. An external provider with no grant may receive
+     `PUBLIC` only.
+
+   The consequence is precise and worth stating, because it is the thing that
+   makes a first live run cheap and safe: **exactly one task is classed
+   `PUBLIC`** — `explain_market_demand`, aggregate published-vacancy counts for
+   one occupation, no data subject. It is served by the
+   `/dashboard/opportunities` surface above. A cloud key alone therefore
+   activates that ONE route for real, and every other route keeps routing
+   vendorless — which is the owner's stated order (`BLOCK external → try local
+   → otherwise fail safely`) working as designed, not a failure.
+
+   Nothing here is operational until an owner sets the env. It must still never
+   be described as operational.
 6. **Learner visibility — RULED AND CLOSED 2026-08-27 (kept for the record).**
    `can_view_worker` treated every active engagement alike, so an education
    relationship would have carried the same scope an employer holds over an
@@ -172,5 +226,35 @@
    engagement row, `employee` → visible, the same row as `student` → not
    visible, worker rows listable unchanged. The institution reaches a learner
    through the purpose-bound project path instead.
+7. **LMC — the engine is right; the ONE missing piece is giving credit back.**
+   Measured on production 2026-08-28 inside a transaction that was rolled back,
+   so nothing persisted and no flag stayed flipped. What the ledger already
+   does correctly, proven rather than assumed: a top-up credits; the same
+   top-up replayed with the same idempotency key credits nothing twice and
+   returns the same transaction; a spend debits; the same spend replayed debits
+   nothing twice; an overspend is refused with the balance unchanged, so a
+   failed action leaves no phantom charge; an unrelated profile cannot debit
+   somebody else's account; a purchase refund claws back only what is LEFT
+   (€10 topped up, €3 spent, €7 reversed) and records the already-consumed
+   remainder honestly instead of inventing a balance; and the ledger refuses
+   UPDATE outright.
+
+   **The gap:** `lmc_reverse_v1` reverses only transactions that CREATED a
+   credit lot. It resolves the original's lot and a `spend` has none —
+   `lmc_original_not_reversible: spend has no credit lot`. So when a user is
+   debited for an action that then fails or is never delivered, **there is no
+   in-product way to give the credit back.** The remaining paths are an admin
+   grant (a different transaction kind, gated behind
+   `lmc_promotional_grants_enabled` and a verified recipient) or nothing.
+
+   That is the specific thing standing between the ledger and LMC_READY, and
+   it is a money-ledger migration: RED class, owner-gated, not an autonomous
+   change. Every other part of the chain above is already correct.
+
+   Separately, and NOT a defect: all six `lmc_settings` flags are false in
+   production, and `stripe_lmc_topups_enabled` / `live_payments_enabled` are
+   `owner_only` — `lmc_set_flag_v1` refuses every caller for those, including
+   service_role, by design. No agent can switch payments on, which is the
+   correct state.
 
 Nothing above is fixed by more code existing. Each needs a real journey run.

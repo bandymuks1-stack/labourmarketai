@@ -110,6 +110,7 @@ What the direction above actually rests on today — checked, not assumed:
 | embeddings anywhere in `lib/` | **none** |
 | `pgvector` extension | **not installed** |
 | hand-written needle packs | 9 files, ~235 lines each (~2,100 lines) for 9 languages |
+| concept-resolution seam (step 2) | **DONE 2026-08-28** — a language may now arrive as data |
 | AI router | implemented, `ENV-GATED`, `ai_runs = 0` |
 
 So the recorded pipeline has **one asset with no data** (`esco_uri`) and **two
@@ -126,11 +127,46 @@ of them blocks the pilot:**
    nothing to resolve *to*. Leave the slug as the join key — matching was
    re-keyed onto slugs precisely because ESCO was inert, and that must not be
    reversed until ESCO is real.
-2. **Make concept resolution a named seam** — one function
-   `expression → concept`, with the needle packs as its first and default
-   implementation. Nothing changes behaviourally; it stops the needle list from
-   being the only *callable* path. This is the step that makes 3 and 4
-   additive rather than a rewrite.
+2. **Make concept resolution a named seam** — DONE 2026-08-28,
+   `apps/web/lib/structuring/concept-resolution/`.
+
+   Two seams, because the plan's one sentence hid two different questions:
+
+   - `ConceptTermSource` — WHERE THE NEEDLES COME FROM. The recognizer's
+     dictionary was assembled from three hardcoded imports, which is the line
+     that made "add a language" and "write a file of curated matching code"
+     the same act. It is now assembled from an ordered list of sources, and a
+     source may be **data** (`ConceptLabelSet`: `slug → { exact, synonyms }`
+     for any language code, plus its provenance). This is the step-3 landing
+     shape: an ESCO label import writes these files and needs no TypeScript.
+   - `ConceptResolver` — WHO ANSWERS. `resolveExpressionToConcepts()` is the
+     one callable entry point. The deterministic lexicon resolver is first and
+     default; a later resolver may only ADD concepts the earlier ones missed,
+     never downgrade or overwrite a deterministic hit (doctrine I-7 — matching
+     must work with no generative AI at all).
+
+   **Coverage stopped being declarable.** `RECOGNITION_LANGUAGES` was a closed
+   twelve-member tuple, so a language became "supported" the moment its code
+   was typed into an array — the same file-counting mistake this document was
+   written to stop, one layer down. `conceptLanguageCoverage()` now measures
+   term counts per language from the sources themselves, and `covered` is true
+   only when at least one real term exists.
+
+   **Georgian is registered and reports zero.** `labels/index.ts` holds a `ka`
+   entry with no labels and a provenance string that says so. That is the
+   honest position: the ARCHITECTURAL exclusion is gone (a Georgian label could
+   not previously be represented at all), the COVERAGE is untouched, and
+   filling that object is the entire remaining work — no code changes with it.
+
+   Proven by `apps/web/lib/guards/concept-resolution-seam.test.ts`, which
+   deliberately proves two claims that pull against each other: **no loss**
+   (the seam emits the identical term list, in identical order, and every
+   shipped language fixture resolves identically to the direct recognizer,
+   forbidden slugs included) and **the ceiling is gone** (a language with no
+   pack, no fixtures and no code reaches the REAL recognizer through data
+   alone — with the negative control that the same sentence resolves to
+   nothing while that data is absent, without which the positive proves
+   nothing).
 3. **Add ESCO's own multilingual labels as a second resolver** behind that
    seam. ESCO publishes preferred/alternative labels in all 24 EU languages —
    which means languages 6–24 stop needing a hand-written pack and start
@@ -185,6 +221,9 @@ Admin and back-office screens do **not** gate a language.
    that runs, multilingual readiness is unproven regardless of file counts.
 3. Move concept identity off literal needle lists (§4) before adding languages
    6–26, or the cost per language stays linear and the over-claim risk
-   compounds.
+   compounds. **The seam for this is built (§4.1 step 2, done 2026-08-28); what
+   is still missing is the DATA** — `esco_uri` remains 0 of 161, so step 1
+   (curation, not engineering) is now the single thing standing between the
+   architecture and languages 6–24.
 4. Promote catalog-only locales (`lv et da no sv pl`) to routed only after
    their *understanding* layers, not just their strings, reach core-journey.

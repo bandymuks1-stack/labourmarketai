@@ -136,7 +136,13 @@ export function buildAiRunRow(
       ? record.fallbackReason.slice(0, 120)
       : null,
     escalation_applied: record.escalation,
-    blocked_reason: record.blocked,
+    // Bounded like every other free-text column. `RouteBlockReason` is a
+    // closed three-member union today, all far under the 64-char CHECK, so
+    // this changes no current row — but the column is the one field the
+    // docblock's "can never fail on size" promise did not actually cover, and
+    // a persistence failure here is SILENT by design (best-effort write). A
+    // future block reason with a longer name would have dropped the row.
+    blocked_reason: record.blocked ? record.blocked.slice(0, 64) : null,
     human_review_state: record.humanReviewState,
     // DATA MINIMISATION. A vendorless row exists to be COUNTED, not to be
     // attributed: there is no spend to allocate to a person, so the person is
