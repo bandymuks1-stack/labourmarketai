@@ -27,7 +27,7 @@ import type {
   AiCompletionResult,
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
-import { fetchErrorResult } from "./extract-json";
+import { fetchErrorResult, httpErrorResult } from "./extract-json";
 
 function enabled(): boolean {
   return process.env.AI_DEEPL_ENABLED === "true";
@@ -99,11 +99,7 @@ export const deeplCompletionProvider: AiCompletionProvider = {
         signal: AbortSignal.timeout(cfg.timeoutMs),
       });
       if (!res.ok) {
-        return {
-          status: "error",
-          code: "provider_error",
-          message: `deepl http ${res.status}`,
-        };
+        return { status: "error", ...(await httpErrorResult("deepl", res)) };
       }
       const json = (await res.json()) as {
         translations?: { text?: string }[];
