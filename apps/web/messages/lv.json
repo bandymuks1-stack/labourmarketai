@@ -3609,7 +3609,9 @@
       "chipServiceRequests": "Atrast pakalpojumu",
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",
       "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",
-      "chipMyOwnInterest": "Manas intereses"
+      "chipMyOwnInterest": "Manas intereses",
+      "createOrganizationHint": "Varu kopā ar jums izveidot organizāciju — dati un pārbaude ir vienā lapā.",
+      "chipCreateOrganization": "Izveidot organizāciju"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

@@ -50,6 +50,7 @@ export type ConversationIntent =
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
   | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
   | "company-overview" // "kas vyksta mano įmonėje?" — the company hub
+  | "create-organization" // "sukurk įmonę" — START one, not look at one
   // ── V9 value-intent: a stated OFFER of value (goods to sell, free
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
   //    refines it; the router only opens the door. ─────────────────────────
@@ -264,6 +265,42 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    /**
+     * START an organization — the opposite direction from `company-overview`.
+     *
+     * WHY THIS EXISTS. "Sukurk įmonės profilį" — the owner's own example
+     * sentence — carried the word `profil`, so it scored 2 on the `profile`
+     * rule and opened the person's PERSONAL profile form. Somebody asking to
+     * create a company was handed a form about themselves, and no wording of
+     * the request could escape it: no rule in this table meant "create an
+     * organization" at all.
+     *
+     * Weight 6 on the verb+noun combination (never on the noun alone) so it
+     * beats `profile` (2) for that sentence while a bare "įmonė" mention —
+     * "kas vyksta mano įmonėje" — still reaches `company-overview`. A CREATE
+     * verb is required: naming a company is not asking to make one.
+     *
+     * The verb list is deliberately NARROW. A first cut also accepted `open`
+     * and `add`, which turned "Open my company" and "Add a person to the
+     * company" into requests to create a second organization — the hub and
+     * the assignment step, both hijacked. `start` is kept only when a company
+     * noun follows it directly ("start a company"), never on its own.
+     */
+    intent: "create-organization",
+    patterns: [
+      // verb -> noun: "sukurk imone", "create a company", "sozdat kompaniyu"
+      p(
+        "(sukur|uzregistruo|registruo|isteig|pradėti(?=\\s+versl)|noriu\\s+sukurti|create|register|set\\s+up|start(?=\\s+a?\\s*(company|business|firm))|создать|создай|создам|зарегистрир|aanmaken|oprichten|registreren|erstellen|anlegen|gründen)\\s*.{0,24}(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen)",
+        6,
+      ),
+      // noun -> verb: "imone sukurti", "bedrijf aanmaken", "Firma anlegen"
+      p(
+        "(įmon|organizacij|firm|bendrov|versl|company|organisation|organization|business|компани|организаци|фирм|bedrijf|unternehmen)\\w*\\s*.{0,24}(sukurti|uzregistruoti|įsteigti|create|register|aanmaken|oprichten|registreren|erstellen|anlegen|gründen|создать|зарегистрировать)",
+        6,
+      ),
+    ],
+  },
+  {
     intent: "context",
     patterns: [
       p("(ką\\s+tu\\s+(apie\\s+mane\\s+)?žinai|what\\s+do\\s+you\\s+know|что\\s+ты\\s+знаешь)", 5),
@@ -395,6 +432,15 @@ const RULES: IntentRule[] = [
       p("(pridėk|pridėti|pridedu|įdėk|įtrauk)\\s*.{0,20}darb", 4),
       p("(add|enter)\\s*.{0,20}(work|hours)", 4),
       p("(добавь|добавить)\\s*.{0,20}(работ|час)", 4),
+      // Same defect as the add-verbs above, one grammatical form further out:
+      // "Įrašyti šiandienos darbą" is the INFINITIVE, and the imperative-only
+      // `įrašyk\\s+darb` above demands adjacency, so the owner's own example
+      // sentence for this workflow scored 0 here and 1 on find-work — a person
+      // asking to write down today's work was handed a job search. Weight 4
+      // for the same reason: a bare noun match must not pull it back.
+      p("(įrašyti|įrašau|užfiksuo|užrašy|suvesti|fiksuoti)\\s*.{0,20}darb", 4),
+      p("(record|log|enter)\\s*.{0,20}(work|day)", 4),
+      p("(записать|записывать|зафиксир)\\s*.{0,20}(работ|день)", 4),
     ],
   },
   {
@@ -653,6 +699,12 @@ const RULES: IntentRule[] = [
       p("(ką|what|что).{0,30}(šiandien|today|сегодня)", 3),
       p("(šiandien|today|сегодня).{0,30}(padaryti|daryti|nuveikti|to\\s+do|сделать|делать)", 3),
       p("(dienos|šiandienos)\\s+plan", 3),
+      // TOMORROW. Every pattern here read TODAY or a bare "mano planas", so
+      // "Parodyk mano rytojaus planą" — the owner's own example for this
+      // workflow — matched nothing at all and reached the not-understood
+      // fallback. The agenda reader already answers for any day; only the
+      // word for the next one was missing.
+      p("(rytoj|rytojaus|tomorrow|завтра|morgen|morgendlich)\\s*.{0,24}(plan|tvarkaraš|grafik|schedule|agenda|расписани|darb)", 3),
       p("(my|мой)\\s+(plan|план)\\b", 2),
       p("\\bmano\\s+planas\\b", 2),
       p("\\bsusitikim", 1),
@@ -787,6 +839,7 @@ const JOURNAL_REQUEST_PATTERNS: readonly RegExp[] = [
   p("(zurnal|journal|журнал|tagebuch|dagboek)").re,
   // an imperative to record work, with no journal word ("įrašyk darbą")
   p("(irasyk|uzfiksuok|uzrasyk|log)\\s+(mano\\s+)?darb").re,
+  p("(irasyti|irasau|uzfiksuoti|uzrasyti|suvesti|fiksuoti)\\s*.{0,20}darb").re,
   p("record\\s+(my\\s+)?work").re,
   p("записать\\s+работу").re,
 ];

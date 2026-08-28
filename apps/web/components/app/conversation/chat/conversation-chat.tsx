@@ -190,6 +190,8 @@ export type ChatLabels = {
   interestInboxAmbiguous: string;
   chipInterestOnMyNeeds: string;
   chipMyOwnInterest: string;
+  createOrganizationHint: string;
+  chipCreateOrganization: string;
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
@@ -2114,6 +2116,43 @@ export function ConversationChat({
             } else {
               assistant(labels.fallback, starterChips);
             }
+            break;
+          case "create-organization":
+            // "Sukurk įmonės profilį" — START an organization. Before this the
+            // sentence scored on the `profile` rule (the word `profil` is in
+            // it) and opened the person's PERSONAL profile form: somebody
+            // asking to create a company was handed a form about themselves.
+            //
+            // Routes to the ONE canonical setup surface — the same
+            // `link:` move as the admin areas and the company hub — rather
+            // than growing a second organization intake inside the chat. The
+            // verification ladder, the ownership rules and the persistence all
+            // stay where they already live (`/dashboard/start/company`).
+            //
+            // NOT identity-gated: starting an organization is precisely what a
+            // person WITHOUT one does, so gating it on already having one
+            // would close the only door it opens. Somebody who already acts as
+            // an employer is offered their existing workspace alongside it —
+            // creating a second company is legitimate, but landing on a blank
+            // form when they meant "my company" is the dead end this pass
+            // exists to remove.
+            assistant(
+              labels.createOrganizationHint,
+              canActAsEmployer
+                ? [
+                    {
+                      id: "link:/dashboard/start/company?new=1",
+                      label: labels.chipCreateOrganization,
+                    },
+                    { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+                  ]
+                : [
+                    {
+                      id: "link:/dashboard/start/company?new=1",
+                      label: labels.chipCreateOrganization,
+                    },
+                  ],
+            );
             break;
           case "admin-approvals":
             // "Ką turiu patvirtinti?" — the approvals area, which no longer

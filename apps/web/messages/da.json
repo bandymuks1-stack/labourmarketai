@@ -3609,7 +3609,9 @@
       "chipServiceRequests": "Find en ydelse",
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
       "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
-      "chipMyOwnInterest": "Min egen interesse"
+      "chipMyOwnInterest": "Min egen interesse",
+      "createOrganizationHint": "Jeg kan oprette en organisation sammen med dig — oplysningerne og verificeringen er på én side.",
+      "chipCreateOrganization": "Opret en organisation"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

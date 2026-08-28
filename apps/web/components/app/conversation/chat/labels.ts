@@ -69,6 +69,10 @@ const CHAT_KEYS = [
   "interestInboxAmbiguous",
   "chipInterestOnMyNeeds",
   "chipMyOwnInterest",
+  // The one sentence that means START an organization (as opposed to
+  // `company-overview`, which means LOOK AT one).
+  "createOrganizationHint",
+  "chipCreateOrganization",
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",

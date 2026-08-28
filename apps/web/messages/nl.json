@@ -11568,6 +11568,8 @@
         "corrected": "Bijgewerkt: {changes}.",
         "changeInsteadOf": "{next} (in plaats van {previous})"
       },
+      "createOrganizationHint": "Ik kan samen met u een organisatie aanmaken — de gegevens en de verificatie staan op één pagina.",
+      "chipCreateOrganization": "Organisatie aanmaken",
       "adminRouteHint": "Hier wordt dat geregeld:",
       "adminApprovalsChip": "Goedkeuringen",
       "adminRequestsChip": "Verzoeken",

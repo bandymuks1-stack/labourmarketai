@@ -201,3 +201,137 @@ describe("isExplicitJournalRequest — a request opens the flow", () => {
     }
   });
 });
+
+/**
+ * The owner brief's §13 "first real workflows" — the six sentences a person is
+ * expected to be able to type on day one. Three of them misrouted before this
+ * suite existed:
+ *
+ *   "Įrašyti šiandienos darbą"   → find-work  (a JOB SEARCH for somebody
+ *                                  asking to write down today's work)
+ *   "Sukurk įmonės profilį"      → profile    (the person's OWN profile form
+ *                                  for somebody asking to create a company)
+ *   "Parodyk mano rytojaus planą"→ unknown    (nothing here read TOMORROW)
+ *
+ * They are pinned together because they are one defect class: the router read
+ * a grammatical form nobody actually types.
+ */
+describe("classifyIntent — the six §13 workflow sentences", () => {
+  const six: Array<[string, string]> = [
+    ["Įrašyti šiandienos darbą", "log-work"],
+    ["Reikia 4 suvirintojų Vokietijoje nuo rugsėjo", "need-workers"],
+    ["Rask man darbą", "find-work"],
+    ["Parodyk mano CV", "cv"],
+    ["Sukurk įmonės profilį", "create-organization"],
+    ["Parodyk mano rytojaus planą", "calendar-view"],
+  ];
+  for (const [text, intent] of six) {
+    it(`"${text}" → ${intent}`, () => {
+      expect(classifyIntent(text).intent).toBe(intent);
+    });
+  }
+});
+
+describe("classifyIntent — create-organization", () => {
+  // Every ACTIVE locale, because a person creates their organization in the
+  // language they signed up in — and once without diacritics, which is how
+  // most Lithuanian keyboards are actually used.
+  const yes = [
+    "Sukurk įmonės profilį",
+    "Noriu sukurti įmonę",
+    "Sukurti organizaciją",
+    "Sukurk imones profili",
+    "Create a company",
+    "Register my business",
+    "I want to set up an organisation",
+    "Создать компанию",
+    "Зарегистрировать организацию",
+    "Bedrijf aanmaken",
+    "Firma anlegen",
+    "Unternehmen gründen",
+    "Start a company",
+    "Noriu pradėti verslą",
+  ];
+  for (const t of yes) {
+    it(`"${t}" → create-organization`, () => {
+      expect(classifyIntent(t).intent).toBe("create-organization");
+    });
+  }
+
+  // A CREATE VERB is required. Naming a company is not asking to make one:
+  // these must keep reaching the intents they already reached, or this rule
+  // would have swallowed the whole employer side of the product.
+  const no: Array<[string, string]> = [
+    ["Kas vyksta mano įmonėje?", "company-overview"],
+    ["Reikia darbuotojų", "need-workers"],
+    ["Parodyk mano profilį", "profile"],
+    ["Pridėk kalbą", "profile"],
+  ];
+  for (const [t, intent] of no) {
+    it(`"${t}" stays ${intent}`, () => {
+      expect(classifyIntent(t).intent).toBe(intent);
+    });
+  }
+
+  // A first cut of this rule accepted `open` and `add` as create-verbs, which
+  // turned "Open my company" into a request to create a SECOND organization
+  // and "Add a person to the company" into the same — the company hub and the
+  // assignment step, both hijacked by a rule meant for people who have neither.
+  // These pin the narrowing: a company noun near a broad verb is not a request
+  // to found one.
+  const notCreation = [
+    "Atidaryk įmonės puslapį",
+    "Open my company",
+    "Open company page",
+    "Add a person to the company",
+    "Pridėk Joną prie projekto",
+  ];
+  for (const t of notCreation) {
+    it(`"${t}" is NOT create-organization`, () => {
+      expect(classifyIntent(t).intent).not.toBe("create-organization");
+    });
+  }
+});
+
+describe("classifyIntent — tomorrow reaches the agenda", () => {
+  const yes = [
+    "Parodyk mano rytojaus planą",
+    "Show tomorrow's schedule",
+    "Что у меня завтра по расписанию",
+  ];
+  for (const t of yes) {
+    it(`"${t}" → calendar-view`, () => {
+      expect(classifyIntent(t).intent).toBe("calendar-view");
+    });
+  }
+
+  // The reminder sentence also says "rytoj" and must NOT be pulled in: a
+  // reminder is blocked honestly, an agenda is answered.
+  it("a reminder about tomorrow is still a reminder", () => {
+    expect(classifyIntent("Primink rytoj 8 valandą paskambinti.").intent).toBe(
+      "reminder",
+    );
+  });
+});
+
+describe("classifyIntent — recording work in its other grammatical forms", () => {
+  const yes = [
+    "Įrašyti šiandienos darbą",
+    "Record today's work",
+    "Записать работу",
+    "Užfiksuoti darbą",
+  ];
+  for (const t of yes) {
+    it(`"${t}" → log-work`, () => {
+      expect(classifyIntent(t).intent).toBe("log-work");
+    });
+  }
+
+  // A past-tense description with no journal word is still log-work, and a
+  // job search is still a job search — the new verbs must not blur either.
+  it("does not swallow a job search", () => {
+    expect(classifyIntent("Rask man darbą Nyderlanduose.").intent).toBe(
+      "find-work",
+    );
+  });
+});
