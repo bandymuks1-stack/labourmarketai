@@ -13825,5 +13825,30 @@
         "hint": "Wij zijn opdrachtgever."
       }
     }
+  },
+  "lmc": {
+    "title": "LMC-tegoed",
+    "noAccount": "Nog geen LMC-rekening. Die ontstaat bij het eerste tegoed of de eerste afschrijving — tot nu toe is er niets gebeurd.",
+    "unavailable": "We konden uw LMC-saldo nu niet uitlezen. Dat betekent niet dat het nul is — we kunnen het op dit moment alleen niet tonen. Probeer het later opnieuw.",
+    "breakdown": "Gekocht: {purchased} · toegekend: {promotional}",
+    "expired": "Verlopen: {amount} (geldigheidsdatum voorbij)",
+    "latest": "Laatste wijziging: {kind} {amount} LMC · {when}",
+    "noMovements": "Nog geen mutaties.",
+    "topUpClosed": "Opwaarderen is nog niet open. Zodra dat kan, doet u het hier.",
+    "historyTitle": "Volledige historie",
+    "kind": {
+      "purchased": "Gekocht",
+      "promotional_signup": "Tegoed bij registratie",
+      "promotional_activity": "Tegoed voor activiteit",
+      "admin_grant": "Toegekend door een beheerder",
+      "referral_reward": "Beloning voor aanbeveling",
+      "spend": "Besteed",
+      "expiry": "Verlopen",
+      "reversal": "Teruggedraaid",
+      "refund_reversal": "Terugbetaling",
+      "chargeback_reversal": "Terugboeking door de bank",
+      "spend_compensation": "Gecompenseerd voor een mislukte actie",
+      "other": "Andere mutatie"
+    }
   }
 }

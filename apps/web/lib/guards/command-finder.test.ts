@@ -28,10 +28,25 @@ import {
 const APP_DIR = join(process.cwd(), "app", "[locale]");
 const ACTIVE = ["lt", "en", "ru"] as const;
 
+/**
+ * A registry route without its fragment.
+ *
+ * A `#anchor` names a POSITION on a page, not a page — the registry's own
+ * contract already says anchored destinations are allowed ("anchors like the
+ * demand intake"), and resolving `/dashboard/account#lmc` against the file tree
+ * would look for a directory called `account#lmc`. Stripping it here is also
+ * what keeps the forbidden-target check honest: without it, appending any
+ * fragment to a banned route would walk straight past the set membership test.
+ */
+function pathOf(route: string): string {
+  const hash = route.indexOf("#");
+  return hash === -1 ? route : route.slice(0, hash);
+}
+
 /** Resolve a locale-prefix-free route to a page.tsx in the app tree. The
  *  marketing group segment `(marketing)` is transparent in the URL. */
 function routeExists(route: string): boolean {
-  const rel = route.replace(/^\//, "");
+  const rel = pathOf(route).replace(/^\//, "");
   const candidates = [
     join(APP_DIR, rel, "page.tsx"),
     join(APP_DIR, "(marketing)", rel, "page.tsx"),
@@ -74,15 +89,17 @@ describe("command finder — registry route truth", () => {
     const bad = COMMAND_REGISTRY.filter(
       (e) =>
         e.audience !== "admin" &&
-        (e.route.startsWith(INTERNAL_ADMIN_PREFIX) ||
-          FORBIDDEN_NON_ADMIN_TARGETS.has(e.route)),
+        (pathOf(e.route).startsWith(INTERNAL_ADMIN_PREFIX) ||
+          FORBIDDEN_NON_ADMIN_TARGETS.has(pathOf(e.route))),
     ).map((e) => `${e.id} → ${e.route}`);
     expect(bad).toEqual([]);
   });
 
   it("admin entries target only the internal admin tree", () => {
     const bad = COMMAND_REGISTRY.filter(
-      (e) => e.audience === "admin" && !e.route.startsWith(INTERNAL_ADMIN_PREFIX),
+      (e) =>
+        e.audience === "admin" &&
+        !pathOf(e.route).startsWith(INTERNAL_ADMIN_PREFIX),
     ).map((e) => e.id);
     expect(bad).toEqual([]);
   });

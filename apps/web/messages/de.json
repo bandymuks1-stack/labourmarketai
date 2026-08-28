@@ -13825,5 +13825,30 @@
         "hint": "Wir sind Auftraggeber."
       }
     }
+  },
+  "lmc": {
+    "title": "LMC-Guthaben",
+    "noAccount": "Noch kein LMC-Konto. Es entsteht mit der ersten Gutschrift oder Abbuchung — bisher ist nichts passiert.",
+    "unavailable": "Ihr LMC-Guthaben konnte gerade nicht gelesen werden. Das heißt nicht, dass es null ist — wir können es im Moment nur nicht anzeigen. Bitte später erneut versuchen.",
+    "breakdown": "Gekauft: {purchased} · gutgeschrieben: {promotional}",
+    "expired": "Abgelaufen: {amount} (Gültigkeit überschritten)",
+    "latest": "Letzte Änderung: {kind} {amount} LMC · {when}",
+    "noMovements": "Noch keine Bewegungen.",
+    "topUpClosed": "Das Aufladen ist noch nicht freigeschaltet. Sobald es soweit ist, laden Sie hier auf.",
+    "historyTitle": "Vollständige Historie",
+    "kind": {
+      "purchased": "Gekauft",
+      "promotional_signup": "Gutschrift zur Registrierung",
+      "promotional_activity": "Gutschrift für Aktivität",
+      "admin_grant": "Von einer Administration gewährt",
+      "referral_reward": "Empfehlungsprämie",
+      "spend": "Ausgegeben",
+      "expiry": "Abgelaufen",
+      "reversal": "Rückabgewickelt",
+      "refund_reversal": "Rückerstattung",
+      "chargeback_reversal": "Rückbuchung",
+      "spend_compensation": "Ausgleich für eine fehlgeschlagene Aktion",
+      "other": "Andere Bewegung"
+    }
   }
 }
