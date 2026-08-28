@@ -85,12 +85,18 @@ test("«Įrašyti šiandienos darbą» opens the work journal, not a job search"
   // The work-log flow — in any of its real states (form, loading, or the
   // honest blocked card). What must NOT appear is the opportunity search.
   const worklog = page
-    .getByTestId("worklog-form")
+    .getByTestId("worklog-flow")
     .or(page.getByTestId("worklog-loading"))
     .or(page.getByTestId("worklog-blocked"))
     .or(page.getByTestId("msg-worklog"));
   await expect(worklog.first()).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("msg-match")).toHaveCount(0);
+  await expect(page.getByTestId("msg-employer-match")).toHaveCount(0);
+
+  // Let the flow settle past its loading frame so the screenshot shows the
+  // real composer rather than a spinner.
+  await expect(page.getByTestId("worklog-loading")).toHaveCount(0, {
+    timeout: 30_000,
+  });
 
   await page.screenshot({
     path: "test-results/ai-first-log-work.png",
@@ -98,23 +104,36 @@ test("«Įrašyti šiandienos darbą» opens the work journal, not a job search"
   });
 });
 
-test("«Parodyk mano rytojaus planą» is answered instead of not understood", async ({
+test("«Parodyk mano rytojaus planą» reaches the agenda, not the fallback", async ({
   page,
 }) => {
   await openChat(page);
-  const before = await page.getByTestId("msg-assistant").count();
   await say(page, "Parodyk mano rytojaus planą");
 
-  // A NEW assistant turn that is not the not-understood fallback. The agenda
-  // may legitimately be empty — an empty day is an answer; "I did not
-  // understand you" is not.
+  // STRONG assertion. A first version of this test only checked that SOME new
+  // assistant turn appeared and was not the fallback — and it passed on an
+  // unrelated profile nudge that happened to arrive first, while the agenda
+  // was still loading. That is a test that cannot fail for the right reason.
+  //
+  // `startAgenda` ends EVERY path — real summary, empty day, failed read —
+  // with `calendarHint`, so that sentence is the signature of the agenda
+  // having actually run. An empty day is a legitimate answer; the
+  // not-understood fallback is not.
+  const hint = LT.conversation.chat.calendarHint;
   await expect
-    .poll(async () => page.getByTestId("msg-assistant").count(), {
-      timeout: 30_000,
-    })
-    .toBeGreaterThan(before);
-  const last = page.getByTestId("msg-assistant").last();
-  await expect(last).not.toHaveText(LT.conversation.chat.fallback);
+    .poll(
+      async () =>
+        (await page.getByTestId("msg-assistant").allInnerTexts()).some((t) =>
+          t.includes(hint),
+        ),
+      { timeout: 30_000 },
+    )
+    .toBe(true);
+
+  const texts = await page.getByTestId("msg-assistant").allInnerTexts();
+  expect(texts.some((t) => t.trim() === LT.conversation.chat.fallback)).toBe(
+    false,
+  );
 
   await page.screenshot({
     path: "test-results/ai-first-tomorrow-plan.png",
