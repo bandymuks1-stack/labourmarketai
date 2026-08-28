@@ -1,6 +1,7 @@
 # LabourMarket.ai — CAPABILITY INVENTORY & GAP MAP
 
-> **Status:** canonical. Derived from **code + production**, 2026-08-27.
+> **Status:** canonical. Derived from **code + production**, 2026-08-27,
+> revised 2026-08-28 (closure train #1320-#1324).
 > Entry point: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 > **A file existing is not proof. A green unit suite is not semantic proof.**
 
@@ -59,7 +60,7 @@
 |---|---|---|
 | Company setup / identity | `UNPROVEN` | code live, no E2E this round |
 | **Organization multi-capability** | `PROVEN` | browser + DB — one org holds `employer` + `training_provider` |
-| Demand intake (`customer_requests`) | `PARTIAL` | 17 real rows; NL→structured path not E2E this round |
+| Demand intake (`customer_requests`) | `PROVEN` | #1322. The employer types the need ONCE: `/dashboard/market/recognize` now writes the canonical draft (`customer_requests`, `status='draft'`, via `save_demand_draft`) and the wizard's existing auto-continue prefills from it. Browser-proven in **LT / EN / RU / NL**, each with a DB assertion that the row is a draft and never `submitted`, plus a negative control that the form opens EMPTY without the recognizer |
 | Worker board visibility | `PROVEN` | requires `companies.verification_status='verified'` |
 | Sees waiting candidate + can review | `PROVEN` | browser + DB; status → `reviewed` |
 | Contact / next action | `UNPROVEN` | code exists (`contact_demand_owner_v1`); not exercised |
@@ -89,6 +90,7 @@
 | **AI router** | `IMPLEMENTED`, `ENV-GATED` | one router, chain, privacy gate, cost model — **`ai_runs = 0`, no provider configured**. Reachable from 4 production routes (blocker 4.5); the gate is `AI_PROVIDER_MODE`, not code |
 | AI vendorless accounting | `UNPROVEN` | #1294 deployed; needs a user to hit an AI surface. `ai_runs = 0` is now ambiguous between "unused" and "write failing silently" — see blocker 4.5 |
 | **LMC ledger engine** | `PROD-PROVEN (rolled back)` | 2026-08-28, production, inside a transaction that was rolled back so no row and no flag persisted: top-up credits · idempotent replay credits nothing twice · spend debits · idempotent replay debits nothing twice · overspend refused with the balance unchanged (no phantom charge) · a foreign actor cannot debit an account · purchase refund claws back only what is left, recording the already-spent remainder honestly · the ledger refuses UPDATE (append-only) |
+| **LMC user surface** | `PROVEN` | #1323. The ledger had ZERO application readers until this train — constants and generated types were the entire footprint. `lib/lmc/lmc-account.ts` reads `lmc_account_balances` under the caller's own RLS (no migration was needed; the owner-scoped SELECT policies and the security-invoker views already existed). Browser-proven 4/4 on the local stack: a fresh database shows `no_account` and NO number; a real promotional grant minus a real spend shows the ledger's own figure; no top-up control exists while top-up is owner-gated; 375px has zero overflow. `unavailable` carries no numeric field, so a failed read can never render as "0 LMC" |
 | **LMC spend reversal** | `MISSING` | `lmc_reverse_v1` reverses CREDIT transactions only — it resolves the original's lot, and a `spend` has none (`lmc_original_not_reversible: spend has no credit lot`). There is therefore **no in-product remedy for a debited user whose paid action failed or was not delivered** |
 | Pricing / LMC / billing (commercial activation) | `OWNER-GATED` | canonical catalogue exists; all six `lmc_settings` flags are false in production and `stripe_lmc_topups_enabled` / `live_payments_enabled` are `owner_only` — the shared setter refuses **every** caller by design, so no agent path can enable them |
 | Stripe / payments chain | `UNPROVEN` | webhook + checkout + subscription store exist with signature and idempotency tests; `billing_customers`, `billing_subscriptions`, `payment_webhook_events`, `subscriptions` are all **0 rows** — nothing has ever run |
@@ -144,12 +146,49 @@
    a browser against a real demand: the LT demand text was recognised into
    skills, candidates were retrieved and ranked with an evidence-tier basis
    rather than a fabricated percentage, missing facts were disclosed on both
-   sides, and shortlist/review actions were reachable. What remains UNPROVEN is
+   sides, and shortlist/review actions were reachable. What remained UNPROVEN was
    the step BEFORE it — an employer typing a need in natural language and
-   getting a structured demand (`customer_requests` intake), which this round
-   seeded rather than drove.
-3. **Cross-actor scenario unproven.** Each actor has been proven separately;
-   institution → student → employer has not been run as one chain.
+   getting a structured demand. **That is now closed (#1322).** The recognizer
+   used to read the sentence, score it, and hand over a plain link to an EMPTY
+   form; it now writes the canonical draft the wizard already auto-continues
+   from, so the employer types the need once. Browser-proven in LT / EN / RU /
+   NL, each with a DB assertion that what stands behind it is `status='draft'`
+   and never `submitted`, plus a negative control that the form opens empty
+   without the recognizer. No new table, no new demand model, and the text
+   never travels in a URL.
+3. **Cross-actor scenario — CLOSED 2026-08-28 (#1324), locally.** It ran as one
+   chain, 7/7, from a `db reset` + fixtures with no leftovers: the institution
+   declares what it does → invites a person AS A LEARNER → the learner is told
+   what they are accepting and accepts → the employment they already had
+   survives untouched (invariant I-1) → their journal becomes evidence and
+   capabilities → an admin verifies the employer → the employer's need reaches
+   the learner's board → the interest travels back. Plus the negative control:
+   an organization that never said it educates cannot name a learner.
+
+   **What had been in the way was never the product.** The spec existed and
+   could not have passed on any freshly reset database, for four reasons, and
+   the way it failed is the part worth remembering:
+
+   * it pinned `organizations.id` and `workers.id` as string literals, and
+     those are GENERATED — every reset mints new ones. A PostgREST filter on a
+     nonexistent organization returns an empty set, so the spec reported
+     *"fixture drift: the learner must already be an employee"*: a true
+     sentence about entirely the wrong thing. Ids are resolved now
+     (`tests/e2e/fixture-ids.ts`) and a guard fails any spec that pins one;
+   * the chain skipped its own first sentence — it asserted "the institution
+     declares what it does" and relied on another spec having done it, which
+     alphabetical spec order guaranteed had not;
+   * the employer was never verified, and a demand only reaches a worker's
+     board once an admin has verified the employer. The guard refuses even
+     service_role, so the spec now performs the real act;
+   * two education specs gate on `SUPABASE_TEST_URL`, which `e2e-local.ts` sets
+     and a hand-rolled invocation does not — four grey SKIPs that read like
+     four green ticks.
+
+   **Still open:** the chain is proven on the LOCAL stack. It has not been run
+   against the deployed app, and 0 production organizations hold
+   `training_provider`, so production remains `PARTIAL` for the same reason
+   blocker 1 records.
 4. **Languages: 5 of 26 routed, Georgian absent entirely.** One narrower gap
    inside this was closed on 2026-08-27: the work-log context selector could
    not NAME a placement, because its base label resolved through
@@ -250,6 +289,18 @@
    That is the specific thing standing between the ledger and LMC_READY, and
    it is a money-ledger migration: RED class, owner-gated, not an autonomous
    change. Every other part of the chain above is already correct.
+
+   **Two things moved on 2026-08-28.** The remedy is written and repaired:
+   PR #1305 adds `lmc_compensate_spend_v1` — a compensating CREDIT linked to
+   the spend it answers, never a history mutation — and now passes every
+   non-owner check (it was RED on three real guards, including a function that
+   revoked PUBLIC but not `anon`). Its `migration-safety` red is the RED
+   CLASSIFICATION itself, which is the gate, not a defect. **It is not
+   applied and must not be.**
+
+   And the other half of "LMC_READY" — that a person could not see a single
+   number of any of this — is closed by #1323; see the LMC user surface row
+   above.
 
    Separately, and NOT a defect: all six `lmc_settings` flags are false in
    production, and `stripe_lmc_topups_enabled` / `live_payments_enabled` are
