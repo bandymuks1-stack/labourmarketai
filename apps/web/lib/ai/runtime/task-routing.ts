@@ -832,6 +832,21 @@ export interface AiRoutingAuditRecord {
   readonly fallback: boolean;
   readonly escalation: boolean;
   readonly blocked: RouteBlockReason | null;
+  /**
+   * Set when a vendor WAS reached and did not answer. Structural, not just
+   * folded into `reason`, because a consumer has to be able to branch on it —
+   * and one already has to: the money ledger derived its `status` from
+   * `blocked` alone, so a run that reached Gemini and got a 404 was written to
+   * `usage_cost_events` as `status: "success"` carrying a pre-run estimate.
+   * At month end that is spend that never happened, attached to a delivery
+   * that never happened.
+   *
+   * `blocked` and this are different events and must stay distinguishable:
+   * BLOCKED means the router refused to dispatch (cost ceiling, unpriced
+   * model, missing human gate); this means it dispatched and the vendor
+   * refused.
+   */
+  readonly providerFailure: string | null;
   readonly secondModelReview: boolean;
   readonly estimatedCostUsd: number | null;
   readonly actualCostUsd: number | null;
@@ -880,6 +895,7 @@ export function buildRoutingAuditRecord(
     fallback: decision.fallbackApplied,
     escalation: decision.escalated,
     blocked: decision.blocked ?? null,
+    providerFailure: outcome.providerFailure ?? null,
     secondModelReview: decision.secondModelReview,
     estimatedCostUsd: outcome.estimatedCostUsd ?? null,
     actualCostUsd: outcome.actualCostUsd,
