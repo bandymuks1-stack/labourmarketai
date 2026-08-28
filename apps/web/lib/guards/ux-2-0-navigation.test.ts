@@ -145,9 +145,22 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
     expect(ids).toContain("journal_text_first");
   });
 
-  it("the journal renders in the simple shell (the core loop never switches chrome)", () => {
+  it("the core loop never switches chrome — because NOTHING user-facing does", () => {
     const chrome = read("components/app/dashboard-chrome.tsx");
-    expect(chrome).toMatch(/"\/dashboard\/journal"/);
+    // This used to assert that "/dashboard/journal" appeared in a hand-kept
+    // PANEL_PREFIXES list. That list is gone: the simple shell is now the
+    // DEFAULT for every product route, so the journal cannot leave it, and
+    // neither can opportunities, the company hub, bookings or the map. The
+    // guarantee got stronger, so the assertion has to pin the stronger fact —
+    // a route the author forgot can no longer fall through to the legacy
+    // module chrome, because there is no fall-through left.
+    expect(chrome).toMatch(/return "panel";/);
+    // The ONE escape is the internal operator console, and it is named by the
+    // canonical admin nav item — never re-spelled as a literal here.
+    expect(chrome).toMatch(/ADMIN_NAV_ITEM\.href/);
+    // No second list of "routes that get the simple shell" may come back:
+    // that list is exactly what let the ruling apply to four routes only.
+    expect(chrome).not.toMatch(/PANEL_PREFIXES/);
   });
 
   it("unifying tabs never removes a route", () => {
