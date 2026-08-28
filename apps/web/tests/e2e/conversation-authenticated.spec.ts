@@ -269,12 +269,21 @@ test.describe("Conversation UI — authenticated /dashboard (desktop)", () => {
     }
   });
 
-  test("module routes still render the full chrome", async ({ page }) => {
-    // The second dashboard (`/dashboard/advanced`) was deleted by W3 Package 4;
-    // the full module chrome survives on the legitimate detail routes. Wait for
-    // the thing being asserted, not for network idle.
+  test("module routes render the ONE top bar, not the legacy module chrome", async ({
+    page,
+  }) => {
+    // This used to assert `[data-chrome="full"]` on /dashboard/bookings. The
+    // legacy module chrome no longer reaches any product route: the canonical
+    // one-top-bar is the default for the whole authenticated tree, and "full"
+    // survives for the internal admin console alone. A worker leaving the
+    // conversation for a module route must not land in a different product.
     await page.goto("/lt/dashboard/bookings", { waitUntil: "domcontentloaded" });
-    await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-chrome="simple"]')).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(page.locator('[data-chrome="full"]')).toHaveCount(0);
+    // The way back to the operating centre exists on every projection.
+    await expect(page.getByTestId("back-to-chat")).toBeVisible();
   });
 });
 
