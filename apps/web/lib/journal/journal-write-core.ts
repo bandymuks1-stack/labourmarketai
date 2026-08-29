@@ -37,7 +37,7 @@ type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
 
 export type JournalWriteCaller = {
   /** The caller's OWN RLS-scoped client. Every read and write below runs as
-   *  them — this module adds no authority and no service-role path. */
+   *  them — this module adds no authority and no admin/elevated path. */
   readonly supabase: ServerSupabase;
   /** `auth.users.id` of the verified caller (from the transport boundary). */
   readonly userId: string;
