@@ -7,6 +7,31 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+// The canonical write is its own module with its own equivalence proofs
+// (journal suites + the live MCP write controls). Here it is a spy: these
+// tests prove the CAPABILITY layer's rules — token verification precedes the
+// write, the FormData mapping matches the conversation executor's, failures
+// map through — not the write itself.
+const coreWrite = vi.fn(async () => ({
+  ok: true as const,
+  entryId: "e-1",
+  skills: {
+    status: "completed",
+    added: 1,
+    strengthened: 0,
+    reviewNeeded: 0,
+    claimsSaved: 0,
+    cvUpdated: true,
+  },
+}));
+vi.mock("@/lib/journal/journal-write-core", () => ({
+  createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+}));
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: async () => (key: string) => key,
+}));
+
 import {
   exposedCapabilities,
   listCapabilities,
@@ -34,6 +59,8 @@ function stubSupabase(script: TableScript) {
       const chain = {
         select: () => chain,
         eq: () => chain,
+        order: () => chain,
+        limit: () => chain,
         maybeSingle: async () => outcome,
         then: (resolve: (v: unknown) => unknown) => resolve(outcome),
       };
@@ -62,10 +89,12 @@ const PROFILE_ROW = {
 };
 
 describe("the registry itself", () => {
-  it("exposes ONLY the read capabilities — the write pair exists but is gated", () => {
+  it("exposes the reads AND the draft→confirm pair (write extraction landed 2026-08-29)", () => {
     expect(exposedCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
       "living_cv.skills.get",
+      "journal.create_draft",
+      "journal.confirm",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -194,8 +223,15 @@ describe("journal draft → confirm", () => {
     siteName: "Vilnius A1",
   };
 
-  it("a draft returns the exact preview + a token, and touches NO table", async () => {
-    const r = await runCapability("journal.create_draft", caller({}), DRAFT);
+  /** The caller's own worker + journal chain head, as the token fingerprint
+   *  reads them. `head` moves after a successful write — the one-time rule. */
+  const journalState = (head: string | null): TableScript => ({
+    workers: { data: { id: "worker-1" }, error: null },
+    journal_entries: { data: head === null ? null : { hash_self: head }, error: null },
+  });
+
+  it("a draft returns the exact preview + a token, and WRITES nothing", async () => {
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.data?.preview).toEqual({
@@ -208,23 +244,68 @@ describe("journal draft → confirm", () => {
     }
   });
 
-  it("confirm verifies the token for the EXACT draft, then refuses honestly (write not yet executable)", async () => {
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+  it("confirm verifies the token, then performs the canonical write with the executor's exact FormData mapping", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     expect(drafted.ok).toBe(true);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
 
-    const confirmed = await runCapability("journal.confirm", caller({}), {
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
       ...DRAFT,
       confirmationToken: token,
     });
-    expect(confirmed).toMatchObject({ ok: false, code: "not_executable" });
+    expect(confirmed).toMatchObject({
+      ok: true,
+      data: { entryId: "e-1", skills: { status: "completed", added: 1 } },
+    });
+
+    expect(coreWrite).toHaveBeenCalledTimes(1);
+    const [deps, formData] = coreWrite.mock.calls[0] as unknown as [
+      { userId: string },
+      FormData,
+    ];
+    expect(deps.userId).toBe("00000000-0000-4000-8000-0000000000aa");
+    // Byte-for-byte the mapping worker-executors.ts "worker.log-work" uses —
+    // one write contract, no ChatGPT-specific fork.
+    expect(Object.fromEntries(formData.entries())).toEqual({
+      locale: "lt",
+      engagement_context_id: DRAFT.engagementContextId,
+      notes: DRAFT.notes,
+      work_date: DRAFT.workDate,
+      site_name: DRAFT.siteName,
+    });
+  });
+
+  it("a write failure maps through with its real code — never invented success", async () => {
+    coreWrite.mockResolvedValueOnce({
+      ok: false,
+      code: "no_worker_profile",
+      message: "no worker",
+    } as never);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("negative control: a rejected token NEVER reaches the write", async () => {
+    coreWrite.mockClear();
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      confirmationToken: "not-a-real.token",
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(coreWrite).not.toHaveBeenCalled();
   });
 
   it("a TAMPERED draft is rejected at the token, before the gate", async () => {
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
 
-    const confirmed = await runCapability("journal.confirm", caller({}), {
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
       ...DRAFT,
       notes: "Different notes than were previewed",
       confirmationToken: token,
@@ -233,11 +314,11 @@ describe("journal draft → confirm", () => {
   });
 
   it("another user cannot spend the token", async () => {
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
 
     const other: CapabilityCaller = {
-      ...caller({}),
+      ...caller(journalState("h0")),
       userId: "00000000-0000-4000-8000-0000000000bb",
     };
     const confirmed = await runCapability("journal.confirm", other, {
@@ -245,5 +326,21 @@ describe("journal draft → confirm", () => {
       confirmationToken: token,
     });
     expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("ONE-TIME: after the journal chain head moves, the same token is dead (replay/dup-retry safe)", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    // The successful confirm appended an entry — the head is now h1. The
+    // identical token, replayed, must be rejected WITHOUT reaching the write.
+    const replayed = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(coreWrite).not.toHaveBeenCalled();
   });
 });

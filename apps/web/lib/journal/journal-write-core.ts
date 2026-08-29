@@ -1,0 +1,608 @@
+import "server-only";
+
+import { createHash } from "node:crypto";
+import type { getTranslations } from "next-intl/server";
+import { revalidatePath } from "next/cache";
+import type { createClient } from "@/lib/supabase/server";
+import { documentProvenanceMetrics } from "./document-journal-draft-model";
+import {
+  failedPipelineResult,
+  processJournalEntrySkills,
+  type JournalSkillPipelineResult,
+} from "@/lib/journal/skill-pipeline";
+
+/**
+ * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
+ * canonical append-only journal save (owner-approved extraction, 2026-08-29
+ * §6; APP_READINESS_MAP step 3).
+ *
+ * Everything here is the byte-faithful body of what `createJournalEntry` in
+ * `actions.ts` used to inline, minus exactly one thing: WHO is calling is now
+ * an input (`deps.supabase` + `deps.userId` from the caller's own transport —
+ * cookie session or the bearer boundary) instead of a cookie resolution baked
+ * into the write. Nothing about the data semantics moved: the same worker
+ * lookup, the same validation order and error codes, the same hash chain, the
+ * same atomic `create_journal_entry_full` RPC with the same legacy fallback,
+ * the same awaited skill pipeline (now running AS THE CALLER via the threaded
+ * `caller` option), the same revalidate.
+ *
+ * NOT a "use server" module on purpose: an exported function taking a live
+ * Supabase client must never be a wire-invokable action endpoint. The server
+ * action wrapper stays in `actions.ts`; route handlers and the capability
+ * registry call this directly.
+ */
+
+type Translator = Awaited<ReturnType<typeof getTranslations>>;
+type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
+
+export type JournalWriteCaller = {
+  /** The caller's OWN RLS-scoped client. Every read and write below runs as
+   *  them — this module adds no authority and no admin/elevated path. */
+  readonly supabase: ServerSupabase;
+  /** `auth.users.id` of the verified caller (from the transport boundary). */
+  readonly userId: string;
+  /** `journal.errors`-namespace translator in the caller's locale. */
+  readonly t: Translator;
+};
+
+export type CreateJournalEntryResult =
+  | { ok: true; entryId: string; skills: JournalSkillPipelineResult }
+  | { ok: false; code: JournalSaveErrorCode; message: string };
+
+export type JournalSaveErrorCode =
+  | "not_authenticated"
+  | "no_worker_profile"
+  | "engagement_required"
+  | "notes_required"
+  | "quantity_invalid"
+  | "unit_slug_unknown"
+  /** Wagon C2a: a `source_document_file_id` was supplied but names no
+   *  document the caller can read — a provenance claim that cannot be
+   *  verified is refused, never silently dropped and never stored. */
+  | "source_document_invalid"
+  | "entry_insert_failed"
+  | "metrics_insert_failed"
+  /** P1-B — the target entry was already superseded (stale tab/deep link);
+   *  superseding it again would fork the chain into duplicate live entries. */
+  | "entry_superseded"
+  /** W0 — a selected taxonomy slug failed server-side validation (unknown /
+   *  inactive / malformed). The atomic RPC rolled the whole save back. */
+  | "skill_selection_invalid";
+
+export type ParsedFragmentInput = {
+  rawPhrase: string;
+  timeValue?: number | null;
+  timeUnit?: "hours" | "minutes" | "days" | null;
+  activitySlug?: string | null;
+  activityLabel?: string | null;
+  /** v3 — true when the parser flagged the fragment as unrecognised
+   *  (time, no matched activity). */
+  isUnknown?: boolean;
+  /** v3 — worker-typed clarification label for an unknown fragment.
+   *  Persists as `unknown_phrase` metric (review-only, no fake
+   *  taxonomy claim). */
+  userLabel?: string | null;
+  /** P1-A — true ONLY when the worker EXPLICITLY picked this fragment's
+   *  taxonomy skill (compact-editor selection). Only selected fragments may
+   *  be skill-linked by the save; the composer's parser-derived slugs never
+   *  set it, so confirming a time parse can't silently declare a skill. */
+  selected?: boolean;
+};
+
+export type RpcMetricRow = {
+  metric_slug: string;
+  /** DB CHECK vocabulary (0013). `ai_extracted` is the machine-origin value —
+   *  used here ONLY for document-import provenance rows, whose extractor row
+   *  spells `deterministic-…` so this can never read as a vendor-AI claim. */
+  source: "worker_input" | "ai_extracted";
+  value_text?: string | null;
+  value_numeric?: number | null;
+  unit_slug?: string | null;
+};
+
+/** Defensive parse of the composer's `rejected_slugs_json` FormData field:
+ *  JSON string array, capped at 50, slug-shaped entries only. Anything
+ *  malformed degrades to an empty exclusion list (never a save failure). */
+export function parseRejectedSlugs(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (s): s is string =>
+          typeof s === "string" && /^[a-z0-9_-]{1,64}$/i.test(s),
+      )
+      .slice(0, 50);
+  } catch {
+    return [];
+  }
+}
+
+export function parseFragments(raw: string | null): ParsedFragmentInput[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const out: ParsedFragmentInput[] = [];
+    for (const row of parsed) {
+      if (typeof row !== "object" || row === null) continue;
+      const r = row as Record<string, unknown>;
+      const rawPhrase = String(r.rawPhrase ?? "").trim();
+      if (!rawPhrase) continue;
+      const timeUnitRaw = r.timeUnit;
+      const timeUnit: ParsedFragmentInput["timeUnit"] =
+        timeUnitRaw === "hours" ||
+        timeUnitRaw === "minutes" ||
+        timeUnitRaw === "days"
+          ? timeUnitRaw
+          : null;
+      out.push({
+        rawPhrase,
+        timeValue:
+          typeof r.timeValue === "number" && Number.isFinite(r.timeValue)
+            ? r.timeValue
+            : null,
+        timeUnit,
+        activitySlug:
+          typeof r.activitySlug === "string" ? r.activitySlug : null,
+        activityLabel:
+          typeof r.activityLabel === "string" ? r.activityLabel : null,
+        isUnknown: r.isUnknown === true,
+        userLabel:
+          typeof r.userLabel === "string" && r.userLabel.trim().length > 0
+            ? r.userLabel.trim().slice(0, 200)
+            : null,
+        selected: r.selected === true,
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/** Run the canonical skill pipeline for a saved entry AS THE CALLER. A
+ *  pipeline throw must NEVER fail the already-persisted save — it degrades to
+ *  an honest `failed` result the UI can show (with a trace id + reprocess
+ *  path). */
+export async function runSkillPipeline(opts: {
+  entryId: string;
+  text: string;
+  locale: string;
+  excludeSlugs: string[];
+  caller?: { supabase: ServerSupabase; userId: string };
+}): Promise<JournalSkillPipelineResult> {
+  try {
+    return await processJournalEntrySkills(opts);
+  } catch (e) {
+    console.error(
+      "[journal] skill pipeline threw:",
+      e instanceof Error ? e.message : String(e),
+    );
+    return failedPipelineResult();
+  }
+}
+
+export function collectUnitSlugs(args: {
+  quantity: number | null;
+  unitSlug: string;
+  fragments: ParsedFragmentInput[];
+}): Set<string> {
+  const out = new Set<string>();
+  if (args.quantity !== null && args.unitSlug) out.add(args.unitSlug);
+  for (const f of args.fragments) {
+    if (f.timeUnit) out.add(f.timeUnit);
+  }
+  return out;
+}
+
+/** Legacy two-step save — only reached when the RPC is not yet on the
+ *  target DB. Atomicity here is best-effort: if the metric insert fails
+ *  we attempt a compensating delete; if RLS forbids the delete we still
+ *  surface the failure so the worker knows the entry leaked. */
+export async function legacyTwoStepSave(
+  supabase: ServerSupabase,
+  t: Translator,
+  args: {
+    worker_id: string;
+    engagement_context_id: string;
+    entry_type_slug: string;
+    profession_id: string | null;
+    original_text: string;
+    original_language: string;
+    hash_prev: string | null;
+    hash_self: string;
+    visibility_scope: string;
+    metrics: RpcMetricRow[];
+  },
+): Promise<
+  // The skill pipeline runs AFTER this save step, so the legacy path returns
+  // the bare save outcome; the caller attaches the pipeline result.
+  | { ok: true; entryId: string }
+  | { ok: false; code: JournalSaveErrorCode; message: string }
+> {
+  const { metrics, ...entryFields } = args;
+  const { data: entry, error } = await supabase
+    .from("journal_entries")
+    .insert(entryFields)
+    .select("id")
+    .single();
+  if (error || !entry) {
+    return {
+      ok: false,
+      code: "entry_insert_failed",
+      message: t("saveFailed", {
+        reason: error?.message ?? t("unknownReason"),
+      }),
+    };
+  }
+  if (metrics.length === 0) return { ok: true, entryId: entry.id };
+  const rows = metrics.map((m) => ({ ...m, entry_id: entry.id }));
+  const { error: mErr } = await supabase
+    .from("journal_entry_metrics")
+    .insert(rows);
+  if (mErr) {
+    // Best-effort compensation — append-only doctrine blocks DELETE by
+    // default, so the entry likely leaks. Surface that honestly.
+    await supabase.from("journal_entries").delete().eq("id", entry.id);
+    return {
+      ok: false,
+      code: "metrics_insert_failed",
+      message: t("metricsInsertFailed", { reason: mErr.message }),
+    };
+  }
+  return { ok: true, entryId: entry.id };
+}
+
+/**
+ * Persist a reviewed work-journal entry (M1) as `deps.userId`. Append-only
+ * (§3): composes `original_text` (the worker's own words — never silently
+ * dropped), computes a sha256 hash chained to the worker's previous entry,
+ * inserts the entry + its metric rows atomically. Per-fragment review
+ * metadata is stored as `parsed_fragment` metrics with `source='worker_input'`
+ * so the suggestions stay reviewable but never get marked verified (§7 — no
+ * fake AI / no fake verification).
+ */
+export async function createJournalEntryCore(
+  deps: JournalWriteCaller,
+  formData: FormData,
+): Promise<CreateJournalEntryResult> {
+  const { supabase, userId, t } = deps;
+
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (!worker) {
+    return {
+      ok: false,
+      code: "no_worker_profile",
+      message: t("noWorkerProfile"),
+    };
+  }
+
+  const locale = String(formData.get("locale") ?? "lt");
+  const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
+  const siteName = String(formData.get("site_name") ?? "").trim();
+  const workDirection = String(formData.get("work_direction") ?? "").trim();
+  const quantityRaw = String(formData.get("quantity") ?? "").trim();
+  const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const workDate = String(formData.get("work_date") ?? "").trim();
+  // v3 — free-text review-only metadata. Capped lengths so a runaway paste
+  // can't blow up a single metric row.
+  const institutionName = String(formData.get("institution_name") ?? "")
+    .trim()
+    .slice(0, 200);
+  const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
+  // Wagon C2a — document-import provenance (value train 2). When the entry
+  // was drafted from an uploaded work report, the review form carries the
+  // source `document_files` id; the save verifies it under the CALLER'S RLS
+  // and records the provenance metric rows. The extractor version is stamped
+  // server-side from the model constant — never trusted from the client.
+  const sourceDocumentFileId = String(
+    formData.get("source_document_file_id") ?? "",
+  ).trim();
+  const fragments = parseFragments(String(formData.get("fragments_json") ?? "") || null);
+  // P0 Track B: slugs the worker explicitly REJECTED in the review step — the
+  // pipeline must leave no trace for them (not even an evidence link).
+  const rejectedSlugs = parseRejectedSlugs(
+    String(formData.get("rejected_slugs_json") ?? ""),
+  );
+  const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+
+  if (!engagementId) {
+    return {
+      ok: false,
+      code: "engagement_required",
+      message: t("engagementRequired"),
+    };
+  }
+  if (!notes) {
+    return {
+      ok: false,
+      code: "notes_required",
+      message: t("notesRequired"),
+    };
+  }
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
+    return {
+      ok: false,
+      code: "quantity_invalid",
+      message: t("quantityInvalid"),
+    };
+  }
+
+  let professionId: string | null = null;
+  if (workDirection) {
+    const { data: prof } = await supabase
+      .from("professions")
+      .select("id")
+      .eq("slug", workDirection)
+      .maybeSingle();
+    professionId = prof?.id ?? null;
+  }
+
+  const originalText = notes;
+
+  const { data: prev } = await supabase
+    .from("journal_entries")
+    .select("hash_self")
+    .eq("worker_id", worker.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const hashPrev = prev?.hash_self ?? null;
+  const hashSelf = createHash("sha256")
+    .update(
+      [
+        worker.id,
+        engagementId,
+        originalText,
+        locale,
+        hashPrev ?? "",
+        new Date().toISOString(),
+      ].join("|"),
+    )
+    .digest("hex");
+
+  // Provenance verification (C2a): a claimed source document must be a real
+  // uuid AND readable by this caller, or the save refuses honestly — a
+  // provenance claim that cannot be verified is never stored. RLS answers
+  // with one silence for "missing" and "not yours".
+  if (sourceDocumentFileId) {
+    const UUID_RX =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const { data: srcDoc, error: srcErr } = UUID_RX.test(sourceDocumentFileId)
+      ? await supabase
+          .from("document_files" as never)
+          .select("id")
+          .eq("id", sourceDocumentFileId)
+          .maybeSingle()
+      : { data: null, error: null };
+    if (srcErr || !srcDoc) {
+      return {
+        ok: false,
+        code: "source_document_invalid",
+        message: t("sourceDocumentInvalid"),
+      };
+    }
+  }
+
+  const hasStructured =
+    quantity !== null || workDirection !== "" || fragments.length > 0;
+
+  // Pre-validate the unit_slug FK so we fail BEFORE any insert if the
+  // worker's productivity unit isn't registered in `productivity_units`.
+  // This is what surfaced after PR #61: the legacy seed only covered
+  // square_meters / square_meters_per_day / box_per_day, so a confirmed
+  // "hours"-as-fallback quantity (or any fragment_time row) tripped the
+  // FK. Migration 0017 closes the seed; this pre-check makes sure that on
+  // a DB where 0017 hasn't been applied yet, the worker still sees a
+  // human-readable reason instead of a half-saved entry.
+  const unitSlugsToCheck = collectUnitSlugs({ quantity, unitSlug, fragments });
+  if (unitSlugsToCheck.size > 0) {
+    const { data: knownUnits } = await supabase
+      .from("productivity_units")
+      .select("slug")
+      .in("slug", [...unitSlugsToCheck]);
+    const known = new Set((knownUnits ?? []).map((r) => r.slug));
+    const missing = [...unitSlugsToCheck].filter((s) => !known.has(s));
+    if (missing.length > 0) {
+      return {
+        ok: false,
+        code: "unit_slug_unknown",
+        message: t("unitSlugUnknown", { units: missing.join(", ") }),
+      };
+    }
+  }
+
+  const metrics: RpcMetricRow[] = [
+    ...(workDirection
+      ? [
+          {
+            metric_slug: "work_direction",
+            value_text: workDirection,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(siteName
+      ? [
+          {
+            metric_slug: "site_name",
+            value_text: siteName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(quantity !== null
+      ? [
+          {
+            metric_slug: "quantity",
+            value_numeric: quantity,
+            unit_slug: unitSlug,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(workDate
+      ? [
+          {
+            metric_slug: "work_date",
+            value_text: workDate,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(institutionName
+      ? [
+          {
+            metric_slug: "institution_name",
+            value_text: institutionName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(topic
+      ? [
+          {
+            metric_slug: "topic",
+            value_text: topic,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...fragments.flatMap((f, idx): RpcMetricRow[] => {
+      const rows: RpcMetricRow[] = [
+        {
+          metric_slug: "parsed_fragment",
+          value_text: `${idx + 1}|${f.rawPhrase}`,
+          source: "worker_input" as const,
+        },
+      ];
+      if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+        rows.push({
+          metric_slug: "fragment_time",
+          value_numeric: f.timeValue,
+          unit_slug: f.timeUnit,
+          value_text: String(idx + 1),
+          source: "worker_input" as const,
+        });
+      }
+      const activityLabel = f.activitySlug ?? f.activityLabel;
+      if (activityLabel) {
+        rows.push({
+          metric_slug: "fragment_activity",
+          value_text: `${idx + 1}|${activityLabel}`,
+          source: "worker_input" as const,
+        });
+      }
+      // v3 — when the parser flagged the fragment as unknown AND the worker
+      // typed a clarification, persist that as a review-only label. Stored
+      // for future admin / agent dictionary review (no auto-promotion).
+      if (f.isUnknown && f.userLabel) {
+        rows.push({
+          metric_slug: "unknown_phrase",
+          value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
+          source: "worker_input" as const,
+        });
+      }
+      return rows;
+    }),
+    // C2a — document-import provenance: the verified source file id + the
+    // server-stamped extractor identity (deterministic-structuring@…) ride
+    // the same atomic save, so an imported entry stays attributable forever.
+    ...(sourceDocumentFileId
+      ? documentProvenanceMetrics(sourceDocumentFileId)
+      : []),
+  ];
+
+  // Atomic save — the RPC inserts the entry and all metric rows inside one
+  // transaction (see 0017). Any failure rolls back the entry, so the worker
+  // never lands in the half-saved "ghost entry" state where the row exists
+  // but its interpretation does not.
+  const rpcParams = {
+    p_worker_id: worker.id,
+    p_engagement_context_id: engagementId,
+    p_entry_type_slug: hasStructured ? "hybrid" : "freeform",
+    p_profession_id: professionId,
+    p_original_text: originalText,
+    p_original_language: locale.slice(0, 2),
+    p_hash_prev: hashPrev,
+    p_hash_self: hashSelf,
+    p_visibility_scope: "closed",
+    p_metrics: metrics,
+  };
+  // The generated supabase-js types are built from the schema cache and
+  // don't include `create_journal_entry_full` until 0017 is applied AND the
+  // local types are regenerated. The runtime call is correct; the cast just
+  // suppresses the static name check.
+  const { data: rpcEntryId, error: rpcErr } = (await (
+    supabase.rpc as unknown as (
+      fn: string,
+      params: typeof rpcParams,
+    ) => Promise<{ data: string | null; error: { code?: string; message?: string } | null }>
+  )("create_journal_entry_full", rpcParams));
+
+  if (rpcErr || typeof rpcEntryId !== "string") {
+    // Fallback path — only entered when the RPC is missing on the target
+    // DB (PostgREST returns `PGRST202` "Could not find the function" /
+    // a 404 schema cache error). On every other failure we surface the
+    // exact reason and DO NOT attempt a second write, so the save stays
+    // all-or-nothing.
+    const isMissingRpc =
+      !!rpcErr &&
+      (/PGRST202/i.test(rpcErr.code ?? "") ||
+        /create_journal_entry_full/i.test(rpcErr.message ?? "") ||
+        rpcErr.message?.includes("function") === true);
+    if (!isMissingRpc) {
+      console.error("[journal] rpc save failed:", rpcErr?.message);
+      return {
+        ok: false,
+        code: "entry_insert_failed",
+        message: t("saveFailed", {
+          reason: rpcErr?.message ?? t("unknownReason"),
+        }),
+      };
+    }
+    console.warn(
+      "[journal] create_journal_entry_full RPC missing — falling back to legacy two-step insert. Apply migration 0017.",
+    );
+    const legacy = await legacyTwoStepSave(supabase, t, {
+      worker_id: worker.id,
+      engagement_context_id: engagementId,
+      entry_type_slug: hasStructured ? "hybrid" : "freeform",
+      profession_id: professionId,
+      original_text: originalText,
+      original_language: locale.slice(0, 2),
+      hash_prev: hashPrev,
+      hash_self: hashSelf,
+      visibility_scope: "closed",
+      metrics: metrics.map((m) => ({ ...m })),
+    });
+    if (!legacy.ok) return legacy;
+    // Canonical save → recognition → evidence → CV pipeline (AWAITED so the
+    // outcome is real, but a pipeline failure never loses the saved entry).
+    const legacySkills = await runSkillPipeline({
+      entryId: legacy.entryId,
+      text: originalText,
+      locale,
+      excludeSlugs: rejectedSlugs,
+      caller: { supabase, userId },
+    });
+    revalidatePath(`/${locale}/dashboard/journal`);
+    return { ok: true, entryId: legacy.entryId, skills: legacySkills };
+  }
+
+  const skills = await runSkillPipeline({
+    entryId: rpcEntryId,
+    text: originalText,
+    locale,
+    excludeSlugs: rejectedSlugs,
+    caller: { supabase, userId },
+  });
+  revalidatePath(`/${locale}/dashboard/journal`);
+  return { ok: true, entryId: rpcEntryId, skills };
+}

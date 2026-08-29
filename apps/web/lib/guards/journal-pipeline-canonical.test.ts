@@ -22,6 +22,9 @@ const APP = process.cwd();
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 
 const ACTIONS = read("lib/journal/actions.ts");
+// The create write moved into the transport-neutral core (owner-approved
+// extraction 2026-08-29 §6); the pipeline pins follow the implementation.
+const WRITE_CORE = read("lib/journal/journal-write-core.ts");
 const COMPOSER = read("components/app/journal-entry-composer.tsx");
 const PIPELINE = read("lib/journal/skill-pipeline.ts");
 const REPROCESS = read("lib/journal/skill-pipeline-actions.ts");
@@ -31,10 +34,14 @@ const FRAGMENTER = read("lib/structuring/journal-fragmenter.ts");
 
 describe("P0 Track B — canonical journal skill pipeline", () => {
   it("save actions AWAIT the server-side pipeline", () => {
-    expect(ACTIONS).toMatch(/await processJournalEntrySkills/);
-    // both save paths attach the pipeline result to the ok-variant
-    expect(ACTIONS).toMatch(/skills:\s*JournalSkillPipelineResult/);
+    // The CREATE path lives in the write core; the SUPERSEDE path stays in
+    // actions.ts — both must run the awaited canonical pipeline (the shared
+    // runSkillPipeline helper wraps exactly `await processJournalEntrySkills`).
+    expect(WRITE_CORE).toMatch(/await processJournalEntrySkills/);
+    expect(WRITE_CORE).toMatch(/skills:\s*JournalSkillPipelineResult/);
+    expect(ACTIONS).toMatch(/await runSkillPipeline/);
     // a pipeline throw degrades honestly, never failing the persisted save
+    expect(WRITE_CORE).toMatch(/failedPipelineResult\(\)/);
     expect(ACTIONS).toMatch(/failedPipelineResult\(\)/);
   });
 
