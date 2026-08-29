@@ -13852,5 +13852,18 @@
       "spend_compensation": "Ausgleich für eine fehlgeschlagene Aktion",
       "other": "Andere Bewegung"
     }
+  },
+  "oauthConsent": {
+      "title": "Zugriff bestätigen",
+      "clientWantsAccess": "„{client}“ bittet um Zugriff auf Ihr LabourMarket.ai-Konto.",
+      "unknownClient": "Unbekannte Anwendung",
+      "clientLabel": "Anwendung",
+      "redirectLabel": "Rückkehradresse",
+      "scopesLabel": "Angeforderte Berechtigungen",
+      "authorityNote": "Die Anwendung handelt nur in Ihrem Namen und sieht nur, was Sie sehen können. Sie können den Zugriff jederzeit widerrufen.",
+      "approve": "Erlauben",
+      "deny": "Ablehnen",
+      "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
+      "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
   }
 }

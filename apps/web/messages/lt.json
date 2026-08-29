@@ -13852,5 +13852,18 @@
       "spend_compensation": "Kompensuota už nepavykusį veiksmą",
       "other": "Kitas judėjimas"
     }
+  },
+  "oauthConsent": {
+      "title": "Prieigos patvirtinimas",
+      "clientWantsAccess": "„{client}“ prašo prieigos prie jūsų LabourMarket.ai paskyros.",
+      "unknownClient": "Nežinoma programa",
+      "clientLabel": "Programa",
+      "redirectLabel": "Grąžinimo adresas",
+      "scopesLabel": "Prašomos teisės",
+      "authorityNote": "Programa veiks tik jūsų vardu ir matys tik tai, ką matote jūs. Prieigą bet kada galėsite atšaukti.",
+      "approve": "Leisti",
+      "deny": "Atmesti",
+      "errorMissingId": "Trūksta autorizacijos užklausos. Grįžkite į programą ir bandykite dar kartą.",
+      "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
   }
 }
