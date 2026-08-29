@@ -11,7 +11,7 @@ import {
   parseErrorResponse,
   type McpToolDef,
 } from "@/lib/mcp/protocol";
-import { defaultLocale } from "@/lib/i18n/config";
+import { activeLocales, defaultLocale } from "@/lib/i18n/config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,6 +49,18 @@ function toolDefs(): McpToolDef[] {
 
 const MAX_BODY_BYTES = 64 * 1024;
 
+/** First ACTIVE locale named by the header, else the default. Handles
+ *  quality-tagged lists ("lt-LT;q=0.9,en;q=0.8") and refuses wildcards. */
+function localeFromAcceptLanguage(header: string | null): string {
+  for (const part of (header ?? "").split(",")) {
+    const tag = part.split(";")[0]?.trim().toLowerCase();
+    if (!tag) continue;
+    const base = tag.split("-")[0];
+    if ((activeLocales as readonly string[]).includes(base)) return base;
+  }
+  return defaultLocale;
+}
+
 export async function POST(req: Request) {
   const auth = await resolveApiIdentity(req);
   if (!auth.ok) {
@@ -77,7 +89,11 @@ export async function POST(req: Request) {
     userId: auth.identity.userId,
     transport: auth.identity.transport,
     supabase: auth.identity.supabase,
-    locale: req.headers.get("accept-language")?.split(",")[0]?.trim() || defaultLocale,
+    // Accept-Language is untrusted client data with wildcards — Node's own
+    // fetch sends literally `*`, which the live write proof measured reaching
+    // the DB as a "locale" and tripping the original_language constraint.
+    // Only an ACTIVE locale is accepted; everything else is the default.
+    locale: localeFromAcceptLanguage(req.headers.get("accept-language")),
   };
 
   const response = await handleMcpMessage(message, {
