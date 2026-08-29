@@ -62,6 +62,14 @@ const RATE_LIMIT = { limit: 3, windowMs: 15 * 60 * 1000 } as const;
 const NOT_APPLIED = new Set(["42883", "42P01"]);
 /** Validation raised by the RPC (`errcode = '22023'`). */
 const RPC_VALIDATION = "22023";
+/**
+ * A DB-enforced ceiling (`errcode = 'P0004'`, anon_write_bounds_v1): the
+ * platform-wide or per-address intake bound inside the RPC itself. Unlike the
+ * in-memory window above, this one holds for a caller that skips this module
+ * and calls PostgREST directly. It maps to the SAME honest state the form
+ * already renders for the app-side throttle: prepared, not persisted.
+ */
+const RPC_RATE_LIMITED = "P0004";
 
 export async function persistPublicCompanyNeed(
   input: PublicIntakeInput,
@@ -123,6 +131,9 @@ export async function persistPublicCompanyNeed(
     }
     if (error.code === RPC_VALIDATION) {
       return { ok: false, code: "invalid" };
+    }
+    if (error.code === RPC_RATE_LIMITED) {
+      return { ok: false, code: "rate_limited" };
     }
     // PRIVACY: never log the payload (it carries employer contact details).
     console.error("[company-need-intake] persist failed", { code: error.code });
