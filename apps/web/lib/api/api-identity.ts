@@ -2,7 +2,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireSupabaseClientEnv } from "@/lib/env";
-import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
+import {
+  clientKeyFromHeaders,
+  rateLimit,
+  rateLimitCheck,
+} from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
 
@@ -72,28 +76,65 @@ export type ApiIdentityResult =
   | { readonly ok: false; readonly reason: ApiIdentityFailure };
 
 /**
- * Why identity could not be established. Every value maps to 401 at the route
- * — the distinction is for the server's own reasoning and for tests, and is
- * deliberately NOT echoed to the caller: telling an attacker whether a token
- * was expired, malformed or from another project is an oracle.
+ * Why identity could not be established. Every judgement ABOUT THE CREDENTIAL
+ * maps to 401 at the route — the distinction is for the server's own reasoning
+ * and for tests, and is deliberately NOT echoed to the caller: telling an
+ * attacker whether a token was expired, malformed or from another project is
+ * an oracle.
+ *
+ * Two values are NOT judgements about the credential and get their own status
+ * (see `refusalStatus`):
+ *
+ *   - `identity-unavailable`: the auth server could not be asked. Saying 401
+ *     would assert something about the caller that was never determined, and a
+ *     client that believes it would discard a perfectly valid session. The
+ *     same lesson as #1314: a failed read is "unknown", never a fact.
+ *   - `rate-limited`: a brake, not a verdict. 429 tells a legitimate client to
+ *     back off instead of throwing its credentials away.
  */
 export type ApiIdentityFailure =
   | "no-credentials"
   | "malformed-bearer"
   | "invalid-bearer"
-  | "rate-limited";
+  | "rate-limited"
+  | "identity-unavailable";
+
+/**
+ * The ONE mapping from refusal to HTTP status, so no route invents its own.
+ * Credential judgements are indistinguishable on the wire (all 401, one body);
+ * only "we could not judge" (503) and "stop asking so fast" (429) differ,
+ * because neither says anything about the token an attacker could learn from.
+ */
+export function refusalStatus(reason: ApiIdentityFailure): 401 | 429 | 503 {
+  switch (reason) {
+    case "no-credentials":
+    case "malformed-bearer":
+    case "invalid-bearer":
+      return 401;
+    case "rate-limited":
+      return 429;
+    case "identity-unavailable":
+      return 503;
+  }
+}
 
 const BEARER_RX = /^Bearer\s+(\S+)$/i;
 
 /**
- * A JWT has three dot-separated non-empty segments. This is a CHEAP pre-filter,
- * not verification — it exists so an anonymous flood of garbage strings cannot
- * each cost a network round-trip to the auth server. Anything that passes it is
- * still verified cryptographically below.
+ * A JWT has three dot-separated non-empty base64url segments (RFC 7515
+ * compact serialization — `A-Z a-z 0-9 - _` and nothing else; Supabase signs
+ * standard JWS, so a legitimate token can never contain `+ / =` or any other
+ * byte). This is a CHEAP pre-filter, not verification — it exists so an
+ * anonymous flood of garbage strings cannot each cost a network round-trip to
+ * the auth server. Anything that passes it is still verified
+ * cryptographically below. The charset strictness is grafted from #1336's
+ * review: it widens the rejected set without excluding any real token.
  */
+const B64URL_SEGMENT = /^[A-Za-z0-9_-]+$/;
+
 function looksLikeJwt(token: string): boolean {
   const parts = token.split(".");
-  return parts.length === 3 && parts.every((p) => p.length > 0);
+  return parts.length === 3 && parts.every((p) => B64URL_SEGMENT.test(p));
 }
 
 /** What an `Authorization` header is, before anything is verified. */
@@ -117,15 +158,38 @@ export function classifyBearerHeader(header: string | null): BearerHeader {
 }
 
 /**
- * Brake on failed bearer verification.
+ * Brake on failed bearer verification — and ONLY on failure.
  *
  * A valid call is already rate-limited per user by the routes that need it.
  * An INVALID one has no user to key on, so without this an anonymous caller
  * could drive unbounded verification round-trips. Keyed on the forwarded
  * client key, which `clientKeyFromHeaders` documents as a brake rather than an
  * identity — the same honest limitation as every other limiter here.
+ *
+ * The mechanics matter: the resolver PEEKS before verifying (an exhausted
+ * budget refuses without spending a round-trip) and RECORDS only a malformed
+ * header or a rejected token. A successful verification is never counted —
+ * counting every attempt was measured (2026-08-29, e2e) to lock out valid
+ * bearer callers after `limit` ordinary requests, which for a phone is
+ * minutes of normal use. 60 failures per 5 minutes still stops a garbage
+ * flood cold, while a client with a real token never touches the budget.
+ * `identity-unavailable` is not recorded either: our own outage must not
+ * lock the door on top of failing to answer.
  */
-const BEARER_FAILURE_LIMIT = { limit: 20, windowMs: 5 * 60 * 1000 } as const;
+const BEARER_FAILURE_LIMIT = { limit: 60, windowMs: 5 * 60 * 1000 } as const;
+const BEARER_FAILURE_LIMITER = "api-bearer-verify" as const;
+
+function bearerFailureBudgetExhausted(key: string): boolean {
+  return rateLimitCheck({
+    name: BEARER_FAILURE_LIMITER,
+    key,
+    ...BEARER_FAILURE_LIMIT,
+  }).limited;
+}
+
+function recordBearerFailure(key: string): void {
+  rateLimit({ name: BEARER_FAILURE_LIMITER, key, ...BEARER_FAILURE_LIMIT });
+}
 
 /**
  * Verify a bearer token and build the caller's client.
@@ -162,13 +226,37 @@ async function identityFromBearer(
     },
   });
 
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data?.user) return { ok: false, reason: "invalid-bearer" };
+  // "The auth server said no" and "the auth server could not be asked" are
+  // different facts, and only the first is about the caller. gotrue-js models
+  // the second as a retryable fetch error (status absent or 5xx) rather than
+  // a verdict; anything thrown outright is by definition not a verdict either.
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error) {
+      return { ok: false, reason: authErrorIsInfrastructure(error) ? "identity-unavailable" : "invalid-bearer" };
+    }
+    if (!data?.user) return { ok: false, reason: "invalid-bearer" };
+    return {
+      ok: true,
+      identity: { userId: data.user.id, transport: "bearer", supabase },
+    };
+  } catch {
+    return { ok: false, reason: "identity-unavailable" };
+  }
+}
 
-  return {
-    ok: true,
-    identity: { userId: data.user.id, transport: "bearer", supabase },
-  };
+/**
+ * Whether an auth error is the infrastructure failing rather than the token
+ * failing. A verdict about a token always arrives as an HTTP 4xx from the
+ * auth server; no status at all means the request never completed, and a 5xx
+ * means the server did not judge it.
+ */
+function authErrorIsInfrastructure(error: {
+  name?: string;
+  status?: number;
+}): boolean {
+  if (error.name === "AuthRetryableFetchError") return true;
+  return typeof error.status !== "number" || error.status >= 500;
 }
 
 /**
@@ -187,17 +275,23 @@ export async function resolveApiIdentity(
   const bearer = classifyBearerHeader(header);
 
   if (bearer.kind !== "absent") {
-    const decision = rateLimit({
-      name: "api-bearer-verify",
-      key: clientKeyFromHeaders(req.headers),
-      ...BEARER_FAILURE_LIMIT,
-    });
-    if (decision.limited) return { ok: false, reason: "rate-limited" };
+    const clientKey = clientKeyFromHeaders(req.headers);
+    if (bearerFailureBudgetExhausted(clientKey)) {
+      return { ok: false, reason: "rate-limited" };
+    }
 
     if (bearer.kind === "malformed") {
+      recordBearerFailure(clientKey);
       return { ok: false, reason: "malformed-bearer" };
     }
-    return identityFromBearer(bearer.token);
+
+    const result = await identityFromBearer(bearer.token);
+    // A REJECTED token is a failure the caller caused; an unreachable auth
+    // server is not. Only the first spends failure budget.
+    if (!result.ok && result.reason === "invalid-bearer") {
+      recordBearerFailure(clientKey);
+    }
+    return result;
   }
 
   const supabase = await createClient();

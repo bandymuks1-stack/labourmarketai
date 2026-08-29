@@ -177,6 +177,14 @@ describe("present-but-unusable is never absent", () => {
     ["Basic dXNlcjpwYXNz", "a different scheme entirely"],
     [`Token ${JWT}`, "an unknown scheme carrying a real-looking JWT"],
     [`Bearer ${JWT} extra`, "trailing junk"],
+    [`Bearer Bearer ${JWT}`, "doubled scheme"],
+    [`Bearer ${JWT},Bearer ddd.eee.fff`, "comma-separated credentials"],
+    // Base64url is the ONLY alphabet a real JWS compact token can use
+    // (RFC 7515). The stricter charset is the graft from #1336's review.
+    ["Bearer aa+a.bbb.ccc", "standard-base64 '+' is not base64url"],
+    ["Bearer aaa.bb/b.ccc", "standard-base64 '/' is not base64url"],
+    ["Bearer aaa.bbb.cc=", "padding '=' never appears in a JWS segment"],
+    ["Bearer aaa.bbb.ccc.ddd", "four segments"],
   ])("%s → malformed, NOT absent (%s)", (header) => {
     const got = classifyBearerHeader(header);
     expect(

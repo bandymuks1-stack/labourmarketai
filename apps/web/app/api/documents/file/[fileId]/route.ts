@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
 import {
   DOCUMENT_FILES_BUCKET,
   DOCUMENT_FILE_SIGNED_URL_TTL_SECONDS,
@@ -51,7 +51,7 @@ export async function GET(
   // signed-URL mint) is untouched and still runs as the CALLER.
   const auth = await resolveApiIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false }, { status: 401 });
+    return NextResponse.json({ ok: false }, { status: refusalStatus(auth.reason) });
   }
   const { supabase } = auth.identity;
 

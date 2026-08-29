@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
 import {
   ownsWorker,
   workerProfessionSkillIds,
@@ -24,7 +24,7 @@ export async function GET(
   // Authority is unchanged below: ownsWorker + RLS still decide.
   const auth = await resolveApiIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: refusalStatus(auth.reason) });
   }
   const { userId, supabase } = auth.identity;
   if (!(await ownsWorker(supabase, workerId, userId))) {
@@ -86,7 +86,7 @@ export async function POST(
   // Authority is unchanged below: ownsWorker + RLS still decide.
   const auth = await resolveApiIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: refusalStatus(auth.reason) });
   }
   const { userId, supabase } = auth.identity;
   if (!(await ownsWorker(supabase, workerId, userId))) {

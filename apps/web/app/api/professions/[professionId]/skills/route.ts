@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
 import { uuidSchema } from "@/lib/skills";
 
 export const runtime = "nodejs";
@@ -28,7 +28,7 @@ export async function GET(
   if (!auth.ok) {
     return NextResponse.json(
       { ok: false, message: "Unauthorized" },
-      { status: 401 },
+      { status: refusalStatus(auth.reason) },
     );
   }
   // RLS decides what this taxonomy read returns, exactly as before; the

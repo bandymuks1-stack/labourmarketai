@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
 import { extractCvText, MAX_CV_BYTES } from "@/lib/cv/extract";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   // never parsed here, and a failed resolution is 401, never anonymous.
   const auth = await resolveApiIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, code: "unauthorized" }, { status: 401 });
+    return NextResponse.json({ ok: false, code: "unauthorized" }, { status: refusalStatus(auth.reason) });
   }
   const { userId } = auth.identity;
 

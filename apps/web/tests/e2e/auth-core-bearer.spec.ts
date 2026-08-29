@@ -49,6 +49,17 @@ test.describe("auth-core bearer boundary", () => {
     "Needs the local Supabase stack (pnpm e2e:local).",
   );
 
+  // Each RUN is its own rate-limit client. The boundary's failure limiter is
+  // keyed on the forwarded client key; without this, the deliberate failures
+  // of consecutive local runs pool in one shared bucket and a later run's
+  // controls start answering 429 for reasons that have nothing to do with the
+  // control. (That pooling is also how the all-attempts limiter defect was
+  // caught, so this line is a control-isolation fix, not a cover-up: the
+  // failure-only semantics are pinned by lib/api/api-identity.test.ts.)
+  test.use({
+    extraHTTPHeaders: { "x-forwarded-for": `e2e-run-${Date.now()}` },
+  });
+
   const WORKER = { email: "dev.worker@local.test", password: "password" };
   const COMPANY = { email: "dev.company@local.test", password: "password" };
 
@@ -124,6 +135,15 @@ test.describe("auth-core bearer boundary", () => {
       "Bearer not-a-jwt",
       "Bearer aaa.bbb",
       "Basic dXNlcjpwYXNzd29yZA==",
+      // The forms that #1336 was measured to serve as the COOKIE identity —
+      // each collapses to "absent" under a two-state parser and each must be
+      // "malformed" under this one (repro 2026-08-29, 8/8 fell through).
+      "Bearer Bearer aaa.bbb.ccc",
+      "Bearer aaa.bbb.ccc,Bearer ddd.eee.fff",
+      "Bearer aaa.bbb ccc",
+      "Bearer aaa.bbb\tccc",
+      "aaa.bbb.ccc",
+      "Bearer ",
     ]) {
       const res = await request.get(skillsUrl(workerId), {
         headers: { Authorization: header },
@@ -180,6 +200,27 @@ test.describe("auth-core bearer boundary", () => {
 
     const res = await request.get(skillsUrl(workerId), {
       headers: { Authorization: `Bearer ${expired}` },
+    });
+    expect(res.status()).toBe(401);
+  });
+
+  test("D2 — the service-role key can never become a user", async ({
+    request,
+  }) => {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+    test.skip(
+      serviceKey.length === 0,
+      "SUPABASE_SERVICE_ROLE_KEY not forwarded by the local runner.",
+    );
+    // A correctly signed, unexpired credential for THIS project — but it
+    // carries `role: service_role` and no user. If the boundary ever answered
+    // anything but a refusal here, an infrastructure credential would have
+    // walked through the user door. (The C control already proved a real
+    // user token works against this same URL, so a 401 here is about the
+    // credential's KIND, not a broken endpoint.)
+    const workerId = await fixtureWorkerId(FIXTURE_PROFILES.worker);
+    const res = await request.get(skillsUrl(workerId), {
+      headers: { Authorization: `Bearer ${serviceKey}` },
     });
     expect(res.status()).toBe(401);
   });
