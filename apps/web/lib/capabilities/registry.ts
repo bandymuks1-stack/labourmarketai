@@ -159,8 +159,56 @@ function capabilityTokenSecret(): string {
   return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
 }
 
-/** A draft is stateless, so its fingerprint is the draft itself. */
-const DRAFT_STATE_FINGERPRINT = "journal-draft:v1";
+/**
+ * The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
+ * HEAD — which is what makes the token genuinely ONE-TIME: a successful
+ * confirm appends an entry, the head moves, and a replay of the same token
+ * (a duplicate retry, a stolen token, a double-tap) fails as `stale_state`
+ * instead of writing a second entry. A constant fingerprint here would have
+ * made "one-time" a five-minute lie.
+ */
+async function journalChainFingerprint(
+  caller: CapabilityCaller,
+): Promise<{ ok: true; fingerprint: string } | { ok: false; result: ExecResult }> {
+  const { data: worker, error: workerError } = await caller.supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", caller.userId)
+    .maybeSingle();
+  if (workerError) {
+    return {
+      ok: false,
+      result: { ok: false, code: "unavailable", message: "Worker read failed." },
+    };
+  }
+  if (!worker) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it has no Work Journal.",
+      },
+    };
+  }
+  const { data: head, error: headError } = await caller.supabase
+    .from("journal_entries")
+    .select("hash_self")
+    .eq("worker_id", worker.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (headError) {
+    return {
+      ok: false,
+      result: { ok: false, code: "unavailable", message: "Journal read failed." },
+    };
+  }
+  return {
+    ok: true,
+    fingerprint: `journal-head:v1:${worker.id}:${head?.hash_self ?? "genesis"}`,
+  };
+}
 
 const journalCreateDraft: CapabilityDescriptor = {
   id: "journal.create_draft",
@@ -177,11 +225,13 @@ const journalCreateDraft: CapabilityDescriptor = {
   inputSchema: workerLogWorkSchema,
   run: async (caller, input): Promise<ExecResult> => {
     const draft = workerLogWorkSchema.parse(input);
+    const state = await journalChainFingerprint(caller);
+    if (!state.ok) return state.result;
     const token = issueConfirmationToken(capabilityTokenSecret(), {
       actionId: "journal.confirm",
       inputHash: canonicalInputHash(draft),
       userId: caller.userId,
-      stateFingerprint: DRAFT_STATE_FINGERPRINT,
+      stateFingerprint: state.fingerprint,
       issuedAtMs: Date.now(),
     });
     return {
@@ -222,11 +272,13 @@ const journalConfirm: CapabilityDescriptor = {
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = journalConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
+    const state = await journalChainFingerprint(caller);
+    if (!state.ok) return state.result;
     const verdict = verifyConfirmationToken(capabilityTokenSecret(), confirmationToken, {
       actionId: "journal.confirm",
       input: draft,
       userId: caller.userId,
-      currentStateFingerprint: DRAFT_STATE_FINGERPRINT,
+      currentStateFingerprint: state.fingerprint,
       nowMs: Date.now(),
     });
     if (!verdict.ok) {

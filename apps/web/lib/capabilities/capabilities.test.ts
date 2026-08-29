@@ -59,6 +59,8 @@ function stubSupabase(script: TableScript) {
       const chain = {
         select: () => chain,
         eq: () => chain,
+        order: () => chain,
+        limit: () => chain,
         maybeSingle: async () => outcome,
         then: (resolve: (v: unknown) => unknown) => resolve(outcome),
       };
@@ -221,8 +223,15 @@ describe("journal draft → confirm", () => {
     siteName: "Vilnius A1",
   };
 
-  it("a draft returns the exact preview + a token, and touches NO table", async () => {
-    const r = await runCapability("journal.create_draft", caller({}), DRAFT);
+  /** The caller's own worker + journal chain head, as the token fingerprint
+   *  reads them. `head` moves after a successful write — the one-time rule. */
+  const journalState = (head: string | null): TableScript => ({
+    workers: { data: { id: "worker-1" }, error: null },
+    journal_entries: { data: head === null ? null : { hash_self: head }, error: null },
+  });
+
+  it("a draft returns the exact preview + a token, and WRITES nothing", async () => {
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.data?.preview).toEqual({
@@ -237,11 +246,11 @@ describe("journal draft → confirm", () => {
 
   it("confirm verifies the token, then performs the canonical write with the executor's exact FormData mapping", async () => {
     coreWrite.mockClear();
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     expect(drafted.ok).toBe(true);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
 
-    const confirmed = await runCapability("journal.confirm", caller({}), {
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
       ...DRAFT,
       confirmationToken: token,
     });
@@ -273,9 +282,9 @@ describe("journal draft → confirm", () => {
       code: "no_worker_profile",
       message: "no worker",
     } as never);
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
-    const confirmed = await runCapability("journal.confirm", caller({}), {
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
       ...DRAFT,
       confirmationToken: token,
     });
@@ -284,7 +293,7 @@ describe("journal draft → confirm", () => {
 
   it("negative control: a rejected token NEVER reaches the write", async () => {
     coreWrite.mockClear();
-    const confirmed = await runCapability("journal.confirm", caller({}), {
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
       ...DRAFT,
       confirmationToken: "not-a-real.token",
     });
@@ -293,10 +302,10 @@ describe("journal draft → confirm", () => {
   });
 
   it("a TAMPERED draft is rejected at the token, before the gate", async () => {
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
 
-    const confirmed = await runCapability("journal.confirm", caller({}), {
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
       ...DRAFT,
       notes: "Different notes than were previewed",
       confirmationToken: token,
@@ -305,11 +314,11 @@ describe("journal draft → confirm", () => {
   });
 
   it("another user cannot spend the token", async () => {
-    const drafted = await runCapability("journal.create_draft", caller({}), DRAFT);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
     const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
 
     const other: CapabilityCaller = {
-      ...caller({}),
+      ...caller(journalState("h0")),
       userId: "00000000-0000-4000-8000-0000000000bb",
     };
     const confirmed = await runCapability("journal.confirm", other, {
@@ -317,5 +326,21 @@ describe("journal draft → confirm", () => {
       confirmationToken: token,
     });
     expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("ONE-TIME: after the journal chain head moves, the same token is dead (replay/dup-retry safe)", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    // The successful confirm appended an entry — the head is now h1. The
+    // identical token, replayed, must be rejected WITHOUT reaching the write.
+    const replayed = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(coreWrite).not.toHaveBeenCalled();
   });
 });
