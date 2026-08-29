@@ -1,4 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
+
+import { expectInViewport } from "./viewport";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -114,7 +116,11 @@ test.describe("the documents lead the documents page", () => {
       waitUntil: "domcontentloaded",
     });
     await page.locator("h1").first().waitFor();
-    await expect(page.locator("#training")).toHaveCount(1);
+    // Scoped to `main` for the same reason as profile-hierarchy: React's
+    // streaming SSR can hold a second, zero-height copy of the subtree in its
+    // `<div id="S:1">` insertion buffer while the stream finishes, which makes
+    // a bare `#training` count 2 for a moment. `main` names the real document.
+    await expect(page.locator("main #training")).toHaveCount(1);
     // The scroll happens on a rAF after the element exists, so poll rather
     // than sample once. It used to stay at 0 forever, which no wait fixes.
     await expect
@@ -123,11 +129,15 @@ test.describe("the documents lead the documents page", () => {
         timeout: 10_000,
       })
       .toBeGreaterThan(0);
-    const box = await page.locator("#training").first().boundingBox();
-    expect(box, "#training exists").not.toBeNull();
-    expect(
-      box!.y,
+    // VIEWPORT space, not document space — the same correction as
+    // profile-hierarchy. `boundingBox().y` is the DOCUMENT position on the
+    // main frame, so the old form asked a question about page length rather
+    // than about what the reader can see. See tests/e2e/viewport.ts.
+    await expectInViewport(
+      page,
+      "main #training",
       "#training is scrolled into view, not left below the fold",
-    ).toBeLessThan(900);
+      { maxTop: 200 },
+    );
   });
 });

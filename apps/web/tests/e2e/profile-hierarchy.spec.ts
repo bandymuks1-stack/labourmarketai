@@ -1,4 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
+
+import { expectInViewport } from "./viewport";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -129,13 +131,31 @@ test.describe("the profile leads with what it exists to edit", () => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(`${ROUTE}?_=${id}#${id}`, { waitUntil: "domcontentloaded" });
       await page.locator("h1").first().waitFor();
-      await expect(page.locator("#cv-details")).toHaveJSProperty("open", true);
-      const box = await page.locator(`#${id}`).first().boundingBox();
-      expect(box, `#${id} has a box`).not.toBeNull();
-      expect(
-        box!.y,
+      // SCOPED TO `main`, because React's streaming SSR briefly puts a SECOND
+      // copy of this subtree in the document. Fizz buffers out-of-order
+      // content in a throwaway `<div id="S:1">` at the end of `<body>` and a
+      // script then moves it into place. Measured here on the second and
+      // third iteration of this very loop: `[id='cv-details']` returned two
+      // nodes — the real one under `MAIN` (height 2253) and the buffered one
+      // under `DIV#S:1` (height 0) — which made the unscoped strict locator
+      // throw "resolved to 2 elements". The page was correct both times.
+      //
+      // `main` is the fix rather than `.first()`: it names the real document,
+      // so a genuine duplicate would still fail instead of being silently
+      // swallowed. A timeout would only have hidden the race.
+      await expect(page.locator("main #cv-details")).toHaveJSProperty("open", true);
+      // VIEWPORT space, not document space. This assertion used to read
+      // `boundingBox().y < 900`, which on the main frame is the element's
+      // DOCUMENT position — so it silently asked "is this in the first 900px
+      // of the page" and passed only while the page was short. It began
+      // failing at 2177.5 once the fixture account had history, while the deep
+      // link was working perfectly (rect.top was 79.5). See tests/e2e/viewport.ts.
+      await expectInViewport(
+        page,
+        `main #${id}`,
         `#${id} is scrolled into view, not left below the fold`,
-      ).toBeLessThan(900);
+        { maxTop: 200 },
+      );
     }
   });
 
