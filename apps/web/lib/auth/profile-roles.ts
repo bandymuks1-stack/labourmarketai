@@ -35,6 +35,36 @@ import "server-only";
  */
 
 /** Delay between the failed first read and the single retry. */
+/**
+ * WHAT A PROFILE MAY ACTUALLY HOLD — wider than what anyone can onboard into.
+ *
+ * `Role` (lib/auth/actions.ts) is the participation mode a person CHOOSES at
+ * sign-up: worker, company, agency, customer. `profile_roles.role` also
+ * carries `admin`, granted out of band by `admin:grant-superadmin --apply`
+ * and read by `lib/auth/superadmin.ts` — nobody onboards into it.
+ *
+ * Measured in production: worker 31, company 10, agency 4, customer 2,
+ * **admin 1**. So the onboarding union was already narrower than the column
+ * it names. Nothing was broken by that, because every read path here is typed
+ * `{ role: string }` and stays open — but a page that legitimately requires
+ * the admin role could not be typed, and the mismatch was invisible.
+ *
+ * This names the distinction instead of leaving it to be rediscovered. It
+ * stays OPEN (`string & {}`) for the same reason `EntityType` does: a value
+ * the database can hold must be representable, and a closed union turns an
+ * unlisted-but-real value into an unrepresentable one.
+ */
+export const KNOWN_HELD_ROLES = [
+  "worker",
+  "company",
+  "agency",
+  "customer",
+  /** Granted, never onboarded — see lib/auth/superadmin.ts. */
+  "admin",
+] as const;
+
+export type HeldProfileRole = (typeof KNOWN_HELD_ROLES)[number] | (string & {});
+
 export const ROLE_SIGNAL_RETRY_DELAY_MS = 120;
 
 /** The read did NOT answer. Distinct from "the read said: no such role". */
