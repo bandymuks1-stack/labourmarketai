@@ -13852,5 +13852,42 @@
       "spend_compensation": "Gecompenseerd voor een mislukte actie",
       "other": "Andere mutatie"
     }
+  },
+  "workHours": {
+    "title": "Gewerkte uren",
+    "subtitle": "Leg vast wie heeft gewerkt, op welke datum, op welk object en hoeveel uur.",
+    "date": "Datum",
+    "worker": "Medewerker",
+    "object": "Object",
+    "hours": "Uren",
+    "note": "Werkomschrijving (optioneel)",
+    "hoursHint": "In stappen van een kwartier, bijv. 7,5",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "saved": "Vastgelegd",
+    "addAnother": "Zelfde medewerker — ander object",
+    "selectWorker": "Kies een medewerker",
+    "selectObject": "Kies een object",
+    "dayTotal": "Dagtotaal",
+    "entriesTitle": "Registraties van deze dag",
+    "noEntries": "Nog geen registraties voor deze dag.",
+    "enteredForSomeoneElse": "Ingevoerd door iemand anders",
+    "duplicateWarning": "Je hebt zojuist dezelfde registratie ingevoerd. Is dit een tweede dienst, sla dan nogmaals op.",
+    "errors": {
+      "hours": "Voer uren in tussen 0,25 en 24.",
+      "quarter": "Uren moeten in stappen van 0,25 zijn.",
+      "worker": "Kies een medewerker.",
+      "object": "Kies een object.",
+      "date": "Ongeldige datum.",
+      "note": "Omschrijving is te lang.",
+      "notAuthorized": "Je mag deze uren niet vastleggen.",
+      "generic": "Opslaan mislukt. Probeer het opnieuw."
+    },
+    "states": {
+      "needsMigration": "Deze functie is nog niet ingeschakeld op deze database.",
+      "noCompany": "Schakel over naar een bedrijfswerkruimte.",
+      "noObjects": "Maak eerst ten minste één object aan.",
+      "error": "Kon deze dag niet laden."
+    }
   }
 }

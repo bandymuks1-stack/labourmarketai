@@ -13852,5 +13852,42 @@
       "spend_compensation": "Kompensuota už nepavykusį veiksmą",
       "other": "Kitas judėjimas"
     }
+  },
+  "workHours": {
+    "title": "Darbo valandos",
+    "subtitle": "Įrašykite, kas dirbo, kurią dieną, kuriame objekte ir kiek valandų.",
+    "date": "Data",
+    "worker": "Darbuotojas",
+    "object": "Objektas",
+    "hours": "Valandos",
+    "note": "Darbo aprašymas (nebūtina)",
+    "hoursHint": "Ketvirčio valandos tikslumu, pvz. 7,5",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "saved": "Įrašyta",
+    "addAnother": "Tam pačiam darbuotojui — kitas objektas",
+    "selectWorker": "Pasirinkite darbuotoją",
+    "selectObject": "Pasirinkite objektą",
+    "dayTotal": "Dienos suma",
+    "entriesTitle": "Šios dienos įrašai",
+    "noEntries": "Šiai dienai įrašų dar nėra.",
+    "enteredForSomeoneElse": "Įvedė kitas asmuo",
+    "duplicateWarning": "Ką tik įrašėte tokį pat įrašą. Jei tai antra pamaina, išsaugokite dar kartą.",
+    "errors": {
+      "hours": "Įveskite valandas nuo 0,25 iki 24.",
+      "quarter": "Valandos turi būti ketvirčio tikslumu (0,25).",
+      "worker": "Pasirinkite darbuotoją.",
+      "object": "Pasirinkite objektą.",
+      "date": "Neteisinga data.",
+      "note": "Aprašymas per ilgas.",
+      "notAuthorized": "Neturite teisės įrašyti šių valandų.",
+      "generic": "Nepavyko išsaugoti. Bandykite dar kartą."
+    },
+    "states": {
+      "needsMigration": "Ši funkcija dar neįjungta šioje duomenų bazėje.",
+      "noCompany": "Pasirinkite įmonės darbo sritį.",
+      "noObjects": "Pirmiausia sukurkite bent vieną objektą.",
+      "error": "Nepavyko įkelti dienos duomenų."
+    }
   }
 }

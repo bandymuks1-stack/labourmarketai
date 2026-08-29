@@ -128,6 +128,8 @@ export const CLIENT_MESSAGE_ROOTS = [
   "waze",
   "workEntryReview",
   "workforcePlanning",
+  /** Work-hour quick entry — the site operator's daily surface. */
+  "workHours",
   /** The one workspace: Context Panel copy (W3). */
   "workspace",
 ] as const;

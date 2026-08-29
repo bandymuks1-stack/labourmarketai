@@ -13852,5 +13852,42 @@
       "spend_compensation": "Compensated for a failed action",
       "other": "Other movement"
     }
+  },
+  "workHours": {
+    "title": "Work hours",
+    "subtitle": "Record who worked, on which date, at which object, and for how many hours.",
+    "date": "Date",
+    "worker": "Worker",
+    "object": "Object",
+    "hours": "Hours",
+    "note": "Work description (optional)",
+    "hoursHint": "Quarter-hour steps, e.g. 7.5",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Recorded",
+    "addAnother": "Same worker — another object",
+    "selectWorker": "Select a worker",
+    "selectObject": "Select an object",
+    "dayTotal": "Day total",
+    "entriesTitle": "Entries for this day",
+    "noEntries": "No entries for this day yet.",
+    "enteredForSomeoneElse": "Entered by someone else",
+    "duplicateWarning": "You just recorded an identical entry. If this is a second shift, save again.",
+    "errors": {
+      "hours": "Enter hours between 0.25 and 24.",
+      "quarter": "Hours must be in quarter steps (0.25).",
+      "worker": "Select a worker.",
+      "object": "Select an object.",
+      "date": "Invalid date.",
+      "note": "Description is too long.",
+      "notAuthorized": "You may not record these hours.",
+      "generic": "Could not save. Please try again."
+    },
+    "states": {
+      "needsMigration": "This feature is not enabled on this database yet.",
+      "noCompany": "Switch to a company workspace.",
+      "noObjects": "Create at least one object first.",
+      "error": "Could not load this day."
+    }
   }
 }
