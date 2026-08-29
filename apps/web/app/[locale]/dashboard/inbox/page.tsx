@@ -12,6 +12,11 @@ import {
 import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import {
+  WORKER_NAME_FIELDS,
+  resolveWorkerName,
+  type WorkerNameRow,
+} from "@/lib/journal/worker-name";
 
 // Structured-field slugs that have a localized label; others fall back to slug.
 const FIELD_LABEL_SLUGS = new Set(["site_name", "tile_type", "area_done"]);
@@ -64,7 +69,7 @@ export default async function InboxPage({
     const { data: rows } = await supabase
       .from("journal_entries")
       .select(
-        "id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(profiles(full_name, email))",
+        `id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
@@ -95,10 +100,7 @@ export default async function InboxPage({
     }
 
     pending = unconfirmed.map((r) => {
-      const prof = (r.workers as { profiles: { full_name: string | null; email: string | null } | null } | null)
-        ?.profiles;
-      const workerName =
-        prof?.full_name ?? (prof?.email ? prof.email.split("@")[0] : "—");
+      const workerName = resolveWorkerName(r.workers as WorkerNameRow);
       const metrics = (r.journal_entry_metrics ?? []).map((m) => {
         const label = FIELD_LABEL_SLUGS.has(m.metric_slug)
           ? tField(`field.${m.metric_slug}`)
