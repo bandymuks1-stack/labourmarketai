@@ -2,8 +2,11 @@ import "server-only";
 
 import { z } from "zod";
 import { createHash } from "node:crypto";
+import { getTranslations } from "next-intl/server";
 
 import { env } from "@/lib/env";
+import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import { fd } from "@/lib/conversation/executor-contract";
 
 import {
   canonicalInputHash,
@@ -167,9 +170,10 @@ const journalCreateDraft: CapabilityDescriptor = {
     "Validates a Work Journal entry and returns the exact preview that " +
     "would be saved, plus a one-time confirmation token. NOTHING is written. " +
     "Uses the same input contract as the web chat work-log form.",
-  // Not listed to external clients until journal.confirm can execute —
-  // a draft whose confirmation can only be refused is not a product.
-  exposed: false,
+  // Exposed since the journal-write extraction landed (owner-approved
+  // 2026-08-29 §6): journal.confirm now performs the real canonical write,
+  // so the draft it prepares leads somewhere true.
+  exposed: true,
   inputSchema: workerLogWorkSchema,
   run: async (caller, input): Promise<ExecResult> => {
     const draft = workerLogWorkSchema.parse(input);
@@ -206,14 +210,14 @@ const journalConfirm: CapabilityDescriptor = {
   title: "Confirm a drafted Work Journal entry",
   description:
     "Verifies the confirmation token against the exact draft, then performs " +
-    "the canonical append-only journal write.",
-  // HONEST GATE: the canonical write (`createJournalEntry`) still resolves
-  // its own cookie session and request-scoped i18n, so it cannot yet run for
-  // a bearer caller without lying about who wrote. Extracting it into a
-  // client-threading service function is APP_READINESS_MAP §5 step 3. Until
-  // then this capability verifies the token (so the contract is provable)
-  // and refuses the write for EVERY transport — one behavior, no fork.
-  exposed: false,
+    "the canonical append-only journal write as the caller.",
+  // The former honest gate is CLOSED: the canonical write was extracted into
+  // the transport-neutral `createJournalEntryCore` (owner-approved 2026-08-29
+  // §6), so a verified draft now becomes the SAME append-only, hash-chained,
+  // pipeline-awaited save the web composer performs — as the caller, under
+  // the caller's RLS, with the identical FormData mapping the conversation
+  // executor uses (worker-executors.ts "worker.log-work"). No fork.
+  exposed: true,
   inputSchema: journalConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = journalConfirmInput.parse(input);
@@ -232,13 +236,38 @@ const journalConfirm: CapabilityDescriptor = {
         message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
       };
     }
+
+    const t = await getTranslations({
+      locale: caller.locale,
+      namespace: "journal.errors",
+    });
+    const result = await createJournalEntryCore(
+      { supabase: caller.supabase, userId: caller.userId, t },
+      fd({
+        locale: caller.locale,
+        engagement_context_id: draft.engagementContextId,
+        notes: draft.notes,
+        work_date: draft.workDate,
+        site_name: draft.siteName ?? "",
+      }),
+    );
+    if (!result.ok) {
+      return { ok: false, code: result.code, message: result.message };
+    }
     return {
-      ok: false,
-      code: "not_executable",
-      message:
-        "The draft and token are valid, but the canonical journal write is not " +
-        "yet reachable over this transport (owner-gated shared-core step). " +
-        "Nothing was written.",
+      ok: true,
+      data: {
+        entryId: result.entryId,
+        // The REAL awaited pipeline outcome — read through, never invented.
+        skills: {
+          status: result.skills.status,
+          added: result.skills.added,
+          strengthened: result.skills.strengthened,
+          reviewNeeded: result.skills.reviewNeeded,
+          claimsSaved: result.skills.claimsSaved,
+          cvUpdated: result.skills.cvUpdated,
+        },
+      },
     };
   },
 };
