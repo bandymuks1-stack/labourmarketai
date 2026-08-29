@@ -281,13 +281,57 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // entry point — not a category mismatch. It also carries the shortest
     // expiry of the four (2026-11-30) and two named enabling steps, because
     // both are integrations that need no schema change.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(4);
+    // 4 -> 5 on 2026-08-29. The fifth record is the OAUTH CONSENT SCREEN,
+    // and it exists because a fifth owner ruling exists — the 2026-08-29
+    // execution order §4, verbatim: "Prepare and perform the minimum
+    // configuration required for LabourMarket.ai to act as the OAuth
+    // authorization server for MCP/ChatGPT." The Supabase OAuth 2.1 server
+    // requires the product to host the authorization UI at a fixed URL, so
+    // the ruling that ordered the configuration ordered the surface.
+    //
+    // What differs from the four above, and is worth seeing in one place: it
+    // is the first STANDARDS-SHAPED AUTH INFRASTRUCTURE record — the page's
+    // existence and redirect flow are defined by OAuth 2.1, and two of its
+    // excused answers (aiControlled, aiCanWorkWithIt) are "no" as a SECURITY
+    // PROPERTY that must never become "yes": the step where a person grants
+    // an external agent access must not itself be agent-drivable. It is also
+    // the first record to cover an A-09 code, for exactly that one finding.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(5);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
       "public-acquisition-route-landing-v1",
       "organization-multi-capability-card",
+      "oauth-consent-auth-infrastructure",
     ]);
+
+    // The 2026-08-29 boundary, executable rather than trusted: seven codes,
+    // one route (plus its page path for diff matching), one PR, and A-09
+    // covering nothing beyond the single ai_cannot_work_with_entity finding.
+    const oauth = SCOPED_OWNER_WAIVERS[4];
+    expect(oauth.axioms).toEqual(["A-01", "A-09"]);
+    expect(oauth.pullRequests).toEqual([1347]);
+    expect(oauth.files).toEqual([
+      "/oauth/consent",
+      "apps/web/app/[locale]/oauth/consent/page.tsx",
+    ]);
+    expect(oauth.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "ai_cannot_work_with_entity",
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+    for (const f of oauth.expectedFindings) {
+      expect(f.file).toBe("/oauth/consent");
+    }
+    // The resolution names the only path that can exist for this surface —
+    // the gate learning the category — and records that aiControlled stays
+    // "no" permanently (the security property survives the waiver).
+    expect(oauth.resolvedBy).toMatch(/auth-infrastructure-category/);
+    expect(oauth.resolvedBy).toMatch(/remain 'no'/);
 
     // The owner's boundary, executable rather than trusted: this record
     // excuses exactly two codes, on exactly one file, for exactly one PR.

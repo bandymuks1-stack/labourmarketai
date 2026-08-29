@@ -13852,5 +13852,18 @@
       "spend_compensation": "Compensated for a failed action",
       "other": "Other movement"
     }
+  },
+  "oauthConsent": {
+      "title": "Confirm access",
+      "clientWantsAccess": "“{client}” is asking for access to your LabourMarket.ai account.",
+      "unknownClient": "Unknown application",
+      "clientLabel": "Application",
+      "redirectLabel": "Return address",
+      "scopesLabel": "Requested permissions",
+      "authorityNote": "The application will act only as you and will see only what you can see. You can revoke access at any time.",
+      "approve": "Allow",
+      "deny": "Deny",
+      "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
+      "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
   }
 }
