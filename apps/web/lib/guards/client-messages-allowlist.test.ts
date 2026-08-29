@@ -305,6 +305,10 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         join(LOCALE_DIR, "invite"),
         join(LOCALE_DIR, "[...rest]"),
         join(LOCALE_DIR, "live-market-review"),
+        // OAuth consent (owner directive 2026-08-29 §4) — a pure server
+        // component: every oauthConsent string renders on the server, the
+        // form is native HTML, so no client i18n pick is needed.
+        join(LOCALE_DIR, "oauth"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
       join(LOCALE_DIR, "error.tsx"),
@@ -331,6 +335,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "focus-landing",
       "invite",
       "live-market-review",
+      "oauth",
       "onboarding",
     ]);
   });
