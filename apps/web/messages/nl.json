@@ -13858,7 +13858,7 @@
     "subtitle": "Leg vast wie heeft gewerkt, op welke datum, op welk object en hoeveel uur.",
     "date": "Datum",
     "worker": "Medewerker",
-    "object": "Object",
+    "object": "Werkobject",
     "hours": "Uren",
     "note": "Werkomschrijving (optioneel)",
     "hoursHint": "In stappen van een kwartier, bijv. 7,5",
