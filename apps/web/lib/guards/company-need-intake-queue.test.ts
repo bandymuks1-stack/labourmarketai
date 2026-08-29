@@ -130,9 +130,16 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
     // (service-role-ONLY grants — the table was created with no grant at
     // all, which silently broke this very queue in production). The fix
     // must never widen access beyond service_role.
+    //
+    // anon_write_bounds_v1 (2026-08-29) is the third: it adds CHECK
+    // constraints and an index to the table and re-creates the public RPC
+    // with DB-side ceilings. It grants nothing on the table — its own guard
+    // (lib/guards/anon-write-bounds.test.ts) pins that — so the queue's
+    // service-role-only read model is unchanged.
     expect(touching).toEqual([
       "20260707120000_company_need_public_intake.sql",
       "20260713190000_company_need_intake_service_grants.sql",
+      "20260829130000_anon_write_bounds_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),

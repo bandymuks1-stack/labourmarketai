@@ -1102,9 +1102,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-08-29: the profile email identity binding carries the marker as
       // the doctrine ACKNOWLEDGEMENT that it is RED (auth-core adjacent:
       // trigger on profiles, two SECURITY DEFINER recreates, two policy
-      // replacements). Its header says OWNER APPROVAL: PENDING — the marker
-      // is not approval, and the file ships UNAPPLIED.
+      // replacements). Approved and applied 2026-08-29 (#1338).
       "20260829120000_profile_email_identity_binding_v1.sql",
+      // 2026-08-29: the anonymous write bounds carry the marker as the
+      // doctrine ACKNOWLEDGEMENT that the file is RED (grant-adjacent:
+      // triggers on anon-writable tables, SECURITY DEFINER helpers, a public
+      // RPC recreated). Its header says OWNER APPROVAL: PENDING — the marker
+      // is not approval, and the file ships UNAPPLIED.
+      "20260829130000_anon_write_bounds_v1.sql",
 ]);
   });
 

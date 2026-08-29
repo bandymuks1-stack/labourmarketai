@@ -195,11 +195,11 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     inputValidation:
       "company_name required and <=200 chars; description required and <=8000; country must match ^[A-Z]{2}$ AND appear in the ten-country allowlist; email must match a single-@ pattern and be <=254; headcount clamped to [1,100000]; urgency/accommodation/engagement_type/locale normalized to fixed enums rather than rejected; nine further per-field length ceilings each raising errcode 22023.",
     abuseControls:
-      "GAP — there is NO database-level rate limit, NO duplicate-submission check, and NO per-IP or per-email throttle. An anonymous caller can insert unbounded rows of up to ~8 KB each. Any protection today lives in the application layer only and is NOT enforced here. This is the largest residual issue on the public surface and is tracked as a follow-up.",
+      "DB-enforced throttle inside the function (anon_write_bounds_v1, 20260829130000): a platform-wide ceiling of 30 intakes per hour, a per-contact-email ceiling of 3 per 24 h, and an exact-duplicate check (same company name + description + contact email within 24 h returns the earlier id and writes nothing). Every per-field length ceiling is mirrored by a table CHECK. Ceilings raise errcode P0004, which the app maps to its `rate_limited` state. Still NO per-IP throttle at the database — the function never sees an address and recording one would be new PII — and NO captcha; the app-side in-memory window (3 per 15 min per client key, per instance) remains the first brake.",
     definerJustification:
       "Required. `company_need_public_intakes` deliberately grants nothing to anon and has no INSERT policy; DEFINER is the only write path, which is what keeps the table otherwise sealed.",
     residualRisk:
-      "Spam and storage exhaustion via unthrottled inserts, plus unsolicited PII arriving in the intake table. Returns only the new row's own id, so it is not an enumeration oracle.",
+      "Bounded spam: at most 30 rows/hour platform-wide of ≤ ~8 KB each, and unsolicited PII may still arrive within that bound. Returns only the row's own id (the earlier one on an exact resubmission), so it is not an enumeration oracle.",
   },
 ] as const;
 

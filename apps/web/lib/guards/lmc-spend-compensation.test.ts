@@ -39,8 +39,19 @@ const ROLLBACK = join(
   "20260828090000_lmc_spend_compensation_v1.down.sql",
 );
 
-const sql = readFileSync(MIGRATION, "utf8");
-const down = readFileSync(ROLLBACK, "utf8");
+/**
+ * LINE ENDINGS ARE NOT PART OF THE CONTRACT. This repo checks out with
+ * `core.autocrlf=true`, so on Windows every migration arrives as CRLF while
+ * CI reads LF. The multi-line `toContain` below ("… is not null\n       and …")
+ * therefore FAILED on every Windows checkout and PASSED in CI — a guard whose
+ * verdict depends on the developer's OS is the Windows-only-guard-failure class
+ * recorded on 2026-08-25. Normalising once here makes the verdict the same on
+ * both, and the NEGATIVE CONTROL at the bottom proves that the raw CRLF form
+ * would still fail without it.
+ */
+const normalizeEol = (s: string): string => s.replace(/\r\n/g, "\n");
+const sql = normalizeEol(readFileSync(MIGRATION, "utf8"));
+const down = normalizeEol(readFileSync(ROLLBACK, "utf8"));
 
 describe("compensation ships disabled", () => {
   it("the DB flag is seeded false and the TS mirror is a literal false", () => {
@@ -183,5 +194,24 @@ describe("the rollback refuses to destroy money records", () => {
     // re-narrowing `lmc_settings_key_check` would reject it and the rollback
     // would fail on its last step having already dropped the function.
     expect(down).not.toMatch(/add constraint lmc_settings_key_check/);
+  });
+});
+
+describe("NEGATIVE CONTROL — LF and CRLF checkouts must reach the same verdict", () => {
+  // The exact multi-line contract string the actor-authority assertion pins.
+  const CONTRACT = "v_account.profile_id is not null\n       and v_account.profile_id = p_actor_profile_id";
+  const asCrlf = (s: string): string => s.replace(/\n/g, "\r\n");
+
+  it("the raw CRLF form of the migration would FAIL the contract without normalisation", () => {
+    const crlf = asCrlf(sql);
+    expect(crlf).not.toBe(sql);
+    expect(crlf).not.toContain(CONTRACT);
+  });
+
+  it("after normalisation the CRLF and LF forms are byte-identical and both carry the contract", () => {
+    expect(normalizeEol(asCrlf(sql))).toBe(sql);
+    expect(normalizeEol(asCrlf(sql))).toContain(CONTRACT);
+    expect(sql).toContain(CONTRACT);
+    expect(normalizeEol(asCrlf(down))).toBe(down);
   });
 });
