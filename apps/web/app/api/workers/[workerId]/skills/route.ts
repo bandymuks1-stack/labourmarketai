@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { resolveApiIdentity, refusalStatus } from "@/lib/auth/api-identity";
 import {
   ownsWorker,
   workerProfessionSkillIds,
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 /** GET /api/workers/:workerId/skills — the worker's declared skills. */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ workerId: string }> },
 ) {
   const { workerId } = await params;
@@ -20,14 +20,17 @@ export async function GET(
     return NextResponse.json({ ok: false, message: "Invalid worker id" }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+  const identity = await resolveApiIdentity(req);
+  if (!identity.ok) {
+    return NextResponse.json(
+      { ok: false, message: "Unauthorized" },
+      { status: refusalStatus(identity.reason) },
+    );
   }
-  if (!(await ownsWorker(supabase, workerId, user.id))) {
+  // The caller's OWN RLS-scoped client — ownership and visibility are still
+  // decided by the database, exactly as before. This seam establishes WHO.
+  const { supabase, userId } = identity;
+  if (!(await ownsWorker(supabase, workerId, userId))) {
     return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
@@ -82,14 +85,17 @@ export async function POST(
   }
   const requested = [...new Set(parsed.data.skillIds)];
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+  const identity = await resolveApiIdentity(req);
+  if (!identity.ok) {
+    return NextResponse.json(
+      { ok: false, message: "Unauthorized" },
+      { status: refusalStatus(identity.reason) },
+    );
   }
-  if (!(await ownsWorker(supabase, workerId, user.id))) {
+  // The caller's OWN RLS-scoped client — ownership and visibility are still
+  // decided by the database, exactly as before. This seam establishes WHO.
+  const { supabase, userId } = identity;
+  if (!(await ownsWorker(supabase, workerId, userId))) {
     return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
