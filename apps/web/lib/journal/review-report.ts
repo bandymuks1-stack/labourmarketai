@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
+import {
+  WORKER_NAME_FIELDS,
+  resolveWorkerName,
+} from "@/lib/journal/worker-name";
 
 /**
  * Company review report preview (v1) — read-only, computed from existing data.
@@ -44,7 +48,10 @@ type EntryRow = {
   original_text: string | null;
   created_at: string;
   worker_id: string | null;
-  workers: { profiles: { full_name: string | null; email: string | null } | null } | null;
+  workers: {
+    display_name: string | null;
+    profiles: { full_name: string | null; email: string | null } | null;
+  } | null;
 };
 
 export async function getReviewReport(
@@ -73,15 +80,13 @@ export async function getReviewReport(
     const { data: rows } = await supabase
       .from("journal_entries")
       .select(
-        "id, original_text, created_at, worker_id, workers!inner(profiles(full_name, email))",
+        `id, original_text, created_at, worker_id, workers!inner(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
 
     for (const raw of (rows ?? []) as EntryRow[]) {
-      const prof = raw.workers?.profiles;
-      const workerName =
-        prof?.full_name ?? (prof?.email ? prof.email.split("@")[0] : "—");
+      const workerName = resolveWorkerName(raw.workers);
       const depth = recognizeEntryDepth(raw.original_text ?? "");
       const entry: ReviewReportEntry = {
         id: raw.id,

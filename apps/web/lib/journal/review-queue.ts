@@ -2,6 +2,11 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import {
+  WORKER_NAME_FIELDS,
+  resolveWorkerName,
+  type WorkerNameRow,
+} from "@/lib/journal/worker-name";
 
 /**
  * One-Tap Confirm queue (S3.5) — the shared read model for the manager's
@@ -52,7 +57,7 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const { data: rows } = await supabase
     .from("journal_entries")
     .select(
-      "id, original_text, created_at, worker_id, workers!inner(profiles(full_name, email))",
+      `id, original_text, created_at, worker_id, workers!inner(${WORKER_NAME_FIELDS})`,
     )
     .in("id", reviewableIds)
     .order("created_at", { ascending: true });
@@ -80,13 +85,7 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   }
 
   return entries.map((r) => {
-    const prof = (
-      r.workers as {
-        profiles: { full_name: string | null; email: string | null } | null;
-      } | null
-    )?.profiles;
-    const workerName =
-      prof?.full_name ?? (prof?.email ? prof.email.split("@")[0] : "—");
+    const workerName = resolveWorkerName(r.workers as WorkerNameRow);
     const depth = recognizeEntryDepth(r.original_text ?? "");
     return {
       id: r.id,

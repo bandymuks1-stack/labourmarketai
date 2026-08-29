@@ -99,7 +99,22 @@ values
    'aaaaaaaa-0000-0000-0000-000000000001',
    'Dev Worker', 'Steel fixer • 8y exp', 8, 'LT',
    array['NL','DK','DE'], 'available', 70, 80)
-on conflict (profile_id) do nothing;
+-- `do nothing` made this insert declare a display_name it never applied. The
+-- role trigger above has ALREADY created the row (with a NULL display_name),
+-- so the conflict always fires and 'Dev Worker' was silently discarded — the
+-- fixture worker had no name at all.
+--
+-- That is not cosmetic. Every manager-facing journal surface names the worker
+-- from `workers.display_name`, so the local stack rendered "—" on every
+-- review card and made a real product defect impossible to see or to test.
+-- 26 of 36 production workers DO carry a display_name; the fixture must look
+-- like the majority case, not like the empty one.
+--
+-- The id is untouched by DO UPDATE, so the NOTE above still holds: the row
+-- keeps its trigger-generated id and must still be found via profile_id.
+on conflict (profile_id) do update
+  set display_name = coalesce(excluded.display_name, workers.display_name),
+      headline = coalesce(excluded.headline, workers.headline);
 
 insert into public.companies
   (id, profile_id, legal_name, display_name, country, trust_score)
