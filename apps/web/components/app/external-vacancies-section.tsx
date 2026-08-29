@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 /**
  * EXTERNAL VACANCIES SECTION — public-source job ads on the ONE worker board.
@@ -50,6 +51,9 @@ export interface ExternalVacanciesLabels {
   readonly payAsPublished: string;
   readonly gapLabel: (gap: string) => string;
   readonly gapsTitle: string;
+  /** Compressed-view header count, e.g. "top 2 of 20" (used only when the
+   *  first view is capped; the full-count header renders otherwise). */
+  readonly shownOfTotal?: (shown: number, total: number) => string;
   /** Same labels object the platform cards pass to MatchTierExplanation. */
   readonly tierLabels: Parameters<typeof MatchTierExplanation>[0]["labels"];
   readonly attributionText: (code: string) => string;
@@ -62,12 +66,27 @@ export function ExternalVacanciesSection({
   cards,
   labels,
   freshness,
+  initialCount = null,
+  expansion = null,
 }: {
   readonly cards: readonly ExternalOpportunityCardV1[];
   readonly labels: ExternalVacanciesLabels;
   readonly freshness: SourceFreshnessV1;
+  /**
+   * Compressed first view (owner rule 2026-08-29): when set, only the top N
+   * of the already-ranked ads render and the section says "top N of M" with
+   * a real link to everything. `null` (any refined/expanded view) renders
+   * every loaded ad exactly as before. Presentation only — retrieval,
+   * ranking, and the loaded set are untouched.
+   */
+  readonly initialCount?: number | null;
+  /** The show-all link the compressed view renders (href + label). */
+  readonly expansion?: { readonly href: string; readonly label: string } | null;
 }): ReactNode {
   if (cards.length === 0) return null;
+
+  const capped = initialCount != null && cards.length > initialCount;
+  const shown = capped ? cards.slice(0, initialCount) : cards;
 
   // Every state except `current` is stated plainly. The platform does not
   // control these vacancies and cannot promise one is still open, so supply
@@ -84,7 +103,10 @@ export function ExternalVacanciesSection({
     >
       <div className="flex flex-col gap-1">
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {labels.sectionTitle} · {cards.length}
+          {labels.sectionTitle} ·{" "}
+          {capped && labels.shownOfTotal
+            ? labels.shownOfTotal(shown.length, cards.length)
+            : cards.length}
         </span>
         <p className="text-meta leading-relaxed text-text-muted">
           {labels.sectionNote}
@@ -111,17 +133,17 @@ export function ExternalVacanciesSection({
           {
             band: "best",
             title: labels.bandBestTitle,
-            list: cards.filter((c) => c.match.status === "strong"),
+            list: shown.filter((c) => c.match.status === "strong"),
           },
           {
             band: "possible",
             title: labels.bandPossibleTitle,
-            list: cards.filter((c) => c.match.status === "possible"),
+            list: shown.filter((c) => c.match.status === "possible"),
           },
           {
             band: "explore",
             title: labels.bandExploreTitle,
-            list: cards.filter(
+            list: shown.filter(
               (c) =>
                 c.match.status !== "strong" && c.match.status !== "possible",
             ),
@@ -258,6 +280,18 @@ export function ExternalVacanciesSection({
             </ul>
           </div>
         ))}
+
+      {/* Compressed-view door: the withheld ads are one real link away —
+          same page, ?view=all. Never a dead control, never a hidden list. */}
+      {capped && expansion ? (
+        <Link
+          href={expansion.href}
+          data-testid="opportunities-external-show-all"
+          className="inline-flex min-h-11 w-fit items-center rounded-md border border-ink-500 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue"
+        >
+          {expansion.label}
+        </Link>
+      ) : null}
     </section>
   );
 }

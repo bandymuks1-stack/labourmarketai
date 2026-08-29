@@ -8164,6 +8164,11 @@
         "body": "Aktive Filter: {filters}. Entfernen Sie einige Filter oder setzen Sie sie zurück.",
         "reset": "Filter zurücksetzen"
       },
+      "initialView": {
+        "summary": "Die {shown} stärksten Treffer von {total} Möglichkeiten werden angezeigt.",
+        "showAll": "Alle anzeigen (noch {count})",
+        "showAllExternal": "Alle Stellenanzeigen anzeigen"
+      },
       "details": {
         "show": "Mehr Details",
         "hide": "Details ausblenden"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
+      "shownOfTotal": "Top {shown} von {total}",
       "bandBest": "Passt am besten",
       "bandPossible": "Möglicherweise passend",
       "bandExplore": "Weitere Anzeigen",

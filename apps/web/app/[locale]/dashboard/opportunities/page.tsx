@@ -51,7 +51,9 @@ import {
   applyDiscoveryFilters,
   buildDiscoveryQuery,
   collectDiscoveryFacets,
+  INITIAL_VIEW_MAX_COUNT,
   parseDiscoveryParams,
+  selectInitialBoardView,
   sortDiscoveryCards,
   type DiscoveryFilterState,
   type DiscoverySort,
@@ -111,13 +113,39 @@ export default async function OpportunitiesPage({
   // Discovery params parsed BEFORE the load so an active profession/country
   // chip narrows what the external-supply retrieval FETCHES (closed-set
   // values), not merely what the page hides afterwards.
-  const { filters, sort } = parseDiscoveryParams(sp);
+  const { filters, sort, view } = parseDiscoveryParams(sp);
   const result = await loadWorkerOpportunityBoard("opportunities_board", {
     externalDiscovery: {
       professionSlug: filters.profession,
       country: filters.country,
     },
   });
+
+  // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
+  //    never more than 5 items before the person asks for more. Pure
+  //    presentation compression over the ALREADY-ranked universe — the
+  //    loader, the RPC limit, the filters and the external retrieval are
+  //    untouched, and every withheld card is one ?view=all click away.
+  const active = activeFilterEntries(filters);
+  const filtered =
+    result.kind === "ready" && result.capabilities.boardAvailable
+      ? sortDiscoveryCards(
+          applyDiscoveryFilters(result.opportunities, filters),
+          sort,
+        )
+      : [];
+  const initialView = selectInitialBoardView(filtered, {
+    sort,
+    activeFilterCount: active.length,
+    view,
+  });
+  // External ads share the SAME 5-item first-view budget: whatever the
+  // internal top slots leave over. In any refined view (filter, sort,
+  // ?view=all) the section shows everything it loaded, as before.
+  const boardRefined = view === "all" || active.length > 0 || sort !== "relevance";
+  const externalInitialCount = boardRefined
+    ? null
+    : Math.max(INITIAL_VIEW_MAX_COUNT - initialView.visible.length, 2);
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
@@ -464,14 +492,16 @@ export default async function OpportunitiesPage({
             </section>
           ) : (
             (() => {
+              // Facets over the FULL authorized universe — the chips must
+              // offer every present value even while the first view shows
+              // only the top of the ranking.
               const facets = collectDiscoveryFacets(
                 result.opportunities.map((o) => o.need),
               );
-              const filtered = sortDiscoveryCards(
-                applyDiscoveryFilters(result.opportunities, filters),
-                sort,
+              const visibleIds = new Set(
+                initialView.visible.map((o) => o.need.id),
               );
-              const active = activeFilterEntries(filters);
+              const expandedHref = `${boardHref}?view=all`;
               const facetGroups: ReadonlyArray<{
                 dim: keyof DiscoveryFilterState;
                 values: readonly string[];
@@ -513,9 +543,16 @@ export default async function OpportunitiesPage({
                         <ul className="flex flex-wrap gap-1.5">
                           {savedLive.map(({ need }) => (
                             <li key={need.id}>
-                              {/* In-page anchor to the live card below. */}
+                              {/* In-page anchor to the live card below. A card
+                                  the compressed first view holds back gets the
+                                  expanded URL instead — a bookmark must never
+                                  dead-link into a hidden card. */}
                               <a
-                                href={`#opp-${need.id}`}
+                                href={
+                                  visibleIds.has(need.id)
+                                    ? `#opp-${need.id}`
+                                    : `${expandedHref}#opp-${need.id}`
+                                }
                                 className="inline-flex min-h-[2.75rem] flex-col justify-center rounded-md border border-ink-500 px-3 py-1.5 transition-colors hover:border-brand-blue"
                                 data-testid="opportunities-saved-item"
                               >
@@ -701,14 +738,15 @@ export default async function OpportunitiesPage({
                       data-testid="opportunities-list"
                     >
                       {/* Rendering IS the read event — and the board renders
-                          `filtered`, not everything the RPC returned. Marking
-                          the loaded set would silently retire matches the
-                          worker never saw behind an active filter. */}
+                          `initialView.visible`, not everything the RPC
+                          returned. Marking the loaded set would silently
+                          retire matches the worker never saw behind an active
+                          filter OR behind the compressed first view. */}
                       <OpportunitiesShownMarker
                         surface="opportunities_board"
-                        requestIds={filtered.map((o) => o.need.id)}
+                        requestIds={initialView.visible.map((o) => o.need.id)}
                       />
-                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured, saved }, rankIndex) => (
+                      {initialView.visible.map(({ need, fit, match, nextAction, interestStatus, structured, saved }, rankIndex) => (
                         <li
                           key={need.id}
                           id={`opp-${need.id}`}
@@ -1048,6 +1086,33 @@ export default async function OpportunitiesPage({
                     </ul>
                   )}
 
+                  {/* Compressed-view honesty line: the first view shows the
+                      strongest matches, and says so — with the true size of
+                      the ranked universe and one real link to all of it.
+                      Nothing is deleted, nothing is hidden without a door. */}
+                  {initialView.capped ? (
+                    <div
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ink-600 bg-ink-800/30 px-4 py-3"
+                      data-testid="opportunities-show-more"
+                    >
+                      <p className="text-xs text-text-secondary">
+                        {t("discovery.initialView.summary", {
+                          shown: initialView.visible.length,
+                          total: filtered.length,
+                        })}
+                      </p>
+                      <Link
+                        href={expandedHref}
+                        data-testid="opportunities-show-all"
+                        className="inline-flex min-h-11 items-center rounded-md border border-brand-blue px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue/80"
+                      >
+                        {t("discovery.initialView.showAll", {
+                          count: initialView.hiddenCount,
+                        })}
+                      </Link>
+                    </div>
+                  ) : null}
+
                   {/* Compare (P2-PR5) — pure client state over the loaded
                       cards; the sticky bar + whitelisted-facts table render
                       only once something is selected. Nothing persists. */}
@@ -1093,7 +1158,14 @@ export default async function OpportunitiesPage({
           <ExternalVacanciesSection
             cards={result.externalVacancies.cards}
             freshness={result.externalVacancies.freshness}
+            initialCount={externalInitialCount}
+            expansion={{
+              href: `${boardHref}?view=all`,
+              label: t("discovery.initialView.showAllExternal"),
+            }}
             labels={{
+              shownOfTotal: (shown, total) =>
+                t("external.shownOfTotal", { shown, total }),
               sectionTitle: t("external.sectionTitle"),
               sectionNote: t("external.sectionNote"),
               // How old this supply is, in the worker's own words. The date is
