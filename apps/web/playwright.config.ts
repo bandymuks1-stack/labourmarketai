@@ -59,7 +59,28 @@ export default defineConfig({
     : {
         command: "pnpm dev",
         url: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000/lt",
-        reuseExistingServer: true,
+        /**
+         * LOCAL-STACK RUNS REFUSE TO INHERIT A SERVER THEY DID NOT START.
+         *
+         * `reuseExistingServer: true` reuses whatever answers on the port. It
+         * cannot tell this build from a stranger's, and :3100 is a fixed port
+         * that abandoned worktrees keep claiming.
+         *
+         * On 2026-08-28 that cost a full session. A `next start -p 3100` left
+         * over from another worktree — 22 commits behind, with the previous
+         * `DetailsHashOpener` that returns early for a hash naming a section
+         * INSIDE the disclosure — answered the suite instead of this build.
+         * The deep-link specs saw `scrollY` stay at exactly 0 with the target
+         * element present, intermittently, and it read exactly like a product
+         * race in the page's own lifecycle. It was not: the same deep links
+         * are deterministic 15/15 and 10/10 against a clean production build
+         * of the same commit. Nothing in the product was wrong.
+         *
+         * Reuse now fails closed for local-stack runs: Playwright errors with
+         * "port is already used" instead of quietly testing someone else's
+         * code. A wrong target must never be able to look like a bug.
+         */
+        reuseExistingServer: !LOCAL_STACK,
         timeout: 120_000,
       },
   projects: [
