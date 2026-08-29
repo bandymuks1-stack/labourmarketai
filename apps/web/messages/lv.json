@@ -2049,6 +2049,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Tiek rādītas {shown} spēcīgākās atbilstības no {total} iespējām.",
+        "showAll": "Rādīt visas (vēl {count})",
+        "showAllExternal": "Rādīt visus darba sludinājumus"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2137,6 +2142,7 @@
     "external": {
       "sectionTitle": "Publiski darba sludinājumi",
       "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
+      "shownOfTotal": "labākās {shown} no {total}",
       "bandBest": "Vispiemērotākie",
       "bandPossible": "Iespējami piemēroti",
       "bandExplore": "Citi sludinājumi",

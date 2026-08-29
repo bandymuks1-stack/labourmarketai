@@ -8164,6 +8164,11 @@
         "body": "Aktyvūs filtrai: {filters}. Pašalinkite dalį filtrų arba išvalykite juos.",
         "reset": "Išvalyti filtrus"
       },
+      "initialView": {
+        "summary": "Rodomos {shown} stipriausios atitiktys iš {total} galimybių.",
+        "showAll": "Rodyti visas (dar {count})",
+        "showAllExternal": "Rodyti visus darbo skelbimus"
+      },
       "details": {
         "show": "Daugiau informacijos",
         "hide": "Slėpti informaciją"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "shownOfTotal": "geriausi {shown} iš {total}",
       "bandBest": "Geriausiai tinkantys",
       "bandPossible": "Galimai tinkantys",
       "bandExplore": "Kiti skelbimai",

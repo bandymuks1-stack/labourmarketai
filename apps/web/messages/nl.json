@@ -8164,6 +8164,11 @@
         "body": "Actieve filters: {filters}. Verwijder enkele filters of wis ze om meer te zien.",
         "reset": "Filters wissen"
       },
+      "initialView": {
+        "summary": "De {shown} sterkste matches van {total} kansen worden getoond.",
+        "showAll": "Alles tonen (nog {count})",
+        "showAllExternal": "Alle vacatures tonen"
+      },
       "details": {
         "show": "Meer details",
         "hide": "Details verbergen"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "shownOfTotal": "top {shown} van {total}",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",
