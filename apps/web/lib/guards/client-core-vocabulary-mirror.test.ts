@@ -35,35 +35,40 @@ const CORE_SRC = join(REPO_ROOT, "packages", "client-core", "src");
 
 /**
  * Read a `const NAME = [ ... ] as const;` string array from a TypeScript
- * source file. Tolerant of formatting and of CRLF checkouts — a guard that
- * reaches a different verdict on Windows than in CI is not a guard.
+ * source file. Tolerant of formatting; line endings are already normalised by
+ * `readSource`.
  */
 function readStringArray(source: string, name: string): string[] {
-  const normalised = source.replace(/\r\n/g, "\n");
   const pattern = new RegExp(
     "(?:export\\s+)?const\\s+" + name + "\\s*=\\s*\\[([\\s\\S]*?)\\]\\s*as const",
   );
-  const match = pattern.exec(normalised);
+  const match = pattern.exec(source);
   if (match === null) {
     throw new Error(`could not find "const ${name} = [...] as const" to compare`);
   }
   return [...match[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 }
 
+/**
+ * Read a file with line endings normalised.
+ *
+ * Normalising HERE rather than at each assertion is deliberate. This
+ * repository has been bitten twice by guards that reached a different verdict
+ * on a CRLF checkout than in CI — once too lenient, once too strict — and the
+ * fix each time was to normalise at one point instead of remembering to do it
+ * at every regex.
+ */
 function readSource(...segments: string[]): string {
   const path = join(...segments);
   if (!existsSync(path)) {
     throw new Error(`expected file is missing: ${path}`);
   }
-  return readFileSync(path, "utf8");
+  return readFileSync(path, "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("the client-core package exists where the architecture says it does", () => {
   it("is a workspace package, so a second client can consume it", () => {
-    const workspace = readSource(REPO_ROOT, "pnpm-workspace.yaml").replace(
-      /\r\n/g,
-      "\n",
-    );
+    const workspace = readSource(REPO_ROOT, "pnpm-workspace.yaml");
     expect(workspace).toMatch(/^\s*-\s*"packages\/\*"/m);
   });
 });
@@ -94,9 +99,7 @@ describe("the locale vocabulary is one vocabulary", () => {
 
   it("the default locale matches", () => {
     const of = (src: string, decl: string) => {
-      const m = new RegExp(decl + "[^=]*=\\s*\"([a-z]{2})\"").exec(
-        src.replace(/\r\n/g, "\n"),
-      );
+      const m = new RegExp(decl + "[^=]*=\\s*\"([a-z]{2})\"").exec(src);
       return m === null ? null : m[1];
     };
     const webDefault = of(web, "defaultLocale");
@@ -171,7 +174,7 @@ describe("the canonical transport gate has not been opened by accident", () => {
     // legitimately merged, flip the constant AND update
     // docs/APP_READINESS_MAP.md §6 and docs/MOBILE_ARCHITECTURE.md — this
     // assertion is what forces both to happen in the same pull request.
-    const transport = readSource(CORE_SRC, "transport.ts").replace(/\r\n/g, "\n");
+    const transport = readSource(CORE_SRC, "transport.ts");
     expect(transport).toMatch(
       /export const DOMAIN_TRANSPORT_STATUS: TransportStatus = \{\s*open: false,/,
     );
