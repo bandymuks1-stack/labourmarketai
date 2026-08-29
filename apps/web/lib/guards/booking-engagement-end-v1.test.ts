@@ -1099,6 +1099,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // pricing, or any weakening of LMC authorization. The capability ships
       // switched OFF (`lmc_compensation_enabled` defaults false).
       "20260828090000_lmc_spend_compensation_v1.sql",
+      // 2026-08-29: the profile email identity binding carries the marker as
+      // the doctrine ACKNOWLEDGEMENT that it is RED (auth-core adjacent:
+      // trigger on profiles, two SECURITY DEFINER recreates, two policy
+      // replacements). Its header says OWNER APPROVAL: PENDING — the marker
+      // is not approval, and the file ships UNAPPLIED.
+      "20260829120000_profile_email_identity_binding_v1.sql",
 ]);
   });
 
