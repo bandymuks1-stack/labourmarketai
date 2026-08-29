@@ -196,8 +196,10 @@ the flip needs no new code written under pressure. The mirror guard fails until
 
 ### Next, in order
 
-1. **PR B — Ramūnas hours quick-entry.** Blocked on §5; see §7 for the
-   correction to the brief's data model.
+1. **PR B — Ramūnas hours quick-entry.** Two dependencies, both pending: the
+   §5 transport seam (#1336) AND the canonical operational hours model
+   (#1344, `work_hour_allocations`, draft/unapplied). See §7 for the model
+   and §7.2 for what PR B may prepare before those clear.
 2. **PR C — Work Journal first slice**, with the voice seam left open.
 3. Living CV, opportunities, employer need, notifications — each a client of
    the same canonical routes.
@@ -207,34 +209,81 @@ store submission.
 
 ---
 
-## 7. THE RAMŪNAS HOURS FLOW — A CORRECTION TO THE BRIEF
+## 7. THE RAMŪNAS HOURS FLOW — TWO HOURS MODELS, KEPT DISTINCT
 
-The brief names `work_hour_allocations`, `work_objects` and `timesheets` as the
-tables to reuse. **`work_hour_allocations` does not exist**, and the nearest
-thing to it is deprecated. The canonical chain, established by migration
-`20260818150000_journal_canonical_work_time_v1.sql` under an explicit owner
-ruling, is:
+> **Corrected 2026-08-29 (owner reconciliation).** An earlier revision of this
+> section concluded that "`work_hour_allocations` does not exist" and that the
+> brief's schema was therefore wrong. That was a **main-only inspection error**:
+> the table is absent from `main` because it is being *introduced* by pending
+> **PR #1344** (`20260829140000_work_hour_allocations_v1.sql`, draft,
+> owner-gated, UNAPPLIED). Absent from main does not mean rejected
+> architecture. The paragraphs below record the actual state.
+
+Three concepts exist and **must never be collapsed into one entity**:
+
+| | concept | where it lives | state |
+|---|---|---|---|
+| **A** | **Operational allocation** — worker + date + object + hours + `entered_by` | `work_hour_allocations` (PR #1344) | **pending canonical operational model** — draft, migration NOT applied |
+| **B** | **Journal metric** — hours/evidence derived from a Work Journal entry | `journal_entry_metrics` → `timesheet_compute_lines_v1` / `lib/journal/work-time.ts` (pinned mirror), per `20260818150000` | **existing, live, preserved** |
+| **C** | **Timesheet** — period submission / approval / frozen snapshot | `timesheets` + `timesheet_events` | existing, live |
+
+The A model's own invariants (from #1344, preserved verbatim in intent):
+`worker_id` = whose work; `entered_by` = who recorded it — never collapsed;
+multiple allocations per worker/day and multiple objects per day are valid, and
+no uniqueness constraint may collapse them; correction is non-destructive
+(`correction_of` / `superseded_by`); `journal_entry_id` is an **optional**
+evidence link — simple attendance allocation is NOT forced through the Work
+Journal. Operational direction:
 
 ```
-WORK JOURNAL ENTRY  (original evidence — immutable, invariant I-3)
-   → journal_entry_metrics   (derived structured metrics; `fragment_time` rows
-                              are the several allocations within one day)
-   → CANONICAL WORK-TIME VALUE
-        · SQL:        timesheet_compute_lines_v1
-        · TypeScript: apps/web/lib/journal/work-time.ts (a pinned mirror)
-   → timesheets → workload / capacity → reporting
+WORK HOUR ALLOCATIONS → aggregation → timesheet snapshot / approval → export
+WORK HOUR ALLOCATION  → optional journal_entry → Work Journal → evidence
 ```
 
-`journal_entry_work_items` is marked **deprecated**, has zero lifetime inserts
-and no writer. Before that migration, three computations claimed to know a
-worker's hours and disagreed on real production rows — 0 h, 5 h and 9 h for the
-same entry. One of them was made canonical; the others were removed.
+The B chain (journal-derived work time) remains exactly as `20260818150000`
+established it under an owner ruling, and **must remain valid**. It is not
+replaced by A. `journal_entry_work_items` stays deprecated (0 lifetime inserts,
+no writer) regardless of which model a client uses.
 
-**So PR B must not create an hours table, and must not write to
-`journal_entry_work_items`.** Mobile hours entry is a Work Journal entry with
-time metrics, reaching the same `create_journal_entry_full` path the chat
-work-log form uses, and manager attribution is the existing confirmation loop.
-No Ramūnas-specific account, company or rule appears anywhere.
+### 7.1 BOUNDED COMPATIBILITY REQUIREMENT (recorded, not solved here)
+
+Once both A and B are live, the same real work could be recorded through both
+paths, and any aggregation that sums them naively **double-counts**. The
+concrete seam: today `timesheet_compute_lines_v1` computes timesheet lines
+from journal metrics (B) only, while #1344's stated direction has timesheets
+aggregating allocation rows (A) — and #1344 deliberately does not touch the
+compute function. Both statements are correct today because A is unapplied and
+unaggregated; they cannot both stay unqualified once A is applied.
+
+The reconciliation (source-tagging of lines, e.g. explicit allocation vs
+journal-derived vs import vs approved-timesheet projection, and a rule for
+which wins when both describe the same work) is a **separate bounded slice**
+with its own owner review. It is deliberately NOT solved inside mobile PR B,
+and no final enum is invented here — `work_hour_allocations.source` is open by
+convention, matching `worker_skills.source`.
+
+### 7.2 WHAT THIS MEANS FOR PR B
+
+PR B consumes the pending canonical model; it does not invent one. The
+dependency graph is:
+
+```
+MOBILE UI
+  → shared client transport contract (packages/client-core, gate closed)
+  → canonical authenticated API/domain action   ← DEPENDENCY: #1336 seam
+  → work_hour_allocations                       ← DEPENDENCY: #1344 applied
+  → RLS
+  → aggregation → timesheet / export
+  (optional, later: allocation → Work Journal linkage)
+```
+
+PR B must NOT query operational tables directly from the mobile client merely
+because RLS would technically allow it, must not create an hours table, and
+must not write to `journal_entry_work_items`. Until both dependencies are
+legitimate, PR B work is limited to the interface seam: screen boundaries,
+transport interface, request/response types, loading/error/success states, and
+tests against an injected transport. No Ramūnas-specific account, company,
+rule, or hardcoded object limit appears anywhere.
 
 ---
 
