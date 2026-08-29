@@ -42,9 +42,10 @@
 --   • company_worker_invitations_select / agency_worker_invitations_select
 --     (0027:94, 0025:72) grant the invitee-side read on
 --     `invited_email = (select email from profiles where id = auth.uid())`.
---   • Four newer families copied the invite-side lookup as "precedent":
---     delegate_workflow_step_v1, assign_training_v1,
---     create_performance_review_v1, create/update_management_decision_v1.
+--   • Four newer families copied the invite-side lookup as "precedent": the
+--     workflow-step delegation, training-assignment, performance-review and
+--     management-decision commands (20260817130000, 20260817230000,
+--     20260817231000, 20260817232000).
 --   Today: 36 profiles, 36 distinct emails, 0 rows where profiles.email
 --   differs from auth.users.email. Nothing was exploited. The mechanism was
 --   read from the live definitions, not executed.
@@ -236,6 +237,8 @@ end $$;
 
 revoke all on function
   public.accept_company_worker_invitation(uuid) from public;
+revoke all on function
+  public.accept_company_worker_invitation(uuid) from anon;
 grant execute on function
   public.accept_company_worker_invitation(uuid) to authenticated;
 
@@ -308,6 +311,8 @@ end $$;
 
 revoke all on function
   public.accept_agency_worker_invitation(uuid) from public;
+revoke all on function
+  public.accept_agency_worker_invitation(uuid) from anon;
 grant execute on function
   public.accept_agency_worker_invitation(uuid) to authenticated;
 

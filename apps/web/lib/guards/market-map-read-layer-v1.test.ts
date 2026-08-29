@@ -675,7 +675,14 @@ describe("NO new DB migration in this PR", () => {
     // grants): it ships UNAPPLIED behind `lmc_compensation_enabled = false`
     // and production apply stays owner-gated. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 245 real files.
-    expect(count).toBeLessThanOrEqual(245);
+    //
+    // Bumped 245 -> 246 for the profile email identity binding
+    // (20260829120000_profile_email_identity_binding_v1, paired rollback) —
+    // a trigger on profiles + two accept RPCs + two policies reading the
+    // session's verified email instead of user-writable profiles.email. RED
+    // by classification (auth-core adjacent), ships UNAPPLIED, owner-gated.
+    // Nothing to do with the market-map read layer, which stays pure TS.
+    expect(count).toBeLessThanOrEqual(246);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

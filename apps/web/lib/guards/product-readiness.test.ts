@@ -2242,7 +2242,18 @@ describe("no migration files added by this sprint", () => {
     // grants): it ships UNAPPLIED behind `lmc_compensation_enabled = false`
     // and production apply stays owner-gated. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 245 real files.
-    const SPRINT_BASELINE = 245;
+    //
+    // Bumped 245 -> 246 for the profile email identity binding
+    // (20260829120000_profile_email_identity_binding_v1, paired rollback).
+    // Closes the Phase-1 audit C-1 defect: profiles.email was user-writable
+    // through PostgREST while three invitation RPCs and two policies trusted
+    // it as identity. Adds ONE BEFORE trigger on profiles, recreates the two
+    // legacy accept RPCs to read auth.jwt() email, and replaces the two
+    // invitee-side SELECT policies. No table dropped, no column removed, no
+    // grant on any table changed. RED by classification (auth-core
+    // adjacent): ships UNAPPLIED, production apply owner-gated. RECOUNTED
+    // from the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 246.
+    const SPRINT_BASELINE = 246;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
