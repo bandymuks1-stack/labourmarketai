@@ -47,12 +47,64 @@
 // "already in the ledger" (the repo files mirror the ledger). True ledger
 // collisions are additionally caught at MCP apply time.
 //
+// Evasion hardening (2026-08-29, independent audit — every case below was
+// proven to pass GREEN before this change and is now a self-test case):
+//   (r) permissive predicates spelled other than `(true)`: `((true))`,
+//       `(1=1)`, `('t')` → rls-permissive-true; `auth.uid() is not null` /
+//       `auth.role() = 'authenticated'` as the WHOLE predicate → NOTICE
+//       rls-any-authenticated (legitimate on catalog tables, loosening on
+//       tenant data — a human decides)
+//   (s) ALTER FUNCTION ... SECURITY DEFINER → security-definer-function
+//   (t) DML hidden INSIDE dollar-quoted bodies (`do $$ begin delete …`) and
+//       dynamic SQL (`execute '…'`, `execute format(…)`, `execute v_sql`) →
+//       data-dml / dynamic-sql. The gate cannot see what dynamic SQL will do,
+//       so it fails closed on its presence.
+//   (u) a VIEW without `security_invoker = true` (RLS evaluated as the view
+//       owner = bypass) → view-without-security-invoker; MATERIALIZED VIEW
+//       (a snapshot outside RLS entirely) → materialized-view
+//   (v) ALTER/CREATE ROLE|USER (search_path, BYPASSRLS, SUPERUSER) →
+//       role-change; DROP TRIGGER / ALTER TABLE … DISABLE TRIGGER (removes a
+//       guard such as the admin-grant trigger) → drop-trigger /
+//       disable-trigger; NO FORCE ROW LEVEL SECURITY → no-force-rls;
+//       CREATE RULE → create-rule
+//   (w) auth-core widened from `auth.users` to any DDL/DML/GRANT that names
+//       an `auth.` object (auth.identities, auth.sessions, …); reading
+//       `auth.uid()` / `auth.jwt()` inside a policy predicate is NOT a hit
+//   (x) the inline rollback comment must be a HEADING (`-- ROLLBACK` /
+//       `-- down` at line start) — `-- no rollback needed` no longer counts
+//   (y) §16 filenames must carry a REAL timestamp (month 01–12, day 01–31,
+//       hour 00–23, minute/second 00–59); nine live names with hour 24–33
+//       are frozen history and are never re-checked (added files only)
+//
+// WHAT THIS GATE GUARANTEES. For every migration file ADDED or MODIFIED in
+// the PR: the structural checks (c)(d)(q) always hold; every risk pattern
+// listed above is detected in comment-stripped SQL, inside dollar-quoted
+// bodies, and inside single-quoted strings passed to EXECUTE; any statement
+// whose leading keyword is unrecognized is RED.
+//
+// WHAT IT DOES NOT GUARANTEE — READ THIS BEFORE TRUSTING A GREEN.
+//   • It is a regex classifier, not a SQL parser. It cannot see SQL that is
+//     assembled at runtime from variables, `format()` arguments, or string
+//     concatenation (it flags their PRESENCE as dynamic-sql, nothing more).
+//   • It cannot judge SEMANTIC loosening: `using (org_id = org_id)`,
+//     `using (true or x)`, a predicate that is always true for a data reason,
+//     a definer function whose body is permissive in effect — all GREEN.
+//   • `to public` policies with a restrictive-looking predicate are a NOTICE.
+//   • Quoted identifiers spelled to defeat word boundaries (`"USING"`), SQL
+//     inside comments that a later migration un-comments, or an encoding
+//     trick are out of scope.
+//   • THE ANNOTATION IS NOT A PASS. A file carrying `-- @human-gate-approved`
+//     has every risk finding downgraded to a NOTICE and the job exits 0. At
+//     the time of this hardening 163 of 210 timestamped migrations carry the
+//     marker, so for most migrations THIS GATE IS ADVISORY and the human gate
+//     (draft PR + needs-human-gate + owner approval) is the control. The run
+//     log now says so in so many words whenever a gated file is present.
+//
 // Detection boundary: risk patterns run on EXECUTABLE SQL with comments
-// stripped; the fail-closed catch-all additionally strips dollar-quoted
-// function bodies and single-quoted string literals before splitting on `;`,
-// so a `;` inside a string or a PL/pgSQL body never spoofs a statement.
-// Dangerous content INSIDE a function body (e.g. SECURITY DEFINER, an UPDATE)
-// is still caught by the whole-file risk patterns above.
+// stripped; dollar-quoted bodies are scanned a second time on their own for
+// DML and dynamic SQL; the fail-closed catch-all strips bodies and string
+// literals before splitting on `;`, so a `;` inside a string or a PL/pgSQL
+// body never spoofs a statement.
 //
 // Usage:
 //   node .github/scripts/migration-safety.mjs            # analyze PR diff
@@ -66,6 +118,25 @@ import { basename } from "node:path";
 
 const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
 const FILENAME_RE = /^\d{14}_[a-z0-9]+(_[a-z0-9]+)*\.sql$/;
+
+/**
+ * (y) §16 shape AND a real timestamp. `20260705240000_x.sql` matched the
+ * shape and sorted after every legitimate file that day; nine such names
+ * exist in history and stay frozen — only ADDED files are checked.
+ */
+export function validMigrationFilename(base) {
+  if (!FILENAME_RE.test(base)) return false;
+  const [, mo, d, h, mi, s] = /^\d{4}(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})_/.exec(base);
+  const n = (x) => Number(x);
+  return n(mo) >= 1 && n(mo) <= 12 && n(d) >= 1 && n(d) <= 31 && n(h) <= 23 && n(mi) <= 59 && n(s) <= 59;
+}
+
+/** Every dollar-quoted body ($$…$$ / $tag$…$tag$) in comment-stripped SQL. */
+function dollarBodies(code) {
+  const out = [];
+  for (const m of code.matchAll(/\$([a-zA-Z_]*)\$([\s\S]*?)\$\1\$/g)) out.push(m[2]);
+  return out;
+}
 
 // Strip SQL comments so risk patterns are detected only in EXECUTABLE SQL.
 // This is what lets a commented `-- drop table ...` inside a ROLLBACK block NOT
@@ -141,8 +212,14 @@ export function analyzeMigration(a) {
   }
 
   // (b) reversible rollback block required for every migration.
+  //     (x) It must be a HEADING — `-- ROLLBACK` / `-- ROLLBACK (down):` /
+  //     `-- down` at the start of a comment line. The old `\brollback\b`
+  //     anywhere in any comment was satisfied by `-- no rollback needed`.
+  //     Box-drawing and punctuation before the word are fine (`-- ── DOWN`,
+  //     `-- ── Rollback (manual)`); a WORD before it is not. A paired
+  //     supabase/rollbacks/*.down.sql (when the runner has looked) also counts.
   const hasRollback =
-    /--[^\n]*\brollback\b/i.test(raw) || /(^|\n)[ \t]*--[ \t]*down\b/i.test(raw);
+    /(^|\r?\n)[ \t]*--[^\w\r\n]*(rollback|down)\b/i.test(raw) || a.rollbackFileExists === true;
   if (!hasRollback) {
     risk(
       "missing-rollback",
@@ -150,9 +227,19 @@ export function analyzeMigration(a) {
     );
   }
 
-  // (e) RLS-loosening.
-  if (/\busing\s*\(\s*true\s*\)/i.test(code) || /\bwith\s+check\s*\(\s*true\s*\)/i.test(code)) {
-    risk("rls-permissive-true", "permissive policy predicate `using (true)` / `with check (true)`");
+  // (e) RLS-loosening. (r) Every spelling of "always true": `(true)`,
+  //     `((true))`, `(1=1)`, `('t')`, with any whitespace.
+  const ALWAYS_TRUE = /\b(using|with\s+check)\s*\(\s*\(*\s*(true|1\s*=\s*1|'t'|'true')\s*\)*\s*\)/i;
+  if (ALWAYS_TRUE.test(code)) {
+    risk("rls-permissive-true", "permissive policy predicate `using (true)` / `with check (true)` (any spelling: ((true)), 1=1, 't')");
+  }
+  //     (r) "any authenticated user" as the WHOLE predicate — normal on a
+  //     catalog table, loosening on tenant data. Machine-detectable, human-judged.
+  if (/\b(using|with\s+check)\s*\(\s*\(*\s*(auth\.uid\(\)\s+is\s+not\s+null|auth\.role\(\)\s*=\s*'authenticated')\s*\)*\s*\)/i.test(code)) {
+    notices.push({
+      id: "rls-any-authenticated",
+      msg: "policy predicate is `auth.uid() is not null` / `auth.role() = 'authenticated'` — every signed-in user; fine for a catalog, a leak on tenant data. Confirm the table",
+    });
   }
   if (/\bto\s+anon\b/i.test(code)) {
     risk("rls-to-anon", "policy or grant targets the `anon` (unauthenticated) role");
@@ -171,14 +258,14 @@ export function analyzeMigration(a) {
     });
   }
 
-  // (f) auth-core objects.
+  // (f) auth-core objects. (w) Any `auth.` OBJECT under DDL/DML/GRANT — not
+  //     only auth.users. Reading auth.uid()/auth.jwt() in a predicate is not
+  //     a hit: every pattern requires the verb to name the object.
   const authCore = [
-    /\b(alter|drop)\s+table\s+auth\./i,
-    /\b(create|drop)\s+(or\s+replace\s+)?function\s+auth\./i,
-    /\b(insert\s+into|update|delete\s+from)\s+auth\.users\b/i,
-    /\bcreate\s+policy\b[\s\S]*?\bon\s+auth\./i,
-    /\bgrant\b[\s\S]*?\bon\s+auth\./i,
-    /\b(create|drop)\s+trigger\b[\s\S]*?\bon\s+auth\./i,
+    /\b(create|alter|drop)\s+(or\s+replace\s+)?(table|function|view|index|sequence|type|schema)\s+(if\s+(not\s+)?exists\s+)?auth\b\.?/i,
+    /\b(create|alter|drop)\s+(or\s+replace\s+)?(trigger|policy|rule)\b[^;]*?\bon\s+auth\./i,
+    /\b(insert\s+into|update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?auth\./i,
+    /\b(grant|revoke)\b[^;]*?\bon\s+(all\s+\w+\s+in\s+schema\s+auth\b|schema\s+auth\b|(table\s+|function\s+|sequence\s+)?auth\.)/i,
   ];
   if (authCore.some((re) => re.test(code))) {
     risk("auth-core-change", "modifies auth-core (auth schema) objects — auth.users / auth functions / policies / grants / triggers");
@@ -190,10 +277,15 @@ export function analyzeMigration(a) {
   //    gate; it never makes these GREEN). ────────────────────────────────
 
   // (g) SECURITY DEFINER function (new or swap) — bypasses RLS.
-  if (/\bcreate\s+(or\s+replace\s+)?function\b[\s\S]*?\bsecurity\s+definer\b/i.test(code)) {
+  //     (s) ALTER FUNCTION … SECURITY DEFINER flips an existing invoker
+  //     function to definer without a CREATE — same class, same finding.
+  if (
+    /\bcreate\s+(or\s+replace\s+)?function\b[\s\S]*?\bsecurity\s+definer\b/i.test(code) ||
+    /\balter\s+function\b[^;]*?\bsecurity\s+definer\b/i.test(code)
+  ) {
     risk(
       "security-definer-function",
-      "CREATE [OR REPLACE] FUNCTION ... SECURITY DEFINER — bypasses RLS; requires human review",
+      "CREATE [OR REPLACE] / ALTER FUNCTION ... SECURITY DEFINER — bypasses RLS; requires human review",
     );
   }
   // (h) any GRANT / REVOKE — privilege-surface change. (`grant_org_manager`
@@ -233,6 +325,31 @@ export function analyzeMigration(a) {
   if (/(^|;)\s*(update|delete\s+from)\s+\w/im.test(code)) {
     risk("data-dml", "UPDATE/DELETE of data — mutates existing rows");
   }
+  //     (t) The same DML INSIDE a dollar-quoted body, where it is not at a
+  //     line start: `do $$ begin delete from public.t; end $$;`. Bodies are
+  //     scanned on their own with PL/pgSQL block keywords as anchors.
+  //     And DYNAMIC SQL: a string handed to EXECUTE that carries a risky
+  //     verb, or an EXECUTE of anything that is not a plain string literal
+  //     (a variable, format(), concatenation) — the gate cannot see what it
+  //     will run, so its presence is RED.
+  const BODY_DML = /(^|[;\n]|\b(begin|then|else|loop|declare))\s*(update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?\w/i;
+  // A string is "SQL-shaped" only when the verb is followed by its object —
+  // `'update'` as a status literal or `'revoke'` as an action name is not.
+  const RISKY_IN_STRING = /\b(update\s+\w+(\.\w+)?\s+set\b|delete\s+from\s+\w|truncate\s+(table\s+)?\w|drop\s+(table|column|policy|trigger|function|role)\s+\w|alter\s+(table|role|user|function|policy)\s+\w|grant\s+\w+[^']*?\bon\b|revoke\s+\w+[^']*?\bon\b|disable\s+(trigger|row\s+level)|security\s+definer)/i;
+  let bodyDml = false, dynamicSql = false;
+  for (const body of dollarBodies(code)) {
+    if (BODY_DML.test(body)) bodyDml = true;
+    for (const lit of body.match(/'(?:[^']|'')*'/g) ?? []) {
+      if (RISKY_IN_STRING.test(lit)) dynamicSql = true;
+    }
+    if (/\bexecute\s+(?!immediate\b)(?!')\s*[a-z_(]/i.test(body)) dynamicSql = true;
+  }
+  if (bodyDml) {
+    risk("data-dml", "UPDATE/DELETE/TRUNCATE inside a DO block or function body — mutates rows when it runs");
+  }
+  if (dynamicSql) {
+    risk("dynamic-sql", "EXECUTE of dynamic SQL (a variable, format(), or a string carrying DDL/DML/GRANT) — the gate cannot see what it runs; fail-closed RED");
+  }
   // (o) dangerous shapes that hide under a safe leading keyword.
   if (/\bdisable\s+row\s+level\s+security\b/i.test(code)) {
     risk("disable-rls", "DISABLE ROW LEVEL SECURITY — turns off RLS on a table");
@@ -251,6 +368,45 @@ export function analyzeMigration(a) {
   }
   if (/\balter\s+type\b/i.test(code)) {
     risk("alter-type", "ALTER TYPE — enum/type change can break dependents");
+  }
+  //     (u) Views. A plain view evaluates RLS as its OWNER (postgres) — every
+  //     row policy on the underlying table is bypassed for whoever may
+  //     SELECT the view. `security_invoker = true` is the only safe default;
+  //     a MATERIALIZED view is a snapshot outside RLS entirely.
+  const stmts = stripBodiesAndStrings(code).split(";");
+  for (const stmt of stmts) {
+    if (/\bcreate\s+(or\s+replace\s+)?(temp(orary)?\s+)?(recursive\s+)?view\b/i.test(stmt)
+        && !/\bsecurity_invoker\s*(=\s*)?(true|on)\b/i.test(stmt)) {
+      risk("view-without-security-invoker", "CREATE VIEW without `with (security_invoker = true)` — RLS is evaluated as the view owner, bypassing every row policy");
+      break;
+    }
+  }
+  if (/\bcreate\s+materialized\s+view\b/i.test(code)) {
+    risk("materialized-view", "CREATE MATERIALIZED VIEW — a snapshot outside RLS; requires human review of who can read it");
+  }
+  //     (v) Role, trigger and RLS-enforcement shapes that remove a guard.
+  if (/\b(create|alter)\s+(role|user)\b/i.test(code)) {
+    risk("role-change", "CREATE/ALTER ROLE|USER — search_path, BYPASSRLS or SUPERUSER changes live here");
+  }
+  //     `drop trigger if exists X … create trigger X` in the same file is the
+  //     idempotent-recreate idiom (43 migrations use it) and stays GREEN; a
+  //     DROP whose trigger is not re-created in the same file removes a guard.
+  for (const m of code.matchAll(/\bdrop\s+trigger\s+(if\s+exists\s+)?("?[\w]+"?)/gi)) {
+    const name = m[2].replace(/"/g, "");
+    const recreated = new RegExp(`\\bcreate\\s+(or\\s+replace\\s+)?(constraint\\s+)?trigger\\s+"?${name}"?\\b`, "i").test(code);
+    if (!recreated) {
+      risk("drop-trigger", `DROP TRIGGER ${name} with no CREATE TRIGGER ${name} in the same file — removes a guard that fires on writes (e.g. the admin-grant guard)`);
+      break;
+    }
+  }
+  if (/\bdisable\s+trigger\b/i.test(code)) {
+    risk("disable-trigger", "ALTER TABLE ... DISABLE TRIGGER — switches a guard off");
+  }
+  if (/\bno\s+force\s+row\s+level\s+security\b/i.test(code)) {
+    risk("no-force-rls", "NO FORCE ROW LEVEL SECURITY — the table owner bypasses its own policies again");
+  }
+  if (/\bcreate\s+(or\s+replace\s+)?rule\b/i.test(code)) {
+    risk("create-rule", "CREATE RULE — rewrites statements at the parser; can silently redirect or drop writes");
   }
 
   // (p) FAIL-CLOSED catch-all. Split top-level statements (dollar bodies and
@@ -284,11 +440,12 @@ export function analyzeMigration(a) {
     );
   }
 
-  // (c) filename convention — STRUCTURAL, added files only.
-  if (isAdded && !FILENAME_RE.test(base)) {
+  // (c) filename convention — STRUCTURAL, added files only. (y) The 14
+  //     digits must also be a real timestamp.
+  if (isAdded && !validMigrationFilename(base)) {
     structural(
       "filename-convention",
-      `filename does not match §16 YYYYMMDDHHMMSS_snake_case.sql: ${base}`,
+      `filename does not match §16 YYYYMMDDHHMMSS_snake_case.sql with a real timestamp (MM 01-12, DD 01-31, HH 00-23, MI/SS 00-59): ${base}`,
     );
   }
 
@@ -354,6 +511,8 @@ function runDiff() {
   }
 
   let errorCount = 0;
+  let gatedFiles = 0;
+  let bypassedRisks = 0;
   console.log(`migration-safety: checking ${changed.length} changed migration file(s) against base ${base}\n`);
   for (const f of changed) {
     const raw = readFileSync(f, "utf8");
@@ -374,6 +533,16 @@ function runDiff() {
       errorCount++;
     }
     if (!errors.length && !notices.length) console.log("  ok");
+    if (gated) {
+      gatedFiles++;
+      const bypassed = notices.filter((n) => /bypassed by @human-gate-approved/.test(n.msg));
+      bypassedRisks += bypassed.length;
+      // Visible in the PR checks UI, not only in the log: the marker is an
+      // acknowledgement that a HUMAN must review these, not a pass.
+      console.log(
+        `  ::warning file=${f}::@human-gate-approved bypasses ${bypassed.length} risk finding(s) [${bypassed.map((n) => n.id).join(", ")}] — this file is RED-class; the static gate is ADVISORY for it and the human gate (draft + needs-human-gate + owner approval) is the control`,
+      );
+    }
   }
 
   if (errorCount > 0) {
@@ -381,6 +550,14 @@ function runDiff() {
     console.log("Fix the migration, or (for an intentional, human-reviewed change) add `-- @human-gate-approved`,");
     console.log("open the PR as a draft with the `needs-human-gate` label, and request explicit DI/Chat-Claude approval.");
     process.exit(1);
+  }
+  if (gatedFiles > 0) {
+    console.log(
+      `\nmigration-safety: STRUCTURAL-GREEN, RISK-ACKNOWLEDGED — ${gatedFiles} human-gated file(s) with ${bypassedRisks} risk finding(s) bypassed by @human-gate-approved.`,
+    );
+    console.log("This run proves ONLY the structural checks (filename, version, rollback file) for those files.");
+    console.log("It is NOT a safety pass: merge requires the human gate (draft PR + needs-human-gate + owner approval), and prod apply stays manual.");
+    return;
   }
   console.log("\nmigration-safety: GREEN — all changed migrations pass the static safety gate.");
 }
@@ -560,15 +737,80 @@ function selfTest() {
       a: { filename: "supabase/migrations/20260613001000_gated_definer.sql", raw: `-- @human-gate-approved\ncreate function public.f() returns int language sql security definer as $$ select 1 $$;\ngrant execute on function public.f() to authenticated;\n${ROLL}`, isAdded: true, baseVersions, addedVersionCounts: av("20260613001000"), rollbackFileExists: true },
       expectErrors: [],
     },
+    // ── Evasions proven GREEN by the 2026-08-29 audit, now RED ─────────────
+    // Each shape below passed the gate before this hardening. The negative
+    // controls that follow each family prove the new detector does not fire
+    // on the legitimate spelling next to it.
+    ...[
+      ["using ((true))", "create policy p on public.t for select using ((true));", ["rls-permissive-true"]],
+      ["using (1=1)", "create policy p on public.t for select using (1 = 1);", ["rls-permissive-true"]],
+      ["with check ('t')", "create policy p on public.t for insert with check ('t');", ["rls-permissive-true"]],
+      ["NEGATIVE CONTROL — a restrictive predicate that merely CONTAINS true", "create policy p on public.t for select using (owner = auth.uid() and is_active = true);", []],
+      ["ALTER FUNCTION ... SECURITY DEFINER", "alter function public.f() security definer;", ["security-definer-function"]],
+      ["NEGATIVE CONTROL — ALTER FUNCTION ... SECURITY INVOKER", "alter function public.f() security invoker;", []],
+      ["DML inside a DO block on one line", "do $$ begin delete from public.t where x = 1; end $$;", ["data-dml"]],
+      ["DML inside a function body after THEN", "create function public.f() returns void language plpgsql as $$ begin if true then update public.t set a = 1; end if; end $$;", ["data-dml"]],
+      ["dynamic SQL: EXECUTE of a DML string", "do $$ begin execute 'delete from public.t'; end $$;", ["dynamic-sql"]],
+      ["dynamic SQL: EXECUTE format() carrying a grant", "do $$ begin execute format('grant select on %I to anon', 't'); end $$;", ["dynamic-sql", "grant-anon-public", "rls-to-anon"]],
+      ["dynamic SQL: EXECUTE of a variable", "do $$ declare v text := 'x'; begin execute v; end $$;", ["dynamic-sql"]],
+      ["NEGATIVE CONTROL — a status literal is not dynamic SQL", "create function public.f() returns text language plpgsql as $$ begin if 'update' = 'revoke' then return 'update'; end if; return 'ok'; end $$;", []],
+      ["VIEW without security_invoker", "create view public.v as select id from public.t;", ["view-without-security-invoker"]],
+      ["NEGATIVE CONTROL — VIEW with security_invoker = true", "create or replace view public.v with (security_invoker = true) as select id from public.t;", []],
+      ["MATERIALIZED VIEW", "create materialized view public.mv as select id from public.t;", ["materialized-view"]],
+      ["ALTER ROLE search_path", "alter role authenticated set search_path = public, pg_temp;", ["role-change"]],
+      ["DROP TRIGGER", "drop trigger if exists trg_profiles_admin_grant_guard on public.profiles;", ["drop-trigger"]],
+      ["DISABLE TRIGGER", "alter table public.profiles disable trigger user;", ["disable-trigger"]],
+      ["NEGATIVE CONTROL — ENABLE TRIGGER", "alter table public.profiles enable trigger user;", []],
+      ["NO FORCE ROW LEVEL SECURITY", "alter table public.t no force row level security;", ["no-force-rls"]],
+      ["NEGATIVE CONTROL — FORCE ROW LEVEL SECURITY", "alter table public.t force row level security;", []],
+      ["CREATE RULE", "create rule r as on insert to public.t do instead nothing;", ["create-rule"]],
+      ["auth-core: INSERT into auth.identities", "insert into auth.identities (id) values ('x');", ["auth-core-change"]],
+      ["auth-core: DROP INDEX on an auth object", "drop index if exists auth.users_email_idx;", ["auth-core-change"]],
+      ["NEGATIVE CONTROL — a policy that READS auth.uid() is not an auth-core change", "create policy p on public.t for select using (auth.uid() = owner_id);", []],
+    ].map(([name, body, expectErrors], i) => ({
+      name,
+      a: { filename: `supabase/migrations/2026061400${String(i).padStart(2, "0")}00_evasion.sql`, raw: `${body}\n${ROLL}`, isAdded: true, baseVersions, addedVersionCounts: av(`2026061400${String(i).padStart(2, "0")}00`), rollbackFileExists: true },
+      expectErrors,
+    })),
+    {
+      name: "'any authenticated user' predicate → NOTICE, not an error (human judgement)",
+      a: { filename: "supabase/migrations/20260614100000_anyauth.sql", raw: `create policy p on public.t for select using (auth.uid() is not null);\n${ROLL}`, isAdded: true, baseVersions, addedVersionCounts: av("20260614100000"), rollbackFileExists: true },
+      expectErrors: [],
+      expectNotices: ["rls-any-authenticated"],
+    },
+    {
+      name: "'-- no rollback needed' is not a rollback → RED (with no paired .down.sql either)",
+      a: { filename: "supabase/migrations/20260614110000_norb.sql", raw: `alter table public.t add column y text;\n-- no rollback needed`, isAdded: true, baseVersions, addedVersionCounts: av("20260614110000"), rollbackFileExists: false },
+      expectErrors: ["missing-rollback", "missing-rollback-file"],
+    },
+    {
+      name: "NEGATIVE CONTROL — '-- ROLLBACK (down):' heading still counts",
+      a: { filename: "supabase/migrations/20260614120000_rbhead.sql", raw: `alter table public.t add column y text;\n-- ROLLBACK (down):\n-- alter table public.t drop column y;`, isAdded: true, baseVersions, addedVersionCounts: av("20260614120000"), rollbackFileExists: true },
+      expectErrors: [],
+    },
+    {
+      name: "hour 24 in the timestamp → RED (structural)",
+      a: { filename: "supabase/migrations/20260705240000_bad_hour.sql", raw: `alter table public.t add column y text;\n${ROLL}`, isAdded: true, baseVersions, addedVersionCounts: av("20260705240000"), rollbackFileExists: true },
+      expectErrors: ["filename-convention"],
+    },
+    {
+      name: "NEGATIVE CONTROL — hour 23 is a real timestamp",
+      a: { filename: "supabase/migrations/20260705230000_good_hour.sql", raw: `alter table public.t add column y text;\n${ROLL}`, isAdded: true, baseVersions, addedVersionCounts: av("20260705230000"), rollbackFileExists: true },
+      expectErrors: [],
+    },
   ];
 
   let pass = 0,
     fail = 0;
   for (const c of cases) {
-    const { errors } = analyzeMigration(c.a);
+    const { errors, notices } = analyzeMigration(c.a);
     const got = errors.map((e) => e.id).sort();
     const want = [...c.expectErrors].sort();
-    const ok = got.length === want.length && got.every((id, i) => id === want[i]);
+    let ok = got.length === want.length && got.every((id, i) => id === want[i]);
+    if (ok && c.expectNotices) {
+      const ids = new Set(notices.map((n) => n.id));
+      ok = c.expectNotices.every((id) => ids.has(id));
+    }
     if (ok) {
       pass++;
       console.log(`  PASS  ${c.name}`);
