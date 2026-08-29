@@ -590,6 +590,104 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: true,
   },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
+    // /dashboard/hours — where a day of real work becomes a record.
+    //
+    // A site manager, standing on a site, on a phone, records who worked, on
+    // which date, on which object, for how many hours. It writes
+    // `work_hour_allocations` — the canonical row a timesheet was only ever a
+    // snapshot of.
+    //
+    // WHY THIS ONE IS NOT /create-cv. That declaration answers all five
+    // world-state questions "no" because a pre-auth public page has no
+    // workspace to be inside. This surface IS inside the authenticated
+    // workspace, so three of the five are honestly "yes" and only three
+    // findings remain. They are recorded as they are, not softened: the point
+    // of A-06 is that a false "yes" here would be worse than a blocked gate.
+    //
+    //   changesWorldState              TRUE  — it writes canonical work facts.
+    //   usableWithoutLeavingWorkspace  TRUE  — a /dashboard route; the person
+    //                                          never leaves the workspace.
+    //   reflectedOnMap                 false — hours draw nothing on the World
+    //                                          Map today. Recorded as false
+    //                                          rather than dressed up.
+    //   aiControlled                   false — structured entry, deliberately.
+    //                                          Natural-language hours entry is
+    //                                          a later slice and must not gate
+    //                                          a crew being paid correctly.
+    //   needsNoNewPage                 false — it is a new page.
+    //
+    // The three "false" answers are what the gate reports. Excusing them is an
+    // OWNER decision via `.github/scripts/owner-waivers.mjs`; this train does
+    // not write its own waiver, because a surface that approves itself is the
+    // same defect as an agent that mints its own authorisation.
+    // ═══════════════════════════════════════════════════════════════════════
+    id: "/dashboard/hours",
+    kind: "screen",
+    // A-04 names this case exactly: "a new wizard/stepper or multi-field form
+    // must declare why a conversation cannot do the same job."
+    originAxiom: "A-04",
+    purpose:
+      "The one mobile surface where a manager records a day of real work for a real crew: date, object, worker, hours, and optionally what was done. It writes the canonical per-worker/per-object/per-day allocation that timesheets, monthly totals and export all aggregate from, so the hours a company pays against exist as facts rather than as cells in someone's spreadsheet.",
+    whyNotChat:
+      "A conversation is the wrong instrument for repetitive numeric entry: a manager enters a whole crew across several objects in one sitting, and each allocation is four short values he already knows. Dictating twenty of them and re-reading each confirmation is slower and less accurate than tapping them, on a site, in poor signal. This is not a rejection of natural-language entry — that is a planned later slice — but the pilot must not make a crew's pay depend on parsing quality that has never been measured.",
+    whyNotExistingComponent:
+      "Every existing hours surface READS. `lib/timesheets` aggregates and approves; the timesheet is a snapshot. Nothing in the product WROTE the underlying per-worker/per-object/per-day fact — the rows a timesheet is a snapshot OF did not exist, which is why hours were being kept in a spreadsheet outside the product. This surface adds the missing writer and reuses the existing readers (`listActiveCompanyWorkers`, `getOrgWorkObjects`) rather than asking a second time who works here.",
+    owner:
+      "Product / work-hours foundation — Ramūnas pilot train (2026-08-29), PR #1344",
+    ownsAction: "work_hours.record_allocation",
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "objects",
+    whyNotExistingElement:
+      "It extends no new element. Hours are a dated fact ABOUT an existing work object and an existing worker; the object is the same `work_objects` row the task picker and the company page already use. What was missing was not an element but a way to attach elapsed work to one.",
+    chatIntegration:
+      "None today, and recorded as none rather than as a plan. The assistant cannot yet write allocations; when it can, it will dispatch into this same action instead of growing a second entry path.",
+    avatarEffect:
+      "None automatically, and that is a deliberate constraint rather than an omission: recorded hours are NOT skill evidence. A worker having been on a site for eight hours says nothing about what they can do, and inventing a competency from it is precisely the fake-verification A-06 forbids. Only an explicit, optional journal entry can carry evidence, and only a human confirms it.",
+    mapEffect:
+      "None. Recorded as `reflectedOnMap: false` rather than described as a map effect it does not have.",
+    journalRelation:
+      "Optional and one-directional: an allocation may reference a `journal_entries` row via `journal_entry_id`, but hours-only entry never creates one. The Work Journal stays the source of proven skills; this surface supplies time, not proof.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    // `objects` is an ELEMENT, and the pillar that owns it is `world_map` —
+    // the four pillars are ai_conversation / avatar / world_map / work_journal.
+    pillar: "world_map",
+    objectType: "construction_site",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "construction_site"
+    hasTimeline: true, // `work_date` — allocations are dated state by construction
+    hasHistory: true, // corrections supersede via correction_of / superseded_by
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    // Three true, two false, honestly. See the header comment.
+    changesWorldState: true,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    usesEntity: true,
+    // No new Entity Type: an allocation is a RELATIONSHIP between a worker and
+    // an already-registered object, carrying a date and a duration.
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    // worker × object × day, with hours. Registered as a predicate, not as a
+    // new architecture.
+    createsNewRelationship: true,
+    // A plain relational fact with named columns — the AI can read, total and
+    // summarise it with no architectural change.
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+  },
 ] as const;
 
 /**
