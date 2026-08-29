@@ -164,11 +164,33 @@ exists to prevent.
 
 ## 6. HONEST STATUS
 
+*Updated 2026-08-29 by the mobile foundation slice — see
+[`docs/MOBILE_ARCHITECTURE.md`](MOBILE_ARCHITECTURE.md).*
+
 | | |
 |---|---|
-| `APP_SHARED_CORE_READY` | **PARTIAL** — the logic is shared; the transport is not |
-| `ANDROID_IMPLEMENTATION_READY` | **NO** — blocked on §5.1 |
-| `CHATGPT_APP_BACKEND_READY` | **NO** — blocked on §5.1, same seam |
+| `APP_SHARED_CORE_READY` | **YES for the client-agnostic core** — `packages/client-core` exists (config, session, locale, transport contract, actor context), zero dependencies, zero framework imports. The DOMAIN logic is still shared-but-unreachable, per the row below |
+| `ANDROID_CLIENT_SCAFFOLD` | **BUILT** — `apps/mobile`, Expo SDK 57. Registration, sign-in, session, sign-out, language and the navigation shell are real. A Hermes bundle compiles for both platforms |
+| `ANDROID_IMPLEMENTATION_READY` | **NO** — still blocked on §5.1 for everything that shows product data. The scaffold ships this as an honest refusal, never as an empty screen |
+| `ANDROID_NATIVE_BUILD_PROVEN` | **NO** — no APK/AAB has been produced. The build machine has JDK 8 and no Android SDK |
+| `IOS_BUILD_PROVEN` | **NO** — the JavaScript bundle compiles; the native app needs Xcode on macOS |
+| `CHATGPT_APP_BACKEND_READY` | **NO** — blocked on §5.1, the same seam |
 
 One blocker, one gate, one owner decision. Everything else on the list is
 already in the right place.
+
+### 6.1 WHY A CLIENT WAS SCAFFOLDED BEFORE THE GATE OPENED
+
+§5 says *do not build an Android client before (1)*, because it would either
+reimplement authentication or scrape the web client. The scaffold does neither,
+and the reason is a distinction §5 did not draw:
+
+**Authentication is not behind the blocked seam.** Supabase Auth accepts a
+token directly and has never needed a cookie, so registration, sign-in, refresh
+and sign-out work today against the platform's own auth server — no second
+identity system, no reimplementation, nothing scraped.
+
+Everything the seam DOES block — journal, hours, Living CV, opportunities — is
+built as a refusal that names its cause, and `DOMAIN_TRANSPORT_STATUS` in
+`packages/client-core/src/transport.ts` ships closed. A guard in the required
+merge gate fails if it is opened without updating this document.

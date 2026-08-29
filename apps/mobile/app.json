@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "LabourMarket.ai",
+    "slug": "labourmarketai",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "labourmarketai",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "ai.labourmarket.app",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "ai.labourmarket.app",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "//": "PUBLIC values only. A device build cannot hold a secret: the binary is on the user's phone and cannot be edited afterwards. These are read through EXPO_PUBLIC_* at build time and validated by @labourmarket/client-core, which REFUSES a key that bypasses RLS."
+    }
+  }
+}

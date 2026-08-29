@@ -47,8 +47,20 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      # `--filter=!mobile` keeps the REQUIRED gate's cost flat.
+      #
+      # apps/mobile (Expo / React Native) pulls roughly a thousand packages
+      # that nothing in this workflow runs. Installing them on every web PR
+      # would add minutes to the one check that gates every merge, for no
+      # coverage: `pnpm -F web ...` never touches them, and the client-core
+      # guard below reads its files off the checkout rather than through a
+      # dependency edge.
+      #
+      # The mobile side is built and typechecked by .github/workflows/mobile.yml
+      # instead. This filter fails in the SAFE direction — if the exclusion ever
+      # stops matching, the install is merely slower, never incomplete.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --filter=!mobile
 
       - name: Typecheck
         run: pnpm -F web typecheck
