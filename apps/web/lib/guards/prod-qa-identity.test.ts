@@ -34,6 +34,26 @@ const LOCAL_GUARD = "lib/testing/local-supabase-guard.ts";
 
 const PROD_URL = `${PRODUCTION_ORIGIN}`;
 
+/**
+ * SQL shapes the provisioning script must never contain. Hoisted so the
+ * negative control at the bottom of this file asserts against the SAME
+ * objects the guard uses — not a copy that could drift.
+ *
+ * Two of these shipped with a literal U+0008 where `\b` was intended
+ * (2026-07-31 → 2026-08-29). They compiled, matched nothing, and the
+ * "provisioning changes no protection" assertion passed against ANY script.
+ */
+const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
+  /\.rpc\(/,
+  /create\s+policy/i,
+  /alter\s+policy/i,
+  /drop\s+policy/i,
+  /\bgrant\s+(select|insert|update|delete|all|usage|execute)\b/i,
+  /\brevoke\s+(select|insert|update|delete|all|usage|execute)\b/i,
+  /security\s+definer/i,
+  /alter\s+table/i,
+];
+
 describe("exactly one synthetic identity is allowlisted", () => {
   it("the allowlist has one entry, and it is unmistakably synthetic", () => {
     expect(PROD_QA_IDENTITIES).toHaveLength(1);
@@ -193,16 +213,7 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
     // SQL-shaped only. The script has a `--revoke` FLAG that bans the QA
     // account's sessions — that is the removal procedure, not a policy change,
     // and a bare /revoke/ would have flagged the word in its own documentation.
-    for (const forbidden of [
-      /\.rpc\(/,
-      /create\s+policy/i,
-      /alter\s+policy/i,
-      /drop\s+policy/i,
-      /grant\s+(select|insert|update|delete|all|usage|execute)/i,
-      /revoke\s+(select|insert|update|delete|all|usage|execute)/i,
-      /security\s+definer/i,
-      /alter\s+table/i,
-    ]) {
+    for (const forbidden of FORBIDDEN_PROVISIONING_SQL) {
       expect(forbidden.test(src), `provisioning must not touch: ${forbidden}`).toBe(false);
     }
   });
@@ -281,3 +292,42 @@ function grepTree(dir: string, rx: RegExp): string[] {
   }
   return out;
 }
+
+describe("NEGATIVE CONTROL — every forbidden-SQL pattern can actually fire", () => {
+  // A pattern that is only ever asserted `false` must be shown `true` on the
+  // thing it forbids, or it guards nothing. One sample per pattern, in the
+  // order of FORBIDDEN_PROVISIONING_SQL.
+  const SAMPLES = [
+    'await admin.rpc("grant_something", {})',
+    "create policy p on public.t for select using (true)",
+    "alter policy p on public.t using (false)",
+    "drop policy if exists p on public.t",
+    "grant select on public.workers to anon;",
+    "REVOKE EXECUTE ON FUNCTION public.f() FROM anon;",
+    "create function f() returns void language sql security definer",
+    "alter table public.workers disable row level security",
+  ];
+
+  it("fires once per pattern on its own sample", () => {
+    expect(SAMPLES).toHaveLength(FORBIDDEN_PROVISIONING_SQL.length);
+    FORBIDDEN_PROVISIONING_SQL.forEach((re, i) => {
+      expect(re.test(SAMPLES[i]), `${re} must match ${JSON.stringify(SAMPLES[i])}`).toBe(true);
+    });
+  });
+
+  it("still ignores the documented --revoke FLAG and ordinary prose", () => {
+    const prose = "the --revoke flag bans the QA account's sessions; granted access is logged";
+    for (const re of FORBIDDEN_PROVISIONING_SQL) {
+      expect(re.test(prose), `${re} must not match prose`).toBe(false);
+    }
+  });
+
+  it("no pattern carries a control character where a boundary was meant", () => {
+    for (const re of FORBIDDEN_PROVISIONING_SQL) {
+      for (const ch of re.source) {
+        const code = ch.charCodeAt(0);
+        expect(code < 0x20, `${re} contains U+${code.toString(16).padStart(4, "0")}`).toBe(false);
+      }
+    }
+  });
+});

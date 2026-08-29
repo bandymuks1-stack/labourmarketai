@@ -100,15 +100,29 @@ type FileFacts = {
 const RISK_AGENT = /admin_risk|adminRisk|booking_risk|bookingRisk/;
 const WRITE = /\.(insert|update|upsert|delete)\(|\.rpc\(|revalidatePath\(/;
 const DELETES_WORKER_SKILLS = /from\(["']worker_skills["']\)[\s\S]{0,160}\.delete\(/;
-const NAMED_SKILL_REMOVAL = /(delete_worker_skill|removeSkillForRisk|revokeSkill)/;
-const PAYMENT_HOLD =
-  /(payment_hold|withhold_payment|hold_payout|freeze_earnings|suspend_payout)/;
-const PUBLIC_RISK_MARK =
-  /(public_flag|publicly_flagged|fraud_badge|scam_badge|risk_badge)/;
-const ENFORCEMENT_MARKERS =
-  /(suspendAccount|banUser|blockAccount|deactivateProfile|removeSkillForRisk|holdEarnings)/;
-const AI_WRITE_EXECUTION =
-  /(executeWrite|applyAgentDecision|autoApply|enforceAgent|agentEnforce)/;
+/**
+ * IDENTIFIER BOUNDARY. All five enforcement markers shipped with a literal
+ * U+0008 where `\b` was intended (2026-08-02 → 2026-08-29): they compiled,
+ * matched nothing, and every "stays advisory" invariant below passed
+ * vacuously. The boundary is now an explicit non-alphanumeric one — NOT
+ * `\b`, because `_` is a word character and `\bhold_payout\b` would let
+ * `hold_payout_v1` (the repo's own RPC naming convention) walk past it.
+ */
+const ident = (alts: string): RegExp =>
+  new RegExp(`(?<![A-Za-z0-9])(?:${alts})(?![A-Za-z0-9])`);
+const NAMED_SKILL_REMOVAL = ident("delete_worker_skill|removeSkillForRisk|revokeSkill");
+const PAYMENT_HOLD = ident(
+  "payment_hold|withhold_payment|hold_payout|freeze_earnings|suspend_payout",
+);
+const PUBLIC_RISK_MARK = ident(
+  "public_flag|publicly_flagged|fraud_badge|scam_badge|risk_badge",
+);
+const ENFORCEMENT_MARKERS = ident(
+  "suspendAccount|banUser|blockAccount|deactivateProfile|removeSkillForRisk|holdEarnings",
+);
+const AI_WRITE_EXECUTION = ident(
+  "executeWrite|applyAgentDecision|autoApply|enforceAgent|agentEnforce",
+);
 
 const AI_DIR = join("lib", "ai");
 const REGISTRY_DIR = join("ai", "registry");
@@ -401,5 +415,57 @@ describe("slice 4 — the enforcement contract (currently vacuous, deliberately)
       (x) => x.rel,
     );
     expect(mixed, "a file mixes agent output with enforcement").toEqual([]);
+  });
+});
+
+// ── NEGATIVE CONTROL — the enforcement markers can fire ─────────────────────
+
+describe("NEGATIVE CONTROL — every enforcement marker fires on the thing it forbids", () => {
+  const CASES: readonly [name: string, re: RegExp, hit: string[], miss: string[]][] = [
+    [
+      "NAMED_SKILL_REMOVAL",
+      NAMED_SKILL_REMOVAL,
+      ['rpc("delete_worker_skill", { id })', "await removeSkillForRisk(x)", "delete_worker_skill_v1("],
+      ["undelete_worker_skill(", "revokeSkillset(", "removeSkillForRisky"],
+    ],
+    [
+      "PAYMENT_HOLD",
+      PAYMENT_HOLD,
+      ["status: 'payment_hold'", "hold_payout_v1(", "await suspend_payout("],
+      ["unfreeze_earnings(", "payment_holds_count", "prehold_payout"],
+    ],
+    [
+      "PUBLIC_RISK_MARK",
+      PUBLIC_RISK_MARK,
+      ["<RiskBadge kind='fraud_badge' />", "public_flag = true", "scam_badge_v2"],
+      ["public_flags_total", "risk_badges", "unfraud_badge"],
+    ],
+    [
+      "ENFORCEMENT_MARKERS",
+      ENFORCEMENT_MARKERS,
+      ["await suspendAccount(id)", "banUser(", "holdEarnings_v1("],
+      ["unbanUser(", "blockAccounts(", "deactivateProfiles"],
+    ],
+    [
+      "AI_WRITE_EXECUTION",
+      AI_WRITE_EXECUTION,
+      ["executeWrite(decision)", "applyAgentDecision(", "autoApply_v1("],
+      ["autoApplyAll(", "reexecuteWrite(", "enforceAgents("],
+    ],
+  ];
+
+  for (const [name, re, hits, misses] of CASES) {
+    it(`${name} matches its markers and ignores near-misses`, () => {
+      for (const h of hits) expect(re.test(h), `${name} must match ${JSON.stringify(h)}`).toBe(true);
+      for (const m of misses) expect(re.test(m), `${name} must not match ${JSON.stringify(m)}`).toBe(false);
+    });
+  }
+
+  it("no marker carries a control character where a boundary was meant", () => {
+    for (const [name, re] of CASES) {
+      for (const ch of re.source) {
+        expect(ch.charCodeAt(0) < 0x20, `${name} contains a control character`).toBe(false);
+      }
+    }
   });
 });
