@@ -2253,7 +2253,17 @@ describe("no migration files added by this sprint", () => {
     // grant on any table changed. RED by classification (auth-core
     // adjacent): ships UNAPPLIED, production apply owner-gated. RECOUNTED
     // from the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 246.
-    const SPRINT_BASELINE = 246;
+    // Bumped 246 -> 247 for the anonymous write bounds
+    // (20260829130000_anon_write_bounds_v1, paired rollback). Closes the
+    // Phase-1 audit C-2 gap: the three anonymous write paths (pilot_events,
+    // waitlist, submit_company_need_public_v1) were bounded only by the
+    // app's per-instance in-memory windows, which a direct PostgREST call
+    // never touches. Adds CHECK constraints, two BEFORE INSERT ceilings and
+    // DB-side dedupe/ceilings inside the public RPC. No anon grant or policy
+    // touched; the surfaces stay open. RED by classification (grant-adjacent):
+    // ships UNAPPLIED, production apply owner-gated. RECOUNTED from the
+    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 247.
+    const SPRINT_BASELINE = 247;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

@@ -682,7 +682,13 @@ describe("NO new DB migration in this PR", () => {
     // session's verified email instead of user-writable profiles.email. RED
     // by classification (auth-core adjacent), ships UNAPPLIED, owner-gated.
     // Nothing to do with the market-map read layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(246);
+    // Bumped 246 -> 247 for the anonymous write bounds
+    // (20260829130000_anon_write_bounds_v1, paired rollback) — CHECKs and
+    // BEFORE INSERT ceilings on pilot_events/waitlist and DB-side ceilings
+    // inside the public intake RPC. RED by classification (grant-adjacent),
+    // ships UNAPPLIED, owner-gated. Nothing to do with the market-map read
+    // layer, which stays pure TS.
+    expect(count).toBeLessThanOrEqual(247);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
