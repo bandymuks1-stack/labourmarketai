@@ -78,6 +78,10 @@ const CLASSIFICATION: Record<
     class: "shared",
     why: "The one document download door, and the most authorization-heavy read in app/api — which is exactly why it is worth proving over the new transport rather than avoiding.",
   },
+  "mcp/route.ts": {
+    class: "shared",
+    why: "The MCP door for external clients (ChatGPT connector, future agents). Bearer is its primary transport by nature; it resolves identity through the one boundary and every tool call runs the caller's own RLS-scoped client via lib/capabilities.",
+  },
   "dashboard-search/route.ts": {
     class: "shared-blocked",
     why: "The route would be trivial to convert and it would be a LIE: getDashboardSearchGroups() takes no client and fans out to helpers that each call createClient() themselves, so the search would silently run as the cookie session (or as nobody) while the route reported the bearer caller's identity. The coupling is below the route layer — 257 of 892 lib modules resolve their own cookie client. Converting this route needs the shared-core refactor, not a header.",
