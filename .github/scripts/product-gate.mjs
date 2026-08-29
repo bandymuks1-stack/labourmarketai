@@ -321,11 +321,16 @@ function analyse(base) {
   }
 
   // A SECOND AI is forbidden outright (AI Conversation element rule).
+  //
+  // ASSISTANT_FILE_RE shipped with a literal U+0008 where `\b` was intended
+  // (until 2026-08-29): the `agent` alternative could never match, so only
+  // `assistant` / `copilot` file names were ever inspected. The self-test
+  // below now proves all three alternatives fire.
   for (const file of added.filter((f) => IS_SCREEN.test(f) || IS_COMPONENT.test(f))) {
     const src = read(file);
     const id = IS_SCREEN.test(file) ? routeOf(file) : file.replace(/^apps\/web\//, "");
     const looksLikeAssistant =
-      /assistant|copilot|agent/i.test(file) &&
+      ASSISTANT_FILE_RE.test(file) &&
       /(chat|prompt|message)/i.test(src) &&
       !/ConversationChat/.test(src);
     if (looksLikeAssistant) {
@@ -672,6 +677,9 @@ it blocks the merge, and the reviewer either declares the surface or removes it.
   writeFileSync(`${REPO_ROOT}/${DIFF_OUT}`, body, "utf8");
 }
 
+/** File names that look like a second assistant surface (heuristic). */
+const ASSISTANT_FILE_RE = /assistant|copilot|\bagent\b/i;
+
 // ── self-test: prove each rule can actually fire ────────────────────────────
 
 function selfTest() {
@@ -701,6 +709,13 @@ function selfTest() {
     ["waiver_expiry_after", !/SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export function renderEntityByType(e) {}")],
     ["waiver_field_allowlist", ["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("worldStateCanControlIt")],
     ["waiver_field_allowlist_negative", !["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("registrationIsEnough")],
+    // second_ai: the file-name heuristic must fire on ALL THREE alternatives.
+    // Until 2026-08-29 the `agent` one carried a literal backspace and never did.
+    ["second_ai_assistant", ASSISTANT_FILE_RE.test("apps/web/components/app/assistant-panel.tsx")],
+    ["second_ai_copilot", ASSISTANT_FILE_RE.test("apps/web/app/[locale]/dashboard/copilot/page.tsx")],
+    ["second_ai_agent", ASSISTANT_FILE_RE.test("apps/web/components/app/agent-chat.tsx")],
+    ["second_ai_agent_negative", !ASSISTANT_FILE_RE.test("apps/web/components/app/reagent-panel.tsx")],
+    ["second_ai_no_control_char", ![...ASSISTANT_FILE_RE.source].some((c) => c.charCodeAt(0) < 0x20)],
   ];
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n);
   if (failed.length > 0) {

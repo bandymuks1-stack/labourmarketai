@@ -251,9 +251,26 @@ it("form inputs reach 16px, so iOS never auto-zooms the page on focus", () => {
     expect(inputCls, "44px input height").toContain("min-h-11");
   });
 
+  /**
+   * The raw Tailwind size the ladder replaces. Shipped with a literal U+0008
+   * where `\b` was intended (2026-07-26 → 2026-08-29), so the sweep below
+   * found no offenders in ANY tree. `-` is not a word character, so `\b`
+   * still sees `md:text-sm` and `text-sm/6`, and still passes `text-small`.
+   */
+  const TEXT_SM = /\btext-sm\b/;
+
+  it("NEGATIVE CONTROL — the text-sm sweep can see an offender", () => {
+    for (const hit of ['className="px-2 text-sm"', "md:text-sm", "text-sm/6 leading-5"]) {
+      expect(TEXT_SM.test(hit), `must flag ${hit}`).toBe(true);
+    }
+    for (const miss of ["text-small", "text-support", "text-smx", "context-smart"]) {
+      expect(TEXT_SM.test(miss), `must not flag ${miss}`).toBe(false);
+    }
+  });
+
   it("no text-sm survives on the conversation — every size is a ladder role", () => {
     const offenders = conversationFiles()
-      .filter((p) => /text-sm/.test(read(rel(p))))
+      .filter((p) => TEXT_SM.test(read(rel(p))))
       .map(rel);
     expect(offenders, "use text-body/support/basis/meta").toEqual([]);
   });
