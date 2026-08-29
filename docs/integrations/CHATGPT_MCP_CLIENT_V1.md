@@ -77,13 +77,23 @@ today (the same `shared-blocked` reality as dashboard-search).
 - CHATGPT CLIENT CONTRACT PROVEN: **NO** — needs a real ChatGPT connection (§5)
 - PRODUCTION PROVEN: **NO** — stacked on RED-gated #1331
 
-## 5. Owner gates to go live
+## 5. Path to live (updated 2026-08-29 after the owner go-decision)
 
-1. Approve + merge #1331 (auth-core RED), then this PR.
-2. Enable the **OAuth 2.1 server** in the Supabase dashboard (project-level
-   feature; until then the discovery document is accurate but the referenced
-   authorization server does not answer).
-3. Connect ChatGPT (developer mode → add MCP server → `https://<domain>/api/mcp`)
-   and run the §4 controls against the real client.
-4. Decide the journal write extraction slice (unlocks `journal.confirm`,
-   the first ChatGPT write).
+1. ~~Approve + merge #1331~~ — **DONE** (main `1781acef`; prod verified
+   fail-closed: 401 on no-cred/malformed/invalid bearer).
+2. App-side OAuth pieces (buildable, separate slice): the **consent page**
+   (`/oauth/consent` — Supabase's OAuth server delegates the user-approval UI
+   to the product; `supabase.auth.oauth.getAuthorizationDetails` /
+   `approveAuthorization` / `denyAuthorization`, supported by the installed
+   supabase-js 2.106), and this PR's RFC 9728 document naming
+   `https://<project-ref>.supabase.co/auth/v1` as the authorization server
+   (the exact identifier Supabase's discovery serves).
+3. **Owner-dashboard action (the one unavoidable step):** Supabase dashboard →
+   **Authentication → OAuth Server** → enable OAuth 2.1, set **Authorization
+   Path** to `/oauth/consent`, and enable **dynamic client registration**
+   (ChatGPT registers itself via DCR; monitor registered clients).
+4. Connect ChatGPT (developer mode → add MCP server →
+   `https://labourmarket.ai/api/mcp`) and run the §4 controls against the
+   real client.
+5. Journal write extraction slice (owner-approved 2026-08-29) unlocks
+   `journal.confirm`, the first ChatGPT write.

@@ -30,7 +30,12 @@ export async function GET(req: Request) {
   return NextResponse.json(
     {
       resource: origin,
-      authorization_servers: [url],
+      // The AS identifier is the auth service path, not the bare project
+      // origin: Supabase serves RFC 8414 discovery at
+      // /.well-known/oauth-authorization-server/auth/v1, which clients derive
+      // FROM this identifier (verified against the Supabase OAuth-server docs
+      // 2026-08-29 — a bare origin would send them to a 404).
+      authorization_servers: [`${url.replace(/\/$/, "")}/auth/v1`],
       bearer_methods_supported: ["header"],
       resource_name: "LabourMarket.ai",
     },
