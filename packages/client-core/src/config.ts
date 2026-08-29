@@ -47,6 +47,25 @@ export type ConfigResult =
   | { readonly ok: true; readonly config: ClientConfig }
   | { readonly ok: false; readonly problems: readonly ConfigProblem[] };
 
+/**
+ * Strip trailing slashes, in a loop rather than with `/\/+$/`.
+ *
+ * That regex is a polynomial ReDoS (CodeQL `js/polynomial-redos`, flagged high
+ * on the first version of this file): a greedy `+` under an end anchor makes
+ * the engine retry from every starting position on a string of many slashes,
+ * so the work grows with the square of the input.
+ *
+ * The realistic input here is a build-time configuration value, so the
+ * exploitability is low — but this is a package that a phone, a server and a
+ * future MCP client all import, and a quadratic scanner in shared code is not
+ * worth arguing about when the linear version is four lines.
+ */
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end -= 1;
+  return value.slice(0, end);
+}
+
 /** A cleared dashboard field means "not configured", not "configured as empty". */
 function present(value: string | undefined | null): string | null {
   if (typeof value !== "string") return null;
@@ -164,7 +183,7 @@ export function readClientConfig(source: {
     config: {
       supabaseUrl: url as string,
       supabaseAnonKey: anonKey as string,
-      apiBaseUrl: (apiBaseUrl as string).replace(/\/+$/, ""),
+      apiBaseUrl: stripTrailingSlashes(apiBaseUrl as string),
     },
   };
 }

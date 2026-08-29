@@ -111,13 +111,35 @@ describe("configuration is validated, and reported rather than thrown", () => {
   });
 
   it("normalises a trailing slash so paths do not double up", () => {
-    const result = readClientConfig({
-      ...VALID,
-      apiBaseUrl: "https://labourmarket.ai/",
-    });
-    expect(result.ok === true && result.config.apiBaseUrl).toBe(
-      "https://labourmarket.ai",
-    );
+    for (const given of [
+      "https://labourmarket.ai/",
+      "https://labourmarket.ai///",
+    ]) {
+      const result = readClientConfig({ ...VALID, apiBaseUrl: given });
+      expect(result.ok === true && result.config.apiBaseUrl, given).toBe(
+        "https://labourmarket.ai",
+      );
+    }
+  });
+
+  it("normalises in linear time on the input that made the old regex quadratic", () => {
+    // The first version used `/\/+$/`, which CodeQL flagged as a polynomial
+    // ReDoS (`js/polynomial-redos`, high): a greedy `+` under an end anchor
+    // makes the engine retry from every starting position.
+    //
+    // THE INPUT MATTERS, and the first draft of this test got it wrong. A
+    // string that ENDS in slashes matches immediately and takes 0.2 ms even
+    // with the bad regex — the assertion would have passed against the very
+    // code it was written to catch. The pathological shape is a long slash run
+    // that is NOT at the end, so every start position fails after scanning to
+    // the trailing character: measured at 7.8 SECONDS with the old regex, and
+    // 0.1 ms with the loop that replaced it.
+    const pathological = "https://labourmarket.ai" + "/".repeat(100_000) + "x";
+    const started = performance.now();
+    const result = readClientConfig({ ...VALID, apiBaseUrl: pathological });
+    // Nothing to strip: it does not end in a slash. The point is the time.
+    expect(result.ok === true && result.config.apiBaseUrl).toBe(pathological);
+    expect(performance.now() - started).toBeLessThan(1000);
   });
 
   it("a problem description never repeats the value it rejected", () => {
