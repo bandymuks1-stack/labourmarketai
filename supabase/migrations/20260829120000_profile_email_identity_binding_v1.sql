@@ -1,8 +1,22 @@
 -- @human-gate-approved — TIER: owner-gated (CREATE TRIGGER on public.profiles,
 --   SECURITY DEFINER recreate ×2, DROP/CREATE POLICY ×2). The marker is the
---   doctrine ACKNOWLEDGEMENT that this file is RED; it is not approval.
---   OWNER APPROVAL: PENDING — DO NOT APPLY. Record the approval line here and
---   in docs/human-gates/ before `apply_migration`.
+--   doctrine ACKNOWLEDGEMENT that this file is RED.
+--   OWNER APPROVAL: RECORDED 2026-08-29 (PR #1338). Verbatim scope, because
+--   an approval that is remembered loosely is an approval that grows:
+--     "#1338 — APPROVED. Approved security invariant: a user-editable profile
+--      attribute must never be authoritative identity for organization
+--      membership or another actor-sensitive authorization decision. Identity
+--      authority must come from a verified session/credential/authentication
+--      authority. Preserve: invitations to already registered users;
+--      invitations to not-yet-registered users; eventual claim by the
+--      authenticated owner of the invited email; pending/unclaimed identity
+--      compatibility; future human and AI actor architecture. Do not turn
+--      profiles.email into a new independent identity system. APPROVAL DOES
+--      NOT AUTHORIZE CAPABILITY REDUCTION."
+--   Reviewed HEAD 7e5daafb (the tree the owner approved), rebased onto main
+--   32ecf124 with the executable SQL byte-identical; this header block is the
+--   only change after approval. Full record:
+--   docs/human-gates/profile-email-identity-binding-gate.md
 -- ═══════════════════════════════════════════════════════════════════════════
 -- PROFILE EMAIL IDENTITY BINDING v1
 -- a user-editable profile field stops being an account identity
