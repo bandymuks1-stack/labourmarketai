@@ -1,8 +1,28 @@
 -- @human-gate-approved — TIER: owner-gated (CREATE TRIGGER ×2, SECURITY
 --   DEFINER ×3, REVOKE/GRANT on functions, ADD CONSTRAINT on three tables).
---   The marker is the doctrine ACKNOWLEDGEMENT that this file is RED; it is
---   not approval. OWNER APPROVAL: PENDING — DO NOT APPLY. Record the approval
---   line here and in docs/human-gates/ before `apply_migration`.
+--   The marker is the doctrine ACKNOWLEDGEMENT that this file is RED.
+--   OWNER APPROVAL: RECORDED 2026-08-29 (PR #1339). Verbatim scope:
+--     "#1339 — APPROVED, with the invariant below. Approved as ANTI-ABUSE
+--      SAFETY CEILINGS, not product/business ceilings. The current numerical
+--      limits MUST NOT become architectural limits on LabourMarket.ai growth.
+--      Preserve: public acquisition; legitimate traffic spikes; advertising
+--      campaigns; employer demand campaigns; worker registrations; future
+--      partner/API traffic; horizontal scaling. If legitimate observed traffic
+--      approaches these ceilings, the architecture must support
+--      raising/configuring/scoping the limits rather than dropping legitimate
+--      product capability. Do not redesign the system now unless required for
+--      correctness. APPROVAL DOES NOT AUTHORIZE CAPABILITY REDUCTION."
+--   How the invariant is honoured: every ceiling is a plain literal in ONE
+--   place (this file) and can be raised by a CREATE OR REPLACE of the helper
+--   or the RPC — no table, grant or policy needs to move; the numbers are
+--   10–30× the observed production peaks; the app-side in-memory windows
+--   remain the first brake; nothing here throttles registrations, authenticated
+--   employer intake, partner/API paths or reads. Recorded follow-up: move the
+--   ceilings into a settings row when the first legitimate spike approaches one.
+--   Reviewed HEAD 92bc0f3e (the tree the owner approved), rebased onto main
+--   654bda58 with the executable SQL byte-identical; this header block is the
+--   only change after approval. Full record:
+--   docs/human-gates/anon-write-bounds-gate.md
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ANON WRITE BOUNDS v1
 -- public intake stays open; anonymous cost gets a ceiling the database enforces
