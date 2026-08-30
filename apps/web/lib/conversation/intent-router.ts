@@ -41,6 +41,7 @@ export type ConversationIntent =
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "need-service" // "reikia, kad kas nors sutaisytų stogą" — a JOB done, not a job
   | "context" // "ką tu apie mane žinai?"
+  | "switch-context" // "perjunk į įmonę X" / "grįžk į asmeninį" — ONE ACTIVE CONTEXT
   | "opportunities" // "kokias galimybes man gali pasiūlyti?" — the OWN board
   | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
   | "admin-approvals" // "ką turiu patvirtinti?" — the approvals area
@@ -100,7 +101,7 @@ const UB = UNICODE_WORD_BOUNDARY;
  * because they are not decomposable: `ł` and `ø`. Cyrillic `ё`→`е` is folded
  * for the same reason (it is routinely typed as `е`).
  */
-function fold(input: string): string {
+export function fold(input: string): string {
   return input
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -307,6 +308,36 @@ const RULES: IntentRule[] = [
       p("(ką\\s+tu\\s+(apie\\s+mane\\s+)?žinai|what\\s+do\\s+you\\s+know|что\\s+ты\\s+знаешь)", 5),
       p("(kokiame\\s+kontekst|current\\s+context|мой\\s+контекст)", 4),
       p("(kur\\s+aš\\s+dabar\\s+esu|where\\s+am\\s+i\\s+now)", 4),
+    ],
+  },
+  {
+    // ONE ACTIVE CONTEXT (chat-first audit 2026-08-30, gap G1). The state
+    // every other answer resolves against — personal space vs organization —
+    // was the one piece of product state NO sentence could reach: "Perjunk į
+    // Nonstop Group" fell to the generic fallback while a header dropdown two
+    // centimetres away did exactly that. The router only classifies; the chat
+    // surface resolves WHICH workspace against the caller's real,
+    // membership-validated list and asks when the sentence is ambiguous.
+    // Verbs are deliberately switching-specific ("perjunk", "переключи",
+    // "wechsle zu") and the "work as X" family requires a ROLE noun, so a
+    // profession statement ("dirbu kaip plytelių klojėjas") never routes here.
+    intent: "switch-context",
+    patterns: [
+      p("(perjunk|persijunk|persijung|perjung)", 5), // lt — the switching verb itself
+      p("(grįžk|grižk|grąžink)\\s+į\\s+(mano\\s+)?asmenin", 5), // lt — back to personal
+      p("(dirbu|dirbk|veikiu|veik)\\s+(dabar\\s+)?kaip\\s+(įmon|darbuotoj|asmuo|organizacij)", 5),
+      p("\\bswitch\\s+(me\\s+)?to\\b", 5), // en
+      p("(change|set)\\s+(my\\s+)?(workspace|context)", 5),
+      p("(go\\s+)?back\\s+to\\s+(my\\s+)?personal", 5),
+      p("(work|act)\\s+as\\s+(a\\s+|an\\s+|the\\s+)?(company|employer|worker|person|organization)", 5),
+      p("переключи(сь)?\\s+(меня\\s+)?(на|в)", 5), // ru
+      p("верни(сь)?\\s+в\\s+личн", 5),
+      p("(работа(ю|й|ть)|действуй)\\s+как\\s+(компани|работодател|работник|организаци)", 5),
+      p("(schakel|wissel)\\s+(over\\s+)?naar", 5), // nl
+      p("terug\\s+naar\\s+(mijn\\s+)?persoonlijk", 5),
+      p("(wechsle|wechsel|wechseln)\\s+(zu|in|auf)", 5), // de
+      p("zurück\\s+zu\\s+(meinem\\s+)?persönlich", 5),
+      p("(arbeite|arbeiten|handle)\\s+als\\s+(firma|unternehmen|arbeitgeber|arbeitnehmer|organisation)", 5),
     ],
   },
   {

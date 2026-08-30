@@ -33,8 +33,10 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
   classifyIntent,
+  fold,
   isExplicitJournalRequest,
 } from "@/lib/conversation/intent-router";
+import type { WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
@@ -1130,6 +1132,107 @@ export function ConversationChat({
   ]);
 
   /**
+   * CONTEXT SWITCHING BY SENTENCE (chat-first audit 2026-08-30, gap G1).
+   *
+   * ONE ACTIVE CONTEXT is the state every other answer resolves against, and
+   * until this it was the only piece of product state the chat could not
+   * touch: "Perjunk į Nonstop Group" fell to the generic fallback while the
+   * header dropdown did exactly that. The switch itself stays the ONE
+   * existing, server-validated path (`auth.switchWorkspace` → the same
+   * membership-checked pointer the header uses) — the chat adds language on
+   * top, never a second switching mechanism.
+   *
+   * Honesty: `switchWorkspace` now reports whether the server accepted the
+   * switch, so the done-message is only said when it is true. An ambiguous or
+   * unmatched sentence ASKS with one chip per real workspace — it never
+   * guesses, and the chip carries only the workspace id the server
+   * re-validates.
+   */
+  const performContextSwitch = useCallback(
+    (workspace: WorkspaceInfo) => {
+      const displayName =
+        workspace.kind === "personal" ? t("switchContextPersonal") : workspace.name;
+      if (auth?.activeWorkspaceId === workspace.id) {
+        assistant(t("switchContextAlready", { name: displayName }));
+        return;
+      }
+      setTyping(true);
+      (auth
+        ? auth.switchWorkspace(workspace.id)
+        : Promise.resolve(false)
+      )
+        .then((accepted) => {
+          setTyping(false);
+          assistant(
+            accepted
+              ? t("switchContextDone", { name: displayName })
+              : t("switchContextFailed"),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("switchContextFailed"));
+        });
+    },
+    [assistant, auth, t],
+  );
+
+  const startSwitchContext = useCallback(
+    (text: string) => {
+      const workspaces = auth?.workspaces ?? [];
+      if (!auth || workspaces.length === 0 || auth.workspacePointerAvailable === false) {
+        // The pointer is honestly unavailable (owner-gated migration) or the
+        // list did not resolve — say so, never a silent no-op.
+        withTyping(() => assistant(t("switchContextUnavailable")));
+        return;
+      }
+      const folded = fold(text);
+      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…"
+      // (folded: persönlich → personlich) — the personal space by name.
+      const wantsPersonal = ["asmenin", "personal", "личн", "persoonlijk", "personlich"].some(
+        (hint) => folded.includes(hint),
+      );
+      const organizations = workspaces.filter(
+        (w) => w.kind === "organization" && w.name.trim() !== "",
+      );
+      let target: WorkspaceInfo | undefined = wantsPersonal
+        ? workspaces.find((w) => w.kind === "personal")
+        : undefined;
+      if (!target && !wantsPersonal) {
+        // Full-name inclusion first; then a single ≥4-char name token. Real
+        // entity names only (§6 of the train: no "Workspace 1" labels) — and
+        // anything short/ambiguous falls through to the explicit question.
+        const byFullName = organizations.filter((w) => {
+          const name = fold(w.name).trim();
+          return name.length >= 3 && folded.includes(name);
+        });
+        if (byFullName.length === 1) {
+          target = byFullName[0];
+        } else if (byFullName.length === 0) {
+          const byToken = organizations.filter((w) =>
+            fold(w.name)
+              .split(/\s+/)
+              .some((token) => token.length >= 4 && folded.includes(token)),
+          );
+          if (byToken.length === 1) target = byToken[0];
+        }
+      }
+      if (!target) {
+        assistant(
+          t("switchContextPick"),
+          workspaces.map((w) => ({
+            id: `ws:${w.id}`,
+            label: w.kind === "personal" ? t("switchContextPersonal") : w.name,
+          })),
+        );
+        return;
+      }
+      performContextSwitch(target);
+    },
+    [assistant, auth, performContextSwitch, t, withTyping],
+  );
+
+  /**
    * PROJECTS IN THE CONVERSATION (W11).
    *
    * The same split every result follows — the chat EXPLAINS, the panel SHOWS
@@ -1587,6 +1690,16 @@ export function ConversationChat({
             // completion, the subject and duplicate state before any form
             // exists. A chip is a request to look, never a permission.
             selectInteractionRef.current(chip.id.slice(3));
+          } else if (chip.id.startsWith("ws:")) {
+            // Context-switch chip (gap G1) — carries ONLY the workspace id;
+            // membership is re-validated server-side, the chip grants nothing.
+            const target = (auth?.workspaces ?? []).find(
+              (w) => w.id === chip.id.slice(3),
+            );
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target);
+            }
           } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
           } else if (chip.id.startsWith("link:")) {
@@ -1597,7 +1710,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch],
   );
   handleChipRef.current = handleChip;
 
@@ -1972,6 +2085,12 @@ export function ConversationChat({
         runWorkflow(workflow);
         return;
       }
+      if (intent === "switch-context") {
+        // ONE ACTIVE CONTEXT by sentence (gap G1) — resolves the target
+        // against the caller's real workspace list, asks when ambiguous.
+        startSwitchContext(text);
+        return;
+      }
       // These run a real async server read with their own typing cue.
       if (intent === "profile" || intent === "next-action" || intent === "resume") {
         startProfileSummary(
@@ -2215,7 +2334,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity, t, demandPrefill, renderValueStatement],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, openForm, identity, t, demandPrefill, renderValueStatement],
   );
 
   const nav = {
