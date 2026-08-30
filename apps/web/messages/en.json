@@ -13888,6 +13888,8 @@
     "skillsEmpty": "Your Living CV has no recorded skills yet.",
     "draftSummary": "Work Journal draft for {date}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
     "draftSummaryWithSite": "Work Journal draft for {date} at {site}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "draftChooseContext": "This entry could belong to more than one work context: {options}. Which one should it go to?",
+    "draftContext": "Context: {context}.",
     "confirmSummary": "Journal entry saved. Skill recognition: {added} added, {strengthened} strengthened, {reviewNeeded} awaiting review."
   }
 }

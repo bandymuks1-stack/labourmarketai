@@ -13888,6 +13888,8 @@
     "skillsEmpty": "Ihr lebender Lebenslauf enthält noch keine Fähigkeiten.",
     "draftSummary": "Arbeitsjournal-Entwurf für {date}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
     "draftSummaryWithSite": "Arbeitsjournal-Entwurf für {date} am Standort {site}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "draftChooseContext": "Dieser Eintrag könnte zu mehreren Arbeitskontexten gehören: {options}. Zu welchem gehört er?",
+    "draftContext": "Kontext: {context}.",
     "confirmSummary": "Journaleintrag gespeichert. Fähigkeitserkennung: {added} hinzugefügt, {strengthened} gestärkt, {reviewNeeded} wartet auf Prüfung."
   }
 }

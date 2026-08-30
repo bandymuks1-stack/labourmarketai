@@ -100,6 +100,44 @@ describe("summarizeCapabilityResult", () => {
     expect(notes.endsWith("…")).toBe(true);
   });
 
+  it("journal.create_draft: the resolved context is NAMED; a rule-C outcome lists the labeled options", async () => {
+    // Compound string: draftSummary followed by draftContext — assert both
+    // keys fired with the right values (raw probe output, not re-parsed).
+    const withContext = await summarizeCapabilityResult(
+      "journal.create_draft",
+      {
+        preview: {
+          workDate: "2026-08-30",
+          siteName: null,
+          notes: "Testas",
+          engagementContextId: "ec-1",
+          engagementLabel: "Dev Statyba",
+        },
+        confirmationToken: "t",
+      },
+      "lt",
+    );
+    expect(withContext).toContain('"key":"draftSummary"');
+    expect(withContext).toContain('"key":"draftContext"');
+    expect(withContext).toContain("Dev Statyba");
+
+    const choice = parse(
+      await summarizeCapabilityResult(
+        "journal.create_draft",
+        {
+          status: "engagement_choice_required",
+          options: [
+            { id: "a", label: "Dev Statyba" },
+            { id: "b", label: "Nonstop Group" },
+          ],
+        },
+        "lt",
+      ),
+    );
+    expect(choice?.key).toBe("draftChooseContext");
+    expect(choice?.values).toEqual({ options: "Dev Statyba, Nonstop Group" });
+  });
+
   it("journal.confirm: reports the REAL pipeline numbers, never invented ones", async () => {
     const out = parse(
       await summarizeCapabilityResult(

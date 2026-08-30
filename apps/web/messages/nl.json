@@ -13888,6 +13888,8 @@
     "skillsEmpty": "Uw levende cv bevat nog geen vaardigheden.",
     "draftSummary": "Concept werkjournaalinvoer voor {date}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
     "draftSummaryWithSite": "Concept werkjournaalinvoer voor {date} op {site}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "draftChooseContext": "Deze invoer kan bij meerdere werkcontexten horen: {options}. Bij welke hoort deze?",
+    "draftContext": "Werkcontext: {context}.",
     "confirmSummary": "Journaalinvoer opgeslagen. Vaardigheidsherkenning: {added} toegevoegd, {strengthened} versterkt, {reviewNeeded} wacht op beoordeling."
   }
 }
