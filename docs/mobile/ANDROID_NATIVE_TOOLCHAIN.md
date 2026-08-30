@@ -1,11 +1,13 @@
 # Android native toolchain — minimal install proposal (owner decision)
 
-> Status 2026-08-29: NOT installed. This machine has a JRE 1.8 only
-> (`C:\Program Files\Java\jre1.8.0_461`, Oracle java8path shim on PATH), no
-> JDK, no Android SDK, no Android Studio, no `JAVA_HOME`/`ANDROID_HOME`.
-> Expo SDK 57 / React Native 0.86 (apps/mobile) requires JDK 17 and
-> Android SDK 35/36 to compile a native APK. Everything below is the exact
-> minimal change; nothing has been run.
+> Status 2026-08-30: **INSTALLED and PROVEN.** Temurin JDK 17 +
+> `C:\Android\sdk` (cmdline-tools, platform android-36, build-tools 35/36,
+> platform-tools, NDK, CMake) are present; `JAVA_HOME` is set machine-wide,
+> `ANDROID_HOME` is passed per-build. `gradlew assembleDebug` produced a
+> debug APK — see the 2026-08-30 update in
+> [`NATIVE_READINESS_2026-08-29.md`](NATIVE_READINESS_2026-08-29.md).
+> The emulator remains NOT installed (optional footprint below).
+> Original proposal text kept for the rollback path:
 
 ## What is actually required
 

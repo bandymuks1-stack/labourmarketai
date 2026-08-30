@@ -38,6 +38,36 @@ its rollback) is [`ANDROID_NATIVE_TOOLCHAIN.md`](ANDROID_NATIVE_TOOLCHAIN.md)
 — ≈0.7 GB without an emulator. After it: `expo prebuild` → `gradlew
 assembleDebug` → `expo run:android`.
 
+## UPDATE 2026-08-30 — ANDROID_NATIVE_BUILD_PROVEN: YES
+
+The toolchain from `ANDROID_NATIVE_TOOLCHAIN.md` is installed (Temurin
+JDK 17, cmdline-tools, platform android-36, build-tools 35/36, NDK, CMake;
+no emulator). With two repo changes — `node-linker=hoisted` in the root
+`.npmrc` (the Expo-documented monorepo layout) and the two Expo-bundled
+native pins below — the full native build passes on this machine:
+
+```
+expo prebuild --platform android   → clean
+gradlew assembleDebug --no-daemon  → BUILD SUCCESSFUL in 35m 10s
+                                     458 tasks: 434 executed, 24 up-to-date
+app-debug.apk                      → 225,656,648 bytes
+                                     applicationId ai.labourmarket.app, v0.1.0
+sha256 4829f14faddd768597268e599b1c536256936bfb0634dc90b01664ecda00e920
+```
+
+Root cause of the historical worklets/screens C++ failure, measured: with
+fresh resolution, `react-native-reanimated` 4.6.0 pulled
+`react-native-worklets` 0.12.1, which `expo-modules-core` 57.0.14 does not
+support (peer `^0.7.4 || ^0.8 || ^0.9 || ^0.10`) — the compile error was
+`no member named 'executeSync' in 'worklets::WorkletRuntime'`. The fix pins
+the Expo SDK 57 bundled pair (`react-native-reanimated` 4.5.1,
+`react-native-worklets` 0.10.1) as direct dependencies of `apps/mobile`.
+Both satisfy every peer range (expo-router accepts reanimated `*`).
+
+**Still NO:** `ANDROID_NATIVE_RUNTIME_PROVEN` — no emulator/system image is
+installed (deliberately excluded from the minimal footprint) and no device
+was attached; install+launch remains the next proof step.
+
 ## iOS — everything provable from Windows: DONE; the rest is macOS-only
 
 `expo prebuild --platform ios` **refuses on Windows by design** ("Run npx

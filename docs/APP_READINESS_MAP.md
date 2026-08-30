@@ -200,7 +200,7 @@ exists to prevent.
 | `APP_SHARED_CORE_READY` | **PARTIAL** — `packages/client-core` exists (config, session, locale, transport contract, actor context; zero dependencies, zero framework imports) and the transport exists; but 257 of 892 `lib/` modules still resolve their own cookie client, so only 4 of 9 routes can honestly use it |
 | `ANDROID_CLIENT_SCAFFOLD` | **BUILT** — `apps/mobile`, Expo SDK 57. Registration, sign-in, session, sign-out, language and the navigation shell are real. A Hermes bundle compiles for both platforms |
 | `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam (§5.1 opened with auth-core). Product data waits on the shared-core refactor coverage above; the scaffold ships every blocked surface as an honest refusal, never an empty screen |
-| `ANDROID_NATIVE_BUILD_PROVEN` | **NO** — no APK/AAB has been produced on this branch. The build machine has JDK 8 and no Android SDK |
+| `ANDROID_NATIVE_BUILD_PROVEN` | **YES (build level, 2026-08-30)** — `gradlew assembleDebug` BUILD SUCCESSFUL, `app-debug.apk` produced (`ai.labourmarket.app` v0.1.0); hoisted linker + Expo SDK 57 bundled pins, see `docs/mobile/NATIVE_READINESS_2026-08-29.md`. Runtime install+launch still unproven: no emulator/device on the build machine |
 | `IOS_BUILD_PROVEN` | **NO** — the JavaScript bundle compiles; the native app needs Xcode on macOS |
 | `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and three canonical capabilities are reachable over it; the rest wait on the same shared-core refactor |
 
