@@ -68,6 +68,21 @@ Both satisfy every peer range (expo-router accepts reanimated `*`).
 installed (deliberately excluded from the minimal footprint) and no device
 was attached; install+launch remains the next proof step.
 
+## UPDATE 2026-08-30 — IOS_NATIVE_BUILD_PROVEN: YES (simulator)
+
+The "macOS-only" gap below is closed without owner infrastructure: GitHub's
+hosted `macos-26` runners (free on this public repo) run
+`.github/workflows/ios.yml` — prebuild → `pod install` → `xcodebuild`
+(scheme `LabourMarketai`, Debug, unsigned, Xcode 26.6) → **BUILD
+SUCCEEDED** → `simctl` install + launch → process alive after 15s
+(`IOS_SIM_LAUNCH_PROVEN`). Six measured iterations got there: x86_64
+slice off (arm64 runner), toolchain floor **Xcode 26.4+/Swift 6.3**
+(16.4 lacks Swift tools 6.2; 26.0–26.3 trip the Swift/C++ interop rules
+in expo-modules-jsi `RuntimeScheduler.h` — upstream expo/expo#46242),
+and the app scheme selected by `.xcodeproj` name (schemes[0] is a Pods
+scheme). Still NOT claimed: device builds, signing, store readiness,
+real-backend auth/deep-link E2E.
+
 ## iOS — everything provable from Windows: DONE; the rest is macOS-only
 
 `expo prebuild --platform ios` **refuses on Windows by design** ("Run npx
