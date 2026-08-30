@@ -108,12 +108,32 @@ function summarizeConfirm(t: Translator, data: Record<string, unknown>): string 
   });
 }
 
+function summarizeJournalList(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  const entries = data.entries;
+  if (!Array.isArray(entries)) return null;
+  if (entries.length === 0) return t("journalListEmpty");
+  // The newest entry's work_date metric (the product's own date for the
+  // work) — created_at as the honest fallback when the metric is absent.
+  const first = asRecord(entries[0]);
+  const metrics = Array.isArray(first?.metrics) ? first.metrics : [];
+  const workDate = metrics
+    .map((m) => asRecord(m))
+    .find((m) => m?.slug === "work_date");
+  const latest =
+    text(workDate?.valueText) ?? text(first?.createdAt)?.slice(0, 10) ?? "";
+  return t("journalListSummary", { count: entries.length, latest });
+}
+
 const SUMMARIZERS: Record<
   string,
   (t: Translator, data: Record<string, unknown>) => string | null
 > = {
   "profile.get": summarizeProfile,
   "living_cv.skills.get": summarizeSkills,
+  "journal.list": summarizeJournalList,
   "journal.create_draft": summarizeDraft,
   "journal.confirm": summarizeConfirm,
 };

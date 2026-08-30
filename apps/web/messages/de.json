@@ -13879,6 +13879,8 @@
       "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
   },
   "capabilities": {
+    "journalListEmpty": "Das Arbeitsjournal hat noch keine Einträge.",
+    "journalListSummary": "{count} Einträge gefunden. Neuester: {latest}.",
     "notSet": "nicht angegeben",
     "workerExists": "aktiv",
     "workerNone": "keins",

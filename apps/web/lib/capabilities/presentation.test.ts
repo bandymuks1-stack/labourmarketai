@@ -73,6 +73,45 @@ describe("summarizeCapabilityResult", () => {
     expect(empty?.key).toBe("skillsEmpty");
   });
 
+  it("journal.list: counts entries and names the newest work_date; empty gets its own honest key", async () => {
+    const out = parse(
+      await summarizeCapabilityResult(
+        "journal.list",
+        {
+          workerId: "w-1",
+          entries: [
+            {
+              entryId: "e-1",
+              createdAt: "2026-08-30T08:00:00Z",
+              metrics: [{ slug: "work_date", valueText: "2026-08-30" }],
+            },
+            { entryId: "e-2", createdAt: "2026-08-29T08:00:00Z", metrics: [] },
+          ],
+        },
+        "lt",
+      ),
+    );
+    expect(out?.key).toBe("journalListSummary");
+    expect(out?.values).toEqual({ count: 2, latest: "2026-08-30" });
+
+    // Without the work_date metric the honest fallback is the created date.
+    const fallback = parse(
+      await summarizeCapabilityResult(
+        "journal.list",
+        {
+          entries: [{ entryId: "e-3", createdAt: "2026-08-28T10:00:00Z", metrics: [] }],
+        },
+        "en",
+      ),
+    );
+    expect(fallback?.values).toEqual({ count: 1, latest: "2026-08-28" });
+
+    const empty = parse(
+      await summarizeCapabilityResult("journal.list", { entries: [] }, "en"),
+    );
+    expect(empty?.key).toBe("journalListEmpty");
+  });
+
   it("journal.create_draft: summarizes the exact preview; site switches the key; long notes are trimmed", async () => {
     const withSite = parse(
       await summarizeCapabilityResult(

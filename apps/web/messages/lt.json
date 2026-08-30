@@ -13879,6 +13879,8 @@
       "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
   },
   "capabilities": {
+    "journalListEmpty": "Darbo žurnale dar nėra įrašų.",
+    "journalListSummary": "Rasta įrašų: {count}. Naujausias — {latest}.",
     "notSet": "nenurodyta",
     "workerExists": "aktyvus",
     "workerNone": "nėra",
