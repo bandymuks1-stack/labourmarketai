@@ -161,7 +161,13 @@ something to join to.
 **The order this has to happen in — each step is useful on its own, and none
 of them blocks the pilot:**
 
-1. **Populate `esco_uri` for the 161 skills.** This is the whole unlock: it is
+1. **Populate `esco_uri` for the 161 skills.** *(2026-08-30: the mapping dry
+   run for this step exists — `docs/taxonomy/esco-mapping-dryrun-2026-08-30.json`
+   + `docs/taxonomy/ESCO_CANONICAL_LINKAGE_PLAN.md`; 31/161 skills and 36/49
+   professions are deterministically linkable, the rest is a curation queue.
+   The step-3 pipeline is proven end-to-end at guard level in Polish —
+   `lib/guards/esco-concept-label-e2e.test.ts`. Prod is still unwritten.)*
+   This is the whole unlock: it is
    the only language-independent identity the schema already has, and it is
    empty. Curation, not engineering. Until it holds data, every later step has
    nothing to resolve *to*. Leave the slug as the join key — matching was
