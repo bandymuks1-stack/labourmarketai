@@ -14,9 +14,12 @@
  * SKILL SLUG (`skills.slug` — present for 100% of rows). A legacy ESCO URI
  * is accepted as an opaque id for backward compatibility and is bridged to
  * its slug by the read layers when `skills.esco_uri` is curated. Matching
- * MUST NOT depend on `esco_uri` being non-null (prod reality: 0/152 skills
- * carried one, which made the previous URI-keyed fit inert — see
- * runtime/audits/matching-scouting-reality-audit-2026-07-04.md).
+ * MUST NOT depend on `esco_uri` being non-null (prod reality at the
+ * 2026-07-04 audit: 0/152 skills carried one, which made the previous
+ * URI-keyed fit inert — see
+ * runtime/audits/matching-scouting-reality-audit-2026-07-04.md. Re-verified
+ * 2026-08-30: still 0, now of 161 skills — canonical numbers in
+ * docs/LANGUAGE_MATRIX.md §4.1).
  */
 
 export interface SubjectEscoSkill {
