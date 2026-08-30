@@ -81,12 +81,16 @@ jobs:
 
       # The workspace/scheme names derive from app.json's display name; read
       # them from the generated project instead of hardcoding a guess.
+      # NOT schemes[0]: the workspace lists every Pods scheme too, and
+      # alphabetically that made run 5 "successfully" build EXConstants
+      # instead of the app. The app scheme matches the .xcodeproj name.
       - name: Discover workspace and scheme
         id: xc
         working-directory: apps/mobile/ios
         run: |
           WS=$(ls -d *.xcworkspace | head -1)
-          SCHEME=$(xcodebuild -workspace "$WS" -list -json | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')
+          SCHEME=$(basename "$(ls -d *.xcodeproj | head -1)" .xcodeproj)
+          xcodebuild -workspace "$WS" -list -json | python3 -c 'import json,sys; print("schemes:", json.load(sys.stdin)["workspace"]["schemes"])'
           echo "workspace=$WS" >> "$GITHUB_OUTPUT"
           echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
           echo "workspace=$WS scheme=$SCHEME"
