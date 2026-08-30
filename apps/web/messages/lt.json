@@ -13879,6 +13879,9 @@
       "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
   },
   "capabilities": {
+    "workspacePersonal": "Asmeninė erdvė",
+    "workspaceSwitched": "Aktyvi darbo erdvė pakeista į „{label}“.",
+    "workspaceChoose": "Pasirinkite darbo erdvę: {options}.",
     "journalListEmpty": "Darbo žurnale dar nėra įrašų.",
     "journalListSummary": "Rasta įrašų: {count}. Naujausias — {latest}.",
     "notSet": "nenurodyta",

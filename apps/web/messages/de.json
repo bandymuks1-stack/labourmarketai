@@ -13879,6 +13879,9 @@
       "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
   },
   "capabilities": {
+    "workspacePersonal": "Persönlicher Bereich",
+    "workspaceSwitched": "Aktiver Arbeitsbereich zu „{label}“ gewechselt.",
+    "workspaceChoose": "Arbeitsbereich wählen: {options}.",
     "journalListEmpty": "Das Arbeitsjournal hat noch keine Einträge.",
     "journalListSummary": "{count} Einträge gefunden. Neuester: {latest}.",
     "notSet": "nicht angegeben",

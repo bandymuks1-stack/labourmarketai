@@ -10,6 +10,8 @@ import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
+import { listWorkspaceMemberships } from "@/lib/company/active-organization";
+import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
 
 import {
   canonicalInputHash,
@@ -639,6 +641,122 @@ const journalConfirm: CapabilityDescriptor = {
   },
 };
 
+// ── context.switch ─────────────────────────────────────────────────────────
+
+const contextSwitchInput = z
+  .object({
+    /** "personal", a workspace id, or an organization name from the
+     *  caller's own memberships. */
+    workspace: z.string().min(1).max(200),
+  })
+  .strict();
+
+const contextSwitch: CapabilityDescriptor = {
+  id: "context.switch",
+  kind: "execute",
+  title: "Switch my active workspace",
+  description:
+    "Switches the caller's DURABLE active-workspace pointer — the default " +
+    "new sessions and bearer clients resolve against. An already-open " +
+    "browser session keeps its own in-session choice until changed there. " +
+    "`workspace` is 'personal', a workspace id, or an organization name " +
+    "from the caller's own memberships; an unknown or ambiguous value " +
+    "returns the labeled options and switches NOTHING.",
+  exposed: true,
+  // A real write (the pointer row) — reversible, never destructive, and
+  // repeating the same switch is a no-op.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: contextSwitchInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = contextSwitchInput.parse(input);
+    // G4 bridge: the SAME membership list the web workspace chip renders,
+    // and the SAME switch core the web server actions run.
+    const memberships = await listWorkspaceMemberships(caller);
+
+    const t = await getTranslations({
+      locale: caller.locale,
+      namespace: "capabilities",
+    });
+    const tRelationships = await getTranslations({
+      locale: caller.locale,
+      namespace: "relationshipTypes",
+    });
+    const relationshipLabel = (slug: string): string =>
+      tRelationships.has(slug) ? tRelationships(slug) : slug;
+    // Same duplicate-qualification rule as the work-log selector (#1360):
+    // a base label that occurs more than once gains its relationship.
+    const baseOf = (w: (typeof memberships)[number]): string =>
+      w.kind === "personal" ? t("workspacePersonal") : w.name.trim() || t("notSet");
+    const baseCounts = new Map<string, number>();
+    for (const w of memberships) {
+      const base = baseOf(w);
+      baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+    }
+    const labelOf = (w: (typeof memberships)[number]): string => {
+      const base = baseOf(w);
+      const duplicated = (baseCounts.get(base) ?? 0) > 1;
+      return duplicated && w.kind === "organization" && w.relationship
+        ? `${base} — ${relationshipLabel(w.relationship)}`
+        : base;
+    };
+
+    // Resolution is deliberately EXACT (id, the personal sentinel, or a
+    // full case-insensitive name) — fuzzy sentence matching stays the web
+    // chat's own presentation concern; anything else gets the options.
+    const needle = parsed.workspace.trim().toLowerCase();
+    const matches = memberships.filter(
+      (w) =>
+        w.id.toLowerCase() === needle ||
+        (w.kind === "organization" && w.name.trim().toLowerCase() === needle),
+    );
+    if (matches.length !== 1) {
+      return {
+        ok: true,
+        data: {
+          status: "workspace_choice_required",
+          options: memberships.map((w) => ({ id: w.id, label: labelOf(w) })),
+          note: "The given workspace is not exactly one of the caller's own — nothing was switched. Ask the user to choose, then call again with the chosen workspace id.",
+        },
+      };
+    }
+
+    const target = matches[0];
+    const result = await switchActiveWorkspaceCore(caller, target.id);
+    if (!result.ok) {
+      if (result.code === "needs-migration") {
+        return {
+          ok: false,
+          code: "needs_migration",
+          message:
+            "The durable workspace pointer is not enabled on this environment, so a bearer client cannot switch yet. The web workspace switcher still works.",
+        };
+      }
+      if (result.code === "not-member") {
+        return {
+          ok: false,
+          code: "not_authorized",
+          message: "Not a member of that workspace.",
+        };
+      }
+      return { ok: false, code: "unavailable", message: "Workspace switch failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        status: "switched",
+        workspaceId: target.id,
+        label: labelOf(target),
+        durablePointer: true,
+      },
+    };
+  },
+};
+
 // ── the registry ───────────────────────────────────────────────────────────
 
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
@@ -647,6 +765,7 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   journalList,
   journalCreateDraft,
   journalConfirm,
+  contextSwitch,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

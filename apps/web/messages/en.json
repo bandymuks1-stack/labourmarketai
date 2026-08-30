@@ -13879,6 +13879,9 @@
       "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
   },
   "capabilities": {
+    "workspacePersonal": "Personal space",
+    "workspaceSwitched": "Active workspace switched to “{label}”.",
+    "workspaceChoose": "Choose a workspace: {options}.",
     "journalListEmpty": "The Work Journal has no entries yet.",
     "journalListSummary": "{count} entries found. Latest: {latest}.",
     "notSet": "not set",

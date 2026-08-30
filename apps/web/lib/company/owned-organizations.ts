@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import type { DomainCaller } from "@/lib/domain/caller";
 
 /**
  * Multi-company read model (IA cleanup v2, correction #6).
@@ -71,11 +72,18 @@ export async function getOwnedOrganizations(): Promise<OwnedOrganizationsResult>
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", organizations: [] };
+  return readOwnedOrganizations({ supabase, userId: user.id });
+}
 
-  const { data, error } = await asAny(supabase)
+/** THE owned-organizations read as an explicit caller (G4 bridge) — the
+ *  transport-neutral core under `getOwnedOrganizations`. */
+export async function readOwnedOrganizations(
+  caller: DomainCaller,
+): Promise<OwnedOrganizationsResult> {
+  const { data, error } = await asAny(caller.supabase)
     .from("organizations")
     .select("id, display_name, legal_name, organization_type, legacy_company_id")
-    .eq("owner_profile_id", user.id)
+    .eq("owner_profile_id", caller.userId)
     .order("created_at", { ascending: true });
 
   if (error) {
