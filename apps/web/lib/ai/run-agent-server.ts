@@ -22,6 +22,7 @@
  *     and a route that engaged no vendor has none to record.
  */
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { getAiRuntimeConfig, getAiProviderStates } from "./runtime/config";
 import {
   auditDispositionFor,
@@ -72,10 +73,18 @@ export async function runAiAgent<T = unknown>(
   // fabricated and never becomes a row.
   const disposition = auditDispositionFor(cfg.state);
   if (disposition !== "synthetic" && outcome.routing) {
+    // ONE deterministic id per run, shared by both ledger rows as their PK.
+    // That makes each append idempotent — nothing retries today, but a future
+    // retry layer re-attempting a persist can only ever land ONE ai_runs row
+    // and ONE usage_cost_events row for this run (duplicate key = already
+    // persisted, never double-counted spend). The shared value also links the
+    // audit row to its cost row without a new column.
+    const runId = randomUUID();
     const persisted = await persistAiRunAudit(outcome.routing, {
       profileId: opts.profileId ?? null,
       requestContext: agent,
       disposition,
+      runId,
     });
     // W14 Pilot Analytics slice v1: the same live run also lands as ONE
     // `usage_cost_events` row (event_type='usage', EUR cents) — the canonical
@@ -107,6 +116,7 @@ export async function runAiAgent<T = unknown>(
         profileId: opts.profileId ?? null,
         organizationId,
         requestContext: agent,
+        eventId: runId,
       });
     }
     if (!persisted) {
