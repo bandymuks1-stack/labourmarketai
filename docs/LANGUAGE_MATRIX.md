@@ -1,7 +1,11 @@
 # LabourMarket.ai — LANGUAGE MATRIX (measured, not claimed)
 
-> **Status:** canonical audit, 2026-08-27. Derived from CODE, not from the
-> presence of locale files.
+> **Status:** canonical audit, 2026-08-27; catalog + prod-DB numbers
+> re-measured **2026-08-30** (repo at `632ad088`, prod SQL). Derived from CODE
+> and the PRODUCTION DATABASE, not from the presence of locale files.
+> **This file is the ONE canonical source for language-coverage numbers.**
+> Any other doc or code comment that carries a language/ESCO count is a
+> snapshot of its own date and must defer here when it disagrees.
 > **Owner requirement:** all 24 official EU languages **+ Georgian/Kartvelian
 > + Russian**.
 > **Rule this file exists to enforce:** a language is **not** FULL merely
@@ -43,6 +47,36 @@ multilingual-ready.
 prerenders and the URL↔locale resolver rejects the code. A file is not a
 language.
 
+### 2.1 CATALOG PARITY — measured 2026-08-30 (leaf string counts)
+
+The "11 catalogs" are NOT eleven copies of the same catalog. Measured by
+walking every leaf string in `apps/web/messages/*.json`:
+
+| locale | leaf strings | `[EN]` markers | share untranslated |
+|---|---|---|---|
+| en, lt, ru, nl, de | **10,263** each | 0 | 0% |
+| lv, et | 4,150 | 2,514 | 60.6% |
+| no, sv | 4,150 | 2,442 | 58.8% |
+| pl | 4,150 | 2,439 | 58.8% |
+| da | 4,150 | 1,301 | 31.3% |
+
+Two facts, both required to read this honestly:
+
+1. The six unrouted catalogs are **structurally truncated** — they hold 4,150
+   leaves against 10,263 in the five routed locales. New keys have in practice
+   landed only in the routed set, so the doctrine §2.4 sentence "new i18n keys
+   land in all 11 catalogs in the same PR" describes the requirement, **not
+   the measured state** (see the annotation in `lib/i18n/config.ts`).
+2. Of the leaves the truncated catalogs DO hold, ~31–61% are `[EN]`
+   placeholders. The live ratchet baselines are in
+   `lib/guards/i18n-debt.ts` (2026-08-30: `da: 1314` ceiling, live count
+   1,301; `de/nl/ru: 0`). The historical "DA and DE each carry 633" figure in
+   `docs/quality/i18n-da-de-debt-guard-v1.md` is the guard-creation snapshot,
+   long superseded: DE went to 0 on 2026-07-11, DA grew with the catalog.
+
+Promoting any of the six to routed therefore costs BOTH backfilling ~6,113
+missing leaves AND translating the `[EN]` residue — not just the residue.
+
 ---
 
 ## 3. PER-JOURNEY MATRIX
@@ -65,7 +99,7 @@ Legend: **F** full · **C** core-journey only · **P** partial · **—** not im
 | Employer need structuring | F | C | C | P | P | — | — | — | — |
 | Institution / student | F | F | C | C | C | — | — | — | — |
 | Notifications / email | P | P | P | P | P | — | — | — | — |
-| AI provider support | n/a — no provider configured (see `ai_runs = 0`) |
+| AI provider support | env-gated, LIVE since 2026-08-28 (`ai_runs` = 7 on 2026-08-30; the 2026-08-27 "`ai_runs = 0`" note is superseded) |
 
 **Reading it honestly:** only **Lithuanian** is genuinely full across the
 product. English is full for UI and CV but core-journey for understanding.
@@ -106,17 +140,23 @@ What the direction above actually rests on today — checked, not assumed:
 
 | prerequisite | state |
 |---|---|
-| `skills.esco_uri` (language-independent concept id) | column EXISTS, **0 of 161 rows populated (0%)** |
+| `skills.esco_uri` (language-independent concept id) | column EXISTS, **0 of 161 rows populated (0%)** — prod-verified 2026-08-30 |
+| `professions.esco_uri` | column EXISTS, **0 of 49 rows populated (0%)** — prod-verified 2026-08-30 |
+| `esco_labels` multilingual label corpus | **IN PROD: 1,045,186 rows across 28 locales** (verified 2026-08-30) — but INERT: with every `esco_uri` NULL, no skill or profession row joins to it |
 | embeddings anywhere in `lib/` | **none** |
 | `pgvector` extension | **not installed** |
 | hand-written needle packs | 9 files, ~235 lines each (~2,100 lines) for 9 languages |
 | concept-resolution seam (step 2) | **DONE 2026-08-28** — a language may now arrive as data |
-| AI router | implemented, `ENV-GATED`, `ai_runs = 0` |
+| AI router | implemented, env-gated, LIVE (`ai_runs` = 7, prod-verified 2026-08-30) |
 
-So the recorded pipeline has **one asset with no data** (`esco_uri`) and **two
-absent layers** (embeddings, vector store). That is why "add a language" still
-costs a needle pack: there is currently no other way for an expression to reach
-a concept.
+So the pipeline's shape changed between the two measurements: the step-3 label
+DATA now exists in prod (`esco_labels`, 1M+ rows, 28 locales — more than the
+24 EU languages, though `ka` must still be checked per-concept), but the
+**join key is still empty on both sides** (`skills.esco_uri` 0/161,
+`professions.esco_uri` 0/49) and **two layers stay absent** (embeddings,
+vector store). That is why "add a language" still costs a needle pack: the
+million-row corpus can answer no query until step 1's curation gives it
+something to join to.
 
 **The order this has to happen in — each step is useful on its own, and none
 of them blocks the pilot:**
@@ -222,8 +262,10 @@ Admin and back-office screens do **not** gate a language.
 3. Move concept identity off literal needle lists (§4) before adding languages
    6–26, or the cost per language stays linear and the over-claim risk
    compounds. **The seam for this is built (§4.1 step 2, done 2026-08-28); what
-   is still missing is the DATA** — `esco_uri` remains 0 of 161, so step 1
-   (curation, not engineering) is now the single thing standing between the
-   architecture and languages 6–24.
+   is still missing is the LINK** — `skills.esco_uri` remains 0 of 161 and
+   `professions.esco_uri` 0 of 49 (prod-verified 2026-08-30), even though the
+   `esco_labels` corpus itself is already loaded (§4.1). Step 1 (curation, not
+   engineering) is now the single thing standing between the architecture and
+   languages 6–24.
 4. Promote catalog-only locales (`lv et da no sv pl`) to routed only after
    their *understanding* layers, not just their strings, reach core-journey.

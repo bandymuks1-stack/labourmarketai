@@ -3,6 +3,16 @@
 > Companion to the primary-route smoke guard (PR #136) and Quality Gates CI
 > (PR #138). Spec: `docs/quality/safe-merge-and-continue-quality-v2.md`.
 
+> ⚠️ **Historical snapshot — numbers below are the guard-creation baseline,
+> not the current state.** Measured 2026-08-30: `de.json` carries **0** `[EN]`
+> markers (DE was fully translated and ACTIVATED 2026-07-11; its ratchet
+> baseline is 0) and `da.json` carries **1,301** (live ratchet ceiling
+> `da: 1314`). The current baselines live in `apps/web/lib/guards/i18n-debt.ts`
+> and the canonical language-coverage numbers live in
+> [`docs/LANGUAGE_MATRIX.md`](../LANGUAGE_MATRIX.md) §2.1 — defer there when
+> this file disagrees. The mechanism this doc describes (measure + ratchet,
+> never machine-translate) is still in force unchanged.
+
 ## Problem
 
 Quality Audit v2 flagged that the non-primary locale catalogs ship many strings

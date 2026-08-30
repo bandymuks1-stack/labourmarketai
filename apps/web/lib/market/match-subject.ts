@@ -303,7 +303,9 @@ export async function buildSupplyCandidates(
   // worker_skills.source → evidence tier, keyed on the CANONICAL SKILL SLUG
   // (best tier wins). PR4 repair: this used to key on skills.esco_uri and
   // silently DROPPED every skill whose esco_uri was NULL — which in prod was
-  // ALL of them (0/152 curated), making the whole supply side skill-less.
+  // ALL of them (0/152 curated at the 2026-07-04 audit; re-verified
+  // 2026-08-30: still 0, now of 161 — docs/LANGUAGE_MATRIX.md §4.1), making
+  // the whole supply side skill-less.
   // The slug exists for 100% of rows; esco_uri rides along only as a legacy
   // alias for human-ESCO-structured needs.
   const tierRank: Record<EvidenceTier, number> = {
