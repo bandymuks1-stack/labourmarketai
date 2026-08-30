@@ -13879,6 +13879,10 @@
       "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
   },
   "capabilities": {
+    "interestChooseDemand": "Wählen Sie den Bedarf, der Sie interessiert: {options}.",
+    "interestDraftSummary": "Bereit, Interesse zu bekunden: {demand}. Noch nichts gesendet — Ihre Bestätigung ist erforderlich.",
+    "interestDraftRepeat": "Sie haben bereits Interesse an „{demand}“ bekundet — die Bestätigung aktualisiert es.",
+    "interestConfirmed": "Interesse erfasst. Der Eigentümer des Bedarfs sieht es in seiner eigenen Umgebung — nichts verlässt die Plattform.",
     "workspacePersonal": "Persönlicher Bereich",
     "workspaceSwitched": "Aktiver Arbeitsbereich zu „{label}“ gewechselt.",
     "workspaceChoose": "Arbeitsbereich wählen: {options}.",

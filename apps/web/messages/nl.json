@@ -13879,6 +13879,10 @@
       "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Ga terug naar de applicatie en probeer het opnieuw."
   },
   "capabilities": {
+    "interestChooseDemand": "Kies de vraag waarin u geïnteresseerd bent: {options}.",
+    "interestDraftSummary": "Klaar om interesse te tonen: {demand}. Er is nog niets verzonden — uw bevestiging is vereist.",
+    "interestDraftRepeat": "U heeft al interesse getoond in “{demand}” — bevestigen vernieuwt deze.",
+    "interestConfirmed": "Interesse vastgelegd. De eigenaar van de vraag ziet dit in de eigen omgeving — niets verlaat het platform.",
     "workspacePersonal": "Persoonlijke ruimte",
     "workspaceSwitched": "Actieve werkruimte gewijzigd naar “{label}”.",
     "workspaceChoose": "Kies een werkruimte: {options}.",

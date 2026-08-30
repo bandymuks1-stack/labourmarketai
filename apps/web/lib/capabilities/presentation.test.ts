@@ -189,6 +189,66 @@ describe("summarizeCapabilityResult", () => {
     expect(out?.values).toEqual({ added: 2, strengthened: 1, reviewNeeded: 0 });
   });
 
+  it("interest.express_draft/confirm: names the demand; repeat and choice outcomes get their own keys", async () => {
+    const drafted = parse(
+      await summarizeCapabilityResult(
+        "interest.express_draft",
+        {
+          preview: {
+            requestId: "r-1",
+            demandLabel: "Plytelių klojėjas — Dev Statyba",
+            alreadyExpressed: false,
+          },
+        },
+        "lt",
+      ),
+    );
+    expect(drafted?.key).toBe("interestDraftSummary");
+    expect(drafted?.values).toEqual({ demand: "Plytelių klojėjas — Dev Statyba" });
+
+    const repeat = parse(
+      await summarizeCapabilityResult(
+        "interest.express_draft",
+        {
+          preview: {
+            requestId: "r-1",
+            demandLabel: "Plytelių klojėjas — Dev Statyba",
+            alreadyExpressed: true,
+          },
+        },
+        "lt",
+      ),
+    );
+    expect(repeat?.key).toBe("interestDraftRepeat");
+
+    const choice = parse(
+      await summarizeCapabilityResult(
+        "interest.express_draft",
+        {
+          status: "demand_choice_required",
+          options: [
+            { id: "r-1", label: "Plytelių klojėjas — Dev Statyba" },
+            { id: "r-2", label: "Suvirintojas — Nonstop Group" },
+          ],
+        },
+        "lt",
+      ),
+    );
+    expect(choice?.key).toBe("interestChooseDemand");
+    expect(choice?.values).toEqual({
+      options: "Plytelių klojėjas — Dev Statyba; Suvirintojas — Nonstop Group",
+    });
+
+    const confirmed = parse(
+      await summarizeCapabilityResult(
+        "interest.express_confirm",
+        { status: "interested", structuredDestination: "/dashboard/opportunities" },
+        "lt",
+      ),
+    );
+    expect(confirmed?.key).toBe("interestConfirmed");
+  });
+
   it("context.switch: names the new workspace; a choice outcome lists the labeled options", async () => {
     const switched = parse(
       await summarizeCapabilityResult(

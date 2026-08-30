@@ -145,6 +145,32 @@ function summarizeContextSwitch(
   return null;
 }
 
+function summarizeInterestDraft(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  if (data.status === "demand_choice_required" && Array.isArray(data.options)) {
+    const labels = data.options
+      .map((o) => text(asRecord(o)?.label))
+      .filter((l): l is string => l !== null);
+    if (labels.length === 0) return null;
+    return t("interestChooseDemand", { options: labels.join("; ") });
+  }
+  const preview = asRecord(data.preview);
+  const demand = text(preview?.demandLabel);
+  if (!demand) return null;
+  return preview?.alreadyExpressed === true
+    ? t("interestDraftRepeat", { demand })
+    : t("interestDraftSummary", { demand });
+}
+
+function summarizeInterestConfirm(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  return data.status === "interested" ? t("interestConfirmed") : null;
+}
+
 const SUMMARIZERS: Record<
   string,
   (t: Translator, data: Record<string, unknown>) => string | null
@@ -154,6 +180,8 @@ const SUMMARIZERS: Record<
   "journal.list": summarizeJournalList,
   "journal.create_draft": summarizeDraft,
   "journal.confirm": summarizeConfirm,
+  "interest.express_draft": summarizeInterestDraft,
+  "interest.express_confirm": summarizeInterestConfirm,
   "context.switch": summarizeContextSwitch,
 };
 

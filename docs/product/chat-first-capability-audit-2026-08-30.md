@@ -140,9 +140,13 @@ action schemas · the concept-resolution seam.
    contract + envelope reconciliation; one core per table for
    profiles/workers/worker_skills/journal-list; workspace-switch core +
    `context.switch` capability; `journal.list` capability. REMAINING G4
-   tail: per-action `*Core` for the 19 schema'd conversation actions
-   (start: express-interest, create-demand, save-work-card) + the
-   CONVERSATION_ACTIONS→CapabilityDescriptor bridge.
+   tail: per-action `*Core` for the 19 schema'd conversation actions.
+   **Wagon 1 SHIPPED 2026-08-30: express-interest** — `expressInterestCore`
+   + shared board-gate/fingerprint in `lib/opportunities/interest.ts`,
+   `interest.express_draft`/`interest.express_confirm` capabilities, the
+   `conversationActionId` bridge field + shared confirmation wiring
+   (`lib/capabilities/confirmable.ts`). Next: create-demand,
+   save-work-card — same pattern.
 4. (P1) G6 — `journal.list` SHIPPED 2026-08-30 (canonical list core, page delegates). `living_cv.get` (full CV via `buildVerifiedCv` caller-threading) still open.
 5. (P1) G3 nl/de intent coverage; then router behind concept-resolution.
 6. (P1) G7 mobile gate flip onto the capability registry.

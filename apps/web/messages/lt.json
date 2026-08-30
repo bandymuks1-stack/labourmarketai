@@ -13879,6 +13879,10 @@
       "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
   },
   "capabilities": {
+    "interestChooseDemand": "Pasirinkite poreikį, kuris jus domina: {options}.",
+    "interestDraftSummary": "Paruošta išreikšti susidomėjimą: {demand}. Dar niekas neišsiųsta — reikia jūsų patvirtinimo.",
+    "interestDraftRepeat": "Susidomėjimą „{demand}“ jau esate išreiškę — patvirtinus jis bus atnaujintas.",
+    "interestConfirmed": "Susidomėjimas užfiksuotas. Poreikio savininkas jį matys savo aplinkoje — niekas nesiunčiama už platformos ribų.",
     "workspacePersonal": "Asmeninė erdvė",
     "workspaceSwitched": "Aktyvi darbo erdvė pakeista į „{label}“.",
     "workspaceChoose": "Pasirinkite darbo erdvę: {options}.",

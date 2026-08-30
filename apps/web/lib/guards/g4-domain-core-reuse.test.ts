@@ -51,6 +51,38 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(activeOrg).toMatch(/listWorkspaceMemberships\(\{ supabase, userId: user\.id \}\)/);
   });
 
+  it("express-interest runs through ONE core, ONE gate, ONE fingerprint (wagon 1)", () => {
+    // The capability layer consumes the interest domain module — it holds no
+    // private board query, no private signal read/write, no second
+    // eligibility implementation.
+    expect(REGISTRY).not.toMatch(/from\("demand_interest_signals"\)/);
+    expect(REGISTRY).not.toMatch(/list_open_demand_for_workers/);
+    expect(REGISTRY).not.toMatch(/\.rpc\(/);
+    expect(REGISTRY).toMatch(/expressInterestCore\(caller/);
+    expect(REGISTRY).toMatch(/interestStateFingerprint\(caller/);
+    expect(REGISTRY).toMatch(/listVisibleDemandsForCaller\(caller\)/);
+    // The conversation dispatcher binds its confirmation to the SAME
+    // fingerprint — its inline copy is gone.
+    const dispatch = read("lib", "conversation", "dispatch.ts");
+    expect(dispatch).toMatch(/interestStateFingerprint\(/);
+    expect(dispatch).not.toMatch(/demand_interest_signals/);
+    // The signal upsert exists in exactly one place: the domain core.
+    const interest = read("lib", "opportunities", "interest.ts");
+    const upserts = interest.match(/\.upsert\(/g) ?? [];
+    expect(upserts.length).toBe(1);
+  });
+
+  it("capability confirmations share ONE minting/verification wiring", () => {
+    // The registry never touches the raw token primitives — every draft
+    // mints and every confirm verifies through ./confirmable, so a second
+    // (subtly different) confirmation semantics cannot grow per capability.
+    expect(REGISTRY).not.toMatch(/@\/lib\/conversation\/confirmation-token/);
+    const mints = REGISTRY.match(/mintCapabilityConfirmation\(/g) ?? [];
+    const verifies = REGISTRY.match(/verifyCapabilityConfirmation\(/g) ?? [];
+    expect(mints.length).toBeGreaterThanOrEqual(2);
+    expect(verifies.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("the journal LIST select lives in exactly one place (the core)", () => {
     const core = read("lib", "journal", "journal-list-core.ts");
     expect(core).toMatch(/deleted_at, superseded_by/);

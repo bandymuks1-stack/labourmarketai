@@ -71,6 +71,15 @@ export type CapabilityCaller = {
 export type CapabilityDescriptor = {
   readonly id: string;
   readonly kind: CapabilityKind;
+  /**
+   * G4 bridge: the conversation-action this capability is the external face
+   * of (an id from `lib/conversation/action-registry.ts`). Present on every
+   * capability that bridges a schema'd conversation write — it declares, in
+   * review, that BOTH transports run the same schema, the same confirmation
+   * tier, and the same domain core (guard-checked). Absent on reads and on
+   * capabilities with no conversation counterpart.
+   */
+  readonly conversationActionId?: string;
   /** Shown to external clients (an MCP tool description). Honest, concrete. */
   readonly title: string;
   readonly description: string;

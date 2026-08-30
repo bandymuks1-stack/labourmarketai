@@ -153,11 +153,33 @@ export interface WorkerProfessionRow {
 }
 
 /**
+ * THE canonical `worker_professions` read as an explicit caller (G4 bridge) —
+ * the transport-neutral core under `getWorkerProfessionRows`. `workerId` must
+ * be the caller's OWN worker row (RLS scopes the rows regardless).
+ */
+export async function readWorkerProfessionRows(
+  caller: DomainCaller,
+  workerId: string,
+): Promise<CoreRead<WorkerProfessionRow[]>> {
+  try {
+    const { data, error } = await asAny(caller.supabase)
+      .from("worker_professions")
+      .select("is_primary, profession_id, professions(slug)")
+      .eq("worker_id", workerId)
+      .order("is_primary", { ascending: false });
+    if (error || !Array.isArray(data)) return { ok: false };
+    return { ok: true, value: data as WorkerProfessionRow[] };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
  * THE canonical per-request `worker_professions` read for the signed-in
  * worker (primary first). Consumers derive "the primary profession" from
  * this ONE result instead of each issuing their own `is_primary = true`
  * select (4× per navigation in production). [] when there is no worker row
- * or on any error.
+ * or on any error. Delegates to the caller-scoped core above.
  */
 export const getWorkerProfessionRows = cache(
   async (): Promise<WorkerProfessionRow[]> => {
@@ -165,13 +187,15 @@ export const getWorkerProfessionRows = cache(
       const worker = await getWorkerCoreRow();
       if (!worker) return [];
       const supabase = await createClient();
-      const { data, error } = await asAny(supabase)
-        .from("worker_professions")
-        .select("is_primary, profession_id, professions(slug)")
-        .eq("worker_id", worker.id)
-        .order("is_primary", { ascending: false });
-      if (error || !Array.isArray(data)) return [];
-      return data as WorkerProfessionRow[];
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [];
+      const read = await readWorkerProfessionRows(
+        { supabase, userId: user.id },
+        worker.id,
+      );
+      return read.ok ? read.value : [];
     } catch {
       return [];
     }
