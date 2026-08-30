@@ -13879,6 +13879,10 @@
       "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
   },
   "capabilities": {
+    "interestChooseDemand": "Choose the demand you are interested in: {options}.",
+    "interestDraftSummary": "Ready to express interest: {demand}. Nothing has been sent yet — your confirmation is required.",
+    "interestDraftRepeat": "You have already expressed interest in “{demand}” — confirming will refresh it.",
+    "interestConfirmed": "Interest recorded. The demand's owner will see it in their own workspace — nothing leaves the platform.",
     "workspacePersonal": "Personal space",
     "workspaceSwitched": "Active workspace switched to “{label}”.",
     "workspaceChoose": "Choose a workspace: {options}.",

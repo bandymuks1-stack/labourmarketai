@@ -1,10 +1,8 @@
 import "server-only";
 
 import { z } from "zod";
-import { createHash } from "node:crypto";
 import { getTranslations } from "next-intl/server";
 
-import { env } from "@/lib/env";
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
@@ -12,13 +10,21 @@ import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
 import { listWorkspaceMemberships } from "@/lib/company/active-organization";
 import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
+import {
+  expressInterestCore,
+  interestStateFingerprint,
+  listVisibleDemandsForCaller,
+} from "@/lib/opportunities/interest";
+import { safeApprovedCompanyName } from "@/lib/opportunities/opportunity-fit";
 
 import {
-  canonicalInputHash,
-  issueConfirmationToken,
-  verifyConfirmationToken,
-} from "@/lib/conversation/confirmation-token";
-import { workerLogWorkSchema } from "@/lib/conversation/worker-schemas";
+  mintCapabilityConfirmation,
+  verifyCapabilityConfirmation,
+} from "./confirmable";
+import {
+  workerExpressInterestSchema,
+  workerLogWorkSchema,
+} from "@/lib/conversation/worker-schemas";
 import {
   resolveEngagementContext,
   type EngagementCandidate,
@@ -219,22 +225,8 @@ const journalList: CapabilityDescriptor = {
 };
 
 // ── journal.create_draft / journal.confirm ─────────────────────────────────
-
-/**
- * Domain-separated signing secret for CAPABILITY confirmation tokens. Same
- * derivation pattern as the conversation dispatcher's, different purpose
- * string — a token minted for one surface can never be replayed on the other.
- */
-function capabilityTokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
-    throw new Error(
-      "capability confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
-    );
-  }
-  return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
-}
+// (Confirmation wiring lives in ./confirmable — ONE minting/verification
+// semantics for every bridged write capability, G4 tail wagon 1.)
 
 /**
  * The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
@@ -530,12 +522,11 @@ const journalCreateDraft: CapabilityDescriptor = {
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
     };
-    const token = issueConfirmationToken(capabilityTokenSecret(), {
+    const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
-      inputHash: canonicalInputHash(normalizedDraftForHash(resolved)),
+      input: normalizedDraftForHash(resolved),
       userId: caller.userId,
       stateFingerprint: state.fingerprint,
-      issuedAtMs: Date.now(),
     });
     return {
       ok: true,
@@ -589,14 +580,14 @@ const journalConfirm: CapabilityDescriptor = {
     const { confirmationToken, ...draft } = parsed;
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const verdict = verifyConfirmationToken(capabilityTokenSecret(), confirmationToken, {
+    const verdict = verifyCapabilityConfirmation({
       actionId: "journal.confirm",
+      token: confirmationToken,
       // Same null-vs-absent normalization the draft hashed — see
       // normalizedDraftForHash.
       input: normalizedDraftForHash(draft),
       userId: caller.userId,
       currentStateFingerprint: state.fingerprint,
-      nowMs: Date.now(),
     });
     if (!verdict.ok) {
       return {
@@ -636,6 +627,230 @@ const journalConfirm: CapabilityDescriptor = {
           claimsSaved: result.skills.claimsSaved,
           cvUpdated: result.skills.cvUpdated,
         },
+      },
+    };
+  },
+};
+
+// ── interest.express_draft / interest.express_confirm ──────────────────────
+// G4 tail wagon 1: the FIRST schema'd conversation write bridged through the
+// capability architecture. `conversationActionId` links both halves to
+// `worker.express-interest` — same zod schema, same confirmation tier
+// (important_write → draft/confirm), same state fingerprint, same domain
+// core (`expressInterestCore`). No parallel implementation anywhere.
+
+/** Capability-level draft input: `requestId` becomes OPTIONAL here (and only
+ *  here) — when absent or unknown the caller's VISIBLE demands come back as
+ *  labeled options, so no external client ever needs to invent a UUID
+ *  (#1360 lesson, applied before the defect this time). */
+const interestDraftInput = workerExpressInterestSchema.extend({
+  requestId: z.uuid().optional(),
+});
+
+/** The confirmation hash must not depend on null-vs-absent `note` — the
+ *  journal pair's normalizedDraftForHash lesson, same rule here. */
+function normalizedInterestForHash(draft: {
+  requestId: string;
+  note?: string | null;
+}): Record<string, unknown> {
+  return { requestId: draft.requestId, note: draft.note ?? null };
+}
+
+/** Human label for a board row — approved facts only (role text, the safe
+ *  approved company name, the safe location label). Never free text from a
+ *  non-approved route. */
+function demandOptionLabel(row: Record<string, unknown>): string {
+  const role =
+    typeof row.role_text === "string" && row.role_text.trim() !== ""
+      ? row.role_text.trim()
+      : String(row.id);
+  const company = safeApprovedCompanyName(row);
+  const location =
+    typeof row.location_label === "string" && row.location_label.trim() !== ""
+      ? row.location_label.trim()
+      : typeof row.country === "string" && row.country.trim() !== ""
+        ? row.country.trim()
+        : null;
+  const suffix = [company, location].filter((v): v is string => v !== null);
+  return suffix.length > 0 ? `${role} — ${suffix.join(", ")}` : role;
+}
+
+const interestExpressDraft: CapabilityDescriptor = {
+  id: "interest.express_draft",
+  kind: "draft",
+  conversationActionId: "worker.express-interest",
+  title: "Draft expressing interest in a demand",
+  description:
+    "Validates expressing interest in a demand the caller can currently SEE " +
+    "on their own opportunity board and returns a human-readable preview " +
+    "plus a one-time confirmation token. NOTHING is sent or stored. " +
+    "requestId may be omitted or unknown — the caller's visible demands " +
+    "come back as labeled options to choose from. The signal is " +
+    "internal-only: the demand's owner sees it on their own view; no email " +
+    "or message leaves the platform.",
+  exposed: true,
+  // Read-only is HONEST: a draft reads the board and mints a token — the
+  // write happens only in interest.express_confirm.
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: interestDraftInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const draft = interestDraftInput.parse(input);
+    // THE board pipeline — the same visibility gate the write re-checks.
+    const rows = await listVisibleDemandsForCaller(caller);
+    if (rows === null) {
+      return { ok: false, code: "unavailable", message: "Opportunity board read failed." };
+    }
+    const row = draft.requestId
+      ? (rows.find((r) => String(r.id) === draft.requestId) ?? null)
+      : null;
+    if (!row) {
+      if (rows.length === 0) {
+        return {
+          ok: false,
+          code: "no_visible_demand",
+          message:
+            "No demands are visible to this account right now, so there is nothing to express interest in.",
+        };
+      }
+      // Unknown, foreign, or omitted id — identical answer (no oracle):
+      // the caller's own options, and NO token.
+      return {
+        ok: true,
+        data: {
+          status: "demand_choice_required",
+          options: rows
+            .slice(0, 20)
+            .map((r) => ({ id: String(r.id), label: demandOptionLabel(r) })),
+          note: "The given requestId is not one of the demands this account can see — nothing was drafted. Ask the user to choose one of these options, then draft again with the chosen id.",
+        },
+      };
+    }
+
+    // Eligibility: an account without a worker profile gets an honest
+    // refusal, never a token for an unconfirmable draft.
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    if (!workerRead.value) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it cannot express interest.",
+      };
+    }
+
+    const requestId = draft.requestId as string;
+    // THE shared fingerprint — the same fact the conversation dispatcher
+    // binds its confirmation to (lib/opportunities/interest).
+    const fingerprint = await interestStateFingerprint(caller, requestId);
+    const normalized = normalizedInterestForHash({ requestId, note: draft.note });
+    const token = mintCapabilityConfirmation({
+      actionId: "interest.express_confirm",
+      input: normalized,
+      userId: caller.userId,
+      stateFingerprint: fingerprint,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          requestId,
+          demandLabel: demandOptionLabel(row),
+          note: draft.note ?? null,
+          // HONEST idempotency note: the domain treats a repeat express as a
+          // snapshot refresh, and the human should know it is a repeat.
+          alreadyExpressed: fingerprint === "interest:interested",
+        },
+        confirmationToken: token,
+        note: "Nothing was sent. Confirming requires interest.express_confirm with this exact draft and token.",
+      },
+    };
+  },
+};
+
+const interestConfirmInput = workerExpressInterestSchema.extend({
+  confirmationToken: z.string().min(10),
+});
+
+const interestExpressConfirm: CapabilityDescriptor = {
+  id: "interest.express_confirm",
+  kind: "confirm",
+  conversationActionId: "worker.express-interest",
+  title: "Confirm expressing interest in a demand",
+  description:
+    "Verifies the confirmation token against the exact draft, then performs " +
+    "the canonical express-interest write as the caller. Idempotent by " +
+    "domain design: re-expressing refreshes the stored snapshot and keeps " +
+    "the status. The demand's visibility is re-checked at write time.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: interestConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = interestConfirmInput.parse(input);
+    const { confirmationToken, ...draft } = parsed;
+    const fingerprint = await interestStateFingerprint(caller, draft.requestId);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "interest.express_confirm",
+      token: confirmationToken,
+      input: normalizedInterestForHash(draft),
+      userId: caller.userId,
+      currentStateFingerprint: fingerprint,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
+      };
+    }
+
+    // THE canonical core — the identical write the web chat confirmation and
+    // the board button perform. Every precondition re-runs inside it.
+    const result = await expressInterestCore(caller, {
+      requestId: draft.requestId,
+      note: draft.note ?? null,
+    });
+    if (result.kind !== "ok") {
+      const code =
+        result.kind === "no-worker"
+          ? "no_worker_profile"
+          : result.kind === "not-visible"
+            ? "not_visible"
+            : result.kind === "needs-migration"
+              ? "needs_migration"
+              : result.kind === "invalid"
+                ? "invalid"
+                : "unavailable";
+      const message =
+        result.kind === "not-visible"
+          ? "That demand is not visible to this account (it may have closed)."
+          : result.kind === "no-worker"
+            ? "This account has no worker profile, so it cannot express interest."
+            : result.kind === "needs-migration"
+              ? "The interest signal store is not enabled on this environment."
+              : result.kind === "invalid"
+                ? "Invalid request."
+                : "Express-interest failed.";
+      return { ok: false, code, message };
+    }
+    return {
+      ok: true,
+      data: {
+        status: result.status,
+        // Where the richer UI shows the same fact (the action registry's
+        // advanced route for worker.express-interest).
+        structuredDestination: "/dashboard/opportunities",
       },
     };
   },
@@ -765,6 +980,8 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   journalList,
   journalCreateDraft,
   journalConfirm,
+  interestExpressDraft,
+  interestExpressConfirm,
   contextSwitch,
 ];
 

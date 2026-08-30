@@ -33,11 +33,22 @@ vi.mock("next-intl/server", () => ({
     Object.assign((key: string) => key, { has: () => false }),
 }));
 
+// The notification emitters resolve an admin client of their own (recipient
+// resolution AFTER the caller's RLS write) — out of scope here; the spy
+// proves the core reached the emission step with the real signal id.
+const interestEmit = vi.fn(async () => {});
+vi.mock("@/lib/notifications/event-emitters", () => ({
+  INTEREST_UNDELIVERED: "interest_undelivered",
+  emitDemandInterestNotification: (...a: unknown[]) => interestEmit(...(a as [])),
+  emitDemandInterestResponseNotification: async () => {},
+}));
+
 import {
   exposedCapabilities,
   listCapabilities,
   runCapability,
 } from "./registry";
+import { getConversationAction } from "@/lib/conversation/action-registry";
 import type { CapabilityCaller } from "./contract";
 
 /**
@@ -65,10 +76,17 @@ function stubSupabase(script: TableScript) {
         order: () => chain,
         limit: () => chain,
         update: () => chain,
+        upsert: () => chain,
         maybeSingle: async () => outcome,
         then: (resolve: (v: unknown) => unknown) => resolve(outcome),
       };
       return chain;
+    },
+    // RPCs are scripted under "rpc:<name>" — the board pipeline reads one.
+    async rpc(fn: string) {
+      return (
+        script[`rpc:${fn}`] ?? { data: null, error: { message: `unscripted rpc ${fn}` } }
+      );
     },
   } as unknown as CapabilityCaller["supabase"];
 }
@@ -100,6 +118,8 @@ describe("the registry itself", () => {
       "journal.list",
       "journal.create_draft",
       "journal.confirm",
+      "interest.express_draft",
+      "interest.express_confirm",
       "context.switch",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
@@ -108,8 +128,29 @@ describe("the registry itself", () => {
       "journal.list",
       "journal.create_draft",
       "journal.confirm",
+      "interest.express_draft",
+      "interest.express_confirm",
       "context.switch",
     ]);
+  });
+
+  it("G4 bridge: a capability that names a conversation action matches its confirmation contract", () => {
+    const bridged = listCapabilities().filter((c) => c.conversationActionId);
+    // Wagon 1: exactly the express-interest pair is bridged.
+    expect(bridged.map((c) => c.id).sort()).toEqual([
+      "interest.express_confirm",
+      "interest.express_draft",
+    ]);
+    for (const c of bridged) {
+      const action = getConversationAction(c.conversationActionId!);
+      // The named conversation action must exist…
+      expect(action, c.id).toBeTruthy();
+      // …and its important_write tier maps to the draft→confirm split — an
+      // external client can never run the write with less confirmation than
+      // the web chat requires.
+      expect(action!.confirmation).toBe("important_write");
+      expect(["draft", "confirm"]).toContain(c.kind);
+    }
   });
 
   it("every capability declares HONEST behavior annotations — no spec-default lies", () => {
@@ -138,6 +179,10 @@ describe("the registry itself", () => {
     // A pointer write: not read-only, never destructive, repeat = no-op.
     expect(byId["context.switch"].annotations.readOnlyHint).toBe(false);
     expect(byId["context.switch"].annotations.idempotentHint).toBe(true);
+    // The interest pair mirrors the journal pair's honesty split.
+    expect(byId["interest.express_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["interest.express_confirm"].annotations.readOnlyHint).toBe(false);
+    expect(byId["interest.express_confirm"].annotations.idempotentHint).toBe(true);
   });
 
   it("an unknown capability id is refused, never a throw", async () => {
@@ -319,6 +364,223 @@ describe("journal.list", () => {
   it("rejects an out-of-bounds limit at the schema", async () => {
     const r = await runCapability("journal.list", caller({}), { limit: 500 });
     expect(r).toMatchObject({ ok: false, code: "invalid" });
+  });
+});
+
+describe("interest draft → confirm (G4 tail wagon 1)", () => {
+  const REQ = "00000000-0000-4000-8000-0000000000dd";
+  const DEMAND_ROW = {
+    id: REQ,
+    approved_route: true,
+    role_text: "Plytelių klojėjas",
+    company_name: "Dev Statyba",
+    location_label: "Vilnius",
+    country: "LT",
+  };
+
+  /** The caller's own worker world + the visible board + a signal store.
+   *  `signal` scripts the demand_interest_signals outcome: its `status`
+   *  feeds the fingerprint read, its `id` the post-upsert select. */
+  const interestWorld = (
+    signal: { id?: string; status?: string } | null = { id: "sig-1" },
+    overrides: TableScript = {},
+  ): TableScript => ({
+    workers: {
+      data: { id: "worker-1", profile_id: "00000000-0000-4000-8000-0000000000aa" },
+      error: null,
+    },
+    worker_skills: { data: [], error: null },
+    worker_professions: { data: [], error: null },
+    preferred_locations: { data: [], error: null },
+    worker_languages: { data: [], error: null },
+    demand_interest_signals: { data: signal, error: null },
+    "rpc:list_open_demand_for_workers": { data: [DEMAND_ROW], error: null },
+    ...overrides,
+  });
+
+  it("draft WITHOUT a requestId → the caller's visible demands as labeled options, NO token", async () => {
+    const r = await runCapability("interest.express_draft", caller(interestWorld()), {});
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("demand_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.options).toEqual([
+        { id: REQ, label: "Plytelių klojėjas — Dev Statyba, Vilnius" },
+      ]);
+    }
+  });
+
+  it("a foreign/unknown requestId gets the SAME options answer (no oracle), NO token", async () => {
+    const r = await runCapability("interest.express_draft", caller(interestWorld()), {
+      requestId: "00000000-0000-4000-8000-0000000000ee",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("demand_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.preview).toBeUndefined();
+    }
+  });
+
+  it("an unreadable board is 'unavailable', never an empty choice (#1314)", async () => {
+    const r = await runCapability(
+      "interest.express_draft",
+      caller(
+        interestWorld(null, {
+          "rpc:list_open_demand_for_workers": { data: null, error: { message: "boom" } },
+        }),
+      ),
+      { requestId: REQ },
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("no visible demands at all → an honest refusal, no options theater", async () => {
+    const r = await runCapability(
+      "interest.express_draft",
+      caller(
+        interestWorld(null, {
+          "rpc:list_open_demand_for_workers": { data: [], error: null },
+        }),
+      ),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_visible_demand" });
+  });
+
+  it("no worker profile → honest refusal, NEVER a token for an unconfirmable draft", async () => {
+    const r = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld(null, { workers: { data: null, error: null } })),
+      { requestId: REQ },
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("a valid draft returns the human preview + a token; alreadyExpressed is honest", async () => {
+    const fresh = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld({ id: "sig-1" })),
+      { requestId: REQ, note: "Galiu pradėti kitą savaitę." },
+    );
+    expect(fresh.ok).toBe(true);
+    if (fresh.ok) {
+      expect(fresh.data?.preview).toEqual({
+        requestId: REQ,
+        demandLabel: "Plytelių klojėjas — Dev Statyba, Vilnius",
+        note: "Galiu pradėti kitą savaitę.",
+        alreadyExpressed: false,
+      });
+      expect(typeof fresh.data?.confirmationToken).toBe("string");
+    }
+
+    const repeat = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld({ id: "sig-1", status: "interested" })),
+      { requestId: REQ },
+    );
+    expect(repeat.ok).toBe(true);
+    if (repeat.ok) {
+      const preview = repeat.data?.preview as Record<string, unknown>;
+      expect(preview.alreadyExpressed).toBe(true);
+    }
+  });
+
+  it("draft → confirm runs THE canonical core: real write path, real emitter key", async () => {
+    interestEmit.mockClear();
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    const confirmed = await runCapability("interest.express_confirm", caller(world), {
+      requestId: REQ,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({
+      ok: true,
+      data: { status: "interested", structuredDestination: "/dashboard/opportunities" },
+    });
+    // The notification is keyed on the REAL signal row id from the upsert.
+    expect(interestEmit).toHaveBeenCalledTimes(1);
+    expect(interestEmit).toHaveBeenCalledWith("sig-1");
+  });
+
+  it("a TAMPERED note is rejected at the token, before any write", async () => {
+    interestEmit.mockClear();
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+      note: "Original note",
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("interest.express_confirm", caller(world), {
+      requestId: REQ,
+      note: "Different note",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(interestEmit).not.toHaveBeenCalled();
+  });
+
+  it("STALE/replay: after the signal status moves, the old token is dead", async () => {
+    interestEmit.mockClear();
+    // Token minted while the caller had NO signal (fingerprint interest:none)…
+    const drafted = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld({ id: "sig-1" })),
+      { requestId: REQ },
+    );
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // …replayed after the express landed (status now `interested`).
+    const replayed = await runCapability(
+      "interest.express_confirm",
+      caller(interestWorld({ id: "sig-1", status: "interested" })),
+      { requestId: REQ, confirmationToken: token },
+    );
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(interestEmit).not.toHaveBeenCalled();
+  });
+
+  it("another user cannot spend the token", async () => {
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const other: CapabilityCaller = {
+      ...caller(world),
+      userId: "00000000-0000-4000-8000-0000000000bb",
+    };
+    const confirmed = await runCapability("interest.express_confirm", other, {
+      requestId: REQ,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("a demand that closed between draft and confirm is refused by the write-time gate", async () => {
+    interestEmit.mockClear();
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // Same signal state (token still fresh) — but the board no longer shows
+    // the demand: the core's own visibility re-check refuses.
+    const confirmed = await runCapability(
+      "interest.express_confirm",
+      caller(
+        interestWorld({ id: "sig-1" }, {
+          "rpc:list_open_demand_for_workers": { data: [], error: null },
+        }),
+      ),
+      { requestId: REQ, confirmationToken: token },
+    );
+    expect(confirmed).toMatchObject({ ok: false, code: "not_visible" });
+    expect(interestEmit).not.toHaveBeenCalled();
   });
 });
 

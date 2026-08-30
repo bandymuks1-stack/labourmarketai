@@ -30,6 +30,7 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { interestStateFingerprint } from "@/lib/opportunities/interest";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
 
@@ -137,19 +138,13 @@ async function stateFingerprint(
     return `booking:${(data?.status as string) ?? "missing"}`;
   }
   if (actionId === "worker.express-interest") {
-    const { data: worker } = await supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", userId)
-      .maybeSingle();
-    if (!worker?.id) return "interest:no-worker";
-    const { data } = await supabase
-      .from("demand_interest_signals")
-      .select("status")
-      .eq("worker_id", worker.id)
-      .eq("request_id", String(input.requestId))
-      .maybeSingle();
-    return `interest:${(data?.status as string) ?? "none"}`;
+    // G4 tail wagon 1: THE shared fingerprint (lib/opportunities/interest) —
+    // the capability draft→confirm flow binds its tokens to the same fact,
+    // so the two transports can never disagree about staleness.
+    return interestStateFingerprint(
+      { supabase, userId },
+      String(input.requestId),
+    );
   }
   if (actionId === "engagement.end") {
     /**
