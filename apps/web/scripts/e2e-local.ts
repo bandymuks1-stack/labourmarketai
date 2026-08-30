@@ -75,6 +75,12 @@ const env = {
   NEXT_PUBLIC_SUPABASE_URL: apiUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
   SUPABASE_SERVICE_ROLE_KEY: serviceKey,
+  // The LOCAL stack's JWT signing secret, forwarded for ONE purpose: the
+  // auth-core spec forges a correctly-signed but EXPIRED token, which is the
+  // only way to test expiry as its own failure mode rather than folding it
+  // into "bad signature". Local-only by construction — the loopback assertion
+  // above has already refused any non-local target before this is read.
+  E2E_LOCAL_JWT_SECRET: parsed.JWT_SECRET ?? "",
   PORT,
   E2E_BASE_URL: `http://127.0.0.1:${PORT}`,
   // Tells playwright.config.ts this run shares ONE dev server and ONE fixture

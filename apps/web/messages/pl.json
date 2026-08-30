@@ -2049,6 +2049,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Wyświetlane są {shown} najsilniejsze dopasowania z {total} możliwości.",
+        "showAll": "Pokaż wszystkie (jeszcze {count})",
+        "showAllExternal": "Pokaż wszystkie ogłoszenia o pracę"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2137,6 +2142,7 @@
     "external": {
       "sectionTitle": "Publiczne ogłoszenia o pracę",
       "sectionNote": "Ogłoszenia z oficjalnych publicznych służb zatrudnienia. Publikuje je pracodawca u źródła — labourmarket.ai je pokazuje, aby można je było znaleźć, a aplikowanie odbywa się przez oryginalne ogłoszenie.",
+      "shownOfTotal": "najlepsze {shown} z {total}",
       "bandBest": "Najlepiej dopasowane",
       "bandPossible": "Możliwe dopasowania",
       "bandExplore": "Pozostałe ogłoszenia",

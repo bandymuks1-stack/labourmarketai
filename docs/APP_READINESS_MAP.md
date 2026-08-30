@@ -56,9 +56,33 @@ cookie jar. So today:
 - it cannot call an API route either, because the route will resolve *no user*
   and RLS will correctly return nothing.
 
-That is the whole gap. It is one seam, not a rewrite — and it is **auth-core**,
-which this repository classifies RED (`CLAUDE.md` → Merge model). It is
-therefore recorded here and **not** implemented autonomously. See §5.
+That was the whole gap. It is one seam, not a rewrite.
+
+### UPDATE 2026-08-28 — the API half of the seam is built
+
+The owner approved the auth-core API boundary, and it exists:
+`lib/api/api-identity.ts`, one resolver, used by `app/api/**` only. Server
+actions are untouched and stay a browser transport by design.
+
+What is now true, and what is still not:
+
+| | before | now |
+|---|---|---|
+| `app/api` routes reading `Authorization` | 0 of 9 | 4 of 9, through ONE resolver |
+| a phone can reach a canonical READ | no | yes (`GET /api/workers/:id/skills`) |
+| a phone can reach a canonical WRITE | no | yes (`POST /api/workers/:id/skills`) |
+| a phone can import a CV | no | yes (`POST /api/cv/extract`) |
+| a phone can call a server action | no | **still no, and deliberately** |
+| the 184 server actions | cookie-bound | cookie-bound, unchanged |
+
+The remaining coupling is NOT at the route layer. It is that **257 of 892
+`lib/` modules call `createClient()` themselves** rather than accepting the
+caller's client, so a route whose domain helpers do that cannot honestly be
+made bearer-capable by adding a header — the search would run as the cookie
+session while the route reported the bearer caller. `/api/dashboard-search` is
+classified `shared-blocked` for exactly this reason, in the guard, with the
+measurement attached. That is the shared-core refactor, and it is now the next
+piece of work rather than the gate.
 
 ---
 
@@ -142,14 +166,17 @@ edit to that list.
 
 ## 5. THE ORDER OF WORK, AND THE GATE
 
-1. **OWNER GATE — bearer auth on the API boundary.** One resolver that accepts
-   `Authorization: Bearer <supabase jwt>` in addition to cookies, used by
-   `app/api/**` only (never by server actions). This is **auth-core → RED**:
-   it must be an owner-approved, separately reviewed slice with its own
-   negative controls (an expired token, a token for another project, a token
-   whose `sub` is not a profile, and the existing cookie path unchanged).
-   Nothing downstream is worth building before it, because nothing downstream
-   is reachable without it.
+1. ~~**OWNER GATE — bearer auth on the API boundary.**~~ **DONE** (2026-08-28,
+   owner-approved). One resolver, `app/api/**` only, never server actions.
+   Ten negative controls against the real stack, listed in
+   `tests/e2e/auth-core-bearer.spec.ts`.
+
+   One control from the original sketch was deliberately NOT built: *"a token
+   whose `sub` is not a profile"*. Rejecting that at the transport would make
+   BEARER STRICTER THAN COOKIE — the cookie path has never required a profile
+   row, and a just-registered user legitimately has none. The rule the boundary
+   must hold is parity, and an extra check is as much a violation of it as a
+   missing one. Every other control is built and observed failing.
 2. Expose the already-pure reads first — Living CV / player card, opportunities,
    market facts. No extraction needed; they only need a route.
 3. Extract journal + demand WRITES into service functions behind those routes.
@@ -169,15 +196,17 @@ exists to prevent.
 
 | | |
 |---|---|
-| `APP_SHARED_CORE_READY` | **YES for the client-agnostic core** — `packages/client-core` exists (config, session, locale, transport contract, actor context), zero dependencies, zero framework imports. The DOMAIN logic is still shared-but-unreachable, per the row below |
+| `AUTH_CORE_API_READY` | **YES** — implemented, 10 negative controls, cookie path regression-proven |
+| `APP_SHARED_CORE_READY` | **PARTIAL** — `packages/client-core` exists (config, session, locale, transport contract, actor context; zero dependencies, zero framework imports) and the transport exists; but 257 of 892 `lib/` modules still resolve their own cookie client, so only 4 of 9 routes can honestly use it |
 | `ANDROID_CLIENT_SCAFFOLD` | **BUILT** — `apps/mobile`, Expo SDK 57. Registration, sign-in, session, sign-out, language and the navigation shell are real. A Hermes bundle compiles for both platforms |
-| `ANDROID_IMPLEMENTATION_READY` | **NO** — still blocked on §5.1 for everything that shows product data. The scaffold ships this as an honest refusal, never as an empty screen |
-| `ANDROID_NATIVE_BUILD_PROVEN` | **NO** — no APK/AAB has been produced. The build machine has JDK 8 and no Android SDK |
+| `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam (§5.1 opened with auth-core). Product data waits on the shared-core refactor coverage above; the scaffold ships every blocked surface as an honest refusal, never an empty screen |
+| `ANDROID_NATIVE_BUILD_PROVEN` | **NO** — no APK/AAB has been produced on this branch. The build machine has JDK 8 and no Android SDK |
 | `IOS_BUILD_PROVEN` | **NO** — the JavaScript bundle compiles; the native app needs Xcode on macOS |
-| `CHATGPT_APP_BACKEND_READY` | **NO** — blocked on §5.1, the same seam |
+| `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and three canonical capabilities are reachable over it; the rest wait on the same shared-core refactor |
 
-One blocker, one gate, one owner decision. Everything else on the list is
-already in the right place.
+The gate is closed. What remains is not a decision — it is the mechanical work
+of letting domain helpers accept the caller's client instead of fetching their
+own.
 
 ### 6.1 WHY A CLIENT WAS SCAFFOLDED BEFORE THE GATE OPENED
 

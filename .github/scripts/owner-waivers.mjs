@@ -540,6 +540,78 @@ export const SCOPED_OWNER_WAIVERS = [
     owner:
       "Product owner — OWNER RULING 2026-08-27 §3, PR-scoped waiver for #1299, axiom A-01, codes not_reflected_on_map + not_ai_controlled only",
   },
+
+  /**
+   * OAUTH CONSENT SCREEN — the human-only step of the client ecosystem.
+   *
+   * OWNER RULING, 2026-08-29 execution order §4, verbatim:
+   *   "Prepare and perform the minimum configuration required for
+   *    LabourMarket.ai to act as the OAuth authorization server for
+   *    MCP/ChatGPT IF the currently authorized Supabase tooling allows this
+   *    safely."
+   * The Supabase OAuth 2.1 server REQUIRES the product to host the
+   * authorization UI at a fixed URL (Authorization Path); this screen IS the
+   * minimum configuration, so the ruling that ordered the configuration
+   * ordered the surface.
+   *
+   * WHAT IS BEING EXCUSED — a THIRD category, distinct from the pre-auth
+   * acquisition records above: STANDARDS-SHAPED AUTH INFRASTRUCTURE. OAuth
+   * 2.1 defines this screen's existence, URL-stability and redirect flow, so
+   * `needsNoNewPage` and `usableWithoutLeavingWorkspace` are honestly "no"
+   * by specification, not by design preference. And `aiControlled` /
+   * `aiCanWorkWithIt` are "no" as a SECURITY PROPERTY: the one step where a
+   * person grants an external agent standing access must never itself be
+   * agent-drivable — an assistant that could operate this screen could be
+   * prompt-injected into granting itself access. Waiving the A-09 finding
+   * here is therefore not excusing a gap; it is refusing to close one that
+   * must stay open. All answers are recorded as "no" in the declaration
+   * rather than rewritten (A-06).
+   *
+   * WHY THIS CANNOT LEAK. All six gate constraints bind: the seven codes,
+   * axioms A-01 + A-09 (A-09 for the single `ai_cannot_work_with_entity`
+   * code only), the two file entries, PR #1347, the expiry, and the subset
+   * rule — an eighth finding anywhere un-waives the whole run. No other
+   * surface, PR or axiom inherits anything.
+   *
+   * WHAT REMOVES IT (`resolvedBy`): the gate learning an
+   * auth-infrastructure category (a constitution change, owner-only) — the
+   * same resolution path as the acquisition records, plus one honest
+   * difference: for THIS surface `aiControlled` must never become "yes", so
+   * category-learning is the only resolution that can exist.
+   */
+  {
+    id: "oauth-consent-auth-infrastructure",
+    axioms: ["A-01", "A-09"],
+    scope:
+      "The OAuth 2.1 consent screen /oauth/consent (owner directive 2026-08-29 §4) — the delegated Supabase Authorization Path UI",
+    pullRequests: [1347],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: [
+      "/oauth/consent",
+      "apps/web/app/[locale]/oauth/consent/page.tsx",
+    ],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=1347 node .github/scripts/product-gate.mjs
+    // on 2026-08-29, after the declaration was added. Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/oauth/consent" },
+      { code: "not_reflected_on_map", file: "/oauth/consent" },
+      { code: "not_ai_controlled", file: "/oauth/consent" },
+      { code: "requires_leaving_workspace", file: "/oauth/consent" },
+      { code: "requires_new_page", file: "/oauth/consent" },
+      { code: "ai_cannot_work_with_entity", file: "/oauth/consent" },
+      { code: "world_state_cannot_control_it", file: "/oauth/consent" },
+    ],
+    reason:
+      "OAuth 2.1 and the Supabase Authorization Path contract require a consent screen at a fixed URL, outside the workspace, that no AI may operate — the last property being the security point of the screen, not a debt. The owner ordered the minimum OAuth-server configuration on 2026-08-29; this screen is that configuration's product half. All seven answers are declared honestly and excused for this one route and nothing else.",
+    resolvedBy:
+      "gate-learns-auth-infrastructure-category (owner constitution decision; note aiControlled must remain 'no' for this surface permanently)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner ruling 2026-08-29 execution order §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
+  },
 ];
 
 /** Is this ONE finding excused? Every constraint must hold. */

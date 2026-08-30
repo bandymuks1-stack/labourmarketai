@@ -44,6 +44,12 @@ const SUBMIT = /type=\s*["']submit["']/;
 // reloads. Feedback is the navigation; inline pending/error is optional.
 const NATIVE_NAV = new Set([
   "components/app/account-menu.tsx", // logout POST → redirect
+  // OAuth consent (owner directive 2026-08-29 §4) — approve/deny is a
+  // NATIVE-NAV server action that ALWAYS redirects: to the client's
+  // registered redirect URI (carrying the code or access_denied), to login
+  // when the session died, or to the page's own honest ?error= state.
+  // Feedback IS the navigation — the whole screen exists to leave it.
+  "app/[locale]/oauth/consent/page.tsx",
   "components/app/message-button.tsx", // open-conversation action → redirect
   // Accepted-booking message CTA (lifecycle v1) — openBookingConversationAction
   // form → redirect to the conversation; feedback is the navigation itself

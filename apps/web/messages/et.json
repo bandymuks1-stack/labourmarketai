@@ -2049,6 +2049,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Kuvatakse {shown} tugevaimat vastet {total} võimalusest.",
+        "showAll": "Näita kõiki (veel {count})",
+        "showAllExternal": "Näita kõiki töökuulutusi"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2137,6 +2142,7 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "shownOfTotal": "parimad {shown} / {total}",
       "bandBest": "Kõige sobivamad",
       "bandPossible": "Võimalikud sobivused",
       "bandExplore": "Muud kuulutused",
