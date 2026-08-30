@@ -84,8 +84,14 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
           EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_not_a_real_key
           EXPO_PUBLIC_API_BASE_URL: https://example.invalid
+        # ONLY_ACTIVE_ARCH=YES: the hosted runner is arm64; without it
+        # xcodebuild also builds the x86_64 simulator slice, which is where
+        # the first run failed (ReactCodegen x86_64 objects). One slice is
+        # all a launch smoke needs.
+        # Full log goes to a file; on failure the error region is printed —
+        # a bare `tail -200` swallowed the actual error text on run 1.
         run: |
-          set -o pipefail
+          set +e
           xcodebuild \
             -workspace "${{ steps.xc.outputs.workspace }}" \
             -scheme "${{ steps.xc.outputs.scheme }}" \
@@ -93,7 +99,18 @@ jobs:
             -sdk iphonesimulator \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
-            build | tail -200
+            ONLY_ACTIVE_ARCH=YES \
+            build > xcodebuild.log 2>&1
+          STATUS=$?
+          if [ $STATUS -ne 0 ]; then
+            echo "===== error regions ====="
+            grep -n -B 3 -A 20 " error: " xcodebuild.log | head -400
+            echo "===== last 80 lines ====="
+            tail -80 xcodebuild.log
+          else
+            tail -30 xcodebuild.log
+          fi
+          exit $STATUS
 
       - name: Simulator launch smoke (15s alive, no startup crash)
         working-directory: apps/mobile/ios
