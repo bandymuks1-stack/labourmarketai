@@ -688,7 +688,13 @@ describe("NO new DB migration in this PR", () => {
     // inside the public intake RPC. RED by classification (grant-adjacent),
     // ships UNAPPLIED, owner-gated. Nothing to do with the market-map read
     // layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(247);
+    // Bumped 247 -> 248 for the ESCO canonical linkage 67
+    // (20260830100000_esco_canonical_linkage_67, paired rollback) — a
+    // write-if-null UPDATE of skills/professions.esco_uri for the artifact's
+    // EXACT/HIGH rows. RED by classification (data migration), ships
+    // UNAPPLIED, owner-gated. Nothing to do with the market-map read layer,
+    // which stays pure TS.
+    expect(count).toBeLessThanOrEqual(248);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

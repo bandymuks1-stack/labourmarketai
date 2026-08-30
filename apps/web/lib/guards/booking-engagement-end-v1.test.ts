@@ -1110,6 +1110,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // RPC recreated). Its header says OWNER APPROVAL: PENDING — the marker
       // is not approval, and the file ships UNAPPLIED.
       "20260829130000_anon_write_bounds_v1.sql",
+      // 2026-08-30: the 67-row ESCO canonical linkage carries the marker as
+      // the doctrine ACKNOWLEDGEMENT that a data migration (UPDATE of
+      // skills/professions.esco_uri) is RED by classification. Write-if-null,
+      // corpus-asserted, paired rollback; the marker is not approval — the
+      // owner reviews docs/taxonomy/esco-apply-review-2026-08-30.md and the
+      // file ships UNAPPLIED.
+      "20260830100000_esco_canonical_linkage_67.sql",
 ]);
   });
 
