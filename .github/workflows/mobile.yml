@@ -1,0 +1,96 @@
+name: Mobile
+
+# Build and typecheck the Expo client (apps/mobile) and unit-test the shared
+# client core (packages/client-core).
+#
+# WHY IT IS ITS OWN WORKFLOW, and not steps inside quality.yml:
+# `quality` is the REQUIRED merge gate and is deliberately fast and secret-free.
+# The Expo dependency tree is roughly a thousand packages and the Metro/Hermes
+# bundle takes minutes; bolting that onto the gate would tax every web PR for
+# coverage no web PR needs. Kept separate, `quality` installs with
+# `--filter=!mobile` and stays as quick as it was.
+#
+# NOT a required check yet. Until the owner reviews it and adds it to branch
+# protection, a red run here does NOT block a merge — the same deliberate
+# introduction CodeQL had in this repository.
+#
+# Secret-free. The bundle is built with PLACEHOLDER public configuration: it
+# proves the JavaScript compiles and the module graph resolves, which is what
+# this check is for. It never signs in and never reaches a real project.
+
+on:
+  push:
+    branches: [main]
+  # No `paths:` filter, and no `branches:` filter on pull_request — the same
+  # two lessons this repository already paid for. A path filter on a check that
+  # may later become required leaves unrelated PRs waiting on a status that
+  # never reports, and a branches filter silently skips stacked PRs.
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # The mirror image of the quality gate's filter: this job needs the
+      # mobile app and the shared package, and nothing the Next.js app pulls in.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=mobile... --filter=@labourmarket/client-core...
+
+      - name: Shared client core — typecheck
+        run: pnpm -F @labourmarket/client-core typecheck
+
+      # Where the auth-state machine, the configuration refusals and the
+      # transport contract are actually proven. They are pure TypeScript on
+      # purpose: the rules a phone depends on are testable without a phone.
+      - name: Shared client core — unit tests
+        run: pnpm -F @labourmarket/client-core test
+
+      - name: Mobile app — typecheck
+        run: pnpm -F mobile typecheck
+
+      # A real Metro bundle compiled to Hermes bytecode — the exact artifact an
+      # Android release ships as its JavaScript. This is what catches a
+      # dependency that typechecks and then cannot be compiled for a device;
+      # `@supabase/supabase-js` 2.106 was one, and only this step would have
+      # found it.
+      - name: Mobile app — Android bundle (Metro + Hermes)
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          # A syntactically valid, entirely fictional anon-shaped key. It
+          # authenticates nothing and reaches nothing; it exists so the config
+          # validator is satisfied and the bundle can be built.
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_not_a_real_key
+          EXPO_PUBLIC_API_BASE_URL: https://example.invalid
+        run: pnpm -F mobile exec expo export --platform android --output-dir .expo-export
+
+      - name: Mobile app — iOS bundle (Metro + Hermes)
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_not_a_real_key
+          EXPO_PUBLIC_API_BASE_URL: https://example.invalid
+        # The JavaScript half of an iOS build, which is all a Linux runner can
+        # honestly prove. Compiling the native iOS app needs Xcode on macOS and
+        # is NOT claimed by this workflow.
+        run: pnpm -F mobile exec expo export --platform ios --output-dir .expo-export-ios

@@ -191,14 +191,35 @@ exists to prevent.
 
 ## 6. HONEST STATUS
 
+*Updated 2026-08-29 by the mobile foundation slice — see
+[`docs/MOBILE_ARCHITECTURE.md`](MOBILE_ARCHITECTURE.md).*
+
 | | |
 |---|---|
 | `AUTH_CORE_API_READY` | **YES** — implemented, 10 negative controls, cookie path regression-proven |
-| `APP_SHARED_CORE_READY` | **PARTIAL** — the transport exists; 257 of 892 `lib/` modules still resolve their own cookie client, so only 4 of 9 routes can honestly use it |
-| `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam. Blocked on there being no client, which is a build decision, not an architecture one |
-| `IOS_IMPLEMENTATION_READY` | **NO** — same |
+| `APP_SHARED_CORE_READY` | **PARTIAL** — `packages/client-core` exists (config, session, locale, transport contract, actor context; zero dependencies, zero framework imports) and the transport exists; but 257 of 892 `lib/` modules still resolve their own cookie client, so only 4 of 9 routes can honestly use it |
+| `ANDROID_CLIENT_SCAFFOLD` | **BUILT** — `apps/mobile`, Expo SDK 57. Registration, sign-in, session, sign-out, language and the navigation shell are real. A Hermes bundle compiles for both platforms |
+| `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam (§5.1 opened with auth-core). Product data waits on the shared-core refactor coverage above; the scaffold ships every blocked surface as an honest refusal, never an empty screen |
+| `ANDROID_NATIVE_BUILD_PROVEN` | **NO** — no APK/AAB has been produced on this branch. The build machine has JDK 8 and no Android SDK |
+| `IOS_BUILD_PROVEN` | **NO** — the JavaScript bundle compiles; the native app needs Xcode on macOS |
 | `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and three canonical capabilities are reachable over it; the rest wait on the same shared-core refactor |
 
 The gate is closed. What remains is not a decision — it is the mechanical work
 of letting domain helpers accept the caller's client instead of fetching their
 own.
+
+### 6.1 WHY A CLIENT WAS SCAFFOLDED BEFORE THE GATE OPENED
+
+§5 says *do not build an Android client before (1)*, because it would either
+reimplement authentication or scrape the web client. The scaffold does neither,
+and the reason is a distinction §5 did not draw:
+
+**Authentication is not behind the blocked seam.** Supabase Auth accepts a
+token directly and has never needed a cookie, so registration, sign-in, refresh
+and sign-out work today against the platform's own auth server — no second
+identity system, no reimplementation, nothing scraped.
+
+Everything the seam DOES block — journal, hours, Living CV, opportunities — is
+built as a refusal that names its cause, and `DOMAIN_TRANSPORT_STATUS` in
+`packages/client-core/src/transport.ts` ships closed. A guard in the required
+merge gate fails if it is opened without updating this document.
