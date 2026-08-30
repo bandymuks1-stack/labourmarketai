@@ -3,6 +3,7 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { classifyIntent } from "@/lib/conversation/intent-router";
+import { INTENT_REGISTRY } from "@/lib/conversation/intent-registry";
 import { AI_MAY_NEVER_CHANGE } from "@/lib/product-gate/world-state";
 import {
   UNSUPPORTED_DIMENSIONS,
@@ -238,6 +239,8 @@ describe("W4 — intents route to the right workflow", () => {
   });
 
   it("every AI-workspace intent has a workflow wired in the chat", () => {
+    // G2: routing is registry-dispatched — each intent's registry row names
+    // the component handler, and that handler must run a REAL workflow.
     const src = read(CHAT);
     for (const intent of [
       "find-work",
@@ -247,9 +250,10 @@ describe("W4 — intents route to the right workflow", () => {
       "open-project",
       "find-workers",
       "context",
-    ]) {
+    ] as const) {
+      const handler = INTENT_REGISTRY[intent].handler;
       expect(src, `${intent} has no workflow`).toMatch(
-        new RegExp(`["']?${intent.replace("-", "\\-")}["']?:\\s*\\(\\)`),
+        new RegExp(`${handler}: \\(\\) => runWorkflow\\(`),
       );
     }
   });

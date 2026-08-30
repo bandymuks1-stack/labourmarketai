@@ -170,7 +170,9 @@ describe("§8.1 messages are a CONVERSATION projection", () => {
 
   it("asking for messages in words opens the projection, not a dead hint", () => {
     expect(ROUTER).toMatch(/intent: "messages-view"/);
-    expect(CHAT).toMatch(/case "messages-view":[\s\S]{0,240}startMessages\(\)/);
+    // G2: routing is registry-dispatched — `messages-view` resolves to the
+    // component's `messages` handler, which opens the real projection.
+    expect(CHAT).toMatch(/messages: \(\) => startMessages\(\)/);
     expect(CHAT).toContain("ChatMessageReply");
   });
 

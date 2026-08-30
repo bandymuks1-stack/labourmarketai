@@ -72,7 +72,7 @@ P2 major workflow incomplete · P3 polish/advanced.
 | # | Gap | Domain | What exists | What's missing / why | Canonical fix | Prio |
 |---|---|---|---|---|---|---|
 | G1 | **Context switch unreachable by chat** | context | `switchActiveOrganization`/`switchWorkspace` (UI-only) | no intent, no chip; chat can't change the state everything else resolves against | one `switch-context` intent + `ws:<id>` chip calling the existing `auth.switchWorkspace` — no new domain code | **P0** |
-| G2 | **Intent→handler map not a registry** | chat core | `action-registry.ts` + `result-registry.ts` are declarative/guarded | the actual routing is inlined in `conversation-chat.tsx` (2,453 lines); can't enumerate/guard/i18n-audit | extract an `IntentDescriptor` table {intent, domain, r/w, locales, handler ref}; mechanical, no behavior change | **P0** (foundation) |
+| G2 | ~~Intent→handler map not a registry~~ | chat core | `lib/conversation/intent-registry.ts` | **CLOSED 2026-08-30**: declarative `IntentDescriptor` table (domain, read/write class, handler id, typing behavior) + `dispatchIntent`; component supplies handlers, exhaustive both ways at compile time; source-slicing guards re-anchored to registry/handlers. Per-locale coverage field deferred to G3 (needles become data there — declaring locales the router cannot prove would be a lie) | — | done |
 | G3 | **nl/de routed but ~12/32 intents understood** | i18n | full lt/en/ru needles | German/Dutch users get fluent UI + generic chat fallback; violates LANGUAGE_MATRIX honesty | complete needle sets for nl/de as data; then migrate router behind the concept-resolution seam | **P1** |
 | G4 | **MCP surface = 4 capabilities vs 19 schema'd chat actions** | external clients | `worker-schemas.ts` has 9 worker + `company-schemas.ts` 10 company actions, all zod'd + confirmation-tiered | executors are cookie-coupled (259/893 lib modules self-resolve cookie client) | per-action `createJournalEntryCore`-style extraction, then a CONVERSATION_ACTIONS→CapabilityDescriptor bridge; NO new domain logic | **P1** (foundation) |
 | G5 | ~~No MCP annotations / no presentation~~ | external clients | — | **CLOSED by this audit's slice** (§5) | — | done |
@@ -134,7 +134,7 @@ action schemas · the concept-resolution seam.
 ## 7. Continuation queue (prioritized, honest)
 
 1. (P0) G1 context-switch intent — in this train.
-2. (P0-found.) G2 intent registry extraction — next PR, mechanical.
+2. ~~(P0-found.) G2 intent registry extraction~~ — SHIPPED 2026-08-30 (`intent-registry.ts`).
 3. (P1) G4 executor extraction train: one `*Core` per conversation action
    (start: express-interest, create-demand, save-work-card) + capability
    bridge. Unlocks ChatGPT AND mobile simultaneously (same registry).
@@ -148,8 +148,8 @@ action schemas · the concept-resolution seam.
 ## 8. Completion state (§28 vocabulary)
 
 - **AUDIT_COMPLETE: YES** (this document, evidence-based)
-- **FOUNDATION_COMPLETE: NO** (G2 registry extraction + G4 bridge pending)
-- **P0_COMPLETE: PARTIAL** (G1 shipped this train; G2 queued)
+- **FOUNDATION_COMPLETE: PARTIAL** (G2 registry shipped 2026-08-30; G4 bridge pending)
+- **P0_COMPLETE: YES** (G1 shipped this train; G2 shipped 2026-08-30)
 - **P1_COMPLETE: NO**
 - **FULL_PRODUCT_COMPLETE: NO**
 
