@@ -38,7 +38,7 @@ concurrency:
 
 jobs:
   ios:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     steps:
       - name: Checkout
@@ -58,19 +58,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter=mobile... --filter=@labourmarket/client-core...
 
-      # Measured Xcode window for Expo SDK 57 on this image:
-      #   16.4 (default) → Swift 6.1, too OLD: ExpoModulesJSI SwiftPM needs
-      #     tools 6.2 ("package 'apple' is using Swift tools version 6.2.0").
-      #   26.3 (newest)  → too NEW: stricter Swift/C++ interop rejects
-      #     expo-modules-jsi RuntimeScheduler.h SWIFT_RETURNS_RETAINED
-      #     annotations.
-      # 26.0.1 is the first Swift 6.2 release — the SDK 57 target line.
-      - name: Select Xcode 26.0
+      # Measured toolchain requirement (runs 2-4 + expo/expo#46242):
+      # expo-modules-jsi needs Xcode 26.4+ (Swift 6.3) — 16.4 is too old
+      # (Swift 6.1 < tools 6.2) and every 26.0-26.3 fails the Swift/C++
+      # interop rules in RuntimeScheduler.h. macos-15 tops out at 26.3,
+      # hence runs-on: macos-26 (default Xcode 26.4.1). Newest wins.
+      - name: Select newest Xcode
         run: |
-          XC=/Applications/Xcode_26.0.1.app
-          [ -d "$XC" ] || XC=/Applications/Xcode_26.0.app
-          echo "Selecting $XC (available: $(ls -d /Applications/Xcode*.app | tr '\n' ' '))"
-          sudo xcode-select -s "$XC"
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $NEWEST (available: $(ls -d /Applications/Xcode*.app | tr '\n' ' '))"
+          sudo xcode-select -s "$NEWEST"
           xcodebuild -version
           swift --version
 
