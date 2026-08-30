@@ -1,9 +1,10 @@
 # ChatGPT as a first-class client — MCP adapter v1
 
-> Status 2026-08-29: implemented and **locally proven** (production build +
-> real local GoTrue/RLS, 10/10 controls). NOT yet connected to real ChatGPT —
-> that requires the owner gates in §5. Stacked on the auth-core boundary
-> (PR #1331 reconciliation); nothing here merges before it.
+> Status 2026-08-30: **connected to real ChatGPT in production.** OAuth 2.1
+> (DCR → consent → token), capability discovery, and a caller-scoped
+> `profile.get` read are all proven against the live client with server-log
+> evidence (§4, §6). The first real-client WRITE (`journal.create_draft` →
+> `journal.confirm`) is the remaining unproven step.
 
 ## 1. The verified platform contract
 
@@ -58,8 +59,8 @@ runtime) speaks the same door — this is also the AI-actor transport seam.
 |---|---|---|---|
 | `profile.get` | read | yes | LIVE-proven locally: own profile facts + three-valued worker existence |
 | `living_cv.skills.get` | read | yes | LIVE-proven locally: own `worker_skills` rows + catalogue slugs — the same rows the web Living CV reads |
-| `journal.create_draft` | draft | **no** | implemented + unit-proven: validates the SAME input contract as the chat work-log form, returns exact preview + one-time HMAC confirmation token, writes NOTHING |
-| `journal.confirm` | confirm | **no** | implemented + unit-proven: verifies the token (tamper/user-mismatch rejected), then refuses honestly — the canonical journal write still resolves its own cookie session (`lib/journal/actions.ts`), so executing it for a bearer caller would misattribute; extraction into a client-threading service function is the recorded next step |
+| `journal.create_draft` | draft | **yes** | validates the SAME input contract as the chat work-log form, returns exact preview + one-time HMAC confirmation token fingerprinted on the caller's journal-chain head, writes NOTHING — exposed since the journal-write extraction landed (owner-approved 2026-08-29) so the draft it prepares now leads to a real confirm |
+| `journal.confirm` | confirm | **yes** | verifies the one-time token against the exact draft (tamper/user-mismatch/replay rejected), then performs the REAL canonical write: the transport-neutral `createJournalEntryCore` runs the SAME append-only, hash-chained, pipeline-awaited save the web composer performs — as the caller, under the caller's RLS, no fork. The former honest gate is CLOSED |
 
 Exposure is a reviewed product decision (`exposed:` in the registry), the
 honest-gate pattern at capability granularity. `profile.get` deliberately
@@ -72,10 +73,31 @@ today (the same `shared-blocked` reality as dashboard-search).
 - UNIT PROVEN: 21 tests (`lib/mcp/protocol.test.ts`, `lib/capabilities/capabilities.test.ts`)
 - LOCAL AUTH/RLS PROVEN: 10/10 live controls — RFC 9728 doc, 401+`WWW-Authenticate`
   pointer, malformed-bearer refusal, initialize/notification semantics,
-  tools/list shows ONLY exposed reads, both reads return the caller's own
-  rows under two different real users
-- CHATGPT CLIENT CONTRACT PROVEN: **NO** — needs a real ChatGPT connection (§5)
-- PRODUCTION PROVEN: **NO** — stacked on RED-gated #1331
+  tools/list shows the exposed capabilities, both reads return the caller's own
+  rows under two different real users. All four capabilities (`profile.get`,
+  `living_cv.skills.get`, `journal.create_draft`, `journal.confirm`) are now
+  `exposed: true`; `journal.confirm` performs a real one-time-token-gated
+  canonical journal write (`createJournalEntryCore`), not an honest refusal
+- REAL CHATGPT OAUTH CONNECTION PROVEN: **YES** (prod, 2026-08-30) — real
+  ChatGPT performed DCR (`POST /auth/v1/oauth/clients/register` 201), the owner
+  approved consent (`POST /auth/v1/oauth/authorizations/…/consent` 200), ChatGPT
+  exchanged the code (`POST /auth/v1/oauth/token` 200, `resource=https://labourmarket.ai`,
+  scope `openid email offline_access profile phone`), and every subsequent
+  bearer verification returned 200 (`GET /auth/v1/user`, 79/80 OK in-window).
+- REAL CHATGPT CAPABILITY DISCOVERY PROVEN: **YES** — ChatGPT completed the
+  `initialize` / `tools/list` handshake against prod (two bursts, 11:11 and
+  11:13 UTC) and surfaced the tool schemas (owner saw `journal_confirm` with its
+  real schema, classified as a write).
+- REAL CHATGPT READ (`profile.get`) PROVEN: **YES** (prod, 2026-08-30
+  11:44:16 UTC) — after the owner attached the LabourMarket.ai connector to the
+  conversation composer and sent an explicit request, the capability's unique
+  PostgREST fingerprint
+  (`profiles?select=id,full_name,email,locale,country,onboarded,active_role`)
+  executed with status 200 under the caller's own JWT subject
+  (`dc3284ea-…`, the owner's profile id) — caller-scoped RLS, no service role.
+  ChatGPT rendered the owner's real production profile. See §6 resolution.
+- PRODUCTION WRITE PROVEN: **NO** — no `journal.confirm` has yet run through
+  the real client. The draft→preview→confirm E2E is the next real-client test.
 
 ## 5. Path to live (updated 2026-08-29 after the owner go-decision)
 
@@ -95,5 +117,78 @@ today (the same `shared-blocked` reality as dashboard-search).
 4. Connect ChatGPT (developer mode → add MCP server →
    `https://labourmarket.ai/api/mcp`) and run the §4 controls against the
    real client.
-5. Journal write extraction slice (owner-approved 2026-08-29) unlocks
-   `journal.confirm`, the first ChatGPT write.
+5. ~~Journal write extraction slice (owner-approved 2026-08-29) unlocks
+   `journal.confirm`, the first ChatGPT write.~~ — **DONE**: the canonical
+   write is extracted into the transport-neutral `createJournalEntryCore`
+   (`apps/web/lib/journal/journal-write-core.ts`), and both
+   `journal.create_draft` and `journal.confirm` are `exposed: true`.
+   `journal.confirm` now performs the real one-time-token-gated write as the
+   caller. The remaining gates are the owner OAuth-server steps (3) and a real
+   ChatGPT connection (4) before this executes for the actual client.
+
+## 6. Real-client test — 2026-08-30 (server-log evidence)
+
+The owner connected the real ChatGPT client to `https://labourmarket.ai/api/mcp`
+and sent, with the connector active, `"Parodyk mano LabourMarket.ai profilį."`
+ChatGPT replied that it had no access to the profile data. Investigated against
+the prod Supabase edge/auth logs (project `gorgitwvdzxbnaxhrsrw`); reasoning from
+server evidence, not the prose reply:
+
+**What the logs prove happened**
+- OAuth is real and complete: DCR 201 → consent 200 → token 200
+  (`resource=https://labourmarket.ai`), then two MCP discovery bursts
+  (`initialize`/`tools/list`) at 11:11 and 11:13 UTC.
+- Every bearer verification (`GET /auth/v1/user`) returned 200 (79/80 in-window;
+  the one non-200 is a lone 403 the day before the test, not from the ChatGPT
+  session). **Auth/token/scope/resource
+  are not the problem.**
+- The `profile.get` capability issues a PostgREST read with a column set unique
+  to it (`…locale,country,onboarded,active_role` — note `onboarded`, not the
+  web app's `onboarded_at`). That fingerprint appears **zero** times across the
+  full retained window. **The capability handler never executed.**
+- No discovery burst is followed by any `/rest/v1/` read — every MCP request that
+  reached the server was `initialize`/`tools/list`; **no `tools/call` ever
+  reached a capability.**
+
+**Server-side ruled out** (each checked, not assumed): tool names are sanitized
+correctly (`profile.get`→`profile_get`, dots stripped, valid `[a-zA-Z0-9_-]`);
+all four capabilities are `exposed:true` and mapped into `tools/list`; the
+emitted input JSON Schema is valid for no-arg tools
+(`{type:object,properties:{},additionalProperties:false}`); the single-JSON-response
+transport is accepted (it served discovery through the same channel).
+
+**Conclusion — FAILURE_CLASS = A (model did not request the tool).** Not B/C/D/E:
+the tool is offered with a valid schema, auth succeeds, transport works, and the
+handler never ran because no invocation arrived. No server-side code defect is
+proven — a change here would be a guess. The boundary is on the ChatGPT
+client/model side (developer-mode connectors are per-conversation, and a
+natural-language request let the model decline instead of invoking).
+
+**Open metadata note (not the proven cause):** `tools/list` sends no MCP
+`annotations` (`readOnlyHint`/`destructiveHint`/`idempotentHint`/`openWorldHint`).
+These are OPTIONAL per spec and their absence does not make a tool non-callable,
+but adding honest annotations (reads/drafts `readOnlyHint:true`; `confirm`
+`readOnlyHint:false`, append-only so `destructiveHint:false`, one-time-token so
+`idempotentHint:true`) is a correct additive hardening that may nudge ChatGPT
+toward auto-invoking reads. Deferred until the owner re-test below isolates
+whether invocation is the blocker.
+
+**RESOLVED (2026-08-30, same day):** the owner ran the isolation test. After
+explicitly attaching the LabourMarket.ai connector to the conversation composer
+("+" → LabourMarket.ai) and sending an explicit request, `profile.get` fired:
+the unique `profiles?select=id,full_name,email,locale,country,onboarded,active_role`
+read appears in the prod edge logs at **11:44:16.546 UTC, status 200**, JWT
+subject = the owner's own profile id (immediately followed by the worker
+existence probe at 11:44:17.541). **FAILURE_CLASS A is confirmed as
+attach-scope:** developer-mode connector tools are per-conversation in the
+ChatGPT UI — until the connector is attached to the composer, the model has no
+tools to call and declines in prose. Not a server defect; nothing server-side
+was changed to make it work.
+
+**UX notes carried forward from the resolved test:**
+1. The diagnostic asked for raw JSON deliberately. Raw JSON is NOT the desired
+   end-user presentation — capabilities should ship human-presentable results
+   (see the presentation-contract work in the chat-first audit).
+2. The MCP `annotations` gap above is still open and now unblocked: honest
+   annotations + richer tool descriptions are the correct additive step to help
+   the model auto-invoke on natural language once the connector is attached.
