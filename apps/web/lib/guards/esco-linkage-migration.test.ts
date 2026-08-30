@@ -124,6 +124,24 @@ describe("esco linkage migration — pinned to the mapping artifact", () => {
     }
   });
 
+  it("ships the governance rollback FILE with the same 67 pairs, value-guarded", () => {
+    const down = readFileSync(
+      resolve(REPO, "supabase/rollbacks/20260830100000_esco_canonical_linkage_67.down.sql"),
+      "utf8",
+    );
+    // Nulls only rows still holding exactly the written value — never a later
+    // deliberate re-curation.
+    expect(down).toMatch(/where s\.slug = w\.slug and s\.esco_uri = w\.uri/);
+    expect(down).toMatch(/where p\.slug = w\.slug and p\.esco_uri = w\.uri/);
+    for (const p of planPairs) {
+      expect(down.includes(`('${p.slug}', '${p.uri}')`), `down.sql missing ${p.slug}`).toBe(true);
+    }
+  });
+
+  it("is annotated @human-gate-approved — RED class acknowledged, human gate is the control", () => {
+    expect(sql).toMatch(/^--\s*@human-gate-approved/);
+  });
+
   it("only slugs that exist in the canonical name registries are written", () => {
     const skillNames = JSON.parse(
       readFileSync(resolve(REPO, "apps/web/messages/en/skill-names.json"), "utf8"),

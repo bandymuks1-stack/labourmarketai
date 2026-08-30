@@ -1,3 +1,11 @@
+-- @human-gate-approved
+-- RED-CLASS DATA MIGRATION, deliberately: it UPDATEs existing rows (esco_uri
+-- curation). The annotation above acknowledges that — it does NOT authorize
+-- auto-merge or auto-apply. The PR ships as DRAFT + needs-human-gate; prod
+-- apply happens only via Supabase MCP apply_migration after the owner reviews
+-- docs/taxonomy/esco-apply-review-2026-08-30.md. Rollback file:
+-- supabase/rollbacks/20260830100000_esco_canonical_linkage_67.down.sql.
+--
 -- ESCO canonical linkage: the 67 EXACT / HIGH_CONFIDENCE rows of the owner-
 -- reviewed mapping dry run (docs/taxonomy/esco-mapping-dryrun-2026-08-30.json;
 -- review pack docs/taxonomy/esco-apply-review-2026-08-30.md). 31 skills +
