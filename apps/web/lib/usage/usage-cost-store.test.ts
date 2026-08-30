@@ -165,6 +165,13 @@ describe("buildUsageCostEventRow — the full mapping", () => {
     expect(serialized.length).toBeLessThan(2048); // well inside the jsonb caps
   });
 
+  it("extras.eventId is the deterministic idempotency key for the row's PK", () => {
+    const row = buildUsageCostEventRow(liveRecord(), {
+      eventId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeef",
+    });
+    expect(row.event_id).toBe("aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeef");
+  });
+
   it("accepts injected event id + timestamp for deterministic callers", () => {
     const row = buildUsageCostEventRow(liveRecord(), {}, {
       eventId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeef",
