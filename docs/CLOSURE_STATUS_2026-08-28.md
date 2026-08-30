@@ -165,73 +165,99 @@ complete.
 
 ---
 
-## 4. OWNER GATE — AUTH-CORE API BOUNDARY
+## 4. AUTH-CORE API BOUNDARY — approved, built, and proven
 
-Everything below is analysis and design. **No insecure interim auth has been
-built, and none should be.** The canonical measurement is
-[`docs/APP_READINESS_MAP.md`](APP_READINESS_MAP.md) (#1308); this presents its
-gate in the form the closure brief asked for.
+The gate presented in the previous revision of this document was approved. The
+boundary exists: **`lib/api/api-identity.ts`, one resolver, `app/api/**` only.**
+Server actions are untouched and stay a browser transport by design.
 
-### The exact boundary
+### What it does, and what it refuses to do
 
-`app/api/**` only — **9 route files, 8 of which resolve identity from
-`cookies()`**, and **zero** of which read an `Authorization` header today.
-Server actions are explicitly out of scope: they are a browser transport and
-stay one.
+```
+AUTHENTICATION / TRANSPORT   →  establish WHO is calling   ← the resolver
+DATABASE / RLS / DOMAIN      →  decide WHAT they may do    ← unchanged
+```
 
-### Token model
+The resolver returns the caller's own RLS-scoped Supabase client and nothing
+else. It re-implements no scope, no role and no organization authority — those
+already live in the database and in the domain helpers the routes already call.
+Both transports produce an **anon-key** client carrying that person's own JWT,
+so Postgres evaluates the same policies for both, and there is no service-role
+path on either. The property to protect is one sentence: *a bearer caller can
+never do more than the same person's web session.*
 
-Supabase-issued JWT, presented as `Authorization: Bearer <jwt>`, **in addition
-to** cookies rather than instead of them. No new token type, no new signing
-authority, no second identity system — the platform already issues exactly this
-token to the web client.
+Verification uses the platform's own mechanism (`auth.getUser(jwt)`) rather
+than a private signature check — one call validates signature, expiry and the
+user still existing, with no second copy of the project's key material to keep
+in step.
 
-### Validation
+### The classification, which is the product decision
 
-One resolver, used by every `app/api/**` route: verify signature and expiry
-against the project's JWKS, confirm the `sub` resolves to a real `profiles`
-row, and fail **closed** on any error. A failed verification is never an
-anonymous request — that is the same distinction #1314 drew for roles and #1323
-for balances.
+`lib/guards/api-auth-boundary.test.ts` holds every route and fails CI if a new
+one appears without an answer:
 
-### Identity binding, scopes, org/context authorization
+| route | class |
+|---|---|
+| `billing/webhook`, `waitlist` | `public` |
+| `billing/portal`, `billing/test-checkout` | `cookie-only` — money surfaces that redirect a browser |
+| `cv/extract`, `professions/:id/skills`, `workers/:id/skills`, `documents/file/:id` | **`shared`** |
+| `dashboard-search` | **`shared-blocked`** |
 
-Identity binding is the resolved profile, never a client-supplied id. **Scopes
-and organization/context authority are not re-implemented**: the database
-already holds them (RLS, `belongs_to_organization`, the SECDEF RPCs, the
-`grants_worker_visibility` data model). The boundary's job is to establish WHO
-is calling; WHAT they may see stays where it is enforced today. Any design that
-moves authority up into the API layer should be rejected — it would create a
-second permission model, which is the failure this whole seam exists to prevent.
+`dashboard-search` is the honest one. Adding the header there would be a lie:
+`getDashboardSearchGroups()` takes no client and fans out to helpers that each
+call `createClient()` themselves, so the search would run as the cookie session
+while the route reported the bearer caller's identity. The coupling is *below*
+the route layer — **257 of 892 `lib/` modules resolve their own cookie client**
+— and that is the shared-core refactor, not a header.
 
-### Revocation, rate limiting, audit
+### Twelve controls against the real stack, and the one that mattered
 
-Revocation follows the platform's own session revocation (short-lived access
-tokens plus refresh, so a revoked session dies at the next refresh rather than
-being separately tracked). Rate limiting reuses `request_rate_limits_v3`,
-already in production. Audit reuses `audit_logs`. **No service-role key is ever
-exposed to a client, on any path.**
+No mocks: real GoTrue, real JWTs, real PostgREST, real RLS.
 
-### Negative controls the slice must ship with
+| | control | result |
+|---|---|---|
+| A | no credentials | 401 |
+| B | malformed `Authorization` | 401 |
+| C | well-formed token, **foreign signature** | 401 |
+| D | correctly signed but **expired** | 401 |
+| E | user A reads user B's skills | 403 |
+| F | user A writes user B's skills | 403, **and B's rows unchanged** |
+| G | valid token, own resource | 200 |
+| H | **bearer authority == cookie authority** | identical on both, and the two answers differ |
+| I | **bad token WITH a valid session cookie** | 401 |
+| | CV import over bearer / closed without | 200 / 401 |
+| | document door, unknown file, valid token | 404 — no existence oracle |
+| | the cookie path | unchanged, 200 |
 
-1. an **expired** token → refused;
-2. a token from **another Supabase project** → refused;
-3. a token whose `sub` is **not a profile** → refused;
-4. the existing **cookie path unchanged** — the web client must not regress;
-5. a valid token for user A **cannot read** user B's rows (RLS still decides).
+C, D and H each carry their own positive control, so none of them can pass by
+accident: the untampered token must work, the same self-signed claims with a
+*future* `exp` must be accepted, and the own/foreign answers must genuinely
+differ.
 
-### Migration and client impact
+**I is the only one that catches the worst bug, and that was measured rather
+than argued.** A–H are all sent without cookies, so a boundary that quietly
+fell back to the cookie session on a bad token would answer 401 to every one of
+them and the file would read green. Building exactly that fallback: A–H and the
+cookie regression **all still passed, and I was the only failure.**
 
-No schema migration is implied by the resolver itself. Client impact: none for
-the web app (cookies keep working); it is the precondition for Android, iOS and
-the ChatGPT/MCP app, none of which may be built before it.
+One control from the design sketch was deliberately NOT built — *"a token whose
+`sub` is not a profile"*. Rejecting that at the transport would make bearer
+**stricter** than cookie, which has never required a profile row and which a
+just-registered user legitimately lacks. The rule is parity, and an extra check
+breaks it as surely as a missing one.
 
-> ### APPROVE AUTH-CORE API BOUNDARY
->
-> Until this is approved the slice stays **blocked**, and
-> `AUTH_CORE_API_READY`, `ANDROID_IMPLEMENTATION_READY`,
-> `IOS_IMPLEMENTATION_READY` and `CHATGPT_APP_BACKEND_READY` all stay **NO** —
-> not because the domain logic is missing, but because the transport is.
+### Web regression
+
+Cookie identity is resolved by the same `createClient()` → `getUser()` as
+before; only its call site moved. Proven, not assumed: the cookie half of H,
+the standalone cookie-path test, and a 26-test authenticated browser pass
+across the conversation, documents, profile, opportunities and shell specs.
+
+**Status: `AUTH_CORE_API_READY = YES`.** `ANDROID_` / `IOS_IMPLEMENTATION_READY`
+are no longer blocked on the seam — they are blocked on there being no client,
+which is a build decision. `CHATGPT_APP_BACKEND_READY = PARTIAL`: the transport
+is there and three canonical capabilities are reachable over it; the rest wait
+on the shared-core refactor above.
 
 ---
 

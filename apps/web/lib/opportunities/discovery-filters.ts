@@ -30,6 +30,24 @@ export interface DiscoveryFilterState {
 
 export type DiscoverySort = "relevance" | "newest";
 
+/**
+ * Initial-view mode. "top" (the default) is the compressed first view — the
+ * few strongest matches, everything else one explicit click away. "all" is
+ * the person's own request to see the full authorized universe (?view=all).
+ */
+export type DiscoveryView = "top" | "all";
+
+/** Default number of opportunities in the compressed first view. */
+export const INITIAL_VIEW_DEFAULT_COUNT = 3;
+/**
+ * Hard ceiling for the FIRST view. Visual/cognitive compression only — the
+ * loaded universe is never reduced: filters, sort, and ?view=all all reach
+ * every authorized row. Raising this above 5 is a product decision, not a
+ * tweak (owner rule: 3 best by default, never more than 5 before the person
+ * asks for more).
+ */
+export const INITIAL_VIEW_MAX_COUNT = 5;
+
 export const EMPTY_DISCOVERY_FILTERS: DiscoveryFilterState = {
   profession: null,
   country: null,
@@ -50,7 +68,7 @@ const str = (v: string | string[] | undefined): string | null => {
 
 export function parseDiscoveryParams(
   sp: Record<string, string | string[] | undefined>,
-): { filters: DiscoveryFilterState; sort: DiscoverySort } {
+): { filters: DiscoveryFilterState; sort: DiscoverySort; view: DiscoveryView } {
   return {
     filters: {
       profession: str(sp.profession),
@@ -61,6 +79,7 @@ export function parseDiscoveryParams(
       tool: str(sp.tool),
     },
     sort: str(sp.sort) === "newest" ? "newest" : "relevance",
+    view: str(sp.view) === "all" ? "all" : "top",
   };
 }
 
@@ -146,6 +165,55 @@ export function sortDiscoveryCards<T extends { readonly need: OpportunityNeed }>
     if (cb === "") return -1;
     return cb < ca ? -1 : 1;
   });
+}
+
+export interface InitialBoardView<T> {
+  /** The cards the first view actually renders, in ranked order. */
+  readonly visible: readonly T[];
+  /** How many ranked cards the compressed view holds back (0 when not capped). */
+  readonly hiddenCount: number;
+  /** True only when the compressed default view withheld cards. */
+  readonly capped: boolean;
+}
+
+/**
+ * Compressed first view over the ALREADY-ranked, already-authorized cards.
+ *
+ * The cap applies ONLY to the pristine default view (relevance sort, no
+ * active filters, no ?view=all). Any explicit refinement — a filter chip, the
+ * newest sort, or the show-all link — is the person asking for more, and gets
+ * the full list. This is presentation compression, never data reduction: the
+ * input array is returned intact whenever the cap does not apply, and the
+ * hidden remainder is reported honestly so the UI can say "showing N of M".
+ *
+ * PURE and order-preserving: `visible` is always a prefix of `cards`, so the
+ * §19 comparator order the loader applied is exactly what renders — the top 3
+ * are the engine's top 3, not three arbitrary rows.
+ */
+export function selectInitialBoardView<T>(
+  cards: readonly T[],
+  opts: {
+    readonly sort: DiscoverySort;
+    readonly activeFilterCount: number;
+    readonly view: DiscoveryView;
+    /** Clamped to [1, INITIAL_VIEW_MAX_COUNT]; defaults to 3. */
+    readonly initialCount?: number;
+  },
+): InitialBoardView<T> {
+  const cap = Math.min(
+    Math.max(1, Math.floor(opts.initialCount ?? INITIAL_VIEW_DEFAULT_COUNT)),
+    INITIAL_VIEW_MAX_COUNT,
+  );
+  const refined =
+    opts.view === "all" || opts.activeFilterCount > 0 || opts.sort !== "relevance";
+  if (refined || cards.length <= cap) {
+    return { visible: [...cards], hiddenCount: 0, capped: false };
+  }
+  return {
+    visible: cards.slice(0, cap),
+    hiddenCount: cards.length - cap,
+    capped: true,
+  };
 }
 
 export interface DiscoveryFacets {

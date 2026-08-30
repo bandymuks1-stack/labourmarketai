@@ -8164,6 +8164,11 @@
         "body": "Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "Reset filters"
       },
+      "initialView": {
+        "summary": "Showing the {shown} strongest matches of {total} opportunities.",
+        "showAll": "Show all ({count} more)",
+        "showAllExternal": "Show all job ads"
+      },
       "details": {
         "show": "More details",
         "hide": "Hide details"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
+      "shownOfTotal": "top {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -13852,5 +13858,18 @@
       "spend_compensation": "Compensated for a failed action",
       "other": "Other movement"
     }
+  },
+  "oauthConsent": {
+      "title": "Confirm access",
+      "clientWantsAccess": "“{client}” is asking for access to your LabourMarket.ai account.",
+      "unknownClient": "Unknown application",
+      "clientLabel": "Application",
+      "redirectLabel": "Return address",
+      "scopesLabel": "Requested permissions",
+      "authorityNote": "The application will act only as you and will see only what you can see. You can revoke access at any time.",
+      "approve": "Allow",
+      "deny": "Deny",
+      "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
+      "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
   }
 }

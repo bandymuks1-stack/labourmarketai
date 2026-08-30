@@ -136,7 +136,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // the hero product demo, the six-step product chain, the concept map moment
   // and the fact/skill/opinion band land in all 11 locales; lt/en/ru/nl/de
   // translated, da [EN] until human translation).
-  da: 1314,
+  // MEASURED 1301 on main at fe75acce (2026-08-30, PR #1350 catalog audit) —
+  // the ceiling had 13 keys of slack, enough to ship 13 new untranslated DA
+  // strings without tripping the ratchet. Tightened to the live count; no
+  // translation content changed in this PR.
+  da: 1301,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

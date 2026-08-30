@@ -27,25 +27,35 @@ function read(p: string): string {
 }
 
 describe("journal save action returns structured results", () => {
-  const src = read("lib/journal/actions.ts");
+  // The write implementation lives in the transport-neutral core since the
+  // owner-approved extraction (2026-08-29 §6); actions.ts is the web wrapper.
+  // Each pin reads the file that actually carries the property; the
+  // service-role and throw bans cover BOTH.
+  const src = read("lib/journal/journal-write-core.ts");
+  const wrapper = read("lib/journal/actions.ts");
 
-  it("exports the CreateJournalEntryResult tagged union", () => {
+  it("exports the CreateJournalEntryResult tagged union (and the wrapper re-exports it)", () => {
     expect(src).toMatch(/export type CreateJournalEntryResult\s*=/);
     expect(src).toMatch(/ok:\s*true/);
     expect(src).toMatch(/ok:\s*false/);
+    expect(wrapper).toMatch(/CreateJournalEntryResult/);
   });
 
   it("never throws a string Error for known failure modes", () => {
-    expect(src).not.toMatch(/throw new Error\("Engagement context required"\)/);
-    expect(src).not.toMatch(/throw new Error\("No worker profile"\)/);
-    expect(src).not.toMatch(/throw new Error\("Not authenticated"\)/);
-    expect(src).not.toMatch(/throw new Error\("Please describe what you did"\)/);
+    for (const s of [src, wrapper]) {
+      expect(s).not.toMatch(/throw new Error\("Engagement context required"\)/);
+      expect(s).not.toMatch(/throw new Error\("No worker profile"\)/);
+      expect(s).not.toMatch(/throw new Error\("Not authenticated"\)/);
+      expect(s).not.toMatch(/throw new Error\("Please describe what you did"\)/);
+    }
   });
 
   it("does not use a service_role / admin runtime client for journal writes", () => {
-    expect(src).not.toMatch(/service[_-]?role/i);
-    expect(src).not.toMatch(/SUPABASE_SERVICE_ROLE/);
-    expect(src).not.toMatch(/createAdminClient/i);
+    for (const s of [src, wrapper]) {
+      expect(s).not.toMatch(/service[_-]?role/i);
+      expect(s).not.toMatch(/SUPABASE_SERVICE_ROLE/);
+      expect(s).not.toMatch(/createAdminClient/i);
+    }
   });
 
   it("pre-validates unit_slug against productivity_units before any insert", () => {
@@ -82,16 +92,19 @@ describe("journal save action returns structured results", () => {
     // v3 lifecycle: the soft-delete server action must route through the
     // 0018 RPC. Direct table mutations would be RLS-denied and would also
     // skip the post-confirmation gate.
-    expect(src).toMatch(/export async function softDeleteJournalEntry/);
-    expect(src).toMatch(/["']journal_entry_soft_delete["']/);
+    // (Lifecycle actions stay in the wrapper module — only the CREATE write
+    // moved to the core.)
+    expect(wrapper).toMatch(/export async function softDeleteJournalEntry/);
+    expect(wrapper).toMatch(/["']journal_entry_soft_delete["']/);
   });
 
   it("returns a tagged JournalLifecycleResult — not a plain boolean", () => {
     // The UI relies on the result's `code` to show different copy for
-    // not_owner / already_confirmed / rpc_unavailable.
-    expect(src).toMatch(/export type JournalLifecycleResult\s*=/);
-    expect(src).toMatch(/already_confirmed/);
-    expect(src).toMatch(/rpc_unavailable/);
+    // not_owner / already_confirmed / rpc_unavailable. Lifecycle stays in
+    // the wrapper module.
+    expect(wrapper).toMatch(/export type JournalLifecycleResult\s*=/);
+    expect(wrapper).toMatch(/already_confirmed/);
+    expect(wrapper).toMatch(/rpc_unavailable/);
   });
 
   it("exports supersedeJournalEntry that calls the ATOMIC journal_entry_supersede_v2 RPC (W0)", () => {
@@ -99,8 +112,8 @@ describe("journal save action returns structured results", () => {
     // through the supersede RPC instead of the create path. The action
     // shares the FormData contract so the composer can re-use submit code.
     // W0: the atomic v2 RPC carries selected/rejected slugs transactionally.
-    expect(src).toMatch(/export async function supersedeJournalEntry/);
-    expect(src).toMatch(/["']journal_entry_supersede_v2["']/);
+    expect(wrapper).toMatch(/export async function supersedeJournalEntry/);
+    expect(wrapper).toMatch(/["']journal_entry_supersede_v2["']/);
   });
 });
 
@@ -169,10 +182,11 @@ describe("journal review UI is honest about state", () => {
 describe("journal evidence-loop scope discipline", () => {
   const composer = read("components/app/journal-entry-composer.tsx");
   const action = read("lib/journal/actions.ts");
+  const core = read("lib/journal/journal-write-core.ts");
   const parser = read("lib/structuring/extract-journal-suggestions.ts");
   const keywords = read("lib/structuring/keywords.ts");
 
-  const all = [composer, action, parser, keywords].join("\n");
+  const all = [composer, action, core, parser, keywords].join("\n");
 
   it("does not touch billing / payments / Stripe / Montonio", () => {
     expect(all).not.toMatch(/stripe|montonio|checkout|subscription|pricing/i);

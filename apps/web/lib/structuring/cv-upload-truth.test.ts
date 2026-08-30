@@ -59,9 +59,30 @@ describe("CV extraction route is auth-gated, size-capped, non-logging", () => {
     expect(existsSync(join(root, ROUTE))).toBe(true);
   });
   const src = read(ROUTE);
-  it("requires an authenticated user", () => {
-    expect(src).toMatch(/auth\.getUser/);
-    expect(src).toMatch(/401/);
+
+  // The security property is "an unresolved identity is refused before any
+  // byte of the CV is read", not "the route calls auth.getUser" — that was an
+  // implementation detail, and it went stale the day identity resolution
+  // moved into the canonical boundary (lib/api/api-identity.ts). The guard
+  // now asserts the boundary itself: the route resolves identity through the
+  // ONE resolver and refuses a failed resolution. Which transports may reach
+  // it, and that it never builds a second identity path, is guarded by
+  // lib/guards/api-auth-boundary.test.ts.
+  const refusesUnresolvedIdentity = (s: string): boolean =>
+    /resolveApiIdentity\s*\(/.test(s) && /if\s*\(!auth\.ok\)/.test(s);
+
+  it("negative control: the guard rejects a route that skips the boundary", () => {
+    // The exact source shape this guard replaced — direct cookie-client auth.
+    const preBoundaryRoute = `
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return NextResponse.json({}, { status: 401 });`;
+    expect(refusesUnresolvedIdentity(preBoundaryRoute)).toBe(false);
+    expect(refusesUnresolvedIdentity("")).toBe(false);
+  });
+
+  it("requires an authenticated user via the canonical identity boundary", () => {
+    expect(refusesUnresolvedIdentity(src)).toBe(true);
   });
   it("enforces a size cap and never logs the CV text", () => {
     expect(src).toMatch(/MAX_CV_BYTES/);
