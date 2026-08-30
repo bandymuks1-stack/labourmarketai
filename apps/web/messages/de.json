@@ -13871,5 +13871,17 @@
       "deny": "Ablehnen",
       "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
       "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
+  },
+  "capabilities": {
+    "notSet": "nicht angegeben",
+    "workerExists": "aktiv",
+    "workerNone": "keins",
+    "workerUnavailable": "konnte nicht geprüft werden",
+    "profileSummary": "Ihr LabourMarket.ai-Profil — Name: {name}; Land: {country}; Sprache: {language}; aktive Rolle: {role}; Arbeitnehmerprofil: {worker}.",
+    "skillsSummary": "Ihr lebender Lebenslauf enthält {count} Fähigkeiten ({verified} verifiziert).",
+    "skillsEmpty": "Ihr lebender Lebenslauf enthält noch keine Fähigkeiten.",
+    "draftSummary": "Arbeitsjournal-Entwurf für {date}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "draftSummaryWithSite": "Arbeitsjournal-Entwurf für {date} am Standort {site}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "confirmSummary": "Journaleintrag gespeichert. Fähigkeitserkennung: {added} hinzugefügt, {strengthened} gestärkt, {reviewNeeded} wartet auf Prüfung."
   }
 }

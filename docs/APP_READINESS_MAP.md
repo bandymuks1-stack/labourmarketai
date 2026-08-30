@@ -202,7 +202,7 @@ exists to prevent.
 | `ANDROID_IMPLEMENTATION_READY` | **NO** — no longer blocked on the seam (§5.1 opened with auth-core). Product data waits on the shared-core refactor coverage above; the scaffold ships every blocked surface as an honest refusal, never an empty screen |
 | `ANDROID_NATIVE_BUILD_PROVEN` | **YES (build level, 2026-08-30)** — `gradlew assembleDebug` BUILD SUCCESSFUL, `app-debug.apk` produced (`ai.labourmarket.app` v0.1.0); hoisted linker + Expo SDK 57 bundled pins, see `docs/mobile/NATIVE_READINESS_2026-08-29.md`. Runtime install+launch still unproven: no emulator/device on the build machine |
 | `IOS_BUILD_PROVEN` | **YES (simulator, 2026-08-30)** — `ios.yml` on GitHub `macos-26` runners: prebuild → pod install → xcodebuild (scheme `LabourMarketai`, Xcode 26.6, unsigned) → BUILD SUCCEEDED → simulator install+launch, process alive 15s ("IOS_SIM_LAUNCH_PROVEN"). Toolchain floor: Xcode 26.4+/Swift 6.3 (expo/expo#46242). NOT claimed: device builds, signing, store readiness, real-backend auth/deep-link E2E |
-| `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and three canonical capabilities are reachable over it; the rest wait on the same shared-core refactor |
+| `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and four canonical capabilities are reachable over it (`profile.get`, `living_cv.skills.get`, `journal.create_draft`, `journal.confirm`; real-client OAuth + read PROVEN 2026-08-30, see `docs/integrations/CHATGPT_MCP_CLIENT_V1.md`); the rest wait on the same shared-core refactor |
 
 The gate is closed. What remains is not a decision — it is the mechanical work
 of letting domain helpers accept the caller's client instead of fetching their

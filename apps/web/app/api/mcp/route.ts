@@ -12,6 +12,7 @@ import {
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
+import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,6 +45,9 @@ function toolDefs(): McpToolDef[] {
     title: c.title,
     description: c.description,
     inputSchema: z.toJSONSchema(c.inputSchema) as Record<string, unknown>,
+    // Honest behavior hints declared per capability in review — clients can
+    // tell reads from writes without parsing prose.
+    annotations: c.annotations,
   }));
 }
 
@@ -99,7 +103,23 @@ export async function POST(req: Request) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
       const result = await runCapability(capability.id, caller, args);
-      return { isError: !result.ok, payload: result };
+      // Human presentation is ADDITIVE and may never break the call: a
+      // summarizer failure just means the client gets the structured payload
+      // alone, exactly as before.
+      let humanText: string | undefined;
+      if (result.ok) {
+        try {
+          humanText =
+            (await summarizeCapabilityResult(
+              capability.id,
+              result.data ?? {},
+              caller.locale,
+            )) ?? undefined;
+        } catch {
+          humanText = undefined;
+        }
+      }
+      return { isError: !result.ok, payload: result, humanText };
     },
   });
 

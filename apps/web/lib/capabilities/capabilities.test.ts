@@ -104,6 +104,30 @@ describe("the registry itself", () => {
     ]);
   });
 
+  it("every capability declares HONEST behavior annotations — no spec-default lies", () => {
+    for (const c of listCapabilities()) {
+      // All four hints are explicit, reviewed claims (contract requires them).
+      expect(Object.keys(c.annotations).sort()).toEqual([
+        "destructiveHint",
+        "idempotentHint",
+        "openWorldHint",
+        "readOnlyHint",
+      ]);
+      // Nothing in the registry reaches outside the product's own domain.
+      expect(c.annotations.openWorldHint).toBe(false);
+      // Nothing in the registry destroys data (journal writes are append-only).
+      expect(c.annotations.destructiveHint).toBe(false);
+    }
+    const byId = Object.fromEntries(listCapabilities().map((c) => [c.id, c]));
+    // Reads AND the write-nothing draft are read-only; the confirm is not.
+    expect(byId["profile.get"].annotations.readOnlyHint).toBe(true);
+    expect(byId["living_cv.skills.get"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.create_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
+    // The one-time token makes a duplicate confirm a no-op, not a second row.
+    expect(byId["journal.confirm"].annotations.idempotentHint).toBe(true);
+  });
+
   it("an unknown capability id is refused, never a throw", async () => {
     const r = await runCapability("db.drop_everything", caller({}), {});
     expect(r).toMatchObject({ ok: false, code: "unknown_capability" });

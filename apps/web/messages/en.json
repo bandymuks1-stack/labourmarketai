@@ -13871,5 +13871,17 @@
       "deny": "Deny",
       "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
       "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
+  },
+  "capabilities": {
+    "notSet": "not set",
+    "workerExists": "active",
+    "workerNone": "none",
+    "workerUnavailable": "could not be checked",
+    "profileSummary": "Your LabourMarket.ai profile — name: {name}; country: {country}; language: {language}; active role: {role}; worker profile: {worker}.",
+    "skillsSummary": "Your Living CV holds {count} skills ({verified} verified).",
+    "skillsEmpty": "Your Living CV has no recorded skills yet.",
+    "draftSummary": "Work Journal draft for {date}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "draftSummaryWithSite": "Work Journal draft for {date} at {site}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "confirmSummary": "Journal entry saved. Skill recognition: {added} added, {strengthened} strengthened, {reviewNeeded} awaiting review."
   }
 }
