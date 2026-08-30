@@ -14,6 +14,12 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { workerLogWorkSchema } from "@/lib/conversation/worker-schemas";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { orgDisplayName } from "@/lib/company/org-display";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
 import type {
   CapabilityCaller,
@@ -222,6 +228,146 @@ async function journalChainFingerprint(
   };
 }
 
+/**
+ * A CONFIRMATION HASH MUST NOT DEPEND ON null-vs-absent. The draft side may
+ * receive `siteName` as absent while the confirming client copies the
+ * preview's explicit `null` back (that is exactly what an MCP model does) —
+ * JSON drops the absent key and keeps the null one, so the same draft would
+ * hash differently and every confirm would die as `input_mismatch`. Both
+ * sides hash THIS normalized shape.
+ */
+function normalizedDraftForHash(draft: {
+  engagementContextId: string;
+  notes: string;
+  workDate: string;
+  siteName?: string | null;
+}): Record<string, unknown> {
+  return {
+    engagementContextId: draft.engagementContextId,
+    notes: draft.notes,
+    workDate: draft.workDate,
+    siteName: draft.siteName ?? null,
+  };
+}
+
+/**
+ * WHICH ENGAGEMENT CONTEXT — capability edition (§18 of the chat-first
+ * audit: a user must never need an internal UUID to get value).
+ *
+ * `engagementContextId` is an internal id no external client can discover, so
+ * the draft capability resolves it the SAME way the web work-log flow does:
+ * the caller's own active professional contexts under their own RLS, decided
+ * by the canonical rule hierarchy (`resolveEngagementContext`, rules B/C/D).
+ * On real ambiguity (rule C) it returns the labeled options and mints NO
+ * token — the client must ask the human, exactly like the web flow.
+ */
+type DraftEngagementOutcome =
+  | { kind: "selected"; id: string; label: string | null }
+  | { kind: "choice"; options: { id: string; label: string }[] }
+  | { kind: "refused"; result: ExecResult };
+
+async function resolveDraftEngagementContext(
+  caller: CapabilityCaller,
+  workDate: string,
+  requestedId: string | undefined,
+): Promise<DraftEngagementOutcome> {
+  const { data: rows, error } = await caller.supabase
+    .from("engagement_contexts")
+    .select(
+      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)",
+    )
+    .eq("profile_id", caller.userId)
+    .eq("status", "active")
+    .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS])
+    .order("is_primary", { ascending: false });
+  if (error) {
+    return {
+      kind: "refused",
+      result: { ok: false, code: "unavailable", message: "Engagement context read failed." },
+    };
+  }
+
+  const tRelationships = await getTranslations({
+    locale: caller.locale,
+    namespace: "relationshipTypes",
+  });
+  const labelOf = (row: {
+    relationship_slug: string;
+    title: string | null;
+    organizations: { display_name: string | null; legal_name: string | null } | null;
+  }): string =>
+    orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name) ??
+    row.title ??
+    (tRelationships.has(row.relationship_slug)
+      ? tRelationships(row.relationship_slug)
+      : row.relationship_slug);
+
+  type Row = {
+    id: string;
+    relationship_slug: string;
+    title: string | null;
+    is_primary: boolean | null;
+    organization_id: string | null;
+    status: string | null;
+    started_at: string | null;
+    ended_at: string | null;
+    organizations: { display_name: string | null; legal_name: string | null } | null;
+  };
+  const contexts = (rows ?? []) as unknown as Row[];
+
+  // An explicitly named context passes through — the canonical write core
+  // still validates ownership, so an id outside this list fails THERE with
+  // its real error, never silently rerouted here.
+  if (requestedId) {
+    const named = contexts.find((r) => r.id === requestedId);
+    return { kind: "selected", id: requestedId, label: named ? labelOf(named) : null };
+  }
+
+  const candidates: EngagementCandidate[] = contexts.map((r) => ({
+    id: r.id,
+    relationshipSlug: r.relationship_slug,
+    organizationId: r.organization_id,
+    status: r.status ?? "active",
+    startedAt: r.started_at,
+    endedAt: r.ended_at,
+    isPrimary: r.is_primary === true,
+  }));
+  const resolution = resolveEngagementContext({ candidates, workDay: workDate });
+  if (resolution.selectedId) {
+    const hit = contexts.find((r) => r.id === resolution.selectedId);
+    return {
+      kind: "selected",
+      id: resolution.selectedId,
+      label: hit ? labelOf(hit) : null,
+    };
+  }
+  if (resolution.rule === "C") {
+    const applicable = new Set(resolution.candidateIds);
+    return {
+      kind: "choice",
+      options: contexts
+        .filter((r) => applicable.has(r.id))
+        .map((r) => ({ id: r.id, label: labelOf(r) })),
+    };
+  }
+  return {
+    kind: "refused",
+    result: {
+      ok: false,
+      code: "no_engagement_context",
+      message:
+        "No active engagement context can hold this entry — the account has no usable work context.",
+    },
+  };
+}
+
+/** Capability-level draft input: `engagementContextId` becomes OPTIONAL here
+ *  (and only here) — when absent the capability resolves it by the canonical
+ *  rule hierarchy above. The conversation dispatcher's contract is untouched. */
+const journalDraftInput = workerLogWorkSchema.extend({
+  engagementContextId: z.uuid().optional(),
+});
+
 const journalCreateDraft: CapabilityDescriptor = {
   id: "journal.create_draft",
   kind: "draft",
@@ -229,6 +375,9 @@ const journalCreateDraft: CapabilityDescriptor = {
   description:
     "Validates a Work Journal entry and returns the exact preview that " +
     "would be saved, plus a one-time confirmation token. NOTHING is written. " +
+    "engagementContextId may be omitted: the entry's work context is then " +
+    "resolved from the caller's own active contexts, and on real ambiguity " +
+    "the labeled options are returned so the user can choose by name. " +
     "Uses the same input contract as the web chat work-log form.",
   // Exposed since the journal-write extraction landed (owner-approved
   // 2026-08-29 §6): journal.confirm now performs the real canonical write,
@@ -242,14 +391,38 @@ const journalCreateDraft: CapabilityDescriptor = {
     idempotentHint: true,
     openWorldHint: false,
   },
-  inputSchema: workerLogWorkSchema,
+  inputSchema: journalDraftInput,
   run: async (caller, input): Promise<ExecResult> => {
-    const draft = workerLogWorkSchema.parse(input);
+    const draft = journalDraftInput.parse(input);
+    const engagement = await resolveDraftEngagementContext(
+      caller,
+      draft.workDate,
+      draft.engagementContextId,
+    );
+    if (engagement.kind === "refused") return engagement.result;
+    if (engagement.kind === "choice") {
+      // Real ambiguity (rule C): NOTHING preselected, NO token minted — the
+      // client must ask the human, exactly like the web work-log flow.
+      return {
+        ok: true,
+        data: {
+          status: "engagement_choice_required",
+          options: engagement.options,
+          note: "This entry could belong to more than one work context. Ask the user to choose, then draft again with the chosen engagementContextId.",
+        },
+      };
+    }
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
+    const resolved = {
+      engagementContextId: engagement.id,
+      notes: draft.notes,
+      workDate: draft.workDate,
+      siteName: draft.siteName ?? null,
+    };
     const token = issueConfirmationToken(capabilityTokenSecret(), {
       actionId: "journal.confirm",
-      inputHash: canonicalInputHash(draft),
+      inputHash: canonicalInputHash(normalizedDraftForHash(resolved)),
       userId: caller.userId,
       stateFingerprint: state.fingerprint,
       issuedAtMs: Date.now(),
@@ -258,10 +431,14 @@ const journalCreateDraft: CapabilityDescriptor = {
       ok: true,
       data: {
         preview: {
-          workDate: draft.workDate,
-          siteName: draft.siteName ?? null,
-          notes: draft.notes,
-          engagementContextId: draft.engagementContextId,
+          workDate: resolved.workDate,
+          siteName: resolved.siteName,
+          notes: resolved.notes,
+          engagementContextId: resolved.engagementContextId,
+          // The RESOLVED context, named — the human must SEE which context
+          // the entry will land in before confirming (preselect-and-show,
+          // never silently assign).
+          engagementLabel: engagement.label,
         },
         confirmationToken: token,
         note: "Nothing was saved. Confirming requires journal.confirm with this exact draft and token.",
@@ -304,7 +481,9 @@ const journalConfirm: CapabilityDescriptor = {
     if (!state.ok) return state.result;
     const verdict = verifyConfirmationToken(capabilityTokenSecret(), confirmationToken, {
       actionId: "journal.confirm",
-      input: draft,
+      // Same null-vs-absent normalization the draft hashed — see
+      // normalizedDraftForHash.
+      input: normalizedDraftForHash(draft),
       userId: caller.userId,
       currentStateFingerprint: state.fingerprint,
       nowMs: Date.now(),
