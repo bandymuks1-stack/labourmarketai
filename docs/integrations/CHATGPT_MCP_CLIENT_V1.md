@@ -98,8 +98,9 @@ today (the same `shared-blocked` reality as dashboard-search).
   executed with status 200 under the caller's own JWT subject
   (`dc3284ea-…`, the owner's profile id) — caller-scoped RLS, no service role.
   ChatGPT rendered the owner's real production profile. See §6 resolution.
-- PRODUCTION WRITE PROVEN: **NO** — no `journal.confirm` has yet run through
-  the real client. The draft→preview→confirm E2E is the next real-client test.
+- PRODUCTION WRITE PROVEN: **YES** (prod, 2026-08-30 13:16 UTC) — the full
+  natural-language draft→preview→confirm E2E ran through the real ChatGPT
+  client with server-log + DB evidence. See §7.
 
 ## 5. Path to live (updated 2026-08-29 after the owner go-decision)
 
@@ -197,3 +198,56 @@ was changed to make it work.
 2. The MCP `annotations` gap above is still open and now unblocked: honest
    annotations + richer tool descriptions are the correct additive step to help
    the model auto-invoke on natural language once the connector is attached.
+   (Closed the same day — see §4 and §7.)
+
+## 7. Real-client WRITE E2E — 2026-08-30 (PASS, evidence)
+
+Prod = merge of #1358 (annotations + presentation + switch-context) and #1359
+(draft-side engagement-context resolution), deployment `success` 12:59:15 UTC.
+Fresh ChatGPT conversation, connector attached to the composer, owner account.
+Natural request (verbatim): *"Įrašyk į mano darbo dienoraštį bandomąjį įrašą:
+šiandien 1 valanda, TEST CHATGPT E2E. Prieš išsaugant parodyk, ką įrašysi."*
+
+**Observed flow (fresh schema):**
+1. The model invoked `journal_create_draft` DIRECTLY on the natural sentence
+   (no auxiliary profile read this round, no fabricated arguments). The
+   read-only-annotated draft ran without a ChatGPT consent dialog.
+2. Rule C fired (the owner holds 3 org-linked contexts): the capability
+   returned `engagement_choice_required` with HUMAN labels and NO token;
+   ChatGPT asked in Lithuanian, listing the four named contexts.
+3. The owner-side answer was the context NAME only ("Labour market ai Sp.
+   z o.o"). The re-draft resolved it and the preview NAMED it: date, context,
+   note, "dar niekas neišsaugota", confirm instruction. No JSON, no UUIDs.
+4. Natural confirmation ("Taip, išsaugok.") → ChatGPT showed its write-consent
+   dialog (the `readOnlyHint:false` tool), then `journal_confirm` ran.
+
+**Server/DB evidence:**
+- `POST /rest/v1/rpc/create_journal_entry_full` 200 at 13:16:40.711 UTC under
+  the caller's own JWT subject (`dc3284ea-…`) — no service role.
+- `journal_entries` 18 → **19** (exactly once); new row
+  `5e7557f9-4e40-431b-928d-1a3e4be860aa`: correct worker, correct
+  `engagement_context_id` (`39b1f66c-…` = the context chosen BY NAME),
+  `original_text "1 valanda, TEST CHATGPT E2E"`, `original_language lt`,
+  `hash_prev` = the pre-write chain head (chain intact), 2 metric rows.
+- Draft persisted NOTHING: after three draft executions across two
+  conversations the count and head hash were unchanged.
+- **Replay control through the real client:** asking to save again with the
+  same token returned `confirmation_rejected (stale_state)`; count stayed 19.
+- **Structured UI sync:** `/lt/dashboard/journal` shows the entry under
+  2026-08-30 — one canonical domain state, two clients.
+- Tamper / cross-user / input-mismatch rejections remain covered by the unit
+  and local live controls (not re-run against the owner's prod account, by
+  design).
+
+**Findings from the STALE-schema first conversation (recorded, not hidden):**
+- A conversation pins the tools/list it discovered at attach time. Against the
+  pre-#1359 schema the model FABRICATED a nil-UUID `engagementContextId`; the
+  requested-id passthrough accepted it at DRAFT time (label null — the model
+  then invented a context label in prose). Safe (the write core would have
+  refused; nothing was written; the model itself declined to confirm), but a
+  recorded defect: **the draft should validate a requested id against the
+  caller's own contexts and refuse with the labeled options instead of
+  minting an unconfirmable token.** Follow-up slice.
+- The rule-C option labels can collide (two org-less/unnamed contexts both
+  render as the localized relationship word). The web flow qualifies duplicate
+  labels; the capability path should too. Follow-up slice.

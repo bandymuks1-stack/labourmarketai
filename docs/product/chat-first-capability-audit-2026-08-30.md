@@ -22,7 +22,7 @@ below is claimed from documentation alone.
 | REAL_CHATGPT_OAUTH_CONNECTION | **PROVEN** | DCR 201 → consent 200 → token 200 (`resource=https://labourmarket.ai`), prod Supabase auth logs 2026-08-30 |
 | MCP_IDENTITY_PROVEN | **YES** | every bearer verification 200 under the caller's own JWT subject |
 | MCP_READ_PROVEN | **YES** | unique `profile.get` fingerprint (`profiles?select=…onboarded,active_role`) executed 11:44:16.546 UTC, status 200, subject = caller — caller-scoped RLS, no service role |
-| MCP_WRITE_PROVEN | **NO** | no `journal.confirm` has run through the real client yet — the draft→preview→confirm E2E is the next real-client test |
+| MCP_WRITE_PROVEN | **YES** (2026-08-30 13:16 UTC) | full natural-language draft→choice-by-name→preview→confirm E2E through the real ChatGPT client: exactly-once canonical write (`journal_entries` 18→19, entry `5e7557f9-…`), caller's own JWT subject, chosen context attributed, chain intact, draft wrote nothing, real-client replay rejected `stale_state`, entry visible in the web journal. Evidence: `CHATGPT_MCP_CLIENT_V1.md` §7 |
 | Connector attach UX | ChatGPT platform behavior | developer-mode connector tools are **per-conversation**; until attached to the composer the model has no tools and declines in prose. Not a server defect. Mitigation shipped: honest MCP `annotations` + richer presentation (see §5) |
 
 ## 1. Architecture verdicts (the §27 headline flags)
