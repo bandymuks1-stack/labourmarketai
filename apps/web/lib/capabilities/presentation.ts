@@ -127,6 +127,24 @@ function summarizeJournalList(
   return t("journalListSummary", { count: entries.length, latest });
 }
 
+function summarizeContextSwitch(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  if (data.status === "workspace_choice_required" && Array.isArray(data.options)) {
+    const labels = data.options
+      .map((o) => text(asRecord(o)?.label))
+      .filter((l): l is string => l !== null);
+    if (labels.length === 0) return null;
+    return t("workspaceChoose", { options: labels.join(", ") });
+  }
+  if (data.status === "switched") {
+    const label = text(data.label);
+    return label ? t("workspaceSwitched", { label }) : null;
+  }
+  return null;
+}
+
 const SUMMARIZERS: Record<
   string,
   (t: Translator, data: Record<string, unknown>) => string | null
@@ -136,6 +154,7 @@ const SUMMARIZERS: Record<
   "journal.list": summarizeJournalList,
   "journal.create_draft": summarizeDraft,
   "journal.confirm": summarizeConfirm,
+  "context.switch": summarizeContextSwitch,
 };
 
 /**

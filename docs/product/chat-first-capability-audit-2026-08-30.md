@@ -135,10 +135,15 @@ action schemas · the concept-resolution seam.
 
 1. (P0) G1 context-switch intent — in this train.
 2. ~~(P0-found.) G2 intent registry extraction~~ — SHIPPED 2026-08-30 (`intent-registry.ts`).
-3. (P1) G4 executor extraction train: one `*Core` per conversation action
-   (start: express-interest, create-demand, save-work-card) + capability
-   bridge. Unlocks ChatGPT AND mobile simultaneously (same registry).
-4. (P1) G6 `journal.list` + `living_cv.get` capabilities.
+3. (P1) G4 executor extraction train — **REPRESENTATIVE BRIDGE SHIPPED
+   2026-08-30** (PRs A/B/C): `lib/domain/caller.ts` shared execution
+   contract + envelope reconciliation; one core per table for
+   profiles/workers/worker_skills/journal-list; workspace-switch core +
+   `context.switch` capability; `journal.list` capability. REMAINING G4
+   tail: per-action `*Core` for the 19 schema'd conversation actions
+   (start: express-interest, create-demand, save-work-card) + the
+   CONVERSATION_ACTIONS→CapabilityDescriptor bridge.
+4. (P1) G6 — `journal.list` SHIPPED 2026-08-30 (canonical list core, page delegates). `living_cv.get` (full CV via `buildVerifiedCv` caller-threading) still open.
 5. (P1) G3 nl/de intent coverage; then router behind concept-resolution.
 6. (P1) G7 mobile gate flip onto the capability registry.
 7. (P1) MCP write E2E through the real ChatGPT client (owner-in-the-loop).
@@ -148,7 +153,7 @@ action schemas · the concept-resolution seam.
 ## 8. Completion state (§28 vocabulary)
 
 - **AUDIT_COMPLETE: YES** (this document, evidence-based)
-- **FOUNDATION_COMPLETE: PARTIAL** (G2 registry shipped 2026-08-30; G4 bridge pending)
+- **FOUNDATION_COMPLETE: PARTIAL** (G2 registry + G4 representative bridge shipped 2026-08-30; G4 per-action extraction of the 19 schema'd conversation actions pending)
 - **P0_COMPLETE: YES** (G1 shipped this train; G2 shipped 2026-08-30)
 - **P1_COMPLETE: NO**
 - **FULL_PRODUCT_COMPLETE: NO**

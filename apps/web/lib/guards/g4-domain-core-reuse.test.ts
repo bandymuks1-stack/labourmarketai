@@ -37,6 +37,20 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(REGISTRY).toMatch(/listJournalEntries\(caller/);
   });
 
+  it("the workspace switch runs through ONE core from every transport", () => {
+    // The web server actions and the context.switch capability both execute
+    // the same membership-validated pointer write — neither keeps a private
+    // copy of the membership check or the UPDATE.
+    const actions = read("lib", "company", "organization-actions.ts");
+    expect(actions).toMatch(/switchActiveWorkspaceCore\(/);
+    expect(actions).not.toMatch(/from\("profiles"\)/);
+    expect(REGISTRY).toMatch(/switchActiveWorkspaceCore\(caller/);
+    expect(REGISTRY).toMatch(/listWorkspaceMemberships\(caller\)/);
+    // The membership list itself is built in exactly one place.
+    const activeOrg = read("lib", "company", "active-organization.ts");
+    expect(activeOrg).toMatch(/listWorkspaceMemberships\(\{ supabase, userId: user\.id \}\)/);
+  });
+
   it("the journal LIST select lives in exactly one place (the core)", () => {
     const core = read("lib", "journal", "journal-list-core.ts");
     expect(core).toMatch(/deleted_at, superseded_by/);

@@ -61,8 +61,10 @@ function stubSupabase(script: TableScript) {
         select: () => chain,
         eq: () => chain,
         in: () => chain,
+        not: () => chain,
         order: () => chain,
         limit: () => chain,
+        update: () => chain,
         maybeSingle: async () => outcome,
         then: (resolve: (v: unknown) => unknown) => resolve(outcome),
       };
@@ -98,6 +100,7 @@ describe("the registry itself", () => {
       "journal.list",
       "journal.create_draft",
       "journal.confirm",
+      "context.switch",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -105,6 +108,7 @@ describe("the registry itself", () => {
       "journal.list",
       "journal.create_draft",
       "journal.confirm",
+      "context.switch",
     ]);
   });
 
@@ -131,6 +135,9 @@ describe("the registry itself", () => {
     expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
     // The one-time token makes a duplicate confirm a no-op, not a second row.
     expect(byId["journal.confirm"].annotations.idempotentHint).toBe(true);
+    // A pointer write: not read-only, never destructive, repeat = no-op.
+    expect(byId["context.switch"].annotations.readOnlyHint).toBe(false);
+    expect(byId["context.switch"].annotations.idempotentHint).toBe(true);
   });
 
   it("an unknown capability id is refused, never a throw", async () => {
@@ -312,6 +319,82 @@ describe("journal.list", () => {
   it("rejects an out-of-bounds limit at the schema", async () => {
     const r = await runCapability("journal.list", caller({}), { limit: 500 });
     expect(r).toMatchObject({ ok: false, code: "invalid" });
+  });
+});
+
+describe("context.switch", () => {
+  /** One owned org + no governance/engagement memberships + a writable
+   *  profiles pointer — the minimal membership world. */
+  const workspaceWorld = (profilesOutcome?: {
+    data: unknown;
+    error: { message: string; code?: string } | null;
+  }): TableScript => ({
+    organizations: {
+      data: [
+        {
+          id: "00000000-0000-4000-8000-00000000or01",
+          display_name: "Dev Statyba",
+          legal_name: null,
+          organization_type: "company",
+          legacy_company_id: null,
+        },
+      ],
+      error: null,
+    },
+    engagement_contexts: { data: [], error: null },
+    company_memberships: { data: [], error: null },
+    profiles: profilesOutcome ?? { data: null, error: null },
+  });
+
+  it("switches by the organization's exact name through the SAME core the web action runs", async () => {
+    const r = await runCapability("context.switch", caller(workspaceWorld()), {
+      workspace: "Dev Statyba",
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      data: {
+        status: "switched",
+        workspaceId: "00000000-0000-4000-8000-00000000or01",
+        durablePointer: true,
+      },
+    });
+  });
+
+  it("'personal' switches to the personal workspace", async () => {
+    const r = await runCapability("context.switch", caller(workspaceWorld()), {
+      workspace: "personal",
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      data: { status: "switched", workspaceId: "personal" },
+    });
+  });
+
+  it("an unknown or foreign workspace → the labeled options, NOTHING switched", async () => {
+    const r = await runCapability("context.switch", caller(workspaceWorld()), {
+      workspace: "Some Other Company",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("workspace_choice_required");
+      expect(r.data?.options).toEqual([
+        // The translation mock renders keys — the personal label resolves
+        // through the localized catalogue in the app.
+        { id: "personal", label: "workspacePersonal" },
+        { id: "00000000-0000-4000-8000-00000000or01", label: "Dev Statyba" },
+      ]);
+    }
+  });
+
+  it("a missing durable pointer column is an HONEST needs_migration refusal for bearer callers", async () => {
+    const r = await runCapability(
+      "context.switch",
+      caller(
+        workspaceWorld({ data: null, error: { message: "column absent", code: "42703" } }),
+      ),
+      { workspace: "Dev Statyba" },
+    );
+    expect(r).toMatchObject({ ok: false, code: "needs_migration" });
   });
 });
 

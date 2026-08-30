@@ -13879,6 +13879,9 @@
       "errorUnresolved": "Не удалось обработать запрос авторизации. Вернитесь в приложение и попробуйте снова."
   },
   "capabilities": {
+    "workspacePersonal": "Личное пространство",
+    "workspaceSwitched": "Активное рабочее пространство переключено на «{label}».",
+    "workspaceChoose": "Выберите рабочее пространство: {options}.",
     "journalListEmpty": "В рабочем журнале пока нет записей.",
     "journalListSummary": "Найдено записей: {count}. Последняя — {latest}.",
     "notSet": "не указано",

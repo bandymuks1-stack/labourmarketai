@@ -189,6 +189,34 @@ describe("summarizeCapabilityResult", () => {
     expect(out?.values).toEqual({ added: 2, strengthened: 1, reviewNeeded: 0 });
   });
 
+  it("context.switch: names the new workspace; a choice outcome lists the labeled options", async () => {
+    const switched = parse(
+      await summarizeCapabilityResult(
+        "context.switch",
+        { status: "switched", workspaceId: "org-1", label: "Dev Statyba", durablePointer: true },
+        "lt",
+      ),
+    );
+    expect(switched?.key).toBe("workspaceSwitched");
+    expect(switched?.values).toEqual({ label: "Dev Statyba" });
+
+    const choice = parse(
+      await summarizeCapabilityResult(
+        "context.switch",
+        {
+          status: "workspace_choice_required",
+          options: [
+            { id: "personal", label: "Asmeninė erdvė" },
+            { id: "org-1", label: "Dev Statyba" },
+          ],
+        },
+        "lt",
+      ),
+    );
+    expect(choice?.key).toBe("workspaceChoose");
+    expect(choice?.values).toEqual({ options: "Asmeninė erdvė, Dev Statyba" });
+  });
+
   it("unknown capability or unrecognized data shape → null, never a guess", async () => {
     expect(await summarizeCapabilityResult("future.capability", { anything: 1 }, "en")).toBeNull();
     expect(await summarizeCapabilityResult("profile.get", {}, "en")).toBeNull();

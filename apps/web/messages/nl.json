@@ -13879,6 +13879,9 @@
       "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Ga terug naar de applicatie en probeer het opnieuw."
   },
   "capabilities": {
+    "workspacePersonal": "Persoonlijke ruimte",
+    "workspaceSwitched": "Actieve werkruimte gewijzigd naar “{label}”.",
+    "workspaceChoose": "Kies een werkruimte: {options}.",
     "journalListEmpty": "Het werkjournaal heeft nog geen items.",
     "journalListSummary": "{count} items gevonden. Meest recent: {latest}.",
     "notSet": "niet ingesteld",
