@@ -58,6 +58,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter=mobile... --filter=@labourmarket/client-core...
 
+      # Run 2 failed with: "package 'apple' is using Swift tools version
+      # 6.2.0 but the installed version is 6.1.0" — the ExpoModulesJSI
+      # SwiftPM build needs a newer Swift than the runner's default
+      # Xcode 16.4. Select the newest Xcode installed on the image,
+      # discovery-based so image updates keep working.
+      - name: Select newest Xcode
+        run: |
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $NEWEST (available: $(ls -d /Applications/Xcode*.app | tr '\n' ' '))"
+          sudo xcode-select -s "$NEWEST"
+          xcodebuild -version
+          swift --version
+
       - name: Expo prebuild (iOS)
         working-directory: apps/mobile
         run: pnpm exec expo prebuild --platform ios --no-install
