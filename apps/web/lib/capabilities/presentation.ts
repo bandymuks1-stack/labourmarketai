@@ -76,15 +76,26 @@ function summarizeSkills(t: Translator, data: Record<string, unknown>): string |
 }
 
 function summarizeDraft(t: Translator, data: Record<string, unknown>): string | null {
+  // Rule-C outcome: the entry could belong to several contexts — the human
+  // must choose by NAME before anything is drafted.
+  if (data.status === "engagement_choice_required" && Array.isArray(data.options)) {
+    const labels = data.options
+      .map((o) => text(asRecord(o)?.label))
+      .filter((l): l is string => l !== null);
+    if (labels.length === 0) return null;
+    return t("draftChooseContext", { options: labels.join(", ") });
+  }
   const preview = asRecord(data.preview);
   if (!preview) return null;
   const date = text(preview.workDate);
   const notes = text(preview.notes);
   if (!date || !notes) return null;
   const site = text(preview.siteName);
-  return site
+  const base = site
     ? t("draftSummaryWithSite", { date, site, notes: trimNotes(notes) })
     : t("draftSummary", { date, notes: trimNotes(notes) });
+  const context = text(preview.engagementLabel);
+  return context ? `${base} ${t("draftContext", { context })}` : base;
 }
 
 function summarizeConfirm(t: Translator, data: Record<string, unknown>): string | null {

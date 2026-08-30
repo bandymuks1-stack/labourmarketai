@@ -29,7 +29,8 @@ vi.mock("@/lib/journal/journal-write-core", () => ({
 }));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: async () => (key: string) => key,
+  getTranslations: async () =>
+    Object.assign((key: string) => key, { has: () => false }),
 }));
 
 import {
@@ -59,6 +60,7 @@ function stubSupabase(script: TableScript) {
       const chain = {
         select: () => chain,
         eq: () => chain,
+        in: () => chain,
         order: () => chain,
         limit: () => chain,
         maybeSingle: async () => outcome,
@@ -247,11 +249,26 @@ describe("journal draft → confirm", () => {
     siteName: "Vilnius A1",
   };
 
+  /** One active org-linked engagement context the caller can log against —
+   *  the row the capability's context resolution reads. */
+  const EC_ROW = {
+    id: DRAFT.engagementContextId,
+    relationship_slug: "employee",
+    title: null,
+    is_primary: true,
+    organization_id: "org-1",
+    status: "active",
+    started_at: null,
+    ended_at: null,
+    organizations: { display_name: "Dev Statyba", legal_name: null },
+  };
+
   /** The caller's own worker + journal chain head, as the token fingerprint
    *  reads them. `head` moves after a successful write — the one-time rule. */
   const journalState = (head: string | null): TableScript => ({
     workers: { data: { id: "worker-1" }, error: null },
     journal_entries: { data: head === null ? null : { hash_self: head }, error: null },
+    engagement_contexts: { data: [EC_ROW], error: null },
   });
 
   it("a draft returns the exact preview + a token, and WRITES nothing", async () => {
@@ -263,9 +280,94 @@ describe("journal draft → confirm", () => {
         siteName: "Vilnius A1",
         notes: DRAFT.notes,
         engagementContextId: DRAFT.engagementContextId,
+        // The named context — the human sees WHERE the entry lands before
+        // confirming.
+        engagementLabel: "Dev Statyba",
       });
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
+  });
+
+  it("engagementContextId may be OMITTED: one applicable org context resolves (rule B) and is NAMED in the preview", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(journalState("h0")),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as Record<string, unknown>;
+      expect(preview.engagementContextId).toBe(DRAFT.engagementContextId);
+      expect(preview.engagementLabel).toBe("Dev Statyba");
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+  });
+
+  it("a resolved draft's token confirms — the OMITTED id round-trips through the preview", async () => {
+    coreWrite.mockClear();
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const drafted = await runCapability(
+      "journal.create_draft",
+      caller(journalState("h0")),
+      withoutContext,
+    );
+    expect(drafted.ok).toBe(true);
+    const preview = drafted.ok
+      ? (drafted.data?.preview as Record<string, unknown>)
+      : {};
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // The confirming client copies the PREVIEW back — including the explicit
+    // null siteName it renders — which is exactly what an MCP model does.
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      engagementContextId: preview.engagementContextId,
+      notes: preview.notes,
+      workDate: preview.workDate,
+      siteName: preview.siteName,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: true });
+    expect(coreWrite).toHaveBeenCalledTimes(1);
+  });
+
+  it("several applicable org contexts → the LABELED options, no preselection, NO token (rule C)", async () => {
+    const second = {
+      ...EC_ROW,
+      id: "00000000-0000-4000-8000-0000000000ed",
+      is_primary: false,
+      organizations: { display_name: "Nonstop Group", legal_name: null },
+    };
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [EC_ROW, second], error: null },
+      }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.options).toEqual([
+        { id: EC_ROW.id, label: "Dev Statyba" },
+        { id: second.id, label: "Nonstop Group" },
+      ]);
+    }
+  });
+
+  it("no usable context at all → an honest refusal, never a guess", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [], error: null },
+      }),
+      withoutContext,
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_engagement_context" });
   });
 
   it("confirm verifies the token, then performs the canonical write with the executor's exact FormData mapping", async () => {

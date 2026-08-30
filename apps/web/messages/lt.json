@@ -13888,6 +13888,8 @@
     "skillsEmpty": "Jūsų gyvajame CV įgūdžių dar nėra.",
     "draftSummary": "Darbo žurnalo juodraštis {date}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
     "draftSummaryWithSite": "Darbo žurnalo juodraštis {date}, objektas {site}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "draftChooseContext": "Šis įrašas gali priklausyti keliems darbo kontekstams: {options}. Kuriam jį priskirti?",
+    "draftContext": "Kontekstas: {context}.",
     "confirmSummary": "Žurnalo įrašas išsaugotas. Įgūdžių atpažinimas: {added} pridėta, {strengthened} sustiprinta, {reviewNeeded} laukia peržiūros."
   }
 }
