@@ -29,6 +29,31 @@ import type { Database } from "@/lib/supabase/types";
 
 export type CapabilityKind = "read" | "draft" | "confirm" | "execute";
 
+/**
+ * Honest MCP-style behavior hints, declared per capability IN REVIEW — the
+ * adapter emits them verbatim as MCP tool `annotations` so an external client
+ * (ChatGPT, Claude, any MCP host) can tell a read from a write without
+ * parsing prose. They are hints for clients, never authority: the server
+ * still enforces kind/draft→confirm/RLS regardless of what a client assumes.
+ *
+ * All four fields are REQUIRED so a new capability cannot ship with the MCP
+ * spec's dangerous defaults (destructiveHint defaults to true, openWorldHint
+ * to true) by omission — every hint is a reviewed, explicit claim.
+ */
+export type CapabilityAnnotations = {
+  /** True when the handler modifies nothing (reads and token-minting drafts). */
+  readonly readOnlyHint: boolean;
+  /** True only if the capability can destroy/overwrite data. Append-only
+   *  writes are NOT destructive. */
+  readonly destructiveHint: boolean;
+  /** True when repeating the same call with the same arguments has no
+   *  additional effect (reads; one-time-token confirms). */
+  readonly idempotentHint: boolean;
+  /** True only if the capability reaches outside the product's own domain
+   *  (none do today). */
+  readonly openWorldHint: boolean;
+};
+
 /** How the caller authenticated. Diagnostics only — a capability MUST NOT
  *  branch authority on it (RLS already decided WHAT the caller may do). */
 export type CapabilityTransport = "cookie" | "bearer";
@@ -56,6 +81,7 @@ export type CapabilityDescriptor = {
    * a capability is a product decision made here, in code review.
    */
   readonly exposed: boolean;
+  readonly annotations: CapabilityAnnotations;
   readonly inputSchema: z.ZodTypeAny;
   readonly run: (
     caller: CapabilityCaller,

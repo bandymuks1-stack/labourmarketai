@@ -43,6 +43,12 @@ const profileGet: CapabilityDescriptor = {
     "state, and whether a worker profile exists. Facts as recorded — no " +
     "derived scores.",
   exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: z.object({}).strict(),
   run: async (caller): Promise<ExecResult> => {
     const { data: profile, error } = await caller.supabase
@@ -97,6 +103,12 @@ const livingCvSkillsGet: CapabilityDescriptor = {
     "The caller's own declared and journal-backed skills with their " +
     "verification state and source — the same rows the web Living CV reads.",
   exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: z.object({}).strict(),
   run: async (caller): Promise<ExecResult> => {
     const { data: worker, error: workerError } = await caller.supabase
@@ -222,6 +234,14 @@ const journalCreateDraft: CapabilityDescriptor = {
   // 2026-08-29 §6): journal.confirm now performs the real canonical write,
   // so the draft it prepares leads somewhere true.
   exposed: true,
+  // Read-only is HONEST here: a draft mints a token and writes NOTHING —
+  // the write happens only in journal.confirm.
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: workerLogWorkSchema,
   run: async (caller, input): Promise<ExecResult> => {
     const draft = workerLogWorkSchema.parse(input);
@@ -268,6 +288,14 @@ const journalConfirm: CapabilityDescriptor = {
   // the caller's RLS, with the identical FormData mapping the conversation
   // executor uses (worker-executors.ts "worker.log-work"). No fork.
   exposed: true,
+  // A real write — but APPEND-ONLY (never destroys data) and one-time-token
+  // gated, so a duplicate retry with the same arguments cannot write twice.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   inputSchema: journalConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = journalConfirmInput.parse(input);

@@ -70,7 +70,9 @@ today (the same `shared-blocked` reality as dashboard-search).
 
 ## 4. Proof levels (§20 vocabulary)
 
-- UNIT PROVEN: 21 tests (`lib/mcp/protocol.test.ts`, `lib/capabilities/capabilities.test.ts`)
+- UNIT PROVEN: `lib/mcp/protocol.test.ts`, `lib/capabilities/capabilities.test.ts`,
+  `lib/capabilities/presentation.test.ts` (annotations honesty, humanText
+  composition, token chain, summarizer rules)
 - LOCAL AUTH/RLS PROVEN: 10/10 live controls — RFC 9728 doc, 401+`WWW-Authenticate`
   pointer, malformed-bearer refusal, initialize/notification semantics,
   tools/list shows the exposed capabilities, both reads return the caller's own
@@ -164,14 +166,17 @@ proven — a change here would be a guess. The boundary is on the ChatGPT
 client/model side (developer-mode connectors are per-conversation, and a
 natural-language request let the model decline instead of invoking).
 
-**Open metadata note (not the proven cause):** `tools/list` sends no MCP
-`annotations` (`readOnlyHint`/`destructiveHint`/`idempotentHint`/`openWorldHint`).
-These are OPTIONAL per spec and their absence does not make a tool non-callable,
-but adding honest annotations (reads/drafts `readOnlyHint:true`; `confirm`
-`readOnlyHint:false`, append-only so `destructiveHint:false`, one-time-token so
-`idempotentHint:true`) is a correct additive hardening that may nudge ChatGPT
-toward auto-invoking reads. Deferred until the owner re-test below isolates
-whether invocation is the blocker.
+**Metadata note — CLOSED (2026-08-30, chat-first audit slice):** `tools/list`
+now emits honest MCP `annotations` per capability, declared as REQUIRED
+reviewed fields on the capability contract (`CapabilityAnnotations`): reads and
+the write-nothing draft are `readOnlyHint:true`; `journal.confirm` is
+`readOnlyHint:false` but `destructiveHint:false` (append-only) and
+`idempotentHint:true` (one-time token); everything is `openWorldHint:false`.
+The same slice added the presentation adapter
+(`lib/capabilities/presentation.ts`): a successful tool call now leads with a
+LOCALIZED human summary (5 active locales, parity-guarded `capabilities`
+namespace) followed by the full structured payload — presentation added,
+structure never removed.
 
 **RESOLVED (2026-08-30, same day):** the owner ran the isolation test. After
 explicitly attaching the LabourMarket.ai connector to the conversation composer

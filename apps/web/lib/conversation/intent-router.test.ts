@@ -51,6 +51,44 @@ describe("classifyIntent — brief example sentences", () => {
 });
 
 /**
+ * ONE ACTIVE CONTEXT by sentence (chat-first audit 2026-08-30, gap G1): the
+ * switching sentences from the audit brief reach `switch-context` in all five
+ * routed locales — and the "work as X" family stays ROLE-gated so a
+ * profession statement never routes here.
+ */
+describe("switch-context — the active context is reachable by sentence", () => {
+  const cases: Array<[string, string]> = [
+    ["Perjunk į Nonstop Group.", "switch-context"],
+    ["Perjunk į įmonę X.", "switch-context"],
+    ["perjunk mane i imone", "switch-context"], // diacritic-free
+    ["Grįžk į mano asmeninį profilį.", "switch-context"],
+    ["Dirbu dabar kaip darbuotojas.", "switch-context"],
+    ["Switch to Nonstop Group", "switch-context"],
+    ["go back to my personal space", "switch-context"],
+    ["change my workspace", "switch-context"],
+    ["I want to act as a company now", "switch-context"],
+    ["Переключи меня на компанию Nonstop", "switch-context"],
+    ["вернись в личное пространство", "switch-context"],
+    ["schakel over naar mijn bedrijf", "switch-context"],
+    ["terug naar mijn persoonlijke ruimte", "switch-context"],
+    ["wechsle zu meiner Firma", "switch-context"],
+    ["zurück zu meinem persönlichen Bereich", "switch-context"],
+  ];
+  for (const [text, expected] of cases) {
+    it(`"${text}" → ${expected}`, () => {
+      expect(classifyIntent(text).intent).toBe(expected);
+    });
+  }
+
+  it("a profession statement is NOT a context switch (role-noun gate)", () => {
+    // "I work as a tiler" — a fact about the person, not a workspace request.
+    expect(classifyIntent("dirbu kaip plytelių klojėjas").intent).not.toBe("switch-context");
+    expect(classifyIntent("I work as a tiler in Oslo").intent).not.toBe("switch-context");
+    expect(classifyIntent("работаю как плиточник").intent).not.toBe("switch-context");
+  });
+});
+
+/**
  * DIACRITIC-FREE TYPING (owner-acceptance §16 production finding A-12).
  * Lithuanian typed without diacritics must reach the SAME intent — on most
  * keyboards that is how people actually write.

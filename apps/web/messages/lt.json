@@ -11475,6 +11475,12 @@
       "calendarHint": "Tavo planą rasi skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
       "messagesHint": "Štai tavo žinutės — atsidaro žemiau esančia nuoroda.",
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
+      "switchContextPersonal": "asmeninė erdvė",
+      "switchContextPick": "Kuriame kontekste norite dirbti?",
+      "switchContextDone": "Atlikta — dabar dirbate kontekste „{name}“.",
+      "switchContextAlready": "Jau dirbate kontekste „{name}“.",
+      "switchContextFailed": "Perjungti nepavyko — aktyvus kontekstas nepasikeitė.",
+      "switchContextUnavailable": "Konteksto perjungimas šiuo metu nepasiekiamas.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
       "experiencesEligible": "Radau užbaigtų sąveikų, apie kurias gali palikti patirtį. Pasirink, apie kurią.",
@@ -13871,5 +13877,17 @@
       "deny": "Atmesti",
       "errorMissingId": "Trūksta autorizacijos užklausos. Grįžkite į programą ir bandykite dar kartą.",
       "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
+  },
+  "capabilities": {
+    "notSet": "nenurodyta",
+    "workerExists": "aktyvus",
+    "workerNone": "nėra",
+    "workerUnavailable": "nepavyko patikrinti",
+    "profileSummary": "Jūsų LabourMarket.ai profilis — vardas: {name}; šalis: {country}; kalba: {language}; aktyvus vaidmuo: {role}; darbuotojo profilis: {worker}.",
+    "skillsSummary": "Jūsų gyvajame CV yra {count} įgūdžių ({verified} patvirtinti).",
+    "skillsEmpty": "Jūsų gyvajame CV įgūdžių dar nėra.",
+    "draftSummary": "Darbo žurnalo juodraštis {date}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "draftSummaryWithSite": "Darbo žurnalo juodraštis {date}, objektas {site}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "confirmSummary": "Žurnalo įrašas išsaugotas. Įgūdžių atpažinimas: {added} pridėta, {strengthened} sustiprinta, {reviewNeeded} laukia peržiūros."
   }
 }

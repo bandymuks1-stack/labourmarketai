@@ -114,8 +114,10 @@ type AuthContextValue = AuthState & {
   switchOrganization: (organizationId: string) => Promise<void>;
   /** Switch the ACTIVE workspace — PERSONAL_WORKSPACE_ID clears the pointer,
    *  an org id delegates to switchOrganization. Server-validated, honest
-   *  no-op on failure. */
-  switchWorkspace: (workspaceId: string) => Promise<void>;
+   *  no-op on failure. Returns whether the server ACCEPTED the switch, so a
+   *  caller that reports the outcome (the chat) never claims a switch that
+   *  did not happen. */
+  switchWorkspace: (workspaceId: string) => Promise<boolean>;
   markAsRead: (id: string) => void;
   markAllRead: () => void;
   /** Streamed-spine hydration hook (SpineHydrator only). */
@@ -181,7 +183,7 @@ export function AuthProvider({
         workspaceId === PERSONAL_WORKSPACE_ID
           ? await clearActiveOrganizationAction()
           : await switchActiveOrganizationAction(workspaceId);
-      if (!result.ok) return;
+      if (!result.ok) return false;
       // The workspace IS the acting context (owner audit P0.1): choosing an
       // organization means acting as that organization, so the base identity
       // follows — the chat greeting, CTAs, and company surfaces all switch
@@ -200,6 +202,7 @@ export function AuthProvider({
         await switchActiveRoleAction(wanted);
       }
       router.refresh();
+      return true;
     },
     [router, initial.roles, initial.activeRole],
   );

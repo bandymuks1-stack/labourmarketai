@@ -11475,6 +11475,12 @@
       "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
       "messagesHint": "Hier zijn je berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
+      "switchContextPersonal": "persoonlijke ruimte",
+      "switchContextPick": "In welke context wilt u werken?",
+      "switchContextDone": "Klaar — u werkt nu in {name}.",
+      "switchContextAlready": "U werkt al in {name}.",
+      "switchContextFailed": "Overschakelen is niet gelukt — uw actieve context is ongewijzigd.",
+      "switchContextUnavailable": "Contextwisseling is momenteel niet beschikbaar.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
       "experiencesEligible": "Ik vond afgeronde interacties die je kunt beschrijven. Kies welke.",
@@ -13871,5 +13877,17 @@
       "deny": "Weigeren",
       "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
       "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Ga terug naar de applicatie en probeer het opnieuw."
+  },
+  "capabilities": {
+    "notSet": "niet ingesteld",
+    "workerExists": "actief",
+    "workerNone": "geen",
+    "workerUnavailable": "kon niet worden gecontroleerd",
+    "profileSummary": "Uw LabourMarket.ai-profiel — naam: {name}; land: {country}; taal: {language}; actieve rol: {role}; werknemersprofiel: {worker}.",
+    "skillsSummary": "Uw levende cv bevat {count} vaardigheden ({verified} geverifieerd).",
+    "skillsEmpty": "Uw levende cv bevat nog geen vaardigheden.",
+    "draftSummary": "Concept werkjournaalinvoer voor {date}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "draftSummaryWithSite": "Concept werkjournaalinvoer voor {date} op {site}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "confirmSummary": "Journaalinvoer opgeslagen. Vaardigheidsherkenning: {added} toegevoegd, {strengthened} versterkt, {reviewNeeded} wacht op beoordeling."
   }
 }
