@@ -7,6 +7,8 @@ import { getTranslations } from "next-intl/server";
 import { env } from "@/lib/env";
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
 import { fd } from "@/lib/conversation/executor-contract";
+import { readProfileRow } from "@/lib/auth/session-profile";
+import { readWorkerCoreRow } from "@/lib/data/worker-core";
 
 import {
   canonicalInputHash,
@@ -57,24 +59,21 @@ const profileGet: CapabilityDescriptor = {
   },
   inputSchema: z.object({}).strict(),
   run: async (caller): Promise<ExecResult> => {
-    const { data: profile, error } = await caller.supabase
-      .from("profiles")
-      .select("id, full_name, email, locale, country, onboarded, active_role")
-      .eq("id", caller.userId)
-      .maybeSingle();
-    if (error) {
+    // G4 bridge: the SAME profile-row core the web session shell reads
+    // (`getSessionProfile` → readProfileRow) and the SAME workers-row core
+    // every web navigation reads (`getWorkerCoreRow` → readWorkerCoreRow) —
+    // one query contract per table, no capability-side re-implementation.
+    const read = await readProfileRow(caller);
+    if (!read.ok) {
       // A failed read is "unavailable", never "you have no profile" (#1314).
       return { ok: false, code: "unavailable", message: "Profile read failed." };
     }
+    const profile = read.value;
     if (!profile) {
       return { ok: false, code: "not_found", message: "No profile row for this account." };
     }
 
-    const { data: worker, error: workerError } = await caller.supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", caller.userId)
-      .maybeSingle();
+    const workerRead = await readWorkerCoreRow(caller);
 
     return {
       ok: true,
@@ -89,10 +88,10 @@ const profileGet: CapabilityDescriptor = {
           activeRole: profile.active_role,
         },
         // Three-valued on purpose: unknown ≠ absent.
-        worker: workerError
+        worker: !workerRead.ok
           ? { status: "unavailable" as const }
-          : worker
-            ? { status: "exists" as const, workerId: worker.id }
+          : workerRead.value
+            ? { status: "exists" as const, workerId: workerRead.value.id }
             : { status: "none" as const },
       },
     };
@@ -117,14 +116,12 @@ const livingCvSkillsGet: CapabilityDescriptor = {
   },
   inputSchema: z.object({}).strict(),
   run: async (caller): Promise<ExecResult> => {
-    const { data: worker, error: workerError } = await caller.supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", caller.userId)
-      .maybeSingle();
-    if (workerError) {
+    // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
       return { ok: false, code: "unavailable", message: "Worker read failed." };
     }
+    const worker = workerRead.value;
     if (!worker) {
       return {
         ok: false,
@@ -188,17 +185,15 @@ function capabilityTokenSecret(): string {
 async function journalChainFingerprint(
   caller: CapabilityCaller,
 ): Promise<{ ok: true; fingerprint: string } | { ok: false; result: ExecResult }> {
-  const { data: worker, error: workerError } = await caller.supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", caller.userId)
-    .maybeSingle();
-  if (workerError) {
+  // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+  const workerRead = await readWorkerCoreRow(caller);
+  if (!workerRead.ok) {
     return {
       ok: false,
       result: { ok: false, code: "unavailable", message: "Worker read failed." },
     };
   }
+  const worker = workerRead.value;
   if (!worker) {
     return {
       ok: false,

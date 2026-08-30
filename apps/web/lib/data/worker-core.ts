@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
 
 /**
  * Request-cached CORE worker readers (P0 nav-performance repair, Track B).
@@ -71,36 +72,38 @@ export interface WorkerCoreRow {
 }
 
 /**
- * THE canonical per-request `workers` row read (workers.profile_id =
- * auth.uid()). One round-trip per navigation regardless of how many
- * consumers call it. Null when signed out, when no worker row exists, or on
- * any read error.
+ * THE canonical `workers` row read as an explicit caller (G4 bridge) — the
+ * transport-neutral core under `getWorkerCoreRow`. Same query, same
+ * feature-detected column fallback; the difference is the honest three-state
+ * result: `{ ok: false }` on a failed read, `{ ok: true, value: null }` when
+ * the caller has no worker row (#1314 — absence and failure are different
+ * facts, and bearer consumers must be able to tell them apart).
  */
-export const getWorkerCoreRow = cache(
-  async (): Promise<WorkerCoreRow | null> => {
-    try {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return null;
+export async function readWorkerCoreRow(
+  caller: DomainCaller,
+): Promise<CoreRead<WorkerCoreRow | null>> {
+  try {
+    const full = await asAny(caller.supabase)
+      .from("workers")
+      .select(WORKER_FULL_COLS)
+      .eq("profile_id", caller.userId)
+      .maybeSingle();
+    if (!full.error) {
+      return { ok: true, value: (full.data as WorkerCoreRow | null) ?? null };
+    }
 
-      const full = await asAny(supabase)
-        .from("workers")
-        .select(WORKER_FULL_COLS)
-        .eq("profile_id", user.id)
-        .maybeSingle();
-      if (!full.error) return (full.data as WorkerCoreRow | null) ?? null;
-
-      // Missing human-gated column → degrade to the base set (never throw).
-      if (full.error.code !== UNDEFINED_COLUMN_CODE) return null;
-      const base = await asAny(supabase)
-        .from("workers")
-        .select(WORKER_BASE_COLS)
-        .eq("profile_id", user.id)
-        .maybeSingle();
-      if (base.error || !base.data) return null;
-      return {
+    // Missing human-gated column → degrade to the base set (never throw).
+    if (full.error.code !== UNDEFINED_COLUMN_CODE) return { ok: false };
+    const base = await asAny(caller.supabase)
+      .from("workers")
+      .select(WORKER_BASE_COLS)
+      .eq("profile_id", caller.userId)
+      .maybeSingle();
+    if (base.error) return { ok: false };
+    if (!base.data) return { ok: true, value: null };
+    return {
+      ok: true,
+      value: {
         willing_to_relocate: null,
         has_transport: null,
         driving_licence_categories: null,
@@ -112,7 +115,31 @@ export const getWorkerCoreRow = cache(
         own_tools: null,
         work_card_confirmed_at: null,
         ...(base.data as Partial<WorkerCoreRow>),
-      } as WorkerCoreRow;
+      } as WorkerCoreRow,
+    };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * THE canonical per-request `workers` row read (workers.profile_id =
+ * auth.uid()). One round-trip per navigation regardless of how many
+ * consumers call it. Null when signed out, when no worker row exists, or on
+ * any read error. Delegates to the caller-scoped core above — one query
+ * contract for every transport.
+ */
+export const getWorkerCoreRow = cache(
+  async (): Promise<WorkerCoreRow | null> => {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const read = await readWorkerCoreRow({ supabase, userId: user.id });
+      return read.ok ? read.value : null;
     } catch {
       return null;
     }
