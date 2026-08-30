@@ -24,12 +24,32 @@ const WORKER_CORE = read("lib", "data", "worker-core.ts");
 const CALLER = read("lib", "domain", "caller.ts");
 
 describe("one domain core per table — no transport-side re-implementation", () => {
-  it("the capability registry does not query profiles/workers directly", () => {
+  it("the capability registry does not query profiles/workers/worker_skills directly", () => {
     expect(REGISTRY).not.toMatch(/from\("profiles"\)/);
     expect(REGISTRY).not.toMatch(/from\("workers"\)/);
+    expect(REGISTRY).not.toMatch(/from\("worker_skills"\)/);
     // It consumes the SAME cores the web session shell and navigations read.
+    // (The journal chain-head read stays: it is the write-confirmation
+    // fingerprint, a journal-write concern — not a list re-implementation.)
     expect(REGISTRY).toMatch(/readProfileRow\(caller\)/);
     expect(REGISTRY).toMatch(/readWorkerCoreRow\(caller\)/);
+    expect(REGISTRY).toMatch(/readWorkerSkillRows\(caller/);
+    expect(REGISTRY).toMatch(/listJournalEntries\(caller/);
+  });
+
+  it("the journal LIST select lives in exactly one place (the core)", () => {
+    const core = read("lib", "journal", "journal-list-core.ts");
+    expect(core).toMatch(/deleted_at, superseded_by/);
+    // The page consumes the core rather than keeping its own copy.
+    const page = read(
+      "app",
+      "[locale]",
+      "dashboard",
+      "journal",
+      "page.tsx",
+    );
+    expect(page).toMatch(/listJournalEntries\(/);
+    expect(page).not.toMatch(/from\("journal_entries"\)/);
   });
 
   it("the cookie-side readers DELEGATE to the caller-scoped cores", () => {

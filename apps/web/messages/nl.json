@@ -13879,6 +13879,8 @@
       "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Ga terug naar de applicatie en probeer het opnieuw."
   },
   "capabilities": {
+    "journalListEmpty": "Het werkjournaal heeft nog geen items.",
+    "journalListSummary": "{count} items gevonden. Meest recent: {latest}.",
     "notSet": "niet ingesteld",
     "workerExists": "actief",
     "workerNone": "geen",

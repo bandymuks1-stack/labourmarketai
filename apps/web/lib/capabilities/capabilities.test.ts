@@ -95,12 +95,14 @@ describe("the registry itself", () => {
     expect(exposedCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
       "living_cv.skills.get",
+      "journal.list",
       "journal.create_draft",
       "journal.confirm",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
       "living_cv.skills.get",
+      "journal.list",
       "journal.create_draft",
       "journal.confirm",
     ]);
@@ -124,6 +126,7 @@ describe("the registry itself", () => {
     // Reads AND the write-nothing draft are read-only; the confirm is not.
     expect(byId["profile.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["living_cv.skills.get"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.list"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.create_draft"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
     // The one-time token makes a duplicate confirm a no-op, not a second row.
@@ -238,6 +241,77 @@ describe("living_cv.skills.get", () => {
       {},
     );
     expect(r).toMatchObject({ ok: false, code: "no_worker" });
+  });
+});
+
+describe("journal.list", () => {
+  const ENTRY_ROW = {
+    id: "e-1",
+    original_text: "Klojau plyteles objekte.",
+    created_at: "2026-08-30T08:00:00Z",
+    deleted_at: null,
+    superseded_by: null,
+    engagement_context_id: "00000000-0000-4000-8000-0000000000ec",
+    journal_entry_metrics: [
+      { metric_slug: "work_date", value_text: "2026-08-30", value_numeric: null, unit_slug: null },
+    ],
+    journal_entry_confirmations: [{ confirmation_scope: "entry" }],
+  };
+
+  it("returns the caller's own live entries through the canonical list core", async () => {
+    const r = await runCapability(
+      "journal.list",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        journal_entries: {
+          data: [ENTRY_ROW, { ...ENTRY_ROW, id: "e-dead", deleted_at: "2026-08-30T09:00:00Z" }],
+          error: null,
+        },
+      }),
+      {},
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      // The soft-deleted row is filtered — live projection only.
+      expect(r.data?.entries).toEqual([
+        {
+          entryId: "e-1",
+          text: ENTRY_ROW.original_text,
+          createdAt: ENTRY_ROW.created_at,
+          engagementContextId: ENTRY_ROW.engagement_context_id,
+          metrics: [
+            { slug: "work_date", valueText: "2026-08-30", valueNumeric: null, unitSlug: null },
+          ],
+          confirmations: 1,
+        },
+      ]);
+    }
+  });
+
+  it("no worker profile is an honest no_worker_profile, not an empty success", async () => {
+    const r = await runCapability(
+      "journal.list",
+      caller({ workers: { data: null, error: null } }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("a failed journal read is 'unavailable', never an empty list (#1314)", async () => {
+    const r = await runCapability(
+      "journal.list",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        journal_entries: { data: null, error: { message: "boom" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("rejects an out-of-bounds limit at the schema", async () => {
+    const r = await runCapability("journal.list", caller({}), { limit: 500 });
+    expect(r).toMatchObject({ ok: false, code: "invalid" });
   });
 });
 

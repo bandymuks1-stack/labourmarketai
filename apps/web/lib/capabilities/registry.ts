@@ -8,7 +8,8 @@ import { env } from "@/lib/env";
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
-import { readWorkerCoreRow } from "@/lib/data/worker-core";
+import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
+import { listJournalEntries } from "@/lib/journal/journal-list-core";
 
 import {
   canonicalInputHash,
@@ -130,13 +131,10 @@ const livingCvSkillsGet: CapabilityDescriptor = {
       };
     }
 
-    // The identical read GET /api/workers/:id/skills serves, joined to the
-    // catalogue slug so the rows are meaningful outside the web UI.
-    const { data, error } = await caller.supabase
-      .from("worker_skills")
-      .select("skill_id, verified, source, verified_at, skills(slug)")
-      .eq("worker_id", worker.id);
-    if (error) {
+    // G4 bridge: THE canonical worker_skills core — the same rows every web
+    // navigation reads through `getWorkerSkillRows` (and the web Living CV).
+    const skillsRead = await readWorkerSkillRows(caller, worker.id);
+    if (!skillsRead.ok) {
       return { ok: false, code: "unavailable", message: "Skills read failed." };
     }
 
@@ -144,12 +142,74 @@ const livingCvSkillsGet: CapabilityDescriptor = {
       ok: true,
       data: {
         workerId: worker.id,
-        skills: (data ?? []).map((r) => ({
+        skills: skillsRead.value.map((r) => ({
           skillId: r.skill_id,
-          slug: (r.skills as { slug: string | null } | null)?.slug ?? null,
+          slug: r.skills?.slug ?? null,
           verified: r.verified,
           source: r.source,
           verifiedAt: r.verified_at,
+        })),
+      },
+    };
+  },
+};
+
+// ── journal.list ───────────────────────────────────────────────────────────
+
+const journalListInput = z
+  .object({
+    limit: z.number().int().min(1).max(50).optional(),
+  })
+  .strict();
+
+const journalList: CapabilityDescriptor = {
+  id: "journal.list",
+  kind: "read",
+  title: "My Work Journal entries",
+  description:
+    "The caller's own most recent Work Journal entries — the same live rows " +
+    "the web journal page shows: entry text, creation time, recorded metrics " +
+    "(including the work_date metric), and confirmation count. Newest first. " +
+    "`limit` bounds the read (default 20, max 50); a page may carry fewer " +
+    "live rows than the limit when older revisions were superseded.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: journalListInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = journalListInput.parse(input);
+    // G4 bridge: THE canonical journal-list core — the exact read the web
+    // journal page performs (v3 lifecycle select + legacy fallback).
+    const read = await listJournalEntries(caller, { limit: parsed.limit ?? 20 });
+    if (!read.ok) {
+      return read.code === "no_worker"
+        ? {
+            ok: false,
+            code: "no_worker_profile",
+            message: "This account has no worker profile, so it has no Work Journal.",
+          }
+        : { ok: false, code: "unavailable", message: "Journal read failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        workerId: read.workerId,
+        entries: read.entries.map((e) => ({
+          entryId: e.id,
+          text: e.original_text,
+          createdAt: e.created_at,
+          engagementContextId: e.engagement_context_id ?? null,
+          metrics: (e.journal_entry_metrics ?? []).map((m) => ({
+            slug: m.metric_slug,
+            valueText: m.value_text,
+            valueNumeric: m.value_numeric,
+            unitSlug: m.unit_slug,
+          })),
+          confirmations: (e.journal_entry_confirmations ?? []).length,
         })),
       },
     };
@@ -584,6 +644,7 @@ const journalConfirm: CapabilityDescriptor = {
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
   profileGet,
   livingCvSkillsGet,
+  journalList,
   journalCreateDraft,
   journalConfirm,
 ];

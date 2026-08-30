@@ -13879,6 +13879,8 @@
       "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
   },
   "capabilities": {
+    "journalListEmpty": "The Work Journal has no entries yet.",
+    "journalListSummary": "{count} entries found. Latest: {latest}.",
     "notSet": "not set",
     "workerExists": "active",
     "workerNone": "none",

@@ -183,6 +183,9 @@ export interface WorkerSkillRow {
   skill_id: string | null;
   verified: boolean | null;
   source: string | null;
+  /** When the skill was confirmed — carried for the Living CV consumers
+   *  (superset pattern: one select serves every transport). */
+  verified_at: string | null;
   confidence_bin: string | null;
   /** Catalogue slug — the ONLY name source. The `skills` table carries just
    *  id/slug/category/is_active/esco_uri; the legacy name_lt/name_en columns
@@ -191,21 +194,45 @@ export interface WorkerSkillRow {
 }
 
 /**
+ * THE canonical `worker_skills` read as an explicit caller (G4 bridge) — the
+ * transport-neutral core under `getWorkerSkillRows` AND the MCP
+ * `living_cv.skills.get` capability. `workerId` must be the caller's OWN
+ * worker row (RLS scopes the rows regardless); honest three-state result.
+ */
+export async function readWorkerSkillRows(
+  caller: DomainCaller,
+  workerId: string,
+): Promise<CoreRead<WorkerSkillRow[]>> {
+  try {
+    const { data, error } = await asAny(caller.supabase)
+      .from("worker_skills")
+      .select(
+        "id, skill_id, verified, source, verified_at, confidence_bin, skills(slug)",
+      )
+      .eq("worker_id", workerId);
+    if (error || !Array.isArray(data)) return { ok: false };
+    return { ok: true, value: data as WorkerSkillRow[] };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
  * THE canonical per-request `worker_skills` read for the signed-in worker
  * (was 5 independent selects per navigation). [] when there is no worker
- * row or on any error.
+ * row or on any error. Delegates to the caller-scoped core above.
  */
 export const getWorkerSkillRows = cache(async (): Promise<WorkerSkillRow[]> => {
   try {
     const worker = await getWorkerCoreRow();
     if (!worker) return [];
     const supabase = await createClient();
-    const { data, error } = await asAny(supabase)
-      .from("worker_skills")
-      .select("id, skill_id, verified, source, confidence_bin, skills(slug)")
-      .eq("worker_id", worker.id);
-    if (error || !Array.isArray(data)) return [];
-    return data as WorkerSkillRow[];
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    const read = await readWorkerSkillRows({ supabase, userId: user.id }, worker.id);
+    return read.ok ? read.value : [];
   } catch {
     return [];
   }
