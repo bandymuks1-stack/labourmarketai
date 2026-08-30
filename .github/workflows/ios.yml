@@ -1,0 +1,112 @@
+name: iOS
+
+# Native iOS proof on GitHub's macOS runners — the authorized macOS
+# environment this repository already has (public repo, hosted runners).
+#
+# WHY IT IS ITS OWN WORKFLOW: same reasoning as mobile.yml — `quality` is the
+# required, fast, secret-free merge gate; an Xcode build takes tens of minutes
+# and no web PR needs it. NOT a required check. A red run here does not block
+# a merge until the owner reviews it and adds it to branch protection — the
+# same deliberate introduction CodeQL and mobile.yml had.
+#
+# Secret-free. The app is built and launched with PLACEHOLDER public
+# configuration: it proves the native project compiles, links every pod
+# (Hermes, Reanimated 4.5.1, Worklets 0.10.1, Screens 4.27 — the exact
+# versions the Android build proved) and starts on a simulator without
+# crashing. It never signs in and never reaches a real backend.
+#
+# What this workflow can honestly claim when green:
+#   IOS_NATIVE_BUILD_PROVEN  — xcodebuild compiles and links the real app
+#   IOS_SIM_LAUNCH_PROVEN    — the app process starts and stays alive 15s
+# What it deliberately does NOT claim: device builds, signing, App Store
+# readiness, real auth/deep-link E2E (those need a session against a real
+# backend and are a later, separate proof).
+
+on:
+  push:
+    branches: [main]
+  # No paths filter, no branches filter on pull_request — the two lessons
+  # this repository already paid for (see mobile.yml).
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=mobile... --filter=@labourmarket/client-core...
+
+      - name: Expo prebuild (iOS)
+        working-directory: apps/mobile
+        run: pnpm exec expo prebuild --platform ios --no-install
+
+      - name: CocoaPods install
+        working-directory: apps/mobile/ios
+        run: pod install
+
+      # The workspace/scheme names derive from app.json's display name; read
+      # them from the generated project instead of hardcoding a guess.
+      - name: Discover workspace and scheme
+        id: xc
+        working-directory: apps/mobile/ios
+        run: |
+          WS=$(ls -d *.xcworkspace | head -1)
+          SCHEME=$(xcodebuild -workspace "$WS" -list -json | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')
+          echo "workspace=$WS" >> "$GITHUB_OUTPUT"
+          echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
+          echo "workspace=$WS scheme=$SCHEME"
+
+      - name: Xcode build (simulator, Debug, unsigned)
+        working-directory: apps/mobile/ios
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_not_a_real_key
+          EXPO_PUBLIC_API_BASE_URL: https://example.invalid
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -workspace "${{ steps.xc.outputs.workspace }}" \
+            -scheme "${{ steps.xc.outputs.scheme }}" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tail -200
+
+      - name: Simulator launch smoke (15s alive, no startup crash)
+        working-directory: apps/mobile/ios
+        run: |
+          APP=$(find build/Build/Products -maxdepth 2 -name "*.app" | head -1)
+          test -n "$APP" || { echo "no .app produced"; exit 1; }
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(dev["udid"] for devs in d.values() for dev in devs if dev["isAvailable"]))')
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" ai.labourmarket.app
+          sleep 15
+          # Startup-crash detector: the process must still be alive.
+          xcrun simctl spawn "$UDID" launchctl list | grep -q "ai.labourmarket.app" \
+            && echo "IOS_SIM_LAUNCH_PROVEN: app alive after 15s" \
+            || { echo "app not running after 15s — startup crash"; exit 1; }
