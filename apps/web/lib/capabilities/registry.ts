@@ -259,11 +259,18 @@ function normalizedDraftForHash(draft: {
  * the caller's own active professional contexts under their own RLS, decided
  * by the canonical rule hierarchy (`resolveEngagementContext`, rules B/C/D).
  * On real ambiguity (rule C) it returns the labeled options and mints NO
- * token — the client must ask the human, exactly like the web flow.
+ * token — the client must ask the human, exactly like the web flow. A
+ * requested id that is NOT one of the caller's own contexts gets the same
+ * labeled-options answer, never a token: the write core would refuse the
+ * draft anyway, and a token for an unconfirmable draft is a lie in waiting.
  */
 type DraftEngagementOutcome =
   | { kind: "selected"; id: string; label: string | null }
-  | { kind: "choice"; options: { id: string; label: string }[] }
+  | {
+      kind: "choice";
+      reason: "ambiguous" | "unknown_requested_id";
+      options: { id: string; label: string }[];
+    }
   | { kind: "refused"; result: ExecResult };
 
 async function resolveDraftEngagementContext(
@@ -291,16 +298,8 @@ async function resolveDraftEngagementContext(
     locale: caller.locale,
     namespace: "relationshipTypes",
   });
-  const labelOf = (row: {
-    relationship_slug: string;
-    title: string | null;
-    organizations: { display_name: string | null; legal_name: string | null } | null;
-  }): string =>
-    orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name) ??
-    row.title ??
-    (tRelationships.has(row.relationship_slug)
-      ? tRelationships(row.relationship_slug)
-      : row.relationship_slug);
+  const relationshipLabel = (slug: string): string =>
+    tRelationships.has(slug) ? tRelationships(slug) : slug;
 
   type Row = {
     id: string;
@@ -315,12 +314,62 @@ async function resolveDraftEngagementContext(
   };
   const contexts = (rows ?? []) as unknown as Row[];
 
-  // An explicitly named context passes through — the canonical write core
-  // still validates ownership, so an id outside this list fails THERE with
-  // its real error, never silently rerouted here.
+  // Same qualification rule as the web work-log selector
+  // (lib/conversation/worklog-engagements.ts): a base label that occurs more
+  // than once is qualified by its relationship, a unique one is left as-is.
+  // Without it, two contexts at the same organization (or two org-less ones
+  // sharing a relationship) render as the identical word and the choice the
+  // options exist to offer cannot actually be made.
+  const withBase = contexts.map((row) => ({
+    row,
+    base:
+      orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name) ??
+      row.title ??
+      relationshipLabel(row.relationship_slug),
+  }));
+  const baseCounts = new Map<string, number>();
+  for (const { base } of withBase) {
+    baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+  }
+  const labelById = new Map<string, string>();
+  for (const { row, base } of withBase) {
+    const duplicated = (baseCounts.get(base) ?? 0) > 1;
+    labelById.set(
+      row.id,
+      duplicated ? `${base} — ${relationshipLabel(row.relationship_slug)}` : base,
+    );
+  }
+
+  // An explicitly named context must be one of the caller's OWN — the real
+  // ChatGPT write E2E (2026-08-30) showed a model fabricating a nil-UUID id,
+  // and passing it through minted a confirmation token for a draft the write
+  // core could never accept. A fabricated/foreign id gets the caller's real
+  // labeled options back instead of a dead-end token.
   if (requestedId) {
     const named = contexts.find((r) => r.id === requestedId);
-    return { kind: "selected", id: requestedId, label: named ? labelOf(named) : null };
+    if (named) {
+      return {
+        kind: "selected",
+        id: requestedId,
+        label: labelById.get(named.id) ?? null,
+      };
+    }
+    if (contexts.length > 0) {
+      return {
+        kind: "choice",
+        reason: "unknown_requested_id",
+        options: contexts.map((r) => ({ id: r.id, label: labelById.get(r.id)! })),
+      };
+    }
+    return {
+      kind: "refused",
+      result: {
+        ok: false,
+        code: "no_engagement_context",
+        message:
+          "The given engagementContextId does not belong to this account, and the account has no active work context to offer instead.",
+      },
+    };
   }
 
   const candidates: EngagementCandidate[] = contexts.map((r) => ({
@@ -334,20 +383,20 @@ async function resolveDraftEngagementContext(
   }));
   const resolution = resolveEngagementContext({ candidates, workDay: workDate });
   if (resolution.selectedId) {
-    const hit = contexts.find((r) => r.id === resolution.selectedId);
     return {
       kind: "selected",
       id: resolution.selectedId,
-      label: hit ? labelOf(hit) : null,
+      label: labelById.get(resolution.selectedId) ?? null,
     };
   }
   if (resolution.rule === "C") {
     const applicable = new Set(resolution.candidateIds);
     return {
       kind: "choice",
+      reason: "ambiguous",
       options: contexts
         .filter((r) => applicable.has(r.id))
-        .map((r) => ({ id: r.id, label: labelOf(r) })),
+        .map((r) => ({ id: r.id, label: labelById.get(r.id)! })),
     };
   }
   return {
@@ -401,14 +450,18 @@ const journalCreateDraft: CapabilityDescriptor = {
     );
     if (engagement.kind === "refused") return engagement.result;
     if (engagement.kind === "choice") {
-      // Real ambiguity (rule C): NOTHING preselected, NO token minted — the
-      // client must ask the human, exactly like the web work-log flow.
+      // NOTHING preselected, NO token minted — the client must ask the human,
+      // exactly like the web work-log flow. Two ways here: real ambiguity
+      // (rule C) or a requested id that is not one of the caller's own.
       return {
         ok: true,
         data: {
           status: "engagement_choice_required",
           options: engagement.options,
-          note: "This entry could belong to more than one work context. Ask the user to choose, then draft again with the chosen engagementContextId.",
+          note:
+            engagement.reason === "unknown_requested_id"
+              ? "The given engagementContextId is not one of this account's active work contexts — nothing was drafted. Ask the user to choose one of these options, then draft again with the chosen engagementContextId."
+              : "This entry could belong to more than one work context. Ask the user to choose, then draft again with the chosen engagementContextId.",
         },
       };
     }

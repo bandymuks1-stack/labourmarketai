@@ -357,6 +357,86 @@ describe("journal draft → confirm", () => {
     }
   });
 
+  it("a requested id that is NOT the caller's own → the labeled options, NEVER a token (fabricated-id E2E 2026-08-30)", async () => {
+    // The real ChatGPT write E2E showed the model inventing the nil UUID —
+    // a valid uuid shape that belongs to nobody. The old pass-through minted
+    // a token for it; now the caller's real options come back instead.
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), {
+      ...DRAFT,
+      engagementContextId: "00000000-0000-0000-0000-000000000000",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.preview).toBeUndefined();
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba" }]);
+      expect(String(r.data?.note)).toMatch(/not one of this account's active work contexts/);
+    }
+  });
+
+  it("a well-formed uuid outside the caller's own list (other user's / stale / inaccessible) → options, NEVER a token", async () => {
+    // Under RLS + the query's own filters (profile_id = caller, status =
+    // active, professional slugs) every one of those classes arrives here
+    // the same way: as an id absent from the caller's visible list.
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), {
+      ...DRAFT,
+      engagementContextId: "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba" }]);
+    }
+  });
+
+  it("a foreign requested id with NO contexts of one's own → an honest refusal, no token", async () => {
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [], error: null },
+      }),
+      {
+        ...DRAFT,
+        engagementContextId: "00000000-0000-0000-0000-000000000000",
+      },
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_engagement_context" });
+  });
+
+  it("duplicate option labels are qualified by relationship — two contexts at the same org stay tellable apart", async () => {
+    // The education case from the web selector (worklog-engagements.ts):
+    // employed at the org that also hosts the placement. Both bases render
+    // as the org name, so each gets its relationship as a qualifier.
+    const placement = {
+      ...EC_ROW,
+      id: "00000000-0000-4000-8000-0000000000ed",
+      relationship_slug: "student",
+      is_primary: false,
+    };
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [EC_ROW, placement], error: null },
+      }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      // The translation mock has() => false, so the qualifier is the raw
+      // slug here; in the app it is the localized relationshipTypes word.
+      expect(r.data?.options).toEqual([
+        { id: EC_ROW.id, label: "Dev Statyba — employee" },
+        { id: placement.id, label: "Dev Statyba — student" },
+      ]);
+    }
+  });
+
   it("no usable context at all → an honest refusal, never a guess", async () => {
     const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
     const r = await runCapability(
