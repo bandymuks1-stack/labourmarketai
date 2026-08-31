@@ -140,7 +140,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // the ceiling had 13 keys of slack, enough to ship 13 new untranslated DA
   // strings without tripping the ratchet. Tightened to the live count; no
   // translation content changed in this PR.
-  da: 1301,
+  // MEASURED 1302 at google-new-user-honesty-v1 (2026-08-31, +1: the
+  // auth.errors.oauth.cancelled honest OAuth-cancel copy lands in all 11
+  // catalogs; lt/en/ru/nl/de translated, da/lv/et/no/sv/pl [EN] until human
+  // translation — only da is ratchet-tracked).
+  da: 1302,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

@@ -163,6 +163,16 @@ describe("Guard: callback route includes trace id + safe logging", () => {
     expect(violations).toEqual([]);
   });
 
+  it("never logs the provider's free-form error_description", () => {
+    // `error` + `error_code` are bounded identifiers and safe; the
+    // description is provider-authored prose and stays out of the logs.
+    for (const call of consoleCalls(route)) {
+      expect(call, `error_description leaked in: ${call.slice(0, 200)}`).not.toMatch(
+        /error_description/,
+      );
+    }
+  });
+
   it("never logs auth tokens, cookies, or the raw request URL inside any console.X", () => {
     // `code: exchangeError.code` (a non-secret SDK error tag) is allowed
     // because the value side is `exchangeError.code`, NOT the local auth
@@ -199,9 +209,15 @@ describe("Guard: login form surfaces ?error + ?trace and preview notice", () => 
       "exchange_failed",
       "no_user",
       "callback",
+      "cancelled",
     ]) {
       expect(form).toMatch(new RegExp(`${code}:\\s*["']oauth\\.${code}["']`));
     }
+  });
+
+  it("renders a CANCEL as a neutral status, never a red system-fault alert", () => {
+    // The person pressed Cancel/Deny at the provider — a deliberate choice.
+    expect(form).toMatch(/oauthCancelled \? "status" : "alert"/);
   });
 
   it("renders the trace id as a font-mono label below the error", () => {
@@ -222,14 +238,24 @@ describe("Guard: LT + EN auth.errors.oauth + auth.login.preview_host_notice pres
   const en = JSON.parse(read("messages/en.json"));
 
   it("LT exposes oauth.* error keys", () => {
-    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "unknown"]) {
+    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown"]) {
       expect(lt.auth?.errors?.oauth?.[k]).toBeTruthy();
     }
   });
 
   it("EN exposes oauth.* error keys", () => {
-    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "unknown"]) {
+    for (const k of ["missing_code", "exchange_failed", "no_user", "callback", "cancelled", "unknown"]) {
       expect(en.auth?.errors?.oauth?.[k]).toBeTruthy();
+    }
+  });
+
+  it("every catalog carries the honest cancel copy (all 11 locales, doctrine §2.4)", () => {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "da", "lv", "et", "no", "sv", "pl"]) {
+      const cat = JSON.parse(read(`messages/${locale}.json`));
+      expect(
+        cat.auth?.errors?.oauth?.cancelled,
+        `messages/${locale}.json auth.errors.oauth.cancelled`,
+      ).toBeTruthy();
     }
   });
 
