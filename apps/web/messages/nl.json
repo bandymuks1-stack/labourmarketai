@@ -3408,6 +3408,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Doorgaan met LinkedIn",
+      "continueWithFacebook": "Doorgaan met Facebook"
+    },
     "legalNotice": {
       "signup": "Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
       "googleLogin": "Hebt u nog geen account, dan wordt er een aangemaakt wanneer u doorgaat met Google. Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",

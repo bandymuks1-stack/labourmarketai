@@ -3408,6 +3408,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Mit LinkedIn fortfahren",
+      "continueWithFacebook": "Mit Facebook fortfahren"
+    },
     "legalNotice": {
       "signup": "Mit der Erstellung eines Kontos bestätigen Sie, dass Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy> gelesen haben.",
       "googleLogin": "Wenn Sie noch kein Konto haben, wird beim Fortfahren mit Google eines erstellt. Mit der Erstellung eines Kontos bestätigen Sie, dass Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy> gelesen haben.",

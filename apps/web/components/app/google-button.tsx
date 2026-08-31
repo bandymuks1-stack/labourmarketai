@@ -41,6 +41,26 @@ function GoogleLogo() {
   );
 }
 
+/** LinkedIn "in" bug, white on transparent — sits on the brand-blue button
+ *  surface below. Inline so no external asset pipeline is needed. */
+function LinkedInLogo() {
+  return (
+    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+      <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z" />
+    </svg>
+  );
+}
+
+/** Facebook "f" mark, white on transparent — sits on the brand-blue button
+ *  surface below. Inline so no external asset pipeline is needed. */
+function FacebookLogo() {
+  return (
+    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+      <path d="M13.5 21.9v-8.4h2.82l.42-3.27H13.5V8.14c0-.95.26-1.59 1.62-1.59h1.74V3.63c-.3-.04-1.33-.13-2.53-.13-2.5 0-4.22 1.53-4.22 4.34v2.42H7.28v3.27h2.83v8.37c.62.09 1.25.13 1.89.13.51 0 1.01-.03 1.5-.13Z" />
+    </svg>
+  );
+}
+
 /**
  * Provider seam (social-acquisition readiness v1).
  *
@@ -251,4 +271,74 @@ const GOOGLE_PROVIDER: OAuthProviderConfig = {
  *  need no edits when further providers arrive beside it. */
 export function GoogleButton(props: OAuthButtonProps) {
   return <OAuthProviderButton provider={GOOGLE_PROVIDER} {...props} />;
+}
+
+/**
+ * LinkedIn (OIDC) provider config — the `linkedin_oidc` Supabase provider,
+ * NOT the deprecated `linkedin` one. Rendered ONLY when the auth server
+ * reports the provider enabled (lib/auth/enabled-providers.ts, the §18
+ * honesty gate) — the flag is threaded from the auth page server components.
+ *
+ * ACCOUNT-SAFETY NOTE (no code needed, recorded for reviewers): Supabase
+ * links a social identity to an existing account by VERIFIED email only —
+ * manual identity linking stays disabled — so a LinkedIn sign-in with the
+ * same verified email lands in the same account, and an unverifiable email
+ * yields a refusal, never a silent account takeover. The provider-agnostic
+ * callback keeps its GENERIC error copy — no provider-specific "account
+ * exists" message is ever added, so the error path stays useless as an
+ * account-existence oracle.
+ */
+const LINKEDIN_PROVIDER: OAuthProviderConfig = {
+  id: "linkedin_oidc",
+  logo: <LinkedInLogo />,
+  testId: "linkedin-signin",
+  // LinkedIn brand button: the fixed #0A66C2 surface with white label —
+  // brand-fixed like the Google white card, hence config, not a caller prop,
+  // and theme-independent by design.
+  buttonClassName:
+    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-[#0A66C2] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:bg-[#0A66C2]/90 disabled:cursor-not-allowed disabled:opacity-60",
+  markPending: () => markSignupPending("linkedin_oidc"),
+  logStartFailure: (e) =>
+    console.error("[auth] signInWithOAuth(linkedin_oidc) failed:", {
+      name: e instanceof Error ? e.name : "unknown",
+      message: e instanceof Error ? e.message : String(e),
+    }),
+};
+
+/**
+ * Facebook provider config. Rendered ONLY behind the same enabled-providers
+ * honesty gate as LinkedIn above.
+ *
+ * ACCOUNT-SAFETY NOTE (recorded for reviewers): Facebook can return accounts
+ * WITHOUT a verified email (phone-only signups, unconfirmed addresses).
+ * GoTrue then refuses the silently-unsafe email link and treats the identity
+ * separately — that refusal is correct behaviour, not a bug to "fix" by
+ * enabling manual linking.
+ */
+const FACEBOOK_PROVIDER: OAuthProviderConfig = {
+  id: "facebook",
+  logo: <FacebookLogo />,
+  testId: "facebook-signin",
+  // Facebook brand button: the fixed #1877F2 surface with white label —
+  // brand-fixed and theme-independent, same rationale as above.
+  buttonClassName:
+    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-[#1877F2] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:bg-[#1877F2]/90 disabled:cursor-not-allowed disabled:opacity-60",
+  markPending: () => markSignupPending("facebook"),
+  logStartFailure: (e) =>
+    console.error("[auth] signInWithOAuth(facebook) failed:", {
+      name: e instanceof Error ? e.name : "unknown",
+      message: e instanceof Error ? e.message : String(e),
+    }),
+};
+
+/** "Continue with LinkedIn" — the SAME same-tab flow, LinkedIn OIDC config.
+ *  Callers render this ONLY behind the enabled-providers flag. */
+export function LinkedInButton(props: OAuthButtonProps) {
+  return <OAuthProviderButton provider={LINKEDIN_PROVIDER} {...props} />;
+}
+
+/** "Continue with Facebook" — the SAME same-tab flow, Facebook config.
+ *  Callers render this ONLY behind the enabled-providers flag. */
+export function FacebookButton(props: OAuthButtonProps) {
+  return <OAuthProviderButton provider={FACEBOOK_PROVIDER} {...props} />;
 }
