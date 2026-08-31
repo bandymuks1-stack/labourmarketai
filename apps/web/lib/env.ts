@@ -146,11 +146,11 @@ const schema = z.object({
   AGENTAI_OS_ALERT_TOKEN: z.string().optional(),
 
   // ── Google sign-in ────────────────────────────────────────────────────────
-  // Owner ruling 2026-07-29 (P0): the GIS ID-token POPUP flow was removed —
-  // sign-in is ONE same-tab redirect via signInWithOAuth + the PKCE
-  // callback. The client id stays declared (it is public by design and other
-  // tooling may read it), but no runtime path branches on it any more.
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
+  // Owner ruling 2026-07-29 (P0): sign-in is ONE same-tab redirect via
+  // signInWithOAuth + the PKCE callback — the client id is resolved at the
+  // Supabase auth host, so the app needs NO Google env var. The vestigial
+  // NEXT_PUBLIC_GOOGLE_CLIENT_ID declaration (unread since the GIS popup
+  // removal) was deleted in social-acquisition readiness v1.
 
   // ── Voice Work Journal transcription (server-only, never NEXT_PUBLIC) ──────
   // Points at the LabourMarket.ai-controlled self-hosted whisper.cpp service
@@ -206,7 +206,6 @@ const parsed = schema.safeParse({
   AGENTAI_OS_ALERTS_ENABLED: process.env.AGENTAI_OS_ALERTS_ENABLED,
   AGENTAI_OS_ALERT_ENDPOINT: process.env.AGENTAI_OS_ALERT_ENDPOINT,
   AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   VOICE_TRANSCRIBE_URL: process.env.VOICE_TRANSCRIBE_URL,
   VOICE_TRANSCRIBE_TOKEN: process.env.VOICE_TRANSCRIBE_TOKEN,
 });

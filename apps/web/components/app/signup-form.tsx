@@ -101,7 +101,14 @@ export function SignupForm() {
           // Harmless when "Confirm email" is OFF; correct target if DI
           // re-enables verification later.
           emailRedirectTo: `${origin}/${locale}/auth/callback`,
-          data: { locale },
+          // Durable first-touch attribution (social-acquisition readiness
+          // v1): localStorage lives on ONE device/browser only, so the
+          // bounded first-touch fields also ride the signup into
+          // auth.users.raw_user_meta_data — no schema change, no cookie.
+          // Every value passed here has already been through the attribution
+          // sanitizer (control chars stripped, angle brackets removed,
+          // 120-char cap); when nothing was captured the spread adds nothing.
+          data: { locale, ...getFirstTouchAttribution() },
         },
       });
       if (err) throw err;
