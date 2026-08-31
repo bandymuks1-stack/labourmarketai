@@ -63,7 +63,15 @@ export function ConversationThread({
 }) {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    // WCAG 2.3.3: a motion-sensitive person gets an instant jump, not a
+    // smooth glide, on every new turn.
+    const reduceMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    endRef.current?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "end",
+    });
   }, [items.length, typing]);
 
   /** Nothing has happened yet — the screen holds only the assistant's
