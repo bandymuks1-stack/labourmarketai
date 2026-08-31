@@ -46,8 +46,15 @@
 >   row-level hour fact existed). Wiring `timesheet_compute_lines_v1` to
 >   aggregate from allocations is the follow-up slice after the table
 >   exists; timesheets remain honest-empty until then.
-> - **RECOMMENDATION: APPROVE.** Remaining blocker is owner approval only —
->   then merge #1344 and apply `20260829140000_work_hour_allocations_v1`
+> - **RECOMMENDATION: APPROVE.** Two owner acts remain, both by design
+>   (verified on the refreshed branch's CI):
+>   1. the RED migration approval (`migration-safety` red carries no
+>      annotation on purpose — approval first);
+>   2. a product-gate waiver in `.github/scripts/owner-waivers.mjs` for
+>      `/dashboard/hours`'s three honest "no" answers
+>      (`not_reflected_on_map`, `not_ai_controlled`, `requires_new_page`)
+>      — the surface refuses to waive itself, same as the /jobs precedent.
+>   Then merge #1344 and apply `20260829140000_work_hour_allocations_v1`
 >   via Supabase MCP `apply_migration`.
 
 **One consolidated decision, three production defects, two artifacts.**
