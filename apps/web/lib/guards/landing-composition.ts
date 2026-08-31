@@ -56,10 +56,10 @@ export const LANDING_PAGE = "app/[locale]/page.tsx";
  * a CTA or baseline component is still shipped if EITHER arm renders it,
  * and genuinely deleting it from the arm that owns it still fails the guard.
  */
-export const LANDING_ARM_PAGES = [
+export const LANDING_ARM_PAGES: readonly string[] = [
   LANDING_PAGE,
   "app/[locale]/live-market-review/page.tsx",
-] as const;
+];
 
 /**
  * Every file in the landing's render tree, page first, deduped and depth-capped.
