@@ -114,12 +114,18 @@ export default async function OpportunitiesPage({
   // chip narrows what the external-supply retrieval FETCHES (closed-set
   // values), not merely what the page hides afterwards.
   const { filters, sort, view } = parseDiscoveryParams(sp);
-  const result = await loadWorkerOpportunityBoard("opportunities_board", {
-    externalDiscovery: {
-      professionSlug: filters.profession,
-      country: filters.country,
-    },
-  });
+  // Board + salary benchmark + weekly digest are independent reads — one
+  // combined await so TTFB pays the slowest of the three, not their sum.
+  const [result, salaryIntel, weekly] = await Promise.all([
+    loadWorkerOpportunityBoard("opportunities_board", {
+      externalDiscovery: {
+        professionSlug: filters.profession,
+        country: filters.country,
+      },
+    }),
+    getWorkerSalaryIntelligence(),
+    getWeeklyPersonalIntelligence(),
+  ]);
 
   // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
   //    never more than 5 items before the person asks for more. Pure
@@ -158,7 +164,6 @@ export default async function OpportunitiesPage({
   // Root translator — provenance/attribution codes are FULL key paths
   // (vacancySources.*), stored as codes on the record, resolved only here.
   const tRoot = await getTranslations();
-  const salaryIntel = await getWorkerSalaryIntelligence();
   const marketContextCards = buildOpportunityInsightRow(
     salaryIntel.kind === "ok"
       ? {
@@ -172,7 +177,7 @@ export default async function OpportunitiesPage({
   // Weekly personal intelligence (C-r1): the SAME request-cached read the
   // digest emitter uses — the bell row's href lands here, so this is where
   // the summary it points at finally renders. No second derivation.
-  const weekly = await getWeeklyPersonalIntelligence();
+  // (Loaded in the combined await above.)
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
