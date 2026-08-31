@@ -87,6 +87,33 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(rpcCalls.length).toBe(1);
   });
 
+  it("the demand submit + employer gate run through ONE core from every transport (wagon 3)", () => {
+    // The capability layer consumes the demand domain module and the employer
+    // workspace chain — no private customer_requests write, no private
+    // membership/company resolution.
+    expect(REGISTRY).not.toMatch(/from\("customer_requests"\)/);
+    expect(REGISTRY).not.toMatch(/from\("organizations"\)/);
+    expect(REGISTRY).not.toMatch(/from\("companies"\)/);
+    expect(REGISTRY).toMatch(/submitDemandRequestCore\(\s*caller/);
+    expect(REGISTRY).toMatch(/demandStateFingerprint\(caller\)/);
+    expect(REGISTRY).toMatch(/requireEmployerCompanyForCaller\(caller\)/);
+    // The cookie server path is a wrapper over the SAME submit core…
+    const demand = read("lib", "demand", "demand-request.ts");
+    expect(demand).toMatch(/submitDemandRequestCore\(\s*\{ supabase, userId: user\.id \}/);
+    // …and the submit RPC chain is invoked in exactly one function (the core):
+    const submits = demand.match(/rpc\(\s*\n?\s*"submit_demand_request(_v2)?"/g) ?? [];
+    expect(submits.length).toBe(2); // v2 attempt + v1 fallback, both in the core
+    // The cookie employer resolver delegates to the shared gate chain.
+    const employerCtx = read("lib", "company", "employer-company-context.ts");
+    expect(employerCtx).toMatch(/resolveEmployerCompanyCore\(\{ supabase, userId: user\.id \}, workspace\)/);
+    // The bearer workspace resolution reuses the ONE membership core + the
+    // SAME resolveActiveWorkspaceId rules (no second resolution algorithm).
+    const activeOrg = read("lib", "company", "active-organization.ts");
+    expect(activeOrg).toMatch(/resolveActiveWorkspaceForCaller/);
+    const resolverCalls = activeOrg.match(/resolveActiveWorkspaceId\(/g) ?? [];
+    expect(resolverCalls.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("capability confirmations share ONE minting/verification wiring", () => {
     // The registry never touches the raw token primitives — every draft
     // mints and every confirm verifies through ./confirmable, so a second

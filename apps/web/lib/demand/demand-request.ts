@@ -27,6 +27,7 @@ import {
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
 import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import type { DomainCaller } from "@/lib/domain/caller";
 import {
   readStructuredDemandV2,
   sanitizeStructuredDemandV2,
@@ -191,11 +192,6 @@ export async function submitDemandRequest(
   intent: DemandIntent,
   fields?: DemandFields,
 ): Promise<DemandRequestResult> {
-  // Block meaningless creation up-front (defence in depth — the client also
-  // disables the create action until a description exists).
-  const description = clamp(fields?.description, MAX_TEXT);
-  if (description.length === 0) return { ok: false, code: "empty_description" };
-
   const supabase = await createClient();
   const {
     data: { user },
@@ -209,6 +205,36 @@ export async function submitDemandRequest(
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { ok: false, code: "no_company_context" };
 
+  const result = await submitDemandRequestCore(
+    { supabase, userId: user.id },
+    { organizationId: employer.organizationId },
+    intent,
+    fields,
+  );
+  if (result.ok) revalidatePath("/", "layout");
+  return result;
+}
+
+/**
+ * THE demand submit DOMAIN core (G4 wagon 3) — the same canonical write as an
+ * explicit caller, so the web form, the chat executor, and the MCP capability
+ * run ONE implementation. The transport resolves the employer context (cookie:
+ * `requireEmployerCompany`; bearer: `requireEmployerCompanyForCaller`) and
+ * passes only the VALIDATED organization id; every closed-set validation, the
+ * v2→v1 RPC fallback, and the structured-column follow-up stay here unchanged.
+ */
+export async function submitDemandRequestCore(
+  caller: DomainCaller,
+  employer: { organizationId: string },
+  intent: DemandIntent,
+  fields?: DemandFields,
+): Promise<DemandRequestResult> {
+  // Block meaningless creation up-front (defence in depth — the client also
+  // disables the create action until a description exists).
+  const description = clamp(fields?.description, MAX_TEXT);
+  if (description.length === 0) return { ok: false, code: "empty_description" };
+
+  const supabase = caller.supabase;
   const kind = INTENT_KIND[intent];
   const role = clamp(fields?.role, MAX_TITLE);
   // The request title reads from the user's role/work text; falls back to an
@@ -346,7 +372,7 @@ export async function submitDemandRequest(
         start_period: startPeriod,
       })
       .eq("id", requestId)
-      .eq("profile_id", user.id);
+      .eq("profile_id", caller.userId);
     if (upErr) {
       console.error("[demand-request] structured-field update failed:", upErr.message);
       // Observable drift signal (audit F-E3): if RLS/columns ever drift, the
@@ -369,8 +395,33 @@ export async function submitDemandRequest(
     }
   }
 
-  revalidatePath("/", "layout");
   return { ok: true, requestId };
+}
+
+/**
+ * THE demand-creation state fingerprint (G4 wagon 3) — the caller's own most
+ * recent `customer_requests` row + own-row count, read under the caller's RLS.
+ * A successful submit adds a row, so a confirmation token minted before the
+ * write dies as stale_state on replay — genuinely one-time, which matters
+ * here because demand creation is NOT idempotent (a replay would create a
+ * second demand).
+ */
+export async function demandStateFingerprint(caller: DomainCaller): Promise<string> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = caller.supabase as any;
+    const { data, error } = await sb
+      .from("customer_requests")
+      .select("id, created_at")
+      .eq("profile_id", caller.userId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "demand:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "demand:none" : `demand:latest:${rows[0].id}`;
+  } catch {
+    return "demand:unreadable";
+  }
 }
 
 /** Duplicate-and-edit prefill (Capability E/G repeat action): the owner's own

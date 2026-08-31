@@ -197,6 +197,36 @@ function summarizeWorkCardDraft(
   return t("workCardDraftSummary", { fields: [...named].join(", ") });
 }
 
+function summarizeDemandDraft(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  const preview = asRecord(data.preview);
+  const actingFor = text(preview?.actingFor);
+  const description = text(preview?.description);
+  if (!actingFor || !description) return null;
+  const role = text(preview?.role);
+  return role
+    ? t("demandDraftSummaryWithRole", {
+        org: actingFor,
+        role,
+        description: trimNotes(description),
+      })
+    : t("demandDraftSummary", {
+        org: actingFor,
+        description: trimNotes(description),
+      });
+}
+
+function summarizeDemandConfirm(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  if (data.status !== "submitted") return null;
+  const org = text(data.actingFor);
+  return org ? t("demandSubmitted", { org }) : null;
+}
+
 function summarizeWorkCardConfirm(
   t: Translator,
   data: Record<string, unknown>,
@@ -217,6 +247,8 @@ const SUMMARIZERS: Record<
   "interest.express_confirm": summarizeInterestConfirm,
   "work_card.save_draft": summarizeWorkCardDraft,
   "work_card.save_confirm": summarizeWorkCardConfirm,
+  "demand.create_draft": summarizeDemandDraft,
+  "demand.create_confirm": summarizeDemandConfirm,
   "context.switch": summarizeContextSwitch,
 };
 

@@ -346,6 +346,45 @@ export async function listWorkspaceMemberships(
   return [personal, ...orgWorkspaces];
 }
 
+/**
+ * THE caller-scoped workspace resolution (G4 wagon 3) — the same membership
+ * list + the same `resolveActiveWorkspaceId` rules as the cookie resolver
+ * below, minus the session cookie (a bearer client has none): the DURABLE
+ * DB pointer (`profiles.active_organization_id`, written only by the
+ * membership-validated switch core) is the stored choice. This is what makes
+ * "acting for organization X" mean ONE thing for the web session, the MCP
+ * capability layer, and mobile.
+ */
+export async function resolveActiveWorkspaceForCaller(
+  caller: DomainCaller,
+  identity: "person" | "company" | null,
+): Promise<WorkspaceContext> {
+  const workspaces = await listWorkspaceMemberships(caller);
+  const orgWorkspaces = workspaces.filter((w) => w.kind === "organization");
+
+  let dbPointer: string | null = null;
+  const { data, error } = await asAny(caller.supabase)
+    .from("profiles")
+    .select("active_organization_id")
+    .eq("id", caller.userId)
+    .maybeSingle();
+  if (!error) {
+    dbPointer =
+      ((data as { active_organization_id?: string | null } | null)
+        ?.active_organization_id as string | null) ?? null;
+  }
+
+  return {
+    workspaces,
+    activeWorkspaceId: resolveActiveWorkspaceId(
+      identity,
+      orgWorkspaces.map((w) => w.id),
+      dbPointer,
+    ),
+    pointerAvailable: true,
+  };
+}
+
 export const getWorkspaceContext = cache(async function getWorkspaceContext(
   identity: "person" | "company" | null,
 ): Promise<WorkspaceContext> {
