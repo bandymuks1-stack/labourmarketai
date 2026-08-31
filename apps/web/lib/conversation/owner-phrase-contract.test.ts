@@ -30,8 +30,10 @@ const OWNER_PHRASES: ReadonlyArray<readonly [string, string]> = [
   ["kas susidomėjo mano poreikiu?", "interest-inbox"],
   ["parodyk man tinkamiausius darbus", "find-work"],
   ["parodyk tinkamiausius žmones šitam darbui", "find-workers"],
-  ["kur mano projektai?", "open-project"],
-  ["mano projektai", "open-project"],
+  // G8: the LIST reading routes to the `projects` chip's own handler now —
+  // the same panel a tap opens; `open-project` keeps the targeted OPEN verbs.
+  ["kur mano projektai?", "projects"],
+  ["mano projektai", "projects"],
   ["ką turiu patvirtinti?", "admin-approvals"],
   ["pridėk šiandienos darbą", "log-work"],
   ["noriu pateikti prašymą", "admin-requests"],

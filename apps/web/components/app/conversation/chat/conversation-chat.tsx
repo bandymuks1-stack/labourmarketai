@@ -2072,6 +2072,10 @@ export function ConversationChat({
         recentJournal: () => runWorkflow(() => runRecentJournal()),
         figures: () => runWorkflow(() => runFigures()),
         openProject: () => runWorkflow(() => runOpenProject(text)),
+        // G8: the typed sentence runs the SAME functions the `projects` and
+        // `candidates` chips run — never a second engine for the same request.
+        projectsList: () => startProjects(),
+        employerCandidates: () => startEmployerCandidates(),
         findWorkers: () => runWorkflow(() => runFindWorkers()),
         contextReadback: () => runWorkflow(() => runContextReadback()),
         // "Kas susidomėjo mano poreikiu?" — routed by IDENTITY, because the
@@ -2265,7 +2269,7 @@ export function ConversationChat({
         assistant(labels.fallback, starterChips),
       );
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, openForm, identity, t, demandPrefill, renderValueStatement],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement],
   );
 
   const nav = {

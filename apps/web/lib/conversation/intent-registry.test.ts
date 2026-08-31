@@ -28,8 +28,9 @@ describe("the intent registry is the enumerable routing contract", () => {
   it("covers every routed intent and never the `unknown` sentinel", () => {
     // The count is the union's size minus `unknown` — a new intent that
     // updates the union but not this expectation fails HERE, loudly, instead
-    // of silently shipping unclassified.
-    expect(entries.length).toBe(33);
+    // of silently shipping unclassified. 33 → 35 with G8 (`projects` and
+    // `candidates` — the chip surfaces, reachable by sentence).
+    expect(entries.length).toBe(35);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -107,5 +108,15 @@ describe("the component implements the registry, not a parallel map", () => {
     for (const [, d] of entries) {
       expect(CHAT, d.handler).toMatch(new RegExp(`${d.handler}: \\(\\) =>`));
     }
+  });
+
+  it("G8: the sentence intents run the SAME functions the chips run", () => {
+    // A typed request and a tapped chip are ONE path: `projects` and
+    // `candidates` sentences resolve to the exact component functions the
+    // chip cases call — never a parallel engine for the same request.
+    expect(CHAT).toMatch(/projectsList: \(\) => startProjects\(\)/);
+    expect(CHAT).toMatch(/employerCandidates: \(\) => startEmployerCandidates\(\)/);
+    expect(CHAT).toMatch(/case "projects":[\s\S]{0,200}?startProjects\(\)/);
+    expect(CHAT).toMatch(/case "candidates":[\s\S]{0,200}?startEmployerCandidates\(\)/);
   });
 });
