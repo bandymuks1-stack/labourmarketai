@@ -22,10 +22,18 @@ const DATA = "lib/market/live-market-landing.ts";
 
 describe("(a) the canonical homepage is the approved living market V1", () => {
   it("mounts the shared command surface with canonical SEO metadata", () => {
+    // Since the 2026-08-22 owner command (DEFAULT = FOCUS) and the 2026-08-31
+    // P0 entry-point fix, the approved living-market V1 is the landing's
+    // EXPLICIT-CHOICE arm: the canonical page statically serves FOCUS, and
+    // the cookie-gated live-market-review route mounts the command surface.
+    // Both arms build the same canonical SEO metadata for /{locale}.
     const page = read(HOME_PAGE);
-    expect(page).toContain("LiveMarketLanding");
     expect(page).toContain("buildPageMetadata");
-    expect(page).not.toContain("HeroLiveDemo");
+    const liveArm = read("app/[locale]/live-market-review/page.tsx");
+    expect(liveArm).toContain("LiveMarketLanding");
+    expect(liveArm).toContain("buildPageMetadata");
+    // The LIVE arm never mixes in the FOCUS hero.
+    expect(liveArm).not.toContain("HeroLiveDemo");
   });
 
   it("keeps the approved responsive cinematic image foundation", () => {
