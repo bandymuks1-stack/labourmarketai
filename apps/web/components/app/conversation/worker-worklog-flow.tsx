@@ -568,6 +568,7 @@ export function WorkerWorkLogFlow({
       <input
         ref={photoInputRef}
         type="file"
+        aria-label={tPhoto("label")}
         accept="image/jpeg,image/png,image/webp"
         disabled={confirming || pending}
         data-testid="worklog-photo-input"
@@ -662,6 +663,7 @@ export function WorkerWorkLogFlow({
         <Field label={labels.labelDate}>
           <input
             type="date"
+            aria-label={labels.labelDate}
             value={workDate}
             disabled={confirming || pending}
             onChange={(e) => setWorkDate(e.target.value)}

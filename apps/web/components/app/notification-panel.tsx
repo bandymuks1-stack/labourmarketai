@@ -114,7 +114,12 @@ export function NotificationPanel() {
         </div>
       </AnchoredOverlay>
 
-      <MobileSheet open={open} onClose={() => setOpen(false)} title={t("label")}>
+      <MobileSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("label")}
+        closeLabel={t("close")}
+      >
         <NotificationsBody
           label={t("label")}
           emptyTitle={t("emptyTitle")}
