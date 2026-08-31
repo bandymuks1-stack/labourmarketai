@@ -24,7 +24,14 @@ import {
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
+  workerSaveWorkCardFields,
+  workerSaveWorkCardSchema,
 } from "@/lib/conversation/worker-schemas";
+import {
+  normalizeCountryList,
+  saveWorkerCardCore,
+  workCardStateFingerprint,
+} from "@/lib/worker/work-card-core";
 import {
   resolveEngagementContext,
   type EngagementCandidate,
@@ -972,6 +979,204 @@ const contextSwitch: CapabilityDescriptor = {
   },
 };
 
+// ── work_card.save draft → confirm (G4 tail wagon 2) ──────────────────────
+//
+// The worker's availability/location/salary card — the SAME
+// `save_worker_card` RPC the web form and the chat `worker.save-work-card`
+// form submit, through ONE domain core (`lib/worker/work-card-core`). The
+// capability adds nothing of its own: partial saves stay the domain rule
+// (an omitted field keeps its value), and the write happens only in the
+// confirm leg after an explicit human confirmation.
+
+/** Which of the card fields this draft actually provides — `undefined` means
+ *  "keep the current value" and must survive the round trip untouched. */
+const WORK_CARD_FIELDS = [
+  "availabilityStatus",
+  "availableFrom",
+  "salaryMin",
+  "salaryMax",
+  "locationCountry",
+  "preferredCountries",
+] as const;
+
+type WorkCardDraft = z.infer<typeof workerSaveWorkCardSchema>;
+
+function providedWorkCardFields(draft: WorkCardDraft): string[] {
+  return WORK_CARD_FIELDS.filter((f) => draft[f] !== undefined);
+}
+
+/** The confirmation hash must not depend on null-vs-absent — absent fields
+ *  are normalized to a sentinel that cannot collide with a real value, so
+ *  "clear this field" (null) and "keep this field" (absent) stay DIFFERENT
+ *  drafts (they are different writes). */
+function normalizedWorkCardForHash(draft: WorkCardDraft): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of WORK_CARD_FIELDS) {
+    out[f] = draft[f] === undefined ? "__keep__" : (draft[f] ?? null);
+  }
+  return out;
+}
+
+const workCardSaveDraft: CapabilityDescriptor = {
+  id: "work_card.save_draft",
+  kind: "draft",
+  conversationActionId: "worker.save-work-card",
+  title: "Draft a work-card update",
+  description:
+    "Validates an update to the caller's own work card (availability, " +
+    "available-from date, salary range, location country, preferred " +
+    "countries) and returns a preview of exactly what would change plus a " +
+    "one-time confirmation token. NOTHING is saved. Omitted fields keep " +
+    "their current values; a field sent as null clears it. Confirming " +
+    "requires work_card.save_confirm with this exact draft and token.",
+  exposed: true,
+  // Read-only is HONEST: the draft reads the current card and mints a token —
+  // the write happens only in work_card.save_confirm.
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workerSaveWorkCardSchema,
+  run: async (caller, input): Promise<ExecResult> => {
+    const draft = workerSaveWorkCardSchema.parse(input);
+    const provided = providedWorkCardFields(draft);
+    if (provided.length === 0) {
+      return {
+        ok: false,
+        code: "nothing_to_save",
+        message:
+          "No card field was provided, so there is nothing to draft. Send at least one field.",
+      };
+    }
+
+    // Eligibility + current values through THE canonical workers-row core.
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    if (!workerRead.value) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it has no work card to update.",
+      };
+    }
+    const current = workerRead.value;
+
+    // The honest change preview — current recorded value → drafted value,
+    // only for the fields this draft provides. (Salary currently has no
+    // caller-readable column in the core row; its `from` is honestly null.)
+    const currentByField: Record<string, unknown> = {
+      availabilityStatus: current.availability_status,
+      availableFrom: current.available_from,
+      salaryMin: null,
+      salaryMax: null,
+      locationCountry: current.current_location_country,
+      preferredCountries: current.preferred_countries,
+    };
+    const changes = provided.map((field) => ({
+      field,
+      from: currentByField[field] ?? null,
+      to:
+        field === "preferredCountries"
+          ? normalizeCountryList(draft.preferredCountries ?? null)
+          : field === "locationCountry"
+            ? (draft.locationCountry?.toUpperCase() ?? null)
+            : (draft[field as keyof WorkCardDraft] ?? null),
+    }));
+
+    const fingerprint = await workCardStateFingerprint(caller);
+    const token = mintCapabilityConfirmation({
+      actionId: "work_card.save_confirm",
+      input: normalizedWorkCardForHash(draft),
+      userId: caller.userId,
+      stateFingerprint: fingerprint,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: { changes },
+        confirmationToken: token,
+        note: "Nothing was saved. Confirming requires work_card.save_confirm with this exact draft and token. Omitted fields keep their current values.",
+      },
+    };
+  },
+};
+
+const workCardConfirmInput = workerSaveWorkCardFields.extend({
+  confirmationToken: z.string().min(10),
+});
+
+const workCardSaveConfirm: CapabilityDescriptor = {
+  id: "work_card.save_confirm",
+  kind: "confirm",
+  conversationActionId: "worker.save-work-card",
+  title: "Confirm the work-card update",
+  description:
+    "Verifies the confirmation token against the exact draft, then performs " +
+    "the canonical work-card save as the caller (the same save_worker_card " +
+    "write path as the web form). Partial by design: omitted fields keep " +
+    "their current values.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workCardConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = workCardConfirmInput.parse(input);
+    const { confirmationToken, ...draft } = parsed;
+    const fingerprint = await workCardStateFingerprint(caller);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "work_card.save_confirm",
+      token: confirmationToken,
+      input: normalizedWorkCardForHash(draft),
+      userId: caller.userId,
+      currentStateFingerprint: fingerprint,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
+      };
+    }
+
+    // THE canonical core — the identical write the web form performs. The
+    // token's field set maps 1:1 (absent = keep, the core's own rule).
+    const result = await saveWorkerCardCore(caller, {
+      availabilityStatus: draft.availabilityStatus,
+      availableFrom: draft.availableFrom,
+      salaryMin: draft.salaryMin,
+      salaryMax: draft.salaryMax,
+      locationCountry: draft.locationCountry,
+      preferredCountries: draft.preferredCountries ?? null,
+    });
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message:
+          result.code === "needs_migration"
+            ? "The work-card store is not enabled on this environment."
+            : (result.message ?? "Work-card save failed."),
+      };
+    }
+    return {
+      ok: true,
+      data: {
+        status: "saved",
+        savedFields: providedWorkCardFields(draft),
+        structuredDestination: "/dashboard/profile",
+      },
+    };
+  },
+};
+
 // ── the registry ───────────────────────────────────────────────────────────
 
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
@@ -982,6 +1187,8 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   journalConfirm,
   interestExpressDraft,
   interestExpressConfirm,
+  workCardSaveDraft,
+  workCardSaveConfirm,
   contextSwitch,
 ];
 

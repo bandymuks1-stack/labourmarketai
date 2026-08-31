@@ -72,6 +72,21 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(upserts.length).toBe(1);
   });
 
+  it("the work-card save runs through ONE core from every transport (wagon 2)", () => {
+    // The capability layer consumes the work-card domain module — it holds no
+    // private RPC call, no private workers read for the fingerprint.
+    expect(REGISTRY).toMatch(/saveWorkerCardCore\(caller/);
+    expect(REGISTRY).toMatch(/workCardStateFingerprint\(caller\)/);
+    // The cookie server action is a wrapper over the SAME core.
+    const actions = read("lib", "worker", "work-card-actions.ts");
+    expect(actions).toMatch(/saveWorkerCardCore\(/);
+    expect(actions).not.toMatch(/rpc\("save_worker_card"/);
+    // The save_worker_card RPC is invoked in exactly one place: the core.
+    const core = read("lib", "worker", "work-card-core.ts");
+    const rpcCalls = core.match(/rpc\("save_worker_card"/g) ?? [];
+    expect(rpcCalls.length).toBe(1);
+  });
+
   it("capability confirmations share ONE minting/verification wiring", () => {
     // The registry never touches the raw token primitives — every draft
     // mints and every confirm verifies through ./confirmable, so a second
