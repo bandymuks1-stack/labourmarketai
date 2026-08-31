@@ -51,6 +51,9 @@ export default async function MarketMapPage({
 
   const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
+  // Marketplace loop reachability (M7): the OFFER half reuses the loop's own
+  // canonical labels (marketplace.hubOffer*) — no parallel copy source.
+  const tMarketplace = await getTranslations("marketplace");
   const tLayers = await getTranslations("mapLayers");
   const tRec = await getTranslations("marketRecognition");
   const tCountries = await getTranslations("labourMarket");
@@ -252,13 +255,25 @@ export default async function MarketMapPage({
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tMap("connections.title")}
         </span>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2">
           {[
             {
               key: "marketplace",
               href: "/dashboard/service-requests",
               label: tMap("connections.marketplace"),
               note: tMap("connections.marketplaceNote"),
+            },
+            {
+              // Marketplace loop reachability (M7): the loop's OFFER half.
+              // Until this link the only door to /dashboard/services was the
+              // cross-link inside /dashboard/service-requests itself — a
+              // provider could not discover where to publish an offering.
+              // Existing route + existing i18n keys; every identity may offer
+              // services (registry: services.roles = ALL_ROLES).
+              key: "services",
+              href: "/dashboard/services",
+              label: tMarketplace("hubOffer"),
+              note: tMarketplace("hubOfferNote"),
             },
             {
               key: "opportunities",
