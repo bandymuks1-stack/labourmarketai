@@ -171,6 +171,39 @@ function summarizeInterestConfirm(
   return data.status === "interested" ? t("interestConfirmed") : null;
 }
 
+/** capability field ids → the `capabilities` namespace key naming them. */
+const WORK_CARD_FIELD_KEYS: Record<string, string> = {
+  availabilityStatus: "workCardFieldAvailability",
+  availableFrom: "workCardFieldAvailableFrom",
+  salaryMin: "workCardFieldSalary",
+  salaryMax: "workCardFieldSalary",
+  locationCountry: "workCardFieldLocation",
+  preferredCountries: "workCardFieldPreferredCountries",
+};
+
+function summarizeWorkCardDraft(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  const preview = asRecord(data.preview);
+  const changes = Array.isArray(preview?.changes) ? preview.changes : null;
+  if (!changes || changes.length === 0) return null;
+  const named = new Set<string>();
+  for (const c of changes) {
+    const key = WORK_CARD_FIELD_KEYS[String(asRecord(c)?.field ?? "")];
+    if (key) named.add(t(key));
+  }
+  if (named.size === 0) return null;
+  return t("workCardDraftSummary", { fields: [...named].join(", ") });
+}
+
+function summarizeWorkCardConfirm(
+  t: Translator,
+  data: Record<string, unknown>,
+): string | null {
+  return data.status === "saved" ? t("workCardSaved") : null;
+}
+
 const SUMMARIZERS: Record<
   string,
   (t: Translator, data: Record<string, unknown>) => string | null
@@ -182,6 +215,8 @@ const SUMMARIZERS: Record<
   "journal.confirm": summarizeConfirm,
   "interest.express_draft": summarizeInterestDraft,
   "interest.express_confirm": summarizeInterestConfirm,
+  "work_card.save_draft": summarizeWorkCardDraft,
+  "work_card.save_confirm": summarizeWorkCardConfirm,
   "context.switch": summarizeContextSwitch,
 };
 

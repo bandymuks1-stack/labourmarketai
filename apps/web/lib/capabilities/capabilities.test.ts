@@ -120,6 +120,8 @@ describe("the registry itself", () => {
       "journal.confirm",
       "interest.express_draft",
       "interest.express_confirm",
+      "work_card.save_draft",
+      "work_card.save_confirm",
       "context.switch",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
@@ -130,25 +132,32 @@ describe("the registry itself", () => {
       "journal.confirm",
       "interest.express_draft",
       "interest.express_confirm",
+      "work_card.save_draft",
+      "work_card.save_confirm",
       "context.switch",
     ]);
   });
 
   it("G4 bridge: a capability that names a conversation action matches its confirmation contract", () => {
     const bridged = listCapabilities().filter((c) => c.conversationActionId);
-    // Wagon 1: exactly the express-interest pair is bridged.
+    // Wagon 1 bridged express-interest; wagon 2 the work card.
     expect(bridged.map((c) => c.id).sort()).toEqual([
       "interest.express_confirm",
       "interest.express_draft",
+      "work_card.save_confirm",
+      "work_card.save_draft",
     ]);
     for (const c of bridged) {
       const action = getConversationAction(c.conversationActionId!);
       // The named conversation action must exist…
       expect(action, c.id).toBeTruthy();
-      // …and its important_write tier maps to the draft→confirm split — an
-      // external client can never run the write with less confirmation than
-      // the web chat requires.
-      expect(action!.confirmation).toBe("important_write");
+      // …and its write tier maps to the draft→confirm split — an external
+      // client can never run the write with LESS confirmation than the web
+      // chat requires (draft→confirm ≥ a reversible form submit, and equals
+      // the important_write two-phase flow).
+      expect(["important_write", "reversible_write"]).toContain(
+        action!.confirmation,
+      );
       expect(["draft", "confirm"]).toContain(c.kind);
     }
   });
@@ -183,6 +192,10 @@ describe("the registry itself", () => {
     expect(byId["interest.express_draft"].annotations.readOnlyHint).toBe(true);
     expect(byId["interest.express_confirm"].annotations.readOnlyHint).toBe(false);
     expect(byId["interest.express_confirm"].annotations.idempotentHint).toBe(true);
+    // The work-card pair follows the same split (partial save, repeat = same card).
+    expect(byId["work_card.save_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["work_card.save_confirm"].annotations.readOnlyHint).toBe(false);
+    expect(byId["work_card.save_confirm"].annotations.idempotentHint).toBe(true);
   });
 
   it("an unknown capability id is refused, never a throw", async () => {
@@ -967,5 +980,155 @@ describe("journal draft → confirm", () => {
     expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
     expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
     expect(coreWrite).not.toHaveBeenCalled();
+  });
+});
+
+describe("work card draft → confirm (G4 tail wagon 2)", () => {
+  /** The caller's own workers row, as the core row read returns it. */
+  const workerRow = (confirmedAt: string) => ({
+    id: "worker-1",
+    profile_id: "00000000-0000-4000-8000-0000000000aa",
+    availability_status: "busy",
+    available_from: null,
+    current_location_country: "LT",
+    preferred_countries: ["LT"],
+    preferred_contract_type: null,
+    willing_to_relocate: null,
+    has_transport: null,
+    driving_licence_categories: null,
+    pay_basis_preference: null,
+    night_shifts_ok: null,
+    weekend_shifts_ok: null,
+    overtime_ok: null,
+    own_vehicle: null,
+    own_tools: null,
+    work_card_confirmed_at: confirmedAt,
+  });
+
+  const cardWorld = (confirmedAt = "2026-08-01T00:00:00Z", overrides: TableScript = {}): TableScript => ({
+    workers: { data: workerRow(confirmedAt), error: null },
+    "rpc:save_worker_card": { data: null, error: null },
+    ...overrides,
+  });
+
+  const DRAFT = { availabilityStatus: "available" as const, locationCountry: "NL" };
+
+  it("an empty draft is an honest nothing_to_save, no token", async () => {
+    const r = await runCapability("work_card.save_draft", caller(cardWorld()), {});
+    expect(r).toMatchObject({ ok: false, code: "nothing_to_save" });
+  });
+
+  it("no worker profile → honest refusal, NEVER a token for an unconfirmable draft", async () => {
+    const r = await runCapability(
+      "work_card.save_draft",
+      caller(cardWorld("t", { workers: { data: null, error: null } })),
+      DRAFT,
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("an unreadable workers row is 'unavailable', never 'no worker' (#1314)", async () => {
+    const r = await runCapability(
+      "work_card.save_draft",
+      caller(cardWorld("t", { workers: { data: null, error: { message: "boom" } } })),
+      DRAFT,
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("a valid draft previews exactly the provided fields (current → drafted) and WRITES nothing", async () => {
+    // No save RPC scripted: if the draft reached the write, it would error.
+    const r = await runCapability(
+      "work_card.save_draft",
+      caller(cardWorld("t", { "rpc:save_worker_card": undefined as never })),
+      DRAFT,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as { changes: { field: string; from: unknown; to: unknown }[] };
+      expect(preview.changes).toEqual([
+        { field: "availabilityStatus", from: "busy", to: "available" },
+        { field: "locationCountry", from: "LT", to: "NL" },
+      ]);
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+  });
+
+  it("draft → confirm performs the canonical save and names the saved fields", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("work_card.save_confirm", caller(cardWorld()), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed.ok).toBe(true);
+    if (confirmed.ok) {
+      expect(confirmed.data?.status).toBe("saved");
+      expect(confirmed.data?.savedFields).toEqual(["availabilityStatus", "locationCountry"]);
+    }
+  });
+
+  it("a TAMPERED draft is rejected at the token, before any write", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("work_card.save_confirm", caller(cardWorld()), {
+      ...DRAFT,
+      locationCountry: "DE",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("'clear this field' (null) and 'keep this field' (absent) are DIFFERENT drafts", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // Adding an explicit availableFrom:null (= clear) to the confirmed input
+    // is a different write than the draft the human saw — rejected.
+    const confirmed = await runCapability("work_card.save_confirm", caller(cardWorld()), {
+      ...DRAFT,
+      availableFrom: null,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("ONE-TIME: after the card changes (confirmed_at moves), the token is dead", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld("t0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const replayed = await runCapability("work_card.save_confirm", caller(cardWorld("t1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+  });
+
+  it("another user cannot spend the token", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const other = { ...caller(cardWorld()), userId: "00000000-0000-4000-8000-0000000000bb" };
+    const confirmed = await runCapability("work_card.save_confirm", other, {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("a missing save RPC maps to an honest needs_migration, never invented success", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability(
+      "work_card.save_confirm",
+      caller(
+        cardWorld("2026-08-01T00:00:00Z", {
+          "rpc:save_worker_card": {
+            data: null,
+            error: { message: "function does not exist", code: "42883" } as { message: string },
+          },
+        }),
+      ),
+      { ...DRAFT, confirmationToken: token },
+    );
+    expect(confirmed).toMatchObject({ ok: false, code: "needs_migration" });
   });
 });
