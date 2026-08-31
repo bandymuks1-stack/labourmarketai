@@ -5,7 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
-import { GoogleButton } from "@/components/app/google-button";
+import {
+  FacebookButton,
+  GoogleButton,
+  LinkedInButton,
+} from "@/components/app/google-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
@@ -25,12 +29,25 @@ function isValidEmail(v: string): boolean {
 
 const MIN_PASSWORD = 8;
 
-/** Signup form. Google OAuth (shared button) + email/password/confirm
- *  (`signUp`). Role is no longer picked here — it moves to /onboarding.
- *  Email confirmation is OFF (DI prereq), so signUp returns a live session;
- *  we route straight to /onboarding. Magic link was removed in M1. */
-export function SignupForm() {
+/** Signup form. Social OAuth (shared same-tab buttons) + email/password/
+ *  confirm (`signUp`). Role is no longer picked here — it moves to
+ *  /onboarding. Email confirmation is OFF (DI prereq), so signUp returns a
+ *  live session; we route straight to /onboarding. Magic link was removed in
+ *  M1.
+ *
+ *  `linkedinEnabled` / `facebookEnabled` come from the SERVER page component
+ *  (lib/auth/enabled-providers.ts). Default FALSE = fail-closed: a provider
+ *  button never renders unless the auth server confirmed it can complete the
+ *  flow (§18 honesty — and never as a disabled/greyed decoration either). */
+export function SignupForm({
+  linkedinEnabled = false,
+  facebookEnabled = false,
+}: {
+  linkedinEnabled?: boolean;
+  facebookEnabled?: boolean;
+} = {}) {
   const t = useTranslations("auth.signup");
+  const tSocial = useTranslations("auth.social");
   const tErr = useTranslations("auth.errors");
   const locale = useLocale();
   const router = useRouter();
@@ -194,6 +211,30 @@ export function SignupForm() {
         nextPath={nextPath}
         context="signup"
       />
+
+      {/* LinkedIn/Facebook render ONLY when the auth server reports the
+          provider enabled — the same account-creating same-tab flow, behind
+          the same GDPR notice above. */}
+      {linkedinEnabled && (
+        <LinkedInButton
+          label={tSocial("continueWithLinkedIn")}
+          redirectingLabel={t("google_redirecting")}
+          errorLabel={t("error_generic")}
+          disabled={disabled}
+          nextPath={nextPath}
+          context="signup"
+        />
+      )}
+      {facebookEnabled && (
+        <FacebookButton
+          label={tSocial("continueWithFacebook")}
+          redirectingLabel={t("google_redirecting")}
+          errorLabel={t("error_generic")}
+          disabled={disabled}
+          nextPath={nextPath}
+          context="signup"
+        />
+      )}
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />

@@ -3408,6 +3408,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Tęsti su LinkedIn",
+      "continueWithFacebook": "Tęsti su Facebook"
+    },
     "legalNotice": {
       "signup": "Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
       "googleLogin": "Jei paskyros dar neturite, tęsiant su „Google“ ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",

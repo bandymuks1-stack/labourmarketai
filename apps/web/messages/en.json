@@ -3408,6 +3408,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Continue with LinkedIn",
+      "continueWithFacebook": "Continue with Facebook"
+    },
     "legalNotice": {
       "signup": "By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
       "googleLogin": "If you don't have an account yet, continuing with Google will create one. By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",

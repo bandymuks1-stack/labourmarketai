@@ -147,7 +147,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // merged tree: the auth.errors.oauth.cancelled honest OAuth-cancel copy
   // lands in all 11 catalogs; lt/en/ru/nl/de translated, da/lv/et/no/sv/pl
   // [EN] until human translation — only da is ratchet-tracked).
-  da: 1305,
+  // MEASURED 1307 at social-auth-linkedin-facebook-v1 (2026-08-31, +2: the
+  // auth.social continueWithLinkedIn/continueWithFacebook labels land in all
+  // 11 catalogs; lt/en/ru/nl/de translated, da/lv/et/no/sv/pl [EN] until
+  // human translation — only da is ratchet-tracked).
+  da: 1307,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an
