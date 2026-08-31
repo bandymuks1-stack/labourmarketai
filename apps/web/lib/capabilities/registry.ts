@@ -33,6 +33,12 @@ import {
   workCardStateFingerprint,
 } from "@/lib/worker/work-card-core";
 import {
+  demandStateFingerprint,
+  submitDemandRequestCore,
+} from "@/lib/demand/demand-request";
+import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
+import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
+import {
   resolveEngagementContext,
   type EngagementCandidate,
 } from "@/lib/journal/engagement-context-selection";
@@ -1177,6 +1183,222 @@ const workCardSaveConfirm: CapabilityDescriptor = {
   },
 };
 
+// ── demand.create draft → confirm (G4 wagon 3) ────────────────────────────
+//
+// The employer's structured need onto the ONE canonical intake
+// (`customer_requests`, doctrine §17) — the same `submitDemandRequestCore`
+// write the web form and the chat `company.create-demand` action run,
+// gated by the SAME employer-workspace chain (`requireEmployerCompanyForCaller`
+// → `resolveEmployerCompanyCore`) the web resolves through. The capability
+// "draft" is a token preview and persists NOTHING — the web chat's persisted
+// `customer_requests` draft row (mode:"draft") stays a chat/web concern.
+
+type DemandDraftInput = z.infer<typeof companyCreateDemandFields>;
+
+const DEMAND_FIELDS = [
+  "intent",
+  "description",
+  "role",
+  "location",
+  "skills",
+  "urgency",
+  "notes",
+  "workType",
+  "country",
+  "teamSize",
+  "accommodation",
+  "transport",
+] as const;
+
+/** null-vs-absent must not change the hash for optional fields — absent and
+ *  null both mean "not stated" to the canonical submit. */
+function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
+  return out;
+}
+
+/** Employer-context refusal → an honest capability failure. `context.switch`
+ *  is named because it is the caller's own way out of the personal space. */
+function demandContextRefusal(reason: string): ExecResult {
+  if (reason === "personal-workspace") {
+    return {
+      ok: false,
+      code: "personal_workspace",
+      message:
+        "The caller is acting in their personal space. A structured need belongs to an organization — switch with context.switch first.",
+    };
+  }
+  if (reason === "no-organization") {
+    return {
+      ok: false,
+      code: "no_organization",
+      message: "This account belongs to no organization, so it cannot create a demand.",
+    };
+  }
+  if (reason === "needs-migration") {
+    return {
+      ok: false,
+      code: "needs_migration",
+      message: "The organization store is not enabled on this environment.",
+    };
+  }
+  return {
+    ok: false,
+    code: "no_company_context",
+    message:
+      "No employer company resolves for this caller right now (workspace not company-bound, membership missing, or the read failed).",
+  };
+}
+
+const demandCreateDraft: CapabilityDescriptor = {
+  id: "demand.create_draft",
+  kind: "draft",
+  conversationActionId: "company.create-demand",
+  title: "Draft a worker-need (demand) request",
+  description:
+    "Validates a structured worker-need for the organization the caller is " +
+    "ACTING FOR (their active workspace), and returns a human-readable " +
+    "preview naming that organization plus a one-time confirmation token. " +
+    "NOTHING is created or sent. `description` is the need in the caller's " +
+    "own words (required); role/location/skills/urgency/notes are optional " +
+    "free text; workType/country/teamSize/accommodation/transport are " +
+    "structured facts a worker's board may later see. Confirming requires " +
+    "demand.create_confirm with this exact draft and token.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: companyCreateDemandFields,
+  run: async (caller, input): Promise<ExecResult> => {
+    const draft = companyCreateDemandFields.parse(input);
+    // THE employer-workspace gate — same chain as the web (wagon 3 core).
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const fingerprint = await demandStateFingerprint(caller);
+    const token = mintCapabilityConfirmation({
+      actionId: "demand.create_confirm",
+      input: normalizedDemandForHash(draft),
+      userId: caller.userId,
+      stateFingerprint: fingerprint,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          actingFor: employer.organizationName,
+          intent: draft.intent,
+          role: draft.role ?? null,
+          description: draft.description,
+          teamSize: draft.teamSize ?? null,
+          country: draft.country ?? null,
+          workType: draft.workType ?? null,
+          urgency: draft.urgency ?? null,
+        },
+        confirmationToken: token,
+        note: "Nothing was created. Confirming requires demand.create_confirm with this exact draft and token; the demand will be created for the named organization.",
+      },
+    };
+  },
+};
+
+const demandConfirmInput = companyCreateDemandFields.extend({
+  confirmationToken: z.string().min(10),
+});
+
+const demandCreateConfirm: CapabilityDescriptor = {
+  id: "demand.create_confirm",
+  kind: "confirm",
+  conversationActionId: "company.create-demand",
+  title: "Confirm creating the worker-need (demand) request",
+  description:
+    "Verifies the confirmation token against the exact draft, re-resolves " +
+    "the caller's employer organization at write time, then performs the " +
+    "canonical demand submit (status becomes 'submitted' on the one " +
+    "canonical intake). NOT idempotent by nature — the one-time token is " +
+    "what prevents a replay from creating a second demand.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    // Honest: a demand submit is not idempotent; replay safety comes from the
+    // one-time state-fingerprinted token, not from the write itself.
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+  inputSchema: demandConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = demandConfirmInput.parse(input);
+    const { confirmationToken, ...draft } = parsed;
+    const fingerprint = await demandStateFingerprint(caller);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "demand.create_confirm",
+      token: confirmationToken,
+      input: normalizedDemandForHash(draft),
+      userId: caller.userId,
+      currentStateFingerprint: fingerprint,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). Draft again.`,
+      };
+    }
+
+    // Employer context is re-resolved at WRITE time — a workspace switch
+    // between draft and confirm must not create the demand for the old org
+    // silently. (The fingerprint does not bind the org; this re-check plus
+    // the preview's actingFor name is the honest contract.)
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const result = await submitDemandRequestCore(
+      caller,
+      { organizationId: employer.organizationId },
+      draft.intent,
+      {
+        description: draft.description,
+        role: draft.role ?? undefined,
+        location: draft.location ?? undefined,
+        skills: draft.skills ?? undefined,
+        urgency: draft.urgency ?? undefined,
+        notes: draft.notes ?? undefined,
+        workType: draft.workType ?? undefined,
+        country: draft.country ?? undefined,
+        teamSize: draft.teamSize ?? undefined,
+        accommodation: draft.accommodation ?? undefined,
+        transport: draft.transport ?? undefined,
+      },
+    );
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message:
+          result.code === "needs_migration"
+            ? "The demand intake is not enabled on this environment."
+            : result.code === "no_company_context"
+              ? "No employer company resolves for this caller."
+              : "Demand submit failed.",
+      };
+    }
+    return {
+      ok: true,
+      data: {
+        status: "submitted",
+        requestId: result.requestId,
+        actingFor: employer.organizationName,
+        structuredDestination: "/dashboard/company",
+      },
+    };
+  },
+};
+
 // ── the registry ───────────────────────────────────────────────────────────
 
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
@@ -1189,6 +1411,8 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   interestExpressConfirm,
   workCardSaveDraft,
   workCardSaveConfirm,
+  demandCreateDraft,
+  demandCreateConfirm,
   contextSwitch,
 ];
 

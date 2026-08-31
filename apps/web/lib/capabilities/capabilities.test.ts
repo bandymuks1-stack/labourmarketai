@@ -43,6 +43,32 @@ vi.mock("@/lib/notifications/event-emitters", () => ({
   emitDemandInterestResponseNotification: async () => {},
 }));
 
+// The employer-workspace gate and the demand submit core have their own
+// suites (lib/company + lib/demand); here they are spies — these tests prove
+// the CAPABILITY layer's rules: the gate refusal mapping, token verification
+// BEFORE the write, write-time org re-resolution, honest failure mapping.
+const employerGate = vi.fn(
+  async (): Promise<
+    | { ok: true; companyId: string; organizationId: string; organizationName: string; role: string }
+    | { ok: false; reason: string }
+  > => ({
+    ok: true,
+    companyId: "comp-1",
+    organizationId: "org-1",
+    organizationName: "Dev Statyba",
+    role: "owner",
+  }),
+);
+vi.mock("@/lib/company/employer-company-context", () => ({
+  requireEmployerCompanyForCaller: (...a: unknown[]) => employerGate(...(a as [])),
+}));
+const demandSubmit = vi.fn(async () => ({ ok: true as const, requestId: "req-1" }));
+const demandFingerprint = vi.fn(async () => "demand:none");
+vi.mock("@/lib/demand/demand-request", () => ({
+  submitDemandRequestCore: (...a: unknown[]) => demandSubmit(...(a as [])),
+  demandStateFingerprint: (...a: unknown[]) => demandFingerprint(...(a as [])),
+}));
+
 import {
   exposedCapabilities,
   listCapabilities,
@@ -122,6 +148,8 @@ describe("the registry itself", () => {
       "interest.express_confirm",
       "work_card.save_draft",
       "work_card.save_confirm",
+      "demand.create_draft",
+      "demand.create_confirm",
       "context.switch",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
@@ -134,14 +162,18 @@ describe("the registry itself", () => {
       "interest.express_confirm",
       "work_card.save_draft",
       "work_card.save_confirm",
+      "demand.create_draft",
+      "demand.create_confirm",
       "context.switch",
     ]);
   });
 
   it("G4 bridge: a capability that names a conversation action matches its confirmation contract", () => {
     const bridged = listCapabilities().filter((c) => c.conversationActionId);
-    // Wagon 1 bridged express-interest; wagon 2 the work card.
+    // Wagon 1 bridged express-interest; wagon 2 the work card; wagon 3 demand.
     expect(bridged.map((c) => c.id).sort()).toEqual([
+      "demand.create_confirm",
+      "demand.create_draft",
       "interest.express_confirm",
       "interest.express_draft",
       "work_card.save_confirm",
@@ -196,6 +228,11 @@ describe("the registry itself", () => {
     expect(byId["work_card.save_draft"].annotations.readOnlyHint).toBe(true);
     expect(byId["work_card.save_confirm"].annotations.readOnlyHint).toBe(false);
     expect(byId["work_card.save_confirm"].annotations.idempotentHint).toBe(true);
+    // Demand creation is honestly NOT idempotent — replay safety is the
+    // one-time token, and the annotation must not claim otherwise.
+    expect(byId["demand.create_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["demand.create_confirm"].annotations.readOnlyHint).toBe(false);
+    expect(byId["demand.create_confirm"].annotations.idempotentHint).toBe(false);
   });
 
   it("an unknown capability id is refused, never a throw", async () => {
@@ -1129,6 +1166,139 @@ describe("work card draft → confirm (G4 tail wagon 2)", () => {
       ),
       { ...DRAFT, confirmationToken: token },
     );
+    expect(confirmed).toMatchObject({ ok: false, code: "needs_migration" });
+  });
+});
+
+describe("demand draft → confirm (G4 wagon 3)", () => {
+  const DRAFT = {
+    description: "Reikia 3 plyteliu klojeju objektui Vilniuje",
+    role: "Plyteliu klojejas",
+    teamSize: 3,
+    country: "LT",
+  };
+
+  it("a personal-workspace caller gets an honest refusal naming context.switch, NO token", async () => {
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "personal-workspace" });
+    const r = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(r).toMatchObject({ ok: false, code: "personal_workspace" });
+    expect(r.ok === false && /context\.switch/.test(r.message ?? "")).toBe(true);
+  });
+
+  it("no organization at all → no_organization; unresolved context → no_company_context", async () => {
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "no-organization" });
+    const a = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(a).toMatchObject({ ok: false, code: "no_organization" });
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "company-not-owned" });
+    const b = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(b).toMatchObject({ ok: false, code: "no_company_context" });
+  });
+
+  it("a valid draft names the ACTING organization in the preview, mints a token, and SUBMITS nothing", async () => {
+    demandSubmit.mockClear();
+    const r = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.preview).toMatchObject({
+        actingFor: "Dev Statyba",
+        role: "Plyteliu klojejas",
+        teamSize: 3,
+        country: "LT",
+      });
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("draft → confirm runs THE canonical submit core with the gate's own organization id", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed.ok).toBe(true);
+    if (confirmed.ok) {
+      expect(confirmed.data?.status).toBe("submitted");
+      expect(confirmed.data?.requestId).toBe("req-1");
+      expect(confirmed.data?.actingFor).toBe("Dev Statyba");
+    }
+    expect(demandSubmit).toHaveBeenCalledTimes(1);
+    const [, employerArg, intentArg, fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    expect(employerArg).toEqual({ organizationId: "org-1" });
+    expect(intentArg).toBe("hire_workers");
+    expect(fieldsArg).toMatchObject({
+      description: DRAFT.description,
+      role: DRAFT.role,
+      teamSize: 3,
+      country: "LT",
+    });
+  });
+
+  it("a TAMPERED description is rejected at the token, before any submit", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      description: "Kitas tekstas visai kitam poreikiui, pakeistas po perziuros",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("ONE-TIME: after a demand exists (fingerprint moved), the token is dead — no second demand from replay", async () => {
+    demandSubmit.mockClear();
+    demandFingerprint.mockResolvedValueOnce("demand:none");
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    demandFingerprint.mockResolvedValue("demand:latest:req-1");
+    const replayed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(demandSubmit).not.toHaveBeenCalled();
+    demandFingerprint.mockResolvedValue("demand:none");
+  });
+
+  it("another user cannot spend the token", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const other = { ...caller({}), userId: "00000000-0000-4000-8000-0000000000bb" };
+    const confirmed = await runCapability("demand.create_confirm", other, {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("the employer context is RE-RESOLVED at write time — a caller who lost it is refused", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "personal-workspace" });
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "personal_workspace" });
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a submit failure maps through honestly — never invented success", async () => {
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    demandSubmit.mockResolvedValueOnce({ ok: false, code: "needs_migration" } as never);
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
     expect(confirmed).toMatchObject({ ok: false, code: "needs_migration" });
   });
 });
