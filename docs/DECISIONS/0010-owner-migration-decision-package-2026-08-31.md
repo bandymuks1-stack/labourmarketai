@@ -23,6 +23,32 @@
 > unauthenticated 42501. **M1_FIXED = YES. M2_FIXED = YES.**
 >
 > **Item 2 (M3, PR #1344) remains the only open decision in this package.**
+>
+> ### M3 re-review against current main (2026-08-31, per owner mandate §10)
+>
+> - Branch refreshed: `origin/main` (post-#1371/#1370 + fixes) merged into
+>   `feat/cc/work-hours-allocation-v1` at `c1a84a56`; conflicts were
+>   append-append only (surface-registry entry + 5 locale catalogs), resolved
+>   as unions — no logic touched.
+> - Verified after merge: typecheck 0 errors, lint 0 errors, the PR's own
+>   guards + allocation model + route-truth + product-readiness +
+>   market-map guards 123/123, lt-en i18n parity 63/63.
+> - Production preconditions re-verified read-only: `manages_organization`,
+>   `owns_worker`, `set_updated_at` all present; `work_hour_allocations`
+>   name FREE; `work_objects` exists (0 rows); `timesheets` 1 row.
+> - Architecture fit: additive-only (1 table, 1 nullable UX column + format
+>   check, 3 indexes, tight grants incl. explicit anon revoke + TRUNCATE
+>   withheld, RLS mirroring `timesheets`, correction via
+>   `correction_of`/`superseded_by` — the journal idiom). It creates the
+>   canonical hour FACT that timesheets aggregate from; approval stays in
+>   `timesheets`/`timesheet_events` (no second approval framework).
+> - Honest scope note: this PR closes the MISSING-FACT half of M3 (no
+>   row-level hour fact existed). Wiring `timesheet_compute_lines_v1` to
+>   aggregate from allocations is the follow-up slice after the table
+>   exists; timesheets remain honest-empty until then.
+> - **RECOMMENDATION: APPROVE.** Remaining blocker is owner approval only —
+>   then merge #1344 and apply `20260829140000_work_hour_allocations_v1`
+>   via Supabase MCP `apply_migration`.
 
 **One consolidated decision, three production defects, two artifacts.**
 Everything below is already engineered, tested and shipped UNAPPLIED — the
