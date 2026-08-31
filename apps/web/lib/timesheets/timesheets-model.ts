@@ -162,8 +162,10 @@ export type TimesheetLine = {
    *  invention. */
   readonly value: number;
   readonly unit: "hours" | "minutes" | "days";
-  /** Which canonical rule produced this line. */
-  readonly derivedFrom: "fragment_time" | "entry_quantity";
+  /** Which canonical rule produced this line. `work_hour_allocation` lines
+   *  come from the canonical `work_hour_allocations` row-level hour fact
+   *  (M3, 20260831170000) rather than from journal metrics. */
+  readonly derivedFrom: "fragment_time" | "entry_quantity" | "work_hour_allocation";
   /** `journal_entry_metrics.source` of the row behind this line. */
   readonly metricSource: string | null;
   readonly projectId: string | null;
@@ -258,7 +260,10 @@ export function parseTimesheetSnapshot(raw: unknown): TimesheetSnapshot {
       value,
       unit: unit as TimesheetLine["unit"],
       derivedFrom:
-        l.derivedFrom === "entry_quantity" ? "entry_quantity" : "fragment_time",
+        l.derivedFrom === "entry_quantity" ||
+        l.derivedFrom === "work_hour_allocation"
+          ? l.derivedFrom
+          : "fragment_time",
       metricSource:
         typeof l.metricSource === "string" ? l.metricSource : null,
       projectId: typeof l.projectId === "string" ? l.projectId : null,

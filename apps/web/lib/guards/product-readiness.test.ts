@@ -2275,7 +2275,20 @@ describe("no migration files added by this sprint", () => {
     // drop-policy-if-exists + create-trigger): ships UNAPPLIED, production
     // apply owner-gated. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 248.
-    const SPRINT_BASELINE = 248;
+    // Bumped 248 -> 249 for the M3 compute wiring
+    // (20260831170000_timesheet_compute_allocations_v1, paired rollback).
+    // Wires timesheet_compute_lines_v1 to read the now-applied
+    // work_hour_allocations (ledger 20260831161725) ALONGSIDE
+    // journal_entry_metrics, with an allocation-wins dedupe so one hour fact
+    // never counts twice, a combined 500-line cap, and the journal half
+    // copied VERBATIM from 20260819220000. RED by classification (SECURITY
+    // DEFINER body replace + revoke re-assertion), human-gate-annotated under
+    // the owner's 2026-08-31 closure-session sequence ("wire the actual
+    // timesheet compute path" — the follow-up slice recorded in
+    // docs/DECISIONS/0010 and the APPLIED_LEDGER row for 20260831161725);
+    // merge and production apply stay with the main session. RECOUNTED from
+    // the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
+    const SPRINT_BASELINE = 249;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

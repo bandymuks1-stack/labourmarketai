@@ -696,7 +696,16 @@ describe("NO new DB migration in this PR", () => {
     // (grant/revoke + drop-policy-if-exists + create-trigger), ships
     // UNAPPLIED, production apply owner-gated. Still no migration from the
     // market-map read layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(248);
+    // Bumped 248 -> 249 for the M3 compute wiring
+    // (20260831170000_timesheet_compute_allocations_v1, paired rollback) —
+    // timesheet_compute_lines_v1 re-issued to read work_hour_allocations
+    // alongside journal_entry_metrics (allocation-wins dedupe, combined
+    // 500-line cap). RED by route (SECURITY DEFINER body replace),
+    // human-gate-annotated under the owner's 2026-08-31 closure-session
+    // sequence; merge and production apply stay with the main session. Still
+    // nothing from the market-map read layer itself. RECOUNTED from the
+    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
+    expect(count).toBeLessThanOrEqual(249);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
