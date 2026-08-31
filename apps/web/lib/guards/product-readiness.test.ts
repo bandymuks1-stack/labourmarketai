@@ -2263,7 +2263,19 @@ describe("no migration files added by this sprint", () => {
     // touched; the surfaces stay open. RED by classification (grant-adjacent):
     // ships UNAPPLIED, production apply owner-gated. RECOUNTED from the
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 247.
-    const SPRINT_BASELINE = 247;
+    // Bumped 247 -> 248 for the work-hour allocations foundation
+    // (20260829140000_work_hour_allocations_v1, paired rollback). The
+    // canonical row a timesheet aggregates: one row per worker/date/object,
+    // deliberately WITHOUT a uniqueness constraint on (worker, date) or
+    // (worker, date, object), because two objects in one day — and even two
+    // shifts on one object — are legitimate facts, not conflicts. entered_by
+    // stays distinct from worker_id so a manager recording a colleague is
+    // never stored as that colleague's self-entry. No DELETE policy: history
+    // is correction_of/superseded_by. RED by classification (grant/revoke +
+    // drop-policy-if-exists + create-trigger): ships UNAPPLIED, production
+    // apply owner-gated. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 248.
+    const SPRINT_BASELINE = 248;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

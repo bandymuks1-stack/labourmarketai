@@ -27,8 +27,35 @@ import type { CompanyTerritorySourceRow } from "@/lib/market-map/spatial-entitie
  * the calm "prepared, activation pending" state and nothing is faked.
  */
 
-const SELECT_COLUMNS =
+const BASE_COLUMNS =
   "id, organization_id, project_id, name, country, region, city, address_line, latitude, longitude, responsible_profile_id, status, created_at";
+
+/** `color_hex` arrives with 20260829140000. Selected when present, dropped on
+ *  a database that has not applied it yet — see `runObjectSelect`. */
+const SELECT_COLUMNS = `${BASE_COLUMNS.replace(", created_at", "")}, color_hex, created_at`;
+
+/** undefined_column — the column is not in THIS database yet. */
+const UNDEFINED_COLUMN_CODE = "42703";
+
+/**
+ * Run an object select, degrading to the pre-colour column list if this
+ * database has not applied 20260829140000.
+ *
+ * Without this, adding `color_hex` to the select would break the company page
+ * and the task object picker everywhere the migration is not applied — a new
+ * feature silently removing two working surfaces. The same retry idiom
+ * `listActiveCompanyWorkers` uses for its ops-bridge columns.
+ */
+async function runObjectSelect(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  build: (cols: string) => any,
+): Promise<{ data: Row[] | null; error: { code?: string } | null }> {
+  const withColour = await build(SELECT_COLUMNS);
+  if (withColour.error?.code === UNDEFINED_COLUMN_CODE) {
+    return await build(BASE_COLUMNS);
+  }
+  return withColour;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -48,6 +75,9 @@ type Row = {
   longitude: number | null;
   responsible_profile_id: string | null;
   status: string;
+  /** Added by 20260829140000. Optional in the row type because a database
+   *  without that migration simply omits it, and the reader must not crash. */
+  color_hex?: string | null;
   created_at: string;
 };
 
@@ -66,6 +96,7 @@ function toObject(r: Row): WorkObject | null {
     longitude: r.longitude ?? null,
     responsibleProfileId: r.responsible_profile_id ?? null,
     status: r.status,
+    colorHex: r.color_hex ?? null,
     createdAt: r.created_at,
   };
 }
@@ -90,13 +121,15 @@ export async function getOrgWorkObjects(): Promise<OrgWorkObjectsResult> {
   if (ctx.kind !== "ok") return { kind: "no-company" };
 
   const supabase = await createClient();
-  const res = await asAny(supabase)
-    .from("work_objects")
-    .select(SELECT_COLUMNS)
-    .eq("organization_id", ctx.organizationId)
-    .order("status", { ascending: true })
-    .order("created_at", { ascending: false })
-    .limit(WORK_OBJECT_READ_LIMIT);
+  const res = await runObjectSelect((cols) =>
+    asAny(supabase)
+      .from("work_objects")
+      .select(cols)
+      .eq("organization_id", ctx.organizationId)
+      .order("status", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(WORK_OBJECT_READ_LIMIT),
+  );
   if (res.error) {
     if (isObjectMigrationMissingCode(res.error.code)) {
       return { kind: "needs-migration" };
@@ -127,12 +160,14 @@ export async function listVisibleActiveObjects(): Promise<VisibleObjectsResult> 
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
 
-  const res = await asAny(supabase)
-    .from("work_objects")
-    .select(SELECT_COLUMNS)
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(WORK_OBJECT_READ_LIMIT);
+  const res = await runObjectSelect((cols) =>
+    asAny(supabase)
+      .from("work_objects")
+      .select(cols)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(WORK_OBJECT_READ_LIMIT),
+  );
   if (res.error) {
     if (isObjectMigrationMissingCode(res.error.code)) {
       return { kind: "needs-migration" };

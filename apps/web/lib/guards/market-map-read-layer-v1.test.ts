@@ -688,7 +688,15 @@ describe("NO new DB migration in this PR", () => {
     // inside the public intake RPC. RED by classification (grant-adjacent),
     // ships UNAPPLIED, owner-gated. Nothing to do with the market-map read
     // layer, which stays pure TS.
-    expect(count).toBeLessThanOrEqual(247);
+    // Bumped 247 -> 248 for the work-hour allocations foundation
+    // (20260829140000_work_hour_allocations_v1, paired rollback) — the
+    // canonical per-worker/per-object/per-day row a timesheet was only ever a
+    // snapshot of, with entered_by kept distinct from worker_id and no DELETE
+    // policy (history is correction/supersession). RED by classification
+    // (grant/revoke + drop-policy-if-exists + create-trigger), ships
+    // UNAPPLIED, production apply owner-gated. Still no migration from the
+    // market-map read layer, which stays pure TS.
+    expect(count).toBeLessThanOrEqual(248);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

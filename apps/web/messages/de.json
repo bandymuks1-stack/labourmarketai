@@ -13869,6 +13869,43 @@
       "other": "Andere Bewegung"
     }
   },
+  "workHours": {
+    "title": "Arbeitsstunden",
+    "subtitle": "Erfassen Sie, wer gearbeitet hat, an welchem Tag, auf welchem Objekt und wie viele Stunden.",
+    "date": "Datum",
+    "worker": "Mitarbeiter",
+    "object": "Objekt",
+    "hours": "Stunden",
+    "note": "Arbeitsbeschreibung (optional)",
+    "hoursHint": "In Viertelstunden, z. B. 7,5",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Erfasst",
+    "addAnother": "Gleicher Mitarbeiter — anderes Objekt",
+    "selectWorker": "Mitarbeiter auswählen",
+    "selectObject": "Objekt auswählen",
+    "dayTotal": "Tagessumme",
+    "entriesTitle": "Einträge dieses Tages",
+    "noEntries": "Für diesen Tag gibt es noch keine Einträge.",
+    "enteredForSomeoneElse": "Von einer anderen Person erfasst",
+    "duplicateWarning": "Sie haben soeben einen identischen Eintrag erfasst. Ist dies eine zweite Schicht, speichern Sie erneut.",
+    "errors": {
+      "hours": "Geben Sie Stunden zwischen 0,25 und 24 ein.",
+      "quarter": "Stunden müssen in Viertelschritten (0,25) sein.",
+      "worker": "Wählen Sie einen Mitarbeiter.",
+      "object": "Wählen Sie ein Objekt.",
+      "date": "Ungültiges Datum.",
+      "note": "Beschreibung ist zu lang.",
+      "notAuthorized": "Sie dürfen diese Stunden nicht erfassen.",
+      "generic": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "states": {
+      "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
+      "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
+      "noObjects": "Legen Sie zuerst mindestens ein Objekt an.",
+      "error": "Der Tag konnte nicht geladen werden."
+    }
+  },
   "oauthConsent": {
       "title": "Zugriff bestätigen",
       "clientWantsAccess": "„{client}“ bittet um Zugriff auf Ihr LabourMarket.ai-Konto.",
