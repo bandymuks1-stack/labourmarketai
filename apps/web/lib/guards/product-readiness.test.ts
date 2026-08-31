@@ -2263,7 +2263,15 @@ describe("no migration files added by this sprint", () => {
     // touched; the surfaces stay open. RED by classification (grant-adjacent):
     // ships UNAPPLIED, production apply owner-gated. RECOUNTED from the
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 247.
-    const SPRINT_BASELINE = 247;
+    // Bumped 247 -> 248 for the ESCO canonical linkage 67
+    // (20260830100000_esco_canonical_linkage_67, paired rollback) — the
+    // write-if-null esco_uri curation for the mapping artifact's EXACT/HIGH
+    // rows. RED by classification (data migration), @human-gate-approved as
+    // acknowledgement only; ships UNAPPLIED, production apply owner-gated
+    // after docs/taxonomy/esco-apply-review-2026-08-30.md review. RECOUNTED
+    // from the tree, never summed: `ls supabase/migrations/*.sql | wc -l`
+    // = 248.
+    const SPRINT_BASELINE = 248;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
