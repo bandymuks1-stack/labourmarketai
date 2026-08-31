@@ -128,7 +128,7 @@ jobs:
       # the Hermes bundle via `expo export:embed` in the build phase, with the
       # EXPO_PUBLIC_* placeholders below inlined at bundle time — the runtime
       # journey asserts the UI those values produce.
-      - name: Xcode build (simulator, Release, unsigned, embedded bundle)
+      - name: Xcode build (simulator, Release, ad-hoc signed, embedded bundle)
         working-directory: apps/mobile/ios
         env:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co

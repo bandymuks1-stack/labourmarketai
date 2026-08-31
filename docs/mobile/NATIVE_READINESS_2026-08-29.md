@@ -83,7 +83,7 @@ and the app scheme selected by `.xcodeproj` name (schemes[0] is a Pods
 scheme). Still NOT claimed: device builds, signing, store readiness,
 real-backend auth/deep-link E2E.
 
-## UPDATE 2026-08-31 — IOS_RUNTIME_JOURNEY_PROVEN: defined, NOT yet claimed
+## UPDATE 2026-08-31 — IOS_RUNTIME_JOURNEY_PROVEN: YES (CI simulator)
 
 `IOS_SIM_LAUNCH_PROVEN` asserted **process liveness only** — and the Debug
 build it launched loads JavaScript from a Metro server that does not exist on
@@ -110,11 +110,27 @@ simulator, driven by the Maestro flow
    output are uploaded as run artifacts; a failing run also uploads the
    simulator log.
 
-**Claim status: NOT claimed until the extended `ios.yml` run is green.** When
-it is, this line changes to YES with the run reference.
+**Claim status: PROVEN 2026-08-31** — `ios.yml` run 33405199015 (PR #1372,
+`macos-26`, iPhone 17 Pro / iOS 26.4 simulator, Maestro 2.9.x): every flow
+step COMPLETED and `IOS_RUNTIME_JOURNEY_PROVEN` printed; the uploaded
+artifact holds the screenshots (sign-in form rendered; the surfaced
+"We could not reach the server…" failure block with the typed email intact).
 
-**Still NOT claimed either way:** device builds, signing, App Store / store
-readiness, a real-backend authenticated session, deep-link E2E.
+Two environment facts the proof train measured, recorded so they are not
+re-learned:
+
+- **A wholly unsigned simulator app has no working keychain.** With
+  `CODE_SIGNING_ALLOWED=NO` every `expo-secure-store` call fails
+  (missing application-identifier entitlement) and the app honestly rendered
+  the "secure storage did not answer" state instead of the sign-in form.
+  Certless **ad-hoc signing** (`CODE_SIGN_IDENTITY=-`) fixes it.
+- **Maestro's iOS `hideKeyboard` is mid-screen swipes**, which is where this
+  form's switch-mode link sits — it navigated to register and triggered the
+  system "Save Password?" dialog. The flow avoids `hideKeyboard` and
+  conditionally dismisses that dialog instead.
+
+**Still NOT claimed:** device builds, signing for distribution, App Store /
+store readiness, a real-backend authenticated session, deep-link E2E.
 
 ## iOS — everything provable from Windows: DONE; the rest is macOS-only
 
