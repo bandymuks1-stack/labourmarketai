@@ -6,12 +6,26 @@ import "server-only";
  *
  * Every function here:
  *   - runs with the ADMIN client (the table grants authenticated no INSERT);
- *   - is called AFTER the domain RPC succeeded, fire-and-forget (a booking
- *     accept must never fail because its notification could not be written);
+ *   - is called AFTER the domain RPC succeeded and is AWAITED end to end at
+ *     every WRITE-PATH call site (see SERVERLESS DELIVERY below);
  *   - resolves the RECIPIENT from the domain rows themselves (never from
  *     caller-supplied ids alone — the caller knows who acted, the row knows
  *     who must hear about it);
- *   - never throws.
+ *   - never throws — so awaiting one can never fail the domain write it
+ *     follows. Every failure collapses to a greppable console marker.
+ *
+ * SERVERLESS DELIVERY (2026-08-31, TRAIN 10). These emitters were written
+ * fire-and-forget for a server that outlives the response. On Vercel's
+ * serverless runtime the invocation can be FROZEN the instant the action
+ * returns, killing a detached insert mid-flight — which is exactly what made
+ * the live `demand_interest_expressed` emitter deliver NOTHING in production
+ * (only backfill rows existed). Every write-path emitter therefore awaits its
+ * insert(s) through `emitNotificationEvent` and its call site awaits the
+ * emitter. The ONLY detached emitters left are the three READ-TIME ones at the
+ * bottom (document_expiring ×2, weekly_digest): they are re-derived on every
+ * page visit and deduped by the store's UNIQUE (recipient, dedupe_key), so a
+ * killed insert self-heals on the next visit instead of losing a fact — and an
+ * await there would tax a read path for no durability gain.
  *
  * RECIPIENT DECISIONS, STATED (v1):
  *   booking_proposed    → the WORKER the employer proposed to.
@@ -42,6 +56,7 @@ import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
   emitNotificationEvent,
   emitNotificationEventInBackground,
+  type NotificationEventInput,
   type NotificationEventType,
 } from "./events";
 import {
@@ -53,6 +68,47 @@ import { getWorkerCoreRow } from "../data/worker-core";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * ONE greppable marker for "the domain write happened and the recipient was
+ * not told" — the generic sibling of `INTEREST_UNDELIVERED` below, which
+ * production proved was needed: without a marker, a permanent delivery
+ * failure is indistinguishable from success anywhere outside the database.
+ * Carries the EVENT TYPE and a bounded reason only — never free text, ids,
+ * payloads or people. Approved silences (self-assignment, self-ack,
+ * `duplicate`, `feature_unavailable`) deliberately do NOT come through here,
+ * so a hit is always something to look at.
+ */
+export const NOTIFICATION_UNDELIVERED = "[notifications] recipient not told";
+
+function notDelivered(
+  eventType: string,
+  reason: string,
+  detail?: string,
+): void {
+  console.warn(
+    NOTIFICATION_UNDELIVERED,
+    detail ? { eventType, reason, detail } : { eventType, reason },
+  );
+}
+
+/**
+ * The AWAITED insert every write-path emitter rides. A detached insert is
+ * killable on the serverless runtime (see the module header); this one is
+ * awaited end to end and reports the only unapproved outcome. It cannot
+ * throw: `emitNotificationEvent` catches everything into its outcome union.
+ */
+async function deliver(
+  admin: AdminClient,
+  input: NotificationEventInput,
+): Promise<void> {
+  const outcome = await emitNotificationEvent(admin, input);
+  if (outcome.kind === "unexpected_error") {
+    // `duplicate` and `feature_unavailable` are approved outcomes and stay
+    // quiet; this line only fires on something real.
+    notDelivered(input.eventType, "insert_failed", outcome.code);
+  }
+}
 
 async function workerProfileId(
   admin: AdminClient,
@@ -87,7 +143,10 @@ export async function emitBookingNotification(
       start_date?: string | null;
       location_country?: string | null;
     } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered(eventType, "row_unreadable");
+      return;
+    }
 
     const metadata = {
       country: row.location_country ?? undefined,
@@ -101,8 +160,11 @@ export async function emitBookingNotification(
       const worker = row.worker_id
         ? await workerProfileId(admin, row.worker_id)
         : null;
-      if (!worker) return;
-      emitNotificationEventInBackground(admin, {
+      if (!worker) {
+        notDelivered(eventType, "recipient_unresolved");
+        return;
+      }
+      await deliver(admin, {
         recipientProfileId: worker,
         eventType,
         entityType: "booking_request",
@@ -112,16 +174,25 @@ export async function emitBookingNotification(
       return;
     }
 
-    if (!row.owner_id) return;
-    emitNotificationEventInBackground(admin, {
+    if (!row.owner_id) {
+      notDelivered(eventType, "recipient_unresolved");
+      return;
+    }
+    await deliver(admin, {
       recipientProfileId: row.owner_id,
       eventType,
       entityType: "booking_request",
       entityId: bookingId,
       metadata,
     });
-  } catch {
-    // Emission is an enhancement; the domain write already succeeded.
+  } catch (err) {
+    // Emission is an enhancement; the domain write already succeeded. But the
+    // failure is named — a bare catch is how interest delivery died unseen.
+    notDelivered(
+      eventType,
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -143,7 +214,10 @@ export async function emitEngagementCreatedNotification(
       start_date?: string | null;
       location_country?: string | null;
     } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered("engagement_created", "row_unreadable");
+      return;
+    }
     const metadata = {
       country: row.location_country ?? undefined,
       startDate: row.start_date ?? undefined,
@@ -154,8 +228,12 @@ export async function emitEngagementCreatedNotification(
       ? await workerProfileId(admin, row.worker_id)
       : null;
     if (worker) recipients.add(worker);
+    if (recipients.size === 0) {
+      notDelivered("engagement_created", "recipient_unresolved");
+      return;
+    }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType: "engagement_created",
         entityType: "engagement",
@@ -165,8 +243,13 @@ export async function emitEngagementCreatedNotification(
         metadata,
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "engagement_created",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -197,7 +280,10 @@ export async function emitEngagementEndedNotification(
       .eq("id", engagementId)
       .maybeSingle();
     const row = data as { company_id?: string | null; worker_id?: string | null } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered("engagement_ended", "row_unreadable");
+      return;
+    }
 
     let recipient: string | null = null;
     if (actorSide === "worker") {
@@ -213,17 +299,25 @@ export async function emitEngagementEndedNotification(
     } else if (row.worker_id) {
       recipient = await workerProfileId(admin, row.worker_id);
     }
-    if (!recipient) return;
+    if (!recipient) {
+      notDelivered("engagement_ended", "recipient_unresolved");
+      return;
+    }
 
-    emitNotificationEventInBackground(admin, {
+    await deliver(admin, {
       recipientProfileId: recipient,
       eventType: "engagement_ended",
       entityType: "engagement",
       entityId: engagementId,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "engagement_ended",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -249,17 +343,27 @@ export async function emitWorkTaskAssignedNotification(
       due_at?: string | null;
     } | null;
     const assignee = row?.assignee_profile_id ?? null;
-    if (!assignee || assignee === actorProfileId) return;
+    if (!assignee) {
+      notDelivered("work_task_assigned", "recipient_unresolved");
+      return;
+    }
+    // APPROVED silence: a self-assignment needs no telling.
+    if (assignee === actorProfileId) return;
 
-    emitNotificationEventInBackground(admin, {
+    await deliver(admin, {
       recipientProfileId: assignee,
       eventType: "work_task_assigned",
       entityType: "work_task",
       entityId: taskId,
       metadata: { startDate: row?.due_at?.slice(0, 10) ?? undefined },
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "work_task_assigned",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -287,16 +391,16 @@ export async function emitWorkTaskAssignedNotification(
  * alpha-2 code. The worker's `note` is free text and never leaves the signal
  * row — a notification must be safe to render in a preview.
  *
- * AWAITED, UNLIKE ITS SIBLINGS — and deliberately. The other emitters here
- * detach their insert through `emitNotificationEventInBackground`, which is
- * safe on a long-lived server and NOT safe on a serverless runtime: the
- * invocation can be frozen the moment the action returns, killing a detached
- * insert mid-flight. The whole point of this emitter is that the signal stops
- * being silent, so an emission that survives only when the platform feels like
- * it would reintroduce the defect it was written to fix. It is awaited end to
- * end instead, and it CANNOT fail the domain write because it never throws:
- * the try/catch below and `emitNotificationEvent`'s own outcome union between
- * them turn every failure into a logged outcome rather than an exception.
+ * AWAITED — and no longer unlike its siblings. This emitter was the FIRST to
+ * await its insert end to end, because a detached insert is killable on the
+ * serverless runtime (the invocation can be frozen the moment the action
+ * returns) — the exact mechanism that made this event deliver nothing live.
+ * TRAIN 10 (2026-08-31) extended the same fix to every write-path emitter in
+ * this module: all of them now ride the awaited `deliver` helper and are
+ * awaited at their call sites. It CANNOT fail the domain write because it
+ * never throws: the try/catch below and `emitNotificationEvent`'s own outcome
+ * union between them turn every failure into a logged outcome rather than an
+ * exception.
  */
 /**
  * ONE greppable marker for "a worker raised their hand and the owner was not
@@ -478,15 +582,22 @@ export async function emitAbsenceNotification(
       requested_by?: string;
       start_date?: string | null;
     } | null;
-    if (!row?.worker_id) return;
+    if (!row?.worker_id) {
+      notDelivered(eventType, "row_unreadable");
+      return;
+    }
     const worker = await workerProfileId(admin, row.worker_id);
-    if (!worker) return;
+    if (!worker) {
+      notDelivered(eventType, "recipient_unresolved");
+      return;
+    }
     const metadata = { startDate: row.start_date ?? undefined };
 
     if (eventType === "absence_requested") {
-      // Only when someone ELSE filed it for the worker — see the header.
+      // APPROVED silence otherwise: only when someone ELSE filed it for the
+      // worker — see the header.
       if (row.requested_by && row.requested_by !== worker) {
-        emitNotificationEventInBackground(admin, {
+        await deliver(admin, {
           recipientProfileId: worker,
           eventType,
           entityType: "worker_absence",
@@ -502,7 +613,7 @@ export async function emitAbsenceNotification(
       recipients.add(row.requested_by);
     }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType,
         entityType: "worker_absence",
@@ -510,8 +621,13 @@ export async function emitAbsenceNotification(
         metadata,
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      eventType,
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -615,7 +731,7 @@ export async function emitWorkflowStepPendingNotifications(
       if (raw.delegated_to_profile_id) recipients.add(raw.delegated_to_profile_id);
     }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType: "workflow_step_pending",
         entityType: "workflow_instance",
@@ -623,8 +739,13 @@ export async function emitWorkflowStepPendingNotifications(
         metadata: {},
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_step_pending",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -636,16 +757,24 @@ export async function emitWorkflowDecidedNotification(
   try {
     const admin = createAdminClient();
     const instance = await readWorkflowInstanceLite(admin, instanceId);
-    if (!instance?.requesterProfileId) return;
-    emitNotificationEventInBackground(admin, {
+    if (!instance?.requesterProfileId) {
+      notDelivered("workflow_decided", "recipient_unresolved");
+      return;
+    }
+    await deliver(admin, {
       recipientProfileId: instance.requesterProfileId,
       eventType: "workflow_decided",
       entityType: "workflow_instance",
       entityId: instance.id,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_decided",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -667,16 +796,24 @@ export async function emitWorkflowDelegatedNotification(
     const delegate =
       (data as { delegated_to_profile_id?: string | null } | null)
         ?.delegated_to_profile_id ?? null;
-    if (!delegate) return;
-    emitNotificationEventInBackground(admin, {
+    if (!delegate) {
+      notDelivered("workflow_delegated", "recipient_unresolved");
+      return;
+    }
+    await deliver(admin, {
       recipientProfileId: delegate,
       eventType: "workflow_delegated",
       entityType: "workflow_instance",
       entityId: instanceId,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_delegated",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -718,8 +855,12 @@ export async function emitWorkflowEscalatedNotifications(
     for (const raw of (members ?? []) as { profile_id?: string }[]) {
       if (raw.profile_id) recipients.add(raw.profile_id);
     }
+    if (recipients.size === 0) {
+      notDelivered("workflow_escalated", "recipient_unresolved");
+      return;
+    }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType: "workflow_escalated",
         entityType: "workflow_instance",
@@ -727,8 +868,13 @@ export async function emitWorkflowEscalatedNotifications(
         metadata: {},
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_escalated",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 // ── Document & Evidence Engine v3 emitters (20260817140100) ────────────────
@@ -779,11 +925,18 @@ export async function emitDocumentAckNotification(
       assignee_profile_id?: string;
       assigned_by?: string;
     } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered(eventType, "row_unreadable");
+      return;
+    }
 
     let recipient: string | null = null;
     if (eventType === "document_ack_assigned") {
       recipient = row.assignee_profile_id ?? null;
+      if (!recipient) {
+        notDelivered(eventType, "recipient_unresolved");
+        return;
+      }
     } else if (
       row.assigned_by &&
       row.assigned_by !== row.assignee_profile_id
@@ -791,17 +944,23 @@ export async function emitDocumentAckNotification(
       // Completed → the assigner hears it; the acting assignee does not.
       recipient = row.assigned_by;
     }
+    // APPROVED silence: acknowledging your own assignment needs no telling.
     if (!recipient) return;
 
-    emitNotificationEventInBackground(admin, {
+    await deliver(admin, {
       recipientProfileId: recipient,
       eventType,
       entityType: "document_acknowledgement",
       entityId: ackId,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      eventType,
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -817,7 +976,15 @@ function isInsideExpiryWindow(dateOnly: string | null, now: Date): boolean {
 }
 
 /** Durable "your document enters the 30-day expiry window" facts for one
- *  worker's OWN documents. Fire-and-forget from the documents read path. */
+ *  worker's OWN documents.
+ *
+ *  READ-TIME DETACHED — the documented exception to the module's awaited
+ *  rule. This fires on the documents READ path, where an await would tax
+ *  every page load; and unlike a write-path event the fact is not one-shot:
+ *  it is re-derived on EVERY visit and deduped by the store's UNIQUE
+ *  (recipient, dedupe_key), so an insert killed by the serverless freeze
+ *  self-heals on the next visit instead of losing the fact forever. A
+ *  THROWN failure still logs the NOTIFICATION_UNDELIVERED marker. */
 export function emitWorkerDocumentExpiringNotifications(workerId: string): void {
   void (async () => {
     try {
@@ -852,14 +1019,22 @@ export function emitWorkerDocumentExpiringNotifications(workerId: string): void 
           metadata: {},
         });
       }
-    } catch {
+    } catch (err) {
       // Emission is an enhancement; reads must never fail because of it.
+      notDelivered(
+        "document_expiring",
+        "threw",
+        err instanceof Error ? err.message.slice(0, 200) : undefined,
+      );
     }
   })();
 }
 
 /** Durable expiry facts for an org register: the responsible person (or the
- *  creator) hears that an ACTIVE entry enters the window. */
+ *  creator) hears that an ACTIVE entry enters the window.
+ *
+ *  READ-TIME DETACHED — same documented exception (and same self-healing
+ *  argument) as `emitWorkerDocumentExpiringNotifications` above. */
 export function emitOrgDocumentExpiringNotifications(
   organizationId: string,
 ): void {
@@ -891,8 +1066,13 @@ export function emitOrgDocumentExpiringNotifications(
           metadata: {},
         });
       }
-    } catch {
+    } catch (err) {
       // Emission is an enhancement; reads must never fail because of it.
+      notDelivered(
+        "document_expiring",
+        "threw",
+        err instanceof Error ? err.message.slice(0, 200) : undefined,
+      );
     }
   })();
 }
@@ -917,6 +1097,14 @@ export function emitOrgDocumentExpiringNotifications(
  * (the opportunities board recomputes them at read time). Nothing is
  * emitted when neither the journal nor the market block could be read: a
  * digest that can say nothing true says nothing.
+ *
+ * READ-TIME DETACHED — the third documented exception to the module's
+ * awaited rule (see the header). It fires on every dashboard visit and the
+ * UNIQUE dedupe key makes it exactly-once per week, so an insert killed by
+ * the serverless freeze self-heals on the very next visit; awaiting it
+ * would gate the spine render for no durability gain. Its catch stays an
+ * APPROVED silence: it also covers "no service env at all", which would
+ * turn the marker into per-visit noise in environments without the key.
  */
 export function maybeEmitWeeklyDigestInBackground(
   durable: readonly WeeklyDigestSkipRow[],

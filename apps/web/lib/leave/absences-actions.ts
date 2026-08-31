@@ -86,11 +86,15 @@ export async function requestAbsenceAction(input: {
   );
   if (error) return mapError(error);
   revalidatePath("/", "layout");
-  // Durable notification (fire-and-forget; silently nothing until the
-  // owner-gated notification_events store is applied). The emitter itself
-  // decides the recipient from the stored row — see event-emitters.ts.
+  // Durable notification — AWAITED, not detached: the serverless runtime can
+  // freeze the invocation the instant the action returns, killing a `void`-
+  // detached insert mid-flight (the mechanism that made the live interest
+  // emitter deliver nothing). The emitter never throws, so the absence write
+  // that already succeeded cannot fail on its own bell; it still degrades
+  // silently until the owner-gated notification_events store is applied. The
+  // emitter itself decides the recipient from the stored row.
   if (typeof newAbsenceId === "string" && newAbsenceId) {
-    void emitAbsenceNotification(newAbsenceId, "absence_requested");
+    await emitAbsenceNotification(newAbsenceId, "absence_requested");
   }
   return { ok: true };
 }
@@ -115,8 +119,10 @@ export async function reviewAbsenceAction(input: {
   if (error) return mapError(error);
   revalidatePath("/", "layout");
   // The absence OUTCOME is the exact event an offline worker never learned
-  // about under the derived-only spine. Fire-and-forget.
-  void emitAbsenceNotification(
+  // about under the derived-only spine — which is why it must be AWAITED: a
+  // detached emit is killable at serverless return, and the outcome event has
+  // no second chance to fire. The emitter never throws.
+  await emitAbsenceNotification(
     input.absenceId,
     input.decision === "approved" ? "absence_approved" : "absence_rejected",
   );
