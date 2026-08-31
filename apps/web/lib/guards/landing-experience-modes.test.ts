@@ -19,6 +19,7 @@ const telemetryAction = read("lib/telemetry/actions.ts");
 const telemetryTask = read("lib/telemetry/task.ts");
 const rootPage = read("app/[locale]/page.tsx");
 const reviewPage = read("app/[locale]/live-market-review/page.tsx");
+const middlewareSource = read("middleware.ts");
 const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
 const focusSwitcher = read(
   "app/[locale]/focus-landing/landing-mode-switcher.tsx",
@@ -43,9 +44,16 @@ const focusSwitcherStyles = read(
  */
 describe("canonical landing LIVE / FOCUS experiences", () => {
   it("keeps one indexed landing and no mode-specific product surface", () => {
-    expect(rootPage).toContain("LiveMarketLanding");
+    // P0 entry-point fix 2026-08-31: the canonical page mounts FOCUS (the
+    // default) and is STATIC; the LIVE tree lives behind the cookie-gated
+    // internal route the middleware rewrites to. Still one indexed URL:
+    // the review route redirects every visitor without the explicit-choice
+    // cookie and its canonical metadata points at the root landing.
     expect(rootPage).toContain("FocusLanding");
+    expect(rootPage).not.toContain("force-dynamic");
+    expect(reviewPage).toContain("LiveMarketLanding");
     expect(reviewPage).toContain("redirect(`/${locale}`)");
+    expect(reviewPage).toContain('buildPageMetadata({ locale, path: "" })');
     expect(existsSync(join(WEB, "app", "[locale]", "live", "page.tsx"))).toBe(
       false,
     );
@@ -60,9 +68,21 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
   });
 
   it("resolves the arm on the SERVER so only one landing is shipped", () => {
-    expect(rootPage).toContain("LANDING_MODE_COOKIE");
-    expect(rootPage).toContain('isLandingMode(value) ? value : "focus"');
-    expect(rootPage).toMatch(/mode === "focus" \? \(\s*<FocusLanding/);
+    // The arm decision moved from the page to the MIDDLEWARE (still server
+    // side, still one shipped tree): an explicit "live" cookie rewrites the
+    // locale root to the LIVE route; everyone else gets the static FOCUS
+    // page, so a fresh visit never waits on a serverless invocation.
+    expect(middlewareSource).toContain("LANDING_MODE_COOKIE");
+    expect(middlewareSource).toContain('landingMode === "live"');
+    expect(middlewareSource).toContain("live-market-review");
+    expect(middlewareSource).toContain("NextResponse.rewrite(liveUrl)");
+    // The static default: an ISR window equal to the market snapshot's own
+    // freshness (300 s), and no per-request state read on the root page.
+    expect(rootPage).toContain("export const revalidate = 300");
+    expect(rootPage).not.toContain("cookies()");
+    // The LIVE route is the one place the cookie gate lives now.
+    expect(reviewPage).toContain("LANDING_MODE_COOKIE");
+    expect(reviewPage).toMatch(/mode !== "live"/);
     expect(contract).toContain('LANDING_MODE_COOKIE = "lm_landing_mode"');
     // localStorage stays the persistence record; the cookie only lets the
     // server learn it. Both are bounded to the two literal modes.
@@ -75,7 +95,14 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
     // The fallback IS the whole default mechanism: no cookie, no explicit
     // choice, therefore FOCUS. A crawler sends no cookie, so the indexed
     // landing is the same one a fresh human gets.
-    expect(rootPage).toContain('return isLandingMode(value) ? value : "focus"');
+    // The root page reads NO per-visitor state at all — absence of the read
+    // IS the default mechanism now: no cookie consulted, FOCUS rendered,
+    // crawler and fresh human byte-identical. The middleware rewrite fires
+    // only on the exact explicit value, and the LIVE route re-checks it.
+    expect(rootPage).not.toContain("LANDING_MODE_COOKIE");
+    expect(rootPage).not.toContain("cookies()");
+    expect(middlewareSource).toContain('landingMode === "live"');
+    expect(reviewPage).toContain('mode !== "live"');
     // No heuristic may override it — nothing may branch on device, locale,
     // geography or user agent to pick an arm.
     const rootCode = code(rootPage);
