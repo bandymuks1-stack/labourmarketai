@@ -1110,6 +1110,18 @@ describe("the migration set is exactly what this slice declared", () => {
       // RPC recreated). Its header says OWNER APPROVAL: PENDING — the marker
       // is not approval, and the file ships UNAPPLIED.
       "20260829130000_anon_write_bounds_v1.sql",
+      // 2026-08-31: work-hour allocations v1 (M3, PR #1344) gained its marker
+      // under the owner's closure-session decision, recorded VERBATIM in the
+      // migration header and .github/scripts/owner-waivers.mjs:
+      // "M3_MIGRATION_APPROVAL: APPROVE / HOURS_PRODUCT_GATE_WAIVER: APPROVE.
+      // Approval scope is limited strictly to the fresh #1344 / package 0010
+      // implementation." The marker acknowledges the three intentional RED
+      // findings (grant-or-revoke incl. anon revoke, RLS policies on the new
+      // table, updated_at trigger) reviewed in
+      // docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md,
+      // and was added in the same commit as the scoped /dashboard/hours
+      // waiver that same decision approved.
+      "20260829140000_work_hour_allocations_v1.sql",
 ]);
   });
 
