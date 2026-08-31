@@ -3425,6 +3425,7 @@
         "exchange_failed": "Sign-in didn't complete. Try again — the sign-in code works once and expires quickly.",
         "no_user": "You signed in, but your account couldn't be reached. Sign out and back in.",
         "callback": "Unexpected error during sign-in. Try again — if it persists, share the trace ID below.",
+        "cancelled": "Sign-in was cancelled. Nothing happened to your account.",
         "unknown": "Couldn't sign in. Please try again."
       }
     },

@@ -247,6 +247,20 @@ export function markSignupPending(surface: "email" | "google"): void {
   }
 }
 
+/** Clear a pending-signup marker WITHOUT emitting anything. Used when an
+ *  OAuth attempt bounces back to /auth/login with an `?error=` (the person
+ *  cancelled at the provider, or the handoff failed): the marked signup never
+ *  happened, so the flag must not survive in localStorage to mislabel a
+ *  much-later ordinary login as a completed signup. */
+export function clearSignupPending(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(SIGNUP_PENDING_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Read-and-clear the signup-pending flag. Returns the surface label if a
  *  signup is pending (fires `signup_completed` once), else null. */
 export function consumeSignupPending(): "email" | "google" | null {

@@ -37,6 +37,28 @@ export async function GET(
   if (nextParam) loginUrl.searchParams.set("next", nextParam);
   if (traceId) loginUrl.searchParams.set("trace", traceId);
 
+  // A bounce that carries an explicit ?error= is an OUTCOME, not a missing
+  // code: `error=access_denied` is the person pressing Cancel/Deny on the
+  // provider's consent screen — a deliberate choice, not a system fault — so
+  // it must not fall through to the "missing sign-in code" system-error copy.
+  // Safe diagnostics only: `error` + `error_code` are bounded identifiers;
+  // `error_description` is free-form provider text and is deliberately NOT
+  // logged (same convention as never logging the full request URL).
+  const providerError = url.searchParams.get("error");
+  if (providerError) {
+    console.info("[auth/callback] provider returned an explicit error", {
+      locale,
+      trace: traceId,
+      error: providerError,
+      errorCode: url.searchParams.get("error_code"),
+    });
+    loginUrl.searchParams.set(
+      "error",
+      providerError === "access_denied" ? "cancelled" : "provider_error",
+    );
+    return NextResponse.redirect(loginUrl);
+  }
+
   if (!code) {
     console.error("[auth/callback] missing code in callback URL", {
       locale,
@@ -105,12 +127,16 @@ export async function GET(
     // NEXT_LOCALE cookie > profiles.locale > the URL locale the middleware
     // derived from Accept-Language. When the profile preference wins, the
     // cookie is set so the choice sticks for every later navigation.
+    // A NOT-yet-onboarded account never gets its URL locale overridden: its
+    // profiles.locale is the signup-time DB default, not a human choice (the
+    // onboarding wizard records the real one at completion).
     const jar = await cookies();
     const decision = resolvePostLoginLocale({
       cookieLocale: jar.get(LOCALE_COOKIE_NAME)?.value ?? null,
       profileLocale:
         (profile as { locale?: string | null } | null)?.locale ?? null,
       urlLocale: locale,
+      onboarded: Boolean(profile?.onboarded_at),
     });
     const landingLocale = decision.locale;
     const withLocaleCookie = (res: NextResponse): NextResponse => {

@@ -143,7 +143,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 1304 at education-home-identity (M10) (+3: the education
   // starter chips + the learner greeting context land in all 11 locales;
   // lt/en/ru/nl/de translated, da [EN] until human translation).
-  da: 1304,
+  // MEASURED 1305 at google-new-user-honesty-v1 (2026-08-31, +1 on the
+  // merged tree: the auth.errors.oauth.cancelled honest OAuth-cancel copy
+  // lands in all 11 catalogs; lt/en/ru/nl/de translated, da/lv/et/no/sv/pl
+  // [EN] until human translation — only da is ratchet-tracked).
+  da: 1305,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

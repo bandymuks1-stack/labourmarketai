@@ -64,7 +64,7 @@ type OAuthProviderConfig = {
    *  (Google mandates the white card), so it is config, not a caller prop. */
   readonly buttonClassName: string;
   /** Marks the pending signup with THIS provider's bounded surface label so
-   *  the first authed surface emits `signup_completed` exactly once. */
+   *  the onboarding surface emits `signup_completed` exactly once. */
   readonly markPending: () => void;
   /** Provider-named SAFE failure log: extracts ONLY `.name` + `.message` of
    *  the start error — never the full Error object, whose subclass `cause`
@@ -84,7 +84,11 @@ type OAuthButtonProps = {
   /** Which surface hosts this button. In "signup" context the press is a
    *  registration attempt (emits `registration_started` with first-touch
    *  attribution) and a NEW user landing on /onboarding is marked so the
-   *  first authed surface emits `signup_completed`. Default "login". */
+   *  onboarding surface emits `signup_completed`. BOTH auth pages pass
+   *  "signup": the login page's Google button equally creates an account
+   *  for a new Google identity, so its attribution may not be dropped.
+   *  Default "login" (a conservative default for future surfaces that are
+   *  genuinely login-only). */
   context?: "signup" | "login";
 };
 
@@ -171,9 +175,12 @@ function OAuthProviderButton({
           ...getFirstTouchAttribution(),
         });
         // The callback routes a NEW user to /onboarding; mark the pending
-        // signup now so the first authed surface emits `signup_completed`
-        // exactly once. A returning user never reaches /onboarding, so they
-        // are never mis-counted (the marker is consumed only there).
+        // signup now so the ONBOARDING surface emits `signup_completed`
+        // exactly once (SessionTelemetry emits it only there). A returning
+        // user never mounts /onboarding — the dashboard clears an unconsumed
+        // marker silently — and a cancelled/failed attempt bounces back to
+        // /auth/login?error=…, which clears the marker too. So an optimistic
+        // press-time marker never becomes a false signup count.
         provider.markPending();
       }
       const { error } = await supabase.auth.signInWithOAuth({
