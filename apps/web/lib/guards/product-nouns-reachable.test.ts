@@ -40,11 +40,14 @@ const MUST_ROUTE: readonly (readonly [string, string])[] = [
   ["какие возможности у меня есть", "opportunities"],
   ["welche möglichkeiten habe ich", "opportunities"],
 
-  // ── Projects, asked for rather than opened (audit defect D) ──────────────
-  ["parodyk mano projektus", "open-project"],
-  ["mano projektai", "open-project"],
-  ["show my projects", "open-project"],
-  ["покажи мои проекты", "open-project"],
+  // ── Projects, asked for rather than opened (audit defect D; G8 moved the
+  //    LIST reading to the `projects` chip's own handler) ───────────────────
+  ["parodyk mano projektus", "projects"],
+  ["mano projektai", "projects"],
+  ["show my projects", "projects"],
+  ["покажи мои проекты", "projects"],
+  ["meine Projekte", "projects"],
+  ["mijn projecten", "projects"],
 
   // ── Who raised a hand (audit defect C) ───────────────────────────────────
   ["kas susidomėjo mano poreikiu?", "interest-inbox"],
@@ -105,7 +108,9 @@ describe("widening the worker vocabulary steals no employer sentence", () => {
     ["reikia darbuotojų", "need-workers"],
     ["ieškau darbuotojų", "need-workers"],
     ["surask darbuotojų", "find-workers"],
-    ["parodyk kandidatus", "find-workers"],
+    // G8: the candidate noun means the REVIEW surface now (the same handler
+    // the `candidates` chip runs), no longer the scouting workflow.
+    ["parodyk kandidatus", "candidates"],
     ["ieškau darbo", "find-work"],
   ];
   for (const [sentence, intent] of UNCHANGED) {

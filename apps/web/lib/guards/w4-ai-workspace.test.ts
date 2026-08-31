@@ -224,7 +224,9 @@ describe("W4 — intents route to the right workflow", () => {
     expect(classifyIntent("Open this project").intent).toBe("open-project");
     expect(classifyIntent("atidaryk šį projektą").intent).toBe("open-project");
     expect(classifyIntent("Find workers").intent).toBe("find-workers");
-    expect(classifyIntent("Compare these candidates").intent).toBe("find-workers");
+    // G8: the candidate NOUN now reaches the candidate-review surface — the
+    // SAME handler the `candidates` chip runs — not the scouting workflow.
+    expect(classifyIntent("Compare these candidates").intent).toBe("candidates");
   });
 
   it("does NOT steal the intents that already existed", () => {
