@@ -47,6 +47,11 @@ const CHAT_KEYS = [
   "chipNeedWorkers",
   "chipCandidates",
   "chipCompanyHub",
+  // M10 — education-shaped starters for a training-provider workspace.
+  // `learnerGreetingContext` carries an `{institution}` placeholder, so like
+  // `greetingNamed` it is resolved by the server caller that knows the name.
+  "chipEduInviteLearner",
+  "chipEduCapabilities",
   "companyDemandNext",
   "chipTasks",
   "clarifyWorkLog",

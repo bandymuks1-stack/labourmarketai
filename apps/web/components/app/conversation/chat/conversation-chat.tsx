@@ -154,6 +154,12 @@ export type ChatLabels = {
   chipNeedWorkers: string;
   chipCandidates: string;
   chipCompanyHub: string;
+  /** M10 — education-shaped starters for a training-provider workspace. Both
+   *  chips lead to REAL existing surfaces (the network invite panel with the
+   *  learner relationship; the company hub's capabilities card) — never a
+   *  control that looks like a feature and is then refused. */
+  chipEduInviteLearner: string;
+  chipEduCapabilities: string;
   companyDemandNext: string;
   chipTasks: string;
   chipLang: string;
@@ -305,6 +311,8 @@ export function ConversationChat({
   mobile = false,
   personalIntroPayload = null,
   countryLabels,
+  educationWorkspace = false,
+  learnerContextLine = null,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -325,6 +333,16 @@ export function ConversationChat({
   /** Localized country names, resolved server-side. The demand prefill needs a
    *  WORD for the location field — the ISO code is an internal value (§23). */
   countryLabels?: Record<string, string>;
+  /** M10 — SERVER-resolved: the active organization holds the education
+   *  capability and not the employer one (`isEducationFirstWorkspace` over the
+   *  canonical `organization_roles` read). Decides only WHICH starters the
+   *  company greeting offers — the two-base-identity model is untouched. */
+  educationWorkspace?: boolean;
+  /** M10 — SERVER-resolved sentence for a person with an ACTIVE learner link
+   *  (`engagement_contexts` relationship `student`), already localized with
+   *  the institution's real name. `null` = no link or the read degraded —
+   *  nothing is rendered, never a fabricated learning context. */
+  learnerContextLine?: string | null;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -353,7 +371,20 @@ export function ConversationChat({
   const starterChips: ChoiceChip[] = useMemo(
     () =>
       identity === "company"
-        ? [
+        ? educationWorkspace
+          ? [
+              // M10 — the education institution's real first steps, within the
+              // SAME company identity (no third base identity). Every chip
+              // routes to an EXISTING canonical surface (rebuild W4 rule):
+              // the network invite panel is where a learner link is created
+              // (`join_organization` + relationship `student`), the company
+              // hub carries the capabilities card, and the communication
+              // surface is where linked learners are reached. Same 1–3 cap.
+              { id: "link:/dashboard/network", label: labels.chipEduInviteLearner },
+              { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
+              { id: "link:/dashboard/communication", label: labels.navMessages },
+            ]
+          : [
             // The employer's primary action — the canonical demand intake as
             // an inline conversation form (company.create-demand executor).
             // Employer greeting also honours the 1–3 cap (§D).
@@ -379,7 +410,7 @@ export function ConversationChat({
             { id: "cv", label: labels.chipCv },
             { id: "jobs", label: labels.chipJobs },
           ],
-    [labels, identity],
+    [labels, identity, educationWorkspace],
   );
 
   /**
@@ -416,7 +447,7 @@ export function ConversationChat({
 
   const initial: ThreadItem[] = useMemo(() => {
     if (script) return script.map((message) => ({ id: message.id, message }));
-    return [
+    const opening: ThreadItem[] = [
       {
         id: nid(),
         message: {
@@ -430,7 +461,25 @@ export function ConversationChat({
         } as ChatMessage,
       },
     ];
-  }, [script, greetingText, labels.assistantName, starterChips]);
+    // M10 — a linked learner's opening acknowledges their REAL learning
+    // context (server-resolved, real institution name — never invented). A
+    // plain assistant turn under the greeting, carrying the same starters:
+    // chip rows render only on the newest message, so the row simply moves
+    // down one turn — same mechanics as the opening brief.
+    if (learnerContextLine && identity === "person") {
+      opening.push({
+        id: nid(),
+        message: {
+          id: nid(),
+          role: "assistant",
+          kind: "text",
+          text: learnerContextLine,
+          chips: starterChips,
+        } as ChatMessage,
+      });
+    }
+    return opening;
+  }, [script, greetingText, labels.assistantName, starterChips, learnerContextLine, identity]);
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
