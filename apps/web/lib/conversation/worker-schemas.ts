@@ -53,15 +53,19 @@ export const workerAddAchievementSchema = z.object({
   kind: z.enum(["achievement", "declared_certificate"]).default("achievement"),
 });
 
-export const workerSaveWorkCardSchema = z
-  .object({
-    availabilityStatus: z.enum(["available", "busy", "unavailable"]).nullable().optional(),
-    availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
-    salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
-    salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
-    locationCountry: z.string().trim().length(2).nullable().optional(),
-    preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
-  })
+/** The bare field object — exported so the capability layer can `.extend()`
+ *  it (a refined schema cannot be extended); the refined schema below stays
+ *  the one the dispatcher validates against. */
+export const workerSaveWorkCardFields = z.object({
+  availabilityStatus: z.enum(["available", "busy", "unavailable"]).nullable().optional(),
+  availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
+  salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
+  salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
+  locationCountry: z.string().trim().length(2).nullable().optional(),
+  preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
+});
+
+export const workerSaveWorkCardSchema = workerSaveWorkCardFields
   .refine(
     (v) =>
       v.salaryMin == null || v.salaryMax == null || v.salaryMin <= v.salaryMax,

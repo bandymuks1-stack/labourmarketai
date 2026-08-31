@@ -28,6 +28,32 @@ const isoDate = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/);
  * hire_workers intent. `description` is REQUIRED — an empty need is never
  * persisted (§7), mirroring the canonical action's own guard.
  */
+/** The demand fields WITHOUT the web-chat `mode` switch — exported so the
+ *  capability layer can reuse the exact shape (its draft is a token preview,
+ *  not a persisted `customer_requests` draft row; see registry). A refined
+ *  schema cannot be `.extend()`ed, hence the split. */
+export const companyCreateDemandFields = z.object({
+  intent: z.enum(["hire_workers", "partner"]).default("hire_workers"),
+  description: z.string().trim().min(3).max(4000),
+  role: z.string().trim().max(120).nullable().optional(),
+  location: z.string().trim().max(120).nullable().optional(),
+  skills: z.string().trim().max(4000).nullable().optional(),
+  urgency: z.enum(["flexible", "this_week", "urgent"]).nullable().optional(),
+  notes: z.string().trim().max(4000).nullable().optional(),
+  /** Work-type slug — validated against the shared taxonomy canonically. */
+  workType: z.string().trim().max(64).nullable().optional(),
+  country: z.string().trim().length(2).nullable().optional(),
+  teamSize: z.number().int().min(1).max(100000).nullable().optional(),
+  accommodation: z
+    .enum(["provided_free", "provided_paid", "provided_deducted", "not_provided"])
+    .nullable()
+    .optional(),
+  transport: z
+    .enum(["provided", "compensated", "not_provided", "unknown"])
+    .nullable()
+    .optional(),
+});
+
 export const companyCreateDemandSchema = z
   .object({
     intent: z.enum(["hire_workers", "partner"]).default("hire_workers"),

@@ -38,8 +38,12 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
   const derived = buildSpineNotifications(spineCounts, activeRole ?? "worker");
   // Weekly personal digest — materialized read-time, at most once per ISO
   // week (skip check on the feed just fetched; UNIQUE dedupe key is the
-  // authority). Fire-and-forget: never gates this render; the row appears in
-  // the bell on the next visit.
+  // authority). DELIBERATELY DETACHED (TRAIN 10 decision): this is a render
+  // path, so an await would gate the spine on a notification insert — and a
+  // digest insert killed by the serverless freeze self-heals, because every
+  // later visit this week re-derives it and the dedupe key keeps it
+  // exactly-once. Write-path emitters are awaited instead; see the
+  // READ-TIME DETACHED notes in lib/notifications/event-emitters.ts.
   maybeEmitWeeklyDigestInBackground(durable);
   // Durable rows render under the SAME bell — one attention surface, two
   // honest row kinds. They clear by marking read (`durable: true`), and they

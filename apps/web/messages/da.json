@@ -2049,6 +2049,11 @@
         "body": "Aktive filtre: {filters}. Fjern nogle filtre, eller nulstil dem for at se mere.",
         "reset": "Nulstil filtre"
       },
+      "initialView": {
+        "summary": "Viser de {shown} stærkeste match ud af {total} muligheder.",
+        "showAll": "Vis alle ({count} mere)",
+        "showAllExternal": "Vis alle jobopslag"
+      },
       "details": {
         "show": "Flere detaljer",
         "hide": "Skjul detaljer"
@@ -2137,6 +2142,7 @@
     "external": {
       "sectionTitle": "Offentlige jobannoncer",
       "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
+      "shownOfTotal": "top {shown} af {total}",
       "bandBest": "Passer bedst",
       "bandPossible": "Muligvis passende",
       "bandExplore": "Øvrige annoncer",

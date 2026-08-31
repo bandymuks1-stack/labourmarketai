@@ -123,7 +123,9 @@ describe("server half wiring (source contract)", () => {
       "utf8",
     );
     expect(chat).toMatch(/loadCriteriaSummaryForChat/);
-    expect(chat).toMatch(/intent === "criteria"/);
+    // G2: routing is registry-dispatched — the `criteria` intent resolves to
+    // the component's `criteria` handler, which starts this real read.
+    expect(chat).toMatch(/criteria: \(\) => startCriteria\(\)/);
   });
 });
 

@@ -8164,6 +8164,11 @@
         "body": "Aktive Filter: {filters}. Entfernen Sie einige Filter oder setzen Sie sie zurück.",
         "reset": "Filter zurücksetzen"
       },
+      "initialView": {
+        "summary": "Die {shown} stärksten Treffer von {total} Möglichkeiten werden angezeigt.",
+        "showAll": "Alle anzeigen (noch {count})",
+        "showAllExternal": "Alle Stellenanzeigen anzeigen"
+      },
       "details": {
         "show": "Mehr Details",
         "hide": "Details ausblenden"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
+      "shownOfTotal": "Top {shown} von {total}",
       "bandBest": "Passt am besten",
       "bandPossible": "Möglicherweise passend",
       "bandExplore": "Weitere Anzeigen",
@@ -11469,6 +11475,12 @@
       "calendarHint": "Deinen Plan findest du im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
       "messagesHint": "Hier sind deine Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
+      "switchContextPersonal": "persönlicher Bereich",
+      "switchContextPick": "In welchem Kontext möchten Sie arbeiten?",
+      "switchContextDone": "Erledigt — Sie arbeiten jetzt in {name}.",
+      "switchContextAlready": "Sie arbeiten bereits in {name}.",
+      "switchContextFailed": "Der Wechsel hat nicht geklappt — Ihr aktiver Kontext ist unverändert.",
+      "switchContextUnavailable": "Kontextwechsel ist derzeit nicht verfügbar.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
       "experiencesEligible": "Ich habe abgeschlossene Interaktionen gefunden, die du schildern kannst. Wähle welche.",
@@ -13889,5 +13901,51 @@
       "noObjects": "Legen Sie zuerst mindestens ein Objekt an.",
       "error": "Der Tag konnte nicht geladen werden."
     }
+  },
+  "oauthConsent": {
+      "title": "Zugriff bestätigen",
+      "clientWantsAccess": "„{client}“ bittet um Zugriff auf Ihr LabourMarket.ai-Konto.",
+      "unknownClient": "Unbekannte Anwendung",
+      "clientLabel": "Anwendung",
+      "redirectLabel": "Rückkehradresse",
+      "scopesLabel": "Angeforderte Berechtigungen",
+      "authorityNote": "Die Anwendung handelt nur in Ihrem Namen und sieht nur, was Sie sehen können. Sie können den Zugriff jederzeit widerrufen.",
+      "approve": "Erlauben",
+      "deny": "Ablehnen",
+      "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
+      "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Wählen Sie den Bedarf, der Sie interessiert: {options}.",
+    "interestDraftSummary": "Bereit, Interesse zu bekunden: {demand}. Noch nichts gesendet — Ihre Bestätigung ist erforderlich.",
+    "interestDraftRepeat": "Sie haben bereits Interesse an „{demand}“ bekundet — die Bestätigung aktualisiert es.",
+    "interestConfirmed": "Interesse erfasst. Der Eigentümer des Bedarfs sieht es in seiner eigenen Umgebung — nichts verlässt die Plattform.",
+    "workspacePersonal": "Persönlicher Bereich",
+    "workspaceSwitched": "Aktiver Arbeitsbereich zu „{label}“ gewechselt.",
+    "workspaceChoose": "Arbeitsbereich wählen: {options}.",
+    "workCardDraftSummary": "Bereit, Ihre Arbeitskarte zu aktualisieren ({fields}). Noch ist nichts gespeichert — Ihre Bestätigung ist erforderlich.",
+    "workCardSaved": "Arbeitskarte aktualisiert.",
+    "workCardFieldAvailability": "Verfügbarkeit",
+    "workCardFieldAvailableFrom": "verfügbar ab",
+    "workCardFieldSalary": "Gehaltsspanne",
+    "workCardFieldLocation": "Standort",
+    "workCardFieldPreferredCountries": "bevorzugte Länder",
+    "demandDraftSummary": "Bereit, einen Personalbedarf für {org} anzulegen: „{description}“. Noch wurde nichts angelegt — Ihre Bestätigung ist erforderlich.",
+    "demandDraftSummaryWithRole": "Bereit, einen Personalbedarf für {org} anzulegen — {role}: „{description}“. Noch wurde nichts angelegt — Ihre Bestätigung ist erforderlich.",
+    "demandSubmitted": "Personalbedarf für {org} eingereicht. Passende Arbeitskräfte können die strukturierten Fakten jetzt auf ihrem Board sehen.",
+    "journalListEmpty": "Das Arbeitsjournal hat noch keine Einträge.",
+    "journalListSummary": "{count} Einträge gefunden. Neuester: {latest}.",
+    "notSet": "nicht angegeben",
+    "workerExists": "aktiv",
+    "workerNone": "keins",
+    "workerUnavailable": "konnte nicht geprüft werden",
+    "profileSummary": "Ihr LabourMarket.ai-Profil — Name: {name}; Land: {country}; Sprache: {language}; aktive Rolle: {role}; Arbeitnehmerprofil: {worker}.",
+    "skillsSummary": "Ihr lebender Lebenslauf enthält {count} Fähigkeiten ({verified} verifiziert).",
+    "skillsEmpty": "Ihr lebender Lebenslauf enthält noch keine Fähigkeiten.",
+    "draftSummary": "Arbeitsjournal-Entwurf für {date}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "draftSummaryWithSite": "Arbeitsjournal-Entwurf für {date} am Standort {site}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "draftChooseContext": "Dieser Eintrag könnte zu mehreren Arbeitskontexten gehören: {options}. Zu welchem gehört er?",
+    "draftContext": "Kontext: {context}.",
+    "confirmSummary": "Journaleintrag gespeichert. Fähigkeitserkennung: {added} hinzugefügt, {strengthened} gestärkt, {reviewNeeded} wartet auf Prüfung."
   }
 }

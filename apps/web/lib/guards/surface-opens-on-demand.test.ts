@@ -290,7 +290,7 @@ describe("the surfaces that moved are still reachable in words", () => {
       ["ieškau darbo", "find-work"],
       ["kokias galimybes man gali pasiūlyti?", "opportunities"],
       ["kas susidomėjo mano poreikiu?", "interest-inbox"],
-      ["parodyk mano projektus", "open-project"],
+      ["parodyk mano projektus", "projects"],
     ];
     for (const [sentence, intent] of UNCHANGED) {
       expect(classifyIntent(sentence).intent, sentence).toBe(intent);

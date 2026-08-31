@@ -333,6 +333,14 @@ export async function processJournalEntrySkills(opts: {
   excludeSlugs?: readonly string[];
   /** default true */
   revalidate?: boolean;
+  /**
+   * The CALLER'S identity + RLS-scoped client, threaded from the canonical
+   * boundary (journal-write extraction, owner-approved 2026-08-29 §6). When
+   * absent the cookie session is resolved exactly as before — the web path
+   * is byte-identical. Present, it lets a bearer caller's save run the
+   * pipeline AS THAT CALLER instead of silently failing as "nobody".
+   */
+  caller?: { supabase: Awaited<ReturnType<typeof createClient>>; userId: string };
 }): Promise<JournalSkillPipelineResult> {
   const trace = newTrace();
   const started = Date.now();
@@ -351,16 +359,24 @@ export async function processJournalEntrySkills(opts: {
 
   try {
     // ── 1. Auth + ownership ──────────────────────────────────────────────
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return zeroResult(trace, "failed");
+    let supabase: Awaited<ReturnType<typeof createClient>>;
+    let userId: string;
+    if (opts.caller) {
+      supabase = opts.caller.supabase;
+      userId = opts.caller.userId;
+    } else {
+      supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return zeroResult(trace, "failed");
+      userId = user.id;
+    }
 
     const { data: worker } = await supabase
       .from("workers")
       .select("id")
-      .eq("profile_id", user.id)
+      .eq("profile_id", userId)
       .maybeSingle();
     if (!worker?.id) return zeroResult(trace, "failed");
 
@@ -565,7 +581,7 @@ export async function processJournalEntrySkills(opts: {
     );
     if (ambiguousCandidates.length > 0) {
       const rows = ambiguousCandidates.map((a) => ({
-        profile_id: user.id,
+        profile_id: userId,
         label: a.label,
         normalized_label: normalizeSkillLabel(a.label),
       }));
@@ -594,7 +610,7 @@ export async function processJournalEntrySkills(opts: {
         const { data: claimRows, error: claimErr } = await sb
           .from("profile_skill_claims")
           .select("normalized_label")
-          .eq("profile_id", user.id);
+          .eq("profile_id", userId);
         if (claimErr) logError(trace, "read_profile_claims", claimErr);
         for (const r of (claimRows ?? []) as { normalized_label: string }[]) {
           claimSet.add(r.normalized_label);

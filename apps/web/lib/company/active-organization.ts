@@ -7,8 +7,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   getOwnedOrganizations,
+  readOwnedOrganizations,
   type OwnedOrganization,
 } from "@/lib/company/owned-organizations";
+import type { DomainCaller } from "@/lib/domain/caller";
 import {
   PERSONAL_WORKSPACE_ID,
   resolveActiveOrganizationId,
@@ -292,19 +294,22 @@ const EMPTY_WORKSPACE: WorkspaceContext = {
   pointerAvailable: false,
 };
 
-export const getWorkspaceContext = cache(async function getWorkspaceContext(
-  identity: "person" | "company" | null,
-): Promise<WorkspaceContext> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return EMPTY_WORKSPACE;
-
+/**
+ * THE caller's workspace MEMBERSHIP list (G4 bridge) — the transport-neutral
+ * core under `getWorkspaceContext` and the membership authority the
+ * workspace-switch core validates against. Personal workspace first, then
+ * every org membership from the three canonical sources (owned +
+ * governance + engagement), owner precedence, deduped — extracted verbatim
+ * from the resolver below. NO pointer resolution here: which workspace is
+ * ACTIVE is a session concern the cookie-side wrapper owns.
+ */
+export async function listWorkspaceMemberships(
+  caller: DomainCaller,
+): Promise<readonly WorkspaceInfo[]> {
   const [owned, engagementWorkspaces, governanceWorkspaces] = await Promise.all([
-    getOwnedOrganizations(),
-    readEngagementMemberships(supabase, user.id),
-    readGovernanceMemberships(supabase, user.id),
+    readOwnedOrganizations(caller),
+    readEngagementMemberships(caller.supabase, caller.userId),
+    readGovernanceMemberships(caller.supabase, caller.userId),
   ]);
 
   const orgWorkspaces: WorkspaceInfo[] = [];
@@ -332,6 +337,68 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
     }
   }
 
+  const personal: WorkspaceInfo = {
+    id: PERSONAL_WORKSPACE_ID,
+    name: "",
+    kind: "personal",
+    accentIndex: 0,
+  };
+  return [personal, ...orgWorkspaces];
+}
+
+/**
+ * THE caller-scoped workspace resolution (G4 wagon 3) — the same membership
+ * list + the same `resolveActiveWorkspaceId` rules as the cookie resolver
+ * below, minus the session cookie (a bearer client has none): the DURABLE
+ * DB pointer (`profiles.active_organization_id`, written only by the
+ * membership-validated switch core) is the stored choice. This is what makes
+ * "acting for organization X" mean ONE thing for the web session, the MCP
+ * capability layer, and mobile.
+ */
+export async function resolveActiveWorkspaceForCaller(
+  caller: DomainCaller,
+  identity: "person" | "company" | null,
+): Promise<WorkspaceContext> {
+  const workspaces = await listWorkspaceMemberships(caller);
+  const orgWorkspaces = workspaces.filter((w) => w.kind === "organization");
+
+  let dbPointer: string | null = null;
+  const { data, error } = await asAny(caller.supabase)
+    .from("profiles")
+    .select("active_organization_id")
+    .eq("id", caller.userId)
+    .maybeSingle();
+  if (!error) {
+    dbPointer =
+      ((data as { active_organization_id?: string | null } | null)
+        ?.active_organization_id as string | null) ?? null;
+  }
+
+  return {
+    workspaces,
+    activeWorkspaceId: resolveActiveWorkspaceId(
+      identity,
+      orgWorkspaces.map((w) => w.id),
+      dbPointer,
+    ),
+    pointerAvailable: true,
+  };
+}
+
+export const getWorkspaceContext = cache(async function getWorkspaceContext(
+  identity: "person" | "company" | null,
+): Promise<WorkspaceContext> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return EMPTY_WORKSPACE;
+
+  // G4: the membership list comes from THE shared core; this wrapper owns
+  // only the session-shaped part (cookie + DB pointer resolution).
+  const workspaces = await listWorkspaceMemberships({ supabase, userId: user.id });
+  const orgWorkspaces = workspaces.filter((w) => w.kind === "organization");
+
   // Stored pointer: the in-session choice (server-side cookie, written only
   // by the validated switch actions) wins over the durable DB pointer; both
   // are membership-validated by `resolveActiveWorkspaceId` below. The DB
@@ -358,15 +425,8 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
   // two places and let them drift apart.
   const storedId = sessionPointer ?? dbPointer;
 
-  const personal: WorkspaceInfo = {
-    id: PERSONAL_WORKSPACE_ID,
-    name: "",
-    kind: "personal",
-    accentIndex: 0,
-  };
-
   return {
-    workspaces: [personal, ...orgWorkspaces],
+    workspaces,
     activeWorkspaceId: resolveActiveWorkspaceId(
       identity,
       orgWorkspaces.map((w) => w.id),

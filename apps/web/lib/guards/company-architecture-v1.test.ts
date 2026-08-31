@@ -173,10 +173,14 @@ describe("company switcher wiring", () => {
   });
 
   it("switch action validates membership BEFORE writing and degrades on 42703", () => {
+    // G4: membership validation + the pointer write moved into THE shared
+    // workspace-switch core; the action delegates to it.
     const src = read("lib/company/organization-actions.ts");
-    expect(src).toMatch(/getOwnedOrganizations/);
-    expect(src).toMatch(/needs-migration/);
-    expect(src).toMatch(/active_organization_id/);
+    expect(src).toMatch(/switchActiveWorkspaceCore/);
+    const core = read("lib/company/workspace-switch-core.ts");
+    expect(core).toMatch(/listWorkspaceMemberships/);
+    expect(core).toMatch(/needs-migration/);
+    expect(core).toMatch(/active_organization_id/);
   });
 
   it("the dashboard layout feeds the provider from the active-organization context", () => {

@@ -8164,6 +8164,11 @@
         "body": "Aktyvūs filtrai: {filters}. Pašalinkite dalį filtrų arba išvalykite juos.",
         "reset": "Išvalyti filtrus"
       },
+      "initialView": {
+        "summary": "Rodomos {shown} stipriausios atitiktys iš {total} galimybių.",
+        "showAll": "Rodyti visas (dar {count})",
+        "showAllExternal": "Rodyti visus darbo skelbimus"
+      },
       "details": {
         "show": "Daugiau informacijos",
         "hide": "Slėpti informaciją"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "shownOfTotal": "geriausi {shown} iš {total}",
       "bandBest": "Geriausiai tinkantys",
       "bandPossible": "Galimai tinkantys",
       "bandExplore": "Kiti skelbimai",
@@ -11469,6 +11475,12 @@
       "calendarHint": "Tavo planą rasi skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
       "messagesHint": "Štai tavo žinutės — atsidaro žemiau esančia nuoroda.",
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
+      "switchContextPersonal": "asmeninė erdvė",
+      "switchContextPick": "Kuriame kontekste norite dirbti?",
+      "switchContextDone": "Atlikta — dabar dirbate kontekste „{name}“.",
+      "switchContextAlready": "Jau dirbate kontekste „{name}“.",
+      "switchContextFailed": "Perjungti nepavyko — aktyvus kontekstas nepasikeitė.",
+      "switchContextUnavailable": "Konteksto perjungimas šiuo metu nepasiekiamas.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
       "experiencesEligible": "Radau užbaigtų sąveikų, apie kurias gali palikti patirtį. Pasirink, apie kurią.",
@@ -13889,5 +13901,51 @@
       "noObjects": "Pirmiausia sukurkite bent vieną objektą.",
       "error": "Nepavyko įkelti dienos duomenų."
     }
+  },
+  "oauthConsent": {
+      "title": "Prieigos patvirtinimas",
+      "clientWantsAccess": "„{client}“ prašo prieigos prie jūsų LabourMarket.ai paskyros.",
+      "unknownClient": "Nežinoma programa",
+      "clientLabel": "Programa",
+      "redirectLabel": "Grąžinimo adresas",
+      "scopesLabel": "Prašomos teisės",
+      "authorityNote": "Programa veiks tik jūsų vardu ir matys tik tai, ką matote jūs. Prieigą bet kada galėsite atšaukti.",
+      "approve": "Leisti",
+      "deny": "Atmesti",
+      "errorMissingId": "Trūksta autorizacijos užklausos. Grįžkite į programą ir bandykite dar kartą.",
+      "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Pasirinkite poreikį, kuris jus domina: {options}.",
+    "interestDraftSummary": "Paruošta išreikšti susidomėjimą: {demand}. Dar niekas neišsiųsta — reikia jūsų patvirtinimo.",
+    "interestDraftRepeat": "Susidomėjimą „{demand}“ jau esate išreiškę — patvirtinus jis bus atnaujintas.",
+    "interestConfirmed": "Susidomėjimas užfiksuotas. Poreikio savininkas jį matys savo aplinkoje — niekas nesiunčiama už platformos ribų.",
+    "workspacePersonal": "Asmeninė erdvė",
+    "workspaceSwitched": "Aktyvi darbo erdvė pakeista į „{label}“.",
+    "workspaceChoose": "Pasirinkite darbo erdvę: {options}.",
+    "workCardDraftSummary": "Paruošta atnaujinti jūsų darbo kortelę ({fields}). Dar niekas neišsaugota — reikia jūsų patvirtinimo.",
+    "workCardSaved": "Darbo kortelė atnaujinta.",
+    "workCardFieldAvailability": "prieinamumas",
+    "workCardFieldAvailableFrom": "nuo kada gali dirbti",
+    "workCardFieldSalary": "atlyginimo rėžiai",
+    "workCardFieldLocation": "vieta",
+    "workCardFieldPreferredCountries": "pageidaujamos šalys",
+    "demandDraftSummary": "Paruošta sukurti darbuotojų poreikį organizacijai {org}: „{description}“. Dar niekas nesukurta — reikia jūsų patvirtinimo.",
+    "demandDraftSummaryWithRole": "Paruošta sukurti darbuotojų poreikį organizacijai {org} — {role}: „{description}“. Dar niekas nesukurta — reikia jūsų patvirtinimo.",
+    "demandSubmitted": "Darbuotojų poreikis pateiktas organizacijai {org}. Tinkami darbuotojai dabar gali matyti struktūruotus faktus savo lentoje.",
+    "journalListEmpty": "Darbo žurnale dar nėra įrašų.",
+    "journalListSummary": "Rasta įrašų: {count}. Naujausias — {latest}.",
+    "notSet": "nenurodyta",
+    "workerExists": "aktyvus",
+    "workerNone": "nėra",
+    "workerUnavailable": "nepavyko patikrinti",
+    "profileSummary": "Jūsų LabourMarket.ai profilis — vardas: {name}; šalis: {country}; kalba: {language}; aktyvus vaidmuo: {role}; darbuotojo profilis: {worker}.",
+    "skillsSummary": "Jūsų gyvajame CV yra {count} įgūdžių ({verified} patvirtinti).",
+    "skillsEmpty": "Jūsų gyvajame CV įgūdžių dar nėra.",
+    "draftSummary": "Darbo žurnalo juodraštis {date}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "draftSummaryWithSite": "Darbo žurnalo juodraštis {date}, objektas {site}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "draftChooseContext": "Šis įrašas gali priklausyti keliems darbo kontekstams: {options}. Kuriam jį priskirti?",
+    "draftContext": "Kontekstas: {context}.",
+    "confirmSummary": "Žurnalo įrašas išsaugotas. Įgūdžių atpažinimas: {added} pridėta, {strengthened} sustiprinta, {reviewNeeded} laukia peržiūros."
   }
 }

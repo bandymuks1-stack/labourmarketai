@@ -182,10 +182,14 @@ export async function proposeBookingAction(
     source: "booking",
     metadata: { surface: "bookings", role_context: "company" },
   });
-  // Durable notification for the WORKER (fire-and-forget; degrades silently
-  // to nothing while the owner-gated notification_events store is unapplied).
+  // Durable notification for the WORKER. AWAITED, not detached: the serverless
+  // runtime can freeze the invocation the instant the action returns, killing
+  // a `void`-detached insert mid-flight — the mechanism that made the live
+  // interest emitter deliver nothing. The emitter never throws, so awaiting it
+  // can never fail the proposal that already succeeded (it still degrades
+  // silently while the owner-gated notification_events store is unapplied).
   if (typeof newBookingId === "string" && newBookingId) {
-    void emitBookingNotification(newBookingId, "booking_proposed");
+    await emitBookingNotification(newBookingId, "booking_proposed");
   }
   return { kind: "ok", status: "proposed" };
 }
@@ -224,7 +228,9 @@ export async function respondBookingAction(input: {
     });
     if (!v2.error) {
       revalidatePath(`/${input.locale}/dashboard/bookings`);
-      void emitBookingNotification(input.bookingId, "booking_declined");
+      // AWAITED — a detached emit is killable at serverless return (see
+      // proposeBookingAction); the emitter never throws.
+      await emitBookingNotification(input.bookingId, "booking_declined");
       return { kind: "ok", status: input.decision, reasonStored: true };
     }
     if (!isAbsentFunction(v2.error)) return classify(v2.error);
@@ -234,7 +240,8 @@ export async function respondBookingAction(input: {
     });
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
-    void emitBookingNotification(input.bookingId, "booking_declined");
+    // AWAITED — survives the serverless freeze; never throws.
+    await emitBookingNotification(input.bookingId, "booking_declined");
     return { kind: "ok", status: input.decision, reasonStored: false };
   }
 
@@ -262,9 +269,12 @@ export async function respondBookingAction(input: {
           source: "booking",
           metadata: { surface: "bookings", role_context: "worker" },
         });
-        void emitEngagementCreatedNotification(input.bookingId);
+        // AWAITED — a detached emit is killable at serverless return; both
+        // emitters never throw, so the accept that already succeeded cannot
+        // fail on its own notification.
+        await emitEngagementCreatedNotification(input.bookingId);
       }
-      void emitBookingNotification(input.bookingId, "booking_accepted");
+      await emitBookingNotification(input.bookingId, "booking_accepted");
       return { kind: "ok", status: "accepted", engagement };
     }
     if (!isAbsentFunction(v3.error)) return classify(v3.error);
@@ -274,7 +284,8 @@ export async function respondBookingAction(input: {
     });
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
-    void emitBookingNotification(input.bookingId, "booking_accepted");
+    // AWAITED — survives the serverless freeze; never throws.
+    await emitBookingNotification(input.bookingId, "booking_accepted");
     return { kind: "ok", status: "accepted", engagement: "needs_migration" };
   }
 
@@ -284,7 +295,8 @@ export async function respondBookingAction(input: {
   });
   if (error) return classify(error);
   revalidatePath(`/${input.locale}/dashboard/bookings`);
-  void emitBookingNotification(input.bookingId, "booking_declined");
+  // AWAITED — survives the serverless freeze; never throws.
+  await emitBookingNotification(input.bookingId, "booking_declined");
   return { kind: "ok", status: input.decision };
 }
 
@@ -316,7 +328,9 @@ export async function withdrawBookingAction(input: {
     });
     if (!v2.error) {
       revalidatePath(`/${input.locale}/dashboard/bookings`);
-      void emitBookingNotification(input.bookingId, "booking_withdrawn");
+      // AWAITED — a detached emit is killable at serverless return (see
+      // proposeBookingAction); the emitter never throws.
+      await emitBookingNotification(input.bookingId, "booking_withdrawn");
       return { kind: "ok", status: "withdrawn", reasonStored: true };
     }
     if (!isAbsentFunction(v2.error)) return classify(v2.error);
@@ -325,7 +339,8 @@ export async function withdrawBookingAction(input: {
     });
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
-    void emitBookingNotification(input.bookingId, "booking_withdrawn");
+    // AWAITED — survives the serverless freeze; never throws.
+    await emitBookingNotification(input.bookingId, "booking_withdrawn");
     return { kind: "ok", status: "withdrawn", reasonStored: false };
   }
 
@@ -334,7 +349,8 @@ export async function withdrawBookingAction(input: {
   });
   if (error) return classify(error);
   revalidatePath(`/${input.locale}/dashboard/bookings`);
-  void emitBookingNotification(input.bookingId, "booking_withdrawn");
+  // AWAITED — survives the serverless freeze; never throws.
+  await emitBookingNotification(input.bookingId, "booking_withdrawn");
   return { kind: "ok", status: "withdrawn" };
 }
 

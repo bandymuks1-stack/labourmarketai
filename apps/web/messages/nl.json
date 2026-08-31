@@ -8164,6 +8164,11 @@
         "body": "Actieve filters: {filters}. Verwijder enkele filters of wis ze om meer te zien.",
         "reset": "Filters wissen"
       },
+      "initialView": {
+        "summary": "De {shown} sterkste matches van {total} kansen worden getoond.",
+        "showAll": "Alles tonen (nog {count})",
+        "showAllExternal": "Alle vacatures tonen"
+      },
       "details": {
         "show": "Meer details",
         "hide": "Details verbergen"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "shownOfTotal": "top {shown} van {total}",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",
@@ -11469,6 +11475,12 @@
       "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
       "messagesHint": "Hier zijn je berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
+      "switchContextPersonal": "persoonlijke ruimte",
+      "switchContextPick": "In welke context wilt u werken?",
+      "switchContextDone": "Klaar — u werkt nu in {name}.",
+      "switchContextAlready": "U werkt al in {name}.",
+      "switchContextFailed": "Overschakelen is niet gelukt — uw actieve context is ongewijzigd.",
+      "switchContextUnavailable": "Contextwisseling is momenteel niet beschikbaar.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
       "experiencesEligible": "Ik vond afgeronde interacties die je kunt beschrijven. Kies welke.",
@@ -13889,5 +13901,51 @@
       "noObjects": "Maak eerst ten minste één object aan.",
       "error": "Kon deze dag niet laden."
     }
+  },
+  "oauthConsent": {
+      "title": "Toegang bevestigen",
+      "clientWantsAccess": "„{client}” vraagt toegang tot uw LabourMarket.ai-account.",
+      "unknownClient": "Onbekende applicatie",
+      "clientLabel": "Applicatie",
+      "redirectLabel": "Terugkeeradres",
+      "scopesLabel": "Gevraagde rechten",
+      "authorityNote": "De applicatie handelt alleen namens u en ziet alleen wat u kunt zien. U kunt de toegang op elk moment intrekken.",
+      "approve": "Toestaan",
+      "deny": "Weigeren",
+      "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
+      "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Ga terug naar de applicatie en probeer het opnieuw."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Kies de vraag waarin u geïnteresseerd bent: {options}.",
+    "interestDraftSummary": "Klaar om interesse te tonen: {demand}. Er is nog niets verzonden — uw bevestiging is vereist.",
+    "interestDraftRepeat": "U heeft al interesse getoond in “{demand}” — bevestigen vernieuwt deze.",
+    "interestConfirmed": "Interesse vastgelegd. De eigenaar van de vraag ziet dit in de eigen omgeving — niets verlaat het platform.",
+    "workspacePersonal": "Persoonlijke ruimte",
+    "workspaceSwitched": "Actieve werkruimte gewijzigd naar “{label}”.",
+    "workspaceChoose": "Kies een werkruimte: {options}.",
+    "workCardDraftSummary": "Klaar om uw werkkaart bij te werken ({fields}). Er is nog niets opgeslagen — uw bevestiging is vereist.",
+    "workCardSaved": "Werkkaart bijgewerkt.",
+    "workCardFieldAvailability": "beschikbaarheid",
+    "workCardFieldAvailableFrom": "beschikbaar vanaf",
+    "workCardFieldSalary": "salarisbereik",
+    "workCardFieldLocation": "locatie",
+    "workCardFieldPreferredCountries": "voorkeurslanden",
+    "demandDraftSummary": "Klaar om een personeelsbehoefte aan te maken voor {org}: “{description}”. Er is nog niets aangemaakt — uw bevestiging is vereist.",
+    "demandDraftSummaryWithRole": "Klaar om een personeelsbehoefte aan te maken voor {org} — {role}: “{description}”. Er is nog niets aangemaakt — uw bevestiging is vereist.",
+    "demandSubmitted": "Personeelsbehoefte ingediend voor {org}. Passende werkers kunnen de gestructureerde feiten nu op hun bord zien.",
+    "journalListEmpty": "Het werkjournaal heeft nog geen items.",
+    "journalListSummary": "{count} items gevonden. Meest recent: {latest}.",
+    "notSet": "niet ingesteld",
+    "workerExists": "actief",
+    "workerNone": "geen",
+    "workerUnavailable": "kon niet worden gecontroleerd",
+    "profileSummary": "Uw LabourMarket.ai-profiel — naam: {name}; land: {country}; taal: {language}; actieve rol: {role}; werknemersprofiel: {worker}.",
+    "skillsSummary": "Uw levende cv bevat {count} vaardigheden ({verified} geverifieerd).",
+    "skillsEmpty": "Uw levende cv bevat nog geen vaardigheden.",
+    "draftSummary": "Concept werkjournaalinvoer voor {date}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "draftSummaryWithSite": "Concept werkjournaalinvoer voor {date} op {site}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "draftChooseContext": "Deze invoer kan bij meerdere werkcontexten horen: {options}. Bij welke hoort deze?",
+    "draftContext": "Werkcontext: {context}.",
+    "confirmSummary": "Journaalinvoer opgeslagen. Vaardigheidsherkenning: {added} toegevoegd, {strengthened} versterkt, {reviewNeeded} wacht op beoordeling."
   }
 }

@@ -59,9 +59,11 @@ describe("employer capability is read from HELD roles, not the active one", () =
 
 describe("a sentence about hiring never dead-ends for an employer", () => {
   it("need-workers bridges instead of falling back", () => {
+    // G2: routing is registry-dispatched — the branch is the component's
+    // `needWorkers` handler (order pinned by the handlers object).
     const branch = CHAT.slice(
-      CHAT.indexOf('case "need-workers":'),
-      CHAT.indexOf('case "offer-value":'),
+      CHAT.indexOf("needWorkers: () =>"),
+      CHAT.indexOf("needService: () =>"),
     );
     expect(branch.length).toBeGreaterThan(0);
     // The active-workspace employer still gets the real intake form.
@@ -77,8 +79,8 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
 
   it("company-overview answers an owner in any workspace", () => {
     const branch = CHAT.slice(
-      CHAT.indexOf('case "company-overview":'),
-      CHAT.indexOf('case "admin-approvals":'),
+      CHAT.indexOf("companyOverview: () =>"),
+      CHAT.indexOf("createOrganization: () =>"),
     );
     expect(branch.length).toBeGreaterThan(0);
     expect(branch).toMatch(/identity === "company" \|\| canActAsEmployer/);
@@ -89,8 +91,8 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     // The chip IS the confirmation (§36). A silent switchRole here would be
     // the product changing someone's workspace because of a sentence.
     const branch = CHAT.slice(
-      CHAT.indexOf('case "need-workers":'),
-      CHAT.indexOf('case "offer-value":'),
+      CHAT.indexOf("needWorkers: () =>"),
+      CHAT.indexOf("needService: () =>"),
     );
     expect(branch).not.toMatch(/switchRole|switchWorkspace|switchOrganization/);
   });

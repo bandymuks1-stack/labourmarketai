@@ -107,6 +107,39 @@ export function rateLimit(opts: {
 }
 
 /**
+ * Report whether `key` is over budget WITHOUT recording an attempt.
+ *
+ * Exists for limiters that meter a specific OUTCOME rather than every call —
+ * the bearer boundary counts failed verifications only, so it peeks here
+ * before doing work and records (via `rateLimit`) only when the work fails.
+ * Metering every attempt through `rateLimit` would turn a failure brake into
+ * a hard throttle on legitimate traffic: the auth-core e2e suite measured
+ * exactly that — two consecutive runs pushed VALID bearer calls over a
+ * 20-attempt budget and every control after them was refused.
+ */
+export function rateLimitCheck(opts: {
+  readonly name: string;
+  readonly key: string;
+  readonly limit: number;
+  readonly windowMs: number;
+  readonly nowMs?: number;
+}): RateLimitDecision {
+  const now = opts.nowMs ?? Date.now();
+  const recent = (bucketFor(opts.name).get(opts.key) ?? []).filter(
+    (t) => now - t < opts.windowMs,
+  );
+  if (recent.length >= opts.limit) {
+    const oldest = recent[0] ?? now;
+    return {
+      limited: true,
+      count: recent.length,
+      retryAfterSeconds: Math.max(1, Math.ceil((opts.windowMs - (now - oldest)) / 1000)),
+    };
+  }
+  return { limited: false, count: recent.length, retryAfterSeconds: 0 };
+}
+
+/**
  * Best-effort client identity from proxy headers.
  *
  * Returns the FIRST `x-forwarded-for` hop (the client as the edge saw it).

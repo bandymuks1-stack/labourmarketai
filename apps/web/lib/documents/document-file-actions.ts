@@ -295,7 +295,9 @@ export async function acknowledgeDocumentAction(
   const outcome = String(data ?? "");
   if (outcome === "acknowledged") {
     // Durable fact for the ASSIGNER — after the domain write succeeded.
-    void emitDocumentAckNotification(ackId, "document_ack_completed");
+    // AWAITED, not detached: a `void`-detached insert is killable the instant
+    // the serverless invocation returns. The emitter never throws.
+    await emitDocumentAckNotification(ackId, "document_ack_completed");
   }
   finish(
     locale,

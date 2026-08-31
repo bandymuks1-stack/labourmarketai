@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { MarketingFunnelBeacon } from "@/components/app/marketing-funnel-beacon";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import {
@@ -103,16 +104,24 @@ export async function LiveMarketLanding({
   };
 
   return (
-    <LiveMarketCommand
-      locale={locale}
-      market={{
-        ...market,
-        professions: market.professions.map((profession) => ({
-          ...profession,
-          label: professions(profession.slug),
-        })),
-      }}
-      labels={labels}
-    />
+    <>
+      {/* Acquisition-funnel beacon: the FOCUS landing and every (marketing)
+          page mount this, but the LIVE tree did not — a visitor who had
+          explicitly chosen LIVE produced no `landing_viewed` event and no
+          first-touch capture, so LIVE-arm ad landings were invisible in the
+          funnel. Same component, same once-per-tab-session semantics. */}
+      <MarketingFunnelBeacon />
+      <LiveMarketCommand
+        locale={locale}
+        market={{
+          ...market,
+          professions: market.professions.map((profession) => ({
+            ...profession,
+            label: professions(profession.slug),
+          })),
+        }}
+        labels={labels}
+      />
+    </>
   );
 }

@@ -33,8 +33,14 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
   classifyIntent,
+  fold,
   isExplicitJournalRequest,
 } from "@/lib/conversation/intent-router";
+import {
+  dispatchIntent,
+  type IntentHandlers,
+} from "@/lib/conversation/intent-registry";
+import type { WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
@@ -1130,6 +1136,107 @@ export function ConversationChat({
   ]);
 
   /**
+   * CONTEXT SWITCHING BY SENTENCE (chat-first audit 2026-08-30, gap G1).
+   *
+   * ONE ACTIVE CONTEXT is the state every other answer resolves against, and
+   * until this it was the only piece of product state the chat could not
+   * touch: "Perjunk į Nonstop Group" fell to the generic fallback while the
+   * header dropdown did exactly that. The switch itself stays the ONE
+   * existing, server-validated path (`auth.switchWorkspace` → the same
+   * membership-checked pointer the header uses) — the chat adds language on
+   * top, never a second switching mechanism.
+   *
+   * Honesty: `switchWorkspace` now reports whether the server accepted the
+   * switch, so the done-message is only said when it is true. An ambiguous or
+   * unmatched sentence ASKS with one chip per real workspace — it never
+   * guesses, and the chip carries only the workspace id the server
+   * re-validates.
+   */
+  const performContextSwitch = useCallback(
+    (workspace: WorkspaceInfo) => {
+      const displayName =
+        workspace.kind === "personal" ? t("switchContextPersonal") : workspace.name;
+      if (auth?.activeWorkspaceId === workspace.id) {
+        assistant(t("switchContextAlready", { name: displayName }));
+        return;
+      }
+      setTyping(true);
+      (auth
+        ? auth.switchWorkspace(workspace.id)
+        : Promise.resolve(false)
+      )
+        .then((accepted) => {
+          setTyping(false);
+          assistant(
+            accepted
+              ? t("switchContextDone", { name: displayName })
+              : t("switchContextFailed"),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("switchContextFailed"));
+        });
+    },
+    [assistant, auth, t],
+  );
+
+  const startSwitchContext = useCallback(
+    (text: string) => {
+      const workspaces = auth?.workspaces ?? [];
+      if (!auth || workspaces.length === 0 || auth.workspacePointerAvailable === false) {
+        // The pointer is honestly unavailable (owner-gated migration) or the
+        // list did not resolve — say so, never a silent no-op.
+        withTyping(() => assistant(t("switchContextUnavailable")));
+        return;
+      }
+      const folded = fold(text);
+      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…"
+      // (folded: persönlich → personlich) — the personal space by name.
+      const wantsPersonal = ["asmenin", "personal", "личн", "persoonlijk", "personlich"].some(
+        (hint) => folded.includes(hint),
+      );
+      const organizations = workspaces.filter(
+        (w) => w.kind === "organization" && w.name.trim() !== "",
+      );
+      let target: WorkspaceInfo | undefined = wantsPersonal
+        ? workspaces.find((w) => w.kind === "personal")
+        : undefined;
+      if (!target && !wantsPersonal) {
+        // Full-name inclusion first; then a single ≥4-char name token. Real
+        // entity names only (§6 of the train: no "Workspace 1" labels) — and
+        // anything short/ambiguous falls through to the explicit question.
+        const byFullName = organizations.filter((w) => {
+          const name = fold(w.name).trim();
+          return name.length >= 3 && folded.includes(name);
+        });
+        if (byFullName.length === 1) {
+          target = byFullName[0];
+        } else if (byFullName.length === 0) {
+          const byToken = organizations.filter((w) =>
+            fold(w.name)
+              .split(/\s+/)
+              .some((token) => token.length >= 4 && folded.includes(token)),
+          );
+          if (byToken.length === 1) target = byToken[0];
+        }
+      }
+      if (!target) {
+        assistant(
+          t("switchContextPick"),
+          workspaces.map((w) => ({
+            id: `ws:${w.id}`,
+            label: w.kind === "personal" ? t("switchContextPersonal") : w.name,
+          })),
+        );
+        return;
+      }
+      performContextSwitch(target);
+    },
+    [assistant, auth, performContextSwitch, t, withTyping],
+  );
+
+  /**
    * PROJECTS IN THE CONVERSATION (W11).
    *
    * The same split every result follows — the chat EXPLAINS, the panel SHOWS
@@ -1587,6 +1694,16 @@ export function ConversationChat({
             // completion, the subject and duplicate state before any form
             // exists. A chip is a request to look, never a permission.
             selectInteractionRef.current(chip.id.slice(3));
+          } else if (chip.id.startsWith("ws:")) {
+            // Context-switch chip (gap G1) — carries ONLY the workspace id;
+            // membership is re-validated server-side, the chip grants nothing.
+            const target = (auth?.workspaces ?? []).find(
+              (w) => w.id === chip.id.slice(3),
+            );
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target);
+            }
           } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
           } else if (chip.id.startsWith("link:")) {
@@ -1597,7 +1714,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch],
   );
   handleChipRef.current = handleChip;
 
@@ -1931,24 +2048,36 @@ export function ConversationChat({
       const { intent } = classifyIntent(text);
 
       /**
-       * AI-workspace goals (W4). Each one is a real workflow over canonical
-       * reads; "find-work" now goes through it too, because the sentence may
-       * carry World State ("…in Germany") that the plain search would drop on
-       * the floor.
+       * G2: the sentence dispatch goes through THE declarative intent
+       * registry (`lib/conversation/intent-registry.ts`). The table is the
+       * enumerable contract — domain, read/write class, typing behavior —
+       * and these are the component-bound handler implementations it names.
+       * Exhaustive in BOTH directions at compile time: a new
+       * `ConversationIntent` without a registry row, or a registry row
+       * naming a handler missing here, refuses to build — never a silent
+       * fallthrough to the generic fallback.
        */
-      const WORKFLOWS: Partial<Record<typeof intent, () => Promise<WorkflowResult>>> = {
-        "find-work": () => runFindWork(text),
-        "skill-gap": () => runSkillGap(),
-        "journal-recent": () => runRecentJournal(),
-        figures: () => runFigures(),
-        "open-project": () => runOpenProject(text),
-        "find-workers": () => runFindWorkers(),
-        context: () => runContextReadback(),
-        // "Kokias galimybes man gali pasiūlyti?" — the product's own central
-        // noun, which used to score 0 and land on the generic fallback. It is
-        // the SAME question as "rask man darbą", so it runs the SAME engine:
-        // one matching pipeline, one result surface, no second stack.
-        opportunities: () => runFindWork(text),
+      const handlers: IntentHandlers = {
+        /**
+         * AI-workspace goals (W4). Each one is a real workflow over canonical
+         * reads; "find-work" goes through it too, because the sentence may
+         * carry World State ("…in Germany") that the plain search would drop
+         * on the floor. "Kokias galimybes man gali pasiūlyti?" is the SAME
+         * question as "rask man darbą", so `opportunities` maps to the SAME
+         * handler in the registry: one matching pipeline, one result surface,
+         * no second stack.
+         */
+        findWork: () => runWorkflow(() => runFindWork(text)),
+        skillGap: () => runWorkflow(() => runSkillGap()),
+        recentJournal: () => runWorkflow(() => runRecentJournal()),
+        figures: () => runWorkflow(() => runFigures()),
+        openProject: () => runWorkflow(() => runOpenProject(text)),
+        // G8: the typed sentence runs the SAME functions the `projects` and
+        // `candidates` chips run — never a second engine for the same request.
+        projectsList: () => startProjects(),
+        employerCandidates: () => startEmployerCandidates(),
+        findWorkers: () => runWorkflow(() => runFindWorkers()),
+        contextReadback: () => runWorkflow(() => runContextReadback()),
         // "Kas susidomėjo mano poreikiu?" — routed by IDENTITY, because the
         // sentence means two different real things. For the employer it is
         // "which of my demands, and who is on them" (the demand list whose
@@ -1956,266 +2085,191 @@ export function ConversationChat({
         // where "Mano susidomėjimai" carries the company's answer. Neither
         // branch invents a candidate the reader is not allowed to see.
         // A person who can act as an employer but is standing in their
-        // personal space used to fall to the worker arm and get a JOB SEARCH —
-        // an answer to neither reading of the question. That case is handled
-        // outside this map, because the honest answer there is to ASK rather
-        // than to guess (see the `interest-inbox` branch below).
-        ...(identity === "company" || !canActAsEmployer
-          ? {
-              "interest-inbox": () =>
-                identity === "company" ? runFindWorkers() : runFindWork(text),
-            }
-          : {}),
-      };
-      const workflow = WORKFLOWS[intent];
-      if (workflow) {
-        runWorkflow(workflow);
-        return;
-      }
-      // These run a real async server read with their own typing cue.
-      if (intent === "profile" || intent === "next-action" || intent === "resume") {
-        startProfileSummary(
-          intent === "profile" ? "profile" : intent === "next-action" ? "next" : "resume",
-        );
-        return;
-      }
-      if (intent === "criteria") {
-        startCriteria();
-        return;
-      }
-      if (intent === "player-card") {
-        // The canonical card, rendered IN the conversation (§5.1).
-        startPlayerCard();
-        return;
-      }
-      if (intent === "engagements") {
-        // §7.1 — the real work relationships, in the panel. Saying "end my
-        // engagement" opens the LIST, never a confirmation: the confirmation
-        // belongs to one real row and is minted there.
-        startEngagements();
-        return;
-      }
-      if (intent === "experiences") {
-        // W6 slice 3D — the real state of the person's experiences, plus one
-        // chip per interaction they could actually describe. Never a form.
-        startExperiences();
-        return;
-      }
-      if (intent === "calendar-view") {
-        // Real agenda readback from the canonical Time Engine (async, own
-        // typing cue) — no longer a bare navigation hint.
-        startAgenda();
-        return;
-      }
-      withTyping(() => {
-        switch (intent) {
-          case "cv":
-            handleChip({ id: "cv", label: "" });
-            break;
-          case "need-workers":
-            // Employer demand (rebuild W4): the canonical intake as an inline
-            // form — for the employer identity only; a worker typing about
-            // workers gets the honest fallback, never a wrong-audience form.
-            // V9: what the sentence already SAID pre-fills the form (visible,
-            // editable, still reviewed — nothing submitted on their behalf).
-            if (identity === "company") {
-              openForm(
-                "company.create-demand",
-                undefined,
-                undefined,
-                demandPrefill(structureValueStatement(text), text),
-              );
-            } else if (canActAsEmployer) {
-              // They ARE an employer, just not in that workspace right now.
-              // Say so and hand them the door rather than pretending not to
-              // understand a sentence the product understood perfectly.
-              assistant(labels.employerBridgeHint, [
-                {
-                  id: "link:/dashboard/company#demand-intake",
-                  label: labels.chipNeedWorkers,
-                },
-              ]);
-            } else {
-              assistant(labels.fallback, starterChips);
-            }
-            break;
-          case "interest-inbox":
-            // Only reached by a person who HOLDS the company role while
-            // standing in their personal space — the map above answers
-            // everybody else.
-            //
-            // "Kas susidomėjo?" genuinely means two different things for this
-            // person: who raised a hand on THEIR demand, and what came of the
-            // interest THEY expressed. The patterns lean employer ("interested
-            // in MY need") but "susidomėjimai" is the worker's own word, so
-            // picking one silently would be wrong half the time — and the old
-            // behaviour picked a third thing, a job search, which was right
-            // neither time. Both readings are real surfaces, so it offers both.
-            // BOTH readings answer INSIDE the workspace (W8). The first
-            // version of this used `link:` chips to scouting and the board,
-            // which `w8-employer-chat-workspace` refuses by name: the
-            // employer's second step must not navigate out of the chat-first
-            // workspace, and that decision predates this change. These are the
-            // existing in-chat results — the same ones the starter chips run —
-            // carrying labels that name the two readings.
+        // personal space used to get a JOB SEARCH — an answer to neither
+        // reading of the question. The honest answer there is to ASK rather
+        // than to guess: both readings answer INSIDE the workspace (W8) —
+        // these are the existing in-chat results the starter chips run,
+        // carrying labels that name the two readings, never `link:` routes
+        // out of the chat-first workspace (`w8-employer-chat-workspace`
+        // refuses those by name).
+        interestInbox: () => {
+          if (identity === "company" || !canActAsEmployer) {
+            runWorkflow(() =>
+              identity === "company" ? runFindWorkers() : runFindWork(text),
+            );
+            return;
+          }
+          withTyping(() =>
             assistant(labels.interestInboxAmbiguous, [
               { id: "candidates", label: labels.chipInterestOnMyNeeds },
               { id: "jobs", label: labels.chipMyOwnInterest },
-            ]);
-            break;
-          case "need-service":
-            // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a
-            // JOB TO BE DONE, not for somebody to fill a job. Before this it
-            // classified `unknown`, and "ieškau, kas galėtų nuvalyti langus"
-            // classified `find-work` — handing somebody who wants to HIRE a
-            // window cleaner a job search, the opposite direction.
-            //
-            // Routes to the surface that already exists for exactly this (a
-            // buyer discovering active offerings and requesting one) rather
-            // than growing a second intake inside the chat. Not identity
-            // gated: needing a service is not a workspace role.
-            assistant(labels.serviceNeedHint, [
-              {
-                id: "link:/dashboard/service-requests",
-                label: labels.chipServiceRequests,
-              },
-            ]);
-            break;
-          case "offer-value":
-            // V9/V10: read the statement, run channel DISCOVERY, render the
-            // honest options (renderValueStatement — shared with the
-            // correction path so both render identically).
-            renderValueStatement(structureValueStatement(text), text);
-            break;
-          case "offers":
-            handleChip({ id: "offers", label: "" });
-            break;
-          case "log-work":
-            // A sentence that NAMES the journal is a request, not a vague
-            // mention: open the flow instead of answering with the clarify
-            // question the user cannot escape by rephrasing.
-            startWorkLog(text, { explicit: isExplicitJournalRequest(text) });
-            break;
-          // Honest blocked/hint answers explain themselves; repeating the same
-          // four-item menu under every one of them taught users to ignore the
-          // chips entirely. The menu stays where it is a menu: the greeting
-          // and the not-understood fallback.
-          case "company-overview":
-            // "Kas vyksta mano įmonėje?" — the same link-chip move as the
-            // admin areas: route to the ONE canonical company screen rather
-            // than grow a second company view inside the chat.
-            //
-            // Identity-gated exactly like `need-workers`: a person in their
-            // personal space has no company hub to open, and sending them to
-            // an empty one would be the dead end this pass exists to remove.
-            if (identity === "company" || canActAsEmployer) {
-              // Same §2 correction: a company owner asking what is happening
-              // in their company gets their company, not a shrug, whichever
-              // workspace they happen to be standing in.
-              assistant(labels.adminRouteHint, [
-                { id: "link:/dashboard/company", label: labels.chipCompanyHub },
-              ]);
-            } else {
-              assistant(labels.fallback, starterChips);
-            }
-            break;
-          case "create-organization":
-            // "Sukurk įmonės profilį" — START an organization. Before this the
-            // sentence scored on the `profile` rule (the word `profil` is in
-            // it) and opened the person's PERSONAL profile form: somebody
-            // asking to create a company was handed a form about themselves.
-            //
-            // Routes to the ONE canonical setup surface — the same
-            // `link:` move as the admin areas and the company hub — rather
-            // than growing a second organization intake inside the chat. The
-            // verification ladder, the ownership rules and the persistence all
-            // stay where they already live (`/dashboard/start/company`).
-            //
-            // NOT identity-gated: starting an organization is precisely what a
-            // person WITHOUT one does, so gating it on already having one
-            // would close the only door it opens. Somebody who already acts as
-            // an employer is offered their existing workspace alongside it —
-            // creating a second company is legitimate, but landing on a blank
-            // form when they meant "my company" is the dead end this pass
-            // exists to remove.
-            assistant(
-              labels.createOrganizationHint,
-              canActAsEmployer
-                ? [
-                    {
-                      id: "link:/dashboard/start/company?new=1",
-                      label: labels.chipCreateOrganization,
-                    },
-                    { id: "link:/dashboard/company", label: labels.chipCompanyHub },
-                  ]
-                : [
-                    {
-                      id: "link:/dashboard/start/company?new=1",
-                      label: labels.chipCreateOrganization,
-                    },
-                  ],
+            ]),
+          );
+        },
+        // ONE ACTIVE CONTEXT by sentence (gap G1) — resolves the target
+        // against the caller's real workspace list, asks when ambiguous.
+        switchContext: () => startSwitchContext(text),
+        // These run a real async server read with their own typing cue.
+        profileSummary: () => startProfileSummary("profile"),
+        nextActionSummary: () => startProfileSummary("next"),
+        resumeSummary: () => startProfileSummary("resume"),
+        criteria: () => startCriteria(),
+        // The canonical card, rendered IN the conversation (§5.1).
+        playerCard: () => startPlayerCard(),
+        // §7.1 — the real work relationships, in the panel. Saying "end my
+        // engagement" opens the LIST, never a confirmation: the confirmation
+        // belongs to one real row and is minted there.
+        engagements: () => startEngagements(),
+        // W6 slice 3D — the real state of the person's experiences, plus one
+        // chip per interaction they could actually describe. Never a form.
+        experiences: () => startExperiences(),
+        // Real agenda readback from the canonical Time Engine (async, own
+        // typing cue) — no longer a bare navigation hint.
+        agenda: () => startAgenda(),
+        cvChip: () => handleChip({ id: "cv", label: "" }),
+        offersChip: () => handleChip({ id: "offers", label: "" }),
+        // A sentence that NAMES the journal is a request, not a vague
+        // mention: open the flow instead of answering with the clarify
+        // question the user cannot escape by rephrasing.
+        logWork: () =>
+          startWorkLog(text, { explicit: isExplicitJournalRequest(text) }),
+        // Employer demand (rebuild W4): the canonical intake as an inline
+        // form — for the employer identity only; a worker typing about
+        // workers gets the honest fallback, never a wrong-audience form.
+        // V9: what the sentence already SAID pre-fills the form (visible,
+        // editable, still reviewed — nothing submitted on their behalf).
+        needWorkers: () => {
+          if (identity === "company") {
+            openForm(
+              "company.create-demand",
+              undefined,
+              undefined,
+              demandPrefill(structureValueStatement(text), text),
             );
-            break;
-          case "lmc":
-            // "Kiek turiu LMC?" / "Už ką buvo nuskaičiuota?" — the platform
-            // credit the person holds.
-            //
-            // A `link:` chip to the ONE canonical surface, not a second balance
-            // rendered in the thread. The figure comes from
-            // `lmc_account_balances` under the caller's own RLS, and a number
-            // repeated in two places is a number that will eventually disagree
-            // with itself — on money, that is not a cosmetic problem.
-            //
-            // The anchor matters as much as the route: dropping somebody at the
-            // top of a settings page is not an answer to "how much do I have".
-            assistant(labels.lmcHint, [
-              { id: "link:/dashboard/account#lmc", label: labels.chipLmc },
-            ]);
-            break;
-          case "admin-approvals":
-            // "Ką turiu patvirtinti?" — the approvals area, which no longer
-            // unrolls under every visit to /dashboard/network. A `link:` chip
-            // is the sanctioned move here: it routes to the ONE canonical
-            // screen and never grows a second view of it.
-            assistant(labels.adminRouteHint, [
+          } else if (canActAsEmployer) {
+            // They ARE an employer, just not in that workspace right now.
+            // Say so and hand them the door rather than pretending not to
+            // understand a sentence the product understood perfectly.
+            assistant(labels.employerBridgeHint, [
               {
-                id: "link:/dashboard/network?area=approvals",
-                label: labels.adminApprovalsChip,
+                id: "link:/dashboard/company#demand-intake",
+                label: labels.chipNeedWorkers,
               },
             ]);
-            break;
-          case "admin-requests":
-            // "Noriu pateikti atostogų prašymą" — the filing half of the same
-            // engine (leave, trip, expense), same routing rule.
-            assistant(labels.adminRouteHint, [
-              {
-                id: "link:/dashboard/network?area=requests",
-                label: labels.adminRequestsChip,
-              },
-            ]);
-            break;
-          case "reminder":
-            // No scheduler exists — never a fake reminder (honest degradation).
-            assistant(labels.reminderBlocked);
-            break;
-          case "translate":
-            // No real translation engine — never a fake translation.
-            assistant(labels.translateBlocked);
-            break;
-          case "messages-view":
-            // §8.1: the chat SHOWS the waiting threads, drafts a reply and
-            // sends it after confirmation — the full inbox stays one tap away.
-            startMessages();
-            break;
-          case "write-employer":
-            assistant(labels.writeEmployerHint);
-            break;
-          default:
+          } else {
             assistant(labels.fallback, starterChips);
-        }
-      });
+          }
+        },
+        // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a
+        // JOB TO BE DONE, not for somebody to fill a job. Routes to the
+        // surface that already exists for exactly this (a buyer discovering
+        // active offerings and requesting one) rather than growing a second
+        // intake inside the chat. Not identity gated: needing a service is
+        // not a workspace role.
+        needService: () =>
+          assistant(labels.serviceNeedHint, [
+            {
+              id: "link:/dashboard/service-requests",
+              label: labels.chipServiceRequests,
+            },
+          ]),
+        // V9/V10: read the statement, run channel DISCOVERY, render the
+        // honest options (renderValueStatement — shared with the
+        // correction path so both render identically).
+        offerValue: () =>
+          renderValueStatement(structureValueStatement(text), text),
+        // Honest blocked/hint answers explain themselves; repeating the same
+        // four-item menu under every one of them taught users to ignore the
+        // chips entirely. The menu stays where it is a menu: the greeting
+        // and the not-understood fallback.
+        //
+        // "Kas vyksta mano įmonėje?" — the same link-chip move as the admin
+        // areas: route to the ONE canonical company screen rather than grow
+        // a second company view inside the chat. Identity-gated exactly like
+        // `need-workers`: a person in their personal space has no company
+        // hub to open — but a company owner asking what is happening in
+        // their company gets their company, not a shrug, whichever workspace
+        // they happen to be standing in.
+        companyOverview: () => {
+          if (identity === "company" || canActAsEmployer) {
+            assistant(labels.adminRouteHint, [
+              { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+            ]);
+          } else {
+            assistant(labels.fallback, starterChips);
+          }
+        },
+        // "Sukurk įmonės profilį" — START an organization. Routes to the ONE
+        // canonical setup surface (`/dashboard/start/company`) — the
+        // verification ladder, the ownership rules and the persistence all
+        // stay where they already live. NOT identity-gated: starting an
+        // organization is precisely what a person WITHOUT one does. Somebody
+        // who already acts as an employer is offered their existing
+        // workspace alongside it — creating a second company is legitimate,
+        // but landing on a blank form when they meant "my company" is the
+        // dead end this pass exists to remove.
+        createOrganization: () =>
+          assistant(
+            labels.createOrganizationHint,
+            canActAsEmployer
+              ? [
+                  {
+                    id: "link:/dashboard/start/company?new=1",
+                    label: labels.chipCreateOrganization,
+                  },
+                  { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+                ]
+              : [
+                  {
+                    id: "link:/dashboard/start/company?new=1",
+                    label: labels.chipCreateOrganization,
+                  },
+                ],
+          ),
+        // "Kiek turiu LMC?" — a `link:` chip to the ONE canonical surface,
+        // not a second balance rendered in the thread: the figure comes from
+        // `lmc_account_balances` under the caller's own RLS, and a number
+        // repeated in two places is a number that will eventually disagree
+        // with itself — on money, that is not a cosmetic problem. The anchor
+        // matters as much as the route: dropping somebody at the top of a
+        // settings page is not an answer to "how much do I have".
+        lmc: () =>
+          assistant(labels.lmcHint, [
+            { id: "link:/dashboard/account#lmc", label: labels.chipLmc },
+          ]),
+        // "Ką turiu patvirtinti?" — the approvals area. A `link:` chip is
+        // the sanctioned move here: it routes to the ONE canonical screen
+        // and never grows a second view of it.
+        adminApprovals: () =>
+          assistant(labels.adminRouteHint, [
+            {
+              id: "link:/dashboard/network?area=approvals",
+              label: labels.adminApprovalsChip,
+            },
+          ]),
+        // "Noriu pateikti atostogų prašymą" — the filing half of the same
+        // engine (leave, trip, expense), same routing rule.
+        adminRequests: () =>
+          assistant(labels.adminRouteHint, [
+            {
+              id: "link:/dashboard/network?area=requests",
+              label: labels.adminRequestsChip,
+            },
+          ]),
+        // No scheduler exists — never a fake reminder (honest degradation).
+        reminderBlocked: () => assistant(labels.reminderBlocked),
+        // No real translation engine — never a fake translation.
+        translateBlocked: () => assistant(labels.translateBlocked),
+        // §8.1: the chat SHOWS the waiting threads, drafts a reply and
+        // sends it after confirmation — the full inbox stays one tap away.
+        messages: () => startMessages(),
+        writeEmployer: () => assistant(labels.writeEmployerHint),
+      };
+      dispatchIntent(intent, handlers, withTyping, () =>
+        assistant(labels.fallback, starterChips),
+      );
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity, t, demandPrefill, renderValueStatement],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement],
   );
 
   const nav = {

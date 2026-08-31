@@ -688,6 +688,72 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: true,
   },
+
+  // ══ OAUTH CONSENT (owner directive 2026-08-29 §4) ═════════════════════════
+  // The authorization UI the Supabase OAuth 2.1 server DELEGATES to the
+  // product: external clients (the ChatGPT connector, future agents) obtain
+  // the user's own JWT only after the user approves on this screen. It is
+  // infrastructure the OAuth standard requires at a stable URL — not a
+  // workspace feature — so its World-State answers are honestly "no" and are
+  // excused by the scoped owner waiver, not rewritten.
+  {
+    id: "/oauth/consent",
+    kind: "screen",
+    // A-04: multiple valid entry points. This one is the doorway through which
+    // EXTERNAL clients gain a user's delegated access — the user is coerced
+    // into nothing; deny is a first-class button.
+    originAxiom: "A-04",
+    purpose:
+      "The one screen where a signed-in person approves or denies an external OAuth client's request to act as them: it shows the client name, its registered redirect URI and the requested scopes exactly as GoTrue recorded them, then routes the decision through supabase.auth.oauth.approveAuthorization / denyAuthorization on the user's own session.",
+    whyNotChat:
+      "Deliberate security property, not a limitation: granting an external agent standing access to the account is the ONE decision an assistant must never make or be able to make on a person's behalf — if the assistant could drive this screen, a prompt injection could grant itself access. aiControlled: false is the point.",
+    whyNotExistingComponent:
+      "No existing surface renders a pending OAuth authorization: the flow is defined by the OAuth 2.1 spec and Supabase's Authorization Path contract (a fixed URL GoTrue redirects to with an authorization_id), which no dashboard component satisfies.",
+    owner:
+      "Owner directive 2026-08-29 §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
+    ownsAction: "oauth.consent-decision",
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "It extends no element — it guards the existing identity. One user, one identity, multiple clients: this screen is where the 'multiple clients' half becomes consented fact.",
+    chatIntegration:
+      "None, by design (see whyNotChat). After approval the external client reaches the SAME canonical capability layer the assistant uses — the integration point is the bearer boundary, not this screen.",
+    avatarEffect:
+      "None directly; an approval records an OAuth grant against the user's identity in GoTrue, visible and revocable, never a profile/avatar change.",
+    mapEffect:
+      "None. An authorization handshake draws nothing on the World Map — recorded as reflectedOnMap: false rather than dressed up.",
+    journalRelation:
+      "None. Consent is not work and never becomes evidence; the journal is untouched.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true, // grants are issued/revoked at recorded times (GoTrue)
+    hasHistory: true, // GoTrue records the grant lifecycle
+    addableWithoutMapChange: true,
+
+    // Honestly "no", all five. This is standards-shaped auth infrastructure:
+    // it exists at a fixed URL because RFC 6749/OAuth 2.1 and the Supabase
+    // Authorization Path contract require exactly that, and it must never be
+    // AI-drivable (the security property above).
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: false, // MUST stay false — see whyNotChat
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot and must not control an OAuth consent screen.
+    worldStateCanControlIt: false,
+  },
 ] as const;
 
 /**

@@ -1,7 +1,8 @@
 # LabourMarket.ai — CAPABILITY INVENTORY & GAP MAP
 
 > **Status:** canonical. Derived from **code + production**, 2026-08-27,
-> revised 2026-08-28 (closure train #1320-#1324).
+> revised 2026-08-28 (closure train #1320-#1324), extended 2026-08-31 with the
+> full-product master matrix (§5, six parallel domain sweeps).
 > Entry point: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 > **A file existing is not proof. A green unit suite is not semantic proof.**
 
@@ -310,3 +311,75 @@
    correct state.
 
 Nothing above is fixed by more code existing. Each needs a real journey run.
+
+---
+
+## 5. FULL-PRODUCT MASTER MATRIX (2026-08-31 master train)
+
+> Method: six parallel source-level domain sweeps (calendar/project/work-mgmt,
+> marketplace, messaging/notifications, mobile, social-auth/acquisition,
+> role-home UX) on main `60b01541`, cross-checked against the chat-first audit
+> ([`chat-first-capability-audit-2026-08-30.md`](product/chat-first-capability-audit-2026-08-30.md),
+> G1–G20) and the production ledger. Statuses are evidence-based; this section
+> is the ACTOR × GOAL completion lens — the per-capability proof levels in §2
+> stand where they overlap.
+
+### 5.1 Actor × platform scorecard
+
+✅ real · ◐ partial · ✗ missing · Ⓖ gated (code exists; a gate or owner action blocks)
+
+| Actor / journey | WEB | ANDROID/IOS | CHATGPT (MCP) | Blocking fact |
+|---|---|---|---|---|
+| Worker: register→onboard→CV→journal→opportunities→interest | ✅ proven | Ⓖ stale gate (flip train in flight) | ◐ profile/CV-read, journal r/w, interest, work-card via bridge | — |
+| Employer: setup→demand→matching→shortlist→contact→booking | ✅ proven | ✗ | ✗ no company.* capability yet | employer workspace resolver is cookie-coupled |
+| Student/learner: link→journal→evidence→CV | ✅ local chain 7/7; prod partial | ✗ | ◐ same as worker | gets WORKER home copy (M10) |
+| Education institution: declare→invite→learner evidence | ✅ server-proven; 0 prod `training_provider` orgs | ✗ | ✗ | gets EMPLOYER home copy (M10) |
+| Customer/buyer: register→browse services→request | ◐ | ✗ | ✗ | absent from onboarding (M8); buyer `customer_requests` reach nobody (verified-company gate) |
+| Project/team manager: projects→tasks→timesheets→absences | ◐ | ✗ | ✗ | three prod-broken links (§5.2 M1–M3) |
+| AI actors | recorded, deferred (ARCH §5.1) | — | transport seam = MCP | — |
+
+### 5.2 New findings beyond G1–G20 (M-series, 2026-08-31)
+
+| # | Finding | Class | Evidence anchor |
+|---|---|---|---|
+| M1 | ~~Absence review dead in production for booking-engagement employers~~ **CLOSED — STALE FINDING.** The fix migration was ALREADY APPLIED to prod 2026-08-12 (ledger `20260812180224`); this finding cited the never-struck deferred entry at `APPLIED_LEDGER.md:1475` (an M17-class doc defect, now corrected). Behavior proven IN PRODUCTION 2026-08-31 (rolled-back probe): engaged employer sees + approves the request; private note hidden; unrelated/ended employers see nothing | **CLOSED 2026-08-31 (was doc-stale, not prod-broken)** | ✅ ledger entry `20260812180224` + 2026-08-31 prod probe |
+| M2 | ~~`assign_worker_to_project` regressed in production~~ **CLOSED — STALE FINDING.** The same 2026-08-12 apply restored the engagement bridge pinned to `by_roster`. Proven IN PRODUCTION 2026-08-31: engagement→assign returns a row on the engaging company's project (idempotent, exactly one active assignment); SIBLING company 42501; unrelated caller 42501; unauthenticated 42501 | **CLOSED 2026-08-31 (was doc-stale, not prod-broken)** | same |
+| M3 | **Timesheets derive zero hours in prod**: 6/7 journal time rows hang off org-less engagement contexts; `timesheet_compute_lines_v1` scopes on `ec.organization_id`. Code-level restatement: no row-level work-hour fact exists in main (PR #1344, DRAFT, RED, unapplied) | **P1 (honest-empty, no wrong data) · OWNER-GATED** | `APPLIED_LEDGER.md:145` |
+| M4 | 11 of 15 notification emitters still `void`-detached on serverless — the failure mode that killed the live interest emitter | P1 — fix train `fix/cc/awaited-notification-emitters` | `event-emitters.ts:281-299` |
+| M5 | `notification_preferences` (#1243, applied to prod) has ZERO consumers and no settings UI — complete module, unreachable | P1 | grep: only its own test |
+| M6 | A new message reaching an OFFLINE person is a silent no-op: no email channel configured (`INVITE_EMAIL_*` unset, Supabase SMTP default, `enable_confirmations=false`), no push anywhere | P1 · ENV/OWNER-GATED | messaging sweep |
+| M7 | Marketplace loop WORKS (offering CRUD → request → accept/decline → conversation) but is unreachable: not in nav; the "always-on dashboard grid" registry has NO renderer (W3 deleted it); `marketplace-loop-reachability.test.ts` passes while the reachability it names does not exist | P1 + guard-honesty defect | surface-matrix N6 |
+| M8 | Customer role absent from onboarding (`ROLE_CARDS = worker, company`); buyer acquisition path Tier-C buried | P1 | `onboarding-wizard.tsx:21` |
+| M9 | `service_offerings` has no `organization_id` (owner-join only); nothing after `accepted` (no quote/booking/completion/rating — partly by doctrine, partly vision §7 unbuilt) | P2 | marketplace sweep |
+| M10 | Only two home identities exist (`person`/`company`): education institutions get "I need workers" chips, buyers get hiring chips, students get plain worker copy | P1 UX | `roles.ts:345` |
+| M11 | 11 routes at 800–1,500 lines render under back-arrow-only chrome; ResultShell / ContextPanel / `<details>` primitives exist and are unused there | P1 UX (Train 9) | UX sweep |
+| M12 | Attention fragmented across `/dashboard/activity`, `/assist`, `/inbox`, bell + brief; the canonical aggregator reachable only from the bell popover footer | P2 UX | UX sweep |
+| M13 | Capacity model ignores `worker_absences` (approved leave counts as free); `capacity_records` named by AI task-routing does not exist in schema | P2 | workforce sweep |
+| M14 | Two task truths: `work_tasks` (canonical, healthy, 0 prod rows) vs `follow_up_tasks` (admin CRM queue, no bridge); project detail page shows no tasks | P2 | project sweep |
+| M15 | Attribution truth: a mature first-party UTM + funnel-event system EXISTS (`lib/telemetry/*`, ~55 events, anon-insert grants applied). Real gaps: durable first-touch at signup, OG share images (none exist), LIVE-landing beacon unmounted | P1 — fix train `feat/cc/acquisition-readiness-v1` | acquisition sweep |
+| M16 | Mobile gate text factually FALSE (cites the #1331 seam as unmerged; it merged a day before the app) + refusal vocabulary mismatch (429 unmapped → "server broken", 403 → "no profile") + `callDomain` cannot speak `/api/mcp` JSON-RPC | P0 (mobile) — fix train `feat/cc/mobile-domain-open` | mobile sweep |
+| M17 | Doc hygiene: `APPLIED_LEDGER.md:1375` "not yet applied" contradicts :1150 (anon-bypass fix IS applied); `20260613100000_worker_availability_preferences` header still says DRAFT with zero ledger mentions — apply state unverifiable | P2 | sweeps |
+
+### 5.3 Readiness gates (master-train vocabulary)
+
+| Gate | State | What stands in the way |
+|---|---|---|
+| WORKER_READY (web) | **YES** — first-value journey proven, no known P0 in it | — |
+| EMPLOYER_READY (web) | **YES (web core)** — need→match→shortlist→interest proven (12/12 e2e refresh 2026-08-31); absence review + booking→project for engagement employers proven live in prod (M1/M2 closed as doc-stale) | — |
+| STUDENT_READY | PARTIAL | prod browser chain + M10 |
+| EDUCATION_INSTITUTION_READY | PARTIAL | real prod `training_provider` org + M10 |
+| MOBILE_ANDROID_READY / IOS | NO — builds proven, zero product data | gate-flip train + runtime proof |
+| MARKETPLACE_READY | NO — loop works, reachability ≈ zero | M7, M8 slices |
+| CV_IMPORT_READY | YES (DOCX + PDF proven); XLSX/bulk = G10 architecture decision | — |
+| CALENDAR_READY | PARTIAL — real viewer, no write path, no shift primitive | scope decision |
+| PROJECT_MANAGEMENT_READY | NO | M3 + zero prod usage (M2 closed 2026-08-31 — bridge proven live) |
+| SOCIAL_AUTH_READY | Google only (proven); LinkedIn/FB need owner provider apps + dashboard config | owner action |
+| SOCIAL_ACQUISITION_READY | PARTIAL — measurement mature; durable attribution + OG cards in flight | train; ad spend NOT requested |
+| COMPACT_UX_READY | NO | M10, M11, M12 (Train 9) |
+
+### 5.4 Owner-action queue (each independent; none blocks code trains)
+
+1. ~~RED apply `20260808150000` (M1)~~ / ~~M2 fix migration~~ — **RESOLVED 2026-08-31: already applied 2026-08-12 (ledger `20260812180224`); both behaviors proven live in prod.** No owner action.
+2. Review PR #1344 work-hour allocations (M3) — unlocks timesheets end-to-end.
+3. Email channel: `INVITE_EMAIL_PROVIDER/API_KEY/FROM` env + Supabase SMTP decision (M6).
+4. Unchanged existing gates: #1355 ESCO linkage, #1305 LMC compensate-spend, AI `AI_PROVIDER_MODE` env, LinkedIn/Meta developer apps (only when wanted).

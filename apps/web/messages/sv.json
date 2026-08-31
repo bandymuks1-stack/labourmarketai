@@ -2049,6 +2049,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Visar de {shown} starkaste matchningarna av {total} möjligheter.",
+        "showAll": "Visa alla ({count} till)",
+        "showAllExternal": "Visa alla platsannonser"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2137,6 +2142,7 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
+      "shownOfTotal": "topp {shown} av {total}",
       "bandBest": "Passar bäst",
       "bandPossible": "Möjligen passande",
       "bandExplore": "Övriga annonser",

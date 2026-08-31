@@ -8164,6 +8164,11 @@
         "body": "Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "Reset filters"
       },
+      "initialView": {
+        "summary": "Showing the {shown} strongest matches of {total} opportunities.",
+        "showAll": "Show all ({count} more)",
+        "showAllExternal": "Show all job ads"
+      },
       "details": {
         "show": "More details",
         "hide": "Hide details"
@@ -8405,6 +8410,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
+      "shownOfTotal": "top {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -11469,6 +11475,12 @@
       "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
+      "switchContextPersonal": "personal space",
+      "switchContextPick": "Which context do you want to work in?",
+      "switchContextDone": "Done — you're now working in {name}.",
+      "switchContextAlready": "You're already working in {name}.",
+      "switchContextFailed": "The switch didn't go through — your active context is unchanged.",
+      "switchContextUnavailable": "Context switching isn't available right now.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
       "experiencesEligible": "I found finished interactions you can describe. Pick which one.",
@@ -13889,5 +13901,51 @@
       "noObjects": "Create at least one object first.",
       "error": "Could not load this day."
     }
+  },
+  "oauthConsent": {
+      "title": "Confirm access",
+      "clientWantsAccess": "“{client}” is asking for access to your LabourMarket.ai account.",
+      "unknownClient": "Unknown application",
+      "clientLabel": "Application",
+      "redirectLabel": "Return address",
+      "scopesLabel": "Requested permissions",
+      "authorityNote": "The application will act only as you and will see only what you can see. You can revoke access at any time.",
+      "approve": "Allow",
+      "deny": "Deny",
+      "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
+      "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Choose the demand you are interested in: {options}.",
+    "interestDraftSummary": "Ready to express interest: {demand}. Nothing has been sent yet — your confirmation is required.",
+    "interestDraftRepeat": "You have already expressed interest in “{demand}” — confirming will refresh it.",
+    "interestConfirmed": "Interest recorded. The demand's owner will see it in their own workspace — nothing leaves the platform.",
+    "workspacePersonal": "Personal space",
+    "workspaceSwitched": "Active workspace switched to “{label}”.",
+    "workspaceChoose": "Choose a workspace: {options}.",
+    "workCardDraftSummary": "Ready to update your work card ({fields}). Nothing is saved yet — your confirmation is required.",
+    "workCardSaved": "Work card updated.",
+    "workCardFieldAvailability": "availability",
+    "workCardFieldAvailableFrom": "available from",
+    "workCardFieldSalary": "salary range",
+    "workCardFieldLocation": "location",
+    "workCardFieldPreferredCountries": "preferred countries",
+    "demandDraftSummary": "Ready to create a worker-need for {org}: “{description}”. Nothing has been created yet — your confirmation is required.",
+    "demandDraftSummaryWithRole": "Ready to create a worker-need for {org} — {role}: “{description}”. Nothing has been created yet — your confirmation is required.",
+    "demandSubmitted": "Worker-need submitted for {org}. Matching workers may now see the structured facts on their board.",
+    "journalListEmpty": "The Work Journal has no entries yet.",
+    "journalListSummary": "{count} entries found. Latest: {latest}.",
+    "notSet": "not set",
+    "workerExists": "active",
+    "workerNone": "none",
+    "workerUnavailable": "could not be checked",
+    "profileSummary": "Your LabourMarket.ai profile — name: {name}; country: {country}; language: {language}; active role: {role}; worker profile: {worker}.",
+    "skillsSummary": "Your Living CV holds {count} skills ({verified} verified).",
+    "skillsEmpty": "Your Living CV has no recorded skills yet.",
+    "draftSummary": "Work Journal draft for {date}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "draftSummaryWithSite": "Work Journal draft for {date} at {site}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "draftChooseContext": "This entry could belong to more than one work context: {options}. Which one should it go to?",
+    "draftContext": "Context: {context}.",
+    "confirmSummary": "Journal entry saved. Skill recognition: {added} added, {strengthened} strengthened, {reviewNeeded} awaiting review."
   }
 }

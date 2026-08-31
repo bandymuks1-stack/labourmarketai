@@ -206,6 +206,18 @@ import { join } from "node:path";
  * `landing-market-proof.test.ts` was inverted: it used to prove the typed
  * numbers equalled the claim module, and now proves no catalog carries a
  * market total at all.
+ *
+ * LIVE-arm funnel beacon (acquisition readiness v1, owner handoff 2026-08-31
+ * §12, PR #1370) — the FOCUS landing and every (marketing) page mount
+ * `MarketingFunnelBeacon`, but the LIVE tree did not: a visitor who had
+ * explicitly chosen LIVE produced no `landing_viewed` event and no
+ * first-touch capture, so LIVE-arm ad landings were invisible in the
+ * acquisition funnel. `live-market-page.tsx` now mounts the SAME beacon
+ * component with the same once-per-tab-session semantics ahead of the
+ * unchanged composition. The beacon renders NOTHING — no copy, no layout,
+ * no data, no visual output moved. The regeneration touched EXACTLY ONE
+ * file hash — live-market-page.tsx — and ZERO namespace hashes, which is
+ * the proof this stayed a telemetry mount.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
