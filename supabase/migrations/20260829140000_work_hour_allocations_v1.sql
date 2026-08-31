@@ -1,9 +1,17 @@
 -- ════════════════════════════════════════════════════════════════════════════
 -- 20260829140000 — work hour allocations v1
 --
--- CLASS: GREEN. Purely additive — one new table, one new nullable column on
--- `work_objects`, no drops, no data migration, no RLS loosened anywhere. Full
--- rollback ships beside it.
+-- @human-gate-approved
+-- OWNER APPROVAL 2026-08-31: "M3_MIGRATION_APPROVAL: APPROVE" — scope limited
+-- to this PR #1344 / decision package docs/DECISIONS/0010 (2026-08-31). The
+-- three migration-safety flags (grant-or-revoke, alter-drop-policy,
+-- create-trigger) are the migration's INTENTIONAL tight-grant + RLS + audit
+-- surface, reviewed in the package; the annotation acknowledges RED class, it
+-- does not reclassify it. Apply via Supabase MCP apply_migration only.
+--
+-- CLASS: additive-only content, RED review class (new authorization surface).
+-- One new table, one new nullable column on `work_objects`, no drops, no data
+-- migration, no RLS loosened anywhere. Full rollback ships beside it.
 --
 -- ── WHY (real pilot, measured before writing) ───────────────────────────────
 --

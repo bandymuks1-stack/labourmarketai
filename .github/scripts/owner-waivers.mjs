@@ -612,6 +612,58 @@ export const SCOPED_OWNER_WAIVERS = [
     owner:
       "Owner ruling 2026-08-29 execution order §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
   },
+
+  {
+    id: "work-hours-allocation-surface",
+    axioms: ["A-01"],
+    /**
+     * WORK-HOUR ALLOCATIONS — `/dashboard/hours` (M3, PR #1344).
+     *
+     * OWNER APPROVAL, 2026-08-31 closure session, verbatim:
+     *   "M3_MIGRATION_APPROVAL: APPROVE
+     *    HOURS_PRODUCT_GATE_WAIVER: APPROVE
+     *    Approval scope is limited strictly to the fresh #1344 / package 0010
+     *    implementation described in the closure report."
+     *
+     * WHAT IS BEING EXCUSED. The surface declares three honest "no" answers:
+     * it is a structured per-day hour ledger (numeric facts per worker ×
+     * object × date), not yet reflected on the workspace map, not yet
+     * AI-operable, and it needs its own page because a dense editable grid
+     * does not fit a chat turn. The declaration refuses to claim otherwise;
+     * this record excuses exactly those three answers for this one route,
+     * per the /jobs precedent (the surface must not waive itself — the
+     * waiver arrives WITH the owner approval, not before).
+     */
+    scope:
+      "The manager hour-allocation surface /dashboard/hours (M3, decision package docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md Item 2)",
+    pullRequests: [1344],
+    // Deliberately empty — the waiver lives IN the branch whose CI must
+    // honour it, so pinning the head SHA would change the head SHA.
+    approvedHeadShas: [],
+    // After the squash-merge the gate re-validates the whole registry on
+    // `main`, so the post-merge branch run must be covered too.
+    postMergeBranches: ["main"],
+    files: [
+      "/dashboard/hours",
+      "apps/web/app/[locale]/dashboard/hours/page.tsx",
+    ],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=1344 node .github/scripts/product-gate.mjs
+    // on 2026-08-31 (post main-merge at 371c0eaa). Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_reflected_on_map", file: "/dashboard/hours" },
+      { code: "not_ai_controlled", file: "/dashboard/hours" },
+      { code: "requires_new_page", file: "/dashboard/hours" },
+    ],
+    reason:
+      "The canonical row-level work-hour fact (work_hour_allocations) needs a dense per-day editing surface that cannot honestly claim map reflection or AI operability on day one. The owner reviewed package 0010 and approved both the RED migration and these three declared 'no' answers for this one route and nothing else.",
+    resolvedBy:
+      "hours-surface-reaches-map-and-chat (reflect allocations on the workspace map and expose an AI/chat write path, then delete this record)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner decision, 2026-08-31 closure session — 'HOURS_PRODUCT_GATE_WAIVER: APPROVE' (scope: fresh #1344 / package 0010 only).",
+  },
 ];
 
 /** Is this ONE finding excused? Every constraint must hold. */
