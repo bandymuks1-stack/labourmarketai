@@ -64,6 +64,14 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
   },
 };
 
+/**
+ * Social share card dimensions (social-acquisition readiness v1) — the
+ * standard 1.91:1 OG/Twitter `summary_large_image` canvas. Single source for
+ * both the metadata wiring below and the generated image route
+ * (`app/[locale]/opengraph-image.tsx`, reused by `twitter-image.tsx`).
+ */
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
+
 /** OpenGraph locale tag per active locale (BCP-47-ish region form). */
 const OG_LOCALE: Readonly<Record<ActiveLocale, string>> = {
   en: "en_GB",
@@ -538,6 +546,17 @@ export function buildPageMetadata({
   const resolvedTitle = title ? `${title} · ${BRAND_NAME}` : brand.title;
   const resolvedDescription = description ?? brand.description;
   const url = localizedUrl(active, path);
+  // Brand share card (social-acquisition readiness v1): every public page
+  // inherits the SAME per-locale generated image, served by
+  // app/[locale]/opengraph-image.tsx via next/og — no external asset, no
+  // per-page variance. Without this, social/chat link previews rendered as
+  // bare text despite the `summary_large_image` card declaration.
+  const shareImage = {
+    url: localizedUrl(active, "/opengraph-image"),
+    width: OG_IMAGE_SIZE.width,
+    height: OG_IMAGE_SIZE.height,
+    alt: brand.title,
+  };
 
   return {
     title: resolvedTitle,
@@ -554,11 +573,13 @@ export function buildPageMetadata({
       description: resolvedDescription,
       url,
       locale: OG_LOCALE[active],
+      images: [shareImage],
     },
     twitter: {
       card: "summary_large_image",
       title: resolvedTitle,
       description: resolvedDescription,
+      images: [shareImage],
     },
   };
 }
