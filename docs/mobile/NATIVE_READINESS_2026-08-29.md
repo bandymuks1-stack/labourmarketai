@@ -83,6 +83,55 @@ and the app scheme selected by `.xcodeproj` name (schemes[0] is a Pods
 scheme). Still NOT claimed: device builds, signing, store readiness,
 real-backend auth/deep-link E2E.
 
+## UPDATE 2026-08-31 — IOS_RUNTIME_JOURNEY_PROVEN: YES (CI simulator)
+
+`IOS_SIM_LAUNCH_PROVEN` asserted **process liveness only** — and the Debug
+build it launched loads JavaScript from a Metro server that does not exist on
+the runner, so the "alive" app was a shell with no UI. A blank screen passed.
+
+**Token definition — `IOS_RUNTIME_JOURNEY_PROVEN`** (printed by
+`.github/workflows/ios.yml` only when every step below passes on the CI
+simulator, driven by the Maestro flow
+`apps/mobile/.maestro/auth-failure-journey.yaml`):
+
+1. The build is **Release** with the **embedded Hermes bundle**
+   (`expo export:embed` inside the Xcode build phase, `EXPO_PUBLIC_*`
+   placeholders inlined) — the app runs its real JavaScript with no server.
+2. The auth screen **renders**: `email`, `password`, `submit` (RN `testID` →
+   iOS accessibility identifier) are visible after launch.
+3. A **real sign-in attempt** runs (syntactically valid credentials) against
+   the deterministic bad-network config
+   (`https://example.supabase.co` + placeholder publishable key).
+4. The **failure is surfaced honestly**: the `NotAvailable` block
+   (`testID="auth-failure"`, `src/screens/credentials-form.tsx`) appears —
+   `unreachable`/`rejected` per `auth-context.tsx`, never a silent spinner.
+5. The app **survives the failure**: the form is still visible and
+   interactive afterwards. Screenshots (before/after) and Maestro debug
+   output are uploaded as run artifacts; a failing run also uploads the
+   simulator log.
+
+**Claim status: PROVEN 2026-08-31** — `ios.yml` run 33405199015 (PR #1372,
+`macos-26`, iPhone 17 Pro / iOS 26.4 simulator, Maestro 2.9.x): every flow
+step COMPLETED and `IOS_RUNTIME_JOURNEY_PROVEN` printed; the uploaded
+artifact holds the screenshots (sign-in form rendered; the surfaced
+"We could not reach the server…" failure block with the typed email intact).
+
+Two environment facts the proof train measured, recorded so they are not
+re-learned:
+
+- **A wholly unsigned simulator app has no working keychain.** With
+  `CODE_SIGNING_ALLOWED=NO` every `expo-secure-store` call fails
+  (missing application-identifier entitlement) and the app honestly rendered
+  the "secure storage did not answer" state instead of the sign-in form.
+  Certless **ad-hoc signing** (`CODE_SIGN_IDENTITY=-`) fixes it.
+- **Maestro's iOS `hideKeyboard` is mid-screen swipes**, which is where this
+  form's switch-mode link sits — it navigated to register and triggered the
+  system "Save Password?" dialog. The flow avoids `hideKeyboard` and
+  conditionally dismisses that dialog instead.
+
+**Still NOT claimed:** device builds, signing for distribution, App Store /
+store readiness, a real-backend authenticated session, deep-link E2E.
+
 ## iOS — everything provable from Windows: DONE; the rest is macOS-only
 
 `expo prebuild --platform ios` **refuses on Windows by design** ("Run npx

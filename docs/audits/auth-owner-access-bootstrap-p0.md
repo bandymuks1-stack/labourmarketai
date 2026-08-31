@@ -40,5 +40,6 @@ So onboarding completes (the RPC UPDATE now finds the row → sets `onboarded_at
 ## 8. What still needs owner / Supabase action
 - NONE required for this code fix. Optional/recommended (owner/Supabase side, NOT done here):
   - Confirm/repair the `on_auth_user_created` → `handle_new_user` trigger in production (so the profile row is created at signup, not only at onboarding completion). This is a DB/trigger action — a hard-stop class; flagged, not performed.
+    - **Verification note (2026-08-31):** CONFIRMED on production via a read-only `pg_trigger` query — the trigger is present and enabled (`tgenabled = 'O'`): `tgname = on_auth_user_created`, firing `handle_new_user`, whose `ON CONFLICT (id) DO NOTHING` guard is present. No repair needed; the §7 code-side shell upsert stays as defense-in-depth. This item is now closed.
   - Confirm the Supabase Google provider's Site URL + redirect URLs include `https://app.labourmarket.ai/<locale>/auth/callback` (external config — not changed here).
 - No env/secrets, no Supabase data writes, no migration, no RLS change performed.

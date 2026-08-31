@@ -3425,6 +3425,7 @@
         "exchange_failed": "Die Anmeldung hat nicht geklappt. Versuchen Sie es erneut — der Anmeldecode gilt nur einmal und läuft schnell ab.",
         "no_user": "Sie sind angemeldet, aber Ihr Konto ist nicht erreichbar. Melden Sie sich ab und wieder an.",
         "callback": "Unerwarteter Fehler bei der Anmeldung. Versuchen Sie es erneut — falls das Problem bestehen bleibt, teilen Sie die unten stehende Trace-ID mit.",
+        "cancelled": "Die Anmeldung wurde abgebrochen. An Ihrem Konto hat sich nichts geändert.",
         "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut."
       }
     },
@@ -11509,6 +11510,9 @@
       "chipNeedWorkers": "Ich brauche Arbeitskräfte",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Unternehmensbereich",
+      "chipEduInviteLearner": "Lernende einladen",
+      "chipEduCapabilities": "Was wir anbieten",
+      "learnerGreetingContext": "Du lernst bei {institution} — jede erfasste Arbeit wird Teil deiner Nachweise und deines Lebenslaufs.",
       "companyDemandNext": "Der Bedarf ist in deinem Unternehmensbereich erfasst. Was nun?",
       "navJournal": "Journal",
       "chipTasks": "Aufgaben",

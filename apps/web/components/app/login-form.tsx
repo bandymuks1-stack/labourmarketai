@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { clearSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
@@ -24,6 +24,9 @@ const OAUTH_ERROR_KEYS: Record<string, string> = {
   exchange_failed: "oauth.exchange_failed",
   no_user: "oauth.no_user",
   callback: "oauth.callback",
+  // The person pressed Cancel/Deny at the provider — a deliberate choice,
+  // rendered as a NEUTRAL status, never as a system fault.
+  cancelled: "oauth.cancelled",
 };
 
 function isValidEmail(v: string): boolean {
@@ -76,6 +79,17 @@ export function LoginForm() {
   const oauthError = oauthErrorCode
     ? tErr(OAUTH_ERROR_KEYS[oauthErrorCode] ?? "oauth.unknown")
     : null;
+  // A cancel is not a failure: neutral styling, `role="status"` (below).
+  const oauthCancelled = oauthErrorCode === "cancelled";
+
+  // Any `?error=` bounce means the OAuth attempt did NOT create a session.
+  // The Google button optimistically marks a pending signup BEFORE the
+  // redirect; without this cleanup a cancelled attempt would leave that flag
+  // in localStorage and mislabel a much-later ordinary login as a completed
+  // signup. Clearing emits nothing — the signup never happened.
+  useEffect(() => {
+    if (oauthErrorCode) clearSignupPending();
+  }, [oauthErrorCode]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -151,9 +165,15 @@ export function LoginForm() {
         // Surfaced when the callback redirected back here with `?error=…`.
         // The trace id (also a URL param) is shown so the user can quote
         // it in support. NEVER includes the auth code, tokens, or cookies.
+        // A CANCEL at the provider is a deliberate choice, not a fault —
+        // it renders as a neutral status line, not a red alert.
         <div
-          role="alert"
-          className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs leading-relaxed text-state-danger"
+          role={oauthCancelled ? "status" : "alert"}
+          className={
+            oauthCancelled
+              ? "rounded-md border border-ink-600/60 bg-ink-500/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+              : "rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs leading-relaxed text-state-danger"
+          }
           data-testid="login-oauth-error"
         >
           <p>{oauthError}</p>
@@ -187,12 +207,19 @@ export function LoginForm() {
           account and needs no notice. */}
       <AuthLegalNotice variant="googleLogin" />
 
+      {/* `context="signup"` because this button is ACCOUNT-CREATING for a new
+          Google identity (see the notice above) — the press mirrors the signup
+          form exactly: first-touch attribution + `registration_started` +
+          the pending-signup marker. A returning login is never mis-counted:
+          only the /onboarding surface (which a returning user never mounts)
+          emits `signup_completed` from that marker. */}
       <GoogleButton
         label={t("google_label")}
         redirectingLabel={t("google_redirecting")}
         errorLabel={t("error_generic")}
         disabled={disabled}
         nextPath={nextPath}
+        context="signup"
       />
 
       <div className="flex items-center gap-3" aria-hidden>

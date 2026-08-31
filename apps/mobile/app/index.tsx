@@ -1,5 +1,6 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect } from "expo-router";
 
 import { useAuth } from "../src/auth-context";
@@ -35,23 +36,26 @@ export default function Index() {
       return <Redirect href="/sign-in" />;
     case "unavailable":
       return (
-        <Screen>
-          <NotAvailable
-            tone="warning"
-            title={t("session.unavailable.title")}
-            body={t("session.unavailable.body")}
-          />
-          <Button
-            testID="session-retry"
-            label={t("session.unavailable.retry")}
-            onPress={() => void retry()}
-          />
-        </Screen>
+        <SafeAreaView style={styles.safe}>
+          <Screen>
+            <NotAvailable
+              tone="warning"
+              title={t("session.unavailable.title")}
+              body={t("session.unavailable.body")}
+            />
+            <Button
+              testID="session-retry"
+              label={t("session.unavailable.retry")}
+              onPress={() => void retry()}
+            />
+          </Screen>
+        </SafeAreaView>
       );
   }
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: theme.color.background },
   centre: {
     flex: 1,
     alignItems: "center",

@@ -81,6 +81,35 @@ describe("google sign-in — same-tab redirect only", () => {
   });
 });
 
+describe("google sign-in — BOTH auth surfaces are account-creating (new-user honesty)", () => {
+  // The login page's own notice says its Google button also creates an
+  // account for a new Google identity. Attribution + the registration
+  // funnel may therefore not be gated to the /auth/signup page alone.
+  it("the LOGIN form passes signup context to its Google button", () => {
+    const form = read("components/app/login-form.tsx");
+    expect(form).toMatch(/<GoogleButton[\s\S]{0,600}context="signup"/);
+  });
+
+  it("an ?error= bounce back to login clears the optimistic pending-signup marker", () => {
+    // The press-time marker must never outlive a cancelled/failed attempt —
+    // a stale flag would mislabel a much-later ordinary login as a signup.
+    const form = read("components/app/login-form.tsx");
+    expect(form).toMatch(/clearSignupPending\(\)/);
+  });
+
+  it("signup_completed emits ONLY on the onboarding surface; the dashboard clears silently", () => {
+    // Every genuinely new account is routed through /onboarding before any
+    // dashboard mounts, so onboarding is the one surface that may emit.
+    const telemetry = read("components/app/session-telemetry.tsx");
+    expect(telemetry).toMatch(/signupSurface && surface === "onboarding"/);
+    const onboarding = read("app/[locale]/onboarding/page.tsx");
+    expect(onboarding).toMatch(/<SessionTelemetry surface="onboarding" \/>/);
+    // The dashboard layout must NOT claim the emitting surface.
+    const dashboard = read("app/[locale]/dashboard/layout.tsx");
+    expect(dashboard).not.toMatch(/<SessionTelemetry surface="onboarding"/);
+  });
+});
+
 describe("google sign-in — the removed popup endpoint stays removed", () => {
   it("the GIS endpoint and helpers do not exist", () => {
     for (const rel of [
@@ -110,5 +139,14 @@ describe("google sign-in — the callback completes the loop", () => {
 
   it("keeps the user's locale on both success and failure", () => {
     expect(cb).toMatch(/\/\$\{locale\}\/auth\/login/);
+  });
+
+  it("a provider ?error= bounce is routed as an OUTCOME, not a missing code", () => {
+    // The user pressing Cancel/Deny at Google returns ?error=access_denied
+    // and NO code. Without this branch the cancel fell into the !code path
+    // and was mislabeled with the "missing sign-in code" system-error copy.
+    expect(cb).toMatch(/searchParams\.get\("error"\)/);
+    expect(cb).toMatch(/access_denied/);
+    expect(cb).toMatch(/"cancelled"/);
   });
 });
