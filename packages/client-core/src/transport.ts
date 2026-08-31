@@ -1,47 +1,48 @@
 /**
- * REACHING THE CANONICAL DOMAIN — the one seam a second client needs, and the
- * honest statement that it is not open yet.
+ * REACHING THE CANONICAL DOMAIN — the one seam a second client needs.
+ *
+ * ## The gate is OPEN, and here is the receipt
  *
  * `docs/APP_READINESS_MAP.md` §2 measured the whole gap between this platform
- * and a mobile app, and it is one sentence: every authenticated path — all 184
- * server actions and every `app/api` route — resolves identity from browser
- * cookies. A phone holds a Supabase JWT, not a cookie jar. So today a native
- * client cannot call a server action (they are an RPC protocol private to the
- * Next.js client bundle) and cannot call an API route either (it would resolve
- * no user, and RLS would correctly return nothing).
+ * and a mobile app as one sentence: every authenticated path resolved identity
+ * from browser cookies. That seam was opened by the auth-core bearer resolver
+ * (#1331, merged 2026-08-29): `resolveApiIdentity` on the API boundary accepts
+ * `Authorization: Bearer <supabase JWT>` and hands every handler the caller's
+ * own RLS-scoped client. No service role, no second permission model — a
+ * bearer caller can never do more than the same person's web session.
  *
- * Opening that seam is an auth-core change: RED, owner-gated, and parked as
- * PR #1336 until real-token proof is complete. **This file does not open it.**
+ * The domain surface behind that seam is the capability registry served at
+ * `/api/mcp` (`apps/web/lib/capabilities/registry.ts`): POST-only JSON-RPC 2.0
+ * (`tools/call`), one capability per domain action, each running the SAME core
+ * the web routes run. `callCapability` below speaks that protocol; `callDomain`
+ * remains the plain-REST primitive it is built on.
  *
- * ## What this file does instead
+ * ## What still may not happen
  *
- * It writes down the contract, so that when the gate opens nothing has to be
- * invented under time pressure, and — more importantly — so that the client
- * REFUSES rather than improvises in the meantime.
- *
- * The improvisation would be obvious and wrong: query the database directly
- * with `supabase-js` from the device. RLS would even permit it. But the
- * canonical domain is not the tables — it is the derivation on top of them (a
- * journal entry becomes evidence becomes a capability becomes a CV line), and
- * a device re-deriving that would be the second implementation this
+ * The improvisation this file forbids is unchanged: querying the database
+ * directly with `supabase-js` from the device. RLS would even permit it. But
+ * the canonical domain is not the tables — it is the derivation on top of them
+ * (a journal entry becomes evidence becomes a capability becomes a CV line),
+ * and a device re-deriving that would be the second implementation this
  * architecture exists to prevent. Reads and writes of product meaning go
- * through the canonical routes or they do not happen.
- *
- * So `callDomain` returns `transport_unavailable`, the UI says so in words a
- * person understands, and no screen ever shows an empty list as if it were a
- * finding.
+ * through the canonical capabilities or they do not happen.
  */
 
 /**
- * The four refusals `resolveApiIdentity` distinguishes on the server side
- * (PR #1336), restated here so a client can react to each as the different
- * fact it is — the #1314 rule again: a read that did not answer is not an
- * answer.
+ * The refusals a client keeps apart — the #1314 rule: a read that did not
+ * answer is not an answer, and "you may not" is not "we could not check".
+ *
+ * `/api/mcp` deliberately returns NO `reason` field in refusal bodies (naming
+ * the exact credential defect would be an oracle), so in practice only the
+ * status-code mapping below matters; a named body reason is still honoured for
+ * routes that send one.
  */
 export type IdentityRefusal =
   | "no_credentials"
   | "invalid_token"
   | "no_profile"
+  | "not_authorized"
+  | "rate_limited"
   | "identity_unavailable";
 
 export type DomainFailure =
@@ -52,11 +53,23 @@ export type DomainFailure =
   | { readonly kind: "transport_unavailable"; readonly because: string }
   /** The client holds no usable credential. Send the user to sign in. */
   | { readonly kind: "not_authenticated" }
-  /** The server refused, and said which refusal. */
+  /** The server refused to establish identity, and said which refusal. */
   | {
       readonly kind: "refused";
       readonly reason: IdentityRefusal;
       readonly status: number;
+    }
+  /**
+   * The server DID identify the caller, ran the capability, and declined it —
+   * a domain answer (`{ isError: true }` inside a 200), never a transport
+   * problem and NEVER a success. `code` is the capability's machine word
+   * (`no_worker_profile`, `unavailable`, …); `message` is the server's own
+   * sentence.
+   */
+  | {
+      readonly kind: "capability_refused";
+      readonly code: string;
+      readonly message: string;
     }
   /** The request never completed. Offer a retry; assert nothing. */
   | { readonly kind: "unreachable"; readonly detail: string }
@@ -72,24 +85,20 @@ export type TransportStatus =
   | { readonly open: false; readonly because: string };
 
 /**
- * THE GATE.
- *
- * Flip this to `{ open: true }` in the same pull request that merges the
- * owner-approved bearer resolver into the API boundary, and not one commit
- * before. Every enabled-path behaviour is already implemented and tested by
- * injecting an open status, so the flip is a one-line change with no new code
- * written under pressure.
+ * THE GATE — OPEN since the bearer seam (#1331) merged 2026-08-29 and the
+ * capability boundary `/api/mcp` went live behind it. The closed variant
+ * remains in the type (and injectable via `DomainDependencies.status`) so a
+ * build that must refuse — a broken configuration, a future incident switch —
+ * still refuses honestly instead of improvising.
  */
-export const DOMAIN_TRANSPORT_STATUS: TransportStatus = {
-  open: false,
-  because:
-    "The canonical API boundary accepts browser cookies only. Bearer transport is an owner-gated auth-core change (PR #1336) and is not merged.",
-};
+export const DOMAIN_TRANSPORT_STATUS: TransportStatus = { open: true };
 
 const KNOWN_REFUSALS: readonly IdentityRefusal[] = [
   "no_credentials",
   "invalid_token",
   "no_profile",
+  "not_authorized",
+  "rate_limited",
   "identity_unavailable",
 ];
 
@@ -104,11 +113,17 @@ function refusalFor(status: number, body: unknown): IdentityRefusal | null {
   ) {
     return reason as IdentityRefusal;
   }
-  // The server refused without naming a refusal. Map the status rather than
-  // guess a cause: 503 in particular means "we could not establish identity",
-  // which is emphatically not "you are not allowed".
+  // The server refused without naming a refusal — which is what `/api/mcp`
+  // always does (anti-oracle). Map the status rather than guess a cause:
+  //   401 — no usable credential was presented or it was rejected.
+  //   403 — identified, but this request is not allowed. Emphatically NOT
+  //         "you have no profile": mistranslating an authorization refusal
+  //         into a missing-profile finding was a measured defect.
+  //   429 — a brake, not a verdict. Back off; do not discard credentials.
+  //   503 — "we could not establish identity", which is not "you may not".
   if (status === 401) return "no_credentials";
-  if (status === 403) return "no_profile";
+  if (status === 403) return "not_authorized";
+  if (status === 429) return "rate_limited";
   if (status === 503) return "identity_unavailable";
   return null;
 }
@@ -126,7 +141,7 @@ export type DomainRequest = {
 export type DomainDependencies = {
   readonly apiBaseUrl: string;
   readonly fetch: typeof fetch;
-  /** Injectable so the enabled path is testable before the gate opens. */
+  /** Injectable so a refusing build stays testable. */
   readonly status?: TransportStatus;
 };
 
@@ -199,9 +214,145 @@ export async function callDomain<T>(
   }
 
   if (payload === undefined) {
+    // Includes a 202-with-empty-body: per streamable-HTTP MCP that
+    // acknowledges a NOTIFICATION, and a call that expected an answer did not
+    // get one — a defined failure, never a silent success.
     return { ok: false, failure: { kind: "unreadable", status: response.status } };
   }
   return { ok: true, data: payload as T };
+}
+
+// ── the capability protocol ────────────────────────────────────────────────
+
+/** Where the capability registry is served. POST-only JSON-RPC 2.0. */
+export const CAPABILITY_PATH = "/api/mcp";
+
+export type CapabilityRequest = {
+  /**
+   * The canonical capability id (`profile.get`, `journal.list`, …). MCP tool
+   * names replace the dots with underscores; that translation happens here so
+   * no screen ever spells a wire name.
+   */
+  readonly name: string;
+  readonly args?: Record<string, unknown>;
+  readonly accessToken: string | null;
+  readonly locale?: string;
+};
+
+/** JSON-RPC ids only disambiguate within one HTTP exchange here (the server
+ *  is stateless single-response), but distinct ids make logs readable. */
+let nextRpcId = 1;
+
+type JsonRpcEnvelope = {
+  readonly jsonrpc?: unknown;
+  readonly id?: unknown;
+  readonly result?: unknown;
+  readonly error?: { readonly code?: unknown; readonly message?: unknown };
+};
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+/**
+ * Call ONE canonical capability through `/api/mcp`.
+ *
+ * Frames a JSON-RPC 2.0 `tools/call`, then unwraps the MCP result envelope:
+ *
+ *   - `result.structuredContent` (falling back to the first text content
+ *     block) carries the capability's `ExecResult` — `{ ok, data | code+message }`.
+ *   - `{ isError: true }` INSIDE a 200 is a capability refusal and maps to a
+ *     `capability_refused` failure. It is NEVER `ok: true`.
+ *   - A JSON-RPC `error` object (unknown tool, invalid params) is also a
+ *     refusal — the server judged the request, so the caller gets its words.
+ *   - Identity refusals arrive as HTTP statuses and keep `callDomain`'s
+ *     mapping (401/403/429/503 → the refusal vocabulary above).
+ */
+export async function callCapability<T>(
+  deps: DomainDependencies,
+  request: CapabilityRequest,
+): Promise<DomainResult<T>> {
+  const outcome = await callDomain<JsonRpcEnvelope>(deps, {
+    path: CAPABILITY_PATH,
+    method: "POST",
+    body: {
+      jsonrpc: "2.0",
+      id: nextRpcId++,
+      method: "tools/call",
+      params: {
+        name: request.name.replace(/\./g, "_"),
+        arguments: request.args ?? {},
+      },
+    },
+    accessToken: request.accessToken,
+    locale: request.locale,
+  });
+  if (!outcome.ok) return outcome;
+
+  const envelope = asRecord(outcome.data);
+  if (envelope === null) {
+    return { ok: false, failure: { kind: "unreadable", status: 200 } };
+  }
+
+  const rpcError = asRecord(envelope.error);
+  if (rpcError !== null) {
+    return {
+      ok: false,
+      failure: {
+        kind: "capability_refused",
+        code: "rpc_error",
+        message:
+          typeof rpcError.message === "string"
+            ? rpcError.message
+            : "The server rejected the request.",
+      },
+    };
+  }
+
+  const result = asRecord(envelope.result);
+  if (result === null) {
+    return { ok: false, failure: { kind: "unreadable", status: 200 } };
+  }
+
+  let payload = asRecord(result.structuredContent);
+  if (payload === null && Array.isArray(result.content)) {
+    // Older/other servers may omit structuredContent; the payload is then the
+    // JSON text of the first content block.
+    const first = asRecord(result.content[0]);
+    if (first !== null && typeof first.text === "string") {
+      try {
+        payload = asRecord(JSON.parse(first.text));
+      } catch {
+        payload = null;
+      }
+    }
+  }
+  if (payload === null) {
+    return { ok: false, failure: { kind: "unreadable", status: 200 } };
+  }
+
+  // A tool-level failure is a RESULT with isError — and an `ok: false`
+  // payload is a refusal even if a server forgot the flag. Neither may ever
+  // surface as success.
+  if (result.isError === true || payload.ok === false) {
+    return {
+      ok: false,
+      failure: {
+        kind: "capability_refused",
+        code: typeof payload.code === "string" ? payload.code : "unknown",
+        message:
+          typeof payload.message === "string"
+            ? payload.message
+            : "The server declined this request.",
+      },
+    };
+  }
+  if (payload.ok !== true) {
+    return { ok: false, failure: { kind: "unreadable", status: 200 } };
+  }
+  return { ok: true, data: payload.data as T };
 }
 
 /**
@@ -219,6 +370,8 @@ export function failureMessageKey(failure: DomainFailure): string {
       return "domain.unavailable.signInAgain";
     case "refused":
       return "domain.refused." + failure.reason;
+    case "capability_refused":
+      return "domain.refused.capability";
     case "unreachable":
       return "domain.unavailable.offline";
     case "unreadable":

@@ -30,9 +30,11 @@ import { TRANSPORT_STATUS } from "./domain";
  *
  * Holdings are read from the backend under RLS — `profile_roles`,
  * `company_workers`, `organization_capabilities` and the relationship tables
- * decide them, and no client may cache them as a claim about authority. This
- * client cannot make that read yet, because the canonical transport is not
- * open. So holdings are `unavailable`, and the UI says exactly that.
+ * decide them, and no client may cache them as a claim about authority. The
+ * canonical transport is open now (`/api/mcp`, bearer seam #1331), but this
+ * client has not yet wired the holdings read — so holdings are `unknown`, and
+ * the UI says it cannot list contexts yet. Wiring it (via `context.switch`'s
+ * choice flow or a dedicated read) is its own slice.
  *
  * It would have been easy to seed `["worker"]` and move on. That would tell a
  * manager of three companies that they are only a worker — a fabricated claim
@@ -51,9 +53,10 @@ function currentHoldings(): ContextHoldings {
   if (!TRANSPORT_STATUS.open) {
     return { status: "unavailable", because: TRANSPORT_STATUS.because };
   }
-  // When the transport opens, this becomes a read through `request()` and the
-  // provider gains a loading state. Until then there is nothing to fetch and
-  // pretending otherwise would be a spinner that never resolves.
+  // The transport is open, but this provider does not perform the holdings
+  // read yet — that is the next slice, and it brings a real loading state
+  // with it. `unknown` keeps the UI honest in the meantime: it renders
+  // "we cannot list your contexts yet", never an invented single context.
   return { status: "unknown" };
 }
 

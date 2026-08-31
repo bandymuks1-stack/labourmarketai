@@ -168,22 +168,38 @@ describe("the shared package stays shareable", () => {
   });
 });
 
-describe("the canonical transport gate has not been opened by accident", () => {
-  it("client-core still reports the API boundary as cookie-only", () => {
-    // Opening this is an owner-gated auth-core change (PR #1336). If it has
-    // legitimately merged, flip the constant AND update
-    // docs/APP_READINESS_MAP.md §6 and docs/MOBILE_ARCHITECTURE.md — this
-    // assertion is what forces both to happen in the same pull request.
+describe("the canonical transport gate is open, and says so truthfully", () => {
+  it("client-core reports the gate OPEN and names /api/mcp as the boundary", () => {
+    // The bearer seam merged 2026-08-29 (#1331) and the capability boundary
+    // `/api/mcp` serves the domain behind it. For months after, client-core
+    // still claimed the seam was "parked as PR #1336 … not merged" — a stale
+    // refusal is as dishonest as a fake success, so this guard now pins the
+    // OPEN truth the same way it used to pin the closed one. If the gate ever
+    // legitimately closes again, update docs/APP_READINESS_MAP.md §6 and
+    // docs/MOBILE_ARCHITECTURE.md in the same pull request — this assertion
+    // forces the code and the documents to move together.
     const transport = readSource(CORE_SRC, "transport.ts");
     expect(transport).toMatch(
-      /export const DOMAIN_TRANSPORT_STATUS: TransportStatus = \{\s*open: false,/,
+      /export const DOMAIN_TRANSPORT_STATUS: TransportStatus = \{\s*open: true\s*,?\s*\}/,
     );
+    expect(transport).toContain("/api/mcp");
+    // The stale claim must never come back.
+    expect(transport).not.toMatch(/is not merged/i);
   });
 
-  it("and the web boundary still resolves identity from cookies only", () => {
+  it("and the boundary it names actually resolves bearer identity", () => {
+    // The gate being open is only honest if the server side is real: the MCP
+    // route must go through the ONE identity resolver (bearer + cookie), not
+    // a private header parse.
+    const route = readSource(process.cwd(), "app", "api", "mcp", "route.ts");
+    expect(route).toMatch(/resolveApiIdentity/);
+  });
+
+  it("while the request-scoped web client stays cookie-only", () => {
     // The same property `app-shared-core.test.ts` pins, restated from the
-    // mobile side: if a bearer path appears in the request-scoped client, the
-    // mobile foundation's assumptions have changed and must be re-read.
+    // mobile side: bearer identity lives in `lib/api/api-identity.ts` at the
+    // API boundary ONLY. If a bearer path appears in the request-scoped
+    // client, the auth-core assumptions have changed and must be re-read.
     const server = readSource(process.cwd(), "lib", "supabase", "server.ts");
     expect(server).toMatch(/from "next\/headers"/);
     expect(server).not.toMatch(/authorization|bearer/i);

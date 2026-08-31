@@ -11,18 +11,20 @@ Read it before changing anything in this directory.
 
 ## The one thing to know first
 
-This app can **sign you in** and it **cannot yet read or write your work**.
+This app reads product data through **one door**: the canonical capability
+boundary at **`/api/mcp`** (JSON-RPC 2.0 `tools/call`, bearer-authenticated by
+the auth-core seam merged 2026-08-29 as #1331). `DOMAIN_TRANSPORT_STATUS` is
+**open**, and the Today / Work journal / Profile tabs perform real reads —
+`profile.get`, `journal.list`, `living_cv.skills.get` — as the signed-in
+person, under their own RLS.
 
-That is not an oversight. Every authenticated path in the platform resolves
-identity from browser cookies, and a phone holds a token instead
-([`docs/APP_READINESS_MAP.md`](../../docs/APP_READINESS_MAP.md) §2). Opening
-that seam is an owner-gated auth-core change (PR #1336). Until it merges,
-`DOMAIN_TRANSPORT_STATUS` is closed and every screen that would show product
-data says so.
+What is NOT wired yet: writes (journal draft→confirm), context holdings, and
+on-device runtime proof of these reads against production. A failed read
+renders as the failure it is (`CapabilityGate`), never as an empty list.
 
-**Do not work around it.** Querying Supabase tables directly from the device
-would re-derive on a phone the meaning the canonical domain already owns. That
-is the failure the architecture exists to prevent.
+**Do not work around the door.** Querying Supabase tables directly from the
+device would re-derive on a phone the meaning the canonical domain already
+owns. That is the failure the architecture exists to prevent.
 
 ---
 
@@ -66,8 +68,10 @@ src/
   auth-context.tsx      React wiring around the shared state machine
   supabase.ts           authenticates, and does nothing else
   secure-session-store.ts   the OS keychain
-  domain.ts             the ONLY path to product data — currently refuses
-  context-provider.tsx  one person, many contexts
+  domain.ts             the ONLY path to product data — capability() → /api/mcp
+  use-capability.ts     one capability read as React state (loading/loaded/failed)
+  capability-shapes.ts  presentation mirrors of the read capabilities' payloads
+  context-provider.tsx  one person, many contexts (holdings read not wired yet)
   i18n/                 five active locales; parity enforced by the compiler
   ui/                   primitives, not product surfaces
   screens/

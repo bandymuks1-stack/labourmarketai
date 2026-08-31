@@ -51,12 +51,15 @@ export type {
 } from "./session";
 
 export {
+  CAPABILITY_PATH,
   DOMAIN_TRANSPORT_STATUS,
+  callCapability,
   callDomain,
   failureMessageKey,
 } from "./transport";
 export type {
   IdentityRefusal,
+  CapabilityRequest,
   DomainFailure,
   DomainResult,
   DomainRequest,
