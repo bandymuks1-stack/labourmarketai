@@ -138,6 +138,13 @@ jobs:
         # xcodebuild also builds the x86_64 simulator slice, which is where
         # the first run failed (ReactCodegen x86_64 objects). One slice is
         # all this proof needs.
+        # CODE_SIGN_IDENTITY=- (ad hoc, certless) instead of the old
+        # CODE_SIGNING_ALLOWED=NO: a wholly UNSIGNED app has no
+        # application-identifier entitlement, so every keychain call
+        # (expo-secure-store) fails on the simulator — journey run 1 proved it:
+        # the app rendered the honest "secure storage did not answer" state
+        # instead of the sign-in form. Ad-hoc signing needs no certificate and
+        # restores the keychain.
         # Full log goes to a file; on failure the error region is printed —
         # a bare `tail -200` swallowed the actual error text on run 1.
         run: |
@@ -148,7 +155,8 @@ jobs:
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=YES \
             build > xcodebuild.log 2>&1
           STATUS=$?
@@ -223,4 +231,8 @@ jobs:
           name: ios-runtime-journey-${{ github.run_id }}
           path: ios-artifacts/
           if-no-files-found: ignore
+          # Maestro writes its debug output under a hidden `.maestro/` subdir,
+          # which upload-artifact skips by default (run 1 uploaded nothing
+          # from --debug-output).
+          include-hidden-files: true
           retention-days: 14
