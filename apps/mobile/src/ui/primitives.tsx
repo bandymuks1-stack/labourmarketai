@@ -117,17 +117,20 @@ export function NotAvailable({
   title,
   body,
   tone = "info",
+  testID,
   children,
 }: {
   title: string;
   body: string;
   tone?: "info" | "warning";
+  testID?: string;
   children?: React.ReactNode;
 }) {
   return (
     <View
       accessible
       accessibilityRole="summary"
+      testID={testID}
       style={[styles.notice, tone === "warning" && styles.noticeWarning]}
     >
       <Text style={styles.noticeTitle}>{title}</Text>

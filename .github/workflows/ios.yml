@@ -13,21 +13,47 @@ name: iOS
 # configuration: it proves the native project compiles, links every pod
 # (Hermes, Reanimated 4.5.1, Worklets 0.10.1, Screens 4.27 — the exact
 # versions the Android build proved) and starts on a simulator without
-# crashing. It never signs in and never reaches a real backend.
+# crashing. It never reaches a real backend: the Maestro journey below
+# ATTEMPTS a sign-in against https://example.supabase.co (deterministic
+# bad-network config) precisely to prove the failure is surfaced honestly.
+#
+# WHY RELEASE, NOT DEBUG (changed with the runtime-journey proof): a Debug
+# build's bundleURL() points at a Metro dev server, which does not exist on
+# the runner — the Debug app "alive after 15s" was a shell with NO JavaScript
+# loaded, so a blank screen passed. Release runs `expo export:embed` inside
+# the Xcode build phase (the same bundler mobile.yml proves on Linux), inlines
+# the EXPO_PUBLIC_* placeholders into the embedded Hermes bundle, and loads
+# it with no server — the only configuration whose UI can be asserted in CI.
 #
 # What this workflow can honestly claim when green:
-#   IOS_NATIVE_BUILD_PROVEN  — xcodebuild compiles and links the real app
-#   IOS_SIM_LAUNCH_PROVEN    — the app process starts and stays alive 15s
+#   IOS_NATIVE_BUILD_PROVEN      — xcodebuild compiles and links the real app
+#   IOS_SIM_LAUNCH_PROVEN        — the app process starts and stays alive 15s
+#   IOS_RUNTIME_JOURNEY_PROVEN   — the auth screen RENDERS, a real sign-in
+#                                  attempt runs, the failure state is SHOWN
+#                                  (testID auth-failure), and the app survives
+#                                  it (Maestro flow apps/mobile/.maestro/)
 # What it deliberately does NOT claim: device builds, signing, App Store
-# readiness, real auth/deep-link E2E (those need a session against a real
-# backend and are a later, separate proof).
+# readiness, a real-backend authenticated session or deep-link E2E (those
+# need a session against a real backend and are a later, separate proof).
 
 on:
+  # Paths-filtered: this workflow is NOT a required check (see header), so
+  # skipping it on web-only changes narrows no merge gate — it only stops
+  # spending 40+ macOS minutes on PRs that cannot change the mobile app.
+  # (mobile.yml's no-filter lessons applied to a required-adjacent quality
+  # signal; this one is an explicit, self-contained proof.)
   push:
     branches: [main]
-  # No paths filter, no branches filter on pull_request — the two lessons
-  # this repository already paid for (see mobile.yml).
+    paths:
+      - "apps/mobile/**"
+      - "packages/client-core/**"
+      - ".github/workflows/ios.yml"
   pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/client-core/**"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -39,7 +65,9 @@ concurrency:
 jobs:
   ios:
     runs-on: macos-26
-    timeout-minutes: 60
+    # Was 60 for build+launch; Release adds the embedded-bundle export and the
+    # Maestro journey adds CLI install + XCTest driver startup + the flow.
+    timeout-minutes: 75
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -95,7 +123,12 @@ jobs:
           echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
           echo "workspace=$WS scheme=$SCHEME"
 
-      - name: Xcode build (simulator, Debug, unsigned)
+      # Release, not Debug: Debug loads JS from a Metro server that does not
+      # exist here (a Debug app on the runner renders NOTHING). Release embeds
+      # the Hermes bundle via `expo export:embed` in the build phase, with the
+      # EXPO_PUBLIC_* placeholders below inlined at bundle time — the runtime
+      # journey asserts the UI those values produce.
+      - name: Xcode build (simulator, Release, unsigned, embedded bundle)
         working-directory: apps/mobile/ios
         env:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
@@ -104,7 +137,7 @@ jobs:
         # ONLY_ACTIVE_ARCH=YES: the hosted runner is arm64; without it
         # xcodebuild also builds the x86_64 simulator slice, which is where
         # the first run failed (ReactCodegen x86_64 objects). One slice is
-        # all a launch smoke needs.
+        # all this proof needs.
         # Full log goes to a file; on failure the error region is printed —
         # a bare `tail -200` swallowed the actual error text on run 1.
         run: |
@@ -112,7 +145,7 @@ jobs:
           xcodebuild \
             -workspace "${{ steps.xc.outputs.workspace }}" \
             -scheme "${{ steps.xc.outputs.scheme }}" \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
@@ -135,6 +168,7 @@ jobs:
           APP=$(find build/Build/Products -maxdepth 2 -name "*.app" | head -1)
           test -n "$APP" || { echo "no .app produced"; exit 1; }
           UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(dev["udid"] for devs in d.values() for dev in devs if dev["isAvailable"]))')
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl install "$UDID" "$APP"
@@ -144,3 +178,49 @@ jobs:
           xcrun simctl spawn "$UDID" launchctl list | grep -q "ai.labourmarket.app" \
             && echo "IOS_SIM_LAUNCH_PROVEN: app alive after 15s" \
             || { echo "app not running after 15s — startup crash"; exit 1; }
+
+      # ---------- runtime JOURNEY proof (IOS_RUNTIME_JOURNEY_PROVEN) ----------
+      # The smoke above proves process liveness only — a blank screen passes
+      # it. The Maestro flow proves the auth screen RENDERS, a real sign-in
+      # attempt runs against the deterministic bad-network config, the failure
+      # is SURFACED (testID auth-failure), and the app survives it.
+
+      - name: Evidence — screenshot before the journey
+        run: |
+          mkdir -p ios-artifacts
+          xcrun simctl io "$SIM_UDID" screenshot ios-artifacts/00-post-launch.png
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: Maestro runtime journey (auth render → sign-in attempt → surfaced failure)
+        env:
+          # iOS XCTest driver default is 120s; hosted runners are slow to
+          # build/boot the driver the first time.
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+          MAESTRO_CLI_NO_ANALYTICS: "1"
+        run: |
+          maestro test apps/mobile/.maestro/auth-failure-journey.yaml \
+            --debug-output ios-artifacts/maestro-debug
+          echo "IOS_RUNTIME_JOURNEY_PROVEN: auth screen rendered, sign-in attempted, failure state surfaced, app interactive after failure"
+
+      - name: Evidence on failure — simulator log
+        if: failure()
+        run: |
+          mkdir -p ios-artifacts
+          xcrun simctl io "$SIM_UDID" screenshot ios-artifacts/99-on-failure.png || true
+          xcrun simctl spawn "$SIM_UDID" log show --style compact --last 15m \
+            --predicate 'processImagePath CONTAINS "LabourMarketai" OR processImagePath CONTAINS "SpringBoard"' \
+            > ios-artifacts/simulator-log.txt || true
+
+      - name: Upload journey evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ios-runtime-journey-${{ github.run_id }}
+          path: ios-artifacts/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,62 @@
+# iOS runtime JOURNEY proof — the flow behind IOS_RUNTIME_JOURNEY_PROVEN.
+#
+# Runs in CI (.github/workflows/ios.yml) against a Release simulator build
+# whose bundle was compiled with deterministic bad-network configuration
+# (EXPO_PUBLIC_SUPABASE_URL=https://example.supabase.co, placeholder key,
+# EXPO_PUBLIC_API_BASE_URL=https://example.invalid). No real backend is ever
+# reached; no secret exists anywhere in this proof.
+#
+# What each stage proves, beyond the old process-liveness smoke:
+#   1. The auth screen actually RENDERS — a blank white screen used to pass
+#      the launchctl liveness check; it cannot pass an assertVisible.
+#   2. A real sign-in attempt runs the real code path (supabase-js →
+#      auth-context.tsx failure mapping).
+#   3. The failure SURFACES honestly: the NotAvailable block
+#      (testID "auth-failure" in src/screens/credentials-form.tsx) appears —
+#      "unreachable" or "rejected", never a silent spinner or a crash.
+#   4. The app survives the failure: the form is still on screen and
+#      interactive afterwards (no crash, no dead end).
+appId: ai.labourmarket.app
+name: auth-failure-journey
+---
+# --- 1. Fresh launch; the auth gate must land on a RENDERED sign-in form ---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- assertVisible:
+    id: "password"
+- assertVisible:
+    id: "submit"
+- takeScreenshot: ios-artifacts/journey-01-auth-screen
+
+# --- 2. A real sign-in attempt with syntactically valid credentials ---
+- tapOn:
+    id: "email"
+- inputText: "ci-journey@example.com"
+- tapOn:
+    id: "password"
+- inputText: "not-a-real-password-1"
+# The iOS software keyboard can cover the submit button; hiding it is
+# best-effort (the KeyboardAvoidingView already keeps the form visible).
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: "submit"
+
+# --- 3. The failure state must SURFACE (NotAvailable block) ---
+- extendedWaitUntil:
+    visible:
+      id: "auth-failure"
+    timeout: 60000
+- takeScreenshot: ios-artifacts/journey-02-auth-failure
+
+# --- 4. No crash: the form is still there and still interactive ---
+- assertVisible:
+    id: "email"
+- assertVisible:
+    id: "submit"
+- tapOn:
+    id: "email"
