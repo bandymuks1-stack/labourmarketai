@@ -24,7 +24,7 @@ import {
  * `6 7 13`, brand-blue `62 139 255`, brand-cyan `0 194 255`, text-primary
  * `244 246 251`, text-secondary `155 163 184` — chosen because a share card
  * has no theme switch and the dark composition carries the product's visual
- * identity. Typeface is the next/og built-in (Bricolage/Inter cannot be
+ * identity. Typeface is the next/og built-in (the brand display/body faces cannot be
  * loaded here without bundling font binaries; the fallback is deliberate).
  */
 
