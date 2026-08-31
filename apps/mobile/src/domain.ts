@@ -1,7 +1,9 @@
 import {
   DOMAIN_TRANSPORT_STATUS,
+  callCapability,
   callDomain,
   failureMessageKey,
+  type CapabilityRequest,
   type DomainFailure,
   type DomainRequest,
   type DomainResult,
@@ -11,38 +13,51 @@ import { CONFIG } from "./config";
 import type { MessageKey } from "./i18n/messages";
 
 /**
- * THE ONLY WAY THIS APP READS OR WRITES PRODUCT DATA — and today it refuses.
+ * THE ONLY WAY THIS APP READS OR WRITES PRODUCT DATA.
  *
- * Every screen that would show journal entries, hours, a Living CV or
- * opportunities goes through here. Not through `supabase` in `supabase.ts`:
- * that client authenticates and nothing else. Querying tables from a phone
- * would mean re-deriving on the device the meaning the canonical domain
- * already owns, and that second implementation is precisely what
- * `docs/APP_READINESS_MAP.md` exists to prevent.
+ * Every screen that shows journal entries, a Living CV or a profile goes
+ * through here — specifically through `capability()`, which speaks JSON-RPC to
+ * the canonical capability boundary `/api/mcp` (bearer seam #1331, merged
+ * 2026-08-29). Not through `supabase` in `supabase.ts`: that client
+ * authenticates and nothing else. Querying tables from a phone would mean
+ * re-deriving on the device the meaning the canonical domain already owns, and
+ * that second implementation is precisely what `docs/APP_READINESS_MAP.md`
+ * exists to prevent.
  *
- * The transport is closed (owner-gated auth-core, PR #1336), so `request`
- * returns `transport_unavailable`. A screen renders that as a sentence a
- * person can act on. Nothing renders an empty list, because there is no list —
- * absence of an answer is never shown as an answer of absence.
+ * Every request carries WHO (the person's own token); the server and RLS
+ * decide WHAT comes back. When a read fails, a screen renders the failure as a
+ * sentence a person can act on — never an empty list, because absence of an
+ * answer is never shown as an answer of absence (#1314).
  */
 
 export type { DomainFailure, DomainResult };
 
 export const TRANSPORT_STATUS = DOMAIN_TRANSPORT_STATUS;
 
+const NOT_CONFIGURED: DomainResult<never> = {
+  ok: false,
+  failure: {
+    kind: "transport_unavailable",
+    because: "this build has no API configuration",
+  },
+};
+
 export async function request<T>(
   input: Omit<DomainRequest, "accessToken"> & { accessToken: string | null },
 ): Promise<DomainResult<T>> {
-  if (CONFIG === null) {
-    return {
-      ok: false,
-      failure: {
-        kind: "transport_unavailable",
-        because: "this build has no API configuration",
-      },
-    };
-  }
+  if (CONFIG === null) return NOT_CONFIGURED;
   return callDomain<T>(
+    { apiBaseUrl: CONFIG.apiBaseUrl, fetch: globalThis.fetch },
+    input,
+  );
+}
+
+/** Call ONE canonical capability (`profile.get`, `journal.list`, …). */
+export async function capability<T>(
+  input: CapabilityRequest,
+): Promise<DomainResult<T>> {
+  if (CONFIG === null) return NOT_CONFIGURED;
+  return callCapability<T>(
     { apiBaseUrl: CONFIG.apiBaseUrl, fetch: globalThis.fetch },
     input,
   );
@@ -71,6 +86,8 @@ export function failureKey(failure: DomainFailure): MessageKey {
         return "domain.unavailable.offline";
       case "unreadable":
         return "domain.unavailable.unexpectedAnswer";
+      case "capability_refused":
+        return "domain.refused.capability";
       case "refused":
         switch (failure.reason) {
           case "no_credentials":
@@ -79,6 +96,10 @@ export function failureKey(failure: DomainFailure): MessageKey {
             return "domain.refused.invalid_token";
           case "no_profile":
             return "domain.refused.no_profile";
+          case "not_authorized":
+            return "domain.refused.not_authorized";
+          case "rate_limited":
+            return "domain.refused.rate_limited";
           case "identity_unavailable":
             return "domain.refused.identity_unavailable";
         }

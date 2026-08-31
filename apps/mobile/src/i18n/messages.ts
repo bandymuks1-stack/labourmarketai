@@ -67,6 +67,9 @@ const en = {
   "language.title": "Language",
   "language.preview": "Preview translation",
 
+  "domain.loading": "Asking the server…",
+  "domain.retry": "Try again",
+  "domain.failedTitle": "We could not load this",
   "domain.unavailable.notConnectedYet": "Not connected yet",
   "domain.unavailable.signInAgain": "Please sign in again.",
   "domain.unavailable.offline": "No connection. Nothing was sent.",
@@ -75,13 +78,22 @@ const en = {
   "domain.refused.no_credentials": "Please sign in again.",
   "domain.refused.invalid_token": "Your session has ended. Please sign in again.",
   "domain.refused.no_profile": "This account has no profile yet.",
+  "domain.refused.not_authorized":
+    "The server declined this request for this account.",
+  "domain.refused.rate_limited":
+    "The server asked this app to slow down. Try again in a moment.",
+  "domain.refused.capability": "The server declined this request.",
   "domain.refused.identity_unavailable":
     "We could not confirm who you are. This is not a refusal — try again.",
 
-  "notConnected.title": "Not connected yet",
-  "notConnected.body":
-    "Your work, journal and opportunities live in LabourMarket.ai. This app can sign you in, but it cannot read or write them yet. Nothing here is a copy of your data and nothing shown is invented.",
-  "notConnected.useWeb": "Use the website for now",
+  "today.signedInAs": "Signed in as",
+  "today.recentWork": "Recent work",
+  "journal.empty": "No Work Journal entries recorded yet.",
+  "profile.skillsTitle": "Living CV skills",
+  "profile.skillsEmpty": "No skills recorded yet.",
+  "profile.noWorkerProfile": "This account has no worker profile yet.",
+  "profile.skillVerified": "Verified",
+  "profile.skillUnverified": "Unverified",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -135,6 +147,9 @@ const lt: Catalogue = {
   "language.title": "Kalba",
   "language.preview": "Peržiūros vertimas",
 
+  "domain.loading": "Klausiame serverio…",
+  "domain.retry": "Bandyti dar kartą",
+  "domain.failedTitle": "Nepavyko įkelti",
   "domain.unavailable.notConnectedYet": "Dar neprijungta",
   "domain.unavailable.signInAgain": "Prisijunkite iš naujo.",
   "domain.unavailable.offline": "Nėra ryšio. Niekas nebuvo išsiųsta.",
@@ -143,13 +158,22 @@ const lt: Catalogue = {
   "domain.refused.no_credentials": "Prisijunkite iš naujo.",
   "domain.refused.invalid_token": "Jūsų seansas baigėsi. Prisijunkite iš naujo.",
   "domain.refused.no_profile": "Ši paskyra dar neturi profilio.",
+  "domain.refused.not_authorized":
+    "Serveris atmetė šią užklausą šiai paskyrai.",
+  "domain.refused.rate_limited":
+    "Serveris paprašė programos sulėtėti. Bandykite po akimirkos.",
+  "domain.refused.capability": "Serveris atmetė šią užklausą.",
   "domain.refused.identity_unavailable":
     "Nepavyko patvirtinti, kas esate. Tai nėra atsisakymas — bandykite dar kartą.",
 
-  "notConnected.title": "Dar neprijungta",
-  "notConnected.body":
-    "Jūsų darbas, dienoraštis ir galimybės yra LabourMarket.ai. Ši programa gali jus prijungti, bet dar negali jų nuskaityti ar įrašyti. Čia nėra jūsų duomenų kopijos ir niekas nėra sugalvota.",
-  "notConnected.useWeb": "Kol kas naudokitės svetaine",
+  "today.signedInAs": "Prisijungta kaip",
+  "today.recentWork": "Naujausi darbai",
+  "journal.empty": "Darbo dienoraštyje dar nėra įrašų.",
+  "profile.skillsTitle": "Gyvojo CV įgūdžiai",
+  "profile.skillsEmpty": "Įgūdžių dar neužfiksuota.",
+  "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
+  "profile.skillVerified": "Patvirtinta",
+  "profile.skillUnverified": "Nepatvirtinta",
 };
 
 const ru: Catalogue = {
@@ -199,6 +223,9 @@ const ru: Catalogue = {
   "language.title": "Язык",
   "language.preview": "Предварительный перевод",
 
+  "domain.loading": "Спрашиваем сервер…",
+  "domain.retry": "Попробовать снова",
+  "domain.failedTitle": "Не удалось загрузить",
   "domain.unavailable.notConnectedYet": "Пока не подключено",
   "domain.unavailable.signInAgain": "Войдите снова.",
   "domain.unavailable.offline": "Нет соединения. Ничего не отправлено.",
@@ -207,13 +234,22 @@ const ru: Catalogue = {
   "domain.refused.no_credentials": "Войдите снова.",
   "domain.refused.invalid_token": "Ваша сессия закончилась. Войдите снова.",
   "domain.refused.no_profile": "У этого аккаунта пока нет профиля.",
+  "domain.refused.not_authorized":
+    "Сервер отклонил этот запрос для этого аккаунта.",
+  "domain.refused.rate_limited":
+    "Сервер попросил приложение замедлиться. Попробуйте чуть позже.",
+  "domain.refused.capability": "Сервер отклонил этот запрос.",
   "domain.refused.identity_unavailable":
     "Не удалось подтвердить, кто вы. Это не отказ — попробуйте снова.",
 
-  "notConnected.title": "Пока не подключено",
-  "notConnected.body":
-    "Ваша работа, дневник и возможности находятся в LabourMarket.ai. Это приложение может вас авторизовать, но пока не может их читать или записывать. Здесь нет копии ваших данных, и ничего не выдумано.",
-  "notConnected.useWeb": "Пока пользуйтесь сайтом",
+  "today.signedInAs": "Вы вошли как",
+  "today.recentWork": "Недавняя работа",
+  "journal.empty": "В дневнике работы пока нет записей.",
+  "profile.skillsTitle": "Навыки живого CV",
+  "profile.skillsEmpty": "Навыки пока не записаны.",
+  "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
+  "profile.skillVerified": "Подтверждено",
+  "profile.skillUnverified": "Не подтверждено",
 };
 
 const nl: Catalogue = {
@@ -263,6 +299,9 @@ const nl: Catalogue = {
   "language.title": "Taal",
   "language.preview": "Voorlopige vertaling",
 
+  "domain.loading": "We vragen het aan de server…",
+  "domain.retry": "Opnieuw proberen",
+  "domain.failedTitle": "Dit kon niet worden geladen",
   "domain.unavailable.notConnectedYet": "Nog niet verbonden",
   "domain.unavailable.signInAgain": "Log opnieuw in.",
   "domain.unavailable.offline": "Geen verbinding. Er is niets verstuurd.",
@@ -271,13 +310,22 @@ const nl: Catalogue = {
   "domain.refused.no_credentials": "Log opnieuw in.",
   "domain.refused.invalid_token": "Je sessie is verlopen. Log opnieuw in.",
   "domain.refused.no_profile": "Dit account heeft nog geen profiel.",
+  "domain.refused.not_authorized":
+    "De server weigerde dit verzoek voor dit account.",
+  "domain.refused.rate_limited":
+    "De server vroeg deze app om te vertragen. Probeer het zo opnieuw.",
+  "domain.refused.capability": "De server weigerde dit verzoek.",
   "domain.refused.identity_unavailable":
     "We konden niet bevestigen wie je bent. Dit is geen weigering — probeer het opnieuw.",
 
-  "notConnected.title": "Nog niet verbonden",
-  "notConnected.body":
-    "Je werk, dagboek en kansen staan in LabourMarket.ai. Deze app kan je inloggen, maar kan ze nog niet lezen of schrijven. Hier staat geen kopie van je gegevens en niets is verzonnen.",
-  "notConnected.useWeb": "Gebruik voorlopig de website",
+  "today.signedInAs": "Ingelogd als",
+  "today.recentWork": "Recent werk",
+  "journal.empty": "Nog geen werkdagboek-items vastgelegd.",
+  "profile.skillsTitle": "Living CV-vaardigheden",
+  "profile.skillsEmpty": "Nog geen vaardigheden vastgelegd.",
+  "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
+  "profile.skillVerified": "Geverifieerd",
+  "profile.skillUnverified": "Niet geverifieerd",
 };
 
 const de: Catalogue = {
@@ -327,6 +375,9 @@ const de: Catalogue = {
   "language.title": "Sprache",
   "language.preview": "Vorläufige Übersetzung",
 
+  "domain.loading": "Wir fragen den Server…",
+  "domain.retry": "Erneut versuchen",
+  "domain.failedTitle": "Konnte nicht geladen werden",
   "domain.unavailable.notConnectedYet": "Noch nicht verbunden",
   "domain.unavailable.signInAgain": "Bitte melde dich erneut an.",
   "domain.unavailable.offline": "Keine Verbindung. Es wurde nichts gesendet.",
@@ -336,13 +387,22 @@ const de: Catalogue = {
   "domain.refused.invalid_token":
     "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
   "domain.refused.no_profile": "Dieses Konto hat noch kein Profil.",
+  "domain.refused.not_authorized":
+    "Der Server hat diese Anfrage für dieses Konto abgelehnt.",
+  "domain.refused.rate_limited":
+    "Der Server hat diese App gebeten, langsamer zu machen. Versuche es gleich erneut.",
+  "domain.refused.capability": "Der Server hat diese Anfrage abgelehnt.",
   "domain.refused.identity_unavailable":
     "Wir konnten nicht bestätigen, wer du bist. Das ist keine Ablehnung — versuche es erneut.",
 
-  "notConnected.title": "Noch nicht verbunden",
-  "notConnected.body":
-    "Deine Arbeit, dein Tagebuch und deine Möglichkeiten liegen in LabourMarket.ai. Diese App kann dich anmelden, sie aber noch nicht lesen oder schreiben. Hier liegt keine Kopie deiner Daten, und nichts ist erfunden.",
-  "notConnected.useWeb": "Nutze vorerst die Website",
+  "today.signedInAs": "Angemeldet als",
+  "today.recentWork": "Aktuelle Arbeit",
+  "journal.empty": "Noch keine Einträge im Arbeitstagebuch.",
+  "profile.skillsTitle": "Living-CV-Fähigkeiten",
+  "profile.skillsEmpty": "Noch keine Fähigkeiten erfasst.",
+  "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
+  "profile.skillVerified": "Bestätigt",
+  "profile.skillUnverified": "Unbestätigt",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de };

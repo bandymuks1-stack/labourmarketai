@@ -133,7 +133,10 @@ function held to it by a guard. Here the guard is
 `apps/web/lib/guards/client-core-vocabulary-mirror.test.ts`, and it runs inside
 the **required** gate. Five negative controls were run against it: dropping a
 locale, renaming a participation mode, adding a framework import, adding a
-runtime dependency, and opening the transport gate each make it fail.
+runtime dependency, and mis-stating the transport gate each make it fail. (The
+gate assertion originally pinned the gate CLOSED; since the 2026-08-31 slice it
+pins it OPEN and citing `/api/mcp` — the guard's job is that the constant tells
+the truth, whichever truth it is.)
 
 A mirror without a guard is a duplicate. A mirror with a guard is one
 vocabulary that happens to be written down twice.
@@ -150,34 +153,33 @@ with its own verification; it is not a side effect of scaffolding a phone app.
 
 ---
 
-## 5. THE ONE BLOCKER, AND WHAT THIS SLICE DOES ABOUT IT
+## 5. THE ONE BLOCKER — RESOLVED, AND WHAT OPENED IT
 
-Every authenticated path in the product resolves identity from browser cookies.
-A phone holds a Supabase JWT. So a native client cannot call a server action,
-and cannot usefully call an API route either — the route resolves no user and
-RLS correctly returns nothing.
+*(Historical framing kept for the reasoning; status updated 2026-08-31.)*
 
-Opening that seam is an **auth-core change: RED, owner-gated**, parked as PR
-#1336 until real-token proof is complete. **This slice does not open it, does
-not merge it, and does not work around it.**
+Every authenticated path in the product used to resolve identity from browser
+cookies, while a phone holds a Supabase JWT. That seam was opened by the
+**auth-core bearer resolver (#1331, merged 2026-08-29)**: `resolveApiIdentity`
+on the API boundary accepts `Authorization: Bearer` and hands every handler the
+caller's own RLS-scoped client — no service role, no second permission model.
+The domain surface behind it is the **capability registry at `/api/mcp`**
+(JSON-RPC 2.0 `tools/call`; `apps/web/lib/capabilities/registry.ts`), each
+capability running the same core the web routes run.
 
-The obvious workaround was available and was refused: query the database
-directly with `supabase-js` from the device. RLS would even permit it. It was
+The obvious workaround was available and remains refused: query the database
+directly with `supabase-js` from the device. RLS would even permit it. It stays
 refused because the canonical domain is not the tables — it is the derivation
 on top of them, and a device re-deriving that is the second implementation this
 architecture exists to prevent.
 
-So `callDomain` returns `transport_unavailable`, and every screen that would
-show product data says so in a sentence a person can act on. **No screen renders
-an empty list**, because an empty list means "you have nothing recorded" and the
-truth is "we could not ask".
-
-**When #1336 merges**, the change here is one constant:
-`DOMAIN_TRANSPORT_STATUS` flips to `{ open: true }`. Every enabled-path
-behaviour is already implemented and tested by injecting an open status —
-headers, the four refusals kept apart, network failure, unreadable answers — so
-the flip needs no new code written under pressure. The mirror guard fails until
-`APP_READINESS_MAP.md` §6 and this file are updated in the same pull request.
+So `DOMAIN_TRANSPORT_STATUS` is **`{ open: true }`**, `callCapability` in
+`packages/client-core` speaks the JSON-RPC framing (and maps
+`{ isError: true }`-inside-200, 401/403/429/503, and 202-empty each to its own
+honest failure), and the three product tabs read real data. **No screen renders
+an empty list for a failed read** — an empty list means "you have nothing
+recorded" and a failure means "we could not ask". The mirror guard now pins the
+gate OPEN; for a while after #1331 merged the constant still claimed the seam
+was unmerged, and a stale refusal is as dishonest as a fake success.
 
 ---
 
@@ -189,10 +191,10 @@ the flip needs no new code written under pressure. The mirror guard fails until
 |---|---|
 | Registration, sign-in, session persistence, sign-out | **Real.** Supabase Auth, same server as web. Credential in the OS keychain (`expo-secure-store`), never AsyncStorage. |
 | Language selection | **Real.** Device language by default; the five active locales offered; AI-seeded ones labelled as previews (§7.4). |
-| Context switching | **Shell built, holdings honestly unavailable.** Which contexts a person holds is an RLS read this client cannot make yet. |
+| Context switching | **Shell built, holdings read not wired.** The transport can now carry the read; wiring it (via `context.switch` options or a dedicated read) is its own slice. Until then holdings are `unknown` and the UI says it cannot list contexts yet. |
 | Navigation shell | **Real.** One app, four destinations, with a deep-link auth guard. |
 | Environment handling | **Real.** Public values only, validated, RLS-bypassing keys refused. |
-| Today / Work journal / Profile | **Honest placeholders.** They state what is not connected and why, and offer the website. |
+| Today / Work journal / Profile | **Real reads (2026-08-31).** `profile.get`, `journal.list`, `living_cv.skills.get` over `/api/mcp` as the signed-in person. Failures render as failures (`CapabilityGate`); on-device runtime proof against production is still outstanding. |
 
 ### Next, in order
 
