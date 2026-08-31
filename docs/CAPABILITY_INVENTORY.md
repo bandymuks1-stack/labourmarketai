@@ -342,8 +342,8 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 
 | # | Finding | Class | Evidence anchor |
 |---|---|---|---|
-| M1 | **Absence review dead in production** for booking-engagement employers: `20260808150000_caller_manages_worker_engagements_v1` ships UNAPPLIED (RED by design) → `review_worker_absence_v1` + RLS blind to `company_worker_engagements`; "Requests to review" renders empty while the request side works | **P0 prod-broken · OWNER-GATED** | `APPLIED_LEDGER.md:1475` |
-| M2 | **`assign_worker_to_project` regressed in production**: applied `20260804120000_project_lifecycle_v1` re-issued the RPC from a pre-engagement ancestor, silently dropping the `caller_has_booking_engagement_for_project` branch — booking→project bridge broken both directions; the helper has zero callers in prod | **P0 prod-broken · RED fix migration needed** | same ledger entry |
+| M1 | ~~Absence review dead in production for booking-engagement employers~~ **CLOSED — STALE FINDING.** The fix migration was ALREADY APPLIED to prod 2026-08-12 (ledger `20260812180224`); this finding cited the never-struck deferred entry at `APPLIED_LEDGER.md:1475` (an M17-class doc defect, now corrected). Behavior proven IN PRODUCTION 2026-08-31 (rolled-back probe): engaged employer sees + approves the request; private note hidden; unrelated/ended employers see nothing | **CLOSED 2026-08-31 (was doc-stale, not prod-broken)** | ✅ ledger entry `20260812180224` + 2026-08-31 prod probe |
+| M2 | ~~`assign_worker_to_project` regressed in production~~ **CLOSED — STALE FINDING.** The same 2026-08-12 apply restored the engagement bridge pinned to `by_roster`. Proven IN PRODUCTION 2026-08-31: engagement→assign returns a row on the engaging company's project (idempotent, exactly one active assignment); SIBLING company 42501; unrelated caller 42501; unauthenticated 42501 | **CLOSED 2026-08-31 (was doc-stale, not prod-broken)** | same |
 | M3 | **Timesheets derive zero hours in prod**: 6/7 journal time rows hang off org-less engagement contexts; `timesheet_compute_lines_v1` scopes on `ec.organization_id`. Code-level restatement: no row-level work-hour fact exists in main (PR #1344, DRAFT, RED, unapplied) | **P1 (honest-empty, no wrong data) · OWNER-GATED** | `APPLIED_LEDGER.md:145` |
 | M4 | 11 of 15 notification emitters still `void`-detached on serverless — the failure mode that killed the live interest emitter | P1 — fix train `fix/cc/awaited-notification-emitters` | `event-emitters.ts:281-299` |
 | M5 | `notification_preferences` (#1243, applied to prod) has ZERO consumers and no settings UI — complete module, unreachable | P1 | grep: only its own test |
@@ -365,22 +365,21 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 | Gate | State | What stands in the way |
 |---|---|---|
 | WORKER_READY (web) | **YES** — first-value journey proven, no known P0 in it | — |
-| EMPLOYER_READY (web) | **CLOSE** — need→match→shortlist→interest proven; M1/M2 break absence review + booking→project for engagement-based employers | M1, M2 (owner applies) |
+| EMPLOYER_READY (web) | **YES (web core)** — need→match→shortlist→interest proven (12/12 e2e refresh 2026-08-31); absence review + booking→project for engagement employers proven live in prod (M1/M2 closed as doc-stale) | — |
 | STUDENT_READY | PARTIAL | prod browser chain + M10 |
 | EDUCATION_INSTITUTION_READY | PARTIAL | real prod `training_provider` org + M10 |
 | MOBILE_ANDROID_READY / IOS | NO — builds proven, zero product data | gate-flip train + runtime proof |
 | MARKETPLACE_READY | NO — loop works, reachability ≈ zero | M7, M8 slices |
 | CV_IMPORT_READY | YES (DOCX + PDF proven); XLSX/bulk = G10 architecture decision | — |
 | CALENDAR_READY | PARTIAL — real viewer, no write path, no shift primitive | scope decision |
-| PROJECT_MANAGEMENT_READY | NO | M2 + M3 + zero prod usage |
+| PROJECT_MANAGEMENT_READY | NO | M3 + zero prod usage (M2 closed 2026-08-31 — bridge proven live) |
 | SOCIAL_AUTH_READY | Google only (proven); LinkedIn/FB need owner provider apps + dashboard config | owner action |
 | SOCIAL_ACQUISITION_READY | PARTIAL — measurement mature; durable attribution + OG cards in flight | train; ad spend NOT requested |
 | COMPACT_UX_READY | NO | M10, M11, M12 (Train 9) |
 
 ### 5.4 Owner-action queue (each independent; none blocks code trains)
 
-1. RED apply `20260808150000_caller_manages_worker_engagements_v1` (M1) — restores absence review; migration already written, shipped unapplied by design.
-2. RED fix + apply: re-issue `assign_worker_to_project` WITH the booking-engagement branch (M2) — new migration needed; highest-priority correctness item.
-3. Review PR #1344 work-hour allocations (M3) — unlocks timesheets end-to-end.
-4. Email channel: `INVITE_EMAIL_PROVIDER/API_KEY/FROM` env + Supabase SMTP decision (M6).
-5. Unchanged existing gates: #1355 ESCO linkage, #1305 LMC compensate-spend, AI `AI_PROVIDER_MODE` env, LinkedIn/Meta developer apps (only when wanted).
+1. ~~RED apply `20260808150000` (M1)~~ / ~~M2 fix migration~~ — **RESOLVED 2026-08-31: already applied 2026-08-12 (ledger `20260812180224`); both behaviors proven live in prod.** No owner action.
+2. Review PR #1344 work-hour allocations (M3) — unlocks timesheets end-to-end.
+3. Email channel: `INVITE_EMAIL_PROVIDER/API_KEY/FROM` env + Supabase SMTP decision (M6).
+4. Unchanged existing gates: #1355 ESCO linkage, #1305 LMC compensate-spend, AI `AI_PROVIDER_MODE` env, LinkedIn/Meta developer apps (only when wanted).

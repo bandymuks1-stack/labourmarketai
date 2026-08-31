@@ -1,5 +1,29 @@
 # Owner migration decision package — 2026-08-31 (M1 + M2 + M3)
 
+> ## ✅ RESOLUTION — 2026-08-31 (same day, after owner approval of Item 1)
+>
+> **Item 1 was NOT applied by this decision, because the pre-apply
+> re-verification found it ALREADY APPLIED — since 2026-08-12.** Production
+> ledger row `20260812180224 · caller_manages_worker_engagements_v1`; all
+> three function bodies md5-verified identical to the repo file (only delta:
+> 5 blank lines in `assign_worker_to_project`); SECDEF + pinned search_path +
+> authenticated-only EXECUTE intact. This package's "shipped UNAPPLIED"
+> premise came from the never-struck deferred entry in `APPLIED_LEDGER.md`
+> (M17 doc-hygiene class) — corrected in the ledger the same day.
+> Per the owner's own STOP-on-delta rule, **no apply was performed** (a
+> re-apply would have re-run the file and double-recorded the ledger).
+>
+> **Both behaviors were then proven IN PRODUCTION** (2026-08-31, single
+> transaction, rolled back, zero residue verified): M1 — engaged employer
+> sees the requested absence and `review_worker_absence_v1` approves it;
+> approved private-note row stays hidden; unrelated and ended-engagement
+> employers see nothing. M2 — engagement→`assign_worker_to_project` returns
+> a row on the engaging company's project, idempotent, exactly one active
+> assignment; sibling-company project refused 42501; unrelated caller 42501;
+> unauthenticated 42501. **M1_FIXED = YES. M2_FIXED = YES.**
+>
+> **Item 2 (M3, PR #1344) remains the only open decision in this package.**
+
 **One consolidated decision, three production defects, two artifacts.**
 Everything below is already engineered, tested and shipped UNAPPLIED — the
 only missing input is the owner's OK. Nothing here may be applied
