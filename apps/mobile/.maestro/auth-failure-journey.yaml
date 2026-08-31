@@ -33,24 +33,43 @@ name: auth-failure-journey
 - takeScreenshot: ios-artifacts/journey-01-auth-screen
 
 # --- 2. A real sign-in attempt with syntactically valid credentials ---
+# No hideKeyboard here: on iOS Maestro implements it as mid-screen swipes,
+# and run 2 proved one of those swipes lands on the "Create an account" link
+# (mid-screen), navigating away. The KeyboardAvoidingView keeps the submit
+# button reachable with the keyboard up.
 - tapOn:
     id: "email"
 - inputText: "ci-journey@example.com"
 - tapOn:
     id: "password"
 - inputText: "not-a-real-password-1"
-# The iOS software keyboard can cover the submit button; hiding it is
-# best-effort (the KeyboardAvoidingView already keeps the form visible).
-- hideKeyboard:
-    optional: true
 - tapOn:
     id: "submit"
 
 # --- 3. The failure state must SURFACE (NotAvailable block) ---
+# iOS may raise the system "Save Password?" dialog when the password field's
+# context ends (run 2 met it); it hides the app's hierarchy, so dismiss it
+# whenever it shows up. First wait is optional so the dismissal between the
+# two waits can run even if the dialog delays the failure block.
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
 - extendedWaitUntil:
     visible:
       id: "auth-failure"
-    timeout: 60000
+    timeout: 20000
+    optional: true
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "auth-failure"
+    timeout: 45000
 - takeScreenshot: ios-artifacts/journey-02-auth-failure
 
 # --- 4. No crash: the form is still there and still interactive ---
