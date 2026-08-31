@@ -96,6 +96,7 @@ export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
 
           {failure !== null ? (
             <NotAvailable
+              testID="auth-failure"
               tone={failure.kind === "rejected" ? "warning" : "info"}
               title={
                 isSignIn ? t("auth.signIn.title") : t("auth.register.title")
