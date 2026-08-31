@@ -162,8 +162,11 @@ export async function endEngagementAction(
         metadata: { role_context: actorSide },
       });
       // v2: the COUNTERPARTY hears the end durably (the actor is watching it
-      // happen). Fire-and-forget — the end already succeeded.
-      void emitEngagementEndedNotification(engagement, actorSide);
+      // happen). AWAITED, not detached — the serverless runtime can freeze the
+      // invocation the instant the action returns, killing a `void`-detached
+      // insert mid-flight. The emitter never throws, so the end that already
+      // succeeded cannot fail on its own notification.
+      await emitEngagementEndedNotification(engagement, actorSide);
       // Every surface that renders engagement state re-reads.
       revalidatePath(`/${locale}/dashboard/projects`);
       revalidatePath(`/${locale}/dashboard`);

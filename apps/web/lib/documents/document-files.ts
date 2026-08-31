@@ -122,6 +122,11 @@ export async function getWorkerDocumentFiles(
     }
 
     // Durable "entering the 30-day window" fact — enhancement, never blocks.
+    // DELIBERATELY DETACHED (TRAIN 10 decision): this is a READ path, so an
+    // await would tax every page load — and unlike a write-path event the
+    // fact self-heals: it is re-derived on every visit and deduped by the
+    // store's UNIQUE key, so an insert killed by the serverless freeze is
+    // retried next visit. See the emitter's READ-TIME DETACHED note.
     emitWorkerDocumentExpiringNotifications(workerId);
 
     return { available: true, byDocument };
@@ -354,6 +359,8 @@ export async function getOrgDocumentRegister(
     });
 
     // Durable expiry facts for the register's responsible people.
+    // DELIBERATELY DETACHED — same read-path/self-healing reasoning as
+    // emitWorkerDocumentExpiringNotifications above (TRAIN 10 decision).
     emitOrgDocumentExpiringNotifications(organizationId);
 
     return { kind: "ok", entries, deltaAvailable, filters: appliedFilters };

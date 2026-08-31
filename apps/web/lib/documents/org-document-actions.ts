@@ -420,7 +420,10 @@ export async function assignDocumentAckAction(
       .maybeSingle();
     const ackId = (ackRes.data?.id as string | undefined) ?? null;
     if (ackId) {
-      void emitDocumentAckNotification(ackId, "document_ack_assigned");
+      // AWAITED, not detached — a `void`-detached insert is killable the
+      // instant the serverless invocation returns. The emitter never throws,
+      // so the assignment that already succeeded cannot fail on its bell.
+      await emitDocumentAckNotification(ackId, "document_ack_assigned");
     }
   }
   finish(locale, noticeForDocumentRpcOutcome(outcome, "assigned", "assigned"));
