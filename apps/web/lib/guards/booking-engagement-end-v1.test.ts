@@ -1122,6 +1122,22 @@ describe("the migration set is exactly what this slice declared", () => {
       // and was added in the same commit as the scoped /dashboard/hours
       // waiver that same decision approved.
       "20260829140000_work_hour_allocations_v1.sql",
+      // 2026-08-31: M3 compute wiring (20260831170000) carries the marker
+      // under the owner's 2026-08-31 closure-session approval sequence
+      // ("wire the actual timesheet compute path"), the follow-up slice the
+      // repo records verbatim in docs/DECISIONS/0010 ("Wiring
+      // `timesheet_compute_lines_v1` to aggregate from allocations is the
+      // follow-up slice after the table exists") and in the APPLIED_LEDGER
+      // row for ledger 20260831161725 ("timesheets stay honest-empty until
+      // the compute-wiring follow-up (same owner-approved sequence) lands").
+      // RED by route — it replaces the timesheet_compute_lines_v1 SECURITY
+      // DEFINER body (the established re-issue idiom of 20260818150000 and
+      // 20260819220000) — while creating and dropping nothing and running no
+      // DML. The journal half is copied VERBATIM from 20260819220000; the
+      // additions are the allocation source, the allocation-wins dedupe and
+      // the combined 500-line cap. The marker lets CI classify it; merge and
+      // production apply stay with the main session after review.
+      "20260831170000_timesheet_compute_allocations_v1.sql",
 ]);
   });
 
