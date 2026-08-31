@@ -123,7 +123,11 @@ export default async function OpenGraphImage({
             color: "rgb(134, 144, 168)",
           }}
         >
-          <div>labourmarket.ai/{active}</div>
+          {/* ONE template-literal child, not `text{expr}`: Satori counts
+              adjacent text + interpolation as two child nodes and refuses any
+              multi-child element without explicit display:flex — this exact
+              line 500'd the route in production. */}
+          <div>{`labourmarket.ai/${active}`}</div>
           <div>{BRAND_NAME}</div>
         </div>
       </div>
