@@ -519,7 +519,10 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // approvals 2026-08-22). Whichever arm renders, the six answers below are
     // the same honest no — the finding set is unchanged, which is what keeps
     // these extensions rather than a broadening.
-    expect(landing.pullRequests).toEqual([1221, 1231, 1232]);
+    // #1380 (2026-08-31): the owner's P0 fresh-visit order — the FOCUS
+    // default became static/CDN-cached, the LIVE choice a middleware
+    // rewrite; same route, same six honest answers.
+    expect(landing.pullRequests).toEqual([1221, 1231, 1232, 1380]);
     expect(landing.owner).toMatch(/SHIP THIS LANDING AS V1/);
     expect(landing.files).toEqual(["/", "apps/web/app/[locale]/page.tsx"]);
     expect(landing.expectedFindings).toHaveLength(6);
