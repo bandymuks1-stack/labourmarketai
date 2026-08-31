@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { classifyIntent, isExplicitJournalRequest } from "./intent-router";
+import type { RoutedIntent } from "./intent-registry";
 
 /**
  * The deterministic intent router is the always-on floor of the conversation
@@ -372,4 +373,345 @@ describe("classifyIntent — recording work in its other grammatical forms", () 
       "find-work",
     );
   });
+});
+
+/**
+ * G8 (chat-first audit 2026-08-30): the chip surfaces, reachable by SENTENCE.
+ *
+ * `startEmployerCandidates` and `startProjects` were reachable ONLY via chips:
+ * typing "show my candidates" ran `find-workers` — a different engine for the
+ * same request — and "mano projektai" ran `open-project`, whose nameless
+ * branch answers with a text list while the chip opened the real panel. Both
+ * requests now route to the SAME handler their chip runs.
+ */
+describe("G8 — candidates and projects route to the chip handlers", () => {
+  const cases: Array<[string, string]> = [
+    // candidates — all five locales
+    ["parodyk kandidatus", "candidates"],
+    ["mano kandidatai", "candidates"],
+    ["show my candidates", "candidates"],
+    ["покажи кандидатов", "candidates"],
+    ["toon de kandidaten", "candidates"],
+    ["zeig die Kandidaten", "candidates"],
+    ["wer wartet auf eine Antwort?", "candidates"],
+    ["wie wacht er nog?", "candidates"],
+    // projects — all five locales
+    ["parodyk mano projektus", "projects"],
+    ["mano projektai", "projects"],
+    ["show my projects", "projects"],
+    ["покажи мои проекты", "projects"],
+    ["mijn projecten", "projects"],
+    ["meine Projekte", "projects"],
+    ["kur mano projektai?", "projects"],
+  ];
+  for (const [text, expected] of cases) {
+    it(`"${text}" → ${expected}`, () => {
+      expect(classifyIntent(text).intent).toBe(expected);
+    });
+  }
+
+  it("candidate phrasing NEVER falls through to find-workers (negative control)", () => {
+    for (const s of [
+      "show my candidates",
+      "parodyk kandidatus",
+      "покажи кандидатов",
+      "toon de kandidaten",
+      "zeig die Kandidaten",
+      "compare these candidates",
+    ]) {
+      expect(classifyIntent(s).intent, s).not.toBe("find-workers");
+      expect(classifyIntent(s).intent, s).toBe("candidates");
+    }
+  });
+
+  it("scouting and targeted project-open keep their own doors", () => {
+    // The SEARCH-FOR-PEOPLE framing is still scouting…
+    expect(classifyIntent("surask darbuotojų").intent).toBe("find-workers");
+    expect(classifyIntent("find workers").intent).toBe("find-workers");
+    expect(classifyIntent("finde passende Leute").intent).toBe("find-workers");
+    expect(classifyIntent("vind geschikte mensen").intent).toBe("find-workers");
+    // …and naming ONE project is still the targeted open.
+    expect(classifyIntent("atidaryk šį projektą").intent).toBe("open-project");
+    expect(classifyIntent("Open this project").intent).toBe("open-project");
+    expect(classifyIntent("Open dit project").intent).toBe("open-project");
+    expect(classifyIntent("Öffne dieses Projekt").intent).toBe("open-project");
+    expect(classifyIntent("kas vyksta mano objekte?").intent).toBe("open-project");
+  });
+});
+
+/**
+ * G3 — FIVE-LOCALE PARITY RATCHET (chat-first audit 2026-08-30).
+ *
+ * nl/de are fully routed locales (complete UI catalogues), yet the router
+ * understood only ~12 of the intents in German or Dutch — two-thirds of the
+ * product answered fluent UI users with the generic fallback. This matrix is
+ * the ratchet that keeps that from regressing: ONE natural sentence per
+ * routed intent per ACTIVE locale, every one asserted against the classifier.
+ *
+ * `Record<RoutedIntent, …>` makes it exhaustive at COMPILE time: a future
+ * intent added to the union without a five-locale row here refuses to build —
+ * a new capability can never ship reachable in three languages and silently
+ * unreachable in the other two.
+ */
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+type ActiveLocale = (typeof ACTIVE_LOCALES)[number];
+
+const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>> = {
+  "log-work": {
+    lt: "Šiandien dirbau nuo 8 iki 17",
+    en: "Today I worked from 8 to 17",
+    ru: "Сегодня работал с 8 до 17",
+    nl: "Vandaag heb ik 8 uur gewerkt",
+    de: "Heute habe ich von 8 bis 17 gearbeitet",
+  },
+  "find-work": {
+    lt: "Rask man darbą Nyderlanduose",
+    en: "Find me a job",
+    ru: "Найди мне работу",
+    nl: "Ik zoek werk in Nederland",
+    de: "Ich suche Arbeit in Deutschland",
+  },
+  "write-employer": {
+    lt: "Parašyk šiai įmonei",
+    en: "Write to this employer",
+    ru: "Напиши работодателю",
+    nl: "Schrijf naar deze werkgever",
+    de: "Schreib dem Arbeitgeber",
+  },
+  translate: {
+    lt: "Išversk žinutę į olandų kalbą",
+    en: "Translate this message",
+    ru: "Переведи сообщение",
+    nl: "Vertaal dit bericht",
+    de: "Übersetze diese Nachricht",
+  },
+  "calendar-view": {
+    lt: "Kada turiu kitą susitikimą?",
+    en: "When is my next meeting?",
+    ru: "Что у меня сегодня",
+    nl: "Wanneer is mijn volgende afspraak?",
+    de: "Wann ist mein nächster Termin?",
+  },
+  reminder: {
+    lt: "Primink rytoj 8 valandą paskambinti",
+    en: "Remind me tomorrow",
+    ru: "Напомни мне завтра",
+    nl: "Herinner me er morgen aan",
+    de: "Erinnere mich morgen daran",
+  },
+  cv: {
+    lt: "Parodyk mano CV",
+    en: "Show my resume",
+    ru: "Покажи моё резюме",
+    nl: "Toon mijn cv",
+    de: "Zeig meinen Lebenslauf",
+  },
+  profile: {
+    lt: "Pridėk kalbą",
+    en: "Update my profile",
+    ru: "Покажи мой профиль",
+    nl: "Voeg een taal toe aan mijn profiel",
+    de: "Zeig mein Profil",
+  },
+  offers: {
+    lt: "Ką man siūlo?",
+    en: "Show my offers",
+    ru: "Какие предложения у меня есть",
+    nl: "Welke aanbiedingen heb ik?",
+    de: "Zeig meine Angebote",
+  },
+  "need-workers": {
+    lt: "Reikia darbuotojų",
+    en: "We need workers next month",
+    ru: "Нужны сварщики",
+    nl: "Wij zoeken personeel",
+    de: "Wir brauchen Mitarbeiter",
+  },
+  criteria: {
+    lt: "Kokie kriterijai pas mane nurodyti?",
+    en: "What are my search criteria?",
+    ru: "Какие критерии у меня указаны",
+    nl: "Wat zijn mijn zoekcriteria?",
+    de: "Meine Suchkriterien",
+  },
+  "next-action": {
+    lt: "Ką dar turiu padaryti?",
+    en: "What should I do next?",
+    ru: "Что дальше?",
+    nl: "Wat moet ik nog doen?",
+    de: "Was soll ich als Nächstes tun?",
+  },
+  resume: {
+    lt: "Kur sustojau?",
+    en: "Where did I stop?",
+    ru: "На чём я остановился?",
+    nl: "Waar was ik gebleven?",
+    de: "Wo war ich stehengeblieben?",
+  },
+  "skill-gap": {
+    lt: "Kokių įgūdžių man trūksta?",
+    en: "What skills am I missing?",
+    ru: "Каких навыков мне не хватает?",
+    nl: "Welke vaardigheden mis ik?",
+    de: "Welche Fähigkeiten fehlen mir?",
+  },
+  "journal-recent": {
+    lt: "Parodyk paskutinius žurnalo įrašus",
+    en: "Show my latest journal entries",
+    ru: "Покажи мой дневник",
+    nl: "Toon mijn dagboek",
+    de: "Zeig mein Tagebuch",
+  },
+  figures: {
+    lt: "Paruošk ataskaitą",
+    en: "Show my approved hours",
+    ru: "Подготовь отчёт",
+    nl: "Toon mijn bevestigde uren",
+    de: "Zeig meine bestätigten Stunden",
+  },
+  "open-project": {
+    lt: "Atidaryk šį projektą",
+    en: "Open this project",
+    ru: "Открой этот проект",
+    nl: "Open dit project",
+    de: "Öffne dieses Projekt",
+  },
+  projects: {
+    lt: "Mano projektai",
+    en: "Show my projects",
+    ru: "Покажи мои проекты",
+    nl: "Mijn projecten",
+    de: "Meine Projekte",
+  },
+  candidates: {
+    lt: "Parodyk kandidatus",
+    en: "Show my candidates",
+    ru: "Покажи кандидатов",
+    nl: "Toon de kandidaten",
+    de: "Zeig die Kandidaten",
+  },
+  "find-workers": {
+    lt: "Surask darbuotojų",
+    en: "Find workers",
+    ru: "Найди работников",
+    nl: "Vind geschikte mensen",
+    de: "Finde passende Leute",
+  },
+  "need-service": {
+    lt: "Reikia, kad kas nors sutaisytų stogą",
+    en: "Need someone to repair the roof",
+    ru: "Нужен кто-нибудь, чтобы починить кран",
+    nl: "Iemand nodig om het dak te repareren",
+    de: "Jemand, der das Dach repariert",
+  },
+  context: {
+    lt: "Ką tu apie mane žinai?",
+    en: "What do you know about me?",
+    ru: "Что ты знаешь обо мне?",
+    nl: "Wat weet je over mij?",
+    de: "Was weißt du über mich?",
+  },
+  "switch-context": {
+    lt: "Perjunk į įmonę",
+    en: "Switch to my company",
+    ru: "Переключи меня на компанию",
+    nl: "Schakel over naar mijn bedrijf",
+    de: "Wechsle zu meiner Firma",
+  },
+  opportunities: {
+    lt: "Kokias galimybes man gali pasiūlyti?",
+    en: "What opportunities do I have?",
+    ru: "Какие возможности у меня есть?",
+    nl: "Welke mogelijkheden heb ik?",
+    de: "Welche Möglichkeiten habe ich?",
+  },
+  "interest-inbox": {
+    lt: "Kas susidomėjo mano poreikiu?",
+    en: "Who showed interest in my demand?",
+    ru: "Кто заинтересовался?",
+    nl: "Wie heeft interesse in mijn aanvraag?",
+    de: "Wer hat Interesse gezeigt?",
+  },
+  "admin-approvals": {
+    lt: "Ką turiu patvirtinti?",
+    en: "What do I need to approve?",
+    ru: "Что мне нужно утвердить?",
+    nl: "Wat wacht op mijn goedkeuring?",
+    de: "Was muss ich genehmigen?",
+  },
+  "admin-requests": {
+    lt: "Noriu pateikti atostogų prašymą",
+    en: "Leave request",
+    ru: "Хочу подать заявление на отпуск",
+    nl: "Ik wil verlof aanvragen",
+    de: "Ich möchte Urlaub beantragen",
+  },
+  "messages-view": {
+    lt: "Parodyk žinutes",
+    en: "Show my messages",
+    ru: "Покажи мои сообщения",
+    nl: "Toon mijn berichten",
+    de: "Zeig meine Nachrichten",
+  },
+  "player-card": {
+    lt: "Parodyk mano kortelę",
+    en: "Show my card",
+    ru: "Покажи мою карточку",
+    nl: "Toon mijn kaart",
+    de: "Zeig meine Karte",
+  },
+  experiences: {
+    lt: "Patirtys apie mane",
+    en: "I want to leave an experience",
+    ru: "Оставить отзыв о взаимодействии",
+    nl: "Ik wil een ervaring achterlaten",
+    de: "Eine Erfahrung hinterlassen",
+  },
+  engagements: {
+    lt: "Su kuo aš dirbu?",
+    en: "Who do I work with?",
+    ru: "Рабочие отношения",
+    nl: "Met wie werk ik?",
+    de: "Mit wem arbeite ich?",
+  },
+  "company-overview": {
+    lt: "Kas vyksta mano įmonėje?",
+    en: "What is happening in my company?",
+    ru: "Что происходит в моей компании?",
+    nl: "Wat gebeurt er in mijn bedrijf?",
+    de: "Was passiert in meiner Firma?",
+  },
+  "create-organization": {
+    lt: "Sukurk įmonės profilį",
+    en: "Create a company",
+    ru: "Создать компанию",
+    nl: "Bedrijf aanmaken",
+    de: "Firma anlegen",
+  },
+  lmc: {
+    lt: "Kiek turiu LMC?",
+    en: "How much LMC do I have?",
+    ru: "Сколько у меня LMC?",
+    nl: "Hoeveel LMC heb ik?",
+    de: "Wie viel LMC habe ich?",
+  },
+  "offer-value": {
+    lt: "Turiu 30 kg agurkų ir noriu parduoti",
+    en: "I want to sell 500 wooden pallets",
+    ru: "Продам огурцы",
+    nl: "Ik wil 30 kg komkommers verkopen",
+    de: "Ich möchte 500 Paletten verkaufen",
+  },
+};
+
+describe("G3 — every routed intent is reachable in all five active locales", () => {
+  for (const [intent, sentences] of Object.entries(PARITY_MATRIX) as Array<
+    [RoutedIntent, Record<ActiveLocale, string>]
+  >) {
+    for (const locale of ACTIVE_LOCALES) {
+      it(`${intent} [${locale}]: "${sentences[locale]}"`, () => {
+        expect(classifyIntent(sentences[locale]).intent).toBe(intent);
+      });
+    }
+  }
 });

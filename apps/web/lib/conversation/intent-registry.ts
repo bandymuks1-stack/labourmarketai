@@ -60,6 +60,8 @@ export type IntentHandlerId =
   | "recentJournal"
   | "figures"
   | "openProject"
+  | "projectsList"
+  | "employerCandidates"
   | "findWorkers"
   | "contextReadback"
   | "interestInbox"
@@ -112,6 +114,11 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "journal-recent": { domain: "journal", access: "read", handler: "recentJournal", ownTyping: true },
   figures: { domain: "journal", access: "read", handler: "figures", ownTyping: true },
   "open-project": { domain: "project", access: "read", handler: "openProject", ownTyping: true },
+  // G8: the chip surfaces by SENTENCE — each routes to the SAME component
+  // handler its chip runs (`startProjects` / `startEmployerCandidates`), so a
+  // typed request and a tapped chip are one path, one engine, one panel.
+  projects: { domain: "project", access: "read", handler: "projectsList", ownTyping: true },
+  candidates: { domain: "matching", access: "read", handler: "employerCandidates", ownTyping: true },
   "find-workers": { domain: "matching", access: "read", handler: "findWorkers", ownTyping: true },
   context: { domain: "context", access: "read", handler: "contextReadback", ownTyping: true },
   // Routed by IDENTITY inside the handler; the ambiguous dual-role case is
