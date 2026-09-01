@@ -2294,8 +2294,22 @@ describe("no migration files added by this sprint", () => {
     // and one TIGHTENED RLS policy, closing the leak where a severed client
     // keeps the agency's candidate identities. Narrowing only; ships
     // UNAPPLIED with merge and production apply owner-gated.
+    // Bumped 249 -> 250 for the relationship-visibility least-privilege
+    // ruling (20260901060000_relationship_visibility_least_privilege_v1,
+    // paired rollback) — the slice 20260827210000 deferred by name in its
+    // own header. Three rows of relationship_types (volunteer, viewer,
+    // unemployed) move from grants_worker_visibility true to false, closing
+    // the invitable `volunteer` path to employer-grade worker-record reads.
+    // DATA-only, narrowing only, measured-zero blast radius (production has
+    // no engagement context on those slugs). Ships UNAPPLIED; merge and
+    // production apply stay owner-gated (draft + needs-human-gate).
     // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
-    const SPRINT_BASELINE = 250;
+    // RE-COUNTED 2026-09-01 after #1395 landed on main first: that PR
+    // took slot 250 for the agency disclosure-revocation package, so this
+    // ruling is the 251st file, not the 250th. Both are declared above.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 251.
+    const SPRINT_BASELINE = 251;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

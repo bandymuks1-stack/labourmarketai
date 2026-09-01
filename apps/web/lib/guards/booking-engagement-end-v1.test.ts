@@ -1151,6 +1151,19 @@ describe("the migration set is exactly what this slice declared", () => {
       // merge and production apply stay owner-gated (draft +
       // needs-human-gate).
       "20260901052300_agency_disclosure_revocation_v1.sql",
+      // 2026-09-01: the relationship-visibility least-privilege ruling
+      // (20260901060000) carries the marker because it is the slice
+      // 20260827210000 deferred BY NAME — that migration's header records
+      // "rule on volunteer / viewer / unemployed, which are preserved here
+      // only because narrowing them is outside this ruling". RED by route
+      // (`data-dml` on the registry that governs an authorization
+      // predicate) while creating, dropping and replacing nothing: three
+      // rows of relationship_types move from true to false, plus a column
+      // comment. Direction is NARROWING only, and the blast radius is
+      // measured zero — production holds no volunteer/viewer/unemployed
+      // engagement context. The marker lets CI classify it; merge and
+      // production apply stay owner-gated (draft + needs-human-gate).
+      "20260901060000_relationship_visibility_least_privilege_v1.sql",
 ]);
   });
 
