@@ -1164,6 +1164,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // engagement context. The marker lets CI classify it; merge and
       // production apply stay owner-gated (draft + needs-human-gate).
       "20260901060000_relationship_visibility_least_privilege_v1.sql",
+      // 2026-09-01: the public-schema CREATE revoke (20260901100000)
+      // carries the marker because a REVOKE is a grant-surface change by
+      // classification. It is narrowing only: ONE statement,
+      // `revoke create on schema public from public`, removing the CREATE
+      // that anon/authenticated/service_role inherited via PUBLIC (none
+      // held a direct grant). USAGE stays, so every read, RPC and auth path
+      // is untouched. Minimal current-equivalent extraction of the
+      // still-live half of #879, owner-approved 2026-09-01.
+      "20260901100000_revoke_public_schema_create_v1.sql",
 ]);
   });
 
