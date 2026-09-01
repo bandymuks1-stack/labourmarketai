@@ -462,14 +462,9 @@ export function HeroLiveDemo() {
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("mapLabel")}
           </p>
-          {/* The data badge is not decoration: the visitor must never mistake a
-              demonstration for today's live market. */}
-          <span
-            data-testid="hero-map-origin"
-            className="rounded-sm border border-state-amber/40 bg-state-amber/10 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber"
-          >
-            {t("demoBadge")}
-          </span>
+          {/* The origin badge is rendered by <MarketMap> itself (intrinsic —
+              no caller can forget it), so the hero no longer renders its own
+              copy; `mapLabel` states the concept-scenario scope in words. */}
         </div>
 
         {/* On desktop the AI column is the taller sibling, and a fixed-height

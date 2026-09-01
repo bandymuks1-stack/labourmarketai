@@ -76,6 +76,13 @@ const CITY_TABLE: Readonly<Record<string, ReadonlyArray<{ names: string[]; coord
     { names: ["gothenburg", "goteborg", "göteborg"], coord: { lat: 57.7089, lng: 11.9746 } },
     { names: ["malmo", "malmö"], coord: { lat: 55.605, lng: 13.0038 } },
     { names: ["uppsala"], coord: { lat: 59.8586, lng: 17.6389 } },
+    { names: ["linkoping", "linköping"], coord: { lat: 58.4109, lng: 15.6216 } },
+    { names: ["jonkoping", "jönköping"], coord: { lat: 57.7826, lng: 14.1618 } },
+    { names: ["orebro", "örebro"], coord: { lat: 59.2753, lng: 15.2134 } },
+    { names: ["umea", "umeå"], coord: { lat: 63.8258, lng: 20.263 } },
+    { names: ["vasteras", "västerås"], coord: { lat: 59.6099, lng: 16.5448 } },
+    { names: ["lulea", "luleå"], coord: { lat: 65.5848, lng: 22.1567 } },
+    { names: ["lund"], coord: { lat: 55.7047, lng: 13.191 } },
   ],
   PL: [
     { names: ["warsaw", "warszawa"], coord: { lat: 52.2297, lng: 21.0122 } },

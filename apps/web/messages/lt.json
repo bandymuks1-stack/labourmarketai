@@ -876,6 +876,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Reali rinkos paklausa",
+      "lead": "Atviri poreikiai iš tikrosios šios platformos paklausos — kur darbo prašoma dabar."
+    },
+    "vacancyVolume": {
+      "title": "Viešų skelbimų apimtis",
+      "scope": "{count} importuotų viešų darbo skelbimų profesijai „{profession}“. Dabartinė šaltinių aprėptis: {countries}.",
+      "window": "Miestų apimtys skaičiuojamos pagal naujausius {window} skelbimų, ne visą fondą."
+    },
     "entities": {
       "title": "Trys dalykai žemėlapyje",
       "intro": "Žemėlapyje rodomi trys skirtingi dalykai: žmonės, įmonių veiklos teritorijos ir projektų vietos. Kiekvienas rodomas pagal savo taisyklę ir atrodo skirtingai.",
@@ -3332,6 +3341,10 @@
       "legendTarget": "Rinkos kryptys",
       "legendContext": "Platesnis pasaulis",
       "aria": "Darbo kryptys — pasaulio žemėlapis"
+    },
+    "origin": {
+      "live": "Tikri duomenys",
+      "preview": "Peržiūra"
     }
   },
   "company": {
@@ -12185,11 +12198,10 @@
       "headline": "Paklausk. Pamatyk. Įdarbink.",
       "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje.",
       "chatLabel": "AI pokalbis",
-      "mapLabel": "Europos darbo rinka",
+      "mapLabel": "Koncepcinis žemėlapis — iliustracinis scenarijus",
       "thinking": "Analizuoju rinkos signalus…",
       "answered": "Radau. Žemėlapis atnaujintas.",
       "resultLabel": "Rezultatas",
-      "demoBadge": "Demonstracija",
       "mapHint": "Spustelėk žymeklį — žemėlapis atsako.",
       "scenario": {
         "q1": "Kur dabar reikia elektrikų?",
@@ -12245,9 +12257,9 @@
       },
       "askPlaceholder": "Paklausk savo klausimo…",
       "askSubmit": "Klausti",
-      "unmatched": "Šioje demonstracijoje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
+      "unmatched": "Šioje peržiūroje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
       "basisLabel": "Kuo tai grindžiama",
-      "basisNote": "Aukščiau pasvertais {count} signalais, naudojant iliustracinius kiekius — tai demonstracija, ne šios dienos rinka.",
+      "basisNote": "Aukščiau pasvertais {count} signalais, naudojant iliustracinius kiekius — tai koncepcinis scenarijus, ne šios dienos rinka.",
       "previewLabel": "Tinkamiausias žmogus",
       "previewName": "Jonas P.",
       "previewRole": "Elektrikas · Vilnius · Laisvas nuo rugsėjo",

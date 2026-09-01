@@ -876,6 +876,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Echte Marktnachfrage",
+      "lead": "Offene Bedarfe aus der realen Nachfrage dieser Plattform — wo gerade Arbeit gesucht wird."
+    },
+    "vacancyVolume": {
+      "title": "Volumen öffentlicher Stellenanzeigen",
+      "scope": "{count} importierte öffentliche Stellenanzeigen für {profession}. Aktuelle Quellenabdeckung: {countries}.",
+      "window": "Stadtvolumen werden über die neuesten {window} Anzeigen gezählt, nicht über den gesamten Bestand."
+    },
     "entities": {
       "title": "Drei Dinge auf der Karte",
       "intro": "Die Karte zeigt drei verschiedene Dinge: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jedes folgt seiner eigenen Sichtbarkeitsregel und sieht anders aus.",
@@ -3332,6 +3341,10 @@
       "legendTarget": "Marktrichtungen",
       "legendContext": "Übrige Welt",
       "aria": "Arbeitsrichtungen — Weltkarte"
+    },
+    "origin": {
+      "live": "Live-Daten",
+      "preview": "Vorschau"
     }
   },
   "company": {
@@ -12185,11 +12198,10 @@
       "headline": "Fragen. Sehen. Einstellen.",
       "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort.",
       "chatLabel": "KI-Gespräch",
-      "mapLabel": "Europäischer Arbeitsmarkt",
+      "mapLabel": "Konzeptkarte — illustratives Szenario",
       "thinking": "Marktsignale werden analysiert…",
       "answered": "Gefunden. Karte aktualisiert.",
       "resultLabel": "Ergebnis",
-      "demoBadge": "Demonstration",
       "mapHint": "Auf eine Markierung tippen — die Karte antwortet.",
       "scenario": {
         "q1": "Wo werden jetzt Elektriker gebraucht?",
@@ -12245,9 +12257,9 @@
       },
       "askPlaceholder": "Stellen Sie Ihre eigene Frage…",
       "askSubmit": "Fragen",
-      "unmatched": "In dieser Demonstration beantworte ich nur Fragen zu Elektrikern, Schweißern und verfügbaren Menschen.",
+      "unmatched": "In dieser Vorschau beantworte ich nur Fragen zu Elektrikern, Schweißern und verfügbaren Menschen.",
       "basisLabel": "Worauf das beruht",
-      "basisNote": "Auf den {count} oben abgewogenen Signalen, mit illustrativen Mengen — dies ist eine Demonstration, nicht der heutige Markt.",
+      "basisNote": "Auf den {count} oben abgewogenen Signalen, mit illustrativen Mengen — dies ist ein Konzept-Szenario, nicht der heutige Markt.",
       "previewLabel": "Am besten passende Person",
       "previewName": "Jonas P.",
       "previewRole": "Elektriker · Vilnius · Verfügbar ab September",
