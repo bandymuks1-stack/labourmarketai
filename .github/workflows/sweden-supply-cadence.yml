@@ -68,7 +68,7 @@ jobs:
             echo "configuration_gated=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.gate.outputs.configuration_gated == 'false'
 
       - uses: pnpm/action-setup@v6
