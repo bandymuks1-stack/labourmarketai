@@ -17,6 +17,7 @@ import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
+import { AccountBillingSection } from "@/components/app/account-billing-section";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 
@@ -33,10 +34,16 @@ import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
  */
 export default async function AccountPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ billing?: string }>;
 }) {
   const { locale } = await params;
+  // Native-nav `?billing=` return feedback (same idiom as planning's plain
+  // searchParams): the TEST billing routes send the user back here with
+  // `?billing=test_success` / `portal_return`, and until now nothing read it.
+  const { billing } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
@@ -144,6 +151,12 @@ export default async function AccountPage({
           <span aria-hidden className="text-text-muted">→</span>
         </Link>
       </section>
+
+      {/* Billing/subscription state + billing-return feedback (commercial
+          safe-prep v1). Honest about the disabled state; the return notice
+          never activates anything — state syncs via the signature-verified
+          webhook only. */}
+      <AccountBillingSection billingReturn={billing ?? null} />
 
       {/* LMC — placed directly under the plan line because they answer the same
           question at two depths: what this account is entitled to, and what it

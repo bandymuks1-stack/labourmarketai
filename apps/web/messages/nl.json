@@ -4738,6 +4738,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "De checkout is geannuleerd — er is niets afgeschreven en er is niets veranderd aan je account."
+    },
     "eyebrow": "Prijzen",
     "title": "Eenvoudige niveaus,",
     "titleAccent": "eerlijk vastgesteld.",
@@ -7859,6 +7862,49 @@
     "starting": "Starten…",
     "error": "Kon niet starten"
   },
+  "adminLmc": {
+    "title": "LMC-grootboek",
+    "intro": "Intern platformtegoed (1 LMC = 1 EUR intern tegoed). Live databasestand: schakelaars, uitstaande verplichting en tester-creditering. Alle commerciële schakelaars staan UIT; inschakelen is een besluit van de eigenaar.",
+    "unavailable": "Het grootboek kon met deze sessie niet worden gelezen — een mislukte leesactie, geen leeg grootboek.",
+    "on": "Aan",
+    "off": "Uit",
+    "policy": {
+      "admin": "door admin schakelbaar",
+      "owner_only": "alleen eigenaar",
+      "system_locked": "systeemvergrendeld"
+    },
+    "liability": {
+      "outstanding": "Uitstaand tegoed",
+      "promotional": "Promotioneel",
+      "purchased": "Gekocht",
+      "accounts": "Rekeningen",
+      "note": "Elke uitgegeven LMC is een uitgestelde verplichting van een euro. Live lezing van de canonieke saldoweergave — geen opgeslagen rapport."
+    },
+    "grant": {
+      "email": "E-mail ontvanger",
+      "amount": "Bedrag (LMC)",
+      "reason": "Reden (opgeslagen in het grootboek)",
+      "campaign": "Campagne",
+      "expiryDays": "Verloopt over (dagen)",
+      "key": "Idempotentiesleutel",
+      "submit": "LMC crediteren",
+      "submitting": "Crediteren…",
+      "granted": "Gecrediteerd",
+      "replay": "Met deze sleutel is al eerder gecrediteerd — er is niets dubbel gecrediteerd",
+      "disabledHint": "Promotionele crediteringen staan in de database UIT — het grootboek zal deze creditering weigeren. Inschakelen is een besluit via het eigenaarskanaal.",
+      "reasons": {
+        "grants_disabled": "Geweigerd: promotionele crediteringen staan uit",
+        "not_admin": "Geweigerd: admin-identiteit vereist",
+        "recipient_not_found": "Geweigerd: geen geverifieerd profiel met dat e-mailadres",
+        "invalid_amount": "Geweigerd: ongeldig bedrag",
+        "invalid_expiry": "Geweigerd: ongeldige vervaldatum",
+        "idempotency_conflict": "Geweigerd: deze sleutel is al anders gebruikt",
+        "ledger_absent": "De grootboekfuncties zijn niet beschikbaar",
+        "error": "Het grootboek heeft de creditering geweigerd"
+      }
+    },
+    "spendFrozen": "Uitgeven staat UIT — uitgegeven tegoed blijft bevroren tot de eigenaar uitgeven inschakelt."
+  },
   "adminBilling": {
     "eyebrow": "FACTURATIE — TESTMODUS",
     "title": "Facturatiecentrum",
@@ -9048,6 +9094,36 @@
     "links": {
       "workers": "Voor werknemers",
       "companies": "Voor bedrijven"
+    }
+  },
+  "accountBilling": {
+    "title": "Facturering & abonnement",
+    "testBadge": "Testmodus",
+    "returned": {
+      "success": "Test-checkout afgerond. Er is geen echt geld bewogen; de abonnementsstatus hieronder synchroniseert via de handtekening-geverifieerde webhook van de betaalprovider en kan even op zich laten wachten.",
+      "cancelled": "De checkout is geannuleerd. Er is niets afgeschreven en er is niets veranderd aan je account.",
+      "portal": "Je bent terug uit het factureringsportaal. Wijzigingen die je daar maakte, synchroniseren hier automatisch."
+    },
+    "disabled": "Betalingen zijn niet ingeschakeld. Betaalde abonnementen zijn voorbereide concepten — hier is niets te koop en er is geen betaalmethode nodig.",
+    "none": "Geen abonnement op dit account.",
+    "planLabel": "Abonnement",
+    "statusLabel": "Huidige status",
+    "status": {
+      "none": "Geen abonnement",
+      "trialing": "Proefperiode",
+      "active": "Actief",
+      "past_due": "Betaling achterstallig",
+      "unpaid": "Onbetaald",
+      "cancelled": "Opgezegd",
+      "incomplete": "Onvolledig",
+      "expired": "Verlopen"
+    },
+    "graceNotice": "De laatste betaling is mislukt — het abonnement zit in een respijtperiode tot een nieuwe poging.",
+    "manage": {
+      "open": "Abonnement beheren",
+      "opening": "Openen…",
+      "error": "Het factureringsportaal kon niet worden geopend",
+      "hint": "Opent het portaal van de betaalprovider om op te zeggen of de betaalmethode te wijzigen. Alleen testmodus — geen echte afschrijvingen."
     }
   },
   "accountPlan": {

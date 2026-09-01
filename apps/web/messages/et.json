@@ -926,6 +926,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Maksmine katkestati — midagi ei võetud ja sinu kontol ei muutunud midagi."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {

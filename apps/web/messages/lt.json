@@ -4738,6 +4738,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Apmokėjimas atšauktas — niekas nenuskaičiuota ir jūsų paskyroje niekas nepasikeitė."
+    },
     "eyebrow": "Kainos",
     "title": "Aiškūs planai —",
     "titleAccent": "sąžininga kaina.",
@@ -7859,6 +7862,49 @@
     "starting": "Pradedama…",
     "error": "Nepavyko pradėti"
   },
+  "adminLmc": {
+    "title": "LMC žurnalas",
+    "intro": "Vidinis platformos kreditas (1 LMC = 1 EUR vidinio kredito). Gyva duomenų bazės būsena: saugikliai, neapmokėtas įsipareigojimas ir testuotojo kreditavimas. Visi komerciniai jungikliai išjungti; įjungimas — savininko sprendimas.",
+    "unavailable": "Žurnalo nepavyko perskaityti su šia sesija — tai nepavykęs skaitymas, ne tuščias žurnalas.",
+    "on": "Įjungta",
+    "off": "Išjungta",
+    "policy": {
+      "admin": "keičia administratorius",
+      "owner_only": "tik savininkas",
+      "system_locked": "užrakinta sistemos"
+    },
+    "liability": {
+      "outstanding": "Neapmokėtas kreditas",
+      "promotional": "Reklaminis",
+      "purchased": "Pirktas",
+      "accounts": "Sąskaitos",
+      "note": "Kiekvienas išleistas LMC yra euro dydžio atidėtas įsipareigojimas. Gyvas kanoninio balanso rodinio skaitymas — ne išsaugota ataskaita."
+    },
+    "grant": {
+      "email": "Gavėjo el. paštas",
+      "amount": "Suma (LMC)",
+      "reason": "Priežastis (įrašoma į žurnalą)",
+      "campaign": "Kampanija",
+      "expiryDays": "Galioja (dienų)",
+      "key": "Idempotencijos raktas",
+      "submit": "Kredituoti LMC",
+      "submitting": "Kredituojama…",
+      "granted": "Kredituota",
+      "replay": "Su šiuo raktu jau kredituota anksčiau — antrą kartą niekas nekredituota",
+      "disabledHint": "Reklaminiai kreditavimai duomenų bazėje IŠJUNGTI — žurnalas šį kreditavimą atmes. Jungiklio įjungimas — savininko kanalo sprendimas.",
+      "reasons": {
+        "grants_disabled": "Atmesta: reklaminiai kreditavimai išjungti",
+        "not_admin": "Atmesta: reikalinga administratoriaus tapatybė",
+        "recipient_not_found": "Atmesta: patvirtinto profilio su tokiu el. paštu nėra",
+        "invalid_amount": "Atmesta: netinkama suma",
+        "invalid_expiry": "Atmesta: netinkamas galiojimas",
+        "idempotency_conflict": "Atmesta: šis raktas jau panaudotas kitaip",
+        "ledger_absent": "Žurnalo funkcijos nepasiekiamos",
+        "error": "Žurnalas kreditavimą atmetė"
+      }
+    },
+    "spendFrozen": "Išleidimas IŠJUNGTAS — išduotas kreditas užšaldytas, kol savininkas įjungs leidimą."
+  },
   "adminBilling": {
     "eyebrow": "MOKĖJIMAI — TEST MODE",
     "title": "Mokėjimų centras",
@@ -9048,6 +9094,36 @@
     "links": {
       "workers": "Darbuotojams",
       "companies": "Įmonėms"
+    }
+  },
+  "accountBilling": {
+    "title": "Mokėjimai ir prenumerata",
+    "testBadge": "Testavimo režimas",
+    "returned": {
+      "success": "Testinis apmokėjimas užbaigtas. Tikri pinigai nejudėjo; prenumeratos būsena žemiau sinchronizuojama per parašu patvirtintą mokėjimų teikėjo webhook ir gali atsirasti ne iš karto.",
+      "cancelled": "Apmokėjimas atšauktas. Niekas nenuskaičiuota ir jūsų paskyroje niekas nepasikeitė.",
+      "portal": "Grįžote iš mokėjimų portalo. Ten atlikti pakeitimai šiame puslapyje susinchronizuojami automatiškai."
+    },
+    "disabled": "Mokėjimai neįjungti. Mokami planai — paruošti juodraščiai: čia nieko negalima nusipirkti ir mokėjimo priemonės nereikia.",
+    "none": "Šioje paskyroje prenumeratos nėra.",
+    "planLabel": "Planas",
+    "statusLabel": "Būsena",
+    "status": {
+      "none": "Prenumeratos nėra",
+      "trialing": "Bandomasis laikotarpis",
+      "active": "Aktyvi",
+      "past_due": "Mokėjimas vėluoja",
+      "unpaid": "Neapmokėta",
+      "cancelled": "Atšaukta",
+      "incomplete": "Neužbaigta",
+      "expired": "Pasibaigusi"
+    },
+    "graceNotice": "Paskutinis mokėjimas nepavyko — prenumerata veikia lengvatiniu laikotarpiu, kol mokėjimas bus pakartotas.",
+    "manage": {
+      "open": "Tvarkyti prenumeratą",
+      "opening": "Atidaroma…",
+      "error": "Nepavyko atidaryti mokėjimų portalo",
+      "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę. Tik testavimo režimas — jokių tikrų mokesčių."
     }
   },
   "accountPlan": {

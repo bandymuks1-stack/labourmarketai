@@ -10,6 +10,7 @@ import {
   type BillingReadinessStatus,
 } from "@/lib/billing/readiness";
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
+import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
 
 /**
@@ -202,6 +203,12 @@ export default async function AdminBillingPage({
           }}
         />
       </section>
+
+      {/* LMC ledger — kill-switch truth, outstanding liability, tester grant
+          (commercial safe-prep v1). Separate domain from Stripe by guard
+          (stripe-lmc-separation): nothing here touches subscriptions and no
+          billing module touches the ledger. */}
+      <AdminLmcPanel locale={locale} />
 
       {/* Webhook events */}
       <section className="flex flex-col gap-2">

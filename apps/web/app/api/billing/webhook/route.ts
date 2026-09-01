@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { getBillingProvider } from "@/lib/billing/provider";
 import {
   isHandledEventType,
+  isRecordOnlyEventType,
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
+  summarizeRecordedEvent,
   assertTestEvent,
 } from "@/lib/billing/webhook-core";
 import {
@@ -48,11 +50,17 @@ export async function POST(req: Request) {
   // Idempotency: record first. Only a duplicate whose FIRST delivery finished
   // processing is short-circuited; an unprocessed duplicate is a Stripe retry
   // after our earlier non-2xx and MUST be reprocessed.
+  // Record-only events (charge.refunded / charge.dispute.*) persist a parsed
+  // summary with the record — that summary IS their processing outcome, so the
+  // operator can read what was refunded/disputed without replaying Stripe.
+  const summary = summarizeRecordedEvent(event.type, event.object);
   const recorded = await recordWebhookEvent({
     eventId: event.id,
     eventType: event.type,
     testMode: event.testMode,
-    payload: { id: event.id, type: event.type },
+    payload: summary
+      ? { id: event.id, type: event.type, summary }
+      : { id: event.id, type: event.type },
   });
   if (recorded === "duplicate-processed") {
     return NextResponse.json({ ok: true, received: true, duplicate: true });
@@ -73,6 +81,18 @@ export async function POST(req: Request) {
   if (!isHandledEventType(event.type)) {
     await markWebhookProcessed(event.id);
     return NextResponse.json({ ok: true, received: true, ignored: true });
+  }
+
+  // Refund/dispute ingestion is RECORD-ONLY (commercial safe-prep v1): the
+  // event + parsed summary are persisted above, and NO subscription state
+  // transition happens here — a full refund of the latest invoice does NOT
+  // auto-cancel (Stripe keeps the subscription billing unless it is cancelled
+  // separately), and a dispute's effect depends on its outcome. Any warranted
+  // state change arrives via the customer.subscription.* / invoice.* events
+  // this route already applies conservatively. See webhook-core RECORD_ONLY.
+  if (isRecordOnlyEventType(event.type)) {
+    await markWebhookProcessed(event.id);
+    return NextResponse.json({ ok: true, received: true, processed: true, recordOnly: true });
   }
 
   let result: string = "ok";

@@ -926,6 +926,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Betalingen ble avbrutt — ingenting ble trukket, og ingenting er endret på kontoen din."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {

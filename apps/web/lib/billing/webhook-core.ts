@@ -31,10 +31,47 @@ const HANDLED = new Set([
   // pair for one invoice is harmless.
   "invoice.paid",
   "invoice.payment_failed",
+  // Refund/dispute ingestion (commercial safe-prep v1): these are RECORDED,
+  // signature-verified, test-only — see RECORD_ONLY below for why they do not
+  // mutate subscription state.
+  "charge.refunded",
+  "charge.dispute.created",
+  "charge.dispute.closed",
 ]);
 
 export function isHandledEventType(type: string): boolean {
   return HANDLED.has(type);
+}
+
+/**
+ * Events that are INGESTED AS RECORDS ONLY (persisted to the webhook-events
+ * store with a parsed summary) and deliberately cause NO subscription state
+ * transition. The semantics are not unambiguous enough to automate:
+ *
+ *   - `charge.refunded` — a full refund of the latest invoice does NOT mean
+ *     the subscription is cancelled: Stripe keeps the subscription billing
+ *     unless it is cancelled separately, and a partial/goodwill refund means
+ *     even less. Auto-cancelling here would silently strip an entitlement the
+ *     provider still considers live. The refund is recorded; any state change
+ *     is an operator decision (or a later `customer.subscription.*` event,
+ *     which this chain already applies).
+ *   - `charge.dispute.created` / `charge.dispute.closed` — a dispute's effect
+ *     depends on its outcome and on how the account is configured; Stripe
+ *     itself emits the authoritative subscription/invoice events that follow.
+ *     The dispute lifecycle is recorded for the operator; state stays
+ *     conservative.
+ *
+ * When ANY billing state change is warranted, it arrives through the
+ * subscription/invoice events above — never inferred from a charge event.
+ */
+const RECORD_ONLY = new Set([
+  "charge.refunded",
+  "charge.dispute.created",
+  "charge.dispute.closed",
+]);
+
+export function isRecordOnlyEventType(type: string): boolean {
+  return RECORD_ONLY.has(type);
 }
 
 /** Stripe subscription.status → our enum (conservative). */
@@ -180,6 +217,89 @@ export function parseInvoiceObject(
     providerSubscriptionId: subscriptionIdFromInvoice(obj),
     lastPaymentStatus: succeeded ? "succeeded" : "failed",
   };
+}
+
+/**
+ * Parsed summary of a charge.refunded event — the persisted RECORD (nothing
+ * here drives a state machine). `fullyRefunded` mirrors Stripe's own
+ * `refunded` boolean; `amountRefundedCents` is the cumulative refunded total
+ * in the charge's smallest currency unit, exactly as Stripe reports it.
+ */
+export interface ChargeRefundRecord {
+  chargeId: string | null;
+  paymentIntentId: string | null;
+  invoiceId: string | null;
+  amountRefundedCents: number | null;
+  currency: string | null;
+  fullyRefunded: boolean;
+}
+
+export function parseChargeRefundObject(
+  obj: Record<string, unknown> | null | undefined,
+): ChargeRefundRecord | null {
+  if (!obj) return null;
+  return {
+    chargeId: asString(obj.id),
+    paymentIntentId: idFrom(obj.payment_intent),
+    invoiceId: idFrom(obj.invoice),
+    amountRefundedCents:
+      typeof obj.amount_refunded === "number" && Number.isFinite(obj.amount_refunded)
+        ? obj.amount_refunded
+        : null,
+    currency: asString(obj.currency),
+    fullyRefunded: obj.refunded === true,
+  };
+}
+
+/** Parsed summary of a charge.dispute.* event — the persisted RECORD. */
+export interface DisputeRecord {
+  disputeId: string | null;
+  chargeId: string | null;
+  paymentIntentId: string | null;
+  /** Stripe's own dispute status string (e.g. needs_response, won, lost). */
+  status: string | null;
+  /** Stripe's own dispute reason string (e.g. fraudulent, product_not_received). */
+  reason: string | null;
+  amountCents: number | null;
+  currency: string | null;
+}
+
+export function parseDisputeObject(
+  obj: Record<string, unknown> | null | undefined,
+): DisputeRecord | null {
+  if (!obj) return null;
+  return {
+    disputeId: asString(obj.id),
+    chargeId: idFrom(obj.charge),
+    paymentIntentId: idFrom(obj.payment_intent),
+    status: asString(obj.status),
+    reason: asString(obj.reason),
+    amountCents:
+      typeof obj.amount === "number" && Number.isFinite(obj.amount)
+        ? obj.amount
+        : null,
+    currency: asString(obj.currency),
+  };
+}
+
+/**
+ * The summary a record-only event persists alongside {id, type} in the
+ * webhook-events store. Returns null for every other event type (their record
+ * stays the lean {id, type} shape it always was).
+ */
+export function summarizeRecordedEvent(
+  type: string,
+  obj: Record<string, unknown> | null | undefined,
+): Record<string, unknown> | null {
+  if (type === "charge.refunded") {
+    const r = parseChargeRefundObject(obj);
+    return r ? { ...r } : null;
+  }
+  if (type === "charge.dispute.created" || type === "charge.dispute.closed") {
+    const d = parseDisputeObject(obj);
+    return d ? { ...d } : null;
+  }
+  return null;
 }
 
 /** A test event MUST be test-mode — a live event is rejected. */

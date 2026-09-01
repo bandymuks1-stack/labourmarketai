@@ -17,6 +17,10 @@ import {
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
+  parseChargeRefundObject,
+  parseDisputeObject,
+  summarizeRecordedEvent,
+  isRecordOnlyEventType,
   assertTestEvent,
   mapStripeStatus,
 } from "./webhook-core";
@@ -134,6 +138,84 @@ describe("webhook signature E2E proof (no keys, no money)", () => {
     expect(sub?.currentPeriodStart).toMatch(/^20/);
     expect(sub?.currentPeriodEnd).toMatch(/^20/);
     expect(sub?.status).toBe("active");
+  });
+
+  it("a signed charge.refunded TEST event verifies and parses as a RECORD (no state transition)", () => {
+    const { body, header } = signed({
+      id: "evt_refund_1", type: "charge.refunded", livemode: false,
+      data: {
+        object: {
+          id: "ch_ref_1", payment_intent: "pi_ref_1", invoice: "in_ref_1",
+          amount_refunded: 2900, currency: "eur", refunded: true,
+        },
+      },
+    });
+    const event = stripe.webhooks.constructEvent(body, header, SECRET);
+    expect(assertTestEvent({ testMode: event.livemode === false })).toBe(true);
+    // Record-only: the route persists this summary and marks the event
+    // processed WITHOUT touching billing_subscriptions — a full refund of the
+    // latest invoice does NOT auto-cancel (conservative by design).
+    expect(isRecordOnlyEventType(event.type)).toBe(true);
+    const record = parseChargeRefundObject(obj(event));
+    expect(record).toEqual({
+      chargeId: "ch_ref_1",
+      paymentIntentId: "pi_ref_1",
+      invoiceId: "in_ref_1",
+      amountRefundedCents: 2900,
+      currency: "eur",
+      fullyRefunded: true,
+    });
+    expect(summarizeRecordedEvent(event.type, obj(event))).toMatchObject({
+      chargeId: "ch_ref_1",
+      fullyRefunded: true,
+    });
+  });
+
+  it("a signed charge.dispute.created TEST event verifies and parses the dispute record", () => {
+    const { body, header } = signed({
+      id: "evt_dispute_1", type: "charge.dispute.created", livemode: false,
+      data: {
+        object: {
+          id: "dp_1", charge: "ch_ref_1", payment_intent: "pi_ref_1",
+          status: "needs_response", reason: "product_not_received",
+          amount: 2900, currency: "eur",
+        },
+      },
+    });
+    const event = stripe.webhooks.constructEvent(body, header, SECRET);
+    expect(isRecordOnlyEventType(event.type)).toBe(true);
+    const record = parseDisputeObject(obj(event));
+    expect(record?.disputeId).toBe("dp_1");
+    expect(record?.status).toBe("needs_response");
+    expect(record?.reason).toBe("product_not_received");
+  });
+
+  it("a signed charge.dispute.closed TEST event carries the outcome verbatim", () => {
+    const { body, header } = signed({
+      id: "evt_dispute_2", type: "charge.dispute.closed", livemode: false,
+      data: {
+        object: {
+          id: "dp_1", charge: "ch_ref_1", status: "won",
+          reason: "product_not_received", amount: 2900, currency: "eur",
+        },
+      },
+    });
+    const event = stripe.webhooks.constructEvent(body, header, SECRET);
+    const record = parseDisputeObject(obj(event));
+    expect(record?.status).toBe("won");
+    expect(summarizeRecordedEvent(event.type, obj(event))).toMatchObject({
+      disputeId: "dp_1",
+      status: "won",
+    });
+  });
+
+  it("a LIVE charge.refunded is refused by assertTestEvent even if signed", () => {
+    const { body, header } = signed({
+      id: "evt_refund_live", type: "charge.refunded", livemode: true,
+      data: { object: { id: "ch_live", refunded: true } },
+    });
+    const event = stripe.webhooks.constructEvent(body, header, SECRET);
+    expect(assertTestEvent({ testMode: event.livemode === false })).toBe(false);
   });
 
   it("a PINNED-VERSION (post-Basil) shaped invoice.paid event parses the subscription id", () => {

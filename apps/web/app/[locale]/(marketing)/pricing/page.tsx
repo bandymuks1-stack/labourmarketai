@@ -24,10 +24,18 @@ export const dynamic = "force-dynamic";
 
 export default async function PricingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ billing?: string }>;
 }) {
   const { locale } = await params;
+  // Native-nav `?billing=test_cancelled` return feedback: the test-checkout
+  // route's cancel URL points here, and until now nothing read it — a person
+  // backing out of a TEST checkout landed with no acknowledgement. The notice
+  // states only what is true (nothing charged, nothing changed); it never
+  // implies a purchase was possible.
+  const { billing } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
   const faq = t.raw("faq") as { q: string; a: string }[];
@@ -43,6 +51,16 @@ export default async function PricingPage({
         ctaLabel={t("planCta")}
         ctaSource="pricing_hero"
       />
+      {billing === "test_cancelled" ? (
+        <div className="mx-auto max-w-container px-6 sm:px-12">
+          <p
+            className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-4 py-3 text-sm text-text-primary"
+            data-testid="pricing-checkout-cancelled"
+          >
+            {t("checkoutReturn.cancelled")}
+          </p>
+        </div>
+      ) : null}
       {/* Public commercial surface only: the technical billing state banner
           and the Stripe TEST checkout moved to the superadmin-gated
           /dashboard/admin/billing (launch repair Scope C). */}
