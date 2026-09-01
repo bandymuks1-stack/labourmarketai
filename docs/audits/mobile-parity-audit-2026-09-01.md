@@ -46,7 +46,7 @@ converted them into proof of anything they did not cover.
 | **Password reset** | **ABSENT** | No "forgot password" anywhere in `src/screens/credentials-form.tsx`. A person who forgets their password has no route back inside the app. Needs an auth-server email send — deliberately not attempted here. |
 | **Profile** | **BUILT-UNPROVEN** | `app/(shell)/profile.tsx` — reads `profile.get` and `living_cv.skills.get` through `/api/mcp`. Skills render their recorded verification state in words; an unverified skill cannot look verified (doctrine §7). Read-only: no edit path. |
 | **Work journal — read** | **BUILT-UNPROVEN** | `app/(shell)/journal.tsx` + `src/screens/journal-entries.tsx`, via `journal.list` (limit 20). `app/(shell)/today.tsx` shows the most recent 5. Date comes from the server's `work_date` metric, falling back to `createdAt` — nothing computed on the device. |
-| **Work journal — write** | **ABSENT** | `journal.create_draft` and `journal.confirm` exist and are exposed in `apps/web/lib/capabilities/registry.ts`, and `journal.create_draft` even resolves the engagement context itself when omitted. The mobile client calls neither. This is the single largest closable gap. |
+| **Work journal — write** | **BUILT-UNPROVEN** (was ABSENT) | `app/(shell)/log-work.tsx` + `src/screens/journal-composer.tsx`, through `journal.create_draft` → `journal.confirm` — the SAME exposed pair the web work-log flow and an MCP client use, over `/api/mcp`, as the caller. Reached from the journal tab; hidden from the tab bar (`href: null`) so it keeps the group's auth gate without becoming a fifth destination. No offline queue and no local draft store, deliberately — see §8, D-5. **Not proven against a real backend:** no authenticated runtime proof exists for the preview, choice or saved branches. |
 | **Opportunities** | **ABSENT** | Web: `apps/web/app/[locale]/dashboard/opportunities`. Server-side there is `interest.express_draft` / `interest.express_confirm`, but **no capability lists opportunities** — the board read is not on the canonical capability surface, so mobile cannot reach it without a new backend capability. |
 | **Notifications** | **ABSENT** | Web spine at `apps/web/lib/notifications/` (`spine.ts`, `events.ts`, `notification-preferences.ts`); surfaces at `dashboard/inbox`, `dashboard/activity`. No capability exposes it, and no push vendor is wired on mobile (deliberate — `docs/MOBILE_ARCHITECTURE.md` §6 lists push as not started). |
 | **Hours** | **ABSENT** | Web: `apps/web/app/[locale]/dashboard/hours`. The canonical operational model (`work_hour_allocations`) was applied to production 2026-08-31, but **no capability exposes it**, and `docs/MOBILE_ARCHITECTURE.md` §7.1 records an unresolved double-counting reconciliation between allocation rows and journal-derived work time. Mobile hours entry is blocked on that slice, not on mobile code. |
@@ -94,14 +94,15 @@ all reads:
 | `profile.get` | read | ✅ used |
 | `journal.list` | read | ✅ used |
 | `living_cv.skills.get` | read | ✅ used |
-| `journal.create_draft` / `journal.confirm` | draft → confirm | ❌ |
+| `journal.create_draft` / `journal.confirm` | draft → confirm | ✅ used (D-5, closed 2026-09-01) |
 | `interest.express_draft` / `interest.express_confirm` | draft → confirm | ❌ |
 | `work_card.save_draft` / `work_card.save_confirm` | draft → confirm | ❌ |
 | `demand.create_draft` / `demand.create_confirm` | draft → confirm | ❌ |
 | `context.switch` | execute | ❌ |
 
-Mobile is **read-only today**. Nine write capabilities are already live behind
-the same seam and are reachable with no backend work whatsoever.
+Mobile was **read-only** when this audit was written. The journal write pair
+closed that (D-5); seven write capabilities remain live behind the same seam
+and reachable with no backend work whatsoever.
 
 ---
 
@@ -167,7 +168,7 @@ Effort: **S** ≤ ~½ day, **M** ~1–2 days, **L** > 2 days or needs a backend 
 | **D-2** | **Unknown deep link had no destination.** The `labourmarketai://` scheme is registered and most platform links are web links for routes this client does not have. Unmatched routes fell through to expo-router's built-in screen: English regardless of language, off-theme, worded for a developer. | high | S | — **CLOSED HERE** |
 | **D-3** | **No error boundary.** A render fault unmounted the whole tree — a blank screen on a release build, with no words and no way out. | high | S | — **CLOSED HERE** |
 | **D-4** | Tab labels truncate at large OS font scales; H-3's comment overclaims. Real fix is tab icons (there are none) or shorter labels. | medium | S–M | product decision (label/icon design) |
-| **D-5** | **Work journal is read-only.** `journal.create_draft` → `journal.confirm` are live, exposed, and resolve the engagement context themselves. A worker can read their journal on a phone but not add to it — which inverts the actual use case (the phone is where the work happens). | very high | M | nothing. This is the next slice. |
+| **D-5** | **Work journal is read-only.** `journal.create_draft` → `journal.confirm` are live, exposed, and resolve the engagement context themselves. A worker can read their journal on a phone but not add to it — which inverts the actual use case (the phone is where the work happens). | very high | M | — **CLOSED 2026-09-01**, see §10 |
 | **D-6** | **Context holdings not read.** Settings honestly says it cannot list contexts. | medium | M | see §6 — needs care, do not improvise |
 | **D-7** | Work card (`work_card.save_*`), employer demand (`demand.create_*`), interest (`interest.express_*`) unreachable from mobile. | medium | M each | nothing backend-side |
 | **D-8** | No password reset in-app. | medium | S | requires an auth-server email send |
@@ -275,3 +276,102 @@ enforced; there is no half-translated state to find.
 - **No context-holdings wiring** — §6.
 - **Nothing near package 0011.** No auth domain, no branding, no DNS, no
   Vercel auth-origin configuration.
+
+---
+
+## 10. D-5 CLOSED — WORK JOURNAL WRITE FROM THE PHONE (2026-09-01)
+
+Added after the audit, in the slice the audit named as next.
+
+### What was built
+
+- `apps/mobile/src/screens/journal-composer.tsx` — the composer and its state
+  machine (writing → drafting → preview → saving → saved, plus a distinct
+  failure state on each leg).
+- `apps/mobile/app/(shell)/log-work.tsx` — the route. It lives INSIDE the shell
+  group so it inherits the group's auth gate (a deep link straight to it from a
+  signed-out device is redirected like every other product screen), and is
+  hidden from the tab bar with `href: null` so it stays an action reached from
+  the journal rather than a fifth destination — which would also have been the
+  tab label that finally truncates (D-4).
+- `apps/mobile/app/(shell)/journal.tsx` — the entry point. The compose button
+  sits **outside** the read's `CapabilityGate`: a journal that could not be read
+  this minute is no reason to stop someone recording work they just did.
+- `apps/mobile/src/screens/capability-failure.tsx` — the failure notice,
+  extracted from `CapabilityGate` so reads and writes state a failure the same
+  way. `CapabilityGate` now renders through it; its behaviour is unchanged.
+
+### Which capability, and what it is NOT
+
+`journal.create_draft` → `journal.confirm`, exactly as registered in
+`apps/web/lib/capabilities/registry.ts`, over the `/api/mcp` seam this client
+already used for its reads, as the caller, under the caller's own RLS.
+`journal.confirm` runs `createJournalEntryCore` — the same append-only,
+hash-chained, pipeline-awaited save the web composer performs. **No migration,
+no new capability, no new RPC, no new table, no service role, no second write
+path.** The composer never invents an `engagementContextId`: it omits the field
+so the capability resolves the context itself, and sends one back only after the
+person has chosen from the options the SERVER offered.
+
+### Honest states, and one that is deliberately not comfortable
+
+In-flight is a real spinner on a real request. Success shows what was saved
+(the previewed date, the named work context, the site, the words) plus the
+pipeline's own awaited counts — and says plainly when the Living CV update
+did not run, because "saved" alone would hide a CV the person expects to have
+moved. Failures stay apart: a local shape complaint says *nothing was sent*; a
+named refusal (`no_worker_profile`, `no_engagement_context`,
+`confirmation_rejected`) is stated in the person's language with no retry
+button pretending it might change; anything else shows the failure kind's
+sentence plus the server's own words.
+
+The uncomfortable one is a dropped connection **during the confirm leg**. The
+request left the device and never came back, so "nothing was sent" would be a
+guess. The screen says exactly that, tells the person to open their journal and
+check, and says that trying again cannot duplicate — which is true because the
+confirmation token is one-time and fingerprinted against the caller's journal
+chain head, so a retry after a write that DID land is refused as stale.
+
+**No offline queue and no local draft store.** If the capability cannot be
+reached, the words stay in the box the person is looking at and the screen says
+so. A "saved" that never reached the server is the one failure a work journal
+must never have.
+
+### i18n
+
+Thirty-nine new keys, in all five active locales with real translations.
+Compiler-enforced (`Record<MessageKey, string>`), so there is no
+half-translated state to find.
+
+### Proven — and exactly how far
+
+- `pnpm -F @labourmarket/client-core typecheck` and `test` (64 tests) — green.
+- `pnpm -F mobile typecheck` — green.
+- `pnpm -F web typecheck` and the client-core mirror guard (12 tests) — green.
+  (Nothing in `packages/client-core` or `apps/web` changed; run to prove it.)
+- Android Metro→Hermes bundle (3.4 MB `.hbc`) and iOS JS bundle (3.1 MB) —
+  both built from the shipping code, before any test harness existed.
+- **Runtime, Expo web target, placeholder configuration, device language
+  Lithuanian:** the composer renders with every field and control; pressing
+  review with an empty entry renders the local refusal *"Prieš įrašydami
+  aprašykite, ką nuveikėte. Niekas nebuvo išsiųsta."*; pressing it with real
+  text runs the real `journal.create_draft` call through `callCapability`, and
+  the unauthenticated outcome surfaces as *"Nepavyko paruošti šio įrašo —
+  Prisijunkite iš naujo."* — a stated failure, never a spinner and never an
+  optimistic success. The temporary harness route used to reach it was deleted
+  and is not in this diff.
+
+### NOT proven
+
+- **Any authenticated round trip.** The preview branch, the
+  engagement-choice branch, the saved branch and the real skill-pipeline counts
+  have never been rendered against a real backend. They need credentials this
+  slice does not have; CI is secret-free by design and cannot do it.
+- **The `unreachable` failure path at runtime.** It is unit-tested in
+  `packages/client-core/src/transport.test.ts` and renders through the same
+  notice component proven above, but reaching it needs a token.
+- **Any device.** The runtime proof above is the web target. Same code path,
+  but that is a device claim not being made here.
+
+This entry is written so it can be falsified. CI green on this slice means
+"it compiles, it bundles, and the failure path renders" — nothing more.
