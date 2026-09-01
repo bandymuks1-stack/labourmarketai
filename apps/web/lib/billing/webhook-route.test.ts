@@ -181,11 +181,94 @@ describe("webhook route — processing outcomes", () => {
   });
 
   it("unhandled event type → acknowledged, recorded processed (ignored)", async () => {
-    withEvent({ id: "evt_x", type: "charge.refunded", testMode: true, object: {} });
+    withEvent({ id: "evt_x", type: "payout.paid", testMode: true, object: {} });
     const res = await post();
     expect(res.status).toBe(200);
     expect((await res.json()).ignored).toBe(true);
     expect(processed).toHaveBeenCalledWith("evt_x");
+  });
+});
+
+describe("webhook route — refund/dispute ingestion (record-only)", () => {
+  const REFUND_EVENT = {
+    id: "evt_ref",
+    type: "charge.refunded",
+    testMode: true,
+    object: {
+      id: "ch_1",
+      payment_intent: "pi_1",
+      invoice: "in_1",
+      amount_refunded: 2900,
+      currency: "eur",
+      refunded: true,
+    },
+  };
+
+  it("charge.refunded is recorded WITH its parsed summary and marked processed", async () => {
+    withEvent(REFUND_EVENT);
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect((await res.json()).recordOnly).toBe(true);
+    expect(record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId: "evt_ref",
+        eventType: "charge.refunded",
+        payload: expect.objectContaining({
+          summary: expect.objectContaining({
+            chargeId: "ch_1",
+            amountRefundedCents: 2900,
+            fullyRefunded: true,
+          }),
+        }),
+      }),
+    );
+    expect(processed).toHaveBeenCalledWith("evt_ref");
+  });
+
+  it("a FULL refund never auto-cancels: no subscription/invoice state write", async () => {
+    withEvent(REFUND_EVENT);
+    await post();
+    expect(upsert).not.toHaveBeenCalled();
+    expect(invoicePay).not.toHaveBeenCalled();
+  });
+
+  it("charge.dispute.created/closed are recorded with the dispute summary, no state write", async () => {
+    for (const [id, type, status] of [
+      ["evt_dp1", "charge.dispute.created", "needs_response"],
+      ["evt_dp2", "charge.dispute.closed", "won"],
+    ] as const) {
+      vi.clearAllMocks();
+      record.mockResolvedValue("ok");
+      processed.mockResolvedValue();
+      withEvent({
+        id,
+        type,
+        testMode: true,
+        object: { id: "dp_1", charge: "ch_1", status, reason: "fraudulent", amount: 100, currency: "eur" },
+      });
+      const res = await post();
+      expect(res.status).toBe(200);
+      expect(record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: type,
+          payload: expect.objectContaining({
+            summary: expect.objectContaining({ disputeId: "dp_1", status }),
+          }),
+        }),
+      );
+      expect(processed).toHaveBeenCalledWith(id);
+      expect(upsert).not.toHaveBeenCalled();
+      expect(invoicePay).not.toHaveBeenCalled();
+    }
+  });
+
+  it("a duplicate-processed refund replay is skipped, not re-recorded as processed", async () => {
+    withEvent(REFUND_EVENT);
+    record.mockResolvedValue("duplicate-processed");
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect((await res.json()).duplicate).toBe(true);
+    expect(processed).not.toHaveBeenCalled();
   });
 });
 

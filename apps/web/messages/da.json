@@ -930,6 +930,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Betalingen blev annulleret — der blev ikke trukket noget, og intet er ændret på din konto."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {

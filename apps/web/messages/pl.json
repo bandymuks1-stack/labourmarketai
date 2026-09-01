@@ -930,6 +930,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Płatność została anulowana — nic nie pobrano i nic się nie zmieniło na Twoim koncie."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {

@@ -930,6 +930,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Maksājums tika atcelts — nekas netika iekasēts, un jūsu kontā nekas nemainījās."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {

@@ -4745,6 +4745,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Der Checkout wurde abgebrochen — es wurde nichts abgebucht und an Ihrem Konto hat sich nichts geändert."
+    },
     "eyebrow": "Preise",
     "title": "Einfache Stufen,",
     "titleAccent": "fair angesetzt.",
@@ -7887,6 +7890,49 @@
     "starting": "Wird gestartet…",
     "error": "Konnte nicht gestartet werden"
   },
+  "adminLmc": {
+    "title": "LMC-Hauptbuch",
+    "intro": "Internes Plattformguthaben (1 LMC = 1 EUR internes Guthaben). Live-Datenbankstand: Schalter, ausstehende Verpflichtung und Tester-Gutschrift. Alle kommerziellen Schalter sind AUS; das Einschalten ist eine Entscheidung des Eigentümers.",
+    "unavailable": "Das Hauptbuch konnte mit dieser Sitzung nicht gelesen werden — ein fehlgeschlagener Lesevorgang, kein leeres Hauptbuch.",
+    "on": "An",
+    "off": "Aus",
+    "policy": {
+      "admin": "durch Admin schaltbar",
+      "owner_only": "nur Eigentümer",
+      "system_locked": "systemgesperrt"
+    },
+    "liability": {
+      "outstanding": "Ausstehendes Guthaben",
+      "promotional": "Promo",
+      "purchased": "Gekauft",
+      "accounts": "Konten",
+      "note": "Jeder ausgegebene LMC ist eine aufgeschobene Verpflichtung in Euro. Live-Lesung der kanonischen Saldo-Sicht — kein gespeicherter Bericht."
+    },
+    "grant": {
+      "email": "E-Mail des Empfängers",
+      "amount": "Betrag (LMC)",
+      "reason": "Grund (wird im Hauptbuch gespeichert)",
+      "campaign": "Kampagne",
+      "expiryDays": "Läuft ab in (Tagen)",
+      "key": "Idempotenzschlüssel",
+      "submit": "LMC gutschreiben",
+      "submitting": "Wird gutgeschrieben…",
+      "granted": "Gutgeschrieben",
+      "replay": "Mit diesem Schlüssel wurde bereits gutgeschrieben — nichts wurde doppelt gutgeschrieben",
+      "disabledHint": "Promo-Gutschriften sind in der Datenbank AUS — das Hauptbuch wird diese Gutschrift ablehnen. Das Einschalten ist eine Entscheidung im Eigentümerkanal.",
+      "reasons": {
+        "grants_disabled": "Abgelehnt: Promo-Gutschriften sind deaktiviert",
+        "not_admin": "Abgelehnt: Admin-Identität erforderlich",
+        "recipient_not_found": "Abgelehnt: kein verifiziertes Profil mit dieser E-Mail",
+        "invalid_amount": "Abgelehnt: ungültiger Betrag",
+        "invalid_expiry": "Abgelehnt: ungültiges Ablaufdatum",
+        "idempotency_conflict": "Abgelehnt: dieser Schlüssel wurde bereits anders verwendet",
+        "ledger_absent": "Die Hauptbuchfunktionen sind nicht verfügbar",
+        "error": "Das Hauptbuch hat die Gutschrift abgelehnt"
+      }
+    },
+    "spendFrozen": "Ausgeben ist AUS — ausgegebenes Guthaben bleibt eingefroren, bis der Eigentümer das Ausgeben aktiviert."
+  },
   "adminBilling": {
     "eyebrow": "ABRECHNUNG — TESTMODUS",
     "title": "Abrechnungszentrum",
@@ -9076,6 +9122,36 @@
     "links": {
       "workers": "Für Arbeitskräfte",
       "companies": "Für Unternehmen"
+    }
+  },
+  "accountBilling": {
+    "title": "Abrechnung & Abonnement",
+    "testBadge": "Testmodus",
+    "returned": {
+      "success": "Test-Checkout abgeschlossen. Es ist kein echtes Geld geflossen; der Abonnementstatus unten wird über den signaturgeprüften Webhook des Zahlungsanbieters synchronisiert und kann einen Moment brauchen.",
+      "cancelled": "Der Checkout wurde abgebrochen. Es wurde nichts abgebucht und an Ihrem Konto hat sich nichts geändert.",
+      "portal": "Sie sind zurück aus dem Abrechnungsportal. Dort vorgenommene Änderungen werden hier automatisch synchronisiert."
+    },
+    "disabled": "Zahlungen sind nicht aktiviert. Bezahlpläne sind vorbereitete Entwürfe — hier ist nichts kaufbar und keine Zahlungsmethode nötig.",
+    "none": "Kein Abonnement auf diesem Konto.",
+    "planLabel": "Tarif",
+    "statusLabel": "Abostatus",
+    "status": {
+      "none": "Kein Abonnement",
+      "trialing": "Testphase",
+      "active": "Aktiv",
+      "past_due": "Zahlung überfällig",
+      "unpaid": "Unbezahlt",
+      "cancelled": "Gekündigt",
+      "incomplete": "Unvollständig",
+      "expired": "Abgelaufen"
+    },
+    "graceNotice": "Die letzte Zahlung ist fehlgeschlagen — das Abonnement befindet sich bis zum erneuten Versuch in einer Kulanzfrist.",
+    "manage": {
+      "open": "Abonnement verwalten",
+      "opening": "Wird geöffnet…",
+      "error": "Das Abrechnungsportal konnte nicht geöffnet werden",
+      "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode. Nur Testmodus — keine echten Abbuchungen."
     }
   },
   "accountPlan": {

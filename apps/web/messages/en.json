@@ -4745,6 +4745,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Checkout was cancelled — nothing was charged and nothing changed on your account."
+    },
     "eyebrow": "Pricing",
     "title": "Simple tiers,",
     "titleAccent": "set fairly.",
@@ -7887,6 +7890,49 @@
     "starting": "Starting…",
     "error": "Could not start"
   },
+  "adminLmc": {
+    "title": "LMC ledger",
+    "intro": "Internal platform credit (1 LMC = 1 EUR of internal credit). Live database state: kill-switches, outstanding liability and the tester grant. All commercial switches ship OFF; flipping one is an owner decision.",
+    "unavailable": "The ledger could not be read with this session — this is a failed read, not an empty ledger.",
+    "on": "On",
+    "off": "Off",
+    "policy": {
+      "admin": "admin-flippable",
+      "owner_only": "owner only",
+      "system_locked": "system locked"
+    },
+    "liability": {
+      "outstanding": "Outstanding credit",
+      "promotional": "Promotional",
+      "purchased": "Purchased",
+      "accounts": "Accounts",
+      "note": "Every issued LMC is a euro of deferred obligation. Live read of the canonical balance view — not a stored report."
+    },
+    "grant": {
+      "email": "Recipient email",
+      "amount": "Amount (LMC)",
+      "reason": "Reason (stored in the ledger)",
+      "campaign": "Campaign",
+      "expiryDays": "Expires in (days)",
+      "key": "Idempotency key",
+      "submit": "Credit LMC",
+      "submitting": "Crediting…",
+      "granted": "Credited",
+      "replay": "Already credited earlier with this key — nothing was credited twice",
+      "disabledHint": "Promotional grants are switched OFF in the database — the ledger will refuse this grant. Enabling the switch is an owner-channel decision.",
+      "reasons": {
+        "grants_disabled": "Refused: promotional grants are disabled",
+        "not_admin": "Refused: admin identity required",
+        "recipient_not_found": "Refused: no verified profile for that email",
+        "invalid_amount": "Refused: invalid amount",
+        "invalid_expiry": "Refused: invalid expiry",
+        "idempotency_conflict": "Refused: this key was already used differently",
+        "ledger_absent": "The ledger functions are not available",
+        "error": "The ledger refused the grant"
+      }
+    },
+    "spendFrozen": "Spending is switched OFF — issued credit stays frozen until the owner enables spending."
+  },
   "adminBilling": {
     "eyebrow": "BILLING — TEST MODE",
     "title": "Billing center",
@@ -9076,6 +9122,36 @@
     "links": {
       "workers": "For workers",
       "companies": "For companies"
+    }
+  },
+  "accountBilling": {
+    "title": "Billing & subscription",
+    "testBadge": "Test mode",
+    "returned": {
+      "success": "Test-mode checkout completed. No real money moved; the subscription state below syncs from the payment provider's signature-verified webhook and can take a moment to appear.",
+      "cancelled": "Checkout was cancelled. Nothing was charged and nothing changed on your account.",
+      "portal": "You are back from the billing portal. Any change you made there syncs to this page automatically."
+    },
+    "disabled": "Payments are not enabled. Paid plans are prepared drafts — nothing is purchasable here and no payment method is needed.",
+    "none": "No subscription on this account.",
+    "planLabel": "Plan",
+    "statusLabel": "Status",
+    "status": {
+      "none": "No subscription",
+      "trialing": "Trial period",
+      "active": "Active",
+      "past_due": "Payment overdue",
+      "unpaid": "Unpaid",
+      "cancelled": "Cancelled",
+      "incomplete": "Incomplete",
+      "expired": "Expired"
+    },
+    "graceNotice": "The last payment failed — the subscription is in a grace period until it is retried.",
+    "manage": {
+      "open": "Manage subscription",
+      "opening": "Opening…",
+      "error": "Could not open the billing portal",
+      "hint": "Opens the payment provider's portal to cancel or update the payment method. Test mode only — no real charges."
     }
   },
   "accountPlan": {
