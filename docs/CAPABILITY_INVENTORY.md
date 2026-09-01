@@ -75,7 +75,8 @@
 | `student` / `volunteer` relationship writable | `PROVEN` | RPC under RLS; `manager` correctly rejected |
 | **Institution ↔ learner link** | `APPLIED`, `PROD-PROVEN (server chain)` | Migration 20260827200000 applied 2026-08-27 (ledger `20260827132137`). Re-proven on PRODUCTION in rolled-back transactions: capable org invites → learner accepts → `student` engagement alongside the existing employment; org without `training_provider` refused; `manager` refused; legacy invitation still → `employee`. Browser chain against the deployed app NOT yet run. |
 | Learner visibility is NOT employer visibility | `APPLIED`, `PROD-PROVEN` | 20260827210000. Controlled comparison, non-admin org owner: one engagement row, `employee` → visible, same row as `student` → not visible. |
-| Transversal capability recognition | `PARTIAL` | LT/EN/RU only, classified `deferred` |
+| Transversal capability recognition | `PROVEN` (12 recognition languages) | All 8 slugs classified `core`: LT/EN/RU base lexicon + real per-language needles in all 9 offline packs (da de et fi lv nl no pl sv). Guard-enforced (`offline-language-pack.test.ts`) + real-sentence tests (`lib/structuring/transversal-capability-locales.test.ts`). |
+| Practice/volunteering as a matching signal | `SHIPPED (labelled, additive)` | `MatchSubject.practiceEngagements` → `practice_experience` reason in match-v1; NEVER employment, never a score input. Readable by the admin workbench + the worker's own board; an employer scouting session cannot read `engagement_contexts` (RLS 0013) so it degrades to "not stated". |
 
 ### Cross-cutting
 | capability | status | evidence |
@@ -141,9 +142,17 @@
    same day — see blocker 6 below, which is now a resolved entry rather than an
    open one.
 
-   What is still MISSING is not code: **0 production organizations hold
-   `training_provider`**, so no institution exists in production yet, and the
-   user-facing browser chain has not been run against the deployed app.
+   **The "0 production organizations hold `training_provider`" blocker is
+   CLOSED (2026-08-28).** `Labour market ai Sp. z o.o` now holds
+   `employer,training_provider`, set through the REAL UI (workspace switch →
+   organization-capability card), not SQL — invariant I-2 (one organization,
+   many capabilities) proven live in production for the first time. The
+   institution↔learner invitation shipped with #1301 and is applied.
+
+   What is still MISSING is one browser step, and it is an OWNER gate rather
+   than code: the learner half (institution invites → learner ACCEPTS) needs a
+   SECOND signed-in identity against the deployed app. The server chain for
+   exactly that step is prod-proven in rolled-back transactions (above).
 2. **Employer need → matching → shortlist — PROVEN 2026-08-27.** Exercised in
    a browser against a real demand: the LT demand text was recognised into
    skills, candidates were retrieved and ranked with an evidence-tier basis
@@ -187,10 +196,12 @@
      and a hand-rolled invocation does not — four grey SKIPs that read like
      four green ticks.
 
-   **Still open:** the chain is proven on the LOCAL stack. It has not been run
-   against the deployed app, and 0 production organizations hold
-   `training_provider`, so production remains `PARTIAL` for the same reason
-   blocker 1 records.
+   **Still open:** the chain is proven on the LOCAL stack and, server-side, on
+   production. Production holds its first `training_provider` organization
+   since 2026-08-28, so that half is no longer the blocker; what has not been
+   run against the deployed app is the learner ACCEPT step in a browser, which
+   needs a second signed-in identity (owner gate). Production therefore stays
+   `PARTIAL` for that one reason — see blocker 1.
 4. **Languages: 5 of 26 routed, Georgian absent entirely.** One narrower gap
    inside this was closed on 2026-08-27: the work-log context selector could
    not NAME a placement, because its base label resolved through
@@ -333,7 +344,7 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 | Worker: register→onboard→CV→journal→opportunities→interest | ✅ proven | Ⓖ stale gate (flip train in flight) | ◐ profile/CV-read, journal r/w, interest, work-card via bridge | — |
 | Employer: setup→demand→matching→shortlist→contact→booking | ✅ proven | ✗ | ✗ no company.* capability yet | employer workspace resolver is cookie-coupled |
 | Student/learner: link→journal→evidence→CV | ✅ local chain 7/7; prod partial | ✗ | ◐ same as worker | gets WORKER home copy (M10) |
-| Education institution: declare→invite→learner evidence | ✅ server-proven; 0 prod `training_provider` orgs | ✗ | ✗ | gets EMPLOYER home copy (M10) |
+| Education institution: declare→invite→learner evidence | ✅ server-proven; first prod `training_provider` org live 2026-08-28 | ✗ | ✗ | learner ACCEPT in a browser needs a 2nd identity (owner gate); gets EMPLOYER home copy (M10) |
 | Customer/buyer: register→browse services→request | ◐ | ✗ | ✗ | absent from onboarding (M8); buyer `customer_requests` reach nobody (verified-company gate) |
 | Project/team manager: projects→tasks→timesheets→absences | ◐ | ✗ | ✗ | three prod-broken links (§5.2 M1–M3) |
 | AI actors | recorded, deferred (ARCH §5.1) | — | transport seam = MCP | — |
@@ -366,8 +377,8 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 |---|---|---|
 | WORKER_READY (web) | **YES** — first-value journey proven, no known P0 in it | — |
 | EMPLOYER_READY (web) | **YES (web core)** — need→match→shortlist→interest proven (12/12 e2e refresh 2026-08-31); absence review + booking→project for engagement employers proven live in prod (M1/M2 closed as doc-stale) | — |
-| STUDENT_READY | PARTIAL | prod browser chain + M10 |
-| EDUCATION_INSTITUTION_READY | PARTIAL | real prod `training_provider` org + M10 |
+| STUDENT_READY | PARTIAL | prod browser chain (2nd identity, owner gate) + M10 |
+| EDUCATION_INSTITUTION_READY | PARTIAL | first real prod `training_provider` org LIVE (2026-08-28) and #1301 applied; remaining: learner ACCEPT in a browser (2nd identity, owner gate) + M10 |
 | MOBILE_ANDROID_READY / IOS | NO — builds proven, zero product data | gate-flip train + runtime proof |
 | MARKETPLACE_READY | NO — loop works, reachability ≈ zero | M7, M8 slices |
 | CV_IMPORT_READY | YES (DOCX + PDF proven); XLSX/bulk = G10 architecture decision | — |

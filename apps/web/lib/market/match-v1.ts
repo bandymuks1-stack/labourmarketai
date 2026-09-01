@@ -216,6 +216,24 @@ export interface MatchSubject {
   /** workers.experience_years — evaluated ONLY when the demand author set a
    *  requirement_priorities.min_experience tier (Wagon 4); null = not stated. */
   readonly experienceYears?: number | null;
+
+  /**
+   * PRACTICE PLACEMENTS the person really completed — the count of
+   * `engagement_contexts` rows whose `relationship_slug` is one of
+   * `PRACTICE_RELATIONSHIPS` (student / volunteer — see
+   * lib/player-card/work-history-model.ts, which keeps that list SEPARATE from
+   * `WORKER_RELATIONSHIPS` precisely so a placement is never printed as a job).
+   *
+   * It is NEVER merged with employment, with `experienceYears`, or with the
+   * skill sets. It exists so that a real placement — the education pilot's
+   * whole premise that a student who completed one is not "someone with no
+   * experience" — stops being invisible to the match result.
+   *
+   * null / undefined = the reader could not see the rows (RLS: an employer
+   * cannot read a candidate's engagements) — honest "not stated", never
+   * "this person has none".
+   */
+  readonly practiceEngagements?: number | null;
 }
 
 /** Great-circle distance in km (haversine). Pure; used only when BOTH sides
@@ -255,6 +273,9 @@ export type MatchReason =
   | { readonly code: "skill_fit"; readonly matched: number; readonly total: number; readonly confirmed: number }
   | { readonly code: "skills_journal_supported"; readonly count: number }
   | { readonly code: "skills_manager_confirmed"; readonly count: number }
+  /** Completed PRACTICE placements (student / volunteer). Its own code, with
+   *  its own localized label, so it can never be read as employment. */
+  | { readonly code: "practice_experience"; readonly count: number }
   | { readonly code: "country_match" }
   | { readonly code: "city_match" }
   | { readonly code: "location_within_radius"; readonly km: number; readonly radiusKm: number }
@@ -508,6 +529,35 @@ export function matchWorkerToNeed(
       outcome: "met",
       source: "worker_skills.source",
     });
+  }
+
+  // ── Practice placements — ADDITIVE, LABELLED, NEVER SCORED. ───────────────
+  //
+  // WHY IT EXISTS. The education chain is live in production: a
+  // training_provider invites a learner, the learner records practice /
+  // volunteer work, and `engagement_contexts` carries the placement. Every
+  // other surface renders it under its own heading — but the MATCH RESULT
+  // could not see it at all, so the one fact the education pilot exists to
+  // establish ("this person did real work, as a placement") reached the human
+  // deciding the match as silence.
+  //
+  // WHY IT IS ONLY A REASON. Three invariants, in this order:
+  //   (a) LABELLED — its own code, its own localized string. It is never
+  //       folded into employment, `experienceYears`, or the skill sets.
+  //   (b) ADDITIVE ONLY — it touches neither `status`, nor `eligible`, nor
+  //       `hardBlock`/`softCap`, nor `strengths` (a weighted criterion is an
+  //       ordering input), nor `compareMatches`. Adding practice to a subject
+  //       can therefore only APPEND one reason: no candidate's fit can fall,
+  //       and no employment-backed candidate can be reordered downward by
+  //       someone else's placement.
+  //   (c) HONEST — absence is "we could not see it" (RLS / unapplied read),
+  //       never "this person has none", so nothing is emitted for absence.
+  //
+  // A placement is evidence a human weighs, not a number the engine assigns
+  // (§19: fit with its basis, never a rating).
+  const practiceEngagements = subject.practiceEngagements ?? 0;
+  if (practiceEngagements > 0) {
+    reasons.push({ code: "practice_experience", count: practiceEngagements });
   }
 
   // Skill gap.
