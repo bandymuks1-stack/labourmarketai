@@ -1,11 +1,11 @@
 import React from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 
-import { failureKey, type DomainFailure } from "../domain";
 import { useLocale } from "../i18n/locale-context";
-import { Body, Button, NotAvailable } from "../ui/primitives";
+import { Body } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import type { CapabilityState } from "../use-capability";
+import { CapabilityFailureNotice } from "./capability-failure";
 
 /**
  * WHAT A SCREEN SHOWS AROUND A CAPABILITY READ.
@@ -22,10 +22,12 @@ import type { CapabilityState } from "../use-capability";
  *   - It does not spin forever. The spinner here has a real request behind it,
  *     and every outcome of that request resolves to content or to a sentence.
  *
- * Failures render the catalogue sentence for the failure kind (localized),
- * the server's own words as muted detail when it said any, and a retry.
+ * Failures render through `CapabilityFailureNotice`, which is shared with the
+ * write flows: the catalogue sentence for the failure kind (localized), the
+ * server's own words as muted detail when it said any, and a retry.
  * `refusalText` lets a screen translate a KNOWN capability code (for example
- * `no_worker_profile`) into its own honest, localized sentence.
+ * `no_worker_profile`) into its own honest, localized sentence — and a named
+ * refusal is a finding, so it gets no retry.
  */
 export function CapabilityGate<T>({
   state,
@@ -50,55 +52,16 @@ export function CapabilityGate<T>({
   }
 
   if (state.status === "failed") {
-    const known = knownRefusal(state.failure, refusalText);
-    if (known !== null) {
-      // A refusal the screen can name in the person's language — a finding,
-      // not an error, so no retry button pretending it might change.
-      return <NotAvailable title={t("domain.failedTitle")} body={known} />;
-    }
     return (
-      <NotAvailable
-        title={t("domain.failedTitle")}
-        body={t(failureKey(state.failure))}
-      >
-        {detailOf(state.failure) !== null ? (
-          <Body muted>{detailOf(state.failure)}</Body>
-        ) : null}
-        <Button
-          variant="quiet"
-          testID="capability-retry"
-          label={t("domain.retry")}
-          onPress={reload}
-        />
-      </NotAvailable>
+      <CapabilityFailureNotice
+        failure={state.failure}
+        refusalText={refusalText}
+        retry={reload}
+      />
     );
   }
 
   return <>{children(state.data)}</>;
-}
-
-function knownRefusal(
-  failure: DomainFailure,
-  refusalText: ((code: string) => string | null) | undefined,
-): string | null {
-  if (failure.kind !== "capability_refused" || refusalText === undefined) {
-    return null;
-  }
-  return refusalText(failure.code);
-}
-
-/** The server's own words, when it said any — shown muted, never invented. */
-function detailOf(failure: DomainFailure): string | null {
-  switch (failure.kind) {
-    case "capability_refused":
-      return failure.message;
-    case "unreachable":
-      return failure.detail;
-    case "transport_unavailable":
-      return failure.because;
-    default:
-      return null;
-  }
 }
 
 const styles = StyleSheet.create({

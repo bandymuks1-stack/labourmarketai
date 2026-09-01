@@ -91,17 +91,27 @@ export function Button({
 
 export function Field({
   label,
+  hint,
+  style,
   ...props
-}: TextInputProps & { label: string }) {
+}: TextInputProps & { label: string; hint?: string }) {
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
+        // The label is the accessible name; a hint that exists is the
+        // accessible HINT, so a screen-reader user hears the format rule the
+        // sighted user reads under the box rather than nothing at all.
         accessibilityLabel={label}
+        accessibilityHint={hint}
         placeholderTextColor={theme.color.textMuted}
-        style={styles.input}
         {...props}
+        // AFTER the spread, and merged rather than replaced: a caller that
+        // needs a taller multiline box must not silently lose the border,
+        // colours and minimum height that make the field usable.
+        style={[styles.input, style]}
       />
+      {hint !== undefined ? <Text style={styles.fieldHint}>{hint}</Text> : null}
     </View>
   );
 }
@@ -185,6 +195,10 @@ const styles = StyleSheet.create({
   buttonQuietLabel: { color: theme.color.text },
   field: { gap: theme.space.xs },
   fieldLabel: {
+    color: theme.color.textMuted,
+    fontSize: theme.font.small,
+  },
+  fieldHint: {
     color: theme.color.textMuted,
     fontSize: theme.font.small,
   },
