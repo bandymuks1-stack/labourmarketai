@@ -7028,6 +7028,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Journalentwurf erstellen",
+      "title": "Vom Dokument ins Arbeitsjournal",
+      "understoodNote": "Unten steht der aus „{filename}“ gelesene Text. Prüfe, bearbeite und bestätige ihn — erst dann wird er Teil deiner Journalhistorie.",
+      "detectedSkills": "Wir haben {count} Erwähnungen von Fähigkeiten im Text erkannt.",
+      "notesLabel": "Eintragstext (aus deinem Dokument — vor dem Speichern bearbeiten)",
+      "engagementLabel": "Arbeitskontext",
+      "save": "Bestätigen und im Journal speichern",
+      "saving": "Speichern…",
+      "saved": "Im Arbeitsjournal gespeichert — das Quelldokument bleibt mit diesem Eintrag verknüpft.",
+      "savedLink": "Journal öffnen",
+      "error": "Speichern fehlgeschlagen. Nichts wurde gespeichert.",
+      "notFound": "Dieses Dokument wurde in deinen Dokumenten nicht gefunden.",
+      "refusedClassified": "Vertrauliche Dokumente werden nicht automatisch gelesen — der Download bleibt ein protokollierter manueller Schritt.",
+      "refusedNoOcr": "Fotos werden nicht gelesen — Texterkennung existiert noch nicht.",
+      "refusedType": "Dieser Dateityp kann nicht als Text gelesen werden.",
+      "empty": "In diesem Dokument wurde kein lesbarer Text gefunden.",
+      "failed": "Das Dokument konnte nicht gelesen werden.",
+      "noEngagement": "Du brauchst zuerst einen Arbeitskontext — öffne das Dashboard und richte einen ein."
+    },
     "currentVersion": "Version {n}",
     "download": "Herunterladen",
     "noFileYet": "Noch keine Datei hochgeladen.",

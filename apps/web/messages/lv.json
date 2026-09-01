@@ -4655,6 +4655,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Sagatavot žurnāla ierakstu",
+      "title": "No dokumenta uz Darba žurnālu",
+      "understoodNote": "Zemāk ir teksts, kas nolasīts no “{filename}”. Pārskati, izlabo un apstiprini — tikai tad tas kļūs par tava žurnāla vēstures daļu.",
+      "detectedSkills": "Tekstā atradām prasmju pieminējumus: {count}",
+      "notesLabel": "Ieraksta teksts (no tava dokumenta — izlabo pirms saglabāšanas)",
+      "engagementLabel": "Darba konteksts",
+      "save": "Apstiprināt un saglabāt žurnālā",
+      "saving": "Saglabā…",
+      "saved": "Saglabāts tavā Darba žurnālā — avota dokuments paliek saistīts ar šo ierakstu.",
+      "savedLink": "Atvērt žurnālu",
+      "error": "Saglabāt neizdevās. Nekas netika ierakstīts.",
+      "notFound": "Šis dokuments nav atrasts starp taviem dokumentiem.",
+      "refusedClassified": "Konfidenciāli dokumenti netiek lasīti automātiski — lejupielāde paliek reģistrēts manuāls solis.",
+      "refusedNoOcr": "Fotogrāfijas netiek lasītas — teksta atpazīšanas vēl nav.",
+      "refusedType": "Šī tipa failu nevar nolasīt kā tekstu.",
+      "empty": "Šajā dokumentā nav atrasts lasāms teksts.",
+      "failed": "Dokumentu neizdevās nolasīt.",
+      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",

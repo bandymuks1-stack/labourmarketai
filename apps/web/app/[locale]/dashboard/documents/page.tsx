@@ -26,6 +26,7 @@ import {
 } from "@/lib/documents/document-centre-model";
 import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-document-verify-request-button";
 import { WorkerDocumentFileSlot } from "@/components/app/worker-document-file-slot";
+import { DocumentJournalDraftReview } from "@/components/app/document-journal-draft-review";
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
@@ -172,6 +173,8 @@ export default async function WorkerDocumentsPage({
     regObject?: string;
     regRetention?: string;
     regQ?: string;
+    /** C2b — document → journal draft review (searchParams only, no route). */
+    draftFrom?: string;
     /** Training & Certification v1 outcome notice (closed vocabulary,
      *  validated inside the section — never rendered raw). */
     trn?: string;
@@ -366,6 +369,16 @@ export default async function WorkerDocumentsPage({
       <HashScrollOnLoad />
       <Header t={t} />
       <DocNoticeBanner notice={sp.docNotice} tf={tf} />
+
+      {/* C2b — document → journal draft review. Mounted ONLY under
+          ?draftFrom= (searchParams only, no route — this page's stated
+          pattern); the seam re-answers ownership under the caller's RLS. */}
+      {sp.draftFrom ? (
+        <DocumentJournalDraftReview
+          locale={locale}
+          documentFileId={sp.draftFrom}
+        />
+      ) : null}
 
       {/* (a) Attention strip — counts of REAL field states only (derived
           valid_until status; stored verification), each resolving into the
