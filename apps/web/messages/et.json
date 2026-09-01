@@ -5712,5 +5712,77 @@
         "hint": "Oleme tellija."
       }
     }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Impordi tunnid arvutustabelist (.xlsx)",
+      "backToEntry": "Tagasi päevasisestusse",
+      "title": "Tööajatabeli import",
+      "subtitle": "Laadige üles kuu tööajatabel. Vaadake tõlgendus allpool üle ja parandage — midagi ei salvestata enne, kui kinnitate.",
+      "fileLabel": "Tööajatabeli fail (.xlsx)",
+      "fileHint": "Kuu ruudustik töötaja × päev või leht veergudega töötaja / kuupäev / objekt / tunnid, kuni 5 MB.",
+      "parse": "Faili eelvaade",
+      "parsing": "Loen…",
+      "refused": {
+        "no-file": "Valige kõigepealt fail.",
+        "too-large": "Fail on suurem kui 5 MB.",
+        "not-xlsx": "See ei ole .xlsx-arvutustabel.",
+        "too-complex": "Arvutustabel on turvaliseks lugemiseks liiga suur.",
+        "read-failed": "Faili ei õnnestunud lugeda.",
+        "unrecognized": "Selles failis ei tuvastatud tööajatabeli struktuuri.",
+        "too-many-rows": "Lehel on rohkem ridu, kui üks import mahutab — jagage fail osadeks."
+      },
+      "emptyFile": "Failis pole tööajatabeli andmeid.",
+      "noCompany": "Lülituge ettevõtte tööruumi.",
+      "summary": "Loetud read: {rows} (leht {sheet}).",
+      "notPersistedNotice": "Midagi ei salvestata enne, kui kinnitate.",
+      "skippedTitle": "Lahtrid, mida ei õnnestunud lugeda",
+      "skippedReasons": {
+        "unparsable": "loetamatu väärtus",
+        "hours-out-of-bounds": "tunnid väljaspool 0–24",
+        "invalid-date": "sellist kuupäeva selles kuus pole"
+      },
+      "monthLabel": "Kuu",
+      "monthHint": "Leht ei nimeta kuud — valige see selgesõnaliselt.",
+      "duplicateWarning": "Identsed kirjed on juba olemas {count} rea jaoks (sama töötaja, kuupäev, objekt ja tunnid). Uuesti kirjutamine nõuab allolevat kinnitust.",
+      "columns": {
+        "include": "Kaasa",
+        "worker": "Töötaja",
+        "object": "Objekt",
+        "date": "Kuupäev",
+        "hours": "Tunnid",
+        "note": "Märkus",
+        "status": "Olek"
+      },
+      "chooseWorker": "Valige töötaja",
+      "chooseObject": "Valige objekt",
+      "suggestions": "Soovitused",
+      "allWorkers": "Kõik töötajad",
+      "allObjects": "Kõik objektid",
+      "needsReview": "Mitmetähenduslik lahter — kontrollige jaotust",
+      "duplicateBadge": "Juba kirjas",
+      "incomplete": "Valik puudub",
+      "rowProblems": {
+        "worker": "Töötajat ei aktsepteeritud",
+        "object": "Objekti ei aktsepteeritud",
+        "date": "Vigane kuupäev",
+        "hours": "Vigased tunnid",
+        "note": "Märkus on liiga pikk"
+      },
+      "overrideLabel": "Kirjuta duplikaadid siiski (tõeline teine vahetus)",
+      "confirm": "Kinnita valitud read ({count})",
+      "confirming": "Kirjutan…",
+      "receipt": "Valmis — kirjutatud kirjeid: {count}. Need on nüüd töötundide osa.",
+      "confirmBlockedHint": "Iga kaasatud rida vajab töötajat, objekti, kuupäeva ja tunde.",
+      "errors": {
+        "invalidRows": "Parandamist vajavad read: {count}. Midagi ei kirjutatud.",
+        "duplicatesFound": "Identseid olemasolevaid kirjeid: {count}. Midagi ei kirjutatud — märkige kinnitus, et need siiski kirjutada.",
+        "noRows": "Pole ridu, mida kirjutada.",
+        "tooManyRows": "Ühe impordi jaoks liiga palju ridu — jagage fail osadeks.",
+        "needsMigration": "See funktsioon pole selles andmebaasis veel lubatud.",
+        "notAuthorized": "Te ei tohi neid tunde kirjutada.",
+        "generic": "Töötlemine ebaõnnestus. Proovige uuesti."
+      }
+    }
   }
 }

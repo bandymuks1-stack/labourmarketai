@@ -5712,5 +5712,77 @@
         "hint": "Vi er ordregiver."
       }
     }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importér timer fra et regneark (.xlsx)",
+      "backToEntry": "Tilbage til daglig registrering",
+      "title": "Import af timeseddel",
+      "subtitle": "Upload en månedlig timeseddel. Gennemgå og ret fortolkningen nedenfor — intet gemmes, før du bekræfter.",
+      "fileLabel": "Timeseddelfil (.xlsx)",
+      "fileHint": "Et månedsgitter medarbejder × dag eller et ark med kolonnerne medarbejder / dato / objekt / timer, op til 5 MB.",
+      "parse": "Forhåndsvis fil",
+      "parsing": "Læser…",
+      "refused": {
+        "no-file": "Vælg først en fil.",
+        "too-large": "Filen er større end 5 MB.",
+        "not-xlsx": "Dette er ikke et .xlsx-regneark.",
+        "too-complex": "Regnearket er for stort til at blive læst sikkert.",
+        "read-failed": "Filen kunne ikke læses.",
+        "unrecognized": "Der blev ikke genkendt nogen timeseddelstruktur i denne fil.",
+        "too-many-rows": "Arket indeholder flere rækker, end én import kan rumme — del filen op."
+      },
+      "emptyFile": "Filen indeholder ingen timeseddeldata.",
+      "noCompany": "Skift til et virksomhedsarbejdsområde.",
+      "summary": "Læste rækker: {rows} (ark {sheet}).",
+      "notPersistedNotice": "Intet gemmes, før du bekræfter.",
+      "skippedTitle": "Celler, der ikke kunne læses",
+      "skippedReasons": {
+        "unparsable": "ulæselig værdi",
+        "hours-out-of-bounds": "timer uden for 0–24",
+        "invalid-date": "denne dato findes ikke i denne måned"
+      },
+      "monthLabel": "Måned",
+      "monthHint": "Arket angiver ingen måned — vælg den udtrykkeligt.",
+      "duplicateWarning": "Identiske registreringer findes allerede for {count} rækker (samme medarbejder, dato, objekt og timer). At skrive dem igen kræver bekræftelsen nedenfor.",
+      "columns": {
+        "include": "Medtag",
+        "worker": "Medarbejder",
+        "object": "Objekt",
+        "date": "Dato",
+        "hours": "Timer",
+        "note": "Note",
+        "status": "Status"
+      },
+      "chooseWorker": "Vælg en medarbejder",
+      "chooseObject": "Vælg et objekt",
+      "suggestions": "Forslag",
+      "allWorkers": "Alle medarbejdere",
+      "allObjects": "Alle objekter",
+      "needsReview": "Tvetydig celle — tjek opdelingen",
+      "duplicateBadge": "Allerede registreret",
+      "incomplete": "Valg mangler",
+      "rowProblems": {
+        "worker": "Medarbejder ikke accepteret",
+        "object": "Objekt ikke accepteret",
+        "date": "Ugyldig dato",
+        "hours": "Ugyldige timer",
+        "note": "Noten er for lang"
+      },
+      "overrideLabel": "Skriv dubletter alligevel (en ægte anden vagt)",
+      "confirm": "Bekræft valgte rækker ({count})",
+      "confirming": "Skriver…",
+      "receipt": "Færdig — skrevne registreringer: {count}. De er nu en del af arbejdstimerne.",
+      "confirmBlockedHint": "Hver medtaget række kræver en medarbejder, et objekt, en dato og timer.",
+      "errors": {
+        "invalidRows": "Rækker, der skal rettes: {count}. Intet blev skrevet.",
+        "duplicatesFound": "Identiske eksisterende registreringer: {count}. Intet blev skrevet — markér bekræftelsen for at skrive dem alligevel.",
+        "noRows": "Ingen rækker at skrive.",
+        "tooManyRows": "For mange rækker til én import — del filen op.",
+        "needsMigration": "Denne funktion er endnu ikke aktiveret i denne database.",
+        "notAuthorized": "Du må ikke registrere disse timer.",
+        "generic": "Behandlingen mislykkedes. Prøv igen."
+      }
+    }
   }
 }
