@@ -89,6 +89,14 @@ const CHAT_KEYS = [
   // The timesheet area of the planning page, reachable by sentence
   // (self-serve approval-template closure slice).
   "timesheetsChip",
+  // §9 chat-first coverage — six domains that shipped reachable only by URL.
+  // They reuse `adminRouteHint` for the sentence and add one chip label each.
+  "timesheetImportChip",
+  "workHoursChip",
+  "absencesChip",
+  "documentsChip",
+  "marketMapChip",
+  "activityChip",
   "writeEmployerHint",
   // W7 slice 2 — intent-aware attach.
   "attachChoice",

@@ -38,7 +38,12 @@ export type IntentDomain =
   | "admin"
   | "value"
   | "money"
-  | "project";
+  | "project"
+  // §9 chat-first coverage — domains that existed in the product but had no
+  // sentence that could reach them.
+  | "documents"
+  | "market"
+  | "activity";
 
 /**
  * What the intent can lead to. HONEST classification, not aspiration:
@@ -86,6 +91,12 @@ export type IntentHandlerId =
   | "adminApprovals"
   | "adminRequests"
   | "timesheets"
+  | "timesheetImport"
+  | "workHours"
+  | "absences"
+  | "documents"
+  | "marketMap"
+  | "activityCentre"
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
@@ -159,6 +170,17 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The timesheet document area of the planning page — a `link:` chip to the
   // one canonical #timesheets anchor, same rule as the admin areas.
   timesheets: { domain: "time", access: "route", handler: "timesheets", ownTyping: false },
+  // ── §9 chat-first coverage: whole domains that EXISTED and shipped, but
+  //    that only a URL could reach. Every one is route-class on purpose — the
+  //    canonical screen already renders the domain, so the chat answers with
+  //    ONE chip to it and never grows a second projection (and, being route,
+  //    never a second write path either).
+  "hours-import": { domain: "time", access: "route", handler: "timesheetImport", ownTyping: false },
+  "work-hours": { domain: "time", access: "route", handler: "workHours", ownTyping: false },
+  absences: { domain: "time", access: "route", handler: "absences", ownTyping: false },
+  documents: { domain: "documents", access: "route", handler: "documents", ownTyping: false },
+  "market-map": { domain: "market", access: "route", handler: "marketMap", ownTyping: false },
+  activity: { domain: "activity", access: "route", handler: "activityCentre", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────

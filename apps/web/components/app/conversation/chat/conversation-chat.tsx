@@ -210,6 +210,16 @@ export type ChatLabels = {
   adminApprovalsChip: string;
   adminRequestsChip: string;
   timesheetsChip: string;
+  /** §9 chat-first coverage — the chips for the domains that existed but had
+   *  no sentence that could reach them. All six share `adminRouteHint`: the
+   *  answer is the same shape ("here is where that is handled"), and one hint
+   *  with six chips is one contract, not six near-identical strings. */
+  timesheetImportChip: string;
+  workHoursChip: string;
+  absencesChip: string;
+  documentsChip: string;
+  marketMapChip: string;
+  activityChip: string;
   writeEmployerHint: string;
   /** W7 slice 2 — the paperclip's one-off "what is this file for?" turn, shown
    *  ONLY when no flow that owns files is open. */
@@ -2314,6 +2324,45 @@ export function ConversationChat({
               id: "link:/dashboard/planning#timesheets",
               label: labels.timesheetsChip,
             },
+          ]),
+        // ── §9 chat-first coverage ────────────────────────────────────────
+        // Six domains the product already ships, each of which could only be
+        // reached by KNOWING ITS URL until now. Every one answers the same
+        // way the admin areas do: the honest route hint plus ONE chip
+        // carrying a human label to the single canonical screen. No second
+        // view of the domain grows inside the thread, and — because these are
+        // route-class — no second write path either: the screen the chip
+        // opens owns its own writes, with its own confirmations.
+        //
+        // "Įkelk tabelį" lands on the hours screen in its import mode: the
+        // historical grid and today's quick entry produce the same canonical
+        // allocations, so they are one surface, not two.
+        timesheetImport: () =>
+          assistant(labels.adminRouteHint, [
+            {
+              id: "link:/dashboard/hours?import=1",
+              label: labels.timesheetImportChip,
+            },
+          ]),
+        workHours: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/hours", label: labels.workHoursChip },
+          ]),
+        absences: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/absences", label: labels.absencesChip },
+          ]),
+        documents: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/documents", label: labels.documentsChip },
+          ]),
+        marketMap: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/market-map", label: labels.marketMapChip },
+          ]),
+        activityCentre: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/activity", label: labels.activityChip },
           ]),
         // No scheduler exists — never a fake reminder (honest degradation).
         reminderBlocked: () => assistant(labels.reminderBlocked),
