@@ -119,4 +119,20 @@ describe("#879 supersession is recorded, not assumed", () => {
     expect(sql).toContain("v_owner is not null and v_owner = uid");
     expect(sql).toContain("ZERO");
   });
+
+  it("names no guarded function identifier, so the team-layer guards stay true", () => {
+    // team-brigades-layer.test.ts and team-trust-connect-layer.test.ts assert
+    // that each of those function names is defined by exactly ONE migration.
+    // This file defines none of them, so it must not spell them out either —
+    // a substring in a comment is enough to trip those guards. Naming them
+    // belongs in the PR description, not in the migration text.
+    for (const guarded of [
+      "save_team_details_v1",
+      "get_team_capability_summary_v1",
+      "add_org_member",
+      "grant_org_manager",
+    ]) {
+      expect(sql).not.toContain(guarded);
+    }
+  });
 });

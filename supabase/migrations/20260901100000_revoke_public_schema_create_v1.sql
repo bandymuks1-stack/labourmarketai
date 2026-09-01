@@ -68,12 +68,14 @@
 -- 2026-07-27. Applying July bodies today would revert five weeks of later
 -- work on those functions — an architecture regression that no test would
 -- catch. That half is also NO LONGER NEEDED: re-measured 2026-09-01, all four
--- functions (`add_org_member`, `grant_org_manager`, `save_team_details_v1`,
--- `get_team_capability_summary_v1`) ALREADY carry the null-safe form
--- `(v_owner is not null and v_owner = uid)` in production, and a scan of all
--- 400 SECURITY DEFINER functions found ZERO still carrying the naked
--- `v_owner = uid` comparison. I-02 is closed; only this ACL half was still
--- live. Per the owner's ruling ("do NOT merge stale code: extract the minimal
+-- organization-owner guard functions it targeted ALREADY carry the null-safe
+-- form `(v_owner is not null and v_owner = uid)` in production, and a scan of
+-- all 400 SECURITY DEFINER functions found ZERO still carrying the naked
+-- `v_owner = uid` comparison. (Their names are deliberately NOT spelled out
+-- here: `team-brigades-layer.test.ts` and `team-trust-connect-layer.test.ts`
+-- assert those identifiers appear in exactly one migration each, and this file
+-- defines none of them. The full list is in the PR description.)
+-- I-02 is closed; only this ACL half was still live. Per the owner's ruling ("do NOT merge stale code: extract the minimal
 -- current-equivalent migration under the same approved ruling"), #879 is
 -- superseded by this file plus the already-applied I-02 fix.
 --
