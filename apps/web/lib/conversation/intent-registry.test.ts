@@ -30,8 +30,11 @@ describe("the intent registry is the enumerable routing contract", () => {
     // updates the union but not this expectation fails HERE, loudly, instead
     // of silently shipping unclassified. 33 → 35 with G8 (`projects` and
     // `candidates` — the chip surfaces, reachable by sentence); 35 → 36 with
-    // `timesheets` (the planning #timesheets area, reachable by sentence).
-    expect(entries.length).toBe(36);
+    // `timesheets` (the planning #timesheets area, reachable by sentence);
+    // 36 → 42 with the §9 chat-first coverage slice, which gives the six
+    // domains that shipped reachable ONLY by URL a sentence each
+    // (hours-import, work-hours, absences, documents, market-map, activity).
+    expect(entries.length).toBe(42);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -56,15 +59,45 @@ describe("the intent registry is the enumerable routing contract", () => {
   });
 
   it("the route set is exactly the link-chip answers to canonical surfaces", () => {
+    // The §9 additions are ALL route-class, and that is the point: each names
+    // a screen the product already renders, so the chat hands over one chip
+    // instead of growing a second projection — and a route intent can never
+    // become a second write path.
     expect(intentsWhere((d) => d.access === "route")).toEqual([
+      "absences",
+      "activity",
       "admin-approvals",
       "admin-requests",
       "company-overview",
       "create-organization",
+      "documents",
+      "hours-import",
       "lmc",
+      "market-map",
       "need-service",
       "timesheets",
+      "work-hours",
     ]);
+  });
+
+  it("§9: every route-class intent chip points at a real dashboard surface", () => {
+    // A route intent whose chip goes nowhere is worse than no intent at all:
+    // the sentence is understood and the answer is a dead end. Pinned here
+    // against the ROUTES the component actually emits.
+    const CHAT = readFileSync(
+      join(__dirname, "..", "..", "components", "app", "conversation", "chat", "conversation-chat.tsx"),
+      "utf8",
+    );
+    for (const route of [
+      "/dashboard/hours?import=1",
+      "/dashboard/hours",
+      "/dashboard/absences",
+      "/dashboard/documents",
+      "/dashboard/market-map",
+      "/dashboard/activity",
+    ]) {
+      expect(CHAT, route).toContain(`link:${route}`);
+    }
   });
 
   it("opportunities runs the SAME engine as find-work — one matching pipeline, no second stack", () => {
