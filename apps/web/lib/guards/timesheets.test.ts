@@ -209,11 +209,11 @@ describe("TS layer — engine integration, not re-implementation", () => {
       "reopen_timesheet_v1",
       "sync_timesheet_decision_v1",
       // Engine seam (integration): start + compensating withdraw + the
-      // one-click template create/publish.
+      // one-click default-pack install (the engine's OWN idempotent
+      // installer — templates are never authored from this module).
       "start_workflow_instance_v1",
       "withdraw_workflow_instance_v1",
-      "create_workflow_definition_v1",
-      "publish_workflow_version_v1",
+      "install_default_workflow_pack_v1",
     ]) {
       expect(actions).toContain(`"${rpc}"`);
     }
@@ -221,6 +221,23 @@ describe("TS layer — engine integration, not re-implementation", () => {
     // decisions belong to the approvals area.
     expect(actions).not.toContain("decide_workflow_step_v1");
     expect(reads).not.toContain("decide_workflow_step_v1");
+    // The retired rival-slug path must not come back: authoring a SECOND
+    // timesheet definition next to the pack's `timesheet_default` made the
+    // template-state read and the submit path disagree about the same org.
+    expect(actions).not.toContain("timesheet_approval_standard");
+    expect(actions).not.toContain("create_workflow_definition_v1");
+    expect(actions).not.toContain("publish_workflow_version_v1");
+  });
+
+  it("template state is read per-org with the submit path's own model", () => {
+    // The read asks about the caller's orgs, never a global window …
+    expect(reads).toContain('.in("organization_id", organizationIds)');
+    // … and the install offer is rendered only where the engine's authoring
+    // RPCs would accept the caller (governance mirror), never as a button
+    // whose only possible answer is not_authorized.
+    expect(reads).toContain("canGovern");
+    expect(section).toContain("o.canGovern");
+    expect(section).toContain("templateNeedsAdmin");
   });
 
   it("submit starts the instance with the timesheet as context entity", () => {

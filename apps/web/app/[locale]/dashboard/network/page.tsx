@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
+import { getGovernedOrganizations } from "@/lib/company/managed-organizations";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
@@ -153,7 +154,15 @@ export default async function NetworkPage({
   // must not pay for the relationship reads, and the relationship screen must
   // not pay for the governance stack (which is the regression this whole
   // change exists to remove).
-  const orgsResult = await getOwnedOrganizations();
+  // Approvals additionally needs the GOVERNED set (owner OR admin
+  // membership — the exact authority the engine's RPCs re-check), because
+  // gating that panel on ownership alone hid it from admin members the
+  // server would have accepted. Read ONLY when the approvals area is open —
+  // the relationship screen must not pay for the governance stack.
+  const [orgsResult, governedOrganizations] = await Promise.all([
+    getOwnedOrganizations(),
+    openArea === "approvals" ? getGovernedOrganizations() : Promise.resolve([]),
+  ]);
   /**
    * ONE LABEL, RESOLVED ONCE, FOR EVERY CONSUMER OF THIS LIST.
    *
@@ -187,6 +196,21 @@ export default async function NetworkPage({
               : t("organizations.unnamed")),
         }))
       : [];
+
+  /**
+   * The approvals area is parameterised by the orgs the caller GOVERNS, not
+   * only the orgs they OWN: the engine's authoring/install/mark-overdue RPCs
+   * authorize owner OR admin membership (`membership_actor_role_v1`), so an
+   * admin member must see the same panel the server would already act for.
+   * Owners keep exactly the labeled list they had; governed extras append
+   * with the same honest unnamed fallback.
+   */
+  const approvalOrganizations = [
+    ...organizations,
+    ...governedOrganizations
+      .filter((g) => !organizations.some((o) => o.id === g.id))
+      .map((g) => ({ id: g.id, name: g.name || t("organizations.unnamed") })),
+  ];
 
   /**
    * What each organization has DECLARED it does, for the invite panel's
@@ -240,7 +264,7 @@ export default async function NetworkPage({
           <ApprovalsSection
             locale={locale}
             notice={workflowNotice}
-            organizations={organizations}
+            organizations={approvalOrganizations}
           />
         )}
         {openArea === "requests" && (

@@ -85,6 +85,7 @@ export type IntentHandlerId =
   | "lmc"
   | "adminApprovals"
   | "adminRequests"
+  | "timesheets"
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
@@ -155,6 +156,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },
   "admin-approvals": { domain: "admin", access: "route", handler: "adminApprovals", ownTyping: false },
   "admin-requests": { domain: "admin", access: "route", handler: "adminRequests", ownTyping: false },
+  // The timesheet document area of the planning page — a `link:` chip to the
+  // one canonical #timesheets anchor, same rule as the admin areas.
+  timesheets: { domain: "time", access: "route", handler: "timesheets", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────

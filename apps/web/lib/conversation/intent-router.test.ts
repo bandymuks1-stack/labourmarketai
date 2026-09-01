@@ -646,6 +646,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil verlof aanvragen",
     de: "Ich möchte Urlaub beantragen",
   },
+  timesheets: {
+    lt: "Parodyk mano tabelį",
+    en: "Open my timesheet",
+    ru: "Покажи мой табель",
+    nl: "Open mijn urenstaat",
+    de: "Zeig meinen Stundenzettel",
+  },
   "messages-view": {
     lt: "Parodyk žinutes",
     en: "Show my messages",

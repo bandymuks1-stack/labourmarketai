@@ -29,8 +29,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // The count is the union's size minus `unknown` — a new intent that
     // updates the union but not this expectation fails HERE, loudly, instead
     // of silently shipping unclassified. 33 → 35 with G8 (`projects` and
-    // `candidates` — the chip surfaces, reachable by sentence).
-    expect(entries.length).toBe(35);
+    // `candidates` — the chip surfaces, reachable by sentence); 35 → 36 with
+    // `timesheets` (the planning #timesheets area, reachable by sentence).
+    expect(entries.length).toBe(36);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -62,6 +63,7 @@ describe("the intent registry is the enumerable routing contract", () => {
       "create-organization",
       "lmc",
       "need-service",
+      "timesheets",
     ]);
   });
 

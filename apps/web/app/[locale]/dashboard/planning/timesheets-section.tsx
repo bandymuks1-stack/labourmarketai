@@ -7,8 +7,8 @@ import { Select } from "@/components/ui/Select";
 import { Link } from "@/lib/i18n/navigation";
 import { WorkflowTimeline } from "@/components/app/workflow-timeline";
 import {
-  createStandardTimesheetTemplateAction,
   createTimesheetAction,
+  installTimesheetApprovalPackAction,
   refreshTimesheetAction,
   reopenTimesheetAction,
   submitTimesheetAction,
@@ -49,7 +49,8 @@ import { createUtcFormatter } from "@/lib/time/display";
  * Honest degradation: while the human-gated timesheets migration is
  * unapplied the whole area shows a calm "not enabled yet" state; an org
  * without a published timesheet template gets a clear message (and org
- * admins a one-click standard template) instead of a dead submit button.
+ * owners/admins a one-click default-pack install) instead of a dead
+ * submit button.
  */
 
 const STATUS_TONE: Record<TimesheetRow["status"], string> = {
@@ -388,30 +389,60 @@ export async function TimesheetsSection({
           </h3>
           <p className="text-xs text-text-muted">{t("org.decideNote")}</p>
 
-          {/* Honest template state + one-click standard template. The engine
-              itself re-checks governance authority — a non-admin pressing
-              this simply hears not_authorized, nothing silently happens. */}
+          {/* Honest template state. The install offer is rendered ONLY for
+              people the engine's authoring RPCs would actually accept
+              (owner/admin membership — mirrored as canGovern); everyone
+              else reads WHO can unblock this instead of meeting a button
+              that can only answer not_authorized. The action delegates to
+              the engine's own idempotent default-pack installer, so no
+              rival timesheet definition can be created from here. */}
           {overview.orgOptions
             .filter((o) => !templateFor(o.organizationId)?.published)
-            .map((o) => (
-              <form
-                key={o.organizationId}
-                action={createStandardTimesheetTemplateAction}
-                className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/20 p-3"
-                data-testid={`timesheet-template-offer-${o.organizationId}`}
-              >
-                <input type="hidden" name="locale" value={locale} />
-                <input type="hidden" name="organizationId" value={o.organizationId} />
-                <span className="text-xs text-text-secondary">
-                  {t("org.noTemplateFor", {
-                    name: o.name ?? t("create.unnamedOrganization"),
-                  })}
-                </span>
-                <Button type="submit" variant="secondary">
-                  {t("org.createTemplate")}
-                </Button>
-              </form>
-            ))}
+            .map((o) => {
+              const orgName = o.name ?? t("create.unnamedOrganization");
+              // Workers are ACTUALLY waiting when documents already exist in
+              // an editable state — computed from the reads this page has,
+              // never invented.
+              const blockedCount = [...overview.mine, ...overview.org].filter(
+                (s) =>
+                  s.organizationId === o.organizationId &&
+                  isEditableTimesheetStatus(s.status),
+              ).length;
+              return o.canGovern ? (
+                <form
+                  key={o.organizationId}
+                  action={installTimesheetApprovalPackAction}
+                  className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/20 p-3"
+                  data-testid={`timesheet-template-offer-${o.organizationId}`}
+                >
+                  <input type="hidden" name="locale" value={locale} />
+                  <input type="hidden" name="organizationId" value={o.organizationId} />
+                  <span className="text-xs text-text-secondary">
+                    {t("org.noTemplateFor", { name: orgName })}
+                  </span>
+                  {blockedCount > 0 ? (
+                    <span
+                      className="w-full text-xs text-state-warning"
+                      data-testid={`timesheet-template-blocked-${o.organizationId}`}
+                    >
+                      {t("org.blockedNote", { count: blockedCount })}
+                    </span>
+                  ) : null}
+                  <Button type="submit" variant="secondary">
+                    {t("org.createTemplate")}
+                  </Button>
+                </form>
+              ) : (
+                <p
+                  key={o.organizationId}
+                  className="rounded-md border border-ink-600 bg-ink-800/20 p-3 text-xs text-text-secondary"
+                  data-testid={`timesheet-template-needs-admin-${o.organizationId}`}
+                >
+                  {t("org.noTemplateFor", { name: orgName })}{" "}
+                  {t("org.templateNeedsAdmin")}
+                </p>
+              );
+            })}
 
           {overview.org.length > 0 ? (
             <ul className="flex flex-col gap-2" data-testid="timesheets-org-list">

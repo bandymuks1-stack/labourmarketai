@@ -33,9 +33,9 @@ import { emitWorkflowStepPendingNotifications } from "@/lib/notifications/event-
  * context_entity_id = timesheet id). Decisions happen in the engine's
  * approvals UI; `sync_timesheet_decision_v1` only copies the terminal
  * outcome back. If the org has NO published timesheet template, submit
- * degrades honestly (`?ts=no_template`) and org admins are offered a
- * one-click standard template (create + publish through the engine's own
- * commands — again, nothing re-implemented).
+ * degrades honestly (`?ts=no_template`) and org owners/admins are offered a
+ * one-click install of the engine's own default pack
+ * (`install_default_workflow_pack_v1` — again, nothing re-implemented).
  *
  * NATIVE-NAV forms: each action redirects back to the planning page with an
  * honest `?ts=` outcome — feedback is the navigation itself (the established
@@ -301,12 +301,19 @@ export async function syncTimesheetDecisionAction(
 }
 
 /**
- * One-click STANDARD approval template for org admins whose org has none:
- * a single 'single'-mode step decided by the org's owners/admins — created
- * and published through the ENGINE's own commands (create + publish); the
- * engine re-checks governance authority server-side.
+ * One-click approval templates for org owners/admins whose org has none:
+ * delegates to the ENGINE's own idempotent pack installer
+ * (`install_default_workflow_pack_v1`), which seeds and publishes the
+ * canonical `timesheet_default` template (plus the rest of the default
+ * pack) and re-checks governance authority server-side.
+ *
+ * This REPLACES the retired create+publish path, whose bespoke slug was a
+ * rival to the pack's `timesheet_default`: an org could end up with a
+ * second timesheet definition the template-state read then disagreed with
+ * the submit path about. One installer, one slug family — no new rival
+ * definitions can be created from here (guard: lib/guards/timesheets).
  */
-export async function createStandardTimesheetTemplateAction(
+export async function installTimesheetApprovalPackAction(
   formData: FormData,
 ): Promise<void> {
   const ctx = readContext(formData);
@@ -315,49 +322,37 @@ export async function createStandardTimesheetTemplateAction(
   const organizationId = String(formData.get("organizationId") ?? "").trim();
   if (!UUID_RX.test(organizationId)) finish(ctx, "invalid");
 
-  const SLUG = "timesheet_approval_standard";
-  const createRes = await asAny(supabase).rpc("create_workflow_definition_v1", {
-    p_organization_id: organizationId,
-    p_name: "Timesheet approval",
-    p_slug: SLUG,
-    p_context_entity_type: "timesheet",
-    p_steps: [
-      {
-        name: "Approval",
-        approval_mode: "single",
-        approver_rule: { kind: "org_role", roles: ["owner", "admin"] },
-      },
-    ],
-  });
-  if (createRes.error) finish(ctx, noticeForRpcError(createRes.error));
-  const createOutcome = String(createRes.data ?? "");
-  if (createOutcome !== "created" && createOutcome !== "already_exists") {
-    if (createOutcome === "not_authorized") finish(ctx, "not_authorized");
-    finish(ctx, timesheetNoticeForOutcome(createOutcome));
+  const { data, error } = await asAny(supabase).rpc(
+    "install_default_workflow_pack_v1",
+    { p_organization_id: organizationId },
+  );
+  if (error) finish(ctx, noticeForRpcError(error));
+  const summary = (data ?? null) as { outcome?: unknown } | null;
+  const outcome = String(summary?.outcome ?? "");
+  if (outcome === "not_authorized") finish(ctx, "not_authorized");
+  if (outcome !== "installed" && outcome !== "all_skipped") {
+    finish(ctx, timesheetNoticeForOutcome(outcome));
   }
 
-  // Read the version back (RLS: active org members) and publish it.
+  // The installer is pack-wide and skip-happy, so its outcome alone does not
+  // prove the one thing THIS button promised: a published timesheet template.
+  // (`all_skipped` can also mean an inactive or unpublished definition still
+  // holds the slug.) Verify with the SAME read the submit path uses and
+  // answer honestly.
   const defRes = await asAny(supabase)
     .from("workflow_definitions")
-    .select("id, workflow_definition_versions(id, version, published_at)")
+    .select("id, workflow_definition_versions(id, published_at)")
     .eq("organization_id", organizationId)
-    .eq("slug", SLUG)
-    .maybeSingle();
-  if (defRes.error || !defRes.data) finish(ctx, "error");
-  type VerRow = { id: string; version: number; published_at: string | null };
-  const versions = ((defRes.data as { workflow_definition_versions: VerRow[] | null })
-    .workflow_definition_versions ?? []) as VerRow[];
-  const latest = [...versions].sort((a, b) => b.version - a.version)[0];
-  if (!latest) finish(ctx, "error");
-  if (latest!.published_at === null) {
-    const pubRes = await asAny(supabase).rpc("publish_workflow_version_v1", {
-      p_version_id: latest!.id,
-    });
-    if (pubRes.error) finish(ctx, noticeForRpcError(pubRes.error));
-    const pubOutcome = String(pubRes.data ?? "");
-    if (pubOutcome !== "published" && pubOutcome !== "already_published") {
-      finish(ctx, "error");
-    }
-  }
-  finish(ctx, "template_created");
+    .eq("context_entity_type", "timesheet")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(5);
+  if (defRes.error) finish(ctx, noticeForRpcError(defRes.error));
+  type DefRow = {
+    workflow_definition_versions: { published_at: string | null }[] | null;
+  };
+  const published = ((defRes.data ?? []) as DefRow[]).some((d) =>
+    (d.workflow_definition_versions ?? []).some((v) => v.published_at !== null),
+  );
+  finish(ctx, published ? "template_created" : "no_template");
 }
