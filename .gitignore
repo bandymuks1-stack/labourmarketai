@@ -74,6 +74,14 @@ next-env.d.ts
 /apps/web/.playwright-proofs/
 /apps/web/ia-proof/
 
+# local research/proof artifacts (playwright CLI logs, ad-hoc run output).
+# The auto-commit workflow stages with `git add .`; without these entries a
+# session's 79MB of local artifacts is one commit away from landing on main.
+/.playwright-cli/
+/output/
+/apps/output/
+/apps/web/output/
+
 # os / editor
 Thumbs.db
 .DS_Store
