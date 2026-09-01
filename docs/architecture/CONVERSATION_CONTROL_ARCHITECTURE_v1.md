@@ -3,6 +3,7 @@
 **Status:** `CONVERSATION_CONTROL_ARCHITECTURE_READY_FOR_OWNER_REVIEW`
 **Baseline main:** `a0fbba9c` · **Branch:** `feat/cc/conversation-control-foundation-v1` · **Date:** 2026-07-24
 **Product gate:** worker ads stay OFF until a verified conversation-first control layer exists.
+**Governed by:** [`docs/owner-decisions/work-journal-conversation-architecture-v1.md`](../owner-decisions/work-journal-conversation-architecture-v1.md) (owner canonical decision, 2026-07-25; registry entry [`ADR 0014`](../DECISIONS/0014-work-journal-first-conversation-architecture.md)) — the conversation window is the **primary work journal**, not a control/navigation layer. This document describes *how* the control layer is built; the canonical decision defines *what the conversation is for* and wins on any conflict.
 
 > One-line thesis: the conversation-first layer is a **thin, deterministic orchestration + presentation surface over the platform's existing server actions, RPCs, RLS, next-action engine, command registry and audit stores.** It introduces **no new domain logic, no parallel data system, and (for the foundation) no database migration.** The LLM is an optional, feature-flagged suggestion layer that can never execute or claim success.
 
