@@ -4655,6 +4655,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Koosta päevikukanne",
+      "title": "Dokumendist Tööpäevikusse",
+      "understoodNote": "All on tekst, mis loeti failist „{filename}“. Vaata üle, paranda ja kinnita — alles siis saab see sinu päeviku ajaloo osaks.",
+      "detectedSkills": "Leidsime tekstist {count} oskuste mainimist.",
+      "notesLabel": "Kande tekst (sinu dokumendist — muuda enne salvestamist)",
+      "engagementLabel": "Töökontekst",
+      "save": "Kinnita ja salvesta päevikusse",
+      "saving": "Salvestan…",
+      "saved": "Salvestatud sinu Tööpäevikusse — lähtedokument jääb selle kandega seotuks.",
+      "savedLink": "Ava päevik",
+      "error": "Salvestamine ebaõnnestus. Midagi ei salvestatud.",
+      "notFound": "Seda dokumenti sinu dokumentide hulgast ei leitud.",
+      "refusedClassified": "Konfidentsiaalseid dokumente automaatselt ei loeta — allalaadimine jääb logitud käsitsi sammuks.",
+      "refusedNoOcr": "Fotosid ei loeta — tekstituvastust veel pole.",
+      "refusedType": "Seda failitüüpi ei saa tekstina lugeda.",
+      "empty": "Sellest dokumendist ei leitud loetavat teksti.",
+      "failed": "Dokumenti ei õnnestunud lugeda.",
+      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",

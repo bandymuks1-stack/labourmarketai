@@ -4655,6 +4655,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Szkic wpisu do dziennika",
+      "title": "Z dokumentu do Dziennika pracy",
+      "understoodNote": "Poniżej znajduje się tekst odczytany z „{filename}”. Przejrzyj, popraw i zatwierdź — dopiero wtedy stanie się częścią historii Twojego dziennika.",
+      "detectedSkills": "Rozpoznaliśmy w tekście wzmianki o umiejętnościach: {count}",
+      "notesLabel": "Tekst wpisu (z Twojego dokumentu — popraw przed zapisaniem)",
+      "engagementLabel": "Kontekst pracy",
+      "save": "Zatwierdź i zapisz w dzienniku",
+      "saving": "Zapisywanie…",
+      "saved": "Zapisano w Twoim Dzienniku pracy — dokument źródłowy pozostaje powiązany z tym wpisem.",
+      "savedLink": "Otwórz dziennik",
+      "error": "Zapis się nie powiódł. Nic nie zostało zapisane.",
+      "notFound": "Nie znaleziono tego dokumentu wśród Twoich dokumentów.",
+      "refusedClassified": "Dokumenty poufne nie są czytane automatycznie — pobranie pozostaje rejestrowanym krokiem ręcznym.",
+      "refusedNoOcr": "Zdjęcia nie są czytane — rozpoznawanie tekstu jeszcze nie istnieje.",
+      "refusedType": "Tego typu pliku nie można odczytać jako tekstu.",
+      "empty": "W tym dokumencie nie znaleziono czytelnego tekstu.",
+      "failed": "Nie udało się odczytać dokumentu.",
+      "noEngagement": "Najpierw potrzebujesz kontekstu pracy — otwórz panel i go utwórz."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",

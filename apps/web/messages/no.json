@@ -4655,6 +4655,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Utkast til journalinnslag",
+      "title": "Fra dokument til Arbeidsjournal",
+      "understoodNote": "Nedenfor er teksten lest fra “{filename}”. Gå gjennom, rett og bekreft — først da blir den en del av journalhistorikken din.",
+      "detectedSkills": "Vi fant {count} omtaler av ferdigheter i teksten.",
+      "notesLabel": "Innslagets tekst (fra dokumentet ditt — rediger før lagring)",
+      "engagementLabel": "Arbeidskontekst",
+      "save": "Bekreft og lagre i journalen",
+      "saving": "Lagrer…",
+      "saved": "Lagret i Arbeidsjournalen din — kildedokumentet forblir knyttet til dette innslaget.",
+      "savedLink": "Åpne journalen",
+      "error": "Lagring mislyktes. Ingenting ble lagret.",
+      "notFound": "Dette dokumentet ble ikke funnet blant dokumentene dine.",
+      "refusedClassified": "Konfidensielle dokumenter leses ikke automatisk — nedlasting forblir et logget manuelt steg.",
+      "refusedNoOcr": "Bilder leses ikke — tekstgjenkjenning finnes ikke ennå.",
+      "refusedType": "Denne filtypen kan ikke leses som tekst.",
+      "empty": "Fant ingen lesbar tekst i dette dokumentet.",
+      "failed": "Dokumentet kunne ikke leses.",
+      "noEngagement": "Du trenger først en arbeidskontekst — åpne dashbordet og opprett en."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",

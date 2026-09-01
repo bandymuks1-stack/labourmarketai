@@ -4655,6 +4655,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Utkast till journalpost",
+      "title": "Från dokument till Arbetsjournal",
+      "understoodNote": "Nedan är texten som lästs från “{filename}”. Granska, rätta och bekräfta — först då blir den en del av din journalhistorik.",
+      "detectedSkills": "Vi hittade {count} omnämnanden av kompetenser i texten.",
+      "notesLabel": "Postens text (från ditt dokument — redigera före sparande)",
+      "engagementLabel": "Arbetskontext",
+      "save": "Bekräfta och spara i journalen",
+      "saving": "Sparar…",
+      "saved": "Sparat i din Arbetsjournal — källdokumentet förblir kopplat till den här posten.",
+      "savedLink": "Öppna journalen",
+      "error": "Det gick inte att spara. Inget sparades.",
+      "notFound": "Det här dokumentet hittades inte bland dina dokument.",
+      "refusedClassified": "Konfidentiella dokument läses inte automatiskt — nedladdning förblir ett loggat manuellt steg.",
+      "refusedNoOcr": "Foton läses inte — textigenkänning finns inte ännu.",
+      "refusedType": "Den här filtypen kan inte läsas som text.",
+      "empty": "Ingen läsbar text hittades i dokumentet.",
+      "failed": "Dokumentet kunde inte läsas.",
+      "noEngagement": "Du behöver först en arbetskontext — öppna panelen och skapa en."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",
