@@ -374,6 +374,10 @@
         "event_demand_interest_expressed": "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
         "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe"
+      },
+      "email": {
+        "open": "Otwórz w LabourMarket.ai:",
+        "manage": "Zarządzaj ustawieniami powiadomień:"
       }
     },
     "onboarding": {

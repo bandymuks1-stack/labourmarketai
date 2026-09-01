@@ -19,6 +19,17 @@ import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
+import {
+  NotificationPreferencesSection,
+  type NotificationPreferenceRowView,
+} from "@/components/app/notification-preferences-section";
+import { NOTIFICATION_EVENT_TYPES } from "@/lib/notifications/events";
+import { NOTIFICATION_EMAIL_INCAPABLE_TYPES } from "@/lib/notifications/email-dispatch";
+import {
+  readNotificationPreferencesFor,
+  resolveEffectivePreferences,
+} from "@/lib/notifications/notification-preferences";
+import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -72,6 +83,29 @@ export default async function AccountPage({
     profileRoles: rolesRows ?? [],
   });
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+
+  // Notification preferences (completion v1, M5 closure): the caller's own
+  // stored rows resolved against the channel defaults (in-app ON, email OFF
+  // — consent-first, migration §4). An unreadable table resolves to the
+  // defaults here; a save then reports its honest feature_unavailable.
+  const prefsRead = await readNotificationPreferencesFor(supabase, user.id);
+  const effectivePrefs = resolveEffectivePreferences(
+    prefsRead.kind === "ok" ? prefsRead.rows : [],
+    NOTIFICATION_EVENT_TYPES,
+  );
+  const tNotifTypes = await getTranslations("auth.notifications.types");
+  const tPrefs = await getTranslations("notificationPrefs");
+  const prefRows: NotificationPreferenceRowView[] = effectivePrefs.map((p) => ({
+    type: p.notificationType,
+    label: tNotifTypes.has(`event_${p.notificationType}` as never)
+      ? tNotifTypes(`event_${p.notificationType}` as never)
+      : tNotifTypes("generic"),
+    inApp: p.channels.in_app,
+    // Types with no email dispatch path get NO email toggle (null → dash).
+    email: NOTIFICATION_EMAIL_INCAPABLE_TYPES.includes(p.notificationType)
+      ? null
+      : p.channels.email,
+  }));
 
   // Security & access (security docs step 1 — benefit-based, never coercive).
   // Everything shown is REAL: sign-in methods come from the user's identity
@@ -239,6 +273,27 @@ export default async function AccountPage({
           </p>
         </div>
       </section>
+
+      {/* Notification preferences (completion v1, M5 closure) — per-type ×
+          per-channel toggles over the applied notification_preferences
+          table. Settings-appropriate: a collapsed disclosure, real stored
+          state only, and the email column tells the truth about delivery
+          (consent stored now, sends begin when the owner configures a
+          provider). */}
+      <NotificationPreferencesSection
+        rows={prefRows}
+        emailDeliveryActive={isTransactionalEmailConfigured()}
+        labels={{
+          title: tPrefs("title"),
+          intro: tPrefs("intro"),
+          inAppHeader: tPrefs("inAppHeader"),
+          emailHeader: tPrefs("emailHeader"),
+          emailConsentNote: tPrefs("emailConsentNote"),
+          emailInactiveNote: tPrefs("emailInactiveNote"),
+          error: tPrefs("error"),
+          unavailable: tPrefs("unavailable"),
+        }}
+      />
 
       {/* Identity is edited on the Profilis surface; a single settings link
           (not a launcher grid) keeps account = settings while the profile-cv
