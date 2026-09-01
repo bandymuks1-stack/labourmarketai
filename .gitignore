@@ -95,3 +95,7 @@ BRIEF_MO.md
 supabase/.branches/
 supabase/.temp/
 /apps/web/tests/e2e/.storage-state.admin.json
+
+# Playwright JSON report — written by the E2E Smoke workflow's executed-count
+# guard (.github/workflows/e2e-smoke.yml) and by local subset runs.
+/apps/web/e2e-report.json
