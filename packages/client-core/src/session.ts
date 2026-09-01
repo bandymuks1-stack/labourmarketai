@@ -79,6 +79,41 @@ export function isExpired(session: StoredSession, nowSeconds: number): boolean {
   return session.expiresAt - EXPIRY_SKEW_SECONDS <= nowSeconds;
 }
 
+/**
+ * The longest a client may wait before looking at the token again.
+ *
+ * A cap, not a schedule. Its job is to stop an absurd `expiresAt` — a clock
+ * that jumped, a store that came back with a number from another century —
+ * from overflowing a 32-bit timer, which on most runtimes does not wait a
+ * century but fires immediately, forever. Waking early is harmless; spinning
+ * is not.
+ */
+export const MAX_REFRESH_DELAY_MS = 15 * 60 * 1000;
+
+/**
+ * How long until this session's access token must be renewed, in
+ * milliseconds. Zero means it is due now.
+ *
+ * A client that only renews at launch works for an hour and then fails at
+ * everything until the process is killed: the token expires, but nothing
+ * observes that, so the state never changes and the same dead credential is
+ * offered to every request. The person sees a screen full of refusals and no
+ * way back — a session ending silently, which is the one thing an expiry must
+ * never do.
+ *
+ * The same `EXPIRY_SKEW_SECONDS` that stops `bearerTokenFor` handing out a
+ * token in its last minute is what makes this fire a minute early, so the
+ * renewal happens BEFORE any request is refused rather than after.
+ */
+export function millisecondsUntilRefresh(
+  session: StoredSession,
+  nowSeconds: number,
+): number {
+  const remaining = session.expiresAt - EXPIRY_SKEW_SECONDS - nowSeconds;
+  if (remaining <= 0) return 0;
+  return Math.min(remaining * 1000, MAX_REFRESH_DELAY_MS);
+}
+
 function parseSession(raw: string): StoredSession | null {
   let value: unknown;
   try {

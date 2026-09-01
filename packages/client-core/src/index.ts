@@ -37,7 +37,9 @@ export type { ClientConfig, ConfigProblem, ConfigResult } from "./config";
 
 export {
   SESSION_STORE_KEY,
+  MAX_REFRESH_DELAY_MS,
   isExpired,
+  millisecondsUntilRefresh,
   readStoredSession,
   writeStoredSession,
   clearStoredSession,

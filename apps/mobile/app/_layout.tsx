@@ -1,5 +1,5 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -7,7 +7,26 @@ import { AuthProvider } from "../src/auth-context";
 import { ActorContextProvider } from "../src/context-provider";
 import { LocaleProvider } from "../src/i18n/locale-context";
 import { CONFIG_PROBLEMS } from "../src/config";
+import { CrashScreen } from "../src/screens/crash";
 import { MisconfiguredScreen } from "../src/screens/misconfigured";
+
+/**
+ * Exporting `ErrorBoundary` from the ROOT layout is what puts a floor under
+ * the whole app: expo-router wraps this route in it, so a render fault
+ * anywhere below — including inside the providers — resolves to a screen with
+ * words on it instead of unmounting the tree to blank white.
+ *
+ * It is above every provider by construction, which is why `CrashScreen`
+ * reads its own language rather than taking one from context.
+ */
+export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+  return (
+    <SafeAreaProvider>
+      <StatusBar style="light" />
+      <CrashScreen retry={retry} />
+    </SafeAreaProvider>
+  );
+}
 
 /**
  * The root of the app.
