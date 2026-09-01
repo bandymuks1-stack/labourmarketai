@@ -1173,6 +1173,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // is untouched. Minimal current-equivalent extraction of the
       // still-live half of #879, owner-approved 2026-09-01.
       "20260901100000_revoke_public_schema_create_v1.sql",
+      // 2026-09-01: the labour-economics metric widening (20260901140000)
+      // carries the marker because it is `data-dml` on the registry that
+      // governs which metrics an importer may write. That DML is the whole
+      // point: the fail-closed allowlist is what keeps the labour-economics
+      // spec inert, so widening it is the activation. It creates, drops and
+      // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
+      // docs/intelligence/labour-economics-metrics-v1.md §6.
+      "20260901140000_labour_economics_metric_widening_v1.sql",
 ]);
   });
 

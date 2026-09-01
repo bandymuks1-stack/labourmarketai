@@ -2316,7 +2316,14 @@ describe("no migration files added by this sprint", () => {
     // deliberately preserved. Narrowing only; owner-approved 2026-09-01 as
     // the minimal current-equivalent extraction of #879.
     // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 252.
-    const SPRINT_BASELINE = 252;
+    // Bumped 252 -> 253 for the labour-economics metric widening
+    // (20260901140000_labour_economics_metric_widening_v1, paired rollback):
+    // five published Eurostat labour-cost/productivity keys onto the eurostat
+    // source, and the DERIVED value-to-cost ratio onto
+    // internal_platform_aggregates so it is never attributed to Eurostat.
+    // Permission-only; imports nothing. Owner-approved 2026-09-01.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 253.
+    const SPRINT_BASELINE = 253;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

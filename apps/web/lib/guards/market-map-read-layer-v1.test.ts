@@ -736,7 +736,14 @@ describe("NO new DB migration in this PR", () => {
     // narrowing only. Still no migration from the market-map read layer,
     // which stays pure TS. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 252.
-    expect(count).toBeLessThanOrEqual(252);
+    // Bumped 252 -> 253 for the labour-economics metric widening
+    // (20260901140000_labour_economics_metric_widening_v1, paired rollback) —
+    // owner-approved 2026-09-01. It widens the FAIL-CLOSED
+    // market_intelligence_sources import allowlist by six metric keys and
+    // imports nothing. Still no migration from the market-map read layer,
+    // which stays pure TS. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 253.
+    expect(count).toBeLessThanOrEqual(253);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
