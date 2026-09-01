@@ -1,0 +1,108 @@
+-- ============================================================================
+-- 20260901100000 — revoke_public_schema_create_v1
+--
+-- OWNER APPROVED 2026-09-01 ("APPROVE #879, subject to final current-state
+-- verification"). This file is the MINIMAL CURRENT-EQUIVALENT extraction of
+-- the still-live half of #879, authored fresh against current main rather
+-- than merged from that branch — see PROVENANCE below.
+--
+-- @human-gate-approved
+--   Acknowledged RED because it contains a REVOKE, which migration-safety
+--   classifies as a grant-surface change. The annotation makes CI classify it;
+--   it does NOT authorise an automatic merge. This migration TIGHTENS the
+--   privilege surface — it grants nothing to anyone.
+--
+-- ----------------------------------------------------------------------------
+-- FINDING — PUBLIC inherits CREATE on schema `public`
+-- ----------------------------------------------------------------------------
+-- Re-measured against production 2026-09-01, immediately before writing this
+-- file. The `public` schema ACL is:
+--
+--   {postgres=UC/postgres,=UC/postgres}
+--
+-- The second entry (`=UC/postgres`) is a grant to the PUBLIC pseudo-role, so
+-- EVERY role inherits CREATE on the schema. Measured per role, direct grant
+-- vs inherited:
+--
+--   role            CREATE_direct   CREATE_effective   USAGE_effective
+--   anon            no              TRUE               true
+--   authenticated   no              TRUE               true
+--   service_role    no              TRUE               true
+--   authenticator   no              TRUE               true
+--   postgres        YES             true               true
+--
+-- So anon/authenticated/service_role hold CREATE *only* by inheritance from
+-- PUBLIC — none of them has a direct grant. Revoking the PUBLIC grant is
+-- therefore the whole and only fix; no per-role REVOKE is needed or wanted.
+--
+-- WHY IT MATTERS: a writable default schema for low-privilege roles is a
+-- classic lateral-movement / object-shadowing surface (plant a function that a
+-- later unqualified call resolves to). None of these roles has any legitimate
+-- DDL need: the application reaches Postgres only through PostgREST, which
+-- performs RPC calls and RLS-bounded DML — never DDL. Verified by scanning
+-- apps/web for runtime DDL: no `create table` / `create function` /
+-- `alter table` / `drop table` is issued from any application code path.
+--
+-- ----------------------------------------------------------------------------
+-- EFFECT — narrowing only, and USAGE is deliberately preserved
+-- ----------------------------------------------------------------------------
+-- Only the implicit PUBLIC CREATE goes away:
+--
+--   before: nspacl = {postgres=UC/postgres,=UC/postgres}
+--   after:  nspacl = {postgres=UC/postgres,=U/postgres}
+--
+-- USAGE stays with PUBLIC (`=U/postgres`), so every read, write, RPC call and
+-- auth path is untouched — losing USAGE would break the entire application,
+-- which is exactly why this migration revokes CREATE and nothing else. No
+-- object-level privilege is altered: no table grant, no function grant, no
+-- policy, no row. DDL keeps working for the roles that legitimately do it —
+-- `postgres` holds its own direct `UC` grant (MCP apply_migration runs as
+-- `postgres`) and `supabase_admin` is a superuser that bypasses ACLs.
+--
+-- ----------------------------------------------------------------------------
+-- PROVENANCE — why this is a fresh file and not a merge of #879
+-- ----------------------------------------------------------------------------
+-- #879 (fix/cc/security-residual-hygiene-v1) had diverged 890 commits from
+-- main and bundled a SECOND migration, 20260727170000_null_safe_owner_guards_v1,
+-- which recreates four SECURITY DEFINER function bodies as they stood on
+-- 2026-07-27. Applying July bodies today would revert five weeks of later
+-- work on those functions — an architecture regression that no test would
+-- catch. That half is also NO LONGER NEEDED: re-measured 2026-09-01, all four
+-- functions (`add_org_member`, `grant_org_manager`, `save_team_details_v1`,
+-- `get_team_capability_summary_v1`) ALREADY carry the null-safe form
+-- `(v_owner is not null and v_owner = uid)` in production, and a scan of all
+-- 400 SECURITY DEFINER functions found ZERO still carrying the naked
+-- `v_owner = uid` comparison. I-02 is closed; only this ACL half was still
+-- live. Per the owner's ruling ("do NOT merge stale code: extract the minimal
+-- current-equivalent migration under the same approved ruling"), #879 is
+-- superseded by this file plus the already-applied I-02 fix.
+--
+-- ROLLBACK: supabase/rollbacks/20260901100000_revoke_public_schema_create_v1.down.sql
+-- ============================================================================
+
+begin;
+
+-- Idempotent: REVOKE of an absent privilege is a no-op, so re-running is safe
+-- (including on a clean local `supabase db reset`, where the same default
+-- PUBLIC grant exists and is removed the same way).
+revoke create on schema public from public;
+
+commit;
+
+-- ============================================================================
+-- POST-APPLY VERIFICATION (read-only)
+--
+--   select n.nspacl::text                                        as acl,
+--          has_schema_privilege('anon','public','CREATE')          as anon_create,
+--          has_schema_privilege('authenticated','public','CREATE') as authed_create,
+--          has_schema_privilege('service_role','public','CREATE')  as service_create,
+--          has_schema_privilege('postgres','public','CREATE')      as postgres_create,
+--          has_schema_privilege('anon','public','USAGE')           as anon_usage,
+--          has_schema_privilege('authenticated','public','USAGE')  as authed_usage
+--     from pg_namespace n where n.nspname = 'public';
+--
+--   EXPECT acl = {postgres=UC/postgres,=U/postgres}
+--   EXPECT anon_create/authed_create/service_create = false
+--   EXPECT postgres_create = true
+--   EXPECT anon_usage = authed_usage = true   (reads and RPCs unaffected)
+-- ============================================================================

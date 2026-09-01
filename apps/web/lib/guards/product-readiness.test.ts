@@ -2309,7 +2309,14 @@ describe("no migration files added by this sprint", () => {
     // ruling is the 251st file, not the 250th. Both are declared above.
     // RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 251.
-    const SPRINT_BASELINE = 251;
+    // Bumped 251 -> 252 for the public-schema CREATE revoke
+    // (20260901100000_revoke_public_schema_create_v1, paired rollback):
+    // `revoke create on schema public from public`, closing the inherited
+    // CREATE that anon/authenticated/service_role held via PUBLIC. USAGE is
+    // deliberately preserved. Narrowing only; owner-approved 2026-09-01 as
+    // the minimal current-equivalent extraction of #879.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 252.
+    const SPRINT_BASELINE = 252;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

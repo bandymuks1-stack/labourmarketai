@@ -729,7 +729,14 @@ describe("NO new DB migration in this PR", () => {
     // ruling is the 251st file, not the 250th. Both are declared above.
     // RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 251.
-    expect(count).toBeLessThanOrEqual(251);
+    // Bumped 251 -> 252 for the public-schema CREATE revoke
+    // (20260901100000_revoke_public_schema_create_v1, paired rollback) — the
+    // minimal current-equivalent extraction of the still-live half of #879,
+    // owner-approved 2026-09-01. One REVOKE, no grant, USAGE preserved;
+    // narrowing only. Still no migration from the market-map read layer,
+    // which stays pure TS. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 252.
+    expect(count).toBeLessThanOrEqual(252);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
