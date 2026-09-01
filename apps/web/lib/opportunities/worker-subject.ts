@@ -12,6 +12,7 @@ import {
   type WorkerSkillRow,
 } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
   sourceToEvidence,
   type EvidenceTier,
@@ -56,8 +57,12 @@ async function readSubjectSideRows(
   supabase: SupabaseClient,
   profileId: string,
   workerId: string,
-): Promise<{ prefLocRes: { data: unknown }; langsRes: { data: unknown } }> {
-  const [prefLocRes, langsRes] = await Promise.all([
+): Promise<{
+  prefLocRes: { data: unknown };
+  langsRes: { data: unknown };
+  practiceRes: { data: unknown };
+}> {
+  const [prefLocRes, langsRes, practiceRes] = await Promise.all([
     // OWN preferred locations (own-rows RLS, §20 — never readable by
     // employers). City feeds the worker-side city tier of the match engine;
     // the table may not exist in every environment → graceful null.
@@ -82,8 +87,21 @@ async function readSubjectSideRows(
         (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
         () => ({ data: null }),
       ),
+    // OWN practice / volunteer placements (engagement_contexts, own-rows RLS).
+    // No status filter — an ENDED placement is a COMPLETED one, and it is the
+    // same call `work-history-model.ts` makes for the CV. Feeds the labelled,
+    // additive practice reason of the match engine.
+    asAny(supabase)
+      .from("engagement_contexts")
+      .select("relationship_slug")
+      .eq("profile_id", profileId)
+      .in("relationship_slug", [...PRACTICE_RELATIONSHIPS])
+      .then(
+        (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
+        () => ({ data: null }),
+      ),
   ]);
-  return { prefLocRes, langsRes };
+  return { prefLocRes, langsRes, practiceRes };
 }
 
 /**
@@ -114,6 +132,7 @@ export async function buildOwnWorkerContextCore(
       professionRows.find((r) => r.is_primary === true)?.professions?.slug ?? null,
     prefLocRes: side.prefLocRes,
     langsRes: side.langsRes,
+    practiceRes: side.practiceRes,
   });
 }
 
@@ -142,6 +161,7 @@ export async function buildOwnWorkerContext(
     professionSlug,
     prefLocRes: side.prefLocRes,
     langsRes: side.langsRes,
+    practiceRes: side.practiceRes,
   });
 }
 
@@ -152,12 +172,14 @@ function assembleOwnWorkerContext({
   professionSlug,
   prefLocRes,
   langsRes,
+  practiceRes,
 }: {
   worker: WorkerCoreRow;
   skillRows: readonly WorkerSkillRow[];
   professionSlug: string | null;
   prefLocRes: { data: unknown };
   langsRes: { data: unknown };
+  practiceRes: { data: unknown };
 }): OwnWorkerContext {
   const workerId = worker.id;
 
@@ -244,6 +266,12 @@ function assembleOwnWorkerContext({
       nightShiftsOk: prefs?.night_shifts_ok ?? null,
       weekendShiftsOk: prefs?.weekend_shifts_ok ?? null,
       overtimeOk: prefs?.overtime_ok ?? null,
+      // Practice placements — LABELLED and ADDITIVE in the engine (it can only
+      // append a reason). null = the read did not land, never "has none".
+      practiceEngagements:
+        practiceRes?.data === null || practiceRes?.data === undefined
+          ? null
+          : (practiceRes.data as unknown[]).length,
     },
   };
 }

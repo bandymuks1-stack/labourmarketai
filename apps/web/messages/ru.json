@@ -7457,6 +7457,7 @@
     "reason": {
       "skills_manager_confirmed": "Навыки, подтверждённые руководителем",
       "skills_journal_supported": "Навыки, подкреплённые журналом",
+      "practice_experience": "Опыт практики или волонтёрства",
       "country_match": "Страна совпадает",
       "mobility_match": "Готов работать в этой стране",
       "available_now": "Доступен сейчас",
