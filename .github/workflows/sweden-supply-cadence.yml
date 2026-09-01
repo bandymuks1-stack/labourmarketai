@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.gate.outputs.configuration_gated == 'false'
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         if: steps.gate.outputs.configuration_gated == 'false'
 
       - uses: actions/setup-node@v4
