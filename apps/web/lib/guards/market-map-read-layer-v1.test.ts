@@ -705,7 +705,16 @@ describe("NO new DB migration in this PR", () => {
     // sequence; merge and production apply stay with the main session. Still
     // nothing from the market-map read layer itself. RECOUNTED from the
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
-    expect(count).toBeLessThanOrEqual(249);
+    // Bumped 249 -> 250 for the relationship-visibility least-privilege
+    // ruling (20260901060000_relationship_visibility_least_privilege_v1,
+    // paired rollback) — the slice 20260827210000 deferred by name: three
+    // rows of relationship_types (volunteer, viewer, unemployed) move from
+    // grants_worker_visibility true to false. DATA-only and narrowing only;
+    // production holds zero engagement contexts on those slugs, so the blast
+    // radius is measured zero. Ships UNAPPLIED, owner-gated. Still no
+    // migration from the market-map read layer, which stays pure TS.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
+    expect(count).toBeLessThanOrEqual(250);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

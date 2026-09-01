@@ -2288,7 +2288,17 @@ describe("no migration files added by this sprint", () => {
     // docs/DECISIONS/0010 and the APPLIED_LEDGER row for 20260831161725);
     // merge and production apply stay with the main session. RECOUNTED from
     // the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
-    const SPRINT_BASELINE = 249;
+    // Bumped 249 -> 250 for the relationship-visibility least-privilege
+    // ruling (20260901060000_relationship_visibility_least_privilege_v1,
+    // paired rollback) — the slice 20260827210000 deferred by name in its
+    // own header. Three rows of relationship_types (volunteer, viewer,
+    // unemployed) move from grants_worker_visibility true to false, closing
+    // the invitable `volunteer` path to employer-grade worker-record reads.
+    // DATA-only, narrowing only, measured-zero blast radius (production has
+    // no engagement context on those slugs). Ships UNAPPLIED; merge and
+    // production apply stay owner-gated (draft + needs-human-gate).
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
+    const SPRINT_BASELINE = 250;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
