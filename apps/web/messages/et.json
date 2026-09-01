@@ -369,11 +369,15 @@
         "event_workflow_escalated": "Kinnitusetapp ületas tähtaja",
         "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
-        "event_document_expiring": "[EN] A document's validity is ending soon.",
+        "event_document_expiring": "Dokumendi kehtivus lõpeb peagi.",
         "event_work_task_assigned": "Sulle määrati ülesanne",
         "event_demand_interest_expressed": "Töötaja avaldas huvi teie vajaduse vastu",
         "event_demand_interest_reviewed": "Ettevõte märkis teie huvi läbivaadatuks",
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis"
+      },
+      "email": {
+        "open": "Ava LabourMarket.ai-s:",
+        "manage": "Halda teavituste seadeid:"
       }
     },
     "onboarding": {
@@ -2212,6 +2216,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Praktika- või vabatahtliku töö kogemus",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",

@@ -374,6 +374,10 @@
         "event_demand_interest_expressed": "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
         "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe"
+      },
+      "email": {
+        "open": "Otwórz w LabourMarket.ai:",
+        "manage": "Zarządzaj ustawieniami powiadomień:"
       }
     },
     "onboarding": {
@@ -2212,6 +2216,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Doświadczenie z praktyk lub wolontariatu",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",

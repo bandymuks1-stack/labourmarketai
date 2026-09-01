@@ -705,6 +705,16 @@ describe("NO new DB migration in this PR", () => {
     // sequence; merge and production apply stay with the main session. Still
     // nothing from the market-map read layer itself. RECOUNTED from the
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
+    // Bumped 249 -> 250 for the agency disclosure-revocation package
+    // (20260901052300_agency_disclosure_revocation_v1, paired rollback) —
+    // severed agency-client connections currently leave the client with
+    // permanent read on the agency's candidate identities; the package adds
+    // active-connection filters to two list RPCs, cascades offers to
+    // withdrawn on revoke, and TIGHTENS one RLS policy. RED by
+    // classification (SECDEF replace + policy recreate + DML), ships
+    // UNAPPLIED, owner-gated. Still no migration from the market-map read
+    // layer, which stays pure TS. RECOUNTED from the tree:
+    // `ls supabase/migrations/*.sql | wc -l` = 250.
     // Bumped 249 -> 250 for the relationship-visibility least-privilege
     // ruling (20260901060000_relationship_visibility_least_privilege_v1,
     // paired rollback) — the slice 20260827210000 deferred by name: three
@@ -714,7 +724,12 @@ describe("NO new DB migration in this PR", () => {
     // radius is measured zero. Ships UNAPPLIED, owner-gated. Still no
     // migration from the market-map read layer, which stays pure TS.
     // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
-    expect(count).toBeLessThanOrEqual(250);
+    // RE-COUNTED 2026-09-01 after #1395 landed on main first: that PR
+    // took slot 250 for the agency disclosure-revocation package, so this
+    // ruling is the 251st file, not the 250th. Both are declared above.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 251.
+    expect(count).toBeLessThanOrEqual(251);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -56,6 +56,17 @@ export default function ShellLayout() {
       <Tabs.Screen name="journal" options={{ title: t("nav.journal") }} />
       <Tabs.Screen name="profile" options={{ title: t("nav.profile") }} />
       <Tabs.Screen name="settings" options={{ title: t("nav.settings") }} />
+      {/*
+        Log work is an ACTION, not a fifth destination: it is reached from the
+        journal and returns there, so `href: null` keeps it out of the tab bar
+        while leaving it inside this group — which is what gives it the same
+        auth gate every other product screen has. A fifth tab would also be the
+        label that finally truncates (defect D-4).
+      */}
+      <Tabs.Screen
+        name="log-work"
+        options={{ href: null, title: t("journal.compose.title") }}
+      />
     </Tabs>
   );
 }

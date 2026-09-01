@@ -237,5 +237,30 @@ export const NL_PACK: LanguagePack = {
     translation: {
       exact: ["vertaald", "vertaalde", "vertaler", "getolkt"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["presenteerde", "presentatie", "gaf een presentatie"],
+    },
+    "stakeholder-engagement": {
+      exact: ["belanghebbenden", "sprak met vertegenwoordigers", "overleg met vertegenwoordigers"],
+    },
+    "partnership-development": {
+      exact: ["partnerschap", "samenwerkingsmogelijkheden", "samenwerking opgezet"],
+    },
+    negotiation: {
+      exact: ["onderhandelde", "onderhandeling"],
+    },
+    "project-coordination": {
+      exact: ["projectleiding", "projectcoördinatie", "coördineerde het project"],
+    },
+    "report-writing": {
+      exact: ["schreef een rapport", "rapportage opgesteld", "verslag geschreven"],
+    },
+    teamwork: {
+      exact: ["teamwerk", "in teamverband", "groepswerk"],
+    },
+    research: {
+      exact: ["onderzoek gedaan", "deed onderzoek", "literatuuronderzoek"],
+    },
   },
 };

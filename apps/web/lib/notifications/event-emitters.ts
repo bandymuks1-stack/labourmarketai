@@ -64,6 +64,12 @@ import {
   weeklyDigestEntityId,
   type WeeklyDigestSkipRow,
 } from "./weekly-digest-emitter";
+import {
+  readNotificationPreferencesFor,
+  resolveChannelEnabled,
+  type NotificationPreferenceRow,
+} from "./notification-preferences";
+import { maybeDispatchNotificationEmail } from "./email-dispatch";
 import { getWorkerCoreRow } from "../data/worker-core";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
@@ -93,21 +99,67 @@ function notDelivered(
 }
 
 /**
+ * The recipient's stored preference rows, FAIL-OPEN (completion v1): if the
+ * preferences table cannot be read — absent, degraded, anything — this
+ * returns NO rows, and `resolveChannelEnabled` then applies the channel
+ * defaults (in-app ON, email OFF). A preferences outage must never silently
+ * kill notifications; only an explicit stored opt-out may.
+ */
+async function readPrefRowsFailOpen(
+  admin: AdminClient,
+  recipientProfileId: string,
+): Promise<readonly NotificationPreferenceRow[]> {
+  const prefs = await readNotificationPreferencesFor(admin, recipientProfileId);
+  return prefs.kind === "ok" ? prefs.rows : [];
+}
+
+/** What `deliver` did — the cron route reports these honestly. */
+type DeliverOutcome =
+  | "written"
+  | "duplicate"
+  | "feature_unavailable"
+  | "unexpected_error"
+  /** The recipient stored an explicit in-app opt-out for this type. */
+  | "suppressed_preference";
+
+/**
  * The AWAITED insert every write-path emitter rides. A detached insert is
  * killable on the serverless runtime (see the module header); this one is
  * awaited end to end and reports the only unapproved outcome. It cannot
  * throw: `emitNotificationEvent` catches everything into its outcome union.
+ *
+ * Completion v1 adds the two channel hops around the insert:
+ *   - BEFORE: the recipient's stored in-app preference (M5 closure). The
+ *     default stays ON (opt-out model); only an explicit stored opt-out row
+ *     suppresses, and an unreadable preferences table FAILS OPEN (see
+ *     `readPrefRowsFailOpen`) — deliver anyway.
+ *   - AFTER a successful insert: the email dispatcher (M6 preparation).
+ *     Consent-first (email default OFF) and env-inert: it becomes live
+ *     automatically the moment the owner configures a real email provider —
+ *     that is the design intent, no further code change needed. Its every
+ *     failure collapses to a tagged outcome; it can never fail the insert
+ *     that already happened.
  */
 async function deliver(
   admin: AdminClient,
   input: NotificationEventInput,
-): Promise<void> {
+): Promise<DeliverOutcome> {
+  const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
+  if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
+    // APPROVED silence: the recipient turned this type off themselves.
+    return "suppressed_preference";
+  }
   const outcome = await emitNotificationEvent(admin, input);
   if (outcome.kind === "unexpected_error") {
     // `duplicate` and `feature_unavailable` are approved outcomes and stay
     // quiet; this line only fires on something real.
     notDelivered(input.eventType, "insert_failed", outcome.code);
+    return "unexpected_error";
   }
+  if (outcome.kind === "written") {
+    await maybeDispatchNotificationEmail(admin, input, prefRows);
+  }
+  return outcome.kind;
 }
 
 async function workerProfileId(
@@ -461,6 +513,16 @@ export async function emitDemandInterestNotification(
     // your own hand. Deliberately unlogged so the marker below stays a signal.
     if (actor && actor === owner) return;
 
+    // Preference gate + email hop (completion v1) — this emitter predates
+    // `deliver` and keeps its own audited insert (guard-pinned), so it
+    // carries the same two channel hops explicitly. Fail-open on an
+    // unreadable preferences table; suppression only on a stored opt-out.
+    const prefRows = await readPrefRowsFailOpen(admin, owner);
+    if (!resolveChannelEnabled(prefRows, "demand_interest_expressed", "in_app")) {
+      // APPROVED silence: the owner turned this type off themselves.
+      return;
+    }
+
     const country = req?.country ?? null;
     const outcome = await emitNotificationEvent(admin, {
       recipientProfileId: owner,
@@ -475,6 +537,17 @@ export async function emitDemandInterestNotification(
       // `duplicate` and `feature_unavailable` are approved outcomes and stay
       // quiet; this line only fires on something real.
       undelivered("insert_failed", outcome.code);
+    }
+    if (outcome.kind === "written") {
+      await maybeDispatchNotificationEmail(
+        admin,
+        {
+          recipientProfileId: owner,
+          eventType: "demand_interest_expressed",
+          entityType: "demand_interest_signal",
+        },
+        prefRows,
+      );
     }
   } catch (err) {
     // Emission is an enhancement; the signal itself is already stored — the
@@ -545,6 +618,12 @@ export async function emitDemandInterestResponseNotification(input: {
     const recipient = await workerProfileId(admin, input.workerId);
     if (!recipient || recipient === input.actorProfileId) return;
 
+    // Same two channel hops as the outbound half (rationale up there).
+    const prefRows = await readPrefRowsFailOpen(admin, recipient);
+    if (!resolveChannelEnabled(prefRows, "demand_interest_reviewed", "in_app")) {
+      return;
+    }
+
     const outcome = await emitNotificationEvent(admin, {
       recipientProfileId: recipient,
       eventType: "demand_interest_reviewed",
@@ -555,6 +634,17 @@ export async function emitDemandInterestResponseNotification(input: {
     if (outcome.kind === "unexpected_error") {
       console.error(
         `[notifications] demand_interest_reviewed emit failed: ${outcome.code}`,
+      );
+    }
+    if (outcome.kind === "written") {
+      await maybeDispatchNotificationEmail(
+        admin,
+        {
+          recipientProfileId: recipient,
+          eventType: "demand_interest_reviewed",
+          entityType: "demand_interest_response",
+        },
+        prefRows,
       );
     }
   } catch {
@@ -998,6 +1088,13 @@ export function emitWorkerDocumentExpiringNotifications(workerId: string): void 
         (worker as { profile_id?: string } | null)?.profile_id ?? null;
       if (!recipient) return;
 
+      // Preference gate (completion v1): a stored in-app opt-out for this
+      // type suppresses the whole derivation. Fail-open like `deliver`.
+      const prefRows = await readPrefRowsFailOpen(admin, recipient);
+      if (!resolveChannelEnabled(prefRows, "document_expiring", "in_app")) {
+        return;
+      }
+
       const { data } = await admin
         .from("worker_documents")
         .select("id, status, valid_until")
@@ -1049,6 +1146,9 @@ export function emitOrgDocumentExpiringNotifications(
         .not("expires_on", "is", null)
         .limit(200);
       const now = new Date();
+      // Preference gate per DISTINCT recipient (completion v1), cached so a
+      // register with one responsible person costs one read. Fail-open.
+      const allowedByRecipient = new Map<string, boolean>();
       for (const row of (data ?? []) as {
         id: string;
         expires_on: string | null;
@@ -1058,6 +1158,16 @@ export function emitOrgDocumentExpiringNotifications(
         if (!isInsideExpiryWindow(row.expires_on, now)) continue;
         const recipient = row.responsible_profile_id ?? row.created_by;
         if (!recipient) continue;
+        let allowed = allowedByRecipient.get(recipient);
+        if (allowed === undefined) {
+          allowed = resolveChannelEnabled(
+            await readPrefRowsFailOpen(admin, recipient),
+            "document_expiring",
+            "in_app",
+          );
+          allowedByRecipient.set(recipient, allowed);
+        }
+        if (!allowed) continue;
         emitNotificationEventInBackground(admin, {
           recipientProfileId: recipient,
           eventType: "document_expiring",
@@ -1123,6 +1233,10 @@ export function maybeEmitWeeklyDigestInBackground(
       if (!journal.available && !opportunities.available) return;
 
       const admin = createAdminClient();
+      // Preference gate (completion v1): a stored in-app opt-out for the
+      // digest suppresses the read-time emit too. Fail-open like `deliver`.
+      const prefRows = await readPrefRowsFailOpen(admin, worker.profile_id);
+      if (!resolveChannelEnabled(prefRows, "weekly_digest", "in_app")) return;
       emitNotificationEventInBackground(admin, {
         recipientProfileId: worker.profile_id,
         eventType: "weekly_digest",
@@ -1134,4 +1248,107 @@ export function maybeEmitWeeklyDigestInBackground(
       // never the page. The next visit tries again.
     }
   })();
+}
+
+/** The cron sweep's honest report — counts only, never ids or people. */
+export interface WeeklyDigestCronSummary {
+  readonly kind: "ran";
+  /** Distinct candidate recipients the sweep considered. */
+  readonly candidates: number;
+  readonly written: number;
+  /** Already had this week's row (read-time emit or an earlier sweep). */
+  readonly duplicates: number;
+  /** Stored in-app opt-outs. */
+  readonly suppressed: number;
+  readonly failures: number;
+}
+
+const WEEKLY_DIGEST_CRON_RECIPIENT_LIMIT = 500;
+
+/**
+ * WEEKLY DIGEST CRON SWEEP (completion v1) — the scheduled sibling of the
+ * read-time emitter above, for the people the read-time path structurally
+ * cannot reach: workers who did NOT visit the dashboard this week. Both
+ * paths write the SAME deterministic per-week entity id, so the UNIQUE
+ * (recipient, dedupe_key) constraint keeps the digest exactly-once per
+ * recipient per week whichever path gets there first.
+ *
+ * RECIPIENT DECISION, stated: workers with at least one live journal entry
+ * in the trailing 7 days. The read-time emitter's richer "can this digest
+ * say something true" check (`getWeeklyPersonalIntelligence`) runs under the
+ * signed-in session and cannot run here; recent journal activity is the
+ * service-role-readable subset of that truth — a worker who logged work this
+ * week always has a non-empty digest. Widening the audience is a deliberate
+ * later decision, not a default.
+ *
+ * Rides `deliver`, so the sweep inherits the preference gate AND the email
+ * hop: once the owner configures a real email provider, workers who opted in
+ * to digest email start receiving it from this sweep with no further code
+ * change. Lives in THIS module because event-emitters.ts is the one audited
+ * home of durable-notification service-role writers (chat-visibility-rls
+ * pins the caller inventory).
+ */
+export async function emitWeeklyDigestNotificationsForCron(): Promise<
+  WeeklyDigestCronSummary | { readonly kind: "unavailable" }
+> {
+  try {
+    const admin = createAdminClient();
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const sinceIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await admin
+      .from("journal_entries")
+      .select("worker_id")
+      .gte("created_at", sinceIso)
+      .is("deleted_at", null)
+      .limit(5000);
+    if (error) return { kind: "unavailable" };
+    const workerIds = [
+      ...new Set(
+        ((data ?? []) as { worker_id?: string | null }[])
+          .map((r) => r.worker_id)
+          .filter((id): id is string => typeof id === "string" && id.length > 0),
+      ),
+    ].slice(0, WEEKLY_DIGEST_CRON_RECIPIENT_LIMIT);
+
+    const recipients = new Set<string>();
+    for (let i = 0; i < workerIds.length; i += 100) {
+      const { data: workers } = await admin
+        .from("workers")
+        .select("id, profile_id")
+        .in("id", workerIds.slice(i, i + 100));
+      for (const w of (workers ?? []) as { profile_id?: string | null }[]) {
+        if (w.profile_id) recipients.add(w.profile_id);
+      }
+    }
+
+    const entityId = weeklyDigestEntityId(todayIso);
+    const summary = {
+      candidates: recipients.size,
+      written: 0,
+      duplicates: 0,
+      suppressed: 0,
+      failures: 0,
+    };
+    for (const recipientProfileId of recipients) {
+      const outcome = await deliver(admin, {
+        recipientProfileId,
+        eventType: "weekly_digest",
+        entityType: "weekly_digest",
+        // POINTER-ONLY (§19(d)): no metadata — the numbers live where the
+        // href lands, recomputed at read time.
+        entityId,
+      });
+      if (outcome === "written") summary.written += 1;
+      else if (outcome === "duplicate") summary.duplicates += 1;
+      else if (outcome === "suppressed_preference") summary.suppressed += 1;
+      else if (outcome === "unexpected_error") summary.failures += 1;
+      // feature_unavailable: the store is unapplied — every later recipient
+      // would fail identically, so stop and report honestly.
+      else if (outcome === "feature_unavailable") return { kind: "unavailable" };
+    }
+    return { kind: "ran", ...summary };
+  } catch {
+    return { kind: "unavailable" };
+  }
 }

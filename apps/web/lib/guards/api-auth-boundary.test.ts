@@ -62,6 +62,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "cron/weekly-digest/route.ts": {
+    class: "public",
+    why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
+  },
   "cv/extract/route.ts": {
     class: "shared",
     why: "Importing a CV from a phone is one of the first things a mobile client must do.",

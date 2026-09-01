@@ -52,6 +52,15 @@ export type ConversationIntent =
   | "admin-approvals" // "ką turiu patvirtinti?" — the approvals area
   | "admin-requests" // "noriu pateikti atostogų prašymą" — the requests area
   | "timesheets" // "parodyk mano tabelį" — the timesheets area of planning
+  // ── §9 chat-first coverage: whole domains that EXIST in the product but
+  //    could only be reached by knowing their URL. Route-class, one `link:`
+  //    chip each, never a second view inside the chat. ─────────────────────
+  | "hours-import" // "įkelk tabelį" — the historical timesheet import surface
+  | "work-hours" // "atidaryk darbo valandas" — the daily hours screen
+  | "absences" // "kiek atostogų dienų man liko?" — leave & absence
+  | "documents" // "parodyk mano dokumentus" — the document centre
+  | "market-map" // "parodyk rinkos žemėlapį" — the labour-market map
+  | "activity" // "parodyk pranešimus" — the unified activity centre
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
@@ -475,6 +484,36 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    /**
+     * IMPORTING a historical timesheet — deliberately ABOVE `timesheets`, and
+     * on score, not on order.
+     *
+     * "Įkelk tabelį" carries the same timesheet noun as "parodyk tabelį", so
+     * the reading that decides between them is the VERB: one asks to look at
+     * the period documents, the other asks to feed a spreadsheet of past
+     * hours into `work_hour_allocations`. Every pattern here therefore
+     * REQUIRES an import/upload verb next to the document noun, weighted 8 so
+     * it decisively outranks the bare-noun `timesheets` rule (5–6) — while
+     * "parodyk mano tabelį", which has no such verb, cannot reach this rule at
+     * all and still opens the timesheet area.
+     */
+    intent: "hours-import",
+    patterns: [
+      // lt — "įkelk tabelį", "importuok valandas iš excelio"
+      p("(įkelk|įkelti|įkeliu|importuok|importuoti|suvesk\\s+iš)\\s*.{0,16}(tabel|žiniarašt|valand|excel|xlsx)", 8),
+      // en — "import timesheet", "upload the hours spreadsheet"
+      p("(import|upload)\\s*.{0,16}(time\\s?sheet|hours|excel|xlsx|spreadsheet)", 8),
+      // ru — "загрузи табель", "импортируй часы из экселя"
+      p("(загрузи|загрузить|импортир|выгруз)\\s*.{0,16}(табел|час|excel|xlsx|эксел)", 8),
+      // de — both orders: "Stundenzettel importieren" / "importiere die Stunden"
+      p("(stundenzettel|arbeitszeitnachweis|stunden|excel)\\w*\\s*.{0,16}(importier|hochlad|einles)", 8),
+      p("(importier|lade|lese)\\s*.{0,20}(stundenzettel|arbeitszeitnachweis|stunden|excel)", 8),
+      // nl — both orders: "urenstaat importeren" / "importeer de uren"
+      p("(urenstaat|urenbriefje|uren|excel)\\w*\\s*.{0,16}(importeren|uploaden|inlezen)", 8),
+      p("(importeer|upload|lees)\\s*.{0,20}(urenstaat|urenbriefje|uren|excel)", 8),
+    ],
+  },
+  {
     // The timesheet document area — the period hour documents under
     // /dashboard/planning#timesheets. Same routing rule as the admin areas:
     // the sentence resolves to a `link:` chip to the ONE canonical surface,
@@ -492,6 +531,75 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    /**
+     * THE DAILY WORK-HOURS SCREEN (/dashboard/hours) — §9 chat-first coverage.
+     *
+     * A whole domain that only a URL could reach. The hard part is that the
+     * hour NOUN is the most overloaded word in this product: it already means
+     * "record what I did" (`log-work`), "how many hours did I work"
+     * (`journal-recent`, weight 7) and "my confirmed hours" (`figures`). So no
+     * pattern here fires on a bare hour word. Two shapes only:
+     *
+     *   * the unambiguous COMPOUND — "darbo valandos", "work hours",
+     *     "рабочие часы", "Arbeitsstunden", "werkuren" — which no other rule
+     *     reads, and
+     *   * an OPEN verb pointing at an hour noun, weighted 4 so the more
+     *     specific document rules above ("Öffne meinen Stundenzettel" → 6,
+     *     "Open mijn urenstaat" → 6) keep their own sentences.
+     *
+     * "Kiek valandų dirbau šiandien?" therefore still reads the journal (7):
+     * a QUESTION about recorded hours is a read of what was recorded, not a
+     * request to open the entry screen.
+     */
+    intent: "work-hours",
+    patterns: [
+      p("darbo\\s+valand", 5), // lt
+      p("valandų\\s+(apskait|suvestin)", 5), // lt — "valandų apskaita"
+      p("\\bwork\\s*hours\\b", 5), // en
+      p("(рабочие\\s+часы|рабочих\\s+часов|учет\\s+часов|учёт\\s+часов)", 5), // ru
+      p("(arbeitsstunden|arbeitszeiten)", 5), // de
+      p("(werkuren|urenregistratie)", 5), // nl
+      // The OPEN framing, deliberately weaker than the document rules above.
+      p("(atidaryk|atverk|open|открой|öffne)\\s*.{0,12}(valand|hour|час|stunden|uren|uur)", 4),
+    ],
+  },
+  {
+    /**
+     * LEAVE & ABSENCE, the OVERVIEW half (/dashboard/absences) — §9.
+     *
+     * `admin-requests` already owns FILING a leave request and keeps every one
+     * of its needles untouched. This is the other question a person asks about
+     * the same domain and had no door at all: how much leave is left, and who
+     * is away. Each pattern pairs the leave noun with a BALANCE or an
+     * ABSENT-WHO reading and is weighted 8, so it wins over the bare leave
+     * stems in `admin-requests` (5) for those sentences only — "Noriu pateikti
+     * atostogų prašymą" matches nothing here and still opens the request area.
+     */
+    intent: "absences",
+    patterns: [
+      // lt — "Kiek atostogų dienų man liko?", "atostogų likutis"
+      p("(kiek|liko)\\s*.{0,20}atostog", 8),
+      p("atostogų\\s+(likut|balans|dien)", 8),
+      p("(kas\\s+(šiandien\\s+)?(nedirba|atostogauja|serga))", 8),
+      // en
+      p("(leave|holiday|vacation)\\s+(balance|days\\s+left|entitlement)", 8),
+      p("how\\s+(many|much)\\s*.{0,20}(leave|holiday|vacation)", 8),
+      p("(who\\s+is\\s+(absent|away|off|on\\s+leave))", 8),
+      p("\\babsences?\\b", 5),
+      // ru
+      p("(сколько)\\s*.{0,20}(отпуск|отгул)", 8),
+      p("(остаток|баланс)\\s+отпуск", 8),
+      p("кто\\s+(в\\s+отпуске|отсутствует|болеет)", 8),
+      p("\\bотсутстви", 5),
+      // de
+      p("(urlaubskonto|urlaubstage|resturlaub|abwesenheit)", 6),
+      p("wer\\s+ist\\s+(abwesend|krank|im\\s+urlaub)", 8),
+      // nl
+      p("(verlofsaldo|verlofdagen|vakantiedagen|afwezigheid)", 6),
+      p("wie\\s+is\\s+(afwezig|ziek|met\\s+verlof)", 8),
+    ],
+  },
+  {
     // The worker's half of the same engine: filing a request (leave, trip,
     // expense) rather than deciding one.
     intent: "admin-requests",
@@ -505,6 +613,83 @@ const RULES: IntentRule[] = [
       p("\\bзаявлени", 4),
       p("\\burlaub", 5), // de
       p("\\bverlof", 5), // nl
+    ],
+  },
+  {
+    /**
+     * THE DOCUMENT CENTRE (/dashboard/documents) — §9 chat-first coverage.
+     *
+     * Named in the capability audit as one of the domains that was
+     * "sentence-unreachable": contracts, certificates and identity documents
+     * all live on one canonical screen, and the only way in was typing the
+     * URL. The document word carries the whole signal in every active locale
+     * and collides with nothing else in this table, so no verb is required —
+     * naming your documents IS asking for them.
+     */
+    intent: "documents",
+    patterns: [
+      p("\\bdokument", 5), // lt dokumentai / de Dokumente
+      p("\\bdocument", 5), // en documents / nl documenten
+      p("\\bдокумент", 5), // ru
+      // The things people actually keep there, when they name the thing
+      // rather than the folder.
+      p("(pažymėjim|sertifikat|certificate|zertifikat|certificaat)", 4),
+      p("\\bсертификат", 4),
+    ],
+  },
+  {
+    /**
+     * THE LABOUR-MARKET MAP (/dashboard/market-map) — §9 chat-first coverage.
+     *
+     * WHY EVERY PATTERN CARRIES THE MARKET WORD. `player-card` reads a bare
+     * "Karte" / "kaart" / "card" (weight 7): "Zeig meine Karte" means the
+     * person's own card, and it must keep meaning that. So the map is reached
+     * through the COMPOUND the market is actually called by — Arbeitsmarkt-
+     * karte, arbeidsmarktkaart, market map, карта рынка — weighted 8, which
+     * beats the card rule for those sentences and cannot touch any other.
+     * Lithuanian needs no compound: `žemėlapis` is a map and nothing else.
+     */
+    intent: "market-map",
+    patterns: [
+      p("žemėlap", 6), // lt
+      p("(labour|labor|work|market)\\s*market\\s*map\\b", 8), // en
+      p("\\bmarket\\s+map\\b", 8), // en
+      p("карт(а|у|ы|е)\\s*.{0,16}(рынк|труд)", 8), // ru — "карта рынка труда"
+      p("(arbeitsmarkt|markt)karte", 8), // de
+      p("karte\\s+(des|vom)\\s+arbeitsmarkt", 8), // de
+      p("(arbeidsmarkt|markt)kaart", 8), // nl
+      p("kaart\\s+van\\s+de\\s+arbeidsmarkt", 8), // nl
+    ],
+  },
+  {
+    /**
+     * THE UNIFIED ACTIVITY CENTRE (/dashboard/activity) — §9.
+     *
+     * Everything that wants the caller's attention, on one cross-module
+     * screen fed by the notification spine — and no sentence could open it.
+     *
+     * THE GERMAN TRAP, measured: "Benachrichtigungen" CONTAINS "Nachrichten",
+     * so `messages-view` (weight 6) matched "Zeig meine Benachrichtigungen"
+     * and answered a request for notifications with the message thread. The
+     * notification word is therefore weighted 7 in German specifically — the
+     * longer, more specific word wins, and a plain "Zeig meine Nachrichten"
+     * still opens messages because it never reaches this rule.
+     */
+    intent: "activity",
+    patterns: [
+      p("\\bpranešim", 5), // lt
+      p("\\bnotification", 5), // en
+      p("\\bуведомлени", 5), // ru
+      p("\\bmelding", 5), // nl — bounded, so "aanmelding" is not a notification
+      p("benachrichtigung", 7), // de — see the trap above
+      p("(veiklos\\s+sraut|activity\\s+(centre|center|feed)|лента\\s+событ|activiteitencentrum|aktivitäten)", 5),
+      p(
+        "(ką\\s+reikia\\s+peržiūrėti|needs\\s+my\\s+attention|требует\\s+внимания|erfordert\\s+meine\\s+aufmerksamkeit|vraagt\\s+mijn\\s+aandacht)",
+        6,
+      ),
+      // A bare "what's new?" with no company/project noun after it — the
+      // rules above keep those, because they name what is being asked about.
+      p("(kas\\s+naujo|what'?s\\s+new|что\\s+нового|was\\s+ist\\s+neu|wat\\s+is\\s+er\\s+nieuw)", 4),
     ],
   },
   {

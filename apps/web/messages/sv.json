@@ -374,6 +374,10 @@
         "event_demand_interest_expressed": "En arbetstagare har visat intresse för ditt behov",
         "event_demand_interest_reviewed": "Ett företag har markerat ditt intresse som granskat",
         "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar"
+      },
+      "email": {
+        "open": "Öppna i LabourMarket.ai:",
+        "manage": "Hantera dina aviseringsinställningar:"
       }
     },
     "onboarding": {
@@ -2212,6 +2216,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Praktik- eller volontärerfarenhet",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",

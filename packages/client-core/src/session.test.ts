@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAX_REFRESH_DELAY_MS,
   SESSION_STORE_KEY,
   bearerTokenFor,
   clearStoredSession,
   isExpired,
+  millisecondsUntilRefresh,
   readStoredSession,
   writeStoredSession,
   type SessionStore,
@@ -143,6 +145,46 @@ describe("expiry is about the access token, not about the session", () => {
     expect(
       bearerTokenFor({ status: "signed_in", session: session() }, NOW),
     ).toBe("access-token");
+  });
+});
+
+describe("a session that is about to expire announces itself in time", () => {
+  // The defect this closes: a client that renewed only at launch. After an
+  // hour the token was dead, nothing observed it, and every read failed with
+  // "please sign in again" until the app was killed and reopened.
+
+  it("is due BEFORE the token is refused, not after", () => {
+    // The renewal window and the token-refusal window are the same skew, so a
+    // renewal is always due while the token still works. If these two ever
+    // disagreed, there would be a gap in which requests fail and no renewal
+    // has been scheduled — the silent expiry, reintroduced.
+    // Inside the cap, so the answer is the real due time rather than a
+    // re-check interval.
+    const s = session({ expiresAt: NOW + 600 });
+    const dueAt = NOW + millisecondsUntilRefresh(s, NOW) / 1000;
+    expect(isExpired(s, dueAt)).toBe(true);
+    expect(isExpired(s, dueAt - 1)).toBe(false);
+  });
+
+  it("an already-expired session is due now, never negative", () => {
+    // A negative delay handed to a timer fires immediately on some runtimes
+    // and never on others. Zero is the one answer both read the same way.
+    expect(millisecondsUntilRefresh(session({ expiresAt: NOW - 10_000 }), NOW)).toBe(0);
+    expect(millisecondsUntilRefresh(session({ expiresAt: NOW }), NOW)).toBe(0);
+  });
+
+  it("an absurd expiry is capped instead of overflowing a timer", () => {
+    // A clock jump or a corrupt store can produce a delay larger than a 32-bit
+    // timer holds, and an overflowed timer does not wait — it fires in a loop.
+    const distant = session({ expiresAt: NOW + 60 * 60 * 24 * 365 * 100 });
+    expect(millisecondsUntilRefresh(distant, NOW)).toBe(MAX_REFRESH_DELAY_MS);
+    expect(MAX_REFRESH_DELAY_MS).toBeLessThan(2 ** 31 - 1);
+  });
+
+  it("a normal hour-long token is due once, well inside the cap", () => {
+    expect(millisecondsUntilRefresh(session({ expiresAt: NOW + 600 }), NOW)).toBe(
+      (600 - 60) * 1000,
+    );
   });
 });
 

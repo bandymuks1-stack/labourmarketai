@@ -230,5 +230,30 @@ export const ET_PACK: LanguagePack = {
     translation: {
       exact: ["tõlkisin", "tõlkija", "tõlkimine"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["esitlesin", "esitlus", "tegin ettekande"],
+    },
+    "stakeholder-engagement": {
+      exact: ["huvirühmad", "kohtusin esindajatega", "kohtumine esindajatega"],
+    },
+    "partnership-development": {
+      exact: ["partnerlus", "koostöövõimalus", "sõlmisin koostöö"],
+    },
+    negotiation: {
+      exact: ["läbirääkimised", "pidasin läbirääkimisi"],
+    },
+    "project-coordination": {
+      exact: ["koordineerisin projekti", "projektijuhtimine", "projekti koordineerimine"],
+    },
+    "report-writing": {
+      exact: ["kirjutasin aruande", "aruannete koostamine", "koostasin aruande"],
+    },
+    teamwork: {
+      exact: ["meeskonnatöö", "töötasin meeskonnas", "rühmatöö"],
+    },
+    research: {
+      exact: ["viisin läbi uuringu", "teadustöö", "kirjanduse ülevaade"],
+    },
   },
 };

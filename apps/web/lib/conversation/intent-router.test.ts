@@ -653,6 +653,48 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Open mijn urenstaat",
     de: "Zeig meinen Stundenzettel",
   },
+  "hours-import": {
+    lt: "Įkelk tabelį",
+    en: "Import a timesheet",
+    ru: "Загрузи табель",
+    nl: "Urenstaat importeren",
+    de: "Stundenzettel importieren",
+  },
+  "work-hours": {
+    lt: "Atidaryk darbo valandas",
+    en: "Open work hours",
+    ru: "Открой рабочие часы",
+    nl: "Open de werkuren",
+    de: "Öffne die Arbeitsstunden",
+  },
+  absences: {
+    lt: "Kiek atostogų dienų man liko?",
+    en: "How many holiday days do I have left?",
+    ru: "Сколько дней отпуска у меня осталось?",
+    nl: "Hoeveel verlofdagen heb ik nog?",
+    de: "Wie viele Urlaubstage habe ich noch?",
+  },
+  documents: {
+    lt: "Parodyk mano dokumentus",
+    en: "Show my documents",
+    ru: "Покажи мои документы",
+    nl: "Toon mijn documenten",
+    de: "Zeig meine Dokumente",
+  },
+  "market-map": {
+    lt: "Parodyk rinkos žemėlapį",
+    en: "Show me the market map",
+    ru: "Покажи карту рынка труда",
+    nl: "Toon de arbeidsmarktkaart",
+    de: "Öffne die Arbeitsmarktkarte",
+  },
+  activity: {
+    lt: "Parodyk pranešimus",
+    en: "Show my notifications",
+    ru: "Покажи уведомления",
+    nl: "Toon mijn meldingen",
+    de: "Zeig meine Benachrichtigungen",
+  },
   "messages-view": {
     lt: "Parodyk žinutes",
     en: "Show my messages",
@@ -710,6 +752,71 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Ich möchte 500 Paletten verkaufen",
   },
 };
+
+/**
+ * §9 CHAT-FIRST COVERAGE — the ambiguity proofs.
+ *
+ * Six route-class intents were added over vocabulary that six EXISTING rules
+ * already read (the timesheet noun, the hour noun, the leave stems, the card
+ * noun, the German Nachrichten substring). Adding coverage must never cost
+ * coverage, so every sentence the older rule owns is asserted here to still
+ * reach it. These are the tests that would fail first if a future widening
+ * quietly stole a working intent.
+ */
+describe("§9 coverage never steals a sentence an existing intent already owned", () => {
+  it("the timesheet AREA still wins without an import verb", () => {
+    expect(classifyIntent("Parodyk mano tabelį").intent).toBe("timesheets");
+    expect(classifyIntent("Open my timesheet").intent).toBe("timesheets");
+    expect(classifyIntent("Покажи мой табель").intent).toBe("timesheets");
+    expect(classifyIntent("Open mijn urenstaat").intent).toBe("timesheets");
+    expect(classifyIntent("Zeig meinen Stundenzettel").intent).toBe("timesheets");
+    // …and the SAME noun with an import verb is the import surface.
+    expect(classifyIntent("Įkelk tabelį").intent).toBe("hours-import");
+    expect(classifyIntent("Stundenzettel importieren").intent).toBe("hours-import");
+    expect(classifyIntent("Urenstaat importeren").intent).toBe("hours-import");
+  });
+
+  it("a QUESTION about hours is still a journal read, not the hours screen", () => {
+    expect(classifyIntent("Kiek valandų dirbau šiandien?").intent).toBe("journal-recent");
+    expect(classifyIntent("How many hours did I work?").intent).toBe("journal-recent");
+    // …and confirmed-hours phrasing is still the figures workflow.
+    expect(classifyIntent("Show my approved hours").intent).toBe("figures");
+    expect(classifyIntent("Zeig meine bestätigten Stunden").intent).toBe("figures");
+    // …and recording work is still the work log.
+    expect(classifyIntent("Šiandien dirbau nuo 8 iki 17").intent).toBe("log-work");
+    expect(classifyIntent("Uren invoeren").intent).toBe("log-work");
+  });
+
+  it("FILING a leave request still opens the requests area, not the balance", () => {
+    expect(classifyIntent("Noriu pateikti atostogų prašymą").intent).toBe("admin-requests");
+    expect(classifyIntent("Leave request").intent).toBe("admin-requests");
+    expect(classifyIntent("Хочу подать заявление на отпуск").intent).toBe("admin-requests");
+    expect(classifyIntent("Ik wil verlof aanvragen").intent).toBe("admin-requests");
+    expect(classifyIntent("Ich möchte Urlaub beantragen").intent).toBe("admin-requests");
+  });
+
+  it("a bare CARD is still the player card — only the market compound is the map", () => {
+    expect(classifyIntent("Zeig meine Karte").intent).toBe("player-card");
+    expect(classifyIntent("Toon mijn kaart").intent).toBe("player-card");
+    expect(classifyIntent("Покажи мою карточку").intent).toBe("player-card");
+    expect(classifyIntent("Show my card").intent).toBe("player-card");
+  });
+
+  it("de: Nachrichten is still the message thread, Benachrichtigungen is the activity centre", () => {
+    // The measured trap: "Benachrichtigungen" CONTAINS "Nachrichten".
+    expect(classifyIntent("Zeig meine Nachrichten").intent).toBe("messages-view");
+    expect(classifyIntent("Zeig meine Benachrichtigungen").intent).toBe("activity");
+    expect(classifyIntent("Toon mijn berichten").intent).toBe("messages-view");
+    expect(classifyIntent("Toon mijn meldingen").intent).toBe("activity");
+  });
+
+  it("a 'what is new' question that NAMES its subject still reaches that subject", () => {
+    expect(classifyIntent("Kas naujo mano įmonėje?").intent).toBe("company-overview");
+    expect(classifyIntent("Kas vyksta mano objekte?").intent).toBe("open-project");
+    // Only the unqualified form is the activity centre.
+    expect(classifyIntent("Kas naujo?").intent).toBe("activity");
+  });
+});
 
 describe("G3 — every routed intent is reachable in all five active locales", () => {
   for (const [intent, sentences] of Object.entries(PARITY_MATRIX) as Array<

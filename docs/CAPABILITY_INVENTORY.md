@@ -75,7 +75,8 @@
 | `student` / `volunteer` relationship writable | `PROVEN` | RPC under RLS; `manager` correctly rejected |
 | **Institution ↔ learner link** | `APPLIED`, `PROD-PROVEN (server chain)` | Migration 20260827200000 applied 2026-08-27 (ledger `20260827132137`). Re-proven on PRODUCTION in rolled-back transactions: capable org invites → learner accepts → `student` engagement alongside the existing employment; org without `training_provider` refused; `manager` refused; legacy invitation still → `employee`. Browser chain against the deployed app NOT yet run. |
 | Learner visibility is NOT employer visibility | `APPLIED`, `PROD-PROVEN` | 20260827210000. Controlled comparison, non-admin org owner: one engagement row, `employee` → visible, same row as `student` → not visible. |
-| Transversal capability recognition | `PARTIAL` | LT/EN/RU only, classified `deferred` |
+| Transversal capability recognition | `PROVEN` (12 recognition languages) | All 8 slugs classified `core`: LT/EN/RU base lexicon + real per-language needles in all 9 offline packs (da de et fi lv nl no pl sv). Guard-enforced (`offline-language-pack.test.ts`) + real-sentence tests (`lib/structuring/transversal-capability-locales.test.ts`). |
+| Practice/volunteering as a matching signal | `SHIPPED (labelled, additive)` | `MatchSubject.practiceEngagements` → `practice_experience` reason in match-v1; NEVER employment, never a score input. Readable by the admin workbench + the worker's own board; an employer scouting session cannot read `engagement_contexts` (RLS 0013) so it degrades to "not stated". |
 
 ### Cross-cutting
 | capability | status | evidence |
@@ -141,9 +142,17 @@
    same day — see blocker 6 below, which is now a resolved entry rather than an
    open one.
 
-   What is still MISSING is not code: **0 production organizations hold
-   `training_provider`**, so no institution exists in production yet, and the
-   user-facing browser chain has not been run against the deployed app.
+   **The "0 production organizations hold `training_provider`" blocker is
+   CLOSED (2026-08-28).** `Labour market ai Sp. z o.o` now holds
+   `employer,training_provider`, set through the REAL UI (workspace switch →
+   organization-capability card), not SQL — invariant I-2 (one organization,
+   many capabilities) proven live in production for the first time. The
+   institution↔learner invitation shipped with #1301 and is applied.
+
+   What is still MISSING is one browser step, and it is an OWNER gate rather
+   than code: the learner half (institution invites → learner ACCEPTS) needs a
+   SECOND signed-in identity against the deployed app. The server chain for
+   exactly that step is prod-proven in rolled-back transactions (above).
 2. **Employer need → matching → shortlist — PROVEN 2026-08-27.** Exercised in
    a browser against a real demand: the LT demand text was recognised into
    skills, candidates were retrieved and ranked with an evidence-tier basis
@@ -187,10 +196,12 @@
      and a hand-rolled invocation does not — four grey SKIPs that read like
      four green ticks.
 
-   **Still open:** the chain is proven on the LOCAL stack. It has not been run
-   against the deployed app, and 0 production organizations hold
-   `training_provider`, so production remains `PARTIAL` for the same reason
-   blocker 1 records.
+   **Still open:** the chain is proven on the LOCAL stack and, server-side, on
+   production. Production holds its first `training_provider` organization
+   since 2026-08-28, so that half is no longer the blocker; what has not been
+   run against the deployed app is the learner ACCEPT step in a browser, which
+   needs a second signed-in identity (owner gate). Production therefore stays
+   `PARTIAL` for that one reason — see blocker 1.
 4. **Languages: 5 of 26 routed, Georgian absent entirely.** One narrower gap
    inside this was closed on 2026-08-27: the work-log context selector could
    not NAME a placement, because its base label resolved through
@@ -333,7 +344,7 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 | Worker: register→onboard→CV→journal→opportunities→interest | ✅ proven | Ⓖ stale gate (flip train in flight) | ◐ profile/CV-read, journal r/w, interest, work-card via bridge | — |
 | Employer: setup→demand→matching→shortlist→contact→booking | ✅ proven | ✗ | ✗ no company.* capability yet | employer workspace resolver is cookie-coupled |
 | Student/learner: link→journal→evidence→CV | ✅ local chain 7/7; prod partial | ✗ | ◐ same as worker | gets WORKER home copy (M10) |
-| Education institution: declare→invite→learner evidence | ✅ server-proven; 0 prod `training_provider` orgs | ✗ | ✗ | gets EMPLOYER home copy (M10) |
+| Education institution: declare→invite→learner evidence | ✅ server-proven; first prod `training_provider` org live 2026-08-28 | ✗ | ✗ | learner ACCEPT in a browser needs a 2nd identity (owner gate); gets EMPLOYER home copy (M10) |
 | Customer/buyer: register→browse services→request | ◐ | ✗ | ✗ | absent from onboarding (M8); buyer `customer_requests` reach nobody (verified-company gate) |
 | Project/team manager: projects→tasks→timesheets→absences | ◐ | ✗ | ✗ | three prod-broken links (§5.2 M1–M3) |
 | AI actors | recorded, deferred (ARCH §5.1) | — | transport seam = MCP | — |
@@ -345,9 +356,9 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 | M1 | ~~Absence review dead in production for booking-engagement employers~~ **CLOSED — STALE FINDING.** The fix migration was ALREADY APPLIED to prod 2026-08-12 (ledger `20260812180224`); this finding cited the never-struck deferred entry at `APPLIED_LEDGER.md:1475` (an M17-class doc defect, now corrected). Behavior proven IN PRODUCTION 2026-08-31 (rolled-back probe): engaged employer sees + approves the request; private note hidden; unrelated/ended employers see nothing | **CLOSED 2026-08-31 (was doc-stale, not prod-broken)** | ✅ ledger entry `20260812180224` + 2026-08-31 prod probe |
 | M2 | ~~`assign_worker_to_project` regressed in production~~ **CLOSED — STALE FINDING.** The same 2026-08-12 apply restored the engagement bridge pinned to `by_roster`. Proven IN PRODUCTION 2026-08-31: engagement→assign returns a row on the engaging company's project (idempotent, exactly one active assignment); SIBLING company 42501; unrelated caller 42501; unauthenticated 42501 | **CLOSED 2026-08-31 (was doc-stale, not prod-broken)** | same |
 | M3 | **Timesheets derive zero hours in prod**: 6/7 journal time rows hang off org-less engagement contexts; `timesheet_compute_lines_v1` scopes on `ec.organization_id`. Code-level restatement: no row-level work-hour fact exists in main (PR #1344, DRAFT, RED, unapplied) | **P1 (honest-empty, no wrong data) · OWNER-GATED** | `APPLIED_LEDGER.md:145` |
-| M4 | 11 of 15 notification emitters still `void`-detached on serverless — the failure mode that killed the live interest emitter | P1 — fix train `fix/cc/awaited-notification-emitters` | `event-emitters.ts:281-299` |
-| M5 | `notification_preferences` (#1243, applied to prod) has ZERO consumers and no settings UI — complete module, unreachable | P1 | grep: only its own test |
-| M6 | A new message reaching an OFFLINE person is a silent no-op: no email channel configured (`INVITE_EMAIL_*` unset, Supabase SMTP default, `enable_confirmations=false`), no push anywhere | P1 · ENV/OWNER-GATED | messaging sweep |
+| M4 | ~~11 of 15 notification emitters still `void`-detached on serverless~~ **CLOSED — STALE FINDING.** TRAIN 10 (2026-08-31) awaited every write-path emitter end to end; exactly the THREE documented read-time emitters (document_expiring ×2, weekly_digest) stay deliberately detached and self-heal via the UNIQUE dedupe key. Pinned by `lib/guards/notification-emitters-are-awaited.test.ts` (counts the 3) | **CLOSED (was doc-stale)** | guard + `event-emitters.ts` header |
+| M5 | ~~`notification_preferences` has ZERO consumers and no settings UI~~ **CLOSED — notifications completion v1.** Settings UI: per-type × per-channel toggles on `/dashboard/account` (collapsed section). Enforcement: every durable emit resolves the recipient's in-app preference (opt-out model, default ON, FAIL-OPEN on a prefs outage); email stays consent-first opt-in (§4). `document_expiring` deliberately offers no email toggle (no dispatch path on its read-time emitters) | **CLOSED** | `lib/notifications/event-emitters.ts` `deliver()` + `components/app/notification-preferences-section.tsx` |
+| M6 | Email channel PREPARED, inert until credentials (notifications completion v1): per-event templates render from the same i18n keys the bell uses (`lib/email/notification-email.ts`), dispatcher runs after every durable insert (`lib/notifications/email-dispatch.ts` — explicit opt-in row required, recipient must hold a `profiles.email`, tagged skip otherwise), weekly-digest cron sweep at `/api/cron/weekly-digest` (CRON_SECRET-gated, refuses while unset). Flips LIVE automatically when the owner sets `INVITE_EMAIL_*` to a real provider; `log` provider exercises the path in dev/test. Push still absent everywhere | P2 · ENV/OWNER-GATED (was P1 code-gap) | `lib/notifications/email-dispatch.ts` |
 | M7 | Marketplace loop WORKS (offering CRUD → request → accept/decline → conversation) but is unreachable: not in nav; the "always-on dashboard grid" registry has NO renderer (W3 deleted it); `marketplace-loop-reachability.test.ts` passes while the reachability it names does not exist | P1 + guard-honesty defect | surface-matrix N6 |
 | M8 | Customer role absent from onboarding (`ROLE_CARDS = worker, company`); buyer acquisition path Tier-C buried | P1 | `onboarding-wizard.tsx:21` |
 | M9 | `service_offerings` has no `organization_id` (owner-join only); nothing after `accepted` (no quote/booking/completion/rating — partly by doctrine, partly vision §7 unbuilt) | P2 | marketplace sweep |
@@ -366,8 +377,8 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 |---|---|---|
 | WORKER_READY (web) | **YES** — first-value journey proven, no known P0 in it | — |
 | EMPLOYER_READY (web) | **YES (web core)** — need→match→shortlist→interest proven (12/12 e2e refresh 2026-08-31); absence review + booking→project for engagement employers proven live in prod (M1/M2 closed as doc-stale) | — |
-| STUDENT_READY | PARTIAL | prod browser chain + M10 |
-| EDUCATION_INSTITUTION_READY | PARTIAL | real prod `training_provider` org + M10 |
+| STUDENT_READY | PARTIAL | prod browser chain (2nd identity, owner gate) + M10 |
+| EDUCATION_INSTITUTION_READY | PARTIAL | first real prod `training_provider` org LIVE (2026-08-28) and #1301 applied; remaining: learner ACCEPT in a browser (2nd identity, owner gate) + M10 |
 | MOBILE_ANDROID_READY / IOS | NO — builds proven, zero product data | gate-flip train + runtime proof |
 | MARKETPLACE_READY | NO — loop works, reachability ≈ zero | M7, M8 slices |
 | CV_IMPORT_READY | YES (DOCX + PDF proven); XLSX/bulk = G10 architecture decision | — |

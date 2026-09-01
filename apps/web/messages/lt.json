@@ -461,7 +461,10 @@
       "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje.",
       "pending_absence_reviews": "Išnyksta, kai atostogų ir nebuvimo puslapyje patvirtinate arba atmetate prašymą.",
       "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje)."
-    }
+    },
+    "storedTitle": "Įrašyti pranešimai",
+    "storedIntro": "Užfiksuoti įvykiai apie jus — kiekviena eilutė atidaro susijusį puslapį. Perskaitymo būsena tvarkoma per varpelį.",
+    "storedEmpty": "Įrašytų pranešimų kol kas nėra."
   },
   "commandFinder": {
     "title": "Greita paieška",
@@ -4163,7 +4166,11 @@
       "switchRoleCta": "Persijungti į {role} norėdami pamatyti",
       "markAllRead": "Pažymėti visus skaitytais",
       "close": "Uždaryti",
-      "viewAll": "Visa veikla"
+      "viewAll": "Visa veikla",
+      "email": {
+        "open": "Atidaryti LabourMarket.ai:",
+        "manage": "Tvarkyti pranešimų nustatymus:"
+      }
     }
   },
   "shared": {
@@ -7450,6 +7457,7 @@
     "reason": {
       "skills_manager_confirmed": "Vadovo patvirtinti įgūdžiai",
       "skills_journal_supported": "Žurnalu pagrįsti įgūdžiai",
+      "practice_experience": "Praktikos ar savanorystės patirtis",
       "country_match": "Šalis sutampa",
       "mobility_match": "Sutiktų dirbti šioje šalyje",
       "available_now": "Šiuo metu laisvas",
@@ -11631,6 +11639,12 @@
       "adminApprovalsChip": "Tvirtinimai",
       "adminRequestsChip": "Prašymai",
       "timesheetsChip": "Žiniaraščiai",
+      "timesheetImportChip": "Tabelio importas",
+      "workHoursChip": "Darbo valandos",
+      "absencesChip": "Atostogos ir nebuvimas",
+      "documentsChip": "Mano dokumentai",
+      "marketMapChip": "Rinkos žemėlapis",
+      "activityChip": "Veikla",
       "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą.",
       "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
       "chipServiceRequests": "Rasti paslaugą",
@@ -14060,5 +14074,15 @@
     "draftChooseContext": "Šis įrašas gali priklausyti keliems darbo kontekstams: {options}. Kuriam jį priskirti?",
     "draftContext": "Kontekstas: {context}.",
     "confirmSummary": "Žurnalo įrašas išsaugotas. Įgūdžių atpažinimas: {added} pridėta, {strengthened} sustiprinta, {reviewNeeded} laukia peržiūros."
+  },
+  "notificationPrefs": {
+    "title": "Pranešimai",
+    "intro": "Pasirinkite, kurie pranešimai jus pasiekia — pagal tipą ir kanalą. Pranešimai programoje įjungti, kol jų neišjungiate.",
+    "inAppHeader": "Programoje",
+    "emailHeader": "El. paštu",
+    "emailConsentNote": "El. laiškai pagal numatytuosius nustatymus išjungti — siunčiami tik tų tipų, kuriuos čia įjungsite.",
+    "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
+    "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
+    "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
   }
 }

@@ -461,7 +461,10 @@
       "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
       "pending_absence_reviews": "Verdwijnt zodra u de aanvraag op de pagina Verlof & afwezigheid goedkeurt of afwijst.",
       "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
-    }
+    },
+    "storedTitle": "Opgeslagen meldingen",
+    "storedIntro": "Vastgelegde gebeurtenissen over u — elke rij opent de bijbehorende pagina. De leesstatus beheert u via de bel.",
+    "storedEmpty": "Nog geen opgeslagen meldingen."
   },
   "commandFinder": {
     "title": "Snel zoeken",
@@ -4163,7 +4166,11 @@
       "switchRoleCta": "Schakel over naar {role} om te bekijken",
       "markAllRead": "Markeer alles als gelezen",
       "close": "Sluiten",
-      "viewAll": "Alle activiteit bekijken"
+      "viewAll": "Alle activiteit bekijken",
+      "email": {
+        "open": "Openen in LabourMarket.ai:",
+        "manage": "Meldingsinstellingen beheren:"
+      }
     }
   },
   "shared": {
@@ -7450,6 +7457,7 @@
     "reason": {
       "skills_manager_confirmed": "Door manager bevestigde vaardigheden",
       "skills_journal_supported": "Journaal-onderbouwde vaardigheden",
+      "practice_experience": "Stage- of vrijwilligerservaring",
       "country_match": "Land komt overeen",
       "mobility_match": "Bereid om in dit land te werken",
       "available_now": "Nu beschikbaar",
@@ -11631,6 +11639,12 @@
       "adminApprovalsChip": "Goedkeuringen",
       "adminRequestsChip": "Verzoeken",
       "timesheetsChip": "Urenstaten",
+      "timesheetImportChip": "Urenstaat importeren",
+      "workHoursChip": "Gewerkte uren",
+      "absencesChip": "Verlof & afwezigheid",
+      "documentsChip": "Mijn documenten",
+      "marketMapChip": "Marktkaart",
+      "activityChip": "Activiteit",
       "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
@@ -14060,5 +14074,15 @@
     "draftChooseContext": "Deze invoer kan bij meerdere werkcontexten horen: {options}. Bij welke hoort deze?",
     "draftContext": "Werkcontext: {context}.",
     "confirmSummary": "Journaalinvoer opgeslagen. Vaardigheidsherkenning: {added} toegevoegd, {strengthened} versterkt, {reviewNeeded} wacht op beoordeling."
+  },
+  "notificationPrefs": {
+    "title": "Meldingen",
+    "intro": "Kies welke meldingen u bereiken — per type en kanaal. Meldingen in de app staan aan totdat u ze uitschakelt.",
+    "inAppHeader": "In de app",
+    "emailHeader": "E-mail",
+    "emailConsentNote": "E-mail staat standaard uit — er wordt alleen gemaild voor de typen die u hier inschakelt.",
+    "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Uw keuzes worden opgeslagen en gelden zodra die actief is.",
+    "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
+    "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
   }
 }

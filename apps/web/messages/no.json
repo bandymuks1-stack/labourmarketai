@@ -374,6 +374,10 @@
         "event_demand_interest_expressed": "En arbeidstaker har vist interesse for behovet ditt",
         "event_demand_interest_reviewed": "En bedrift har markert interessen din som gjennomgått",
         "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar"
+      },
+      "email": {
+        "open": "Åpne i LabourMarket.ai:",
+        "manage": "Administrer varslingsinnstillingene dine:"
       }
     },
     "onboarding": {
@@ -2212,6 +2216,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Praksis- eller frivilligerfaring",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",
