@@ -9,7 +9,10 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { markAllNotificationEventsReadAction } from "@/lib/notifications/events-actions";
+import {
+  markAllNotificationEventsReadAction,
+  markNotificationEventReadAction,
+} from "@/lib/notifications/events-actions";
 import {
   addRole as addRoleAction,
   switchActiveRole as switchActiveRoleAction,
@@ -207,13 +210,25 @@ export function AuthProvider({
     [router, initial.roles, initial.activeRole],
   );
 
-  const markAsRead = useCallback((id: string) => {
-    setNotifications((cur) =>
-      cur.map((n) =>
-        n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
-      ),
-    );
-  }, []);
+  const markAsRead = useCallback(
+    (id: string) => {
+      // PERSIST for durable events only (completion v1): a stored row's read
+      // marker survives the next hydration; derived signals clear by visiting
+      // their surface and get the optimistic client state only (persisting
+      // them is impossible — they are counts, not rows). Fire-and-forget:
+      // the action is idempotent and an unapplied store is an honest no-op.
+      const target = notifications.find((n) => n.id === id);
+      if (target?.durable && !target.read_at) {
+        void markNotificationEventReadAction(id).catch(() => {});
+      }
+      setNotifications((cur) =>
+        cur.map((n) =>
+          n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
+        ),
+      );
+    },
+    [notifications],
+  );
 
   const markAllRead = useCallback(() => {
     const now = new Date().toISOString();

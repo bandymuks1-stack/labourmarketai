@@ -461,7 +461,10 @@
       "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
       "pending_absence_reviews": "Verschwindet, sobald Sie den Antrag auf der Seite Urlaub & Abwesenheit genehmigen oder ablehnen.",
       "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
-    }
+    },
+    "storedTitle": "Gespeicherte Benachrichtigungen",
+    "storedIntro": "Aufgezeichnete Ereignisse zu Ihnen — jede Zeile öffnet die zugehörige Seite. Der Lesestatus wird über die Glocke verwaltet.",
+    "storedEmpty": "Noch keine gespeicherten Benachrichtigungen."
   },
   "commandFinder": {
     "title": "Schnellsuche",
@@ -4163,7 +4166,11 @@
       "switchRoleCta": "Zu {role} wechseln, um es anzusehen",
       "markAllRead": "Alle als gelesen markieren",
       "close": "Schließen",
-      "viewAll": "Alle Aktivitäten ansehen"
+      "viewAll": "Alle Aktivitäten ansehen",
+      "email": {
+        "open": "In LabourMarket.ai öffnen:",
+        "manage": "Benachrichtigungseinstellungen verwalten:"
+      }
     }
   },
   "shared": {
@@ -14060,5 +14067,15 @@
     "draftChooseContext": "Dieser Eintrag könnte zu mehreren Arbeitskontexten gehören: {options}. Zu welchem gehört er?",
     "draftContext": "Kontext: {context}.",
     "confirmSummary": "Journaleintrag gespeichert. Fähigkeitserkennung: {added} hinzugefügt, {strengthened} gestärkt, {reviewNeeded} wartet auf Prüfung."
+  },
+  "notificationPrefs": {
+    "title": "Benachrichtigungen",
+    "intro": "Wählen Sie, welche Benachrichtigungen Sie erreichen — je Typ und Kanal. In-App-Benachrichtigungen sind aktiv, bis Sie sie ausschalten.",
+    "inAppHeader": "In der App",
+    "emailHeader": "E-Mail",
+    "emailConsentNote": "E-Mail ist standardmäßig aus — gesendet wird nur für die Typen, die Sie hier einschalten.",
+    "emailInactiveNote": "Der E-Mail-Versand ist auf der Plattform noch nicht aktiv. Ihre Auswahl wird gespeichert und gilt, sobald er aktiv ist.",
+    "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
+    "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
   }
 }

@@ -461,7 +461,10 @@
       "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page.",
       "pending_absence_reviews": "Clears when you approve or reject the request on the leave & absence page.",
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card)."
-    }
+    },
+    "storedTitle": "Stored notifications",
+    "storedIntro": "Recorded events about you — each row opens the page it is about. Read state is managed from the bell.",
+    "storedEmpty": "No stored notifications yet."
   },
   "commandFinder": {
     "title": "Quick find",
@@ -4163,7 +4166,11 @@
       "switchRoleCta": "Switch to {role} to view",
       "markAllRead": "Mark all as read",
       "close": "Close",
-      "viewAll": "View all activity"
+      "viewAll": "View all activity",
+      "email": {
+        "open": "Open in LabourMarket.ai:",
+        "manage": "Manage your notification settings:"
+      }
     }
   },
   "shared": {
@@ -14060,5 +14067,15 @@
     "draftChooseContext": "This entry could belong to more than one work context: {options}. Which one should it go to?",
     "draftContext": "Context: {context}.",
     "confirmSummary": "Journal entry saved. Skill recognition: {added} added, {strengthened} strengthened, {reviewNeeded} awaiting review."
+  },
+  "notificationPrefs": {
+    "title": "Notifications",
+    "intro": "Choose which notifications reach you, per type and channel. In-app notifications are on until you turn them off.",
+    "inAppHeader": "In-app",
+    "emailHeader": "Email",
+    "emailConsentNote": "Email is off by default — it is sent only for the types you switch on here.",
+    "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
+    "error": "The change could not be saved and was reverted. Please try again.",
+    "unavailable": "Notification settings are not available right now."
   }
 }

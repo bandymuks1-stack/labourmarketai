@@ -293,6 +293,16 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the row carries NO metadata (§19(d): computed fit values are never
     //    persisted), and the same fire-and-forget/service-role posture
     //    applies — no new caller file, no new bypass.
+    //    Completion v1 (notifications) updates the "sends nothing outbound"
+    //    clause for THIS file only: after a successful durable insert the
+    //    awaited deliver path MAY send one notification email through the
+    //    audited transactional adapter (lib/email/transactional.ts) — but
+    //    ONLY where the recipient stored an explicit per-type email opt-in
+    //    (consent-first, default OFF) and the owner configured a real
+    //    provider; otherwise it is a tagged no-op. The same file also gained
+    //    the weekly-digest cron sweep (service-role reads of journal_entries
+    //    / workers to resolve recipients) — still no chat table, still the
+    //    one audited emitter home.
     //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only

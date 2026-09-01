@@ -374,6 +374,10 @@
         "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov",
         "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået",
         "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar"
+      },
+      "email": {
+        "open": "Åbn i LabourMarket.ai:",
+        "manage": "Administrér dine notifikationsindstillinger:"
       }
     },
     "onboarding": {

@@ -111,8 +111,11 @@ export function buildNavBadges(
  *
  * While the owner-gated notification_events store is unapplied this returns
  * [] and the product renders exactly what it rendered before.
+ *
+ * `limit` (default: the bell's FEED_LIMIT of 20) lets the activity page
+ * show the longer history the bell truncates — the reader clamps it.
  */
-export async function getDurableNotifications(): Promise<
+export async function getDurableNotifications(limit?: number): Promise<
   readonly {
     id: string;
     type: string;
@@ -123,7 +126,8 @@ export async function getDurableNotifications(): Promise<
   }[]
 > {
   const supabase = await createServerClient();
-  const feed = await readMyNotificationEvents(supabase);
+  // `undefined` falls through to the reader's own FEED_LIMIT default.
+  const feed = await readMyNotificationEvents(supabase, limit);
   if (feed.kind !== "ready") return [];
   return feed.events.map((e) => ({
     id: e.id,
