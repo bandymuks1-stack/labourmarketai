@@ -1138,6 +1138,19 @@ describe("the migration set is exactly what this slice declared", () => {
       // the combined 500-line cap. The marker lets CI classify it; merge and
       // production apply stay with the main session after review.
       "20260831170000_timesheet_compute_allocations_v1.sql",
+      // 2026-09-01: the agency disclosure-revocation package
+      // (20260901052300) carries the marker because its RED content is the
+      // point of the change: it replaces two SECURITY DEFINER list RPCs and
+      // the revoke RPC, and recreates one RLS policy. Every edit NARROWS —
+      // the list functions gain active-connection/active-share predicates,
+      // revoke cascades live offers to withdrawn, and the policy's client
+      // arm gains an active-connection requirement; the agency and admin
+      // arms are byte-identical. It closes the leak where a client whose
+      // connection was severed keeps permanent read on the agency's
+      // candidate identities and notes. The marker lets CI classify it;
+      // merge and production apply stay owner-gated (draft +
+      // needs-human-gate).
+      "20260901052300_agency_disclosure_revocation_v1.sql",
 ]);
   });
 
