@@ -5712,5 +5712,77 @@
         "hint": "Vi er oppdragsgiver."
       }
     }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importer timer fra et regneark (.xlsx)",
+      "backToEntry": "Tilbake til daglig registrering",
+      "title": "Import av timeliste",
+      "subtitle": "Last opp en månedlig timeliste. Gå gjennom og rett tolkningen nedenfor — ingenting lagres før du bekrefter.",
+      "fileLabel": "Timelistefil (.xlsx)",
+      "fileHint": "Et månedsrutenett arbeider × dag eller et ark med kolonnene arbeider / dato / objekt / timer, opptil 5 MB.",
+      "parse": "Forhåndsvis fil",
+      "parsing": "Leser…",
+      "refused": {
+        "no-file": "Velg en fil først.",
+        "too-large": "Filen er større enn 5 MB.",
+        "not-xlsx": "Dette er ikke et .xlsx-regneark.",
+        "too-complex": "Regnearket er for stort til å leses trygt.",
+        "read-failed": "Filen kunne ikke leses.",
+        "unrecognized": "Ingen timelistestruktur ble gjenkjent i denne filen.",
+        "too-many-rows": "Arket har flere rader enn én import rommer — del opp filen."
+      },
+      "emptyFile": "Filen inneholder ingen timelistedata.",
+      "noCompany": "Bytt til et bedriftsarbeidsområde.",
+      "summary": "Leste rader: {rows} (ark {sheet}).",
+      "notPersistedNotice": "Ingenting lagres før du bekrefter.",
+      "skippedTitle": "Celler som ikke kunne leses",
+      "skippedReasons": {
+        "unparsable": "uleselig verdi",
+        "hours-out-of-bounds": "timer utenfor 0–24",
+        "invalid-date": "denne datoen finnes ikke i denne måneden"
+      },
+      "monthLabel": "Måned",
+      "monthHint": "Arket oppgir ingen måned — velg den uttrykkelig.",
+      "duplicateWarning": "Identiske registreringer finnes allerede for {count} rader (samme arbeider, dato, objekt og timer). Å skrive dem igjen krever bekreftelsen nedenfor.",
+      "columns": {
+        "include": "Ta med",
+        "worker": "Arbeider",
+        "object": "Objekt",
+        "date": "Dato",
+        "hours": "Timer",
+        "note": "Notat",
+        "status": "Status"
+      },
+      "chooseWorker": "Velg en arbeider",
+      "chooseObject": "Velg et objekt",
+      "suggestions": "Forslag",
+      "allWorkers": "Alle arbeidere",
+      "allObjects": "Alle objekter",
+      "needsReview": "Tvetydig celle — sjekk oppdelingen",
+      "duplicateBadge": "Allerede registrert",
+      "incomplete": "Valg mangler",
+      "rowProblems": {
+        "worker": "Arbeider ikke akseptert",
+        "object": "Objekt ikke akseptert",
+        "date": "Ugyldig dato",
+        "hours": "Ugyldige timer",
+        "note": "Notatet er for langt"
+      },
+      "overrideLabel": "Skriv duplikater likevel (et ekte andre skift)",
+      "confirm": "Bekreft valgte rader ({count})",
+      "confirming": "Skriver…",
+      "receipt": "Ferdig — skrevne registreringer: {count}. De er nå en del av arbeidstimene.",
+      "confirmBlockedHint": "Hver rad som tas med trenger en arbeider, et objekt, en dato og timer.",
+      "errors": {
+        "invalidRows": "Rader som må rettes: {count}. Ingenting ble skrevet.",
+        "duplicatesFound": "Identiske eksisterende registreringer: {count}. Ingenting ble skrevet — huk av bekreftelsen for å skrive dem likevel.",
+        "noRows": "Ingen rader å skrive.",
+        "tooManyRows": "For mange rader for én import — del opp filen.",
+        "needsMigration": "Denne funksjonen er ennå ikke aktivert i denne databasen.",
+        "notAuthorized": "Du kan ikke registrere disse timene.",
+        "generic": "Behandlingen mislyktes. Prøv igjen."
+      }
+    }
   }
 }

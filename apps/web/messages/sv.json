@@ -5712,5 +5712,77 @@
         "hint": "Vi är beställare."
       }
     }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importera timmar från ett kalkylblad (.xlsx)",
+      "backToEntry": "Tillbaka till daglig registrering",
+      "title": "Import av tidrapport",
+      "subtitle": "Ladda upp en månatlig tidrapport. Granska och rätta tolkningen nedan — inget sparas förrän du bekräftar.",
+      "fileLabel": "Tidrapportfil (.xlsx)",
+      "fileHint": "Ett månadsrutnät arbetare × dag eller ett blad med kolumnerna arbetare / datum / objekt / timmar, upp till 5 MB.",
+      "parse": "Förhandsgranska fil",
+      "parsing": "Läser…",
+      "refused": {
+        "no-file": "Välj en fil först.",
+        "too-large": "Filen är större än 5 MB.",
+        "not-xlsx": "Detta är inte ett .xlsx-kalkylblad.",
+        "too-complex": "Kalkylbladet är för stort för att läsas säkert.",
+        "read-failed": "Filen kunde inte läsas.",
+        "unrecognized": "Ingen tidrapportstruktur kändes igen i den här filen.",
+        "too-many-rows": "Bladet har fler rader än en import rymmer — dela upp filen."
+      },
+      "emptyFile": "Filen innehåller inga tidrapportdata.",
+      "noCompany": "Byt till en företagsarbetsyta.",
+      "summary": "Lästa rader: {rows} (blad {sheet}).",
+      "notPersistedNotice": "Inget sparas förrän du bekräftar.",
+      "skippedTitle": "Celler som inte kunde läsas",
+      "skippedReasons": {
+        "unparsable": "oläsligt värde",
+        "hours-out-of-bounds": "timmar utanför 0–24",
+        "invalid-date": "detta datum finns inte i denna månad"
+      },
+      "monthLabel": "Månad",
+      "monthHint": "Bladet anger ingen månad — välj den uttryckligen.",
+      "duplicateWarning": "Identiska poster finns redan för {count} rader (samma arbetare, datum, objekt och timmar). Att skriva dem igen kräver bekräftelsen nedan.",
+      "columns": {
+        "include": "Ta med",
+        "worker": "Arbetare",
+        "object": "Objekt",
+        "date": "Datum",
+        "hours": "Timmar",
+        "note": "Anteckning",
+        "status": "Status"
+      },
+      "chooseWorker": "Välj en arbetare",
+      "chooseObject": "Välj ett objekt",
+      "suggestions": "Förslag",
+      "allWorkers": "Alla arbetare",
+      "allObjects": "Alla objekt",
+      "needsReview": "Tvetydig cell — kontrollera uppdelningen",
+      "duplicateBadge": "Redan registrerad",
+      "incomplete": "Val krävs",
+      "rowProblems": {
+        "worker": "Arbetare ej accepterad",
+        "object": "Objekt ej accepterat",
+        "date": "Ogiltigt datum",
+        "hours": "Ogiltiga timmar",
+        "note": "Anteckningen är för lång"
+      },
+      "overrideLabel": "Skriv dubbletter ändå (ett äkta andra skift)",
+      "confirm": "Bekräfta valda rader ({count})",
+      "confirming": "Skriver…",
+      "receipt": "Klart — skrivna poster: {count}. De är nu en del av arbetstimmarna.",
+      "confirmBlockedHint": "Varje medtagen rad behöver en arbetare, ett objekt, ett datum och timmar.",
+      "errors": {
+        "invalidRows": "Rader som behöver rättas: {count}. Inget skrevs.",
+        "duplicatesFound": "Identiska befintliga poster: {count}. Inget skrevs — bocka i bekräftelsen för att skriva dem ändå.",
+        "noRows": "Inga rader att skriva.",
+        "tooManyRows": "För många rader för en import — dela upp filen.",
+        "needsMigration": "Den här funktionen är ännu inte aktiverad i den här databasen.",
+        "notAuthorized": "Du får inte registrera dessa timmar.",
+        "generic": "Bearbetningen misslyckades. Försök igen."
+      }
+    }
   }
 }

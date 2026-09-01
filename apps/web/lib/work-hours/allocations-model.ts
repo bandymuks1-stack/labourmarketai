@@ -40,6 +40,11 @@ export type AllocationStatus = (typeof ALLOCATION_STATUSES)[number];
  */
 export const ALLOCATION_SOURCE_MANUAL = "manual";
 
+/** Historical work documents brought in through the reviewed XLSX import —
+ *  the first non-manual source, added exactly as the comment above promised:
+ *  as data, not as a migration. */
+export const ALLOCATION_SOURCE_IMPORT = "import";
+
 /** One allocation may not exceed a real day. Multiple allocations still sum
  *  freely across objects — this only catches 80 typed for 8. */
 export const ALLOCATION_HOURS_MIN = 0.25;

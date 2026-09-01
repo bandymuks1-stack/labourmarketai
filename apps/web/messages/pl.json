@@ -5712,5 +5712,77 @@
         "hint": "Jesteśmy zamawiającym."
       }
     }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importuj godziny z arkusza (.xlsx)",
+      "backToEntry": "Wróć do wpisu dziennego",
+      "title": "Import ewidencji czasu pracy",
+      "subtitle": "Prześlij miesięczną ewidencję czasu pracy. Sprawdź i popraw interpretację poniżej — nic nie zostanie zapisane, dopóki nie potwierdzisz.",
+      "fileLabel": "Plik ewidencji (.xlsx)",
+      "fileHint": "Miesięczna siatka pracownik × dzień lub arkusz z kolumnami pracownik / data / obiekt / godziny, do 5 MB.",
+      "parse": "Podgląd pliku",
+      "parsing": "Odczytywanie…",
+      "refused": {
+        "no-file": "Najpierw wybierz plik.",
+        "too-large": "Plik jest większy niż 5 MB.",
+        "not-xlsx": "To nie jest arkusz .xlsx.",
+        "too-complex": "Arkusz jest zbyt duży, aby bezpiecznie go odczytać.",
+        "read-failed": "Nie udało się odczytać pliku.",
+        "unrecognized": "W tym pliku nie rozpoznano struktury ewidencji.",
+        "too-many-rows": "Arkusz zawiera więcej wierszy, niż mieści jeden import — podziel plik."
+      },
+      "emptyFile": "Plik nie zawiera danych ewidencji.",
+      "noCompany": "Przełącz się na przestrzeń roboczą firmy.",
+      "summary": "Odczytane wiersze: {rows} (arkusz {sheet}).",
+      "notPersistedNotice": "Nic nie zostanie zapisane, dopóki nie potwierdzisz.",
+      "skippedTitle": "Komórki, których nie udało się odczytać",
+      "skippedReasons": {
+        "unparsable": "nieczytelna wartość",
+        "hours-out-of-bounds": "godziny poza zakresem 0–24",
+        "invalid-date": "taka data nie istnieje w tym miesiącu"
+      },
+      "monthLabel": "Miesiąc",
+      "monthHint": "Arkusz nie podaje miesiąca — wybierz go jednoznacznie.",
+      "duplicateWarning": "Identyczne wpisy już istnieją dla {count} wierszy (ten sam pracownik, data, obiekt i godziny). Ponowny zapis wymaga potwierdzenia poniżej.",
+      "columns": {
+        "include": "Uwzględnij",
+        "worker": "Pracownik",
+        "object": "Obiekt",
+        "date": "Data",
+        "hours": "Godziny",
+        "note": "Notatka",
+        "status": "Status"
+      },
+      "chooseWorker": "Wybierz pracownika",
+      "chooseObject": "Wybierz obiekt",
+      "suggestions": "Podpowiedzi",
+      "allWorkers": "Wszyscy pracownicy",
+      "allObjects": "Wszystkie obiekty",
+      "needsReview": "Niejednoznaczna komórka — sprawdź podział",
+      "duplicateBadge": "Już zapisane",
+      "incomplete": "Wymagany wybór",
+      "rowProblems": {
+        "worker": "Pracownik nieprzyjęty",
+        "object": "Obiekt nieprzyjęty",
+        "date": "Nieprawidłowa data",
+        "hours": "Nieprawidłowe godziny",
+        "note": "Notatka zbyt długa"
+      },
+      "overrideLabel": "Zapisz duplikaty mimo to (prawdziwa druga zmiana)",
+      "confirm": "Potwierdź wybrane wiersze ({count})",
+      "confirming": "Zapisywanie…",
+      "receipt": "Gotowe — zapisane wpisy: {count}. Są już częścią godzin pracy.",
+      "confirmBlockedHint": "Każdy uwzględniony wiersz potrzebuje pracownika, obiektu, daty i godzin.",
+      "errors": {
+        "invalidRows": "Wiersze wymagające poprawy: {count}. Nic nie zapisano.",
+        "duplicatesFound": "Identyczne istniejące wpisy: {count}. Nic nie zapisano — zaznacz potwierdzenie, aby mimo to je zapisać.",
+        "noRows": "Brak wierszy do zapisania.",
+        "tooManyRows": "Zbyt wiele wierszy na jeden import — podziel plik.",
+        "needsMigration": "Ta funkcja nie jest jeszcze włączona w tej bazie danych.",
+        "notAuthorized": "Nie możesz zapisać tych godzin.",
+        "generic": "Przetwarzanie nie powiodło się. Spróbuj ponownie."
+      }
+    }
   }
 }

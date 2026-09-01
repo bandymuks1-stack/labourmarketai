@@ -5712,5 +5712,77 @@
         "hint": "Mēs esam pasūtītājs."
       }
     }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importēt stundas no izklājlapas (.xlsx)",
+      "backToEntry": "Atpakaļ pie dienas ievades",
+      "title": "Darba laika tabeles imports",
+      "subtitle": "Augšupielādējiet mēneša darba laika tabeli. Pārskatiet un izlabojiet interpretāciju zemāk — nekas netiek saglabāts, kamēr neapstiprināt.",
+      "fileLabel": "Tabeles fails (.xlsx)",
+      "fileHint": "Mēneša režģis darbinieks × diena vai lapa ar kolonnām darbinieks / datums / objekts / stundas, līdz 5 MB.",
+      "parse": "Priekšskatīt failu",
+      "parsing": "Lasa…",
+      "refused": {
+        "no-file": "Vispirms izvēlieties failu.",
+        "too-large": "Fails ir lielāks par 5 MB.",
+        "not-xlsx": "Šī nav .xlsx izklājlapa.",
+        "too-complex": "Izklājlapa ir pārāk liela, lai to droši nolasītu.",
+        "read-failed": "Failu neizdevās nolasīt.",
+        "unrecognized": "Šajā failā netika atpazīta tabeles struktūra.",
+        "too-many-rows": "Lapā ir vairāk rindu, nekā ietilpst vienā importā — sadaliet failu."
+      },
+      "emptyFile": "Failā nav tabeles datu.",
+      "noCompany": "Pārslēdzieties uz uzņēmuma darbvietu.",
+      "summary": "Nolasītas rindas: {rows} (lapa {sheet}).",
+      "notPersistedNotice": "Nekas netiek saglabāts, kamēr neapstiprināt.",
+      "skippedTitle": "Šūnas, kuras neizdevās nolasīt",
+      "skippedReasons": {
+        "unparsable": "nenolasāma vērtība",
+        "hours-out-of-bounds": "stundas ārpus 0–24",
+        "invalid-date": "šāda datuma šajā mēnesī nav"
+      },
+      "monthLabel": "Mēnesis",
+      "monthHint": "Lapā mēnesis nav norādīts — izvēlieties to skaidri.",
+      "duplicateWarning": "Identiski ieraksti jau pastāv {count} rindām (tas pats darbinieks, datums, objekts un stundas). Lai tos ierakstītu vēlreiz, nepieciešams apstiprinājums zemāk.",
+      "columns": {
+        "include": "Iekļaut",
+        "worker": "Darbinieks",
+        "object": "Objekts",
+        "date": "Datums",
+        "hours": "Stundas",
+        "note": "Piezīme",
+        "status": "Statuss"
+      },
+      "chooseWorker": "Izvēlieties darbinieku",
+      "chooseObject": "Izvēlieties objektu",
+      "suggestions": "Ieteikumi",
+      "allWorkers": "Visi darbinieki",
+      "allObjects": "Visi objekti",
+      "needsReview": "Neskaidra šūna — pārbaudiet sadalījumu",
+      "duplicateBadge": "Jau ierakstīts",
+      "incomplete": "Nepieciešama izvēle",
+      "rowProblems": {
+        "worker": "Darbinieks nav pieņemts",
+        "object": "Objekts nav pieņemts",
+        "date": "Nederīgs datums",
+        "hours": "Nederīgas stundas",
+        "note": "Piezīme pārāk gara"
+      },
+      "overrideLabel": "Tomēr ierakstīt dublikātus (īsta otrā maiņa)",
+      "confirm": "Apstiprināt izvēlētās rindas ({count})",
+      "confirming": "Raksta…",
+      "receipt": "Gatavs — ierakstītie ieraksti: {count}. Tie tagad ir darba stundu daļa.",
+      "confirmBlockedHint": "Katrai iekļautajai rindai vajadzīgs darbinieks, objekts, datums un stundas.",
+      "errors": {
+        "invalidRows": "Labojamās rindas: {count}. Nekas netika ierakstīts.",
+        "duplicatesFound": "Identiski esoši ieraksti: {count}. Nekas netika ierakstīts — atzīmējiet apstiprinājumu, lai tos tomēr ierakstītu.",
+        "noRows": "Nav rindu, ko ierakstīt.",
+        "tooManyRows": "Pārāk daudz rindu vienam importam — sadaliet failu.",
+        "needsMigration": "Šī funkcija šajā datubāzē vēl nav iespējota.",
+        "notAuthorized": "Jūs nevarat ierakstīt šīs stundas.",
+        "generic": "Neizdevās apstrādāt. Mēģiniet vēlreiz."
+      }
+    }
   }
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { TimesheetImportReview } from "@/components/app/timesheet-import-review";
 import { recordAllocationAction } from "@/lib/work-hours/allocations-actions";
 import type { AllocationActionState } from "@/lib/work-hours/allocations-actions";
 import type {
@@ -54,6 +56,7 @@ export function WorkHoursQuickEntry({
 }) {
   const t = useTranslations("workHours");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [state, action, pending] = useActionState(recordAllocationAction, INITIAL);
 
   const [date, setDate] = useState(workDate);
@@ -109,8 +112,35 @@ export function WorkHoursQuickEntry({
   };
   const error = errorText();
 
+  // `?import=1` swaps the entry form for the TIMESHEET IMPORT surface — the
+  // same screen, because a historical monthly grid and today's quick entry
+  // produce the exact same canonical facts (work_hour_allocations), just in
+  // bulk and with a human-reviewed interpretation step in between. It renders
+  // only here, on the employer/manager `ok` branch this component requires.
+  if (searchParams.get("import") === "1") {
+    return (
+      <div className="flex w-full flex-col gap-5">
+        <Link
+          href={`?d=${workDate}`}
+          className="self-start text-sm underline underline-offset-4"
+          data-testid="hours-import-back"
+        >
+          {t("import.backToEntry")}
+        </Link>
+        <TimesheetImportReview workers={workers} objects={objects} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col gap-5">
+      <Link
+        href="?import=1"
+        className="self-start text-sm underline underline-offset-4"
+        data-testid="hours-import-link"
+      >
+        {t("import.entryLink")}
+      </Link>
       <form action={action} className="flex flex-col gap-4">
         {/* The server reads only these. `entered_by` is never a form field —
             it is taken from the session, so an operator cannot be recorded as
