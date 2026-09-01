@@ -51,6 +51,15 @@ const en = {
     "This is not the same as being signed out — your phone's secure storage did not answer. Try again.",
   "session.unavailable.retry": "Try again",
 
+  "route.notFound.title": "That screen is not in this app",
+  "route.notFound.body":
+    "The link you followed does not lead anywhere here. It may be for the website, or it may be out of date. Nothing was sent anywhere.",
+  "route.notFound.action": "Back to the app",
+
+  "crash.title": "The app hit a fault",
+  "crash.body":
+    "This is a fault in the app itself, not something you did, and nothing was sent anywhere. Try again — if it keeps happening, close the app and reopen it.",
+
   "config.problem.title": "This build is not configured",
   "config.problem.body":
     "The app cannot start until these values are set. No data has been sent anywhere.",
@@ -131,6 +140,15 @@ const lt: Catalogue = {
     "Tai nereiškia, kad esate atsijungę — telefono saugykla neatsakė. Bandykite dar kartą.",
   "session.unavailable.retry": "Bandyti dar kartą",
 
+  "route.notFound.title": "Tokio ekrano šioje programėlėje nėra",
+  "route.notFound.body":
+    "Nuoroda, kuria atėjote, čia niekur neveda. Ji gali būti skirta svetainei arba būti pasenusi. Niekas niekur nebuvo išsiųsta.",
+  "route.notFound.action": "Grįžti į programėlę",
+
+  "crash.title": "Programėlėje įvyko klaida",
+  "crash.body":
+    "Tai pačios programėlės klaida, ne jūsų veiksmas, ir niekas niekur nebuvo išsiųsta. Bandykite dar kartą — jei kartojasi, uždarykite programėlę ir atidarykite iš naujo.",
+
   "config.problem.title": "Ši versija nesukonfigūruota",
   "config.problem.body":
     "Programa negali pasileisti, kol nenustatytos šios reikšmės. Jokie duomenys niekur nebuvo išsiųsti.",
@@ -206,6 +224,15 @@ const ru: Catalogue = {
   "session.unavailable.body":
     "Это не значит, что вы вышли, — защищённое хранилище телефона не ответило. Попробуйте снова.",
   "session.unavailable.retry": "Попробовать снова",
+
+  "route.notFound.title": "Такого экрана в приложении нет",
+  "route.notFound.body":
+    "Ссылка, по которой вы перешли, здесь никуда не ведёт. Возможно, она предназначена для сайта или устарела. Никуда ничего не отправлено.",
+  "route.notFound.action": "Вернуться в приложение",
+
+  "crash.title": "В приложении произошёл сбой",
+  "crash.body":
+    "Это сбой самого приложения, а не ваша ошибка, и никуда ничего не отправлено. Попробуйте снова — если повторяется, закройте приложение и откройте заново.",
 
   "config.problem.title": "Эта сборка не настроена",
   "config.problem.body":
@@ -283,6 +310,15 @@ const nl: Catalogue = {
     "Dit betekent niet dat je bent uitgelogd — de beveiligde opslag van je telefoon gaf geen antwoord. Probeer het opnieuw.",
   "session.unavailable.retry": "Opnieuw proberen",
 
+  "route.notFound.title": "Dat scherm bestaat niet in deze app",
+  "route.notFound.body":
+    "De link die je volgde leidt hier nergens heen. Misschien is hij voor de website bedoeld, of is hij verouderd. Er is niets verstuurd.",
+  "route.notFound.action": "Terug naar de app",
+
+  "crash.title": "De app liep vast",
+  "crash.body":
+    "Dit is een fout in de app zelf, niet iets wat jij deed, en er is niets verstuurd. Probeer het opnieuw — als het blijft gebeuren, sluit de app en open hem opnieuw.",
+
   "config.problem.title": "Deze versie is niet geconfigureerd",
   "config.problem.body":
     "De app kan niet starten totdat deze waarden zijn ingesteld. Er zijn geen gegevens verstuurd.",
@@ -358,6 +394,15 @@ const de: Catalogue = {
   "session.unavailable.body":
     "Das heißt nicht, dass du abgemeldet bist — der sichere Speicher deines Telefons hat nicht geantwortet. Versuche es erneut.",
   "session.unavailable.retry": "Erneut versuchen",
+
+  "route.notFound.title": "Diesen Bildschirm gibt es in dieser App nicht",
+  "route.notFound.body":
+    "Der Link, dem du gefolgt bist, führt hier nirgendwohin. Vielleicht gehört er zur Website, vielleicht ist er veraltet. Es wurde nichts gesendet.",
+  "route.notFound.action": "Zurück zur App",
+
+  "crash.title": "Die App ist auf einen Fehler gestoßen",
+  "crash.body":
+    "Das ist ein Fehler in der App selbst und nicht deiner, und es wurde nichts gesendet. Versuche es erneut — wenn es weiter passiert, schließe die App und öffne sie neu.",
 
   "config.problem.title": "Diese Version ist nicht konfiguriert",
   "config.problem.body":
