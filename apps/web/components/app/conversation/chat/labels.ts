@@ -86,6 +86,9 @@ const CHAT_KEYS = [
   "adminRouteHint",
   "adminApprovalsChip",
   "adminRequestsChip",
+  // The timesheet area of the planning page, reachable by sentence
+  // (self-serve approval-template closure slice).
+  "timesheetsChip",
   "writeEmployerHint",
   // W7 slice 2 — intent-aware attach.
   "attachChoice",

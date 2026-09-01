@@ -209,6 +209,7 @@ export type ChatLabels = {
   adminRouteHint: string;
   adminApprovalsChip: string;
   adminRequestsChip: string;
+  timesheetsChip: string;
   writeEmployerHint: string;
   /** W7 slice 2 — the paperclip's one-off "what is this file for?" turn, shown
    *  ONLY when no flow that owns files is open. */
@@ -2303,6 +2304,15 @@ export function ConversationChat({
             {
               id: "link:/dashboard/network?area=requests",
               label: labels.adminRequestsChip,
+            },
+          ]),
+        // "Parodyk mano tabelį" — the timesheet documents live under the
+        // planning page's #timesheets anchor; same one-canonical-surface rule.
+        timesheets: () =>
+          assistant(labels.adminRouteHint, [
+            {
+              id: "link:/dashboard/planning#timesheets",
+              label: labels.timesheetsChip,
             },
           ]),
         // No scheduler exists — never a fake reminder (honest degradation).

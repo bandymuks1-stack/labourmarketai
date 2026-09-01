@@ -51,6 +51,7 @@ export type ConversationIntent =
   | "interest-inbox" // "kas susidomėjo mano poreikiu?" — who raised a hand
   | "admin-approvals" // "ką turiu patvirtinti?" — the approvals area
   | "admin-requests" // "noriu pateikti atostogų prašymą" — the requests area
+  | "timesheets" // "parodyk mano tabelį" — the timesheets area of planning
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
@@ -471,6 +472,23 @@ const RULES: IntentRule[] = [
       p("genehmig", 4), // de — "Was muss ich genehmigen?" / Genehmigungen
       p("\\bgoedkeuring", 4), // nl
       p("goedkeuren", 4), // nl — the verb form "wat moet ik goedkeuren?"
+    ],
+  },
+  {
+    // The timesheet document area — the period hour documents under
+    // /dashboard/planning#timesheets. Same routing rule as the admin areas:
+    // the sentence resolves to a `link:` chip to the ONE canonical surface,
+    // never to a second view of it inside the chat.
+    intent: "timesheets",
+    patterns: [
+      p("\\btabel(is|i|į|io|iu|y)", 5), // lt — tabelis / tabelį / tabeliai
+      p("žiniarašt", 5), // lt — (darbo laiko apskaitos) žiniaraštis
+      p("\\btime\\s?sheets?\\b", 6), // en — timesheet / time sheet
+      p("табел", 5), // ru — табель / табеля / табели
+      p("stundenzettel", 6), // de
+      p("arbeitszeitnachweis", 6), // de — the formal word for the same document
+      p("urenstaat", 6), // nl
+      p("urenbriefje", 6), // nl
     ],
   },
   {
