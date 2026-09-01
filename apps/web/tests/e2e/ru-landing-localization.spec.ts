@@ -59,6 +59,32 @@ test.describe("Russian landing hero renders Russian (U-15)", () => {
     await page.goto("/ru", { waitUntil: "networkidle" });
 
     const body = page.locator("body");
+
+    // THE CONTINUATION PHASE MUST BE ENTERED, NOT WAITED FOR.
+    //
+    // Two of MUST_APPEAR — `previewLabel` ("Наиболее подходящий человек") and
+    // `persistAction` ("Сохранить результат") — render only inside
+    // `hero-live-demo`'s `continued` branch, which the visitor reaches by
+    // pressing the decision's next-action button. They are not on the first
+    // paint and no amount of waiting will produce them.
+    //
+    // This spec used to assert them straight after `goto`, so it failed with
+    // the page fully and correctly translated — a localization alarm raised by
+    // a harness that never performed the interaction its own assertion
+    // depended on. Driving the click keeps the assertion strong (the strings
+    // must still be Russian) instead of weakening it to whatever the first
+    // screen happens to show.
+    const nextAction = page.getByTestId("hero-next-action");
+    await expect(
+      nextAction,
+      "the hero decision's next-action control should be present on /ru",
+    ).toBeVisible({ timeout: 30_000 });
+    await nextAction.click();
+    await expect(
+      page.getByTestId("hero-player-preview"),
+      "clicking the next action should reveal the player-card preview",
+    ).toBeVisible({ timeout: 15_000 });
+
     for (const phrase of MUST_APPEAR) {
       await expect(
         body,

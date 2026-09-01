@@ -1,0 +1,185 @@
+name: E2E Smoke
+
+# G-21 — MAKE E2E ROT VISIBLE.
+#
+# Until now CI ran ZERO Playwright specs. 93 specs existed and nothing
+# exercised them, so selector rot, browser drift and dead specs were invisible
+# until someone ran the suite by hand — which is how browser drift went
+# unnoticed until 2026-09-01.
+#
+# This does NOT dump the whole suite into CI. Most specs need an authenticated
+# identity and a test Supabase project, and a suite that is red for
+# environmental reasons teaches everyone to ignore it. Instead this runs a
+# SMALL, NAMED, ACTOR-SPECIFIC subset that is secret-free by construction:
+# public routes only, no login, no SUPABASE_TEST_URL, no database.
+#
+# Deliberately a SEPARATE workflow rather than a step inside `quality`:
+#   - the required gate's cost stays flat;
+#   - this check can be observed for stability before anyone considers making
+#     it required (a branch-protection change is an owner action anyway).
+#
+# ---------------------------------------------------------------------------
+# WHY THE TWO GUARD STEPS BELOW ARE THE POINT
+#
+# A Playwright job that silently runs FEWER specs than intended is worse than
+# no job: it reports green while covering nothing. Two ways that happens, both
+# guarded here:
+#
+#   1. A spec is renamed or deleted, and its path stops matching. The
+#      "spec allowlist" step fails the run rather than quietly testing less.
+#   2. Every spec skips at runtime (the usual cause: a missing env var), and
+#      Playwright still exits 0. The "executed count" step reads the JSON
+#      report and fails if fewer than MIN_EXPECTED tests actually ran.
+#
+# Without those, this workflow would be exactly the kind of assertion that
+# cannot fail — the defect class this repo has hit twice.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # The named subset, grouped by the actor each spec speaks for. Add a spec
+      # here ONLY if it is genuinely secret-free: public routes, no login, no
+      # SUPABASE_TEST_URL. Anything needing an identity belongs in a future
+      # authenticated job with its own fixture stack, not in this one.
+      #
+      #   visitor / acquisition : primary-route-live-smoke
+      #   locale visitor        : ru-landing-localization
+      #   mobile visitor        : landing-mobile-overflow, mobile-marketing-nav
+      #   unauthenticated auth  : auth-field-touch-floor
+      #
+      # DELIBERATELY NOT INCLUDED: tests/e2e/pr-i-reality-landing.spec.ts.
+      # It asserts three surfaces that exist NOWHERE in the product today
+      # (`#conversation`, `#partners`, the `live-product-demo` testid), so it
+      # is red for a reason nobody has decided yet — see
+      # docs/audits/G21-e2e-ci-subset-2026-09-01.md. It is left in the repo
+      # untouched, because that spec is the last written record that those
+      # surfaces were once expected. Wiring a permanently-red check would only
+      # teach everyone to ignore this job.
+      E2E_SPECS: >-
+        tests/e2e/primary-route-live-smoke.spec.ts
+        tests/e2e/ru-landing-localization.spec.ts
+        tests/e2e/landing-mobile-overflow.spec.ts
+        tests/e2e/mobile-marketing-nav.spec.ts
+        tests/e2e/auth-field-touch-floor.spec.ts
+      # Measured, not guessed: this subset runs 32 tests against a production
+      # build (verified locally 2026-09-01, 32 passed / 0 failed).
+      #
+      # A floor, not a target. Adding tests is fine. NEVER lower it to make a
+      # red run go green — a dropping count IS the rot signal this job exists
+      # to surface.
+      MIN_EXPECTED: "32"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # Same `--filter=!mobile` reasoning as quality.yml: apps/mobile pulls
+      # ~1000 packages that nothing here runs.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      # GUARD 1 — every named spec must still exist.
+      # A renamed or deleted spec must turn this check RED, not shrink the run.
+      - name: Spec allowlist still resolves
+        run: |
+          set -euo pipefail
+          missing=0
+          for spec in $E2E_SPECS; do
+            if [ ! -f "apps/web/$spec" ]; then
+              echo "::error title=E2E spec missing::apps/web/$spec is in the CI subset but does not exist. Update .github/workflows/e2e-smoke.yml deliberately, or restore the spec."
+              missing=1
+            else
+              echo "ok  apps/web/$spec"
+            fi
+          done
+          [ "$missing" -eq 0 ]
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      # Env-independent in this repo (see quality.yml). No secrets, no DB.
+      - name: Build
+        run: pnpm -F web build
+
+      - name: Start server
+        run: |
+          pnpm -F web exec next start -p 3000 &
+          echo $! > /tmp/next.pid
+          npx --yes wait-on -t 120000 http://127.0.0.1:3000/lt
+
+      - name: Run E2E subset
+        env:
+          # The server is already up; Playwright must not try to start its own.
+          E2E_NO_SERVER: "1"
+          E2E_BASE_URL: http://127.0.0.1:3000
+          # Resolved relative to apps/web (where `pnpm -F web exec` runs), so
+          # the report lands at apps/web/e2e-report.json. Verified locally.
+          PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-report.json
+        run: |
+          set -euo pipefail
+          pnpm -F web exec playwright test $E2E_SPECS \
+            --reporter=github,json
+
+      # GUARD 2 — the run must actually have executed tests.
+      # Playwright exits 0 when everything skips. A green tick over zero
+      # executed tests is the exact failure mode this workflow exists to stop.
+      - name: Executed test count is above the floor
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ ! -f apps/web/e2e-report.json ]; then
+            echo "::error title=No E2E report::playwright produced no JSON report, so the executed-test count cannot be verified."
+            exit 1
+          fi
+          node -e '
+            const r = require("./apps/web/e2e-report.json");
+            const s = r.stats || {};
+            const ran = (s.expected || 0) + (s.unexpected || 0) + (s.flaky || 0);
+            const floor = Number(process.env.MIN_EXPECTED);
+            console.log(`executed=${ran} passed=${s.expected||0} failed=${s.unexpected||0} flaky=${s.flaky||0} skipped=${s.skipped||0} floor=${floor}`);
+            if (ran < floor) {
+              console.log(`::error title=E2E subset shrank::only ${ran} tests executed, floor is ${floor}. Specs are skipping or have been removed — this is E2E rot, not a passing run.`);
+              process.exit(1);
+            }
+          '
+
+      - name: Upload traces and videos on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: e2e-smoke-artifacts
+          path: |
+            apps/web/test-results/
+            apps/web/e2e-report.json
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f /tmp/next.pid ]; then kill "$(cat /tmp/next.pid)" 2>/dev/null || true; fi
