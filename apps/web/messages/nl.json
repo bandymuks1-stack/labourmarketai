@@ -876,6 +876,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Echte marktvraag",
+      "lead": "Open behoeften uit de echte vraag op dit platform — waar nu om werk wordt gevraagd."
+    },
+    "vacancyVolume": {
+      "title": "Volume openbare vacatures",
+      "scope": "{count} geïmporteerde openbare vacatures voor {profession}. Huidige brondekking: {countries}.",
+      "window": "Stadsvolumes worden geteld over de nieuwste {window} advertenties, niet over het hele bestand."
+    },
     "entities": {
       "title": "Drie dingen op de kaart",
       "intro": "De kaart toont drie verschillende dingen: mensen, werkgebieden van bedrijven en projectlocaties. Elk volgt zijn eigen zichtbaarheidsregel en ziet er anders uit.",
@@ -3332,6 +3341,10 @@
       "legendTarget": "Marktrichtingen",
       "legendContext": "Rest van de wereld",
       "aria": "Werkrichtingen — wereldkaart"
+    },
+    "origin": {
+      "live": "Live gegevens",
+      "preview": "Voorbeeld"
     }
   },
   "company": {
@@ -12184,11 +12197,10 @@
       "headline": "Vraag. Zie. Neem aan.",
       "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek.",
       "chatLabel": "AI-gesprek",
-      "mapLabel": "Europese arbeidsmarkt",
+      "mapLabel": "Conceptkaart — illustratief scenario",
       "thinking": "Marktsignalen analyseren…",
       "answered": "Gevonden. Kaart bijgewerkt.",
       "resultLabel": "Resultaat",
-      "demoBadge": "Demonstratie",
       "mapHint": "Tik op een markering — de kaart antwoordt.",
       "scenario": {
         "q1": "Waar zijn nu elektriciens nodig?",
@@ -12244,9 +12256,9 @@
       },
       "askPlaceholder": "Stel je eigen vraag…",
       "askSubmit": "Vraag",
-      "unmatched": "In deze demonstratie beantwoord ik alleen vragen over elektriciens, lassers en beschikbare mensen.",
+      "unmatched": "In dit voorbeeld beantwoord ik alleen vragen over elektriciens, lassers en beschikbare mensen.",
       "basisLabel": "Waar dit op rust",
-      "basisNote": "Op de {count} hierboven gewogen signalen, met illustratieve aantallen — dit is een demonstratie, niet de markt van vandaag.",
+      "basisNote": "Op de {count} hierboven gewogen signalen, met illustratieve aantallen — dit is een conceptscenario, niet de markt van vandaag.",
       "previewLabel": "Best passende persoon",
       "previewName": "Jonas P.",
       "previewRole": "Elektricien · Vilnius · Beschikbaar vanaf september",

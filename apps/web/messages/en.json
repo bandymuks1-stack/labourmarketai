@@ -876,6 +876,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Live market demand",
+      "lead": "Open needs from this platform's real demand — where work is being asked for right now."
+    },
+    "vacancyVolume": {
+      "title": "Public vacancy volume",
+      "scope": "{count} imported public job advertisements for {profession}. Current source coverage: {countries}.",
+      "window": "City volumes are tallied over the newest {window} advertisements, not the whole pool."
+    },
     "entities": {
       "title": "Three things on the map",
       "intro": "The map shows three different things: people, company operating territories and project locations. Each follows its own visibility rule and looks different.",
@@ -3332,6 +3341,10 @@
       "legendTarget": "Market directions",
       "legendContext": "Wider world",
       "aria": "Work directions — world map"
+    },
+    "origin": {
+      "live": "Live data",
+      "preview": "Preview"
     }
   },
   "company": {
@@ -12184,11 +12197,10 @@
       "headline": "Ask. See. Hire.",
       "sub": "An AI labour-market operating system — conversation, map and result in one place.",
       "chatLabel": "AI conversation",
-      "mapLabel": "European labour market",
+      "mapLabel": "Concept map — illustrative scenario",
       "thinking": "Analysing market signals…",
       "answered": "Found it. Map updated.",
       "resultLabel": "Result",
-      "demoBadge": "Demonstration",
       "mapHint": "Tap a marker — the map answers.",
       "scenario": {
         "q1": "Where are electricians needed now?",
@@ -12244,9 +12256,9 @@
       },
       "askPlaceholder": "Ask your own question…",
       "askSubmit": "Ask",
-      "unmatched": "In this demonstration I answer about electricians, welders and available people.",
+      "unmatched": "In this preview I answer about electricians, welders and available people.",
       "basisLabel": "What this rests on",
-      "basisNote": "The {count} signals weighed above, on illustrative volumes — this is a demonstration, not today's market.",
+      "basisNote": "The {count} signals weighed above, on illustrative volumes — this is a concept scenario, not today's market.",
       "previewLabel": "Best matching person",
       "previewName": "Jonas P.",
       "previewRole": "Electrician · Vilnius · Available from September",

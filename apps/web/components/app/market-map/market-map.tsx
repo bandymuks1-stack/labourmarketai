@@ -2,6 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type * as LeafletTypes from "leaflet";
 
 import {
@@ -82,6 +83,10 @@ export function MarketMap({
    */
   revealCount?: number;
 }) {
+  // Origin labels live in the small `map` namespace — the one root every
+  // surface that mounts this component (marketing landing, dashboard,
+  // workspace) already ships to the client (client-messages allowlists).
+  const tOrigin = useTranslations("map.origin");
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletTypes.Map | null>(null);
   const layerGroupRef = useRef<LeafletTypes.LayerGroup | null>(null);
@@ -246,7 +251,28 @@ export function MarketMap({
       data-map-layer={layer}
       data-map-origin={view.origin}
     >
-      <div ref={hostRef} className="market-map-host size-full" />
+      {/* `isolate z-0` keeps Leaflet's internal z-indexes (panes 400–700,
+          controls 1000) PRIVATE to the map host — the same fix .wsmap applies
+          in globals.css — so the positioned siblings below (badge, loading
+          veil) paint above it in plain DOM order, with no arbitrary z-[n]. */}
+      <div ref={hostRef} className="market-map-host isolate z-0 size-full" />
+      {/* THE ORIGIN IS PART OF THE MAP, not a caller courtesy. `data-map-origin`
+          alone relied on every caller remembering to render a visible label —
+          the /dashboard/market-map page never did. The badge lives INSIDE the
+          component so no origin can ever render unlabelled: real rows say
+          "live", the landing's scripted scenario and local fixtures say
+          "preview" (doctrine §18 vocabulary — never "demo"). Pointer events
+          off so it steals no map click. */}
+      <span
+        data-testid="map-origin-badge"
+        className={`pointer-events-none absolute right-2 top-2 rounded-sm border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label ${
+          view.origin === "live"
+            ? "border-ink-500 bg-ink-900/80 text-text-secondary"
+            : "border-state-amber/40 bg-state-amber/15 text-state-amber"
+        }`}
+      >
+        {view.origin === "live" ? tOrigin("live") : tOrigin("preview")}
+      </span>
       {!ready ? (
         <div className="absolute inset-0 grid place-items-center bg-ink-900/60">
           <span className="text-meta text-text-muted">…</span>

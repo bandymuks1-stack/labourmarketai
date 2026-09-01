@@ -32,11 +32,21 @@ const FILES = [...BASE_FILES, ...TAXONOMY_FILES];
 
 // Unicode lookarounds instead of \b — \b silently fails next to LT diacritics
 // (ą ę ė į š ų ū ž), so "demo" beside them would slip through a \b guard.
-// "demonstracija"/"demokratija" stay allowed (no boundary after "demo").
+// "demokratija" stays allowed (no "demonstr" stem); "demonstracija" and its
+// cognates do NOT — that whitelist let the landing ship a "Demonstration"
+// badge over the exact framing the ban exists for. Same class, same rule.
 const FORBIDDEN: Array<{ re: RegExp; why: string }> = [
   {
     re: /(?<![\p{L}\p{N}_])demos?(?![\p{L}\p{N}_])/iu,
     why: 'word "demo" is banned in product copy — use "preview" / "concept" / "not live yet"',
+  },
+  {
+    re: /(?<![\p{L}\p{N}_])demonstr\p{L}*(?![\p{L}\p{N}_])/iu,
+    why: '"demonstration" framing (EN/LT/NL/DE demonstr-*) is the same banned class as "demo" — use "preview" / "concept"',
+  },
+  {
+    re: /демонстр\p{L}*/iu,
+    why: 'RU "демонстрация" framing is the same banned class as "demo" — use "предпросмотр" / "концепция"',
   },
   {
     re: /trial\s+access/i,

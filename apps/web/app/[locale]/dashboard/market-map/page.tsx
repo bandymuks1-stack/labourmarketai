@@ -12,6 +12,9 @@ import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
 import { MapLayersLegend } from "@/components/app/map-layers-legend";
 import { MarketMapEntityLayers } from "@/components/app/market-map-entity-layers";
+import { MarketMap } from "@/components/app/market-map/market-map";
+import { loadMarketResult } from "@/lib/market-map/market-result";
+import { loadVacancyVolume } from "@/lib/market-map/vacancy-volume";
 import { getOwnSpatialCollections } from "@/lib/market-map/spatial-read";
 import { emptySpatialCollections } from "@/lib/market-map/spatial-entities";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
@@ -51,6 +54,12 @@ export default async function MarketMapPage({
 
   const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
+  // The live-demand map reuses the conversation result's OWN honesty copy
+  // (error ≠ empty), and the vacancy layer reuses the market panel's
+  // profession + derived-occupation lexicon — one vocabulary per fact.
+  const tResults = await getTranslations("conversation.results");
+  const tExplanation = await getTranslations("marketExplanation");
+  const tProfessions = await getTranslations("professions");
   // Marketplace loop reachability (M7): the OFFER half reuses the loop's own
   // canonical labels (marketplace.hubOffer*) — no parallel copy source.
   const tMarketplace = await getTranslations("marketplace");
@@ -82,6 +91,18 @@ export default async function MarketMapPage({
   // presence (aggregate-only, §20), company territory, project locations —
   // composed from the caller's own RLS-scoped rows only.
   const spatial = await getOwnSpatialCollections();
+  // THE REAL MARKET on the page named "market map" (this page previously
+  // mounted only self-signal surfaces, while the conversation registry's
+  // "advanced" link for the market result points here — a promise this page
+  // did not keep). Two clearly separated layers, both origin:"live":
+  //  - the canonical demand read (`loadMarketResult` — the SAME source the
+  //    conversation's market result renders), and
+  //  - public vacancy volume for the caller's occupation, projected from the
+  //    EXISTING authenticated `getPublicMarketFacts` aggregate.
+  const [marketResult, vacancyVolume] = await Promise.all([
+    loadMarketResult(),
+    loadVacancyVolume(),
+  ]);
   const spatialCollections = spatial?.collections ?? emptySpatialCollections();
   const companyTerritorySource = spatial?.companyTerritorySource ?? "error";
   const countryNames = Object.fromEntries(
@@ -209,6 +230,102 @@ export default async function MarketMapPage({
           exists; the active context only changes the focused layer/panel below,
           never whether a separate map exists. */}
       <MarketMapBase identity={mapIdentity} />
+      {/* ── THE REAL MARKET ──────────────────────────────────────────────
+          Live demand from the ONE canonical demand read, on the canonical
+          <MarketMap> (same engine + data as the conversation's market
+          result). Honest states are kept apart: a failed read is an error,
+          zero rows is emptiness — neither borrows the other's sentence, and
+          the map's intrinsic origin badge labels the data as live. */}
+      <section
+        className="flex flex-col gap-2"
+        data-testid="market-map-live-demand"
+      >
+        <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+          {tMap("liveDemand.title")}
+        </h2>
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {tMap("liveDemand.lead")}
+        </p>
+        {marketResult.failed ? (
+          <p
+            className="rounded-md border border-state-danger/40 bg-state-danger/5 p-3 text-sm text-state-danger"
+            data-testid="market-map-live-demand-error"
+          >
+            {tResults("marketError")}
+          </p>
+        ) : marketResult.empty ? (
+          <p
+            className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
+            data-testid="market-map-live-demand-empty"
+          >
+            {tResults("marketEmpty")}
+          </p>
+        ) : (
+          <MarketMap view={marketResult.view} mode="result" layer="demand" />
+        )}
+      </section>
+      {/* Public vacancy volume for the caller's occupation — the
+          `getPublicMarketFacts` aggregate (imported public advertisements,
+          authenticated read) projected onto the same canonical map as its own
+          layer. The covered countries are DERIVED from the data and named in
+          the copy: the source's true current scope, never a product boundary.
+          No profession and no data render nothing; an advertised-nothing
+          market renders as words, never as an empty-looking map. */}
+      {vacancyVolume.kind === "ok" ? (
+        <section
+          className="flex flex-col gap-2"
+          data-testid="market-map-vacancy-volume"
+        >
+          <h2 className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+            {tMap("vacancyVolume.title")}
+          </h2>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {tMap("vacancyVolume.scope", {
+              count: vacancyVolume.data.activeAds,
+              profession: tProfessions.has(vacancyVolume.data.professionSlug)
+                ? tProfessions(vacancyVolume.data.professionSlug)
+                : vacancyVolume.data.professionSlug,
+              countries: vacancyVolume.data.countries
+                .map((code) =>
+                  tCountries.has(`countryNames.${code}`)
+                    ? tCountries(`countryNames.${code}`)
+                    : code,
+                )
+                .join(", "),
+            })}
+          </p>
+          {vacancyVolume.data.derived ? (
+            <p
+              className="text-xs leading-relaxed text-text-muted"
+              data-testid="market-map-vacancy-volume-derived"
+            >
+              {tExplanation("derivedFromWork")}
+            </p>
+          ) : null}
+          <MarketMap view={vacancyVolume.data.view} mode="result" layer="jobs" />
+          {!vacancyVolume.data.rankingWindowCoversAll ? (
+            <p
+              className="text-xs leading-relaxed text-text-muted"
+              data-testid="market-map-vacancy-volume-window"
+            >
+              {tMap("vacancyVolume.window", {
+                window: vacancyVolume.data.rankingWindowAds,
+              })}
+            </p>
+          ) : null}
+        </section>
+      ) : vacancyVolume.kind === "empty" ? (
+        <p
+          className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
+          data-testid="market-map-vacancy-volume-none"
+        >
+          {tExplanation("noneOpen", {
+            profession: tProfessions.has(vacancyVolume.professionSlug)
+              ? tProfessions(vacancyVolume.professionSlug)
+              : vacancyVolume.professionSlug,
+          })}
+        </p>
+      ) : null}
       {/* Unified layers panel — the real visible-now layers WITH state on the
           SAME map: my person signal (active), the selected company (incomplete
           when it has no confirmed location), own needs (off-map until

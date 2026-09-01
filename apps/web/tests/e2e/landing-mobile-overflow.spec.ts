@@ -186,7 +186,10 @@ for (const width of MOBILE_WIDTHS) {
         ["hero suggestion chips", "[data-testid='hero-scenario-chip']"],
         ["hero Klausti submit", "[data-testid='hero-ask-submit']"],
         ["market map host", ".market-map-host"],
-        ["Demonstracija badge", "[data-testid='hero-map-origin']"],
+        // The origin badge moved INSIDE <MarketMap> (intrinsic labelling);
+        // it is absolutely positioned within the map container, but stays
+        // named here so a regression reads as itself.
+        ["map origin badge", "[data-testid='map-origin-badge']"],
       ];
       for (const [name, selector] of named) {
         for (const el of await page.locator(selector).all()) {
