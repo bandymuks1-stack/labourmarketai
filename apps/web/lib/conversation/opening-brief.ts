@@ -10,6 +10,7 @@ import { visibleRange } from "@/lib/planning/planning-model";
 import { buildWorkContext } from "@/lib/conversation/context-intelligence";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
+import { listMyEngagements } from "@/lib/invitations/network";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
@@ -144,6 +145,31 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   }
 
   // 4 ── the first missing profile step ────────────────────────────────────
+  // ── learner identity (M10, second half — FINAL COMPLETION Train G2) ──
+  // A person enrolled with a training provider (an ACTIVE engagement whose
+  // relationship is `student`, the slug the institution↔learner invitation
+  // establishes as DATA, never a third base identity) greeted only with
+  // worker copy could not tell that the product knew where they study or
+  // that their practice counts as evidence. One line names the institution;
+  // the chip is the SAME journal starter — learning and practice are logged
+  // exactly like work, and become the same evidence and capabilities.
+  try {
+    if (lines.length < MAX_LINES) {
+      const engagements = await listMyEngagements();
+      const learner = engagements.find((e) => e.relationshipSlug === "student");
+      if (learner) {
+        lines.push(
+          learner.organizationName
+            ? t("briefLearner", { organization: learner.organizationName })
+            : t("briefLearnerUnnamed"),
+        );
+        addChip("logwork", t("chipLogLearning"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents an enrolment */
+  }
+
   try {
     if (lines.length < MAX_LINES) {
       const summary = await loadProfileSummaryForChat("resume");

@@ -11765,7 +11765,10 @@
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
       "chipMyOwnInterest": "Mano susidomėjimai",
       "lmcHint": "Jūsų LMC likutį ir visą judėjimų istoriją rodome vienoje vietoje.",
-      "chipLmc": "Atidaryti LMC"
+      "chipLmc": "Atidaryti LMC",
+      "briefLearner": "Mokotės {organization}. Čia užfiksuota praktika ir mokymasis tampa jūsų įrodymais.",
+      "briefLearnerUnnamed": "Esate besimokantis. Čia užfiksuota praktika ir mokymasis tampa jūsų įrodymais.",
+      "chipLogLearning": "Užfiksuoti mokymąsi ar praktiką"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

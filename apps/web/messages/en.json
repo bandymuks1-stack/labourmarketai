@@ -11765,7 +11765,10 @@
       "chipInterestOnMyNeeds": "Interest in my needs",
       "chipMyOwnInterest": "My own interest",
       "lmcHint": "Your LMC balance and the full history of movements live in one place.",
-      "chipLmc": "Open LMC"
+      "chipLmc": "Open LMC",
+      "briefLearner": "You are enrolled at {organization}. Practice and learning you record here count as evidence.",
+      "briefLearnerUnnamed": "You are enrolled as a learner. Practice and learning you record here count as evidence.",
+      "chipLogLearning": "Log learning or practice"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

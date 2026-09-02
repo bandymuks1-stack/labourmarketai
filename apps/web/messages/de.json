@@ -11765,7 +11765,10 @@
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
       "chipMyOwnInterest": "Mein eigenes Interesse",
       "lmcHint": "Ihr LMC-Guthaben und die vollständige Bewegungshistorie stehen an einer Stelle.",
-      "chipLmc": "LMC öffnen"
+      "chipLmc": "LMC öffnen",
+      "briefLearner": "Du bist bei {organization} eingeschrieben. Praxis und Lernen, die du hier festhältst, zählen als Nachweis.",
+      "briefLearnerUnnamed": "Du bist als Lernende:r eingeschrieben. Praxis und Lernen, die du hier festhältst, zählen als Nachweis.",
+      "chipLogLearning": "Lernen oder Praxis festhalten"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
