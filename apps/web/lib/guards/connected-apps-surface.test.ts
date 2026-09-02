@@ -96,7 +96,7 @@ describe("Guard: Connected Apps — reachability", () => {
     const KEYS = [
       "title", "intro", "empty", "unavailable", "unnamed", "grantedAt", "grantedUnknown",
       "scopesLabel", "disconnect", "confirmTitle", "confirmBody", "confirmYes", "cancel",
-      "feedbackRevoked", "feedbackError", "note",
+      "feedbackRevoked", "feedbackError", "note", "pending",
     ];
     for (const locale of ["lt", "en", "ru", "nl", "de"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));

@@ -4104,7 +4104,8 @@
           "cancel": "Verbonden houden",
           "feedbackRevoked": "Losgekoppeld. De toepassing heeft geen toegang meer tot je account.",
           "feedbackError": "De toepassing kon niet worden losgekoppeld. Laad de pagina opnieuw en probeer het nog eens.",
-          "note": "Uitloggen bij LabourMarket.ai koppelt apps niet los. Hier loskoppelen is de enige manier om de toegang van een app te beëindigen."
+          "note": "Uitloggen bij LabourMarket.ai koppelt apps niet los. Hier loskoppelen is de enige manier om de toegang van een app te beëindigen.",
+          "pending": "Loskoppelen…"
         }
       },
       "comingSoon": {

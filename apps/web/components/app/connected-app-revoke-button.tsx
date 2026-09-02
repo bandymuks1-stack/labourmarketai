@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { revokeConnectedApp } from "@/lib/auth/connected-apps-actions";
 
@@ -9,7 +10,33 @@ import { revokeConnectedApp } from "@/lib/auth/connected-apps-actions";
  * press only opens an inline confirmation naming the client; the second
  * submits the server action. No `window.confirm` (unstyled, not localisable,
  * blocked by some in-app browsers) and no destructive one-click.
+ *
+ * While the server action runs the confirm button is disabled and a
+ * role="status" line says so (form-submit-feedback contract) — the person
+ * never presses twice or wonders whether anything happened.
  */
+function ConfirmSubmit({ label, pendingLabel }: { label: string; pendingLabel: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <>
+      <button
+        type="submit"
+        disabled={pending}
+        aria-busy={pending}
+        className="rounded-md bg-state-danger px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        data-testid="connected-app-confirm-yes"
+      >
+        {pending ? pendingLabel : label}
+      </button>
+      {pending && (
+        <span role="status" className="sr-only">
+          {pendingLabel}
+        </span>
+      )}
+    </>
+  );
+}
+
 export function ConnectedAppRevokeButton({
   clientId,
   name,
@@ -24,6 +51,7 @@ export function ConnectedAppRevokeButton({
     confirmTitle: string;
     confirmBody: string;
     confirmYes: string;
+    pending: string;
     cancel: string;
   };
 }) {
@@ -56,13 +84,7 @@ export function ConnectedAppRevokeButton({
       <p className="text-sm font-medium text-text-primary">{labels.confirmTitle}</p>
       <p className="text-xs leading-relaxed text-text-secondary">{labels.confirmBody}</p>
       <div className="flex gap-2">
-        <button
-          type="submit"
-          className="rounded-md bg-state-danger px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-          data-testid="connected-app-confirm-yes"
-        >
-          {labels.confirmYes}
-        </button>
+        <ConfirmSubmit label={labels.confirmYes} pendingLabel={labels.pending} />
         <button
           type="button"
           onClick={() => setConfirming(false)}

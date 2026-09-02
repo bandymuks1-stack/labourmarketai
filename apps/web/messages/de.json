@@ -4104,7 +4104,8 @@
           "cancel": "Verbunden lassen",
           "feedbackRevoked": "Getrennt. Die Anwendung hat keinen Zugriff mehr auf dein Konto.",
           "feedbackError": "Die Anwendung konnte nicht getrennt werden. Lade die Seite neu und versuch es erneut.",
-          "note": "Das Abmelden von LabourMarket.ai trennt keine Apps. Das Trennen hier ist der einzige Weg, den Zugriff einer Anwendung zu beenden."
+          "note": "Das Abmelden von LabourMarket.ai trennt keine Apps. Das Trennen hier ist der einzige Weg, den Zugriff einer Anwendung zu beenden.",
+          "pending": "Wird getrennt…"
         }
       },
       "comingSoon": {

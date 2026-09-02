@@ -4104,7 +4104,8 @@
           "cancel": "Keep connected",
           "feedbackRevoked": "Disconnected. The application no longer has access to your account.",
           "feedbackError": "The application could not be disconnected. Reload the page and try again.",
-          "note": "Signing out of LabourMarket.ai does not disconnect apps. Disconnecting here is the only way to end an application's access."
+          "note": "Signing out of LabourMarket.ai does not disconnect apps. Disconnecting here is the only way to end an application's access.",
+          "pending": "Disconnecting…"
         }
       },
       "comingSoon": {

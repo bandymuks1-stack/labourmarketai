@@ -1,5 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import { Card } from "@/components/ui/Card";
+import { formatUtcDateTime } from "@/lib/time/display";
+
 import { ConnectedAppRevokeButton } from "@/components/app/connected-app-revoke-button";
 import {
   presentConnectedApps,
@@ -33,17 +36,10 @@ export async function ConnectedAppsSection({
   const supabase = await createClient();
   const { data, error } = await supabase.auth.oauth.listGrants();
   const apps = error ? null : presentConnectedApps(data);
-  const fmt = new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 
   return (
-    <section
-      id="connected-apps"
-      className="card-border p-5"
-      data-testid="account-connected-apps"
-    >
+    <section id="connected-apps" data-testid="account-connected-apps">
+      <Card compact>
       <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("title")}
       </p>
@@ -107,7 +103,9 @@ export async function ConnectedAppsSection({
                   )}
                   <p className="text-xs text-text-muted">
                     {app.grantedAt
-                      ? t("grantedAt", { date: fmt.format(new Date(app.grantedAt)) })
+                      ? t("grantedAt", {
+                          date: formatUtcDateTime(app.grantedAt, locale) ?? "",
+                        })
                       : t("grantedUnknown")}
                   </p>
                   {app.scopes.length > 0 && (
@@ -128,6 +126,7 @@ export async function ConnectedAppsSection({
                     confirmTitle: t("confirmTitle", { name }),
                     confirmBody: t("confirmBody"),
                     confirmYes: t("confirmYes"),
+                    pending: t("pending"),
                     cancel: t("cancel"),
                   }}
                 />
@@ -140,6 +139,7 @@ export async function ConnectedAppsSection({
       <p className="mt-4 border-t border-ink-600 pt-3 text-xs leading-relaxed text-text-muted">
         {t("note")}
       </p>
+      </Card>
     </section>
   );
 }

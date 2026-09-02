@@ -4104,7 +4104,8 @@
           "cancel": "Palikti prijungtą",
           "feedbackRevoked": "Atjungta. Programa nebeturi prieigos prie jūsų paskyros.",
           "feedbackError": "Programos atjungti nepavyko. Atnaujinkite puslapį ir pabandykite dar kartą.",
-          "note": "Atsijungimas nuo LabourMarket.ai programų neatjungia. Atjungimas čia yra vienintelis būdas nutraukti programos prieigą."
+          "note": "Atsijungimas nuo LabourMarket.ai programų neatjungia. Atjungimas čia yra vienintelis būdas nutraukti programos prieigą.",
+          "pending": "Atjungiama…"
         }
       },
       "comingSoon": {
