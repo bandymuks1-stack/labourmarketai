@@ -7062,6 +7062,16 @@
       "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
       "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
       "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
+    },
+    "validity": {
+      "active": "Gültig",
+      "expired": "Abgelaufen",
+      "revoked": "Widerrufen",
+      "pending": "Prüfung ausstehend",
+      "rejected": "Abgelehnt",
+      "unverified": "Nicht geprüft",
+      "unknown": "Gültigkeit unbekannt",
+      "reviewedOn": "Geprüft am {date}"
     }
   },
   "documentFiles": {
