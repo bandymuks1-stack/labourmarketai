@@ -4,6 +4,7 @@ import { refusalStatus } from "./api-identity";
 import {
   classifyRefusal,
   classifyTokenEndpointFailure,
+  parseTokenEndpointError,
   refusalBody,
   serializeAuthEvent,
   wwwAuthenticateChallenge,
@@ -99,6 +100,40 @@ describe("token-endpoint failures: only the authorization server can say 'dead g
     expect(r.errorClass).toBe("REFRESH_REVOKED");
     expect(r.clientAction).toBe("reconnect");
     expect(r.userMessage).toBe("reconnect_required");
+  });
+
+  it("Supabase Auth's LEGACY body — no RFC `error` member, only error_code/msg — is classified the same way (measured 2026-09-02)", () => {
+    // Exactly what production returned to ChatGPT's reconnect at 09:01:53Z:
+    const parsed = parseTokenEndpointError(400, {
+      code: 400,
+      error_code: "refresh_token_not_found",
+      msg: "Invalid Refresh Token: Refresh Token Not Found",
+    });
+    expect(parsed.rfcShaped).toBe(false);
+    const r = classifyTokenEndpointFailure(parsed);
+    expect(r.errorClass).toBe("REFRESH_REVOKED");
+    expect(r.clientAction).toBe("reconnect");
+    expect(r.userMessage).toBe("reconnect_required");
+  });
+
+  it("an RFC-shaped body reports rfcShaped=true and classifies identically", () => {
+    const parsed = parseTokenEndpointError(400, {
+      error: "invalid_grant",
+      error_description: "Invalid Refresh Token: Refresh Token Not Found",
+    });
+    expect(parsed.rfcShaped).toBe(true);
+    expect(classifyTokenEndpointFailure(parsed).errorClass).toBe("REFRESH_REVOKED");
+  });
+
+  it("legacy client / code-verifier codes fold into their RFC classes", () => {
+    expect(classifyTokenEndpointFailure({ status: 400, errorCode: "oauth_client_not_found" }).errorClass).toBe("ACCOUNT_LINK_INVALID");
+    expect(classifyTokenEndpointFailure({ status: 400, errorCode: "bad_code_verifier", msg: "invalid" }).errorClass).toBe("REFRESH_FAILED");
+    expect(classifyTokenEndpointFailure({ status: 400, errorCode: "refresh_token_already_used", msg: "Invalid Refresh Token: Already Used" }).errorClass).toBe("REFRESH_REVOKED");
+  });
+
+  it("a non-JSON body still yields a usable classification", () => {
+    const r = classifyTokenEndpointFailure(parseTokenEndpointError(400, "not json"));
+    expect(r.clientAction).toBe("reconnect");
   });
 
   it("rotation reuse ('Already Used') is also unrecoverable", () => {
