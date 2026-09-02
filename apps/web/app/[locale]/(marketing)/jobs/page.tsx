@@ -321,7 +321,7 @@ export default async function JobsPage({
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         {H1[active]}
       </h1>
@@ -512,7 +512,7 @@ export default async function JobsPage({
           )}
         </>
       )}
-    </div>
+    </main>
   );
 }
 
