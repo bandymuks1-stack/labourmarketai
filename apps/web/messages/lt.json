@@ -4087,6 +4087,24 @@
             "note": "Tavo atkūrimo el. paštas: {email}. Saugok prieigą prie jo."
           },
           "comingLater": "Vėliau čia matysi, kur esi prisijungęs, galėsi užbaigti sesijas ir gauti atsarginius kodus."
+        },
+        "connectedApps": {
+          "title": "Prijungtos programos",
+          "intro": "Išorinės programos ir asistentai, kuriems leidote veikti jūsų vardu LabourMarket.ai. Kiekviena mato tik tai, ką matote jūs, ir bet kada galite ją atjungti.",
+          "empty": "Prie jūsų paskyros neprijungta jokia programa.",
+          "unavailable": "Šiuo metu nepavyko įkelti prijungtų programų sąrašo. Pabandykite po akimirkos.",
+          "unnamed": "Neįvardinta programa",
+          "grantedAt": "Prijungta {date}",
+          "grantedUnknown": "Prijungimo data neužfiksuota",
+          "scopesLabel": "Leidimai",
+          "disconnect": "Atjungti",
+          "confirmTitle": "Atjungti „{name}“?",
+          "confirmBody": "Programa iš karto netenka prieigos. Norėdama vėl veikti jūsų vardu, ji turės iš naujo paprašyti jūsų leidimo.",
+          "confirmYes": "Taip, atjungti",
+          "cancel": "Palikti prijungtą",
+          "feedbackRevoked": "Atjungta. Programa nebeturi prieigos prie jūsų paskyros.",
+          "feedbackError": "Programos atjungti nepavyko. Atnaujinkite puslapį ir pabandykite dar kartą.",
+          "note": "Atsijungimas nuo LabourMarket.ai programų neatjungia. Atjungimas čia yra vienintelis būdas nutraukti programos prieigą."
         }
       },
       "comingSoon": {

@@ -1012,7 +1012,30 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       lt: ["paskyra", "nustatymai", "rolės", "kalba"],
       ru: ["аккаунт", "настройки", "роли", "язык"],
       nl: ["account", "instellingen", "rollen", "taal"],
-      de: ["konto", "einstellungen", "rollen", "sprache"],
+      de: ["konto", "einstellingen", "rollen", "sprache"],
+    },
+  },
+  // Connected apps (Train A slice 2, 2026-09-02) — its OWN entry so "which
+  // apps have access" / "disconnect ChatGPT" resolves to the section, not to
+  // the top of settings. The words below name products people actually
+  // type; the surface itself knows no client by name (vendor neutrality).
+  {
+    id: "connected_apps",
+    route: "/dashboard/account#connected-apps",
+    audience: "public",
+    labels: {
+      en: "Connected apps",
+      lt: "Prijungtos programos",
+      ru: "Подключённые приложения",
+      nl: "Verbonden apps",
+      de: "Verbundene Apps",
+    },
+    synonyms: {
+      en: ["connected apps", "authorized apps", "disconnect", "revoke access", "chatgpt", "claude", "assistant access"],
+      lt: ["prijungtos programos", "atjungti", "prieiga", "chatgpt", "claude", "asistento prieiga"],
+      ru: ["подключённые приложения", "отключить", "доступ", "chatgpt", "claude", "доступ ассистента"],
+      nl: ["verbonden apps", "loskoppelen", "toegang intrekken", "chatgpt", "claude"],
+      de: ["verbundene apps", "trennen", "zugriff widerrufen", "chatgpt", "claude"],
     },
   },
   // LMC — the platform credit a person actually holds. Deliberately its OWN

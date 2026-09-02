@@ -18,6 +18,8 @@ import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AccountBillingSection } from "@/components/app/account-billing-section";
+import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
+import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 import {
@@ -48,13 +50,15 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ billing?: string }>;
+  searchParams: Promise<{ billing?: string; apps?: string }>;
 }) {
   const { locale } = await params;
   // Native-nav `?billing=` return feedback (same idiom as planning's plain
   // searchParams): the TEST billing routes send the user back here with
   // `?billing=test_success` / `portal_return`, and until now nothing read it.
-  const { billing } = await searchParams;
+  // `?apps=revoked|error` — the Connected Apps disconnect action's return
+  // feedback (same idiom); anything else is ignored.
+  const { billing, apps } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
@@ -286,6 +290,15 @@ export default async function AccountPage({
           </p>
         </div>
       </section>
+
+      {/* Connected apps (FINAL COMPLETION Train A slice 2, 2026-09-02): which
+          external applications / assistants hold delegated access, with what
+          permissions, since when — and an explicit Disconnect. Data is
+          GoTrue's own grant list; the web logout never revokes (#1412). */}
+      <ConnectedAppsSection
+        locale={locale}
+        feedback={parseConnectedAppsFeedback(apps)}
+      />
 
       {/* Notification preferences (completion v1, M5 closure) — per-type ×
           per-channel toggles over the applied notification_preferences

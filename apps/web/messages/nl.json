@@ -4087,6 +4087,24 @@
             "note": "Je herstel-e-mailadres: {email}. Zorg dat je er toegang toe houdt."
           },
           "comingLater": "Later zie je waar je bent ingelogd, kun je sessies beëindigen en krijg je back-upcodes."
+        },
+        "connectedApps": {
+          "title": "Verbonden apps",
+          "intro": "Externe toepassingen en assistenten die je hebt toegestaan namens jou te handelen op LabourMarket.ai. Elke app ziet alleen wat jij ziet en je kunt hem altijd loskoppelen.",
+          "empty": "Er is geen app verbonden met je account.",
+          "unavailable": "De lijst met verbonden apps kon nu niet worden geladen. Probeer het zo opnieuw.",
+          "unnamed": "Naamloze toepassing",
+          "grantedAt": "Verbonden op {date}",
+          "grantedUnknown": "Verbindingsdatum niet vastgelegd",
+          "scopesLabel": "Rechten",
+          "disconnect": "Loskoppelen",
+          "confirmTitle": "{name} loskoppelen?",
+          "confirmBody": "De toepassing verliest direct de toegang. Ze moet opnieuw om je toestemming vragen voordat ze namens jou kan handelen.",
+          "confirmYes": "Ja, loskoppelen",
+          "cancel": "Verbonden houden",
+          "feedbackRevoked": "Losgekoppeld. De toepassing heeft geen toegang meer tot je account.",
+          "feedbackError": "De toepassing kon niet worden losgekoppeld. Laad de pagina opnieuw en probeer het nog eens.",
+          "note": "Uitloggen bij LabourMarket.ai koppelt apps niet los. Hier loskoppelen is de enige manier om de toegang van een app te beëindigen."
         }
       },
       "comingSoon": {

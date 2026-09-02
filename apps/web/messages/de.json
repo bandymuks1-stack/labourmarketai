@@ -4087,6 +4087,24 @@
             "note": "Ihre Wiederherstellungs-E-Mail: {email}. Stellen Sie sicher, dass Sie darauf zugreifen können."
           },
           "comingLater": "Später sehen Sie, wo Sie angemeldet sind, können Sitzungen beenden und Backup-Codes erhalten."
+        },
+        "connectedApps": {
+          "title": "Verbundene Apps",
+          "intro": "Externe Anwendungen und Assistenten, denen du erlaubt hast, auf LabourMarket.ai in deinem Namen zu handeln. Jede sieht nur, was du siehst, und du kannst sie jederzeit trennen.",
+          "empty": "Mit deinem Konto ist keine Anwendung verbunden.",
+          "unavailable": "Die Liste der verbundenen Apps konnte gerade nicht geladen werden. Versuch es gleich noch einmal.",
+          "unnamed": "Unbenannte Anwendung",
+          "grantedAt": "Verbunden am {date}",
+          "grantedUnknown": "Verbindungsdatum nicht erfasst",
+          "scopesLabel": "Berechtigungen",
+          "disconnect": "Trennen",
+          "confirmTitle": "{name} trennen?",
+          "confirmBody": "Die Anwendung verliert sofort den Zugriff. Sie muss erneut um deine Erlaubnis bitten, bevor sie in deinem Namen handeln kann.",
+          "confirmYes": "Ja, trennen",
+          "cancel": "Verbunden lassen",
+          "feedbackRevoked": "Getrennt. Die Anwendung hat keinen Zugriff mehr auf dein Konto.",
+          "feedbackError": "Die Anwendung konnte nicht getrennt werden. Lade die Seite neu und versuch es erneut.",
+          "note": "Das Abmelden von LabourMarket.ai trennt keine Apps. Das Trennen hier ist der einzige Weg, den Zugriff einer Anwendung zu beenden."
         }
       },
       "comingSoon": {
