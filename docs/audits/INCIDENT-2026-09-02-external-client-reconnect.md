@@ -156,3 +156,72 @@ bypasses OAuth, or stores anything new.
 - The remaining blind spot is the authorization-server half (refresh /
   revocation), which only a real OAuth client behind a human consent can
   exercise — recorded as a gap, not papered over.
+
+---
+
+## 9. Continuation — the owner's reconnect after #1412 also failed (proven)
+
+`#1412` merged as `c3accc7c`, deployed `success`; the resource-server contract
+was verified live (both refusal probes PASS). The owner then performed the
+reconnect in ChatGPT and got the same generic wall. Production evidence:
+
+| Time (UTC) | Request | Result |
+|---|---|---|
+| 09:01:51.9 | `GET /.well-known/oauth-authorization-server/auth/v1` | 200 |
+| 09:01:52.1 | `GET /auth/v1/.well-known/openid-configuration` | 200 |
+| 09:01:53.0 | **`POST /auth/v1/oauth/token`** (grant_type = **refresh_token**) | **400** `Invalid Refresh Token: Refresh Token Not Found` |
+| 08:59:09 | same `POST /auth/v1/oauth/token` | 400 (the first click) |
+
+**There was no `GET /auth/v1/oauth/authorize`, no `/oauth/consent` visit, no
+new `oauth_authorizations` row, no authorization code, no session.** ChatGPT's
+"reconnect/reload" is a *token refresh*, not a new authorization.
+
+Why it does not fall back to a fresh authorization — measured on the live
+endpoint:
+
+```
+POST /auth/v1/oauth/token  grant_type=refresh_token (dead grant, ChatGPT client_id)
+→ 400 {"code":400,"error_code":"refresh_token_not_found","msg":"Invalid Refresh Token: Refresh Token Not Found"}
+
+POST /auth/v1/oauth/token  grant_type=authorization_code (bogus code, same client)
+→ 400 {"error":"invalid_grant","error_description":"Invalid authorization code"}
+```
+
+The **refresh** path answers Supabase Auth's *legacy* error shape with **no RFC
+6749 §5.2 `error` member**; the **code-exchange** path on the same endpoint is
+RFC-shaped. A standards-conforming OAuth client reads `error === "invalid_grant"`
+as "grant dead → re-authorize". It never sees that word, cannot classify the
+400, keeps believing its stored grant is valid, and surfaces "We couldn't
+connect your account" — every "reconnect" then repeats the same refresh.
+
+What is **not** the cause, each checked:
+- the preserved consent row does not block a new grant — a fresh
+  `GET /auth/v1/oauth/authorize` for the ChatGPT client (PKCE S256,
+  `resource=https://labourmarket.ai`, registered redirect) answered
+  **302 → `https://labourmarket.ai/oauth/consent?authorization_id=…`** (pending
+  row, self-expiring in 10 min, not followed);
+- discovery is correct (issuer, `authorization_endpoint`, `token_endpoint`,
+  `grant_types_supported = authorization_code, refresh_token`,
+  `offline_access` in `scopes_supported`);
+- #1412 is live and unrelated to this hop; nothing in LabourMarket.ai was
+  touched by the reconnect (no `/api/mcp`, no `/auth/v1/user` from ChatGPT).
+
+**Root cause of the failed reconnect:** upstream. Supabase Auth's OAuth 2.1
+`/oauth/token` emits a non-RFC error body on the `refresh_token` grant, and
+ChatGPT's connector does not re-authorize on an unclassifiable 400. Neither is
+LabourMarket.ai code; the AS is Supabase-managed.
+
+**Smallest safe fix in this repo:** make the shape visible and classifiable —
+`parseTokenEndpointError` + legacy-code folding in the taxonomy (first-party
+clients now classify `refresh_token_not_found` → `REFRESH_REVOKED → reconnect`),
+and a non-fatal `AS_TOKEN_ERROR_SHAPE` step in the contract check that WARNs
+while the upstream shape is non-RFC and passes the day it heals. No auth-core
+change; GREEN class.
+
+**What actually restores the connector:** the client must discard its stored
+grant so it issues `/oauth/authorize` again. That is a ChatGPT-side
+disconnect (revoke / log out of the connector's OAuth), then connect — not a
+"reload". Evidence-backed, not speculative: no reload can ever reach
+`/oauth/authorize` while the client thinks its grant is valid. Nothing on the
+LabourMarket.ai side is lost by it (consent is re-issued or re-used; DCR may
+register a fresh client row). Report the token-endpoint shape to Supabase.

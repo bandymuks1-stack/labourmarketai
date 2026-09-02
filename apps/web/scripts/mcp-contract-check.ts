@@ -117,6 +117,49 @@ async function main(): Promise<void> {
     );
   }
 
+  // ---- AS_TOKEN_ERROR_SHAPE (non-fatal): can a standards-only client classify a dead grant?
+  //
+  // 2026-09-02: the owner's reconnect in ChatGPT ran discovery and then a
+  // refresh_token grant at Supabase Auth's /oauth/token, which answered 400
+  // with the LEGACY body {"error_code":"refresh_token_not_found","msg":…} —
+  // no RFC 6749 §5.2 `error` member. A conforming client cannot read that as
+  // `invalid_grant`, so it never restarts authorization and shows a generic
+  // wall instead. The authorization_code path on the same endpoint IS
+  // RFC-shaped. This step follows the real discovery chain
+  // (protected-resource → RFC 8414 → token_endpoint) and reports the shape.
+  // WARN, not FAIL: the endpoint is Supabase-managed, so a red gate here
+  // would be permanently red for something no PR in this repo can change —
+  // but the day it turns green is the day this class of failure heals.
+  {
+    let detail = "skipped";
+    try {
+      const prm = (await (await fetch(`${BASE_URL}/.well-known/oauth-protected-resource`)).json()) as {
+        authorization_servers?: string[];
+      };
+      const as = (prm.authorization_servers ?? [])[0] ?? "";
+      const asUrl = new URL(as);
+      const meta = (await (
+        await fetch(`${asUrl.origin}/.well-known/oauth-authorization-server${asUrl.pathname}`)
+      ).json()) as { token_endpoint?: string };
+      const tokenEndpoint = meta.token_endpoint ?? "";
+      const form = new URLSearchParams({ grant_type: "refresh_token", refresh_token: "contract-check-not-a-token" });
+      if (process.env.MCP_OAUTH_CLIENT_ID) form.set("client_id", process.env.MCP_OAUTH_CLIENT_ID);
+      const res = await fetch(tokenEndpoint, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
+        body: form,
+      });
+      const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      const rfcShaped = typeof body.error === "string" && body.error.length > 0;
+      detail = `token_endpoint=${tokenEndpoint ? "discovered" : "missing"} status=${res.status} rfc_error_member=${rfcShaped ? "present" : "ABSENT"}${
+        typeof body.error_code === "string" ? ` legacy_error_code=${body.error_code}` : ""
+      }`;
+      console.log(`${rfcShaped ? "PASS" : "WARN"}  AS_TOKEN_ERROR_SHAPE (dead refresh grant → RFC 6749 error member)  ${detail}`);
+    } catch (e) {
+      console.log(`WARN  AS_TOKEN_ERROR_SHAPE  could not follow discovery: ${e instanceof Error ? e.message : "unknown"}`);
+    }
+  }
+
   if (!BEARER) {
     record("AUTHENTICATE", false, "MCP_BEARER is not set — authenticated steps cannot run");
     finish();

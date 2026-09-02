@@ -221,14 +221,28 @@ export function classifyTokenEndpointFailure(input: {
   readonly status?: number;
   readonly error?: string;
   readonly errorDescription?: string;
+  /**
+   * Supabase Auth's LEGACY error shape on `/oauth/token` (measured in
+   * production 2026-09-02): `{"code":400,"error_code":"refresh_token_not_found",
+   * "msg":"Invalid Refresh Token: Refresh Token Not Found"}` — NO RFC 6749 §5.2
+   * `error` member at all. A standards-only client cannot recognise that as
+   * `invalid_grant` and therefore never restarts authorization; it shows a
+   * generic failure instead. First-party clients pass `errorCode` / `msg`
+   * here so they classify it correctly regardless of shape.
+   */
+  readonly errorCode?: string;
+  readonly msg?: string;
 }): {
   readonly errorClass: AuthorizationServerAuthClass;
   readonly clientAction: ClientAction;
   readonly userMessage: UserMessageKind;
 } {
   const status = input.status ?? 0;
-  const error = (input.error ?? "").toLowerCase();
-  const desc = (input.errorDescription ?? "").toLowerCase();
+  const legacy = (input.errorCode ?? "").toLowerCase();
+  // Legacy GoTrue codes fold into their RFC equivalents FIRST, so the rest
+  // of this function reasons about one vocabulary.
+  const error = (input.error ?? "").toLowerCase() || legacyToRfcError(legacy);
+  const desc = ((input.errorDescription ?? "") || (input.msg ?? "")).toLowerCase();
 
   if (status >= 500 || status === 0) {
     return { errorClass: "SERVER_AUTH_FAILURE", clientAction: "retry_later", userMessage: "temporarily_unavailable" };
@@ -258,6 +272,53 @@ export function classifyTokenEndpointFailure(input: {
     return { errorClass: "USER_REVOKED_ACCESS", clientAction: "reconnect", userMessage: "reconnect_required" };
   }
   return { errorClass: "REFRESH_FAILED", clientAction: "reconnect", userMessage: "reconnect_required" };
+}
+
+/** GoTrue legacy `error_code` → RFC 6749 `error`. Unknown codes map to "" so
+ *  the caller's own fallbacks apply. */
+function legacyToRfcError(code: string): string {
+  switch (code) {
+    case "refresh_token_not_found":
+    case "refresh_token_already_used":
+    case "bad_code_verifier":
+    case "flow_state_not_found":
+    case "flow_state_expired":
+    case "invalid_grant":
+      return "invalid_grant";
+    case "oauth_client_not_found":
+    case "invalid_client":
+    case "unauthorized_client":
+      return "invalid_client";
+    case "invalid_scope":
+      return "invalid_scope";
+    case "access_denied":
+      return "access_denied";
+    default:
+      return "";
+  }
+}
+
+/**
+ * Parse an OAuth token-endpoint failure body of EITHER shape into the input
+ * `classifyTokenEndpointFailure` expects — RFC 6749 §5.2
+ * (`error` / `error_description`) or Supabase Auth's legacy
+ * (`error_code` / `msg`). Tolerates a non-JSON body.
+ */
+export function parseTokenEndpointError(
+  status: number,
+  body: unknown,
+): Parameters<typeof classifyTokenEndpointFailure>[0] & { readonly rfcShaped: boolean } {
+  const b = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
+  const str = (k: string): string | undefined => (typeof b[k] === "string" ? (b[k] as string) : undefined);
+  const error = str("error");
+  return {
+    status,
+    error,
+    errorDescription: str("error_description"),
+    errorCode: str("error_code"),
+    msg: str("msg"),
+    rfcShaped: typeof error === "string" && error.length > 0,
+  };
 }
 
 /**
