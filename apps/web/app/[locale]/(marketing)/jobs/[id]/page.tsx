@@ -392,7 +392,7 @@ export default async function JobDetailPage({
     : undefined;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <Link href="/jobs" className="text-sm text-muted-foreground hover:underline">
         {BACK[active]}
       </Link>
@@ -540,6 +540,6 @@ export default async function JobDetailPage({
       {attribution && (
         <p className="mt-8 text-xs text-muted-foreground">{attribution}</p>
       )}
-    </main>
+    </div>
   );
 }

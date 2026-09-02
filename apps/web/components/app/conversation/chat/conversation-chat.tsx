@@ -2535,7 +2535,11 @@ export function ConversationChat({
       {/* Publishes open/close into `worldRef` so the send handler — which sits
           above this provider — can let the AI change World State (W4). */}
       <AiWorkspaceBridge bind={worldRef} />
-      <div className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`} data-testid="conversation-chat">
+      <div
+        role="main"
+        className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`}
+        data-testid="conversation-chat"
+      >
         <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
         {/* Column on phones (panel docks under the composer, collapsed until
             something is selected), row from `lg` (panel is the right column

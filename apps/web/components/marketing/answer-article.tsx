@@ -76,7 +76,7 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
   const showLegalNote = question.riskLevel === "HIGH" || Boolean(answer.countryScope);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+    <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
       <AnswerPageViewed category={category} />
       <JsonLd data={organizationJsonLd()} />
       <JsonLd data={breadcrumbJsonLd(crumbs.map((c) => ({ name: c.name, url: c.url })))} />
@@ -197,6 +197,6 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
           </ul>
         </nav>
       ) : null}
-    </main>
+    </article>
   );
 }

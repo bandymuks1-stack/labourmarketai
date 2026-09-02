@@ -30,7 +30,7 @@ export default async function QuestionsHub({
   const abs = (p: string) => `${MARKETING_ORIGIN}/${l}${p}`;
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10" id="main-content">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }} />
       <script
         type="application/ld+json"
@@ -68,6 +68,6 @@ export default async function QuestionsHub({
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

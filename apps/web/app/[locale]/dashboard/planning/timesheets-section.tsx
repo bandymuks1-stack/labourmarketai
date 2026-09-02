@@ -238,7 +238,7 @@ export async function TimesheetsSection({
           >
             <input type="hidden" name="locale" value={locale} />
             <div className="flex flex-col gap-1">
-              <Label>{t("create.organization")}</Label>
+              <Label htmlFor="timesheet-org">{t("create.organization")}</Label>
               <Select id="timesheet-org" name="organizationId" required>
                 {overview.orgOptions.map((o) => (
                   <option key={o.organizationId} value={o.organizationId}>
@@ -248,7 +248,7 @@ export async function TimesheetsSection({
               </Select>
             </div>
             <div className="flex flex-col gap-1">
-              <Label>{t("create.periodStart")}</Label>
+              <Label htmlFor="timesheet-start">{t("create.periodStart")}</Label>
               <Input
                 id="timesheet-start"
                 type="date"
@@ -258,7 +258,7 @@ export async function TimesheetsSection({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <Label>{t("create.periodEnd")}</Label>
+              <Label htmlFor="timesheet-end">{t("create.periodEnd")}</Label>
               <Input
                 id="timesheet-end"
                 type="date"
@@ -498,7 +498,7 @@ export async function TimesheetsSection({
                           <input type="hidden" name="locale" value={locale} />
                           <input type="hidden" name="timesheetId" value={sheet.id} />
                           <div className="flex flex-col gap-1">
-                            <Label>
+                            <Label htmlFor={`reopen-note-${sheet.id}`}>
                               {t("org.reopenNote")}
                             </Label>
                             <Input

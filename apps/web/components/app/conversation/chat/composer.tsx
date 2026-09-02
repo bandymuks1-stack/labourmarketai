@@ -134,6 +134,7 @@ export function Composer({
         <textarea
           ref={ref}
           rows={1}
+          aria-label={placeholder}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
