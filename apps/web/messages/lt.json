@@ -9310,7 +9310,8 @@
       "finance": "Finansai",
       "invitation": "Kvietimas",
       "absence": "Atostogos",
-      "stage": "Etapai"
+      "stage": "Etapai",
+      "plan": "Suplanuotas darbas"
     },
     "sourceNotes": {
       "bookingUnavailable": "Rezervacijos dar neįjungtos — jos prisijungs prie plano, kai bus įjungtas rezervacijų sluoksnis.",
@@ -9326,7 +9327,9 @@
       "absenceUnavailable": "Atostogų modulis dar neįjungtas šioje aplinkoje.",
       "absenceError": "Atostogų įrašų nepavyko perskaityti — planas rodomas be jų.",
       "stageUnavailable": "Projektų etapų modulis dar neįjungtas šioje aplinkoje.",
-      "stageError": "Projektų etapų nepavyko perskaityti — planas rodomas be jų."
+      "stageError": "Projektų etapų nepavyko perskaityti — planas rodomas be jų.",
+      "planUnavailable": "Suplanuotas darbas šioje aplinkoje dar nepasiekiamas.",
+      "planError": "Nepavyko perskaityti suplanuoto darbo."
     },
     "week": {
       "label": "Artimiausios 7 dienos"
@@ -9361,7 +9364,8 @@
       "finance": "Finansų įrašas",
       "invitation": "Kvietimas",
       "absence": "Atostogos / nedarbingumas",
-      "stage": "Projekto etapas"
+      "stage": "Projekto etapas",
+      "plan": "Suplanuotas darbas"
     },
     "projectStatus": {
       "draft": "Juodraštis",
@@ -9423,6 +9427,10 @@
       "plannedDays": "{count} suplanuotos darbo dienos",
       "actualHours": "{hours} val. užrašyta žurnale",
       "note": "Suplanuotos dienos ateina iš priimtų rezervacijų ir projektų priskyrimų; užrašytos valandos — iš jūsų žurnalo įrašų. Abu skaičiai rodomi greta, niekada neperskaičiuojami vienas į kitą."
+    },
+    "planStatus": {
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
     }
   },
   "workforcePlanning": {
@@ -14197,5 +14205,38 @@
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
+  },
+  "workPlan": {
+    "title": "Suplanuotas darbas",
+    "intro": "Suplanuokite, kas, kur ir kada dirba. Kalendorius tai rodo kaip planą; kas iš tikrųjų įvyko, lieka darbo žurnale.",
+    "worker": "Darbuotojas",
+    "project": "Projektas (neprivaloma)",
+    "workObject": "Objektas (neprivaloma)",
+    "startDate": "Nuo",
+    "endDate": "Iki",
+    "startTime": "Pradžia (neprivaloma)",
+    "endTime": "Pabaiga (neprivaloma)",
+    "note": "Pastaba (neprivaloma)",
+    "none": "Nėra",
+    "submit": "Suplanuoti darbą",
+    "pending": "Planuojama…",
+    "cancel": "Atšaukti planą",
+    "cancelPending": "Atšaukiama…",
+    "empty": "Šiam laikotarpiui dar nieko nesuplanuota.",
+    "noWorkers": "Jūsų sąraše dar nėra darbuotojų. Pirmiausia pakvieskite žmones, tada planuokite jų darbą.",
+    "unavailable": "Planavimas šioje aplinkoje dar nepasiekiamas.",
+    "listTitle": "Suplanuoti laikotarpiai",
+    "overlap": "Persidengia su patvirtintomis atostogomis",
+    "outcome": {
+      "planned": "Darbas suplanuotas.",
+      "cancelled": "Planas atšauktas.",
+      "invalid": "Patikrinkite datas ir laukus ir bandykite dar kartą.",
+      "not_allowed": "Negalite planuoti šiai organizacijai.",
+      "worker_not_in_scope": "Šis darbuotojas nėra šios organizacijos sąraše.",
+      "project_not_in_organization": "Šis projektas priklauso kitai organizacijai.",
+      "work_object_not_in_organization": "Šis objektas priklauso kitai organizacijai.",
+      "unavailable": "Planavimas šioje aplinkoje dar nepasiekiamas.",
+      "error": "Kažkas nepavyko. Bandykite dar kartą."
+    }
   }
 }

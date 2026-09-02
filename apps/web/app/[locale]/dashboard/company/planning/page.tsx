@@ -9,6 +9,7 @@ import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-nav
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
 import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
+import { WorkPlanSection } from "@/components/app/work-plan-section";
 import { getOrganizationToday } from "@/lib/planning/organization-today";
 import { OrganizationTodayPanel } from "@/components/app/organization-today-panel";
 import {
@@ -68,10 +69,14 @@ const PRIMARY_CTA_CLASS =
 
 export default async function CompanyWorkforcePlanningPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** `?plan=` — the work-plan actions' bounded return vocabulary (Train F1). */
+  searchParams: Promise<{ plan?: string }>;
 }) {
   const { locale } = await params;
+  const { plan: planOutcome } = await searchParams;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -392,6 +397,10 @@ export default async function CompanyWorkforcePlanningPage({
             entered — an employer with an empty planning zone is precisely the
             one about to schedule someone. */}
         {availabilitySection}
+        {/* Train F1 — the PLAN primitive: plan who works where and when, even
+            before any demand is entered (that is exactly when a manager with
+            a roster needs it). */}
+        <WorkPlanSection locale={locale} outcome={planOutcome} />
         <div
           className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
           data-testid="planning-zone-empty"
@@ -649,6 +658,10 @@ export default async function CompanyWorkforcePlanningPage({
           </div>
         ) : null}
       </section>
+      {/* Train F1 — the PLAN primitive, below the demand timeline: plan who
+          works where and when; the calendar projects it; the journal keeps
+          what actually happened. */}
+      <WorkPlanSection locale={locale} outcome={planOutcome} />
     </div>
   );
 

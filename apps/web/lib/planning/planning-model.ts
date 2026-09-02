@@ -35,6 +35,9 @@ export const PLANNING_SOURCE_TYPES = [
   "invitation",
   "absence",
   "stage",
+  // Train F1 (2026-09-02): the organization's PLAN primitive — a planned work
+  // window for one worker (work_plan_entries). CALENDAR = PLAN.
+  "plan",
 ] as const;
 export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
 
@@ -226,6 +229,10 @@ export function hrefForSource(
       // project-operations href from the project id (this generic fallback
       // only anchors the projects surface).
       return "/dashboard/projects";
+    case "plan":
+      // Train F1: the plan list lives on the workforce planning zone; the
+      // projector overrides this with the dated day-view link.
+      return `/dashboard/company/planning#work-plan-${sourceId}`;
   }
 }
 
@@ -262,6 +269,8 @@ export function statusKeyForSource(
     case "stage":
       // Reuses the project-stages panel's own lifecycle copy (W6 model).
       return `projectStages.statuses.${status}`;
+    case "plan":
+      return `planning.planStatus.${status}`;
   }
 }
 

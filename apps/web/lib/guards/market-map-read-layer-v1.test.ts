@@ -743,7 +743,10 @@ describe("NO new DB migration in this PR", () => {
     // imports nothing. Still no migration from the market-map read layer,
     // which stays pure TS. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 253.
-    expect(count).toBeLessThanOrEqual(253);
+    // Bumped 253 -> 257: FINAL COMPLETION Train B2 (3 lifecycle migrations, #1421,
+    // RED, unapplied) + Train F1 (20260902200000 work_plan_entries, RED,
+    // unapplied). Each creates machinery; none changes data on apply.
+    expect(count).toBeLessThanOrEqual(257);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

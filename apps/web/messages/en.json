@@ -9310,7 +9310,8 @@
       "finance": "Finance",
       "invitation": "Invitation",
       "absence": "Leave",
-      "stage": "Stages"
+      "stage": "Stages",
+      "plan": "Planned work"
     },
     "sourceNotes": {
       "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
@@ -9326,7 +9327,9 @@
       "absenceUnavailable": "The leave module isn't enabled in this environment yet.",
       "absenceError": "Leave records couldn't be read — the plan is shown without them.",
       "stageUnavailable": "The project-stages module isn't enabled in this environment yet.",
-      "stageError": "Project stages couldn't be read — the plan is shown without them."
+      "stageError": "Project stages couldn't be read — the plan is shown without them.",
+      "planUnavailable": "Planned work is not available in this environment yet.",
+      "planError": "Planned work could not be read."
     },
     "week": {
       "label": "Next 7 days"
@@ -9361,7 +9364,8 @@
       "finance": "Finance record",
       "invitation": "Invitation",
       "absence": "Leave / absence",
-      "stage": "Project stage"
+      "stage": "Project stage",
+      "plan": "Planned work"
     },
     "projectStatus": {
       "draft": "Draft",
@@ -9423,6 +9427,10 @@
       "plannedDays": "{count} planned work days",
       "actualHours": "{hours} h recorded in the journal",
       "note": "Planned days come from accepted bookings and project assignments; recorded hours come from your journal entries. The two are shown side by side, never converted into each other."
+    },
+    "planStatus": {
+      "planned": "Planned",
+      "cancelled": "Cancelled"
     }
   },
   "workforcePlanning": {
@@ -14197,5 +14205,38 @@
     "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
     "error": "The change could not be saved and was reverted. Please try again.",
     "unavailable": "Notification settings are not available right now."
+  },
+  "workPlan": {
+    "title": "Planned work",
+    "intro": "Plan who works where and when. The calendar shows it as a plan; what actually happened stays in the work journal.",
+    "worker": "Worker",
+    "project": "Project (optional)",
+    "workObject": "Object / site (optional)",
+    "startDate": "From",
+    "endDate": "To",
+    "startTime": "Start time (optional)",
+    "endTime": "End time (optional)",
+    "note": "Note (optional)",
+    "none": "None",
+    "submit": "Plan work",
+    "pending": "Planning…",
+    "cancel": "Cancel plan",
+    "cancelPending": "Cancelling…",
+    "empty": "Nothing planned for this period yet.",
+    "noWorkers": "No workers on your roster yet. Invite people first, then plan their work.",
+    "unavailable": "Planning is not available in this environment yet.",
+    "listTitle": "Planned windows",
+    "overlap": "Overlaps approved leave",
+    "outcome": {
+      "planned": "Work planned.",
+      "cancelled": "Plan cancelled.",
+      "invalid": "Check the dates and fields and try again.",
+      "not_allowed": "You cannot plan for this organization.",
+      "worker_not_in_scope": "That worker is not on this organization's roster.",
+      "project_not_in_organization": "That project belongs to another organization.",
+      "work_object_not_in_organization": "That object belongs to another organization.",
+      "unavailable": "Planning is not available in this environment yet.",
+      "error": "Something went wrong. Try again."
+    }
   }
 }

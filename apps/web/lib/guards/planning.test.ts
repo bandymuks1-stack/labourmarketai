@@ -349,10 +349,13 @@ describe("4. the agenda is pure, forward-looking date math", () => {
 });
 
 describe("5. real sources only — nothing that does not exist is simulated", () => {
-  it("exactly booking / project / task / journal / finance / invitation / absence / stage", () => {
+  it("exactly booking / project / task / journal / finance / invitation / absence / stage / plan", () => {
     // Time Engine W2: the APPLIED W6/W7 tables (project_stages,
     // worker_absences) finally project into the ONE canonical calendar —
     // they are real, live models, not simulations.
+    // FINAL COMPLETION Train F1 (2026-09-02): `plan` = work_plan_entries,
+    // the organization's own PLAN object — a real table (RLS, RPC writes),
+    // projected like every other source; the calendar stays a projection.
     expect([...PLANNING_SOURCE_TYPES]).toEqual([
       "booking",
       "project",
@@ -362,6 +365,7 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
       "invitation",
       "absence",
       "stage",
+      "plan",
     ]);
   });
 
