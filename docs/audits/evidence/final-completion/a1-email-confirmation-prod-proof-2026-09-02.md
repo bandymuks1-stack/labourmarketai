@@ -21,8 +21,7 @@ Unit/guard coverage: `lib/auth/email-confirm.test.ts`, `lib/auth/callback-route.
 `lib/auth-errors.test.ts`, guards `oauth-trace-and-safe-diagnostics`, `google-same-tab-redirect`,
 `auth-stability-pkce-logout`. Deployed as `2a939c83` (#1418).
 
-Still EXTERNAL_GATE (G-1): delivery of the mail to a real inbox (custom SMTP) — see
-`docs/human-gates/email-delivery-gate.md`. UI-level browser walk of the "check your e-mail" state and the resend
+G-1 correction (owner-verified, later on 2026-09-02): the mail for every bounded identity above DID leave through the production SMTP (Resend team `bandymuks1`, `smtp.resend.com`) and BOUNCED only because `e2e-*@labourmarket.ai` are not mailboxes. Delivery to a real external inbox is the single remaining proof — see `docs/human-gates/email-delivery-gate.md`. UI-level browser walk of the "check your e-mail" state and the resend
 button runs in the CI e2e subset against the local stack (Confirm email OFF there → the state is reached by
 mocking `signUp` returning no session — see `tests/e2e/auth.spec.ts` follow-up in Train M).
 
