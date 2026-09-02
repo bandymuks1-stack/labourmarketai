@@ -229,4 +229,12 @@ export const BILLING_READINESS_ITEMS: readonly BillingReadinessItem[] = [
     status: "blocked_by_design",
     proof: "apps/web/lib/billing/provider.ts",
   },
+  {
+    // D3 (2026-09-02): the live path exists in code and is INERT until the
+    // owner arms it — token in env (G-8) + price table confirmed in code
+    // (G-7) + complete live keys. Prepared, not ready.
+    key: "live_activation",
+    status: "prepared",
+    proof: "apps/web/lib/billing/config-core.ts",
+  },
 ];

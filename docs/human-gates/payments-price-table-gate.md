@@ -41,6 +41,26 @@ Constraints that hold whichever set is chosen:
 **Owner action:** reply with "Set A", "Set B", or an amended table. Cost: none. Reversible: prices can change;
 existing subscriptions keep their price until migrated.
 
+## Recommendation made from evidence (2026-09-02 consolidation)
+
+**Set A** is the recommended launch table: it is the only set the owner ever confirmed ("owner pricing
+implemented exactly", closed #754), it is feature-based so it needs NO metering build, and its worker
+free tier satisfies the free-participation principle. Set B stays a documented candidate for the first
+pricing review after real usage. The owner's decision therefore reduces to one word — **"Set A"** —
+or an amended table.
+
+## D3 — the live path exists in code and is INERT (RED draft, 2026-09-02)
+
+`lib/billing/config-core.ts` now resolves a `stripe_live` state, but ONLY when all four hold at once:
+`STRIPE_MODE=live` with a complete live key set (`sk_live_…`, `pk_live_…`, `whsec_…`), the env token
+`STRIPE_LIVE_ACTIVATION=approved-by-owner`, and the code constant `PRICING_READINESS_STATE` flipped to
+`owner_confirmed` (the G-7 approval lands as that one-line change on the same RED PR). Any missing piece
+keeps the historical hard block with the reason named (`live_blocked`, `live_pricing_not_confirmed`,
+`live_keys_incomplete`, `missing_webhook_secret`). The webhook accepts live events only under
+`stripe_live` and rejects test replays there; entitlements enforce under either active state; the account
+page shows the real mode. Pinned by `lib/guards/no-live-payments.test.ts` (the token alone cannot arm
+live while pricing is draft) and `lib/billing/config.test.ts`.
+
 ## G-8 — live activation (EXTERNAL_GATE + RED PR)
 
 After G-7:

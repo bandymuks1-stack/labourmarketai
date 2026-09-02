@@ -37,9 +37,9 @@ export async function AccountBillingSection({
   const ent = await getEffectiveEntitlements();
 
   const returnNotice =
-    billingReturn === "test_success"
+    billingReturn === "test_success" || billingReturn === "success"
       ? t("returned.success")
-      : billingReturn === "test_cancelled"
+      : billingReturn === "test_cancelled" || billingReturn === "cancelled"
         ? t("returned.cancelled")
         : billingReturn === "portal_return"
           ? t("returned.portal")
@@ -47,11 +47,13 @@ export async function AccountBillingSection({
 
   const status = ent.subscriptionStatus ?? "none";
   const hasSubscription = ent.source === "subscription";
+  // D3: the section is live for BOTH adapter states; the TEST badge only in test.
+  const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
 
-  // The portal opens ONLY for a stored TEST billing customer — never offered
+  // The portal opens ONLY for a stored billing customer — never offered
   // while payments are disabled, and never a dead button.
   let portalAvailable = false;
-  if (cfg.state === "stripe_test" && ent.profileId) {
+  if (billingOn && ent.profileId) {
     const lookup = await findBillingCustomer(ent.profileId);
     portalAvailable = lookup.status === "found";
   }
@@ -67,7 +69,7 @@ export async function AccountBillingSection({
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </p>
-        {cfg.state === "stripe_test" ? (
+        {cfg.testMode ? (
           <span className="rounded-sm border border-state-amber/50 bg-state-amber/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
             {t("testBadge")}
           </span>
@@ -84,7 +86,7 @@ export async function AccountBillingSection({
         </p>
       ) : null}
 
-      {cfg.state !== "stripe_test" ? (
+      {!billingOn ? (
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">
           {t("disabled")}
         </p>

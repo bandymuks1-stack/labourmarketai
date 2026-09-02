@@ -8418,7 +8418,8 @@
     "state": {
       "disabled": "Mokėjimai išjungti",
       "stripe_test": "Stripe TEST režimas",
-      "stripe_live_blocked": "Live blokuojamas"
+      "stripe_live_blocked": "Live blokuojamas",
+      "stripe_live": "Stripe LIVE (savininko įjungtas)"
     },
     "tiles": {
       "payments": "Mokėjimai",
@@ -8473,7 +8474,8 @@
         "plan_catalogue": "Planų katalogas ir ribos apibrėžtos kode",
         "entitlement_coverage": "Teisių sujungimas: vartai paruošti, leidžiantys, kol mokėjimai išjungti",
         "pricing_copy": "Kainodaros tekstai: savininko redaguojami juodraščiai, be tiesioginių teiginių",
-        "provider_connection": "Mokėjimų teikėjo prijungimas — užblokuotas pagal dizainą (savininko vartai)"
+        "provider_connection": "Mokėjimų teikėjo prijungimas — užblokuotas pagal dizainą (savininko vartai)",
+        "live_activation": "Tiesioginio režimo įjungimas: kodo kelias paruoštas, neveikia, kol savininkas nenustato aktyvavimo žymės, nepatvirtina kainų lentelės ir nepateikia tiesioginių raktų"
       },
       "status": {
         "ready": "Paruošta",

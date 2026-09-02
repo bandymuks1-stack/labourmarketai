@@ -3,7 +3,8 @@ import "server-only";
 import Stripe from "stripe";
 
 import {
-  requireStripeTestSecret,
+  getBillingConfig,
+  requireStripeSecret,
   requireStripeWebhookSecret,
 } from "@/lib/billing/config";
 import type {
@@ -18,11 +19,14 @@ import type {
 } from "@/lib/billing/provider";
 
 /**
- * Stripe TEST-mode adapter (Stripe sprint PR1) — the ONLY module that imports
- * the Stripe SDK. It is constructed exclusively with a sk_test_ secret
- * (requireStripeTestSecret throws on anything else), so a live key can never be
- * used here. Created lazily by getBillingProvider() only when the config is
- * `stripe_test`.
+ * The Stripe adapter — the ONLY module that imports the Stripe SDK. Since D3
+ * (2026-09-02) it serves BOTH adapter states: `stripe_test` (sk_test_) and
+ * `stripe_live` (sk_live_, reachable only after the owner arms live mode —
+ * see config-core.ts). `requireStripeSecret` refuses any key whose shape
+ * disagrees with the active state, so a live key can never be used under a
+ * test config and vice versa. Created lazily by getBillingProvider() only when
+ * one of the two states is active. The file keeps its historical name because
+ * three guards pin it as the single SDK import site.
  */
 
 /**
@@ -42,8 +46,8 @@ export const STRIPE_PINNED_API_VERSION: NonNullable<
 > = "2026-05-27.dahlia";
 
 function client(): Stripe {
-  // requireStripeTestSecret enforces sk_test_ and that test mode is active.
-  return new Stripe(requireStripeTestSecret(), {
+  // requireStripeSecret enforces the key shape that matches the active state.
+  return new Stripe(requireStripeSecret(), {
     apiVersion: STRIPE_PINNED_API_VERSION,
   });
 }
@@ -52,9 +56,12 @@ function reasonFrom(e: unknown): string {
   return e instanceof Error ? e.message.slice(0, 200) : "stripe_error";
 }
 
-export function createStripeTestProvider(): BillingProvider {
+export function createStripeProvider(): BillingProvider {
+  const cfg = getBillingConfig();
+  const live = cfg.state === "stripe_live";
+  const testMode = !live;
   return {
-    id: "stripe_test",
+    id: live ? "stripe_live" : "stripe_test",
     active: true,
 
     async createCheckoutSession(
@@ -63,14 +70,14 @@ export function createStripeTestProvider(): BillingProvider {
       try {
         const metadata: Record<string, string> = {
           ...(input.metadata ?? { plan_key: input.planKey }),
-          test_mode: "true",
+          test_mode: String(testMode),
         };
         const session = await client().checkout.sessions.create(
           {
             mode: "subscription",
             line_items: [{ price: input.priceId, quantity: 1 }],
             client_reference_id: input.clientReferenceId,
-            // Reuse the stored TEST customer when we have one; fall back to
+            // Reuse the stored customer when we have one; fall back to
             // email prefill for first-time checkouts without a mapping.
             customer: input.providerCustomerId ?? undefined,
             customer_email: input.providerCustomerId
@@ -89,7 +96,7 @@ export function createStripeTestProvider(): BillingProvider {
             : undefined,
         );
         if (!session.url) return { ok: false, reason: "no_session_url" };
-        return { ok: true, url: session.url, sessionId: session.id, testMode: true };
+        return { ok: true, url: session.url, sessionId: session.id, testMode };
       } catch (e) {
         return { ok: false, reason: reasonFrom(e) };
       }
@@ -102,12 +109,12 @@ export function createStripeTestProvider(): BillingProvider {
         const customer = await client().customers.create(
           {
             email: input.email ?? undefined,
-            metadata: { ...input.metadata, test_mode: "true" },
+            metadata: { ...input.metadata, test_mode: String(testMode) },
           },
           // One customer per profile — a retry must not mint a second one.
           { idempotencyKey: `cus1_${input.ownerId}` },
         );
-        return { ok: true, customerId: customer.id, testMode: true };
+        return { ok: true, customerId: customer.id, testMode };
       } catch (e) {
         return { ok: false, reason: reasonFrom(e) };
       }
@@ -133,7 +140,7 @@ export function createStripeTestProvider(): BillingProvider {
       signature: string,
     ): Promise<BillingWebhookEvent> {
       // Throws on an invalid/forged signature — business logic never runs
-      // without a verified test webhook secret.
+      // without a verified webhook secret.
       const event = client().webhooks.constructEvent(
         payload,
         signature,
@@ -147,4 +154,9 @@ export function createStripeTestProvider(): BillingProvider {
       };
     },
   };
+}
+
+/** Historical name (Stripe sprint PR1); the adapter is mode-aware since D3. */
+export function createStripeTestProvider(): BillingProvider {
+  return createStripeProvider();
 }

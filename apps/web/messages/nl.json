@@ -8418,7 +8418,8 @@
     "state": {
       "disabled": "Facturatie uitgeschakeld",
       "stripe_test": "Stripe TEST-modus",
-      "stripe_live_blocked": "Live geblokkeerd"
+      "stripe_live_blocked": "Live geblokkeerd",
+      "stripe_live": "Stripe LIVE (door eigenaar geactiveerd)"
     },
     "tiles": {
       "payments": "Betalingen",
@@ -8473,7 +8474,8 @@
         "plan_catalogue": "Plancatalogus en grenzen gedefinieerd in code",
         "entitlement_coverage": "Entitlement-koppeling: gates voorbereid, permissief zolang betalingen uit staan",
         "pricing_copy": "Prijsteksten: door de eigenaar bewerkbare concepten, geen live claims",
-        "provider_connection": "Koppeling betalingsprovider — bewust geblokkeerd (eigenaarsgate)"
+        "provider_connection": "Koppeling betalingsprovider — bewust geblokkeerd (eigenaarsgate)",
+        "live_activation": "Live-activering: codepad voorbereid, inactief totdat de eigenaar het activeringstoken instelt, de prijstabel bevestigt en live-sleutels aanlevert"
       },
       "status": {
         "ready": "Gereed",

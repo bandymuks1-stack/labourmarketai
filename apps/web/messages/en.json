@@ -8418,7 +8418,8 @@
     "state": {
       "disabled": "Billing disabled",
       "stripe_test": "Stripe TEST mode",
-      "stripe_live_blocked": "Live blocked"
+      "stripe_live_blocked": "Live blocked",
+      "stripe_live": "Stripe LIVE (owner-armed)"
     },
     "tiles": {
       "payments": "Payments",
@@ -8473,7 +8474,8 @@
         "plan_catalogue": "Plan catalogue and boundaries defined in code",
         "entitlement_coverage": "Entitlement wiring: gates prepared, permissive while payments are off",
         "pricing_copy": "Pricing copy: owner-editable drafts, no live claims",
-        "provider_connection": "Payment provider connection — blocked by design (owner gate)"
+        "provider_connection": "Payment provider connection — blocked by design (owner gate)",
+        "live_activation": "Live activation: code path prepared, inert until the owner sets the activation token, confirms the price table and provides live keys"
       },
       "status": {
         "ready": "Ready",

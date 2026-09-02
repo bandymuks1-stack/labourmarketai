@@ -42,7 +42,8 @@ export interface EffectiveEntitlements extends EntitlementContext {
 
 export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements> {
   const config = getBillingConfig();
-  const billingActive = config.state === "stripe_test";
+  // Enforcement is on under either active adapter state (test, or owner-armed live).
+  const billingActive = config.state === "stripe_test" || config.state === "stripe_live";
 
   const supabase = await createClient();
   const {

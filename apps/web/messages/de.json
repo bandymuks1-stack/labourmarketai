@@ -8418,7 +8418,8 @@
     "state": {
       "disabled": "Abrechnung deaktiviert",
       "stripe_test": "Stripe-TESTMODUS",
-      "stripe_live_blocked": "Live blockiert"
+      "stripe_live_blocked": "Live blockiert",
+      "stripe_live": "Stripe LIVE (vom Eigentümer freigeschaltet)"
     },
     "tiles": {
       "payments": "Zahlungen",
@@ -8473,7 +8474,8 @@
         "plan_catalogue": "Plankatalog und Grenzen im Code definiert",
         "entitlement_coverage": "Berechtigungsverdrahtung: Gates vorbereitet, permissiv solange Zahlungen aus sind",
         "pricing_copy": "Preistexte: vom Eigentümer bearbeitbare Entwürfe, keine Live-Aussagen",
-        "provider_connection": "Verbindung zum Zahlungsanbieter — konzeptbedingt blockiert (Owner-Gate)"
+        "provider_connection": "Verbindung zum Zahlungsanbieter — konzeptbedingt blockiert (Owner-Gate)",
+        "live_activation": "Live-Aktivierung: Codepfad vorbereitet, inaktiv bis der Eigentümer das Aktivierungstoken setzt, die Preistabelle bestätigt und Live-Schlüssel bereitstellt"
       },
       "status": {
         "ready": "Bereit",

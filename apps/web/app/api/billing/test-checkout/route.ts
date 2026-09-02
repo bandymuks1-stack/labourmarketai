@@ -127,11 +127,11 @@ export async function POST(req: Request) {
     organizationId,
     metadata: checkoutMetadata({ planKey, ownerId: user.id, organizationId }),
     idempotencyKey: checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId }),
-    successUrl: `${origin}/dashboard/account?billing=test_success`,
-    cancelUrl: `${origin}/pricing?billing=test_cancelled`,
+    successUrl: `${origin}/dashboard/account?billing=${config.testMode ? "test_success" : "success"}`,
+    cancelUrl: `${origin}/pricing?billing=${config.testMode ? "test_cancelled" : "cancelled"}`,
   });
   if (!result.ok) {
     return NextResponse.json({ ok: false, reason: result.reason }, { status: 400 });
   }
-  return NextResponse.json({ ok: true, url: result.url, testMode: true });
+  return NextResponse.json({ ok: true, url: result.url, testMode: config.testMode });
 }
