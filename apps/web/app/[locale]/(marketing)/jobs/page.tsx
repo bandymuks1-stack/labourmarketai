@@ -334,6 +334,7 @@ export default async function JobsPage({
   };
 
   return (
+<<<<<<< ours
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       {/* K3 (2026-09-02): anonymous-safe JSON-LD — a CollectionPage/ItemList of
           positions by occupation label. Built ONLY from the anonymous preview
@@ -357,6 +358,9 @@ export default async function JobsPage({
           }}
         />
       )}
+=======
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+>>>>>>> theirs
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         {H1[active]}
       </h1>
@@ -547,7 +551,7 @@ export default async function JobsPage({
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }
 
