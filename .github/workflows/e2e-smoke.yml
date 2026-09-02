@@ -60,6 +60,10 @@ jobs:
       #   locale visitor        : ru-landing-localization
       #   mobile visitor        : landing-mobile-overflow
       #   unauthenticated auth  : auth-field-touch-floor
+      #   social/e-mail auth    : social-auth-matrix (callback legs shared by
+      #                           every provider — cancel, expired link,
+      #                           cross-device confirmation, honest buttons,
+      #                           hostile next; no session, no credential)
       #
       # "SECRET-FREE" MEANS SECRET-FREE AT RUNTIME, NOT JUST AT BUILD TIME.
       #
@@ -94,19 +98,21 @@ jobs:
         tests/e2e/ru-landing-localization.spec.ts
         tests/e2e/landing-mobile-overflow.spec.ts
         tests/e2e/auth-field-touch-floor.spec.ts
+        tests/e2e/social-auth-matrix.spec.ts
       # Excludes the env-dependent describe block named above. If that title
       # ever changes, the block comes BACK IN and this job goes red — it can
       # never silently drop coverage, which is the safe direction. And if the
       # pattern ever excluded more than intended, the count floor below catches
       # it.
       E2E_GREP_INVERT: "auth-gated routes"
-      # Measured on the runner, not guessed: these 4 files minus that block are
-      # 21 tests, and all 21 passed in this workflow's first CI run.
+      # Measured on the runner, not guessed: the first 4 files minus that block
+      # are 21 tests, and all 21 passed in this workflow's first CI run.
+      # social-auth-matrix adds 6 (FINAL COMPLETION Train C2, 2026-09-02).
       #
       # A floor, not a target. Adding tests is fine. NEVER lower it to make a
       # red run go green — a dropping count IS the rot signal this job exists
       # to surface.
-      MIN_EXPECTED: "21"
+      MIN_EXPECTED: "27"
 
     steps:
       - name: Checkout

@@ -438,6 +438,7 @@ export function LoginForm({
                 : "/auth/signup"
             }
             className="text-brand-blue hover:text-brand-cyan"
+            data-testid="login-signup-link"
           >
             {t("signup_link")}
           </Link>
