@@ -118,9 +118,17 @@ Everything else is an engineering decision and is **not** brought back to the ow
 
 ---
 
-## 3a. Owner action queue
+## 3a. Target states (owner correction 2026-09-02 — the acceptance definition is NOT weakened)
 
-Leverage-ordered, one line per gate with screen/action, why, unlocks, cost, reversibility: [`OWNER_ACTION_QUEUE_2026-09-02.md`](OWNER_ACTION_QUEUE_2026-09-02.md). After its items 1–6 the register flips to LAUNCH_READY.
+| State | Definition | Gates that must be closed |
+|---|---|---|
+| **CORE_PRODUCT_READY** | an unfamiliar person can register, confirm, onboard, work (journal, documents, CV), be invited, be seen; a company can register, claim its organisation, roster, plan, record, approve, export; an institution can link a learner — all proven on production, every core defect fixed or gated with a reversible draft | G-1 (real-inbox confirmation), G-16, G-12, G-15, G-13, G-14 + its M leg |
+| **COMMERCIAL_LAUNCH_READY** | CORE_PRODUCT_READY **plus** every mandatory launch capability of the canonical command: social-auth production E2E for the providers in launch scope, payments production E2E for paid entitlements (checkout → subscription → webhook → entitlement → renewal/cancel/failure → idempotency → customer-visible state), critical UX decided (I2), observability + rollback drill done, cross-actor chain (M) complete | + G-7, G-8 (payments), G-2 (LinkedIn/Meta, if in launch scope), I2, L2/L3 |
+| **REAL_USERS** | first unfamiliar users admitted; OBSERVE → FIX → SCALE | — |
+
+Neither state is declared by this register until its gates are closed with evidence. The owner action
+sheet [`OWNER_ACTION_QUEUE_2026-09-02.md`](OWNER_ACTION_QUEUE_2026-09-02.md) is split accordingly:
+DO NOW (unlocks the next execution frontier) · DO BEFORE COMMERCIAL LAUNCH · SAFE TO DEFER AFTER LAUNCH.
 
 ## 4. Change log
 
