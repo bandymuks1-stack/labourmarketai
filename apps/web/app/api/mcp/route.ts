@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
+import { resolveApiIdentity } from "@/lib/api/api-identity";
+import {
+  classifyRefusal,
+  refusalBody,
+  serializeAuthEvent,
+  wwwAuthenticateChallenge,
+} from "@/lib/api/external-client-auth";
 import {
   exposedCapabilities,
   runCapability,
@@ -32,9 +38,33 @@ export const dynamic = "force-dynamic";
  * so an OAuth-capable client can discover the authorization server — see
  * `app/.well-known/oauth-protected-resource/route.ts`.
  *
+ * REFUSALS ARE MACHINE-READABLE (2026-09-02 incident). A rejected token
+ * answers `WWW-Authenticate: Bearer error="invalid_token" …` (RFC 6750's own
+ * "refresh and retry" signal) and a JSON body naming the class and the
+ * client's next action — so a client can tell RETRY AUTOMATICALLY from
+ * RECONNECT REQUIRED instead of showing a generic wall. The vocabulary and
+ * the no-oracle rule live in `lib/api/external-client-auth.ts`.
+ *
+ * EVERY auth and tool outcome is logged as one privacy-safe JSON line
+ * (classes and names only — never a token, argument, payload or user id) so a
+ * connector regression is countable in the platform logs before anyone finds
+ * it by hand.
+ *
  * The protocol layer is `lib/mcp/protocol.ts` (pure, tested); the product
  * lives in `lib/capabilities/` and does not know MCP exists.
  */
+
+const DOOR = "/api/mcp";
+
+function logEvent(event: Parameters<typeof serializeAuthEvent>[0]): void {
+  try {
+    console.info(serializeAuthEvent(event));
+  } catch {
+    // Observability is additive and must never break the request. A throw
+    // here means a forbidden key reached the event — that is a code defect
+    // the unit tests catch, not something to surface to the caller.
+  }
+}
 
 /** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
 const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
@@ -56,15 +86,25 @@ const MAX_BODY_BYTES = 64 * 1024;
 export async function POST(req: Request) {
   const auth = await resolveApiIdentity(req);
   if (!auth.ok) {
-    const status = refusalStatus(auth.reason);
+    const refusal = classifyRefusal(auth.reason);
     const headers: Record<string, string> = {};
-    if (status === 401) {
-      const origin = new URL(req.url).origin;
-      headers["WWW-Authenticate"] =
-        `Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource"`;
-    }
-    return NextResponse.json({ ok: false }, { status, headers });
+    const challenge = wwwAuthenticateChallenge(new URL(req.url).origin, refusal.errorClass);
+    if (challenge) headers["WWW-Authenticate"] = challenge;
+    logEvent({
+      event: "external_client.auth",
+      outcome: "refused",
+      error_class: refusal.errorClass,
+      status: refusal.status,
+      door: DOOR,
+    });
+    return NextResponse.json(refusalBody(refusal), { status: refusal.status, headers });
   }
+  logEvent({
+    event: "external_client.auth",
+    outcome: "ok",
+    transport: auth.identity.transport,
+    door: DOOR,
+  });
 
   const raw = await req.text();
   if (raw.length > MAX_BODY_BYTES) {
@@ -103,6 +143,20 @@ export async function POST(req: Request) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
       const result = await runCapability(capability.id, caller, args);
+      logEvent({
+        event: "external_client.tool",
+        door: DOOR,
+        tool: name,
+        ok: result.ok,
+        ...(result.ok
+          ? {}
+          : {
+              code:
+                typeof (result as { code?: unknown }).code === "string"
+                  ? (result as { code: string }).code
+                  : "error",
+            }),
+      });
       // Human presentation is ADDITIVE and may never break the call: a
       // summarizer failure just means the client gets the structured payload
       // alone, exactly as before.
