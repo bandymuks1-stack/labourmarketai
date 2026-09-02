@@ -7,12 +7,22 @@ import {
   resolvePostLoginLocale,
 } from "@/lib/auth/locale-preference";
 import { readOauthTraceId } from "@/lib/auth/oauth-trace";
+import {
+  classifyAuthRedirectError,
+  classifyExchangeFailure,
+  isEmailConfirmFlow,
+  parseEmailVerification,
+  parseRedirectToHint,
+} from "@/lib/auth/email-confirm";
 import { routing } from "@/lib/i18n/routing";
 
 /**
- * Magic-link / OAuth callback. Supabase redirects here after the user
- * clicks the email link or finishes Google OAuth, with `?code=…` (PKCE
- * flow). We exchange it for a session cookie, then route the user:
+ * E-mail confirmation / OAuth callback. Supabase redirects here after the
+ * user clicks the email link or finishes Google OAuth, with `?code=…` (PKCE
+ * flow), OR — with the `token_hash` e-mail template — with
+ * `?token_hash=…&type=signup`, which we verify ourselves (`verifyOtp`) so the
+ * link works on ANY device, not only the browser that started the signup.
+ * Either way a session cookie is established, then the user is routed:
  *
  *   • back to `?next=…` when the middleware attached one and it is safe,
  *   • else `/[locale]/onboarding` for users who haven't onboarded yet,
@@ -20,16 +30,27 @@ import { routing } from "@/lib/i18n/routing";
  *
  * On any failure we bounce to `/[locale]/auth/login?error=…` while
  * preserving the original `next` param so the user still lands where
- * they intended after a retry.
+ * they intended after a retry. See lib/auth/email-confirm.ts for the
+ * cross-device and resume reasoning (Train A slice 1).
  */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ locale: string }> },
 ) {
-  const { locale } = await params;
+  const { locale: urlLocale } = await params;
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const nextParam = url.searchParams.get("next");
+  // A `token_hash` template passes the original `emailRedirectTo` along as
+  // `rt`; it is a HINT (locale + next) validated below, never a target.
+  const hint = parseRedirectToHint(
+    url.searchParams.get("rt"),
+    url.origin,
+    routing.locales as readonly string[],
+  );
+  const locale = hint.locale ?? urlLocale;
+  const nextParam = url.searchParams.get("next") ?? hint.next;
+  const verification = parseEmailVerification(url.searchParams);
+  const emailConfirmFlow = isEmailConfirmFlow(url.searchParams);
   // v1 OAuth trace id (see lib/auth/oauth-trace.ts). NOT a secret; safe to
   // log and to forward to /login on failure so the user can quote it back.
   const traceId = readOauthTraceId(url);
@@ -46,20 +67,23 @@ export async function GET(
   // logged (same convention as never logging the full request URL).
   const providerError = url.searchParams.get("error");
   if (providerError) {
+    const errorCode = url.searchParams.get("error_code");
     console.info("[auth/callback] provider returned an explicit error", {
       locale,
       trace: traceId,
       error: providerError,
-      errorCode: url.searchParams.get("error_code"),
+      errorCode,
     });
+    // `access_denied` + `otp_expired` is a dead e-mail link, not a cancel —
+    // the classifier keeps the two apart (lib/auth/email-confirm.ts).
     loginUrl.searchParams.set(
       "error",
-      providerError === "access_denied" ? "cancelled" : "provider_error",
+      classifyAuthRedirectError({ error: providerError, errorCode }),
     );
     return NextResponse.redirect(loginUrl);
   }
 
-  if (!code) {
+  if (!code && !verification) {
     console.error("[auth/callback] missing code in callback URL", {
       locale,
       trace: traceId,
@@ -70,8 +94,33 @@ export async function GET(
 
   try {
     const supabase = await createClient();
-    const { error: exchangeError } =
-      await supabase.auth.exchangeCodeForSession(code);
+    if (verification) {
+      // token_hash path: GoTrue's single-use, expiring token is verified
+      // here, so the session is created in THIS browser whatever device
+      // started the signup. Nothing about PKCE is bypassed — no auth code
+      // is involved on this path at all.
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: verification.tokenHash,
+        type: verification.type,
+      });
+      if (verifyError) {
+        console.error("[auth/callback] verifyOtp failed", {
+          locale,
+          trace: traceId,
+          type: verification.type,
+          code: verifyError.code,
+          status: verifyError.status,
+          name: verifyError.name,
+        });
+        // Expired, already used, or never valid — the login page offers a
+        // fresh link; a person who already confirmed simply signs in.
+        loginUrl.searchParams.set("error", "link_expired");
+        return NextResponse.redirect(loginUrl);
+      }
+    }
+    const { error: exchangeError } = verification
+      ? { error: null }
+      : await supabase.auth.exchangeCodeForSession(code as string);
     if (exchangeError) {
       // Surface the non-secret Supabase error identifiers so the owner can
       // tell expired/already-used codes (`invalid_grant`) apart from PKCE
@@ -95,7 +144,13 @@ export async function GET(
       // only reads existing cookies, never trusts client input.
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData?.session) {
-        loginUrl.searchParams.set("error", "exchange_failed");
+        // E-mail confirmation opened on ANOTHER device: GoTrue already
+        // confirmed the address before redirecting here, and this browser
+        // holds no PKCE verifier → "confirmed, sign in here", not a fault.
+        loginUrl.searchParams.set(
+          "error",
+          classifyExchangeFailure(exchangeError, emailConfirmFlow),
+        );
         return NextResponse.redirect(loginUrl);
       }
       console.warn(

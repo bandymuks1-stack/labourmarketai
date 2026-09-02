@@ -3446,8 +3446,11 @@
         "no_user": "You signed in, but your account couldn't be reached. Sign out and back in.",
         "callback": "Unexpected error during sign-in. Try again — if it persists, share the trace ID below.",
         "cancelled": "Sign-in was cancelled. Nothing happened to your account.",
-        "unknown": "Couldn't sign in. Please try again."
-      }
+        "unknown": "Couldn't sign in. Please try again.",
+        "link_expired": "This confirmation link has expired or was already used. If you already confirmed your email, just sign in. Otherwise request a new link below.",
+        "confirmed_sign_in": "Your email is confirmed. This device didn't start the signup, so sign in here to continue."
+      },
+      "emailNotConfirmed": "Your email isn't confirmed yet. Open the confirmation link we sent you, or request a new one below."
     },
     "signup": {
       "headline": "Create your account",
@@ -3483,7 +3486,10 @@
       "error_password_number": "Password must include a number.",
       "error_password_special": "Password must include a special character.",
       "check_email_title": "Confirm your email",
-      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account."
+      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "resend_label": "Send the link again",
+      "resend_sent": "Sent again. Check your inbox and spam folder.",
+      "resend_wait": "You can request another link in {seconds} s."
     },
     "login": {
       "headline": "Sign in",
@@ -3507,7 +3513,9 @@
       "error_invalid_credentials": "Invalid email or password.",
       "google_hint": "Signed up with Google? Then you don't have a password — use \"Continue with Google\" above.",
       "preview_host_notice": "You're on a preview version of the site. Google sign-in only works on the live site — open https://labourmarket.ai to use it. Email and password sign-in works here as usual.",
-      "google_recovery_label": "Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Send a new confirmation link",
+      "resend_sent": "A new confirmation link is on its way to {email}."
     },
     "forgotPassword": {
       "headline": "Forgot password?",
@@ -14116,7 +14124,7 @@
     "approve": "Allow",
     "deny": "Deny",
     "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
-    "errorUnresolved": "The authorization request could not be resolved. Go back to the application and try again."
+    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again."
   },
   "capabilities": {
     "interestChooseDemand": "Choose the demand you are interested in: {options}.",

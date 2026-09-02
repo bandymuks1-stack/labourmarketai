@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // without next/headers. The test controls what `exchangeCodeForSession`
 // returns to exercise each branch.
 const exchangeMock = vi.fn();
+const verifyOtpMock = vi.fn();
 const getUserMock = vi.fn();
 const getSessionMock = vi.fn();
 const fromMock = vi.fn();
@@ -12,6 +13,7 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     auth: {
       exchangeCodeForSession: exchangeMock,
+      verifyOtp: verifyOtpMock,
       getUser: getUserMock,
       getSession: getSessionMock,
     },
@@ -36,6 +38,7 @@ function buildRequest(qs: string): Request {
 
 beforeEach(() => {
   exchangeMock.mockReset();
+  verifyOtpMock.mockReset();
   getUserMock.mockReset();
   getSessionMock.mockReset();
   fromMock.mockReset();
@@ -46,6 +49,134 @@ beforeEach(() => {
   getSessionMock.mockResolvedValue({ data: { session: null } });
   // Default: no NEXT_LOCALE cookie on the device.
   cookieGetMock.mockReturnValue(undefined);
+});
+
+const HASH = "pkce_f94d2f53feea6de6a2a59e2b62b4c83d1e7044674ab049b75754c0a7";
+
+function profile(onboardedAt: string | null) {
+  fromMock.mockReturnValue({
+    select: () => ({
+      eq: () => ({
+        single: async () => ({ data: { onboarded_at: onboardedAt } }),
+      }),
+    }),
+  });
+}
+
+/** Train A slice 1 (2026-09-02): e-mail confirmation on any device + resume
+ *  of a pending destination through the inbox round trip. */
+describe("auth/callback route — e-mail confirmation", () => {
+  it("verifies a token_hash itself (no PKCE code involved) and lands a new user on onboarding with next", async () => {
+    verifyOtpMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({ data: { user: { id: "u-new" } } });
+    profile(null);
+
+    const next = "/lt/oauth/consent?authorization_id=abc123";
+    const res = await GET(
+      buildRequest(`token_hash=${HASH}&type=signup&next=${encodeURIComponent(next)}`),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+
+    expect(verifyOtpMock).toHaveBeenCalledWith({ token_hash: HASH, type: "signup" });
+    expect(exchangeMock).not.toHaveBeenCalled();
+    const loc = res.headers.get("location") ?? "";
+    expect(loc).toContain("/lt/onboarding");
+    expect(loc).toContain(`next=${encodeURIComponent(next)}`);
+    expect(loc).not.toContain(HASH);
+  });
+
+  it("an expired / used / garbage token_hash → login?error=link_expired, never a leaked hash", async () => {
+    verifyOtpMock.mockResolvedValue({
+      error: { name: "AuthApiError", code: "otp_expired", status: 403, message: "Token has expired or is invalid" },
+    });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await GET(
+      buildRequest(`token_hash=${HASH}&type=signup&next=%2Flt%2Fdashboard`),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+    const loc = res.headers.get("location") ?? "";
+    expect(loc).toContain("/lt/auth/login");
+    expect(loc).toContain("error=link_expired");
+    expect(loc).toContain("next=%2Flt%2Fdashboard");
+    expect(loc).not.toContain(HASH);
+    const [, payload] = errorSpy.mock.calls[0] ?? [];
+    expect(payload).toMatchObject({ locale: "lt", trace: null, code: "otp_expired" });
+    expect(JSON.stringify(payload)).not.toContain(HASH);
+    errorSpy.mockRestore();
+  });
+
+  it("an unknown otp type is not a verification: falls through to missing_code", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await GET(buildRequest(`token_hash=${HASH}&type=sms`), {
+      params: Promise.resolve({ locale: "lt" }),
+    });
+    expect(verifyOtpMock).not.toHaveBeenCalled();
+    expect(res.headers.get("location") ?? "").toContain("error=missing_code");
+    errorSpy.mockRestore();
+  });
+
+  it("GoTrue's expired-link redirect (access_denied + otp_expired) is link_expired, a bare access_denied stays cancelled", async () => {
+    const expired = await GET(
+      buildRequest("error=access_denied&error_code=otp_expired&next=%2Flt%2Fdashboard"),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+    expect(expired.headers.get("location") ?? "").toContain("error=link_expired");
+
+    const cancelled = await GET(buildRequest("error=access_denied"), {
+      params: Promise.resolve({ locale: "lt" }),
+    });
+    expect(cancelled.headers.get("location") ?? "").toContain("error=cancelled");
+  });
+
+  it("a confirmation link opened on ANOTHER device (no PKCE verifier) → confirmed_sign_in, not a fault", async () => {
+    exchangeMock.mockResolvedValue({
+      error: { name: "AuthPKCECodeVerifierMissingError", message: "PKCE code verifier not found in storage", status: 500 },
+    });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await GET(
+      buildRequest("code=X&flow=email_confirm&next=%2Flt%2Fdashboard%2Fjournal"),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+    const loc = res.headers.get("location") ?? "";
+    expect(loc).toContain("/lt/auth/login");
+    expect(loc).toContain("error=confirmed_sign_in");
+    expect(loc).toContain("next=%2Flt%2Fdashboard%2Fjournal");
+    errorSpy.mockRestore();
+  });
+
+  it("the same verifier failure on a Google return stays exchange_failed", async () => {
+    exchangeMock.mockResolvedValue({
+      error: { name: "AuthPKCECodeVerifierMissingError", message: "PKCE code verifier not found in storage", status: 500 },
+    });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await GET(buildRequest("code=X"), {
+      params: Promise.resolve({ locale: "lt" }),
+    });
+    expect(res.headers.get("location") ?? "").toContain("error=exchange_failed");
+    errorSpy.mockRestore();
+  });
+
+  it("lifts locale + next from a same-origin rt hint (token_hash template), ignores a foreign one", async () => {
+    verifyOtpMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+    profile("2025-01-01T00:00:00Z");
+
+    const rt = `${ORIGIN}/en/auth/callback?flow=email_confirm&next=%2Fen%2Fdashboard%2Fjournal`;
+    const res = await GET(
+      buildRequest(`token_hash=${HASH}&type=signup&rt=${encodeURIComponent(rt)}`),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/en/dashboard/journal`);
+
+    const foreign = `https://evil.example/en/auth/callback?next=%2Fen%2Fdashboard%2Fjournal`;
+    const res2 = await GET(
+      buildRequest(`token_hash=${HASH}&type=signup&rt=${encodeURIComponent(foreign)}`),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+    expect(res2.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard`);
+  });
 });
 
 describe("auth/callback route", () => {

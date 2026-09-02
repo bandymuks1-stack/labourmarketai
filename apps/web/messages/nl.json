@@ -3446,8 +3446,11 @@
         "no_user": "Je bent aangemeld, maar je account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
         "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
-        "unknown": "Kon niet inloggen. Probeer het opnieuw."
-      }
+        "unknown": "Kon niet inloggen. Probeer het opnieuw.",
+        "link_expired": "Deze bevestigingslink is verlopen of al gebruikt. Heb je je e-mailadres al bevestigd, log dan gewoon in. Vraag anders hieronder een nieuwe link aan.",
+        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan."
+      },
+      "emailNotConfirmed": "Je e-mailadres is nog niet bevestigd. Open de bevestigingslink die we je stuurden, of vraag hieronder een nieuwe aan."
     },
     "signup": {
       "headline": "Maak je account aan",
@@ -3483,7 +3486,10 @@
       "error_password_number": "Wachtwoord moet een cijfer bevatten.",
       "error_password_special": "Wachtwoord moet een speciaal teken bevatten.",
       "check_email_title": "Bevestig je e-mail",
-      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien."
+      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien.",
+      "resend_label": "Link opnieuw sturen",
+      "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
+      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
     },
     "login": {
       "headline": "Inloggen",
@@ -3507,7 +3513,9 @@
       "error_invalid_credentials": "Ongeldig e-mailadres of wachtwoord.",
       "google_hint": "Geregistreerd met Google? Dan heb je geen wachtwoord — gebruik \"Doorgaan met Google\" hierboven.",
       "preview_host_notice": "Je bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon.",
-      "google_recovery_label": "Inloggen met Google — reserveroute (tijdelijk, via een externe inlogpagina)"
+      "google_recovery_label": "Inloggen met Google — reserveroute (tijdelijk, via een externe inlogpagina)",
+      "resend_confirmation": "Nieuwe bevestigingslink sturen",
+      "resend_sent": "Een nieuwe bevestigingslink is onderweg naar {email}."
     },
     "forgotPassword": {
       "headline": "Wachtwoord vergeten?",
@@ -14116,7 +14124,7 @@
     "approve": "Toestaan",
     "deny": "Weigeren",
     "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
-    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Ga terug naar de applicatie en probeer het opnieuw."
+    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw."
   },
   "capabilities": {
     "interestChooseDemand": "Kies de vraag waarin u geïnteresseerd bent: {options}.",

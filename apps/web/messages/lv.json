@@ -299,8 +299,11 @@
       "rateLimited": "[EN] Too many attempts. Please try again later.",
       "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
       "oauth": {
-        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account."
-      }
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Šī apstiprinājuma saite ir beigusies vai jau izmantota. Ja e-pastu jau apstiprinājāt, vienkārši pierakstieties. Citādi pieprasiet jaunu saiti zemāk.",
+        "confirmed_sign_in": "Jūsu e-pasts ir apstiprināts. Reģistrācija tika sākta citā ierīcē, tāpēc pierakstieties šeit, lai turpinātu."
+      },
+      "emailNotConfirmed": "Jūsu e-pasts vēl nav apstiprināts. Atveriet nosūtīto apstiprinājuma saiti vai pieprasiet jaunu zemāk."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -331,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Sūtīt jaunu apstiprinājuma saiti",
+      "resend_sent": "Jauna apstiprinājuma saite nosūtīta uz {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -483,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Sūtīt saiti vēlreiz",
+      "resend_sent": "Nosūtīts vēlreiz. Pārbaudiet iesūtni un mēstuļu mapi.",
+      "resend_wait": "Jaunu saiti varēsiet pieprasīt pēc {seconds} s."
     }
   },
   "common": {

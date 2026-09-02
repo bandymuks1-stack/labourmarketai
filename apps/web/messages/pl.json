@@ -299,8 +299,11 @@
       "rateLimited": "[EN] Too many attempts. Please try again later.",
       "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
       "oauth": {
-        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account."
-      }
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, po prostu się zaloguj. W przeciwnym razie poproś poniżej o nowy link.",
+        "confirmed_sign_in": "Twój e-mail został potwierdzony. Rejestrację rozpoczęto na innym urządzeniu, więc zaloguj się tutaj, aby kontynuować."
+      },
+      "emailNotConfirmed": "Twój e-mail nie został jeszcze potwierdzony. Otwórz przesłany link potwierdzający lub poproś poniżej o nowy."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -331,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)"
+      "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)",
+      "resend_confirmation": "Wyślij nowy link potwierdzający",
+      "resend_sent": "Nowy link potwierdzający jest w drodze na {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -483,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez Google lub e-mailem i hasłem; rolę wybierzesz w następnym kroku.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Wyślij link ponownie",
+      "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
+      "resend_wait": "O nowy link możesz poprosić za {seconds} s."
     }
   },
   "common": {

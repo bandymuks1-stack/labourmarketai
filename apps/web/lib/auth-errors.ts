@@ -16,6 +16,7 @@ export type AuthErrorInfo = {
     | "passwordTooShort"
     | "invalidCredentials"
     | "invalidEmail"
+    | "emailNotConfirmed"
     | "rateLimited"
     | "generic";
   params?: Record<string, string | number>;
@@ -52,6 +53,13 @@ export function mapAuthError(error: unknown): AuthErrorInfo {
 
   if (code === "invalid_credentials" || /invalid login credentials|invalid credentials/.test(msg)) {
     return { key: "invalidCredentials" };
+  }
+
+  // "Confirm email" is ON in production (2026-09-02): a password login before
+  // the link was opened is refused with this code. The form pairs the message
+  // with a "send a new link" action instead of a dead end.
+  if (code === "email_not_confirmed" || /email not confirmed/.test(msg)) {
+    return { key: "emailNotConfirmed" };
   }
 
   if (

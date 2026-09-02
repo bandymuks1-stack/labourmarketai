@@ -3446,8 +3446,11 @@
         "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunkite ir prisijunkite iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandykite dar kartą — jei tęsiasi, atsiųskite žemiau pateiktą trace ID.",
         "cancelled": "Prisijungimas atšauktas. Su jūsų paskyra nieko neįvyko.",
-        "unknown": "Prisijungti nepavyko. Pabandykite dar kartą."
-      }
+        "unknown": "Prisijungti nepavyko. Pabandykite dar kartą.",
+        "link_expired": "Ši patvirtinimo nuoroda nebegalioja arba jau buvo panaudota. Jei el. paštą jau patvirtinote, tiesiog prisijunkite. Kitu atveju paprašykite naujos nuorodos žemiau.",
+        "confirmed_sign_in": "Jūsų el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunkite, kad tęstumėte."
+      },
+      "emailNotConfirmed": "Jūsų el. paštas dar nepatvirtintas. Atidarykite atsiųstą patvirtinimo nuorodą arba paprašykite naujos žemiau."
     },
     "signup": {
       "headline": "Sukurkite paskyrą",
@@ -3483,7 +3486,10 @@
       "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
       "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis.",
       "check_email_title": "Patvirtinkite el. paštą",
-      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją."
+      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją.",
+      "resend_label": "Siųsti nuorodą dar kartą",
+      "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
+      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
     },
     "login": {
       "headline": "Prisijungti",
@@ -3507,7 +3513,9 @@
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
       "google_hint": "Registravotės su „Google“? Tuomet slaptažodžio nereikia — spauskite „Tęsti su Google“ viršuje.",
       "preview_host_notice": "Esate peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidarykite https://labourmarket.ai ir prisijunkite ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
-      "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)"
+      "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
+      "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",
+      "resend_sent": "Nauja patvirtinimo nuoroda išsiųsta adresu {email}."
     },
     "forgotPassword": {
       "headline": "Pamiršai slaptažodį?",
@@ -14116,7 +14124,7 @@
     "approve": "Leisti",
     "deny": "Atmesti",
     "errorMissingId": "Trūksta autorizacijos užklausos. Grįžkite į programą ir bandykite dar kartą.",
-    "errorUnresolved": "Autorizacijos užklausos nepavyko patvirtinti. Grįžkite į programą ir bandykite dar kartą."
+    "errorUnresolved": "Nepavyko išspręsti autorizacijos užklausos. Ji galėjo pasibaigti (užklausos galioja kelias minutes) arba jau buvo panaudota. Grįžkite į programą ir prisijunkite iš naujo."
   },
   "capabilities": {
     "interestChooseDemand": "Pasirinkite poreikį, kuris jus domina: {options}.",

@@ -53,7 +53,9 @@ describe("Guard: callback PKCE-race fallback calls getSession after exchange err
   const route = read("app/[locale]/auth/callback/route.ts");
 
   it("captures exchangeCodeForSession's error under a stable name", () => {
-    expect(route).toMatch(/exchangeCodeForSession\(\s*code\s*\)/);
+    // `code as string` since the token_hash branch (Train A slice 1): the
+    // narrowing happens on the `!code && !verification` guard above.
+    expect(route).toMatch(/exchangeCodeForSession\(\s*code(?:\s+as\s+string)?\s*\)/);
     expect(route).toMatch(/error:\s*exchangeError/);
   });
 
@@ -64,9 +66,14 @@ describe("Guard: callback PKCE-race fallback calls getSession after exchange err
   });
 
   it("only redirects to ?error=exchange_failed when getSession has NO session", () => {
+    // The outcome is produced by the pure classifier (Train A slice 1): it
+    // returns `exchange_failed` for everything except a verifier-missing
+    // failure on the e-mail-confirmation flow, which is `confirmed_sign_in`.
     expect(route).toMatch(
-      /if\s*\(\s*!\s*sessionData\??\.\??session\s*\)\s*\{[\s\S]{0,500}error["']\s*,\s*["']exchange_failed["']/,
+      /if\s*\(\s*!\s*sessionData\??\.\??session\s*\)\s*\{[\s\S]{0,700}classifyExchangeFailure\(\s*exchangeError/,
     );
+    const classifier = read("lib/auth/email-confirm.ts");
+    expect(classifier).toMatch(/if\s*\(\s*!emailConfirmFlow\s*\|\|\s*!error\s*\)\s*return\s*["']exchange_failed["']/);
   });
 });
 

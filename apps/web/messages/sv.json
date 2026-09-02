@@ -299,8 +299,11 @@
       "rateLimited": "[EN] Too many attempts. Please try again later.",
       "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
       "oauth": {
-        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account."
-      }
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Den här bekräftelselänken har gått ut eller redan använts. Har du redan bekräftat din e-post, logga bara in. Annars kan du begära en ny länk nedan.",
+        "confirmed_sign_in": "Din e-postadress är bekräftad. Registreringen påbörjades på en annan enhet, så logga in här för att fortsätta."
+      },
+      "emailNotConfirmed": "Din e-postadress är inte bekräftad ännu. Öppna bekräftelselänken vi skickade, eller begär en ny nedan."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -331,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Skicka en ny bekräftelselänk",
+      "resend_sent": "En ny bekräftelselänk är på väg till {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -483,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Skicka länken igen",
+      "resend_sent": "Skickat igen. Kontrollera inkorgen och skräppostmappen.",
+      "resend_wait": "Du kan begära en ny länk om {seconds} s."
     }
   },
   "common": {
