@@ -38,7 +38,7 @@ the setup form — the fix is COLUMN-level:
    owner (`profile_id = auth.uid()`) or an admin; the setup form and the employer context read them from it;
 4. the consented contact path stays where it is (`contact-permission.ts` decides, then reads).
 
-RED by rule (grants + SECDEF) → DRAFT + `needs-human-gate` PR with the app-side reads adapted in the same PR;
+RED by rule (grants + SECDEF) → DRAFT + `needs-human-gate` **PR #1430** with the app-side reads adapted in the same PR;
 until applied, the exposure stands and is recorded in the register as P1 open (contained by the fact that it
 needs an account and reveals business contact data, not personal profiles).
 
