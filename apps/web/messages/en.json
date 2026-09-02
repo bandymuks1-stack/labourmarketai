@@ -4087,6 +4087,25 @@
             "note": "Your recovery email: {email}. Keep access to it safe."
           },
           "comingLater": "Later you'll see where you're signed in, be able to end sessions and get backup codes."
+        },
+        "connectedApps": {
+          "title": "Connected apps",
+          "intro": "External applications and assistants you have allowed to act as you on LabourMarket.ai. Each one sees only what you can see, and you can disconnect it at any time.",
+          "empty": "No application is connected to your account.",
+          "unavailable": "The list of connected apps could not be loaded right now. Try again in a moment.",
+          "unnamed": "Unnamed application",
+          "grantedAt": "Connected {date}",
+          "grantedUnknown": "Connection date not recorded",
+          "scopesLabel": "Permissions",
+          "disconnect": "Disconnect",
+          "confirmTitle": "Disconnect {name}?",
+          "confirmBody": "The application loses access immediately. It will have to ask for your permission again before it can act as you.",
+          "confirmYes": "Yes, disconnect",
+          "cancel": "Keep connected",
+          "feedbackRevoked": "Disconnected. The application no longer has access to your account.",
+          "feedbackError": "The application could not be disconnected. Reload the page and try again.",
+          "note": "Signing out of LabourMarket.ai does not disconnect apps. Disconnecting here is the only way to end an application's access.",
+          "pending": "Disconnecting…"
         }
       },
       "comingSoon": {
