@@ -14,6 +14,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import { buildEmailConfirmRedirectTo } from "@/lib/auth/email-confirm";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
 import { clearSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -31,7 +32,17 @@ const OAUTH_ERROR_KEYS: Record<string, string> = {
   // The person pressed Cancel/Deny at the provider — a deliberate choice,
   // rendered as a NEUTRAL status, never as a system fault.
   cancelled: "oauth.cancelled",
+  // E-mail confirmation outcomes (Train A slice 1, 2026-09-02): a dead /
+  // already-used link (a fresh one can be requested right here), and a link
+  // opened on a device that did not start the signup (the address IS
+  // confirmed — sign in here).
+  link_expired: "oauth.link_expired",
+  confirmed_sign_in: "oauth.confirmed_sign_in",
 };
+
+/** Outcomes that are a person's own choice or a normal cross-device return,
+ *  rendered as a neutral status line — never as a red system-fault alert. */
+const NEUTRAL_OAUTH_OUTCOMES = new Set(["cancelled", "confirmed_sign_in"]);
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -79,6 +90,15 @@ export function LoginForm({
   // Google-only account (no password), so we point the user back to Google.
   const [passwordFailed, setPasswordFailed] = useState(false);
   const [isPreviewHost, setIsPreviewHost] = useState(false);
+  // "Confirm email" is ON in production: a password attempt before the link
+  // was opened comes back `email_not_confirmed`. That, and a dead link from
+  // the callback (`?error=link_expired`), both get a one-click "send a new
+  // link" — a registration must never dead-end on a single e-mail.
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendState, setResendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [resendError, setResendError] = useState<string | null>(null);
 
   // Detect Vercel preview host (e.g. labourmarketai-<sha>.vercel.app)
   // client-side only — the host is window-bound. Production
@@ -96,8 +116,44 @@ export function LoginForm({
   const oauthError = oauthErrorCode
     ? tErr(OAUTH_ERROR_KEYS[oauthErrorCode] ?? "oauth.unknown")
     : null;
-  // A cancel is not a failure: neutral styling, `role="status"` (below).
-  const oauthCancelled = oauthErrorCode === "cancelled";
+  // A cancel — or "confirmed on another device, sign in here" — is not a
+  // failure: neutral styling, `role="status"` (below).
+  const oauthNeutral =
+    oauthErrorCode !== null && NEUTRAL_OAUTH_OUTCOMES.has(oauthErrorCode);
+  const offerResend = needsConfirmation || oauthErrorCode === "link_expired";
+
+  async function resendConfirmation() {
+    if (!isValidEmail(email)) {
+      setResendError(t("error_email"));
+      setResendState("error");
+      return;
+    }
+    setResendState("sending");
+    setResendError(null);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: {
+          // Same return target as the signup form — the pending `next` (an
+          // assistant's authorization, a deep link) rides along again.
+          emailRedirectTo: buildEmailConfirmRedirectTo(
+            window.location.origin,
+            locale,
+            nextParam ? nextPath : null,
+          ),
+        },
+      });
+      if (err) throw err;
+      setResendState("sent");
+    } catch (e) {
+      console.error("[login] resend confirmation failed:", e);
+      const info = mapAuthError(e);
+      setResendError(tErr(info.key, info.params));
+      setResendState("error");
+    }
+  }
 
   // Any `?error=` bounce means the OAuth attempt did NOT create a session.
   // The Google button optimistically marks a pending signup BEFORE the
@@ -112,6 +168,7 @@ export function LoginForm({
     e.preventDefault();
     setError(null);
     setPasswordFailed(false);
+    setNeedsConfirmation(false);
     if (!isValidEmail(email)) {
       setError(t("error_email"));
       return;
@@ -138,6 +195,13 @@ export function LoginForm({
       setStatus("error");
       const info = mapAuthError(e);
       setError(tErr(info.key, info.params));
+      if (info.key === "emailNotConfirmed") {
+        // Not a wrong password and not a Google account: the person simply
+        // has not opened the confirmation link yet. Offer a fresh one.
+        setNeedsConfirmation(true);
+        setResendState("idle");
+        return;
+      }
       // Password sign-in failed — surface the Google path. A Google-created
       // account has no password, so "invalid credentials" here usually means
       // "you signed up with Google", not "wrong password".
@@ -185,9 +249,9 @@ export function LoginForm({
         // A CANCEL at the provider is a deliberate choice, not a fault —
         // it renders as a neutral status line, not a red alert.
         <div
-          role={oauthCancelled ? "status" : "alert"}
+          role={oauthNeutral ? "status" : "alert"}
           className={
-            oauthCancelled
+            oauthNeutral
               ? "rounded-md border border-ink-600/60 bg-ink-500/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
               : "rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs leading-relaxed text-state-danger"
           }
@@ -312,6 +376,37 @@ export function LoginForm({
         <p className="text-xs text-state-danger" role="alert">
           {error}
         </p>
+      )}
+      {offerResend && (
+        // Unconfirmed address (password refused) or a dead link from the
+        // callback: the way forward is a fresh confirmation mail, sent to the
+        // address typed above. Uses the auth server's own resend (single
+        // pending token per address, server-side rate limit) — no custom
+        // mailer, no token handled here.
+        <div
+          className="flex flex-col gap-2 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="login-resend-confirmation"
+        >
+          {resendState === "sent" ? (
+            <p role="status">{t("resend_sent", { email: email.trim() })}</p>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resendState === "sending" || !isValidEmail(email)}
+                className="self-start rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t("resend_confirmation")}
+              </button>
+              {resendError && (
+                <p className="text-state-danger" role="alert">
+                  {resendError}
+                </p>
+              )}
+            </>
+          )}
+        </div>
       )}
       {passwordFailed && (
         // The most common reason an email/password attempt fails for this

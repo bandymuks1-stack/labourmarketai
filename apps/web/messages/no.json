@@ -299,8 +299,11 @@
       "rateLimited": "[EN] Too many attempts. Please try again later.",
       "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
       "oauth": {
-        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account."
-      }
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Denne bekreftelseslenken er utløpt eller allerede brukt. Har du allerede bekreftet e-posten, kan du bare logge inn. Ellers kan du be om en ny lenke nedenfor.",
+        "confirmed_sign_in": "E-postadressen din er bekreftet. Registreringen ble startet på en annen enhet, så logg inn her for å fortsette."
+      },
+      "emailNotConfirmed": "E-postadressen din er ikke bekreftet ennå. Åpne bekreftelseslenken vi sendte deg, eller be om en ny nedenfor."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -331,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Send en ny bekreftelseslenke",
+      "resend_sent": "En ny bekreftelseslenke er på vei til {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -483,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Send lenken på nytt",
+      "resend_sent": "Sendt på nytt. Sjekk innboksen og søppelpostmappen.",
+      "resend_wait": "Du kan be om en ny lenke om {seconds} s."
     }
   },
   "common": {

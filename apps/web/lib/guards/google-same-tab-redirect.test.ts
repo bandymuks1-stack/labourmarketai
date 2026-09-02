@@ -146,7 +146,13 @@ describe("google sign-in — the callback completes the loop", () => {
     // and NO code. Without this branch the cancel fell into the !code path
     // and was mislabeled with the "missing sign-in code" system-error copy.
     expect(cb).toMatch(/searchParams\.get\("error"\)/);
-    expect(cb).toMatch(/access_denied/);
-    expect(cb).toMatch(/"cancelled"/);
+    // Since Train A slice 1 (2026-09-02) the outcome is decided by the pure
+    // classifier — `access_denied` alone is "cancelled", `access_denied` +
+    // `otp_expired` is a dead e-mail link. The callback must call it, and
+    // the classifier must still know both words.
+    expect(cb).toMatch(/classifyAuthRedirectError\(\s*\{\s*error:\s*providerError/);
+    const classifier = read("lib/auth/email-confirm.ts");
+    expect(classifier).toMatch(/access_denied/);
+    expect(classifier).toMatch(/"cancelled"/);
   });
 });

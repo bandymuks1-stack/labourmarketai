@@ -3446,8 +3446,11 @@
         "no_user": "Sie sind angemeldet, aber Ihr Konto ist nicht erreichbar. Melden Sie sich ab und wieder an.",
         "callback": "Unerwarteter Fehler bei der Anmeldung. Versuchen Sie es erneut — falls das Problem bestehen bleibt, teilen Sie die unten stehende Trace-ID mit.",
         "cancelled": "Die Anmeldung wurde abgebrochen. An Ihrem Konto hat sich nichts geändert.",
-        "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut."
-      }
+        "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut.",
+        "link_expired": "Dieser Bestätigungslink ist abgelaufen oder wurde bereits verwendet. Wenn du deine E-Mail-Adresse schon bestätigt hast, melde dich einfach an. Andernfalls fordere unten einen neuen Link an.",
+        "confirmed_sign_in": "Deine E-Mail-Adresse ist bestätigt. Die Registrierung wurde auf einem anderen Gerät begonnen. Melde dich hier an, um fortzufahren."
+      },
+      "emailNotConfirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Öffne den zugesandten Bestätigungslink oder fordere unten einen neuen an."
     },
     "signup": {
       "headline": "Konto erstellen",
@@ -3483,7 +3486,10 @@
       "error_password_number": "Das Passwort muss eine Zahl enthalten.",
       "error_password_special": "Das Passwort muss ein Sonderzeichen enthalten.",
       "check_email_title": "E-Mail bestätigen",
-      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen."
+      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen.",
+      "resend_label": "Link erneut senden",
+      "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
+      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
     },
     "login": {
       "headline": "Anmelden",
@@ -3507,7 +3513,9 @@
       "error_invalid_credentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
       "google_hint": "Mit Google registriert? Dann haben Sie kein Passwort — nutzen Sie oben \"Mit Google fortfahren\".",
       "preview_host_notice": "Sie befinden sich auf einer Vorschauversion der Website. Die Google-Anmeldung funktioniert nur auf der Live-Website — öffnen Sie https://labourmarket.ai, um sie zu nutzen. Die Anmeldung mit E-Mail-Adresse und Passwort funktioniert hier wie gewohnt.",
-      "google_recovery_label": "Mit Google anmelden — Ausweichweg (vorübergehend, über eine externe Anmeldeseite)"
+      "google_recovery_label": "Mit Google anmelden — Ausweichweg (vorübergehend, über eine externe Anmeldeseite)",
+      "resend_confirmation": "Neuen Bestätigungslink senden",
+      "resend_sent": "Ein neuer Bestätigungslink ist unterwegs an {email}."
     },
     "forgotPassword": {
       "headline": "Passwort vergessen?",
@@ -14116,7 +14124,7 @@
     "approve": "Erlauben",
     "deny": "Ablehnen",
     "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
-    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht verarbeitet werden. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut."
+    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht aufgelöst werden. Sie ist möglicherweise abgelaufen (Anfragen gelten einige Minuten) oder wurde bereits verwendet. Geh zurück zur Anwendung und verbinde dich erneut."
   },
   "capabilities": {
     "interestChooseDemand": "Wählen Sie den Bedarf, der Sie interessiert: {options}.",
