@@ -2195,16 +2195,135 @@ describe("no migration files added by this sprint", () => {
     // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 239.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    // Bumped 239 -> 240 for the ai_runs subject de-linking DRAFT
-    // (20260824170000_ai_runs_retention_delink_subject_v1) — a SECURITY
-    // DEFINER replace of the ONE canonical retention function so that past
-    // the 90-day horizon it also nulls profile_id and request_context. RED by
-    // route; deliberately NOT @human-gate-annotated because the owner gave the
-    // direction but has approved no SQL; paired rollback that RESTORES the
-    // one-column body rather than dropping the function; ships UNAPPLIED.
+    // Bumped 239 -> 240 for the transversal capability catalogue
+    // (20260827060000_transversal_capability_skills_v1) — INSERT-only, GREEN,
+    // idempotent. Eight professional capability slugs so a student's projects,
+    // presentations and teamwork can become evidence at all; the catalogue was
+    // 153 rows of which exactly ONE was professional. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 240.
+    // Bumped 240 -> 241 for practice work history v1
+    // (20260826182421_practice_work_history_v1) — widens the EXISTING
+    // save_self_declared_work_history_v1 allowlist by two slugs that already
+    // exist in relationship_types ('student','volunteer'). No new table, no new
+    // function, no grant, no RLS change, no signature change. Owner-approved
+    // 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 241.
+    // Bumped 241 -> 242 for organization roles v1
+    // (20260827050000_organization_roles_v1) — the multi-capability foundation
+    // that lets an education institution register honestly instead of calling
+    // itself a company. Two NEW tables + registry seed + a conservative
+    // company/agency backfill; organizations.organization_type is untouched.
+    // Owner-approved 2026-08-27. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 242.
+    // Bumped 242 -> 243 for the relationship-invitations migration
+    // (20260827200000_relationship_invitations_v1) — the institution↔learner
+    // link. Additive: two nullable/defaulted columns on relationship_types, one
+    // nullable column on invitations, and CREATE OR REPLACE of five existing
+    // SECURITY DEFINER functions. No table/column dropped, no RLS policy
+    // changed, no grant widened. RED, owner-gated, NOT applied to production
+    // (PR #1301, draft + needs-human-gate).
+    // Bumped 243 -> 244 for learner visibility least privilege
+    // (20260827210000_learner_visibility_least_privilege_v1) — the owner's
+    // 2026-08-27 ruling that an education relationship must not inherit the
+    // employer-grade worker scope. One fail-closed registry column plus a
+    // CREATE OR REPLACE of can_view_worker that adds ONE conjunct: it narrows
+    // and never widens, and every slug except `student` is seeded true so
+    // nothing that worked before stops working. Applied to production and
+    // regression-proven by a controlled comparison on one otherwise identical
+    // engagement row (employee true / student false). RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 244.
+    //
+    // Bumped 244 -> 245 for the LMC spend-compensation migration
+    // (20260828090000_lmc_spend_compensation_v1, paired rollback). Adds ONE
+    // transaction kind, ONE lot source, ONE default-false flag and ONE
+    // SECURITY DEFINER RPC that issues a compensating credit against a spend.
+    // No table is dropped, no column removed, no RLS loosened, append-only is
+    // untouched. RED by classification (money ledger + SECURITY DEFINER +
+    // grants): it ships UNAPPLIED behind `lmc_compensation_enabled = false`
+    // and production apply stays owner-gated. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 245 real files.
+    //
+    // Bumped 245 -> 246 for the profile email identity binding
+    // (20260829120000_profile_email_identity_binding_v1, paired rollback).
+    // Closes the Phase-1 audit C-1 defect: profiles.email was user-writable
+    // through PostgREST while three invitation RPCs and two policies trusted
+    // it as identity. Adds ONE BEFORE trigger on profiles, recreates the two
+    // legacy accept RPCs to read auth.jwt() email, and replaces the two
+    // invitee-side SELECT policies. No table dropped, no column removed, no
+    // grant on any table changed. RED by classification (auth-core
+    // adjacent): ships UNAPPLIED, production apply owner-gated. RECOUNTED
+    // from the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 246.
+    // Bumped 246 -> 247 for the anonymous write bounds
+    // (20260829130000_anon_write_bounds_v1, paired rollback). Closes the
+    // Phase-1 audit C-2 gap: the three anonymous write paths (pilot_events,
+    // waitlist, submit_company_need_public_v1) were bounded only by the
+    // app's per-instance in-memory windows, which a direct PostgREST call
+    // never touches. Adds CHECK constraints, two BEFORE INSERT ceilings and
+    // DB-side dedupe/ceilings inside the public RPC. No anon grant or policy
+    // touched; the surfaces stay open. RED by classification (grant-adjacent):
+    // ships UNAPPLIED, production apply owner-gated. RECOUNTED from the
+    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 247.
+    // Bumped 247 -> 248 for the work-hour allocations foundation
+    // (20260829140000_work_hour_allocations_v1, paired rollback). The
+    // canonical row a timesheet aggregates: one row per worker/date/object,
+    // deliberately WITHOUT a uniqueness constraint on (worker, date) or
+    // (worker, date, object), because two objects in one day — and even two
+    // shifts on one object — are legitimate facts, not conflicts. entered_by
+    // stays distinct from worker_id so a manager recording a colleague is
+    // never stored as that colleague's self-entry. No DELETE policy: history
+    // is correction_of/superseded_by. RED by classification (grant/revoke +
+    // drop-policy-if-exists + create-trigger): ships UNAPPLIED, production
+    // apply owner-gated. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 248.
+    // Bumped 248 -> 249 for the M3 compute wiring
+    // (20260831170000_timesheet_compute_allocations_v1, paired rollback).
+    // Wires timesheet_compute_lines_v1 to read the now-applied
+    // work_hour_allocations (ledger 20260831161725) ALONGSIDE
+    // journal_entry_metrics, with an allocation-wins dedupe so one hour fact
+    // never counts twice, a combined 500-line cap, and the journal half
+    // copied VERBATIM from 20260819220000. RED by classification (SECURITY
+    // DEFINER body replace + revoke re-assertion), human-gate-annotated under
+    // the owner's 2026-08-31 closure-session sequence ("wire the actual
+    // timesheet compute path" — the follow-up slice recorded in
+    // docs/DECISIONS/0010 and the APPLIED_LEDGER row for 20260831161725);
+    // merge and production apply stay with the main session. RECOUNTED from
+    // the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
+    // Bumped 249 -> 250 for the agency disclosure-revocation package
+    // (20260901052300_agency_disclosure_revocation_v1, paired rollback):
+    // active-connection filters on two list RPCs, offer cascade on revoke,
+    // and one TIGHTENED RLS policy, closing the leak where a severed client
+    // keeps the agency's candidate identities. Narrowing only; ships
+    // UNAPPLIED with merge and production apply owner-gated.
+    // Bumped 249 -> 250 for the relationship-visibility least-privilege
+    // ruling (20260901060000_relationship_visibility_least_privilege_v1,
+    // paired rollback) — the slice 20260827210000 deferred by name in its
+    // own header. Three rows of relationship_types (volunteer, viewer,
+    // unemployed) move from grants_worker_visibility true to false, closing
+    // the invitable `volunteer` path to employer-grade worker-record reads.
+    // DATA-only, narrowing only, measured-zero blast radius (production has
+    // no engagement context on those slugs). Ships UNAPPLIED; merge and
+    // production apply stay owner-gated (draft + needs-human-gate).
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
+    // RE-COUNTED 2026-09-01 after #1395 landed on main first: that PR
+    // took slot 250 for the agency disclosure-revocation package, so this
+    // ruling is the 251st file, not the 250th. Both are declared above.
     // RECOUNTED from the tree, never summed:
-    // `ls supabase/migrations/*.sql | wc -l` = 240 real files.
-    const SPRINT_BASELINE = 240;
+    // `ls supabase/migrations/*.sql | wc -l` = 251.
+    // Bumped 251 -> 252 for the public-schema CREATE revoke
+    // (20260901100000_revoke_public_schema_create_v1, paired rollback):
+    // `revoke create on schema public from public`, closing the inherited
+    // CREATE that anon/authenticated/service_role held via PUBLIC. USAGE is
+    // deliberately preserved. Narrowing only; owner-approved 2026-09-01 as
+    // the minimal current-equivalent extraction of #879.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 252.
+    // Bumped 252 -> 253 for the labour-economics metric widening
+    // (20260901140000_labour_economics_metric_widening_v1, paired rollback):
+    // five published Eurostat labour-cost/productivity keys onto the eurostat
+    // source, and the DERIVED value-to-cost ratio onto
+    // internal_platform_aggregates so it is never attributed to Eurostat.
+    // Permission-only; imports nothing. Owner-approved 2026-09-01.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 253.
+    const SPRINT_BASELINE = 254;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

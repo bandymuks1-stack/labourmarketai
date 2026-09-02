@@ -7,6 +7,10 @@ import {
   requireEmployerCompany,
 } from "@/lib/company/employer-company-context";
 import { createClient } from "@/lib/supabase/server";
+import {
+  WORKER_NAME_FIELDS,
+  resolveWorkerName,
+} from "@/lib/journal/worker-name";
 
 /**
  * Windowed journal report (V8 employer daily loop, GAP 4).
@@ -133,15 +137,15 @@ type EntryRow = {
   created_at: string;
   engagement_context_id: string | null;
   workers: {
+    display_name: string | null;
     profiles: { full_name: string | null; email: string | null } | null;
   } | null;
 };
 
-/** The review report's own name rule, mirrored: full name, else the email
- *  local part, else an explicit dash — never a raw id. */
+/** One shared rule for every journal surface — see lib/journal/worker-name.ts
+ *  for why the readable source is `workers.display_name` and not `profiles`. */
 function workerName(row: EntryRow): string {
-  const prof = row.workers?.profiles;
-  return prof?.full_name ?? (prof?.email ? prof.email.split("@")[0] : "—");
+  return resolveWorkerName(row.workers);
 }
 
 export async function getJournalWindowReport(
@@ -189,7 +193,7 @@ export async function getJournalWindowReport(
   const entriesRes = await asAny(supabase)
     .from("journal_entries")
     .select(
-      "id, worker_id, created_at, engagement_context_id, workers(profiles(full_name, email))",
+      `id, worker_id, created_at, engagement_context_id, workers(${WORKER_NAME_FIELDS})`,
     )
     .in("engagement_context_id", contextIds)
     .gte("created_at", gteIso)

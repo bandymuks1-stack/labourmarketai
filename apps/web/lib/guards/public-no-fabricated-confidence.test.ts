@@ -194,14 +194,17 @@ describe("the honest replacement is actually rendered", () => {
     expect(missing, missing.join("\n")).toEqual([]);
   });
 
-  it("the basis note states it is a demonstration, in every locale", () => {
+  it("the basis note states it is a concept scenario, in every locale", () => {
     // The W14 finding was that the only qualifier sat ~180 lines away in the
-    // DOM. The qualifier now has to travel WITH the claim.
+    // DOM. The qualifier now has to travel WITH the claim — in the doctrine
+    // §18 vocabulary (concept/preview family), since the "demonstration"
+    // wording itself is the banned framing product-copy-forbidden-terms
+    // now catches.
     const weak: string[] = [];
     for (const [locale, h] of locales) {
       const note = String(h.basisNote ?? "");
-      if (!/demonstrac|demonstrat|демонстрац|demonstration/i.test(note)) {
-        weak.push(`${locale}: landing.hero.basisNote does not say it is a demonstration`);
+      if (!/koncep|concept|Konzept|концеп|preview|peržiūr|vorschau|voorbeeld|предпросмотр/i.test(note)) {
+        weak.push(`${locale}: landing.hero.basisNote does not carry the concept/preview qualifier`);
       }
     }
     expect(weak, weak.join("\n")).toEqual([]);

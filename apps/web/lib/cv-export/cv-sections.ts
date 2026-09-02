@@ -127,6 +127,9 @@ export interface CvSectionData {
   professionalSummary: string | null;
   workHistoryCount: number;
   languagesCount: number;
+  /** Study placements / volunteering — counted apart from employment so the
+   *  two never share a heading (§7: a placement is not a job). */
+  practiceHistoryCount: number;
   certificateDocsCount: number;
   drivingLicenceCategoriesCount: number;
   declaredCertificatesCount: number;
@@ -143,6 +146,7 @@ export interface CvSectionData {
 export interface CvSectionVisibility {
   summary: boolean;
   workHistory: boolean;
+  practiceHistory: boolean;
   languages: boolean;
   certificates: boolean;
   education: boolean;
@@ -158,6 +162,7 @@ export function cvSectionVisibility(d: CvSectionData): CvSectionVisibility {
   return {
     summary: (d.professionalSummary ?? "").trim().length > 0,
     workHistory: d.workHistoryCount > 0,
+    practiceHistory: d.practiceHistoryCount > 0,
     languages: d.languagesCount > 0,
     certificates:
       d.certificateDocsCount > 0 ||

@@ -67,6 +67,17 @@ export interface UsageCostPersistExtras {
   readonly organizationId?: string | null;
   /** Short label of the calling surface (e.g. the agent key). */
   readonly requestContext?: string | null;
+  /**
+   * Deterministic idempotency key for THIS run — becomes the row's primary
+   * key (`event_id`, caller-supplied by table design). The server wrapper
+   * generates exactly one per `runAiAgent` invocation, so a retry layer
+   * re-attempting the persist can only ever land ONE cost row for the run: a
+   * duplicate key resolves as already-persisted, never as double-counted
+   * spend (the LMC ledger's idempotency-key rule, applied to this ledger).
+   * Absent → a fresh `randomUUID()` per call and the insert is NOT
+   * idempotent (legacy behaviour, kept for direct builder callers).
+   */
+  readonly eventId?: string | null;
 }
 
 /** Row shape for public.usage_cost_events — kept in sync with the applied
@@ -147,12 +158,23 @@ export function buildUsageCostEventRow(
   if (record.blocked) metadata.blocked_reason = record.blocked.slice(0, 64);
 
   return {
-    event_id: ids.eventId ?? randomUUID(),
+    event_id: ids.eventId ?? extras.eventId ?? randomUUID(),
     occurred_at: ids.occurredAtIso ?? new Date().toISOString(),
     event_type: "usage",
     // A blocked run performed no billable work — recorded as `rejected` so a
     // refusal is countable but never sums into spend as a success.
-    status: record.blocked ? "rejected" : "success",
+    // THREE outcomes, not two. `blocked` means the ROUTER refused to dispatch
+    // (cost ceiling, unpriced model, missing human gate). `providerFailure`
+    // means it DID dispatch and the vendor refused — a different event, and
+    // one this line used to record as `success`. Production, 2026-08-28: a
+    // Gemini 404 landed here as a successful usage event carrying a pre-run
+    // estimate, which at month end is spend that never happened attached to a
+    // delivery that never happened.
+    status: record.blocked
+      ? "rejected"
+      : record.providerFailure
+        ? "error"
+        : "success",
     provider: record.providerAdapter.slice(0, 64),
     service: "llm_completion",
     resource: record.modelId
@@ -177,7 +199,7 @@ export function buildUsageCostEventRow(
 interface MinimalUsageDb {
   from(table: "usage_cost_events"): {
     insert(values: Record<string, unknown>): PromiseLike<{
-      error: { message?: string } | null;
+      error: { message?: string; code?: string } | null;
     }>;
   };
 }
@@ -209,6 +231,10 @@ export async function persistUsageCostEvent(
       buildUsageCostEventRow(record, extras) as unknown as Record<string, unknown>,
     );
     if (error) {
+      // Unique violation on the deterministic event id = the row from THIS
+      // run already landed (a retried persist). Idempotent success, not a
+      // failure: the append-only ledger holds exactly one row for the run.
+      if (extras.eventId && error.code === "23505") return true;
       console.error("[usage-cost-store] persist failed", {
         message: (error.message ?? "unknown").slice(0, 200),
       });

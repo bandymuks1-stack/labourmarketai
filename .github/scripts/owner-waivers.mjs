@@ -443,7 +443,7 @@ export const SCOPED_OWNER_WAIVERS = [
     axioms: ["A-01"],
     scope:
       "The canonical public landing at / approved by the owner — the restored previous production landing as the DEFAULT FOCUS arm and the living-market V1 as the optional LIVE arm, both behind one URL",
-    pullRequests: [1221, 1231, 1232],
+    pullRequests: [1221, 1231, 1232, 1380],
     approvedHeadShas: [],
     postMergeBranches: ["main"],
     files: ["/", "apps/web/app/[locale]/page.tsx"],
@@ -456,11 +456,213 @@ export const SCOPED_OWNER_WAIVERS = [
       { code: "world_state_cannot_control_it", file: "/" },
     ],
     reason:
-      "A pre-authentication public landing cannot satisfy workspace-only questions. The owner explicitly approved and ordered this V1 to ship; the declaration answers all six no honestly; this record excuses those six findings for this one route and nothing else. Extended to #1231 on 2026-08-22: the owner approved restoring the ACTUAL previous production landing as the FOCUS arm of this same canonical route, while LIVE stays unchanged. That adds no route, no seventh finding and no new axiom — both arms answer the same six workspace questions the same honest no, and a crawler still receives exactly one indexed landing at /. The waiver is NOT broadened to anything else. Extended again to #1232 on the same day: FOCUS became the DEFAULT arm and both arms were bound to the one canonical market reader. That moves which arm an unknown visitor sees and where its numbers come from — it adds no route, no seventh finding and no new axiom, and the six answers stay the same honest no for whichever arm renders.",
+      "A pre-authentication public landing cannot satisfy workspace-only questions. The owner explicitly approved and ordered this V1 to ship; the declaration answers all six no honestly; this record excuses those six findings for this one route and nothing else. Extended to #1231 on 2026-08-22: the owner approved restoring the ACTUAL previous production landing as the FOCUS arm of this same canonical route, while LIVE stays unchanged. That adds no route, no seventh finding and no new axiom — both arms answer the same six workspace questions the same honest no, and a crawler still receives exactly one indexed landing at /. The waiver is NOT broadened to anything else. Extended again to #1232 on the same day: FOCUS became the DEFAULT arm and both arms were bound to the one canonical market reader. That moves which arm an unknown visitor sees and where its numbers come from — it adds no route, no seventh finding and no new axiom, and the six answers stay the same honest no for whichever arm renders. Extended to #1380 on 2026-08-31 under the owner's explicit P0 order of that day ('Investigate this as a real production performance/reliability regression … fix root cause if reproducible … no disabling functionality'): the fresh-visit entry was function-bound and cold-start-exposed, so the DEFAULT FOCUS arm became static/CDN-cached and the explicit-LIVE choice moved to a middleware rewrite of the SAME canonical route. Rendering strategy only — no route added, no arm removed, no seventh finding, no new axiom; the six answers stay the same honest no.",
     resolvedBy:
       "gate-learns-public-acquisition-route-category (owner constitution decision)",
     expiresAt: "2026-12-31",
     owner: "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
+  },
+
+  /**
+   * ORGANIZATION MULTI-CAPABILITY CARD — the education pilot's registration
+   * surface.
+   *
+   * OWNER RULING, 2026-08-27, verbatim:
+   *   "APPROVED as a temporary PR-scoped waiver ONLY for: not_reflected_on_map,
+   *    not_ai_controlled. Scope: components/app/organization-capabilities-card.tsx.
+   *    Axiom: A-01. PR: 1299."
+   *   "The organization multi-capability UI is required to close the
+   *    education/institution pilot cycle now. The underlying multi-role
+   *    architecture is canonical and already production-backed. World Map
+   *    reflection and conversational AI control remain required follow-up
+   *    integrations; absence of those two secondary representations must not
+   *    block the real organization capability workflow."
+   *   "This waiver MUST NOT waive any other Product Gate finding. Do not
+   *    broaden its scope."
+   *
+   * WHAT IS BEING EXCUSED — two SECONDARY REPRESENTATIONS, not the surface.
+   * The card's declaration answers `reflectedOnMap: false` and
+   * `aiControlled: false` HONESTLY (A-06 outranks the temptation to rewrite
+   * them green): nothing renders an organization's training capability on the
+   * market map today, and the assistant cannot yet open the card. The three
+   * remaining World-State answers — `changesWorldState`,
+   * `usableWithoutLeavingWorkspace`, `needsNoNewPage` — are real YES, so this
+   * is a partial, two-answer debt on an existing surface, not a new page
+   * escaping the lock.
+   *
+   * WHY IT CANNOT LEAK. All six gate constraints bind: the two codes, axiom
+   * A-01, the single file, PR #1299, the expiry, and the subset rule. A third
+   * finding anywhere — including on this same card — un-waives the entire run.
+   * No other surface, PR or axiom inherits anything.
+   *
+   * ENABLING STEPS (owner-required; either one landing removes half of this
+   * record, both remove it entirely):
+   *   1. MAP — reflect organization capabilities on the canonical World Map /
+   *      state representation, so declared education supply is visible where
+   *      the market is read. `mapEffect` in the declaration then becomes a real
+   *      effect and `reflectedOnMap` a real yes.
+   *   2. CONVERSATION — make capability declaration and change reachable
+   *      through the canonical conversational action layer WITHOUT creating a
+   *      parallel write path: the assistant must call the SAME
+   *      `add_organization_role_v1` the card calls. A second writer would be a
+   *      doctrine violation that costs more than the waiver it removes.
+   *
+   * WHY THE ARCHITECTURE ALREADY SUPPORTS BOTH. `organization_roles`
+   * (20260827050000, applied) is a registry-keyed, many-valued fact — neither
+   * enabling step needs a schema change, which is why they are integrations
+   * and not redesigns.
+   */
+  {
+    id: "organization-multi-capability-card",
+    axioms: ["A-01"],
+    scope:
+      "The organization multi-capability declaration card (education pilot P0.1) — its map reflection and conversational control ONLY",
+    pullRequests: [1299],
+    approvedHeadShas: [],
+    /**
+     * Once #1299 merges the debt lives in `main`, and the gate validates the
+     * whole registry on every run rather than only the diff. Without this the
+     * merged waiver would turn `main` red and block every later PR — the exact
+     * failure the mechanism exists to remove. Every other constraint still
+     * binds; only `main` is listed.
+     */
+    postMergeBranches: ["main"],
+    files: ["components/app/organization-capabilities-card.tsx"],
+    expectedFindings: [
+      { code: "not_reflected_on_map", file: "components/app/organization-capabilities-card.tsx" },
+      { code: "not_ai_controlled", file: "components/app/organization-capabilities-card.tsx" },
+    ],
+    reason:
+      "An education institution cannot register honestly without a way to state that it educates, and the single-value company_type field cannot carry it. The multi-role architecture behind the card is canonical and production-backed. The two failing answers are missing SECONDARY representations of a fact the card records truthfully — a map layer and a conversational entry point — and the owner ruled that their absence must not block the real organization capability workflow. Both are recorded as NO in the declaration rather than rewritten to YES.",
+    resolvedBy:
+      "organization-capabilities-on-map + capability-declaration-via-canonical-conversational-action-layer (the two enabling steps above; no schema change needed for either)",
+    expiresAt: "2026-11-30",
+    owner:
+      "Product owner — OWNER RULING 2026-08-27 §3, PR-scoped waiver for #1299, axiom A-01, codes not_reflected_on_map + not_ai_controlled only",
+  },
+
+  /**
+   * OAUTH CONSENT SCREEN — the human-only step of the client ecosystem.
+   *
+   * OWNER RULING, 2026-08-29 execution order §4, verbatim:
+   *   "Prepare and perform the minimum configuration required for
+   *    LabourMarket.ai to act as the OAuth authorization server for
+   *    MCP/ChatGPT IF the currently authorized Supabase tooling allows this
+   *    safely."
+   * The Supabase OAuth 2.1 server REQUIRES the product to host the
+   * authorization UI at a fixed URL (Authorization Path); this screen IS the
+   * minimum configuration, so the ruling that ordered the configuration
+   * ordered the surface.
+   *
+   * WHAT IS BEING EXCUSED — a THIRD category, distinct from the pre-auth
+   * acquisition records above: STANDARDS-SHAPED AUTH INFRASTRUCTURE. OAuth
+   * 2.1 defines this screen's existence, URL-stability and redirect flow, so
+   * `needsNoNewPage` and `usableWithoutLeavingWorkspace` are honestly "no"
+   * by specification, not by design preference. And `aiControlled` /
+   * `aiCanWorkWithIt` are "no" as a SECURITY PROPERTY: the one step where a
+   * person grants an external agent standing access must never itself be
+   * agent-drivable — an assistant that could operate this screen could be
+   * prompt-injected into granting itself access. Waiving the A-09 finding
+   * here is therefore not excusing a gap; it is refusing to close one that
+   * must stay open. All answers are recorded as "no" in the declaration
+   * rather than rewritten (A-06).
+   *
+   * WHY THIS CANNOT LEAK. All six gate constraints bind: the seven codes,
+   * axioms A-01 + A-09 (A-09 for the single `ai_cannot_work_with_entity`
+   * code only), the two file entries, PR #1347, the expiry, and the subset
+   * rule — an eighth finding anywhere un-waives the whole run. No other
+   * surface, PR or axiom inherits anything.
+   *
+   * WHAT REMOVES IT (`resolvedBy`): the gate learning an
+   * auth-infrastructure category (a constitution change, owner-only) — the
+   * same resolution path as the acquisition records, plus one honest
+   * difference: for THIS surface `aiControlled` must never become "yes", so
+   * category-learning is the only resolution that can exist.
+   */
+  {
+    id: "oauth-consent-auth-infrastructure",
+    axioms: ["A-01", "A-09"],
+    scope:
+      "The OAuth 2.1 consent screen /oauth/consent (owner directive 2026-08-29 §4) — the delegated Supabase Authorization Path UI",
+    pullRequests: [1347],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: [
+      "/oauth/consent",
+      "apps/web/app/[locale]/oauth/consent/page.tsx",
+    ],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=1347 node .github/scripts/product-gate.mjs
+    // on 2026-08-29, after the declaration was added. Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/oauth/consent" },
+      { code: "not_reflected_on_map", file: "/oauth/consent" },
+      { code: "not_ai_controlled", file: "/oauth/consent" },
+      { code: "requires_leaving_workspace", file: "/oauth/consent" },
+      { code: "requires_new_page", file: "/oauth/consent" },
+      { code: "ai_cannot_work_with_entity", file: "/oauth/consent" },
+      { code: "world_state_cannot_control_it", file: "/oauth/consent" },
+    ],
+    reason:
+      "OAuth 2.1 and the Supabase Authorization Path contract require a consent screen at a fixed URL, outside the workspace, that no AI may operate — the last property being the security point of the screen, not a debt. The owner ordered the minimum OAuth-server configuration on 2026-08-29; this screen is that configuration's product half. All seven answers are declared honestly and excused for this one route and nothing else.",
+    resolvedBy:
+      "gate-learns-auth-infrastructure-category (owner constitution decision; note aiControlled must remain 'no' for this surface permanently)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner ruling 2026-08-29 execution order §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
+  },
+
+  {
+    id: "work-hours-allocation-surface",
+    axioms: ["A-01"],
+    /**
+     * WORK-HOUR ALLOCATIONS — `/dashboard/hours` (M3, PR #1344).
+     *
+     * OWNER APPROVAL, 2026-08-31 closure session, verbatim:
+     *   "M3_MIGRATION_APPROVAL: APPROVE
+     *    HOURS_PRODUCT_GATE_WAIVER: APPROVE
+     *    Approval scope is limited strictly to the fresh #1344 / package 0010
+     *    implementation described in the closure report."
+     *
+     * WHAT IS BEING EXCUSED. The surface declares three honest "no" answers:
+     * it is a structured per-day hour ledger (numeric facts per worker ×
+     * object × date), not yet reflected on the workspace map, not yet
+     * AI-operable, and it needs its own page because a dense editable grid
+     * does not fit a chat turn. The declaration refuses to claim otherwise;
+     * this record excuses exactly those three answers for this one route,
+     * per the /jobs precedent (the surface must not waive itself — the
+     * waiver arrives WITH the owner approval, not before).
+     */
+    scope:
+      "The manager hour-allocation surface /dashboard/hours (M3, decision package docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md Item 2)",
+    pullRequests: [1344],
+    // Deliberately empty — the waiver lives IN the branch whose CI must
+    // honour it, so pinning the head SHA would change the head SHA.
+    approvedHeadShas: [],
+    // After the squash-merge the gate re-validates the whole registry on
+    // `main`, so the post-merge branch run must be covered too.
+    postMergeBranches: ["main"],
+    files: [
+      "/dashboard/hours",
+      "apps/web/app/[locale]/dashboard/hours/page.tsx",
+    ],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=1344 node .github/scripts/product-gate.mjs
+    // on 2026-08-31 (post main-merge at 371c0eaa). Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_reflected_on_map", file: "/dashboard/hours" },
+      { code: "not_ai_controlled", file: "/dashboard/hours" },
+      { code: "requires_new_page", file: "/dashboard/hours" },
+    ],
+    reason:
+      "The canonical row-level work-hour fact (work_hour_allocations) needs a dense per-day editing surface that cannot honestly claim map reflection or AI operability on day one. The owner reviewed package 0010 and approved both the RED migration and these three declared 'no' answers for this one route and nothing else.",
+    resolvedBy:
+      "hours-surface-reaches-map-and-chat (reflect allocations on the workspace map and expose an AI/chat write path, then delete this record)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner decision, 2026-08-31 closure session — 'HOURS_PRODUCT_GATE_WAIVER: APPROVE' (scope: fresh #1344 / package 0010 only).",
   },
 ];
 

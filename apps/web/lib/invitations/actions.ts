@@ -20,6 +20,7 @@ import {
 import {
   buildInviteLink,
   isInvitationType,
+  isRelationshipInviteSlug,
   parseEmailList,
   type InvitationType,
 } from "@/lib/invitations/model";
@@ -82,6 +83,14 @@ export type InvitationSendOutcome = {
     | "limit_reached"
     | "rate_limited"
     | "not_authorized"
+    // The relationship named is not one that may be established by invitation
+    // (unknown, inactive, or deliberately not offerable — `manager`, `owner`).
+    | "invalid_relationship"
+    // The relationship requires a capability the organization has not declared:
+    // an organization that never said it provides education cannot name a
+    // learner. Surfaced as itself so the screen can say what to do about it
+    // rather than reporting a generic failure.
+    | "organization_capability_required"
     | "error";
   invitationId?: string;
   /** The shareable link — returned ONLY to the inviter who minted it. */
@@ -112,6 +121,14 @@ export async function createAndSendInvitations(input: {
   invitedName?: string | null;
   proposedRole?: string | null;
   personalMessage?: string | null;
+  /**
+   * IN WHAT CAPACITY the invited person joins — `student`, `volunteer`,
+   * `employee`… Absent (or null) means the historical per-type default, so
+   * every existing caller keeps its exact behaviour. Validated server-side by
+   * `create_invitation_v1` against `relationship_types.invitable`; this layer
+   * only forwards it.
+   */
+  relationshipSlug?: string | null;
 }): Promise<CreateInvitationsResult> {
   const supabase = await createClient();
   const {
@@ -125,6 +142,13 @@ export async function createAndSendInvitations(input: {
   const parsed = parseEmailList(input.emails ?? "");
   const origin = await requestOrigin();
   const emailConfigured = isTransactionalEmailConfigured();
+  // Only a capacity this build actually offers is forwarded. A forged value
+  // would be refused by the RPC anyway (`invalid_relationship`); dropping it
+  // here means a tampered form falls back to the historical default instead of
+  // producing a confusing refusal for a choice the screen never showed.
+  const relationshipSlug = isRelationshipInviteSlug(input.relationshipSlug)
+    ? (input.relationshipSlug as string)
+    : null;
   // Recipient-oriented language: email copy AND the invite-link path locale.
   const recipientLocale = resolveRecipientLocale(
     input.recipientLocale,
@@ -150,6 +174,19 @@ export async function createAndSendInvitations(input: {
       // The stored locale is the RECIPIENT'S — the accept flow and any
       // resend read it back as the invited person's language.
       p_locale: recipientLocale,
+      /**
+       * OMITTED ENTIRELY when no capacity was chosen, and that is deliberate.
+       *
+       * PostgREST resolves an RPC by the exact SET OF ARGUMENT NAMES in the
+       * body. Against a database that still carries the pre-20260827200000
+       * 9-argument `create_invitation_v1`, sending `p_relationship_slug: null`
+       * matches NO function (PGRST202) — which would turn every ordinary
+       * invitation into a "not enabled" state until the owner-gated migration
+       * is applied. Spreading the key in only when a capacity was actually
+       * chosen keeps the default call byte-identical to today's, so the
+       * existing flow cannot regress while the migration is pending.
+       */
+      ...(relationshipSlug ? { p_relationship_slug: relationshipSlug } : {}),
     });
     if (error) {
       if (isMissingSchema(error)) return { status: "needs-migration" };
@@ -167,6 +204,8 @@ export async function createAndSendInvitations(input: {
             "limit_reached",
             "rate_limited",
             "not_authorized",
+            "invalid_relationship",
+            "organization_capability_required",
           ] as const
         ).includes(outcome as never)
           ? (outcome as InvitationSendOutcome["outcome"])

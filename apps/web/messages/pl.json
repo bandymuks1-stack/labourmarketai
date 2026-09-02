@@ -5,7 +5,13 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet."
+    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "syntheticTitle": {
+      "hiringWorkers": "Poszukiwani pracownicy",
+      "agencyPartnership": "Oferta współpracy"
+    },
+    "interestWaiting": "{count, plural, one {# osoba czeka na odpowiedź} few {# osoby czekają na odpowiedź} many {# osób czeka na odpowiedź} other {# osoby czeka na odpowiedź}}",
+    "untitledInquiry": "Zapytanie bez nazwy"
   },
   "journey": {
     "eyebrow": "Jak to działa",
@@ -115,6 +121,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "[EN] Continue with LinkedIn",
+      "continueWithFacebook": "[EN] Continue with Facebook"
+    },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
       "error_title": "[EN] Sign-in failed",
@@ -287,7 +297,13 @@
       "invalidEmail": "[EN] Invalid email format.",
       "passwordTooShort": "[EN] Password too short (at least {min} characters).",
       "rateLimited": "[EN] Too many attempts. Please try again later.",
-      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead."
+      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
+      "oauth": {
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, po prostu się zaloguj. W przeciwnym razie poproś poniżej o nowy link.",
+        "confirmed_sign_in": "Twój e-mail został potwierdzony. Rejestrację rozpoczęto na innym urządzeniu, więc zaloguj się tutaj, aby kontynuować."
+      },
+      "emailNotConfirmed": "Twój e-mail nie został jeszcze potwierdzony. Otwórz przesłany link potwierdzający lub poproś poniżej o nowy."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -318,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)"
+      "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)",
+      "resend_confirmation": "Wyślij nowy link potwierdzający",
+      "resend_sent": "Nowy link potwierdzający jest w drodze na {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -361,6 +379,10 @@
         "event_demand_interest_expressed": "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
         "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe"
+      },
+      "email": {
+        "open": "Otwórz w LabourMarket.ai:",
+        "manage": "Zarządzaj ustawieniami powiadomień:"
       }
     },
     "onboarding": {
@@ -466,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez Google lub e-mailem i hasłem; rolę wybierzesz w następnym kroku.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Wyślij link ponownie",
+      "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
+      "resend_wait": "O nowy link możesz poprosić za {seconds} s."
     }
   },
   "common": {
@@ -913,6 +938,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Płatność została anulowana — nic nie pobrano i nic się nie zmieniło na Twoim koncie."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
@@ -1536,7 +1564,8 @@
         "openDemands": "[EN] Open demands",
         "interestActive": "[EN] Interest: new",
         "interestReviewed": "[EN] Interest: reviewed",
-        "interestContacted": "[EN] Interest: contacted"
+        "interestContacted": "[EN] Interest: contacted",
+        "interestNotified": "Zainteresowanie: powiadomiono"
       },
       "status": {
         "green_scoped": "[EN] green scoped",
@@ -2042,6 +2071,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Wyświetlane są {shown} najsilniejsze dopasowania z {total} możliwości.",
+        "showAll": "Pokaż wszystkie (jeszcze {count})",
+        "showAllExternal": "Pokaż wszystkie ogłoszenia o pracę"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2130,6 +2164,7 @@
     "external": {
       "sectionTitle": "Publiczne ogłoszenia o pracę",
       "sectionNote": "Ogłoszenia z oficjalnych publicznych służb zatrudnienia. Publikuje je pracodawca u źródła — labourmarket.ai je pokazuje, aby można je było znaleźć, a aplikowanie odbywa się przez oryginalne ogłoszenie.",
+      "shownOfTotal": "najlepsze {shown} z {total}",
       "bandBest": "Najlepiej dopasowane",
       "bandPossible": "Możliwe dopasowania",
       "bandExplore": "Pozostałe ogłoszenia",
@@ -2192,6 +2227,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Doświadczenie z praktyk lub wolontariatu",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",
@@ -3557,6 +3593,9 @@
       "chipNeedWorkers": "Potrzebuję pracowników",
       "chipCandidates": "Kandydaci",
       "chipCompanyHub": "Przestrzeń firmy",
+      "chipEduInviteLearner": "[EN] Invite a learner",
+      "chipEduCapabilities": "[EN] What we provide",
+      "learnerGreetingContext": "[EN] You're learning with {institution} — every work entry you log becomes part of your evidence and CV.",
       "companyDemandNext": "Zapotrzebowanie zapisano w przestrzeni firmy. Co dalej?",
       "navJournal": "Dziennik",
       "chipTasks": "Zadania",
@@ -3596,7 +3635,15 @@
       "engagementsOpened": "Oto zapisane relacje robocze. Jedną z nich możesz zakończyć w panelu.",
       "engagementsNone": "Nie ma zapisanych relacji roboczych.",
       "engagementsNoCompany": "Nie działasz teraz w imieniu organizacji, więc nie ma listy do pokazania.",
-      "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak."
+      "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
+      "employerBridgeHint": "Możesz opublikować to jako swoja firma — otworzę formularz zapotrzebowania.",
+      "serviceNeedHint": "To zadanie do wykonania — pokażę, kto oferuje taką usługę.",
+      "chipServiceRequests": "Znajdź usługę",
+      "interestInboxAmbiguous": "To może znaczyć dwie rzeczy — co chcesz zobaczyć?",
+      "chipInterestOnMyNeeds": "Zainteresowanie moimi zapytaniami",
+      "chipMyOwnInterest": "Moje zgłoszenia",
+      "createOrganizationHint": "Mogę razem z Tobą utworzyć organizację — dane i weryfikacja są na jednej stronie.",
+      "chipCreateOrganization": "Utwórz organizację"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4624,6 +4671,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Szkic wpisu do dziennika",
+      "title": "Z dokumentu do Dziennika pracy",
+      "understoodNote": "Poniżej znajduje się tekst odczytany z „{filename}”. Przejrzyj, popraw i zatwierdź — dopiero wtedy stanie się częścią historii Twojego dziennika.",
+      "detectedSkills": "Rozpoznaliśmy w tekście wzmianki o umiejętnościach: {count}",
+      "notesLabel": "Tekst wpisu (z Twojego dokumentu — popraw przed zapisaniem)",
+      "engagementLabel": "Kontekst pracy",
+      "save": "Zatwierdź i zapisz w dzienniku",
+      "saving": "Zapisywanie…",
+      "saved": "Zapisano w Twoim Dzienniku pracy — dokument źródłowy pozostaje powiązany z tym wpisem.",
+      "savedLink": "Otwórz dziennik",
+      "error": "Zapis się nie powiódł. Nic nie zostało zapisane.",
+      "notFound": "Nie znaleziono tego dokumentu wśród Twoich dokumentów.",
+      "refusedClassified": "Dokumenty poufne nie są czytane automatycznie — pobranie pozostaje rejestrowanym krokiem ręcznym.",
+      "refusedNoOcr": "Zdjęcia nie są czytane — rozpoznawanie tekstu jeszcze nie istnieje.",
+      "refusedType": "Tego typu pliku nie można odczytać jako tekstu.",
+      "empty": "W tym dokumencie nie znaleziono czytelnego tekstu.",
+      "failed": "Nie udało się odczytać dokumentu.",
+      "noEngagement": "Najpierw potrzebujesz kontekstu pracy — otwórz panel i go utwórz."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",
@@ -4830,7 +4897,9 @@
       "title": "Karty czasu pracy zespołu",
       "decideNote": "Decyzje o zatwierdzeniu zapadają w obszarze zatwierdzeń. Tutaj możesz przejrzeć wiersze, wyeksportować i zwrócić już rozstrzygniętą kartę.",
       "noTemplateFor": "{name} nie ma opublikowanego szablonu zatwierdzania kart.",
-      "createTemplate": "Utwórz standardowy szablon zatwierdzania",
+      "templateNeedsAdmin": "Szablon zatwierdzania może opublikować tylko właściciel lub administrator organizacji. Do tego czasu nie można przesyłać kart pracy.",
+      "blockedNote": "Czeka na ten szablon: {count} kart(y) pracy w tej organizacji nie można przesłać, dopóki nie zostanie opublikowany.",
+      "createTemplate": "Zainstaluj standardowe szablony zatwierdzania",
       "unnamedWorker": "Pracownik",
       "decideInApprovals": "Zdecyduj w obszarze zatwierdzeń",
       "reopenNote": "Notatka zwrotu",
@@ -4847,7 +4916,7 @@
       "synced_pending": "Zatwierdzanie wciąż trwa.",
       "no_instance": "Dla tej karty nie istnieje jeszcze wniosek o zatwierdzenie.",
       "no_template": "Ta organizacja nie ma jeszcze opublikowanego szablonu zatwierdzania kart.",
-      "template_created": "Standardowy szablon zatwierdzania utworzony i opublikowany.",
+      "template_created": "Standardowe szablony zatwierdzania zainstalowane — szablon zatwierdzania kart pracy został opublikowany.",
       "overlap": "Ten okres nachodzi na istniejącą kartę.",
       "invalid_period": "Okres jest nieprawidłowy — do 31 dni, a koniec nie może być przed początkiem.",
       "no_worker": "Twoje konto nie ma profilu pracownika.",
@@ -5644,5 +5713,112 @@
       "awaitingOwnerApproval": "oczekuje na zatwierdzenie właściciela"
     },
     "footer": "Uczciwy podgląd · Bez udawanej SI · Bez udawanej weryfikacji · Bez zmyślonych twarzy pracowników · Każda pozycja zaczyna się od „Sample · …”, więc nigdy nie wygląda jak dane rzeczywiste."
+  },
+  "organizationCapabilities": {
+    "title": "Czym zajmuje się Twoja organizacja?",
+    "help": "Zaznacz wszystko, co pasuje — organizacja może robić kilka rzeczy naraz.",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "notPermitted": "Nie możesz zmieniać tej organizacji.",
+    "error": "Nie udało się zapisać. Spróbuj ponownie.",
+    "allDeclared": "Wszystko, co dostępne, zostało już podane.",
+    "choices": {
+      "training": {
+        "label": "Kształcimy i szkolimy ludzi",
+        "hint": "Szkoła, uczelnia lub centrum szkoleniowe; przyjmujemy na praktyki."
+      },
+      "employer": {
+        "label": "Zatrudniamy ludzi",
+        "hint": "Rekrutujemy dla siebie."
+      },
+      "workforce": {
+        "label": "Dostarczamy pracowników innym organizacjom",
+        "hint": "Udostępnianie pracowników, brygady kontraktowe."
+      },
+      "recruitment": {
+        "label": "Pomagamy znaleźć i wybrać ludzi",
+        "hint": "Rekrutacja i selekcja."
+      },
+      "project": {
+        "label": "Prowadzimy projekty",
+        "hint": "Bierzemy udział jako wykonawca lub partner."
+      },
+      "client": {
+        "label": "Zlecamy prace lub usługi",
+        "hint": "Jesteśmy zamawiającym."
+      }
+    }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importuj godziny z arkusza (.xlsx)",
+      "backToEntry": "Wróć do wpisu dziennego",
+      "title": "Import ewidencji czasu pracy",
+      "subtitle": "Prześlij miesięczną ewidencję czasu pracy. Sprawdź i popraw interpretację poniżej — nic nie zostanie zapisane, dopóki nie potwierdzisz.",
+      "fileLabel": "Plik ewidencji (.xlsx)",
+      "fileHint": "Miesięczna siatka pracownik × dzień lub arkusz z kolumnami pracownik / data / obiekt / godziny, do 5 MB.",
+      "parse": "Podgląd pliku",
+      "parsing": "Odczytywanie…",
+      "refused": {
+        "no-file": "Najpierw wybierz plik.",
+        "too-large": "Plik jest większy niż 5 MB.",
+        "not-xlsx": "To nie jest arkusz .xlsx.",
+        "too-complex": "Arkusz jest zbyt duży, aby bezpiecznie go odczytać.",
+        "read-failed": "Nie udało się odczytać pliku.",
+        "unrecognized": "W tym pliku nie rozpoznano struktury ewidencji.",
+        "too-many-rows": "Arkusz zawiera więcej wierszy, niż mieści jeden import — podziel plik."
+      },
+      "emptyFile": "Plik nie zawiera danych ewidencji.",
+      "noCompany": "Przełącz się na przestrzeń roboczą firmy.",
+      "summary": "Odczytane wiersze: {rows} (arkusz {sheet}).",
+      "notPersistedNotice": "Nic nie zostanie zapisane, dopóki nie potwierdzisz.",
+      "skippedTitle": "Komórki, których nie udało się odczytać",
+      "skippedReasons": {
+        "unparsable": "nieczytelna wartość",
+        "hours-out-of-bounds": "godziny poza zakresem 0–24",
+        "invalid-date": "taka data nie istnieje w tym miesiącu"
+      },
+      "monthLabel": "Miesiąc",
+      "monthHint": "Arkusz nie podaje miesiąca — wybierz go jednoznacznie.",
+      "duplicateWarning": "Identyczne wpisy już istnieją dla {count} wierszy (ten sam pracownik, data, obiekt i godziny). Ponowny zapis wymaga potwierdzenia poniżej.",
+      "columns": {
+        "include": "Uwzględnij",
+        "worker": "Pracownik",
+        "object": "Obiekt",
+        "date": "Data",
+        "hours": "Godziny",
+        "note": "Notatka",
+        "status": "Status"
+      },
+      "chooseWorker": "Wybierz pracownika",
+      "chooseObject": "Wybierz obiekt",
+      "suggestions": "Podpowiedzi",
+      "allWorkers": "Wszyscy pracownicy",
+      "allObjects": "Wszystkie obiekty",
+      "needsReview": "Niejednoznaczna komórka — sprawdź podział",
+      "duplicateBadge": "Już zapisane",
+      "incomplete": "Wymagany wybór",
+      "rowProblems": {
+        "worker": "Pracownik nieprzyjęty",
+        "object": "Obiekt nieprzyjęty",
+        "date": "Nieprawidłowa data",
+        "hours": "Nieprawidłowe godziny",
+        "note": "Notatka zbyt długa"
+      },
+      "overrideLabel": "Zapisz duplikaty mimo to (prawdziwa druga zmiana)",
+      "confirm": "Potwierdź wybrane wiersze ({count})",
+      "confirming": "Zapisywanie…",
+      "receipt": "Gotowe — zapisane wpisy: {count}. Są już częścią godzin pracy.",
+      "confirmBlockedHint": "Każdy uwzględniony wiersz potrzebuje pracownika, obiektu, daty i godzin.",
+      "errors": {
+        "invalidRows": "Wiersze wymagające poprawy: {count}. Nic nie zapisano.",
+        "duplicatesFound": "Identyczne istniejące wpisy: {count}. Nic nie zapisano — zaznacz potwierdzenie, aby mimo to je zapisać.",
+        "noRows": "Brak wierszy do zapisania.",
+        "tooManyRows": "Zbyt wiele wierszy na jeden import — podziel plik.",
+        "needsMigration": "Ta funkcja nie jest jeszcze włączona w tej bazie danych.",
+        "notAuthorized": "Nie możesz zapisać tych godzin.",
+        "generic": "Przetwarzanie nie powiodło się. Spróbuj ponownie."
+      }
+    }
   }
 }

@@ -5,7 +5,13 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet."
+    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "syntheticTitle": {
+      "hiringWorkers": "Söker medarbetare",
+      "agencyPartnership": "Partnerskapserbjudande"
+    },
+    "interestWaiting": "{count, plural, one {# person väntar på svar} other {# personer väntar på svar}}",
+    "untitledInquiry": "Förfrågan utan titel"
   },
   "journey": {
     "eyebrow": "Så fungerar det",
@@ -115,6 +121,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "[EN] Continue with LinkedIn",
+      "continueWithFacebook": "[EN] Continue with Facebook"
+    },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
       "error_title": "[EN] Sign-in failed",
@@ -287,7 +297,13 @@
       "invalidEmail": "[EN] Invalid email format.",
       "passwordTooShort": "[EN] Password too short (at least {min} characters).",
       "rateLimited": "[EN] Too many attempts. Please try again later.",
-      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead."
+      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
+      "oauth": {
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Den här bekräftelselänken har gått ut eller redan använts. Har du redan bekräftat din e-post, logga bara in. Annars kan du begära en ny länk nedan.",
+        "confirmed_sign_in": "Din e-postadress är bekräftad. Registreringen påbörjades på en annan enhet, så logga in här för att fortsätta."
+      },
+      "emailNotConfirmed": "Din e-postadress är inte bekräftad ännu. Öppna bekräftelselänken vi skickade, eller begär en ny nedan."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -318,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Skicka en ny bekräftelselänk",
+      "resend_sent": "En ny bekräftelselänk är på väg till {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -361,6 +379,10 @@
         "event_demand_interest_expressed": "En arbetstagare har visat intresse för ditt behov",
         "event_demand_interest_reviewed": "Ett företag har markerat ditt intresse som granskat",
         "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar"
+      },
+      "email": {
+        "open": "Öppna i LabourMarket.ai:",
+        "manage": "Hantera dina aviseringsinställningar:"
       }
     },
     "onboarding": {
@@ -466,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Skicka länken igen",
+      "resend_sent": "Skickat igen. Kontrollera inkorgen och skräppostmappen.",
+      "resend_wait": "Du kan begära en ny länk om {seconds} s."
     }
   },
   "common": {
@@ -913,6 +938,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Betalningen avbröts — inget debiterades och inget ändrades på ditt konto."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
@@ -1536,7 +1564,8 @@
         "openDemands": "[EN] Open demands",
         "interestActive": "[EN] Interest: new",
         "interestReviewed": "[EN] Interest: reviewed",
-        "interestContacted": "[EN] Interest: contacted"
+        "interestContacted": "[EN] Interest: contacted",
+        "interestNotified": "Intresse: aviserat"
       },
       "status": {
         "green_scoped": "[EN] green scoped",
@@ -2042,6 +2071,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Visar de {shown} starkaste matchningarna av {total} möjligheter.",
+        "showAll": "Visa alla ({count} till)",
+        "showAllExternal": "Visa alla platsannonser"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2130,6 +2164,7 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
+      "shownOfTotal": "topp {shown} av {total}",
       "bandBest": "Passar bäst",
       "bandPossible": "Möjligen passande",
       "bandExplore": "Övriga annonser",
@@ -2192,6 +2227,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Praktik- eller volontärerfarenhet",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",
@@ -3557,6 +3593,9 @@
       "chipNeedWorkers": "Jag behöver arbetare",
       "chipCandidates": "Kandidater",
       "chipCompanyHub": "Företagsyta",
+      "chipEduInviteLearner": "[EN] Invite a learner",
+      "chipEduCapabilities": "[EN] What we provide",
+      "learnerGreetingContext": "[EN] You're learning with {institution} — every work entry you log becomes part of your evidence and CV.",
       "companyDemandNext": "Behovet är registrerat i din företagsyta. Vad händer nu?",
       "navJournal": "Loggbok",
       "chipTasks": "Uppgifter",
@@ -3596,7 +3635,15 @@
       "engagementsOpened": "Här är de registrerade arbetsrelationerna. Du kan avsluta en av dem i panelen.",
       "engagementsNone": "Det finns inga registrerade arbetsrelationer.",
       "engagementsNoCompany": "Du agerar inte för en organisation just nu, så det finns ingen lista att visa.",
-      "engagementsUnavailable": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några."
+      "engagementsUnavailable": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några.",
+      "employerBridgeHint": "Du kan publicera detta som ditt företag — jag öppnar behovsformuläret.",
+      "serviceNeedHint": "Det är ett jobb som ska göras — jag visar vem som erbjuder den tjänsten.",
+      "chipServiceRequests": "Hitta en tjänst",
+      "interestInboxAmbiguous": "Det kan betyda två saker — vad vill du se?",
+      "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",
+      "chipMyOwnInterest": "Mitt eget intresse",
+      "createOrganizationHint": "Jag kan skapa en organisation tillsammans med dig — uppgifterna och verifieringen finns på en sida.",
+      "chipCreateOrganization": "Skapa en organisation"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4624,6 +4671,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Utkast till journalpost",
+      "title": "Från dokument till Arbetsjournal",
+      "understoodNote": "Nedan är texten som lästs från “{filename}”. Granska, rätta och bekräfta — först då blir den en del av din journalhistorik.",
+      "detectedSkills": "Vi hittade {count} omnämnanden av kompetenser i texten.",
+      "notesLabel": "Postens text (från ditt dokument — redigera före sparande)",
+      "engagementLabel": "Arbetskontext",
+      "save": "Bekräfta och spara i journalen",
+      "saving": "Sparar…",
+      "saved": "Sparat i din Arbetsjournal — källdokumentet förblir kopplat till den här posten.",
+      "savedLink": "Öppna journalen",
+      "error": "Det gick inte att spara. Inget sparades.",
+      "notFound": "Det här dokumentet hittades inte bland dina dokument.",
+      "refusedClassified": "Konfidentiella dokument läses inte automatiskt — nedladdning förblir ett loggat manuellt steg.",
+      "refusedNoOcr": "Foton läses inte — textigenkänning finns inte ännu.",
+      "refusedType": "Den här filtypen kan inte läsas som text.",
+      "empty": "Ingen läsbar text hittades i dokumentet.",
+      "failed": "Dokumentet kunde inte läsas.",
+      "noEngagement": "Du behöver först en arbetskontext — öppna panelen och skapa en."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",
@@ -4830,7 +4897,9 @@
       "title": "Lagets tidrapporter",
       "decideNote": "Godkännandebeslut fattas i godkännandeområdet. Här kan du granska rader, exportera och återlämna en avgjord tidrapport.",
       "noTemplateFor": "{name} har ingen publicerad godkännandemall för tidrapporter.",
-      "createTemplate": "Skapa standardgodkännandemall",
+      "templateNeedsAdmin": "Endast en ägare eller administratör i organisationen kan publicera godkännandemallen. Tills dess kan tidrapporter inte skickas in.",
+      "blockedNote": "Väntar på denna mall: {count} tidrapporter i den här organisationen kan inte skickas in förrän den är publicerad.",
+      "createTemplate": "Installera standardmallar för godkännande",
       "unnamedWorker": "Arbetare",
       "decideInApprovals": "Avgör i godkännandeområdet",
       "reopenNote": "Återlämningsnotering",
@@ -4847,7 +4916,7 @@
       "synced_pending": "Godkännandet pågår fortfarande.",
       "no_instance": "Det finns ännu ingen godkännandebegäran för den här tidrapporten.",
       "no_template": "Den här organisationen har ännu ingen publicerad godkännandemall för tidrapporter.",
-      "template_created": "Standardgodkännandemall skapad och publicerad.",
+      "template_created": "Standardmallar för godkännande installerade — tidrapportmallen är publicerad.",
       "overlap": "Den här perioden överlappar en befintlig tidrapport.",
       "invalid_period": "Perioden är ogiltig — högst 31 dagar, och slutet får inte ligga före början.",
       "no_worker": "Ditt konto har ingen arbetarprofil.",
@@ -5644,5 +5713,112 @@
       "awaitingOwnerApproval": "väntar på ägarens godkännande"
     },
     "footer": "Ärlig förhandsvisning · Ingen fejkad AI · Ingen fejkad verifiering · Inga påhittade arbetaransikten · Varje post börjar med ”Sample · …” och läses därför aldrig som riktiga data."
+  },
+  "organizationCapabilities": {
+    "title": "Vad gör er organisation?",
+    "help": "Kryssa i allt som stämmer — en organisation kan göra flera saker samtidigt.",
+    "save": "Spara",
+    "saved": "Sparat",
+    "notPermitted": "Du kan inte ändra denna organisation.",
+    "error": "Kunde inte spara. Försök igen.",
+    "allDeclared": "Allt tillgängligt är redan angivet.",
+    "choices": {
+      "training": {
+        "label": "Vi utbildar människor",
+        "hint": "Skola, universitet eller utbildningscenter; vi tar emot praktikanter."
+      },
+      "employer": {
+        "label": "Vi anställer människor",
+        "hint": "Vi rekryterar till oss själva."
+      },
+      "workforce": {
+        "label": "Vi tillhandahåller arbetstagare till andra organisationer",
+        "hint": "Bemanning, kontrakterade lag."
+      },
+      "recruitment": {
+        "label": "Vi hjälper till att hitta och välja människor",
+        "hint": "Rekrytering och urval."
+      },
+      "project": {
+        "label": "Vi driver projekt",
+        "hint": "Vi deltar som utförare eller partner."
+      },
+      "client": {
+        "label": "Vi beställer arbeten eller tjänster",
+        "hint": "Vi är beställare."
+      }
+    }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importera timmar från ett kalkylblad (.xlsx)",
+      "backToEntry": "Tillbaka till daglig registrering",
+      "title": "Import av tidrapport",
+      "subtitle": "Ladda upp en månatlig tidrapport. Granska och rätta tolkningen nedan — inget sparas förrän du bekräftar.",
+      "fileLabel": "Tidrapportfil (.xlsx)",
+      "fileHint": "Ett månadsrutnät arbetare × dag eller ett blad med kolumnerna arbetare / datum / objekt / timmar, upp till 5 MB.",
+      "parse": "Förhandsgranska fil",
+      "parsing": "Läser…",
+      "refused": {
+        "no-file": "Välj en fil först.",
+        "too-large": "Filen är större än 5 MB.",
+        "not-xlsx": "Detta är inte ett .xlsx-kalkylblad.",
+        "too-complex": "Kalkylbladet är för stort för att läsas säkert.",
+        "read-failed": "Filen kunde inte läsas.",
+        "unrecognized": "Ingen tidrapportstruktur kändes igen i den här filen.",
+        "too-many-rows": "Bladet har fler rader än en import rymmer — dela upp filen."
+      },
+      "emptyFile": "Filen innehåller inga tidrapportdata.",
+      "noCompany": "Byt till en företagsarbetsyta.",
+      "summary": "Lästa rader: {rows} (blad {sheet}).",
+      "notPersistedNotice": "Inget sparas förrän du bekräftar.",
+      "skippedTitle": "Celler som inte kunde läsas",
+      "skippedReasons": {
+        "unparsable": "oläsligt värde",
+        "hours-out-of-bounds": "timmar utanför 0–24",
+        "invalid-date": "detta datum finns inte i denna månad"
+      },
+      "monthLabel": "Månad",
+      "monthHint": "Bladet anger ingen månad — välj den uttryckligen.",
+      "duplicateWarning": "Identiska poster finns redan för {count} rader (samma arbetare, datum, objekt och timmar). Att skriva dem igen kräver bekräftelsen nedan.",
+      "columns": {
+        "include": "Ta med",
+        "worker": "Arbetare",
+        "object": "Objekt",
+        "date": "Datum",
+        "hours": "Timmar",
+        "note": "Anteckning",
+        "status": "Status"
+      },
+      "chooseWorker": "Välj en arbetare",
+      "chooseObject": "Välj ett objekt",
+      "suggestions": "Förslag",
+      "allWorkers": "Alla arbetare",
+      "allObjects": "Alla objekt",
+      "needsReview": "Tvetydig cell — kontrollera uppdelningen",
+      "duplicateBadge": "Redan registrerad",
+      "incomplete": "Val krävs",
+      "rowProblems": {
+        "worker": "Arbetare ej accepterad",
+        "object": "Objekt ej accepterat",
+        "date": "Ogiltigt datum",
+        "hours": "Ogiltiga timmar",
+        "note": "Anteckningen är för lång"
+      },
+      "overrideLabel": "Skriv dubbletter ändå (ett äkta andra skift)",
+      "confirm": "Bekräfta valda rader ({count})",
+      "confirming": "Skriver…",
+      "receipt": "Klart — skrivna poster: {count}. De är nu en del av arbetstimmarna.",
+      "confirmBlockedHint": "Varje medtagen rad behöver en arbetare, ett objekt, ett datum och timmar.",
+      "errors": {
+        "invalidRows": "Rader som behöver rättas: {count}. Inget skrevs.",
+        "duplicatesFound": "Identiska befintliga poster: {count}. Inget skrevs — bocka i bekräftelsen för att skriva dem ändå.",
+        "noRows": "Inga rader att skriva.",
+        "tooManyRows": "För många rader för en import — dela upp filen.",
+        "needsMigration": "Den här funktionen är ännu inte aktiverad i den här databasen.",
+        "notAuthorized": "Du får inte registrera dessa timmar.",
+        "generic": "Bearbetningen misslyckades. Försök igen."
+      }
+    }
   }
 }

@@ -13,6 +13,10 @@ import {
   MODEL_PRICING_USD_PER_MTOK,
   pricingForModel,
 } from "@/lib/ai/runtime/model-pricing";
+import {
+  AI_EGRESS_GRANTS,
+  egressPermitted,
+} from "@/lib/ai/runtime/data-egress";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -149,6 +153,102 @@ describe("an unsourced price can never authorise spend", () => {
   });
 });
 
+describe("a verified price is not permission to run", () => {
+  // Gemini's prices were read first-hand from the vendor's pricing page on
+  // 2026-08-24 and recorded in the registry. That closed ONE of the reasons the
+  // provider could not run, and these pins exist so it is not mistaken for
+  // having closed the others. The remaining blocker is a DATA-TRANSFER
+  // decision (`data-egress.ts`, grant table empty by owner decision), which no
+  // pricing edit is entitled to touch.
+  const gemini = MODEL_REGISTRY.filter((e) => e.provider === "gemini");
+
+  it("every gemini model carries a first-hand source and a date", () => {
+    expect(gemini.length).toBeGreaterThan(0);
+    for (const e of gemini) {
+      expect(e.inputUsdPerMTok, e.model).not.toBeNull();
+      expect(e.outputUsdPerMTok, e.model).not.toBeNull();
+      expect(e.pricingSource, e.model).toContain("ai.google.dev");
+      // The 2.5-series rows keep their original date; the replacement lite
+      // model is dated the day its price was read.
+      expect(["2026-08-24", "2026-08-28"], e.model).toContain(e.effectiveFrom);
+    }
+  });
+
+  it("EXACTLY ONE gemini model is enabled — the cheapest, and no other", () => {
+    // #1265 priced all three and enabled none, because pricing is not
+    // permission and the remaining blocker was a data-transfer decision.
+    // 2026-08-24: that decision is answered for ONE task classed PUBLIC, which
+    // needs no egress grant. That model serves the `haiku` alias and therefore
+    // the `low_cost` tier the task prefers.
+    //
+    // 2026-08-28: the id CHANGED, and the reason is the point. The first real
+    // production call returned 404 NOT_FOUND — `gemini-2.5-flash-lite` "is no
+    // longer available to new users. Please update your code to use
+    // models/gemini-3.5-flash-lite". The vendor named its own replacement, so
+    // the enabled entry follows it. What is pinned here is unchanged: exactly
+    // ONE, and it is the cheapest.
+    //
+    // `flash` and `pro` stay disabled and this pins that they do. The public
+    // task cannot escalate (`escalationConditions: []`), so they would be
+    // unreachable models wearing a live enablement flag — and the next, more
+    // sensitive task to want them would find the enablement already done and
+    // looking reviewed.
+    const enabled = gemini.filter((e) => e.enabled).map((e) => e.model);
+    expect(enabled).toEqual(["gemini-3.5-flash-lite"]);
+
+    for (const e of gemini) {
+      const shouldRun = e.model === "gemini-3.5-flash-lite";
+      expect(isSelectable(e), e.model).toBe(shouldRun);
+      if (shouldRun) {
+        expect(pricingForModel(e.model), e.model).not.toBeNull();
+      } else {
+        expect(pricingForModel(e.model), e.model).toBeNull();
+      }
+    }
+  });
+
+  it("enabling it did NOT open the egress gate", () => {
+    // The load-bearing separation, asserted where someone flipping the next
+    // `enabled` flag will read it: a selectable model is still refused every
+    // payload above PUBLIC, because selectability and permission are different
+    // decisions owned by different files.
+    expect(AI_EGRESS_GRANTS).toEqual([]);
+    const geminiProfile = { id: "gemini", locality: "cloud" as const, costClass: "paid" };
+    expect(egressPermitted(geminiProfile, "PUBLIC").permitted).toBe(true);
+    expect(egressPermitted(geminiProfile, "LOW_RISK_PROJECT_DATA").permitted).toBe(false);
+    expect(egressPermitted(geminiProfile, "PERSONAL").permitted).toBe(false);
+    expect(egressPermitted(geminiProfile, "SENSITIVE_FREE_TEXT").permitted).toBe(false);
+  });
+
+  it("the recorded price is the metered rate, never the free allowance", () => {
+    // A €0 here would be the one error a ceiling cannot absorb: the key can be
+    // moved onto billing by an owner action that changes nothing in this repo,
+    // and the ceiling would then be judged against a price that had quietly
+    // stopped being true.
+    for (const e of gemini) {
+      expect(e.inputUsdPerMTok, e.model).toBeGreaterThan(0);
+      expect(e.outputUsdPerMTok, e.model).toBeGreaterThan(0);
+    }
+  });
+
+  it("gemini-2.5-pro is priced at its LONG-prompt tier", () => {
+    // The vendor charges $1.25/$10.00 up to a 200k-token prompt and
+    // $2.50/$15.00 above it. One price per model means it must be the higher
+    // one, or every long prompt is judged against a ceiling it cannot exceed.
+    const pro = registryEntryForModel("gemini-2.5-pro");
+    expect(pro).not.toBeNull();
+    expect(pro?.inputUsdPerMTok).toBe(2.5);
+    expect(pro?.outputUsdPerMTok).toBe(15);
+  });
+
+  it("the free-tier training term is recorded as CURRENT, not historical", () => {
+    for (const e of gemini) {
+      expect(e.freeTier, e.model).toBe(true);
+      expect(e.dataRestrictions.join(" "), e.model).toContain("2026-08-24");
+    }
+  });
+});
+
 describe("the derived tables did not change any shipped value", () => {
   it("model ids are byte-identical to the pre-registry literals", () => {
     expect(AI_MODEL_CANDIDATES.anthropic).toEqual({
@@ -162,10 +262,17 @@ describe("the derived tables did not change any shipped value", () => {
       sonnet: "gpt-5-mini",
       haiku: "gpt-5-nano",
     });
+    // `haiku` is the ONE id in this file that is no longer the pre-registry
+    // literal, and it is deliberate: Google retired `gemini-2.5-flash-lite`
+    // for new keys and named `gemini-3.5-flash-lite` as its replacement (see
+    // the enablement test above). The other two are untouched — a retired id
+    // nobody can reach cannot be verified by reaching it, and guessing a
+    // replacement for a DISABLED model would put an unverified value into the
+    // one table whose job is to hold verified ones.
     expect(AI_MODEL_CANDIDATES.gemini).toEqual({
       opus: "gemini-2.5-pro",
       sonnet: "gemini-2.5-flash",
-      haiku: "gemini-2.5-flash-lite",
+      haiku: "gemini-3.5-flash-lite",
     });
     expect(AI_MODEL_CANDIDATES.xai).toEqual({
       opus: "grok-4",

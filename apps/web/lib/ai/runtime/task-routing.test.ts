@@ -25,8 +25,8 @@ import { ALL_AGENT_KEYS } from "../registry/registry";
 const GAP_TASKS: AiTaskType[] = ["detect_capacity_gap", "detect_skill_gap"];
 
 describe("TASK_POLICIES completeness", () => {
-  it("covers all 10 program task types", () => {
-    expect(AI_TASK_TYPES).toHaveLength(10);
+  it("covers all 11 program task types", () => {
+    expect(AI_TASK_TYPES).toHaveLength(11);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_POLICIES[t], t).toBeDefined();
       expect(TASK_POLICIES[t].taskType).toBe(t);
@@ -239,6 +239,10 @@ describe("routing audit record — every program field, honest nulls", () => {
       fallback: false,
       escalation: false,
       blocked: null,
+      // A clean route carries no vendor failure. The field is structural (the
+      // money ledger branches on it to tell a refusal from a success) so it
+      // appears here as an explicit null rather than being absent.
+      providerFailure: null,
       secondModelReview: false,
       estimatedCostUsd: null,
       actualCostUsd: null,
@@ -303,9 +307,9 @@ describe("language as a routing dimension (AI Router v1)", () => {
   });
 });
 
-describe("agent → task mapping is total over the 11 registered agents", () => {
+describe("agent → task mapping is total over the 12 registered agents", () => {
   it("maps every registered agent to a valid task type", () => {
-    expect(ALL_AGENT_KEYS.length).toBe(11);
+    expect(ALL_AGENT_KEYS.length).toBe(12);
     for (const agent of ALL_AGENT_KEYS) {
       const t = taskTypeForAgent(agent);
       expect(AI_TASK_TYPES, `${agent} → ${t}`).toContain(t);

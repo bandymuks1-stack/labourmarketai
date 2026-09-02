@@ -91,8 +91,17 @@ describe("1. composition-only: existing reads, nothing new, nothing privileged",
     // worker_documents      — read by lib/documents/readiness.ts (verification
     //                         axis column added 20260613100200, degradable)
     // journal_entries(+photos) — read by lib/journal/project-gallery.ts
+    // worker_document_events — the APPEND-ONLY history (20260610170000),
+    //                         read only (Train E1) to tell REVOKED from
+    //                         REJECTED; own rows via RLS, bounded, degradable
     expect(new Set(froms)).toEqual(
-      new Set(["workers", "worker_documents", "journal_entries", "journal_entry_photos"]),
+      new Set([
+        "workers",
+        "worker_documents",
+        "journal_entries",
+        "journal_entry_photos",
+        "worker_document_events",
+      ]),
     );
     expect(COMPOSE).toMatch(/\.limit\(DOC_CENTRE_VERIFICATION_READ_LIMIT\)/);
     expect(DOC_CENTRE_VERIFICATION_READ_LIMIT).toBeLessThanOrEqual(200);
@@ -101,6 +110,24 @@ describe("1. composition-only: existing reads, nothing new, nothing privileged",
     // The pure model touches no table; the page keeps only its role read.
     expect(MODEL).not.toMatch(/\.from\(/);
     expect(PAGE).not.toMatch(/\.from\("(?!profiles")/);
+  });
+
+  it("Train E1: current validity is derived by the pure rule; history is read, never written or reshaped", () => {
+    const VALIDITY = read("lib/documents/credential-validity.ts");
+    // Pure: no IO, no ambient clock.
+    expect(VALIDITY).not.toMatch(/\.from\(|\.rpc\(|createClient|Date\.now\(\)|new Date\(\)/);
+    for (const s of ["active", "expired", "revoked", "pending", "rejected", "unverified", "unknown"]) {
+      expect(VALIDITY).toContain(`"${s}"`);
+    }
+    // The centre composes validity through the pure rule and reads the history
+    // only for the ever-verified bit; the events table is selected, never inserted into.
+    expect(COMPOSE).toMatch(/deriveCredentialValidity\(/);
+    expect(COMPOSE).toMatch(/historyEverVerified\(/);
+    expect(COMPOSE).toMatch(/\.from\("worker_document_events"\)[\s\S]{0,120}\.select\(/);
+    expect(COMPOSE).not.toMatch(/worker_document_events"\)[\s\S]{0,200}\.(insert|update|delete|upsert)\(/);
+    // The page shows validity and the verbatim verification SIDE BY SIDE.
+    expect(PAGE).toMatch(/data-testid="doc-centre-validity"/);
+    expect(PAGE).toMatch(/data-testid="doc-centre-verification"/);
   });
 
   it("the ONLY rpc is the applied s6 consent-gated aggregate", () => {
@@ -359,10 +386,17 @@ describe("6. honest degradation per source + the preparing gate stays", () => {
     expect(PAGE).toMatch(/doc-centre-org-empty/);
     expect(PAGE).toMatch(/doc-centre-org-project-link/);
     // The org branch renders no document list and no verification badges.
+    // End marker is the CALL, not one assignment form: the worker path now
+    // batches that read with the consent read, and pinning the exact
+    // `const centre = await …` spelling made this slice silently empty
+    // (indexOf → -1) rather than fail loudly.
+    const orgEnd = PAGE.indexOf("getWorkerDocumentCentre()");
+    expect(orgEnd).toBeGreaterThan(0);
     const orgBranch = PAGE.slice(
       PAGE.indexOf("ORG_ROLES.has(activeRole)"),
-      PAGE.indexOf("const centre = await getWorkerDocumentCentre()"),
+      orgEnd,
     );
+    expect(orgBranch.length).toBeGreaterThan(0);
     expect(orgBranch).not.toMatch(/documents-list|doc-centre-verification/);
   });
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
 import { extractCvText, MAX_CV_BYTES } from "@/lib/cv/extract";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *
  * Security:
  *   - requires an authenticated session (401 otherwise);
- *   - hard 5 MB size cap (413 otherwise) — checked before reading the body fully;
+ *   - hard 25 MB size cap (MAX_CV_BYTES, 413 otherwise) — checked before reading the body fully;
  *   - never logs the CV text (only a coarse error code);
  *   - returns a typed error code, never the underlying parser message;
  *   - per-user rate limit (SEC-16): each call runs a PDF/DOCX parser, which is
@@ -25,15 +25,16 @@ export const dynamic = "force-dynamic";
 const RATE_LIMIT = { limit: 10, windowMs: 10 * 60 * 1000 } as const;
 
 export async function POST(req: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ ok: false, code: "unauthorized" }, { status: 401 });
+  // SHARED AUTHENTICATED API: cookie session OR `Authorization: Bearer`.
+  // One resolver for every route (lib/api/api-identity.ts) — the header is
+  // never parsed here, and a failed resolution is 401, never anonymous.
+  const auth = await resolveApiIdentity(req);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, code: "unauthorized" }, { status: refusalStatus(auth.reason) });
   }
+  const { userId } = auth.identity;
 
-  const decision = rateLimit({ name: "cv-extract", key: user.id, ...RATE_LIMIT });
+  const decision = rateLimit({ name: "cv-extract", key: userId, ...RATE_LIMIT });
   if (decision.limited) {
     return NextResponse.json(
       { ok: false, code: "rate-limited" },

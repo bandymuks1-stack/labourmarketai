@@ -26,8 +26,9 @@ describe("generic starter chips appear only where a menu belongs", () => {
       "translateBlocked",
       "writeEmployerHint",
     ]) {
-      // assistant(labels.X) with no second argument.
-      expect(CHAT, key).toMatch(new RegExp(`assistant\\(labels\\.${key}\\);`));
+      // assistant(labels.X) with no second argument — as a statement (`;`)
+      // or as a registry handler's arrow-expression body (`,`).
+      expect(CHAT, key).toMatch(new RegExp(`assistant\\(labels\\.${key}\\)[;,]`));
       expect(CHAT, key).not.toMatch(
         new RegExp(`assistant\\(labels\\.${key},\\s*starterChips\\)`),
       );

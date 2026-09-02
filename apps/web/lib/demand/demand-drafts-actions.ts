@@ -12,6 +12,10 @@ import {
   type DraftType,
   type DemandDraftRow,
 } from "./demand-drafts";
+import {
+  startDemandFromNeedText as _startDemandFromNeedText,
+  type StartDemandFromNeedText,
+} from "./demand-from-need-text";
 
 export async function saveDemandDraftAction(
   type: DraftType,
@@ -22,4 +26,16 @@ export async function saveDemandDraftAction(
 
 export async function deleteDemandDraftAction(type: DraftType): Promise<void> {
   return _deleteDemandDraft(type);
+}
+
+/**
+ * Carry a recognised need into the canonical demand draft, so the employer does
+ * not type it a second time. See `demand-from-need-text.ts` for why this is a
+ * draft row and not a query parameter.
+ */
+export async function startDemandFromNeedTextAction(
+  rawText: string,
+  locale: string,
+): Promise<StartDemandFromNeedText> {
+  return _startDemandFromNeedText(rawText, locale);
 }

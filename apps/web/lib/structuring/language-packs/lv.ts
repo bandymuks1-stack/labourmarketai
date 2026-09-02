@@ -237,5 +237,30 @@ export const LV_PACK: LanguagePack = {
     translation: {
       exact: ["tulkoju", "tulks", "tulkojumi", "tulkotāj"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["prezentēju", "prezentācija", "uzstājos ar prezentāciju"],
+    },
+    "stakeholder-engagement": {
+      exact: ["ieinteresētās puses", "tikos ar pārstāvjiem", "tikšanās ar pārstāvjiem"],
+    },
+    "partnership-development": {
+      exact: ["partnerība", "sadarbības iespējas", "izveidoju sadarbību"],
+    },
+    negotiation: {
+      exact: ["pārrunas", "vedu sarunas", "risināju sarunas"],
+    },
+    "project-coordination": {
+      exact: ["koordinēju projektu", "projekta vadība", "projekta koordinācija"],
+    },
+    "report-writing": {
+      exact: ["rakstīju atskaiti", "atskaišu sagatavošana", "sagatavoju ziņojumu"],
+    },
+    teamwork: {
+      exact: ["komandas darbs", "strādāju komandā", "grupas darbs"],
+    },
+    research: {
+      exact: ["veicu pētījumu", "pētniecība", "literatūras apskats"],
+    },
   },
 };

@@ -5,7 +5,13 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet."
+    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "syntheticTitle": {
+      "hiringWorkers": "Søger medarbejdere",
+      "agencyPartnership": "Partnerskabstilbud"
+    },
+    "interestWaiting": "{count, plural, one {# person venter på svar} other {# personer venter på svar}}",
+    "untitledInquiry": "Forespørgsel uden titel"
   },
   "journey": {
     "eyebrow": "Sådan fungerer det",
@@ -115,6 +121,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "[EN] Continue with LinkedIn",
+      "continueWithFacebook": "[EN] Continue with Facebook"
+    },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
       "error_title": "[EN] Sign-in failed",
@@ -287,7 +297,13 @@
       "invalidEmail": "[EN] Invalid email format.",
       "passwordTooShort": "[EN] Password too short (at least {min} characters).",
       "rateLimited": "[EN] Too many attempts. Please try again later.",
-      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead."
+      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
+      "oauth": {
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "Dette bekræftelseslink er udløbet eller allerede brugt. Har du allerede bekræftet din e-mail, så log blot ind. Ellers kan du bede om et nyt link nedenfor.",
+        "confirmed_sign_in": "Din e-mail er bekræftet. Registreringen blev startet på en anden enhed, så log ind her for at fortsætte."
+      },
+      "emailNotConfirmed": "Din e-mail er endnu ikke bekræftet. Åbn bekræftelseslinket, vi sendte dig, eller bed om et nyt nedenfor."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -318,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Send et nyt bekræftelseslink",
+      "resend_sent": "Et nyt bekræftelseslink er på vej til {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -361,6 +379,10 @@
         "event_demand_interest_expressed": "En medarbejder har vist interesse for dit behov",
         "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået",
         "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar"
+      },
+      "email": {
+        "open": "Åbn i LabourMarket.ai:",
+        "manage": "Administrér dine notifikationsindstillinger:"
       }
     },
     "onboarding": {
@@ -466,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Send linket igen",
+      "resend_sent": "Sendt igen. Tjek din indbakke og spammappe.",
+      "resend_wait": "Du kan bede om et nyt link om {seconds} s."
     }
   },
   "common": {
@@ -913,6 +938,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Betalingen blev annulleret — der blev ikke trukket noget, og intet er ændret på din konto."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
@@ -1536,7 +1564,8 @@
         "openDemands": "[EN] Open demands",
         "interestActive": "[EN] Interest: new",
         "interestReviewed": "[EN] Interest: reviewed",
-        "interestContacted": "[EN] Interest: contacted"
+        "interestContacted": "[EN] Interest: contacted",
+        "interestNotified": "Interesse: notificeret"
       },
       "status": {
         "green_scoped": "[EN] green scoped",
@@ -2042,6 +2071,11 @@
         "body": "Aktive filtre: {filters}. Fjern nogle filtre, eller nulstil dem for at se mere.",
         "reset": "Nulstil filtre"
       },
+      "initialView": {
+        "summary": "Viser de {shown} stærkeste match ud af {total} muligheder.",
+        "showAll": "Vis alle ({count} mere)",
+        "showAllExternal": "Vis alle jobopslag"
+      },
       "details": {
         "show": "Flere detaljer",
         "hide": "Skjul detaljer"
@@ -2130,6 +2164,7 @@
     "external": {
       "sectionTitle": "Offentlige jobannoncer",
       "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
+      "shownOfTotal": "top {shown} af {total}",
       "bandBest": "Passer bedst",
       "bandPossible": "Muligvis passende",
       "bandExplore": "Øvrige annoncer",
@@ -2192,6 +2227,7 @@
     "reason": {
       "skills_manager_confirmed": "Lederbekræftede færdigheder",
       "skills_journal_supported": "Journal-understøttede færdigheder",
+      "practice_experience": "Praktik- eller frivilligerfaring",
       "country_match": "Land matcher",
       "mobility_match": "Villig til at arbejde i dette land",
       "available_now": "Tilgængelig nu",
@@ -3557,6 +3593,9 @@
       "chipNeedWorkers": "Jeg mangler medarbejdere",
       "chipCandidates": "Kandidater",
       "chipCompanyHub": "Virksomhedsområde",
+      "chipEduInviteLearner": "[EN] Invite a learner",
+      "chipEduCapabilities": "[EN] What we provide",
+      "learnerGreetingContext": "[EN] You're learning with {institution} — every work entry you log becomes part of your evidence and CV.",
       "companyDemandNext": "Behovet er registreret i dit virksomhedsområde. Hvad nu?",
       "navJournal": "Logbog",
       "chipTasks": "Opgaver",
@@ -3596,7 +3635,15 @@
       "engagementsOpened": "Her er de registrerede arbejdsrelationer. Du kan afslutte en af dem i panelet.",
       "engagementsNone": "Der er ingen registrerede arbejdsrelationer.",
       "engagementsNoCompany": "Du handler ikke på vegne af en organisation lige nu, så der er ingen liste at vise.",
-      "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have."
+      "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
+      "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen.",
+      "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
+      "chipServiceRequests": "Find en ydelse",
+      "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
+      "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
+      "chipMyOwnInterest": "Min egen interesse",
+      "createOrganizationHint": "Jeg kan oprette en organisation sammen med dig — oplysningerne og verificeringen er på én side.",
+      "chipCreateOrganization": "Opret en organisation"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4624,6 +4671,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Udkast til journalnotat",
+      "title": "Fra dokument til Arbejdsjournal",
+      "understoodNote": "Nedenfor er teksten læst fra “{filename}”. Gennemgå, ret og bekræft — først da bliver den en del af din journalhistorik.",
+      "detectedSkills": "Vi fandt {count} omtaler af kompetencer i teksten.",
+      "notesLabel": "Notatets tekst (fra dit dokument — ret før du gemmer)",
+      "engagementLabel": "Arbejdskontekst",
+      "save": "Bekræft og gem i journalen",
+      "saving": "Gemmer…",
+      "saved": "Gemt i din Arbejdsjournal — kildedokumentet forbliver knyttet til dette notat.",
+      "savedLink": "Åbn journalen",
+      "error": "Kunne ikke gemme. Intet blev gemt.",
+      "notFound": "Dette dokument blev ikke fundet blandt dine dokumenter.",
+      "refusedClassified": "Fortrolige dokumenter læses ikke automatisk — download forbliver et logget manuelt trin.",
+      "refusedNoOcr": "Fotos læses ikke — tekstgenkendelse findes ikke endnu.",
+      "refusedType": "Denne filtype kan ikke læses som tekst.",
+      "empty": "Ingen læsbar tekst fundet i dette dokument.",
+      "failed": "Dokumentet kunne ikke læses.",
+      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en."
+    },
     "currentVersion": "Version {n}",
     "download": "Download",
     "noFileYet": "Ingen fil uploadet endnu.",
@@ -4830,7 +4897,9 @@
       "title": "Holdets timesedler",
       "decideNote": "Godkendelsesbeslutninger træffes i godkendelsesområdet. Her kan du gennemse linjer, eksportere og returnere en afgjort timeseddel.",
       "noTemplateFor": "{name} har ingen offentliggjort godkendelsesskabelon for timesedler.",
-      "createTemplate": "Opret standardgodkendelsesskabelon",
+      "templateNeedsAdmin": "Kun en ejer eller administrator af organisationen kan udgive godkendelsesskabelonen. Indtil da kan timesedler ikke indsendes.",
+      "blockedNote": "Venter på denne skabelon: {count} timesedler i denne organisation kan ikke indsendes, før den er udgivet.",
+      "createTemplate": "Installer standardgodkendelsesskabeloner",
       "unnamedWorker": "Medarbejder",
       "decideInApprovals": "Afgør i godkendelsesområdet",
       "reopenNote": "Returnote",
@@ -4847,7 +4916,7 @@
       "synced_pending": "Godkendelsen er stadig i gang.",
       "no_instance": "Der findes endnu ingen godkendelsesanmodning for denne timeseddel.",
       "no_template": "Denne organisation har endnu ingen offentliggjort godkendelsesskabelon for timesedler.",
-      "template_created": "Standardgodkendelsesskabelon oprettet og offentliggjort.",
+      "template_created": "Standardgodkendelsesskabeloner installeret — timeseddelskabelonen er udgivet.",
       "overlap": "Denne periode overlapper en eksisterende timeseddel.",
       "invalid_period": "Perioden er ugyldig — højst 31 dage, og slutningen må ikke ligge før starten.",
       "no_worker": "Din konto har ingen medarbejderprofil.",
@@ -5644,5 +5713,112 @@
       "awaitingOwnerApproval": "afventer ejerens godkendelse"
     },
     "footer": "Ærlig forhåndsvisning · Ingen falsk AI · Ingen falsk verificering · Ingen opdigtede medarbejderansigter · Hver post begynder med ”Sample · …”, så den aldrig læses som rigtige data."
+  },
+  "organizationCapabilities": {
+    "title": "Hvad laver jeres organisation?",
+    "help": "Sæt kryds ved alt, der passer — en organisation kan gøre flere ting på én gang.",
+    "save": "Gem",
+    "saved": "Gemt",
+    "notPermitted": "Du kan ikke ændre denne organisation.",
+    "error": "Kunne ikke gemme. Prøv igen.",
+    "allDeclared": "Alt tilgængeligt er allerede angivet.",
+    "choices": {
+      "training": {
+        "label": "Vi uddanner og træner mennesker",
+        "hint": "Skole, universitet eller uddannelsescenter; vi tager praktikanter."
+      },
+      "employer": {
+        "label": "Vi ansætter mennesker",
+        "hint": "Vi rekrutterer til os selv."
+      },
+      "workforce": {
+        "label": "Vi leverer medarbejdere til andre organisationer",
+        "hint": "Vikarydelser, kontraktsjak."
+      },
+      "recruitment": {
+        "label": "Vi hjælper med at finde og udvælge mennesker",
+        "hint": "Rekruttering og udvælgelse."
+      },
+      "project": {
+        "label": "Vi driver projekter",
+        "hint": "Vi deltager som udfører eller partner."
+      },
+      "client": {
+        "label": "Vi bestiller arbejde eller tjenester",
+        "hint": "Vi er ordregiver."
+      }
+    }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Importér timer fra et regneark (.xlsx)",
+      "backToEntry": "Tilbage til daglig registrering",
+      "title": "Import af timeseddel",
+      "subtitle": "Upload en månedlig timeseddel. Gennemgå og ret fortolkningen nedenfor — intet gemmes, før du bekræfter.",
+      "fileLabel": "Timeseddelfil (.xlsx)",
+      "fileHint": "Et månedsgitter medarbejder × dag eller et ark med kolonnerne medarbejder / dato / objekt / timer, op til 5 MB.",
+      "parse": "Forhåndsvis fil",
+      "parsing": "Læser…",
+      "refused": {
+        "no-file": "Vælg først en fil.",
+        "too-large": "Filen er større end 5 MB.",
+        "not-xlsx": "Dette er ikke et .xlsx-regneark.",
+        "too-complex": "Regnearket er for stort til at blive læst sikkert.",
+        "read-failed": "Filen kunne ikke læses.",
+        "unrecognized": "Der blev ikke genkendt nogen timeseddelstruktur i denne fil.",
+        "too-many-rows": "Arket indeholder flere rækker, end én import kan rumme — del filen op."
+      },
+      "emptyFile": "Filen indeholder ingen timeseddeldata.",
+      "noCompany": "Skift til et virksomhedsarbejdsområde.",
+      "summary": "Læste rækker: {rows} (ark {sheet}).",
+      "notPersistedNotice": "Intet gemmes, før du bekræfter.",
+      "skippedTitle": "Celler, der ikke kunne læses",
+      "skippedReasons": {
+        "unparsable": "ulæselig værdi",
+        "hours-out-of-bounds": "timer uden for 0–24",
+        "invalid-date": "denne dato findes ikke i denne måned"
+      },
+      "monthLabel": "Måned",
+      "monthHint": "Arket angiver ingen måned — vælg den udtrykkeligt.",
+      "duplicateWarning": "Identiske registreringer findes allerede for {count} rækker (samme medarbejder, dato, objekt og timer). At skrive dem igen kræver bekræftelsen nedenfor.",
+      "columns": {
+        "include": "Medtag",
+        "worker": "Medarbejder",
+        "object": "Objekt",
+        "date": "Dato",
+        "hours": "Timer",
+        "note": "Note",
+        "status": "Status"
+      },
+      "chooseWorker": "Vælg en medarbejder",
+      "chooseObject": "Vælg et objekt",
+      "suggestions": "Forslag",
+      "allWorkers": "Alle medarbejdere",
+      "allObjects": "Alle objekter",
+      "needsReview": "Tvetydig celle — tjek opdelingen",
+      "duplicateBadge": "Allerede registreret",
+      "incomplete": "Valg mangler",
+      "rowProblems": {
+        "worker": "Medarbejder ikke accepteret",
+        "object": "Objekt ikke accepteret",
+        "date": "Ugyldig dato",
+        "hours": "Ugyldige timer",
+        "note": "Noten er for lang"
+      },
+      "overrideLabel": "Skriv dubletter alligevel (en ægte anden vagt)",
+      "confirm": "Bekræft valgte rækker ({count})",
+      "confirming": "Skriver…",
+      "receipt": "Færdig — skrevne registreringer: {count}. De er nu en del af arbejdstimerne.",
+      "confirmBlockedHint": "Hver medtaget række kræver en medarbejder, et objekt, en dato og timer.",
+      "errors": {
+        "invalidRows": "Rækker, der skal rettes: {count}. Intet blev skrevet.",
+        "duplicatesFound": "Identiske eksisterende registreringer: {count}. Intet blev skrevet — markér bekræftelsen for at skrive dem alligevel.",
+        "noRows": "Ingen rækker at skrive.",
+        "tooManyRows": "For mange rækker til én import — del filen op.",
+        "needsMigration": "Denne funktion er endnu ikke aktiveret i denne database.",
+        "notAuthorized": "Du må ikke registrere disse timer.",
+        "generic": "Behandlingen mislykkedes. Prøv igen."
+      }
+    }
   }
 }

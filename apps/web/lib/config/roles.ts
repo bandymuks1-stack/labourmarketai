@@ -35,9 +35,28 @@ export type RoleAvailability =
    *  for buyer / customer until `public.customers` migration ships. */
   | "partial";
 
+/**
+ * THE live participation modes — the single runtime source for this
+ * vocabulary.
+ *
+ * These four ids were hand-written in five places: this union, the `Role`
+ * union in `lib/auth/actions.ts` (whose own comment said it matched this
+ * one), the `ONBOARDING_ROLES` set and `ROLE_ORDER` array beside it, and the
+ * `isLiveRoleId` predicate below. Five copies of one vocabulary is five
+ * chances to drift, and nothing would have failed if they had.
+ *
+ * A runtime const with the type derived from it is the same pattern
+ * `ENTITY_TYPES` and `MEMBERSHIP_ROLES` already use.
+ *
+ * NOT the set of roles a profile may HOLD — production `profile_roles` also
+ * carries `admin`, which nobody onboards into. See `HeldProfileRole` in
+ * `lib/auth/profile-roles.ts`.
+ */
+export const LIVE_ROLE_IDS = ["worker", "company", "agency", "customer"] as const;
+
 /** Roles already used as the `Role` union elsewhere in the codebase
  *  (matches `profile_roles.role` + DB enum today). */
-export type LiveRoleId = "worker" | "company" | "agency" | "customer";
+export type LiveRoleId = (typeof LIVE_ROLE_IDS)[number];
 
 /** Forward-looking role ids — documented as `hidden` for now so the
  *  catalogue is a single, searchable list of "every role we've ever
@@ -300,7 +319,7 @@ export function isRolePreparing(id: LabourMarketRoleId): boolean {
 }
 
 export function isLiveRoleId(id: string): id is LiveRoleId {
-  return id === "worker" || id === "company" || id === "agency" || id === "customer";
+  return (LIVE_ROLE_IDS as readonly string[]).includes(id);
 }
 
 export function rolePreparingLabelKey(): string {

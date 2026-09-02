@@ -242,4 +242,26 @@ export const SKILL_RECOGNITION_STATUS: Readonly<Record<string, SkillRecognitionS
   "waterproofing-tiles": deferred(
     "wet-room niche — real phrases resolve to the parent waterproofing needles (hidroizoli/гидроизоляц); a dedicated needle would double-suggest",
   ),
+
+  // ── Transversal professional capabilities (2026-08-27; packs 2026-09-01) ─
+  // The education-pilot family. These shipped DEFERRED — LT/EN/RU needles
+  // only, with the note "the 9 offline pack languages arrive with the next
+  // language wave". This IS that wave: every one of the nine registered packs
+  // (da de et fi lv nl no pl sv) now carries real per-language needles for all
+  // eight slugs, so the promotion to `core` is a statement of measured fact,
+  // not a claim — the guard below re-checks it against the packs themselves on
+  // every run and fails the moment a pack loses a needle.
+  //
+  // They are deliberately NOT added to core-slugs.ts: that list is the owner's
+  // minimum coverage for the labour-market families, and a transversal ability
+  // is not a family. `core` here means exactly what the header says — needles
+  // in the base lexicon AND in every registered pack.
+  presenting: CORE,
+  "stakeholder-engagement": CORE,
+  "partnership-development": CORE,
+  negotiation: CORE,
+  "project-coordination": CORE,
+  "report-writing": CORE,
+  teamwork: CORE,
+  research: CORE,
 };

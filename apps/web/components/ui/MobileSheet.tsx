@@ -19,12 +19,17 @@ export function MobileSheet({
   open,
   onClose,
   title,
+  closeLabel,
   children,
   className,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
+  /** Localized accessible name for the two close controls (backdrop + ✕).
+   *  Callers pass their own translated string; the English fallback exists
+   *  only so an unmigrated caller degrades to the previous behavior. */
+  closeLabel?: string;
   children: React.ReactNode;
   className?: string;
 }) {
@@ -60,7 +65,7 @@ export function MobileSheet({
     >
       <button
         type="button"
-        aria-label="Close"
+        aria-label={closeLabel ?? "Close"}
         onClick={onClose}
         className="absolute inset-0 bg-ink-900/70 backdrop-blur-sm"
       />
@@ -77,7 +82,7 @@ export function MobileSheet({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={closeLabel ?? "Close"}
             className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             ✕

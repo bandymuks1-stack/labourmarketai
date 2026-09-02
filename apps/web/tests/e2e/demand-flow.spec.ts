@@ -22,7 +22,16 @@ import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-const STORAGE_STATE = join(__dirname, ".storage-state.json");
+// The COMPANY-actor session file, not the shared `.storage-state.json`: the
+// generic file's identity is whatever the last mint chose (the 2026-08-31
+// journey pass minted it as dev.worker), and a worker session is redirected
+// off the role-gated /dashboard/company — the form then "fails to render" for
+// a reason that has nothing to do with the demand flow. Same pinning
+// employer-no-retyping.spec.ts already uses. Mint with:
+//   E2E_OWNER_EMAIL=dev.company@local.test \
+//   E2E_STORAGE_FILE=.storage-state.company.json \
+//   npx tsx scripts/e2e-mint-session.ts
+const STORAGE_STATE = join(__dirname, ".storage-state.company.json");
 const SCREENSHOT_DIR = join(
   __dirname,
   "..",

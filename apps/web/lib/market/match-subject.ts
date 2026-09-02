@@ -22,6 +22,7 @@ import {
   lastActiveBucket,
   type LastActiveBucket,
 } from "@/lib/scouting/profile-freshness";
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * Read layer for matching v1 — assembles a `MatchSubject` for each
@@ -299,11 +300,20 @@ export async function buildSupplyCandidates(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows: any[] = poolIds.map((id) => byId.get(id)).filter(Boolean);
   const workerIds = rows.map((w) => w.id as string);
+  const profileIds = [
+    ...new Set(
+      rows
+        .map((w) => w.profile_id as string | null)
+        .filter((p): p is string => typeof p === "string" && p !== ""),
+    ),
+  ];
 
   // worker_skills.source → evidence tier, keyed on the CANONICAL SKILL SLUG
   // (best tier wins). PR4 repair: this used to key on skills.esco_uri and
   // silently DROPPED every skill whose esco_uri was NULL — which in prod was
-  // ALL of them (0/152 curated), making the whole supply side skill-less.
+  // ALL of them (0/152 curated at the 2026-07-04 audit; re-verified
+  // 2026-08-30: still 0, now of 161 — docs/LANGUAGE_MATRIX.md §4.1), making
+  // the whole supply side skill-less.
   // The slug exists for 100% of rows; esco_uri rides along only as a legacy
   // alias for human-ESCO-structured needs.
   const tierRank: Record<EvidenceTier, number> = {
@@ -319,7 +329,14 @@ export async function buildSupplyCandidates(
   // HUMAN-GATED and may not be applied: a 42703 / 42P01 response leaves the
   // facts undefined (→ honest missingFacts in the engine), never an error,
   // and the primary workers query above stays untouched so nothing regresses.
-  const [skillsRes, profsRes, prefsRes, langsRes] = await Promise.all([
+  //
+  // The practice read joins them: `engagement_contexts` SELECT is
+  // own-rows / managed-org / admin (0013). An employer scouting session
+  // therefore reads NOTHING here and the subject keeps `practiceEngagements`
+  // null — an honest "not stated", exactly like the gated stores above. The
+  // superadmin matching workbench, which is where a human actually weighs a
+  // learner's placement today, reads the real rows.
+  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("worker_id, source, verified, skills ( slug, esco_uri )")
@@ -346,6 +363,20 @@ export async function buildSupplyCandidates(
         (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
         () => ({ data: null }),
       ),
+    // Practice / volunteer placements, keyed by PROFILE id. No status filter:
+    // an ENDED placement is a completed one — still real, still the person's
+    // own history (work-history-model.ts makes the same call).
+    profileIds.length === 0
+      ? Promise.resolve({ data: null })
+      : asAny(supabase)
+          .from("engagement_contexts")
+          .select("profile_id, relationship_slug")
+          .in("profile_id", profileIds)
+          .in("relationship_slug", [...PRACTICE_RELATIONSHIPS])
+          .then(
+            (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
+            () => ({ data: null }),
+          ),
   ]);
 
   for (const s of (skillsRes.data ?? []) as {
@@ -405,6 +436,21 @@ export async function buildSupplyCandidates(
     languagesByWorker.set(l.worker_id, list);
   }
 
+  // Practice placements per PROFILE. `null` (unreadable / no read issued) and
+  // `0` are deliberately different: null stays "not stated" on the subject,
+  // never "has none".
+  const practiceByProfile: Map<string, number> | null =
+    practiceRes.data === null ? null : new Map<string, number>();
+  if (practiceByProfile) {
+    for (const e of (practiceRes.data ?? []) as {
+      profile_id: string | null;
+      relationship_slug: string | null;
+    }[]) {
+      if (!e.profile_id) continue;
+      practiceByProfile.set(e.profile_id, (practiceByProfile.get(e.profile_id) ?? 0) + 1);
+    }
+  }
+
   // W5 slice 1: the candidate_skills join was REMOVED. The table never had a
   // writer (the capture slice shipped to skill_candidate_clarifications and
   // profile_skill_claims instead), so this read only ever saw an empty set.
@@ -448,6 +494,11 @@ export async function buildSupplyCandidates(
         nightShiftsOk: prefsByWorker.get(w.id as string)?.night_shifts_ok ?? null,
         weekendShiftsOk: prefsByWorker.get(w.id as string)?.weekend_shifts_ok ?? null,
         overtimeOk: prefsByWorker.get(w.id as string)?.overtime_ok ?? null,
+        // Practice placements — labelled, additive; null when unreadable.
+        practiceEngagements:
+          practiceByProfile === null
+            ? null
+            : (practiceByProfile.get((w.profile_id as string | null) ?? "") ?? 0),
       } satisfies MatchSubject,
     };
   });

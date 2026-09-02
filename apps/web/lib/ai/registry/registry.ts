@@ -2,7 +2,7 @@
  * Prompt registry — the single source of truth (Internal LLM Agents v1).
  *
  * Agents register here, not in components/routes (enforced by
- * prompt-registry-required). All ELEVEN product agents are registered.
+ * prompt-registry-required). All TWELVE product agents are registered.
  * `getPromptEntry` throws for an unregistered agent so a caller can never
  * silently run a promptless agent.
  */
@@ -18,6 +18,7 @@ import { bookingRiskEntry } from "./agents/booking-risk";
 import { adminRiskEntry } from "./agents/admin-risk";
 import { supportOnboardingEntry } from "./agents/support-onboarding";
 import { translationCopyEntry } from "./agents/translation-copy";
+import { marketExplanationEntry } from "./agents/market-explanation";
 
 export const AI_PROMPT_REGISTRY: Partial<
   Record<AiAgentKey, PromptRegistryEntry>
@@ -33,9 +34,10 @@ export const AI_PROMPT_REGISTRY: Partial<
   admin_risk: adminRiskEntry,
   support_onboarding: supportOnboardingEntry,
   translation_copy: translationCopyEntry,
+  market_explanation: marketExplanationEntry,
 };
 
-/** Agent keys with a registered prompt today (all eleven). */
+/** Agent keys with a registered prompt today (all twelve). */
 export const REGISTERED_AGENTS = Object.keys(
   AI_PROMPT_REGISTRY,
 ) as AiAgentKey[];
@@ -67,4 +69,5 @@ export const ALL_AGENT_KEYS: readonly AiAgentKey[] = [
   "admin_risk",
   "support_onboarding",
   "translation_copy",
+  "market_explanation",
 ];

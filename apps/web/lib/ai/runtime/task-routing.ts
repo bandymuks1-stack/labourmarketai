@@ -55,6 +55,9 @@ export const AI_TASK_TYPES = [
   "explain_match",
   "translate_message",
   "draft_follow_up",
+  /** Aggregate PUBLIC labour-market statistics → a plain-language reading.
+   *  The only task in this program whose payload carries no data subject. */
+  "explain_market_demand",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -342,6 +345,65 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // the low_cost LLM tier serves the task exactly as before.
     languageRouting: { preferredProvider: "deepl" },
   },
+  /**
+   * THE PUBLIC TASK.
+   *
+   * `allowedFields` is the whole classification argument, because
+   * `TASK_SENSITIVITY` is derived from the fields a policy admits rather than
+   * from the task's name. Every field below is an aggregate COUNT, a taxonomy
+   * SLUG, a place NAME or a DATE, assembled by
+   * `lib/market/public-market-facts.ts` from externally published job
+   * advertisements. No data subject, no employer identity, no advertisement
+   * text — so `PUBLIC` here is a statement about the payload, checkable
+   * against this list, not a convenient label.
+   *
+   * `low_cost` on both tiers and NO escalation conditions: reading numbers
+   * back is not a task that gets better with a frontier model, and an
+   * explanation surface that can silently escalate is an explanation surface
+   * with an unbounded bill. The ceiling is set accordingly.
+   */
+  explain_market_demand: {
+    taskType: "explain_market_demand",
+    riskLevel: "low",
+    allowedFields: [
+      "profession_slug",
+      "measured_at_iso",
+      "active_ads",
+      "new_ads_7d",
+      "new_ads_30d",
+      "ads_stating_pay",
+      "ranking_window_ads",
+      "ranking_window_covers_all",
+      "top_skills",
+      "top_cities",
+      "countries",
+      "locale",
+    ],
+    prohibitedFields: [
+      "full_cv",
+      "worker_profile",
+      "journal_entry_text",
+      "employer_name",
+      "vacancy_title",
+      "vacancy_description",
+      "application_url",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "marketExplanationOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.02,
+    expectedOutputTokens: 700,
+    maxLatencyMs: 30_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // The output is a suggestion rendered beside the deterministic facts it
+    // explains, never persisted and never a record. The human decision it
+    // supports is the reader's own next move, which is why this is false
+    // while every person-describing task here is true.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
@@ -384,6 +446,7 @@ export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   admin_risk: "explain_match", // same explanation-class task, admin audience
   support_onboarding: "draft_follow_up", // guidance / next-step message drafts
   translation_copy: "translate_message",
+  market_explanation: "explain_market_demand",
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {
@@ -724,6 +787,29 @@ export interface AiRoutingRunOutcome {
   /** Field NAMES / categories sent — NEVER field values (no PII in audit). */
   readonly dataCategoriesSent: readonly string[];
   readonly estimatedCostUsd?: number | null;
+  /**
+   * Why the VENDOR call failed, when one was made and did not succeed.
+   *
+   * This field exists because of a real production incident, and the incident
+   * is the argument for it. The first live vendor integration failed on its
+   * first real call, and the row it wrote said the route had succeeded:
+   * `provider gemini`, a concrete `model_id`, `latency_ms 110`,
+   * `blocked_reason null`, `route_reason` reporting a clean route. The adapter
+   * knew exactly what happened — it had built the string `gemini http <status>`
+   * — and every layer above it dropped that string on the floor. The operator
+   * was left with a screen saying the service was unavailable and a telemetry
+   * row saying nothing was wrong.
+   *
+   * A route that reached a vendor and came back empty is not the same event as
+   * a route that resolved cleanly, and `ai_runs` has to be able to tell them
+   * apart or it cannot be used to diagnose the thing it exists to measure.
+   *
+   * BOUNDED AND SECRET-FREE BY CONSTRUCTION. Only ADAPTER-level failures reach
+   * here — `gemini http 404`, `anthropic http 401`, a timeout, an unsupported
+   * route. Schema-rejection details are deliberately NOT carried: those echo
+   * model output, and audit records never carry content.
+   */
+  readonly providerFailure?: string | null;
   // ── AI Router v1 additions (all optional → honest nulls on the record) ────
   /** Concrete model id the run was dispatched with (null when no LLM ran). */
   readonly modelId?: string | null;
@@ -746,6 +832,21 @@ export interface AiRoutingAuditRecord {
   readonly fallback: boolean;
   readonly escalation: boolean;
   readonly blocked: RouteBlockReason | null;
+  /**
+   * Set when a vendor WAS reached and did not answer. Structural, not just
+   * folded into `reason`, because a consumer has to be able to branch on it —
+   * and one already has to: the money ledger derived its `status` from
+   * `blocked` alone, so a run that reached Gemini and got a 404 was written to
+   * `usage_cost_events` as `status: "success"` carrying a pre-run estimate.
+   * At month end that is spend that never happened, attached to a delivery
+   * that never happened.
+   *
+   * `blocked` and this are different events and must stay distinguishable:
+   * BLOCKED means the router refused to dispatch (cost ceiling, unpriced
+   * model, missing human gate); this means it dispatched and the vendor
+   * refused.
+   */
+  readonly providerFailure: string | null;
   readonly secondModelReview: boolean;
   readonly estimatedCostUsd: number | null;
   readonly actualCostUsd: number | null;
@@ -781,10 +882,20 @@ export function buildRoutingAuditRecord(
     selectedTier: decision.tier,
     providerAdapter: outcome.providerAdapter,
     modelAlias: decision.modelAlias,
-    reason: decision.reason,
+    // The route's own reasoning, plus — when a vendor was reached and did not
+    // answer — WHY it did not. `route_reason` is the widest text column on the
+    // row (600 chars, sliced by the writer), and the alternative was a schema
+    // change to record a fact the runtime already had in hand. A failure that
+    // is not a BLOCK has nowhere else to land: `blocked_reason` is a closed
+    // three-member vocabulary and `fallback_reason` describes a retry that did
+    // happen, not a call that failed.
+    reason: outcome.providerFailure
+      ? `${decision.reason} — vendor call failed: ${outcome.providerFailure.slice(0, 400)}`
+      : decision.reason,
     fallback: decision.fallbackApplied,
     escalation: decision.escalated,
     blocked: decision.blocked ?? null,
+    providerFailure: outcome.providerFailure ?? null,
     secondModelReview: decision.secondModelReview,
     estimatedCostUsd: outcome.estimatedCostUsd ?? null,
     actualCostUsd: outcome.actualCostUsd,

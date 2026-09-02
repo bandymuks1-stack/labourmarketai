@@ -47,6 +47,11 @@ const CHAT_KEYS = [
   "chipNeedWorkers",
   "chipCandidates",
   "chipCompanyHub",
+  // M10 — education-shaped starters for a training-provider workspace.
+  // `learnerGreetingContext` carries an `{institution}` placeholder, so like
+  // `greetingNamed` it is resolved by the server caller that knows the name.
+  "chipEduInviteLearner",
+  "chipEduCapabilities",
   "companyDemandNext",
   "chipTasks",
   "clarifyWorkLog",
@@ -54,6 +59,44 @@ const CHAT_KEYS = [
   "messagesHint",
   "reminderBlocked",
   "translateBlocked",
+  // The administration areas that now open on an explicit ?area= instead
+  // of unrolling under every visit to /dashboard/network. Gating a surface
+  // is only half the job: these are how the sentences that mean them still
+  // reach them.
+  // §2 — the person is ONE. Somebody who HOLDS the company role is an
+  // employer even while their active workspace is personal, so a sentence
+  // about hiring must not die in the not-understood fallback.
+  "employerBridgeHint",
+  // §33 — a request for a JOB TO BE DONE is not a request to fill a job.
+  "serviceNeedHint",
+  "chipServiceRequests",
+  // §2: "kas susidomėjo?" means two real things for a dual-role person.
+  "interestInboxAmbiguous",
+  "chipInterestOnMyNeeds",
+  "chipMyOwnInterest",
+  // The one sentence that means START an organization (as opposed to
+  // `company-overview`, which means LOOK AT one).
+  "createOrganizationHint",
+  "chipCreateOrganization",
+  // The credit ledger, reachable by asking rather than only by searching.
+  // The command finder already answered the SHORT query ("lmc"); a sentence
+  // walked past it, because that matcher is a search box and not a router.
+  "lmcHint",
+  "chipLmc",
+  "adminRouteHint",
+  "adminApprovalsChip",
+  "adminRequestsChip",
+  // The timesheet area of the planning page, reachable by sentence
+  // (self-serve approval-template closure slice).
+  "timesheetsChip",
+  // §9 chat-first coverage — six domains that shipped reachable only by URL.
+  // They reuse `adminRouteHint` for the sentence and add one chip label each.
+  "timesheetImportChip",
+  "workHoursChip",
+  "absencesChip",
+  "documentsChip",
+  "marketMapChip",
+  "activityChip",
   "writeEmployerHint",
   // W7 slice 2 — intent-aware attach.
   "attachChoice",

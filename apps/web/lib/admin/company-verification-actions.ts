@@ -24,11 +24,20 @@ export type CompanyVerificationActionState =
       message?: string;
     };
 
-function readStatus(v: FormDataEntryValue | null): AdminVerificationStatus | null {
-  const s = (v ?? "").toString();
-  return (ADMIN_VERIFICATION_STATUSES as readonly string[]).includes(s)
-    ? (s as AdminVerificationStatus)
-    : null;
+/**
+ * The form posts `status` through two channels (see the component header):
+ * the hidden input (empty on a pre-hydration native submit, set on hydrated
+ * clicks) and the clicked button's own name/value. DOM order puts the empty
+ * hidden input first, so resolve the LAST non-empty valid entry.
+ */
+function readStatus(values: readonly FormDataEntryValue[]): AdminVerificationStatus | null {
+  for (let i = values.length - 1; i >= 0; i -= 1) {
+    const s = (values[i] ?? "").toString();
+    if (s && (ADMIN_VERIFICATION_STATUSES as readonly string[]).includes(s)) {
+      return s as AdminVerificationStatus;
+    }
+  }
+  return null;
 }
 
 export async function setCompanyVerificationAction(
@@ -40,7 +49,7 @@ export async function setCompanyVerificationAction(
   await requireSuperadmin("lt");
 
   const companyId = String(formData.get("company_id") ?? "").trim();
-  const status = readStatus(formData.get("status"));
+  const status = readStatus(formData.getAll("status"));
   const note = formData.get("note")?.toString() ?? null;
 
   if (!companyId || !status) {

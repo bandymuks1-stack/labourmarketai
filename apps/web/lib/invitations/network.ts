@@ -127,6 +127,13 @@ export type IncomingInvitationRow = {
   organizationName: string | null;
   projectTitle: string | null;
   inviterName: string | null;
+  /**
+   * WHAT the invited person is being asked to become — `student`, `volunteer`,
+   * `employee`… Null on every invitation created before 20260827200000, which
+   * is exactly when the historical per-type default applies. Rendered through
+   * the localized `relationshipTypes` catalogue, never as the slug.
+   */
+  relationshipSlug: string | null;
 };
 
 export type IncomingInvitationsRead =
@@ -152,6 +159,9 @@ export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
     organization_name: string | null;
     project_title: string | null;
     inviter_name: string | null;
+    /** WHAT the invited person is being asked to become. Null on every
+     *  invitation created before 20260827200000 — the historical default. */
+    relationship_slug: string | null;
   };
   const items = ((data?.items ?? []) as Item[]).map((i) => ({
     id: i.id,
@@ -163,6 +173,7 @@ export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
     organizationName: i.organization_name,
     projectTitle: i.project_title,
     inviterName: i.inviter_name,
+    relationshipSlug: i.relationship_slug ?? null,
   }));
   return { status: "ok", items };
 }

@@ -461,7 +461,10 @@
       "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje.",
       "pending_absence_reviews": "Išnyksta, kai atostogų ir nebuvimo puslapyje patvirtinate arba atmetate prašymą.",
       "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje)."
-    }
+    },
+    "storedTitle": "Įrašyti pranešimai",
+    "storedIntro": "Užfiksuoti įvykiai apie jus — kiekviena eilutė atidaro susijusį puslapį. Perskaitymo būsena tvarkoma per varpelį.",
+    "storedEmpty": "Įrašytų pranešimų kol kas nėra."
   },
   "commandFinder": {
     "title": "Greita paieška",
@@ -719,6 +722,10 @@
       "needsClear": "{n} užklausų tapo pakankamai aiškios geresniam sutapimui.",
       "projectsClarified": "{n} projektų patikslinti iki geriausių variantų sąrašo.",
       "topTrades": "Daugiausia ieškota šią savaitę: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Jūsų tekstas neišsaugotas: kol neturite įmonės darbo srities, juodraštis neturi kam priklausyti. Poreikio formą atidarome tuščią — įmonę galite sukurti ten pat.",
+      "failed": "Jūsų teksto išsaugoti nepavyko, todėl poreikio formą atidarome tuščią. Aprašymą teks suvesti iš naujo."
     }
   },
   "quickNav": {
@@ -872,6 +879,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Reali rinkos paklausa",
+      "lead": "Atviri poreikiai iš tikrosios šios platformos paklausos — kur darbo prašoma dabar."
+    },
+    "vacancyVolume": {
+      "title": "Viešų skelbimų apimtis",
+      "scope": "{count} importuotų viešų darbo skelbimų profesijai „{profession}“. Dabartinė šaltinių aprėptis: {countries}.",
+      "window": "Miestų apimtys skaičiuojamos pagal naujausius {window} skelbimų, ne visą fondą."
+    },
     "entities": {
       "title": "Trys dalykai žemėlapyje",
       "intro": "Žemėlapyje rodomi trys skirtingi dalykai: žmonės, įmonių veiklos teritorijos ir projektų vietos. Kiekvienas rodomas pagal savo taisyklę ir atrodo skirtingai.",
@@ -1463,7 +1479,13 @@
       "urgency": "Kada reikia",
       "notes": "Pastabos"
     },
-    "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas"
+    "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas",
+    "syntheticTitle": {
+      "hiringWorkers": "Ieškoma darbuotojų",
+      "agencyPartnership": "Partnerystės pasiūlymas"
+    },
+    "interestWaiting": "{count, plural, one {# žmogus laukia atsakymo} few {# žmonės laukia atsakymo} other {# žmonių laukia atsakymo}}",
+    "untitledInquiry": "Užklausa be pavadinimo"
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",
@@ -2795,7 +2817,8 @@
         "openDemands": "Atviri poreikiai",
         "interestActive": "Susidomėjimas: nauji",
         "interestReviewed": "Susidomėjimas: peržiūrėti",
-        "interestContacted": "Susidomėjimas: susisiekta"
+        "interestContacted": "Susidomėjimas: susisiekta",
+        "interestNotified": "Susidomėjimas: pranešta"
       },
       "status": {
         "green_scoped": "green scoped",
@@ -3321,6 +3344,10 @@
       "legendTarget": "Rinkos kryptys",
       "legendContext": "Platesnis pasaulis",
       "aria": "Darbo kryptys — pasaulio žemėlapis"
+    },
+    "origin": {
+      "live": "Tikri duomenys",
+      "preview": "Peržiūra"
     }
   },
   "company": {
@@ -3397,6 +3424,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Tęsti su LinkedIn",
+      "continueWithFacebook": "Tęsti su Facebook"
+    },
     "legalNotice": {
       "signup": "Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
       "googleLogin": "Jei paskyros dar neturite, tęsiant su „Google“ ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
@@ -3414,8 +3445,12 @@
         "exchange_failed": "Prisijungti nepavyko. Pabandykite dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
         "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunkite ir prisijunkite iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandykite dar kartą — jei tęsiasi, atsiųskite žemiau pateiktą trace ID.",
-        "unknown": "Prisijungti nepavyko. Pabandykite dar kartą."
-      }
+        "cancelled": "Prisijungimas atšauktas. Su jūsų paskyra nieko neįvyko.",
+        "unknown": "Prisijungti nepavyko. Pabandykite dar kartą.",
+        "link_expired": "Ši patvirtinimo nuoroda nebegalioja arba jau buvo panaudota. Jei el. paštą jau patvirtinote, tiesiog prisijunkite. Kitu atveju paprašykite naujos nuorodos žemiau.",
+        "confirmed_sign_in": "Jūsų el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunkite, kad tęstumėte."
+      },
+      "emailNotConfirmed": "Jūsų el. paštas dar nepatvirtintas. Atidarykite atsiųstą patvirtinimo nuorodą arba paprašykite naujos žemiau."
     },
     "signup": {
       "headline": "Sukurkite paskyrą",
@@ -3451,7 +3486,10 @@
       "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
       "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis.",
       "check_email_title": "Patvirtinkite el. paštą",
-      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją."
+      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją.",
+      "resend_label": "Siųsti nuorodą dar kartą",
+      "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
+      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
     },
     "login": {
       "headline": "Prisijungti",
@@ -3475,7 +3513,9 @@
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
       "google_hint": "Registravotės su „Google“? Tuomet slaptažodžio nereikia — spauskite „Tęsti su Google“ viršuje.",
       "preview_host_notice": "Esate peržiūros (preview) versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidarykite https://labourmarket.ai ir prisijunkite ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
-      "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)"
+      "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
+      "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",
+      "resend_sent": "Nauja patvirtinimo nuoroda išsiųsta adresu {email}."
     },
     "forgotPassword": {
       "headline": "Pamiršai slaptažodį?",
@@ -4047,6 +4087,25 @@
             "note": "Tavo atkūrimo el. paštas: {email}. Saugok prieigą prie jo."
           },
           "comingLater": "Vėliau čia matysi, kur esi prisijungęs, galėsi užbaigti sesijas ir gauti atsarginius kodus."
+        },
+        "connectedApps": {
+          "title": "Prijungtos programos",
+          "intro": "Išorinės programos ir asistentai, kuriems leidote veikti jūsų vardu LabourMarket.ai. Kiekviena mato tik tai, ką matote jūs, ir bet kada galite ją atjungti.",
+          "empty": "Prie jūsų paskyros neprijungta jokia programa.",
+          "unavailable": "Šiuo metu nepavyko įkelti prijungtų programų sąrašo. Pabandykite po akimirkos.",
+          "unnamed": "Neįvardinta programa",
+          "grantedAt": "Prijungta {date}",
+          "grantedUnknown": "Prijungimo data neužfiksuota",
+          "scopesLabel": "Leidimai",
+          "disconnect": "Atjungti",
+          "confirmTitle": "Atjungti „{name}“?",
+          "confirmBody": "Programa iš karto netenka prieigos. Norėdama vėl veikti jūsų vardu, ji turės iš naujo paprašyti jūsų leidimo.",
+          "confirmYes": "Taip, atjungti",
+          "cancel": "Palikti prijungtą",
+          "feedbackRevoked": "Atjungta. Programa nebeturi prieigos prie jūsų paskyros.",
+          "feedbackError": "Programos atjungti nepavyko. Atnaujinkite puslapį ir pabandykite dar kartą.",
+          "note": "Atsijungimas nuo LabourMarket.ai programų neatjungia. Atjungimas čia yra vienintelis būdas nutraukti programos prieigą.",
+          "pending": "Atjungiama…"
         }
       },
       "comingSoon": {
@@ -4134,7 +4193,11 @@
       "switchRoleCta": "Persijungti į {role} norėdami pamatyti",
       "markAllRead": "Pažymėti visus skaitytais",
       "close": "Uždaryti",
-      "viewAll": "Visa veikla"
+      "viewAll": "Visa veikla",
+      "email": {
+        "open": "Atidaryti LabourMarket.ai:",
+        "manage": "Tvarkyti pranešimų nustatymus:"
+      }
     }
   },
   "shared": {
@@ -4709,6 +4772,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Apmokėjimas atšauktas — niekas nenuskaičiuota ir jūsų paskyroje niekas nepasikeitė."
+    },
     "eyebrow": "Kainos",
     "title": "Aiškūs planai —",
     "titleAccent": "sąžininga kaina.",
@@ -6996,9 +7062,39 @@
       "unavailable": "Sutikimu pagrįstos dokumentų suvestinės šioje aplinkoje nepasiekiamos. Dokumentai priklauso darbuotojams.",
       "projectAxisLink": "Projektų parengties sąrašai",
       "projectAxisNote": "Darbuotojų parengtis pagal projektą rodoma kiekvieno projekto operacijų puslapyje."
+    },
+    "validity": {
+      "active": "Galioja",
+      "expired": "Nebegalioja",
+      "revoked": "Atšaukta",
+      "pending": "Laukia peržiūros",
+      "rejected": "Atmesta",
+      "unverified": "Nepatikrinta",
+      "unknown": "Galiojimas nežinomas",
+      "reviewedOn": "Peržiūrėta {date}"
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Ruošti žurnalo įrašą",
+      "title": "Iš dokumento į Darbo žurnalą",
+      "understoodNote": "Žemiau — tekstas, nuskaitytas iš „{filename}“. Peržiūrėk, pataisyk ir patvirtink — tik tada jis taps tavo žurnalo istorijos dalimi.",
+      "detectedSkills": "Tekste radome įgūdžių paminėjimų: {count}",
+      "notesLabel": "Įrašo tekstas (iš tavo dokumento — pataisyk prieš išsaugant)",
+      "engagementLabel": "Darbo kontekstas",
+      "save": "Patvirtinti ir išsaugoti žurnale",
+      "saving": "Saugoma…",
+      "saved": "Išsaugota tavo Darbo žurnale — šaltinio dokumentas lieka susietas su šiuo įrašu.",
+      "savedLink": "Atidaryti žurnalą",
+      "error": "Išsaugoti nepavyko. Niekas nebuvo įrašyta.",
+      "notFound": "Šis dokumentas nerastas tarp tavo dokumentų.",
+      "refusedClassified": "Konfidencialūs dokumentai automatiškai neskaitomi — atsisiuntimas lieka registruojamu rankiniu veiksmu.",
+      "refusedNoOcr": "Nuotraukos neskaitomos — teksto atpažinimo dar nėra.",
+      "refusedType": "Šio tipo failo neįmanoma perskaityti kaip teksto.",
+      "empty": "Šiame dokumente skaitomo teksto nerasta.",
+      "failed": "Dokumento perskaityti nepavyko.",
+      "noEngagement": "Pirmiausia reikia darbo konteksto — atsidaryk skydelį ir jį susikurk."
+    },
     "currentVersion": "Versija {n}",
     "download": "Atsisiųsti",
     "noFileYet": "Failas dar neįkeltas.",
@@ -7196,6 +7292,7 @@
     "generatedAt": "Sugeneruota",
     "notWorker": "CV eksportas galimas tik darbuotojo profiliui.",
     "summaryTitle": "Profesinis aprašymas",
+    "practiceHistoryTitle": "Praktika ir savanorystė",
     "workHistoryTitle": "Darbo istorija",
     "present": "Dabar",
     "languagesTitle": "Kalbos",
@@ -7209,10 +7306,20 @@
     "projectsTitle": "Projektai",
     "projectsHint": "Iš darbo įrašų",
     "confirmedByManager": "Patvirtinta vadovo",
+    "euFormat": {
+      "notOfficial": "Šis CV parengtas pagal Europass struktūrą, kad Europos darbdaviai jį perskaitytų įprastu formatu. Tai nėra Europos Sąjungos išduotas Europass dokumentas.",
+      "personal": "Asmeninė informacija",
+      "workExperience": "Darbo patirtis",
+      "educationAndTraining": "Išsilavinimas ir mokymai",
+      "personalSkills": "Asmeniniai gebėjimai",
+      "jobRelatedSkills": "Su darbu susiję gebėjimai",
+      "additionalInformation": "Papildoma informacija"
+    },
     "templates": {
       "label": "Šablonas",
       "standard": "Standartinis",
-      "compact": "Kompaktiškas"
+      "compact": "Kompaktiškas",
+      "eu": "ES formatas"
     },
     "privateDetails": {
       "toggle": "Įtraukti atlyginimo lūkestį ir prieinamumą į spausdinamą CV",
@@ -7390,6 +7497,7 @@
     "reason": {
       "skills_manager_confirmed": "Vadovo patvirtinti įgūdžiai",
       "skills_journal_supported": "Žurnalu pagrįsti įgūdžiai",
+      "practice_experience": "Praktikos ar savanorystės patirtis",
       "country_match": "Šalis sutampa",
       "mobility_match": "Sutiktų dirbti šioje šalyje",
       "available_now": "Šiuo metu laisvas",
@@ -7819,6 +7927,49 @@
     "starting": "Pradedama…",
     "error": "Nepavyko pradėti"
   },
+  "adminLmc": {
+    "title": "LMC žurnalas",
+    "intro": "Vidinis platformos kreditas (1 LMC = 1 EUR vidinio kredito). Gyva duomenų bazės būsena: saugikliai, neapmokėtas įsipareigojimas ir testuotojo kreditavimas. Visi komerciniai jungikliai išjungti; įjungimas — savininko sprendimas.",
+    "unavailable": "Žurnalo nepavyko perskaityti su šia sesija — tai nepavykęs skaitymas, ne tuščias žurnalas.",
+    "on": "Įjungta",
+    "off": "Išjungta",
+    "policy": {
+      "admin": "keičia administratorius",
+      "owner_only": "tik savininkas",
+      "system_locked": "užrakinta sistemos"
+    },
+    "liability": {
+      "outstanding": "Neapmokėtas kreditas",
+      "promotional": "Reklaminis",
+      "purchased": "Pirktas",
+      "accounts": "Sąskaitos",
+      "note": "Kiekvienas išleistas LMC yra euro dydžio atidėtas įsipareigojimas. Gyvas kanoninio balanso rodinio skaitymas — ne išsaugota ataskaita."
+    },
+    "grant": {
+      "email": "Gavėjo el. paštas",
+      "amount": "Suma (LMC)",
+      "reason": "Priežastis (įrašoma į žurnalą)",
+      "campaign": "Kampanija",
+      "expiryDays": "Galioja (dienų)",
+      "key": "Idempotencijos raktas",
+      "submit": "Kredituoti LMC",
+      "submitting": "Kredituojama…",
+      "granted": "Kredituota",
+      "replay": "Su šiuo raktu jau kredituota anksčiau — antrą kartą niekas nekredituota",
+      "disabledHint": "Reklaminiai kreditavimai duomenų bazėje IŠJUNGTI — žurnalas šį kreditavimą atmes. Jungiklio įjungimas — savininko kanalo sprendimas.",
+      "reasons": {
+        "grants_disabled": "Atmesta: reklaminiai kreditavimai išjungti",
+        "not_admin": "Atmesta: reikalinga administratoriaus tapatybė",
+        "recipient_not_found": "Atmesta: patvirtinto profilio su tokiu el. paštu nėra",
+        "invalid_amount": "Atmesta: netinkama suma",
+        "invalid_expiry": "Atmesta: netinkamas galiojimas",
+        "idempotency_conflict": "Atmesta: šis raktas jau panaudotas kitaip",
+        "ledger_absent": "Žurnalo funkcijos nepasiekiamos",
+        "error": "Žurnalas kreditavimą atmetė"
+      }
+    },
+    "spendFrozen": "Išleidimas IŠJUNGTAS — išduotas kreditas užšaldytas, kol savininkas įjungs leidimą."
+  },
   "adminBilling": {
     "eyebrow": "MOKĖJIMAI — TEST MODE",
     "title": "Mokėjimų centras",
@@ -8142,6 +8293,11 @@
         "body": "Aktyvūs filtrai: {filters}. Pašalinkite dalį filtrų arba išvalykite juos.",
         "reset": "Išvalyti filtrus"
       },
+      "initialView": {
+        "summary": "Rodomos {shown} stipriausios atitiktys iš {total} galimybių.",
+        "showAll": "Rodyti visas (dar {count})",
+        "showAllExternal": "Rodyti visus darbo skelbimus"
+      },
       "details": {
         "show": "Daugiau informacijos",
         "hide": "Slėpti informaciją"
@@ -8278,7 +8434,10 @@
     "noSkills": {
       "title": "Jūsų įgūdžiai dar neužfiksuoti",
       "body": "Įgūdžių atitikimui reikia įrodymų. Pridėkite darbo įrašus į darbo žurnalą — iš tikro darbo atpažinti įgūdžiai daro atitikmenis prasmingus.",
-      "cta": "Pridėti darbo įrašą"
+      "cta": "Pridėti darbo įrašą",
+      "confirmTitle": "Patvirtinkite, ką rodo jūsų darbo įrašai",
+      "confirmBody": "Jūsų darbo žurnale jau yra įrašų. Peržiūrėkite juose atpažintus įgūdžius ir patvirtinkite tuos, kuriuos tikrai mokate — tada galėsime derinti pasiūlymus.",
+      "confirmCta": "Peržiūrėti atpažintus įgūdžius"
     },
     "skillMatch": {
       "title": "Įgūdžių atitikimas",
@@ -8380,6 +8539,7 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "shownOfTotal": "geriausi {shown} iš {total}",
       "bandBest": "Geriausiai tinkantys",
       "bandPossible": "Galimai tinkantys",
       "bandExplore": "Kiti skelbimai",
@@ -8999,6 +9159,36 @@
     "links": {
       "workers": "Darbuotojams",
       "companies": "Įmonėms"
+    }
+  },
+  "accountBilling": {
+    "title": "Mokėjimai ir prenumerata",
+    "testBadge": "Testavimo režimas",
+    "returned": {
+      "success": "Testinis apmokėjimas užbaigtas. Tikri pinigai nejudėjo; prenumeratos būsena žemiau sinchronizuojama per parašu patvirtintą mokėjimų teikėjo webhook ir gali atsirasti ne iš karto.",
+      "cancelled": "Apmokėjimas atšauktas. Niekas nenuskaičiuota ir jūsų paskyroje niekas nepasikeitė.",
+      "portal": "Grįžote iš mokėjimų portalo. Ten atlikti pakeitimai šiame puslapyje susinchronizuojami automatiškai."
+    },
+    "disabled": "Mokėjimai neįjungti. Mokami planai — paruošti juodraščiai: čia nieko negalima nusipirkti ir mokėjimo priemonės nereikia.",
+    "none": "Šioje paskyroje prenumeratos nėra.",
+    "planLabel": "Planas",
+    "statusLabel": "Būsena",
+    "status": {
+      "none": "Prenumeratos nėra",
+      "trialing": "Bandomasis laikotarpis",
+      "active": "Aktyvi",
+      "past_due": "Mokėjimas vėluoja",
+      "unpaid": "Neapmokėta",
+      "cancelled": "Atšaukta",
+      "incomplete": "Neužbaigta",
+      "expired": "Pasibaigusi"
+    },
+    "graceNotice": "Paskutinis mokėjimas nepavyko — prenumerata veikia lengvatiniu laikotarpiu, kol mokėjimas bus pakartotas.",
+    "manage": {
+      "open": "Tvarkyti prenumeratą",
+      "opening": "Atidaroma…",
+      "error": "Nepavyko atidaryti mokėjimų portalo",
+      "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę. Tik testavimo režimas — jokių tikrų mokesčių."
     }
   },
   "accountPlan": {
@@ -10039,6 +10229,7 @@
     },
     "organizations": {
       "title": "Mano įmonės",
+      "unnamed": "Įmonė be pavadinimo",
       "noCompanyCta": "Pridėti įmonę",
       "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.",
       "individualDesc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje."
@@ -10106,9 +10297,15 @@
         "limit_reached": "Pasiektas kvietimų limitas",
         "rate_limited": "Per daug kvietimų šiandien",
         "not_authorized": "Neturite teisės",
-        "error": "Nepavyko"
+        "error": "Nepavyko",
+        "invalid_relationship": "Netinkamas ryšio tipas",
+        "organization_capability_required": "Organizacija to dar nenurodė"
       },
-      "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)"
+      "recipientLanguageLabel": "Gavėjo kalba (laiškas ir kvietimas)",
+      "capacityLabel": "Kuo pakviestas asmuo bus jūsų organizacijoje?",
+      "capacityHint": "Praktika ar studijos nėra įdarbinimas — tai bus užrašyta tiksliai taip, kaip pasirinksite.",
+      "capacityNeedsCapability": "Jūsų organizacija dar nenurodė, kad vykdo mokymus. Nurodykite tai organizacijos puslapyje, tada galėsite pakviesti besimokantįjį.",
+      "capacityNeedsCapabilityCta": "Atidaryti organizacijos puslapį"
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
@@ -10148,9 +10345,16 @@
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
         "not_found": "Kvietimas nerastas.",
         "error": "Nepavyko. Bandykite dar kartą."
-      }
+      },
+      "capacity": "Ryšys: {capacity}",
+      "capacityNotEmployment": "Tai nėra darbo pasiūlymas ir nesukuria įdarbinimo."
     },
-    "teamEnquiriesTitle": "Mano užklausos komandoms"
+    "teamEnquiriesTitle": "Mano užklausos komandoms",
+    "admin": {
+      "title": "Administravimas",
+      "hint": "Tvirtinimai, prašymai ir organizacijos taisyklės — atidaroma tada, kai reikia.",
+      "back": "Grįžti į ryšius"
+    }
   },
   "people": {
     "eyebrow": "Asmens profilis",
@@ -11293,6 +11497,7 @@
         "language": "Kalba",
         "level": "Lygis",
         "jobTitle": "Pareigos",
+        "engagementKind": "Kokia tai buvo veikla",
         "jobTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlininkas, programuotojas",
         "startMonth": "Pradžios mėnuo",
         "startYear": "Pradžios metai",
@@ -11429,6 +11634,12 @@
       "calendarHint": "Tavo planą rasi skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
       "messagesHint": "Štai tavo žinutės — atsidaro žemiau esančia nuoroda.",
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
+      "switchContextPersonal": "asmeninė erdvė",
+      "switchContextPick": "Kuriame kontekste norite dirbti?",
+      "switchContextDone": "Atlikta — dabar dirbate kontekste „{name}“.",
+      "switchContextAlready": "Jau dirbate kontekste „{name}“.",
+      "switchContextFailed": "Perjungti nepavyko — aktyvus kontekstas nepasikeitė.",
+      "switchContextUnavailable": "Konteksto perjungimas šiuo metu nepasiekiamas.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
       "experiencesEligible": "Radau užbaigtų sąveikų, apie kurias gali palikti patirtį. Pasirink, apie kurią.",
@@ -11457,6 +11668,9 @@
       "chipNeedWorkers": "Reikia darbuotojų",
       "chipCandidates": "Kandidatai",
       "chipCompanyHub": "Įmonės erdvė",
+      "chipEduInviteLearner": "Pakviesti besimokantįjį",
+      "chipEduCapabilities": "Ką teikiame",
+      "learnerGreetingContext": "Mokaisi su {institution} — kiekvienas užfiksuotas darbas tampa tavo įrodymų ir CV dalimi.",
       "companyDemandNext": "Poreikis įrašytas įmonės erdvėje. Kas toliau?",
       "navJournal": "Žurnalas",
       "chipTasks": "Užduotys",
@@ -11531,7 +11745,30 @@
         "chipServices": "Atidaryti paslaugas",
         "corrected": "Atnaujinau: {changes}.",
         "changeInsteadOf": "{next} (vietoj {previous})"
-      }
+      },
+      "createOrganizationHint": "Galiu kartu su jumis sukurti organizaciją — duomenys ir patvirtinimas yra viename puslapyje.",
+      "chipCreateOrganization": "Sukurti organizaciją",
+      "adminRouteHint": "Štai kur tai tvarkoma:",
+      "adminApprovalsChip": "Tvirtinimai",
+      "adminRequestsChip": "Prašymai",
+      "timesheetsChip": "Žiniaraščiai",
+      "timesheetImportChip": "Tabelio importas",
+      "workHoursChip": "Darbo valandos",
+      "absencesChip": "Atostogos ir nebuvimas",
+      "documentsChip": "Mano dokumentai",
+      "marketMapChip": "Rinkos žemėlapis",
+      "activityChip": "Veikla",
+      "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą.",
+      "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
+      "chipServiceRequests": "Rasti paslaugą",
+      "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",
+      "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
+      "chipMyOwnInterest": "Mano susidomėjimai",
+      "lmcHint": "Jūsų LMC likutį ir visą judėjimų istoriją rodome vienoje vietoje.",
+      "chipLmc": "Atidaryti LMC",
+      "briefLearner": "Mokotės {organization}. Čia užfiksuota praktika ir mokymasis tampa jūsų įrodymais.",
+      "briefLearnerUnnamed": "Esate besimokantis. Čia užfiksuota praktika ir mokymasis tampa jūsų įrodymais.",
+      "chipLogLearning": "Užfiksuoti mokymąsi ar praktiką"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -12111,11 +12348,10 @@
       "headline": "Paklausk. Pamatyk. Įdarbink.",
       "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje.",
       "chatLabel": "AI pokalbis",
-      "mapLabel": "Europos darbo rinka",
+      "mapLabel": "Koncepcinis žemėlapis — iliustracinis scenarijus",
       "thinking": "Analizuoju rinkos signalus…",
       "answered": "Radau. Žemėlapis atnaujintas.",
       "resultLabel": "Rezultatas",
-      "demoBadge": "Demonstracija",
       "mapHint": "Spustelėk žymeklį — žemėlapis atsako.",
       "scenario": {
         "q1": "Kur dabar reikia elektrikų?",
@@ -12171,9 +12407,9 @@
       },
       "askPlaceholder": "Paklausk savo klausimo…",
       "askSubmit": "Klausti",
-      "unmatched": "Šioje demonstracijoje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
+      "unmatched": "Šioje peržiūroje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
       "basisLabel": "Kuo tai grindžiama",
-      "basisNote": "Aukščiau pasvertais {count} signalais, naudojant iliustracinius kiekius — tai demonstracija, ne šios dienos rinka.",
+      "basisNote": "Aukščiau pasvertais {count} signalais, naudojant iliustracinius kiekius — tai koncepcinis scenarijus, ne šios dienos rinka.",
       "previewLabel": "Tinkamiausias žmogus",
       "previewName": "Jonas P.",
       "previewRole": "Elektrikas · Vilnius · Laisvas nuo rugsėjo",
@@ -12914,7 +13150,9 @@
       "title": "Komandos žiniaraščiai",
       "decideNote": "Tvirtinimo sprendimai priimami tvirtinimų srityje. Čia galite peržiūrėti eilutes, eksportuoti ir grąžinti jau nuspręstą žiniaraštį.",
       "noTemplateFor": "{name} neturi paskelbto žiniaraščių tvirtinimo šablono.",
-      "createTemplate": "Sukurti standartinį tvirtinimo šabloną",
+      "templateNeedsAdmin": "Tvirtinimo šabloną paskelbti gali tik organizacijos savininkas arba administratorius. Kol jo nėra, žiniaraščių pateikti negalima.",
+      "blockedNote": "Laukia šio šablono: {count} žiniaraščio (-ių) šioje organizacijoje negalima pateikti, kol jis nepaskelbtas.",
+      "createTemplate": "Įdiegti standartinius tvirtinimo šablonus",
       "unnamedWorker": "Darbuotojas",
       "decideInApprovals": "Spręsti tvirtinimų srityje",
       "reopenNote": "Grąžinimo pastaba",
@@ -12931,7 +13169,7 @@
       "synced_pending": "Tvirtinimas dar vyksta.",
       "no_instance": "Šiam žiniaraščiui tvirtinimo užklausos dar nėra.",
       "no_template": "Ši organizacija dar neturi paskelbto žiniaraščių tvirtinimo šablono.",
-      "template_created": "Standartinis tvirtinimo šablonas sukurtas ir paskelbtas.",
+      "template_created": "Standartiniai tvirtinimo šablonai įdiegti — žiniaraščių tvirtinimo šablonas paskelbtas.",
       "overlap": "Šis laikotarpis persidengia su esamu žiniaraščiu.",
       "invalid_period": "Laikotarpis netinkamas — iki 31 dienos, pabaiga negali būti ankstesnė už pradžią.",
       "no_worker": "Jūsų paskyra neturi darbuotojo profilio.",
@@ -13711,5 +13949,256 @@
       "awaitingOwnerApproval": "laukiama savininko patvirtinimo"
     },
     "footer": "Sąžininga peržiūra · Jokio netikro DI · Jokio netikro patvirtinimo · Jokių netikrų darbuotojų veidų · Kiekvienas įrašas prasideda „Sample · …“, todėl niekada neatrodo kaip tikri duomenys."
+  },
+  "marketExplanation": {
+    "title": "{profession} rinka",
+    "source": "Suskaičiuota iš viešų darbo skelbimų, importuotų į LabourMarket.ai, nuskaityta {measuredAt}. Tai nėra visa darbo rinka ir tai nėra šios platformos poreikių lenta.",
+    "derivedFromWork": "Profesijos nenurodei — ši rinka parinkta pagal įgūdžius, kuriuos rodo tavo užfiksuoti darbai. Nurodyk profesiją, jei nori kitos.",
+    "statOpen": "Atviri skelbimai",
+    "statNew7d": "Paskelbta per 7 d.",
+    "statNew30d": "Paskelbta per 30 d.",
+    "noneOpen": "Šiuo metu šiame rinkinyje {profession} skelbimų nėra.",
+    "skillsTitleAll": "Prašomi įgūdžiai visuose atviruose skelbimuose",
+    "skillsTitleWindow": "Prašomi įgūdžiai {window} naujausiuose skelbimuose",
+    "citiesTitleAll": "Kur jie yra – visuose atviruose skelbimuose",
+    "citiesTitleWindow": "Kur jie yra – {window} naujausiuose skelbimuose",
+    "noPayStated": "Nė viename iš šių skelbimų nenurodytas atlygis, todėl čia joks atlygis nerodomas ir nespėjamas.",
+    "cta": "Paaiškinti šią rinką",
+    "pending": "Skaitomi skaičiai...",
+    "resultTitle": "DI perskaityti aukščiau esantys skaičiai",
+    "attribution": "Parašė {provider} {model} pagal aukščiau esančius skaičius. Tai pasiūlymas, ne oficialus faktas.",
+    "whereTitle": "Kur yra paklausa",
+    "aiSkillsTitle": "Paklausūs įgūdžiai",
+    "actionsTitle": "Ką galėtumėte daryti toliau",
+    "limitationsTitle": "Ko šie skaičiai nepasako",
+    "reviewNote": "Skaičių nedaug, todėl šį perskaitymą vertinkite atsargiai.",
+    "offNotAuthenticated": "Prisijunkite, kad galėtumėte paprašyti paaiškinimo.",
+    "offRateLimited": "Ką tik to prašėte kelis kartus. Pabandykite po kelių minučių.",
+    "offFactsUnavailable": "Šiuo metu nepavyko nuskaityti rinkos skaičių, todėl nėra ko paaiškinti.",
+    "offMarketTooSmall": "Mažiau nei {min} atvirų skelbimų – per mažai, kad paaiškinimas duotų daugiau nei aukščiau esantys skaičiai.",
+    "offAiUnavailable": "Paaiškinimo paslauga šiuo metu neveikia. Aukščiau esantiems skaičiams tai neturi įtakos."
+  },
+  "organizationCapabilities": {
+    "title": "Ką veikia jūsų organizacija?",
+    "help": "Pažymėkite viską, kas tinka — organizacija gali daryti kelis dalykus vienu metu.",
+    "save": "Išsaugoti",
+    "saved": "Išsaugota",
+    "notPermitted": "Šios organizacijos keisti negalite.",
+    "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "allDeclared": "Viskas, ką galima nurodyti, jau nurodyta.",
+    "choices": {
+      "training": {
+        "label": "Mokome ir rengiame žmones",
+        "hint": "Mokykla, universitetas, mokymo centras; priimame studentus praktikai."
+      },
+      "employer": {
+        "label": "Įdarbiname žmones",
+        "hint": "Ieškome darbuotojų sau."
+      },
+      "workforce": {
+        "label": "Teikiame darbuotojus kitoms organizacijoms",
+        "hint": "Darbo jėgos nuoma, rangos brigados."
+      },
+      "recruitment": {
+        "label": "Padedame surasti ir atrinkti žmones",
+        "hint": "Atranka, įdarbinimo partnerystė."
+      },
+      "project": {
+        "label": "Vykdome projektus",
+        "hint": "Dalyvaujame projektuose kaip vykdytojas ar partneris."
+      },
+      "client": {
+        "label": "Užsakome darbus ar paslaugas",
+        "hint": "Esame užsakovas."
+      }
+    }
+  },
+  "lmc": {
+    "title": "LMC kreditas",
+    "noAccount": "LMC sąskaita dar nesukurta. Ji atsiranda su pirmuoju kreditu arba nuskaitymu — kol kas nieko neįvyko.",
+    "unavailable": "Šiuo metu nepavyko nuskaityti jūsų LMC likučio. Tai nereiškia, kad likutis nulinis — tiesiog dabar jo parodyti negalime. Pabandykite vėliau.",
+    "breakdown": "Įsigyta: {purchased} · dovanota: {promotional}",
+    "expired": "Nebegalioja: {amount} (pasibaigė galiojimo laikas)",
+    "latest": "Paskutinis pokytis: {kind} {amount} LMC · {when}",
+    "noMovements": "Judėjimų dar nebuvo.",
+    "topUpClosed": "Papildymas dar neatidarytas. Kai jis veiks, papildyti galėsite čia pat.",
+    "historyTitle": "Visa istorija",
+    "kind": {
+      "purchased": "Įsigyta",
+      "promotional_signup": "Dovana už registraciją",
+      "promotional_activity": "Dovana už veiklą",
+      "admin_grant": "Administratoriaus skirta",
+      "referral_reward": "Atlygis už rekomendaciją",
+      "spend": "Panaudota",
+      "expiry": "Nustojo galioti",
+      "reversal": "Grąžinta atgal",
+      "refund_reversal": "Pinigų grąžinimas",
+      "chargeback_reversal": "Mokėjimo ginčas",
+      "spend_compensation": "Kompensuota už nepavykusį veiksmą",
+      "other": "Kitas judėjimas"
+    }
+  },
+  "workHours": {
+    "title": "Darbo valandos",
+    "subtitle": "Įrašykite, kas dirbo, kurią dieną, kuriame objekte ir kiek valandų.",
+    "date": "Data",
+    "worker": "Darbuotojas",
+    "object": "Objektas",
+    "hours": "Valandos",
+    "note": "Darbo aprašymas (nebūtina)",
+    "hoursHint": "Ketvirčio valandos tikslumu, pvz. 7,5",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "saved": "Įrašyta",
+    "addAnother": "Tam pačiam darbuotojui — kitas objektas",
+    "selectWorker": "Pasirinkite darbuotoją",
+    "selectObject": "Pasirinkite objektą",
+    "dayTotal": "Dienos suma",
+    "entriesTitle": "Šios dienos įrašai",
+    "noEntries": "Šiai dienai įrašų dar nėra.",
+    "enteredForSomeoneElse": "Įvedė kitas asmuo",
+    "duplicateWarning": "Ką tik įrašėte tokį pat įrašą. Jei tai antra pamaina, išsaugokite dar kartą.",
+    "errors": {
+      "hours": "Įveskite valandas nuo 0,25 iki 24.",
+      "quarter": "Valandos turi būti ketvirčio tikslumu (0,25).",
+      "worker": "Pasirinkite darbuotoją.",
+      "object": "Pasirinkite objektą.",
+      "date": "Neteisinga data.",
+      "note": "Aprašymas per ilgas.",
+      "notAuthorized": "Neturite teisės įrašyti šių valandų.",
+      "generic": "Nepavyko išsaugoti. Bandykite dar kartą."
+    },
+    "states": {
+      "needsMigration": "Ši funkcija dar neįjungta šioje duomenų bazėje.",
+      "noCompany": "Pasirinkite įmonės darbo sritį.",
+      "noObjects": "Pirmiausia sukurkite bent vieną objektą.",
+      "error": "Nepavyko įkelti dienos duomenų."
+    },
+    "import": {
+      "entryLink": "Importuoti valandas iš skaičiuoklės (.xlsx)",
+      "backToEntry": "Grįžti į dienos įvedimą",
+      "title": "Tabelio importas",
+      "subtitle": "Įkelkite mėnesio darbo laiko tabelį. Peržiūrėkite ir pataisykite interpretaciją žemiau — niekas neišsaugoma, kol nepatvirtinsite.",
+      "fileLabel": "Tabelio failas (.xlsx)",
+      "fileHint": "Mėnesio lentelė „darbuotojas × diena“ arba lapas su stulpeliais darbuotojas / data / objektas / valandos, iki 5 MB.",
+      "parse": "Peržiūrėti failą",
+      "parsing": "Skaitoma…",
+      "refused": {
+        "no-file": "Pirmiausia pasirinkite failą.",
+        "too-large": "Failas didesnis nei 5 MB.",
+        "not-xlsx": "Tai ne .xlsx skaičiuoklė.",
+        "too-complex": "Skaičiuoklė per didelė, kad būtų saugiai perskaityta.",
+        "read-failed": "Failo nepavyko perskaityti.",
+        "unrecognized": "Šiame faile neatpažinta tabelio struktūra.",
+        "too-many-rows": "Lape daugiau eilučių, nei telpa į vieną importą — padalinkite failą."
+      },
+      "emptyFile": "Faile nėra tabelio duomenų.",
+      "noCompany": "Persijunkite į įmonės darbo erdvę.",
+      "summary": "Perskaityta eilučių: {rows} (lapas {sheet}).",
+      "notPersistedNotice": "Niekas neišsaugoma, kol nepatvirtinsite.",
+      "skippedTitle": "Langeliai, kurių nepavyko perskaityti",
+      "skippedReasons": {
+        "unparsable": "neperskaitoma reikšmė",
+        "hours-out-of-bounds": "valandos už 0–24 ribų",
+        "invalid-date": "tokios dienos šį mėnesį nėra"
+      },
+      "monthLabel": "Mėnuo",
+      "monthHint": "Lape mėnuo nenurodytas — pasirinkite jį aiškiai.",
+      "duplicateWarning": "Identiški įrašai jau egzistuoja {count} eilutėms (tas pats darbuotojas, data, objektas ir valandos). Norint juos įrašyti dar kartą, reikia patvirtinimo žemiau.",
+      "columns": {
+        "include": "Įtraukti",
+        "worker": "Darbuotojas",
+        "object": "Objektas",
+        "date": "Data",
+        "hours": "Valandos",
+        "note": "Pastaba",
+        "status": "Būsena"
+      },
+      "chooseWorker": "Pasirinkite darbuotoją",
+      "chooseObject": "Pasirinkite objektą",
+      "suggestions": "Siūlymai",
+      "allWorkers": "Visi darbuotojai",
+      "allObjects": "Visi objektai",
+      "needsReview": "Neaiškus langelis — patikrinkite skaidymą",
+      "duplicateBadge": "Jau įrašyta",
+      "incomplete": "Trūksta pasirinkimo",
+      "rowProblems": {
+        "worker": "Darbuotojas nepriimtas",
+        "object": "Objektas nepriimtas",
+        "date": "Neteisinga data",
+        "hours": "Neteisingos valandos",
+        "note": "Pastaba per ilga"
+      },
+      "overrideLabel": "Vis tiek įrašyti dublikatus (tikra antra pamaina)",
+      "confirm": "Patvirtinti pasirinktas eilutes ({count})",
+      "confirming": "Įrašoma…",
+      "receipt": "Atlikta — įrašyta įrašų: {count}. Jie jau yra darbo valandose.",
+      "confirmBlockedHint": "Kiekvienai įtrauktai eilutei reikia darbuotojo, objekto, datos ir valandų.",
+      "errors": {
+        "invalidRows": "Taisytinų eilučių: {count}. Nieko neįrašyta.",
+        "duplicatesFound": "Identiškų esamų įrašų: {count}. Nieko neįrašyta — pažymėkite patvirtinimą, jei vis tiek norite įrašyti.",
+        "noRows": "Nėra ką įrašyti.",
+        "tooManyRows": "Per daug eilučių vienam importui — padalinkite failą.",
+        "needsMigration": "Ši funkcija šioje duomenų bazėje dar neįjungta.",
+        "notAuthorized": "Negalite įrašyti šių valandų.",
+        "generic": "Nepavyko apdoroti. Bandykite dar kartą."
+      }
+    }
+  },
+  "oauthConsent": {
+    "title": "Prieigos patvirtinimas",
+    "clientWantsAccess": "„{client}“ prašo prieigos prie jūsų LabourMarket.ai paskyros.",
+    "unknownClient": "Nežinoma programa",
+    "clientLabel": "Programa",
+    "redirectLabel": "Grąžinimo adresas",
+    "scopesLabel": "Prašomos teisės",
+    "authorityNote": "Programa veiks tik jūsų vardu ir matys tik tai, ką matote jūs. Prieigą bet kada galėsite atšaukti.",
+    "approve": "Leisti",
+    "deny": "Atmesti",
+    "errorMissingId": "Trūksta autorizacijos užklausos. Grįžkite į programą ir bandykite dar kartą.",
+    "errorUnresolved": "Nepavyko išspręsti autorizacijos užklausos. Ji galėjo pasibaigti (užklausos galioja kelias minutes) arba jau buvo panaudota. Grįžkite į programą ir prisijunkite iš naujo."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Pasirinkite poreikį, kuris jus domina: {options}.",
+    "interestDraftSummary": "Paruošta išreikšti susidomėjimą: {demand}. Dar niekas neišsiųsta — reikia jūsų patvirtinimo.",
+    "interestDraftRepeat": "Susidomėjimą „{demand}“ jau esate išreiškę — patvirtinus jis bus atnaujintas.",
+    "interestConfirmed": "Susidomėjimas užfiksuotas. Poreikio savininkas jį matys savo aplinkoje — niekas nesiunčiama už platformos ribų.",
+    "workspacePersonal": "Asmeninė erdvė",
+    "workspaceSwitched": "Aktyvi darbo erdvė pakeista į „{label}“.",
+    "workspaceChoose": "Pasirinkite darbo erdvę: {options}.",
+    "workCardDraftSummary": "Paruošta atnaujinti jūsų darbo kortelę ({fields}). Dar niekas neišsaugota — reikia jūsų patvirtinimo.",
+    "workCardSaved": "Darbo kortelė atnaujinta.",
+    "workCardFieldAvailability": "prieinamumas",
+    "workCardFieldAvailableFrom": "nuo kada gali dirbti",
+    "workCardFieldSalary": "atlyginimo rėžiai",
+    "workCardFieldLocation": "vieta",
+    "workCardFieldPreferredCountries": "pageidaujamos šalys",
+    "demandDraftSummary": "Paruošta sukurti darbuotojų poreikį organizacijai {org}: „{description}“. Dar niekas nesukurta — reikia jūsų patvirtinimo.",
+    "demandDraftSummaryWithRole": "Paruošta sukurti darbuotojų poreikį organizacijai {org} — {role}: „{description}“. Dar niekas nesukurta — reikia jūsų patvirtinimo.",
+    "demandSubmitted": "Darbuotojų poreikis pateiktas organizacijai {org}. Tinkami darbuotojai dabar gali matyti struktūruotus faktus savo lentoje.",
+    "journalListEmpty": "Darbo žurnale dar nėra įrašų.",
+    "journalListSummary": "Rasta įrašų: {count}. Naujausias — {latest}.",
+    "notSet": "nenurodyta",
+    "workerExists": "aktyvus",
+    "workerNone": "nėra",
+    "workerUnavailable": "nepavyko patikrinti",
+    "profileSummary": "Jūsų LabourMarket.ai profilis — vardas: {name}; šalis: {country}; kalba: {language}; aktyvus vaidmuo: {role}; darbuotojo profilis: {worker}.",
+    "skillsSummary": "Jūsų gyvajame CV yra {count} įgūdžių ({verified} patvirtinti).",
+    "skillsEmpty": "Jūsų gyvajame CV įgūdžių dar nėra.",
+    "draftSummary": "Darbo žurnalo juodraštis {date}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "draftSummaryWithSite": "Darbo žurnalo juodraštis {date}, objektas {site}: „{notes}“. Niekas dar neišsaugota — patvirtinus bus įrašytas būtent šis įrašas.",
+    "draftChooseContext": "Šis įrašas gali priklausyti keliems darbo kontekstams: {options}. Kuriam jį priskirti?",
+    "draftContext": "Kontekstas: {context}.",
+    "confirmSummary": "Žurnalo įrašas išsaugotas. Įgūdžių atpažinimas: {added} pridėta, {strengthened} sustiprinta, {reviewNeeded} laukia peržiūros."
+  },
+  "notificationPrefs": {
+    "title": "Pranešimai",
+    "intro": "Pasirinkite, kurie pranešimai jus pasiekia — pagal tipą ir kanalą. Pranešimai programoje įjungti, kol jų neišjungiate.",
+    "inAppHeader": "Programoje",
+    "emailHeader": "El. paštu",
+    "emailConsentNote": "El. laiškai pagal numatytuosius nustatymus išjungti — siunčiami tik tų tipų, kuriuos čia įjungsite.",
+    "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
+    "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
+    "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
   }
 }

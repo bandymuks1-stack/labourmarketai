@@ -45,12 +45,15 @@ import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-rea
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
+import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
   buildDiscoveryQuery,
   collectDiscoveryFacets,
+  INITIAL_VIEW_MAX_COUNT,
   parseDiscoveryParams,
+  selectInitialBoardView,
   sortDiscoveryCards,
   type DiscoveryFilterState,
   type DiscoverySort,
@@ -110,13 +113,45 @@ export default async function OpportunitiesPage({
   // Discovery params parsed BEFORE the load so an active profession/country
   // chip narrows what the external-supply retrieval FETCHES (closed-set
   // values), not merely what the page hides afterwards.
-  const { filters, sort } = parseDiscoveryParams(sp);
-  const result = await loadWorkerOpportunityBoard("opportunities_board", {
-    externalDiscovery: {
-      professionSlug: filters.profession,
-      country: filters.country,
-    },
+  const { filters, sort, view } = parseDiscoveryParams(sp);
+  // Board + salary benchmark + weekly digest are independent reads — one
+  // combined await so TTFB pays the slowest of the three, not their sum.
+  const [result, salaryIntel, weekly] = await Promise.all([
+    loadWorkerOpportunityBoard("opportunities_board", {
+      externalDiscovery: {
+        professionSlug: filters.profession,
+        country: filters.country,
+      },
+    }),
+    getWorkerSalaryIntelligence(),
+    getWeeklyPersonalIntelligence(),
+  ]);
+
+  // ── Compressed first view (owner rule 2026-08-29): 3 best by default,
+  //    never more than 5 items before the person asks for more. Pure
+  //    presentation compression over the ALREADY-ranked universe — the
+  //    loader, the RPC limit, the filters and the external retrieval are
+  //    untouched, and every withheld card is one ?view=all click away.
+  const active = activeFilterEntries(filters);
+  const filtered =
+    result.kind === "ready" && result.capabilities.boardAvailable
+      ? sortDiscoveryCards(
+          applyDiscoveryFilters(result.opportunities, filters),
+          sort,
+        )
+      : [];
+  const initialView = selectInitialBoardView(filtered, {
+    sort,
+    activeFilterCount: active.length,
+    view,
   });
+  // External ads share the SAME 5-item first-view budget: whatever the
+  // internal top slots leave over. In any refined view (filter, sort,
+  // ?view=all) the section shows everything it loaded, as before.
+  const boardRefined = view === "all" || active.length > 0 || sort !== "relevance";
+  const externalInitialCount = boardRefined
+    ? null
+    : Math.max(INITIAL_VIEW_MAX_COUNT - initialView.visible.length, 2);
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
@@ -129,7 +164,6 @@ export default async function OpportunitiesPage({
   // Root translator — provenance/attribution codes are FULL key paths
   // (vacancySources.*), stored as codes on the record, resolved only here.
   const tRoot = await getTranslations();
-  const salaryIntel = await getWorkerSalaryIntelligence();
   const marketContextCards = buildOpportunityInsightRow(
     salaryIntel.kind === "ok"
       ? {
@@ -143,7 +177,7 @@ export default async function OpportunitiesPage({
   // Weekly personal intelligence (C-r1): the SAME request-cached read the
   // digest emitter uses — the bell row's href lands here, so this is where
   // the summary it points at finally renders. No second derivation.
-  const weekly = await getWeeklyPersonalIntelligence();
+  // (Loaded in the combined await above.)
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const profileHref = `/${locale}/dashboard/profile`;
@@ -338,7 +372,7 @@ export default async function OpportunitiesPage({
       : [];
 
   return (
-    <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "opportunities", role_context: "worker" }}
@@ -347,60 +381,8 @@ export default async function OpportunitiesPage({
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
       </header>
 
-      <FeatureNote testId="feature-note-opportunities">
-        {(await getTranslations("featureNotes"))("opportunities")}
-      </FeatureNote>
-      <Link
-        href={`/${locale}/dashboard/market-map`}
-        data-testid="opportunities-market-map-link"
-        className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-cyan"
-      >
-        {t("marketMapLink")} →
-      </Link>
-
-      {/* Next-step bridge (§8.10 / §6 system loop): a fit doesn't dead-end — it
-          moves through the marketplace (request/offer) and the plan (a confirmed
-          match becomes a booking). Existing routes only; navigation, no fake
-          matching action, mobile-first tap targets. */}
-      <section
-        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
-        data-testid="opportunities-next-step"
-      >
-        {/* Density pass (worker-workspace UX audit v2): the intro sentence
-            restated what the two link cards below already say — removed. */}
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("nextStep.title")}
-        </span>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            {
-              key: "marketplace",
-              href: `/${locale}/dashboard/service-requests`,
-              label: t("nextStep.marketplace"),
-              note: t("nextStep.marketplaceNote"),
-            },
-            {
-              key: "bookings",
-              href: `/${locale}/dashboard/bookings`,
-              label: t("nextStep.bookings"),
-              note: t("nextStep.bookingsNote"),
-            },
-          ].map((l) => (
-            <Link
-              key={l.key}
-              href={l.href}
-              data-testid={`opportunities-next-step-${l.key}`}
-              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-            >
-              <span className="font-semibold">{l.label}</span>
-              <span className="text-xs text-text-muted">{l.note}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
 
       {result.kind === "no-worker" ? (
         <section className="rounded-lg border border-dashed border-ink-500 px-4 py-6">
@@ -414,90 +396,21 @@ export default async function OpportunitiesPage({
         </section>
       ) : (
         <>
-          {/* ── Your readiness (real own-data) ─────────────────────────── */}
-          <section
-            className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-ink-800/40 p-4"
-            data-testid="opportunities-readiness"
-          >
-            <div className="flex flex-col gap-0.5">
-              <h2 className="font-display text-base font-semibold text-text-primary">
-                {t("readinessTitle")}
-              </h2>
-              <p className="text-xs leading-relaxed text-text-secondary">
-                {t("readinessIntro")}
-              </p>
-            </div>
-            <ul className="flex flex-wrap gap-2">
-              {(
-                [
-                  ["workType", result.readiness.hasWorkType],
-                  ["skills", result.readiness.hasSkills],
-                  ["country", result.readiness.countries.length > 0],
-                  ["documents", result.readiness.documentsCount > 0],
-                  ["availability", result.readiness.availabilitySet],
-                ] as const
-              ).map(([key, ok]) => (
-                <li
-                  key={key}
-                  className={`rounded-md border px-2.5 py-1 text-xs ${
-                    ok
-                      ? "border-state-success/40 bg-state-success/10 text-state-success"
-                      : "border-state-amber/40 bg-state-amber/5 text-state-amber"
-                  }`}
-                  data-ready={ok ? "yes" : "no"}
-                >
-                  {t(`ready.${key}`)} · {ok ? t("ready.set") : t("ready.missing")}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href={profileHref}
-              className="inline-block w-fit rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80"
-            >
-              {t("ctaProfile")} →
-            </Link>
-          </section>
-
-          {/* Weekly personal intelligence (C-r1) — the summary the weekly
-              digest bell row points at. Renders only when at least one of
-              the two reads answered (emitter rule mirrored). */}
-          {weekly.kind === "ready" ? (
-            <WeeklyIntelligenceSection intel={weekly.intelligence} locale={locale} />
-          ) : null}
-
-          {/* Market context row (Contextual Intelligence UI v1): the ONE
-              trust-card engine renders the worker's salary-vs-benchmark
-              position plus four honest unavailable placeholders — no
-              duplicate UI, no fabricated figures, premium empty states. */}
-          {salaryIntel.kind !== "no_viewer" ? (
-            <section
-              className="flex flex-col gap-3"
-              data-testid="opportunities-market-context"
-              aria-label={tIntel("trustCard.rowTitle")}
-            >
-              <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
-                {tIntel("trustCard.rowTitle")}
-              </h2>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {marketContextCards.map((card, index) => (
-                  <TrustInsightCard
-                    key={card.id}
-                    card={card}
-                    locale={locale}
-                    linkToWorkspace={index === 0}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
-
+          {/* WHAT BLOCKS MATCHING, if anything -- one reason, one action.
+              These two are the only profile states that stop the engine from
+              producing a match at all, so they stay above the board. Everything
+              else the page knows about the profile is in the readiness
+              disclosure below it. */}
           {/* No work type: onboarding only started asking on 2026-08-21, so
               everyone who joined before that is past the one screen that asks.
-              Without it `subject.professionSlug` is null, the profile-directed
-              pool never runs, and this board is the newest ads of any kind.
-              The signal is already loaded (`hasWorkType` is
-              `Boolean(subject.professionSlug)`), so this costs no query, and
-              the prompt is dismissible — it invites, it never blocks. */}
+              Without it the profile-directed pool never runs and this board is
+              the newest ads of any kind.
+              `hasWorkType` is no longer `Boolean(subject.professionSlug)` — it
+              is satisfied by a DECLARED profession or one their recorded work
+              evidences, so this prompt now appears only for someone we
+              genuinely cannot read, instead of nagging every worker whose
+              journal already answered the question. Still no query, still
+              dismissible — it invites, it never blocks. */}
           {result.kind === "ready" && !result.readiness.hasWorkType ? (
             <ProfessionRecoveryPrompt
               labels={{
@@ -516,93 +429,36 @@ export default async function OpportunitiesPage({
               className="flex flex-col items-start gap-2 rounded-md border border-state-amber/40 bg-state-amber/10 px-4 py-3"
               data-testid="opportunities-no-skills"
             >
+              {/* Two different silences, opposite next steps. Somebody who
+                  has never recorded work needs to start; somebody whose
+                  journal is already full needs to CONFIRM what it describes —
+                  telling them to "add a work entry" is asking them to redo
+                  the thing they did. Same section, same honesty, no fake fit. */}
               <p className="text-sm font-semibold text-text-primary">
-                {t("noSkills.title")}
+                {result.readiness.hasRecordedWork
+                  ? t("noSkills.confirmTitle")
+                  : t("noSkills.title")}
               </p>
               <p className="text-xs leading-relaxed text-text-secondary">
-                {t("noSkills.body")}
+                {result.readiness.hasRecordedWork
+                  ? t("noSkills.confirmBody")
+                  : t("noSkills.body")}
               </p>
               <Link
                 href={`/${locale}/dashboard/journal`}
                 className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80"
                 data-testid="opportunities-no-skills-cta"
               >
-                {t("noSkills.cta")} →
+                {result.readiness.hasRecordedWork
+                  ? t("noSkills.confirmCta")
+                  : t("noSkills.cta")}{" "}
+                →
               </Link>
             </section>
           ) : null}
 
-          {/* Trust note — workers first see only approved / safely-managed
-              opportunities (Worker Opportunities v1). */}
-          <p
-            className="rounded-md border border-brand-blue/25 bg-brand-blue/5 px-4 py-3 text-xs leading-relaxed text-text-secondary"
-            data-testid="opportunities-trust-note"
-          >
-            {t("trustNote")}
-          </p>
-
-          {/* ── Mano susidomėjimai (extension A) — the worker's OWN interest
-              signals, collapsible, INDEPENDENT of board visibility: a signal
-              whose demand closed stays here with an honest label instead of
-              silently vanishing. Renders only when at least one signal
-              exists — no empty wall, and never a section for an unapplied
-              store (rows are empty then). Actions reuse EXISTING flows only
-              (withdraw / contact employer / view demand / tailored CV). */}
-          {myInterestDisplayRows.length > 0 ? (
-            <WorkerMyInterestSection
-              locale={locale}
-              rows={myInterestDisplayRows}
-              labels={{
-                title: t("myInterest.title"),
-                summary: t("myInterest.summary", {
-                  count: myInterestDisplayRows.length,
-                }),
-                intro: t("myInterest.intro"),
-                closed: t("myInterest.closed"),
-                withdrawnStatusText: t("myInterest.status.withdrawn"),
-                withdraw: t("interest.withdraw"),
-                contactEmployer: t("interest.contactEmployer"),
-                openConversation: t("interest.contactedLink"),
-                viewDemand: t("myInterest.viewDemand"),
-                cvLink: t("myInterest.cvLink"),
-                error: t("interest.error"),
-                internalNote: t("interest.internalNote"),
-              }}
-            />
-          ) : null}
-
-          {/* How matching works — deterministic rules + calc version, no AI
-              claims, no global score (contract v2 presentation rule). */}
-          <details
-            className="group rounded-lg border border-ink-600 bg-ink-800/40"
-            data-testid="opportunities-how-matching"
-          >
-            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-text-primary marker:text-text-muted">
-              {t("discovery.how.title")}
-            </summary>
-            <div className="flex flex-col gap-2 px-4 pb-4 text-xs leading-relaxed text-text-secondary">
-              <p>{t("discovery.how.body")}</p>
-              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-                {t("discovery.how.version", { version: MATCH_CALC_VERSION })}
-              </p>
-            </div>
-          </details>
-
-          {/* Recently viewed (P2-PR5) — DEVICE-LOCAL list of detail
-              disclosures opened on THIS device, re-joined against the live,
-              already-authorized rows (ids + timestamps only in storage; the
-              strip itself discloses that nothing leaves this browser). */}
-          {result.opportunities.length > 0 ? (
-            <RecentlyViewedStrip
-              liveRows={result.opportunities.map(({ need }) => ({
-                id: need.id,
-                title: roleLabel(need.roleText),
-                scanLine: scanLine(need),
-              }))}
-              labels={recentLabels}
-            />
-          ) : null}
-
+          {/* THE OPPORTUNITIES. First, because they are the page.
+              They used to be the eleventh block. */}
           {/* ── Opportunities (approved supply routes only) ────────────── */}
           {!result.capabilities.boardAvailable ? (
             <section
@@ -641,14 +497,16 @@ export default async function OpportunitiesPage({
             </section>
           ) : (
             (() => {
+              // Facets over the FULL authorized universe — the chips must
+              // offer every present value even while the first view shows
+              // only the top of the ranking.
               const facets = collectDiscoveryFacets(
                 result.opportunities.map((o) => o.need),
               );
-              const filtered = sortDiscoveryCards(
-                applyDiscoveryFilters(result.opportunities, filters),
-                sort,
+              const visibleIds = new Set(
+                initialView.visible.map((o) => o.need.id),
               );
-              const active = activeFilterEntries(filters);
+              const expandedHref = `${boardHref}?view=all`;
               const facetGroups: ReadonlyArray<{
                 dim: keyof DiscoveryFilterState;
                 values: readonly string[];
@@ -690,9 +548,16 @@ export default async function OpportunitiesPage({
                         <ul className="flex flex-wrap gap-1.5">
                           {savedLive.map(({ need }) => (
                             <li key={need.id}>
-                              {/* In-page anchor to the live card below. */}
+                              {/* In-page anchor to the live card below. A card
+                                  the compressed first view holds back gets the
+                                  expanded URL instead — a bookmark must never
+                                  dead-link into a hidden card. */}
                               <a
-                                href={`#opp-${need.id}`}
+                                href={
+                                  visibleIds.has(need.id)
+                                    ? `#opp-${need.id}`
+                                    : `${expandedHref}#opp-${need.id}`
+                                }
                                 className="inline-flex min-h-[2.75rem] flex-col justify-center rounded-md border border-ink-500 px-3 py-1.5 transition-colors hover:border-brand-blue"
                                 data-testid="opportunities-saved-item"
                               >
@@ -754,20 +619,30 @@ export default async function OpportunitiesPage({
                     </section>
                   ) : null}
 
-                  {/* ── Filter chips (URL-param links, server-rendered) ── */}
-                  <section
-                    className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
+                  {/* ── Filters (URL-param links, server-rendered) ──────────
+                      On request, not by default. Always-open, this panel was
+                      330px of controls -- five facet rows and a sort row --
+                      between the title and the first opportunity, so having
+                      moved eight blocks off the top of the page the board was
+                      still not the first thing on it.
+                      `open={active.length > 0}` is the honesty rule: a board
+                      that IS filtered always shows what is filtering it, and
+                      the reset link with it. Nothing else changed -- same
+                      facets, same links, same sort, same reset. */}
+                  <details
+                    open={active.length > 0}
+                    className="group rounded-lg border border-ink-600 bg-ink-800/30"
                     data-testid="opportunities-filters"
-                    aria-label={t("discovery.filters.title")}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                        {t("discovery.filters.title")}
-                        {active.length > 0
-                          ? ` · ${t("discovery.filters.activeCount", { count: active.length })}`
-                          : ""}
-                      </span>
-                      {active.length > 0 ? (
+                    <summary className="cursor-pointer select-none px-4 py-3 font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
+                      {t("discovery.filters.title")}
+                      {active.length > 0
+                        ? ` · ${t("discovery.filters.activeCount", { count: active.length })}`
+                        : ""}
+                    </summary>
+                    <div className="flex flex-col gap-3 px-4 pb-4">
+                    {active.length > 0 ? (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         <Link
                           href={boardHref}
                           data-testid="opportunities-filters-reset"
@@ -775,8 +650,8 @@ export default async function OpportunitiesPage({
                         >
                           {t("discovery.filters.reset")}
                         </Link>
-                      ) : null}
-                    </div>
+                      </div>
+                    ) : null}
                     {facetGroups
                       .filter((g) => g.values.length > 0)
                       .map((g) => (
@@ -821,7 +696,8 @@ export default async function OpportunitiesPage({
                         </Link>
                       ))}
                     </div>
-                  </section>
+                    </div>
+                  </details>
 
                   {filtered.length === 0 ? (
                     /* Empty state names WHICH active filters produced zero. */
@@ -851,16 +727,31 @@ export default async function OpportunitiesPage({
                       </Link>
                     </section>
                   ) : (
-                    <ul className="flex flex-col gap-3" data-testid="opportunities-list">
+                    /* ONE COLUMN WAS THE WHOLE DEFECT. The owner audit
+                       described "tiny cards in a narrow central column
+                       extending vertically through a huge mostly-empty desktop
+                       page" — this `flex flex-col` is that column. Below xl
+                       nothing changes (a phone has no spare width to give);
+                       from 1280px the list uses the width it already occupies,
+                       which halves the scroll instead of leaving the right half
+                       of the screen empty. `items-start` keeps a card that
+                       expands its details from stretching its neighbour. DOM
+                       order is untouched, so the strongest match is still
+                       first — top-left, then across. */
+                    <ul
+                      className="grid grid-cols-1 items-start gap-3 xl:grid-cols-2"
+                      data-testid="opportunities-list"
+                    >
                       {/* Rendering IS the read event — and the board renders
-                          `filtered`, not everything the RPC returned. Marking
-                          the loaded set would silently retire matches the
-                          worker never saw behind an active filter. */}
+                          `initialView.visible`, not everything the RPC
+                          returned. Marking the loaded set would silently
+                          retire matches the worker never saw behind an active
+                          filter OR behind the compressed first view. */}
                       <OpportunitiesShownMarker
                         surface="opportunities_board"
-                        requestIds={filtered.map((o) => o.need.id)}
+                        requestIds={initialView.visible.map((o) => o.need.id)}
                       />
-                      {filtered.map(({ need, fit, match, nextAction, interestStatus, structured, saved }) => (
+                      {initialView.visible.map(({ need, fit, match, nextAction, interestStatus, structured, saved }, rankIndex) => (
                         <li
                           key={need.id}
                           id={`opp-${need.id}`}
@@ -869,8 +760,30 @@ export default async function OpportunitiesPage({
                         >
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="flex min-w-0 flex-col gap-0.5">
-                              <p className="font-display text-base font-bold text-text-primary">
-                                {roleLabel(need.roleText)}
+                              <p className="flex items-baseline gap-1.5 font-display text-base font-bold text-text-primary">
+                                {/* POSITION, NOT A SCORE. The board already
+                                    orders by `compareMatches` (status →
+                                    coverage → confirmed evidence →
+                                    availability), but nothing said so, and the
+                                    order is invisible once the cards sit in a
+                                    grid. A rank states what the product can
+                                    honestly claim — "this is the strongest
+                                    evidence we currently hold" — where a
+                                    percentage would invent a precision no
+                                    calibration backs (§19).
+
+                                    Rendered ONLY under the relevance sort: on
+                                    "newest" the position means recency, and a
+                                    "#1" there would be a lie about fit. */}
+                                {sort === "relevance" ? (
+                                  <span
+                                    className="font-mono text-meta text-text-muted"
+                                    data-testid={`opportunity-rank-${rankIndex + 1}`}
+                                  >
+                                    #{rankIndex + 1}
+                                  </span>
+                                ) : null}
+                                <span className="min-w-0">{roleLabel(need.roleText)}</span>
                               </p>
                               {/* Compact scan line — full facts in details. */}
                               <p className="text-xs text-text-secondary">
@@ -1178,6 +1091,33 @@ export default async function OpportunitiesPage({
                     </ul>
                   )}
 
+                  {/* Compressed-view honesty line: the first view shows the
+                      strongest matches, and says so — with the true size of
+                      the ranked universe and one real link to all of it.
+                      Nothing is deleted, nothing is hidden without a door. */}
+                  {initialView.capped ? (
+                    <div
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ink-600 bg-ink-800/30 px-4 py-3"
+                      data-testid="opportunities-show-more"
+                    >
+                      <p className="text-xs text-text-secondary">
+                        {t("discovery.initialView.summary", {
+                          shown: initialView.visible.length,
+                          total: filtered.length,
+                        })}
+                      </p>
+                      <Link
+                        href={expandedHref}
+                        data-testid="opportunities-show-all"
+                        className="inline-flex min-h-11 items-center rounded-md border border-brand-blue px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue/80"
+                      >
+                        {t("discovery.initialView.showAll", {
+                          count: initialView.hiddenCount,
+                        })}
+                      </Link>
+                    </div>
+                  ) : null}
+
                   {/* Compare (P2-PR5) — pure client state over the loaded
                       cards; the sticky bar + whitelisted-facts table render
                       only once something is selected. Nothing persists. */}
@@ -1187,13 +1127,50 @@ export default async function OpportunitiesPage({
             })()
           )}
 
+          {/* ── Mano susidomėjimai (extension A) — the worker's OWN interest
+              signals, collapsible, INDEPENDENT of board visibility: a signal
+              whose demand closed stays here with an honest label instead of
+              silently vanishing. Renders only when at least one signal
+              exists — no empty wall, and never a section for an unapplied
+              store (rows are empty then). Actions reuse EXISTING flows only
+              (withdraw / contact employer / view demand / tailored CV). */}
+          {myInterestDisplayRows.length > 0 ? (
+            <WorkerMyInterestSection
+              locale={locale}
+              rows={myInterestDisplayRows}
+              labels={{
+                title: t("myInterest.title"),
+                summary: t("myInterest.summary", {
+                  count: myInterestDisplayRows.length,
+                }),
+                intro: t("myInterest.intro"),
+                closed: t("myInterest.closed"),
+                withdrawnStatusText: t("myInterest.status.withdrawn"),
+                withdraw: t("interest.withdraw"),
+                contactEmployer: t("interest.contactEmployer"),
+                openConversation: t("interest.contactedLink"),
+                viewDemand: t("myInterest.viewDemand"),
+                cvLink: t("myInterest.cvLink"),
+                error: t("interest.error"),
+                internalNote: t("interest.internalNote"),
+              }}
+            />
+          ) : null}
+
           {/* External public-source ads (real-supply train) — same board,
               same engine, provenance always rendered. The section is absent
               while there is no supply: no dead shell. */}
           <ExternalVacanciesSection
             cards={result.externalVacancies.cards}
             freshness={result.externalVacancies.freshness}
+            initialCount={externalInitialCount}
+            expansion={{
+              href: `${boardHref}?view=all`,
+              label: t("discovery.initialView.showAllExternal"),
+            }}
             labels={{
+              shownOfTotal: (shown, total) =>
+                t("external.shownOfTotal", { shown, total }),
               sectionTitle: t("external.sectionTitle"),
               sectionNote: t("external.sectionNote"),
               // How old this supply is, in the worker's own words. The date is
@@ -1236,9 +1213,232 @@ export default async function OpportunitiesPage({
             }}
           />
 
+          {/* MARKET SITUATION -- on request, not by default.
+              Market intelligence is a real capability and none of it is removed:
+              the same salary/benchmark cards, the same AI reading of the public
+              ad pool, the same weekly summary, the same map. What changed is that
+              it no longer occupies the viewport a worker opened to see WORK.
+              Three consecutive market blocks used to sit between the reader and
+              the first opportunity -- and on a profile with no imported ads they
+              were three cards of zeroes.
+              Reuses the existing market-context row title as the summary, so no
+              untranslated string enters the product. */}
+          <details
+            className="group rounded-lg border border-ink-600 bg-ink-800/40"
+            data-testid="opportunities-market-situation"
+          >
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-text-primary marker:text-text-muted">
+              {tIntel("trustCard.rowTitle")}
+            </summary>
+            <div className="flex flex-col gap-4 px-4 pb-4">
+              {/* Market context row (Contextual Intelligence UI v1): the ONE
+                  trust-card engine renders the worker's salary-vs-benchmark
+                  position plus four honest unavailable placeholders — no
+                  duplicate UI, no fabricated figures, premium empty states. */}
+              {salaryIntel.kind !== "no_viewer" ? (
+                <section
+                  className="flex flex-col gap-3"
+                  data-testid="opportunities-market-context"
+                  aria-label={tIntel("trustCard.rowTitle")}
+                >
+                  <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                    {tIntel("trustCard.rowTitle")}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    {marketContextCards.map((card, index) => (
+                      <TrustInsightCard
+                        key={card.id}
+                        card={card}
+                        locale={locale}
+                        linkToWorkspace={index === 0}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {/* Market for the worker's own occupation — exact counts over the
+                  imported public advertisement pool, plus the optional AI
+                  reading of them. Placed ABOVE the weekly summary because it is
+                  the one signal on this page that does not depend on the
+                  internal demand board having rows in it. Renders nothing when
+                  the profile carries no work type. */}
+              {result.kind === "ready" ? (
+                <MarketExplanationPanel
+                  professionSlug={result.readiness.professionSlug}
+                  evidencedProfessionSlug={result.readiness.evidencedProfessionSlug}
+                  locale={locale}
+                />
+              ) : null}
+
+              {/* Weekly personal intelligence (C-r1) — the summary the weekly
+                  digest bell row points at. Renders only when at least one of
+                  the two reads answered (emitter rule mirrored). */}
+              {weekly.kind === "ready" ? (
+                <WeeklyIntelligenceSection intel={weekly.intelligence} locale={locale} />
+              ) : null}
+
+          <Link
+            href={`/${locale}/dashboard/market-map`}
+            data-testid="opportunities-market-map-link"
+            className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-cyan"
+          >
+            {t("marketMapLink")} →
+          </Link>
+            </div>
+          </details>
+
+          {/* YOUR READINESS -- diagnostics, on request.
+              This is the worker's own profile-completeness scorecard. It is real,
+              own-data and worth keeping, but it is not what the page is FOR, and
+              as a permanent card above the board it made opportunity discovery
+              compete with profile admin every time the page opened.
+              The two states that genuinely BLOCK matching -- no work type, no
+              skills -- are NOT in here. They still render above the board as one
+              reason plus one action, because those a worker must act on now. */}
+          <details
+            className="group rounded-lg border border-ink-600 bg-ink-800/40"
+            data-testid="opportunities-readiness-disclosure"
+          >
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-text-primary marker:text-text-muted">
+              {t("readinessTitle")}
+            </summary>
+            <div className="px-4 pb-4">
+              {/* ── Your readiness (real own-data) ─────────────────────────── */}
+              <section
+                className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-ink-800/40 p-4"
+                data-testid="opportunities-readiness"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-xs leading-relaxed text-text-secondary">
+                    {t("readinessIntro")}
+                  </p>
+                </div>
+                <ul className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      ["workType", result.readiness.hasWorkType],
+                      ["skills", result.readiness.hasSkills],
+                      ["country", result.readiness.countries.length > 0],
+                      ["documents", result.readiness.documentsCount > 0],
+                      ["availability", result.readiness.availabilitySet],
+                    ] as const
+                  ).map(([key, ok]) => (
+                    <li
+                      key={key}
+                      className={`rounded-md border px-2.5 py-1 text-xs ${
+                        ok
+                          ? "border-state-success/40 bg-state-success/10 text-state-success"
+                          : "border-state-amber/40 bg-state-amber/5 text-state-amber"
+                      }`}
+                      data-ready={ok ? "yes" : "no"}
+                    >
+                      {t(`ready.${key}`)} · {ok ? t("ready.set") : t("ready.missing")}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={profileHref}
+                  className="inline-block w-fit rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80"
+                >
+                  {t("ctaProfile")} →
+                </Link>
+              </section>
+            </div>
+          </details>
+
+          {/* How matching works — deterministic rules + calc version, no AI
+              claims, no global score (contract v2 presentation rule). */}
+          <details
+            className="group rounded-lg border border-ink-600 bg-ink-800/40"
+            data-testid="opportunities-how-matching"
+          >
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-text-primary marker:text-text-muted">
+              {t("discovery.how.title")}
+            </summary>
+            <div className="flex flex-col gap-2 px-4 pb-4 text-xs leading-relaxed text-text-secondary">
+              <p>{t("discovery.how.body")}</p>
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("discovery.how.version", { version: MATCH_CALC_VERSION })}
+              </p>
+              <p data-testid="opportunities-trust-note">{t("trustNote")}</p>
+              {/* What this surface is. It used to be a permanent banner
+                  above the board -- copy explaining the feature, on the
+                  feature, in the space the feature needed. Here it answers
+                  the reader who actually asked. */}
+              <FeatureNote testId="feature-note-opportunities">
+                {(await getTranslations("featureNotes"))("opportunities")}
+              </FeatureNote>
+            </div>
+          </details>
+
+          {/* Recently viewed (P2-PR5) — DEVICE-LOCAL list of detail
+              disclosures opened on THIS device, re-joined against the live,
+              already-authorized rows (ids + timestamps only in storage; the
+              strip itself discloses that nothing leaves this browser). */}
+          {result.opportunities.length > 0 ? (
+            <RecentlyViewedStrip
+              liveRows={result.opportunities.map(({ need }) => ({
+                id: need.id,
+                title: roleLabel(need.roleText),
+                scanLine: scanLine(need),
+              }))}
+              labels={recentLabels}
+            />
+          ) : null}
+
           <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
         </>
       )}
-    </main>
+
+      {/* Next-step bridge (§8.10 / §6 system loop): a fit doesn't dead-end — it
+          moves through the marketplace (request/offer) and the plan (a confirmed
+          match becomes a booking). Existing routes only; navigation, no fake
+          matching action, mobile-first tap targets.
+
+          It sits AFTER the board, not before it. This block used to be the
+          first thing on the page: a worker who opened "Galimybės" met two
+          links to OTHER surfaces before a single opportunity. A next step is
+          only a next step once there is something to step on from — and the
+          page now answers "what matters now?" before "what else can I do?".
+          Still outside the no-worker branch, so it renders exactly as often
+          as it did before. */}
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="opportunities-next-step"
+      >
+        {/* Density pass (worker-workspace UX audit v2): the intro sentence
+            restated what the two link cards below already say — removed. */}
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("nextStep.title")}
+        </span>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {[
+            {
+              key: "marketplace",
+              href: `/${locale}/dashboard/service-requests`,
+              label: t("nextStep.marketplace"),
+              note: t("nextStep.marketplaceNote"),
+            },
+            {
+              key: "bookings",
+              href: `/${locale}/dashboard/bookings`,
+              label: t("nextStep.bookings"),
+              note: t("nextStep.bookingsNote"),
+            },
+          ].map((l) => (
+            <Link
+              key={l.key}
+              href={l.href}
+              data-testid={`opportunities-next-step-${l.key}`}
+              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+            >
+              <span className="font-semibold">{l.label}</span>
+              <span className="text-xs text-text-muted">{l.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }

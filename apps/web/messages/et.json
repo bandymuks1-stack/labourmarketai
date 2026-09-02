@@ -5,7 +5,13 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet."
+    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "syntheticTitle": {
+      "hiringWorkers": "Otsitakse töötajaid",
+      "agencyPartnership": "Partnerluspakkumine"
+    },
+    "interestWaiting": "{count, plural, one {# inimene ootab vastust} other {# inimest ootab vastust}}",
+    "untitledInquiry": "Nimeta päring"
   },
   "journey": {
     "eyebrow": "Kuidas see töötab",
@@ -115,6 +121,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "[EN] Continue with LinkedIn",
+      "continueWithFacebook": "[EN] Continue with Facebook"
+    },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
       "error_title": "[EN] Sign-in failed",
@@ -287,7 +297,13 @@
       "invalidEmail": "[EN] Invalid email format.",
       "passwordTooShort": "[EN] Password too short (at least {min} characters).",
       "rateLimited": "[EN] Too many attempts. Please try again later.",
-      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead."
+      "userAlreadyRegistered": "[EN] This email is already registered. Sign in instead.",
+      "oauth": {
+        "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
+        "link_expired": "See kinnituslink on aegunud või juba kasutatud. Kui oled e-posti juba kinnitanud, logi lihtsalt sisse. Muidu küsi allpool uus link.",
+        "confirmed_sign_in": "Sinu e-post on kinnitatud. Registreerumine alustati teises seadmes, seega logi jätkamiseks siin sisse."
+      },
+      "emailNotConfirmed": "Sinu e-post pole veel kinnitatud. Ava saadetud kinnituslink või küsi allpool uus."
     },
     "forgotPassword": {
       "back_to_login": "[EN] Back to sign in",
@@ -318,7 +334,9 @@
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
-      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Saada uus kinnituslink",
+      "resend_sent": "Uus kinnituslink on teel aadressile {email}."
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",
@@ -356,11 +374,15 @@
         "event_workflow_escalated": "Kinnitusetapp ületas tähtaja",
         "event_document_ack_assigned": "[EN] You were asked to confirm you have read a document.",
         "event_document_ack_completed": "[EN] A document you sent for confirmation was confirmed.",
-        "event_document_expiring": "[EN] A document's validity is ending soon.",
+        "event_document_expiring": "Dokumendi kehtivus lõpeb peagi.",
         "event_work_task_assigned": "Sulle määrati ülesanne",
         "event_demand_interest_expressed": "Töötaja avaldas huvi teie vajaduse vastu",
         "event_demand_interest_reviewed": "Ettevõte märkis teie huvi läbivaadatuks",
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis"
+      },
+      "email": {
+        "open": "Ava LabourMarket.ai-s:",
+        "manage": "Halda teavituste seadeid:"
       }
     },
     "onboarding": {
@@ -466,7 +488,10 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
-      "submit_label": "[EN] Sign up"
+      "submit_label": "[EN] Sign up",
+      "resend_label": "Saada link uuesti",
+      "resend_sent": "Uuesti saadetud. Kontrolli postkasti ja rämpsposti kausta.",
+      "resend_wait": "Uut linki saad küsida {seconds} s pärast."
     }
   },
   "common": {
@@ -913,6 +938,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Maksmine katkestati — midagi ei võetud ja sinu kontol ei muutunud midagi."
+    },
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
@@ -1536,7 +1564,8 @@
         "openDemands": "[EN] Open demands",
         "interestActive": "[EN] Interest: new",
         "interestReviewed": "[EN] Interest: reviewed",
-        "interestContacted": "[EN] Interest: contacted"
+        "interestContacted": "[EN] Interest: contacted",
+        "interestNotified": "Huvi: teavitatud"
       },
       "status": {
         "green_scoped": "[EN] green scoped",
@@ -2042,6 +2071,11 @@
         "body": "[EN] Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "[EN] Reset filters"
       },
+      "initialView": {
+        "summary": "Kuvatakse {shown} tugevaimat vastet {total} võimalusest.",
+        "showAll": "Näita kõiki (veel {count})",
+        "showAllExternal": "Näita kõiki töökuulutusi"
+      },
       "details": {
         "show": "[EN] More details",
         "hide": "[EN] Hide details"
@@ -2130,6 +2164,7 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "shownOfTotal": "parimad {shown} / {total}",
       "bandBest": "Kõige sobivamad",
       "bandPossible": "Võimalikud sobivused",
       "bandExplore": "Muud kuulutused",
@@ -2192,6 +2227,7 @@
     "reason": {
       "skills_manager_confirmed": "[EN] Manager-confirmed skills",
       "skills_journal_supported": "[EN] Journal-supported skills",
+      "practice_experience": "Praktika- või vabatahtliku töö kogemus",
       "country_match": "[EN] Country matches",
       "mobility_match": "[EN] Willing to work in this country",
       "available_now": "[EN] Available now",
@@ -3557,6 +3593,9 @@
       "chipNeedWorkers": "Vajan töötajaid",
       "chipCandidates": "Kandidaadid",
       "chipCompanyHub": "Ettevõtte tööruum",
+      "chipEduInviteLearner": "[EN] Invite a learner",
+      "chipEduCapabilities": "[EN] What we provide",
+      "learnerGreetingContext": "[EN] You're learning with {institution} — every work entry you log becomes part of your evidence and CV.",
       "companyDemandNext": "Vajadus on salvestatud ettevõtte tööruumis. Mis edasi?",
       "navJournal": "Päevik",
       "chipTasks": "Ülesanded",
@@ -3596,7 +3635,15 @@
       "engagementsOpened": "Siin on registreeritud töösuhted. Ühe neist saab paneelil lõpetada.",
       "engagementsNone": "Registreeritud töösuhteid ei ole.",
       "engagementsNoCompany": "Sa ei tegutse praegu organisatsiooni nimel, seega pole nimekirja, mida näidata.",
-      "engagementsUnavailable": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks."
+      "engagementsUnavailable": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks.",
+      "employerBridgeHint": "Saad selle avaldada oma ettevõttena — avan vajaduse vormi.",
+      "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
+      "chipServiceRequests": "Leia teenus",
+      "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
+      "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
+      "chipMyOwnInterest": "Minu enda huvi",
+      "createOrganizationHint": "Saan koos teiega organisatsiooni luua — andmed ja kontroll on ühel lehel.",
+      "chipCreateOrganization": "Loo organisatsioon"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4624,6 +4671,26 @@
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Koosta päevikukanne",
+      "title": "Dokumendist Tööpäevikusse",
+      "understoodNote": "All on tekst, mis loeti failist „{filename}“. Vaata üle, paranda ja kinnita — alles siis saab see sinu päeviku ajaloo osaks.",
+      "detectedSkills": "Leidsime tekstist {count} oskuste mainimist.",
+      "notesLabel": "Kande tekst (sinu dokumendist — muuda enne salvestamist)",
+      "engagementLabel": "Töökontekst",
+      "save": "Kinnita ja salvesta päevikusse",
+      "saving": "Salvestan…",
+      "saved": "Salvestatud sinu Tööpäevikusse — lähtedokument jääb selle kandega seotuks.",
+      "savedLink": "Ava päevik",
+      "error": "Salvestamine ebaõnnestus. Midagi ei salvestatud.",
+      "notFound": "Seda dokumenti sinu dokumentide hulgast ei leitud.",
+      "refusedClassified": "Konfidentsiaalseid dokumente automaatselt ei loeta — allalaadimine jääb logitud käsitsi sammuks.",
+      "refusedNoOcr": "Fotosid ei loeta — tekstituvastust veel pole.",
+      "refusedType": "Seda failitüüpi ei saa tekstina lugeda.",
+      "empty": "Sellest dokumendist ei leitud loetavat teksti.",
+      "failed": "Dokumenti ei õnnestunud lugeda.",
+      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see."
+    },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
     "noFileYet": "[EN] No file uploaded yet.",
@@ -4830,7 +4897,9 @@
       "title": "[EN] Team timesheets",
       "decideNote": "[EN] Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
       "noTemplateFor": "[EN] {name} has no published timesheet approval template.",
-      "createTemplate": "[EN] Create standard approval template",
+      "templateNeedsAdmin": "Kinnitusmalli saab avaldada ainult organisatsiooni omanik või administraator. Seni ei saa tööajatabelit esitada.",
+      "blockedNote": "Ootab seda malli: {count} tööajatabelit selles organisatsioonis ei saa esitada enne, kui mall on avaldatud.",
+      "createTemplate": "Paigalda standardsed kinnitusmallid",
       "unnamedWorker": "[EN] Worker",
       "decideInApprovals": "[EN] Decide in the approvals area",
       "reopenNote": "[EN] Return note",
@@ -4847,7 +4916,7 @@
       "synced_pending": "[EN] The approval is still in progress.",
       "no_instance": "[EN] No approval request exists for this timesheet yet.",
       "no_template": "[EN] This organization has no published timesheet approval template yet.",
-      "template_created": "[EN] Standard approval template created and published.",
+      "template_created": "Standardsed kinnitusmallid paigaldatud — tööajatabeli mall on avaldatud.",
       "overlap": "[EN] This period overlaps an existing timesheet.",
       "invalid_period": "[EN] The period is invalid — up to 31 days, and the end may not be before the start.",
       "no_worker": "[EN] Your account has no worker profile.",
@@ -5644,5 +5713,112 @@
       "awaitingOwnerApproval": "ootab omaniku kinnitust"
     },
     "footer": "Aus eelvaade · Ei mingit võltsitud tehisintellekti · Ei mingit võltsitud kinnitamist · Ei mingeid väljamõeldud töötajanägusid · Iga kirje algab sõnadega „Sample · …“, seega ei loe see kunagi päris andmetena."
+  },
+  "organizationCapabilities": {
+    "title": "Millega teie organisatsioon tegeleb?",
+    "help": "Märkige kõik, mis sobib — organisatsioon võib teha mitut asja korraga.",
+    "save": "Salvesta",
+    "saved": "Salvestatud",
+    "notPermitted": "Te ei saa seda organisatsiooni muuta.",
+    "error": "Salvestamine ebaõnnestus. Proovige uuesti.",
+    "allDeclared": "Kõik võimalik on juba märgitud.",
+    "choices": {
+      "training": {
+        "label": "Me õpetame ja koolitame inimesi",
+        "hint": "Kool, ülikool või koolituskeskus; võtame praktikale."
+      },
+      "employer": {
+        "label": "Me võtame inimesi tööle",
+        "hint": "Värbame endale."
+      },
+      "workforce": {
+        "label": "Me pakume töötajaid teistele organisatsioonidele",
+        "hint": "Tööjõu vahendamine, lepingubrigaadid."
+      },
+      "recruitment": {
+        "label": "Me aitame inimesi leida ja valida",
+        "hint": "Värbamine ja valik."
+      },
+      "project": {
+        "label": "Me viime ellu projekte",
+        "hint": "Osaleme teostaja või partnerina."
+      },
+      "client": {
+        "label": "Me tellime töid või teenuseid",
+        "hint": "Oleme tellija."
+      }
+    }
+  },
+  "workHours": {
+    "import": {
+      "entryLink": "Impordi tunnid arvutustabelist (.xlsx)",
+      "backToEntry": "Tagasi päevasisestusse",
+      "title": "Tööajatabeli import",
+      "subtitle": "Laadige üles kuu tööajatabel. Vaadake tõlgendus allpool üle ja parandage — midagi ei salvestata enne, kui kinnitate.",
+      "fileLabel": "Tööajatabeli fail (.xlsx)",
+      "fileHint": "Kuu ruudustik töötaja × päev või leht veergudega töötaja / kuupäev / objekt / tunnid, kuni 5 MB.",
+      "parse": "Faili eelvaade",
+      "parsing": "Loen…",
+      "refused": {
+        "no-file": "Valige kõigepealt fail.",
+        "too-large": "Fail on suurem kui 5 MB.",
+        "not-xlsx": "See ei ole .xlsx-arvutustabel.",
+        "too-complex": "Arvutustabel on turvaliseks lugemiseks liiga suur.",
+        "read-failed": "Faili ei õnnestunud lugeda.",
+        "unrecognized": "Selles failis ei tuvastatud tööajatabeli struktuuri.",
+        "too-many-rows": "Lehel on rohkem ridu, kui üks import mahutab — jagage fail osadeks."
+      },
+      "emptyFile": "Failis pole tööajatabeli andmeid.",
+      "noCompany": "Lülituge ettevõtte tööruumi.",
+      "summary": "Loetud read: {rows} (leht {sheet}).",
+      "notPersistedNotice": "Midagi ei salvestata enne, kui kinnitate.",
+      "skippedTitle": "Lahtrid, mida ei õnnestunud lugeda",
+      "skippedReasons": {
+        "unparsable": "loetamatu väärtus",
+        "hours-out-of-bounds": "tunnid väljaspool 0–24",
+        "invalid-date": "sellist kuupäeva selles kuus pole"
+      },
+      "monthLabel": "Kuu",
+      "monthHint": "Leht ei nimeta kuud — valige see selgesõnaliselt.",
+      "duplicateWarning": "Identsed kirjed on juba olemas {count} rea jaoks (sama töötaja, kuupäev, objekt ja tunnid). Uuesti kirjutamine nõuab allolevat kinnitust.",
+      "columns": {
+        "include": "Kaasa",
+        "worker": "Töötaja",
+        "object": "Objekt",
+        "date": "Kuupäev",
+        "hours": "Tunnid",
+        "note": "Märkus",
+        "status": "Olek"
+      },
+      "chooseWorker": "Valige töötaja",
+      "chooseObject": "Valige objekt",
+      "suggestions": "Soovitused",
+      "allWorkers": "Kõik töötajad",
+      "allObjects": "Kõik objektid",
+      "needsReview": "Mitmetähenduslik lahter — kontrollige jaotust",
+      "duplicateBadge": "Juba kirjas",
+      "incomplete": "Valik puudub",
+      "rowProblems": {
+        "worker": "Töötajat ei aktsepteeritud",
+        "object": "Objekti ei aktsepteeritud",
+        "date": "Vigane kuupäev",
+        "hours": "Vigased tunnid",
+        "note": "Märkus on liiga pikk"
+      },
+      "overrideLabel": "Kirjuta duplikaadid siiski (tõeline teine vahetus)",
+      "confirm": "Kinnita valitud read ({count})",
+      "confirming": "Kirjutan…",
+      "receipt": "Valmis — kirjutatud kirjeid: {count}. Need on nüüd töötundide osa.",
+      "confirmBlockedHint": "Iga kaasatud rida vajab töötajat, objekti, kuupäeva ja tunde.",
+      "errors": {
+        "invalidRows": "Parandamist vajavad read: {count}. Midagi ei kirjutatud.",
+        "duplicatesFound": "Identseid olemasolevaid kirjeid: {count}. Midagi ei kirjutatud — märkige kinnitus, et need siiski kirjutada.",
+        "noRows": "Pole ridu, mida kirjutada.",
+        "tooManyRows": "Ühe impordi jaoks liiga palju ridu — jagage fail osadeks.",
+        "needsMigration": "See funktsioon pole selles andmebaasis veel lubatud.",
+        "notAuthorized": "Te ei tohi neid tunde kirjutada.",
+        "generic": "Töötlemine ebaõnnestus. Proovige uuesti."
+      }
+    }
   }
 }

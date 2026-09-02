@@ -461,7 +461,10 @@
       "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
       "pending_absence_reviews": "Verschwindet, sobald Sie den Antrag auf der Seite Urlaub & Abwesenheit genehmigen oder ablehnen.",
       "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
-    }
+    },
+    "storedTitle": "Gespeicherte Benachrichtigungen",
+    "storedIntro": "Aufgezeichnete Ereignisse zu Ihnen — jede Zeile öffnet die zugehörige Seite. Der Lesestatus wird über die Glocke verwaltet.",
+    "storedEmpty": "Noch keine gespeicherten Benachrichtigungen."
   },
   "commandFinder": {
     "title": "Schnellsuche",
@@ -719,6 +722,10 @@
       "needsClear": "{n} Anfragen wurden klar genug für besseres Matching.",
       "projectsClarified": "{n} Projekte wurden zu einer Top-Shortlist geklärt.",
       "topTrades": "Diese Woche am meisten gefragt: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Ihr Text wurde nicht gespeichert: ohne Unternehmens-Arbeitsbereich hat ein Entwurf keine Zugehörigkeit. Das Bedarfsformular öffnet leer — das Unternehmen können Sie dort anlegen.",
+      "failed": "Ihr Text konnte nicht gespeichert werden, daher öffnet das Bedarfsformular leer. Die Beschreibung müssen Sie erneut eingeben."
     }
   },
   "quickNav": {
@@ -872,6 +879,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Echte Marktnachfrage",
+      "lead": "Offene Bedarfe aus der realen Nachfrage dieser Plattform — wo gerade Arbeit gesucht wird."
+    },
+    "vacancyVolume": {
+      "title": "Volumen öffentlicher Stellenanzeigen",
+      "scope": "{count} importierte öffentliche Stellenanzeigen für {profession}. Aktuelle Quellenabdeckung: {countries}.",
+      "window": "Stadtvolumen werden über die neuesten {window} Anzeigen gezählt, nicht über den gesamten Bestand."
+    },
     "entities": {
       "title": "Drei Dinge auf der Karte",
       "intro": "Die Karte zeigt drei verschiedene Dinge: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jedes folgt seiner eigenen Sichtbarkeitsregel und sieht anders aus.",
@@ -1463,7 +1479,13 @@
       "urgency": "Wann benötigt",
       "notes": "Notizen"
     },
-    "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage"
+    "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage",
+    "syntheticTitle": {
+      "hiringWorkers": "Mitarbeiter gesucht",
+      "agencyPartnership": "Partnerschaftsangebot"
+    },
+    "interestWaiting": "{count, plural, one {# Person wartet auf eine Antwort} other {# Personen warten auf eine Antwort}}",
+    "untitledInquiry": "Anfrage ohne Titel"
   },
   "journey": {
     "eyebrow": "So funktioniert es",
@@ -2795,7 +2817,8 @@
         "openDemands": "Offene Bedarfe",
         "interestActive": "Interesse: neu",
         "interestReviewed": "Interesse: geprüft",
-        "interestContacted": "Interesse: kontaktiert"
+        "interestContacted": "Interesse: kontaktiert",
+        "interestNotified": "Interesse: benachrichtigt"
       },
       "status": {
         "green_scoped": "grün (begrenzt)",
@@ -3321,6 +3344,10 @@
       "legendTarget": "Marktrichtungen",
       "legendContext": "Übrige Welt",
       "aria": "Arbeitsrichtungen — Weltkarte"
+    },
+    "origin": {
+      "live": "Live-Daten",
+      "preview": "Vorschau"
     }
   },
   "company": {
@@ -3397,6 +3424,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Mit LinkedIn fortfahren",
+      "continueWithFacebook": "Mit Facebook fortfahren"
+    },
     "legalNotice": {
       "signup": "Mit der Erstellung eines Kontos bestätigen Sie, dass Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy> gelesen haben.",
       "googleLogin": "Wenn Sie noch kein Konto haben, wird beim Fortfahren mit Google eines erstellt. Mit der Erstellung eines Kontos bestätigen Sie, dass Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy> gelesen haben.",
@@ -3414,8 +3445,12 @@
         "exchange_failed": "Die Anmeldung hat nicht geklappt. Versuchen Sie es erneut — der Anmeldecode gilt nur einmal und läuft schnell ab.",
         "no_user": "Sie sind angemeldet, aber Ihr Konto ist nicht erreichbar. Melden Sie sich ab und wieder an.",
         "callback": "Unerwarteter Fehler bei der Anmeldung. Versuchen Sie es erneut — falls das Problem bestehen bleibt, teilen Sie die unten stehende Trace-ID mit.",
-        "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut."
-      }
+        "cancelled": "Die Anmeldung wurde abgebrochen. An Ihrem Konto hat sich nichts geändert.",
+        "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut.",
+        "link_expired": "Dieser Bestätigungslink ist abgelaufen oder wurde bereits verwendet. Wenn du deine E-Mail-Adresse schon bestätigt hast, melde dich einfach an. Andernfalls fordere unten einen neuen Link an.",
+        "confirmed_sign_in": "Deine E-Mail-Adresse ist bestätigt. Die Registrierung wurde auf einem anderen Gerät begonnen. Melde dich hier an, um fortzufahren."
+      },
+      "emailNotConfirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Öffne den zugesandten Bestätigungslink oder fordere unten einen neuen an."
     },
     "signup": {
       "headline": "Konto erstellen",
@@ -3451,7 +3486,10 @@
       "error_password_number": "Das Passwort muss eine Zahl enthalten.",
       "error_password_special": "Das Passwort muss ein Sonderzeichen enthalten.",
       "check_email_title": "E-Mail bestätigen",
-      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen."
+      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen.",
+      "resend_label": "Link erneut senden",
+      "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
+      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
     },
     "login": {
       "headline": "Anmelden",
@@ -3475,7 +3513,9 @@
       "error_invalid_credentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
       "google_hint": "Mit Google registriert? Dann haben Sie kein Passwort — nutzen Sie oben \"Mit Google fortfahren\".",
       "preview_host_notice": "Sie befinden sich auf einer Vorschauversion der Website. Die Google-Anmeldung funktioniert nur auf der Live-Website — öffnen Sie https://labourmarket.ai, um sie zu nutzen. Die Anmeldung mit E-Mail-Adresse und Passwort funktioniert hier wie gewohnt.",
-      "google_recovery_label": "Mit Google anmelden — Ausweichweg (vorübergehend, über eine externe Anmeldeseite)"
+      "google_recovery_label": "Mit Google anmelden — Ausweichweg (vorübergehend, über eine externe Anmeldeseite)",
+      "resend_confirmation": "Neuen Bestätigungslink senden",
+      "resend_sent": "Ein neuer Bestätigungslink ist unterwegs an {email}."
     },
     "forgotPassword": {
       "headline": "Passwort vergessen?",
@@ -4047,6 +4087,25 @@
             "note": "Ihre Wiederherstellungs-E-Mail: {email}. Stellen Sie sicher, dass Sie darauf zugreifen können."
           },
           "comingLater": "Später sehen Sie, wo Sie angemeldet sind, können Sitzungen beenden und Backup-Codes erhalten."
+        },
+        "connectedApps": {
+          "title": "Verbundene Apps",
+          "intro": "Externe Anwendungen und Assistenten, denen du erlaubt hast, auf LabourMarket.ai in deinem Namen zu handeln. Jede sieht nur, was du siehst, und du kannst sie jederzeit trennen.",
+          "empty": "Mit deinem Konto ist keine Anwendung verbunden.",
+          "unavailable": "Die Liste der verbundenen Apps konnte gerade nicht geladen werden. Versuch es gleich noch einmal.",
+          "unnamed": "Unbenannte Anwendung",
+          "grantedAt": "Verbunden am {date}",
+          "grantedUnknown": "Verbindungsdatum nicht erfasst",
+          "scopesLabel": "Berechtigungen",
+          "disconnect": "Trennen",
+          "confirmTitle": "{name} trennen?",
+          "confirmBody": "Die Anwendung verliert sofort den Zugriff. Sie muss erneut um deine Erlaubnis bitten, bevor sie in deinem Namen handeln kann.",
+          "confirmYes": "Ja, trennen",
+          "cancel": "Verbunden lassen",
+          "feedbackRevoked": "Getrennt. Die Anwendung hat keinen Zugriff mehr auf dein Konto.",
+          "feedbackError": "Die Anwendung konnte nicht getrennt werden. Lade die Seite neu und versuch es erneut.",
+          "note": "Das Abmelden von LabourMarket.ai trennt keine Apps. Das Trennen hier ist der einzige Weg, den Zugriff einer Anwendung zu beenden.",
+          "pending": "Wird getrennt…"
         }
       },
       "comingSoon": {
@@ -4134,7 +4193,11 @@
       "switchRoleCta": "Zu {role} wechseln, um es anzusehen",
       "markAllRead": "Alle als gelesen markieren",
       "close": "Schließen",
-      "viewAll": "Alle Aktivitäten ansehen"
+      "viewAll": "Alle Aktivitäten ansehen",
+      "email": {
+        "open": "In LabourMarket.ai öffnen:",
+        "manage": "Benachrichtigungseinstellungen verwalten:"
+      }
     }
   },
   "shared": {
@@ -4709,6 +4772,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Der Checkout wurde abgebrochen — es wurde nichts abgebucht und an Ihrem Konto hat sich nichts geändert."
+    },
     "eyebrow": "Preise",
     "title": "Einfache Stufen,",
     "titleAccent": "fair angesetzt.",
@@ -6996,9 +7062,39 @@
       "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
       "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
       "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
+    },
+    "validity": {
+      "active": "Gültig",
+      "expired": "Abgelaufen",
+      "revoked": "Widerrufen",
+      "pending": "Prüfung ausstehend",
+      "rejected": "Abgelehnt",
+      "unverified": "Nicht geprüft",
+      "unknown": "Gültigkeit unbekannt",
+      "reviewedOn": "Geprüft am {date}"
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Journalentwurf erstellen",
+      "title": "Vom Dokument ins Arbeitsjournal",
+      "understoodNote": "Unten steht der aus „{filename}“ gelesene Text. Prüfe, bearbeite und bestätige ihn — erst dann wird er Teil deiner Journalhistorie.",
+      "detectedSkills": "Wir haben {count} Erwähnungen von Fähigkeiten im Text erkannt.",
+      "notesLabel": "Eintragstext (aus deinem Dokument — vor dem Speichern bearbeiten)",
+      "engagementLabel": "Arbeitskontext",
+      "save": "Bestätigen und im Journal speichern",
+      "saving": "Speichern…",
+      "saved": "Im Arbeitsjournal gespeichert — das Quelldokument bleibt mit diesem Eintrag verknüpft.",
+      "savedLink": "Journal öffnen",
+      "error": "Speichern fehlgeschlagen. Nichts wurde gespeichert.",
+      "notFound": "Dieses Dokument wurde in deinen Dokumenten nicht gefunden.",
+      "refusedClassified": "Vertrauliche Dokumente werden nicht automatisch gelesen — der Download bleibt ein protokollierter manueller Schritt.",
+      "refusedNoOcr": "Fotos werden nicht gelesen — Texterkennung existiert noch nicht.",
+      "refusedType": "Dieser Dateityp kann nicht als Text gelesen werden.",
+      "empty": "In diesem Dokument wurde kein lesbarer Text gefunden.",
+      "failed": "Das Dokument konnte nicht gelesen werden.",
+      "noEngagement": "Du brauchst zuerst einen Arbeitskontext — öffne das Dashboard und richte einen ein."
+    },
     "currentVersion": "Version {n}",
     "download": "Herunterladen",
     "noFileYet": "Noch keine Datei hochgeladen.",
@@ -7196,6 +7292,7 @@
     "generatedAt": "Erstellt",
     "notWorker": "Der Lebenslauf-Export ist für Arbeitskraft-Profile verfügbar — er wird aus dem Arbeitsjournal und bestätigten Fähigkeiten erstellt.",
     "summaryTitle": "Berufliches Profil",
+    "practiceHistoryTitle": "Praktikum und Ehrenamt",
     "workHistoryTitle": "Beruflicher Werdegang",
     "present": "Heute",
     "languagesTitle": "Sprachen",
@@ -7209,10 +7306,20 @@
     "projectsTitle": "Projekte",
     "projectsHint": "Aus Arbeitseinträgen",
     "confirmedByManager": "Vom Manager bestätigt",
+    "euFormat": {
+      "notOfficial": "Dieser Lebenslauf folgt der Europass-Struktur, damit europäische Arbeitgeber ihn im erwarteten Format lesen können. Er ist kein von der Europäischen Union ausgestelltes Europass-Dokument.",
+      "personal": "Persönliche Daten",
+      "workExperience": "Berufserfahrung",
+      "educationAndTraining": "Schul- und Berufsbildung",
+      "personalSkills": "Persönliche Fähigkeiten",
+      "jobRelatedSkills": "Berufsbezogene Fähigkeiten",
+      "additionalInformation": "Weitere Angaben"
+    },
     "templates": {
       "label": "Vorlage",
       "standard": "Standard",
-      "compact": "Kompakt"
+      "compact": "Kompakt",
+      "eu": "EU-Format"
     },
     "privateDetails": {
       "toggle": "Gehaltsvorstellung & Verfügbarkeit im Ausdruck aufnehmen",
@@ -7390,6 +7497,7 @@
     "reason": {
       "skills_manager_confirmed": "Vom Manager bestätigte Fähigkeiten",
       "skills_journal_supported": "Journal-gestützte Fähigkeiten",
+      "practice_experience": "Praktikums- oder Freiwilligenerfahrung",
       "country_match": "Land passt",
       "mobility_match": "Bereit, in diesem Land zu arbeiten",
       "available_now": "Jetzt verfügbar",
@@ -7819,6 +7927,49 @@
     "starting": "Wird gestartet…",
     "error": "Konnte nicht gestartet werden"
   },
+  "adminLmc": {
+    "title": "LMC-Hauptbuch",
+    "intro": "Internes Plattformguthaben (1 LMC = 1 EUR internes Guthaben). Live-Datenbankstand: Schalter, ausstehende Verpflichtung und Tester-Gutschrift. Alle kommerziellen Schalter sind AUS; das Einschalten ist eine Entscheidung des Eigentümers.",
+    "unavailable": "Das Hauptbuch konnte mit dieser Sitzung nicht gelesen werden — ein fehlgeschlagener Lesevorgang, kein leeres Hauptbuch.",
+    "on": "An",
+    "off": "Aus",
+    "policy": {
+      "admin": "durch Admin schaltbar",
+      "owner_only": "nur Eigentümer",
+      "system_locked": "systemgesperrt"
+    },
+    "liability": {
+      "outstanding": "Ausstehendes Guthaben",
+      "promotional": "Promo",
+      "purchased": "Gekauft",
+      "accounts": "Konten",
+      "note": "Jeder ausgegebene LMC ist eine aufgeschobene Verpflichtung in Euro. Live-Lesung der kanonischen Saldo-Sicht — kein gespeicherter Bericht."
+    },
+    "grant": {
+      "email": "E-Mail des Empfängers",
+      "amount": "Betrag (LMC)",
+      "reason": "Grund (wird im Hauptbuch gespeichert)",
+      "campaign": "Kampagne",
+      "expiryDays": "Läuft ab in (Tagen)",
+      "key": "Idempotenzschlüssel",
+      "submit": "LMC gutschreiben",
+      "submitting": "Wird gutgeschrieben…",
+      "granted": "Gutgeschrieben",
+      "replay": "Mit diesem Schlüssel wurde bereits gutgeschrieben — nichts wurde doppelt gutgeschrieben",
+      "disabledHint": "Promo-Gutschriften sind in der Datenbank AUS — das Hauptbuch wird diese Gutschrift ablehnen. Das Einschalten ist eine Entscheidung im Eigentümerkanal.",
+      "reasons": {
+        "grants_disabled": "Abgelehnt: Promo-Gutschriften sind deaktiviert",
+        "not_admin": "Abgelehnt: Admin-Identität erforderlich",
+        "recipient_not_found": "Abgelehnt: kein verifiziertes Profil mit dieser E-Mail",
+        "invalid_amount": "Abgelehnt: ungültiger Betrag",
+        "invalid_expiry": "Abgelehnt: ungültiges Ablaufdatum",
+        "idempotency_conflict": "Abgelehnt: dieser Schlüssel wurde bereits anders verwendet",
+        "ledger_absent": "Die Hauptbuchfunktionen sind nicht verfügbar",
+        "error": "Das Hauptbuch hat die Gutschrift abgelehnt"
+      }
+    },
+    "spendFrozen": "Ausgeben ist AUS — ausgegebenes Guthaben bleibt eingefroren, bis der Eigentümer das Ausgeben aktiviert."
+  },
   "adminBilling": {
     "eyebrow": "ABRECHNUNG — TESTMODUS",
     "title": "Abrechnungszentrum",
@@ -8142,6 +8293,11 @@
         "body": "Aktive Filter: {filters}. Entfernen Sie einige Filter oder setzen Sie sie zurück.",
         "reset": "Filter zurücksetzen"
       },
+      "initialView": {
+        "summary": "Die {shown} stärksten Treffer von {total} Möglichkeiten werden angezeigt.",
+        "showAll": "Alle anzeigen (noch {count})",
+        "showAllExternal": "Alle Stellenanzeigen anzeigen"
+      },
       "details": {
         "show": "Mehr Details",
         "hide": "Details ausblenden"
@@ -8278,7 +8434,10 @@
     "noSkills": {
       "title": "Ihre Fähigkeiten sind noch nicht erfasst",
       "body": "Fähigkeits-Matching braucht Nachweise. Fügen Sie Ihrem Arbeitsjournal Arbeitseinträge hinzu — aus echter Arbeit erkannte Fähigkeiten machen Ihre Matches aussagekräftig.",
-      "cta": "Arbeitseintrag hinzufügen"
+      "cta": "Arbeitseintrag hinzufügen",
+      "confirmTitle": "Bestätige, was deine Arbeitseinträge zeigen",
+      "confirmBody": "In deinem Arbeitsjournal stehen bereits Einträge. Sieh dir die darin erkannten Fähigkeiten an und bestätige die, die du wirklich hast — dann können wir dich vermitteln.",
+      "confirmCta": "Erkannte Fähigkeiten ansehen"
     },
     "skillMatch": {
       "title": "Fähigkeits-Match",
@@ -8380,6 +8539,7 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
+      "shownOfTotal": "Top {shown} von {total}",
       "bandBest": "Passt am besten",
       "bandPossible": "Möglicherweise passend",
       "bandExplore": "Weitere Anzeigen",
@@ -8999,6 +9159,36 @@
     "links": {
       "workers": "Für Arbeitskräfte",
       "companies": "Für Unternehmen"
+    }
+  },
+  "accountBilling": {
+    "title": "Abrechnung & Abonnement",
+    "testBadge": "Testmodus",
+    "returned": {
+      "success": "Test-Checkout abgeschlossen. Es ist kein echtes Geld geflossen; der Abonnementstatus unten wird über den signaturgeprüften Webhook des Zahlungsanbieters synchronisiert und kann einen Moment brauchen.",
+      "cancelled": "Der Checkout wurde abgebrochen. Es wurde nichts abgebucht und an Ihrem Konto hat sich nichts geändert.",
+      "portal": "Sie sind zurück aus dem Abrechnungsportal. Dort vorgenommene Änderungen werden hier automatisch synchronisiert."
+    },
+    "disabled": "Zahlungen sind nicht aktiviert. Bezahlpläne sind vorbereitete Entwürfe — hier ist nichts kaufbar und keine Zahlungsmethode nötig.",
+    "none": "Kein Abonnement auf diesem Konto.",
+    "planLabel": "Tarif",
+    "statusLabel": "Abostatus",
+    "status": {
+      "none": "Kein Abonnement",
+      "trialing": "Testphase",
+      "active": "Aktiv",
+      "past_due": "Zahlung überfällig",
+      "unpaid": "Unbezahlt",
+      "cancelled": "Gekündigt",
+      "incomplete": "Unvollständig",
+      "expired": "Abgelaufen"
+    },
+    "graceNotice": "Die letzte Zahlung ist fehlgeschlagen — das Abonnement befindet sich bis zum erneuten Versuch in einer Kulanzfrist.",
+    "manage": {
+      "open": "Abonnement verwalten",
+      "opening": "Wird geöffnet…",
+      "error": "Das Abrechnungsportal konnte nicht geöffnet werden",
+      "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode. Nur Testmodus — keine echten Abbuchungen."
     }
   },
   "accountPlan": {
@@ -10039,6 +10229,7 @@
     },
     "organizations": {
       "title": "Meine Unternehmen",
+      "unnamed": "Unternehmen ohne Namen",
       "noCompanyCta": "Unternehmen hinzufügen",
       "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten.",
       "individualDesc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil."
@@ -10106,9 +10297,15 @@
         "limit_reached": "Einladungslimit erreicht",
         "rate_limited": "Zu viele Einladungen heute",
         "not_authorized": "Nicht erlaubt",
-        "error": "Fehlgeschlagen"
+        "error": "Fehlgeschlagen",
+        "invalid_relationship": "Keine zulässige Beziehung",
+        "organization_capability_required": "Organisation hat dies noch nicht angegeben"
       },
-      "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)"
+      "recipientLanguageLabel": "Sprache des Empfängers (E-Mail und Einladung)",
+      "capacityLabel": "Was wird die eingeladene Person in Ihrer Organisation sein?",
+      "capacityHint": "Ein Praktikum oder ein Studium ist kein Arbeitsverhältnis — es wird genau so erfasst, wie Sie es hier wählen.",
+      "capacityNeedsCapability": "Ihre Organisation hat noch nicht angegeben, dass sie ausbildet. Geben Sie das auf der Organisationsseite an, danach können Sie eine lernende Person einladen.",
+      "capacityNeedsCapabilityCta": "Organisationsseite öffnen"
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
@@ -10148,9 +10345,16 @@
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
-      }
+      },
+      "capacity": "Beziehung: {capacity}",
+      "capacityNotEmployment": "Dies ist kein Stellenangebot und begründet kein Arbeitsverhältnis."
     },
-    "teamEnquiriesTitle": "Meine Anfragen an Kolonnen"
+    "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
+    "admin": {
+      "title": "Verwaltung",
+      "hint": "Freigaben, Anträge und Organisationsregeln — werden bei Bedarf geöffnet.",
+      "back": "Zurück zu den Beziehungen"
+    }
   },
   "people": {
     "eyebrow": "Personenprofil",
@@ -11293,6 +11497,7 @@
         "language": "Sprache",
         "level": "Niveau",
         "jobTitle": "Position",
+        "engagementKind": "Art der Tätigkeit",
         "jobTitlePlaceholder": "z. B. Schweißer, Krankenpfleger, Lagerarbeiter, Entwickler",
         "startMonth": "Startmonat",
         "startYear": "Startjahr",
@@ -11429,6 +11634,12 @@
       "calendarHint": "Deinen Plan findest du im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
       "messagesHint": "Hier sind deine Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
+      "switchContextPersonal": "persönlicher Bereich",
+      "switchContextPick": "In welchem Kontext möchten Sie arbeiten?",
+      "switchContextDone": "Erledigt — Sie arbeiten jetzt in {name}.",
+      "switchContextAlready": "Sie arbeiten bereits in {name}.",
+      "switchContextFailed": "Der Wechsel hat nicht geklappt — Ihr aktiver Kontext ist unverändert.",
+      "switchContextUnavailable": "Kontextwechsel ist derzeit nicht verfügbar.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
       "experiencesEligible": "Ich habe abgeschlossene Interaktionen gefunden, die du schildern kannst. Wähle welche.",
@@ -11457,6 +11668,9 @@
       "chipNeedWorkers": "Ich brauche Arbeitskräfte",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Unternehmensbereich",
+      "chipEduInviteLearner": "Lernende einladen",
+      "chipEduCapabilities": "Was wir anbieten",
+      "learnerGreetingContext": "Du lernst bei {institution} — jede erfasste Arbeit wird Teil deiner Nachweise und deines Lebenslaufs.",
       "companyDemandNext": "Der Bedarf ist in deinem Unternehmensbereich erfasst. Was nun?",
       "navJournal": "Journal",
       "chipTasks": "Aufgaben",
@@ -11531,7 +11745,30 @@
         "chipServices": "Dienstleistungen öffnen",
         "corrected": "Aktualisiert: {changes}.",
         "changeInsteadOf": "{next} (statt {previous})"
-      }
+      },
+      "createOrganizationHint": "Ich kann mit Ihnen eine Organisation anlegen — die Angaben und die Verifizierung stehen auf einer Seite.",
+      "chipCreateOrganization": "Organisation anlegen",
+      "adminRouteHint": "Hier wird das verwaltet:",
+      "adminApprovalsChip": "Freigaben",
+      "adminRequestsChip": "Anträge",
+      "timesheetsChip": "Stundenzettel",
+      "timesheetImportChip": "Stundenzettel-Import",
+      "workHoursChip": "Arbeitsstunden",
+      "absencesChip": "Urlaub & Abwesenheit",
+      "documentsChip": "Meine Dokumente",
+      "marketMapChip": "Marktkarte",
+      "activityChip": "Aktivität",
+      "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular.",
+      "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
+      "chipServiceRequests": "Leistung finden",
+      "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
+      "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
+      "chipMyOwnInterest": "Mein eigenes Interesse",
+      "lmcHint": "Ihr LMC-Guthaben und die vollständige Bewegungshistorie stehen an einer Stelle.",
+      "chipLmc": "LMC öffnen",
+      "briefLearner": "Du bist bei {organization} eingeschrieben. Praxis und Lernen, die du hier festhältst, zählen als Nachweis.",
+      "briefLearnerUnnamed": "Du bist als Lernende:r eingeschrieben. Praxis und Lernen, die du hier festhältst, zählen als Nachweis.",
+      "chipLogLearning": "Lernen oder Praxis festhalten"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -12111,11 +12348,10 @@
       "headline": "Fragen. Sehen. Einstellen.",
       "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort.",
       "chatLabel": "KI-Gespräch",
-      "mapLabel": "Europäischer Arbeitsmarkt",
+      "mapLabel": "Konzeptkarte — illustratives Szenario",
       "thinking": "Marktsignale werden analysiert…",
       "answered": "Gefunden. Karte aktualisiert.",
       "resultLabel": "Ergebnis",
-      "demoBadge": "Demonstration",
       "mapHint": "Auf eine Markierung tippen — die Karte antwortet.",
       "scenario": {
         "q1": "Wo werden jetzt Elektriker gebraucht?",
@@ -12171,9 +12407,9 @@
       },
       "askPlaceholder": "Stellen Sie Ihre eigene Frage…",
       "askSubmit": "Fragen",
-      "unmatched": "In dieser Demonstration beantworte ich nur Fragen zu Elektrikern, Schweißern und verfügbaren Menschen.",
+      "unmatched": "In dieser Vorschau beantworte ich nur Fragen zu Elektrikern, Schweißern und verfügbaren Menschen.",
       "basisLabel": "Worauf das beruht",
-      "basisNote": "Auf den {count} oben abgewogenen Signalen, mit illustrativen Mengen — dies ist eine Demonstration, nicht der heutige Markt.",
+      "basisNote": "Auf den {count} oben abgewogenen Signalen, mit illustrativen Mengen — dies ist ein Konzept-Szenario, nicht der heutige Markt.",
       "previewLabel": "Am besten passende Person",
       "previewName": "Jonas P.",
       "previewRole": "Elektriker · Vilnius · Verfügbar ab September",
@@ -12914,7 +13150,9 @@
       "title": "Stundenzettel des Teams",
       "decideNote": "Freigabeentscheidungen fallen im Freigabebereich. Hier können Sie Zeilen prüfen, exportieren und einen entschiedenen Stundenzettel zurückgeben.",
       "noTemplateFor": "{name} hat keine veröffentlichte Freigabevorlage für Stundenzettel.",
-      "createTemplate": "Standard-Freigabevorlage erstellen",
+      "templateNeedsAdmin": "Nur Inhaber oder Administratoren der Organisation können die Freigabevorlage veröffentlichen. Bis dahin können Stundenzettel nicht eingereicht werden.",
+      "blockedNote": "Warten auf diese Vorlage: {count} Stundenzettel in dieser Organisation können erst nach der Veröffentlichung eingereicht werden.",
+      "createTemplate": "Standard-Freigabevorlagen installieren",
       "unnamedWorker": "Arbeitskraft",
       "decideInApprovals": "Im Freigabebereich entscheiden",
       "reopenNote": "Rückgabenotiz",
@@ -12931,7 +13169,7 @@
       "synced_pending": "Die Freigabe läuft noch.",
       "no_instance": "Für diesen Stundenzettel existiert noch keine Freigabeanfrage.",
       "no_template": "Diese Organisation hat noch keine veröffentlichte Freigabevorlage für Stundenzettel.",
-      "template_created": "Standard-Freigabevorlage erstellt und veröffentlicht.",
+      "template_created": "Standard-Freigabevorlagen installiert — die Freigabevorlage für Stundenzettel ist veröffentlicht.",
       "overlap": "Dieser Zeitraum überschneidet sich mit einem bestehenden Stundenzettel.",
       "invalid_period": "Der Zeitraum ist ungültig — höchstens 31 Tage, und das Ende darf nicht vor dem Beginn liegen.",
       "no_worker": "Ihr Konto hat kein Arbeitskraft-Profil.",
@@ -13711,5 +13949,256 @@
       "awaitingOwnerApproval": "Eigentümerfreigabe steht aus"
     },
     "footer": "Ehrliche Vorschau · Keine vorgetäuschte KI · Keine vorgetäuschte Verifizierung · Keine erfundenen Gesichter von Arbeitskräften · Jeder Eintrag beginnt mit „Sample · …“ und liest sich daher nie wie echte Daten."
+  },
+  "marketExplanation": {
+    "title": "Markt für {profession}",
+    "source": "Gezählt aus öffentlichen Stellenanzeigen, die in LabourMarket.ai importiert wurden, gelesen am {measuredAt}. Das ist nicht der gesamte Arbeitsmarkt und nicht das eigene Bedarfsboard dieser Plattform.",
+    "derivedFromWork": "Du hast keinen Beruf angegeben — dieser Markt wurde aus den Fähigkeiten gewählt, die deine erfasste Arbeit zeigt. Gib einen Beruf an, wenn du einen anderen möchtest.",
+    "statOpen": "Offene Anzeigen",
+    "statNew7d": "In 7 Tagen veröffentlicht",
+    "statNew30d": "In 30 Tagen veröffentlicht",
+    "noneOpen": "Für {profession} wird in dieser Sammlung derzeit nichts ausgeschrieben.",
+    "skillsTitleAll": "Gefragte Fähigkeiten über alle offenen Anzeigen",
+    "skillsTitleWindow": "Gefragte Fähigkeiten in den {window} zuletzt veröffentlichten",
+    "citiesTitleAll": "Wo sie sind, über alle offenen Anzeigen",
+    "citiesTitleWindow": "Wo sie sind, in den {window} zuletzt veröffentlichten",
+    "noPayStated": "Keine dieser Anzeigen nennt einen Vergütungsbetrag, deshalb wird hier keine Vergütung gezeigt oder geschätzt.",
+    "cta": "Diesen Markt erklären",
+    "pending": "Die Zahlen werden gelesen...",
+    "resultTitle": "KI-Lesart der Zahlen oben",
+    "attribution": "Geschrieben von {provider} {model} auf Basis der Zahlen oben. Ein Vorschlag, keine feststehende Tatsache.",
+    "whereTitle": "Wo die Nachfrage ist",
+    "aiSkillsTitle": "Gefragte Fähigkeiten",
+    "actionsTitle": "Was Sie als Nächstes tun könnten",
+    "limitationsTitle": "Was diese Zahlen nicht sagen können",
+    "reviewNote": "Die Zahlen sind dünn, lesen Sie diese Deutung daher mit Vorsicht.",
+    "offNotAuthenticated": "Melden Sie sich an, um eine Erklärung anzufordern.",
+    "offRateLimited": "Sie haben das gerade mehrfach angefragt. Versuchen Sie es in ein paar Minuten erneut.",
+    "offFactsUnavailable": "Die Marktzahlen konnten gerade nicht gelesen werden, es gibt also nichts zu erklären.",
+    "offMarketTooSmall": "Weniger als {min} offene Anzeigen — zu wenige, als dass eine Erklärung mehr wert wäre als die Zahlen oben.",
+    "offAiUnavailable": "Der Erklärungsdienst ist derzeit nicht verfügbar. Die Zahlen oben bleiben davon unberührt."
+  },
+  "organizationCapabilities": {
+    "title": "Was macht Ihre Organisation?",
+    "help": "Wählen Sie alles Zutreffende — eine Organisation kann mehreres zugleich tun.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "notPermitted": "Sie können diese Organisation nicht ändern.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "allDeclared": "Alles Verfügbare ist bereits angegeben.",
+    "choices": {
+      "training": {
+        "label": "Wir bilden Menschen aus",
+        "hint": "Schule, Hochschule oder Bildungszentrum; wir nehmen Praktikanten auf."
+      },
+      "employer": {
+        "label": "Wir beschäftigen Menschen",
+        "hint": "Wir stellen für uns selbst ein."
+      },
+      "workforce": {
+        "label": "Wir stellen anderen Organisationen Personal",
+        "hint": "Personalbereitstellung, Vertragskolonnen."
+      },
+      "recruitment": {
+        "label": "Wir helfen, Menschen zu finden und auszuwählen",
+        "hint": "Rekrutierung und Auswahl."
+      },
+      "project": {
+        "label": "Wir führen Projekte durch",
+        "hint": "Wir wirken als Betreiber oder Partner mit."
+      },
+      "client": {
+        "label": "Wir vergeben Arbeiten oder Leistungen",
+        "hint": "Wir sind Auftraggeber."
+      }
+    }
+  },
+  "lmc": {
+    "title": "LMC-Guthaben",
+    "noAccount": "Noch kein LMC-Konto. Es entsteht mit der ersten Gutschrift oder Abbuchung — bisher ist nichts passiert.",
+    "unavailable": "Ihr LMC-Guthaben konnte gerade nicht gelesen werden. Das heißt nicht, dass es null ist — wir können es im Moment nur nicht anzeigen. Bitte später erneut versuchen.",
+    "breakdown": "Gekauft: {purchased} · gutgeschrieben: {promotional}",
+    "expired": "Abgelaufen: {amount} (Gültigkeit überschritten)",
+    "latest": "Letzte Änderung: {kind} {amount} LMC · {when}",
+    "noMovements": "Noch keine Bewegungen.",
+    "topUpClosed": "Das Aufladen ist noch nicht freigeschaltet. Sobald es soweit ist, laden Sie hier auf.",
+    "historyTitle": "Vollständige Historie",
+    "kind": {
+      "purchased": "Gekauft",
+      "promotional_signup": "Gutschrift zur Registrierung",
+      "promotional_activity": "Gutschrift für Aktivität",
+      "admin_grant": "Von einer Administration gewährt",
+      "referral_reward": "Empfehlungsprämie",
+      "spend": "Ausgegeben",
+      "expiry": "Abgelaufen",
+      "reversal": "Rückabgewickelt",
+      "refund_reversal": "Rückerstattung",
+      "chargeback_reversal": "Rückbuchung",
+      "spend_compensation": "Ausgleich für eine fehlgeschlagene Aktion",
+      "other": "Andere Bewegung"
+    }
+  },
+  "workHours": {
+    "title": "Arbeitsstunden",
+    "subtitle": "Erfassen Sie, wer gearbeitet hat, an welchem Tag, auf welchem Objekt und wie viele Stunden.",
+    "date": "Datum",
+    "worker": "Mitarbeiter",
+    "object": "Objekt",
+    "hours": "Stunden",
+    "note": "Arbeitsbeschreibung (optional)",
+    "hoursHint": "In Viertelstunden, z. B. 7,5",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Erfasst",
+    "addAnother": "Gleicher Mitarbeiter — anderes Objekt",
+    "selectWorker": "Mitarbeiter auswählen",
+    "selectObject": "Objekt auswählen",
+    "dayTotal": "Tagessumme",
+    "entriesTitle": "Einträge dieses Tages",
+    "noEntries": "Für diesen Tag gibt es noch keine Einträge.",
+    "enteredForSomeoneElse": "Von einer anderen Person erfasst",
+    "duplicateWarning": "Sie haben soeben einen identischen Eintrag erfasst. Ist dies eine zweite Schicht, speichern Sie erneut.",
+    "errors": {
+      "hours": "Geben Sie Stunden zwischen 0,25 und 24 ein.",
+      "quarter": "Stunden müssen in Viertelschritten (0,25) sein.",
+      "worker": "Wählen Sie einen Mitarbeiter.",
+      "object": "Wählen Sie ein Objekt.",
+      "date": "Ungültiges Datum.",
+      "note": "Beschreibung ist zu lang.",
+      "notAuthorized": "Sie dürfen diese Stunden nicht erfassen.",
+      "generic": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "states": {
+      "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
+      "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
+      "noObjects": "Legen Sie zuerst mindestens ein Objekt an.",
+      "error": "Der Tag konnte nicht geladen werden."
+    },
+    "import": {
+      "entryLink": "Stunden aus einer Tabelle importieren (.xlsx)",
+      "backToEntry": "Zurück zur Tageserfassung",
+      "title": "Stundenzettel-Import",
+      "subtitle": "Laden Sie einen monatlichen Stundenzettel hoch. Prüfen und korrigieren Sie die Interpretation unten — nichts wird gespeichert, bis Sie bestätigen.",
+      "fileLabel": "Stundenzettel-Datei (.xlsx)",
+      "fileHint": "Ein Monatsraster Mitarbeiter × Tag oder ein Blatt mit Spalten Mitarbeiter / Datum / Objekt / Stunden, bis 5 MB.",
+      "parse": "Datei-Vorschau",
+      "parsing": "Wird gelesen…",
+      "refused": {
+        "no-file": "Wählen Sie zuerst eine Datei.",
+        "too-large": "Die Datei ist größer als 5 MB.",
+        "not-xlsx": "Dies ist keine .xlsx-Tabelle.",
+        "too-complex": "Die Tabelle ist zu groß, um sie sicher zu lesen.",
+        "read-failed": "Die Datei konnte nicht gelesen werden.",
+        "unrecognized": "In dieser Datei wurde keine Stundenzettel-Struktur erkannt.",
+        "too-many-rows": "Das Blatt enthält mehr Zeilen, als ein Import verarbeiten kann — teilen Sie die Datei."
+      },
+      "emptyFile": "Die Datei enthält keine Stundenzettel-Daten.",
+      "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
+      "summary": "Gelesene Zeilen: {rows} (Blatt {sheet}).",
+      "notPersistedNotice": "Nichts wird gespeichert, bis Sie bestätigen.",
+      "skippedTitle": "Zellen, die nicht gelesen werden konnten",
+      "skippedReasons": {
+        "unparsable": "unlesbarer Wert",
+        "hours-out-of-bounds": "Stunden außerhalb von 0–24",
+        "invalid-date": "dieses Datum gibt es in diesem Monat nicht"
+      },
+      "monthLabel": "Monat",
+      "monthHint": "Das Blatt nennt keinen Monat — wählen Sie ihn ausdrücklich.",
+      "duplicateWarning": "Für {count} Zeilen existieren bereits identische Einträge (gleicher Mitarbeiter, Datum, Objekt und Stunden). Erneutes Schreiben erfordert die Bestätigung unten.",
+      "columns": {
+        "include": "Übernehmen",
+        "worker": "Mitarbeiter",
+        "object": "Objekt",
+        "date": "Datum",
+        "hours": "Stunden",
+        "note": "Notiz",
+        "status": "Prüfstatus"
+      },
+      "chooseWorker": "Mitarbeiter auswählen",
+      "chooseObject": "Objekt auswählen",
+      "suggestions": "Vorschläge",
+      "allWorkers": "Alle Mitarbeiter",
+      "allObjects": "Alle Objekte",
+      "needsReview": "Mehrdeutige Zelle — Aufteilung prüfen",
+      "duplicateBadge": "Bereits erfasst",
+      "incomplete": "Auswahl erforderlich",
+      "rowProblems": {
+        "worker": "Mitarbeiter nicht akzeptiert",
+        "object": "Objekt nicht akzeptiert",
+        "date": "Ungültiges Datum",
+        "hours": "Ungültige Stunden",
+        "note": "Notiz zu lang"
+      },
+      "overrideLabel": "Duplikate trotzdem schreiben (eine echte zweite Schicht)",
+      "confirm": "Ausgewählte Zeilen bestätigen ({count})",
+      "confirming": "Wird geschrieben…",
+      "receipt": "Fertig — geschriebene Einträge: {count}. Sie sind jetzt Teil der Arbeitsstunden.",
+      "confirmBlockedHint": "Jede übernommene Zeile braucht Mitarbeiter, Objekt, Datum und Stunden.",
+      "errors": {
+        "invalidRows": "Zu korrigierende Zeilen: {count}. Nichts wurde geschrieben.",
+        "duplicatesFound": "Identische vorhandene Einträge: {count}. Nichts wurde geschrieben — setzen Sie das Häkchen, um sie trotzdem zu schreiben.",
+        "noRows": "Keine Zeilen zum Schreiben.",
+        "tooManyRows": "Zu viele Zeilen für einen Import — teilen Sie die Datei.",
+        "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
+        "notAuthorized": "Sie dürfen diese Stunden nicht erfassen.",
+        "generic": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen."
+      }
+    }
+  },
+  "oauthConsent": {
+    "title": "Zugriff bestätigen",
+    "clientWantsAccess": "„{client}“ bittet um Zugriff auf Ihr LabourMarket.ai-Konto.",
+    "unknownClient": "Unbekannte Anwendung",
+    "clientLabel": "Anwendung",
+    "redirectLabel": "Rückkehradresse",
+    "scopesLabel": "Angeforderte Berechtigungen",
+    "authorityNote": "Die Anwendung handelt nur in Ihrem Namen und sieht nur, was Sie sehen können. Sie können den Zugriff jederzeit widerrufen.",
+    "approve": "Erlauben",
+    "deny": "Ablehnen",
+    "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
+    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht aufgelöst werden. Sie ist möglicherweise abgelaufen (Anfragen gelten einige Minuten) oder wurde bereits verwendet. Geh zurück zur Anwendung und verbinde dich erneut."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Wählen Sie den Bedarf, der Sie interessiert: {options}.",
+    "interestDraftSummary": "Bereit, Interesse zu bekunden: {demand}. Noch nichts gesendet — Ihre Bestätigung ist erforderlich.",
+    "interestDraftRepeat": "Sie haben bereits Interesse an „{demand}“ bekundet — die Bestätigung aktualisiert es.",
+    "interestConfirmed": "Interesse erfasst. Der Eigentümer des Bedarfs sieht es in seiner eigenen Umgebung — nichts verlässt die Plattform.",
+    "workspacePersonal": "Persönlicher Bereich",
+    "workspaceSwitched": "Aktiver Arbeitsbereich zu „{label}“ gewechselt.",
+    "workspaceChoose": "Arbeitsbereich wählen: {options}.",
+    "workCardDraftSummary": "Bereit, Ihre Arbeitskarte zu aktualisieren ({fields}). Noch ist nichts gespeichert — Ihre Bestätigung ist erforderlich.",
+    "workCardSaved": "Arbeitskarte aktualisiert.",
+    "workCardFieldAvailability": "Verfügbarkeit",
+    "workCardFieldAvailableFrom": "verfügbar ab",
+    "workCardFieldSalary": "Gehaltsspanne",
+    "workCardFieldLocation": "Standort",
+    "workCardFieldPreferredCountries": "bevorzugte Länder",
+    "demandDraftSummary": "Bereit, einen Personalbedarf für {org} anzulegen: „{description}“. Noch wurde nichts angelegt — Ihre Bestätigung ist erforderlich.",
+    "demandDraftSummaryWithRole": "Bereit, einen Personalbedarf für {org} anzulegen — {role}: „{description}“. Noch wurde nichts angelegt — Ihre Bestätigung ist erforderlich.",
+    "demandSubmitted": "Personalbedarf für {org} eingereicht. Passende Arbeitskräfte können die strukturierten Fakten jetzt auf ihrem Board sehen.",
+    "journalListEmpty": "Das Arbeitsjournal hat noch keine Einträge.",
+    "journalListSummary": "{count} Einträge gefunden. Neuester: {latest}.",
+    "notSet": "nicht angegeben",
+    "workerExists": "aktiv",
+    "workerNone": "keins",
+    "workerUnavailable": "konnte nicht geprüft werden",
+    "profileSummary": "Ihr LabourMarket.ai-Profil — Name: {name}; Land: {country}; Sprache: {language}; aktive Rolle: {role}; Arbeitnehmerprofil: {worker}.",
+    "skillsSummary": "Ihr lebender Lebenslauf enthält {count} Fähigkeiten ({verified} verifiziert).",
+    "skillsEmpty": "Ihr lebender Lebenslauf enthält noch keine Fähigkeiten.",
+    "draftSummary": "Arbeitsjournal-Entwurf für {date}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "draftSummaryWithSite": "Arbeitsjournal-Entwurf für {date} am Standort {site}: „{notes}“. Noch nichts gespeichert — mit der Bestätigung wird genau dieser Eintrag geschrieben.",
+    "draftChooseContext": "Dieser Eintrag könnte zu mehreren Arbeitskontexten gehören: {options}. Zu welchem gehört er?",
+    "draftContext": "Kontext: {context}.",
+    "confirmSummary": "Journaleintrag gespeichert. Fähigkeitserkennung: {added} hinzugefügt, {strengthened} gestärkt, {reviewNeeded} wartet auf Prüfung."
+  },
+  "notificationPrefs": {
+    "title": "Benachrichtigungen",
+    "intro": "Wählen Sie, welche Benachrichtigungen Sie erreichen — je Typ und Kanal. In-App-Benachrichtigungen sind aktiv, bis Sie sie ausschalten.",
+    "inAppHeader": "In der App",
+    "emailHeader": "E-Mail",
+    "emailConsentNote": "E-Mail ist standardmäßig aus — gesendet wird nur für die Typen, die Sie hier einschalten.",
+    "emailInactiveNote": "Der E-Mail-Versand ist auf der Plattform noch nicht aktiv. Ihre Auswahl wird gespeichert und gilt, sobald er aktiv ist.",
+    "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
+    "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
   }
 }

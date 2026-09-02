@@ -197,10 +197,13 @@ export async function createWorkTaskAction(formData: FormData): Promise<void> {
   if (error) finish(ctx, noticeForRpcError(error));
 
   const outcome = String(data ?? "");
-  // Success returns the new task id — emit the durable assignment event
-  // for assign-to-other (fire-and-forget; recipient read from the row).
+  // Success returns the new task id — emit the durable assignment event for
+  // assign-to-other. AWAITED, not detached: a `void`-detached insert is
+  // killable the instant the serverless invocation returns (the mechanism
+  // that made the live interest emitter deliver nothing). The emitter never
+  // throws, so the create that already succeeded cannot fail on its bell.
   if (UUID_RX.test(outcome) && assignee && assignee !== user!.id) {
-    void emitWorkTaskAssignedNotification(outcome, user!.id);
+    await emitWorkTaskAssignedNotification(outcome, user!.id);
   }
   finish(ctx, noticeForOutcome(outcome, "created"));
 }
@@ -319,7 +322,8 @@ export async function assignWorkTaskAction(formData: FormData): Promise<void> {
 
   const outcome = String(data ?? "");
   if (outcome === "updated" && assignee && assignee !== user!.id) {
-    void emitWorkTaskAssignedNotification(taskId, user!.id);
+    // AWAITED — survives the serverless freeze; never throws.
+    await emitWorkTaskAssignedNotification(taskId, user!.id);
   }
   finish(ctx, noticeForOutcome(outcome, "updated"));
 }

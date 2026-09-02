@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +27,7 @@ import {
 } from "@/lib/documents/document-centre-model";
 import { WorkerDocumentVerifyRequestButton } from "@/components/app/worker-document-verify-request-button";
 import { WorkerDocumentFileSlot } from "@/components/app/worker-document-file-slot";
+import { DocumentJournalDraftReview } from "@/components/app/document-journal-draft-review";
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
@@ -35,6 +37,7 @@ import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
 import { WorkerDocumentForm } from "@/components/app/worker-document-form";
 import { LtDocumentGuidance } from "@/components/app/lt-document-guidance";
+import { HashScrollOnLoad } from "@/components/app/hash-scroll-on-load";
 import {
   workerReadinessFromChecklist,
   type WorkerCountryReadinessStatus,
@@ -76,6 +79,18 @@ const VERIFICATION_TONE: Record<DocumentVerificationState, string> = {
   pending: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
   verified: "border-state-success/40 bg-state-success/5 text-state-success",
   rejected: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+};
+
+/** Train E1 — current-validity tones. Same palette as the other badges;
+ *  revoked is the only danger tone: a credential that WAS valid and is not. */
+const VALIDITY_TONE: Record<CredentialValidityState, string> = {
+  active: "border-state-success/40 bg-state-success/5 text-state-success",
+  expired: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+  revoked: "border-state-danger/50 bg-state-danger/10 text-state-danger",
+  pending: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  rejected: "border-state-warning/60 bg-state-warning/10 text-state-warning",
+  unverified: "border-ink-500 bg-ink-800/40 text-text-muted",
+  unknown: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
 const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
@@ -171,6 +186,8 @@ export default async function WorkerDocumentsPage({
     regObject?: string;
     regRetention?: string;
     regQ?: string;
+    /** C2b — document → journal draft review (searchParams only, no route). */
+    draftFrom?: string;
     /** Training & Certification v1 outcome notice (closed vocabulary,
      *  validated inside the section — never rendered raw). */
     trn?: string;
@@ -292,7 +309,16 @@ export default async function WorkerDocumentsPage({
     );
   }
 
-  const centre = await getWorkerDocumentCentre();
+  // The document centre and the docs-aggregate consent both resolve their own
+  // worker from the session — neither reads the other's result — so they cost
+  // one round trip instead of two. The consent read stays behind the readiness
+  // constant so the disabled branch issues exactly the queries it issued
+  // before (today the constant is `true`, so that arm is unreachable; guarding
+  // it keeps this change semantics-preserving if it is ever flipped).
+  const [centre, docsConsent] = await Promise.all([
+    getWorkerDocumentCentre(),
+    DOCUMENTS_READINESS_ENABLED ? getDocsConsent() : Promise.resolve(null),
+  ]);
 
   if (!DOCUMENTS_READINESS_ENABLED) {
     return (
@@ -323,8 +349,8 @@ export default async function WorkerDocumentsPage({
 
   const now = new Date();
   // S6 — the worker's documents-aggregate consent (null until the gated
-  // draft is applied → honest needs-gate state inside the toggle).
-  const docsConsent = await getDocsConsent();
+  // draft is applied → honest needs-gate state inside the toggle). Read in
+  // the batch above; nothing between here and there depends on it.
 
   const inv = centre.inventory;
   const filters =
@@ -348,8 +374,24 @@ export default async function WorkerDocumentsPage({
 
   return (
     <div className="flex flex-col gap-6" data-testid="documents-page">
+      {/* `#training` is the return target of the training save action
+          (`?trn=…#training`). Measured 2026-08-28: four seconds after that
+          redirect `window.scrollY` was still 0 — the browser never acted on
+          the hash. The link only looked alive while the section sat above the
+          fold; now that the documents lead the page it has to actually work. */}
+      <HashScrollOnLoad />
       <Header t={t} />
       <DocNoticeBanner notice={sp.docNotice} tf={tf} />
+
+      {/* C2b — document → journal draft review. Mounted ONLY under
+          ?draftFrom= (searchParams only, no route — this page's stated
+          pattern); the seam re-answers ownership under the caller's RLS. */}
+      {sp.draftFrom ? (
+        <DocumentJournalDraftReview
+          locale={locale}
+          documentFileId={sp.draftFrom}
+        />
+      ) : null}
 
       {/* (a) Attention strip — counts of REAL field states only (derived
           valid_until status; stored verification), each resolving into the
@@ -416,21 +458,6 @@ export default async function WorkerDocumentsPage({
       >
         {t("disclaimer")}
       </p>
-
-      {/* (c) Work-proof section — the real exports + own journal evidence
-          counts, all linking to the existing surfaces (nothing duplicated). */}
-      <WorkProofExports t={t} tc={tc} locale={locale} workProof={centre.workProof} />
-
-      {/* Document & Evidence Engine v1 — documents this person was asked to
-          confirm (version-bound acks). Renders nothing while the layer is
-          absent or the inbox is empty. */}
-      <DocumentAckInbox locale={locale} />
-
-      {/* Training & Certification v1 — the person's own training and their
-          certificates. Completing is self-only; nobody records it for them. */}
-      <TrainingRegister locale={locale} notice={sp.trn} />
-
-      <DocsConsentToggle current={docsConsent} />
 
       {inv.kind === "needs-migration" ? (
         <p className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning">
@@ -539,8 +566,33 @@ export default async function WorkerDocumentsPage({
                           {t("fields.validUntil")}: {d.validUntil}
                         </span>
                       ) : null}
+                      {/* Train E1: the reviewer's decision date is a fact of
+                          the history; shown as a date, never as a score. */}
+                      {d.verifiedAt ? (
+                        <span
+                          className="font-mono text-meta uppercase tracking-label text-text-muted"
+                          data-testid="doc-centre-reviewed-on"
+                        >
+                          {tc("validity.reviewedOn", { date: d.verifiedAt.slice(0, 10) })}
+                        </span>
+                      ) : null}
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
+                      {/* Train E1 — CURRENT validity, derived by the pure rule
+                          (lib/documents/credential-validity) from the stored
+                          row + the append-only history. Rendered only when the
+                          verification axis is readable; the stored verification
+                          below stays VERBATIM next to it — current state and
+                          history are shown apart, never merged. */}
+                      {d.validity ? (
+                        <span
+                          className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${VALIDITY_TONE[d.validity.state]}`}
+                          data-testid="doc-centre-validity"
+                          data-validity={d.validity.state}
+                        >
+                          {tc(`validity.${d.validity.state}`)}
+                        </span>
+                      ) : null}
                       {/* Verification VERBATIM — rendered only when the axis
                           is really readable; no claim otherwise. */}
                       {inv.verificationAvailable && d.verification ? (
@@ -758,6 +810,40 @@ export default async function WorkerDocumentsPage({
           </section>
         </>
       )}
+
+      {/* IA (documents hierarchy): these four blocks stood BETWEEN the
+          attention strip and the document inventory, so on a page called "My
+          documents" the documents were the EIGHTH block, at y=910 on a
+          1280x900 viewport — a full screen below the fold, behind exports, an
+          acknowledgement inbox, a training register and an agency-consent
+          toggle. None of them is a document. They are all still here, in the
+          same order, with the same props and the same reads; they now follow
+          the inventory instead of guarding it.
+
+          They stay OUTSIDE the `inv.kind === "ok"` branch on purpose: a worker
+          whose inventory is unreadable, unmigrated or worker-less must still
+          reach their exports, their training register and — above all — the
+          consent toggle that decides what their agency can see. Folding them
+          into the ok-branch would have made a privacy control disappear
+          exactly when the page is already degraded.
+
+          `TrainingRegister` keeps its `#training` id, and its save action
+          already redirects to `?trn=…#training`, so the confirmation still
+          scrolls itself into view from the new position. */}
+      {/* (c) Work-proof section — the real exports + own journal evidence
+          counts, all linking to the existing surfaces (nothing duplicated). */}
+      <WorkProofExports t={t} tc={tc} locale={locale} workProof={centre.workProof} />
+
+      {/* Document & Evidence Engine v1 — documents this person was asked to
+          confirm (version-bound acks). Renders nothing while the layer is
+          absent or the inbox is empty. */}
+      <DocumentAckInbox locale={locale} />
+
+      {/* Training & Certification v1 — the person's own training and their
+          certificates. Completing is self-only; nobody records it for them. */}
+      <TrainingRegister locale={locale} notice={sp.trn} />
+
+      <DocsConsentToggle current={docsConsent} />
 
       {/* WAGON 9 (area 17) — Lithuanian-master jurisdiction/document
           guidance. LT locale renders the full draft registry; other locales

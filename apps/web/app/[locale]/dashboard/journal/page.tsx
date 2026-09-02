@@ -24,6 +24,10 @@ import { formatDuration } from "@/lib/journal/format-duration";
 import { groupLinkedSkillIdsByEntry } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
+import {
+  listJournalEntries,
+  type JournalEntryListRow,
+} from "@/lib/journal/journal-list-core";
 import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
 import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
@@ -44,6 +48,7 @@ import { Link } from "@/lib/i18n/navigation";
 // Mano CV identity lead — the player-card/avatar identity is the visual layer
 // at the TOP of the Mano CV surface (this work-records surface), with the work
 // records below (owner IA: Mano CV = marketplace identity + work records).
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
@@ -110,6 +115,11 @@ export default async function JournalPage({
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tQuick = await getTranslations("quickNav");
+  // The COLLAPSED card row is now the only thing naming the card on this page,
+  // so it names it the way every other entry point does. `quickNav.identity`
+  // stays shared with the profile hub's own `#profile-identity` anchor — one
+  // target, one label, and no second vocabulary for the same object.
+  const tTabs = await getTranslations("auth.dashboard.tabs");
 
   const supabase = await createClient();
   const {
@@ -117,26 +127,37 @@ export default async function JournalPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // Worker row + the submitter's own display name (owner UX recovery v1:
-  // every journal entry names who submitted it) — independent reads, one batch.
-  const [{ data: worker }, { data: ownProfile }] = await Promise.all([
+  // Worker row, the submitter's own display name (owner UX recovery v1: every
+  // journal entry names who submitted it), the active worker-side engagements
+  // (the journal is only meaningful with one) and the active workspace.
+  //
+  // All four depend ONLY on `user.id` — none reads another's result — so they
+  // travel as one round trip instead of four. `workspaceForDefault` in
+  // particular is called with the literal "person" and is consumed further
+  // down purely to ORDER `ecRows`; ordering after the batch is identical to
+  // ordering after a serial await.
+  const [
+    { data: worker },
+    { data: ownProfile },
+    { data: ecRows },
+    workspaceForDefault,
+  ] = await Promise.all([
     supabase.from("workers").select("id").eq("profile_id", user.id).maybeSingle(),
     supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("engagement_contexts")
+      .select(
+        "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+      )
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .in("relationship_slug", WORKER_RELATIONSHIPS)
+      .order("is_primary", { ascending: false }),
+    getWorkspaceContext("person"),
   ]);
   const submitterName =
     ownProfile?.full_name ??
     (ownProfile?.email ? ownProfile.email.split("@")[0] : null);
-
-  // Active worker-side engagements — the journal is only meaningful with one.
-  const { data: ecRows } = await supabase
-    .from("engagement_contexts")
-    .select(
-      "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
-    )
-    .eq("profile_id", user.id)
-    .eq("status", "active")
-    .in("relationship_slug", WORKER_RELATIONSHIPS)
-    .order("is_primary", { ascending: false });
   // State 4 vs 5: the worker has a context but review may not be enabled by
   // the owner yet. Honest signal — they can log work, but it won't be
   // confirmable until review is enabled for them.
@@ -161,7 +182,6 @@ export default async function JournalPage({
   //   D none → personal is correct.
   // Ordering still puts the active workspace first so the list reads sensibly,
   // but the DEFAULT is the resolution, and on ambiguity there is none.
-  const workspaceForDefault = await getWorkspaceContext("person");
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
   const ecOrdered = [...(ecRows ?? [])].sort(
     (a, b) =>
@@ -220,9 +240,22 @@ export default async function JournalPage({
       org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—";
     // A personal worker engagement (no organization) reads clearer as a
     // named personal entry than a bare "— · Darbuotojas". Role model unchanged.
+    //
+    // …but when the person GAVE it a title, that title is what tells two of
+    // them apart. This branch used to return the same constant for every
+    // org-less context, so an account holding more than one rendered the
+    // identical row twice and the chooser asked the worker to pick between
+    // two things it had just made indistinguishable. Production holds exactly
+    // this case: one untitled personal context carrying entries, and one
+    // titled "Darbų vadovas". Same defect the network page already fixed for
+    // unnamed organizations — the rows were never duplicates, their labels
+    // were. Their own words, no invented data, no new i18n key.
+    const personalTitle = e.title?.trim();
     const label = org
       ? `${orgName} · ${tRel(e.relationship_slug)}`
-      : t("personalEntry");
+      : personalTitle
+        ? `${t("personalEntry")} · ${personalTitle}`
+        : t("personalEntry");
     return {
       id: e.id,
       label,
@@ -349,12 +382,42 @@ export default async function JournalPage({
   }
 
   // The worker's work directions (primary + additional) for the entry form —
-  // so the journal is no longer locked to one tiler template.
-  const { data: dirRows } = await supabase
-    .from("worker_professions")
-    .select("is_primary, professions(slug)")
-    .eq("worker_id", worker.id)
-    .order("is_primary", { ascending: false });
+  // so the journal is no longer locked to one tiler template — and the
+  // worker's declared skills.
+  //
+  // ONE read of `worker_skills`, not two. This page used to issue the same
+  // query twice against the same table with the same `worker_id` filter: once
+  // selecting `skills(slug)` and once selecting `skill_id, verified,
+  // skills(slug)`. The second is a strict superset of the first, so both the
+  // composer's suggestion list and the entry↔skill link UI are derived from
+  // it. Both reads depend only on `worker.id`, so they batch with `dirRows`.
+  //
+  // The entry-skill link read and the entries read below depend only on
+  // `worker.id` too, so they ride in this same round trip. Both used to await
+  // serially further down, which put four DB round trips on the critical path
+  // where two suffice: this batch, then the templates read that genuinely
+  // needs `directions`. Read ORDER is unchanged where it matters — the links
+  // are still read before the lazy heal writes to `journal_entry_skills`.
+  const [{ data: dirRows }, { data: skillIdRows }, linkRead, entriesRead] =
+    await Promise.all([
+      supabase
+        .from("worker_professions")
+        .select("is_primary, professions(slug)")
+        .eq("worker_id", worker.id)
+        .order("is_primary", { ascending: false }),
+      supabase
+        .from("worker_skills")
+        .select("skill_id, verified, skills(slug)")
+        .eq("worker_id", worker.id),
+      readWorkerEntrySkillLinks(supabase, worker.id),
+      // G4 bridge: THE canonical journal-list core (v3 select + legacy
+      // fallback + live filter) — the same read the `journal.list`
+      // capability serves external clients.
+      listJournalEntries(
+        { supabase, userId: user.id },
+        { workerId: worker.id },
+      ),
+    ]);
   const directions = (dirRows ?? [])
     .map((r) => (r.professions as { slug: string } | null)?.slug ?? null)
     .filter((s): s is string => s !== null)
@@ -371,12 +434,9 @@ export default async function JournalPage({
 
   // Worker's saved skills — used by the composer to surface
   // "this entry could strengthen X" suggestions for the rule-based parser.
+  // Derived from the single `worker_skills` read above.
   const tSkillName = await getTranslations("skillNames");
-  const { data: workerSkillRows } = await supabase
-    .from("worker_skills")
-    .select("skills(slug)")
-    .eq("worker_id", worker.id);
-  const workerSkills = (workerSkillRows ?? [])
+  const workerSkills = (skillIdRows ?? [])
     .map((r) => (r.skills as { slug: string | null } | null)?.slug ?? null)
     .filter((slug): slug is string => !!slug)
     .map((slug) => ({ slug, name: tSkillName(slug) }));
@@ -385,10 +445,7 @@ export default async function JournalPage({
   // they can mark an entry as supporting, plus their current durable links.
   // `verified` rides along so a manager/client-confirmed skill can read as
   // "confirmed" on the entry chip (stale-skill review state, PR B).
-  const { data: skillIdRows } = await supabase
-    .from("worker_skills")
-    .select("skill_id, verified, skills(slug)")
-    .eq("worker_id", worker.id);
+  //
   // `slug` rides along for the render-time detected-signal computation (it is
   // structurally invisible to the {id,name} link-UI props).
   const availableSkillsForLinks = (skillIdRows ?? [])
@@ -435,64 +492,21 @@ export default async function JournalPage({
   // with an automatic pre-migration fallback (lib/journal/entry-skill-link-read).
   let linksByEntry = new Map<string, string[]>();
   let skillLinksReady = false;
-  const linkRead = await readWorkerEntrySkillLinks(supabase, worker.id);
   const provenanceByEntry = linkRead.provenanceByEntry;
   if (linkRead.ok) {
     skillLinksReady = true;
     linksByEntry = groupLinkedSkillIdsByEntry(linkRead.rows);
   }
 
-  // Entries with their metrics + confirmation status. The select reads the
-  // v3 lifecycle columns (deleted_at, superseded_by) so the list filter
-  // hides soft-deleted rows and entries that the worker has superseded
-  // pre-confirmation. The columns themselves only exist after migration
-  // 0018 is applied; the leading try/catch keeps the page renderable on
-  // older DBs by falling back to the legacy projection.
-  type JournalEntryRow = {
-    id: string;
-    original_text: string;
-    created_at: string;
-    deleted_at?: string | null;
-    superseded_by?: string | null;
-    engagement_context_id?: string | null;
-    journal_entry_metrics:
-      | {
-          metric_slug: string;
-          value_text: string | null;
-          value_numeric: number | null;
-          unit_slug: string | null;
-        }[]
-      | null;
-    journal_entry_confirmations:
-      | { confirmation_scope: unknown; created_at?: string | null }[]
-      | null;
-  };
-  let entries: JournalEntryRow[] | null = null;
-  // Cast the supabase client through `any` for the v3 select — the
-  // `deleted_at` / `superseded_by` columns are present at runtime after
-  // migration 0018 but aren't in the generated Supabase types until those
-  // are regenerated. The runtime path falls back to the legacy projection
-  // when the v3 columns are still missing on the target DB.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const v3 = await (supabase.from("journal_entries") as any)
-    .select(
-      "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
-    )
-    .eq("worker_id", worker.id)
-    .order("created_at", { ascending: false });
-  if (v3.error) {
-    const legacy = await supabase
-      .from("journal_entries")
-      .select(
-        "id, original_text, created_at, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
-      )
-      .eq("worker_id", worker.id)
-      .order("created_at", { ascending: false });
-    entries = legacy.data as JournalEntryRow[] | null;
-  } else {
-    const rows = (v3.data ?? []) as JournalEntryRow[];
-    entries = rows.filter((e) => !e.deleted_at && !e.superseded_by);
-  }
+  // Entries with their metrics + confirmation status — read through THE
+  // canonical journal-list core (G4): v3 lifecycle select (deleted_at,
+  // superseded_by hidden), legacy projection fallback while migration 0018
+  // is unapplied, newest first. A failed read renders as an empty list,
+  // exactly as the inline query degraded before the extraction.
+  type JournalEntryRow = JournalEntryListRow;
+  const entries: JournalEntryRow[] | null = entriesRead.ok
+    ? entriesRead.entries
+    : null;
 
   // ── Lazy historical heal (Universal Journal Recall v2) ──────────────────
   // Up to 5 own live entries whose latest `pipeline_version` metric is below
@@ -698,14 +712,21 @@ export default async function JournalPage({
   // CV surface, above the work records. Worker-scoped real data only (null for
   // non-worker accounts, which never reach this branch). The same premium card
   // used elsewhere; `/dashboard/player-card` redirects here.
-  const manoCard = await getWorkerPlayerCard();
-  const manoCardLabels = manoCard
-    ? await buildPlayerCardLabels(manoCard)
-    : null;
-  const manoThermometer = manoCard
-    ? toThermometerView(await getOwnThermometer())
-    : null;
-  const manoAvatar = await getOwnAvatar();
+  //
+  // Four serial reads become two round trips, issuing exactly the same set of
+  // reads as before: the avatar never depended on the card, and the labels and
+  // the thermometer are both gated on the SAME `manoCard` non-null check — so
+  // they resolve together, and neither is fetched when there is no card.
+  const [manoCard, manoAvatar] = await Promise.all([
+    getWorkerPlayerCard(),
+    getOwnAvatar(),
+  ]);
+  const [manoCardLabels, manoThermometer] = manoCard
+    ? await Promise.all([
+        buildPlayerCardLabels(manoCard),
+        getOwnThermometer().then(toThermometerView),
+      ])
+    : [null, null];
 
   return (
     <div className="flex flex-col gap-6">
@@ -741,7 +762,7 @@ export default async function JournalPage({
         ariaLabel={tQuick("ariaLabel")}
         items={[
           { href: "#mano-cv-top", label: tQuick("top") },
-          { href: "#mano-cv-identity", label: tQuick("identity") },
+          { href: "#mano-cv-identity", label: tTabs("playerCard") },
           { href: "#journal-entries", label: tQuick("records") },
           // §6.1: "add entry" is the conversation's job now; the quick nav
           // keeps only the projection's own regions.
@@ -758,19 +779,22 @@ export default async function JournalPage({
           the CV identity. The player card (and its readiness detail) stays
           one tap away in a single disclosure — the diary is no longer pushed
           below a full identity block on every visit. */}
-      {/* §5.1 REGRESSION FOUND IN AUTHENTICATED PRODUCTION (2026-07-30, after
-          the false-completion postmortem): this disclosure shipped CLOSED, so
-          the avatar menu's "Mano kortelė" deep-link landed on a 40px summary
-          row — literally the defect the owner's audit §5.1 reported ("kortelė —
-          sulankstytas akordeonas žurnalo apačioje"), while the traceability
-          recorded §5.1 as LIVE. The canonical Player Card is the person's main
-          object (GOAL), so it now opens by default. It stays collapsible, so
-          the work-records-first reading of Owner UX recovery v1 is still one
-          click away — but the card is never HIDDEN (addendum §2). */}
+      {/* OWNER RULING 2026-08-28 — SUPERSEDES the 2026-07-30 always-open rule.
+          That rule existed for ONE reason: a closed disclosure made the avatar
+          menu's "Mano kortelė" deep-link land on a 40px summary row. The link
+          was the casualty, not the collapse. #1317 removed that limitation by
+          generalising `DetailsHashOpener` — it opens the disclosure for its own
+          id AND for any id nested inside it — so the deep link now arrives at an
+          OPEN card whether or not the default is open.
+          With the technical reason gone, the default reverts to what the page is
+          for: the Journal's first viewport is the work RECORDS and the composer,
+          not 2118px of identity block the visitor did not ask for on every
+          visit. Nothing is hidden and nothing moves: the same card, the same
+          readiness panel, the same anchor, the same quick-nav entry and the same
+          avatar-menu link — one tap, or zero taps when you arrived by link. */}
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
-          open
           className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
@@ -782,9 +806,13 @@ export default async function JournalPage({
               >
                 ›
               </span>
-              {tQuick("identity")}
+              {tTabs("playerCard")}
             </span>
           </summary>
+          {/* The deep link is what made this disclosure open-by-default; this
+              is the mechanism that replaces it. Mounted INSIDE the disclosure
+              so it can never be separated from the element it answers for. */}
+          <DetailsHashOpener targetId="mano-cv-identity" />
           <div className="flex flex-col gap-4 px-4 pb-4">
             <WorkerPlayerCard
               card={manoCard}

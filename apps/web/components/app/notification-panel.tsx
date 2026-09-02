@@ -23,7 +23,8 @@ import { RoleIcon } from "@/components/app/role-icon";
 export function NotificationPanel() {
   const t = useTranslations("auth.notifications");
   const tRole = useTranslations("auth.signup.role");
-  const { notifications, activeRole, switchRole, markAllRead } = useAuth();
+  const { notifications, activeRole, switchRole, markAllRead, markAsRead } =
+    useAuth();
   const [open, setOpen] = useState(false);
   const unread = notifications.filter((n) => !n.read_at).length;
 
@@ -110,11 +111,17 @@ export function NotificationPanel() {
             activeRole={activeRole}
             switchRole={switchRole}
             markAllRead={markAllRead}
+            markAsRead={markAsRead}
           />
         </div>
       </AnchoredOverlay>
 
-      <MobileSheet open={open} onClose={() => setOpen(false)} title={t("label")}>
+      <MobileSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("label")}
+        closeLabel={t("close")}
+      >
         <NotificationsBody
           label={t("label")}
           emptyTitle={t("emptyTitle")}
@@ -125,6 +132,7 @@ export function NotificationPanel() {
           activeRole={activeRole}
           switchRole={switchRole}
           markAllRead={markAllRead}
+          markAsRead={markAsRead}
           chromeless
         />
       </MobileSheet>
@@ -158,6 +166,7 @@ function NotificationsBody({
   activeRole,
   switchRole,
   markAllRead,
+  markAsRead,
   chromeless = false,
 }: {
   label: string;
@@ -169,6 +178,7 @@ function NotificationsBody({
   activeRole: Role | null;
   switchRole: (r: Role) => void;
   markAllRead: () => void;
+  markAsRead: (id: string) => void;
   chromeless?: boolean;
 }) {
   // Localized notification-type labels (dead-UI repair: never the raw enum).
@@ -240,10 +250,15 @@ function NotificationsBody({
               >
                 {n.href ? (
                   // A derived signal IS a next action — the row navigates to
-                  // the exact surface that clears it (audit PR5).
+                  // the exact surface that clears it (audit PR5). A DURABLE
+                  // row additionally persists its read marker on the click
+                  // (completion v1): opening the entity is the read event,
+                  // and the mark survives the next hydration. Derived rows
+                  // pass no id — their clearing stays the visit itself.
                   <Link
                     href={n.href as "/dashboard"}
                     data-testid={`notification-signal-${n.id}`}
+                    onClick={n.durable ? () => markAsRead(n.id) : undefined}
                     className="block px-3 py-3 transition-colors hover:bg-ink-800/70"
                   >
                     {rowBody}

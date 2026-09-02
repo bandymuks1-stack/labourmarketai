@@ -206,6 +206,39 @@ import { join } from "node:path";
  * `landing-market-proof.test.ts` was inverted: it used to prove the typed
  * numbers equalled the claim module, and now proves no catalog carries a
  * market total at all.
+ *
+ * LIVE-arm funnel beacon (acquisition readiness v1, owner handoff 2026-08-31
+ * §12, PR #1370) — the FOCUS landing and every (marketing) page mount
+ * `MarketingFunnelBeacon`, but the LIVE tree did not: a visitor who had
+ * explicitly chosen LIVE produced no `landing_viewed` event and no
+ * first-touch capture, so LIVE-arm ad landings were invisible in the
+ * acquisition funnel. `live-market-page.tsx` now mounts the SAME beacon
+ * component with the same once-per-tab-session semantics ahead of the
+ * unchanged composition. The beacon renders NOTHING — no copy, no layout,
+ * no data, no visual output moved. The regeneration touched EXACTLY ONE
+ * file hash — live-market-page.tsx — and ZERO namespace hashes, which is
+ * the proof this stayed a telemetry mount.
+ *
+ * Doctrine-vocabulary honesty pass (market-map real-data slice, 2026-09-01)
+ * — the hero's scripted scenario was labelled with the exact framing doctrine
+ * §18 bans: a "Demonstration"/"Demonstracija" badge, a "European labour
+ * market" caption over an illustrative concept scenario, and
+ * "demonstration"-worded basisNote/unmatched strings. The whitelist in
+ * product-copy-forbidden-terms.test.ts that allowed "demonstracija" was
+ * REMOVED (the guard now catches the whole demonstr-/демонстр- class), so
+ * the copy moved to the doctrine concept/preview vocabulary in all five
+ * active locales: mapLabel now states "Concept map — illustrative scenario",
+ * basisNote says "concept scenario", unmatched says "preview", and the
+ * demoBadge key was DELETED because the origin badge now renders INSIDE the
+ * canonical <MarketMap> itself (intrinsic labelling — no caller can forget
+ * it; live data says "Live data", the scenario says "Preview"). The
+ * regeneration touched the hero-live-demo.tsx hash (badge removal only — no
+ * layout, motion or data change) and the three `*.landing` namespace hashes
+ * (copy honesty only). Permanently guarded by the tightened
+ * product-copy-forbidden-terms guard and the updated concept/preview
+ * qualifier check in public-no-fabricated-confidence.test.ts, so the freeze
+ * is not the only thing standing between the landing and the banned framing
+ * coming back.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

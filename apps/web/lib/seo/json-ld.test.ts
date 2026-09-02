@@ -89,15 +89,21 @@ describe("no JSON-LD block uses raw JSON.stringify (audit L-05)", () => {
     return out;
   }
 
-  const FILES = sourceFiles();
+  // W19 class: the tree walk over app/ + components/ can exceed vitest's 5s
+  // default under full-suite CPU contention on Windows. Run it lazily inside
+  // the tests (not at collection time, where no timeout applies) and give the
+  // scanning tests the same 30s ceiling as the lib/guards/ project.
+  const SCAN_TIMEOUT = { timeout: 30_000 };
+  let cachedFiles: string[] | undefined;
+  const files = () => (cachedFiles ??= sourceFiles());
 
-  it("scans a non-trivial number of files", () => {
-    expect(FILES.length).toBeGreaterThan(100);
+  it("scans a non-trivial number of files", SCAN_TIMEOUT, () => {
+    expect(files().length).toBeGreaterThan(100);
   });
 
-  it("every ld+json script serializes through jsonLdScript", () => {
+  it("every ld+json script serializes through jsonLdScript", SCAN_TIMEOUT, () => {
     const offenders: string[] = [];
-    for (const file of FILES) {
+    for (const file of files()) {
       const src = readFileSync(file, "utf8");
       if (!src.includes("application/ld+json")) continue;
       // Within a JSON-LD-bearing file, a raw JSON.stringify into __html is the

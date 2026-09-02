@@ -64,7 +64,9 @@ const HERO_BASELINE: Readonly<Record<string, number>> = {
   lt: 4, // previewName "Jonas P." + the three bare numbers 14 / 3 / 7
   ru: 3, // the three bare numbers — the persona name IS transliterated ("Йонас П.")
   nl: 4, // previewName + the three bare numbers
-  de: 5, // previewName + the three numbers + "Demonstration", a real German word
+  de: 4, // previewName + the three numbers (the "Demonstration" badge — the
+  //        one accounted-for German identical — was removed with the copy's
+  //        move to the doctrine concept/preview vocabulary)
 };
 
 type Catalogue = Record<string, string>;

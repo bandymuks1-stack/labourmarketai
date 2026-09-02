@@ -232,5 +232,30 @@ export const DA_PACK: LanguagePack = {
     translation: {
       exact: ["oversatte", "oversættelse", "tolkede"],
     },
+    // ── transversal professional capabilities (education pilot) ────────────
+    presenting: {
+      exact: ["præsenterede", "præsentation", "holdt oplæg"],
+    },
+    "stakeholder-engagement": {
+      exact: ["interessenter", "mødte repræsentanter", "møde med repræsentanter"],
+    },
+    "partnership-development": {
+      exact: ["partnerskab", "samarbejdsmuligheder", "indgik samarbejde"],
+    },
+    negotiation: {
+      exact: ["forhandlede", "forhandling"],
+    },
+    "project-coordination": {
+      exact: ["koordinerede projekt", "projektledelse", "projektstyring"],
+    },
+    "report-writing": {
+      exact: ["skrev rapport", "rapportskrivning", "udarbejdede rapport"],
+    },
+    teamwork: {
+      exact: ["teamarbejde", "arbejdede i et team", "gruppearbejde"],
+    },
+    research: {
+      exact: ["forskning", "lavede en undersøgelse", "litteraturstudie"],
+    },
   },
 };

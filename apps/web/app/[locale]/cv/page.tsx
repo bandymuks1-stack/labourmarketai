@@ -16,6 +16,12 @@ import {
   type TailoredNeedResult,
 } from "@/lib/cv-export/tailored";
 import { formatUtcDate } from "@/lib/time/display";
+import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
+import {
+  buildEuFormatCv,
+  resolveEuFormatDocument,
+} from "@/lib/cv-export/eu-format";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
 /**
  * Verified CV — PDF export (S3.5 + Full CV System v1). A print-clean sheet of
@@ -146,9 +152,15 @@ export default async function VerifiedCvPage({
 
   // ONE guard-pinned visibility decision — a section with no data does not
   // exist on the export (no empty headers on a printed CV).
+  // Employment and placements print under separate headings. A student's real
+  // placement belongs on the CV — it is simply not the same claim as a job.
+  const employmentHistory = cv.workHistory.filter((e) => e.kind === "employment");
+  const practiceHistory = cv.workHistory.filter((e) => e.kind === "practice");
+
   const visibility = cvSectionVisibility({
     professionalSummary: cv.professionalSummary,
-    workHistoryCount: cv.workHistory.length,
+    workHistoryCount: employmentHistory.length,
+    practiceHistoryCount: practiceHistory.length,
     languagesCount: cv.languages.length,
     certificateDocsCount: cv.certificateDocs.length,
     drivingLicenceCategoriesCount: cv.drivingLicenceCategories.length,
@@ -227,6 +239,46 @@ export default async function VerifiedCvPage({
   const bodyText = compact ? "text-xs" : "text-sm";
   const pageGap = compact ? "gap-4" : "gap-6";
 
+  // One renderer for both history sections — employment and placements differ
+  // in their HEADING, never in how a real engagement is described.
+  const historyItems = (rows: typeof cv.workHistory) =>
+    rows.map((e, i) => {
+      const orgDisplay =
+        e.orgName ??
+        (e.organizationType === "company"
+          ? tRole("company")
+          : e.organizationType === "agency"
+            ? tRole("agency")
+            : (e.title ??
+              (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship)));
+      const roleLabel = tRel.has(e.relationship)
+        ? tRel(e.relationship)
+        : e.relationship;
+      const start = formatUtcDate(e.startedAt, locale);
+      const end = formatUtcDate(e.endedAt, locale);
+      const range =
+        start && end
+          ? `${start} – ${end}`
+          : start
+            ? `${start} – ${t("present")}`
+            : (end ?? "");
+      return (
+        <li
+          key={`${e.relationship}-${i}`}
+          className="flex flex-col border-l-2 border-zinc-300 pl-3"
+        >
+          <span className={`font-semibold ${bodyText}`}>{orgDisplay}</span>
+          <span className="text-xs text-zinc-600">
+            {roleLabel}
+            {range ? ` · ${range}` : ""}
+          </span>
+          {e.title && e.title !== orgDisplay ? (
+            <span className="text-xs text-zinc-500">{e.title}</span>
+          ) : null}
+        </li>
+      );
+    });
+
   return (
     <div className="min-h-screen bg-white px-6 py-8 text-zinc-900 print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
@@ -282,6 +334,53 @@ export default async function VerifiedCvPage({
           </p>
         ) : null}
 
+        {/* The EU-format export is a VIEW over the SAME `cv` object — a
+            different document for a different reader, never a second store of
+            the person (§4B). Everything below this branch is the platform's
+            own layout. */}
+        {template === "eu" ? (
+          <EuFormatCv
+            doc={resolveEuFormatDocument(buildEuFormatCv(cv), {
+              relationship: (slug) => (tRel.has(slug) ? tRel(slug) : slug),
+              educationType: (slug) => tEduTypes(slug),
+              skill: (slug) => tSkill(slug),
+              profession: (slug) => tProf(slug),
+              // The standard export prints the bare code; the native name is
+              // friendlier and falls back to the same code, so the two
+              // documents never disagree about which language it is.
+              language: (code) =>
+                WORKER_LANGUAGE_NATIVE_NAMES[
+                  code as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES
+                ] ?? code.toUpperCase(),
+              certificateType: (slug) =>
+                tDocTypes.has(slug) ? tDocTypes(slug) : slug,
+              date: (iso) => formatUtcDate(iso, locale),
+              present: t("present"),
+            })}
+            labels={{
+              documentTitle: t("templates.eu"),
+              notAnOfficialEuropass: t("euFormat.notOfficial"),
+              nameNotProvided: t("nameNotProvided"),
+              personal: t("euFormat.personal"),
+              workExperience: t("euFormat.workExperience"),
+              educationAndTraining: t("euFormat.educationAndTraining"),
+              personalSkills: t("euFormat.personalSkills"),
+              languages: t("languagesTitle"),
+              languagesSelfStated: t("languagesSelfStated"),
+              jobRelatedSkills: t("euFormat.jobRelatedSkills"),
+              drivingLicences: t("drivingLicences"),
+              additionalInformation: t("euFormat.additionalInformation"),
+              summary: t("summaryTitle"),
+              generatedAt: `${t("generatedAt")}: ${generatedAt}`,
+              tiers: {
+                confirmed: t("tiers.confirmed"),
+                evidence: t("tiers.evidence"),
+                declared: t("tiers.declared"),
+              },
+            }}
+          />
+        ) : (
+          <>
         {/* Player-card style header — identity + honest counters. */}
         <header className={`rounded-xl border-2 border-zinc-900 ${compact ? "p-4" : "p-6"}`}>
           <p className="font-mono text-meta uppercase tracking-widest text-zinc-500">
@@ -389,44 +488,23 @@ export default async function VerifiedCvPage({
           >
             <h2 className={sectionTitle}>{t("workHistoryTitle")}</h2>
             <ul className="flex flex-col gap-2">
-              {cv.workHistory.map((e, i) => {
-                const orgDisplay =
-                  e.orgName ??
-                  (e.organizationType === "company"
-                    ? tRole("company")
-                    : e.organizationType === "agency"
-                      ? tRole("agency")
-                      : (e.title ??
-                        (tRel.has(e.relationship)
-                          ? tRel(e.relationship)
-                          : e.relationship)));
-                const roleLabel = tRel.has(e.relationship)
-                  ? tRel(e.relationship)
-                  : e.relationship;
-                const start = formatUtcDate(e.startedAt, locale);
-                const end = formatUtcDate(e.endedAt, locale);
-                const range =
-                  start && end
-                    ? `${start} – ${end}`
-                    : start
-                      ? `${start} – ${t("present")}`
-                      : (end ?? "");
-                return (
-                  <li
-                    key={`${e.relationship}-${i}`}
-                    className="flex flex-col border-l-2 border-zinc-300 pl-3"
-                  >
-                    <span className={`font-semibold ${bodyText}`}>{orgDisplay}</span>
-                    <span className="text-xs text-zinc-600">
-                      {roleLabel}
-                      {range ? ` · ${range}` : ""}
-                    </span>
-                    {e.title && e.title !== orgDisplay ? (
-                      <span className="text-xs text-zinc-500">{e.title}</span>
-                    ) : null}
-                  </li>
-                );
-              })}
+              {historyItems(employmentHistory)}
+            </ul>
+          </section>
+        ) : null}
+
+        {/* Practice and volunteering — real engagements at real organizations
+            that are NOT employment. A separate heading is the whole point: a
+            student's placement counts as experience without being claimed as
+            a job. Omitted entirely when the person has none. */}
+        {visibility.practiceHistory ? (
+          <section
+            className="flex flex-col gap-3"
+            data-testid="cv-practice-history"
+          >
+            <h2 className={sectionTitle}>{t("practiceHistoryTitle")}</h2>
+            <ul className="flex flex-col gap-2">
+              {historyItems(practiceHistory)}
             </ul>
           </section>
         ) : null}
@@ -699,6 +777,8 @@ export default async function VerifiedCvPage({
             {t("generatedAt")}: {generatedAt}
           </p>
         </footer>
+          </>
+        )}
       </div>
     </div>
   );

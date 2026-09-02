@@ -231,6 +231,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    service_role grants posture; the owner resolution moved into the
     //    gated SECURITY DEFINER RPC contact_demand_owner_v1, so the action
     //    no longer touches the admin client at all.)
+    //  - lib/lmc/compensation.ts — typed caller for the production-applied
+    //    lmc_compensate_spend_v1 RPC (commercial safe-prep v1). Service role
+    //    is genuinely required, not convenient: the human-gated migration
+    //    20260828090000 grants EXECUTE on the RPC to service_role ONLY
+    //    (revoked from public/anon/authenticated) — a deliberate posture for
+    //    a credit-creating SECURITY DEFINER function. The wrapper is
+    //    server-only, REQUIRES an explicit actorProfileId, and the RPC
+    //    re-checks that the actor owns the affected account or is an admin —
+    //    the service key opens the front door, never the authority check. It
+    //    calls exactly one RPC, reads/writes no table directly, touches no
+    //    chat table, sends nothing outbound. No product call site yet (no
+    //    spend caller exists); it is the prepared seam for spend-failure
+    //    compensation.
     //  - lib/ai/runtime/audit-store.ts — AI Router v1 append-only run audit.
     //    Best-effort INSERT of one ai_runs row per LIVE AI run + a head-only
     //    COUNT for the daily-run budget. ai_runs by design carries NO
@@ -293,6 +306,16 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the row carries NO metadata (§19(d): computed fit values are never
     //    persisted), and the same fire-and-forget/service-role posture
     //    applies — no new caller file, no new bypass.
+    //    Completion v1 (notifications) updates the "sends nothing outbound"
+    //    clause for THIS file only: after a successful durable insert the
+    //    awaited deliver path MAY send one notification email through the
+    //    audited transactional adapter (lib/email/transactional.ts) — but
+    //    ONLY where the recipient stored an explicit per-type email opt-in
+    //    (consent-first, default OFF) and the owner configured a real
+    //    provider; otherwise it is a tagged no-op. The same file also gained
+    //    the weekly-digest cron sweep (service-role reads of journal_entries
+    //    / workers to resolve recipients) — still no chat table, still the
+    //    one audited emitter home.
     //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
@@ -310,6 +333,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/customer-store.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/lmc/compensation.ts",
       "lib/notifications/event-emitters.ts",
       "lib/sales/lead-intake.ts",
       "lib/usage/usage-cost-store.ts",

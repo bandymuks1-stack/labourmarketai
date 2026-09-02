@@ -162,6 +162,18 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
      *   defines no task RPC — the existing task RPCs stay the only writers.
      */
     "20260820070000_workflow_work_task_definition_v1",
+    /**
+     *   20260831170000 — M3 compute wiring (owner 2026-08-31 closure-session
+     *   sequence): re-issues timesheet_compute_lines_v1 with the 20260819220000
+     *   journal half copied VERBATIM — so it inherits, unchanged, that body's
+     *   task_link CTE (a read of public.work_tasks for attribution + title,
+     *   tenant-scoped) — and adds only the work_hour_allocations source. Its
+     *   rollback restores the 20260819220000 body verbatim, with the same
+     *   read. It creates, alters, drops, writes and policies nothing on
+     *   work_tasks, and defines no task RPC — the existing task RPCs stay the
+     *   only writers.
+     */
+    "20260831170000_timesheet_compute_allocations_v1",
   ];
 
   it("only the D2 + train-D migration pairs DEFINE work_tasks or the task RPCs", () => {

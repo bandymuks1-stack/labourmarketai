@@ -5,6 +5,8 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
+import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 // Real two-subject bridge (issue #859): candidates a connected agency proposed
@@ -101,7 +103,7 @@ export default async function CompanyScoutingPage({
   const employerContext = await resolveEmployerCompanyContext();
   if (employerContext.kind !== "ok") {
     return (
-      <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-6">
         <header className="flex flex-col gap-1">
           <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
             {t("title")}
@@ -112,7 +114,7 @@ export default async function CompanyScoutingPage({
           reason={employerContext.reason}
           activeWorkspaceName={employerContext.activeWorkspaceName}
         />
-      </main>
+      </div>
     );
   }
   // Contract-v2 criterion vocabulary is localized ONCE, in the shared
@@ -123,15 +125,47 @@ export default async function CompanyScoutingPage({
   const tPipe = await getTranslations("candidatePipeline");
   // Localized skill names for the bounded facet chips (Wagon 1).
   const tSkill = await getTranslations("skillNames");
-  const demands = await listCompanyDemands();
-  // Human-structured demands first; since PR4 an unstructured demand can
-  // still match via offline text recognition (honestly labeled below).
-  const selected = request ?? demands.find((d) => d.structured)?.id ?? demands[0]?.id ?? null;
+  const [demands, pendingInterest] = await Promise.all([
+    listCompanyDemands(),
+    listPendingInterestCountsForCompany(),
+  ]);
+  /**
+   * SOMEBODY WAITING OUTRANKS EVERY OTHER DEFAULT.
+   *
+   * The interest notification's href is per entity TYPE, so it arrives here
+   * with no `?request=`. The old rule then picked the first structured demand
+   * — an arbitrary one — and the employer who had just been told "a worker
+   * expressed interest in your demand" was shown a different demand entirely,
+   * with no route to the one that was actually waiting (owner audit defect C:
+   * four production signals, none ever reviewed).
+   *
+   * An EXPLICIT `?request=` still wins: this changes only the case where the
+   * page had no instruction and was guessing. Ties break on the highest
+   * pending count, then on the existing structured-first rule, so the default
+   * stays deterministic. When nothing is waiting — or the owner-gated table is
+   * absent, which returns an empty map — the previous rule applies unchanged.
+   */
+  const mostAwaited = [...pendingInterest.entries()]
+    .filter(([id]) => demands.some((d) => d.id === id))
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
+  const selected =
+    request ??
+    mostAwaited ??
+    demands.find((d) => d.structured)?.id ??
+    demands[0]?.id ??
+    null;
   const result = selected ? await runScouting(selected, requestedFilters) : null;
   // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
   // returns rows only to the request owner). Empty until the owner-gated bridge
   // migration is applied.
   const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  // ONE source of truth for the synthetic-title labels — the same catalogue
+  // node the company hub and the buyer surface already read.
+  const tDemandReadback = await getTranslations("demandReadback");
+  const demandTitleLabels = {
+    hiringWorkers: tDemandReadback("syntheticTitle.hiringWorkers"),
+    agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
+  };
   const tOffered = await getTranslations("scoutingAgencyOffers");
 
   // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
@@ -193,7 +227,7 @@ export default async function CompanyScoutingPage({
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("title")}
@@ -281,7 +315,21 @@ export default async function CompanyScoutingPage({
                   : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
               }`}
             >
-              {d.title}
+              {resolveDemandTitle(d.title, demandTitleLabels) ||
+                tDemandReadback("untitledInquiry")}
+              {/* HOW MANY PEOPLE ARE WAITING ON THIS ONE. Without it the
+                  employer had to open each demand in turn to discover where
+                  the hands were — the count is a real row count from
+                  demand_interest_signals (status `interested` only), never an
+                  estimate, and the chip simply does not render at zero. */}
+              {(pendingInterest.get(d.id) ?? 0) > 0 ? (
+                <span
+                  className="ml-1.5 rounded-full bg-state-success/15 px-1.5 font-mono text-meta text-state-success"
+                  data-testid={`scouting-demand-interest-${d.id}`}
+                >
+                  {pendingInterest.get(d.id)}
+                </span>
+              ) : null}
               {!d.structured ? (
                 <span className="ml-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("unstructuredTag")}
@@ -569,7 +617,13 @@ export default async function CompanyScoutingPage({
                       </span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  {/* `flex-wrap`, measured: three status badges on one line
+                      rendered 355px wide inside a 309px parent at 375px, which
+                      is the 13px of body overflow this page carried. They are
+                      independent labels with no reading order between them, so
+                      wrapping costs nothing and a second line is the honest
+                      answer on a phone. */}
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {/* Worker-initiated interest — a REAL internal signal
                         (demand_interest_signals row), never fabricated. */}
                     {result.interestByWorker[c.workerId] ? (
@@ -989,6 +1043,6 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
-    </main>
+    </div>
   );
 }

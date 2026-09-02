@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Link } from "@/lib/i18n/navigation";
 import { FeatureNote } from "@/components/app/feature-note";
 import { createClient } from "@/lib/supabase/server";
@@ -15,9 +14,25 @@ import {
 import { RoleIcon } from "@/components/app/role-icon";
 import { IdCard } from "lucide-react";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
+import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
+import { AccountBillingSection } from "@/components/app/account-billing-section";
+import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
+import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
+import {
+  NotificationPreferencesSection,
+  type NotificationPreferenceRowView,
+} from "@/components/app/notification-preferences-section";
+import { NOTIFICATION_EVENT_TYPES } from "@/lib/notifications/events";
+import { NOTIFICATION_EMAIL_INCAPABLE_TYPES } from "@/lib/notifications/email-dispatch";
+import {
+  readNotificationPreferencesFor,
+  resolveEffectivePreferences,
+} from "@/lib/notifications/notification-preferences";
+import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -32,16 +47,23 @@ import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
  */
 export default async function AccountPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ billing?: string; apps?: string }>;
 }) {
   const { locale } = await params;
+  // Native-nav `?billing=` return feedback (same idiom as planning's plain
+  // searchParams): the TEST billing routes send the user back here with
+  // `?billing=test_success` / `portal_return`, and until now nothing read it.
+  // `?apps=revoked|error` — the Connected Apps disconnect action's return
+  // feedback (same idiom); anything else is ignored.
+  const { billing, apps } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
   const tRole = await getTranslations("auth.signup.role");
   const tSwitcher = await getTranslations("auth.roleSwitcher");
-  const tCommon = await getTranslations("common");
   const tProfile = await getTranslations("auth.dashboard.tabs");
 
   const supabase = await createClient();
@@ -55,17 +77,46 @@ export default async function AccountPage({
     .select("email, active_role")
     .eq("id", user.id)
     .single();
-  const { data: rolesRows } = await supabase
-    .from("profile_roles")
-    .select("role, added_at, is_active")
-    .eq("profile_id", user.id)
-    .order("added_at", { ascending: true });
+  // This page RENDERS the list below as "your roles". A swallowed read error
+  // used to render that list empty — telling the user their account holds no
+  // roles because a query hiccupped (#1314). The shared reader retries once and
+  // then throws to the error boundary instead of printing a false answer.
+  const rolesRows = await readActiveProfileRoles(() =>
+    supabase
+      .from("profile_roles")
+      .select("role, added_at, is_active")
+      .eq("profile_id", user.id)
+      .order("added_at", { ascending: true }),
+  );
 
   const isAdmin = deriveIsAdmin({
     activeRole: profile?.active_role ?? null,
     profileRoles: rolesRows ?? [],
   });
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+
+  // Notification preferences (completion v1, M5 closure): the caller's own
+  // stored rows resolved against the channel defaults (in-app ON, email OFF
+  // — consent-first, migration §4). An unreadable table resolves to the
+  // defaults here; a save then reports its honest feature_unavailable.
+  const prefsRead = await readNotificationPreferencesFor(supabase, user.id);
+  const effectivePrefs = resolveEffectivePreferences(
+    prefsRead.kind === "ok" ? prefsRead.rows : [],
+    NOTIFICATION_EVENT_TYPES,
+  );
+  const tNotifTypes = await getTranslations("auth.notifications.types");
+  const tPrefs = await getTranslations("notificationPrefs");
+  const prefRows: NotificationPreferenceRowView[] = effectivePrefs.map((p) => ({
+    type: p.notificationType,
+    label: tNotifTypes.has(`event_${p.notificationType}` as never)
+      ? tNotifTypes(`event_${p.notificationType}` as never)
+      : tNotifTypes("generic"),
+    inApp: p.channels.in_app,
+    // Types with no email dispatch path get NO email toggle (null → dash).
+    email: NOTIFICATION_EMAIL_INCAPABLE_TYPES.includes(p.notificationType)
+      ? null
+      : p.channels.email,
+  }));
 
   // Security & access (security docs step 1 — benefit-based, never coercive).
   // Everything shown is REAL: sign-in methods come from the user's identity
@@ -138,6 +189,19 @@ export default async function AccountPage({
           <span aria-hidden className="text-text-muted">→</span>
         </Link>
       </section>
+
+      {/* Billing/subscription state + billing-return feedback (commercial
+          safe-prep v1). Honest about the disabled state; the return notice
+          never activates anything — state syncs via the signature-verified
+          webhook only. */}
+      <AccountBillingSection billingReturn={billing ?? null} />
+
+      {/* LMC — placed directly under the plan line because they answer the same
+          question at two depths: what this account is entitled to, and what it
+          actually holds. The ledger was proven correct on production months ago
+          and no screen showed a single number of it; this is that number, read
+          server-side under the caller's own RLS. */}
+      <LmcBalanceSection locale={locale} />
 
       <section className="card-border p-5">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -226,6 +290,36 @@ export default async function AccountPage({
           </p>
         </div>
       </section>
+
+      {/* Connected apps (FINAL COMPLETION Train A slice 2, 2026-09-02): which
+          external applications / assistants hold delegated access, with what
+          permissions, since when — and an explicit Disconnect. Data is
+          GoTrue's own grant list; the web logout never revokes (#1412). */}
+      <ConnectedAppsSection
+        locale={locale}
+        feedback={parseConnectedAppsFeedback(apps)}
+      />
+
+      {/* Notification preferences (completion v1, M5 closure) — per-type ×
+          per-channel toggles over the applied notification_preferences
+          table. Settings-appropriate: a collapsed disclosure, real stored
+          state only, and the email column tells the truth about delivery
+          (consent stored now, sends begin when the owner configures a
+          provider). */}
+      <NotificationPreferencesSection
+        rows={prefRows}
+        emailDeliveryActive={isTransactionalEmailConfigured()}
+        labels={{
+          title: tPrefs("title"),
+          intro: tPrefs("intro"),
+          inAppHeader: tPrefs("inAppHeader"),
+          emailHeader: tPrefs("emailHeader"),
+          emailConsentNote: tPrefs("emailConsentNote"),
+          emailInactiveNote: tPrefs("emailInactiveNote"),
+          error: tPrefs("error"),
+          unavailable: tPrefs("unavailable"),
+        }}
+      />
 
       {/* Identity is edited on the Profilis surface; a single settings link
           (not a launcher grid) keeps account = settings while the profile-cv
@@ -394,19 +488,6 @@ export default async function AccountPage({
           })}
         </ul>
       </details>
-
-      {/* UI language — visible on ALL viewports (WAGON 5): the account page is
-          where users expect a language setting, so the line is no longer
-          mobile-only. Reuses the existing locale architecture (lt/en/ru active,
-          RU preview-tagged) — no new locales, no new switcher system. */}
-      <section className="card-border p-5" data-testid="account-ui-language">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {tCommon("localeSwitch")}
-        </p>
-        <div className="mt-3">
-          <LocaleSwitcher />
-        </div>
-      </section>
 
       <section className="card-border p-5">
         <form action={`/${locale}/auth/logout`} method="post">

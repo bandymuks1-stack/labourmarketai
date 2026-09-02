@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
 import {
   PERSONAL_WORKSPACE_ID,
+  workspaceDisplayLabels,
   type WorkspaceInfo,
 } from "@/lib/company/organization-switch";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
@@ -79,18 +80,30 @@ export function WorkspaceChip() {
 
   const active =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
-  const nameOf = (w: WorkspaceInfo) =>
-    w.kind === "personal"
-      ? t("workspacePersonal")
-      : // Unnamed organization → localized fallback, never a dash row.
-        w.name || t("workspaceUnnamed");
+  // Unnamed organizations → the localized fallback, never a dash row — and
+  // never the SAME row twice: two unnamed organizations used to render as two
+  // identical entries, so the switcher could not answer "where am I?" at all
+  // (owner audit defects A/B). The resolver appends a positional suffix only
+  // on a genuine collision; see workspaceDisplayLabels.
+  const labelById = workspaceDisplayLabels(workspaces, {
+    personal: t("workspacePersonal"),
+    unnamedOrganization: t("workspaceUnnamed"),
+  });
+  const nameOf = (w: WorkspaceInfo) => labelById.get(w.id) ?? w.name;
 
+  // `min-w-0` on the chip root (both variants below) is what lets `truncate`
+  // actually fire. Without it the chip's default `min-width: auto` floors it at
+  // its content width, so at 375px it measured 100..255 while the header's
+  // search control started at 219 — 36px of the active workspace name rendered
+  // UNDERNEATH the search button. The wrapper in the header already had
+  // `min-w-0`; a flex item only shrinks if it carries it too.
+  //
   // Single-workspace person → a pure indicator, no fake multi-tenancy chrome.
   if (workspaces.length === 1) {
     return (
       <span
         data-testid="workspace-chip"
-        className="flex min-h-11 max-w-40 items-center gap-1.5 rounded-full border border-ink-500 px-2.5 text-meta font-medium text-text-secondary sm:max-w-56"
+        className="flex min-h-11 min-w-0 max-w-40 items-center gap-1.5 rounded-full border border-ink-500 px-2.5 text-meta font-medium text-text-secondary sm:max-w-56"
         title={t("workspaceLabel")}
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
@@ -100,7 +113,11 @@ export function WorkspaceChip() {
   }
 
   return (
-    <div className="relative" data-testid="workspace-chip">
+    // `min-w-0` here as well as on the button: this wrapper is the element the
+    // header's flex row measures, and its default `min-width: auto` floors it
+    // at the button's content width — so the button could never actually use
+    // the `truncate` it carries.
+    <div className="relative min-w-0" data-testid="workspace-chip">
       <button
         ref={triggerRef}
         type="button"
@@ -108,7 +125,7 @@ export function WorkspaceChip() {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={t("workspaceLabel")}
-        className="flex min-h-11 max-w-40 cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary sm:max-w-56"
+        className="flex min-h-11 min-w-0 max-w-40 cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary sm:max-w-56"
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
         <span className="truncate">{nameOf(active)}</span>

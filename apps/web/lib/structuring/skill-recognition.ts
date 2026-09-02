@@ -13,9 +13,7 @@
  *
  * Pure + deterministic (stable ordering); safe in client + server bundles.
  */
-import { SKILL_HINTS_LT } from "./keywords";
-import { SKILL_SYNONYMS } from "./synonyms";
-import { LANGUAGE_PACKS } from "./language-packs";
+import { conceptTerms } from "./concept-resolution/term-sources";
 import { foldText, boundedEditDistance } from "./normalize";
 
 export type SkillConfidence = "high" | "medium" | "low";
@@ -128,29 +126,23 @@ type Term = {
  *  extra rows in the SAME dictionary, never a second matching system. */
 const TERMS: readonly Term[] = (() => {
   const out: Term[] = [];
-  for (const row of SKILL_HINTS_LT) {
-    for (const n of row.needles) {
-      const t = foldText(n).trim();
-      if (t) out.push({ slug: row.slug, term: t, via: "exact", len: t.length, fuzzySource: true });
-    }
-  }
-  for (const [slug, phrases] of Object.entries(SKILL_SYNONYMS)) {
-    for (const p of phrases) {
-      const t = foldText(p).trim();
-      if (t) out.push({ slug, term: t, via: "synonym", len: t.length, fuzzySource: true });
-    }
-  }
-  for (const pack of LANGUAGE_PACKS) {
-    for (const [slug, set] of Object.entries(pack.skills)) {
-      for (const n of set.exact) {
-        const t = foldText(n).trim();
-        if (t) out.push({ slug, term: t, via: "exact", len: t.length, fuzzySource: false });
-      }
-      for (const p of set.synonyms ?? []) {
-        const t = foldText(p).trim();
-        if (t) out.push({ slug, term: t, via: "synonym", len: t.length, fuzzySource: false });
-      }
-    }
+  // ONE dictionary, assembled through the concept-resolution term seam
+  // (./concept-resolution/term-sources.ts). The three hardcoded imports this
+  // replaced said, structurally, that a needle can only come from a file
+  // somebody wrote — which is why language thirteen cost ~235 lines of curated
+  // code. The sources emit the SAME terms in the SAME order, so recognition is
+  // unchanged (pinned by lib/guards/concept-resolution-seam.test.ts); what
+  // changed is that a source may now be DATA.
+  for (const t of conceptTerms()) {
+    const folded = foldText(t.term).trim();
+    if (!folded) continue;
+    out.push({
+      slug: t.slug,
+      term: folded,
+      via: t.tier,
+      len: folded.length,
+      fuzzySource: t.fuzzyEligible,
+    });
   }
   return out;
 })();

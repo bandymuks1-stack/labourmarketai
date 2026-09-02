@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && rm -rf node_modules apps/web/node_modules apps/mobile/node_modules packages/client-core/node_modules && pnpm install --frozen-lockfile --filter=!mobile",
+  "regions": [
+    "dub1"
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 7 * * 1"
+    }
+  ]
+}

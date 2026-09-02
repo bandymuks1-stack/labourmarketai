@@ -461,7 +461,10 @@
       "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page.",
       "pending_absence_reviews": "Clears when you approve or reject the request on the leave & absence page.",
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card)."
-    }
+    },
+    "storedTitle": "Stored notifications",
+    "storedIntro": "Recorded events about you — each row opens the page it is about. Read state is managed from the bell.",
+    "storedEmpty": "No stored notifications yet."
   },
   "commandFinder": {
     "title": "Quick find",
@@ -719,6 +722,10 @@
       "needsClear": "{n} requests became clear enough for better matching.",
       "projectsClarified": "{n} projects were clarified into a top shortlist.",
       "topTrades": "Most requested this week: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Your text was not saved: without a company workspace a draft has nothing to belong to. The demand form opens empty — you can create the company there.",
+      "failed": "Your text could not be saved, so the demand form opens empty. You will need to enter the description again."
     }
   },
   "quickNav": {
@@ -872,6 +879,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Live market demand",
+      "lead": "Open needs from this platform's real demand — where work is being asked for right now."
+    },
+    "vacancyVolume": {
+      "title": "Public vacancy volume",
+      "scope": "{count} imported public job advertisements for {profession}. Current source coverage: {countries}.",
+      "window": "City volumes are tallied over the newest {window} advertisements, not the whole pool."
+    },
     "entities": {
       "title": "Three things on the map",
       "intro": "The map shows three different things: people, company operating territories and project locations. Each follows its own visibility rule and looks different.",
@@ -1463,7 +1479,13 @@
       "urgency": "When needed",
       "notes": "Notes"
     },
-    "scoutLink": "Matched workers & interest for this inquiry"
+    "scoutLink": "Matched workers & interest for this inquiry",
+    "syntheticTitle": {
+      "hiringWorkers": "Hiring workers",
+      "agencyPartnership": "Agency partnership"
+    },
+    "interestWaiting": "{count, plural, one {# person is waiting for a reply} other {# people are waiting for a reply}}",
+    "untitledInquiry": "Untitled inquiry"
   },
   "journey": {
     "eyebrow": "How it works",
@@ -2795,7 +2817,8 @@
         "openDemands": "Open demands",
         "interestActive": "Interest: new",
         "interestReviewed": "Interest: reviewed",
-        "interestContacted": "Interest: contacted"
+        "interestContacted": "Interest: contacted",
+        "interestNotified": "Interest: notified"
       },
       "status": {
         "green_scoped": "green scoped",
@@ -3321,6 +3344,10 @@
       "legendTarget": "Market directions",
       "legendContext": "Wider world",
       "aria": "Work directions — world map"
+    },
+    "origin": {
+      "live": "Live data",
+      "preview": "Preview"
     }
   },
   "company": {
@@ -3397,6 +3424,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Continue with LinkedIn",
+      "continueWithFacebook": "Continue with Facebook"
+    },
     "legalNotice": {
       "signup": "By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
       "googleLogin": "If you don't have an account yet, continuing with Google will create one. By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
@@ -3414,8 +3445,12 @@
         "exchange_failed": "Sign-in didn't complete. Try again — the sign-in code works once and expires quickly.",
         "no_user": "You signed in, but your account couldn't be reached. Sign out and back in.",
         "callback": "Unexpected error during sign-in. Try again — if it persists, share the trace ID below.",
-        "unknown": "Couldn't sign in. Please try again."
-      }
+        "cancelled": "Sign-in was cancelled. Nothing happened to your account.",
+        "unknown": "Couldn't sign in. Please try again.",
+        "link_expired": "This confirmation link has expired or was already used. If you already confirmed your email, just sign in. Otherwise request a new link below.",
+        "confirmed_sign_in": "Your email is confirmed. This device didn't start the signup, so sign in here to continue."
+      },
+      "emailNotConfirmed": "Your email isn't confirmed yet. Open the confirmation link we sent you, or request a new one below."
     },
     "signup": {
       "headline": "Create your account",
@@ -3451,7 +3486,10 @@
       "error_password_number": "Password must include a number.",
       "error_password_special": "Password must include a special character.",
       "check_email_title": "Confirm your email",
-      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account."
+      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "resend_label": "Send the link again",
+      "resend_sent": "Sent again. Check your inbox and spam folder.",
+      "resend_wait": "You can request another link in {seconds} s."
     },
     "login": {
       "headline": "Sign in",
@@ -3475,7 +3513,9 @@
       "error_invalid_credentials": "Invalid email or password.",
       "google_hint": "Signed up with Google? Then you don't have a password — use \"Continue with Google\" above.",
       "preview_host_notice": "You're on a preview version of the site. Google sign-in only works on the live site — open https://labourmarket.ai to use it. Email and password sign-in works here as usual.",
-      "google_recovery_label": "Sign in with Google — backup route (temporary, via an external sign-in page)"
+      "google_recovery_label": "Sign in with Google — backup route (temporary, via an external sign-in page)",
+      "resend_confirmation": "Send a new confirmation link",
+      "resend_sent": "A new confirmation link is on its way to {email}."
     },
     "forgotPassword": {
       "headline": "Forgot password?",
@@ -4047,6 +4087,25 @@
             "note": "Your recovery email: {email}. Keep access to it safe."
           },
           "comingLater": "Later you'll see where you're signed in, be able to end sessions and get backup codes."
+        },
+        "connectedApps": {
+          "title": "Connected apps",
+          "intro": "External applications and assistants you have allowed to act as you on LabourMarket.ai. Each one sees only what you can see, and you can disconnect it at any time.",
+          "empty": "No application is connected to your account.",
+          "unavailable": "The list of connected apps could not be loaded right now. Try again in a moment.",
+          "unnamed": "Unnamed application",
+          "grantedAt": "Connected {date}",
+          "grantedUnknown": "Connection date not recorded",
+          "scopesLabel": "Permissions",
+          "disconnect": "Disconnect",
+          "confirmTitle": "Disconnect {name}?",
+          "confirmBody": "The application loses access immediately. It will have to ask for your permission again before it can act as you.",
+          "confirmYes": "Yes, disconnect",
+          "cancel": "Keep connected",
+          "feedbackRevoked": "Disconnected. The application no longer has access to your account.",
+          "feedbackError": "The application could not be disconnected. Reload the page and try again.",
+          "note": "Signing out of LabourMarket.ai does not disconnect apps. Disconnecting here is the only way to end an application's access.",
+          "pending": "Disconnecting…"
         }
       },
       "comingSoon": {
@@ -4134,7 +4193,11 @@
       "switchRoleCta": "Switch to {role} to view",
       "markAllRead": "Mark all as read",
       "close": "Close",
-      "viewAll": "View all activity"
+      "viewAll": "View all activity",
+      "email": {
+        "open": "Open in LabourMarket.ai:",
+        "manage": "Manage your notification settings:"
+      }
     }
   },
   "shared": {
@@ -4709,6 +4772,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "Checkout was cancelled — nothing was charged and nothing changed on your account."
+    },
     "eyebrow": "Pricing",
     "title": "Simple tiers,",
     "titleAccent": "set fairly.",
@@ -6996,9 +7062,39 @@
       "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
       "projectAxisLink": "Project readiness checklists",
       "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
+    },
+    "validity": {
+      "active": "Valid",
+      "expired": "Expired",
+      "revoked": "Revoked",
+      "pending": "Awaiting review",
+      "rejected": "Refused",
+      "unverified": "Not verified",
+      "unknown": "Validity unknown",
+      "reviewedOn": "Reviewed {date}"
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Draft journal entry",
+      "title": "From document to Work Journal",
+      "understoodNote": "Below is the text read from “{filename}”. Review it, edit it, and confirm — only then does it become part of your journal history.",
+      "detectedSkills": "We recognized {count} skill mentions in the text.",
+      "notesLabel": "Entry text (from your document — edit before saving)",
+      "engagementLabel": "Work context",
+      "save": "Confirm and save to journal",
+      "saving": "Saving…",
+      "saved": "Saved to your Work Journal — the source document stays linked to this entry.",
+      "savedLink": "Open journal",
+      "error": "Saving failed. Nothing was stored.",
+      "notFound": "This document was not found among your documents.",
+      "refusedClassified": "Confidential documents are not read automatically — downloading them stays a recorded manual step.",
+      "refusedNoOcr": "Photos are not read — no text recognition exists yet.",
+      "refusedType": "This file type cannot be read as text.",
+      "empty": "No readable text was found in this document.",
+      "failed": "The document could not be read.",
+      "noEngagement": "You need a work context first — open the dashboard to set one up."
+    },
     "currentVersion": "Version {n}",
     "download": "Download",
     "noFileYet": "No file uploaded yet.",
@@ -7196,6 +7292,7 @@
     "generatedAt": "Generated",
     "notWorker": "CV export is available for worker profiles.",
     "summaryTitle": "Professional summary",
+    "practiceHistoryTitle": "Practice and volunteering",
     "workHistoryTitle": "Work history",
     "present": "Present",
     "languagesTitle": "Languages",
@@ -7209,10 +7306,20 @@
     "projectsTitle": "Projects",
     "projectsHint": "From work records",
     "confirmedByManager": "Confirmed by a manager",
+    "euFormat": {
+      "notOfficial": "This CV follows the Europass structure so European employers can read it in the format they expect. It is not a Europass document issued by the European Union.",
+      "personal": "Personal information",
+      "workExperience": "Work experience",
+      "educationAndTraining": "Education and training",
+      "personalSkills": "Personal skills",
+      "jobRelatedSkills": "Job-related skills",
+      "additionalInformation": "Additional information"
+    },
     "templates": {
       "label": "Template",
       "standard": "Standard",
-      "compact": "Compact"
+      "compact": "Compact",
+      "eu": "EU format"
     },
     "privateDetails": {
       "toggle": "Include salary expectation & availability in the printout",
@@ -7390,6 +7497,7 @@
     "reason": {
       "skills_manager_confirmed": "Manager-confirmed skills",
       "skills_journal_supported": "Journal-supported skills",
+      "practice_experience": "Practice or volunteering experience",
       "country_match": "Country matches",
       "mobility_match": "Willing to work in this country",
       "available_now": "Available now",
@@ -7819,6 +7927,49 @@
     "starting": "Starting…",
     "error": "Could not start"
   },
+  "adminLmc": {
+    "title": "LMC ledger",
+    "intro": "Internal platform credit (1 LMC = 1 EUR of internal credit). Live database state: kill-switches, outstanding liability and the tester grant. All commercial switches ship OFF; flipping one is an owner decision.",
+    "unavailable": "The ledger could not be read with this session — this is a failed read, not an empty ledger.",
+    "on": "On",
+    "off": "Off",
+    "policy": {
+      "admin": "admin-flippable",
+      "owner_only": "owner only",
+      "system_locked": "system locked"
+    },
+    "liability": {
+      "outstanding": "Outstanding credit",
+      "promotional": "Promotional",
+      "purchased": "Purchased",
+      "accounts": "Accounts",
+      "note": "Every issued LMC is a euro of deferred obligation. Live read of the canonical balance view — not a stored report."
+    },
+    "grant": {
+      "email": "Recipient email",
+      "amount": "Amount (LMC)",
+      "reason": "Reason (stored in the ledger)",
+      "campaign": "Campaign",
+      "expiryDays": "Expires in (days)",
+      "key": "Idempotency key",
+      "submit": "Credit LMC",
+      "submitting": "Crediting…",
+      "granted": "Credited",
+      "replay": "Already credited earlier with this key — nothing was credited twice",
+      "disabledHint": "Promotional grants are switched OFF in the database — the ledger will refuse this grant. Enabling the switch is an owner-channel decision.",
+      "reasons": {
+        "grants_disabled": "Refused: promotional grants are disabled",
+        "not_admin": "Refused: admin identity required",
+        "recipient_not_found": "Refused: no verified profile for that email",
+        "invalid_amount": "Refused: invalid amount",
+        "invalid_expiry": "Refused: invalid expiry",
+        "idempotency_conflict": "Refused: this key was already used differently",
+        "ledger_absent": "The ledger functions are not available",
+        "error": "The ledger refused the grant"
+      }
+    },
+    "spendFrozen": "Spending is switched OFF — issued credit stays frozen until the owner enables spending."
+  },
   "adminBilling": {
     "eyebrow": "BILLING — TEST MODE",
     "title": "Billing center",
@@ -8142,6 +8293,11 @@
         "body": "Active filters: {filters}. Remove some filters or reset them to see more.",
         "reset": "Reset filters"
       },
+      "initialView": {
+        "summary": "Showing the {shown} strongest matches of {total} opportunities.",
+        "showAll": "Show all ({count} more)",
+        "showAllExternal": "Show all job ads"
+      },
       "details": {
         "show": "More details",
         "hide": "Hide details"
@@ -8278,7 +8434,10 @@
     "noSkills": {
       "title": "Your skills aren't recorded yet",
       "body": "Skill matching needs evidence. Add work entries to your Work Journal — recognized skills from real work make your matches meaningful.",
-      "cta": "Add a work entry"
+      "cta": "Add a work entry",
+      "confirmTitle": "Confirm what your work entries show",
+      "confirmBody": "Your Work Journal already has entries. Review the skills recognised in them and confirm the ones you really have — then we can match you.",
+      "confirmCta": "Review recognised skills"
     },
     "skillMatch": {
       "title": "Skill match",
@@ -8380,6 +8539,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
+      "shownOfTotal": "top {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -8999,6 +9159,36 @@
     "links": {
       "workers": "For workers",
       "companies": "For companies"
+    }
+  },
+  "accountBilling": {
+    "title": "Billing & subscription",
+    "testBadge": "Test mode",
+    "returned": {
+      "success": "Test-mode checkout completed. No real money moved; the subscription state below syncs from the payment provider's signature-verified webhook and can take a moment to appear.",
+      "cancelled": "Checkout was cancelled. Nothing was charged and nothing changed on your account.",
+      "portal": "You are back from the billing portal. Any change you made there syncs to this page automatically."
+    },
+    "disabled": "Payments are not enabled. Paid plans are prepared drafts — nothing is purchasable here and no payment method is needed.",
+    "none": "No subscription on this account.",
+    "planLabel": "Plan",
+    "statusLabel": "Status",
+    "status": {
+      "none": "No subscription",
+      "trialing": "Trial period",
+      "active": "Active",
+      "past_due": "Payment overdue",
+      "unpaid": "Unpaid",
+      "cancelled": "Cancelled",
+      "incomplete": "Incomplete",
+      "expired": "Expired"
+    },
+    "graceNotice": "The last payment failed — the subscription is in a grace period until it is retried.",
+    "manage": {
+      "open": "Manage subscription",
+      "opening": "Opening…",
+      "error": "Could not open the billing portal",
+      "hint": "Opens the payment provider's portal to cancel or update the payment method. Test mode only — no real charges."
     }
   },
   "accountPlan": {
@@ -10039,6 +10229,7 @@
     },
     "organizations": {
       "title": "My companies",
+      "unnamed": "Unnamed company",
       "noCompanyCta": "Add company",
       "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel.",
       "individualDesc": "Act as an independent provider — managed in your personal profile."
@@ -10106,9 +10297,15 @@
         "limit_reached": "Invitation limit reached",
         "rate_limited": "Too many invitations today",
         "not_authorized": "Not allowed",
-        "error": "Failed"
+        "error": "Failed",
+        "invalid_relationship": "Not an offerable relationship",
+        "organization_capability_required": "Organization has not declared this yet"
       },
-      "recipientLanguageLabel": "Recipient's language (email and invitation)"
+      "recipientLanguageLabel": "Recipient's language (email and invitation)",
+      "capacityLabel": "What will the invited person be in your organization?",
+      "capacityHint": "A placement or studies are not employment — it will be recorded exactly as you choose here.",
+      "capacityNeedsCapability": "Your organization has not said it provides education yet. State that on the organization page, then you can invite a learner.",
+      "capacityNeedsCapabilityCta": "Open the organization page"
     },
     "invitePage": {
       "eyebrow": "INVITATION",
@@ -10148,9 +10345,16 @@
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
         "not_found": "Invitation not found.",
         "error": "Something went wrong. Please try again."
-      }
+      },
+      "capacity": "Relationship: {capacity}",
+      "capacityNotEmployment": "This is not a job offer and does not create employment."
     },
-    "teamEnquiriesTitle": "My enquiries to teams"
+    "teamEnquiriesTitle": "My enquiries to teams",
+    "admin": {
+      "title": "Administration",
+      "hint": "Approvals, requests and organization rules — opened when you need them.",
+      "back": "Back to relationships"
+    }
   },
   "people": {
     "eyebrow": "Person profile",
@@ -11293,6 +11497,7 @@
         "language": "Language",
         "level": "Level",
         "jobTitle": "Job title",
+        "engagementKind": "Kind of engagement",
         "jobTitlePlaceholder": "e.g. welder, nurse, warehouse worker, developer",
         "startMonth": "Start month",
         "startYear": "Start year",
@@ -11429,6 +11634,12 @@
       "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
+      "switchContextPersonal": "personal space",
+      "switchContextPick": "Which context do you want to work in?",
+      "switchContextDone": "Done — you're now working in {name}.",
+      "switchContextAlready": "You're already working in {name}.",
+      "switchContextFailed": "The switch didn't go through — your active context is unchanged.",
+      "switchContextUnavailable": "Context switching isn't available right now.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
       "experiencesEligible": "I found finished interactions you can describe. Pick which one.",
@@ -11457,6 +11668,9 @@
       "chipNeedWorkers": "I need workers",
       "chipCandidates": "Candidates",
       "chipCompanyHub": "Company workspace",
+      "chipEduInviteLearner": "Invite a learner",
+      "chipEduCapabilities": "What we provide",
+      "learnerGreetingContext": "You're learning with {institution} — every work entry you log becomes part of your evidence and CV.",
       "companyDemandNext": "The need is recorded in your company workspace. What's next?",
       "navJournal": "Journal",
       "chipTasks": "Tasks",
@@ -11531,7 +11745,30 @@
         "chipServices": "Open the services board",
         "corrected": "Updated: {changes}.",
         "changeInsteadOf": "{next} (instead of {previous})"
-      }
+      },
+      "createOrganizationHint": "I can set up an organization with you — the details and the verification live on one page.",
+      "chipCreateOrganization": "Create an organization",
+      "adminRouteHint": "Here is where that is handled:",
+      "adminApprovalsChip": "Approvals",
+      "adminRequestsChip": "Requests",
+      "timesheetsChip": "Timesheets",
+      "timesheetImportChip": "Timesheet import",
+      "workHoursChip": "Work hours",
+      "absencesChip": "Leave & absence",
+      "documentsChip": "My documents",
+      "marketMapChip": "Market map",
+      "activityChip": "Activity",
+      "employerBridgeHint": "You can post this as your company — I will open the need form.",
+      "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
+      "chipServiceRequests": "Find a service",
+      "interestInboxAmbiguous": "That can mean two things — which one do you want?",
+      "chipInterestOnMyNeeds": "Interest in my needs",
+      "chipMyOwnInterest": "My own interest",
+      "lmcHint": "Your LMC balance and the full history of movements live in one place.",
+      "chipLmc": "Open LMC",
+      "briefLearner": "You are enrolled at {organization}. Practice and learning you record here count as evidence.",
+      "briefLearnerUnnamed": "You are enrolled as a learner. Practice and learning you record here count as evidence.",
+      "chipLogLearning": "Log learning or practice"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -12111,11 +12348,10 @@
       "headline": "Ask. See. Hire.",
       "sub": "An AI labour-market operating system — conversation, map and result in one place.",
       "chatLabel": "AI conversation",
-      "mapLabel": "European labour market",
+      "mapLabel": "Concept map — illustrative scenario",
       "thinking": "Analysing market signals…",
       "answered": "Found it. Map updated.",
       "resultLabel": "Result",
-      "demoBadge": "Demonstration",
       "mapHint": "Tap a marker — the map answers.",
       "scenario": {
         "q1": "Where are electricians needed now?",
@@ -12171,9 +12407,9 @@
       },
       "askPlaceholder": "Ask your own question…",
       "askSubmit": "Ask",
-      "unmatched": "In this demonstration I answer about electricians, welders and available people.",
+      "unmatched": "In this preview I answer about electricians, welders and available people.",
       "basisLabel": "What this rests on",
-      "basisNote": "The {count} signals weighed above, on illustrative volumes — this is a demonstration, not today's market.",
+      "basisNote": "The {count} signals weighed above, on illustrative volumes — this is a concept scenario, not today's market.",
       "previewLabel": "Best matching person",
       "previewName": "Jonas P.",
       "previewRole": "Electrician · Vilnius · Available from September",
@@ -12914,7 +13150,9 @@
       "title": "Team timesheets",
       "decideNote": "Approval decisions happen in the approvals area. Here you can review lines, export, and return a decided timesheet.",
       "noTemplateFor": "{name} has no published timesheet approval template.",
-      "createTemplate": "Create standard approval template",
+      "templateNeedsAdmin": "Only an organization owner or admin can publish the approval template. Until then timesheets cannot be submitted.",
+      "blockedNote": "Waiting on this template: {count} timesheet(s) in this organization cannot be submitted until it is published.",
+      "createTemplate": "Install standard approval templates",
       "unnamedWorker": "Worker",
       "decideInApprovals": "Decide in the approvals area",
       "reopenNote": "Return note",
@@ -12931,7 +13169,7 @@
       "synced_pending": "The approval is still in progress.",
       "no_instance": "No approval request exists for this timesheet yet.",
       "no_template": "This organization has no published timesheet approval template yet.",
-      "template_created": "Standard approval template created and published.",
+      "template_created": "Standard approval templates installed — the timesheet template is published.",
       "overlap": "This period overlaps an existing timesheet.",
       "invalid_period": "The period is invalid — up to 31 days, and the end may not be before the start.",
       "no_worker": "Your account has no worker profile.",
@@ -13711,5 +13949,256 @@
       "awaitingOwnerApproval": "awaiting owner approval"
     },
     "footer": "Honest preview · No fake AI · No fake verification · No fake worker faces · Each entity is prefixed “Sample · …” so it never reads as live data."
+  },
+  "marketExplanation": {
+    "title": "Market for {profession}",
+    "source": "Counted from public job advertisements imported into LabourMarket.ai, read {measuredAt}. This is not the whole labour market, and it is not this platform's own demand board.",
+    "derivedFromWork": "You have not stated a profession — this market was chosen from the skills your recorded work shows. State a profession if you want a different one.",
+    "statOpen": "Open advertisements",
+    "statNew7d": "Published in 7 days",
+    "statNew30d": "Published in 30 days",
+    "noneOpen": "Nothing is being advertised for {profession} in this pool right now.",
+    "skillsTitleAll": "Skills asked for, across every open advertisement",
+    "skillsTitleWindow": "Skills asked for, across the {window} most recently published",
+    "citiesTitleAll": "Where they are, across every open advertisement",
+    "citiesTitleWindow": "Where they are, across the {window} most recently published",
+    "noPayStated": "None of these advertisements states a pay figure, so no pay is shown or estimated anywhere here.",
+    "cta": "Explain this market",
+    "pending": "Reading the numbers...",
+    "resultTitle": "AI reading of the numbers above",
+    "attribution": "Written by {provider} {model} from the counts above. A suggestion, not a fact of record.",
+    "whereTitle": "Where demand is",
+    "aiSkillsTitle": "Skills in demand",
+    "actionsTitle": "What you could do next",
+    "limitationsTitle": "What these numbers cannot tell you",
+    "reviewNote": "These counts are thin, so read this reading with caution.",
+    "offNotAuthenticated": "Sign in to ask for an explanation.",
+    "offRateLimited": "You have asked for this a few times just now. Try again in a few minutes.",
+    "offFactsUnavailable": "The market counts could not be read just now, so there is nothing to explain.",
+    "offMarketTooSmall": "Fewer than {min} open advertisements — too few for an explanation to be worth more than the counts above.",
+    "offAiUnavailable": "The explanation service is not available right now. The counts above are unaffected."
+  },
+  "organizationCapabilities": {
+    "title": "What does your organization do?",
+    "help": "Tick everything that applies — an organization can do several of these at once.",
+    "save": "Save",
+    "saved": "Saved",
+    "notPermitted": "You cannot change this organization.",
+    "error": "Could not save. Please try again.",
+    "allDeclared": "Everything available has already been stated.",
+    "choices": {
+      "training": {
+        "label": "We educate and train people",
+        "hint": "School, university or training centre; we host students on placements."
+      },
+      "employer": {
+        "label": "We employ people",
+        "hint": "We hire for ourselves."
+      },
+      "workforce": {
+        "label": "We supply workers to other organizations",
+        "hint": "Workforce provision, contracted crews."
+      },
+      "recruitment": {
+        "label": "We help find and select people",
+        "hint": "Recruitment and selection partnership."
+      },
+      "project": {
+        "label": "We run projects",
+        "hint": "We take part in projects as an operator or partner."
+      },
+      "client": {
+        "label": "We commission work or services",
+        "hint": "We are the client."
+      }
+    }
+  },
+  "lmc": {
+    "title": "LMC credit",
+    "noAccount": "No LMC account yet. One appears with the first credit or charge — nothing has happened so far.",
+    "unavailable": "We could not read your LMC balance just now. That does not mean it is zero — we simply cannot show it at this moment. Please try again later.",
+    "breakdown": "Purchased: {purchased} · granted: {promotional}",
+    "expired": "Expired: {amount} (past its validity date)",
+    "latest": "Last change: {kind} {amount} LMC · {when}",
+    "noMovements": "No movements yet.",
+    "topUpClosed": "Top-up is not open yet. When it is, you will be able to top up right here.",
+    "historyTitle": "Full history",
+    "kind": {
+      "purchased": "Purchased",
+      "promotional_signup": "Sign-up grant",
+      "promotional_activity": "Activity grant",
+      "admin_grant": "Granted by an administrator",
+      "referral_reward": "Referral reward",
+      "spend": "Spent",
+      "expiry": "Expired",
+      "reversal": "Reversed",
+      "refund_reversal": "Refund",
+      "chargeback_reversal": "Chargeback",
+      "spend_compensation": "Compensated for a failed action",
+      "other": "Other movement"
+    }
+  },
+  "workHours": {
+    "title": "Work hours",
+    "subtitle": "Record who worked, on which date, at which object, and for how many hours.",
+    "date": "Date",
+    "worker": "Worker",
+    "object": "Object",
+    "hours": "Hours",
+    "note": "Work description (optional)",
+    "hoursHint": "Quarter-hour steps, e.g. 7.5",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Recorded",
+    "addAnother": "Same worker — another object",
+    "selectWorker": "Select a worker",
+    "selectObject": "Select an object",
+    "dayTotal": "Day total",
+    "entriesTitle": "Entries for this day",
+    "noEntries": "No entries for this day yet.",
+    "enteredForSomeoneElse": "Entered by someone else",
+    "duplicateWarning": "You just recorded an identical entry. If this is a second shift, save again.",
+    "errors": {
+      "hours": "Enter hours between 0.25 and 24.",
+      "quarter": "Hours must be in quarter steps (0.25).",
+      "worker": "Select a worker.",
+      "object": "Select an object.",
+      "date": "Invalid date.",
+      "note": "Description is too long.",
+      "notAuthorized": "You may not record these hours.",
+      "generic": "Could not save. Please try again."
+    },
+    "states": {
+      "needsMigration": "This feature is not enabled on this database yet.",
+      "noCompany": "Switch to a company workspace.",
+      "noObjects": "Create at least one object first.",
+      "error": "Could not load this day."
+    },
+    "import": {
+      "entryLink": "Import hours from a spreadsheet (.xlsx)",
+      "backToEntry": "Back to daily entry",
+      "title": "Timesheet import",
+      "subtitle": "Upload a monthly timesheet file. Review and correct the interpretation below — nothing is saved until you confirm.",
+      "fileLabel": "Timesheet file (.xlsx)",
+      "fileHint": "A monthly worker-by-day grid or a sheet with worker / date / object / hours columns, up to 5 MB.",
+      "parse": "Preview file",
+      "parsing": "Reading…",
+      "refused": {
+        "no-file": "Choose a file first.",
+        "too-large": "The file is larger than 5 MB.",
+        "not-xlsx": "This is not an .xlsx spreadsheet.",
+        "too-complex": "The spreadsheet is too large to read safely.",
+        "read-failed": "The file could not be read.",
+        "unrecognized": "No timesheet structure was recognized in this file.",
+        "too-many-rows": "The sheet holds more rows than one import can carry — split the file."
+      },
+      "emptyFile": "The file contains no timesheet data.",
+      "noCompany": "Switch to a company workspace.",
+      "summary": "Read {rows} rows from sheet {sheet}.",
+      "notPersistedNotice": "Nothing is saved until you confirm.",
+      "skippedTitle": "Cells that could not be read",
+      "skippedReasons": {
+        "unparsable": "unreadable value",
+        "hours-out-of-bounds": "hours outside 0–24",
+        "invalid-date": "no such date in this month"
+      },
+      "monthLabel": "Month",
+      "monthHint": "The sheet does not state its month — choose it explicitly.",
+      "duplicateWarning": "Identical entries already exist for {count} rows (same worker, date, object and hours). Writing them again requires the override below.",
+      "columns": {
+        "include": "Include",
+        "worker": "Worker",
+        "object": "Object",
+        "date": "Date",
+        "hours": "Hours",
+        "note": "Note",
+        "status": "Status"
+      },
+      "chooseWorker": "Select a worker",
+      "chooseObject": "Select an object",
+      "suggestions": "Suggestions",
+      "allWorkers": "All workers",
+      "allObjects": "All objects",
+      "needsReview": "Ambiguous cell — check the split",
+      "duplicateBadge": "Already recorded",
+      "incomplete": "Needs a selection",
+      "rowProblems": {
+        "worker": "Worker not accepted",
+        "object": "Object not accepted",
+        "date": "Invalid date",
+        "hours": "Invalid hours",
+        "note": "Note too long"
+      },
+      "overrideLabel": "Write duplicates anyway (a real second shift)",
+      "confirm": "Confirm selected rows ({count})",
+      "confirming": "Writing…",
+      "receipt": "Done — entries written: {count}. They are part of work hours now.",
+      "confirmBlockedHint": "Every included row needs a worker, an object, a date and hours.",
+      "errors": {
+        "invalidRows": "Rows needing correction: {count}. Nothing was written.",
+        "duplicatesFound": "Identical existing entries: {count}. Nothing was written — tick the override to write them anyway.",
+        "noRows": "No rows to write.",
+        "tooManyRows": "Too many rows for one import — split the file.",
+        "needsMigration": "This feature is not enabled on this database yet.",
+        "notAuthorized": "You may not record these hours.",
+        "generic": "Could not process. Please try again."
+      }
+    }
+  },
+  "oauthConsent": {
+    "title": "Confirm access",
+    "clientWantsAccess": "“{client}” is asking for access to your LabourMarket.ai account.",
+    "unknownClient": "Unknown application",
+    "clientLabel": "Application",
+    "redirectLabel": "Return address",
+    "scopesLabel": "Requested permissions",
+    "authorityNote": "The application will act only as you and will see only what you can see. You can revoke access at any time.",
+    "approve": "Allow",
+    "deny": "Deny",
+    "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
+    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Choose the demand you are interested in: {options}.",
+    "interestDraftSummary": "Ready to express interest: {demand}. Nothing has been sent yet — your confirmation is required.",
+    "interestDraftRepeat": "You have already expressed interest in “{demand}” — confirming will refresh it.",
+    "interestConfirmed": "Interest recorded. The demand's owner will see it in their own workspace — nothing leaves the platform.",
+    "workspacePersonal": "Personal space",
+    "workspaceSwitched": "Active workspace switched to “{label}”.",
+    "workspaceChoose": "Choose a workspace: {options}.",
+    "workCardDraftSummary": "Ready to update your work card ({fields}). Nothing is saved yet — your confirmation is required.",
+    "workCardSaved": "Work card updated.",
+    "workCardFieldAvailability": "availability",
+    "workCardFieldAvailableFrom": "available from",
+    "workCardFieldSalary": "salary range",
+    "workCardFieldLocation": "location",
+    "workCardFieldPreferredCountries": "preferred countries",
+    "demandDraftSummary": "Ready to create a worker-need for {org}: “{description}”. Nothing has been created yet — your confirmation is required.",
+    "demandDraftSummaryWithRole": "Ready to create a worker-need for {org} — {role}: “{description}”. Nothing has been created yet — your confirmation is required.",
+    "demandSubmitted": "Worker-need submitted for {org}. Matching workers may now see the structured facts on their board.",
+    "journalListEmpty": "The Work Journal has no entries yet.",
+    "journalListSummary": "{count} entries found. Latest: {latest}.",
+    "notSet": "not set",
+    "workerExists": "active",
+    "workerNone": "none",
+    "workerUnavailable": "could not be checked",
+    "profileSummary": "Your LabourMarket.ai profile — name: {name}; country: {country}; language: {language}; active role: {role}; worker profile: {worker}.",
+    "skillsSummary": "Your Living CV holds {count} skills ({verified} verified).",
+    "skillsEmpty": "Your Living CV has no recorded skills yet.",
+    "draftSummary": "Work Journal draft for {date}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "draftSummaryWithSite": "Work Journal draft for {date} at {site}: “{notes}”. Nothing is saved yet — confirming will write exactly this entry.",
+    "draftChooseContext": "This entry could belong to more than one work context: {options}. Which one should it go to?",
+    "draftContext": "Context: {context}.",
+    "confirmSummary": "Journal entry saved. Skill recognition: {added} added, {strengthened} strengthened, {reviewNeeded} awaiting review."
+  },
+  "notificationPrefs": {
+    "title": "Notifications",
+    "intro": "Choose which notifications reach you, per type and channel. In-app notifications are on until you turn them off.",
+    "inAppHeader": "In-app",
+    "emailHeader": "Email",
+    "emailConsentNote": "Email is off by default — it is sent only for the types you switch on here.",
+    "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
+    "error": "The change could not be saved and was reverted. Please try again.",
+    "unavailable": "Notification settings are not available right now."
   }
 }

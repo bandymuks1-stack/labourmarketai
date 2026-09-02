@@ -130,9 +130,15 @@ const GENERAL_TASKS: readonly AiTaskType[] = [
   "explain_match",
   "translate_message",
   "draft_follow_up",
+  "explain_market_demand",
 ];
 
 const ANTHROPIC_SOURCE = "Anthropic public pricing, reviewed by owner 2026-06";
+
+/** Read first-hand from the vendor's own pricing page, not an aggregator —
+ *  the distinction #1197 made load-bearing. */
+const GEMINI_SOURCE =
+  "Google Gemini API pricing, https://ai.google.dev/gemini-api/docs/pricing, standard paid tier, read 2026-08-28 (gemini-3.5-flash-lite $0.30 in / $2.50 out per 1M tokens; earlier 2.5-series figures read 2026-08-24)";
 
 export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   // ── Anthropic — the only prices the owner has reviewed. ───────────────────
@@ -238,29 +244,105 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     pricingSource: null,
     enabled: false,
   })),
-  ...(["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"] as const).map(
-    (model, i) => ({
-      provider: "gemini",
-      transport: "gemini" as const,
-      model,
-      alias: (["haiku", "sonnet", "opus"] as const)[i],
-      capabilities: GENERAL_TASKS,
-      qualityScore: null,
-      inputUsdPerMTok: null,
-      outputUsdPerMTok: null,
-      freeTier: true,
-      contextTokens: null,
-      maxOutputTokens: null,
-      latencyP50Ms: null,
-      // The finding that drove data-sensitivity.ts, carried at model level.
-      dataRestrictions: [
-        "free tier documents that content may be used to improve vendor products",
-      ],
-      effectiveFrom: null,
-      pricingSource: null,
-      enabled: false,
-    }),
-  ),
+  // ── Gemini — prices VERIFIED 2026-08-24, still NOT enabled. ──────────────
+  //
+  // The figures below are the STANDARD PAID-TIER prices read first-hand from
+  // Google's own pricing page on 2026-08-24, not from an aggregator. They are
+  // recorded here so that "we have no verified price" stops being one of the
+  // reasons this provider cannot run — that reason was real, and it is now
+  // answered with a source and a date.
+  //
+  // WHY PAID PRICES ON ENTRIES MARKED `freeTier: true`. The ceiling must never
+  // UNDER-estimate. A key sitting on the free allowance today can be moved onto
+  // billing by an owner action that touches nothing in this repo, and if the
+  // registry had recorded €0 for that model the per-run ceiling would have been
+  // computed against a price that stopped being true without a single line
+  // changing here. Pricing the models at the metered rate means a tier change
+  // can never silently spend past a budget. It also means that IF a run is ever
+  // served by the free allowance, the cost written to `ai_runs` is the standard
+  // rate rather than the €0 actually charged — an over-statement, in the one
+  // direction a budget can absorb. Which tier this deployment's key is on is an
+  // owner fact this repo cannot observe; see the human gate.
+  //
+  // gemini-2.5-pro is priced at its LONG-PROMPT tier ($2.50 / $15.00, prompts
+  // over 200k tokens) rather than its cheaper short-prompt tier ($1.25 /
+  // $10.00). The registry holds one price per model and the ceiling is only
+  // sound if that price is the higher of the two.
+  //
+  // ENABLED: exactly ONE of the three — `gemini-2.5-flash-lite`, the cheapest,
+  // which serves the `haiku` alias and therefore the `low_cost` tier.
+  //
+  // #1265 shipped all three priced and all three `enabled: false`, and said
+  // why: pricing is not permission, and the remaining blocker was a
+  // DATA-TRANSFER question. That question has since been answered in the ONE
+  // direction that needs no grant. `explain_market_demand` is classed `PUBLIC`
+  // on the evidence of its own field list, `AI_EGRESS_GRANTS` is still empty,
+  // and an ungranted external provider may already receive `PUBLIC` — so the
+  // gate opens for exactly one task and stays shut for every other.
+  //
+  // The other two stay FALSE. `explain_market_demand` prefers `low_cost` and
+  // cannot escalate (`escalationConditions: []`), so `flash` and `pro` would
+  // be unreachable models carrying a live enablement flag — and the moment a
+  // second, more sensitive task wanted them, the enablement would already be
+  // in place and would look like it had been reviewed. Enabling a model is
+  // cheap to do and expensive to notice.
+  ...(
+    [
+      // RETIRED MODEL REPLACED 2026-08-28, on the vendor's own instruction.
+      // `gemini-2.5-flash-lite` was the ONE enabled entry, and the first real
+      // production call against it returned:
+      //
+      //   404 NOT_FOUND: This model models/gemini-2.5-flash-lite is no longer
+      //   available to new users. Please update your code to use
+      //   models/gemini-3.5-flash-lite for the latest features and
+      //   improvements.
+      //
+      // So the AI path was not blocked by a key, an env var, a code gate or a
+      // privacy rule — every one of those was already correct and proven. It
+      // was blocked by a model id that Google retired for new API keys. That
+      // is worth recording because four earlier rounds of investigation
+      // concluded otherwise.
+      //
+      // Prices are the PAID-tier figures published for gemini-3.5-flash-lite
+      // ($0.30 in / $2.50 out per 1M tokens), read from the source below on
+      // 2026-08-28 — same rule as the rest of this table: never the free-tier
+      // €0, so a key moved onto billing cannot silently spend past a ceiling.
+      // The rise from $0.10/$0.40 keeps `explain_market_demand` far inside its
+      // $0.02 per-run ceiling (~$0.0035 at the observed payload size).
+      { model: "gemini-3.5-flash-lite", input: 0.3, output: 2.5, enabled: true },
+      // The other two are UNCHANGED and stay `enabled: false`. They are almost
+      // certainly retired the same way, but an id nobody can reach cannot be
+      // verified by reaching it — and guessing a replacement plus a price for a
+      // disabled model would put two unverified numbers into the one table
+      // whose entire job is to hold verified ones. They are corrected when a
+      // task actually needs them, which requires an owner enablement anyway.
+      { model: "gemini-2.5-flash", input: 0.3, output: 2.5, enabled: false },
+      { model: "gemini-2.5-pro", input: 2.5, output: 15, enabled: false },
+    ] as const
+  ).map((entry, i) => ({
+    provider: "gemini",
+    transport: "gemini" as const,
+    model: entry.model,
+    alias: (["haiku", "sonnet", "opus"] as const)[i],
+    capabilities: GENERAL_TASKS,
+    qualityScore: null,
+    inputUsdPerMTok: entry.input,
+    outputUsdPerMTok: entry.output,
+    freeTier: true,
+    contextTokens: null,
+    maxOutputTokens: null,
+    latencyP50Ms: null,
+    // The finding that drove data-sensitivity.ts, carried at model level —
+    // and re-confirmed against the same page the prices came from: the free
+    // tier's row reads "used to improve our products", the paid tier's reads
+    // "not used". The restriction is therefore CURRENT, not historical.
+    dataRestrictions: [
+      "free tier documents that content may be used to improve vendor products (re-verified 2026-08-24)",
+    ],
+    effectiveFrom: "2026-08-24",
+    pricingSource: GEMINI_SOURCE,
+    enabled: entry.enabled,
+  })),
   ...(["grok-3-mini", "grok-3", "grok-4"] as const).map((model, i) => ({
     provider: "xai",
     transport: "openai-compatible" as const,

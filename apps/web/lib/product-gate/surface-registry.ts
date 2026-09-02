@@ -532,6 +532,228 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: false,
   },
+  {
+    // ORGANIZATION CAPABILITIES — "What does your organization do?"
+    //
+    // The screen that made an already-applied table reachable. Two of the five
+    // World-State answers are recorded as honest NO below, and they are not
+    // dressed up: the capability set is not drawn on the World Map yet, and the
+    // AI cannot yet set it by conversation. Recording those as "yes" to clear
+    // the gate would be exactly the fabrication the gate exists to catch.
+    id: "components/app/organization-capabilities-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Lets an organization state what it actually does — educate/train, employ, supply workers, recruit, run projects, commission work — as several simultaneous capabilities, so an education institution can register honestly instead of calling itself a company.",
+    whyNotChat:
+      "It is a settled identity claim about an organization, not a request. Each answer is a durable, owner-only statement that others rely on for matching and discovery, and the RPC behind it is additive — a capability cannot be withdrawn. A conversational turn is the wrong shape for a decision that is hard to reverse and must be reviewable at a glance; chat may later OPEN this card, which is the extension recorded below.",
+    whyNotExistingComponent:
+      "The company setup form already answers a different question — companies.company_type, which is the INDUSTRY and holds exactly one value. Capabilities are what the organization DOES and are many-valued; a vocational school that also employs people needs both. Extending the industry control to carry capabilities would collapse the two axes and rebuild the single-value trap ORGANIZATION_ROLE_ORCHESTRATION_V1 exists to forbid.",
+    owner:
+      "Product owner — education pilot P0.1, owner directive 2026-08-27 (institution capability UI)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "Same element. This states what an existing organization is, and creates no new world element.",
+    chatIntegration:
+      "None today, and that is recorded as a NO rather than implied. The capability question is reachable only from the organization page. Making the assistant able to open it — 'we also train people' — is the natural next step and needs no schema change, because add_organization_role_v1 already accepts it.",
+    avatarEffect:
+      "None on a person. This describes an organization, not a human, and writes nothing to any profile, skill or journal.",
+    mapEffect:
+      "None yet — recorded honestly. A training capability is exactly the kind of fact the market map should eventually show (where education supply actually is), but nothing renders it today and claiming otherwise would be a fabricated map effect.",
+    journalRelation:
+      "None. An organization declaring what it does is a statement about itself, never evidence of work performed; the Work Journal remains the only source of proven capability for a person.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // The five mandatory answers, honestly.
+    changesWorldState: true,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+  },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
+    // /dashboard/hours — where a day of real work becomes a record.
+    //
+    // A site manager, standing on a site, on a phone, records who worked, on
+    // which date, on which object, for how many hours. It writes
+    // `work_hour_allocations` — the canonical row a timesheet was only ever a
+    // snapshot of.
+    //
+    // WHY THIS ONE IS NOT /create-cv. That declaration answers all five
+    // world-state questions "no" because a pre-auth public page has no
+    // workspace to be inside. This surface IS inside the authenticated
+    // workspace, so three of the five are honestly "yes" and only three
+    // findings remain. They are recorded as they are, not softened: the point
+    // of A-06 is that a false "yes" here would be worse than a blocked gate.
+    //
+    //   changesWorldState              TRUE  — it writes canonical work facts.
+    //   usableWithoutLeavingWorkspace  TRUE  — a /dashboard route; the person
+    //                                          never leaves the workspace.
+    //   reflectedOnMap                 false — hours draw nothing on the World
+    //                                          Map today. Recorded as false
+    //                                          rather than dressed up.
+    //   aiControlled                   false — structured entry, deliberately.
+    //                                          Natural-language hours entry is
+    //                                          a later slice and must not gate
+    //                                          a crew being paid correctly.
+    //   needsNoNewPage                 false — it is a new page.
+    //
+    // The three "false" answers are what the gate reports. Excusing them is an
+    // OWNER decision via `.github/scripts/owner-waivers.mjs`; this train does
+    // not write its own waiver, because a surface that approves itself is the
+    // same defect as an agent that mints its own authorisation.
+    // ═══════════════════════════════════════════════════════════════════════
+    id: "/dashboard/hours",
+    kind: "screen",
+    // A-04 names this case exactly: "a new wizard/stepper or multi-field form
+    // must declare why a conversation cannot do the same job."
+    originAxiom: "A-04",
+    purpose:
+      "The one mobile surface where a manager records a day of real work for a real crew: date, object, worker, hours, and optionally what was done. It writes the canonical per-worker/per-object/per-day allocation that timesheets, monthly totals and export all aggregate from, so the hours a company pays against exist as facts rather than as cells in someone's spreadsheet.",
+    whyNotChat:
+      "A conversation is the wrong instrument for repetitive numeric entry: a manager enters a whole crew across several objects in one sitting, and each allocation is four short values he already knows. Dictating twenty of them and re-reading each confirmation is slower and less accurate than tapping them, on a site, in poor signal. This is not a rejection of natural-language entry — that is a planned later slice — but the pilot must not make a crew's pay depend on parsing quality that has never been measured.",
+    whyNotExistingComponent:
+      "Every existing hours surface READS. `lib/timesheets` aggregates and approves; the timesheet is a snapshot. Nothing in the product WROTE the underlying per-worker/per-object/per-day fact — the rows a timesheet is a snapshot OF did not exist, which is why hours were being kept in a spreadsheet outside the product. This surface adds the missing writer and reuses the existing readers (`listActiveCompanyWorkers`, `getOrgWorkObjects`) rather than asking a second time who works here.",
+    owner:
+      "Product / work-hours foundation — Ramūnas pilot train (2026-08-29), PR #1344",
+    ownsAction: "work_hours.record_allocation",
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "objects",
+    whyNotExistingElement:
+      "It extends no new element. Hours are a dated fact ABOUT an existing work object and an existing worker; the object is the same `work_objects` row the task picker and the company page already use. What was missing was not an element but a way to attach elapsed work to one.",
+    chatIntegration:
+      "None today, and recorded as none rather than as a plan. The assistant cannot yet write allocations; when it can, it will dispatch into this same action instead of growing a second entry path.",
+    avatarEffect:
+      "None automatically, and that is a deliberate constraint rather than an omission: recorded hours are NOT skill evidence. A worker having been on a site for eight hours says nothing about what they can do, and inventing a competency from it is precisely the fake-verification A-06 forbids. Only an explicit, optional journal entry can carry evidence, and only a human confirms it.",
+    mapEffect:
+      "None. Recorded as `reflectedOnMap: false` rather than described as a map effect it does not have.",
+    journalRelation:
+      "Optional and one-directional: an allocation may reference a `journal_entries` row via `journal_entry_id`, but hours-only entry never creates one. The Work Journal stays the source of proven skills; this surface supplies time, not proof.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    // `objects` is an ELEMENT, and the pillar that owns it is `world_map` —
+    // the four pillars are ai_conversation / avatar / world_map / work_journal.
+    pillar: "world_map",
+    objectType: "construction_site",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "construction_site"
+    hasTimeline: true, // `work_date` — allocations are dated state by construction
+    hasHistory: true, // corrections supersede via correction_of / superseded_by
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    // Three true, two false, honestly. See the header comment.
+    changesWorldState: true,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    usesEntity: true,
+    // No new Entity Type: an allocation is a RELATIONSHIP between a worker and
+    // an already-registered object, carrying a date and a duration.
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    // worker × object × day, with hours. Registered as a predicate, not as a
+    // new architecture.
+    createsNewRelationship: true,
+    // A plain relational fact with named columns — the AI can read, total and
+    // summarise it with no architectural change.
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+  },
+
+  // ══ OAUTH CONSENT (owner directive 2026-08-29 §4) ═════════════════════════
+  // The authorization UI the Supabase OAuth 2.1 server DELEGATES to the
+  // product: external clients (the ChatGPT connector, future agents) obtain
+  // the user's own JWT only after the user approves on this screen. It is
+  // infrastructure the OAuth standard requires at a stable URL — not a
+  // workspace feature — so its World-State answers are honestly "no" and are
+  // excused by the scoped owner waiver, not rewritten.
+  {
+    id: "/oauth/consent",
+    kind: "screen",
+    // A-04: multiple valid entry points. This one is the doorway through which
+    // EXTERNAL clients gain a user's delegated access — the user is coerced
+    // into nothing; deny is a first-class button.
+    originAxiom: "A-04",
+    purpose:
+      "The one screen where a signed-in person approves or denies an external OAuth client's request to act as them: it shows the client name, its registered redirect URI and the requested scopes exactly as GoTrue recorded them, then routes the decision through supabase.auth.oauth.approveAuthorization / denyAuthorization on the user's own session.",
+    whyNotChat:
+      "Deliberate security property, not a limitation: granting an external agent standing access to the account is the ONE decision an assistant must never make or be able to make on a person's behalf — if the assistant could drive this screen, a prompt injection could grant itself access. aiControlled: false is the point.",
+    whyNotExistingComponent:
+      "No existing surface renders a pending OAuth authorization: the flow is defined by the OAuth 2.1 spec and Supabase's Authorization Path contract (a fixed URL GoTrue redirects to with an authorization_id), which no dashboard component satisfies.",
+    owner:
+      "Owner directive 2026-08-29 §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
+    ownsAction: "oauth.consent-decision",
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "It extends no element — it guards the existing identity. One user, one identity, multiple clients: this screen is where the 'multiple clients' half becomes consented fact.",
+    chatIntegration:
+      "None, by design (see whyNotChat). After approval the external client reaches the SAME canonical capability layer the assistant uses — the integration point is the bearer boundary, not this screen.",
+    avatarEffect:
+      "None directly; an approval records an OAuth grant against the user's identity in GoTrue, visible and revocable, never a profile/avatar change.",
+    mapEffect:
+      "None. An authorization handshake draws nothing on the World Map — recorded as reflectedOnMap: false rather than dressed up.",
+    journalRelation:
+      "None. Consent is not work and never becomes evidence; the journal is untouched.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true, // grants are issued/revoked at recorded times (GoTrue)
+    hasHistory: true, // GoTrue records the grant lifecycle
+    addableWithoutMapChange: true,
+
+    // Honestly "no", all five. This is standards-shaped auth infrastructure:
+    // it exists at a fixed URL because RFC 6749/OAuth 2.1 and the Supabase
+    // Authorization Path contract require exactly that, and it must never be
+    // AI-drivable (the security property above).
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: false, // MUST stay false — see whyNotChat
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot and must not control an OAuth consent screen.
+    worldStateCanControlIt: false,
+  },
 ] as const;
 
 /**

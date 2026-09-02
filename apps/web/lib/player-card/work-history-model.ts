@@ -20,9 +20,7 @@
 
 import { orgDisplayName } from "@/lib/company/org-display";
 
-/** The relationship slugs that count as WORK history — the ONE list every
- *  history surface filters by (W4: the card timeline used to skip this filter
- *  and showed manager/student/volunteer rows the CV and profile omit). */
+/** The relationship slugs that count as PAID / CONTRACTED work. */
 export const WORKER_RELATIONSHIPS = [
   "employee",
   "freelancer",
@@ -30,6 +28,56 @@ export const WORKER_RELATIONSHIPS = [
   "owner",
   "collaborator",
 ] as const;
+
+/**
+ * Relationships under which a person really works, but not as an employee:
+ * a study placement and unpaid volunteering.
+ *
+ * These used to be filtered out of every history surface alongside `manager`.
+ * That is right for `manager` — an administrative relationship to an org, not
+ * the person's own work — and wrong for these two. A student who completed a
+ * real placement at a real organization had that placement removed from their
+ * own CV, and the education pilot's premise is precisely that such a person is
+ * NOT "someone with no experience".
+ *
+ * They stay a SEPARATE list rather than becoming extra members of
+ * WORKER_RELATIONSHIPS, because the honest statement is "this happened, and it
+ * was a placement" — never "this was a job". Every surface renders them under
+ * their own heading.
+ */
+export const PRACTICE_RELATIONSHIPS = ["student", "volunteer"] as const;
+
+/** The ONE list every history surface filters by. `manager` stays out. */
+export const PROFESSIONAL_HISTORY_RELATIONSHIPS = [
+  ...WORKER_RELATIONSHIPS,
+  ...PRACTICE_RELATIONSHIPS,
+] as const;
+
+/**
+ * What a person may declare about their OWN past, with no organization to
+ * confirm it. Mirrors the closed set inside
+ * `save_self_declared_work_history_v1` — keep the two in step.
+ *
+ * `owner` is absent on purpose: owning an organization is not something a
+ * person types into their history, it follows from really owning one.
+ */
+export const SELF_DECLARED_RELATIONSHIPS = [
+  "employee",
+  "freelancer",
+  "consultant",
+  "collaborator",
+  "student",
+  "volunteer",
+] as const;
+
+/** Employment or practice — decided by the relationship, never guessed. */
+export type WorkHistoryKind = "employment" | "practice";
+
+export function historyKindOf(relationshipSlug: string): WorkHistoryKind {
+  return (PRACTICE_RELATIONSHIPS as readonly string[]).includes(relationshipSlug)
+    ? "practice"
+    : "employment";
+}
 
 /** One real engagement in the person's history. */
 export interface WorkHistoryEntry {
@@ -40,6 +88,9 @@ export interface WorkHistoryEntry {
   readonly organizationName: string | null;
   /** Canonical relationship slug (employee / manager / owner …). */
   readonly relationshipSlug: string;
+  /** Paid/contracted work or a placement — derived from the relationship, so
+   *  a placement can never be printed as employment (§7). */
+  readonly kind: WorkHistoryKind;
   /** ISO date the engagement started, or null when never recorded. */
   readonly startedAt: string | null;
   /** ISO date it ended; null while it is still running. */
@@ -68,6 +119,64 @@ export interface WorkHistorySourceRow {
 const ACTIVE_STATUS = "active";
 
 /**
+ * Does this engagement row say ANYTHING about the person's work?
+ *
+ * ── THE DEFECT THIS EXISTS TO FIX ──────────────────────────────────────────
+ * `ensure_worker_personal_engagement` (20260702140000) gives every worker a
+ * personal engagement the moment their `workers` row is created, because the
+ * journal composer requires a context to write against. That row is pure
+ * scaffolding: no organization, no title, no start date, no end date — just
+ * `relationship_slug = 'employee'`, `is_primary`, `active`.
+ *
+ * It is also, by that same shape, indistinguishable from a real employment
+ * row to every history reader. So the CV printed it: a work-history entry
+ * whose employer fell back to the word "Employee" and which carried no dates.
+ * The profile card counted it as a current engagement.
+ *
+ * Measured in production on 2026-08-26: 35 of 36 profiles carry exactly this
+ * row (organization NULL, title NULL, started_at NULL, active, primary). Every
+ * one of those people had a phantom job on their CV.
+ *
+ * ── WHY THIS PREDICATE IS SAFE ─────────────────────────────────────────────
+ * It drops a row ONLY when the row asserts nothing at all — no organization,
+ * no title, and neither date. Every path that records something real fails
+ * that test and survives:
+ *
+ *   - self-declared history → `save_self_declared_work_history_v1` requires a
+ *     title of at least 3 characters;
+ *   - invitation acceptance → carries `organization_id`;
+ *   - org membership / ownership → carries `organization_id`.
+ *
+ * A single recorded date is enough to keep a row: someone who typed only "I
+ * started in 2019" stated a fact, and facts are not tidied away.
+ *
+ * ── WHAT THIS DOES NOT TOUCH ───────────────────────────────────────────────
+ * The scaffold row stays exactly where it is and keeps doing its job. The
+ * work-log context picker still offers it — case D in
+ * `engagement-context-selection.ts` is the personal, org-less context, and a
+ * person logging their own work needs it. This is a rule about what counts as
+ * HISTORY, not a rule about what counts as a context.
+ */
+export function isRecordedEngagement(
+  row: Pick<WorkHistorySourceRow, "title" | "started_at" | "ended_at"> & {
+    readonly organizations?: WorkHistorySourceRow["organizations"];
+    readonly organizationName?: string | null;
+  },
+): boolean {
+  const org =
+    row.organizationName ??
+    row.organizations?.display_name ??
+    row.organizations?.legal_name ??
+    null;
+  return (
+    nonEmpty(org) !== null ||
+    nonEmpty(row.title) !== null ||
+    nonEmpty(row.started_at) !== null ||
+    nonEmpty(row.ended_at) !== null
+  );
+}
+
+/**
  * Derive the history, newest first.
  *
  * Ordering is by real dates only: a row with no start date sorts last rather
@@ -77,7 +186,7 @@ const ACTIVE_STATUS = "active";
 export function deriveWorkHistory(
   rows: readonly WorkHistorySourceRow[],
 ): WorkHistoryEntry[] {
-  const entries = rows.map((r) => ({
+  const entries = rows.filter(isRecordedEngagement).map((r) => ({
     id: r.id,
     title: nonEmpty(r.title),
     // The org's own display name, then its legal name — never a fabricated
@@ -85,6 +194,7 @@ export function deriveWorkHistory(
     organizationName:
       orgDisplayName(r.organizations?.display_name, r.organizations?.legal_name),
     relationshipSlug: r.relationship_slug,
+    kind: historyKindOf(r.relationship_slug),
     startedAt: nonEmpty(r.started_at),
     endedAt: nonEmpty(r.ended_at),
     current: r.status === ACTIVE_STATUS && !nonEmpty(r.ended_at),

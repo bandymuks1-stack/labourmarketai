@@ -24,6 +24,7 @@ import {
   fetchErrorResult,
   jsonSchemaHint,
   malformedOrTruncated,
+  httpErrorResult,
 } from "./extract-json";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -89,11 +90,7 @@ export const geminiCompletionProvider: AiCompletionProvider = {
         },
       );
       if (!res.ok) {
-        return {
-          status: "error",
-          code: "provider_error",
-          message: `gemini http ${res.status}`,
-        };
+        return { status: "error", ...(await httpErrorResult("gemini", res)) };
       }
       const json = (await res.json()) as {
         candidates?: {

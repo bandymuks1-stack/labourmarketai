@@ -280,3 +280,20 @@ audit.
   the runner itself regardless of the admin's wishes. No chat table is read
   or written; nothing is sent outbound. Pinned in the
   `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-09-01 — `lib/lmc/compensation.ts`** (commercial safe-prep v1: typed
+  caller for the production-applied `lmc_compensate_spend_v1` RPC). Service
+  role is genuinely required rather than convenient: the human-gated applied
+  migration `20260828090000_lmc_spend_compensation_v1.sql` (prod ledger
+  `20260828155923`) grants EXECUTE on the RPC to `service_role` ONLY —
+  revoked from `public` and `anon`, never granted to `authenticated` — a
+  deliberate posture for a credit-creating SECURITY DEFINER function. The
+  wrapper is `server-only`, REQUIRES an explicit `actorProfileId`, and the
+  RPC itself re-checks that the actor owns the affected account or is an
+  admin (`lmc_actor_not_authorized` otherwise), enforces idempotency by key
+  and refuses over-compensation — the service key opens the front door,
+  never the authority check. The module calls exactly one RPC and touches no
+  table directly, no chat table, nothing outbound. It has NO product call
+  site yet (the product never calls `lmc_spend_v1`); it is the prepared seam
+  so the first spend caller can pair its failure path with compensation.
+  Pinned in the `chat-visibility-rls.test.ts` caller inventory.

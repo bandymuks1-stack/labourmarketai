@@ -5,13 +5,18 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
-import { GoogleButton } from "@/components/app/google-button";
+import {
+  FacebookButton,
+  GoogleButton,
+  LinkedInButton,
+} from "@/components/app/google-button";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import { buildEmailConfirmRedirectTo } from "@/lib/auth/email-confirm";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { clearSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
@@ -24,18 +29,44 @@ const OAUTH_ERROR_KEYS: Record<string, string> = {
   exchange_failed: "oauth.exchange_failed",
   no_user: "oauth.no_user",
   callback: "oauth.callback",
+  // The person pressed Cancel/Deny at the provider — a deliberate choice,
+  // rendered as a NEUTRAL status, never as a system fault.
+  cancelled: "oauth.cancelled",
+  // E-mail confirmation outcomes (Train A slice 1, 2026-09-02): a dead /
+  // already-used link (a fresh one can be requested right here), and a link
+  // opened on a device that did not start the signup (the address IS
+  // confirmed — sign in here).
+  link_expired: "oauth.link_expired",
+  confirmed_sign_in: "oauth.confirmed_sign_in",
 };
+
+/** Outcomes that are a person's own choice or a normal cross-device return,
+ *  rendered as a neutral status line — never as a red system-fault alert. */
+const NEUTRAL_OAUTH_OUTCOMES = new Set(["cancelled", "confirmed_sign_in"]);
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }
 
-/** Login form. Google OAuth (shared button) + email/password
+/** Login form. Social OAuth (shared same-tab buttons) + email/password
  *  (`signInWithPassword`). Magic link was removed in the M1 auth refactor.
  *  On success the session is set and we route to /dashboard — middleware
- *  bounces not-yet-onboarded users on to /onboarding. */
-export function LoginForm() {
+ *  bounces not-yet-onboarded users on to /onboarding.
+ *
+ *  `linkedinEnabled` / `facebookEnabled` come from the SERVER page component
+ *  (lib/auth/enabled-providers.ts — the auth server's own `/settings`
+ *  answer). Default FALSE = fail-closed: a provider button never renders
+ *  unless the auth server confirmed it can complete the flow (§18 honesty —
+ *  and never as a disabled/greyed decoration either). */
+export function LoginForm({
+  linkedinEnabled = false,
+  facebookEnabled = false,
+}: {
+  linkedinEnabled?: boolean;
+  facebookEnabled?: boolean;
+} = {}) {
   const t = useTranslations("auth.login");
+  const tSocial = useTranslations("auth.social");
   const tErr = useTranslations("auth.errors");
   const locale = useLocale();
   // Honour the `?next=…` the middleware sets when it bounces an
@@ -59,6 +90,15 @@ export function LoginForm() {
   // Google-only account (no password), so we point the user back to Google.
   const [passwordFailed, setPasswordFailed] = useState(false);
   const [isPreviewHost, setIsPreviewHost] = useState(false);
+  // "Confirm email" is ON in production: a password attempt before the link
+  // was opened comes back `email_not_confirmed`. That, and a dead link from
+  // the callback (`?error=link_expired`), both get a one-click "send a new
+  // link" — a registration must never dead-end on a single e-mail.
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendState, setResendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [resendError, setResendError] = useState<string | null>(null);
 
   // Detect Vercel preview host (e.g. labourmarketai-<sha>.vercel.app)
   // client-side only — the host is window-bound. Production
@@ -76,11 +116,59 @@ export function LoginForm() {
   const oauthError = oauthErrorCode
     ? tErr(OAUTH_ERROR_KEYS[oauthErrorCode] ?? "oauth.unknown")
     : null;
+  // A cancel — or "confirmed on another device, sign in here" — is not a
+  // failure: neutral styling, `role="status"` (below).
+  const oauthNeutral =
+    oauthErrorCode !== null && NEUTRAL_OAUTH_OUTCOMES.has(oauthErrorCode);
+  const offerResend = needsConfirmation || oauthErrorCode === "link_expired";
+
+  async function resendConfirmation() {
+    if (!isValidEmail(email)) {
+      setResendError(t("error_email"));
+      setResendState("error");
+      return;
+    }
+    setResendState("sending");
+    setResendError(null);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: {
+          // Same return target as the signup form — the pending `next` (an
+          // assistant's authorization, a deep link) rides along again.
+          emailRedirectTo: buildEmailConfirmRedirectTo(
+            window.location.origin,
+            locale,
+            nextParam ? nextPath : null,
+          ),
+        },
+      });
+      if (err) throw err;
+      setResendState("sent");
+    } catch (e) {
+      console.error("[login] resend confirmation failed:", e);
+      const info = mapAuthError(e);
+      setResendError(tErr(info.key, info.params));
+      setResendState("error");
+    }
+  }
+
+  // Any `?error=` bounce means the OAuth attempt did NOT create a session.
+  // The Google button optimistically marks a pending signup BEFORE the
+  // redirect; without this cleanup a cancelled attempt would leave that flag
+  // in localStorage and mislabel a much-later ordinary login as a completed
+  // signup. Clearing emits nothing — the signup never happened.
+  useEffect(() => {
+    if (oauthErrorCode) clearSignupPending();
+  }, [oauthErrorCode]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setPasswordFailed(false);
+    setNeedsConfirmation(false);
     if (!isValidEmail(email)) {
       setError(t("error_email"));
       return;
@@ -107,6 +195,13 @@ export function LoginForm() {
       setStatus("error");
       const info = mapAuthError(e);
       setError(tErr(info.key, info.params));
+      if (info.key === "emailNotConfirmed") {
+        // Not a wrong password and not a Google account: the person simply
+        // has not opened the confirmation link yet. Offer a fresh one.
+        setNeedsConfirmation(true);
+        setResendState("idle");
+        return;
+      }
       // Password sign-in failed — surface the Google path. A Google-created
       // account has no password, so "invalid credentials" here usually means
       // "you signed up with Google", not "wrong password".
@@ -151,9 +246,15 @@ export function LoginForm() {
         // Surfaced when the callback redirected back here with `?error=…`.
         // The trace id (also a URL param) is shown so the user can quote
         // it in support. NEVER includes the auth code, tokens, or cookies.
+        // A CANCEL at the provider is a deliberate choice, not a fault —
+        // it renders as a neutral status line, not a red alert.
         <div
-          role="alert"
-          className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs leading-relaxed text-state-danger"
+          role={oauthNeutral ? "status" : "alert"}
+          className={
+            oauthNeutral
+              ? "rounded-md border border-ink-600/60 bg-ink-500/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+              : "rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs leading-relaxed text-state-danger"
+          }
           data-testid="login-oauth-error"
         >
           <p>{oauthError}</p>
@@ -187,13 +288,44 @@ export function LoginForm() {
           account and needs no notice. */}
       <AuthLegalNotice variant="googleLogin" />
 
+      {/* `context="signup"` because this button is ACCOUNT-CREATING for a new
+          Google identity (see the notice above) — the press mirrors the signup
+          form exactly: first-touch attribution + `registration_started` +
+          the pending-signup marker. A returning login is never mis-counted:
+          only the /onboarding surface (which a returning user never mounts)
+          emits `signup_completed` from that marker. */}
       <GoogleButton
         label={t("google_label")}
         redirectingLabel={t("google_redirecting")}
         errorLabel={t("error_generic")}
         disabled={disabled}
         nextPath={nextPath}
+        context="signup"
       />
+
+      {/* LinkedIn/Facebook render ONLY when the auth server reports the
+          provider enabled — same account-creating same-tab flow as Google,
+          so `context="signup"` for the same attribution reasons. */}
+      {linkedinEnabled && (
+        <LinkedInButton
+          label={tSocial("continueWithLinkedIn")}
+          redirectingLabel={t("google_redirecting")}
+          errorLabel={t("error_generic")}
+          disabled={disabled}
+          nextPath={nextPath}
+          context="signup"
+        />
+      )}
+      {facebookEnabled && (
+        <FacebookButton
+          label={tSocial("continueWithFacebook")}
+          redirectingLabel={t("google_redirecting")}
+          errorLabel={t("error_generic")}
+          disabled={disabled}
+          nextPath={nextPath}
+          context="signup"
+        />
+      )}
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />
@@ -245,6 +377,37 @@ export function LoginForm() {
           {error}
         </p>
       )}
+      {offerResend && (
+        // Unconfirmed address (password refused) or a dead link from the
+        // callback: the way forward is a fresh confirmation mail, sent to the
+        // address typed above. Uses the auth server's own resend (single
+        // pending token per address, server-side rate limit) — no custom
+        // mailer, no token handled here.
+        <div
+          className="flex flex-col gap-2 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="login-resend-confirmation"
+        >
+          {resendState === "sent" ? (
+            <p role="status">{t("resend_sent", { email: email.trim() })}</p>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resendState === "sending" || !isValidEmail(email)}
+                className="self-start rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t("resend_confirmation")}
+              </button>
+              {resendError && (
+                <p className="text-state-danger" role="alert">
+                  {resendError}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
       {passwordFailed && (
         // The most common reason an email/password attempt fails for this
         // product is that the account was created with Google (no password).
@@ -275,6 +438,7 @@ export function LoginForm() {
                 : "/auth/signup"
             }
             className="text-brand-blue hover:text-brand-cyan"
+            data-testid="login-signup-link"
           >
             {t("signup_link")}
           </Link>

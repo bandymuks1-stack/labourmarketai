@@ -88,10 +88,13 @@ describe("§11 employer context — membership truth is the final gate", () => {
   });
 
   it("keeps the creator-compatibility arm and fails closed otherwise", () => {
-    expect(ctx).toMatch(/company\.profile_id === user\.id\) role = "owner"/);
+    // G4 wagon 3 moved the gate chain into the caller-scoped core, so the
+    // subject is `caller.userId` — the arm and its precedence are unchanged.
+    expect(ctx).toMatch(/company\.profile_id === caller\.userId\) role = "owner"/);
     expect(ctx).toMatch(/isEmployerSurfaceRole/);
-    // The OLD sole gate (refuse unless creator) must be gone.
-    expect(ctx).not.toMatch(/company\.profile_id !== user\.id/);
+    // The OLD sole gate (refuse unless creator) must be gone — under either
+    // subject spelling.
+    expect(ctx).not.toMatch(/company\.profile_id !== (user\.id|caller\.userId)/);
   });
 
   it("the resolved role rides in the ok context", () => {

@@ -15,7 +15,15 @@ import { activeLocales } from "@/lib/i18n/config";
  *      honours the cookie on every navigation; the callback must not fight it.)
  *   2. profiles.locale — the ACCOUNT preference. Honoured only on a device
  *      with no cookie (fresh device / cleared cookies), only when it is a
- *      valid active locale, and only when it differs from the URL locale.
+ *      valid active locale, only when it differs from the URL locale, and
+ *      ONLY for an account that has completed onboarding. Before onboarding
+ *      `profiles.locale` is a DB default the person never chose
+ *      (`handle_new_user` falls back to 'lt' when OAuth supplies no locale
+ *      in `raw_user_meta_data`), so honouring it would yank a brand-new
+ *      Google signup who landed on /en into /lt/onboarding AND pin
+ *      NEXT_LOCALE=lt for a year. The onboarding wizard writes the REAL
+ *      choice (from the URL locale) at completion; from then on the account
+ *      preference participates exactly as before.
  *   3. The URL locale — which the middleware derived from Accept-Language
  *      when neither of the above existed. Left untouched.
  *
@@ -46,13 +54,20 @@ export function resolvePostLoginLocale(input: {
   profileLocale: string | null;
   /** The locale segment of the callback URL. */
   urlLocale: string;
+  /** Has this account completed onboarding (`profiles.onboarded_at` set)?
+   *  When false, the profile locale is the signup-time DB default — not a
+   *  human choice — and must never override the URL locale the person
+   *  actually landed on. */
+  onboarded: boolean;
 }): PostLoginLocaleDecision {
   // 1. A device cookie — even one matching the URL — is an explicit choice.
   if (input.cookieLocale !== null && input.cookieLocale.trim() !== "") {
     return { locale: input.urlLocale, overridden: false };
   }
-  // 2. The account preference, only when real, active and actually different.
+  // 2. The account preference, only when real, active, actually different —
+  //    and only once onboarding has confirmed it as a human choice.
   if (
+    input.onboarded &&
     isActiveLocale(input.profileLocale) &&
     input.profileLocale !== input.urlLocale
   ) {

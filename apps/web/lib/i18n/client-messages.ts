@@ -99,6 +99,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "messaging",
   "needStructuring",
   "network",
+  // The organization capability question ("What does your organization do?").
+  // Client-reachable because the card is interactive; the labels are the only
+  // thing the reader ever sees — the stored slug never leaves the server.
+  "organizationCapabilities",
   "opportunities",
   "playercards",
   "productivityUnits",
@@ -124,6 +128,8 @@ export const CLIENT_MESSAGE_ROOTS = [
   "waze",
   "workEntryReview",
   "workforcePlanning",
+  /** Work-hour quick entry — the site operator's daily surface. */
+  "workHours",
   /** The one workspace: Context Panel copy (W3). */
   "workspace",
 ] as const;

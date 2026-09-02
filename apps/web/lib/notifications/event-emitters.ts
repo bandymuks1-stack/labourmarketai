@@ -6,12 +6,26 @@ import "server-only";
  *
  * Every function here:
  *   - runs with the ADMIN client (the table grants authenticated no INSERT);
- *   - is called AFTER the domain RPC succeeded, fire-and-forget (a booking
- *     accept must never fail because its notification could not be written);
+ *   - is called AFTER the domain RPC succeeded and is AWAITED end to end at
+ *     every WRITE-PATH call site (see SERVERLESS DELIVERY below);
  *   - resolves the RECIPIENT from the domain rows themselves (never from
  *     caller-supplied ids alone — the caller knows who acted, the row knows
  *     who must hear about it);
- *   - never throws.
+ *   - never throws — so awaiting one can never fail the domain write it
+ *     follows. Every failure collapses to a greppable console marker.
+ *
+ * SERVERLESS DELIVERY (2026-08-31, TRAIN 10). These emitters were written
+ * fire-and-forget for a server that outlives the response. On Vercel's
+ * serverless runtime the invocation can be FROZEN the instant the action
+ * returns, killing a detached insert mid-flight — which is exactly what made
+ * the live `demand_interest_expressed` emitter deliver NOTHING in production
+ * (only backfill rows existed). Every write-path emitter therefore awaits its
+ * insert(s) through `emitNotificationEvent` and its call site awaits the
+ * emitter. The ONLY detached emitters left are the three READ-TIME ones at the
+ * bottom (document_expiring ×2, weekly_digest): they are re-derived on every
+ * page visit and deduped by the store's UNIQUE (recipient, dedupe_key), so a
+ * killed insert self-heals on the next visit instead of losing a fact — and an
+ * await there would tax a read path for no durability gain.
  *
  * RECIPIENT DECISIONS, STATED (v1):
  *   booking_proposed    → the WORKER the employer proposed to.
@@ -42,6 +56,7 @@ import { DOCUMENT_EXPIRING_WINDOW_DAYS } from "@/lib/config/documents";
 import {
   emitNotificationEvent,
   emitNotificationEventInBackground,
+  type NotificationEventInput,
   type NotificationEventType,
 } from "./events";
 import {
@@ -49,10 +64,103 @@ import {
   weeklyDigestEntityId,
   type WeeklyDigestSkipRow,
 } from "./weekly-digest-emitter";
+import {
+  readNotificationPreferencesFor,
+  resolveChannelEnabled,
+  type NotificationPreferenceRow,
+} from "./notification-preferences";
+import { maybeDispatchNotificationEmail } from "./email-dispatch";
 import { getWorkerCoreRow } from "../data/worker-core";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * ONE greppable marker for "the domain write happened and the recipient was
+ * not told" — the generic sibling of `INTEREST_UNDELIVERED` below, which
+ * production proved was needed: without a marker, a permanent delivery
+ * failure is indistinguishable from success anywhere outside the database.
+ * Carries the EVENT TYPE and a bounded reason only — never free text, ids,
+ * payloads or people. Approved silences (self-assignment, self-ack,
+ * `duplicate`, `feature_unavailable`) deliberately do NOT come through here,
+ * so a hit is always something to look at.
+ */
+export const NOTIFICATION_UNDELIVERED = "[notifications] recipient not told";
+
+function notDelivered(
+  eventType: string,
+  reason: string,
+  detail?: string,
+): void {
+  console.warn(
+    NOTIFICATION_UNDELIVERED,
+    detail ? { eventType, reason, detail } : { eventType, reason },
+  );
+}
+
+/**
+ * The recipient's stored preference rows, FAIL-OPEN (completion v1): if the
+ * preferences table cannot be read — absent, degraded, anything — this
+ * returns NO rows, and `resolveChannelEnabled` then applies the channel
+ * defaults (in-app ON, email OFF). A preferences outage must never silently
+ * kill notifications; only an explicit stored opt-out may.
+ */
+async function readPrefRowsFailOpen(
+  admin: AdminClient,
+  recipientProfileId: string,
+): Promise<readonly NotificationPreferenceRow[]> {
+  const prefs = await readNotificationPreferencesFor(admin, recipientProfileId);
+  return prefs.kind === "ok" ? prefs.rows : [];
+}
+
+/** What `deliver` did — the cron route reports these honestly. */
+type DeliverOutcome =
+  | "written"
+  | "duplicate"
+  | "feature_unavailable"
+  | "unexpected_error"
+  /** The recipient stored an explicit in-app opt-out for this type. */
+  | "suppressed_preference";
+
+/**
+ * The AWAITED insert every write-path emitter rides. A detached insert is
+ * killable on the serverless runtime (see the module header); this one is
+ * awaited end to end and reports the only unapproved outcome. It cannot
+ * throw: `emitNotificationEvent` catches everything into its outcome union.
+ *
+ * Completion v1 adds the two channel hops around the insert:
+ *   - BEFORE: the recipient's stored in-app preference (M5 closure). The
+ *     default stays ON (opt-out model); only an explicit stored opt-out row
+ *     suppresses, and an unreadable preferences table FAILS OPEN (see
+ *     `readPrefRowsFailOpen`) — deliver anyway.
+ *   - AFTER a successful insert: the email dispatcher (M6 preparation).
+ *     Consent-first (email default OFF) and env-inert: it becomes live
+ *     automatically the moment the owner configures a real email provider —
+ *     that is the design intent, no further code change needed. Its every
+ *     failure collapses to a tagged outcome; it can never fail the insert
+ *     that already happened.
+ */
+async function deliver(
+  admin: AdminClient,
+  input: NotificationEventInput,
+): Promise<DeliverOutcome> {
+  const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
+  if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
+    // APPROVED silence: the recipient turned this type off themselves.
+    return "suppressed_preference";
+  }
+  const outcome = await emitNotificationEvent(admin, input);
+  if (outcome.kind === "unexpected_error") {
+    // `duplicate` and `feature_unavailable` are approved outcomes and stay
+    // quiet; this line only fires on something real.
+    notDelivered(input.eventType, "insert_failed", outcome.code);
+    return "unexpected_error";
+  }
+  if (outcome.kind === "written") {
+    await maybeDispatchNotificationEmail(admin, input, prefRows);
+  }
+  return outcome.kind;
+}
 
 async function workerProfileId(
   admin: AdminClient,
@@ -87,7 +195,10 @@ export async function emitBookingNotification(
       start_date?: string | null;
       location_country?: string | null;
     } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered(eventType, "row_unreadable");
+      return;
+    }
 
     const metadata = {
       country: row.location_country ?? undefined,
@@ -101,8 +212,11 @@ export async function emitBookingNotification(
       const worker = row.worker_id
         ? await workerProfileId(admin, row.worker_id)
         : null;
-      if (!worker) return;
-      emitNotificationEventInBackground(admin, {
+      if (!worker) {
+        notDelivered(eventType, "recipient_unresolved");
+        return;
+      }
+      await deliver(admin, {
         recipientProfileId: worker,
         eventType,
         entityType: "booking_request",
@@ -112,16 +226,25 @@ export async function emitBookingNotification(
       return;
     }
 
-    if (!row.owner_id) return;
-    emitNotificationEventInBackground(admin, {
+    if (!row.owner_id) {
+      notDelivered(eventType, "recipient_unresolved");
+      return;
+    }
+    await deliver(admin, {
       recipientProfileId: row.owner_id,
       eventType,
       entityType: "booking_request",
       entityId: bookingId,
       metadata,
     });
-  } catch {
-    // Emission is an enhancement; the domain write already succeeded.
+  } catch (err) {
+    // Emission is an enhancement; the domain write already succeeded. But the
+    // failure is named — a bare catch is how interest delivery died unseen.
+    notDelivered(
+      eventType,
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -143,7 +266,10 @@ export async function emitEngagementCreatedNotification(
       start_date?: string | null;
       location_country?: string | null;
     } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered("engagement_created", "row_unreadable");
+      return;
+    }
     const metadata = {
       country: row.location_country ?? undefined,
       startDate: row.start_date ?? undefined,
@@ -154,8 +280,12 @@ export async function emitEngagementCreatedNotification(
       ? await workerProfileId(admin, row.worker_id)
       : null;
     if (worker) recipients.add(worker);
+    if (recipients.size === 0) {
+      notDelivered("engagement_created", "recipient_unresolved");
+      return;
+    }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType: "engagement_created",
         entityType: "engagement",
@@ -165,8 +295,13 @@ export async function emitEngagementCreatedNotification(
         metadata,
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "engagement_created",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -197,7 +332,10 @@ export async function emitEngagementEndedNotification(
       .eq("id", engagementId)
       .maybeSingle();
     const row = data as { company_id?: string | null; worker_id?: string | null } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered("engagement_ended", "row_unreadable");
+      return;
+    }
 
     let recipient: string | null = null;
     if (actorSide === "worker") {
@@ -213,17 +351,25 @@ export async function emitEngagementEndedNotification(
     } else if (row.worker_id) {
       recipient = await workerProfileId(admin, row.worker_id);
     }
-    if (!recipient) return;
+    if (!recipient) {
+      notDelivered("engagement_ended", "recipient_unresolved");
+      return;
+    }
 
-    emitNotificationEventInBackground(admin, {
+    await deliver(admin, {
       recipientProfileId: recipient,
       eventType: "engagement_ended",
       entityType: "engagement",
       entityId: engagementId,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "engagement_ended",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -249,17 +395,27 @@ export async function emitWorkTaskAssignedNotification(
       due_at?: string | null;
     } | null;
     const assignee = row?.assignee_profile_id ?? null;
-    if (!assignee || assignee === actorProfileId) return;
+    if (!assignee) {
+      notDelivered("work_task_assigned", "recipient_unresolved");
+      return;
+    }
+    // APPROVED silence: a self-assignment needs no telling.
+    if (assignee === actorProfileId) return;
 
-    emitNotificationEventInBackground(admin, {
+    await deliver(admin, {
       recipientProfileId: assignee,
       eventType: "work_task_assigned",
       entityType: "work_task",
       entityId: taskId,
       metadata: { startDate: row?.due_at?.slice(0, 10) ?? undefined },
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "work_task_assigned",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -287,17 +443,37 @@ export async function emitWorkTaskAssignedNotification(
  * alpha-2 code. The worker's `note` is free text and never leaves the signal
  * row — a notification must be safe to render in a preview.
  *
- * AWAITED, UNLIKE ITS SIBLINGS — and deliberately. The other emitters here
- * detach their insert through `emitNotificationEventInBackground`, which is
- * safe on a long-lived server and NOT safe on a serverless runtime: the
- * invocation can be frozen the moment the action returns, killing a detached
- * insert mid-flight. The whole point of this emitter is that the signal stops
- * being silent, so an emission that survives only when the platform feels like
- * it would reintroduce the defect it was written to fix. It is awaited end to
- * end instead, and it CANNOT fail the domain write because it never throws:
- * the try/catch below and `emitNotificationEvent`'s own outcome union between
- * them turn every failure into a logged outcome rather than an exception.
+ * AWAITED — and no longer unlike its siblings. This emitter was the FIRST to
+ * await its insert end to end, because a detached insert is killable on the
+ * serverless runtime (the invocation can be frozen the moment the action
+ * returns) — the exact mechanism that made this event deliver nothing live.
+ * TRAIN 10 (2026-08-31) extended the same fix to every write-path emitter in
+ * this module: all of them now ride the awaited `deliver` helper and are
+ * awaited at their call sites. It CANNOT fail the domain write because it
+ * never throws: the try/catch below and `emitNotificationEvent`'s own outcome
+ * union between them turn every failure into a logged outcome rather than an
+ * exception.
  */
+/**
+ * ONE greppable marker for "a worker raised their hand and the owner was not
+ * told". Production evidence (2026-08-27): five `demand_interest_signals`, two
+ * `demand_interest_expressed` rows — and both of those carry a `created_at`
+ * identical to their signal to the microsecond, which this emitter cannot
+ * produce because it never sets `created_at`. They are backfill artifacts, so
+ * the LIVE emitter has delivered nothing since it shipped, and every path by
+ * which it could fail was silent. Correct suppressions (self-interest,
+ * duplicate) deliberately do NOT come through here, so a hit is always
+ * something to look at.
+ *
+ * Carries a REASON only — never the worker's free text, the ids, the payload
+ * or the person.
+ */
+export const INTEREST_UNDELIVERED = "[notifications/interest] owner not told";
+
+function undelivered(reason: string, detail?: string): void {
+  console.warn(INTEREST_UNDELIVERED, detail ? { reason, detail } : { reason });
+}
+
 export async function emitDemandInterestNotification(
   signalId: string,
 ): Promise<void> {
@@ -312,7 +488,10 @@ export async function emitDemandInterestNotification(
       request_id?: string | null;
       worker_id?: string | null;
     } | null;
-    if (!row?.request_id || !row.worker_id) return;
+    if (!row?.request_id || !row.worker_id) {
+      undelivered("signal_unreadable");
+      return;
+    }
 
     const { data: demand } = await admin
       .from("customer_requests")
@@ -324,10 +503,25 @@ export async function emitDemandInterestNotification(
       country?: string | null;
     } | null;
     const owner = req?.profile_id ?? null;
-    if (!owner) return;
+    if (!owner) {
+      undelivered("owner_unresolved");
+      return;
+    }
 
     const actor = await workerProfileId(admin, row.worker_id);
+    // APPROVED silence, not a failure: you do not need telling that you raised
+    // your own hand. Deliberately unlogged so the marker below stays a signal.
     if (actor && actor === owner) return;
+
+    // Preference gate + email hop (completion v1) — this emitter predates
+    // `deliver` and keeps its own audited insert (guard-pinned), so it
+    // carries the same two channel hops explicitly. Fail-open on an
+    // unreadable preferences table; suppression only on a stored opt-out.
+    const prefRows = await readPrefRowsFailOpen(admin, owner);
+    if (!resolveChannelEnabled(prefRows, "demand_interest_expressed", "in_app")) {
+      // APPROVED silence: the owner turned this type off themselves.
+      return;
+    }
 
     const country = req?.country ?? null;
     const outcome = await emitNotificationEvent(admin, {
@@ -342,12 +536,30 @@ export async function emitDemandInterestNotification(
     if (outcome.kind === "unexpected_error") {
       // `duplicate` and `feature_unavailable` are approved outcomes and stay
       // quiet; this line only fires on something real.
-      console.error(
-        `[notifications] demand_interest_expressed emit failed: ${outcome.code}`,
+      undelivered("insert_failed", outcome.code);
+    }
+    if (outcome.kind === "written") {
+      await maybeDispatchNotificationEmail(
+        admin,
+        {
+          recipientProfileId: owner,
+          eventType: "demand_interest_expressed",
+          entityType: "demand_interest_signal",
+        },
+        prefRows,
       );
     }
-  } catch {
-    // Emission is an enhancement; the signal itself is already stored.
+  } catch (err) {
+    // Emission is an enhancement; the signal itself is already stored — the
+    // worker's action still succeeded. But this catch used to be BARE, which
+    // is why a permanent delivery failure was undiagnosable from outside the
+    // database: nothing threw, nothing logged, and the employer simply never
+    // heard anything. The failure is now named. Bounded and secret-free: no
+    // free text, no ids, no payload.
+    undelivered(
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -406,6 +618,12 @@ export async function emitDemandInterestResponseNotification(input: {
     const recipient = await workerProfileId(admin, input.workerId);
     if (!recipient || recipient === input.actorProfileId) return;
 
+    // Same two channel hops as the outbound half (rationale up there).
+    const prefRows = await readPrefRowsFailOpen(admin, recipient);
+    if (!resolveChannelEnabled(prefRows, "demand_interest_reviewed", "in_app")) {
+      return;
+    }
+
     const outcome = await emitNotificationEvent(admin, {
       recipientProfileId: recipient,
       eventType: "demand_interest_reviewed",
@@ -416,6 +634,17 @@ export async function emitDemandInterestResponseNotification(input: {
     if (outcome.kind === "unexpected_error") {
       console.error(
         `[notifications] demand_interest_reviewed emit failed: ${outcome.code}`,
+      );
+    }
+    if (outcome.kind === "written") {
+      await maybeDispatchNotificationEmail(
+        admin,
+        {
+          recipientProfileId: recipient,
+          eventType: "demand_interest_reviewed",
+          entityType: "demand_interest_response",
+        },
+        prefRows,
       );
     }
   } catch {
@@ -443,15 +672,22 @@ export async function emitAbsenceNotification(
       requested_by?: string;
       start_date?: string | null;
     } | null;
-    if (!row?.worker_id) return;
+    if (!row?.worker_id) {
+      notDelivered(eventType, "row_unreadable");
+      return;
+    }
     const worker = await workerProfileId(admin, row.worker_id);
-    if (!worker) return;
+    if (!worker) {
+      notDelivered(eventType, "recipient_unresolved");
+      return;
+    }
     const metadata = { startDate: row.start_date ?? undefined };
 
     if (eventType === "absence_requested") {
-      // Only when someone ELSE filed it for the worker — see the header.
+      // APPROVED silence otherwise: only when someone ELSE filed it for the
+      // worker — see the header.
       if (row.requested_by && row.requested_by !== worker) {
-        emitNotificationEventInBackground(admin, {
+        await deliver(admin, {
           recipientProfileId: worker,
           eventType,
           entityType: "worker_absence",
@@ -467,7 +703,7 @@ export async function emitAbsenceNotification(
       recipients.add(row.requested_by);
     }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType,
         entityType: "worker_absence",
@@ -475,8 +711,13 @@ export async function emitAbsenceNotification(
         metadata,
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      eventType,
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -580,7 +821,7 @@ export async function emitWorkflowStepPendingNotifications(
       if (raw.delegated_to_profile_id) recipients.add(raw.delegated_to_profile_id);
     }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType: "workflow_step_pending",
         entityType: "workflow_instance",
@@ -588,8 +829,13 @@ export async function emitWorkflowStepPendingNotifications(
         metadata: {},
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_step_pending",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -601,16 +847,24 @@ export async function emitWorkflowDecidedNotification(
   try {
     const admin = createAdminClient();
     const instance = await readWorkflowInstanceLite(admin, instanceId);
-    if (!instance?.requesterProfileId) return;
-    emitNotificationEventInBackground(admin, {
+    if (!instance?.requesterProfileId) {
+      notDelivered("workflow_decided", "recipient_unresolved");
+      return;
+    }
+    await deliver(admin, {
       recipientProfileId: instance.requesterProfileId,
       eventType: "workflow_decided",
       entityType: "workflow_instance",
       entityId: instance.id,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_decided",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -632,16 +886,24 @@ export async function emitWorkflowDelegatedNotification(
     const delegate =
       (data as { delegated_to_profile_id?: string | null } | null)
         ?.delegated_to_profile_id ?? null;
-    if (!delegate) return;
-    emitNotificationEventInBackground(admin, {
+    if (!delegate) {
+      notDelivered("workflow_delegated", "recipient_unresolved");
+      return;
+    }
+    await deliver(admin, {
       recipientProfileId: delegate,
       eventType: "workflow_delegated",
       entityType: "workflow_instance",
       entityId: instanceId,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_delegated",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -683,8 +945,12 @@ export async function emitWorkflowEscalatedNotifications(
     for (const raw of (members ?? []) as { profile_id?: string }[]) {
       if (raw.profile_id) recipients.add(raw.profile_id);
     }
+    if (recipients.size === 0) {
+      notDelivered("workflow_escalated", "recipient_unresolved");
+      return;
+    }
     for (const recipientProfileId of recipients) {
-      emitNotificationEventInBackground(admin, {
+      await deliver(admin, {
         recipientProfileId,
         eventType: "workflow_escalated",
         entityType: "workflow_instance",
@@ -692,8 +958,13 @@ export async function emitWorkflowEscalatedNotifications(
         metadata: {},
       });
     }
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      "workflow_escalated",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 // ── Document & Evidence Engine v3 emitters (20260817140100) ────────────────
@@ -744,11 +1015,18 @@ export async function emitDocumentAckNotification(
       assignee_profile_id?: string;
       assigned_by?: string;
     } | null;
-    if (!row) return;
+    if (!row) {
+      notDelivered(eventType, "row_unreadable");
+      return;
+    }
 
     let recipient: string | null = null;
     if (eventType === "document_ack_assigned") {
       recipient = row.assignee_profile_id ?? null;
+      if (!recipient) {
+        notDelivered(eventType, "recipient_unresolved");
+        return;
+      }
     } else if (
       row.assigned_by &&
       row.assigned_by !== row.assignee_profile_id
@@ -756,17 +1034,23 @@ export async function emitDocumentAckNotification(
       // Completed → the assigner hears it; the acting assignee does not.
       recipient = row.assigned_by;
     }
+    // APPROVED silence: acknowledging your own assignment needs no telling.
     if (!recipient) return;
 
-    emitNotificationEventInBackground(admin, {
+    await deliver(admin, {
       recipientProfileId: recipient,
       eventType,
       entityType: "document_acknowledgement",
       entityId: ackId,
       metadata: {},
     });
-  } catch {
+  } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
+    notDelivered(
+      eventType,
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
@@ -782,7 +1066,15 @@ function isInsideExpiryWindow(dateOnly: string | null, now: Date): boolean {
 }
 
 /** Durable "your document enters the 30-day expiry window" facts for one
- *  worker's OWN documents. Fire-and-forget from the documents read path. */
+ *  worker's OWN documents.
+ *
+ *  READ-TIME DETACHED — the documented exception to the module's awaited
+ *  rule. This fires on the documents READ path, where an await would tax
+ *  every page load; and unlike a write-path event the fact is not one-shot:
+ *  it is re-derived on EVERY visit and deduped by the store's UNIQUE
+ *  (recipient, dedupe_key), so an insert killed by the serverless freeze
+ *  self-heals on the next visit instead of losing the fact forever. A
+ *  THROWN failure still logs the NOTIFICATION_UNDELIVERED marker. */
 export function emitWorkerDocumentExpiringNotifications(workerId: string): void {
   void (async () => {
     try {
@@ -795,6 +1087,13 @@ export function emitWorkerDocumentExpiringNotifications(workerId: string): void 
       const recipient =
         (worker as { profile_id?: string } | null)?.profile_id ?? null;
       if (!recipient) return;
+
+      // Preference gate (completion v1): a stored in-app opt-out for this
+      // type suppresses the whole derivation. Fail-open like `deliver`.
+      const prefRows = await readPrefRowsFailOpen(admin, recipient);
+      if (!resolveChannelEnabled(prefRows, "document_expiring", "in_app")) {
+        return;
+      }
 
       const { data } = await admin
         .from("worker_documents")
@@ -817,14 +1116,22 @@ export function emitWorkerDocumentExpiringNotifications(workerId: string): void 
           metadata: {},
         });
       }
-    } catch {
+    } catch (err) {
       // Emission is an enhancement; reads must never fail because of it.
+      notDelivered(
+        "document_expiring",
+        "threw",
+        err instanceof Error ? err.message.slice(0, 200) : undefined,
+      );
     }
   })();
 }
 
 /** Durable expiry facts for an org register: the responsible person (or the
- *  creator) hears that an ACTIVE entry enters the window. */
+ *  creator) hears that an ACTIVE entry enters the window.
+ *
+ *  READ-TIME DETACHED — same documented exception (and same self-healing
+ *  argument) as `emitWorkerDocumentExpiringNotifications` above. */
 export function emitOrgDocumentExpiringNotifications(
   organizationId: string,
 ): void {
@@ -839,6 +1146,9 @@ export function emitOrgDocumentExpiringNotifications(
         .not("expires_on", "is", null)
         .limit(200);
       const now = new Date();
+      // Preference gate per DISTINCT recipient (completion v1), cached so a
+      // register with one responsible person costs one read. Fail-open.
+      const allowedByRecipient = new Map<string, boolean>();
       for (const row of (data ?? []) as {
         id: string;
         expires_on: string | null;
@@ -848,6 +1158,16 @@ export function emitOrgDocumentExpiringNotifications(
         if (!isInsideExpiryWindow(row.expires_on, now)) continue;
         const recipient = row.responsible_profile_id ?? row.created_by;
         if (!recipient) continue;
+        let allowed = allowedByRecipient.get(recipient);
+        if (allowed === undefined) {
+          allowed = resolveChannelEnabled(
+            await readPrefRowsFailOpen(admin, recipient),
+            "document_expiring",
+            "in_app",
+          );
+          allowedByRecipient.set(recipient, allowed);
+        }
+        if (!allowed) continue;
         emitNotificationEventInBackground(admin, {
           recipientProfileId: recipient,
           eventType: "document_expiring",
@@ -856,8 +1176,13 @@ export function emitOrgDocumentExpiringNotifications(
           metadata: {},
         });
       }
-    } catch {
+    } catch (err) {
       // Emission is an enhancement; reads must never fail because of it.
+      notDelivered(
+        "document_expiring",
+        "threw",
+        err instanceof Error ? err.message.slice(0, 200) : undefined,
+      );
     }
   })();
 }
@@ -882,6 +1207,14 @@ export function emitOrgDocumentExpiringNotifications(
  * (the opportunities board recomputes them at read time). Nothing is
  * emitted when neither the journal nor the market block could be read: a
  * digest that can say nothing true says nothing.
+ *
+ * READ-TIME DETACHED — the third documented exception to the module's
+ * awaited rule (see the header). It fires on every dashboard visit and the
+ * UNIQUE dedupe key makes it exactly-once per week, so an insert killed by
+ * the serverless freeze self-heals on the very next visit; awaiting it
+ * would gate the spine render for no durability gain. Its catch stays an
+ * APPROVED silence: it also covers "no service env at all", which would
+ * turn the marker into per-visit noise in environments without the key.
  */
 export function maybeEmitWeeklyDigestInBackground(
   durable: readonly WeeklyDigestSkipRow[],
@@ -900,6 +1233,10 @@ export function maybeEmitWeeklyDigestInBackground(
       if (!journal.available && !opportunities.available) return;
 
       const admin = createAdminClient();
+      // Preference gate (completion v1): a stored in-app opt-out for the
+      // digest suppresses the read-time emit too. Fail-open like `deliver`.
+      const prefRows = await readPrefRowsFailOpen(admin, worker.profile_id);
+      if (!resolveChannelEnabled(prefRows, "weekly_digest", "in_app")) return;
       emitNotificationEventInBackground(admin, {
         recipientProfileId: worker.profile_id,
         eventType: "weekly_digest",
@@ -911,4 +1248,107 @@ export function maybeEmitWeeklyDigestInBackground(
       // never the page. The next visit tries again.
     }
   })();
+}
+
+/** The cron sweep's honest report — counts only, never ids or people. */
+export interface WeeklyDigestCronSummary {
+  readonly kind: "ran";
+  /** Distinct candidate recipients the sweep considered. */
+  readonly candidates: number;
+  readonly written: number;
+  /** Already had this week's row (read-time emit or an earlier sweep). */
+  readonly duplicates: number;
+  /** Stored in-app opt-outs. */
+  readonly suppressed: number;
+  readonly failures: number;
+}
+
+const WEEKLY_DIGEST_CRON_RECIPIENT_LIMIT = 500;
+
+/**
+ * WEEKLY DIGEST CRON SWEEP (completion v1) — the scheduled sibling of the
+ * read-time emitter above, for the people the read-time path structurally
+ * cannot reach: workers who did NOT visit the dashboard this week. Both
+ * paths write the SAME deterministic per-week entity id, so the UNIQUE
+ * (recipient, dedupe_key) constraint keeps the digest exactly-once per
+ * recipient per week whichever path gets there first.
+ *
+ * RECIPIENT DECISION, stated: workers with at least one live journal entry
+ * in the trailing 7 days. The read-time emitter's richer "can this digest
+ * say something true" check (`getWeeklyPersonalIntelligence`) runs under the
+ * signed-in session and cannot run here; recent journal activity is the
+ * service-role-readable subset of that truth — a worker who logged work this
+ * week always has a non-empty digest. Widening the audience is a deliberate
+ * later decision, not a default.
+ *
+ * Rides `deliver`, so the sweep inherits the preference gate AND the email
+ * hop: once the owner configures a real email provider, workers who opted in
+ * to digest email start receiving it from this sweep with no further code
+ * change. Lives in THIS module because event-emitters.ts is the one audited
+ * home of durable-notification service-role writers (chat-visibility-rls
+ * pins the caller inventory).
+ */
+export async function emitWeeklyDigestNotificationsForCron(): Promise<
+  WeeklyDigestCronSummary | { readonly kind: "unavailable" }
+> {
+  try {
+    const admin = createAdminClient();
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const sinceIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await admin
+      .from("journal_entries")
+      .select("worker_id")
+      .gte("created_at", sinceIso)
+      .is("deleted_at", null)
+      .limit(5000);
+    if (error) return { kind: "unavailable" };
+    const workerIds = [
+      ...new Set(
+        ((data ?? []) as { worker_id?: string | null }[])
+          .map((r) => r.worker_id)
+          .filter((id): id is string => typeof id === "string" && id.length > 0),
+      ),
+    ].slice(0, WEEKLY_DIGEST_CRON_RECIPIENT_LIMIT);
+
+    const recipients = new Set<string>();
+    for (let i = 0; i < workerIds.length; i += 100) {
+      const { data: workers } = await admin
+        .from("workers")
+        .select("id, profile_id")
+        .in("id", workerIds.slice(i, i + 100));
+      for (const w of (workers ?? []) as { profile_id?: string | null }[]) {
+        if (w.profile_id) recipients.add(w.profile_id);
+      }
+    }
+
+    const entityId = weeklyDigestEntityId(todayIso);
+    const summary = {
+      candidates: recipients.size,
+      written: 0,
+      duplicates: 0,
+      suppressed: 0,
+      failures: 0,
+    };
+    for (const recipientProfileId of recipients) {
+      const outcome = await deliver(admin, {
+        recipientProfileId,
+        eventType: "weekly_digest",
+        entityType: "weekly_digest",
+        // POINTER-ONLY (§19(d)): no metadata — the numbers live where the
+        // href lands, recomputed at read time.
+        entityId,
+      });
+      if (outcome === "written") summary.written += 1;
+      else if (outcome === "duplicate") summary.duplicates += 1;
+      else if (outcome === "suppressed_preference") summary.suppressed += 1;
+      else if (outcome === "unexpected_error") summary.failures += 1;
+      // feature_unavailable: the store is unapplied — every later recipient
+      // would fail identically, so stop and report honestly.
+      else if (outcome === "feature_unavailable") return { kind: "unavailable" };
+    }
+    return { kind: "ran", ...summary };
+  } catch {
+    return { kind: "unavailable" };
+  }
 }

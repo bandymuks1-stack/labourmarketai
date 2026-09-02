@@ -52,7 +52,10 @@ describe("Guard: journal is the canonical entry INPUT", () => {
   });
 
   it("keeps newest-first ordering", () => {
-    expect(journal).toMatch(/order\("created_at",\s*\{\s*ascending:\s*false\s*\}\)/);
+    // G4: the entries read lives in THE journal-list core; the page delegates.
+    expect(journal).toMatch(/listJournalEntries\(/);
+    const core = read("lib/journal/journal-list-core.ts");
+    expect(core).toMatch(/order\("created_at",\s*\{\s*ascending:\s*false\s*\}\)/);
   });
 
   it("per-entry skill links live inside the entry row only", () => {

@@ -2,8 +2,13 @@
 // EN (source) + 9 launch markets + RU (worker language, DI-approved
 // amendment 2026-06-12 — most workers on the first real sites operate in
 // Russian; see doctrine §9 changelog). The 11 JSON files MUST exist in repo
-// at all times (§2.4 file-presence requirement) and new i18n keys land in
-// all 11 in the same PR. The set itself never shrinks.
+// at all times (§2.4 file-presence requirement). §2.4 also REQUIRES new
+// i18n keys to land in all 11 in the same PR, but measured 2026-08-30 that
+// has NOT held in practice: the six unrouted catalogs (lv/et/da/no/sv/pl)
+// are structurally truncated at 4,150 leaf strings vs 10,263 in the five
+// active ones, and ~31-61% of the leaves they do hold are [EN] placeholders
+// — canonical measurement in docs/LANGUAGE_MATRIX.md §2.1. The set itself
+// never shrinks.
 //
 // market → locale code: Lithuania=lt, Latvia=lv, Estonia=et, Netherlands=nl,
 // Germany=de, Denmark=da, Norway=no, Sweden=sv, Poland=pl. RU is a worker

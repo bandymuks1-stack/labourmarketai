@@ -642,11 +642,108 @@ describe("NO new DB migration in this PR", () => {
     // the market-map read layer itself.
     // Bumped 237 -> 238 for the anonymous public-vacancy boundary v2
     // (owner P0 addendum + apply approval 2026-08-24, PR #1255).
-    // Bumped 239 -> 240 for the ai_runs subject de-linking DRAFT
-    // (20260824170000, paired rollback). RED by route (SECURITY DEFINER
-    // replace), deliberately NOT human-gate-annotated, ships UNAPPLIED. Still
-    // nothing from the market-map read layer itself.
-    expect(count).toBeLessThanOrEqual(240);
+    // Bumped 239 -> 240 for the transversal capability catalogue
+    // (20260827060000) — INSERT-only seed, nothing to do with the market-map
+    // read layer.
+    // Bumped 240 -> 241 for practice work history v1 (20260826182421) — a
+    // secdef allowlist widening, owner-approved. Nothing to do with the
+    // market-map read layer, which stays pure TS.
+    // Bumped 241 -> 242 for organization roles v1 (20260827050000) — the
+    // multi-capability foundation, owner-approved. Still nothing to do with
+    // the market-map read layer, which stays pure TS.
+    // Bumped 242 -> 243 for the relationship-invitations migration
+    // (20260827200000_relationship_invitations_v1) — the institution↔learner
+    // link. Additive: two nullable/defaulted columns on relationship_types, one
+    // nullable column on invitations, and CREATE OR REPLACE of five existing
+    // SECURITY DEFINER functions. No table/column dropped, no RLS policy
+    // changed, no grant widened. RED, owner-gated, NOT applied to production
+    // (PR #1301, draft + needs-human-gate).
+    // Bumped 243 -> 244 for learner visibility least privilege
+    // (20260827210000) — the owner's 2026-08-27 ruling that a learner must not
+    // inherit employer-grade worker visibility. It NARROWS `can_view_worker`
+    // by one conjunct and adds one fail-closed registry column. Applied to
+    // production, regression-proven by a controlled comparison (employee
+    // true / student false on one otherwise identical row). Still nothing to
+    // do with the market-map read layer, which stays pure TS.
+    //
+    // Bumped 244 -> 245 for the LMC spend-compensation migration
+    // (20260828090000_lmc_spend_compensation_v1, paired rollback). Adds ONE
+    // transaction kind, ONE lot source, ONE default-false flag and ONE
+    // SECURITY DEFINER RPC that issues a compensating credit against a spend.
+    // No table is dropped, no column removed, no RLS loosened, append-only is
+    // untouched. RED by classification (money ledger + SECURITY DEFINER +
+    // grants): it ships UNAPPLIED behind `lmc_compensation_enabled = false`
+    // and production apply stays owner-gated. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 245 real files.
+    //
+    // Bumped 245 -> 246 for the profile email identity binding
+    // (20260829120000_profile_email_identity_binding_v1, paired rollback) —
+    // a trigger on profiles + two accept RPCs + two policies reading the
+    // session's verified email instead of user-writable profiles.email. RED
+    // by classification (auth-core adjacent), ships UNAPPLIED, owner-gated.
+    // Nothing to do with the market-map read layer, which stays pure TS.
+    // Bumped 246 -> 247 for the anonymous write bounds
+    // (20260829130000_anon_write_bounds_v1, paired rollback) — CHECKs and
+    // BEFORE INSERT ceilings on pilot_events/waitlist and DB-side ceilings
+    // inside the public intake RPC. RED by classification (grant-adjacent),
+    // ships UNAPPLIED, owner-gated. Nothing to do with the market-map read
+    // layer, which stays pure TS.
+    // Bumped 247 -> 248 for the work-hour allocations foundation
+    // (20260829140000_work_hour_allocations_v1, paired rollback) — the
+    // canonical per-worker/per-object/per-day row a timesheet was only ever a
+    // snapshot of, with entered_by kept distinct from worker_id and no DELETE
+    // policy (history is correction/supersession). RED by classification
+    // (grant/revoke + drop-policy-if-exists + create-trigger), ships
+    // UNAPPLIED, production apply owner-gated. Still no migration from the
+    // market-map read layer, which stays pure TS.
+    // Bumped 248 -> 249 for the M3 compute wiring
+    // (20260831170000_timesheet_compute_allocations_v1, paired rollback) —
+    // timesheet_compute_lines_v1 re-issued to read work_hour_allocations
+    // alongside journal_entry_metrics (allocation-wins dedupe, combined
+    // 500-line cap). RED by route (SECURITY DEFINER body replace),
+    // human-gate-annotated under the owner's 2026-08-31 closure-session
+    // sequence; merge and production apply stay with the main session. Still
+    // nothing from the market-map read layer itself. RECOUNTED from the
+    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 249.
+    // Bumped 249 -> 250 for the agency disclosure-revocation package
+    // (20260901052300_agency_disclosure_revocation_v1, paired rollback) —
+    // severed agency-client connections currently leave the client with
+    // permanent read on the agency's candidate identities; the package adds
+    // active-connection filters to two list RPCs, cascades offers to
+    // withdrawn on revoke, and TIGHTENS one RLS policy. RED by
+    // classification (SECDEF replace + policy recreate + DML), ships
+    // UNAPPLIED, owner-gated. Still no migration from the market-map read
+    // layer, which stays pure TS. RECOUNTED from the tree:
+    // `ls supabase/migrations/*.sql | wc -l` = 250.
+    // Bumped 249 -> 250 for the relationship-visibility least-privilege
+    // ruling (20260901060000_relationship_visibility_least_privilege_v1,
+    // paired rollback) — the slice 20260827210000 deferred by name: three
+    // rows of relationship_types (volunteer, viewer, unemployed) move from
+    // grants_worker_visibility true to false. DATA-only and narrowing only;
+    // production holds zero engagement contexts on those slugs, so the blast
+    // radius is measured zero. Ships UNAPPLIED, owner-gated. Still no
+    // migration from the market-map read layer, which stays pure TS.
+    // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 250.
+    // RE-COUNTED 2026-09-01 after #1395 landed on main first: that PR
+    // took slot 250 for the agency disclosure-revocation package, so this
+    // ruling is the 251st file, not the 250th. Both are declared above.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 251.
+    // Bumped 251 -> 252 for the public-schema CREATE revoke
+    // (20260901100000_revoke_public_schema_create_v1, paired rollback) — the
+    // minimal current-equivalent extraction of the still-live half of #879,
+    // owner-approved 2026-09-01. One REVOKE, no grant, USAGE preserved;
+    // narrowing only. Still no migration from the market-map read layer,
+    // which stays pure TS. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 252.
+    // Bumped 252 -> 253 for the labour-economics metric widening
+    // (20260901140000_labour_economics_metric_widening_v1, paired rollback) —
+    // owner-approved 2026-09-01. It widens the FAIL-CLOSED
+    // market_intelligence_sources import allowlist by six metric keys and
+    // imports nothing. Still no migration from the market-map read layer,
+    // which stays pure TS. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 253.
+    expect(count).toBeLessThanOrEqual(254);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
-import { GoogleButton } from "@/components/app/google-button";
+import {
+  FacebookButton,
+  GoogleButton,
+  LinkedInButton,
+} from "@/components/app/google-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import {
+  RESEND_COOLDOWN_SECONDS,
+  buildEmailConfirmRedirectTo,
+} from "@/lib/auth/email-confirm";
 import { cn } from "@/lib/utils";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { markSignupPending, trackFunnel } from "@/lib/telemetry/task";
@@ -25,12 +33,25 @@ function isValidEmail(v: string): boolean {
 
 const MIN_PASSWORD = 8;
 
-/** Signup form. Google OAuth (shared button) + email/password/confirm
- *  (`signUp`). Role is no longer picked here — it moves to /onboarding.
- *  Email confirmation is OFF (DI prereq), so signUp returns a live session;
- *  we route straight to /onboarding. Magic link was removed in M1. */
-export function SignupForm() {
+/** Signup form. Social OAuth (shared same-tab buttons) + email/password/
+ *  confirm (`signUp`). Role is no longer picked here — it moves to
+ *  /onboarding. Email confirmation is OFF (DI prereq), so signUp returns a
+ *  live session; we route straight to /onboarding. Magic link was removed in
+ *  M1.
+ *
+ *  `linkedinEnabled` / `facebookEnabled` come from the SERVER page component
+ *  (lib/auth/enabled-providers.ts). Default FALSE = fail-closed: a provider
+ *  button never renders unless the auth server confirmed it can complete the
+ *  flow (§18 honesty — and never as a disabled/greyed decoration either). */
+export function SignupForm({
+  linkedinEnabled = false,
+  facebookEnabled = false,
+}: {
+  linkedinEnabled?: boolean;
+  facebookEnabled?: boolean;
+} = {}) {
   const t = useTranslations("auth.signup");
+  const tSocial = useTranslations("auth.social");
   const tErr = useTranslations("auth.errors");
   const locale = useLocale();
   const router = useRouter();
@@ -52,6 +73,56 @@ export function SignupForm() {
   const [errorKind, setErrorKind] = useState<"generic" | "alreadyRegistered">(
     "generic",
   );
+  // "Confirm email" is ON in production (2026-09-02). The check-your-email
+  // state offers ONE way forward when the mail is slow or lost: a resend,
+  // throttled to the auth server's own per-address limit so the button never
+  // offers what the server would refuse.
+  const [resendState, setResendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [resendError, setResendError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = window.setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => window.clearTimeout(id);
+  }, [cooldown]);
+
+  /** The return target for BOTH the first mail and a resend: our callback
+   *  with the e-mail-flow marker and, when the signup was reached with a
+   *  destination (an assistant's pending authorization, a deep link), that
+   *  destination as `next` — so it survives the round trip through the inbox. */
+  function emailRedirectTo(): string {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return buildEmailConfirmRedirectTo(
+      origin,
+      locale,
+      nextParam ? nextPath : null,
+    );
+  }
+
+  async function resendConfirmation() {
+    if (cooldown > 0 || resendState === "sending") return;
+    setResendState("sending");
+    setResendError(null);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: emailRedirectTo() },
+      });
+      if (err) throw err;
+      setResendState("sent");
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+    } catch (e) {
+      console.error("[signup] resend confirmation failed:", e);
+      const info = mapAuthError(e);
+      setResendError(tErr(info.key, info.params));
+      setResendState("error");
+      if (info.key === "rateLimited") setCooldown(RESEND_COOLDOWN_SECONDS);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -92,32 +163,40 @@ export function SignupForm() {
     });
     try {
       const supabase = createClient();
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
-          // Harmless when "Confirm email" is OFF; correct target if DI
-          // re-enables verification later.
-          emailRedirectTo: `${origin}/${locale}/auth/callback`,
-          data: { locale },
+          // Production requires e-mail confirmation: the link returns to our
+          // callback with the flow marker and the pending `next` (see
+          // lib/auth/email-confirm.ts for the cross-device + resume rules).
+          emailRedirectTo: emailRedirectTo(),
+          // Durable first-touch attribution (social-acquisition readiness
+          // v1): localStorage lives on ONE device/browser only, so the
+          // bounded first-touch fields also ride the signup into
+          // auth.users.raw_user_meta_data — no schema change, no cookie.
+          // Every value passed here has already been through the attribution
+          // sanitizer (control chars stripped, angle brackets removed,
+          // 120-char cap); when nothing was captured the spread adds nothing.
+          data: { locale, ...getFirstTouchAttribution() },
         },
       });
       if (err) throw err;
-      // Defensive: if "Confirm email" is ever toggled ON, signUp returns NO
-      // session (and no error). Without this branch the form would redirect to
-      // /onboarding, which bounces an unauthenticated user back to /login with
-      // no message — a silent registration dead-end gated on a single Supabase
-      // toggle. Show an explicit "check your email" state instead.
+      // "Confirm email" ON (production since 2026-09-02): signUp returns NO
+      // session and no error. Show the explicit "check your email" state —
+      // the callback finishes the signup when the link is opened. Without
+      // this branch the form would redirect to /onboarding, which bounces an
+      // unauthenticated user back to /login with no message.
       if (!data.session) {
         setStatus("check_email");
+        setCooldown(RESEND_COOLDOWN_SECONDS);
         return;
       }
-      // Confirm email OFF → session is live. Mark this session as a fresh
-      // signup so the first authed surface emits `signup_completed`, then land
-      // on the unified onboarding, propagating `next` so onboarding completion
-      // can fall back to the user's original destination.
+      // Confirm email OFF (local stack) → session is live. Mark this session
+      // as a fresh signup so the first authed surface emits
+      // `signup_completed`, then land on the unified onboarding, propagating
+      // `next` so onboarding completion can fall back to the user's original
+      // destination.
       markSignupPending("email");
       const onboardingPath = nextParam
         ? `/onboarding?next=${encodeURIComponent(nextPath)}`
@@ -152,8 +231,39 @@ export function SignupForm() {
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("check_email_body", { email: email.trim() })}
         </p>
+        <div className="flex flex-col gap-2 text-xs text-text-secondary">
+          {resendState === "sent" && (
+            <p role="status" data-testid="signup-resend-sent">
+              {t("resend_sent")}
+            </p>
+          )}
+          {resendError && (
+            <p className="text-state-danger" role="alert">
+              {resendError}
+            </p>
+          )}
+          {cooldown > 0 ? (
+            <p className="text-text-muted" data-testid="signup-resend-wait">
+              {t("resend_wait", { seconds: cooldown })}
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={resendConfirmation}
+              disabled={resendState === "sending"}
+              className="self-start rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="signup-resend"
+            >
+              {t("resend_label")}
+            </button>
+          )}
+        </div>
         <Link
-          href="/auth/login"
+          href={
+            nextParam
+              ? `/auth/login?next=${encodeURIComponent(nextPath)}`
+              : "/auth/login"
+          }
           className="text-sm text-brand-blue hover:text-brand-cyan"
         >
           {t("login_link")} →
@@ -187,6 +297,30 @@ export function SignupForm() {
         nextPath={nextPath}
         context="signup"
       />
+
+      {/* LinkedIn/Facebook render ONLY when the auth server reports the
+          provider enabled — the same account-creating same-tab flow, behind
+          the same GDPR notice above. */}
+      {linkedinEnabled && (
+        <LinkedInButton
+          label={tSocial("continueWithLinkedIn")}
+          redirectingLabel={t("google_redirecting")}
+          errorLabel={t("error_generic")}
+          disabled={disabled}
+          nextPath={nextPath}
+          context="signup"
+        />
+      )}
+      {facebookEnabled && (
+        <FacebookButton
+          label={tSocial("continueWithFacebook")}
+          redirectingLabel={t("google_redirecting")}
+          errorLabel={t("error_generic")}
+          disabled={disabled}
+          nextPath={nextPath}
+          context="signup"
+        />
+      )}
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />

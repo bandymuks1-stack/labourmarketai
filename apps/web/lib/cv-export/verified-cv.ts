@@ -20,7 +20,12 @@ import {
   type CvCertificateDoc,
   type CvProject,
 } from "./cv-sections";
-import { WORKER_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import {
+  historyKindOf,
+  isRecordedEngagement,
+  PROFESSIONAL_HISTORY_RELATIONSHIPS,
+  type WorkHistoryKind,
+} from "@/lib/player-card/work-history-model";
 
 /**
  * Verified CV export (S3.5) — the worker's OWN portable, honest history.
@@ -51,6 +56,10 @@ export type VerifiedCvEngagement = {
   organizationType: string | null;
   /** engagement relationship slug (employee / freelancer / …). */
   relationship: string;
+  /** Paid/contracted work vs a study placement or volunteering — decided by
+   *  the relationship. The page prints the two under separate headings so a
+   *  placement is never presented as a job. */
+  kind: WorkHistoryKind;
   /** Free-text engagement title, if the worker gave one. */
   title: string | null;
   startedAt: string | null;
@@ -198,7 +207,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
           "relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
-        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
         .order("started_at", { ascending: false, nullsFirst: false }),
     ]);
@@ -279,11 +288,25 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       orgName: orgDisplayName(org?.display_name, org?.legal_name),
       organizationType: org?.organization_type ?? null,
       relationship: e.relationship_slug,
+      kind: historyKindOf(e.relationship_slug),
       title: (e.title as string | null) ?? null,
       startedAt: e.started_at,
       endedAt: e.ended_at,
     };
-  });
+  })
+    // The trigger-provisioned personal context (20260702140000) carries no
+    // organization, no title and no dates — it exists so the journal composer
+    // has something to write against, and it is not a job. Printing it gave
+    // 35 of 36 production profiles a phantom "Employee" with no employer.
+    // Same rule as the profile card, so the two never disagree.
+    .filter((e) =>
+      isRecordedEngagement({
+        title: e.title,
+        started_at: e.startedAt,
+        ended_at: e.endedAt,
+        organizationName: e.orgName,
+      }),
+    );
 
   const personName =
     profileRes.data?.full_name ??

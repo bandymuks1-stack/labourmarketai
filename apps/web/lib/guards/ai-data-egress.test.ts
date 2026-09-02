@@ -55,12 +55,43 @@ describe("the gate is closed by default", () => {
     }
   });
 
-  it("so no task can leave the platform today", () => {
-    // No task is classed PUBLIC (a recorded finding in data-sensitivity.ts), so
-    // the live consequence of an empty grant table is: local, or nothing.
-    // BLOCK external → try local → otherwise fail safely.
+  it("so ONLY a PUBLIC task can leave the platform, and every other is refused", () => {
+    // Until 2026-08-24 no task was classed PUBLIC, so the live consequence of
+    // an empty grant table was "local, or nothing" for everything. One task is
+    // PUBLIC now (`explain_market_demand` — aggregate advertisement counts, no
+    // data subject), and that is the ENTIRE change in what may leave: the gate
+    // itself is untouched, because an ungranted external provider has always
+    // been permitted PUBLIC and nothing else.
+    //
+    // The assertion is therefore split rather than deleted. Deleting it would
+    // have removed the only check that the other ten stay refused, which is the
+    // half that matters.
     for (const task of AI_TASK_TYPES) {
       const s = sensitivityForTask(task);
+      const expected = s === "PUBLIC";
+      for (const p of AI_PROVIDER_PROFILES) {
+        if (p.locality === "local") continue;
+        expect(egressPermitted(p, s).permitted, `${task} → ${p.id}`).toBe(expected);
+      }
+    }
+  });
+
+  it("the tasks that carry a person are still refused by name", () => {
+    // Named explicitly so a future reclassification of any ONE of them is a
+    // red test rather than an arithmetic change in the loop above.
+    const mustBeRefused = [
+      "extract_cv",
+      "normalize_work_scope",
+      "normalize_external_profile",
+      "explain_match",
+      "draft_follow_up",
+      "translate_message",
+      "structure_future_work",
+      "derive_workforce_requirements",
+    ] as const;
+    for (const task of mustBeRefused) {
+      const s = sensitivityForTask(task);
+      expect(s, task).not.toBe("PUBLIC");
       for (const p of AI_PROVIDER_PROFILES) {
         if (p.locality === "local") continue;
         expect(egressPermitted(p, s).permitted, `${task} → ${p.id}`).toBe(false);
@@ -166,15 +197,21 @@ describe("the classification the gate depends on stays honest", () => {
 
   it("no task is quietly reclassified PUBLIC to slip past the gate", () => {
     // The one way to defeat this gate without touching it: relabel a task's
-    // data as public. If a PUBLIC task ever appears it must be a deliberate,
-    // reviewed change — this failing is the prompt to check it.
+    // data as public. So the PUBLIC set is an ALLOWLIST, not a count — a new
+    // entry here is a red test until someone writes down why that payload
+    // carries no data subject.
+    //
+    // `explain_market_demand` is on it as of 2026-08-24. Its reasoning is in
+    // `data-sensitivity.ts`, its field list is in `TASK_POLICIES`, and the
+    // payload assembler is pinned separately by
+    // `public-market-facts-payload.test.ts`.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
-    );
+    ).sort();
     expect(
       publicTasks,
       "a task became PUBLIC — verify its payload really carries no project or personal data",
-    ).toEqual([]);
+    ).toEqual(["explain_market_demand"]);
   });
 });
 

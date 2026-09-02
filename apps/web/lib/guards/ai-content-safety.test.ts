@@ -36,8 +36,8 @@ function objectKeys(schema: z.ZodTypeAny): string[] {
 const CONTENT_FIELD = /content|filebytes|filedata|rawfile|documenttext|ocr|base64|binary/i;
 
 describe("AI content safety (structural, over the registry)", () => {
-  it("covers all eleven agents", () => {
-    expect(entries.length).toBe(11);
+  it("covers all twelve agents", () => {
+    expect(entries.length).toBe(12);
   });
 
   // 1 — no AI verifies skills.

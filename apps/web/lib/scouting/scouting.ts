@@ -116,7 +116,12 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
       created_at: string;
     }[]).map((r) => ({
       id: r.id,
-      title: r.title ?? "—",
+      // RAW stored title. The data layer does not get to pick a display
+      // string: an em-dash here would have been an internal placeholder
+      // rendered at the employer (§23), and the stored title can be an
+      // English synthetic label that only the display layer knows how to
+      // localize. The single consumer resolves both.
+      title: r.title ?? "",
       status: r.status ?? "draft",
       structured: parseStructuredNeed(r.payload) !== null,
       // List view derives from title only (full derivation runs in

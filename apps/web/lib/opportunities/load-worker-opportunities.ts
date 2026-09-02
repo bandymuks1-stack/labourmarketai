@@ -31,6 +31,7 @@ import {
   compareMatches,
   type MatchResultV1,
 } from "@/lib/market/match-v1";
+import { bestEvidencedProfession } from "./adjacent-directions";
 import {
   readStructuredDemandPublic,
   type StructuredDemandPublic,
@@ -64,7 +65,14 @@ function asAny(c: SupabaseClient): any {
 
 export interface WorkerReadiness extends WorkerOpportunityProfile {
   readonly availabilityStatus: string | null;
+  /** The profession the worker DECLARED, or null. Never inferred. */
   readonly professionSlug: string | null;
+  /**
+   * The profession their recorded work already evidences, present ONLY when
+   * they declared none. A reading of real held skills, never a claim about
+   * the person — every surface that uses it must say so.
+   */
+  readonly evidencedProfessionSlug: string | null;
 }
 
 export interface OpportunityCard {
@@ -157,14 +165,58 @@ export async function loadWorkerOpportunities(
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
 
-  const { data: docs } = await asAny(supabase)
-    .from("worker_documents")
-    .select("id")
-    .eq("worker_id", ctx.workerId);
+  // Both depend only on `ctx.workerId`, so they travel as one round trip.
+  //
+  // The entry count exists to tell two different silences apart. `hasSkills`
+  // still gates the fit — with no skill evidence there is genuinely nothing to
+  // compare — but "record some work" is the WRONG next step to hand somebody
+  // who already did: production has two workers with journal entries and no
+  // confirmed skills, and the board was telling them to start writing. Their
+  // real next step is confirming what their entries already describe.
+  const [{ data: docs }, entryCountRes] = await Promise.all([
+    asAny(supabase)
+      .from("worker_documents")
+      .select("id")
+      .eq("worker_id", ctx.workerId),
+    asAny(supabase)
+      .from("journal_entries")
+      .select("id", { count: "exact", head: true })
+      .eq("worker_id", ctx.workerId),
+  ]);
+  const journalEntryCount =
+    typeof entryCountRes?.count === "number" ? entryCountRes.count : 0;
+
+  /**
+   * What kind of work does this person do? Declared, or — failing that —
+   * evidenced by the skills their recorded work produced.
+   *
+   * THIS IS THE HARD GATE THE AUDIT WAS LOOKING FOR. `hasWorkType` used to be
+   * exactly `Boolean(professionSlug)`, and `computeOpportunityFit` opens with
+   * `if (!profile.hasWorkType || !profile.hasSkills) return
+   * "missing_profile_info"`. So a worker who never filled in the profession
+   * field saw EVERY opportunity on the board reported as "missing profile
+   * information" — no matter how much evidence they had. Production worker
+   * 8af3e334 has twelve skills and twelve journal entries and was told,
+   * card after card, that we did not know enough about them.
+   *
+   * That is the dependency the product is not supposed to have: the field is
+   * a useful signal when supplied, never a precondition for being understood.
+   * The evidenced reading is derived from the SAME skills the match engine
+   * already runs on, so this states nothing the board was not already using —
+   * it only stops the completeness layer from vetoing it.
+   *
+   * `hasSkills` is untouched and still gates: with no skill evidence there
+   * genuinely is nothing to compare, and the board says so honestly.
+   */
+  const evidencedProfessionSlug = bestEvidencedProfession({
+    workerSkillSlugs: ctx.subject.skills.map((s) => s.uri),
+    declaredProfessionSlug: ctx.subject.professionSlug ?? null,
+  });
 
   const readiness: WorkerReadiness = {
-    hasWorkType: Boolean(ctx.subject.professionSlug),
+    hasWorkType: Boolean(ctx.subject.professionSlug || evidencedProfessionSlug),
     hasSkills: ctx.skillRowCount > 0,
+    hasRecordedWork: journalEntryCount > 0,
     countries: ctx.worker.current_location_country
       ? [ctx.worker.current_location_country]
       : [],
@@ -174,6 +226,10 @@ export async function loadWorkerOpportunities(
     documentsCount: docs?.length ?? 0,
     availabilityStatus: ctx.worker.availability_status,
     professionSlug: ctx.subject.professionSlug ?? null,
+    // What their WORK says, when they never said it themselves — computed
+    // once above and reused, so the readiness gate and the market panel can
+    // never disagree about which occupation this person is.
+    evidencedProfessionSlug,
   };
 
   // Own interest map (empty + unavailable until the owner-gated table exists).

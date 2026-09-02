@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
+import { getGovernedOrganizations } from "@/lib/company/managed-organizations";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
   listInvitationsForMe,
@@ -66,11 +68,14 @@ export default async function NetworkPage({
      *  vocabularies, validated inside each section — never rendered raw). */
     rev?: string;
     dec?: string;
+    /** Which administration area the reader explicitly opened. Absent on the
+     *  default screen, which is the whole point — see ADMIN_AREAS below. */
+    area?: string;
   }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, wf, req, reqStatus, reqType, rev, dec } =
+  const { q, type, org, project, wf, req, reqStatus, reqType, rev, dec, area } =
     await searchParams;
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
@@ -87,6 +92,48 @@ export default async function NetworkPage({
       : {}),
   };
 
+  /**
+   * ADMINISTRATION IS OPENED, NOT SERVED.
+   *
+   * "Ryšiai" means relationships, and the reader comes here to answer four
+   * questions: who am I connected to, what relationship do we have, is
+   * something happening, what can I do about it. Underneath those answers the
+   * page also rendered — unconditionally, for everyone — approval templates,
+   * multi-stage workflow configuration, default-workflow installation, the
+   * employee-request register, leave limits, development conversations and
+   * management decisions. Owner audit, verbatim: "unacceptable information
+   * architecture".
+   *
+   * The cost was not only cognitive. Those four sections issue their own
+   * server reads on every visit — ApprovalsSection three, RequestsSection
+   * four PLUS one leave-policy query per member organization (an N+1),
+   * DevelopmentReviewsSection one, ManagementDecisionsSection one — so a
+   * person who only wanted to see who invited them paid for the entire
+   * governance stack. Collapsing them behind a `<details>` would have hidden
+   * the clutter and kept every query, which is the wrong half of the fix.
+   *
+   * Gating on an explicit `?area=` does both: the default screen neither
+   * renders nor FETCHES administration, and each area is one click away with
+   * nothing moved, renamed or deleted. No new route, no new nav entry — the
+   * same "expanded inside an existing surface" rule these sections already
+   * shipped under.
+   *
+   * An outcome notice re-opens its own area: a form inside approvals redirects
+   * back to `?wf=…`, and the reader must land on the section that just
+   * answered them, not on a screen that looks like nothing happened.
+   */
+  const ADMIN_AREAS = ["approvals", "requests", "reviews", "decisions"] as const;
+  type AdminArea = (typeof ADMIN_AREAS)[number];
+  const requestedArea = ADMIN_AREAS.includes(area as AdminArea)
+    ? (area as AdminArea)
+    : null;
+  const openArea: AdminArea | null =
+    requestedArea ??
+    (workflowNotice ? "approvals" : null) ??
+    (requestNotice ? "requests" : null) ??
+    (rev ? "reviews" : null) ??
+    (dec ? "decisions" : null);
+
   // W7 marketplaceHub reconciliation: the three strings the W7-S4 move
   // carried here were the LAST live keys of the `marketplaceHub` namespace —
   // a misnomer since the marketplace hub surface itself was removed. The
@@ -100,8 +147,145 @@ export default async function NetworkPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/network`);
 
+  // The organization list is the ONE read both screens need: the relationship
+  // screen lists them, and the two org-scoped administration sections are
+  // parameterised by them. Everything else belongs to exactly one screen and
+  // is fetched only by the screen that renders it — an administration area
+  // must not pay for the relationship reads, and the relationship screen must
+  // not pay for the governance stack (which is the regression this whole
+  // change exists to remove).
+  // Approvals additionally needs the GOVERNED set (owner OR admin
+  // membership — the exact authority the engine's RPCs re-check), because
+  // gating that panel on ownership alone hid it from admin members the
+  // server would have accepted. Read ONLY when the approvals area is open —
+  // the relationship screen must not pay for the governance stack.
+  const [orgsResult, governedOrganizations] = await Promise.all([
+    getOwnedOrganizations(),
+    openArea === "approvals" ? getGovernedOrganizations() : Promise.resolve([]),
+  ]);
+  /**
+   * ONE LABEL, RESOLVED ONCE, FOR EVERY CONSUMER OF THIS LIST.
+   *
+   * `getOwnedOrganizations` reports a missing name as the EMPTY STRING (it
+   * used to substitute a literal "—", which is where the dash rows in the
+   * switcher came from). That is right for a data module, but every surface
+   * downstream renders this array directly — the company list here, and the
+   * approvals and requests sections, which put the name in a select option, a
+   * "mark overdue — {org}" button and a per-template suffix. Passing "" down
+   * would turn those into a blank option and a trailing dash: a different
+   * defect, not a fixed one.
+   *
+   * So the honest label is applied HERE, once, where the translator is in
+   * scope. It also matters for a reason that is not cosmetic: the owner's
+   * account owns TWO unnamed organizations, each with its own correct set of
+   * eight default approval templates — which is exactly why that section
+   * appeared to show "duplicated approval templates". The rows were never
+   * duplicates; the two owners of them were indistinguishable.
+   */
+  const organizations =
+    orgsResult.kind === "ok"
+      ? orgsResult.organizations.map((o, i, all) => ({
+          id: o.id,
+          name:
+            o.name ||
+            // Numbered only when more than one is unnamed, so a single
+            // nameless company reads plainly. Same rule as the workspace
+            // switcher (workspaceDisplayLabels).
+            (all.filter((x) => !x.name).length > 1
+              ? `${t("organizations.unnamed")} ${all.filter((x, j) => !x.name && j <= i).length}`
+              : t("organizations.unnamed")),
+        }))
+      : [];
+
+  /**
+   * The approvals area is parameterised by the orgs the caller GOVERNS, not
+   * only the orgs they OWN: the engine's authoring/install/mark-overdue RPCs
+   * authorize owner OR admin membership (`membership_actor_role_v1`), so an
+   * admin member must see the same panel the server would already act for.
+   * Owners keep exactly the labeled list they had; governed extras append
+   * with the same honest unnamed fallback.
+   */
+  const approvalOrganizations = [
+    ...organizations,
+    ...governedOrganizations
+      .filter((g) => !organizations.some((o) => o.id === g.id))
+      .map((g) => ({ id: g.id, name: g.name || t("organizations.unnamed") })),
+  ];
+
+  /**
+   * What each organization has DECLARED it does, for the invite panel's
+   * capacity control: an organization that has never said it provides
+   * education must be told so before it tries to invite a learner, rather than
+   * after `create_invitation_v1` refuses the send.
+   *
+   * Read under the caller's OWN RLS (`organization_roles_select` already fences
+   * it to owners/members) and per organization the caller already owns, so this
+   * discloses nothing the page did not already show. A failed read returns an
+   * empty list, which fails CLOSED — the capacity shows as unavailable rather
+   * than being silently offered.
+   */
+  const organizationCapabilities = await Promise.all(
+    organizations.map((o) => readOrganizationCapabilities(o.id)),
+  );
+  const organizationsWithCapabilities = organizations.map((o, i) => ({
+    ...o,
+    capabilities: organizationCapabilities[i] ?? [],
+  }));
+
+  // The strip reads each area its OWN title, from the namespace that section
+  // already owns — so a link can never drift from the heading it opens, and
+  // no fifth copy of these four names enters the catalogue.
+  const [tApprovals, tRequests, tReviews, tDecisions] = await Promise.all([
+    getTranslations("approvals"),
+    getTranslations("requests"),
+    getTranslations("developmentReviews"),
+    getTranslations("managementDecisions"),
+  ]);
+  const adminAreaLabels: Record<AdminArea, string> = {
+    approvals: tApprovals("title"),
+    requests: tRequests("title"),
+    reviews: tReviews("title"),
+    decisions: tDecisions("title"),
+  };
+
+  if (openArea) {
+    return (
+      <div className="flex flex-col gap-6" data-testid="network-page">
+        <header className="flex flex-col gap-1">
+          <Link
+            href={"/dashboard/network" as "/dashboard"}
+            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-brand-orange transition-colors hover:text-text-primary"
+            data-testid="network-admin-back"
+          >
+            ← {t("admin.back")}
+          </Link>
+        </header>
+        {openArea === "approvals" && (
+          <ApprovalsSection
+            locale={locale}
+            notice={workflowNotice}
+            organizations={approvalOrganizations}
+          />
+        )}
+        {openArea === "requests" && (
+          <RequestsSection
+            locale={locale}
+            notice={requestNotice}
+            organizations={organizations}
+            filter={requestsFilter}
+          />
+        )}
+        {openArea === "reviews" && (
+          <DevelopmentReviewsSection locale={locale} notice={rev} />
+        )}
+        {openArea === "decisions" && (
+          <ManagementDecisionsSection locale={locale} notice={dec} />
+        )}
+      </div>
+    );
+  }
+
   const [
-    orgsResult,
     projects,
     engagements,
     sent,
@@ -111,7 +295,6 @@ export default async function NetworkPage({
     // move must not re-introduce the waterfall W7-S3 removed from the profile.
     employerOwnerProfileId,
   ] = await Promise.all([
-    getOwnedOrganizations(),
     listManagedProjects(),
     listMyEngagements(),
     listMySentInvitations(),
@@ -119,10 +302,6 @@ export default async function NetworkPage({
     listMyTeamEnquiries(),
     getEmployerOwnerProfileId(),
   ]);
-  const organizations =
-    orgsResult.kind === "ok"
-      ? orgsResult.organizations.map((o) => ({ id: o.id, name: o.name }))
-      : [];
   const search = q ? await searchPeopleAndCompanies(q) : null;
 
   return (
@@ -263,7 +442,7 @@ export default async function NetworkPage({
       {/* The canonical Pakviesti action. */}
       <InvitePanel
         locale={locale}
-        organizations={organizations}
+        organizations={organizationsWithCapabilities}
         projects={projects.map((p) => ({ id: p.id, title: p.title }))}
         defaultType={type}
         defaultOrganizationId={org}
@@ -328,6 +507,10 @@ export default async function NetworkPage({
                     className="flex min-h-11 items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
                     data-testid={`network-org-${o.id}`}
                   >
+                    {/* Already resolved above — an organization with neither
+                        display_name nor legal_name carries the localized
+                        fallback by the time it reaches any renderer, so this
+                        row can never be the bare "—" it used to be. */}
                     {o.name}
                   </Link>
                 </li>
@@ -435,41 +618,34 @@ export default async function NetworkPage({
         )}
       </section>
 
-      {/* Approvals area (Workflow & Approval Engine v1) — org-relationship
-          governance, expanded INSIDE this declared surface (no new route;
-          the reports?journalWindow constitution precedent). Owns its own
-          `approvals` namespace and degrades honestly until the human-gated
-          engine migration is applied. */}
-      <ApprovalsSection
-        locale={locale}
-        notice={workflowNotice}
-        organizations={organizations}
-      />
-
-      {/* Typed employee requests (v1) — the register half of the same
-          engine: filing, my requests + timeline, the org register and the
-          leave-number configuration. Deciding stays in the approvals inbox
-          above. Expanded INSIDE this declared surface (no new route; the
-          approvals-section precedent). */}
-      <RequestsSection
-        locale={locale}
-        notice={requestNotice}
-        organizations={organizations}
-        filter={requestsFilter}
-      />
-
-      {/* Development & performance reviews (v1) — the recorded development
-          conversation between two named people, with evidence links to real
-          entries. No rating, no score, no ranking exists on this surface or
-          in its schema. Expanded INSIDE this declared surface (no new
-          route; the approvals-section precedent). */}
-      <DevelopmentReviewsSection locale={locale} notice={rev} />
-
-      {/* Management decisions (v1) — a thin register over the SAME workflow
-          engine the approvals section above serves: the engine's
-          multi-approver step IS the vote, cast up there. Nothing here
-          tallies or decides. */}
-      <ManagementDecisionsSection locale={locale} notice={dec} />
+      {/* ADMINISTRATION — four links where four full sections used to be.
+          Approvals (Workflow & Approval Engine v1), typed employee requests
+          and their leave limits, development conversations and the management
+          decision register are all still here, unchanged and unmoved; they
+          now open on request instead of unrolling under every visit. Each
+          keeps its own namespace, its own notices and its own honest
+          degrade-when-unapplied behaviour — the only thing that changed is
+          WHEN it renders. This is one compact strip, not four new nav
+          entries. */}
+      <section className="flex flex-col gap-2" data-testid="network-admin">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+          {t("admin.title")}
+        </h2>
+        <p className="text-xs text-text-muted">{t("admin.hint")}</p>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {ADMIN_AREAS.map((a) => (
+            <li key={a}>
+              <Link
+                href={`/dashboard/network?area=${a}` as "/dashboard"}
+                className="flex min-h-11 items-center rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+                data-testid={`network-admin-${a}`}
+              >
+                {adminAreaLabels[a]}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

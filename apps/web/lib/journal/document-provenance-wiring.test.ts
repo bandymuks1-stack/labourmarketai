@@ -11,9 +11,21 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { documentProvenanceMetrics } from "./document-journal-draft-model";
 
-const ACTIONS = readFileSync(join(__dirname, "actions.ts"), "utf8");
+// The canonical write moved from actions.ts into the transport-neutral
+// journal-write-core.ts (owner-approved extraction, 2026-08-29 §6). The
+// provenance contract these pins protect lives with the write — the guard
+// follows the implementation, and a second copy appearing back in actions.ts
+// would be caught by the not-duplicated pin below.
+const ACTIONS = readFileSync(join(__dirname, "journal-write-core.ts"), "utf8");
+const ACTIONS_WRAPPER = readFileSync(join(__dirname, "actions.ts"), "utf8");
 
 describe("createJournalEntry — document provenance (C2a)", () => {
+  it("the write was moved, not duplicated — actions.ts holds no second provenance path", () => {
+    expect(ACTIONS_WRAPPER).not.toContain(
+      "documentProvenanceMetrics(sourceDocumentFileId)",
+    );
+    expect(ACTIONS_WRAPPER).toContain("createJournalEntryCore");
+  });
   it("reads the source document id from the form", () => {
     expect(ACTIONS).toContain('formData.get("source_document_file_id")');
   });

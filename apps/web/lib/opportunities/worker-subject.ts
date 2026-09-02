@@ -5,7 +5,14 @@ import {
   getPrimaryProfessionSlug,
   getWorkerCoreRow,
   getWorkerSkillRows,
+  readWorkerCoreRow,
+  readWorkerProfessionRows,
+  readWorkerSkillRows,
+  type WorkerCoreRow,
+  type WorkerSkillRow,
 } from "@/lib/data/worker-core";
+import type { DomainCaller } from "@/lib/domain/caller";
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
   sourceToEvidence,
   type EvidenceTier,
@@ -44,23 +51,18 @@ export interface OwnWorkerContext {
   };
 }
 
-export async function buildOwnWorkerContext(
+/** Shared row fetches that already run on an explicit client — used by both
+ *  transports below. */
+async function readSubjectSideRows(
   supabase: SupabaseClient,
   profileId: string,
-): Promise<OwnWorkerContext | null> {
-  // Request-cached core row (self-resolving via the session). Every caller
-  // passes the signed-in user's own profile id; if a future caller ever
-  // passed a different id, the mismatch degrades to an honest null instead
-  // of silently returning someone else's context.
-  const worker = await getWorkerCoreRow();
-  if (!worker || (worker.profile_id !== null && worker.profile_id !== profileId)) {
-    return null;
-  }
-  const workerId = worker.id;
-
-  const [skillRows, professionSlug, prefLocRes, langsRes] = await Promise.all([
-    getWorkerSkillRows(),
-    getPrimaryProfessionSlug(),
+  workerId: string,
+): Promise<{
+  prefLocRes: { data: unknown };
+  langsRes: { data: unknown };
+  practiceRes: { data: unknown };
+}> {
+  const [prefLocRes, langsRes, practiceRes] = await Promise.all([
     // OWN preferred locations (own-rows RLS, §20 — never readable by
     // employers). City feeds the worker-side city tier of the match engine;
     // the table may not exist in every environment → graceful null.
@@ -85,7 +87,101 @@ export async function buildOwnWorkerContext(
         (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
         () => ({ data: null }),
       ),
+    // OWN practice / volunteer placements (engagement_contexts, own-rows RLS).
+    // No status filter — an ENDED placement is a COMPLETED one, and it is the
+    // same call `work-history-model.ts` makes for the CV. Feeds the labelled,
+    // additive practice reason of the match engine.
+    asAny(supabase)
+      .from("engagement_contexts")
+      .select("relationship_slug")
+      .eq("profile_id", profileId)
+      .in("relationship_slug", [...PRACTICE_RELATIONSHIPS])
+      .then(
+        (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
+        () => ({ data: null }),
+      ),
   ]);
+  return { prefLocRes, langsRes, practiceRes };
+}
+
+/**
+ * G4 bridge: the SAME subject builder as an explicit caller — the
+ * transport-neutral core under `buildOwnWorkerContext`. Row reads go through
+ * the caller-scoped worker-core functions (no request-cache, no session);
+ * the ASSEMBLY below is shared verbatim with the cookie path, so the two
+ * transports can never compute different subjects from the same rows.
+ */
+export async function buildOwnWorkerContextCore(
+  caller: DomainCaller,
+): Promise<OwnWorkerContext | null> {
+  const workerRead = await readWorkerCoreRow(caller);
+  const worker = workerRead.ok ? workerRead.value : null;
+  if (!worker || (worker.profile_id !== null && worker.profile_id !== caller.userId)) {
+    return null;
+  }
+  const [skillsRead, professionsRead, side] = await Promise.all([
+    readWorkerSkillRows(caller, worker.id),
+    readWorkerProfessionRows(caller, worker.id),
+    readSubjectSideRows(caller.supabase, caller.userId, worker.id),
+  ]);
+  const professionRows = professionsRead.ok ? professionsRead.value : [];
+  return assembleOwnWorkerContext({
+    worker,
+    skillRows: skillsRead.ok ? skillsRead.value : [],
+    professionSlug:
+      professionRows.find((r) => r.is_primary === true)?.professions?.slug ?? null,
+    prefLocRes: side.prefLocRes,
+    langsRes: side.langsRes,
+    practiceRes: side.practiceRes,
+  });
+}
+
+export async function buildOwnWorkerContext(
+  supabase: SupabaseClient,
+  profileId: string,
+): Promise<OwnWorkerContext | null> {
+  // Request-cached core row (self-resolving via the session). Every caller
+  // passes the signed-in user's own profile id; if a future caller ever
+  // passed a different id, the mismatch degrades to an honest null instead
+  // of silently returning someone else's context.
+  const worker = await getWorkerCoreRow();
+  if (!worker || (worker.profile_id !== null && worker.profile_id !== profileId)) {
+    return null;
+  }
+  const workerId = worker.id;
+
+  const [skillRows, professionSlug, side] = await Promise.all([
+    getWorkerSkillRows(),
+    getPrimaryProfessionSlug(),
+    readSubjectSideRows(supabase, profileId, workerId),
+  ]);
+  return assembleOwnWorkerContext({
+    worker,
+    skillRows,
+    professionSlug,
+    prefLocRes: side.prefLocRes,
+    langsRes: side.langsRes,
+    practiceRes: side.practiceRes,
+  });
+}
+
+/** ONE assembly for both transports — pure over the fetched rows. */
+function assembleOwnWorkerContext({
+  worker,
+  skillRows,
+  professionSlug,
+  prefLocRes,
+  langsRes,
+  practiceRes,
+}: {
+  worker: WorkerCoreRow;
+  skillRows: readonly WorkerSkillRow[];
+  professionSlug: string | null;
+  prefLocRes: { data: unknown };
+  langsRes: { data: unknown };
+  practiceRes: { data: unknown };
+}): OwnWorkerContext {
+  const workerId = worker.id;
 
   const tierRank: Record<EvidenceTier, number> = {
     self_declared: 0,
@@ -170,6 +266,12 @@ export async function buildOwnWorkerContext(
       nightShiftsOk: prefs?.night_shifts_ok ?? null,
       weekendShiftsOk: prefs?.weekend_shifts_ok ?? null,
       overtimeOk: prefs?.overtime_ok ?? null,
+      // Practice placements — LABELLED and ADDITIVE in the engine (it can only
+      // append a reason). null = the read did not land, never "has none".
+      practiceEngagements:
+        practiceRes?.data === null || practiceRes?.data === undefined
+          ? null
+          : (practiceRes.data as unknown[]).length,
     },
   };
 }

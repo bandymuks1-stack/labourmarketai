@@ -35,8 +35,15 @@ const ROLLBACK = resolve(
 );
 const MODULE = resolve(ROOT, "apps/web/lib/journal/work-time.ts");
 
-const sql = readFileSync(CANONICAL, "utf8");
-const ts = readFileSync(MODULE, "utf8");
+/** Line endings normalised: the signature assertion below spans newlines
+ *  (`"p_worker_id uuid,\n  p_organization_id uuid,…"`), and these files are
+ *  checked out CRLF on Windows — so the literal never matched there and this
+ *  guard failed for every Windows developer while CI (Linux) stayed green.
+ *  The assertion is about the SQL, never about the line-ending style. */
+const readText = (p: string) => readFileSync(p, "utf8").replace(/\r\n/g, "\n");
+
+const sql = readText(CANONICAL);
+const ts = readText(MODULE);
 
 /** The migration WITHOUT its `--` comment lines, so an assertion about what
  *  the migration DOES can never be satisfied or broken by prose about it. */

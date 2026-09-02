@@ -143,10 +143,19 @@ function withTimeout<T>(work: Promise<T>, label: string): Promise<T> {
 
 async function extractPdf(buffer: ArrayBuffer): Promise<string> {
   // unpdf bundles pdf.js and runs in the Node server runtime with no native
-  // binaries. mergePages joins all pages into one text blob.
+  // binaries.
+  //
+  // `mergePages: true` is deliberately NOT used. It does not merely join the
+  // pages — it also runs a whitespace collapse over the joined result, which
+  // destroys every line break pdf.js produced. Downstream, `parseCvSections`
+  // splits on newlines, so with the merge flag a PDF CV arrived as ONE line
+  // and no work-history row could ever be proposed from it (measured: a
+  // four-line CV came back as a single line, producing zero jobs and one
+  // nonsense education row). Asking for the per-page array instead keeps the
+  // line structure, and we join the pages ourselves.
   const { extractText, getDocumentProxy } = await import("unpdf");
   const pdf = await getDocumentProxy(new Uint8Array(buffer));
-  const { text } = await extractText(pdf, { mergePages: true });
+  const { text } = await extractText(pdf);
   return Array.isArray(text) ? text.join("\n") : text;
 }
 

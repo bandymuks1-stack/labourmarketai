@@ -4,6 +4,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 
 import { createClient } from "@/lib/supabase/server";
+import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { env } from "@/lib/env";
 import { type Role } from "@/lib/auth/actions";
 import { getConversationAction } from "@/lib/conversation/action-registry";
@@ -29,6 +30,7 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { interestStateFingerprint } from "@/lib/opportunities/interest";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
 
@@ -92,21 +94,30 @@ function tokenSecret(): string {
   return createHash("sha256").update(`conversation-confirmation:v1:${material}`).digest("hex");
 }
 
+/**
+ * The roles this dispatch may act on.
+ *
+ * The `worker` default is for a read that ANSWERED with no rows — a brand-new
+ * account must still be able to act. It is NOT for a read that failed: an
+ * unreadable role table used to be handed to `authorizeDispatch` as the worker
+ * role, so a database hiccup GRANTED worker-tier conversation actions (#1314).
+ * `readActiveProfileRoles` retries once and then throws, and the throw is
+ * deliberately not caught here — an unknown role state grants nothing and is
+ * never passed downstream disguised as an answer.
+ */
 async function heldRolesOf(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
 ): Promise<Set<Role>> {
-  try {
-    const { data } = await supabase
+  const rows = await readActiveProfileRoles(() =>
+    supabase
       .from("profile_roles")
       .select("role")
       .eq("profile_id", userId)
-      .eq("is_active", true);
-    const set = new Set<Role>((data ?? []).map((r) => r.role as Role));
-    return set.size > 0 ? set : new Set<Role>(["worker"]);
-  } catch {
-    return new Set<Role>(["worker"]);
-  }
+      .eq("is_active", true),
+  );
+  const set = new Set<Role>(rows.map((r) => r.role as Role));
+  return set.size > 0 ? set : new Set<Role>(["worker"]);
 }
 
 /** Opaque state fingerprint bound into a confirmation token so a card that was
@@ -127,19 +138,13 @@ async function stateFingerprint(
     return `booking:${(data?.status as string) ?? "missing"}`;
   }
   if (actionId === "worker.express-interest") {
-    const { data: worker } = await supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", userId)
-      .maybeSingle();
-    if (!worker?.id) return "interest:no-worker";
-    const { data } = await supabase
-      .from("demand_interest_signals")
-      .select("status")
-      .eq("worker_id", worker.id)
-      .eq("request_id", String(input.requestId))
-      .maybeSingle();
-    return `interest:${(data?.status as string) ?? "none"}`;
+    // G4 tail wagon 1: THE shared fingerprint (lib/opportunities/interest) —
+    // the capability draft→confirm flow binds its tokens to the same fact,
+    // so the two transports can never disagree about staleness.
+    return interestStateFingerprint(
+      { supabase, userId },
+      String(input.requestId),
+    );
   }
   if (actionId === "engagement.end") {
     /**

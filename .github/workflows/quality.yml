@@ -30,14 +30,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # The Product Gate diffs the PR against its base, so the base ref must
           # exist locally. The default shallow checkout has no origin/main.
           fetch-depth: 0
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 10.33.2
 
@@ -47,8 +47,20 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      # `--filter=!mobile` keeps the REQUIRED gate's cost flat.
+      #
+      # apps/mobile (Expo / React Native) pulls roughly a thousand packages
+      # that nothing in this workflow runs. Installing them on every web PR
+      # would add minutes to the one check that gates every merge, for no
+      # coverage: `pnpm -F web ...` never touches them, and the client-core
+      # guard below reads its files off the checkout rather than through a
+      # dependency edge.
+      #
+      # The mobile side is built and typechecked by .github/workflows/mobile.yml
+      # instead. This filter fails in the SAFE direction — if the exclusion ever
+      # stops matching, the install is merely slower, never incomplete.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --filter=!mobile
 
       - name: Typecheck
         run: pnpm -F web typecheck

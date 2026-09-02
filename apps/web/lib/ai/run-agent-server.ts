@@ -10,14 +10,22 @@
  *     persisted ai_runs counter is queried best-effort and fed into the
  *     daily-run-budget guard (over budget → honest `budget_exceeded` block).
  *     A failed count proceeds and logs — never a silent skip of a real count.
- *   - AUDIT PERSISTENCE: the routing audit record of every LIVE run is
- *     appended best-effort to the ai_runs table (runtime/audit-store.ts).
- *     Mock/disabled runs are never persisted (no synthetic rows in the audit
- *     trail). Persistence failures never affect the run outcome.
+ *   - AUDIT PERSISTENCE: the routing audit record of every run that really
+ *     happened is appended best-effort to the ai_runs table
+ *     (runtime/audit-store.ts) — both the runs a vendor answered and the
+ *     VENDORLESS ones (runtime disabled, deterministic tier, pre-dispatch
+ *     block), which are the zero-cost resolutions the cost doctrine wants
+ *     counted first. MOCK runs are never persisted: their output is fabricated,
+ *     and a synthetic row produces a confident wrong number at month end.
+ *     Persistence failures never affect the run outcome.
+ *   - COST LEDGER: `usage_cost_events` stays VENDOR-ONLY. It records money,
+ *     and a route that engaged no vendor has none to record.
  */
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { getAiRuntimeConfig, getAiProviderStates } from "./runtime/config";
 import {
+  auditDispositionFor,
   countAiRunsTodayBestEffort,
   persistAiRunAudit,
 } from "./runtime/audit-store";
@@ -51,11 +59,32 @@ export async function runAiAgent<T = unknown>(
     providerStates: opts.providerStates ?? getAiProviderStates(),
   });
 
-  // Append-only audit trail for real (live) runs — never blocks the outcome.
-  if (cfg.state === "live" && outcome.routing) {
+  // Append-only audit trail for REAL runs — never blocks the outcome.
+  //
+  // "Real" used to mean `cfg.state === "live"`, i.e. "a vendor answered", and
+  // every other finished route was dropped. On a stack with no provider
+  // configured that is every route there is: the surfaces are reachable, people
+  // reach them, the router resolves a route, and `ai_runs` stayed empty — which
+  // reads as "nobody wants AI" when it actually means "we never wrote down that
+  // they did". Zero-vendor resolutions are the ones the cost doctrine wants
+  // counted FIRST, so they are now recorded as what they are.
+  //
+  // The synthetic case is unchanged and non-negotiable: mock output is
+  // fabricated and never becomes a row.
+  const disposition = auditDispositionFor(cfg.state);
+  if (disposition !== "synthetic" && outcome.routing) {
+    // ONE deterministic id per run, shared by both ledger rows as their PK.
+    // That makes each append idempotent — nothing retries today, but a future
+    // retry layer re-attempting a persist can only ever land ONE ai_runs row
+    // and ONE usage_cost_events row for this run (duplicate key = already
+    // persisted, never double-counted spend). The shared value also links the
+    // audit row to its cost row without a new column.
+    const runId = randomUUID();
     const persisted = await persistAiRunAudit(outcome.routing, {
       profileId: opts.profileId ?? null,
       requestContext: agent,
+      disposition,
+      runId,
     });
     // W14 Pilot Analytics slice v1: the same live run also lands as ONE
     // `usage_cost_events` row (event_type='usage', EUR cents) — the canonical
@@ -68,18 +97,28 @@ export async function runAiAgent<T = unknown>(
     // or in a personal workspace this stays an honest null — a personal
     // run's cost is never assigned to an employer, and organization A's
     // request can only ever carry A (B is unreachable from A's context).
-    let organizationId: string | null = null;
-    try {
-      const attribution = await resolveAnalyticsAttribution();
-      organizationId = attribution.organizationId;
-    } catch {
-      // no request context — honest null
+    //
+    // THE COST LEDGER STAYS VENDOR-ONLY. `usage_cost_events` is the money
+    // ledger, and its own CHECKs forbid a fabricated zero. A vendorless route
+    // engaged no vendor, so it has no cost to record — not 0, not an estimate
+    // for a model that never ran. It belongs in the audit trail above, which
+    // says what happened, and NOT here, which says what it cost.
+    let costPersisted = true;
+    if (disposition === "vendor_run") {
+      let organizationId: string | null = null;
+      try {
+        const attribution = await resolveAnalyticsAttribution();
+        organizationId = attribution.organizationId;
+      } catch {
+        // no request context — honest null
+      }
+      costPersisted = await persistUsageCostEvent(outcome.routing, {
+        profileId: opts.profileId ?? null,
+        organizationId,
+        requestContext: agent,
+        eventId: runId,
+      });
     }
-    const costPersisted = await persistUsageCostEvent(outcome.routing, {
-      profileId: opts.profileId ?? null,
-      organizationId,
-      requestContext: agent,
-    });
     if (!persisted) {
       // W14 audit P0-2. `persistAiRunAudit` reports whether the row landed,
       // and this boolean used to be DISCARDED — so a live run whose cost was

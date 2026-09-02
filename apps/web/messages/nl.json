@@ -461,7 +461,10 @@
       "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
       "pending_absence_reviews": "Verdwijnt zodra u de aanvraag op de pagina Verlof & afwezigheid goedkeurt of afwijst.",
       "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
-    }
+    },
+    "storedTitle": "Opgeslagen meldingen",
+    "storedIntro": "Vastgelegde gebeurtenissen over u — elke rij opent de bijbehorende pagina. De leesstatus beheert u via de bel.",
+    "storedEmpty": "Nog geen opgeslagen meldingen."
   },
   "commandFinder": {
     "title": "Snel zoeken",
@@ -719,6 +722,10 @@
       "needsClear": "{n} aanvragen werden duidelijk genoeg voor betere matching.",
       "projectsClarified": "{n} projecten werden verduidelijkt tot een top-shortlist.",
       "topTrades": "Meest gevraagd deze week: {trades}."
+    },
+    "carryNote": {
+      "no_company": "Uw tekst is niet opgeslagen: zonder bedrijfswerkruimte hoort een concept nergens bij. Het behoefteformulier opent leeg — u kunt het bedrijf daar aanmaken.",
+      "failed": "Uw tekst kon niet worden opgeslagen, dus het behoefteformulier opent leeg. U moet de omschrijving opnieuw invoeren."
     }
   },
   "quickNav": {
@@ -872,6 +879,15 @@
     }
   },
   "marketMap": {
+    "liveDemand": {
+      "title": "Echte marktvraag",
+      "lead": "Open behoeften uit de echte vraag op dit platform — waar nu om werk wordt gevraagd."
+    },
+    "vacancyVolume": {
+      "title": "Volume openbare vacatures",
+      "scope": "{count} geïmporteerde openbare vacatures voor {profession}. Huidige brondekking: {countries}.",
+      "window": "Stadsvolumes worden geteld over de nieuwste {window} advertenties, niet over het hele bestand."
+    },
     "entities": {
       "title": "Drie dingen op de kaart",
       "intro": "De kaart toont drie verschillende dingen: mensen, werkgebieden van bedrijven en projectlocaties. Elk volgt zijn eigen zichtbaarheidsregel en ziet er anders uit.",
@@ -1463,7 +1479,13 @@
       "urgency": "Wanneer nodig",
       "notes": "Notities"
     },
-    "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag"
+    "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag",
+    "syntheticTitle": {
+      "hiringWorkers": "Medewerkers gezocht",
+      "agencyPartnership": "Samenwerkingsvoorstel"
+    },
+    "interestWaiting": "{count, plural, one {# persoon wacht op een reactie} other {# personen wachten op een reactie}}",
+    "untitledInquiry": "Naamloze aanvraag"
   },
   "journey": {
     "eyebrow": "Hoe het werkt",
@@ -2795,7 +2817,8 @@
         "openDemands": "Open behoeften",
         "interestActive": "Interesse: nieuw",
         "interestReviewed": "Interesse: beoordeeld",
-        "interestContacted": "Interesse: gecontacteerd"
+        "interestContacted": "Interesse: gecontacteerd",
+        "interestNotified": "Interesse: gemeld"
       },
       "status": {
         "green_scoped": "groen afgebakend",
@@ -3321,6 +3344,10 @@
       "legendTarget": "Marktrichtingen",
       "legendContext": "Rest van de wereld",
       "aria": "Werkrichtingen — wereldkaart"
+    },
+    "origin": {
+      "live": "Live gegevens",
+      "preview": "Voorbeeld"
     }
   },
   "company": {
@@ -3397,6 +3424,10 @@
     }
   },
   "auth": {
+    "social": {
+      "continueWithLinkedIn": "Doorgaan met LinkedIn",
+      "continueWithFacebook": "Doorgaan met Facebook"
+    },
     "legalNotice": {
       "signup": "Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
       "googleLogin": "Hebt u nog geen account, dan wordt er een aangemaakt wanneer u doorgaat met Google. Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
@@ -3414,8 +3445,12 @@
         "exchange_failed": "Aanmelden is niet gelukt. Probeer het opnieuw — de aanmeldcode werkt één keer en verloopt snel.",
         "no_user": "Je bent aangemeld, maar je account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
-        "unknown": "Kon niet inloggen. Probeer het opnieuw."
-      }
+        "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
+        "unknown": "Kon niet inloggen. Probeer het opnieuw.",
+        "link_expired": "Deze bevestigingslink is verlopen of al gebruikt. Heb je je e-mailadres al bevestigd, log dan gewoon in. Vraag anders hieronder een nieuwe link aan.",
+        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan."
+      },
+      "emailNotConfirmed": "Je e-mailadres is nog niet bevestigd. Open de bevestigingslink die we je stuurden, of vraag hieronder een nieuwe aan."
     },
     "signup": {
       "headline": "Maak je account aan",
@@ -3451,7 +3486,10 @@
       "error_password_number": "Wachtwoord moet een cijfer bevatten.",
       "error_password_special": "Wachtwoord moet een speciaal teken bevatten.",
       "check_email_title": "Bevestig je e-mail",
-      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien."
+      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien.",
+      "resend_label": "Link opnieuw sturen",
+      "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
+      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
     },
     "login": {
       "headline": "Inloggen",
@@ -3475,7 +3513,9 @@
       "error_invalid_credentials": "Ongeldig e-mailadres of wachtwoord.",
       "google_hint": "Geregistreerd met Google? Dan heb je geen wachtwoord — gebruik \"Doorgaan met Google\" hierboven.",
       "preview_host_notice": "Je bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon.",
-      "google_recovery_label": "Inloggen met Google — reserveroute (tijdelijk, via een externe inlogpagina)"
+      "google_recovery_label": "Inloggen met Google — reserveroute (tijdelijk, via een externe inlogpagina)",
+      "resend_confirmation": "Nieuwe bevestigingslink sturen",
+      "resend_sent": "Een nieuwe bevestigingslink is onderweg naar {email}."
     },
     "forgotPassword": {
       "headline": "Wachtwoord vergeten?",
@@ -4047,6 +4087,25 @@
             "note": "Je herstel-e-mailadres: {email}. Zorg dat je er toegang toe houdt."
           },
           "comingLater": "Later zie je waar je bent ingelogd, kun je sessies beëindigen en krijg je back-upcodes."
+        },
+        "connectedApps": {
+          "title": "Verbonden apps",
+          "intro": "Externe toepassingen en assistenten die je hebt toegestaan namens jou te handelen op LabourMarket.ai. Elke app ziet alleen wat jij ziet en je kunt hem altijd loskoppelen.",
+          "empty": "Er is geen app verbonden met je account.",
+          "unavailable": "De lijst met verbonden apps kon nu niet worden geladen. Probeer het zo opnieuw.",
+          "unnamed": "Naamloze toepassing",
+          "grantedAt": "Verbonden op {date}",
+          "grantedUnknown": "Verbindingsdatum niet vastgelegd",
+          "scopesLabel": "Rechten",
+          "disconnect": "Loskoppelen",
+          "confirmTitle": "{name} loskoppelen?",
+          "confirmBody": "De toepassing verliest direct de toegang. Ze moet opnieuw om je toestemming vragen voordat ze namens jou kan handelen.",
+          "confirmYes": "Ja, loskoppelen",
+          "cancel": "Verbonden houden",
+          "feedbackRevoked": "Losgekoppeld. De toepassing heeft geen toegang meer tot je account.",
+          "feedbackError": "De toepassing kon niet worden losgekoppeld. Laad de pagina opnieuw en probeer het nog eens.",
+          "note": "Uitloggen bij LabourMarket.ai koppelt apps niet los. Hier loskoppelen is de enige manier om de toegang van een app te beëindigen.",
+          "pending": "Loskoppelen…"
         }
       },
       "comingSoon": {
@@ -4134,7 +4193,11 @@
       "switchRoleCta": "Schakel over naar {role} om te bekijken",
       "markAllRead": "Markeer alles als gelezen",
       "close": "Sluiten",
-      "viewAll": "Alle activiteit bekijken"
+      "viewAll": "Alle activiteit bekijken",
+      "email": {
+        "open": "Openen in LabourMarket.ai:",
+        "manage": "Meldingsinstellingen beheren:"
+      }
     }
   },
   "shared": {
@@ -4709,6 +4772,9 @@
     }
   },
   "pricing": {
+    "checkoutReturn": {
+      "cancelled": "De checkout is geannuleerd — er is niets afgeschreven en er is niets veranderd aan je account."
+    },
     "eyebrow": "Prijzen",
     "title": "Eenvoudige niveaus,",
     "titleAccent": "eerlijk vastgesteld.",
@@ -6996,9 +7062,39 @@
       "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
       "projectAxisLink": "Gereedheidschecklists per project",
       "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
+    },
+    "validity": {
+      "active": "Geldig",
+      "expired": "Verlopen",
+      "revoked": "Ingetrokken",
+      "pending": "Wacht op beoordeling",
+      "rejected": "Afgewezen",
+      "unverified": "Niet geverifieerd",
+      "unknown": "Geldigheid onbekend",
+      "reviewedOn": "Beoordeeld {date}"
     }
   },
   "documentFiles": {
+    "journalDraft": {
+      "action": "Journaalconcept maken",
+      "title": "Van document naar Werkjournaal",
+      "understoodNote": "Hieronder staat de tekst die uit “{filename}” is gelezen. Controleer, bewerk en bevestig — pas dan wordt hij deel van je journaalgeschiedenis.",
+      "detectedSkills": "We herkenden {count} vermeldingen van vaardigheden in de tekst.",
+      "notesLabel": "Tekst van de invoer (uit je document — bewerk vóór het opslaan)",
+      "engagementLabel": "Werkcontext",
+      "save": "Bevestigen en opslaan in journaal",
+      "saving": "Opslaan…",
+      "saved": "Opgeslagen in je Werkjournaal — het brondocument blijft aan deze invoer gekoppeld.",
+      "savedLink": "Journaal openen",
+      "error": "Opslaan mislukt. Er is niets bewaard.",
+      "notFound": "Dit document is niet gevonden tussen je documenten.",
+      "refusedClassified": "Vertrouwelijke documenten worden niet automatisch gelezen — downloaden blijft een gelogde handmatige stap.",
+      "refusedNoOcr": "Foto's worden niet gelezen — tekstherkenning bestaat nog niet.",
+      "refusedType": "Dit bestandstype kan niet als tekst worden gelezen.",
+      "empty": "Geen leesbare tekst gevonden in dit document.",
+      "failed": "Het document kon niet worden gelezen.",
+      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken."
+    },
     "currentVersion": "Versie {n}",
     "download": "Downloaden",
     "noFileYet": "Nog geen bestand geüpload.",
@@ -7196,6 +7292,7 @@
     "generatedAt": "Gegenereerd",
     "notWorker": "CV-export is beschikbaar voor werknemersprofielen — het wordt opgebouwd uit het werkdagboek en bevestigde vaardigheden.",
     "summaryTitle": "Professionele samenvatting",
+    "practiceHistoryTitle": "Stage en vrijwilligerswerk",
     "workHistoryTitle": "Werkervaring",
     "present": "Heden",
     "languagesTitle": "Talen",
@@ -7209,10 +7306,20 @@
     "projectsTitle": "Projecten",
     "projectsHint": "Uit werkregistraties",
     "confirmedByManager": "Bevestigd door een manager",
+    "euFormat": {
+      "notOfficial": "Dit cv volgt de Europass-structuur, zodat Europese werkgevers het in het verwachte formaat kunnen lezen. Het is geen Europass-document dat door de Europese Unie is afgegeven.",
+      "personal": "Persoonlijke gegevens",
+      "workExperience": "Werkervaring",
+      "educationAndTraining": "Opleiding en training",
+      "personalSkills": "Persoonlijke vaardigheden",
+      "jobRelatedSkills": "Vakgerelateerde vaardigheden",
+      "additionalInformation": "Aanvullende informatie"
+    },
     "templates": {
       "label": "Sjabloon",
       "standard": "Standaard",
-      "compact": "Compact"
+      "compact": "Compact",
+      "eu": "EU-format"
     },
     "privateDetails": {
       "toggle": "Salarisverwachting en beschikbaarheid opnemen in de afdruk",
@@ -7390,6 +7497,7 @@
     "reason": {
       "skills_manager_confirmed": "Door manager bevestigde vaardigheden",
       "skills_journal_supported": "Journaal-onderbouwde vaardigheden",
+      "practice_experience": "Stage- of vrijwilligerservaring",
       "country_match": "Land komt overeen",
       "mobility_match": "Bereid om in dit land te werken",
       "available_now": "Nu beschikbaar",
@@ -7819,6 +7927,49 @@
     "starting": "Starten…",
     "error": "Kon niet starten"
   },
+  "adminLmc": {
+    "title": "LMC-grootboek",
+    "intro": "Intern platformtegoed (1 LMC = 1 EUR intern tegoed). Live databasestand: schakelaars, uitstaande verplichting en tester-creditering. Alle commerciële schakelaars staan UIT; inschakelen is een besluit van de eigenaar.",
+    "unavailable": "Het grootboek kon met deze sessie niet worden gelezen — een mislukte leesactie, geen leeg grootboek.",
+    "on": "Aan",
+    "off": "Uit",
+    "policy": {
+      "admin": "door admin schakelbaar",
+      "owner_only": "alleen eigenaar",
+      "system_locked": "systeemvergrendeld"
+    },
+    "liability": {
+      "outstanding": "Uitstaand tegoed",
+      "promotional": "Promotioneel",
+      "purchased": "Gekocht",
+      "accounts": "Rekeningen",
+      "note": "Elke uitgegeven LMC is een uitgestelde verplichting van een euro. Live lezing van de canonieke saldoweergave — geen opgeslagen rapport."
+    },
+    "grant": {
+      "email": "E-mail ontvanger",
+      "amount": "Bedrag (LMC)",
+      "reason": "Reden (opgeslagen in het grootboek)",
+      "campaign": "Campagne",
+      "expiryDays": "Verloopt over (dagen)",
+      "key": "Idempotentiesleutel",
+      "submit": "LMC crediteren",
+      "submitting": "Crediteren…",
+      "granted": "Gecrediteerd",
+      "replay": "Met deze sleutel is al eerder gecrediteerd — er is niets dubbel gecrediteerd",
+      "disabledHint": "Promotionele crediteringen staan in de database UIT — het grootboek zal deze creditering weigeren. Inschakelen is een besluit via het eigenaarskanaal.",
+      "reasons": {
+        "grants_disabled": "Geweigerd: promotionele crediteringen staan uit",
+        "not_admin": "Geweigerd: admin-identiteit vereist",
+        "recipient_not_found": "Geweigerd: geen geverifieerd profiel met dat e-mailadres",
+        "invalid_amount": "Geweigerd: ongeldig bedrag",
+        "invalid_expiry": "Geweigerd: ongeldige vervaldatum",
+        "idempotency_conflict": "Geweigerd: deze sleutel is al anders gebruikt",
+        "ledger_absent": "De grootboekfuncties zijn niet beschikbaar",
+        "error": "Het grootboek heeft de creditering geweigerd"
+      }
+    },
+    "spendFrozen": "Uitgeven staat UIT — uitgegeven tegoed blijft bevroren tot de eigenaar uitgeven inschakelt."
+  },
   "adminBilling": {
     "eyebrow": "FACTURATIE — TESTMODUS",
     "title": "Facturatiecentrum",
@@ -8142,6 +8293,11 @@
         "body": "Actieve filters: {filters}. Verwijder enkele filters of wis ze om meer te zien.",
         "reset": "Filters wissen"
       },
+      "initialView": {
+        "summary": "De {shown} sterkste matches van {total} kansen worden getoond.",
+        "showAll": "Alles tonen (nog {count})",
+        "showAllExternal": "Alle vacatures tonen"
+      },
       "details": {
         "show": "Meer details",
         "hide": "Details verbergen"
@@ -8278,7 +8434,10 @@
     "noSkills": {
       "title": "Je vaardigheden zijn nog niet vastgelegd",
       "body": "Vaardighedenmatching heeft bewijs nodig. Voeg werkregistraties toe aan je werkjournaal — erkende vaardigheden uit echt werk maken je matches betekenisvol.",
-      "cta": "Voeg een werkregistratie toe"
+      "cta": "Voeg een werkregistratie toe",
+      "confirmTitle": "Bevestig wat je werknotities laten zien",
+      "confirmBody": "Je werkjournaal bevat al notities. Bekijk de daarin herkende vaardigheden en bevestig de vaardigheden die je echt hebt — dan kunnen we je matchen.",
+      "confirmCta": "Herkende vaardigheden bekijken"
     },
     "skillMatch": {
       "title": "Vaardighedenmatch",
@@ -8380,6 +8539,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "shownOfTotal": "top {shown} van {total}",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",
@@ -8999,6 +9159,36 @@
     "links": {
       "workers": "Voor werknemers",
       "companies": "Voor bedrijven"
+    }
+  },
+  "accountBilling": {
+    "title": "Facturering & abonnement",
+    "testBadge": "Testmodus",
+    "returned": {
+      "success": "Test-checkout afgerond. Er is geen echt geld bewogen; de abonnementsstatus hieronder synchroniseert via de handtekening-geverifieerde webhook van de betaalprovider en kan even op zich laten wachten.",
+      "cancelled": "De checkout is geannuleerd. Er is niets afgeschreven en er is niets veranderd aan je account.",
+      "portal": "Je bent terug uit het factureringsportaal. Wijzigingen die je daar maakte, synchroniseren hier automatisch."
+    },
+    "disabled": "Betalingen zijn niet ingeschakeld. Betaalde abonnementen zijn voorbereide concepten — hier is niets te koop en er is geen betaalmethode nodig.",
+    "none": "Geen abonnement op dit account.",
+    "planLabel": "Abonnement",
+    "statusLabel": "Huidige status",
+    "status": {
+      "none": "Geen abonnement",
+      "trialing": "Proefperiode",
+      "active": "Actief",
+      "past_due": "Betaling achterstallig",
+      "unpaid": "Onbetaald",
+      "cancelled": "Opgezegd",
+      "incomplete": "Onvolledig",
+      "expired": "Verlopen"
+    },
+    "graceNotice": "De laatste betaling is mislukt — het abonnement zit in een respijtperiode tot een nieuwe poging.",
+    "manage": {
+      "open": "Abonnement beheren",
+      "opening": "Openen…",
+      "error": "Het factureringsportaal kon niet worden geopend",
+      "hint": "Opent het portaal van de betaalprovider om op te zeggen of de betaalmethode te wijzigen. Alleen testmodus — geen echte afschrijvingen."
     }
   },
   "accountPlan": {
@@ -10039,6 +10229,7 @@
     },
     "organizations": {
       "title": "Mijn bedrijven",
+      "unnamed": "Naamloos bedrijf",
       "noCompanyCta": "Bedrijf toevoegen",
       "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen.",
       "individualDesc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel."
@@ -10106,9 +10297,15 @@
         "limit_reached": "Uitnodigingslimiet bereikt",
         "rate_limited": "Te veel uitnodigingen vandaag",
         "not_authorized": "Niet toegestaan",
-        "error": "Mislukt"
+        "error": "Mislukt",
+        "invalid_relationship": "Geen toegestane relatie",
+        "organization_capability_required": "Organisatie heeft dit nog niet aangegeven"
       },
-      "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)"
+      "recipientLanguageLabel": "Taal van de ontvanger (e-mail en uitnodiging)",
+      "capacityLabel": "Wat wordt de uitgenodigde persoon in uw organisatie?",
+      "capacityHint": "Een stage of studie is geen dienstverband — het wordt vastgelegd precies zoals u hier kiest.",
+      "capacityNeedsCapability": "Uw organisatie heeft nog niet aangegeven dat zij opleidt. Geef dat aan op de organisatiepagina, daarna kunt u een lerende uitnodigen.",
+      "capacityNeedsCapabilityCta": "Organisatiepagina openen"
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
@@ -10148,9 +10345,16 @@
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw."
-      }
+      },
+      "capacity": "Relatie: {capacity}",
+      "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband."
     },
-    "teamEnquiriesTitle": "Mijn aanvragen aan ploegen"
+    "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
+    "admin": {
+      "title": "Beheer",
+      "hint": "Goedkeuringen, verzoeken en organisatieregels — open je wanneer je ze nodig hebt.",
+      "back": "Terug naar relaties"
+    }
   },
   "people": {
     "eyebrow": "Persoonsprofiel",
@@ -11293,6 +11497,7 @@
         "language": "Taal",
         "level": "Niveau",
         "jobTitle": "Functie",
+        "engagementKind": "Soort dienstverband",
         "jobTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
         "startMonth": "Startmaand",
         "startYear": "Startjaar",
@@ -11429,6 +11634,12 @@
       "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
       "messagesHint": "Hier zijn je berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
+      "switchContextPersonal": "persoonlijke ruimte",
+      "switchContextPick": "In welke context wilt u werken?",
+      "switchContextDone": "Klaar — u werkt nu in {name}.",
+      "switchContextAlready": "U werkt al in {name}.",
+      "switchContextFailed": "Overschakelen is niet gelukt — uw actieve context is ongewijzigd.",
+      "switchContextUnavailable": "Contextwisseling is momenteel niet beschikbaar.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
       "experiencesEligible": "Ik vond afgeronde interacties die je kunt beschrijven. Kies welke.",
@@ -11457,6 +11668,9 @@
       "chipNeedWorkers": "Ik zoek werknemers",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Bedrijfsruimte",
+      "chipEduInviteLearner": "Een cursist uitnodigen",
+      "chipEduCapabilities": "Wat wij aanbieden",
+      "learnerGreetingContext": "Je leert bij {institution} — elk werk dat je vastlegt, wordt onderdeel van je bewijs en cv.",
       "companyDemandNext": "De behoefte is vastgelegd in je bedrijfsruimte. Wat nu?",
       "navJournal": "Logboek",
       "chipTasks": "Taken",
@@ -11531,7 +11745,30 @@
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",
         "changeInsteadOf": "{next} (in plaats van {previous})"
-      }
+      },
+      "createOrganizationHint": "Ik kan samen met u een organisatie aanmaken — de gegevens en de verificatie staan op één pagina.",
+      "chipCreateOrganization": "Organisatie aanmaken",
+      "adminRouteHint": "Hier wordt dat geregeld:",
+      "adminApprovalsChip": "Goedkeuringen",
+      "adminRequestsChip": "Verzoeken",
+      "timesheetsChip": "Urenstaten",
+      "timesheetImportChip": "Urenstaat importeren",
+      "workHoursChip": "Gewerkte uren",
+      "absencesChip": "Verlof & afwezigheid",
+      "documentsChip": "Mijn documenten",
+      "marketMapChip": "Marktkaart",
+      "activityChip": "Activiteit",
+      "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
+      "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
+      "chipServiceRequests": "Een dienst zoeken",
+      "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",
+      "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
+      "chipMyOwnInterest": "Mijn eigen interesse",
+      "lmcHint": "Uw LMC-saldo en de volledige mutatiehistorie staan op één plek.",
+      "chipLmc": "LMC openen",
+      "briefLearner": "Je bent ingeschreven bij {organization}. Praktijk en leren die je hier vastlegt, tellen als bewijs.",
+      "briefLearnerUnnamed": "Je bent ingeschreven als lerende. Praktijk en leren die je hier vastlegt, tellen als bewijs.",
+      "chipLogLearning": "Leren of praktijk vastleggen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -12111,11 +12348,10 @@
       "headline": "Vraag. Zie. Neem aan.",
       "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek.",
       "chatLabel": "AI-gesprek",
-      "mapLabel": "Europese arbeidsmarkt",
+      "mapLabel": "Conceptkaart — illustratief scenario",
       "thinking": "Marktsignalen analyseren…",
       "answered": "Gevonden. Kaart bijgewerkt.",
       "resultLabel": "Resultaat",
-      "demoBadge": "Demonstratie",
       "mapHint": "Tik op een markering — de kaart antwoordt.",
       "scenario": {
         "q1": "Waar zijn nu elektriciens nodig?",
@@ -12171,9 +12407,9 @@
       },
       "askPlaceholder": "Stel je eigen vraag…",
       "askSubmit": "Vraag",
-      "unmatched": "In deze demonstratie beantwoord ik alleen vragen over elektriciens, lassers en beschikbare mensen.",
+      "unmatched": "In dit voorbeeld beantwoord ik alleen vragen over elektriciens, lassers en beschikbare mensen.",
       "basisLabel": "Waar dit op rust",
-      "basisNote": "Op de {count} hierboven gewogen signalen, met illustratieve aantallen — dit is een demonstratie, niet de markt van vandaag.",
+      "basisNote": "Op de {count} hierboven gewogen signalen, met illustratieve aantallen — dit is een conceptscenario, niet de markt van vandaag.",
       "previewLabel": "Best passende persoon",
       "previewName": "Jonas P.",
       "previewRole": "Elektricien · Vilnius · Beschikbaar vanaf september",
@@ -12914,7 +13150,9 @@
       "title": "Urenstaten van het team",
       "decideNote": "Goedkeuringsbeslissingen gebeuren in het goedkeuringsgedeelte. Hier kunt u regels bekijken, exporteren en een besliste urenstaat terugsturen.",
       "noTemplateFor": "{name} heeft geen gepubliceerd goedkeuringssjabloon voor urenstaten.",
-      "createTemplate": "Standaard goedkeuringssjabloon maken",
+      "templateNeedsAdmin": "Alleen een eigenaar of beheerder van de organisatie kan de goedkeuringssjabloon publiceren. Tot die tijd kunnen urenstaten niet worden ingediend.",
+      "blockedNote": "Wacht op deze sjabloon: {count} urenstaat(-staten) in deze organisatie kunnen pas na publicatie worden ingediend.",
+      "createTemplate": "Standaard goedkeuringssjablonen installeren",
       "unnamedWorker": "Werknemer",
       "decideInApprovals": "Beslissen in het goedkeuringsgedeelte",
       "reopenNote": "Terugstuurnotitie",
@@ -12931,7 +13169,7 @@
       "synced_pending": "De goedkeuring loopt nog.",
       "no_instance": "Er bestaat nog geen goedkeuringsverzoek voor deze urenstaat.",
       "no_template": "Deze organisatie heeft nog geen gepubliceerd goedkeuringssjabloon voor urenstaten.",
-      "template_created": "Standaard goedkeuringssjabloon gemaakt en gepubliceerd.",
+      "template_created": "Standaard goedkeuringssjablonen geïnstalleerd — de goedkeuringssjabloon voor urenstaten is gepubliceerd.",
       "overlap": "Deze periode overlapt met een bestaande urenstaat.",
       "invalid_period": "De periode is ongeldig — maximaal 31 dagen, en het einde mag niet vóór het begin liggen.",
       "no_worker": "Uw account heeft geen werknemersprofiel.",
@@ -13711,5 +13949,256 @@
       "awaitingOwnerApproval": "wacht op goedkeuring van de eigenaar"
     },
     "footer": "Eerlijk voorbeeld · Geen nep-AI · Geen nepverificatie · Geen verzonnen gezichten van werknemers · Elk item begint met „Sample · …”, zodat het nooit als echte data leest."
+  },
+  "marketExplanation": {
+    "title": "Markt voor {profession}",
+    "source": "Geteld uit openbare vacatures die in LabourMarket.ai zijn geïmporteerd, gelezen op {measuredAt}. Dit is niet de hele arbeidsmarkt en niet het eigen vraagbord van dit platform.",
+    "derivedFromWork": "Je hebt geen beroep opgegeven — deze markt is gekozen op basis van de vaardigheden die uit je vastgelegde werk blijken. Geef een beroep op als je een andere wilt.",
+    "statOpen": "Open vacatures",
+    "statNew7d": "Geplaatst in 7 dagen",
+    "statNew30d": "Geplaatst in 30 dagen",
+    "noneOpen": "Er wordt op dit moment niets geadverteerd voor {profession} in deze verzameling.",
+    "skillsTitleAll": "Gevraagde vaardigheden, in alle open vacatures",
+    "skillsTitleWindow": "Gevraagde vaardigheden, in de {window} meest recent geplaatste",
+    "citiesTitleAll": "Waar ze zijn, in alle open vacatures",
+    "citiesTitleWindow": "Waar ze zijn, in de {window} meest recent geplaatste",
+    "noPayStated": "Geen van deze vacatures noemt een salarisbedrag, dus hier wordt geen salaris getoond of geschat.",
+    "cta": "Leg deze markt uit",
+    "pending": "De cijfers worden gelezen...",
+    "resultTitle": "AI-lezing van de cijfers hierboven",
+    "attribution": "Geschreven door {provider} {model} op basis van de cijfers hierboven. Een suggestie, geen vastgelegd feit.",
+    "whereTitle": "Waar de vraag zit",
+    "aiSkillsTitle": "Gevraagde vaardigheden",
+    "actionsTitle": "Wat u hierna zou kunnen doen",
+    "limitationsTitle": "Wat deze cijfers niet kunnen zeggen",
+    "reviewNote": "Deze aantallen zijn klein, lees deze uitleg dus met voorzichtigheid.",
+    "offNotAuthenticated": "Log in om een uitleg te vragen.",
+    "offRateLimited": "U heeft dit zojuist een paar keer gevraagd. Probeer het over enkele minuten opnieuw.",
+    "offFactsUnavailable": "De markttellingen konden nu niet worden gelezen, dus er valt niets uit te leggen.",
+    "offMarketTooSmall": "Minder dan {min} open vacatures — te weinig om een uitleg meer waard te maken dan de cijfers hierboven.",
+    "offAiUnavailable": "De uitlegdienst is nu niet beschikbaar. De cijfers hierboven blijven ongewijzigd."
+  },
+  "organizationCapabilities": {
+    "title": "Wat doet uw organisatie?",
+    "help": "Vink alles aan wat van toepassing is — een organisatie kan meerdere dingen tegelijk doen.",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "notPermitted": "U kunt deze organisatie niet wijzigen.",
+    "error": "Opslaan mislukt. Probeer het opnieuw.",
+    "allDeclared": "Alles wat beschikbaar is, is al opgegeven.",
+    "choices": {
+      "training": {
+        "label": "Wij leiden mensen op",
+        "hint": "School, universiteit of opleidingscentrum; wij bieden stageplaatsen."
+      },
+      "employer": {
+        "label": "Wij nemen mensen in dienst",
+        "hint": "Wij werven voor onszelf."
+      },
+      "workforce": {
+        "label": "Wij leveren werknemers aan andere organisaties",
+        "hint": "Arbeidsbemiddeling, ploegen op contract."
+      },
+      "recruitment": {
+        "label": "Wij helpen mensen te vinden en te selecteren",
+        "hint": "Werving en selectie."
+      },
+      "project": {
+        "label": "Wij voeren projecten uit",
+        "hint": "Wij doen mee als uitvoerder of partner."
+      },
+      "client": {
+        "label": "Wij besteden werk of diensten uit",
+        "hint": "Wij zijn opdrachtgever."
+      }
+    }
+  },
+  "lmc": {
+    "title": "LMC-tegoed",
+    "noAccount": "Nog geen LMC-rekening. Die ontstaat bij het eerste tegoed of de eerste afschrijving — tot nu toe is er niets gebeurd.",
+    "unavailable": "We konden uw LMC-saldo nu niet uitlezen. Dat betekent niet dat het nul is — we kunnen het op dit moment alleen niet tonen. Probeer het later opnieuw.",
+    "breakdown": "Gekocht: {purchased} · toegekend: {promotional}",
+    "expired": "Verlopen: {amount} (geldigheidsdatum voorbij)",
+    "latest": "Laatste wijziging: {kind} {amount} LMC · {when}",
+    "noMovements": "Nog geen mutaties.",
+    "topUpClosed": "Opwaarderen is nog niet open. Zodra dat kan, doet u het hier.",
+    "historyTitle": "Volledige historie",
+    "kind": {
+      "purchased": "Gekocht",
+      "promotional_signup": "Tegoed bij registratie",
+      "promotional_activity": "Tegoed voor activiteit",
+      "admin_grant": "Toegekend door een beheerder",
+      "referral_reward": "Beloning voor aanbeveling",
+      "spend": "Besteed",
+      "expiry": "Verlopen",
+      "reversal": "Teruggedraaid",
+      "refund_reversal": "Terugbetaling",
+      "chargeback_reversal": "Terugboeking door de bank",
+      "spend_compensation": "Gecompenseerd voor een mislukte actie",
+      "other": "Andere mutatie"
+    }
+  },
+  "workHours": {
+    "title": "Gewerkte uren",
+    "subtitle": "Leg vast wie heeft gewerkt, op welke datum, op welk object en hoeveel uur.",
+    "date": "Datum",
+    "worker": "Medewerker",
+    "object": "Werkobject",
+    "hours": "Uren",
+    "note": "Werkomschrijving (optioneel)",
+    "hoursHint": "In stappen van een kwartier, bijv. 7,5",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "saved": "Vastgelegd",
+    "addAnother": "Zelfde medewerker — ander object",
+    "selectWorker": "Kies een medewerker",
+    "selectObject": "Kies een object",
+    "dayTotal": "Dagtotaal",
+    "entriesTitle": "Registraties van deze dag",
+    "noEntries": "Nog geen registraties voor deze dag.",
+    "enteredForSomeoneElse": "Ingevoerd door iemand anders",
+    "duplicateWarning": "Je hebt zojuist dezelfde registratie ingevoerd. Is dit een tweede dienst, sla dan nogmaals op.",
+    "errors": {
+      "hours": "Voer uren in tussen 0,25 en 24.",
+      "quarter": "Uren moeten in stappen van 0,25 zijn.",
+      "worker": "Kies een medewerker.",
+      "object": "Kies een object.",
+      "date": "Ongeldige datum.",
+      "note": "Omschrijving is te lang.",
+      "notAuthorized": "Je mag deze uren niet vastleggen.",
+      "generic": "Opslaan mislukt. Probeer het opnieuw."
+    },
+    "states": {
+      "needsMigration": "Deze functie is nog niet ingeschakeld op deze database.",
+      "noCompany": "Schakel over naar een bedrijfswerkruimte.",
+      "noObjects": "Maak eerst ten minste één object aan.",
+      "error": "Kon deze dag niet laden."
+    },
+    "import": {
+      "entryLink": "Uren importeren uit een spreadsheet (.xlsx)",
+      "backToEntry": "Terug naar dagelijkse invoer",
+      "title": "Urenstaat importeren",
+      "subtitle": "Upload een maandelijkse urenstaat. Controleer en corrigeer de interpretatie hieronder — er wordt niets opgeslagen totdat u bevestigt.",
+      "fileLabel": "Urenstaatbestand (.xlsx)",
+      "fileHint": "Een maandraster werknemer × dag of een blad met kolommen werknemer / datum / object / uren, tot 5 MB.",
+      "parse": "Bestand voorvertonen",
+      "parsing": "Lezen…",
+      "refused": {
+        "no-file": "Kies eerst een bestand.",
+        "too-large": "Het bestand is groter dan 5 MB.",
+        "not-xlsx": "Dit is geen .xlsx-spreadsheet.",
+        "too-complex": "De spreadsheet is te groot om veilig te lezen.",
+        "read-failed": "Het bestand kon niet worden gelezen.",
+        "unrecognized": "In dit bestand is geen urenstaatstructuur herkend.",
+        "too-many-rows": "Het blad bevat meer rijen dan één import aankan — splits het bestand."
+      },
+      "emptyFile": "Het bestand bevat geen urenstaatgegevens.",
+      "noCompany": "Schakel over naar een bedrijfswerkruimte.",
+      "summary": "Gelezen rijen: {rows} (blad {sheet}).",
+      "notPersistedNotice": "Er wordt niets opgeslagen totdat u bevestigt.",
+      "skippedTitle": "Cellen die niet gelezen konden worden",
+      "skippedReasons": {
+        "unparsable": "onleesbare waarde",
+        "hours-out-of-bounds": "uren buiten 0–24",
+        "invalid-date": "deze datum bestaat niet in deze maand"
+      },
+      "monthLabel": "Maand",
+      "monthHint": "Het blad vermeldt geen maand — kies deze expliciet.",
+      "duplicateWarning": "Voor {count} rijen bestaan al identieke registraties (zelfde werknemer, datum, object en uren). Opnieuw schrijven vereist de bevestiging hieronder.",
+      "columns": {
+        "include": "Opnemen",
+        "worker": "Werknemer",
+        "object": "Werkobject",
+        "date": "Datum",
+        "hours": "Uren",
+        "note": "Notitie",
+        "status": "Toestand"
+      },
+      "chooseWorker": "Kies een werknemer",
+      "chooseObject": "Kies een object",
+      "suggestions": "Suggesties",
+      "allWorkers": "Alle werknemers",
+      "allObjects": "Alle objecten",
+      "needsReview": "Onduidelijke cel — controleer de splitsing",
+      "duplicateBadge": "Al geregistreerd",
+      "incomplete": "Keuze vereist",
+      "rowProblems": {
+        "worker": "Werknemer niet geaccepteerd",
+        "object": "Object niet geaccepteerd",
+        "date": "Ongeldige datum",
+        "hours": "Ongeldige uren",
+        "note": "Notitie te lang"
+      },
+      "overrideLabel": "Duplicaten toch schrijven (een echte tweede dienst)",
+      "confirm": "Geselecteerde rijen bevestigen ({count})",
+      "confirming": "Schrijven…",
+      "receipt": "Klaar — geschreven registraties: {count}. Ze staan nu in de werkuren.",
+      "confirmBlockedHint": "Elke opgenomen rij heeft een werknemer, een object, een datum en uren nodig.",
+      "errors": {
+        "invalidRows": "Rijen die correctie nodig hebben: {count}. Er is niets geschreven.",
+        "duplicatesFound": "Identieke bestaande registraties: {count}. Er is niets geschreven — vink de bevestiging aan om ze toch te schrijven.",
+        "noRows": "Geen rijen om te schrijven.",
+        "tooManyRows": "Te veel rijen voor één import — splits het bestand.",
+        "needsMigration": "Deze functie is nog niet ingeschakeld in deze database.",
+        "notAuthorized": "U mag deze uren niet registreren.",
+        "generic": "Verwerken mislukt. Probeer het opnieuw."
+      }
+    }
+  },
+  "oauthConsent": {
+    "title": "Toegang bevestigen",
+    "clientWantsAccess": "„{client}” vraagt toegang tot uw LabourMarket.ai-account.",
+    "unknownClient": "Onbekende applicatie",
+    "clientLabel": "Applicatie",
+    "redirectLabel": "Terugkeeradres",
+    "scopesLabel": "Gevraagde rechten",
+    "authorityNote": "De applicatie handelt alleen namens u en ziet alleen wat u kunt zien. U kunt de toegang op elk moment intrekken.",
+    "approve": "Toestaan",
+    "deny": "Weigeren",
+    "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
+    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw."
+  },
+  "capabilities": {
+    "interestChooseDemand": "Kies de vraag waarin u geïnteresseerd bent: {options}.",
+    "interestDraftSummary": "Klaar om interesse te tonen: {demand}. Er is nog niets verzonden — uw bevestiging is vereist.",
+    "interestDraftRepeat": "U heeft al interesse getoond in “{demand}” — bevestigen vernieuwt deze.",
+    "interestConfirmed": "Interesse vastgelegd. De eigenaar van de vraag ziet dit in de eigen omgeving — niets verlaat het platform.",
+    "workspacePersonal": "Persoonlijke ruimte",
+    "workspaceSwitched": "Actieve werkruimte gewijzigd naar “{label}”.",
+    "workspaceChoose": "Kies een werkruimte: {options}.",
+    "workCardDraftSummary": "Klaar om uw werkkaart bij te werken ({fields}). Er is nog niets opgeslagen — uw bevestiging is vereist.",
+    "workCardSaved": "Werkkaart bijgewerkt.",
+    "workCardFieldAvailability": "beschikbaarheid",
+    "workCardFieldAvailableFrom": "beschikbaar vanaf",
+    "workCardFieldSalary": "salarisbereik",
+    "workCardFieldLocation": "locatie",
+    "workCardFieldPreferredCountries": "voorkeurslanden",
+    "demandDraftSummary": "Klaar om een personeelsbehoefte aan te maken voor {org}: “{description}”. Er is nog niets aangemaakt — uw bevestiging is vereist.",
+    "demandDraftSummaryWithRole": "Klaar om een personeelsbehoefte aan te maken voor {org} — {role}: “{description}”. Er is nog niets aangemaakt — uw bevestiging is vereist.",
+    "demandSubmitted": "Personeelsbehoefte ingediend voor {org}. Passende werkers kunnen de gestructureerde feiten nu op hun bord zien.",
+    "journalListEmpty": "Het werkjournaal heeft nog geen items.",
+    "journalListSummary": "{count} items gevonden. Meest recent: {latest}.",
+    "notSet": "niet ingesteld",
+    "workerExists": "actief",
+    "workerNone": "geen",
+    "workerUnavailable": "kon niet worden gecontroleerd",
+    "profileSummary": "Uw LabourMarket.ai-profiel — naam: {name}; land: {country}; taal: {language}; actieve rol: {role}; werknemersprofiel: {worker}.",
+    "skillsSummary": "Uw levende cv bevat {count} vaardigheden ({verified} geverifieerd).",
+    "skillsEmpty": "Uw levende cv bevat nog geen vaardigheden.",
+    "draftSummary": "Concept werkjournaalinvoer voor {date}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "draftSummaryWithSite": "Concept werkjournaalinvoer voor {date} op {site}: “{notes}”. Er is nog niets opgeslagen — na bevestiging wordt precies deze invoer geschreven.",
+    "draftChooseContext": "Deze invoer kan bij meerdere werkcontexten horen: {options}. Bij welke hoort deze?",
+    "draftContext": "Werkcontext: {context}.",
+    "confirmSummary": "Journaalinvoer opgeslagen. Vaardigheidsherkenning: {added} toegevoegd, {strengthened} versterkt, {reviewNeeded} wacht op beoordeling."
+  },
+  "notificationPrefs": {
+    "title": "Meldingen",
+    "intro": "Kies welke meldingen u bereiken — per type en kanaal. Meldingen in de app staan aan totdat u ze uitschakelt.",
+    "inAppHeader": "In de app",
+    "emailHeader": "E-mail",
+    "emailConsentNote": "E-mail staat standaard uit — er wordt alleen gemaild voor de typen die u hier inschakelt.",
+    "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Uw keuzes worden opgeslagen en gelden zodra die actief is.",
+    "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
+    "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
   }
 }

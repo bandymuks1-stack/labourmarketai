@@ -6,16 +6,48 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
+import { LIVE_ROLE_IDS, type LiveRoleId } from "@/lib/config/roles";
 
-export type Role = "worker" | "company" | "agency" | "customer";
+/**
+ * THE PARTICIPATION MODE A PERSON ONBOARDS INTO — one of FOUR concepts this
+ * codebase keeps deliberately apart. See `lib/guards/actor-role-plan-boundary.test.ts`.
+ *
+ *   1. ACTOR TYPE          what an actor IS (human, ai_agent, organization).
+ *                          `lib/product-gate/entity-model.ts` — an OPEN
+ *                          registry that already declares `ai_agent`.
+ *   2. PARTICIPATION MODE  what a person signs up to DO — this type, and
+ *                          `profile_roles.role`.
+ *   3. PERMISSION ROLE     authority INSIDE an organization: `MembershipRole`
+ *                          / `GovernanceRole` (owner, admin, manager,
+ *                          external_manager, member), `relationship_slug`,
+ *                          `confirmer_role`.
+ *   4. PLAN / ENTITLEMENT  what an actor may spend: `usage_cost_events`
+ *                          (`plan_key`, `payer`, `feature_code`).
+ *
+ * An AI agent is concept 1. It must NEVER be added here: an AI agent that
+ * does work holds the `worker` participation mode like anyone else, while
+ * being `actor_type = 'ai_agent'`. Collapsing the two would make "what you
+ * are" and "what you do" the same field, and there would be no way back.
+ *
+ * DERIVED, NOT RE-DECLARED. `lib/config/roles.ts` is the catalogue — it
+ * already carries availability, labels, setup routes and forward-looking ids
+ * (`freelancer`, `team_lead`, `service_provider`), and its own header says
+ * adding a role is a one-row change there. This union was a second, hand-kept
+ * copy of the same four ids, and its comment in that file even said so
+ * ("matches the `Role` union elsewhere"). One vocabulary, one source.
+ *
+ * NOT the set of roles a profile may HOLD. Production `profile_roles` also
+ * contains `admin`, which nobody onboards into — see `HeldProfileRole` in
+ * `lib/auth/profile-roles.ts`.
+ */
+export type Role = LiveRoleId;
 
-const ONBOARDING_ROLES = new Set<Role>([
-  "worker",
-  "company",
-  "agency",
-  "customer",
-]);
+const ONBOARDING_ROLES = new Set<Role>(LIVE_ROLE_IDS);
 
+/** CANONICAL PRIORITY, not merely the list: the first role in this order
+ *  becomes the primary (active) workspace. Kept explicit because the ORDER is
+ *  load-bearing and a reader must be able to see it; a guard asserts it stays
+ *  a permutation of `LIVE_ROLE_IDS`, so it cannot drift out of the set. */
 const ROLE_ORDER: Role[] = ["worker", "company", "agency", "customer"];
 
 /** Finish the first onboarding — person-first, multi-role. `roles` is a

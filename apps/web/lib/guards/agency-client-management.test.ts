@@ -58,11 +58,18 @@ describe("1. renders ONLY under the staffing_agency company type", () => {
     expect(companyPage).toMatch(
       /const isStaffingAgency = companyRow\?\.companyType === "staffing_agency"/,
     );
+    // The invariant is the CONDITIONAL — never the `await` keyword. Both
+    // reads now sit inside the page's batched `Promise.all` (the serial
+    // waterfall this dashboard used to run was the measured reason it felt
+    // slow), so the call is no longer individually awaited. The gate itself is
+    // unchanged and still pinned: in any mode but staffing-agency the
+    // expression is `null` and NOTHING is fetched. `await` is optional here
+    // precisely so batching stays allowed; the ternary is not.
     expect(companyPage).toMatch(
-      /isStaffingAgency \? await listAgencyClients\(\) : null/,
+      /isStaffingAgency \? (await )?listAgencyClients\(\) : null/,
     );
     expect(companyPage).toMatch(
-      /isStaffingAgency \? await listAgencyDemands\(\) : null/,
+      /isStaffingAgency \? (await )?listAgencyDemands\(\) : null/,
     );
   });
 

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+
 /**
  * Zod input schemas for the executable worker conversation actions (Phase B).
  * Every dispatched write is validated against one of these server-side BEFORE
@@ -16,6 +18,9 @@ const uuid = z.string().uuid();
 export const workerAddWorkHistorySchema = z
   .object({
     title: z.string().trim().min(3).max(200),
+    /** Employment, placement or volunteering. Defaults to `employee` so an
+     *  older client that never sent the field keeps working unchanged. */
+    relationship: z.enum(SELF_DECLARED_RELATIONSHIPS).default("employee"),
     startYear: year,
     startMonth: month.nullable().optional(),
     endYear: year.nullable().optional(),
@@ -48,15 +53,19 @@ export const workerAddAchievementSchema = z.object({
   kind: z.enum(["achievement", "declared_certificate"]).default("achievement"),
 });
 
-export const workerSaveWorkCardSchema = z
-  .object({
-    availabilityStatus: z.enum(["available", "busy", "unavailable"]).nullable().optional(),
-    availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
-    salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
-    salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
-    locationCountry: z.string().trim().length(2).nullable().optional(),
-    preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
-  })
+/** The bare field object — exported so the capability layer can `.extend()`
+ *  it (a refined schema cannot be extended); the refined schema below stays
+ *  the one the dispatcher validates against. */
+export const workerSaveWorkCardFields = z.object({
+  availabilityStatus: z.enum(["available", "busy", "unavailable"]).nullable().optional(),
+  availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
+  salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
+  salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
+  locationCountry: z.string().trim().length(2).nullable().optional(),
+  preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
+});
+
+export const workerSaveWorkCardSchema = workerSaveWorkCardFields
   .refine(
     (v) =>
       v.salaryMin == null || v.salaryMax == null || v.salaryMin <= v.salaryMax,

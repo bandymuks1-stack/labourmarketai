@@ -24,8 +24,15 @@
  *   E2E_OWNER_EMAIL=dev.worker@local.test pnpm tsx scripts/e2e-mint-session.ts
  *
  * Writes: tests/e2e/.storage-state.json (gitignored).
+ *
+ * A second actor goes to its own file — `E2E_STORAGE_FILE` is a bare filename
+ * resolved inside tests/e2e/:
+ *
+ *   E2E_OWNER_EMAIL=dev.company@local.test \
+ *   E2E_STORAGE_FILE=.storage-state-manager.json \
+ *   pnpm tsx scripts/e2e-mint-session.ts
  */
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -187,7 +194,26 @@ async function main(): Promise<void> {
   }
 
   const storageState = { cookies, origins: [] };
-  const out = join(process.cwd(), "tests", "e2e", ".storage-state.json");
+  /**
+   * The filename is a parameter because a CROSS-ACTOR spec needs two sessions
+   * at once. `quick-confirm-cv-export` is the case that forced it: a manager
+   * confirms a worker's entry and the worker then reads the result on their
+   * own CV, so one storage state can never express the flow — and the spec
+   * sat behind an unconditional `test.skip` for exactly that reason.
+   *
+   * `E2E_STORAGE_FILE` is a BARE FILENAME, never a path: it is resolved inside
+   * `tests/e2e/` and rejected if it tries to escape. A mint script that will
+   * happily write an attacker-chosen path is not a thing to leave lying around
+   * in a repo, and the callers only ever need a name.
+   */
+  const requested = process.env.E2E_STORAGE_FILE ?? ".storage-state.json";
+  if (requested !== basename(requested)) {
+    throw new Error(
+      `E2E_STORAGE_FILE must be a bare filename, got "${requested}". ` +
+        "It is resolved inside tests/e2e/.",
+    );
+  }
+  const out = join(process.cwd(), "tests", "e2e", requested);
   writeFileSync(out, JSON.stringify(storageState, null, 2));
 
   // Print only metadata, never the tokens themselves.

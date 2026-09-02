@@ -15,9 +15,9 @@ export function BenefitCards({
           <span className="inline-grid h-9 w-9 place-items-center rounded-md border border-brand-blue/40 font-mono text-sm text-brand-blue">
             {i + 1}
           </span>
-          <h3 className="mt-4 font-display text-lg font-semibold tracking-tight text-text-primary">
+          <h2 className="mt-4 font-display text-lg font-semibold tracking-tight text-text-primary">
             {it.title}
-          </h3>
+          </h2>
           <p className="mt-2 text-sm leading-relaxed text-text-secondary">
             {it.body}
           </p>

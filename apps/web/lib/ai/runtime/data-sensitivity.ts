@@ -66,12 +66,33 @@ const SENSITIVITY_RANK: Record<AiDataSensitivity, number> = {
  * (`TASK_POLICIES[t].allowedFields` in task-routing.ts) — not from the task's
  * name and not from how it feels.
  *
- * NO TASK IS `PUBLIC` TODAY. That is a finding, not an omission: every task
- * this platform runs is about either a business's own work or a specific
- * person. The class exists because a future taxonomy/reference task is the
- * obvious candidate for it, and inventing a `PUBLIC` mapping now to make the
- * table look complete would be exactly the kind of claim this file exists to
- * prevent.
+ * EXACTLY ONE TASK IS `PUBLIC` (2026-08-24). For the whole life of this file
+ * until then, none was — recorded here as a finding rather than an omission,
+ * because every task this platform ran was about either a business's own work
+ * or a specific person, and inventing a `PUBLIC` mapping to make the table
+ * look complete would have been exactly the claim this file exists to prevent.
+ *
+ * `explain_market_demand` is the reference task the note anticipated. It is
+ * `PUBLIC` on the evidence of its own policy: `TASK_POLICIES` admits eleven
+ * fields, every one of them an aggregate count, a taxonomy slug, a place name
+ * or a date, derived from externally published job advertisements. Employer
+ * identity, advertisement text, application URLs and coordinates are all in
+ * its `prohibitedFields`, and the module that assembles the payload
+ * (`lib/market/public-market-facts.ts`) never selects them from the database
+ * in the first place.
+ *
+ * WHAT THIS DOES AND DOES NOT CHANGE. It does not touch `AI_EGRESS_GRANTS`,
+ * which stays empty; it does not raise any provider's ceiling; and it moves no
+ * existing task. An ungranted external provider may already receive `PUBLIC`,
+ * so this one classification is the entire mechanism by which the first real
+ * external run becomes possible — and CV extraction, journal normalisation,
+ * match explanation, follow-up drafting and translation stay refused by the
+ * identical rule they were refused by yesterday.
+ *
+ * A SECOND `PUBLIC` TASK IS NOT ROUTINE. Adding one means making this same
+ * argument again, field by field, against that task's own policy. The guard
+ * `lib/guards/ai-wired-surface-sensitivity.test.ts` holds the allowlist so
+ * that a new `PUBLIC` entry is a red test until someone writes the reasoning.
  */
 export const TASK_SENSITIVITY: Record<AiTaskType, AiDataSensitivity> = {
   // Employer's own future work — scope, headcount, timeframe, region.
@@ -96,6 +117,9 @@ export const TASK_SENSITIVITY: Record<AiTaskType, AiDataSensitivity> = {
   translate_message: "SENSITIVE_FREE_TEXT",
   // Conversation summary + goal, written about and often by a named person.
   draft_follow_up: "PERSONAL",
+  // Aggregate counts of published job advertisements for ONE occupation.
+  // Nobody is described; nothing is re-joinable to a row. See the note above.
+  explain_market_demand: "PUBLIC",
 };
 
 export function sensitivityForTask(task: AiTaskType): AiDataSensitivity {

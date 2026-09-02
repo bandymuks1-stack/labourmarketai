@@ -1031,7 +1031,157 @@ describe("the migration set is exactly what this slice declared", () => {
       // (PR #1256). Detailed risk analysis is in the private Internal Brain
       // per AGENTS.md, not here.
       "20260824130000_null_safe_owner_guards_v2.sql",
-    ]);
+          // 2026-08-26: the practice work-history widening
+      // (20260826182421) carries the marker because a CREATE OR REPLACE of a
+      // SECURITY DEFINER function is RED by classification and cannot reach
+      // CI green without it. The marker is an ACKNOWLEDGEMENT, not an
+      // approval: the PR is a draft carrying needs-human-gate and the
+      // migration ships UNAPPLIED until the owner applies it.
+      "20260826182421_practice_work_history_v1.sql",
+      // 2026-08-27: organization roles v1 — the multi-capability foundation
+      // that lets an education institution register honestly instead of
+      // calling itself a company. The marker records that the RED content is
+      // INTENTIONAL and reviewed: grants on two NEW tables (this project's
+      // pg_default_acl for schema public is empty, so a new table is otherwise
+      // unreadable by `authenticated`), a SECURITY DEFINER writer RPC, and
+      // `using (true)` on the VOCABULARY table only — identical to the
+      // existing relationship_types_select precedent. The assignment table is
+      // scoped, not permissive. Owner approval given in-session 2026-08-27
+      // ("I approve proceeding with BOTH prepared owner-gated changes… This
+      // approval applies only to the exact reviewed/tested scopes"), and the
+      // marker was added in the same commit as that recorded decision.
+      "20260827050000_organization_roles_v1.sql",
+      // 2026-08-27: relationship invitations v1 — the institution↔learner
+      // link. The marker records that the RED content is INTENTIONAL and
+      // reviewed: CREATE OR REPLACE of five existing SECURITY DEFINER
+      // functions, their re-asserted REVOKE/GRANT floor, seed DML on the
+      // relationship registry, and one DROP that is not a removal of
+      // capability — Postgres treats `create_invitation_v1` with an added
+      // defaulted parameter as a NEW function, so leaving both would make
+      // every 9-positional-argument call ambiguous. Nothing is dropped
+      // otherwise, no policy changes, no grant widens. APPLIED to production
+      // 2026-08-27 under owner ruling §1 ("APPROVED: Apply migration
+      // 20260827200000 using the canonical Supabase MCP apply_migration path
+      // only"), ledger 20260827132137; the marker was added in the same commit
+      // as that record. Provenance guard:
+      // lib/guards/relationship-invitations.test.ts.
+      "20260827200000_relationship_invitations_v1.sql",
+      // 2026-08-27: learner visibility, least privilege — the answer to the
+      // consequence 20260827200000 disclosed rather than hid. The marker
+      // records that the RED content is a CREATE OR REPLACE of ONE auth-core
+      // SECURITY DEFINER predicate, `can_view_worker`, which the envelope
+      // classes RED in either direction. This one NARROWS: the
+      // engagement_contexts branch gains a single conjunct joining a new
+      // fail-closed registry column, and every other arm is byte-identical.
+      // Every relationship slug except `student` is seeded true, so employer,
+      // company, agency, booking and project visibility are unchanged by
+      // construction. Owner ruling 2026-08-27 §2 ("implement the smallest
+      // architecture-consistent fix … Regression-prove employee/employer
+      // visibility remains unchanged"), applied the same day and proven by a
+      // controlled comparison on production with a NON-ADMIN organization
+      // owner: one engagement row, employee -> visible, the same row as
+      // student -> not visible. Provenance guard:
+      // lib/guards/learner-visibility-least-privilege.test.ts.
+      "20260827210000_learner_visibility_least_privilege_v1.sql",
+      // 2026-08-28: LMC spend compensation (#1305) gained its marker under an
+      // explicit owner approval whose scope was recorded VERBATIM, because an
+      // approval remembered loosely is an approval that grows. Full record -
+      // the wording, the reviewed HEAD 3f0e2ce7, the reviewed migration
+      // sha256, the production pre-state and every post-apply check - lives in
+      // docs/human-gates/lmc-spend-compensation-gate.md. Marker added in the
+      // SAME commit as that record, per the procedure the worker display-name
+      // gate above established.
+      //
+      // Worth stating plainly because it is a money ledger: the approval
+      // covers the two findings this file actually raises
+      // (security-definer-function, grant-or-revoke) and nothing else, and it
+      // explicitly does NOT approve live payments, live-money activation, new
+      // pricing, or any weakening of LMC authorization. The capability ships
+      // switched OFF (`lmc_compensation_enabled` defaults false).
+      "20260828090000_lmc_spend_compensation_v1.sql",
+      // 2026-08-29: the profile email identity binding carries the marker as
+      // the doctrine ACKNOWLEDGEMENT that it is RED (auth-core adjacent:
+      // trigger on profiles, two SECURITY DEFINER recreates, two policy
+      // replacements). Approved and applied 2026-08-29 (#1338).
+      "20260829120000_profile_email_identity_binding_v1.sql",
+      // 2026-08-29: the anonymous write bounds carry the marker as the
+      // doctrine ACKNOWLEDGEMENT that the file is RED (grant-adjacent:
+      // triggers on anon-writable tables, SECURITY DEFINER helpers, a public
+      // RPC recreated). Its header says OWNER APPROVAL: PENDING — the marker
+      // is not approval, and the file ships UNAPPLIED.
+      "20260829130000_anon_write_bounds_v1.sql",
+      // 2026-08-31: work-hour allocations v1 (M3, PR #1344) gained its marker
+      // under the owner's closure-session decision, recorded VERBATIM in the
+      // migration header and .github/scripts/owner-waivers.mjs:
+      // "M3_MIGRATION_APPROVAL: APPROVE / HOURS_PRODUCT_GATE_WAIVER: APPROVE.
+      // Approval scope is limited strictly to the fresh #1344 / package 0010
+      // implementation." The marker acknowledges the three intentional RED
+      // findings (grant-or-revoke incl. anon revoke, RLS policies on the new
+      // table, updated_at trigger) reviewed in
+      // docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md,
+      // and was added in the same commit as the scoped /dashboard/hours
+      // waiver that same decision approved.
+      "20260829140000_work_hour_allocations_v1.sql",
+      // 2026-08-31: M3 compute wiring (20260831170000) carries the marker
+      // under the owner's 2026-08-31 closure-session approval sequence
+      // ("wire the actual timesheet compute path"), the follow-up slice the
+      // repo records verbatim in docs/DECISIONS/0010 ("Wiring
+      // `timesheet_compute_lines_v1` to aggregate from allocations is the
+      // follow-up slice after the table exists") and in the APPLIED_LEDGER
+      // row for ledger 20260831161725 ("timesheets stay honest-empty until
+      // the compute-wiring follow-up (same owner-approved sequence) lands").
+      // RED by route — it replaces the timesheet_compute_lines_v1 SECURITY
+      // DEFINER body (the established re-issue idiom of 20260818150000 and
+      // 20260819220000) — while creating and dropping nothing and running no
+      // DML. The journal half is copied VERBATIM from 20260819220000; the
+      // additions are the allocation source, the allocation-wins dedupe and
+      // the combined 500-line cap. The marker lets CI classify it; merge and
+      // production apply stay with the main session after review.
+      "20260831170000_timesheet_compute_allocations_v1.sql",
+      // 2026-09-01: the agency disclosure-revocation package
+      // (20260901052300) carries the marker because its RED content is the
+      // point of the change: it replaces two SECURITY DEFINER list RPCs and
+      // the revoke RPC, and recreates one RLS policy. Every edit NARROWS —
+      // the list functions gain active-connection/active-share predicates,
+      // revoke cascades live offers to withdrawn, and the policy's client
+      // arm gains an active-connection requirement; the agency and admin
+      // arms are byte-identical. It closes the leak where a client whose
+      // connection was severed keeps permanent read on the agency's
+      // candidate identities and notes. The marker lets CI classify it;
+      // merge and production apply stay owner-gated (draft +
+      // needs-human-gate).
+      "20260901052300_agency_disclosure_revocation_v1.sql",
+      // 2026-09-01: the relationship-visibility least-privilege ruling
+      // (20260901060000) carries the marker because it is the slice
+      // 20260827210000 deferred BY NAME — that migration's header records
+      // "rule on volunteer / viewer / unemployed, which are preserved here
+      // only because narrowing them is outside this ruling". RED by route
+      // (`data-dml` on the registry that governs an authorization
+      // predicate) while creating, dropping and replacing nothing: three
+      // rows of relationship_types move from true to false, plus a column
+      // comment. Direction is NARROWING only, and the blast radius is
+      // measured zero — production holds no volunteer/viewer/unemployed
+      // engagement context. The marker lets CI classify it; merge and
+      // production apply stay owner-gated (draft + needs-human-gate).
+      "20260901060000_relationship_visibility_least_privilege_v1.sql",
+      // 2026-09-01: the public-schema CREATE revoke (20260901100000)
+      // carries the marker because a REVOKE is a grant-surface change by
+      // classification. It is narrowing only: ONE statement,
+      // `revoke create on schema public from public`, removing the CREATE
+      // that anon/authenticated/service_role inherited via PUBLIC (none
+      // held a direct grant). USAGE stays, so every read, RPC and auth path
+      // is untouched. Minimal current-equivalent extraction of the
+      // still-live half of #879, owner-approved 2026-09-01.
+      "20260901100000_revoke_public_schema_create_v1.sql",
+      // 2026-09-01: the labour-economics metric widening (20260901140000)
+      // carries the marker because it is `data-dml` on the registry that
+      // governs which metrics an importer may write. That DML is the whole
+      // point: the fail-closed allowlist is what keeps the labour-economics
+      // spec inert, so widening it is the activation. It creates, drops and
+      // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
+      // docs/intelligence/labour-economics-metrics-v1.md §6.
+      "20260901140000_labour_economics_metric_widening_v1.sql",
+]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

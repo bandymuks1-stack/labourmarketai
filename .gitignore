@@ -71,7 +71,16 @@ next-env.d.ts
 # owner visual-proof capture (holds a live Google login session + authed
 # screenshots — never committed; see scripts/capture-ia-proof.mjs)
 /apps/web/.playwright-ia-proof-profile/
+/apps/web/.playwright-proofs/
 /apps/web/ia-proof/
+
+# local research/proof artifacts (playwright CLI logs, ad-hoc run output).
+# The auto-commit workflow stages with `git add .`; without these entries a
+# session's 79MB of local artifacts is one commit away from landing on main.
+/.playwright-cli/
+/output/
+/apps/output/
+/apps/web/output/
 
 # os / editor
 Thumbs.db
@@ -86,3 +95,7 @@ BRIEF_MO.md
 supabase/.branches/
 supabase/.temp/
 /apps/web/tests/e2e/.storage-state.admin.json
+
+# Playwright JSON report — written by the E2E Smoke workflow's executed-count
+# guard (.github/workflows/e2e-smoke.yml) and by local subset runs.
+/apps/web/e2e-report.json

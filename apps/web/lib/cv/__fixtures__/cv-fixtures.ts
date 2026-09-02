@@ -93,7 +93,15 @@ function storedZip(entries: { name: string; data: Uint8Array }[]): Uint8Array {
 const xmlEscape = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** Minimal valid .docx (Office Open XML) carrying `text` in one paragraph. */
+/**
+ * Minimal valid .docx (Office Open XML) carrying `text`.
+ *
+ * Every LINE of `text` becomes its own `<w:p>`, because that is the only shape
+ * mammoth turns back into a newline (`extractRawText` joins paragraphs, not
+ * runs). A real CV is a list of lines and `parseCvSections` splits on `
+`, so
+ * a single-paragraph fixture could only ever prove a one-line CV.
+ */
 export function makeDocx(text: string): Uint8Array {
   const contentTypes =
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -107,12 +115,16 @@ export function makeDocx(text: string): Uint8Array {
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
     "</Relationships>";
+  const paragraphs = text
+    .split("\n")
+    .map((line) => `<w:p><w:r><w:t xml:space="preserve">${xmlEscape(line)}</w:t></w:r></w:p>`)
+    .join("");
   const doc =
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
-    "<w:body><w:p><w:r><w:t>" +
-    xmlEscape(text) +
-    "</w:t></w:r></w:p></w:body></w:document>";
+    "<w:body>" +
+    paragraphs +
+    "</w:body></w:document>";
 
   return storedZip([
     { name: "[Content_Types].xml", data: enc(contentTypes) },
@@ -134,19 +146,22 @@ export function makePdf(text: string): Uint8Array {
   // Wrap at word boundaries so every glyph stays inside the MediaBox —
   // pdf.js drops text positioned past the page edge, so a single long line
   // would come back truncated from extraction.
-  const words = safe.split(" ");
+  // An explicit newline is a hard break; only over-long lines are re-wrapped.
   const lines: string[] = [];
-  let cur = "";
-  for (const w of words) {
-    const next = cur ? `${cur} ${w}` : w;
-    if (next.length > 70 && cur) {
-      lines.push(cur);
-      cur = w;
-    } else {
-      cur = next;
+  for (const source of safe.split("\n")) {
+    const words = source.split(" ");
+    let cur = "";
+    for (const w of words) {
+      const next = cur ? `${cur} ${w}` : w;
+      if (next.length > 70 && cur) {
+        lines.push(cur);
+        cur = w;
+      } else {
+        cur = next;
+      }
     }
+    lines.push(cur);
   }
-  if (cur) lines.push(cur);
   const stream = `BT /F1 12 Tf 14 TL 72 720 Td ${lines
     .map((l) => `(${l}) Tj T*`)
     .join(" ")} ET`;

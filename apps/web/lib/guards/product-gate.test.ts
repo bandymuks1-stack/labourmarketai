@@ -1213,15 +1213,44 @@ describe("unified world model — one Entity, registered types", () => {
     expect(src).toContain('from "./universal-object-model"');
   });
 
+  /**
+   * The tables THIS lock would introduce, as a migration filename would spell
+   * them: a snake_case token, so the boundary is start-of-name or `_`, and
+   * the end is `_` or the extension. A loose /entit/ hits pre-existing files
+   * like 0026_customer_entity and *_identity_*.
+   */
+  const ENTITY_LOCK_TABLE_FILE = /(^|_)entities(?=_|\.)|entity_relationships|entity_roles/i;
+
   it("this slice really changed no schema", () => {
     // The lock must not have smuggled a migration in with it.
     const migrations = join(repoRoot, "supabase", "migrations");
     const before = readdirSync(migrations).filter((f) => f.endsWith(".sql"));
     // Precise: the tables THIS lock would introduce. A loose /entit/ match
     // hits pre-existing files like 0026_customer_entity and *_identity_*.
-    expect(
-      before.some((f) => /entities|entity_relationships|entity_roles/i.test(f)),
-    ).toBe(false);
+    expect(before.some((f) => ENTITY_LOCK_TABLE_FILE.test(f))).toBe(false);
+  });
+
+  it("NEGATIVE CONTROL — the schema detector fires on what it forbids, not on look-alikes", () => {
+    // The first version carried a literal U+0008 where `\b` was meant and
+    // matched nothing (2026-07-28 → 2026-08-29). The control also shows why
+    // `\b` alone would NOT have been enough: `_` is a word character, so
+    // `\bentities\b` can never match a migration named `…_entities.sql`.
+    for (const hit of [
+      "20260901000000_entities.sql",
+      "20260901000000_create_entities_v1.sql",
+      "20260901000000_entity_relationships.sql",
+      "20260901000000_entity_roles_v2.sql",
+    ]) {
+      expect(ENTITY_LOCK_TABLE_FILE.test(hit), `must flag ${hit}`).toBe(true);
+    }
+    for (const miss of [
+      "0026_customer_entity.sql",
+      "20260705170000_conversation_counterpart_identity.sql",
+      "20260901000000_entitiesx.sql",
+      "20260901000000_myentities.sql",
+    ]) {
+      expect(ENTITY_LOCK_TABLE_FILE.test(miss), `must not flag ${miss}`).toBe(false);
+    }
   });
 });
 

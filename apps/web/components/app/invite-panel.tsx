@@ -12,9 +12,12 @@ import {
   type InvitationSendOutcome,
 } from "@/lib/invitations/actions";
 import {
+  DEFAULT_RELATIONSHIP_SLUG,
   INVITATION_TYPES,
   MAX_EMAILS_PER_ACTION,
   ORG_INVITATION_TYPES,
+  RELATIONSHIP_INVITE_CHOICES,
+  relationshipChoiceBlocked,
   type InvitationType,
 } from "@/lib/invitations/model";
 
@@ -40,13 +43,42 @@ export function InvitePanel({
   defaultProjectId,
 }: {
   locale: string;
-  organizations: { id: string; name: string }[];
+  /**
+   * `capabilities` are the organization's declared roles (`organization_roles`).
+   * They are used ONLY to explain, before the send, why a capacity is not on
+   * offer — `create_invitation_v1` re-checks server-side and is the actual
+   * enforcement point. Absent (an older caller) reads as "nothing declared",
+   * which is the honest fail-closed answer rather than a silent allow.
+   */
+  organizations: { id: string; name: string; capabilities?: readonly string[] }[];
   projects: { id: string; title: string | null }[];
   defaultType?: string;
   defaultOrganizationId?: string;
   defaultProjectId?: string;
 }) {
   const t = useTranslations("network.invite");
+  // The ONE localized relationship vocabulary — the same words the CV prints.
+  const tRelationships = useTranslations("relationshipTypes");
+  /**
+   * THE FORM OPENS WHEN SOMEBODY ASKS FOR IT.
+   *
+   * Eight controls — type, addresses, recipient language, invited name,
+   * proposed role, message, organization, project — used to be unrolled on
+   * every visit to a page whose job is to show existing relationships. Owner
+   * rule for this train: "Forms should open only after an explicit action
+   * such as Pakviesti"; and "an empty feature should normally consume only a
+   * few lines".
+   *
+   * A deep link that already names what to invite (`?invite=1&type=…&org=…`,
+   * used from the company workspace and project operations) is itself the
+   * explicit action, so it still lands on the open form — closing it for
+   * those callers would break a real entry point to make a screenshot
+   * tidier. Nothing is removed and no state is reset: this is the same panel,
+   * behind its own heading.
+   */
+  const [open, setOpen] = useState(
+    Boolean(defaultType || defaultOrganizationId || defaultProjectId),
+  );
   const [type, setType] = useState<InvitationType>(
     (INVITATION_TYPES as readonly string[]).includes(defaultType ?? "")
       ? (defaultType as InvitationType)
@@ -67,12 +99,40 @@ export function InvitePanel({
   const [projectId, setProjectId] = useState(
     defaultProjectId ?? projects[0]?.id ?? "",
   );
+  // Defaults to the historical relationship, so a sender who ignores this
+  // control gets exactly the invitation the product sent before it existed.
+  const [relationshipSlug, setRelationshipSlug] = useState<string>(
+    DEFAULT_RELATIONSHIP_SLUG,
+  );
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<CreateInvitationsResult | null>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
   const needsOrg = (ORG_INVITATION_TYPES as readonly string[]).includes(type);
   const needsProject = type === "join_project";
+
+  /**
+   * IN WHAT CAPACITY. Only organization-scoped invitations establish a
+   * person↔organization relationship, so the question is asked only there;
+   * everywhere else the historical default stands and nothing is sent.
+   */
+  const selectedOrgCapabilities = useMemo(
+    () => organizations.find((o) => o.id === organizationId)?.capabilities ?? [],
+    [organizations, organizationId],
+  );
+  /**
+   * Every capacity stays VISIBLE even when the organization cannot offer it
+   * yet. Hiding `student` from a school that has not declared it trains people
+   * produces the worst possible screen — the thing the reader came to do is
+   * simply absent, with no way to find out why. Showing it and saying what is
+   * missing turns a dead end into the next step.
+   */
+  const blockedChoice = useMemo(() => {
+    const choice = RELATIONSHIP_INVITE_CHOICES.find(
+      (c) => c.slug === relationshipSlug,
+    );
+    return choice ? relationshipChoiceBlocked(choice, selectedOrgCapabilities) : false;
+  }, [relationshipSlug, selectedOrgCapabilities]);
 
   const availableTypes = useMemo(
     () =>
@@ -99,6 +159,9 @@ export function InvitePanel({
         recipientLocale,
         organizationId: needsOrg ? organizationId : null,
         projectId: needsProject ? projectId : null,
+        // Only an organization invitation carries a capacity; anywhere else
+        // there is no organization for the relationship to be WITH.
+        relationshipSlug: needsOrg ? relationshipSlug : null,
         invitedName: invitedName || null,
         proposedRole: proposedRole || null,
         personalMessage: message || null,
@@ -140,12 +203,28 @@ export function InvitePanel({
       data-testid="invite-panel"
     >
       <header className="flex flex-col gap-1">
-        <h2 className="font-display text-lg font-bold text-text-primary">
-          {t("title")}
-        </h2>
+        {/* Closed, the heading IS the trigger — the panel's own title is
+            already the word the owner named for this action ("Pakviesti"), so
+            the compact state needs no new string in any locale, and the
+            reader sees the same word whether it is open or shut. */}
+        {open ? (
+          <h2 className="font-display text-lg font-bold text-text-primary">
+            {t("title")}
+          </h2>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            data-testid="invite-panel-open"
+            className="flex min-h-11 items-center gap-2 self-start rounded-md border border-ink-500 px-3 py-1.5 font-display text-lg font-bold text-text-primary transition-colors hover:border-brand-blue"
+          >
+            {t("title")}
+          </button>
+        )}
         <p className="text-xs text-text-secondary">{t("intro")}</p>
       </header>
 
+      {open && (
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("typeLabel")}
@@ -178,6 +257,44 @@ export function InvitePanel({
                 </option>
               ))}
             </select>
+          </label>
+        )}
+
+        {/* IN WHAT CAPACITY — the control that lets an institution connect a
+            learner instead of accidentally declaring them an employee. The
+            names come from the `relationshipTypes` catalogue, never from the
+            slug (invariant I-8). */}
+        {needsOrg && (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("capacityLabel")}
+            <select
+              value={relationshipSlug}
+              onChange={(e) => setRelationshipSlug(e.target.value)}
+              data-testid="invite-capacity"
+              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            >
+              {RELATIONSHIP_INVITE_CHOICES.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {tRelationships(c.slug)}
+                </option>
+              ))}
+            </select>
+            <span className="text-meta text-text-muted">{t("capacityHint")}</span>
+            {blockedChoice && (
+              <span
+                className="text-meta text-state-danger"
+                data-testid="invite-capacity-blocked"
+              >
+                {t("capacityNeedsCapability")}{" "}
+                <a
+                  href={`/${locale}/dashboard/company`}
+                  className="underline hover:text-text-primary"
+                  data-testid="invite-capacity-blocked-cta"
+                >
+                  {t("capacityNeedsCapabilityCta")}
+                </a>
+              </span>
+            )}
           </label>
         )}
 
@@ -272,6 +389,7 @@ export function InvitePanel({
           {sending ? t("sending") : t("send")}
         </button>
       </form>
+      )}
 
       {result && (
         <div

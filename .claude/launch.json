@@ -4,9 +4,46 @@
     {
       "name": "acceptance",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["tsx", "scripts/dev-acceptance.ts"],
+      "runtimeArgs": [
+        "tsx",
+        "scripts/dev-acceptance.ts"
+      ],
       "cwd": "apps/web",
       "port": 3000
+    },
+    {
+      "name": "mobile-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "-C",
+        "apps/mobile",
+        "exec",
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8081"
+      ],
+      "port": 8081
+    },
+    {
+      "name": "dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "-p", "3000"],
+      "cwd": "apps/web",
+      "port": 3000
+    },
+    {
+      "name": "prod-verify",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "-p",
+        "3300"
+      ],
+      "cwd": "apps/web",
+      "port": 3300
     }
   ]
 }

@@ -20,9 +20,15 @@ import type {
   BookingActionLabels,
   BookingOffer,
 } from "@/components/app/conversation/worker-booking-action";
+import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
+import { baseIdentityForRole } from "@/lib/config/roles";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
+import { listMyEngagements } from "@/lib/invitations/network";
 
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
@@ -70,11 +76,51 @@ export default async function DashboardHomePage({
   // block appears the moment it is known.
   const personalIntroPayload: Promise<PersonalIntroPayload> =
     loadPersonalIntroPayload();
-  const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
+  // M10 — HOME IDENTITY ADAPTATION, within the two-base-identity model.
+  // Which starters the company greeting offers depends on what the active
+  // organization DECLARED it does (canonical `organization_roles` read, legacy
+  // column fallback — the same layer the invite panel and the company hub
+  // read). For a person, one RLS-scoped read answers whether an ACTIVE
+  // learner link exists, so the opening can acknowledge the real learning
+  // context. Both reads run in parallel with the booking read below; every
+  // failure degrades to the plain greeting — nothing is fabricated.
+  const identity = baseIdentityForRole(activeRole) ?? "person";
+  const [{ offers, labels: bookingLabels }, educationWorkspace, learnerLink] =
+    await Promise.all([
+      loadBookingOffers(activeRole),
+      identity === "company" ? loadEducationWorkspaceFlag() : false,
+      identity === "person" ? loadActiveLearnerLink() : null,
+    ]);
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
   );
+
+  /**
+   * Localized country names for the demand prefill.
+   *
+   * The structurer already reads the country out of "…Nyderlanduose", but the
+   * intake form then asked for the location anyway, because `demandPrefill`
+   * had no way to turn `NL` into a word. The code itself must never reach the
+   * field — that is an internal value in a box the person is about to read
+   * (§23) — so the NAME is resolved here, where the catalogue lives.
+   *
+   * `labourMarket.countryNames` is the same node the company page uses; this
+   * adds no second source.
+   */
+  const tCountryNames = await getTranslations("labourMarket");
+  const countryLabels = Object.fromEntries(
+    MARKET_COUNTRIES.map((c) => [c, tCountryNames(`countryNames.${c}`)]),
+  ) as Record<string, string>;
+
+  // M10 — the learner line is resolved HERE because it carries a placeholder
+  // (`{institution}`), same rule as `greetingNamed`: the raw placeholder must
+  // never reach the screen. Rendered only with the institution's REAL name.
+  const tChat = await getTranslations("conversation.chat");
+  const learnerContextLine =
+    identity === "person" && learnerLink
+      ? tChat("learnerGreetingContext", { institution: learnerLink })
+      : null;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -97,9 +143,55 @@ export default async function DashboardHomePage({
         bookingOffers={offers}
         bookingLabels={bookingLabels}
         personalIntroPayload={personalIntroPayload}
+        countryLabels={countryLabels}
+        educationWorkspace={educationWorkspace}
+        learnerContextLine={learnerContextLine}
       />
     </>
   );
+}
+
+/**
+ * M10 — is the ACTIVE organization an education-first workspace?
+ *
+ * `getActiveOrganizationContext` is request-cached (the layout already runs
+ * it), so the only new IO is the one `organization_roles` read the invite
+ * panel and the company hub already perform per organization. Declared rows
+ * win; the legacy column is the fallback (`organizationCapabilities`
+ * semantics). Any failure reads as `false` — the plain employer greeting,
+ * never an invented capability.
+ */
+async function loadEducationWorkspaceFlag(): Promise<boolean> {
+  try {
+    const orgContext = await getActiveOrganizationContext();
+    if (!orgContext.activeOrganizationId) return false;
+    const roleSlugs = await readOrganizationCapabilities(
+      orgContext.activeOrganizationId,
+    );
+    return isEducationFirstWorkspace({
+      roleSlugs,
+      legacyType: orgContext.activeOrganization?.organizationType ?? null,
+    });
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * M10 — the person's ACTIVE learner link, as the linked institution's real
+ * name (`engagement_contexts` relationship `student`, the row an accepted
+ * learner invitation creates — institution↔learner link v1). Reuses the
+ * network page's own RLS-scoped read; `null` on no link, an unnamed
+ * institution, or any degraded read — the greeting then stands unchanged.
+ */
+async function loadActiveLearnerLink(): Promise<string | null> {
+  try {
+    const engagements = await listMyEngagements();
+    const link = engagements.find((e) => e.relationshipSlug === "student");
+    return link?.organizationName?.trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 /**

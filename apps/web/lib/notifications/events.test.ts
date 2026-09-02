@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   emitNotificationEvent,
   markAllNotificationEventsRead,
+  markNotificationEventRead,
   notificationDedupeKey,
+  NOTIFICATION_EVENT_TYPES,
   readMyNotificationEvents,
 } from "./events";
 
@@ -21,7 +23,7 @@ import {
 
 interface Recorded {
   table: string;
-  kind: "insert" | "update" | "select";
+  kind: "insert" | "update" | "select" | "eq" | "limit";
   payload?: unknown;
 }
 
@@ -41,8 +43,15 @@ function fakeDb(options: {
     return chain;
   };
   chain.order = self;
-  chain.limit = self;
+  chain.limit = (value: unknown) => {
+    ops.push({ table: "notification_events", kind: "limit", payload: value });
+    return chain;
+  };
   chain.is = self;
+  chain.eq = (...args: unknown[]) => {
+    ops.push({ table: "notification_events", kind: "eq", payload: args });
+    return chain;
+  };
   chain.insert = (payload: unknown) => {
     ops.push({ table: "notification_events", kind: "insert", payload });
     return Promise.resolve(
@@ -187,5 +196,63 @@ describe("markAllNotificationEventsRead", () => {
     expect(
       await markAllNotificationEventsRead(client, "2026-08-10T07:00:00Z"),
     ).toEqual({ kind: "feature_unavailable" });
+  });
+});
+
+describe("markNotificationEventRead (per-row, completion v1)", () => {
+  it("stamps read_at on exactly the named row (id filter present)", async () => {
+    const { client, ops } = fakeDb();
+    const outcome = await markNotificationEventRead(
+      client,
+      "33333333-3333-4333-8333-333333333333",
+      "2026-08-31T07:00:00Z",
+    );
+    expect(outcome).toEqual({ kind: "persisted" });
+    const update = ops.find((o) => o.kind === "update")!.payload as Record<
+      string,
+      unknown
+    >;
+    expect(update.read_at).toBe("2026-08-31T07:00:00Z");
+    const eq = ops.find((o) => o.kind === "eq")!.payload as unknown[];
+    expect(eq).toEqual(["id", "33333333-3333-4333-8333-333333333333"]);
+  });
+
+  it("an absent store degrades honestly", async () => {
+    const { client } = fakeDb({ errorCode: "PGRST205" });
+    expect(
+      await markNotificationEventRead(client, "x", "2026-08-31T07:00:00Z"),
+    ).toEqual({ kind: "feature_unavailable" });
+  });
+});
+
+describe("feed limit (completion v1)", () => {
+  it("defaults to the bell's 20", async () => {
+    const { client, ops } = fakeDb({ rows: [] });
+    await readMyNotificationEvents(client);
+    expect(ops.find((o) => o.kind === "limit")!.payload).toBe(20);
+  });
+
+  it("a caller-supplied limit is used, clamped to the 200 ceiling", async () => {
+    const first = fakeDb({ rows: [] });
+    await readMyNotificationEvents(first.client, 100);
+    expect(first.ops.find((o) => o.kind === "limit")!.payload).toBe(100);
+
+    const second = fakeDb({ rows: [] });
+    await readMyNotificationEvents(second.client, 100000);
+    expect(second.ops.find((o) => o.kind === "limit")!.payload).toBe(200);
+  });
+});
+
+describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
+  it("carries every code-side type exactly once (settings-surface source)", () => {
+    expect(new Set(NOTIFICATION_EVENT_TYPES).size).toBe(
+      NOTIFICATION_EVENT_TYPES.length,
+    );
+    // Spot-pin the families; exhaustiveness is compile-time-checked in the
+    // module itself (EventTypesNotListed).
+    expect(NOTIFICATION_EVENT_TYPES).toContain("booking_proposed");
+    expect(NOTIFICATION_EVENT_TYPES).toContain("weekly_digest");
+    expect(NOTIFICATION_EVENT_TYPES).toContain("demand_interest_reviewed");
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(20);
   });
 });

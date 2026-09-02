@@ -66,8 +66,11 @@ export default async function OnboardingPage({
           without this, login_succeeded fires after onboarding_started
           (funnel order inversion) and onboarding drop-offs count as
           "never logged in" (audit F-T4). Dedup key prevents double-fire
-          once the user later reaches the dashboard in the same tab. */}
-      <SessionTelemetry />
+          once the user later reaches the dashboard in the same tab.
+          surface="onboarding": this is the ONE surface allowed to emit
+          `signup_completed` from the pending marker — every genuinely new
+          account passes through here first. */}
+      <SessionTelemetry surface="onboarding" />
       <AmbientGlow />
       {/* V8 W4-B: language stays switchable DURING onboarding — the wizard
           writes profiles.locale from the URL locale at completion, so the
