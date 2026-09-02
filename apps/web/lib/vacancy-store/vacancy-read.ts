@@ -169,6 +169,11 @@ export async function getPublicVacancy(
     .eq("provider_key", providerKey)
     .eq("external_id", externalId)
     .eq("is_active", true)
+    // LIVENESS is the same everywhere (Train B1, 2026-09-02): an ad past its
+    // own `expires_at` is not live merely because the publisher never
+    // withdrew it. Every other read — the anon RPCs, the board, the count —
+    // already says so; this detail read was the one path that did not.
+    .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
     .maybeSingle();
 
   if (error) {
