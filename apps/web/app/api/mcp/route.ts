@@ -83,11 +83,26 @@ function toolDefs(): McpToolDef[] {
 
 const MAX_BODY_BYTES = 64 * 1024;
 
+/**
+ * Server-Timing (RFC-standard header) for the three server-side phases a
+ * client can otherwise only guess at: bearer verification against the auth
+ * server, the capability (including its DB reads), and the presentation
+ * summary. Durations only — no identity, no arguments. Any HTTP client can
+ * read it, which is what makes "is it us or the assistant?" answerable.
+ */
+function serverTiming(marks: Record<string, number>): string {
+  return Object.entries(marks)
+    .map(([k, v]) => `${k};dur=${v.toFixed(1)}`)
+    .join(", ");
+}
+
 export async function POST(req: Request) {
+  const t0 = performance.now();
   const auth = await resolveApiIdentity(req);
+  const authMs = performance.now() - t0;
   if (!auth.ok) {
     const refusal = classifyRefusal(auth.reason);
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { "Server-Timing": serverTiming({ auth: authMs }) };
     const challenge = wwwAuthenticateChallenge(new URL(req.url).origin, refusal.errorClass);
     if (challenge) headers["WWW-Authenticate"] = challenge;
     logEvent({
@@ -128,6 +143,7 @@ export async function POST(req: Request) {
     locale: localeFromAcceptLanguage(req.headers.get("accept-language")),
   };
 
+  const marks: Record<string, number> = { auth: authMs };
   const response = await handleMcpMessage(message, {
     serverInfo: { name: "labourmarket-ai", version: "0.1.0" },
     instructions:
@@ -142,7 +158,9 @@ export async function POST(req: Request) {
       if (!capability) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
+      const tCap = performance.now();
       const result = await runCapability(capability.id, caller, args);
+      marks.capability = performance.now() - tCap;
       logEvent({
         event: "external_client.tool",
         door: DOOR,
@@ -162,6 +180,7 @@ export async function POST(req: Request) {
       // alone, exactly as before.
       let humanText: string | undefined;
       if (result.ok) {
+        const tPres = performance.now();
         try {
           humanText =
             (await summarizeCapabilityResult(
@@ -172,14 +191,17 @@ export async function POST(req: Request) {
         } catch {
           humanText = undefined;
         }
+        marks.presentation = performance.now() - tPres;
       }
       return { isError: !result.ok, payload: result, humanText };
     },
   });
 
+  marks.total = performance.now() - t0;
+  const timing = { "Server-Timing": serverTiming(marks) };
   // A notification produces no body — 202 per streamable-HTTP MCP.
-  if (response === null) return new Response(null, { status: 202 });
-  return NextResponse.json(response);
+  if (response === null) return new Response(null, { status: 202, headers: timing });
+  return NextResponse.json(response, { headers: timing });
 }
 
 /** No SSE stream: this server is deliberately stateless (single-response). */

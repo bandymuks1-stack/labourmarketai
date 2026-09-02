@@ -100,6 +100,18 @@ describe("/api/mcp refusals are machine-readable and keep the no-oracle rule", (
     expect((await res.json()).client_action).toBe("retry_later");
   });
 
+  it("every response carries Server-Timing with the auth phase (durations only)", async () => {
+    nextResult = { ok: false, reason: "invalid-bearer" };
+    const refused = await POST(initialize());
+    expect(refused.headers.get("server-timing")).toMatch(/^auth;dur=\d+(\.\d+)?$/);
+    nextResult = { ok: true, identity: { userId: "u-1", transport: "bearer", supabase: {} } };
+    const ok = await POST(initialize());
+    const st = ok.headers.get("server-timing") ?? "";
+    expect(st).toMatch(/auth;dur=/);
+    expect(st).toMatch(/total;dur=/);
+    expect(st).not.toContain("u-1");
+  });
+
   it("rate limited → 429, no challenge, RATE_LIMITED / back_off", async () => {
     nextResult = { ok: false, reason: "rate-limited" };
     const res = await POST(initialize());
