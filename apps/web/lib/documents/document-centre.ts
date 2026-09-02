@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  deriveCredentialValidity,
+  historyEverVerified,
+} from "@/lib/documents/credential-validity";
+import {
   deriveDocumentStatus,
   listMyDocuments,
   type DocumentsListResult,
@@ -110,24 +114,73 @@ async function getOwnWorkerId(
 async function readVerificationByDocument(
   supabase: SupabaseClient,
   workerId: string,
-): Promise<ReadonlyMap<string, DocumentVerificationState> | null> {
+): Promise<ReadonlyMap<
+  string,
+  { verification: DocumentVerificationState; verifiedAt: string | null }
+> | null> {
   try {
     const { data, error } = await asAny(supabase)
       .from("worker_documents")
-      .select("id, verification")
+      .select("id, verification, verified_at")
       .eq("worker_id", workerId)
       .limit(DOC_CENTRE_VERIFICATION_READ_LIMIT);
     if (error) return null; // 42703 column absent, or any other failure
-    const map = new Map<string, DocumentVerificationState>();
-    for (const row of (data ?? []) as { id: string; verification: string }[]) {
+    const map = new Map<
+      string,
+      { verification: DocumentVerificationState; verifiedAt: string | null }
+    >();
+    for (const row of (data ?? []) as {
+      id: string;
+      verification: string;
+      verified_at?: string | null;
+    }[]) {
       if (
         row.verification === "unverified" ||
         row.verification === "pending" ||
         row.verification === "verified" ||
         row.verification === "rejected"
       ) {
-        map.set(row.id, row.verification);
+        map.set(row.id, {
+          verification: row.verification,
+          verifiedAt: typeof row.verified_at === "string" ? row.verified_at : null,
+        });
       }
+    }
+    return map;
+  } catch {
+    return null;
+  }
+}
+
+/** Which documents were EVER verified, read from the append-only history
+ *  (`worker_document_events`, own rows via RLS, bounded). This is the only
+ *  thing that tells a REVOKED credential (once verified, now refused) from a
+ *  plain REJECTED one. null = history unreadable → no revocation is claimed
+ *  (the row then derives as rejected, which is still true). Read-only. */
+async function readEverVerifiedByDocument(
+  supabase: SupabaseClient,
+  documentIds: readonly string[],
+): Promise<ReadonlyMap<string, boolean> | null> {
+  if (documentIds.length === 0) return new Map();
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("worker_document_events")
+      .select("worker_document_id, after_state")
+      .in("worker_document_id", documentIds)
+      .limit(DOC_CENTRE_VERIFICATION_READ_LIMIT);
+    if (error) return null;
+    const byDoc = new Map<string, { after_state?: unknown }[]>();
+    for (const row of (data ?? []) as {
+      worker_document_id: string;
+      after_state?: unknown;
+    }[]) {
+      const list = byDoc.get(row.worker_document_id) ?? [];
+      list.push({ after_state: row.after_state });
+      byDoc.set(row.worker_document_id, list);
+    }
+    const map = new Map<string, boolean>();
+    for (const id of documentIds) {
+      map.set(id, historyEverVerified(byDoc.get(id)));
     }
     return map;
   } catch {
@@ -198,18 +251,44 @@ export async function getWorkerDocumentCentre(): Promise<WorkerDocumentCentre> {
       ? await readVerificationByDocument(supabase, workerId)
       : null;
 
+  // History (append-only events) is read ONLY to tell revoked from rejected;
+  // it is never written or reshaped here (Train E1: history ≠ current state).
+  const everVerified =
+    verification !== null
+      ? await readEverVerifiedByDocument(
+          supabase,
+          readiness.documents.map((d) => d.id),
+        )
+      : null;
+
   const now = new Date();
-  const documents: CentreDocumentRow[] = readiness.documents.map((d) => ({
-    id: d.id,
-    documentTypeSlug: d.documentTypeSlug,
-    country: d.country,
-    validUntil: d.validUntil,
-    storedStatus: d.storedStatus,
-    derivedStatus: deriveDocumentStatus(d, now),
+  const documents: CentreDocumentRow[] = readiness.documents.map((d) => {
     // A row missing from the (bounded) verification read carries null —
     // "no claim" — never a defaulted state.
-    verification: verification?.get(d.id) ?? null,
-  }));
+    const v = verification?.get(d.id) ?? null;
+    return {
+      id: d.id,
+      documentTypeSlug: d.documentTypeSlug,
+      country: d.country,
+      validUntil: d.validUntil,
+      storedStatus: d.storedStatus,
+      derivedStatus: deriveDocumentStatus(d, now),
+      verification: v?.verification ?? null,
+      verifiedAt: v?.verifiedAt ?? null,
+      validity:
+        v === null
+          ? null
+          : deriveCredentialValidity(
+              {
+                verification: v.verification,
+                validUntil: d.validUntil,
+                verifiedAt: v.verifiedAt,
+                everVerified: everVerified?.get(d.id) ?? false,
+              },
+              now,
+            ),
+    };
+  });
 
   return {
     inventory: {

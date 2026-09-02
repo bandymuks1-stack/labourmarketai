@@ -7062,6 +7062,16 @@
       "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
       "projectAxisLink": "Project readiness checklists",
       "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
+    },
+    "validity": {
+      "active": "Valid",
+      "expired": "Expired",
+      "revoked": "Revoked",
+      "pending": "Awaiting review",
+      "rejected": "Refused",
+      "unverified": "Not verified",
+      "unknown": "Validity unknown",
+      "reviewedOn": "Reviewed {date}"
     }
   },
   "documentFiles": {

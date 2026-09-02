@@ -7062,6 +7062,16 @@
       "unavailable": "Sutikimu pagrįstos dokumentų suvestinės šioje aplinkoje nepasiekiamos. Dokumentai priklauso darbuotojams.",
       "projectAxisLink": "Projektų parengties sąrašai",
       "projectAxisNote": "Darbuotojų parengtis pagal projektą rodoma kiekvieno projekto operacijų puslapyje."
+    },
+    "validity": {
+      "active": "Galioja",
+      "expired": "Nebegalioja",
+      "revoked": "Atšaukta",
+      "pending": "Laukia peržiūros",
+      "rejected": "Atmesta",
+      "unverified": "Nepatikrinta",
+      "unknown": "Galiojimas nežinomas",
+      "reviewedOn": "Peržiūrėta {date}"
     }
   },
   "documentFiles": {

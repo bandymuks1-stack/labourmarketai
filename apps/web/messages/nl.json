@@ -7062,6 +7062,16 @@
       "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
       "projectAxisLink": "Gereedheidschecklists per project",
       "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
+    },
+    "validity": {
+      "active": "Geldig",
+      "expired": "Verlopen",
+      "revoked": "Ingetrokken",
+      "pending": "Wacht op beoordeling",
+      "rejected": "Afgewezen",
+      "unverified": "Niet geverifieerd",
+      "unknown": "Geldigheid onbekend",
+      "reviewedOn": "Beoordeeld {date}"
     }
   },
   "documentFiles": {
