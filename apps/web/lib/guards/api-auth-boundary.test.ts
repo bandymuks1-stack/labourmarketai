@@ -66,6 +66,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
   },
+  "health/route.ts": {
+    class: "public",
+    why: "A liveness probe for an external uptime monitor (FINAL COMPLETION Train L1). No user identity exists or is read: it uses only the anon key every browser already holds, against two dependencies a sign-in needs, and answers booleans + latencies + the build id — nothing a person owns.",
+  },
   "cv/extract/route.ts": {
     class: "shared",
     why: "Importing a CV from a phone is one of the first things a mobile client must do.",
