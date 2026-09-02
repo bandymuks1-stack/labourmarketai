@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readAllCompaniesPrivateAsAdmin } from "@/lib/company/company-private-read";
 import type { CompanyVerificationStatus } from "@/lib/company/company-setup";
 
 /**
@@ -76,8 +77,8 @@ export type SetVerificationResult =
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
-const SELECT_COLUMNS =
-  "id, profile_id, legal_name, country, registration_code, address, website, contact_email, contact_phone, requester_role, requested_at, verification_status, verification_note, created_at";
+// Column list (incl. private contact columns) lives with the admin reader in
+// lib/company/company-private-read.ts (K2-1).
 
 /** Exception-review ordering: things that may need admin attention first
  *  (flagged checks + explicit escalations), then the rest, verified last. */
@@ -97,10 +98,9 @@ export async function listCompanyVerificationRequests(): Promise<CompanyVerifica
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
 
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .order("requested_at", { ascending: false, nullsFirst: false });
+  // K2-1: private columns through the admin reader (definer RPC once
+  // 20260902210000 is applied; the direct read before that).
+  const { data, error } = await readAllCompaniesPrivateAsAdmin(supabase);
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||

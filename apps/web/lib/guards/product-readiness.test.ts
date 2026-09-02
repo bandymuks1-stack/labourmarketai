@@ -2323,7 +2323,7 @@ describe("no migration files added by this sprint", () => {
     // internal_platform_aggregates so it is never attributed to Eurostat.
     // Permission-only; imports nothing. Owner-approved 2026-09-01.
     // RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 253.
-    const SPRINT_BASELINE = 253;
+    const SPRINT_BASELINE = 258; // FINAL COMPLETION 2026-09-02: +3 B2 (#1421) +1 F1 (#1426) +1 K2-1 (companies contact minimization) — all RED drafts, unapplied
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
