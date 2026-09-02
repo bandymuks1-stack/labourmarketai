@@ -127,3 +127,106 @@ Leverage-ordered, one line per gate with screen/action, why, unlocks, cost, reve
 - **2026-09-02 evening — G-1 CORRECTED (owner-verified).** Production Auth mail already flows through Resend (team `bandymuks1`, Supabase Custom SMTP `smtp.resend.com:465`, sender `noreply@labourmarket.ai`); today's `e2e-*` confirmation mails BOUNCED as expected (fake mailboxes), one SUPPRESSED; zero mailer/SMTP errors server-side. Time-expiry proven without a single new send: the unconfirmed 12:42 UTC token verified at ~18:30 UTC → `403 otp_expired`. Root TXT `resend-domain-verification=…` identified as the abandoned new-team claim (optional bounded cleanup). G-1 is now exactly ONE owner acceptance test on a real external inbox (`docs/human-gates/email-delivery-gate.md`). Owner decision: keep the existing team; no transfer, no rotation. Evidence: `docs/audits/evidence/final-completion/g1-resend-smtp-state-2026-09-02.md`.
 
 - 2026-09-02 — register opened; handoff reconciled; §6 email gate verified live; Connected Apps confirmed MISSING; residue recorded.
+
+---
+
+## 5. FULL PRODUCT VISION AUDIT (additive layer, 2026-09-02)
+
+> **This section does NOT revise anything above it.** Sections 0–4 answer
+> *launch readiness* and keep their original meaning and authority. This section
+> answers a different question — *how much of the FINAL LabourMarket.ai vision
+> exists* — against a different denominator (the canonical product vision
+> §1–§19 plus the owner's full-vision audit brief).
+>
+> Full audit: [`docs/audits/FULL_PRODUCT_VISION_AUDIT_2026-09-02.md`](../audits/FULL_PRODUCT_VISION_AUDIT_2026-09-02.md)
+
+### 5.1 Three separate states
+
+| State | Score | Denominator |
+|---|---:|---|
+| `CORE_PRODUCT_READY` | **78%** | the current core (worker + employer web loop) working for a real user in production |
+| `COMMERCIAL_LAUNCH_READY` | **35%** | actually accepting paying users |
+| `FULL_VISION_COMPLETE` | **38%** | the canonical vision §1–§19 + the audit brief's domains |
+
+`CORE_PRODUCT_READY` is **not** vision completion. The gap between 78% and 38%
+is the honest measure of how much product remains.
+
+### 5.2 Domain scorecard (weights = final product mass, not current code mass)
+
+| Domain | W | % | Headline |
+|---|---:|---:|---|
+| Identity & multi-context account | 5 | 65 | PROD core; intern/apprentice/graduate/mentor vocabulary missing |
+| Worker · Living CV · Journal · evidence | 8 | 70 | strongest domain, PROD_VERIFIED |
+| Employer · demand · recruitment | 7 | 55 | core proven; no employer demand since 2026-07-13 |
+| **Education & students** | 10 | **18** | substrate only — no programmes/cohorts/qualifications/internships |
+| **Agencies & staffing** | 9 | **25** | full RPC loop, 0 rows, no workspace, **no placement object** |
+| Workforce OS | 9 | 45 | enterprise skeleton; 19 of 24 operational tables never used |
+| Services marketplace + housing | 6 | 20 | housing (vision §8) MISSING entirely |
+| Credentials · verification · trust | 4 | 40 | model excellent, `worker_documents` 0 rows |
+| Documents · mobility · compliance | 4 | 30 | guidance content, not a rules engine |
+| Matching + AI | 7 | 45 | matching strong & explainable; `ai_runs` = 7 lifetime |
+| Market intelligence + upstream | 5 | 30 | supply-side imports only; upstream discovery MISSING |
+| Payments · LMC · invoicing | 6 | 25 | all 7 flags `false`; invoicing from journal MISSING |
+| Communication · notifications · social | 4 | 35 | transport live; LI/FB/IG/TikTok channels absent |
+| Language / global reach | 4 | 30 | 5 of 24 routed; Georgian absent |
+| Security · privacy · GDPR | 5 | 70 | strongest non-worker domain; one open P1 (K2-1) |
+| Automations & autonomous agents | 4 | 12 | Agent OS is 10 static doc cards, no runtime |
+| Mobile & multi-surface (incl. MCP) | 3 | 30 | builds + MCP proven; zero product data on mobile |
+| **TOTAL** | **100** | **38.4** | |
+
+### 5.3 NEW P0 production finding — **P0-1**
+
+**The anonymous read path sits ON the `anon` 3 s statement timeout, and
+`/api/health` flaps RED.** `count_public_vacancies_v1()` measured at **3,758 ms**
+(`EXPLAIN ANALYZE`, cold buffers, spills to temp) against `anon`
+`statement_timeout=3s`; `search_public_vacancy_previews_v1` — the public job
+board — measured **2,747 ms**. Four live probes on `c252fae8`: **503, 503**
+(19:59 / 20:01 UTC), then 200, 200 once buffers warmed.
+
+Consequences: the Train-L1 grade "PRODUCTION_PROVEN" was taken on a warm probe
+and should read **PARTIAL**; the #1439 health cron will page the owner on
+cold-buffer runs; the SEO/acquisition surface is one buffer eviction from
+erroring for anonymous visitors. **GREEN class, no owner gate** — this is the
+first autonomous action on resume.
+
+### 5.4 Verdicts the brief asked for separately
+
+- **STUDENT + EDUCATION — `PARTIAL` 18%.** Institution → invite → learner accept
+  → `student` context beside employment is `PROD_VERIFIED` and the identity model
+  is right. Everything an education institution would actually *use* is
+  `MISSING`: programmes, courses, cohorts, assignments, teacher validation,
+  qualification issuance, internship/apprenticeship management, graduation,
+  graduate tracking, outcome analytics, curriculum feedback, Learning Compass.
+  Of the seven links in `demand → gap → education → evidence → qualification →
+  internship → employment`, **two exist**.
+- **AGENCY — `BACKEND_ONLY` 25%.** `agencies` + 6 tables + ~16 RPCs implement a
+  complete two-sided loop (client connections, demand shares, candidate offers,
+  pool, invitations, docs readiness) — **every table has 0 rows**, there is **no
+  `/dashboard/agency` route**, and there is **no placement/assignment object**
+  between "offer accepted" and an employment engagement. Worker portability is
+  safe by architecture. Blocker to any agency train: `agencies` and
+  `staffing_agency`-typed companies are **two disjoint key spaces**.
+- **WORKFORCE OS — `PARTIAL` 45%.** Genuinely enterprise-grade skeleton (one
+  canonical workflow engine, append-only ledgers immutable even to
+  `service_role`, row-level work-hour allocations, proven timesheet→approval→
+  export chain). 19 of 24 operational tables have never held a row; the plan
+  primitive is owner-gated (#1426); the calendar has no write path.
+- **INTELLIGENCE + AUTONOMY — 30% / 12%.** Source governance is exemplary
+  (activation gated on owner approval + confirmed legal status; small-sample
+  suppression). Signal coverage is supply-side only. No live agent runtime
+  exists inside labourmarket.ai — discovery/outreach should stay **Agentai OS**
+  authority; what this product is missing is the **user-facing automations
+  engine** (vision §12).
+
+### 5.5 Parallelisable lanes
+
+Eight of eleven lanes are **unblocked today**: P0-1 · education model · agency
+workspace + placement · invoicing from journal · upstream discovery · lifecycle
+vocabulary · housing · marketplace lifecycle. Only live payments, LinkedIn/Meta
+auth, chat transcript persistence and the plan primitive are owner-gated.
+**The product is scope-bound, not gate-bound.**
+
+### 5.6 What this audit did NOT change
+
+No launch-readiness entry, train state, gate or evidence link in §0–§4 was
+edited. No PR touched. No migration applied. No CI or deployment altered.
