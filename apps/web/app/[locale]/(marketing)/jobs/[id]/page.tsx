@@ -395,8 +395,7 @@ export default async function JobDetailPage({
     : undefined;
 
   return (
-<<<<<<< ours
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       {/* K3 (2026-09-02): anonymous-safe JSON-LD — a WebPage about an
           Occupation with the salary band. Built ONLY from the anonymous
           preview (never `member`), so employer / location / publisher title /
@@ -416,9 +415,6 @@ export default async function JobDetailPage({
           ),
         }}
       />
-=======
-    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
->>>>>>> theirs
       <Link href="/jobs" className="text-sm text-muted-foreground hover:underline">
         {BACK[active]}
       </Link>
