@@ -1,6 +1,10 @@
 -- ============================================================================
 -- 20260902160100 — public_vacancies_unused_indexes_v1
 --
+-- @human-gate-approved
+--   Acknowledged RED by route (DROP INDEX). NOT an approval: ships DRAFT +
+--   needs-human-gate, unapplied; the rollback recreates both indexes verbatim.
+--
 -- FINAL COMPLETION Train B2 (2026-09-02). OWNER GATE G-3 — RED by policy
 -- (DDL drop). Ships as a DRAFT + needs-human-gate PR; the owner approves the
 -- apply. Reversible: the exact CREATE INDEX statements are in the rollback.

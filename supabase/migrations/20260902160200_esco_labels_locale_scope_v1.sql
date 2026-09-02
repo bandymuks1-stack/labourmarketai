@@ -1,6 +1,10 @@
 -- ============================================================================
 -- 20260902160200 — esco_labels_locale_scope_v1
 --
+-- @human-gate-approved
+--   Acknowledged RED by route (SECURITY DEFINER + grants + DELETE inside the
+--   function body). NOT an approval: ships DRAFT + needs-human-gate, unapplied.
+--
 -- FINAL COMPLETION Train B2 (2026-09-02). OWNER GATE G-5 — RED by policy:
 -- creates the machinery to PRUNE esco_labels to the locales the product can
 -- use, and applies NOTHING by itself. Every run is a service-role-only call

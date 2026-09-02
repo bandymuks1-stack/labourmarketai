@@ -747,7 +747,7 @@ describe("NO new DB migration in this PR", () => {
     // (20260902160000 vacancy retention fn, 20260902160100 unused-index drop,
     // 20260902160200 esco locale prune fn) — RED, owner-gated G-3..G-5, NOT
     // applied; each creates machinery or reversible DDL, none changes data.
-    expect(count).toBeLessThanOrEqual(256);
+    expect(count).toBeLessThanOrEqual(257);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

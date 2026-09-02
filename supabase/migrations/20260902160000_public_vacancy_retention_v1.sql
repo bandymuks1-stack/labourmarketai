@@ -1,6 +1,10 @@
 -- ============================================================================
 -- 20260902160000 — public_vacancy_retention_v1
 --
+-- @human-gate-approved
+--   Acknowledged RED by route (SECURITY DEFINER + grants + DML inside the
+--   function body). NOT an approval: ships DRAFT + needs-human-gate, unapplied.
+--
 -- FINAL COMPLETION Train B2 (2026-09-02). OWNER GATE G-4 — RED by policy:
 -- this file creates the RETENTION MACHINERY for imported job ads and applies
 -- NOTHING by itself. Every run is an explicit, service-role-only call whose

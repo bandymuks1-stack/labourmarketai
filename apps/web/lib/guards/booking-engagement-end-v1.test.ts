@@ -1181,6 +1181,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-02 (FINAL COMPLETION Train B2): the three lifecycle
+      // migrations carry the marker as an ACKNOWLEDGEMENT, not an approval —
+      // they ship as a DRAFT + needs-human-gate PR (#1421) and stay unapplied
+      // until the owner rules on gates G-3..G-5. Each creates machinery or
+      // one reversible DDL and changes no data on apply.
+      "20260902160000_public_vacancy_retention_v1.sql",
+      "20260902160100_public_vacancies_unused_indexes_v1.sql",
+      "20260902160200_esco_labels_locale_scope_v1.sql",
 ]);
   });
 
