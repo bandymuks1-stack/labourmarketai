@@ -1181,6 +1181,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-02: current-equivalent port of #1046 — the worker board RPC
+      // attributes a demand by ORGANISATION (fan-out on multi-company owners
+      // measured live). SECURITY DEFINER body = RED by rule; marker states the
+      // route only, apply stays owner-gated.
+      "20260902233000_worker_demand_org_attribution_v2.sql",
 ]);
   });
 
