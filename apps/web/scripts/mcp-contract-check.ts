@@ -256,8 +256,16 @@ async function main(): Promise<void> {
 }
 
 function entryIds(list: ToolResult): string[] {
-  const rows = (list.data?.entries ?? list.data?.items ?? []) as { id?: unknown }[];
-  return rows.map((r) => (typeof r.id === "string" ? r.id : "")).filter(Boolean);
+  // `journal.list` rows carry `entryId` (registry.ts), not `id`. The first
+  // production run of this gate (2026-09-02, bounded test identity) confirmed
+  // the write and the count 0→1 but reported READ_BACK false because this
+  // read the wrong field — an unreachable assertion of my own making. Both
+  // names are accepted so a future rename cannot silently blind the gate again;
+  // the count-delta assertion in DUPLICATE_CONFIRM is the backstop.
+  const rows = (list.data?.entries ?? list.data?.items ?? []) as { entryId?: unknown; id?: unknown }[];
+  return rows
+    .map((r) => (typeof r.entryId === "string" ? r.entryId : typeof r.id === "string" ? r.id : ""))
+    .filter(Boolean);
 }
 
 function finish(): void {
