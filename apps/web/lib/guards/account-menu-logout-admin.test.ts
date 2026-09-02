@@ -81,7 +81,12 @@ describe("Guard: logout route redirects to the localized login", () => {
   });
 
   it("logout calls only signOut — no delete / RPC / profile mutation", () => {
-    expect(route).toMatch(/supabase\.auth\.signOut\(\)/);
+    // `scope: "local"` is part of the pin (2026-09-02 incident): a bare
+    // `signOut()` takes supabase-js's default `global` scope and deletes the
+    // user's EXTERNAL OAuth-client sessions (ChatGPT / MCP grants) as a side
+    // effect of signing out of one browser. See lib/auth/logout-route.test.ts.
+    expect(route).toMatch(/supabase\.auth\.signOut\(\s*\{\s*scope:\s*["']local["']\s*\}\s*\)/);
+    expect(route).not.toMatch(/scope:\s*["'](global|others)["']/);
     // Anything that would touch user data is forbidden in logout.
     for (const banned of [
       ".delete(",
