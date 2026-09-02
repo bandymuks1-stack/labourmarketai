@@ -11765,7 +11765,10 @@
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
       "chipMyOwnInterest": "Mijn eigen interesse",
       "lmcHint": "Uw LMC-saldo en de volledige mutatiehistorie staan op één plek.",
-      "chipLmc": "LMC openen"
+      "chipLmc": "LMC openen",
+      "briefLearner": "Je bent ingeschreven bij {organization}. Praktijk en leren die je hier vastlegt, tellen als bewijs.",
+      "briefLearnerUnnamed": "Je bent ingeschreven als lerende. Praktijk en leren die je hier vastlegt, tellen als bewijs.",
+      "chipLogLearning": "Leren of praktijk vastleggen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
