@@ -2,9 +2,10 @@
 
 > **Addendum (window 2, later on 2026-09-03):** the newest state is the
 > "UPDATE — window 2" block at the top of `RESUME_CHECKPOINT_2026-09-03.md`.
-> Two facts override §2 below: (1) the batch-B education tables are
+> Two facts override §2 below: (1) the batch-B education tables were
 > **unreadable in production** for every authenticated user (`42P17` policy
-> recursion) — fix is **#1457 RED batch D**, owner queue **row 0**; (2) the
+> recursion) — **fixed: RED batch D applied 13:04 UTC** (ledger
+> `20260903130400`, #1457 merging); (2) the
 > Lane A chain A4–A8 is PROD-PROVEN at the DB level (rolled back). #1458
 > (student cohort view) is merged.
 

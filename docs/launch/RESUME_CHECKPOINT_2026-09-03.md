@@ -6,8 +6,8 @@
 |---|---|
 | `main` | `953c34e7` (#1459 opportunity-type chip) on `7f15c221` (docs) on `d5172597` (#1458) — verify `git log origin/main -3` |
 | Production | `d5172597` verified 12:45 UTC; `953c34e7` was `Vercel: pending` at merge (the docs push `7f15c221` was rate-limited — harmless) — confirm `/api/health` `build` on resume |
-| Open RED draft | **#1457 batch D** `20260903150000_education_rls_recursion_fix_v1` — owner queue **row 0**; migration count 262 on that branch (main = 261) |
-| **Production defect (pilot-blocking, Lane B)** | every authenticated read of `education_programs` / `education_cohorts` / `education_cohort_members` → `42P17` policy recursion (batch B). Institution programmes section = "—", no create form; student cohort view shows nothing. Fix = #1457, prod-proven in a rolled-back transaction. **Do not re-diagnose; do not weaken RLS to work around it.** |
+| RED batch D | **APPLIED TO PROD 13:04 UTC** (owner "Apply batch 2026-09-03 D"; ledger `20260903130400`; readback per actor green; residue 0). **#1457** marked ready, auto-merge armed — on resume confirm it merged, its Vercel status, and `/api/health` `build`; migration count becomes 262 on `main` |
+| Production defect (Lane B) | **CLOSED in the DB**: the `42P17` policy recursion on the three education tables is gone (manager/learner/outsider/anon reads verified). The UI needs no change; the programmes section and the student cohort view light up with real rows. Next: walk B2/B3/B6 with the owner's real institution. |
 | Lane A | A4 → A8 chain PROD-PROVEN 2026-09-03 (rolled back, zero residue) — invite/accept/share/offer/accept→booking/progress/candidate accept→engagement/outsider 0. Only real people are missing. |
 | Lane B | B1, B4, B5 (invite/learners) live; **B2/B3/B6 blocked in prod until D**; B7 compass live; B10 aggregates live |
 | Real pilot signals | none — 0 rows in agency_client_connections / agency_candidate_offers / education_programs / education_cohorts; 15 auth users in 48 h are e2e/proof identities |
