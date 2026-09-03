@@ -5,7 +5,7 @@
     "subtitleInstitution": "What the public market asks for right now — the directions your learners are heading into.",
     "active": "{count} live vacancies",
     "employers": "{count} employers",
-    "filtered": "{profession}: {count}",
+    "filtered": "{profession}: {count} vacancies",
     "none": "No matching public vacancies at the moment.",
     "provenance": "Imported public market data (one source market today); the employers listed are not customers of LabourMarket.ai and do not publish through it.",
     "unavailable": "Market data is not available right now.",
