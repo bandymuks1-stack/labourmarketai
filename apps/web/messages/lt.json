@@ -10533,6 +10533,22 @@
     "fromAgency": "Nuo"
   },
   "scoutingAgencyOffers": {
+    "status": {
+      "offered": "pasiūlytas",
+      "withdrawn": "atšauktas",
+      "accepted": "priimtas",
+      "declined": "atmestas"
+    },
+    "decision": {
+      "accept": "Priimti kandidatą",
+      "decline": "Atmesti",
+      "accepted": "Priimta — darbuotojui išsiųstas rezervacijos pasiūlymas; toliau sprendžia jis.",
+      "declined": "Atmesta — agentūra tai mato.",
+      "notReady": "Kandidatų priėmimas ir atmetimas dar neveikia — kol kas naudokite kontaktą arba rezervacijos pasiūlymą žemiau.",
+      "forbidden": "Spręsti gali tik šio poreikio savininkas.",
+      "closed": "Šis pasiūlymas nebegalioja.",
+      "error": "Kažkas nepavyko. Bandykite dar kartą."
+    },
     "title": "Agentūros pasiūlyti kandidatai",
     "subtitle": "Prijungta personalo agentūra pasiūlė šiuos darbuotojus šiam poreikiui. Peržiūrėkite, susisiekite arba rezervuokite juos tais pačiais valdikliais žemiau.",
     "via": "Per"
