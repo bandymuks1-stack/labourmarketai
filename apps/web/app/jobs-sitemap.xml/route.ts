@@ -41,7 +41,20 @@ function esc(s: string): string {
 }
 
 export async function GET(): Promise<Response> {
-  const counts = await readPublicVacancySupplyCounts();
+  let counts: Awaited<ReturnType<typeof readPublicVacancySupplyCounts>>;
+  try {
+    counts = await readPublicVacancySupplyCounts();
+  } catch {
+    // The count is a real query that can exceed the anon statement timeout on
+    // a cold buffer pool (P0-1b, 2026-09-03). A crawler must never read that
+    // as "the sitemap is broken" (500) nor as "there are no jobs" (an empty
+    // index would invite de-indexing). 503 + Retry-After is the truthful
+    // answer: temporarily unavailable, come back — and it is never cached.
+    return new Response(null, {
+      status: 503,
+      headers: { "Retry-After": "600", "Cache-Control": "no-store" },
+    });
+  }
 
   // `not_provisioned` (feature off) and "zero live ads" both mean there is
   // nothing to advertise. A crawler must still receive a VALID, EMPTY index —
