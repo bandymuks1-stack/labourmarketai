@@ -168,6 +168,34 @@ export async function submitOfferAction(
   return { status: "ok" };
 }
 
+/** CLIENT: accept (→ canonical booking proposed to the worker) or decline an
+ *  agency's candidate offer. Migration 20260903101000; until applied the
+ *  action reports `needs-migration` and the surface says so. */
+export async function respondCandidateOfferAction(
+  _prev: BridgeActionState,
+  formData: FormData,
+): Promise<BridgeActionState> {
+  const offerId = String(formData.get("offerId") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  const note = validateOfferNote(String(formData.get("note") ?? ""));
+  if (!isBridgeUuid(offerId)) return { status: "invalid" };
+  if (decision !== "accepted" && decision !== "declined") return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
+    p_offer_id: offerId,
+    p_decision: decision,
+    p_note: note,
+  });
+  if (error) {
+    const m = (error.message ?? "").toLowerCase();
+    if (m.includes("offer_not_open") || m.includes("offer_not_found")) return { status: "not-found" };
+    return mapErr(error.code, error.message);
+  }
+  revalidatePath("/[locale]/dashboard/company/scouting", "page");
+  revalidatePath("/[locale]/dashboard/company", "page");
+  return { status: "ok" };
+}
+
 /** AGENCY: withdraw an offer. */
 export async function withdrawOfferAction(
   _prev: BridgeActionState,

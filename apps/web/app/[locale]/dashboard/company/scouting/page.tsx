@@ -26,6 +26,7 @@ import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-contr
 import { FeatureNote } from "@/components/app/feature-note";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
+import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
 import {
   deriveCandidatePipelineStage,
@@ -525,8 +526,28 @@ export default async function CompanyScoutingPage({
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
                   </span>
                   <span className="text-xs text-text-muted">{tOffered("via")}: {oc.agencyName}</span>
+                  <span
+                    className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+                    data-testid={`scout-offer-status-${oc.offerStatus}`}
+                  >
+                    {tOffered(`status.${oc.offerStatus}`)}
+                  </span>
                   {oc.note ? <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">{oc.note}</span> : null}
                 </div>
+                {/* The client's decision on THIS candidate (agency first value):
+                    accept proposes the canonical booking to the worker, decline
+                    closes the offer. Renders only while the offer is open. */}
+                {oc.offerStatus === "offered" ? (
+                  <OfferDecisionButtons
+                    offerId={oc.offerId}
+                    labels={{
+                      accept: tOffered("decision.accept"), decline: tOffered("decision.decline"),
+                      accepted: tOffered("decision.accepted"), declined: tOffered("decision.declined"),
+                      notReady: tOffered("decision.notReady"), forbidden: tOffered("decision.forbidden"),
+                      closed: tOffered("decision.closed"), error: tOffered("decision.error"),
+                    }}
+                  />
+                ) : null}
                 <div className="flex flex-col gap-2">
                   <RequestCommunicationButton
                     locale={locale}

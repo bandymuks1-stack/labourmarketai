@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  isMissingRpcCode,
   isMissingTableCode,
   type AgencyConnection,
   type AgencyConnectionsState,
@@ -188,21 +189,32 @@ export async function listOfferedCandidatesForRequest(
   requestId: string,
 ): Promise<readonly OfferedCandidateRow[]> {
   const supabase = await createClient();
+  const toRow = (r: Record<string, unknown>): OfferedCandidateRow => ({
+    offerId: r.offer_id as string,
+    workerId: r.worker_id as string,
+    agencyName: (r.agency_name as string | null) ?? "—",
+    note: (r.note as string | null) ?? null,
+    createdAt: r.created_at as string,
+    offerStatus: ((r.offer_status as string | null) ?? "offered") as OfferedCandidateRow["offerStatus"],
+    bookingId: (r.booking_id as string | null) ?? null,
+    decidedAt: (r.decided_at as string | null) ?? null,
+  });
   try {
+    // v2 (migration 20260903101000) carries the client's decision + booking and
+    // includes decided offers; until it is applied, the v1 read (open offers
+    // only) answers — same surface, honestly narrower.
+    const v2 = await asAny(supabase).rpc(
+      "list_agency_offered_candidates_for_request_v2",
+      { p_request_id: requestId },
+    );
+    if (!v2.error) return (v2.data ?? []).map(toRow);
+    if (!isMissingRpcCode(v2.error.code)) return [];
     const { data, error } = await asAny(supabase).rpc(
       "list_agency_offered_candidates_for_request_v1",
       { p_request_id: requestId },
     );
     if (error) return [];
-    return (data ?? []).map(
-      (r: Record<string, unknown>): OfferedCandidateRow => ({
-        offerId: r.offer_id as string,
-        workerId: r.worker_id as string,
-        agencyName: (r.agency_name as string | null) ?? "—",
-        note: (r.note as string | null) ?? null,
-        createdAt: r.created_at as string,
-      }),
-    );
+    return (data ?? []).map(toRow);
   } catch {
     return [];
   }

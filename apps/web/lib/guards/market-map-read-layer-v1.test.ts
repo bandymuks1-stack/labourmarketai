@@ -769,11 +769,11 @@ describe("NO new DB migration in this PR", () => {
     // IMMUTABLE projection demand_structured_v2_public with two more allowed
     // values; no definer, no grant, no data change. RECOUNTED from the tree,
     // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
-    // Re-based after main reached 257: bumped 257 -> 258 for RED batch 2026-09-03 B
-    // (20260903120000 education programmes / cohorts / members + demand per
-    // profession), owner-gated draft, UNAPPLIED, no marker. RECOUNTED from the
-    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 258.
-expect(count).toBeLessThanOrEqual(258);
+    // Re-based after main reached 257: bumped 257 -> 259 for RED batch 2026-09-03 A
+    // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
+    // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
+expect(count).toBeLessThanOrEqual(260);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

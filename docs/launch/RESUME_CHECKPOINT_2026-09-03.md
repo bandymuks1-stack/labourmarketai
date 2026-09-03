@@ -10,14 +10,14 @@ Canonical root `C:\Users\Mano\Documents\labourmarketai`, branch `main`.
 
 | Item | Value |
 |---|---|
-| `main` at last write | `b4f136b2` (#1453 merged 09:22 UTC) — verify `git log origin/main -3` |
+| `main` at last write | `cb88be09` + #1455 merged 09:44 UTC (internship type) — verify `git log origin/main -3` |
 | Production | `da136d3e` verified 08:25 UTC (health 200 ×3); later merges redeploy automatically — verify `/api/health` `build` on resume |
 | Production health | 200 ×3, db 52–849 ms. P0-1 closed (health probe constant-cost; count index-only + autovacuum thresholds); P2-1 closed |
-| Applied to prod today | `20260903070000`, `20260903090000`, `20260903110000` (all GREEN, paired rollbacks) + one manual `VACUUM (ANALYZE) public.public_vacancies` |
-| Merged today | #1439 #1445 #1447 #1446 #1449 #1450 #1451 #1452 #1453 |
+| Applied to prod today | `20260903070000`, `20260903090000`, `20260903110000`, `20260903130000` (internship/apprenticeship projection; ledger `20260903094724`) — all GREEN, paired rollbacks — + one manual `VACUUM (ANALYZE) public.public_vacancies` |
+| Merged today | #1439 #1445 #1447 #1446 #1449 #1450 #1451 #1452 #1453 #1455 |
 | Open with auto-merge | none (all GREEN slices merged) |
-| RED drafts (needs-human-gate) | **#1448** batch A (supply-counts row + agency offer decision **+ the client accept/decline UI**, rebased, MERGEABLE) · **#1454** batch B (education programmes/cohorts/members + demand per profession **+ the programmes/cohorts UI**) · #1441 #1440 #1436 #1433 #1430 #1426 #1421 #1355 #1266 #1046 #1045 #897 #896 #895 #883 #740 |
-| Temp worktrees | `scratchpad/wt-red` (#1448) and `scratchpad/wt-red-b` (#1454) — both have node_modules (offline install); keep until merged, then `git worktree remove`. Stale `.claude/worktrees/agent-*` predate this session — untouched; **run vitest from `apps/web`** |
+| RED batches — **ALL APPLIED TO PROD 2026-09-03 11:00 UTC** (owner sentence "Apply batch 2026-09-03 A+B+C"; PRs ready, merging in order A→B→C with ratchet re-base) | **#1448** batch A (supply-counts row + agency offer decision + client accept/decline UI + agency-side decision chips; ratchet 259) · **#1454** batch B (education programmes/cohorts/members + demand per profession + programmes UI; ratchet 258) · **#1456** batch C (institution learner outcomes, aggregates only, suppressed < 5; ratchet 258) — all MERGEABLE against `main` (257) · #1441 #1440 #1436 #1433 #1430 #1426 #1421 #1355 #1266 #1046 #1045 #897 #896 #895 #883 #740 |
+| Temp worktrees | `scratchpad/wt-red` (#1448), `scratchpad/wt-red-b` (#1454) — with node_modules; `scratchpad/wt-red-c` (#1456) — no node_modules. Keep until merged, then `git worktree remove`. Pilot runbooks: `PILOT_RUNBOOK_LANE_A_RECRUITER.md`, `PILOT_RUNBOOK_LANE_B_INSTITUTION.md`. Stale `.claude/worktrees/agent-*` predate this session — untouched; **run vitest from `apps/web`** |
 | Local processes | none; no browser tab open |
 
 ## Actor state after this stretch

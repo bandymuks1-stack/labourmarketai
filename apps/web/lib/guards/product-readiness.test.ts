@@ -2349,11 +2349,11 @@ describe("no migration files added by this sprint", () => {
     // IMMUTABLE projection demand_structured_v2_public with two more allowed
     // values; no definer, no grant, no data change. RECOUNTED from the tree,
     // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
-    // Re-based after main reached 257: bumped 257 -> 258 for RED batch 2026-09-03 B
-    // (20260903120000 education programmes / cohorts / members + demand per
-    // profession), owner-gated draft, UNAPPLIED, no marker. RECOUNTED from the
-    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 258.
-const SPRINT_BASELINE = 258;
+    // Re-based after main reached 257: bumped 257 -> 259 for RED batch 2026-09-03 A
+    // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
+    // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
+const SPRINT_BASELINE = 260;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

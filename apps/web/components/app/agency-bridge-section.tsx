@@ -199,6 +199,22 @@ export function AgencyBridgeSection({
                       <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[reviewStageTone(p.reviewStage)]}`}>
                         {labels.stageLabels[p.reviewStage] ?? p.reviewStage}
                       </span>
+                      {/* The CLIENT's explicit decision on this candidate
+                          (migration 20260903101000): accepted → a booking was
+                          proposed to the worker; declined → closed. Shown
+                          beside the derived review stage, never instead of it. */}
+                      {p.offerStatus === "accepted" || p.offerStatus === "declined" ? (
+                        <span
+                          className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
+                            p.offerStatus === "accepted"
+                              ? "border-state-success/40 bg-state-success/10 text-text-primary"
+                              : "border-ink-500 bg-ink-800 text-text-muted"
+                          }`}
+                          data-testid={`agency-bridge-decision-${p.offerStatus}`}
+                        >
+                          {labels.stageLabels[`decision_${p.offerStatus}`] ?? p.offerStatus}
+                        </span>
+                      ) : null}
                       <a href={`/${locale}/dashboard/company/scouting?request=${p.requestId}`}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline">
                         {labels.openScouting} <ArrowUpRight className="h-3 w-3" aria-hidden />

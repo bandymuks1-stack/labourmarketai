@@ -10593,7 +10593,9 @@
       "contacted": "Kontaktiert",
       "rejected": "Abgelehnt",
       "booking_started": "Buchung gestartet",
-      "accepted": "Buchung angenommen"
+      "accepted": "Buchung angenommen",
+      "decision_accepted": "Kunde angenommen",
+      "decision_declined": "Kunde abgelehnt"
     }
   },
   "clientBridge": {
@@ -10616,6 +10618,22 @@
     "fromAgency": "Von"
   },
   "scoutingAgencyOffers": {
+    "status": {
+      "offered": "vorgeschlagen",
+      "withdrawn": "zurückgezogen",
+      "accepted": "angenommen",
+      "declined": "abgelehnt"
+    },
+    "decision": {
+      "accept": "Kandidat annehmen",
+      "decline": "Ablehnen",
+      "accepted": "Angenommen — ein Buchungsvorschlag wurde an die Arbeitskraft gesendet; sie entscheidet als Nächstes.",
+      "declined": "Abgelehnt — die Agentur sieht das.",
+      "notReady": "Kandidaten annehmen oder ablehnen ist noch nicht verfügbar — nutzen Sie bis dahin Kontakt oder einen Buchungsvorschlag unten.",
+      "forbidden": "Nur der Eigentümer dieser Anfrage kann entscheiden.",
+      "closed": "Dieses Angebot ist nicht mehr offen.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
     "title": "Von der Agentur vorgeschlagene Kandidaten",
     "subtitle": "Eine verbundene Personalagentur hat diese Mitarbeiter für diese Anfrage vorgeschlagen. Prüfen, kontaktieren oder buchen Sie sie mit denselben Steuerelementen unten.",
     "via": "Über"

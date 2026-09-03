@@ -478,6 +478,9 @@ export default async function CompanyDashboardPage({
           offered: tAB("stage.offered"), reviewed: tAB("stage.reviewed"),
           contacted: tAB("stage.contacted"), rejected: tAB("stage.rejected"),
           booking_started: tAB("stage.booking_started"), accepted: tAB("stage.accepted"),
+          // the client's explicit decision on a candidate (20260903101000)
+          decision_accepted: tAB("stage.decision_accepted"),
+          decision_declined: tAB("stage.decision_declined"),
         },
       }
     : null;
