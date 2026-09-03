@@ -757,7 +757,13 @@ describe("NO new DB migration in this PR", () => {
     // index-only scan (2,821 ms warm seq scan -> 640 ms on prod). No grant,
     // no policy, no function change. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 255.
-expect(count).toBeLessThanOrEqual(255);
+    // Bumped 255 -> 256 for the P0-1 autovacuum tuning
+    // (20260903110000_public_vacancies_autovacuum_v1, paired rollback) — GREEN:
+    // per-table autovacuum thresholds only, so the nightly importer's updates
+    // are vacuumed and the covering index stays index-only. No grant, no
+    // policy, no function, no data change. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
+expect(count).toBeLessThanOrEqual(256);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
