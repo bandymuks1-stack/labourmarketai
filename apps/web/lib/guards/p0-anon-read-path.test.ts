@@ -76,6 +76,22 @@ describe("P0-1 GREEN migration 2 — covering partial index for the supply count
   });
 });
 
+describe("P0-1 GREEN migration 3 — autovacuum keeps the covering index index-only", () => {
+  const AV = "supabase/migrations/20260903110000_public_vacancies_autovacuum_v1.sql";
+  const sql = read(AV, repo);
+
+  it("lowers the per-table autovacuum thresholds (2 % / 500) — storage parameters only", () => {
+    // Measured 2026-09-03: last_autovacuum six days old, 26,098 heap fetches
+    // on the index-only scan; one VACUUM → 0 heap fetches, 618 ms warm.
+    expect(sql).toMatch(/alter table public\.public_vacancies set \(\s*autovacuum_vacuum_scale_factor = 0\.02,\s*autovacuum_vacuum_threshold = 500,\s*autovacuum_analyze_scale_factor = 0\.02,\s*autovacuum_analyze_threshold = 500\s*\);/);
+    const executable = sql.replace(/--[^\n]*/g, "");
+    expect(executable).not.toMatch(/security\s+definer|(^|\s)(grant|revoke)\s+|create\s+policy|\bdrop\b|\bupdate\b|\bdelete\b/i);
+    expect(sql).toMatch(/^-- ROLLBACK$/m);
+    const down = read(AV.replace("migrations", "rollbacks").replace(/\.sql$/, ".down.sql"), repo);
+    expect(down).toMatch(/alter table public\.public_vacancies reset \(/);
+  });
+});
+
 describe("P0-1b — /jobs-sitemap.xml never answers 500 on a transient count failure", () => {
   const route = read("app/jobs-sitemap.xml/route.ts");
 
