@@ -2330,15 +2330,28 @@ describe("no migration files added by this sprint", () => {
     // count_public_vacancies_v1. No grant, no policy, no definer swap, no
     // data change. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 254.
-        // Bumped 255 -> 257 for the RED batch 2026-09-03 A (both owner-gated,
+        // Bumped 254 -> 255 for the P0-1 covering index
+    // (20260903090000_public_vacancy_supply_cover_index_v1, paired rollback)
+    // — GREEN: one covering partial index (expires_at include employer_name,
+    // last_seen_at where is_active) so count_public_vacancies_v1 is an
+    // index-only scan (2,821 ms warm seq scan -> 640 ms on prod). No grant,
+    // no policy, no function change. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 255.
+    // Bumped 255 -> 256 for the P0-1 autovacuum tuning
+    // (20260903110000_public_vacancies_autovacuum_v1, paired rollback) — GREEN:
+    // per-table autovacuum thresholds only, so the nightly importer's updates
+    // are vacuumed and the covering index stays index-only. No grant, no
+    // policy, no function, no data change. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
+    // Bumped 256 -> 258 for the RED batch 2026-09-03 A (both owner-gated,
     // shipped UNAPPLIED as a draft, no marker):
     //   20260903100000_public_vacancy_supply_counts_v1 — maintained counts
     //   row + pg_cron refresh + count_public_vacancies_v1 reads the row;
     //   20260903101000_agency_candidate_offer_decision_v1 — client
     //   accept/decline of an agency candidate offer → canonical booking.
     // RECOUNTED from the tree, never summed:
-    // `ls supabase/migrations/*.sql | wc -l` = 257.
-const SPRINT_BASELINE = 257;
+    // `ls supabase/migrations/*.sql | wc -l` = 258.
+const SPRINT_BASELINE = 258;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

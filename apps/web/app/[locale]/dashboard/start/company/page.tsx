@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
 import {
   COMPANY_COUNTRY_CODES,
   listOwnedCompanies,
@@ -54,10 +55,20 @@ export default async function CompanyStartPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ new?: string }>;
+  searchParams?: Promise<{ new?: string; type?: string; capability?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Universal first-run router presets (lib/onboarding/first-run-intent.ts):
+  // an agency intent pre-selects the staffing_agency company TYPE, an
+  // education intent declares the training_provider CAPABILITY once the
+  // company exists. Both are validated against the closed vocabularies; an
+  // unknown value is simply ignored.
+  const sp = (await searchParams) ?? {};
+  const presetCompanyType = (COMPANY_TYPES as readonly string[]).includes(sp.type ?? "")
+    ? (sp.type as CompanyType)
+    : undefined;
+  const presetCapability = sp.capability === "training_provider" ? "training_provider" : undefined;
 
   const supabase = await createClient();
   const {
@@ -320,6 +331,8 @@ export default async function CompanyStartPage({
             existing={company}
             labels={formLabels}
             targetCompanyId={targetCompanyId}
+            presetCompanyType={presetCompanyType}
+            presetCapability={presetCapability}
           />
         </section>
       ) : null}

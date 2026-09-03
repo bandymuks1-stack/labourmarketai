@@ -1543,6 +1543,20 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "UNTERNEHMENSBEREICH",
+      "learners": {
+        "title": "Lernende",
+        "subtitle": "Wen Sie eingeladen haben und wer verbunden ist. Lernende führen ihre Aufzeichnungen selbst; Sie sehen die Teilnahme, nicht ihre Journale.",
+        "connected": "{count} verbunden",
+        "pending": "{count} eingeladen, noch nicht angenommen",
+        "declined": "{count} abgelehnt oder abgelaufen",
+        "invite": "Studierende einladen",
+        "none": "Noch keine Studierenden eingeladen — beginnen Sie mit einer begrenzten Liste echter Lernender.",
+        "statusAccepted": "verbunden",
+        "statusPending": "eingeladen",
+        "statusDeclined": "abgelehnt",
+        "statusExpired": "abgelaufen",
+        "statusRevoked": "zurückgezogen"
+      },
       "title": "Unternehmensbereich",
       "subtitle": "Der Unternehmenskontext ist ein Einstiegspunkt, keine Grenze. Sie können weitere Rollen innehaben und später über den Rollenwechsler hinzufügen.",
       "pilotDisclaimer": "Matching wird noch nicht angeboten. Nichts wird automatisch öffentlich. Sie können Ihre erste Anfrage in Ruhe vorbereiten — sie wird sofort gespeichert und bleibt privat für Sie.",
@@ -3553,6 +3567,15 @@
     "onboarding": {
       "pendingInviteNote": "Sie haben eine ausstehende Einladung von {org}. Schließen Sie unten die Einrichtung Ihres Kontos ab — danach können Sie sie in Ihrem Dashboard annehmen.",
       "rolePicker": {
+        "intentHeading": "Wofür sind Sie hier?",
+        "intentNote": "Wählen Sie alles Zutreffende — ein Konto trägt alles. Person und Organisation sind die zwei Räume; was Sie darin tun, entscheiden Sie.",
+        "intent": {
+          "work": { "title": "Ich suche Arbeit", "desc": "Profil, Fähigkeiten, Lebenslauf und ein Arbeitsjournal, das zeigt, was Sie können; echte passende Chancen." },
+          "hire": { "title": "Ich brauche Arbeitskräfte", "desc": "Beschreiben Sie einen echten Personalbedarf in einfachen Worten und erreichen Sie passende Menschen." },
+          "agency": { "title": "Ich bin Recruiter / Personalagentur", "desc": "Ihr Kandidatenpool, Ihre Kundenunternehmen, Vorschläge und Vermittlungen — als Personaldienstleister." },
+          "student": { "title": "Ich bin Student/in", "desc": "Ihr Studium zählt. Verbinden Sie sich mit Ihrer Bildungseinrichtung, finden Sie Praktika und erste Jobs." },
+          "education": { "title": "Ich vertrete eine Bildungseinrichtung", "desc": "Laden Sie Studierende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit echten Praktika und Jobs." }
+        },
         "heading": "Starten Sie als Person oder als Unternehmen?",
         "worker": {
           "title": "Person",
@@ -3575,6 +3598,12 @@
         "multiNote": "Wählen Sie eine oder beide Optionen — dies ist nur ein Ausgangspunkt. Person und Unternehmen sind Identitäten; Einstellen, Einkaufen, Anbieten von Arbeitskräften oder Leiten von Projekten sind Aktionen, die Sie später hinzufügen."
       },
       "step2": {
+        "studentHeading": "Wo studieren Sie?",
+        "institutionLabel": "Bildungseinrichtung",
+        "institutionPlaceholder": "Schule, Hochschule, Universität oder Bildungsanbieter",
+        "programLabel": "Studiengang oder Fachrichtung (optional)",
+        "educationTypeLabel": "Art der Ausbildung",
+        "errorInstitution": "Bitte geben Sie an, wo Sie studieren (mindestens 2 Zeichen).",
         "heading": "Ein paar Angaben zu Ihnen",
         "continue": "Abschließen"
       },

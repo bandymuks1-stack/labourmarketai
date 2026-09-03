@@ -57,6 +57,41 @@ describe("P0-1 GREEN migration — board index + count work_mem", () => {
   });
 });
 
+describe("P0-1 GREEN migration 2 — covering partial index for the supply count", () => {
+  const COVER = "supabase/migrations/20260903090000_public_vacancy_supply_cover_index_v1.sql";
+  const sql = read(COVER, repo);
+
+  it("keys on expires_at and INCLUDEs exactly the two payload columns the count reads, active rows only", () => {
+    expect(sql).toMatch(
+      /create index if not exists public_vacancies_active_supply_cover_idx\s+on public\.public_vacancies \(expires_at\)\s+include \(employer_name, last_seen_at\)\s+where is_active;/,
+    );
+  });
+
+  it("stays GREEN and ships its rollback", () => {
+    const executable = sql.replace(/--[^\n]*/g, "");
+    expect(executable).not.toMatch(/security\s+definer|(^|\s)(grant|revoke)\s+|create\s+policy|\bdrop\b/i);
+    expect(sql).toMatch(/^-- ROLLBACK$/m);
+    const down = read(COVER.replace("migrations", "rollbacks").replace(/\.sql$/, ".down.sql"), repo);
+    expect(down).toMatch(/drop index if exists public\.public_vacancies_active_supply_cover_idx;/);
+  });
+});
+
+describe("P0-1 GREEN migration 3 — autovacuum keeps the covering index index-only", () => {
+  const AV = "supabase/migrations/20260903110000_public_vacancies_autovacuum_v1.sql";
+  const sql = read(AV, repo);
+
+  it("lowers the per-table autovacuum thresholds (2 % / 500) — storage parameters only", () => {
+    // Measured 2026-09-03: last_autovacuum six days old, 26,098 heap fetches
+    // on the index-only scan; one VACUUM → 0 heap fetches, 618 ms warm.
+    expect(sql).toMatch(/alter table public\.public_vacancies set \(\s*autovacuum_vacuum_scale_factor = 0\.02,\s*autovacuum_vacuum_threshold = 500,\s*autovacuum_analyze_scale_factor = 0\.02,\s*autovacuum_analyze_threshold = 500\s*\);/);
+    const executable = sql.replace(/--[^\n]*/g, "");
+    expect(executable).not.toMatch(/security\s+definer|(^|\s)(grant|revoke)\s+|create\s+policy|\bdrop\b|\bupdate\b|\bdelete\b/i);
+    expect(sql).toMatch(/^-- ROLLBACK$/m);
+    const down = read(AV.replace("migrations", "rollbacks").replace(/\.sql$/, ".down.sql"), repo);
+    expect(down).toMatch(/alter table public\.public_vacancies reset \(/);
+  });
+});
+
 describe("P0-1b — /jobs-sitemap.xml never answers 500 on a transient count failure", () => {
   const route = read("app/jobs-sitemap.xml/route.ts");
 
@@ -93,6 +128,19 @@ describe("P2-1 — apex paths with a file extension answer a truthful 404", () =
     expect(nf).not.toMatch(/#[0-9a-fA-F]{3,8}\b|style=\{\{/);
     // doctrine §18: no banned framing
     expect(nf).not.toMatch(/(?<![\p{L}\p{N}_])demos?(?![\p{L}\p{N}_])/iu);
+  });
+
+  it("the [locale] segment closes its param set (dynamicParams = false) — the actual 500 source is never rendered", () => {
+    // Reproduced on the local production build 2026-09-03: `/foo-control.xml`
+    // → `[locale]/page` with locale "foo-control.xml" → `RangeError:
+    // Incorrect locale information provided` from Intl.NumberFormat, thrown
+    // before the layout's notFound() could win (layout and page render
+    // concurrently). The landing page is FROZEN (landing-freeze guard), so the
+    // fix lives on the segment: an unknown locale is a 404 before any render.
+    const layout = read("app/[locale]/layout.tsx");
+    expect(layout).toMatch(/export function generateStaticParams\(\) \{\s*return routing\.locales\.map/);
+    expect(layout).toMatch(/^export const dynamicParams = false;$/m);
+    expect(layout).toMatch(/if \(!hasLocale\(routing\.locales, locale\)\) \{\s*notFound\(\);/);
   });
 
   it("the middleware matcher still skips dotted paths (so these reach the root boundary, not the locale rewrite)", () => {
