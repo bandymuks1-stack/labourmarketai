@@ -43,7 +43,14 @@
     "step_express_interest": "Pareikškite susidomėjimą tinkama galimybe.",
     "step_gain_evidence_for_missing": "Paremkite trūkstamą įgūdį: fiksuokite praktiką, pridėkite sertifikatą ar paprašykite žmogaus, kuris matė darbą.",
     "openProfile": "Redaguoti profilį",
-    "openJournal": "Atidaryti Darbo žurnalą"
+    "openJournal": "Atidaryti Darbo žurnalą",
+    "cohortsTitle": "Jūsų programa",
+    "cohortLine": "{program} · grupė {cohort}",
+    "cohortAt": "{institution}",
+    "cohortDirection": "Kryptis: {profession}",
+    "cohortDemand": "{count} atviros darbo vietos šiai krypčiai šiandien (importuoti rinkos duomenys)",
+    "cohortDemandUnknown": "Šios krypties paklausa dar neišmatuota",
+    "missingFromProgram": "Įprasta jūsų programos krypčiai, jūsų įrašuose dar nėra:"
   },
   "businessProfile": {
     "eyebrow": "Verslo profilis",

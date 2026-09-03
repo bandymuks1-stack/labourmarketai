@@ -321,6 +321,8 @@ export async function searchPeopleAndCompanies(
 export type NetworkRelationship = {
   engagementId: string;
   relationshipSlug: string;
+  /** The organisation this engagement is with (null for the personal context). */
+  organizationId: string | null;
   organizationName: string | null;
   startedAt: string | null;
   title: string | null;
@@ -335,7 +337,7 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
   if (!user) return [];
   const { data, error } = await asAny(supabase)
     .from("engagement_contexts")
-    .select("id, relationship_slug, started_at, title, organizations(display_name, legal_name)")
+    .select("id, relationship_slug, organization_id, started_at, title, organizations(display_name, legal_name)")
     .eq("profile_id", user.id)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -344,6 +346,7 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
   type Row = {
     id: string;
     relationship_slug: string;
+    organization_id: string | null;
     started_at: string | null;
     title: string | null;
     organizations: { display_name: string | null; legal_name: string | null } | null;
@@ -351,6 +354,7 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
   return ((data ?? []) as Row[]).map((r) => ({
     engagementId: r.id,
     relationshipSlug: r.relationship_slug,
+    organizationId: r.organization_id ?? null,
     organizationName:
       r.organizations?.display_name ?? r.organizations?.legal_name ?? null,
     startedAt: r.started_at,

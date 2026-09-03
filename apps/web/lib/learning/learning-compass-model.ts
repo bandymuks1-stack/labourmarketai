@@ -42,6 +42,30 @@ export interface CompassOpportunity {
   readonly missingSkillSlugs: readonly string[];
 }
 
+/**
+ * A cohort the person is an ACTIVE member of (education programmes / cohorts,
+ * migration 20260903120000). Read through the person's own membership row —
+ * RLS lets a learner see only the cohort and programme they belong to. The
+ * institution name comes from the person's own student engagement context,
+ * never from a read of the institution's records.
+ */
+export interface CompassCohort {
+  readonly cohortId: string;
+  readonly cohortName: string;
+  readonly programName: string;
+  readonly institutionName: string | null;
+  readonly targetProfessionSlug: string | null;
+  readonly educationTypeSlug: string | null;
+  readonly startsOn: string | null;
+  readonly endsOn: string | null;
+  /**
+   * Active public vacancies for the programme's direction (imported market
+   * data, same count the institution sees). `null` = not measured (no
+   * direction, or the count was unavailable) — never a made-up zero.
+   */
+  readonly demandCount: number | null;
+}
+
 export interface CompassInput {
   readonly professionSlug: string | null;
   readonly skills: readonly CompassSkill[];
@@ -49,9 +73,11 @@ export interface CompassInput {
   readonly education: readonly CompassEducation[];
   readonly opportunities: readonly CompassOpportunity[];
   readonly availabilityKnown: boolean;
+  /** Active cohort memberships; optional so existing callers stay valid. */
+  readonly cohorts?: readonly CompassCohort[];
 }
 
-export type CompassMissingSource = "opportunities" | "profession";
+export type CompassMissingSource = "opportunities" | "profession" | "program";
 
 export interface CompassMissingSkill {
   readonly slug: string;
@@ -72,6 +98,8 @@ export interface LearningCompass {
   readonly becoming: {
     readonly professionSlug: string | null;
     readonly currentEducation: CompassEducation | null;
+    /** The programme(s) / cohort(s) the person is an active member of. */
+    readonly cohorts: readonly CompassCohort[];
   };
   readonly evidence: {
     readonly skillsTotal: number;
@@ -98,6 +126,7 @@ function tierIs(tier: EvidenceTier, ...names: string[]): boolean {
 
 export function buildLearningCompass(input: CompassInput): LearningCompass {
   const currentEducation = input.education.find((e) => e.isCurrent) ?? null;
+  const cohorts = input.cohorts ?? [];
   const ownSlugs = new Set(input.skills.map((s) => s.slug));
 
   // EvidenceTier = "manager_confirmed" | "work_journal" | "self_declared"
@@ -135,6 +164,18 @@ export function buildLearningCompass(input: CompassInput): LearningCompass {
       missingSource = "profession";
       missing = registry.slice(0, MAX_MISSING).map((slug) => ({ slug, askedBy: 0 }));
     }
+  } else {
+    // No own direction yet, but the programme the person is enrolled in points
+    // at one: the registry for THAT direction is the honest fallback. It is the
+    // institution's declared target, so the source is named as such.
+    const programDirection = cohorts.find((c) => c.targetProfessionSlug)?.targetProfessionSlug ?? null;
+    if (programDirection) {
+      const registry = skillsForProfession(programDirection).filter((s) => !ownSlugs.has(s));
+      if (registry.length > 0) {
+        missingSource = "program";
+        missing = registry.slice(0, MAX_MISSING).map((slug) => ({ slug, askedBy: 0 }));
+      }
+    }
   }
 
   // 5. Next steps — deterministic, in the order that unblocks the most.
@@ -148,7 +189,7 @@ export function buildLearningCompass(input: CompassInput): LearningCompass {
   if (missing.length > 0) next.push("gain_evidence_for_missing");
 
   return {
-    becoming: { professionSlug: input.professionSlug, currentEducation },
+    becoming: { professionSlug: input.professionSlug, currentEducation, cohorts },
     evidence: {
       skillsTotal: input.skills.length,
       skillsConfirmed,
