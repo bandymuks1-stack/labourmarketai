@@ -19,6 +19,7 @@ import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
+import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
@@ -974,6 +975,11 @@ export default async function CompanyDashboardPage({
           needs-migration state until applied). */}
       {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
         <InstitutionProgramsSection organizationId={capabilityOrgId} />
+      {/* Real market demand on the first session (never an empty marketplace):
+          the public vacancy pool for staffing agencies and education
+          institutions, with its provenance stated on the card. */}
+      {isStaffingAgency || declaredCapabilities.includes("training_provider") ? (
+        <PublicDemandSection audience={isStaffingAgency ? "agency" : "institution"} />
       ) : null}
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
