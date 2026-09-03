@@ -45,7 +45,6 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     remove: t("form.remove"),
     saving: t("form.saving"),
     saved: t("form.saved"),
-    notReady: t("form.notReady"),
     forbidden: t("form.forbidden"),
     invalid: t("form.invalid"),
     error: t("form.error"),
@@ -68,9 +67,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
           <p className="text-xs leading-relaxed text-text-secondary">{t("subtitle")}</p>
         </header>
 
-        {read.status === "needs-migration" ? (
-          <p className="text-xs text-text-muted" data-testid="institution-programs-not-ready">{t("notReady")}</p>
-        ) : read.status === "unavailable" ? (
+        {read.status === "unavailable" ? (
           <p className="text-xs text-text-muted" data-testid="institution-programs-unavailable">—</p>
         ) : (
           <>

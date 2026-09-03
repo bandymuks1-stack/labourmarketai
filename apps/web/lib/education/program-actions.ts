@@ -6,19 +6,16 @@ import { createClient } from "@/lib/supabase/server";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
-import { isMissingSchemaCode } from "./programs";
 
 /**
  * Education programmes / cohorts — server actions (RED batch B). Thin
  * wrappers over the three SECURITY DEFINER commands; every rule (manager of
  * the organisation, training_provider capability, learner already linked as
- * a student) lives server-side in the RPCs. Until the batch is applied every
- * action reports `needs-migration` and the forms say so.
+ * a student) lives server-side in the RPCs (batch 20260903120000, applied).
  */
 export type ProgramActionState =
   | { status: "idle" }
   | { status: "ok"; id?: string }
-  | { status: "needs-migration" }
   | { status: "invalid" }
   | { status: "forbidden" }
   | { status: "error"; reason?: string };
@@ -26,7 +23,6 @@ export type ProgramActionState =
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function mapErr(code: string | undefined, message: string | undefined): ProgramActionState {
-  if (isMissingSchemaCode(code)) return { status: "needs-migration" };
   const m = (message ?? "").toLowerCase();
   if (m.includes("not_manager") || m.includes("not_education_institution") || m.includes("not_a_linked_learner"))
     return { status: "forbidden" };

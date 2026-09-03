@@ -29,7 +29,6 @@ export type ProgramFormLabels = {
   readonly remove: string;
   readonly saving: string;
   readonly saved: string;
-  readonly notReady: string;
   readonly forbidden: string;
   readonly invalid: string;
   readonly error: string;
@@ -43,8 +42,6 @@ const btnCls =
 function StateLine({ state, labels }: { state: ProgramActionState; labels: ProgramFormLabels }) {
   if (state.status === "idle") return null;
   if (state.status === "ok") return <p className="text-xs text-text-secondary">{labels.saved}</p>;
-  if (state.status === "needs-migration")
-    return <p className="text-xs text-text-muted" data-testid="program-form-not-ready">{labels.notReady}</p>;
   if (state.status === "forbidden") return <p className="text-xs text-state-danger" role="alert">{labels.forbidden}</p>;
   if (state.status === "invalid") return <p className="text-xs text-state-danger" role="alert">{labels.invalid}</p>;
   return <p className="text-xs text-state-danger" role="alert">{labels.error}</p>;

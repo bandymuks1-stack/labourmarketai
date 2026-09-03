@@ -1592,7 +1592,6 @@
       "programs": {
         "title": "Programos ir grupės",
         "subtitle": "Ko mokote, nukreipta į darbo rinkos kryptį, ir besimokančiųjų grupės viduje. Paklausa rodo gyvas viešas darbo vietas tai krypčiai.",
-        "notReady": "Programos ir grupės dar neveikia — ši dalis įjungiama po kito duomenų bazės atnaujinimo. Studentų kvietimas jau veikia.",
         "empty": "Programų dar nėra. Pridėkite pirmą ir nurodykite, į kokią darbo kryptį ji veda.",
         "addProgram": "Pridėti programą",
         "noDirection": "Darbo kryptis nenurodyta",
@@ -1618,7 +1617,6 @@
           "remove": "pašalinti",
           "saving": "Saugoma…",
           "saved": "Išsaugota.",
-          "notReady": "Neveikia iki kito duomenų bazės atnaujinimo.",
           "forbidden": "Tai gali daryti tik šios įstaigos vadovas.",
           "invalid": "Patikrinkite reikšmes.",
           "error": "Kažkas nepavyko. Bandykite dar kartą."

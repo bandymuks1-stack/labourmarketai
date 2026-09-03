@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
  * `count_public_vacancies_by_profession_v1` (authenticated callers only;
  * counts per profession, no vacancy row).
  *
- * Honest degradation: `needs-migration` until the batch is applied;
+ * Honest degradation (batch 20260903120000 is applied in production):
  * `unavailable` on any other failure — never an empty list pretending.
  */
 
@@ -57,7 +57,6 @@ export type InstitutionProgramsRead =
       readonly programs: readonly ProgramRow[];
       readonly assignable: readonly AssignableLearner[];
     }
-  | { readonly status: "needs-migration" }
   | { readonly status: "unavailable" };
 
 const MISSING = new Set(["42P01", "PGRST205", "42883", "PGRST202"]);
@@ -81,7 +80,7 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
     .order("created_at", { ascending: true })
     .limit(100);
   if (programsRes.error) {
-    return isMissingSchemaCode(programsRes.error.code) ? { status: "needs-migration" } : { status: "unavailable" };
+    return { status: "unavailable" };
   }
   const programRows = (programsRes.data ?? []) as Array<Record<string, unknown>>;
   const programIds = programRows.map((p) => String(p.id));
