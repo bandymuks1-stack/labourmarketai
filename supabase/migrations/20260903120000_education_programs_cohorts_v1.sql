@@ -1,3 +1,4 @@
+-- @human-gate-approved — owner approval "Apply batch 2026-09-03 A+B+C" (2026-09-03); APPLIED TO PROD via Supabase MCP after the final security review recorded in PR #1454
 -- 20260903120000_education_programs_cohorts_v1
 --
 -- ██ RED CLASS — human gate (migration-safety: new tables + GRANT, SECURITY
