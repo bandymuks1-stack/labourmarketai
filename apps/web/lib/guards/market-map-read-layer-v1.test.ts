@@ -763,15 +763,17 @@ describe("NO new DB migration in this PR", () => {
     // are vacuumed and the covering index stays index-only. No grant, no
     // policy, no function, no data change. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
-    // Bumped 256 -> 258 for the RED batch 2026-09-03 A (both owner-gated,
-    // shipped UNAPPLIED as a draft, no marker):
-    //   20260903100000_public_vacancy_supply_counts_v1 — maintained counts
-    //   row + pg_cron refresh + count_public_vacancies_v1 reads the row;
-    //   20260903101000_agency_candidate_offer_decision_v1 — client
-    //   accept/decline of an agency candidate offer → canonical booking.
-    // RECOUNTED from the tree, never summed:
-    // `ls supabase/migrations/*.sql | wc -l` = 258.
-expect(count).toBeLessThanOrEqual(258);
+    // Bumped 256 -> 257 for internship / apprenticeship as canonical
+    // opportunity types (20260903130000_opportunity_type_internship_
+    // apprenticeship_v1, paired rollback) — GREEN: re-declares the plain
+    // IMMUTABLE projection demand_structured_v2_public with two more allowed
+    // values; no definer, no grant, no data change. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
+    // Re-based after main reached 257: bumped 257 -> 259 for RED batch 2026-09-03 A
+    // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
+    // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
+expect(count).toBeLessThanOrEqual(259);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

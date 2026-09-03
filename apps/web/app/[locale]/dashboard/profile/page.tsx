@@ -62,6 +62,8 @@ import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
+import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
   getOwnWorkerEducation,
@@ -288,6 +290,7 @@ export default async function ProfilePage({
   // 20260714160000 — needs-migration until the owner applies it) and the
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
+  let learningCompass: LearningCompassRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
   let projectLinkedEntryCount = 0;
   let certificateDocCount = 0;
@@ -313,6 +316,7 @@ export default async function ProfilePage({
      */
     const [
       prefsRes,
+      compassRes,
       langsRes,
       extRes,
       eduRes,
@@ -326,6 +330,9 @@ export default async function ProfilePage({
       trust,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
+      // Learning Compass (Track C): own records + the board's match results;
+      // any failure is `null` → the section simply does not render.
+      readLearningCompass().catch((): LearningCompassRead | null => null),
       getOwnWorkerLanguages(),
       getOwnExternalProfiles(),
       getOwnWorkerEducation(),
@@ -383,6 +390,7 @@ export default async function ProfilePage({
     workerLanguages = langsRes;
     externalProfiles = extRes;
     workerEducation = eduRes;
+    learningCompass = compassRes;
     workerAchievements = achRes;
     projectLinkedEntryCount = projCountRes.count ?? 0;
     certificateDocCount = certDocsRes.count ?? 0;
@@ -1056,6 +1064,14 @@ export default async function ProfilePage({
           initial={workerEducation.kind === "ok" ? workerEducation.entries : []}
           needsMigration={workerEducation.kind === "needs-migration"}
         />
+      ) : null}
+
+      {/* Learning Compass (Track C, 2026-09-03) — the student home's five
+          answers, rendered only on the student path (a current education row
+          or an active learner link). Reads the person's own records and the
+          same match engine the opportunity board uses; nothing generated. */}
+      {learningCompass?.status === "ok" && learningCompass.student ? (
+        <LearningCompassSection compass={learningCompass.compass} />
       ) : null}
       {workerId && workerAchievements ? (
         <WorkerAchievementsSection
