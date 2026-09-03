@@ -81,6 +81,8 @@ export function CompanySetupForm({
   existing,
   labels,
   targetCompanyId,
+  presetCompanyType,
+  presetCapability,
 }: {
   readonly existing: CompanyRow | null;
   readonly labels: CompanySetupFormLabels;
@@ -90,6 +92,11 @@ export function CompanySetupForm({
    *  behaviour. Editing pages pass `existing.id`; the create entry passes
    *  "new" so a second organization NEVER renames the first. */
   readonly targetCompanyId?: string;
+  /** First-run router presets: pre-select the company type (agency intent)
+   *  and carry a capability to declare once the company exists (education
+   *  intent). Presets never override an EXISTING company's stored type. */
+  readonly presetCompanyType?: CompanyType;
+  readonly presetCapability?: "training_provider";
 }) {
   const [state, formAction, isPending] = useActionState<
     CompanySetupFormState | null,
@@ -144,6 +151,9 @@ export function CompanySetupForm({
       data-testid="company-setup-form"
     >
       <input type="hidden" name="intent" ref={intentRef} defaultValue="draft" />
+      {presetCapability ? (
+        <input type="hidden" name="capability" value={presetCapability} readOnly />
+      ) : null}
       {targetCompanyId !== undefined ? (
         <input type="hidden" name="company_id" value={targetCompanyId} readOnly />
       ) : null}
@@ -200,7 +210,7 @@ export function CompanySetupForm({
         <OptionCards
           name="company_type"
           ariaLabel={labels.companyType}
-          defaultValue={existing?.companyType ?? "other"}
+          defaultValue={existing?.companyType ?? presetCompanyType ?? "other"}
           testId="company-setup-company-type"
           options={COMPANY_TYPES.map((type) => ({
             value: type,

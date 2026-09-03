@@ -3553,6 +3553,15 @@
     "onboarding": {
       "pendingInviteNote": "You have a pending invitation from {org}. Finish setting up your account below — then you can accept it on your dashboard.",
       "rolePicker": {
+        "intentHeading": "What did you come here to do?",
+        "intentNote": "Pick everything that applies — one account carries all of it. A person and an organisation are the two spaces; what you do inside them is up to you.",
+        "intent": {
+          "work": { "title": "I'm looking for work", "desc": "Profile, skills, CV and a Work Journal that shows what you can do; real opportunities that match." },
+          "hire": { "title": "I need workers", "desc": "Describe a real workforce need in plain words and reach matching people." },
+          "agency": { "title": "I'm a recruiter / agency", "desc": "Your candidate pool, your client companies, submissions and placements — as a staffing organisation." },
+          "student": { "title": "I'm a student", "desc": "Your studies count. Connect to your institution, find internships and first jobs." },
+          "education": { "title": "I represent an education institution", "desc": "Invite students, see their participation and connect them to real internships and jobs." }
+        },
         "heading": "Are you starting as a person or a company?",
         "worker": {
           "title": "Person",
@@ -3575,6 +3584,12 @@
         "multiNote": "Pick one or both — this is only a starting point. Person and company are identities; hiring, buying, offering workers or running projects are actions you add later."
       },
       "step2": {
+        "studentHeading": "Where are you studying?",
+        "institutionLabel": "Institution",
+        "institutionPlaceholder": "School, college, university or training provider",
+        "programLabel": "Programme or field (optional)",
+        "educationTypeLabel": "Type of study",
+        "errorInstitution": "Please enter where you study (at least 2 characters).",
         "heading": "A bit about you",
         "continue": "Finish"
       },

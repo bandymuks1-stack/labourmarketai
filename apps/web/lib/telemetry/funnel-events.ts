@@ -45,6 +45,14 @@ export const FUNNEL_EVENTS = {
   onboardingStepRoleCompleted: "onboarding_step_role_completed",
   onboardingStepProfileCompleted: "onboarding_step_profile_completed",
   onboardingCompleted: "onboarding_completed",
+  // ── Time-to-first-value (FIRST REAL ECOSYSTEM USE, 2026-09-03). The key
+  //    metric is not a page view: it is the moment a person performs their
+  //    first REAL state-changing action and the moment they receive a real
+  //    result for it. Emitted at the action points of each actor's first
+  //    value chain; `role_context` carries the actor, `intent` the first-run
+  //    choice, `surface` the chain. Bounded scalars only, never ids/PII.
+  firstRealAction: "first_real_action",
+  firstRealResult: "first_real_result",
   dashboardViewed: "dashboard_viewed",
   firstActionCardViewed: "first_action_card_viewed",
   firstActionCardClicked: "first_action_card_clicked",
@@ -158,6 +166,9 @@ export type FunnelMetadata = {
   step?: string;
   /** Coarse role context: 'worker' | 'company' | 'agency' | 'customer' | 'person'. */
   role_context?: string;
+  /** First-run intent: 'work' | 'hire' | 'agency' | 'student' | 'education',
+   *  or a comma-joined set of them. Never free text. */
+  intent?: string;
   /** Anonymous entity type, e.g. 'company_request' | 'agency_offer'. Never an id. */
   entity_type?: string;
   /** Coarse success/failure flag for an attempted action. */

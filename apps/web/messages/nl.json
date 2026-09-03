@@ -3553,6 +3553,15 @@
     "onboarding": {
       "pendingInviteNote": "Je hebt een openstaande uitnodiging van {org}. Rond hieronder het instellen van je account af — daarna kun je de uitnodiging accepteren op je dashboard.",
       "rolePicker": {
+        "intentHeading": "Waarvoor kom je?",
+        "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
+        "intent": {
+          "work": { "title": "Ik zoek werk", "desc": "Profiel, vaardigheden, cv en een werkjournaal dat laat zien wat je kunt; echte kansen die passen." },
+          "hire": { "title": "Ik heb werknemers nodig", "desc": "Beschrijf een echte personeelsbehoefte in gewone woorden en bereik passende mensen." },
+          "agency": { "title": "Ik ben recruiter / uitzendbureau", "desc": "Je kandidatenpool, je klantbedrijven, voordrachten en plaatsingen — als uitzendorganisatie." },
+          "student": { "title": "Ik ben student", "desc": "Je studie telt mee. Koppel je aan je onderwijsinstelling, vind stages en eerste banen." },
+          "education": { "title": "Ik vertegenwoordig een onderwijsinstelling", "desc": "Nodig studenten uit, zie hun deelname en koppel ze aan echte stages en banen." }
+        },
         "heading": "Begin je als persoon of als bedrijf?",
         "worker": {
           "title": "Persoon",
@@ -3575,6 +3584,12 @@
         "multiNote": "Kies er één of beide — dit is alleen een startpunt. Persoon en bedrijf zijn identiteiten; aannemen, inkopen, werknemers aanbieden of projecten uitvoeren zijn acties die je later toevoegt."
       },
       "step2": {
+        "studentHeading": "Waar studeer je?",
+        "institutionLabel": "Onderwijsinstelling",
+        "institutionPlaceholder": "School, hogeschool, universiteit of opleider",
+        "programLabel": "Opleiding of vakgebied (optioneel)",
+        "educationTypeLabel": "Soort opleiding",
+        "errorInstitution": "Vul in waar je studeert (minimaal 2 tekens).",
         "heading": "Iets over jou",
         "continue": "Afronden"
       },

@@ -8,6 +8,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 /** Unified onboarding shell. Role is picked here (Step 1), so we no longer
  *  pre-read active_role. Display name is prefilled from the auth identity:
@@ -49,6 +50,14 @@ export default async function OnboardingPage({
   // real pending invitation so they aren't confused by a bare role-start screen.
   const pendingInvites = await listMyPendingWorkerInvitations();
   const tOnboard = await getTranslations("auth.onboarding");
+  // Student step (universal first-run router): the education-type registry
+  // labels, resolved here on the server from the CV namespace so the wizard's
+  // client bundle keeps the auth allowlist (no `cvSections` root shipped).
+  const tEducationTypes = await getTranslations("cvSections.educationTypes");
+  const educationTypeOptions = EDUCATION_TYPE_SLUGS.map((slug) => ({
+    slug,
+    label: tEducationTypes(slug),
+  }));
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const metaFullName =
@@ -97,7 +106,11 @@ export default async function OnboardingPage({
             </p>
           </div>
         )}
-        <OnboardingWizard defaultName={defaultName} returnTo={safeNext} />
+        <OnboardingWizard
+          defaultName={defaultName}
+          returnTo={safeNext}
+          educationTypeOptions={educationTypeOptions}
+        />
       </main>
     </div>
   );
