@@ -2315,7 +2315,9 @@
       "temporary_assignment": "[EN] Temporary assignment",
       "project_work": "[EN] Project work",
       "subcontract": "[EN] Subcontract",
-      "service_request": "[EN] Service request"
+      "service_request": "[EN] Service request",
+      "internship": "Praksisplass",
+      "apprenticeship": "Lærlingplass"
     },
     "targetSupplyLabel": "[EN] Who is needed",
     "targetSupply": {

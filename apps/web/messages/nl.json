@@ -1530,7 +1530,8 @@
       "location": "Locatie",
       "skills": "Vaardigheden / criteria",
       "urgency": "Wanneer nodig",
-      "notes": "Notities"
+      "notes": "Notities",
+      "opportunityType": "Soort"
     },
     "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag",
     "syntheticTitle": {
@@ -3656,11 +3657,26 @@
         "intentHeading": "Waarvoor kom je?",
         "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
         "intent": {
-          "work": { "title": "Ik zoek werk", "desc": "Profiel, vaardigheden, cv en een werkjournaal dat laat zien wat je kunt; echte kansen die passen." },
-          "hire": { "title": "Ik heb werknemers nodig", "desc": "Beschrijf een echte personeelsbehoefte in gewone woorden en bereik passende mensen." },
-          "agency": { "title": "Ik ben recruiter / uitzendbureau", "desc": "Je kandidatenpool, je klantbedrijven, voordrachten en plaatsingen — als uitzendorganisatie." },
-          "student": { "title": "Ik ben student", "desc": "Je studie telt mee. Koppel je aan je onderwijsinstelling, vind stages en eerste banen." },
-          "education": { "title": "Ik vertegenwoordig een onderwijsinstelling", "desc": "Nodig studenten uit, zie hun deelname en koppel ze aan echte stages en banen." }
+          "work": {
+            "title": "Ik zoek werk",
+            "desc": "Profiel, vaardigheden, cv en een werkjournaal dat laat zien wat je kunt; echte kansen die passen."
+          },
+          "hire": {
+            "title": "Ik heb werknemers nodig",
+            "desc": "Beschrijf een echte personeelsbehoefte in gewone woorden en bereik passende mensen."
+          },
+          "agency": {
+            "title": "Ik ben recruiter / uitzendbureau",
+            "desc": "Je kandidatenpool, je klantbedrijven, voordrachten en plaatsingen — als uitzendorganisatie."
+          },
+          "student": {
+            "title": "Ik ben student",
+            "desc": "Je studie telt mee. Koppel je aan je onderwijsinstelling, vind stages en eerste banen."
+          },
+          "education": {
+            "title": "Ik vertegenwoordig een onderwijsinstelling",
+            "desc": "Nodig studenten uit, zie hun deelname en koppel ze aan echte stages en banen."
+          }
         },
         "heading": "Begin je als persoon of als bedrijf?",
         "worker": {
@@ -11673,7 +11689,8 @@
         "demandLocationPlaceholder": "Stad of regio",
         "teamSize": "Aantal werknemers",
         "urgency": "Urgentie",
-        "saveAsDraft": "Opslaan als concept"
+        "saveAsDraft": "Opslaan als concept",
+        "opportunityType": "Soort kans"
       },
       "availability": {
         "available": "Beschikbaar",

@@ -130,6 +130,8 @@ export const COMPANY_EXECUTORS: {
           // Sent as a string because the draft payload is string-only.
           teamSize:
             input.teamSize == null ? undefined : String(input.teamSize),
+          // The declared opportunity type survives the draft leg too.
+          opportunityType: input.opportunityType ?? undefined,
           notes: input.notes ?? undefined,
         });
         return row
@@ -151,6 +153,10 @@ export const COMPANY_EXECUTORS: {
       teamSize: input.teamSize ?? undefined,
       accommodation: input.accommodation ?? undefined,
       transport: input.transport ?? undefined,
+      // Declared opportunity type → the structured cluster the worker board
+      // and the Learning Compass read (`payload.structured_v2`). Absent when
+      // the employer stated none — nothing is inferred.
+      structuredV2: input.opportunityType ? { opportunity_type: input.opportunityType } : undefined,
     });
     // The REAL id + status come from the canonical action — never invented.
     return r.ok

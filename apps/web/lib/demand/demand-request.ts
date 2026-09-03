@@ -565,6 +565,14 @@ export async function getOwnLastDemandPrefill(
           : null,
       requiredTools,
     },
-    structuredV2: readStructuredDemandV2(payload),
+    // A submitted request carries its structured cluster; a DRAFT stores the
+    // light form's `opportunityType` string instead — re-validated through
+    // the same sanitizer (closed set), so a declared type survives
+    // draft → continue and nothing near-valid is salvaged.
+    structuredV2:
+      readStructuredDemandV2(payload) ??
+      (isDraft && typeof payload.opportunityType === "string"
+        ? sanitizeStructuredDemandV2({ opportunity_type: payload.opportunityType })
+        : null),
   };
 }

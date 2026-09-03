@@ -1530,7 +1530,8 @@
       "location": "Vieta",
       "skills": "Įgūdžiai / kriterijai",
       "urgency": "Kada reikia",
-      "notes": "Pastabos"
+      "notes": "Pastabos",
+      "opportunityType": "Tipas"
     },
     "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas",
     "syntheticTitle": {
@@ -3656,11 +3657,26 @@
         "intentHeading": "Ko atėjote?",
         "intentNote": "Pažymėkite viską, kas tinka — viena paskyra talpina visa tai. Asmuo ir organizacija yra dvi erdvės; ką jose veikiate, sprendžiate jūs.",
         "intent": {
-          "work": { "title": "Ieškau darbo", "desc": "Profilis, įgūdžiai, CV ir Darbo žurnalas, kuris parodo, ką mokate; realios, jums tinkančios galimybės." },
-          "hire": { "title": "Man reikia darbuotojų", "desc": "Aprašykite realų darbo jėgos poreikį paprastais žodžiais ir pasiekite tinkamus žmones." },
-          "agency": { "title": "Esu įdarbinimo agentūra / atrankų specialistas", "desc": "Jūsų kandidatų bazė, klientų įmonės, pasiūlymai ir įdarbinimai — kaip darbuotojų nuomos organizacija." },
-          "student": { "title": "Esu studentas", "desc": "Jūsų studijos skaičiuojasi. Prisijunkite prie savo mokymo įstaigos, raskite praktikas ir pirmus darbus." },
-          "education": { "title": "Atstovauju mokymo įstaigai", "desc": "Kvieskite studentus, matykite jų dalyvavimą ir jungkite juos prie realių praktikų ir darbų." }
+          "work": {
+            "title": "Ieškau darbo",
+            "desc": "Profilis, įgūdžiai, CV ir Darbo žurnalas, kuris parodo, ką mokate; realios, jums tinkančios galimybės."
+          },
+          "hire": {
+            "title": "Man reikia darbuotojų",
+            "desc": "Aprašykite realų darbo jėgos poreikį paprastais žodžiais ir pasiekite tinkamus žmones."
+          },
+          "agency": {
+            "title": "Esu įdarbinimo agentūra / atrankų specialistas",
+            "desc": "Jūsų kandidatų bazė, klientų įmonės, pasiūlymai ir įdarbinimai — kaip darbuotojų nuomos organizacija."
+          },
+          "student": {
+            "title": "Esu studentas",
+            "desc": "Jūsų studijos skaičiuojasi. Prisijunkite prie savo mokymo įstaigos, raskite praktikas ir pirmus darbus."
+          },
+          "education": {
+            "title": "Atstovauju mokymo įstaigai",
+            "desc": "Kvieskite studentus, matykite jų dalyvavimą ir jungkite juos prie realių praktikų ir darbų."
+          }
         },
         "heading": "Pradedate kaip asmuo ar įmonė?",
         "worker": {
@@ -11673,7 +11689,8 @@
         "demandLocationPlaceholder": "Miestas ar regionas",
         "teamSize": "Darbuotojų skaičius",
         "urgency": "Skubumas",
-        "saveAsDraft": "Išsaugoti kaip juodraštį"
+        "saveAsDraft": "Išsaugoti kaip juodraštį",
+        "opportunityType": "Galimybės tipas"
       },
       "availability": {
         "available": "Laisvas",

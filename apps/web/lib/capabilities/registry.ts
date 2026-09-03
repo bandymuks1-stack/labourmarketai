@@ -1208,6 +1208,7 @@ const DEMAND_FIELDS = [
   "teamSize",
   "accommodation",
   "transport",
+  "opportunityType",
 ] as const;
 
 /** null-vs-absent must not change the hash for optional fields — absent and
@@ -1373,6 +1374,9 @@ const demandCreateConfirm: CapabilityDescriptor = {
         teamSize: draft.teamSize ?? undefined,
         accommodation: draft.accommodation ?? undefined,
         transport: draft.transport ?? undefined,
+        // Declared opportunity type → structured cluster (same as the web
+        // and chat legs); absent when not stated.
+        structuredV2: draft.opportunityType ? { opportunity_type: draft.opportunityType } : undefined,
       },
     );
     if (!result.ok) {

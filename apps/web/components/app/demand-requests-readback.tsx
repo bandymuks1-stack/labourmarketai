@@ -57,6 +57,8 @@ export interface DemandRequestsReadbackLabels {
   readonly fields: Readonly<{
     description: string;
     role: string;
+    /** Row label for the declared opportunity type (structured cluster). */
+    opportunityType: string;
     location: string;
     skills: string;
     urgency: string;
@@ -64,6 +66,8 @@ export interface DemandRequestsReadbackLabels {
   }>;
   /** Localized labels for the urgency enum stored in the payload. */
   readonly urgencyValues: Readonly<Record<string, string>>;
+  /** Localized labels for `structured_v2.opportunity_type` (closed set). */
+  readonly opportunityTypeValues: Readonly<Record<string, string>>;
 }
 
 /** A single label/value row inside the submitted-details list. */
@@ -146,9 +150,16 @@ export function DemandRequestsReadback({
             const urgencyKey = str(p.urgency);
             const urgency = urgencyKey ? labels.urgencyValues[urgencyKey] ?? "" : "";
             const notes = str(p.notes) || str(r.notes);
+            // The DECLARED opportunity type (internship / apprenticeship / …)
+            // from the structured cluster — shown back to the employer so the
+            // row says the same thing the worker board and compass show.
+            const s2 = p.structured_v2 && typeof p.structured_v2 === "object" ? (p.structured_v2 as Record<string, unknown>) : null;
+            const opportunityTypeKey = s2 ? str(s2.opportunity_type) : "";
+            const opportunityType = opportunityTypeKey ? labels.opportunityTypeValues[opportunityTypeKey] ?? "" : "";
             const detailRows: Array<[string, string]> = [
               [labels.fields.description, description],
               [labels.fields.role, role],
+              [labels.fields.opportunityType, opportunityType],
               [labels.fields.location, location],
               [labels.fields.skills, skills],
               [labels.fields.urgency, urgency],

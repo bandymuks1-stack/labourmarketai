@@ -1,4 +1,5 @@
 import type { FormState, WorkerFormSpec } from "@/lib/conversation/worker-forms";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 
 /**
  * Declarative inline-form specs for the EMPLOYER-side conversation actions
@@ -70,6 +71,21 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
           { value: "urgent", labelKey: "conversation.forms.urgency.urgent" },
         ],
       },
+      {
+        // What KIND of opportunity this is — internship, apprenticeship,
+        // temporary assignment … A declared value only; "not stated" writes
+        // nothing (the structured cluster omits the key).
+        name: "opportunityType",
+        kind: "select",
+        labelKey: "conversation.forms.fields.opportunityType",
+        options: [
+          { value: "", labelKey: "conversation.forms.fields.notStated" },
+          ...OPPORTUNITY_TYPES.map((v) => ({
+            value: v,
+            labelKey: `structuredDemand.opportunityType.${v}`,
+          })),
+        ],
+      },
       { name: "asDraft", kind: "checkbox", labelKey: "conversation.forms.fields.saveAsDraft" },
     ],
     build: (st: FormState) => ({
@@ -80,6 +96,7 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       location: s(st.location) || null,
       teamSize: numOrNull(st.teamSize),
       urgency: s(st.urgency) || null,
+      opportunityType: s(st.opportunityType) || null,
     }),
   },
 ] as const;

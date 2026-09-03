@@ -2315,7 +2315,9 @@
       "temporary_assignment": "Midlertidig opgave",
       "project_work": "Projektarbejde",
       "subcontract": "Underentreprise",
-      "service_request": "Serviceopgave"
+      "service_request": "Serviceopgave",
+      "internship": "Praktikplads",
+      "apprenticeship": "Lærlingeplads"
     },
     "targetSupplyLabel": "Hvem søges",
     "targetSupply": {
