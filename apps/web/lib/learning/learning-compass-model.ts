@@ -17,6 +17,7 @@
  * an honest "nothing yet", never a placeholder.
  */
 
+import type { OpportunityType } from "@/lib/demand/structured-demand-v2";
 import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 
@@ -37,6 +38,9 @@ export interface CompassOpportunity {
   readonly roleSlug: string | null;
   readonly companyName: string | null;
   readonly country: string | null;
+  /** The demand's declared type (internship / apprenticeship / …) as the
+   *  board carries it; `null`/absent when the employer stated none. */
+  readonly opportunityType?: OpportunityType | null;
   readonly status: "strong" | "possible" | "weak" | "insufficient_data";
   readonly matchedSkillSlugs: readonly string[];
   readonly missingSkillSlugs: readonly string[];

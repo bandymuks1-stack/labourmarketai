@@ -168,6 +168,7 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
           roleSlug: r.roleSlug,
           companyName: r.companyName,
           country: r.country,
+          opportunityType: r.opportunityType,
           status: r.status,
           matchedSkillSlugs: r.matchedSkillSlugs,
           missingSkillSlugs: r.missingSkillSlugs,
