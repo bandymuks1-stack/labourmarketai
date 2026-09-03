@@ -1577,6 +1577,41 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "COMPANY WORKSPACE",
+      "programs": {
+        "title": "Programmes and cohorts",
+        "subtitle": "What you teach, pointed at a labour-market direction, and the groups of learners inside it. Demand shows live public vacancies for that direction.",
+        "notReady": "Programmes and cohorts are not available yet — this part is switched on after the next database update. Inviting students already works.",
+        "empty": "No programmes yet. Add the first one and point it at the work direction it leads to.",
+        "addProgram": "Add a programme",
+        "noDirection": "No work direction set",
+        "demand": "{count} live vacancies",
+        "demandUnknown": "demand unavailable",
+        "members": "{count} learners",
+        "noLearnersYet": "No connected learners to assign yet — invite students first.",
+        "form": {
+          "programName": "Programme name",
+          "targetProfession": "Leads to (work direction)",
+          "noProfession": "— not set —",
+          "educationType": "Type",
+          "noType": "— not set —",
+          "description": "Description (optional)",
+          "createProgram": "Create programme",
+          "cohortName": "New cohort (class / intake)",
+          "startsOn": "Starts",
+          "endsOn": "Ends",
+          "createCohort": "Create cohort",
+          "assignLearner": "Assign a connected learner",
+          "chooseLearner": "Choose a learner",
+          "assign": "Assign",
+          "remove": "remove",
+          "saving": "Saving…",
+          "saved": "Saved.",
+          "notReady": "Not available until the next database update.",
+          "forbidden": "Only a manager of this institution can do this.",
+          "invalid": "Please check the values.",
+          "error": "Something went wrong. Please try again."
+        }
+      },
       "learners": {
         "title": "Learners",
         "subtitle": "Who you invited and who is connected. Learners keep their own records; you see participation, not their journals.",

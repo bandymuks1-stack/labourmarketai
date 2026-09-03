@@ -1577,6 +1577,41 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "UNTERNEHMENSBEREICH",
+      "programs": {
+        "title": "Studiengänge und Kohorten",
+        "subtitle": "Was Sie lehren, ausgerichtet auf eine Arbeitsmarktrichtung, und die Lerngruppen darin. Nachfrage zeigt aktuelle öffentliche Stellen für diese Richtung.",
+        "notReady": "Studiengänge und Kohorten sind noch nicht verfügbar — dieser Teil wird nach dem nächsten Datenbank-Update eingeschaltet. Studierende einladen funktioniert bereits.",
+        "empty": "Noch keine Studiengänge. Fügen Sie den ersten hinzu und richten Sie ihn auf die Arbeitsrichtung aus, zu der er führt.",
+        "addProgram": "Studiengang hinzufügen",
+        "noDirection": "Keine Arbeitsrichtung festgelegt",
+        "demand": "{count} aktuelle Stellen",
+        "demandUnknown": "Nachfrage nicht verfügbar",
+        "members": "{count} Lernende",
+        "noLearnersYet": "Noch keine verbundenen Lernenden zum Zuweisen — laden Sie zuerst Studierende ein.",
+        "form": {
+          "programName": "Name des Studiengangs",
+          "targetProfession": "Führt zu (Arbeitsrichtung)",
+          "noProfession": "— nicht festgelegt —",
+          "educationType": "Art",
+          "noType": "— nicht festgelegt —",
+          "description": "Beschreibung (optional)",
+          "createProgram": "Studiengang anlegen",
+          "cohortName": "Neue Kohorte (Klasse / Jahrgang)",
+          "startsOn": "Beginn",
+          "endsOn": "Ende",
+          "createCohort": "Kohorte anlegen",
+          "assignLearner": "Verbundene/n Lernende/n zuweisen",
+          "chooseLearner": "Lernende/n wählen",
+          "assign": "Zuweisen",
+          "remove": "entfernen",
+          "saving": "Speichern…",
+          "saved": "Gespeichert.",
+          "notReady": "Bis zum nächsten Datenbank-Update nicht verfügbar.",
+          "forbidden": "Das kann nur eine Leitung dieser Einrichtung.",
+          "invalid": "Bitte prüfen Sie die Werte.",
+          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        }
+      },
       "learners": {
         "title": "Lernende",
         "subtitle": "Wen Sie eingeladen haben und wer verbunden ist. Lernende führen ihre Aufzeichnungen selbst; Sie sehen die Teilnahme, nicht ihre Journale.",

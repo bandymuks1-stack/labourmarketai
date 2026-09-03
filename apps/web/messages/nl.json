@@ -1577,6 +1577,41 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "BEDRIJFSWERKRUIMTE",
+      "programs": {
+        "title": "Opleidingen en cohorten",
+        "subtitle": "Wat je onderwijst, gericht op een richting op de arbeidsmarkt, en de groepen lerenden daarbinnen. Vraag toont actuele publieke vacatures voor die richting.",
+        "notReady": "Opleidingen en cohorten zijn nog niet beschikbaar — dit deel gaat aan na de volgende database-update. Studenten uitnodigen werkt al.",
+        "empty": "Nog geen opleidingen. Voeg de eerste toe en richt die op de werkrichting waar ze toe leidt.",
+        "addProgram": "Opleiding toevoegen",
+        "noDirection": "Geen werkrichting ingesteld",
+        "demand": "{count} actuele vacatures",
+        "demandUnknown": "vraag niet beschikbaar",
+        "members": "{count} lerenden",
+        "noLearnersYet": "Nog geen verbonden lerenden om toe te wijzen — nodig eerst studenten uit.",
+        "form": {
+          "programName": "Naam opleiding",
+          "targetProfession": "Leidt naar (werkrichting)",
+          "noProfession": "— niet ingesteld —",
+          "educationType": "Soort",
+          "noType": "— niet ingesteld —",
+          "description": "Beschrijving (optioneel)",
+          "createProgram": "Opleiding aanmaken",
+          "cohortName": "Nieuw cohort (klas / instroom)",
+          "startsOn": "Start",
+          "endsOn": "Einde",
+          "createCohort": "Cohort aanmaken",
+          "assignLearner": "Verbonden lerende toewijzen",
+          "chooseLearner": "Kies een lerende",
+          "assign": "Toewijzen",
+          "remove": "verwijderen",
+          "saving": "Opslaan…",
+          "saved": "Opgeslagen.",
+          "notReady": "Niet beschikbaar tot de volgende database-update.",
+          "forbidden": "Alleen een beheerder van deze instelling kan dit doen.",
+          "invalid": "Controleer de waarden.",
+          "error": "Er ging iets mis. Probeer het opnieuw."
+        }
+      },
       "learners": {
         "title": "Lerenden",
         "subtitle": "Wie je hebt uitgenodigd en wie verbonden is. Lerenden beheren hun eigen gegevens; jij ziet deelname, niet hun journaals.",

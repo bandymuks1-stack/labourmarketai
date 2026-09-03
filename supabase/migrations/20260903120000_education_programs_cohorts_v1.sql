@@ -259,10 +259,10 @@ as $$
    limit least(greatest(coalesce(p_limit, 20), 1), 100);
 $$;
 
-revoke execute on function public.count_public_vacancies_by_profession_v1(integer) from public;
-grant execute on function public.count_public_vacancies_by_profession_v1(integer) to anon, authenticated;
+revoke execute on function public.count_public_vacancies_by_profession_v1(p_limit integer) from public;
+grant execute on function public.count_public_vacancies_by_profession_v1(p_limit integer) to anon, authenticated;
 
-comment on function public.count_public_vacancies_by_profession_v1(integer) is
+comment on function public.count_public_vacancies_by_profession_v1(p_limit integer) is
   'Active public vacancies per profession (imported market data), the demand signal for education institutions and agencies. Anon-safe: counts only, same boundary as count_public_vacancies_v1.';
 
 -- ROLLBACK

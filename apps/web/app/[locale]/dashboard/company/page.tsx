@@ -18,6 +18,7 @@ import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
+import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
@@ -966,6 +967,13 @@ export default async function CompanyDashboardPage({
           Least-privilege by ruling: never a learner's journal or profile. */}
       {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
         <InstitutionLearnersSection organizationId={capabilityOrgId} />
+      ) : null}
+
+      {/* Programmes → cohorts → learners, each programme pointed at a work
+          direction with its live public demand (RED batch B; honest
+          needs-migration state until applied). */}
+      {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
+        <InstitutionProgramsSection organizationId={capabilityOrgId} />
       ) : null}
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
