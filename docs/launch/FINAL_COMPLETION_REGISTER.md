@@ -230,3 +230,41 @@ auth, chat transcript persistence and the plan primitive are owner-gated.
 
 No launch-readiness entry, train state, gate or evidence link in §0–§4 was
 edited. No PR touched. No migration applied. No CI or deployment altered.
+
+### 5.7 Continuation 2026-09-03 — fourth score, 20-domain coverage, new domains
+
+Continuation: [`docs/audits/FULL_PRODUCT_VISION_AUDIT_2026-09-03.md`](../audits/FULL_PRODUCT_VISION_AUDIT_2026-09-03.md)
+(re-verified at `main` = production = `b9db4431`). §0–§4 and §5.1–§5.6 are
+unchanged; `CORE_PRODUCT_READY` and `COMMERCIAL_LAUNCH_READY` keep their
+launch-layer meaning.
+
+| State | Score | Note |
+|---|---:|---|
+| `CORE_PRODUCT_READY` | **78%** | held — P0-1 reproduced unfixed at `b9db4431` (503, 503, 200) |
+| `COMMERCIAL_LAUNCH_READY` | **35%** | held |
+| `FULL_CANONICAL_VISION_COMPLETE` | **40%** | 39.6 on the brief's 20 material domains (re-normalisation of the 38.4 above, +1.2, no new product) |
+| `FULL_CANONICAL_VISION_PROD_VERIFIED` | **24%** | only production-verified credit; the 16-point gap to 40 is tested code with no production row |
+
+Domains first indexed by the continuation: services marketplace `PARTIAL` 30
+(real to `accepted`, nothing after) · housing `MISSING` 0 · document engine
+`PARTIAL` 35 (inventory model, 0 rows, no rules engine) · invoicing 15 (manual
+`finance_records`, nothing generated from work) · automation engine `MISSING`
+10 · SEO/AEO `PARTIAL` 45 · admin/observability `PARTIAL` 45 · Telegram/social
+10 · **Agentai OS integration `PARTIAL` 30** (contract
+`contracts/labourmarket-capability-contract.json` exists, one-way, 9 days
+stale; radar/outreach schedules on the owner PC all **Disabled**; VPS state
+`UNKNOWN`).
+
+New production findings: **P0-1b** — `/jobs-sitemap.xml` (advertised in
+`robots.txt`) returns 500 on cold buffers via the same `count_public_vacancies_v1`
+timeout; **P2-1** — apex unknown paths with a file extension (`/foo.xml`,
+`/foo.json`, `/llms.txt`) return 500 instead of 404 (locale-prefixed paths 404
+correctly). Both `PRODUCT_DEFECT`, both GREEN-class fixes, both folded into
+WAVE 0. Also: **#1439 is now `CONFLICTING`** — the only auto-merge PR cannot
+merge until its register conflict is resolved (recipe in
+`RESUME_CHECKPOINT_2026-09-02.md`).
+
+New owner gates (genuine only): **VPS-1** Agentai VPS scheduler state ·
+**TG-1** create the LabourMarket.ai Telegram channel · **AEO-1** (optional)
+editorial approval of first answer pages. Resume from
+`RESUME_CHECKPOINT_2026-09-03.md`.

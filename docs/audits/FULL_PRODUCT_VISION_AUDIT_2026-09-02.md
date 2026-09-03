@@ -1,5 +1,12 @@
 # FULL PRODUCT VISION AUDIT — LabourMarket.ai
 
+> **Continued 2026-09-03:** [`FULL_PRODUCT_VISION_AUDIT_2026-09-03.md`](FULL_PRODUCT_VISION_AUDIT_2026-09-03.md)
+> re-verifies ground truth at `b9db4431`, adds the domains not indexed here
+> (services marketplace, housing, documents engine, invoicing, automation,
+> SEO/AEO, admin/observability, Telegram, Agentai OS boundary), re-normalises
+> the coverage table to the brief's 20 domains and adds the fourth score
+> (`FULL_CANONICAL_VISION_PROD_VERIFIED` 24%). This file stays the evidence base.
+>
 > **Date:** 2026-09-02 · **Class:** additive audit layer, ABOVE the launch-readiness
 > register. This file does **not** restate or revise
 > [`docs/launch/FINAL_COMPLETION_REGISTER.md`](../launch/FINAL_COMPLETION_REGISTER.md);
