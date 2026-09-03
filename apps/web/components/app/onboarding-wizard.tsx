@@ -203,6 +203,9 @@ export function OnboardingWizard({
         // paths runs, so the event never double-fires.
         trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
           role_context: primaryRole,
+          // The precise actor (student / education / agency …) — without it
+          // the TTFV bucketing only had the coarse identity on this row.
+          intent: intentList.join(","),
         });
       } catch (e) {
         // A successful onboarding ends in a server-side redirect
@@ -212,6 +215,7 @@ export function OnboardingWizard({
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
           trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
             role_context: primaryRole,
+            intent: intentList.join(","),
           });
           throw e;
         }

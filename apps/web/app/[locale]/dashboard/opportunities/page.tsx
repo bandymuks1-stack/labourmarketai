@@ -373,9 +373,18 @@ export default async function OpportunitiesPage({
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      {/* `candidate_count` = how many fitting opportunities this view showed
+          (0 when the board is not available or empty). A board with fits is
+          the worker's first SYSTEM result; an empty one is not value — the
+          admin TTFV section reads exactly this number. */}
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
-        metadata={{ surface: "opportunities", role_context: "worker" }}
+        metadata={{
+          surface: "opportunities",
+          role_context: "worker",
+          candidate_count:
+            result.kind === "ready" && result.capabilities.boardAvailable ? result.opportunities.length : 0,
+        }}
       />
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
