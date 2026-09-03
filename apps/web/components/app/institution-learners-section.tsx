@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
 
@@ -24,8 +25,9 @@ export async function InstitutionLearnersSection({
   const read = await readInstitutionLearners(organizationId);
 
   return (
+    <Card compact>
     <section
-      className="card-border flex flex-col gap-3 p-4"
+      className="flex flex-col gap-3"
       data-testid="institution-learners"
       aria-labelledby="institution-learners-title"
     >
@@ -101,5 +103,6 @@ export async function InstitutionLearnersSection({
         {t("invite")} →
       </Link>
     </section>
+    </Card>
   );
 }
