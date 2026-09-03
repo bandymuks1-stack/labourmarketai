@@ -3537,7 +3537,7 @@
     },
     "legalNotice": {
       "signup": "Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "googleLogin": "Jei paskyros dar neturite, tęsiant su „Google“ ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "googleLogin": "Jei paskyros dar neturite, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
       "controller": "Jūsų paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
     },
     "errors": {
