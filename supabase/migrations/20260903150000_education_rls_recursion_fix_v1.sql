@@ -1,4 +1,4 @@
--- @human-gate-approved — PENDING: owner approval sentence "Apply batch 2026-09-03 D" (OWNER_ACTION_QUEUE_2026-09-03.md row 0); NOT applied to prod until then. Fix proven on prod in a rolled-back transaction 2026-09-03 (see PR body).
+-- @human-gate-approved — owner approval "Apply batch 2026-09-03 D" (2026-09-03); APPLIED TO PROD via Supabase MCP after the rolled-back prod proof recorded in PR #1457
 -- 20260903150000_education_rls_recursion_fix_v1
 --
 -- ██ RED CLASS — human gate (migration-safety: DROP/CREATE POLICY + SECURITY
