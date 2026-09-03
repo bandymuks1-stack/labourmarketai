@@ -43,7 +43,14 @@
     "step_express_interest": "Bekunden Sie Interesse an einer passenden Chance.",
     "step_gain_evidence_for_missing": "Belegen Sie eine fehlende Fähigkeit: Praxis erfassen, Zertifikat hinzufügen oder jemanden fragen, der die Arbeit gesehen hat.",
     "openProfile": "Profil bearbeiten",
-    "openJournal": "Arbeitsjournal öffnen"
+    "openJournal": "Arbeitsjournal öffnen",
+    "cohortsTitle": "Ihr Studiengang",
+    "cohortLine": "{program} · Gruppe {cohort}",
+    "cohortAt": "an {institution}",
+    "cohortDirection": "Richtung: {profession}",
+    "cohortDemand": "{count} offene Stellen für diese Richtung heute (importierte Marktdaten)",
+    "cohortDemandUnknown": "Nachfrage für diese Richtung noch nicht gemessen",
+    "missingFromProgram": "Üblich für die Richtung Ihres Studiengangs, noch nicht in Ihren Aufzeichnungen:"
   },
   "businessProfile": {
     "eyebrow": "Unternehmensprofil",

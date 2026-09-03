@@ -43,7 +43,14 @@
     "step_express_interest": "Проявите интерес к подходящей возможности.",
     "step_gain_evidence_for_missing": "Подкрепите недостающий навык: фиксируйте практику, добавьте сертификат или попросите того, кто видел работу.",
     "openProfile": "Редактировать профиль",
-    "openJournal": "Открыть журнал работ"
+    "openJournal": "Открыть журнал работ",
+    "cohortsTitle": "Ваша программа",
+    "cohortLine": "{program} · группа {cohort}",
+    "cohortAt": "в {institution}",
+    "cohortDirection": "Направление: {profession}",
+    "cohortDemand": "{count} открытых вакансий по этому направлению сегодня (импортированные данные рынка)",
+    "cohortDemandUnknown": "Спрос по этому направлению ещё не измерен",
+    "missingFromProgram": "Обычно для направления вашей программы, но ещё нет в ваших записях:"
   },
   "businessProfile": {
     "eyebrow": "Профиль бизнеса",

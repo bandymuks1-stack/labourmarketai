@@ -35,7 +35,7 @@ const base: CompassInput = {
 describe("learning compass — pure model", () => {
   it("with nothing declared, every answer is an honest 'nothing yet' and the steps say what unblocks first", () => {
     const c = buildLearningCompass(base);
-    expect(c.becoming).toEqual({ professionSlug: null, currentEducation: null });
+    expect(c.becoming).toEqual({ professionSlug: null, currentEducation: null, cohorts: [] });
     expect(c.evidence).toEqual({
       skillsTotal: 0,
       skillsConfirmed: 0,
@@ -97,6 +97,64 @@ describe("learning compass — pure model", () => {
     expect(isStudentPath({ education: [edu], hasLearnerLink: false })).toBe(true);
     expect(isStudentPath({ education: [{ ...edu, isCurrent: false }], hasLearnerLink: false })).toBe(false);
     expect(isStudentPath({ education: [], hasLearnerLink: true })).toBe(true);
+  });
+
+  it("cohort membership is carried into 'becoming' untouched; without it the list is empty (callers may omit it)", () => {
+    const cohort = {
+      cohortId: "c1",
+      cohortName: "2026 autumn",
+      programName: "Electrical installation",
+      institutionName: "VTU",
+      targetProfessionSlug: "electrician",
+      educationTypeSlug: "vocational",
+      startsOn: "2026-09-01",
+      endsOn: null,
+      demandCount: 17,
+    };
+    expect(buildLearningCompass(base).becoming.cohorts).toEqual([]);
+    const c = buildLearningCompass({ ...base, cohorts: [cohort] });
+    expect(c.becoming.cohorts).toEqual([cohort]);
+    // membership does not invent a direction or an education row
+    expect(c.becoming.professionSlug).toBeNull();
+    expect(c.nextSteps).toContain("choose_direction");
+  });
+
+  it("with no own direction, the programme's target direction drives 'missing' and is named as the programme's", () => {
+    const registry = skillsForProfession("electrician");
+    expect(registry.length).toBeGreaterThan(1);
+    const cohort = {
+      cohortId: "c1",
+      cohortName: "A",
+      programName: "P",
+      institutionName: null,
+      targetProfessionSlug: "electrician",
+      educationTypeSlug: null,
+      startsOn: null,
+      endsOn: null,
+      demandCount: null,
+    };
+    const c = buildLearningCompass({
+      ...base,
+      cohorts: [cohort],
+      skills: [{ slug: registry[0], evidence: tier("self_declared") }],
+    });
+    expect(c.missing.source).toBe("program");
+    expect(c.missing.skills.map((m) => m.slug)).not.toContain(registry[0]);
+    expect(c.missing.skills.every((m) => m.askedBy === 0)).toBe(true);
+
+    // an own direction wins over the programme's — the person's choice is the anchor
+    const own = buildLearningCompass({ ...base, cohorts: [cohort], professionSlug: "electrician" });
+    expect(own.missing.source).toBe("profession");
+    // and the engine's gaps over real opportunities win over both
+    const withOpps = buildLearningCompass({
+      ...base,
+      cohorts: [cohort],
+      opportunities: [opp({ missingSkillSlugs: ["panel-wiring"] })],
+    });
+    expect(withOpps.missing.source).toBe("opportunities");
+    // a cohort without a direction contributes nothing to 'missing'
+    const noDir = buildLearningCompass({ ...base, cohorts: [{ ...cohort, targetProfessionSlug: null }] });
+    expect(noDir.missing).toEqual({ source: null, skills: [] });
   });
 
   it("never lists a missing skill the person already holds", () => {

@@ -9,6 +9,7 @@ import { listMyEngagements } from "@/lib/invitations/network";
 import {
   buildLearningCompass,
   isStudentPath,
+  type CompassCohort,
   type CompassEducation,
   type CompassOpportunity,
   type LearningCompass,
@@ -34,6 +35,97 @@ export type LearningCompassRead =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
   return c;
+}
+
+/** Same ceiling the institution side uses; the function clamps to 100. */
+const DEMAND_LIMIT = 100;
+
+type CohortMembershipRow = {
+  cohort_id: string;
+  status: string;
+  education_cohorts: {
+    id: string;
+    name: string;
+    starts_on: string | null;
+    ends_on: string | null;
+    organization_id: string;
+    archived_at: string | null;
+    education_programs: {
+      id: string;
+      name: string;
+      target_profession_slug: string | null;
+      education_type_slug: string | null;
+      archived_at: string | null;
+    } | null;
+  } | null;
+};
+
+/**
+ * The person's OWN active cohort memberships (education programmes / cohorts,
+ * migration 20260903120000). RLS: a learner reads only their own membership
+ * rows and, through them, exactly the cohort + programme they belong to. The
+ * institution's name comes from the person's own student engagement context
+ * (`organizationNameById`), so nothing of the institution's is read here.
+ *
+ * Demand per direction is the same authenticated count the institution sees
+ * (`count_public_vacancies_by_profession_v1`, imported public vacancy pool):
+ * when the returned list is shorter than the limit it is exhaustive, so an
+ * absent direction is a real 0; when it is full, an absent direction is
+ * `null` (not measured) — never a made-up zero.
+ */
+async function readOwnCohorts(
+  supabase: SupabaseClient,
+  profileId: string,
+  organizationNameById: ReadonlyMap<string, string | null>,
+): Promise<CompassCohort[]> {
+  const res = await asAny(supabase)
+    .from("education_cohort_members")
+    .select(
+      "cohort_id, status, education_cohorts(id, name, starts_on, ends_on, organization_id, archived_at, education_programs(id, name, target_profession_slug, education_type_slug, archived_at))",
+    )
+    .eq("profile_id", profileId)
+    .eq("status", "active")
+    .limit(20);
+  if (res.error) return [];
+  const rows = (res.data ?? []) as CohortMembershipRow[];
+  const live = rows.filter(
+    (r) => r.education_cohorts && !r.education_cohorts.archived_at && r.education_cohorts.education_programs && !r.education_cohorts.education_programs.archived_at,
+  );
+  if (live.length === 0) return [];
+
+  const wantsDemand = live.some((r) => r.education_cohorts?.education_programs?.target_profession_slug);
+  let demandBySlug: Map<string, number> | null = null;
+  let exhaustive = false;
+  if (wantsDemand) {
+    const demandRes = await asAny(supabase).rpc("count_public_vacancies_by_profession_v1", { p_limit: DEMAND_LIMIT });
+    if (!demandRes.error) {
+      const list = (demandRes.data ?? []) as Array<{ profession_slug: string; active_vacancies: number | string }>;
+      demandBySlug = new Map(list.map((r) => [String(r.profession_slug), Number(r.active_vacancies ?? 0)]));
+      exhaustive = list.length < DEMAND_LIMIT;
+    }
+  }
+
+  return live.map((r) => {
+    const c = r.education_cohorts!;
+    const p = c.education_programs!;
+    const slug = p.target_profession_slug ?? null;
+    let demandCount: number | null = null;
+    if (slug && demandBySlug) {
+      const found = demandBySlug.get(slug);
+      demandCount = found !== undefined ? found : exhaustive ? 0 : null;
+    }
+    return {
+      cohortId: c.id,
+      cohortName: c.name,
+      programName: p.name,
+      institutionName: organizationNameById.get(c.organization_id) ?? null,
+      targetProfessionSlug: slug,
+      educationTypeSlug: p.education_type_slug ?? null,
+      startsOn: c.starts_on ?? null,
+      endsOn: c.ends_on ?? null,
+      demandCount,
+    };
+  });
 }
 
 export async function readLearningCompass(): Promise<LearningCompassRead> {
@@ -86,6 +178,17 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
   const availabilityKnown =
     ctx.worker.availability_status !== null && ctx.worker.availability_status !== "unknown";
 
+  // Cohort membership presupposes an accepted student link to the SAME
+  // institution (enforced by `set_education_cohort_member_v1`), so the
+  // institution's name is already in the person's own engagement contexts.
+  const organizationNameById = new Map<string, string | null>();
+  for (const e of engagements) {
+    if (e.relationshipSlug === "student" && e.organizationId) {
+      organizationNameById.set(e.organizationId, e.organizationName);
+    }
+  }
+  const cohorts = hasLearnerLink ? await readOwnCohorts(supabase, user.id, organizationNameById) : [];
+
   const compass = buildLearningCompass({
     professionSlug: ctx.subject.professionSlug ?? null,
     skills: ctx.subject.skills.map((s) => ({ slug: s.uri, evidence: s.evidence })),
@@ -93,6 +196,7 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
     education,
     opportunities,
     availabilityKnown,
+    cohorts,
   });
 
   return {

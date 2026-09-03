@@ -43,7 +43,14 @@
     "step_express_interest": "Toon interesse in een passende kans.",
     "step_gain_evidence_for_missing": "Onderbouw een ontbrekende vaardigheid: leg praktijk vast, voeg een certificaat toe of vraag iemand die het werk zag.",
     "openProfile": "Profiel bewerken",
-    "openJournal": "Werkjournaal openen"
+    "openJournal": "Werkjournaal openen",
+    "cohortsTitle": "Je opleiding",
+    "cohortLine": "{program} · groep {cohort}",
+    "cohortAt": "bij {institution}",
+    "cohortDirection": "Richting: {profession}",
+    "cohortDemand": "{count} open vacatures voor deze richting vandaag (geïmporteerde marktdata)",
+    "cohortDemandUnknown": "Vraag voor deze richting nog niet gemeten",
+    "missingFromProgram": "Gebruikelijk voor de richting van je opleiding, nog niet in je gegevens:"
   },
   "businessProfile": {
     "eyebrow": "Bedrijfsprofiel",

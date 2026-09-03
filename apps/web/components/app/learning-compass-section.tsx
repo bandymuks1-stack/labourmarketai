@@ -56,6 +56,40 @@ export async function LearningCompassSection({
                   : ""}
               </p>
             ) : null}
+            {becoming.cohorts.length > 0 ? (
+              <div className="mt-1 flex flex-col gap-1.5" data-testid="compass-cohorts">
+                <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("cohortsTitle")}</h4>
+                <ul className="flex flex-col gap-1.5">
+                  {becoming.cohorts.map((c) => (
+                    <li
+                      key={c.cohortId}
+                      className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/60 p-2 text-xs"
+                      data-testid={`compass-cohort-${c.cohortId}`}
+                    >
+                      <span className="text-text-primary">
+                        {t("cohortLine", { program: c.programName, cohort: c.cohortName })}
+                        {c.institutionName ? ` · ${t("cohortAt", { institution: c.institutionName })}` : ""}
+                      </span>
+                      {c.targetProfessionSlug ? (
+                        <span className="text-text-secondary">
+                          {t("cohortDirection", { profession: professionLabel(c.targetProfessionSlug) })}
+                          {c.startsOn ? ` · ${c.startsOn}` : ""}
+                          {c.endsOn ? ` → ${c.endsOn}` : ""}
+                        </span>
+                      ) : null}
+                      {c.targetProfessionSlug ? (
+                        <span
+                          className="mt-0.5 w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-text-primary"
+                          data-testid={`compass-cohort-demand-${c.cohortId}`}
+                        >
+                          {c.demandCount === null ? t("cohortDemandUnknown") : t("cohortDemand", { count: c.demandCount })}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-1" data-testid="compass-evidence">
@@ -116,7 +150,11 @@ export async function LearningCompassSection({
           ) : (
             <>
               <p className="text-xs text-text-secondary">
-                {missing.source === "opportunities" ? t("missingFromOpportunities") : t("missingFromProfession")}
+                {missing.source === "opportunities"
+                  ? t("missingFromOpportunities")
+                  : missing.source === "program"
+                    ? t("missingFromProgram")
+                    : t("missingFromProfession")}
               </p>
               <ul className="flex flex-wrap gap-1.5 text-xs">
                 {missing.skills.map((m) => (

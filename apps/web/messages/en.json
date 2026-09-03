@@ -43,7 +43,14 @@
     "step_express_interest": "Express interest in a fitting opportunity.",
     "step_gain_evidence_for_missing": "Back up a missing skill: log practice, add a certificate or ask someone who saw the work.",
     "openProfile": "Edit profile",
-    "openJournal": "Open Work Journal"
+    "openJournal": "Open Work Journal",
+    "cohortsTitle": "Your programme",
+    "cohortLine": "{program} · cohort {cohort}",
+    "cohortAt": "at {institution}",
+    "cohortDirection": "Direction: {profession}",
+    "cohortDemand": "{count} open vacancies for this direction today (imported market data)",
+    "cohortDemandUnknown": "Demand for this direction not measured yet",
+    "missingFromProgram": "Usual for your programme's direction, not yet in your records:"
   },
   "businessProfile": {
     "eyebrow": "Business profile",
