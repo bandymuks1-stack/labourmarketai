@@ -743,7 +743,14 @@ describe("NO new DB migration in this PR", () => {
     // imports nothing. Still no migration from the market-map read layer,
     // which stays pure TS. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 253.
-    expect(count).toBeLessThanOrEqual(253);
+    // Bumped 253 -> 254 for the P0-1 anon read-path fix
+    // (20260903070000_public_vacancy_board_index_and_count_work_mem_v1, paired
+    // rollback) — GREEN: one partial index in board order over active
+    // public_vacancies rows + function-scoped work_mem on
+    // count_public_vacancies_v1. No grant, no policy, no definer swap, no
+    // data change. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 254.
+    expect(count).toBeLessThanOrEqual(254);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -29,9 +29,24 @@ describe("Guard: /api/health", () => {
     expect(route).toMatch(/export const dynamic = "force-dynamic"/);
     expect(route).toMatch(/cache-control.*no-store/);
     expect(route).toMatch(/auth\/v1\/settings/);
-    expect(route).toMatch(/rpc\/count_public_vacancies_v1/);
+    expect(route).toMatch(/rpc\/\$\{DB_PROBE_RPC\}/);
     expect(route).toMatch(/timedCheck\(/);
     expect(route).toMatch(/PROBE_TIMEOUT_MS/);
+  });
+
+  it("the db probe is a CONSTANT-COST real read, not the heavy public count (P0-1, 2026-09-03)", () => {
+    // count_public_vacancies_v1 scans ~45k active rows and measured 3.1–3.8 s
+    // cold against the anon 3 s statement_timeout: the probe flapped 503/200
+    // with the buffer pool, paging on a slow public query rather than on the
+    // product's ability to serve a person. A primary-key lookup on the nil
+    // UUID is a real PostgREST → pooler → database round trip at bounded cost.
+    expect(route).toMatch(/const DB_PROBE_RPC = "get_public_vacancy_preview_v1"/);
+    expect(route).toMatch(/const NIL_UUID = "00000000-0000-0000-0000-000000000000"/);
+    expect(route).toMatch(/body: JSON\.stringify\(\{ p_id: NIL_UUID \}\)/);
+    // executable text only — the rationale comment is allowed to name the old RPC
+    const code = route.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(code).not.toMatch(/count_public_vacancies_v1/);
+    expect(code).not.toMatch(/search_public_vacancy_previews_v1|list_public_vacancy_sitemap_v1/);
   });
 
   it("uses only the anon key — never the service role, never cookies", () => {

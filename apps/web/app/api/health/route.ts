@@ -19,6 +19,22 @@ export const runtime = "nodejs";
 
 const PROBE_TIMEOUT_MS = 4_000;
 
+/**
+ * The db probe is a CONSTANT-COST real read: a primary-key lookup through
+ * PostgREST and the pooler on the anon-executable public-vacancy preview,
+ * keyed on the nil UUID so it matches nothing and returns an empty set.
+ *
+ * It replaced `count_public_vacancies_v1` on 2026-09-03 (P0-1): that count
+ * scans ~45k active rows and measured 3.1–3.8 s on a cold buffer pool against
+ * the anon role's 3 s statement_timeout, so the probe answered 503 on cold
+ * buffers and 200 once warm — a false alarm about a slow public query, not
+ * about the product's ability to serve a person. The semantics are unchanged:
+ * `db.ok` still means "the database answered a real query for an anonymous
+ * caller"; only the cost of the question is now bounded.
+ */
+const DB_PROBE_RPC = "get_public_vacancy_preview_v1";
+const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
 export async function GET(): Promise<NextResponse> {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
   const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -37,16 +53,16 @@ export async function GET(): Promise<NextResponse> {
     }, PROBE_TIMEOUT_MS),
     timedCheck(async (signal) => {
       if (missingEnv) return { ok: false, reason: "env" };
-      // Anon-executable by design (public job counts); a real round trip
-      // through PostgREST and the pooler to the database.
-      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/count_public_vacancies_v1`, {
+      // Anon-executable by design; a real round trip through PostgREST and
+      // the pooler to the database, at a constant (index-lookup) cost.
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/${DB_PROBE_RPC}`, {
         method: "POST",
         headers: {
           apikey: anonKey,
           authorization: `Bearer ${anonKey}`,
           "content-type": "application/json",
         },
-        body: "{}",
+        body: JSON.stringify({ p_id: NIL_UUID }),
         signal,
         cache: "no-store",
       });
