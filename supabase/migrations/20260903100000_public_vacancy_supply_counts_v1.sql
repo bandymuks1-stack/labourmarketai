@@ -91,7 +91,15 @@ comment on function public.refresh_public_vacancy_supply_counts_v1() is
 -- Seed the row now (this migration runs as postgres).
 select public.refresh_public_vacancy_supply_counts_v1();
 
--- Same signature and grants as before (CREATE OR REPLACE keeps anon/authenticated EXECUTE).
+-- Same signature and grants as before (CREATE OR REPLACE keeps the ACL — anon /
+-- authenticated EXECUTE — but NOT the function config: `work_mem = 64MB` from
+-- 20260903070000 must be re-stated here, verified on production 2026-09-03 in a
+-- rolled-back probe).
+--
+-- Fallback shape, verified on production (EXPLAIN in a rolled-back probe): the
+-- `where not exists` becomes a One-Time Filter so the live aggregate is NEVER
+-- EXECUTED while the row exists; the `having not exists` removes the aggregate's
+-- zero-count row, so the function returns exactly one row either way.
 create or replace function public.count_public_vacancies_v1()
 returns table (
   active_vacancies bigint,
@@ -101,6 +109,7 @@ returns table (
 language sql
 security definer
 set search_path = public
+set work_mem = '64MB'
 stable
 as $$
   select c.active_vacancies, c.distinct_employers, c.last_refreshed_at
@@ -113,7 +122,8 @@ as $$
     from public.public_vacancies v
    where v.is_active
      and (v.expires_at is null or v.expires_at > now())
-  limit 1;
+     and not exists (select 1 from public.public_vacancy_supply_counts x where x.singleton)
+  having not exists (select 1 from public.public_vacancy_supply_counts x where x.singleton);
 $$;
 
 comment on function public.count_public_vacancies_v1() is

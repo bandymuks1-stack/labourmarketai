@@ -12,8 +12,9 @@ begin
 end;
 $$;
 
--- Previous body (production definition read back 2026-09-03; work_mem=64MB
--- from 20260903070000 is a function config and is preserved by CREATE OR REPLACE).
+-- Previous body (production definition read back 2026-09-03). CREATE OR REPLACE
+-- does NOT preserve a function's SET config (verified on production in a
+-- rolled-back probe), so the work_mem = 64MB from 20260903070000 is re-stated.
 create or replace function public.count_public_vacancies_v1()
 returns table (
   active_vacancies bigint,
@@ -23,6 +24,7 @@ returns table (
 language sql
 security definer
 set search_path = public
+set work_mem = '64MB'
 stable
 as $$
   select
