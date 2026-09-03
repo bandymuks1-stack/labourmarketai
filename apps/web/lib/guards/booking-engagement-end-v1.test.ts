@@ -1181,6 +1181,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-02: FINAL COMPLETION finding F4-1 (gate G-15) — the
+      // accept-company-invitation RPC also binds the organisation membership
+      // (the add_org_member row shape). SECURITY DEFINER body = RED by rule;
+      // the marker states the route only, apply stays owner-gated.
+      "20260902230000_accept_invitation_binds_org_membership_v1.sql",
 ]);
   });
 

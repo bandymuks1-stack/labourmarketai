@@ -743,7 +743,7 @@ describe("NO new DB migration in this PR", () => {
     // imports nothing. Still no migration from the market-map read layer,
     // which stays pure TS. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 253.
-    expect(count).toBeLessThanOrEqual(253);
+    expect(count).toBeLessThanOrEqual(254);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
