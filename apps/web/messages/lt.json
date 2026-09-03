@@ -1589,6 +1589,39 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "ĮMONĖS ERDVĖ",
+      "programs": {
+        "title": "Programos ir grupės",
+        "subtitle": "Ko mokote, nukreipta į darbo rinkos kryptį, ir besimokančiųjų grupės viduje. Paklausa rodo gyvas viešas darbo vietas tai krypčiai.",
+        "empty": "Programų dar nėra. Pridėkite pirmą ir nurodykite, į kokią darbo kryptį ji veda.",
+        "addProgram": "Pridėti programą",
+        "noDirection": "Darbo kryptis nenurodyta",
+        "demand": "{count} gyvos darbo vietos",
+        "demandUnknown": "paklausa nepasiekiama",
+        "members": "{count} besimokantieji",
+        "noLearnersYet": "Dar nėra prisijungusių besimokančiųjų, kuriuos būtų galima priskirti — pirmiausia pakvieskite studentus.",
+        "form": {
+          "programName": "Programos pavadinimas",
+          "targetProfession": "Veda į (darbo kryptis)",
+          "noProfession": "— nenurodyta —",
+          "educationType": "Tipas",
+          "noType": "— nenurodyta —",
+          "description": "Aprašymas (neprivaloma)",
+          "createProgram": "Sukurti programą",
+          "cohortName": "Nauja grupė (klasė / srautas)",
+          "startsOn": "Pradžia",
+          "endsOn": "Pabaiga",
+          "createCohort": "Sukurti grupę",
+          "assignLearner": "Priskirti prisijungusį besimokantįjį",
+          "chooseLearner": "Pasirinkite besimokantįjį",
+          "assign": "Priskirti",
+          "remove": "pašalinti",
+          "saving": "Saugoma…",
+          "saved": "Išsaugota.",
+          "forbidden": "Tai gali daryti tik šios įstaigos vadovas.",
+          "invalid": "Patikrinkite reikšmes.",
+          "error": "Kažkas nepavyko. Bandykite dar kartą."
+        }
+      },
       "learners": {
         "title": "Besimokantieji",
         "subtitle": "Ką pakvietėte ir kas prisijungė. Besimokantieji tvarko savo įrašus patys; jūs matote dalyvavimą, ne jų žurnalus.",
@@ -10558,7 +10591,9 @@
       "contacted": "Susisiekta",
       "rejected": "Atmesta",
       "booking_started": "Pradėta rezervacija",
-      "accepted": "Rezervacija priimta"
+      "accepted": "Rezervacija priimta",
+      "decision_accepted": "Klientas priėmė",
+      "decision_declined": "Klientas atmetė"
     }
   },
   "clientBridge": {
@@ -10581,6 +10616,22 @@
     "fromAgency": "Nuo"
   },
   "scoutingAgencyOffers": {
+    "status": {
+      "offered": "pasiūlytas",
+      "withdrawn": "atšauktas",
+      "accepted": "priimtas",
+      "declined": "atmestas"
+    },
+    "decision": {
+      "accept": "Priimti kandidatą",
+      "decline": "Atmesti",
+      "accepted": "Priimta — darbuotojui išsiųstas rezervacijos pasiūlymas; toliau sprendžia jis.",
+      "declined": "Atmesta — agentūra tai mato.",
+      "notReady": "Kandidatų priėmimas ir atmetimas dar neveikia — kol kas naudokite kontaktą arba rezervacijos pasiūlymą žemiau.",
+      "forbidden": "Spręsti gali tik šio poreikio savininkas.",
+      "closed": "Šis pasiūlymas nebegalioja.",
+      "error": "Kažkas nepavyko. Bandykite dar kartą."
+    },
     "title": "Agentūros pasiūlyti kandidatai",
     "subtitle": "Prijungta personalo agentūra pasiūlė šiuos darbuotojus šiam poreikiui. Peržiūrėkite, susisiekite arba rezervuokite juos tais pačiais valdikliais žemiau.",
     "via": "Per"

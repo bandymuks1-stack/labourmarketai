@@ -1589,6 +1589,39 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "UNTERNEHMENSBEREICH",
+      "programs": {
+        "title": "Studiengänge und Kohorten",
+        "subtitle": "Was Sie lehren, ausgerichtet auf eine Arbeitsmarktrichtung, und die Lerngruppen darin. Nachfrage zeigt aktuelle öffentliche Stellen für diese Richtung.",
+        "empty": "Noch keine Studiengänge. Fügen Sie den ersten hinzu und richten Sie ihn auf die Arbeitsrichtung aus, zu der er führt.",
+        "addProgram": "Studiengang hinzufügen",
+        "noDirection": "Keine Arbeitsrichtung festgelegt",
+        "demand": "{count} aktuelle Stellen",
+        "demandUnknown": "Nachfrage nicht verfügbar",
+        "members": "{count} Lernende",
+        "noLearnersYet": "Noch keine verbundenen Lernenden zum Zuweisen — laden Sie zuerst Studierende ein.",
+        "form": {
+          "programName": "Name des Studiengangs",
+          "targetProfession": "Führt zu (Arbeitsrichtung)",
+          "noProfession": "— nicht festgelegt —",
+          "educationType": "Art",
+          "noType": "— nicht festgelegt —",
+          "description": "Beschreibung (optional)",
+          "createProgram": "Studiengang anlegen",
+          "cohortName": "Neue Kohorte (Klasse / Jahrgang)",
+          "startsOn": "Beginn",
+          "endsOn": "Ende",
+          "createCohort": "Kohorte anlegen",
+          "assignLearner": "Verbundene/n Lernende/n zuweisen",
+          "chooseLearner": "Lernende/n wählen",
+          "assign": "Zuweisen",
+          "remove": "entfernen",
+          "saving": "Speichern…",
+          "saved": "Gespeichert.",
+          "forbidden": "Das kann nur eine Leitung dieser Einrichtung.",
+          "invalid": "Bitte prüfen Sie die Werte.",
+          "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        }
+      },
       "learners": {
         "title": "Lernende",
         "subtitle": "Wen Sie eingeladen haben und wer verbunden ist. Lernende führen ihre Aufzeichnungen selbst; Sie sehen die Teilnahme, nicht ihre Journale.",
@@ -10558,7 +10591,9 @@
       "contacted": "Kontaktiert",
       "rejected": "Abgelehnt",
       "booking_started": "Buchung gestartet",
-      "accepted": "Buchung angenommen"
+      "accepted": "Buchung angenommen",
+      "decision_accepted": "Kunde angenommen",
+      "decision_declined": "Kunde abgelehnt"
     }
   },
   "clientBridge": {
@@ -10581,6 +10616,22 @@
     "fromAgency": "Von"
   },
   "scoutingAgencyOffers": {
+    "status": {
+      "offered": "vorgeschlagen",
+      "withdrawn": "zurückgezogen",
+      "accepted": "angenommen",
+      "declined": "abgelehnt"
+    },
+    "decision": {
+      "accept": "Kandidat annehmen",
+      "decline": "Ablehnen",
+      "accepted": "Angenommen — ein Buchungsvorschlag wurde an die Arbeitskraft gesendet; sie entscheidet als Nächstes.",
+      "declined": "Abgelehnt — die Agentur sieht das.",
+      "notReady": "Kandidaten annehmen oder ablehnen ist noch nicht verfügbar — nutzen Sie bis dahin Kontakt oder einen Buchungsvorschlag unten.",
+      "forbidden": "Nur der Eigentümer dieser Anfrage kann entscheiden.",
+      "closed": "Dieses Angebot ist nicht mehr offen.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
     "title": "Von der Agentur vorgeschlagene Kandidaten",
     "subtitle": "Eine verbundene Personalagentur hat diese Mitarbeiter für diese Anfrage vorgeschlagen. Prüfen, kontaktieren oder buchen Sie sie mit denselben Steuerelementen unten.",
     "via": "Über"

@@ -4,7 +4,7 @@
  * WHY THIS EXISTS. `anon-secdef-allowlist.ts` pins the four functions `anon`
  * may reach. Nothing pinned the opposite side: which RPCs must stay reachable
  * by `authenticated`. That gap allowed 22 SECURITY DEFINER RPCs to ship with
- * NO grant statement anywhere in the migration chain — they worked only
+ * NO grant statement anywhere in the migration chain ï¿½ they worked only
  * because an environment default happened to grant EXECUTE. Once the
  * 20260722160000 closure revokes PUBLIC, any such function would break in a
  * production-baseline database. This list is the regression pin.
@@ -17,7 +17,7 @@
  *
  * MAINTENANCE. Adding a new `.rpc(...)` call site means adding the name here
  * AND granting EXECUTE to `authenticated` in the migration that creates it.
- * Note `apps/web/lib/supabase/types.ts` is NOT a usable source — it is stale
+ * Note `apps/web/lib/supabase/types.ts` is NOT a usable source ï¿½ it is stale
  * (58 live RPCs are missing from it), which is why call sites use `asAny`.
  */
 export const CANONICAL_APP_RPCS = [
@@ -52,9 +52,12 @@ export const CANONICAL_APP_RPCS = [
   "contact_demand_owner_v1",
   "conversation_counterpart_identities",
   "conversation_source_context",
+  "count_public_vacancies_by_profession_v1",
   "create_agency_client_connection_v1",
   "create_asset_v1",
   "create_contract_v1",
+  "create_education_cohort_v1",
+  "create_education_program_v1",
   "create_finance_record_v1",
   "create_follow_up_task_v1",
   "create_invitation_v1",
@@ -86,6 +89,7 @@ export const CANONICAL_APP_RPCS = [
   "issue_asset_v1",
   "list_agency_offer_progress_v1",
   "list_agency_offered_candidates_for_request_v1",
+  "list_agency_offered_candidates_for_request_v2",
   "list_booking_engagement_workers_v1",
   "list_invitations_for_me_v1",
   "list_my_contact_disclosure_requests_v1",
@@ -120,6 +124,7 @@ export const CANONICAL_APP_RPCS = [
   "requester_identities_for_provider",
   "reschedule_booking_proposal_v1",
   "resend_invitation_v1",
+  "respond_agency_candidate_offer_v1",
   "respond_booking_request",
   "respond_booking_request_v2",
   "respond_booking_request_v3",
@@ -159,6 +164,7 @@ export const CANONICAL_APP_RPCS = [
   "set_defect_status_v1",
   "set_demand_agency_client_v1",
   "set_docs_aggregate_consent",
+  "set_education_cohort_member_v1",
   "set_external_profile_visibility_v1",
   "set_finance_record_status_v1",
   "set_follow_up_task_status_v1",

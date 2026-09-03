@@ -1589,6 +1589,39 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "BEDRIJFSWERKRUIMTE",
+      "programs": {
+        "title": "Opleidingen en cohorten",
+        "subtitle": "Wat je onderwijst, gericht op een richting op de arbeidsmarkt, en de groepen lerenden daarbinnen. Vraag toont actuele publieke vacatures voor die richting.",
+        "empty": "Nog geen opleidingen. Voeg de eerste toe en richt die op de werkrichting waar ze toe leidt.",
+        "addProgram": "Opleiding toevoegen",
+        "noDirection": "Geen werkrichting ingesteld",
+        "demand": "{count} actuele vacatures",
+        "demandUnknown": "vraag niet beschikbaar",
+        "members": "{count} lerenden",
+        "noLearnersYet": "Nog geen verbonden lerenden om toe te wijzen — nodig eerst studenten uit.",
+        "form": {
+          "programName": "Naam opleiding",
+          "targetProfession": "Leidt naar (werkrichting)",
+          "noProfession": "— niet ingesteld —",
+          "educationType": "Soort",
+          "noType": "— niet ingesteld —",
+          "description": "Beschrijving (optioneel)",
+          "createProgram": "Opleiding aanmaken",
+          "cohortName": "Nieuw cohort (klas / instroom)",
+          "startsOn": "Start",
+          "endsOn": "Einde",
+          "createCohort": "Cohort aanmaken",
+          "assignLearner": "Verbonden lerende toewijzen",
+          "chooseLearner": "Kies een lerende",
+          "assign": "Toewijzen",
+          "remove": "verwijderen",
+          "saving": "Opslaan…",
+          "saved": "Opgeslagen.",
+          "forbidden": "Alleen een beheerder van deze instelling kan dit doen.",
+          "invalid": "Controleer de waarden.",
+          "error": "Er ging iets mis. Probeer het opnieuw."
+        }
+      },
       "learners": {
         "title": "Lerenden",
         "subtitle": "Wie je hebt uitgenodigd en wie verbonden is. Lerenden beheren hun eigen gegevens; jij ziet deelname, niet hun journaals.",
@@ -10558,7 +10591,9 @@
       "contacted": "Gecontacteerd",
       "rejected": "Afgewezen",
       "booking_started": "Boeking gestart",
-      "accepted": "Boeking geaccepteerd"
+      "accepted": "Boeking geaccepteerd",
+      "decision_accepted": "Klant geaccepteerd",
+      "decision_declined": "Klant afgewezen"
     }
   },
   "clientBridge": {
@@ -10581,6 +10616,22 @@
     "fromAgency": "Van"
   },
   "scoutingAgencyOffers": {
+    "status": {
+      "offered": "voorgesteld",
+      "withdrawn": "ingetrokken",
+      "accepted": "geaccepteerd",
+      "declined": "afgewezen"
+    },
+    "decision": {
+      "accept": "Kandidaat accepteren",
+      "decline": "Afwijzen",
+      "accepted": "Geaccepteerd — een boekingsvoorstel is naar de werknemer gestuurd; die beslist nu.",
+      "declined": "Afgewezen — het bureau ziet dit.",
+      "notReady": "Kandidaten accepteren of afwijzen is nog niet beschikbaar — gebruik tot dan contact of een boekingsvoorstel hieronder.",
+      "forbidden": "Alleen de eigenaar van deze aanvraag kan beslissen.",
+      "closed": "Dit voorstel is niet meer open.",
+      "error": "Er ging iets mis. Probeer het opnieuw."
+    },
     "title": "Door bureau voorgestelde kandidaten",
     "subtitle": "Een verbonden uitzendbureau stelde deze werknemers voor deze aanvraag voor. Beoordeel, contacteer of boek ze met dezelfde bedieningselementen hieronder.",
     "via": "Via"

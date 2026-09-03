@@ -18,6 +18,7 @@ import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
+import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
@@ -477,6 +478,9 @@ export default async function CompanyDashboardPage({
           offered: tAB("stage.offered"), reviewed: tAB("stage.reviewed"),
           contacted: tAB("stage.contacted"), rejected: tAB("stage.rejected"),
           booking_started: tAB("stage.booking_started"), accepted: tAB("stage.accepted"),
+          // the client's explicit decision on a candidate (20260903101000)
+          decision_accepted: tAB("stage.decision_accepted"),
+          decision_declined: tAB("stage.decision_declined"),
         },
       }
     : null;
@@ -967,6 +971,13 @@ export default async function CompanyDashboardPage({
           Least-privilege by ruling: never a learner's journal or profile. */}
       {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
         <InstitutionLearnersSection organizationId={capabilityOrgId} />
+      ) : null}
+
+      {/* Programmes → cohorts → learners, each programme pointed at a work
+          direction with its live public demand (RED batch B; honest
+          needs-migration state until applied). */}
+      {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
+        <InstitutionProgramsSection organizationId={capabilityOrgId} />
       ) : null}
 
       {/* Real market demand on the first session (never an empty marketplace):
