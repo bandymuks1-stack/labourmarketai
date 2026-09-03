@@ -975,6 +975,8 @@ export default async function CompanyDashboardPage({
           needs-migration state until applied). */}
       {capabilityOrgId && declaredCapabilities.includes("training_provider") ? (
         <InstitutionProgramsSection organizationId={capabilityOrgId} />
+      ) : null}
+
       {/* Real market demand on the first session (never an empty marketplace):
           the public vacancy pool for staffing agencies and education
           institutions, with its provenance stated on the card. */}
