@@ -1181,6 +1181,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-03: RED batch C: institution learner outcomes (definer + grant); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903140000_institution_learner_outcomes_v1.sql",
 ]);
   });
 
