@@ -1181,6 +1181,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-02 (FINAL COMPLETION Train F1): the work-plan primitive
+      // carries the marker as an ACKNOWLEDGEMENT, not an approval — it ships
+      // as a DRAFT + needs-human-gate PR and stays unapplied until the owner
+      // rules. RED by rule (SECURITY DEFINER RPCs + grants + trigger); it
+      // creates one additive table and changes no data.
+      "20260902200000_work_plan_entries_v1.sql",
 ]);
   });
 

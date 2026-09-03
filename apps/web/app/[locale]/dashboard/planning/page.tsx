@@ -90,6 +90,8 @@ const SOURCE_TONE: Record<PlanningSourceType, string> = {
   // Time Engine W2: the W6/W7 sources joined the canonical calendar.
   absence: "border-state-amber/40 text-state-amber",
   stage: "border-brand-violet/40 text-brand-violet",
+  // Train F1: the organization's PLAN primitive (planned work windows).
+  plan: "border-brand-blue/40 text-brand-blue",
 };
 
 /** Canonical href — omits defaults so the clean URL stays canonical. */

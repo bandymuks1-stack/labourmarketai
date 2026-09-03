@@ -124,7 +124,11 @@ describe("§7.1 the full agreed field set exists in the model and renders", () =
 });
 
 describe("§7.2 every agreed source is really composed", () => {
-  it("the source catalogue is the agreed eight", () => {
+  it("the source catalogue is the agreed eight + the plan primitive (Train F1)", () => {
+    // FINAL COMPLETION Train F1 (2026-09-02): `plan` = work_plan_entries, the
+    // organization's own PLAN object (who works where, when). A real table
+    // with RLS and RPC writes, projected like every other source — not a
+    // simulation, not a calendar copy.
     expect([...PLANNING_SOURCE_TYPES].sort()).toEqual(
       [
         "absence",
@@ -132,6 +136,7 @@ describe("§7.2 every agreed source is really composed", () => {
         "finance",
         "invitation",
         "journal",
+        "plan",
         "project",
         "stage",
         "task",

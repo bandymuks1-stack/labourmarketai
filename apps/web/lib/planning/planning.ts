@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listMyBookings } from "@/lib/booking/booking-actions";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { listMyTasks } from "@/lib/tasks/tasks";
+import { readWorkPlanItems } from "@/lib/planning/work-plan";
 import { isOpen } from "@/lib/tasks/task-model";
 import { listMyFinanceRecords } from "@/lib/finance/finance";
 import {
@@ -93,6 +94,9 @@ export interface PlanningSources {
   readonly absence: PlanningSourceState;
   /** Time Engine W2: dated stages of visible projects (W6 model). */
   readonly stage: PlanningSourceState;
+  /** Train F1: planned work windows (work_plan_entries) — the organization's
+   *  PLAN primitive; a manager sees the windows they planned, a worker their own. */
+  readonly plan: PlanningSourceState;
 }
 
 export type PlanningReadResult =
@@ -853,7 +857,7 @@ export async function getPlanning(
     },
   );
 
-  const [booking, managed, assigned, stage, task, journal, finance, invitation, absence] =
+  const [booking, managed, assigned, stage, task, journal, finance, invitation, absence, plan] =
     await Promise.all([
       readBookingItems(),
       managedPromise,
@@ -864,6 +868,7 @@ export async function getPlanning(
       readFinanceItems(today),
       readInvitationItems(),
       readAbsenceItems(),
+      readWorkPlanItems(rangeStart, rangeEnd),
     ]);
 
   // Merge project directions — assigned (personal commitment) wins on id
@@ -896,6 +901,7 @@ export async function getPlanning(
       ...finance.items,
       ...invitation.items,
       ...absence.items,
+      ...plan.items,
     ],
     sources: {
       booking: booking.state,
@@ -906,6 +912,7 @@ export async function getPlanning(
       invitation: invitation.state,
       absence: absence.state,
       stage: stage.state,
+      plan: plan.state,
     },
   };
 }

@@ -9310,7 +9310,8 @@
       "finance": "Financiën",
       "invitation": "Uitnodiging",
       "absence": "Verlof",
-      "stage": "Fasen"
+      "stage": "Fasen",
+      "plan": "Gepland werk"
     },
     "sourceNotes": {
       "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
@@ -9326,7 +9327,9 @@
       "absenceUnavailable": "De verlofmodule is in deze omgeving nog niet ingeschakeld.",
       "absenceError": "Verlofrecords konden niet worden gelezen — het plan wordt zonder deze getoond.",
       "stageUnavailable": "De projectfasenmodule is in deze omgeving nog niet ingeschakeld.",
-      "stageError": "Projectfasen konden niet worden gelezen — het plan wordt zonder deze getoond."
+      "stageError": "Projectfasen konden niet worden gelezen — het plan wordt zonder deze getoond.",
+      "planUnavailable": "Gepland werk is in deze omgeving nog niet beschikbaar.",
+      "planError": "Gepland werk kon niet worden gelezen."
     },
     "week": {
       "label": "Komende 7 dagen"
@@ -9361,7 +9364,8 @@
       "finance": "Financieel record",
       "invitation": "Uitnodiging",
       "absence": "Verlof / afwezigheid",
-      "stage": "Projectfase"
+      "stage": "Projectfase",
+      "plan": "Gepland werk"
     },
     "projectStatus": {
       "draft": "Concept",
@@ -9423,6 +9427,10 @@
       "plannedDays": "{count} geplande werkdagen",
       "actualHours": "{hours} u geregistreerd in het journaal",
       "note": "Geplande dagen komen uit geaccepteerde boekingen en projecttoewijzingen; geregistreerde uren uit uw journaalvermeldingen. Beide worden naast elkaar getoond en nooit in elkaar omgerekend."
+    },
+    "planStatus": {
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
     }
   },
   "workforcePlanning": {
@@ -14200,5 +14208,38 @@
     "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Uw keuzes worden opgeslagen en gelden zodra die actief is.",
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
+  },
+  "workPlan": {
+    "title": "Gepland werk",
+    "intro": "Plan wie waar en wanneer werkt. De kalender toont het als plan; wat werkelijk gebeurde, staat in het werkjournaal.",
+    "worker": "Werknemer",
+    "project": "Project (optioneel)",
+    "workObject": "Object / locatie (optioneel)",
+    "startDate": "Van",
+    "endDate": "Tot",
+    "startTime": "Starttijd (optioneel)",
+    "endTime": "Eindtijd (optioneel)",
+    "note": "Notitie (optioneel)",
+    "none": "Geen",
+    "submit": "Werk plannen",
+    "pending": "Plannen…",
+    "cancel": "Plan annuleren",
+    "cancelPending": "Annuleren…",
+    "empty": "Voor deze periode is nog niets gepland.",
+    "noWorkers": "Nog geen werknemers op je lijst. Nodig eerst mensen uit en plan dan hun werk.",
+    "unavailable": "Plannen is in deze omgeving nog niet beschikbaar.",
+    "listTitle": "Geplande periodes",
+    "overlap": "Overlapt met goedgekeurd verlof",
+    "outcome": {
+      "planned": "Werk gepland.",
+      "cancelled": "Plan geannuleerd.",
+      "invalid": "Controleer de datums en velden en probeer opnieuw.",
+      "not_allowed": "Je kunt niet plannen voor deze organisatie.",
+      "worker_not_in_scope": "Die werknemer staat niet op de lijst van deze organisatie.",
+      "project_not_in_organization": "Dat project hoort bij een andere organisatie.",
+      "work_object_not_in_organization": "Dat object hoort bij een andere organisatie.",
+      "unavailable": "Plannen is in deze omgeving nog niet beschikbaar.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    }
   }
 }
