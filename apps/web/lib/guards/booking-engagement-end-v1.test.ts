@@ -1181,6 +1181,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-03: RED batch A: supply-counts row (definer swap + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903100000_public_vacancy_supply_counts_v1.sql",
+      // 2026-09-03: RED batch A: agency offer decision (CHECK widening + definer + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
+      "20260903101000_agency_candidate_offer_decision_v1.sql",
 ]);
   });
 

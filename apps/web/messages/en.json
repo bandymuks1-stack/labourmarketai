@@ -10558,7 +10558,9 @@
       "contacted": "Contacted",
       "rejected": "Rejected",
       "booking_started": "Booking started",
-      "accepted": "Booking accepted"
+      "accepted": "Booking accepted",
+      "decision_accepted": "Client accepted",
+      "decision_declined": "Client declined"
     }
   },
   "clientBridge": {
@@ -10581,6 +10583,22 @@
     "fromAgency": "From"
   },
   "scoutingAgencyOffers": {
+    "status": {
+      "offered": "proposed",
+      "withdrawn": "withdrawn",
+      "accepted": "accepted",
+      "declined": "declined"
+    },
+    "decision": {
+      "accept": "Accept candidate",
+      "decline": "Decline",
+      "accepted": "Accepted — a booking proposal was sent to the worker; they decide next.",
+      "declined": "Declined — the agency can see this.",
+      "notReady": "Accepting and declining candidates is not available yet — until then, use contact or propose a booking below.",
+      "forbidden": "Only the owner of this request can decide.",
+      "closed": "This offer is no longer open.",
+      "error": "Something went wrong. Please try again."
+    },
     "title": "Agency-proposed candidates",
     "subtitle": "A connected staffing agency proposed these workers for this request. Review, contact, or book them with the same controls below.",
     "via": "Via"
