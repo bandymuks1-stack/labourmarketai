@@ -28,6 +28,8 @@ company setup (type pre-selected: staffing agency).
 
 Success = A1–A7 completed by one real agency with one real client within a week; TTFV target < 1 day.
 
+> **Status 2026-09-03 (window 2):** A3–A7 + the candidate's acceptance (runbook A4–A8) are **PROD-PROVEN at the DB level** in one rolled-back transaction (agency invite → client accept → share → offer → client accept = booking → agency progress → candidate accept = engagement; outsider sees 0; agency cannot decide its own offer). Zero residue. What remains is the real people and the UI walk with them.
+
 ## Lane B — real education institution (+ its students)
 
 Entry: signup → intent **"I represent an education institution"** → company setup
@@ -44,6 +46,8 @@ Entry: signup → intent **"I represent an education institution"** → company 
 | B7 | Institution sees outcomes | — | placement/employment state per learner | MISSING (Track C slice 2) |
 
 Success = one real institution with ≥ 5 real students through B1–B4 within two weeks; B5 shipped before the second week.
+
+> **Status 2026-09-03 (window 2):** the pilot walk (reading production as the institution manager and as a learner) found that **programmes / cohorts / members are unreadable in production** — `42P17` policy recursion in batch B — so the programmes section renders "—" and the runbook's B2/B3/B6 are unreachable until **#1457 (RED batch D, owner queue row 0)** is applied. B1, B4, B5 (invite → learner → Learners section), B7 (compass, now with the student's own cohort view #1458) and B10 (aggregates) are unaffected. Do not send student invitations for a programme pilot before D is applied.
 
 ## Lane C — real worker + employer loop
 

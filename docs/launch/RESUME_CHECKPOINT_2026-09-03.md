@@ -1,5 +1,23 @@
 # RESUME_CHECKPOINT — 2026-09-03 (execution mode: FIRST REAL ECOSYSTEM USE, late session)
 
+## UPDATE — window 2 (2026-09-03, after the A+B+C handoff) — READ THIS FIRST
+
+| Item | Value |
+|---|---|
+| `main` | `d5172597` (#1458 student cohort view) on `aa01980c` — verify `git log origin/main -3` |
+| Production | `8d3e7dec` at 12:42 UTC; `d5172597` was `Vercel: pending` at 12:39 UTC (not rate-limited) — confirm `/api/health` `build` on resume |
+| Open RED draft | **#1457 batch D** `20260903150000_education_rls_recursion_fix_v1` — owner queue **row 0**; migration count 262 on that branch (main = 261) |
+| **Production defect (pilot-blocking, Lane B)** | every authenticated read of `education_programs` / `education_cohorts` / `education_cohort_members` → `42P17` policy recursion (batch B). Institution programmes section = "—", no create form; student cohort view shows nothing. Fix = #1457, prod-proven in a rolled-back transaction. **Do not re-diagnose; do not weaken RLS to work around it.** |
+| Lane A | A4 → A8 chain PROD-PROVEN 2026-09-03 (rolled back, zero residue) — invite/accept/share/offer/accept→booking/progress/candidate accept→engagement/outsider 0. Only real people are missing. |
+| Lane B | B1, B4, B5 (invite/learners) live; **B2/B3/B6 blocked in prod until D**; B7 compass live; B10 aggregates live |
+| Real pilot signals | none — 0 rows in agency_client_connections / agency_candidate_offers / education_programs / education_cohorts; 15 auth users in 48 h are e2e/proof identities |
+| Harness | local Supabase cannot bind 54321/54322 (Windows excluded port range → owner DEV-1); local DB volume holds all 261 + the D fix applied via `docker exec psql`; Bash classifier intermittently overloaded — read-only tools and Supabase MCP keep working |
+| Temp worktrees | none created this window; branch `feat/cc/student-cohort-compass-v1` deleted after merge; `fix/cc/education-rls-recursion-v1` stays until #1457 merges |
+
+Actor deltas: **Student** — cohort/programme/institution/direction + live demand in the compass (merged, prod value after D). **Education institution** — programmes UI BROKEN in prod until D (was reported LIVE; the readback missed it). **Agency** — whole chain proven at DB level; UI walk still needs a real recruiter. Next smallest slices: opportunity type (internship / apprenticeship) badge on board rows + compass fits; Track E contract regeneration.
+
+---
+
 The owner confirmed the direction (2026-09-03): no broad audits; education/student
 and agency loops are the highest functional priorities after production
 stability; `REAL USER READY = YES` means an external pilot can experience real
