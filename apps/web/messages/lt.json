@@ -10510,7 +10510,9 @@
       "contacted": "Susisiekta",
       "rejected": "Atmesta",
       "booking_started": "Pradėta rezervacija",
-      "accepted": "Rezervacija priimta"
+      "accepted": "Rezervacija priimta",
+      "decision_accepted": "Klientas priėmė",
+      "decision_declined": "Klientas atmetė"
     }
   },
   "clientBridge": {

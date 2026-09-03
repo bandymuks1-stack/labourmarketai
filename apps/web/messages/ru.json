@@ -10510,7 +10510,9 @@
       "contacted": "Связались",
       "rejected": "Отклонено",
       "booking_started": "Бронирование начато",
-      "accepted": "Бронирование принято"
+      "accepted": "Бронирование принято",
+      "decision_accepted": "Клиент принял",
+      "decision_declined": "Клиент отклонил"
     }
   },
   "clientBridge": {

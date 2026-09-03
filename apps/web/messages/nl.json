@@ -10510,7 +10510,9 @@
       "contacted": "Gecontacteerd",
       "rejected": "Afgewezen",
       "booking_started": "Boeking gestart",
-      "accepted": "Boeking geaccepteerd"
+      "accepted": "Boeking geaccepteerd",
+      "decision_accepted": "Klant geaccepteerd",
+      "decision_declined": "Klant afgewezen"
     }
   },
   "clientBridge": {

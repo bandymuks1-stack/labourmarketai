@@ -10510,7 +10510,9 @@
       "contacted": "Contacted",
       "rejected": "Rejected",
       "booking_started": "Booking started",
-      "accepted": "Booking accepted"
+      "accepted": "Booking accepted",
+      "decision_accepted": "Client accepted",
+      "decision_declined": "Client declined"
     }
   },
   "clientBridge": {
