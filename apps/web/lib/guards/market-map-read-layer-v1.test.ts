@@ -763,7 +763,13 @@ describe("NO new DB migration in this PR", () => {
     // are vacuumed and the covering index stays index-only. No grant, no
     // policy, no function, no data change. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
-expect(count).toBeLessThanOrEqual(256);
+    // Bumped 256 -> 257 for internship / apprenticeship as canonical
+    // opportunity types (20260903130000_opportunity_type_internship_
+    // apprenticeship_v1, paired rollback) — GREEN: re-declares the plain
+    // IMMUTABLE projection demand_structured_v2_public with two more allowed
+    // values; no definer, no grant, no data change. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
+expect(count).toBeLessThanOrEqual(257);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

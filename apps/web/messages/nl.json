@@ -9964,7 +9964,9 @@
       "temporary_assignment": "Tijdelijke opdracht",
       "project_work": "Projectwerk",
       "subcontract": "Onderaanneming",
-      "service_request": "Dienstaanvraag"
+      "service_request": "Dienstaanvraag",
+      "internship": "Stage",
+      "apprenticeship": "Leerwerkplek"
     },
     "targetSupplyLabel": "Wie is er nodig",
     "targetSupply": {

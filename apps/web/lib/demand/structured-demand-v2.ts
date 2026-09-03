@@ -35,6 +35,11 @@ export const OPPORTUNITY_TYPES = [
   "project_work",
   "subcontract",
   "service_request",
+  // Canonical learning-to-work opportunities (2026-09-03): the SAME demand
+  // object, one more value — never a parallel student job system. Mirrored
+  // in the SQL projection demand_structured_v2_public (20260903130000).
+  "internship",
+  "apprenticeship",
 ] as const;
 export type OpportunityType = (typeof OPPORTUNITY_TYPES)[number];
 

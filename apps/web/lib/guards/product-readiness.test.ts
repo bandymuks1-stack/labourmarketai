@@ -2343,7 +2343,13 @@ describe("no migration files added by this sprint", () => {
     // are vacuumed and the covering index stays index-only. No grant, no
     // policy, no function, no data change. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
-const SPRINT_BASELINE = 256;
+    // Bumped 256 -> 257 for internship / apprenticeship as canonical
+    // opportunity types (20260903130000_opportunity_type_internship_
+    // apprenticeship_v1, paired rollback) — GREEN: re-declares the plain
+    // IMMUTABLE projection demand_structured_v2_public with two more allowed
+    // values; no definer, no grant, no data change. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
+const SPRINT_BASELINE = 257;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

@@ -9964,7 +9964,9 @@
       "temporary_assignment": "Временная работа",
       "project_work": "Проектная работа",
       "subcontract": "Субподряд",
-      "service_request": "Заказ услуги"
+      "service_request": "Заказ услуги",
+      "internship": "Стажировка",
+      "apprenticeship": "Ученичество"
     },
     "targetSupplyLabel": "Кто нужен",
     "targetSupply": {
