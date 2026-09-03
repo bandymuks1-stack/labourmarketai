@@ -10,6 +10,10 @@ import {
 /**
  * Real market demand, first session (FIRST REAL ECOSYSTEM USE, 2026-09-03).
  *
+ * An in-page SECTION of the declared company workspace (like the learners
+ * section), not a standalone persistent card: it opens no new surface and
+ * owns no action — it reads the public pool and links to the declared board.
+ *
  * An agency or an education institution must never meet an empty marketplace.
  * This card shows the REAL public vacancy pool — the same imported market data
  * the public job board serves (anon-safe RPCs, no privilege change): the live
@@ -21,7 +25,7 @@ import {
  * Honest degradation: `not_provisioned` or a failed read renders the calm
  * "unavailable" line — never a zero that reads as "no demand".
  */
-export async function PublicDemandCard({
+export async function PublicDemandSection({
   professionSlug = null,
   audience,
 }: {

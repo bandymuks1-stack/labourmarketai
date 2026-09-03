@@ -18,7 +18,7 @@ import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
-import { PublicDemandCard } from "@/components/app/public-demand-card";
+import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
@@ -973,7 +973,7 @@ export default async function CompanyDashboardPage({
           the public vacancy pool for staffing agencies and education
           institutions, with its provenance stated on the card. */}
       {isStaffingAgency || declaredCapabilities.includes("training_provider") ? (
-        <PublicDemandCard audience={isStaffingAgency ? "agency" : "institution"} />
+        <PublicDemandSection audience={isStaffingAgency ? "agency" : "institution"} />
       ) : null}
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
