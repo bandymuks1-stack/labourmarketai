@@ -114,17 +114,17 @@ describe("P2-1 — apex paths with a file extension answer a truthful 404", () =
     expect(nf).not.toMatch(/(?<![\p{L}\p{N}_])demos?(?![\p{L}\p{N}_])/iu);
   });
 
-  it("the landing page rejects an unknown locale BEFORE any Intl work, in both entry points (the actual 500 source)", () => {
+  it("the [locale] segment closes its param set (dynamicParams = false) — the actual 500 source is never rendered", () => {
     // Reproduced on the local production build 2026-09-03: `/foo-control.xml`
-    // → `[locale]/page` → `RangeError: Incorrect locale information provided`
-    // from Intl.NumberFormat, thrown before the layout's notFound() could win
-    // (layout and page render concurrently).
-    const page = read("app/[locale]/page.tsx");
-    expect(page).toMatch(/function assertKnownLocale\(locale: string\): void \{\s*if \(!hasLocale\(routing\.locales, locale\)\) notFound\(\);/);
-    const metaIdx = page.indexOf("export async function generateMetadata");
-    const pageIdx = page.indexOf("export default async function LandingPage");
-    expect(page.slice(metaIdx, pageIdx)).toMatch(/assertKnownLocale\(locale\);[\s\S]*buildPageMetadata/);
-    expect(page.slice(pageIdx)).toMatch(/assertKnownLocale\(locale\);[\s\S]*<FocusLanding/);
+    // → `[locale]/page` with locale "foo-control.xml" → `RangeError:
+    // Incorrect locale information provided` from Intl.NumberFormat, thrown
+    // before the layout's notFound() could win (layout and page render
+    // concurrently). The landing page is FROZEN (landing-freeze guard), so the
+    // fix lives on the segment: an unknown locale is a 404 before any render.
+    const layout = read("app/[locale]/layout.tsx");
+    expect(layout).toMatch(/export function generateStaticParams\(\) \{\s*return routing\.locales\.map/);
+    expect(layout).toMatch(/^export const dynamicParams = false;$/m);
+    expect(layout).toMatch(/if \(!hasLocale\(routing\.locales, locale\)\) \{\s*notFound\(\);/);
   });
 
   it("the middleware matcher still skips dotted paths (so these reach the root boundary, not the locale rewrite)", () => {

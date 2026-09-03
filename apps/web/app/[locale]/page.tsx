@@ -1,23 +1,6 @@
 import type { Metadata } from "next";
-import { hasLocale } from "next-intl";
-import { notFound } from "next/navigation";
-import { routing } from "@/lib/i18n/routing";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { FocusLanding } from "./focus-landing/focus-landing";
-
-/**
- * P2-1 (2026-09-03): a request like `/foo.xml` or `/llms-old.txt` skips the
- * i18n middleware (its matcher excludes dotted paths) and lands HERE with
- * `locale = "foo.xml"`. The layout rejects unknown locales with notFound(),
- * but Next renders layout and page CONCURRENTLY, so the landing had already
- * thrown `RangeError: Incorrect locale information provided` from
- * Intl.NumberFormat before the layout's 404 could win — a 500 for every
- * unknown apex path with an extension. The page must reject the locale
- * itself, before any locale-dependent work, in both entry points.
- */
-function assertKnownLocale(locale: string): void {
-  if (!hasLocale(routing.locales, locale)) notFound();
-}
 
 /**
  * ONE canonical landing URL, two alternative landing experiences.
@@ -61,7 +44,6 @@ export async function generateMetadata({
   readonly params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  assertKnownLocale(locale);
   return buildPageMetadata({ locale, path: "" });
 }
 
@@ -70,7 +52,5 @@ export default async function LandingPage({
 }: {
   readonly params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  assertKnownLocale(locale);
   return <FocusLanding params={params} />;
 }

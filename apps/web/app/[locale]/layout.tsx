@@ -97,6 +97,21 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+/**
+ * P2-1 (2026-09-03): a request like `/foo.xml` or `/old-file.json` skips the
+ * i18n middleware (its matcher excludes dotted paths) and reaches this
+ * segment with `locale = "foo.xml"`. The layout rejects it with notFound()
+ * below, but Next renders layout and page CONCURRENTLY, and the landing page
+ * throws `RangeError: Incorrect locale information provided` from
+ * Intl.NumberFormat first — a 500 for every unknown apex path with an
+ * extension (reproduced on the local production build). With
+ * `dynamicParams = false` the router answers 404 for any locale outside
+ * generateStaticParams() BEFORE rendering anything, so the frozen landing
+ * file is never touched and the root not-found (#1445) serves the reply.
+ * Locales are a closed set — nothing an active locale could do is narrowed.
+ */
+export const dynamicParams = false;
+
 export default async function LocaleLayout({
   children,
   params,
