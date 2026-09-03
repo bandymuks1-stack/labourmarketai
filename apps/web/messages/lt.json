@@ -794,7 +794,8 @@
     "details": "Asmens duomenys",
     "improve": "Ką dar pagerinti",
     "capabilities": "Įgūdžiai ir darbo istorija",
-    "fullRecordsInCv": "Visi darbo įrašai"
+    "fullRecordsInCv": "Visi darbo įrašai",
+    "compass": "Mokymosi kompasas"
   },
   "mapLayers": {
     "title": "Žemėlapio sluoksniai",
@@ -1522,7 +1523,7 @@
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių užklausas darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, užklausos matomos tik jums ir peržiūros komandai.",
     "empty": "Dar nepateikėte nė vienos užklausos. Pateikite užklausą viršuje ir ji atsiras čia su savo būsena.",
     "created": "Sukurta",
-    "manageHelp": "Juodraščius galima ištrinti. Pateiktos užklausos uždarymas ar atidarymas iš naujo — ir atpažintų įgūdžių patvirtinimas — atliekami jos atrankos (scouting) vaizde. Pateikto teksto redagavimas dar negalimas.",
+    "manageHelp": "Juodraščius galima ištrinti. Pateiktos užklausos uždarymas ar atidarymas iš naujo — ir atpažintų įgūdžių patvirtinimas — atliekami jos kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
     "detailsLabel": "Pateikti duomenys",
     "fields": {
       "description": "Aprašymas",
@@ -1627,7 +1628,9 @@
           "forbidden": "Tai gali daryti tik šios įstaigos vadovas.",
           "invalid": "Patikrinkite reikšmes.",
           "error": "Kažkas nepavyko. Bandykite dar kartą."
-        }
+        },
+        "unavailable": "Šiuo metu programų įkelti nepavyko. Perkraukite puslapį; tai, ką sukūrėte, neprarasta.",
+        "inviteLearners": "Pakviesti besimokančiuosius"
       },
       "learners": {
         "title": "Besimokantieji",
@@ -1641,7 +1644,8 @@
         "statusPending": "pakviestas",
         "statusDeclined": "atsisakė",
         "statusExpired": "pasibaigė",
-        "statusRevoked": "atšaukta"
+        "statusRevoked": "atšaukta",
+        "unavailable": "Šiuo metu besimokančiųjų duomenų įkelti nepavyko. Perkraukite puslapį; jei taip ir lieka, kvietimai vis tiek galioja."
       },
       "title": "Įmonės darbo erdvė",
       "subtitle": "Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.",
@@ -1781,7 +1785,9 @@
           "pending_verification": "Paprašėte neprivalomos rankinės peržiūros. Įmonė lieka pilnai naudojama, kol laukiama.",
           "unverified": "Nepatvirtinta. Galite toliau normaliai naudotis įmone.",
           "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
-        }
+        },
+        "goToWorkspace": "Atidaryti įmonės darbo erdvę",
+        "capabilityNotDeclared": "Švietimo įstaigos vaidmuo dar neužfiksuotas — nurodykite jį darbo erdvėje, skiltyje „Ką veikia jūsų organizacija?“."
       },
       "workersBlocker": {
         "title": "Nepavyko",
@@ -3656,11 +3662,26 @@
         "intentHeading": "Ko atėjote?",
         "intentNote": "Pažymėkite viską, kas tinka — viena paskyra talpina visa tai. Asmuo ir organizacija yra dvi erdvės; ką jose veikiate, sprendžiate jūs.",
         "intent": {
-          "work": { "title": "Ieškau darbo", "desc": "Profilis, įgūdžiai, CV ir Darbo žurnalas, kuris parodo, ką mokate; realios, jums tinkančios galimybės." },
-          "hire": { "title": "Man reikia darbuotojų", "desc": "Aprašykite realų darbo jėgos poreikį paprastais žodžiais ir pasiekite tinkamus žmones." },
-          "agency": { "title": "Esu įdarbinimo agentūra / atrankų specialistas", "desc": "Jūsų kandidatų bazė, klientų įmonės, pasiūlymai ir įdarbinimai — kaip darbuotojų nuomos organizacija." },
-          "student": { "title": "Esu studentas", "desc": "Jūsų studijos skaičiuojasi. Prisijunkite prie savo mokymo įstaigos, raskite praktikas ir pirmus darbus." },
-          "education": { "title": "Atstovauju mokymo įstaigai", "desc": "Kvieskite studentus, matykite jų dalyvavimą ir jungkite juos prie realių praktikų ir darbų." }
+          "work": {
+            "title": "Ieškau darbo",
+            "desc": "Profilis, įgūdžiai, CV ir Darbo žurnalas, kuris parodo, ką mokate; realios, jums tinkančios galimybės."
+          },
+          "hire": {
+            "title": "Man reikia darbuotojų",
+            "desc": "Aprašykite realų darbo jėgos poreikį paprastais žodžiais ir pasiekite tinkamus žmones."
+          },
+          "agency": {
+            "title": "Esu įdarbinimo agentūra / atrankų specialistas",
+            "desc": "Jūsų kandidatų bazė, klientų įmonės, pasiūlymai ir įdarbinimai — kaip darbuotojų nuomos organizacija."
+          },
+          "student": {
+            "title": "Esu studentas",
+            "desc": "Jūsų studijos skaičiuojasi. Prisijunkite prie savo mokymo įstaigos, raskite praktikas ir pirmus darbus."
+          },
+          "education": {
+            "title": "Atstovauju mokymo įstaigai",
+            "desc": "Kvieskite studentus, matykite jų dalyvavimą ir jungkite juos prie realių praktikų ir darbų."
+          }
         },
         "heading": "Pradedate kaip asmuo ar įmonė?",
         "worker": {
@@ -6167,14 +6188,14 @@
     "company": {
       "title": "Komandos branduolys",
       "scope": "Tuščia būsena",
-      "intro": "Čia bus tavo komandos žmonės — realūs darbuotojai, dabartiniai vaidmenys ir kas šią savaitę dirba. Kol kas nėra nė vieno nario, todėl rodome tik tuščią būseną, o ne sugalvotus pavyzdžius.",
-      "footnote": "Kvietimai, vaidmenys ir prieinamumas atsiras vėlesniame etape. Realių žmonių išgalvoti neketiname."
+      "intro": "Čia atsiras jūsų komandos žmonės — realūs darbuotojai, dabartiniai vaidmenys ir kas šią savaitę dirba. Kol kas niekas dar neprisijungė.",
+      "footnote": "Naudokite mygtuką „Pakviesti“ žemiau: kiekvienas žmogus pats priima kvietimą ir atsiranda čia. Žmonių už jus nepridedame."
     },
     "agency": {
       "title": "Kandidatų rezervas",
       "scope": "Tuščia būsena",
-      "intro": "Čia matysi savo aktyvius kandidatus — kas pasiruošęs, kas dabar užsiėmęs, kas laukia kito sezono. Kol kas nė vieno nėra, todėl rodome tuščią būseną be netikrų profilių.",
-      "footnote": "Rezervo valdymas, prieinamumo langai ir komandų rekomendacijos atsiras vėliau, palaipsniui."
+      "intro": "Čia atsiras jūsų aktyvūs kandidatai — kas pasiruošęs, kas šiuo metu įdarbintas, kas laukia kito sezono. Kol kas niekas dar neprisijungė.",
+      "footnote": "Naudokite mygtuką „Pakviesti“ žemiau: kiekvienas kandidatas pats priima kvietimą ir atsiranda čia. Žmonių už jus nepridedame."
     }
   },
   "helpRequests": {
@@ -7582,8 +7603,8 @@
       "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.",
       "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo."
     },
-    "title": "Žvalgyba",
-    "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum į trumpąjį sąrašą.",
+    "title": "Kandidatų atranka",
+    "intro": "Pasirinkite vieną iš savo struktūruotų poreikių, kad matytumėte tinkamus darbuotojus, kodėl jie tinka, ir įtrauktumėte juos į trumpąjį sąrašą.",
     "visibilityNote": "Matomumas remiasi pasiruošimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
@@ -7780,7 +7801,8 @@
         "mixed": "Įrodymai: iš dalies patvirtinta",
         "unverified": "Įrodymai: tik paties deklaruota"
       }
-    }
+    },
+    "editNeedCta": "Patikslinti arba pridėti poreikį"
   },
   "planBoundary": {
     "title": "Ką apima mokami planai",
@@ -10379,7 +10401,7 @@
       "typeLabel": "Kvietimo tipas",
       "types": {
         "join_platform": "Prisijungti prie LabourMarket.ai",
-        "join_organization": "Prisijungti prie mano įmonės",
+        "join_organization": "Prisijungti prie mano įmonės ar organizacijos",
         "join_team": "Prisijungti prie komandos",
         "join_as_employee": "Prisijungti kaip darbuotojui",
         "collaborate_partner": "Bendradarbiauti kaip partneriui",
@@ -10584,7 +10606,7 @@
     "progressHeading": "Jūsų pasiūlymai",
     "noOffers": "Kol kas pasiūlymų nėra.",
     "withdrawButton": "Atšaukti pasiūlymą",
-    "openScouting": "Atverti žvalgybą",
+    "openScouting": "Atverti kandidatų atranką",
     "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
     "status": {
       "pending": "Laukiama",
@@ -10601,7 +10623,9 @@
       "accepted": "Rezervacija priimta",
       "decision_accepted": "Klientas priėmė",
       "decision_declined": "Klientas atmetė"
-    }
+    },
+    "goToRoster": "Pereiti į komandą",
+    "invalidLabel": "Patikrinkite el. pašto adresą — kvietimas neišsiųstas."
   },
   "clientBridge": {
     "title": "Personalo agentūros",
@@ -11805,7 +11829,7 @@
       "chipCompanyHub": "Įmonės erdvė",
       "chipEduInviteLearner": "Pakviesti besimokantįjį",
       "chipEduCapabilities": "Ką teikiame",
-      "learnerGreetingContext": "Mokaisi su {institution} — kiekvienas užfiksuotas darbas tampa tavo įrodymų ir CV dalimi.",
+      "learnerGreetingContext": "Mokotės su {institution} — kiekvienas užfiksuotas darbas tampa jūsų įrodymų ir CV dalimi.",
       "companyDemandNext": "Poreikis įrašytas įmonės erdvėje. Kas toliau?",
       "navJournal": "Žurnalas",
       "chipTasks": "Užduotys",

@@ -23,7 +23,7 @@ still invite, see participation and demand (B1, B4–B7).
 
 | # | Step (what the person does) | Where | Real result | Agent records |
 |---|---|---|---|---|
-| B1 | Admin signs up, picks the institution intent, finishes the setup form (capability `training_provider` declared by the setup action) | `/lt/signup` → onboarding → `/dashboard/start/company?capability=training_provider` | `organizations` + `organization_roles(training_provider)`; `signup_completed`, `role_selected{intent:education}` | **T0** |
+| B1 | Admin signs up, picks the institution intent, finishes the setup form (capability `training_provider` declared by the setup action) | `/lt/auth/signup` → onboarding → `/dashboard/start/company?capability=training_provider` | `organizations` + `organization_roles(training_provider)`; `signup_completed`, `role_selected{intent:education}` | **T0** |
 | B2 | Admin creates a programme pointed at a work direction and sees **live demand** for it | company workspace → Programmes and cohorts (after #1454) | `education_programs` row; demand count from `count_public_vacancies_by_profession_v1` | **T0 → programme = TTFV (action)** |
 | B3 | Admin creates a cohort | same | `education_cohorts` row | — |
 | B4 | Admin invites students (bounded list) | `/dashboard/network` → invite → relationship **student** | `invitations` rows (student) | invitation → acceptance latency, drop-offs |

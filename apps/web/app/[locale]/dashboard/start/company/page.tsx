@@ -161,6 +161,8 @@ export default async function CompanyStartPage({
     submitRequest: t("submitRequest"),
     statusDraftSaved: t("statusDraftSaved"),
     statusSubmitted: t("statusSubmitted"),
+    goToWorkspace: t("goToWorkspace"),
+    capabilityNotDeclared: t("capabilityNotDeclared"),
     statusNeedsMigration: t("statusNeedsMigration"),
     statusInvalid: t("statusInvalid"),
     statusDuplicateCompany: t("statusDuplicateCompany"),

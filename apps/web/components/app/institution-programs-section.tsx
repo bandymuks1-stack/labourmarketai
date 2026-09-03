@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
+import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionPrograms } from "@/lib/education/programs";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -68,7 +69,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
         </header>
 
         {read.status === "unavailable" ? (
-          <p className="text-xs text-text-muted" data-testid="institution-programs-unavailable">—</p>
+          <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-programs-unavailable">{t("unavailable")}</p>
         ) : (
           <>
             {read.programs.length === 0 ? (
@@ -132,14 +133,26 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                       ) : null}
                       <CreateCohortForm programId={p.id} labels={labels} />
                       {memberIds.size === 0 && read.assignable.length === 0 ? (
-                        <p className="text-meta text-text-muted">{t("noLearnersYet")}</p>
+                        <p className="text-meta text-text-muted">
+                          {t("noLearnersYet")}{" "}
+                          <Link
+                            href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
+                            className="text-brand-blue hover:underline"
+                            data-testid="program-invite-learners"
+                          >
+                            {t("inviteLearners")} →
+                          </Link>
+                        </p>
                       ) : null}
                     </li>
                   );
                 })}
               </ul>
             )}
-            <details className="rounded-md border border-ink-600 p-3">
+            {/* First session: with no programme yet the create form is the
+                only door, so it starts open instead of hiding behind a
+                collapsed disclosure. */}
+            <details className="rounded-md border border-ink-600 p-3" open={read.programs.length === 0}>
               <summary className="cursor-pointer text-xs font-semibold text-text-primary">{t("addProgram")}</summary>
               <div className="mt-3">
                 <CreateProgramForm organizationId={organizationId} professions={professions} educationTypes={educationTypes} labels={labels} />

@@ -467,7 +467,8 @@ export default async function CompanyDashboardPage({
         noConnections: tAB("noConnections"), sharedHeading: tAB("sharedHeading"),
         noShared: tAB("noShared"), workerLabel: tAB("workerLabel"),
         workerPlaceholder: tAB("workerPlaceholder"), offerButton: tAB("offerButton"),
-        noRoster: tAB("noRoster"), progressHeading: tAB("progressHeading"),
+        noRoster: tAB("noRoster"), goToRoster: tAB("goToRoster"), invalidLabel: tAB("invalidLabel"),
+        progressHeading: tAB("progressHeading"),
         noOffers: tAB("noOffers"), withdrawButton: tAB("withdrawButton"),
         openScouting: tAB("openScouting"), errorLabel: tAB("errorLabel"),
         statusLabels: {
@@ -1116,7 +1117,18 @@ export default async function CompanyDashboardPage({
       {/* REAL two-subject bridge — client side: a real (non-agency) company
           accepts a staffing agency's connection, shares specific OWN requests,
           and reviews proposed candidates on its OWN scouting surface. */}
-      {companyRow && companyRow.companyType !== "staffing_agency" && clientInvites && clientBridgeLabels && ownCompany ? (
+      {/* Only an agency can initiate a connection, so a company with no
+          pending invite and no connection has nothing to do here — showing
+          two "nothing yet" lines on a first visit (to an employer, or to a
+          school) is noise, not information. The section appears the moment
+          an agency invites this company. */}
+      {companyRow &&
+      companyRow.companyType !== "staffing_agency" &&
+      clientInvites &&
+      clientInvites.kind === "ok" &&
+      clientInvites.rows.length > 0 &&
+      clientBridgeLabels &&
+      ownCompany ? (
         <ClientAgencyBridgeSection
           invites={clientInvites}
           clientCompanyId={ownCompany.id}
@@ -1345,7 +1357,7 @@ export default async function CompanyDashboardPage({
           enquiriesApplied={teamBrigades.enquiriesApplied}
         />
       ) : (
-        <TeamRosterEmptyState variant="company" />
+        <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
       )}
 
       {/* Canonical Pakviesti (core-network area B): every invite context

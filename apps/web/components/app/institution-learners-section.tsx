@@ -39,8 +39,8 @@ export async function InstitutionLearnersSection({
       </header>
 
       {read.status === "unavailable" ? (
-        <p className="text-xs text-text-muted" data-testid="institution-learners-unavailable">
-          —
+        <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learners-unavailable">
+          {t("unavailable")}
         </p>
       ) : (
         <>
@@ -95,8 +95,12 @@ export async function InstitutionLearnersSection({
         </>
       )}
 
+      {/* Deep link straight into the ONE invitation panel with the right
+          type, organisation and relationship pre-selected (`join_organization`
+          + `student`), so inviting a learner is one click, not four
+          collapsed-panel steps. Same pattern the chat home uses. */}
       <Link
-        href="/dashboard/network"
+        href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
         className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90"
         data-testid="institution-learners-invite"
       >

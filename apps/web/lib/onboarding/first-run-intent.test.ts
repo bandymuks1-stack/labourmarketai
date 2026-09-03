@@ -70,6 +70,10 @@ describe("first-run intent router (pure)", () => {
       "/dashboard/start/company?new=1&capability=training_provider",
     );
     expect(nextPathForIntents(["work"])).toBeNull();
-    expect(nextPathForIntents(["student"])).toBeNull();
+    // A student's first screen is the Learning Compass, not the generic
+    // worker setup card; a company intent alongside it still wins the setup
+    // form (the company identity needs its organisation first).
+    expect(nextPathForIntents(["student"])).toBe("/dashboard/profile#learning-compass");
+    expect(nextPathForIntents(["student", "hire"])).toBe("/dashboard/start/company?new=1");
   });
 });

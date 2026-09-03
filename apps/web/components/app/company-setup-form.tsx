@@ -2,6 +2,7 @@
 
 import { useActionState, useRef } from "react";
 
+import { Link } from "@/lib/i18n/navigation";
 import {
   saveCompanySetupAction,
   type CompanySetupFormState,
@@ -62,6 +63,10 @@ export interface CompanySetupFormLabels {
   readonly submitRequest: string;
   readonly statusDraftSaved: string;
   readonly statusSubmitted: string;
+  /** The door after a successful save — the company workspace. */
+  readonly goToWorkspace: string;
+  /** Shown when the first-run education preset could not be recorded. */
+  readonly capabilityNotDeclared: string;
   readonly statusNeedsMigration: string;
   readonly statusInvalid: string;
   /** M-P0-2: same creator already has a company with this canonical name. */
@@ -369,6 +374,26 @@ export function CompanySetupForm({
         >
           {banner.text}
         </p>
+      ) : null}
+      {/* "Company saved" used to be a dead end — the person had to find the
+          workspace themselves. Offer the one next door, and say plainly when
+          the education preset did not land (the capability card in the
+          workspace is where it is declared; nothing is faked). */}
+      {state?.ok ? (
+        <div className="flex flex-col gap-2" data-testid="company-setup-next">
+          {state.capabilityDeclared === false ? (
+            <p className="text-xs leading-relaxed text-state-warning" role="status">
+              {labels.capabilityNotDeclared}
+            </p>
+          ) : null}
+          <Link
+            href="/dashboard/company"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            data-testid="company-setup-go-workspace"
+          >
+            {labels.goToWorkspace} →
+          </Link>
+        </div>
       ) : null}
     </form>
   );

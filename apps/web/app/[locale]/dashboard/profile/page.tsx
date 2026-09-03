@@ -752,6 +752,12 @@ export default async function ProfilePage({
           // chip they would be discoverable only by scrolling past the skills
           // composer. `DetailsHashOpener` opens the disclosure on the jump.
           { href: "#cv-details", label: tQuick("details") },
+          // Student path (Track C): the Learning Compass is the student's
+          // home and sits far down this page — without a chip it is
+          // reachable only by scrolling past every other section.
+          ...(learningCompass?.status === "ok" && learningCompass.student
+            ? [{ href: "#learning-compass", label: tQuick("compass") }]
+            : []),
         ]}
       />
 

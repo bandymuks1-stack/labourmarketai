@@ -39,6 +39,10 @@ export interface AgencyBridgeLabels {
   readonly workerPlaceholder: string;
   readonly offerButton: string;
   readonly noRoster: string;
+  /** Link text beside `noRoster` — jumps to the roster section. */
+  readonly goToRoster: string;
+  /** Shown when an action rejected its input (e.g. a malformed client e-mail). */
+  readonly invalidLabel: string;
   readonly progressHeading: string;
   readonly noOffers: string;
   readonly withdrawButton: string;
@@ -157,7 +161,12 @@ export function AgencyBridgeSection({
                   <li key={s.shareId} className="card-border flex flex-col gap-2 p-3" data-testid="agency-bridge-shared-row">
                     <span className="truncate text-sm font-semibold text-text-primary">{s.title}</span>
                     {roster.length === 0 ? (
-                      <p className="text-xs text-text-muted">{labels.noRoster}</p>
+                      <p className="text-xs text-text-muted">
+                        {labels.noRoster}{" "}
+                        <a href="#company-team" className="text-brand-blue hover:underline" data-testid="agency-bridge-no-roster-link">
+                          {labels.goToRoster} →
+                        </a>
+                      </p>
                     ) : (
                       <form action={offerAction} className="flex flex-col gap-2 sm:flex-row sm:items-end" data-testid="agency-bridge-offer-form">
                         <input type="hidden" name="shareId" value={s.shareId} />
@@ -234,8 +243,15 @@ export function AgencyBridgeSection({
               </ul>
             )}
           </div>
-          {(inviteState.status === "error" || offerState.status === "error" || inviteState.status === "forbidden" || offerState.status === "forbidden") && (
-            <p className="text-xs text-state-danger" role="alert">{labels.errorLabel}</p>
+          {/* Every non-ok outcome the actions can return is surfaced — an
+              invalid client e-mail or a vanished share used to produce no
+              feedback at all. */}
+          {(["error", "forbidden", "invalid", "not-found"] as const).some(
+            (s) => inviteState.status === s || offerState.status === s,
+          ) && (
+            <p className="text-xs text-state-danger" role="alert">
+              {inviteState.status === "invalid" || offerState.status === "invalid" ? labels.invalidLabel : labels.errorLabel}
+            </p>
           )}
         </>
       )}
