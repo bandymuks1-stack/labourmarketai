@@ -1543,6 +1543,20 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "COMPANY WORKSPACE",
+      "learners": {
+        "title": "Learners",
+        "subtitle": "Who you invited and who is connected. Learners keep their own records; you see participation, not their journals.",
+        "connected": "{count} connected",
+        "pending": "{count} invited, not yet accepted",
+        "declined": "{count} declined or expired",
+        "invite": "Invite students",
+        "none": "No students invited yet — start with a bounded list of real learners.",
+        "statusAccepted": "connected",
+        "statusPending": "invited",
+        "statusDeclined": "declined",
+        "statusExpired": "expired",
+        "statusRevoked": "revoked"
+      },
       "title": "Company workspace",
       "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
       "pilotDisclaimer": "Matching is not offered yet. Nothing becomes public automatically. You can prepare your first request calmly — it's saved right away and stays private to you.",
