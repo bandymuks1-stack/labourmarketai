@@ -42,6 +42,12 @@ import { LIVE_ROLE_IDS, type LiveRoleId } from "@/lib/config/roles";
  */
 export type Role = LiveRoleId;
 
+import {
+  asksForCurrentEducation,
+  parseFirstRunIntents,
+} from "@/lib/onboarding/first-run-intent";
+import { validateEducationInput } from "@/lib/worker/worker-education-model";
+
 const ONBOARDING_ROLES = new Set<Role>(LIVE_ROLE_IDS);
 
 /** CANONICAL PRIORITY, not merely the list: the first role in this order
@@ -84,6 +90,9 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       ? rawProfession
       : null;
   const locale = String(formData.get("locale") ?? "lt");
+  // Universal first-run router: what the person came to do. Optional — a
+  // legacy submit without it behaves exactly as before.
+  const intents = parseFirstRunIntents(String(formData.get("intents") ?? ""));
 
   // First-login bootstrap resilience (auth-owner-access-bootstrap-p0): ensure
   // the caller's OWN profile shell exists before the RPC. handle_new_user
@@ -174,6 +183,40 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       .from("profiles")
       .update({ active_role: primary })
       .eq("id", user.id);
+  }
+
+  // Student intent: "I am studying" is a real, canonical state — a CURRENT
+  // worker_education row, the same table the profile and the verified CV
+  // read and the row an institution link later sits beside. Written under
+  // the caller's own RLS (profile_id = auth.uid()); validated by the same
+  // model as the profile's education editor, never coerced. A failure here
+  // is logged, not fatal: onboarding stands and the profile offers the same
+  // entry — an honest gap, never a silent invention.
+  if (asksForCurrentEducation(intents) && roles.includes("worker")) {
+    const edu = validateEducationInput({
+      institutionName: String(formData.get("institution_name") ?? ""),
+      programOrField: String(formData.get("program_or_field") ?? ""),
+      educationTypeSlug: String(formData.get("education_type_slug") ?? "other"),
+      isCurrent: true,
+    });
+    if (edu) {
+      const { error: eduErr } = await supabase.from("worker_education").insert({
+        profile_id: user.id,
+        institution_name: edu.institutionName,
+        program_or_field: edu.programOrField,
+        education_type_slug: edu.educationTypeSlug,
+        start_year: edu.startYear,
+        end_year: edu.endYear,
+        is_current: true,
+        note: edu.note,
+      });
+      if (eduErr) {
+        console.error("[completeOnboarding] student education insert failed", {
+          code: eduErr.code,
+          message: eduErr.message,
+        });
+      }
+    }
   }
 
   revalidatePath(`/${locale}/dashboard`);

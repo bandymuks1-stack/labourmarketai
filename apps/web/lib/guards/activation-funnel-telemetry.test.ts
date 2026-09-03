@@ -43,6 +43,10 @@ const EXPECTED_EVENTS = [
   "onboarding_step_role_completed",
   "onboarding_step_profile_completed",
   "onboarding_completed",
+  // Time-to-first-value (FIRST REAL ECOSYSTEM USE, 2026-09-03): the first
+  // real state-changing action and its real result, per actor.
+  "first_real_action",
+  "first_real_result",
   "dashboard_viewed",
   "first_action_card_viewed",
   "first_action_card_clicked",

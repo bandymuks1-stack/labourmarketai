@@ -3553,6 +3553,15 @@
     "onboarding": {
       "pendingInviteNote": "Turite laukiantį kvietimą iš {org}. Užbaikite paskyros nustatymą žemiau — tada galėsite jį priimti savo skydelyje.",
       "rolePicker": {
+        "intentHeading": "Ko atėjote?",
+        "intentNote": "Pažymėkite viską, kas tinka — viena paskyra talpina visa tai. Asmuo ir organizacija yra dvi erdvės; ką jose veikiate, sprendžiate jūs.",
+        "intent": {
+          "work": { "title": "Ieškau darbo", "desc": "Profilis, įgūdžiai, CV ir Darbo žurnalas, virstantis įrodymais; realios, jums tinkančios galimybės." },
+          "hire": { "title": "Man reikia darbuotojų", "desc": "Aprašykite realų darbo jėgos poreikį paprastais žodžiais ir pasiekite tinkamus žmones." },
+          "agency": { "title": "Esu įdarbinimo agentūra / atrankų specialistas", "desc": "Jūsų kandidatų bazė, klientų įmonės, pasiūlymai ir įdarbinimai — kaip darbuotojų nuomos organizacija." },
+          "student": { "title": "Esu studentas", "desc": "Jūsų mokymasis tampa įrodymais. Prisijunkite prie savo mokymo įstaigos, raskite praktikas ir pirmus darbus." },
+          "education": { "title": "Atstovauju mokymo įstaigai", "desc": "Kvieskite studentus, matykite jų dalyvavimą ir jungkite juos prie realių praktikų ir darbų." }
+        },
         "heading": "Pradedate kaip asmuo ar įmonė?",
         "worker": {
           "title": "Asmuo",
@@ -3575,6 +3584,12 @@
         "multiNote": "Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau."
       },
       "step2": {
+        "studentHeading": "Kur mokotės?",
+        "institutionLabel": "Mokymo įstaiga",
+        "institutionPlaceholder": "Mokykla, kolegija, universitetas ar mokymų teikėjas",
+        "programLabel": "Programa ar kryptis (neprivaloma)",
+        "educationTypeLabel": "Studijų tipas",
+        "errorInstitution": "Įrašykite, kur mokotės (bent 2 simboliai).",
         "heading": "Šiek tiek apie tave",
         "continue": "Baigti"
       },
