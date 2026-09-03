@@ -8,6 +8,7 @@ import {
   formatDurationMs,
   getTimeToValueSummary,
 } from "@/lib/admin/pilot-metrics";
+import { getTimeToFirstValueByActor } from "@/lib/admin/ttfv-by-actor";
 import {
   formatEurCents,
   formatUsd,
@@ -89,6 +90,11 @@ export default async function AdminTelemetryPage({
   // limits (per-tab sessions, no unique-visitor claims, no cohort slicing
   // without the pilots migration) are stated in the section copy.
   const ttv = await getTimeToValueSummary(supabase);
+
+  // Time to FIRST REAL VALUE per actor (FIRST REAL ECOSYSTEM USE, 2026-09-03):
+  // keyed by profile, actor from the first-run intent, start → first real
+  // action → first real result. The owner's key pilot metric.
+  const ttfv = await getTimeToFirstValueByActor(supabase);
 
   // AI cost & usage (W14 Pilot Analytics slice v1) — caller's RLS client
   // over ai_runs + usage_cost_events. Production has 0 rows while
@@ -644,6 +650,67 @@ export default async function AdminTelemetryPage({
           </table>
         )}
       </section>
+
+      <Card compact>
+      <section
+        className="flex flex-col gap-3"
+        data-testid="telemetry-ttfv-by-actor"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            Time to first real value — per actor
+          </h2>
+          <p className="text-meta text-text-muted">
+            Keyed by person (not tab session). Start = signup or onboarding
+            completed; first real action = the first state-changing event
+            (journal entry, CV import, demand, service request, booking
+            proposal, contact request, or the dedicated first_real_action);
+            first real result = match preview, contact disclosed, booking
+            accepted, engagement created, or first_real_result. Actor comes
+            from the first-run intent (work / hire / agency / student /
+            education), falling back to the coarse identity. Medians over the
+            last {8000} events; preview-host and anonymous rows excluded
+            {ttfv.excludedPreview > 0 ? ` (${ttfv.excludedPreview} excluded)` : ""}.
+          </p>
+        </div>
+        {!ttfv.available ? (
+          <p className="text-sm text-text-secondary">Not readable from this session.</p>
+        ) : ttfv.usersWithStart === 0 ? (
+          <p className="text-sm text-text-secondary">
+            No person has completed signup or onboarding in the window yet.
+          </p>
+        ) : (
+          <table className="w-full text-left text-sm" data-testid="telemetry-ttfv-table">
+            <thead className="text-meta uppercase tracking-label text-text-muted">
+              <tr>
+                <th className="py-1 pr-3 font-normal">Actor</th>
+                <th className="py-1 pr-3 font-normal">People</th>
+                <th className="py-1 pr-3 font-normal">Reached action</th>
+                <th className="py-1 pr-3 font-normal">Median to action</th>
+                <th className="py-1 pr-3 font-normal">Reached result</th>
+                <th className="py-1 pr-3 font-normal">Median to result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ttfv.byActor.map((b) => (
+                <tr key={b.actor} className="border-t border-ink-600" data-testid={`ttfv-actor-${b.actor}`}>
+                  <td className="py-1.5 pr-3 text-text-primary">{b.actor}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.users}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedAction}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">
+                    {b.medianToActionMs === null ? "—" : formatDurationMs(b.medianToActionMs)}
+                  </td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedResult}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">
+                    {b.medianToResultMs === null ? "—" : formatDurationMs(b.medianToResultMs)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+      </Card>
 
       <section className="card-border flex flex-col gap-2 p-4">
         <h2 className="font-display text-base font-semibold text-text-primary">
