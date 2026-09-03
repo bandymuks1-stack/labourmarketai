@@ -750,7 +750,14 @@ describe("NO new DB migration in this PR", () => {
     // count_public_vacancies_v1. No grant, no policy, no definer swap, no
     // data change. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 254.
-    expect(count).toBeLessThanOrEqual(254);
+        // Bumped 254 -> 255 for the P0-1 covering index
+    // (20260903090000_public_vacancy_supply_cover_index_v1, paired rollback)
+    // — GREEN: one covering partial index (expires_at include employer_name,
+    // last_seen_at where is_active) so count_public_vacancies_v1 is an
+    // index-only scan (2,821 ms warm seq scan -> 640 ms on prod). No grant,
+    // no policy, no function change. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 255.
+expect(count).toBeLessThanOrEqual(255);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

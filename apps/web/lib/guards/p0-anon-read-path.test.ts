@@ -57,6 +57,25 @@ describe("P0-1 GREEN migration — board index + count work_mem", () => {
   });
 });
 
+describe("P0-1 GREEN migration 2 — covering partial index for the supply count", () => {
+  const COVER = "supabase/migrations/20260903090000_public_vacancy_supply_cover_index_v1.sql";
+  const sql = read(COVER, repo);
+
+  it("keys on expires_at and INCLUDEs exactly the two payload columns the count reads, active rows only", () => {
+    expect(sql).toMatch(
+      /create index if not exists public_vacancies_active_supply_cover_idx\s+on public\.public_vacancies \(expires_at\)\s+include \(employer_name, last_seen_at\)\s+where is_active;/,
+    );
+  });
+
+  it("stays GREEN and ships its rollback", () => {
+    const executable = sql.replace(/--[^\n]*/g, "");
+    expect(executable).not.toMatch(/security\s+definer|(^|\s)(grant|revoke)\s+|create\s+policy|\bdrop\b/i);
+    expect(sql).toMatch(/^-- ROLLBACK$/m);
+    const down = read(COVER.replace("migrations", "rollbacks").replace(/\.sql$/, ".down.sql"), repo);
+    expect(down).toMatch(/drop index if exists public\.public_vacancies_active_supply_cover_idx;/);
+  });
+});
+
 describe("P0-1b — /jobs-sitemap.xml never answers 500 on a transient count failure", () => {
   const route = read("app/jobs-sitemap.xml/route.ts");
 
@@ -93,6 +112,19 @@ describe("P2-1 — apex paths with a file extension answer a truthful 404", () =
     expect(nf).not.toMatch(/#[0-9a-fA-F]{3,8}\b|style=\{\{/);
     // doctrine §18: no banned framing
     expect(nf).not.toMatch(/(?<![\p{L}\p{N}_])demos?(?![\p{L}\p{N}_])/iu);
+  });
+
+  it("the landing page rejects an unknown locale BEFORE any Intl work, in both entry points (the actual 500 source)", () => {
+    // Reproduced on the local production build 2026-09-03: `/foo-control.xml`
+    // → `[locale]/page` → `RangeError: Incorrect locale information provided`
+    // from Intl.NumberFormat, thrown before the layout's notFound() could win
+    // (layout and page render concurrently).
+    const page = read("app/[locale]/page.tsx");
+    expect(page).toMatch(/function assertKnownLocale\(locale: string\): void \{\s*if \(!hasLocale\(routing\.locales, locale\)\) notFound\(\);/);
+    const metaIdx = page.indexOf("export async function generateMetadata");
+    const pageIdx = page.indexOf("export default async function LandingPage");
+    expect(page.slice(metaIdx, pageIdx)).toMatch(/assertKnownLocale\(locale\);[\s\S]*buildPageMetadata/);
+    expect(page.slice(pageIdx)).toMatch(/assertKnownLocale\(locale\);[\s\S]*<FocusLanding/);
   });
 
   it("the middleware matcher still skips dotted paths (so these reach the root boundary, not the locale rewrite)", () => {
