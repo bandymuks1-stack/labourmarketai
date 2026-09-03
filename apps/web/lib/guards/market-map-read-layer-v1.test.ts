@@ -743,7 +743,11 @@ describe("NO new DB migration in this PR", () => {
     // imports nothing. Still no migration from the market-map read layer,
     // which stays pure TS. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 253.
-    expect(count).toBeLessThanOrEqual(253);
+    // Bumped 253 -> 256 for the FINAL COMPLETION Train B2 lifecycle machinery
+    // (20260902160000 vacancy retention fn, 20260902160100 unused-index drop,
+    // 20260902160200 esco locale prune fn) — RED, owner-gated G-3..G-5, NOT
+    // applied; each creates machinery or reversible DDL, none changes data.
+    expect(count).toBeLessThanOrEqual(257);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
