@@ -61,41 +61,37 @@ begin
     raise exception 'not_education_institution' using errcode = '42501';
   end if;
 
-  create temp table if not exists _learners (profile_id uuid primary key, worker_id uuid) on commit drop;
-  delete from _learners;
-  insert into _learners (profile_id, worker_id)
-  select ec.profile_id, w.id
-    from public.engagement_contexts ec
-    left join public.workers w on w.profile_id = ec.profile_id
-   where ec.organization_id = p_organization_id
-     and ec.relationship_slug = 'student'
-     and ec.status = 'active'
-  on conflict (profile_id) do nothing;
-
-  select count(*) into v_n from _learners;
+  -- The learner set: everyone with an ACTIVE student context on this
+  -- organisation (the row an accepted invitation creates). Never materialised
+  -- outside this statement; never returned.
+  select count(*),
+         count(*) filter (where exists (
+           select 1 from public.journal_entries je
+            where je.worker_id = l.worker_id and je.deleted_at is null
+              and je.created_at >= now() - interval '30 days')),
+         count(*) filter (where exists (
+           select 1 from public.demand_interest_signals s where s.worker_id = l.worker_id)),
+         count(*) filter (where exists (
+           select 1 from public.booking_requests b
+            where b.worker_id = l.worker_id and b.status = 'accepted')),
+         count(*) filter (where exists (
+           select 1 from public.company_worker_engagements e
+            where e.worker_id = l.worker_id and e.status = 'active'))
+    into v_n, v_act, v_int, v_book, v_eng
+    from (
+      select ec.profile_id, w.id as worker_id
+        from public.engagement_contexts ec
+        left join public.workers w on w.profile_id = ec.profile_id
+       where ec.organization_id = p_organization_id
+         and ec.relationship_slug = 'student'
+         and ec.status = 'active'
+       group by ec.profile_id, w.id
+    ) l;
 
   if v_n < 3 then
     return query select v_n, null::integer, null::integer, null::integer, null::integer, true, now();
     return;
   end if;
-
-  select count(distinct l.profile_id) into v_act
-    from _learners l
-    join public.journal_entries je on je.worker_id = l.worker_id
-   where je.created_at >= now() - interval '30 days'
-     and je.deleted_at is null;
-
-  select count(distinct l.profile_id) into v_int
-    from _learners l
-    join public.demand_interest_signals s on s.worker_id = l.worker_id;
-
-  select count(distinct l.profile_id) into v_book
-    from _learners l
-    join public.booking_requests b on b.worker_id = l.worker_id and b.status = 'accepted';
-
-  select count(distinct l.profile_id) into v_eng
-    from _learners l
-    join public.company_worker_engagements e on e.worker_id = l.worker_id and e.status = 'active';
 
   return query select v_n, v_act, v_int, v_book, v_eng, false, now();
 end;
