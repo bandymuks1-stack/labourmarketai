@@ -9999,7 +9999,9 @@
       "temporary_assignment": "Zeitarbeit",
       "project_work": "Projektarbeit",
       "subcontract": "Nachunternehmerauftrag",
-      "service_request": "Dienstleistungsauftrag"
+      "service_request": "Dienstleistungsauftrag",
+      "internship": "Praktikum",
+      "apprenticeship": "Ausbildungsplatz"
     },
     "targetSupplyLabel": "Wer wird gesucht",
     "targetSupply": {

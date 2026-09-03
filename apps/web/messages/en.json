@@ -9999,7 +9999,9 @@
       "temporary_assignment": "Temporary assignment",
       "project_work": "Project work",
       "subcontract": "Subcontract",
-      "service_request": "Service request"
+      "service_request": "Service request",
+      "internship": "Internship",
+      "apprenticeship": "Apprenticeship"
     },
     "targetSupplyLabel": "Who is needed",
     "targetSupply": {

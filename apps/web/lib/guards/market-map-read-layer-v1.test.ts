@@ -763,12 +763,17 @@ describe("NO new DB migration in this PR", () => {
     // are vacuumed and the covering index stays index-only. No grant, no
     // policy, no function, no data change. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
-    // Bumped 256 -> 257 for RED batch 2026-09-03 B (owner-gated, shipped
-    // UNAPPLIED as a draft, no marker): 20260903120000_education_programs_
-    // cohorts_v1 — programmes / cohorts / cohort members for training_provider
-    // organisations + count_public_vacancies_by_profession_v1. RECOUNTED from
-    // the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
-expect(count).toBeLessThanOrEqual(257);
+    // Bumped 256 -> 257 for internship / apprenticeship as canonical
+    // opportunity types (20260903130000_opportunity_type_internship_
+    // apprenticeship_v1, paired rollback) — GREEN: re-declares the plain
+    // IMMUTABLE projection demand_structured_v2_public with two more allowed
+    // values; no definer, no grant, no data change. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
+    // Re-based after main reached 257: bumped 257 -> 258 for RED batch 2026-09-03 B
+    // (20260903120000 education programmes / cohorts / members + demand per
+    // profession), owner-gated draft, UNAPPLIED, no marker. RECOUNTED from the
+    // tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 258.
+expect(count).toBeLessThanOrEqual(258);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

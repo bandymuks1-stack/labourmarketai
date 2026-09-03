@@ -9999,7 +9999,9 @@
       "temporary_assignment": "Laikinas darbas",
       "project_work": "Projektinis darbas",
       "subcontract": "Subranga",
-      "service_request": "Paslaugos užsakymas"
+      "service_request": "Paslaugos užsakymas",
+      "internship": "Praktika",
+      "apprenticeship": "Pameistrystė"
     },
     "targetSupplyLabel": "Ko ieškote",
     "targetSupply": {
