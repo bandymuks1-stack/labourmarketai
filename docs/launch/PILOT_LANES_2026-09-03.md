@@ -39,7 +39,7 @@ Entry: signup → intent **"I represent an education institution"** → company 
 | B2 | Invite students (bounded list, one link each) | `/dashboard/network` invite panel → relationship **student** | `relationship_invitations` rows | LIVE (PROD_VERIFIED 2026-08-27) |
 | B3 | A student accepts and gets the student context beside any job | invite link → signup with intent **"I'm a student"** | `engagement_contexts` `student` row; current `worker_education` row | LIVE (#1447 + institution link v1) |
 | B4 | Student records learning / practice in the Work Journal | chat-first home → journal | `journal_entries` + extracted skills | LIVE |
-| B5 | Institution sees participation | company page (education-first home) | list of linked learners + activity | **MISSING** → Track C slice 1 (GREEN read over `engagement_contexts` where `manages_organization`) |
+| B5 | Institution sees participation | company workspace → "Learners" section | connected count + every sent student invitation with its state | SHIPPED (#1450, Track C slice 1) — learner activity itself stays out of the institution's view by the least-privilege ruling |
 | B6 | Students see relevant opportunities (internships / first jobs) | opportunity board | real board rows | LIVE for jobs; internship as a demand kind = MISSING (RED vocabulary) |
 | B7 | Institution sees outcomes | — | placement/employment state per learner | MISSING (Track C slice 2) |
 
@@ -52,7 +52,7 @@ Success = one real institution with ≥ 5 real students through B1–B4 within t
 | C1 | Worker signs up (intent "looking for work"), profession chosen | onboarding → guided profile setup | worker + profession row | LIVE |
 | C2 | Worker logs first work / imports CV | journal or CV import | entries, skills, living CV | LIVE (PROD_VERIFIED) |
 | C3 | Worker sees the 3-best board and expresses interest | opportunity board | `interest` signal row | LIVE (PROD_VERIFIED) |
-| C4 | Employer signs up (intent "I need workers"), describes a need in plain words | onboarding → company setup → chat "Need 12 formwork carpenters in Rotterdam from Monday" | structured `customer_requests` row | LIVE (NL→demand intake; headcount in non-English = known defect #1303) |
+| C4 | Employer signs up (intent "I need workers"), describes a need in plain words | onboarding → company setup → chat "Need 12 formwork carpenters in Rotterdam from Monday" | structured `customer_requests` row | LIVE (NL→demand intake; headcount survives the language it was written in since #1303, merged 2026-08-28) |
 | C5 | Employer sees matching workers and invites / contacts | scouting page | disclosure request, booking | LIVE |
 | C6 | Both return later; state intact | — | — | LIVE |
 
