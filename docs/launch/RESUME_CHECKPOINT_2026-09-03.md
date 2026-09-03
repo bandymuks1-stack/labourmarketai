@@ -4,8 +4,8 @@
 
 | Item | Value |
 |---|---|
-| `main` | `d5172597` (#1458 student cohort view) on `aa01980c` — verify `git log origin/main -3` |
-| Production | `8d3e7dec` at 12:42 UTC; `d5172597` was `Vercel: pending` at 12:39 UTC (not rate-limited) — confirm `/api/health` `build` on resume |
+| `main` | `953c34e7` (#1459 opportunity-type chip) on `7f15c221` (docs) on `d5172597` (#1458) — verify `git log origin/main -3` |
+| Production | `d5172597` verified 12:45 UTC; `953c34e7` was `Vercel: pending` at merge (the docs push `7f15c221` was rate-limited — harmless) — confirm `/api/health` `build` on resume |
 | Open RED draft | **#1457 batch D** `20260903150000_education_rls_recursion_fix_v1` — owner queue **row 0**; migration count 262 on that branch (main = 261) |
 | **Production defect (pilot-blocking, Lane B)** | every authenticated read of `education_programs` / `education_cohorts` / `education_cohort_members` → `42P17` policy recursion (batch B). Institution programmes section = "—", no create form; student cohort view shows nothing. Fix = #1457, prod-proven in a rolled-back transaction. **Do not re-diagnose; do not weaken RLS to work around it.** |
 | Lane A | A4 → A8 chain PROD-PROVEN 2026-09-03 (rolled back, zero residue) — invite/accept/share/offer/accept→booking/progress/candidate accept→engagement/outsider 0. Only real people are missing. |
