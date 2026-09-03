@@ -2343,7 +2343,12 @@ describe("no migration files added by this sprint", () => {
     // are vacuumed and the covering index stays index-only. No grant, no
     // policy, no function, no data change. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 256.
-const SPRINT_BASELINE = 256;
+    // Bumped 256 -> 257 for RED batch 2026-09-03 B (owner-gated, shipped
+    // UNAPPLIED as a draft, no marker): 20260903120000_education_programs_
+    // cohorts_v1 — programmes / cohorts / cohort members for training_provider
+    // organisations + count_public_vacancies_by_profession_v1. RECOUNTED from
+    // the tree, never summed: `ls supabase/migrations/*.sql | wc -l` = 257.
+const SPRINT_BASELINE = 257;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
