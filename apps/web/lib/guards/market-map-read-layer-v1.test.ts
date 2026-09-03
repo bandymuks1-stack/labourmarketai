@@ -750,7 +750,15 @@ describe("NO new DB migration in this PR", () => {
     // count_public_vacancies_v1. No grant, no policy, no definer swap, no
     // data change. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 254.
-    expect(count).toBeLessThanOrEqual(254);
+        // Bumped 255 -> 257 for the RED batch 2026-09-03 A (both owner-gated,
+    // shipped UNAPPLIED as a draft, no marker):
+    //   20260903100000_public_vacancy_supply_counts_v1 — maintained counts
+    //   row + pg_cron refresh + count_public_vacancies_v1 reads the row;
+    //   20260903101000_agency_candidate_offer_decision_v1 — client
+    //   accept/decline of an agency candidate offer → canonical booking.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 257.
+expect(count).toBeLessThanOrEqual(257);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

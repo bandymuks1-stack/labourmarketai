@@ -2330,7 +2330,15 @@ describe("no migration files added by this sprint", () => {
     // count_public_vacancies_v1. No grant, no policy, no definer swap, no
     // data change. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 254.
-    const SPRINT_BASELINE = 254;
+        // Bumped 255 -> 257 for the RED batch 2026-09-03 A (both owner-gated,
+    // shipped UNAPPLIED as a draft, no marker):
+    //   20260903100000_public_vacancy_supply_counts_v1 — maintained counts
+    //   row + pg_cron refresh + count_public_vacancies_v1 reads the row;
+    //   20260903101000_agency_candidate_offer_decision_v1 — client
+    //   accept/decline of an agency candidate offer → canonical booking.
+    // RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 257.
+const SPRINT_BASELINE = 257;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
