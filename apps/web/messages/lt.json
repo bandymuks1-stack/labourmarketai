@@ -1589,6 +1589,39 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "ĮMONĖS ERDVĖ",
+      "programs": {
+        "title": "Programos ir grupės",
+        "subtitle": "Ko mokote, nukreipta į darbo rinkos kryptį, ir besimokančiųjų grupės viduje. Paklausa rodo gyvas viešas darbo vietas tai krypčiai.",
+        "empty": "Programų dar nėra. Pridėkite pirmą ir nurodykite, į kokią darbo kryptį ji veda.",
+        "addProgram": "Pridėti programą",
+        "noDirection": "Darbo kryptis nenurodyta",
+        "demand": "{count} gyvos darbo vietos",
+        "demandUnknown": "paklausa nepasiekiama",
+        "members": "{count} besimokantieji",
+        "noLearnersYet": "Dar nėra prisijungusių besimokančiųjų, kuriuos būtų galima priskirti — pirmiausia pakvieskite studentus.",
+        "form": {
+          "programName": "Programos pavadinimas",
+          "targetProfession": "Veda į (darbo kryptis)",
+          "noProfession": "— nenurodyta —",
+          "educationType": "Tipas",
+          "noType": "— nenurodyta —",
+          "description": "Aprašymas (neprivaloma)",
+          "createProgram": "Sukurti programą",
+          "cohortName": "Nauja grupė (klasė / srautas)",
+          "startsOn": "Pradžia",
+          "endsOn": "Pabaiga",
+          "createCohort": "Sukurti grupę",
+          "assignLearner": "Priskirti prisijungusį besimokantįjį",
+          "chooseLearner": "Pasirinkite besimokantįjį",
+          "assign": "Priskirti",
+          "remove": "pašalinti",
+          "saving": "Saugoma…",
+          "saved": "Išsaugota.",
+          "forbidden": "Tai gali daryti tik šios įstaigos vadovas.",
+          "invalid": "Patikrinkite reikšmes.",
+          "error": "Kažkas nepavyko. Bandykite dar kartą."
+        }
+      },
       "learners": {
         "title": "Besimokantieji",
         "subtitle": "Ką pakvietėte ir kas prisijungė. Besimokantieji tvarko savo įrašus patys; jūs matote dalyvavimą, ne jų žurnalus.",

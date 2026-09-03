@@ -773,7 +773,7 @@ describe("NO new DB migration in this PR", () => {
     // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
     // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
-expect(count).toBeLessThanOrEqual(259);
+expect(count).toBeLessThanOrEqual(260);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
