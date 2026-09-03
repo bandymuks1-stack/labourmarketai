@@ -116,23 +116,6 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Discloses the size and freshness of the imported corpus and the number of distinct employers in it. Both are already stated publicly as market-coverage claims, and neither identifies an employer.",
   },
   {
-    name: "count_public_vacancies_by_profession_v1",
-    identityArgs: "p_limit integer",
-    mutates: false,
-    publicCaller:
-      "The live-demand cards on the education-institution and staffing-agency workspaces and, later, the public labour-market surface: active public vacancies PER PROFESSION, so an institution sees real demand for the directions it teaches (RED batch B, 2026-09-03).",
-    authorization:
-      "Returns aggregates ONLY — (profession_slug, active count) pairs over the same live-row filter as count_public_vacancies_v1 (`is_active AND not expired`, profession set). No row, no employer name, no location is returned in any form. The profession slugs are the platform's own public registry.",
-    inputValidation:
-      "`p_limit` is clamped to 1..100 in SQL; there is no other input.",
-    abuseControls:
-      "No DB-level rate limit. Read-only, at most 100 rows of two scalars each; the aggregate is served from the profession partial index and the caller-side card caches it. Nothing to enumerate beyond the public profession registry.",
-    definerJustification:
-      "`public_vacancies` has no anon grant, so an anonymous visitor cannot group it. DEFINER exposes the per-profession aggregate without exposing any row — the same reasoning as count_public_vacancies_v1.",
-    residualRisk:
-      "Discloses how the imported corpus splits across professions. This is market-coverage information already visible by browsing the public board profession by profession; it identifies no employer and no person.",
-  },
-  {
     name: "list_public_vacancy_sitemap_v1",
     identityArgs: "p_limit integer, p_offset integer",
     mutates: false,

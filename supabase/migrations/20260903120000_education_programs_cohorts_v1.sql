@@ -239,8 +239,19 @@ grant execute on function public.create_education_program_v1(uuid, text, text, t
 grant execute on function public.create_education_cohort_v1(uuid, text, date, date) to authenticated;
 grant execute on function public.set_education_cohort_member_v1(uuid, uuid, text) to authenticated;
 
--- ── 4. Public demand per profession (anon-safe, same boundary as the count) ─
+-- ── 4. Demand per profession (authenticated; same projection boundary as the count) ─
 
+-- Measured on production 2026-09-03 (rolled-back probe): without a covering
+-- index the aggregate is a bitmap heap scan over 8,930 blocks, 7.2 s; with
+-- this index it is an index-only scan, 176 ms. Additive, no privileges.
+create index if not exists public_vacancies_active_profession_cover_idx
+  on public.public_vacancies (profession_slug)
+  include (expires_at)
+  where is_active and profession_slug is not null;
+
+-- Grant is AUTHENTICATED ONLY (least privilege): the only callers today are the
+-- institution and agency workspaces. An anonymous surface may widen it later
+-- with its own contract entry in lib/security/anon-secdef-allowlist.ts.
 create or replace function public.count_public_vacancies_by_profession_v1(p_limit integer default 20)
 returns table (profession_slug text, active_vacancies bigint)
 language sql
@@ -259,15 +270,16 @@ as $$
    limit least(greatest(coalesce(p_limit, 20), 1), 100);
 $$;
 
-revoke execute on function public.count_public_vacancies_by_profession_v1(p_limit integer) from public;
-grant execute on function public.count_public_vacancies_by_profession_v1(p_limit integer) to anon, authenticated;
+revoke execute on function public.count_public_vacancies_by_profession_v1(p_limit integer) from public, anon;
+grant execute on function public.count_public_vacancies_by_profession_v1(p_limit integer) to authenticated;
 
 comment on function public.count_public_vacancies_by_profession_v1(p_limit integer) is
-  'Active public vacancies per profession (imported market data), the demand signal for education institutions and agencies. Anon-safe: counts only, same boundary as count_public_vacancies_v1.';
+  'Active public vacancies per profession (imported market data), the demand signal for education institutions and agencies. Counts only, same projection boundary as count_public_vacancies_v1; authenticated callers only.';
 
 -- ROLLBACK
 -- (see supabase/rollbacks/20260903120000_education_programs_cohorts_v1.down.sql — guarded)
 -- drop function if exists public.count_public_vacancies_by_profession_v1(integer);
+-- drop index if exists public.public_vacancies_active_profession_cover_idx;
 -- drop function if exists public.set_education_cohort_member_v1(uuid, uuid, text);
 -- drop function if exists public.create_education_cohort_v1(uuid, text, date, date);
 -- drop function if exists public.create_education_program_v1(uuid, text, text, text, text);

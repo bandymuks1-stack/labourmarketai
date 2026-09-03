@@ -14,6 +14,7 @@ end;
 $$;
 
 drop function if exists public.count_public_vacancies_by_profession_v1(integer);
+drop index if exists public.public_vacancies_active_profession_cover_idx;
 drop function if exists public.set_education_cohort_member_v1(uuid, uuid, text);
 drop function if exists public.create_education_cohort_v1(uuid, text, date, date);
 drop function if exists public.create_education_program_v1(uuid, text, text, text, text);
