@@ -20,7 +20,6 @@ import {
   professionRequiredForIntents,
   type FirstRunIntent,
 } from "@/lib/onboarding/first-run-intent";
-import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -59,15 +58,20 @@ const INTENT_ICON_ROLE: Record<FirstRunIntent, Role> = {
 export function OnboardingWizard({
   defaultName,
   returnTo,
+  educationTypeOptions,
 }: {
   defaultName: string;
   /** Safe internal path (e.g. an invite deep link) that onboarding
    *  completion returns to instead of the role dashboard. */
   returnTo?: string | null;
+  /** Education-type registry labels, resolved on the SERVER (the
+   *  `cvSections.educationTypes` namespace is not part of the auth client
+   *  message allowlist, and must not be — the wizard ships ~31 KB, not the
+   *  CV tree). Order = registry order. */
+  educationTypeOptions: ReadonlyArray<{ slug: string; label: string }>;
 }) {
   const t = useTranslations("auth.onboarding");
   const tProfession = useTranslations("professions");
-  const tEducationTypes = useTranslations("educationTypes");
   const locale = useLocale();
 
   // Registry slugs → the label in the language on screen, ordered by that
@@ -417,9 +421,9 @@ export function OnboardingWizard({
               data-testid="onboarding-education-type"
               className={inputCls}
             >
-              {EDUCATION_TYPE_SLUGS.map((slug) => (
-                <option key={slug} value={slug}>
-                  {tEducationTypes(slug)}
+              {educationTypeOptions.map((o) => (
+                <option key={o.slug} value={o.slug}>
+                  {o.label}
                 </option>
               ))}
             </select>
