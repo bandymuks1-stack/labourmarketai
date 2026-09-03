@@ -664,12 +664,18 @@ export default async function AdminTelemetryPage({
             Keyed by person (not tab session). Start = signup or onboarding
             completed; first real action = the first state-changing event
             (journal entry, CV import, demand, service request, booking
-            proposal, contact request, or the dedicated first_real_action);
-            first real result = match preview, contact disclosed, booking
-            accepted, engagement created, or first_real_result. Actor comes
-            from the first-run intent (work / hire / agency / student /
-            education), falling back to the coarse identity. Medians over the
-            last {8000} events; preview-host and anonymous rows excluded
+            proposal, contact request, or the dedicated first_real_action).
+            Two results, measured separately: <strong>system</strong> = the
+            product produced value with nobody else involved (match preview
+            for an employer; a board showing at least one fitting opportunity
+            for a worker or student; first_real_result step=system);
+            <strong> human</strong> = another person had to act (contact
+            disclosed, booking accepted, engagement created;
+            first_real_result step=human). Actor comes from the first-run
+            intent (work / hire / agency / student / education), falling back
+            to the coarse identity. Medians over the last {8000} events; a
+            bucket with one person shows that person&apos;s value, not a
+            median. Preview-host and anonymous rows excluded
             {ttfv.excludedPreview > 0 ? ` (${ttfv.excludedPreview} excluded)` : ""}.
           </p>
         </div>
@@ -687,8 +693,10 @@ export default async function AdminTelemetryPage({
                 <th className="py-1 pr-3 font-normal">People</th>
                 <th className="py-1 pr-3 font-normal">Reached action</th>
                 <th className="py-1 pr-3 font-normal">Median to action</th>
-                <th className="py-1 pr-3 font-normal">Reached result</th>
-                <th className="py-1 pr-3 font-normal">Median to result</th>
+                <th className="py-1 pr-3 font-normal">System result (n)</th>
+                <th className="py-1 pr-3 font-normal">Median to system result</th>
+                <th className="py-1 pr-3 font-normal">Human response (n)</th>
+                <th className="py-1 pr-3 font-normal">Median to human response</th>
               </tr>
             </thead>
             <tbody>
@@ -700,9 +708,13 @@ export default async function AdminTelemetryPage({
                   <td className="py-1.5 pr-3 tabular-nums">
                     {b.medianToActionMs === null ? "—" : formatDurationMs(b.medianToActionMs)}
                   </td>
-                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedResult}</td>
-                  <td className="py-1.5 pr-3 tabular-nums">
-                    {b.medianToResultMs === null ? "—" : formatDurationMs(b.medianToResultMs)}
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedSystemResult}</td>
+                  <td className="py-1.5 pr-3 tabular-nums" data-testid={`ttfv-system-${b.actor}`}>
+                    {b.medianToSystemResultMs === null ? "—" : formatDurationMs(b.medianToSystemResultMs)}
+                  </td>
+                  <td className="py-1.5 pr-3 tabular-nums">{b.reachedHumanResult}</td>
+                  <td className="py-1.5 pr-3 tabular-nums" data-testid={`ttfv-human-${b.actor}`}>
+                    {b.medianToHumanResultMs === null ? "—" : formatDurationMs(b.medianToHumanResultMs)}
                   </td>
                 </tr>
               ))}
