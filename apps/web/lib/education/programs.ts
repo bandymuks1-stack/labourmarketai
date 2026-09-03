@@ -12,7 +12,8 @@ import { createClient } from "@/lib/supabase/server";
  * on the invitations those learners accepted (`invitations.accepted_by_
  * profile_id` → `invited_name`). No learner journal, skills or profile is
  * read (least-privilege ruling 2026-08-27). Demand per programme comes from
- * the anon-safe `count_public_vacancies_by_profession_v1`.
+ * `count_public_vacancies_by_profession_v1` (authenticated callers only;
+ * counts per profession, no vacancy row).
  *
  * Honest degradation: `needs-migration` until the batch is applied;
  * `unavailable` on any other failure — never an empty list pretending.
