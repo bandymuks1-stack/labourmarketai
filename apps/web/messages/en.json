@@ -794,7 +794,8 @@
     "details": "Personal details",
     "improve": "What to improve",
     "capabilities": "Skills & work history",
-    "fullRecordsInCv": "All work records"
+    "fullRecordsInCv": "All work records",
+    "compass": "Learning Compass"
   },
   "mapLayers": {
     "title": "Map layers",
@@ -1627,7 +1628,9 @@
           "forbidden": "Only a manager of this institution can do this.",
           "invalid": "Please check the values.",
           "error": "Something went wrong. Please try again."
-        }
+        },
+        "unavailable": "Programmes could not be loaded right now. Reload the page; nothing you created is lost.",
+        "inviteLearners": "Invite learners"
       },
       "learners": {
         "title": "Learners",
@@ -1641,7 +1644,8 @@
         "statusPending": "invited",
         "statusDeclined": "declined",
         "statusExpired": "expired",
-        "statusRevoked": "revoked"
+        "statusRevoked": "revoked",
+        "unavailable": "Learner data could not be loaded right now. Reload the page; if it stays like this, the invitations are still in place."
       },
       "title": "Company workspace",
       "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
@@ -1781,7 +1785,9 @@
           "pending_verification": "You asked for an optional manual review. Your company stays fully usable while it waits.",
           "unverified": "Not verified. You can keep using your company normally.",
           "verified": "Verified — a stronger trust state, granted only after a real check."
-        }
+        },
+        "goToWorkspace": "Open the company workspace",
+        "capabilityNotDeclared": "The education-provider role was not recorded yet — declare it in the workspace under “What does your organisation do?”."
       },
       "workersBlocker": {
         "title": "Something went wrong",
@@ -3656,11 +3662,26 @@
         "intentHeading": "What did you come here to do?",
         "intentNote": "Pick everything that applies — one account carries all of it. A person and an organisation are the two spaces; what you do inside them is up to you.",
         "intent": {
-          "work": { "title": "I'm looking for work", "desc": "Profile, skills, CV and a Work Journal that shows what you can do; real opportunities that match." },
-          "hire": { "title": "I need workers", "desc": "Describe a real workforce need in plain words and reach matching people." },
-          "agency": { "title": "I'm a recruiter / agency", "desc": "Your candidate pool, your client companies, submissions and placements — as a staffing organisation." },
-          "student": { "title": "I'm a student", "desc": "Your studies count. Connect to your institution, find internships and first jobs." },
-          "education": { "title": "I represent an education institution", "desc": "Invite students, see their participation and connect them to real internships and jobs." }
+          "work": {
+            "title": "I'm looking for work",
+            "desc": "Profile, skills, CV and a Work Journal that shows what you can do; real opportunities that match."
+          },
+          "hire": {
+            "title": "I need workers",
+            "desc": "Describe a real workforce need in plain words and reach matching people."
+          },
+          "agency": {
+            "title": "I'm a recruiter / agency",
+            "desc": "Your candidate pool, your client companies, submissions and placements — as a staffing organisation."
+          },
+          "student": {
+            "title": "I'm a student",
+            "desc": "Your studies count. Connect to your institution, find internships and first jobs."
+          },
+          "education": {
+            "title": "I represent an education institution",
+            "desc": "Invite students, see their participation and connect them to real internships and jobs."
+          }
         },
         "heading": "Are you starting as a person or a company?",
         "worker": {
@@ -6167,14 +6188,14 @@
     "company": {
       "title": "Team core",
       "scope": "Empty state",
-      "intro": "This will hold your team — real people, current roles and who is working this week. There are no members yet, so we show only the empty state instead of made-up examples.",
-      "footnote": "Invitations, roles and availability windows will land in a later stage. We will not invent people."
+      "intro": "This is where your team will appear — real people, their current roles and who is working this week. Nobody has joined yet.",
+      "footnote": "Use “Invite” below: each person accepts their own invitation and appears here. We never add people for you."
     },
     "agency": {
       "title": "Candidate bench",
       "scope": "Empty state",
-      "intro": "This will show your active candidates — who is ready, who is currently engaged, who is waiting for the next season. There are none yet, so we show an empty state instead of fake profiles.",
-      "footnote": "Bench management, availability windows and team recommendations will land later, step by step."
+      "intro": "This is where your active candidates will appear — who is ready, who is currently placed, who is waiting for the next season. Nobody has joined yet.",
+      "footnote": "Use “Invite” below: each candidate accepts their own invitation and appears here. We never add people for you."
     }
   },
   "helpRequests": {
@@ -7780,7 +7801,8 @@
         "mixed": "Evidence: partly confirmed",
         "unverified": "Evidence: self-declared only"
       }
-    }
+    },
+    "editNeedCta": "Adjust or add a need"
   },
   "planBoundary": {
     "title": "What paid plans include",
@@ -10379,7 +10401,7 @@
       "typeLabel": "Invitation type",
       "types": {
         "join_platform": "Join LabourMarket.ai",
-        "join_organization": "Join my company",
+        "join_organization": "Join my company / organisation",
         "join_team": "Join a team",
         "join_as_employee": "Join as an employee",
         "collaborate_partner": "Collaborate as a partner",
@@ -10601,7 +10623,9 @@
       "accepted": "Booking accepted",
       "decision_accepted": "Client accepted",
       "decision_declined": "Client declined"
-    }
+    },
+    "goToRoster": "Go to the roster",
+    "invalidLabel": "Check the e-mail address — the invitation was not sent."
   },
   "clientBridge": {
     "title": "Staffing agencies",

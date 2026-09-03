@@ -110,7 +110,12 @@ export function companyPresetForIntents(
  */
 export function nextPathForIntents(intents: readonly FirstRunIntent[]): string | null {
   const preset = companyPresetForIntents(intents);
-  if (!preset) return null;
+  if (!preset) {
+    // A student lands on the Learning Compass — the student home that the
+    // current-education row they just created makes render — instead of the
+    // generic worker setup card that says nothing about studying.
+    return intents.includes("student") ? "/dashboard/profile#learning-compass" : null;
+  }
   const params = new URLSearchParams({ new: "1" });
   if (preset.companyType) params.set("type", preset.companyType);
   if (preset.capability) params.set("capability", preset.capability);

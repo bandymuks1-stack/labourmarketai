@@ -21,7 +21,7 @@ invitations go out — the invitation link travels by e-mail.
 
 | # | Step (what the person does) | Where | Real result (row / state) | Agent records |
 |---|---|---|---|---|
-| A1 | Recruiter signs up (e-mail or Google), picks the agency intent, finishes the setup form (type pre-selected: staffing agency) | `/lt/signup` → onboarding → `/dashboard/start/company?type=staffing_agency` | `companies.company_type = staffing_agency`; `organizations` row; `signup_completed`, `role_selected{intent:agency}`, `onboarding_completed` | timestamp of `signup_completed` = **T0** |
+| A1 | Recruiter signs up (e-mail or Google), picks the agency intent, finishes the setup form (type pre-selected: staffing agency) | `/lt/auth/signup` → onboarding → `/dashboard/start/company?type=staffing_agency` | `companies.company_type = staffing_agency`; `organizations` row; `signup_completed`, `role_selected{intent:agency}`, `onboarding_completed` | timestamp of `signup_completed` = **T0** |
 | A2 | Recruiter opens the company workspace: sees **Live market demand** and the agency bridge (clients) | `/dashboard/company` | page renders the demand section (real public pool) | any error; time to first screen |
 | A3 | Recruiter invites 1–3 candidates to the roster | `/dashboard/network` → invite (employee / collaborator) | `invitations` rows; each candidate accepts → `company_workers` (active) | invitation → acceptance latency; drop-offs |
 | A4 | Recruiter invites the client company (connection) | company page → agency bridge → invite client | `agency_client_connections` (pending) | — |

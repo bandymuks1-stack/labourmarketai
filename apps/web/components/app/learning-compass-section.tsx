@@ -2,7 +2,19 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
-import type { LearningCompass } from "@/lib/learning/learning-compass-model";
+import type { CompassNextStep, LearningCompass } from "@/lib/learning/learning-compass-model";
+
+/** Where each next step is actually done — in-page anchors on the profile
+ *  (the compass renders there) or the one canonical route. */
+const STEP_HREF: Record<CompassNextStep, "/dashboard/journal" | "/dashboard/opportunities" | "/dashboard/profile"> = {
+  choose_direction: "/dashboard/profile#profile-edit" as "/dashboard/profile",
+  declare_skills: "/dashboard/profile#profile-edit" as "/dashboard/profile",
+  add_current_education: "/dashboard/profile#cv-details" as "/dashboard/profile",
+  log_first_entry: "/dashboard/journal",
+  set_availability: "/dashboard/profile#cv-availability" as "/dashboard/profile",
+  express_interest: "/dashboard/opportunities",
+  gain_evidence_for_missing: "/dashboard/journal",
+};
 
 /**
  * Learning Compass — the student home's five answers (Track C, 2026-09-03).
@@ -185,10 +197,14 @@ export async function LearningCompassSection({
 
         <div className="flex flex-col gap-1" data-testid="compass-next">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>
+          {/* Every step is a door, not a sentence: each links to the exact
+              section (same page anchor or route) where the person does it. */}
           <ol className="flex list-decimal flex-col gap-1 pl-5 text-xs text-text-primary">
             {nextSteps.map((step) => (
               <li key={step} data-testid={`compass-step-${step}`}>
-                {t(`step_${step}`)}
+                <Link href={STEP_HREF[step]} className="hover:underline">
+                  {t(`step_${step}`)} →
+                </Link>
               </li>
             ))}
           </ol>

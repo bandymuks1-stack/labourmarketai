@@ -113,7 +113,7 @@ works (the callback handles the PKCE `?code=` path and tells a cross-device user
 UI honestly shows "El. laiškų siuntimas dar neaktyvuotas" with a copyable link (proven 2026-09-02).
 
 ### Step 5 — proof (the owner does 1 minute; the agent does the rest)
-1. **Real inbox:** the owner registers `<any real address the owner controls>` at `https://labourmarket.ai/lt/signup`,
+1. **Real inbox:** the owner registers `<any real address the owner controls>` at `https://labourmarket.ai/lt/auth/signup`,
    opens the mail on a **phone** (a different device than the signup), taps the link → lands signed in on
    the dashboard. One screenshot of the inbox + one of the dashboard = G-1 closed.
 2. **Expiry:** agent sets OTP expiry to `60` s (owner grants a 5-minute window or does it), signs up a bounded
@@ -136,7 +136,7 @@ confirm the entries are `e2e-*@labourmarket.ai` only and use an address that has
 ## The one real-inbox test (the only remaining proof)
 
 1. On a **phone**, open a **private / incognito** browser (no existing labourmarket.ai session).
-2. Go to `https://labourmarket.ai/lt/signup`.
+2. Go to `https://labourmarket.ai/lt/auth/signup`.
 3. Register with **e-mail + password** (not Google), using ONE real external address that has never been
    registered on labourmarket.ai and is not on the Resend suppression list. Any name.
 4. Expected screen: "check your e-mail" state with the **resend** control (no dashboard yet).

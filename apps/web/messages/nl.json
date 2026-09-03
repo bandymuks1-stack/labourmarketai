@@ -794,7 +794,8 @@
     "details": "Persoonsgegevens",
     "improve": "Wat te verbeteren",
     "capabilities": "Vaardigheden & werkgeschiedenis",
-    "fullRecordsInCv": "Alle werkregistraties"
+    "fullRecordsInCv": "Alle werkregistraties",
+    "compass": "Leerkompas"
   },
   "mapLayers": {
     "title": "Kaartlagen",
@@ -1627,7 +1628,9 @@
           "forbidden": "Alleen een beheerder van deze instelling kan dit doen.",
           "invalid": "Controleer de waarden.",
           "error": "Er ging iets mis. Probeer het opnieuw."
-        }
+        },
+        "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
+        "inviteLearners": "Lerenden uitnodigen"
       },
       "learners": {
         "title": "Lerenden",
@@ -1641,7 +1644,8 @@
         "statusPending": "uitgenodigd",
         "statusDeclined": "afgewezen",
         "statusExpired": "verlopen",
-        "statusRevoked": "ingetrokken"
+        "statusRevoked": "ingetrokken",
+        "unavailable": "De gegevens van lerenden konden nu niet worden geladen. Vernieuw de pagina; blijft dit zo, dan gelden de uitnodigingen nog steeds."
       },
       "title": "Bedrijfswerkruimte",
       "subtitle": "Bedrijfscontext is een startpunt, geen beperking. Je kunt andere rollen hebben en er later meer toevoegen via de rolwisselaar.",
@@ -1781,7 +1785,9 @@
           "pending_verification": "Je hebt een optionele handmatige beoordeling aangevraagd. Je bedrijf blijft volledig bruikbaar terwijl die wacht.",
           "unverified": "Niet geverifieerd. Je kunt je bedrijf gewoon blijven gebruiken.",
           "verified": "Geverifieerd — een sterkere vertrouwensstatus, alleen toegekend na een echte controle."
-        }
+        },
+        "goToWorkspace": "Bedrijfswerkruimte openen",
+        "capabilityNotDeclared": "De rol van onderwijsinstelling is nog niet vastgelegd — geef die op in de werkruimte onder “Wat doet je organisatie?”."
       },
       "workersBlocker": {
         "title": "Er is iets misgegaan",
@@ -3656,11 +3662,26 @@
         "intentHeading": "Waarvoor kom je?",
         "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
         "intent": {
-          "work": { "title": "Ik zoek werk", "desc": "Profiel, vaardigheden, cv en een werkjournaal dat laat zien wat je kunt; echte kansen die passen." },
-          "hire": { "title": "Ik heb werknemers nodig", "desc": "Beschrijf een echte personeelsbehoefte in gewone woorden en bereik passende mensen." },
-          "agency": { "title": "Ik ben recruiter / uitzendbureau", "desc": "Je kandidatenpool, je klantbedrijven, voordrachten en plaatsingen — als uitzendorganisatie." },
-          "student": { "title": "Ik ben student", "desc": "Je studie telt mee. Koppel je aan je onderwijsinstelling, vind stages en eerste banen." },
-          "education": { "title": "Ik vertegenwoordig een onderwijsinstelling", "desc": "Nodig studenten uit, zie hun deelname en koppel ze aan echte stages en banen." }
+          "work": {
+            "title": "Ik zoek werk",
+            "desc": "Profiel, vaardigheden, cv en een werkjournaal dat laat zien wat je kunt; echte kansen die passen."
+          },
+          "hire": {
+            "title": "Ik heb werknemers nodig",
+            "desc": "Beschrijf een echte personeelsbehoefte in gewone woorden en bereik passende mensen."
+          },
+          "agency": {
+            "title": "Ik ben recruiter / uitzendbureau",
+            "desc": "Je kandidatenpool, je klantbedrijven, voordrachten en plaatsingen — als uitzendorganisatie."
+          },
+          "student": {
+            "title": "Ik ben student",
+            "desc": "Je studie telt mee. Koppel je aan je onderwijsinstelling, vind stages en eerste banen."
+          },
+          "education": {
+            "title": "Ik vertegenwoordig een onderwijsinstelling",
+            "desc": "Nodig studenten uit, zie hun deelname en koppel ze aan echte stages en banen."
+          }
         },
         "heading": "Begin je als persoon of als bedrijf?",
         "worker": {
@@ -6167,14 +6188,14 @@
     "company": {
       "title": "Teamkern",
       "scope": "Lege staat",
-      "intro": "Hier komt je team te staan — echte mensen, huidige rollen en wie er deze week werkt. Er zijn nog geen leden, dus we tonen alleen de lege staat in plaats van verzonnen voorbeelden.",
-      "footnote": "Uitnodigingen, rollen en beschikbaarheidsvensters komen in een latere fase. We verzinnen geen mensen."
+      "intro": "Hier verschijnt je team — echte mensen, hun huidige rol en wie deze week werkt. Nog niemand is aangesloten.",
+      "footnote": "Gebruik “Uitnodigen” hieronder: iedereen accepteert zelf de uitnodiging en verschijnt hier. Wij voegen nooit mensen voor je toe."
     },
     "agency": {
       "title": "Kandidatenbank",
       "scope": "Lege staat",
-      "intro": "Hier zie je straks je actieve kandidaten — wie er klaarstaat, wie momenteel aan het werk is en wie op het volgende seizoen wacht. Er zijn er nog geen, dus we tonen een lege staat in plaats van nepprofielen.",
-      "footnote": "Bankbeheer, beschikbaarheidsvensters en ploegaanbevelingen komen later, stap voor stap."
+      "intro": "Hier verschijnen je actieve kandidaten — wie klaarstaat, wie nu geplaatst is, wie op het volgende seizoen wacht. Nog niemand is aangesloten.",
+      "footnote": "Gebruik “Uitnodigen” hieronder: elke kandidaat accepteert zelf de uitnodiging en verschijnt hier. Wij voegen nooit mensen voor je toe."
     }
   },
   "helpRequests": {
@@ -7780,7 +7801,8 @@
         "mixed": "Bewijs: deels bevestigd",
         "unverified": "Bewijs: alleen zelf opgegeven"
       }
-    }
+    },
+    "editNeedCta": "Behoefte aanpassen of toevoegen"
   },
   "planBoundary": {
     "title": "Wat betaalde plannen omvatten",
@@ -10379,7 +10401,7 @@
       "typeLabel": "Type uitnodiging",
       "types": {
         "join_platform": "Word lid van LabourMarket.ai",
-        "join_organization": "Word lid van mijn bedrijf",
+        "join_organization": "Bij mijn bedrijf / organisatie aansluiten",
         "join_team": "Word lid van een team",
         "join_as_employee": "Word lid als medewerker",
         "collaborate_partner": "Samenwerken als partner",
@@ -10601,7 +10623,9 @@
       "accepted": "Boeking geaccepteerd",
       "decision_accepted": "Klant geaccepteerd",
       "decision_declined": "Klant afgewezen"
-    }
+    },
+    "goToRoster": "Naar het team",
+    "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden."
   },
   "clientBridge": {
     "title": "Uitzendbureaus",

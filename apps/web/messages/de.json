@@ -794,7 +794,8 @@
     "details": "Persönliche Daten",
     "improve": "Verbesserungspunkte",
     "capabilities": "Fähigkeiten & Arbeitshistorie",
-    "fullRecordsInCv": "Alle Arbeitseinträge"
+    "fullRecordsInCv": "Alle Arbeitseinträge",
+    "compass": "Lernkompass"
   },
   "mapLayers": {
     "title": "Kartenebenen",
@@ -1627,7 +1628,9 @@
           "forbidden": "Das kann nur eine Leitung dieser Einrichtung.",
           "invalid": "Bitte prüfen Sie die Werte.",
           "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
-        }
+        },
+        "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
+        "inviteLearners": "Lernende einladen"
       },
       "learners": {
         "title": "Lernende",
@@ -1641,7 +1644,8 @@
         "statusPending": "eingeladen",
         "statusDeclined": "abgelehnt",
         "statusExpired": "abgelaufen",
-        "statusRevoked": "zurückgezogen"
+        "statusRevoked": "zurückgezogen",
+        "unavailable": "Die Daten der Lernenden konnten gerade nicht geladen werden. Laden Sie die Seite neu; bleibt es dabei, gelten die Einladungen trotzdem."
       },
       "title": "Unternehmensbereich",
       "subtitle": "Der Unternehmenskontext ist ein Einstiegspunkt, keine Grenze. Sie können weitere Rollen innehaben und später über den Rollenwechsler hinzufügen.",
@@ -1781,7 +1785,9 @@
           "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar.",
           "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen.",
           "verified": "Verifiziert — ein stärkerer Vertrauensstatus, der nur nach einer echten Prüfung vergeben wird."
-        }
+        },
+        "goToWorkspace": "Unternehmens-Arbeitsbereich öffnen",
+        "capabilityNotDeclared": "Die Rolle als Bildungsanbieter wurde noch nicht erfasst — geben Sie sie im Arbeitsbereich unter „Was macht Ihre Organisation?“ an."
       },
       "workersBlocker": {
         "title": "Etwas ist schiefgelaufen",
@@ -3656,11 +3662,26 @@
         "intentHeading": "Wofür sind Sie hier?",
         "intentNote": "Wählen Sie alles Zutreffende — ein Konto trägt alles. Person und Organisation sind die zwei Räume; was Sie darin tun, entscheiden Sie.",
         "intent": {
-          "work": { "title": "Ich suche Arbeit", "desc": "Profil, Fähigkeiten, Lebenslauf und ein Arbeitsjournal, das zeigt, was Sie können; echte passende Chancen." },
-          "hire": { "title": "Ich brauche Arbeitskräfte", "desc": "Beschreiben Sie einen echten Personalbedarf in einfachen Worten und erreichen Sie passende Menschen." },
-          "agency": { "title": "Ich bin Recruiter / Personalagentur", "desc": "Ihr Kandidatenpool, Ihre Kundenunternehmen, Vorschläge und Vermittlungen — als Personaldienstleister." },
-          "student": { "title": "Ich bin Student/in", "desc": "Ihr Studium zählt. Verbinden Sie sich mit Ihrer Bildungseinrichtung, finden Sie Praktika und erste Jobs." },
-          "education": { "title": "Ich vertrete eine Bildungseinrichtung", "desc": "Laden Sie Studierende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit echten Praktika und Jobs." }
+          "work": {
+            "title": "Ich suche Arbeit",
+            "desc": "Profil, Fähigkeiten, Lebenslauf und ein Arbeitsjournal, das zeigt, was Sie können; echte passende Chancen."
+          },
+          "hire": {
+            "title": "Ich brauche Arbeitskräfte",
+            "desc": "Beschreiben Sie einen echten Personalbedarf in einfachen Worten und erreichen Sie passende Menschen."
+          },
+          "agency": {
+            "title": "Ich bin Recruiter / Personalagentur",
+            "desc": "Ihr Kandidatenpool, Ihre Kundenunternehmen, Vorschläge und Vermittlungen — als Personaldienstleister."
+          },
+          "student": {
+            "title": "Ich bin Student/in",
+            "desc": "Ihr Studium zählt. Verbinden Sie sich mit Ihrer Bildungseinrichtung, finden Sie Praktika und erste Jobs."
+          },
+          "education": {
+            "title": "Ich vertrete eine Bildungseinrichtung",
+            "desc": "Laden Sie Studierende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit echten Praktika und Jobs."
+          }
         },
         "heading": "Starten Sie als Person oder als Unternehmen?",
         "worker": {
@@ -6167,14 +6188,14 @@
     "company": {
       "title": "Kernteam",
       "scope": "Leerer Zustand",
-      "intro": "Hier wird Ihr Team abgebildet — echte Personen, aktuelle Rollen und wer diese Woche arbeitet. Es gibt noch keine Mitglieder, daher zeigen wir nur den leeren Zustand statt erfundener Beispiele.",
-      "footnote": "Einladungen, Rollen und Verfügbarkeitszeiträume kommen in einer späteren Phase. Wir werden keine Personen erfinden."
+      "intro": "Hier erscheint Ihr Team — echte Menschen, ihre aktuellen Rollen und wer diese Woche arbeitet. Noch ist niemand beigetreten.",
+      "footnote": "Nutzen Sie „Einladen“ unten: jede Person nimmt ihre Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu."
     },
     "agency": {
       "title": "Kandidatenpool",
       "scope": "Leerer Zustand",
-      "intro": "Hier werden Ihre aktiven Kandidaten angezeigt — wer bereit ist, wer gerade im Einsatz ist, wer auf die nächste Saison wartet. Es gibt noch keine, daher zeigen wir einen leeren Zustand statt gefälschter Profile.",
-      "footnote": "Poolverwaltung, Verfügbarkeitszeiträume und Teamempfehlungen kommen später, Schritt für Schritt."
+      "intro": "Hier erscheinen Ihre aktiven Kandidaten — wer bereit ist, wer gerade vermittelt ist, wer auf die nächste Saison wartet. Noch ist niemand beigetreten.",
+      "footnote": "Nutzen Sie „Einladen“ unten: jeder Kandidat nimmt seine Einladung selbst an und erscheint hier. Wir fügen nie Personen für Sie hinzu."
     }
   },
   "helpRequests": {
@@ -7780,7 +7801,8 @@
         "mixed": "Nachweis: teilweise bestätigt",
         "unverified": "Nachweis: nur selbst angegeben"
       }
-    }
+    },
+    "editNeedCta": "Bedarf anpassen oder hinzufügen"
   },
   "planBoundary": {
     "title": "Was bezahlte Pläne enthalten",
@@ -10379,7 +10401,7 @@
       "typeLabel": "Einladungstyp",
       "types": {
         "join_platform": "LabourMarket.ai beitreten",
-        "join_organization": "Meinem Unternehmen beitreten",
+        "join_organization": "Meinem Unternehmen / meiner Organisation beitreten",
         "join_team": "Einem Team beitreten",
         "join_as_employee": "Als Mitarbeiter beitreten",
         "collaborate_partner": "Als Partner zusammenarbeiten",
@@ -10601,7 +10623,9 @@
       "accepted": "Buchung angenommen",
       "decision_accepted": "Kunde angenommen",
       "decision_declined": "Kunde abgelehnt"
-    }
+    },
+    "goToRoster": "Zum Team",
+    "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet."
   },
   "clientBridge": {
     "title": "Personalagenturen",

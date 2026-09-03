@@ -41,6 +41,7 @@ export function InvitePanel({
   defaultType,
   defaultOrganizationId,
   defaultProjectId,
+  defaultRelationshipSlug,
 }: {
   locale: string;
   /**
@@ -55,6 +56,8 @@ export function InvitePanel({
   defaultType?: string;
   defaultOrganizationId?: string;
   defaultProjectId?: string;
+  /** Deep-link preset for the relationship control (`?relationship=student`). */
+  defaultRelationshipSlug?: string;
 }) {
   const t = useTranslations("network.invite");
   // The ONE localized relationship vocabulary — the same words the CV prints.
@@ -102,7 +105,13 @@ export function InvitePanel({
   // Defaults to the historical relationship, so a sender who ignores this
   // control gets exactly the invitation the product sent before it existed.
   const [relationshipSlug, setRelationshipSlug] = useState<string>(
-    DEFAULT_RELATIONSHIP_SLUG,
+    // A deep link may name the relationship (`?relationship=student` from the
+    // institution's "Invite learners"); anything outside the closed choice
+    // list falls back to the historical default.
+    defaultRelationshipSlug &&
+      RELATIONSHIP_INVITE_CHOICES.some((c) => c.slug === defaultRelationshipSlug)
+      ? defaultRelationshipSlug
+      : DEFAULT_RELATIONSHIP_SLUG,
   );
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<CreateInvitationsResult | null>(null);

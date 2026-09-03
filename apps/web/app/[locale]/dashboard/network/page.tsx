@@ -60,6 +60,9 @@ export default async function NetworkPage({
     type?: string;
     org?: string;
     project?: string;
+    /** Pre-selects the relationship in the invite panel (e.g. `student` from
+     *  the institution's "Invite learners"); validated inside the panel. */
+    relationship?: string;
     wf?: string;
     req?: string;
     reqStatus?: string;
@@ -75,7 +78,7 @@ export default async function NetworkPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, wf, req, reqStatus, reqType, rev, dec, area } =
+  const { q, type, org, project, relationship, wf, req, reqStatus, reqType, rev, dec, area } =
     await searchParams;
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
@@ -447,6 +450,7 @@ export default async function NetworkPage({
         defaultType={type}
         defaultOrganizationId={org}
         defaultProjectId={project}
+        defaultRelationshipSlug={relationship}
       />
 
       {/* My sent invitations with the real lifecycle. */}

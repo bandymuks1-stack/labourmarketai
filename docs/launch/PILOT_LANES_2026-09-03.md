@@ -13,7 +13,7 @@
 
 ## Lane A — real recruiter / agency
 
-Entry: `https://labourmarket.ai/lt/signup` → intent **"I'm a recruiter / agency"** →
+Entry: `https://labourmarket.ai/lt/auth/signup` → intent **"I'm a recruiter / agency"** →
 company setup (type pre-selected: staffing agency).
 
 | # | Step | Where | Real result expected | Status 2026-09-03 |

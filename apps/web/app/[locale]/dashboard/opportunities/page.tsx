@@ -471,6 +471,16 @@ export default async function OpportunitiesPage({
               <p className="mt-1 text-sm leading-relaxed text-text-secondary">
                 {t("needsAccessBody")}
               </p>
+              {/* The body already tells the person what to do (complete the
+                  profile); give them the door — same link the sibling empty
+                  state offers, so this branch is no longer a dead end. */}
+              <Link
+                href={`/${locale}/dashboard/profile`}
+                data-testid="opportunities-pending-cta"
+                className="mt-3 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue"
+              >
+                {t("approvedEmptyCta")} →
+              </Link>
             </section>
           ) : result.opportunities.length === 0 ? (
             <section

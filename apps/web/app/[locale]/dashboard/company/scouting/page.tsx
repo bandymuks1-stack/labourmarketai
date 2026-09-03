@@ -507,6 +507,16 @@ export default async function CompanyScoutingPage({
               {t("filters.clear")} →
             </Link>
           ) : null}
+          {/* The copy says "broaden the need" — this is the door to do it.
+              Rendered in every empty case, so the page never ends without a
+              next action. */}
+          <Link
+            href={`/${locale}/dashboard/company#demand-intake`}
+            className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+            data-testid="scouting-empty-edit-need"
+          >
+            {t("editNeedCta")} →
+          </Link>
         </div>
       ) : null}
 
