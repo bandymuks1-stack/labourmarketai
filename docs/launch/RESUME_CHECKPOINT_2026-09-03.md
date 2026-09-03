@@ -33,12 +33,6 @@ Canonical root `C:\Users\Mano\Documents\labourmarketai`, branch `main`.
 
 ## First autonomous actions on resume
 
-1. Verify production build; if #1453 merged, confirm the demand card renders for a `staffing_agency` company (CI covers compile; a real pilot login is the visual proof).
-2. If the owner replied "Apply batch 2026-09-03 A": apply #1448's two migrations in order via Supabase MCP, verify (cron.job row; `count_public_vacancies_v1()` < 50 ms; 4-value CHECK; RPCs present), mark ready, merge, remove `wt-red`.
-3. If "Apply batch 2026-09-03 B": apply `20260903120000`, verify (3 tables RLS on; `count_public_vacancies_by_profession_v1(5)` rows), merge #1454, remove `wt-red-b`.
-4. Track C slice 3 (GREEN): internship as a demand kind through `customer_requests.payload.engagement_type = 'internship'` (no CHECK change) surfaced on the board and the compass; learner-side view of own cohort/programme (reads exist after B).
-5. Agency: after #1448, agency-side offer progress shows the client decision (`offer_status` accepted/declined) — small read/label change.
-6. Time-to-first-value: the admin telemetry section is live; the first external pilot supplies the first per-actor measurement. Do not fabricate one.
-7. Track E: regenerate `agantai/contracts/labourmarket-capability-contract.json` from production facts (read-only); VPS-1 stays owner-gated.
+**Superseded 2026-09-03 12:00 UTC — start from `NEW_WINDOW_HANDOFF_2026-09-03.md` §9.** Batches A/B/C are applied, merged and deployed (`8d3e7dec`); the numbered list that stood here referred to them.
 
 Do not re-run proofs recorded in the register or the audits; do not generate `e2e-*` mail; never edit frozen landing files.
