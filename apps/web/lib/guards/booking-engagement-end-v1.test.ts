@@ -1181,6 +1181,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-02 (FINAL COMPLETION Train K2, finding K2-1): the companies
+      // contact-minimization migration carries the marker as an
+      // ACKNOWLEDGEMENT — DRAFT + needs-human-gate, unapplied. Privilege
+      // narrowing + two definer readers; no data change.
+      "20260902210000_companies_contact_minimization_v1.sql",
 ]);
   });
 

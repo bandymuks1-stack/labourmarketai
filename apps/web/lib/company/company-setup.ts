@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readOwnCompaniesPrivate } from "@/lib/company/company-private-read";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -159,8 +160,8 @@ export type SaveCompanyResult =
   | { kind: "multiple-companies" }
   | { kind: "error"; message: string };
 
-const SELECT_COLUMNS =
-  "id, profile_id, legal_name, display_name, company_type, country, registration_code, address, website, contact_email, contact_phone, requester_role, verification_status, verification_note, requested_at, created_at";
+// The column list (incl. the private contact columns) lives with the owner /
+// admin readers in lib/company/company-private-read.ts (K2-1).
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapCompanyRow(r: any): CompanyRow {
@@ -202,11 +203,9 @@ export async function listOwnedCompanies(): Promise<CompanyListResult> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .eq("profile_id", user.id)
-    .order("created_at", { ascending: true });
+  // K2-1: private columns come through the owner reader (definer RPC once
+  // 20260902210000 is applied; the direct read before that).
+  const { data, error } = await readOwnCompaniesPrivate(supabase, user.id);
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
@@ -232,12 +231,9 @@ export async function getOwnedCompanyById(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", row: null };
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .eq("id", companyId)
-    .eq("profile_id", user.id)
-    .maybeSingle();
+  // K2-1: read the owner's rows through the private reader, then pick the
+  // explicit id — a foreign/unknown id yields null, never an oracle.
+  const { data, error } = await readOwnCompaniesPrivate(supabase, user.id);
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
@@ -247,7 +243,9 @@ export async function getOwnedCompanyById(
     }
     return { kind: "error", message: error.message };
   }
-  return { kind: "ok", row: data ? mapCompanyRow(data) : null };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const match = ((data ?? []) as any[]).find((r) => r.id === companyId) ?? null;
+  return { kind: "ok", row: match ? mapCompanyRow(match) : null };
 }
 
 export async function getOwnCompany(): Promise<CompanyReadResult> {
@@ -256,11 +254,15 @@ export async function getOwnCompany(): Promise<CompanyReadResult> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", row: null };
-  const { data, error } = await asAny(supabase)
-    .from("companies")
-    .select(SELECT_COLUMNS)
-    .eq("profile_id", user.id)
-    .maybeSingle();
+  // K2-1: owner reader; `.maybeSingle()` semantics kept — a profile owning
+  // two rows is an explicit-selection situation, not "the" company.
+  const read = await readOwnCompaniesPrivate(supabase, user.id);
+  const error =
+    read.error ??
+    ((read.data ?? []).length > 1
+      ? { code: "PGRST116", message: "multiple rows" }
+      : null);
+  const data = read.error ? null : ((read.data ?? [])[0] ?? null);
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||

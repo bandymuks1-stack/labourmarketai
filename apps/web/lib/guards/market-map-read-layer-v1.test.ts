@@ -743,7 +743,9 @@ describe("NO new DB migration in this PR", () => {
     // imports nothing. Still no migration from the market-map read layer,
     // which stays pure TS. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 253.
-    expect(count).toBeLessThanOrEqual(253);
+    // Bumped 253 -> 258: FINAL COMPLETION RED drafts (B2 x3 #1421, F1 #1426,
+    // K2-1 companies contact minimization), all owner-gated and unapplied.
+    expect(count).toBeLessThanOrEqual(258);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
