@@ -20,6 +20,9 @@ export async function LearningCompassSection({
   const t = await getTranslations("learningCompass");
   const tSkill = await getTranslations("skillNames");
   const tProf = await getTranslations("professions");
+  // Declared opportunity type labels — the same catalogue the demand form and
+  // the board's structured detail use (`structuredDemand.opportunityType.*`).
+  const tsd = await getTranslations("structuredDemand");
   const skillLabel = (slug: string) =>
     tSkill.has(slug as never) ? tSkill(slug as never) : slug.replace(/-/g, " ");
   const professionLabel = (slug: string) =>
@@ -126,10 +129,20 @@ export async function LearningCompassSection({
             <ul className="flex flex-col divide-y divide-ink-600">
               {fitsNow.map((o) => (
                 <li key={o.requestId} className="flex items-center justify-between gap-3 py-1.5 text-xs" data-testid={`compass-fit-${o.status}`}>
-                  <span className="min-w-0 truncate text-text-primary">
-                    {o.roleSlug ? professionLabel(o.roleSlug) : "—"}
-                    {o.companyName ? ` · ${o.companyName}` : ""}
-                    {o.country ? ` · ${o.country}` : ""}
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="min-w-0 truncate text-text-primary">
+                      {o.roleSlug ? professionLabel(o.roleSlug) : "—"}
+                      {o.companyName ? ` · ${o.companyName}` : ""}
+                      {o.country ? ` · ${o.country}` : ""}
+                    </span>
+                    {o.opportunityType && o.opportunityType !== "employment" ? (
+                      <span
+                        className="shrink-0 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
+                        data-testid="compass-fit-type"
+                      >
+                        {tsd(`opportunityType.${o.opportunityType}` as never)}
+                      </span>
+                    ) : null}
                   </span>
                   <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                     {o.status === "strong" ? t("fitStrong") : t("fitPossible")}

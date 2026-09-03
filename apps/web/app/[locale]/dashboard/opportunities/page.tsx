@@ -784,6 +784,20 @@ export default async function OpportunitiesPage({
                                   </span>
                                 ) : null}
                                 <span className="min-w-0">{roleLabel(need.roleText)}</span>
+                                {/* Declared opportunity type (internship /
+                                    apprenticeship / temporary assignment …)
+                                    from the demand's structured projection —
+                                    stated by the employer, never inferred.
+                                    Plain employment is the default and gets
+                                    no chip; the full row stays in details. */}
+                                {structured?.opportunity_type && structured.opportunity_type !== "employment" ? (
+                                  <span
+                                    className="shrink-0 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
+                                    data-testid="opportunity-type-chip"
+                                  >
+                                    {sd(`opportunityType.${structured.opportunity_type}`)}
+                                  </span>
+                                ) : null}
                               </p>
                               {/* Compact scan line — full facts in details. */}
                               <p className="text-xs text-text-secondary">

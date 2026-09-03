@@ -28,6 +28,7 @@
  *     recommendation, no matter its coverage.
  */
 
+import type { OpportunityType } from "@/lib/demand/structured-demand-v2";
 import {
   compareMatches,
   type MatchReason,
@@ -60,6 +61,10 @@ export interface RecommendationSourceNeed {
 export interface RecommendationSource {
   readonly need: RecommendationSourceNeed;
   readonly match: MatchResultV1;
+  /** The worker-safe structured projection the board card already carries
+   *  (`OpportunityCard.structured`) — only its declared opportunity type is
+   *  read here. Absent/null = the demand did not state one. */
+  readonly structured?: { readonly opportunity_type?: OpportunityType | null } | null;
 }
 
 /** The worker's own seen markers (worker_opportunity_seen). `available` is
@@ -88,6 +93,10 @@ export interface JobRecommendation {
   readonly locationLabel: string | null;
   readonly startPeriod: string | null;
   readonly companyName: string | null;
+  /** The demand's DECLARED opportunity type (employment, internship,
+   *  apprenticeship, …) from its structured projection — `null` when the
+   *  employer did not state one. Never inferred from text. */
+  readonly opportunityType: OpportunityType | null;
   readonly status: MatchResultV1["status"];
   /** §19 contextual basis — always complete, never a bare %. */
   readonly basis: RecommendationBasis;
@@ -165,6 +174,7 @@ export function deriveJobRecommendations(
         locationLabel: s.need.locationLabel ?? null,
         startPeriod: s.need.startPeriod,
         companyName: s.need.companyName ?? null,
+        opportunityType: s.structured?.opportunity_type ?? null,
         status: s.match.status,
         basis: {
           pct: fit.pct,

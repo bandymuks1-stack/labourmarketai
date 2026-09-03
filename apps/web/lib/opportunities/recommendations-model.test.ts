@@ -82,6 +82,23 @@ const seenStore = (...ids: string[]): SeenState => ({
 const NOW = Date.parse("2026-07-14T12:00:00Z");
 const daysAgo = (d: number) => new Date(NOW - d * 86400000).toISOString();
 
+describe("declared opportunity type travels with the recommendation", () => {
+  it("is the structured projection's value when stated, null when the employer stated none — never inferred", () => {
+    const stated: RecommendationSource = {
+      ...source("a", makeMatch()),
+      structured: { opportunity_type: "internship" },
+    };
+    const unstated = source("b", makeMatch());
+    const bare: RecommendationSource = { ...source("c", makeMatch()), structured: null };
+    const recs = deriveJobRecommendations([stated, unstated, bare], NO_SEEN_STORE, NOW);
+    expect(recs.map((r) => [r.requestId, r.opportunityType])).toEqual([
+      ["a", "internship"],
+      ["b", null],
+      ["c", null],
+    ]);
+  });
+});
+
 describe("eligibility filter (quality first — no spam)", () => {
   it("an ineligible match (failed hard criterion) is NEVER recommended", () => {
     expect(isRecommendable(makeMatch({ eligible: false }))).toBe(false);

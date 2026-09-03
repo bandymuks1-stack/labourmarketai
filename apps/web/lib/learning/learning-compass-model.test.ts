@@ -157,6 +157,20 @@ describe("learning compass — pure model", () => {
     expect(noDir.missing).toEqual({ source: null, skills: [] });
   });
 
+  it("a fit's declared opportunity type travels untouched (the board's value, never inferred here)", () => {
+    const c = buildLearningCompass({
+      ...base,
+      opportunities: [
+        opp({ requestId: "i", status: "strong", opportunityType: "internship" }),
+        opp({ requestId: "j", status: "possible" }),
+      ],
+    });
+    expect(c.fitsNow.map((o) => [o.requestId, o.opportunityType ?? null])).toEqual([
+      ["i", "internship"],
+      ["j", null],
+    ]);
+  });
+
   it("never lists a missing skill the person already holds", () => {
     const c = buildLearningCompass({
       ...base,
