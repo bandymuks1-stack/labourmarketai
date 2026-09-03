@@ -25,6 +25,7 @@ import {
   type AdvancedDemandFormState,
 } from "@/lib/demand/structured-demand-form";
 import {
+  OPPORTUNITY_TYPES,
   deriveCompensationHonestyFlags,
   requiresTalentPoolDisclosure,
   sanitizeStructuredDemandV2,
@@ -202,6 +203,10 @@ export function DemandRequestButton({
         location,
         timing: urgency,
         accommodation,
+        // The declared opportunity type used to be discarded by "save as
+        // draft" while the UI reported success (same class as the teamSize
+        // loss fixed earlier).
+        opportunityType: adv.opportunityType || undefined,
         notes,
       });
       setDraftSource(true);
@@ -673,6 +678,22 @@ export function DemandRequestButton({
               ariaLabel={tc("transportOffer")}
               placeholder="—"
               testId="demand-transport"
+            />
+          </label>
+          {/* What KIND of opportunity — internship, apprenticeship, temporary
+              assignment … Promoted out of the collapsed "advanced" cluster so
+              an employer can DECLARE it in the normal flow (0 of 17 production
+              demands carried a type while it was buried). Untouched = omitted
+              from the structured cluster; nothing is defaulted or inferred. */}
+          <label className="flex flex-col gap-1.5">
+            <Label>{tsd("opportunityTypeLabel")}</Label>
+            <DarkListbox
+              value={adv.opportunityType}
+              onChange={(v) => patchAdv({ opportunityType: v })}
+              options={OPPORTUNITY_TYPES.map((v) => ({ value: v, label: tsd(`opportunityType.${v}`) }))}
+              ariaLabel={tsd("opportunityTypeLabel")}
+              placeholder="—"
+              testId="demand-opportunity-type"
             />
           </label>
           {/* Required tools / equipment (§8.6) — optional toggle chips over the

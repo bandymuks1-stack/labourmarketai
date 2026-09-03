@@ -1531,7 +1531,8 @@
       "location": "Vieta",
       "skills": "Įgūdžiai / kriterijai",
       "urgency": "Kada reikia",
-      "notes": "Pastabos"
+      "notes": "Pastabos",
+      "opportunityType": "Tipas"
     },
     "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas",
     "syntheticTitle": {
@@ -11697,7 +11698,8 @@
         "demandLocationPlaceholder": "Miestas ar regionas",
         "teamSize": "Darbuotojų skaičius",
         "urgency": "Skubumas",
-        "saveAsDraft": "Išsaugoti kaip juodraštį"
+        "saveAsDraft": "Išsaugoti kaip juodraštį",
+        "opportunityType": "Galimybės tipas"
       },
       "availability": {
         "available": "Laisvas",

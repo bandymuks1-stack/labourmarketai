@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
+
 /**
  * Zod input schemas for the executable EMPLOYER-side conversation actions
  * (company.* + agency.* — PR-E). Same contract as `worker-schemas.ts`: every
@@ -52,6 +54,10 @@ export const companyCreateDemandFields = z.object({
     .enum(["provided", "compensated", "not_provided", "unknown"])
     .nullable()
     .optional(),
+  /** DECLARED opportunity type (closed set shared with the structured demand
+   *  cluster) — internship / apprenticeship / temporary assignment … Never
+   *  inferred from the description; absent = the employer stated none. */
+  opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
 });
 
 export const companyCreateDemandSchema = z
@@ -76,6 +82,8 @@ export const companyCreateDemandSchema = z
       .enum(["provided", "compensated", "not_provided", "unknown"])
       .nullable()
       .optional(),
+    /** Same declared opportunity type as `companyCreateDemandFields`. */
+    opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
   })
   .refine((v) => v.mode !== "draft" || v.intent === "hire_workers", {
     message: "drafts exist only for the hire_workers intent",

@@ -1531,7 +1531,8 @@
       "location": "Standort",
       "skills": "Fähigkeiten / Kriterien",
       "urgency": "Wann benötigt",
-      "notes": "Notizen"
+      "notes": "Notizen",
+      "opportunityType": "Art"
     },
     "scoutLink": "Passende Arbeitskräfte & Interesse für diese Anfrage",
     "syntheticTitle": {
@@ -11697,7 +11698,8 @@
         "demandLocationPlaceholder": "Stadt oder Region",
         "teamSize": "Anzahl der Arbeitskräfte",
         "urgency": "Dringlichkeit",
-        "saveAsDraft": "Als Entwurf speichern"
+        "saveAsDraft": "Als Entwurf speichern",
+        "opportunityType": "Art der Gelegenheit"
       },
       "availability": {
         "available": "Verfügbar",

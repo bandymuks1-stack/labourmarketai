@@ -1531,7 +1531,8 @@
       "location": "Location",
       "skills": "Skills / criteria",
       "urgency": "When needed",
-      "notes": "Notes"
+      "notes": "Notes",
+      "opportunityType": "Type"
     },
     "scoutLink": "Matched workers & interest for this inquiry",
     "syntheticTitle": {
@@ -11697,7 +11698,8 @@
         "demandLocationPlaceholder": "City or region",
         "teamSize": "Number of workers",
         "urgency": "Urgency",
-        "saveAsDraft": "Save as draft"
+        "saveAsDraft": "Save as draft",
+        "opportunityType": "Type of opportunity"
       },
       "availability": {
         "available": "Available",

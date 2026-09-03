@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import {
   CalendarDays,
   FolderKanban,
@@ -269,6 +270,8 @@ export default async function CompanyDashboardPage({
   const tWow = await getTranslations("auth.dashboard.wow");
   const tFlow = await getTranslations("auth.dashboard.wow.flow");
   const tReadback = await getTranslations("demandReadback");
+  // Declared opportunity-type labels — the same catalogue the demand form uses.
+  const tStructured = await getTranslations("structuredDemand");
   const tReqStatus = await getTranslations(
     "roleDashboards.buyer.requests.understanding.requestStatus",
   );
@@ -324,7 +327,11 @@ export default async function CompanyDashboardPage({
       skills: tReadback("fields.skills"),
       urgency: tReadback("fields.urgency"),
       notes: tReadback("fields.notes"),
+      opportunityType: tReadback("fields.opportunityType"),
     },
+    opportunityTypeValues: Object.fromEntries(
+      OPPORTUNITY_TYPES.map((v) => [v, tStructured(`opportunityType.${v}`)]),
+    ),
     urgencyValues: {
       flexible: tWow("demand.form.urgencyFlexible"),
       this_week: tWow("demand.form.urgencyThisWeek"),

@@ -1531,7 +1531,8 @@
       "location": "Местоположение",
       "skills": "Навыки / критерии",
       "urgency": "Когда нужно",
-      "notes": "Заметки"
+      "notes": "Заметки",
+      "opportunityType": "Тип"
     },
     "scoutLink": "Подходящие работники и интерес по этому запросу",
     "syntheticTitle": {
@@ -11697,7 +11698,8 @@
         "demandLocationPlaceholder": "Город или регион",
         "teamSize": "Количество работников",
         "urgency": "Срочность",
-        "saveAsDraft": "Сохранить как черновик"
+        "saveAsDraft": "Сохранить как черновик",
+        "opportunityType": "Тип возможности"
       },
       "availability": {
         "available": "Доступен",

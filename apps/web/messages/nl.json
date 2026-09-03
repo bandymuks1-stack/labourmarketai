@@ -1531,7 +1531,8 @@
       "location": "Locatie",
       "skills": "Vaardigheden / criteria",
       "urgency": "Wanneer nodig",
-      "notes": "Notities"
+      "notes": "Notities",
+      "opportunityType": "Soort"
     },
     "scoutLink": "Gematchte werknemers & interesse voor deze aanvraag",
     "syntheticTitle": {
@@ -11697,7 +11698,8 @@
         "demandLocationPlaceholder": "Stad of regio",
         "teamSize": "Aantal werknemers",
         "urgency": "Urgentie",
-        "saveAsDraft": "Opslaan als concept"
+        "saveAsDraft": "Opslaan als concept",
+        "opportunityType": "Soort kans"
       },
       "availability": {
         "available": "Beschikbaar",
