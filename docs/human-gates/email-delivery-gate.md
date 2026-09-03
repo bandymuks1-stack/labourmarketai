@@ -51,6 +51,82 @@ value). Not part of the canonical mail configuration; optional.
 Everything above ran against the bounded identities; **no further `e2e-*` mail is to be generated** for SMTP
 proof — each send only adds a meaningless bounce.
 
+## Smallest owner procedure (2026-09-02 consolidation — decisions already made from evidence)
+
+> **Status 2026-09-03:** steps 1–4 below were completed on 2026-09-02 (Resend SMTP is live in
+> production, see §"Reconciliation" in the register). They stay here as the exact reference procedure;
+> the only remaining proof is the one real-inbox test at the end of this file.
+
+
+**Architecture (decided):** two senders, one domain. (1) Supabase Auth mail (confirmation, magic link,
+password reset) goes through **custom SMTP** on the Supabase project. (2) Product mail (invitations,
+notifications) goes through the app's own transactional adapter `lib/email/transactional.ts`, which already
+supports **Resend or Postmark** via three Vercel env vars. Use the SAME provider and the SAME verified
+domain for both, so one DNS setup covers everything.
+
+**Provider (recommended): Resend** — EU data region available, DKIM/SPF via three DNS records, SMTP relay
+included, free tier well above launch volume, API key doubles as the SMTP password. Postmark is the
+equal-quality alternative if the owner already has an account; nothing else changes.
+
+### Step 1 — domain + DNS (provider dashboard → Domains → add `labourmarket.ai`, region EU)
+Add the records the provider shows (typical set):
+
+| Type | Host | Purpose |
+|---|---|---|
+| TXT | `resend._domainkey` (or provider-named) | DKIM signing |
+| TXT/MX | `send` (return-path subdomain) | SPF for the bounce address |
+| TXT | `_dmarc` → `v=DMARC1; p=none; rua=mailto:postmaster@labourmarket.ai` | DMARC (start with `p=none`, move to `quarantine` after a clean week) |
+
+Wait for the provider to show **Verified** (minutes to an hour). Sender address: `noreply@labourmarket.ai`
+(auth) and `invites@labourmarket.ai` (product). No mailbox is needed for either.
+
+### Step 2 — Supabase Auth SMTP (exact fields)
+Dashboard → project `gorgitwvdzxbnaxhrsrw` → **Authentication → Emails → SMTP Settings → Enable Custom SMTP**:
+
+| Field | Value |
+|---|---|
+| Sender email | `noreply@labourmarket.ai` |
+| Sender name | `LabourMarket.ai` |
+| Host | `smtp.resend.com` (Postmark: `smtp.postmarkapp.com`) |
+| Port | `465` (Resend, implicit TLS) — `587` also works |
+| Username | `resend` (Postmark: the Server API token) |
+| Password | the provider API key (Postmark: the same Server API token) |
+| Minimum interval between emails | keep the default |
+
+Then **Authentication → Rate Limits → Emails per hour**: raise from the built-in default (2–4) to at least
+`100`. **Authentication → Email → OTP expiry**: `86400` (24 h) so a confirmation opened the next morning still
+works (default 3600 s).
+
+### Step 3 — templates (Authentication → Emails → Templates)
+*Confirm signup* body link (recommended; the callback verifies the token on any device):
+
+```html
+<a href="{{ .SiteURL }}/lt/auth/callback?token_hash={{ .TokenHash }}&type=signup&rt={{ .RedirectTo }}">Patvirtinti el. paštą / Confirm your email</a>
+```
+
+*Magic Link*: same shape with `type=magiclink`; *Reset password*: `type=recovery`. Leaving the defaults also
+works (the callback handles the PKCE `?code=` path and tells a cross-device user "confirmed — sign in here").
+
+### Step 4 — product mail (Vercel → Project → Settings → Environment Variables, Production)
+`INVITE_EMAIL_PROVIDER=resend` · `INVITE_EMAIL_API_KEY=<the same API key>` ·
+`INVITE_EMAIL_FROM=LabourMarket.ai <invites@labourmarket.ai>` → redeploy. Until these exist the invitation
+UI honestly shows "El. laiškų siuntimas dar neaktyvuotas" with a copyable link (proven 2026-09-02).
+
+### Step 5 — proof (the owner does 1 minute; the agent does the rest)
+1. **Real inbox:** the owner registers `<any real address the owner controls>` at `https://labourmarket.ai/lt/signup`,
+   opens the mail on a **phone** (a different device than the signup), taps the link → lands signed in on
+   the dashboard. One screenshot of the inbox + one of the dashboard = G-1 closed.
+2. **Expiry:** agent sets OTP expiry to `60` s (owner grants a 5-minute window or does it), signs up a bounded
+   `e2e-*@labourmarket.ai` identity, waits 90 s, opens the link → the login page shows the *link expired*
+   state with the resend control; restores `86400`.
+3. **Resend:** on that same page, resend → the OLD link now answers `otp_expired` (token rotated, proven
+   2026-09-02) and the NEW link confirms. Cooldown 60 s is enforced server-side.
+4. **Failure:** with SMTP credentials wrong, GoTrue logs `mailer error` and the signup still returns 200
+   without a session (the app never claims delivery) — agent verifies once by reading auth logs.
+
+Cost: €0 at launch volume (Resend free tier 3,000/month; Postmark 100/month free then ~€13). Reversible:
+disable custom SMTP → built-in mailer again; DNS records are harmless if left.
+
 ### Suppression check (before the real test)
 
 Resend's suppression list holds addresses that hard-bounced or complained. The bounced `e2e-*` recipients live
