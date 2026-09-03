@@ -773,7 +773,15 @@ describe("NO new DB migration in this PR", () => {
     // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
     // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
-expect(count).toBeLessThanOrEqual(261);
+    // Bumped 261 -> 262 for the education RLS recursion FIX
+    // (20260903150000_education_rls_recursion_fix_v1, paired rollback) — RED:
+    // DROP/CREATE of the three batch-B SELECT policies (same readers, evaluated
+    // through three SECURITY DEFINER helpers so the policies no longer re-enter
+    // each other — prod-verified 42P17 on every authenticated read today) +
+    // helper grants to authenticated only. Owner-gated draft, UNAPPLIED until
+    // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 262.
+expect(count).toBeLessThanOrEqual(262);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
