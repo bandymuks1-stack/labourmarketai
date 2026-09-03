@@ -2353,7 +2353,15 @@ describe("no migration files added by this sprint", () => {
     // (20260903100000 supply-counts row, 20260903101000 agency offer decision),
     // owner-gated drafts, UNAPPLIED, no marker. RECOUNTED from the tree, never
     // summed: `ls supabase/migrations/*.sql | wc -l` = 259.
-const SPRINT_BASELINE = 261;
+    // Bumped 261 -> 262 for the education RLS recursion FIX
+    // (20260903150000_education_rls_recursion_fix_v1, paired rollback) — RED:
+    // DROP/CREATE of the three batch-B SELECT policies (same readers, evaluated
+    // through three SECURITY DEFINER helpers so the policies no longer re-enter
+    // each other — prod-verified 42P17 on every authenticated read today) +
+    // helper grants to authenticated only. Owner-gated draft, UNAPPLIED until
+    // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 262.
+const SPRINT_BASELINE = 262;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

@@ -1189,6 +1189,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260903120000_education_programs_cohorts_v1.sql",
       // 2026-09-03: RED batch C: institution learner outcomes (definer + grant); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
       "20260903140000_institution_learner_outcomes_v1.sql",
+      // 2026-09-03: RED batch D: education RLS recursion fix (drop/create the three batch-B SELECT policies + 3 definer helpers + grants); owner approval PENDING — "Apply batch 2026-09-03 D"; NOT applied to prod; fix prod-verified in a rolled-back transaction.
+      "20260903150000_education_rls_recursion_fix_v1.sql",
 ]);
   });
 
