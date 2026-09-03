@@ -1,4 +1,16 @@
 {
+  "publicDemand": {
+    "title": "Aktuelle Marktnachfrage",
+    "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
+    "subtitleInstitution": "Was der öffentliche Markt gerade verlangt — die Richtungen, in die Ihre Lernenden gehen.",
+    "active": "{count} aktive Stellen",
+    "employers": "{count} Arbeitgeber",
+    "filtered": "{profession}: {count}",
+    "none": "Derzeit keine passenden öffentlichen Stellen.",
+    "provenance": "Importierte öffentliche Marktdaten (heute ein Quellmarkt); die genannten Arbeitgeber sind keine Kunden von LabourMarket.ai und veröffentlichen nicht über die Plattform.",
+    "unavailable": "Marktdaten sind derzeit nicht verfügbar.",
+    "openBoard": "Öffentliche Stellenübersicht öffnen"
+  },
   "learningCompass": {
     "title": "Lernkompass",
     "subtitle": "Von Ihren Lern- und Arbeitsaufzeichnungen zu echten Chancen — jede Zeile unten stammt aus Ihren eigenen Aufzeichnungen und demselben Matching, das Arbeitgeber sehen.",

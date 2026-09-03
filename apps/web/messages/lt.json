@@ -1,4 +1,16 @@
 {
+  "publicDemand": {
+    "title": "Gyva rinkos paklausa",
+    "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
+    "subtitleInstitution": "Ko vieša rinka prašo dabar — kryptys, į kurias eina jūsų besimokantieji.",
+    "active": "{count} aktyvių darbo vietų",
+    "employers": "{count} darbdavių",
+    "filtered": "{profession}: {count}",
+    "none": "Šiuo metu tinkamų viešų darbo vietų nėra.",
+    "provenance": "Importuoti vieši rinkos duomenys (šiandien — viena šaltinio rinka); išvardyti darbdaviai nėra LabourMarket.ai klientai ir per platformą neskelbia.",
+    "unavailable": "Rinkos duomenys šiuo metu nepasiekiami.",
+    "openBoard": "Atidaryti viešą darbo lentą"
+  },
   "learningCompass": {
     "title": "Mokymosi kompasas",
     "subtitle": "Nuo jūsų mokymosi ir darbo įrašų iki realių galimybių — kiekviena eilutė žemiau kyla iš jūsų pačių įrašų ir tos pačios atrankos, kurią mato darbdaviai.",

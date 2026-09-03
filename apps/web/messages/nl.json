@@ -1,4 +1,16 @@
 {
+  "publicDemand": {
+    "title": "Actuele marktvraag",
+    "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die je kandidaten op het bord zien.",
+    "subtitleInstitution": "Wat de publieke markt nu vraagt — de richtingen waar je lerenden naartoe gaan.",
+    "active": "{count} actuele vacatures",
+    "employers": "{count} werkgevers",
+    "filtered": "{profession}: {count}",
+    "none": "Op dit moment geen passende publieke vacatures.",
+    "provenance": "Geïmporteerde publieke marktdata (vandaag één bronmarkt); de genoemde werkgevers zijn geen klanten van LabourMarket.ai en publiceren niet via het platform.",
+    "unavailable": "Marktdata is nu niet beschikbaar.",
+    "openBoard": "Open het publieke vacaturebord"
+  },
   "learningCompass": {
     "title": "Leerkompas",
     "subtitle": "Van je leer- en werkgegevens naar echte kansen — elke regel hieronder komt uit je eigen gegevens en dezelfde matching die werkgevers zien.",

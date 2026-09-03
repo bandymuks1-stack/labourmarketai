@@ -1,4 +1,16 @@
 {
+  "publicDemand": {
+    "title": "Live market demand",
+    "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",
+    "subtitleInstitution": "What the public market asks for right now — the directions your learners are heading into.",
+    "active": "{count} live vacancies",
+    "employers": "{count} employers",
+    "filtered": "{profession}: {count}",
+    "none": "No matching public vacancies at the moment.",
+    "provenance": "Imported public market data (one source market today); the employers listed are not customers of LabourMarket.ai and do not publish through it.",
+    "unavailable": "Market data is not available right now.",
+    "openBoard": "Open the public job board"
+  },
   "learningCompass": {
     "title": "Learning Compass",
     "subtitle": "From your learning and work records to real opportunities — every line below comes from your own records and the same matching every employer sees.",
