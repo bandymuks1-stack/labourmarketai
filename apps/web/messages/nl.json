@@ -1543,6 +1543,20 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "BEDRIJFSWERKRUIMTE",
+      "learners": {
+        "title": "Lerenden",
+        "subtitle": "Wie je hebt uitgenodigd en wie verbonden is. Lerenden beheren hun eigen gegevens; jij ziet deelname, niet hun journaals.",
+        "connected": "{count} verbonden",
+        "pending": "{count} uitgenodigd, nog niet geaccepteerd",
+        "declined": "{count} afgewezen of verlopen",
+        "invite": "Studenten uitnodigen",
+        "none": "Nog geen studenten uitgenodigd — begin met een afgebakende lijst van echte lerenden.",
+        "statusAccepted": "verbonden",
+        "statusPending": "uitgenodigd",
+        "statusDeclined": "afgewezen",
+        "statusExpired": "verlopen",
+        "statusRevoked": "ingetrokken"
+      },
       "title": "Bedrijfswerkruimte",
       "subtitle": "Bedrijfscontext is een startpunt, geen beperking. Je kunt andere rollen hebben en er later meer toevoegen via de rolwisselaar.",
       "pilotDisclaimer": "Matching wordt nog niet aangeboden. Niets wordt automatisch openbaar. Je kunt rustig je eerste aanvraag voorbereiden — die wordt direct opgeslagen en blijft privé voor jou.",

@@ -1543,6 +1543,20 @@
   "roleDashboards": {
     "company": {
       "eyebrow": "UNTERNEHMENSBEREICH",
+      "learners": {
+        "title": "Lernende",
+        "subtitle": "Wen Sie eingeladen haben und wer verbunden ist. Lernende führen ihre Aufzeichnungen selbst; Sie sehen die Teilnahme, nicht ihre Journale.",
+        "connected": "{count} verbunden",
+        "pending": "{count} eingeladen, noch nicht angenommen",
+        "declined": "{count} abgelehnt oder abgelaufen",
+        "invite": "Studierende einladen",
+        "none": "Noch keine Studierenden eingeladen — beginnen Sie mit einer begrenzten Liste echter Lernender.",
+        "statusAccepted": "verbunden",
+        "statusPending": "eingeladen",
+        "statusDeclined": "abgelehnt",
+        "statusExpired": "abgelaufen",
+        "statusRevoked": "zurückgezogen"
+      },
       "title": "Unternehmensbereich",
       "subtitle": "Der Unternehmenskontext ist ein Einstiegspunkt, keine Grenze. Sie können weitere Rollen innehaben und später über den Rollenwechsler hinzufügen.",
       "pilotDisclaimer": "Matching wird noch nicht angeboten. Nichts wird automatisch öffentlich. Sie können Ihre erste Anfrage in Ruhe vorbereiten — sie wird sofort gespeichert und bleibt privat für Sie.",
