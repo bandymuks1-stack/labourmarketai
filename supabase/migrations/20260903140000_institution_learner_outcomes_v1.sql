@@ -19,7 +19,7 @@
 --   with_accepted_bookings    learners with ≥ 1 accepted booking
 --   with_active_engagements   learners with ≥ 1 active engagement (placement)
 --
--- SMALL-COHORT SUPPRESSION: with fewer than 3 connected learners every
+-- SMALL-COHORT SUPPRESSION: with fewer than 5 connected learners every
 -- activity/outcome count is returned NULL and `suppressed = true`, so a count
 -- can never identify one person. No id, name, employer or request ever leaves
 -- the function. Caller must manage the organisation AND the organisation must
@@ -88,7 +88,7 @@ begin
        group by ec.profile_id, w.id
     ) l;
 
-  if v_n < 3 then
+  if v_n < 5 then
     return query select v_n, null::integer, null::integer, null::integer, null::integer, true, now();
     return;
   end if;
@@ -101,7 +101,7 @@ revoke execute on function public.institution_learner_outcomes_v1(uuid) from pub
 grant execute on function public.institution_learner_outcomes_v1(uuid) to authenticated;
 
 comment on function public.institution_learner_outcomes_v1(uuid) is
-  'Aggregate outcomes over an institution''s connected learners (counts only, suppressed below 3 learners). Caller must manage the organisation and it must hold training_provider. Never returns a learner row.';
+  'Aggregate outcomes over an institution''s connected learners (counts only, suppressed below 5 learners). Caller must manage the organisation and it must hold training_provider. Never returns a learner row.';
 
 -- ROLLBACK
 -- drop function if exists public.institution_learner_outcomes_v1(uuid);
