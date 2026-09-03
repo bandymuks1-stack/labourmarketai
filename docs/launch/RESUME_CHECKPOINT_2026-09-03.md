@@ -1,6 +1,24 @@
 # RESUME_CHECKPOINT — 2026-09-03 (execution mode: FIRST REAL ECOSYSTEM USE, late session)
 
-## UPDATE — window 2 (2026-09-03, after the A+B+C handoff) — READ THIS FIRST
+## UPDATE — evening run (2026-09-03, after batch D) — READ THIS FIRST
+
+| Item | Value |
+|---|---|
+| `main` | `b6514087` (#1461) on `cba98045` (#1460) — plus #1462 (TTFV) auto-merging and one docs+copy commit after it; verify `git log origin/main -4` |
+| Production | **`cba98045`** verified 18:46 UTC (#1460 live: `/lt/signup` 308 → `/lt/auth/signup` PROD VERIFIED). #1461/#1462 deploy after merge — confirm `/api/health` `build` on resume |
+| Pilot entry URL | `https://labourmarket.ai/lt/auth/signup` (canonical); `/lt/signup`, `/lt/login`, `/lt/register` redirect there since `cba98045` |
+| Lane B | B1 (setup + `capabilityDeclared` signal), B2/B3/B6 (programme → cohort → assign) **proven in the local browser** as the fixture institution after the D fix; invite deep link opens pre-set to "Studentas"; **not yet done by a real institution on production** |
+| Lane A | DB chain prod-proven (window 2); UI friction fixed (#1460); **not yet done by a real recruiter** |
+| Student | compass chip + cohort block + linked steps proven locally; student intent lands on `#learning-compass` |
+| Local harness | stack runs on **553xx** via UNCOMMITTED `supabase/config.toml` (ports, analytics/inbucket off) + UNCOMMITTED `.claude/launch.json` `dev-local` entry → scratch runner; keep both until the owner frees 54290–54489 (DEV-1). Fixture seeds in the local DB: dev.worker student context + accepted invitation + current education row + one programme/cohort under Dev Construction. **Stop `next dev` before `pnpm build`** (shared `.next`). |
+| Open PRs | #1462 (auto-merge) — otherwise only the long-standing RED drafts |
+| Milestones | REAL_RECRUITER_USED_PRODUCT = FALSE · REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE (no fabrication) |
+
+Next smallest slices: `/dashboard/start/*` hardcoded `label(lt,en)` → i18n keys (ru/nl/de first screen); emit the real `first_real_action` / `first_real_result` events (worker board, programme created, offer decided); UI caller for `institution_learner_outcomes_v1`; employer internship posting proof on prod (B8) so the type chip gets real rows.
+
+---
+
+## UPDATE — window 2 (2026-09-03, after the A+B+C handoff)
 
 | Item | Value |
 |---|---|

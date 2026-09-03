@@ -8,6 +8,12 @@
 > `20260903130400`, #1457 merging); (2) the
 > Lane A chain A4–A8 is PROD-PROVEN at the DB level (rolled back). #1458
 > (student cohort view) is merged.
+>
+> **Evening addendum:** #1460 (first-session doors; `/lt/signup` was a 404 on
+> production — now redirects), #1461 (employer-declared opportunity type)
+> and #1462 (TTFV system vs human) landed; the entry URL for pilots is
+> `https://labourmarket.ai/lt/auth/signup`. Newest state = the
+> "UPDATE — evening run" block at the top of `RESUME_CHECKPOINT_2026-09-03.md`.
 
 > Written at the close of the window that reviewed, applied, merged and
 > deployed RED batch 2026-09-03 A+B+C. A new agent window starts from THIS
