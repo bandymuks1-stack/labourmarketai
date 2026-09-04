@@ -52,6 +52,7 @@ import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-for
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
+import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
@@ -384,6 +385,13 @@ export type ChatLabels = {
   chipCvSheet: string;
   taskCreateIntro: string;
   taskCreatedNext: string;
+  capacityIntro: string;
+  capacityFree: string;
+  capacityBusyUntil: string;
+  capacityAbsencesUnknown: string;
+  capacityEmpty: string;
+  capacityUnavailable: string;
+  chipAddTask: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -2210,6 +2218,44 @@ export function ConversationChat({
     [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.taskCreateIntro, labels.taskCreatedNext, labels.chipTasks, labels.projectsUnavailable, fallbackText, starterChips, openForm],
   );
 
+  /** CAPACITY (§11): "kas laisvas šią savaitę?" — the company's roster against
+   *  approved absences (when, never why) for the next days, answered in the
+   *  chat with the projects chip beside it. Company identity only. */
+  const startWhoAvailable = useCallback(() => {
+    if (identity !== "company") {
+      if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+      else assistant(fallbackText, starterChips);
+      return;
+    }
+    setTyping(true);
+    loadWhoIsAvailableForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "empty") {
+          assistant(labels.capacityEmpty, [{ id: "f:company.invite-worker", label: labels.chipInviteCandidate }]);
+          return;
+        }
+        if (res.kind !== "ok") {
+          assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+          return;
+        }
+        const lines = res.rows.map((r) =>
+          r.state === "free"
+            ? `• ${r.label} — ${labels.capacityFree}`
+            : `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", r.unavailableUntil ?? res.to)}`,
+        );
+        const head = labels.capacityIntro.replace("{from}", res.from).replace("{to}", res.to).replace("{count}", String(res.rosterTotal));
+        assistant([head, ...lines, ...(res.absencesKnown ? [] : [labels.capacityAbsencesUnknown])].join("\n"), [
+          { id: "projects", label: labels.chipProjects },
+          { id: "f:company.create-task", label: labels.chipAddTask },
+        ]);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+      });
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+
   const startAgencyInvite = useCallback(
     (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
       const isClient = actionId === "agency.invite-client";
@@ -3443,6 +3489,7 @@ export function ConversationChat({
         clientOffers: () => startClientOffers(),
         addDocument: () => startAddDocument(text),
         addTask: () => startCreateTask(text),
+        whoAvailable: () => startWhoAvailable(),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one
         // canonical output; a company identity has no own CV to show.
@@ -3462,7 +3509,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

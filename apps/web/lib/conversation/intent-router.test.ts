@@ -847,6 +847,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuwe taak voor het project: steiger opbouwen",
     de: "Neue Aufgabe für das Projekt: Gerüst aufbauen",
   },
+  "who-available": {
+    lt: "Kas laisvas šią savaitę?",
+    en: "Who is available this week?",
+    ru: "Кто свободен на этой неделе?",
+    nl: "Wie is deze week beschikbaar?",
+    de: "Wer ist diese Woche frei?",
+  },
 };
 
 /**

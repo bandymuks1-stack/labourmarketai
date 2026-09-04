@@ -226,6 +226,13 @@ const CHAT_KEYS = [
   "chipCvSheet",
   "taskCreateIntro",
   "taskCreatedNext",
+  "capacityIntro",
+  "capacityFree",
+  "capacityBusyUntil",
+  "capacityAbsencesUnknown",
+  "capacityEmpty",
+  "capacityUnavailable",
+  "chipAddTask",
 ] as const;
 
 const WORKLOG_KEYS = [
