@@ -67,3 +67,11 @@ d.m.yyyy forms; an impossible day is null, never "corrected").
 `a1_certificate` AND `valid until 2027-03-31` pre-filled → saved → readiness re-answered;
 DB row `85158bc2…` with `valid_until 2027-03-31` (deleted afterwards). Journey stage
 "documents completed where required" is now proven from the sentence to the row.
+
+## The CV sheet by sentence (prod `0bd1c542`, #1490)
+
+`walk-cv-sheet-prod.cjs`, E2E Worker Two, 23.8 s: "parodyk mano CV" → the hint ("Jūsų
+patvirtintas CV — vienas lapas iš to, ką sistema tikrai žino…") with ONE chip "Atidaryti
+CV lapą" (the import flow did NOT open) → `/lt/cv`: "MANO CV · E2E Worker Two · žurnalo
+įrašai 1" — the entry logged on the chat-created project is already on the sheet.
+Work/evidence returned to the professional identity, by sentence.

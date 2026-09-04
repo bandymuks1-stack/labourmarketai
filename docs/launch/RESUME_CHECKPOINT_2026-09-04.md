@@ -9,9 +9,6 @@
 
 | Item | Value |
 |---|---|
-| Production | `f49cc972` (#1489). Walked tonight: `6fc477d9` (client decline, worker documents line), `a726b2ce` (document by sentence; agency re-proposal → client ACCEPT → booking `245e91a8` proposed to E2E Worker Two), `f49cc972` (candidates panel read-only). Next proofs after merge: cv-export chip (#1490), valid-until pre-fill (#1491, re-run `walk-add-document-prod.cjs`, delete the row) — confirm `/api/health` `build` on resume |
-| `main` | #1467–#1474 · #1476–#1489 (…#1488 document by sentence · #1489 worker 'contacted' rung). Open (auto-merge): **#1490** CV sheet by sentence + owner report journey table · **#1491** written end date. RED draft: **#1475** My Space table (owner gate) |
-| Active P0 chain | journeys are structurally complete in the chat (see the owner report's journey table); remaining S-items: worker document FILE via chat, project work/progress/evidence chain on a chat-created project, agency placement after the worker's answer (booking `245e91a8` is `proposed` — the E2E worker's accept would close it). Owner-gated: verified E2E company, e-mail delivery, My Space table |
 | Production | `0bd1c542` (#1490) deploying at 00:05 UTC 2026-09-05; walked: `461326d2` (valid-until pre-fill; worker log with project_id), `f49cc972` (candidates panel; project assign; worker accepted booking → engagement). Next proofs: cv-sheet chip (#1490, chain running), project-panel refetch (branch `fix/cc/project-panel-refetch-after-assign`, PR next) — confirm `/api/health` `build` on resume |
 | `main` | #1467–#1474 · #1476–#1491 (… #1488 document by sentence · #1489 'contacted' rung · #1490 CV sheet by sentence + journey table · #1491 written end date). Open: branch `fix/cc/project-panel-refetch-after-assign` (build running → PR). RED draft: **#1475** My Space table (owner gate) |
 | Active P0 chain | ALL FIVE journeys prod-proven end-to-end with E2E identities on 2026-09-04/05 (agency: propose → accept → booking → worker accepted → engagement; project: create → assign → worker's log carries project_id). Remaining S-items: document FILE via chat; phone-viewport chips under the open panel (recorded); employer review-queue line after a worker's log (not observed at 14 s). Owner-gated: verified E2E company, e-mail delivery, My Space table |
@@ -44,7 +41,6 @@
 
 ## Queue (contract §33; next automatic step first)
 
-1. On resume: consume #1490/#1491 (walks above), then pick the next S-item from the Active P0 chain row; keep evaluating at journey level (owner note 2026-09-04 late).
 1. On resume: consume the cv-sheet walk + the refetch PR; then the S-items above; keep evaluating at journey level (owner note 2026-09-04 late).
 2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
 3. F2: end date / duration in the demand structurer; the site as a project object.
