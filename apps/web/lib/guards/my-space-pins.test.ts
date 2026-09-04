@@ -44,10 +44,20 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
     expect(CHAT).toMatch(/labels\.pinCap\.replace\("\{max\}", String\(PIN_CAP\)\)/);
   });
 
+  it("REORDER is an ordinary-human gesture — \"put this first\" — through the canonical reorder action", () => {
+    expect(CHAT).toContain('if (id.startsWith("pin-first:"))');
+    expect(CHAT).toContain("reorderPinsAction({ refs: next.map((p) => p.ref) })");
+    // The first pin gets no "move first" chip; every other pin does.
+    expect(CHAT).toContain("...(i > 0 ? [{ id: `pin-first:${p.ref}`");
+    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+      expect((JSON.parse(read(`messages/${locale}.json`)).conversation.chat as Record<string, string>).reorderDone).toContain("{label}");
+    }
+  });
+
   it("copy exists in all 11 catalogs", () => {
     for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
       const chat = JSON.parse(read(`messages/${locale}.json`)).conversation.chat as Record<string, string>;
-      for (const key of ["mySpaceTitle", "chipManagePins", "pinAsk", "chipPinYes", "chipPinNo", "pinDone", "pinCap", "pinUnavailable", "pinsManageIntro", "pinsNone", "unpinPrefix", "unpinDone"]) {
+      for (const key of ["mySpaceTitle", "chipManagePins", "pinAsk", "chipPinYes", "chipPinNo", "pinDone", "pinCap", "pinUnavailable", "pinsManageIntro", "pinsNone", "unpinPrefix", "unpinDone", "pinFirstPrefix", "reorderDone"]) {
         expect(chat[key], `${locale}.${key}`).toBeTypeOf("string");
         expect(chat[key]).not.toMatch(/^\[EN\]/);
       }

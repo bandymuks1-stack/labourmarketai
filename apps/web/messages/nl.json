@@ -12049,7 +12049,9 @@
       "pinsManageIntro": "Uw Mijn ruimte. Tik op wat u wilt verwijderen:",
       "pinsNone": "Mijn ruimte is leeg. Als u iets vaak gebruikt, stel ik voor het toe te voegen.",
       "unpinPrefix": "Verwijderen",
-      "unpinDone": "Verwijderd uit Mijn ruimte."
+      "unpinDone": "Verwijderd uit Mijn ruimte.",
+      "pinFirstPrefix": "Vooraan zetten",
+      "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

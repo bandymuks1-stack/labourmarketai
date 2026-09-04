@@ -12049,7 +12049,9 @@
       "pinsManageIntro": "Jūsų Mano erdvė. Paspauskite, ką pašalinti:",
       "pinsNone": "Mano erdvė tuščia. Kai ką nors naudosite dažnai, pasiūlysiu pridėti.",
       "unpinPrefix": "Pašalinti",
-      "unpinDone": "Pašalinta iš Mano erdvės."
+      "unpinDone": "Pašalinta iš Mano erdvės.",
+      "pinFirstPrefix": "Į priekį",
+      "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

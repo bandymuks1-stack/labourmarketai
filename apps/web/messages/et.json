@@ -3760,7 +3760,9 @@
       "pinsManageIntro": "Teie Minu ala. Puudutage, mida eemaldada:",
       "pinsNone": "Minu ala on tühi. Kui kasutate midagi sageli, pakun selle lisamist.",
       "unpinPrefix": "Eemalda",
-      "unpinDone": "Eemaldatud Minu alalt."
+      "unpinDone": "Eemaldatud Minu alalt.",
+      "pinFirstPrefix": "Ettepoole",
+      "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

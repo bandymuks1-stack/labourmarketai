@@ -12049,7 +12049,9 @@
       "pinsManageIntro": "Ihr Mein Bereich. Tippen Sie, was entfernt werden soll:",
       "pinsNone": "Mein Bereich ist leer. Wenn Sie etwas oft nutzen, schlage ich vor, es hinzuzufügen.",
       "unpinPrefix": "Entfernen",
-      "unpinDone": "Aus Mein Bereich entfernt."
+      "unpinDone": "Aus Mein Bereich entfernt.",
+      "pinFirstPrefix": "Nach vorn",
+      "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
