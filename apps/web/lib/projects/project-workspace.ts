@@ -10,6 +10,11 @@ import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-co
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { listProjectStages } from "@/lib/projects/stages";
+import { getProjectStadium } from "@/lib/projects/stadium";
+import { deriveProjectReadinessRatio } from "@/lib/projects/operations-centre-model";
+import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
+import { listProjectTasks } from "@/lib/tasks/tasks";
+import { isOverdue, OPEN_WORK_TASK_STATUSES } from "@/lib/tasks/task-model";
 import { isProjectStatus, type ProjectStatus } from "@/lib/projects/project-lifecycle-model";
 import {
   PROJECT_ASSIGNMENT_LIMIT,
@@ -19,6 +24,7 @@ import {
   type ProjectLifecycleResult,
   type ProjectListResult,
   type ProjectListRow,
+  type ProjectPulse,
   type ProjectStageRow,
 } from "@/lib/projects/project-result-contract";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
@@ -190,6 +196,34 @@ export async function loadProjectDetailForResult(
     // Stages are behind an owner-gated migration. `applied: false` is a
     // DIFFERENT fact from "no stages" and travels as `null`, so the panel can
     // say which one is true instead of showing a confident empty list.
+    // The PULSE — the operations centre's own reads, bounded, in parallel; any
+    // failure makes the whole pulse null (never a zero pretending to be a fact).
+    let pulse: ProjectPulse | null = null;
+    try {
+      const [stadium, gallery, tasks] = await Promise.all([
+        getProjectStadium(projectId),
+        getProjectGallerySummary(projectId),
+        listProjectTasks(projectId),
+      ]);
+      if (stadium && tasks.status === "ok") {
+        const now = new Date();
+        const open = tasks.tasks.filter((t) => (OPEN_WORK_TASK_STATUSES as readonly string[]).includes(t.status));
+        const ratio = deriveProjectReadinessRatio(stadium.ops.workers);
+        pulse = {
+          entriesToday: stadium.entriesToday,
+          evidenceEntries: gallery.entryCount,
+          evidencePhotos: gallery.photoCount,
+          tasksOpen: open.length,
+          tasksOverdue: open.filter((t) => isOverdue(t.dueAt, now)).length,
+          readinessChecked: ratio.checked,
+          readinessTotal: ratio.total,
+          workersWithMissingDocs: stadium.ops.counters.withMissingDocs,
+        };
+      }
+    } catch {
+      pulse = null;
+    }
+
     let stages: readonly ProjectStageRow[] | null = null;
     try {
       const data = await listProjectStages(projectId);
@@ -226,6 +260,7 @@ export async function loadProjectDetailForResult(
         assignmentTotal: assignments.length,
         stages,
         canManage,
+        pulse,
       },
     };
   } catch {

@@ -70,6 +70,29 @@ export interface ProjectStageRow {
 }
 
 /** The panel's view of ONE project. */
+/**
+ * The project's PULSE (owner contract 2026-09-04 §11 — the living project:
+ * what is happening now, what exists, what is missing). Every number is the
+ * SAME canonical read the operations centre renders — journal entries on
+ * this project, its tasks, the roster's readiness checklist — never a
+ * second count. `null` = the reads were not available (not "zero").
+ */
+export interface ProjectPulse {
+  /** Journal entries written TODAY by assigned workers. */
+  readonly entriesToday: number;
+  /** Journal entries / photos on this project, all time. */
+  readonly evidenceEntries: number;
+  readonly evidencePhotos: number;
+  /** Open tasks (todo / in progress / blocked) and how many are overdue. */
+  readonly tasksOpen: number;
+  readonly tasksOverdue: number;
+  /** Roster readiness checklist: items checked / items total (0/0 = none kept). */
+  readonly readinessChecked: number;
+  readonly readinessTotal: number;
+  /** Assigned workers with at least one missing / needed document item. */
+  readonly workersWithMissingDocs: number;
+}
+
 export interface ProjectDetail {
   readonly projectId: string;
   readonly title: string;
@@ -92,6 +115,8 @@ export interface ProjectDetail {
   /** Whether the viewer may run lifecycle writes. Server-derived from the same
    *  authority the RPC enforces; the client never decides this. */
   readonly canManage: boolean;
+  /** See `ProjectPulse`; null when its reads are unavailable here. */
+  readonly pulse: ProjectPulse | null;
 }
 
 export type ProjectDetailResult =

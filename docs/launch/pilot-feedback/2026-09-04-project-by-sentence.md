@@ -89,3 +89,19 @@ chat-created project — the state the assignment produced, shown where it was m
 and the role RPCs reject any attempt to enable it ("review can't come from a label").
 E2E Walker's engagement context has it false, so the worker's log never reaches the
 employer's review line. Listed under owner gates.
+## Phone: the sheet yields to the question (prod `d9af9d81`, #1493)
+
+`walk-phone-sheet-prod.cjs` (390×844, touch): "parodyk kandidatus" → the sheet expands
+(`aria-expanded=true`) → "kokius kandidatus pasiūlė agentūra?" → the sheet collapsed
+(`false`) and the answer's chip is tappable (`trial` click passes). Baseline on
+`0bd1c542` was expanded / not tappable. The sheet still opens for a NEW selection or
+result.
+
+## The living project in the panel (branch `feat/cc/project-pulse`)
+
+The chat's project detail now carries a PULSE from the SAME reads the operations centre
+renders: entries today · evidence (entries · photos) · tasks (open · overdue) · roster
+readiness (checked/total) · people with missing documents — and ONE honest next line
+(assign people / overdue tasks / missing documents / no work logged yet). Nothing new is
+stored; unavailable reads render nothing. Both entries — the sentence ("mano projektai")
+and the panel — converge on the same state.
