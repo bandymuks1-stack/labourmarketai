@@ -70,6 +70,7 @@ export function ContextPanel({
   resultContext = "personal",
   resultNavigation,
   wide = false,
+  chipsPostedAt = null,
   onCloseResult,
   onOpenFull,
 }: {
@@ -110,6 +111,9 @@ export function ContextPanel({
    * nothing changes: the sheet is already full width.
    */
   wide?: boolean;
+  /** When the thread last posted a question with chips (see the chat). On a
+   *  phone the sheet yields to it when it still shows the same thing. */
+  chipsPostedAt?: number | null;
   onCloseResult?: () => void;
   onOpenFull?: (route: string) => void;
 }) {
@@ -201,6 +205,19 @@ export function ContextPanel({
   useEffect(() => {
     if (work?.invitations) setExpanded(true);
   }, [work]);
+
+  // Prod walk 2026-09-04 (phone): after "Priskirti darbuotoją" the question
+  // "Kas turėtų jame dirbti?" and its chips landed in the thread UNDER the
+  // open sheet. When the thread asks something while the sheet still shows
+  // the SAME selection/result it already showed, the sheet yields so the
+  // person can answer; a NEW selection or result still opens it (the effect
+  // above). Desktop ignores `expanded` altogether.
+  const yieldKeyRef = useRef<string>(`${result ?? ""}|${selectionKey}`);
+  useEffect(() => {
+    const key = `${result ?? ""}|${selectionKey}`;
+    if (chipsPostedAt && yieldKeyRef.current === key) setExpanded(false);
+    yieldKeyRef.current = key;
+  }, [chipsPostedAt, result, selectionKey]);
 
   const title =
     panel.mode === "entity"

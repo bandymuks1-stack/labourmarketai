@@ -774,10 +774,16 @@ export function ConversationChat({
   const pushEmbed = useCallback((embed: ReactNode) => {
     setItems((prev) => [...prev, { id: nid(), embed }]);
   }, []);
+  /** The moment the thread last asked a QUESTION (a message with chips). On a
+   *  phone the bottom sheet yields to it when it is still showing the same
+   *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
+   *  sat under the open project sheet and could not be tapped. */
+  const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
   const assistant = useCallback(
     (text: string, chips?: ChoiceChip[]) => {
       pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips });
       persistTurn("assistant", text);
+      if (chips && chips.length > 0) setChipsPostedAt(Date.now());
     },
     [pushMessage, persistTurn],
   );
@@ -3644,6 +3650,7 @@ export function ConversationChat({
             resultContext={resultContext}
             resultNavigation={resultNavigation}
             wide={panelWide}
+            chipsPostedAt={chipsPostedAt}
             onCloseResult={closeResult}
             onOpenFull={openFullScreen}
           />
