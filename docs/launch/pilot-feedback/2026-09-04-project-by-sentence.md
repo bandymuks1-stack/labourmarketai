@@ -89,3 +89,38 @@ chat-created project — the state the assignment produced, shown where it was m
 and the role RPCs reject any attempt to enable it ("review can't come from a label").
 E2E Walker's engagement context has it false, so the worker's log never reaches the
 employer's review line. Listed under owner gates.
+## Phone: the sheet yields to the question (prod `d9af9d81`, #1493)
+
+`walk-phone-sheet-prod.cjs` (390×844, touch): "parodyk kandidatus" → the sheet expands
+(`aria-expanded=true`) → "kokius kandidatus pasiūlė agentūra?" → the sheet collapsed
+(`false`) and the answer's chip is tappable (`trial` click passes). Baseline on
+`0bd1c542` was expanded / not tappable. The sheet still opens for a NEW selection or
+result.
+
+## The living project in the panel (branch `feat/cc/project-pulse`)
+
+The chat's project detail now carries a PULSE from the SAME reads the operations centre
+renders: entries today · evidence (entries · photos) · tasks (open · overdue) · roster
+readiness (checked/total) · people with missing documents — and ONE honest next line
+(assign people / overdue tasks / missing documents / no work logged yet). Nothing new is
+stored; unavailable reads render nothing. Both entries — the sentence ("mano projektai")
+and the panel — converge on the same state.
+
+## The same state on the visual side (prod `d9af9d81`, read-only)
+
+`walk-project-ops-prod.cjs` for the chat-created project `3b9c55d3…`:
+
+- `/dashboard/projects/<id>/operations` — PROJEKTO APŽVALGA (būsena draft · priskirta 1 ·
+  atviros užduotys 0 · sąrašo patikrinta: dar nieko nesekama) · PROJEKTO VALDYMAS
+  (pažanga, atsakingas asmuo, būsena → Paleisti) · Projekto etapai · Laiko juosta
+  (Gantt) · Biudžetas ir ekonomika · Defektai ir kokybė · REIKIA DĖMESIO · OPERACIJOS ·
+  ŠIO PROJEKTO DARBUOTOJAI: **E2E Worker Two** · Perdavimo pasas · IŠTEKLIAI IR
+  PRISKYRIMO PARENGTIS · PROJEKTO UŽDUOTYS · DARBO ĮRODYMAI.
+- `/dashboard/projects/<id>` — VIETA · KOMUNIKACIJA · AIKŠTĖ — KAS ŠIANDIEN KOMANDOJE:
+  **"1 šiandienos žurnalo įrašas — diena juda"** · DARBŲ GALERIJA · TRŪKSTAMOS POZICIJOS.
+
+So the living Project Field the contract asks for (who is on it, what work exists, what
+is happening now, what is missing, readiness, evidence, progress, what needs action)
+already exists as the operations page + the project centre; the chat panel's pulse
+(`feat/cc/project-pulse`) shows the same numbers where the sentence lands, and hands
+over to these pages for manipulation. No duplicate state.
