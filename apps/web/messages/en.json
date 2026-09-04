@@ -12776,7 +12776,8 @@
         "start": "Start",
         "accommodation": "Housing",
         "transport": "Transport",
-        "tool": "Required tool"
+        "tool": "Required tool",
+        "opportunityType": "Opportunity type"
       },
       "whyFiltered": "You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "I searched your whole board — you did not narrow it.",

@@ -245,6 +245,9 @@ export default async function OpportunitiesPage({
         return transportLabel(value);
       case "tool":
         return skillLabel(value);
+      case "opportunityType":
+        // The same catalogue the row badge uses (structuredDemand.opportunityType).
+        return sd(`opportunityType.${value}` as never);
     }
   };
 

@@ -136,6 +136,31 @@ export async function buildWorkspaceVocabulary(
     }
   }
 
+  // ── opportunity types ────────────────────────────────────────────────────
+  // Owner contract 2026-09-04 §4A/§15: "Where can I do an internship?" must
+  // narrow the board to internships. Values are the DECLARED types present on
+  // the board; the words are the catalogue labels in every active language
+  // plus the everyday stems a person actually types ("praktika", "stažuotė",
+  // "стажировка", "stage", "Praktikum", "pameistrystė", "apprenticeship").
+  const typeCatalogues = await Promise.all(
+    activeLocales.map((locale) =>
+      getTranslations({ locale, namespace: "structuredDemand.opportunityType" }),
+    ),
+  );
+  const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
+    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
+    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
+  };
+  for (const value of facets.opportunityTypes) {
+    const names = new Set<string>(EVERYDAY_TYPE_WORDS[value] ?? []);
+    for (const t of typeCatalogues) {
+      if (t.has(value)) names.add(t(value) as string);
+    }
+    if (names.size > 0) {
+      terms.push({ dimension: "opportunityType", value, terms: [...names], available: true });
+    }
+  }
+
   return { terms, facets };
 }
 

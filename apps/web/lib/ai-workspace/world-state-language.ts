@@ -51,6 +51,9 @@ export const WORLD_STATE_DIMENSIONS = {
   accommodation: "accommodation",
   transport: "transport",
   tool: "tool",
+  // Owner contract 2026-09-04 §4A/§15: "Where can I do an internship?" — the
+  // declared opportunity type is a World State dimension the board honours.
+  opportunityType: "opportunityType",
 } as const satisfies Record<string, keyof DiscoveryFilterState>;
 
 export type WorldStateDimension = keyof typeof WORLD_STATE_DIMENSIONS;
