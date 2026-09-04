@@ -58,6 +58,14 @@ describe("the employer brief carries agency and institution attention", () => {
     expect(FN).toMatch(/!ws\.signals\.staffingAgency && lines\.length < MAX_LINES/);
   });
 
+  it("the worker brief names companies that answered the person's OWN interest with contacted — from the board read, above the match count", () => {
+    const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
+    expect(worker).toMatch(/Object\.values\(view\.interestStatusByRequestId\)\.filter\(\(status\) => status === "contacted"\)/);
+    expect(worker).toMatch(/briefInterestContacted/);
+    expect(worker).toMatch(/addChip\("jobs", t\("chipMyOwnInterest"\)\)/);
+    expect(worker.indexOf("briefInterestContacted")).toBeLessThan(worker.indexOf("briefNewMatches"));
+  });
+
   it("the worker brief names expiring / missing documents from the SAME documents-gap derivation the chat answers with", () => {
     const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
     expect(worker).toMatch(/loadWorkerDocumentGap\(\)/);
@@ -75,7 +83,7 @@ describe("the employer brief carries agency and institution attention", () => {
   it("the brief copy exists in the five routed locales (same parity as the existing brief keys)", () => {
     for (const locale of ["lt", "en", "ru", "nl", "de"]) {
       const chat = JSON.parse(readFileSync(join(APP, "messages", `${locale}.json`), "utf8")).conversation.chat as Record<string, string>;
-      for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting", "briefEmployerAgencyOffersWaiting"]) {
+      for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting", "briefEmployerAgencyOffersWaiting", "briefInterestContacted"]) {
         expect(chat[key], `${locale}.${key}`).toMatch(/\{count, plural/);
       }
     }

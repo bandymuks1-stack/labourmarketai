@@ -107,6 +107,15 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
       limit: 1,
     });
     if (view.kind === "ready" && view.capabilities.boardAvailable) {
+      // 1a ── a company answered the person's OWN interest with "contacted"
+      // (owner contract §4D: another human moved on something this person
+      // started — it outranks a passive match count). Same read, same rows the
+      // board's "Mano susidomėjimai" shows — demands still on the board.
+      const contacted = Object.values(view.interestStatusByRequestId).filter((status) => status === "contacted").length;
+      if (contacted > 0 && lines.length < MAX_LINES) {
+        lines.push(t("briefInterestContacted", { count: contacted }));
+        addChip("jobs", t("chipMyOwnInterest"));
+      }
       const fresh = view.newCount > 0 ? view.newCount : 0;
       const total = view.totalRecommendable;
       if (fresh > 0) {
