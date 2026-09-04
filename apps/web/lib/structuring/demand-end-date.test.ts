@@ -13,6 +13,16 @@ import { structureValueStatement } from "./value-statement";
  */
 const TODAY = "2026-09-04";
 
+describe("a WRITTEN end date — the way a person copies it off a certificate", () => {
+  it("iki 2027-03-31 / until 31.03.2027 / bis 31.3.2027 → the ISO day; an impossible day is null", () => {
+    expect(parseEndDate("turiu naują A1 pažymą iki 2027-03-31", "2026-09-04", null)).toBe("2027-03-31");
+    expect(parseEndDate("valid until 31.03.2027", "2026-09-04", null)).toBe("2027-03-31");
+    expect(parseEndDate("gültig bis 31.3.2027", "2026-09-04", null)).toBe("2027-03-31");
+    expect(parseEndDate("iki 2027-02-30", "2026-09-04", null)).toBeNull();
+    expect(parseEndDate("iki 2027-13-01", "2026-09-04", null)).toBeNull();
+  });
+});
+
 describe("an END date across locales, anchored on the start (never next year by accident)", () => {
   it.each([
     ["nuo spalio 5 iki spalio 20", "2026-10-05", "2026-10-20"],

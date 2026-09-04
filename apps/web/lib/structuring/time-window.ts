@@ -189,6 +189,17 @@ const UNTIL_WORD = "(?:iki|until|till|to|до|tot|t/m|bis|do)";
 export function parseEndDate(text: string, todayIso: string, startIso: string | null): string | null {
   const folded = foldText(text ?? "");
   const anchor = startIso ?? todayIso;
+  // A written date — "iki 2027-03-31", "until 31.03.2027", "bis 31.3.2027" —
+  // the way a person copies it off a certificate. Prod walk 2026-09-04:
+  // "turiu naują A1 pažymą iki 2027-03-31" left the valid-until field empty.
+  const iso = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{4})-(\\d{2})-(\\d{2})(?!\\d)`, "u"),
+  );
+  if (iso) return validIsoDate(iso[1], iso[2], iso[3]);
+  const dmy = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{1,2})[./](\\d{1,2})[./](\\d{4})(?!\\d)`, "u"),
+  );
+  if (dmy) return validIsoDate(dmy[3], dmy[2], dmy[1]);
   const dayFirst = folded.match(
     new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
   );
@@ -204,6 +215,18 @@ export function parseEndDate(text: string, todayIso: string, startIso: string | 
     if (month) return nextOccurrence(anchor, month, Number.parseInt(monthFirst[2], 10));
   }
   return null;
+}
+
+/** "2027-3-31" → "2027-03-31" when it is a real calendar day, else null (a
+ *  written date that does not exist is never silently "corrected"). */
+function validIsoDate(y: string, m: string, d: string): string | null {
+  const yy = Number.parseInt(y, 10);
+  const mm = Number.parseInt(m, 10);
+  const day = Number.parseInt(d, 10);
+  if (!Number.isFinite(yy) || mm < 1 || mm > 12 || day < 1 || day > 31) return null;
+  const dt = new Date(Date.UTC(yy, mm - 1, day));
+  if (dt.getUTCFullYear() !== yy || dt.getUTCMonth() !== mm - 1 || dt.getUTCDate() !== day) return null;
+  return `${String(yy).padStart(4, "0")}-${String(mm).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
 /** Duration units, folded stems: weeks / months across the locales. */
