@@ -111,6 +111,12 @@ const EXPECTED_EVENTS = [
   "profession_recovery_prompt_seen",
   "profession_recovery_prompt_opened",
   "profession_recovery_prompt_dismissed",
+  // Chat-first execution funnel (real recruiter pilot, 2026-09-04).
+  "chat_intent_recognized",
+  "chat_intent_unrecognized",
+  "chat_missing_data_asked",
+  "chat_action_attempted",
+  "chat_action_persisted",
 ] as const;
 
 describe("activation funnel — event registry", () => {

@@ -3387,6 +3387,10 @@
         "reviewEngagements": {
           "label": "Se gjennom arbeidsforhold",
           "description": "Se hvem som jobber for denne organisasjonen, og avslutt et arbeidsforhold."
+        },
+        "inviteWorker": {
+          "label": "[EN] Invite a worker",
+          "description": "[EN] Invite a person to your roster by e-mail."
         }
       },
       "agency": {
@@ -3474,7 +3478,15 @@
         "demandLocationPlaceholder": "By eller region",
         "teamSize": "Antall arbeidere",
         "urgency": "Hastegrad",
-        "saveAsDraft": "Lagre som utkast"
+        "saveAsDraft": "Lagre som utkast",
+        "clientEmail": "[EN] Client e-mail",
+        "clientEmailPlaceholder": "[EN] name@company.com",
+        "workerEmail": "[EN] Worker e-mail",
+        "workerEmailPlaceholder": "[EN] name@example.com",
+        "inviteNote": "[EN] Note (optional)",
+        "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "rosterWorker": "[EN] Roster worker",
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3645,7 +3657,40 @@
       "chipInterestOnMyNeeds": "Interesse for mine forespørsler",
       "chipMyOwnInterest": "Min egen interesse",
       "createOrganizationHint": "Jeg kan opprette en organisasjon sammen med deg — opplysningene og verifiseringen er på én side.",
-      "chipCreateOrganization": "Opprett en organisasjon"
+      "chipCreateOrganization": "Opprett en organisasjon",
+      "fallbackCompany": "[EN] I can help with your workforce need, candidates and projects. What would you like to do?",
+      "fallbackAgency": "[EN] I can invite a client or a candidate, show client requests and your proposal status. What would you like to do?",
+      "fallbackEducation": "[EN] I can help invite learners, manage programmes and cohorts, and show market demand. What would you like to do?",
+      "agencyInviteClientAsk": "[EN] Sure. Which e-mail should the client invitation go to?",
+      "agencyInviteClientPrefilled": "[EN] Sure — I will invite the client at this e-mail. Confirm below.",
+      "agencyInviteClientDone": "[EN] The invitation is created and waits for the client to accept. Once the client accepts and shares a need, you can propose candidates.",
+      "agencyInviteCandidateAsk": "[EN] Sure. Which e-mail should the roster invitation go to?",
+      "agencyInviteCandidateDone": "[EN] The invitation is recorded. No e-mail is sent — the person signs in with that address and accepts; then they appear in your roster.",
+      "agencyInviteCandidateExists": "[EN] This person is already invited or already on your roster — nothing new was recorded.",
+      "agencyNotAgencyWorkspace": "[EN] This workspace is not a staffing agency, so client invitations do not apply here. Agency actions live in an agency workspace.",
+      "agencySwitchHint": "[EN] You can do that as your company — pick the workspace:",
+      "agencyClientDemandIntro": "[EN] Requests your clients shared:",
+      "agencyClientDemandNone": "[EN] No client has shared a request yet. Once a connected client shares one, it appears here.",
+      "agencyProposalsIntro": "[EN] Your proposals:",
+      "agencyProposalsNone": "[EN] No proposals yet. Once a client shares a need, you can propose a roster worker.",
+      "agencyProposeAsk": "[EN] Which request should the candidate be proposed for?",
+      "agencyProposeDone": "[EN] The proposal is recorded — the client sees it on their request and can accept or decline.",
+      "agencyRosterEmpty": "[EN] Your roster is empty, so there is nobody to propose yet. Invite a candidate first.",
+      "agencyUnavailable": "[EN] The agency data could not be read right now. Try again or open the company workspace.",
+      "agencyNext": "[EN] What's next?",
+      "chipInviteClient": "[EN] Invite a client",
+      "chipInviteCandidate": "[EN] Invite a candidate",
+      "chipClientDemand": "[EN] Client requests",
+      "chipProposalStatus": "[EN] Proposal status",
+      "chipProposeFor": "[EN] Propose a candidate",
+      "userClientDemand": "[EN] Show client requests",
+      "userProposalStatus": "[EN] How are my proposals doing?",
+      "learningCompassHint": "[EN] Your Learning Compass — direction, missing skills and fitting opportunities:",
+      "chipLearningCompass": "[EN] Learning Compass",
+      "inviteStudentHint": "[EN] A learner is invited with a personal link from the network area (relationship “Student”):",
+      "chipInviteStudent": "[EN] Invite a learner",
+      "programmesHint": "[EN] Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
+      "chipProgrammes": "[EN] Programmes & cohorts"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

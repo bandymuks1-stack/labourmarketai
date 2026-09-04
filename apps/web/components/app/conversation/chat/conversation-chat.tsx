@@ -27,8 +27,12 @@ import {
   WorkerWorkLogFlow,
   type WorkLogLabels,
 } from "@/components/app/conversation/worker-worklog-flow";
-import { getWorkerForm } from "@/lib/conversation/worker-forms";
-import { getCompanyForm } from "@/lib/conversation/company-forms";
+import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-forms";
+import { agencyProposeCandidateForm, getCompanyForm } from "@/lib/conversation/company-forms";
+import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
+import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
@@ -120,6 +124,17 @@ function PersonalWorkspaceIntroStream({
   const { intro, labels } = use(payload);
   if (intro.kind === "hidden" || !labels) return null;
   return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
+}
+
+/**
+ * An e-mail address the person already typed in the sentence ("pakviesk
+ * klientą jonas@imone.lt"). Chat-first rule: never ask for a fact the sentence
+ * already carries — it pre-fills the ONE field and the person only confirms.
+ * Shape gate only; the canonical validators stay authoritative server-side.
+ */
+function extractEmail(sentence: string): string | null {
+  const m = sentence.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+  return m ? m[0].toLowerCase() : null;
 }
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
@@ -294,6 +309,40 @@ export type ChatLabels = {
   /** The read failed, or the source is not available here. NEVER rendered as
    *  "you work with nobody" — that would be a claim about the person's work. */
   engagementsUnavailable: string;
+  // Agency / student / institution vocabulary (real recruiter pilot, 2026-09-04).
+  fallbackCompany: string;
+  fallbackAgency: string;
+  fallbackEducation: string;
+  agencyInviteClientAsk: string;
+  agencyInviteClientPrefilled: string;
+  agencyInviteClientDone: string;
+  agencyInviteCandidateAsk: string;
+  agencyInviteCandidateDone: string;
+  agencyInviteCandidateExists: string;
+  agencyNotAgencyWorkspace: string;
+  agencySwitchHint: string;
+  agencyClientDemandIntro: string;
+  agencyClientDemandNone: string;
+  agencyProposalsIntro: string;
+  agencyProposalsNone: string;
+  agencyProposeAsk: string;
+  agencyProposeDone: string;
+  agencyRosterEmpty: string;
+  agencyUnavailable: string;
+  agencyNext: string;
+  chipInviteClient: string;
+  chipInviteCandidate: string;
+  chipClientDemand: string;
+  chipProposalStatus: string;
+  chipProposeFor: string;
+  userClientDemand: string;
+  userProposalStatus: string;
+  learningCompassHint: string;
+  chipLearningCompass: string;
+  inviteStudentHint: string;
+  chipInviteStudent: string;
+  programmesHint: string;
+  chipProgrammes: string;
 };
 
 
@@ -323,6 +372,7 @@ export function ConversationChat({
   personalIntroPayload = null,
   countryLabels,
   educationWorkspace = false,
+  agencyWorkspace = false,
   learnerContextLine = null,
 }: {
   labels: ChatLabels;
@@ -349,6 +399,12 @@ export function ConversationChat({
    *  canonical `organization_roles` read). Decides only WHICH starters the
    *  company greeting offers — the two-base-identity model is untouched. */
   educationWorkspace?: boolean;
+  /** Real recruiter pilot (2026-09-04) — SERVER-resolved: the active
+   *  organization's company is a staffing agency (`company_type`). Decides
+   *  the agency starters, the agency fallback and which sentence handlers
+   *  may open the agency bridge; still the company identity, never a third
+   *  base identity (an agency is a company TYPE). */
+  agencyWorkspace?: boolean;
   /** M10 — SERVER-resolved sentence for a person with an ACTIVE learner link
    *  (`engagement_contexts` relationship `student`), already localized with
    *  the institution's real name. `null` = no link or the read degraded —
@@ -395,7 +451,17 @@ export function ConversationChat({
               { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
               { id: "link:/dashboard/communication", label: labels.navMessages },
             ]
-          : [
+          : agencyWorkspace
+            ? [
+                // Real recruiter pilot (2026-09-04): the agency's first
+                // value chain, as chat actions — the client invitation is
+                // the ONE inline form over the canonical dispatcher; the two
+                // reads answer INSIDE the chat with the real bridge rows.
+                { id: "f:agency.invite-client", label: labels.chipInviteClient },
+                { id: "agency:demand", label: labels.chipClientDemand },
+                { id: "agency:progress", label: labels.chipProposalStatus },
+              ]
+            : [
             // The employer's primary action — the canonical demand intake as
             // an inline conversation form (company.create-demand executor).
             // Employer greeting also honours the 1–3 cap (§D).
@@ -421,8 +487,30 @@ export function ConversationChat({
             { id: "cv", label: labels.chipCv },
             { id: "jobs", label: labels.chipJobs },
           ],
-    [labels, identity, educationWorkspace],
+    [labels, identity, educationWorkspace, agencyWorkspace],
   );
+
+  /**
+   * THE NOT-UNDERSTOOD ANSWER FOLLOWS THE WORKSPACE (real recruiter pilot,
+   * 2026-09-04). The first real recruiter, in the agency workspace, typed a
+   * valid agency sentence and read "I can help with your CV, profile and job
+   * offers" above employer chips — worker copy for a company context. A
+   * fallback is the product's description of itself; it must describe the
+   * capabilities of the context the person is standing in, never another
+   * actor's. Same three-way split the starters already make.
+   */
+  const fallbackText =
+    identity === "company"
+      ? agencyWorkspace
+        ? labels.fallbackAgency
+        : educationWorkspace
+          ? labels.fallbackEducation
+          : labels.fallbackCompany
+      : labels.fallback;
+  /** Coarse role for the chat-execution funnel — the EXISTING telemetry
+   *  vocabulary; agency = the company identity in an agency workspace. */
+  const roleContextNow: "worker" | "company" | "agency" =
+    identity === "company" ? (agencyWorkspace ? "agency" : "company") : "worker";
 
   /**
    * The greeting says the user's name when the product already knows it.
@@ -622,15 +710,23 @@ export function ConversationChat({
 
   const openForm = useCallback(
     (
-      actionId: string,
+      // A registered action id, or a spec BUILT for this turn (the agency
+      // candidate offer lists the roster the adapter just read — same
+      // InlineActionForm, same dispatcher, same confirmation).
+      actionOrSpec: string | WorkerFormSpec,
       onCloseOverride?: () => void,
       continueLabel?: string,
       initialValues?: Record<string, string | boolean>,
+      onDone?: (res: { ok: true; data?: Record<string, unknown> }) => void,
     ) => {
       // ONE form renderer, BOTH sides (rebuild W4): worker specs and company
       // specs share InlineActionForm + the canonical dispatcher.
-      const spec = getWorkerForm(actionId) ?? getCompanyForm(actionId);
+      const spec =
+        typeof actionOrSpec === "string"
+          ? (getWorkerForm(actionOrSpec) ?? getCompanyForm(actionOrSpec))
+          : actionOrSpec;
       if (spec) {
+        const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
         pushEmbed(
@@ -640,6 +736,7 @@ export function ConversationChat({
             // V9 value-intent: what the person already SAID pre-fills the
             // fields — visible, editable, still reviewed before any write.
             initialValues={initialValues}
+            onDone={onDone}
             // Closing a form shows the contextual next step, never a generic
             // menu: worker forms re-read the REAL profile state; the employer
             // demand form offers the real demand follow-ups. A caller with a
@@ -732,10 +829,10 @@ export function ConversationChat({
         })
         .catch(() => {
           setTyping(false);
-          assistant(labels.fallback, starterChips);
+          assistant(fallbackText, starterChips);
         });
     },
-    [assistant, pushMessage, locale, searchChips, starterChips, labels.fallback, tAi],
+    [assistant, pushMessage, locale, searchChips, starterChips, fallbackText, tAi],
   );
 
   /**
@@ -778,9 +875,9 @@ export function ConversationChat({
       })
       .catch(() => {
         setTyping(false);
-        assistant(labels.fallback, starterChips);
+        assistant(fallbackText, starterChips);
       });
-  }, [assistant, searchChips, starterChips, labels.fallback]);
+  }, [assistant, searchChips, starterChips, fallbackText]);
 
   /**
    * "Ieškau darbo" starts a DIALOGUE, not a verdict (owner audit P0.5). The
@@ -895,10 +992,10 @@ export function ConversationChat({
         })
         .catch(() => {
           setTyping(false);
-          if (!opts?.quiet) assistant(labels.fallback, starterChips);
+          if (!opts?.quiet) assistant(fallbackText, starterChips);
         });
     },
-    [pushMessage, assistant, starterChips, profileChips, labels.fallback, tSummary],
+    [pushMessage, assistant, starterChips, profileChips, fallbackText, tSummary],
   );
   startProfileSummaryRef.current = startProfileSummary;
 
@@ -968,9 +1065,9 @@ export function ConversationChat({
       })
       .catch(() => {
         setTyping(false);
-        assistant(labels.fallback, starterChips);
+        assistant(fallbackText, starterChips);
       });
-  }, [assistant, starterChips, labels.fallback, labels.chipPrefs, labels.chipJobs]);
+  }, [assistant, starterChips, fallbackText, labels.chipPrefs, labels.chipJobs]);
 
   /**
    * THE PLAYER CARD OPENS IN THE PANEL (W3 row 1).
@@ -1640,6 +1737,207 @@ export function ConversationChat({
 
   /** Late-bound self-reference so one chip case can reuse another's behaviour
    *  without a second copy of it (same pattern as `startProfileSummaryRef`). */
+  /**
+   * THE AGENCY BRIDGE, OPERATED FROM THE CONVERSATION (real recruiter pilot,
+   * 2026-09-04).
+   *
+   * NATURAL LANGUAGE → INTENT (router) → ACTIVE CONTEXT (identity +
+   * agencyWorkspace, both server-resolved) → ALREADY-KNOWN DATA (the sentence's
+   * e-mail, the roster, the shared requests) → ONE MISSING QUESTION (the
+   * inline form) → AUTHORIZATION (dispatcher role gate + `owns_company` in
+   * SQL) → CANONICAL EXECUTOR → REAL ROW → READBACK IN WORDS → NEXT CHIPS.
+   *
+   * Nothing here writes: the writes are the registered actions
+   * (`agency.invite-client`, `company.invite-worker`,
+   * `agency.propose-candidate`) behind the ONE dispatcher; the reads are the
+   * agency bridge adapter over the same canonical reads the company page
+   * renders. The workspace stays one chip away, never a mandatory stop.
+   */
+  const agencyRosterRef = useRef<readonly AgencyChatRosterWorker[]>([]);
+  const agencyChips: ChoiceChip[] = useMemo(
+    () => [
+      { id: "f:agency.invite-client", label: labels.chipInviteClient },
+      { id: "agency:demand", label: labels.chipClientDemand },
+      { id: "agency:progress", label: labels.chipProposalStatus },
+    ],
+    [labels.chipInviteClient, labels.chipClientDemand, labels.chipProposalStatus],
+  );
+  const agencyFollowup = useCallback(() => {
+    assistant(labels.agencyNext, agencyChips);
+  }, [assistant, labels.agencyNext, agencyChips]);
+  /** "You can do that as your company" — the person holds the company role
+   *  but stands in the personal space: offer the real workspaces (the SAME
+   *  membership-validated switch the `ws:` chips already run). */
+  const workspaceChips: ChoiceChip[] = useMemo(
+    () =>
+      (auth?.workspaces ?? [])
+        .filter((w) => w.kind === "organization")
+        .slice(0, 3)
+        .map((w) => ({ id: `ws:${w.id}`, label: w.name })),
+    [auth?.workspaces],
+  );
+
+  const openProposeForm = useCallback(
+    (shareId: string) => {
+      const roster = agencyRosterRef.current;
+      if (roster.length === 0) {
+        assistant(labels.agencyRosterEmpty, [
+          { id: "f:company.invite-worker", label: labels.chipInviteCandidate },
+        ]);
+        return;
+      }
+      trackFunnel(FUNNEL_EVENTS.chatMissingDataAsked, {
+        surface: "chat",
+        step: "agency.propose-candidate",
+        role_context: "agency",
+      });
+      openForm(
+        agencyProposeCandidateForm(shareId, roster),
+        agencyFollowup,
+        labels.chipProposalStatus,
+        undefined,
+        () => assistant(labels.agencyProposeDone),
+      );
+    },
+    [assistant, labels.agencyRosterEmpty, labels.chipInviteCandidate, labels.chipProposalStatus, labels.agencyProposeDone, openForm, agencyFollowup],
+  );
+
+  const startAgencyBridge = useCallback(
+    (mode: "demand" | "progress" | "propose") => {
+      setTyping(true);
+      loadAgencyBridgeForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "not-agency") {
+            assistant(labels.agencyNotAgencyWorkspace, [
+              { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+            ]);
+            return;
+          }
+          if (res.kind !== "ok") {
+            assistant(labels.agencyUnavailable, [
+              { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+            ]);
+            return;
+          }
+          agencyRosterRef.current = res.roster;
+          if (mode === "progress") {
+            if (res.progress.length === 0) {
+              assistant(labels.agencyProposalsNone, [
+                { id: "agency:demand", label: labels.chipClientDemand },
+                { id: "f:agency.invite-client", label: labels.chipInviteClient },
+              ]);
+              return;
+            }
+            const lines = res.progress.map(
+              (p) =>
+                `• ${p.title} — ${p.workerLabel} · ${p.stageLabel}${p.decisionLabel ? ` · ${p.decisionLabel}` : ""}`,
+            );
+            assistant([labels.agencyProposalsIntro, ...lines].join("\n"), [
+              { id: "agency:demand", label: labels.chipClientDemand },
+              { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+            ]);
+            return;
+          }
+          if (res.shared.length === 0) {
+            assistant(labels.agencyClientDemandNone, [
+              { id: "f:agency.invite-client", label: labels.chipInviteClient },
+              { id: "agency:progress", label: labels.chipProposalStatus },
+            ]);
+            return;
+          }
+          if (mode === "propose" && res.shared.length === 1) {
+            openProposeForm(res.shared[0].shareId);
+            return;
+          }
+          const lines = res.shared.map((r) => `• ${r.title}`);
+          assistant(
+            [mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
+            res.shared.slice(0, 3).map((r) => ({
+              id: `agency-propose:${r.shareId}`,
+              label: `${labels.chipProposeFor}: ${r.title}`,
+            })),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.agencyUnavailable, [
+            { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+          ]);
+        });
+    },
+    [assistant, labels, openProposeForm],
+  );
+
+  /** Identity gate shared by the agency reads: the company identity asks the
+   *  adapter (which answers "not an agency" honestly); an employer-capable
+   *  person in the personal space is offered the real switch; everyone else
+   *  gets the context-aware fallback. */
+  const runAgencyRead = useCallback(
+    (mode: "demand" | "progress" | "propose") => {
+      if (identity === "company") {
+        startAgencyBridge(mode);
+      } else if (canActAsEmployer && workspaceChips.length > 0) {
+        withTyping(() => assistant(labels.agencySwitchHint, workspaceChips));
+      } else {
+        withTyping(() => assistant(fallbackText, starterChips));
+      }
+    },
+    [identity, canActAsEmployer, workspaceChips, startAgencyBridge, withTyping, assistant, labels.agencySwitchHint, fallbackText, starterChips],
+  );
+
+  /** "Noriu pakviesti klientą" / "pakviesk darbuotoją": the ONE missing fact
+   *  is the e-mail — asked once, or pre-filled when the sentence carried it;
+   *  the inline form is the confirmation; the readback names the REAL state. */
+  const startAgencyInvite = useCallback(
+    (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
+      const isClient = actionId === "agency.invite-client";
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) {
+          assistant(labels.agencySwitchHint, workspaceChips);
+        } else {
+          assistant(fallbackText, starterChips);
+        }
+        return;
+      }
+      if (isClient && !agencyWorkspace) {
+        assistant(labels.agencyNotAgencyWorkspace, [
+          { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+        ]);
+        return;
+      }
+      const email = extractEmail(sentence);
+      if (email) {
+        if (isClient) assistant(labels.agencyInviteClientPrefilled);
+      } else {
+        assistant(isClient ? labels.agencyInviteClientAsk : labels.agencyInviteCandidateAsk);
+        trackFunnel(FUNNEL_EVENTS.chatMissingDataAsked, {
+          surface: "chat",
+          step: actionId,
+          role_context: roleContextNow,
+        });
+      }
+      openForm(
+        actionId,
+        agencyFollowup,
+        isClient ? labels.chipClientDemand : labels.chipProposalStatus,
+        email ? { email } : undefined,
+        (res) => {
+          if (isClient) {
+            assistant(labels.agencyInviteClientDone);
+          } else {
+            assistant(
+              res.data?.outcome === "invited"
+                ? labels.agencyInviteCandidateDone
+                : labels.agencyInviteCandidateExists,
+            );
+          }
+        },
+      );
+    },
+    [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, agencyFollowup],
+  );
+
   const handleChipRef = useRef<(chip: ChoiceChip) => void>(() => {});
 
   const handleChip = useCallback(
@@ -1732,6 +2030,16 @@ export function ConversationChat({
           // identities enter here; the SERVER picks the slice.
           startEngagements();
           break;
+        case "agency:demand":
+          user(labels.userClientDemand);
+          // The agency bridge read, answered IN the chat — the same rows the
+          // company page's bridge section renders.
+          runAgencyRead("demand");
+          break;
+        case "agency:progress":
+          user(labels.userProposalStatus);
+          runAgencyRead("progress");
+          break;
         default:
           if (chip.id.startsWith("assign:")) {
             // W11 — `assign:<projectId>:<workerProfileId>`. Both ids are
@@ -1764,6 +2072,12 @@ export function ConversationChat({
               user(chip.label);
               performContextSwitch(target);
             }
+          } else if (chip.id.startsWith("agency-propose:")) {
+            // The share-bound handoff: the chip carries the share id and
+            // NOTHING else; the RPC re-verifies the share is active and the
+            // worker is on THIS agency's roster before any row exists.
+            user(chip.label);
+            openProposeForm(chip.id.slice(15));
           } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
           } else if (chip.id.startsWith("link:")) {
@@ -1774,7 +2088,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -2106,6 +2420,14 @@ export function ConversationChat({
       }
 
       const { intent } = classifyIntent(text);
+      // Chat-first execution funnel: was the sentence understood at all? The
+      // intent id and the coarse role only — never the sentence.
+      trackFunnel(
+        intent === "unknown"
+          ? FUNNEL_EVENTS.chatIntentUnrecognized
+          : FUNNEL_EVENTS.chatIntentRecognized,
+        { surface: "chat", step: intent, role_context: roleContextNow },
+      );
 
       /**
        * G2: the sentence dispatch goes through THE declarative intent
@@ -2217,7 +2539,7 @@ export function ConversationChat({
               },
             ]);
           } else {
-            assistant(labels.fallback, starterChips);
+            assistant(fallbackText, starterChips);
           }
         },
         // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a
@@ -2256,7 +2578,7 @@ export function ConversationChat({
               { id: "link:/dashboard/company", label: labels.chipCompanyHub },
             ]);
           } else {
-            assistant(labels.fallback, starterChips);
+            assistant(fallbackText, starterChips);
           }
         },
         // "Sukurk įmonės profilį" — START an organization. Routes to the ONE
@@ -2365,6 +2687,41 @@ export function ConversationChat({
             { id: "link:/dashboard/activity", label: labels.activityChip },
           ]),
         // No scheduler exists — never a fake reminder (honest degradation).
+        // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────
+        // "noriu pakviesti klientą" → the ONE missing question (e-mail) → the
+        // canonical client invitation → readback. The candidate invite and
+        // the proposal run the same way; the two reads answer in the chat.
+        inviteClient: () => startAgencyInvite("agency.invite-client", text),
+        inviteCandidate: () => startAgencyInvite("company.invite-worker", text),
+        clientDemand: () => runAgencyRead("demand"),
+        proposeCandidate: () => runAgencyRead("propose"),
+        // "How are my proposals doing?" means two real things: the agency's
+        // offers (company identity) or the worker's own booking offers
+        // (person) — routed by the ACTIVE identity, never guessed.
+        proposalStatus: () => {
+          if (identity === "person" && !canActAsEmployer) {
+            handleChip({ id: "offers", label: "" });
+            return;
+          }
+          runAgencyRead("progress");
+        },
+        // ── STUDENT / INSTITUTION — the one chip to the canonical surface ──
+        learningCompass: () =>
+          assistant(labels.learningCompassHint, [
+            { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
+          ]),
+        inviteStudent: () =>
+          identity === "company" || canActAsEmployer
+            ? assistant(labels.inviteStudentHint, [
+                { id: "link:/dashboard/network?relationship=student", label: labels.chipInviteStudent },
+              ])
+            : assistant(fallbackText, starterChips),
+        programmes: () =>
+          identity === "company" || canActAsEmployer
+            ? assistant(labels.programmesHint, [
+                { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+              ])
+            : assistant(fallbackText, starterChips),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
         translateBlocked: () => assistant(labels.translateBlocked),
@@ -2374,10 +2731,10 @@ export function ConversationChat({
         writeEmployer: () => assistant(labels.writeEmployerHint),
       };
       dispatchIntent(intent, handlers, withTyping, () =>
-        assistant(labels.fallback, starterChips),
+        assistant(fallbackText, starterChips),
       );
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

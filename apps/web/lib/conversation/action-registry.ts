@@ -566,11 +566,41 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "deep_link" },
   },
 
+  {
+    /**
+     * ROSTER INVITATION BY SENTENCE (real recruiter pilot, 2026-09-04).
+     * "Pakviesk darbuotoją į komandą" — the company's/agency's canonical
+     * roster invite (`invite_company_worker` RPC via lib/company/actions):
+     * a PENDING invitation addressed to an e-mail; the person links only by
+     * accepting it themself. No e-mail is sent by the platform today (the
+     * roster section says so); the chat says the same.
+     */
+    id: "company.invite-worker",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.inviteWorker.label",
+    descriptionKey: "conversation.actions.company.inviteWorker.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company",
+    handler: { kind: "server_action", ref: "inviteCompanyWorkerAction" },
+  },
+
   // ── AGENCY ────────────────────────────────────────────────────────────────
+  // An agency is a company TYPE (Direction A: `companies.company_type =
+  // 'staffing_agency'`), never a root role — every real agency account since
+  // the first-run router holds the `company` role and nothing else. Gating
+  // these on the legacy `agency` role alone made every agency act
+  // `not_authorized` for exactly the accounts that are agencies (found with
+  // the first real recruiter, 2026-09-04). Both roles are accepted here; the
+  // real authority is re-derived in SQL (`owns_company` + the staffing_agency
+  // check inside each bridge RPC), where it always was.
   {
     id: "agency.review-clients",
     subject: "agency",
-    allowedRoles: ["agency"],
+    allowedRoles: ["company", "agency"],
     labelKey: "conversation.actions.agency.reviewClients.label",
     descriptionKey: "conversation.actions.agency.reviewClients.description",
     confirmation: "read",
@@ -583,7 +613,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   {
     id: "agency.invite-client",
     subject: "agency",
-    allowedRoles: ["agency"],
+    allowedRoles: ["company", "agency"],
     labelKey: "conversation.actions.agency.inviteClient.label",
     descriptionKey: "conversation.actions.agency.inviteClient.description",
     confirmation: "important_write",
@@ -596,7 +626,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   {
     id: "agency.propose-candidate",
     subject: "agency",
-    allowedRoles: ["agency"],
+    allowedRoles: ["company", "agency"],
     labelKey: "conversation.actions.agency.proposeCandidate.label",
     descriptionKey: "conversation.actions.agency.proposeCandidate.description",
     confirmation: "important_write",
@@ -609,7 +639,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   {
     id: "agency.offer-status",
     subject: "agency",
-    allowedRoles: ["agency"],
+    allowedRoles: ["company", "agency"],
     labelKey: "conversation.actions.agency.offerStatus.label",
     descriptionKey: "conversation.actions.agency.offerStatus.description",
     confirmation: "read",
@@ -622,7 +652,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   {
     id: "agency.who-waits",
     subject: "agency",
-    allowedRoles: ["agency"],
+    allowedRoles: ["company", "agency"],
     labelKey: "conversation.actions.agency.whoWaits.label",
     descriptionKey: "conversation.actions.agency.whoWaits.description",
     confirmation: "read",

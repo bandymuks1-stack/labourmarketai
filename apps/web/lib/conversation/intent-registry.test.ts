@@ -33,8 +33,12 @@ describe("the intent registry is the enumerable routing contract", () => {
     // `timesheets` (the planning #timesheets area, reachable by sentence);
     // 36 → 42 with the §9 chat-first coverage slice, which gives the six
     // domains that shipped reachable ONLY by URL a sentence each
-    // (hours-import, work-hours, absences, documents, market-map, activity).
-    expect(entries.length).toBe(42);
+    // (hours-import, work-hours, absences, documents, market-map, activity);
+    // 42 → 50 with the real recruiter pilot (2026-09-04): five agency intents
+    // (invite-client, invite-candidate, client-demand, propose-candidate,
+    // proposal-status) and three student/institution route intents
+    // (learning-compass, invite-student, programmes).
+    expect(entries.length).toBe(50);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -52,8 +56,11 @@ describe("the intent registry is the enumerable routing contract", () => {
 
   it("the write set is exactly the flows that can persist — all behind explicit confirmation", () => {
     expect(intentsWhere((d) => d.access === "write")).toEqual([
+      "invite-candidate",
+      "invite-client",
       "log-work",
       "need-workers",
+      "propose-candidate",
       "switch-context",
     ]);
   });
@@ -72,9 +79,12 @@ describe("the intent registry is the enumerable routing contract", () => {
       "create-organization",
       "documents",
       "hours-import",
+      "invite-student",
+      "learning-compass",
       "lmc",
       "market-map",
       "need-service",
+      "programmes",
       "timesheets",
       "work-hours",
     ]);

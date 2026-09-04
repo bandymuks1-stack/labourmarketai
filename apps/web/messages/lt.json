@@ -11610,6 +11610,10 @@
         "reviewEngagements": {
           "label": "Peržiūrėti darbo santykius",
           "description": "Pamatykite, kas dirba šioje organizacijoje, ir užbaikite darbo santykį."
+        },
+        "inviteWorker": {
+          "label": "Pakviesti darbuotoją",
+          "description": "Pakviesk žmogų į savo komandą el. paštu."
         }
       },
       "agency": {
@@ -11699,7 +11703,15 @@
         "teamSize": "Darbuotojų skaičius",
         "urgency": "Skubumas",
         "saveAsDraft": "Išsaugoti kaip juodraštį",
-        "opportunityType": "Galimybės tipas"
+        "opportunityType": "Galimybės tipas",
+        "clientEmail": "Kliento el. paštas",
+        "clientEmailPlaceholder": "vardas@imone.lt",
+        "workerEmail": "Darbuotojo el. paštas",
+        "workerEmailPlaceholder": "vardas@pastas.lt",
+        "inviteNote": "Pastaba (nebūtina)",
+        "inviteNotePlaceholder": "Pvz., pradžia nuo spalio, objektas Kaune",
+        "rosterWorker": "Komandos narys",
+        "proposalNotePlaceholder": "Pvz., 5 m. patirtis, gali pradėti pirmadienį"
       },
       "availability": {
         "available": "Laisvas",
@@ -11929,7 +11941,40 @@
       "chipLmc": "Atidaryti LMC",
       "briefLearner": "Mokotės {organization}. Čia užfiksuota praktika ir mokymasis tampa jūsų įrodymais.",
       "briefLearnerUnnamed": "Esate besimokantis. Čia užfiksuota praktika ir mokymasis tampa jūsų įrodymais.",
-      "chipLogLearning": "Užfiksuoti mokymąsi ar praktiką"
+      "chipLogLearning": "Užfiksuoti mokymąsi ar praktiką",
+      "fallbackCompany": "Galiu padėti su darbuotojų poreikiu, kandidatais ir projektais. Ką norėtumėte daryti?",
+      "fallbackAgency": "Galiu pakviesti klientą ar kandidatą, parodyti klientų poreikius ir pasiūlymų būseną. Ką norėtumėte daryti?",
+      "fallbackEducation": "Galiu padėti pakviesti studentus, tvarkyti programas ir grupes bei parodyti rinkos paklausą. Ką norėtumėte daryti?",
+      "agencyInviteClientAsk": "Gerai. Kokiu el. paštu pakviesti klientą?",
+      "agencyInviteClientPrefilled": "Gerai — pakviesiu klientą šiuo el. paštu. Patvirtinkite žemiau.",
+      "agencyInviteClientDone": "Pakvietimas sukurtas ir laukia kliento patvirtinimo. Kai klientas priims ryšį ir pasidalins poreikiu, galėsite siūlyti kandidatus.",
+      "agencyInviteCandidateAsk": "Gerai. Kokiu el. paštu pakviesti darbuotoją į savo komandą?",
+      "agencyInviteCandidateDone": "Kvietimas įrašytas. Laiškas nesiunčiamas — žmogus turi prisijungti šiuo el. paštu ir priimti kvietimą; tada jis atsiras jūsų komandoje.",
+      "agencyInviteCandidateExists": "Šis žmogus jau pakviestas arba jau yra jūsų komandoje — nieko naujo neįrašyta.",
+      "agencyNotAgencyWorkspace": "Ši erdvė nėra personalo agentūra, todėl klientų kvietimų čia nėra. Agentūros veiksmus rasite agentūros erdvėje.",
+      "agencySwitchHint": "Tai galite padaryti savo įmonės vardu — pasirinkite erdvę:",
+      "agencyClientDemandIntro": "Klientų pasidalinti poreikiai:",
+      "agencyClientDemandNone": "Kol kas nė vienas klientas nepasidalino poreikiu. Kai prijungtas klientas pasidalins, jis atsiras čia.",
+      "agencyProposalsIntro": "Jūsų pasiūlymų būsena:",
+      "agencyProposalsNone": "Pasiūlymų dar nėra. Kai klientas pasidalins poreikiu, galėsite pasiūlyti komandos narį.",
+      "agencyProposeAsk": "Kuriam poreikiui siūlyti kandidatą?",
+      "agencyProposeDone": "Pasiūlymas įrašytas — klientas jį matys prie savo poreikio ir galės priimti arba atmesti.",
+      "agencyRosterEmpty": "Jūsų komandoje dar nėra nė vieno žmogaus, todėl siūlyti nėra ko. Pirmiausia pakvieskite kandidatą.",
+      "agencyUnavailable": "Agentūros duomenų dabar nepavyko perskaityti. Pabandykite dar kartą arba atidarykite įmonės erdvę.",
+      "agencyNext": "Kas toliau?",
+      "chipInviteClient": "Pakviesti klientą",
+      "chipInviteCandidate": "Pakviesti kandidatą",
+      "chipClientDemand": "Klientų poreikiai",
+      "chipProposalStatus": "Pasiūlymų būsena",
+      "chipProposeFor": "Siūlyti kandidatą",
+      "userClientDemand": "Parodyk klientų poreikius",
+      "userProposalStatus": "Kaip sekasi mano pasiūlymams?",
+      "learningCompassHint": "Jūsų mokymosi kompasas — kryptis, trūkstami įgūdžiai ir tinkamos galimybės:",
+      "chipLearningCompass": "Mokymosi kompasas",
+      "inviteStudentHint": "Studentas pakviečiamas asmenine nuoroda iš tinklo skilties (ryšys „Studentas“):",
+      "chipInviteStudent": "Pakviesti studentą",
+      "programmesHint": "Programos ir grupės tvarkomos įmonės erdvėje — čia sukursite programą, grupę ir priskirsite besimokančius:",
+      "chipProgrammes": "Programos ir grupės"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

@@ -73,8 +73,9 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     expect(branch).toMatch(/employerBridgeHint/);
     expect(branch).toMatch(/link:\/dashboard\/company#demand-intake/);
     // And somebody who genuinely holds no company role still gets the honest
-    // fallback — this must NOT become a chip everybody sees.
-    expect(branch).toMatch(/labels\.fallback/);
+    // fallback — this must NOT become a chip everybody sees. Since 2026-09-04
+    // the fallback is the context-aware `fallbackText`.
+    expect(branch).toMatch(/fallbackText/);
   });
 
   it("company-overview answers an owner in any workspace", () => {
@@ -84,7 +85,10 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     );
     expect(branch.length).toBeGreaterThan(0);
     expect(branch).toMatch(/identity === "company" \|\| canActAsEmployer/);
-    expect(branch).toMatch(/labels\.fallback/);
+    // 2026-09-04: the not-understood answer is the context-aware
+    // `fallbackText` (worker / employer / agency / education), never the
+    // worker copy read directly.
+    expect(branch).toMatch(/fallbackText/);
   });
 
   it("nothing is switched on the person's behalf", () => {

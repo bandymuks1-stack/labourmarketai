@@ -3387,6 +3387,10 @@
         "reviewEngagements": {
           "label": "Gennemgå arbejdsrelationer",
           "description": "Se, hvem der arbejder for denne organisation, og afslut en arbejdsrelation."
+        },
+        "inviteWorker": {
+          "label": "Inviter en medarbejder",
+          "description": "Inviter en person til jeres team via e-mail."
         }
       },
       "agency": {
@@ -3474,7 +3478,15 @@
         "demandLocationPlaceholder": "By eller region",
         "teamSize": "Antal medarbejdere",
         "urgency": "Hastegrad",
-        "saveAsDraft": "Gem som kladde"
+        "saveAsDraft": "Gem som kladde",
+        "clientEmail": "Kundens e-mail",
+        "clientEmailPlaceholder": "navn@firma.dk",
+        "workerEmail": "Medarbejderens e-mail",
+        "workerEmailPlaceholder": "navn@eksempel.dk",
+        "inviteNote": "Note (valgfri)",
+        "inviteNotePlaceholder": "F.eks. start i oktober, byggeplads i Kaunas",
+        "rosterWorker": "Teammedlem",
+        "proposalNotePlaceholder": "F.eks. 5 års erfaring, kan starte mandag"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3645,7 +3657,40 @@
       "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
       "chipMyOwnInterest": "Min egen interesse",
       "createOrganizationHint": "Jeg kan oprette en organisation sammen med dig — oplysningerne og verificeringen er på én side.",
-      "chipCreateOrganization": "Opret en organisation"
+      "chipCreateOrganization": "Opret en organisation",
+      "fallbackCompany": "Jeg kan hjælpe med jeres behov for medarbejdere, kandidater og projekter. Hvad vil du gøre?",
+      "fallbackAgency": "Jeg kan invitere en kunde eller en kandidat, vise kundernes forespørgsler og status på jeres forslag. Hvad vil du gøre?",
+      "fallbackEducation": "Jeg kan hjælpe med at invitere elever, administrere programmer og hold og vise efterspørgslen på markedet. Hvad vil du gøre?",
+      "agencyInviteClientAsk": "Godt. Hvilken e-mail skal kundeinvitationen sendes til?",
+      "agencyInviteClientPrefilled": "Godt — jeg inviterer kunden på denne e-mail. Bekræft nedenfor.",
+      "agencyInviteClientDone": "Invitationen er oprettet og afventer kundens accept. Når kunden accepterer og deler et behov, kan I foreslå kandidater.",
+      "agencyInviteCandidateAsk": "Godt. Hvilken e-mail skal teaminvitationen sendes til?",
+      "agencyInviteCandidateDone": "Invitationen er registreret. Der sendes ingen e-mail — personen logger ind med den adresse og accepterer; derefter vises personen i jeres team.",
+      "agencyInviteCandidateExists": "Denne person er allerede inviteret eller allerede i jeres team — intet nyt blev registreret.",
+      "agencyNotAgencyWorkspace": "Dette arbejdsområde er ikke et vikarbureau, så kundeinvitationer gælder ikke her. Bureauhandlinger hører til i et bureau-arbejdsområde.",
+      "agencySwitchHint": "Det kan du gøre som din virksomhed — vælg arbejdsområdet:",
+      "agencyClientDemandIntro": "Forespørgsler, jeres kunder har delt:",
+      "agencyClientDemandNone": "Ingen kunde har delt en forespørgsel endnu. Når en tilknyttet kunde deler en, vises den her.",
+      "agencyProposalsIntro": "Status på jeres forslag:",
+      "agencyProposalsNone": "Ingen forslag endnu. Når en kunde deler et behov, kan I foreslå en medarbejder fra teamet.",
+      "agencyProposeAsk": "Hvilken forespørgsel skal kandidaten foreslås til?",
+      "agencyProposeDone": "Forslaget er registreret — kunden ser det på sin forespørgsel og kan acceptere eller afvise.",
+      "agencyRosterEmpty": "Jeres team er tomt, så der er ingen at foreslå endnu. Inviter først en kandidat.",
+      "agencyUnavailable": "Bureauets data kunne ikke læses lige nu. Prøv igen eller åbn virksomhedens arbejdsområde.",
+      "agencyNext": "Hvad nu?",
+      "chipInviteClient": "Inviter en kunde",
+      "chipInviteCandidate": "Inviter en kandidat",
+      "chipClientDemand": "Kundeforespørgsler",
+      "chipProposalStatus": "Status på forslag",
+      "chipProposeFor": "Foreslå en kandidat",
+      "userClientDemand": "Vis kundeforespørgsler",
+      "userProposalStatus": "Hvordan går det med mine forslag?",
+      "learningCompassHint": "Dit læringskompas — retning, manglende færdigheder og passende muligheder:",
+      "chipLearningCompass": "Læringskompas",
+      "inviteStudentHint": "En elev inviteres med et personligt link fra netværksområdet (relation “Studerende”):",
+      "chipInviteStudent": "Inviter en elev",
+      "programmesHint": "Programmer og hold administreres i virksomhedens arbejdsområde — opret et program og et hold og tildel elever der:",
+      "chipProgrammes": "Programmer og hold"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

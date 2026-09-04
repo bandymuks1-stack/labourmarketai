@@ -101,6 +101,93 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
   },
 ] as const;
 
+/**
+ * AGENCY — real recruiter pilot (2026-09-04). "Noriu pakviesti klientą" needs
+ * exactly ONE missing fact (the client's e-mail); "pakviesk darbuotoją" the
+ * same plus an optional note. Both are important-tier canonical writes, so
+ * the inline form is the ONE missing question AND the confirmation.
+ */
+export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
+  {
+    actionId: "agency.invite-client",
+    titleKey: "conversation.actions.agency.inviteClient.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "email",
+        kind: "text",
+        labelKey: "conversation.forms.fields.clientEmail",
+        placeholderKey: "conversation.forms.fields.clientEmailPlaceholder",
+        required: true,
+        maxLength: 254,
+      },
+    ],
+    build: (st: FormState) => ({ email: s(st.email) }),
+  },
+  {
+    actionId: "company.invite-worker",
+    titleKey: "conversation.actions.company.inviteWorker.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "email",
+        kind: "text",
+        labelKey: "conversation.forms.fields.workerEmail",
+        placeholderKey: "conversation.forms.fields.workerEmailPlaceholder",
+        required: true,
+        maxLength: 254,
+      },
+      {
+        name: "note",
+        kind: "text",
+        labelKey: "conversation.forms.fields.inviteNote",
+        placeholderKey: "conversation.forms.fields.inviteNotePlaceholder",
+        maxLength: 500,
+      },
+    ],
+    build: (st: FormState) => ({ email: s(st.email), note: s(st.note) || null }),
+  },
+] as const;
+
+/**
+ * "Pasiūlyk kandidatą" — the offer needs a real shared request AND a real
+ * roster worker. Both lists come from the agency bridge read adapter at the
+ * moment of asking, so the spec is BUILT per conversation turn: the select
+ * offers only workers the agency really has, the share id is the one the
+ * person just picked. Still the same InlineActionForm + dispatcher; the RPC
+ * re-verifies both ids (share active, worker on THIS agency's roster).
+ */
+export function agencyProposeCandidateForm(
+  shareId: string,
+  roster: ReadonlyArray<{ workerId: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "agency.propose-candidate",
+    titleKey: "conversation.actions.agency.proposeCandidate.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "workerId",
+        kind: "select",
+        labelKey: "conversation.forms.fields.rosterWorker",
+        required: true,
+        options: roster.map((w) => ({ value: w.workerId, label: w.label })),
+      },
+      {
+        name: "note",
+        kind: "text",
+        labelKey: "conversation.forms.fields.inviteNote",
+        placeholderKey: "conversation.forms.fields.proposalNotePlaceholder",
+        maxLength: 500,
+      },
+    ],
+    build: (st: FormState) => ({ shareId, workerId: s(st.workerId), note: s(st.note) || null }),
+  };
+}
+
 export function getCompanyForm(actionId: string): WorkerFormSpec | undefined {
-  return COMPANY_FORMS.find((f) => f.actionId === actionId);
+  return (
+    COMPANY_FORMS.find((f) => f.actionId === actionId) ??
+    AGENCY_FORMS.find((f) => f.actionId === actionId)
+  );
 }

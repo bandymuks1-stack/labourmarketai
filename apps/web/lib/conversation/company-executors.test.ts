@@ -363,7 +363,9 @@ describe("agency bridge executors", () => {
     const [, formData] = asMock(inviteClientAction).mock.calls[0];
     expect(formData.get("agencyCompanyId")).toBe(UUID);
     expect(formData.get("email")).toBe("client@example.com");
-    expect(r).toEqual({ ok: true });
+    // Readback for the conversation: a new connection is PENDING until the
+    // client accepts — the executor states that real state.
+    expect(r).toEqual({ ok: true, data: { status: "pending" } });
 
     asMock(inviteClientAction).mockResolvedValue({ status: "needs-migration" });
     expect(

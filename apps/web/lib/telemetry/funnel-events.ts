@@ -145,6 +145,21 @@ export const FUNNEL_EVENTS = {
   professionRecoveryPromptSeen: "profession_recovery_prompt_seen",
   professionRecoveryPromptOpened: "profession_recovery_prompt_opened",
   professionRecoveryPromptDismissed: "profession_recovery_prompt_dismissed",
+  // ── Chat-first execution funnel (real recruiter pilot, 2026-09-04). The
+  //    first real recruiter typed a valid agency sentence and fell through to
+  //    the generic fallback — and nothing measured it. These five make the
+  //    conversational operating layer measurable end-to-end: was the sentence
+  //    understood (`step` = the routed intent id, never the sentence), did the
+  //    chat have to ask for one missing fact, was a canonical action
+  //    attempted, did it persist (server-side, in the ONE dispatcher). Bounded
+  //    scalars only: intent/action ids and the coarse role — never text, ids
+  //    or e-mails. `first_real_action` / `first_real_result` stay the
+  //    value events; these are the mechanics that lead to them.
+  chatIntentRecognized: "chat_intent_recognized",
+  chatIntentUnrecognized: "chat_intent_unrecognized",
+  chatMissingDataAsked: "chat_missing_data_asked",
+  chatActionAttempted: "chat_action_attempted",
+  chatActionPersisted: "chat_action_persisted",
 } as const;
 
 export type FunnelEventName =

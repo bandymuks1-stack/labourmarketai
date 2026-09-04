@@ -71,7 +71,10 @@ describe("W4 — employer demand intake shares the ONE form pipeline", () => {
 
   it("every company form dispatches through the ONE InlineActionForm", () => {
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
-    expect(chat).toMatch(/getWorkerForm\(actionId\) \?\? getCompanyForm\(actionId\)/);
+    // 2026-09-04: `openForm` also accepts a spec BUILT for the turn (the
+    // agency candidate offer lists the roster just read) — the id path still
+    // resolves through the two registries, in this order.
+    expect(chat).toMatch(/getWorkerForm\(actionOrSpec\) \?\? getCompanyForm\(actionOrSpec\)/);
     // No parallel employer form component exists in the conversation tree.
     expect(COMPANY_FORMS.length).toBeGreaterThanOrEqual(1);
   });

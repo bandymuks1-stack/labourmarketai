@@ -100,7 +100,17 @@ export type IntentHandlerId =
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
-  | "writeEmployer";
+  | "writeEmployer"
+  // Agency (real recruiter pilot, 2026-09-04) — the canonical bridge actions,
+  // reachable by sentence; student / institution route handlers.
+  | "inviteClient"
+  | "inviteCandidate"
+  | "clientDemand"
+  | "proposeCandidate"
+  | "proposalStatus"
+  | "learningCompass"
+  | "inviteStudent"
+  | "programmes";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -182,6 +192,21 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "market-map": { domain: "market", access: "route", handler: "marketMap", ownTyping: false },
   activity: { domain: "activity", access: "route", handler: "activityCentre", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
+
+  // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────────────
+  // The three writes open the ONE inline form over the canonical dispatcher
+  // (`agency.invite-client`, `company.invite-worker`, `agency.propose-candidate`
+  // — important-tier, token-confirmed); the two reads run the agency bridge
+  // read adapter and answer INSIDE the chat with the real rows + chips.
+  "invite-client": { domain: "company", access: "write", handler: "inviteClient", ownTyping: false },
+  "invite-candidate": { domain: "company", access: "write", handler: "inviteCandidate", ownTyping: false },
+  "propose-candidate": { domain: "company", access: "write", handler: "proposeCandidate", ownTyping: true },
+  "client-demand": { domain: "company", access: "read", handler: "clientDemand", ownTyping: true },
+  "proposal-status": { domain: "company", access: "read", handler: "proposalStatus", ownTyping: true },
+  // ── STUDENT / INSTITUTION — route-class to the canonical surfaces ─────────
+  "learning-compass": { domain: "profile", access: "route", handler: "learningCompass", ownTyping: false },
+  "invite-student": { domain: "company", access: "route", handler: "inviteStudent", ownTyping: false },
+  programmes: { domain: "company", access: "route", handler: "programmes", ownTyping: false },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

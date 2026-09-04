@@ -11610,6 +11610,10 @@
         "reviewEngagements": {
           "label": "Review engagements",
           "description": "See who works for this organisation and end an engagement."
+        },
+        "inviteWorker": {
+          "label": "Invite a worker",
+          "description": "Invite a person to your roster by e-mail."
         }
       },
       "agency": {
@@ -11699,7 +11703,15 @@
         "teamSize": "Number of workers",
         "urgency": "Urgency",
         "saveAsDraft": "Save as draft",
-        "opportunityType": "Type of opportunity"
+        "opportunityType": "Type of opportunity",
+        "clientEmail": "Client e-mail",
+        "clientEmailPlaceholder": "name@company.com",
+        "workerEmail": "Worker e-mail",
+        "workerEmailPlaceholder": "name@example.com",
+        "inviteNote": "Note (optional)",
+        "inviteNotePlaceholder": "E.g. start in October, site in Kaunas",
+        "rosterWorker": "Roster worker",
+        "proposalNotePlaceholder": "E.g. 5 years' experience, can start Monday"
       },
       "availability": {
         "available": "Available",
@@ -11929,7 +11941,40 @@
       "chipLmc": "Open LMC",
       "briefLearner": "You are enrolled at {organization}. Practice and learning you record here count as evidence.",
       "briefLearnerUnnamed": "You are enrolled as a learner. Practice and learning you record here count as evidence.",
-      "chipLogLearning": "Log learning or practice"
+      "chipLogLearning": "Log learning or practice",
+      "fallbackCompany": "I can help with your workforce need, candidates and projects. What would you like to do?",
+      "fallbackAgency": "I can invite a client or a candidate, show client requests and your proposal status. What would you like to do?",
+      "fallbackEducation": "I can help invite learners, manage programmes and cohorts, and show market demand. What would you like to do?",
+      "agencyInviteClientAsk": "Sure. Which e-mail should the client invitation go to?",
+      "agencyInviteClientPrefilled": "Sure — I will invite the client at this e-mail. Confirm below.",
+      "agencyInviteClientDone": "The invitation is created and waits for the client to accept. Once the client accepts and shares a need, you can propose candidates.",
+      "agencyInviteCandidateAsk": "Sure. Which e-mail should the roster invitation go to?",
+      "agencyInviteCandidateDone": "The invitation is recorded. No e-mail is sent — the person signs in with that address and accepts; then they appear in your roster.",
+      "agencyInviteCandidateExists": "This person is already invited or already on your roster — nothing new was recorded.",
+      "agencyNotAgencyWorkspace": "This workspace is not a staffing agency, so client invitations do not apply here. Agency actions live in an agency workspace.",
+      "agencySwitchHint": "You can do that as your company — pick the workspace:",
+      "agencyClientDemandIntro": "Requests your clients shared:",
+      "agencyClientDemandNone": "No client has shared a request yet. Once a connected client shares one, it appears here.",
+      "agencyProposalsIntro": "Your proposals:",
+      "agencyProposalsNone": "No proposals yet. Once a client shares a need, you can propose a roster worker.",
+      "agencyProposeAsk": "Which request should the candidate be proposed for?",
+      "agencyProposeDone": "The proposal is recorded — the client sees it on their request and can accept or decline.",
+      "agencyRosterEmpty": "Your roster is empty, so there is nobody to propose yet. Invite a candidate first.",
+      "agencyUnavailable": "The agency data could not be read right now. Try again or open the company workspace.",
+      "agencyNext": "What's next?",
+      "chipInviteClient": "Invite a client",
+      "chipInviteCandidate": "Invite a candidate",
+      "chipClientDemand": "Client requests",
+      "chipProposalStatus": "Proposal status",
+      "chipProposeFor": "Propose a candidate",
+      "userClientDemand": "Show client requests",
+      "userProposalStatus": "How are my proposals doing?",
+      "learningCompassHint": "Your Learning Compass — direction, missing skills and fitting opportunities:",
+      "chipLearningCompass": "Learning Compass",
+      "inviteStudentHint": "A learner is invited with a personal link from the network area (relationship “Student”):",
+      "chipInviteStudent": "Invite a learner",
+      "programmesHint": "Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
+      "chipProgrammes": "Programmes & cohorts"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

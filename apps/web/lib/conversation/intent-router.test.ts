@@ -751,6 +751,66 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil 30 kg komkommers verkopen",
     de: "Ich möchte 500 Paletten verkaufen",
   },
+  // ── AGENCY (real recruiter pilot, 2026-09-04) — the first row is the exact
+  //    sentence the first real recruiter typed and the product did not
+  //    understand. ────────────────────────────────────────────────────────────
+  "invite-client": {
+    lt: "Noriu pakviesti klientą",
+    en: "Invite a client",
+    ru: "Пригласить клиента",
+    nl: "Klant uitnodigen",
+    de: "Kunden einladen",
+  },
+  "invite-candidate": {
+    lt: "Pakviesk darbuotoją į komandą",
+    en: "Invite a worker to my roster",
+    ru: "Пригласить работника",
+    nl: "Medewerker uitnodigen",
+    de: "Mitarbeiter einladen",
+  },
+  "client-demand": {
+    lt: "Parodyk kliento poreikį",
+    en: "Show me the client requests",
+    ru: "Запрос клиента",
+    nl: "Aanvraag van de klant",
+    de: "Kundenanfrage anzeigen",
+  },
+  "propose-candidate": {
+    lt: "Pasiūlyk kandidatą",
+    en: "Propose a candidate",
+    ru: "Предложить кандидата",
+    nl: "Kandidaat voorstellen",
+    de: "Kandidaten vorschlagen",
+  },
+  "proposal-status": {
+    lt: "Pasiūlymų būsena",
+    en: "Proposal status",
+    ru: "Статус предложений",
+    nl: "Status van mijn voorstellen",
+    de: "Stand der Vorschläge",
+  },
+  // ── STUDENT / INSTITUTION (route-class) ──────────────────────────────────
+  "learning-compass": {
+    lt: "Parodyk mano mokymosi kompasą",
+    en: "Show my learning compass",
+    ru: "Покажи мой учебный компас",
+    nl: "Toon mijn leerkompas",
+    de: "Zeig meinen Lernkompass",
+  },
+  "invite-student": {
+    lt: "Pakviesk studentą",
+    en: "Invite a learner",
+    ru: "Пригласить студента",
+    nl: "Leerling uitnodigen",
+    de: "Schüler einladen",
+  },
+  programmes: {
+    lt: "Sukurk programą",
+    en: "Create a cohort",
+    ru: "Создать программу",
+    nl: "Nieuwe opleiding aanmaken",
+    de: "Programm anlegen",
+  },
 };
 
 /**
