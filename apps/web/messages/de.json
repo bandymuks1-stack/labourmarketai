@@ -11719,6 +11719,7 @@
         "demandLocation": "Ort",
         "startDate": "Startdatum",
         "startDatePlaceholder": "JJJJ-MM-TT",
+        "endDate": "Enddatum",
         "programmeName": "Programmname",
         "programmeNamePlaceholder": "z. B. Schweißerkurs",
         "programmeDescription": "Beschreibung (optional)",

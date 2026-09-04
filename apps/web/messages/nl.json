@@ -11719,6 +11719,7 @@
         "demandLocation": "Locatie",
         "startDate": "Startdatum",
         "startDatePlaceholder": "JJJJ-MM-DD",
+        "endDate": "Einddatum",
         "programmeName": "Naam van de opleiding",
         "programmeNamePlaceholder": "bijv. Lascursus",
         "programmeDescription": "Beschrijving (optioneel)",

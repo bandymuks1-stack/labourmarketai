@@ -11719,6 +11719,7 @@
         "demandLocation": "Место",
         "startDate": "Дата начала",
         "startDatePlaceholder": "ГГГГ-ММ-ДД",
+        "endDate": "Дата окончания",
         "programmeName": "Название программы",
         "programmeNamePlaceholder": "напр., Курс сварщиков",
         "programmeDescription": "Описание (необязательно)",

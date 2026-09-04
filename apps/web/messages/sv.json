@@ -3495,6 +3495,7 @@
         "demandLocation": "Plats",
         "startDate": "Startdatum",
         "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
+        "endDate": "Slutdatum",
         "programmeName": "Programnamn",
         "programmeNamePlaceholder": "t.ex. Svetskurs",
         "programmeDescription": "Beskrivning (valfritt)",

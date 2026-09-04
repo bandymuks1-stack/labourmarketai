@@ -2444,6 +2444,9 @@ export function ConversationChat({
       if (v.window) {
         if (v.window.kind === "from_date" && v.window.startIso) {
           out.startDate = v.window.startIso;
+          // The END, when stated as a date or a duration ("iki spalio 20",
+          // "3 savaitėms") — never invented.
+          if (v.window.endIso) out.endDate = v.window.endIso;
           out.urgency = daysUntil(v.window.startIso) <= 7 ? "this_week" : "flexible";
         } else {
           out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";

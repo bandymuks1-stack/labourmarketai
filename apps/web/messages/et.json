@@ -3495,6 +3495,7 @@
         "demandLocation": "Asukoht",
         "startDate": "Alguskuupäev",
         "startDatePlaceholder": "AAAA-KK-PP",
+        "endDate": "Lõppkuupäev",
         "programmeName": "Programmi nimi",
         "programmeNamePlaceholder": "nt Keevitajate kursus",
         "programmeDescription": "Kirjeldus (valikuline)",
