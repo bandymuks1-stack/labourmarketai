@@ -3795,7 +3795,7 @@
       "documentAddDone": "Dokuments reģistrēts. Lūk, jūsu gatavība tagad:",
       "documentAddUnavailable": "Dokumentu katalogu šobrīd neizdevās ielādēt — reģistrējiet dokumentu dokumentu centrā.",
       "cvExportHint": "Jūsu apstiprinātais CV — viena lapa ar to, ko sistēma patiešām zina. Atveriet un izdrukājiet PDF.",
-      "chipCvSheet": "Mana CV lapa",
+      "chipCvSheet": "Atvērt CV lapu",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

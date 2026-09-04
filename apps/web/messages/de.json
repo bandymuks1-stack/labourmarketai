@@ -12096,7 +12096,7 @@
       "documentAddDone": "Dokument erfasst. So steht Ihre Bereitschaft jetzt:",
       "documentAddUnavailable": "Der Dokumentkatalog konnte gerade nicht geladen werden — erfassen Sie das Dokument im Dokumentencenter.",
       "cvExportHint": "Ihr geprüfter Lebenslauf — ein Blatt mit dem, was das System wirklich weiß. Öffnen und als PDF drucken.",
-      "chipCvSheet": "Mein Lebenslauf-Blatt",
+      "chipCvSheet": "Lebenslauf-Blatt öffnen",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },

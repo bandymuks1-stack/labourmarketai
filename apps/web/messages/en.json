@@ -12096,7 +12096,7 @@
       "documentAddDone": "Document recorded. Here is your readiness now:",
       "documentAddUnavailable": "The document catalogue could not be loaded right now — record it in the documents centre.",
       "cvExportHint": "Your verified CV — one sheet of what the system really knows. Open it and print to PDF.",
-      "chipCvSheet": "My CV sheet",
+      "chipCvSheet": "Open the CV sheet",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },
