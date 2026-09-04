@@ -14,6 +14,7 @@ import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
 import { DOCUMENT_GAP_LINE_CAP, type DocumentGap } from "@/lib/conversation/documents-gap";
 import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
+import { readLearningCompass } from "@/lib/learning/learning-compass";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -291,6 +292,122 @@ export async function runDocumentsReadiness(): Promise<WorkflowResult> {
           ? t("whyDocs", { countries: countries.map(countryName).join(", ") })
           : t("whyDocsNoCountry"),
     },
+    chips,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2c. Learning Compass — "what should I learn / what fits me / what am I becoming?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The student's five answers IN THE CHAT (owner contract 2026-09-04 §15):
+ * becoming · evidence · fits now · missing · next step — composed from the
+ * SAME canonical read the profile's compass section renders
+ * (`readLearningCompass` → `buildLearningCompass`). The compass was a route
+ * chip; a student asked "ką man mokytis?" and was sent to a page.
+ *
+ * Copy: the compass vocabulary (`learningCompass.*`) exists in the five
+ * routed locales; where a catalog does not carry it the answer says so and
+ * hands over the compass chip — never a half-translated answer.
+ */
+export async function runLearningCompass(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const read = await readLearningCompass();
+  if (read.status === "no-worker") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  if (read.status !== "ok") return blocked(t("compassBlocked"), t("whyCompassBlocked"));
+
+  const tc = await getTranslations("learningCompass");
+  if (!tc.has("becoming")) {
+    return {
+      kind: "answer",
+      text: t("compassLocaleGap"),
+      explanation: { why: t("whyCompass") },
+      chips: [{ id: "compass-page", label: t("chipCompassPage") }],
+    };
+  }
+  const tProf = await getTranslations("professions");
+  const tSkill = await getTranslations("skillNames");
+  const tLm = await getTranslations("labourMarket");
+  const tsd = await getTranslations("structuredDemand");
+  const prof = (slug: string) => (tProf.has(slug as never) ? (tProf(slug as never) as string) : slug.replace(/-/g, " "));
+  const skill = (slug: string) => (tSkill.has(slug as never) ? (tSkill(slug as never) as string) : slug);
+  const country = (code: string | null) =>
+    code && tLm.has(`countryNames.${code}` as never) ? (tLm(`countryNames.${code}` as never) as string) : (code ?? "—");
+
+  const { becoming, evidence, fitsNow, missing, nextSteps } = read.compass;
+  const lines: string[] = [];
+
+  // BECOMING
+  lines.push(`${tc("becoming")}: ${becoming.professionSlug ? prof(becoming.professionSlug) : tc("becomingNone")}`);
+  if (becoming.currentEducation?.institutionName) {
+    lines.push(
+      tc("studyingAt", { institution: becoming.currentEducation.institutionName }) +
+        (becoming.currentEducation.programOrField ? ` · ${tc("program", { program: becoming.currentEducation.programOrField })}` : ""),
+    );
+  }
+  for (const c of becoming.cohorts.slice(0, 2)) {
+    lines.push(tc("cohortLine", { program: c.programName, cohort: c.cohortName }));
+  }
+  // EVIDENCE
+  lines.push(
+    `${tc("evidence")}: ${tc("skills", { count: evidence.skillsTotal })} · ${tc("confirmed", { count: evidence.skillsConfirmed })} · ${tc("journalEntries", { count: evidence.journalEntries })}`,
+  );
+  // FITS NOW
+  lines.push(`${tc("fits")}:`);
+  if (fitsNow.length === 0) lines.push(tc("fitsNone"));
+  for (const o of fitsNow.slice(0, ANSWER_LIMIT)) {
+    // Facts joined with separators — no sentence to translate; every word
+    // in the line is a localized label.
+    const type =
+      o.opportunityType && tsd.has(`opportunityType.${o.opportunityType}` as never)
+        ? (tsd(`opportunityType.${o.opportunityType}` as never) as string)
+        : null;
+    const fit = o.status === "strong" ? tc("fitStrong") : tc("fitPossible");
+    lines.push(
+      `• ${[`${o.roleSlug ? prof(o.roleSlug) : "—"} — ${o.companyName ?? "—"}`, country(o.country), type, fit]
+        .filter(Boolean)
+        .join(" · ")}`,
+    );
+  }
+  // MISSING → the closing step is named, never "gap found" alone (§16)
+  lines.push(`${tc("missing")}:`);
+  if (missing.skills.length === 0) lines.push(tc("missingNone"));
+  else {
+    lines.push(
+      missing.source === "opportunities"
+        ? tc("missingFromOpportunities")
+        : missing.source === "program"
+          ? tc("missingFromProgram")
+          : tc("missingFromProfession"),
+    );
+    for (const m of missing.skills.slice(0, ANSWER_LIMIT)) {
+      lines.push(t("compassMissingLine", { skill: skill(m.slug), count: m.askedBy }));
+    }
+  }
+
+  // NEXT — each step is a real chat action (the same doors the section links).
+  const STEP_CHIP: Record<string, string> = {
+    choose_direction: "profile",
+    declare_skills: "cv",
+    add_current_education: "f:worker.add-education",
+    log_first_entry: "logwork",
+    set_availability: "f:worker.save-work-card",
+    express_interest: "jobs",
+    gain_evidence_for_missing: "logwork",
+  };
+  const chips = nextSteps
+    .slice(0, 2)
+    .map((step) => ({ id: STEP_CHIP[step] ?? "compass-page", label: tc(`step_${step}` as never) as string }));
+  chips.push({ id: "compass-page", label: t("chipCompassPage") });
+
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why: t("whyCompass") },
     chips,
   };
 }

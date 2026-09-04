@@ -208,9 +208,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // over the ONE dispatcher (`education.*` actions) — the learner invitation
   // opens the one inline form; "programmes" reads the institution's real
   // programmes and, when the sentence asks to create / add / assign, opens
-  // the matching form built from those rows. The student's compass stays a
-  // route to the profile section that renders it.
-  "learning-compass": { domain: "profile", access: "route", handler: "learningCompass", ownTyping: false },
+  // the matching form built from those rows.
+  // The student's compass is ANSWERED in the chat (becoming · evidence ·
+  // fits · missing · next) from the same read the profile section renders.
+  "learning-compass": { domain: "profile", access: "read", handler: "learningCompass", ownTyping: true },
   "invite-student": { domain: "company", access: "write", handler: "inviteStudent", ownTyping: false },
   programmes: { domain: "company", access: "write", handler: "programmes", ownTyping: true },
 

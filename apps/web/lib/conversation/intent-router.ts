@@ -463,6 +463,11 @@ const RULES: IntentRule[] = [
     patterns: [
       p("(mokymosi|learning|lern|leer|обучени|учебн)\\w*\\s*.{0,10}(kompas|compass|kompass|компас)", 8),
       p("\\b(kompas|compass|kompass|компас)", 5),
+      // Owner contract 2026-09-04 §15 — the student's own questions, in
+      // their own words: "what should I learn / study", "what am I
+      // becoming". Answered in the chat from the same compass read.
+      p("(ką|ka|what|was|wat|что)\\s+(man|turėčiau|should\\s+i|soll\\s+ich|moet\\s+ik|мне)\\s*.{0,10}(mokytis|studijuoti|learn|study|lernen|studieren|leren|studeren|учить|изучать)", 8),
+      p("(kuo|what)\\s+(aš\\s+)?(tampu|tapsiu|am\\s+i\\s+becoming)", 7),
     ],
   },
   {

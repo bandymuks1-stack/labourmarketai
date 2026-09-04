@@ -92,6 +92,7 @@ import {
   runRecentJournal,
   runSkillGap,
   runDocumentsReadiness,
+  runLearningCompass,
 } from "@/lib/ai-workspace/workflows";
 import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
@@ -2170,6 +2171,14 @@ export function ConversationChat({
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
       switch (chip.id) {
+        case "compass-page":
+          // The compass answer names its next steps as chat actions; the
+          // profile section that renders the full compass is one chip away
+          // (route emitted by the chat, never by the workflow layer — W4).
+          assistant(labels.learningCompassHint, [
+            { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
+          ]);
+          return;
         case "documents-centre":
           // The document-gap answer names the closing step; the centre (add,
           // renew, send for verification) is the ONE existing surface for it.
@@ -2971,10 +2980,15 @@ export function ConversationChat({
           runAgencyRead("progress");
         },
         // ── STUDENT / INSTITUTION — the one chip to the canonical surface ──
+        // Owner contract 2026-09-04 §15: the student's compass is ANSWERED
+        // in the chat (becoming · evidence · fits · missing · next step) for a
+        // person; a company workspace is handed the section.
         learningCompass: () =>
-          assistant(labels.learningCompassHint, [
-            { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
-          ]),
+          identity === "person"
+            ? runWorkflow(() => runLearningCompass())
+            : assistant(labels.learningCompassHint, [
+                { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
+              ]),
         // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────
         // The institution's commands by SENTENCE over the ONE dispatcher:
         // "pakviesk studentą" → one question (e-mail) → canonical invitation
