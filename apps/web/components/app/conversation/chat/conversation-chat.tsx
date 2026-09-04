@@ -2478,6 +2478,11 @@ export function ConversationChat({
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
       switch (chip.id) {
+        case "agency-offers":
+          // The attention chip ("N agentūros pasiūlymai laukia…") — the SAME
+          // in-chat offers answer the sentence runs.
+          startClientOffers();
+          return;
         case "compass-page":
           // The compass answer names its next steps as chat actions; the
           // profile section that renders the full compass is one chip away

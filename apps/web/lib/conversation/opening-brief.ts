@@ -286,6 +286,17 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
         addChip("link:/dashboard/network?relationship=student", t("chipInviteStudent"));
       }
     }
+    // Agency offers on the company's OWN demands still awaiting the client's
+    // decision — the other side of the agency's "offers awaiting" rung above.
+    // The chip is the in-chat offers answer with its accept / decline chips.
+    if (!ws.signals.staffingAgency && lines.length < MAX_LINES) {
+      const { loadClientOffersForChat } = await import("@/lib/conversation/client-offers");
+      const offers = await loadClientOffersForChat();
+      if (offers.kind === "ok" && offers.offers.length > 0) {
+        lines.push(t("briefEmployerAgencyOffersWaiting", { count: offers.offers.length }));
+        addChip("agency-offers", t("chipAgencyOffers"));
+      }
+    }
     // Candidates who raised a hand on the company's OWN demands and are
     // still waiting for an answer (interest signals not yet acknowledged —
     // the same read the candidates screen counts with). The chip is the

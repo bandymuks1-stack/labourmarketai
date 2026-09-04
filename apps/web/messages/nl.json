@@ -11915,6 +11915,8 @@
       "briefDocumentsExpiring": "{count, plural, one {# document verloopt binnenkort} other {# documenten verlopen binnenkort}}.",
       "briefDocumentsMissing": "{count, plural, one {# document ontbreekt voor uw landen} other {# documenten ontbreken voor uw landen}}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidaat wacht op uw antwoord} other {# kandidaten wachten op uw antwoord}}.",
+      "briefEmployerAgencyOffersWaiting": "{count, plural, one {# aanbod van een bureau wacht op uw beslissing} other {# aanbiedingen van bureaus wachten op uw beslissing}}.",
+      "chipAgencyOffers": "Aanbiedingen van bureaus",
       "briefEmployerPendingAbsences": "{count, plural, one {# afwezigheidsverzoek wacht} other {# afwezigheidsverzoeken wachten}} op uw besluit.",
       "briefEmployerAbsentToday": "{count, plural, one {# van uw medewerkers is} other {# van uw medewerkers zijn}} vandaag afwezig.",
       "chipEmployerInbox": "Beoordelingsrij",
