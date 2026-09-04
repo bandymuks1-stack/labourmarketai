@@ -3815,6 +3815,9 @@
       "capacityUnavailable": "Teamets tilgjengelighet kunne ikke leses nå.",
       "chipProjects": "Prosjekter",
       "chipAddTask": "Legg til oppgave",
+      "workerProjectsIntro": "Dine prosjekter ({count} aktive):",
+      "workerProjectsEnded": "avsluttet",
+      "chipOpenProjectPrefix": "Åpne",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

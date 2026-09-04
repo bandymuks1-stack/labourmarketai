@@ -3815,6 +3815,9 @@
       "capacityUnavailable": "Teamets tillgänglighet kunde inte läsas just nu.",
       "chipProjects": "Projekt",
       "chipAddTask": "Lägg till uppgift",
+      "workerProjectsIntro": "Dina projekt ({count} aktiva):",
+      "workerProjectsEnded": "avslutat",
+      "chipOpenProjectPrefix": "Öppna",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först."
     },

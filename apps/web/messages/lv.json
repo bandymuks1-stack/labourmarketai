@@ -3815,6 +3815,9 @@
       "capacityUnavailable": "Komandas pieejamību šobrīd neizdevās nolasīt.",
       "chipProjects": "Projekti",
       "chipAddTask": "Pievienot uzdevumu",
+      "workerProjectsIntro": "Jūsu projekti ({count} aktīvi):",
+      "workerProjectsEnded": "beigts",
+      "chipOpenProjectPrefix": "Atvērt",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

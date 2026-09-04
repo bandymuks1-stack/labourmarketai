@@ -9,9 +9,9 @@
 
 | Item | Value |
 |---|---|
-| Production | `d9af9d81` (#1493) — phone sheet yields to chips (prod-proven); `8aac9ab9` project readback proven. Next: `feat/cc/project-pulse` (PR after build) → read-only detail walk logs the pulse block — confirm `/api/health` `build` on resume |
-| `main` | #1467–#1474 · #1476–#1494. Open: branch `feat/cc/project-pulse` (build running → PR). RED draft: **#1475** My Space table (owner gate) |
-| Active P0 chain | PROJECT journey continued from real state: create → assign → worker log with project_id → pulse in the chat panel (PR) → the operations page + project centre already render the living Project Field (walked). Next connected candidates: project RESULT/REPORT by sentence (org figures exist; project-level report = the operations/handover pages), capacity (who is available — operations centre availability map), work packages (tasks by sentence). Owner gates unchanged (+ journal review v4 hold) |
+| Production | `8aac9ab9` (#1492) — project detail readback proven ("Priskirta 1 · E2E Worker Two"). Earlier tonight: `0bd1c542` CV sheet, `461326d2` valid-until + worker log on the project, `f49cc972`, `a726b2ce`, `6fc477d9`. Open: **#1493** phone sheet yields to chips (chain re-walks `walk-phone-sheet-prod.cjs` after deploy) — confirm `/api/health` `build` on resume |
+| `main` | #1467–#1474 · #1476–#1494 · #1497 task by sentence (merged 02:1x UTC). Open (auto-merge): **#1495** project pulse (rebased) · **#1498** who is available (rebased on main) · branch `feat/cc/worker-projects-in-chat` (stacked on #1498; build running → PR). RED draft: **#1475** My Space table (owner gate) |
+| Active P0 chain | PROJECT journey continued from real state: create → assign → worker log with project_id → pulse in the panel (#1495) → work packages by sentence (#1497; prod walk chain running) → who is available (#1498) → the WORKER's own assignments by sentence (branch). Visual Project Field (operations page + centre) walked. Next connected candidates: the worker's task by sentence ('ką turiu padaryti?' already answers with the 14-day plan incl. journal), stage progress by sentence, project report handover. Owner gates unchanged (+ journal review v4 hold) |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
 | Local stack | Docker Desktop dead → `LOCAL_DOCKER_UNAVAILABLE`; verification = unit/guards/typecheck/lint/build + CI + prod walks with bounded `e2e-*` identities (scratchpad `walk-*.cjs`, `wait-prod.cjs`; `curl` denied in this harness) |
@@ -41,7 +41,7 @@
 
 ## Queue (contract §33; next automatic step first)
 
-1. On resume: consume the cv-sheet walk + the refetch PR; then the S-items above; keep evaluating at journey level (owner note 2026-09-04 late).
+1. On resume: consume #1495 (pulse walk) / #1497 (task walk) / #1498 / worker-projects PR chains; then keep evaluating at journey level (owner notes 2026-09-04 late / 2026-09-05).
 2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
 3. F2: end date / duration in the demand structurer; the site as a project object.
 4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.

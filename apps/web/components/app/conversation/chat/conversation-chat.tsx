@@ -53,6 +53,7 @@ import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
+import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
 import { parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
@@ -392,6 +393,9 @@ export type ChatLabels = {
   capacityEmpty: string;
   capacityUnavailable: string;
   chipAddTask: string;
+  workerProjectsIntro: string;
+  workerProjectsEnded: string;
+  chipOpenProjectPrefix: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -1533,7 +1537,33 @@ export function ConversationChat({
       .then((res) => {
         setTyping(false);
         if (res.kind === "no-company-context") {
-          assistant(labels.projectsNoCompany);
+          // A PERSON asking for "my projects" means the projects they are
+          // ASSIGNED to (owner contract §11, prod walk 2026-09-05): the same
+          // read the worker's project page uses. Only with no assignment at
+          // all does the honest workspace line remain.
+          setTyping(true);
+          loadWorkerProjectsForChat()
+            .then((mine) => {
+              setTyping(false);
+              if (mine.kind !== "ok") {
+                assistant(labels.projectsNoCompany);
+                return;
+              }
+              const lines = mine.projects.map((pr) =>
+                `• ${pr.title}${pr.place ? ` — ${pr.place}` : ""}${pr.assignmentStatus === "ended" ? ` · ${labels.workerProjectsEnded}` : ""}`,
+              );
+              assistant(
+                [labels.workerProjectsIntro.replace("{count}", String(mine.activeCount)), ...lines].join("\n"),
+                mine.projects
+                  .filter((pr) => pr.assignmentStatus === "active")
+                  .slice(0, 3)
+                  .map((pr) => ({ id: `link:/dashboard/projects/${pr.projectId}`, label: `${labels.chipOpenProjectPrefix}: ${pr.title}` })),
+              );
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(labels.projectsNoCompany);
+            });
           return;
         }
         if (res.kind === "blocked") {
