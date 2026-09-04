@@ -176,6 +176,25 @@ const CHAT_KEYS = [
   "chipInviteStudent",
   "programmesHint",
   "chipProgrammes",
+  // Education by sentence (owner contract 2026-09-04 §15).
+  "eduInviteAsk",
+  "eduInviteDone",
+  "eduInviteCreatedNoEmail",
+  "eduProgrammesIntro",
+  "eduProgrammesNone",
+  "eduProgrammeLine",
+  "eduProgrammeCreated",
+  "eduCohortPick",
+  "eduCohortCreated",
+  "eduAssignNoCohort",
+  "eduAssignNoLearners",
+  "eduAssignDone",
+  "eduNotInstitution",
+  "eduUnavailable",
+  "eduNext",
+  "chipCreateProgramme",
+  "chipCreateCohort",
+  "chipAssignLearner",
 ] as const;
 
 const WORKLOG_KEYS = [

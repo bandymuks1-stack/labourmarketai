@@ -100,6 +100,16 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/company/employer-company-context",
       "@/lib/conversation/company-schemas",
       "@/lib/conversation/executor-contract",
+      // Owner contract 2026-09-04 §15 — the education institution's commands
+      // by sentence: the SAME canonical programme/cohort/member server
+      // actions the company page's forms call, and the SAME invitation layer
+      // the network panel uses (student relationship). The two telemetry
+      // modules emit the institution's `first_real_action` server-side (no
+      // write of their own). Added consciously.
+      "@/lib/education/program-actions",
+      "@/lib/invitations/actions",
+      "@/lib/telemetry/server-funnel",
+      "@/lib/telemetry/funnel-events",
     ]);
     const imports = [...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]);
     expect(imports.length).toBeGreaterThan(5);

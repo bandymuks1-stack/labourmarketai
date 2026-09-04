@@ -15,6 +15,15 @@ import { assignWorkerToProjectAction } from "@/lib/projects/actions";
 import { inviteClientAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import {
+  createCohortAction,
+  createProgramAction,
+  setCohortMemberAction,
+  type ProgramActionState,
+} from "@/lib/education/program-actions";
+import { createAndSendInvitations } from "@/lib/invitations/actions";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { z } from "zod";
 
 import {
@@ -285,4 +294,100 @@ export const COMPANY_EXECUTORS: {
         fd({ shareId: input.shareId, workerId: input.workerId, note: input.note ?? "" }),
       ),
     ),
+
+  // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
+  // The institution's commands by sentence. The organization is the ACTIVE
+  // workspace's (membership-validated resolver — never client-supplied); the
+  // RPCs re-check manager authority and the training_provider capability, so
+  // a company that is not an institution is refused THERE with a named
+  // reason, which the dispatcher reports honestly. Each first real write
+  // emits `first_real_action` server-side (the institution's TTFV).
+  "company.create-programme": async (input, ctx) => {
+    const org = await requireEmployerCompany();
+    if (!org.ok) return { ok: false, code: "not_authorized" };
+    const r = await createProgramAction(
+      { status: "idle" },
+      fd({
+        organizationId: org.organizationId,
+        name: input.name,
+        targetProfessionSlug: input.targetProfessionSlug ?? "",
+        educationTypeSlug: input.educationTypeSlug ?? "",
+        description: input.description ?? "",
+      }),
+    );
+    if (r.status === "ok") emitEducationFirstAction("programme_created", "education_program", ctx.locale);
+    return r.status === "ok" ? { ok: true, data: { programId: r.id ?? null } } : mapProgram(r);
+  },
+
+  "company.create-cohort": async (input, ctx) => {
+    const r = await createCohortAction(
+      { status: "idle" },
+      fd({
+        programId: input.programId,
+        name: input.name,
+        startsOn: input.startsOn ?? "",
+        endsOn: input.endsOn ?? "",
+      }),
+    );
+    if (r.status === "ok") emitEducationFirstAction("cohort_created", "education_cohort", ctx.locale);
+    return r.status === "ok" ? { ok: true, data: { cohortId: r.id ?? null } } : mapProgram(r);
+  },
+
+  "company.assign-learner": async (input, ctx) => {
+    const r = await setCohortMemberAction(
+      { status: "idle" },
+      fd({ cohortId: input.cohortId, profileId: input.profileId, status: "active" }),
+    );
+    if (r.status === "ok") emitEducationFirstAction("learner_assigned", "education_cohort_member", ctx.locale);
+    return r.status === "ok" ? { ok: true, data: { status: "active" } } : mapProgram(r);
+  },
+
+  "company.invite-learner": async (input, ctx) => {
+    // The SAME invitation the network panel sends for a learner: a
+    // `join_organization` invitation carrying the `student` relationship —
+    // accepted by the person, it becomes the institution↔learner link
+    // (engagement_contexts, relationship student). The RPC validates the
+    // capability (`training_provider`) and the relationship's invitability.
+    const org = await requireEmployerCompany();
+    if (!org.ok) return { ok: false, code: "not_authorized" };
+    const r = await createAndSendInvitations({
+      emails: input.email,
+      invitationType: "join_organization",
+      locale: ctx.locale,
+      recipientLocale: ctx.locale,
+      organizationId: org.organizationId,
+      invitedName: input.name ?? null,
+      relationshipSlug: "student",
+    });
+    // Readback states the REAL delivery: `sent` = provider acknowledged;
+    // `created` = stored, no e-mail configured (share the link) — never a
+    // fabricated "e-mail sent".
+    if (r.status !== "ok") return { ok: false, code: "not_authorized" };
+    const first = r.results[0];
+    if (!first) return { ok: false, code: r.invalid.length > 0 ? "invalid" : "error" };
+    if (r.status === "ok" && (first.outcome === "created" || first.outcome === "sent")) {
+      emitEducationFirstAction("learner_invited", "invitation", ctx.locale);
+      return { ok: true, data: { outcome: first.outcome, emailConfigured: r.emailConfigured } };
+    }
+    return { ok: false, code: first.outcome === "invalid_email" ? "invalid" : "error", message: first.outcome };
+  },
 });
+
+function mapProgram(r: ProgramActionState): ExecResult {
+  if (r.status === "forbidden") return { ok: false, code: "not_authorized" };
+  if (r.status === "invalid") return { ok: false, code: "invalid" };
+  return { ok: false, code: "error", message: r.status === "error" ? r.reason : undefined };
+}
+
+function emitEducationFirstAction(step: string, entityType: string, locale: string): void {
+  emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+    source: "education-chat",
+    route: `/${locale}/dashboard`,
+    metadata: {
+      surface: "education",
+      step,
+      role_context: "company",
+      entity_type: entityType,
+    },
+  });
+}

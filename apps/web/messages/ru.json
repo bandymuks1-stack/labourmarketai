@@ -11616,6 +11616,24 @@
           "description": "Пригласите человека в свою команду по e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Создать программу",
+          "description": "Создайте учебную программу в своём учреждении."
+        },
+        "createCohort": {
+          "label": "Создать группу",
+          "description": "Создайте группу (поток) в программе."
+        },
+        "assignLearner": {
+          "label": "Назначить студента",
+          "description": "Назначьте принятого студента в группу."
+        },
+        "inviteLearner": {
+          "label": "Пригласить студента",
+          "description": "Пригласите студента присоединиться к вашему учреждению."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "Просмотреть клиентов",
@@ -11701,6 +11719,18 @@
         "demandLocation": "Место",
         "startDate": "Дата начала",
         "startDatePlaceholder": "ГГГГ-ММ-ДД",
+        "programmeName": "Название программы",
+        "programmeNamePlaceholder": "напр., Курс сварщиков",
+        "programmeDescription": "Описание (необязательно)",
+        "learnerEmail": "E-mail студента",
+        "learnerEmailPlaceholder": "imya@pochta.ru",
+        "learnerName": "Имя (необязательно)",
+        "cohortName": "Название группы",
+        "cohortNamePlaceholder": "напр., Осень 2026",
+        "cohortStarts": "Начало (дата)",
+        "cohortEnds": "Окончание (дата)",
+        "cohort": "Группа",
+        "learner": "Студент",
         "demandLocationPlaceholder": "Город или регион",
         "teamSize": "Количество работников",
         "urgency": "Срочность",
@@ -11984,7 +12014,25 @@
       "inviteStudentHint": "Студента приглашают персональной ссылкой из раздела сети (связь «Студент»):",
       "chipInviteStudent": "Пригласить студента",
       "programmesHint": "Программы и группы ведутся в пространстве компании — там вы создадите программу, группу и назначите учащихся:",
-      "chipProgrammes": "Программы и группы"
+      "chipProgrammes": "Программы и группы",
+      "eduInviteAsk": "Хорошо. На какой e-mail пригласить студента?",
+      "eduInviteDone": "Приглашение отправлено. Студент присоединится к вашему учреждению, когда примет его.",
+      "eduInviteCreatedNoEmail": "Приглашение создано, но письмо не отправляется — поделитесь ссылкой из раздела сети.",
+      "eduProgrammesIntro": "Ваши программы:",
+      "eduProgrammesNone": "Программ пока нет. Начнём с первой.",
+      "eduProgrammeLine": "• {name} — групп: {cohorts} · спрос на рынке: {demand}",
+      "eduProgrammeCreated": "Программа создана. Теперь можно создать группу или пригласить студентов.",
+      "eduCohortPick": "Для какой программы создать группу?",
+      "eduCohortCreated": "Группа создана. Можно назначать студентов.",
+      "eduAssignNoCohort": "Групп пока нет — сначала создайте группу.",
+      "eduAssignNoLearners": "Принятых студентов пока нет. Пригласите студента — назначить можно будет после принятия приглашения.",
+      "eduAssignDone": "Студент назначен в группу.",
+      "eduNotInstitution": "Эта организация ещё не отмечена как учебное заведение. Отметьте это в разделе компании.",
+      "eduUnavailable": "Сейчас не удаётся прочитать программы. Это не значит, что их нет.",
+      "eduNext": "Что дальше?",
+      "chipCreateProgramme": "Создать программу",
+      "chipCreateCohort": "Создать группу",
+      "chipAssignLearner": "Назначить студента"
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",

@@ -11616,6 +11616,24 @@
           "description": "Nodig iemand per e-mail uit voor je team."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Opleiding aanmaken",
+          "description": "Maak een opleiding aan in uw instelling."
+        },
+        "createCohort": {
+          "label": "Groep aanmaken",
+          "description": "Maak een groep (lichting) aan in een opleiding."
+        },
+        "assignLearner": {
+          "label": "Leerling toewijzen",
+          "description": "Wijs een geaccepteerde leerling toe aan een groep."
+        },
+        "inviteLearner": {
+          "label": "Leerling uitnodigen",
+          "description": "Nodig een leerling uit om zich bij uw instelling aan te sluiten."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "Klanten bekijken",
@@ -11701,6 +11719,18 @@
         "demandLocation": "Locatie",
         "startDate": "Startdatum",
         "startDatePlaceholder": "JJJJ-MM-DD",
+        "programmeName": "Naam van de opleiding",
+        "programmeNamePlaceholder": "bijv. Lascursus",
+        "programmeDescription": "Beschrijving (optioneel)",
+        "learnerEmail": "E-mail van de leerling",
+        "learnerEmailPlaceholder": "naam@mail.nl",
+        "learnerName": "Naam (optioneel)",
+        "cohortName": "Naam van de groep",
+        "cohortNamePlaceholder": "bijv. Najaar 2026",
+        "cohortStarts": "Start (datum)",
+        "cohortEnds": "Einde (datum)",
+        "cohort": "Groep",
+        "learner": "Leerling",
         "demandLocationPlaceholder": "Stad of regio",
         "teamSize": "Aantal werknemers",
         "urgency": "Urgentie",
@@ -11984,7 +12014,25 @@
       "inviteStudentHint": "Een leerling nodig je uit met een persoonlijke link vanuit het netwerkgedeelte (relatie ‘Student’):",
       "chipInviteStudent": "Leerling uitnodigen",
       "programmesHint": "Opleidingen en groepen beheer je in de bedrijfswerkruimte — maak daar een opleiding en een groep aan en wijs leerlingen toe:",
-      "chipProgrammes": "Opleidingen en groepen"
+      "chipProgrammes": "Opleidingen en groepen",
+      "eduInviteAsk": "Goed. Op welk e-mailadres nodig ik de leerling uit?",
+      "eduInviteDone": "Uitnodiging verzonden. De leerling sluit zich bij uw instelling aan zodra hij of zij accepteert.",
+      "eduInviteCreatedNoEmail": "Uitnodiging aangemaakt, maar er wordt geen e-mail verstuurd — deel de link vanuit het netwerkgedeelte.",
+      "eduProgrammesIntro": "Uw opleidingen:",
+      "eduProgrammesNone": "Nog geen opleidingen. Laten we met de eerste beginnen.",
+      "eduProgrammeLine": "• {name} — groepen: {cohorts} · marktvraag: {demand}",
+      "eduProgrammeCreated": "Opleiding aangemaakt. U kunt nu een groep aanmaken of leerlingen uitnodigen.",
+      "eduCohortPick": "Voor welke opleiding is de groep?",
+      "eduCohortCreated": "Groep aangemaakt. U kunt leerlingen toewijzen.",
+      "eduAssignNoCohort": "Nog geen groepen — maak eerst een groep aan.",
+      "eduAssignNoLearners": "Nog geen geaccepteerde leerlingen. Nodig een leerling uit — toewijzen kan zodra hij of zij accepteert.",
+      "eduAssignDone": "Leerling toegewezen aan de groep.",
+      "eduNotInstitution": "Deze organisatie is nog niet gemarkeerd als opleidingsinstelling. Markeer dit in het bedrijfsgedeelte.",
+      "eduUnavailable": "Opleidingen kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+      "eduNext": "Wat nu?",
+      "chipCreateProgramme": "Opleiding aanmaken",
+      "chipCreateCohort": "Groep aanmaken",
+      "chipAssignLearner": "Leerling toewijzen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

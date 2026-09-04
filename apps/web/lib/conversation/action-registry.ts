@@ -588,6 +588,65 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "inviteCompanyWorkerAction" },
   },
 
+  // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
+  // An education institution is a company that holds the `training_provider`
+  // capability (I-2: one organization, many capabilities). Its commands
+  // existed only as page forms; these rows make them sentences over the ONE
+  // dispatcher. Authority is re-derived in SQL (`manages_organization` + the
+  // capability check inside each RPC), never here.
+  {
+    id: "company.create-programme",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.education.createProgramme.label",
+    descriptionKey: "conversation.actions.education.createProgramme.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company",
+    handler: { kind: "server_action", ref: "createProgramAction" },
+  },
+  {
+    id: "company.create-cohort",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.education.createCohort.label",
+    descriptionKey: "conversation.actions.education.createCohort.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company",
+    handler: { kind: "server_action", ref: "createCohortAction" },
+  },
+  {
+    id: "company.assign-learner",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.education.assignLearner.label",
+    descriptionKey: "conversation.actions.education.assignLearner.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company",
+    handler: { kind: "server_action", ref: "setCohortMemberAction" },
+  },
+  {
+    id: "company.invite-learner",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.education.inviteLearner.label",
+    descriptionKey: "conversation.actions.education.inviteLearner.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/network",
+    handler: { kind: "server_action", ref: "createAndSendInvitations" },
+  },
+
   // ── AGENCY ────────────────────────────────────────────────────────────────
   // An agency is a company TYPE (Direction A: `companies.company_type =
   // 'staffing_agency'`), never a root role — every real agency account since

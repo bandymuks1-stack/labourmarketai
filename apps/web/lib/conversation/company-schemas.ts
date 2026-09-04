@@ -152,6 +152,38 @@ export const companyInviteWorkerSchema = z.object({
   note: z.string().trim().max(500).nullable().optional(),
 });
 
+// ── EDUCATION (owner contract 2026-09-04 §15) ───────────────────────────────
+// The institution's commands existed only as page forms; these are the SAME
+// server actions (`lib/education/program-actions.ts`, the invitation layer)
+// reached by sentence through the ONE dispatcher. Closed-set validation
+// (profession / education-type slugs, manager authority, capability) stays
+// in the RPCs.
+const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+export const educationCreateProgrammeSchema = z.object({
+  name: z.string().trim().min(2).max(160),
+  targetProfessionSlug: z.string().trim().max(80).nullable().optional(),
+  educationTypeSlug: z.string().trim().max(40).nullable().optional(),
+  description: z.string().trim().max(2000).nullable().optional(),
+});
+
+export const educationCreateCohortSchema = z.object({
+  programId: uuid,
+  name: z.string().trim().min(1).max(120),
+  startsOn: isoDay.nullable().optional(),
+  endsOn: isoDay.nullable().optional(),
+});
+
+export const educationInviteLearnerSchema = z.object({
+  email: z.string().trim().email().max(254),
+  name: z.string().trim().max(120).nullable().optional(),
+});
+
+export const educationAssignLearnerSchema = z.object({
+  cohortId: uuid,
+  profileId: uuid,
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -184,6 +216,10 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,
+  "company.create-programme": educationCreateProgrammeSchema,
+  "company.create-cohort": educationCreateCohortSchema,
+  "company.invite-learner": educationInviteLearnerSchema,
+  "company.assign-learner": educationAssignLearnerSchema,
 } as const;
 
 export type CompanyActionId = keyof typeof COMPANY_ACTION_SCHEMAS;
