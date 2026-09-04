@@ -28,6 +28,7 @@ import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
 import { InlineActionForm } from "@/components/app/conversation/inline-action-form";
+import { DocumentFileEmbed } from "./document-file-embed";
 import { WorkerCvFlow } from "@/components/app/conversation/worker-cv-flow";
 import {
   WorkerBookingAction,
@@ -50,6 +51,7 @@ import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+import { loadDocumentFileTargetForChat } from "@/lib/conversation/document-file-chat";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
@@ -384,6 +386,15 @@ export type ChatLabels = {
   documentAddIntro: string;
   documentAddDone: string;
   documentAddUnavailable: string;
+  documentFileOffer: string;
+  documentFileChoose: string;
+  documentFileSubmit: string;
+  documentFileUploading: string;
+  documentFileSkip: string;
+  documentFileUploaded: string;
+  documentFileTooLarge: string;
+  documentFileUnsupported: string;
+  documentFileFailed: string;
   cvExportHint: string;
   chipCvSheet: string;
   taskCreateIntro: string;
@@ -2237,9 +2248,49 @@ export function ConversationChat({
             undefined,
             undefined,
             Object.keys(prefill).length > 0 ? prefill : undefined,
-            () => {
-              assistant(labels.documentAddDone);
-              runWorkflow(() => runDocumentsReadiness());
+            (res) => {
+              // §5.5 one backbone: the FILE is offered right here, over the
+              // same write the documents page uses — only when that page's
+              // file layer really answers for the row just recorded.
+              const data = res.data ?? {};
+              const savedSlug = typeof data.typeSlug === "string" ? data.typeSlug : "";
+              const savedCountry = typeof data.country === "string" && data.country !== "" ? data.country : null;
+              const finishWithReadiness = () => {
+                assistant(labels.documentAddDone);
+                runWorkflow(() => runDocumentsReadiness());
+              };
+              if (savedSlug === "") {
+                finishWithReadiness();
+                return;
+              }
+              loadDocumentFileTargetForChat({ typeSlug: savedSlug, country: savedCountry })
+                .then((target) => {
+                  if (target.kind !== "ready") {
+                    finishWithReadiness();
+                    return;
+                  }
+                  assistant(labels.documentFileOffer);
+                  pushEmbed(
+                    <DocumentFileEmbed
+                      documentId={target.documentId}
+                      labels={{
+                        choose: labels.documentFileChoose,
+                        submit: labels.documentFileSubmit,
+                        uploading: labels.documentFileUploading,
+                        skip: labels.documentFileSkip,
+                        tooLarge: labels.documentFileTooLarge,
+                        unsupported: labels.documentFileUnsupported,
+                        failed: labels.documentFileFailed,
+                      }}
+                      onUploaded={() => {
+                        assistant(labels.documentFileUploaded);
+                        runWorkflow(() => runDocumentsReadiness());
+                      }}
+                      onSkip={finishWithReadiness}
+                    />,
+                  );
+                })
+                .catch(() => finishWithReadiness());
             },
           );
         })
@@ -2248,7 +2299,7 @@ export function ConversationChat({
           assistant(labels.documentAddUnavailable, [{ id: "documents-centre", label: labels.documentsChip }]);
         });
     },
-    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, openForm, runWorkflow],
+    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, labels.documentFileOffer, labels.documentFileChoose, labels.documentFileSubmit, labels.documentFileUploading, labels.documentFileSkip, labels.documentFileUploaded, labels.documentFileTooLarge, labels.documentFileUnsupported, labels.documentFileFailed, openForm, runWorkflow, pushEmbed],
   );
 
   /** PROJECT → WORK (§11): "pridėk užduotį projektui: …" — the one form over
