@@ -86,7 +86,22 @@ real pilot friction (P0, chat-first doctrine).
 
 ## Production verification (E2E agency identity, not the real user)
 
-Recorded below after deploy: the exact sentence → the one missing question →
-the persisted invitation → the readback; `proposal-status` and
-`client-demand` answered in the chat; an unknown sentence gets the agency
-fallback, never worker copy.
+Deployed as #1466 → `00f3749a` (07:2x UTC). Bounded synthetic agency identity
+(`e2e-timing-…`, owner of "E2E Agentūra UAB (testinis subjektas)"), Chromium
+390 px against production:
+
+| Step | Observed |
+|---|---|
+| greeting | agency starters: "Pakviesti klientą", "Klientų poreikiai", "Pasiūlymų būsena" |
+| typed "noriu pakviesti klientą" | "Gerai. Kokiu el. paštu pakviesti klientą?" + the one-field form (1.5 s after send); no worker fallback |
+| e-mail → Tęsti → Išsaugoti | "Pakvietimas sukurtas ir laukia kliento patvirtinimo…" (3.2 s from the sentence) |
+| DB | `agency_client_connections` row `c528bdd6…`, status `pending`, agency = the E2E agency |
+| telemetry (one profile, same minute) | `chat_intent_recognized{step: invite-client, role_context: agency}` → `chat_missing_data_asked` → `chat_action_attempted` → `first_real_action{surface: agency_bridge}` → `chat_action_persisted` |
+| "kaip sekasi mano pasiūlymams" | answered in the chat (no proposals yet), no fallback |
+| "parodyk klientų poreikius" | answered in the chat (no shared requests yet), no fallback |
+| "blablabla xyz" | the AGENCY fallback ("Galiu pakviesti klientą ar kandidatą…"), never worker copy; `chat_intent_unrecognized` recorded |
+
+Residue: one labelled E2E connection (`e2e-chat-client-2026-09-04@labourmarket.ai`, pending) on the E2E agency.
+
+The real account made no chat action yet after the fix (0 connections on
+"Labour market ai Sp. z o.o"); REAL_RECRUITER_USED_PRODUCT stays FALSE until it does.
