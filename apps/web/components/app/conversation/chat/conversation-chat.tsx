@@ -31,6 +31,7 @@ import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-fo
 import { agencyProposeCandidateForm, getCompanyForm } from "@/lib/conversation/company-forms";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
+import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { baseIdentityForRole } from "@/lib/config/roles";
@@ -371,9 +372,11 @@ export function ConversationChat({
   mobile = false,
   personalIntroPayload = null,
   countryLabels,
-  educationWorkspace = false,
   agencyWorkspace = false,
   learnerContextLine = null,
+  starters = null,
+  contextFallback = null,
+  workspaceContextLine = null,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -396,8 +399,9 @@ export function ConversationChat({
   countryLabels?: Record<string, string>;
   /** M10 — SERVER-resolved: the active organization holds the education
    *  capability and not the employer one (`isEducationFirstWorkspace` over the
-   *  canonical `organization_roles` read). Decides only WHICH starters the
-   *  company greeting offers — the two-base-identity model is untouched. */
+   *  canonical `organization_roles` read). Since 2026-09-04 the starters are
+   *  derived on the server from the same reading (`starters` below); the flag
+   *  stays on the contract for the page and the design preview. */
   educationWorkspace?: boolean;
   /** Real recruiter pilot (2026-09-04) — SERVER-resolved: the active
    *  organization's company is a staffing agency (`company_type`). Decides
@@ -410,6 +414,23 @@ export function ConversationChat({
    *  the institution's real name. `null` = no link or the read degraded —
    *  nothing is rendered, never a fabricated learning context. */
   learnerContextLine?: string | null;
+  /** STARTERS ARE SUGGESTIONS (owner contract 2026-09-04 §6) — SERVER-derived
+   *  from the workspace's held capabilities + the facts that decide each
+   *  track's next real step (`lib/conversation/starters.ts`). At most three,
+   *  a MIX across capabilities, never one role's fixed menu. `null` (design
+   *  preview / script) falls back to the identity default. Labels resolve
+   *  from the ONE chat label bag; ids are the existing `handleChip`
+   *  vocabulary. */
+  starters?: readonly StarterChipSpec[] | null;
+  /** The not-understood answer, composed on the server from the same
+   *  capability tracks ("I can help with needs, candidates, projects,
+   *  clients…"). `null` = the identity's plain fallback. */
+  contextFallback?: string | null;
+  /** The "on whose behalf" line for a company workspace, with the real
+   *  organization name and its capabilities — the active context stated in
+   *  the column the person reads (CHAT_FIRST_DASHBOARD CF-4), never only in
+   *  the header chip. `null` = nothing rendered. */
+  workspaceContextLine?: string | null;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -435,59 +456,22 @@ export function ConversationChat({
    */
   const canActAsEmployer = Boolean(auth0?.roles?.includes("company"));
 
+  /**
+   * The greeting row: signal-derived suggestions from the server (a mix across
+   * the capabilities the workspace holds — see `lib/conversation/starters.ts`),
+   * or the identity default when the page did not resolve any (design
+   * preview). OWNER RULING 2026-07-29 (§D): at most THREE meaningful starts;
+   * everything else is contextual. OWNER CONTRACT 2026-09-04 (§5–§6): the row
+   * suggests, it never bounds — the router understands every sentence
+   * regardless of which chips are shown, and being an agency or a school
+   * never erases what else the company does.
+   */
   const starterChips: ChoiceChip[] = useMemo(
     () =>
-      identity === "company"
-        ? educationWorkspace
-          ? [
-              // M10 — the education institution's real first steps, within the
-              // SAME company identity (no third base identity). Every chip
-              // routes to an EXISTING canonical surface (rebuild W4 rule):
-              // the network invite panel is where a learner link is created
-              // (`join_organization` + relationship `student`), the company
-              // hub carries the capabilities card, and the communication
-              // surface is where linked learners are reached. Same 1–3 cap.
-              { id: "link:/dashboard/network", label: labels.chipEduInviteLearner },
-              { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
-              { id: "link:/dashboard/communication", label: labels.navMessages },
-            ]
-          : agencyWorkspace
-            ? [
-                // Real recruiter pilot (2026-09-04): the agency's first
-                // value chain, as chat actions — the client invitation is
-                // the ONE inline form over the canonical dispatcher; the two
-                // reads answer INSIDE the chat with the real bridge rows.
-                { id: "f:agency.invite-client", label: labels.chipInviteClient },
-                { id: "agency:demand", label: labels.chipClientDemand },
-                { id: "agency:progress", label: labels.chipProposalStatus },
-              ]
-            : [
-            // The employer's primary action — the canonical demand intake as
-            // an inline conversation form (company.create-demand executor).
-            // Employer greeting also honours the 1–3 cap (§D).
-            { id: "f:company.create-demand", label: labels.chipNeedWorkers },
-            // W8: candidates are an ANSWER now, not a route. This chip used to
-            // be `link:/dashboard/company/scouting` — the employer's second
-            // step took them out of the workspace, which is exactly what a
-            // chat-first product must not do. The full screen is still there,
-            // one action away from every state of the result.
-            { id: "candidates", label: labels.chipCandidates },
-            // W11: the employer's third meaningful start is their running
-            // work. The agenda stays reachable by typing — the owner cap is
-            // THREE starters, so a fourth chip is not an option and projects
-            // is the more employer-shaped of the two.
-            { id: "projects", label: labels.chipProjects },
-          ]
-        : [
-            // OWNER RULING 2026-07-29 (§D): the six-chip wall is gone. The
-            // greeting offers at most THREE meaningful starts; everything
-            // else is contextual — the opening brief and each answer's own
-            // follow-ups surface actions when they are actually relevant.
-            { id: "logwork", label: labels.chipLogWork },
-            { id: "cv", label: labels.chipCv },
-            { id: "jobs", label: labels.chipJobs },
-          ],
-    [labels, identity, educationWorkspace, agencyWorkspace],
+      (starters ?? personStarters({ learnerLinked: false }))
+        .slice(0, STARTER_CAP)
+        .map((s) => ({ id: s.id, label: labels[s.labelKey] })),
+    [labels, starters],
   );
 
   /**
@@ -497,16 +481,14 @@ export function ConversationChat({
    * offers" above employer chips — worker copy for a company context. A
    * fallback is the product's description of itself; it must describe the
    * capabilities of the context the person is standing in, never another
-   * actor's. Same three-way split the starters already make.
+   * actor's — and ALL of them (owner contract 2026-09-04 §5): the server
+   * composes the sentence from the capability tracks the workspace holds, so
+   * an agency that also employs hears both. The plain company / worker copy
+   * stands only when nothing was resolved.
    */
   const fallbackText =
-    identity === "company"
-      ? agencyWorkspace
-        ? labels.fallbackAgency
-        : educationWorkspace
-          ? labels.fallbackEducation
-          : labels.fallbackCompany
-      : labels.fallback;
+    contextFallback ??
+    (identity === "company" ? labels.fallbackCompany : labels.fallback);
   /** Coarse role for the chat-execution funnel — the EXISTING telemetry
    *  vocabulary; agency = the company identity in an agency workspace. */
   const roleContextNow: "worker" | "company" | "agency" =
@@ -577,8 +559,24 @@ export function ConversationChat({
         } as ChatMessage,
       });
     }
+    // ACTIVE CONTEXT = "on whose behalf am I acting?" (owner contract
+    // 2026-09-04 §5; CF-4). A company workspace opens by naming the real
+    // organization and what the product can do for it here — stated in the
+    // column the person reads, with the same starter row moved under it.
+    if (workspaceContextLine && identity === "company") {
+      opening.push({
+        id: nid(),
+        message: {
+          id: nid(),
+          role: "assistant",
+          kind: "text",
+          text: workspaceContextLine,
+          chips: starterChips,
+        } as ChatMessage,
+      });
+    }
     return opening;
-  }, [script, greetingText, labels.assistantName, starterChips, learnerContextLine, identity]);
+  }, [script, greetingText, labels.assistantName, starterChips, learnerContextLine, workspaceContextLine, identity]);
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);

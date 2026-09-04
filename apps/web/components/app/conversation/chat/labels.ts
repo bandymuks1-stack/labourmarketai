@@ -143,6 +143,9 @@ const CHAT_KEYS = [
   "fallbackCompany",
   "fallbackAgency",
   "fallbackEducation",
+  // Owner contract 2026-09-04 §5–§6: the composed capability sentence lives
+  // on the server (`fallbackComposed`, `workspaceIntro`, `capPhrase*` are
+  // resolved in the page); no new client label.
   "agencyInviteClientAsk",
   "agencyInviteClientPrefilled",
   "agencyInviteClientDone",

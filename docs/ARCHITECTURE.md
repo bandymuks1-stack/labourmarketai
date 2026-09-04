@@ -37,6 +37,7 @@ PRODUCT_UNIVERSE_LOCK_V2              ← world architecture
   ├─ PRODUCT_VISION_LOCK_V1             (the twelve elements, four pillars)
   ├─ OPPORTUNITY_REALIZATION_LOCK_V1    (product boundary + value flywheel, A-13)
   ├─ ORGANIZATION_ROLE_ORCHESTRATION_V1 (one organization, MANY roles)
+  ├─ OWNER_MASTER_EXECUTION_CONTRACT_2026-09-04 (interaction + execution rules, §5.5)
   └─ PRODUCT_CONSTITUTION               (axioms + Product Gate)
       └─ everything else
 ```
@@ -182,6 +183,59 @@ internships, projects, laboratory tasks, competitions, workshops,
 certifications, volunteering, presentations, reports, research, team
 participation and real practical work. **Absence of formal employment must
 never render as "no experience" or an empty profile.**
+
+### 5.5 Owner Master Execution Contract (2026-09-04) — interaction + execution rules
+
+Owner text recorded 1:1 in
+[`docs/product/OWNER_MASTER_EXECUTION_CONTRACT_2026-09-04.md`](product/OWNER_MASTER_EXECUTION_CONTRACT_2026-09-04.md).
+It **extends** the locks above (nothing removed). What it adds that no earlier
+document stated as a binding rule:
+
+| Rule | Meaning for implementation |
+|---|---|
+| **Shared canonical action backbone** (owner clarification 2026-09-04) | The canonical dispatcher / authorization / domain execution / persistence / audit / state-readback path is the ONE action backbone. CONVERSATION enters it through `NATURAL LANGUAGE → INTENT → CONTEXT → MISSING DATA where required → AUTHORIZATION → CANONICAL ACTION/DISPATCHER → DOMAIN EXECUTION → REAL STATE CHANGE → AUDIT/PROVENANCE → STATE READBACK → RESULT` (proven by #1466). **Chat-first, NOT chat-only:** direct visual / inline interactions (dragging a worker or team on the Project Field, selecting an object on the World Map, acting from an Attention item, a pinned My Space shortcut, confirming a proposed movement, comparing candidates visually, manipulating a timeline, approving evidence, a minimal inline form) are legitimate when they are the more natural human interaction. They enter the SAME backbone with an explicit structured action + context and are never forced through the natural-language router — and they never create a parallel domain executor, authorization path, or a second Person / Company / Project / Demand / Skills / Document / Work Journal / Matching / Communication / Report truth. "Move Team A from X to Y next week" said in chat and dragged on the field resolve to the SAME proposed movement, what-if, authorization, consequence calculation, confirmation and persisted state. See the backbone diagram below. |
+| **Four cooperating layers over one state** | CONVERSATION (control) · WORLD (see reality) · MY SPACE (pins = references to canonical entities/actions/views, never duplicated state) · ATTENTION (what changed / why it matters / what to do). Refines `WORLD_STATE_UX_ARCHITECTURE_V1` (AI Conversation · World Map · Context Panel): My Space and Attention are content of the same workspace, not new screens. |
+| **Active context ≠ role tunnel** | Active context answers "on whose behalf am I acting?" It never locks the product to one role. A company holds MANY capabilities at once (`ORGANIZATION_ROLE_ORCHESTRATION_V1`, I-2); classification may shape authorization, suggestions, compliance and matching, never erase a legitimate capability. The 2026-09-04 production drift (an agency workspace reduced to three agency chips) is the named failure. |
+| **Starters are suggestions, not navigation** | Suggestion chips are a SMALL set derived from signals (context, unfinished actions, attention state, recent/frequent use, pins, current project, real demand, next action) — not a fixed per-role menu, never a product boundary, never a substitute for the router. |
+| **Ordinary-human-usable is the acceptance bar** | A journey is complete only when a new person, without instructions, states a need in their own words and obtains a real persisted result with an obvious next action. "Go to X, open Y" in normal use = not complete. |
+| **Matching continues after "no"** | `GAP → WHY → CONSEQUENCE → SOLUTION → WHO CAN HELP → TIME/COST → ACTION`, at person / team / project / company / education / market level. Marketplace is the gap-fulfilment layer of the same world. |
+| **Documents are first-class** | have / valid / expires / missing / required / why / for what / by when / who can issue / who can help / next — with immutable evidence kept apart from current validity. |
+| **Communication translation ≠ language capability** | a translated conversation never satisfies a language requirement in matching. |
+| **Agentai OS boundary** | external discovery / radar / outreach / provider routing live in Agentai OS behind an explicit bridge; LabourMarket.ai owns identity, evidence, demand, matching, journeys and product interaction. `DEMAND VALIDITY ≠ OUTREACH ELIGIBILITY`. |
+| **Execution engine** | RECOVER → CONNECT → IMPLEMENT → TEST → DEPLOY → PROD VERIFY → OBSERVE → FIX → CONTINUE, driven by a completion queue; owner gates only for genuine owner-only decisions (§31); the checkpoint of §35 is `docs/launch/RESUME_CHECKPOINT_<date>.md`. |
+
+```
+                         ┌─ CONVERSATION            natural language → intent/context
+                         ├─ WORLD / MAP / FIELD     structured visual action + context
+HUMAN INTENT ────────────┼─ MY SPACE                canonical shortcut/action reference
+                         ├─ ATTENTION               contextual canonical action
+                         └─ DIRECT VISUAL / INLINE  structured action + context
+                                      │
+                                      ▼
+                         ONE CANONICAL ACTION BACKBONE
+                                      │
+                         AUTHORIZATION / POLICY
+                                      │
+                         CANONICAL DOMAIN EXECUTOR
+                                      │
+                         REAL CANONICAL STATE
+                                      │
+                         AUDIT / PROVENANCE
+                                      │
+                         STATE READBACK
+                                      │
+                         ALL DEPENDENT REPRESENTATIONS UPDATE
+```
+
+CONVERSATION = CONTROL · WORLD = SEE / MANIPULATE REALITY · MY SPACE = FAST
+PERSONAL ACCESS · ATTENTION = WHAT NEEDS ACTION — over ONE CANONICAL WORLD.
+Never build two implementations of a business action. This clarification is
+not a licence for a dashboard framework, widget system or ERP menu.
+
+Where this contract and an older owner text differ in **reach**, the broader
+requirement stands (§6). Where they differ in an **interaction or execution
+rule**, the 2026-09-04 text governs. `PLATFORM_DOCTRINE` remains supreme for
+technical/legal safety.
 
 ---
 

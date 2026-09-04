@@ -25,12 +25,13 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { baseIdentityForRole } from "@/lib/config/roles";
-import { getActiveOrganizationContext } from "@/lib/company/active-organization";
-import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
-import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
-import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
 import { listMyEngagements } from "@/lib/invitations/network";
+import {
+  loadCompanyStarterContext,
+  personStarterContext,
+  type WorkspaceStarterContext,
+} from "@/lib/conversation/starter-signals";
+import { capabilityPhraseKeys, deriveStarters } from "@/lib/conversation/starters";
 
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
@@ -78,22 +79,28 @@ export default async function DashboardHomePage({
   // block appears the moment it is known.
   const personalIntroPayload: Promise<PersonalIntroPayload> =
     loadPersonalIntroPayload();
-  // M10 — HOME IDENTITY ADAPTATION, within the two-base-identity model.
-  // Which starters the company greeting offers depends on what the active
-  // organization DECLARED it does (canonical `organization_roles` read, legacy
-  // column fallback — the same layer the invite panel and the company hub
-  // read). For a person, one RLS-scoped read answers whether an ACTIVE
-  // learner link exists, so the opening can acknowledge the real learning
-  // context. Both reads run in parallel with the booking read below; every
-  // failure degrades to the plain greeting — nothing is fabricated.
+  // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
+  // §5–§6, ARCHITECTURE §5.5). The company greeting used to branch on ONE
+  // flag (education | agency | employer) and show that role's three chips —
+  // the real recruiter's workspace, an agency that also holds needs, a roster
+  // and projects, opened as "Agency Mode". Now the server resolves the ACTIVE
+  // workspace's capabilities and the few facts that decide each track's next
+  // real step, and the pure resolver returns a small MIX. For a person, one
+  // RLS-scoped read answers whether an ACTIVE learner link exists, so the
+  // opening can acknowledge the real learning context. Every read degrades to
+  // the plain greeting — nothing is fabricated.
   const identity = baseIdentityForRole(activeRole) ?? "person";
-  const [{ offers, labels: bookingLabels }, educationWorkspace, learnerLink, agencyWorkspace] =
-    await Promise.all([
-      loadBookingOffers(activeRole),
-      identity === "company" ? loadEducationWorkspaceFlag() : false,
-      identity === "person" ? loadActiveLearnerLink() : null,
-      identity === "company" ? loadAgencyWorkspaceFlag() : false,
-    ]);
+  const [{ offers, labels: bookingLabels }, learnerLink, starterContext] = await Promise.all([
+    loadBookingOffers(activeRole),
+    identity === "person" ? loadActiveLearnerLink() : null,
+    identity === "company"
+      ? loadCompanyStarterContext()
+      : Promise.resolve<WorkspaceStarterContext | null>(null),
+  ]);
+  const workspace: WorkspaceStarterContext =
+    starterContext ?? personStarterContext(Boolean(learnerLink));
+  const { agencyWorkspace, educationWorkspace } = workspace;
+  const starters = deriveStarters(workspace.signals);
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
@@ -124,6 +131,21 @@ export default async function DashboardHomePage({
     identity === "person" && learnerLink
       ? tChat("learnerGreetingContext", { institution: learnerLink })
       : null;
+  // The not-understood answer and the opening line describe the world the
+  // person stands in, composed from the capability tracks the workspace
+  // genuinely holds — an agency that is also an employer hears BOTH. Phrases
+  // are joined here, on the server, so the composed sentence is one
+  // localized string (no client-side grammar).
+  const phraseKeys = capabilityPhraseKeys(workspace.signals);
+  const capabilityList = phraseKeys.map((k) => tChat(k)).join(", ");
+  const contextFallback =
+    identity === "company" && phraseKeys.length > 0
+      ? tChat("fallbackComposed", { list: capabilityList })
+      : null;
+  const workspaceContextLine =
+    identity === "company" && workspace.organizationName && phraseKeys.length > 0
+      ? tChat("workspaceIntro", { company: workspace.organizationName, list: capabilityList })
+      : null;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -150,55 +172,12 @@ export default async function DashboardHomePage({
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}
         learnerContextLine={learnerContextLine}
+        starters={starters}
+        contextFallback={contextFallback}
+        workspaceContextLine={workspaceContextLine}
       />
     </>
   );
-}
-
-/**
- * M10 — is the ACTIVE organization an education-first workspace?
- *
- * `getActiveOrganizationContext` is request-cached (the layout already runs
- * it), so the only new IO is the one `organization_roles` read the invite
- * panel and the company hub already perform per organization. Declared rows
- * win; the legacy column is the fallback (`organizationCapabilities`
- * semantics). Any failure reads as `false` — the plain employer greeting,
- * never an invented capability.
- */
-/**
- * Real recruiter pilot (2026-09-04) — is the ACTIVE workspace a staffing
- * agency? Same resolver the company page uses (membership-validated employer
- * context → creator-or-governing-member company read → `company_type`).
- * Decides which starters and which fallback the company greeting offers; the
- * two-base-identity model is untouched (an agency is a company TYPE). Any
- * failure reads as `false` — the plain employer greeting, never an invented
- * agency.
- */
-async function loadAgencyWorkspaceFlag(): Promise<boolean> {
-  try {
-    const ctx = await resolveEmployerCompanyContext();
-    if (ctx.kind !== "ok") return false;
-    const company = await getOwnedCompanyById(ctx.companyId);
-    return company.kind === "ok" && company.row?.companyType === "staffing_agency";
-  } catch {
-    return false;
-  }
-}
-
-async function loadEducationWorkspaceFlag(): Promise<boolean> {
-  try {
-    const orgContext = await getActiveOrganizationContext();
-    if (!orgContext.activeOrganizationId) return false;
-    const roleSlugs = await readOrganizationCapabilities(
-      orgContext.activeOrganizationId,
-    );
-    return isEducationFirstWorkspace({
-      roleSlugs,
-      legacyType: orgContext.activeOrganization?.organizationType ?? null,
-    });
-  } catch {
-    return false;
-  }
 }
 
 /**
