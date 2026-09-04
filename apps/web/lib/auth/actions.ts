@@ -115,9 +115,14 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     });
   }
 
-  // company/agency entity rows seed a draft name from role_data.name.
+  // Legacy submits (no first-run intents) seed a draft company/agency name
+  // from role_data.name. The first-run router NEVER does: `display_name` is
+  // the PERSON's name there, and "<person> UAB" is a legal entity nobody
+  // stated (doctrine §7 — no fabricated data). The company row stays an
+  // unnamed shell for the few seconds until the canonical setup form, which
+  // onboarding opens next, gives it its real identity.
   const roleData = (r: Role): Record<string, string> =>
-    (r === "company" || r === "agency") && display_name
+    (r === "company" || r === "agency") && display_name && intents.length === 0
       ? { name: `${display_name} UAB` }
       : {};
 

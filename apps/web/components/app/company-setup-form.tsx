@@ -88,6 +88,7 @@ export function CompanySetupForm({
   targetCompanyId,
   presetCompanyType,
   presetCapability,
+  firstSetup = false,
 }: {
   readonly existing: CompanyRow | null;
   readonly labels: CompanySetupFormLabels;
@@ -102,6 +103,10 @@ export function CompanySetupForm({
    *  intent). Presets never override an EXISTING company's stored type. */
   readonly presetCompanyType?: CompanyType;
   readonly presetCapability?: "training_provider";
+  /** The row being edited is an unnamed SHELL from onboarding (first setup):
+   *  the first-run preset is the person's actual choice, the shell's stored
+   *  default type is not — so the preset wins here and only here. */
+  readonly firstSetup?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     CompanySetupFormState | null,
@@ -215,7 +220,11 @@ export function CompanySetupForm({
         <OptionCards
           name="company_type"
           ariaLabel={labels.companyType}
-          defaultValue={existing?.companyType ?? presetCompanyType ?? "other"}
+          defaultValue={
+            (firstSetup
+              ? (presetCompanyType ?? existing?.companyType)
+              : (existing?.companyType ?? presetCompanyType)) ?? "other"
+          }
           testId="company-setup-company-type"
           options={COMPANY_TYPES.map((type) => ({
             value: type,

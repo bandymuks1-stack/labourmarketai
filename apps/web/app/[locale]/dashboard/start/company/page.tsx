@@ -90,10 +90,23 @@ export default async function CompanyStartPage({
   const migrationNeeded = owned.kind === "needs-migration";
   const ownedRows: readonly CompanyRow[] = owned.kind === "ok" ? owned.rows : [];
 
+  // A SHELL is a company row that exists but was never given an identity:
+  // `complete_onboarding` (company intent) and `add_role` insert one with no
+  // legal name before this form is ever seen. It is the person's unfinished
+  // FIRST organisation, so it is the row this form completes — never a reason
+  // to insert a second one. Real pilot 2026-09-02: shell + `?new=1` produced
+  // two organisations, and the workspace resolver (fail-closed on ambiguity)
+  // then showed "no company profile" on the dashboard.
+  const isShellRow = (r: CompanyRow) => r.legalName === null;
+  const shell = ownedRows.find(isShellRow) ?? null;
+
   let company: CompanyRow | null = null;
   let targetCompanyId: string = "new";
   let ambiguous = false;
-  if (!createRequested && !migrationNeeded) {
+  if (createRequested && !migrationNeeded && shell) {
+    company = shell;
+    targetCompanyId = shell.id;
+  } else if (!createRequested && !migrationNeeded) {
     const workspace = await resolveEmployerCompanyContext();
     const workspaceCompany =
       workspace.kind === "ok"
@@ -110,6 +123,10 @@ export default async function CompanyStartPage({
     }
   }
 
+  // First setup of a shell: the form CREATES the identity (title, presets)
+  // even though it technically edits an existing row.
+  const firstSetup = company !== null && isShellRow(company);
+
   const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
   const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
@@ -117,7 +134,7 @@ export default async function CompanyStartPage({
     // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
     // edit — the heading must say WHICH, so an existing company is never
     // tricked into thinking it is creating a second one.
-    title: company ? t("formTitleEdit") : t("formTitleCreate"),
+    title: company && !firstSetup ? t("formTitleEdit") : t("formTitleCreate"),
     subtitle: t("formSubtitle"),
     legalName: t("legalName"),
     legalNameHelp: t("legalNameHelp"),
@@ -204,7 +221,7 @@ export default async function CompanyStartPage({
         </section>
       ) : null}
 
-      {company ? (
+      {company && !firstSetup ? (
         <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="company-start-existing"
@@ -320,7 +337,7 @@ export default async function CompanyStartPage({
           className="card-border flex flex-col gap-4 p-5"
           data-testid="company-start-form-section"
         >
-          {company === null ? null : (
+          {company === null || firstSetup ? null : (
             <Link
               href={"/dashboard/start/company?new=1" as "/dashboard"}
               className="self-start text-sm text-brand-blue hover:underline"
@@ -335,6 +352,7 @@ export default async function CompanyStartPage({
             targetCompanyId={targetCompanyId}
             presetCompanyType={presetCompanyType}
             presetCapability={presetCapability}
+            firstSetup={firstSetup}
           />
         </section>
       ) : null}

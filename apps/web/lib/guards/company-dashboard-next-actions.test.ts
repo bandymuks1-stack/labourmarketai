@@ -43,7 +43,11 @@ describe("Guard: the company dashboard wires the next-actions surface", () => {
   });
 
   it("guides to start-company (no empty technical blocks) when no company row", () => {
-    expect(page).toMatch(/companyProfile\.kind\s*===\s*"ok"\s*&&\s*companyProfile\.row\s*===\s*null/);
+    // The same guide also serves an unnamed onboarding shell (`setupIncomplete`,
+    // 2026-09-04) — hence the optional parenthesis.
+    expect(page).toMatch(
+      /companyProfile\.kind\s*===\s*"ok"\s*&&\s*\(?companyProfile\.row\s*===\s*null/,
+    );
     expect(page).toMatch(/<CompanyNoProfileGuide\s*\/>/);
   });
 

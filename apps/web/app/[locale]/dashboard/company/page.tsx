@@ -124,12 +124,21 @@ export default async function CompanyDashboardPage({
       : employerCtx.reason === "needs-migration"
         ? { kind: "needs-migration" }
         : { kind: "ok", row: null };
-  if (companyProfile.kind === "ok" && companyProfile.row === null) {
+  // A company row with NO legal name is the unnamed shell `complete_onboarding`
+  // / `add_role` inserted before the setup form ran (the person left setup
+  // unfinished). A nameless workspace is not a workspace - send them back to
+  // the ONE setup form, which completes that same row. Measured as its own
+  // step so an abandoned first setup is distinguishable from "no company".
+  const setupIncomplete =
+    companyProfile.kind === "ok" &&
+    companyProfile.row !== null &&
+    companyProfile.row.legalName === null;
+  if (companyProfile.kind === "ok" && (companyProfile.row === null || setupIncomplete)) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-dashboard">
         <TelemetryView
           event={FUNNEL_EVENTS.companyDashboardViewed}
-          metadata={{ surface: "company", step: "no_profile" }}
+          metadata={{ surface: "company", step: setupIncomplete ? "setup_incomplete" : "no_profile" }}
         />
         <header className="flex flex-col gap-1">
           <p className="font-mono text-meta uppercase tracking-label text-brand-orange">

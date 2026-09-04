@@ -16,6 +16,8 @@ import {
   withdrawOfferAction,
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Agency side of the REAL two-subject bridge (issue #859). The staffing agency
@@ -93,8 +95,23 @@ export function AgencyBridgeSection({
   const progressRows = progress.kind === "ok" ? progress.rows : [];
   const stageByWorker = new Map(progressRows.map((p) => [`${p.requestId}:${p.workerId}`, p]));
 
+  // TIME_TO_EXTERNAL_HUMAN_RESPONSE for the agency: another person acted on
+  // what the agency did - a client accepted the connection, shared a request
+  // or decided on a candidate - and the agency is looking at it now. Emitted
+  // once per tab session (TelemetryView dedup), no ids.
+  const humanResponseVisible =
+    connRows.some((c) => c.status === "active") ||
+    sharedRows.length > 0 ||
+    progressRows.some((p) => p.offerStatus === "accepted" || p.offerStatus === "declined");
+
   return (
     <section className="card-border flex flex-col gap-4 p-5" data-testid="agency-bridge-section">
+      {humanResponseVisible ? (
+        <TelemetryView
+          event={FUNNEL_EVENTS.firstRealResult}
+          metadata={{ surface: "agency_bridge", step: "human", role_context: "agency" }}
+        />
+      ) : null}
       <header className="flex flex-col gap-1">
         <h2 className="inline-flex items-center gap-2 font-display text-lg font-semibold text-text-primary">
           <Link2 className="h-4 w-4 text-brand-blue" aria-hidden />

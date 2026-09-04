@@ -9,6 +9,37 @@ import {
   validateInviteEmail,
   validateOfferNote,
 } from "@/lib/agency/bridge-model";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+
+/**
+ * TIME TO FIRST REAL VALUE (real recruiter pilot, 2026-09-04). Every bridge
+ * write below is a REAL state-changing action by one of the two subjects, so
+ * each success emits `first_real_action` server-side (profile derived from
+ * the session; the TTFV model takes the earliest per person, so a later
+ * action is harmless). `role_context` names the side that acted - the
+ * agency (invite / offer) or the client company (accept / share / decide) -
+ * and `step` the action; bounded scalars only, never ids or e-mails. The
+ * matching `first_real_result` is emitted where the OTHER side's response
+ * becomes visible (agency bridge section / client scouting offers), because
+ * a result is received when it is seen, and by the person who receives it.
+ */
+function emitFirstRealAction(
+  roleContext: "agency" | "company",
+  step: string,
+  entityType: string,
+): void {
+  emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+    source: "agency-bridge",
+    route: "/dashboard/company",
+    metadata: {
+      surface: "agency_bridge",
+      step,
+      role_context: roleContext,
+      entity_type: entityType,
+    },
+  });
+}
 
 /**
  * Real two-subject bridge — server actions (issue #859). Thin wrappers around
@@ -58,6 +89,7 @@ export async function inviteClientAction(
     p_invited_email: email.value,
   });
   if (error) return mapErr(error.code, error.message);
+  emitFirstRealAction("agency", "invite_client", "agency_client_connection");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }
@@ -78,6 +110,9 @@ export async function acceptConnectionAction(
   if (error) return mapErr(error.code, error.message);
   if (data === "not_found") return { status: "not-found" };
   if (data === "accepted" || data === "already_active") {
+    if (data === "accepted") {
+      emitFirstRealAction("company", "accept_connection", "agency_client_connection");
+    }
     revalidatePath("/[locale]/dashboard/company", "page");
     return { status: "ok" };
   }
@@ -130,6 +165,7 @@ export async function shareRequestAction(
     p_request_id: requestId,
   });
   if (error) return mapErr(error.code, error.message);
+  emitFirstRealAction("company", "share_request", "agency_client_request_share");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }
@@ -164,6 +200,7 @@ export async function submitOfferAction(
     p_note: note,
   });
   if (error) return mapErr(error.code, error.message);
+  emitFirstRealAction("agency", "offer_candidate", "agency_candidate_offer");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }
@@ -191,6 +228,7 @@ export async function respondCandidateOfferAction(
     if (m.includes("offer_not_open") || m.includes("offer_not_found")) return { status: "not-found" };
     return mapErr(error.code, error.message);
   }
+  emitFirstRealAction("company", "offer_" + decision, "agency_candidate_offer");
   revalidatePath("/[locale]/dashboard/company/scouting", "page");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
