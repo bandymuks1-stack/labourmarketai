@@ -150,11 +150,24 @@ export async function runSkillGap(): Promise<WorkflowResult> {
   if (!board.capabilities.boardAvailable) {
     return blocked(t("blockedNoAccess"), t("whyNoAccess"));
   }
+  // MATCHING CONTINUES AFTER "NO" (owner contract 2026-09-04 §16): a gap
+  // answer names the closing step. Skills close through real work in the
+  // journal; documents close through the document centre — so the same
+  // "what am I missing?" also states the required documents the person does
+  // not hold for the countries they want to work in (own rows, same join the
+  // documents page renders) — INCLUDING when no skill is missing (prod walk
+  // 2026-09-04: "Nieko netrūksta" ended the answer while six required
+  // documents were absent). A degraded document read adds NOTHING.
+  const docs = await readDocumentGapForAnswer();
+  const docTail = docs && docs.missing.length > 0 ? [await documentGapSentence(docs, t)] : [];
+  const docChips = docs && docs.missing.length > 0 ? [{ id: "documents-centre", label: t("chipDocuments") }] : [];
+
   if (board.opportunities.length === 0) {
     return {
       kind: "answer",
-      text: t("skillGapNoDemands"),
+      text: [t("skillGapNoDemands"), ...docTail].join("\n"),
       explanation: { why: t("whyFromYourBoard") },
+      chips: docChips,
     };
   }
 
@@ -168,8 +181,9 @@ export async function runSkillGap(): Promise<WorkflowResult> {
   if (demandsPerSkill.size === 0) {
     return {
       kind: "answer",
-      text: t("skillGapNone", { demands: board.opportunities.length }),
+      text: [t("skillGapNone", { demands: board.opportunities.length }), ...docTail].join("\n"),
       explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
+      chips: docChips,
     };
   }
 
@@ -184,28 +198,12 @@ export async function runSkillGap(): Promise<WorkflowResult> {
     }),
   );
 
-  // MATCHING CONTINUES AFTER "NO" (owner contract 2026-09-04 §16): a gap
-  // answer names the closing step. Skills close through real work in the
-  // journal; documents close through the document centre — so the same
-  // "what am I missing?" also states the required documents the person does
-  // not hold for the countries they want to work in (own rows, same join the
-  // documents page renders). A degraded document read adds NOTHING.
-  const docs = await readDocumentGapForAnswer();
-  const docTail =
-    docs && docs.missing.length > 0
-      ? [
-          await documentGapSentence(docs, t),
-        ]
-      : [];
-  const chips = [{ id: "logwork", label: t("chipLogWork") }];
-  if (docs && docs.missing.length > 0) chips.push({ id: "documents-centre", label: t("chipDocuments") });
-
   return {
     kind: "answer",
     text: [t("skillGapIntro", { count: demandsPerSkill.size }), ...lines, ...docTail].join("\n"),
     explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
     // The journal is where a skill becomes real — never a self-declaration.
-    chips,
+    chips: [{ id: "logwork", label: t("chipLogWork") }, ...docChips],
   };
 }
 

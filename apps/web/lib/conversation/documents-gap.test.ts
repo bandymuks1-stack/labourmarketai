@@ -120,6 +120,10 @@ describe("the sentences reach the answer", () => {
     // closing step; the route itself is emitted by the chat, never here.
     expect(WF).toMatch(/readDocumentGapForAnswer\(\)/);
     expect(WF).toMatch(/id: "documents-centre", label: t\("chipDocuments"\)/);
+    // …INCLUDING when no skill is missing (prod walk 2026-09-04: "Nieko
+    // netrūksta" ended the answer while six required documents were absent).
+    expect(WF).toMatch(/text: \[t\("skillGapNone", \{ demands: board\.opportunities\.length \}\), \.\.\.docTail\]\.join/);
+    expect(WF).toMatch(/text: \[t\("skillGapNoDemands"\), \.\.\.docTail\]\.join/);
     expect(CHAT).toMatch(/case "documents-centre":/);
   });
 
