@@ -199,6 +199,15 @@ export const companyCreateProjectSchema = z.object({
   city: z.string().trim().max(120).nullable().optional(),
 });
 
+/** CLIENT: the decision on an agency's candidate offer (canonical:
+ *  `respondCandidateOfferAction` → `respond_agency_candidate_offer_v1`, which
+ *  re-checks that the caller owns the demand and the offer is open). */
+export const companyRespondOfferSchema = z.object({
+  offerId: uuid,
+  decision: z.enum(["accepted", "declined"]),
+  note: z.string().trim().max(1000).nullable().optional(),
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -229,6 +238,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
   "company.create-project": companyCreateProjectSchema,
+  "company.respond-offer": companyRespondOfferSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

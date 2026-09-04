@@ -818,6 +818,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuw project aanmaken",
     de: "Neues Projekt anlegen",
   },
+  "agency-offers": {
+    lt: "Kokius kandidatus pasiūlė agentūra?",
+    en: "Which candidates did the agency offer?",
+    ru: "Каких кандидатов предложило агентство?",
+    nl: "Welke kandidaten heeft het bureau aangeboden?",
+    de: "Welche Kandidaten hat die Agentur vorgeschlagen?",
+  },
 };
 
 /**

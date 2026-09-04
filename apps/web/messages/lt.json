@@ -11624,6 +11624,10 @@
         "createProject": {
           "label": "Sukurti projektą",
           "description": "Objektas ar užsakymas, prie kurio priskirsite žmones."
+        },
+        "respondOffer": {
+          "label": "Atsakyti į agentūros pasiūlymą",
+          "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
         }
       },
       "education": {
@@ -11911,6 +11915,8 @@
       "briefDocumentsExpiring": "{count, plural, one {# dokumentas baigia galioti} few {# dokumentai baigia galioti} other {# dokumentų baigia galioti}}.",
       "briefDocumentsMissing": "{count, plural, one {Trūksta # dokumento jūsų šalims} few {Trūksta # dokumentų jūsų šalims} other {Trūksta # dokumentų jūsų šalims}}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidatas laukia jūsų atsakymo} few {# kandidatai laukia jūsų atsakymo} other {# kandidatų laukia jūsų atsakymo}}.",
+      "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agentūros pasiūlymas laukia jūsų sprendimo} few {# agentūrų pasiūlymai laukia jūsų sprendimo} other {# agentūrų pasiūlymų laukia jūsų sprendimo}}.",
+      "chipAgencyOffers": "Agentūrų pasiūlymai",
       "briefEmployerPendingAbsences": "{count, plural, one {# neatvykimo prašymas laukia} few {# neatvykimo prašymai laukia} other {# neatvykimo prašymų laukia}} jūsų sprendimo.",
       "briefEmployerAbsentToday": "{count, plural, one {Šiandien nedirba # jūsų darbuotojas} few {Šiandien nedirba # jūsų darbuotojai} other {Šiandien nedirba # jūsų darbuotojų}}.",
       "chipEmployerInbox": "Peržiūros eilė",
@@ -12069,6 +12075,13 @@
       "unpinDone": "Pašalinta iš Mano erdvės.",
       "projectCreateIntro": "Naujas projektas. Pavadinimas ir miestas — ir žmones galėsite priskirti čia pat.",
       "projectCreatedNext": "Projektas sukurtas. Čia pat priskirkite žmones — arba grįžkite prie jo vėliau iš „Mano projektai“.",
+      "clientOffersIntro": "Agentūrų pasiūlyti kandidatai jūsų poreikiams:",
+      "clientOffersNone": "Agentūros dar nepasiūlė kandidatų jūsų atviriems poreikiams.",
+      "chipOfferAccept": "Priimti",
+      "chipOfferDecline": "Atmesti",
+      "offerAccepted": "Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia.",
+      "offerDeclined": "Atmesta. Agentūra matys jūsų sprendimą.",
+      "offerDecisionFailed": "Sprendimo išsaugoti nepavyko — pasiūlymas gal jau uždarytas. Patikrinkite kandidatų sąraše.",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

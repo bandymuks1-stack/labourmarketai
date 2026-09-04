@@ -212,6 +212,13 @@ const CHAT_KEYS = [
   "reorderDone",
   "projectCreateIntro",
   "projectCreatedNext",
+  "clientOffersIntro",
+  "clientOffersNone",
+  "chipOfferAccept",
+  "chipOfferDecline",
+  "offerAccepted",
+  "offerDeclined",
+  "offerDecisionFailed",
 ] as const;
 
 const WORKLOG_KEYS = [

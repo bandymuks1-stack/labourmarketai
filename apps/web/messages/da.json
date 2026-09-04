@@ -3395,6 +3395,10 @@
         "createProject": {
           "label": "Opret projekt",
           "description": "En byggeplads eller opgave, du tildeler folk til."
+        },
+        "respondOffer": {
+          "label": "Svar på et bureaus tilbud",
+          "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
         }
       },
       "education": {
@@ -3771,6 +3775,13 @@
       "unpinDone": "Fjernet fra Mit område.",
       "projectCreateIntro": "Et nyt projekt. Navn og by — så kan du tildele folk lige her.",
       "projectCreatedNext": "Projekt oprettet. Tildel folk lige her — eller vend tilbage til det senere fra “Mine projekter”.",
+      "clientOffersIntro": "Kandidater, som bureauer har tilbudt til jeres behov:",
+      "clientOffersNone": "Intet bureau har endnu tilbudt kandidater til jeres åbne behov.",
+      "chipOfferAccept": "Accepter",
+      "chipOfferDecline": "Afvis",
+      "offerAccepted": "Accepteret. Kandidaten fik et bookingforslag — svaret ser du her.",
+      "offerDeclined": "Afvist. Bureauet ser din beslutning.",
+      "offerDecisionFailed": "Beslutningen kunne ikke gemmes — tilbuddet er måske allerede lukket. Tjek kandidatlisten.",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

@@ -38,8 +38,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // (invite-client, invite-candidate, client-demand, propose-candidate,
     // proposal-status) and three student/institution route intents
     // (learning-compass, invite-student, programmes); 50 → 51 with F2
-    // (`create-project` — the site as a project object, by sentence).
-    expect(entries.length).toBe(51);
+    // (`create-project` — the site as a project object, by sentence); 51 → 52
+    // with `agency-offers` (the client's side of the agency bridge, read).
+    expect(entries.length).toBe(52);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

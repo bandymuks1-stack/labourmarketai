@@ -111,7 +111,8 @@ export type IntentHandlerId =
   | "learningCompass"
   | "inviteStudent"
   | "programmes"
-  | "createProject";
+  | "createProject"
+  | "clientOffers";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -219,6 +220,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // Roterdame"): the ONE inline form over `company.create-project`, the
   // canonical `createProjectAction` behind it. Company identity only.
   "create-project": { domain: "project", access: "write", handler: "createProject", ownTyping: false },
+  // The CLIENT's side of the agency bridge: the offers made on the company's
+  // own demands, decided in the chat (accept → canonical booking proposed).
+  "agency-offers": { domain: "company", access: "read", handler: "clientOffers", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

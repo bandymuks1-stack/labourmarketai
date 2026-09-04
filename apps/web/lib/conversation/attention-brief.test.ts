@@ -51,13 +51,22 @@ describe("the employer brief carries agency and institution attention", () => {
     expect(FN.indexOf("listPendingInterestCountsForCompany")).toBeLessThan(FN.indexOf("fetchQuickReviewQueue"));
   });
 
+  it("the employer brief names agency offers awaiting the client's decision, from the SAME chat read, with the in-chat offers chip", () => {
+    expect(FN).toMatch(/loadClientOffersForChat\(\)/);
+    expect(FN).toMatch(/briefEmployerAgencyOffersWaiting/);
+    expect(FN).toMatch(/addChip\("agency-offers", t\("chipAgencyOffers"\)\)/);
+    expect(FN).toMatch(/!ws\.signals\.staffingAgency && lines\.length < MAX_LINES/);
+  });
+
   it("the worker brief names expiring / missing documents from the SAME documents-gap derivation the chat answers with", () => {
     const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
     expect(worker).toMatch(/loadWorkerDocumentGap\(\)/);
-    expect(worker).toMatch(/docs\.gap\.expiring\.length > 0/);
+    expect(worker).toMatch(/docGap\.gap\.expiring\.length > 0/);
+    // A deadline outranks the passive lines: the expiring rung sits BEFORE matches.
+    expect(worker.indexOf("briefDocumentsExpiring")).toBeLessThan(worker.indexOf("briefNewMatches"));
     expect(worker).toMatch(/briefDocumentsExpiring/);
     // A missing-document line needs a stated country — the brief never guesses one.
-    expect(worker).toMatch(/docs\.gap\.missing\.length > 0 && docs\.countries\.length > 0/);
+    expect(worker).toMatch(/docGap\.gap\.missing\.length > 0 && docGap\.countries\.length > 0/);
     expect(worker).toMatch(/addChip\("documents-centre", t\("documentsChip"\)\)/);
     // Inside its own try, and before the learner-identity block the guard slices.
     expect(worker.indexOf("loadWorkerDocumentGap")).toBeLessThan(worker.indexOf("learner identity (M10"));
@@ -66,7 +75,7 @@ describe("the employer brief carries agency and institution attention", () => {
   it("the brief copy exists in the five routed locales (same parity as the existing brief keys)", () => {
     for (const locale of ["lt", "en", "ru", "nl", "de"]) {
       const chat = JSON.parse(readFileSync(join(APP, "messages", `${locale}.json`), "utf8")).conversation.chat as Record<string, string>;
-      for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting"]) {
+      for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting", "briefEmployerAgencyOffersWaiting"]) {
         expect(chat[key], `${locale}.${key}`).toMatch(/\{count, plural/);
       }
     }
