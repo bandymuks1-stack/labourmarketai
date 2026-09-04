@@ -62,3 +62,8 @@ afterwards so the E2E baseline (6 missing) stays stable for future walks.
 20"-style dates, not a WRITTEN date ("iki 2027-03-31", "until 31.03.2027"), the way a
 person copies it off a certificate. Fixed on `fix/cc/end-date-written-iso` (ISO and
 d.m.yyyy forms; an impossible day is null, never "corrected").
+
+**Re-walk on `461326d2` (#1491):** "turiu naują A1 pažymą iki 2027-03-31" → type
+`a1_certificate` AND `valid until 2027-03-31` pre-filled → saved → readiness re-answered;
+DB row `85158bc2…` with `valid_until 2027-03-31` (deleted afterwards). Journey stage
+"documents completed where required" is now proven from the sentence to the row.

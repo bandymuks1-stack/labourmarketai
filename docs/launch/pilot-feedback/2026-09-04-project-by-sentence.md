@@ -38,3 +38,27 @@ projects`) — readback via Supabase MCP `execute_sql`, same as `customer_reques
 After creation the new project opens in the panel (the same opener the "projects"
 chip uses: real, empty roster + assignment controls) with one line: "Projektas
 sukurtas. Čia pat priskirkite žmones…". No second view, no menu.
+
+## People on the project (prod `f49cc972`) — and the readback defect it found
+
+`walk-project-assign-prod.cjs`, E2E Walker UAB (desktop viewport), 38.0 s:
+"sukurk projektą Vilniuje" → form pre-filled `city = Vilnius` → "E2E Vilniaus objektas
+(testinis)" saved → "mano projektai" → the ONE project opens as the detail panel
+("JUODRAŠTIS · E2E WALKER UAB · Vilnius · Priskirta 0 · Priskirti darbuotoją") →
+"Priskirti darbuotoją" → "Kas turėtų jame dirbti?" with the chip **E2E Worker Two** (the
+worker whose engagement the agency placement created minutes earlier) → chip →
+**"Priskirta projektui."** DB: `project_worker_assignments` row `80883119…` active at
+20:50:26 UTC (project `3b9c55d3…`, worker `0dbd5eda…`).
+
+**Defect:** the panel re-opened right after the success line still read "Priskirta 0"
+— the chat re-addressed the SAME project, the address did not change, and the detail
+did not re-read. Fixed on `fix/cc/project-panel-refetch-after-assign`: the opener stamps
+a fresh `pr` token, the detail re-reads when it changes.
+
+Also noted: on the phone viewport the worker chip sits in the thread UNDER the open
+panel, so it could not be tapped (the walk had to use a desktop viewport) — a real
+ordinary-human friction on mobile after an in-panel action offers chips in the thread;
+recorded, not fixed tonight.
+
+E2E residue: project `3b9c55d3` (draft) with one assignment — kept (the worker's
+work-log against it is the next proof).

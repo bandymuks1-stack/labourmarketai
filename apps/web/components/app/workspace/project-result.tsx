@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
@@ -258,6 +259,10 @@ function ProjectDetailView({
    * outcome is still on screen next to the state it produced.
    */
   const [outcome, setOutcome] = useState<{ text: string; error: boolean } | null>(null);
+  // The opener stamps `pr` when it re-addresses the same project after a
+  // write; a changed stamp is a changed question, so the detail re-reads.
+  const searchParams = useSearchParams();
+  const refreshStamp = searchParams?.get("pr") ?? null;
 
   // A different project is a different question — never carry an answer over.
   useEffect(() => {
@@ -277,7 +282,7 @@ function ProjectDetailView({
     return () => {
       cancelled = true;
     };
-  }, [projectId, attempt]);
+  }, [projectId, attempt, refreshStamp]);
 
   const back = (
     <button
