@@ -610,6 +610,27 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "createProjectAction" },
   },
 
+  {
+    /**
+     * The CLIENT's decision on an agency's candidate offer (owner contract
+     * 2026-09-04 §15 — the client half of the agency journey). The agency's
+     * chain by sentence is prod-proven; the client could decide only with the
+     * scouting page's buttons. Same canonical action, token-confirmed, reached
+     * from the in-chat offers list ("kokius kandidatus pasiūlė agentūra?").
+     */
+    id: "company.respond-offer",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.respondOffer.label",
+    descriptionKey: "conversation.actions.company.respondOffer.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/scouting",
+    handler: { kind: "server_action", ref: "respondCandidateOfferAction" },
+  },
+
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`
   // capability (I-2: one organization, many capabilities). Its commands

@@ -47,6 +47,7 @@ import {
 } from "@/lib/conversation/company-forms";
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
+import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -364,6 +365,13 @@ export type ChatLabels = {
   unpinDone: string;
   projectCreateIntro: string;
   projectCreatedNext: string;
+  clientOffersIntro: string;
+  clientOffersNone: string;
+  chipOfferAccept: string;
+  chipOfferDecline: string;
+  offerAccepted: string;
+  offerDeclined: string;
+  offerDecisionFailed: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -1641,6 +1649,40 @@ export function ConversationChat({
     [assistant, locale, labels.assignDone, labels.assignFailed],
   );
 
+  /** The CLIENT's decision on an agency's offer (owner contract §15): the
+   *  SAME token-confirmed dispatch as every important write, over the SAME
+   *  canonical action the scouting page's buttons call. The readback names
+   *  the real consequence (accept → a booking proposed to the worker). */
+  const runOfferDecision = useCallback(
+    (offerId: string, decision: "accepted" | "declined") => {
+      setTyping(true);
+      const input = { offerId, decision };
+      prepareConfirmationAction("company.respond-offer", input)
+        .then((prep) => {
+          if (!prep.ok) {
+            setTyping(false);
+            assistant(labels.offerDecisionFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.respond-offer", input, {
+            locale,
+            confirmationToken: prep.token,
+          }).then((res) => {
+            setTyping(false);
+            assistant(
+              res.ok ? (decision === "accepted" ? labels.offerAccepted : labels.offerDeclined) : labels.offerDecisionFailed,
+              [{ id: "candidates", label: labels.chipCandidates }],
+            );
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.offerDecisionFailed);
+        });
+    },
+    [assistant, locale, labels.offerAccepted, labels.offerDeclined, labels.offerDecisionFailed, labels.chipCandidates],
+  );
+
   /**
    * MESSAGES IN THE CONVERSATION (owner audit §8.1). The chat reads the real
    * inbox (same RLS-scoped reads the messages page uses), shows only the
@@ -2017,6 +2059,47 @@ export function ConversationChat({
     },
     [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, fallbackText, starterChips, openForm],
   );
+
+  /** "Kokius kandidatus pasiūlė agentūra?" — the offers on the company's OWN
+   *  demands, from the SAME reads the scouting page renders; each open offer
+   *  carries its accept / decline chip. An agency workspace asking this
+   *  means its own proposals — routed there, never guessed. */
+  const startClientOffers = useCallback(() => {
+    if (identity !== "company") {
+      if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+      else assistant(fallbackText, starterChips);
+      return;
+    }
+    if (agencyWorkspace) {
+      handleChipRef.current({ id: "agency:progress", label: "" });
+      return;
+    }
+    setTyping(true);
+    loadClientOffersForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind !== "ok") {
+          assistant(labels.agencyUnavailable, [{ id: "candidates", label: labels.chipCandidates }]);
+          return;
+        }
+        if (res.offers.length === 0) {
+          assistant(labels.clientOffersNone, [{ id: "candidates", label: labels.chipCandidates }]);
+          return;
+        }
+        const lines = res.offers.map((o) => `• ${o.demandTitle} — ${o.agencyName}${o.note ? ` · ${o.note}` : ""}`);
+        assistant(
+          [labels.clientOffersIntro, ...lines].join("\n"),
+          res.offers.slice(0, 3).flatMap((o) => [
+            { id: `offer-accept:${o.offerId}`, label: `${labels.chipOfferAccept}: ${o.demandTitle}` },
+            { id: `offer-decline:${o.offerId}`, label: `${labels.chipOfferDecline}: ${o.demandTitle}` },
+          ]),
+        );
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.agencyUnavailable, [{ id: "candidates", label: labels.chipCandidates }]);
+      });
+  }, [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips]);
 
   const startAgencyInvite = useCallback(
     (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
@@ -2549,6 +2632,14 @@ export function ConversationChat({
               user(chip.label);
               performContextSwitch(target);
             }
+          } else if (chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")) {
+            // The client's decision: the chip carries the offer id and nothing
+            // else; the RPC re-checks the demand is theirs and the offer open.
+            user(chip.label);
+            runOfferDecision(
+              chip.id.slice(chip.id.indexOf(":") + 1),
+              chip.id.startsWith("offer-accept:") ? "accepted" : "declined",
+            );
           } else if (chip.id.startsWith("agency-propose:")) {
             // The share-bound handoff: the chip carries the share id and
             // NOTHING else; the RPC re-verifies the share is active and the
@@ -3235,6 +3326,7 @@ export function ConversationChat({
         inviteStudent: () => startEducationInvite(text),
         programmes: () => runEducationProgrammes(educationModeFromText(text)),
         createProject: () => startCreateProject(text),
+        clientOffers: () => startClientOffers(),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
         translateBlocked: () => assistant(labels.translateBlocked),
@@ -3247,7 +3339,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, startCreateProject, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

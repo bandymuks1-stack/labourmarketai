@@ -11624,6 +11624,10 @@
         "createProject": {
           "label": "Sukurti projektą",
           "description": "Objektas ar užsakymas, prie kurio priskirsite žmones."
+        },
+        "respondOffer": {
+          "label": "Atsakyti į agentūros pasiūlymą",
+          "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
         }
       },
       "education": {
@@ -12069,6 +12073,13 @@
       "unpinDone": "Pašalinta iš Mano erdvės.",
       "projectCreateIntro": "Naujas projektas. Pavadinimas ir miestas — ir žmones galėsite priskirti čia pat.",
       "projectCreatedNext": "Projektas sukurtas. Čia pat priskirkite žmones — arba grįžkite prie jo vėliau iš „Mano projektai“.",
+      "clientOffersIntro": "Agentūrų pasiūlyti kandidatai jūsų poreikiams:",
+      "clientOffersNone": "Agentūros dar nepasiūlė kandidatų jūsų atviriems poreikiams.",
+      "chipOfferAccept": "Priimti",
+      "chipOfferDecline": "Atmesti",
+      "offerAccepted": "Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia.",
+      "offerDeclined": "Atmesta. Agentūra matys jūsų sprendimą.",
+      "offerDecisionFailed": "Sprendimo išsaugoti nepavyko — pasiūlymas gal jau uždarytas. Patikrinkite kandidatų sąraše.",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

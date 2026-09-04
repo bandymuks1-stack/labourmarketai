@@ -3395,6 +3395,10 @@
         "createProject": {
           "label": "Izveidot projektu",
           "description": "Objekts vai darbs, kuram piesaistīsiet cilvēkus."
+        },
+        "respondOffer": {
+          "label": "Atbildēt uz aģentūras piedāvājumu",
+          "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
         }
       },
       "education": {
@@ -3771,6 +3775,13 @@
       "unpinDone": "Noņemts no Manas telpas.",
       "projectCreateIntro": "Jauns projekts. Nosaukums un pilsēta — tad cilvēkus varēsiet piesaistīt tepat.",
       "projectCreatedNext": "Projekts izveidots. Piesaistiet cilvēkus tepat — vai atgriezieties pie tā vēlāk no “Mani projekti”.",
+      "clientOffersIntro": "Aģentūru piedāvātie kandidāti jūsu vajadzībām:",
+      "clientOffersNone": "Neviena aģentūra vēl nav piedāvājusi kandidātus jūsu atvērtajām vajadzībām.",
+      "chipOfferAccept": "Pieņemt",
+      "chipOfferDecline": "Noraidīt",
+      "offerAccepted": "Pieņemts. Kandidātam nosūtīts rezervācijas piedāvājums — viņa atbildi redzēsiet šeit.",
+      "offerDeclined": "Noraidīts. Aģentūra redzēs jūsu lēmumu.",
+      "offerDecisionFailed": "Lēmumu neizdevās saglabāt — piedāvājums, iespējams, jau slēgts. Pārbaudiet kandidātu sarakstu.",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

@@ -11624,6 +11624,10 @@
         "createProject": {
           "label": "Project aanmaken",
           "description": "Een locatie of opdracht waaraan u mensen toewijst."
+        },
+        "respondOffer": {
+          "label": "Aanbod van een bureau beantwoorden",
+          "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
         }
       },
       "education": {
@@ -12069,6 +12073,13 @@
       "unpinDone": "Verwijderd uit Mijn ruimte.",
       "projectCreateIntro": "Een nieuw project. Naam en stad — daarna wijst u hier meteen mensen toe.",
       "projectCreatedNext": "Project aangemaakt. Wijs hier meteen mensen toe — of kom er later op terug via “Mijn projecten”.",
+      "clientOffersIntro": "Kandidaten die bureaus voor uw behoeften hebben aangeboden:",
+      "clientOffersNone": "Nog geen bureau heeft kandidaten voor uw open behoeften aangeboden.",
+      "chipOfferAccept": "Accepteren",
+      "chipOfferDecline": "Afwijzen",
+      "offerAccepted": "Geaccepteerd. De kandidaat kreeg een boekingsvoorstel — zijn antwoord ziet u hier.",
+      "offerDeclined": "Afgewezen. Het bureau ziet uw beslissing.",
+      "offerDecisionFailed": "De beslissing kon niet worden opgeslagen — het aanbod is misschien al gesloten. Controleer de kandidatenlijst.",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

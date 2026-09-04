@@ -3395,6 +3395,10 @@
         "createProject": {
           "label": "Opprett prosjekt",
           "description": "Et anlegg eller oppdrag du tildeler folk til."
+        },
+        "respondOffer": {
+          "label": "Svar på et byrås tilbud",
+          "description": "Godta eller avslå en kandidat et byrå tilbød til deres behov."
         }
       },
       "education": {
@@ -3771,6 +3775,13 @@
       "unpinDone": "Fjernet fra Mitt område.",
       "projectCreateIntro": "Et nytt prosjekt. Navn og by — så kan du tildele folk her.",
       "projectCreatedNext": "Prosjekt opprettet. Tildel folk her — eller kom tilbake til det senere fra «Mine prosjekter».",
+      "clientOffersIntro": "Kandidater byråer har tilbudt til deres behov:",
+      "clientOffersNone": "Ingen byrå har tilbudt kandidater til deres åpne behov ennå.",
+      "chipOfferAccept": "Godta",
+      "chipOfferDecline": "Avslå",
+      "offerAccepted": "Godtatt. Kandidaten fikk et bookingforslag — svaret ser du her.",
+      "offerDeclined": "Avslått. Byrået ser avgjørelsen din.",
+      "offerDecisionFailed": "Avgjørelsen kunne ikke lagres — tilbudet er kanskje allerede lukket. Sjekk kandidatlisten.",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

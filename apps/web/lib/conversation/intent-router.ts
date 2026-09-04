@@ -90,6 +90,7 @@ export type ConversationIntent =
   | "invite-student" // "pakviesk studentą" — learner invitation (relationship student)
   | "programmes" // "sukurk programą / grupę" — programmes & cohorts
   | "create-project" // "sukurk projektą Roterdame" — the SITE as a project object (F2)
+  | "agency-offers" // "kokius kandidatus pasiūlė agentūra?" — the client's side of the bridge
   | "unknown";
 
 export type IntentMatch = {
@@ -846,6 +847,22 @@ const RULES: IntentRule[] = [
       p("(sukur|kurti|prid[eė]|prad[eė]|nauj|create|new|add|start|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(projekt|project|проект|objekt|statybviet|baustelle|bouwplaats|стройплощад|объект)", 8),
       // noun → verb: "projektą sukurti", "Projekt anlegen", "project aanmaken"
       p("(projekt|project|проект|objekt|baustelle|bouwplaats|объект)\\w*\\s*.{0,16}(sukur|kurti|prad[eė]|create|erstell|anleg|aanmak|создать|создай)", 8),
+    ],
+  },
+  {
+    intent: "agency-offers",
+    patterns: [
+      // The CLIENT asks what an agency proposed: "kokius kandidatus pasiūlė
+      // agentūra?", "agentūros pasiūlymai", "agency offers", "offered
+      // candidates", "предложенные кандидаты", "aangeboden kandidaten",
+      // "vorgeschlagene Kandidaten". Identity-routed in the chat: an agency
+      // workspace reads it as its own proposal status.
+      p("(agent[uū]r|agency|agencies|агент|uitzend|bureau|agentur)\\w*\\s*.{0,24}(pasi[uū]l|si[uū]lo|kandidat|offer|propos|candidate|предлож|кандидат|voorstel|aanbod|kandida|vorschl|angebot)", 9),
+      p("(pasi[uū]lyt|si[uū]lom|offered|proposed|предложен|aangeboden|voorgesteld|vorgeschlagen|angebotene)\\w*\\s*.{0,12}(kandidat|candidate|кандидат|kandida)", 9),
+      // noun first: "kandidatus pasiūlė agentūra", "Kandidaten … die Agentur",
+      // "kandidaten … het bureau", "кандидатов предложило агентство"
+      p("(kandidat|candidate|кандидат|kandida)\\w*\\s*.{0,28}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 9),
+      p("(pasi[uū]l|si[uū]l|offer|propos|предлож|aangebod|aanbied|vorschl|vorgeschlag)\\w*\\s*.{0,20}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 9),
     ],
   },
   {

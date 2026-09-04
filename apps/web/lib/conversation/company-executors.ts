@@ -12,7 +12,7 @@ import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
 import { assignWorkerToProjectAction, createProjectAction, type ProjectActionResult } from "@/lib/projects/actions";
-import { inviteClientAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
+import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
@@ -288,6 +288,22 @@ export const COMPANY_EXECUTORS: {
       metadata: { surface: "projects", step: "project_created", role_context: "company", entity_type: "project" },
     });
     return { ok: true, data: { projectId: r.id ?? null } };
+  },
+
+  "company.respond-offer": async (input) => {
+    // The CLIENT's decision on an agency's offer — the SAME canonical action
+    // the scouting page's buttons call; `respond_agency_candidate_offer_v1`
+    // re-checks demand ownership and that the offer is still open. On
+    // acceptance the RPC proposes the canonical booking to the worker.
+    const r = await respondCandidateOfferAction(
+      { status: "idle" },
+      fd({ offerId: input.offerId, decision: input.decision, note: input.note ?? "" }),
+    );
+    if (r.status === "ok") return { ok: true, data: { decision: input.decision } };
+    if (r.status === "needs-migration") return { ok: false, code: "needs_migration" };
+    if (r.status === "forbidden") return { ok: false, code: "not_authorized" };
+    if (r.status === "not-found" || r.status === "invalid") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.status === "error" ? r.reason : undefined };
   },
 
   "agency.invite-client": async (input) => {

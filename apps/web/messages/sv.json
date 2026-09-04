@@ -3395,6 +3395,10 @@
         "createProject": {
           "label": "Skapa projekt",
           "description": "En arbetsplats eller ett uppdrag du tilldelar folk till."
+        },
+        "respondOffer": {
+          "label": "Svara på en byrås erbjudande",
+          "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
         }
       },
       "education": {
@@ -3771,6 +3775,13 @@
       "unpinDone": "Borttaget från Mitt utrymme.",
       "projectCreateIntro": "Ett nytt projekt. Namn och stad — sedan tilldelar du folk direkt här.",
       "projectCreatedNext": "Projekt skapat. Tilldela folk direkt här — eller återkom till det senare från ”Mina projekt”.",
+      "clientOffersIntro": "Kandidater som byråer erbjudit för era behov:",
+      "clientOffersNone": "Ingen byrå har ännu erbjudit kandidater för era öppna behov.",
+      "chipOfferAccept": "Acceptera",
+      "chipOfferDecline": "Avböj",
+      "offerAccepted": "Accepterat. Kandidaten fick ett bokningsförslag — svaret ser du här.",
+      "offerDeclined": "Avböjt. Byrån ser ditt beslut.",
+      "offerDecisionFailed": "Beslutet kunde inte sparas — erbjudandet kan redan vara stängt. Kontrollera kandidatlistan.",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först."
     },

@@ -11624,6 +11624,10 @@
         "createProject": {
           "label": "Create a project",
           "description": "A site or job you will assign people to."
+        },
+        "respondOffer": {
+          "label": "Answer an agency's offer",
+          "description": "Accept or decline a candidate an agency offered for your need."
         }
       },
       "education": {
@@ -12069,6 +12073,13 @@
       "unpinDone": "Removed from My Space.",
       "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
       "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
+      "clientOffersIntro": "Candidates agencies offered for your needs:",
+      "clientOffersNone": "No agency has offered candidates for your open needs yet.",
+      "chipOfferAccept": "Accept",
+      "chipOfferDecline": "Decline",
+      "offerAccepted": "Accepted. A booking proposal was sent to the candidate — you will see their answer here.",
+      "offerDeclined": "Declined. The agency will see your decision.",
+      "offerDecisionFailed": "The decision could not be saved — the offer may already be closed. Check the candidates list.",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },

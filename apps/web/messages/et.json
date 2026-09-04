@@ -3395,6 +3395,10 @@
         "createProject": {
           "label": "Loo projekt",
           "description": "Objekt või töö, kuhu määrate inimesi."
+        },
+        "respondOffer": {
+          "label": "Vasta agentuuri pakkumisele",
+          "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
         }
       },
       "education": {
@@ -3771,6 +3775,13 @@
       "unpinDone": "Eemaldatud Minu alalt.",
       "projectCreateIntro": "Uus projekt. Nimi ja linn — seejärel saate siinsamas inimesi määrata.",
       "projectCreatedNext": "Projekt loodud. Määrake inimesed siinsamas — või tulge selle juurde hiljem tagasi „Minu projektid“ alt.",
+      "clientOffersIntro": "Agentuuride pakutud kandidaadid teie vajadustele:",
+      "clientOffersNone": "Ükski agentuur pole veel teie avatud vajadustele kandidaate pakkunud.",
+      "chipOfferAccept": "Võta vastu",
+      "chipOfferDecline": "Lükka tagasi",
+      "offerAccepted": "Vastu võetud. Kandidaadile saadeti broneeringu ettepanek — tema vastust näete siin.",
+      "offerDeclined": "Tagasi lükatud. Agentuur näeb teie otsust.",
+      "offerDecisionFailed": "Otsust ei õnnestunud salvestada — pakkumine võib olla juba suletud. Vaadake kandidaatide loendit.",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

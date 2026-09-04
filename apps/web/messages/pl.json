@@ -3395,6 +3395,10 @@
         "createProject": {
           "label": "Utwórz projekt",
           "description": "Obiekt lub zlecenie, do którego przypiszesz ludzi."
+        },
+        "respondOffer": {
+          "label": "Odpowiedz na ofertę agencji",
+          "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
         }
       },
       "education": {
@@ -3771,6 +3775,13 @@
       "unpinDone": "Usunięto z Mojej przestrzeni.",
       "projectCreateIntro": "Nowy projekt. Nazwa i miasto — potem od razu przypiszesz tu ludzi.",
       "projectCreatedNext": "Projekt utworzony. Przypisz ludzi od razu tutaj — albo wróć do niego później z „Moje projekty”.",
+      "clientOffersIntro": "Kandydaci zaproponowani przez agencje do Twoich potrzeb:",
+      "clientOffersNone": "Żadna agencja nie zaproponowała jeszcze kandydatów do Twoich otwartych potrzeb.",
+      "chipOfferAccept": "Przyjmij",
+      "chipOfferDecline": "Odrzuć",
+      "offerAccepted": "Przyjęto. Kandydat otrzymał propozycję rezerwacji — jego odpowiedź zobaczysz tutaj.",
+      "offerDeclined": "Odrzucono. Agencja zobaczy Twoją decyzję.",
+      "offerDecisionFailed": "Nie udało się zapisać decyzji — oferta mogła już zostać zamknięta. Sprawdź listę kandydatów.",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },
