@@ -3475,6 +3475,8 @@
         "demandRole": "Roll",
         "demandRolePlaceholder": "Nt müürsepp",
         "demandLocation": "Asukoht",
+        "startDate": "Alguskuupäev",
+        "startDatePlaceholder": "AAAA-KK-PP",
         "demandLocationPlaceholder": "Linn või piirkond",
         "teamSize": "Töötajate arv",
         "urgency": "Kiireloomulisus",

@@ -3475,6 +3475,8 @@
         "demandRole": "Loma",
         "demandRolePlaceholder": "Piem. mūrnieks",
         "demandLocation": "Vieta",
+        "startDate": "Sākuma datums",
+        "startDatePlaceholder": "GGGG-MM-DD",
         "demandLocationPlaceholder": "Pilsēta vai reģions",
         "teamSize": "Darbinieku skaits",
         "urgency": "Steidzamība",

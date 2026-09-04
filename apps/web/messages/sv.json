@@ -3475,6 +3475,8 @@
         "demandRole": "Roll",
         "demandRolePlaceholder": "T.ex. murare",
         "demandLocation": "Plats",
+        "startDate": "Startdatum",
+        "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
         "demandLocationPlaceholder": "Stad eller region",
         "teamSize": "Antal arbetare",
         "urgency": "Brådska",

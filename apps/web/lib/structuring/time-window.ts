@@ -19,6 +19,11 @@ export type TimeWindowKind =
   | "this_week"
   | "next_month"
   | "days_count"
+  /** An ABSOLUTE start date the person stated ("nuo spalio 5", "from 5
+   *  October", "с 5 октября", "2026-10-05") — owner contract 2026-09-04 §9:
+   *  "I need 12 scaffolders in Rotterdam from 5 October" must keep its date.
+   *  `startIso` is the stated day; no end is invented. */
+  | "from_date"
   | "none";
 
 export interface TimeWindow {
@@ -90,6 +95,87 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
   },
 ];
 
+/**
+ * Month stems, folded, one row per month — LT (genitive as people write
+ * dates: "spalio 5"), EN, RU (genitive: "5 октября"), NL, DE, PL. A stem
+ * matches a WHOLE word prefix, so "kov" (LT March) cannot fire inside another
+ * word and "spal" needs the day beside it. Ordered by month number.
+ */
+const MONTH_STEMS: ReadonlyArray<readonly string[]> = [
+  ["saus", "jan", "январ", "januari", "januar", "stycz"],
+  ["vasar", "feb", "феврал", "februari", "februar", "lut"],
+  ["kov", "mar", "март", "maart", "marz", "marc"],
+  ["baland", "apr", "апрел", "april", "kwiet"],
+  ["geguz", "may", "мая", "май", "mei", "mai", "maj"],
+  ["birzel", "jun", "июн", "juni", "czerw"],
+  ["liep", "jul", "июл", "juli", "lip"],
+  ["rugpj", "aug", "август", "augustus", "sierp"],
+  ["rugsej", "sep", "сентябр", "september", "wrze"],
+  ["spal", "oct", "октябр", "oktober", "pazdz"],
+  ["lapkri", "nov", "ноябр", "november", "listopad"],
+  ["gruod", "dec", "декабр", "december", "grudn"],
+];
+
+/** "from" across the locales — the word that turns a date into a START. */
+const FROM_WORD = "(?:nuo|from|starting|с|со|vanaf|ab|od)";
+
+function monthOf(word: string): number | null {
+  for (let m = 0; m < MONTH_STEMS.length; m++) {
+    if (MONTH_STEMS[m].some((stem) => word.startsWith(stem))) return m + 1;
+  }
+  return null;
+}
+
+/** The next occurrence of `month/day` on or after today (UTC). A stated day
+ *  that already passed this year means next year — never a date in the past. */
+function nextOccurrence(todayIso: string, month: number, day: number): string | null {
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const today = utc(todayIso);
+  for (const year of [today.getUTCFullYear(), today.getUTCFullYear() + 1]) {
+    const d = new Date(Date.UTC(year, month - 1, day));
+    if (d.getUTCMonth() !== month - 1) return null; // e.g. 31 April
+    if (d.getTime() >= today.getTime()) return toIso(d);
+  }
+  return null;
+}
+
+/**
+ * An absolute START date, when the person stated one:
+ *   "nuo spalio 5", "nuo spalio 5 d.", "from 5 October", "from October 5",
+ *   "с 5 октября", "vanaf 5 oktober", "ab 5. Oktober", "od 5 października",
+ *   or an ISO day "2026-10-05" (with or without the from-word).
+ * Returns the ISO day or `null`. Deliberately does not read "5/10" — the
+ * day/month order differs per country and a wrong guess is worse than a
+ * question.
+ */
+export function parseStartDate(text: string, todayIso: string): string | null {
+  const folded = foldText(text ?? "");
+  const iso = folded.match(/\b(\d{4})-(\d{2})-(\d{2})\b/u);
+  if (iso) {
+    const d = utc(`${iso[1]}-${iso[2]}-${iso[3]}`);
+    return Number.isNaN(d.getTime()) ? null : toIso(d);
+  }
+  // day-first: "nuo 5 spalio" / "from 5 October" / "с 5 октября" / "ab 5. Oktober"
+  // NB: `\b` is ASCII-only in JS, so a Cyrillic from-word ("с") gets an
+  // explicit non-letter left edge instead.
+  const dayFirst = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
+  );
+  if (dayFirst) {
+    const month = monthOf(dayFirst[2]);
+    if (month) return nextOccurrence(todayIso, month, Number.parseInt(dayFirst[1], 10));
+  }
+  // month-first: "nuo spalio 5" / "from October 5"
+  const monthFirst = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+([\\p{L}]+)\\s+(\\d{1,2})(?!\\d)`, "u"),
+  );
+  if (monthFirst) {
+    const month = monthOf(monthFirst[1]);
+    if (month) return nextOccurrence(todayIso, month, Number.parseInt(monthFirst[2], 10));
+  }
+  return null;
+}
+
 /** Day-count words across the locales (folded stems). */
 const DAY_WORD = /^(dien\w*|days?|день|дня|дней|дни|dagen|dag|tage?n?)$/u;
 
@@ -121,6 +207,11 @@ function findDayCount(text: string): number | null {
 export function parseTimeWindow(text: string, todayIso: string): TimeWindow {
   const folded = foldText(text ?? "");
   const days = findDayCount(text ?? "") ?? undefined;
+
+  // An absolute start date is the most precise thing a person can state — it
+  // wins over the coarse phrases. No end is invented.
+  const startIso = parseStartDate(text ?? "", todayIso);
+  if (startIso) return { kind: "from_date", startIso, days };
 
   for (const { kind, res } of KIND_NEEDLES) {
     if (!res.some((re) => re.test(folded))) continue;

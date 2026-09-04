@@ -11699,6 +11699,8 @@
         "demandRole": "Rolle",
         "demandRolePlaceholder": "Z. B. Maurer",
         "demandLocation": "Ort",
+        "startDate": "Startdatum",
+        "startDatePlaceholder": "JJJJ-MM-TT",
         "demandLocationPlaceholder": "Stadt oder Region",
         "teamSize": "Anzahl der Arbeitskräfte",
         "urgency": "Dringlichkeit",
@@ -11894,6 +11896,7 @@
         "understood": "Nach Ihren Angaben: {summary}.",
         "people": "{count, plural, one {# Person} other {# Personen}}",
         "daysCount": "{count, plural, one {# Tag} other {# Tage}}",
+        "fromDate": "ab {date}",
         "window": {
           "next_week": "nächste Woche",
           "this_week": "diese Woche",
