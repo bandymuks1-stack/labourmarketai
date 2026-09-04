@@ -90,39 +90,48 @@ describe("1. isEducationFirstWorkspace decides from the canonical capability lay
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe("2. the education workspace gets education-shaped starters", () => {
-  const starter = /const starterChips[\s\S]*?\],\s*\[labels/.exec(CHAT)?.[0] ?? "";
+  // 2026-09-04 (owner contract §5–§6): the greeting row is no longer a fixed
+  // per-role branch inside the chat — it is DERIVED in
+  // `lib/conversation/starters.ts` from the capabilities the workspace holds
+  // and its facts. The rules this section protects (real chips only, the cap,
+  // no narrowing of the plain company or the worker) now bind that module.
+  const STARTERS = read("lib/conversation/starters.ts");
+  const SIGNALS = read("lib/conversation/starter-signals.ts");
 
-  it("the education branch exists and is decided by the server-resolved flag", () => {
-    expect(starter).toMatch(/educationWorkspace\s*\?/);
+  it("the education track exists and is decided by the canonical capability read", () => {
+    expect(STARTERS).toMatch(/capabilities\.includes\("training_provider"\)/);
+    expect(SIGNALS).toMatch(/isEducationFirstWorkspace\(/);
+    expect(SIGNALS).toMatch(/readOrganizationCapabilities\(/);
   });
 
   it("every education chip leads to a REAL existing surface (no dead chips)", () => {
-    // The invite panel (learner relationship lives there), the company hub
-    // (capabilities card), the communication surface. All three routes exist
-    // as canonical screens today — link chips route, never duplicate.
-    expect(starter).toMatch(/id: "link:\/dashboard\/network", label: labels\.chipEduInviteLearner/);
-    expect(starter).toMatch(/id: "link:\/dashboard\/company", label: labels\.chipEduCapabilities/);
-    expect(starter).toMatch(/id: "link:\/dashboard\/communication", label: labels\.navMessages/);
+    // The invite panel (learner relationship lives there), the programmes
+    // section on the company hub, the hub itself. All exist as canonical
+    // screens today — link chips route, never duplicate.
+    expect(STARTERS).toMatch(/id: "link:\/dashboard\/network\?relationship=student", labelKey: "chipInviteStudent"/);
+    expect(STARTERS).toMatch(/id: "link:\/dashboard\/company#institution-programs-title", labelKey: "chipProgrammes"/);
+    expect(STARTERS).toMatch(/id: "link:\/dashboard\/company", labelKey: "chipEduCapabilities"/);
   });
 
   it("a PLAIN company keeps the employer starters (question B — no narrowing)", () => {
-    expect(starter).toMatch(/id: "f:company\.create-demand", label: labels\.chipNeedWorkers/);
-    expect(starter).toMatch(/id: "candidates", label: labels\.chipCandidates/);
-    expect(starter).toMatch(/id: "projects", label: labels\.chipProjects/);
+    expect(STARTERS).toMatch(/id: "f:company\.create-demand", labelKey: "chipNeedWorkers"/);
+    expect(STARTERS).toMatch(/id: "candidates", labelKey: "chipCandidates"/);
+    expect(STARTERS).toMatch(/id: "projects", labelKey: "chipProjects"/);
+    // The employer track is held by EVERY company — a school or an agency
+    // never loses it.
+    expect(STARTERS).toMatch(/const all: CapabilityTrack\[\] = \["employer", "operations"\]/);
   });
 
   it("the worker starters are untouched", () => {
-    expect(starter).toMatch(/id: "logwork", label: labels\.chipLogWork/);
-    expect(starter).toMatch(/id: "cv", label: labels\.chipCv/);
-    expect(starter).toMatch(/id: "jobs", label: labels\.chipJobs/);
+    expect(STARTERS).toMatch(/id: "logwork", labelKey: "chipLogWork"/);
+    expect(STARTERS).toMatch(/id: "cv", labelKey: "chipCv"/);
+    expect(STARTERS).toMatch(/id: "jobs", labelKey: "chipJobs"/);
   });
 
-  it("the 1–3 owner cap holds in EVERY branch of the greeting", () => {
-    // Count chip literals per array segment — no branch may exceed three.
-    for (const segment of starter.split(/[?:]\s*\[/).slice(1)) {
-      const ids = segment.split("]")[0].match(/\{ id: "/g) ?? [];
-      expect(ids.length).toBeLessThanOrEqual(3);
-    }
+  it("the 1–3 owner cap holds for EVERY derivation", () => {
+    expect(STARTERS).toMatch(/export const STARTER_CAP = 3/);
+    expect(STARTERS).toMatch(/\.slice\(0, STARTER_CAP\)/);
+    expect(CHAT).toMatch(/\.slice\(0, STARTER_CAP\)/);
   });
 });
 
@@ -132,9 +141,13 @@ describe("2. the education workspace gets education-shaped starters", () => {
 
 describe("3. the page threads the flag from the canonical capability read", () => {
   it("resolves the ACTIVE organization and reads organization_roles", () => {
-    expect(PAGE).toMatch(/getActiveOrganizationContext\(\)/);
-    expect(PAGE).toMatch(/readOrganizationCapabilities\(/);
-    expect(PAGE).toMatch(/isEducationFirstWorkspace\(/);
+    // Since 2026-09-04 the page delegates to the ONE starter-context loader,
+    // which runs the same canonical reads.
+    expect(PAGE).toMatch(/loadCompanyStarterContext\(\)/);
+    const SIGNALS = read("lib/conversation/starter-signals.ts");
+    expect(SIGNALS).toMatch(/getActiveOrganizationContext\(\)/);
+    expect(SIGNALS).toMatch(/readOrganizationCapabilities\(/);
+    expect(SIGNALS).toMatch(/isEducationFirstWorkspace\(/);
   });
 
   it("the learner link comes from the existing engagement read, student slug", () => {

@@ -147,15 +147,20 @@ describe("the not-understood answer follows the workspace, never worker copy for
     join(__dirname, "..", "..", "app", "[locale]", "dashboard", "page.tsx"),
     "utf8",
   );
-  it("the fallback is chosen by identity + agency/education workspace", () => {
-    expect(CHAT).toMatch(/const fallbackText =[\s\S]{0,400}labels\.fallbackAgency[\s\S]{0,200}labels\.fallbackEducation[\s\S]{0,200}labels\.fallbackCompany[\s\S]{0,100}labels\.fallback;/);
+  it("the fallback is composed from the workspace's capabilities (server), never worker copy for a company", () => {
+    // 2026-09-04 (owner contract §5): the server composes the sentence from
+    // ALL capability tracks the workspace holds (`contextFallback`); the plain
+    // company / worker copy stands only when nothing was resolved.
+    expect(CHAT).toMatch(/const fallbackText =\s*contextFallback \?\?\s*\(identity === "company" \? labels\.fallbackCompany : labels\.fallback\);/);
+    expect(PAGE).toMatch(/tChat\("fallbackComposed", \{ list: capabilityList \}\)/);
+    expect(PAGE).toMatch(/capabilityPhraseKeys\(workspace\.signals\)/);
     // No answer path reaches for the worker copy directly any more — every
     // "not understood" goes through the context-aware value.
     const direct = CHAT.match(/labels\.fallback\b(?!Company|Agency|Education)/g) ?? [];
     expect(direct.length).toBe(1); // the one read inside the selector itself
   });
   it("the server resolves the agency workspace and the chat receives it", () => {
-    expect(PAGE).toMatch(/loadAgencyWorkspaceFlag\(\)/);
+    expect(PAGE).toMatch(/loadCompanyStarterContext\(\)/);
     expect(PAGE).toMatch(/agencyWorkspace=\{agencyWorkspace\}/);
     expect(CHAT).toMatch(/agencyWorkspace = false/);
   });
