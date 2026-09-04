@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
 import {
   COMPANY_COUNTRY_CODES,
+  getOwnedCompanyById,
   listOwnedCompanies,
   type CompanyRow,
   type CompanyVerificationStatus,
@@ -108,10 +109,19 @@ export default async function CompanyStartPage({
     targetCompanyId = shell.id;
   } else if (!createRequested && !migrationNeeded) {
     const workspace = await resolveEmployerCompanyContext();
-    const workspaceCompany =
+    // The active workspace's company: one the caller CREATED (in the owned
+    // list) or one they GOVERN as an active owner/admin member (read by id,
+    // membership re-checked inside getOwnedCompanyById). A governed company
+    // is edited, never re-created — a member who reached this form must not
+    // be offered a blank "create" that would duplicate their organisation.
+    let workspaceCompany: CompanyRow | null =
       workspace.kind === "ok"
         ? (ownedRows.find((r) => r.id === workspace.companyId) ?? null)
         : null;
+    if (!workspaceCompany && workspace.kind === "ok") {
+      const governed = await getOwnedCompanyById(workspace.companyId);
+      workspaceCompany = governed.kind === "ok" ? governed.row : null;
+    }
     if (workspaceCompany) {
       company = workspaceCompany;
       targetCompanyId = workspaceCompany.id;

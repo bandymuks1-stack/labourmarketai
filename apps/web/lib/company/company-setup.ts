@@ -236,7 +236,6 @@ export async function getOwnedCompanyById(
     .from("companies")
     .select(SELECT_COLUMNS)
     .eq("id", companyId)
-    .eq("profile_id", user.id)
     .maybeSingle();
   if (error) {
     if (
@@ -247,7 +246,33 @@ export async function getOwnedCompanyById(
     }
     return { kind: "error", message: error.message };
   }
-  return { kind: "ok", row: data ? mapCompanyRow(data) : null };
+  if (!data) return { kind: "ok", row: null };
+  const row = mapCompanyRow(data);
+  // COMPANY AUTHORITY = the creator OR an ACTIVE owner/admin MEMBER of the
+  // organisation bound to this company (M-P0-4 §11: membership proves the
+  // role; the creator stays as the owner-equivalent compatibility arm). The
+  // creator-only filter this read carried until 2026-09-04 meant a second
+  // person could never open the company they govern — the real recruiter
+  // pilot's account, made an admin of an existing verified agency, would
+  // have seen "no company profile". The membership row is the caller's own
+  // (`company_memberships_select`: profile_id = auth.uid()), so this read
+  // exposes nothing beyond what the caller already holds; every write is
+  // still re-checked SQL-side (`owns_company`, `save_company_setup_v3`).
+  if (row.profileId === user.id) return { kind: "ok", row };
+  const { data: membership, error: mErr } = await asAny(supabase)
+    .from("company_memberships")
+    .select("id, organizations!inner(legacy_company_id)")
+    .eq("profile_id", user.id)
+    .eq("status", "active")
+    .in("role", ["owner", "admin"])
+    .eq("organizations.legacy_company_id", companyId)
+    .limit(1);
+  if (mErr) {
+    // A membership read failure must not turn into "you own this": fail
+    // closed to the same shape as "not yours".
+    return { kind: "ok", row: null };
+  }
+  return { kind: "ok", row: (membership ?? []).length > 0 ? row : null };
 }
 
 export async function getOwnCompany(): Promise<CompanyReadResult> {
