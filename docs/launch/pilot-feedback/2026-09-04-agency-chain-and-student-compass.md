@@ -47,3 +47,39 @@ invitations (owner gate).
 
 Screenshots: `walk-agency-proposal/74-…77-*.png`, `walk-compass/60-compass-answer.png`
 (session scratchpad).
+
+## Student: "kur galiu atlikti praktiką?" (prod `287b6fb0`, #1477 → #1479 → follow-up)
+
+**What the first walk found (build `d141ddc2`, #1477 live):** the E2E learner
+(`e2e-learner-202609021634@labourmarket.ai`, personal space, LT) typed
+*"kur galiu atlikti praktiką?"* and got the **whole board** — every employment
+demand as if it were a practice placement. Cause: the World State vocabulary
+listed only the opportunity types PRESENT on the board, and no verified
+company had declared an internship, so the word was simply unknown.
+
+**Fix (#1479):** the closed `OPPORTUNITY_TYPES` set is always in the
+vocabulary, each term `available` only when a demand of that type is visible
+to the person — the same rule countries already follow.
+
+**Walk on `287b6fb0` (`walk-internship-prod.cjs`, 32.5 s):**
+
+| Check | Result |
+|---|---|
+| plain "ieškau darbo" opens the board | yes (20 public ads panel) |
+| "kur galiu atlikti praktiką?" understood as an internship question | **yes** — "Supratau „praktika“, bet ten dabar tau nieko nematoma. Matoma: …" |
+| whole board leaked under the internship question | **no** (`kind: "answer"` returns before the search) |
+| generic fallback | no |
+
+**Second defect found by the same walk:** the "Matoma:" list after an absent
+opportunity type named **countries** ("LT, NL"), because the alternatives
+were always `facets.countries`. Fixed on `fix/cc/absent-type-alternatives`
+(`df4a17b1`): the alternatives come from the SAME dimension the person named
+(visible opportunity types, labelled in their own language first; countries
+only for an absent country); none on that dimension → the plain "nothing
+visible" answer.
+
+**Positive proof still owed:** a board that actually carries an
+`internship` demand visible to the learner (the E2E client can declare one
+by sentence — `opportunityType` select on the demand form) and the narrowed
+result. Not run today: the walk deliberately did not create demand rows on
+the shared verified company.

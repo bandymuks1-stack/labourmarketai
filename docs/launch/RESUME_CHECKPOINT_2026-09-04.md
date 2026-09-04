@@ -9,9 +9,9 @@
 
 | Item | Value |
 |---|---|
-| Production | `71f93e11` (#1473) verified 10:19 UTC by the agency + compass walks; #1474 (attention) merged after — confirm `/api/health` `build` on resume |
-| `main` | #1467 starters · #1468 employer sentence · #1469 documents · #1470 institution by sentence · #1471 skill-gap → documents · #1472 student compass · #1473 shared-needs fix · #1474 attention. Open: **#1476** My Space code (auto-merge) · **#1475** My Space table (RED draft, owner gate) · opportunity-type dimension (branch `feat/cc/opportunity-type-dimension`, PR next) |
-| Active P0 chain | all P0 actors have a prod-proven sentence chain (E2E identities); now: student "kur galiu atlikti praktiką?" narrows to internships (PR), then typed-sentence usage for My Space, F2 |
+| Production | `287b6fb0` (#1479) walked 2026-09-04 (internship question honest; second defect → `fix/cc/absent-type-alternatives`) — confirm `/api/health` `build` on resume |
+| `main` | #1467 starters · #1468 employer sentence · #1469 documents · #1470 institution by sentence · #1471 skill-gap → documents · #1472 student compass · #1473 shared-needs fix · #1474 attention · #1476 My Space code · #1477 opportunity type · #1478 end date · #1479 absent type NAMED. Open: **#1480** My Space typed-sentence usage (auto-merge) · `fix/cc/absent-type-alternatives` (same-dimension "Matoma:" list; PR next) · branch `feat/cc/my-space-reorder` ("put this first" chip; PR after #1480) · **#1475** My Space table (RED draft, owner gate) |
+| Active P0 chain | all P0 actors have a prod-proven sentence chain (E2E identities); now: alternatives-fix PR → My Space reorder PR → positive internship proof (a visible `internship` demand) → F2 |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
 | Local stack | Docker Desktop dead → `LOCAL_DOCKER_UNAVAILABLE`; verification = unit/guards/typecheck/lint/build + CI + prod walks with bounded `e2e-*` identities (scratchpad `walk-*.cjs`, `wait-prod.cjs`; `curl` denied in this harness) |
@@ -36,12 +36,12 @@
 | Employer | need → form → demand → candidates → contact/booking; the owner's sentence structured | end date / duration; site as a project |
 | Agency | whole chain by sentence; attention lines (offers awaiting, needs without offer, clients pending) (#1474) | client's decision by sentence (chips exist on the scouting page); e-mail delivery (**owner gate**) |
 | Institution | programme / cohort / learner invitation / assignment / list; attention: pending learner invitations | `institution_learner_outcomes_v1` has no caller; e-mail delivery (**owner gate**) |
-| Student | compass answered; internships as opportunity type (PR) | executable compass actions beyond chips |
-| Everyone | My Space: pinned row + ask after repeated use + unpin (code #1476; table #1475 owner-gated) | reorder gesture; typed-sentence usage counting |
+| Student | compass answered; "kur galiu atlikti praktiką?" narrows to internships (#1477) and NAMES an absent type instead of leaking the whole board (#1479) | executable compass actions beyond chips |
+| Everyone | My Space: pinned row + ask after repeated use (chip AND typed sentence, #1480) + unpin + "put this first" reorder (branch) — code only until the table is applied (#1475 owner-gated) | — |
 
 ## Queue (contract §33; next automatic step first)
 
-1. Opportunity-type dimension PR → merge → prod walk with the E2E learner ("kur galiu atlikti praktiką?") — the board needs at least one `internship` demand visible to it for a positive proof; the E2E client can create one by sentence (opportunityType select) if none exists.
+1. PR `fix/cc/absent-type-alternatives` (auto-merge); PR the reorder branch once #1480 has merged (rebase onto main first); then the positive internship proof with a visible `internship` demand declared by the E2E client.
 2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
 3. F2: end date / duration in the demand structurer; the site as a project object.
 4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.
