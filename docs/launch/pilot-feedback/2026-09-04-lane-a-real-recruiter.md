@@ -187,3 +187,16 @@ action.
 
 **Approval sentence:** "Apply Lane A ownership 2026-09-04" (covers Part 1 + Part 2). To choose co-owner
 instead of admin, say "… as owner".
+
+### APPLIED 2026-09-04 (owner: "Apply Lane A ownership 2026-09-04")
+
+- Migration applied via Supabase MCP `apply_migration` → ledger `20260904055214`; `owns_company` membership-aware,
+  `create_agency_client_connection_v1` uses it; ACLs unchanged (postgres + authenticated; anon none).
+- Grant applied in one transaction: 1 admin membership (`owner-grant:lane-a:2026-09-04`), `company` profile role,
+  profile `onboarded`, `active_role = company`, `active_organization_id` = the agency organisation, name from the
+  Google identity, country left unset. **0 companies created for the account.**
+- Per-actor readback (read-only, production): real account `owns_company = true`, roster 1, roster invitations 2,
+  membership + organisation visible; creator account `true`, roster 1 (unchanged); unrelated account `false`,
+  roster 0; anon → 42501.
+- #1464 marked ready (auto-merge); #1465 (app half) auto-merging. The member path of the workspace is verified
+  with an E2E member identity, never with the real account.
