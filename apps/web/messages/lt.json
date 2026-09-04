@@ -11640,6 +11640,10 @@
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
+        },
+        "moveWorker": {
+          "label": "Perkelti žmogų į kitą projektą",
+          "description": "Priskiria naujam projektui ir baigia ankstesnį priskyrimą — po pasekmių peržiūros."
         }
       },
       "education": {
@@ -12142,7 +12146,26 @@
       "documentFileUnsupported": "Šis failo tipas nepalaikomas — naudokite PDF, Word arba nuotrauką.",
       "documentFileFailed": "Failo įkelti nepavyko — niekas neišsaugota. Pabandykite dokumentų centre.",
       "briefEmployerBookingResponses": "{count, plural, one {# darbuotojas atsakė į jūsų rezervacijos pasiūlymą} few {# darbuotojai atsakė į jūsų rezervacijų pasiūlymus} other {# darbuotojų atsakė į jūsų rezervacijų pasiūlymus}}.",
-      "chipEmployerBookings": "Mano pasiūlymai"
+      "chipEmployerBookings": "Mano pasiūlymai",
+      "moveNotFound": "Tokio žmogaus tame projekte nerandu — pasirinkite iš sąrašo.",
+      "moveNoOptions": "Perkelti nėra ko: reikia bent dviejų projektų ir bent vieno priskirto žmogaus.",
+      "moveAskWorker": "Ką perkelti? Pasirinkite:",
+      "moveAskProject": "Kur perkelti {name}? Pasirinkite:",
+      "moveWhatIfTitle": "Jei {name} pereitų iš „{from}“ į „{to}“:",
+      "moveFromLine": "• „{from}“: žmonių {before} → {after}; jo atvirų užduočių ten lieka {tasks}; pasiruošimo sąrašas ten: {checked}/{total}.",
+      "moveToLine": "• „{to}“: žmonių {before} → {after}; pasiruošimo sąrašas ten prasidės nuo 0/{total}.",
+      "moveCountryLine": "• Šalis keičiasi: {from} → {to} — dokumentų reikalavimai kitokie.",
+      "moveNoDatesLine": "• „{to}“ neturi datų — nebuvimų sutikrinti negaliu.",
+      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi — nebuvimų modelis šioje aplinkoje neatsako.",
+      "moveAvailabilityLine": "• {start}–{end} lange jis turi {count} nebuvimo įrašų.",
+      "moveAvailabilityFreeLine": "• „{to}“ datose nebuvimų neužfiksuota.",
+      "moveOnlyConfirmLine": "Kol kas niekas nepakeista — pakeis tik patvirtinimas.",
+      "moveConfirmChip": "Perkelti",
+      "moveCancelChip": "Palikti kaip yra",
+      "moveDone": "Perkelta: priskirtas naujam projektui, ankstesnis priskyrimas baigtas.",
+      "moveDonePartial": "Priskirtas naujam projektui, bet ankstesnio priskyrimo baigti nepavyko — jis vis dar abiejuose; užbaikite projekto lange.",
+      "moveFailed": "Perkelti nepavyko — niekas nepasikeitė.",
+      "chipMovePrefix": "Perkelti į"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

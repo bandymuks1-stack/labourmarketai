@@ -3411,6 +3411,10 @@
         "respondOffer": {
           "label": "Vasta agentuuri pakkumisele",
           "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
+        },
+        "moveWorker": {
+          "label": "Liiguta inimene teise projekti",
+          "description": "Määrab uude projekti ja lõpetab eelmise määramise — pärast tagajärgede vaadet."
         }
       },
       "education": {
@@ -3839,7 +3843,26 @@
       "documentFileUploaded": "Fail on dokumendile lisatud. Teie valmisolek praegu:",
       "documentFileTooLarge": "Fail on suurem kui 5 MB — midagi ei salvestatud.",
       "documentFileUnsupported": "Seda failitüüpi ei toetata — kasutage PDF-i, Wordi või fotot.",
-      "documentFileFailed": "Faili ei õnnestunud üles laadida — midagi ei salvestatud. Proovige dokumendikeskuses."
+      "documentFileFailed": "Faili ei õnnestunud üles laadida — midagi ei salvestatud. Proovige dokumendikeskuses.",
+      "moveNotFound": "Ma ei leia seda inimest sellest projektist — valige loendist.",
+      "moveNoOptions": "Pole kedagi liigutada: vaja on vähemalt kahte projekti ja ühte määratud inimest.",
+      "moveAskWorker": "Keda liigutada? Valige:",
+      "moveAskProject": "Kuhu {name} liigutada? Valige:",
+      "moveWhatIfTitle": "Kui {name} liiguks projektist „{from}“ projekti „{to}“:",
+      "moveFromLine": "• „{from}“: inimesi {before} → {after}; tema avatud tööpakette jääb sinna {tasks}; valmisoleku loend seal: {checked}/{total}.",
+      "moveToLine": "• „{to}“: inimesi {before} → {after}; valmisoleku loend seal algab 0/{total}.",
+      "moveCountryLine": "• Riik muutub: {from} → {to} — dokumendinõuded on teised.",
+      "moveNoDatesLine": "• Projektil „{to}“ pole kuupäevi — puudumisi ei saa kontrollida.",
+      "moveAvailabilityUnknownLine": "• Puudumised teadmata — puhkusemudel siin ei vasta.",
+      "moveAvailabilityLine": "• Vahemikus {start}–{end} on tal {count} puudumise kirjet.",
+      "moveAvailabilityFreeLine": "• Projekti „{to}“ kuupäevades puudumisi pole.",
+      "moveOnlyConfirmLine": "Midagi pole veel muudetud — muudab ainult teie kinnitus.",
+      "moveConfirmChip": "Liiguta",
+      "moveCancelChip": "Jäta nii",
+      "moveDone": "Liigutatud: määratud uude projekti, eelmine määramine lõpetatud.",
+      "moveDonePartial": "Määratud uude projekti, kuid eelmist määramist ei õnnestunud lõpetada — ta on mõlemas; lõpetage projekti paneelil.",
+      "moveFailed": "Liigutamine ebaõnnestus — midagi ei muutunud.",
+      "chipMovePrefix": "Liiguta projekti"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

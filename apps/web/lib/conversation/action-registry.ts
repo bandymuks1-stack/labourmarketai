@@ -555,6 +555,25 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "assignWorkerToProjectAction" },
   },
   {
+    /**
+     * §11 (owner contract 2026-09-04) — the WHAT-IF move: a person leaves
+     * project X for project Y. The chat shows the consequences on both sides
+     * from canonical reads first; this action is the confirmed commit — two
+     * canonical RPCs in the safe order (assign to Y, then end X).
+     */
+    id: "company.move-worker",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.moveWorker.label",
+    descriptionKey: "conversation.actions.company.moveWorker.description",
+    confirmation: "strong_irreversible", // binds + ends assignments
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "assignWorkerToProjectAction" },
+  },
+  {
     // §7.1 — the EMPLOYER's door to the `engagements` result. The mirror of
     // `worker.review-engagements`; see that entry for why there are two doors
     // and one result.

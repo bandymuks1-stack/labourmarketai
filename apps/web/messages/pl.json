@@ -3411,6 +3411,10 @@
         "respondOffer": {
           "label": "Odpowiedz na ofertę agencji",
           "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
+        },
+        "moveWorker": {
+          "label": "Przenieś osobę do innego projektu",
+          "description": "Przypisuje do nowego projektu i kończy poprzednie przypisanie — po podglądzie skutków."
         }
       },
       "education": {
@@ -3839,7 +3843,26 @@
       "documentFileUploaded": "Plik dodany do dokumentu. Oto Twoja gotowość teraz:",
       "documentFileTooLarge": "Plik jest większy niż 5 MB — nic nie zapisano.",
       "documentFileUnsupported": "Ten typ pliku nie jest obsługiwany — użyj PDF, Word lub zdjęcia.",
-      "documentFileFailed": "Nie udało się przesłać pliku — nic nie zapisano. Spróbuj w centrum dokumentów."
+      "documentFileFailed": "Nie udało się przesłać pliku — nic nie zapisano. Spróbuj w centrum dokumentów.",
+      "moveNotFound": "Nie znajduję tej osoby w tym projekcie — wybierz z listy.",
+      "moveNoOptions": "Nie ma kogo przenieść: potrzebne są co najmniej dwa projekty i jedna przypisana osoba.",
+      "moveAskWorker": "Kogo przenieść? Wybierz:",
+      "moveAskProject": "Dokąd przenieść {name}? Wybierz:",
+      "moveWhatIfTitle": "Jeśli {name} przejdzie z „{from}” do „{to}”:",
+      "moveFromLine": "• „{from}”: osób {before} → {after}; jego otwartych zadań zostaje tam {tasks}; lista gotowości tam: {checked}/{total}.",
+      "moveToLine": "• „{to}”: osób {before} → {after}; lista gotowości tam zacznie się od 0/{total}.",
+      "moveCountryLine": "• Zmienia się kraj: {from} → {to} — inne wymagania dokumentowe.",
+      "moveNoDatesLine": "• „{to}” nie ma dat — nieobecności nie można sprawdzić.",
+      "moveAvailabilityUnknownLine": "• Nieobecności nieznane — model urlopów tu nie odpowiada.",
+      "moveAvailabilityLine": "• W oknie {start}–{end} ma {count} wpisów nieobecności.",
+      "moveAvailabilityFreeLine": "• Brak nieobecności w datach „{to}”.",
+      "moveOnlyConfirmLine": "Na razie nic się nie zmieniło — zmieni dopiero potwierdzenie.",
+      "moveConfirmChip": "Przenieś",
+      "moveCancelChip": "Zostaw jak jest",
+      "moveDone": "Przeniesiono: przypisany do nowego projektu, poprzednie przypisanie zakończone.",
+      "moveDonePartial": "Przypisany do nowego projektu, ale poprzedniego przypisania nie udało się zakończyć — jest w obu; dokończ w panelu projektu.",
+      "moveFailed": "Przeniesienie nie powiodło się — nic się nie zmieniło.",
+      "chipMovePrefix": "Przenieś do"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
