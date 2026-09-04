@@ -105,3 +105,22 @@ readiness (checked/total) · people with missing documents — and ONE honest ne
 (assign people / overdue tasks / missing documents / no work logged yet). Nothing new is
 stored; unavailable reads render nothing. Both entries — the sentence ("mano projektai")
 and the panel — converge on the same state.
+
+## The same state on the visual side (prod `d9af9d81`, read-only)
+
+`walk-project-ops-prod.cjs` for the chat-created project `3b9c55d3…`:
+
+- `/dashboard/projects/<id>/operations` — PROJEKTO APŽVALGA (būsena draft · priskirta 1 ·
+  atviros užduotys 0 · sąrašo patikrinta: dar nieko nesekama) · PROJEKTO VALDYMAS
+  (pažanga, atsakingas asmuo, būsena → Paleisti) · Projekto etapai · Laiko juosta
+  (Gantt) · Biudžetas ir ekonomika · Defektai ir kokybė · REIKIA DĖMESIO · OPERACIJOS ·
+  ŠIO PROJEKTO DARBUOTOJAI: **E2E Worker Two** · Perdavimo pasas · IŠTEKLIAI IR
+  PRISKYRIMO PARENGTIS · PROJEKTO UŽDUOTYS · DARBO ĮRODYMAI.
+- `/dashboard/projects/<id>` — VIETA · KOMUNIKACIJA · AIKŠTĖ — KAS ŠIANDIEN KOMANDOJE:
+  **"1 šiandienos žurnalo įrašas — diena juda"** · DARBŲ GALERIJA · TRŪKSTAMOS POZICIJOS.
+
+So the living Project Field the contract asks for (who is on it, what work exists, what
+is happening now, what is missing, readiness, evidence, progress, what needs action)
+already exists as the operations page + the project centre; the chat panel's pulse
+(`feat/cc/project-pulse`) shows the same numbers where the sentence lands, and hands
+over to these pages for manipulation. No duplicate state.
