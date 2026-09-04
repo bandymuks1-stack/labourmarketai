@@ -12059,6 +12059,7 @@
       "unpinPrefix": "Entfernen",
       "unpinDone": "Aus Mein Bereich entfernt.",
       "projectCreateIntro": "Ein neues Projekt. Name und Stadt — danach weisen Sie hier direkt Leute zu.",
+      "projectCreatedNext": "Projekt angelegt. Weisen Sie hier direkt Leute zu — oder kommen Sie später über „Meine Projekte“ darauf zurück.",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },

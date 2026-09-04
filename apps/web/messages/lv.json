@@ -3770,6 +3770,7 @@
       "unpinPrefix": "Noņemt",
       "unpinDone": "Noņemts no Manas telpas.",
       "projectCreateIntro": "Jauns projekts. Nosaukums un pilsēta — tad cilvēkus varēsiet piesaistīt tepat.",
+      "projectCreatedNext": "Projekts izveidots. Piesaistiet cilvēkus tepat — vai atgriezieties pie tā vēlāk no “Mani projekti”.",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

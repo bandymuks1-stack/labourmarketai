@@ -12059,6 +12059,7 @@
       "unpinPrefix": "Verwijderen",
       "unpinDone": "Verwijderd uit Mijn ruimte.",
       "projectCreateIntro": "Een nieuw project. Naam en stad — daarna wijst u hier meteen mensen toe.",
+      "projectCreatedNext": "Project aangemaakt. Wijs hier meteen mensen toe — of kom er later op terug via “Mijn projecten”.",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

@@ -3770,6 +3770,7 @@
       "unpinPrefix": "Usuń",
       "unpinDone": "Usunięto z Mojej przestrzeni.",
       "projectCreateIntro": "Nowy projekt. Nazwa i miasto — potem od razu przypiszesz tu ludzi.",
+      "projectCreatedNext": "Projekt utworzony. Przypisz ludzi od razu tutaj — albo wróć do niego później z „Moje projekty”.",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },

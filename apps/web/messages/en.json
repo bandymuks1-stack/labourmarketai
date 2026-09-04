@@ -12059,6 +12059,7 @@
       "unpinPrefix": "Remove",
       "unpinDone": "Removed from My Space.",
       "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
+      "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },

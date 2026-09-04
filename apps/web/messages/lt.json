@@ -12059,6 +12059,7 @@
       "unpinPrefix": "Pašalinti",
       "unpinDone": "Pašalinta iš Mano erdvės.",
       "projectCreateIntro": "Naujas projektas. Pavadinimas ir miestas — ir žmones galėsite priskirti čia pat.",
+      "projectCreatedNext": "Projektas sukurtas. Čia pat priskirkite žmones — arba grįžkite prie jo vėliau iš „Mano projektai“.",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

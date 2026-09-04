@@ -211,6 +211,7 @@ const CHAT_KEYS = [
   "pinFirstPrefix",
   "reorderDone",
   "projectCreateIntro",
+  "projectCreatedNext",
 ] as const;
 
 const WORKLOG_KEYS = [
