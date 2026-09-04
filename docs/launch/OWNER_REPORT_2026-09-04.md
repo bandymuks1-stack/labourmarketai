@@ -53,6 +53,18 @@ The company greeting is capability-derived (employer + operations + agency + edu
 - Not built: Project Field / team movement what-if (§11); reporting export/print by sentence (§19); World Map layers (§18); communication translation (honest "no engine"); reorder gesture and typed-sentence usage counting for My Space.
 - Real-user evidence: none today beyond the recruiter's 06:15 sign-in. Everything above is E2E-proven, not real-user-proven.
 
+## Evening additions (2026-09-04, after the owner's "never idle on CI" correction)
+
+All E2E-proven on production unless marked PR. ENTRY → REQUEST → ACTION → PERSISTED → DEPENDENT STATE → NEXT.
+
+- **Employer** — "sukurk projektą Roterdame" → the ONE form pre-filled with the city → `projects` row for the company (`f307e574`, row deleted after) → the new project opens in the panel with its (empty) roster and assignment controls (#1486) → NEXT: assign people there. Attention: "N kandidatai laukia jūsų atsakymo" (pending interest) and "N agentūrų pasiūlymai laukia jūsų sprendimo" (#1485/#1487).
+- **Client of an agency** — greeting "1 agentūros pasiūlymas laukia jūsų sprendimo" → "kokius kandidatus pasiūlė agentūra?" → "• Suvirintojas — E2E Agentūra UAB" with accept / decline chips → decline (token-confirmed `company.respond-offer`) → offer `f93735c6` `declined` (`6fc477d9`); accept would propose the canonical booking to the worker.
+- **Worker** — greeting "Trūksta 6 dokumentų jūsų šalims" + "Mano dokumentai" chip (`6fc477d9`; an EXPIRING document sits above matches as a deadline). "turiu naują A1 pažymą iki 2027-03-31" → the one form pre-filled (type, valid-until) over the canonical document upsert → readiness re-answers (**#1488, PR**). My Space counts typed sentences like chip clicks (#1480); "Į priekį" reorder (#1482).
+- **Student** — "kur galiu atlikti praktiką?" → honest "Supratau „praktika“, bet ten dabar tau nieko nematoma. Matoma: …" listing what IS visible on the SAME dimension (`287b6fb0`, #1479/#1481); never the whole board again.
+- **Education institution** — the learners section reports OUTCOMES from real state through `institution_learner_outcomes_v1` (its first caller); below 5 learners the suppression is SAID: "Rezultatai rodomi, kai prisijungę bent 5 besimokantieji (dabar 1)" (`d543867d`, #1484).
+
+Honest remainder added tonight: the positive internship proof needs a demand from a VERIFIED company visible to a worker — no E2E company is verified and verifying one would show test demands to real workers (**owner decision**); the document FILE still goes through the documents centre; institution outcomes above the floor are unproven (no institution has 5 learners); the real recruiter has not acted since 06:15 UTC.
+
 ## Supporting evidence
 
-PRs merged: #1467 #1468 #1469 #1470 #1471 #1472 #1473 #1474 (+ #1476 #1477 #1478 auto-merging; #1475 RED draft). Prod builds walked: `a870427a`, `c448cff7`, `2076d727`, `3b459de7`, `71f93e11`. Guards re-anchored consciously each time; migration-count ratchets untouched on `main` (bumped only inside the RED draft).
+PRs merged: #1467–#1474, #1476–#1487 (#1488 open with auto-merge; #1475 RED draft). Prod builds walked: `a870427a`, `c448cff7`, `2076d727`, `3b459de7`, `71f93e11`. Guards re-anchored consciously each time; migration-count ratchets untouched on `main` (bumped only inside the RED draft).
