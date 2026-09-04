@@ -368,6 +368,29 @@ export function educationAssignLearnerForm(
   };
 }
 
+/** "Pridėk užduotį" — BUILT per turn from the company's real projects (the
+ *  same list the "projects" chip reads); priority from the closed set. */
+export function companyCreateTaskForm(
+  projects: ReadonlyArray<{ value: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "company.create-task",
+    titleKey: "conversation.actions.company.createTask.label",
+    fields: [
+      { name: "title", kind: "text", labelKey: "conversation.forms.fields.taskTitle", placeholderKey: "conversation.forms.fields.taskTitlePlaceholder", required: true, maxLength: 160 },
+      { name: "projectId", kind: "select", labelKey: "conversation.forms.fields.taskProject", options: [{ value: "", label: "—" }, ...projects.map((p) => ({ value: p.value, label: p.label }))] },
+      { name: "dueDate", kind: "text", labelKey: "conversation.forms.fields.taskDue", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
+      { name: "priority", kind: "select", labelKey: "conversation.forms.fields.taskPriority", options: ["low", "normal", "high"].map((v) => ({ value: v, labelKey: `tasks.priority.${v}` })) },
+    ],
+    build: (st: FormState) => ({
+      title: s(st.title),
+      projectId: s(st.projectId) || null,
+      dueDate: s(st.dueDate) || null,
+      priority: (s(st.priority) || "normal") as "low" | "normal" | "high",
+    }),
+  };
+}
+
 export function getCompanyForm(actionId: string): WorkerFormSpec | undefined {
   return (
     COMPANY_FORMS.find((f) => f.actionId === actionId) ??

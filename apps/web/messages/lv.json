@@ -3400,6 +3400,10 @@
           "label": "Izveidot projektu",
           "description": "Objekts vai darbs, kuram piesaistīsiet cilvēkus."
         },
+        "createTask": {
+          "label": "Pievienot uzdevumu",
+          "description": "Darba pakete projektā — kas jāpaveic un līdz kuram laikam."
+        },
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
@@ -3535,6 +3539,11 @@
         "validUntil": "Derīgs līdz",
         "validUntilPlaceholder": "piem. 2027-03-31",
         "documentNote": "Piezīme (nav obligāti)",
+        "taskTitle": "Uzdevums",
+        "taskTitlePlaceholder": "piem. Uzstādīt sastatnes",
+        "taskProject": "Projekts (nav obligāti)",
+        "taskDue": "Termiņš",
+        "taskPriority": "Prioritāte",
         "projectTitle": "Projekta nosaukums",
         "projectTitlePlaceholder": "piem. Roterdamas noliktava",
         "projectCity": "Pilsēta (nav obligāti)",
@@ -3796,6 +3805,8 @@
       "documentAddUnavailable": "Dokumentu katalogu šobrīd neizdevās ielādēt — reģistrējiet dokumentu dokumentu centrā.",
       "cvExportHint": "Jūsu apstiprinātais CV — viena lapa ar to, ko sistēma patiešām zina. Atveriet un izdrukājiet PDF.",
       "chipCvSheet": "Atvērt CV lapu",
+      "taskCreateIntro": "Jauns uzdevums: kas jāpaveic, kurā projektā un līdz kuram laikam.",
+      "taskCreatedNext": "Uzdevums reģistrēts. Projekta pulss to rāda kā atvērtu; personu piesaistiet uzdevumu ekrānā.",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

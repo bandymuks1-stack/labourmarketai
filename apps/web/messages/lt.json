@@ -11629,6 +11629,10 @@
           "label": "Sukurti projektą",
           "description": "Objektas ar užsakymas, prie kurio priskirsite žmones."
         },
+        "createTask": {
+          "label": "Pridėti užduotį",
+          "description": "Darbo paketas projekte — kas turi būti padaryta ir iki kada."
+        },
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
@@ -11766,6 +11770,11 @@
         "validUntil": "Galioja iki",
         "validUntilPlaceholder": "pvz. 2027-03-31",
         "documentNote": "Pastaba (nebūtina)",
+        "taskTitle": "Užduotis",
+        "taskTitlePlaceholder": "pvz. Sumontuoti pastolius",
+        "taskProject": "Projektas (nebūtina)",
+        "taskDue": "Terminas",
+        "taskPriority": "Svarba",
         "projectTitle": "Projekto pavadinimas",
         "projectTitlePlaceholder": "pvz. Roterdamo sandėlis",
         "projectCity": "Miestas (nebūtina)",
@@ -12097,6 +12106,8 @@
       "documentAddUnavailable": "Dokumentų katalogo dabar nepavyko įkelti — užrašykite dokumentą dokumentų centre.",
       "cvExportHint": "Jūsų patvirtintas CV — vienas lapas iš to, ką sistema tikrai žino. Atidarykite ir spausdinkite į PDF.",
       "chipCvSheet": "Atidaryti CV lapą",
+      "taskCreateIntro": "Nauja užduotis: kas turi būti padaryta, kuriame projekte ir iki kada.",
+      "taskCreatedNext": "Užduotis įrašyta. Projekto pulse ją rodo kaip atvirą; priskirti žmogų galite užduočių lange.",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

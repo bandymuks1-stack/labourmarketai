@@ -90,6 +90,7 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/communication/request-worker-conversation",
       "@/lib/booking/booking-actions",
       "@/lib/projects/actions",
+      "@/lib/tasks/task-chat-actions", // THE ONE task create, no redirect
       "@/lib/agency/bridge-actions",
       // Real recruiter pilot (2026-09-04): the canonical ROSTER invite
       // (invite_company_worker via lib/company/actions) and the ONE employer

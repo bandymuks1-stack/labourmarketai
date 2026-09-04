@@ -51,7 +51,8 @@ import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
-import { parseEndDate } from "@/lib/structuring/time-window";
+import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
+import { parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -381,6 +382,8 @@ export type ChatLabels = {
   documentAddUnavailable: string;
   cvExportHint: string;
   chipCvSheet: string;
+  taskCreateIntro: string;
+  taskCreatedNext: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -2160,6 +2163,53 @@ export function ConversationChat({
     [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, openForm, runWorkflow],
   );
 
+  /** PROJECT → WORK (§11): "pridėk užduotį projektui: …" — the one form over
+   *  the one task create, built from the company's real projects. What the
+   *  sentence said pre-fills it (title after the colon, a written or spoken
+   *  due day, a project it names); after the save the project re-opens so
+   *  the pulse shows the task. Company identity only. */
+  const startCreateTask = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      setTyping(true);
+      loadProjectsForResult()
+        .then((res) => {
+          setTyping(false);
+          const projects = res.kind === "projects" ? res.projects.map((p) => ({ value: p.projectId, label: p.title })) : [];
+          const colon = sentence.indexOf(":");
+          const title = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
+          const dueDate = parseEndDate(sentence, todayIso(), null) ?? parseStartDate(sentence, todayIso());
+          const lower = sentence.toLowerCase();
+          const named = projects.find((p) => p.label.length >= 4 && lower.includes(p.label.toLowerCase()));
+          const prefill: Record<string, string> = {};
+          if (title) prefill.title = title.slice(0, 160);
+          if (dueDate) prefill.dueDate = dueDate;
+          if (named) prefill.projectId = named.value;
+          assistant(labels.taskCreateIntro);
+          openForm(
+            companyCreateTaskForm(projects),
+            undefined,
+            undefined,
+            Object.keys(prefill).length > 0 ? prefill : undefined,
+            (done) => {
+              const projectId = typeof done.data?.projectId === "string" ? done.data.projectId : null;
+              assistant(labels.taskCreatedNext, [{ id: "link:/dashboard/tasks", label: labels.chipTasks }]);
+              if (projectId) selectProjectRef.current(projectId);
+            },
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.projectsUnavailable);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.taskCreateIntro, labels.taskCreatedNext, labels.chipTasks, labels.projectsUnavailable, fallbackText, starterChips, openForm],
+  );
+
   const startAgencyInvite = useCallback(
     (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
       const isClient = actionId === "agency.invite-client";
@@ -3392,6 +3442,7 @@ export function ConversationChat({
         createProject: () => startCreateProject(text),
         clientOffers: () => startClientOffers(),
         addDocument: () => startAddDocument(text),
+        addTask: () => startCreateTask(text),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one
         // canonical output; a company identity has no own CV to show.
@@ -3411,7 +3462,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

@@ -93,6 +93,7 @@ export type ConversationIntent =
   | "agency-offers" // "kokius kandidatus pasiūlė agentūra?" — the client's side of the bridge
   | "add-document" // "turiu naują A1 iki 2027-03" — record a document, by sentence
   | "cv-export" // "parodyk / atsisiųsk mano CV" — the verified CV sheet, not the import
+  | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "unknown";
 
 export type IntentMatch = {
@@ -886,6 +887,16 @@ const RULES: IntentRule[] = [
       // CV", "скачай моё резюме", "download mijn cv", "Lebenslauf herunterladen".
       p("(parodyk|rodyk|atsisi[uų]s|atsisiųsk|eksportuo|spausdin|show|download|export|print|скача|покаж|экспорт|распечат|toon|download|exporteer|print|zeig|herunterlad|exportier|druck)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
       p("(\\bcv\\b|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,8}(pdf|atsisi[uų]st|export|herunterlad|скача)", 8),
+    ],
+  },
+  {
+    intent: "add-task",
+    patterns: [
+      // PROJECT → WORK: "pridėk užduotį", "nauja užduotis projektui", "add a
+      // task", "neue Aufgabe", "nieuwe taak", "добавь задачу" — a work
+      // package on the company's project, by sentence.
+      p("(prid[eė]|sukur|nauj|u[zž]ra[sš]|create|add|new|erstell|neu|maak|nieuw|добав|создай|нов)\\w*\\s*.{0,16}(u[zž]duot|task|aufgabe|taak|задач)", 9),
+      p("(u[zž]duot|task|aufgabe|taak|задач)\\w*\\s*.{0,12}(prid[eė]|sukur|create|add|erstell|anleg|toevoeg|aanmak|добав|создай)", 9),
     ],
   },
   {

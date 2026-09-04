@@ -11629,6 +11629,10 @@
           "label": "Create a project",
           "description": "A site or job you will assign people to."
         },
+        "createTask": {
+          "label": "Add a task",
+          "description": "A work package on the project — what must be done and by when."
+        },
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
@@ -11766,6 +11770,11 @@
         "validUntil": "Valid until",
         "validUntilPlaceholder": "e.g. 2027-03-31",
         "documentNote": "Note (optional)",
+        "taskTitle": "Task",
+        "taskTitlePlaceholder": "e.g. Erect the scaffold",
+        "taskProject": "Project (optional)",
+        "taskDue": "Due",
+        "taskPriority": "Priority",
         "projectTitle": "Project name",
         "projectTitlePlaceholder": "e.g. Rotterdam warehouse",
         "projectCity": "City (optional)",
@@ -12097,6 +12106,8 @@
       "documentAddUnavailable": "The document catalogue could not be loaded right now — record it in the documents centre.",
       "cvExportHint": "Your verified CV — one sheet of what the system really knows. Open it and print to PDF.",
       "chipCvSheet": "Open the CV sheet",
+      "taskCreateIntro": "A new task: what must be done, on which project and by when.",
+      "taskCreatedNext": "Task recorded. The project pulse shows it as open; assign a person on the tasks screen.",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },

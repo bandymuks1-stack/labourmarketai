@@ -208,6 +208,16 @@ export const companyRespondOfferSchema = z.object({
   note: z.string().trim().max(1000).nullable().optional(),
 });
 
+/** A work package (task) on the company's project, by sentence — the shape
+ *  gate only; `create_work_task_v2` validates project ownership and limits. */
+export const companyCreateTaskSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  projectId: uuid.nullable().optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  priority: z.enum(["low", "normal", "high"]).default("normal"),
+  description: z.string().trim().max(2000).nullable().optional(),
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -239,6 +249,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.assign-worker": companyAssignWorkerSchema,
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
+  "company.create-task": companyCreateTaskSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

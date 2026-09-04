@@ -14,6 +14,7 @@ import { proposeBookingAction } from "@/lib/booking/booking-actions";
 import { assignWorkerToProjectAction, createProjectAction, type ProjectActionResult } from "@/lib/projects/actions";
 import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
+import { createWorkTaskForChatAction } from "@/lib/tasks/task-chat-actions";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   createCohortAction,
@@ -288,6 +289,31 @@ export const COMPANY_EXECUTORS: {
       metadata: { surface: "projects", step: "project_created", role_context: "company", entity_type: "project" },
     });
     return { ok: true, data: { projectId: r.id ?? null } };
+  },
+
+  "company.create-task": async (input, ctx) => {
+    // THE ONE task create (lib/tasks/create-task-core.ts) — the tasks page's
+    // form inserts through the same core; `create_work_task_v2` re-checks the
+    // project and the caller. Outcome names map to the dispatcher's codes.
+    const r = await createWorkTaskForChatAction({
+      title: input.title,
+      description: input.description ?? "",
+      priority: input.priority,
+      dueDate: input.dueDate ?? "",
+      projectId: input.projectId ?? "",
+    });
+    if (r.kind === "created") {
+      emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+        source: "tasks-chat",
+        route: `/${ctx.locale}/dashboard`,
+        metadata: { surface: "tasks", step: "task_created", role_context: "company", entity_type: "work_task" },
+      });
+      return { ok: true, data: { taskId: r.id, projectId: input.projectId ?? null } };
+    }
+    if (r.kind === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.kind === "invalid" || r.kind === "not_found" || r.kind === "limit_reached" || r.kind === "cycle") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error" };
   },
 
   "company.respond-offer": async (input) => {

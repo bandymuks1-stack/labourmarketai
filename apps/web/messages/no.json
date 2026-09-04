@@ -3400,6 +3400,10 @@
           "label": "Opprett prosjekt",
           "description": "Et anlegg eller oppdrag du tildeler folk til."
         },
+        "createTask": {
+          "label": "Legg til oppgave",
+          "description": "En arbeidspakke i prosjektet — hva som må gjøres og innen når."
+        },
         "respondOffer": {
           "label": "Svar på et byrås tilbud",
           "description": "Godta eller avslå en kandidat et byrå tilbød til deres behov."
@@ -3535,6 +3539,11 @@
         "validUntil": "Gyldig til",
         "validUntilPlaceholder": "f.eks. 2027-03-31",
         "documentNote": "Merknad (valgfritt)",
+        "taskTitle": "Oppgave",
+        "taskTitlePlaceholder": "f.eks. Sett opp stillas",
+        "taskProject": "Prosjekt (valgfritt)",
+        "taskDue": "Frist",
+        "taskPriority": "Prioritet",
         "projectTitle": "Prosjektnavn",
         "projectTitlePlaceholder": "f.eks. Lageret i Rotterdam",
         "projectCity": "By (valgfritt)",
@@ -3796,6 +3805,8 @@
       "documentAddUnavailable": "Dokumentkatalogen kunne ikke lastes nå — registrer dokumentet i dokumentsenteret.",
       "cvExportHint": "Din verifiserte CV — ett ark med det systemet virkelig vet. Åpne den og skriv ut til PDF.",
       "chipCvSheet": "Åpne CV-arket",
+      "taskCreateIntro": "En ny oppgave: hva som må gjøres, i hvilket prosjekt og innen når.",
+      "taskCreatedNext": "Oppgave registrert. Prosjektpulsen viser den som åpen; tildel en person på oppgaveskjermen.",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

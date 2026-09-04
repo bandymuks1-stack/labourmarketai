@@ -114,7 +114,8 @@ export type IntentHandlerId =
   | "createProject"
   | "clientOffers"
   | "addDocument"
-  | "cvExport";
+  | "cvExport"
+  | "addTask";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -231,6 +232,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The verified CV SHEET (print-to-PDF, outside the shell so no chrome
   // prints) — a route, because the sheet IS the canonical output (§19).
   "cv-export": { domain: "cv", access: "route", handler: "cvExport", ownTyping: false },
+  // PROJECT → WORK (§11): a work package on the company's project through
+  // the one inline form over the one task create.
+  "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

@@ -11629,6 +11629,10 @@
           "label": "Project aanmaken",
           "description": "Een locatie of opdracht waaraan u mensen toewijst."
         },
+        "createTask": {
+          "label": "Taak toevoegen",
+          "description": "Een werkpakket op het project — wat er moet gebeuren en wanneer."
+        },
         "respondOffer": {
           "label": "Aanbod van een bureau beantwoorden",
           "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
@@ -11766,6 +11770,11 @@
         "validUntil": "Geldig tot",
         "validUntilPlaceholder": "bijv. 2027-03-31",
         "documentNote": "Opmerking (optioneel)",
+        "taskTitle": "Taak",
+        "taskTitlePlaceholder": "bijv. Steiger opbouwen",
+        "taskProject": "Project (optioneel)",
+        "taskDue": "Deadline",
+        "taskPriority": "Prioriteit",
         "projectTitle": "Projectnaam",
         "projectTitlePlaceholder": "bijv. Magazijn Rotterdam",
         "projectCity": "Stad (optioneel)",
@@ -12097,6 +12106,8 @@
       "documentAddUnavailable": "De documentcatalogus kon nu niet worden geladen — leg het document vast in het documentencentrum.",
       "cvExportHint": "Uw geverifieerde cv — één blad met wat het systeem echt weet. Open het en print naar PDF.",
       "chipCvSheet": "Cv-blad openen",
+      "taskCreateIntro": "Een nieuwe taak: wat er moet gebeuren, op welk project en wanneer.",
+      "taskCreatedNext": "Taak vastgelegd. De projectpuls toont hem als open; wijs een persoon toe op het takenscherm.",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

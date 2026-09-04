@@ -3400,6 +3400,10 @@
           "label": "Loo projekt",
           "description": "Objekt või töö, kuhu määrate inimesi."
         },
+        "createTask": {
+          "label": "Lisa ülesanne",
+          "description": "Tööpakett projektis — mida tuleb teha ja mis ajaks."
+        },
         "respondOffer": {
           "label": "Vasta agentuuri pakkumisele",
           "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
@@ -3535,6 +3539,11 @@
         "validUntil": "Kehtib kuni",
         "validUntilPlaceholder": "nt 2027-03-31",
         "documentNote": "Märkus (valikuline)",
+        "taskTitle": "Ülesanne",
+        "taskTitlePlaceholder": "nt Tellingud püstitada",
+        "taskProject": "Projekt (valikuline)",
+        "taskDue": "Tähtaeg",
+        "taskPriority": "Prioriteet",
         "projectTitle": "Projekti nimi",
         "projectTitlePlaceholder": "nt Rotterdami ladu",
         "projectCity": "Linn (valikuline)",
@@ -3796,6 +3805,8 @@
       "documentAddUnavailable": "Dokumendikataloogi ei õnnestunud praegu laadida — märkige dokument dokumendikeskuses.",
       "cvExportHint": "Teie kinnitatud CV — üks leht sellest, mida süsteem tõesti teab. Avage ja printige PDF-iks.",
       "chipCvSheet": "Ava CV leht",
+      "taskCreateIntro": "Uus ülesanne: mida tuleb teha, millises projektis ja mis ajaks.",
+      "taskCreatedNext": "Ülesanne salvestatud. Projekti pulss näitab seda avatuna; inimese määrate ülesannete ekraanil.",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },
