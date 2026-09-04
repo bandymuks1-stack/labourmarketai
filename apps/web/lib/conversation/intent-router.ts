@@ -463,6 +463,8 @@ const RULES: IntentRule[] = [
       // "pakviesk studentą / mokinį", "invite a learner", "Schüler einladen",
       // "student uitnodigen", "пригласить студента"
       p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)\\w*\\s*.{0,24}(student|mokin|besimokan|learner|studier|schüler|leerling|студент|учащ|ученик)", 8),
+      // noun → verb: "Leerling uitnodigen", "Schüler einladen", "studentą pakviesti"
+      p("(student|mokin|besimokan|learner|schüler|leerling|студент|учащ)\\w*\\s*.{0,20}(pakvies|kviest|invite|einlad|uitnodig|приглас)", 8),
     ],
   },
   {
@@ -472,6 +474,8 @@ const RULES: IntentRule[] = [
       // "Programm anlegen", "nieuwe opleiding", "создать программу"
       p("(sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(program|kurs|grup|kohort|cohort|kursus|opleiding|программ|курс|групп|когорт)", 7),
       p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|наши)\\s+(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)", 6),
+      // noun → verb: "Programm anlegen", "opleiding aanmaken", "programą sukurti"
+      p("(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)\\w*\\s*.{0,16}(sukur|kurti|create|erstell|anleg|aanmak|создать|создай)", 7),
     ],
   },
   {
