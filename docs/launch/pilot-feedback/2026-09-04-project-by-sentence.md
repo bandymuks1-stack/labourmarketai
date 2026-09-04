@@ -38,3 +38,42 @@ projects`) — readback via Supabase MCP `execute_sql`, same as `customer_reques
 After creation the new project opens in the panel (the same opener the "projects"
 chip uses: real, empty roster + assignment controls) with one line: "Projektas
 sukurtas. Čia pat priskirkite žmones…". No second view, no menu.
+
+## People on the project (prod `f49cc972`) — and the readback defect it found
+
+`walk-project-assign-prod.cjs`, E2E Walker UAB (desktop viewport), 38.0 s:
+"sukurk projektą Vilniuje" → form pre-filled `city = Vilnius` → "E2E Vilniaus objektas
+(testinis)" saved → "mano projektai" → the ONE project opens as the detail panel
+("JUODRAŠTIS · E2E WALKER UAB · Vilnius · Priskirta 0 · Priskirti darbuotoją") →
+"Priskirti darbuotoją" → "Kas turėtų jame dirbti?" with the chip **E2E Worker Two** (the
+worker whose engagement the agency placement created minutes earlier) → chip →
+**"Priskirta projektui."** DB: `project_worker_assignments` row `80883119…` active at
+20:50:26 UTC (project `3b9c55d3…`, worker `0dbd5eda…`).
+
+**Defect:** the panel re-opened right after the success line still read "Priskirta 0"
+— the chat re-addressed the SAME project, the address did not change, and the detail
+did not re-read. Fixed on `fix/cc/project-panel-refetch-after-assign`: the opener stamps
+a fresh `pr` token, the detail re-reads when it changes.
+
+Also noted: on the phone viewport the worker chip sits in the thread UNDER the open
+panel, so it could not be tapped (the walk had to use a desktop viewport) — a real
+ordinary-human friction on mobile after an in-panel action offers chips in the thread;
+recorded, not fixed tonight.
+
+E2E residue: project `3b9c55d3` (draft) with one assignment — kept (the worker's
+work-log against it is the next proof).
+
+## Work → evidence on the chat-created project (prod `461326d2`)
+
+`walk-worklog-project-prod.cjs`, E2E Worker Two, 30.6 s: "Užpildyk darbo žurnalą" → the
+work-log form (date · place "Vilnius" · "Klojau pamatus Vilniaus objekte. E2E-WL-…") →
+two-step save. DB: `journal_entries` row `01d4a36d…` at 20:58:52 UTC with
+**`project_id 3b9c55d3…`** (the project created by sentence 14 minutes earlier) and
+`engagement_context_id 90da8c16…` — the chat attached the work to the assignment
+without asking, because the worker has exactly one active context.
+
+So PROJECT create → people → work → evidence is proven on production by sentence and
+chips; the evidence sits on the worker's identity (journal → verified CV sheet) and on
+the project. Not seen: the employer's greeting did not carry a "… laukia peržiūros"
+line 14 s later (the review queue keys on the confirmation model; the brief showed the
+institution line only) — recorded for the next observation, not chased tonight.
