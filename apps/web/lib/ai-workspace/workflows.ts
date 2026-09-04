@@ -79,13 +79,24 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
   const missed = reading.matches.filter((m) => !m.available);
 
   // Named something the world does not have: say what it DOES have. This is
-  // the difference between "no results" and an answer.
+  // the difference between "no results" and an answer. What it DOES have is
+  // listed on the SAME dimension the person named: an absent opportunity
+  // type is answered with the types that are visible, an absent country
+  // with the countries — never "no internships; visible: LT, NL".
   if (applied.length === 0 && missed.length > 0) {
-    const countries = facets.countries.join(", ");
+    const missedDimension = missed[0].dimension;
+    const alternatives =
+      missedDimension === "country"
+        ? facets.countries.join(", ")
+        : terms
+            .filter((v) => v.dimension === missedDimension && v.available)
+            .map((v) => v.terms[0])
+            .filter((label): label is string => typeof label === "string" && label.length > 0)
+            .join(", ");
     return {
       kind: "answer",
-      text: countries
-        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: countries })
+      text: alternatives
+        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
         : t("noSuchValue", { asked: missed[0].matchedText }),
       explanation: {
         why: t("whyFromYourBoard"),

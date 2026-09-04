@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { countryDisplayName } from "@/lib/location/country-model";
 import { collectDiscoveryFacets, type DiscoveryFacets } from "@/lib/opportunities/discovery-filters";
@@ -143,10 +143,12 @@ export async function buildWorkspaceVocabulary(
   // the board; the words are the catalogue labels in every active language
   // plus the everyday stems a person actually types ("praktika", "stažuotė",
   // "стажировка", "stage", "Praktikum", "pameistrystė", "apprenticeship").
+  const currentLocale = await getLocale();
   const typeCatalogues = await Promise.all(
-    activeLocales.map((locale) =>
-      getTranslations({ locale, namespace: "structuredDemand.opportunityType" }),
-    ),
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "structuredDemand.opportunityType" }),
+    })),
   );
   const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
     internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
@@ -158,11 +160,19 @@ export async function buildWorkspaceVocabulary(
   // the student got the whole board — the honest answer is "I understood
   // internships; none is visible to you right now" (same rule as a country
   // that is not on the board).
+  // Term order matters for DISPLAY only: the first term is what the answer
+  // shows when it lists what IS visible ("Matoma: darbas, pameistrystė"), so
+  // the person's own language comes first, then the other catalogues, then
+  // the everyday stems.
   for (const value of OPPORTUNITY_TYPES) {
-    const names = new Set<string>(EVERYDAY_TYPE_WORDS[value] ?? []);
-    for (const t of typeCatalogues) {
+    const names = new Set<string>();
+    for (const { locale, t } of typeCatalogues) {
+      if (locale === currentLocale && t.has(value)) names.add(t(value) as string);
+    }
+    for (const { t } of typeCatalogues) {
       if (t.has(value)) names.add(t(value) as string);
     }
+    for (const word of EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word);
     if (names.size > 0) {
       terms.push({
         dimension: "opportunityType",

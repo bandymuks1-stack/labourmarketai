@@ -89,6 +89,13 @@ describe("the student's sentence narrows the board", () => {
     const SRC = readFileSync(join(__dirname, "..", "ai-workspace", "vocabulary-server.ts"), "utf8");
     expect(SRC).toMatch(/for \(const value of OPPORTUNITY_TYPES\)/);
     expect(SRC).toMatch(/available: facets\.opportunityTypes\.includes\(value\)/);
+    // What IS visible is listed on the SAME dimension the person named —
+    // never countries under an absent opportunity type — and in the
+    // person's own language first.
+    const WF = readFileSync(join(__dirname, "..", "ai-workspace", "workflows.ts"), "utf8");
+    expect(WF).toContain('missedDimension === "country"');
+    expect(WF).toContain("v.dimension === missedDimension && v.available");
+    expect(SRC).toContain("locale === currentLocale && t.has(value)");
   });
 
   it("a plain job search sets no type", () => {
