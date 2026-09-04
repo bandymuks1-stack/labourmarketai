@@ -11640,6 +11640,10 @@
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
+        },
+        "moveWorker": {
+          "label": "Move a person to another project",
+          "description": "Assigns to the new project and ends the previous assignment — after the what-if."
         }
       },
       "education": {
@@ -12142,7 +12146,26 @@
       "documentFileUnsupported": "This file type is not supported — use PDF, Word or a photo.",
       "documentFileFailed": "The file could not be uploaded — nothing was saved. Try again from the documents centre.",
       "briefEmployerBookingResponses": "{count, plural, one {# worker has answered your booking proposal} other {# workers have answered your booking proposals}}.",
-      "chipEmployerBookings": "My proposals"
+      "chipEmployerBookings": "My proposals",
+      "moveNotFound": "I cannot find that person on that project — pick from the list.",
+      "moveNoOptions": "Nothing to move: this needs at least two projects and one assigned person.",
+      "moveAskWorker": "Whom to move? Pick:",
+      "moveAskProject": "Where to move {name}? Pick:",
+      "moveWhatIfTitle": "If {name} moved from “{from}” to “{to}”:",
+      "moveFromLine": "• “{from}”: people {before} → {after}; {tasks} of their open work packages stay there; readiness checklist there: {checked}/{total}.",
+      "moveToLine": "• “{to}”: people {before} → {after}; the readiness checklist there starts at 0/{total}.",
+      "moveCountryLine": "• The country changes: {from} → {to} — document requirements differ.",
+      "moveNoDatesLine": "• “{to}” has no dates — absences cannot be checked.",
+      "moveAvailabilityUnknownLine": "• Absences unknown — the leave model does not answer here.",
+      "moveAvailabilityLine": "• Inside {start}–{end} they have {count} absence records.",
+      "moveAvailabilityFreeLine": "• No absences inside “{to}”'s dates.",
+      "moveOnlyConfirmLine": "Nothing has changed yet — only your confirmation will.",
+      "moveConfirmChip": "Move",
+      "moveCancelChip": "Leave as is",
+      "moveDone": "Moved: assigned to the new project, the previous assignment ended.",
+      "moveDonePartial": "Assigned to the new project, but the previous assignment could not be ended — they are on both; finish it in the project panel.",
+      "moveFailed": "The move failed — nothing changed.",
+      "chipMovePrefix": "Move to"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

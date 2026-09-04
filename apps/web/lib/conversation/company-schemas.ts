@@ -141,6 +141,16 @@ export const companyAssignWorkerSchema = z.object({
   workerProfileId: uuid,
 });
 
+/** §11 what-if MOVE: the person leaves project X for project Y. Both ids are
+ *  re-checked by the two canonical RPCs (assign, end); X ≠ Y here. */
+export const companyMoveWorkerSchema = z
+  .object({
+    workerProfileId: uuid,
+    fromProjectId: uuid,
+    toProjectId: uuid,
+  })
+  .refine((v) => v.fromProjectId !== v.toProjectId, { message: "same project" });
+
 export const agencyInviteClientSchema = z.object({
   /** Optional since 2026-09-04: the chat never knows the company id — the
    *  executor resolves the ACTIVE workspace's company (M-P0-3, the same
@@ -256,6 +266,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.contact-worker": companyContactWorkerSchema,
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
+  "company.move-worker": companyMoveWorkerSchema,
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
   "company.create-task": companyCreateTaskSchema,

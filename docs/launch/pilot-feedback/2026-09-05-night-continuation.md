@@ -39,3 +39,12 @@ All proofs with E2E identities on production (`labourmarket.ai`), never the real
 ## Residue (E2E, recorded)
 
 - project `3b9c55d3` with stage `1885abb7`, assignment `80883119`, log `01d4a36d`, task `712182db` (earlier); booking `910c138a` (to delete after the decline walk); document file for E2E worker2's A1 row (blob removed by the walk; row via MCP).
+
+## PROJECT — the §11 WHAT-IF move, built (branch `feat/cc/project-move-what-if`; not live until the Vercel freeze lifts)
+
+- ENTRY: chat, company identity — "perkelk Joną į projektą Y" / "move John to project Riga" / "переведи Ивана на проект Рига" / "verplaats Jan naar project Utrecht" / "versetze Jan in das Projekt Berlin" (intent `move-worker`, write).
+- RESOLVE: the person and the destination against the company's REAL projects and ACTIVE assignments (`loadProjectMoveOptionsForChat` over the operations centre's own read); what the sentence leaves open is asked with chips built from those rows.
+- WHAT-IF (nothing written): `loadProjectMoveWhatIfForChat` — X: people N → N−1, the person's OPEN work packages that stay on X, X's readiness checklist checked/total for them; Y: people M → M+1, the checklist starts 0/N there, absences inside Y's dates (or "no dates" / "leave model does not answer", said), country change. Ends with "nothing has changed yet — only your confirmation will".
+- COMMIT: the confirm chip only — `company.move-worker` (strong tier, token) = assign to Y (`assign_worker_to_project`) THEN end X (`end_worker_project_assignment`); a failed second step is reported as "on both projects — finish it in the panel". The destination project re-opens in the panel.
+- Guard `move-worker-intent.test.ts`: routes in 5 locales; the what-if module has no table/RPC/write; the executor's order; the chat's chip order; real copy in 11 catalogues.
+- Vercel production freeze: the walk (`walk-move-prod.cjs`, to be written for E2E Walker UAB with a second project) runs after the reset.

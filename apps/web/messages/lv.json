@@ -3411,6 +3411,10 @@
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
+        },
+        "moveWorker": {
+          "label": "Pārcelt cilvēku uz citu projektu",
+          "description": "Piesaista jaunajam projektam un beidz iepriekšējo piesaisti — pēc seku pārskata."
         }
       },
       "education": {
@@ -3839,7 +3843,26 @@
       "documentFileUploaded": "Fails pievienots dokumentam. Lūk, jūsu gatavība tagad:",
       "documentFileTooLarge": "Fails ir lielāks par 5 MB — nekas netika saglabāts.",
       "documentFileUnsupported": "Šis faila tips netiek atbalstīts — izmantojiet PDF, Word vai foto.",
-      "documentFileFailed": "Failu neizdevās augšupielādēt — nekas netika saglabāts. Mēģiniet dokumentu centrā."
+      "documentFileFailed": "Failu neizdevās augšupielādēt — nekas netika saglabāts. Mēģiniet dokumentu centrā.",
+      "moveNotFound": "Neatrodu šo cilvēku tajā projektā — izvēlieties no saraksta.",
+      "moveNoOptions": "Nav ko pārcelt: vajadzīgi vismaz divi projekti un viens piesaistīts cilvēks.",
+      "moveAskWorker": "Ko pārcelt? Izvēlieties:",
+      "moveAskProject": "Kur pārcelt {name}? Izvēlieties:",
+      "moveWhatIfTitle": "Ja {name} pārietu no „{from}“ uz „{to}“:",
+      "moveFromLine": "• „{from}“: cilvēku {before} → {after}; viņa atvērto darba pakotņu tur paliek {tasks}; gatavības saraksts tur: {checked}/{total}.",
+      "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
+      "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
+      "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
+      "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas — atvaļinājumu modelis šeit neatbild.",
+      "moveAvailabilityLine": "• Laikā {start}–{end} viņam ir {count} prombūtnes ieraksti.",
+      "moveAvailabilityFreeLine": "• „{to}“ datumos prombūtņu nav.",
+      "moveOnlyConfirmLine": "Pagaidām nekas nav mainīts — mainīs tikai jūsu apstiprinājums.",
+      "moveConfirmChip": "Pārcelt",
+      "moveCancelChip": "Atstāt kā ir",
+      "moveDone": "Pārcelts: piesaistīts jaunajam projektam, iepriekšējā piesaiste beigta.",
+      "moveDonePartial": "Piesaistīts jaunajam projektam, bet iepriekšējo piesaisti neizdevās beigt — viņš ir abos; pabeidziet projekta panelī.",
+      "moveFailed": "Pārcelt neizdevās — nekas nemainījās.",
+      "chipMovePrefix": "Pārcelt uz"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

@@ -42,10 +42,11 @@
 
 ## Queue (contract §33; next automatic step first)
 
-1. On resume: consume #1495 (pulse walk) / #1497 (task walk) / #1498 / worker-projects PR chains; then keep evaluating at journey level (owner notes 2026-09-04 late / 2026-09-05).
-2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
-3. F2: end date / duration in the demand structurer; the site as a project object.
-4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.
+1. On resume (after the Vercel reset ~23:00 UTC 2026-09-05): a push to `main` (or the owner's Redeploy) → on the new build, in this order: `walk-stage-prod.cjs` (#1503), `CLEANUP=1 walk-document-file-prod.cjs` (#1502; then delete the `document_files` row via MCP), `WORKER_EMAIL=qa.worker+multiw@labourmarket.ai walk-employer-proposal-prod.cjs` (the employer's "workers answered" rung, #1505; delete the `booking_requests` row via MCP after), `walk-task-prod.cjs` (title without the deadline tail, #1504), and a NEW walk for the §11 what-if move (E2E Walker UAB: E2E Worker Two on `3b9c55d3` → "perkelk … į projektą <other project>" → what-if lines → confirm → readback of BOTH assignments; end with the person back on `3b9c55d3`).
+2. Keep evaluating at journey level (owner notes 2026-09-04); the merged-but-unproven set IS the backlog until the freeze lifts — push no more branches than needed (each push is a Vercel deployment).
+3. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
+4. F2: end date / duration in the demand structurer; the site as a project object.
+5. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.
 
 ## Open owner gates (consolidated, do not re-ask)
 
