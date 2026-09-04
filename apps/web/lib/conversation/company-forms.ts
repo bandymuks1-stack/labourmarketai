@@ -71,6 +71,15 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
         maxLength: 10,
       },
       {
+        // WHEN the work ends — stated as a date ("iki spalio 20") or a
+        // duration ("3 savaitėms"), prefilled from the sentence; optional.
+        name: "endDate",
+        kind: "text",
+        labelKey: "conversation.forms.fields.endDate",
+        placeholderKey: "conversation.forms.fields.startDatePlaceholder",
+        maxLength: 10,
+      },
+      {
         name: "urgency",
         kind: "select",
         labelKey: "conversation.forms.fields.urgency",
@@ -108,6 +117,7 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       urgency: s(st.urgency) || null,
       opportunityType: s(st.opportunityType) || null,
       startDate: s(st.startDate) || null,
+      endDate: s(st.endDate) || null,
       // Derived by the structurer from the person's own sentence (never
       // typed): the taxonomy slug and the ISO market. They ride the form
       // state so the canonical columns (`role_or_work_type`, `country`) are

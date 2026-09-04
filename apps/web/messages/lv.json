@@ -3495,6 +3495,7 @@
         "demandLocation": "Vieta",
         "startDate": "Sākuma datums",
         "startDatePlaceholder": "GGGG-MM-DD",
+        "endDate": "Beigu datums",
         "programmeName": "Programmas nosaukums",
         "programmeNamePlaceholder": "piem., Metinātāju kurss",
         "programmeDescription": "Apraksts (neobligāti)",

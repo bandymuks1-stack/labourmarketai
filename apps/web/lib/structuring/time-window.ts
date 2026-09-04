@@ -176,6 +176,60 @@ export function parseStartDate(text: string, todayIso: string): string | null {
   return null;
 }
 
+/** "until" across the locales — the word that turns a date into an END. */
+const UNTIL_WORD = "(?:iki|until|till|to|до|tot|t/m|bis|do)";
+
+/**
+ * An absolute END date ("iki spalio 20", "until 20 October", "до 20 октября",
+ * "tot 20 oktober", "bis 20. Oktober", "do 20 października") — the same
+ * month/day reading as the start, anchored on or after the start day so
+ * "nuo spalio 5 iki spalio 20" never reads the end as next year. `null` when
+ * none is stated.
+ */
+export function parseEndDate(text: string, todayIso: string, startIso: string | null): string | null {
+  const folded = foldText(text ?? "");
+  const anchor = startIso ?? todayIso;
+  const dayFirst = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
+  );
+  if (dayFirst) {
+    const month = monthOf(dayFirst[2]);
+    if (month) return nextOccurrence(anchor, month, Number.parseInt(dayFirst[1], 10));
+  }
+  const monthFirst = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+([\\p{L}]+)\\s+(\\d{1,2})(?!\\d)`, "u"),
+  );
+  if (monthFirst) {
+    const month = monthOf(monthFirst[1]);
+    if (month) return nextOccurrence(anchor, month, Number.parseInt(monthFirst[2], 10));
+  }
+  return null;
+}
+
+/** Duration units, folded stems: weeks / months across the locales. */
+// `\w` is ASCII-only in JS — Cyrillic and Lithuanian endings need `\p{L}`.
+const WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*)$/u;
+const MONTH_WORD = /^(men[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
+
+/**
+ * A stated DURATION ("3 savaitėms", "for 3 weeks", "на 3 недели", "3 weken",
+ * "3 Wochen", "na 3 tygodnie", "2 mėnesiams", "for two months") → the number
+ * of days it spans, or `null`. Word-numbers count too.
+ */
+export function parseDurationDays(text: string): number | null {
+  const tokens = (text ?? "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const folded = tokens.map(foldText);
+  for (let i = 1; i < folded.length; i++) {
+    const unit = WEEK_WORD.test(folded[i]) ? 7 : MONTH_WORD.test(folded[i]) ? 30 : 0;
+    if (!unit) continue;
+    const candidate = tokens[i - 1];
+    const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
+    const value = digits ?? parseWordNumber(candidate);
+    if (value !== null && value >= 1 && value <= 52) return value * unit;
+  }
+  return null;
+}
+
 /** Day-count words across the locales (folded stems). */
 const DAY_WORD = /^(dien\w*|days?|день|дня|дней|дни|dagen|dag|tage?n?)$/u;
 
@@ -211,7 +265,16 @@ export function parseTimeWindow(text: string, todayIso: string): TimeWindow {
   // An absolute start date is the most precise thing a person can state — it
   // wins over the coarse phrases. No end is invented.
   const startIso = parseStartDate(text ?? "", todayIso);
-  if (startIso) return { kind: "from_date", startIso, days };
+  if (startIso) {
+    // An END is stated as a date ("iki spalio 20"), a duration ("3
+    // savaitėms") or a day count — in that order of precision. Nothing is
+    // invented when none is stated.
+    const duration = parseDurationDays(text ?? "");
+    const endIso =
+      parseEndDate(text ?? "", todayIso, startIso) ??
+      (duration ? plusDays(startIso, duration - 1) : days ? plusDays(startIso, days - 1) : undefined);
+    return { kind: "from_date", startIso, ...(endIso ? { endIso } : {}), days };
+  }
 
   for (const { kind, res } of KIND_NEEDLES) {
     if (!res.some((re) => re.test(folded))) continue;

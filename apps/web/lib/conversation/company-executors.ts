@@ -168,10 +168,17 @@ export const COMPANY_EXECUTORS: {
       // and the Learning Compass read (`payload.structured_v2`). Absent when
       // the employer stated none — nothing is inferred.
       structuredV2:
-        input.opportunityType || input.startDate
+        input.opportunityType || input.startDate || input.endDate
           ? {
               ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
-              ...(input.startDate ? { time: { start_earliest: input.startDate } } : {}),
+              ...(input.startDate || input.endDate
+                ? {
+                    time: {
+                      ...(input.startDate ? { start_earliest: input.startDate } : {}),
+                      ...(input.endDate ? { end_date: input.endDate } : {}),
+                    },
+                  }
+                : {}),
             }
           : undefined,
     });

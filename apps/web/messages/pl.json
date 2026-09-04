@@ -3495,6 +3495,7 @@
         "demandLocation": "Lokalizacja",
         "startDate": "Data rozpoczęcia",
         "startDatePlaceholder": "RRRR-MM-DD",
+        "endDate": "Data zakończenia",
         "programmeName": "Nazwa programu",
         "programmeNamePlaceholder": "np. Kurs spawania",
         "programmeDescription": "Opis (opcjonalnie)",

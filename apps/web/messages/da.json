@@ -3495,6 +3495,7 @@
         "demandLocation": "Sted",
         "startDate": "Startdato",
         "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
+        "endDate": "Slutdato",
         "programmeName": "Programnavn",
         "programmeNamePlaceholder": "f.eks. Svejsekursus",
         "programmeDescription": "Beskrivelse (valgfri)",

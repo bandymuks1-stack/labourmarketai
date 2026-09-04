@@ -11719,6 +11719,7 @@
         "demandLocation": "Location",
         "startDate": "Start date",
         "startDatePlaceholder": "YYYY-MM-DD",
+        "endDate": "End date",
         "programmeName": "Programme name",
         "programmeNamePlaceholder": "e.g. Welding course",
         "programmeDescription": "Description (optional)",
