@@ -78,7 +78,7 @@ export const WORKER_EXECUTORS: {
         locale: ctx.locale,
       }),
     );
-    if (r && r.ok) return { ok: true, data: { typeSlug: input.typeSlug } };
+    if (r && r.ok) return { ok: true, data: { typeSlug: input.typeSlug, country: input.country ?? "" } };
     const code = r ? r.code : "error";
     return { ok: false, code: code === "needs_migration" ? "needs_migration" : code === "invalid" ? "invalid" : code === "not_authenticated" || code === "no_worker" ? "not_authorized" : "error" };
   },
