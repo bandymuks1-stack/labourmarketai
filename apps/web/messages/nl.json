@@ -12037,7 +12037,19 @@
       "eduNext": "Wat nu?",
       "chipCreateProgramme": "Opleiding aanmaken",
       "chipCreateCohort": "Groep aanmaken",
-      "chipAssignLearner": "Leerling toewijzen"
+      "chipAssignLearner": "Leerling toewijzen",
+      "mySpaceTitle": "Mijn ruimte",
+      "chipManagePins": "Beheren",
+      "pinAsk": "U gebruikt dit vaak. Toevoegen aan Mijn ruimte?",
+      "chipPinYes": "Toevoegen",
+      "chipPinNo": "Niet nu",
+      "pinDone": "Toegevoegd aan Mijn ruimte — u vindt het bovenaan.",
+      "pinCap": "Mijn ruimte bevat al {max} items. Verwijder er een om een nieuw toe te voegen.",
+      "pinUnavailable": "Mijn ruimte kan nu niet worden opgeslagen.",
+      "pinsManageIntro": "Uw Mijn ruimte. Tik op wat u wilt verwijderen:",
+      "pinsNone": "Mijn ruimte is leeg. Als u iets vaak gebruikt, stel ik voor het toe te voegen.",
+      "unpinPrefix": "Verwijderen",
+      "unpinDone": "Verwijderd uit Mijn ruimte."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

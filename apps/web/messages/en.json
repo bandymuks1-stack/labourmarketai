@@ -12037,7 +12037,19 @@
       "eduNext": "What next?",
       "chipCreateProgramme": "Create a programme",
       "chipCreateCohort": "Create a cohort",
-      "chipAssignLearner": "Assign a learner"
+      "chipAssignLearner": "Assign a learner",
+      "mySpaceTitle": "My Space",
+      "chipManagePins": "Manage",
+      "pinAsk": "You use this often. Add it to My Space?",
+      "chipPinYes": "Add",
+      "chipPinNo": "Not now",
+      "pinDone": "Added to My Space — you will find it at the top.",
+      "pinCap": "My Space already holds {max} items. Remove one to add another.",
+      "pinUnavailable": "My Space cannot be saved right now.",
+      "pinsManageIntro": "Your My Space. Tap what to remove:",
+      "pinsNone": "My Space is empty. When you use something often, I will offer to add it.",
+      "unpinPrefix": "Remove",
+      "unpinDone": "Removed from My Space."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

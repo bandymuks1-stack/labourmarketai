@@ -12037,7 +12037,19 @@
       "eduNext": "Kas toliau?",
       "chipCreateProgramme": "Sukurti programą",
       "chipCreateCohort": "Sukurti grupę",
-      "chipAssignLearner": "Priskirti studentą"
+      "chipAssignLearner": "Priskirti studentą",
+      "mySpaceTitle": "Mano erdvė",
+      "chipManagePins": "Tvarkyti",
+      "pinAsk": "Šį veiksmą naudojate dažnai. Pridėti į Mano erdvę?",
+      "chipPinYes": "Pridėti",
+      "chipPinNo": "Ne dabar",
+      "pinDone": "Pridėta į Mano erdvę — rasite viršuje.",
+      "pinCap": "Mano erdvėje jau {max} įrašai. Pašalinkite vieną, kad pridėtumėte naują.",
+      "pinUnavailable": "Mano erdvės šiuo metu išsaugoti nepavyksta.",
+      "pinsManageIntro": "Jūsų Mano erdvė. Paspauskite, ką pašalinti:",
+      "pinsNone": "Mano erdvė tuščia. Kai ką nors naudosite dažnai, pasiūlysiu pridėti.",
+      "unpinPrefix": "Pašalinti",
+      "unpinDone": "Pašalinta iš Mano erdvės."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

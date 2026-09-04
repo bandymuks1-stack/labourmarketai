@@ -3748,7 +3748,19 @@
       "eduNext": "Mis edasi?",
       "chipCreateProgramme": "Loo programm",
       "chipCreateCohort": "Loo rühm",
-      "chipAssignLearner": "Määra õppija"
+      "chipAssignLearner": "Määra õppija",
+      "mySpaceTitle": "Minu ala",
+      "chipManagePins": "Halda",
+      "pinAsk": "Kasutate seda sageli. Lisada Minu alale?",
+      "chipPinYes": "Lisa",
+      "chipPinNo": "Mitte praegu",
+      "pinDone": "Lisatud Minu alale — leiate selle ülevalt.",
+      "pinCap": "Minu alal on juba {max} kirjet. Eemaldage üks, et lisada uus.",
+      "pinUnavailable": "Minu ala ei saa praegu salvestada.",
+      "pinsManageIntro": "Teie Minu ala. Puudutage, mida eemaldada:",
+      "pinsNone": "Minu ala on tühi. Kui kasutate midagi sageli, pakun selle lisamist.",
+      "unpinPrefix": "Eemalda",
+      "unpinDone": "Eemaldatud Minu alalt."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

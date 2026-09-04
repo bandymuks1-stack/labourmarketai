@@ -12037,7 +12037,19 @@
       "eduNext": "Was als Nächstes?",
       "chipCreateProgramme": "Programm anlegen",
       "chipCreateCohort": "Gruppe anlegen",
-      "chipAssignLearner": "Lernenden zuweisen"
+      "chipAssignLearner": "Lernenden zuweisen",
+      "mySpaceTitle": "Mein Bereich",
+      "chipManagePins": "Verwalten",
+      "pinAsk": "Sie nutzen das oft. Zu Mein Bereich hinzufügen?",
+      "chipPinYes": "Hinzufügen",
+      "chipPinNo": "Nicht jetzt",
+      "pinDone": "Zu Mein Bereich hinzugefügt — Sie finden es oben.",
+      "pinCap": "Mein Bereich enthält bereits {max} Einträge. Entfernen Sie einen, um einen neuen hinzuzufügen.",
+      "pinUnavailable": "Mein Bereich kann gerade nicht gespeichert werden.",
+      "pinsManageIntro": "Ihr Mein Bereich. Tippen Sie, was entfernt werden soll:",
+      "pinsNone": "Mein Bereich ist leer. Wenn Sie etwas oft nutzen, schlage ich vor, es hinzuzufügen.",
+      "unpinPrefix": "Entfernen",
+      "unpinDone": "Aus Mein Bereich entfernt."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

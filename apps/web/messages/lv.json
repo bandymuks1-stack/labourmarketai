@@ -3748,7 +3748,19 @@
       "eduNext": "Kas tālāk?",
       "chipCreateProgramme": "Izveidot programmu",
       "chipCreateCohort": "Izveidot grupu",
-      "chipAssignLearner": "Piešķirt audzēkni"
+      "chipAssignLearner": "Piešķirt audzēkni",
+      "mySpaceTitle": "Mana telpa",
+      "chipManagePins": "Pārvaldīt",
+      "pinAsk": "Jūs to izmantojat bieži. Pievienot Manai telpai?",
+      "chipPinYes": "Pievienot",
+      "chipPinNo": "Ne tagad",
+      "pinDone": "Pievienots Manai telpai — atradīsiet augšā.",
+      "pinCap": "Manā telpā jau ir {max} ieraksti. Noņemiet vienu, lai pievienotu jaunu.",
+      "pinUnavailable": "Manu telpu pašlaik nevar saglabāt.",
+      "pinsManageIntro": "Jūsu Mana telpa. Pieskarieties tam, ko noņemt:",
+      "pinsNone": "Mana telpa ir tukša. Kad kaut ko izmantosiet bieži, piedāvāšu to pievienot.",
+      "unpinPrefix": "Noņemt",
+      "unpinDone": "Noņemts no Manas telpas."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

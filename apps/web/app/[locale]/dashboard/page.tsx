@@ -32,6 +32,7 @@ import {
   type WorkspaceStarterContext,
 } from "@/lib/conversation/starter-signals";
 import { capabilityPhraseKeys, deriveStarters } from "@/lib/conversation/starters";
+import { listMyPins } from "@/lib/workspace/pins";
 
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
@@ -101,6 +102,11 @@ export default async function DashboardHomePage({
     starterContext ?? personStarterContext(Boolean(learnerLink));
   const { agencyWorkspace, educationWorkspace } = workspace;
   const starters = deriveStarters(workspace.signals);
+  // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
+  // THIS workspace, under RLS. Unavailable (migration unapplied / read
+  // failed) → `null` → no row, no ask.
+  const pinsRead = await listMyPins(identity === "company" ? workspace.organizationId : null);
+  const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
@@ -175,6 +181,7 @@ export default async function DashboardHomePage({
         starters={starters}
         contextFallback={contextFallback}
         workspaceContextLine={workspaceContextLine}
+        pins={pins}
       />
     </>
   );

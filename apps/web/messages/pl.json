@@ -3748,7 +3748,19 @@
       "eduNext": "Co dalej?",
       "chipCreateProgramme": "Utwórz program",
       "chipCreateCohort": "Utwórz grupę",
-      "chipAssignLearner": "Przypisz ucznia"
+      "chipAssignLearner": "Przypisz ucznia",
+      "mySpaceTitle": "Moja przestrzeń",
+      "chipManagePins": "Zarządzaj",
+      "pinAsk": "Często z tego korzystasz. Dodać do Mojej przestrzeni?",
+      "chipPinYes": "Dodaj",
+      "chipPinNo": "Nie teraz",
+      "pinDone": "Dodano do Mojej przestrzeni — znajdziesz to u góry.",
+      "pinCap": "Moja przestrzeń ma już {max} elementów. Usuń jeden, aby dodać nowy.",
+      "pinUnavailable": "Nie można teraz zapisać Mojej przestrzeni.",
+      "pinsManageIntro": "Twoja Moja przestrzeń. Dotknij, co usunąć:",
+      "pinsNone": "Moja przestrzeń jest pusta. Gdy będziesz często z czegoś korzystać, zaproponuję dodanie.",
+      "unpinPrefix": "Usuń",
+      "unpinDone": "Usunięto z Mojej przestrzeni."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
