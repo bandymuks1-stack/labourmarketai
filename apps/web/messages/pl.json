@@ -3815,6 +3815,9 @@
       "capacityUnavailable": "Nie udało się teraz odczytać dostępności zespołu.",
       "chipProjects": "Projekty",
       "chipAddTask": "Dodaj zadanie",
+      "workerProjectsIntro": "Twoje projekty ({count} aktywne):",
+      "workerProjectsEnded": "zakończone",
+      "chipOpenProjectPrefix": "Otwórz",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },

@@ -12116,6 +12116,9 @@
       "capacityUnavailable": "Die Verfügbarkeit des Teams konnte gerade nicht gelesen werden.",
       "chipProjects": "Projekte",
       "chipAddTask": "Aufgabe hinzufügen",
+      "workerProjectsIntro": "Ihre Projekte ({count} aktiv):",
+      "workerProjectsEnded": "beendet",
+      "chipOpenProjectPrefix": "Öffnen",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },

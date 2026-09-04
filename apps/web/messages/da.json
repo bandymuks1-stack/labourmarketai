@@ -3815,6 +3815,9 @@
       "capacityUnavailable": "Holdets tilgængelighed kunne ikke læses lige nu.",
       "chipProjects": "Projekter",
       "chipAddTask": "Tilføj opgave",
+      "workerProjectsIntro": "Dine projekter ({count} aktive):",
+      "workerProjectsEnded": "afsluttet",
+      "chipOpenProjectPrefix": "Åbn",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

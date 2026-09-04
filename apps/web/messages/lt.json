@@ -12116,6 +12116,9 @@
       "capacityUnavailable": "Komandos prieinamumo dabar nuskaityti nepavyko.",
       "chipProjects": "Projektai",
       "chipAddTask": "Pridėti užduotį",
+      "workerProjectsIntro": "Jūsų projektai ({count} aktyv.):",
+      "workerProjectsEnded": "baigta",
+      "chipOpenProjectPrefix": "Atidaryti",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

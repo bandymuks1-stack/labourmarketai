@@ -3815,6 +3815,9 @@
       "capacityUnavailable": "Meeskonna saadavust ei õnnestunud praegu lugeda.",
       "chipProjects": "Projektid",
       "chipAddTask": "Lisa ülesanne",
+      "workerProjectsIntro": "Teie projektid ({count} aktiivset):",
+      "workerProjectsEnded": "lõppenud",
+      "chipOpenProjectPrefix": "Ava",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

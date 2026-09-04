@@ -233,6 +233,9 @@ const CHAT_KEYS = [
   "capacityEmpty",
   "capacityUnavailable",
   "chipAddTask",
+  "workerProjectsIntro",
+  "workerProjectsEnded",
+  "chipOpenProjectPrefix",
 ] as const;
 
 const WORKLOG_KEYS = [

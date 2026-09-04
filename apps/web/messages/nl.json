@@ -12116,6 +12116,9 @@
       "capacityUnavailable": "De beschikbaarheid van het team kon nu niet worden gelezen.",
       "chipProjects": "Projecten",
       "chipAddTask": "Taak toevoegen",
+      "workerProjectsIntro": "Uw projecten ({count} actief):",
+      "workerProjectsEnded": "beëindigd",
+      "chipOpenProjectPrefix": "Openen",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

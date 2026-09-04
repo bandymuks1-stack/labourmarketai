@@ -12116,6 +12116,9 @@
       "capacityUnavailable": "The team's availability could not be read right now.",
       "chipProjects": "Projects",
       "chipAddTask": "Add a task",
+      "workerProjectsIntro": "Your projects ({count} active):",
+      "workerProjectsEnded": "ended",
+      "chipOpenProjectPrefix": "Open",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },
