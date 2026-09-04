@@ -229,10 +229,32 @@ rather than in a mock.
 `lib/supply-bridge/__contract__/agentai-v1-consumer.vendored.ts` is Agentai's
 `first-party-signal-contract.ts` copied **verbatim** from `origin/main`
 `8f5ccf1` (the only edit is inlining two type aliases from a sibling module —
-marked in the file). 45 vitest cases run every emitted row through the real
-`validateFirstPartySignal`, `decideMatchability` and `decidePublication`,
-including the production row above, pinned in `production-emitted-row.test.ts`
-and asserted `toEqual` after the round trip — no field lost, none altered.
+marked in the file). **54 vitest cases** across three files run every emitted row
+through the real `validateFirstPartySignal`, `decideMatchability` and
+`decidePublication`, including the production row above, pinned in
+`production-emitted-row.test.ts` and asserted `toEqual` after the round trip —
+no field lost, none altered.
+
+### The artefact, and the honest-degradation path
+
+`feed-file.test.ts` pins the file rather than the string: an empty feed **is** a
+file (present, zero bytes); a failed read writes **none** and does **not**
+truncate the one already there; a non-array answer is unavailable; a withdrawn
+person **disappears** on the next whole-file rebuild rather than becoming a
+tombstone; two rebuilds of unchanged state are byte-identical; no `.tmp`
+survives a successful write.
+
+The unavailable path was then run against the **live production database**,
+where this slice's migration is deliberately UNAPPLIED:
+
+```
+$ pnpm -F web supply-feed:emit --dry-run
+[supply-feed] UNAVAILABLE — nothing written, previous file untouched
+[supply-feed] reason: first_party_supply_feed_v1 is not applied to this database
+```
+
+No file was created. That is *"we did not look"* reaching the consumer as an
+absent feed — not a measured zero — proven against production rather than a mock.
 
 **Not proven here:** `classifyOccupation` and the ~600-line construction
 occupation taxonomy, which decide whether a trade string resolves to an
