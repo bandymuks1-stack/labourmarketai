@@ -115,5 +115,9 @@ G-04). E2E residue: that proposed booking stays (test identities only).
 
 Observed: the client's greeting did not carry the "1 agentūros pasiūlymas laukia…"
 line on this run (it did on `6fc477d9`); the offers list and the decision worked.
-Possible cause: the three-line cap filled by the institution rung + operations
-lines for this identity (E2E Walker also holds training_provider) — to re-check.
+Re-checked on `f49cc972` after the acceptance: the greeting carries only the
+institution line (one of three) — so the cap was not the cause. The offer had been
+created ~40 s before the client's page loaded; on `6fc477d9` (offer hours old) the line
+was there. Most likely a short data-cache / render lag on the dashboard greeting, not
+a missing rung — the in-chat list (a fresh server action) showed the offer at once.
+Not chased further tonight; noted for the next real-client observation.
