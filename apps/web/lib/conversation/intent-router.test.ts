@@ -811,6 +811,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuwe opleiding aanmaken",
     de: "Programm anlegen",
   },
+  "create-project": {
+    lt: "Sukurk projektą Roterdame",
+    en: "Create a new project in Rotterdam",
+    ru: "Создай проект в Роттердаме",
+    nl: "Nieuw project aanmaken",
+    de: "Neues Projekt anlegen",
+  },
 };
 
 /**

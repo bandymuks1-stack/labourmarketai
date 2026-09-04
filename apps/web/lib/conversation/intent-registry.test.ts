@@ -37,8 +37,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 42 → 50 with the real recruiter pilot (2026-09-04): five agency intents
     // (invite-client, invite-candidate, client-demand, propose-candidate,
     // proposal-status) and three student/institution route intents
-    // (learning-compass, invite-student, programmes).
-    expect(entries.length).toBe(50);
+    // (learning-compass, invite-student, programmes); 50 → 51 with F2
+    // (`create-project` — the site as a project object, by sentence).
+    expect(entries.length).toBe(51);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -56,6 +57,8 @@ describe("the intent registry is the enumerable routing contract", () => {
 
   it("the write set is exactly the flows that can persist — all behind explicit confirmation", () => {
     expect(intentsWhere((d) => d.access === "write")).toEqual([
+      // F2 — the site as a project object, by sentence.
+      "create-project",
       "invite-candidate",
       "invite-client",
       // Owner contract 2026-09-04 §15 — the institution's commands by

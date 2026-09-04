@@ -11614,6 +11614,10 @@
         "inviteWorker": {
           "label": "Mitarbeiter einladen",
           "description": "Laden Sie eine Person per E-Mail in Ihr Team ein."
+        },
+        "createProject": {
+          "label": "Projekt anlegen",
+          "description": "Ein Objekt oder Auftrag, dem Sie Leute zuweisen."
         }
       },
       "education": {
@@ -11743,6 +11747,10 @@
         "workerEmailPlaceholder": "name@beispiel.de",
         "inviteNote": "Notiz (optional)",
         "inviteNotePlaceholder": "Z. B. Start im Oktober, Baustelle in Kaunas",
+        "projectTitle": "Projektname",
+        "projectTitlePlaceholder": "z. B. Lager Rotterdam",
+        "projectCity": "Stadt (optional)",
+        "projectCityPlaceholder": "z. B. Rotterdam",
         "rosterWorker": "Teammitglied",
         "proposalNotePlaceholder": "Z. B. 5 Jahre Erfahrung, kann am Montag anfangen"
       },
@@ -12049,7 +12057,8 @@
       "pinsManageIntro": "Ihr Mein Bereich. Tippen Sie, was entfernt werden soll:",
       "pinsNone": "Mein Bereich ist leer. Wenn Sie etwas oft nutzen, schlage ich vor, es hinzuzufügen.",
       "unpinPrefix": "Entfernen",
-      "unpinDone": "Aus Mein Bereich entfernt.",
+      "unpinDone": "Aus Mein Bereich entfernt.",
+      "projectCreateIntro": "Ein neues Projekt. Name und Stadt — danach weisen Sie hier direkt Leute zu.",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },

@@ -174,6 +174,31 @@ export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
     ],
     build: (st: FormState) => ({ email: s(st.email), note: s(st.note) || null }),
   },
+  {
+    // F2 — the SITE as a project object, by sentence; the city the sentence
+    // named is pre-filled by the chat (visible, editable, still confirmed).
+    actionId: "company.create-project",
+    titleKey: "conversation.actions.company.createProject.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "title",
+        kind: "text",
+        labelKey: "conversation.forms.fields.projectTitle",
+        placeholderKey: "conversation.forms.fields.projectTitlePlaceholder",
+        required: true,
+        maxLength: 120,
+      },
+      {
+        name: "city",
+        kind: "text",
+        labelKey: "conversation.forms.fields.projectCity",
+        placeholderKey: "conversation.forms.fields.projectCityPlaceholder",
+        maxLength: 120,
+      },
+    ],
+    build: (st: FormState) => ({ title: s(st.title), city: s(st.city) || null }),
+  },
 ] as const;
 
 /**

@@ -3391,6 +3391,10 @@
         "inviteWorker": {
           "label": "[EN] Invite a worker",
           "description": "[EN] Invite a person to your roster by e-mail."
+        },
+        "createProject": {
+          "label": "Loo projekt",
+          "description": "Objekt või töö, kuhu määrate inimesi."
         }
       },
       "education": {
@@ -3518,6 +3522,10 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "projectTitle": "Projekti nimi",
+        "projectTitlePlaceholder": "nt Rotterdami ladu",
+        "projectCity": "Linn (valikuline)",
+        "projectCityPlaceholder": "nt Rotterdam",
         "rosterWorker": "[EN] Roster worker",
         "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
       },
@@ -3760,7 +3768,8 @@
       "pinsManageIntro": "Teie Minu ala. Puudutage, mida eemaldada:",
       "pinsNone": "Minu ala on tühi. Kui kasutate midagi sageli, pakun selle lisamist.",
       "unpinPrefix": "Eemalda",
-      "unpinDone": "Eemaldatud Minu alalt.",
+      "unpinDone": "Eemaldatud Minu alalt.",
+      "projectCreateIntro": "Uus projekt. Nimi ja linn — seejärel saate siinsamas inimesi määrata.",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

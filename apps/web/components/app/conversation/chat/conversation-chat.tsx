@@ -362,6 +362,7 @@ export type ChatLabels = {
   pinsNone: string;
   unpinPrefix: string;
   unpinDone: string;
+  projectCreateIntro: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -1980,6 +1981,27 @@ export function ConversationChat({
   /** "Noriu pakviesti klientą" / "pakviesk darbuotoją": the ONE missing fact
    *  is the e-mail — asked once, or pre-filled when the sentence carried it;
    *  the inline form is the confirmation; the readback names the REAL state. */
+  /** F2 — "sukurk projektą Roterdame": the SITE as a project object, by
+   *  sentence. Company identity only (a person in their personal space gets
+   *  the workspace hint, never a wrong-audience form); the city the sentence
+   *  named pre-fills the form — visible, editable, still confirmed. */
+  const startCreateProject = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) {
+          assistant(labels.agencySwitchHint, workspaceChips);
+        } else {
+          assistant(fallbackText, starterChips);
+        }
+        return;
+      }
+      const city = structureValueStatement(sentence).city ?? "";
+      assistant(labels.projectCreateIntro);
+      openForm("company.create-project", undefined, undefined, city ? { city } : undefined);
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, fallbackText, starterChips, openForm],
+  );
+
   const startAgencyInvite = useCallback(
     (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
       const isClient = actionId === "agency.invite-client";
@@ -3196,6 +3218,7 @@ export function ConversationChat({
         // "parodyk programas" → answered in the chat.
         inviteStudent: () => startEducationInvite(text),
         programmes: () => runEducationProgrammes(educationModeFromText(text)),
+        createProject: () => startCreateProject(text),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
         translateBlocked: () => assistant(labels.translateBlocked),
@@ -3208,7 +3231,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

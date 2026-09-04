@@ -110,7 +110,8 @@ export type IntentHandlerId =
   | "proposalStatus"
   | "learningCompass"
   | "inviteStudent"
-  | "programmes";
+  | "programmes"
+  | "createProject";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -214,6 +215,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "learning-compass": { domain: "profile", access: "read", handler: "learningCompass", ownTyping: true },
   "invite-student": { domain: "company", access: "write", handler: "inviteStudent", ownTyping: false },
   programmes: { domain: "company", access: "write", handler: "programmes", ownTyping: true },
+  // F2 — the SITE as a project object by sentence ("sukurk projektą
+  // Roterdame"): the ONE inline form over `company.create-project`, the
+  // canonical `createProjectAction` behind it. Company identity only.
+  "create-project": { domain: "project", access: "write", handler: "createProject", ownTyping: false },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

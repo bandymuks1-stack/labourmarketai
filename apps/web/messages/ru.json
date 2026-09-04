@@ -11614,6 +11614,10 @@
         "inviteWorker": {
           "label": "Пригласить работника",
           "description": "Пригласите человека в свою команду по e-mail."
+        },
+        "createProject": {
+          "label": "Создать проект",
+          "description": "Объект или заказ, к которому вы назначите людей."
         }
       },
       "education": {
@@ -11743,6 +11747,10 @@
         "workerEmailPlaceholder": "ivan@pochta.ru",
         "inviteNote": "Заметка (необязательно)",
         "inviteNotePlaceholder": "Напр., старт в октябре, объект в Каунасе",
+        "projectTitle": "Название проекта",
+        "projectTitlePlaceholder": "напр. Склад в Роттердаме",
+        "projectCity": "Город (необязательно)",
+        "projectCityPlaceholder": "напр. Роттердам",
         "rosterWorker": "Работник из команды",
         "proposalNotePlaceholder": "Напр., опыт 5 лет, может начать в понедельник"
       },
@@ -12049,7 +12057,8 @@
       "pinsManageIntro": "Ваше Моё пространство. Нажмите, что удалить:",
       "pinsNone": "Моё пространство пусто. Когда вы будете чем-то часто пользоваться, я предложу добавить.",
       "unpinPrefix": "Удалить",
-      "unpinDone": "Удалено из Моего пространства.",
+      "unpinDone": "Удалено из Моего пространства.",
+      "projectCreateIntro": "Новый проект. Название и город — и людей можно назначить прямо здесь.",
       "pinFirstPrefix": "В начало",
       "reorderDone": "Готово: «{label}» теперь первая."
     },

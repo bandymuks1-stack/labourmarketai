@@ -588,6 +588,28 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "inviteCompanyWorkerAction" },
   },
 
+  {
+    /**
+     * F2 (owner contract 2026-09-04 §9/§11 seed): "sukurk projektą Roterdame"
+     * — the SITE as a project object, created by sentence through the ONE
+     * dispatcher over the canonical `createProjectAction` (the same core the
+     * company page's form inserts through). A project is what workers are
+     * assigned to (`company.assign-worker`), so need → project → assignment
+     * closes inside the conversation.
+     */
+    id: "company.create-project",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.createProject.label",
+    descriptionKey: "conversation.actions.company.createProject.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company",
+    handler: { kind: "server_action", ref: "createProjectAction" },
+  },
+
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`
   // capability (I-2: one organization, many capabilities). Its commands

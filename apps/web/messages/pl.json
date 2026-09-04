@@ -3391,6 +3391,10 @@
         "inviteWorker": {
           "label": "[EN] Invite a worker",
           "description": "[EN] Invite a person to your roster by e-mail."
+        },
+        "createProject": {
+          "label": "Utwórz projekt",
+          "description": "Obiekt lub zlecenie, do którego przypiszesz ludzi."
         }
       },
       "education": {
@@ -3518,6 +3522,10 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "projectTitle": "Nazwa projektu",
+        "projectTitlePlaceholder": "np. Magazyn w Rotterdamie",
+        "projectCity": "Miasto (opcjonalnie)",
+        "projectCityPlaceholder": "np. Rotterdam",
         "rosterWorker": "[EN] Roster worker",
         "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
       },
@@ -3760,7 +3768,8 @@
       "pinsManageIntro": "Twoja Moja przestrzeń. Dotknij, co usunąć:",
       "pinsNone": "Moja przestrzeń jest pusta. Gdy będziesz często z czegoś korzystać, zaproponuję dodanie.",
       "unpinPrefix": "Usuń",
-      "unpinDone": "Usunięto z Mojej przestrzeni.",
+      "unpinDone": "Usunięto z Mojej przestrzeni.",
+      "projectCreateIntro": "Nowy projekt. Nazwa i miasto — potem od razu przypiszesz tu ludzi.",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },
