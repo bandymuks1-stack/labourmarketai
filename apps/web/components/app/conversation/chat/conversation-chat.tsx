@@ -58,7 +58,7 @@ import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import type { StageStatus } from "@/lib/projects/stages-model";
-import { parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
+import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -2320,8 +2320,10 @@ export function ConversationChat({
           setTyping(false);
           const projects = res.kind === "projects" ? res.projects.map((p) => ({ value: p.projectId, label: p.title })) : [];
           const colon = sentence.indexOf(":");
-          const title = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
           const dueDate = parseEndDate(sentence, todayIso(), null) ?? parseStartDate(sentence, todayIso());
+          // the deadline the sentence stated is its own field — not a title tail
+          const rawTitle = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
+          const title = dueDate ? stripEndDatePhrase(rawTitle) : rawTitle;
           const lower = sentence.toLowerCase();
           const named = projects.find((p) => p.label.length >= 4 && lower.includes(p.label.toLowerCase()));
           const prefill: Record<string, string> = {};

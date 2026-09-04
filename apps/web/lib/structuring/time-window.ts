@@ -217,6 +217,37 @@ export function parseEndDate(text: string, todayIso: string, startIso: string | 
   return null;
 }
 
+/**
+ * The deadline phrase parseEndDate read, removed from the ORIGINAL text so a
+ * title pre-filled from the same sentence does not keep it as a tail
+ * (prod polish 2026-09-04: "pridėk užduotį projektui: sumontuoti pastolius
+ * iki 2026-10-03" pre-filled the title WITH "iki 2026-10-03" while the due
+ * date was already its own field). Only a phrase this module recognises is
+ * removed — a month word must be a real month; anything else stays.
+ */
+export function stripEndDatePhrase(text: string): string {
+  const src = text ?? "";
+  const forms = [
+    `${UNTIL_WORD}\\s+\\d{4}-\\d{2}-\\d{2}(?!\\d)`,
+    `${UNTIL_WORD}\\s+\\d{1,2}[./]\\d{1,2}[./]\\d{4}(?!\\d)`,
+    `${UNTIL_WORD}\\s+\\d{1,2}\\.?\\s+[\\p{L}]+`,
+    `${UNTIL_WORD}\\s+[\\p{L}]+\\s+\\d{1,2}(?!\\d)`,
+  ];
+  for (const form of forms) {
+    const rx = new RegExp(`(^|[^\\p{L}])(${form})`, "iu");
+    const m = src.match(rx);
+    if (!m || m.index === undefined) continue;
+    const phrase = m[2];
+    // month-word forms: the word must be a month this module knows
+    const word = phrase.match(/[\p{L}]+\s*$/u)?.[0] ?? phrase.match(/\s([\p{L}]+)\s+\d{1,2}$/u)?.[1];
+    const numeric = /\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}[./]\d{4}/.test(phrase);
+    if (!numeric && (!word || !monthOf(foldText(word)))) continue;
+    const start = m.index + m[1].length;
+    return (src.slice(0, start) + src.slice(start + phrase.length)).replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
+  }
+  return src.trim();
+}
+
 /** "2027-3-31" → "2027-03-31" when it is a real calendar day, else null (a
  *  written date that does not exist is never silently "corrected"). */
 function validIsoDate(y: string, m: string, d: string): string | null {
