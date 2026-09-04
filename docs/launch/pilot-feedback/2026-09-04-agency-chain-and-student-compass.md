@@ -83,3 +83,18 @@ visible" answer.
 by sentence — `opportunityType` select on the demand form) and the narrowed
 result. Not run today: the walk deliberately did not create demand rows on
 the shared verified company.
+
+## Agency journey, the CLIENT half (prod `6fc477d9`, #1487)
+
+The agency's chain by sentence was proven above; the client could decide on an offer
+only with the scouting page's buttons. Walk `walk-client-offers-prod.cjs` as the E2E
+client (E2E Walker UAB, open offer `f93735c6` on "Suvirintojas", 37.7 s):
+
+| Step | Result |
+|---|---|
+| greeting (attention §4D) | "1 agentūros pasiūlymas laukia jūsų sprendimo." + chip "Agentūrų pasiūlymai" |
+| "kokius kandidatus pasiūlė agentūra?" | "• Suvirintojas — E2E Agentūra UAB (testinis subjektas)" with 1 accept + 1 decline chip |
+| decline chip (token-confirmed `company.respond-offer`) | "Atmesta. Agentūra matys jūsų sprendimą." — offer `f93735c6` is now `declined` (E2E residue: decided, not deleted; the agency's progress list shows the decision) |
+
+Accepting would have proposed the canonical booking to the E2E worker; the walk chose
+decline to leave no booking residue.

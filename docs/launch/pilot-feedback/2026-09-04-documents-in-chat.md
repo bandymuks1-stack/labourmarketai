@@ -35,3 +35,16 @@ Known limits (honest): the country name renders in the nominative
 ("reikalingas Nyderlandai"); the skills gap still names only "log work" as
 the closing step — training suggestions need a public projection of
 programmes by profession (privacy decision recorded in the checkpoint queue).
+
+## Attention from the documents gap (prod `6fc477d9`, #1485 + #1487)
+
+Worker two (preferred NL + DE, 6 required documents missing) opens the dashboard: the
+opening brief now carries **"Trūksta 6 dokumentų jūsų šalims."** with the "Mano
+dokumentai" chip (`walk-attention-prod.cjs`, 10.6 s). The first walk on `2fc998ee`
+found the line never reached an active worker (the cap of three lines was filled by
+matches / unlogged work / unread) — an EXPIRING document now sits right after the
+offer rung as a deadline; a MISSING document (for a stated country) stays lower and
+was reached here.
+
+Next: a document RECORDED by sentence ("turiu naują A1 iki 2027-03-31", #1488) so the
+gap can close from the same conversation.
