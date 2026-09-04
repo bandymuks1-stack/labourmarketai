@@ -398,9 +398,11 @@ absent before consent, **gone** (not flagged) after withdrawal, no identity in
 the serialised row, and `identityDisclosureAuthority` DENIED while matchable.
 
 **NOT YET RUN.** It needs the local Supabase stack with the migration applied,
-and that stack cannot start on this machine: `docker info` hangs past 120s, and
-Windows reserves ports 54290–54389 so the local stack cannot bind. Both are
-recorded environment faults, not properties of this change. The spec refuses to
+and that stack cannot start on this machine: the Docker daemon is not reachable
+(`docker version` returns no server version; Docker Desktop's backend process is
+up, the engine is not answering), and Windows reserves ports 54290–54389 so the
+local stack could not bind even if it were. Both are recorded environment faults,
+not properties of this change. The spec refuses to
 report a skip as a pass under `E2E_REQUIRE_AUTH=1`; Playwright discovers both
 tests (`--list` verified). Command and prerequisites: integration checklist §10.
 

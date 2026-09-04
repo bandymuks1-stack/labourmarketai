@@ -174,10 +174,12 @@ authorities → save → canonical state → present in the feed → withdraw �
 from the feed) plus the second test proving that withdrawing the CONSENT alone
 also removes the row.
 
-**Currently BLOCKED on this machine**, and this is why it has not been run:
-Docker does not respond (`docker info` hangs past 120s), and the local Supabase
-stack cannot bind its ports because Windows reserves 54290–54389. Both are
-recorded environment faults, not properties of this change.
+**Currently BLOCKED on this machine**, and this is why it has not been run: the
+Docker daemon is not reachable (`docker version` returns no server version;
+Docker Desktop's backend process is up, the engine is not answering), and the
+local Supabase stack could not bind its ports anyway because Windows reserves
+54290–54389. Both are recorded environment faults, not properties of this
+change.
 
 ## 11. Production verification
 
