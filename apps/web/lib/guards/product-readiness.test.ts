@@ -2360,8 +2360,10 @@ describe("no migration files added by this sprint", () => {
     // each other — prod-verified 42P17 on every authenticated read today) +
     // helper grants to authenticated only. Owner-gated draft, UNAPPLIED until
     // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 262.
-const SPRINT_BASELINE = 262;
+    // Bumped 262 -> 263 for owns_company governance membership (Lane A real
+    // recruiter, 2026-09-04, RED draft).
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
+const SPRINT_BASELINE = 263;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
