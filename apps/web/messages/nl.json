@@ -12776,7 +12776,8 @@
         "start": "Start",
         "accommodation": "Huisvesting",
         "transport": "Vervoer",
-        "tool": "Vereist gereedschap"
+        "tool": "Vereist gereedschap",
+        "opportunityType": "Soort kans"
       },
       "whyFiltered": "Je zei: {words}. Daarop heb ik de zoekopdracht versmald.",
       "whyUnfiltered": "Ik heb je hele lijst doorzocht — je hebt niets versmald.",

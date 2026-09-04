@@ -118,6 +118,9 @@ export function needFromDemandRow(row: unknown): {
     need: {
       ...base.need,
       structuredV2,
+      // The declared type rides the need so discovery can filter on it
+      // ("praktika" → internship only); absent = the employer stated none.
+      opportunityType: structuredV2?.opportunity_type ?? null,
       // W10 — DECLARE the one remaining consequential reduction rather than
       // let it read as an absence. The gated board RPC
       // (`list_open_demand_for_workers`) does not project the legacy

@@ -12776,7 +12776,8 @@
         "start": "Beginn",
         "accommodation": "Unterkunft",
         "transport": "Transport",
-        "tool": "Benötigtes Werkzeug"
+        "tool": "Benötigtes Werkzeug",
+        "opportunityType": "Art der Chance"
       },
       "whyFiltered": "Du hast gesagt: {words}. Danach habe ich die Suche eingegrenzt.",
       "whyUnfiltered": "Ich habe deine ganze Liste durchsucht — du hast nichts eingegrenzt.",

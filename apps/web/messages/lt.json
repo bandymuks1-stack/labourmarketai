@@ -12776,7 +12776,8 @@
         "start": "Pradžia",
         "accommodation": "Apgyvendinimas",
         "transport": "Transportas",
-        "tool": "Reikalingas įrankis"
+        "tool": "Reikalingas įrankis",
+        "opportunityType": "Galimybės tipas"
       },
       "whyFiltered": "Pasakei: {words}. Pagal tai ir susiaurinau paiešką.",
       "whyUnfiltered": "Ieškojau visame tavo sąraše — nieko nesusiaurinai.",

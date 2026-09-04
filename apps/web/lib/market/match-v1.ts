@@ -117,6 +117,9 @@ export interface MatchNeed {
    *  presented as human-structured. */
   readonly needSource?: NeedSkillSource | null;
   readonly professionSlug?: string | null;
+  /** DECLARED opportunity type (internship / apprenticeship / …) carried for
+   *  discovery filtering; never a matching input. Absent = not stated. */
+  readonly opportunityType?: string | null;
   /** ISO-3166 alpha-2 country the work is in. */
   readonly country?: string | null;
   /** City/locality of the work (free-form; compared normalized). */

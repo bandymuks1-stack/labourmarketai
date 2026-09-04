@@ -4189,7 +4189,8 @@
         "start": "[EN] Start",
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
-        "tool": "[EN] Required tool"
+        "tool": "[EN] Required tool",
+        "opportunityType": "Rodzaj możliwości"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
