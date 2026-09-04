@@ -1,5 +1,8 @@
-import "server-only";
-
+// Deliberately NOT `server-only`: the operator script
+// (scripts/emit-first-party-supply-feed.ts) runs under tsx, where importing a
+// `server-only` module throws by design, and it must write the same artefact
+// through the same code as the server does. This module holds no credential
+// and reads no database — it writes a body it is handed.
 import { mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
