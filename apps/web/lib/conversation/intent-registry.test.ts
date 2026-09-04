@@ -43,8 +43,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 52 → 53 with `add-document` (a document recorded by sentence, write);
     // 53 → 54 with `cv-export` (the verified CV sheet, route); 54 → 55 with
     // `add-task` (a work package on the project, write); 55 → 56 with
-    // `who-available` (capacity from the roster + absences, read).
-    expect(entries.length).toBe(56);
+    // `who-available` (capacity from the roster + absences, read); 56 → 57
+    // with `stage-status` (a stage moved to a real status, write).
+    expect(entries.length).toBe(57);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -79,6 +80,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       "need-workers",
       "programmes",
       "propose-candidate",
+      // PROJECT → PROGRESS: a stage moved to a real status, by sentence.
+      "stage-status",
       "switch-context",
     ]);
   });

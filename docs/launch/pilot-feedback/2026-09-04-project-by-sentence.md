@@ -124,3 +124,24 @@ is happening now, what is missing, readiness, evidence, progress, what needs act
 already exists as the operations page + the project centre; the chat panel's pulse
 (`feat/cc/project-pulse`) shows the same numbers where the sentence lands, and hands
 over to these pages for manipulation. No duplicate state.
+
+## Work package by sentence + the pulse, on production (`76817e9d`, #1497 + #1495)
+
+`walk-task-prod.cjs`, E2E Walker UAB, 27.0 s: "pridėk užduotį projektui E2E Vilniaus
+objektas (testinis): sumontuoti pastolius iki 2026-10-03" → the one form
+`company.create-task` pre-filled: **project = the chat-created project** (matched by
+name), **due = 2026-10-03** (the written date), title = the text after the colon →
+save → "Užduotis įrašyta…". DB: `work_tasks` row `712182db…` (todo · normal · due
+2026-10-03 · `project_id 3b9c55d3…`).
+
+`walk-project-detail-readonly-prod.cjs`, 19.1 s: "mano projektai" → the detail now
+carries **KAS VYKSTA — Šiandien įrašų 1 · Įrodymai 1 įrašas · 0 nuotraukų · Užduotys 1
+atvirų · 0 vėluoja** — the worker's log and the sentence-made task, from the operations
+centre's own reads, where the sentence lands. (The title kept the "iki 2026-10-03"
+tail — a small pre-fill polish for later, not a defect of the write.)
+
+## Who is available (prod `76817e9d`, #1498)
+
+`walk-capacity-prod.cjs`, E2E Walker UAB, 17.9 s: "kas laisvas šią savaitę?" → **"Komanda
+2026-09-04 – 2026-09-10 (1 žm.): • E2E Worker Two — laisvas"** with the "Projektai" and
+"Pridėti užduotį" chips — the roster against approved absences (none), in the chat.

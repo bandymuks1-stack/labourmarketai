@@ -3404,6 +3404,10 @@
           "label": "Tilføj opgave",
           "description": "En arbejdspakke i projektet — hvad der skal gøres og hvornår."
         },
+        "updateStageStatus": {
+          "label": "Sæt fasestatus",
+          "description": "En projektfase får sin reelle status — i gang, færdig, blokeret."
+        },
         "respondOffer": {
           "label": "Svar på et bureaus tilbud",
           "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
@@ -3818,6 +3822,14 @@
       "workerProjectsIntro": "Dine projekter ({count} aktive):",
       "workerProjectsEnded": "afsluttet",
       "chipOpenProjectPrefix": "Åbn",
+      "stageAsk": "Hvilken fase? Vælg:",
+      "stageNotFound": "Jeg kan ikke finde den fase blandt dine åbne faser. Hvilken mente du?",
+      "stageNone": "Ingen åbne faser endnu — faser oprettes i projektstyringen.",
+      "stageDone": "Fase markeret som færdig.",
+      "stageStarted": "Fase markeret som i gang.",
+      "stageBlocked": "Fase markeret som blokeret.",
+      "stageFailed": "Fasestatus kunne ikke ændres.",
+      "chipStagePrefix": "Fase",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

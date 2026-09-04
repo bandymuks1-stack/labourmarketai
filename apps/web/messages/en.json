@@ -11633,6 +11633,10 @@
           "label": "Add a task",
           "description": "A work package on the project — what must be done and by when."
         },
+        "updateStageStatus": {
+          "label": "Set a stage status",
+          "description": "A project stage gets its real status — in progress, done, blocked."
+        },
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
@@ -12119,6 +12123,14 @@
       "workerProjectsIntro": "Your projects ({count} active):",
       "workerProjectsEnded": "ended",
       "chipOpenProjectPrefix": "Open",
+      "stageAsk": "Which stage? Pick one:",
+      "stageNotFound": "I cannot find that stage among your open stages. Which one did you mean?",
+      "stageNone": "No open stages yet — stages are entered in the project operations.",
+      "stageDone": "Stage marked done.",
+      "stageStarted": "Stage marked in progress.",
+      "stageBlocked": "Stage marked blocked.",
+      "stageFailed": "The stage status could not be changed.",
+      "chipStagePrefix": "Stage",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },
@@ -12444,6 +12456,7 @@
       "projectStages": "Stages",
       "projectStagesEmpty": "No stages have been entered for this project.",
       "projectStagesUnavailable": "Stages cannot be read in this environment, so we are not showing an empty list as if there were none.",
+      "projectStageMarkDone": "Mark done",
       "projectAssignWorker": "Assign a worker",
       "projectOpenOperations": "Open project management",
       "projectOpenProject": "Open the project",

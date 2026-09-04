@@ -671,6 +671,26 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "createWorkTaskAction" },
   },
 
+  {
+    /**
+     * PROJECT → PROGRESS (owner contract 2026-09-04 §11): a stage moved to a
+     * real status — "etapas pamatai baigtas" by sentence, or the stage row's
+     * own control in the panel. Both enter here; the operations page's stage
+     * panel calls the same action. Progress is a stored status, never a bar.
+     */
+    id: "company.update-stage-status",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.updateStageStatus.label",
+    descriptionKey: "conversation.actions.company.updateStageStatus.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "updateStageStatusAction" },
+  },
+
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`
   // capability (I-2: one organization, many capabilities). Its commands

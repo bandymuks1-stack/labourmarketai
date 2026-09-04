@@ -15,6 +15,7 @@ import { assignWorkerToProjectAction, createProjectAction, type ProjectActionRes
 import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { createWorkTaskForChatAction } from "@/lib/tasks/task-chat-actions";
+import { updateStageStatusAction } from "@/lib/projects/stages-actions";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   createCohortAction,
@@ -314,6 +315,22 @@ export const COMPANY_EXECUTORS: {
     if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
     if (r.kind === "invalid" || r.kind === "not_found" || r.kind === "limit_reached" || r.kind === "cycle") return { ok: false, code: "invalid" };
     return { ok: false, code: "error" };
+  },
+
+  "company.update-stage-status": async (input) => {
+    // PROGRESS is a real status on a real stage — the SAME action the
+    // operations page's stage panel calls; the RPC re-checks project
+    // management and refuses `blocked` without a reason.
+    const r = await updateStageStatusAction({
+      stageId: input.stageId,
+      status: input.status,
+      blockedReason: input.blockedReason ?? undefined,
+    });
+    if (r.ok) return { ok: true, data: { status: input.status } };
+    if (r.code === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.code === "auth" || r.code === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.code === "invalid") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.message };
   },
 
   "company.respond-offer": async (input) => {

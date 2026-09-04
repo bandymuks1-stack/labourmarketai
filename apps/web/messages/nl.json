@@ -11633,6 +11633,10 @@
           "label": "Taak toevoegen",
           "description": "Een werkpakket op het project — wat er moet gebeuren en wanneer."
         },
+        "updateStageStatus": {
+          "label": "Fasestatus zetten",
+          "description": "Een projectfase krijgt zijn echte status — bezig, afgerond, geblokkeerd."
+        },
         "respondOffer": {
           "label": "Aanbod van een bureau beantwoorden",
           "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
@@ -12119,6 +12123,14 @@
       "workerProjectsIntro": "Uw projecten ({count} actief):",
       "workerProjectsEnded": "beëindigd",
       "chipOpenProjectPrefix": "Openen",
+      "stageAsk": "Welke fase? Kies er een:",
+      "stageNotFound": "Die fase vind ik niet bij uw open fasen. Welke bedoelde u?",
+      "stageNone": "Nog geen open fasen — fasen voert u in bij het projectbeheer.",
+      "stageDone": "Fase gemarkeerd als afgerond.",
+      "stageStarted": "Fase gemarkeerd als bezig.",
+      "stageBlocked": "Fase gemarkeerd als geblokkeerd.",
+      "stageFailed": "De fasestatus kon niet worden gewijzigd.",
+      "chipStagePrefix": "Fase",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },
@@ -12444,6 +12456,7 @@
       "projectStages": "Fasen",
       "projectStagesEmpty": "Voor dit project zijn nog geen fasen ingevoerd.",
       "projectStagesUnavailable": "Fasen kunnen in deze omgeving niet gelezen worden, dus tonen we geen lege lijst alsof er geen zijn.",
+      "projectStageMarkDone": "Markeer als afgerond",
       "projectAssignWorker": "Een medewerker toewijzen",
       "projectOpenOperations": "Open projectbeheer",
       "projectOpenProject": "Open het project",

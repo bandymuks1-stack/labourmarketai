@@ -3404,6 +3404,10 @@
           "label": "Legg til oppgave",
           "description": "En arbeidspakke i prosjektet — hva som må gjøres og innen når."
         },
+        "updateStageStatus": {
+          "label": "Sett fasestatus",
+          "description": "En prosjektfase får sin reelle status — pågår, ferdig, blokkert."
+        },
         "respondOffer": {
           "label": "Svar på et byrås tilbud",
           "description": "Godta eller avslå en kandidat et byrå tilbød til deres behov."
@@ -3818,6 +3822,14 @@
       "workerProjectsIntro": "Dine prosjekter ({count} aktive):",
       "workerProjectsEnded": "avsluttet",
       "chipOpenProjectPrefix": "Åpne",
+      "stageAsk": "Hvilken fase? Velg:",
+      "stageNotFound": "Jeg finner ikke den fasen blant dine åpne faser. Hvilken mente du?",
+      "stageNone": "Ingen åpne faser ennå — faser legges inn i prosjektstyringen.",
+      "stageDone": "Fase markert som ferdig.",
+      "stageStarted": "Fase markert som pågående.",
+      "stageBlocked": "Fase markert som blokkert.",
+      "stageFailed": "Fasestatus kunne ikke endres.",
+      "chipStagePrefix": "Fase",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

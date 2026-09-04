@@ -3404,6 +3404,10 @@
           "label": "Lägg till uppgift",
           "description": "Ett arbetspaket i projektet — vad som ska göras och till när."
         },
+        "updateStageStatus": {
+          "label": "Sätt fasstatus",
+          "description": "En projektfas får sin verkliga status — pågår, klar, blockerad."
+        },
         "respondOffer": {
           "label": "Svara på en byrås erbjudande",
           "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
@@ -3818,6 +3822,14 @@
       "workerProjectsIntro": "Dina projekt ({count} aktiva):",
       "workerProjectsEnded": "avslutat",
       "chipOpenProjectPrefix": "Öppna",
+      "stageAsk": "Vilken fas? Välj:",
+      "stageNotFound": "Jag hittar inte den fasen bland dina öppna faser. Vilken menade du?",
+      "stageNone": "Inga öppna faser ännu — faser läggs in i projektstyrningen.",
+      "stageDone": "Fas markerad som klar.",
+      "stageStarted": "Fas markerad som pågående.",
+      "stageBlocked": "Fas markerad som blockerad.",
+      "stageFailed": "Fasstatusen kunde inte ändras.",
+      "chipStagePrefix": "Fas",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först."
     },

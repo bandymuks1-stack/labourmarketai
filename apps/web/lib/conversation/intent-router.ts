@@ -95,6 +95,7 @@ export type ConversationIntent =
   | "cv-export" // "parodyk / atsisiųsk mano CV" — the verified CV sheet, not the import
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
+  | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
   | "unknown";
 
 export type IntentMatch = {
@@ -908,6 +909,16 @@ const RULES: IntentRule[] = [
       // frei / verfügbar", "wie is beschikbaar / vrij", "кто свободен".
       p("(kas|who|wer|wie|кто)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
       p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники))", 8),
+    ],
+  },
+  {
+    intent: "stage-status",
+    patterns: [
+      // PROJECT → PROGRESS: "etapas pamatai baigtas", "pradėjome stogo etapą",
+      // "etapas užstrigo", "stage foundations done", "Phase Rohbau fertig",
+      // "fase fundering afgerond", "этап фундамент завершён".
+      p("(etap|stage|phase|fase|этап)\\w*\\s+.{0,40}(baigt|atlikt|u[zž]baig|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|сделан|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял)", 9),
+      p("(baigt|atlikt|u[zž]baig|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял)\\w*\\s+.{0,20}(etap|stage|phase|fase|этап)", 9),
     ],
   },
   {
