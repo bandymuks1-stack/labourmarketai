@@ -2147,14 +2147,17 @@ export function ConversationChat({
       const input = { stageId, status, blockedReason: blockedReason ?? null };
       prepareConfirmationAction("company.update-stage-status", input)
         .then((prep) => {
-          if (!prep.ok) {
+          // `reversible_write` needs no token: the dispatcher honestly answers
+          // `no_confirmation_needed` and the write proceeds without one. Any
+          // other refusal is a real one (prod defect 2026-09-04, stage walk).
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
             setTyping(false);
             assistant(labels.stageFailed);
             return;
           }
           return dispatchWorkerAction("company.update-stage-status", input, {
             locale,
-            confirmationToken: prep.token,
+            confirmationToken: prep.ok ? prep.token : undefined,
           }).then((res) => {
             setTyping(false);
             assistant(
