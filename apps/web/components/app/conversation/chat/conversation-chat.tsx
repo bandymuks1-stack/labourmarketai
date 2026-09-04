@@ -23,6 +23,7 @@ import {
   type PinUsage,
   type WorkspacePin,
 } from "@/lib/workspace/pins-model";
+import { pinRefForSentence } from "@/lib/workspace/pin-usage-from-intent";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
@@ -2258,6 +2259,29 @@ export function ConversationChat({
     },
     [pinsAvailable, pinned, assistant, labels.pinAsk, labels.chipPinYes, labels.chipPinNo],
   );
+  /** The label the ask shows for a reference reached by SENTENCE (no chip
+   *  was clicked, so no chip label is at hand): the same chip wording the
+   *  starters use, falling back to the pin label resolver. */
+  const sentencePinLabel = useCallback(
+    (ref: string): string => {
+      const named: Readonly<Record<string, string | undefined>> = {
+        logwork: labels.chipLogWork,
+        jobs: labels.chipJobs,
+        profile: labels.chipProfile,
+        candidates: labels.chipCandidates,
+        engagements: labels.chipEngagements,
+        "agency:demand": labels.chipClientDemand,
+        "agency:progress": labels.chipProposalStatus,
+        "f:company.create-demand": labels.chipNeedWorkers,
+        "f:agency.invite-client": labels.chipInviteClient,
+        "f:company.invite-worker": labels.chipInviteCandidate,
+        "f:company.invite-learner": labels.chipInviteStudent,
+        "compass-page": labels.chipLearningCompass,
+      };
+      return named[ref] ?? pinLabelFor(ref);
+    },
+    [labels, pinLabelFor],
+  );
   const runPinChip = useCallback(
     (id: string): boolean => {
       if (id.startsWith("pin:")) {
@@ -2840,6 +2864,15 @@ export function ConversationChat({
         { surface: "chat", step: intent, role_context: roleContextNow },
       );
 
+      // MY SPACE §4C — the typed sentence is a use of the SAME reference its
+      // chip carries ("užrašyk darbą" three times = the log-work chip three
+      // times). One counter, one ask, one key space: the ref goes through
+      // `noteUsage` exactly like a chip click.
+      {
+        const sentenceRef = pinRefForSentence(intent, identity === "company" ? "company" : "person");
+        if (sentenceRef) noteUsage(sentenceRef, sentencePinLabel(sentenceRef));
+      }
+
       /**
        * G2: the sentence dispatch goes through THE declarative intent
        * registry (`lib/conversation/intent-registry.ts`). The table is the
@@ -3153,7 +3186,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {
