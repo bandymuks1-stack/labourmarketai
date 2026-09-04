@@ -85,7 +85,6 @@ describe("the intent registry is the enumerable routing contract", () => {
       "create-organization",
       "documents",
       "hours-import",
-      "learning-compass",
       "lmc",
       "market-map",
       "need-service",
