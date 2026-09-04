@@ -77,3 +77,15 @@ chips; the evidence sits on the worker's identity (journal → verified CV sheet
 the project. Not seen: the employer's greeting did not carry a "… laukia peržiūros"
 line 14 s later (the review queue keys on the confirmation model; the brief showed the
 institution line only) — recorded for the next observation, not chased tonight.
+
+## Readback after the fix (prod `8aac9ab9`, #1492)
+
+`walk-project-detail-readonly-prod.cjs`, 26.4 s: "mano projektai" → the detail panel
+now reads **"Priskirta 1 · PRISKIRTI ŽMONĖS · E2E Worker Two · 2026-09-04"** for the
+chat-created project — the state the assignment produced, shown where it was made.
+
+**Employer review of that work is an OWNER HOLD (v4), not a defect:** the review queue
+(`reviewable_journal_entry_ids`) admits only engagements with `journal_review_enabled`,
+and the role RPCs reject any attempt to enable it ("review can't come from a label").
+E2E Walker's engagement context has it false, so the worker's log never reaches the
+employer's review line. Listed under owner gates.
