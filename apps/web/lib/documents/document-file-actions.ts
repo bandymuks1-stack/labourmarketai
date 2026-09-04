@@ -149,32 +149,34 @@ async function uploadAndRegister(opts: {
   return "uploaded";
 }
 
-/** Upload (or replace with a NEW VERSION) the file of the caller's OWN
- *  worker document. Acks/verifications never carry over versions. */
-export async function uploadWorkerDocumentFileAction(
-  formData: FormData,
-): Promise<void> {
-  const locale = readLocale(formData);
+/**
+ * THE ONE worker-document file write (owner contract 2026-09-04 §5.5 — one
+ * backbone): the documents page's slot action redirects with a notice; the
+ * chat's action returns it. Both run this core — same checks, same canonical
+ * path, same `register_document_file_v1`, same rollback of an unregistered
+ * blob. Never a second upload path.
+ */
+async function uploadWorkerDocumentFileCore(formData: FormData): Promise<DocumentEngineNotice> {
   const workerDocumentId = String(formData.get("workerDocumentId") ?? "").trim();
-  if (!UUID_RX.test(workerDocumentId)) finish(locale, "invalid");
+  if (!UUID_RX.test(workerDocumentId)) return "invalid";
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) finish(locale, "not_allowed");
+  if (!user) return "not_allowed";
 
   const prepared = await prepareFile(formData);
-  if (typeof prepared === "string") finish(locale, prepared);
+  if (typeof prepared === "string") return prepared;
 
   // Own worker row (the RPC re-checks ownership server-side).
   const { data: worker } = await asAny(supabase)
     .from("workers")
     .select("id")
-    .eq("profile_id", user!.id)
+    .eq("profile_id", user.id)
     .maybeSingle();
   const workerId = (worker?.id as string | undefined) ?? null;
-  if (!workerId) finish(locale, "not_allowed");
+  if (!workerId) return "not_allowed";
 
   // Existing versions (RLS-scoped) → the next monotonic version for the
   // canonical path. The RPC re-derives it and rejects a stale prefix.
@@ -184,29 +186,46 @@ export async function uploadWorkerDocumentFileAction(
     .eq("worker_document_id", workerDocumentId)
     .limit(100);
   if (filesRes.error) {
-    finish(
-      locale,
-      isDocumentFileAbsentCode(filesRes.error.code) ? "needs_migration" : "error",
-    );
+    return isDocumentFileAbsentCode(filesRes.error.code) ? "needs_migration" : "error";
   }
   const version = nextDocumentFileVersion(
     (filesRes.data ?? []) as { version: number }[],
   );
   const path = buildWorkerDocumentFilePath(
-    workerId!,
+    workerId,
     workerDocumentId,
     version,
     prepared.originalName,
   );
 
-  const notice = await uploadAndRegister({
+  return uploadAndRegister({
     supabase,
     scope: "worker",
     parentId: workerDocumentId,
     path,
     prepared,
   });
+}
+
+/** Upload (or replace with a NEW VERSION) the file of the caller's OWN
+ *  worker document. Acks/verifications never carry over versions. The
+ *  documents page's form contract: redirects with the notice. */
+export async function uploadWorkerDocumentFileAction(
+  formData: FormData,
+): Promise<void> {
+  const locale = readLocale(formData);
+  const notice = await uploadWorkerDocumentFileCore(formData);
   finish(locale, notice);
+}
+
+/** The chat's entry to the same write: the outcome comes back as a notice
+ *  instead of a redirect, so the conversation can say what really happened. */
+export async function uploadWorkerDocumentFileForChatAction(
+  formData: FormData,
+): Promise<{ notice: DocumentEngineNotice }> {
+  const notice = await uploadWorkerDocumentFileCore(formData);
+  if (notice === "uploaded") revalidatePath("/", "layout");
+  return { notice };
 }
 
 /** Upload a new version onto an org register entry. The organization is
