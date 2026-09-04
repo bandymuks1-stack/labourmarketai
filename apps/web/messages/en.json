@@ -12049,7 +12049,9 @@
       "pinsManageIntro": "Your My Space. Tap what to remove:",
       "pinsNone": "My Space is empty. When you use something often, I will offer to add it.",
       "unpinPrefix": "Remove",
-      "unpinDone": "Removed from My Space."
+      "unpinDone": "Removed from My Space.",
+      "pinFirstPrefix": "Move first",
+      "reorderDone": "Done: “{label}” is now first."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

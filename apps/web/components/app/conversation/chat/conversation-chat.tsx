@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader } from "./conversation-header";
 import { MySpaceRow } from "./my-space-row";
-import { pinAction, unpinAction } from "@/lib/workspace/pins-actions";
+import { pinAction, reorderPinsAction, unpinAction } from "@/lib/workspace/pins-actions";
 import {
   PIN_CAP,
   isPinnableRef,
@@ -362,6 +362,8 @@ export type ChatLabels = {
   pinsNone: string;
   unpinPrefix: string;
   unpinDone: string;
+  pinFirstPrefix: string;
+  reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
   eduInviteAsk: string;
   eduInviteDone: string;
@@ -2302,6 +2304,23 @@ export function ConversationChat({
         return true;
       }
       if (id.startsWith("pin-no:")) return true;
+      // REORDER (§4C) as an ordinary-human gesture: "put this first". The
+      // canonical reorder action receives the whole new order; the row
+      // re-renders from the same list the server holds.
+      if (id.startsWith("pin-first:")) {
+        const ref = id.slice(10);
+        const next = [...pinned.filter((p) => p.ref === ref), ...pinned.filter((p) => p.ref !== ref)];
+        if (next.length === 0 || next[0]?.ref !== ref) return true;
+        void reorderPinsAction({ refs: next.map((p) => p.ref) }).then((r) => {
+          if (r.ok) {
+            setPinned(next.map((p, i) => ({ ...p, position: i })));
+            assistant(labels.reorderDone.replace("{label}", next[0]?.label ?? pinLabelFor(ref)));
+          } else {
+            assistant(labels.pinUnavailable);
+          }
+        });
+        return true;
+      }
       if (id.startsWith("unpin:")) {
         const ref = id.slice(6);
         void unpinAction({ ref }).then((r) => {
@@ -2319,7 +2338,10 @@ export function ConversationChat({
         else
           assistant(
             labels.pinsManageIntro,
-            pinned.map((p) => ({ id: `unpin:${p.ref}`, label: `${labels.unpinPrefix}: ${p.label ?? pinLabelFor(p.ref)}` })),
+            pinned.flatMap((p, i) => [
+              ...(i > 0 ? [{ id: `pin-first:${p.ref}`, label: `${labels.pinFirstPrefix}: ${p.label ?? pinLabelFor(p.ref)}` }] : []),
+              { id: `unpin:${p.ref}`, label: `${labels.unpinPrefix}: ${p.label ?? pinLabelFor(p.ref)}` },
+            ]),
           );
         return true;
       }

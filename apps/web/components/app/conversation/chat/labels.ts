@@ -208,6 +208,8 @@ const CHAT_KEYS = [
   "pinsNone",
   "unpinPrefix",
   "unpinDone",
+  "pinFirstPrefix",
+  "reorderDone",
 ] as const;
 
 const WORKLOG_KEYS = [

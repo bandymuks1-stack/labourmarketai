@@ -3760,7 +3760,9 @@
       "pinsManageIntro": "Ditt Mitt utrymme. Tryck på det du vill ta bort:",
       "pinsNone": "Mitt utrymme är tomt. När du använder något ofta föreslår jag att lägga till det.",
       "unpinPrefix": "Ta bort",
-      "unpinDone": "Borttaget från Mitt utrymme."
+      "unpinDone": "Borttaget från Mitt utrymme.",
+      "pinFirstPrefix": "Sätt först",
+      "reorderDone": "Klart: ”{label}” är nu först."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

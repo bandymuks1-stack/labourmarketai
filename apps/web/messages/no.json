@@ -3760,7 +3760,9 @@
       "pinsManageIntro": "Ditt Mitt område. Trykk på det du vil fjerne:",
       "pinsNone": "Mitt område er tomt. Når du bruker noe ofte, foreslår jeg å legge det til.",
       "unpinPrefix": "Fjern",
-      "unpinDone": "Fjernet fra Mitt område."
+      "unpinDone": "Fjernet fra Mitt område.",
+      "pinFirstPrefix": "Sett først",
+      "reorderDone": "Klart: «{label}» er nå først."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

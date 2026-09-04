@@ -3760,7 +3760,9 @@
       "pinsManageIntro": "Dit Mit område. Tryk på det, du vil fjerne:",
       "pinsNone": "Mit område er tomt. Når du bruger noget ofte, foreslår jeg at tilføje det.",
       "unpinPrefix": "Fjern",
-      "unpinDone": "Fjernet fra Mit område."
+      "unpinDone": "Fjernet fra Mit område.",
+      "pinFirstPrefix": "Sæt forrest",
+      "reorderDone": "Klar: “{label}” er nu forrest."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

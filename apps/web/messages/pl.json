@@ -3760,7 +3760,9 @@
       "pinsManageIntro": "Twoja Moja przestrzeń. Dotknij, co usunąć:",
       "pinsNone": "Moja przestrzeń jest pusta. Gdy będziesz często z czegoś korzystać, zaproponuję dodanie.",
       "unpinPrefix": "Usuń",
-      "unpinDone": "Usunięto z Mojej przestrzeni."
+      "unpinDone": "Usunięto z Mojej przestrzeni.",
+      "pinFirstPrefix": "Na początek",
+      "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

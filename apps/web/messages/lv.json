@@ -3760,7 +3760,9 @@
       "pinsManageIntro": "Jūsu Mana telpa. Pieskarieties tam, ko noņemt:",
       "pinsNone": "Mana telpa ir tukša. Kad kaut ko izmantosiet bieži, piedāvāšu to pievienot.",
       "unpinPrefix": "Noņemt",
-      "unpinDone": "Noņemts no Manas telpas."
+      "unpinDone": "Noņemts no Manas telpas.",
+      "pinFirstPrefix": "Uz priekšu",
+      "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
