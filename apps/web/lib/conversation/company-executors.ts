@@ -11,7 +11,7 @@ import type { DemandLifecycleResult } from "@/lib/demand/demand-lifecycle";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, createProjectAction, type ProjectActionResult } from "@/lib/projects/actions";
 import { inviteClientAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
@@ -275,6 +275,21 @@ export const COMPANY_EXECUTORS: {
       : { ok: false, code: r.outcome === "not_owner" ? "not_authorized" : "invalid" };
   },
 
+  "company.create-project": async (input, ctx) => {
+    // F2 — the SITE as a project object, by sentence. The ONE project-create
+    // core (`insertProjectForCompany`) sits behind the canonical server action
+    // the company page uses; RLS `projects_insert` (owns_company) gates the
+    // row. Never a second insert path.
+    const r = await createProjectAction(null, fd({ title: input.title, city: input.city ?? "" }));
+    if (!r.ok) return mapProjectCreate(r);
+    emitServerFunnelEvent(FUNNEL_EVENTS.firstRealAction, {
+      source: "projects-chat",
+      route: `/${ctx.locale}/dashboard`,
+      metadata: { surface: "projects", step: "project_created", role_context: "company", entity_type: "project" },
+    });
+    return { ok: true, data: { projectId: r.id ?? null } };
+  },
+
   "agency.invite-client": async (input) => {
     // The chat never carries a company id: the ACTIVE workspace's company is
     // the agency (M-P0-3 — the one employer resolver). A fail-closed resolve
@@ -379,6 +394,14 @@ export const COMPANY_EXECUTORS: {
     return { ok: false, code: first.outcome === "invalid_email" ? "invalid" : "error", message: first.outcome };
   },
 });
+
+/** The canonical project-create result → the dispatcher's honest codes. */
+function mapProjectCreate(r: Extract<ProjectActionResult, { ok: false }>): ExecResult {
+  if (r.code === "needs_migration") return { ok: false, code: "needs_migration" };
+  if (r.code === "invalid") return { ok: false, code: "invalid" };
+  if (r.code === "error") return { ok: false, code: "error", message: r.message };
+  return { ok: false, code: "not_authorized" };
+}
 
 function mapProgram(r: ProgramActionState): ExecResult {
   if (r.status === "forbidden") return { ok: false, code: "not_authorized" };

@@ -190,6 +190,15 @@ export const educationAssignLearnerSchema = z.object({
   profileId: uuid,
 });
 
+/** F2 (owner contract 2026-09-04 §9/§11 seed): the SITE as a project object,
+ *  by sentence — "sukurk projektą Roterdame". Shape gate only; the canonical
+ *  `createProjectAction` → `insertProjectForCompany` validates the title and
+ *  RLS `projects_insert` (owns_company) gates the row. */
+export const companyCreateProjectSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  city: z.string().trim().max(120).nullable().optional(),
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -219,6 +228,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.contact-worker": companyContactWorkerSchema,
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
+  "company.create-project": companyCreateProjectSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

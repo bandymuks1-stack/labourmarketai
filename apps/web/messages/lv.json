@@ -3391,6 +3391,10 @@
         "inviteWorker": {
           "label": "[EN] Invite a worker",
           "description": "[EN] Invite a person to your roster by e-mail."
+        },
+        "createProject": {
+          "label": "Izveidot projektu",
+          "description": "Objekts vai darbs, kuram piesaistīsiet cilvēkus."
         }
       },
       "education": {
@@ -3518,6 +3522,10 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "projectTitle": "Projekta nosaukums",
+        "projectTitlePlaceholder": "piem. Roterdamas noliktava",
+        "projectCity": "Pilsēta (nav obligāti)",
+        "projectCityPlaceholder": "piem. Roterdama",
         "rosterWorker": "[EN] Roster worker",
         "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
       },
@@ -3760,7 +3768,8 @@
       "pinsManageIntro": "Jūsu Mana telpa. Pieskarieties tam, ko noņemt:",
       "pinsNone": "Mana telpa ir tukša. Kad kaut ko izmantosiet bieži, piedāvāšu to pievienot.",
       "unpinPrefix": "Noņemt",
-      "unpinDone": "Noņemts no Manas telpas.",
+      "unpinDone": "Noņemts no Manas telpas.",
+      "projectCreateIntro": "Jauns projekts. Nosaukums un pilsēta — tad cilvēkus varēsiet piesaistīt tepat.",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

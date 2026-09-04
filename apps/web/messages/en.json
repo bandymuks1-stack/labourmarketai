@@ -11614,6 +11614,10 @@
         "inviteWorker": {
           "label": "Invite a worker",
           "description": "Invite a person to your roster by e-mail."
+        },
+        "createProject": {
+          "label": "Create a project",
+          "description": "A site or job you will assign people to."
         }
       },
       "education": {
@@ -11743,6 +11747,10 @@
         "workerEmailPlaceholder": "name@example.com",
         "inviteNote": "Note (optional)",
         "inviteNotePlaceholder": "E.g. start in October, site in Kaunas",
+        "projectTitle": "Project name",
+        "projectTitlePlaceholder": "e.g. Rotterdam warehouse",
+        "projectCity": "City (optional)",
+        "projectCityPlaceholder": "e.g. Rotterdam",
         "rosterWorker": "Roster worker",
         "proposalNotePlaceholder": "E.g. 5 years' experience, can start Monday"
       },
@@ -12049,7 +12057,8 @@
       "pinsManageIntro": "Your My Space. Tap what to remove:",
       "pinsNone": "My Space is empty. When you use something often, I will offer to add it.",
       "unpinPrefix": "Remove",
-      "unpinDone": "Removed from My Space.",
+      "unpinDone": "Removed from My Space.",
+      "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first."
     },

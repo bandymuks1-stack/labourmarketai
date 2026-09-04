@@ -3391,6 +3391,10 @@
         "inviteWorker": {
           "label": "[EN] Invite a worker",
           "description": "[EN] Invite a person to your roster by e-mail."
+        },
+        "createProject": {
+          "label": "Opprett prosjekt",
+          "description": "Et anlegg eller oppdrag du tildeler folk til."
         }
       },
       "education": {
@@ -3518,6 +3522,10 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "projectTitle": "Prosjektnavn",
+        "projectTitlePlaceholder": "f.eks. Lageret i Rotterdam",
+        "projectCity": "By (valgfritt)",
+        "projectCityPlaceholder": "f.eks. Rotterdam",
         "rosterWorker": "[EN] Roster worker",
         "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
       },
@@ -3760,7 +3768,8 @@
       "pinsManageIntro": "Ditt Mitt område. Trykk på det du vil fjerne:",
       "pinsNone": "Mitt område er tomt. Når du bruker noe ofte, foreslår jeg å legge det til.",
       "unpinPrefix": "Fjern",
-      "unpinDone": "Fjernet fra Mitt område.",
+      "unpinDone": "Fjernet fra Mitt område.",
+      "projectCreateIntro": "Et nytt prosjekt. Navn og by — så kan du tildele folk her.",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

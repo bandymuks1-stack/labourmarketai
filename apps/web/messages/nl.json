@@ -11614,6 +11614,10 @@
         "inviteWorker": {
           "label": "Medewerker uitnodigen",
           "description": "Nodig iemand per e-mail uit voor je team."
+        },
+        "createProject": {
+          "label": "Project aanmaken",
+          "description": "Een locatie of opdracht waaraan u mensen toewijst."
         }
       },
       "education": {
@@ -11743,6 +11747,10 @@
         "workerEmailPlaceholder": "naam@voorbeeld.nl",
         "inviteNote": "Notitie (optioneel)",
         "inviteNotePlaceholder": "Bijv. start in oktober, locatie Kaunas",
+        "projectTitle": "Projectnaam",
+        "projectTitlePlaceholder": "bijv. Magazijn Rotterdam",
+        "projectCity": "Stad (optioneel)",
+        "projectCityPlaceholder": "bijv. Rotterdam",
         "rosterWorker": "Teamlid",
         "proposalNotePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen"
       },
@@ -12049,7 +12057,8 @@
       "pinsManageIntro": "Uw Mijn ruimte. Tik op wat u wilt verwijderen:",
       "pinsNone": "Mijn ruimte is leeg. Als u iets vaak gebruikt, stel ik voor het toe te voegen.",
       "unpinPrefix": "Verwijderen",
-      "unpinDone": "Verwijderd uit Mijn ruimte.",
+      "unpinDone": "Verwijderd uit Mijn ruimte.",
+      "projectCreateIntro": "Een nieuw project. Naam en stad — daarna wijst u hier meteen mensen toe.",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

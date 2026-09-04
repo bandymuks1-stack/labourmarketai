@@ -3391,6 +3391,10 @@
         "inviteWorker": {
           "label": "Inviter en medarbejder",
           "description": "Inviter en person til jeres team via e-mail."
+        },
+        "createProject": {
+          "label": "Opret projekt",
+          "description": "En byggeplads eller opgave, du tildeler folk til."
         }
       },
       "education": {
@@ -3518,6 +3522,10 @@
         "workerEmailPlaceholder": "navn@eksempel.dk",
         "inviteNote": "Note (valgfri)",
         "inviteNotePlaceholder": "F.eks. start i oktober, byggeplads i Kaunas",
+        "projectTitle": "Projektnavn",
+        "projectTitlePlaceholder": "f.eks. Lager i Rotterdam",
+        "projectCity": "By (valgfrit)",
+        "projectCityPlaceholder": "f.eks. Rotterdam",
         "rosterWorker": "Teammedlem",
         "proposalNotePlaceholder": "F.eks. 5 års erfaring, kan starte mandag"
       },
@@ -3760,7 +3768,8 @@
       "pinsManageIntro": "Dit Mit område. Tryk på det, du vil fjerne:",
       "pinsNone": "Mit område er tomt. Når du bruger noget ofte, foreslår jeg at tilføje det.",
       "unpinPrefix": "Fjern",
-      "unpinDone": "Fjernet fra Mit område.",
+      "unpinDone": "Fjernet fra Mit område.",
+      "projectCreateIntro": "Et nyt projekt. Navn og by — så kan du tildele folk lige her.",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

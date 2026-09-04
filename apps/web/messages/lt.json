@@ -11614,6 +11614,10 @@
         "inviteWorker": {
           "label": "Pakviesti darbuotoją",
           "description": "Pakviesk žmogų į savo komandą el. paštu."
+        },
+        "createProject": {
+          "label": "Sukurti projektą",
+          "description": "Objektas ar užsakymas, prie kurio priskirsite žmones."
         }
       },
       "education": {
@@ -11743,6 +11747,10 @@
         "workerEmailPlaceholder": "vardas@pastas.lt",
         "inviteNote": "Pastaba (nebūtina)",
         "inviteNotePlaceholder": "Pvz., pradžia nuo spalio, objektas Kaune",
+        "projectTitle": "Projekto pavadinimas",
+        "projectTitlePlaceholder": "pvz. Roterdamo sandėlis",
+        "projectCity": "Miestas (nebūtina)",
+        "projectCityPlaceholder": "pvz. Roterdamas",
         "rosterWorker": "Komandos narys",
         "proposalNotePlaceholder": "Pvz., 5 m. patirtis, gali pradėti pirmadienį"
       },
@@ -12049,7 +12057,8 @@
       "pinsManageIntro": "Jūsų Mano erdvė. Paspauskite, ką pašalinti:",
       "pinsNone": "Mano erdvė tuščia. Kai ką nors naudosite dažnai, pasiūlysiu pridėti.",
       "unpinPrefix": "Pašalinti",
-      "unpinDone": "Pašalinta iš Mano erdvės.",
+      "unpinDone": "Pašalinta iš Mano erdvės.",
+      "projectCreateIntro": "Naujas projektas. Pavadinimas ir miestas — ir žmones galėsite priskirti čia pat.",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

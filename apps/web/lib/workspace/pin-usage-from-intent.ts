@@ -38,6 +38,7 @@ const SENTENCE_REFS: Partial<Record<ConversationIntent, { ref: string; company?:
   "invite-client": { ref: "f:agency.invite-client", company: true },
   "invite-candidate": { ref: "f:company.invite-worker", company: true },
   "invite-student": { ref: "f:company.invite-learner", company: true },
+  "create-project": { ref: "f:company.create-project", company: true },
 };
 
 export type SentenceIdentity = "company" | "person";

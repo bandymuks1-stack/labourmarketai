@@ -89,6 +89,7 @@ export type ConversationIntent =
   | "learning-compass" // "parodyk mano mokymosi kompasą"
   | "invite-student" // "pakviesk studentą" — learner invitation (relationship student)
   | "programmes" // "sukurk programą / grupę" — programmes & cohorts
+  | "create-project" // "sukurk projektą Roterdame" — the SITE as a project object (F2)
   | "unknown";
 
 export type IntentMatch = {
@@ -834,6 +835,17 @@ const RULES: IntentRule[] = [
       // A bare "what's new?" with no company/project noun after it — the
       // rules above keep those, because they name what is being asked about.
       p("(kas\\s+naujo|what'?s\\s+new|что\\s+нового|was\\s+ist\\s+neu|wat\\s+is\\s+er\\s+nieuw)", 4),
+    ],
+  },
+  {
+    intent: "create-project",
+    patterns: [
+      // F2 — "sukurk projektą Roterdame", "naujas objektas Vilniuje", "new
+      // project in Rotterdam", "neues Projekt / Baustelle anlegen", "nieuw
+      // project", "создай проект / объект": a SITE as a project object.
+      p("(sukur|kurti|prid[eė]|prad[eė]|nauj|create|new|add|start|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(projekt|project|проект|objekt|statybviet|baustelle|bouwplaats|стройплощад|объект)", 8),
+      // noun → verb: "projektą sukurti", "Projekt anlegen", "project aanmaken"
+      p("(projekt|project|проект|objekt|baustelle|bouwplaats|объект)\\w*\\s*.{0,16}(sukur|kurti|prad[eė]|create|erstell|anleg|aanmak|создать|создай)", 8),
     ],
   },
   {
