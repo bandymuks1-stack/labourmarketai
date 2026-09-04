@@ -1,4 +1,4 @@
--- @human-gate-approved — pending owner approval "Apply Lane A ownership 2026-09-04" (draft, needs-human-gate)
+-- @human-gate-approved — owner approval "Apply Lane A ownership 2026-09-04" (2026-09-04); APPLIED TO PROD via Supabase MCP apply_migration (ledger 20260904055214) with the membership grant recorded in docs/launch/pilot-feedback/2026-09-04-lane-a-real-recruiter.md
 -- 20260904060000_owns_company_governance_membership_v1
 --
 -- ██ RED CLASS — human gate (migration-safety: CREATE OR REPLACE of two
