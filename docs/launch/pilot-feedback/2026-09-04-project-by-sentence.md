@@ -62,3 +62,18 @@ recorded, not fixed tonight.
 
 E2E residue: project `3b9c55d3` (draft) with one assignment — kept (the worker's
 work-log against it is the next proof).
+
+## Work → evidence on the chat-created project (prod `461326d2`)
+
+`walk-worklog-project-prod.cjs`, E2E Worker Two, 30.6 s: "Užpildyk darbo žurnalą" → the
+work-log form (date · place "Vilnius" · "Klojau pamatus Vilniaus objekte. E2E-WL-…") →
+two-step save. DB: `journal_entries` row `01d4a36d…` at 20:58:52 UTC with
+**`project_id 3b9c55d3…`** (the project created by sentence 14 minutes earlier) and
+`engagement_context_id 90da8c16…` — the chat attached the work to the assignment
+without asking, because the worker has exactly one active context.
+
+So PROJECT create → people → work → evidence is proven on production by sentence and
+chips; the evidence sits on the worker's identity (journal → verified CV sheet) and on
+the project. Not seen: the employer's greeting did not carry a "… laukia peržiūros"
+line 14 s later (the review queue keys on the confirmation model; the brief showed the
+institution line only) — recorded for the next observation, not chased tonight.
