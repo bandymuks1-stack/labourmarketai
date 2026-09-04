@@ -12140,7 +12140,9 @@
       "documentFileUploaded": "File attached to the document. Here is your readiness now:",
       "documentFileTooLarge": "The file is larger than 5 MB — nothing was saved.",
       "documentFileUnsupported": "This file type is not supported — use PDF, Word or a photo.",
-      "documentFileFailed": "The file could not be uploaded — nothing was saved. Try again from the documents centre."
+      "documentFileFailed": "The file could not be uploaded — nothing was saved. Try again from the documents centre.",
+      "briefEmployerBookingResponses": "{count, plural, one {# worker has answered your booking proposal} other {# workers have answered your booking proposals}}.",
+      "chipEmployerBookings": "My proposals"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

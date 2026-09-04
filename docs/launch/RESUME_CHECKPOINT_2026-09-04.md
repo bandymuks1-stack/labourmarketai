@@ -9,7 +9,7 @@
 
 | Item | Value |
 |---|---|
-| Production | `02e4476c` (#1500 stage progress + #1501 one document-file write). Prod-proven on it: worker "mano projektai" names the assigned project (#1499, `e535971d`). The stage SENTENCE failed on prod (chat treated `no_confirmation_needed` as failure — fixed in `fix/cc/stage-status-confirmation`); #1502 (document FILE in the chat) auto-merging. Confirm `/api/health` `build` on resume |
+| Production | **FROZEN at `02e4476c`** — Vercel Hobby build rate limit hit 2026-09-04 ~22:57 UTC ("Deployment rate limited — retry in 24 hours" on every commit since, incl. `e4ffd04d` #1502 and `2723d876` #1503). Nothing merged after 02e4476c is live. When the limit lifts (~23:00 UTC 2026-09-05) production needs a NEW push to `main` (or the owner's Redeploy in Vercel) — then run the pending walks: `walk-stage-prod.cjs`, `walk-document-file-prod.cjs` (CLEANUP=1), `walk-employer-proposal-prod.cjs` (WORKER_EMAIL=qa.worker+multiw) |
 | `main` | #1467–#1474 · #1476–#1501 (incl. #1495 pulse, #1497 task, #1498 capacity, #1499 worker projects, #1500 stages, #1501 file core). Open: **#1502** document file in the chat (auto-merge), `fix/cc/stage-status-confirmation` (PR after build). RED draft: **#1475** My Space table (owner gate) |
 | Active P0 chain | PROJECT journey from real state: create → assign → worker log with project_id → pulse → task by sentence → capacity → a stage moved by sentence (#1500; first prod walk exposed the token-tier defect, fix in flight → re-walk `walk-stage-prod.cjs` after deploy). WORKER: the document FILE offered in the thread after the sentence (#1502 → `walk-document-file-prod.cjs` after deploy, then MCP row cleanup). Then: EMPLOYER contact/proposal via the chat panel (S → prod walk) |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
@@ -50,6 +50,7 @@
 ## Open owner gates (consolidated, do not re-ask)
 
 - **Apply My Space 2026-09-04** → #1475 (`20260904120000_workspace_pins_v1`): one reference table, owner-only RLS, `grant … to authenticated` only (the static grant rule makes it RED). Until applied the chat shows no row and no ask.
+- **Vercel Hobby build rate limit** (hit 2026-09-04 ~22:57 UTC): production deploys refused for 24 h. Options only the owner has: upgrade the Vercel project to Pro, or wait; no code change fixes it. Consequence recorded once here; merges continue, prod proofs resume after the reset.
 - **Transactional e-mail** (`INVITE_EMAIL_PROVIDER` = resend|postmark, `INVITE_EMAIL_API_KEY`, `INVITE_EMAIL_FROM` in Vercel prod env): every invitation is stored, not sent; the chat says so.
 - **Public programme projection** (institution + programme names readable by workers) for "who can help" on a skills gap — privacy/commercial decision.
 - RED drafts unchanged: #1441 #1440 #1436 #1433 #1430 #1426 #1421 #1355 #1266 #1046 #1045 #897 #896 #895 #883 #740. DEV-1 and Docker Desktop are owner-machine actions.

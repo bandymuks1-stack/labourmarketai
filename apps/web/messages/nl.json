@@ -12140,7 +12140,9 @@
       "documentFileUploaded": "Bestand aan het document toegevoegd. Dit is uw gereedheid nu:",
       "documentFileTooLarge": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
       "documentFileUnsupported": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
-      "documentFileFailed": "Het bestand kon niet worden geüpload — er is niets opgeslagen. Probeer het in het documentencentrum."
+      "documentFileFailed": "Het bestand kon niet worden geüpload — er is niets opgeslagen. Probeer het in het documentencentrum.",
+      "briefEmployerBookingResponses": "{count, plural, one {# medewerker heeft op uw boekingsvoorstel geantwoord} other {# medewerkers hebben op uw boekingsvoorstellen geantwoord}}.",
+      "chipEmployerBookings": "Mijn voorstellen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

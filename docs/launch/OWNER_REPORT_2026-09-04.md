@@ -66,6 +66,10 @@ All E2E-proven on production unless marked PR. ENTRY → REQUEST → ACTION → 
 
 Honest remainder added tonight: the positive internship proof needs a demand from a VERIFIED company visible to a worker — no E2E company is verified and verifying one would show test demands to real workers (**owner decision**); the document FILE still goes through the documents centre; institution outcomes above the floor are unproven (no institution has 5 learners); the real recruiter has not acted since 06:15 UTC.
 
+## Production freeze (2026-09-04 ~22:57 UTC) — one owner-level fact
+
+Vercel's Hobby build rate limit was hit: every deployment since `02e4476c` is refused with "Deployment rate limited — retry in 24 hours". #1502 (document file in the chat), #1503 (stage-by-sentence fix), #1504 (task title) and the employer "workers answered" brief rung are merged/merging but NOT live until the limit lifts (~23:00 UTC 2026-09-05) and a new push to `main` (or your Redeploy in Vercel) lands. Only you can shorten this (Vercel Pro). Prod proofs for those four resume right after.
+
 ## Journey status (unit of success = the journey, not the rung; 2026-09-04 late)
 
 Legend: **P** = prod-proven with an E2E identity today or earlier; **S** = shipped, unproven on prod today; **G** = owner-gated; **—** = not built.

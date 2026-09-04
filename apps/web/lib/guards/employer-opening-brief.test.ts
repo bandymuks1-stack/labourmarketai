@@ -76,6 +76,8 @@ describe("the employer opening brief", () => {
         "briefEmployerAbsentToday",
         "chipEmployerInbox",
         "chipEmployerAbsences",
+        "briefEmployerBookingResponses",
+        "chipEmployerBookings",
       ]) {
         expect(typeof chat[key], `${l}.${key}`).toBe("string");
       }
