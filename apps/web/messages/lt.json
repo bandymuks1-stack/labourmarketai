@@ -11916,6 +11916,7 @@
       "briefDocumentsMissing": "{count, plural, one {Trūksta # dokumento jūsų šalims} few {Trūksta # dokumentų jūsų šalims} other {Trūksta # dokumentų jūsų šalims}}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidatas laukia jūsų atsakymo} few {# kandidatai laukia jūsų atsakymo} other {# kandidatų laukia jūsų atsakymo}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agentūros pasiūlymas laukia jūsų sprendimo} few {# agentūrų pasiūlymai laukia jūsų sprendimo} other {# agentūrų pasiūlymų laukia jūsų sprendimo}}.",
+      "briefInterestContacted": "{count, plural, one {# įmonė nori su jumis susisiekti dėl jūsų susidomėjimo} few {# įmonės nori su jumis susisiekti dėl jūsų susidomėjimo} other {# įmonių nori su jumis susisiekti dėl jūsų susidomėjimo}}.",
       "chipAgencyOffers": "Agentūrų pasiūlymai",
       "briefEmployerPendingAbsences": "{count, plural, one {# neatvykimo prašymas laukia} few {# neatvykimo prašymai laukia} other {# neatvykimo prašymų laukia}} jūsų sprendimo.",
       "briefEmployerAbsentToday": "{count, plural, one {Šiandien nedirba # jūsų darbuotojas} few {Šiandien nedirba # jūsų darbuotojai} other {Šiandien nedirba # jūsų darbuotojų}}.",

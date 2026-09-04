@@ -11916,6 +11916,7 @@
       "briefDocumentsMissing": "{count, plural, one {# Dokument fehlt für Ihre Länder} other {# Dokumente fehlen für Ihre Länder}}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# Kandidat wartet auf Ihre Antwort} other {# Kandidaten warten auf Ihre Antwort}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# Agenturangebot wartet auf Ihre Entscheidung} other {# Agenturangebote warten auf Ihre Entscheidung}}.",
+      "briefInterestContacted": "{count, plural, one {# Unternehmen möchte Sie wegen Ihres Interesses kontaktieren} other {# Unternehmen möchten Sie wegen Ihres Interesses kontaktieren}}.",
       "chipAgencyOffers": "Agenturangebote",
       "briefEmployerPendingAbsences": "{count, plural, one {# Abwesenheitsantrag wartet} other {# Abwesenheitsanträge warten}} auf Ihre Entscheidung.",
       "briefEmployerAbsentToday": "{count, plural, one {# Ihrer Mitarbeitenden ist} other {# Ihrer Mitarbeitenden sind}} heute abwesend.",
