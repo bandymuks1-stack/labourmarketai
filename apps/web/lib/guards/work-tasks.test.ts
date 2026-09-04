@@ -57,7 +57,13 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const MODEL = read("lib/tasks/task-model.ts");
 const READS = read("lib/tasks/tasks.ts");
-const ACTIONS = read("lib/tasks/task-actions.ts");
+// THE ONE task create moved into lib/tasks/create-task-core.ts (the page action
+// and the chat action both insert through it); the RPC-shape assertions read
+// the whole write layer, which is still exactly these three files.
+const ACTIONS =
+  read("lib/tasks/task-actions.ts") +
+  read("lib/tasks/create-task-core.ts") +
+  read("lib/tasks/task-chat-actions.ts");
 const PAGE_REL = "app/[locale]/dashboard/tasks/page.tsx";
 const PAGE = read(PAGE_REL);
 const SPINE = read("lib/notifications/spine.ts");

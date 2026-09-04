@@ -651,6 +651,26 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "respondCandidateOfferAction" },
   },
 
+  {
+    /**
+     * PROJECT → WORK (owner contract 2026-09-04 §11): a work package by
+     * sentence — "pridėk užduotį projektui: sumontuoti pastolius iki spalio 3".
+     * Same core the tasks page's form inserts through; the project pulse
+     * shows it as an open task the moment it exists.
+     */
+    id: "company.create-task",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.createTask.label",
+    descriptionKey: "conversation.actions.company.createTask.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/tasks",
+    handler: { kind: "server_action", ref: "createWorkTaskAction" },
+  },
+
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`
   // capability (I-2: one organization, many capabilities). Its commands

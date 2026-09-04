@@ -3400,6 +3400,10 @@
           "label": "Opret projekt",
           "description": "En byggeplads eller opgave, du tildeler folk til."
         },
+        "createTask": {
+          "label": "Tilføj opgave",
+          "description": "En arbejdspakke i projektet — hvad der skal gøres og hvornår."
+        },
         "respondOffer": {
           "label": "Svar på et bureaus tilbud",
           "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
@@ -3535,6 +3539,11 @@
         "validUntil": "Gyldig til",
         "validUntilPlaceholder": "f.eks. 2027-03-31",
         "documentNote": "Note (valgfrit)",
+        "taskTitle": "Opgave",
+        "taskTitlePlaceholder": "f.eks. Opstil stillads",
+        "taskProject": "Projekt (valgfrit)",
+        "taskDue": "Frist",
+        "taskPriority": "Prioritet",
         "projectTitle": "Projektnavn",
         "projectTitlePlaceholder": "f.eks. Lager i Rotterdam",
         "projectCity": "By (valgfrit)",
@@ -3796,6 +3805,8 @@
       "documentAddUnavailable": "Dokumentkataloget kunne ikke indlæses lige nu — registrér dokumentet i dokumentcentret.",
       "cvExportHint": "Dit verificerede CV — ét ark med det, systemet virkelig ved. Åbn det og print til PDF.",
       "chipCvSheet": "Åbn CV-arket",
+      "taskCreateIntro": "En ny opgave: hvad der skal gøres, på hvilket projekt og hvornår.",
+      "taskCreatedNext": "Opgave registreret. Projektpulsen viser den som åben; tildel en person på opgaveskærmen.",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

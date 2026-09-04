@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { emitWorkTaskAssignedNotification } from "@/lib/notifications/event-emitters";
+import { createWorkTaskCore } from "@/lib/tasks/create-task-core";
 import {
   WORK_TASK_DESCRIPTION_MAX,
   WORK_TASK_TITLE_MAX,
@@ -140,72 +141,20 @@ export async function createWorkTaskAction(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) finish(ctx, "not_authorized");
 
-  const title = String(formData.get("title") ?? "").trim();
-  if (title.length < WORK_TASK_TITLE_MIN || title.length > WORK_TASK_TITLE_MAX) {
-    finish(ctx, "invalid");
-  }
-
-  const description = String(formData.get("description") ?? "").trim();
-  if (description.length > WORK_TASK_DESCRIPTION_MAX) finish(ctx, "invalid");
-
-  const priority = String(formData.get("priority") ?? "normal");
-  if (!isValidWorkTaskPriority(priority)) finish(ctx, "invalid");
-
-  const dueDate = String(formData.get("dueDate") ?? "").trim();
-  if (dueDate && !DATE_RX.test(dueDate)) finish(ctx, "invalid");
-
-  const projectId = String(formData.get("projectId") ?? "").trim();
-  if (projectId && !UUID_RX.test(projectId)) finish(ctx, "invalid");
-
-  const objectId = String(formData.get("objectId") ?? "").trim();
-  if (objectId && !UUID_RX.test(objectId)) finish(ctx, "invalid");
-
-  // The assign select posts a profile id; the plain checkbox posts "on"
-  // (self-assign). An empty value means unassigned — exactly like v1.
-  const assigneeRaw = String(formData.get("assigneeProfileId") ?? "").trim();
-  const assignSelf = formData.get("assignSelf") === "on";
-  const assignee = assigneeRaw || (assignSelf ? user!.id : "");
-  if (assignee && !UUID_RX.test(assignee)) finish(ctx, "invalid");
-
-  const { data, error } = await asAny(supabase).rpc("create_work_task_v2", {
-    p_title: title,
-    p_description: description,
-    p_priority: priority,
-    p_due_date: dueDate,
-    p_project_id: projectId,
-    p_object_id: objectId,
-    p_assignee_profile_id: assignee,
+  // THE ONE create (lib/tasks/create-task-core.ts): the chat's
+  // `company.create-task` inserts through the same core. This action keeps
+  // its form contract and its redirect-with-notice; nothing else.
+  const result = await createWorkTaskCore(supabase, user!.id, {
+    title: String(formData.get("title") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    priority: String(formData.get("priority") ?? "normal"),
+    dueDate: String(formData.get("dueDate") ?? ""),
+    projectId: String(formData.get("projectId") ?? ""),
+    objectId: String(formData.get("objectId") ?? ""),
+    assigneeProfileId: String(formData.get("assigneeProfileId") ?? ""),
+    assignSelf: formData.get("assignSelf") === "on",
   });
-
-  if (error && isMigrationMissingCode(error.code)) {
-    // v2 not applied yet. Plain creates fall back to the APPLIED v1 RPC;
-    // v2-only capabilities report the honest pre-apply state instead.
-    if (objectId || (assignee && assignee !== user!.id)) {
-      finish(ctx, "needs_migration");
-    }
-    const v1 = await asAny(supabase).rpc("create_work_task_v1", {
-      p_title: title,
-      p_description: description,
-      p_priority: priority,
-      p_due_date: dueDate,
-      p_project_id: projectId,
-      p_assign_to_self: assignee === user!.id,
-    });
-    if (v1.error) finish(ctx, noticeForRpcError(v1.error));
-    finish(ctx, noticeForOutcome(String(v1.data ?? ""), "created"));
-  }
-  if (error) finish(ctx, noticeForRpcError(error));
-
-  const outcome = String(data ?? "");
-  // Success returns the new task id — emit the durable assignment event for
-  // assign-to-other. AWAITED, not detached: a `void`-detached insert is
-  // killable the instant the serverless invocation returns (the mechanism
-  // that made the live interest emitter deliver nothing). The emitter never
-  // throws, so the create that already succeeded cannot fail on its bell.
-  if (UUID_RX.test(outcome) && assignee && assignee !== user!.id) {
-    await emitWorkTaskAssignedNotification(outcome, user!.id);
-  }
-  finish(ctx, noticeForOutcome(outcome, "created"));
+  finish(ctx, result.kind === "created" ? "created" : result.kind);
 }
 
 /** Move a task along the honest forward transitions

@@ -224,6 +224,8 @@ const CHAT_KEYS = [
   "documentAddUnavailable",
   "cvExportHint",
   "chipCvSheet",
+  "taskCreateIntro",
+  "taskCreatedNext",
 ] as const;
 
 const WORKLOG_KEYS = [

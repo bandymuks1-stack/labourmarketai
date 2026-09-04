@@ -840,6 +840,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Download mijn cv",
     de: "Meinen Lebenslauf herunterladen",
   },
+  "add-task": {
+    lt: "Pridėk užduotį projektui: sumontuoti pastolius",
+    en: "Add a task to the project: erect the scaffold",
+    ru: "Добавь задачу в проект: собрать леса",
+    nl: "Nieuwe taak voor het project: steiger opbouwen",
+    de: "Neue Aufgabe für das Projekt: Gerüst aufbauen",
+  },
 };
 
 /**

@@ -3400,6 +3400,10 @@
           "label": "Utwórz projekt",
           "description": "Obiekt lub zlecenie, do którego przypiszesz ludzi."
         },
+        "createTask": {
+          "label": "Dodaj zadanie",
+          "description": "Pakiet prac w projekcie — co trzeba zrobić i do kiedy."
+        },
         "respondOffer": {
           "label": "Odpowiedz na ofertę agencji",
           "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
@@ -3535,6 +3539,11 @@
         "validUntil": "Ważny do",
         "validUntilPlaceholder": "np. 2027-03-31",
         "documentNote": "Uwaga (opcjonalnie)",
+        "taskTitle": "Zadanie",
+        "taskTitlePlaceholder": "np. Zmontować rusztowanie",
+        "taskProject": "Projekt (opcjonalnie)",
+        "taskDue": "Termin",
+        "taskPriority": "Priorytet",
         "projectTitle": "Nazwa projektu",
         "projectTitlePlaceholder": "np. Magazyn w Rotterdamie",
         "projectCity": "Miasto (opcjonalnie)",
@@ -3796,6 +3805,8 @@
       "documentAddUnavailable": "Nie udało się teraz wczytać katalogu dokumentów — zapisz dokument w centrum dokumentów.",
       "cvExportHint": "Twoje zweryfikowane CV — jedna strona tego, co system naprawdę wie. Otwórz i wydrukuj do PDF.",
       "chipCvSheet": "Otwórz arkusz CV",
+      "taskCreateIntro": "Nowe zadanie: co trzeba zrobić, w którym projekcie i do kiedy.",
+      "taskCreatedNext": "Zadanie zapisane. Puls projektu pokazuje je jako otwarte; osobę przypiszesz na ekranie zadań.",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },

@@ -41,8 +41,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // (`create-project` — the site as a project object, by sentence); 51 → 52
     // with `agency-offers` (the client's side of the agency bridge, read);
     // 52 → 53 with `add-document` (a document recorded by sentence, write);
-    // 53 → 54 with `cv-export` (the verified CV sheet, route).
-    expect(entries.length).toBe(54);
+    // 53 → 54 with `cv-export` (the verified CV sheet, route); 54 → 55 with
+    // `add-task` (a work package on the project, write).
+    expect(entries.length).toBe(55);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -62,6 +63,8 @@ describe("the intent registry is the enumerable routing contract", () => {
     expect(intentsWhere((d) => d.access === "write")).toEqual([
       // Documents first-class: a document recorded by sentence.
       "add-document",
+      // PROJECT → WORK: a work package by sentence.
+      "add-task",
       // F2 — the site as a project object, by sentence.
       "create-project",
       "invite-candidate",
