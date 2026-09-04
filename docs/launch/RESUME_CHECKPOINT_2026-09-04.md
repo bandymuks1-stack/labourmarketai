@@ -9,9 +9,9 @@
 
 | Item | Value |
 |---|---|
-| Production | `8aac9ab9` (#1492) — project detail readback proven ("Priskirta 1 · E2E Worker Two"). Earlier tonight: `0bd1c542` CV sheet, `461326d2` valid-until + worker log on the project, `f49cc972`, `a726b2ce`, `6fc477d9`. Open: **#1493** phone sheet yields to chips (chain re-walks `walk-phone-sheet-prod.cjs` after deploy) — confirm `/api/health` `build` on resume |
-| `main` | #1467–#1474 · #1476–#1494 · #1497 task by sentence (merged 02:1x UTC). Open (auto-merge): **#1495** project pulse (rebased) · **#1498** who is available (rebased on main) · branch `feat/cc/worker-projects-in-chat` (stacked on #1498; build running → PR). RED draft: **#1475** My Space table (owner gate) |
-| Active P0 chain | PROJECT journey continued from real state: create → assign → worker log with project_id → pulse in the panel (#1495) → work packages by sentence (#1497; prod walk chain running) → who is available (#1498) → the WORKER's own assignments by sentence (branch). Visual Project Field (operations page + centre) walked. Next connected candidates: the worker's task by sentence ('ką turiu padaryti?' already answers with the 14-day plan incl. journal), stage progress by sentence, project report handover. Owner gates unchanged (+ journal review v4 hold) |
+| Production | `02e4476c` (#1500 stage progress + #1501 one document-file write). Prod-proven on it: worker "mano projektai" names the assigned project (#1499, `e535971d`). The stage SENTENCE failed on prod (chat treated `no_confirmation_needed` as failure — fixed in `fix/cc/stage-status-confirmation`); #1502 (document FILE in the chat) auto-merging. Confirm `/api/health` `build` on resume |
+| `main` | #1467–#1474 · #1476–#1501 (incl. #1495 pulse, #1497 task, #1498 capacity, #1499 worker projects, #1500 stages, #1501 file core). Open: **#1502** document file in the chat (auto-merge), `fix/cc/stage-status-confirmation` (PR after build). RED draft: **#1475** My Space table (owner gate) |
+| Active P0 chain | PROJECT journey from real state: create → assign → worker log with project_id → pulse → task by sentence → capacity → a stage moved by sentence (#1500; first prod walk exposed the token-tier defect, fix in flight → re-walk `walk-stage-prod.cjs` after deploy). WORKER: the document FILE offered in the thread after the sentence (#1502 → `walk-document-file-prod.cjs` after deploy, then MCP row cleanup). Then: EMPLOYER contact/proposal via the chat panel (S → prod walk) |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
 | Local stack | Docker Desktop dead → `LOCAL_DOCKER_UNAVAILABLE`; verification = unit/guards/typecheck/lint/build + CI + prod walks with bounded `e2e-*` identities (scratchpad `walk-*.cjs`, `wait-prod.cjs`; `curl` denied in this harness) |
@@ -27,12 +27,13 @@
 | Agency | invite client → client accepts + shares (canonical RPCs) → invite candidate → worker joins → "parodyk klientų poreikius" lists the need → "pasiūlyk kandidatą" → offer `offered` → status; full telemetry incl. `first_real_action:offer_candidate` (#1466/#1473) |
 | Institution | "sukurk programą" → "sukurk grupę" → "pakviesk studentą" (truthful "created, no e-mail") → assignment form from real rows → "parodyk programas"; `first_real_action` ×3 (#1470) |
 | Student | "ką man mokytis?" → becoming · evidence · fits · missing · next-step chips + full compass chip (#1472) |
+| Worker (assigned) | "mano projektai" → "Jūsų projektai (1 aktyv.): • E2E Vilniaus objektas (testinis) — Vilnius" + open chip, from the person's side (#1499, `e535971d`) |
 
 ## Ordinary-human-usable vs technically proven (honest)
 
 | Actor | Usable by sentence in prod | Still missing |
 |---|---|---|
-| Worker | find work, log work, CV, documents + gaps; attention: expiring / missing documents (#1485/#1487); a document RECORDED by sentence (#1488, PR) | the file itself (documents-centre upload); training suggestion for a skills gap (**owner gate**: public programme projection) |
+| Worker | find work, log work, CV, documents + gaps; attention: expiring / missing documents (#1485/#1487); a document RECORDED by sentence (#1488, PR) | the file by sentence — offered in the thread after the record (#1502, unproven on prod until the walk); training suggestion for a skills gap (**owner gate**: public programme projection) |
 | Employer | need → form → demand → candidates → contact/booking; the owner's sentence structured incl. end date; a project by sentence and people assigned right after (#1483/#1486); attention: candidates waiting for an answer, agency offers waiting (#1485/#1487) | site readiness / work packages (§11 Project Field) |
 | Agency | whole chain by sentence; attention lines (#1474); the CLIENT decides on the offer by sentence, accept → canonical booking (#1487, prod-proven decline) | e-mail delivery (**owner gate**) |
 | Institution | programme / cohort / learner invitation / assignment / list; attention: pending learner invitations; learner OUTCOMES block (#1484: the one caller of `institution_learner_outcomes_v1`, suppression said) | e-mail delivery (**owner gate**) |
