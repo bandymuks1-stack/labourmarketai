@@ -11633,6 +11633,10 @@
           "label": "Pridėti užduotį",
           "description": "Darbo paketas projekte — kas turi būti padaryta ir iki kada."
         },
+        "updateStageStatus": {
+          "label": "Pakeisti etapo būseną",
+          "description": "Projekto etapas pažymimas tikra būsena — vykdomas, atliktas, blokuotas."
+        },
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
@@ -12119,6 +12123,14 @@
       "workerProjectsIntro": "Jūsų projektai ({count} aktyv.):",
       "workerProjectsEnded": "baigta",
       "chipOpenProjectPrefix": "Atidaryti",
+      "stageAsk": "Kuris etapas? Pasirinkite:",
+      "stageNotFound": "Tokio etapo nerandu tarp jūsų atvirų etapų. Kurį turėjote omenyje?",
+      "stageNone": "Atvirų etapų kol kas nėra — etapus įvesite projekto valdyme.",
+      "stageDone": "Etapas pažymėtas atliktu.",
+      "stageStarted": "Etapas pažymėtas vykdomu.",
+      "stageBlocked": "Etapas pažymėtas blokuotu.",
+      "stageFailed": "Etapo būsenos pakeisti nepavyko.",
+      "chipStagePrefix": "Etapas",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },
@@ -12444,6 +12456,7 @@
       "projectStages": "Etapai",
       "projectStagesEmpty": "Šiam projektui etapų dar neįvesta.",
       "projectStagesUnavailable": "Šioje aplinkoje etapų nuskaityti negalima, todėl nerodome tuščio sąrašo, tarsi jų nebūtų.",
+      "projectStageMarkDone": "Pažymėti atliktu",
       "projectAssignWorker": "Priskirti darbuotoją",
       "projectOpenOperations": "Atidaryti projekto valdymą",
       "projectOpenProject": "Atidaryti projektą",

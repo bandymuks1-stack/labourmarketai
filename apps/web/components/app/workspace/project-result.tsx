@@ -93,6 +93,7 @@ export function ProjectResult({
   onBack,
   onOpenFull,
   onAssignWorker,
+  onStageStatus,
 }: {
   /** Which project the panel is showing, or null for the project list. */
   projectId: string | null;
@@ -106,6 +107,7 @@ export function ProjectResult({
    * own — the same rule the Context Panel follows for every chip.
    */
   onAssignWorker: (projectId: string) => void;
+  onStageStatus: (projectId: string, stageId: string, status: "done") => void;
 }) {
   return projectId === null ? (
     <ProjectPicker onSelectProject={onSelectProject} onOpenFull={onOpenFull} />
@@ -116,6 +118,7 @@ export function ProjectResult({
       onBack={onBack}
       onOpenFull={onOpenFull}
       onAssignWorker={onAssignWorker}
+      onStageStatus={onStageStatus}
     />
   );
 }
@@ -231,12 +234,14 @@ function ProjectDetailView({
   onBack,
   onOpenFull,
   onAssignWorker,
+  onStageStatus,
 }: {
   projectId: string;
   locale: string;
   onBack: () => void;
   onOpenFull: (route: string) => void;
   onAssignWorker: (projectId: string) => void;
+  onStageStatus: (projectId: string, stageId: string, status: "done") => void;
 }) {
   const t = useTranslations("conversation.results");
   const [phase, setPhase] = useState<DetailPhase>({ kind: "loading" });
@@ -413,8 +418,7 @@ function ProjectDetailView({
       )}
 
       <Pulse pulse={p.pulse} assignmentTotal={p.assignmentTotal} />
-
-      <Stages stages={p.stages} />
+      <Stages stages={p.stages} canManage={p.canManage} onMarkDone={(stageId) => onStageStatus(p.projectId, stageId, "done")} />
 
       {/* ASSIGNMENT. Offered only where the canonical rule allows it, and only
           to someone the server says may manage the project. A completed
@@ -632,9 +636,18 @@ function Pulse({ pulse, assignmentTotal }: { pulse: ProjectDetail["pulse"]; assi
     </div>
   );
 }
-
-function Stages({ stages }: { stages: ProjectDetail["stages"] }) {
+function Stages({
+  stages,
+  canManage,
+  onMarkDone,
+}: {
+  stages: ProjectDetail["stages"];
+  canManage: boolean;
+  onMarkDone: (stageId: string) => void;
+}) {
   const t = useTranslations("conversation.results");
+  // The five stored statuses, worded by the same catalogue the operations page uses.
+  const ts = useTranslations("projectStages");
   // `null` = the stage source is not readable here. That is NOT "no stages",
   // and saying so is the whole point of carrying the distinction this far.
   if (stages === null) {
@@ -665,9 +678,25 @@ function Stages({ stages }: { stages: ProjectDetail["stages"] }) {
               ? [s.actualStart, s.actualEnd].filter(Boolean).join(" — ")
               : [s.plannedStart, s.plannedEnd].filter(Boolean).join(" — ");
           return (
-            <li key={s.id} className="flex items-center justify-between gap-2 py-1.5 text-support">
-              <span className="text-text-primary">{s.name}</span>
-              <span className="font-mono text-meta text-text-muted">{span}</span>
+            <li key={s.id} className="flex items-center justify-between gap-2 py-1.5 text-support" data-testid={`project-stage-${s.id}`}>
+              <span className="min-w-0 truncate text-text-primary">{s.name}</span>
+              <span className="flex shrink-0 items-center gap-2">
+                <span className="font-mono text-meta text-text-muted">{span}</span>
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted" data-testid={`project-stage-status-${s.id}`}>{ts(`statuses.${s.status}`)}</span>
+                {/* PROGRESS is a stored status the manager sets — never derived, never a bar (§11). The same
+                    dispatch the sentence "etapas X baigtas" runs; the operations page's stage panel calls
+                    the same action. Terminal stages carry no control. */}
+                {canManage && s.status !== "done" && s.status !== "cancelled" && (
+                  <button
+                    type="button"
+                    onClick={() => onMarkDone(s.id)}
+                    data-testid={`project-stage-done-${s.id}`}
+                    className="rounded-full border border-ink-500 px-2.5 py-0.5 text-meta font-semibold text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    {t("projectStageMarkDone")}
+                  </button>
+                )}
+              </span>
             </li>
           );
         })}

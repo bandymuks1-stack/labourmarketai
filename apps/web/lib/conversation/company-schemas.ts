@@ -218,6 +218,15 @@ export const companyCreateTaskSchema = z.object({
   description: z.string().trim().max(2000).nullable().optional(),
 });
 
+/** PROGRESS (§11): a project stage moved to a real status — the canonical
+ *  `updateStageStatusAction` (`set_project_stage_status`) re-checks that the
+ *  caller manages the project; `blocked` needs a reason there too. */
+export const companyUpdateStageStatusSchema = z.object({
+  stageId: uuid,
+  status: z.enum(["planned", "in_progress", "blocked", "done", "cancelled"]),
+  blockedReason: z.string().trim().max(500).nullable().optional(),
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -250,6 +259,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
   "company.create-task": companyCreateTaskSchema,
+  "company.update-stage-status": companyUpdateStageStatusSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

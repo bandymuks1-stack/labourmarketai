@@ -3404,6 +3404,10 @@
           "label": "Dodaj zadanie",
           "description": "Pakiet prac w projekcie — co trzeba zrobić i do kiedy."
         },
+        "updateStageStatus": {
+          "label": "Ustaw status etapu",
+          "description": "Etap projektu dostaje prawdziwy status — w toku, zakończony, zablokowany."
+        },
         "respondOffer": {
           "label": "Odpowiedz na ofertę agencji",
           "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
@@ -3818,6 +3822,14 @@
       "workerProjectsIntro": "Twoje projekty ({count} aktywne):",
       "workerProjectsEnded": "zakończone",
       "chipOpenProjectPrefix": "Otwórz",
+      "stageAsk": "Który etap? Wybierz:",
+      "stageNotFound": "Nie znajduję takiego etapu wśród otwartych. Który miałeś na myśli?",
+      "stageNone": "Brak otwartych etapów — etapy wprowadza się w zarządzaniu projektem.",
+      "stageDone": "Etap oznaczono jako zakończony.",
+      "stageStarted": "Etap oznaczono jako w toku.",
+      "stageBlocked": "Etap oznaczono jako zablokowany.",
+      "stageFailed": "Nie udało się zmienić statusu etapu.",
+      "chipStagePrefix": "Etap",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },

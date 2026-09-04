@@ -54,6 +54,8 @@ import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
+import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
+import type { StageStatus } from "@/lib/projects/stages-model";
 import { parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
@@ -396,6 +398,14 @@ export type ChatLabels = {
   workerProjectsIntro: string;
   workerProjectsEnded: string;
   chipOpenProjectPrefix: string;
+  stageAsk: string;
+  stageNotFound: string;
+  stageNone: string;
+  stageDone: string;
+  stageStarted: string;
+  stageBlocked: string;
+  stageFailed: string;
+  chipStagePrefix: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -2116,6 +2126,46 @@ export function ConversationChat({
     [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, fallbackText, starterChips, openForm],
   );
 
+  /** PROGRESS (§11): a stage moved to a real status — the SAME token-confirmed
+   *  dispatch every write uses, over the operations page's own stage action.
+   *  Reached by sentence ("etapas pamatai baigtas") and by the stage row's
+   *  control in the panel; the project re-opens so the stages show the change. */
+  const runStageStatus = useCallback(
+    (projectId: string | null, stageId: string, status: StageStatus, blockedReason?: string) => {
+      setTyping(true);
+      const input = { stageId, status, blockedReason: blockedReason ?? null };
+      prepareConfirmationAction("company.update-stage-status", input)
+        .then((prep) => {
+          if (!prep.ok) {
+            setTyping(false);
+            assistant(labels.stageFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.update-stage-status", input, {
+            locale,
+            confirmationToken: prep.token,
+          }).then((res) => {
+            setTyping(false);
+            assistant(
+              res.ok
+                ? status === "done"
+                  ? labels.stageDone
+                  : status === "blocked"
+                    ? labels.stageBlocked
+                    : labels.stageStarted
+                : labels.stageFailed,
+            );
+            if (projectId) selectProjectRef.current(projectId);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.stageFailed);
+        });
+    },
+    [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed],
+  );
+
   /** "Kokius kandidatus pasiūlė agentūra?" — the offers on the company's OWN
    *  demands, from the SAME reads the scouting page renders; each open offer
    *  carries its accept / decline chip. An agency workspace asking this
@@ -2285,6 +2335,51 @@ export function ConversationChat({
         assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
       });
   }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+
+  /** "Etapas pamatai baigtas" — the status the sentence names, resolved
+   *  against the company's REAL stages: one match runs it, several ask with
+   *  one chip each, none is said honestly. Company identity only. */
+  const startStageStatus = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      const lower = sentence.toLowerCase();
+      const status: StageStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял/.test(lower)
+        ? "blocked"
+        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал/.test(lower)
+          ? "in_progress"
+          : "done";
+      setTyping(true);
+      loadCompanyStagesForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(res.kind === "no-company" ? labels.projectsNoCompany : labels.projectsUnavailable);
+            return;
+          }
+          const open = res.stages.filter((s) => s.status !== "done" && s.status !== "cancelled");
+          if (open.length === 0) {
+            assistant(labels.stageNone, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          const named = open.filter((s) => s.name.length >= 3 && lower.includes(s.name.toLowerCase()));
+          const chip = (s: (typeof open)[number]) => ({ id: `stage:${s.projectId}:${s.stageId}:${status}`, label: `${labels.chipStagePrefix}: ${s.name} (${s.projectTitle})` });
+          if (named.length === 1) {
+            runStageStatus(named[0].projectId, named[0].stageId, status, status === "blocked" ? sentence.slice(0, 500) : undefined);
+            return;
+          }
+          assistant(named.length > 1 ? labels.stageAsk : labels.stageNotFound, (named.length > 1 ? named : open).slice(0, 4).map(chip));
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.projectsUnavailable);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, runStageStatus],
+  );
 
   const startAgencyInvite = useCallback(
     (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
@@ -2822,6 +2917,12 @@ export function ConversationChat({
               user(chip.label);
               performContextSwitch(target);
             }
+          } else if (chip.id.startsWith("stage:")) {
+            // `stage:<projectId>:<stageId>:<status>` — the person picked which
+            // real stage the sentence meant; the RPC re-checks the project.
+            const [, projectId, stageId, status] = chip.id.split(":");
+            user(chip.label);
+            runStageStatus(projectId || null, stageId, status as StageStatus);
           } else if (chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")) {
             // The client's decision: the chip carries the offer id and nothing
             // else; the RPC re-checks the demand is theirs and the offer open.
@@ -3520,6 +3621,7 @@ export function ConversationChat({
         addDocument: () => startAddDocument(text),
         addTask: () => startCreateTask(text),
         whoAvailable: () => startWhoAvailable(),
+        stageStatus: () => startStageStatus(text),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one
         // canonical output; a company identity has no own CV to show.
@@ -3539,7 +3641,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {
@@ -3645,6 +3747,8 @@ export function ConversationChat({
       onBackToDemands: clearDemand,
       // W11 — the panel asks the CONVERSATION to assign; it never acts itself.
       onAssignWorker: startAssignWorker,
+      // The stage row's own control in the panel: same dispatch, same readback.
+      onStageStatus: (projectId: string, stageId: string, status: StageStatus) => runStageStatus(projectId, stageId, status),
     }),
     [
       geography,

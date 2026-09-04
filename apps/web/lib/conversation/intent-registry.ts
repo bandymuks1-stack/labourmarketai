@@ -116,7 +116,8 @@ export type IntentHandlerId =
   | "addDocument"
   | "cvExport"
   | "addTask"
-  | "whoAvailable";
+  | "whoAvailable"
+  | "stageStatus";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -238,6 +239,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },
   // CAPACITY (§11): the roster against approved absences for the next days.
   "who-available": { domain: "company", access: "read", handler: "whoAvailable", ownTyping: true },
+  // PROGRESS (§11): a stage moved to a real status, by sentence — resolved
+  // against the company's real stages, token-confirmed like every write.
+  "stage-status": { domain: "project", access: "write", handler: "stageStatus", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

@@ -236,6 +236,14 @@ const CHAT_KEYS = [
   "workerProjectsIntro",
   "workerProjectsEnded",
   "chipOpenProjectPrefix",
+  "stageAsk",
+  "stageNotFound",
+  "stageNone",
+  "stageDone",
+  "stageStarted",
+  "stageBlocked",
+  "stageFailed",
+  "chipStagePrefix",
 ] as const;
 
 const WORKLOG_KEYS = [

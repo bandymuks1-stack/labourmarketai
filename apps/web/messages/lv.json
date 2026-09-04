@@ -3404,6 +3404,10 @@
           "label": "Pievienot uzdevumu",
           "description": "Darba pakete projektā — kas jāpaveic un līdz kuram laikam."
         },
+        "updateStageStatus": {
+          "label": "Iestatīt posma statusu",
+          "description": "Projekta posms saņem īsto statusu — notiek, pabeigts, bloķēts."
+        },
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
@@ -3818,6 +3822,14 @@
       "workerProjectsIntro": "Jūsu projekti ({count} aktīvi):",
       "workerProjectsEnded": "beigts",
       "chipOpenProjectPrefix": "Atvērt",
+      "stageAsk": "Kurš posms? Izvēlieties:",
+      "stageNotFound": "Šādu posmu starp jūsu atvērtajiem posmiem neatrodu. Kuru domājāt?",
+      "stageNone": "Atvērtu posmu vēl nav — posmus ievada projekta vadībā.",
+      "stageDone": "Posms atzīmēts kā pabeigts.",
+      "stageStarted": "Posms atzīmēts kā notiekošs.",
+      "stageBlocked": "Posms atzīmēts kā bloķēts.",
+      "stageFailed": "Posma statusu neizdevās mainīt.",
+      "chipStagePrefix": "Posms",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

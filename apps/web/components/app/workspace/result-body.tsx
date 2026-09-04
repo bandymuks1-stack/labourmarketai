@@ -66,6 +66,9 @@ export interface ResultNavigation {
    * part of the workspace was touched.
    */
   readonly onAssignWorker: (projectId: string) => void;
+  /** W11 / §11 — a stage row's own status control hands the change back to
+   *  the conversation, which dispatches `company.update-stage-status`. */
+  readonly onStageStatus: (projectId: string, stageId: string, status: "done") => void;
 }
 
 /**
@@ -255,6 +258,7 @@ function InlineResult({
           onBack={navigation.onBackToProjects}
           onOpenFull={onOpenFull}
           onAssignWorker={navigation.onAssignWorker}
+          onStageStatus={navigation.onStageStatus}
         />
       );
     case "engagements":

@@ -11633,6 +11633,10 @@
           "label": "Aufgabe hinzufügen",
           "description": "Ein Arbeitspaket im Projekt — was zu tun ist und bis wann."
         },
+        "updateStageStatus": {
+          "label": "Phasenstatus setzen",
+          "description": "Eine Projektphase erhält ihren echten Status — in Arbeit, erledigt, blockiert."
+        },
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
@@ -12119,6 +12123,14 @@
       "workerProjectsIntro": "Ihre Projekte ({count} aktiv):",
       "workerProjectsEnded": "beendet",
       "chipOpenProjectPrefix": "Öffnen",
+      "stageAsk": "Welche Phase? Wählen Sie:",
+      "stageNotFound": "Diese Phase finde ich unter Ihren offenen Phasen nicht. Welche meinten Sie?",
+      "stageNone": "Noch keine offenen Phasen — Phasen werden in der Projektsteuerung angelegt.",
+      "stageDone": "Phase als erledigt markiert.",
+      "stageStarted": "Phase als in Arbeit markiert.",
+      "stageBlocked": "Phase als blockiert markiert.",
+      "stageFailed": "Der Phasenstatus konnte nicht geändert werden.",
+      "chipStagePrefix": "Phase",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },
@@ -12444,6 +12456,7 @@
       "projectStages": "Phasen",
       "projectStagesEmpty": "Für dieses Projekt wurden noch keine Phasen erfasst.",
       "projectStagesUnavailable": "Phasen können in dieser Umgebung nicht gelesen werden — deshalb zeigen wir keine leere Liste, als gäbe es keine.",
+      "projectStageMarkDone": "Als erledigt markieren",
       "projectAssignWorker": "Mitarbeiter zuweisen",
       "projectOpenOperations": "Projektsteuerung öffnen",
       "projectOpenProject": "Projekt öffnen",

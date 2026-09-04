@@ -389,8 +389,8 @@ export const BEHAVIOR_CONFORMANCE = {
   // `company.invite-learner` (the institution's commands by sentence over
   // the ONE dispatcher). Still anchored to a page; still keyed to an actor
   // type (the company holding `training_provider`), so the verdict stands.
-  conversationActions: 43,
-  actionsAnchoredToAPage: 43,
+  conversationActions: 44,
+  actionsAnchoredToAPage: 44,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

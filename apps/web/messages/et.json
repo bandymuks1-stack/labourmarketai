@@ -3404,6 +3404,10 @@
           "label": "Lisa ülesanne",
           "description": "Tööpakett projektis — mida tuleb teha ja mis ajaks."
         },
+        "updateStageStatus": {
+          "label": "Määra etapi olek",
+          "description": "Projekti etapp saab tegeliku oleku — töös, tehtud, blokeeritud."
+        },
         "respondOffer": {
           "label": "Vasta agentuuri pakkumisele",
           "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
@@ -3818,6 +3822,14 @@
       "workerProjectsIntro": "Teie projektid ({count} aktiivset):",
       "workerProjectsEnded": "lõppenud",
       "chipOpenProjectPrefix": "Ava",
+      "stageAsk": "Milline etapp? Valige:",
+      "stageNotFound": "Sellist etappi teie avatud etappide seast ei leia. Millist mõtlesite?",
+      "stageNone": "Avatud etappe veel pole — etapid sisestatakse projekti halduses.",
+      "stageDone": "Etapp märgitud tehtuks.",
+      "stageStarted": "Etapp märgitud töös olevaks.",
+      "stageBlocked": "Etapp märgitud blokeerituks.",
+      "stageFailed": "Etapi olekut ei õnnestunud muuta.",
+      "chipStagePrefix": "Etapp",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

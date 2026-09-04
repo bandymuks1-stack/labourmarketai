@@ -854,6 +854,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wie is deze week beschikbaar?",
     de: "Wer ist diese Woche frei?",
   },
+  "stage-status": {
+    lt: "Etapas pamatai baigtas",
+    en: "Stage foundations is done",
+    ru: "Этап фундамент завершён",
+    nl: "Fase fundering afgerond",
+    de: "Phase Rohbau fertig",
+  },
 };
 
 /**
