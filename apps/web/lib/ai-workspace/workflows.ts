@@ -12,6 +12,8 @@ import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
+import { DOCUMENT_GAP_LINE_CAP, type DocumentGap } from "@/lib/conversation/documents-gap";
+import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -182,12 +184,116 @@ export async function runSkillGap(): Promise<WorkflowResult> {
     }),
   );
 
+  // MATCHING CONTINUES AFTER "NO" (owner contract 2026-09-04 §16): a gap
+  // answer names the closing step. Skills close through real work in the
+  // journal; documents close through the document centre — so the same
+  // "what am I missing?" also states the required documents the person does
+  // not hold for the countries they want to work in (own rows, same join the
+  // documents page renders). A degraded document read adds NOTHING.
+  const docs = await readDocumentGapForAnswer();
+  const docTail =
+    docs && docs.missing.length > 0
+      ? [
+          await documentGapSentence(docs, t),
+        ]
+      : [];
+  const chips = [{ id: "logwork", label: t("chipLogWork") }];
+  if (docs && docs.missing.length > 0) chips.push({ id: "documents-centre", label: t("chipDocuments") });
+
   return {
     kind: "answer",
-    text: [t("skillGapIntro", { count: demandsPerSkill.size }), ...lines].join("\n"),
+    text: [t("skillGapIntro", { count: demandsPerSkill.size }), ...lines, ...docTail].join("\n"),
     explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
     // The journal is where a skill becomes real — never a self-declaration.
-    chips: [{ id: "logwork", label: t("chipLogWork") }],
+    chips,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2b. Documents — "what documents am I missing / what expires?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The person's own documents against the requirements of the countries they
+ * said they want to work in (owner contract 2026-09-04 §12). Before this the
+ * `documents` sentence answered with a route chip; the document centre and
+ * the country-readiness join were never read by the conversation.
+ *
+ * HONESTY: countries come from the person's own preferences — none stated ⇒
+ * the answer ASKS where they want to work instead of inventing a country; a
+ * country the matrix does not know is named as such; a degraded read is a
+ * `blocked` answer, never "you have no documents".
+ */
+async function readDocumentGapForAnswer(): Promise<DocumentGap | null> {
+  const res = await loadWorkerDocumentGap();
+  return res.kind === "ok" ? res.gap : null;
+}
+
+async function documentGapSentence(
+  gap: DocumentGap,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): Promise<string> {
+  const tDocs = await getTranslations("documents");
+  const list = gap.missing
+    .slice(0, DOCUMENT_GAP_LINE_CAP)
+    .map((m) => (tDocs.has(`types.${m.documentTypeSlug}`) ? (tDocs(`types.${m.documentTypeSlug}` as never) as string) : m.documentTypeSlug))
+    .join(", ");
+  return t("docsGapTail", { count: gap.missing.length, list });
+}
+
+export async function runDocumentsReadiness(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const res = await loadWorkerDocumentGap();
+  if (res.kind === "no-worker") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  if (res.kind !== "ok") return blocked(t("docsBlocked"), t("whyDocsBlocked"));
+  const { gap, countries } = res;
+
+  const tDocs = await getTranslations("documents");
+  const tLm = await getTranslations("labourMarket");
+  const docName = (slug: string) =>
+    tDocs.has(`types.${slug}`) ? (tDocs(`types.${slug}` as never) as string) : slug;
+  const countryName = (code: string) =>
+    tLm.has(`countryNames.${code}`) ? (tLm(`countryNames.${code}` as never) as string) : code;
+
+  const lines: string[] = [
+    t("docsIntro", { ready: gap.ready, expiring: gap.expiring.length, missing: gap.missing.length }),
+  ];
+  for (const e of gap.expiring.slice(0, DOCUMENT_GAP_LINE_CAP)) {
+    lines.push(t("docsExpiringLine", { doc: docName(e.documentTypeSlug), date: e.validUntil }));
+  }
+  for (const m of gap.missing.slice(0, DOCUMENT_GAP_LINE_CAP)) {
+    lines.push(
+      m.sourceTitle
+        ? t("docsMissingLineWithSource", { doc: docName(m.documentTypeSlug), country: countryName(m.country), source: m.sourceTitle })
+        : t("docsMissingLine", { doc: docName(m.documentTypeSlug), country: countryName(m.country) }),
+    );
+  }
+  if (countries.length === 0) lines.push(t("docsNoCountry"));
+  else if (gap.missing.length === 0 && gap.countriesKnown.length > 0) {
+    lines.push(t("docsAllGood", { countries: gap.countriesKnown.map(countryName).join(", ") }));
+  }
+  if (gap.countriesUnknown.length > 0) {
+    lines.push(t("docsCountryUnknown", { countries: gap.countriesUnknown.map(countryName).join(", ") }));
+  }
+
+  const chips = [{ id: "documents-centre", label: t("chipDocuments") }];
+  // The work card is where the person states WHERE they want to work — the
+  // same inline form the search opens when the criteria are missing.
+  if (countries.length === 0) chips.push({ id: "f:worker.save-work-card", label: t("chipWhereToWork") });
+
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: {
+      why:
+        countries.length > 0
+          ? t("whyDocs", { countries: countries.map(countryName).join(", ") })
+          : t("whyDocsNoCountry"),
+    },
+    chips,
   };
 }
 

@@ -176,6 +176,14 @@ const RULES: IntentRule[] = [
       p("(fähigkeiten|kompetenzen|qualifikation)\\s*.{0,16}(fehlen|fehlt|brauche)", 5),
       // nl — "Welke vaardigheden mis ik / ontbreken er?"
       p("(vaardigheden|competenties)\\s*.{0,16}(mis|ontbrek|nodig)", 5),
+      // Owner contract 2026-09-04 §16 — the bare question "what am I
+      // missing?" names no domain; the answer compares skills AND the
+      // required documents of the countries the person wants to work in.
+      p("^\\s*(ko|ką)\\s+(man\\s+)?tr[ūu]ksta\\s*\\??\\s*$", 6),
+      p("^\\s*what\\s+am\\s+i\\s+(missing|lacking)\\s*\\??\\s*$", 6),
+      p("^\\s*чего\\s+(мне\\s+)?не\\s+хватает\\s*\\??\\s*$", 6),
+      p("^\\s*was\\s+fehlt(\\s+mir)?(\\s+noch)?\\s*\\??\\s*$", 6),
+      p("^\\s*wat\\s+(mis\\s+ik|ontbreekt\\s+er)\\s*\\??\\s*$", 6),
     ],
   },
   {
@@ -752,6 +760,14 @@ const RULES: IntentRule[] = [
       // rather than the folder.
       p("(pažymėjim|sertifikat|certificate|zertifikat|certificaat)", 4),
       p("\\bсертификат", 4),
+      // Owner contract 2026-09-04 §12 — "what expires / what document am I
+      // missing": expiry and permit words are document questions even when
+      // the folder is not named. Answered from the person's own rows.
+      p("(baigia|baigsis|pasibaig)\\s+galio", 5),
+      p("\\b(expir(es|ing|y|ed)|runs?\\s+out)\\b", 5),
+      p("(истека|заканчива).{0,12}(срок|действ)", 5),
+      p("\\b(verloopt|verlopen|läuft\\s+ab|laeuft\\s+ab|abgelaufen)\\b", 5),
+      p("(leidim|permit|a1\\b|razrešen|разрешени)", 4),
     ],
   },
   {

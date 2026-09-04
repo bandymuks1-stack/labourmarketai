@@ -85,6 +85,7 @@ import {
   runOpenProject,
   runRecentJournal,
   runSkillGap,
+  runDocumentsReadiness,
 } from "@/lib/ai-workspace/workflows";
 import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
@@ -1959,6 +1960,15 @@ export function ConversationChat({
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
       switch (chip.id) {
+        case "documents-centre":
+          // The document-gap answer names the closing step; the centre (add,
+          // renew, send for verification) is the ONE existing surface for it.
+          // The workflow layer emits no route (W4 guard) — the chat does, as
+          // it already does for every other route chip.
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/documents", label: labels.documentsChip },
+          ]);
+          return;
         case "logwork":
           user(labels.userLogWork);
           // Opens the SAME deterministic work-log flow the typed sentence
@@ -2705,10 +2715,16 @@ export function ConversationChat({
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/absences", label: labels.absencesChip },
           ]),
+        // Owner contract 2026-09-04 §12: a person's documents are ANSWERED
+        // (have / expiring / missing for the countries they want to work in,
+        // who can issue), never only routed. A company workspace keeps the
+        // route to its own document centre (the org read is a different join).
         documents: () =>
-          assistant(labels.adminRouteHint, [
-            { id: "link:/dashboard/documents", label: labels.documentsChip },
-          ]),
+          identity === "person"
+            ? runWorkflow(() => runDocumentsReadiness())
+            : assistant(labels.adminRouteHint, [
+                { id: "link:/dashboard/documents", label: labels.documentsChip },
+              ]),
         marketMap: () =>
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/market-map", label: labels.marketMapChip },
