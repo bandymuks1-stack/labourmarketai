@@ -1191,6 +1191,12 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260903140000_institution_learner_outcomes_v1.sql",
       // 2026-09-03: RED batch D: education RLS recursion fix (drop/create the three batch-B SELECT policies + 3 definer helpers + grants); owner approval "Apply batch 2026-09-03 D" (2026-09-03); APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
       "20260903150000_education_rls_recursion_fix_v1.sql",
+      // 2026-09-04: owns_company widened to active owner/admin MEMBERSHIP so
+      // the first real recruiter account can represent the existing verified
+      // agency without a creator transfer. Marker added with the draft PR;
+      // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
+      // marker records the RED classification, not a granted approval.
+      "20260904060000_owns_company_governance_membership_v1.sql",
 ]);
   });
 

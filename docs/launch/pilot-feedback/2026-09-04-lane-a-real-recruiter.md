@@ -105,3 +105,98 @@ down. Candidate next slice: agency mode orders bridge + roster + demand first. N
 
 - REAL_RECRUITER_USED_PRODUCT = FALSE (account exists, intent clicked, nothing persisted by the recruiter yet)
 - REAL_RECRUITER_FIRST_VALUE = FALSE
+
+## Approval package — connect the real recruiter account to "Labour market ai Sp. z o.o" (2026-09-04)
+
+Owner decision (2026-09-04): the first real recruiter account represents the EXISTING verified staffing
+agency "Labour market ai Sp. z o.o"; no duplicate company.
+
+### Why a plain ownership transfer is NOT safe (and is not proposed)
+
+| Fact (read from production) | Consequence |
+|---|---|
+| Company authority is creator-bound: `owns_company(c)` = `companies.profile_id = auth.uid()`; it gates the roster tables, roster invitations, the agency↔client bridge tables (RLS) and 20+ SECURITY DEFINER commands; the company dashboard read (`getOwnedCompanyById`) also filtered on the creator | only ONE account can ever act for a company today |
+| The current creator account is live: admin, signed in 2026-09-02, owns exactly this company, active workspace = this organisation, owner membership, 8 demands, 1 roster worker, 3 engagement contexts | moving the creator pointer to the new account would leave that account with "no company profile" and no roster / bridge authority |
+
+### What is proposed instead (two parts, one approval sentence)
+
+**Part 1 — RED migration `20260904060000_owns_company_governance_membership_v1`** (draft PR, `needs-human-gate`):
+`owns_company(c)` = creator **OR** active `owner` / `admin` membership in the organisation bound to `c`
+(`organizations.legacy_company_id = c`). `create_agency_client_connection_v1` uses that one rule instead of
+its inline creator test. Nothing narrows; `manager` / `external_manager` / `member` gain nothing; no table,
+policy, grant or data change; rollback restores both bodies verbatim. Blast radius today: **0** — no
+company currently has a second owner/admin member, so no existing account changes authority.
+
+**Part 2 — data grant** (one transaction, applied by the agent via Supabase MCP after the sentence; rollback below):
+
+```sql
+begin;
+-- 1. governance membership for the real account (admin: full company authority; not a second "owner")
+insert into public.company_memberships (organization_id, profile_id, role, status, invited_by, accepted_at, source)
+values ('19f47e78-7bd1-4120-9937-603dba769f8a',   -- organisation "Labour market ai Sp. z o.o"
+        '875eb16b-53e7-42d9-874f-e983b5567f8a',   -- real recruiter account (worklandworkoficial@…)
+        'admin', 'active',
+        '6fd1bd46-52a5-4058-b478-20b2916a1665',   -- invited_by = the platform owner's profile (the approver)
+        now(), 'owner-grant:lane-a:2026-09-04');
+-- 2. the company role on the profile (what complete_onboarding would have written)
+insert into public.profile_roles (profile_id, role, is_active, role_data)
+values ('875eb16b-53e7-42d9-874f-e983b5567f8a', 'company', true, '{}'::jsonb)
+on conflict (profile_id, role) do update set is_active = true;
+-- 3. onboarding closed by the grant (the wizard would otherwise insert a NEW shell company);
+--    name from the Google identity the person signed in with; country left unset (unknown); locale stays lt
+update public.profiles set
+  full_name = coalesce(full_name, (select nullif(btrim(u.raw_user_meta_data->>'full_name'), '') from auth.users u where u.id = profiles.id)),
+  active_role = 'company', onboarded = true, onboarded_at = coalesce(onboarded_at, now()),
+  active_organization_id = '19f47e78-7bd1-4120-9937-603dba769f8a'
+where id = '875eb16b-53e7-42d9-874f-e983b5567f8a';
+commit;
+```
+
+Rollback of the grant (data only, no trace left):
+
+```sql
+begin;
+update public.profiles set active_organization_id = null, active_role = null, onboarded = false, onboarded_at = null
+ where id = '875eb16b-53e7-42d9-874f-e983b5567f8a';
+delete from public.profile_roles where profile_id = '875eb16b-53e7-42d9-874f-e983b5567f8a' and role = 'company';
+delete from public.company_memberships where profile_id = '875eb16b-53e7-42d9-874f-e983b5567f8a'
+   and organization_id = '19f47e78-7bd1-4120-9937-603dba769f8a' and source = 'owner-grant:lane-a:2026-09-04';
+commit;
+```
+
+### What each account has afterwards
+
+| Account | Before | After |
+|---|---|---|
+| real recruiter (new) | no company; onboarding step 2 pending | admin of the agency organisation: workspace opens on `/lt/dashboard/company` (bridge, roster, real demand), can invite clients, offer roster candidates, edit the company profile; **no** billing/ownership transfer |
+| current creator | creator + owner membership | **unchanged** — same rows, same authority |
+| roster worker, 2 employees, 8 demands, verified status | — | untouched (demands stay keyed on the creator's profile, as today) |
+| everyone else | — | unchanged (proved: manager-role member, platform owner account, anon → no authority) |
+
+### Proof done / not done (honest)
+
+- Read-only proof on production rows: the new rule with the hypothetical grant → real account TRUE (membership arm only), creator TRUE (both arms), manager-role member FALSE, platform owner account FALSE, anon FALSE; 0 existing accounts change.
+- The full rolled-back dry run (DDL + grant + per-actor readback in one transaction) was **blocked by the session's permission classifier**; it will be run as the post-apply readback instead (same checks, then the real account's first screens are verified with its own session, not by the agent).
+- The GREEN app half (membership-aware company read + governed company edited, never re-created) ships separately and is harmless before the migration.
+
+### Telemetry honesty
+
+No `onboarding_completed` is emitted for the real account (it did not happen through the wizard); T0 stays
+`signup_completed` 04:19:07 UTC. `first_real_action` starts counting from the account's first real bridge
+action.
+
+**Approval sentence:** "Apply Lane A ownership 2026-09-04" (covers Part 1 + Part 2). To choose co-owner
+instead of admin, say "… as owner".
+
+### APPLIED 2026-09-04 (owner: "Apply Lane A ownership 2026-09-04")
+
+- Migration applied via Supabase MCP `apply_migration` → ledger `20260904055214`; `owns_company` membership-aware,
+  `create_agency_client_connection_v1` uses it; ACLs unchanged (postgres + authenticated; anon none).
+- Grant applied in one transaction: 1 admin membership (`owner-grant:lane-a:2026-09-04`), `company` profile role,
+  profile `onboarded`, `active_role = company`, `active_organization_id` = the agency organisation, name from the
+  Google identity, country left unset. **0 companies created for the account.**
+- Per-actor readback (read-only, production): real account `owns_company = true`, roster 1, roster invitations 2,
+  membership + organisation visible; creator account `true`, roster 1 (unchanged); unrelated account `false`,
+  roster 0; anon → 42501.
+- #1464 marked ready (auto-merge); #1465 (app half) auto-merging. The member path of the workspace is verified
+  with an E2E member identity, never with the real account.
