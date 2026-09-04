@@ -222,6 +222,8 @@ const CHAT_KEYS = [
   "documentAddIntro",
   "documentAddDone",
   "documentAddUnavailable",
+  "cvExportHint",
+  "chipCvSheet",
 ] as const;
 
 const WORKLOG_KEYS = [

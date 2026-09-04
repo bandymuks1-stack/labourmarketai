@@ -260,7 +260,8 @@ describe("classifyIntent — the six §13 workflow sentences", () => {
     ["Įrašyti šiandienos darbą", "log-work"],
     ["Reikia 4 suvirintojų Vokietijoje nuo rugsėjo", "need-workers"],
     ["Rask man darbą", "find-work"],
-    ["Parodyk mano CV", "cv"],
+    // Since the CV sheet slice: SEEING the CV is the verified sheet, not the import.
+    ["Parodyk mano CV", "cv-export"],
     ["Sukurk įmonės profilį", "create-organization"],
     ["Parodyk mano rytojaus planą", "calendar-view"],
   ];
@@ -500,11 +501,11 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Erinnere mich morgen daran",
   },
   cv: {
-    lt: "Parodyk mano CV",
-    en: "Show my resume",
-    ru: "Покажи моё резюме",
-    nl: "Toon mijn cv",
-    de: "Zeig meinen Lebenslauf",
+    lt: "Įkelk mano CV",
+    en: "Upload my resume",
+    ru: "Загрузи моё резюме",
+    nl: "Upload mijn cv",
+    de: "Meinen Lebenslauf hochladen",
   },
   profile: {
     lt: "Pridėk kalbą",
@@ -831,6 +832,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     ru: "Получил новое разрешение на работу",
     nl: "Ik heb een nieuwe vergunning",
     de: "Ich habe einen neuen Ausweis",
+  },
+  "cv-export": {
+    lt: "Parodyk mano CV",
+    en: "Download my CV",
+    ru: "Скачай моё резюме",
+    nl: "Download mijn cv",
+    de: "Meinen Lebenslauf herunterladen",
   },
 };
 

@@ -3794,6 +3794,8 @@
       "documentAddIntro": "La oss registrere dokumentet: type, land og gyldighet. Filen kan du legge ved i dokumentsenteret.",
       "documentAddDone": "Dokument registrert. Slik er beredskapen din nå:",
       "documentAddUnavailable": "Dokumentkatalogen kunne ikke lastes nå — registrer dokumentet i dokumentsenteret.",
+      "cvExportHint": "Din verifiserte CV — ett ark med det systemet virkelig vet. Åpne den og skriv ut til PDF.",
+      "chipCvSheet": "Mitt CV-ark",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

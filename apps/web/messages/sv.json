@@ -3794,6 +3794,8 @@
       "documentAddIntro": "Vi registrerar dokumentet: typ, land och giltighet. Filen kan du bifoga i dokumentcentret.",
       "documentAddDone": "Dokument registrerat. Så här ser din beredskap ut nu:",
       "documentAddUnavailable": "Dokumentkatalogen kunde inte läsas in just nu — registrera dokumentet i dokumentcentret.",
+      "cvExportHint": "Ditt verifierade CV — ett blad med det systemet verkligen vet. Öppna det och skriv ut till PDF.",
+      "chipCvSheet": "Mitt CV-blad",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först."
     },

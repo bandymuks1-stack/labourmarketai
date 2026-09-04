@@ -12095,6 +12095,8 @@
       "documentAddIntro": "We leggen het document vast: type, land en geldigheid. Het bestand kunt u in het documentencentrum toevoegen.",
       "documentAddDone": "Document vastgelegd. Dit is uw gereedheid nu:",
       "documentAddUnavailable": "De documentcatalogus kon nu niet worden geladen — leg het document vast in het documentencentrum.",
+      "cvExportHint": "Uw geverifieerde cv — één blad met wat het systeem echt weet. Open het en print naar PDF.",
+      "chipCvSheet": "Mijn cv-blad",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

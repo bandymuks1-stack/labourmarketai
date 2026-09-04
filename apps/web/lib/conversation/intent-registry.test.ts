@@ -40,8 +40,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // (learning-compass, invite-student, programmes); 50 → 51 with F2
     // (`create-project` — the site as a project object, by sentence); 51 → 52
     // with `agency-offers` (the client's side of the agency bridge, read);
-    // 52 → 53 with `add-document` (a document recorded by sentence, write).
-    expect(entries.length).toBe(53);
+    // 52 → 53 with `add-document` (a document recorded by sentence, write);
+    // 53 → 54 with `cv-export` (the verified CV sheet, route).
+    expect(entries.length).toBe(54);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -90,6 +91,7 @@ describe("the intent registry is the enumerable routing contract", () => {
       "admin-requests",
       "company-overview",
       "create-organization",
+      "cv-export",
       "documents",
       "hours-import",
       "lmc",
@@ -109,6 +111,7 @@ describe("the intent registry is the enumerable routing contract", () => {
       "utf8",
     );
     for (const route of [
+      "/cv",
       "/dashboard/hours?import=1",
       "/dashboard/hours",
       "/dashboard/absences",
