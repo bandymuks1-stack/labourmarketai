@@ -81,8 +81,15 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
     }));
   const rosterLabel = new Map(rosterRows.map((w) => [w.workerId, w.label]));
 
+  // `SharedRequestRow.status` is the REQUEST's lifecycle status (submitted /
+  // in_review / needs_followup / closed) — the share and the connection are
+  // already filtered to `active` inside the RPC. Filtering here on
+  // `status === "active"` (a value a request never has) hid EVERY shared
+  // need from the chat: found on production 2026-09-04 when a client had
+  // shared a submitted request and "pasiūlyk kandidatą" answered "no client
+  // shared a need yet". A closed request is the one thing not to propose on.
   const sharedRows: AgencyChatSharedRequest[] = shared.rows
-    .filter((s) => s.status === "active")
+    .filter((s) => s.status !== "closed")
     .slice(0, AGENCY_CHAT_LIST_LIMIT)
     .map((s) => ({ shareId: s.shareId, requestId: s.requestId, title: s.title }));
   const titleByRequest = new Map(shared.rows.map((s) => [s.requestId, s.title]));

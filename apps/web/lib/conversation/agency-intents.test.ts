@@ -170,6 +170,15 @@ describe("the not-understood answer follows the workspace, never worker copy for
     expect(CHAT).toMatch(/loadAgencyBridgeForChat\(\)/);
     expect(CHAT).not.toMatch(/from\("agency_client_connections"\)/);
   });
+  it("the read adapter shows every OPEN shared need — the row's status is the REQUEST's, never the share's", () => {
+    // Production 2026-09-04: a client had shared a `submitted` request and the
+    // chat answered "no client shared a need yet" — the adapter filtered on
+    // `status === "active"`, a value a request never carries (the share and
+    // the connection are already `active` inside the RPC).
+    const ADAPTER = readFileSync(join(__dirname, "agency-workspace.ts"), "utf8");
+    expect(ADAPTER).not.toMatch(/shared\.rows\s*\.filter\(\(s\) => s\.status === "active"\)/);
+    expect(ADAPTER).toMatch(/shared\.rows\s*\.filter\(\(s\) => s\.status !== "closed"\)/);
+  });
   it("the chat measures recognition and the missing-data question", () => {
     expect(CHAT).toMatch(/FUNNEL_EVENTS\.chatIntentRecognized/);
     expect(CHAT).toMatch(/FUNNEL_EVENTS\.chatIntentUnrecognized/);
