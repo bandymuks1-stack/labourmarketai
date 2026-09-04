@@ -3475,6 +3475,8 @@
         "demandRole": "Rola",
         "demandRolePlaceholder": "Np. murarz",
         "demandLocation": "Lokalizacja",
+        "startDate": "Data rozpoczęcia",
+        "startDatePlaceholder": "RRRR-MM-DD",
         "demandLocationPlaceholder": "Miasto lub region",
         "teamSize": "Liczba pracowników",
         "urgency": "Pilność",

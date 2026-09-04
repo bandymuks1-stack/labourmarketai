@@ -3475,6 +3475,8 @@
         "demandRole": "Rolle",
         "demandRolePlaceholder": "F.eks. murer",
         "demandLocation": "Sted",
+        "startDate": "Startdato",
+        "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
         "demandLocationPlaceholder": "By eller region",
         "teamSize": "Antall arbeidere",
         "urgency": "Hastegrad",

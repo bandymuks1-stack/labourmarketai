@@ -61,6 +61,16 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
         max: 100000,
       },
       {
+        // WHEN the work starts, as a day (owner contract 2026-09-04 §9:
+        // "from 5 October" is a date, not an urgency bucket). Prefilled from
+        // the sentence when it stated one; otherwise optional.
+        name: "startDate",
+        kind: "text",
+        labelKey: "conversation.forms.fields.startDate",
+        placeholderKey: "conversation.forms.fields.startDatePlaceholder",
+        maxLength: 10,
+      },
+      {
         name: "urgency",
         kind: "select",
         labelKey: "conversation.forms.fields.urgency",
@@ -97,6 +107,13 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       teamSize: numOrNull(st.teamSize),
       urgency: s(st.urgency) || null,
       opportunityType: s(st.opportunityType) || null,
+      startDate: s(st.startDate) || null,
+      // Derived by the structurer from the person's own sentence (never
+      // typed): the taxonomy slug and the ISO market. They ride the form
+      // state so the canonical columns (`role_or_work_type`, `country`) are
+      // set — before this the chat intake stored only the free-text label.
+      workType: s(st.workType) || null,
+      country: s(st.country) || null,
     }),
   },
 ] as const;

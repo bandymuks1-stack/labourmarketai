@@ -158,7 +158,13 @@ export const COMPANY_EXECUTORS: {
       // Declared opportunity type → the structured cluster the worker board
       // and the Learning Compass read (`payload.structured_v2`). Absent when
       // the employer stated none — nothing is inferred.
-      structuredV2: input.opportunityType ? { opportunity_type: input.opportunityType } : undefined,
+      structuredV2:
+        input.opportunityType || input.startDate
+          ? {
+              ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
+              ...(input.startDate ? { time: { start_earliest: input.startDate } } : {}),
+            }
+          : undefined,
     });
     // The REAL id + status come from the canonical action — never invented.
     return r.ok

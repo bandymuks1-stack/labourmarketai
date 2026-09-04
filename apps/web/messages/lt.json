@@ -11699,6 +11699,8 @@
         "demandRole": "Pareigos / rolė",
         "demandRolePlaceholder": "Pvz. mūrininkas",
         "demandLocation": "Vieta",
+        "startDate": "Darbo pradžia (data)",
+        "startDatePlaceholder": "MMMM-MM-DD",
         "demandLocationPlaceholder": "Miestas ar regionas",
         "teamSize": "Darbuotojų skaičius",
         "urgency": "Skubumas",
@@ -11894,6 +11896,7 @@
         "understood": "Jūsų teigimu: {summary}.",
         "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
         "daysCount": "{count, plural, one {# diena} few {# dienos} other {# dienų}}",
+        "fromDate": "nuo {date}",
         "window": {
           "next_week": "kitą savaitę",
           "this_week": "šią savaitę",

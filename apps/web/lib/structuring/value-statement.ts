@@ -19,7 +19,7 @@
  *    parseTimeWindow, word numbers — no second rule set to drift.
  */
 import { foldText } from "./normalize";
-import { COUNTRY_RULES, WORK_TYPE_RULES } from "./structure-need";
+import { WORK_TYPE_RULES, resolveCountryAndCity } from "./structure-need";
 import { recognizeSkills, type RecognizedSkill } from "./skill-recognition";
 import { parseTimeWindow, type TimeWindow } from "./time-window";
 import { extractQuantities } from "./universal-recognition";
@@ -54,6 +54,11 @@ export interface ValueStatement {
   readonly skills: RecognizedSkill[];
   /** ISO-2 market code via the shared COUNTRY_RULES. */
   readonly country: string | null;
+  /** The CITY the person named, when the country was resolved from a city
+   *  needle ("Roterdame" → Rotterdam); `null` when only a country was named.
+   *  Kept beside the country so the intake never collapses a site into its
+   *  market (owner contract 2026-09-04 §9). */
+  readonly city: string | null;
   readonly window: TimeWindow | null;
   readonly confidence: "high" | "medium" | "low";
   readonly reasons: string[];
@@ -257,9 +262,9 @@ export function structureValueStatement(
   const workType = wt?.slug ?? null;
   if (workType) reasons.push(`work_type:${workType}`);
   const skills = recognizeSkills(raw);
-  const cc = firstRuleMatch(COUNTRY_RULES, folded);
-  const country = cc?.code ?? null;
+  const { country, city } = resolveCountryAndCity(folded);
   if (country) reasons.push(`country:${country}`);
+  if (city) reasons.push(`city:${city}`);
   const window = parseTimeWindow(raw, todayIso);
   if (window.kind !== "none") {
     reasons.push(
@@ -375,6 +380,7 @@ export function structureValueStatement(
     workType,
     skills,
     country,
+    city,
     window: window.kind === "none" ? null : window,
     confidence,
     reasons,

@@ -350,6 +350,24 @@ export type ChatLabels = {
 let uid = 0;
 const nid = () => `m${uid++}`;
 
+/** A stated start day in the person's own language ("5 October"); UTC day. */
+function formatDay(iso: string, locale: string): string {
+  try {
+    return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" }).format(
+      new Date(`${iso}T00:00:00.000Z`),
+    );
+  } catch {
+    return iso;
+  }
+}
+
+/** Whole UTC days from today until `iso` (negative when it passed). */
+function daysUntil(iso: string): number {
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.round((new Date(`${iso}T00:00:00.000Z`).getTime() - today) / 86_400_000);
+}
+
 /**
  * The real conversation window (Real Conversation UI). The WHOLE surface is one
  * chat: a message stream + a bottom composer. The empty state greets the user
@@ -2145,6 +2163,8 @@ export function ConversationChat({
       if (v.window) {
         if (v.window.kind === "days_count") {
           parts.push(t("valueIntent.daysCount", { count: v.window.days ?? 0 }));
+        } else if (v.window.kind === "from_date" && v.window.startIso) {
+          parts.push(t("valueIntent.fromDate", { date: formatDay(v.window.startIso, locale) }));
         } else {
           const base = t(
             `valueIntent.window.${v.window.kind}` as Parameters<typeof t>[0],
@@ -2156,10 +2176,11 @@ export function ConversationChat({
           );
         }
       }
-      if (v.country) parts.push(v.country);
+      if (v.city) parts.push(v.city);
+      else if (v.country) parts.push(v.country);
       return parts.join(" · ");
     },
-    [t, workTypeLabels],
+    [t, workTypeLabels, locale],
   );
 
   /** V9: demand-form prefill from the read statement — initial values only,
@@ -2174,10 +2195,22 @@ export function ConversationChat({
       // goes in, never the ISO code — the field is something they are about to
       // read and edit.
       const countryLabel = v.country ? countryLabels?.[v.country] : undefined;
-      if (countryLabel) out.location = countryLabel;
+      // The CITY the person named stays beside the market — "Rotterdam,
+      // Nyderlandai", never just the country (owner contract 2026-09-04 §9).
+      if (countryLabel) out.location = v.city ? `${v.city}, ${countryLabel}` : countryLabel;
+      else if (v.city) out.location = v.city;
+      // Derived facts ride the form state unrendered: the executor sets the
+      // canonical columns from them (the label above is what the person reads).
+      if (v.workType) out.workType = v.workType;
+      if (v.country) out.country = v.country;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
       if (v.window) {
-        out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";
+        if (v.window.kind === "from_date" && v.window.startIso) {
+          out.startDate = v.window.startIso;
+          out.urgency = daysUntil(v.window.startIso) <= 7 ? "this_week" : "flexible";
+        } else {
+          out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";
+        }
       }
       return out;
     },

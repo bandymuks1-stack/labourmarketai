@@ -42,6 +42,14 @@ export interface NeedStructureSuggestion {
  *  "truck driver" matches transport before a bare "driver", etc. Slugs are
  *  validated against the taxonomy at module load. */
 export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
+  // Construction trades added 2026-09-04 (owner contract §9). PERSON stems
+  // only — "pastolinink" (the scaffolder), never "pastol" (the scaffold): a
+  // sentence about equipment must not become a workforce need.
+  { slug: "scaffolder", needles: ["scaffolder", "pastolinink", "монтажник строительных лесов", "монтажник лесов", "gerustbauer", "steigerbouwer", "rusztowaniow"] },
+  { slug: "concrete_worker", needles: ["concrete worker", "concreter", "betonuotoj", "бетонщик", "betonbauer", "betonwerker", "betoniarz"] },
+  { slug: "plasterer", needles: ["plasterer", "tinkuotoj", "штукатур", "stuckateur", "stukadoor", "tynkarz"] },
+  { slug: "steel_fixer", needles: ["steel fixer", "rebar", "armaturinink", "арматурщик", "eisenflechter", "betonstaalvlechter", "zbrojarz"] },
+  { slug: "insulation_worker", needles: ["insulation worker", "insulator", "izoliuotoj", "изолировщик", "isolierer", "isolatiemonteur"] },
   { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк"] },
   { slug: "electrician", needles: ["electrician", "elektrik", "электрик"] },
   { slug: "plumber", needles: ["plumber", "santechnik", "сантехник"] },
@@ -95,12 +103,12 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "kaun", "klaipėd", "klaiped"] },
   { code: "LV", needles: ["latvia", "latvij", "латв", "riga", "ryga"] },
   { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
-  { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "krak", "wroc", "gdansk", "gdańsk"] },
-  { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "hamburg", "munich", "münchen", "munchen", "frankfurt", "cologne", "köln", "koln", "stuttgart"] },
-  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "hague", "haag", "eindhoven", "utrecht"] },
+  { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk"] },
+  { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart"] },
+  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht"] },
   { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus"] },
   { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "bergen", "trondheim"] },
-  { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "gothenburg", "göteborg", "malmö", "malmo"] },
+  { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme"] },
   { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
   // Open-markets update 2026-07-17 — the six newly opened markets.
   { code: "GE", needles: ["georgia", "gruzij", "sakartvel", "грузия", "грузии", "грузию", "tbilisi", "tbilis", "batumi", "kutaisi", "rustavi"] },
@@ -118,6 +126,42 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
 ];
 
 const KNOWN_COUNTRIES = new Set<string>(MARKET_COUNTRIES);
+
+/**
+ * CITY LABELS — which COUNTRY_RULES needles name a city, and how that city is
+ * written back to the person (owner contract 2026-09-04 §9: "Rotterdam" must
+ * not collapse into "Netherlands"). A needle absent here is a country word.
+ * Display form = the city's own name; the person may edit it in the form.
+ */
+export const CITY_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  vilni: "Vilnius", kaun: "Kaunas", "klaipėd": "Klaipėda", klaiped: "Klaipėda",
+  riga: "Riga", ryga: "Riga", tallinn: "Tallinn", talin: "Tallinn",
+  warsaw: "Warszawa", warszaw: "Warszawa", varsuv: "Warszawa", krak: "Kraków", wroc: "Wrocław", vroclav: "Wrocław", gdansk: "Gdańsk", "gdańsk": "Gdańsk",
+  berlin: "Berlin", berlyn: "Berlin", hamburg: "Hamburg", munich: "München", "münchen": "München", munchen: "München", miunchen: "München", frankfurt: "Frankfurt", cologne: "Köln", "köln": "Köln", koln: "Köln", keln: "Köln", stuttgart: "Stuttgart", stutgart: "Stuttgart",
+  amsterdam: "Amsterdam", rotterdam: "Rotterdam", roterdam: "Rotterdam", "роттердам": "Rotterdam", hague: "Den Haag", haag: "Den Haag", haga: "Den Haag", eindhoven: "Eindhoven", utrecht: "Utrecht",
+  copenhagen: "København", kopenhag: "København", "копенгаг": "København", aarhus: "Aarhus",
+  oslo: "Oslo", bergen: "Bergen", trondheim: "Trondheim",
+  stockholm: "Stockholm", stokholm: "Stockholm", gothenburg: "Göteborg", "göteborg": "Göteborg", goteborg: "Göteborg", gioteborg: "Göteborg", "malmö": "Malmö", malmo: "Malmö", malme: "Malmö",
+  helsinki: "Helsinki", helsink: "Helsinki", espoo: "Espoo", tampere: "Tampere",
+  tbilisi: "Tbilisi", tbilis: "Tbilisi", batumi: "Batumi", kutaisi: "Kutaisi", rustavi: "Rustavi",
+  brussel: "Brussels", briusel: "Brussels", antwerp: "Antwerpen",
+  paris: "Paris", "paryž": "Paris", paryz: "Paris", lyon: "Lyon", marseille: "Marseille",
+  madrid: "Madrid", barcelona: "Barcelona", valencia: "Valencia",
+  vienna: "Wien", wien: "Wien", graz: "Graz", linz: "Linz",
+  zurich: "Zürich", "zürich": "Zürich", geneva: "Genève", genev: "Genève", basel: "Basel",
+  "new york": "New York", "los angeles": "Los Angeles", chicago: "Chicago", houston: "Houston", miami: "Miami", dallas: "Dallas", phoenix: "Phoenix", philadelphia: "Philadelphia", atlanta: "Atlanta", seattle: "Seattle", boston: "Boston", denver: "Denver", washington: "Washington",
+});
+
+/** The market a folded sentence names, plus the CITY when the matching needle
+ *  was a city — `null` city when the person named only the country. */
+export function resolveCountryAndCity(folded: string): {
+  country: string | null;
+  city: string | null;
+} {
+  const hit = firstMatchWithNeedle(COUNTRY_RULES, folded);
+  if (!hit) return { country: null, city: null };
+  return { country: hit.rule.code, city: CITY_LABELS[hit.needle] ?? null };
+}
 
 function firstMatch<T extends { needles: string[] }>(
   rules: T[],

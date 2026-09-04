@@ -11699,6 +11699,8 @@
         "demandRole": "Functie",
         "demandRolePlaceholder": "Bijv. metselaar",
         "demandLocation": "Locatie",
+        "startDate": "Startdatum",
+        "startDatePlaceholder": "JJJJ-MM-DD",
         "demandLocationPlaceholder": "Stad of regio",
         "teamSize": "Aantal werknemers",
         "urgency": "Urgentie",
@@ -11894,6 +11896,7 @@
         "understood": "Volgens jouw opgave: {summary}.",
         "people": "{count, plural, one {# persoon} other {# personen}}",
         "daysCount": "{count, plural, one {# dag} other {# dagen}}",
+        "fromDate": "vanaf {date}",
         "window": {
           "next_week": "volgende week",
           "this_week": "deze week",

@@ -84,6 +84,12 @@ export const companyCreateDemandSchema = z
       .optional(),
     /** Same declared opportunity type as `companyCreateDemandFields`. */
     opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
+    /** Stated start day (ISO) → `structured_v2.time.start_earliest`. */
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .nullable()
+      .optional(),
   })
   .refine((v) => v.mode !== "draft" || v.intent === "hire_workers", {
     message: "drafts exist only for the hire_workers intent",
