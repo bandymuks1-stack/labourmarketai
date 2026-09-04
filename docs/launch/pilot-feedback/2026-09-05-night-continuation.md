@@ -39,3 +39,7 @@ All proofs with E2E identities on production (`labourmarket.ai`), never the real
 ## Residue (E2E, recorded)
 
 - project `3b9c55d3` with stage `1885abb7`, assignment `80883119`, log `01d4a36d`, task `712182db` (earlier); booking `910c138a` (to delete after the decline walk); document file for E2E worker2's A1 row (blob removed by the walk; row via MCP).
+
+## REPORT — §19 EXPORT by sentence (branch `feat/cc/figures-csv-export`)
+
+- "paruošk ataskaitą" (intent `figures`) answers the organisation's figures as before and now offers up to three `download:` chips — the project operations CSV the operations page already serves (`/dashboard/projects/<id>/operations/report`, manager role + RLS re-checked in the route). The chat treats a `download:` chip as a file (full navigation), never as a page. No report store of its own. Guard `lib/ai-workspace/figures-export.test.ts`.

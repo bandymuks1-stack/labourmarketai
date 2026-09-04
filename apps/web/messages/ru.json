@@ -12978,7 +12978,8 @@
       "unnamedOrganization": "(организация без названия)",
       "chipLogWork": "Записать работу",
       "chipCreateDemand": "Описать потребность",
-      "scoutingPickDemand": "Выберите одну — кандидатов покажу прямо здесь, в рабочем пространстве."
+      "scoutingPickDemand": "Выберите одну — кандидатов покажу прямо здесь, в рабочем пространстве.",
+      "chipProjectCsv": "Скачать CSV: {title}"
     },
     "project": {
       "fieldStatus": "Статус",

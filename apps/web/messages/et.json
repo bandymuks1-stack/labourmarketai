@@ -4365,7 +4365,8 @@
       "unnamedOrganization": "[EN] (unnamed organization)",
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
-      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace."
+      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
+      "chipProjectCsv": "Laadi alla CSV: {title}"
     },
     "project": {
       "fieldStatus": "[EN] Status",

@@ -12978,7 +12978,8 @@
       "unnamedOrganization": "(unnamed organization)",
       "chipLogWork": "Log work",
       "chipCreateDemand": "Describe a need",
-      "scoutingPickDemand": "Pick one and I will show its candidates right here in the workspace."
+      "scoutingPickDemand": "Pick one and I will show its candidates right here in the workspace.",
+      "chipProjectCsv": "Download CSV: {title}"
     },
     "project": {
       "fieldStatus": "Status",

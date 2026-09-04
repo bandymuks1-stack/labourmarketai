@@ -12978,7 +12978,8 @@
       "unnamedOrganization": "(organizacija be pavadinimo)",
       "chipLogWork": "Užrašyti darbą",
       "chipCreateDemand": "Aprašyti poreikį",
-      "scoutingPickDemand": "Pasirinkite vieną — kandidatus parodysiu čia pat, darbo erdvėje."
+      "scoutingPickDemand": "Pasirinkite vieną — kandidatus parodysiu čia pat, darbo erdvėje.",
+      "chipProjectCsv": "Atsisiųsti CSV: {title}"
     },
     "project": {
       "fieldStatus": "Būsena",
