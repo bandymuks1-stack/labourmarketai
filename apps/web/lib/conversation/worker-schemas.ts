@@ -32,6 +32,18 @@ export const workerAddWorkHistorySchema = z
     path: ["endYear"],
   });
 
+/** Record a document (owner contract §12/§14): the closed `document_types`
+ *  slug + the closed country set are validated by the canonical upsert
+ *  (`upsert_worker_document`); this is the shape gate only. */
+export const workerAddDocumentSchema = z.object({
+  typeSlug: z.string().trim().min(1).max(80),
+  country: z.string().trim().length(2).nullable().optional(),
+  status: z.enum(["ready", "missing", "blocked"]).default("ready"),
+  validFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  note: z.string().trim().max(500).nullable().optional(),
+});
+
 export const workerAddLanguageSchema = z.object({
   lang: z.string().trim().min(2).max(40),
   level: z.string().trim().min(1).max(8),
@@ -114,6 +126,7 @@ export const workerLogWorkSchema = z.object({
 export const WORKER_ACTION_SCHEMAS = {
   "worker.add-work-history": workerAddWorkHistorySchema,
   "worker.add-language": workerAddLanguageSchema,
+  "worker.add-document": workerAddDocumentSchema,
   "worker.add-education": workerAddEducationSchema,
   "worker.add-achievement": workerAddAchievementSchema,
   "worker.save-work-card": workerSaveWorkCardSchema,

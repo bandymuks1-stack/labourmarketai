@@ -48,6 +48,10 @@ import {
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
+import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
+import { guessDocumentType } from "@/lib/conversation/documents-gap";
+import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
+import { parseEndDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -372,6 +376,9 @@ export type ChatLabels = {
   offerAccepted: string;
   offerDeclined: string;
   offerDecisionFailed: string;
+  documentAddIntro: string;
+  documentAddDone: string;
+  documentAddUnavailable: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -2101,6 +2108,50 @@ export function ConversationChat({
       });
   }, [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips]);
 
+  /** "Turiu naują A1 iki 2027-03" — a document RECORDED by sentence (owner
+   *  contract §12/§14). The form is built from the canonical catalogues per
+   *  turn; what the sentence said (type, valid-until) pre-fills it — visible,
+   *  editable, confirmed. After the save the readiness answer re-runs, so the
+   *  person sees the gap close (or not). Person identity only. */
+  const startAddDocument = useCallback(
+    (sentence: string) => {
+      if (identity !== "person") {
+        assistant(labels.adminRouteHint, [{ id: "link:/dashboard/documents", label: labels.documentsChip }]);
+        return;
+      }
+      setTyping(true);
+      loadDocumentFormOptionsForChat()
+        .then((opts) => {
+          setTyping(false);
+          if (opts.types.length === 0) {
+            assistant(labels.documentAddUnavailable, [{ id: "documents-centre", label: labels.documentsChip }]);
+            return;
+          }
+          const typeSlug = guessDocumentType(sentence);
+          const validUntil = parseEndDate(sentence, todayIso(), null);
+          const prefill: Record<string, string> = {};
+          if (typeSlug && opts.types.some((o) => o.value === typeSlug)) prefill.typeSlug = typeSlug;
+          if (validUntil) prefill.validUntil = validUntil;
+          assistant(labels.documentAddIntro);
+          openForm(
+            workerAddDocumentForm(opts.types, opts.countries),
+            undefined,
+            undefined,
+            Object.keys(prefill).length > 0 ? prefill : undefined,
+            () => {
+              assistant(labels.documentAddDone);
+              runWorkflow(() => runDocumentsReadiness());
+            },
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.documentAddUnavailable, [{ id: "documents-centre", label: labels.documentsChip }]);
+        });
+    },
+    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, openForm, runWorkflow],
+  );
+
   const startAgencyInvite = useCallback(
     (actionId: "agency.invite-client" | "company.invite-worker", sentence: string) => {
       const isClient = actionId === "agency.invite-client";
@@ -3332,6 +3383,7 @@ export function ConversationChat({
         programmes: () => runEducationProgrammes(educationModeFromText(text)),
         createProject: () => startCreateProject(text),
         clientOffers: () => startClientOffers(),
+        addDocument: () => startAddDocument(text),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
         translateBlocked: () => assistant(labels.translateBlocked),
@@ -3344,7 +3396,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

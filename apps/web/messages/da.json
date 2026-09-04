@@ -3294,6 +3294,10 @@
           "label": "[EN] Add a language",
           "description": "[EN] State a language you speak and your level."
         },
+        "addDocument": {
+          "label": "Registrér dokument",
+          "description": "Et certifikat, en tilladelse eller et ID — med udløbsdato, så din parathed er reel."
+        },
         "saveSkills": {
           "label": "[EN] Choose your skills",
           "description": "[EN] Select the skills for your work direction."
@@ -3526,6 +3530,11 @@
         "workerEmailPlaceholder": "navn@eksempel.dk",
         "inviteNote": "Note (valgfri)",
         "inviteNotePlaceholder": "F.eks. start i oktober, byggeplads i Kaunas",
+        "documentType": "Dokumenttype",
+        "documentCountry": "Land (valgfrit)",
+        "validUntil": "Gyldig til",
+        "validUntilPlaceholder": "f.eks. 2027-03-31",
+        "documentNote": "Note (valgfrit)",
         "projectTitle": "Projektnavn",
         "projectTitlePlaceholder": "f.eks. Lager i Rotterdam",
         "projectCity": "By (valgfrit)",
@@ -3782,6 +3791,9 @@
       "offerAccepted": "Accepteret. Kandidaten fik et bookingforslag — svaret ser du her.",
       "offerDeclined": "Afvist. Bureauet ser din beslutning.",
       "offerDecisionFailed": "Beslutningen kunne ikke gemmes — tilbuddet er måske allerede lukket. Tjek kandidatlisten.",
+      "documentAddIntro": "Lad os registrere dokumentet: type, land og gyldighed. Filen kan du vedhæfte i dokumentcentret.",
+      "documentAddDone": "Dokument registreret. Sådan ser din parathed ud nu:",
+      "documentAddUnavailable": "Dokumentkataloget kunne ikke indlæses lige nu — registrér dokumentet i dokumentcentret.",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

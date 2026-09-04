@@ -112,7 +112,8 @@ export type IntentHandlerId =
   | "inviteStudent"
   | "programmes"
   | "createProject"
-  | "clientOffers";
+  | "clientOffers"
+  | "addDocument";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -223,6 +224,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The CLIENT's side of the agency bridge: the offers made on the company's
   // own demands, decided in the chat (accept → canonical booking proposed).
   "agency-offers": { domain: "company", access: "read", handler: "clientOffers", ownTyping: true },
+  // Documents first-class (§12/§14): a document RECORDED by sentence through
+  // the one inline form over the canonical upsert; readiness re-answers.
+  "add-document": { domain: "documents", access: "write", handler: "addDocument", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

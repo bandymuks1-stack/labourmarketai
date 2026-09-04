@@ -11523,6 +11523,10 @@
           "label": "Pridėti kalbą",
           "description": "Nurodyk kalbą, kurią moki, ir lygį."
         },
+        "addDocument": {
+          "label": "Užrašyti dokumentą",
+          "description": "Pažyma, leidimas ar sertifikatas — su galiojimo data, kad pasiruošimas būtų tikras."
+        },
         "saveSkills": {
           "label": "Pasirinkti įgūdžius",
           "description": "Pažymėk savo darbo krypties įgūdžius."
@@ -11757,6 +11761,11 @@
         "workerEmailPlaceholder": "vardas@pastas.lt",
         "inviteNote": "Pastaba (nebūtina)",
         "inviteNotePlaceholder": "Pvz., pradžia nuo spalio, objektas Kaune",
+        "documentType": "Dokumento tipas",
+        "documentCountry": "Šalis (nebūtina)",
+        "validUntil": "Galioja iki",
+        "validUntilPlaceholder": "pvz. 2027-03-31",
+        "documentNote": "Pastaba (nebūtina)",
         "projectTitle": "Projekto pavadinimas",
         "projectTitlePlaceholder": "pvz. Roterdamo sandėlis",
         "projectCity": "Miestas (nebūtina)",
@@ -12082,6 +12091,9 @@
       "offerAccepted": "Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia.",
       "offerDeclined": "Atmesta. Agentūra matys jūsų sprendimą.",
       "offerDecisionFailed": "Sprendimo išsaugoti nepavyko — pasiūlymas gal jau uždarytas. Patikrinkite kandidatų sąraše.",
+      "documentAddIntro": "Užrašykime dokumentą: tipas, šalis ir iki kada galioja. Failą įkelsite dokumentų centre.",
+      "documentAddDone": "Dokumentas užrašytas. Štai jūsų pasiruošimas dabar:",
+      "documentAddUnavailable": "Dokumentų katalogo dabar nepavyko įkelti — užrašykite dokumentą dokumentų centre.",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },

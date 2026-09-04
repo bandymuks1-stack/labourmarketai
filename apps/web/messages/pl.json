@@ -3294,6 +3294,10 @@
           "label": "[EN] Add a language",
           "description": "[EN] State a language you speak and your level."
         },
+        "addDocument": {
+          "label": "Zapisz dokument",
+          "description": "Zaświadczenie, pozwolenie lub certyfikat — z datą ważności, aby gotowość była prawdziwa."
+        },
         "saveSkills": {
           "label": "[EN] Choose your skills",
           "description": "[EN] Select the skills for your work direction."
@@ -3526,6 +3530,11 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "documentType": "Rodzaj dokumentu",
+        "documentCountry": "Kraj (opcjonalnie)",
+        "validUntil": "Ważny do",
+        "validUntilPlaceholder": "np. 2027-03-31",
+        "documentNote": "Uwaga (opcjonalnie)",
         "projectTitle": "Nazwa projektu",
         "projectTitlePlaceholder": "np. Magazyn w Rotterdamie",
         "projectCity": "Miasto (opcjonalnie)",
@@ -3782,6 +3791,9 @@
       "offerAccepted": "Przyjęto. Kandydat otrzymał propozycję rezerwacji — jego odpowiedź zobaczysz tutaj.",
       "offerDeclined": "Odrzucono. Agencja zobaczy Twoją decyzję.",
       "offerDecisionFailed": "Nie udało się zapisać decyzji — oferta mogła już zostać zamknięta. Sprawdź listę kandydatów.",
+      "documentAddIntro": "Zapiszmy dokument: rodzaj, kraj i ważność. Plik dodasz w centrum dokumentów.",
+      "documentAddDone": "Dokument zapisany. Oto Twoja gotowość teraz:",
+      "documentAddUnavailable": "Nie udało się teraz wczytać katalogu dokumentów — zapisz dokument w centrum dokumentów.",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },

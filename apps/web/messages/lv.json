@@ -3294,6 +3294,10 @@
           "label": "[EN] Add a language",
           "description": "[EN] State a language you speak and your level."
         },
+        "addDocument": {
+          "label": "Reģistrēt dokumentu",
+          "description": "Apliecība, atļauja vai sertifikāts — ar derīguma termiņu, lai gatavība būtu īsta."
+        },
         "saveSkills": {
           "label": "[EN] Choose your skills",
           "description": "[EN] Select the skills for your work direction."
@@ -3526,6 +3530,11 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "documentType": "Dokumenta veids",
+        "documentCountry": "Valsts (nav obligāti)",
+        "validUntil": "Derīgs līdz",
+        "validUntilPlaceholder": "piem. 2027-03-31",
+        "documentNote": "Piezīme (nav obligāti)",
         "projectTitle": "Projekta nosaukums",
         "projectTitlePlaceholder": "piem. Roterdamas noliktava",
         "projectCity": "Pilsēta (nav obligāti)",
@@ -3782,6 +3791,9 @@
       "offerAccepted": "Pieņemts. Kandidātam nosūtīts rezervācijas piedāvājums — viņa atbildi redzēsiet šeit.",
       "offerDeclined": "Noraidīts. Aģentūra redzēs jūsu lēmumu.",
       "offerDecisionFailed": "Lēmumu neizdevās saglabāt — piedāvājums, iespējams, jau slēgts. Pārbaudiet kandidātu sarakstu.",
+      "documentAddIntro": "Reģistrēsim dokumentu: veids, valsts un derīgums. Failu varēsiet pievienot dokumentu centrā.",
+      "documentAddDone": "Dokuments reģistrēts. Lūk, jūsu gatavība tagad:",
+      "documentAddUnavailable": "Dokumentu katalogu šobrīd neizdevās ielādēt — reģistrējiet dokumentu dokumentu centrā.",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

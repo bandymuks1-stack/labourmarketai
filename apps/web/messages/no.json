@@ -3294,6 +3294,10 @@
           "label": "[EN] Add a language",
           "description": "[EN] State a language you speak and your level."
         },
+        "addDocument": {
+          "label": "Registrer dokument",
+          "description": "Et sertifikat, en tillatelse eller en ID — med utløpsdato, så beredskapen er reell."
+        },
         "saveSkills": {
           "label": "[EN] Choose your skills",
           "description": "[EN] Select the skills for your work direction."
@@ -3526,6 +3530,11 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "documentType": "Dokumenttype",
+        "documentCountry": "Land (valgfritt)",
+        "validUntil": "Gyldig til",
+        "validUntilPlaceholder": "f.eks. 2027-03-31",
+        "documentNote": "Merknad (valgfritt)",
         "projectTitle": "Prosjektnavn",
         "projectTitlePlaceholder": "f.eks. Lageret i Rotterdam",
         "projectCity": "By (valgfritt)",
@@ -3782,6 +3791,9 @@
       "offerAccepted": "Godtatt. Kandidaten fikk et bookingforslag — svaret ser du her.",
       "offerDeclined": "Avslått. Byrået ser avgjørelsen din.",
       "offerDecisionFailed": "Avgjørelsen kunne ikke lagres — tilbudet er kanskje allerede lukket. Sjekk kandidatlisten.",
+      "documentAddIntro": "La oss registrere dokumentet: type, land og gyldighet. Filen kan du legge ved i dokumentsenteret.",
+      "documentAddDone": "Dokument registrert. Slik er beredskapen din nå:",
+      "documentAddUnavailable": "Dokumentkatalogen kunne ikke lastes nå — registrer dokumentet i dokumentsenteret.",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først."
     },

@@ -75,7 +75,7 @@ describe("the client's agency offers, by sentence", () => {
     expect(CHAT).toContain('chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")');
     // An agency workspace asking "what was offered" means its own proposals.
     expect(CHAT).toContain('handleChipRef.current({ id: "agency:progress", label: "" });');
-    const fn = CHAT.slice(CHAT.indexOf("const startClientOffers = useCallback"), CHAT.indexOf("const startAgencyInvite = useCallback"));
+    const fn = CHAT.slice(CHAT.indexOf("const startClientOffers = useCallback"), CHAT.indexOf("[identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips]"));
     expect(fn).not.toContain("link:/dashboard");
   });
 

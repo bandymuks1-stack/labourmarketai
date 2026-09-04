@@ -825,6 +825,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke kandidaten heeft het bureau aangeboden?",
     de: "Welche Kandidaten hat die Agentur vorgeschlagen?",
   },
+  "add-document": {
+    lt: "Turiu naują A1 pažymą iki 2027-03-31",
+    en: "I have a new VCA certificate",
+    ru: "Получил новое разрешение на работу",
+    nl: "Ik heb een nieuwe vergunning",
+    de: "Ich habe einen neuen Ausweis",
+  },
 };
 
 /**
