@@ -11,6 +11,7 @@ import { buildWorkContext } from "@/lib/conversation/context-intelligence";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import { listMyEngagements } from "@/lib/invitations/network";
+import type { WorkerDocumentGapResult } from "@/lib/conversation/documents-gap-server";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
@@ -81,6 +82,24 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     /* no line — a failed read never invents an offer */
   }
 
+  // 0b ── a document about to expire (owner contract 2026-09-04 §4D/§14).
+  // A deadline on the person's OWN papers outranks every passive line below
+  // (prod walk 2026-09-04: with the cap at three, a documents line placed
+  // after matches / unlogged work / unread never reached an active worker).
+  // The SAME derivation the chat answers "kas baigia galioti?" with; the
+  // chip is the same documents-centre answer. Read once, reused below.
+  let docGap: WorkerDocumentGapResult | null = null;
+  try {
+    const { loadWorkerDocumentGap } = await import("@/lib/conversation/documents-gap-server");
+    docGap = await loadWorkerDocumentGap();
+    if (docGap.kind === "ok" && docGap.gap.expiring.length > 0 && lines.length < MAX_LINES) {
+      lines.push(t("briefDocumentsExpiring", { count: docGap.gap.expiring.length }));
+      addChip("documents-centre", t("documentsChip"));
+    }
+  } catch {
+    /* no line — a failed read never invents a document gap */
+  }
+
   // 1 ── new matching opportunities ────────────────────────────────────────
   try {
     const view = await loadWorkerOpportunityMatches({
@@ -144,27 +163,15 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     /* no line */
   }
 
-  // 3b ── documents: expiring, or missing for the person's OWN stated
-  // countries (owner contract 2026-09-04 §4D/§14 — attention from real
-  // canonical state). The SAME derivation the chat answers "kas baigia
-  // galioti?" with; no country stated → no missing line (the chat asks,
-  // the brief never guesses). The chip is the same documents-centre answer.
+  // 3b ── documents missing for the person's OWN stated countries. No
+  // country stated → no line (the chat asks, the brief never guesses).
   try {
-    if (lines.length < MAX_LINES) {
-      const { loadWorkerDocumentGap } = await import("@/lib/conversation/documents-gap-server");
-      const docs = await loadWorkerDocumentGap();
-      if (docs.kind === "ok") {
-        if (docs.gap.expiring.length > 0) {
-          lines.push(t("briefDocumentsExpiring", { count: docs.gap.expiring.length }));
-          addChip("documents-centre", t("documentsChip"));
-        } else if (docs.gap.missing.length > 0 && docs.countries.length > 0) {
-          lines.push(t("briefDocumentsMissing", { count: docs.gap.missing.length }));
-          addChip("documents-centre", t("documentsChip"));
-        }
-      }
+    if (docGap && docGap.kind === "ok" && docGap.gap.expiring.length === 0 && docGap.gap.missing.length > 0 && docGap.countries.length > 0 && lines.length < MAX_LINES) {
+      lines.push(t("briefDocumentsMissing", { count: docGap.gap.missing.length }));
+      addChip("documents-centre", t("documentsChip"));
     }
   } catch {
-    /* no line — a failed read never invents a document gap */
+    /* no line */
   }
 
   // 4 ── the first missing profile step ────────────────────────────────────

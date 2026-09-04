@@ -61,10 +61,12 @@ describe("the employer brief carries agency and institution attention", () => {
   it("the worker brief names expiring / missing documents from the SAME documents-gap derivation the chat answers with", () => {
     const worker = SRC.slice(SRC.indexOf("export async function loadOpeningBrief"), SRC.indexOf("export async function loadEmployerOpeningBrief"));
     expect(worker).toMatch(/loadWorkerDocumentGap\(\)/);
-    expect(worker).toMatch(/docs\.gap\.expiring\.length > 0/);
+    expect(worker).toMatch(/docGap\.gap\.expiring\.length > 0/);
+    // A deadline outranks the passive lines: the expiring rung sits BEFORE matches.
+    expect(worker.indexOf("briefDocumentsExpiring")).toBeLessThan(worker.indexOf("briefNewMatches"));
     expect(worker).toMatch(/briefDocumentsExpiring/);
     // A missing-document line needs a stated country — the brief never guesses one.
-    expect(worker).toMatch(/docs\.gap\.missing\.length > 0 && docs\.countries\.length > 0/);
+    expect(worker).toMatch(/docGap\.gap\.missing\.length > 0 && docGap\.countries\.length > 0/);
     expect(worker).toMatch(/addChip\("documents-centre", t\("documentsChip"\)\)/);
     // Inside its own try, and before the learner-identity block the guard slices.
     expect(worker.indexOf("loadWorkerDocumentGap")).toBeLessThan(worker.indexOf("learner identity (M10"));
