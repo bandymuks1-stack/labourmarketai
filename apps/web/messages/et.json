@@ -3770,6 +3770,7 @@
       "unpinPrefix": "Eemalda",
       "unpinDone": "Eemaldatud Minu alalt.",
       "projectCreateIntro": "Uus projekt. Nimi ja linn — seejärel saate siinsamas inimesi määrata.",
+      "projectCreatedNext": "Projekt loodud. Määrake inimesed siinsamas — või tulge selle juurde hiljem tagasi „Minu projektid“ alt.",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

@@ -3770,6 +3770,7 @@
       "unpinPrefix": "Ta bort",
       "unpinDone": "Borttaget från Mitt utrymme.",
       "projectCreateIntro": "Ett nytt projekt. Namn och stad — sedan tilldelar du folk direkt här.",
+      "projectCreatedNext": "Projekt skapat. Tilldela folk direkt här — eller återkom till det senare från ”Mina projekt”.",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först."
     },

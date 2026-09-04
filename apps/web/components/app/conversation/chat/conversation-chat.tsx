@@ -363,6 +363,7 @@ export type ChatLabels = {
   unpinPrefix: string;
   unpinDone: string;
   projectCreateIntro: string;
+  projectCreatedNext: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -1997,9 +1998,24 @@ export function ConversationChat({
       }
       const city = structureValueStatement(sentence).city ?? "";
       assistant(labels.projectCreateIntro);
-      openForm("company.create-project", undefined, undefined, city ? { city } : undefined);
+      openForm(
+        "company.create-project",
+        undefined,
+        undefined,
+        city ? { city } : undefined,
+        // PROJECT AFTER CREATION (owner contract §11 seed): the new project
+        // opens in the panel — its real (empty) roster and the assignment
+        // controls — so people are assigned right where the project was
+        // just named. Same panel the "projects" chip opens; no id → the list.
+        (res) => {
+          const id = typeof res.data?.projectId === "string" ? res.data.projectId : null;
+          assistant(labels.projectCreatedNext);
+          if (id) selectProjectRef.current(id);
+          else handleChipRef.current({ id: "projects", label: "" });
+        },
+      );
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, fallbackText, starterChips, openForm],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, fallbackText, starterChips, openForm],
   );
 
   const startAgencyInvite = useCallback(

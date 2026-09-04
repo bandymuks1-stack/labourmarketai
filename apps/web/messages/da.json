@@ -3770,6 +3770,7 @@
       "unpinPrefix": "Fjern",
       "unpinDone": "Fjernet fra Mit område.",
       "projectCreateIntro": "Et nyt projekt. Navn og by — så kan du tildele folk lige her.",
+      "projectCreatedNext": "Projekt oprettet. Tildel folk lige her — eller vend tilbage til det senere fra “Mine projekter”.",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

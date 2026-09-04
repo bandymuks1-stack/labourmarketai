@@ -56,7 +56,11 @@ describe("create a project by sentence", () => {
     expect(form?.fields.map((f) => [f.name, "required" in f && f.required === true])).toEqual([["title", true], ["city", false]]);
     const CHAT = readFileSync(join(__dirname, "..", "..", "components", "app", "conversation", "chat", "conversation-chat.tsx"), "utf8");
     expect(CHAT).toContain("const city = structureValueStatement(sentence).city");
-    expect(CHAT).toContain('openForm("company.create-project", undefined, undefined, city ? { city } : undefined)');
+    expect(CHAT).toContain("city ? { city } : undefined,");
+    // After creation the new project opens in the panel (people are assigned
+    // there) — the same opener the "projects" chip uses, never a second view.
+    expect(CHAT).toContain("if (id) selectProjectRef.current(id);");
+    expect(CHAT).toContain("assistant(labels.projectCreatedNext);");
     expect(CHAT).toContain("createProject: () => startCreateProject(text)");
   });
 
