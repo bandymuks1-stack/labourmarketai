@@ -1646,6 +1646,12 @@
         "statusDeclined": "declined",
         "statusExpired": "expired",
         "statusRevoked": "revoked",
+        "outcomesTitle": "Outcomes",
+        "outcomesSuppressed": "Outcomes appear once at least {floor} learners are connected (now {count}). Counts only, never names.",
+        "outcomesActive": "{count} logged work in the last 30 days",
+        "outcomesInterest": "{count} showed interest in work",
+        "outcomesBookings": "{count} accepted an offer",
+        "outcomesEngagements": "{count} are working now",
         "unavailable": "Learner data could not be loaded right now. Reload the page; if it stays like this, the invitations are still in place."
       },
       "title": "Company workspace",

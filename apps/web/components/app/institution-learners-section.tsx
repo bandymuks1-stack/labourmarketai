@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
+import { OUTCOMES_K_ANONYMITY_FLOOR, readInstitutionLearnerOutcomes } from "@/lib/education/institution-outcomes";
 
 /**
  * Institution learners — participation state for an education institution
@@ -22,7 +23,10 @@ export async function InstitutionLearnersSection({
   readonly organizationId: string;
 }) {
   const t = await getTranslations("roleDashboards.company.learners");
-  const read = await readInstitutionLearners(organizationId);
+  const [read, outcomes] = await Promise.all([
+    readInstitutionLearners(organizationId),
+    readInstitutionLearnerOutcomes(organizationId),
+  ]);
 
   return (
     <Card compact>
@@ -59,6 +63,38 @@ export async function InstitutionLearnersSection({
               </li>
             ) : null}
           </ul>
+
+          {/* OUTCOMES — a report from real state (owner contract §19), through
+              the ONE aggregate function. Counts only; below the k-anonymity
+              floor the function suppresses them and the section SAYS so —
+              never zeros pretending to be an answer. Unavailable stays
+              silent here: the participation read above already carries the
+              honest unavailable line for the section. */}
+          {outcomes.status === "ok" ? (
+            <div className="flex flex-col gap-1" data-testid="institution-learner-outcomes">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("outcomesTitle")}</h3>
+              {outcomes.outcomes.suppressed ? (
+                <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learner-outcomes-suppressed">
+                  {t("outcomesSuppressed", { count: outcomes.outcomes.learnersConnected, floor: OUTCOMES_K_ANONYMITY_FLOOR })}
+                </p>
+              ) : (
+                <ul className="flex flex-wrap gap-2 text-xs" data-testid="institution-learner-outcomes-counts">
+                  <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
+                    {t("outcomesActive", { count: outcomes.outcomes.activeLast30d ?? 0 })}
+                  </li>
+                  <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
+                    {t("outcomesInterest", { count: outcomes.outcomes.withInterestSignals ?? 0 })}
+                  </li>
+                  <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
+                    {t("outcomesBookings", { count: outcomes.outcomes.withAcceptedBookings ?? 0 })}
+                  </li>
+                  <li className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 text-text-primary">
+                    {t("outcomesEngagements", { count: outcomes.outcomes.withActiveEngagements ?? 0 })}
+                  </li>
+                </ul>
+              )}
+            </div>
+          ) : null}
 
           {read.invitations.length === 0 ? (
             <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learners-empty">

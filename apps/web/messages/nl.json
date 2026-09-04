@@ -1646,6 +1646,12 @@
         "statusDeclined": "afgewezen",
         "statusExpired": "verlopen",
         "statusRevoked": "ingetrokken",
+        "outcomesTitle": "Resultaten",
+        "outcomesSuppressed": "Resultaten verschijnen zodra minstens {floor} leerlingen verbonden zijn (nu {count}). Alleen aantallen, nooit namen.",
+        "outcomesActive": "{count} legden werk vast in 30 dagen",
+        "outcomesInterest": "{count} toonden interesse in werk",
+        "outcomesBookings": "{count} accepteerden een aanbod",
+        "outcomesEngagements": "{count} werken nu",
         "unavailable": "De gegevens van lerenden konden nu niet worden geladen. Vernieuw de pagina; blijft dit zo, dan gelden de uitnodigingen nog steeds."
       },
       "title": "Bedrijfswerkruimte",

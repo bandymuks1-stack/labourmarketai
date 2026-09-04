@@ -1646,6 +1646,12 @@
         "statusDeclined": "abgelehnt",
         "statusExpired": "abgelaufen",
         "statusRevoked": "zurückgezogen",
+        "outcomesTitle": "Ergebnisse",
+        "outcomesSuppressed": "Ergebnisse erscheinen ab {floor} verbundenen Lernenden (jetzt {count}). Nur Zahlen, nie Namen.",
+        "outcomesActive": "{count} haben in 30 Tagen Arbeit erfasst",
+        "outcomesInterest": "{count} haben Interesse an Arbeit gezeigt",
+        "outcomesBookings": "{count} haben ein Angebot angenommen",
+        "outcomesEngagements": "{count} arbeiten jetzt",
         "unavailable": "Die Daten der Lernenden konnten gerade nicht geladen werden. Laden Sie die Seite neu; bleibt es dabei, gelten die Einladungen trotzdem."
       },
       "title": "Unternehmensbereich",
