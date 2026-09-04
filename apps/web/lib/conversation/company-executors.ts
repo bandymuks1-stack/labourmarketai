@@ -13,6 +13,8 @@ import { requestWorkerConversationAction } from "@/lib/communication/request-wor
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
 import { assignWorkerToProjectAction } from "@/lib/projects/actions";
 import { inviteClientAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
+import { inviteCompanyWorkerAction } from "@/lib/company/actions";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { z } from "zod";
 
 import {
@@ -232,13 +234,43 @@ export const COMPANY_EXECUTORS: {
       : { ok: false, code: r.code, message: r.message };
   },
 
-  "agency.invite-client": async (input) =>
-    mapBridge(
-      await inviteClientAction(
-        { status: "idle" },
-        fd({ agencyCompanyId: input.agencyCompanyId, email: input.email }),
-      ),
-    ),
+  "company.invite-worker": async (input) => {
+    // The canonical roster invite (lib/company/actions → invite_company_worker):
+    // workspace-gated + capability-checked there, never here. Outcomes are the
+    // RPC's own words; only `invited` is a new row — the others are honest
+    // no-ops reported as such (never "saved" for something that already was).
+    const r = await inviteCompanyWorkerAction(null, fd({ email: input.email, note: input.note ?? "" }));
+    if (!r.ok) {
+      return {
+        ok: false,
+        code: r.code === "needs_migration" ? "needs_migration" : r.code === "no_company" ? "not_authorized" : "error",
+        message: "message" in r ? r.message : undefined,
+      };
+    }
+    const recorded = r.ok && (r.outcome === "invited" || r.outcome === "already_pending" || r.outcome === "already_linked");
+    return recorded
+      ? { ok: true, data: { outcome: r.outcome } }
+      : { ok: false, code: r.outcome === "not_owner" ? "not_authorized" : "invalid" };
+  },
+
+  "agency.invite-client": async (input) => {
+    // The chat never carries a company id: the ACTIVE workspace's company is
+    // the agency (M-P0-3 — the one employer resolver). A fail-closed resolve
+    // becomes the dispatcher's honest `not_authorized`, never a guess.
+    let agencyCompanyId = input.agencyCompanyId ?? null;
+    if (!agencyCompanyId) {
+      const company = await requireEmployerCompany();
+      if (!company.ok) return { ok: false, code: "not_authorized" };
+      agencyCompanyId = company.companyId;
+    }
+    const r = await inviteClientAction(
+      { status: "idle" },
+      fd({ agencyCompanyId, email: input.email }),
+    );
+    // Readback for the conversation: the connection is PENDING until the
+    // client accepts — the real state, stated as such.
+    return r.status === "ok" ? { ok: true, data: { status: "pending" } } : mapBridge(r);
+  },
 
   "agency.propose-candidate": async (input) =>
     mapBridge(

@@ -11610,6 +11610,10 @@
         "reviewEngagements": {
           "label": "Werkrelaties bekijken",
           "description": "Zie wie voor deze organisatie werkt en beëindig een werkrelatie."
+        },
+        "inviteWorker": {
+          "label": "Medewerker uitnodigen",
+          "description": "Nodig iemand per e-mail uit voor je team."
         }
       },
       "agency": {
@@ -11699,7 +11703,15 @@
         "teamSize": "Aantal werknemers",
         "urgency": "Urgentie",
         "saveAsDraft": "Opslaan als concept",
-        "opportunityType": "Soort kans"
+        "opportunityType": "Soort kans",
+        "clientEmail": "E-mail van de klant",
+        "clientEmailPlaceholder": "naam@bedrijf.nl",
+        "workerEmail": "E-mail van de medewerker",
+        "workerEmailPlaceholder": "naam@voorbeeld.nl",
+        "inviteNote": "Notitie (optioneel)",
+        "inviteNotePlaceholder": "Bijv. start in oktober, locatie Kaunas",
+        "rosterWorker": "Teamlid",
+        "proposalNotePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen"
       },
       "availability": {
         "available": "Beschikbaar",
@@ -11929,7 +11941,40 @@
       "chipLmc": "LMC openen",
       "briefLearner": "Je bent ingeschreven bij {organization}. Praktijk en leren die je hier vastlegt, tellen als bewijs.",
       "briefLearnerUnnamed": "Je bent ingeschreven als lerende. Praktijk en leren die je hier vastlegt, tellen als bewijs.",
-      "chipLogLearning": "Leren of praktijk vastleggen"
+      "chipLogLearning": "Leren of praktijk vastleggen",
+      "fallbackCompany": "Ik kan helpen met je personeelsbehoefte, kandidaten en projecten. Wat wil je doen?",
+      "fallbackAgency": "Ik kan een klant of kandidaat uitnodigen, klantaanvragen en de status van je voorstellen tonen. Wat wil je doen?",
+      "fallbackEducation": "Ik kan helpen leerlingen uit te nodigen, opleidingen en groepen te beheren en de marktvraag te tonen. Wat wil je doen?",
+      "agencyInviteClientAsk": "Goed. Naar welk e-mailadres moet de uitnodiging voor de klant?",
+      "agencyInviteClientPrefilled": "Goed — ik nodig de klant uit op dit e-mailadres. Bevestig hieronder.",
+      "agencyInviteClientDone": "De uitnodiging is aangemaakt en wacht op acceptatie door de klant. Zodra de klant accepteert en een aanvraag deelt, kun je kandidaten voorstellen.",
+      "agencyInviteCandidateAsk": "Goed. Naar welk e-mailadres moet de teamuitnodiging?",
+      "agencyInviteCandidateDone": "De uitnodiging is vastgelegd. Er wordt geen e-mail verstuurd — de persoon logt in met dat adres en accepteert; daarna staat hij in je team.",
+      "agencyInviteCandidateExists": "Deze persoon is al uitgenodigd of staat al in je team — er is niets nieuws vastgelegd.",
+      "agencyNotAgencyWorkspace": "Deze werkruimte is geen uitzendbureau, dus klantuitnodigingen gelden hier niet. Bureau-acties horen bij een bureau-werkruimte.",
+      "agencySwitchHint": "Dat kun je als je bedrijf doen — kies de werkruimte:",
+      "agencyClientDemandIntro": "Aanvragen die je klanten hebben gedeeld:",
+      "agencyClientDemandNone": "Nog geen klant heeft een aanvraag gedeeld. Zodra een gekoppelde klant er een deelt, verschijnt die hier.",
+      "agencyProposalsIntro": "De status van je voorstellen:",
+      "agencyProposalsNone": "Nog geen voorstellen. Zodra een klant een aanvraag deelt, kun je een teamlid voorstellen.",
+      "agencyProposeAsk": "Voor welke aanvraag wil je een kandidaat voorstellen?",
+      "agencyProposeDone": "Het voorstel is vastgelegd — de klant ziet het bij zijn aanvraag en kan het accepteren of afwijzen.",
+      "agencyRosterEmpty": "Je team is nog leeg, dus er is niemand om voor te stellen. Nodig eerst een kandidaat uit.",
+      "agencyUnavailable": "De bureaugegevens konden nu niet worden gelezen. Probeer opnieuw of open de bedrijfswerkruimte.",
+      "agencyNext": "Wat nu?",
+      "chipInviteClient": "Klant uitnodigen",
+      "chipInviteCandidate": "Kandidaat uitnodigen",
+      "chipClientDemand": "Klantaanvragen",
+      "chipProposalStatus": "Status voorstellen",
+      "chipProposeFor": "Kandidaat voorstellen",
+      "userClientDemand": "Toon klantaanvragen",
+      "userProposalStatus": "Hoe staat het met mijn voorstellen?",
+      "learningCompassHint": "Je leerkompas — richting, ontbrekende vaardigheden en passende kansen:",
+      "chipLearningCompass": "Leerkompas",
+      "inviteStudentHint": "Een leerling nodig je uit met een persoonlijke link vanuit het netwerkgedeelte (relatie ‘Student’):",
+      "chipInviteStudent": "Leerling uitnodigen",
+      "programmesHint": "Opleidingen en groepen beheer je in de bedrijfswerkruimte — maak daar een opleiding en een groep aan en wijs leerlingen toe:",
+      "chipProgrammes": "Opleidingen en groepen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

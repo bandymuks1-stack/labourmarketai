@@ -33,6 +33,9 @@ import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { interestStateFingerprint } from "@/lib/opportunities/interest";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { roleContextForAction } from "@/lib/conversation/action-role-context";
 
 /**
  * Server dispatcher (Phase B; employer executors added in PR-E) — the ONLY
@@ -345,5 +348,21 @@ export async function dispatchWorkerAction(
   // the own-property key check), so this is the id-matched input by
   // construction; `never` is the safe common parameter type, not a cast away
   // from validation.
-  return executor(parsed.data as never, { locale: opts?.locale ?? "lt", workspace });
+  // Chat-first execution funnel (2026-09-04): the attempt and the persisted
+  // result are recorded HERE, in the one dispatcher every conversation write
+  // passes through — so a surface cannot claim an action it never dispatched
+  // and a dispatched action cannot go uncounted. Bounded: action id + coarse
+  // role; fire-and-forget; never on the result path.
+  emitServerFunnelEvent(FUNNEL_EVENTS.chatActionAttempted, {
+    source: "conversation-dispatch",
+    metadata: { surface: "conversation", step: actionId.slice(0, 64), role_context: roleContextForAction(actionId) },
+  });
+  const result = await executor(parsed.data as never, { locale: opts?.locale ?? "lt", workspace });
+  if (result.ok) {
+    emitServerFunnelEvent(FUNNEL_EVENTS.chatActionPersisted, {
+      source: "conversation-dispatch",
+      metadata: { surface: "conversation", step: actionId.slice(0, 64), role_context: roleContextForAction(actionId) },
+    });
+  }
+  return result;
 }

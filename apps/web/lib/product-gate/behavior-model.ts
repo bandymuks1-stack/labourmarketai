@@ -381,8 +381,11 @@ export const BEHAVIOR_CONFORMANCE = {
   // stays `special_case_per_actor_type` because one action out of 34 does not
   // make a layer — and overstating it here is exactly what this census exists
   // to prevent.
-  conversationActions: 34,
-  actionsAnchoredToAPage: 34,
+  // 2026-09-04: +1 — `company.invite-worker` (roster invitation by sentence,
+  // real recruiter pilot). Still anchored to a page; still keyed to an actor
+  // type, so the verdict below is unchanged.
+  conversationActions: 35,
+  actionsAnchoredToAPage: 35,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

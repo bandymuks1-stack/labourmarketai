@@ -28,6 +28,8 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getOwnedCompanyById } from "@/lib/company/company-setup";
 import { listMyEngagements } from "@/lib/invitations/network";
 
 /**
@@ -85,11 +87,12 @@ export default async function DashboardHomePage({
   // context. Both reads run in parallel with the booking read below; every
   // failure degrades to the plain greeting — nothing is fabricated.
   const identity = baseIdentityForRole(activeRole) ?? "person";
-  const [{ offers, labels: bookingLabels }, educationWorkspace, learnerLink] =
+  const [{ offers, labels: bookingLabels }, educationWorkspace, learnerLink, agencyWorkspace] =
     await Promise.all([
       loadBookingOffers(activeRole),
       identity === "company" ? loadEducationWorkspaceFlag() : false,
       identity === "person" ? loadActiveLearnerLink() : null,
+      identity === "company" ? loadAgencyWorkspaceFlag() : false,
     ]);
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
@@ -145,6 +148,7 @@ export default async function DashboardHomePage({
         personalIntroPayload={personalIntroPayload}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
+        agencyWorkspace={agencyWorkspace}
         learnerContextLine={learnerContextLine}
       />
     </>
@@ -161,6 +165,26 @@ export default async function DashboardHomePage({
  * semantics). Any failure reads as `false` — the plain employer greeting,
  * never an invented capability.
  */
+/**
+ * Real recruiter pilot (2026-09-04) — is the ACTIVE workspace a staffing
+ * agency? Same resolver the company page uses (membership-validated employer
+ * context → creator-or-governing-member company read → `company_type`).
+ * Decides which starters and which fallback the company greeting offers; the
+ * two-base-identity model is untouched (an agency is a company TYPE). Any
+ * failure reads as `false` — the plain employer greeting, never an invented
+ * agency.
+ */
+async function loadAgencyWorkspaceFlag(): Promise<boolean> {
+  try {
+    const ctx = await resolveEmployerCompanyContext();
+    if (ctx.kind !== "ok") return false;
+    const company = await getOwnedCompanyById(ctx.companyId);
+    return company.kind === "ok" && company.row?.companyType === "staffing_agency";
+  } catch {
+    return false;
+  }
+}
+
 async function loadEducationWorkspaceFlag(): Promise<boolean> {
   try {
     const orgContext = await getActiveOrganizationContext();

@@ -72,6 +72,23 @@ export type ConversationIntent =
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
   //    refines it; the router only opens the door. ─────────────────────────
   | "offer-value" // "turiu 30 kg agurkų ir noriu parduoti" / "turiu dvi laisvas dienas"
+  // ── AGENCY (real recruiter pilot, 2026-09-04). The first real recruiter
+  //    typed "noriu pakviesti klientą" and got the generic fallback: the
+  //    agency's whole vocabulary was missing here, although the canonical
+  //    actions (`agency.invite-client`, `agency.propose-candidate`) already
+  //    existed behind the dashboard. Chat-first doctrine: the sentence IS the
+  //    entry point; the workspace is the secondary view. ─────────────────
+  | "invite-client" // "noriu pakviesti klientą" — agency ↔ client connection
+  | "invite-candidate" // "pakviesk darbuotoją į komandą" — roster invitation
+  | "client-demand" // "ką klientas pasidalino?" — the requests clients shared
+  | "propose-candidate" // "pasiūlyk kandidatą" — offer a roster worker
+  | "proposal-status" // "kaip sekasi mano pasiūlymams?" — the client's decisions
+  // ── STUDENT / EDUCATION INSTITUTION — route-class: the canonical surfaces
+  //    exist (compass, programmes, learner invite); the chat answers with the
+  //    one chip to them until an executor exists. ───────────────────────────
+  | "learning-compass" // "parodyk mano mokymosi kompasą"
+  | "invite-student" // "pakviesk studentą" — learner invitation (relationship student)
+  | "programmes" // "sukurk programą / grupę" — programmes & cohorts
   | "unknown";
 
 export type IntentMatch = {
@@ -365,6 +382,98 @@ const RULES: IntentRule[] = [
       ),
     ],
   },
+  // ── AGENCY vocabulary (real recruiter pilot, 2026-09-04) ──────────────────
+  // Verb + noun, weighted 8 so the bare stems the older rules carry
+  // (`kandidat` 6 in `candidates`, `darbuotoj` 4 in `need-workers`, `offer` 3
+  // in `offers`) never outrank an explicit agency act. LT/EN/RU/NL/DE, the
+  // five routed locales; every pattern is folded like the sentence, so
+  // "pakviesti klienta" typed without diacritics lands identically.
+  {
+    intent: "invite-client",
+    patterns: [
+      // verb → client: "noriu pakviesti klientą", "pridėti klientą", "noriu
+      // prijungti įmonę kaip klientą", "invite a client", "Kunden einladen",
+      // "klant uitnodigen", "пригласить клиента"
+      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|prijung|prisijung|add|invite|connect|onboard|einlad|hinzuf|verbind|uitnodig|toevoeg|koppel|приглас|добав|подключ)\\w*\\s*.{0,30}(klient|client|kunde|klant|užsakov|клиент|заказчик)", 8),
+      // client → verb: "klientą pakviesti", "Kunde hinzufügen", "клиента добавить"
+      p("(klient|client|kunde|klant|užsakov|клиент|заказчик)\\w*\\s*.{0,24}(pakvies|kviest|prijung|prid[eė]t|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)", 8),
+    ],
+  },
+  {
+    intent: "invite-candidate",
+    patterns: [
+      // "pakviesk darbuotoją / kandidatą", "pridėti darbuotoją į komandą",
+      // "invite a worker", "Mitarbeiter einladen", "medewerker uitnodigen",
+      // "пригласить работника"
+      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|prijung|add|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)\\w*\\s*.{0,30}(kandidat|darbuotoj|specialist|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник|кандидат)", 8),
+      // "į komandą" / "to the team" / "zum Team" / "aan het team" / "в команду"
+      p("(pakvies|pakviesk|kviesk|prid[eė]|add|invite|einlad|uitnodig|приглас|добав)\\w*\\s*.{0,24}(į\\s+komand|komandos\\s+nar|to\\s+(the\\s+)?team|team\\s+member|zum\\s+team|aan\\s+het\\s+team|в\\s+команд)", 8),
+      // noun → verb (DE/NL word order, LT object-first): "Mitarbeiter
+      // einladen", "medewerker uitnodigen", "darbuotoją pakviesti"
+      p("(kandidat|darbuotoj|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник)\\w*\\s*.{0,20}(pakvies|kviest|prid[eė]t|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)", 8),
+    ],
+  },
+  {
+    intent: "client-demand",
+    patterns: [
+      // "kliento poreikis", "klientų užklausos", "client demand / requests",
+      // "Kundenbedarf", "aanvraag van de klant", "запрос клиента"
+      p("(klient|client|kunde|klant|užsakov|клиент|заказчик)\\w*\\s*.{0,24}(poreik|užklaus|paklaus|demand|need|request|order|bedarf|anfrage|auftrag|aanvra|vraag|behoefte|потребн|запрос|заявк)", 7),
+      p("(poreik|užklaus|demand|request|bedarf|anfrage|aanvra|запрос)\\w*\\s*.{0,24}(klient|client|kunde|klant|užsakov|клиент|заказчик)", 7),
+      // "pasidalinti poreikiai" / "shared requests" — what the client let the
+      // agency see, in the client's own words for it.
+      p("(pasidalin|pasidalyt|shared|geteilt|gedeeld|поделил)\\w*\\s*.{0,20}(poreik|užklaus|request|demand|need|bedarf|anfrage|aanvra|запрос)", 7),
+      // "what did the client share" / "ką klientas pasidalino" — the client as
+      // the subject of sharing, no request noun in the sentence.
+      p("(klient|client|kunde|klant|užsakov|клиент)\\w*\\s*.{0,20}(share|dalin|dalij|teilt|geteilt|deelt|gedeeld|подел)", 7),
+    ],
+  },
+  {
+    intent: "propose-candidate",
+    patterns: [
+      // "pasiūlyk kandidatą", "siūlyti darbuotoją", "propose a candidate",
+      // "Kandidaten vorschlagen", "kandidaat voorstellen", "предложить кандидата"
+      p("(pasiūl|siūl|propose|offer|suggest|put\\s+forward|vorschlag|schlage|voorstel|voordragen|предлож|предлага)\\w*\\s*.{0,24}(kandidat|darbuotoj|žmog|specialist|worker|candidate|person|mitarbeiter|kandida|medewerker|работник|кандидат)", 8),
+      // noun → verb: "Kandidaten vorschlagen", "kandidaat voorstellen",
+      // "kandidatą pasiūlyti", "кандидата предложить"
+      p("(kandidat|darbuotoj|worker|candidate|mitarbeiter|kandida|medewerker|работник|кандидат)\\w*\\s*.{0,20}(pasiūl|siūl|propose|vorschlag|voorschlag|voorstel|voordrag|предлож)", 8),
+    ],
+  },
+  {
+    intent: "proposal-status",
+    patterns: [
+      // "pasiūlymų būsena", "kaip sekasi mano pasiūlymams", "proposal status",
+      // "Stand der Vorschläge", "status van mijn voorstellen", "статус предложений"
+      p("(pasiūlym|proposal|offer|vorschl|voorstel|предлож)\\w*\\s*.{0,20}(būsen|status|eig|progress|stadij|stand|состоян|статус)", 7),
+      p("(būsen|status|статус|stand)\\w*\\s*.{0,20}(pasiūlym|proposal|offer|vorschl|voorstel|kandidat|candidate|предлож|кандидат)", 7),
+      p("(kaip\\s+sekasi|how\\s+(are|is)\\s+.{0,12}(going|doing)|wie\\s+steht|hoe\\s+staat|как\\s+(идут|дела))\\s*.{0,24}(pasiūlym|kandidat|proposal|candidate|offer|vorschl|kandida|предлож|кандидат)", 7),
+    ],
+  },
+  // ── STUDENT / EDUCATION INSTITUTION (route-class) ─────────────────────────
+  {
+    intent: "learning-compass",
+    patterns: [
+      p("(mokymosi|learning|lern|leer|обучени|учебн)\\w*\\s*.{0,10}(kompas|compass|kompass|компас)", 8),
+      p("\\b(kompas|compass|kompass|компас)", 5),
+    ],
+  },
+  {
+    intent: "invite-student",
+    patterns: [
+      // "pakviesk studentą / mokinį", "invite a learner", "Schüler einladen",
+      // "student uitnodigen", "пригласить студента"
+      p("(pakvies|pakviesk|kviesk|kviesti|prid[eė]|invite|add|einlad|hinzuf|uitnodig|toevoeg|приглас|добав)\\w*\\s*.{0,24}(student|mokin|besimokan|learner|studier|schüler|leerling|студент|учащ|ученик)", 8),
+    ],
+  },
+  {
+    intent: "programmes",
+    patterns: [
+      // "sukurk programą", "nauja grupė / kohorta", "create a cohort",
+      // "Programm anlegen", "nieuwe opleiding", "создать программу"
+      p("(sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(program|kurs|grup|kohort|cohort|kursus|opleiding|программ|курс|групп|когорт)", 7),
+      p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|наши)\\s+(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)", 6),
+    ],
+  },
   {
     intent: "context",
     patterns: [
@@ -430,6 +539,10 @@ const RULES: IntentRule[] = [
       // the noun. Deliberately NOT "tinkamus darbus", which is a SEARCH and
       // stays in find-work.
       p("(kas|ką)\\s+man\\s+tinka", 3),
+      // Student value: an internship / apprenticeship / traineeship IS an
+      // opportunity on the same board (opportunity_type is a declared value
+      // on the demand) — the same engine answers, never a second one.
+      p("(praktik|stažuot|stazuot|internship|apprentice|trainee|praktikum|ausbildung|\\bstage\\b|stagiair|стажир|практик)", 4),
       p("(what|which)\\s+.{0,12}(suits?|fits?)\\s+me", 3),
       p("что\\s+мне\\s+подходит", 3),
     ],

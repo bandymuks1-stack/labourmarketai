@@ -11610,6 +11610,10 @@
         "reviewEngagements": {
           "label": "Arbeitsbeziehungen ansehen",
           "description": "Sieh, wer für diese Organisation arbeitet, und beende eine Arbeitsbeziehung."
+        },
+        "inviteWorker": {
+          "label": "Mitarbeiter einladen",
+          "description": "Laden Sie eine Person per E-Mail in Ihr Team ein."
         }
       },
       "agency": {
@@ -11699,7 +11703,15 @@
         "teamSize": "Anzahl der Arbeitskräfte",
         "urgency": "Dringlichkeit",
         "saveAsDraft": "Als Entwurf speichern",
-        "opportunityType": "Art der Gelegenheit"
+        "opportunityType": "Art der Gelegenheit",
+        "clientEmail": "E-Mail des Kunden",
+        "clientEmailPlaceholder": "name@firma.de",
+        "workerEmail": "E-Mail des Mitarbeiters",
+        "workerEmailPlaceholder": "name@beispiel.de",
+        "inviteNote": "Notiz (optional)",
+        "inviteNotePlaceholder": "Z. B. Start im Oktober, Baustelle in Kaunas",
+        "rosterWorker": "Teammitglied",
+        "proposalNotePlaceholder": "Z. B. 5 Jahre Erfahrung, kann am Montag anfangen"
       },
       "availability": {
         "available": "Verfügbar",
@@ -11929,7 +11941,40 @@
       "chipLmc": "LMC öffnen",
       "briefLearner": "Du bist bei {organization} eingeschrieben. Praxis und Lernen, die du hier festhältst, zählen als Nachweis.",
       "briefLearnerUnnamed": "Du bist als Lernende:r eingeschrieben. Praxis und Lernen, die du hier festhältst, zählen als Nachweis.",
-      "chipLogLearning": "Lernen oder Praxis festhalten"
+      "chipLogLearning": "Lernen oder Praxis festhalten",
+      "fallbackCompany": "Ich kann bei Personalbedarf, Kandidaten und Projekten helfen. Was möchten Sie tun?",
+      "fallbackAgency": "Ich kann einen Kunden oder Kandidaten einladen, Kundenanfragen und den Stand Ihrer Vorschläge zeigen. Was möchten Sie tun?",
+      "fallbackEducation": "Ich kann helfen, Lernende einzuladen, Programme und Kohorten zu verwalten und die Marktnachfrage zu zeigen. Was möchten Sie tun?",
+      "agencyInviteClientAsk": "Gut. An welche E-Mail-Adresse soll die Kundeneinladung gehen?",
+      "agencyInviteClientPrefilled": "Gut — ich lade den Kunden unter dieser E-Mail-Adresse ein. Bitte unten bestätigen.",
+      "agencyInviteClientDone": "Die Einladung ist erstellt und wartet auf die Annahme des Kunden. Sobald der Kunde annimmt und einen Bedarf teilt, können Sie Kandidaten vorschlagen.",
+      "agencyInviteCandidateAsk": "Gut. An welche E-Mail-Adresse soll die Team-Einladung gehen?",
+      "agencyInviteCandidateDone": "Die Einladung ist erfasst. Es wird keine E-Mail versendet — die Person meldet sich mit dieser Adresse an und nimmt an; danach erscheint sie in Ihrem Team.",
+      "agencyInviteCandidateExists": "Diese Person ist bereits eingeladen oder bereits in Ihrem Team — nichts Neues wurde erfasst.",
+      "agencyNotAgencyWorkspace": "Dieser Arbeitsbereich ist keine Personalagentur, daher gibt es hier keine Kundeneinladungen. Agenturaktionen gehören in einen Agentur-Arbeitsbereich.",
+      "agencySwitchHint": "Das können Sie im Namen Ihres Unternehmens tun — wählen Sie den Arbeitsbereich:",
+      "agencyClientDemandIntro": "Von Ihren Kunden geteilte Anfragen:",
+      "agencyClientDemandNone": "Noch kein Kunde hat eine Anfrage geteilt. Sobald ein verbundener Kunde eine teilt, erscheint sie hier.",
+      "agencyProposalsIntro": "Stand Ihrer Vorschläge:",
+      "agencyProposalsNone": "Noch keine Vorschläge. Sobald ein Kunde einen Bedarf teilt, können Sie ein Teammitglied vorschlagen.",
+      "agencyProposeAsk": "Für welche Anfrage soll der Kandidat vorgeschlagen werden?",
+      "agencyProposeDone": "Der Vorschlag ist erfasst — der Kunde sieht ihn bei seiner Anfrage und kann annehmen oder ablehnen.",
+      "agencyRosterEmpty": "Ihr Team ist noch leer, daher gibt es niemanden vorzuschlagen. Laden Sie zuerst einen Kandidaten ein.",
+      "agencyUnavailable": "Die Agenturdaten konnten gerade nicht gelesen werden. Versuchen Sie es erneut oder öffnen Sie den Unternehmensbereich.",
+      "agencyNext": "Was kommt als Nächstes?",
+      "chipInviteClient": "Kunden einladen",
+      "chipInviteCandidate": "Kandidaten einladen",
+      "chipClientDemand": "Kundenanfragen",
+      "chipProposalStatus": "Stand der Vorschläge",
+      "chipProposeFor": "Kandidaten vorschlagen",
+      "userClientDemand": "Kundenanfragen anzeigen",
+      "userProposalStatus": "Wie steht es um meine Vorschläge?",
+      "learningCompassHint": "Ihr Lernkompass — Richtung, fehlende Fähigkeiten und passende Möglichkeiten:",
+      "chipLearningCompass": "Lernkompass",
+      "inviteStudentHint": "Ein Lernender wird mit einem persönlichen Link aus dem Netzwerkbereich eingeladen (Beziehung „Student“):",
+      "chipInviteStudent": "Lernenden einladen",
+      "programmesHint": "Programme und Kohorten werden im Unternehmensbereich verwaltet — dort legen Sie ein Programm und eine Kohorte an und weisen Lernende zu:",
+      "chipProgrammes": "Programme & Kohorten"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

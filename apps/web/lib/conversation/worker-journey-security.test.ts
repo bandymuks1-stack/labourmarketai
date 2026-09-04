@@ -91,6 +91,13 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/booking/booking-actions",
       "@/lib/projects/actions",
       "@/lib/agency/bridge-actions",
+      // Real recruiter pilot (2026-09-04): the canonical ROSTER invite
+      // (invite_company_worker via lib/company/actions) and the ONE employer
+      // resolver — the chat never knows a company id, so the agency invite
+      // resolves the ACTIVE workspace's company the way every employer write
+      // does (M-P0-3). Reads only; the write stays in the canonical action.
+      "@/lib/company/actions",
+      "@/lib/company/employer-company-context",
       "@/lib/conversation/company-schemas",
       "@/lib/conversation/executor-contract",
     ]);

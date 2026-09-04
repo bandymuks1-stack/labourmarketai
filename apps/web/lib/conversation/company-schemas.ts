@@ -130,9 +130,20 @@ export const companyAssignWorkerSchema = z.object({
 });
 
 export const agencyInviteClientSchema = z.object({
-  agencyCompanyId: uuid,
+  /** Optional since 2026-09-04: the chat never knows the company id — the
+   *  executor resolves the ACTIVE workspace's company (M-P0-3, the same
+   *  resolver every employer write uses). A supplied id is still re-checked
+   *  by the RPC (`owns_company` + staffing_agency). */
+  agencyCompanyId: uuid.optional(),
   /** Shape gate only — the canonical `validateInviteEmail` stays authoritative. */
   email: z.string().trim().email().max(254),
+});
+
+/** Roster invitation by e-mail (company or agency; the active workspace's
+ *  company is resolved server-side). */
+export const companyInviteWorkerSchema = z.object({
+  email: z.string().trim().email().max(254),
+  note: z.string().trim().max(500).nullable().optional(),
 });
 
 export const agencyProposeCandidateSchema = z.object({
@@ -164,6 +175,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.contact-worker": companyContactWorkerSchema,
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
+  "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,
 } as const;
