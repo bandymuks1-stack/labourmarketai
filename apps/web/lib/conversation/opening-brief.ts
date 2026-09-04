@@ -327,6 +327,19 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
         addChip("candidates", t("chipInterestOnMyNeeds"));
       }
     }
+    // Workers who ANSWERED the company's own booking proposals — accepted or
+    // declined — since the bookings surface was last opened (or inside the
+    // last 14 days when it never was). Prod walk 2026-09-05: a worker's
+    // decline in the chat left the employer's next greeting silent. Same
+    // read the bookings badge uses; the caller's own moves never count.
+    if (lines.length < MAX_LINES) {
+      const { getBookingResponsesNewCount } = await import("@/lib/booking/booking-actions");
+      const answered = await getBookingResponsesNewCount({ fallbackDays: 14 });
+      if (answered > 0) {
+        lines.push(t("briefEmployerBookingResponses", { count: answered }));
+        addChip("link:/dashboard/bookings", t("chipEmployerBookings"));
+      }
+    }
   } catch {
     /* no line — a failed read never invents attention */
   }

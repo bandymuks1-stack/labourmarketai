@@ -12140,7 +12140,9 @@
       "documentFileUploaded": "Datei am Dokument angehängt. So steht Ihre Bereitschaft jetzt:",
       "documentFileTooLarge": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
       "documentFileUnsupported": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
-      "documentFileFailed": "Die Datei konnte nicht hochgeladen werden — nichts wurde gespeichert. Versuchen Sie es im Dokumentenzentrum."
+      "documentFileFailed": "Die Datei konnte nicht hochgeladen werden — nichts wurde gespeichert. Versuchen Sie es im Dokumentenzentrum.",
+      "briefEmployerBookingResponses": "{count, plural, one {# Mitarbeiter hat auf Ihren Buchungsvorschlag geantwortet} other {# Mitarbeiter haben auf Ihre Buchungsvorschläge geantwortet}}.",
+      "chipEmployerBookings": "Meine Vorschläge"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

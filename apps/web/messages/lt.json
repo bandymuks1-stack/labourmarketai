@@ -12140,7 +12140,9 @@
       "documentFileUploaded": "Failas pridėtas prie dokumento. Štai jūsų pasiruošimas dabar:",
       "documentFileTooLarge": "Failas didesnis nei 5 MB — niekas neišsaugota.",
       "documentFileUnsupported": "Šis failo tipas nepalaikomas — naudokite PDF, Word arba nuotrauką.",
-      "documentFileFailed": "Failo įkelti nepavyko — niekas neišsaugota. Pabandykite dokumentų centre."
+      "documentFileFailed": "Failo įkelti nepavyko — niekas neišsaugota. Pabandykite dokumentų centre.",
+      "briefEmployerBookingResponses": "{count, plural, one {# darbuotojas atsakė į jūsų rezervacijos pasiūlymą} few {# darbuotojai atsakė į jūsų rezervacijų pasiūlymus} other {# darbuotojų atsakė į jūsų rezervacijų pasiūlymus}}.",
+      "chipEmployerBookings": "Mano pasiūlymai"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
