@@ -185,6 +185,26 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "confirmCvWorkHistoryAction" },
   },
   {
+    /**
+     * Record a document by sentence (owner contract 2026-09-04 §12/§14 —
+     * documents first-class). "Turiu naują A1 iki 2027-03" → the one inline
+     * form (type / country / valid until, pre-filled from the sentence) over
+     * the canonical upsert the documents page uses. The file itself stays a
+     * documents-centre upload; the readiness re-answers right after.
+     */
+    id: "worker.add-document",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.addDocument.label",
+    descriptionKey: "conversation.actions.worker.addDocument.description",
+    confirmation: "reversible_write",
+    precondition: "has_worker_row",
+    migrationSensitive: true,
+    telemetryEvent: E.profileSaved,
+    advancedRoute: "/dashboard/documents",
+    handler: { kind: "server_action", ref: "upsertWorkerDocumentAction" },
+  },
+  {
     id: "worker.add-language",
     subject: "worker",
     allowedRoles: ["worker"],

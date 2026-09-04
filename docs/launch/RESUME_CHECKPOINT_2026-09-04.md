@@ -9,9 +9,9 @@
 
 | Item | Value |
 |---|---|
-| Production | `f307e574` (#1483) deploying at checkpoint time; last walked build `287b6fb0` (internship honest answer). Next proof: `walk-create-project-prod.cjs` on `f307e574` (E2E agency identity; delete the row afterwards) — confirm `/api/health` `build` on resume |
-| `main` | #1467–#1474 (starters, employer sentence, documents, institution, skill-gap→documents, compass, shared-needs fix, attention) · #1476 My Space code · #1477 opportunity type · #1478 end date · #1479 absent type NAMED · #1480 typed-sentence usage · #1481 same-dimension alternatives · #1482 REORDER chip · #1483 project by sentence. Open (auto-merge): **#1484** institution learner outcomes; branch `feat/cc/attention-documents-interest` (worker documents rung + employer candidates-waiting rung; PR after build). RED draft: **#1475** My Space table (owner gate) |
-| Active P0 chain | prod-verify #1483 (create-project walk) → PR attention rungs → project AFTER creation in the chat (open the new project's panel from the create-project onDone; assign people there) → next broken ordinary-human link |
+| Production | `6fc477d9` (#1487) walked: client offer decision by sentence + worker documents attention line. Earlier today: `f307e574` create-project, `d543867d` institution outcomes, `287b6fb0` internship honest answer. Next proof: `walk-add-document-prod.cjs` after #1488 — confirm `/api/health` `build` on resume |
+| `main` | #1467–#1474 · #1476–#1487 (My Space code/usage/reorder · opportunity type · end date · absent type NAMED · same-dimension alternatives · project by sentence + project after creation · institution learner outcomes · attention rungs: worker documents, employer candidates waiting, employer agency offers waiting · client decides on agency offer by sentence). Open (auto-merge): **#1488** a document recorded by sentence. RED draft: **#1475** My Space table (owner gate) |
+| Active P0 chain | prod-verify #1488 (`walk-add-document-prod.cjs`: prefilled type + valid-until, save, readiness re-answers) → next broken ordinary-human link (candidates: the worker's document FILE upload by chat is still a documents-centre step; the agency sees the client's decision in its progress list — proven read, no push; institution outcomes above 5 learners unproven) |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
 | Local stack | Docker Desktop dead → `LOCAL_DOCKER_UNAVAILABLE`; verification = unit/guards/typecheck/lint/build + CI + prod walks with bounded `e2e-*` identities (scratchpad `walk-*.cjs`, `wait-prod.cjs`; `curl` denied in this harness) |
@@ -32,16 +32,16 @@
 
 | Actor | Usable by sentence in prod | Still missing |
 |---|---|---|
-| Worker | find work, log work, CV, documents + gaps with closing step | training suggestion for a skills gap (**owner gate**: public programme projection); ~~locative country names~~ (already handled: `termStem` + letter run matches "Vokietijoje" — verified 2026-09-04 evening) |
-| Employer | need → form → demand → candidates → contact/booking; the owner's sentence structured | end date / duration; site as a project |
-| Agency | whole chain by sentence; attention lines (offers awaiting, needs without offer, clients pending) (#1474) | client's decision by sentence (chips exist on the scouting page); e-mail delivery (**owner gate**) |
+| Worker | find work, log work, CV, documents + gaps; attention: expiring / missing documents (#1485/#1487); a document RECORDED by sentence (#1488, PR) | the file itself (documents-centre upload); training suggestion for a skills gap (**owner gate**: public programme projection) |
+| Employer | need → form → demand → candidates → contact/booking; the owner's sentence structured incl. end date; a project by sentence and people assigned right after (#1483/#1486); attention: candidates waiting for an answer, agency offers waiting (#1485/#1487) | site readiness / work packages (§11 Project Field) |
+| Agency | whole chain by sentence; attention lines (#1474); the CLIENT decides on the offer by sentence, accept → canonical booking (#1487, prod-proven decline) | e-mail delivery (**owner gate**) |
 | Institution | programme / cohort / learner invitation / assignment / list; attention: pending learner invitations; learner OUTCOMES block (#1484: the one caller of `institution_learner_outcomes_v1`, suppression said) | e-mail delivery (**owner gate**) |
 | Student | compass answered; "kur galiu atlikti praktiką?" narrows to internships (#1477), NAMES an absent type (#1479) and lists what IS visible on the same dimension (#1481) | positive internship proof needs a demand from a VERIFIED company visible to a worker — no E2E company is verified; verifying one exposes test demands to real workers (**owner decision**) |
 | Everyone | My Space: pinned row + ask after repeated use (chip AND typed sentence, #1480) + unpin + "Į priekį" reorder (#1482) — code only until the table is applied (#1475 owner-gated) | — |
 
 ## Queue (contract §33; next automatic step first)
 
-1. Consume the create-project walk result (background task started 2026-09-04 evening; `walk-create-project/` screenshots) → record; delete the E2E project row. Then PR the attention branch; then the chat's create-project `onDone` → open the new project's panel (`selectProjectRef`) so people are assigned right there.
+1. Consume #1488: rebuild pushed after the server-only split (`document-type-guess.ts`); after merge run `walk-add-document-prod.cjs` (worker two) and record in `2026-09-04-documents-in-chat.md`; then the next broken link from the Active P0 chain row.
 2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
 3. F2: end date / duration in the demand structurer; the site as a project object.
 4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.

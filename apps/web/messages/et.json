@@ -3294,6 +3294,10 @@
           "label": "[EN] Add a language",
           "description": "[EN] State a language you speak and your level."
         },
+        "addDocument": {
+          "label": "Märgi dokument",
+          "description": "Tõend, luba või sertifikaat — kehtivusajaga, et valmisolek oleks tõeline."
+        },
         "saveSkills": {
           "label": "[EN] Choose your skills",
           "description": "[EN] Select the skills for your work direction."
@@ -3526,6 +3530,11 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "documentType": "Dokumendi liik",
+        "documentCountry": "Riik (valikuline)",
+        "validUntil": "Kehtib kuni",
+        "validUntilPlaceholder": "nt 2027-03-31",
+        "documentNote": "Märkus (valikuline)",
         "projectTitle": "Projekti nimi",
         "projectTitlePlaceholder": "nt Rotterdami ladu",
         "projectCity": "Linn (valikuline)",
@@ -3782,6 +3791,9 @@
       "offerAccepted": "Vastu võetud. Kandidaadile saadeti broneeringu ettepanek — tema vastust näete siin.",
       "offerDeclined": "Tagasi lükatud. Agentuur näeb teie otsust.",
       "offerDecisionFailed": "Otsust ei õnnestunud salvestada — pakkumine võib olla juba suletud. Vaadake kandidaatide loendit.",
+      "documentAddIntro": "Märgime dokumendi: liik, riik ja kehtivus. Faili saate lisada dokumendikeskuses.",
+      "documentAddDone": "Dokument märgitud. Siin on teie valmisolek praegu:",
+      "documentAddUnavailable": "Dokumendikataloogi ei õnnestunud praegu laadida — märkige dokument dokumendikeskuses.",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

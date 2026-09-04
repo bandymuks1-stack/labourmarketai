@@ -28,6 +28,7 @@ const SENTENCE_REFS: Partial<Record<ConversationIntent, { ref: string; company?:
   "calendar-view": { ref: "agenda" },
   engagements: { ref: "engagements" },
   documents: { ref: "documents-centre" },
+  "add-document": { ref: "f:worker.add-document" },
   "learning-compass": { ref: "compass-page" },
   projects: { ref: "projects", company: true },
   candidates: { ref: "candidates", company: true },

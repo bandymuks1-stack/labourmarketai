@@ -173,6 +173,31 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
   },
 ] as const;
 
+/** "Record a document" — BUILT per turn from the canonical catalogues the
+ *  server read returns (types + countries), never a list of its own. */
+export function workerAddDocumentForm(
+  types: ReadonlyArray<{ value: string; label: string }>,
+  countries: ReadonlyArray<{ value: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "worker.add-document",
+    titleKey: "conversation.actions.worker.addDocument.label",
+    fields: [
+      { name: "typeSlug", kind: "select", labelKey: "conversation.forms.fields.documentType", required: true, options: types.map((o) => ({ value: o.value, label: o.label })) },
+      { name: "country", kind: "select", labelKey: "conversation.forms.fields.documentCountry", options: [{ value: "", label: "—" }, ...countries.map((o) => ({ value: o.value, label: o.label }))] },
+      { name: "validUntil", kind: "text", labelKey: "conversation.forms.fields.validUntil", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
+      { name: "note", kind: "text", labelKey: "conversation.forms.fields.documentNote", maxLength: 500 },
+    ],
+    build: (st) => ({
+      typeSlug: s(st.typeSlug),
+      country: s(st.country) || null,
+      status: "ready",
+      validUntil: s(st.validUntil) || null,
+      note: s(st.note) || null,
+    }),
+  };
+}
+
 export function getWorkerForm(actionId: string): WorkerFormSpec | undefined {
   return WORKER_FORMS.find((f) => f.actionId === actionId);
 }

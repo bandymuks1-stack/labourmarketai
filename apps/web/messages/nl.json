@@ -11523,6 +11523,10 @@
           "label": "Taal toevoegen",
           "description": "Geef een taal op die je spreekt en je niveau."
         },
+        "addDocument": {
+          "label": "Document vastleggen",
+          "description": "Een certificaat, vergunning of ID — met vervaldatum, zodat uw gereedheid klopt."
+        },
         "saveSkills": {
           "label": "Vaardigheden kiezen",
           "description": "Selecteer de vaardigheden voor je werkrichting."
@@ -11757,6 +11761,11 @@
         "workerEmailPlaceholder": "naam@voorbeeld.nl",
         "inviteNote": "Notitie (optioneel)",
         "inviteNotePlaceholder": "Bijv. start in oktober, locatie Kaunas",
+        "documentType": "Documenttype",
+        "documentCountry": "Land (optioneel)",
+        "validUntil": "Geldig tot",
+        "validUntilPlaceholder": "bijv. 2027-03-31",
+        "documentNote": "Opmerking (optioneel)",
         "projectTitle": "Projectnaam",
         "projectTitlePlaceholder": "bijv. Magazijn Rotterdam",
         "projectCity": "Stad (optioneel)",
@@ -12082,6 +12091,9 @@
       "offerAccepted": "Geaccepteerd. De kandidaat kreeg een boekingsvoorstel — zijn antwoord ziet u hier.",
       "offerDeclined": "Afgewezen. Het bureau ziet uw beslissing.",
       "offerDecisionFailed": "De beslissing kon niet worden opgeslagen — het aanbod is misschien al gesloten. Controleer de kandidatenlijst.",
+      "documentAddIntro": "We leggen het document vast: type, land en geldigheid. Het bestand kunt u in het documentencentrum toevoegen.",
+      "documentAddDone": "Document vastgelegd. Dit is uw gereedheid nu:",
+      "documentAddUnavailable": "De documentcatalogus kon nu niet worden geladen — leg het document vast in het documentencentrum.",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan."
     },

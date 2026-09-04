@@ -2,6 +2,7 @@ import "server-only";
 
 import { confirmCvWorkHistoryAction } from "@/lib/profile/cv-section-import-actions";
 import { saveWorkerLanguageAction } from "@/lib/worker/worker-languages-actions";
+import { upsertWorkerDocumentAction } from "@/lib/documents/document-actions";
 import { saveWorkerCardAction } from "@/lib/worker/work-card-actions";
 import { saveWorkerAvailabilityPrefsAction } from "@/lib/worker/availability-prefs-actions";
 import { saveWorkerEducationAction } from "@/lib/worker/worker-education-actions";
@@ -60,6 +61,26 @@ export const WORKER_EXECUTORS: {
       isCurrent: input.isCurrent,
     });
     return r.ok ? { ok: true } : { ok: false, code: r.code, existing: r.existing };
+  },
+
+  "worker.add-document": async (input, ctx) => {
+    // The ONE document write (`upsert_worker_document` behind the canonical
+    // action the documents page uses): type + country validated there.
+    const r = await upsertWorkerDocumentAction(
+      null,
+      fd({
+        document_type_slug: input.typeSlug,
+        country: input.country ?? "",
+        status: input.status,
+        valid_from: input.validFrom ?? "",
+        valid_until: input.validUntil ?? "",
+        note: input.note ?? "",
+        locale: ctx.locale,
+      }),
+    );
+    if (r && r.ok) return { ok: true, data: { typeSlug: input.typeSlug } };
+    const code = r ? r.code : "error";
+    return { ok: false, code: code === "needs_migration" ? "needs_migration" : code === "invalid" ? "invalid" : code === "not_authenticated" || code === "no_worker" ? "not_authorized" : "error" };
   },
 
   "worker.add-language": async (input) => {

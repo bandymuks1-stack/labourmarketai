@@ -219,6 +219,9 @@ const CHAT_KEYS = [
   "offerAccepted",
   "offerDeclined",
   "offerDecisionFailed",
+  "documentAddIntro",
+  "documentAddDone",
+  "documentAddUnavailable",
 ] as const;
 
 const WORKLOG_KEYS = [

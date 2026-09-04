@@ -91,6 +91,7 @@ export type ConversationIntent =
   | "programmes" // "sukurk programą / grupę" — programmes & cohorts
   | "create-project" // "sukurk projektą Roterdame" — the SITE as a project object (F2)
   | "agency-offers" // "kokius kandidatus pasiūlė agentūra?" — the client's side of the bridge
+  | "add-document" // "turiu naują A1 iki 2027-03" — record a document, by sentence
   | "unknown";
 
 export type IntentMatch = {
@@ -863,6 +864,17 @@ const RULES: IntentRule[] = [
       // "kandidaten … het bureau", "кандидатов предложило агентство"
       p("(kandidat|candidate|кандидат|kandida)\\w*\\s*.{0,28}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 9),
       p("(pasi[uū]l|si[uū]l|offer|propos|предлож|aangebod|aanbied|vorschl|vorgeschlag)\\w*\\s*.{0,20}(agent[uū]r|agency|agencies|агент|bureau|agentur)", 9),
+    ],
+  },
+  {
+    intent: "add-document",
+    patterns: [
+      // "turiu naują A1 iki 2027-03", "gavau leidimą dirbti", "pratęsiau
+      // pažymėjimą", "I have a new VCA", "renewed my certificate", "habe
+      // einen neuen Ausweis", "ik heb een nieuwe vergunning", "получил
+      // разрешение": a document to RECORD, not the documents folder to open.
+      p("(turiu|gavau|atsinaujin|prat[eę]s|prid[eė]|[iį]kel|u[zž]ra[sš]|užregistr|have|got|renewed|add|upload|record|habe|bekommen|erneuert|hinzuf|heb|gekregen|verlengd|toevoeg|получил|продлил|добав|загруз|запиш)\\w*\\s*.{0,24}(dokument|pa[zž]ym|sertifik|certif|leidim|permit|pas[aą]\\b|passport|\\ba1\\b|\\bvca\\b|zertifik|ausweis|vergunning|paspoort|документ|сертиф|разрешен|паспорт)", 9),
+      p("(nauj|new|neu|nieuw|нов)\\w*\\s*.{0,10}(pa[zž]ym|sertifik|certificate|zertifikat|certificaat|сертификат|leidim|permit|vergunning|\\ba1\\b|\\bvca\\b)", 9),
     ],
   },
   {
