@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { classifyIntent } from "@/lib/conversation/intent-router";
@@ -74,6 +77,20 @@ describe("the student's sentence narrows the board", () => {
     expect(classifyIntent(text).intent).toBe("opportunities");
     expect(readWorldState(text, vocab).filters.opportunityType).toBe("internship");
   });
+  it("a type NOT on the board is still understood and reported as unavailable — never silently the whole board", () => {
+    // Prod walk 2026-09-04: no verified company had an internship demand, so
+    // "praktiką" was an unknown word and the student got everything. The
+    // closed set is always in the vocabulary; availability comes from the
+    // board (same rule as a country the board does not contain).
+    const withoutInternships = vocab.map((t) => (t.dimension === "opportunityType" ? { ...t, available: false } : t));
+    const reading = readWorldState("Kur galiu atlikti praktiką?", withoutInternships);
+    expect(reading.filters.opportunityType ?? null).toBeNull();
+    expect(reading.matches.some((m) => m.dimension === "opportunityType" && m.available === false)).toBe(true);
+    const SRC = readFileSync(join(__dirname, "..", "ai-workspace", "vocabulary-server.ts"), "utf8");
+    expect(SRC).toMatch(/for \(const value of OPPORTUNITY_TYPES\)/);
+    expect(SRC).toMatch(/available: facets\.opportunityTypes\.includes\(value\)/);
+  });
+
   it("a plain job search sets no type", () => {
     expect(readWorldState("Ieškau darbo Lietuvoje", vocab).filters.opportunityType ?? null).toBeNull();
   });

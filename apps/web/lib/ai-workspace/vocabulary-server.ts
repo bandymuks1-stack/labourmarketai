@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { countryDisplayName } from "@/lib/location/country-model";
 import { collectDiscoveryFacets, type DiscoveryFacets } from "@/lib/opportunities/discovery-filters";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import type { OpportunityNeed } from "@/lib/opportunities/opportunity-fit";
 import { activeLocales } from "@/lib/i18n/config";
 import { buildWorkTypeLabelMap, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
@@ -151,13 +152,24 @@ export async function buildWorkspaceVocabulary(
     internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
     apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
   };
-  for (const value of facets.opportunityTypes) {
+  // EVERY type of the closed set is a term, marked available only when a
+  // demand of that type is on the person's board. Prod walk 2026-09-04: with
+  // no internship on the board the word "praktiką" was simply unknown and
+  // the student got the whole board — the honest answer is "I understood
+  // internships; none is visible to you right now" (same rule as a country
+  // that is not on the board).
+  for (const value of OPPORTUNITY_TYPES) {
     const names = new Set<string>(EVERYDAY_TYPE_WORDS[value] ?? []);
     for (const t of typeCatalogues) {
       if (t.has(value)) names.add(t(value) as string);
     }
     if (names.size > 0) {
-      terms.push({ dimension: "opportunityType", value, terms: [...names], available: true });
+      terms.push({
+        dimension: "opportunityType",
+        value,
+        terms: [...names],
+        available: facets.opportunityTypes.includes(value),
+      });
     }
   }
 
