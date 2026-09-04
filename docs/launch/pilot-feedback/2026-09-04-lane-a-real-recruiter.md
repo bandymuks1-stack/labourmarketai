@@ -79,6 +79,28 @@ identity with a real legal name (recommended), or the owner decides that an
 existing agency row should be re-owned by this account (a data change the
 agent will not make without that decision).
 
+## Production proof of the fixed path (#1463 → `20c0c5dd`, 05:07 UTC) — E2E identity, NOT the real user
+
+Bounded synthetic identity `e2e-timing-…@labourmarket.ai` (existed since 2026-09-02, never onboarded;
+magic-link session, no password, no account created). Chromium 390 px against production:
+
+| Step | Observed |
+|---|---|
+| onboarding → agency intent → name + country → Continue | lands on `/lt/dashboard/start/company?type=staffing_agency` — no `new=1` (12.7 s from open) |
+| setup form | title "Sukurti įmonės profilį", no "existing company" card, **Personalo agentūra pre-selected**, hidden target = the onboarding row's uuid |
+| save | "Įmonė išsaugota — ji aktyvi ir naudojama dabar." + workspace door |
+| workspace | agency bridge rendered (not gated), real public demand card "46742 aktyvių darbo vietų · 8832 darbdavių" (17.1 s from open) |
+| reload + revisit setup | bridge still there; setup shows ONE company in edit mode, type "Personalo agentūra", no ambiguity chooser |
+| DB | exactly **1** company (`staffing_agency`, LT, named), 1 organisation, 1 owner membership; events `onboarding_completed{intent: agency}` → `organization_created` → `company_dashboard_viewed` |
+
+Residue (labelled, keep or clean under G-9): company `0a26c7bf…` "E2E Agentūra UAB (testinis subjektas)".
+
+Mobile friction measured on the agency workspace (390 px, page = 11,408 px, 22 sections):
+public demand card at 1,423 px (≈1.7 screens), agency bridge at 3,036 px (≈3.6 screens), roster
+invite form at 6,498 px (≈7.7 screens). Nothing is broken; the first-value surfaces are simply far
+down. Candidate next slice: agency mode orders bridge + roster + demand first. Not changed here
+(one measured defect per PR).
+
 ## Milestones
 
 - REAL_RECRUITER_USED_PRODUCT = FALSE (account exists, intent clicked, nothing persisted by the recruiter yet)

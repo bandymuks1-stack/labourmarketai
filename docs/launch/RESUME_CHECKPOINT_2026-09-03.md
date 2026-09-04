@@ -1,5 +1,21 @@
 # RESUME_CHECKPOINT — 2026-09-03 (execution mode: FIRST REAL ECOSYSTEM USE, late session)
 
+## UPDATE — 2026-09-04 morning (first REAL recruiter account) — READ THIS FIRST
+
+| Item | Value |
+|---|---|
+| `main` / production | **`20c0c5dd`** (#1463) — health `build=20c0c5dd` verified 05:07 UTC |
+| Real Lane A account | Google account, `lt`, `signup_completed` 04:19:07 UTC (= T0), `role_selected {intent: agency}` 04:27:30, step 2 (name + country) **not submitted**; 0 companies / orgs / invitations; single canonical identity. REAL_RECRUITER_USED_PRODUCT = FALSE |
+| P0 fixed before the real user reached it | onboarding + `?new=1` created a SECOND company ("<name> UAB" shell + the real one) → fail-closed workspace resolver → "no company profile" (prod 2026-09-02). #1463: router drops `new=1`, no fabricated seed, the setup page completes the shell (`firstSetup`), company dashboard sends a shell back to setup |
+| TTFV | `first_real_action` / `first_real_result` now EMITTED on the agency bridge (server actions + where each side sees the other's response). Before #1463 they were declared only |
+| Prod proof (E2E identity, separate from real evidence) | full first-session path walked on `20c0c5dd` at 390 px: onboarding → agency preset → ONE company → workspace with bridge + real demand → persists. `docs/launch/pilot-feedback/2026-09-04-lane-a-real-recruiter.md` |
+| Owner's next step | finish the two screens on the real account (name + country → agency legal name + country → "Išsaugoti įmonę"); business fact needed = the agency's legal name |
+| Dev machine | Docker Desktop 4.75 fails to start (Inference manager listener error — Quit / Reset dialog) → no local stack this session; prod probes use the bounded `e2e-*@labourmarket.ai` identities via magic-link mint (see memory) |
+
+Next smallest slices: agency workspace order on mobile (bridge / roster / demand first — measured 3.6 / 7.7 / 1.7 screens down); roster invitation e-mail (today none is sent; candidate must sign in with the invited address and accept); `first_real_result step=system` for the agency (public demand card with count > 0); `/dashboard/start/*` hardcoded `label(lt,en)` → i18n keys.
+
+---
+
 ## UPDATE — evening run (2026-09-03, after batch D) — READ THIS FIRST
 
 | Item | Value |
