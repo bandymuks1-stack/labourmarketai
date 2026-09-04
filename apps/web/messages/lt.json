@@ -1646,6 +1646,12 @@
         "statusDeclined": "atsisakė",
         "statusExpired": "pasibaigė",
         "statusRevoked": "atšaukta",
+        "outcomesTitle": "Rezultatai",
+        "outcomesSuppressed": "Rezultatai rodomi, kai prisijungę bent {floor} besimokantieji (dabar {count}). Tik skaičiai, niekada vardai.",
+        "outcomesActive": "{count} įrašė darbą per 30 dienų",
+        "outcomesInterest": "{count} parodė susidomėjimą darbu",
+        "outcomesBookings": "{count} priėmė pasiūlymą",
+        "outcomesEngagements": "{count} dirba šiuo metu",
         "unavailable": "Šiuo metu besimokančiųjų duomenų įkelti nepavyko. Perkraukite puslapį; jei taip ir lieka, kvietimai vis tiek galioja."
       },
       "title": "Įmonės darbo erdvė",
