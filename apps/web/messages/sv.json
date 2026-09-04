@@ -3748,7 +3748,19 @@
       "eduNext": "Vad händer nu?",
       "chipCreateProgramme": "Skapa program",
       "chipCreateCohort": "Skapa grupp",
-      "chipAssignLearner": "Tilldela elev"
+      "chipAssignLearner": "Tilldela elev",
+      "mySpaceTitle": "Mitt utrymme",
+      "chipManagePins": "Hantera",
+      "pinAsk": "Du använder detta ofta. Lägga till i Mitt utrymme?",
+      "chipPinYes": "Lägg till",
+      "chipPinNo": "Inte nu",
+      "pinDone": "Tillagt i Mitt utrymme — du hittar det högst upp.",
+      "pinCap": "Mitt utrymme har redan {max} poster. Ta bort en för att lägga till en ny.",
+      "pinUnavailable": "Mitt utrymme kan inte sparas just nu.",
+      "pinsManageIntro": "Ditt Mitt utrymme. Tryck på det du vill ta bort:",
+      "pinsNone": "Mitt utrymme är tomt. När du använder något ofta föreslår jag att lägga till det.",
+      "unpinPrefix": "Ta bort",
+      "unpinDone": "Borttaget från Mitt utrymme."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

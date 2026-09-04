@@ -195,6 +195,19 @@ const CHAT_KEYS = [
   "chipCreateProgramme",
   "chipCreateCohort",
   "chipAssignLearner",
+  // My Space (owner contract 2026-09-04 §4C).
+  "mySpaceTitle",
+  "chipManagePins",
+  "pinAsk",
+  "chipPinYes",
+  "chipPinNo",
+  "pinDone",
+  "pinCap",
+  "pinUnavailable",
+  "pinsManageIntro",
+  "pinsNone",
+  "unpinPrefix",
+  "unpinDone",
 ] as const;
 
 const WORKLOG_KEYS = [

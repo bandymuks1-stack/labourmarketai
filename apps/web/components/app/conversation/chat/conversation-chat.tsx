@@ -13,6 +13,16 @@ import {
 import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader } from "./conversation-header";
+import { MySpaceRow } from "./my-space-row";
+import { pinAction, unpinAction } from "@/lib/workspace/pins-actions";
+import {
+  PIN_CAP,
+  isPinnableRef,
+  recordPinUsage,
+  shouldAskToPin,
+  type PinUsage,
+  type WorkspacePin,
+} from "@/lib/workspace/pins-model";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
@@ -338,6 +348,19 @@ export type ChatLabels = {
   agencyInviteClientDone: string;
   agencyInviteCandidateAsk: string;
   agencyInviteCandidateDone: string;
+  // My Space (owner contract 2026-09-04 §4C).
+  mySpaceTitle: string;
+  chipManagePins: string;
+  pinAsk: string;
+  chipPinYes: string;
+  chipPinNo: string;
+  pinDone: string;
+  pinCap: string;
+  pinUnavailable: string;
+  pinsManageIntro: string;
+  pinsNone: string;
+  unpinPrefix: string;
+  unpinDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
   eduInviteAsk: string;
   eduInviteDone: string;
@@ -388,6 +411,11 @@ export type ChatLabels = {
 let uid = 0;
 const nid = () => `m${uid++}`;
 
+/** My Space usage counters — a per-viewer convenience in the browser (never a
+ *  fact about the person; a cleared browser just resets the ask). */
+const PIN_USAGE_KEY = "lm.myspace.usage.v1";
+const PIN_ASKED_KEY = "lm.myspace.asked.v1";
+
 /** A stated start day in the person's own language ("5 October"); UTC day. */
 function formatDay(iso: string, locale: string): string {
   try {
@@ -433,6 +461,7 @@ export function ConversationChat({
   starters = null,
   contextFallback = null,
   workspaceContextLine = null,
+  pins = null,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -487,6 +516,11 @@ export function ConversationChat({
    *  the column the person reads (CHAT_FIRST_DASHBOARD CF-4), never only in
    *  the header chip. `null` = nothing rendered. */
   workspaceContextLine?: string | null;
+  /** MY SPACE (owner contract 2026-09-04 §4C) — the person's own pinned
+   *  references for THIS workspace, read on the server under RLS. `null` =
+   *  the store is unavailable (migration unapplied / read failed): no row,
+   *  no ask — never an invented empty desktop. */
+  pins?: readonly WorkspacePin[] | null;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -2166,10 +2200,116 @@ export function ConversationChat({
   const runEducationProgrammesRef = useRef(runEducationProgrammes);
   runEducationProgrammesRef.current = runEducationProgrammes;
 
+  /**
+   * MY SPACE (owner contract 2026-09-04 §4C): PIN · UNPIN · the ASK after
+   * repeated use. Pins are references the chat already resolves; the row
+   * above the thread runs the same handlers the chips run. Usage is counted
+   * in the browser (per viewer) and the product asks ONCE per reference when
+   * it crosses the threshold — never silently fills the desktop.
+   */
+  const [pinned, setPinned] = useState<WorkspacePin[]>(() => (pins ?? []).slice(0, PIN_CAP));
+  const pinsAvailable = pins !== null;
+  const pendingPinLabelRef = useRef(new Map<string, string>());
+  const pinLabelFor = useCallback(
+    (ref: string): string => {
+      const own = pinned.find((p) => p.ref === ref)?.label;
+      if (own) return own;
+      const pending = pendingPinLabelRef.current.get(ref);
+      if (pending) return pending;
+      const fromRow = starterChips.find((c) => c.id === ref)?.label;
+      return fromRow ?? ref.replace(/^(f:|link:\/dashboard\/)/, "");
+    },
+    [pinned, starterChips],
+  );
+  const usageRef = useRef<{ usage: PinUsage; asked: Set<string> }>({ usage: {}, asked: new Set() });
+  useEffect(() => {
+    try {
+      const u = localStorage.getItem(PIN_USAGE_KEY);
+      const a = localStorage.getItem(PIN_ASKED_KEY);
+      usageRef.current = { usage: u ? (JSON.parse(u) as PinUsage) : {}, asked: new Set(a ? (JSON.parse(a) as string[]) : []) };
+    } catch {
+      /* a browser without storage simply never asks */
+    }
+  }, []);
+  const noteUsage = useCallback(
+    (ref: string, label: string) => {
+      if (!pinsAvailable || !isPinnableRef(ref)) return;
+      const now = Date.now();
+      const next = recordPinUsage(usageRef.current.usage, ref, now);
+      usageRef.current = { ...usageRef.current, usage: next };
+      try {
+        localStorage.setItem(PIN_USAGE_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      if (shouldAskToPin(next, ref, now, new Set(pinned.map((p) => p.ref)), usageRef.current.asked)) {
+        usageRef.current.asked.add(ref);
+        try {
+          localStorage.setItem(PIN_ASKED_KEY, JSON.stringify([...usageRef.current.asked]));
+        } catch {
+          /* ignore */
+        }
+        pendingPinLabelRef.current.set(ref, label);
+        assistant(labels.pinAsk, [
+          { id: `pin:${ref}`, label: labels.chipPinYes },
+          { id: `pin-no:${ref}`, label: labels.chipPinNo },
+        ]);
+      }
+    },
+    [pinsAvailable, pinned, assistant, labels.pinAsk, labels.chipPinYes, labels.chipPinNo],
+  );
+  const runPinChip = useCallback(
+    (id: string): boolean => {
+      if (id.startsWith("pin:")) {
+        const ref = id.slice(4);
+        const label = pinLabelFor(ref);
+        void pinAction({ ref, label }).then((r) => {
+          if (r.ok) {
+            setPinned((prev) =>
+              prev.some((p) => p.ref === ref) ? prev : [...prev, { ref, kind: "action", label, position: prev.length }],
+            );
+            assistant(labels.pinDone);
+          } else if (r.code === "cap") {
+            assistant(labels.pinCap.replace("{max}", String(PIN_CAP)));
+          } else {
+            assistant(labels.pinUnavailable);
+          }
+        });
+        return true;
+      }
+      if (id.startsWith("pin-no:")) return true;
+      if (id.startsWith("unpin:")) {
+        const ref = id.slice(6);
+        void unpinAction({ ref }).then((r) => {
+          if (r.ok) {
+            setPinned((prev) => prev.filter((p) => p.ref !== ref));
+            assistant(labels.unpinDone);
+          } else {
+            assistant(labels.pinUnavailable);
+          }
+        });
+        return true;
+      }
+      if (id === "pins:manage") {
+        if (pinned.length === 0) assistant(labels.pinsNone);
+        else
+          assistant(
+            labels.pinsManageIntro,
+            pinned.map((p) => ({ id: `unpin:${p.ref}`, label: `${labels.unpinPrefix}: ${p.label ?? pinLabelFor(p.ref)}` })),
+          );
+        return true;
+      }
+      return false;
+    },
+    [pinned, pinLabelFor, assistant, labels],
+  );
+
   const handleChipRef = useRef<(chip: ChoiceChip) => void>(() => {});
 
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
+      if (runPinChip(chip.id)) return;
+      noteUsage(chip.id, chip.label);
       switch (chip.id) {
         case "compass-page":
           // The compass answer names its next steps as chat actions; the
@@ -2341,7 +2481,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -3177,6 +3317,13 @@ export function ConversationChat({
         data-testid="conversation-chat"
       >
         <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
+        <MySpaceRow
+          pins={pinned.map((p) => ({ ref: p.ref, label: p.label ?? pinLabelFor(p.ref) }))}
+          title={labels.mySpaceTitle}
+          manageLabel={labels.chipManagePins}
+          onPin={(ref) => handleChip({ id: ref, label: pinLabelFor(ref) })}
+          onManage={() => handleChip({ id: "pins:manage", label: labels.chipManagePins })}
+        />
         {/* Column on phones (panel docks under the composer, collapsed until
             something is selected), row from `lg` (panel is the right column
             and is always visible). Same component, one mount. */}

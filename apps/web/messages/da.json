@@ -3748,7 +3748,19 @@
       "eduNext": "Hvad nu?",
       "chipCreateProgramme": "Opret program",
       "chipCreateCohort": "Opret hold",
-      "chipAssignLearner": "Tildel elev"
+      "chipAssignLearner": "Tildel elev",
+      "mySpaceTitle": "Mit område",
+      "chipManagePins": "Administrer",
+      "pinAsk": "Du bruger dette ofte. Tilføj til Mit område?",
+      "chipPinYes": "Tilføj",
+      "chipPinNo": "Ikke nu",
+      "pinDone": "Tilføjet til Mit område — du finder det øverst.",
+      "pinCap": "Mit område har allerede {max} elementer. Fjern et for at tilføje et nyt.",
+      "pinUnavailable": "Mit område kan ikke gemmes lige nu.",
+      "pinsManageIntro": "Dit Mit område. Tryk på det, du vil fjerne:",
+      "pinsNone": "Mit område er tomt. Når du bruger noget ofte, foreslår jeg at tilføje det.",
+      "unpinPrefix": "Fjern",
+      "unpinDone": "Fjernet fra Mit område."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
