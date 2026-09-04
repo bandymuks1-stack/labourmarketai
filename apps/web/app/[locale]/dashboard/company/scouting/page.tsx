@@ -27,6 +27,8 @@ import { FeatureNote } from "@/components/app/feature-note";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { TelemetryView } from "@/components/app/telemetry-view";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
 import {
   deriveCandidatePipelineStage,
@@ -522,6 +524,13 @@ export default async function CompanyScoutingPage({
 
       {selected && offeredCandidates.length > 0 ? (
         <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-agency-offers">
+          {/* TIME_TO_EXTERNAL_HUMAN_RESPONSE for the client company: a real
+              agency proposed a real candidate for this need, and the client
+              is looking at it. Once per tab session; no ids. */}
+          <TelemetryView
+            event={FUNNEL_EVENTS.firstRealResult}
+            metadata={{ surface: "agency_offers", step: "human", role_context: "company" }}
+          />
           <header className="flex flex-col gap-1">
             <h2 className="font-display text-base font-semibold text-text-primary">
               {tOffered("title")}

@@ -30,6 +30,8 @@ Success = A1–A7 completed by one real agency with one real client within a wee
 
 > **Status 2026-09-03 (window 2):** A3–A7 + the candidate's acceptance (runbook A4–A8) are **PROD-PROVEN at the DB level** in one rolled-back transaction (agency invite → client accept → share → offer → client accept = booking → agency progress → candidate accept = engagement; outsider sees 0; agency cannot decide its own offer). Zero residue. What remains is the real people and the UI walk with them.
 
+> **Status 2026-09-04 (first REAL recruiter account):** a real Google account signed up on production (`lt`), clicked the **agency** intent (04:27 UTC) and stopped before the name + country step — nothing persisted by the recruiter yet, REAL_RECRUITER_USED_PRODUCT stays FALSE. Before it went further the agent found and fixed the P0 that would have hit on the next click: onboarding + `?new=1` created a **second** company (a "<name> UAB" shell + the real one) and the workspace resolver then showed "no company profile" (seen on the 2026-09-02 profile). The first setup now completes the onboarding row itself; `first_real_action` / `first_real_result` are emitted on the agency bridge (they were declared only). Evidence and options: `docs/launch/pilot-feedback/2026-09-04-lane-a-real-recruiter.md`.
+
 ## Lane B — real education institution (+ its students)
 
 Entry: signup → intent **"I represent an education institution"** → company setup

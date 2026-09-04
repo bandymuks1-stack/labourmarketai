@@ -61,19 +61,27 @@ describe("first-run intent router (pure)", () => {
     expect(companyPresetForIntents(["student"])).toBeNull();
   });
 
+  it("never sends a fresh company identity to ?new=1 — onboarding already created its one shell row", () => {
+    // Regression (production 2026-09-02): create mode after onboarding made
+    // a SECOND company; two organisations + no pointer = "no company profile".
+    for (const intents of [["hire"], ["agency"], ["education"], ["agency", "education"]] as const) {
+      expect(nextPathForIntents([...intents])).not.toMatch(/new=1/);
+    }
+  });
+
   it("routes a company identity straight to the one canonical setup form with its presets", () => {
-    expect(nextPathForIntents(["hire"])).toBe("/dashboard/start/company?new=1");
+    expect(nextPathForIntents(["hire"])).toBe("/dashboard/start/company");
     expect(nextPathForIntents(["agency"])).toBe(
-      "/dashboard/start/company?new=1&type=staffing_agency",
+      "/dashboard/start/company?type=staffing_agency",
     );
     expect(nextPathForIntents(["education"])).toBe(
-      "/dashboard/start/company?new=1&capability=training_provider",
+      "/dashboard/start/company?capability=training_provider",
     );
     expect(nextPathForIntents(["work"])).toBeNull();
     // A student's first screen is the Learning Compass, not the generic
     // worker setup card; a company intent alongside it still wins the setup
     // form (the company identity needs its organisation first).
     expect(nextPathForIntents(["student"])).toBe("/dashboard/profile#learning-compass");
-    expect(nextPathForIntents(["student", "hire"])).toBe("/dashboard/start/company?new=1");
+    expect(nextPathForIntents(["student", "hire"])).toBe("/dashboard/start/company");
   });
 });

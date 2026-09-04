@@ -396,6 +396,22 @@ describe("activation funnel — key surfaces emit their events", () => {
       file: "lib/company/company-setup.ts",
       mustContain: ["organizationCreated"],
     },
+    // Time-to-first-value (real recruiter pilot, 2026-09-04): the agency
+    // bridge is the first chain that emits the dedicated events. Actions
+    // are server-side (both subjects); each side's RESULT is emitted where
+    // the other side's response becomes visible to it.
+    {
+      file: "lib/agency/bridge-actions.ts",
+      mustContain: ["firstRealAction"],
+    },
+    {
+      file: "components/app/agency-bridge-section.tsx",
+      mustContain: ["firstRealResult"],
+    },
+    {
+      file: "app/[locale]/dashboard/company/scouting/page.tsx",
+      mustContain: ["firstRealResult"],
+    },
     {
       file: "lib/company/team-brigade-actions.ts",
       mustContain: ["organizationCreated"],

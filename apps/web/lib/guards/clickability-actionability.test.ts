@@ -84,7 +84,11 @@ describe("5+6. company identity and create-vs-edit", () => {
     expect(companyNext).toMatch(/href="\/dashboard\/start\/company"/);
   });
   it("setup heading says CREATE for new, EDIT for existing", () => {
-    expect(startCompany).toMatch(/company \? t\("formTitleEdit"\) : t\("formTitleCreate"\)/);
+    // `firstSetup` (2026-09-04): an unnamed onboarding shell is EDITED row-wise
+    // but is a CREATE for the person — the heading must say so.
+    expect(startCompany).toMatch(
+      /company && !firstSetup \? t\("formTitleEdit"\) : t\("formTitleCreate"\)/,
+    );
     for (const loc of ["lt", "en", "ru"] as const) {
       const setup = JSON.parse(read(`messages/${loc}.json`)).roleDashboards
         .company.setup;

@@ -107,6 +107,14 @@ export function companyPresetForIntents(
  * presets in the query) instead of a cockpit that would only send it there.
  * `null` = let the action's role-aware default decide (worker → guided
  * profile setup).
+ *
+ * NO `?new=1` here (real-pilot fix, 2026-09-04): `complete_onboarding` has
+ * already inserted the person's ONE company row (an unnamed shell) by the
+ * time this path is followed, so the setup page must EDIT that row — with
+ * `new=1` it created a second company and the workspace resolver then saw
+ * two organisations, no pointer, and rendered "no company profile" (seen on
+ * production 2026-09-02). The page's own rule — one owned company → edit it
+ * — is exactly what a first company setup needs.
  */
 export function nextPathForIntents(intents: readonly FirstRunIntent[]): string | null {
   const preset = companyPresetForIntents(intents);
@@ -116,8 +124,9 @@ export function nextPathForIntents(intents: readonly FirstRunIntent[]): string |
     // generic worker setup card that says nothing about studying.
     return intents.includes("student") ? "/dashboard/profile#learning-compass" : null;
   }
-  const params = new URLSearchParams({ new: "1" });
+  const params = new URLSearchParams();
   if (preset.companyType) params.set("type", preset.companyType);
   if (preset.capability) params.set("capability", preset.capability);
-  return `/dashboard/start/company?${params.toString()}`;
+  const qs = params.toString();
+  return qs ? `/dashboard/start/company?${qs}` : "/dashboard/start/company";
 }

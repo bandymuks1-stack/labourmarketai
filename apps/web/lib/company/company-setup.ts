@@ -437,7 +437,9 @@ export async function saveCompanySetup(
   // company (the pre-save read found none). An update, or a save whose
   // pre-read failed (`existing.kind !== "ok"`), emits nothing — ambiguity is
   // never counted as a creation. Fire-and-forget.
-  if (existing.kind === "ok" && !existing.row) {
+  // A shell row (no legal name yet — inserted by complete_onboarding / add_role)
+  // becomes a real organisation on THIS save, so it counts as the creation.
+  if (existing.kind === "ok" && (!existing.row || existing.row.legalName === null)) {
     emitServerFunnelEvent(FUNNEL_EVENTS.organizationCreated, {
       source: "company-setup",
       metadata: { surface: "company_setup", entity_type: "company" },
