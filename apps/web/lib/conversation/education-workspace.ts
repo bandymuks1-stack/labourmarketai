@@ -5,6 +5,10 @@ import "server-only";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { readInstitutionPrograms } from "@/lib/education/programs";
+import {
+  EDUCATION_CHAT_LIST_LIMIT,
+  type EducationWorkspaceChatResult,
+} from "@/lib/conversation/education-workspace-contract";
 
 /**
  * Education chat-workspace READ adapter (owner contract 2026-09-04 §15).
@@ -21,37 +25,6 @@ import { readInstitutionPrograms } from "@/lib/education/programs";
  * training_provider capability — stated, never a silent empty list),
  * `unavailable` (the read failed).
  */
-export const EDUCATION_CHAT_LIST_LIMIT = 6;
-
-export interface EducationChatCohort {
-  readonly id: string;
-  readonly name: string;
-  readonly memberCount: number;
-}
-
-export interface EducationChatProgramme {
-  readonly id: string;
-  readonly name: string;
-  readonly demandCount: number | null;
-  readonly cohorts: readonly EducationChatCohort[];
-}
-
-export interface EducationChatLearner {
-  readonly profileId: string;
-  readonly label: string;
-}
-
-export type EducationWorkspaceChatResult =
-  | { readonly kind: "no-company" }
-  | { readonly kind: "not-institution" }
-  | { readonly kind: "unavailable" }
-  | {
-      readonly kind: "ok";
-      readonly organizationId: string;
-      readonly programmes: readonly EducationChatProgramme[];
-      readonly assignable: readonly EducationChatLearner[];
-    };
-
 export async function loadEducationWorkspaceForChat(): Promise<EducationWorkspaceChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
