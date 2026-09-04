@@ -3393,6 +3393,24 @@
           "description": "[EN] Invite a person to your roster by e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Izveidot programmu",
+          "description": "Izveidojiet mācību programmu savā iestādē."
+        },
+        "createCohort": {
+          "label": "Izveidot grupu",
+          "description": "Izveidojiet grupu (plūsmu) programmā."
+        },
+        "assignLearner": {
+          "label": "Piešķirt audzēkni",
+          "description": "Piešķiriet pieņemtu audzēkni grupai."
+        },
+        "inviteLearner": {
+          "label": "Uzaicināt audzēkni",
+          "description": "Uzaiciniet audzēkni pievienoties jūsu iestādei."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "[EN] Review clients",
@@ -3477,6 +3495,18 @@
         "demandLocation": "Vieta",
         "startDate": "Sākuma datums",
         "startDatePlaceholder": "GGGG-MM-DD",
+        "programmeName": "Programmas nosaukums",
+        "programmeNamePlaceholder": "piem., Metinātāju kurss",
+        "programmeDescription": "Apraksts (neobligāti)",
+        "learnerEmail": "Audzēkņa e-pasts",
+        "learnerEmailPlaceholder": "vards@pasts.lv",
+        "learnerName": "Vārds (neobligāti)",
+        "cohortName": "Grupas nosaukums",
+        "cohortNamePlaceholder": "piem., 2026. gada rudens",
+        "cohortStarts": "Sākums (datums)",
+        "cohortEnds": "Beigas (datums)",
+        "cohort": "Grupa",
+        "learner": "Audzēknis",
         "demandLocationPlaceholder": "Pilsēta vai reģions",
         "teamSize": "Darbinieku skaits",
         "urgency": "Steidzamība",
@@ -3699,7 +3729,25 @@
       "inviteStudentHint": "[EN] A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "[EN] Invite a learner",
       "programmesHint": "[EN] Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
-      "chipProgrammes": "[EN] Programmes & cohorts"
+      "chipProgrammes": "[EN] Programmes & cohorts",
+      "eduInviteAsk": "Labi. Uz kādu e-pastu uzaicināt audzēkni?",
+      "eduInviteDone": "Uzaicinājums nosūtīts. Audzēknis pievienosies jūsu iestādei, kad to pieņems.",
+      "eduInviteCreatedNoEmail": "Uzaicinājums izveidots, bet e-pasts netiek sūtīts — kopīgojiet saiti no tīkla sadaļas.",
+      "eduProgrammesIntro": "Jūsu programmas:",
+      "eduProgrammesNone": "Programmu vēl nav. Sāksim ar pirmo.",
+      "eduProgrammeLine": "• {name} — grupas: {cohorts} · tirgus pieprasījums: {demand}",
+      "eduProgrammeCreated": "Programma izveidota. Tagad varat izveidot grupu vai uzaicināt audzēkņus.",
+      "eduCohortPick": "Kurai programmai veidot grupu?",
+      "eduCohortCreated": "Grupa izveidota. Varat piešķirt audzēkņus.",
+      "eduAssignNoCohort": "Grupu vēl nav — vispirms izveidojiet grupu.",
+      "eduAssignNoLearners": "Pieņemtu audzēkņu vēl nav. Uzaiciniet audzēkni — piešķirt varēsiet, kad viņš pieņems uzaicinājumu.",
+      "eduAssignDone": "Audzēknis piešķirts grupai.",
+      "eduNotInstitution": "Šī organizācija vēl nav atzīmēta kā mācību iestāde. Atzīmējiet to uzņēmuma sadaļā.",
+      "eduUnavailable": "Programmas pašlaik nevar nolasīt. Tas nenozīmē, ka to nav.",
+      "eduNext": "Kas tālāk?",
+      "chipCreateProgramme": "Izveidot programmu",
+      "chipCreateCohort": "Izveidot grupu",
+      "chipAssignLearner": "Piešķirt audzēkni"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

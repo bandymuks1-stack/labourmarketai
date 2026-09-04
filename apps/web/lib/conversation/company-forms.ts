@@ -202,9 +202,141 @@ export function agencyProposeCandidateForm(
   };
 }
 
+/**
+ * EDUCATION (owner contract 2026-09-04 §15). "Sukurk programą" needs a name
+ * (everything else is optional); "pakviesk studentą" needs ONE e-mail. Both
+ * are important-tier canonical writes over the same InlineActionForm +
+ * dispatcher. Cohort and assignment forms are BUILT per turn (below) from
+ * the institution's real programmes / cohorts / accepted learners.
+ */
+export const EDUCATION_FORMS: readonly WorkerFormSpec[] = [
+  {
+    actionId: "company.create-programme",
+    titleKey: "conversation.actions.education.createProgramme.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "name",
+        kind: "text",
+        labelKey: "conversation.forms.fields.programmeName",
+        placeholderKey: "conversation.forms.fields.programmeNamePlaceholder",
+        required: true,
+        maxLength: 160,
+      },
+      {
+        name: "description",
+        kind: "textarea",
+        labelKey: "conversation.forms.fields.programmeDescription",
+        maxLength: 2000,
+      },
+    ],
+    build: (st: FormState) => ({
+      name: s(st.name),
+      description: s(st.description) || null,
+      // Recognised from the sentence when it named a trade (structurer);
+      // never typed as a slug.
+      targetProfessionSlug: s(st.targetProfessionSlug) || null,
+      educationTypeSlug: s(st.educationTypeSlug) || null,
+    }),
+  },
+  {
+    actionId: "company.invite-learner",
+    titleKey: "conversation.actions.education.inviteLearner.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "email",
+        kind: "text",
+        labelKey: "conversation.forms.fields.learnerEmail",
+        placeholderKey: "conversation.forms.fields.learnerEmailPlaceholder",
+        required: true,
+        maxLength: 254,
+      },
+      {
+        name: "name",
+        kind: "text",
+        labelKey: "conversation.forms.fields.learnerName",
+        maxLength: 120,
+      },
+    ],
+    build: (st: FormState) => ({ email: s(st.email), name: s(st.name) || null }),
+  },
+] as const;
+
+/** "Sukurk grupę" — a cohort belongs to ONE real programme, picked by the
+ *  person (or the only one). Dates are optional ISO days. */
+export function educationCreateCohortForm(programId: string): WorkerFormSpec {
+  return {
+    actionId: "company.create-cohort",
+    titleKey: "conversation.actions.education.createCohort.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "name",
+        kind: "text",
+        labelKey: "conversation.forms.fields.cohortName",
+        placeholderKey: "conversation.forms.fields.cohortNamePlaceholder",
+        required: true,
+        maxLength: 120,
+      },
+      {
+        name: "startsOn",
+        kind: "text",
+        labelKey: "conversation.forms.fields.cohortStarts",
+        placeholderKey: "conversation.forms.fields.startDatePlaceholder",
+        maxLength: 10,
+      },
+      {
+        name: "endsOn",
+        kind: "text",
+        labelKey: "conversation.forms.fields.cohortEnds",
+        placeholderKey: "conversation.forms.fields.startDatePlaceholder",
+        maxLength: 10,
+      },
+    ],
+    build: (st: FormState) => ({
+      programId,
+      name: s(st.name),
+      startsOn: s(st.startsOn) || null,
+      endsOn: s(st.endsOn) || null,
+    }),
+  };
+}
+
+/** "Priskirk studentą grupei" — both selects list only what the institution
+ *  really has: its cohorts and the learners who accepted its invitation. */
+export function educationAssignLearnerForm(
+  cohorts: ReadonlyArray<{ id: string; label: string }>,
+  learners: ReadonlyArray<{ profileId: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "company.assign-learner",
+    titleKey: "conversation.actions.education.assignLearner.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "cohortId",
+        kind: "select",
+        labelKey: "conversation.forms.fields.cohort",
+        required: true,
+        options: cohorts.map((c) => ({ value: c.id, label: c.label })),
+      },
+      {
+        name: "profileId",
+        kind: "select",
+        labelKey: "conversation.forms.fields.learner",
+        required: true,
+        options: learners.map((l) => ({ value: l.profileId, label: l.label })),
+      },
+    ],
+    build: (st: FormState) => ({ cohortId: s(st.cohortId), profileId: s(st.profileId) }),
+  };
+}
+
 export function getCompanyForm(actionId: string): WorkerFormSpec | undefined {
   return (
     COMPANY_FORMS.find((f) => f.actionId === actionId) ??
-    AGENCY_FORMS.find((f) => f.actionId === actionId)
+    AGENCY_FORMS.find((f) => f.actionId === actionId) ??
+    EDUCATION_FORMS.find((f) => f.actionId === actionId)
   );
 }

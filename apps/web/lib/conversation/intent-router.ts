@@ -484,6 +484,12 @@ const RULES: IntentRule[] = [
       p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|наши)\\s+(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)", 6),
       // noun → verb: "Programm anlegen", "opleiding aanmaken", "programą sukurti"
       p("(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)\\w*\\s*.{0,16}(sukur|kurti|create|erstell|anleg|aanmak|создать|создай)", 7),
+      // Owner contract 2026-09-04 §15 — the institution's other two commands
+      // by sentence: "priskirk studentą grupei" (assign a learner to a
+      // cohort) and "parodyk programas / grupes" (read). Both land here; the
+      // handler reads the sentence's verb to pick the form or the list.
+      p("(priskir|assign|zuweis|toewijz|назнач|zapisz)\\w*\\s*.{0,24}(student|mokin|learner|schüler|leerling|студент|учащ)\\w*\\s*.{0,24}(grup|kohort|cohort|groep|gruppe|групп|поток)", 8),
+      p("(parodyk|rodyk|show|zeig|toon|покажи|список)\\s*.{0,12}(program|grup|kohort|cohort|opleiding|программ|групп)", 6),
     ],
   },
   {

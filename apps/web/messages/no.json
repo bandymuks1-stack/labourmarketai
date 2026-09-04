@@ -3393,6 +3393,24 @@
           "description": "[EN] Invite a person to your roster by e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Opprett program",
+          "description": "Opprett et utdanningsprogram i institusjonen din."
+        },
+        "createCohort": {
+          "label": "Opprett gruppe",
+          "description": "Opprett en gruppe (kull) i et program."
+        },
+        "assignLearner": {
+          "label": "Tildel elev",
+          "description": "Tildel en akseptert elev til en gruppe."
+        },
+        "inviteLearner": {
+          "label": "Inviter elev",
+          "description": "Inviter en elev til å bli med i institusjonen din."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "[EN] Review clients",
@@ -3477,6 +3495,18 @@
         "demandLocation": "Sted",
         "startDate": "Startdato",
         "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
+        "programmeName": "Programnavn",
+        "programmeNamePlaceholder": "f.eks. Sveisekurs",
+        "programmeDescription": "Beskrivelse (valgfritt)",
+        "learnerEmail": "Elevens e-post",
+        "learnerEmailPlaceholder": "navn@mail.no",
+        "learnerName": "Navn (valgfritt)",
+        "cohortName": "Gruppenavn",
+        "cohortNamePlaceholder": "f.eks. Høst 2026",
+        "cohortStarts": "Start (dato)",
+        "cohortEnds": "Slutt (dato)",
+        "cohort": "Gruppe",
+        "learner": "Elev",
         "demandLocationPlaceholder": "By eller region",
         "teamSize": "Antall arbeidere",
         "urgency": "Hastegrad",
@@ -3699,7 +3729,25 @@
       "inviteStudentHint": "[EN] A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "[EN] Invite a learner",
       "programmesHint": "[EN] Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
-      "chipProgrammes": "[EN] Programmes & cohorts"
+      "chipProgrammes": "[EN] Programmes & cohorts",
+      "eduInviteAsk": "Greit. Hvilken e-post skal jeg invitere eleven på?",
+      "eduInviteDone": "Invitasjon sendt. Eleven blir med i institusjonen din når den aksepteres.",
+      "eduInviteCreatedNoEmail": "Invitasjon opprettet, men ingen e-post sendes — del lenken fra nettverksdelen.",
+      "eduProgrammesIntro": "Programmene dine:",
+      "eduProgrammesNone": "Ingen programmer ennå. La oss starte med det første.",
+      "eduProgrammeLine": "• {name} — grupper: {cohorts} · etterspørsel: {demand}",
+      "eduProgrammeCreated": "Program opprettet. Du kan nå opprette en gruppe eller invitere elever.",
+      "eduCohortPick": "Hvilket program gjelder gruppen?",
+      "eduCohortCreated": "Gruppe opprettet. Du kan tildele elever.",
+      "eduAssignNoCohort": "Ingen grupper ennå — opprett først en gruppe.",
+      "eduAssignNoLearners": "Ingen aksepterte elever ennå. Inviter en elev — du kan tildele når invitasjonen er akseptert.",
+      "eduAssignDone": "Elev tildelt gruppen.",
+      "eduNotInstitution": "Denne organisasjonen er ennå ikke merket som utdanningsinstitusjon. Merk det i bedriftsdelen.",
+      "eduUnavailable": "Programmene kan ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+      "eduNext": "Hva nå?",
+      "chipCreateProgramme": "Opprett program",
+      "chipCreateCohort": "Opprett gruppe",
+      "chipAssignLearner": "Tildel elev"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

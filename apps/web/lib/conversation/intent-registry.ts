@@ -203,10 +203,16 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "propose-candidate": { domain: "company", access: "write", handler: "proposeCandidate", ownTyping: true },
   "client-demand": { domain: "company", access: "read", handler: "clientDemand", ownTyping: true },
   "proposal-status": { domain: "company", access: "read", handler: "proposalStatus", ownTyping: true },
-  // ── STUDENT / INSTITUTION — route-class to the canonical surfaces ─────────
+  // ── STUDENT / INSTITUTION ─────────────────────────────────────────────────
+  // Owner contract 2026-09-04 §15: the institution's commands are SENTENCES
+  // over the ONE dispatcher (`education.*` actions) — the learner invitation
+  // opens the one inline form; "programmes" reads the institution's real
+  // programmes and, when the sentence asks to create / add / assign, opens
+  // the matching form built from those rows. The student's compass stays a
+  // route to the profile section that renders it.
   "learning-compass": { domain: "profile", access: "route", handler: "learningCompass", ownTyping: false },
-  "invite-student": { domain: "company", access: "route", handler: "inviteStudent", ownTyping: false },
-  programmes: { domain: "company", access: "route", handler: "programmes", ownTyping: false },
+  "invite-student": { domain: "company", access: "write", handler: "inviteStudent", ownTyping: false },
+  programmes: { domain: "company", access: "write", handler: "programmes", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

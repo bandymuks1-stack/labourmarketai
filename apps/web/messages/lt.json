@@ -11616,6 +11616,24 @@
           "description": "Pakviesk žmogų į savo komandą el. paštu."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Sukurti programą",
+          "description": "Sukurkite mokymo programą savo įstaigoje."
+        },
+        "createCohort": {
+          "label": "Sukurti grupę",
+          "description": "Sukurkite grupę (srautą) programoje."
+        },
+        "assignLearner": {
+          "label": "Priskirti studentą",
+          "description": "Priskirkite priimtą studentą grupei."
+        },
+        "inviteLearner": {
+          "label": "Pakviesti studentą",
+          "description": "Pakvieskite studentą prisijungti prie jūsų įstaigos."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "Peržiūrėti klientus",
@@ -11701,6 +11719,18 @@
         "demandLocation": "Vieta",
         "startDate": "Darbo pradžia (data)",
         "startDatePlaceholder": "MMMM-MM-DD",
+        "programmeName": "Programos pavadinimas",
+        "programmeNamePlaceholder": "pvz., Suvirintojų kursas",
+        "programmeDescription": "Aprašymas (nebūtina)",
+        "learnerEmail": "Studento el. paštas",
+        "learnerEmailPlaceholder": "vardas@pastas.lt",
+        "learnerName": "Vardas (nebūtina)",
+        "cohortName": "Grupės pavadinimas",
+        "cohortNamePlaceholder": "pvz., 2026 ruduo",
+        "cohortStarts": "Pradžia (data)",
+        "cohortEnds": "Pabaiga (data)",
+        "cohort": "Grupė",
+        "learner": "Studentas",
         "demandLocationPlaceholder": "Miestas ar regionas",
         "teamSize": "Darbuotojų skaičius",
         "urgency": "Skubumas",
@@ -11984,7 +12014,25 @@
       "inviteStudentHint": "Studentas pakviečiamas asmenine nuoroda iš tinklo skilties (ryšys „Studentas“):",
       "chipInviteStudent": "Pakviesti studentą",
       "programmesHint": "Programos ir grupės tvarkomos įmonės erdvėje — čia sukursite programą, grupę ir priskirsite besimokančius:",
-      "chipProgrammes": "Programos ir grupės"
+      "chipProgrammes": "Programos ir grupės",
+      "eduInviteAsk": "Gerai. Kokiu el. paštu pakviesti studentą?",
+      "eduInviteDone": "Kvietimo laiškas išsiųstas. Studentas prisijungs prie jūsų įstaigos, kai jį priims.",
+      "eduInviteCreatedNoEmail": "Pakvietimas sukurtas, bet el. laiškas nesiunčiamas — pasidalinkite nuoroda iš tinklo skilties.",
+      "eduProgrammesIntro": "Jūsų programos:",
+      "eduProgrammesNone": "Programų dar nėra. Pradėkime nuo pirmosios.",
+      "eduProgrammeLine": "• {name} — grupių: {cohorts} · rinkos paklausa: {demand}",
+      "eduProgrammeCreated": "Programa sukurta. Dabar galite sukurti grupę arba pakviesti studentus.",
+      "eduCohortPick": "Kuriai programai kurti grupę?",
+      "eduCohortCreated": "Grupė sukurta. Galite priskirti studentus.",
+      "eduAssignNoCohort": "Grupių dar nėra — pirmiausia sukurkite grupę.",
+      "eduAssignNoLearners": "Priimtų studentų dar nėra. Pakvieskite studentą — priskirti galėsite, kai jis priims pakvietimą.",
+      "eduAssignDone": "Studentas priskirtas grupei.",
+      "eduNotInstitution": "Ši organizacija dar nepažymėta kaip mokymo įstaiga. Pažymėkite tai įmonės skiltyje.",
+      "eduUnavailable": "Šiuo metu programų perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
+      "eduNext": "Kas toliau?",
+      "chipCreateProgramme": "Sukurti programą",
+      "chipCreateCohort": "Sukurti grupę",
+      "chipAssignLearner": "Priskirti studentą"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

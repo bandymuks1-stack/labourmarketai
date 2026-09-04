@@ -3393,6 +3393,24 @@
           "description": "Inviter en person til jeres team via e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Opret program",
+          "description": "Opret et uddannelsesprogram i din institution."
+        },
+        "createCohort": {
+          "label": "Opret hold",
+          "description": "Opret et hold (årgang) i et program."
+        },
+        "assignLearner": {
+          "label": "Tildel elev",
+          "description": "Tildel en accepteret elev til et hold."
+        },
+        "inviteLearner": {
+          "label": "Inviter elev",
+          "description": "Inviter en elev til at tilslutte sig din institution."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "[EN] Review clients",
@@ -3477,6 +3495,18 @@
         "demandLocation": "Sted",
         "startDate": "Startdato",
         "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
+        "programmeName": "Programnavn",
+        "programmeNamePlaceholder": "f.eks. Svejsekursus",
+        "programmeDescription": "Beskrivelse (valgfri)",
+        "learnerEmail": "Elevens e-mail",
+        "learnerEmailPlaceholder": "navn@mail.dk",
+        "learnerName": "Navn (valgfri)",
+        "cohortName": "Holdnavn",
+        "cohortNamePlaceholder": "f.eks. Efterår 2026",
+        "cohortStarts": "Start (dato)",
+        "cohortEnds": "Slut (dato)",
+        "cohort": "Hold",
+        "learner": "Elev",
         "demandLocationPlaceholder": "By eller region",
         "teamSize": "Antal medarbejdere",
         "urgency": "Hastegrad",
@@ -3699,7 +3729,25 @@
       "inviteStudentHint": "En elev inviteres med et personligt link fra netværksområdet (relation “Studerende”):",
       "chipInviteStudent": "Inviter en elev",
       "programmesHint": "Programmer og hold administreres i virksomhedens arbejdsområde — opret et program og et hold og tildel elever der:",
-      "chipProgrammes": "Programmer og hold"
+      "chipProgrammes": "Programmer og hold",
+      "eduInviteAsk": "Godt. Hvilken e-mail skal jeg invitere eleven på?",
+      "eduInviteDone": "Invitation sendt. Eleven tilslutter sig din institution, når den accepteres.",
+      "eduInviteCreatedNoEmail": "Invitation oprettet, men der sendes ingen e-mail — del linket fra netværksafsnittet.",
+      "eduProgrammesIntro": "Dine programmer:",
+      "eduProgrammesNone": "Ingen programmer endnu. Lad os starte med det første.",
+      "eduProgrammeLine": "• {name} — hold: {cohorts} · efterspørgsel: {demand}",
+      "eduProgrammeCreated": "Program oprettet. Du kan nu oprette et hold eller invitere elever.",
+      "eduCohortPick": "Hvilket program er holdet til?",
+      "eduCohortCreated": "Hold oprettet. Du kan tildele elever.",
+      "eduAssignNoCohort": "Ingen hold endnu — opret først et hold.",
+      "eduAssignNoLearners": "Ingen accepterede elever endnu. Inviter en elev — du kan tildele, når invitationen er accepteret.",
+      "eduAssignDone": "Elev tildelt holdet.",
+      "eduNotInstitution": "Denne organisation er endnu ikke markeret som uddannelsesinstitution. Marker det i virksomhedsafsnittet.",
+      "eduUnavailable": "Programmer kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "eduNext": "Hvad nu?",
+      "chipCreateProgramme": "Opret program",
+      "chipCreateCohort": "Opret hold",
+      "chipAssignLearner": "Tildel elev"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

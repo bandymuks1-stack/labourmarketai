@@ -3393,6 +3393,24 @@
           "description": "[EN] Invite a person to your roster by e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Utwórz program",
+          "description": "Utwórz program kształcenia w swojej placówce."
+        },
+        "createCohort": {
+          "label": "Utwórz grupę",
+          "description": "Utwórz grupę (nabór) w programie."
+        },
+        "assignLearner": {
+          "label": "Przypisz ucznia",
+          "description": "Przypisz przyjętego ucznia do grupy."
+        },
+        "inviteLearner": {
+          "label": "Zaproś ucznia",
+          "description": "Zaproś ucznia do dołączenia do Twojej placówki."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "[EN] Review clients",
@@ -3477,6 +3495,18 @@
         "demandLocation": "Lokalizacja",
         "startDate": "Data rozpoczęcia",
         "startDatePlaceholder": "RRRR-MM-DD",
+        "programmeName": "Nazwa programu",
+        "programmeNamePlaceholder": "np. Kurs spawania",
+        "programmeDescription": "Opis (opcjonalnie)",
+        "learnerEmail": "E-mail ucznia",
+        "learnerEmailPlaceholder": "imie@poczta.pl",
+        "learnerName": "Imię (opcjonalnie)",
+        "cohortName": "Nazwa grupy",
+        "cohortNamePlaceholder": "np. Jesień 2026",
+        "cohortStarts": "Początek (data)",
+        "cohortEnds": "Koniec (data)",
+        "cohort": "Grupa",
+        "learner": "Uczeń",
         "demandLocationPlaceholder": "Miasto lub region",
         "teamSize": "Liczba pracowników",
         "urgency": "Pilność",
@@ -3699,7 +3729,25 @@
       "inviteStudentHint": "[EN] A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "[EN] Invite a learner",
       "programmesHint": "[EN] Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
-      "chipProgrammes": "[EN] Programmes & cohorts"
+      "chipProgrammes": "[EN] Programmes & cohorts",
+      "eduInviteAsk": "Dobrze. Na jaki e-mail zaprosić ucznia?",
+      "eduInviteDone": "Zaproszenie wysłane. Uczeń dołączy do Twojej placówki, gdy je przyjmie.",
+      "eduInviteCreatedNoEmail": "Zaproszenie utworzone, ale e-mail nie jest wysyłany — udostępnij link z sekcji sieci.",
+      "eduProgrammesIntro": "Twoje programy:",
+      "eduProgrammesNone": "Nie ma jeszcze programów. Zacznijmy od pierwszego.",
+      "eduProgrammeLine": "• {name} — grupy: {cohorts} · popyt na rynku: {demand}",
+      "eduProgrammeCreated": "Program utworzony. Możesz teraz utworzyć grupę lub zaprosić uczniów.",
+      "eduCohortPick": "Dla którego programu utworzyć grupę?",
+      "eduCohortCreated": "Grupa utworzona. Możesz przypisywać uczniów.",
+      "eduAssignNoCohort": "Nie ma jeszcze grup — najpierw utwórz grupę.",
+      "eduAssignNoLearners": "Nie ma jeszcze przyjętych uczniów. Zaproś ucznia — przypisać go będzie można po przyjęciu zaproszenia.",
+      "eduAssignDone": "Uczeń przypisany do grupy.",
+      "eduNotInstitution": "Ta organizacja nie jest jeszcze oznaczona jako placówka edukacyjna. Oznacz to w sekcji firmy.",
+      "eduUnavailable": "Nie można teraz odczytać programów. To nie znaczy, że ich nie ma.",
+      "eduNext": "Co dalej?",
+      "chipCreateProgramme": "Utwórz program",
+      "chipCreateCohort": "Utwórz grupę",
+      "chipAssignLearner": "Przypisz ucznia"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

@@ -58,8 +58,14 @@ describe("the intent registry is the enumerable routing contract", () => {
     expect(intentsWhere((d) => d.access === "write")).toEqual([
       "invite-candidate",
       "invite-client",
+      // Owner contract 2026-09-04 §15 — the institution's commands by
+      // sentence (learner invitation; programme / cohort / assignment
+      // through the `programmes` handler), all important-tier over the ONE
+      // dispatcher.
+      "invite-student",
       "log-work",
       "need-workers",
+      "programmes",
       "propose-candidate",
       "switch-context",
     ]);
@@ -79,12 +85,10 @@ describe("the intent registry is the enumerable routing contract", () => {
       "create-organization",
       "documents",
       "hours-import",
-      "invite-student",
       "learning-compass",
       "lmc",
       "market-map",
       "need-service",
-      "programmes",
       "timesheets",
       "work-hours",
     ]);

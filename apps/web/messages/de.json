@@ -11616,6 +11616,24 @@
           "description": "Laden Sie eine Person per E-Mail in Ihr Team ein."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Programm anlegen",
+          "description": "Legen Sie ein Bildungsprogramm in Ihrer Einrichtung an."
+        },
+        "createCohort": {
+          "label": "Gruppe anlegen",
+          "description": "Legen Sie eine Gruppe (Jahrgang) in einem Programm an."
+        },
+        "assignLearner": {
+          "label": "Lernenden zuweisen",
+          "description": "Weisen Sie einen angenommenen Lernenden einer Gruppe zu."
+        },
+        "inviteLearner": {
+          "label": "Lernenden einladen",
+          "description": "Laden Sie einen Lernenden ein, Ihrer Einrichtung beizutreten."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "Kunden ansehen",
@@ -11701,6 +11719,18 @@
         "demandLocation": "Ort",
         "startDate": "Startdatum",
         "startDatePlaceholder": "JJJJ-MM-TT",
+        "programmeName": "Programmname",
+        "programmeNamePlaceholder": "z. B. Schweißerkurs",
+        "programmeDescription": "Beschreibung (optional)",
+        "learnerEmail": "E-Mail des Lernenden",
+        "learnerEmailPlaceholder": "name@mail.de",
+        "learnerName": "Name (freiwillig)",
+        "cohortName": "Gruppenname",
+        "cohortNamePlaceholder": "z. B. Herbst 2026",
+        "cohortStarts": "Beginn (Datum)",
+        "cohortEnds": "Ende (Datum)",
+        "cohort": "Gruppe",
+        "learner": "Lernender",
         "demandLocationPlaceholder": "Stadt oder Region",
         "teamSize": "Anzahl der Arbeitskräfte",
         "urgency": "Dringlichkeit",
@@ -11984,7 +12014,25 @@
       "inviteStudentHint": "Ein Lernender wird mit einem persönlichen Link aus dem Netzwerkbereich eingeladen (Beziehung „Student“):",
       "chipInviteStudent": "Lernenden einladen",
       "programmesHint": "Programme und Kohorten werden im Unternehmensbereich verwaltet — dort legen Sie ein Programm und eine Kohorte an und weisen Lernende zu:",
-      "chipProgrammes": "Programme & Kohorten"
+      "chipProgrammes": "Programme & Kohorten",
+      "eduInviteAsk": "Gut. An welche E-Mail-Adresse soll ich den Lernenden einladen?",
+      "eduInviteDone": "Einladung gesendet. Der Lernende tritt Ihrer Einrichtung bei, sobald er annimmt.",
+      "eduInviteCreatedNoEmail": "Einladung erstellt, aber es wird keine E-Mail gesendet — teilen Sie den Link aus dem Netzwerkbereich.",
+      "eduProgrammesIntro": "Ihre Programme:",
+      "eduProgrammesNone": "Noch keine Programme. Beginnen wir mit dem ersten.",
+      "eduProgrammeLine": "• {name} — Gruppen: {cohorts} · Marktnachfrage: {demand}",
+      "eduProgrammeCreated": "Programm angelegt. Sie können jetzt eine Gruppe anlegen oder Lernende einladen.",
+      "eduCohortPick": "Für welches Programm ist die Gruppe?",
+      "eduCohortCreated": "Gruppe angelegt. Sie können Lernende zuweisen.",
+      "eduAssignNoCohort": "Noch keine Gruppen — legen Sie zuerst eine Gruppe an.",
+      "eduAssignNoLearners": "Noch keine angenommenen Lernenden. Laden Sie einen Lernenden ein — zuweisen können Sie ihn nach der Annahme.",
+      "eduAssignDone": "Lernender der Gruppe zugewiesen.",
+      "eduNotInstitution": "Diese Organisation ist noch nicht als Bildungseinrichtung markiert. Markieren Sie das im Unternehmensbereich.",
+      "eduUnavailable": "Programme können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "eduNext": "Was als Nächstes?",
+      "chipCreateProgramme": "Programm anlegen",
+      "chipCreateCohort": "Gruppe anlegen",
+      "chipAssignLearner": "Lernenden zuweisen"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

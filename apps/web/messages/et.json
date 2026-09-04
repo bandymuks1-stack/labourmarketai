@@ -3393,6 +3393,24 @@
           "description": "[EN] Invite a person to your roster by e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Loo programm",
+          "description": "Looge oma asutuses õppeprogramm."
+        },
+        "createCohort": {
+          "label": "Loo rühm",
+          "description": "Looge programmis rühm (lend)."
+        },
+        "assignLearner": {
+          "label": "Määra õppija",
+          "description": "Määrake vastuvõetud õppija rühma."
+        },
+        "inviteLearner": {
+          "label": "Kutsu õppija",
+          "description": "Kutsuge õppija oma asutusega liituma."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "[EN] Review clients",
@@ -3477,6 +3495,18 @@
         "demandLocation": "Asukoht",
         "startDate": "Alguskuupäev",
         "startDatePlaceholder": "AAAA-KK-PP",
+        "programmeName": "Programmi nimi",
+        "programmeNamePlaceholder": "nt Keevitajate kursus",
+        "programmeDescription": "Kirjeldus (valikuline)",
+        "learnerEmail": "Õppija e-post",
+        "learnerEmailPlaceholder": "nimi@post.ee",
+        "learnerName": "Nimi (valikuline)",
+        "cohortName": "Rühma nimi",
+        "cohortNamePlaceholder": "nt Sügis 2026",
+        "cohortStarts": "Algus (kuupäev)",
+        "cohortEnds": "Lõpp (kuupäev)",
+        "cohort": "Rühm",
+        "learner": "Õppija",
         "demandLocationPlaceholder": "Linn või piirkond",
         "teamSize": "Töötajate arv",
         "urgency": "Kiireloomulisus",
@@ -3699,7 +3729,25 @@
       "inviteStudentHint": "[EN] A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "[EN] Invite a learner",
       "programmesHint": "[EN] Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
-      "chipProgrammes": "[EN] Programmes & cohorts"
+      "chipProgrammes": "[EN] Programmes & cohorts",
+      "eduInviteAsk": "Hea küll. Millisele e-posti aadressile õppija kutsuda?",
+      "eduInviteDone": "Kutse saadetud. Õppija liitub teie asutusega, kui ta kutse vastu võtab.",
+      "eduInviteCreatedNoEmail": "Kutse loodud, kuid e-kirja ei saadeta — jagage linki võrgustiku jaotisest.",
+      "eduProgrammesIntro": "Teie programmid:",
+      "eduProgrammesNone": "Programme veel pole. Alustame esimesest.",
+      "eduProgrammeLine": "• {name} — rühmi: {cohorts} · turunõudlus: {demand}",
+      "eduProgrammeCreated": "Programm loodud. Nüüd saate luua rühma või kutsuda õppijaid.",
+      "eduCohortPick": "Millise programmi jaoks rühm luua?",
+      "eduCohortCreated": "Rühm loodud. Saate õppijaid määrata.",
+      "eduAssignNoCohort": "Rühmi veel pole — looge kõigepealt rühm.",
+      "eduAssignNoLearners": "Vastuvõetud õppijaid veel pole. Kutsuge õppija — määrata saate pärast kutse vastuvõtmist.",
+      "eduAssignDone": "Õppija määratud rühma.",
+      "eduNotInstitution": "See organisatsioon pole veel märgitud õppeasutuseks. Märkige see ettevõtte jaotises.",
+      "eduUnavailable": "Programme ei saa praegu lugeda. See ei tähenda, et neid pole.",
+      "eduNext": "Mis edasi?",
+      "chipCreateProgramme": "Loo programm",
+      "chipCreateCohort": "Loo rühm",
+      "chipAssignLearner": "Määra õppija"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

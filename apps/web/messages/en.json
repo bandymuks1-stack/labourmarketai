@@ -11616,6 +11616,24 @@
           "description": "Invite a person to your roster by e-mail."
         }
       },
+      "education": {
+        "createProgramme": {
+          "label": "Create a programme",
+          "description": "Create a training programme in your institution."
+        },
+        "createCohort": {
+          "label": "Create a cohort",
+          "description": "Create a cohort (intake) in a programme."
+        },
+        "assignLearner": {
+          "label": "Assign a learner",
+          "description": "Assign an accepted learner to a cohort."
+        },
+        "inviteLearner": {
+          "label": "Invite a learner",
+          "description": "Invite a learner to join your institution."
+        }
+      },
       "agency": {
         "reviewClients": {
           "label": "Review clients",
@@ -11701,6 +11719,18 @@
         "demandLocation": "Location",
         "startDate": "Start date",
         "startDatePlaceholder": "YYYY-MM-DD",
+        "programmeName": "Programme name",
+        "programmeNamePlaceholder": "e.g. Welding course",
+        "programmeDescription": "Description (optional)",
+        "learnerEmail": "Learner's e-mail",
+        "learnerEmailPlaceholder": "name@mail.com",
+        "learnerName": "Name (optional)",
+        "cohortName": "Cohort name",
+        "cohortNamePlaceholder": "e.g. Autumn 2026",
+        "cohortStarts": "Starts (date)",
+        "cohortEnds": "Ends (date)",
+        "cohort": "Cohort",
+        "learner": "Learner",
         "demandLocationPlaceholder": "City or region",
         "teamSize": "Number of workers",
         "urgency": "Urgency",
@@ -11984,7 +12014,25 @@
       "inviteStudentHint": "A learner is invited with a personal link from the network area (relationship “Student”):",
       "chipInviteStudent": "Invite a learner",
       "programmesHint": "Programmes and cohorts are managed in the company workspace — create a programme, a cohort and assign learners there:",
-      "chipProgrammes": "Programmes & cohorts"
+      "chipProgrammes": "Programmes & cohorts",
+      "eduInviteAsk": "Sure. Which e-mail should I invite the learner at?",
+      "eduInviteDone": "The invitation e-mail went out. The learner joins your institution once they accept.",
+      "eduInviteCreatedNoEmail": "Invitation created, but no e-mail is sent — share the link from the network section.",
+      "eduProgrammesIntro": "Your programmes:",
+      "eduProgrammesNone": "No programmes yet. Let's start with the first one.",
+      "eduProgrammeLine": "• {name} — cohorts: {cohorts} · market demand: {demand}",
+      "eduProgrammeCreated": "Programme created. You can now create a cohort or invite learners.",
+      "eduCohortPick": "Which programme is the cohort for?",
+      "eduCohortCreated": "Cohort created. You can assign learners.",
+      "eduAssignNoCohort": "No cohorts yet — create a cohort first.",
+      "eduAssignNoLearners": "No accepted learners yet. Invite a learner — you can assign them once they accept.",
+      "eduAssignDone": "Learner assigned to the cohort.",
+      "eduNotInstitution": "This organization is not marked as a training institution yet. Mark it in the company section.",
+      "eduUnavailable": "Programmes cannot be read right now. That does not mean there are none.",
+      "eduNext": "What next?",
+      "chipCreateProgramme": "Create a programme",
+      "chipCreateCohort": "Create a cohort",
+      "chipAssignLearner": "Assign a learner"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

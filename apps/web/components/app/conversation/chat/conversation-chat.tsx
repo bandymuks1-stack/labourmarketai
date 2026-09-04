@@ -28,7 +28,13 @@ import {
   type WorkLogLabels,
 } from "@/components/app/conversation/worker-worklog-flow";
 import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-forms";
-import { agencyProposeCandidateForm, getCompanyForm } from "@/lib/conversation/company-forms";
+import {
+  agencyProposeCandidateForm,
+  educationAssignLearnerForm,
+  educationCreateCohortForm,
+  getCompanyForm,
+} from "@/lib/conversation/company-forms";
+import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
@@ -134,6 +140,17 @@ function PersonalWorkspaceIntroStream({
  * already carries — it pre-fills the ONE field and the person only confirms.
  * Shape gate only; the canonical validators stay authoritative server-side.
  */
+/** Which of the institution's commands a "programmes" sentence asks for —
+ *  create / cohort / assign, else a plain list. Folded, five locales. */
+function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" {
+  const q = (text ?? "").toLowerCase();
+  if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
+  const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
+  if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
+  if (creates) return "create";
+  return "list";
+}
+
 function extractEmail(sentence: string): string | null {
   const m = sentence.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
   return m ? m[0].toLowerCase() : null;
@@ -320,6 +337,25 @@ export type ChatLabels = {
   agencyInviteClientDone: string;
   agencyInviteCandidateAsk: string;
   agencyInviteCandidateDone: string;
+  // Education by sentence (owner contract 2026-09-04 §15).
+  eduInviteAsk: string;
+  eduInviteDone: string;
+  eduInviteCreatedNoEmail: string;
+  eduProgrammesIntro: string;
+  eduProgrammesNone: string;
+  eduProgrammeLine: string;
+  eduProgrammeCreated: string;
+  eduCohortPick: string;
+  eduCohortCreated: string;
+  eduAssignNoCohort: string;
+  eduAssignNoLearners: string;
+  eduAssignDone: string;
+  eduNotInstitution: string;
+  eduUnavailable: string;
+  eduNext: string;
+  chipCreateProgramme: string;
+  chipCreateCohort: string;
+  chipAssignLearner: string;
   agencyInviteCandidateExists: string;
   agencyNotAgencyWorkspace: string;
   agencySwitchHint: string;
@@ -1955,6 +1991,180 @@ export function ConversationChat({
     [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, agencyFollowup],
   );
 
+  /**
+   * EDUCATION, OPERATED FROM THE CONVERSATION (owner contract 2026-09-04 §15).
+   * Same chain as the agency bridge: NATURAL LANGUAGE → INTENT → ACTIVE
+   * CONTEXT (company identity; the RPCs re-check the training_provider
+   * capability and manager authority) → ALREADY-KNOWN DATA (the sentence's
+   * e-mail, the institution's programmes / cohorts / accepted learners) →
+   * ONE MISSING QUESTION (the inline form) → CANONICAL EXECUTOR → REAL ROW →
+   * READBACK IN WORDS → NEXT CHIPS. Nothing here writes.
+   */
+  const educationChips: ChoiceChip[] = useMemo(
+    () => [
+      { id: "edu:cohort", label: labels.chipCreateCohort },
+      { id: "edu:assign", label: labels.chipAssignLearner },
+      { id: "f:company.invite-learner", label: labels.chipInviteStudent },
+    ],
+    [labels.chipCreateCohort, labels.chipAssignLearner, labels.chipInviteStudent],
+  );
+  const educationFollowup = useCallback(() => {
+    assistant(labels.eduNext, educationChips);
+  }, [assistant, labels.eduNext, educationChips]);
+
+  const startEducationInvite = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) {
+          assistant(labels.agencySwitchHint, workspaceChips);
+        } else {
+          assistant(fallbackText, starterChips);
+        }
+        return;
+      }
+      const email = extractEmail(sentence);
+      if (!email) {
+        assistant(labels.eduInviteAsk);
+        trackFunnel(FUNNEL_EVENTS.chatMissingDataAsked, {
+          surface: "chat",
+          step: "company.invite-learner",
+          role_context: roleContextNow,
+        });
+      }
+      openForm(
+        "company.invite-learner",
+        educationFollowup,
+        labels.chipProgrammes,
+        email ? { email } : undefined,
+        (res) =>
+          assistant(
+            res.data?.outcome === "sent" ? labels.eduInviteDone : labels.eduInviteCreatedNoEmail,
+          ),
+      );
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, educationFollowup],
+  );
+
+  const runEducationProgrammes = useCallback(
+    (mode: "list" | "create" | "cohort" | "assign", programId?: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) {
+          assistant(labels.agencySwitchHint, workspaceChips);
+        } else {
+          assistant(fallbackText, starterChips);
+        }
+        return;
+      }
+      if (mode === "create") {
+        openForm(
+          "company.create-programme",
+          educationFollowup,
+          labels.chipCreateCohort,
+          undefined,
+          () => assistant(labels.eduProgrammeCreated),
+        );
+        return;
+      }
+      if (mode === "cohort" && programId) {
+        openForm(
+          educationCreateCohortForm(programId),
+          educationFollowup,
+          labels.chipAssignLearner,
+          undefined,
+          () => assistant(labels.eduCohortCreated),
+        );
+        return;
+      }
+      setTyping(true);
+      loadEducationWorkspaceForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "no-company") {
+            assistant(labels.engagementsNoCompany, workspaceChips);
+            return;
+          }
+          if (res.kind === "not-institution") {
+            assistant(labels.eduNotInstitution, [
+              { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
+            ]);
+            return;
+          }
+          if (res.kind !== "ok") {
+            assistant(labels.eduUnavailable, [
+              { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+            ]);
+            return;
+          }
+          if (mode === "cohort") {
+            if (res.programmes.length === 0) {
+              assistant(labels.eduProgrammesNone, [{ id: "edu:create", label: labels.chipCreateProgramme }]);
+              return;
+            }
+            if (res.programmes.length === 1) {
+              runEducationProgrammesRef.current("cohort", res.programmes[0].id);
+              return;
+            }
+            trackFunnel(FUNNEL_EVENTS.chatMissingDataAsked, {
+              surface: "chat",
+              step: "company.create-cohort",
+              role_context: roleContextNow,
+            });
+            assistant(
+              labels.eduCohortPick,
+              res.programmes.slice(0, 3).map((p) => ({ id: `edu-cohort:${p.id}`, label: p.name })),
+            );
+            return;
+          }
+          if (mode === "assign") {
+            const cohorts = res.programmes.flatMap((p) =>
+              p.cohorts.map((c) => ({ id: c.id, label: `${p.name} — ${c.name}` })),
+            );
+            if (cohorts.length === 0) {
+              assistant(labels.eduAssignNoCohort, [{ id: "edu:cohort", label: labels.chipCreateCohort }]);
+              return;
+            }
+            if (res.assignable.length === 0) {
+              assistant(labels.eduAssignNoLearners, [
+                { id: "f:company.invite-learner", label: labels.chipInviteStudent },
+              ]);
+              return;
+            }
+            openForm(
+              educationAssignLearnerForm(cohorts, res.assignable),
+              educationFollowup,
+              labels.chipProgrammes,
+              undefined,
+              () => assistant(labels.eduAssignDone),
+            );
+            return;
+          }
+          if (res.programmes.length === 0) {
+            assistant(labels.eduProgrammesNone, [
+              { id: "edu:create", label: labels.chipCreateProgramme },
+              { id: "f:company.invite-learner", label: labels.chipInviteStudent },
+            ]);
+            return;
+          }
+          const lines = res.programmes.map((p) =>
+            labels.eduProgrammeLine
+              .replace("{name}", p.name)
+              .replace("{cohorts}", String(p.cohorts.length))
+              .replace("{demand}", p.demandCount === null ? "—" : String(p.demandCount)),
+          );
+          assistant([labels.eduProgrammesIntro, ...lines].join("\n"), educationChips);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.eduUnavailable, [
+            { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+          ]);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, openForm, educationFollowup, educationChips, roleContextNow],
+  );
+  const runEducationProgrammesRef = useRef(runEducationProgrammes);
+  runEducationProgrammesRef.current = runEducationProgrammes;
+
   const handleChipRef = useRef<(chip: ChoiceChip) => void>(() => {});
 
   const handleChip = useCallback(
@@ -2067,6 +2277,14 @@ export function ConversationChat({
           runAgencyRead("progress");
           break;
         default:
+          if (chip.id === "edu:create" || chip.id === "edu:cohort" || chip.id === "edu:assign") {
+            runEducationProgrammes(chip.id.slice(4) as "create" | "cohort" | "assign");
+            break;
+          }
+          if (chip.id.startsWith("edu-cohort:")) {
+            runEducationProgrammes("cohort", chip.id.slice(11));
+            break;
+          }
           if (chip.id.startsWith("assign:")) {
             // W11 — `assign:<projectId>:<workerProfileId>`. Both ids are
             // real rows the server re-verifies; the chip grants nothing.
@@ -2114,7 +2332,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -2757,18 +2975,15 @@ export function ConversationChat({
           assistant(labels.learningCompassHint, [
             { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
           ]),
-        inviteStudent: () =>
-          identity === "company" || canActAsEmployer
-            ? assistant(labels.inviteStudentHint, [
-                { id: "link:/dashboard/network?relationship=student", label: labels.chipInviteStudent },
-              ])
-            : assistant(fallbackText, starterChips),
-        programmes: () =>
-          identity === "company" || canActAsEmployer
-            ? assistant(labels.programmesHint, [
-                { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
-              ])
-            : assistant(fallbackText, starterChips),
+        // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────
+        // The institution's commands by SENTENCE over the ONE dispatcher:
+        // "pakviesk studentą" → one question (e-mail) → canonical invitation
+        // with the student relationship; "sukurk programą / grupę",
+        // "priskirk studentą grupei" → the matching inline form built from
+        // the institution's REAL programmes, cohorts and accepted learners;
+        // "parodyk programas" → answered in the chat.
+        inviteStudent: () => startEducationInvite(text),
+        programmes: () => runEducationProgrammes(educationModeFromText(text)),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
         translateBlocked: () => assistant(labels.translateBlocked),
@@ -2781,7 +2996,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {
