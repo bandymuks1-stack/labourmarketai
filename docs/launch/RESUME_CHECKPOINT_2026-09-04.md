@@ -9,9 +9,9 @@
 
 | Item | Value |
 |---|---|
-| Production | `6fc477d9` (#1487) walked: client offer decision by sentence + worker documents attention line. Earlier today: `f307e574` create-project, `d543867d` institution outcomes, `287b6fb0` internship honest answer. Next proof: `walk-add-document-prod.cjs` after #1488 — confirm `/api/health` `build` on resume |
-| `main` | #1467–#1474 · #1476–#1487 (My Space code/usage/reorder · opportunity type · end date · absent type NAMED · same-dimension alternatives · project by sentence + project after creation · institution learner outcomes · attention rungs: worker documents, employer candidates waiting, employer agency offers waiting · client decides on agency offer by sentence). Open (auto-merge): **#1488** a document recorded by sentence. RED draft: **#1475** My Space table (owner gate) |
-| Active P0 chain | prod-verify #1488 (`walk-add-document-prod.cjs`: prefilled type + valid-until, save, readiness re-answers) → next broken ordinary-human link (candidates: the worker's document FILE upload by chat is still a documents-centre step; the agency sees the client's decision in its progress list — proven read, no push; institution outcomes above 5 learners unproven) |
+| Production | `f49cc972` (#1489). Walked tonight: `6fc477d9` (client decline, worker documents line), `a726b2ce` (document by sentence; agency re-proposal → client ACCEPT → booking `245e91a8` proposed to E2E Worker Two), `f49cc972` (candidates panel read-only). Next proofs after merge: cv-export chip (#1490), valid-until pre-fill (#1491, re-run `walk-add-document-prod.cjs`, delete the row) — confirm `/api/health` `build` on resume |
+| `main` | #1467–#1474 · #1476–#1489 (…#1488 document by sentence · #1489 worker 'contacted' rung). Open (auto-merge): **#1490** CV sheet by sentence + owner report journey table · **#1491** written end date. RED draft: **#1475** My Space table (owner gate) |
+| Active P0 chain | journeys are structurally complete in the chat (see the owner report's journey table); remaining S-items: worker document FILE via chat, project work/progress/evidence chain on a chat-created project, agency placement after the worker's answer (booking `245e91a8` is `proposed` — the E2E worker's accept would close it). Owner-gated: verified E2E company, e-mail delivery, My Space table |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
 | Local stack | Docker Desktop dead → `LOCAL_DOCKER_UNAVAILABLE`; verification = unit/guards/typecheck/lint/build + CI + prod walks with bounded `e2e-*` identities (scratchpad `walk-*.cjs`, `wait-prod.cjs`; `curl` denied in this harness) |
@@ -41,7 +41,7 @@
 
 ## Queue (contract §33; next automatic step first)
 
-1. Consume #1488: rebuild pushed after the server-only split (`document-type-guess.ts`); after merge run `walk-add-document-prod.cjs` (worker two) and record in `2026-09-04-documents-in-chat.md`; then the next broken link from the Active P0 chain row.
+1. On resume: consume #1490/#1491 (walks above), then pick the next S-item from the Active P0 chain row; keep evaluating at journey level (owner note 2026-09-04 late).
 2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
 3. F2: end date / duration in the demand structurer; the site as a project object.
 4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.
