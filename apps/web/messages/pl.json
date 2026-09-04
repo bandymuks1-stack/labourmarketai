@@ -3794,6 +3794,8 @@
       "documentAddIntro": "Zapiszmy dokument: rodzaj, kraj i ważność. Plik dodasz w centrum dokumentów.",
       "documentAddDone": "Dokument zapisany. Oto Twoja gotowość teraz:",
       "documentAddUnavailable": "Nie udało się teraz wczytać katalogu dokumentów — zapisz dokument w centrum dokumentów.",
+      "cvExportHint": "Twoje zweryfikowane CV — jedna strona tego, co system naprawdę wie. Otwórz i wydrukuj do PDF.",
+      "chipCvSheet": "Otwórz arkusz CV",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze."
     },

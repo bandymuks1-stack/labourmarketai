@@ -379,6 +379,8 @@ export type ChatLabels = {
   documentAddIntro: string;
   documentAddDone: string;
   documentAddUnavailable: string;
+  cvExportHint: string;
+  chipCvSheet: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -3384,6 +3386,13 @@ export function ConversationChat({
         createProject: () => startCreateProject(text),
         clientOffers: () => startClientOffers(),
         addDocument: () => startAddDocument(text),
+        // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
+        // not the import flow the bare "cv" chip starts. One chip to the one
+        // canonical output; a company identity has no own CV to show.
+        cvExport: () =>
+          identity === "person"
+            ? assistant(labels.cvExportHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
+            : assistant(fallbackText, starterChips),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.
         translateBlocked: () => assistant(labels.translateBlocked),

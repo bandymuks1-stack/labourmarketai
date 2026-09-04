@@ -3794,6 +3794,8 @@
       "documentAddIntro": "Reģistrēsim dokumentu: veids, valsts un derīgums. Failu varēsiet pievienot dokumentu centrā.",
       "documentAddDone": "Dokuments reģistrēts. Lūk, jūsu gatavība tagad:",
       "documentAddUnavailable": "Dokumentu katalogu šobrīd neizdevās ielādēt — reģistrējiet dokumentu dokumentu centrā.",
+      "cvExportHint": "Jūsu apstiprinātais CV — viena lapa ar to, ko sistēma patiešām zina. Atveriet un izdrukājiet PDF.",
+      "chipCvSheet": "Atvērt CV lapu",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais."
     },

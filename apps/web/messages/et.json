@@ -3794,6 +3794,8 @@
       "documentAddIntro": "Märgime dokumendi: liik, riik ja kehtivus. Faili saate lisada dokumendikeskuses.",
       "documentAddDone": "Dokument märgitud. Siin on teie valmisolek praegu:",
       "documentAddUnavailable": "Dokumendikataloogi ei õnnestunud praegu laadida — märkige dokument dokumendikeskuses.",
+      "cvExportHint": "Teie kinnitatud CV — üks leht sellest, mida süsteem tõesti teab. Avage ja printige PDF-iks.",
+      "chipCvSheet": "Ava CV leht",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene."
     },

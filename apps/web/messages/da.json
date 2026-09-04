@@ -3794,6 +3794,8 @@
       "documentAddIntro": "Lad os registrere dokumentet: type, land og gyldighed. Filen kan du vedhæfte i dokumentcentret.",
       "documentAddDone": "Dokument registreret. Sådan ser din parathed ud nu:",
       "documentAddUnavailable": "Dokumentkataloget kunne ikke indlæses lige nu — registrér dokumentet i dokumentcentret.",
+      "cvExportHint": "Dit verificerede CV — ét ark med det, systemet virkelig ved. Åbn det og print til PDF.",
+      "chipCvSheet": "Åbn CV-arket",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest."
     },

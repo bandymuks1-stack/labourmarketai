@@ -113,7 +113,8 @@ export type IntentHandlerId =
   | "programmes"
   | "createProject"
   | "clientOffers"
-  | "addDocument";
+  | "addDocument"
+  | "cvExport";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -227,6 +228,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // Documents first-class (§12/§14): a document RECORDED by sentence through
   // the one inline form over the canonical upsert; readiness re-answers.
   "add-document": { domain: "documents", access: "write", handler: "addDocument", ownTyping: true },
+  // The verified CV SHEET (print-to-PDF, outside the shell so no chrome
+  // prints) — a route, because the sheet IS the canonical output (§19).
+  "cv-export": { domain: "cv", access: "route", handler: "cvExport", ownTyping: false },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

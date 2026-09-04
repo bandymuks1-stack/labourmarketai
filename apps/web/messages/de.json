@@ -12095,6 +12095,8 @@
       "documentAddIntro": "Erfassen wir das Dokument: Typ, Land und Gültigkeit. Die Datei können Sie im Dokumentencenter anhängen.",
       "documentAddDone": "Dokument erfasst. So steht Ihre Bereitschaft jetzt:",
       "documentAddUnavailable": "Der Dokumentkatalog konnte gerade nicht geladen werden — erfassen Sie das Dokument im Dokumentencenter.",
+      "cvExportHint": "Ihr geprüfter Lebenslauf — ein Blatt mit dem, was das System wirklich weiß. Öffnen und als PDF drucken.",
+      "chipCvSheet": "Lebenslauf-Blatt öffnen",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn."
     },

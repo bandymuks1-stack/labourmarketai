@@ -12095,6 +12095,8 @@
       "documentAddIntro": "Užrašykime dokumentą: tipas, šalis ir iki kada galioja. Failą įkelsite dokumentų centre.",
       "documentAddDone": "Dokumentas užrašytas. Štai jūsų pasiruošimas dabar:",
       "documentAddUnavailable": "Dokumentų katalogo dabar nepavyko įkelti — užrašykite dokumentą dokumentų centre.",
+      "cvExportHint": "Jūsų patvirtintas CV — vienas lapas iš to, ką sistema tikrai žino. Atidarykite ir spausdinkite į PDF.",
+      "chipCvSheet": "Atidaryti CV lapą",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma."
     },
