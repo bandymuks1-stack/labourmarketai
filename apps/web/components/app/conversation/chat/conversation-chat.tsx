@@ -49,7 +49,7 @@ import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-work
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
-import { guessDocumentType } from "@/lib/conversation/documents-gap";
+import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { parseEndDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";

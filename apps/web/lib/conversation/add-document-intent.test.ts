@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { CONVERSATION_ACTIONS } from "./action-registry";
-import { guessDocumentType } from "./documents-gap";
+import { guessDocumentType } from "./document-type-guess";
 import { INTENT_REGISTRY } from "./intent-registry";
 import { classifyIntent } from "./intent-router";
 import { workerAddDocumentForm } from "./worker-forms";
@@ -83,6 +83,7 @@ describe("record a document by sentence", () => {
     const CHAT = readFileSync(join(__dirname, "..", "..", "components", "app", "conversation", "chat", "conversation-chat.tsx"), "utf8");
     expect(CHAT).toContain("addDocument: () => startAddDocument(text)");
     expect(CHAT).toContain("const typeSlug = guessDocumentType(sentence);");
+    expect(CHAT).toContain('from "@/lib/conversation/document-type-guess"');
     expect(CHAT).toContain("const validUntil = parseEndDate(sentence, todayIso(), null);");
     expect(CHAT).toContain("runWorkflow(() => runDocumentsReadiness());");
   });

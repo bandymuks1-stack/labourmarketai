@@ -50,39 +50,6 @@ export interface DocumentGap {
 export const DOCUMENT_GAP_LINE_CAP = 5;
 
 /**
- * The document TYPE a sentence names, in the person's own words — a PREFILL
- * for the one inline form (visible, editable, confirmed), never a write on
- * its own. Slugs are the closed `document_types` set the upsert RPC
- * validates; the most specific reading wins (an "A1" is not a mere
- * certificate, a residence permit is not a work permit).
- */
-const DOCUMENT_TYPE_NEEDLES: ReadonlyArray<{ slug: string; needles: readonly string[] }> = [
-  { slug: "a1_certificate", needles: ["a1"] },
-  { slug: "health_safety_card", needles: ["vca", "saugos kort", "safety card", "sicherheitskarte", "sccp"] },
-  { slug: "residence_permit", needles: ["leidimas gyventi", "leidimą gyventi", "residence", "verblijf", "aufenthalt", "вид на жительство"] },
-  { slug: "work_permit", needles: ["leidim", "permit", "vergunning", "arbeitserlaubnis", "разрешен"] },
-  { slug: "id_document", needles: ["pasas", "pasą", "paso", "passport", "asmens", "tapatyb", "ausweis", "paspoort", "паспорт", "id kort", "id card"] },
-  { slug: "employment_contract", needles: ["sutart", "contract", "vertrag", "договор", "overeenkomst"] },
-  { slug: "posting_notification", needles: ["komandiruot", "posting", "meldung", "уведомл", "detacher"] },
-  { slug: "tax_registration", needles: ["mokesč", "mokesc", "tax", "steuer", "налог", "belasting"] },
-  { slug: "social_security_registration", needles: ["sodra", "social", "sozial", "соц", "sociale"] },
-  { slug: "cv", needles: ["cv", "gyvenimo apraš", "resume", "lebenslauf", "резюме"] },
-  { slug: "professional_certificate", needles: ["pažym", "pazym", "sertifik", "certif", "zertifik", "сертиф", "certificaat", "kvalifik", "diplom"] },
-];
-
-export function guessDocumentType(text: string): string | null {
-  const hay = ` ${(text ?? "").toLowerCase()} `;
-  for (const { slug, needles } of DOCUMENT_TYPE_NEEDLES) {
-    for (const n of needles) {
-      // Short codes ("a1", "cv", "vca") must stand alone; longer stems may sit inside a word.
-      const hit = n.length <= 3 ? new RegExp(`[^\\p{L}\\p{N}]${n}[^\\p{L}\\p{N}]`, "u").test(hay) : hay.includes(n);
-      if (hit) return slug;
-    }
-  }
-  return null;
-}
-
-/**
  * Join own documents × the requirements of the countries the person named.
  * `countries` are the person's stated preferences (ISO-2), already limited by
  * the caller; an empty list means the answer must ASK where they want to work
