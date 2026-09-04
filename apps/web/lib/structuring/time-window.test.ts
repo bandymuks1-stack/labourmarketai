@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseTimeWindow } from "./time-window";
+import { parseTimeWindow, stripEndDatePhrase } from "./time-window";
 
 /** 2026-08-13 is a Thursday (UTC). */
 const TODAY = "2026-08-13";
@@ -76,5 +76,20 @@ describe("parseTimeWindow — coarse UTC windows, honest 'none'", () => {
     for (const text of ["ieškau darbo", "parduodu agurkus", "", "ryt gal"]) {
       expect(parseTimeWindow(text, TODAY).kind, text).toBe("none");
     }
+  });
+});
+
+describe("stripEndDatePhrase — the deadline is its own field, not a title tail", () => {
+  it("removes the written deadline the parser read (ISO, d.m.y, month words)", () => {
+    expect(stripEndDatePhrase("sumontuoti pastolius iki 2026-10-03")).toBe("sumontuoti pastolius");
+    expect(stripEndDatePhrase("install scaffolding until 03.10.2026")).toBe("install scaffolding");
+    expect(stripEndDatePhrase("sumontuoti pastolius iki spalio 3")).toBe("sumontuoti pastolius");
+    expect(stripEndDatePhrase("sumontuoti pastolius iki 3 spalio")).toBe("sumontuoti pastolius");
+    expect(stripEndDatePhrase("Gerüst montieren bis 3.10.2026")).toBe("Gerüst montieren");
+  });
+  it("keeps a phrase that is not a deadline the parser knows", () => {
+    expect(stripEndDatePhrase("nuvežti medžiagas iki pietų")).toBe("nuvežti medžiagas iki pietų");
+    expect(stripEndDatePhrase("go to site 3")).toBe("go to site 3");
+    expect(stripEndDatePhrase("sumontuoti pastolius")).toBe("sumontuoti pastolius");
   });
 });
