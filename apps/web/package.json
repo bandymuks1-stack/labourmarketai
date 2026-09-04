@@ -36,7 +36,8 @@
     "e2e:install": "playwright install chromium",
     "dev:acceptance": "tsx scripts/dev-acceptance.ts",
     "prod-qa:gate": "tsx scripts/prod-qa-gate.ts",
-    "prod-qa:revoke": "tsx scripts/prod-qa-gate.ts --revoke"
+    "prod-qa:revoke": "tsx scripts/prod-qa-gate.ts --revoke",
+    "supply-feed:emit": "tsx scripts/emit-first-party-supply-feed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

@@ -66,6 +66,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
   },
+  "internal/supply-feed/first-party-v1/route.ts": {
+    class: "public",
+    why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",
+  },
   "health/route.ts": {
     class: "public",
     why: "A liveness probe for an external uptime monitor (FINAL COMPLETION Train L1). No user identity exists or is read: it uses only the anon key every browser already holds, against two dependencies a sign-in needs, and answers booleans + latencies + the build id — nothing a person owns.",

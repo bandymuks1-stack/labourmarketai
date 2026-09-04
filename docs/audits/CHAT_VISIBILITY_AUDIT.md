@@ -297,3 +297,31 @@ audit.
   site yet (the product never calls `lmc_spend_v1`); it is the prepared seam
   so the first spend caller can pair its failure path with compensation.
   Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-09-04 — `lib/supply-bridge/feed-source.ts`** (first-party supply feed
+  reader, Agentai OS `FIRST_PARTY_SUPPLY_FEED` contract). Calls exactly one
+  RPC, `first_party_supply_feed_v1()`, and reads or writes no table directly.
+  Service role is genuinely required rather than convenient: the human-gated
+  migration `20260904120000_first_party_supply_representation_v1` grants
+  EXECUTE on that function to `service_role` ONLY — revoked from `public`,
+  `anon` AND `authenticated` — because it answers with every AUTHORISED person
+  at once, which is right for the emitter and wrong for any signed-in account.
+  Proven in the production rollback harness: the same call as `authenticated`
+  fails SQLSTATE 42501.
+
+  The authority filter lives INSIDE the SQL function (a current granted
+  `partner_supply_representation` consent at the current text version, a
+  declaration that is not withdrawn, and a validity window that has not run
+  out), so the service key opens the front door and never the authority check,
+  and a second caller cannot obtain a laxer answer than the first. The
+  projection it returns carries no name, email, phone, address, document or
+  journal content — there is no such column in the function's select list, and
+  the emitter drops any row that grew one.
+
+  Touches no chat table. Sends nothing outbound: the artefact is written to
+  `runtime/labourmarket-supply/first-party-supply-feed.jsonl` (gitignored) or
+  served from the bearer-authenticated pull route
+  `/api/internal/supply-feed/first-party-v1`, which refuses 401 while
+  `SUPPLY_FEED_BEARER_TOKEN` is unset. Pinned in the
+  `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
+  evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
