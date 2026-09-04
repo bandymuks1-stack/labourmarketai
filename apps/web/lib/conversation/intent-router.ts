@@ -94,6 +94,7 @@ export type ConversationIntent =
   | "add-document" // "turiu naują A1 iki 2027-03" — record a document, by sentence
   | "cv-export" // "parodyk / atsisiųsk mano CV" — the verified CV sheet, not the import
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
+  | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "unknown";
 
 export type IntentMatch = {
@@ -897,6 +898,16 @@ const RULES: IntentRule[] = [
       // package on the company's project, by sentence.
       p("(prid[eė]|sukur|nauj|u[zž]ra[sš]|create|add|new|erstell|neu|maak|nieuw|добав|создай|нов)\\w*\\s*.{0,16}(u[zž]duot|task|aufgabe|taak|задач)", 9),
       p("(u[zž]duot|task|aufgabe|taak|задач)\\w*\\s*.{0,12}(prid[eė]|sukur|create|add|erstell|anleg|toevoeg|aanmak|добав|создай)", 9),
+    ],
+  },
+  {
+    intent: "who-available",
+    patterns: [
+      // CAPACITY: "kas laisvas šią savaitę?", "kas gali dirbti rytoj?", "kas
+      // atostogauja?", "who is available / free", "who can work", "wer ist
+      // frei / verfügbar", "wie is beschikbaar / vrij", "кто свободен".
+      p("(kas|who|wer|wie|кто)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
+      p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники))", 8),
     ],
   },
   {

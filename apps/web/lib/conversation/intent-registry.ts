@@ -115,7 +115,8 @@ export type IntentHandlerId =
   | "clientOffers"
   | "addDocument"
   | "cvExport"
-  | "addTask";
+  | "addTask"
+  | "whoAvailable";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -235,6 +236,8 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // PROJECT → WORK (§11): a work package on the company's project through
   // the one inline form over the one task create.
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },
+  // CAPACITY (§11): the roster against approved absences for the next days.
+  "who-available": { domain: "company", access: "read", handler: "whoAvailable", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },
