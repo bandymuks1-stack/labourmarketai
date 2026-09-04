@@ -98,3 +98,22 @@ client (E2E Walker UAB, open offer `f93735c6` on "Suvirintojas", 37.7 s):
 
 Accepting would have proposed the canonical booking to the E2E worker; the walk chose
 decline to leave no booking residue.
+
+## Placement stage: the client ACCEPTS by chip → canonical booking (prod `a726b2ce`)
+
+After the decline above, the agency proposed E2E Worker Two again by sentence
+(`walk-agency-propose-only.cjs`: "parodyk klientų poreikius" → "pasiūlyk kandidatą" →
+form with the real roster → "Pasiūlymas įrašytas" → "kaip sekasi mano pasiūlymams"
+lists it). Then the client (`walk-client-offers-prod.cjs`, `DECIDE=accept`, 37.2 s):
+"kokius kandidatus pasiūlė agentūra?" → the offer with chips → **accept** →
+"Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas…".
+
+DB: offer `c5ba19a5…` `accepted` at 20:32:10 UTC with `booking_id 245e91a8…`;
+`booking_requests` row `proposed` to worker `0dbd5eda…` (E2E Worker Two). The
+worker's answer (accept → engagement) is the chain proven on 2026-09-01 (#857 /
+G-04). E2E residue: that proposed booking stays (test identities only).
+
+Observed: the client's greeting did not carry the "1 agentūros pasiūlymas laukia…"
+line on this run (it did on `6fc477d9`); the offers list and the decision worked.
+Possible cause: the three-line cap filled by the institution rung + operations
+lines for this identity (E2E Walker also holds training_provider) — to re-check.

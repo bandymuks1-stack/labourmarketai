@@ -48,3 +48,17 @@ was reached here.
 
 Next: a document RECORDED by sentence ("turiu naują A1 iki 2027-03-31", #1488) so the
 gap can close from the same conversation.
+
+## A document RECORDED by sentence (prod `a726b2ce`, #1488)
+
+`walk-add-document-prod.cjs`, worker two, 40.2 s: "turiu naują A1 pažymą iki
+2027-03-31" → the one form `worker.add-document` opened with the intro line; **type
+pre-filled `a1_certificate`** from the sentence; continue → review → save →
+"Dokumentas užrašytas. Štai jūsų pasiruošimas dabar:" and the readiness answer
+re-ran. DB: `worker_documents` row `65dc3c3c…` (a1_certificate, ready) — deleted
+afterwards so the E2E baseline (6 missing) stays stable for future walks.
+
+**Defect found:** `valid until` stayed empty — `parseEndDate` read only "iki spalio
+20"-style dates, not a WRITTEN date ("iki 2027-03-31", "until 31.03.2027"), the way a
+person copies it off a certificate. Fixed on `fix/cc/end-date-written-iso` (ISO and
+d.m.yyyy forms; an impossible day is null, never "corrected").
