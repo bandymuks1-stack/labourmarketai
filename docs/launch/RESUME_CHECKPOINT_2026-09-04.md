@@ -9,9 +9,9 @@
 
 | Item | Value |
 |---|---|
-| Production | `287b6fb0` (#1479) walked 2026-09-04 (internship question honest; second defect → `fix/cc/absent-type-alternatives`) — confirm `/api/health` `build` on resume |
-| `main` | #1467 starters · #1468 employer sentence · #1469 documents · #1470 institution by sentence · #1471 skill-gap → documents · #1472 student compass · #1473 shared-needs fix · #1474 attention · #1476 My Space code · #1477 opportunity type · #1478 end date · #1479 absent type NAMED. Open: **#1480** My Space typed-sentence usage (auto-merge) · `fix/cc/absent-type-alternatives` (same-dimension "Matoma:" list; PR next) · branch `feat/cc/my-space-reorder` ("put this first" chip; PR after #1480) · **#1475** My Space table (RED draft, owner gate) |
-| Active P0 chain | all P0 actors have a prod-proven sentence chain (E2E identities); now: alternatives-fix PR → My Space reorder PR → positive internship proof (a visible `internship` demand) → F2 |
+| Production | `f307e574` (#1483) deploying at checkpoint time; last walked build `287b6fb0` (internship honest answer). Next proof: `walk-create-project-prod.cjs` on `f307e574` (E2E agency identity; delete the row afterwards) — confirm `/api/health` `build` on resume |
+| `main` | #1467–#1474 (starters, employer sentence, documents, institution, skill-gap→documents, compass, shared-needs fix, attention) · #1476 My Space code · #1477 opportunity type · #1478 end date · #1479 absent type NAMED · #1480 typed-sentence usage · #1481 same-dimension alternatives · #1482 REORDER chip · #1483 project by sentence. Open (auto-merge): **#1484** institution learner outcomes; branch `feat/cc/attention-documents-interest` (worker documents rung + employer candidates-waiting rung; PR after build). RED draft: **#1475** My Space table (owner gate) |
+| Active P0 chain | prod-verify #1483 (create-project walk) → PR attention rungs → project AFTER creation in the chat (open the new project's panel from the create-project onDone; assign people there) → next broken ordinary-human link |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
 | Local stack | Docker Desktop dead → `LOCAL_DOCKER_UNAVAILABLE`; verification = unit/guards/typecheck/lint/build + CI + prod walks with bounded `e2e-*` identities (scratchpad `walk-*.cjs`, `wait-prod.cjs`; `curl` denied in this harness) |
@@ -32,16 +32,16 @@
 
 | Actor | Usable by sentence in prod | Still missing |
 |---|---|---|
-| Worker | find work, log work, CV, documents + gaps with closing step | training suggestion for a skills gap (**owner gate**: public programme projection); locative country names |
+| Worker | find work, log work, CV, documents + gaps with closing step | training suggestion for a skills gap (**owner gate**: public programme projection); ~~locative country names~~ (already handled: `termStem` + letter run matches "Vokietijoje" — verified 2026-09-04 evening) |
 | Employer | need → form → demand → candidates → contact/booking; the owner's sentence structured | end date / duration; site as a project |
 | Agency | whole chain by sentence; attention lines (offers awaiting, needs without offer, clients pending) (#1474) | client's decision by sentence (chips exist on the scouting page); e-mail delivery (**owner gate**) |
-| Institution | programme / cohort / learner invitation / assignment / list; attention: pending learner invitations | `institution_learner_outcomes_v1` has no caller; e-mail delivery (**owner gate**) |
-| Student | compass answered; "kur galiu atlikti praktiką?" narrows to internships (#1477) and NAMES an absent type instead of leaking the whole board (#1479) | executable compass actions beyond chips |
-| Everyone | My Space: pinned row + ask after repeated use (chip AND typed sentence, #1480) + unpin + "put this first" reorder (branch) — code only until the table is applied (#1475 owner-gated) | — |
+| Institution | programme / cohort / learner invitation / assignment / list; attention: pending learner invitations; learner OUTCOMES block (#1484: the one caller of `institution_learner_outcomes_v1`, suppression said) | e-mail delivery (**owner gate**) |
+| Student | compass answered; "kur galiu atlikti praktiką?" narrows to internships (#1477), NAMES an absent type (#1479) and lists what IS visible on the same dimension (#1481) | positive internship proof needs a demand from a VERIFIED company visible to a worker — no E2E company is verified; verifying one exposes test demands to real workers (**owner decision**) |
+| Everyone | My Space: pinned row + ask after repeated use (chip AND typed sentence, #1480) + unpin + "Į priekį" reorder (#1482) — code only until the table is applied (#1475 owner-gated) | — |
 
 ## Queue (contract §33; next automatic step first)
 
-1. PR `fix/cc/absent-type-alternatives` (auto-merge); PR the reorder branch once #1480 has merged (rebase onto main first); then the positive internship proof with a visible `internship` demand declared by the E2E client.
+1. Consume the create-project walk result (background task started 2026-09-04 evening; `walk-create-project/` screenshots) → record; delete the E2E project row. Then PR the attention branch; then the chat's create-project `onDone` → open the new project's panel (`selectProjectRef`) so people are assigned right there.
 2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
 3. F2: end date / duration in the demand structurer; the site as a project object.
 4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.

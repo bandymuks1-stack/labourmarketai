@@ -144,6 +144,29 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     /* no line */
   }
 
+  // 3b ── documents: expiring, or missing for the person's OWN stated
+  // countries (owner contract 2026-09-04 §4D/§14 — attention from real
+  // canonical state). The SAME derivation the chat answers "kas baigia
+  // galioti?" with; no country stated → no missing line (the chat asks,
+  // the brief never guesses). The chip is the same documents-centre answer.
+  try {
+    if (lines.length < MAX_LINES) {
+      const { loadWorkerDocumentGap } = await import("@/lib/conversation/documents-gap-server");
+      const docs = await loadWorkerDocumentGap();
+      if (docs.kind === "ok") {
+        if (docs.gap.expiring.length > 0) {
+          lines.push(t("briefDocumentsExpiring", { count: docs.gap.expiring.length }));
+          addChip("documents-centre", t("documentsChip"));
+        } else if (docs.gap.missing.length > 0 && docs.countries.length > 0) {
+          lines.push(t("briefDocumentsMissing", { count: docs.gap.missing.length }));
+          addChip("documents-centre", t("documentsChip"));
+        }
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents a document gap */
+  }
+
   // 4 ── the first missing profile step ────────────────────────────────────
   // ── learner identity (M10, second half — FINAL COMPLETION Train G2) ──
   // A person enrolled with a training provider (an ACTIVE engagement whose
@@ -261,6 +284,20 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       if (learners.status === "ok" && learners.counts.pending > 0 && lines.length < MAX_LINES) {
         lines.push(t("briefEduLearnerInvitesPending", { count: learners.counts.pending }));
         addChip("link:/dashboard/network?relationship=student", t("chipInviteStudent"));
+      }
+    }
+    // Candidates who raised a hand on the company's OWN demands and are
+    // still waiting for an answer (interest signals not yet acknowledged —
+    // the same read the candidates screen counts with). The chip is the
+    // in-chat candidates answer, never a route out of the workspace.
+    if (lines.length < MAX_LINES) {
+      const { listPendingInterestCountsForCompany } = await import("@/lib/opportunities/interest");
+      const pending = await listPendingInterestCountsForCompany();
+      let waiting = 0;
+      for (const n of pending.values()) waiting += n;
+      if (waiting > 0) {
+        lines.push(t("briefEmployerInterestWaiting", { count: waiting }));
+        addChip("candidates", t("chipInterestOnMyNeeds"));
       }
     }
   } catch {
