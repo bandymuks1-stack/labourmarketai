@@ -35,3 +35,15 @@ Every fact the sentence carried is now canonical state the matching engine
 and the worker board can read. Not yet: an absolute END date, "for three
 weeks" durations, and the site as a first-class object (a project) — the
 form still holds the site as a location label.
+
+## Matching → people/team, in the chat (prod `f49cc972`, read-only walk)
+
+`walk-candidates-prod.cjs`, E2E Walker UAB, 12.1 s: "parodyk kandidatus" → "Štai jūsų
+poreikiai ir žmonės už jų." → the panel opens the company's ONE open demand directly
+("Suvirintojas · PATEIKTAS" with "Patvirtinti reikalavimus" / "Uždaryti poreikį") and
+lists 19 anonymised candidate cards ("Kandidatas 7F3349 — silpnas atitikimas · 0 %
+reikalingų įgūdžių · Naujas", … "Kandidatas 0DBD5E … · Pasiūlymas" — the worker the
+agency proposed). The contact / shortlist / booking controls live on the card (the
+canonical `company.contact-worker` / `company.shortlist-candidate` /
+`company.propose-booking` dispatch); not clicked tonight to avoid booking residue —
+that chain was proven on 2026-09-01 (#857 / G-04).
