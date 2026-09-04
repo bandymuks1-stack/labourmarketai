@@ -121,3 +121,15 @@ created ~40 s before the client's page loaded; on `6fc477d9` (offer hours old) t
 was there. Most likely a short data-cache / render lag on the dashboard greeting, not
 a missing rung — the in-chat list (a fresh server action) showed the offer at once.
 Not chased further tonight; noted for the next real-client observation.
+## Placement closed by the worker (prod `f49cc972`)
+
+`walk-worker-accept-prod.cjs`, E2E Worker Two, 19.0 s: "ką man siūlo?" → the booking
+card (E2E Walker UAB · Suvirintojas) → **Priimti** → "Priimti šį pasiūlymą?" → "Taip,
+patvirtinti" → "Priėmei". DB: booking `245e91a8…` `accepted` at 20:42:14 UTC and
+`company_worker_engagements` row `c61f1187…` `active` created in the same second.
+
+So the AGENCY journey is proven end-to-end by sentence and chips on production with
+E2E identities: client demand (invite → share) → supply (roster) → proposal → client
+decision (decline AND accept) → placement (booking → worker's acceptance in the chat →
+engagement). Residue on E2E identities only: engagement `c61f1187` (active), offer
+`c5ba19a5` (accepted), offer `f93735c6` (declined).
