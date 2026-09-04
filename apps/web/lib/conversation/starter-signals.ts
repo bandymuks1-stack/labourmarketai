@@ -39,6 +39,9 @@ export interface WorkspaceStarterContext {
   readonly educationWorkspace: boolean;
   /** The active organization's display name — the "on whose behalf" line. */
   readonly organizationName: string | null;
+  /** The active organization's id (membership-validated) — for reads that
+   *  are keyed by organization (learners, programmes). */
+  readonly organizationId: string | null;
 }
 
 const PERSON_SIGNALS: StarterSignals = {
@@ -56,6 +59,7 @@ export function personStarterContext(learnerLinked: boolean): WorkspaceStarterCo
     agencyWorkspace: false,
     educationWorkspace: false,
     organizationName: null,
+    organizationId: null,
   };
 }
 
@@ -66,6 +70,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
     agencyWorkspace: false,
     educationWorkspace: false,
     organizationName: null,
+    organizationId: null,
   };
   let companyId: string | null = null;
   let organizationId: string | null = null;
@@ -202,6 +207,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
     agencyWorkspace: staffingAgency,
     educationWorkspace: educationFirst,
     organizationName,
+    organizationId,
   };
 }
 

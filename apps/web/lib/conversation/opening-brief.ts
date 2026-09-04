@@ -223,6 +223,50 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     chips.push({ id, label });
   };
 
+  // 0 ── ATTENTION for the workspace's OTHER capabilities (owner contract
+  // 2026-09-04 §4D: "client has not confirmed", "offer awaiting decision",
+  // "learner invitation pending"). An agency's daily loop IS its clients and
+  // offers; an institution's IS its learners. Same rules: real counts from
+  // rows the caller may already read, each read in its own try, nothing
+  // invented. The capability flags come from the ONE starter-context read.
+  try {
+    const { loadCompanyStarterContext } = await import("@/lib/conversation/starter-signals");
+    const ws = await loadCompanyStarterContext();
+    if (ws.signals.staffingAgency) {
+      const { listAgencyOfferProgress, listSharedRequestsForAgency } = await import("@/lib/agency/bridge-read");
+      const [progress, shared] = await Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]);
+      if (progress.kind === "ok") {
+        const awaiting = progress.rows.filter((r) => r.offerStatus === "offered").length;
+        if (awaiting > 0 && lines.length < MAX_LINES) {
+          lines.push(t("briefAgencyOffersAwaiting", { count: awaiting }));
+          addChip("agency:progress", t("chipProposalStatus"));
+        }
+        if (shared.kind === "ok") {
+          const offeredFor = new Set(progress.rows.map((r) => r.requestId));
+          const withoutOffer = shared.rows.filter((s) => s.status !== "closed" && !offeredFor.has(s.requestId)).length;
+          if (withoutOffer > 0 && lines.length < MAX_LINES) {
+            lines.push(t("briefAgencySharedWithoutOffer", { count: withoutOffer }));
+            addChip("agency:demand", t("chipClientDemand"));
+          }
+        }
+      }
+      const pendingClients = ws.signals.facts.clientConnectionsPending ?? 0;
+      if (pendingClients > 0 && lines.length < MAX_LINES) {
+        lines.push(t("briefAgencyClientsPending", { count: pendingClients }));
+      }
+    }
+    if (ws.signals.capabilities.includes("training_provider") && ws.organizationId) {
+      const { readInstitutionLearners } = await import("@/lib/education/institution-learners");
+      const learners = await readInstitutionLearners(ws.organizationId);
+      if (learners.status === "ok" && learners.counts.pending > 0 && lines.length < MAX_LINES) {
+        lines.push(t("briefEduLearnerInvitesPending", { count: learners.counts.pending }));
+        addChip("link:/dashboard/network?relationship=student", t("chipInviteStudent"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents attention */
+  }
+
   // 1 ── work entries awaiting review ──────────────────────────────────────
   try {
     const { fetchQuickReviewQueue } = await import("@/lib/journal/review-queue");
