@@ -305,12 +305,106 @@ legal status, availability or preferences.
    consent yet, and empty means *none*, never *all*. Publication is therefore
    refused at the channel gate even when `publicationAuthority` is granted. The
    column exists so a person can grant a channel explicitly later.
-4. **No UI surface yet.** The server actions exist and are typed; the privacy
-   screen does not render them. Nobody can grant this consent through the
-   product until that is built — so the production feed would be a *measured
-   zero* today, which is exactly what the contract says to emit.
+4. ~~**No UI surface yet.**~~ **CLOSED 2026-09-05.** The canonical privacy
+   screen now carries the consent and the declaration — see §8. The feed is
+   still a measured zero until a real person uses it, which is exactly what the
+   contract says to emit.
 
-## 8. Production gates (owner)
+## 8. The worker-facing control (added 2026-09-05)
+
+Lives on the **canonical privacy screen**, `/{locale}/dashboard/privacy`,
+anchor `#partner-supply` — between "employer visibility inside the product" and
+"data transfers to companies", which is the order those sections already read
+in: narrowest audience outwards. **No new product area was created.**
+
+`components/app/partner-supply-representation.tsx`, rendered through the
+canonical `components/ui/Card` primitive, wired to
+`lib/privacy/partner-supply-actions.ts`.
+
+### What a worker can do
+
+opt in · declare current intent (five states) · declare or change a start date ·
+declare the countries where they may legally work · **separately** declare the
+markets where they agree to be offered · switch contact, presentation and naming
+on or off independently · see their own current answers back · reconfirm an
+ageing answer · withdraw the declaration · withdraw the consent itself.
+
+### The two acts, in order
+
+The **consent** is asked first, against the versioned hashed text; the
+**declaration** form appears only after it. A person therefore cannot end up
+scoped-but-not-consenting, and no code path here can reverse that, because the
+filter lives in the database rather than in the component.
+
+Withdrawing the **consent** also stamps the declaration withdrawn, in the same
+transaction — otherwise the next emission would depend on the emitter
+remembering to check both.
+
+### Default deny, and no fabricated defaults
+
+Guarded by `lib/guards/partner-supply-consent-ux.test.ts` (22 assertions):
+
+- no `defaultChecked` anywhere; the three authority checkboxes initialise from
+  `declaration?.x ?? false`;
+- no work-seeking intent is preselected, and the form refuses to submit without
+  one — a default there would be the product making a claim about a person's
+  situation for them;
+- countries are **never** prefilled from `workers.preferred_countries`. That is
+  a preference; this screen asks about a legal right and about consent to be
+  offered. Answering either from the third field would be fabricating consent.
+  The guard asserts the identifier appears nowhere in the component's code;
+- grant and decline are two buttons carrying the identical class string, and
+  declining calls no server action at all;
+- withdrawal is on the same screen and takes one click.
+
+### The sentence that keeps a match from being read as a disclosure
+
+Rendered above the choice, in all five active locales, and asserted per locale:
+
+> Matching alone never reveals your name, email address, phone number or
+> address. Contact and naming are separate permissions you give below, and both
+> start switched off.
+
+### Honest degradation
+
+An unapplied migration renders one plain line, never a fake success. A profile
+with **no worker row** is told plainly that nothing would be represented — the
+feed joins `workers`, so rendering the form silently would be a privacy control
+that does nothing. An errored worker-row read counts as *present*, because
+telling a real worker their declaration is pointless is the worse failure.
+
+### Copy accuracy fix shipped with the UI
+
+The consent text previously asserted that the partner network is *"operated by
+the same data controller"*. That is a legal fact about another system this repo
+cannot establish, and a controller statement is exactly the sentence that must
+not be guessed (Art. 13(1)(a)). It now states the **processor** relationship the
+contract actually supports: approved partner infrastructure that receives the
+de-identified projection only and processes it solely on the controller's
+instructions. Version stays `2026-09-04.v1` — nothing had ever consented to the
+old wording — and the pinned hash moved to `1e756f06…788f`, re-pinned in the
+same unapplied migration. A guard asserts the old claim cannot come back.
+
+### Coverage
+
+`tests/e2e/partner-supply-representation.spec.ts` — two tests over the real
+path: **signed-in worker → current intent → markets → consent/authorities → save
+→ canonical state → emitter eligibility → withdraw → no longer exported**, plus
+a second test proving that withdrawing the **consent alone** also removes the
+row. Each UI step is paired with the canonical read of
+`first_party_supply_feed_v1()`, so a build that ignored the consent predicate
+would fail even though every screen assertion passed. The negative controls:
+absent before consent, **gone** (not flagged) after withdrawal, no identity in
+the serialised row, and `identityDisclosureAuthority` DENIED while matchable.
+
+**NOT YET RUN.** It needs the local Supabase stack with the migration applied,
+and that stack cannot start on this machine: `docker info` hangs past 120s, and
+Windows reserves ports 54290–54389 so the local stack cannot bind. Both are
+recorded environment faults, not properties of this change. The spec refuses to
+report a skip as a pass under `E2E_REQUIRE_AUTH=1`; Playwright discovers both
+tests (`--list` verified). Command and prerequisites: integration checklist §10.
+
+## 9. Production gates (owner)
 
 1. **Apply the migration.** RED class (SECURITY DEFINER + GRANT + policies), so
    `-- @human-gate-approved` is present and the PR opens as a draft with
@@ -319,7 +413,9 @@ legal status, availability or preferences.
 2. **Set `SUPPLY_FEED_BEARER_TOKEN`** (≥32 chars) in Vercel production, and give
    the same value to the Agentai VPS. Until then the pull route answers 401 and
    the bridge is inert by design.
-3. **Decide whether the privacy screen ships the consent + declaration UI** in
-   this slice or the next.
+3. ~~Decide whether the privacy screen ships the consent + declaration UI.~~
+   **Decided and built** (§8). The remaining owner step is the real-worker E2E
+   run once a local stack exists — see the integration checklist,
+   `FIRST_PARTY_SUPPLY_BRIDGE_INTEGRATION_CHECKLIST.md`.
 
 Merge is additionally held by the parallel full-project train — see the PR.

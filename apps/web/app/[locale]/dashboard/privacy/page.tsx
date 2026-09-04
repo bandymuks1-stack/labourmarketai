@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-requests";
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
+import { PartnerSupplyRepresentation } from "@/components/app/partner-supply-representation";
+import { Card } from "@/components/ui/Card";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
 import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
@@ -11,9 +13,11 @@ import {
   getMyDiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
+import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
 import {
   CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
+  PARTNER_SUPPLY_REPRESENTATION_V1,
   PROFILE_DISCOVERABILITY_V1,
   type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
@@ -53,6 +57,7 @@ export default async function PrivacyPage({
   setRequestLocale(locale);
   const t = await getTranslations("privacySelfService");
   const tc = await getTranslations("privacyConsent");
+  const tps = await getTranslations("privacyConsent.partnerSupply");
 
   const supabase = await createClient();
   const {
@@ -60,14 +65,21 @@ export default async function PrivacyPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const [state, history, preview, myRequests, contactRequestsResult] =
-    await Promise.all([
-      getMyDiscoverabilityState(),
-      getMyConsentHistory(),
-      buildOwnDiscoverabilityPreview(),
-      listMyPrivacyRequests(),
-      listMyContactDisclosureRequests(),
-    ]);
+  const [
+    state,
+    history,
+    preview,
+    myRequests,
+    contactRequestsResult,
+    partnerSupplyState,
+  ] = await Promise.all([
+    getMyDiscoverabilityState(),
+    getMyConsentHistory(),
+    buildOwnDiscoverabilityPreview(),
+    listMyPrivacyRequests(),
+    listMyContactDisclosureRequests(),
+    getMyPartnerSupplyState(),
+  ]);
 
   const consentLocale: ConsentLocale = (
     CONSENT_LOCALES as readonly string[]
@@ -75,6 +87,7 @@ export default async function PrivacyPage({
     ? (locale as ConsentLocale)
     : "lt";
   const legal = PROFILE_DISCOVERABILITY_V1.texts[consentLocale];
+  const partnerLegal = PARTNER_SUPPLY_REPRESENTATION_V1.texts[consentLocale];
 
   const previewFields = preview.map((f) => ({
     label: tc(`preview.${f.key}`),
@@ -168,6 +181,95 @@ export default async function PrivacyPage({
             }}
           />
         </div>
+      </section>
+
+      {/* 1a. Representation OUTSIDE the product — the partner_supply
+          representation consent (MATCH) plus the current-supply declaration
+          that scopes it. A separate purpose from discoverability above, because
+          the recipient category is different; a separate consent because a
+          person may reasonably want one and not the other. */}
+      <section data-testid="privacy-partner-supply" id="partner-supply">
+        <Card label={tc("sections.partnerSupply")}>
+          <p className="text-sm leading-relaxed text-text-primary">
+            {tps("sectionIntro")}
+          </p>
+          <div className="mt-3">
+          <PartnerSupplyRepresentation
+            locale={locale}
+            state={partnerSupplyState}
+            legal={partnerLegal}
+            labels={{
+              sectionIntro: tps("sectionIntro"),
+              noWorkerProfile: tps("noWorkerProfile"),
+              statusNotRepresented: tps("statusNotRepresented"),
+              statusNotRepresentedBody: tps("statusNotRepresentedBody"),
+              statusRepresented: tps("statusRepresented"),
+              statusConsentOnly: tps("statusConsentOnly"),
+              statusWithdrawn: tps("statusWithdrawn"),
+              statusStale: tps("statusStale"),
+              statusAgeing: tps("statusAgeing"),
+              statusExpired: tps("statusExpired"),
+              authoritiesTitle: tps("authoritiesTitle"),
+              authorityMatch: tps("authorityMatch"),
+              authorityMatchBody: tps("authorityMatchBody"),
+              authorityContact: tps("authorityContact"),
+              authorityContactBody: tps("authorityContactBody"),
+              authorityPresentation: tps("authorityPresentation"),
+              authorityPresentationBody: tps("authorityPresentationBody"),
+              authorityIdentity: tps("authorityIdentity"),
+              authorityIdentityBody: tps("authorityIdentityBody"),
+              matchNeverReveals: tps("matchNeverReveals"),
+              grant: tps("grant"),
+              decline: tps("decline"),
+              declinedNote: tps("declinedNote"),
+              manage: tps("manage"),
+              withdrawConsent: tps("withdrawConsent"),
+              formTitle: tps("formTitle"),
+              intentLabel: tps("intentLabel"),
+              intentAvailableNow: tps("intentAvailableNow"),
+              intentAvailableFrom: tps("intentAvailableFrom"),
+              intentOpenToOffers: tps("intentOpenToOffers"),
+              intentLookingForWork: tps("intentLookingForWork"),
+              intentLookingForProjects: tps("intentLookingForProjects"),
+              availableFromLabel: tps("availableFromLabel"),
+              workCountriesLabel: tps("workCountriesLabel"),
+              workCountriesHelp: tps("workCountriesHelp"),
+              marketsLabel: tps("marketsLabel"),
+              marketsHelp: tps("marketsHelp"),
+              validDaysLabel: tps("validDaysLabel"),
+              validDaysHelp: tps("validDaysHelp"),
+              save: tps("save"),
+              saving: tps("saving"),
+              saved: tps("saved"),
+              edit: tps("edit"),
+              cancel: tps("cancel"),
+              currentTitle: tps("currentTitle"),
+              currentIntent: tps("currentIntent"),
+              currentAvailableFrom: tps("currentAvailableFrom"),
+              currentWorkCountries: tps("currentWorkCountries"),
+              currentMarkets: tps("currentMarkets"),
+              currentValidUntil: tps("currentValidUntil"),
+              currentReconfirmedAt: tps("currentReconfirmedAt"),
+              currentAuthorities: tps("currentAuthorities"),
+              granted: tps("granted"),
+              denied: tps("denied"),
+              unknown: tps("unknown"),
+              reconfirm: tps("reconfirm"),
+              reconfirmed: tps("reconfirmed"),
+              withdrawDeclaration: tps("withdrawDeclaration"),
+              withdrawnDeclarationNote: tps("withdrawnDeclarationNote"),
+              needsMigration: tps("needsMigration"),
+              errorGeneric: tps("errorGeneric"),
+              errorUnknownIntent: tps("errorUnknownIntent"),
+              errorAvailableFromRequired: tps("errorAvailableFromRequired"),
+              errorCountriesRequired: tps("errorCountriesRequired"),
+              errorNotIso2: tps("errorNotIso2"),
+              errorMarketOutside: tps("errorMarketOutside"),
+              errorValidity: tps("errorValidity"),
+              }}
+            />
+          </div>
+        </Card>
       </section>
 
       {/* 1b. Contact-detail requests from companies (Wagon 1) — the worker

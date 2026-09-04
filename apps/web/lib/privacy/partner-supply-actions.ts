@@ -88,6 +88,15 @@ export interface PartnerSupplyState {
   } | null;
   /** True only when BOTH the consent and a live declaration are in place. */
   representedNow: boolean;
+  /**
+   * Whether the caller has a worker row at all.
+   *
+   * `first_party_supply_feed_v1()` joins `workers`, so a profile without one
+   * can grant the consent, fill in the declaration, and still never appear in
+   * the feed. Rendering the form without saying so would be a control that
+   * quietly does nothing — the one thing a privacy screen must never be.
+   */
+  hasWorkerProfile: boolean;
 }
 
 function emptyState(kind: PartnerSupplyState["kind"]): PartnerSupplyState {
@@ -98,6 +107,7 @@ function emptyState(kind: PartnerSupplyState["kind"]): PartnerSupplyState {
     consentVersion: null,
     declaration: null,
     representedNow: false,
+    hasWorkerProfile: false,
   };
 }
 
@@ -117,6 +127,17 @@ export async function getMyPartnerSupplyState(): Promise<PartnerSupplyState> {
     }
     return emptyState("error");
   }
+
+  // Own worker row, under the caller's own session and RLS (`owns_worker`).
+  // Head-count only: this asks whether one exists, never what is in it.
+  const worker = await supabase
+    .from("workers")
+    .select("id", { count: "exact", head: true })
+    .eq("profile_id", user.id);
+  // An errored count is NOT "no worker" — that would tell a real worker their
+  // declaration is pointless. Unknown reads as present; the emitter is the
+  // place that actually decides, and it fails closed on its own.
+  const hasWorkerProfile = worker.error ? true : (worker.count ?? 0) > 0;
 
   const declared = await asAny(supabase).rpc("my_first_party_supply_declaration");
   if (declared.error) {
@@ -167,6 +188,7 @@ export async function getMyPartnerSupplyState(): Promise<PartnerSupplyState> {
       && hasDeclaration
       && d.withdrawnAt === null
       && (d.freshness === "CURRENT" || d.freshness === "AGEING"),
+    hasWorkerProfile,
   };
 }
 

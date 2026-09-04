@@ -60,7 +60,7 @@ insert into public.privacy_consent_purposes (purpose, current_version, current_t
 values (
   'partner_supply_representation',
   '2026-09-04.v1',
-  'c1b888b72022dab4ca4c31aa89dceb85e3a2d0ca4e0b3e33500349e9e71c5791'
+  '1e756f06b662c4297d48eb7366e755228ac445ca933026c5592e50a8acef788f'
 )
 on conflict (purpose) do nothing;
 

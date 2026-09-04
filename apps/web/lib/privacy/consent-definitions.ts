@@ -286,7 +286,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
   purpose: "partner_supply_representation",
   version: "2026-09-04.v1",
   recipientCategory:
-    "The LabourMarket.ai partner opportunity network, operated by the same data controller to find work for registered people outside this product",
+    "Approved partner infrastructure that LabourMarket.ai uses to find work for registered people with employers and projects outside this product. It receives the de-identified projection only, and processes it solely on the controller's instructions",
   dataCategories: [
     "an opaque reference that identifies you only inside LabourMarket.ai",
     "profession(s) and trades your evidence supports",
@@ -315,7 +315,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "Sutikimą galite bet kada atšaukti privatumo nustatymuose. Atšaukus, jūsų įrašas dingsta iš kito partnerių tinklo atnaujinimo — jis kuriamas iš naujo kiekvieną kartą, todėl atšauktas sutikimas nelieka kaip istorinis įrašas.",
       controller:
-        "Duomenų valdytoja — UAB „Nonstop Group“ (įmonės kodas 302676973, Lietuva). Privatumo kontaktas: info@labourmarket.ai. Partnerių tinklą valdo ta pati valdytoja; programinės įrangos savininkė Labour Market AI Sp. z o.o. jūsų asmens duomenų negauna.",
+        "Duomenų valdytoja — UAB „Nonstop Group“ (įmonės kodas 302676973, Lietuva). Privatumo kontaktas: info@labourmarket.ai. Partnerių infrastruktūra duomenis tvarko tik valdytojos nurodymu ir gauna tik šią neasmenizuotą santrauką; programinės įrangos savininkė Labour Market AI Sp. z o.o. jūsų asmens duomenų negauna.",
     },
     en: {
       title: "Allow my availability to be represented in the partner opportunity network",
@@ -330,7 +330,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "You can withdraw this at any time in your privacy settings. Once withdrawn, your record disappears from the next partner-network rebuild — that view is rebuilt whole each time, so a withdrawn consent is not left behind as a historical entry.",
       controller:
-        "The data controller is UAB “Nonstop Group” (company code 302676973, Lithuania). Privacy contact: info@labourmarket.ai. The partner network is operated by the same controller; the software owner Labour Market AI Sp. z o.o. does not receive your personal data.",
+        "The data controller is UAB “Nonstop Group” (company code 302676973, Lithuania). Privacy contact: info@labourmarket.ai. The partner infrastructure processes data only on the controller’s instructions and receives only this de-identified summary; the software owner Labour Market AI Sp. z o.o. does not receive your personal data.",
     },
     ru: {
       title: "Разрешить представлять мою доступность в партнёрской сети возможностей",
@@ -345,7 +345,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "Вы можете отозвать согласие в любой момент в настройках приватности. После отзыва ваша запись исчезает при следующем обновлении партнёрской сети — представление собирается заново каждый раз, поэтому отозванное согласие не остаётся историческим следом.",
       controller:
-        "Контролёр данных — UAB «Nonstop Group» (код компании 302676973, Литва). Контакт по приватности: info@labourmarket.ai. Партнёрской сетью управляет тот же контролёр; владелец программного обеспечения Labour Market AI Sp. z o.o. ваши персональные данные не получает.",
+        "Контролёр данных — UAB «Nonstop Group» (код компании 302676973, Литва). Контакт по приватности: info@labourmarket.ai. Партнёрская инфраструктура обрабатывает данные только по указанию контролёра и получает только эту обезличенную сводку; владелец программного обеспечения Labour Market AI Sp. z o.o. ваши персональные данные не получает.",
     },
     nl: {
       title: "Mijn beschikbaarheid laten vertegenwoordigen in het partnernetwerk",
@@ -360,7 +360,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "U kunt dit op elk moment intrekken in uw privacy-instellingen. Na intrekking verdwijnt uw record bij de volgende opbouw van het partnernetwerk — dat overzicht wordt telkens volledig opnieuw gebouwd, dus een ingetrokken toestemming blijft niet als historische vermelding achter.",
       controller:
-        "De verwerkingsverantwoordelijke is UAB “Nonstop Group” (bedrijfscode 302676973, Litouwen). Privacycontact: info@labourmarket.ai. Het partnernetwerk wordt door dezelfde verantwoordelijke beheerd; de software-eigenaar Labour Market AI Sp. z o.o. ontvangt uw persoonsgegevens niet.",
+        "De verwerkingsverantwoordelijke is UAB “Nonstop Group” (bedrijfscode 302676973, Litouwen). Privacycontact: info@labourmarket.ai. De partnerinfrastructuur verwerkt gegevens uitsluitend in opdracht van de verwerkingsverantwoordelijke en ontvangt alleen deze geanonimiseerde samenvatting; de software-eigenaar Labour Market AI Sp. z o.o. ontvangt uw persoonsgegevens niet.",
     },
     de: {
       title: "Meine Verfügbarkeit im Partner-Chancennetzwerk vertreten lassen",
@@ -375,7 +375,7 @@ export const PARTNER_SUPPLY_REPRESENTATION_V1: ConsentDefinition = {
       withdrawal:
         "Sie können dies jederzeit in den Datenschutzeinstellungen widerrufen. Nach dem Widerruf verschwindet Ihr Datensatz beim nächsten Neuaufbau des Partnernetzwerks — diese Ansicht wird jedes Mal vollständig neu erzeugt, ein widerrufenes Einverständnis bleibt also nicht als historischer Eintrag zurück.",
       controller:
-        "Verantwortliche ist die UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen). Datenschutzkontakt: info@labourmarket.ai. Das Partnernetzwerk betreibt dieselbe Verantwortliche; die Software-Eigentümerin Labour Market AI Sp. z o.o. erhält Ihre personenbezogenen Daten nicht.",
+        "Verantwortliche ist die UAB „Nonstop Group“ (Unternehmenscode 302676973, Litauen). Datenschutzkontakt: info@labourmarket.ai. Die Partnerinfrastruktur verarbeitet Daten ausschließlich auf Weisung der Verantwortlichen und erhält nur diese anonymisierte Zusammenfassung; die Software-Eigentümerin Labour Market AI Sp. z o.o. erhält Ihre personenbezogenen Daten nicht.",
     },
   },
 };
