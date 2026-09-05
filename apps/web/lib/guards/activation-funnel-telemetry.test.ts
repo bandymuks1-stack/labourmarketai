@@ -121,6 +121,9 @@ const EXPECTED_EVENTS = [
   "chat_missing_data_asked",
   "chat_action_attempted",
   "chat_action_persisted",
+  // Public entry (frozen design contract 2026-09-05, P1): the anonymous
+  // visitor's sentence read by the deterministic router before any account.
+  "landing_intent",
 ] as const;
 
 describe("activation funnel — event registry", () => {

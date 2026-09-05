@@ -252,6 +252,32 @@ import { join } from "node:path";
  * regeneration touched the hero-live-demo.tsx hash (one state flag + one
  * status line) and the five `*.landing` namespace hashes (copy honesty
  * only). Permanently guarded by `landing-own-question-honesty.test.ts`.
+ *
+ * P1 — THE PUBLIC ENTRY UNDERSTANDS A REAL SENTENCE (owner's FROZEN DESIGN
+ * CONTRACT 2026-09-05, package P1 "Viešas įėjimas su tikru intent'u", P0
+ * SAFE PILOT; audit finding FUN-1 "the hero answers with a staged
+ * scenario"). The scripted hero — `hero-live-demo.tsx` and its data module
+ * `components/app/market-map/landing-scenario.ts` — was REMOVED, not
+ * relabelled: no scenario, no worked example, no "illustrative" copy is left
+ * on the entry. In its place `components/marketing/public-entry.tsx` reads
+ * the visitor's own sentence through the ONE deterministic conversation
+ * router (read-only, via the pure `lib/marketing/public-entry.ts`), says
+ * what it understood in ordinary words, asks ONE question with two chips
+ * (work / hire — the first-run families) when it cannot read the sentence,
+ * carries the sentence to the conversation root through the existing
+ * `lib/auth/redirect.ts` return path (`/dashboard?say=…`), and prints the
+ * public counts from the SAME canonical snapshot the market proof band
+ * prints — omitted when the reader cannot answer. The frozen file set swaps
+ * the deleted hero for the two entry modules; the `landing.hero` namespace
+ * keeps only `headline` and `sub` (the 26 scenario keys were deleted in the
+ * five routed locales, none of which is rendered any more) and gains
+ * `landing.entry`. The regeneration therefore touched the focus-landing
+ * hash, the two entry hashes (new) and the three frozen `*.landing`
+ * namespace hashes. Permanently guarded by
+ * `public-entry-real-intent.test.ts` (no scenario module, one router, two
+ * chips, the sentence never in telemetry) and `lib/marketing/
+ * public-entry.test.ts` (three sentences → three recognitions in every
+ * routed locale; the sentence survives the auth sanitiser).
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -269,12 +295,16 @@ export const FROZEN_LANDING_FILES = [
   "lib/market/live-market-landing.ts",
   "lib/telemetry/landing-experience.ts",
   // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
-  // landing, so its composition, its switcher and the six original
-  // components it renders are part of the landing render tree again.
+  // landing, so its composition, its switcher and the original components
+  // it renders are part of the landing render tree again.
   "app/[locale]/focus-landing/focus-landing.tsx",
   "app/[locale]/focus-landing/landing-mode-switcher.tsx",
   "app/[locale]/focus-landing/landing-mode-switcher.module.css",
-  "components/marketing/hero-live-demo.tsx",
+  // Frozen design contract 2026-09-05, P1: the public entry (component + the
+  // pure read-only hook into the conversation router) replaces the scripted
+  // hero scenario at the top of the render tree.
+  "components/marketing/public-entry.tsx",
+  "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",
   "components/marketing/player-card-showcase.tsx",

@@ -12926,86 +12926,63 @@
     },
     "hero": {
       "headline": "Ask. See. Hire.",
-      "sub": "An AI labour-market operating system — conversation, map and result in one place.",
-      "chatLabel": "Example conversation",
-      "mapLabel": "Concept map — illustrative scenario",
-      "thinking": "Analysing market signals…",
-      "answered": "Found it. Map updated.",
-      "resultLabel": "Result",
-      "mapHint": "Tap a marker — the map answers.",
-      "scenario": {
-        "q1": "Where are electricians needed now?",
-        "q2": "Where is there a welder shortage?",
-        "q3": "Where are people available?"
+      "sub": "An AI labour-market operating system — conversation, map and result in one place."
+    },
+    "entry": {
+      "label": "Write what you need — in your own words",
+      "placeholder": "E.g. I need 12 scaffolders in Rotterdam",
+      "submit": "Understand",
+      "examplesLabel": "For example:",
+      "examples": {
+        "hire": "I need 12 scaffolders in Rotterdam",
+        "work": "Looking for a job in Norway",
+        "internship": "Where can I do an internship?"
       },
-      "result": {
-        "r1": "Highest electrician demand — the Netherlands",
-        "r2": "Welders are short along the Norwegian coast",
-        "r3": "Most available people — the Baltics"
+      "understoodLabel": "Understood",
+      "understood": {
+        "need-workers": "You need workers. We will write down the need — which people, how many, where and from when — and look for the right ones.",
+        "find-workers": "You are looking for people to do work. We will show who fits by profession and place.",
+        "candidates": "You want to see the candidates for your need.",
+        "find-work": "You are looking for work. We will show opportunities that fit your profession and place.",
+        "opportunities": "You are looking for opportunities — work, an internship or another path. We will show what fits you.",
+        "need-service": "You need someone to do a job. We will write down exactly what is needed and look for who can help.",
+        "offer-value": "You have something to offer. We will write down the offer so the people who need it can find it.",
+        "create-project": "You want to create a project or a site — with a place, dates and people.",
+        "projects": "You want to see your company's projects.",
+        "company-overview": "You want to see what is happening in your company — people, projects, needs.",
+        "create-organization": "You want to register a company or an organisation.",
+        "cv": "You want to work with your CV — upload it or look at it.",
+        "log-work": "You want to record work you did in the work journal.",
+        "skill-gap": "You want to know which skills you are missing.",
+        "documents": "You are talking about documents and certificates — what is valid, what expires, what is missing.",
+        "add-document": "You have a document or certificate you want to record.",
+        "learning-compass": "You want to know what to learn next.",
+        "profile": "You want to add to your profile — a language, a skill, experience.",
+        "who-available": "You want to know who in your team is free.",
+        "invite-candidate": "You want to invite a person to your team.",
+        "invite-client": "You want to invite a client — you work as an agency.",
+        "propose-candidate": "You want to propose a candidate to a client — you work as an agency.",
+        "client-demand": "You want to see what your clients need.",
+        "invite-student": "You represent an education institution and want to invite a student.",
+        "programmes": "You represent an education institution — programmes, groups, students."
       },
-      "reacting": "Market reacting… {count} signals",
-      "decisionLabel": "EXAMPLE DECISION",
-      "ownQuestionNote": "This is a worked example on your question's topic — not an answer built from your data. Sign in for the real one.",
-      "decisionField": {
-        "whyHere": "Why here",
-        "whyNow": "Why now",
-        "whyYou": "Why you",
-        "whyNotElsewhere": "Why not elsewhere"
+      "family": {
+        "work": "You are talking about your work and professional path.",
+        "hire": "You are talking as an employer or a company — about people, projects or needs.",
+        "agency": "You are talking as an agency — about clients and candidates.",
+        "student": "You are talking about learning and the path to work.",
+        "education": "You represent an education institution."
       },
-      "reason": {
-        "r1a": "Checking open needs by role and region…",
-        "r1b": "Comparing against available people in each area…",
-        "r1c": "Weighing travel distance and start dates…",
-        "r2a": "Searching welding needs in offshore industry…",
-        "r2b": "Checking certification requirements…",
-        "r2c": "Weighing the seasonal project cycle…",
-        "r3a": "Collecting availability signals by region…",
-        "r3b": "Checking skills evidenced in work journals…",
-        "r3c": "Assessing readiness to start…"
+      "nextHint": "To keep the need and be able to answer it, an account is needed. Your sentence travels with you.",
+      "signup": "Create an account",
+      "login": "I have an account — log in",
+      "unrecognised": "I did not understand at first. What are you looking for?",
+      "chips": {
+        "work": "I am looking for work",
+        "hire": "I need workers"
       },
-      "decision": {
-        "d1": {
-          "whyHere": "Rotterdam and Eindhoven have more open needs than available electricians.",
-          "whyNow": "Projects start within the next 4 weeks.",
-          "whyYou": "Your work journal holds 14 entries backing electrical work.",
-          "next": "Review these needs",
-          "whyNotElsewhere": "Belgium and Germany show lower demand and more competition for the same people."
-        },
-        "d2": {
-          "whyHere": "Offshore industry in Stavanger and Bergen is short of certified welders.",
-          "whyNow": "The contracting cycle opens before the winter season.",
-          "whyYou": "You have welding evidence and are ready to travel.",
-          "next": "See the requirements",
-          "whyNotElsewhere": "Denmark has fewer projects; Poland has more local candidates for the same role."
-        },
-        "d3": {
-          "whyHere": "Vilnius and Kaunas hold the most people ready to start.",
-          "whyNow": "Their availability was confirmed in the last 2 weeks.",
-          "whyYou": "Your need matches their evidenced skills.",
-          "next": "Review these people",
-          "whyNotElsewhere": "Latvia and Estonia hold fewer available people and later start dates."
-        }
-      },
-      "askPlaceholder": "Ask your own question…",
-      "askSubmit": "Ask",
-      "unmatched": "In this preview I answer about electricians, welders and available people.",
-      "basisLabel": "What this rests on",
-      "basisNote": "The {count} signals weighed above, on illustrative volumes — this is a concept scenario, not today's market.",
-      "previewLabel": "Best matching person",
-      "previewName": "Jonas P.",
-      "previewRole": "Electrician · Vilnius · Available from September",
-      "previewMetric": {
-        "entries": "Work records",
-        "skills": "Evidenced skills",
-        "years": "Years"
-      },
-      "previewValue": {
-        "entries": "14",
-        "skills": "3",
-        "years": "7"
-      },
-      "persistAction": "Save this result",
-      "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
+      "numbers": "On the platform now: {vacancies} active job listings · {employers} employers",
+      "refreshed": "refreshed {date}"
     },
     "marketProof": {
       "eyebrow": "On the platform right now",

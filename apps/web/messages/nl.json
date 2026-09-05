@@ -12926,86 +12926,63 @@
     },
     "hero": {
       "headline": "Vraag. Zie. Neem aan.",
-      "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek.",
-      "chatLabel": "Voorbeeldgesprek",
-      "mapLabel": "Conceptkaart — illustratief scenario",
-      "thinking": "Marktsignalen analyseren…",
-      "answered": "Gevonden. Kaart bijgewerkt.",
-      "resultLabel": "Resultaat",
-      "mapHint": "Tik op een markering — de kaart antwoordt.",
-      "scenario": {
-        "q1": "Waar zijn nu elektriciens nodig?",
-        "q2": "Waar is een lassertekort?",
-        "q3": "Waar zijn mensen beschikbaar?"
+      "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek."
+    },
+    "entry": {
+      "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
+      "placeholder": "Bijv.: we zoeken 12 steigerbouwers in Rotterdam",
+      "submit": "Begrijpen",
+      "examplesLabel": "Bijvoorbeeld:",
+      "examples": {
+        "hire": "We zoeken 12 steigerbouwers in Rotterdam",
+        "work": "Ik zoek werk in Noorwegen",
+        "internship": "Waar kan ik stage lopen?"
       },
-      "result": {
-        "r1": "Hoogste vraag naar elektriciens — Nederland",
-        "r2": "Lassers tekort langs de Noorse kust",
-        "r3": "Meeste beschikbare mensen — de Baltische staten"
+      "understoodLabel": "Begrepen",
+      "understood": {
+        "need-workers": "U heeft werknemers nodig. We noteren de behoefte — welke mensen, hoeveel, waar en vanaf wanneer — en zoeken de juiste.",
+        "find-workers": "U zoekt mensen voor werk. We laten zien wie past op beroep en plaats.",
+        "candidates": "U wilt de kandidaten voor uw behoefte zien.",
+        "find-work": "U zoekt werk. Op basis van uw beroep en plaats laten we passende kansen zien.",
+        "opportunities": "U zoekt kansen — werk, een stage of een andere weg. We laten zien wat bij u past.",
+        "need-service": "U heeft iemand nodig die een klus doet. We noteren precies wat nodig is en zoeken wie kan helpen.",
+        "offer-value": "U heeft iets aan te bieden. We noteren het aanbod zodat wie het nodig heeft het kan vinden.",
+        "create-project": "U wilt een project of locatie aanmaken — met plaats, data en mensen.",
+        "projects": "U wilt de projecten van uw bedrijf zien.",
+        "company-overview": "U wilt zien wat er in uw bedrijf gebeurt — mensen, projecten, behoeften.",
+        "create-organization": "U wilt een bedrijf of organisatie registreren.",
+        "cv": "U wilt met uw cv werken — uploaden of bekijken.",
+        "log-work": "U wilt gedaan werk in het werkdagboek vastleggen.",
+        "skill-gap": "U wilt weten welke vaardigheden u mist.",
+        "documents": "U heeft het over documenten en certificaten — wat geldig is, wat verloopt, wat ontbreekt.",
+        "add-document": "U heeft een document of certificaat dat u wilt vastleggen.",
+        "learning-compass": "U wilt weten wat u hierna moet leren.",
+        "profile": "U wilt uw profiel aanvullen — een taal, een vaardigheid, ervaring.",
+        "who-available": "U wilt weten wie in uw team vrij is.",
+        "invite-candidate": "U wilt iemand uitnodigen voor uw team.",
+        "invite-client": "U wilt een klant uitnodigen — u werkt als bureau.",
+        "propose-candidate": "U wilt een kandidaat aan een klant voorstellen — u werkt als bureau.",
+        "client-demand": "U wilt zien wat uw klanten nodig hebben.",
+        "invite-student": "U vertegenwoordigt een onderwijsinstelling en wilt een student uitnodigen.",
+        "programmes": "U vertegenwoordigt een onderwijsinstelling — programma's, groepen, studenten."
       },
-      "reacting": "Markt reageert… {count} signalen",
-      "decisionLabel": "VOORBEELDBESLISSING",
-      "ownQuestionNote": "Dit is een uitgewerkt voorbeeld bij het onderwerp van uw vraag — geen antwoord uit uw gegevens. Het echte antwoord krijgt u na het inloggen.",
-      "decisionField": {
-        "whyHere": "Waarom hier",
-        "whyNow": "Waarom nu",
-        "whyYou": "Waarom jij",
-        "whyNotElsewhere": "Waarom niet elders"
+      "family": {
+        "work": "U heeft het over uw werk en uw loopbaan.",
+        "hire": "U spreekt als werkgever of bedrijf — over mensen, projecten of behoeften.",
+        "agency": "U spreekt als bureau — over klanten en kandidaten.",
+        "student": "U heeft het over leren en de weg naar werk.",
+        "education": "U vertegenwoordigt een onderwijsinstelling."
       },
-      "reason": {
-        "r1a": "Ik controleer openstaande behoeften per rol en regio…",
-        "r1b": "Ik vergelijk met beschikbare mensen per gebied…",
-        "r1c": "Ik weeg reisafstand en startdata af…",
-        "r2a": "Ik zoek lasbehoeften in de offshore-industrie…",
-        "r2b": "Ik controleer certificeringseisen…",
-        "r2c": "Ik weeg de seizoensgebonden projectcyclus af…",
-        "r3a": "Ik verzamel beschikbaarheidssignalen per regio…",
-        "r3b": "Ik controleer vaardigheden die in werkjournaals zijn onderbouwd…",
-        "r3c": "Ik beoordeel de startbereidheid…"
+      "nextHint": "Om de behoefte te bewaren en erop te kunnen antwoorden is een account nodig. Uw zin reist met u mee.",
+      "signup": "Account aanmaken",
+      "login": "Ik heb een account — inloggen",
+      "unrecognised": "Dat begreep ik niet meteen. Wat zoekt u?",
+      "chips": {
+        "work": "Ik zoek werk",
+        "hire": "Ik zoek werknemers"
       },
-      "decision": {
-        "d1": {
-          "whyHere": "Rotterdam en Eindhoven hebben meer openstaande behoeften dan beschikbare elektriciens.",
-          "whyNow": "Projecten starten binnen de komende 4 weken.",
-          "whyYou": "Je werkjournaal bevat 14 records die elektrisch werk onderbouwen.",
-          "next": "Bekijk deze behoeften",
-          "whyNotElsewhere": "België en Duitsland laten minder vraag en meer concurrentie om dezelfde mensen zien."
-        },
-        "d2": {
-          "whyHere": "De offshore-industrie in Stavanger en Bergen komt gecertificeerde lassers tekort.",
-          "whyNow": "De aanbestedingscyclus opent vóór het winterseizoen.",
-          "whyYou": "Je hebt lasbewijs en bent bereid om te reizen.",
-          "next": "Bekijk de eisen",
-          "whyNotElsewhere": "Denemarken heeft minder projecten; Polen heeft meer lokale kandidaten voor dezelfde rol."
-        },
-        "d3": {
-          "whyHere": "In Vilnius en Kaunas zijn de meeste mensen klaar om te starten.",
-          "whyNow": "Hun beschikbaarheid is in de afgelopen 2 weken bevestigd.",
-          "whyYou": "Jouw behoefte past bij hun onderbouwde vaardigheden.",
-          "next": "Bekijk deze mensen",
-          "whyNotElsewhere": "Letland en Estland hebben minder beschikbare mensen en latere startdata."
-        }
-      },
-      "askPlaceholder": "Stel je eigen vraag…",
-      "askSubmit": "Vraag",
-      "unmatched": "In dit voorbeeld beantwoord ik alleen vragen over elektriciens, lassers en beschikbare mensen.",
-      "basisLabel": "Waar dit op rust",
-      "basisNote": "Op de {count} hierboven gewogen signalen, met illustratieve aantallen — dit is een conceptscenario, niet de markt van vandaag.",
-      "previewLabel": "Best passende persoon",
-      "previewName": "Jonas P.",
-      "previewRole": "Elektricien · Vilnius · Beschikbaar vanaf september",
-      "previewMetric": {
-        "entries": "Werkrecords",
-        "skills": "Onderbouwde vaardigheden",
-        "years": "Jaren"
-      },
-      "previewValue": {
-        "entries": "14",
-        "skills": "3",
-        "years": "7"
-      },
-      "persistAction": "Bewaar dit resultaat",
-      "persistWhy": "Een account is alleen nodig om te bewaren, te reageren of contact te leggen — kijken kan vrij."
+      "numbers": "Nu op het platform: {vacancies} actieve vacatures · {employers} werkgevers",
+      "refreshed": "bijgewerkt {date}"
     },
     "marketProof": {
       "eyebrow": "Nu op het platform",

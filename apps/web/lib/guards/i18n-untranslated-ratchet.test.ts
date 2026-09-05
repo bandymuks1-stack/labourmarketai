@@ -56,17 +56,20 @@ const BASELINE_SETS: Readonly<Record<string, readonly string[]>> = JSON.parse(
 );
 
 /**
- * The landing hero is pinned tighter than the catalogue as a whole: it is the
- * product's first screen, it is where the defect was found, and its remaining
- * identicals are individually accounted for below.
+ * The landing's first screen is pinned tighter than the catalogue as a
+ * whole: it is where the defect was found. Since the frozen design contract
+ * (2026-09-05, P1) the first screen is `landing.hero` (headline + sub only)
+ * plus `landing.entry` (the public entry: label, examples, the
+ * understanding lines, the one question and its two chips, the public
+ * numbers). The scripted-scenario keys — and with them the persona name and
+ * the bare numbers that were the accounted-for identicals — are gone, so
+ * the first screen now carries ZERO English values in any routed locale.
  */
-const HERO_BASELINE: Readonly<Record<string, number>> = {
-  lt: 4, // previewName "Jonas P." + the three bare numbers 14 / 3 / 7
-  ru: 3, // the three bare numbers — the persona name IS transliterated ("Йонас П.")
-  nl: 4, // previewName + the three bare numbers
-  de: 4, // previewName + the three numbers (the "Demonstration" badge — the
-  //        one accounted-for German identical — was removed with the copy's
-  //        move to the doctrine concept/preview vocabulary)
+const FIRST_SCREEN_BASELINE: Readonly<Record<string, number>> = {
+  lt: 0,
+  ru: 0,
+  nl: 0,
+  de: 0,
 };
 
 type Catalogue = Record<string, string>;
@@ -133,33 +136,37 @@ describe("untranslated-string ratchet (active locales)", () => {
   }
 });
 
-describe("landing hero — the first screen, pinned tighter", () => {
-  const isHero = (k: string) => k.startsWith("landing.hero.");
+describe("landing first screen (hero + public entry) — pinned tighter", () => {
+  const isFirstScreen = (k: string) =>
+    k.startsWith("landing.hero.") || k.startsWith("landing.entry.");
 
   for (const locale of nonEnglish) {
-    it(`${locale}: hero carries only its accounted-for identical values`, () => {
-      const found = identicalKeys(load(locale), isHero);
+    it(`${locale}: the first screen carries only its accounted-for identical values`, () => {
+      const found = identicalKeys(load(locale), isFirstScreen);
       expect(
         found.length,
-        `${locale} landing.hero has ${found.length} English values, baseline ${HERO_BASELINE[locale]}: ${found.join(", ")}`,
-      ).toBeLessThanOrEqual(HERO_BASELINE[locale]!);
+        `${locale} landing.hero/entry has ${found.length} English values, baseline ${FIRST_SCREEN_BASELINE[locale]}: ${found.join(", ")}`,
+      ).toBeLessThanOrEqual(FIRST_SCREEN_BASELINE[locale]!);
     });
   }
 
-  it("the ICU {count} placeholder survives translation in every locale", () => {
+  it("the ICU placeholders of the public-numbers line survive translation in every locale", () => {
     for (const locale of activeLocales) {
-      const value = load(locale)["landing.hero.reacting"];
-      expect(value, `${locale} is missing landing.hero.reacting`).toBeTypeOf("string");
-      expect(
-        value,
-        `${locale} dropped the {count} placeholder — the string would render a literal`,
-      ).toContain("{count}");
+      const value = load(locale)["landing.entry.numbers"];
+      expect(value, `${locale} is missing landing.entry.numbers`).toBeTypeOf("string");
+      for (const placeholder of ["{vacancies}", "{employers}"]) {
+        expect(
+          value,
+          `${locale} dropped the ${placeholder} placeholder — the string would render a literal`,
+        ).toContain(placeholder);
+      }
+      expect(load(locale)["landing.entry.refreshed"]).toContain("{date}");
     }
   });
 
-  it("the '·' separator survives in the preview role line", () => {
+  it("the '·' separator survives in the public-numbers line", () => {
     for (const locale of activeLocales) {
-      expect(load(locale)["landing.hero.previewRole"]).toContain("·");
+      expect(load(locale)["landing.entry.numbers"]).toContain("·");
     }
   });
 });

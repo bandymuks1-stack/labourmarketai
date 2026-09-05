@@ -207,9 +207,13 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
   });
 
   it("restores the previous production landing rather than recreating it", () => {
-    // The six components of `(marketing)/page.tsx` at 7179882, in its order.
+    // The six sections of `(marketing)/page.tsx` at 7179882, in its order.
+    // The first — the scripted <HeroLiveDemo> scenario — was replaced by
+    // <PublicEntry> under the owner's frozen design contract (2026-09-05,
+    // package P1: the entry reads a REAL sentence through the one router);
+    // the other five are the originals, in the original order.
     for (const original of [
-      "HeroLiveDemo",
+      "PublicEntry",
       "ProductChainBand",
       "MarketProofBand",
       "PlayerCardShowcase",
@@ -220,14 +224,16 @@ describe("canonical landing LIVE / FOCUS experiences", () => {
         `import { ${original} } from "@/components/marketing/`,
       );
     }
+    // Code only — the file's own history may NAME the retired hero in prose.
+    expect(code(focus)).not.toContain("HeroLiveDemo");
     const order = [
-      "HeroLiveDemo",
+      "PublicEntry",
       "ProductChainBand",
       "MarketProofBand",
       "PlayerCardShowcase",
       "TrustBand",
       "FinalCtaBand",
-    ].map((c) => focus.indexOf(`<${c} `));
+    ].map((c) => focus.search(new RegExp(`<${c}[\\s/>]`)));
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.

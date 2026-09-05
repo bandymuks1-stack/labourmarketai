@@ -166,6 +166,15 @@ export const FUNNEL_EVENTS = {
   chatMissingDataAsked: "chat_missing_data_asked",
   chatActionAttempted: "chat_action_attempted",
   chatActionPersisted: "chat_action_persisted",
+  // ── Public entry (frozen design contract 2026-09-05, package P1). An
+  //    anonymous visitor types a sentence on the landing and the SAME
+  //    deterministic router reads it before any account exists. One event,
+  //    fired through the anon-insert path (profile_id NULL) with the chat
+  //    funnel's own shape: `step` = the routed intent id, "unrecognised", or
+  //    "chip" (the two-chip answer to the one question), `intent` = the
+  //    first-run family it belongs to, `resolution` = "deterministic". The
+  //    sentence itself is NEVER recorded.
+  landingIntent: "landing_intent",
 } as const;
 
 export type FunnelEventName =
