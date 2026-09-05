@@ -90,7 +90,7 @@ The alternative the owner already scheduled (G-8 step 7: pay the real €99 with
 
 ## D. Open decisions for the owner
 
-1. **Apply** `20260905200000_billing_safety_invariants_v1.sql` (RED; via Supabase MCP `apply_migration`; verified on a 1-row `billing_customers`, 0-row subscriptions/events). Until applied, checkout runs on the legacy key + admission only.
+1. ~~**Apply** `20260905200000_billing_safety_invariants_v1.sql`~~ — **APPLIED 2026-09-05 18:49 UTC** (owner: "apply billing safety 2026-09-05"; ledger `20260905184921 billing_safety_invariants_v1`; readback verified, see FINAL_COMPLETION_REGISTER §4). Checkout now runs on the operations table + mode-aware customer key.
 2. **Subscribe** the LIVE webhook endpoint to `checkout.session.expired` (11th event) — optional; the local window closes operations regardless.
 3. **Choose** the €1 smoke test (section C) or the €99-and-refund path (G-8 step 7) for the first LIVE settlement.
 4. **`unpaid` policy:** this branch refuses a new checkout while a row is `unpaid` (Stripe is still collecting; the Portal fixes the card). If the owner prefers to let an `unpaid` customer buy fresh, the set is one constant (`BLOCKING_SUBSCRIPTION_STATUSES`).
