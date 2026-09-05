@@ -1516,6 +1516,95 @@
       "workforceNote": "Būsimi darbai ir pajėgumas — trūkumai, rizikos data ir siūlomas žingsnis."
     }
   },
+  "companyHome": {
+    "eyebrow": "Jūsų organizacija dabar",
+    "title": "Projektai laike ir kas laisvas",
+    "rolesLabel": "Ką organizacija veikia",
+    "rolesNone": "Dar nepasakyta, ką organizacija veikia.",
+    "rolesDeclare": "Pasakykite, ką veikiate",
+    "projects": {
+      "heading": "Projektai laike",
+      "more": "{count, plural, one {dar # projektas} few {dar # projektai} many {dar # projekto} other {dar # projektų}}",
+      "empty": "Projektų dar nėra. Projekte susitinka žmonės, etapai ir dokumentai.",
+      "emptyCta": "Sukurti pirmą projektą",
+      "noCompany": "Pasirinkite organizaciją, kurios vardu veikiate, kad matytumėte jos projektus.",
+      "error": "Projektų šiuo metu nepavyko perskaityti.",
+      "now": "Dabar",
+      "next": "Toliau",
+      "risk": "Rizika",
+      "nowNone": "Nė vienas etapas nevyksta",
+      "nowBlocked": "Užblokuota: {name}",
+      "stagesUnavailable": "Etapai čia dar nepasiekiami",
+      "stagesDone": "Baigta {done} iš {total} etapų",
+      "nextNone": "Kitas etapas nesuplanuotas",
+      "nextDerived": "išvesta iš etapų eilės",
+      "nextFrom": "nuo {date}",
+      "peopleCount": "{count, plural, =0 {niekas nepriskirtas} one {# žmogus} few {# žmonės} many {# žmogaus} other {# žmonių}}",
+      "riskNone": "Signalų nėra",
+      "riskUnknown": "Šiuo metu neperskaitoma",
+      "riskOverdue": "{count, plural, one {# vėluojanti užduotis} few {# vėluojančios užduotys} many {# vėluojančios užduoties} other {# vėluojančių užduočių}}",
+      "riskBlocked": "{count, plural, one {# užblokuotas etapas} few {# užblokuoti etapai} many {# užblokuoto etapo} other {# užblokuotų etapų}}",
+      "riskDocs": "{count, plural, one {# žmogui trūksta dokumentų} few {# žmonėms trūksta dokumentų} many {# žmogaus trūksta dokumentų} other {# žmonių trūksta dokumentų}}",
+      "riskNobody": "Vykstantis projektas be žmonių",
+      "operations": "Atidaryti operacijas",
+      "invite": "Pakviesti žmonių",
+      "status": {
+        "unknown": "Būsena nežinoma"
+      }
+    },
+    "capacity": {
+      "heading": "Kas laisvas dabar",
+      "free": "laisvas",
+      "away": "nedirba",
+      "awayUntil": "nedirba iki {date}",
+      "absencesUnknown": "Nebuvimai dar neužrašomi — „laisvas“ reiškia, kad niekas nepasakė kitaip.",
+      "more": "{count, plural, one {dar # žmogus planavimo puslapyje} few {dar # žmonės planavimo puslapyje} many {dar # žmogaus planavimo puslapyje} other {dar # žmonių planavimo puslapyje}}",
+      "assign": "Priskirti projektui",
+      "plan": "Atidaryti planavimą",
+      "empty": "Komandoje dar nieko nėra.",
+      "emptyCta": "Pakviesti žmonių",
+      "error": "Laisvumo šiuo metu nepavyko perskaityti."
+    },
+    "missing": {
+      "heading": "Trūksta per 4 savaites",
+      "nothing": "Šiuo metu nieko netrūksta.",
+      "people": "{count, plural, one {# žmogus} few {# žmonės} many {# žmogaus} other {# žmonių}}",
+      "from": "nuo {period}",
+      "status": {
+        "draft": "Juodraštis",
+        "submitted": "Pateikta",
+        "in_review": "Peržiūrima",
+        "needs_followup": "Reikia jūsų atsakymo",
+        "approved": "Patvirtinta",
+        "closed": "Uždaryta"
+      },
+      "continueDraft": "Tęsti juodraštį",
+      "openNeed": "Atidaryti poreikį",
+      "gapsRow": "{count, plural, one {# žmogui projekte „{project}“ trūksta dokumentų} few {# žmonėms projekte „{project}“ trūksta dokumentų} many {# žmogaus projekte „{project}“ trūksta dokumentų} other {# žmonių projekte „{project}“ trūksta dokumentų}}",
+      "gapsCta": "Patikrinti dokumentus",
+      "needsCta": "Aprašyti poreikį"
+    },
+    "attention": {
+      "heading": "Reikia jūsų",
+      "none": "Viskas tvarkoje — niekas jūsų nelaukia."
+    },
+    "partners": {
+      "heading": "Partneriai",
+      "empty": "Partnerių dar nėra.",
+      "agency": "Agentūra",
+      "client": "Klientas",
+      "team": "Komanda",
+      "members": "{count, plural, one {# narys} few {# nariai} many {# nario} other {# narių}}",
+      "pending": "laukia jūsų atsakymo",
+      "status": {
+        "active": "susieta",
+        "declined": "atmesta",
+        "revoked": "nutraukta"
+      },
+      "answer": "Atsakyti į kvietimą",
+      "invite": "Pakviesti partnerį"
+    }
+  },
   "demandReadback": {
     "statusOther": "Peržiūrima",
     "heading": "Jūsų pateiktos užklausos",

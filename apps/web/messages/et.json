@@ -6172,5 +6172,94 @@
         "generic": "Töötlemine ebaõnnestus. Proovige uuesti."
       }
     }
+  },
+  "companyHome": {
+    "eyebrow": "Teie organisatsioon praegu",
+    "title": "Projektid ajas ja kes on vaba",
+    "rolesLabel": "Mida organisatsioon teeb",
+    "rolesNone": "Pole veel öeldud, mida organisatsioon teeb.",
+    "rolesDeclare": "Öelge, mida teete",
+    "projects": {
+      "heading": "Projektid ajas",
+      "more": "{count, plural, =1 {veel 1 projekt} other {veel # projekti}}",
+      "empty": "Projekte veel pole. Projektis kohtuvad inimesed, etapid ja dokumendid.",
+      "emptyCta": "Loo esimene projekt",
+      "noCompany": "Valige organisatsioon, kelle nimel tegutsete, et näha selle projekte.",
+      "error": "Projekte ei õnnestunud praegu lugeda.",
+      "now": "Praegu",
+      "next": "Järgmine",
+      "risk": "Risk",
+      "nowNone": "Ükski etapp ei ole käimas",
+      "nowBlocked": "Blokeeritud: {name}",
+      "stagesUnavailable": "Etapid pole siin veel saadaval",
+      "stagesDone": "{done} etappi {total}-st valmis",
+      "nextNone": "Järgmist etappi pole plaanitud",
+      "nextDerived": "tuletatud etappide järjekorrast",
+      "nextFrom": "alates {date}",
+      "peopleCount": "{count, plural, =0 {kedagi pole määratud} =1 {1 inimene} other {# inimest}}",
+      "riskNone": "Signaale pole",
+      "riskUnknown": "Praegu pole loetav",
+      "riskOverdue": "{count, plural, =1 {1 tähtaja ületanud ülesanne} other {# tähtaja ületanud ülesannet}}",
+      "riskBlocked": "{count, plural, =1 {1 blokeeritud etapp} other {# blokeeritud etappi}}",
+      "riskDocs": "{count, plural, =1 {1 inimesel puuduvad dokumendid} other {# inimesel puuduvad dokumendid}}",
+      "riskNobody": "Käimasolev projekt ilma inimesteta",
+      "operations": "Ava toimingud",
+      "invite": "Kutsu inimesi",
+      "status": {
+        "unknown": "Olek teadmata"
+      }
+    },
+    "capacity": {
+      "heading": "Kes on praegu vaba",
+      "free": "vaba",
+      "away": "eemal",
+      "awayUntil": "eemal kuni {date}",
+      "absencesUnknown": "Puudumisi veel ei salvestata — vaba tähendab, et keegi pole teisiti öelnud.",
+      "more": "{count, plural, =1 {veel 1 inimene planeerimislehel} other {veel # inimest planeerimislehel}}",
+      "assign": "Määra projekti",
+      "plan": "Ava planeerimine",
+      "empty": "Meeskonnas pole veel kedagi.",
+      "emptyCta": "Kutsu inimesi",
+      "error": "Saadavust ei õnnestunud praegu lugeda."
+    },
+    "missing": {
+      "heading": "Puudu 4 nädala jooksul",
+      "nothing": "Praegu ei ole midagi puudu.",
+      "people": "{count, plural, =1 {1 inimene} other {# inimest}}",
+      "from": "alates {period}",
+      "status": {
+        "draft": "Mustand",
+        "submitted": "Esitatud",
+        "in_review": "Läbivaatamisel",
+        "needs_followup": "Vajab teie vastust",
+        "approved": "Kinnitatud",
+        "closed": "Suletud"
+      },
+      "continueDraft": "Jätka mustandit",
+      "openNeed": "Ava vajadus",
+      "gapsRow": "{count, plural, =1 {1 inimesel projektis {project} puuduvad dokumendid} other {# inimesel projektis {project} puuduvad dokumendid}}",
+      "gapsCta": "Kontrolli dokumente",
+      "needsCta": "Kirjelda vajadust"
+    },
+    "attention": {
+      "heading": "Vajab teid",
+      "none": "Kõik korras — miski ei oota teid."
+    },
+    "partners": {
+      "heading": "Partnerid",
+      "empty": "Partnereid veel pole.",
+      "agency": "Agentuur",
+      "client": "Klient",
+      "team": "Meeskond",
+      "members": "{count, plural, =1 {1 liige} other {# liiget}}",
+      "pending": "ootab teie vastust",
+      "status": {
+        "active": "ühendatud",
+        "declined": "tagasi lükatud",
+        "revoked": "lõpetatud"
+      },
+      "answer": "Vasta kutsele",
+      "invite": "Kutsu partner"
+    }
   }
 }
