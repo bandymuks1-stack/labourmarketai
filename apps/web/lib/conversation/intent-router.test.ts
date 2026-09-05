@@ -970,6 +970,40 @@ describe("§9 coverage never steals a sentence an existing intent already owned"
   });
 });
 
+/**
+ * Prod walk D1 (2026-09-05, `169df06f`): two ordinary company sentences were
+ * over-matched by bare weight-1 / weight-4 stems before the Gemini proposer
+ * could run (the chat gate is score-blind — any non-unknown intent
+ * dispatches). The fix widens the SPECIFIC rules so they outscore the bare
+ * stems; the bare stems themselves are untouched, and the four boundary
+ * sentences that motivated them keep their intents.
+ */
+describe("prod walk D1 — a company question outscores the bare site / worker stems", () => {
+  it("\"kuriems mano objektams gresia problemos\" is project risk, not a work-log entry", () => {
+    const m = classifyIntent("Norėčiau sužinoti, kuriems mano objektams gresia problemos");
+    expect(m.intent).toBe("project-risk");
+    // Was: log-work 1 (bare "objekt" site stem), project-risk 0.
+    expect(m.score).toBe(11);
+  });
+
+  it("\"kurie darbuotojai nebus užimti per artimiausias dienas\" is availability, not demand intake", () => {
+    const m = classifyIntent("Sužinok, kurie darbuotojai nebus užimti per artimiausias dienas");
+    expect(m.intent).toBe("who-available");
+    // Was: need-workers 4 (bare "darbuotoj" stem), who-available 0.
+    expect(m.score).toBe(9);
+  });
+
+  it("the boundary sentences keep their intents", () => {
+    // The bare site stem still tips a recorded day to the work log…
+    expect(classifyIntent("Šiandien objekte Roterdame dirbau nuo 8 iki 17, 45 min pietūs, montavau langus.").intent).toBe("log-work");
+    // …a "what is happening" question about the site is still the project…
+    expect(classifyIntent("Kas vyksta mano objekte?").intent).toBe("open-project");
+    // …and the bare worker stem still reads demand intake vs scouting.
+    expect(classifyIntent("ieškau darbuotojų").intent).toBe("need-workers");
+    expect(classifyIntent("surask darbuotojų").intent).toBe("find-workers");
+  });
+});
+
 describe("G3 — every routed intent is reachable in all five active locales", () => {
   for (const [intent, sentences] of Object.entries(PARITY_MATRIX) as Array<
     [RoutedIntent, Record<ActiveLocale, string>]

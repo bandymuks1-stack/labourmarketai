@@ -915,6 +915,16 @@ const RULES: IntentRule[] = [
       // frei / verfügbar", "wie is beschikbaar / vrij", "кто свободен".
       p("(kas|who|wer|wie|кто)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
       p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники))", 8),
+      // Prod walk D1 (2026-09-05): "Sužinok, kurie darbuotojai nebus užimti
+      // per artimiausias dienas" scored 0 here — the first rule needs "kas /
+      // who" and the second needs "laisvi" BEFORE the noun — and the bare
+      // `darbuotoj` stem (weight 4) in `need-workers` took a capacity
+      // question for demand intake. WHICH-word + people-noun + free /
+      // not-busy stem, in that order, is the same capacity question with
+      // its subject named. Weight 9 so the bare noun stems cannot pull it
+      // back. JS \w is ASCII-only, so the LT noun endings are consumed by
+      // the gap, not by \w.
+      p("(kurie|kuris|kas|which|who|wer|welche|wie|кто|какие)\\s+.{0,24}?(darbuotoj|žmon|komand|worker|people|staff|mitarbeiter|leute|medewerker|mensen|работник|люди)\\w*\\s*.{0,24}?(laisv|neužimt|nebus\\s+užimt|available|free|not\\s+busy|frei|verfügbar|vrij|beschikbaar|свобод|не\\s+занят)", 9),
     ],
   },
   {
@@ -976,7 +986,13 @@ const RULES: IntentRule[] = [
       // projektams?", "projektų būklė", "which project is at risk", "welches
       // Projekt ist gefährdet", "welk project loopt risico", "какой проект
       // под угрозой", "który projekt jest zagrożony".
-      p("(projekt|project|проект)\\w*\\s*.{0,24}?(rizik|risk|risiko|risico|gef[aä]hrd|угроз|риск|zagro[zż]|v[eė]luoj|atsilie?k|behind|late|verz[oö]ger|achter|отста|op[oó][zź]ni)", 11),
+      // Prod walk D1 (2026-09-05): "Norėčiau sužinoti, kuriems mano
+      // objektams gresia problemos" scored 0 here — the subject group knew
+      // only "projekt" and the risk stems lacked "gresia / grėsmė" — so the
+      // sentence fell to `log-work` (score 1) on that rule's bare site stem
+      // "objekt". A company calls its projects OBJECTS, and "gresia" is the
+      // everyday verb for "is at risk"; both belong to this rule.
+      p("(projekt|project|проект|objekt|объект)\\w*\\s*.{0,24}?(rizik|risk|risiko|risico|gef[aä]hrd|угроз|риск|zagro[zż]|gresia|gr[eė]sm|v[eė]luoj|atsilie?k|behind|late|verz[oö]ger|achter|отста|op[oó][zź]ni)", 11),
       p("(rizik|risk|risiko|risico|gef[aä]hrd|угроз|риск|zagro[zż])\\w*\\s*.{0,24}?(projekt|project|проект)", 11),
       p("(kaip\\s+sekasi|how\\s+(are|is)|wie\\s+(l[aä]uft|laufen|steht|stehen)|hoe\\s+(gaat|staat|lopen)|как\\s+(идут|идёт|дела)|jak\\s+(idą|idzie))\\s*.{0,20}?(projekt|project|проект)", 10),
       p("(projekt[uų]|projects|projekte|projecten|проектов|projektów)\\s+(b[uū]kl|b[uū]sen|status|stand|state|состоян|статус|stan\\b)", 10),
