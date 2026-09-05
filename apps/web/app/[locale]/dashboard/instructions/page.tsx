@@ -7,6 +7,8 @@ import {
   listManagedWorkers,
 } from "@/lib/instructions/instructions";
 import { listManagedProjects } from "@/lib/projects/projects";
+import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
+import { InstructionProjectAsks, type InstructionProjectAsksLabels } from "@/components/app/instruction-project-asks";
 import {
   WorkerInstructionCard,
   type InstructionCardLabels,
@@ -109,6 +111,20 @@ export default async function InstructionsPage({
 
   // Worker view.
   const read = await listWorkerInstructions();
+  // §11/§12 — what each instruction's project still needs from THIS person,
+  // the SAME domain read the chat's "mano projektai" renders (visual parity).
+  const asks =
+    read.kind === "ok"
+      ? await loadOwnProjectAsks(read.instructions.map((i) => i.projectId).filter((id): id is string => Boolean(id))).catch(() => new Map())
+      : new Map();
+  const asksLabels: InstructionProjectAsksLabels = {
+    title: t("card.asksTitle"),
+    ownReady: t("card.ownReady"),
+    ownExpiring: t("card.ownExpiring"),
+    ownNone: t("card.ownNone"),
+    blocked: t("card.blocked"),
+    record: t("card.record"),
+  };
   const cardLabels: InstructionCardLabels = {
     autoTranslation: t("card.autoTranslation"),
     translationUnavailable: t("card.translationUnavailable"),
@@ -140,8 +156,9 @@ export default async function InstructionsPage({
       ) : (
         <ul className="flex flex-col gap-3">
           {read.instructions.map((ins) => (
-            <li key={ins.id}>
+            <li key={ins.id} className="flex flex-col gap-2">
               <WorkerInstructionCard instruction={ins} labels={cardLabels} />
+              {ins.projectId ? <InstructionProjectAsks asks={asks.get(ins.projectId)?.asks ?? []} labels={asksLabels} /> : null}
             </li>
           ))}
         </ul>

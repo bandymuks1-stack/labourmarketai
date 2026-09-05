@@ -3,7 +3,7 @@
  * "where people are assigned", from the person's side). Types + constants
  * only (a "use server" module exports async functions alone).
  */
-import type { WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";
+import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 
 export const WORKER_PROJECTS_CHAT_LIMIT = 5;
 

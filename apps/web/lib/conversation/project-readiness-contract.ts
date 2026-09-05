@@ -33,9 +33,13 @@ export interface ReadinessChatWorker {
   readonly missing: readonly ReadinessMissingCode[];
   readonly itemsMissing: readonly ReadinessChatItem[];
   readonly itemsBlocked: readonly ReadinessChatItem[];
+  /** Rows the manager marked received but not yet checked — the review step (§12). */
+  readonly itemsReceived: readonly ReadinessChatItem[];
   readonly checked: number;
   readonly total: number;
   readonly operationalStatus: OperationalStatus | null;
+  /** The person's newest answer in the instruction thread AFTER the latest instruction on this project; null = none yet. */
+  readonly reply: { readonly text: string; readonly at: string } | null;
 }
 
 export interface ReadinessChatProjectOption {

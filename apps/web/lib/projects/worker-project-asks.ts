@@ -44,11 +44,14 @@ function rank(s: OwnDocumentState): number {
 
 export function deriveWorkerProjectAsks(
   items: readonly OwnReadinessItemLike[],
-  documents: readonly OwnDocumentLike[],
+  /** The person's own document records; `null` = the documents read did not
+   *  answer (disabled / unavailable) — then NO own state is claimed: an
+   *  unknown record is not "not recorded". */
+  documents: readonly OwnDocumentLike[] | null,
   now: Date,
 ): Map<string, WorkerProjectAsk[]> {
   const byType = new Map<string, OwnDocumentState>();
-  for (const d of documents) {
+  for (const d of documents ?? []) {
     const st = deriveDocumentStatus(d, now);
     const state: OwnDocumentState = st === "ready" ? "ready" : st === "expiring" ? "expiring" : "none";
     const prev = byType.get(d.documentTypeSlug);
@@ -61,7 +64,7 @@ export function deriveWorkerProjectAsks(
     if (list.length >= WORKER_PROJECT_ASK_LIMIT) continue;
     const slugs = documentTypesForReadinessItem(it.itemKey);
     let own: OwnDocumentState | null = null;
-    if (slugs.length > 0) {
+    if (slugs.length > 0 && documents !== null) {
       own = "none";
       for (const s of slugs) {
         const st = byType.get(s);

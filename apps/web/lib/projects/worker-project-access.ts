@@ -1,6 +1,9 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { listMyDocuments } from "@/lib/documents/readiness";
+import { listWorkerInstructions } from "@/lib/instructions/instructions";
+import { deriveWorkerProjectAsks, type WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 
 /**
  * Worker-side project access (F11 / RC2 — role-aware project routing).
@@ -195,4 +198,45 @@ export async function listOwnReadinessItems(
     status: r.status as OwnReadinessItem["status"],
     updatedAt: r.updated_at as string,
   }));
+}
+
+/**
+ * WHAT MY PROJECTS STILL NEED FROM ME — the ONE domain read both the chat
+ * ("mano projektai") and the instructions page render (owner contract §11 /
+ * §12 / §16; chat-first, not chat-only — no chat-specific business workflow).
+ * Composes three existing canonical reads under the caller's RLS: the
+ * person's own open checklist rows (`listOwnReadinessItems`), the person's
+ * own documents (`listMyDocuments`, the documents page's read; an
+ * unanswered read is UNKNOWN, never "no documents"), and the manager's
+ * latest instruction per project (`listWorkerInstructions`, the instructions
+ * page's read — only threads the person is in). A manager never reads a
+ * person's documents through this path (§4 default-closed).
+ */
+export interface OwnProjectAsks {
+  readonly asks: readonly WorkerProjectAsk[];
+  readonly instruction: { readonly conversationId: string; readonly authorName: string | null; readonly text: string } | null;
+}
+
+export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise<Map<string, OwnProjectAsks>> {
+  const out = new Map<string, OwnProjectAsks>();
+  const ids = [...new Set(projectIds)].slice(0, 10);
+  if (ids.length === 0) return out;
+  const workerId = await getOwnWorkerId();
+  if (!workerId) return out;
+  const [items, docs, read] = await Promise.all([listOwnReadinessItems(workerId, ids), listMyDocuments(), listWorkerInstructions()]);
+  const asks = items.length > 0 ? deriveWorkerProjectAsks(items, docs.kind === "ok" ? docs.documents : null, new Date()) : new Map<string, WorkerProjectAsk[]>();
+  const instructions = new Map<string, OwnProjectAsks["instruction"]>();
+  if (read.kind === "ok") {
+    for (const ins of read.instructions) {
+      if (ins.projectId && !instructions.has(ins.projectId)) {
+        instructions.set(ins.projectId, { conversationId: ins.conversationId, authorName: ins.authorName, text: ins.originalText.split("\n")[0].slice(0, 160) });
+      }
+    }
+  }
+  for (const id of ids) {
+    const a = asks.get(id) ?? [];
+    const ins = instructions.get(id) ?? null;
+    if (a.length > 0 || ins) out.set(id, { asks: a, instruction: ins });
+  }
+  return out;
 }

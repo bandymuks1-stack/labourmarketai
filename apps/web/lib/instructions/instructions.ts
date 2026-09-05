@@ -180,3 +180,72 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
   if (!aw.error) collect(aw.data);
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
+
+/**
+ * The people's ANSWERS to the manager's instructions on ONE project (owner
+ * contract §11/§12 — the readiness answer shows what the person said, so the
+ * manager can mark the row received without leaving the chat). Three
+ * bounded reads under the caller's RLS (`conversation_messages_select` =
+ * participant only; the caller reads their own instructions and the direct
+ * threads they are in): the caller's instructions on this project (index
+ * `project_id`), the threads' other participant, the newest non-instruction
+ * message by that person AFTER the latest instruction. Text is the first
+ * line, truncated; never the whole thread. Empty on any failure.
+ */
+export interface InstructionReply {
+  readonly workerProfileId: string;
+  readonly text: string;
+  readonly at: string;
+  readonly instructionAt: string;
+}
+
+export const PROJECT_INSTRUCTION_REPLIES_LIMIT = 40;
+
+export async function listProjectInstructionReplies(projectId: string): Promise<Map<string, InstructionReply>> {
+  const out = new Map<string, InstructionReply>();
+  if (!/^[0-9a-f-]{36}$/i.test(projectId)) return out;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return out;
+  const ins = await asAny(supabase)
+    .from("conversation_messages")
+    .select("conversation_id, created_at")
+    .eq("project_id", projectId)
+    .eq("is_instruction", true)
+    .eq("author_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(PROJECT_INSTRUCTION_REPLIES_LIMIT);
+  if (ins.error || !ins.data || ins.data.length === 0) return out;
+  const latestInstruction = new Map<string, string>();
+  for (const r of ins.data as { conversation_id: string; created_at: string }[]) {
+    if (!latestInstruction.has(r.conversation_id)) latestInstruction.set(r.conversation_id, r.created_at);
+  }
+  const convIds = [...latestInstruction.keys()];
+  const [parts, replies] = await Promise.all([
+    asAny(supabase).from("conversation_participants").select("conversation_id, profile_id").in("conversation_id", convIds),
+    asAny(supabase)
+      .from("conversation_messages")
+      .select("conversation_id, author_id, body, created_at")
+      .in("conversation_id", convIds)
+      .eq("is_instruction", false)
+      .neq("author_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(PROJECT_INSTRUCTION_REPLIES_LIMIT),
+  ]);
+  if (parts.error || replies.error) return out;
+  const personByConv = new Map<string, string>();
+  for (const p of (parts.data ?? []) as { conversation_id: string; profile_id: string }[]) {
+    if (p.profile_id !== user.id) personByConv.set(p.conversation_id, p.profile_id);
+  }
+  for (const m of (replies.data ?? []) as { conversation_id: string; author_id: string; body: string | null; created_at: string }[]) {
+    const person = personByConv.get(m.conversation_id);
+    const since = latestInstruction.get(m.conversation_id);
+    if (!person || !since || m.author_id !== person || out.has(person)) continue;
+    if (Date.parse(m.created_at) <= Date.parse(since)) continue;
+    const text = (m.body ?? "").split("\n")[0].trim().slice(0, 120);
+    out.set(person, { workerProfileId: person, text, at: m.created_at, instructionAt: since });
+  }
+  return out;
+}

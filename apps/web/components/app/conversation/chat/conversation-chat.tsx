@@ -66,7 +66,7 @@ import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/con
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
-import type { WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";
+import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
@@ -454,6 +454,7 @@ export type ChatLabels = {
   riskUnavailable: string;
   chipCreateProject: string;
   readinessIntro: string;
+  readinessRepliedSuffix: string;
   readinessReadyLine: string;
   readinessGapLine: string;
   readinessNoChecklist: string;
@@ -471,6 +472,8 @@ export type ChatLabels = {
   readinessSeeded: string;
   readinessGotChip: string;
   readinessGotDone: string;
+  readinessCheckedChip: string;
+  readinessCheckedDone: string;
   readinessAskChip: string;
   readinessAskDone: string;
   readinessRequestBody: string;
@@ -2748,16 +2751,22 @@ export function ConversationChat({
             return;
           }
           lastReadinessRef.current = res;
+          // §11/§12 — the person's own answer to the instruction (the SAME
+          // direct thread `send_work_instruction_to_project` wrote into, read
+          // by the instruction channel's own read) sits on their line, so the
+          // manager can mark the row received without leaving the chat.
+          const replied = (w: (typeof res.workers)[number]) =>
+            w.reply ? ` · ${labels.readinessRepliedSuffix.replace("{date}", w.reply.at.slice(0, 10)).replace("{text}", w.reply.text)}` : "";
           const lines = res.workers.map((w) => {
             if (w.ready) {
-              return labels.readinessReadyLine.replace("{name}", w.name).replace("{checked}", String(w.checked)).replace("{total}", String(w.total));
+              return labels.readinessReadyLine.replace("{name}", w.name).replace("{checked}", String(w.checked)).replace("{total}", String(w.total)) + replied(w);
             }
             const gaps = [...w.missing.map(readinessCodeLabel), ...w.itemsMissing.map((i) => i.label), ...w.itemsBlocked.map((i) => `${i.label} ${labels.blockedSuffix}`)];
             return labels.readinessGapLine
               .replace("{name}", w.name)
               .replace("{gaps}", gaps.join(", "))
               .replace("{checked}", String(w.checked))
-              .replace("{total}", String(w.total));
+              .replace("{total}", String(w.total)) + replied(w);
           });
           const head = labels.readinessIntro.replace("{title}", res.title).replace("{ready}", String(res.readyCount)).replace("{people}", String(res.workerTotal));
           const tail = res.workerTotal === 0 ? [labels.readinessNoPeople] : res.checklistTracked ? [] : [labels.readinessNoChecklist];
@@ -2773,6 +2782,14 @@ export function ConversationChat({
           if (first && first.itemsMissing.length > 0) {
             const it = first.itemsMissing[0];
             chips.push({ id: `ready-got:${res.projectId}:${first.workerProfileId}:${it.key}`, label: labels.readinessGotChip.replace("{label}", it.label).replace("{name}", first.name) });
+          }
+          // §12 REVIEW — a row the manager marked received awaits their check; the
+          // SAME executor as "Gauta" with status `checked` (the operations page's own
+          // transition). checked/total is what readiness recalculates from.
+          const withReceived = res.workers.find((w) => w.itemsReceived.length > 0);
+          if (withReceived) {
+            const it = withReceived.itemsReceived[0];
+            chips.push({ id: `ready-checked:${res.projectId}:${withReceived.workerProfileId}:${it.key}`, label: labels.readinessCheckedChip.replace("{label}", it.label).replace("{name}", withReceived.name) });
           }
           if (first && (first.itemsMissing.length > 0 || first.missing.length > 0)) {
             chips.push({ id: `ready-ask:${res.projectId}:${first.workerProfileId}`, label: labels.readinessAskChip.replace("{name}", first.name) });
@@ -3651,6 +3668,21 @@ export function ConversationChat({
                 { projectId, workerProfileId, itemKey, label: item.label, status: "received" },
                 projectId,
                 () => labels.readinessGotDone.replace("{label}", item.label).replace("{name}", w.name),
+              );
+          } else if (chip.id.startsWith("ready-checked:")) {
+            // `ready-checked:<projectId>:<workerProfileId>:<itemKey>` — the SAME received
+            // row the answer named, marked checked (the manager's review, §12)
+            const [, projectId, workerProfileId, itemKey] = chip.id.split(":");
+            const w = lastReadinessRef.current?.workers.find((x) => x.workerProfileId === workerProfileId);
+            const item = w?.itemsReceived.find((i) => i.key === itemKey);
+            user(chip.label);
+            if (!w || !item) assistant(labels.readinessWriteFailed);
+            else
+              runReadinessWrite(
+                "company.set-readiness-item",
+                { projectId, workerProfileId, itemKey, label: item.label, status: "checked" },
+                projectId,
+                () => labels.readinessCheckedDone.replace("{label}", item.label).replace("{name}", w.name),
               );
           } else if (chip.id.startsWith("ready-ask:")) {
             // `ready-ask:<projectId>:<workerProfileId>` — a work instruction whose
