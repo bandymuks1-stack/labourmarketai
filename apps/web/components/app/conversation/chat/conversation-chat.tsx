@@ -58,6 +58,8 @@ import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { loadOpenTasksForChat } from "@/lib/conversation/company-tasks";
 import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
 import { loadProjectReadinessForChat } from "@/lib/conversation/project-readiness";
+import { loadConfirmWorkForChat } from "@/lib/conversation/confirm-work";
+import type { ConfirmWorkChatResult } from "@/lib/conversation/confirm-work-contract";
 import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
@@ -465,6 +467,17 @@ export type ChatLabels = {
   readinessAskDone: string;
   readinessRequestBody: string;
   readinessWriteFailed: string;
+  confirmIntro: string;
+  confirmLine: string;
+  confirmChip: string;
+  confirmDone: string;
+  confirmNone: string;
+  confirmNotEnabled: string;
+  confirmEnableChip: string;
+  confirmEnabled: string;
+  confirmFailed: string;
+  confirmUnavailable: string;
+  chipOpenInbox: string;
   moveNotFound: string;
   moveNoOptions: string;
   moveAskWorker: string;
@@ -2550,6 +2563,108 @@ export function ConversationChat({
    *  missing (labels verbatim), the rejected / expired rows, checked/total.
    *  Ends with the way forward: the operations page; people when there are
    *  none. Nothing is scored; nothing is written. Company identity only. */
+  /** §14 EMPLOYER CONFIRMATION: what awaits the manager's confirmation — the
+   *  inbox's own one-tap queue — and who is not reviewable yet. The chips run
+   *  the SAME writes the inbox runs (confirm = approve the entry and verify
+   *  the declared skills it proves; enable review = the membership RPC), then
+   *  the same read again. Company identity only. */
+  const lastConfirmRef = useRef<Extract<ConfirmWorkChatResult, { kind: "ok" }> | null>(null);
+  const startConfirmWork = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      setTyping(true);
+      loadConfirmWorkForChat(sentence)
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "no-company") {
+            assistant(labels.projectsNoCompany);
+            return;
+          }
+          if (res.kind !== "ok") {
+            assistant(labels.confirmUnavailable);
+            return;
+          }
+          lastConfirmRef.current = res;
+          const lines: string[] = [];
+          const chips: { id: string; label: string }[] = [];
+          if (res.entries.length > 0) {
+            lines.push(labels.confirmIntro.replace("{count}", String(res.entryTotal)));
+            for (const e of res.entries) {
+              lines.push(
+                labels.confirmLine
+                  .replace("{name}", e.workerName)
+                  .replace("{date}", e.createdAt.slice(0, 10))
+                  .replace("{text}", e.excerpt)
+                  .replace("{skills}", String(e.skillsToConfirm.length)),
+              );
+            }
+            for (const e of res.entries.slice(0, 4)) {
+              chips.push({
+                id: `confirm:${e.entryId}:${e.skillsToConfirm.map((s) => s.id).join(",")}`,
+                label: labels.confirmChip.replace("{name}", e.workerName).replace("{date}", e.createdAt.slice(0, 10)),
+              });
+            }
+          } else {
+            lines.push(labels.confirmNone);
+          }
+          if (res.notEnabled.length > 0) {
+            lines.push(labels.confirmNotEnabled.replace("{names}", res.notEnabled.map((m) => m.name).join(", ")));
+            for (const m of res.notEnabled) chips.push({ id: `review-on:${m.engagementId}`, label: labels.confirmEnableChip.replace("{name}", m.name) });
+          }
+          chips.push({ id: "link:/dashboard/inbox/quick", label: labels.chipOpenInbox });
+          assistant(lines.join("\n"), chips);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.confirmUnavailable);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips],
+  );
+
+  /** The confirmation writes over the ONE dispatcher (confirm = important tier,
+   *  the chip is the explicit confirmation; enabling review = reversible, no
+   *  token), then the SAME read again so the answer says what still awaits. */
+  const runConfirmWrite = useCallback(
+    (
+      actionId: "company.confirm-work" | "company.enable-journal-review",
+      input: Record<string, unknown>,
+      said: (data: Record<string, unknown> | undefined) => string,
+    ) => {
+      setTyping(true);
+      prepareConfirmationAction(actionId, input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.confirmFailed);
+            return;
+          }
+          return dispatchWorkerAction(actionId, input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.confirmFailed);
+              return;
+            }
+            assistant(said(res.data));
+            // READBACK — what still awaits, from the same canonical read
+            startConfirmWork("");
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.confirmFailed);
+        });
+    },
+    [assistant, locale, labels.confirmFailed, startConfirmWork],
+  );
+
   const lastReadinessRef = useRef<Extract<ProjectReadinessChatResult, { kind: "ok" }> | null>(null);
   const readinessCodeLabel = useCallback(
     (c: ReadinessMissingCode) => (c === "name" ? labels.missingName : c === "declared_skills" ? labels.missingDeclaredSkills : labels.missingEvidence),
@@ -3442,6 +3557,21 @@ export function ConversationChat({
             const [, projectId, stageId, status] = chip.id.split(":");
             user(chip.label);
             runStageStatus(projectId || null, stageId, status as StageStatus);
+          } else if (chip.id.startsWith("confirm:")) {
+            // `confirm:<entryId>:<skillId,skillId…>` — the inbox's one-tap confirm
+            const [, entryId, ids] = chip.id.split(":");
+            const skillIds = ids ? ids.split(",").filter(Boolean) : [];
+            const e = lastConfirmRef.current?.entries.find((x) => x.entryId === entryId);
+            user(chip.label);
+            runConfirmWrite("company.confirm-work", { entryId, skillIds }, (d) =>
+              labels.confirmDone.replace("{name}", e?.workerName ?? "").replace("{count}", String(d?.verifiedSkills ?? 0)),
+            );
+          } else if (chip.id.startsWith("review-on:")) {
+            // `review-on:<engagementId>` — journal review ON for that person
+            const engagementId = chip.id.slice(10);
+            const m = lastConfirmRef.current?.notEnabled.find((x) => x.engagementId === engagementId);
+            user(chip.label);
+            runConfirmWrite("company.enable-journal-review", { engagementId }, () => labels.confirmEnabled.replace("{name}", m?.name ?? ""));
           } else if (chip.id.startsWith("ready-seed:")) {
             // `ready-seed:<projectId>` — start the standard checklist for everyone
             const projectId = chip.id.slice(11);
@@ -4216,6 +4346,7 @@ export function ConversationChat({
         taskStatus: () => startTaskStatus(text),
         projectRisk: () => startProjectRisk(),
         projectReadiness: () => startProjectReadiness(text),
+        confirmWork: () => startConfirmWork(text),
         moveWorker: () => startMoveWorker(text),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one

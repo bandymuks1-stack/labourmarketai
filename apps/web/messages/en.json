@@ -11653,6 +11653,14 @@
           "label": "Ask for what is missing",
           "description": "The worker receives a work instruction listing what the project still needs from them."
         },
+        "confirmWork": {
+          "label": "Confirm a work entry",
+          "description": "A manager confirms a worker's work entry and the skills it proves — those skills become verified."
+        },
+        "enableJournalReview": {
+          "label": "Switch on work review",
+          "description": "A worker's work entries become visible to, and confirmable by, the manager."
+        },
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
@@ -12191,6 +12199,17 @@
       "readinessWriteFailed": "The change could not be made.",
       "briefInstructions": "Instructions waiting: {count}.",
       "chipInstructions": "Instructions",
+      "confirmIntro": "Awaiting your confirmation: {count} entries.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} skills)",
+      "confirmChip": "Confirm: {name} · {date}",
+      "confirmDone": "Confirmed: {name} — skills verified: {count}.",
+      "confirmNone": "No work entries are waiting.",
+      "confirmNotEnabled": "Work review is not switched on yet for: {names}. Switch it on and their entries appear here.",
+      "confirmEnableChip": "Switch on review: {name}",
+      "confirmEnabled": "Review switched on: {name} — their work entries now await your confirmation.",
+      "confirmFailed": "The confirmation could not be made.",
+      "confirmUnavailable": "Confirmations could not be read right now.",
+      "chipOpenInbox": "Open the confirmation inbox",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first.",
       "documentFileOffer": "Document recorded. You can attach the file right here — PDF, Word or a photo up to 5 MB.",

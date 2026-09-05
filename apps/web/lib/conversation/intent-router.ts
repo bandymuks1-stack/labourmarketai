@@ -100,6 +100,7 @@ export type ConversationIntent =
   | "task-status" // "užduotis sumontuoti pastolius atlikta" — a task moved to a real status (§14 RESULT)
   | "project-risk" // "kuris projektas rizikoje?" — every live project's real signals, most first
   | "project-readiness" // "kas trūksta projektui X?" — the people on a live project and what each still needs
+  | "confirm-work" // "patvirtink Jono darbą" — the employer confirms a work entry; verified skills follow (§14)
   | "unknown";
 
 export type IntentMatch = {
@@ -922,6 +923,20 @@ const RULES: IntentRule[] = [
       // Riga", "verplaats Jan naar project Utrecht", "versetze Jan in das
       // Projekt Berlin", "переведи Ивана на проект Рига", "przenieś Jana do projektu".
       p("(perkel|perkelk|move|verplaats|versetz|перевед|перевес|перемест|przenie|przenies)[^\\s]*\\s+.{0,40}(projekt|project|проект)", 12),
+    ],
+  },
+  {
+    intent: "confirm-work",
+    patterns: [
+      // §14 EMPLOYER CONFIRMATION: "patvirtink Jono darbą", "ką reikia
+      // patvirtinti?", "confirm John's work", "what needs my confirmation",
+      // "bestätige Jans Arbeit", "bevestig het werk van Jan", "подтверди
+      // работу Ивана", "potwierdź pracę Jana". "Ką turiu patvirtinti?" stays
+      // the approvals area (owner phrase contract). JS \w is ASCII-only, so
+      // the verb stems are followed by \S* not \w*.
+      p("(patvirtink|patvirtinti|patvirtinu|confirm|approve|best[aä]tig|bevestig|подтверд|potwierd[zź])[^\\s]*\\s*.{0,30}?(darb|work|įraš|entr|journal|arbeit|werk|работ|prac)", 10),
+      p("(k[aą]|what|was|wat|что|co)\\s+.{0,12}?(reikia|needs?|muss|moet|нужно|trzeba|awaits?)\\s+.{0,12}?(patvirtin|confirm|best[aä]tig|bevestig|подтверд|potwierd)", 12),
+      p("(reikia|needs?|awaiting|laukia)\\s+.{0,8}?(patvirtinim|confirmation|approval|bestätigung|bevestiging|подтвержден|potwierdzen)", 9),
     ],
   },
   {

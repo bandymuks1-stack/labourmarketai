@@ -3424,6 +3424,14 @@
           "label": "Bed om det manglende",
           "description": "Medarbejderen modtager en arbejdsinstruktion med det, projektet stadig mangler fra dem."
         },
+        "confirmWork": {
+          "label": "Bekræft arbejdspost",
+          "description": "En leder bekræfter en medarbejders arbejdspost og de kompetencer, den dokumenterer — de bliver bekræftede."
+        },
+        "enableJournalReview": {
+          "label": "Slå arbejdsgennemgang til",
+          "description": "En medarbejders arbejdsposter bliver synlige og kan bekræftes af lederen."
+        },
         "respondOffer": {
           "label": "Svar på et bureaus tilbud",
           "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
@@ -3890,6 +3898,17 @@
       "readinessWriteFailed": "Ændringen kunne ikke foretages.",
       "briefInstructions": "Ventende instruktioner: {count}.",
       "chipInstructions": "Instruktioner",
+      "confirmIntro": "Afventer din bekræftelse: {count} poster.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} kompet.)",
+      "confirmChip": "Bekræft: {name} · {date}",
+      "confirmDone": "Bekræftet: {name} — bekræftede kompetencer: {count}.",
+      "confirmNone": "Ingen arbejdsposter venter.",
+      "confirmNotEnabled": "Arbejdsgennemgang er endnu ikke slået til for: {names}. Slå den til, så vises deres poster her.",
+      "confirmEnableChip": "Slå gennemgang til: {name}",
+      "confirmEnabled": "Gennemgang slået til: {name} — arbejdsposterne afventer din bekræftelse.",
+      "confirmFailed": "Bekræftelsen kunne ikke foretages.",
+      "confirmUnavailable": "Bekræftelser kunne ikke læses lige nu.",
+      "chipOpenInbox": "Åbn bekræftelsesindbakken",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest.",
       "documentFileOffer": "Dokument registreret. Du kan vedhæfte filen her — PDF, Word eller et foto op til 5 MB.",

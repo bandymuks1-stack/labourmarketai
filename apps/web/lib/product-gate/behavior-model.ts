@@ -404,8 +404,12 @@ export const BEHAVIOR_CONFORMANCE = {
   // operations page's own checklist writes) and `company.request-readiness`
   // (a work instruction in the project's thread). Anchored to the projects
   // page; keyed to the company actor type; verdict unchanged.
-  conversationActions: 49,
-  actionsAnchoredToAPage: 49,
+  // 2026-09-05 (owner contract §14): +2 — `company.confirm-work` (the inbox's
+  // one-tap confirm by chip) and `company.enable-journal-review` (the
+  // membership RPC). Anchored to the inbox; keyed to the company actor
+  // type; verdict unchanged.
+  conversationActions: 51,
+  actionsAnchoredToAPage: 51,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

@@ -49,8 +49,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // with `task-status` (§14 a task moved to a real status, write) and
     // `project-risk` (every live project's real signals, read); 60 → 61 with
     // `project-readiness` (the people on a live project and what each still
-    // needs, read).
-    expect(entries.length).toBe(61);
+    // needs, read); 61 → 62 with `confirm-work` (§14 the employer confirms a
+    // work entry; verified skills follow, write).
+    expect(entries.length).toBe(62);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -72,6 +73,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       "add-document",
       // PROJECT → WORK: a work package by sentence.
       "add-task",
+      // §14 EMPLOYER CONFIRMATION: approve an entry + verify the declared skills it proves.
+      "confirm-work",
       // F2 — the site as a project object, by sentence.
       "create-project",
       "invite-candidate",

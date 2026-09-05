@@ -11653,6 +11653,14 @@
           "label": "Fehlendes anfragen",
           "description": "Der Mitarbeiter erhält eine Arbeitsanweisung mit dem, was dem Projekt noch fehlt."
         },
+        "confirmWork": {
+          "label": "Arbeitseintrag bestätigen",
+          "description": "Eine Führungskraft bestätigt den Arbeitseintrag und die damit belegten Fähigkeiten — diese werden bestätigt."
+        },
+        "enableJournalReview": {
+          "label": "Arbeitsprüfung einschalten",
+          "description": "Die Arbeitseinträge einer Person werden für die Führungskraft sichtbar und bestätigbar."
+        },
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
@@ -12191,6 +12199,17 @@
       "readinessWriteFailed": "Die Änderung konnte nicht vorgenommen werden.",
       "briefInstructions": "Wartende Anweisungen: {count}.",
       "chipInstructions": "Anweisungen",
+      "confirmIntro": "Wartet auf Ihre Bestätigung: {count} Einträge.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} Fähigk.)",
+      "confirmChip": "Bestätigen: {name} · {date}",
+      "confirmDone": "Bestätigt: {name} — bestätigte Fähigkeiten: {count}.",
+      "confirmNone": "Keine Arbeitseinträge warten.",
+      "confirmNotEnabled": "Die Arbeitsprüfung ist noch nicht eingeschaltet für: {names}. Einschalten — dann erscheinen die Einträge hier.",
+      "confirmEnableChip": "Prüfung einschalten: {name}",
+      "confirmEnabled": "Prüfung eingeschaltet: {name} — die Arbeitseinträge warten auf Ihre Bestätigung.",
+      "confirmFailed": "Die Bestätigung konnte nicht erfolgen.",
+      "confirmUnavailable": "Bestätigungen konnten gerade nicht gelesen werden.",
+      "chipOpenInbox": "Bestätigungs-Eingang öffnen",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn.",
       "documentFileOffer": "Dokument erfasst. Die Datei können Sie gleich hier anhängen — PDF, Word oder ein Foto bis 5 MB.",
