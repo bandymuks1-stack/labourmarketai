@@ -48,6 +48,27 @@
 6. Real-user watch on every resume: `pilot_events` for profile `875eb16b…` (still `dashboard_viewed` 06:15 UTC 2026-09-04).
 7. Residue register (E2E, intentional): project `3b9c55d3` (stage `1885abb7` done; tasks `712182db` todo, `81a07ed1` done; assignment `80883119`; log `01d4a36d`; readiness rows), project `d9af86de` "E2E Kauno objektas (testinis)" (draft; assignment `d6617763` ended). Bookings: none. Document files: none.
 
+## Full-spine walk with two FRESH identities — `613f6a4c`, 15:08–15:17 UTC 2026-09-05 (Day-5 item, run on Day 0)
+
+Script `pilot-feedback/walks-2026-09-05/walk-full-spine-prod.cjs` (+ README, log). Identities KEPT (pilot_events FK): org `e2e-spine-org-202609051508@labourmarket.ai` (profile `03e1861f…`, organizations `9b96648a…`, companies `acbdf51a…` unnamed, `active_unverified`), person `e2e-spine-person-202609051508@labourmarket.ai` (profile `70851a66…`, profession `builder`). Residue: need `057f876f…` CLOSED via MCP; draft project `e6af0df4…` "E2E Spine objektas"; roster row `company_workers c83fd3d3…` active; 44 pilot_events.
+
+| Leg | Result | Evidence |
+|---|---|---|
+| Org: entry → login door → onboarding (hire) → `/lt/dashboard?say=` | PROVEN (the login page does not auto-forward a live session; the walk re-attached `next` to `/onboarding` — the real e-mail/Google callback carries it) | first own turn = the sentence, demand form prefilled Pastolininkas / Vilnius / 2, saved → `customer_requests` `submitted`, `organization_id` = the org's own canonical `organizations` row |
+| A4 org start hub | PROVEN | "Įmonė ✓ Pradėta … Atidaryti įmonės nustatymą" (company still unnamed — the walk's sr-only radio click failed, walk gap) |
+| Person: entry → signup door → onboarding (work, builder) → first answer | PROVEN with **defect D-S2** | answer = 5 public listings, no narrowing (org need invisible: org unverified = G-14, expected); brief said "Profilyje dar trūksta: Prieinamumas nurodytas." → **fixed #1541** (missing pillar named as a noun) |
+| A4 person start hub | PROVEN | `activity-setup-hub` names the next step |
+| Org: "parodyk kandidatus" | **defect D-S3** | `result-body-fallback` "Šis rezultatas nepasiekiamas dabartiniame kontekste" — context keyed on the org NAME (null for an unnamed fresh org) → **fixed #1543** (keyed on `activeOrganizationId`) |
+| Org invite by sentence → person accepts → org roster | PROVEN | `company.invite-worker` → "mano kvietimai" → accepted → "Komanda … E2E Spine Žmogus — laisvas" |
+| Org project by sentence | PROVEN (draft row) | assignment leg not reached (walk gap: panel chip not found) → readiness "0 iš 0: Projekte dar nėra žmonių" honest |
+| Person instructions | not reached (depends on assignment) | — |
+
+Re-walk after #1543 is served: candidates for the unnamed org; company naming via the label click; assignment → readiness → instruction legs.
+
+## Vercel env contract (code-derived 2026-09-05; owner inventory confirmed) — reconciliation script ready
+
+`pilot-feedback/walks-2026-09-05/vercel-billing-reconcile.cjs` (`plan` / `apply` / `verify`; secrets from `%USERPROFILE%\.config\labourmarket\vercel-billing.env`, never printed). Contract = `apps/web/lib/env.ts` + `lib/billing/config.ts`: Production-only `PAYMENTS_ENABLED=true` (KEEP), `BILLING_PROVIDER=stripe` (UPDATE), `STRIPE_MODE=live` (UPDATE), `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live` (UPDATE), `STRIPE_SECRET_KEY=rk_live labourmarket-runtime` (UPDATE), `STRIPE_WEBHOOK_SECRET` (ADD), `STRIPE_LIVE_ACTIVATION=approved-by-owner` (ADD), `STRIPE_PRICE_COMPANY_PILOT=price_1UCKgg637uptAg5zD8dMA6kU` (ADD); REMOVE every Preview scope (preview deployments off; `PAYMENTS_ENABLED` defaults to false); `STRIPE_PRICE_WORKER_PLUS` / `STRIPE_PRICE_AGENCY_PILOT` SUPERSEDED (deferred plans). The harness deny `Bash(vercel *)` is our own gitignored `.claude/settings.local.json` rule; the minimum replacement (narrow env allows + destructive denies) is `scratchpad/patch-permissions-vercel.py`, applied only on owner approval; CLI login = device flow (owner browser click).
+
 ## Production `plans` data discrepancy — APPLIED 13:19 UTC 2026-09-05 (reversible UPDATE, not a migration)
 
 Read 10:20 UTC: `business` row `name_en=Business`, `name_lt=Verslo`, `price_eur_monthly=99`, `features.job_demands=25`; `free` row €0 `job_demands=1`. The approved contract names the paid plan **Organization / Organizacija** and the entitlement is **10** (code registry `company_pilot`). APPLIED via MCP guarded on the old values (`where slug='business' and name_en='Business' and job_demands=25`); readback: `business` = Organization / Organizacija / 99 / `job_demands` 10 / active. Reversal: `update plans set name_en='Business', name_lt='Verslo', features = features || '{"job_demands":25}' where slug='business'`. The 11th-need refusal is proven by the acceptance walk after #1441 is served. agency/enterprise rows stay inactive.
