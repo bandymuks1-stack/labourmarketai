@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import { listMyDocuments } from "@/lib/documents/readiness";
 import { listWorkerInstructions } from "@/lib/instructions/instructions";
@@ -57,8 +59,10 @@ export interface WorkerProjectListItem {
   readonly assignedAt: string;
 }
 
-/** The caller's own worker id, or null when they have no worker row. */
-export async function getOwnWorkerId(): Promise<string | null> {
+/** The caller's own worker id, or null when they have no worker row.
+ *  Request-cached: the ledger, the project view and the asks read all ask
+ *  for it in one render (QA F3 — five queries per project became three). */
+export const getOwnWorkerId = cache(async (): Promise<string | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -70,7 +74,7 @@ export async function getOwnWorkerId(): Promise<string | null> {
     .eq("profile_id", user.id)
     .maybeSingle();
   return data?.id ?? null;
-}
+});
 
 /**
  * The caller's own assignment on this project + the project facts their

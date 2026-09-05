@@ -399,11 +399,22 @@ function resolve(
   }
 
   if (out.length === 0) out.push({ kind: "ask", href: input.hrefs.ask, why: "nothing_recorded" });
-  if (out.length > REQUIREMENT_LEDGER_RESOLUTIONS_PER_ROW) {
-    rejected += out.length - REQUIREMENT_LEDGER_RESOLUTIONS_PER_ROW;
-    out.length = REQUIREMENT_LEDGER_RESOLUTIONS_PER_ROW;
-  }
+  // Resolutions beyond the per-row cap are NOT shown, but they did fit — they
+  // are never counted as "did not fit" (QA F4: the copy says "other options
+  // did not fit", so only genuinely non-fitting candidates may be in that number).
+  if (out.length > REQUIREMENT_LEDGER_RESOLUTIONS_PER_ROW) out.length = REQUIREMENT_LEDGER_RESOLUTIONS_PER_ROW;
   return { resolutions: out, rejected };
+}
+
+/**
+ * An ISO-3166 alpha-2 code or null — the ONLY shape a country value may take
+ * before it is interpolated into a database filter. `projects.country` is free
+ * text written by managers (QA F1), and the deriver compares upper-cased
+ * `char(2)` codes, so a lower-case value is normalised, anything else dropped.
+ */
+export function safeCountryCode(value: string | null | undefined): string | null {
+  const cc = value?.trim().toUpperCase() ?? "";
+  return /^[A-Z]{2}$/.test(cc) ? cc : null;
 }
 
 /** Pure: the ledger for one person in one context. */

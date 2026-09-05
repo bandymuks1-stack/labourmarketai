@@ -19,6 +19,7 @@ import {
   deriveRequirementLedger,
   REQUIREMENT_LEDGER_CANDIDATE_LIMIT,
   REQUIREMENT_LEDGER_ROUTES,
+  safeCountryCode,
   type LedgerServiceOffering,
   type LedgerTrainingProgram,
   type RequirementLedger,
@@ -63,7 +64,6 @@ export type RequirementLedgerResult =
   | { readonly kind: "not-own" }
   | { readonly kind: "no-context" };
 
-const RELATION_MISSING = new Set(["42P01", "42703", "42883", "PGRST202"]);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -87,7 +87,8 @@ const cachedLanguages = cache(async () => {
 });
 
 /** Training programmes visible to the person (RLS) + whether each is already
- *  assigned to them. `null` when the human-gated tables are absent. */
+ *  assigned to them. `null` when the read did not answer (tables absent in
+ *  this environment, permission, transport) — never "zero candidates". */
 const cachedTrainingCandidates = cache(async (profileId: string): Promise<LedgerTrainingProgram[] | null> => {
   const supabase = await createClient();
   const programs = await asAny(supabase)
@@ -96,7 +97,9 @@ const cachedTrainingCandidates = cache(async (profileId: string): Promise<Ledger
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(REQUIREMENT_LEDGER_CANDIDATE_LIMIT);
-  if (programs.error) return RELATION_MISSING.has(programs.error.code) ? null : [];
+  // Any failed read is "unavailable" (null), never "zero candidates" — a
+  // permission or transport error must not read as "nothing fits" (QA F6).
+  if (programs.error) return null;
   const rows = (programs.data ?? []) as { id: string; title: string; description: string | null }[];
   if (rows.length === 0) return [];
   const mine = await asAny(supabase)
@@ -120,9 +123,13 @@ const cachedServiceCandidates = cache(async (country: string | null): Promise<Le
     .from("service_offerings")
     .select("id, title, description, category_slug, location_country, remote, rate_text")
     .eq("status", "active");
-  q = country ? q.or(`location_country.eq.${country},remote.eq.true`) : q;
+  // `projects.country` is free text written by managers; it is interpolated
+  // into a PostgREST filter, so only a validated ISO-2 code may reach it (QA
+  // F1) — and upper-cased, because the deriver compares `char(2)` codes.
+  const cc = safeCountryCode(country);
+  q = cc ? q.or(`location_country.eq.${cc},remote.eq.true`) : q;
   const res = await q.order("created_at", { ascending: false }).limit(REQUIREMENT_LEDGER_CANDIDATE_LIMIT);
-  if (res.error) return RELATION_MISSING.has(res.error.code) ? null : [];
+  if (res.error) return null;
   return ((res.data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),
     title: String(r.title ?? ""),
