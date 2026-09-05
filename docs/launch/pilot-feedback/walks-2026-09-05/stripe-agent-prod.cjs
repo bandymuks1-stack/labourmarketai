@@ -110,11 +110,39 @@ async function events(minutes) {
   const list = await api("GET", `/v1/events?limit=50&created[gte]=${since}`);
   return list.data.filter((e) => REQUIRED_EVENTS.includes(e.type)).map((e) => ({ id: e.id, type: e.type, created: new Date(e.created * 1000).toISOString(), object: e.data && e.data.object && e.data.object.id, delivered: e.pending_webhooks === 0 }));
 }
+async function verifyCheckout() {
+  // Pre-payment proof (owner directive: no real charge). Read the newest LIVE Checkout Sessions and the objects around them.
+  const list = await api("GET", "/v1/checkout/sessions?limit=5&expand[]=data.line_items");
+  const sessions = list.data.map((s) => ({
+    id: s.id, livemode: s.livemode, mode: s.mode, status: s.status, payment_status: s.payment_status,
+    created: new Date(s.created * 1000).toISOString(), expires_at: new Date(s.expires_at * 1000).toISOString(),
+    currency: s.currency, amount_total: s.amount_total, amount_subtotal: s.amount_subtotal,
+    automatic_tax: s.automatic_tax && { enabled: s.automatic_tax.enabled, status: s.automatic_tax.status },
+    tax_id_collection: s.tax_id_collection && s.tax_id_collection.enabled, billing_address_collection: s.billing_address_collection,
+    customer: s.customer, customer_email: s.customer_email ? s.customer_email.replace(/^(.{3}).*(@.*)$/, "$1***$2") : null,
+    client_reference_id: s.client_reference_id, metadata: s.metadata,
+    success_url: s.success_url, cancel_url: s.cancel_url,
+    line_items: s.line_items && s.line_items.data.map((li) => ({ price: li.price && li.price.id, product: li.price && li.price.product, unit_amount: li.price && li.price.unit_amount, currency: li.price && li.price.currency, interval: li.price && li.price.recurring && li.price.recurring.interval, quantity: li.quantity })),
+    subscription: s.subscription, payment_intent: s.payment_intent,
+  }));
+  const subs = await api("GET", "/v1/subscriptions?limit=10&status=all").catch((e) => ({ error: e.message.slice(0, 100) }));
+  const pis = await api("GET", "/v1/payment_intents?limit=10").catch((e) => ({ error: e.message.slice(0, 100) }));
+  const charges = await api("GET", "/v1/charges?limit=10").catch((e) => ({ error: e.message.slice(0, 100) }));
+  const customers = await api("GET", "/v1/customers?limit=10").catch((e) => ({ error: e.message.slice(0, 100) }));
+  return {
+    sessions,
+    subscriptions: subs.error ? subs : subs.data.map((x) => ({ id: x.id, status: x.status, livemode: x.livemode })),
+    paymentIntents: pis.error ? pis : pis.data.map((x) => ({ id: x.id, status: x.status, amount: x.amount })),
+    charges: charges.error ? charges : charges.data.map((x) => ({ id: x.id, status: x.status, amount: x.amount, refunded: x.refunded })),
+    customers: customers.error ? customers : customers.data.map((x) => ({ id: x.id, livemode: x.livemode, email: x.email ? x.email.replace(/^(.{3}).*(@.*)$/, "$1***$2") : null, metadata: x.metadata })),
+  };
+}
 (async () => {
   const cmd = process.argv[2] || "inventory";
   if (cmd === "inventory") log({ inventory: await inventory() });
   else if (cmd === "ensure-product-price") log(await ensureProductPrice());
   else if (cmd === "ensure-portal") log(await ensurePortal());
+  else if (cmd === "verify-checkout") log({ verifyCheckout: await verifyCheckout() });
   else if (cmd === "events") log({ events: await events(Number(process.argv[3] || 60)) });
   else { console.error("unknown command"); process.exit(2); }
 })().catch((e) => { console.error("STRIPE_AGENT_FAILED " + (e.message || e).toString().replace(/rk_live_\S+/g, "rk_live_***")); process.exit(1); });
