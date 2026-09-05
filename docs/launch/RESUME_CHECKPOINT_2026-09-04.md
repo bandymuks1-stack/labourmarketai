@@ -48,9 +48,9 @@
 6. Real-user watch on every resume: `pilot_events` for profile `875eb16b…` (still `dashboard_viewed` 06:15 UTC 2026-09-04).
 7. Residue register (E2E, intentional): project `3b9c55d3` (stage `1885abb7` done; tasks `712182db` todo, `81a07ed1` done; assignment `80883119`; log `01d4a36d`; readiness rows), project `d9af86de` "E2E Kauno objektas (testinis)" (draft; assignment `d6617763` ended). Bookings: none. Document files: none.
 
-## Production `plans` data discrepancy (Day-2 step, before #1441 merges — reversible UPDATE, not a migration)
+## Production `plans` data discrepancy — APPLIED 13:19 UTC 2026-09-05 (reversible UPDATE, not a migration)
 
-Read 10:20 UTC: `business` row `name_en=Business`, `name_lt=Verslo`, `price_eur_monthly=99`, `features.job_demands=25`; `free` row €0 `job_demands=1`. The approved contract names the paid plan **Organization / Organizacija** and the entitlement is **10** (code registry `company_pilot`). Step: `update plans set name_en='Organization', name_lt='Organizacija', features = features || '{"job_demands":10}' where slug='business'` (readback + the 11th-need refusal walk); agency/enterprise rows stay inactive.
+Read 10:20 UTC: `business` row `name_en=Business`, `name_lt=Verslo`, `price_eur_monthly=99`, `features.job_demands=25`; `free` row €0 `job_demands=1`. The approved contract names the paid plan **Organization / Organizacija** and the entitlement is **10** (code registry `company_pilot`). APPLIED via MCP guarded on the old values (`where slug='business' and name_en='Business' and job_demands=25`); readback: `business` = Organization / Organizacija / 99 / `job_demands` 10 / active. Reversal: `update plans set name_en='Business', name_lt='Verslo', features = features || '{"job_demands":25}' where slug='business'`. The 11th-need refusal is proven by the acceptance walk after #1441 is served. agency/enterprise rows stay inactive.
 
 ## Open owner gates (consolidated, do not re-ask, do not broaden)
 

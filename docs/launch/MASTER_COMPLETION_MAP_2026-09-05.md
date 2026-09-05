@@ -27,7 +27,7 @@
 |---|---|
 | `main` | **`08629b19`** (#1533 checkpoint; #1530 P4 Field, #1531 `?say=`, #1532 P5/C1 merged 11:xx–12:xx UTC while the MASTER was offline) |
 | Production | **`08629b19`** = `main` (served by 13:01 UTC; the Hobby freeze lifted). Walked 13:08–13:15 UTC: P1 entry + `?say=` hand-off, Field, company home, ledger re-walk — all PROD_PROVEN, zero residue |
-| #1441 Stripe (RED, `needs-human-gate`, draft) | head **`d2bdae56`**, MERGEABLE, CI green at head (quality · e2e-smoke · migration-safety · CodeQL; the Vercel check is FAILURE by design — branch deployments off since #1521); **owner gate G-8** (Stripe LIVE session, 8 Vercel vars, approve + squash-merge) + the `plans` data step (prod still reads Business/Verslo, `features.job_demands` 25 → Organization/Organizacija, 10 — reversible UPDATE right before the merge); acceptance walk `walk-stripe-live-prod.cjs`; no writer |
+| #1441 Stripe (RED, `needs-human-gate`, draft) | head **`d2bdae56`**, MERGEABLE, CI green at head (quality · e2e-smoke · migration-safety · CodeQL; the Vercel check is FAILURE by design — branch deployments off since #1521); **owner gate G-8** (Stripe LIVE session, 8 Vercel vars, approve + squash-merge) + the `plans` data step **APPLIED 13:19 UTC 2026-09-05** (MCP UPDATE guarded on the old values: `business` → `name_en=Organization`, `name_lt=Organizacija`, `features.job_demands=10`; readback confirmed; reversal = the inverse UPDATE, `Business`/`Verslo`/`25`; the served `/lt/pricing` still shows the pre-#1441 static card copy — #1441 replaces that page); acceptance walk `walk-stripe-live-prod.cjs`; no writer |
 | Invitation WIP | `8dbe1438` preserved → rebased onto main as `72e3602b` on `feat/cc/invitation-attention-journey` → lane J (one writer) |
 | Real users | REAL_RECRUITER_USED_PRODUCT = FALSE (last event `dashboard_viewed` 06:15 UTC 2026-09-04, re-read 13:05 UTC 2026-09-05); REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE |
 | Local stack | Docker unavailable (LOCAL_DOCKER_UNAVAILABLE); verification = unit/guards/typecheck/lint/build + CI + production walks with `e2e-*` identities |
@@ -90,7 +90,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | E2 | Learner invite / accept → student context | both | accepted membership | PROD_PROVEN | G3 | — | F | — | — |
 | E3 | Learning Compass + demand connection | student | real demand counts, gaps | PROD_PROVEN | #1452/#1458 | — | P11 | — | — |
 | E4 | Practice / internship → employer | student | internship postings + fit | PARTIAL | type live (#1455); 0 postings | verified positive internship company = owner decision | P11 | EDU | yes |
-| E5 | Outcomes → identity | institution | aggregate outcomes (≥5) | IMPL_PENDING_PROOF | function applied; `walk-outcomes-prod.cjs` exists | run the walk | P11 | EDU | yes |
+| E5 | Outcomes → identity | institution | aggregate outcomes (≥5) | PARTIAL | `walk-outcomes-prod.cjs` on `08629b19` 13:20 UTC: the outcomes block renders with the HONEST suppressed line ("Rezultatai rodomi, kai prisijungę bent 5 besimokantieji (dabar 1). Tik skaičiai, niekada vardai."); the ≥5 aggregate itself cannot be shown with 1 real learner | the aggregate needs 5 accepted learners of one institution (real pilot data, not fixtures) | P11 | EDU | yes |
 | F1 | Client / supervisor authorized view | client | sees only what the relationship allows | PROD_PROVEN | agency chain outsider 0 rows; K2 | — | F | — | — |
 | F2 | Privacy boundary on documents / evidence | all | manager never reads worker documents | PROD_PROVEN | guard `gap-resolution-privacy`; `worker_documents_select` owner+admin | K2-1 companies contact columns = G-12 (#1430) | F | — | — |
 | G1 | Deterministic actions | all | sentence → same executor as UI | PROD_PROVEN | daily | — | F | — | — |
@@ -132,13 +132,13 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 |---|---|
 | TOTAL_REQUIRED_STAGES | **75** |
 | PROD_PROVEN | **57** (incl. K2 with one P1 finding open) |
-| IMPLEMENTED_PENDING_PROD_PROOF | **7** (E5, J1, J2, J3, J4, J5, K4) |
-| PARTIAL | **8** (A4, C12, D5, E4, H2, I3, L1, L4) |
+| IMPLEMENTED_PENDING_PROD_PROOF | **6** (J1, J2, J3, J4, J5, K4) |
+| PARTIAL | **9** (A4, C12, D5, E4, E5, H2, I3, L1, L4) |
 | NOT_IMPLEMENTED | **1** (M5) |
 | OWNER_BLOCKED | **1** (I5) + 5 billing stages waiting on G-8 (counted under pending proof) |
 | EXTERNAL_BLOCKED | **1** (M1) |
 
-Check: 57 + 7 + 8 + 1 + 1 + 1 = 75. Percentage, if wanted: 57 / 75 = **76 % PROD_PROVEN**; (57 + 7) / 75 = 85 % implemented. These are stage counts, not effort. Recounted from the Status column 13:15 UTC 2026-09-05.
+Check: 57 + 6 + 9 + 1 + 1 + 1 = 75. Percentage, if wanted: 57 / 75 = **76 % PROD_PROVEN**; (57 + 7) / 75 = 85 % implemented. These are stage counts, not effort. Recounted from the Status column 13:15 UTC 2026-09-05.
 
 ## 2. Three finish lines
 
