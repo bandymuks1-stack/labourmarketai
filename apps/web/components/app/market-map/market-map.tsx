@@ -9,6 +9,7 @@ import {
   EUROPE_CENTER,
   EUROPE_ZOOM,
   MODE_HEIGHT,
+  anchorFit,
   anchorsForLayer,
   type MarketAnchor,
   type MarketMapLayer,
@@ -264,12 +265,41 @@ export function MarketMap({
     }
   }, [ready, view, layer, selectedCode, onSelectRegion, onSelectAnchor, revealCount]);
 
-  // ── fly to the selected region ────────────────────────────────────────────
+  // ── frame the market: the anchors drawn, or Europe when there are none ────
+  //
+  // A FIXED FRAME MADE REAL DEMAND UNREACHABLE. This used to fly to a constant
+  // Europe centre/zoom whenever nothing was selected. That constant was chosen
+  // for a large map; the dashboard result map is ~319x288, and at that size
+  // Lithuania sits outside the viewport while the Netherlands sits inside it.
+  // Leaflet draws an out-of-bounds circleMarker as `d="M0 0"` — the anchor is
+  // in the DOM, announced, focusable and keyboard-activatable, and has NO
+  // geometry, so a pointer can never hit it. A production walk found exactly
+  // that: a real LT need whose marker no mouse user could open (evidence:
+  // `probe-anchor-geometry-8be8502c.log` — NL drew a 36x36 circle, LT drew
+  // nothing at all). Framing what we actually drew is the fix.
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map || !autoFly) return;
+    const L = LRef.current;
+    if (!ready || !map || !L || !autoFly) return;
+
     if (!selectedCode) {
-      map.flyTo([...EUROPE_CENTER] as [number, number], EUROPE_ZOOM, {
+      // The landing is a FROZEN composition (owner-gated design contract); its
+      // framing is deliberate and staged, so it keeps the constant view.
+      const fit = mode === "landing" ? null : anchorFit(view, layer, revealCount);
+      if (!fit || fit.points.length === 0) {
+        // Nothing drawn — there is no market to frame, so the honest default
+        // stands rather than a frame invented around no data.
+        map.flyTo([...EUROPE_CENTER] as [number, number], EUROPE_ZOOM, {
+          duration: 0.9,
+        });
+        return;
+      }
+      map.flyToBounds(L.latLngBounds(fit.points as [number, number][]), {
+        // Padding keeps an edge anchor off the container border, where half a
+        // circle is as unclickable as none of it.
+        padding: [32, 32],
+        // Never closer than the data's own precision allows — see `anchorFit`.
+        maxZoom: fit.maxZoom,
         duration: 0.9,
       });
       return;
@@ -278,7 +308,7 @@ export function MarketMap({
     const first = region?.anchors[0];
     if (!first) return;
     map.flyTo([first.lat, first.lng], 7, { duration: 1.1 });
-  }, [ready, selectedCode, view.regions, autoFly]);
+  }, [ready, selectedCode, view, layer, revealCount, mode, autoFly]);
 
   return (
     <div
