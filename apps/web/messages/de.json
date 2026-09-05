@@ -11637,6 +11637,10 @@
           "label": "Phasenstatus setzen",
           "description": "Eine Projektphase erhält ihren echten Status — in Arbeit, erledigt, blockiert."
         },
+        "updateTaskStatus": {
+          "label": "Aufgabenstatus ändern",
+          "description": "Eine Aufgabe erhält einen echten Status — in Arbeit, erledigt, blockiert."
+        },
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
@@ -12134,6 +12138,23 @@
       "stageBlocked": "Phase als blockiert markiert.",
       "stageFailed": "Der Phasenstatus konnte nicht geändert werden.",
       "chipStagePrefix": "Phase",
+      "taskAsk": "Welche Aufgabe? Bitte wählen:",
+      "taskNotFound": "Diese Aufgabe finde ich unter den offenen nicht. Welche meinten Sie?",
+      "taskNone": "Es gibt noch keine offenen Aufgaben.",
+      "taskUnavailable": "Die Aufgaben konnten gerade nicht gelesen werden.",
+      "taskDone": "Aufgabe als erledigt markiert.",
+      "taskStarted": "Aufgabe als in Arbeit markiert.",
+      "taskBlocked": "Aufgabe als blockiert markiert.",
+      "taskFailed": "Der Aufgabenstatus konnte nicht geändert werden.",
+      "chipTaskPrefix": "Aufgabe",
+      "riskIntro": "Projektstand ({count} aktiv):",
+      "riskLine": "• {title} — {people} Pers.; Aufgaben offen {open}, überfällig {overdue}; blockierte Phasen {blocked}; {docs} Pers. ohne Dokumente; Bereitschaft {checked}/{total}",
+      "riskOkLine": "• {title} — keine Risikosignale ({people} Pers., {open} offene Aufgaben)",
+      "riskUnknownLine": "• {title} — der Stand konnte gerade nicht gelesen werden",
+      "riskNobody": "laufendes Projekt ohne Personen",
+      "riskNone": "Noch keine aktiven Projekte — legen Sie das erste an.",
+      "riskUnavailable": "Der Projektstand konnte gerade nicht gelesen werden.",
+      "chipCreateProject": "Projekt anlegen",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn.",
       "documentFileOffer": "Dokument erfasst. Die Datei können Sie gleich hier anhängen — PDF, Word oder ein Foto bis 5 MB.",

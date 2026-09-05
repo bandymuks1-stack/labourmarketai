@@ -3408,6 +3408,10 @@
           "label": "Iestatīt posma statusu",
           "description": "Projekta posms saņem īsto statusu — notiek, pabeigts, bloķēts."
         },
+        "updateTaskStatus": {
+          "label": "Mainīt uzdevuma statusu",
+          "description": "Uzdevums tiek atzīmēts ar reālu statusu — izpildē, paveikts, bloķēts."
+        },
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
@@ -3833,6 +3837,23 @@
       "stageBlocked": "Posms atzīmēts kā bloķēts.",
       "stageFailed": "Posma statusu neizdevās mainīt.",
       "chipStagePrefix": "Posms",
+      "taskAsk": "Kurš uzdevums? Izvēlieties:",
+      "taskNotFound": "Tādu uzdevumu starp atvērtajiem neatrodu. Kuru domājāt?",
+      "taskNone": "Atvērtu uzdevumu pagaidām nav.",
+      "taskUnavailable": "Uzdevumus šobrīd neizdevās nolasīt.",
+      "taskDone": "Uzdevums atzīmēts kā paveikts.",
+      "taskStarted": "Uzdevums atzīmēts kā izpildē.",
+      "taskBlocked": "Uzdevums atzīmēts kā bloķēts.",
+      "taskFailed": "Uzdevuma statusu neizdevās mainīt.",
+      "chipTaskPrefix": "Uzdevums",
+      "riskIntro": "Projektu stāvoklis ({count} aktīvi):",
+      "riskLine": "• {title} — {people} cilv.; uzdevumi atvērti {open}, kavējas {overdue}; bloķēti posmi {blocked}; dokumentu trūkst {docs} cilv.; gatavība {checked}/{total}",
+      "riskOkLine": "• {title} — riska signālu nav ({people} cilv., {open} atvērti uzdevumi)",
+      "riskUnknownLine": "• {title} — stāvokli šobrīd neizdevās nolasīt",
+      "riskNobody": "aktīvs projekts bez cilvēkiem",
+      "riskNone": "Aktīvu projektu pagaidām nav — izveidojiet pirmo.",
+      "riskUnavailable": "Projektu stāvokli šobrīd neizdevās nolasīt.",
+      "chipCreateProject": "Izveidot projektu",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais.",
       "documentFileOffer": "Dokuments ierakstīts. Failu varat pievienot šeit — PDF, Word vai foto līdz 5 MB.",

@@ -11637,6 +11637,10 @@
           "label": "Pakeisti etapo būseną",
           "description": "Projekto etapas pažymimas tikra būsena — vykdomas, atliktas, blokuotas."
         },
+        "updateTaskStatus": {
+          "label": "Pakeisti užduoties būseną",
+          "description": "Užduotis pažymima tikra būsena — vykdoma, atlikta, užstrigusi."
+        },
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
@@ -12134,6 +12138,23 @@
       "stageBlocked": "Etapas pažymėtas blokuotu.",
       "stageFailed": "Etapo būsenos pakeisti nepavyko.",
       "chipStagePrefix": "Etapas",
+      "taskAsk": "Kuri užduotis? Pasirinkite:",
+      "taskNotFound": "Tokios užduoties nerandu tarp atvirų užduočių. Kurią turėjote omenyje?",
+      "taskNone": "Atvirų užduočių kol kas nėra.",
+      "taskUnavailable": "Užduočių dabar nuskaityti nepavyko.",
+      "taskDone": "Užduotis pažymėta atlikta.",
+      "taskStarted": "Užduotis pažymėta vykdoma.",
+      "taskBlocked": "Užduotis pažymėta užstrigusia.",
+      "taskFailed": "Užduoties būsenos pakeisti nepavyko.",
+      "chipTaskPrefix": "Užduotis",
+      "riskIntro": "Projektų būklė ({count} aktyv.):",
+      "riskLine": "• {title} — {people} žm.; užduočių atvirų {open}, vėluoja {overdue}; blokuotų etapų {blocked}; dokumentų trūksta {docs} žm.; parengtis {checked}/{total}",
+      "riskOkLine": "• {title} — rizikos signalų nėra ({people} žm., {open} atvirų užduočių)",
+      "riskUnknownLine": "• {title} — būklės dabar nuskaityti nepavyko",
+      "riskNobody": "aktyvus projektas be žmonių",
+      "riskNone": "Aktyvių projektų kol kas nėra — sukurkite pirmą.",
+      "riskUnavailable": "Projektų būklės dabar nuskaityti nepavyko.",
+      "chipCreateProject": "Sukurti projektą",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma.",
       "documentFileOffer": "Dokumentas užrašytas. Failą galite pridėti čia pat — PDF, Word arba nuotrauką iki 5 MB.",

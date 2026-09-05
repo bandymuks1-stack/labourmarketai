@@ -11637,6 +11637,10 @@
           "label": "Fasestatus zetten",
           "description": "Een projectfase krijgt zijn echte status — bezig, afgerond, geblokkeerd."
         },
+        "updateTaskStatus": {
+          "label": "Taakstatus wijzigen",
+          "description": "Een taak krijgt een echte status — in uitvoering, klaar, geblokkeerd."
+        },
         "respondOffer": {
           "label": "Aanbod van een bureau beantwoorden",
           "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
@@ -12134,6 +12138,23 @@
       "stageBlocked": "Fase gemarkeerd als geblokkeerd.",
       "stageFailed": "De fasestatus kon niet worden gewijzigd.",
       "chipStagePrefix": "Fase",
+      "taskAsk": "Welke taak? Kies er een:",
+      "taskNotFound": "Die taak vind ik niet tussen de open taken. Welke bedoelde u?",
+      "taskNone": "Er zijn nog geen open taken.",
+      "taskUnavailable": "De taken konden nu niet worden gelezen.",
+      "taskDone": "Taak gemarkeerd als klaar.",
+      "taskStarted": "Taak gemarkeerd als in uitvoering.",
+      "taskBlocked": "Taak gemarkeerd als geblokkeerd.",
+      "taskFailed": "De taakstatus kon niet worden gewijzigd.",
+      "chipTaskPrefix": "Taak",
+      "riskIntro": "Projectstand ({count} actief):",
+      "riskLine": "• {title} — {people} pers.; taken open {open}, te laat {overdue}; geblokkeerde fasen {blocked}; {docs} pers. missen documenten; gereedheid {checked}/{total}",
+      "riskOkLine": "• {title} — geen risicosignalen ({people} pers., {open} open taken)",
+      "riskUnknownLine": "• {title} — de stand kon nu niet worden gelezen",
+      "riskNobody": "lopend project zonder mensen",
+      "riskNone": "Nog geen actieve projecten — maak het eerste aan.",
+      "riskUnavailable": "De projectstand kon nu niet worden gelezen.",
+      "chipCreateProject": "Project aanmaken",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan.",
       "documentFileOffer": "Document vastgelegd. U kunt het bestand hier direct toevoegen — PDF, Word of een foto tot 5 MB.",

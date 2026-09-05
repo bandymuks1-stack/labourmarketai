@@ -3408,6 +3408,10 @@
           "label": "Määra etapi olek",
           "description": "Projekti etapp saab tegeliku oleku — töös, tehtud, blokeeritud."
         },
+        "updateTaskStatus": {
+          "label": "Muuda ülesande olekut",
+          "description": "Ülesanne märgitakse tegeliku olekuga — töös, tehtud, blokeeritud."
+        },
         "respondOffer": {
           "label": "Vasta agentuuri pakkumisele",
           "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
@@ -3833,6 +3837,23 @@
       "stageBlocked": "Etapp märgitud blokeerituks.",
       "stageFailed": "Etapi olekut ei õnnestunud muuta.",
       "chipStagePrefix": "Etapp",
+      "taskAsk": "Milline ülesanne? Valige:",
+      "taskNotFound": "Sellist ülesannet avatud ülesannete seast ei leia. Millist mõtlesite?",
+      "taskNone": "Avatud ülesandeid veel pole.",
+      "taskUnavailable": "Ülesandeid ei õnnestunud praegu lugeda.",
+      "taskDone": "Ülesanne on märgitud tehtuks.",
+      "taskStarted": "Ülesanne on märgitud töös olevaks.",
+      "taskBlocked": "Ülesanne on märgitud blokeerituks.",
+      "taskFailed": "Ülesande olekut ei õnnestunud muuta.",
+      "chipTaskPrefix": "Ülesanne",
+      "riskIntro": "Projektide seis ({count} aktiivset):",
+      "riskLine": "• {title} — {people} in.; ülesandeid avatud {open}, hilinenud {overdue}; blokeeritud etappe {blocked}; dokumendid puuduvad {docs} in.; valmisolek {checked}/{total}",
+      "riskOkLine": "• {title} — riskisignaale pole ({people} in., {open} avatud ülesannet)",
+      "riskUnknownLine": "• {title} — seisu ei õnnestunud praegu lugeda",
+      "riskNobody": "aktiivne projekt ilma inimesteta",
+      "riskNone": "Aktiivseid projekte veel pole — looge esimene.",
+      "riskUnavailable": "Projektide seisu ei õnnestunud praegu lugeda.",
+      "chipCreateProject": "Loo projekt",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene.",
       "documentFileOffer": "Dokument kirja pandud. Faili saate lisada siinsamas — PDF, Word või foto kuni 5 MB.",

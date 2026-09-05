@@ -868,6 +868,20 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Verplaats Jan naar project Utrecht",
     de: "Versetze Jan in das Projekt Berlin",
   },
+  "task-status": {
+    lt: "Užduotis sumontuoti pastolius atlikta",
+    en: "Task install scaffolding is done",
+    ru: "Задача смонтировать леса выполнена",
+    nl: "Taak steiger opbouwen is klaar",
+    de: "Aufgabe Gerüst aufbauen erledigt",
+  },
+  "project-risk": {
+    lt: "Kuris projektas rizikoje?",
+    en: "Which project is at risk?",
+    ru: "Какой проект под угрозой?",
+    nl: "Welk project loopt risico?",
+    de: "Welches Projekt ist gefährdet?",
+  },
 };
 
 /**

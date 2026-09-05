@@ -709,6 +709,28 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     advancedRoute: "/dashboard/projects",
     handler: { kind: "server_action", ref: "updateStageStatusAction" },
   },
+  {
+    /**
+     * WORK PERFORMED → RESULT (owner contract 2026-09-04 §14): a task moved
+     * to a real status — "užduotis sumontuoti pastolius atlikta" by
+     * sentence, or the task row's own control on the tasks page. Both enter
+     * the ONE status core. A WORKER may close the task they were given: the
+     * RPC (`set_work_task_status_v2`) re-checks creator / assignee / project
+     * manager, so the role gate here is deliberately the union of the three
+     * and the row-level authority stays in SQL. Result is a stored status.
+     */
+    id: "company.update-task-status",
+    subject: "company",
+    allowedRoles: ["company", "agency", "worker"],
+    labelKey: "conversation.actions.company.updateTaskStatus.label",
+    descriptionKey: "conversation.actions.company.updateTaskStatus.description",
+    confirmation: "reversible_write",
+    precondition: "authenticated",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/tasks",
+    handler: { kind: "server_action", ref: "setWorkTaskStatusAction" },
+  },
 
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`

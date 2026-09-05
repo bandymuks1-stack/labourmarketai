@@ -97,6 +97,8 @@ export type ConversationIntent =
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
   | "move-worker" // "perkelk Joną į projektą Y" — a person between projects, what-if first
+  | "task-status" // "užduotis sumontuoti pastolius atlikta" — a task moved to a real status (§14 RESULT)
+  | "project-risk" // "kuris projektas rizikoje?" — every live project's real signals, most first
   | "unknown";
 
 export type IntentMatch = {
@@ -919,6 +921,33 @@ const RULES: IntentRule[] = [
       // Riga", "verplaats Jan naar project Utrecht", "versetze Jan in das
       // Projekt Berlin", "переведи Ивана на проект Рига", "przenieś Jana do projektu".
       p("(perkel|perkelk|move|verplaats|versetz|перевед|перевес|перемест|przenie|przenies)[^\\s]*\\s+.{0,40}(projekt|project|проект)", 12),
+    ],
+  },
+  {
+    intent: "task-status",
+    patterns: [
+      // WORK PERFORMED → RESULT (§14): "užduotis sumontuoti pastolius atlikta",
+      // "pradėjau užduotį", "užduotis užstrigo", "task scaffolding done",
+      // "Aufgabe Gerüst erledigt", "taak steiger klaar", "задача выполнена",
+      // "zadanie wykonane". The stage words are a different noun, so the two
+      // intents never share a sentence; add-task's verbs (pridėk / create)
+      // are absent here, so "pridėk užduotį" keeps its own intent.
+      p("(u[zž]duot|task|aufgabe|taak|задач|zadani)\\w*\\s*.{0,60}?(baigt|atlikt|u[zž]baig|padaryt|done|finished|complet|fertig|abgeschlossen|erledigt|klaar|afgerond|заверш|готов|сделан|выполн|wykonan|zakończ|prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz|u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok)", 10),
+      p("(baigiau|atlikau|u[zž]baigiau|padariau|finished|completed|done\\s+with|erledigt|abgeschlossen|afgerond|klaar\\s+met|заверш|выполн|сделал|wykonał|skończył|prad[eė]jau|pradedu|prasid[eė]jo|started|begonnen|angefangen|начал|rozpocz|u[zž]strigo|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok)\\w*\\s*.{0,20}?(u[zž]duot|task|aufgabe|taak|задач|zadani)", 10),
+    ],
+  },
+  {
+    intent: "project-risk",
+    patterns: [
+      // PROGRESS / READINESS / RISK by sentence (§4A "Which project is at
+      // risk?", §11, §16): "kuris projektas rizikoje?", "kaip sekasi
+      // projektams?", "projektų būklė", "which project is at risk", "welches
+      // Projekt ist gefährdet", "welk project loopt risico", "какой проект
+      // под угрозой", "który projekt jest zagrożony".
+      p("(projekt|project|проект)\\w*\\s*.{0,24}?(rizik|risk|risiko|risico|gef[aä]hrd|угроз|риск|zagro[zż]|v[eė]luoj|atsilie?k|behind|late|verz[oö]ger|achter|отста|op[oó][zź]ni)", 11),
+      p("(rizik|risk|risiko|risico|gef[aä]hrd|угроз|риск|zagro[zż])\\w*\\s*.{0,24}?(projekt|project|проект)", 11),
+      p("(kaip\\s+sekasi|how\\s+(are|is)|wie\\s+(l[aä]uft|laufen|steht|stehen)|hoe\\s+(gaat|staat|lopen)|как\\s+(идут|идёт|дела)|jak\\s+(idą|idzie))\\s*.{0,20}?(projekt|project|проект)", 10),
+      p("(projekt[uų]|projects|projekte|projecten|проектов|projektów)\\s+(b[uū]kl|b[uū]sen|status|stand|state|состоян|статус|stan\\b)", 10),
     ],
   },
   {

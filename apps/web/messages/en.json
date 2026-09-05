@@ -11637,6 +11637,10 @@
           "label": "Set a stage status",
           "description": "A project stage gets its real status — in progress, done, blocked."
         },
+        "updateTaskStatus": {
+          "label": "Change task status",
+          "description": "A task is marked with a real status — in progress, done, blocked."
+        },
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
@@ -12134,6 +12138,23 @@
       "stageBlocked": "Stage marked blocked.",
       "stageFailed": "The stage status could not be changed.",
       "chipStagePrefix": "Stage",
+      "taskAsk": "Which task? Pick one:",
+      "taskNotFound": "I can't find that task among the open ones. Which did you mean?",
+      "taskNone": "There are no open tasks yet.",
+      "taskUnavailable": "The tasks could not be read right now.",
+      "taskDone": "Task marked as done.",
+      "taskStarted": "Task marked as in progress.",
+      "taskBlocked": "Task marked as blocked.",
+      "taskFailed": "The task status could not be changed.",
+      "chipTaskPrefix": "Task",
+      "riskIntro": "Project state ({count} active):",
+      "riskLine": "• {title} — {people} people; tasks open {open}, overdue {overdue}; blocked stages {blocked}; {docs} people missing documents; readiness {checked}/{total}",
+      "riskOkLine": "• {title} — no risk signals ({people} people, {open} open tasks)",
+      "riskUnknownLine": "• {title} — its state could not be read right now",
+      "riskNobody": "live project with nobody on it",
+      "riskNone": "No active projects yet — create the first one.",
+      "riskUnavailable": "The projects' state could not be read right now.",
+      "chipCreateProject": "Create a project",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first.",
       "documentFileOffer": "Document recorded. You can attach the file right here — PDF, Word or a photo up to 5 MB.",

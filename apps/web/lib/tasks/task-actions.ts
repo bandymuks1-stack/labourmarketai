@@ -9,6 +9,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { emitWorkTaskAssignedNotification } from "@/lib/notifications/event-emitters";
 import { createWorkTaskCore } from "@/lib/tasks/create-task-core";
+import { setWorkTaskStatusCore, type SetWorkTaskStatusCoreResult } from "@/lib/tasks/set-task-status-core";
 import {
   WORK_TASK_DESCRIPTION_MAX,
   WORK_TASK_TITLE_MAX,
@@ -175,20 +176,27 @@ export async function setWorkTaskStatusAction(
   const status = String(formData.get("status") ?? "").trim();
   if (!isValidWorkTaskStatus(status)) finish(ctx, "invalid");
 
-  const { data, error } = await asAny(supabase).rpc("set_work_task_status_v2", {
-    p_task_id: taskId,
-    p_status: status,
-  });
-  if (error && isMigrationMissingCode(error.code)) {
-    const v1 = await asAny(supabase).rpc("set_work_task_status_v1", {
-      p_task_id: taskId,
-      p_status: status,
-    });
-    if (v1.error) finish(ctx, noticeForRpcError(v1.error));
-    finish(ctx, noticeForOutcome(String(v1.data ?? ""), "updated"));
+  // THE ONE status write (owner contract §5.5) — shared with the chat's
+  // sentence; the core carries the v2 → v1 fallback and the RPC's outcomes.
+  const r = await setWorkTaskStatusCore(supabase, taskId, status);
+  finish(ctx, noticeForCoreOutcome(r.kind));
+}
+
+function noticeForCoreOutcome(kind: SetWorkTaskStatusCoreResult["kind"]): Notice {
+  switch (kind) {
+    case "updated":
+      return "updated";
+    case "needs_migration":
+      return "needs_migration";
+    case "not_authorized":
+      return "not_authorized";
+    case "not_found":
+      return "not_found";
+    case "error":
+      return "error";
+    default:
+      return "invalid";
   }
-  if (error) finish(ctx, noticeForRpcError(error));
-  finish(ctx, noticeForOutcome(String(data ?? ""), "updated"));
 }
 
 /** Edit bounded task fields through update_work_task_v2 (v1 fallback while

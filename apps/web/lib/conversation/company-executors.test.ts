@@ -79,13 +79,24 @@ describe("registry ↔ schema ↔ executor stay in lockstep", () => {
 
   it("authorization comes from dispatch-core over registry allowedRoles — a plain worker is denied every employer action", () => {
     const worker = new Set<Role>(["worker"]);
+    // §14 WORK PERFORMED → RESULT: a WORKER may close the task they were
+    // given — the ONE employer action whose row-level authority (creator /
+    // assignee / project manager) is re-derived inside `set_work_task_status_v2`,
+    // so its conversation role gate is the union of the three. Exactly one;
+    // a second must be named here, never slipped in.
+    const WORKER_ALLOWED = ["company.update-task-status"];
+    expect(
+      Object.keys(COMPANY_ACTION_SCHEMAS)
+        .filter((id) => getConversationAction(id)!.allowedRoles.includes("worker"))
+        .sort(),
+    ).toEqual(WORKER_ALLOWED);
     for (const id of Object.keys(COMPANY_ACTION_SCHEMAS)) {
       const decision = authorizeDispatch({
         descriptor: getConversationAction(id),
         heldRoles: worker,
         executable: true,
       });
-      expect(decision, id).toEqual({ ok: false, code: "not_authorized" });
+      expect(decision, id).toEqual(WORKER_ALLOWED.includes(id) ? { ok: true } : { ok: false, code: "not_authorized" });
       // …and the subject role itself is allowed through the same gate.
       // Every EMPLOYER action's subject is a role (§7.1 widened `subject` to
       // `Role | "engagement"`, and the one relationship action is not in this

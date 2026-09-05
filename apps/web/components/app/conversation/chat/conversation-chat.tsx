@@ -55,6 +55,10 @@ import { loadDocumentFileTargetForChat } from "@/lib/conversation/document-file-
 import { workerAddDocumentForm } from "@/lib/conversation/worker-forms";
 import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
+import { loadOpenTasksForChat } from "@/lib/conversation/company-tasks";
+import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
+import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
+import type { WorkTaskStatus } from "@/lib/tasks/task-model";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
@@ -418,6 +422,23 @@ export type ChatLabels = {
   stageBlocked: string;
   stageFailed: string;
   chipStagePrefix: string;
+  taskAsk: string;
+  taskNotFound: string;
+  taskNone: string;
+  taskUnavailable: string;
+  taskDone: string;
+  taskStarted: string;
+  taskBlocked: string;
+  taskFailed: string;
+  chipTaskPrefix: string;
+  riskIntro: string;
+  riskLine: string;
+  riskOkLine: string;
+  riskUnknownLine: string;
+  riskNobody: string;
+  riskNone: string;
+  riskUnavailable: string;
+  chipCreateProject: string;
   moveNotFound: string;
   moveNoOptions: string;
   moveAskWorker: string;
@@ -2496,6 +2517,150 @@ export function ConversationChat({
   /** CAPACITY (§11): "kas laisvas šią savaitę?" — the company's roster against
    *  approved absences (when, never why) for the next days, answered in the
    *  chat with the projects chip beside it. Company identity only. */
+  /** §14 WORK PERFORMED → RESULT: a task moved to a real status — the SAME
+   *  token-less reversible dispatch the stage flow uses, over the tasks page's
+   *  own status write (`set_work_task_status_v2` re-checks creator / assignee /
+   *  project manager). Reached by sentence ("užduotis sumontuoti pastolius
+   *  atlikta") and by the pick chip. A company re-opens the project so its
+   *  pulse shows the change; a person who finished is offered to write the
+   *  work down (WORK → JOURNAL → EVIDENCE). */
+  const runTaskStatus = useCallback(
+    (projectId: string | null, taskId: string, status: WorkTaskStatus) => {
+      setTyping(true);
+      const input = { taskId, status };
+      prepareConfirmationAction("company.update-task-status", input)
+        .then((prep) => {
+          // `reversible_write` needs no token: the dispatcher honestly answers
+          // `no_confirmation_needed` and the write proceeds without one.
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.taskFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.update-task-status", input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.taskFailed);
+              return;
+            }
+            const said = status === "done" ? labels.taskDone : status === "blocked" ? labels.taskBlocked : labels.taskStarted;
+            if (identity === "company") {
+              assistant(said);
+              if (projectId) selectProjectRef.current(projectId);
+            } else {
+              assistant(said, status === "done" ? [{ id: "logwork", label: labels.chipLogWork }] : undefined);
+            }
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.taskFailed);
+        });
+    },
+    [assistant, identity, locale, labels.taskDone, labels.taskBlocked, labels.taskStarted, labels.taskFailed, labels.chipLogWork],
+  );
+
+  /** "Užduotis sumontuoti pastolius atlikta" — the status the sentence names,
+   *  resolved against the REAL open tasks the person may close (their own
+   *  and, for a company, its projects'): one match runs it, several ask with
+   *  one chip each, none is said honestly. Both identities. */
+  const startTaskStatus = useCallback(
+    (sentence: string) => {
+      const lower = sentence.toLowerCase();
+      const status: WorkTaskStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok/.test(lower)
+        ? "blocked"
+        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz/.test(lower)
+          ? "in_progress"
+          : "done";
+      setTyping(true);
+      loadOpenTasksForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(labels.taskUnavailable);
+            return;
+          }
+          if (res.tasks.length === 0) {
+            assistant(labels.taskNone, identity === "company" ? [{ id: "f:company.create-task", label: labels.chipAddTask }] : undefined);
+            return;
+          }
+          const named = res.tasks.filter((t) => t.title.length >= 3 && lower.includes(t.title.toLowerCase()));
+          const chip = (t: (typeof res.tasks)[number]) => ({
+            id: `task:${t.projectId ?? "-"}:${t.taskId}:${status}`,
+            label: `${labels.chipTaskPrefix}: ${t.title}${t.projectTitle ? ` (${t.projectTitle})` : ""}`,
+          });
+          if (named.length === 1) {
+            runTaskStatus(named[0].projectId, named[0].taskId, status);
+            return;
+          }
+          assistant(named.length > 1 ? labels.taskAsk : labels.taskNotFound, (named.length > 1 ? named : res.tasks).slice(0, 4).map(chip));
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.taskUnavailable);
+        });
+    },
+    [identity, assistant, labels, runTaskStatus],
+  );
+
+  /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
+   *  facts the panel's pulse shows — overdue tasks, blocked stages, people with
+   *  missing documents, a live project with nobody on it — most signals first,
+   *  then the chips that continue: open the project, add people. Nothing here
+   *  is a score. Company identity only. */
+  const startProjectRisk = useCallback(() => {
+    if (identity !== "company") {
+      if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+      else assistant(fallbackText, starterChips);
+      return;
+    }
+    setTyping(true);
+    loadProjectRiskForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "no-company") {
+          assistant(labels.projectsNoCompany);
+          return;
+        }
+        if (res.kind === "empty") {
+          assistant(labels.riskNone, [{ id: "f:company.create-project", label: labels.chipCreateProject }]);
+          return;
+        }
+        if (res.kind !== "ok") {
+          assistant(labels.riskUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+          return;
+        }
+        const fill = (tpl: string, r: ProjectRiskRow) =>
+          tpl
+            .replace("{title}", r.title)
+            .replace("{people}", String(r.people))
+            .replace("{open}", String(r.tasksOpen))
+            .replace("{overdue}", String(r.tasksOverdue))
+            .replace("{blocked}", r.stagesBlocked === null ? "—" : String(r.stagesBlocked))
+            .replace("{docs}", String(r.workersWithMissingDocs))
+            .replace("{checked}", String(r.readinessChecked))
+            .replace("{total}", String(r.readinessTotal));
+        const lines = res.rows.map((r) => {
+          if (!r.pulseKnown) return fill(labels.riskUnknownLine, r);
+          const base = fill(r.signals === 0 ? labels.riskOkLine : labels.riskLine, r);
+          return r.nobodyOnLiveProject ? `${base}; ${labels.riskNobody}` : base;
+        });
+        const chips = res.rows.slice(0, PROJECT_RISK_CHIP_LIMIT).map((r) => ({
+          id: `link:/dashboard/projects/${r.projectId}`,
+          label: `${labels.chipOpenProjectPrefix}: ${r.title}`,
+        }));
+        if (res.rows.some((r) => r.nobodyOnLiveProject)) chips.push({ id: "f:company.invite-worker", label: labels.chipInviteCandidate });
+        assistant([labels.riskIntro.replace("{count}", String(res.total)), ...lines].join("\n"), chips);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.riskUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+      });
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+
   const startWhoAvailable = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
@@ -3118,6 +3283,12 @@ export function ConversationChat({
             const [, projectId, stageId, status] = chip.id.split(":");
             user(chip.label);
             runStageStatus(projectId || null, stageId, status as StageStatus);
+          } else if (chip.id.startsWith("task:")) {
+            // `task:<projectId|->:<taskId>:<status>` — the person picked which
+            // real task the sentence meant; the RPC re-checks who may close it.
+            const [, projectId, taskId, status] = chip.id.split(":");
+            user(chip.label);
+            runTaskStatus(projectId && projectId !== "-" ? projectId : null, taskId, status as WorkTaskStatus);
           } else if (chip.id.startsWith("move-who:")) {
             // `move-who:<workerProfileId>:<fromProjectId>` — the person picked; the
             // destination is asked next from the real project list.
@@ -3839,6 +4010,8 @@ export function ConversationChat({
         addTask: () => startCreateTask(text),
         whoAvailable: () => startWhoAvailable(),
         stageStatus: () => startStageStatus(text),
+        taskStatus: () => startTaskStatus(text),
+        projectRisk: () => startProjectRisk(),
         moveWorker: () => startMoveWorker(text),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one
