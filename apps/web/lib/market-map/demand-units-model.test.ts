@@ -188,3 +188,27 @@ describe("the order is total, so the list never flickers between reads", () => {
     expect(rows.map((r) => r.projectId)).toEqual([UUID_B, UUID_A]);
   });
 });
+
+describe("ownership is provenance, and it decides what the panel may offer", () => {
+  it("the viewer's OWN need carries ownership through to the row", () => {
+    const row = groupIntoDemandUnits([need({ ownedByViewer: true })], NL_CITY, resolves)[0];
+    expect(row?.ownedByViewer).toBe(true);
+  });
+
+  it("another tenant's need does NOT", () => {
+    // The worker RPC branch returns other tenants' demand by design. Offering
+    // an own-demand action over it would dead-end in `not-found`.
+    const row = groupIntoDemandUnits(
+      [need({ ownedByViewer: false, organizationName: "Verified BV" })],
+      NL_CITY,
+      resolves,
+    )[0];
+    expect(row?.ownedByViewer).toBe(false);
+    // …and the disclosed name is still shown: naming is not owning.
+    expect(row?.organization).toBe("Verified BV");
+  });
+
+  it("ownership defaults to false — it is never assumed", () => {
+    expect(groupIntoDemandUnits([need()], NL_CITY, resolves)[0]?.ownedByViewer).toBe(false);
+  });
+});

@@ -12801,6 +12801,7 @@
       "evalNoJudgement": "This is a deterministic explanation of the filter, not a judgement: nothing is claimed here about the project's attractiveness, success probability or suitability.",
       "findPeople": "Find matching people",
       "peopleNotYet": "People matching is not delivered yet — it is the next goal. This is the context that is carried forward:",
+      "openCandidates": "See matching people for this need",
       "workspacePersonal": "Personal space",
       "missing": {
         "city": "city",

@@ -201,6 +201,7 @@ function InlineResult({
           workspace={navigation.workspace}
           onSelectGeography={navigation.onSelectGeography}
           onSelectProject={navigation.onSelectProject}
+          onSelectDemand={navigation.onSelectDemand}
           onBackToMarket={navigation.onBackToMarket}
           onBackToProjects={navigation.onBackToProjects}
         />
