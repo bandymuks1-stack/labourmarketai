@@ -4572,6 +4572,40 @@ export function ConversationChat({
     [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
+  /**
+   * Public entry hand-off (frozen design contract §5 P1, #1528): the landing
+   * carries the visitor's OWN sentence through signup / login as
+   * `/dashboard?say=<sentence>` (built by `buildReturnValue`, sanitised by
+   * `getSafeReturnPath`). The chat consumes it ONCE per mount — the sentence
+   * appears as the person's own turn and runs through the SAME `handleSend`
+   * path as the composer (the one router, the one dispatcher, no second
+   * mechanism) — then strips it from the URL so Back / refresh never re-sends
+   * it. Bounded to the same 500 characters the proposer accepts. Consumed for
+   * every identity: an organisation's "Reikia 12 pastolininkų" must land in
+   * the demand flow exactly as if typed.
+   */
+  const sayConsumedRef = useRef(false);
+  useEffect(() => {
+    if (sayConsumedRef.current) return;
+    if (!auth?.profile) return;
+    let say = "";
+    try {
+      say = (new URLSearchParams(window.location.search).get("say") ?? "").trim();
+    } catch {
+      say = "";
+    }
+    if (!say) return;
+    sayConsumedRef.current = true;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("say");
+      window.history.replaceState(null, "", url.toString());
+    } catch {
+      /* URL cleanup is cosmetic — never block the sentence on it. */
+    }
+    handleSend(say.slice(0, 500));
+  }, [auth?.profile, handleSend]);
+
   const nav = {
     chat: labels.navChat,
     journal: labels.navJournal,
