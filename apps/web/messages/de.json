@@ -12783,7 +12783,7 @@
       "fieldSkills": "Fähigkeiten",
       "fieldDemands": "Offene Anfragen",
       "fieldWorkspace": "Arbeitsbereich",
-      "fieldProjectId": "Projekt-ID",
+      "fieldProject": "Projekt",
       "evalDemand": "Bedarf",
       "evalGeography": "Geografie",
       "evalTiming": "Zeitplan",

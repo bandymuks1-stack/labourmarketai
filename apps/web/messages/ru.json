@@ -12783,7 +12783,7 @@
       "fieldSkills": "Навыки",
       "fieldDemands": "Открытых запросов",
       "fieldWorkspace": "Пространство",
-      "fieldProjectId": "ID проекта",
+      "fieldProject": "Проект",
       "evalDemand": "Потребность",
       "evalGeography": "География",
       "evalTiming": "Сроки",

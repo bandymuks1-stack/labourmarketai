@@ -12783,7 +12783,7 @@
       "fieldSkills": "Vaardigheden",
       "fieldDemands": "Open aanvragen",
       "fieldWorkspace": "Werkruimte",
-      "fieldProjectId": "Project-id",
+      "fieldProject": "Projectnaam",
       "evalDemand": "Vraag",
       "evalGeography": "Geografie",
       "evalTiming": "Timing",
