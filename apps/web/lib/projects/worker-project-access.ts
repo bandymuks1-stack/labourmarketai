@@ -150,3 +150,49 @@ export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
     };
   });
 }
+
+/**
+ * The manager's checklist rows for the PERSON on their own projects (owner
+ * contract §11/§12: "what does the project still need from me?"). `pwri_select`
+ * admits exactly the caller's own rows (owns_worker), so a worker reads their
+ * own asks and never a teammate's. Only the still-open rows (needed / missing /
+ * rejected / expired), bounded; the checklist page's own table, no write.
+ *
+ * Scale (owner constraint §1b): indexed by `worker_id`
+ * (idx_project_worker_readiness_items_worker_id) and the caller's own project
+ * ids; hard limit; never a project's whole checklist.
+ */
+export interface OwnReadinessItem {
+  readonly projectId: string;
+  readonly itemKey: string;
+  readonly label: string;
+  readonly status: "needed" | "missing" | "rejected" | "expired";
+  readonly updatedAt: string;
+}
+
+export const OWN_READINESS_ITEMS_LIMIT = 40;
+const OPEN_READINESS_STATUSES = ["needed", "missing", "rejected", "expired"] as const;
+
+export async function listOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+): Promise<OwnReadinessItem[]> {
+  if (!workerId || projectIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_worker_readiness_items")
+    .select("project_id, item_key, label, status, updated_at")
+    .eq("worker_id", workerId)
+    .in("project_id", projectIds.slice(0, 10))
+    .in("status", [...OPEN_READINESS_STATUSES])
+    .order("updated_at", { ascending: false })
+    .limit(OWN_READINESS_ITEMS_LIMIT);
+  if (error || !data) return [];
+  return data.map((r) => ({
+    projectId: r.project_id as string,
+    itemKey: r.item_key as string,
+    label: r.label as string,
+    status: r.status as OwnReadinessItem["status"],
+    updatedAt: r.updated_at as string,
+  }));
+}

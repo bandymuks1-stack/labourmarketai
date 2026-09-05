@@ -66,6 +66,7 @@ import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/con
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
+import type { WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
@@ -420,6 +421,11 @@ export type ChatLabels = {
   workerProjectsIntro: string;
   workerProjectsEnded: string;
   chipOpenProjectPrefix: string;
+  workerProjectAsks: string;
+  askOwnReady: string;
+  askOwnExpiring: string;
+  askOwnNone: string;
+  chipRecordDocument: string;
   stageAsk: string;
   stageNotFound: string;
   stageNone: string;
@@ -1638,15 +1644,32 @@ export function ConversationChat({
                 assistant(labels.projectsNoCompany);
                 return;
               }
-              const lines = mine.projects.map((pr) =>
-                `• ${pr.title}${pr.place ? ` — ${pr.place}` : ""}${pr.assignmentStatus === "ended" ? ` · ${labels.workerProjectsEnded}` : ""}`,
-              );
+              // §12 — what each project still needs from THIS person: the
+              // manager's open checklist rows (verbatim labels) with the
+              // person's own document state next to each document row; the
+              // chip closes the first recordable gap over the SAME add-document
+              // flow the sentence uses.
+              const askWord = (a: WorkerProjectAsk) => {
+                const base = a.status === "rejected" || a.status === "expired" ? `${a.label} ${labels.blockedSuffix}` : a.label;
+                if (a.own === null) return base;
+                return `${base} (${a.own === "ready" ? labels.askOwnReady : a.own === "expiring" ? labels.askOwnExpiring : labels.askOwnNone})`;
+              };
+              const lines = mine.projects.flatMap((pr) => {
+                const head = `• ${pr.title}${pr.place ? ` — ${pr.place}` : ""}${pr.assignmentStatus === "ended" ? ` · ${labels.workerProjectsEnded}` : ""}`;
+                if (pr.asks.length === 0) return [head];
+                return [head, `  ${labels.workerProjectAsks.replace("{items}", pr.asks.map(askWord).join(" · "))}`];
+              });
+              const recordable = mine.recordable;
+              const chips = [
+                ...(recordable ? [{ id: `add-document:${recordable.documentTypeSlug}`, label: labels.chipRecordDocument.replace("{label}", recordable.label) }] : []),
+                ...mine.projects
+                  .filter((pr) => pr.assignmentStatus === "active")
+                  .slice(0, recordable ? 2 : 3)
+                  .map((pr) => ({ id: `link:/dashboard/projects/${pr.projectId}`, label: `${labels.chipOpenProjectPrefix}: ${pr.title}` })),
+              ];
               assistant(
                 [labels.workerProjectsIntro.replace("{count}", String(mine.activeCount)), ...lines].join("\n"),
-                mine.projects
-                  .filter((pr) => pr.assignmentStatus === "active")
-                  .slice(0, 3)
-                  .map((pr) => ({ id: `link:/dashboard/projects/${pr.projectId}`, label: `${labels.chipOpenProjectPrefix}: ${pr.title}` })),
+                chips,
               );
             })
             .catch(() => {
@@ -2426,7 +2449,7 @@ export function ConversationChat({
    *  editable, confirmed. After the save the readiness answer re-runs, so the
    *  person sees the gap close (or not). Person identity only. */
   const startAddDocument = useCallback(
-    (sentence: string) => {
+    (sentence: string, explicit?: { typeSlug?: string }) => {
       if (identity !== "person") {
         assistant(labels.adminRouteHint, [{ id: "link:/dashboard/documents", label: labels.documentsChip }]);
         return;
@@ -2440,9 +2463,11 @@ export function ConversationChat({
             return;
           }
           const typeSlug = guessDocumentType(sentence);
+          // An explicit type (the project-asks chip) wins over the sentence guess.
+          const chosenSlug = explicit?.typeSlug ?? typeSlug;
           const validUntil = parseEndDate(sentence, todayIso(), null);
           const prefill: Record<string, string> = {};
-          if (typeSlug && opts.types.some((o) => o.value === typeSlug)) prefill.typeSlug = typeSlug;
+          if (chosenSlug && opts.types.some((o) => o.value === chosenSlug)) prefill.typeSlug = chosenSlug;
           if (validUntil) prefill.validUntil = validUntil;
           assistant(labels.documentAddIntro);
           openForm(
@@ -3656,6 +3681,12 @@ export function ConversationChat({
             // worker is on THIS agency's roster before any row exists.
             user(chip.label);
             openProposeForm(chip.id.slice(15));
+          } else if (chip.id.startsWith("add-document:")) {
+            // "Įrašyti: <the manager's row>" from the worker's project answer:
+            // the SAME add-document flow the sentence reaches, the type
+            // prefilled from the readiness-item to document-type map.
+            user(chip.label);
+            startAddDocument("", { typeSlug: chip.id.slice(13) });
           } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
           } else if (chip.id.startsWith("download:")) {
@@ -3672,7 +3703,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
