@@ -23,6 +23,11 @@ import {
   type EvidenceMonth,
   type SkillEvidenceBar,
 } from "./evidence-visuals";
+import {
+  deriveProvenance,
+  type Provenance,
+  type ProvenanceConfirmation,
+} from "@/lib/evidence/provenance";
 
 /**
  * Worker player-card (slice worker-player-card-v1, re-skinned by TASK 07 slice
@@ -115,10 +120,25 @@ export interface WorkerPlayerCard {
    */
   evidenceTimeline: readonly EvidenceMonth[];
   skillEvidence: readonly SkillEvidenceBar[];
+  /**
+   * P6 (frozen design contract §2.9 / §5 P6-subset; design system M): the
+   * person's provenance CLASS — "why believe this card". DERIVED, never
+   * stored: THE one `deriveProvenance` over the same canonical rows the card
+   * already counts (`journal_entry_confirmations` on the person's own
+   * entries, `worker_skills.verified`, own journal entries, own documents).
+   * EMPLOYER_CONFIRMED only from a real approving confirmation row (or the
+   * tier ladder's verified flag); SELF_DECLARED when nothing is recorded.
+   */
+  provenance: Provenance;
 }
 
 /** Trailing window of the evidence timeline, in calendar months. */
 export const EVIDENCE_TIMELINE_MONTHS = 12;
+
+/** Bounded read for the provenance derivation: the newest evidence rows on
+ *  the person's own entries. A person's class needs only the newest approving
+ *  row — 20 covers a rejection-after-approval tail without paging. */
+export const PROVENANCE_CONFIRMATION_LIMIT = 20;
 
 async function safeCount(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,6 +233,54 @@ async function declaredSkillsUnionCount(
     if (label) labels.add(norm(String(label)));
   }
   return labels.size;
+}
+
+/**
+ * P6 — the newest confirmation rows on the worker's OWN entries, with the
+ * organisation the confirmed work belongs to (the entry's engagement →
+ * organisation, a LEFT join: an organisation the caller cannot read arrives
+ * as `null` and renders as a dash, never as an invented confirmer). ONE
+ * bounded, indexed read (`journal_entries(worker_id)` + the confirmations'
+ * `entry_id` index — the same path `loadOwnRecentConfirmations` uses), under
+ * the caller's own RLS. [] on any error — a failed read never confirms.
+ */
+async function ownNewestConfirmations(
+  supabase: SupabaseClient,
+  workerId: string,
+): Promise<ProvenanceConfirmation[]> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("journal_entry_confirmations")
+      .select(
+        "created_at, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organizations(display_name, legal_name)))",
+      )
+      .eq("journal_entries.worker_id", workerId)
+      .order("created_at", { ascending: false })
+      .limit(PROVENANCE_CONFIRMATION_LIMIT);
+    if (error || !Array.isArray(data)) return [];
+    return (
+      data as {
+        created_at: string | null;
+        confirmer_role: string | null;
+        confirmation_scope: unknown;
+        journal_entries: {
+          engagement_contexts: {
+            organizations: { display_name: string | null; legal_name: string | null } | null;
+          } | null;
+        } | null;
+      }[]
+    ).map((r) => {
+      const org = r.journal_entries?.engagement_contexts?.organizations ?? null;
+      return {
+        created_at: r.created_at,
+        confirmer_role: r.confirmer_role,
+        confirmation_scope: r.confirmation_scope,
+        organizationName: org?.display_name ?? org?.legal_name ?? null,
+      };
+    });
+  } catch {
+    return [];
+  }
 }
 
 /** Manager confirmations on the worker's own entries. 0 on any error. */
@@ -338,6 +406,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     documents,
     entryTimestamps,
     skillLinks,
+    provenanceRows,
   ] = await Promise.all([
     // RC3 skills truth: ONE declared population (claims ∪ catalogued skills).
     declaredSkillsUnionCount(supabase, user.id, workerId ? skillRows : []),
@@ -412,6 +481,10 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     workerId
       ? journalSkillLinkSlugs(supabase, workerId)
       : Promise.resolve([] as { slug: string | null }[]),
+    // P6 — the rows the provenance class is derived from; [] without a worker.
+    workerId
+      ? ownNewestConfirmations(supabase, workerId)
+      : Promise.resolve([] as ProvenanceConfirmation[]),
   ]);
 
   return {
@@ -446,5 +519,18 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
         source: r.source,
       })),
     ),
+    // P6 — THE provenance derivation over the rows above. The strongest REAL
+    // class wins: an approving confirmation row (or a manager-verified skill)
+    // → EMPLOYER_CONFIRMED; own entries / documents → EVIDENCE_SUPPORTED;
+    // otherwise SELF_DECLARED. Nothing here is stored or inflated.
+    provenance: deriveProvenance({
+      confirmations: provenanceRows,
+      journalEntries: evidenceEntries,
+      // The tier ladder's top rung comes from the SAME `.eq("verified", true)`
+      // read as the badges — the flag is whether that read returned rows,
+      // never a literal.
+      skill: { verified: verifiedSkills.length > 0 },
+      document: documents && documents.total > 0 ? { validUntil: null } : null,
+    }),
   };
 });

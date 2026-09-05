@@ -2,6 +2,8 @@
 
 import "server-only";
 
+import { getTranslations } from "next-intl/server";
+
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { getEmployerWorkerAvailability, unavailabilityOverlaps } from "@/lib/planning/employer-availability";
@@ -29,9 +31,12 @@ export async function loadWhoIsAvailableForChat(): Promise<CapacityChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
   try {
-    const [roster, availability] = await Promise.all([
+    const [roster, availability, t] = await Promise.all([
       listActiveCompanyWorkers(company.companyId),
       getEmployerWorkerAvailability(),
+      // P2 object language (L1): a person the roster cannot name is said in
+      // ordinary words, never as a raw id fragment.
+      getTranslations("conversation.chat"),
     ]);
     if (roster.kind !== "ok") return { kind: "error" };
     const active = roster.rows.filter((w) => w.status === "active");
@@ -44,7 +49,7 @@ export async function loadWhoIsAvailableForChat(): Promise<CapacityChatResult> {
     const unavailability = availability.status === "ok" ? availability.unavailability : [];
 
     const rows: CapacityChatRow[] = active.map((w) => {
-      const label = w.displayName ?? (w.email ? w.email.split("@")[0] : `#${w.workerId.slice(0, 6)}`);
+      const label = w.displayName ?? (w.email ? w.email.split("@")[0] : t("unnamedPerson"));
       const hits = unavailability.filter((u) => u.workerId === w.workerId && unavailabilityOverlaps(window, u.item));
       if (hits.length === 0) return { workerId: w.workerId, label, state: "free", unavailableUntil: null };
       const until = hits
