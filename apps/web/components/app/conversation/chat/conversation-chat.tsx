@@ -91,7 +91,7 @@ import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
-import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
+import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
 import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
 import { loadEngagementsForResult } from "@/lib/engagements/engagements-result";
 import {
@@ -425,6 +425,8 @@ export type ChatLabels = {
   askOwnReady: string;
   askOwnExpiring: string;
   askOwnNone: string;
+  askReplyIntro: string;
+  askReplyIntroUnnamed: string;
   chipRecordDocument: string;
   stageAsk: string;
   stageNotFound: string;
@@ -1626,6 +1628,8 @@ export function ConversationChat({
    * AND ACTS. One project opens directly; several offer one chip each; the
    * three ways there can be nothing to show stay three different sentences.
    */
+  /** Instruction threads the projects answer read (keyed by conversation id) — for the reply after recording. */
+  const askReplyThreadsRef = useRef(new Map<string, ChatInboxThread>());
   const startProjects = useCallback(() => {
     setTyping(true);
     loadProjectsForResult()
@@ -1659,9 +1663,20 @@ export function ConversationChat({
                 if (pr.asks.length === 0) return [head];
                 return [head, `  ${labels.workerProjectAsks.replace("{items}", pr.asks.map(askWord).join(" · "))}`];
               });
+              // The manager's instruction thread per project (the SAME direct
+              // conversation `send_work_instruction_to_project` wrote into) —
+              // kept for the reply the person may send after recording.
+              askReplyThreadsRef.current = new Map(
+                mine.projects.flatMap((pr) =>
+                  pr.instruction
+                    ? [[pr.instruction.conversationId, { conversationId: pr.instruction.conversationId, counterpart: pr.instruction.authorName, preview: pr.instruction.text, waitingHours: null, overdue: false } satisfies ChatInboxThread]]
+                    : [],
+                ),
+              );
               const recordable = mine.recordable;
+              const replyConversationId = recordable ? (mine.projects.find((pr) => pr.projectId === recordable.projectId)?.instruction?.conversationId ?? null) : null;
               const chips = [
-                ...(recordable ? [{ id: `add-document:${recordable.documentTypeSlug}`, label: labels.chipRecordDocument.replace("{label}", recordable.label) }] : []),
+                ...(recordable ? [{ id: `add-document:${recordable.documentTypeSlug}${replyConversationId ? `:${replyConversationId}` : ""}`, label: labels.chipRecordDocument.replace("{label}", recordable.label) }] : []),
                 ...mine.projects
                   .filter((pr) => pr.assignmentStatus === "active")
                   .slice(0, recordable ? 2 : 3)
@@ -2449,7 +2464,7 @@ export function ConversationChat({
    *  editable, confirmed. After the save the readiness answer re-runs, so the
    *  person sees the gap close (or not). Person identity only. */
   const startAddDocument = useCallback(
-    (sentence: string, explicit?: { typeSlug?: string }) => {
+    (sentence: string, explicit?: { typeSlug?: string; thenReply?: ChatInboxThread }) => {
       if (identity !== "person") {
         assistant(labels.adminRouteHint, [{ id: "link:/dashboard/documents", label: labels.documentsChip }]);
         return;
@@ -2482,9 +2497,20 @@ export function ConversationChat({
               const data = res.data ?? {};
               const savedSlug = typeof data.typeSlug === "string" ? data.typeSlug : "";
               const savedCountry = typeof data.country === "string" && data.country !== "" ? data.country : null;
+              // §11/§12 — the instruction that asked for this document: the
+              // person may ANSWER it here, in their own words, sent only after
+              // the confirm step (ChatMessageReply → the canonical sendMessage).
+              // The chat never drafts the text for them (§7).
+              const thenReply = explicit?.thenReply;
+              const offerInstructionReply = () => {
+                if (!thenReply) return;
+                assistant(thenReply.counterpart ? labels.askReplyIntro.replace("{name}", thenReply.counterpart) : labels.askReplyIntroUnnamed);
+                pushEmbed(<ChatMessageReply threads={[thenReply]} locale={locale} />);
+              };
               const finishWithReadiness = () => {
                 assistant(labels.documentAddDone);
                 runWorkflow(() => runDocumentsReadiness());
+                offerInstructionReply();
               };
               if (savedSlug === "") {
                 finishWithReadiness();
@@ -2512,6 +2538,7 @@ export function ConversationChat({
                       onUploaded={() => {
                         assistant(labels.documentFileUploaded);
                         runWorkflow(() => runDocumentsReadiness());
+                        offerInstructionReply();
                       }}
                       onSkip={finishWithReadiness}
                     />,
@@ -2526,7 +2553,7 @@ export function ConversationChat({
           assistant(labels.documentAddUnavailable, [{ id: "documents-centre", label: labels.documentsChip }]);
         });
     },
-    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, labels.documentFileOffer, labels.documentFileChoose, labels.documentFileSubmit, labels.documentFileUploading, labels.documentFileSkip, labels.documentFileUploaded, labels.documentFileTooLarge, labels.documentFileUnsupported, labels.documentFileFailed, openForm, runWorkflow, pushEmbed],
+    [identity, assistant, labels.adminRouteHint, labels.documentsChip, labels.documentAddUnavailable, labels.documentAddIntro, labels.documentAddDone, labels.documentFileOffer, labels.documentFileChoose, labels.documentFileSubmit, labels.documentFileUploading, labels.documentFileSkip, labels.documentFileUploaded, labels.documentFileTooLarge, labels.documentFileUnsupported, labels.documentFileFailed, labels.askReplyIntro, labels.askReplyIntroUnnamed, openForm, runWorkflow, pushEmbed, locale],
   );
 
   /** PROJECT → WORK (§11): "pridėk užduotį projektui: …" — the one form over
@@ -3686,7 +3713,11 @@ export function ConversationChat({
             // the SAME add-document flow the sentence reaches, the type
             // prefilled from the readiness-item to document-type map.
             user(chip.label);
-            startAddDocument("", { typeSlug: chip.id.slice(13) });
+            // `add-document:<type>[:<instruction conversation>]` — the thread
+            // id only selects a thread the projects answer ALREADY read under
+            // the person's RLS; an unknown id offers no reply.
+            const [, chipType, chipConversation] = chip.id.split(":");
+            startAddDocument("", { typeSlug: chipType, thenReply: chipConversation ? askReplyThreadsRef.current.get(chipConversation) : undefined });
           } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
           } else if (chip.id.startsWith("download:")) {

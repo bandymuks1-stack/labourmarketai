@@ -40,6 +40,8 @@ export interface WorkerInstruction {
   translationStatus: "unavailable" | "pending" | "available";
   createdAt: string;
   authorName: string | null;
+  /** The project the instruction is scoped to (20260609140000); null = roster-level. */
+  projectId: string | null;
 }
 
 function migMissing(code?: string): boolean {
@@ -61,7 +63,7 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
   const res = await asAny(supabase)
     .from("conversation_messages")
     .select(
-      "id, conversation_id, body, original_language, translated_text, translation_status, created_at, author_id, author:profiles!conversation_messages_author_id_fkey(full_name)",
+      "id, conversation_id, project_id, body, original_language, translated_text, translation_status, created_at, author_id, author:profiles!conversation_messages_author_id_fkey(full_name)",
     )
     .eq("is_instruction", true)
     .neq("author_id", user.id) // instructions TO the worker, not ones they sent
@@ -86,6 +88,7 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
       | "pending"
       | "available",
     createdAt: r.created_at,
+    projectId: (r.project_id as string | null) ?? null,
     authorName:
       (r.author as { full_name: string | null } | null)?.full_name ?? null,
   }));

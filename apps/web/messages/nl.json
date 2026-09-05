@@ -12155,6 +12155,8 @@
       "askOwnExpiring": "verloopt binnenkort",
       "askOwnNone": "niet vastgelegd",
       "chipRecordDocument": "Vastleggen: {label}",
+      "askReplyIntro": "{name} vroeg om dit document — u kunt hier terugschrijven (pas verzonden na bevestiging):",
+      "askReplyIntroUnnamed": "Uw manager vroeg om dit document — u kunt hier terugschrijven (pas verzonden na bevestiging):",
       "stageAsk": "Welke fase? Kies er een:",
       "stageNotFound": "Die fase vind ik niet bij uw open fasen. Welke bedoelde u?",
       "stageNone": "Nog geen open fasen — fasen voert u in bij het projectbeheer.",

@@ -130,24 +130,47 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     expect(READ).toContain("listOwnReadinessItems(workerId, activeIds)");
     expect(READ).toMatch(/deriveWorkerProjectAsks\(items, docs\.kind === "ok" \? docs\.documents : \[\], new Date\(\)\)/);
     expect(READ).toMatch(/catch \{\s*\/\* asks stay empty/);
-    expect(READ).toMatch(/recordable: first && first\.documentTypeSlug \? \{ documentTypeSlug: first\.documentTypeSlug, label: first\.label \} : null/);
+    expect(READ).toMatch(/first && first\.documentTypeSlug && firstProject\s*\? \{ documentTypeSlug: first\.documentTypeSlug, label: first\.label, projectId: firstProject\.projectId \}\s*: null/);
   });
 
   it("the chat shows the asks under the project line and routes the record chip to the SAME add-document flow with the type prefilled", () => {
     expect(CHAT).toContain('import type { WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";');
     expect(CHAT).toMatch(/labels\.workerProjectAsks\.replace\("\{items\}", pr\.asks\.map\(askWord\)\.join\(" · "\)\)/);
-    expect(CHAT).toMatch(/id: `add-document:\$\{recordable\.documentTypeSlug\}`/);
+    expect(CHAT).toMatch(/id: `add-document:\$\{recordable\.documentTypeSlug\}/);
     expect(CHAT).toMatch(/chip\.id\.startsWith\("add-document:"\)/);
-    expect(CHAT).toMatch(/startAddDocument\("", \{ typeSlug: chip\.id\.slice\(13\) \}\)/);
+    expect(CHAT).toMatch(/const \[, chipType, chipConversation\] = chip\.id\.split\(":"\);/);
+    expect(CHAT).toMatch(/startAddDocument\("", \{ typeSlug: chipType, thenReply: chipConversation \? askReplyThreadsRef\.current\.get\(chipConversation\) : undefined \}\)/);
     expect(CHAT).toMatch(/const chosenSlug = explicit\?\.typeSlug \?\? typeSlug;/);
     expect(CHAT).toMatch(/if \(chosenSlug && opts\.types\.some\(\(o\) => o\.value === chosenSlug\)\) prefill\.typeSlug = chosenSlug;/);
     // The client never imports the server-only deriver at runtime — type import only.
     expect(CHAT).not.toMatch(/^import \{[^}]*\} from "@\/lib\/conversation\/worker-project-asks"/m);
   });
 
+  it("after recording, the person may ANSWER the manager's instruction — in their own words, over the SAME confirm-then-sendMessage reply; the chat never drafts it", () => {
+    const INS = read("lib/instructions/instructions.ts");
+    // The instruction row's project scope is read by the instructions page's own read (additive column).
+    expect(INS).toContain('"id, conversation_id, project_id, body, original_language,');
+    expect(INS).toMatch(/projectId: \(r\.project_id as string \| null\) \?\? null/);
+    // The chat read attaches the latest instruction per project from that read — no second query.
+    expect(READ).toContain("const read = await listWorkerInstructions();");
+    expect(READ).toMatch(/if \(ins\.projectId && !instructions\.has\(ins\.projectId\)\)/);
+    expect(READ).toMatch(/instruction: instructions\.get\(r\.projectId\) \?\? null/);
+    // The chip carries the conversation id ONLY when the projects answer read it under the person's RLS.
+    expect(CHAT).toMatch(/id: `add-document:\$\{recordable\.documentTypeSlug\}\$\{replyConversationId \? `:\$\{replyConversationId\}` : ""\}`/);
+    expect(CHAT).toMatch(/askReplyThreadsRef\.current = new Map\(/);
+    // The reply is the person's own text through ChatMessageReply (confirm step → canonical sendMessage); no generated draft.
+    const fn = CHAT.slice(CHAT.indexOf("const startAddDocument = useCallback"), CHAT.indexOf("const startAddDocument = useCallback") + 6000);
+    expect(fn).toMatch(/const offerInstructionReply = \(\) => \{/);
+    expect(fn).toMatch(/pushEmbed\(<ChatMessageReply threads=\{\[thenReply\]\} locale=\{locale\} \/>\)/);
+    expect(fn).not.toMatch(/draft=|initialDraft|body:/);
+    // Offered after BOTH completions (recorded without a file; recorded + file uploaded).
+    expect(fn.split("offerInstructionReply();").length).toBe(3);
+    expect(read("components/app/conversation/chat-message-reply.tsx")).toMatch(/const \[draft, setDraft\] = useState\(""\);/);
+  });
+
   it("copy exists in all 11 catalogs and the label keys resolve", () => {
     const LABELS = read("components/app/conversation/chat/labels.ts");
-    const KEYS = ["workerProjectAsks", "askOwnReady", "askOwnExpiring", "askOwnNone", "chipRecordDocument"];
+    const KEYS = ["workerProjectAsks", "askOwnReady", "askOwnExpiring", "askOwnNone", "chipRecordDocument", "askReplyIntro", "askReplyIntroUnnamed"];
     for (const k of KEYS) expect(LABELS, k).toContain(`"${k}"`);
     for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
       const chat = JSON.parse(read(`messages/${locale}.json`)).conversation.chat as Record<string, string>;

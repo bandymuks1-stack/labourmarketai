@@ -12155,6 +12155,8 @@
       "askOwnExpiring": "läuft bald ab",
       "askOwnNone": "nicht erfasst",
       "chipRecordDocument": "Erfassen: {label}",
+      "askReplyIntro": "{name} hat dieses Dokument angefragt — Sie können hier antworten (gesendet erst nach Bestätigung):",
+      "askReplyIntroUnnamed": "Die Leitung hat dieses Dokument angefragt — Sie können hier antworten (gesendet erst nach Bestätigung):",
       "stageAsk": "Welche Phase? Wählen Sie:",
       "stageNotFound": "Diese Phase finde ich unter Ihren offenen Phasen nicht. Welche meinten Sie?",
       "stageNone": "Noch keine offenen Phasen — Phasen werden in der Projektsteuerung angelegt.",
