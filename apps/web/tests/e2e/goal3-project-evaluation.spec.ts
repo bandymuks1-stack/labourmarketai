@@ -4,7 +4,8 @@ import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 
 /**
- * GOAL 3 — EVALUATE PROJECTS, proven in an authenticated browser.
+ * GOAL 3 — EVALUATE THE DEMAND BEHIND A PLACE, proven in an authenticated
+ * browser.
  *
  * Not a unit test in a browser costume: this drives the REAL authenticated
  * workspace with a real minted session, clicks a real marker on the canonical
@@ -12,6 +13,20 @@ import { join } from "node:path";
  * prove this goal — the Goal 4 defect (a result that never opened because
  * `useSearchParams` returns empty outside a Suspense boundary) was invisible to
  * tsc, to vitest and to SQL, and visible immediately in a real session.
+ *
+ * WHAT IT PROVES SINCE 2026-09-05 — THE CANONICAL DEMAND DRILLDOWN. The list
+ * behind a marker used to read `job_demands → projects`, a table that has held
+ * 0 rows in production for its whole life, while the marker itself was built
+ * from the ONE canonical demand read. Every real marker therefore opened onto
+ * an empty list and depth 2 was unreachable. The drilldown now reads that same
+ * canonical source — `customer_requests`, status 'submitted', through the
+ * caller's own-rows policy and the worker-gated RPC — so this spec asserts the
+ * two surfaces agree: a marker built from canonical demand opens a list of the
+ * SAME rows, one row per NEED (a need has no project behind it, so it is never
+ * folded into one), each declaring its provenance, and depth 2 addresses a real
+ * `customer_requests` id. The demand-source line on screen is asserted verbatim
+ * for the same reason: a surface naming one store while reading another is
+ * precisely the drift that hid this defect.
  *
  * Requires the LOCAL stack and the acceptance dev server:
  *   npx supabase start
@@ -31,6 +46,23 @@ const ROTTERDAM = "NL%3Acity%3ARotterdam";
 const EINDHOVEN = "NL%3Acity%3AEindhoven";
 const GERMANY_APPROX = "DE%3Acountry";
 const NO_MATCH = "LT%3Acity%3AVilnius";
+
+/**
+ * The seeded CANONICAL needs — `scripts/db-fixtures-local.ts`,
+ * CANONICAL_DEMAND_SQL. Rotterdam's three are listed in the order the drilldown
+ * sorts them (most open headcount first: 9 / 5 / 3), so an assertion on the
+ * sequence is an assertion on that ordering rule too.
+ *
+ * These are ROLE TEXTS, not project titles. A canonical need has no project
+ * behind it, so what the row shows is the employer's own words.
+ */
+const ROTTERDAM_ROLES = ["Suvirintojas", "Montuotojas", "Elektrikas"] as const;
+const EINDHOVEN_ROLE = "Automatikos technikas";
+
+/** `conversation.results.notStated` in the lt catalogue — how a gap is stated.
+ *  Asserted on the ORGANISATION field, which the canonical contract genuinely
+ *  does not carry: a blank there would read as data. */
+const NOT_STATED = "nenurodyta";
 
 test.use({ storageState: "tests/e2e/.storage-state.json", viewport: { width: 1440, height: 900 } });
 
@@ -168,14 +200,33 @@ test("A — Rotterdam: market → projects → evaluation → continuation", asy
   await expect(page.getByTestId("crumb-place")).toHaveText("Rotterdam, NL");
   await expect(page.getByTestId("crumb-place")).toHaveAttribute("data-geo-precision", "city");
 
-  // Three Rotterdam projects — the acceptance seed's "multiple projects in one
-  // selected city". Not one, which any broken filter would also produce.
+  // Three Rotterdam NEEDS — ONE ROW PER CANONICAL DEMAND ROW, the acceptance
+  // seed's "several needs in the one selected city". Not one row: two needs
+  // from the same place are two commitments with two headcounts, and folding
+  // them into a single unit would invent a third that nobody created.
   const rows = page.getByTestId("project-row");
   await expect(rows).toHaveCount(3);
   // And ONLY Rotterdam: every row states the city it matched on.
   for (const text of await rows.allTextContents()) {
     expect(text).toContain("Rotterdam");
   }
+  // EVERY listed row declares WHICH STORE it came from. A need rendered under
+  // the word "project" would claim a structure the row does not have.
+  expect(
+    await rows.evaluateAll((els) => els.map((e) => e.getAttribute("data-unit-kind"))),
+  ).toEqual(["need", "need", "need"]);
+  const firstBadge = rows.first().getByTestId("unit-kind-badge");
+  await expect(firstBadge).toBeVisible();
+  await expect(firstBadge).toHaveAttribute("data-unit-kind", "need");
+  // The name on a need row is the employer's OWN role text — a need has no
+  // project title — in the loader's order, most open headcount first.
+  const rowTexts = await rows.allTextContents();
+  for (const [i, role] of ROTTERDAM_ROLES.entries()) {
+    expect(rowTexts[i]).toContain(role);
+  }
+  // …and the organisation is an EXPLICIT GAP, because neither authorized read
+  // carries the employer's identity. Not blank, not a dash, not a guess.
+  expect(rowTexts[0]).toContain(`${NOT_STATED} · Rotterdam, NL`);
   // No map at this depth.
   await expect(page.getByTestId("market-map")).toHaveCount(0);
   const a1 = await report(page, "A1-projects", counters);
@@ -183,9 +234,14 @@ test("A — Rotterdam: market → projects → evaluation → continuation", asy
   await page.screenshot({ path: join(SHOTS, "A1-projects-rotterdam-1440.png") });
 
   // ── the evaluation ──────────────────────────────────────────────────────
+  const firstRowId = await rows.first().getAttribute("data-project-id");
   await rows.first().click();
   await expect(page.getByTestId("project-evaluation")).toBeVisible();
+  // The depth-2 address is the unit's canonical id IN ITS OWN STORE — now a
+  // `customer_requests` id rather than a `projects` id, still uuid-shaped, and
+  // still the row that was clicked rather than a synthesised key.
   await expect(page).toHaveURL(/project=[0-9a-f-]{36}/);
+  expect(new URL(page.url()).searchParams.get("project")).toBe(firstRowId);
 
   // Every section the command names.
   for (const section of [
@@ -201,7 +257,20 @@ test("A — Rotterdam: market → projects → evaluation → continuation", asy
   // The explanation is the deterministic match reason, carrying the real city.
   await expect(page.getByTestId("eval-anchor-relation")).toContainText("Rotterdam");
   await expect(page.getByTestId("eval-no-judgement")).toBeVisible();
-  await expect(page.getByTestId("demand-source")).toContainText("job_demands");
+  // A canonical need IS one need: the evaluation lists it as itself instead of
+  // splitting it into sub-needs it does not have.
+  await expect(page.getByTestId("eval-demand-list").locator("li")).toHaveCount(1);
+  // The employer's identity is outside both authorized reads — stated as a gap
+  // here too, on the section whose whole subject it is.
+  await expect(page.getByTestId("eval-organization")).toContainText(NOT_STATED);
+  // THE SOURCE LINE NAMES WHAT WAS ACTUALLY READ. `job_demands` must not appear
+  // on it: a surface naming one store while reading another is exactly the
+  // drift that left this list empty for every real user.
+  const source = page.getByTestId("demand-source");
+  await expect(source).toContainText("canonical demand");
+  await expect(source).toContainText("customer_requests");
+  await expect(source).toContainText("submitted");
+  await expect(source).not.toContainText("job_demands");
   await report(page, "A2-evaluation", counters);
   await page.screenshot({ path: join(SHOTS, "A2-evaluation-1440.png") });
 
@@ -230,15 +299,19 @@ test("B — the result changes with the place, and Rotterdam-only rows disappear
   await expect(page.getByTestId("project-row")).toHaveCount(3);
   const rotterdamTitles = await page.getByTestId("project-row").allTextContents();
 
-  // Eindhoven — a different CITY anchor.
+  // Eindhoven — a different CITY anchor. ONE need there, and it is a different
+  // need: not a Rotterdam row that survived the change of place.
   await page.goto(`${MARKET}&geo=${EINDHOVEN}`);
   await expect(page.getByTestId("projects-view")).toBeVisible();
   const eindhoven = page.getByTestId("project-row");
   await expect(eindhoven).toHaveCount(1);
   for (const text of await eindhoven.allTextContents()) {
     expect(text).toContain("Eindhoven");
+    expect(text).toContain(EINDHOVEN_ROLE);
     expect(text).not.toContain("Rotterdam");
+    expect(rotterdamTitles).not.toContain(text);
   }
+  await expect(eindhoven.first()).toHaveAttribute("data-unit-kind", "need");
   await report(page, "B1-eindhoven", counters);
   await page.screenshot({ path: join(SHOTS, "B1-eindhoven-1440.png") });
 
@@ -251,12 +324,14 @@ test("B — the result changes with the place, and Rotterdam-only rows disappear
   );
   const german = page.getByTestId("project-row");
   await expect(german).toHaveCount(1);
-  // Duisburg is not in the canonical city table; Hamburg is, so Hamburg must
-  // NOT appear under the country aggregate.
+  // Duisburg is not in the canonical city table; Hamburg IS — and the seed
+  // carries a Hamburg need on purpose, so "Hamburg must not appear here" is a
+  // real negative control rather than an assertion about an absent row.
   const germanText = (await german.allTextContents()).join(" ");
   expect(germanText).toContain("Duisburg");
   expect(germanText).not.toContain("Hamburg");
   await expect(german.first().getByTestId("precision-badge")).toBeVisible();
+  await expect(german.first()).toHaveAttribute("data-unit-kind", "need");
   await report(page, "B2-germany-country", counters);
   await page.screenshot({ path: join(SHOTS, "B2-germany-country-1440.png") });
 
@@ -366,9 +441,16 @@ test("mobile — the drill-down does not overflow horizontally", async ({ page }
 /**
  * The failure is caused in the DATABASE, not in the code, because a code path
  * that only fails when a test flag is set proves nothing about the real one.
- * `select` on `public.projects` is revoked from the `authenticated` role, so
- * the join in the real loader genuinely cannot be read — exactly what a broken
- * grant, a bad migration or an outage would do.
+ * `select` on `public.customer_requests` is revoked from the `authenticated`
+ * role, so the caller's OWN-ROWS leg of the canonical demand read genuinely
+ * cannot be read — exactly what a broken grant, a bad migration or an outage
+ * would do.
+ *
+ * RE-ANCHORED WITH THE READ IT BREAKS (2026-09-05). This used to revoke
+ * `public.projects`, which the drilldown no longer touches at all: the same
+ * revoke would now leave the list working and the scenario would silently stop
+ * testing anything. A negative control has to be aimed at the read that
+ * actually exists, so it follows the read.
  *
  * LOCAL ONLY, AND REVERSIBLE. The container name below exists only on a local
  * Supabase stack, the base URL is asserted to be loopback first, and the grant
@@ -399,7 +481,7 @@ test("E — a failed read is stated, and never falls back to rows or emptiness",
   await expect(page.getByTestId("project-row")).toHaveCount(3);
 
   try {
-    psql("revoke select on public.projects from authenticated;");
+    psql("revoke select on public.customer_requests from authenticated;");
     await page.reload();
 
     const error = page.getByTestId("projects-error");
@@ -423,7 +505,7 @@ test("E — a failed read is stated, and never falls back to rows or emptiness",
     await report(page, "E2-market-error", counters);
     await page.screenshot({ path: join(SHOTS, "E2-market-error-1440.png") });
   } finally {
-    psql("grant select on public.projects to authenticated;");
+    psql("grant select on public.customer_requests to authenticated;");
     // Belt and braces: PostgREST keeps a permission-aware schema cache, and a
     // privilege change is exactly the kind of thing it is built from. Measured
     // recovery here is immediate without it, but leaving a stale cache behind
