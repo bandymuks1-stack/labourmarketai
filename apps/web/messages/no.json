@@ -1007,6 +1007,7 @@
         ]
       }
     },
+    "subcopyLive": "Prisene er bekreftet av eieren og gjelder. Aktivering skjer i organisasjonskontoen via en sikker Stripe-betaling; ingenting trekkes på denne siden.",
     "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",

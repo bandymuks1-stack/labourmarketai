@@ -1007,6 +1007,7 @@
         ]
       }
     },
+    "subcopyLive": "Ceny są potwierdzone przez właściciela i obowiązują. Aktywacja odbywa się na koncie organizacji poprzez bezpieczną płatność Stripe; na tej stronie nic nie jest pobierane.",
     "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",
