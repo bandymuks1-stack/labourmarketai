@@ -16,6 +16,13 @@
 | Counts (map §1) | PROD_PROVEN **61 / 75** · COMMERCIAL 25 / 30 · SAFE PILOT **33 / 33** · remaining commercial = J2 PAID=10, J3, J4, J5, K4 = EXTERNAL_REAL_CUSTOMER_PROOF_PENDING |
 | Real users | REAL_RECRUITER_USED_PRODUCT = FALSE (unchanged) |
 
+## 0a. UPDATE ~19:05 UTC — apply done, deploy rate-limited
+
+- **#1552 APPLIED + MERGED.** Owner sentence "apply billing safety 2026-09-05" → MCP `apply_migration` → ledger `20260905184921 billing_safety_invariants_v1` → readback verified (FINAL_COMPLETION_REGISTER §4) → #1552 squash-merged `ad50abe0`. #1549 merged `061580d3`, #1553 merged `f43ce715`, #1554 merged `8942e7e5`, #1555 (this record) armed.
+- **Production serves `f43ce715` (#1553) and STOPS there.** Vercel commit status on `061580d3`, `ad50abe0`, `8942e7e5`: "Deployment rate limited — retry in 24 hours" (Hobby plan; diagnosis: `gh api repos/<o>/<r>/commits/<sha>/status`). So the live-banner copy (#1549) and the billing safety code (#1552) are MERGED but UNSERVED until ≈19:00 UTC 2026-09-06 or the owner's Vercel plan decision (recorded gate, not re-asked). The migration is applied; the served code (`f43ce715`) still writes `billing_customers` through the legacy path — compatible with the widened key (the column set is unchanged), and no live checkout is expected before the deploy.
+- **Next MASTER, first action after the quota resets:** confirm `/api/health` build ≥ `ad50abe0`, then run `walk-billing-safety-prod.cjs` (replay proof + reconcile 403) and `walk-pricing-anon-prod.cjs` (no "neįjungt" text) with `EXPECT_BUILD=<served sha>`; record J1 fully PROD_PROVEN and the checkout-idempotency property PROD_PROVEN.
+- **L1 drilldown (#1553):** served, but the market drilldown's project depth reads `job_demands` = **0 rows in production** (canonical demand lives in `customer_requests`), so the people panel is unreachable for any real user — `walk-drilldown-people.log`. Finding for the WORLD lane: the market → projects → evaluation depth is fed by a dead table (map H2 stays PARTIAL for this reason as well).
+
 ## 1. Drift found on resume (window 2 → 3) and how it was closed
 
 1. **Every open PR's `quality` job failed** — the LIVE anon SECURITY DEFINER gate saw `public_plans_v1()` anon-executable in production (applied 18:20 UTC) while `main`'s allowlist did not carry it; #1548 (which carries the entry) had run BEFORE the apply (its run said "stale allowlist entry") and also lacked the paired rollback file. Fix: `supabase/rollbacks/20260905190000_public_plans_v1.down.sql` added → #1548 green → merged `97f1817e`; the other PRs were refreshed with `gh pr update-branch` (a plain re-run reuses the stale merge ref and fails again — trap, §5).

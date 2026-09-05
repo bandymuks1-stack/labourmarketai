@@ -1203,8 +1203,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // ordering/amount evidence columns, event_created_at, the
       // billing_customers key widened by test_mode (drop + add in one file),
       // and the billing_checkout_operations table with admin SELECT +
-      // service-role grants. Marker added with the draft PR; owner approval
-      // pending — the marker records the RED classification, not an approval.
+      // service-role grants. Owner approval "apply billing safety 2026-09-05"
+      // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
+      // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
       "20260905200000_billing_safety_invariants_v1.sql",
 ]);
   });
