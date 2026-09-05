@@ -5474,6 +5474,12 @@
       "clarifyError": "Die Klärungsanfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
       "clarifyViewThread": "Unterhaltung ansehen",
       "safetyNote": "Bestätigen Sie wichtige Sicherheitsanweisungen eindeutig.",
+      "asksTitle": "Das Projekt braucht von Ihnen noch",
+      "ownReady": "vorhanden",
+      "ownExpiring": "läuft bald ab",
+      "ownNone": "nicht erfasst",
+      "blocked": "(abgelehnt / abgelaufen)",
+      "record": "Dokument erfassen",
       "helpLine": "Eine Übersetzung hilft Ihnen, die Anweisung zu verstehen, aber das Original bleibt erhalten."
     }
   },
@@ -12201,6 +12207,8 @@
       "readinessSeeded": "Liste begonnen: {count} Pers. × {items} Punkte — alle „benötigt“.",
       "readinessGotChip": "Erhalten: {label} ({name})",
       "readinessGotDone": "Als erhalten markiert: {label} ({name}).",
+      "readinessCheckedChip": "Geprüft: {label} ({name})",
+      "readinessCheckedDone": "Als geprüft markiert: {label} ({name}).",
       "readinessAskChip": "Anfragen: {name}",
       "readinessAskDone": "Anweisung gesendet: {name} sieht sie in den Nachrichten.",
       "readinessRequestBody": "Für das Projekt „{title}“ bitte einreichen: {items}.",

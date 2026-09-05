@@ -5474,6 +5474,12 @@
       "clarifyError": "Nepavyko išsiųsti prašymo patikslinti. Pabandykite dar kartą.",
       "clarifyViewThread": "Peržiūrėti pokalbį",
       "safetyNote": "Svarbius saugos nurodymus patvirtinkite aiškiai.",
+      "asksTitle": "Projektui iš jūsų dar reikia",
+      "ownReady": "turite",
+      "ownExpiring": "baigia galioti",
+      "ownNone": "neįrašyta",
+      "blocked": "(atmesta / pasibaigė)",
+      "record": "Įrašyti dokumentą",
       "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas."
     }
   },
@@ -12201,6 +12207,8 @@
       "readinessSeeded": "Sąrašas pradėtas: {count} žm. × {items} punktai — visi „reikia“.",
       "readinessGotChip": "Gauta: {label} ({name})",
       "readinessGotDone": "Pažymėta gauta: {label} ({name}).",
+      "readinessCheckedChip": "Patikrinta: {label} ({name})",
+      "readinessCheckedDone": "Pažymėta patikrinta: {label} ({name}).",
       "readinessAskChip": "Paprašyti: {name}",
       "readinessAskDone": "Nurodymas išsiųstas: {name} matys jį savo pranešimuose.",
       "readinessRequestBody": "Projektui „{title}“ prašome pateikti: {items}.",

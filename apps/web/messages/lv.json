@@ -3900,6 +3900,8 @@
       "readinessSeeded": "Saraksts sākts: {count} cilv. × {items} punkti — visi „nepieciešams“.",
       "readinessGotChip": "Saņemts: {label} ({name})",
       "readinessGotDone": "Atzīmēts kā saņemts: {label} ({name}).",
+      "readinessCheckedChip": "Pārbaudīts: {label} ({name})",
+      "readinessCheckedDone": "Atzīmēts kā pārbaudīts: {label} ({name}).",
       "readinessAskChip": "Pieprasīt: {name}",
       "readinessAskDone": "Norādījums nosūtīts: {name} to redzēs savās ziņās.",
       "readinessRequestBody": "Projektam „{title}“ lūdzam iesniegt: {items}.",

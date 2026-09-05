@@ -3900,6 +3900,8 @@
       "readinessSeeded": "Nimekiri alustatud: {count} in. × {items} punkti — kõik „vajalik“.",
       "readinessGotChip": "Saadud: {label} ({name})",
       "readinessGotDone": "Märgitud saaduks: {label} ({name}).",
+      "readinessCheckedChip": "Kontrollitud: {label} ({name})",
+      "readinessCheckedDone": "Märgitud kontrollituks: {label} ({name}).",
       "readinessAskChip": "Küsi: {name}",
       "readinessAskDone": "Juhis saadetud: {name} näeb seda oma sõnumites.",
       "readinessRequestBody": "Projekti „{title}“ jaoks palume esitada: {items}.",

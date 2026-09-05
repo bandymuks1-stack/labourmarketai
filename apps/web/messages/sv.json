@@ -3900,6 +3900,8 @@
       "readinessSeeded": "Lista startad: {count} pers. × {items} punkter — alla ”krävs”.",
       "readinessGotChip": "Mottaget: {label} ({name})",
       "readinessGotDone": "Markerat som mottaget: {label} ({name}).",
+      "readinessCheckedChip": "Kontrollerad: {label} ({name})",
+      "readinessCheckedDone": "Markerad som kontrollerad: {label} ({name}).",
       "readinessAskChip": "Be om: {name}",
       "readinessAskDone": "Instruktion skickad: {name} ser den bland sina meddelanden.",
       "readinessRequestBody": "För projektet ”{title}” ber vi dig lämna: {items}.",

@@ -70,6 +70,10 @@ export async function loadProjectReadinessForChat(input: {
           .filter((i) => i.status === "needed" || i.status === "missing")
           .map((i) => ({ key: i.itemKey, label: i.label }))
           .slice(0, READINESS_CHAT_ITEM_LIMIT),
+        itemsReceived: w.readinessItems
+          .filter((i) => i.status === "received")
+          .map((i) => ({ key: i.itemKey, label: i.label }))
+          .slice(0, READINESS_CHAT_ITEM_LIMIT),
         itemsBlocked: w.readinessItems
           .filter((i) => i.status === "rejected" || i.status === "expired")
           .map((i) => ({ key: i.itemKey, label: i.label }))

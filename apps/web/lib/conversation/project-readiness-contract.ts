@@ -33,6 +33,8 @@ export interface ReadinessChatWorker {
   readonly missing: readonly ReadinessMissingCode[];
   readonly itemsMissing: readonly ReadinessChatItem[];
   readonly itemsBlocked: readonly ReadinessChatItem[];
+  /** Rows the manager marked received but not yet checked — the review step (§12). */
+  readonly itemsReceived: readonly ReadinessChatItem[];
   readonly checked: number;
   readonly total: number;
   readonly operationalStatus: OperationalStatus | null;

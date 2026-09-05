@@ -3900,6 +3900,8 @@
       "readinessSeeded": "Lista rozpoczęta: {count} os. × {items} pozycji — wszystkie „potrzebne”.",
       "readinessGotChip": "Otrzymano: {label} ({name})",
       "readinessGotDone": "Oznaczono jako otrzymane: {label} ({name}).",
+      "readinessCheckedChip": "Sprawdzone: {label} ({name})",
+      "readinessCheckedDone": "Oznaczono jako sprawdzone: {label} ({name}).",
       "readinessAskChip": "Poproś: {name}",
       "readinessAskDone": "Polecenie wysłane: {name} zobaczy je w swoich wiadomościach.",
       "readinessRequestBody": "Do projektu „{title}” prosimy dostarczyć: {items}.",

@@ -296,6 +296,8 @@ const CHAT_KEYS = [
   "readinessSeeded",
   "readinessGotChip",
   "readinessGotDone",
+  "readinessCheckedChip",
+  "readinessCheckedDone",
   "readinessAskChip",
   "readinessAskDone",
   "readinessRequestBody",

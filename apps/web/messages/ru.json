@@ -5474,6 +5474,12 @@
       "clarifyError": "Не удалось отправить запрос на уточнение. Попробуйте ещё раз.",
       "clarifyViewThread": "Открыть переписку",
       "safetyNote": "Чётко подтверждайте важные инструкции по безопасности.",
+      "asksTitle": "Проекту от вас ещё нужно",
+      "ownReady": "есть",
+      "ownExpiring": "истекает",
+      "ownNone": "не записано",
+      "blocked": "(отклонено / истекло)",
+      "record": "Записать документ",
       "helpLine": "Перевод помогает понять инструкцию, но оригинал остаётся сохранённым."
     }
   },
@@ -12201,6 +12207,8 @@
       "readinessSeeded": "Список начат: {count} чел. × {items} пунктов — все «нужно».",
       "readinessGotChip": "Получено: {label} ({name})",
       "readinessGotDone": "Отмечено как полученное: {label} ({name}).",
+      "readinessCheckedChip": "Проверено: {label} ({name})",
+      "readinessCheckedDone": "Отмечено как проверено: {label} ({name}).",
       "readinessAskChip": "Запросить: {name}",
       "readinessAskDone": "Указание отправлено: {name} увидит его в своих сообщениях.",
       "readinessRequestBody": "Для проекта «{title}» просим предоставить: {items}.",

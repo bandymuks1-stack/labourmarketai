@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_READINESS_ITEM_KEYS, READINESS_ITEM_DOCUMENT_TYPES, documentTypesForReadinessItem } from "@/lib/projects/readiness-items";
 
-import { deriveWorkerProjectAsks, firstRecordableAsk, WORKER_PROJECT_ASK_LIMIT } from "./worker-project-asks";
+import { deriveWorkerProjectAsks, firstRecordableAsk, WORKER_PROJECT_ASK_LIMIT } from "@/lib/projects/worker-project-asks";
 
 /**
  * The checklist ↔ document bridge, on the PERSON's side (owner contract §11
@@ -132,16 +132,37 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     expect(fn).not.toMatch(/\.insert\(|\.update\(|\.upsert\(|\.rpc\(/);
   });
 
-  it("the chat read composes the worker project page's read + the documents page's read + the map; a failed read leaves the asks empty", () => {
-    expect(READ).toContain('import { listMyDocuments } from "@/lib/documents/readiness";');
-    expect(READ).toContain("listOwnReadinessItems(workerId, activeIds)");
-    expect(READ).toMatch(/deriveWorkerProjectAsks\(items, docs\.kind === "ok" \? docs\.documents : null, new Date\(\)\)/);
-    expect(READ).toMatch(/catch \{\s*\/\* asks stay empty/);
+  it("ONE domain read (loadOwnProjectAsks) composes the person's own rows + the documents page's read + the instructions page's read + the map; the chat and the instructions PAGE both render it (chat-first, not chat-only)", () => {
+    const fn = ACCESS.slice(ACCESS.indexOf("export async function loadOwnProjectAsks"));
+    expect(ACCESS).toContain('import { listMyDocuments } from "@/lib/documents/readiness";');
+    expect(ACCESS).toContain('import { listWorkerInstructions } from "@/lib/instructions/instructions";');
+    expect(fn).toContain("listOwnReadinessItems(workerId, ids)");
+    // An unanswered documents read is UNKNOWN (null), never "no documents".
+    expect(fn).toMatch(/deriveWorkerProjectAsks\(items, docs\.kind === "ok" \? docs\.documents : null, new Date\(\)\)/);
+    expect(fn).toMatch(/if \(ins\.projectId && !instructions\.has\(ins\.projectId\)\)/);
+    expect(fn).toMatch(/\.slice\(0, 10\)/);
+    // The chat read composes it and a failed read leaves the asks empty.
+    expect(READ).toContain("const own = await loadOwnProjectAsks(activeIds).catch(() => new Map());");
+    expect(READ).toMatch(/asks: own\.get\(r\.projectId\)\?\.asks \?\? \[\]/);
+    expect(READ).toMatch(/instruction: own\.get\(r\.projectId\)\?\.instruction \?\? null/);
+    expect(READ).not.toMatch(/listMyDocuments|listOwnReadinessItems|listWorkerInstructions/);
     expect(READ).toMatch(/first && first\.documentTypeSlug && firstProject\s*\? \{ documentTypeSlug: first\.documentTypeSlug, label: first\.label, projectId: firstProject\.projectId \}\s*: null/);
+    // The visual surface: the instructions page renders the SAME read under each project-scoped instruction.
+    const PAGE = read("app/[locale]/dashboard/instructions/page.tsx");
+    expect(PAGE).toContain('import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";');
+    expect(PAGE).toMatch(/await loadOwnProjectAsks\(read\.instructions\.map\(\(i\) => i\.projectId\)/);
+    expect(PAGE).toMatch(/<InstructionProjectAsks asks=\{asks\.get\(ins\.projectId\)\?\.asks \?\? \[\]\} labels=\{asksLabels\} \/>/);
+    const COMP = read("components/app/instruction-project-asks.tsx");
+    expect(COMP).toMatch(/href="\/dashboard\/documents"/);
+    expect(COMP).not.toMatch(/\.from\(|\.rpc\(|"use server"|Action\(/);
+    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+      const card = JSON.parse(read(`messages/${locale}.json`)).instructions.card as Record<string, string>;
+      for (const k of ["asksTitle", "ownReady", "ownExpiring", "ownNone", "blocked", "record"]) expect(card[k], `${locale}.${k}`).toBeTypeOf("string");
+    }
   });
 
   it("the chat shows the asks under the project line and routes the record chip to the SAME add-document flow with the type prefilled", () => {
-    expect(CHAT).toContain('import type { WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";');
+    expect(CHAT).toContain('import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";');
     expect(CHAT).toMatch(/labels\.workerProjectAsks\.replace\("\{items\}", pr\.asks\.map\(askWord\)\.join\(" · "\)\)/);
     expect(CHAT).toMatch(/id: `add-document:\$\{recordable\.documentTypeSlug\}/);
     expect(CHAT).toMatch(/chip\.id\.startsWith\("add-document:"\)/);
@@ -158,10 +179,10 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     // The instruction row's project scope is read by the instructions page's own read (additive column).
     expect(INS).toContain('"id, conversation_id, project_id, body, original_language,');
     expect(INS).toMatch(/projectId: \(r\.project_id as string \| null\) \?\? null/);
-    // The chat read attaches the latest instruction per project from that read — no second query.
-    expect(READ).toContain("const read = await listWorkerInstructions();");
-    expect(READ).toMatch(/if \(ins\.projectId && !instructions\.has\(ins\.projectId\)\)/);
-    expect(READ).toMatch(/instruction: instructions\.get\(r\.projectId\) \?\? null/);
+    // The domain read attaches the latest instruction per project from that read — no second query.
+    const own = ACCESS.slice(ACCESS.indexOf("export async function loadOwnProjectAsks"));
+    expect(own).toContain("listWorkerInstructions()");
+    expect(own).toMatch(/instructions\.set\(ins\.projectId, \{ conversationId: ins\.conversationId, authorName: ins\.authorName/);
     // The chip carries the conversation id ONLY when the projects answer read it under the person's RLS.
     expect(CHAT).toMatch(/id: `add-document:\$\{recordable\.documentTypeSlug\}\$\{replyConversationId \? `:\$\{replyConversationId\}` : ""\}`/);
     expect(CHAT).toMatch(/askReplyThreadsRef\.current = new Map\(/);
