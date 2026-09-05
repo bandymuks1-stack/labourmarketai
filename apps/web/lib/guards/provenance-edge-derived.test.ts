@@ -235,3 +235,13 @@ describe("4. i18n — five active locales, same keys, same placeholders, no Engl
     }
   });
 });
+
+describe("the provenance words are never clipped (prod walk c893557b, 390 px)", () => {
+  it("the card's provenance row wraps and the line carries no truncate", () => {
+    const src = read("components/app/worker-player-card.tsx");
+    const row = src.slice(src.indexOf("{labels.provenance.label}") - 400, src.indexOf('testid="player-card-provenance"') + 200);
+    expect(row).toMatch(/className="flex min-w-0 flex-wrap items-baseline gap-x-1\.5"/);
+    expect(row).not.toMatch(/className="truncate"/);
+    expect(row).toMatch(/className="min-w-0 break-words"/);
+  });
+});

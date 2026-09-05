@@ -323,7 +323,11 @@ export function WorkerPlayerCard({
             </p>
             {/* P6 — the SAME fact as the edge, in words (a11y: state is never
                 colour alone). "Kilmė · patvirtino E2E Walker UAB, 2026-09-05". */}
-            <p className="flex min-w-0 items-baseline gap-1.5">
+            {/* The words WRAP — never truncate: on a 390 px screen the header row
+                leaves ~100 px here and "Patvirtino E2E Walker UAB, 2026-09-05" was
+                clipped to "Patvirtino E…" (prod walk c893557b). The fact must be
+                readable in full, the name above may still truncate. */}
+            <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
               <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                 {labels.provenance.label}
               </span>
@@ -331,7 +335,7 @@ export function WorkerPlayerCard({
                 provenanceClass={card.provenance.class}
                 text={labels.provenance.text}
                 testid="player-card-provenance"
-                className="truncate"
+                className="min-w-0 break-words"
               />
             </p>
           </div>
