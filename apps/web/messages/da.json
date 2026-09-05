@@ -3412,6 +3412,18 @@
           "label": "Skift opgavestatus",
           "description": "En opgave markeres med en reel status — i gang, udført, blokeret."
         },
+        "setReadinessItem": {
+          "label": "Markér listepunkt",
+          "description": "Et listepunkt for en projektmedarbejder markeres med en reel status — kræves, modtaget, tjekket."
+        },
+        "seedReadinessChecklist": {
+          "label": "Start dokumentlisten",
+          "description": "Standardlisten for parathed / dokumenter startes for alle på projektet."
+        },
+        "requestReadiness": {
+          "label": "Bed om det manglende",
+          "description": "Medarbejderen modtager en arbejdsinstruktion med det, projektet stadig mangler fra dem."
+        },
         "respondOffer": {
           "label": "Svar på et bureaus tilbud",
           "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
@@ -3854,6 +3866,30 @@
       "riskNone": "Ingen aktive projekter endnu — opret det første.",
       "riskUnavailable": "Projekternes status kunne ikke læses lige nu.",
       "chipCreateProject": "Opret projekt",
+      "readinessIntro": "Parathed for “{title}” — {ready} af {people} klar:",
+      "readinessReadyLine": "• {name} — klar ({checked}/{total})",
+      "readinessGapLine": "• {name} — mangler: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Der føres endnu ingen dokumentliste — start den i projektstyringen.",
+      "readinessNoPeople": "Der er endnu ingen på dette projekt.",
+      "readinessAsk": "Hvilket projekt? Vælg et:",
+      "readinessNotFound": "Jeg kan ikke finde det projekt blandt de aktive. Hvilket mente du?",
+      "readinessUnavailable": "Paratheden kunne ikke læses lige nu.",
+      "chipReadinessPrefix": "Parathed",
+      "chipOpenOperations": "Åbn projektstyring",
+      "missingName": "et navn",
+      "missingDeclaredSkills": "angivne færdigheder",
+      "missingEvidence": "arbejdsdokumentation",
+      "blockedSuffix": "(afvist / udløbet)",
+      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
+      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle “kræves”.",
+      "readinessGotChip": "Modtaget: {label} ({name})",
+      "readinessGotDone": "Markeret som modtaget: {label} ({name}).",
+      "readinessAskChip": "Bed om: {name}",
+      "readinessAskDone": "Instruktion sendt: {name} ser den i sine beskeder.",
+      "readinessRequestBody": "Til projektet “{title}” bedes du levere: {items}.",
+      "readinessWriteFailed": "Ændringen kunne ikke foretages.",
+      "briefInstructions": "Ventende instruktioner: {count}.",
+      "chipInstructions": "Instruktioner",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest.",
       "documentFileOffer": "Dokument registreret. Du kan vedhæfte filen her — PDF, Word eller et foto op til 5 MB.",

@@ -57,6 +57,8 @@ import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { loadOpenTasksForChat } from "@/lib/conversation/company-tasks";
 import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
+import { loadProjectReadinessForChat } from "@/lib/conversation/project-readiness";
+import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
@@ -439,6 +441,28 @@ export type ChatLabels = {
   riskNone: string;
   riskUnavailable: string;
   chipCreateProject: string;
+  readinessIntro: string;
+  readinessReadyLine: string;
+  readinessGapLine: string;
+  readinessNoChecklist: string;
+  readinessNoPeople: string;
+  readinessAsk: string;
+  readinessNotFound: string;
+  readinessUnavailable: string;
+  chipReadinessPrefix: string;
+  chipOpenOperations: string;
+  missingName: string;
+  missingDeclaredSkills: string;
+  missingEvidence: string;
+  blockedSuffix: string;
+  readinessSeedChip: string;
+  readinessSeeded: string;
+  readinessGotChip: string;
+  readinessGotDone: string;
+  readinessAskChip: string;
+  readinessAskDone: string;
+  readinessRequestBody: string;
+  readinessWriteFailed: string;
   moveNotFound: string;
   moveNoOptions: string;
   moveAskWorker: string;
@@ -2517,6 +2541,139 @@ export function ConversationChat({
   /** CAPACITY (§11): "kas laisvas šią savaitę?" — the company's roster against
    *  approved absences (when, never why) for the next days, answered in the
    *  chat with the projects chip beside it. Company identity only. */
+  /** §11 READINESS / §12 / §16: "kas trūksta projektui X?" — the people on
+   *  the named live project with what each still needs, from the operations
+   *  centre's OWN per-person read: the derived reason codes (name / declared
+   *  skills / work evidence), the manager-kept checklist rows still needed or
+   *  missing (labels verbatim), the rejected / expired rows, checked/total.
+   *  Ends with the way forward: the operations page; people when there are
+   *  none. Nothing is scored; nothing is written. Company identity only. */
+  const lastReadinessRef = useRef<Extract<ProjectReadinessChatResult, { kind: "ok" }> | null>(null);
+  const readinessCodeLabel = useCallback(
+    (c: ReadinessMissingCode) => (c === "name" ? labels.missingName : c === "declared_skills" ? labels.missingDeclaredSkills : labels.missingEvidence),
+    [labels.missingName, labels.missingDeclaredSkills, labels.missingEvidence],
+  );
+  const runProjectReadiness = useCallback(
+    (projectId: string | null, sentence: string) => {
+      setTyping(true);
+      loadProjectReadinessForChat({ projectId, sentence })
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "no-company") {
+            assistant(labels.projectsNoCompany);
+            return;
+          }
+          if (res.kind === "empty") {
+            assistant(labels.riskNone, [{ id: "f:company.create-project", label: labels.chipCreateProject }]);
+            return;
+          }
+          if (res.kind === "error") {
+            assistant(labels.readinessUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          if (res.kind === "ask" || res.kind === "not-found") {
+            assistant(
+              res.kind === "ask" ? labels.readinessAsk : labels.readinessNotFound,
+              res.projects.map((p) => ({ id: `ready:${p.projectId}`, label: `${labels.chipReadinessPrefix}: ${p.title}` })),
+            );
+            return;
+          }
+          lastReadinessRef.current = res;
+          const lines = res.workers.map((w) => {
+            if (w.ready) {
+              return labels.readinessReadyLine.replace("{name}", w.name).replace("{checked}", String(w.checked)).replace("{total}", String(w.total));
+            }
+            const gaps = [...w.missing.map(readinessCodeLabel), ...w.itemsMissing.map((i) => i.label), ...w.itemsBlocked.map((i) => `${i.label} ${labels.blockedSuffix}`)];
+            return labels.readinessGapLine
+              .replace("{name}", w.name)
+              .replace("{gaps}", gaps.join(", "))
+              .replace("{checked}", String(w.checked))
+              .replace("{total}", String(w.total));
+          });
+          const head = labels.readinessIntro.replace("{title}", res.title).replace("{ready}", String(res.readyCount)).replace("{people}", String(res.workerTotal));
+          const tail = res.workerTotal === 0 ? [labels.readinessNoPeople] : res.checklistTracked ? [] : [labels.readinessNoChecklist];
+          // §12 / §16 — the gap continues into the corrective action that EXISTS:
+          // start the checklist when nothing is tracked; mark the first person's
+          // first missing row received; ask that person (a work instruction);
+          // the operations page; people when there are none. Bounded chips.
+          const chips: { id: string; label: string }[] = [];
+          const first = res.workers.find((w) => !w.ready);
+          if (res.workerTotal > 0 && !res.checklistTracked) {
+            chips.push({ id: `ready-seed:${res.projectId}`, label: labels.readinessSeedChip.replace("{count}", String(res.workerTotal)) });
+          }
+          if (first && first.itemsMissing.length > 0) {
+            const it = first.itemsMissing[0];
+            chips.push({ id: `ready-got:${res.projectId}:${first.workerProfileId}:${it.key}`, label: labels.readinessGotChip.replace("{label}", it.label).replace("{name}", first.name) });
+          }
+          if (first && (first.itemsMissing.length > 0 || first.missing.length > 0)) {
+            chips.push({ id: `ready-ask:${res.projectId}:${first.workerProfileId}`, label: labels.readinessAskChip.replace("{name}", first.name) });
+          }
+          chips.push({ id: `link:/dashboard/projects/${res.projectId}/operations`, label: labels.chipOpenOperations });
+          if (res.workerTotal === 0) chips.push({ id: "f:company.invite-worker", label: labels.chipInviteCandidate });
+          assistant([head, ...lines, ...tail].join("\n"), chips);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.readinessUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+        });
+    },
+    [assistant, labels, readinessCodeLabel],
+  );
+
+  /** The corrective action a readiness chip names, over the ONE dispatcher
+   *  (reversible tier without a token; the instruction is important tier and
+   *  the chip is its explicit confirmation), then the SAME readiness read
+   *  again — the person sees what changed, in the same words. */
+  const runReadinessWrite = useCallback(
+    (
+      actionId: "company.set-readiness-item" | "company.seed-readiness-checklist" | "company.request-readiness",
+      input: Record<string, unknown>,
+      projectId: string,
+      said: (data: Record<string, unknown> | undefined) => string,
+    ) => {
+      setTyping(true);
+      prepareConfirmationAction(actionId, input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.readinessWriteFailed);
+            return;
+          }
+          return dispatchWorkerAction(actionId, input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.readinessWriteFailed);
+              return;
+            }
+            assistant(said(res.data));
+            // READBACK — the same canonical read, so the answer and the
+            // operations page agree on what just changed.
+            runProjectReadiness(projectId, "");
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.readinessWriteFailed);
+        });
+    },
+    [assistant, locale, labels.readinessWriteFailed, runProjectReadiness],
+  );
+
+  const startProjectReadiness = useCallback(
+    (sentence: string) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      runProjectReadiness(null, sentence);
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, fallbackText, starterChips, runProjectReadiness],
+  );
+
   /** §14 WORK PERFORMED → RESULT: a task moved to a real status — the SAME
    *  token-less reversible dispatch the stage flow uses, over the tasks page's
    *  own status write (`set_work_task_status_v2` re-checks creator / assignee /
@@ -3283,6 +3440,48 @@ export function ConversationChat({
             const [, projectId, stageId, status] = chip.id.split(":");
             user(chip.label);
             runStageStatus(projectId || null, stageId, status as StageStatus);
+          } else if (chip.id.startsWith("ready-seed:")) {
+            // `ready-seed:<projectId>` — start the standard checklist for everyone
+            const projectId = chip.id.slice(11);
+            user(chip.label);
+            runReadinessWrite("company.seed-readiness-checklist", { projectId }, projectId, (d) =>
+              labels.readinessSeeded.replace("{count}", String(d?.seeded ?? 0)).replace("{items}", String(d?.items ?? 0)),
+            );
+          } else if (chip.id.startsWith("ready-got:")) {
+            // `ready-got:<projectId>:<workerProfileId>:<itemKey>` — the SAME row
+            // the answer named (key + stored label), marked received
+            const [, projectId, workerProfileId, itemKey] = chip.id.split(":");
+            const w = lastReadinessRef.current?.workers.find((x) => x.workerProfileId === workerProfileId);
+            const item = w?.itemsMissing.find((i) => i.key === itemKey);
+            user(chip.label);
+            if (!w || !item) assistant(labels.readinessWriteFailed);
+            else
+              runReadinessWrite(
+                "company.set-readiness-item",
+                { projectId, workerProfileId, itemKey, label: item.label, status: "received" },
+                projectId,
+                () => labels.readinessGotDone.replace("{label}", item.label).replace("{name}", w.name),
+              );
+          } else if (chip.id.startsWith("ready-ask:")) {
+            // `ready-ask:<projectId>:<workerProfileId>` — a work instruction whose
+            // body is the REAL gap list, in the project's thread
+            const [, projectId, workerProfileId] = chip.id.split(":");
+            const last = lastReadinessRef.current;
+            const w = last?.workers.find((x) => x.workerProfileId === workerProfileId);
+            user(chip.label);
+            if (!last || !w) assistant(labels.readinessWriteFailed);
+            else {
+              const gaps = [...w.missing.map(readinessCodeLabel), ...w.itemsMissing.map((i) => i.label)];
+              const body = labels.readinessRequestBody.replace("{title}", last.title).replace("{items}", gaps.join(", "));
+              runReadinessWrite("company.request-readiness", { projectId, workerProfileId, body }, projectId, () =>
+                labels.readinessAskDone.replace("{name}", w.name),
+              );
+            }
+          } else if (chip.id.startsWith("ready:")) {
+            // `ready:<projectId>` — the person picked which live project the
+            // readiness question meant; the read is RLS-scoped.
+            user(chip.label);
+            runProjectReadiness(chip.id.slice(6), "");
           } else if (chip.id.startsWith("task:")) {
             // `task:<projectId|->:<taskId>:<status>` — the person picked which
             // real task the sentence meant; the RPC re-checks who may close it.
@@ -4012,6 +4211,7 @@ export function ConversationChat({
         stageStatus: () => startStageStatus(text),
         taskStatus: () => startTaskStatus(text),
         projectRisk: () => startProjectRisk(),
+        projectReadiness: () => startProjectReadiness(text),
         moveWorker: () => startMoveWorker(text),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one

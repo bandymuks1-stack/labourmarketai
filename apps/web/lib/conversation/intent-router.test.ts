@@ -882,6 +882,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welk project loopt risico?",
     de: "Welches Projekt ist gefährdet?",
   },
+  "project-readiness": {
+    lt: "Kas trūksta projektui Vilnius?",
+    en: "What is missing for the project?",
+    ru: "Чего не хватает проекту?",
+    nl: "Is het team klaar?",
+    de: "Was fehlt dem Projekt?",
+  },
 };
 
 /**

@@ -398,8 +398,14 @@ export const BEHAVIOR_CONFORMANCE = {
   // re-derives the row authority (creator / assignee / project manager) —
   // still keyed to actor TYPES, not to a relationship; anchored to the tasks
   // page; verdict unchanged.
-  conversationActions: 46,
-  actionsAnchoredToAPage: 46,
+  // 2026-09-05 (owner contract §11/§12/§16): +3 — the READINESS journey's
+  // corrective actions offered right after "kas trūksta projektui X?":
+  // `company.set-readiness-item`, `company.seed-readiness-checklist` (the
+  // operations page's own checklist writes) and `company.request-readiness`
+  // (a work instruction in the project's thread). Anchored to the projects
+  // page; keyed to the company actor type; verdict unchanged.
+  conversationActions: 49,
+  actionsAnchoredToAPage: 49,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

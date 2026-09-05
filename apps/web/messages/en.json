@@ -11641,6 +11641,18 @@
           "label": "Change task status",
           "description": "A task is marked with a real status — in progress, done, blocked."
         },
+        "setReadinessItem": {
+          "label": "Mark a checklist item",
+          "description": "A project worker's checklist row is marked with a real status — needed, received, checked."
+        },
+        "seedReadinessChecklist": {
+          "label": "Start the document checklist",
+          "description": "The standard readiness / document checklist is started for everyone on the project."
+        },
+        "requestReadiness": {
+          "label": "Ask for what is missing",
+          "description": "The worker receives a work instruction listing what the project still needs from them."
+        },
         "respondOffer": {
           "label": "Answer an agency's offer",
           "description": "Accept or decline a candidate an agency offered for your need."
@@ -12155,6 +12167,30 @@
       "riskNone": "No active projects yet — create the first one.",
       "riskUnavailable": "The projects' state could not be read right now.",
       "chipCreateProject": "Create a project",
+      "readinessIntro": "Readiness for “{title}” — {ready} of {people} ready:",
+      "readinessReadyLine": "• {name} — ready ({checked}/{total})",
+      "readinessGapLine": "• {name} — missing: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "No document checklist is tracked yet — start it in the project operations.",
+      "readinessNoPeople": "Nobody is on this project yet.",
+      "readinessAsk": "Which project? Pick one:",
+      "readinessNotFound": "I can't find that project among the active ones. Which did you mean?",
+      "readinessUnavailable": "Readiness could not be read right now.",
+      "chipReadinessPrefix": "Readiness",
+      "chipOpenOperations": "Open project operations",
+      "missingName": "a name",
+      "missingDeclaredSkills": "declared skills",
+      "missingEvidence": "work evidence",
+      "blockedSuffix": "(rejected / expired)",
+      "readinessSeedChip": "Start the document checklist ({count} people)",
+      "readinessSeeded": "Checklist started: {count} people × {items} items — all “needed”.",
+      "readinessGotChip": "Received: {label} ({name})",
+      "readinessGotDone": "Marked received: {label} ({name}).",
+      "readinessAskChip": "Ask: {name}",
+      "readinessAskDone": "Instruction sent: {name} will see it in their messages.",
+      "readinessRequestBody": "For project “{title}” please provide: {items}.",
+      "readinessWriteFailed": "The change could not be made.",
+      "briefInstructions": "Instructions waiting: {count}.",
+      "chipInstructions": "Instructions",
       "pinFirstPrefix": "Move first",
       "reorderDone": "Done: “{label}” is now first.",
       "documentFileOffer": "Document recorded. You can attach the file right here — PDF, Word or a photo up to 5 MB.",

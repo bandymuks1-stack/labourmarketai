@@ -99,6 +99,7 @@ export type ConversationIntent =
   | "move-worker" // "perkelk Joną į projektą Y" — a person between projects, what-if first
   | "task-status" // "užduotis sumontuoti pastolius atlikta" — a task moved to a real status (§14 RESULT)
   | "project-risk" // "kuris projektas rizikoje?" — every live project's real signals, most first
+  | "project-readiness" // "kas trūksta projektui X?" — the people on a live project and what each still needs
   | "unknown";
 
 export type IntentMatch = {
@@ -921,6 +922,21 @@ const RULES: IntentRule[] = [
       // Riga", "verplaats Jan naar project Utrecht", "versetze Jan in das
       // Projekt Berlin", "переведи Ивана на проект Рига", "przenieś Jana do projektu".
       p("(perkel|perkelk|move|verplaats|versetz|перевед|перевес|перемест|przenie|przenies)[^\\s]*\\s+.{0,40}(projekt|project|проект)", 12),
+    ],
+  },
+  {
+    intent: "project-readiness",
+    patterns: [
+      // READINESS by sentence (§11 / §12 / §16): "kas trūksta projektui X?",
+      // "ar komanda pasiruošusi?", "projekto parengtis", "what is missing for
+      // the project", "is the team ready", "was fehlt dem Projekt", "is het
+      // team klaar", "чего не хватает проекту", "czego brakuje projektowi".
+      // The worker's own "ko man trūksta?" has no project / team word and
+      // keeps its intent.
+      p("(kas|ko|what|was|wat|что|чего|czego)\\s+.{0,12}?(tr[uū]ksta|missing|fehlt|ontbreekt|не\\s+хватает|brakuje)\\s*.{0,30}?(projekt|project|проект|komand|team|объект|objekt)", 12),
+      p("(ar|is|ist|zijn|are|czy)\\s+.{0,14}?(komanda|team|mannschaft|ploeg|команда|zesp[oó]|[zž]mon[eė]s|people|darbuotoj)\\w*\\s*.{0,16}?(pasiruo[sš]|paruo[sš]|ready|bereit|klaar|gereed|готов|gotow)", 12),
+      p("(pasiruo[sš]im|parengt|readiness|bereitschaft|gereedheid|готовност|gotowo[sś][cć])\\w*\\s*.{0,24}?(projekt|project|проект)", 11),
+      p("(projekt|project|проект)\\w*\\s*.{0,24}?(pasiruo[sš]im|parengt|readiness|bereitschaft|gereedheid|готовност|gotowo[sś][cć])", 11),
     ],
   },
   {

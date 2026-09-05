@@ -11641,6 +11641,18 @@
           "label": "Pakeisti užduoties būseną",
           "description": "Užduotis pažymima tikra būsena — vykdoma, atlikta, užstrigusi."
         },
+        "setReadinessItem": {
+          "label": "Pažymėti dokumento punktą",
+          "description": "Projekto darbuotojo sąrašo punktas pažymimas tikra būsena — reikia, gauta, patikrinta."
+        },
+        "seedReadinessChecklist": {
+          "label": "Pradėti dokumentų sąrašą",
+          "description": "Visiems projekto žmonėms pradedamas standartinis pasiruošimo / dokumentų sąrašas."
+        },
+        "requestReadiness": {
+          "label": "Paprašyti trūkstamų dokumentų",
+          "description": "Darbuotojui išsiunčiamas darbo nurodymas su tuo, ko projektui dar trūksta."
+        },
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
@@ -12155,6 +12167,30 @@
       "riskNone": "Aktyvių projektų kol kas nėra — sukurkite pirmą.",
       "riskUnavailable": "Projektų būklės dabar nuskaityti nepavyko.",
       "chipCreateProject": "Sukurti projektą",
+      "readinessIntro": "Parengtis „{title}“ — pasiruošę {ready} iš {people}:",
+      "readinessReadyLine": "• {name} — pasiruošęs ({checked}/{total})",
+      "readinessGapLine": "• {name} — trūksta: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Dokumentų sąrašas dar nesekamas — pradėkite jį projekto valdyme.",
+      "readinessNoPeople": "Projekte dar nėra žmonių.",
+      "readinessAsk": "Kuris projektas? Pasirinkite:",
+      "readinessNotFound": "Tokio projekto nerandu tarp aktyvių. Kurį turėjote omenyje?",
+      "readinessUnavailable": "Parengties dabar nuskaityti nepavyko.",
+      "chipReadinessPrefix": "Parengtis",
+      "chipOpenOperations": "Atidaryti projekto valdymą",
+      "missingName": "vardo",
+      "missingDeclaredSkills": "nurodytų įgūdžių",
+      "missingEvidence": "darbo įrodymų",
+      "blockedSuffix": "(atmesta / pasibaigė)",
+      "readinessSeedChip": "Pradėti dokumentų sąrašą ({count} žm.)",
+      "readinessSeeded": "Sąrašas pradėtas: {count} žm. × {items} punktai — visi „reikia“.",
+      "readinessGotChip": "Gauta: {label} ({name})",
+      "readinessGotDone": "Pažymėta gauta: {label} ({name}).",
+      "readinessAskChip": "Paprašyti: {name}",
+      "readinessAskDone": "Nurodymas išsiųstas: {name} matys jį savo pranešimuose.",
+      "readinessRequestBody": "Projektui „{title}“ prašome pateikti: {items}.",
+      "readinessWriteFailed": "Pakeisti nepavyko.",
+      "briefInstructions": "Laukia nurodymų: {count}.",
+      "chipInstructions": "Nurodymai",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma.",
       "documentFileOffer": "Dokumentas užrašytas. Failą galite pridėti čia pat — PDF, Word arba nuotrauką iki 5 MB.",

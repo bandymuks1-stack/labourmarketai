@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { listAttentionInstructions } from "@/lib/instructions/instructions";
 
 import { getTranslations } from "next-intl/server";
 
@@ -151,6 +152,21 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
       ) {
         lines.push(t("briefLogToday"));
         addChip("logwork", t("chipLogWork"));
+      }
+    }
+  } catch {
+    /* no line */
+  }
+
+  // 3a ── work instructions waiting — a manager asked for something (e.g. a
+  // readiness document, §11/§12): the canonical unread-instruction read and
+  // the one chip to the instructions page. Never a count that is not real.
+  try {
+    if (lines.length < MAX_LINES) {
+      const waiting = await listAttentionInstructions();
+      if (waiting.length > 0) {
+        lines.push(t("briefInstructions", { count: waiting.length }));
+        addChip("link:/dashboard/instructions", t("chipInstructions"));
       }
     }
   } catch {

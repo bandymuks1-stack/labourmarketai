@@ -3412,6 +3412,18 @@
           "label": "Endre oppgavestatus",
           "description": "En oppgave merkes med en reell status — pågående, utført, blokkert."
         },
+        "setReadinessItem": {
+          "label": "Merk listepunkt",
+          "description": "Et listepunkt for en prosjektmedarbeider merkes med en reell status — kreves, mottatt, sjekket."
+        },
+        "seedReadinessChecklist": {
+          "label": "Start dokumentlisten",
+          "description": "Standardlisten for beredskap / dokumenter startes for alle på prosjektet."
+        },
+        "requestReadiness": {
+          "label": "Be om det som mangler",
+          "description": "Medarbeideren får en arbeidsinstruks med det prosjektet fortsatt mangler fra dem."
+        },
         "respondOffer": {
           "label": "Svar på et byrås tilbud",
           "description": "Godta eller avslå en kandidat et byrå tilbød til deres behov."
@@ -3854,6 +3866,30 @@
       "riskNone": "Ingen aktive prosjekter ennå — opprett det første.",
       "riskUnavailable": "Prosjektenes status kunne ikke leses akkurat nå.",
       "chipCreateProject": "Opprett prosjekt",
+      "readinessIntro": "Beredskap for «{title}» — {ready} av {people} klare:",
+      "readinessReadyLine": "• {name} — klar ({checked}/{total})",
+      "readinessGapLine": "• {name} — mangler: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Ingen dokumentliste føres ennå — start den i prosjektstyringen.",
+      "readinessNoPeople": "Ingen er på prosjektet ennå.",
+      "readinessAsk": "Hvilket prosjekt? Velg ett:",
+      "readinessNotFound": "Jeg finner ikke det prosjektet blant de aktive. Hvilket mente du?",
+      "readinessUnavailable": "Beredskapen kunne ikke leses akkurat nå.",
+      "chipReadinessPrefix": "Beredskap",
+      "chipOpenOperations": "Åpne prosjektstyring",
+      "missingName": "et navn",
+      "missingDeclaredSkills": "oppgitte ferdigheter",
+      "missingEvidence": "arbeidsbevis",
+      "blockedSuffix": "(avvist / utløpt)",
+      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
+      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle «kreves».",
+      "readinessGotChip": "Mottatt: {label} ({name})",
+      "readinessGotDone": "Merket som mottatt: {label} ({name}).",
+      "readinessAskChip": "Be om: {name}",
+      "readinessAskDone": "Instruks sendt: {name} ser den i meldingene sine.",
+      "readinessRequestBody": "For prosjektet «{title}» ber vi deg levere: {items}.",
+      "readinessWriteFailed": "Endringen kunne ikke gjøres.",
+      "briefInstructions": "Ventende instrukser: {count}.",
+      "chipInstructions": "Instrukser",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først.",
       "documentFileOffer": "Dokument registrert. Du kan legge ved filen her — PDF, Word eller et bilde opptil 5 MB.",

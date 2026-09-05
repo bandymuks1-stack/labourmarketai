@@ -246,6 +246,31 @@ export const companyUpdateTaskStatusSchema = z.object({
   status: z.enum(["in_progress", "blocked", "done"]),
 });
 
+/** §11 READINESS — the corrective actions offered right after "kas trūksta
+ *  projektui X?": the operations page's OWN writes. `upsert_worker_readiness_item`
+ *  re-checks that the caller manages the project; the seed runs that same
+ *  write per person; the request is a WORK INSTRUCTION in the project's thread
+ *  (`send_work_instruction_to_project` requires an ACTIVE assignment and that
+ *  the caller manages the worker). Nothing here is invented: the label is the
+ *  stored row's label, the body is composed from the real gap labels. */
+export const companySetReadinessItemSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  itemKey: z.string().trim().min(1).max(80),
+  label: z.string().trim().min(1).max(160),
+  status: z.enum(["needed", "missing", "received", "checked", "not_required"]),
+});
+
+export const companySeedReadinessChecklistSchema = z.object({
+  projectId: uuid,
+});
+
+export const companyRequestReadinessSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  body: z.string().trim().min(1).max(2000),
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -281,6 +306,9 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.create-task": companyCreateTaskSchema,
   "company.update-stage-status": companyUpdateStageStatusSchema,
   "company.update-task-status": companyUpdateTaskStatusSchema,
+  "company.set-readiness-item": companySetReadinessItemSchema,
+  "company.seed-readiness-checklist": companySeedReadinessChecklistSchema,
+  "company.request-readiness": companyRequestReadinessSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

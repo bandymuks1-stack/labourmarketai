@@ -731,6 +731,65 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     advancedRoute: "/dashboard/tasks",
     handler: { kind: "server_action", ref: "setWorkTaskStatusAction" },
   },
+  {
+    /**
+     * READINESS → CORRECTIVE ACTION (owner contract 2026-09-04 §11, §12 "what
+     * is missing → who / what can help → action", §16): a manager-kept
+     * checklist row moved to a real status — "Gauta: A1 (Jonas)" by chip
+     * right after the readiness answer, or the row's own control on the
+     * operations page. Both call the ONE write; the RPC re-checks the gate.
+     */
+    id: "company.set-readiness-item",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.setReadinessItem.label",
+    descriptionKey: "conversation.actions.company.setReadinessItem.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "upsertReadinessItemAction" },
+  },
+  {
+    /**
+     * READINESS → CORRECTIVE ACTION: start the standard document checklist
+     * for every person on the project (the operations page's own seed, per
+     * person, with the same default labels) — offered when nothing is
+     * tracked yet, so "kas trūksta?" has real rows to answer from.
+     */
+    id: "company.seed-readiness-checklist",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.seedReadinessChecklist.label",
+    descriptionKey: "conversation.actions.company.seedReadinessChecklist.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "seedReadinessItemsAction" },
+  },
+  {
+    /**
+     * READINESS → WHO CAN HELP → ACTION: ask the person for what is missing —
+     * a WORK INSTRUCTION in the project's thread (the instructions page's own
+     * send; the RPC requires an active assignment and that the caller manages
+     * the worker). The body is composed from the REAL gap labels, never
+     * invented. Important tier: the chip is the explicit confirmation.
+     */
+    id: "company.request-readiness",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.requestReadiness.label",
+    descriptionKey: "conversation.actions.company.requestReadiness.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "sendWorkInstructionAction" },
+  },
 
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`
