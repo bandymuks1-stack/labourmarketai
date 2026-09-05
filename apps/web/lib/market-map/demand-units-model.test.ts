@@ -130,8 +130,28 @@ describe("nothing is invented for a field the canonical contract does not carry"
     expect(rows[0]?.openHeadcount).toBe(0);
   });
 
-  it("the employer's identity is absent, and said to be absent", () => {
-    const row = groupIntoDemandUnits([need()], NL_CITY, resolves)[0];
+  it("names the organisation when the branch that answered disclosed it", () => {
+    // The worker RPC returns company_name for a VERIFIED company. Rendering
+    // "not stated" over a name we are allowed to show is worse than showing it.
+    const row = groupIntoDemandUnits(
+      [need({ organizationName: "Bouwbedrijf De Vries BV" })],
+      NL_CITY,
+      resolves,
+    )[0];
+    expect(row?.organization).toBe("Bouwbedrijf De Vries BV");
+    expect(row?.missing).not.toContain("organization");
+  });
+
+  it("states the gap when the branch disclosed no organisation", () => {
+    // The employer's own-rows read has no company column. Absent stays absent —
+    // it is never filled from the viewer's own workspace.
+    const row = groupIntoDemandUnits([need({ organizationName: null })], NL_CITY, resolves)[0];
+    expect(row?.organization).toBeNull();
+    expect(row?.missing).toContain("organization");
+  });
+
+  it("a blank name is a gap, not an empty label", () => {
+    const row = groupIntoDemandUnits([need({ organizationName: "   " })], NL_CITY, resolves)[0];
     expect(row?.organization).toBeNull();
     expect(row?.missing).toContain("organization");
   });

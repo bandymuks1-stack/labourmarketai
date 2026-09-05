@@ -86,6 +86,8 @@ interface WorkerDemandRow {
   readonly country: string | null;
   readonly team_size: number | null;
   readonly location_label: string | null;
+  /** Already in the RPC's closed whitelist, and only for a VERIFIED company. */
+  readonly company_name: string | null;
   readonly created_at: string | null;
 }
 
@@ -141,6 +143,11 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
         cityLabel: row.location_label,
         quantity: row.team_size,
         roleText: row.role_text,
+        // The RPC already returns this, gated on the company being verified.
+        // Reading a column the function was written to expose is not a
+        // widening; dropping it on the floor and rendering "not stated" for a
+        // name we are allowed to show was the honesty gap this closes.
+        organizationName: row.company_name,
         createdAt: row.created_at,
       });
       if (mapped) rows.push(mapped);
@@ -183,6 +190,10 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
       cityLabel: row.location,
       quantity: row.team_size,
       roleText: row.role_or_work_type,
+      // The own-rows select carries no company column, and the row's
+      // organisation is NOT the viewer's active workspace — borrowing that name
+      // would attach an organisation the row never named. Absent stays absent.
+      organizationName: null,
       createdAt: row.created_at,
     });
     if (mapped) rows.push(mapped);
