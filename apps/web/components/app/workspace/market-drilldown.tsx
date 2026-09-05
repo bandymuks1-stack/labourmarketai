@@ -584,7 +584,7 @@ function ProjectEvaluationView({
                     the context — so the context is what is shown. */}
                 <p className="text-basis text-state-amber">{t("peopleNotYet")}</p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
-                  <Field label={t("fieldProjectId")} value={row.projectId} mono />
+                  <Field label={t("fieldProject")} value={row.title ?? t("notStated")} />
                   <Field label={t("fieldRoles")} value={row.roles.join(", ")} />
                   <Field
                     label={t("fieldSkills")}
