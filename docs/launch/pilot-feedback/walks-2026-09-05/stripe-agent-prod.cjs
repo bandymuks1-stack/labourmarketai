@@ -22,8 +22,9 @@ const REQUIRED_EVENTS = [
 const log = (o) => console.log(JSON.stringify(o));
 function key() {
   if (!fs.existsSync(KEY_FILE)) { console.error("NO_AGENT_KEY: " + KEY_FILE + " is missing — owner action (see the owner block)"); process.exit(3); }
-  const m = fs.readFileSync(KEY_FILE, "utf8").match(/^STRIPE_AGENT_KEY=(\S+)\s*$/m);
-  if (!m) { console.error("NO_AGENT_KEY: file present but no STRIPE_AGENT_KEY= line"); process.exit(3); }
+  // Accepts `STRIPE_AGENT_KEY=rk_live_…` or a bare `rk_live_…` line (the owner placed the bare form 2026-09-05).
+  const m = fs.readFileSync(KEY_FILE, "utf8").match(/^(?:STRIPE_AGENT_KEY=)?\s*(rk_live_\S+|sk_live_\S+|\S+)\s*$/m);
+  if (!m) { console.error("NO_AGENT_KEY: file present but no key line"); process.exit(3); }
   if (!/^rk_live_/.test(m[1])) { console.error("REFUSED: the agent key must be a LIVE RESTRICTED key (rk_live_…), got another shape"); process.exit(3); }
   return m[1];
 }
@@ -93,7 +94,7 @@ async function ensurePortal() {
   const existing = portals.data.find((c) => c.active);
   if (existing) { log({ step: "portal_exists", id: existing.id, isDefault: existing.is_default }); return { portalId: existing.id }; }
   const c = await api("POST", "/v1/billing_portal/configurations", {
-    business_profile: { headline: "LabourMarket.ai — organization account", privacy_policy_url: "https://labourmarket.ai/lt/privacy", terms_of_service_url: "https://labourmarket.ai/lt/terms" },
+    business_profile: { headline: "LabourMarket.ai — organization account", privacy_policy_url: "https://labourmarket.ai/lt/legal/privacy", terms_of_service_url: "https://labourmarket.ai/lt/legal/terms" },
     features: {
       invoice_history: { enabled: true },
       payment_method_update: { enabled: true },

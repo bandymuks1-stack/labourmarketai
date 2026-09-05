@@ -21,13 +21,13 @@
 > conversation column was rejected: conversation is on-demand); `06` → superseded by `27` (eight lenses).
 > Implementation follows the text; tokens only from `apps/web/tokens/*` and `globals.css`.
 
-## 0. Mutable facts (verified 2026-09-05 13:15 UTC)
+## 0. Mutable facts (verified 2026-09-05 14:30 UTC)
 
 | Fact | Value |
 |---|---|
-| `main` | **`08629b19`** (#1533 checkpoint; #1530 P4 Field, #1531 `?say=`, #1532 P5/C1 merged 11:xx–12:xx UTC while the MASTER was offline) |
-| Production | **`08629b19`** = `main` (served by 13:01 UTC; the Hobby freeze lifted). Walked 13:08–13:15 UTC: P1 entry + `?say=` hand-off, Field, company home, ledger re-walk — all PROD_PROVEN, zero residue |
-| #1441 Stripe (RED, `needs-human-gate`, draft) | head **`d2bdae56`**, MERGEABLE, CI green at head (quality · e2e-smoke · migration-safety · CodeQL; the Vercel check is FAILURE by design — branch deployments off since #1521); **owner gate G-8** (Stripe LIVE session, 8 Vercel vars, approve + squash-merge) + the `plans` data step **APPLIED 13:19 UTC 2026-09-05** (MCP UPDATE guarded on the old values: `business` → `name_en=Organization`, `name_lt=Organizacija`, `features.job_demands=10`; readback confirmed; reversal = the inverse UPDATE, `Business`/`Verslo`/`25`; the served `/lt/pricing` still shows the pre-#1441 static card copy — #1441 replaces that page); acceptance walk `walk-stripe-live-prod.cjs`; no writer |
+| `main` | **`c893557b`** (#1535 QA fixes, #1536 P2/P6 provenance edge, #1538 P8 World subset, #1537 docs — all merged 13:3x–14:1x UTC) |
+| Production | **`c893557b`** = `main` (served by 14:15 UTC). Walked 14:18–14:25 UTC: card provenance edge + chat object language, World discovery, company-home regression — PROVEN; one visual defect (390 px provenance clipping) → wrap fix PR |
+| #1441 Stripe (RED, `needs-human-gate`, draft) | head **`6bca4efc`** (Checkout `automatic_tax` + address + VAT id; `rk_live_` accepted). **LIVE inventory 14:05 UTC via the owner's restricted key**: Stripe Tax ACTIVE (reused), product `prod_VCjq8iLCnyfbr2` CREATED, Customer Portal config `bpc_1UCKNU637uptAg5z3ztY0snr` CREATED (default), **€99 price NOT yet created (key lacks Prices write)**, webhook endpoint MISSING (owner). `plans` data step applied. Remaining owner steps in the checkpoint's G-8 bullet |
 | Invitation WIP | `8dbe1438` preserved → rebased onto main as `72e3602b` on `feat/cc/invitation-attention-journey` → lane J (one writer) |
 | Real users | REAL_RECRUITER_USED_PRODUCT = FALSE (last event `dashboard_viewed` 06:15 UTC 2026-09-04, re-read 13:05 UTC 2026-09-05); REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE |
 | Local stack | Docker unavailable (LOCAL_DOCKER_UNAVAILABLE); verification = unit/guards/typecheck/lint/build + CI + production walks with `e2e-*` identities |
@@ -43,6 +43,7 @@
 | **On `59b94523` (10:23–10:30 UTC)** | **INVITATION journey PROD_PROVEN** (real invite panel → brief "E2E Walker UAB kviečia jus (1 kvietimas)" → "mano kvietimai" → accept → accepted → brief line gone → manager PRIIMTAS; readback `invitations` accepted, `audit_logs`, `pilot_events invitation_accepted`, no duplicate engagement; residue deleted) · **D2 name PROD_PROVEN** ("Darbų peržiūra dar neįjungta: E2E Worker Two", chip "Įjungti peržiūrą: E2E Worker Two"; brief line "Darbdavys patvirtino 1 jūsų darbo įrašą" held) | `pilot-feedback/walks-2026-09-05/walk-invitation.log`, `walk-confirm-name.log` |
 | **On `51cd84b2` (10:42–10:47 UTC)** | **D1 PROD_PROVEN**: "kuriems mano objektams gresia problemos" → `project-risk`, "kurie darbuotojai nebus užimti" → `who-available` (pilot_events 10:43 UTC); the proposer still ran for the two open sentences (`ai_runs` 10:44, 10:45); note: the risk handler asked "Kuris projektas?" instead of answering across projects (UX follow-up, CONV). **P3 LEDGER PROD_PROVEN**: `/lt/dashboard/instructions` ratio 1/7, rows with state · reason · "Įrašyti dokumentą" · "2 kiti variantai netiko"; the record link lands on the documents centre prefilled (`?type=professional_certificate`); residue (instruction message) deleted; readiness rows all `needed`, no documents created | `walks-51cd84b2.log` |
 | **On `08629b19` (13:08–13:15 UTC)** | **P1 ENTRY + `?say=` PROD_PROVEN** (A1 — see row) · **FIELD PROD_PROVEN** (C6/C9; first run's F4 stall was a locator artefact, the targeted re-check timed both writes) · **COMPANY HOME PROD_PROVEN** (L2) · **LEDGER re-walk PROD_PROVEN after #1529** (B6). Residue: readiness rows 7/7 `needed`; the ledger walk's instruction message deleted via MCP; `landing_intent` rows are telemetry (kept) | `walk-landing.log`, `walk-field.log`, `walk-field-restore-check.log`, `walk-company-home.log`, `walk-ledger-08629b19.log` |
+| **On `c893557b` (14:18–14:25 UTC)** | **P2/P6 card edge PROD_PROVEN** (B13 → proven, C12 → proven; defect: 390 px clipping → wrap fix) · **P8 World subset PROD_PROVEN** (H2 subset; full H2 stays PARTIAL for the 1M validation) · **chat object language PROVEN** (0 raw ids; DERIVED marker) · **#1535 regression clean** (2 attention lines, no unavailable/none) | `walk-provenance.log`, `walk-provenance-chat.log`, `walk-world.log` |
 
 ## 1. Finite stage table (real end-to-end capabilities; PRs/tests/docs are not stages)
 
@@ -66,7 +67,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | B10 | Receive instruction / task | worker | instruction in brief + thread | PROD_PROVEN | #1510 walk 04:49 UTC | — | F | — | — |
 | B11 | Record work / evidence (file) | worker | journal entry with project + file | PROD_PROVEN | E2, #1502 | — | P7 later | — | — |
 | B12 | Authorized confirmation changes state | employer→worker | confirm entry → skills verified | PROD_PROVEN | confirm-work walk 09:10-09:12 UTC on `169df06f`: chip -> `set_engagement_journal_review` -> Laukia patvirtinimo -> Patvirtinti -> `confirm_entry_and_verify_skills` -> 1 confirmation on `01d4a36d`; D2 name fix held on `59b94523` | - | P6-subset | CONV | after J |
-| B13 | Identity reflects confirmed result | worker | "Darbdavys patvirtino…" on the brief + gold edge on the card | PROD_PROVEN | brief line "Darbdavys patvirtino 1 jūsų darbo įrašą per 7 d." after the confirmation (09:12 UTC `169df06f`, held on `59b94523`) | the card's provenance edge (EMPLOYER_CONFIRMED) = P6-subset lane R (running) | P6-subset | IDENTITY | yes |
+| B13 | Identity reflects confirmed result | worker | "Darbdavys patvirtino…" on the brief + gold edge on the card | PROD_PROVEN | brief line 09:12 UTC `169df06f`; **card edge on `c893557b` 14:20 UTC (#1536)**: "mano kortelė" → `worker-player-card[data-provenance=EMPLOYER_CONFIRMED]`, gold edge, line "Patvirtino E2E Walker UAB, 2026-09-05"; the same answer says "Darbdavys patvirtino 1 jūsų darbo įrašą per 7 d."; negative control (learner) → `SELF_DECLARED`, dashed edge (`walk-provenance.log`, `walk-provenance-chat.log`) | 390 px: the line was clipped to 50 px → wrap fix PR (GREEN, auto-merge); full P6 identity view = V1 | P6-subset | IDENTITY | yes |
 | C1 | Register / set up organisation | org | org + capabilities declared | PROD_PROVEN | F4, #1460 | — | F | — | — |
 | C2 | Express a real workforce need | org | sentence → prefilled form → `customer_requests` | PROD_PROVEN | 2026-09-04 | site as project object (later) | P2 | — | — |
 | C3 | Receive useful matching | org | candidates with why | PROD_PROVEN | candidates walk | — | P2 | — | — |
@@ -78,7 +79,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | C9 | Task / work / progress / what-if move | org | task done by sentence, stage, move + confirm | PROD_PROVEN | #1506/#1509; Field UI subset proven on `08629b19` (see C6) | drag / what-if on the Field = P4 full (V1); the chat's `company.move-worker` covers it | P4 | PROJECT | after P2 |
 | C10 | Review evidence | org | what awaits confirmation, per person | PROD_PROVEN | confirm-work walk 09:10 UTC `169df06f` ("ką reikia patvirtinti?" → "Laukia patvirtinimo: 1 įraš. • E2E Worker Two…"); D2 name fix held on `59b94523` | — | P6 | CONV | after J |
 | C11 | Confirm permitted work | org | confirmation row → verified skills | PROD_PROVEN | same walk: "Patvirtinti: E2E Worker Two" → `confirm_entry_and_verify_skills` → 1 confirmation on `01d4a36d` (kept as evidence) | verified-skill count was 0 for that entry (no matching skill rows) — data, not a defect | P6 | CONV | after J |
-| C12 | Resulting state propagates | both | brief, card, pulse, risk agree | PARTIAL | readiness ratio and the brief agree; confirmation → brief line yes; card edge pending (B13 remaining) | P6-subset (lane R) then one propagation walk: brief · card · pulse · risk on one SHA | F | — | — |
+| C12 | Resulting state propagates | both | brief, card, pulse, risk agree | PROD_PROVEN | on `c893557b`: brief line + card edge agree (EMPLOYER_CONFIRMED); readiness ratio 0/7 in the chat = the Field rows = the ledger; risk line "1 žmogui trūksta dokumentų" on the company home = the same rows | one re-walk after the wrap fix (visual only) | F | — | — |
 | C13 | Hours → timesheet → approval → export | org | F4 chain | PROD_PROVEN | 2026-09-02 | plan primitive = G-13 | F | — | — |
 | C14 | Reports / CSV | org | figures + download | PROD_PROVEN | #1508 | — | F | — | — |
 | D1 | Agency: client invite / accept | agency | connection row | PROD_PROVEN | A4–A8 (rolled back) | e-mail delivery = owner env gate | F | — | — |
@@ -98,7 +99,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | G3 | Ambiguity / missing data | all | asks the genuinely missing thing from real rows | PROD_PROVEN | "Kuris projektas?" today | — | F | — | — |
 | G4 | No fake success | all | honest refusal / not-ready states | PROD_PROVEN | guards + walks | — | F | — | — |
 | H1 | Matching explainable | all | why / gaps | PROD_PROVEN | 3-best; candidates | — | P2 | — | — |
-| H2 | World map layers / viewport | org | bounded, clustered, ≤60 objects | PARTIAL | `market-map` exists | P8 subset = lane WORLD (running); 1M-point load validation (V1) | P8 | WORLD | after P2 |
+| H2 | World map layers / viewport | org | bounded, clustered, ≤60 objects | PARTIAL | **P8 subset PROD_PROVEN on `c893557b` 14:22 UTC (#1538)**: `/lt/dashboard/market-map` → `market-map-world[data-world-layer=demand]`, 3 pills, `data-map-origin=live`, "Matoma: 2 vietos, 2 objektai · Mastelis: šalys", 60-place cap named, rows `data-provenance=derived` (country centroids), projects → `empty` (prod projects have no country), supply → `empty` + aggregate note, 0 write requests, 390 px overflow 0, anon → login (`walk-world.log`) | 1M-point load validation (V1); bbox RPC for worker demand; the page still stacks three map instances (P5 composition later) | P8 | WORLD | after P2 |
 | H3 | Bounded / scalable retrieval | all | no hot-path scans | PROD_PROVEN | P0-1 fixed, indexes, scan caps | — | F | — | — |
 | H4 | Availability / capacity | org | who is free until when | PROD_PROVEN | capacity walk | — | P4 | — | — |
 | I1 | Invitations reach the person | all | in-app Attention + accept | PROD_PROVEN | walked 10:26 UTC on `59b94523` (#1522); QA read-only review APPROVE (one P3: roster fingerprint keyed by org id → CONV backlog) | — | Attention | — | — |
@@ -116,7 +117,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | K3 | Documents / evidence privacy | all | owner+admin only | PROD_PROVEN | guard + policy | S6 consent stays owner-gated | F | — | — |
 | K4 | Webhook security / secrets | org | signature, idempotency, mode match | IMPL_PENDING_PROOF | #1441 tests | prod proof with J3 | P9 | BILLING | — |
 | K5 | Audit / provenance / legal surfaces | all | `ai_runs`, `pilot_events`, privacy/terms | PROD_PROVEN | ai_runs rows today; consent log | provenance classes visible (P6) | P6 | IDENTITY | yes |
-| L1 | No architecture vocabulary | all | ordinary words only | PARTIAL | `#8cda64` fixed (D2 proven); chip vocabulary findings (I2) open | P2 object language on the walked journeys = lane R (running) | P2 | OBJ-UI + CONV | after J |
+| L1 | No architecture vocabulary | all | ordinary words only | PARTIAL | `#8cda64` fixed; on `c893557b` "kas laisvas?" and the readiness answer carry 0 raw id fragments; readiness ends "Išvesta iš dokumentų sąrašo ir profilio įrašų — ne įvertinimas." | chip vocabulary findings (I2); `market-drilldown.tsx` shows "Projekto ID" (WORLD/workspace owner) | P2 | OBJ-UI + CONV | after J |
 | L2 | Visual operation without chat | all | pages for every core action | PROD_PROVEN | **`08629b19` 13:10 UTC, company home without the composer (#1532)**: 22 blocks rendered (roles, 2 project rows with Now / Next / Risk, who is free, missing in 4 weeks with an open need, needs-you, partners); 0 links into the chat; Open operations → the operations page; Describe a need → `#demand-intake` visible; 390 px overflow 0 (`walk-company-home.log`) | P5 full shell + Context = V1 | P5 | SHELL | V1 |
 | L3 | Mobile / responsive core | all | 390 px zero overflow | PROD_PROVEN | J2/P8 walks | P7 PWA is V1 | P7 | MOBILE | V1 |
 | L4 | Failures → understandable recovery | all | honest not-ready states | PARTIAL | many honest states; D3 reclassified as a walk artefact; new surfaces (Field, company home) render NAMED degrade states | keep checking on every new surface | F | CONV | — |
@@ -131,21 +132,21 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | Count | Stages |
 |---|---|
 | TOTAL_REQUIRED_STAGES | **75** |
-| PROD_PROVEN | **57** (incl. K2 with one P1 finding open) |
+| PROD_PROVEN | **58** (incl. K2 with one P1 finding open) |
 | IMPLEMENTED_PENDING_PROD_PROOF | **6** (J1, J2, J3, J4, J5, K4) |
-| PARTIAL | **9** (A4, C12, D5, E4, E5, H2, I3, L1, L4) |
+| PARTIAL | **8** (A4, D5, E4, E5, H2, I3, L1, L4) |
 | NOT_IMPLEMENTED | **1** (M5) |
 | OWNER_BLOCKED | **1** (I5) + 5 billing stages waiting on G-8 (counted under pending proof) |
 | EXTERNAL_BLOCKED | **1** (M1) |
 
-Check: 57 + 6 + 9 + 1 + 1 + 1 = 75. Percentage, if wanted: 57 / 75 = **76 % PROD_PROVEN**; (57 + 6) / 75 = 84 % implemented. These are stage counts, not effort. Recounted from the Status column 13:15 UTC 2026-09-05.
+Check: 58 + 6 + 8 + 1 + 1 + 1 = 75. Percentage, if wanted: 58 / 75 = **77 % PROD_PROVEN**; (58 + 6) / 75 = 85 % implemented. These are stage counts, not effort. Recounted from the Status column 14:30 UTC 2026-09-05.
 
 ## 2. Three finish lines
 
 | Finish line | Stages in scope | Proven / scope | Critical remaining | Optimistic | Realistic | Conservative |
 |---|---|---|---|---|---|---|
-| **SAFE PILOT** (selected real workers/employers, free) | 33 = A1–A4, B1–B13, C1–C12, G1–G4 (+K2/K3 as gates) | **31 / 33** (13:15 UTC 2026-09-05) | A4 five-intent prod walk · C12 propagation walk after the P6-subset card edge · gap link 5–6 (I3) · owner: G-12 apply #1430, G-1 inbox test, G-14 admin click, G-15 apply #1436 · P2/P6-subset (EMPLOYER_CONFIRMED edge + object language on the walked journeys, lane R running) | 3 days | **7 days** | 14 days (each walk on a new build finds defects: today 2 of 3 journeys failed their first prod walk; Hobby freezes) |
-| **PUBLIC COMMERCIAL V1** | SAFE PILOT + J1–J5, K4, H2, L2, I4 grouping, C6/C9 Field UI, L3 PWA, M1 stable = 45 | **34 / 45** (44 distinct stage ids in the union; 13:15 UTC) | owner G-8 (Stripe LIVE objects + 8 Vercel vars + approve/merge #1441) → real €99 payment + refund walk · P6 subset (card edge) · P8 World subset (running) + 1M-point validation · P7 PWA · Attention grouping · Vercel plan — P4 Field subset and P5/C1 subset are PROVEN | 3 weeks after G-8 | **5–6 weeks** | 10 weeks (Stripe review/VAT, load validation surprises) |
+| **SAFE PILOT** (selected real workers/employers, free) | 33 = A1–A4, B1–B13, C1–C12, G1–G4 (+K2/K3 as gates) | **32 / 33** (14:30 UTC 2026-09-05) | A4 five-intent prod walk · C12 propagation walk after the P6-subset card edge · gap link 5–6 (I3) · owner: G-12 apply #1430, G-1 inbox test, G-14 admin click, G-15 apply #1436 · P2/P6-subset (EMPLOYER_CONFIRMED edge + object language on the walked journeys, lane R running) | 3 days | **7 days** | 14 days (each walk on a new build finds defects: today 2 of 3 journeys failed their first prod walk; Hobby freezes) |
+| **PUBLIC COMMERCIAL V1** | SAFE PILOT + J1–J5, K4, H2, L2, I4 grouping, C6/C9 Field UI, L3 PWA, M1 stable = 45 | **35 / 45** (44 distinct stage ids in the union; 14:30 UTC) | owner G-8 (Stripe LIVE objects + 8 Vercel vars + approve/merge #1441) → real €99 payment + refund walk · P6 subset (card edge) · P8 World subset (running) + 1M-point validation · P7 PWA · Attention grouping · Vercel plan — P4 Field subset and P5/C1 subset are PROVEN | 3 weeks after G-8 | **5–6 weeks** | 10 weeks (Stripe review/VAT, load validation surprises) |
 | **FULL CURRENT CANONICAL VISION** | 75 + P10–P15 packages | 49 / 75 (+ audit 2026-09-03: 40 % of the vision domains, 24 % prod-verified) | P10 teams · P11 education field · P12 marketplace TARGET · P13 My Space (#1475) · P14 native · P15 time scrubber; agency placement object; language routing 5→26; automations engine | 3 months | **5 months** | 9 months |
 
 ETA basis: connected journeys remaining (not PR count); one deploy + one walk per journey; the observed defect rate on first prod walks; owner gates answered within a day of being asked; no paid infrastructure decision required for SAFE PILOT.
@@ -189,7 +190,7 @@ Design's "owner decisions" reclassified: Stripe LIVE = genuine (G-8); #1475 = ge
 
 Target = the commercial spine production-proven: public entry → organisation signup/setup → need → results → contact/invitation → worker Attention → respond → readiness/gap → engagement/project → FREE=1 → €99 Checkout → signed webhook → subscription → PAID=10 → 11th = contact → portal/account → cancel/refund readback. Person side: entry → identity → opportunity/invitation → respond → readiness → work context → confirmation.
 
-**COMMERCIAL_CRITICAL_STAGES (30):** A1 A2 B1 B3 B4 B5 B6 B7 B8 B9 B12 B13 C1 C2 C3 C4 C5 C6 C12 G1 G2 J1 J2 J3 J4 J5 K2 K4 L2 L3 — **proven 23 / 30 at 13:15 UTC 2026-09-05** (13:08–13:15 UTC on `08629b19`: A1, B6 re-walk, C6 Field UI, L2 company home moved to proven; earlier today B7, B12, B13, B8, G2). SAFE PILOT: **31 / 33**. Remaining in the 30: C12 (propagation walk after the P6-subset edge), J1–J5 + K4 (#1441, owner gate G-8 + real payment). IMPLEMENTED_PENDING_PROD_PROOF outside the 30: E5 (outcomes walk).
+**COMMERCIAL_CRITICAL_STAGES (30):** A1 A2 B1 B3 B4 B5 B6 B7 B8 B9 B12 B13 C1 C2 C3 C4 C5 C6 C12 G1 G2 J1 J2 J3 J4 J5 K2 K4 L2 L3 — **proven 24 / 30 at 14:30 UTC 2026-09-05** (B13 + C12 proven on `c893557b`; previously (13:08–13:15 UTC on `08629b19`: A1, B6 re-walk, C6 Field UI, L2 company home moved to proven; earlier today B7, B12, B13, B8, G2). SAFE PILOT: **31 / 33**. Remaining in the 30: J1–J5 + K4 only (#1441, owner gate G-8 + real payment). IMPLEMENTED_PENDING_PROD_PROOF outside the 30: E5 (outcomes walk).
 
 | Day (UTC) | Target | Lane / write owner | Dependency | State | Prod proof | Blocker → recovery |
 |---|---|---|---|---|---|---|
