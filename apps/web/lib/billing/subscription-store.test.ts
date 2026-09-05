@@ -319,7 +319,10 @@ describe("applyInvoicePayment — duplicate success events are a no-op", () => {
   it("a failed payment moves the subscription to past_due", async () => {
     const calls = installFakeAdmin(() => ({}));
     expect(await applyInvoicePayment("sub_1", "failed")).toBe("ok");
-    const patch = calls[0].args[0] as Record<string, unknown>;
+    // Billing safety v1: the write is preceded by an ordering SELECT — assert
+    // on the UPDATE, not on call position.
+    const upd = calls.find((c) => c.op === "update")!;
+    const patch = upd.args[0] as Record<string, unknown>;
     expect(patch.last_payment_status).toBe("failed");
     expect(patch.status).toBe("past_due");
   });

@@ -7,6 +7,7 @@ import { BillingPortalButton } from "@/components/app/billing-portal-button";
 import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
+import { subscriptionBlocksCheckout } from "@/lib/billing/checkout-operations-core";
 import { Card } from "@/components/ui/Card";
 
 /**
@@ -66,7 +67,14 @@ export async function AccountBillingSection({
   // authority; never from a public page, never for a person (PERSON stays
   // free). The route re-checks membership, plan and price before any session.
   const subject = billingOn ? await resolveBillingSubject() : null;
-  const canOrder = Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) && !hasSubscription;
+  // Billing safety v1: the order button is also withheld while the subject's
+  // row sits in ANY billing state (incomplete / unpaid included) — the route
+  // refuses those with `subscription_exists` regardless; this keeps the UI
+  // honest about it. The Customer Portal is the path to fix or cancel.
+  const canOrder =
+    Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) &&
+    !hasSubscription &&
+    !subscriptionBlocksCheckout(status);
 
   return (
     <Card compact>

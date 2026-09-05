@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getBillingConfig } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { customerMetadata } from "@/lib/billing/metadata-core";
 
@@ -30,7 +31,13 @@ export type CustomerLookup =
   | { status: "absent" }
   | { status: "needs-migration" };
 
-/** The caller's OWN stored TEST customer id (or absent). */
+/**
+ * The caller's OWN stored customer id for the ACTIVE adapter mode (or absent).
+ * Billing safety v1: a `cus_` id minted in Stripe TEST does not exist in LIVE
+ * (and vice versa) — handing one across would make Checkout fail "No such
+ * customer". The mapping is therefore per (owner, provider, MODE); the store
+ * reads the mode from the billing config, never from a caller.
+ */
 export async function findBillingCustomer(
   ownerId: string,
 ): Promise<CustomerLookup> {
@@ -39,6 +46,7 @@ export async function findBillingCustomer(
     .select("provider_customer_id")
     .eq("owner_id", ownerId)
     .eq("provider", "stripe")
+    .eq("test_mode", getBillingConfig().testMode)
     .maybeSingle();
   if (error) {
     if (error.code === RELATION_ABSENT) return { status: "needs-migration" };
@@ -82,7 +90,9 @@ export async function ensureBillingCustomer(user: {
     owner_id: user.id,
     provider: "stripe",
     provider_customer_id: created.customerId,
-    test_mode: true,
+    // The adapter reports the mode the customer was minted in — evidence, not
+    // an assumption (a LIVE customer row is never labelled test).
+    test_mode: created.testMode,
   });
   if (error) {
     if (error.code === UNIQUE_VIOLATION) {

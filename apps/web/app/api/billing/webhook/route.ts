@@ -19,6 +19,10 @@ import {
   upsertSubscription,
   applyInvoicePayment,
 } from "@/lib/billing/subscription-store";
+import {
+  completeCheckoutOperationBySession,
+  expireCheckoutOperationBySession,
+} from "@/lib/billing/checkout-operations-store";
 
 /**
  * Stripe TEST webhook (Stripe sprint PR4). Verifies the signature (via the
@@ -64,13 +68,17 @@ export async function POST(req: Request) {
   // summary with the record — that summary IS their processing outcome, so the
   // operator can read what was refunded/disputed without replaying Stripe.
   const summary = summarizeRecordedEvent(event.type, event.object);
+  // Billing safety v1: Stripe's own `created` rides with the record (ordering
+  // + incident forensics: which delivery moved which row, in what order).
+  const created = typeof event.created === "number" ? event.created : null;
+  const lean: Record<string, unknown> = { id: event.id, type: event.type };
+  if (created !== null) lean.created = created;
   const recorded = await recordWebhookEvent({
     eventId: event.id,
     eventType: event.type,
     testMode: event.testMode,
-    payload: summary
-      ? { id: event.id, type: event.type, summary }
-      : { id: event.id, type: event.type },
+    eventCreated: created,
+    payload: summary ? { ...lean, summary } : lean,
   });
   if (recorded === "duplicate-processed") {
     return NextResponse.json({ ok: true, received: true, duplicate: true });
@@ -121,10 +129,29 @@ export async function POST(req: Request) {
           currentPeriodEnd: null,
           cancelAtPeriodEnd: false,
           testMode: link.testMode,
+          // Billing safety v1: a LINK event knows ids, not state — on an
+          // existing row it fills linkage and keeps the status a real
+          // subscription event already set (never active → incomplete).
+          transitionKind: "link",
+          eventId: event.id,
+          eventCreated: created,
         });
+        // Bookkeeping: the server-side checkout operation behind this session
+        // is complete. Best-effort — the operation's window closes it anyway.
+        const sessionId = typeof event.object.id === "string" ? event.object.id : null;
+        if (sessionId && (result === "ok" || result === "stale-event")) {
+          await completeCheckoutOperationBySession({
+            sessionId,
+            providerSubscriptionId: link.providerSubscriptionId,
+          });
+        }
       }
+    } else if (event.type === "checkout.session.expired") {
+      // Operation bookkeeping only — no subscription state exists to change.
+      const sessionId = typeof event.object.id === "string" ? event.object.id : null;
+      if (sessionId) await expireCheckoutOperationBySession(sessionId);
     } else if (event.type.startsWith("customer.subscription.")) {
-      const sub = parseSubscriptionObject(event.object, event.testMode);
+      const sub = parseSubscriptionObject(event.object, event.testMode, { id: event.id, created });
       if (sub) {
         if (event.type === "customer.subscription.deleted") {
           result = await upsertSubscription({ ...sub, status: "cancelled" });
@@ -141,7 +168,10 @@ export async function POST(req: Request) {
       // same invoice (distinct event ids) — applying "succeeded" twice is a
       // no-op on the subscription row.
       const inv = parseInvoiceObject(event.object, event.type !== "invoice.payment_failed");
-      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus);
+      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus, {
+        id: event.id,
+        created,
+      });
     }
   } catch (e) {
     // Keep the idempotency record OPEN (processed=false) and answer non-2xx so
@@ -153,7 +183,10 @@ export async function POST(req: Request) {
     );
   }
 
-  if (result === "ok") {
+  if (result === "ok" || result === "stale-event") {
+    // "stale-event" (billing safety v1): the event is OLDER than the one that
+    // last moved the row, or the row is terminal — skipped ON PURPOSE and
+    // acknowledged as processed, so a replay does not re-apply it either.
     await markWebhookProcessed(event.id);
     return NextResponse.json({ ok: true, received: true, processed: true, result });
   }

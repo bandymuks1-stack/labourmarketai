@@ -1197,6 +1197,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
       // marker records the RED classification, not a granted approval.
       "20260904060000_owns_company_governance_membership_v1.sql",
+      // 2026-09-05: billing safety invariants v1 (owner directive "BILLING
+      // SAFETY — MANDATORY BEFORE REAL CUSTOMERS"). RED (billing): additive
+      // ordering/amount evidence columns, event_created_at, the
+      // billing_customers key widened by test_mode (drop + add in one file),
+      // and the billing_checkout_operations table with admin SELECT +
+      // service-role grants. Marker added with the draft PR; owner approval
+      // pending — the marker records the RED classification, not an approval.
+      "20260905190000_billing_safety_invariants_v1.sql",
 ]);
   });
 

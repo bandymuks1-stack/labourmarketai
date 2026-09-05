@@ -18,6 +18,16 @@ import {
   checkoutIdempotencyKey,
   checkoutMetadata,
 } from "@/lib/billing/metadata-core";
+import { admitCheckout } from "@/lib/billing/checkout-admission";
+import {
+  attachProviderSession,
+  markCheckoutOperationFailed,
+  openCheckoutOperation,
+} from "@/lib/billing/checkout-operations-store";
+import {
+  expiresAtUnixFromIso,
+  type BillingScope,
+} from "@/lib/billing/checkout-operations-core";
 
 /**
  * TEST checkout route (Stripe sprint PR3) — STRICTLY gated. A Stripe test
@@ -115,9 +125,52 @@ export async function POST(req: Request) {
   }
 
   const provider = await getBillingProvider();
-  // Per-payer TEST customer (find-or-create, idempotent). Degrades to email
-  // prefill when unavailable — never blocks a valid checkout.
+
+  // ── Billing safety v1 (owner directive 2026-09-05) ────────────────────────
+  // 1. ADMISSION — one active subscription per billing subject + plan. A local
+  //    row in a billing state refuses a new checkout unless the PROVIDER (read)
+  //    says that subscription is dead. Fail closed on an unreadable state.
+  const scope: BillingScope = organizationId
+    ? { type: "organization", id: organizationId }
+    : { type: "profile", id: user.id };
+  const admission = await admitCheckout({ scope, planKey, testMode: config.testMode, provider });
+  if (!admission.admit) {
+    return NextResponse.json(
+      admission.reason === "subscription_exists"
+        ? { ok: false, reason: "subscription_exists", subscriptionStatus: admission.localStatus, testMode: config.testMode }
+        : { ok: false, reason: "checkout_unavailable", testMode: config.testMode },
+      { status: admission.reason === "subscription_exists" ? 409 : 503 },
+    );
+  }
+
+  // Per-payer customer for the ACTIVE mode (find-or-create, idempotent).
+  // Degrades to email prefill when unavailable — never blocks a valid checkout.
   const customer = await ensureBillingCustomer({ id: user.id, email: user.email });
+
+  // 2. OPERATION IDENTITY — the server-side record every Checkout Session is
+  //    derived from. Concurrent/duplicate requests collide on the one-open-
+  //    per-scope index and REUSE the same identity → the same Stripe
+  //    idempotency key → Stripe replays the same session. Its window is the
+  //    session's expiry. Until the table is applied the deterministic legacy
+  //    key (24h Stripe-side dedupe) stays in force; an unreadable store fails
+  //    CLOSED — no session without an identity.
+  const opened = await openCheckoutOperation({
+    ownerId: user.id,
+    organizationId,
+    scope,
+    planKey,
+    priceId,
+    testMode: config.testMode,
+    source: "web",
+  });
+  if (opened.kind === "error") {
+    return NextResponse.json({ ok: false, reason: "checkout_unavailable", testMode: config.testMode }, { status: 503 });
+  }
+  const operation = opened.kind === "needs-migration" ? null : opened.operation;
+  const idempotencyKey = operation
+    ? operation.idempotencyKey
+    : checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId });
+
   const result = await provider.createCheckoutSession({
     planKey,
     priceId,
@@ -126,12 +179,24 @@ export async function POST(req: Request) {
     providerCustomerId: customer.ok ? customer.customerId : null,
     organizationId,
     metadata: checkoutMetadata({ planKey, ownerId: user.id, organizationId }),
-    idempotencyKey: checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId }),
+    idempotencyKey,
+    expiresAt: operation ? expiresAtUnixFromIso(operation.expiresAt) : undefined,
     successUrl: `${origin}/dashboard/account?billing=${config.testMode ? "test_success" : "success"}`,
     cancelUrl: `${origin}/pricing?billing=${config.testMode ? "test_cancelled" : "cancelled"}`,
   });
   if (!result.ok) {
+    // Close the identity so the next attempt gets a fresh one (an honest
+    // provider refusal must not pin a dead key for 45 minutes).
+    if (operation) await markCheckoutOperationFailed(operation.id, result.reason);
     return NextResponse.json({ ok: false, reason: result.reason }, { status: 400 });
   }
-  return NextResponse.json({ ok: true, url: result.url, testMode: config.testMode });
+  if (operation) await attachProviderSession(operation.id, result.sessionId);
+  return NextResponse.json({
+    ok: true,
+    url: result.url,
+    testMode: config.testMode,
+    // Evidence for support: which server-side operation this session belongs to.
+    operationId: operation?.id ?? null,
+    reused: opened.kind === "reused",
+  });
 }

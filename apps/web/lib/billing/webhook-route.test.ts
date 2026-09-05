@@ -31,6 +31,13 @@ vi.mock("@/lib/billing/subscription-store", () => ({
   upsertSubscription: vi.fn(),
   applyInvoicePayment: vi.fn(),
 }));
+// Billing safety v1: the route also books the server-side checkout operation
+// (checkout.session.completed / expired). Mocked so no service-role client is
+// constructed here; the behaviour is pinned in webhook-route-safety.test.ts.
+vi.mock("@/lib/billing/checkout-operations-store", () => ({
+  completeCheckoutOperationBySession: vi.fn(async () => "ok"),
+  expireCheckoutOperationBySession: vi.fn(async () => "ok"),
+}));
 
 import { getBillingProvider } from "@/lib/billing/provider";
 import {
@@ -284,23 +291,25 @@ describe("webhook route — invoice.paid parity", () => {
     object: { parent: { subscription_details: { subscription: "sub_9" } } },
   });
 
+  // Billing safety v1: the route now also passes the event {id, created} for
+  // ordering — the payment-status mapping under test is unchanged.
   it("invoice.paid applies a SUCCEEDED payment (same as invoice.payment_succeeded)", async () => {
     withEvent(invoice("invoice.paid"));
     const res = await post();
     expect(res.status).toBe(200);
-    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded");
+    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded", expect.objectContaining({ id: "evt_invoice.paid" }));
   });
 
   it("invoice.payment_succeeded still applies SUCCEEDED", async () => {
     withEvent(invoice("invoice.payment_succeeded"));
     await post();
-    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded");
+    expect(invoicePay).toHaveBeenCalledWith("sub_9", "succeeded", expect.objectContaining({ id: "evt_invoice.payment_succeeded" }));
   });
 
   it("invoice.payment_failed applies FAILED", async () => {
     withEvent(invoice("invoice.payment_failed"));
     await post();
-    expect(invoicePay).toHaveBeenCalledWith("sub_9", "failed");
+    expect(invoicePay).toHaveBeenCalledWith("sub_9", "failed", expect.objectContaining({ id: "evt_invoice.payment_failed" }));
   });
 
   it("checkout.session.completed links owner+plan as incomplete (unchanged)", async () => {

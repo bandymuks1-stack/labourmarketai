@@ -62,6 +62,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "billing/reconcile/route.ts": {
+    class: "cookie-only",
+    why: "Billing safety v1: the superadmin's READ-ONLY reconciliation report (local billing tables vs the provider's view). Operator surface for a browser session; it takes no input, writes nothing and never charges — a non-browser caller has no product reason to read an anomaly report.",
+  },
   "cron/weekly-digest/route.ts": {
     class: "public",
     why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",

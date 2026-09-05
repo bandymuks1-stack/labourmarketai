@@ -37,6 +37,11 @@ const HANDLED = new Set([
   "charge.refunded",
   "charge.dispute.created",
   "charge.dispute.closed",
+  // Billing safety v1: bookkeeping for the server-side checkout operation —
+  // an expired hosted session closes its operation row early (no subscription
+  // state is touched). Delivered only if the endpoint subscribes to it; the
+  // local window closes the operation regardless.
+  "checkout.session.expired",
 ]);
 
 export function isHandledEventType(type: string): boolean {
@@ -103,6 +108,23 @@ export interface SubscriptionUpsert {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   testMode: boolean;
+  /**
+   * Billing safety v1 — ORDERING + EVIDENCE (optional: legacy callers omit).
+   *   eventId / eventCreated — the Stripe event carrying this state (unix s);
+   *     the store refuses an event OLDER than the one that last moved the row.
+   *   providerPriceId / unitAmountCents / currency — what the subscription
+   *     bills, from the signature-verified object (reconciliation evidence).
+   */
+  eventId?: string | null;
+  eventCreated?: number | null;
+  providerPriceId?: string | null;
+  unitAmountCents?: number | null;
+  currency?: string | null;
+  /**
+   * "link" = checkout.session.completed (knows ids, not state — never
+   * regresses an existing row's status); default "subscription".
+   */
+  transitionKind?: "link" | "subscription";
 }
 
 function isoFromUnix(v: unknown): string | null {
@@ -167,13 +189,40 @@ function subscriptionIdFromInvoice(
   return idFrom(details?.subscription) ?? idFrom(obj.subscription);
 }
 
+/**
+ * The FIRST subscription item's price — id, unit amount (smallest currency
+ * unit) and currency — as Stripe reports it on the subscription object.
+ * Evidence for reconciliation; never a price source.
+ */
+export function parseSubscriptionPrice(
+  obj: Record<string, unknown> | null | undefined,
+): { priceId: string | null; unitAmountCents: number | null; currency: string | null } {
+  const none = { priceId: null, unitAmountCents: null, currency: null };
+  if (!obj) return none;
+  const items = (obj.items as { data?: unknown[] } | null | undefined)?.data;
+  const first = Array.isArray(items) ? items[0] : undefined;
+  if (!first || typeof first !== "object") return none;
+  const price = (first as Record<string, unknown>).price;
+  if (typeof price === "string") return { priceId: price, unitAmountCents: null, currency: null };
+  if (!price || typeof price !== "object") return none;
+  const p = price as Record<string, unknown>;
+  return {
+    priceId: asString(p.id),
+    unitAmountCents:
+      typeof p.unit_amount === "number" && Number.isFinite(p.unit_amount) ? p.unit_amount : null,
+    currency: asString(p.currency),
+  };
+}
+
 /** Parse a customer.subscription.* event object → SubscriptionUpsert. */
 export function parseSubscriptionObject(
   obj: Record<string, unknown> | null | undefined,
   testMode: boolean,
+  event?: { id: string; created?: number | null },
 ): SubscriptionUpsert | null {
   if (!obj || typeof obj.id !== "string") return null;
   const meta = (obj.metadata as Record<string, unknown> | undefined) ?? {};
+  const price = parseSubscriptionPrice(obj);
   return {
     providerSubscriptionId: obj.id,
     providerCustomerId: idFrom(obj.customer),
@@ -185,7 +234,68 @@ export function parseSubscriptionObject(
     currentPeriodEnd: periodFromSubscription(obj, "current_period_end"),
     cancelAtPeriodEnd: Boolean(obj.cancel_at_period_end),
     testMode,
+    eventId: event?.id ?? null,
+    eventCreated: typeof event?.created === "number" ? event.created : null,
+    providerPriceId: price.priceId,
+    unitAmountCents: price.unitAmountCents,
+    currency: price.currency,
   };
+}
+
+// ─── Ordering — the ONE subscription state machine's transition guard ───────
+
+/** Terminal provider states: a Stripe subscription is never un-cancelled. */
+export function isTerminalSubStatus(s: SubStatus | string | null | undefined): boolean {
+  return s === "cancelled" || s === "expired";
+}
+
+export interface ExistingRowSnapshot {
+  readonly status: SubStatus | string;
+  /** ISO timestamp of the event that last moved the row (null = legacy/unknown). */
+  readonly lastEventCreatedAt: string | null;
+}
+
+export type TransitionDecision =
+  /** Apply the incoming state (and record it as the row's latest event). */
+  | { readonly apply: true; readonly keepStatus: false }
+  /**
+   * checkout.session.completed is a LINK event — it knows the ids, not the
+   * state. On an existing row it may fill linkage but must keep the status a
+   * real subscription event already set (never regress active → incomplete).
+   */
+  | { readonly apply: true; readonly keepStatus: true }
+  | { readonly apply: false; readonly reason: "stale_event" | "terminal_state" };
+
+/**
+ * Out-of-order protection. Rules, in order:
+ *   1. no existing row → apply;
+ *   2. a LINK event on an existing row → apply linkage, keep status;
+ *   3. the incoming event is OLDER than the row's last event → stale, skip;
+ *   4. the row is terminal (cancelled/expired) and the incoming state is not
+ *      → skip: Stripe never revives a subscription id, so this can only be a
+ *      late delivery without a usable timestamp;
+ *   5. otherwise apply.
+ * Equal timestamps apply (Stripe emits several events within one second; the
+ * later HTTP delivery is then the later state in practice, and the terminal
+ * rule still protects the one irreversible transition).
+ */
+export function decideSubscriptionTransition(
+  existing: ExistingRowSnapshot | null,
+  incoming: { readonly kind: "link" | "subscription" | "invoice"; readonly status: SubStatus | null; readonly eventCreated: number | null },
+): TransitionDecision {
+  if (!existing) return { apply: true, keepStatus: false };
+  if (incoming.kind === "link") return { apply: true, keepStatus: true };
+  if (
+    existing.lastEventCreatedAt !== null &&
+    incoming.eventCreated !== null &&
+    incoming.eventCreated * 1000 < Date.parse(existing.lastEventCreatedAt)
+  ) {
+    return { apply: false, reason: "stale_event" };
+  }
+  if (isTerminalSubStatus(existing.status) && !isTerminalSubStatus(incoming.status)) {
+    return { apply: false, reason: "terminal_state" };
+  }
+  return { apply: true, keepStatus: false };
 }
 
 /** Parse a checkout.session.completed object → the initial link. */

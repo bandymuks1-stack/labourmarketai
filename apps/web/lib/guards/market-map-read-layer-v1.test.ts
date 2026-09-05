@@ -782,8 +782,14 @@ describe("NO new DB migration in this PR", () => {
     // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
-expect(count).toBeLessThanOrEqual(263);
+    // Bumped 263 -> 264 for billing safety invariants v1 (2026-09-05, RED
+    // billing, draft + needs-human-gate, UNAPPLIED until owner approval):
+    // additive ordering/amount evidence columns on billing_subscriptions,
+    // event_created_at on payment_webhook_events, billing_customers key
+    // widened by test_mode, new billing_checkout_operations table (admin
+    // SELECT, service-role writes). No data loss.
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 264.
+expect(count).toBeLessThanOrEqual(264);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

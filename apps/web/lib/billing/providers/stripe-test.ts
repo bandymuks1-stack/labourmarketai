@@ -14,8 +14,11 @@ import type {
   CheckoutSessionResult,
   CreateCustomerInput,
   CreateCustomerResult,
+  ListSubscriptionsResult,
   PortalSessionInput,
   PortalSessionResult,
+  ProviderSubscriptionView,
+  RetrieveSubscriptionResult,
 } from "@/lib/billing/provider";
 
 /**
@@ -56,10 +59,37 @@ function reasonFrom(e: unknown): string {
   return e instanceof Error ? e.message.slice(0, 200) : "stripe_error";
 }
 
+/** Stripe's "no such object" — a read that finds nothing is an ANSWER, not an error. */
+function isResourceMissing(e: unknown): boolean {
+  return Boolean(e && typeof e === "object" && (e as { code?: unknown }).code === "resource_missing");
+}
+
+/** Normalize a Stripe subscription object into the provider-neutral read view. */
+function viewOf(sub: Stripe.Subscription): ProviderSubscriptionView {
+  const item = sub.items?.data?.[0];
+  const price = item?.price;
+  return {
+    id: sub.id,
+    customerId: typeof sub.customer === "string" ? sub.customer : sub.customer?.id ?? null,
+    rawStatus: sub.status,
+    priceId: price?.id ?? null,
+    unitAmountCents: typeof price?.unit_amount === "number" ? price.unit_amount : null,
+    currency: price?.currency ?? null,
+    livemode: sub.livemode,
+    cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
+  };
+}
+
 export function createStripeProvider(): BillingProvider {
   const cfg = getBillingConfig();
   const live = cfg.state === "stripe_live";
   const testMode = !live;
+  // Billing safety v1 (evidence): every object this adapter creates says which
+  // Stripe environment it belongs to. metadata-core's constant predates live
+  // mode and always said "test"; the adapter is the one place that KNOWS the
+  // mode, so it stamps the truth (a live customer/session/subscription is
+  // never labelled test).
+  const environmentStamp = { environment: live ? "live" : "test", test_mode: String(testMode) };
   return {
     id: live ? "stripe_live" : "stripe_test",
     active: true,
@@ -70,7 +100,7 @@ export function createStripeProvider(): BillingProvider {
       try {
         const metadata: Record<string, string> = {
           ...(input.metadata ?? { plan_key: input.planKey }),
-          test_mode: String(testMode),
+          ...environmentStamp,
         };
         const session = await client().checkout.sessions.create(
           {
@@ -101,6 +131,10 @@ export function createStripeProvider(): BillingProvider {
             // customer.subscription.* events carry owner/plan/org linkage even
             // when they arrive before (or without) the session event.
             subscription_data: { metadata },
+            // Billing safety v1: the hosted session dies with the server-side
+            // checkout operation's window — at most one payable session per
+            // subject + plan at any instant.
+            ...(input.expiresAt ? { expires_at: input.expiresAt } : {}),
           },
           input.idempotencyKey
             ? { idempotencyKey: input.idempotencyKey }
@@ -120,7 +154,7 @@ export function createStripeProvider(): BillingProvider {
         const customer = await client().customers.create(
           {
             email: input.email ?? undefined,
-            metadata: { ...input.metadata, test_mode: String(testMode) },
+            metadata: { ...input.metadata, ...environmentStamp },
           },
           // One customer per profile — a retry must not mint a second one.
           { idempotencyKey: `cus1_${input.ownerId}` },
@@ -161,8 +195,41 @@ export function createStripeProvider(): BillingProvider {
         id: event.id,
         type: event.type,
         testMode: event.livemode === false,
+        created: event.created,
         object: (event.data?.object ?? {}) as unknown as Record<string, unknown>,
       };
+    },
+
+    // ── READ-ONLY provider views (billing safety v1) ──────────────────────
+    // Consulted by checkout admission (is the local "blocking" row still live
+    // in Stripe?) and by reconciliation. Neither creates, updates, cancels or
+    // charges anything — a missing object is an answer, not a failure.
+    async retrieveSubscription(
+      providerSubscriptionId: string,
+    ): Promise<RetrieveSubscriptionResult> {
+      try {
+        const sub = await client().subscriptions.retrieve(providerSubscriptionId);
+        return { ok: true, subscription: viewOf(sub) };
+      } catch (e) {
+        if (isResourceMissing(e)) return { ok: true, subscription: null };
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    async listCustomerSubscriptions(
+      providerCustomerId: string,
+    ): Promise<ListSubscriptionsResult> {
+      try {
+        const page = await client().subscriptions.list({
+          customer: providerCustomerId,
+          status: "all",
+          limit: 100,
+        });
+        return { ok: true, subscriptions: page.data.map(viewOf) };
+      } catch (e) {
+        if (isResourceMissing(e)) return { ok: true, subscriptions: [] };
+        return { ok: false, reason: reasonFrom(e) };
+      }
     },
   };
 }
