@@ -36,6 +36,8 @@ export interface ReadinessChatWorker {
   readonly checked: number;
   readonly total: number;
   readonly operationalStatus: OperationalStatus | null;
+  /** The person's newest answer in the instruction thread AFTER the latest instruction on this project; null = none yet. */
+  readonly reply: { readonly text: string; readonly at: string } | null;
 }
 
 export interface ReadinessChatProjectOption {

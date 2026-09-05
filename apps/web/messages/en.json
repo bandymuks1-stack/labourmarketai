@@ -12189,6 +12189,7 @@
       "readinessNoPeople": "Nobody is on this project yet.",
       "readinessAsk": "Which project? Pick one:",
       "readinessNotFound": "I can't find that project among the active ones. Which did you mean?",
+      "readinessRepliedSuffix": "replied {date}: “{text}”",
       "readinessUnavailable": "Readiness could not be read right now.",
       "chipReadinessPrefix": "Readiness",
       "chipOpenOperations": "Open project operations",

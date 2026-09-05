@@ -3888,6 +3888,7 @@
       "readinessNoPeople": "Ingen er på prosjektet ennå.",
       "readinessAsk": "Hvilket prosjekt? Velg ett:",
       "readinessNotFound": "Jeg finner ikke det prosjektet blant de aktive. Hvilket mente du?",
+      "readinessRepliedSuffix": "svarte {date}: «{text}»",
       "readinessUnavailable": "Beredskapen kunne ikke leses akkurat nå.",
       "chipReadinessPrefix": "Beredskap",
       "chipOpenOperations": "Åpne prosjektstyring",

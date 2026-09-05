@@ -278,6 +278,7 @@ const CHAT_KEYS = [
   "riskUnavailable",
   "chipCreateProject",
   "readinessIntro",
+  "readinessRepliedSuffix",
   "readinessReadyLine",
   "readinessGapLine",
   "readinessNoChecklist",

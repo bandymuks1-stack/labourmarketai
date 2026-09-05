@@ -12189,6 +12189,7 @@
       "readinessNoPeople": "Projekte dar nėra žmonių.",
       "readinessAsk": "Kuris projektas? Pasirinkite:",
       "readinessNotFound": "Tokio projekto nerandu tarp aktyvių. Kurį turėjote omenyje?",
+      "readinessRepliedSuffix": "atsakė {date}: „{text}“",
       "readinessUnavailable": "Parengties dabar nuskaityti nepavyko.",
       "chipReadinessPrefix": "Parengtis",
       "chipOpenOperations": "Atidaryti projekto valdymą",

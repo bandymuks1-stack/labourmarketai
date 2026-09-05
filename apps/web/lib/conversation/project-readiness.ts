@@ -5,6 +5,7 @@ import "server-only";
 import { getProjectOperations } from "@/lib/projects/operations";
 import { deriveReadinessRatio } from "@/lib/projects/operations-centre-model";
 import { loadProjectsForResult } from "@/lib/projects/project-workspace";
+import { listProjectInstructionReplies, type InstructionReply } from "@/lib/instructions/instructions";
 
 import {
   READINESS_CHAT_ASK_LIMIT,
@@ -56,6 +57,8 @@ export async function loadProjectReadinessForChat(input: {
   try {
     const ops = await getProjectOperations(projectId);
     if (!ops) return { kind: "not-found", projects: live.slice(0, READINESS_CHAT_ASK_LIMIT) };
+    // The people's answers in the instruction threads (the instruction channel's own read; empty on failure).
+    const replies = await listProjectInstructionReplies(projectId).catch(() => new Map<string, InstructionReply>());
     const workers: ReadinessChatWorker[] = ops.workers.map((w) => {
       const ratio = deriveReadinessRatio(w.readinessItems);
       return {
@@ -74,6 +77,7 @@ export async function loadProjectReadinessForChat(input: {
         checked: ratio.checked,
         total: ratio.total,
         operationalStatus: w.operationalStatus,
+        reply: (() => { const r = replies.get(w.workerProfileId); return r ? { text: r.text, at: r.at } : null; })(),
       };
     });
     // the people who still need something first, then by name — the order the

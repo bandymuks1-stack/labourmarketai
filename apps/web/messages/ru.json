@@ -12189,6 +12189,7 @@
       "readinessNoPeople": "В проекте пока нет людей.",
       "readinessAsk": "Какой проект? Выберите:",
       "readinessNotFound": "Такого проекта среди активных не нахожу. Какой вы имели в виду?",
+      "readinessRepliedSuffix": "ответил(а) {date}: «{text}»",
       "readinessUnavailable": "Сейчас не удалось прочитать готовность.",
       "chipReadinessPrefix": "Готовность",
       "chipOpenOperations": "Открыть управление проектом",

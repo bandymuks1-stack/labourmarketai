@@ -3888,6 +3888,7 @@
       "readinessNoPeople": "Projektis pole veel kedagi.",
       "readinessAsk": "Milline projekt? Valige:",
       "readinessNotFound": "Sellist projekti aktiivsete seast ei leia. Millist mõtlesite?",
+      "readinessRepliedSuffix": "vastas {date}: „{text}“",
       "readinessUnavailable": "Valmisolekut ei õnnestunud praegu lugeda.",
       "chipReadinessPrefix": "Valmisolek",
       "chipOpenOperations": "Ava projekti juhtimine",

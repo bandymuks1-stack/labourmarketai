@@ -3888,6 +3888,7 @@
       "readinessNoPeople": "W projekcie nie ma jeszcze ludzi.",
       "readinessAsk": "Który projekt? Wybierz:",
       "readinessNotFound": "Nie znajduję takiego projektu wśród aktywnych. Który miałeś na myśli?",
+      "readinessRepliedSuffix": "odpowiedział(a) {date}: „{text}”",
       "readinessUnavailable": "Nie udało się teraz odczytać gotowości.",
       "chipReadinessPrefix": "Gotowość",
       "chipOpenOperations": "Otwórz zarządzanie projektem",

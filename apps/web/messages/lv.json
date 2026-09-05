@@ -3888,6 +3888,7 @@
       "readinessNoPeople": "Projektā vēl nav cilvēku.",
       "readinessAsk": "Kurš projekts? Izvēlieties:",
       "readinessNotFound": "Tādu projektu starp aktīvajiem neatrodu. Kuru domājāt?",
+      "readinessRepliedSuffix": "atbildēja {date}: “{text}”",
       "readinessUnavailable": "Gatavību šobrīd neizdevās nolasīt.",
       "chipReadinessPrefix": "Gatavība",
       "chipOpenOperations": "Atvērt projekta pārvaldību",

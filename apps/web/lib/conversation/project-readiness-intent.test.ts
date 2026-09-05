@@ -146,3 +146,39 @@ describe("what a project still needs, by sentence", () => {
     }
   });
 });
+describe("the person's ANSWER to the instruction reaches the manager's readiness line (§11/§12 — the loop closes in the chat)", () => {
+  const INS = read("lib/instructions/instructions.ts");
+  const CONTRACT = read("lib/conversation/project-readiness-contract.ts");
+
+  it("the read lives in the instruction channel's own module: the caller's instructions on THIS project, the thread's other participant, the newest non-instruction message by that person AFTER the latest instruction — bounded, participant-scoped, no write", () => {
+    const fn = INS.slice(INS.indexOf("export async function listProjectInstructionReplies"));
+    expect(fn).toMatch(/\.eq\("project_id", projectId\)/);
+    expect(fn).toMatch(/\.eq\("is_instruction", true\)/);
+    expect(fn).toMatch(/\.eq\("author_id", user\.id\)/);
+    expect(fn).toMatch(/\.from\("conversation_participants"\)/);
+    expect(fn).toMatch(/\.eq\("is_instruction", false\)/);
+    expect(fn).toMatch(/\.neq\("author_id", user\.id\)/);
+    expect(fn).toMatch(/if \(Date\.parse\(m\.created_at\) <= Date\.parse\(since\)\) continue;/);
+    expect(fn).toMatch(/\.limit\(PROJECT_INSTRUCTION_REPLIES_LIMIT\)/g);
+    expect(fn).toMatch(/\.slice\(0, 120\)/);
+    expect(fn).not.toMatch(/\.insert\(|\.update\(|\.rpc\(|service_role/);
+  });
+
+  it("the readiness loader composes it (the loader itself still writes no query) and the contract carries text + time only", () => {
+    expect(LOADER).toContain('import { listProjectInstructionReplies, type InstructionReply } from "@/lib/instructions/instructions";');
+    expect(LOADER).toContain("const replies = await listProjectInstructionReplies(projectId).catch(() => new Map<string, InstructionReply>());");
+    expect(LOADER).toMatch(/reply: \(\(\) => \{ const r = replies\.get\(w\.workerProfileId\); return r \? \{ text: r\.text, at: r\.at \} : null; \}\)\(\)/);
+    expect(CONTRACT).toMatch(/readonly reply: \{ readonly text: string; readonly at: string \} \| null;/);
+  });
+
+  it("the chat appends the answer to the person's line — ready or not — and the 'Gauta' chip stays the corrective action", () => {
+    expect(CHAT).toMatch(/const replied = \(w: \(typeof res\.workers\)\[number\]\) =>/);
+    expect(CHAT).toMatch(/labels\.readinessRepliedSuffix\.replace\("\{date\}", w\.reply\.at\.slice\(0, 10\)\)\.replace\("\{text\}", w\.reply\.text\)/);
+    expect(CHAT.split("+ replied(w)").length).toBe(3);
+    expect(CHAT).toMatch(/id: `ready-got:\$\{res\.projectId\}:\$\{first\.workerProfileId\}:\$\{it\.key\}`/);
+    for (const loc of LOCALES) {
+      const doc = JSON.parse(read(`messages/${loc}.json`));
+      expect(doc.conversation.chat.readinessRepliedSuffix, loc).toMatch(/\{date\}.*\{text\}/);
+    }
+  });
+});

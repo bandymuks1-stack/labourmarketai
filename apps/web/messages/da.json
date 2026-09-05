@@ -3888,6 +3888,7 @@
       "readinessNoPeople": "Der er endnu ingen på dette projekt.",
       "readinessAsk": "Hvilket projekt? Vælg et:",
       "readinessNotFound": "Jeg kan ikke finde det projekt blandt de aktive. Hvilket mente du?",
+      "readinessRepliedSuffix": "svarede {date}: “{text}”",
       "readinessUnavailable": "Paratheden kunne ikke læses lige nu.",
       "chipReadinessPrefix": "Parathed",
       "chipOpenOperations": "Åbn projektstyring",

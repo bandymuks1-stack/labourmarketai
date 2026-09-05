@@ -454,6 +454,7 @@ export type ChatLabels = {
   riskUnavailable: string;
   chipCreateProject: string;
   readinessIntro: string;
+  readinessRepliedSuffix: string;
   readinessReadyLine: string;
   readinessGapLine: string;
   readinessNoChecklist: string;
@@ -2748,16 +2749,22 @@ export function ConversationChat({
             return;
           }
           lastReadinessRef.current = res;
+          // §11/§12 — the person's own answer to the instruction (the SAME
+          // direct thread `send_work_instruction_to_project` wrote into, read
+          // by the instruction channel's own read) sits on their line, so the
+          // manager can mark the row received without leaving the chat.
+          const replied = (w: (typeof res.workers)[number]) =>
+            w.reply ? ` · ${labels.readinessRepliedSuffix.replace("{date}", w.reply.at.slice(0, 10)).replace("{text}", w.reply.text)}` : "";
           const lines = res.workers.map((w) => {
             if (w.ready) {
-              return labels.readinessReadyLine.replace("{name}", w.name).replace("{checked}", String(w.checked)).replace("{total}", String(w.total));
+              return labels.readinessReadyLine.replace("{name}", w.name).replace("{checked}", String(w.checked)).replace("{total}", String(w.total)) + replied(w);
             }
             const gaps = [...w.missing.map(readinessCodeLabel), ...w.itemsMissing.map((i) => i.label), ...w.itemsBlocked.map((i) => `${i.label} ${labels.blockedSuffix}`)];
             return labels.readinessGapLine
               .replace("{name}", w.name)
               .replace("{gaps}", gaps.join(", "))
               .replace("{checked}", String(w.checked))
-              .replace("{total}", String(w.total));
+              .replace("{total}", String(w.total)) + replied(w);
           });
           const head = labels.readinessIntro.replace("{title}", res.title).replace("{ready}", String(res.readyCount)).replace("{people}", String(res.workerTotal));
           const tail = res.workerTotal === 0 ? [labels.readinessNoPeople] : res.checklistTracked ? [] : [labels.readinessNoChecklist];

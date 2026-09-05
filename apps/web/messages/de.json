@@ -12189,6 +12189,7 @@
       "readinessNoPeople": "Auf diesem Projekt ist noch niemand.",
       "readinessAsk": "Welches Projekt? Bitte wählen:",
       "readinessNotFound": "Dieses Projekt finde ich unter den aktiven nicht. Welches meinten Sie?",
+      "readinessRepliedSuffix": "hat am {date} geantwortet: „{text}“",
       "readinessUnavailable": "Die Bereitschaft konnte gerade nicht gelesen werden.",
       "chipReadinessPrefix": "Bereitschaft",
       "chipOpenOperations": "Projektsteuerung öffnen",

@@ -12189,6 +12189,7 @@
       "readinessNoPeople": "Er staat nog niemand op dit project.",
       "readinessAsk": "Welk project? Kies er een:",
       "readinessNotFound": "Dat project vind ik niet tussen de actieve. Welk bedoelde u?",
+      "readinessRepliedSuffix": "antwoordde op {date}: “{text}”",
       "readinessUnavailable": "De gereedheid kon nu niet worden gelezen.",
       "chipReadinessPrefix": "Gereedheid",
       "chipOpenOperations": "Projectbeheer openen",
