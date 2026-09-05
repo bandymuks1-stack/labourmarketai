@@ -1197,6 +1197,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
       // marker records the RED classification, not a granted approval.
       "20260904060000_owns_company_governance_membership_v1.sql",
+      "20260905190000_public_plans_v1.sql", // 2026-09-05: public_plans_v1 — anon-safe price catalogue RPC (RED, owner gate)
 ]);
   });
 
