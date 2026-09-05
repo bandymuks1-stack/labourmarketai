@@ -125,6 +125,11 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/projects/readiness-items",
       "@/lib/instructions/actions",
       "next-intl/server",
+      // Owner contract §14 (2026-09-05): the inbox's one-tap confirm (approve +
+      // verify skills through the gated RPC chain) and the membership RPC
+      // wrapper that switches a person's journal review on. Added consciously.
+      "@/lib/journal/quick-confirm-actions",
+      "@/lib/operations/org-membership",
     ]);
     const imports = [...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]);
     expect(imports.length).toBeGreaterThan(5);

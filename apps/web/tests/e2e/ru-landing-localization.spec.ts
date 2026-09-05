@@ -33,7 +33,9 @@ const OUT = join(
 
 /** Strings that MUST render in Russian on the hero. */
 const MUST_APPEAR = [
-  "РЕШЕНИЕ ИИ",
+  // 2026-09-05 (#1511, owner directive): the hero is an EXAMPLE — the label
+  // "РЕШЕНИЕ ИИ" was retired with the pretence it named.
+  "ПРИМЕР РЕШЕНИЯ",
   "Почему здесь",
   "Почему сейчас",
   "Наиболее подходящий человек",
@@ -43,6 +45,7 @@ const MUST_APPEAR = [
 /** Their English originals — every one of these was on the Russian page before. */
 const MUST_BE_GONE = [
   "AI DECISION",
+  "EXAMPLE DECISION",
   "Why here",
   "Why now",
   "Best matching person",

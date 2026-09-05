@@ -3424,6 +3424,14 @@
           "label": "Pieprasīt trūkstošo",
           "description": "Darbinieks saņem darba norādījumu ar to, kas projektam no viņa vēl trūkst."
         },
+        "confirmWork": {
+          "label": "Apstiprināt darba ierakstu",
+          "description": "Vadītājs apstiprina darbinieka darba ierakstu un ar to pierādītās prasmes — tās kļūst apstiprinātas."
+        },
+        "enableJournalReview": {
+          "label": "Ieslēgt darbu pārskatīšanu",
+          "description": "Darbinieka darba ieraksti kļūst redzami un apstiprināmi vadītājam."
+        },
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
@@ -3890,6 +3898,17 @@
       "readinessWriteFailed": "Izmaiņu neizdevās veikt.",
       "briefInstructions": "Gaida norādījumi: {count}.",
       "chipInstructions": "Norādījumi",
+      "confirmIntro": "Gaida jūsu apstiprinājumu: {count} ieraksti.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} prasmes)",
+      "confirmChip": "Apstiprināt: {name} · {date}",
+      "confirmDone": "Apstiprināts: {name} — apstiprinātas prasmes: {count}.",
+      "confirmNone": "Gaidošu darba ierakstu nav.",
+      "confirmNotEnabled": "Darbu pārskatīšana vēl nav ieslēgta: {names}. Ieslēdziet, un viņu ieraksti parādīsies šeit.",
+      "confirmEnableChip": "Ieslēgt pārskatīšanu: {name}",
+      "confirmEnabled": "Pārskatīšana ieslēgta: {name} — darba ieraksti gaida jūsu apstiprinājumu.",
+      "confirmFailed": "Apstiprināt neizdevās.",
+      "confirmUnavailable": "Apstiprinājumus šobrīd neizdevās nolasīt.",
+      "chipOpenInbox": "Atvērt apstiprinājumu iesūtni",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais.",
       "documentFileOffer": "Dokuments ierakstīts. Failu varat pievienot šeit — PDF, Word vai foto līdz 5 MB.",

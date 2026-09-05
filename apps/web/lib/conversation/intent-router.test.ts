@@ -889,6 +889,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Is het team klaar?",
     de: "Was fehlt dem Projekt?",
   },
+  "confirm-work": {
+    lt: "Patvirtink Jono darbą",
+    en: "Confirm John's work",
+    ru: "Подтверди работу Ивана",
+    nl: "Bevestig het werk van Jan",
+    de: "Bestätige Jans Arbeit",
+  },
 };
 
 /**

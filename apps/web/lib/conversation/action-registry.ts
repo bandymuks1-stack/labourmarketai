@@ -790,6 +790,44 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     advancedRoute: "/dashboard/projects",
     handler: { kind: "server_action", ref: "sendWorkInstructionAction" },
   },
+  {
+    /**
+     * WORK → EVIDENCE → EMPLOYER CONFIRMATION → VERIFIED CAPABILITY (owner
+     * contract 2026-09-04 §14): "patvirtink Jono darbą" — the inbox's
+     * one-tap confirm by chip: approve the entry and verify the declared
+     * skills it proves. Important tier: a trust act on a person's identity;
+     * the chip is the explicit confirmation.
+     */
+    id: "company.confirm-work",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.confirmWork.label",
+    descriptionKey: "conversation.actions.company.confirmWork.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/inbox",
+    handler: { kind: "server_action", ref: "quickConfirmEntry" },
+  },
+  {
+    /**
+     * The one action that makes a person's work confirmable: journal review
+     * switched on for their employee engagement (the membership RPC). The
+     * inbox's toggle and this chip are the same write.
+     */
+    id: "company.enable-journal-review",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.enableJournalReview.label",
+    descriptionKey: "conversation.actions.company.enableJournalReview.description",
+    confirmation: "reversible_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/inbox",
+    handler: { kind: "server_action", ref: "setEngagementJournalReview" },
+  },
 
   // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────────────
   // An education institution is a company that holds the `training_provider`

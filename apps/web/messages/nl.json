@@ -11653,6 +11653,14 @@
           "label": "Ontbrekende opvragen",
           "description": "De medewerker ontvangt een werkinstructie met wat het project nog van hem nodig heeft."
         },
+        "confirmWork": {
+          "label": "Werkitem bevestigen",
+          "description": "Een leidinggevende bevestigt het werkitem en de vaardigheden die het aantoont — die worden bevestigd."
+        },
+        "enableJournalReview": {
+          "label": "Werkbeoordeling aanzetten",
+          "description": "De werkitems van een medewerker worden zichtbaar en bevestigbaar voor de leidinggevende."
+        },
         "respondOffer": {
           "label": "Aanbod van een bureau beantwoorden",
           "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
@@ -12191,6 +12199,17 @@
       "readinessWriteFailed": "De wijziging kon niet worden gedaan.",
       "briefInstructions": "Wachtende instructies: {count}.",
       "chipInstructions": "Instructies",
+      "confirmIntro": "Wacht op uw bevestiging: {count} items.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} vaardigh.)",
+      "confirmChip": "Bevestigen: {name} · {date}",
+      "confirmDone": "Bevestigd: {name} — bevestigde vaardigheden: {count}.",
+      "confirmNone": "Er wachten geen werkitems.",
+      "confirmNotEnabled": "Werkbeoordeling staat nog niet aan voor: {names}. Zet het aan en hun items verschijnen hier.",
+      "confirmEnableChip": "Beoordeling aanzetten: {name}",
+      "confirmEnabled": "Beoordeling aan: {name} — de werkitems wachten op uw bevestiging.",
+      "confirmFailed": "De bevestiging kon niet worden gedaan.",
+      "confirmUnavailable": "Bevestigingen konden nu niet worden gelezen.",
+      "chipOpenInbox": "Bevestigingsinbox openen",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan.",
       "documentFileOffer": "Document vastgelegd. U kunt het bestand hier direct toevoegen — PDF, Word of een foto tot 5 MB.",

@@ -20,6 +20,8 @@ import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/proje
 import { getProjectOperations } from "@/lib/projects/operations";
 import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
 import { sendWorkInstructionAction } from "@/lib/instructions/actions";
+import { quickConfirmEntry } from "@/lib/journal/quick-confirm-actions";
+import { setEngagementJournalReview } from "@/lib/operations/org-membership";
 import { getTranslations } from "next-intl/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
@@ -409,6 +411,30 @@ export const COMPANY_EXECUTORS: {
     );
     if (r.ok) return { ok: true };
     return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.confirm-work": async (input, ctx) => {
+    // THE PROOF STEP — the inbox's own one-tap confirm: approve the entry and
+    // verify the declared skills it proves through the gated RPC chain (the
+    // only path that can flip a worker's skill to verified). Same form the
+    // inbox posts; the exceptions pyramid and the review flag are re-checked
+    // inside.
+    const f = new FormData();
+    f.set("entry_id", input.entryId);
+    f.set("locale", ctx.locale);
+    for (const id of input.skillIds) f.append("skill_id", id);
+    const r = await quickConfirmEntry(null, f);
+    if (r.ok) return { ok: true, data: { verifiedSkills: r.verifiedSkills } };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.enable-journal-review": async (input) => {
+    // Journal review ON for one employee engagement — the membership RPC the
+    // inbox's toggle calls; it re-checks that the caller manages the
+    // organization and that the engagement is an active employee one.
+    const r = await setEngagementJournalReview(input.engagementId, true);
+    if (r.ok) return { ok: true, data: { code: r.code } };
+    return { ok: false, code: r.code === "not_authorized" ? "not_authorized" : "error", message: r.message };
   },
 
   "company.respond-offer": async (input) => {

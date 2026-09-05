@@ -271,6 +271,22 @@ export const companyRequestReadinessSchema = z.object({
   body: z.string().trim().min(1).max(2000),
 });
 
+/** §14 EMPLOYER CONFIRMATION — the inbox's one-tap confirm: approve a
+ *  journal entry AND verify the declared skills it proves
+ *  (`confirm_entry_and_verify_skills`, the ONLY path that flips a skill to
+ *  verified; re-checks manager authority + the person's review flag). */
+export const companyConfirmWorkSchema = z.object({
+  entryId: uuid,
+  skillIds: z.array(uuid).max(20),
+});
+
+/** Switch a person's journal review on — the membership RPC
+ *  (`set_engagement_journal_review`: an active employee engagement of an
+ *  organization the caller manages). Reversible (the same RPC turns it off). */
+export const companyEnableJournalReviewSchema = z.object({
+  engagementId: uuid,
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -309,6 +325,8 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.set-readiness-item": companySetReadinessItemSchema,
   "company.seed-readiness-checklist": companySeedReadinessChecklistSchema,
   "company.request-readiness": companyRequestReadinessSchema,
+  "company.confirm-work": companyConfirmWorkSchema,
+  "company.enable-journal-review": companyEnableJournalReviewSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

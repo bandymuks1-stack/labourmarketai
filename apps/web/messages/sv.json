@@ -3424,6 +3424,14 @@
           "label": "Be om det som saknas",
           "description": "Medarbetaren får en arbetsinstruktion med det projektet fortfarande saknar från dem."
         },
+        "confirmWork": {
+          "label": "Bekräfta arbetspost",
+          "description": "En chef bekräftar en medarbetares arbetspost och de färdigheter den styrker — de blir bekräftade."
+        },
+        "enableJournalReview": {
+          "label": "Slå på arbetsgranskning",
+          "description": "En medarbetares arbetsposter blir synliga och kan bekräftas av chefen."
+        },
         "respondOffer": {
           "label": "Svara på en byrås erbjudande",
           "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
@@ -3890,6 +3898,17 @@
       "readinessWriteFailed": "Ändringen kunde inte göras.",
       "briefInstructions": "Väntande instruktioner: {count}.",
       "chipInstructions": "Instruktioner",
+      "confirmIntro": "Väntar på din bekräftelse: {count} poster.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} färdigh.)",
+      "confirmChip": "Bekräfta: {name} · {date}",
+      "confirmDone": "Bekräftat: {name} — bekräftade färdigheter: {count}.",
+      "confirmNone": "Inga arbetsposter väntar.",
+      "confirmNotEnabled": "Arbetsgranskning är inte påslagen ännu för: {names}. Slå på den så visas deras poster här.",
+      "confirmEnableChip": "Slå på granskning: {name}",
+      "confirmEnabled": "Granskning påslagen: {name} — arbetsposterna väntar på din bekräftelse.",
+      "confirmFailed": "Bekräftelsen kunde inte göras.",
+      "confirmUnavailable": "Bekräftelser kunde inte läsas just nu.",
+      "chipOpenInbox": "Öppna bekräftelseinkorgen",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först.",
       "documentFileOffer": "Dokument registrerat. Du kan bifoga filen här — PDF, Word eller ett foto upp till 5 MB.",

@@ -3424,6 +3424,14 @@
           "label": "Poproś o brakujące",
           "description": "Pracownik otrzymuje polecenie pracy z tym, czego projekt jeszcze od niego potrzebuje."
         },
+        "confirmWork": {
+          "label": "Potwierdź wpis pracy",
+          "description": "Kierownik potwierdza wpis pracy pracownika i udowodnione nim umiejętności — stają się potwierdzone."
+        },
+        "enableJournalReview": {
+          "label": "Włącz przegląd pracy",
+          "description": "Wpisy pracy pracownika stają się widoczne i potwierdzalne dla kierownika."
+        },
         "respondOffer": {
           "label": "Odpowiedz na ofertę agencji",
           "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
@@ -3890,6 +3898,17 @@
       "readinessWriteFailed": "Nie udało się wprowadzić zmiany.",
       "briefInstructions": "Oczekujące polecenia: {count}.",
       "chipInstructions": "Polecenia",
+      "confirmIntro": "Czeka na potwierdzenie: {count} wpisów.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} umiej.)",
+      "confirmChip": "Potwierdź: {name} · {date}",
+      "confirmDone": "Potwierdzono: {name} — umiejętności potwierdzone: {count}.",
+      "confirmNone": "Brak oczekujących wpisów pracy.",
+      "confirmNotEnabled": "Przegląd pracy nie jest jeszcze włączony: {names}. Włącz — a ich wpisy pojawią się tutaj.",
+      "confirmEnableChip": "Włącz przegląd: {name}",
+      "confirmEnabled": "Przegląd włączony: {name} — wpisy pracy czekają na potwierdzenie.",
+      "confirmFailed": "Nie udało się potwierdzić.",
+      "confirmUnavailable": "Nie udało się teraz odczytać potwierdzeń.",
+      "chipOpenInbox": "Otwórz skrzynkę potwierdzeń",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze.",
       "documentFileOffer": "Dokument zapisany. Plik możesz dodać tutaj — PDF, Word lub zdjęcie do 5 MB.",

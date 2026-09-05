@@ -3424,6 +3424,14 @@
           "label": "Küsi puuduvat",
           "description": "Töötaja saab tööjuhise sellega, mida projekt temalt veel vajab."
         },
+        "confirmWork": {
+          "label": "Kinnita töökanne",
+          "description": "Juht kinnitab töötaja töökande ja sellega tõendatud oskused — need saavad kinnitatuks."
+        },
+        "enableJournalReview": {
+          "label": "Lülita tööde ülevaatus sisse",
+          "description": "Töötaja töökanded muutuvad juhile nähtavaks ja kinnitatavaks."
+        },
         "respondOffer": {
           "label": "Vasta agentuuri pakkumisele",
           "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
@@ -3890,6 +3898,17 @@
       "readinessWriteFailed": "Muudatust ei õnnestunud teha.",
       "briefInstructions": "Ootel juhised: {count}.",
       "chipInstructions": "Juhised",
+      "confirmIntro": "Ootab teie kinnitust: {count} kannet.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} oskust)",
+      "confirmChip": "Kinnita: {name} · {date}",
+      "confirmDone": "Kinnitatud: {name} — kinnitatud oskusi: {count}.",
+      "confirmNone": "Ootel töökandeid pole.",
+      "confirmNotEnabled": "Tööde ülevaatus pole veel sisse lülitatud: {names}. Lülitage sisse ja nende kanded ilmuvad siia.",
+      "confirmEnableChip": "Lülita ülevaatus sisse: {name}",
+      "confirmEnabled": "Ülevaatus sees: {name} — töökanded ootavad teie kinnitust.",
+      "confirmFailed": "Kinnitamine ebaõnnestus.",
+      "confirmUnavailable": "Kinnitusi ei õnnestunud praegu lugeda.",
+      "chipOpenInbox": "Ava kinnituste postkast",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene.",
       "documentFileOffer": "Dokument kirja pandud. Faili saate lisada siinsamas — PDF, Word või foto kuni 5 MB.",

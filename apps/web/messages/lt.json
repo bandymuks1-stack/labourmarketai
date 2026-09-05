@@ -11653,6 +11653,14 @@
           "label": "Paprašyti trūkstamų dokumentų",
           "description": "Darbuotojui išsiunčiamas darbo nurodymas su tuo, ko projektui dar trūksta."
         },
+        "confirmWork": {
+          "label": "Patvirtinti darbo įrašą",
+          "description": "Vadovas patvirtina darbuotojo darbo įrašą ir jo įrodytus įgūdžius — įgūdžiai tampa patvirtinti."
+        },
+        "enableJournalReview": {
+          "label": "Įjungti darbų peržiūrą",
+          "description": "Darbuotojo darbo įrašai tampa matomi ir patvirtinami vadovui."
+        },
         "respondOffer": {
           "label": "Atsakyti į agentūros pasiūlymą",
           "description": "Priimti arba atmesti agentūros pasiūlytą kandidatą jūsų poreikiui."
@@ -12191,6 +12199,17 @@
       "readinessWriteFailed": "Pakeisti nepavyko.",
       "briefInstructions": "Laukia nurodymų: {count}.",
       "chipInstructions": "Nurodymai",
+      "confirmIntro": "Laukia patvirtinimo: {count} įraš.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} įgūdž.)",
+      "confirmChip": "Patvirtinti: {name} · {date}",
+      "confirmDone": "Patvirtinta: {name} — įgūdžių patvirtinta: {count}.",
+      "confirmNone": "Laukiančių darbo įrašų nėra.",
+      "confirmNotEnabled": "Darbų peržiūra dar neįjungta: {names}. Įjungę matysite jų įrašus čia.",
+      "confirmEnableChip": "Įjungti peržiūrą: {name}",
+      "confirmEnabled": "Peržiūra įjungta: {name} — jo darbo įrašai laukia jūsų patvirtinimo.",
+      "confirmFailed": "Patvirtinti nepavyko.",
+      "confirmUnavailable": "Patvirtinimų dabar nuskaityti nepavyko.",
+      "chipOpenInbox": "Atidaryti patvirtinimų dėžutę",
       "pinFirstPrefix": "Į priekį",
       "reorderDone": "Sutvarkyta: „{label}“ dabar pirma.",
       "documentFileOffer": "Dokumentas užrašytas. Failą galite pridėti čia pat — PDF, Word arba nuotrauką iki 5 MB.",
