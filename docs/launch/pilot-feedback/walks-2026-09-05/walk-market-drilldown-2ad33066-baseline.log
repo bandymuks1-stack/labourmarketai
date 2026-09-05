@@ -1,0 +1,28 @@
+{"step":"health","build":"2ad33066"}
+{"step":"preflight_need","via":"supabase MCP (service_role has no grant on customer_requests)","id":"b0a48f65-6152-40eb-8080-986f87dca211"}
+{"step":"market","ms":6003,"anchors":[{"id":"LT-approx","precision":"country"},{"id":"NL-approx","precision":"country"}]}
+{"check":"the map carries a REAL marker for the country of the persisted need","ok":true,"detail":{"id":"LT-approx","precision":"country"}}
+{"step":"pointer_click_failed","geom":{"d":"M0 0","w":0,"h":0},"error":"locator.click: Timeout 20000ms exceeded."}
+{"check":"the marker is reachable BY POINTER, not only by keyboard","ok":false,"detail":{"d":"M0 0","w":0,"h":0}}
+{"step":"depth1","url":"https://labourmarket.ai/lt/dashboard?result=market&geo=LT%3Acountry","emptyShown":0,"rowCount":1,"rowMeta":[{"id":"b0a48f65-6152-40eb-8080-986f87dca211","kind":"need","precision":"country","text":"welderatviras poreikisapytikslė vietanenurodyta · LT · nenurodytaPareigoswelderReikia žmonių2BūsenanenurodytaPradžianenurodytaKodėl rodomaŠis poreikis yra šalyj"}]}
+{"check":"THE FINDING: the drilldown is not empty for real canonical demand","ok":true,"detail":{"emptyShown":0,"rowCount":1}}
+{"check":"the row IS the canonical customer_requests row (same id)","ok":true,"detail":{"id":"b0a48f65-6152-40eb-8080-986f87dca211","kind":"need","precision":"country","text":"welderatviras poreikisapytikslė vietanenurodyta · LT · nenurodytaPareigoswelderReikia žmonių2BūsenanenurodytaPradžianenurodytaKodėl rodomaŠis poreikis yra šalyj"}}
+{"check":"the row declares its provenance as an open need","ok":true,"detail":"need"}
+{"check":"the row carries the employer's OWN role text","ok":true}
+{"check":"the row carries the employer's OWN headcount","ok":true}
+{"step":"depth2","url":"https://labourmarket.ai/lt/dashboard?result=market&geo=LT%3Acountry&project=b0a48f65-6152-40eb-8080-986f87dca211","sections":{"eval-demand-list":1,"eval-anchor-relation":1,"eval-no-judgement":1,"eval-visibility":1},"source":"Šaltinis: canonical demand (customer_requests, submitted)"}
+{"check":"depth 2 opened on the canonical id","ok":true}
+{"check":"every evaluation section rendered","ok":true,"detail":{"eval-demand-list":1,"eval-anchor-relation":1,"eval-no-judgement":1,"eval-visibility":1}}
+{"check":"the source statement names the canonical read, not the frozen table","ok":true,"detail":"Šaltinis: canonical demand (customer_requests, submitted)"}
+{"step":"people","text":"Žmonių paieška dar nepristatyta — tai kitas tikslas. Toliau perduodamas šis kontekstas: POREIKIS welder PAREIGOS welder ĮGŪDŽIAI nenurodyta VIETA LT REIKIA ŽMONIŲ 2 PRADŽIA nenurodyta PABAIGA nenurodyta ERDVĖ E2E Walker UAB"}
+{"check":"THE FINDING CLOSED: the people panel is reachable from real demand","ok":true}
+{"check":"it carries the row's REAL values, not a fabricated list","ok":true}
+{"check":"and it names them in ordinary words — no raw id leaked back in (#1553)","ok":true}
+{"step":"hygiene","consoleErrors":["The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.","The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."],"failedRequests":[]}
+{"check":"no failed request on the journey","ok":true,"detail":[]}
+{"step":"marketplace_leg","anchor":{"id":"NL-approx","precision":"country"},"rowCount":1,"rows":[{"id":"a2ffd425-4bea-4ffa-91df-27a8b6dcaa89","kind":"need","text":"masonatviras poreikisapytikslė vietanenurodyta · NL · nenurodytaPareigosmasonReikia žmonių40BūsenanenurodytaPradžianenurodytaKodėl rodomaŠis"}]}
+{"check":"another tenant's real demand is reachable through the worker leg","ok":true,"detail":1}
+{"step":"known_gap_company_name","note":"RPC exposes company_name; CanonicalDemand does not carry it -> organisation renders as a gap","sample":{"id":"a2ffd425-4bea-4ffa-91df-27a8b6dcaa89","kind":"need","text":"masonatviras poreikisapytikslė vietanenurodyta · NL · nenurodytaPareigosmasonReikia žmonių40BūsenanenurodytaPradžianenurodytaKodėl rodomaŠis"}}
+{"step":"isolation","otherRows":0,"notFound":1,"tail":"L LabourMarket E2E Spine UAB (testinis) Lietuvių E L LABOURMARKET AI Labas, E2E. Kuo šiandien galiu padėti? L LabourMarket AI Veikiate „E2E Spine UAB (testinis)“ vardu. Čia galiu padėti su darbuotojų "}
+{"check":"another tenant cannot open this need from a hand-typed URL","ok":true,"detail":{"otherRows":0,"notFound":1}}
+{"result":"FAIL","failed":["the marker is reachable BY POINTER, not only by keyboard"],"ms":68139,"build":"2ad33066"}

@@ -63,6 +63,9 @@ const EINDHOVEN_ROLE = "Automatikos technikas";
  *  Asserted on the ORGANISATION field, which the canonical contract genuinely
  *  does not carry: a blank there would read as data. */
 const NOT_STATED = "nenurodyta";
+/** `conversation.results.missing.organization` in the lt catalogue — the label
+ *  the gap chip carries when a need has no organisation to name. */
+const ORGANIZATION_LABEL = "organizacija";
 
 test.use({ storageState: "tests/e2e/.storage-state.json", viewport: { width: 1440, height: 900 } });
 
@@ -245,12 +248,10 @@ test("A — Rotterdam: market → projects → evaluation → continuation", asy
 
   // Every section the command names.
   for (const section of [
-    "eval-demand",
-    "eval-geography",
-    "eval-timing",
-    "eval-organization",
-    "eval-data-quality",
-    "eval-explanation",
+    "eval-demand-list",
+    "eval-anchor-relation",
+    "eval-visibility",
+    "eval-no-judgement",
   ]) {
     await expect(page.getByTestId(section)).toBeVisible();
   }
@@ -262,7 +263,12 @@ test("A — Rotterdam: market → projects → evaluation → continuation", asy
   await expect(page.getByTestId("eval-demand-list").locator("li")).toHaveCount(1);
   // The employer's identity is outside both authorized reads — stated as a gap
   // here too, on the section whose whole subject it is.
-  await expect(page.getByTestId("eval-organization")).toContainText(NOT_STATED);
+  // A need carries no organisation, and the panel says so as an explicit gap
+  // chip rather than an empty field. (There is no `eval-organization` test id —
+  // asserting one is how this spec silently stopped checking anything.)
+  await expect(
+    page.getByTestId("eval-missing-field").filter({ hasText: ORGANIZATION_LABEL }),
+  ).toHaveCount(1);
   // THE SOURCE LINE NAMES WHAT WAS ACTUALLY READ. `job_demands` must not appear
   // on it: a surface naming one store while reading another is exactly the
   // drift that left this list empty for every real user.
