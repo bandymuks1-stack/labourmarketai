@@ -175,11 +175,30 @@ export interface OwnReadinessItem {
 
 export const OWN_READINESS_ITEMS_LIMIT = 40;
 const OPEN_READINESS_STATUSES = ["needed", "missing", "rejected", "expired"] as const;
+/** Every status the manager can hold a row in except `not_required` — the
+ *  requirement ledger (lib/player-card/requirement-ledger) reads these so the
+ *  person's "N of M" also counts the rows the manager already received /
+ *  checked. The default (open rows only) is unchanged for the asks. */
+export const LEDGER_READINESS_STATUSES = ["needed", "missing", "received", "checked", "rejected", "expired"] as const;
+
+export interface OwnReadinessLedgerItem extends Omit<OwnReadinessItem, "status"> {
+  readonly status: (typeof LEDGER_READINESS_STATUSES)[number];
+}
 
 export async function listOwnReadinessItems(
   workerId: string,
   projectIds: readonly string[],
-): Promise<OwnReadinessItem[]> {
+): Promise<OwnReadinessItem[]>;
+export async function listOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  options: { readonly statuses: typeof LEDGER_READINESS_STATUSES },
+): Promise<OwnReadinessLedgerItem[]>;
+export async function listOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  options?: { readonly statuses: readonly string[] },
+): Promise<OwnReadinessItem[] | OwnReadinessLedgerItem[]> {
   if (!workerId || projectIds.length === 0) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -187,7 +206,7 @@ export async function listOwnReadinessItems(
     .select("project_id, item_key, label, status, updated_at")
     .eq("worker_id", workerId)
     .in("project_id", projectIds.slice(0, 10))
-    .in("status", [...OPEN_READINESS_STATUSES])
+    .in("status", [...(options?.statuses ?? OPEN_READINESS_STATUSES)])
     .order("updated_at", { ascending: false })
     .limit(OWN_READINESS_ITEMS_LIMIT);
   if (error || !data) return [];
@@ -195,7 +214,7 @@ export async function listOwnReadinessItems(
     projectId: r.project_id as string,
     itemKey: r.item_key as string,
     label: r.label as string,
-    status: r.status as OwnReadinessItem["status"],
+    status: r.status as OwnReadinessLedgerItem["status"],
     updatedAt: r.updated_at as string,
   }));
 }

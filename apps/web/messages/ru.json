@@ -5475,6 +5475,60 @@
       "clarifyViewThread": "Открыть переписку",
       "safetyNote": "Чётко подтверждайте важные инструкции по безопасности.",
       "asksTitle": "Проекту от вас ещё нужно",
+      "ledger": {
+        "ratio": "Есть {have} из {total}",
+        "availability": "Доступность",
+        "state": {
+          "valid": "у вас есть",
+          "expiring": "скоро истекает",
+          "missing": "не хватает",
+          "unknown": "пока неизвестно"
+        },
+        "level": {
+          "recommended": "рекомендуется",
+          "conditional": "может понадобиться"
+        },
+        "why": {
+          "project_checklist": "это просит ваш руководитель",
+          "country_requirement": "нужно для работы в стране {country}",
+          "employer_demand": "требуется в этом предложении работы",
+          "profession": "обычно для этой профессии"
+        },
+        "from": {
+          "ownDocument": "из ваших документов",
+          "ownDocumentUntil": "из ваших документов, действует до {date}",
+          "ownSkill": "из ваших навыков (ваша запись)",
+          "ownSkillConfirmed": "из ваших навыков (подтвердил руководитель)",
+          "ownLanguage": "из ваших языков ({level})",
+          "ownProfile": "из вашего профиля",
+          "manager": "список руководителя: {status}",
+          "notReadable": "сейчас не удалось прочитать",
+          "none": "пока ничего не записано"
+        },
+        "managerStatus": {
+          "needed": "ожидается",
+          "missing": "отмечено как отсутствующее",
+          "received": "получено",
+          "checked": "проверено",
+          "rejected": "отклонено",
+          "expired": "истекло"
+        },
+        "resolution": {
+          "addDocument": "Записать документ",
+          "issuingAuthority": "Выдаёт: {title}",
+          "trainingProgram": "Курс: {title}",
+          "serviceOffering": "Услуга: {title}",
+          "serviceOfferingRate": "Услуга: {title} ({rate})",
+          "addEvidence": "Добавить запись о работе",
+          "setAvailability": "Указать доступность",
+          "ask": "Решений пока нет — спросите руководителя"
+        },
+        "resolutionWhy": {
+          "assignedToYou": "назначено вам",
+          "nameMatches": "название совпадает"
+        },
+        "rejected": "{count} других вариантов не подошли"
+      },
       "ownReady": "есть",
       "ownExpiring": "истекает",
       "ownNone": "не записано",

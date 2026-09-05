@@ -5475,6 +5475,60 @@
       "clarifyViewThread": "Peržiūrėti pokalbį",
       "safetyNote": "Svarbius saugos nurodymus patvirtinkite aiškiai.",
       "asksTitle": "Projektui iš jūsų dar reikia",
+      "ledger": {
+        "ratio": "Yra {have} iš {total}",
+        "availability": "Laisvumas",
+        "state": {
+          "valid": "turite",
+          "expiring": "netrukus baigs galioti",
+          "missing": "trūksta",
+          "unknown": "dar nežinoma"
+        },
+        "level": {
+          "recommended": "rekomenduojama",
+          "conditional": "gali prireikti"
+        },
+        "why": {
+          "project_checklist": "to prašo jūsų vadovas",
+          "country_requirement": "reikia darbui šalyje {country}",
+          "employer_demand": "prašoma šiame darbo pasiūlyme",
+          "profession": "įprasta šiai profesijai"
+        },
+        "from": {
+          "ownDocument": "iš jūsų dokumentų",
+          "ownDocumentUntil": "iš jūsų dokumentų, galioja iki {date}",
+          "ownSkill": "iš jūsų įgūdžių (jūsų įrašas)",
+          "ownSkillConfirmed": "iš jūsų įgūdžių (patvirtino vadovas)",
+          "ownLanguage": "iš jūsų kalbų ({level})",
+          "ownProfile": "iš jūsų profilio",
+          "manager": "vadovo sąrašas: {status}",
+          "notReadable": "šiuo metu nepavyko perskaityti",
+          "none": "dar nieko neįrašyta"
+        },
+        "managerStatus": {
+          "needed": "laukiama",
+          "missing": "pažymėta kaip trūkstama",
+          "received": "gauta",
+          "checked": "patikrinta",
+          "rejected": "atmesta",
+          "expired": "pasibaigė"
+        },
+        "resolution": {
+          "addDocument": "Įrašyti dokumentą",
+          "issuingAuthority": "Išduoda: {title}",
+          "trainingProgram": "Kursas: {title}",
+          "serviceOffering": "Paslauga: {title}",
+          "serviceOfferingRate": "Paslauga: {title} ({rate})",
+          "addEvidence": "Įrašyti darbo įrašą",
+          "setAvailability": "Nurodyti laisvumą",
+          "ask": "Sprendimų dar nėra — paklauskite vadovo"
+        },
+        "resolutionWhy": {
+          "assignedToYou": "priskirta jums",
+          "nameMatches": "pavadinimas sutampa"
+        },
+        "rejected": "{count} kiti variantai netiko"
+      },
       "ownReady": "turite",
       "ownExpiring": "baigia galioti",
       "ownNone": "neįrašyta",
