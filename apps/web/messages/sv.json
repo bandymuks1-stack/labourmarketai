@@ -3408,6 +3408,10 @@
           "label": "Sätt fasstatus",
           "description": "En projektfas får sin verkliga status — pågår, klar, blockerad."
         },
+        "updateTaskStatus": {
+          "label": "Ändra uppgiftsstatus",
+          "description": "En uppgift markeras med en verklig status — pågående, klar, blockerad."
+        },
         "respondOffer": {
           "label": "Svara på en byrås erbjudande",
           "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
@@ -3833,6 +3837,23 @@
       "stageBlocked": "Fas markerad som blockerad.",
       "stageFailed": "Fasstatusen kunde inte ändras.",
       "chipStagePrefix": "Fas",
+      "taskAsk": "Vilken uppgift? Välj en:",
+      "taskNotFound": "Jag hittar inte den uppgiften bland de öppna. Vilken menade du?",
+      "taskNone": "Det finns inga öppna uppgifter än.",
+      "taskUnavailable": "Uppgifterna kunde inte läsas just nu.",
+      "taskDone": "Uppgiften är markerad som klar.",
+      "taskStarted": "Uppgiften är markerad som pågående.",
+      "taskBlocked": "Uppgiften är markerad som blockerad.",
+      "taskFailed": "Uppgiftens status kunde inte ändras.",
+      "chipTaskPrefix": "Uppgift",
+      "riskIntro": "Projektläge ({count} aktiva):",
+      "riskLine": "• {title} — {people} pers.; öppna uppgifter {open}, försenade {overdue}; blockerade etapper {blocked}; {docs} pers. saknar dokument; beredskap {checked}/{total}",
+      "riskOkLine": "• {title} — inga risksignaler ({people} pers., {open} öppna uppgifter)",
+      "riskUnknownLine": "• {title} — läget kunde inte läsas just nu",
+      "riskNobody": "aktivt projekt utan personer",
+      "riskNone": "Inga aktiva projekt än — skapa det första.",
+      "riskUnavailable": "Projektens läge kunde inte läsas just nu.",
+      "chipCreateProject": "Skapa projekt",
       "pinFirstPrefix": "Sätt först",
       "reorderDone": "Klart: ”{label}” är nu först.",
       "documentFileOffer": "Dokument registrerat. Du kan bifoga filen här — PDF, Word eller ett foto upp till 5 MB.",

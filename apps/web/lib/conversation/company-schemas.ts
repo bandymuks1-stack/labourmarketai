@@ -237,6 +237,15 @@ export const companyUpdateStageStatusSchema = z.object({
   blockedReason: z.string().trim().max(500).nullable().optional(),
 });
 
+/** §14 WORK PERFORMED → RESULT: a task moved to a real status — "užduotis
+ *  sumontuoti pastolius atlikta". `set_work_task_status_v2` re-checks that
+ *  the caller created the task, is its assignee, or manages its project;
+ *  `cancelled` stays a page decision, not a sentence. */
+export const companyUpdateTaskStatusSchema = z.object({
+  taskId: uuid,
+  status: z.enum(["in_progress", "blocked", "done"]),
+});
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -271,6 +280,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.respond-offer": companyRespondOfferSchema,
   "company.create-task": companyCreateTaskSchema,
   "company.update-stage-status": companyUpdateStageStatusSchema,
+  "company.update-task-status": companyUpdateTaskStatusSchema,
   "company.invite-worker": companyInviteWorkerSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,

@@ -3408,6 +3408,10 @@
           "label": "Sæt fasestatus",
           "description": "En projektfase får sin reelle status — i gang, færdig, blokeret."
         },
+        "updateTaskStatus": {
+          "label": "Skift opgavestatus",
+          "description": "En opgave markeres med en reel status — i gang, udført, blokeret."
+        },
         "respondOffer": {
           "label": "Svar på et bureaus tilbud",
           "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
@@ -3833,6 +3837,23 @@
       "stageBlocked": "Fase markeret som blokeret.",
       "stageFailed": "Fasestatus kunne ikke ændres.",
       "chipStagePrefix": "Fase",
+      "taskAsk": "Hvilken opgave? Vælg en:",
+      "taskNotFound": "Jeg kan ikke finde den opgave blandt de åbne. Hvilken mente du?",
+      "taskNone": "Der er endnu ingen åbne opgaver.",
+      "taskUnavailable": "Opgaverne kunne ikke læses lige nu.",
+      "taskDone": "Opgaven er markeret som udført.",
+      "taskStarted": "Opgaven er markeret som i gang.",
+      "taskBlocked": "Opgaven er markeret som blokeret.",
+      "taskFailed": "Opgavens status kunne ikke ændres.",
+      "chipTaskPrefix": "Opgave",
+      "riskIntro": "Projektstatus ({count} aktive):",
+      "riskLine": "• {title} — {people} pers.; åbne opgaver {open}, forsinkede {overdue}; blokerede faser {blocked}; {docs} pers. mangler dokumenter; parathed {checked}/{total}",
+      "riskOkLine": "• {title} — ingen risikosignaler ({people} pers., {open} åbne opgaver)",
+      "riskUnknownLine": "• {title} — status kunne ikke læses lige nu",
+      "riskNobody": "aktivt projekt uden folk",
+      "riskNone": "Ingen aktive projekter endnu — opret det første.",
+      "riskUnavailable": "Projekternes status kunne ikke læses lige nu.",
+      "chipCreateProject": "Opret projekt",
       "pinFirstPrefix": "Sæt forrest",
       "reorderDone": "Klar: “{label}” er nu forrest.",
       "documentFileOffer": "Dokument registreret. Du kan vedhæfte filen her — PDF, Word eller et foto op til 5 MB.",

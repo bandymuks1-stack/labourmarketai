@@ -392,8 +392,14 @@ export const BEHAVIOR_CONFORMANCE = {
   // 2026-09-05 (owner contract §11): +1 — `company.move-worker`, the what-if
   // move's confirmed commit over the two canonical assignment RPCs. Anchored
   // to the projects page; keyed to the company actor type; verdict unchanged.
-  conversationActions: 45,
-  actionsAnchoredToAPage: 45,
+  // 2026-09-05 (owner contract §14): +1 — `company.update-task-status`, a
+  // task moved to a real status by sentence over the ONE status core. Its
+  // role gate is the union company / agency / worker because the RPC
+  // re-derives the row authority (creator / assignee / project manager) —
+  // still keyed to actor TYPES, not to a relationship; anchored to the tasks
+  // page; verdict unchanged.
+  conversationActions: 46,
+  actionsAnchoredToAPage: 46,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

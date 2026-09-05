@@ -118,6 +118,8 @@ export type IntentHandlerId =
   | "addTask"
   | "whoAvailable"
   | "stageStatus"
+  | "taskStatus"
+  | "projectRisk"
   | "moveWorker";
 
 export type IntentDescriptor = {
@@ -246,6 +248,8 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // §11 WHAT-IF: a person moved between two projects — consequences on both
   // sides shown first, the commit behind the strong-tier confirmation.
   "move-worker": { domain: "project", access: "write", handler: "moveWorker", ownTyping: true },
+  "task-status": { domain: "project", access: "write", handler: "taskStatus", ownTyping: true },
+  "project-risk": { domain: "project", access: "read", handler: "projectRisk", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

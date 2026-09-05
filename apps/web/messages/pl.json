@@ -3408,6 +3408,10 @@
           "label": "Ustaw status etapu",
           "description": "Etap projektu dostaje prawdziwy status — w toku, zakończony, zablokowany."
         },
+        "updateTaskStatus": {
+          "label": "Zmień status zadania",
+          "description": "Zadanie otrzymuje rzeczywisty status — w toku, wykonane, zablokowane."
+        },
         "respondOffer": {
           "label": "Odpowiedz na ofertę agencji",
           "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
@@ -3833,6 +3837,23 @@
       "stageBlocked": "Etap oznaczono jako zablokowany.",
       "stageFailed": "Nie udało się zmienić statusu etapu.",
       "chipStagePrefix": "Etap",
+      "taskAsk": "Które zadanie? Wybierz:",
+      "taskNotFound": "Nie znajduję takiego zadania wśród otwartych. Które miałeś na myśli?",
+      "taskNone": "Nie ma jeszcze otwartych zadań.",
+      "taskUnavailable": "Nie udało się teraz odczytać zadań.",
+      "taskDone": "Zadanie oznaczone jako wykonane.",
+      "taskStarted": "Zadanie oznaczone jako w toku.",
+      "taskBlocked": "Zadanie oznaczone jako zablokowane.",
+      "taskFailed": "Nie udało się zmienić statusu zadania.",
+      "chipTaskPrefix": "Zadanie",
+      "riskIntro": "Stan projektów ({count} aktywnych):",
+      "riskLine": "• {title} — {people} os.; zadań otwartych {open}, spóźnionych {overdue}; zablokowanych etapów {blocked}; brak dokumentów u {docs} os.; gotowość {checked}/{total}",
+      "riskOkLine": "• {title} — brak sygnałów ryzyka ({people} os., {open} otwartych zadań)",
+      "riskUnknownLine": "• {title} — nie udało się teraz odczytać stanu",
+      "riskNobody": "aktywny projekt bez ludzi",
+      "riskNone": "Nie ma jeszcze aktywnych projektów — utwórz pierwszy.",
+      "riskUnavailable": "Nie udało się teraz odczytać stanu projektów.",
+      "chipCreateProject": "Utwórz projekt",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze.",
       "documentFileOffer": "Dokument zapisany. Plik możesz dodać tutaj — PDF, Word lub zdjęcie do 5 MB.",

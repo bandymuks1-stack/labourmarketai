@@ -3408,6 +3408,10 @@
           "label": "Sett fasestatus",
           "description": "En prosjektfase får sin reelle status — pågår, ferdig, blokkert."
         },
+        "updateTaskStatus": {
+          "label": "Endre oppgavestatus",
+          "description": "En oppgave merkes med en reell status — pågående, utført, blokkert."
+        },
         "respondOffer": {
           "label": "Svar på et byrås tilbud",
           "description": "Godta eller avslå en kandidat et byrå tilbød til deres behov."
@@ -3833,6 +3837,23 @@
       "stageBlocked": "Fase markert som blokkert.",
       "stageFailed": "Fasestatus kunne ikke endres.",
       "chipStagePrefix": "Fase",
+      "taskAsk": "Hvilken oppgave? Velg én:",
+      "taskNotFound": "Jeg finner ikke den oppgaven blant de åpne. Hvilken mente du?",
+      "taskNone": "Det finnes ingen åpne oppgaver ennå.",
+      "taskUnavailable": "Oppgavene kunne ikke leses akkurat nå.",
+      "taskDone": "Oppgaven er merket som utført.",
+      "taskStarted": "Oppgaven er merket som pågående.",
+      "taskBlocked": "Oppgaven er merket som blokkert.",
+      "taskFailed": "Oppgavens status kunne ikke endres.",
+      "chipTaskPrefix": "Oppgave",
+      "riskIntro": "Prosjektstatus ({count} aktive):",
+      "riskLine": "• {title} — {people} pers.; åpne oppgaver {open}, forsinkede {overdue}; blokkerte faser {blocked}; {docs} pers. mangler dokumenter; beredskap {checked}/{total}",
+      "riskOkLine": "• {title} — ingen risikosignaler ({people} pers., {open} åpne oppgaver)",
+      "riskUnknownLine": "• {title} — status kunne ikke leses akkurat nå",
+      "riskNobody": "aktivt prosjekt uten folk",
+      "riskNone": "Ingen aktive prosjekter ennå — opprett det første.",
+      "riskUnavailable": "Prosjektenes status kunne ikke leses akkurat nå.",
+      "chipCreateProject": "Opprett prosjekt",
       "pinFirstPrefix": "Sett først",
       "reorderDone": "Klart: «{label}» er nå først.",
       "documentFileOffer": "Dokument registrert. Du kan legge ved filen her — PDF, Word eller et bilde opptil 5 MB.",

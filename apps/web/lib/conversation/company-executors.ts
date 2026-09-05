@@ -14,7 +14,7 @@ import { proposeBookingAction } from "@/lib/booking/booking-actions";
 import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionResult } from "@/lib/projects/actions";
 import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
-import { createWorkTaskForChatAction } from "@/lib/tasks/task-chat-actions";
+import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
@@ -346,6 +346,18 @@ export const COMPANY_EXECUTORS: {
     if (r.code === "needs_migration") return { ok: false, code: "needs_migration" };
     if (r.code === "auth" || r.code === "not_authorized") return { ok: false, code: "not_authorized" };
     if (r.code === "invalid") return { ok: false, code: "invalid" };
+    return { ok: false, code: "error", message: r.message };
+  },
+
+  "company.update-task-status": async (input) => {
+    // RESULT is a real status on a real task — the SAME core the tasks page's
+    // status control calls; the RPC re-checks creator / assignee / manager and
+    // refuses to leave `done` / `cancelled`.
+    const r = await setWorkTaskStatusForChatAction({ taskId: input.taskId, status: input.status });
+    if (r.kind === "updated") return { ok: true, data: { taskId: r.taskId, status: r.status } };
+    if (r.kind === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
+    if (r.kind === "invalid" || r.kind === "invalid_transition" || r.kind === "not_found") return { ok: false, code: "invalid" };
     return { ok: false, code: "error", message: r.message };
   },
 
