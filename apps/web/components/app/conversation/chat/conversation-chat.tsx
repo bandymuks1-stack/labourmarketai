@@ -4726,9 +4726,14 @@ export function ConversationChat({
   selectInteractionRef.current = selectInteraction;
   selectDemandRef.current = selectDemand;
   selectProjectRef.current = openProjectResult;
-  const resultContext: ResultContext = auth0?.activeOrgName
-    ? "organization"
-    : "personal";
+  // The acting context is the organisation WORKSPACE, keyed by its id - never
+  // by its display name: a fresh organisation that has not named itself yet
+  // (legal_name/display_name null) is still acting as an organisation. Keying
+  // on the name made "parodyk kandidatus" fall back to "unavailable in this
+  // context" for exactly the newest organisations (full-spine prod walk,
+  // 2026-09-05). The name stays a label for the header only.
+  const resultContext: ResultContext =
+    auth0?.activeOrganizationId || auth0?.activeOrgName ? "organization" : "personal";
   const openFullScreen = useCallback(
     // The locale-aware router already in this component — the fallback route
     // is a REAL screen the person keeps, not a dead end.
