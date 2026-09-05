@@ -35,6 +35,7 @@ const code = (rel: string) =>
 const CANONICAL_IO = "lib/demand/canonical-demand.ts";
 const CANONICAL_MODEL = "lib/demand/canonical-demand-model.ts";
 const MARKET_RESULT = "lib/market-map/market-result.ts";
+const DRILLDOWN_LOADER = "lib/market-map/project-results.ts";
 
 describe("the market map reads the canonical demand source", () => {
   it("market-result no longer queries job_demands directly", () => {
@@ -61,6 +62,59 @@ describe("the market map reads the canonical demand source", () => {
   it("a read failure is still an error, never a silent empty market", () => {
     const src = read(MARKET_RESULT);
     expect(src).toMatch(/state === "error"[\s\S]{0,80}failed: true/);
+  });
+});
+
+/**
+ * THE DRILLDOWN BEHIND THE MARKER — the half W10 slice 4 missed.
+ *
+ * The marker moved onto the canonical read in 2026-08; the list and evaluation
+ * BEHIND it kept reading `job_demands` until 2026-09-05. Because that table has
+ * held 0 rows in production for its whole life, every marker built from real
+ * `customer_requests` demand opened onto an empty list and depth 2 — the
+ * evaluation and the continuation to people — was unreachable for every real
+ * user. These pin the fix: one source, one filter, one answer.
+ */
+describe("the drilldown behind the marker reads the SAME canonical source", () => {
+  it("the drilldown loader queries no table of its own", () => {
+    const src = read(DRILLDOWN_LOADER);
+    expect(src).not.toMatch(/\.from\(\s*["']job_demands["']\s*\)/);
+    expect(src).not.toMatch(/\.from\(\s*["']/);
+  });
+
+  it("the drilldown loader composes loadCanonicalDemand", () => {
+    const src = read(DRILLDOWN_LOADER);
+    expect(src).toMatch(/from "@\/lib\/demand\/canonical-demand"/);
+    expect(src).toMatch(/loadCanonicalDemand\(/);
+  });
+
+  it("it dedupes BEFORE it shapes, so one demand is one row", () => {
+    const src = code(DRILLDOWN_LOADER);
+    const dedupeAt = src.indexOf("dedupeCanonicalDemand");
+    const shapeAt = src.indexOf("groupIntoDemandUnits(");
+    expect(dedupeAt).toBeGreaterThan(-1);
+    expect(shapeAt).toBeGreaterThan(dedupeAt);
+  });
+
+  it("the list and the evaluation shape the SAME rows the same way", () => {
+    // Two readers would eventually disagree, and the person would be told a
+    // unit matched in the list and did not in the detail.
+    const src = code(DRILLDOWN_LOADER);
+    expect(src.match(/groupIntoDemandUnits\(/g)?.length).toBe(2);
+    expect(src.match(/loadCanonicalDemand\(/g)?.length).toBe(2);
+  });
+
+  it("the source statement names the canonical read, not the frozen table", () => {
+    // The UI shows this string verbatim. Naming `job_demands` while reading
+    // `customer_requests` is exactly the drift this slice closed.
+    const src = read("lib/market-map/project-results-model.ts");
+    expect(src).toMatch(/DEMAND_SOURCE = "canonical demand \(customer_requests, submitted\)"/);
+  });
+
+  it("a failed canonical read is an error state, never an empty place", () => {
+    const src = code(DRILLDOWN_LOADER);
+    expect(src).toMatch(/canonical\.state === "error"/);
+    expect(src).toMatch(/state: "error"/);
   });
 });
 
