@@ -39,6 +39,21 @@ export interface CanonicalDemand {
   /** People needed. `null` means UNKNOWN — never rendered as a number. */
   readonly quantity: number | null;
   readonly roleText: string | null;
+  /**
+   * The organisation behind the demand, WHEN THE SOURCE ALREADY DISCLOSES IT.
+   *
+   * This carries no new privilege. `list_open_demand_for_workers` is a
+   * SECURITY DEFINER function with a worker-only caller gate that already
+   * returns `company_name`, and only for a company whose
+   * `verification_status = 'verified'`; this field is that column, unchanged.
+   * The employer's own-rows branch has no company column in its select, so it
+   * contributes `null` and the surface states the gap.
+   *
+   * `null` means "not disclosed by the branch that answered", NEVER "no
+   * organisation". A surface renders it as an explicit gap, never as a guess
+   * and never by borrowing a name from the viewer's own workspace.
+   */
+  readonly organizationName: string | null;
   readonly createdAt: string | null;
 }
 
@@ -71,6 +86,8 @@ export interface CanonicalDemandInput {
   readonly cityLabel: string | null | undefined;
   readonly quantity: number | null | undefined;
   readonly roleText: string | null | undefined;
+  /** Only ever the disclosing branch's own column — see `CanonicalDemand`. */
+  readonly organizationName?: string | null | undefined;
   readonly createdAt: string | null | undefined;
 }
 
@@ -89,6 +106,7 @@ export function toCanonicalDemand(input: CanonicalDemandInput): CanonicalDemand 
     cityLabel: text(input.cityLabel),
     quantity: quantity(input.quantity),
     roleText: text(input.roleText),
+    organizationName: text(input.organizationName),
     createdAt: text(input.createdAt),
   };
 }
@@ -100,6 +118,14 @@ export function toCanonicalDemand(input: CanonicalDemandInput): CanonicalDemand 
  * authorized branches, the one that grants a real next step wins; otherwise
  * the first occurrence is kept. Dropping to the non-actionable copy would
  * silently remove a worker's ability to act on a live need.
+ *
+ * AND, ALL ELSE EQUAL, THE ROW THAT CARRIES THE ORGANISATION NAME. An employer
+ * who is also a worker reaches their own request through BOTH branches: the
+ * worker RPC discloses the verified company name, the own-rows read has no
+ * company column. Keeping whichever happened to arrive first would make the
+ * name appear or vanish depending on branch order. Preferring the named copy
+ * discloses nothing new — it is the same row, from the branch that was already
+ * allowed to name it.
  *
  * ORDER IS TOTAL AND DATA-INDEPENDENT — country (unknown last), then city
  * (unknown last), then source, then id. `id` is the final tiebreak so the
@@ -115,7 +141,17 @@ export function dedupeCanonicalDemand(
       byKey.set(row.key, row);
       continue;
     }
-    if (!existing.actionable && row.actionable) byKey.set(row.key, row);
+    if (!existing.actionable && row.actionable) {
+      byKey.set(row.key, row);
+      continue;
+    }
+    if (
+      existing.actionable === row.actionable &&
+      existing.organizationName === null &&
+      row.organizationName !== null
+    ) {
+      byKey.set(row.key, row);
+    }
   }
 
   const nullsLast = (a: string | null, b: string | null): number => {

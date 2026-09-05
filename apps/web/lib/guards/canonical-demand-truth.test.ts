@@ -223,3 +223,57 @@ describe("the slice stayed inside its boundaries", () => {
     expect(src).not.toMatch(/@\/lib\/(auth|billing|stripe)\//);
   });
 });
+
+/**
+ * THE ORGANISATION NAME — disclosed, never invented (2026-09-05).
+ *
+ * The worker RPC `list_open_demand_for_workers` already returns `company_name`,
+ * and only for a company whose `verification_status = 'verified'`. The canonical
+ * read used to drop it, so a worker-visible need rendered "organisation: not
+ * stated" for a name the platform was ALREADY authorised to show — withholding
+ * disclosable information and printing a gap instead.
+ *
+ * Carrying it adds no privilege. These pin that it stays that way: the value may
+ * only ever be the disclosing branch's own column, the other branch must keep
+ * contributing null, and no second lookup may appear to "fill in" the gap.
+ */
+describe("the organisation name is carried, never invented", () => {
+  const CANONICAL_IO = "lib/demand/canonical-demand.ts";
+
+  it("the worker branch passes the RPC's own column straight through", () => {
+    const src = code(CANONICAL_IO);
+    expect(src).toMatch(/organizationName: row\.company_name/);
+  });
+
+  it("the employer's own-rows branch contributes null, not the viewer's workspace", () => {
+    // Borrowing the active workspace name would attach an organisation the row
+    // never named — a fabrication, and wrong whenever the row belongs to
+    // another of the caller's organisations.
+    const src = code(CANONICAL_IO);
+    expect(src).toMatch(/organizationName: null/);
+    expect(src).not.toMatch(/organizationName:\s*employer\./);
+  });
+
+  it("no new query was added to resolve a name", () => {
+    // The whole point is that this costs no extra read and no extra privilege.
+    const src = code(CANONICAL_IO);
+    expect(src).not.toMatch(/\.from\(\s*["'](companies|organizations)["']\s*\)/);
+    expect(src.match(/\.from\(\s*["']/g)?.length ?? 0).toBe(1);
+  });
+
+  it("the read still declares no security definer of its own", () => {
+    const src = code(CANONICAL_IO);
+    expect(src).not.toMatch(/security definer/i);
+    expect(src).not.toMatch(/service[_-]?role/i);
+  });
+
+  it("the contract carries the name but still no contact detail", () => {
+    const src = read(CANONICAL_MODEL);
+    const iface = src.slice(
+      src.indexOf("export interface CanonicalDemand {"),
+      src.indexOf("export type CanonicalDemandResult"),
+    );
+    expect(iface).toMatch(/readonly organizationName: string \| null;/);
+    expect(iface).not.toMatch(/email|phone|contact|profile_id|salary|rate/i);
+  });
+});

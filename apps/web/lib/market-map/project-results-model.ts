@@ -294,12 +294,14 @@ export function groupIntoProjects(
  * construction, which is what the header of `project-results.ts` has always
  * claimed and what reading a second table quietly broke.
  *
- * NOTHING IS INVENTED. The canonical contract carries no project title, no
- * company identity, no end date, no skill ids and no project status for a need
- * — the worker-visible path is a closed column whitelist and the employer's own
- * read is scoped to the same fields. Every one of those absences is declared in
- * `missing` and rendered as an explicit gap. `title` is the employer's OWN role
- * text, not a generated label; when they stated none, it stays null.
+ * NOTHING IS INVENTED. The canonical contract carries no project title, no end
+ * date, no skill ids and no project status for a need, and it carries the
+ * organisation ONLY when the branch that answered already disclosed it — the
+ * worker RPC names a VERIFIED company, the employer's own-rows read has no
+ * company column at all. Every absence is declared in `missing` and rendered as
+ * an explicit gap; a missing organisation is never filled from the viewer's own
+ * workspace. `title` is the employer's OWN role text, not a generated label;
+ * when they stated none, it stays null.
  *
  * The caller dedupes (`dedupeCanonicalDemand`) BEFORE this, exactly as the
  * marker does, so one demand is one row even when two authorized branches
@@ -340,14 +342,18 @@ export function groupIntoDemandUnits(
     if (!role) missing.push("roleTitle");
     missing.push("requiredSkills");
     if (row.quantity === null) missing.push("headcount");
-    // The employer's identity is deliberately outside both authorized reads.
-    missing.push("organization");
+    // Named ONLY when the branch that answered already disclosed it (the
+    // worker RPC, verified companies only). Otherwise the gap is stated — it
+    // is never filled from the viewer's own workspace or from a lookup this
+    // read is not entitled to make.
+    const organization = row.organizationName?.trim() || null;
+    if (!organization) missing.push("organization");
 
     out.push({
       unitKind: "need",
       projectId: row.id,
       title: role,
-      organization: null,
+      organization,
       country,
       city: cityText === "" ? null : cityText,
       precision: resolved ? "city" : "country",
