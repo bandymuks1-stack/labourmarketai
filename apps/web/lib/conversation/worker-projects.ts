@@ -47,7 +47,8 @@ export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatRes
           listMyDocuments(),
         ]);
         if (items.length > 0) {
-          asks = deriveWorkerProjectAsks(items, docs.kind === "ok" ? docs.documents : [], new Date());
+          // A documents read that did not answer is passed as UNKNOWN (null), never as "no documents".
+          asks = deriveWorkerProjectAsks(items, docs.kind === "ok" ? docs.documents : null, new Date());
           // The manager's instruction per project — the instructions page's
           // own read (RLS: only threads the person participates in), newest
           // first; the first row per project is the latest instruction.

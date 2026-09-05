@@ -90,6 +90,13 @@ describe("deriveWorkerProjectAsks — pure truth table", () => {
     expect(only.get("p1")![0].own).toBe("expiring");
   });
 
+  it("an UNKNOWN documents read (null) claims no own state and offers no record chip — unknown is not 'not recorded'", () => {
+    const asks = deriveWorkerProjectAsks([item("p1", "identity_document"), item("p1", "client_specific_requirement")], null, NOW);
+    expect(asks.get("p1")![0]).toMatchObject({ documentTypeSlug: "id_document", own: null });
+    expect(asks.get("p1")![1]).toMatchObject({ documentTypeSlug: null, own: null });
+    expect(firstRecordableAsk(asks.values())).toBeNull();
+  });
+
   it("rows are grouped per project, bounded per project; nothing tracked → no entry (never an invented ask)", () => {
     const many = Array.from({ length: WORKER_PROJECT_ASK_LIMIT + 3 }, (_, i) => item("p1", `custom_${i}`));
     const asks = deriveWorkerProjectAsks([...many, item("p2", "identity_document")], [], NOW);
@@ -128,7 +135,7 @@ describe("the read and the chat — existing canonical paths only (source pins)"
   it("the chat read composes the worker project page's read + the documents page's read + the map; a failed read leaves the asks empty", () => {
     expect(READ).toContain('import { listMyDocuments } from "@/lib/documents/readiness";');
     expect(READ).toContain("listOwnReadinessItems(workerId, activeIds)");
-    expect(READ).toMatch(/deriveWorkerProjectAsks\(items, docs\.kind === "ok" \? docs\.documents : \[\], new Date\(\)\)/);
+    expect(READ).toMatch(/deriveWorkerProjectAsks\(items, docs\.kind === "ok" \? docs\.documents : null, new Date\(\)\)/);
     expect(READ).toMatch(/catch \{\s*\/\* asks stay empty/);
     expect(READ).toMatch(/first && first\.documentTypeSlug && firstProject\s*\? \{ documentTypeSlug: first\.documentTypeSlug, label: first\.label, projectId: firstProject\.projectId \}\s*: null/);
   });
