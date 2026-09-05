@@ -12813,7 +12813,7 @@
     "hero": {
       "headline": "Vraag. Zie. Neem aan.",
       "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek.",
-      "chatLabel": "AI-gesprek",
+      "chatLabel": "Voorbeeldgesprek",
       "mapLabel": "Conceptkaart — illustratief scenario",
       "thinking": "Marktsignalen analyseren…",
       "answered": "Gevonden. Kaart bijgewerkt.",
@@ -12830,7 +12830,8 @@
         "r3": "Meeste beschikbare mensen — de Baltische staten"
       },
       "reacting": "Markt reageert… {count} signalen",
-      "decisionLabel": "AI-BESLISSING",
+      "decisionLabel": "VOORBEELDBESLISSING",
+      "ownQuestionNote": "Dit is een uitgewerkt voorbeeld bij het onderwerp van uw vraag — geen antwoord uit uw gegevens. Het echte antwoord krijgt u na het inloggen.",
       "decisionField": {
         "whyHere": "Waarom hier",
         "whyNow": "Waarom nu",

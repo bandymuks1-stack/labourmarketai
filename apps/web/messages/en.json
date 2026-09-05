@@ -12813,7 +12813,7 @@
     "hero": {
       "headline": "Ask. See. Hire.",
       "sub": "An AI labour-market operating system — conversation, map and result in one place.",
-      "chatLabel": "AI conversation",
+      "chatLabel": "Example conversation",
       "mapLabel": "Concept map — illustrative scenario",
       "thinking": "Analysing market signals…",
       "answered": "Found it. Map updated.",
@@ -12830,7 +12830,8 @@
         "r3": "Most available people — the Baltics"
       },
       "reacting": "Market reacting… {count} signals",
-      "decisionLabel": "AI DECISION",
+      "decisionLabel": "EXAMPLE DECISION",
+      "ownQuestionNote": "This is a worked example on your question's topic — not an answer built from your data. Sign in for the real one.",
       "decisionField": {
         "whyHere": "Why here",
         "whyNow": "Why now",
