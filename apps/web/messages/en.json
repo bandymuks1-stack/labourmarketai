@@ -12199,6 +12199,8 @@
       "readinessWriteFailed": "The change could not be made.",
       "briefInstructions": "Instructions waiting: {count}.",
       "chipInstructions": "Instructions",
+      "briefWorkConfirmed": "Your employer confirmed {count, plural, one {# of your work entries} other {# of your work entries}} in the last 7 days — skills verified: {skills}.",
+      "chipMyCard": "My card",
       "confirmIntro": "Awaiting your confirmation: {count} entries.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} skills)",
       "confirmChip": "Confirm: {name} · {date}",

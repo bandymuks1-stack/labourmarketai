@@ -3414,6 +3414,12 @@ export function ConversationChat({
             { id: "link:/dashboard/documents", label: labels.documentsChip },
           ]);
           return;
+        case "player-card":
+          // The confirmation line in the opening brief ("the employer
+          // confirmed N of your entries") — the SAME card the sentence
+          // "mano kortelė" opens; the verified skills live there, nowhere else.
+          startPlayerCard();
+          return;
         case "logwork":
           user(labels.userLogWork);
           // Opens the SAME deterministic work-log flow the typed sentence
@@ -3666,7 +3672,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 

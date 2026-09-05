@@ -12199,6 +12199,8 @@
       "readinessWriteFailed": "De wijziging kon niet worden gedaan.",
       "briefInstructions": "Wachtende instructies: {count}.",
       "chipInstructions": "Instructies",
+      "briefWorkConfirmed": "Uw werkgever heeft de afgelopen 7 dagen {count, plural, one {# van uw werkregistraties} other {# van uw werkregistraties}} bevestigd — bevestigde vaardigheden: {skills}.",
+      "chipMyCard": "Mijn kaart",
       "confirmIntro": "Wacht op uw bevestiging: {count} items.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} vaardigh.)",
       "confirmChip": "Bevestigen: {name} · {date}",

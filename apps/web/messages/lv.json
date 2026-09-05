@@ -3898,6 +3898,8 @@
       "readinessWriteFailed": "Izmaiņu neizdevās veikt.",
       "briefInstructions": "Gaida norādījumi: {count}.",
       "chipInstructions": "Norādījumi",
+      "briefWorkConfirmed": "Darba devējs pēdējo 7 dienu laikā apstiprināja {count, plural, one {# jūsu darba ierakstu} other {# jūsu darba ierakstus}} — apstiprinātas prasmes: {skills}.",
+      "chipMyCard": "Mana kartīte",
       "confirmIntro": "Gaida jūsu apstiprinājumu: {count} ieraksti.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} prasmes)",
       "confirmChip": "Apstiprināt: {name} · {date}",

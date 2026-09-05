@@ -12199,6 +12199,8 @@
       "readinessWriteFailed": "Die Änderung konnte nicht vorgenommen werden.",
       "briefInstructions": "Wartende Anweisungen: {count}.",
       "chipInstructions": "Anweisungen",
+      "briefWorkConfirmed": "Ihr Arbeitgeber hat in den letzten 7 Tagen {count, plural, one {# Ihrer Arbeitseinträge} other {# Ihrer Arbeitseinträge}} bestätigt — bestätigte Fähigkeiten: {skills}.",
+      "chipMyCard": "Meine Karte",
       "confirmIntro": "Wartet auf Ihre Bestätigung: {count} Einträge.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} Fähigk.)",
       "confirmChip": "Bestätigen: {name} · {date}",

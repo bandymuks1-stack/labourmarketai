@@ -15,6 +15,8 @@ import { listMyEngagements } from "@/lib/invitations/network";
 import type { WorkerDocumentGapResult } from "@/lib/conversation/documents-gap-server";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
 
 /**
  * THE OPENING BRIEF (owner ruling 2026-07-29, W2).
@@ -171,6 +173,26 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     }
   } catch {
     /* no line */
+  }
+
+  // 3a' ── the employer CONFIRMED this person's work (owner contract §14 —
+  // WORK → EVIDENCE → EMPLOYER CONFIRMATION → VERIFIED CAPABILITY → LIVING
+  // IDENTITY, read back on the PERSON's side). The line is derived from the
+  // canonical evidence rows themselves (journal_entry_confirmations inside a
+  // trailing window) — the SAME rows the journal list and the card derive
+  // from; no parallel notification truth, no "seen" table. The chip opens
+  // the one surface that shows the verified state: the person's card.
+  try {
+    if (lines.length < MAX_LINES) {
+      const workerId = await getOwnWorkerId();
+      const fresh = workerId ? await loadOwnRecentConfirmations(workerId) : null;
+      if (fresh && fresh.approvedEntries > 0) {
+        lines.push(t("briefWorkConfirmed", { count: fresh.approvedEntries, skills: fresh.skillsConfirmed }));
+        addChip("player-card", t("chipMyCard"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents a confirmation */
   }
 
   // 3b ── unread human messages (owner audit §4.4/§8: with the tab row gone,
