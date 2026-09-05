@@ -13001,7 +13001,8 @@
       "unnamedOrganization": "(organisatie zonder naam)",
       "chipLogWork": "Werk vastleggen",
       "chipCreateDemand": "Behoefte beschrijven",
-      "scoutingPickDemand": "Kies er één, dan laat ik de kandidaten hier in de werkruimte zien."
+      "scoutingPickDemand": "Kies er één, dan laat ik de kandidaten hier in de werkruimte zien.",
+      "chipProjectCsv": "CSV downloaden: {title}"
     },
     "project": {
       "fieldStatus": "Status",

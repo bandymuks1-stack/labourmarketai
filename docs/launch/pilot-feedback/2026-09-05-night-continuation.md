@@ -48,3 +48,7 @@ All proofs with E2E identities on production (`labourmarket.ai`), never the real
 - COMMIT: the confirm chip only — `company.move-worker` (strong tier, token) = assign to Y (`assign_worker_to_project`) THEN end X (`end_worker_project_assignment`); a failed second step is reported as "on both projects — finish it in the panel". The destination project re-opens in the panel.
 - Guard `move-worker-intent.test.ts`: routes in 5 locales; the what-if module has no table/RPC/write; the executor's order; the chat's chip order; real copy in 11 catalogues.
 - Vercel production freeze: the walk (`walk-move-prod.cjs`, to be written for E2E Walker UAB with a second project) runs after the reset.
+
+## REPORT — §19 EXPORT by sentence (branch `feat/cc/figures-csv-export`)
+
+- "paruošk ataskaitą" (intent `figures`) answers the organisation's figures as before and now offers up to three `download:` chips — the project operations CSV the operations page already serves (`/dashboard/projects/<id>/operations/report`, manager role + RLS re-checked in the route). The chat treats a `download:` chip as a file (full navigation), never as a page. No report store of its own. Guard `lib/ai-workspace/figures-export.test.ts`.

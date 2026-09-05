@@ -13001,7 +13001,8 @@
       "unnamedOrganization": "(Organisation ohne Namen)",
       "chipLogWork": "Arbeit eintragen",
       "chipCreateDemand": "Bedarf beschreiben",
-      "scoutingPickDemand": "Wähle einen aus, dann zeige ich die Kandidaten direkt hier im Arbeitsbereich."
+      "scoutingPickDemand": "Wähle einen aus, dann zeige ich die Kandidaten direkt hier im Arbeitsbereich.",
+      "chipProjectCsv": "CSV herunterladen: {title}"
     },
     "project": {
       "fieldStatus": "Status",

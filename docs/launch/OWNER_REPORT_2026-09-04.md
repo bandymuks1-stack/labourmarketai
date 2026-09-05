@@ -51,7 +51,7 @@ The company greeting is capability-derived (employer + operations + agency + edu
 
 - Owner gates (consolidated, do not re-ask): **"Apply My Space 2026-09-04"** (#1475, one reference table — RED only because of the static grant rule); **transactional e-mail** (`INVITE_EMAIL_PROVIDER/API_KEY/FROM` — every invitation is stored, not sent, and the chat says so); **public programme projection** (privacy decision) for "who can help" on a skills gap.
 - Found tonight: on a PHONE the chips a panel action posts into the thread sat under the open bottom sheet — fixed (#1493, the sheet yields to the question); the project panel showed "Priskirta 0" beside "Priskirta projektui." — fixed (#1492, prod-proven `8aac9ab9`). Owner hold (v4): journal review per engagement cannot be enabled by anyone, so the employer's review stage waits for the owner.
-- Not built: Project Field / team movement what-if (§11); reporting export/print by sentence (§19); World Map layers (§18); communication translation (honest "no engine"); reorder gesture and typed-sentence usage counting for My Space.
+- Built after this line was written (night 2026-09-05, not live until the Vercel freeze lifts): the §11 what-if move (#1506) and §19 EXPORT by sentence — "paruošk ataskaitą" now offers the project operations CSV (the existing manager-gated route) as download chips. Still not built: reporting PRINT/SHARE by sentence (§19); World Map layers (§18); communication translation (honest "no engine"); reorder gesture and typed-sentence usage counting for My Space.
 - Real-user evidence: none today beyond the recruiter's 06:15 sign-in. Everything above is E2E-proven, not real-user-proven.
 
 ## Evening additions (2026-09-04, after the owner's "never idle on CI" correction)

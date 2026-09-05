@@ -3150,6 +3150,12 @@ export function ConversationChat({
             openProposeForm(chip.id.slice(15));
           } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
+          } else if (chip.id.startsWith("download:")) {
+            // §19 EXPORT: a canonical file route (Content-Disposition: attachment)
+            // — a full navigation so the browser saves it; `router.push` would
+            // fetch it as a page. The route re-checks manager role + RLS.
+            user(chip.label);
+            window.location.assign(chip.id.slice(9));
           } else if (chip.id.startsWith("link:")) {
             // Contextual navigation to a REAL canonical surface (rebuild W4)
             // — the chat routes to the one existing screen, it never grows a

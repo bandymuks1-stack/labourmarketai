@@ -530,10 +530,21 @@ export async function runFigures(): Promise<WorkflowResult> {
   if (parts.length === 0) {
     return blocked(t("figuresOrgUnavailable"), t("whyFigures"));
   }
+  // §19 EXPORT / DOWNLOAD by sentence: the report a manager can take away is
+  // the project operations CSV the operations page already serves (the ONE
+  // route, manager-gated + RLS there). Offered for the projects the person
+  // really manages — bounded, never a report store of its own.
+  const locale = await getLocale();
+  const managed = await listManagedProjects();
+  const chips = managed.slice(0, 3).map((p) => ({
+    id: `download:/${locale}/dashboard/projects/${p.id}/operations/report`,
+    label: t("chipProjectCsv", { title: p.title ?? p.id.slice(0, 8) }),
+  }));
   return {
     kind: "answer",
     text: [t("figuresOrgIntro"), ...parts].join("\n"),
     explanation: { why: t("whyFigures") },
+    ...(chips.length > 0 ? { chips } : {}),
   };
 }
 
