@@ -138,7 +138,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | OWNER_BLOCKED | **1** (I5) + 5 billing stages waiting on G-8 (counted under pending proof) |
 | EXTERNAL_BLOCKED | **1** (M1) |
 
-Check: 57 + 6 + 9 + 1 + 1 + 1 = 75. Percentage, if wanted: 57 / 75 = **76 % PROD_PROVEN**; (57 + 7) / 75 = 85 % implemented. These are stage counts, not effort. Recounted from the Status column 13:15 UTC 2026-09-05.
+Check: 57 + 6 + 9 + 1 + 1 + 1 = 75. Percentage, if wanted: 57 / 75 = **76 % PROD_PROVEN**; (57 + 6) / 75 = 84 % implemented. These are stage counts, not effort. Recounted from the Status column 13:15 UTC 2026-09-05.
 
 ## 2. Three finish lines
 
