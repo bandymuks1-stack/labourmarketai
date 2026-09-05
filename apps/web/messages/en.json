@@ -5155,6 +5155,7 @@
     "eyebrow": "Pricing",
     "title": "Simple tiers,",
     "titleAccent": "set fairly.",
+    "subcopyLive": "Prices are confirmed by the owner and in force. Activation happens in the organization account through a secure Stripe payment; nothing is charged on this page.",
     "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "planCta": "Join the waitlist for this plan",
     "featuresLabel": "Includes",
