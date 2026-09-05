@@ -317,6 +317,27 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    / workers to resolve recipients) — still no chat table, still the
     //    one audited emitter home.
     //
+    //  - lib/billing/checkout-operations-store.ts — billing safety v1 (owner
+    //    directive 2026-09-05): the SERVER-side checkout-operation identity
+    //    (`billing_checkout_operations`) behind every Checkout Session — the
+    //    row the Stripe idempotency key is derived from, so a double click /
+    //    two tabs / a retry reuse one session. Same billing-table posture as
+    //    subscription-store.ts: the table carries NO authenticated write
+    //    policy by design (admin SELECT only — it is an evidence record), the
+    //    checkout route and the webhook write it with no user-session write
+    //    path. Writes ONLY that table; touches no chat table; sends nothing
+    //    outbound.
+    //  - lib/billing/reconcile.ts — billing safety v1 READ-ONLY reconciliation
+    //    (superadmin-gated by an explicit isSuperadmin() re-check; the
+    //    launch-readiness pattern). Reads billing_subscriptions /
+    //    billing_customers / payment_webhook_events /
+    //    billing_checkout_operations — the last three are admin-SELECT via
+    //    public.is_admin() (active_role only) while the app's admin signal is
+    //    dual, so the service role is the only read path that agrees with the
+    //    app gate. Writes NOTHING (the report states writesPerformed: 0);
+    //    provider access is the adapter's read-only methods; never a charge;
+    //    touches no chat table; sends nothing outbound.
+    //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
     // ai_runs audit row / the two operator-only vacancy tables / the
@@ -330,7 +351,9 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
       "lib/ai/runtime/audit-store.ts",
+      "lib/billing/checkout-operations-store.ts",
       "lib/billing/customer-store.ts",
+      "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
       "lib/lmc/compensation.ts",
