@@ -1197,6 +1197,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // approval sentence "Apply Lane A ownership 2026-09-04" pending — the
       // marker records the RED classification, not a granted approval.
       "20260904060000_owns_company_governance_membership_v1.sql",
+      // 2026-09-04: the first-party supply bridge — a new consent purpose, the
+      // declaration table, and six SECURITY DEFINER functions (one of them
+      // granted to service_role ONLY). Marker added with the draft PR; it
+      // records the RED classification, not a granted approval — the migration
+      // is UNAPPLIED and the approval sentence is still pending.
+      "20260904120000_first_party_supply_representation_v1.sql",
 ]);
   });
 

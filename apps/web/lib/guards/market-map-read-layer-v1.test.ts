@@ -783,7 +783,13 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
     // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
-expect(count).toBeLessThanOrEqual(263);
+    // Bumped 263 -> 264 for the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback) —
+    // RED draft: new consent purpose + declaration table + six SECURITY
+    // DEFINER functions, one of them service_role-only. Additive; no existing
+    // table, policy or column altered. UNAPPLIED. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 264.
+expect(count).toBeLessThanOrEqual(264);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -2363,7 +2363,13 @@ describe("no migration files added by this sprint", () => {
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
     // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
-const SPRINT_BASELINE = 263;
+    // Bumped 263 -> 264 for the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback) —
+    // RED draft: new consent purpose + declaration table + six SECURITY
+    // DEFINER functions, one of them service_role-only. Additive; no existing
+    // table, policy or column altered. UNAPPLIED. RECOUNTED from the tree,
+    // never summed: `ls supabase/migrations/*.sql | wc -l` = 264.
+const SPRINT_BASELINE = 264;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

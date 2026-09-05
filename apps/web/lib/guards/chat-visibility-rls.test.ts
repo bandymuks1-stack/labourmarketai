@@ -219,6 +219,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    DESIGN (0005 — anon INSERT only, reads restricted to service
     //    role), the call is fenced behind an explicit isSuperadmin()
     //    re-check, SELECTs only `waitlist`, and writes nothing.
+    //  - lib/supply-bridge/feed-source.ts — the first-party supply feed
+    //    reader. Service role is genuinely required, not convenient: the
+    //    human-gated migration 20260904120000 grants EXECUTE on
+    //    first_party_supply_feed_v1() to service_role ONLY (revoked from
+    //    public/anon/authenticated — proven 42501 for authenticated), because
+    //    the function answers with every AUTHORISED person at once, which is
+    //    right for the emitter and wrong for any signed-in account. The
+    //    authority filter lives INSIDE that SQL function (current granted
+    //    partner_supply_representation consent + live, unexpired declaration),
+    //    so the service key opens the front door and never the authority
+    //    check. It calls exactly one RPC, reads and writes no table directly,
+    //    touches no chat table, and sends nothing outbound — the projection it
+    //    returns carries no name, email, phone or address by construction.
     //  - lib/company/claim-public-intake.ts — canonical-journey P3 claim
     //    bridge. Reads company_need_public_intakes rows ONLY where the
     //    caller's AUTHENTICATED email equals contact_email (re-checked on
@@ -336,6 +349,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/lmc/compensation.ts",
       "lib/notifications/event-emitters.ts",
       "lib/sales/lead-intake.ts",
+      "lib/supply-bridge/feed-source.ts",
       "lib/usage/usage-cost-store.ts",
       "lib/vacancy-runner/vacancy-admin-actions.ts",
     ]);
