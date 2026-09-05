@@ -57,7 +57,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | B5 | Act on it (interest / contact) | worker | persisted interest → company sees it | PROD_PROVEN | #596/#597, MCP | — | F | — | — |
 | B6 | Understand readiness gap | worker | documents/skills gap with who issues it | PROD_PROVEN | 2026-09-04 walks | contextual ledger (P3) | P3 | READINESS | yes after RequirementLedger type |
 | B7 | Progress / resolve the gap | worker | record the asked document → readiness recalculates | **PARTIAL (D3)** | today: page yes, chat silent | fix the chat-side reads (brief line, asks, recorded, reply) | P3 | CONV | after J |
-| B8 | Receive / respond to employer action | worker | booking answer · invitation accept in-app | PARTIAL | booking answer PROD_PROVEN (#1505); invitation only via `/invite/[token]` (no e-mail) | lane J: invitation → Attention → accept/decline over the dispatcher | Attention | CONV | lane J running |
+| B8 | Receive / respond to employer action | worker | booking answer · invitation accept in-app | PROD_PROVEN | booking answer (#1505); invitation → brief → "mano kvietimai" → accept → accepted, walked 10:26 UTC on `59b94523` (#1522) | decline-by-id = migration (owner decision, later); e-mail = owner env | Attention | — | — |
 | B9 | Assigned to real project | worker | assignment row, "mano projektai" | PROD_PROVEN | #1503–#1506 | org binding on accept = G-15 (#1436) | F | — | — |
 | B10 | Receive instruction / task | worker | instruction in brief + thread | PROD_PROVEN | #1510 walk 04:49 UTC | — | F | — | — |
 | B11 | Record work / evidence (file) | worker | journal entry with project + file | PROD_PROVEN | E2, #1502 | — | P7 later | — | — |
@@ -97,7 +97,7 @@ States: `PROD_PROVEN` · `IMPL_PENDING_PROOF` · `PARTIAL` · `NOT_IMPLEMENTED` 
 | H2 | World map layers / viewport | org | bounded, clustered, ≤60 objects | PARTIAL | `market-map` exists | P8 + 1M-point load validation (V1) | P8 | WORLD | after P2 |
 | H3 | Bounded / scalable retrieval | all | no hot-path scans | PROD_PROVEN | P0-1 fixed, indexes, scan caps | — | F | — | — |
 | H4 | Availability / capacity | org | who is free until when | PROD_PROVEN | capacity walk | — | P4 | — | — |
-| I1 | Invitations reach the person | all | in-app Attention + accept/decline | PARTIAL | link page only | lane J | Attention | CONV | running |
+| I1 | Invitations reach the person | all | in-app Attention + accept | PROD_PROVEN | walked 10:26 UTC on `59b94523` (#1522); QA read-only review APPROVE (one P3: roster fingerprint keyed by org id → CONV backlog) | — | Attention | — | — |
 | I2 | Instructions | org→worker | brief + thread | PROD_PROVEN | #1510 | — | F | — | — |
 | I3 | Responses (booking answer, instruction reply) | worker | reply persisted, manager sees status | PARTIAL | booking yes; reply chat-side silent today (D3) | fix with D3 | F | CONV | after J |
 | I4 | Attention brief | all | what changed / why / what to do | PROD_PROVEN | attention walks | grouping for >20 items (V1) | Attention | CONV | V1 |
@@ -185,7 +185,7 @@ Design's "owner decisions" reclassified: Stripe LIVE = genuine (G-8); #1475 = ge
 
 Target = the commercial spine production-proven: public entry → organisation signup/setup → need → results → contact/invitation → worker Attention → respond → readiness/gap → engagement/project → FREE=1 → €99 Checkout → signed webhook → subscription → PAID=10 → 11th = contact → portal/account → cancel/refund readback. Person side: entry → identity → opportunity/invitation → respond → readiness → work context → confirmation.
 
-**COMMERCIAL_CRITICAL_STAGES (30):** A1 A2 B1 B3 B4 B5 B6 B7 B8 B9 B12 B13 C1 C2 C3 C4 C5 C6 C12 G1 G2 J1 J2 J3 J4 J5 K2 K4 L2 L3 — **proven 17 / 30** after today's corrected walks (B7 and B12 moved to proven; B13 proven by the brief line; D2 is a name defect on a proven chain).
+**COMMERCIAL_CRITICAL_STAGES (30):** A1 A2 B1 B3 B4 B5 B6 B7 B8 B9 B12 B13 C1 C2 C3 C4 C5 C6 C12 G1 G2 J1 J2 J3 J4 J5 K2 K4 L2 L3 — **proven 18 / 30** (10:30 UTC: B8 invitation in-app walked on `59b94523`; earlier today B7, B12, B13 by the corrected walks). Merged and awaiting a served build: D2 name (#1523, served), D1 router precision (#1526), P3 ledger (#1525).
 
 | Day (UTC) | Target | Lane / write owner | Dependency | State | Prod proof | Blocker → recovery |
 |---|---|---|---|---|---|---|
