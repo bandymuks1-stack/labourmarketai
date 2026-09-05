@@ -7,6 +7,19 @@
  * alone — same split as `education-workspace-contract.ts`).
  */
 
+import type { CompanyWorkersListResult } from "@/lib/company/company-workers";
+
+/**
+ * QA Q-3 — a roster read a server caller has ALREADY issued for the same
+ * request (the company page awaits `listActiveCompanyWorkers` for its roster
+ * section and composes the home field next to it). Handed to
+ * `loadWhoIsAvailableForChat` so the roster is queried once; pending or
+ * resolved, the SAME rows the read would otherwise fetch itself.
+ */
+export interface CapacityPreRead {
+  readonly roster: PromiseLike<CompanyWorkersListResult> | CompanyWorkersListResult;
+}
+
 /** How many days ahead "who is available" looks (today inclusive). */
 export const CAPACITY_WINDOW_DAYS = 7;
 

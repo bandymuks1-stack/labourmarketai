@@ -7,13 +7,17 @@ import type { CapacityChatResult } from "@/lib/conversation/capacity-contract";
 import { loadEmployerOpeningBrief, type OpeningBrief } from "@/lib/conversation/opening-brief";
 import { listProjectStages } from "@/lib/projects/stages";
 import { listProjectAssignments } from "@/lib/projects/projects";
+import type { CompanyWorkersListResult } from "@/lib/company/company-workers";
 import {
   COMPANY_HOME_PEOPLE_CHIP_LIMIT,
   COMPANY_HOME_PROJECT_LIMIT,
+  carriedPeopleNames,
+  carriedStages,
   deriveStageTimeline,
   unpackRiskSignals,
   type RiskSignal,
   type StageTimeline,
+  type TimelineStage,
 } from "@/lib/company/company-home-field-model";
 
 /**
@@ -25,19 +29,25 @@ import {
  *   projects + risk   → loadProjectRiskForChat()   (the chat's "which project
  *                       is at risk" — ≤ PROJECT_RISK_SCAN_LIMIT live projects,
  *                       each through the panel's own detail read)
- *   now / next        → listProjectStages()         (the canonical stages read,
- *                       one bounded query per shown project) — derived in the
- *                       pure model, "next" marked DERIVED
- *   people on it      → listProjectAssignments()    (the project panel's read;
- *                       names capped per row, the count is the risk row's)
- *   who is free       → loadWhoIsAvailableForChat() (the chat's capacity answer)
+ *   now / next        → the stages THAT READ already returned, carried on the
+ *                       risk row (QA Q-3) — derived in the pure model, "next"
+ *                       marked DERIVED; `listProjectStages()` runs only when a
+ *                       row carries none or a list the panel's bound cut short
+ *   people on it      → the roster names the same read returned; the panel's
+ *                       `listProjectAssignments()` only as the same fallback
+ *                       (names capped per row, the count is the risk row's)
+ *   who is free       → loadWhoIsAvailableForChat() (the chat's capacity answer;
+ *                       the company page hands in the roster read it already
+ *                       awaits, so the roster is queried once per request)
  *   needs you         → loadEmployerOpeningBrief()  (the chat's opening brief)
  *
  * Every source degrades on its own into a named state — a failed read is
  * never a calm empty block (owner contract §1 rule 3: real state, never
- * decoration). Bounded: ≤ 6 projects × (1 stages + 1 assignments query).
- * The remaining objects (needs, partners) are rows the company page ALREADY
- * reads for its other sections and are passed in, not read twice.
+ * decoration). Bounded: ≤ 6 projects, and in the common case ZERO queries
+ * beyond the risk read itself (≤ 6 × (1 stages + 1 assignments) only as the
+ * fallback above). The remaining objects (needs, partners) are rows the
+ * company page ALREADY reads for its other sections and are passed in, not
+ * read twice.
  */
 
 export interface HomeProjectRow {
@@ -69,21 +79,37 @@ async function loadProjectRows(): Promise<HomeProjectsResult> {
   const scanned = risk.rows.slice(0, COMPANY_HOME_PROJECT_LIMIT);
   const rows = await Promise.all(
     scanned.map(async (r): Promise<HomeProjectRow> => {
-      // Each read guards itself: an unreadable stage list becomes the honest
+      // QA Q-3: the risk row went through the panel's detail read already —
+      // its stages and roster names are reused; the canonical reads run only
+      // when the row carries nothing usable (`carriedStages` /
+      // `carriedPeopleNames` hold the completeness rule). Each fallback read
+      // guards itself: an unreadable stage list becomes the honest
       // "unavailable" state, an unreadable roster leaves the count (which the
       // risk row already carries) and drops only the names.
-      const [stagesData, assignments] = await Promise.all([
-        listProjectStages(r.projectId).catch(() => ({ applied: false as const })),
-        listProjectAssignments(r.projectId).catch(() => []),
+      const carried = carriedStages(r);
+      const names = carriedPeopleNames(r);
+      const [stages, peopleNames] = await Promise.all([
+        carried !== undefined
+          ? Promise.resolve<readonly TimelineStage[] | null>(carried)
+          : listProjectStages(r.projectId)
+              .then((d): readonly TimelineStage[] | null => (d.applied ? d.stages : null))
+              .catch((): null => null),
+        names !== undefined
+          ? Promise.resolve<readonly string[]>(names)
+          : listProjectAssignments(r.projectId)
+              .then((a): readonly string[] =>
+                a.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT).map((x) => x.name),
+              )
+              .catch((): readonly string[] => []),
       ]);
-      const timeline = deriveStageTimeline(stagesData.applied ? stagesData.stages : null);
+      const timeline = deriveStageTimeline(stages);
       const unpacked = unpackRiskSignals(r);
       return {
         projectId: r.projectId,
         title: r.title,
         status: r.status,
         people: r.people,
-        peopleNames: assignments.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT).map((a) => a.name),
+        peopleNames,
         timeline,
         riskKnown: unpacked.known,
         risk: unpacked.signals,
@@ -93,10 +119,24 @@ async function loadProjectRows(): Promise<HomeProjectsResult> {
   return { kind: "ok", rows, total: risk.total };
 }
 
-export async function loadCompanyHomeField(): Promise<CompanyHomeField> {
+export interface CompanyHomeFieldInput {
+  /**
+   * QA Q-3: the company page already awaits `listActiveCompanyWorkers` for
+   * its roster section. Handing that SAME pending read in lets the capacity
+   * answer reuse it instead of running the roster query a second time in the
+   * same request. Optional — without it the field reads exactly as before.
+   */
+  readonly roster?: PromiseLike<CompanyWorkersListResult> | CompanyWorkersListResult | null;
+}
+
+export async function loadCompanyHomeField(
+  input: CompanyHomeFieldInput = {},
+): Promise<CompanyHomeField> {
   const [projects, capacity, attention] = await Promise.all([
     loadProjectRows().catch((): HomeProjectsResult => ({ kind: "error" })),
-    loadWhoIsAvailableForChat().catch((): CapacityChatResult => ({ kind: "error" })),
+    loadWhoIsAvailableForChat(input.roster ? { roster: input.roster } : undefined).catch(
+      (): CapacityChatResult => ({ kind: "error" }),
+    ),
     // HONESTY (QA Q-2): a failed brief read is "unavailable", never "all clear".
     loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
   ]);

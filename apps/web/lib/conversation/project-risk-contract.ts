@@ -1,4 +1,5 @@
 import type { ProjectStatus } from "@/lib/projects/project-lifecycle-model";
+import type { ProjectStageRow } from "@/lib/projects/project-result-contract";
 
 /** How many projects the risk answer reads (the panel's own detail read each). */
 export const PROJECT_RISK_SCAN_LIMIT = 6;
@@ -28,6 +29,20 @@ export interface ProjectRiskRow {
   readonly readinessTotal: number;
   readonly nobodyOnLiveProject: boolean;
   readonly signals: number;
+  /**
+   * QA Q-3 — what the detail read ALREADY returned for this project, carried
+   * so a server composer (the company home) can derive from it instead of
+   * reading stages and the roster a second time. All optional: the chat's
+   * answer never looks at them, and an older producer may omit them.
+   *
+   * `stages` follows the panel's contract (null = unreadable here; sliced to
+   * `PROJECT_STAGE_LIMIT`), `stageTotal` says how long the list really is,
+   * `peopleNames` are the panel's roster names (sliced to
+   * `PROJECT_ASSIGNMENT_LIMIT`; `people` is the full count).
+   */
+  readonly stages?: readonly ProjectStageRow[] | null;
+  readonly stageTotal?: number | null;
+  readonly peopleNames?: readonly string[];
 }
 
 export type ProjectRiskChatResult =

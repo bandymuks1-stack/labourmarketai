@@ -55,6 +55,10 @@ export async function loadProjectRiskForChat(): Promise<ProjectRiskChatResult> {
         readinessTotal: pulse?.readinessTotal ?? 0,
         nobodyOnLiveProject,
         signals,
+        // QA Q-3: already read above (the panel's detail read) — carried, not re-read.
+        stages: pr.stages,
+        stageTotal: pr.stageTotal,
+        peopleNames: pr.assignments.map((a) => a.name),
       });
     });
     rows.sort((a, b) => b.signals - a.signals || a.title.localeCompare(b.title));

@@ -13,6 +13,7 @@ import {
   CAPACITY_WINDOW_DAYS,
   type CapacityChatResult,
   type CapacityChatRow,
+  type CapacityPreRead,
 } from "@/lib/conversation/capacity-contract";
 
 function isoDay(d: Date): string {
@@ -26,19 +27,31 @@ function isoDay(d: Date): string {
  * reason). A worker is FREE when no approved absence overlaps the window,
  * otherwise UNAVAILABLE until the last overlapping day. No ranking, no new
  * table, no write. Every degraded state is a named kind.
+ *
+ * `preRead` (QA Q-3): a server caller that has ALREADY issued the roster read
+ * for the same request (the company home, which the company page composes
+ * next to its own roster section) hands it in, and the roster is not queried
+ * twice. Without it — the chat's path — the read is unchanged. This module is
+ * a server action, so the argument is client-controllable in principle: it
+ * can only stand in for the caller's OWN roster rows (the absence read stays
+ * the caller's, RLS-scoped, and the company context is still required), and
+ * every row passes the same shape checks — nothing here reads more than the
+ * zero-argument call could.
  */
-export async function loadWhoIsAvailableForChat(): Promise<CapacityChatResult> {
+export async function loadWhoIsAvailableForChat(
+  preRead?: CapacityPreRead,
+): Promise<CapacityChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
   try {
     const [roster, availability, t] = await Promise.all([
-      listActiveCompanyWorkers(company.companyId),
+      preRead?.roster ?? listActiveCompanyWorkers(company.companyId),
       getEmployerWorkerAvailability(),
       // P2 object language (L1): a person the roster cannot name is said in
       // ordinary words, never as a raw id fragment.
       getTranslations("conversation.chat"),
     ]);
-    if (roster.kind !== "ok") return { kind: "error" };
+    if (!roster || roster.kind !== "ok" || !Array.isArray(roster.rows)) return { kind: "error" };
     const active = roster.rows.filter((w) => w.status === "active");
     if (active.length === 0) return { kind: "empty" };
 
