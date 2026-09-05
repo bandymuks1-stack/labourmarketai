@@ -3898,6 +3898,8 @@
       "readinessWriteFailed": "Muudatust ei õnnestunud teha.",
       "briefInstructions": "Ootel juhised: {count}.",
       "chipInstructions": "Juhised",
+      "briefWorkConfirmed": "Tööandja kinnitas viimase 7 päeva jooksul {count, plural, one {# teie töökande} other {# teie töökannet}} — kinnitatud oskusi: {skills}.",
+      "chipMyCard": "Minu kaart",
       "confirmIntro": "Ootab teie kinnitust: {count} kannet.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} oskust)",
       "confirmChip": "Kinnita: {name} · {date}",

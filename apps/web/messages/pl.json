@@ -3898,6 +3898,8 @@
       "readinessWriteFailed": "Nie udało się wprowadzić zmiany.",
       "briefInstructions": "Oczekujące polecenia: {count}.",
       "chipInstructions": "Polecenia",
+      "briefWorkConfirmed": "Pracodawca potwierdził {count, plural, one {# Twój wpis pracy} few {# Twoje wpisy pracy} other {# Twoich wpisów pracy}} w ciągu ostatnich 7 dni — potwierdzone umiejętności: {skills}.",
+      "chipMyCard": "Moja karta",
       "confirmIntro": "Czeka na potwierdzenie: {count} wpisów.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} umiej.)",
       "confirmChip": "Potwierdź: {name} · {date}",

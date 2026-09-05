@@ -12199,6 +12199,8 @@
       "readinessWriteFailed": "Изменение не удалось.",
       "briefInstructions": "Ожидают указания: {count}.",
       "chipInstructions": "Указания",
+      "briefWorkConfirmed": "Работодатель подтвердил {count, plural, one {# вашу запись о работе} few {# ваши записи о работе} other {# ваших записей о работе}} за последние 7 дней — подтверждено навыков: {skills}.",
+      "chipMyCard": "Моя карточка",
       "confirmIntro": "Ожидают вашего подтверждения: {count} записей.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} навыков)",
       "confirmChip": "Подтвердить: {name} · {date}",

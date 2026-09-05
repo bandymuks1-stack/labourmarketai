@@ -12199,6 +12199,8 @@
       "readinessWriteFailed": "Pakeisti nepavyko.",
       "briefInstructions": "Laukia nurodymų: {count}.",
       "chipInstructions": "Nurodymai",
+      "briefWorkConfirmed": "Darbdavys patvirtino {count, plural, one {# jūsų darbo įrašą} few {# jūsų darbo įrašus} other {# jūsų darbo įrašų}} per 7 d. — patvirtinta įgūdžių: {skills}.",
+      "chipMyCard": "Mano kortelė",
       "confirmIntro": "Laukia patvirtinimo: {count} įraš.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} įgūdž.)",
       "confirmChip": "Patvirtinti: {name} · {date}",

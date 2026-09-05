@@ -3898,6 +3898,8 @@
       "readinessWriteFailed": "Ändringen kunde inte göras.",
       "briefInstructions": "Väntande instruktioner: {count}.",
       "chipInstructions": "Instruktioner",
+      "briefWorkConfirmed": "Din arbetsgivare har bekräftat {count, plural, one {# av dina arbetsposter} other {# av dina arbetsposter}} de senaste 7 dagarna — bekräftade kompetenser: {skills}.",
+      "chipMyCard": "Mitt kort",
       "confirmIntro": "Väntar på din bekräftelse: {count} poster.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} färdigh.)",
       "confirmChip": "Bekräfta: {name} · {date}",
