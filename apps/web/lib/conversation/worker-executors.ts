@@ -8,6 +8,10 @@ import { saveWorkerAvailabilityPrefsAction } from "@/lib/worker/availability-pre
 import { saveWorkerEducationAction } from "@/lib/worker/worker-education-actions";
 import { saveWorkerAchievementAction } from "@/lib/worker/worker-achievements-actions";
 import { respondBookingAction } from "@/lib/booking/booking-actions";
+import { acceptInvitationByIdAction } from "@/lib/invitations/actions";
+import { acceptWorkerInvitationAction } from "@/lib/worker/invitation-actions";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { expressInterestAction } from "@/lib/opportunities/interest-actions";
 import { createJournalEntry } from "@/lib/journal/actions";
 import { z } from "zod";
@@ -170,6 +174,41 @@ export const WORKER_EXECUTORS: {
     return { ok: false, code: mapKind(r.kind) };
   },
 
+  "worker.respond-invitation": async (input, ctx) => {
+    // Owner contract §4D: the person answers the invitation from the
+    // attention item over the SAME accept the visual surface calls — the
+    // network page's `acceptInvitationByIdAction` (accept_invitation_by_id_v1:
+    // the caller's verified e-mail must be the invited one; the engagement is
+    // created there) or the dashboard card's `acceptWorkerInvitationAction`
+    // (accept_{company,agency}_worker_invitation: the roster link). Authority
+    // stays in SQL. `accepted` is the only canonical in-app decision; there is
+    // no decline to delegate to, so none is invented here. Only a REAL accept
+    // is `ok` — every other outcome is returned as its own code, so the
+    // dispatcher's "persisted" event never counts an invitation that was
+    // already answered, expired or not the caller's.
+    if (input.source === "invitation") {
+      const r = await acceptInvitationByIdAction({ invitationId: input.invitationId, locale: ctx.locale });
+      if (r.status === "needs-migration") return { ok: false, code: "needs_migration" };
+      if (r.status === "not-authed") return { ok: false, code: "auth" };
+      if (r.outcome !== "accepted") return { ok: false, code: r.outcome === "error" ? "error" : r.outcome };
+      emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted, {
+        source: "conversation-invitation",
+        metadata: { surface: "conversation", entity_type: "invitation", success: true },
+      });
+      return { ok: true, data: { outcome: "accepted" } };
+    }
+    const r = await acceptWorkerInvitationAction(
+      null,
+      fd({ kind: input.source === "company_roster" ? "company" : "agency", orgId: input.orgId }),
+    );
+    if (!r.ok) return { ok: false, code: r.code === "needs_migration" ? "needs_migration" : r.code === "invalid" ? "invalid" : "error" };
+    if (r.outcome !== "linked") return { ok: false, code: r.outcome };
+    emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted, {
+      source: "conversation-invitation",
+      metadata: { surface: "conversation", entity_type: input.source, success: true },
+    });
+    return { ok: true, data: { outcome: "accepted" } };
+  },
   "worker.express-interest": async (input, ctx) => {
     const r = await expressInterestAction(ctx.locale, input.requestId, input.note ?? null);
     return r.kind === "ok" ? { ok: true, data: { status: r.status } } : { ok: false, code: mapKind(r.kind) };

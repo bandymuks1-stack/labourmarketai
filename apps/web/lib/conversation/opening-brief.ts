@@ -12,6 +12,7 @@ import { buildWorkContext } from "@/lib/conversation/context-intelligence";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import { listMyEngagements } from "@/lib/invitations/network";
+import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
 import type { WorkerDocumentGapResult } from "@/lib/conversation/documents-gap-server";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
@@ -83,6 +84,27 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     }
   } catch {
     /* no line — a failed read never invents an offer */
+  }
+
+  // 0a ── an invitation addressed to THIS person (owner contract §4D: someone
+  // is waiting on you; §15 the learner's invitation, §9 the employer's).
+  // Transactional e-mail is an owner gate — until it opens, this line is how
+  // a signed-in person learns they were invited at all. The ONE domain read
+  // (lib/invitations/attention: the network page's canonical invitations +
+  // the dashboard card's roster invitations, pending, the caller's verified
+  // e-mail); the chip opens the in-chat decision over the SAME accept those
+  // pages call. Names the inviter when known, never invents one.
+  try {
+    if (lines.length < MAX_LINES) {
+      const inv = await listInvitationsAddressedToMe();
+      if (inv.status === "ok" && inv.total > 0) {
+        const first = inv.items[0];
+        lines.push(t("briefInvitations", { count: inv.total, who: first.organizationName ?? first.inviterName ?? t("invitationSomeone") }));
+        addChip("invitations", t("chipInvitations"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents an invitation */
   }
 
   // 0b ── a document about to expire (owner contract 2026-09-04 §4D/§14).

@@ -51,7 +51,8 @@ describe("the intent registry is the enumerable routing contract", () => {
     // `project-readiness` (the people on a live project and what each still
     // needs, read); 61 → 62 with `confirm-work` (§14 the employer confirms a
     // work entry; verified skills follow, write).
-    expect(entries.length).toBe(62);
+    // 62 -> 63 with `invitations` (4D the invitations addressed to me, read).
+    expect(entries.length).toBe(63);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

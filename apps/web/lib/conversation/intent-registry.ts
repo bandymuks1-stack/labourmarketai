@@ -100,6 +100,7 @@ export type IntentHandlerId =
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
+  | "invitations"
   | "writeEmployer"
   // Agency (real recruiter pilot, 2026-09-04) — the canonical bridge actions,
   // reachable by sentence; student / institution route handlers.
@@ -204,6 +205,7 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "market-map": { domain: "market", access: "route", handler: "marketMap", ownTyping: false },
   activity: { domain: "activity", access: "route", handler: "activityCentre", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
+  invitations: { domain: "communication", access: "read", handler: "invitations", ownTyping: false },
 
   // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────────────
   // The three writes open the ONE inline form over the canonical dispatcher

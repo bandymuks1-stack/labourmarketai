@@ -77,6 +77,10 @@ const EXPECTED_EVENTS = [
   "booking_viewed",
   "booking_accepted",
   "booking_declined",
+  // Owner contract §4D (2026-09-05): an invitation addressed to the person
+  // accepted from the chat's attention item — emitted server-side by the
+  // conversation executor on a real accepted / linked outcome only.
+  "invitation_accepted",
   // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
   //    Server-emitted at the real action points via
   //    lib/telemetry/server-funnel.ts (fire-and-forget, profile_id derived

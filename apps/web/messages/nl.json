@@ -11580,6 +11580,10 @@
         "reviewEngagements": {
           "label": "Mijn werkrelaties",
           "description": "Zie met wie je werkt en beëindig een werkrelatie."
+        },
+        "respondInvitation": {
+          "label": "Uitnodiging accepteren",
+          "description": "Accepteren creëert een echte relatie met de organisatie — een belangrijke stap."
         }
       },
       "company": {
@@ -12259,7 +12263,26 @@
       "moveDone": "Verplaatst: toegewezen aan het nieuwe project, de vorige toewijzing beëindigd.",
       "moveDonePartial": "Toegewezen aan het nieuwe project, maar de vorige toewijzing kon niet worden beëindigd — hij staat op beide; rond het af in het projectpaneel.",
       "moveFailed": "Verplaatsen mislukt — er is niets veranderd.",
-      "chipMovePrefix": "Verplaatsen naar"
+      "chipMovePrefix": "Verplaatsen naar",
+      "briefInvitations": "{who} {count, plural, one {heeft u uitgenodigd (# uitnodiging)} other {heeft u uitgenodigd (# uitnodigingen)}}.",
+      "chipInvitations": "Uitnodigingen",
+      "invitationSomeone": "Iemand",
+      "invitationsIntro": "Aan u gerichte uitnodigingen: {count}.",
+      "invitationsEmpty": "Er zijn nu geen aan u gerichte uitnodigingen.",
+      "invitationsUnavailable": "Uitnodigingen konden nu niet worden gelezen.",
+      "userInvitations": "Mijn uitnodigingen",
+      "chipNetwork": "Netwerk",
+      "invAccept": "Accepteren",
+      "invLater": "Nu niet",
+      "invConfirmTitle": "Bevestiging",
+      "invConfirmNote": "Door te accepteren wordt u lid van deze organisatie — een echte relatie die zij kan zien.",
+      "invConfirm": "Ja, accepteren",
+      "invCancel": "Annuleren",
+      "invWorking": "Bezig…",
+      "invDone": "Geaccepteerd — u bent nu verbonden.",
+      "invAlreadyAnswered": "Deze uitnodiging is niet meer open of al beantwoord.",
+      "invErrorStale": "De status is gewijzigd — vernieuw en probeer opnieuw.",
+      "invErrorGeneric": "Accepteren mislukt. Probeer opnieuw."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

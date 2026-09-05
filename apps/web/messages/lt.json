@@ -11580,6 +11580,10 @@
         "reviewEngagements": {
           "label": "Mano darbo santykiai",
           "description": "Pamatykite, su kuo dirbate, ir užbaikite darbo santykį."
+        },
+        "respondInvitation": {
+          "label": "Priimti kvietimą",
+          "description": "Priėmimas sukuria tikrą ryšį su organizacija — svarbus žingsnis."
         }
       },
       "company": {
@@ -12259,7 +12263,26 @@
       "moveDone": "Perkelta: priskirtas naujam projektui, ankstesnis priskyrimas baigtas.",
       "moveDonePartial": "Priskirtas naujam projektui, bet ankstesnio priskyrimo baigti nepavyko — jis vis dar abiejuose; užbaikite projekto lange.",
       "moveFailed": "Perkelti nepavyko — niekas nepasikeitė.",
-      "chipMovePrefix": "Perkelti į"
+      "chipMovePrefix": "Perkelti į",
+      "briefInvitations": "{who} {count, plural, one {kviečia jus (# kvietimas)} few {kviečia jus (# kvietimai)} other {kviečia jus (# kvietimų)}}.",
+      "chipInvitations": "Kvietimai",
+      "invitationSomeone": "Kažkas",
+      "invitationsIntro": "Jums adresuoti kvietimai: {count}.",
+      "invitationsEmpty": "Šiuo metu jums adresuotų kvietimų nėra.",
+      "invitationsUnavailable": "Kvietimų dabar perskaityti nepavyko.",
+      "userInvitations": "Mano kvietimai",
+      "chipNetwork": "Tinklas",
+      "invAccept": "Priimti",
+      "invLater": "Vėliau",
+      "invConfirmTitle": "Patvirtinimas",
+      "invConfirmNote": "Priėmę tapsite šios organizacijos nariu — tai tikras ryšys, matomas jai.",
+      "invConfirm": "Taip, priimu",
+      "invCancel": "Atšaukti",
+      "invWorking": "Vykdoma…",
+      "invDone": "Priimta — dabar esate susieti.",
+      "invAlreadyAnswered": "Šis kvietimas nebegalioja arba jau atsakytas.",
+      "invErrorStale": "Būsena pasikeitė — atnaujinkite ir bandykite dar kartą.",
+      "invErrorGeneric": "Nepavyko priimti. Bandykite dar kartą."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

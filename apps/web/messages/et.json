@@ -3345,6 +3345,10 @@
         "reviewEngagements": {
           "label": "Minu töösuhted",
           "description": "Vaata, kellega töötad, ja lõpeta töösuhe."
+        },
+        "respondInvitation": {
+          "label": "Võta kutse vastu",
+          "description": "Vastuvõtmine loob organisatsiooniga tõelise seose — oluline samm."
         }
       },
       "company": {
@@ -3950,7 +3954,26 @@
       "moveDone": "Liigutatud: määratud uude projekti, eelmine määramine lõpetatud.",
       "moveDonePartial": "Määratud uude projekti, kuid eelmist määramist ei õnnestunud lõpetada — ta on mõlemas; lõpetage projekti paneelil.",
       "moveFailed": "Liigutamine ebaõnnestus — midagi ei muutunud.",
-      "chipMovePrefix": "Liiguta projekti"
+      "chipMovePrefix": "Liiguta projekti",
+      "briefInvitations": "{who} {count, plural, one {kutsus teid (# kutse)} other {kutsus teid (# kutset)}}.",
+      "chipInvitations": "Kutsed",
+      "invitationSomeone": "Keegi",
+      "invitationsIntro": "Teile adresseeritud kutsed: {count}.",
+      "invitationsEmpty": "Praegu pole teile adresseeritud kutseid.",
+      "invitationsUnavailable": "Kutseid ei õnnestunud praegu lugeda.",
+      "userInvitations": "Minu kutsed",
+      "chipNetwork": "Võrgustik",
+      "invAccept": "Võta vastu",
+      "invLater": "Hiljem",
+      "invConfirmTitle": "Kinnitus",
+      "invConfirmNote": "Vastu võttes saate selle organisatsiooni liikmeks — tõeline seos, mida ta näeb.",
+      "invConfirm": "Jah, võtan vastu",
+      "invCancel": "Tühista",
+      "invWorking": "Töötab…",
+      "invDone": "Vastu võetud — olete nüüd seotud.",
+      "invAlreadyAnswered": "See kutse pole enam avatud või on juba vastatud.",
+      "invErrorStale": "Olek muutus — värskendage ja proovige uuesti.",
+      "invErrorGeneric": "Vastuvõtmine ebaõnnestus. Proovige uuesti."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

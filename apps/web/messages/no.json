@@ -3345,6 +3345,10 @@
         "reviewEngagements": {
           "label": "Mine arbeidsforhold",
           "description": "Se hvem du jobber med, og avslutt et arbeidsforhold."
+        },
+        "respondInvitation": {
+          "label": "Godta invitasjon",
+          "description": "Å godta skaper en reell relasjon til organisasjonen — et viktig steg."
         }
       },
       "company": {
@@ -3950,7 +3954,26 @@
       "moveDone": "Flyttet: tildelt det nye prosjektet, den forrige tildelingen avsluttet.",
       "moveDonePartial": "Tildelt det nye prosjektet, men den forrige tildelingen kunne ikke avsluttes — han er på begge; fullfør i prosjektpanelet.",
       "moveFailed": "Flyttingen mislyktes — ingenting endret.",
-      "chipMovePrefix": "Flytt til"
+      "chipMovePrefix": "Flytt til",
+      "briefInvitations": "{who} {count, plural, one {har invitert deg (# invitasjon)} other {har invitert deg (# invitasjoner)}}.",
+      "chipInvitations": "Invitasjoner",
+      "invitationSomeone": "Noen",
+      "invitationsIntro": "Invitasjoner til deg: {count}.",
+      "invitationsEmpty": "Det er ingen invitasjoner til deg akkurat nå.",
+      "invitationsUnavailable": "Invitasjonene kunne ikke leses akkurat nå.",
+      "userInvitations": "Mine invitasjoner",
+      "chipNetwork": "Nettverk",
+      "invAccept": "Godta",
+      "invLater": "Senere",
+      "invConfirmTitle": "Bekreftelse",
+      "invConfirmNote": "Ved å godta blir du medlem av denne organisasjonen — en reell relasjon den kan se.",
+      "invConfirm": "Ja, godta",
+      "invCancel": "Avbryt",
+      "invWorking": "Arbeider…",
+      "invDone": "Godtatt — dere er nå koblet sammen.",
+      "invAlreadyAnswered": "Denne invitasjonen er ikke lenger åpen eller er allerede besvart.",
+      "invErrorStale": "Tilstanden endret seg — oppdater og prøv igjen.",
+      "invErrorGeneric": "Kunne ikke godta. Prøv igjen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

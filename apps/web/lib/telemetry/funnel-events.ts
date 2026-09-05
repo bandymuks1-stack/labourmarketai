@@ -90,6 +90,12 @@ export const FUNNEL_EVENTS = {
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
+  //    Owner contract §4D (2026-09-05): an invitation addressed to the person
+  //    was ACCEPTED from the chat's attention item — server-emitted by the
+  //    conversation executor only on a real `accepted` / `linked` outcome
+  //    (the SAME accept RPCs the network page and the dashboard card call).
+  //    Bounded scalars only (surface / entity_type / success); no PII.
+  invitationAccepted: "invitation_accepted",
   // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
   //    The gap between "booking_*" and nothing: the stages where a demand
   //    actually turns into work — match preview → shortlist → contact →
