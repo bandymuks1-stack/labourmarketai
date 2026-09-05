@@ -449,6 +449,96 @@
       "exceedsNote": "Mehr als der verbleibende Urlaub"
     }
   },
+  "projectField": {
+    "title": "Das Feld",
+    "intro": "Phasen in der Zeit, die Personen im Projekt, fehlende Kapazität und wer kommen kann — eine Ansicht, dieselben Aktionen wie im Chat.",
+    "objectsCount": "{n} Objekte",
+    "readAt": "gelesen um {time}",
+    "viewLabel": "Ansicht",
+    "viewField": "Feld",
+    "viewList": "Liste",
+    "contextLabel": "Ausgewähltes Objekt",
+    "contextEmpty": "Wählen Sie eine Phase, eine Person, eine leere Stelle oder jemanden, der kommen kann — dann sehen Sie Details und können handeln.",
+    "honestNote": "Alles hier stammt aus Datensätzen: Phasen und ihre Daten, aktive Zuweisungen, Ihre Checkliste, offene Arbeit und genehmigte Abwesenheiten. Nichts wird bewertet oder prognostiziert; die Einordnung in der Zeit ist aus den eingegebenen Daten abgeleitet.",
+    "time": {
+      "past": "Vergangen",
+      "now": "Jetzt",
+      "next": "Als Nächstes",
+      "undated": "Ohne Daten"
+    },
+    "derivedFromDates": "aus Daten abgeleitet",
+    "derivedFromDueDates": "aus Fälligkeiten abgeleitet",
+    "laneWork": "{n} Arbeiten",
+    "lanesTitle": "Phasen",
+    "moreInList": "+{n} weitere in der Liste",
+    "lanesUnavailable": "Phasen sind noch nicht verfügbar — das Projektbetriebs-Update ist nicht angewendet.",
+    "lanesEmpty": "Noch keine Phasen. Fügen Sie die erste Phase im Phasenbereich unten hinzu.",
+    "unplacedWork": "{n} offene Arbeiten ohne Phasendatum — siehe Aufgabenbereich unten.",
+    "peopleTitle": "Im Projekt",
+    "peopleEmpty": "Diesem Projekt ist noch niemand zugewiesen.",
+    "slotsTitle": "Fehlt",
+    "slotsNone": "Derzeit fehlt nichts.",
+    "slot": {
+      "label": "Leere Stelle",
+      "noPeople": "Niemand im Projekt",
+      "kind": {
+        "unassigned_task": "Arbeit ohne Person",
+        "no_people": "Keine Personen zugewiesen"
+      }
+    },
+    "readyTitle": "Kann kommen",
+    "ready": {
+      "canCome": "Kann kommen",
+      "none": "Sonst ist diese Woche niemand aus Ihrer Liste frei.",
+      "noCompany": "Kein Unternehmensbereich — die Liste ist hier nicht lesbar.",
+      "emptyRoster": "Ihre Liste hat noch keine aktiven Personen.",
+      "unavailable": "Die Liste konnte gerade nicht gelesen werden.",
+      "why": "Warum diese: in Ihrer Liste und ohne genehmigte Abwesenheit zwischen {from} und {to}.",
+      "absencesUnknown": "Abwesenheiten sind noch nicht aktiviert, daher spricht nichts dagegen.",
+      "more": "+{n} weitere freie Personen außerhalb dieser Ansicht."
+    },
+    "tokenState": {
+      "clear": "Checkliste in Ordnung",
+      "needs": "Dokumente nötig",
+      "blocked": "Durch Checkliste blockiert",
+      "untracked": "Checkliste nicht begonnen"
+    },
+    "saved": "Gespeichert — aus dem Datensatz neu gelesen.",
+    "errors": {
+      "needs_migration": "Noch nicht verfügbar — das Update ist nicht angewendet.",
+      "not_authorized": "Sie können dieses Projekt nicht ändern.",
+      "invalid": "Diese Änderung ist hier nicht erlaubt.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
+    "askBody": "Bitte einreichen: {label}",
+    "actions": {
+      "ask": "Person fragen",
+      "received": "Als erhalten markieren",
+      "checked": "Als geprüft markieren",
+      "needed": "Weiterhin nötig",
+      "leave": "Aus Projekt entfernen",
+      "leaveConfirm": "Ja, entfernen",
+      "cancel": "Abbrechen",
+      "save": "Speichern"
+    },
+    "assignedSince": "Im Projekt seit {date}",
+    "checklistRatio": "Checkliste {checked}/{total}",
+    "checklistNone": "noch keine Checkliste",
+    "checklistNoneHint": "Für diese Person gibt es noch keine Checklistenzeilen — beginnen Sie im Personenboard unten.",
+    "checklistTitle": "Checkliste",
+    "leaveConfirm": "{name} aus diesem Projekt entfernen? Die Zuweisung wird beendet, nicht gelöscht.",
+    "taskStatusLabel": "Status von {title}",
+    "laneWorkTitle": "Arbeit in dieser Phase",
+    "laneWorkEmpty": "Keine offene Arbeit mit Fälligkeit innerhalb der Daten dieser Phase.",
+    "suitableTitle": "Wer es übernehmen könnte",
+    "suitableNone": "Derzeit sind keine geeigneten Personen lesbar.",
+    "suitable": {
+      "onProject": "bereits im Projekt",
+      "free": "diese Woche frei",
+      "why": "Warum diese: Personen, die bereits im Projekt sind und deren Checkliste in Ordnung ist, sowie Listenmitglieder ohne genehmigte Abwesenheit diese Woche. Nichts wird gerankt."
+    },
+    "assignLink": "Personen auf der Projektseite zuweisen"
+  },
   "projectStages": {
     "ganttTitle": "Zeitleiste (Gantt)",
     "ganttEmpty": "Fügen Sie Ihren Phasen geplante Termine hinzu, um die Zeitleiste zu sehen.",

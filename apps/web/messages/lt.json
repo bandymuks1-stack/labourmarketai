@@ -449,6 +449,96 @@
       "exceedsNote": "Daugiau nei likę atostogų"
     }
   },
+  "projectField": {
+    "title": "Laukas",
+    "intro": "Etapai laike, žmonės projekte, trūkstamas pajėgumas ir kas gali ateiti — vienas rodinys, tie patys veiksmai kaip pokalbyje.",
+    "objectsCount": "{n} objektai",
+    "readAt": "perskaityta {time}",
+    "viewLabel": "Rodinys",
+    "viewField": "Laukas",
+    "viewList": "Sąrašas",
+    "contextLabel": "Pasirinktas objektas",
+    "contextEmpty": "Pasirinkite etapą, žmogų, tuščią vietą arba galintį ateiti — pamatysite detales ir galėsite veikti.",
+    "honestNote": "Viskas čia iš įrašų: etapai ir jų datos, aktyvūs priskyrimai, jūsų vedamas sąrašas, atviri darbai ir patvirtinti nebuvimai. Niekas nevertinama balais ir neprognozuojama; vieta laike išvesta iš jūsų įvestų datų.",
+    "time": {
+      "past": "Praeitis",
+      "now": "Dabar",
+      "next": "Toliau",
+      "undated": "Be datų"
+    },
+    "derivedFromDates": "išvesta iš datų",
+    "derivedFromDueDates": "išvesta iš terminų",
+    "laneWork": "{n} darbai",
+    "lanesTitle": "Etapai",
+    "moreInList": "+{n} daugiau sąraše",
+    "lanesUnavailable": "Etapai dar neprieinami — projektų operacijų atnaujinimas nepritaikytas.",
+    "lanesEmpty": "Etapų dar nėra. Pridėkite pirmą etapą etapų skiltyje žemiau.",
+    "unplacedWork": "{n} atviri darbai be etapo datos — žr. užduočių skiltį žemiau.",
+    "peopleTitle": "Projekte",
+    "peopleEmpty": "Į šį projektą dar niekas nepriskirtas.",
+    "slotsTitle": "Trūksta",
+    "slotsNone": "Šiuo metu nieko netrūksta.",
+    "slot": {
+      "label": "Tuščia vieta",
+      "noPeople": "Projekte nėra žmonių",
+      "kind": {
+        "unassigned_task": "Darbas be žmogaus",
+        "no_people": "Nepriskirta žmonių"
+      }
+    },
+    "readyTitle": "Gali ateiti",
+    "ready": {
+      "canCome": "Gali ateiti",
+      "none": "Daugiau niekas iš jūsų sąrašo šią savaitę nėra laisvas.",
+      "noCompany": "Nėra įmonės erdvės — sąrašas čia neperskaitomas.",
+      "emptyRoster": "Jūsų sąraše dar nėra aktyvių žmonių.",
+      "unavailable": "Sąrašo šiuo metu nepavyko perskaityti.",
+      "why": "Kodėl šie: yra jūsų sąraše ir neturi patvirtinto nebuvimo tarp {from} ir {to}.",
+      "absencesUnknown": "Nebuvimai dar neįjungti, todėl niekas nesako kitaip.",
+      "more": "+{n} laisvi žmonės už šio rodinio ribų."
+    },
+    "tokenState": {
+      "clear": "Sąrašas tvarkingas",
+      "needs": "Reikia dokumentų",
+      "blocked": "Blokuoja sąrašas",
+      "untracked": "Sąrašas nepradėtas"
+    },
+    "saved": "Išsaugota — perskaityta iš įrašo.",
+    "errors": {
+      "needs_migration": "Dar neprieinama — atnaujinimas nepritaikytas.",
+      "not_authorized": "Šio projekto keisti negalite.",
+      "invalid": "Toks pakeitimas čia neleidžiamas.",
+      "error": "Kažkas nepavyko. Bandykite dar kartą."
+    },
+    "askBody": "Prašome pateikti: {label}",
+    "actions": {
+      "ask": "Paklausti žmogaus",
+      "received": "Pažymėti gauta",
+      "checked": "Pažymėti patikrinta",
+      "needed": "Vis dar reikia",
+      "leave": "Pašalinti iš projekto",
+      "leaveConfirm": "Taip, pašalinti",
+      "cancel": "Atšaukti",
+      "save": "Išsaugoti"
+    },
+    "assignedSince": "Projekte nuo {date}",
+    "checklistRatio": "sąrašas {checked}/{total}",
+    "checklistNone": "sąrašo dar nėra",
+    "checklistNoneHint": "Šiam žmogui sąrašo eilučių dar nėra — pradėkite žmonių lentoje žemiau.",
+    "checklistTitle": "Sąrašas",
+    "leaveConfirm": "Pašalinti {name} iš šio projekto? Priskyrimas užbaigiamas, ne ištrinamas.",
+    "taskStatusLabel": "„{title}“ būsena",
+    "laneWorkTitle": "Darbai šiame etape",
+    "laneWorkEmpty": "Šio etapo datose atvirų darbų su terminu nėra.",
+    "suitableTitle": "Kas galėtų imtis",
+    "suitableNone": "Šiuo metu tinkamų žmonių perskaityti nepavyko.",
+    "suitable": {
+      "onProject": "jau projekte",
+      "free": "laisvas šią savaitę",
+      "why": "Kodėl šie: žmonės, jau esantys projekte su tvarkingu sąrašu, ir sąrašo nariai be patvirtinto nebuvimo šią savaitę. Niekas nereitinguojama."
+    },
+    "assignLink": "Priskirti žmones projektų puslapyje"
+  },
   "projectStages": {
     "ganttTitle": "Laiko juosta (Gantt)",
     "ganttEmpty": "Pridėkite etapams planuojamas datas, kad matytumėte laiko juostą.",
