@@ -1204,7 +1204,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // and the billing_checkout_operations table with admin SELECT +
       // service-role grants. Marker added with the draft PR; owner approval
       // pending — the marker records the RED classification, not an approval.
-      "20260905190000_billing_safety_invariants_v1.sql",
+      "20260905200000_billing_safety_invariants_v1.sql",
 ]);
   });
 

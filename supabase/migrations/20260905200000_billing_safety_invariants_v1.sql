@@ -10,7 +10,7 @@
 -- constraint remodel on billing_customers) — it is an acknowledgement, not an
 -- auto-merge pass.
 --
--- 20260905190000 — Billing safety invariants v1. ADDITIVE; NO DATA LOSS; no
+-- 20260905200000 — Billing safety invariants v1. ADDITIVE; NO DATA LOSS; no
 -- RLS loosening (the new table is admin-SELECT + service-role-write, exactly
 -- the posture of the three tables from 20260613200000).
 --
@@ -49,7 +49,7 @@
 -- SELECT (admin only for the operations table — it is an audit/evidence
 -- record, like payment_webhook_events).
 --
--- ROLLBACK: supabase/rollbacks/20260905190000_billing_safety_invariants_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260905200000_billing_safety_invariants_v1.down.sql
 -- (also mirrored, commented, at the end of this file).
 -- ════════════════════════════════════════════════════════════════════════
 
@@ -158,7 +158,7 @@ grant select on public.billing_checkout_operations to authenticated;
 grant select, insert, update on public.billing_checkout_operations to service_role;
 
 -- ════════════════════════════════════════════════════════════════════════
--- ROLLBACK (mirror of supabase/rollbacks/20260905190000_billing_safety_invariants_v1.down.sql)
+-- ROLLBACK (mirror of supabase/rollbacks/20260905200000_billing_safety_invariants_v1.down.sql)
 --
 --   -- refuses while billing_checkout_operations holds rows or while the
 --   -- evidence columns carry values (operator archives first — no silent loss)

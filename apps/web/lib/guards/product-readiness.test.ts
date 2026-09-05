@@ -2362,12 +2362,12 @@ describe("no migration files added by this sprint", () => {
     // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
-    // Bumped 263 -> 264 for billing safety invariants v1 (2026-09-05, RED
+    // Bumped 263 -> 265 for public_plans_v1 (#1548, applied) + billing safety invariants v1 (2026-09-05, RED
     // billing, draft + needs-human-gate, UNAPPLIED until owner approval):
     // additive evidence columns + billing_checkout_operations table + the
     // billing_customers (owner, provider, test_mode) key. No data loss.
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 264.
-const SPRINT_BASELINE = 264;
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
+const SPRINT_BASELINE = 265;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

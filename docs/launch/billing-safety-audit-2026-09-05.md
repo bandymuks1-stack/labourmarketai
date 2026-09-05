@@ -31,13 +31,13 @@
 
 ### What remains EXTERNAL_REAL_CUSTOMER_PROOF_PENDING
 
-Everything marked IMPLEMENTED_PENDING_PROD_PROOF becomes PROD_PROVEN only after (a) the owner applies `20260905190000_billing_safety_invariants_v1.sql` via Supabase MCP and (b) a real LIVE flow (owner's own organization, real card) produces: one `billing_checkout_operations` row `completed` → one `checkout.session.completed` + `customer.subscription.created/updated` processed in order → one `billing_subscriptions` row `active` bound to the organization with `provider_price_id = price_1UCKgg637uptAg5zD8dMA6kU`, `unit_amount_cents = 9900`, `currency = eur` → `GET /api/billing/reconcile` reports `healthy: true` → a second "Order" click answers `409 subscription_exists`. Until then no production row has ever existed.
+Everything marked IMPLEMENTED_PENDING_PROD_PROOF becomes PROD_PROVEN only after (a) the owner applies `20260905200000_billing_safety_invariants_v1.sql` via Supabase MCP and (b) a real LIVE flow (owner's own organization, real card) produces: one `billing_checkout_operations` row `completed` → one `checkout.session.completed` + `customer.subscription.created/updated` processed in order → one `billing_subscriptions` row `active` bound to the organization with `provider_price_id = price_1UCKgg637uptAg5zD8dMA6kU`, `unit_amount_cents = 9900`, `currency = eur` → `GET /api/billing/reconcile` reports `healthy: true` → a second "Order" click answers `409 subscription_exists`. Until then no production row has ever existed.
 
 ## B. What this branch implements (GAP closures)
 
 | Piece | Files |
 |---|---|
-| RED migration (additive, no data loss) + paired rollback that refuses silent loss | `supabase/migrations/20260905190000_billing_safety_invariants_v1.sql`, `supabase/rollbacks/20260905190000_billing_safety_invariants_v1.down.sql` |
+| RED migration (additive, no data loss) + paired rollback that refuses silent loss | `supabase/migrations/20260905200000_billing_safety_invariants_v1.sql`, `supabase/rollbacks/20260905200000_billing_safety_invariants_v1.down.sql` |
 | Pure checkout-operations core (window, derived key, blocking statuses, admission decision) | `apps/web/lib/billing/checkout-operations-core.ts` |
 | Operations store (open/reuse/expire/fail/complete; service role) | `apps/web/lib/billing/checkout-operations-store.ts` |
 | Admission seam (local row → provider read → heal dead only) | `apps/web/lib/billing/checkout-admission.ts` |
@@ -90,7 +90,7 @@ The alternative the owner already scheduled (G-8 step 7: pay the real €99 with
 
 ## D. Open decisions for the owner
 
-1. **Apply** `20260905190000_billing_safety_invariants_v1.sql` (RED; via Supabase MCP `apply_migration`; verified on a 1-row `billing_customers`, 0-row subscriptions/events). Until applied, checkout runs on the legacy key + admission only.
+1. **Apply** `20260905200000_billing_safety_invariants_v1.sql` (RED; via Supabase MCP `apply_migration`; verified on a 1-row `billing_customers`, 0-row subscriptions/events). Until applied, checkout runs on the legacy key + admission only.
 2. **Subscribe** the LIVE webhook endpoint to `checkout.session.expired` (11th event) — optional; the local window closes operations regardless.
 3. **Choose** the €1 smoke test (section C) or the €99-and-refund path (G-8 step 7) for the first LIVE settlement.
 4. **`unpaid` policy:** this branch refuses a new checkout while a row is `unpaid` (Stripe is still collecting; the Portal fixes the card). If the owner prefers to let an `unpaid` customer buy fresh, the set is one constant (`BLOCKING_SUBSCRIPTION_STATUSES`).

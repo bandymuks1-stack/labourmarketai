@@ -1,4 +1,4 @@
--- 20260905190000_billing_safety_invariants_v1.down.sql
+-- 20260905200000_billing_safety_invariants_v1.down.sql
 -- Reverses the billing safety invariants v1 migration. Every reversal that
 -- could lose evidence REFUSES until the operator has archived it — nothing is
 -- dropped silently (rollbacks/README.md convention). Apply ONLY via Supabase

@@ -45,8 +45,8 @@ const repoRoot = resolve(webRoot, "..", "..");
 const read = (rel: string) => readFileSync(join(webRoot, rel), "utf8");
 const readRepo = (rel: string) => readFileSync(join(repoRoot, rel), "utf8");
 
-const MIGRATION = "supabase/migrations/20260905190000_billing_safety_invariants_v1.sql";
-const ROLLBACK = "supabase/rollbacks/20260905190000_billing_safety_invariants_v1.down.sql";
+const MIGRATION = "supabase/migrations/20260905200000_billing_safety_invariants_v1.sql";
+const ROLLBACK = "supabase/rollbacks/20260905200000_billing_safety_invariants_v1.down.sql";
 
 function sources(dir: string, acc: string[] = []): string[] {
   if (!existsSync(dir)) return acc;
