@@ -8506,6 +8506,7 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Ankstyvoji prieiga",
+      "bodyLive": "Organizacijos planą galima aktyvuoti paskyroje per Stripe. Pirmuosius klientus vis tiek aptarnaujame tiesiogiai: darbuotojų užklausa pateikiama nemokamai, o galutinę apimtį suderiname prieš pradedant.",
       "body": "Vieši mokėjimai dar neįjungti. Pirmuosius klientus aptarnaujame tiesiogiai: darbuotojų užklausos pateikimas nemokamas, o galutinė kaina visada patvirtinama su jumis prieš pradedant bet kokį mokamą darbą.",
       "cta": "Pateikti darbuotojų užklausą"
     },

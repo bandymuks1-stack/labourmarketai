@@ -8506,6 +8506,7 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Vroege toegang",
+      "bodyLive": "Het Organisatieplan kan in het account via Stripe worden geactiveerd. De eerste klanten bedienen we nog steeds rechtstreeks: een personeelsaanvraag indienen is gratis en de definitieve omvang wordt vóór de start afgesproken.",
       "body": "Publieke betalingen zijn nog niet ingeschakeld. De eerste klanten worden direct bediend: een personeelsaanvraag indienen is gratis, en de definitieve prijs wordt altijd met je bevestigd voordat betaald werk begint.",
       "cta": "Dien een personeelsaanvraag in"
     },
