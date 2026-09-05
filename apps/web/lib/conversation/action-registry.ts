@@ -42,6 +42,7 @@ export type ActionPrecondition =
   | "has_worker_row"
   | "has_worker_direction" // profession/direction set (skills need it)
   | "has_open_booking" // an incoming proposed booking exists
+  | "has_pending_invitation" // an invitation addressed to the caller is pending
   | "has_visible_demand" // a currently-visible approved demand exists
   | "has_company"
   | "has_agency"
@@ -307,6 +308,22 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     telemetryEvent: E.bookingAccepted,
     advancedRoute: "/dashboard/bookings",
     handler: { kind: "server_action", ref: "respondBookingAction" },
+  },
+  {
+    // Owner contract 4D / 15 / 9: an invitation addressed to the person,
+    // answered from the attention item. Accepting creates a real relationship
+    // (an engagement), hence the strong tier; the network page's own accept.
+    id: "worker.respond-invitation",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.respondInvitation.label",
+    descriptionKey: "conversation.actions.worker.respondInvitation.description",
+    confirmation: "strong_irreversible",
+    precondition: "has_pending_invitation",
+    migrationSensitive: true,
+    telemetryEvent: E.invitationAccepted,
+    advancedRoute: "/dashboard/network",
+    handler: { kind: "server_action", ref: "acceptInvitationByIdAction" },
   },
   {
     id: "worker.express-interest",

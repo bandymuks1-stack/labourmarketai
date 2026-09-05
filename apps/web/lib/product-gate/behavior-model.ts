@@ -408,8 +408,11 @@ export const BEHAVIOR_CONFORMANCE = {
   // one-tap confirm by chip) and `company.enable-journal-review` (the
   // membership RPC). Anchored to the inbox; keyed to the company actor
   // type; verdict unchanged.
-  conversationActions: 51,
-  actionsAnchoredToAPage: 51,
+  // 2026-09-05 (owner contract 4D): +1 `worker.respond-invitation` (the network
+  // page's own accept, from the attention item). Anchored to the network page;
+  // keyed to the worker actor type; verdict unchanged.
+  conversationActions: 52,
+  actionsAnchoredToAPage: 52,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

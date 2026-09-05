@@ -95,6 +95,19 @@ export const workerSavePreferencesSchema = z.object({
   availabilityNote: z.string().trim().max(500).nullable().optional(),
 });
 
+/** Accept an invitation addressed to the caller (owner contract 4D). The ref
+ *  is the shared `InvitationRef` (lib/invitations/model): a canonical
+ *  `invitations` row by id, or a company / agency ROSTER invitation by the
+ *  organisation id the roster accept RPC takes. `accepted` is the only
+ *  canonical in-app decision — decline exists by mailed token only
+ *  (`decline_invitation_v1`) and not at all for the roster — so the schema
+ *  says so rather than inventing one. */
+export const workerRespondInvitationSchema = z.discriminatedUnion("source", [
+  z.object({ source: z.literal("invitation"), invitationId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("company_roster"), orgId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("agency_roster"), orgId: uuid, decision: z.literal("accepted") }),
+]);
+
 export const workerRespondBookingSchema = z.object({
   bookingId: uuid,
   decision: z.enum(["accepted", "declined"]),
@@ -132,6 +145,7 @@ export const WORKER_ACTION_SCHEMAS = {
   "worker.save-work-card": workerSaveWorkCardSchema,
   "worker.save-preferences": workerSavePreferencesSchema,
   "worker.respond-booking": workerRespondBookingSchema,
+  "worker.respond-invitation": workerRespondInvitationSchema,
   "worker.express-interest": workerExpressInterestSchema,
   "worker.log-work": workerLogWorkSchema,
 } as const;

@@ -31,6 +31,7 @@ import {
 } from "@/lib/conversation/confirmation-token";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { interestStateFingerprint } from "@/lib/opportunities/interest";
+import { invitationStateFingerprint } from "@/lib/invitations/attention";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
@@ -139,6 +140,19 @@ async function stateFingerprint(
       .eq("id", String(input.bookingId))
       .maybeSingle();
     return `booking:${(data?.status as string) ?? "missing"}`;
+  }
+  if (actionId === "worker.respond-invitation") {
+    // Owner contract §4D: THE shared fingerprint (lib/invitations/attention)
+    // — the same domain read the brief and the chat list answer from. Pending
+    // in the caller's own list = acceptable; anything else (accepted, expired,
+    // revoked, addressed to another e-mail, unreadable) reads as absent, so a
+    // token minted while pending goes stale the moment the row leaves that
+    // state. The dispatcher asks the domain, it does not query.
+    return invitationStateFingerprint(
+      input.source === "invitation"
+        ? { source: "invitation", invitationId: String(input.invitationId) }
+        : { source: input.source === "agency_roster" ? "agency_roster" : "company_roster", orgId: String(input.orgId) },
+    );
   }
   if (actionId === "worker.express-interest") {
     // G4 tail wagon 1: THE shared fingerprint (lib/opportunities/interest) —
