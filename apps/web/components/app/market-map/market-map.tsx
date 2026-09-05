@@ -51,6 +51,8 @@ export function MarketMap({
   onSelectAnchor,
   className = "",
   revealCount,
+  onViewportChange,
+  autoFly = true,
 }: {
   view: MarketMapView;
   mode?: MarketMapMode;
@@ -82,6 +84,21 @@ export function MarketMap({
    * everything at once (the authenticated surfaces do).
    */
   revealCount?: number;
+  /**
+   * The viewport the person is actually looking at (P8 World). Fires once when
+   * the map is ready and after every pan/zoom (`moveend`), so a caller can run
+   * a viewport-BOUNDED read instead of drawing the whole market. Kept in a ref
+   * inside — passing a new function each render never re-binds the listener.
+   */
+  onViewportChange?: (viewport: MarketMapViewport) => void;
+  /**
+   * Whether the map flies to the selected region (and back to Europe when the
+   * selection clears) whenever `view.regions` changes. The default keeps the
+   * result/landing behaviour; a viewport-following surface passes `false`,
+   * because flying home after every bounded refresh would fight the person's
+   * own panning.
+   */
+  autoFly?: boolean;
 }) {
   // Origin labels live in the small `map` namespace — the one root every
   // surface that mounts this component (marketing landing, dashboard,
@@ -92,6 +109,8 @@ export function MarketMap({
   const layerGroupRef = useRef<LeafletTypes.LayerGroup | null>(null);
   const LRef = useRef<typeof LeafletTypes | null>(null);
   const [ready, setReady] = useState(false);
+  const viewportRef = useRef(onViewportChange);
+  viewportRef.current = onViewportChange;
 
   // ── mount the map once (via the ONE Leaflet engine, W3 row 28) ────────────
   useEffect(() => {
@@ -120,6 +139,24 @@ export function MarketMap({
       LRef.current = L;
       layerGroupRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
+      // Report the REAL viewport (container-dependent) once, then on every
+      // settled move. Leaflet fires `moveend` after zoom as well.
+      const emitViewport = () => {
+        const cb = viewportRef.current;
+        if (!cb) return;
+        const b = map.getBounds();
+        cb({
+          bounds: {
+            south: b.getSouth(),
+            west: b.getWest(),
+            north: b.getNorth(),
+            east: b.getEast(),
+          },
+          zoom: map.getZoom(),
+        });
+      };
+      map.on("moveend", emitViewport);
+      emitViewport();
       setReady(true);
     })();
 
@@ -230,7 +267,7 @@ export function MarketMap({
   // ── fly to the selected region ────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map) return;
+    if (!ready || !map || !autoFly) return;
     if (!selectedCode) {
       map.flyTo([...EUROPE_CENTER] as [number, number], EUROPE_ZOOM, {
         duration: 0.9,
@@ -241,7 +278,7 @@ export function MarketMap({
     const first = region?.anchors[0];
     if (!first) return;
     map.flyTo([first.lat, first.lng], 7, { duration: 1.1 });
-  }, [ready, selectedCode, view.regions]);
+  }, [ready, selectedCode, view.regions, autoFly]);
 
   return (
     <div
@@ -280,6 +317,17 @@ export function MarketMap({
       ) : null}
     </div>
   );
+}
+
+/** What `onViewportChange` reports: the settled map bounds + zoom (WGS84). */
+export interface MarketMapViewport {
+  readonly bounds: {
+    readonly south: number;
+    readonly west: number;
+    readonly north: number;
+    readonly east: number;
+  };
+  readonly zoom: number;
 }
 
 /** Layer colours. Distinct hues so a layer switch is legible at a glance. */

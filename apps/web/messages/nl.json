@@ -1330,6 +1330,57 @@
       "companyNeed": "Dien een personeelsbehoefte in",
       "project": "Maak een project aan",
       "accommodationNote": "Huisvestingslocaties zijn nog geen aparte datalaag — ze verschijnen als echte signalen zodra die laag is toegevoegd."
+    },
+    "world": {
+      "title": "Wereldbeeld",
+      "lead": "Waar vraag, mensen en projecten zich bevinden in het deel van de kaart dat u bekijkt. Verschuif of zoom de kaart — de cijfers volgen.",
+      "layersLabel": "Kaartlagen",
+      "layers": {
+        "demand": "Vraag",
+        "supply": "Mensen",
+        "projects": "Projecten"
+      },
+      "counts": {
+        "inView": "In beeld: {places} plaatsen, {objects} objecten",
+        "overflow": "Niet getekend: nog {places} plaatsen ({objects} objecten) — zoom in om ze te zien",
+        "unplaced": "Zonder bekende plaats: {count}",
+        "withheld": "Kleine groepen niet getoond: {count} (minder dan 5 mensen)",
+        "truncated": "Meer dan {limit} records in beeld — de cijfers zijn een ondergrens",
+        "cap": "Er worden maximaal {cap} plaatsen tegelijk getekend"
+      },
+      "loading": "Bijwerken…",
+      "provenance": {
+        "fact": "Feit",
+        "factHint": "de plaats staat in het record",
+        "derived": "Afgeleid",
+        "derivedHint": "positie op landniveau — de exacte plaats is niet vermeld"
+      },
+      "state": {
+        "empty": {
+          "demand": "Geen open behoeften in dit deel van de kaart.",
+          "supply": "Geen groepen mensen om te tonen in dit deel van de kaart.",
+          "projects": "Geen van uw projecten ligt in dit deel van de kaart."
+        },
+        "error": "Deze laag kon nu niet worden gelezen. Er wordt niets getoond in plaats van een gok.",
+        "noPlaces": "Geen bekende plaatsen in dit deel van de kaart. Verschuif de kaart naar een land of stad.",
+        "signIn": "Meld u aan om het wereldbeeld te zien.",
+        "fetchFailed": "De kaartgegevens zijn niet aangekomen. Verschuif de kaart om het opnieuw te proberen."
+      },
+      "notes": {
+        "aggregateOnly": "Mensen worden alleen als groepen van 5 of meer getoond. Vandaag voedt alleen uw eigen gedeelde locatie deze laag."
+      },
+      "list": {
+        "title": "Dezelfde {count} plaatsen als lijst",
+        "count": "{count} objecten",
+        "approx": "bij benadering",
+        "selected": "geselecteerd",
+        "more": "+{count} meer"
+      },
+      "scale": {
+        "label": "Schaal: {scale}",
+        "country": "landen",
+        "place": "plaatsen"
+      }
     }
   },
   "demandLocationCapture": {

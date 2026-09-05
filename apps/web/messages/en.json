@@ -1330,6 +1330,57 @@
       "companyNeed": "Submit a company need",
       "project": "Create a project",
       "accommodationNote": "Accommodation locations are not a separate data layer yet — they appear as real signals once that layer is added."
+    },
+    "world": {
+      "title": "World view",
+      "lead": "Where demand, people and projects are in the part of the map you are looking at. Move or zoom the map — the numbers follow.",
+      "layersLabel": "Map layers",
+      "layers": {
+        "demand": "Demand",
+        "supply": "People",
+        "projects": "Projects"
+      },
+      "counts": {
+        "inView": "In view: {places} places, {objects} objects",
+        "overflow": "Not drawn: {places} more places ({objects} objects) — zoom in to see them",
+        "unplaced": "Without a known place: {count}",
+        "withheld": "Small groups withheld: {count} (fewer than 5 people)",
+        "truncated": "More than {limit} records in view — the counts are a lower bound",
+        "cap": "At most {cap} places are drawn at once"
+      },
+      "loading": "Updating…",
+      "provenance": {
+        "fact": "Fact",
+        "factHint": "the place is stated in the record",
+        "derived": "Derived",
+        "derivedHint": "country-level position — the exact place is not stated"
+      },
+      "state": {
+        "empty": {
+          "demand": "No open needs in this part of the map.",
+          "supply": "No people groups to show in this part of the map.",
+          "projects": "None of your projects are in this part of the map."
+        },
+        "error": "This layer could not be read right now. Nothing is shown rather than a guess.",
+        "noPlaces": "No known places in this part of the map. Move the map to a country or a city.",
+        "signIn": "Sign in to see the world view.",
+        "fetchFailed": "The map data did not arrive. Move the map to try again."
+      },
+      "notes": {
+        "aggregateOnly": "People are shown only as groups of 5 or more. Today only your own shared location feeds this layer."
+      },
+      "list": {
+        "title": "The same {count} places as a list",
+        "count": "{count} objects",
+        "approx": "approximate",
+        "selected": "selected",
+        "more": "+{count} more"
+      },
+      "scale": {
+        "label": "Scale: {scale}",
+        "country": "countries",
+        "place": "places"
+      }
     }
   },
   "demandLocationCapture": {
