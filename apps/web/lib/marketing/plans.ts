@@ -4,10 +4,14 @@ export type PlanRow = {
   slug: string;
   name_lt: string | null;
   name_en: string | null;
+  /** The ONE home a price has (owner launch pricing 2026-09-05); null = unpriced. */
+  price_eur_monthly: number | null;
 };
 
 /** Canonical tier order (matches supabase/reference-data.sql). */
-export const PLAN_SLUGS = ["free", "business", "agency", "enterprise"] as const;
+// Owner launch pricing 2026-09-05: two public tiers (€0 / €99) + the individual
+// plan card; `agency` and `enterprise` rows are retired (inactive), not tiers.
+export const PLAN_SLUGS = ["free", "business"] as const;
 export type PlanSlug = (typeof PLAN_SLUGS)[number];
 
 /**
@@ -43,7 +47,7 @@ export async function getPlans(): Promise<PlanRow[] | null> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("plans")
-      .select("slug, name_lt, name_en")
+      .select("slug, name_lt, name_en, price_eur_monthly")
       .eq("active", true);
     if (error || !data) return null;
     return data as PlanRow[];

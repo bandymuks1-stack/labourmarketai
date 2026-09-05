@@ -136,9 +136,18 @@ describe("live activation is owner-armed, never implicit", () => {
     expect(c.paymentsEnabled).toBe(false);
   });
 
-  it("PRICING_READINESS_STATE is still draft on main — production cannot arm live from env alone", async () => {
+  it("PRICING_READINESS_STATE is owner-confirmed (approval 2026-09-05) — live still needs the env token + complete live keys", async () => {
     const { PRICING_READINESS_STATE } = await import("../billing/readiness");
-    expect(PRICING_READINESS_STATE).toBe("draft_pricing");
+    expect(PRICING_READINESS_STATE).toBe("owner_confirmed");
+    const c = resolveBillingConfig({
+      ...base,
+      publishableKey: undefined,
+      liveActivation: { pricingConfirmed: true, token: "approved-by-owner" },
+    });
+    // confirmed table + token, but an incomplete live key set → still blocked
+    // (the keys are the owner's env action)
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_keys_incomplete");
   });
 
   it("the resolver's live branch names every requirement", () => {

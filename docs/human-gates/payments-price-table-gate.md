@@ -1,83 +1,39 @@
 # Gate G-7 / G-8 — the one price table + live Stripe activation (OWNER_GATE + EXTERNAL_GATE)
 
-**Opened:** 2026-09-02 (FINAL COMPLETION, Train D1).
+**Opened:** 2026-09-02 (FINAL COMPLETION, Train D1). **G-7 CLOSED 2026-09-05** (owner approval + same-day correction). **G-8 OPEN** (owner-only external actions below).
 **Register rows:** [`docs/launch/FINAL_COMPLETION_REGISTER.md`](../launch/FINAL_COMPLETION_REGISTER.md) §3 G-7, G-8.
+
+## The approved LAUNCH pricing (owner, 2026-09-05) — canonical, not a permanent ceiling
+
+| Plan | Monthly | Who | Real included value | Real limit | Enforcement |
+|---|---|---|---|---|---|
+| PERSON | €0 | every person / worker / learner | the whole identity loop (journal, CV, skills, documents, board, bookings, card, project asks) | none | free surfaces; no person plan is sellable (`worker_plus` deferred) |
+| ORGANIZATION FREE | €0 | any organization — employer, staffing provider, contractor, training provider | matching shortlist, candidate contact, bookings, projects, instructions, confirmation | **1 concurrent active position / open workforce need** | `free_organization` (`company_create_needs: 1`) via the open-needs gate on the ONE demand creation path |
+| ORGANIZATION | **€99** | the same organization, at operating scale | everything above at scale, project operations, readiness, reports, CSV, journal review | **up to 10** concurrent active positions | `company_pilot` (`company_create_needs: 10`); Stripe subscription bound to the organization |
+| ORGANIZATION — INDIVIDUAL | agreed individually | more than 10 active positions | — | — | the 11th need is refused with the contact path (`/company-need`); no automatic tier, no published price, never a silent charge |
+
+DEFERRED (not sold, not priced): ai_plus, vip_media, agency_start/growth/scale, the €299 alternative, LMC top-ups, priority visibility, media upsells, annual pricing, enterprise/custom pricing, institution pricing.
+
+Where the truth lives (no second source): the FIGURE only in `public.plans.price_eur_monthly` (`free` = 0, `business` = 99 — the row that renders as "Organization"; `agency` / `enterprise` rows inactive); the BOUNDARY in `lib/billing/plans.ts` (limits, never a figure); readiness in `lib/billing/readiness.ts` (`PRICING_READINESS_STATE = "owner_confirmed"`). Stripe price id slot: `STRIPE_PRICE_COMPANY_PILOT` = the ORGANIZATION price (the other two slots stay empty).
 
 ## What exists (inventory, do not rebuild)
 
 | Piece | Where | State |
 |---|---|---|
-| Billing seam + Stripe TEST adapter, live keys hard-blocked (`stripe_live_blocked`) | `lib/billing/provider.ts`, `config-core.ts`, `providers/` | IMPLEMENTED (test) |
-| Test chain: checkout → signature-verified idempotent webhook → subscription/payment rows → entitlement → admin billing centre | `app/api/billing/{test-checkout,webhook,portal}`, `lib/billing/*`, `dashboard/admin/billing` | IMPLEMENTED_UNPROVEN on prod; proven in the test-mode sprint (`docs/audits/stripe-test-mode-final-report.md`) |
-| Entitlements v1 (subscription-derived; permissive while payments off) | `lib/billing/entitlements-v1.ts`, `effective-entitlements.ts` | IMPLEMENTED |
-| Pre-payment plan registry (`free_worker`, pilot plans; `PAYMENTS_ENABLED=false` const) | `lib/billing/plans.ts` | IMPLEMENTED |
-| LMC ledger (1 LMC = €1 platform credit, 23 RPCs, idempotent, compensation applied 2026-08-28) | prod | PRODUCTION_PROVEN |
-| Manual paid-launch path (off-platform payment + admin manual grant) | `docs/launch/manual-paid-launch-runbook.md` | live |
-| Public `/pricing` | honest "prices being prepared", nothing purchasable | live |
-| Metering for numeric allowances (searches, reveals, …) | — | **MISSING** (gateFeature's usage param has no producer) |
-| Billing-touching PRs are RED class verbatim | `CLAUDE.md` merge model | binding |
+| Billing seam + Stripe adapter; live resolves ONLY through the owner-armed path (`STRIPE_MODE=live` + complete live keys + `STRIPE_LIVE_ACTIVATION=approved-by-owner` + `PRICING_READINESS_STATE=owner_confirmed`) | `lib/billing/config-core.ts`, `provider.ts`, `providers/` | IMPLEMENTED (#1441) |
+| Checkout (organization-bound, sellable plan only) → signature-verified idempotent webhook (mode-matched) → `billing_customers` / `billing_subscriptions` / `payment_webhook_events` → entitlements → account state → Customer Portal | `app/api/billing/{test-checkout,webhook,portal}`, `lib/billing/*`, `components/app/account-billing-section.tsx` | IMPLEMENTED; production chain NOT PROVEN (0 rows ever) |
+| Open-needs seam FREE 1 / ORGANIZATION 10 / above → individual plan | `lib/billing/open-needs-gate.ts` → `lib/demand/demand-request.ts` (the ONE demand path; chat + visual form both) | IMPLEMENTED (#1441), enforced once a Stripe adapter state is active |
+| Public `/pricing` — €0 / €99 from the DB figure + "Need more? Contact us" | `components/marketing/pricing-table.tsx` | IMPLEMENTED |
+| LMC ledger | prod | PROVEN; top-ups DEFERRED |
 
-## The decision the owner must make (G-7): which table is canonical
+## G-8 — OWNER ACTIONS (external; nothing here can be done from the repository)
 
-Two owner-sourced price sets exist and disagree. Nothing below is invented; pick one column (or amend it) and the
-implementation follows mechanically.
+1. **Stripe Dashboard (LIVE mode on)** → Products → *Add product*: name `LabourMarket.ai — Organization`, recurring, **€99.00 / month**, currency EUR, tax behaviour *exclusive* (Stripe Tax applies VAT). Copy the **price id** (`price_…`). Verify: the product shows one active monthly price of €99.00.
+2. **Stripe → Settings → Tax**: enable Stripe Tax (Lithuanian entity; EU B2B reverse charge, B2C VAT by customer country). Verify: Tax status *Active*.
+3. **Stripe → Developers → Webhooks → Add endpoint** (LIVE): URL `https://labourmarket.ai/api/billing/webhook`; events `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_succeeded`, `invoice.payment_failed`, `charge.refunded`, `charge.dispute.created`, `charge.dispute.closed`. Copy the **signing secret** (`whsec_…`). Verify: endpoint status *Enabled*.
+4. **Stripe → Settings → Billing → Customer portal**: save a configuration (cancel subscription: on; update payment method: on; invoice history: on). Verify: "Configuration saved".
+5. **Vercel → Project → Settings → Environment Variables (Production)** — set: `PAYMENTS_ENABLED=true`, `BILLING_PROVIDER=stripe`, `STRIPE_MODE=live`, `STRIPE_SECRET_KEY` (`sk_live_…`), `STRIPE_WEBHOOK_SECRET` (`whsec_…` from step 3), `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_live_…`), `STRIPE_PRICE_COMPANY_PILOT` (the price id from step 1), `STRIPE_LIVE_ACTIVATION=approved-by-owner`. Leave `STRIPE_PRICE_WORKER_PLUS` / `STRIPE_PRICE_AGENCY_PILOT` unset. Verify: 8 production variables present (values never pasted anywhere else).
+6. **GitHub PR #1441** — RED class (billing): review and **approve + merge** (squash). Verify: merged; Vercel production deployment created (the Hobby rate limit must have lifted).
+7. **The smallest legitimate real payment**: sign in as an organization owner → `/dashboard/account` → "Order the Organization plan" → Stripe Checkout → pay with a real card. Verify (agent, read-only): `payment_webhook_events` (signed, processed), `billing_subscriptions` row `active` bound to the organization, account page shows the plan and status, the 11th need is refused with the individual-plan path, Customer Portal opens; then **refund** in Stripe → `charge.refunded` recorded, state read back.
 
-| Audience | **Set A — closed PR #754 (2026-07, "owner pricing implemented exactly")** | **Set B — V8 directive candidate (2026-08-13, `docs/commercial/pricing-candidate-v8-2026-08-13.md`, DRAFT_PRICING)** |
-|---|---|---|
-| Persons / workers | FREE €0 · AI PLUS €9.99 · VIP MEDIA €24.99 | FREE €0 · AI PLUS €19.99 · CAREER+ €29.99 |
-| Companies / employers | FREE €0 (1 active ad) · PROJECT LAUNCH OFFER €99 (until 2026-10-31, records 15 % first-annual discount) | FREE €0 · START €49 · GROWTH €149 · SCALE/AGENCY €399 |
-| Agencies | START €99.99 · GROWTH €249.99 · SCALE €499.99 | folded into SCALE/AGENCY €399 |
-| LMC | 1 LMC = €1; top-ups 10/25/50/100/250 | same |
-| Free-participation principle | workers browse/open/apply without paywall | same ("FREE must stay really useful") |
-
-Constraints that hold whichever set is chosen:
-- **Worker free tier is not negotiable** (owner direction: no paywall on basic labour-market participation).
-- **Numeric allowances cannot be sold before metering exists** — Set B's per-tier quotas need a metering
-  build first (Train D2 will ship metering behind the entitlement gate; until then tiers are feature-based).
-- AI-differentiated plans need the AI provider live — it is (`AI_PROVIDER_MODE` set, 4 routes live).
-- VAT: Stripe Tax (automatic) is the recommended path; Lithuanian entity, EU B2B reverse charge, B2C VAT
-  by customer country. This is a configuration decision inside Stripe, not code.
-
-**Owner action:** reply with "Set A", "Set B", or an amended table. Cost: none. Reversible: prices can change;
-existing subscriptions keep their price until migrated.
-
-## Recommendation made from evidence (2026-09-02 consolidation)
-
-**Set A** is the recommended launch table: it is the only set the owner ever confirmed ("owner pricing
-implemented exactly", closed #754), it is feature-based so it needs NO metering build, and its worker
-free tier satisfies the free-participation principle. Set B stays a documented candidate for the first
-pricing review after real usage. The owner's decision therefore reduces to one word — **"Set A"** —
-or an amended table.
-
-## D3 — the live path exists in code and is INERT (RED draft, 2026-09-02)
-
-`lib/billing/config-core.ts` now resolves a `stripe_live` state, but ONLY when all four hold at once:
-`STRIPE_MODE=live` with a complete live key set (`sk_live_…`, `pk_live_…`, `whsec_…`), the env token
-`STRIPE_LIVE_ACTIVATION=approved-by-owner`, and the code constant `PRICING_READINESS_STATE` flipped to
-`owner_confirmed` (the G-7 approval lands as that one-line change on the same RED PR). Any missing piece
-keeps the historical hard block with the reason named (`live_blocked`, `live_pricing_not_confirmed`,
-`live_keys_incomplete`, `missing_webhook_secret`). The webhook accepts live events only under
-`stripe_live` and rejects test replays there; entitlements enforce under either active state; the account
-page shows the real mode. Pinned by `lib/guards/no-live-payments.test.ts` (the token alone cannot arm
-live while pricing is draft) and `lib/billing/config.test.ts`.
-
-## G-8 — live activation (EXTERNAL_GATE + RED PR)
-
-After G-7:
-1. Stripe dashboard (live mode): create the products/prices of the chosen table; enable **Stripe Tax**; set the
-   webhook endpoint `https://labourmarket.ai/api/billing/webhook` (events: `checkout.session.completed`,
-   `customer.subscription.*`, `invoice.*`, `charge.refunded`) and copy the signing secret.
-2. Vercel production env: `PAYMENTS_ENABLED=true`, `BILLING_PROVIDER=stripe`, `STRIPE_MODE=live`,
-   `STRIPE_SECRET_KEY=sk_live_…`, `STRIPE_WEBHOOK_SECRET=whsec_…`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_…`,
-   and the `STRIPE_PRICE_*` ids. (Agent cannot add Vercel env — classifier-blocked; owner action.)
-3. Approve the RED PR that lifts the code live-block behind those env values (opened as DRAFT + `needs-human-gate`
-   by Train D3). Cost: Stripe fees only on real charges. Reversible: env off → `stripe_live_blocked` again.
-4. Proof (agent, after 1–3): smallest real checkout + immediate refund on a bounded org, renewal/upgrade/downgrade/
-   cancel/failed-payment via Stripe test clocks in TEST first, webhook replay idempotency, entitlement flip,
-   invoice/receipt, VAT line — recorded in the register.
-
-## What Train D does meanwhile (no gate needed)
-
-D2: everything provable in TEST mode — renewal, upgrade, downgrade, cancel, failed payment, webhook idempotency,
-entitlement update, invoice/receipt, refund, credits/top-up (LMC), currency/VAT behaviour — with Stripe test clocks;
-metering primitive for allowances; production-readiness guards. D3: the DRAFT live-enablement PR.
+Reversible at any time: remove `STRIPE_LIVE_ACTIVATION` (or set `PAYMENTS_ENABLED=false`) → `stripe_live_blocked`; no data migration involved.

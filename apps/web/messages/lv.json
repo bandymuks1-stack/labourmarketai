@@ -216,7 +216,9 @@
           "sending": "[EN] Sending...",
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
-          "progressHelper": "[EN] These steps show progress. Active actions are shown below."
+          "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
+          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
         }
       },
       "account": {
@@ -944,20 +946,20 @@
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
-        "a": "[EN] We're pre-launch. Setting a price we can't yet stand behind would be dishonest, so tiers show their scope and the price is confirmed before launch.",
-        "q": "[EN] Why is there no price shown yet?"
+        "q": "Why only one paid plan?",
+        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
       },
       {
-        "a": "[EN] Yes. The Free tier is meant to get workers and small employers onto the market with no cost.",
-        "q": "[EN] Will the Free tier stay free?"
+        "q": "Will the Free tier stay free?",
+        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
       },
       {
-        "a": "[EN] Billing integration is planned for a later milestone. In M0 you can only join a waitlist — no card is collected.",
-        "q": "[EN] How is billing handled?"
+        "q": "How is billing handled?",
+        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
       },
       {
-        "a": "[EN] Yes. Tiers are meant to follow your needs; you'll be able to move up or down.",
-        "q": "[EN] Can I change tiers later?"
+        "q": "What happens above 10 active positions?",
+        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
       }
     ],
     "faqTitle": "[EN] Pricing FAQ",
@@ -975,14 +977,14 @@
         "tagline": "[EN] For staffing partners."
       },
       "business": {
+        "name": "Organization",
+        "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "[EN] 10 projects",
-          "[EN] 25 job demands",
-          "[EN] Worker search",
-          "[EN] Email support"
-        ],
-        "name": "[EN] Business",
-        "tagline": "[EN] For active employers."
+          "Up to 10 active positions",
+          "Everything in Free, at operating scale",
+          "One plan for every organization capability",
+          "Project operations, readiness, reports and CSV"
+        ]
       },
       "enterprise": {
         "features": [
@@ -995,18 +997,33 @@
         "tagline": "[EN] For scale and control."
       },
       "free": {
+        "name": "Free",
+        "tagline": "For getting started",
         "features": [
-          "[EN] 1 project",
-          "[EN] 1 job demand",
-          "[EN] Community support"
-        ],
-        "name": "[EN] Free",
-        "tagline": "[EN] Get on the market."
+          "1 active position",
+          "Matching shortlist and candidate contact",
+          "Bookings, projects, instructions",
+          "Work confirmation and verified skills"
+        ]
       }
     },
     "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly."
+    "titleAccent": "[EN] set fairly.",
+    "individual": {
+      "name": "Individual plan",
+      "tagline": "For more than 10 active positions",
+      "question": "Need more?",
+      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "cta": "Contact us"
+    },
+    "priceFree": "€0",
+    "pricePerMonth": "€{price}/month",
+    "ctaStartFree": "Start free in your organization account",
+    "ctaSubscribe": "Activate in your organization account",
+    "priceState": {
+      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+    }
   },
   "secondary": {
     "comm": {
@@ -2274,7 +2291,9 @@
       "close": "[EN] Close this need",
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
-      "error": "[EN] Could not save. Try again."
+      "error": "[EN] Could not save. Try again.",
+      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
     },
     "verdict": {
       "eligible": "Atbilst norādītajām prasībām",
@@ -3613,7 +3632,9 @@
         "errorGeneric": "[EN] Could not save. Please try again.",
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
-        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it."
+        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
+        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
       },
       "urgency": {
         "flexible": "Elastīgi",

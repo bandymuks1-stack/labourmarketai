@@ -6,7 +6,7 @@
  * test price.
  */
 
-import { PRE_PAYMENT_PLANS, type PlanAudience } from "@/lib/billing/plans";
+import { PRE_PAYMENT_PLANS, isSellablePlan, type PlanAudience } from "@/lib/billing/plans";
 import type { BillingConfig } from "@/lib/billing/config-core";
 
 export type CheckoutRejectReason =
@@ -14,6 +14,7 @@ export type CheckoutRejectReason =
   | "live_blocked"
   | "unknown_plan"
   | "not_a_paid_plan"
+  | "plan_deferred"
   | "not_eligible"
   | "price_not_configured"
   | "not_authenticated"
@@ -47,7 +48,7 @@ export type CheckoutGateResult =
 /** The plans a user can start a TEST checkout for (the paid pilot tiers). */
 export function isPaidPlanKey(planKey: string): boolean {
   const p = PRE_PAYMENT_PLANS.find((x) => x.slug === planKey);
-  return Boolean(p && p.accessState === "payment_not_enabled");
+  return Boolean(p && isSellablePlan(p));
 }
 
 export function evaluateCheckoutRequest(input: {
@@ -79,6 +80,12 @@ export function evaluateCheckoutRequest(input: {
   if (!plan) return { ok: false, status: 400, reason: "unknown_plan" };
   if (plan.accessState !== "payment_not_enabled") {
     return { ok: false, status: 400, reason: "not_a_paid_plan" };
+  }
+  // Owner launch pricing 2026-09-05: only the sellable launch plan reaches
+  // checkout; deferred plans (ai_plus / vip_media successors, agency tiers)
+  // are refused here even if a price id were configured for them.
+  if (!isSellablePlan(plan)) {
+    return { ok: false, status: 400, reason: "plan_deferred" };
   }
 
   // Eligibility: the plan's audience role, or an admin (for internal testing).

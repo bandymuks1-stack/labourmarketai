@@ -94,6 +94,10 @@ function mapLifecycle(r: DemandLifecycleResult): ExecResult {
   if (r.kind === "ok") {
     return { ok: true, data: r.status ? { status: r.status } : undefined };
   }
+  if (r.kind === "over-limit") {
+    // The same honest codes the create path uses (upgrade / individual plan).
+    return { ok: false, code: r.next === "individual_plan" ? "over_open_need_limit_individual" : "over_open_need_limit_upgrade" };
+  }
   return {
     ok: false,
     code: mapKind(r.kind),
@@ -192,9 +196,14 @@ export const COMPANY_EXECUTORS: {
           : undefined,
     });
     // The REAL id + status come from the canonical action — never invented.
-    return r.ok
-      ? { ok: true, data: { requestId: r.requestId, status: "submitted" } }
-      : { ok: false, code: r.code };
+    if (r.ok) return { ok: true, data: { requestId: r.requestId, status: "submitted" } };
+    // Owner launch pricing 2026-09-05: the open-needs ceiling names the honest
+    // way forward — the €99 plan, or the individual plan above the paid
+    // ceiling. Nothing is charged, upgraded or created on the person's behalf.
+    if (r.code === "over_open_need_limit") {
+      return { ok: false, code: r.next === "individual_plan" ? "over_open_need_limit_individual" : "over_open_need_limit_upgrade" };
+    }
+    return { ok: false, code: r.code };
   },
 
   "company.confirm-need": async (input, ctx) =>

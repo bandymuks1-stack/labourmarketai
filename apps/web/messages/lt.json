@@ -4241,7 +4241,9 @@
               "assumptionsTitle": "Prielaidų pastabos",
               "humanConfirmNote": "Tai tik pasiūlymai — sprendžiate jūs. Jie niekada nekeičia jūsų skaičių."
             }
-          }
+          },
+          "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
+          "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
         }
       },
       "greeting": "Sveiki, {name}",
@@ -5159,21 +5161,22 @@
     "plans": {
       "free": {
         "name": "Nemokamas",
-        "tagline": "Pradėkite rinkoje.",
+        "tagline": "Pradžiai",
         "features": [
-          "1 projektas",
-          "1 darbo poreikis",
-          "Bendruomenės pagalba"
+          "1 aktyvi pozicija",
+          "Atrankos sąrašas ir kandidatų kontaktas",
+          "Rezervacijos, projektai, nurodymai",
+          "Darbo patvirtinimas ir patvirtinti įgūdžiai"
         ]
       },
       "business": {
-        "name": "Verslo",
-        "tagline": "Aktyviems darbdaviams.",
+        "name": "Organizacija",
+        "tagline": "Organizacijoms, kurios aktyviai samdo ir buria komandas",
         "features": [
-          "10 projektų",
-          "25 darbo poreikiai",
-          "Darbuotojų paieška",
-          "Pagalba el. paštu"
+          "Iki 10 aktyvių pozicijų",
+          "Viskas, kas nemokamame plane — darbiniu mastu",
+          "Vienas planas visoms organizacijos galimybėms",
+          "Projektų valdymas, parengtis, ataskaitos ir CSV"
         ]
       },
       "agency": {
@@ -5200,26 +5203,37 @@
     "faqTitle": "Kainų DUK",
     "faq": [
       {
-        "q": "Kodėl kaina dar nerodoma?",
-        "a": "Dar nepradėjome veiklos. Skelbti kainą, kurios kol kas negalime garantuoti, būtų nesąžininga — todėl rodoma plano apimtis, o kaina patvirtinama prieš startą."
+        "q": "Kodėl tik vienas mokamas planas?",
+        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą. Skiriasi tik mastas: 1 aktyvi pozicija nemokamai, iki 10 už 99 €/mėn., o virš to — individualus planas."
       },
       {
         "q": "Ar nemokamas planas liks nemokamas?",
-        "a": "Taip. Nemokamas planas skirtas darbuotojams ir mažoms įmonėms patekti į rinką be jokių išlaidų."
+        "a": "Taip. Asmenims viskas nemokama, o organizacija gali turėti vieną aktyvią poziciją be jokio mokesčio."
       },
       {
         "q": "Kaip vyks atsiskaitymai?",
-        "a": "Mokėjimai dar neįjungti ir kortelės duomenys nerenkami. Kol kas galite užsirašyti į sąrašą — mokama prieiga suteikiama tiesiogiai."
+        "a": "Mokėjimas kortele per Stripe, PVM taiko Stripe Tax; sąskaitos, atšaukimas ir keitimai — organizacijos paskyroje."
       },
       {
-        "q": "Ar galėsiu keisti planą vėliau?",
-        "a": "Taip. Planai pritaikomi pagal poreikius — galėsite pereiti į aukštesnį ar žemesnį."
+        "q": "Kas vyksta virš 10 aktyvių pozicijų?",
+        "a": "Niekas nenuskaičiuojama ir neperkeliama automatiškai. Paprašysime susisiekti ir suderinsime individualų planą."
       }
     ],
     "priceState": {
       "draft_pricing": "Kainos ruošiamos — nieko įsigyti dar negalima.",
-      "owner_confirmed": "Kainos patvirtintos, bet įsigyti dar negalima — mokėjimai neįjungti."
-    }
+      "owner_confirmed": "Kainos patvirtintos savininko. Aktyvavimas vyksta organizacijos paskyroje; šiame puslapyje niekas nenuskaičiuojama."
+    },
+    "individual": {
+      "name": "Individualus planas",
+      "tagline": "Daugiau nei 10 aktyvių pozicijų",
+      "question": "Reikia daugiau?",
+      "body": "Susisiekite dėl individualaus plano — poreikiai, mastas ir komercinės sąlygos aptariami kartu. Jokio automatinio plano, jokios paskelbtos kainos.",
+      "cta": "Susisiekti"
+    },
+    "priceFree": "0 €",
+    "pricePerMonth": "{price} €/mėn.",
+    "ctaStartFree": "Pradėti nemokamai organizacijos paskyroje",
+    "ctaSubscribe": "Aktyvuoti organizacijos paskyroje"
   },
   "privacySelfService": {
     "title": "Privatumas ir tavo duomenys",
@@ -8049,7 +8063,9 @@
       "close": "Uždaryti šį poreikį",
       "reopen": "Atidaryti iš naujo",
       "closedNote": "Uždaryta — darbuotojams nerodoma.",
-      "error": "Nepavyko išsaugoti. Bandykite dar kartą."
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
+      "limitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
     },
     "freshness": {
       "active": "Neseniai atnaujintas",
@@ -8109,10 +8125,11 @@
     "note": "Planai aprašo apimtį, ne aktyvų mokėjimą. Šiame puslapyje pinigai neimami.",
     "plans": {
       "free_worker": "Nemokamas darbuotojas",
-      "worker_plus": "Worker Plus",
-      "company_pilot": "Įmonės pilotas",
-      "agency_pilot": "Agentūros pilotas",
-      "admin_internal": "Administratorius / vidinis"
+      "worker_plus": "Asmens plius (nesiūlomas)",
+      "company_pilot": "Organizacija",
+      "agency_pilot": "Agentūros planas (nesiūlomas)",
+      "admin_internal": "Administratorius / vidinis",
+      "free_organization": "Organizacija (nemokamas)"
     },
     "access": {
       "free": "Nemokama",
@@ -9627,6 +9644,11 @@
       "opening": "Atidaroma…",
       "error": "Nepavyko atidaryti mokėjimų portalo",
       "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę. Tik testavimo režimas — jokių tikrų mokesčių."
+    },
+    "subscribe": {
+      "title": "Planas „Organizacija“",
+      "cta": "Aktyvuoti planą „Organizacija“ (iki 10 aktyvių pozicijų)",
+      "note": "Būsite nukreipti į Stripe Checkout; prenumerata susiejama su šia organizacija."
     }
   },
   "accountPlan": {
@@ -12138,7 +12160,9 @@
         "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
         "errorInvalid": "Patikrink laukus ir bandyk dar kartą.",
         "errorNeedsMigration": "Ši funkcija dar neįjungta. Bandyk vėliau.",
-        "errorConflict": "Ši reikšmė jau skiriasi. Atidaryk išplėstinį režimą, kad pakeistum."
+        "errorConflict": "Ši reikšmė jau skiriasi. Atidaryk išplėstinį režimą, kad pakeistum.",
+        "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
+        "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
       },
       "urgency": {
         "flexible": "Lankstu",
