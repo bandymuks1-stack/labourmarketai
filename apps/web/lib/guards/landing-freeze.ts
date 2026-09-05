@@ -239,6 +239,19 @@ import { join } from "node:path";
  * qualifier check in public-no-fabricated-confidence.test.ts, so the freeze
  * is not the only thing standing between the landing and the banned framing
  * coming back.
+ *
+ * Owner directive 2026-09-05 (Gemini runtime check, item 8) — "the public
+ * landing must never pretend a canned scenario is the user's answer". The
+ * hero routed a visitor's OWN typed question to one of three scripted
+ * scenarios and rendered that scenario's reasoning under "AI SPRENDIMAS"
+ * with the visitor's words in the bubble — a worked example presented as
+ * their answer. Repair: the section is labelled an EXAMPLE conversation /
+ * decision (the landing runs no model — `data-egress.ts` keeps free text
+ * from leaving the platform), and a visitor's own question now shows the
+ * `ownQuestionNote` line before any reasoning is read as theirs. The
+ * regeneration touched the hero-live-demo.tsx hash (one state flag + one
+ * status line) and the five `*.landing` namespace hashes (copy honesty
+ * only). Permanently guarded by `landing-own-question-honesty.test.ts`.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

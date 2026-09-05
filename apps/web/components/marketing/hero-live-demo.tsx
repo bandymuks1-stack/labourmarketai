@@ -69,6 +69,12 @@ export function HeroLiveDemo() {
   const [reveal, setReveal] = useState(0);
   const [draft, setDraft] = useState("");
   const [unmatched, setUnmatched] = useState(false);
+  /** The visitor typed their OWN question and a scripted scenario matched
+   *  its topic. The reasoning and decision shown are that scenario's, not
+   *  an answer built from the visitor's words — the card says so (owner
+   *  directive 2026-09-05: never pretend a canned scenario is the user's
+   *  answer). The landing runs no model. */
+  const [askedOwn, setAskedOwn] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const scenario: LandingScenario = LANDING_SCENARIOS[index];
@@ -100,6 +106,7 @@ export function HeroLiveDemo() {
       clearTimers();
       setIndex(i);
       setUnmatched(false);
+      setAskedOwn(asked !== undefined);
       const text = asked ?? t(`scenario.${LANDING_SCENARIOS[i].promptKey}`);
 
       const reduced =
@@ -197,7 +204,19 @@ export function HeroLiveDemo() {
             ) : null}
           </div>
 
-          {/* AI REASONING — what is being weighed, not a spinner. */}
+          {/* A visitor's own question → a worked EXAMPLE on its topic, said as
+              such before any reasoning is read as theirs. */}
+          {askedOwn && steps > 0 ? (
+            <p
+              role="status"
+              className="text-meta text-state-amber"
+              data-testid="hero-own-question-note"
+            >
+              {t("ownQuestionNote")}
+            </p>
+          ) : null}
+
+          {/* EXAMPLE REASONING — what is being weighed, not a spinner. */}
           {steps > 0 ? (
             <ul className="flex flex-col gap-1.5" data-testid="hero-reasoning">
               {scenario.reasoningKeys.slice(0, steps).map((k, i) => (

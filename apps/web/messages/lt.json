@@ -12813,7 +12813,7 @@
     "hero": {
       "headline": "Paklausk. Pamatyk. Įdarbink.",
       "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje.",
-      "chatLabel": "AI pokalbis",
+      "chatLabel": "Pavyzdinis pokalbis",
       "mapLabel": "Koncepcinis žemėlapis — iliustracinis scenarijus",
       "thinking": "Analizuoju rinkos signalus…",
       "answered": "Radau. Žemėlapis atnaujintas.",
@@ -12830,7 +12830,8 @@
         "r3": "Daugiausia laisvų darbuotojų — Baltijos šalyse"
       },
       "reacting": "Rinka reaguoja… {count} signalai",
-      "decisionLabel": "AI SPRENDIMAS",
+      "decisionLabel": "PAVYZDINIS SPRENDIMAS",
+      "ownQuestionNote": "Rodomas pavyzdys pagal jūsų klausimo temą — ne atsakymas iš jūsų duomenų. Tikrą atsakymą gausite prisijungę.",
       "decisionField": {
         "whyHere": "Kodėl čia",
         "whyNow": "Kodėl dabar",
