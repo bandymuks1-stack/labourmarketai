@@ -253,3 +253,91 @@ than no assertion.
   that company (owner gate G-14), the need enters the worker feed and becomes
   visible to every worker — and the isolation check in this walk would then fail
   CORRECTLY. A future window must not read that as a regression.
+
+---
+
+## 8. Window 4, later still — organisation disclosure, and the deploy block returns
+
+### 8.1 #1560 — MERGED, CI-GREEN, **NOT PROD_PROVEN** (unserved)
+
+`feat/cc/canonical-demand-organization-name-v1` → `32ca306a`. It closes the
+honesty gap §7.5 recorded: `list_open_demand_for_workers` already returns
+`company_name` for a VERIFIED company, the canonical read dropped it, so a
+worker-visible need rendered "organizacija: nenurodyta" for a name the platform
+was already authorised to show.
+
+No new privilege and no new query: the value is the RPC's own column, the
+employer's own-rows branch contributes `null` (it never borrows the viewer's
+active workspace name), and the read still opens exactly one table. Absent stays
+absent — null or blank keeps `organization` in `missing`.
+
+The closed key-set guard on `CanonicalDemand` failed as designed and was
+**re-stated, not loosened**: what it bans is an identity the read INVENTS;
+salary/fit/score/confidence and every contact detail stay banned, and
+`companyId` / `profileId` were ADDED to the forbidden list.
+
+**It is NOT PROD_PROVEN.** The walk is prepared and now asserts the disclosure
+against a real row — `customer_requests a2ffd425` (mason, NL, 40) whose owner's
+company `Labour market ai Sp. z o.o` is `verification_status = 'verified'`, so
+the worker leg is entitled to the name. Two checks are armed: the row text
+carries that name, and the `organizacija` gap chip is gone for that row.
+
+### 8.2 THE DEPLOY BLOCK RE-ENGAGED (M1, as predicted)
+
+#1560 merged **20:35:02 UTC**. At **20:56 UTC** the newest Vercel Production
+deployment was still ~33 min old — i.e. it PREDATES the merge, and no deployment
+was created for it. The Hobby rate limit is back, exactly the intermittent
+condition §0 warned was "a recurring condition, not a resolved one".
+
+Per the standing directive: no paid plan, no repeated retries, no probing
+pushes. #1560 waits for the next served build. Re-run
+`walk-market-drilldown-prod.cjs` with `EXPECT_BUILD=<sha>` then — the script's
+build guard already refuses to run against the wrong build (it caught exactly
+this when production moved from `128db83d` to `da1ba2eb` mid-window).
+
+### 8.3 The completion map has no autonomous P0 item left
+
+Checked all 14 non-PROD_PROVEN items against what an agent can actually close:
+
+| Item | Why it is not autonomous |
+|---|---|
+| J2 PAID=10, J3, J4, J5, K4 | first genuine paying customer (owner directive: no owner payment) |
+| D5 | "decide by real client need; no new object without proof" — needs a real client |
+| E4 | owner decision + 0 internship postings |
+| E5 | needs ≥5 real accepted learners of one institution |
+| I5 | `INVITE_EMAIL_*` env (owner) |
+| M1 | Vercel plan (owner) — and the block above |
+| M5 | a real recruiter/institution using production |
+| L1 | the chip-vocabulary findings are DONE (#1439). What remains is ONE product-semantic OWNER decision: inner-page navigation (A persistent compact workspace strip vs B finder-only) |
+| L4 | rolling — "keep checking on every new surface", not a closable item |
+| H2 | 1M load validation (V1); a bbox RPC (RED migration, owner gate); page composition (P5, deliberately deferred) |
+
+**H2 composition, measured rather than assumed** (`probe-world-map-da1ba2eb.log`):
+`/lt/dashboard/market-map` really does mount **three** Leaflet instances, all
+visible, at 1440 and 390. But the third is `location-map.tsx` — a location
+PICKER, a different job — so the page is busy composition, not three stacked
+market views. The map's own note defers this to P5. Not treated as a broken
+chain; recorded so the next window need not re-measure it.
+
+### 8.4 The drilldown's people dead end is COHERENCE, not a broken chain
+
+Worth correcting an earlier reading. The drilldown's continuation still says
+"Žmonių paieška dar nepristatyta", which looks like the biggest incomplete
+chain. It is not: a real, deterministic, doctrine-compliant matching engine is
+already live (`lib/market/match-v1` + `match-team-v1`), and an EMPLOYER-facing
+path already composes it — `lib/scouting/scouting.ts` → the `candidates`
+workspace result (`?result=candidates&demand=<requestId>`), plus
+`/dashboard/company/scouting`. So employer → candidates is reachable and proven
+ALREADY; only that one panel dead-ends.
+
+`runScouting` is safe to link to by construction: it requires an employer
+workspace and reads OWN demand only (`profile_id = auth.uid()`), so another
+tenant's id yields `not-found` and discloses nothing.
+
+**Design note for whoever takes it.** The panel would need to know the row is
+the caller's OWN need. That signal belongs on the canonical row
+(`ownedByViewer`, true only on the own-rows leg) — and adding it means
+`dedupeCanonicalDemand` must MERGE the two authorized views of one demand
+(fill a missing `organizationName`, OR the ownership) instead of PREFERRING one
+of them, which is what #1560 currently does. Do that deliberately, with the
+#1560 tests updated, not as a side effect.
