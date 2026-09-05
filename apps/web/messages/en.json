@@ -8506,7 +8506,7 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Early access",
-      "bodyLive": "The Organization plan can be activated in the account through Stripe. We still serve the first clients directly: a workforce request is free to submit, and the final scope is agreed before work starts.",
+      "bodyLive": "The Organization plan can be activated in the account by secure payment. We still serve the first clients directly: a workforce request is free to submit, and the final scope is agreed before work starts.",
       "body": "Public payments are not enabled yet. First clients are served directly: submitting a workforce inquiry is free, and the final price is always confirmed with you before any paid work starts.",
       "cta": "Submit a workforce inquiry"
     },
