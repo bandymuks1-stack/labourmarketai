@@ -77,7 +77,7 @@ describe("bounded reads under the caller's RLS — never the service role, never
     expect(SERVER).toContain('import { createClient } from "@/lib/supabase/server";');
   });
 
-  it("every candidate read is limited to the pinned bound, filtered on an indexed column, and there is no marketplace_listings read (§1.6 — no P0 category exists there)", () => {
+  it("every candidate read is limited to the pinned bound, filtered on the row's own status column, and there is no marketplace_listings read (§1.6 — no P0 category exists there; a covering partial index is a follow-up migration, not a claim this guard makes)", () => {
     const code = stripComments(SERVER);
     expect(REQUIREMENT_LEDGER_CANDIDATE_LIMIT).toBeLessThanOrEqual(20);
     const froms = [...code.matchAll(/\.from\("([a-z_]+)"\)/g)].map((m) => m[1]);
