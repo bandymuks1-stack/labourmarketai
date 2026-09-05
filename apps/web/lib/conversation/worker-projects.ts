@@ -3,6 +3,7 @@
 import "server-only";
 
 import { listMyDocuments } from "@/lib/documents/readiness";
+import { listWorkerInstructions } from "@/lib/instructions/instructions";
 import { getOwnWorkerId, listOwnReadinessItems, listWorkerProjects } from "@/lib/projects/worker-project-access";
 
 import { deriveWorkerProjectAsks, firstRecordableAsk, type WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";
@@ -37,6 +38,7 @@ export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatRes
       .slice(0, WORKER_PROJECTS_CHAT_LIMIT);
     const activeIds = shown.filter((r) => r.assignmentStatus === "active").map((r) => r.projectId);
     let asks: Map<string, WorkerProjectAsk[]> = new Map();
+    const instructions = new Map<string, { conversationId: string; authorName: string | null; text: string }>();
     if (activeIds.length > 0) {
       try {
         const workerId = await getOwnWorkerId();
@@ -46,6 +48,17 @@ export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatRes
         ]);
         if (items.length > 0) {
           asks = deriveWorkerProjectAsks(items, docs.kind === "ok" ? docs.documents : [], new Date());
+          // The manager's instruction per project — the instructions page's
+          // own read (RLS: only threads the person participates in), newest
+          // first; the first row per project is the latest instruction.
+          const read = await listWorkerInstructions();
+          if (read.kind === "ok") {
+            for (const ins of read.instructions) {
+              if (ins.projectId && !instructions.has(ins.projectId)) {
+                instructions.set(ins.projectId, { conversationId: ins.conversationId, authorName: ins.authorName, text: ins.originalText.split("\n")[0].slice(0, 160) });
+              }
+            }
+          }
         }
       } catch {
         /* asks stay empty — a failed read never invents a need */
@@ -57,13 +70,18 @@ export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatRes
       place: [r.city, r.country].filter(Boolean).join(", ") || null,
       assignmentStatus: r.assignmentStatus,
       asks: asks.get(r.projectId) ?? [],
+      instruction: instructions.get(r.projectId) ?? null,
     }));
-    const first = firstRecordableAsk(projects.map((p) => p.asks));
+    const firstProject = projects.find((p) => firstRecordableAsk([p.asks]) !== null) ?? null;
+    const first = firstProject ? firstRecordableAsk([firstProject.asks]) : null;
     return {
       kind: "ok",
       projects,
       activeCount: rows.filter((r) => r.assignmentStatus === "active").length,
-      recordable: first && first.documentTypeSlug ? { documentTypeSlug: first.documentTypeSlug, label: first.label } : null,
+      recordable:
+        first && first.documentTypeSlug && firstProject
+          ? { documentTypeSlug: first.documentTypeSlug, label: first.label, projectId: firstProject.projectId }
+          : null,
     };
   } catch {
     return { kind: "error" };

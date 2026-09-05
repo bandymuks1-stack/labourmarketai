@@ -3854,6 +3854,8 @@
       "askOwnExpiring": "utløper snart",
       "askOwnNone": "ikke registrert",
       "chipRecordDocument": "Registrer: {label}",
+      "askReplyIntro": "{name} ba om dette dokumentet — du kan svare her (sendes først etter bekreftelse):",
+      "askReplyIntroUnnamed": "Lederen din ba om dette dokumentet — du kan svare her (sendes først etter bekreftelse):",
       "stageAsk": "Hvilken fase? Velg:",
       "stageNotFound": "Jeg finner ikke den fasen blant dine åpne faser. Hvilken mente du?",
       "stageNone": "Ingen åpne faser ennå — faser legges inn i prosjektstyringen.",

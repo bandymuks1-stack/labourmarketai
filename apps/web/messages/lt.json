@@ -12155,6 +12155,8 @@
       "askOwnExpiring": "baigia galioti",
       "askOwnNone": "neįrašyta",
       "chipRecordDocument": "Įrašyti: {label}",
+      "askReplyIntro": "{name} prašė šio dokumento — galite parašyti jam čia (išsiunčiama tik patvirtinus):",
+      "askReplyIntroUnnamed": "Vadovas prašė šio dokumento — galite parašyti jam čia (išsiunčiama tik patvirtinus):",
       "stageAsk": "Kuris etapas? Pasirinkite:",
       "stageNotFound": "Tokio etapo nerandu tarp jūsų atvirų etapų. Kurį turėjote omenyje?",
       "stageNone": "Atvirų etapų kol kas nėra — etapus įvesite projekto valdyme.",

@@ -3854,6 +3854,8 @@
       "askOwnExpiring": "drīz beidzas",
       "askOwnNone": "nav ierakstīts",
       "chipRecordDocument": "Ierakstīt: {label}",
+      "askReplyIntro": "{name} lūdza šo dokumentu — varat atbildēt šeit (nosūta tikai pēc apstiprināšanas):",
+      "askReplyIntroUnnamed": "Vadītājs lūdza šo dokumentu — varat atbildēt šeit (nosūta tikai pēc apstiprināšanas):",
       "stageAsk": "Kurš posms? Izvēlieties:",
       "stageNotFound": "Šādu posmu starp jūsu atvērtajiem posmiem neatrodu. Kuru domājāt?",
       "stageNone": "Atvērtu posmu vēl nav — posmus ievada projekta vadībā.",

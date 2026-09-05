@@ -12155,6 +12155,8 @@
       "askOwnExpiring": "expiring",
       "askOwnNone": "not recorded",
       "chipRecordDocument": "Record: {label}",
+      "askReplyIntro": "{name} asked for this document — you can write back here (sent only after you confirm):",
+      "askReplyIntroUnnamed": "Your manager asked for this document — you can write back here (sent only after you confirm):",
       "stageAsk": "Which stage? Pick one:",
       "stageNotFound": "I cannot find that stage among your open stages. Which one did you mean?",
       "stageNone": "No open stages yet — stages are entered in the project operations.",

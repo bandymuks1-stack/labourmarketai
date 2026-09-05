@@ -3854,6 +3854,8 @@
       "askOwnExpiring": "aegub peagi",
       "askOwnNone": "pole kirjas",
       "chipRecordDocument": "Kirjuta: {label}",
+      "askReplyIntro": "{name} küsis seda dokumenti — saate siin vastata (saadetakse alles pärast kinnitamist):",
+      "askReplyIntroUnnamed": "Juht küsis seda dokumenti — saate siin vastata (saadetakse alles pärast kinnitamist):",
       "stageAsk": "Milline etapp? Valige:",
       "stageNotFound": "Sellist etappi teie avatud etappide seast ei leia. Millist mõtlesite?",
       "stageNone": "Avatud etappe veel pole — etapid sisestatakse projekti halduses.",

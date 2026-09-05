@@ -3854,6 +3854,8 @@
       "askOwnExpiring": "wkrótce wygasa",
       "askOwnNone": "nie zapisano",
       "chipRecordDocument": "Zapisz: {label}",
+      "askReplyIntro": "{name} prosił o ten dokument — możesz odpisać tutaj (wysłane dopiero po potwierdzeniu):",
+      "askReplyIntroUnnamed": "Kierownik prosił o ten dokument — możesz odpisać tutaj (wysłane dopiero po potwierdzeniu):",
       "stageAsk": "Który etap? Wybierz:",
       "stageNotFound": "Nie znajduję takiego etapu wśród otwartych. Który miałeś na myśli?",
       "stageNone": "Brak otwartych etapów — etapy wprowadza się w zarządzaniu projektem.",

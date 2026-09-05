@@ -250,6 +250,8 @@ const CHAT_KEYS = [
   "askOwnExpiring",
   "askOwnNone",
   "chipRecordDocument",
+  "askReplyIntro",
+  "askReplyIntroUnnamed",
   "stageAsk",
   "stageNotFound",
   "stageNone",
