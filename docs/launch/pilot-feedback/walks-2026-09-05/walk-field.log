@@ -1,0 +1,9 @@
+{"step":"health","build":"08629b19"}
+{"step":"readback_before","rows":{"unavailable":"permission denied for table project_worker_readiness_items"}}
+{"step":"F1_field","firstSectionIsField":false,"counts":{"lanes":1,"tokens":1,"slots":1,"ready":0,"unplaced":1},"meta":["3 OBJEKTAI · PERSKAITYTA 13:11"],"laneTexts":["✓ Pamatai ATLIKTA BE DATŲ"],"tokenTexts":["EW E2E Worker Two ! REIKIA DOKUMENTŲ · 0/7"],"slotTexts":["◌ sumontuoti pastolius iki 2026-10-03 DARBAS BE ŽMOGAUS · 2026-10-03"],"laterSectionsStillPresent":true}
+{"step":"F2_context","rowCount":7,"rowStatuses":["needed","needed","needed","needed","needed","needed","needed"],"ctxText":"EW E2E Worker Two REIKIA DOKUMENTŲ PROJEKTE NUO 2026-09-04 · SĄRAŠAS 0/7 A1 / komandiravimo dokumentas REIKALINGAS Paklausti žmogaus Pažymėti gauta Pažymėti patikrinta Kliento specifinis reikalavimas REIKALINGAS Paklausti žmogaus Pažymėti gauta Pažymėti patikrinta Darbo sutartis / priskyrimo pagrindas REIKALINGAS Paklausti žmogaus Pažymėti gauta Pažymėti patikrinta Asmens dokumentas REIKALINGAS Pa"}
+{"step":"F3_mark_received","row":"A1 / komandiravimo dokumentas","uiStatus":"received","note":"Viskas čia iš įrašų: etapai ir jų datos, aktyvūs priskyrimai, jūsų vedamas sąrašas, atviri darbai ir patvirtinti nebuvimai. Niekas nevertinama balais ir neprognozuojama; vieta laike išvesta iš jūsų įv","dbReceived":{"unavailable":"permission denied for table project_worker_readiness_items"}}
+{"step":"F4_restore","uiStatus":"received","dbAllNeeded":{"unavailable":"permission denied for table project_worker_readiness_items"},"rows":{"unavailable":"permission denied for table project_worker_readiness_items"}}
+{"step":"F5_list","list":{"visible":true,"lanes":1,"tokens":1,"slots":1,"ready":0}}
+{"step":"F6_mobile","horizontalOverflowPx":0}
+{"step":"done","totalMs":58493}
