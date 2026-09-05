@@ -449,6 +449,96 @@
       "exceedsNote": "More than the leave left"
     }
   },
+  "projectField": {
+    "title": "The field",
+    "intro": "Stages in time, the people on the project, missing capacity and who can come — one view, the same actions as the chat.",
+    "objectsCount": "{n} objects",
+    "readAt": "read at {time}",
+    "viewLabel": "View",
+    "viewField": "Field",
+    "viewList": "List",
+    "contextLabel": "Selected object",
+    "contextEmpty": "Select a stage, a person, an empty slot or someone who can come to see the details and act.",
+    "honestNote": "Everything here comes from records: stages and their dates, active assignments, the checklist you keep, open work and approved absences. Nothing is scored and nothing is guessed about the future; the placement in time is derived from the dates you entered.",
+    "time": {
+      "past": "Past",
+      "now": "Now",
+      "next": "Next",
+      "undated": "No dates"
+    },
+    "derivedFromDates": "derived from dates",
+    "derivedFromDueDates": "derived from due dates",
+    "laneWork": "{n} work",
+    "lanesTitle": "Stages",
+    "moreInList": "+{n} more in the list",
+    "lanesUnavailable": "Stages are not available yet — the project-operations update is not applied.",
+    "lanesEmpty": "No stages yet. Add the first stage in the stages section below.",
+    "unplacedWork": "{n} open work without a stage date — see the tasks section below.",
+    "peopleTitle": "On the project",
+    "peopleEmpty": "No one is assigned to this project yet.",
+    "slotsTitle": "Missing",
+    "slotsNone": "Nothing is missing right now.",
+    "slot": {
+      "label": "Empty slot",
+      "noPeople": "No one on the project",
+      "kind": {
+        "unassigned_task": "Work without a person",
+        "no_people": "No people assigned"
+      }
+    },
+    "readyTitle": "Can come",
+    "ready": {
+      "canCome": "Can come",
+      "none": "No one else on your roster is free this week.",
+      "noCompany": "No company workspace — the roster is not readable here.",
+      "emptyRoster": "Your roster has no active people yet.",
+      "unavailable": "The roster could not be read right now.",
+      "why": "Why these: on your roster and no approved absence between {from} and {to}.",
+      "absencesUnknown": "Absences are not switched on yet, so nothing says otherwise.",
+      "more": "+{n} more free people beyond this view."
+    },
+    "tokenState": {
+      "clear": "Checklist clear",
+      "needs": "Needs documents",
+      "blocked": "Blocked by checklist",
+      "untracked": "Checklist not started"
+    },
+    "saved": "Saved — re-read from the record.",
+    "errors": {
+      "needs_migration": "Not available yet — the update is not applied.",
+      "not_authorized": "You cannot change this project.",
+      "invalid": "That change is not allowed here.",
+      "error": "Something went wrong. Please try again."
+    },
+    "askBody": "Please provide: {label}",
+    "actions": {
+      "ask": "Ask the person",
+      "received": "Mark received",
+      "checked": "Mark checked",
+      "needed": "Still needed",
+      "leave": "Remove from project",
+      "leaveConfirm": "Yes, remove",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "assignedSince": "On the project since {date}",
+    "checklistRatio": "checklist {checked}/{total}",
+    "checklistNone": "no checklist yet",
+    "checklistNoneHint": "No checklist rows for this person yet — start one in the people board below.",
+    "checklistTitle": "Checklist",
+    "leaveConfirm": "Remove {name} from this project? The assignment is ended, not deleted.",
+    "taskStatusLabel": "Status of {title}",
+    "laneWorkTitle": "Work in this stage",
+    "laneWorkEmpty": "No open work is due within this stage's dates.",
+    "suitableTitle": "Who could take it",
+    "suitableNone": "No one suitable is readable right now.",
+    "suitable": {
+      "onProject": "already on the project",
+      "free": "free this week",
+      "why": "Why these: people already on the project whose checklist is clear, and roster members with no approved absence this week. Nothing is ranked."
+    },
+    "assignLink": "Assign people on the projects page"
+  },
   "projectStages": {
     "ganttTitle": "Timeline (Gantt)",
     "ganttEmpty": "Add planned dates to your stages to see the timeline.",

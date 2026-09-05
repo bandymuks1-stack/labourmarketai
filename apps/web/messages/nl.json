@@ -449,6 +449,96 @@
       "exceedsNote": "Meer dan het resterende verlof"
     }
   },
+  "projectField": {
+    "title": "Het veld",
+    "intro": "Fasen in de tijd, de mensen op het project, ontbrekende capaciteit en wie kan komen — één beeld, dezelfde acties als in de chat.",
+    "objectsCount": "{n} objecten",
+    "readAt": "gelezen om {time}",
+    "viewLabel": "Weergave",
+    "viewField": "Veld",
+    "viewList": "Lijst",
+    "contextLabel": "Geselecteerd object",
+    "contextEmpty": "Kies een fase, een persoon, een lege plek of iemand die kan komen om de details te zien en te handelen.",
+    "honestNote": "Alles hier komt uit records: fasen en hun data, actieve toewijzingen, de controlelijst die u bijhoudt, open werk en goedgekeurde afwezigheden. Niets wordt gescoord of voorspeld; de plaats in de tijd is afgeleid van de data die u invoerde.",
+    "time": {
+      "past": "Verleden",
+      "now": "Nu",
+      "next": "Volgende",
+      "undated": "Geen data"
+    },
+    "derivedFromDates": "afgeleid van data",
+    "derivedFromDueDates": "afgeleid van deadlines",
+    "laneWork": "{n} werk",
+    "lanesTitle": "Fasen",
+    "moreInList": "+{n} meer in de lijst",
+    "lanesUnavailable": "Fasen zijn nog niet beschikbaar — de projectoperaties-update is niet toegepast.",
+    "lanesEmpty": "Nog geen fasen. Voeg de eerste fase toe in de fasensectie hieronder.",
+    "unplacedWork": "{n} open werk zonder fasedatum — zie de takensectie hieronder.",
+    "peopleTitle": "Op het project",
+    "peopleEmpty": "Er is nog niemand aan dit project toegewezen.",
+    "slotsTitle": "Ontbreekt",
+    "slotsNone": "Er ontbreekt nu niets.",
+    "slot": {
+      "label": "Lege plek",
+      "noPeople": "Niemand op het project",
+      "kind": {
+        "unassigned_task": "Werk zonder persoon",
+        "no_people": "Geen mensen toegewezen"
+      }
+    },
+    "readyTitle": "Kan komen",
+    "ready": {
+      "canCome": "Kan komen",
+      "none": "Niemand anders op uw lijst is deze week vrij.",
+      "noCompany": "Geen bedrijfsruimte — de lijst is hier niet leesbaar.",
+      "emptyRoster": "Uw lijst heeft nog geen actieve mensen.",
+      "unavailable": "De lijst kon nu niet worden gelezen.",
+      "why": "Waarom deze: op uw lijst en zonder goedgekeurde afwezigheid tussen {from} en {to}.",
+      "absencesUnknown": "Afwezigheden staan nog niet aan, dus niets zegt het tegendeel.",
+      "more": "+{n} vrije mensen buiten dit beeld."
+    },
+    "tokenState": {
+      "clear": "Controlelijst in orde",
+      "needs": "Documenten nodig",
+      "blocked": "Geblokkeerd door controlelijst",
+      "untracked": "Controlelijst niet gestart"
+    },
+    "saved": "Opgeslagen — opnieuw gelezen uit het record.",
+    "errors": {
+      "needs_migration": "Nog niet beschikbaar — de update is niet toegepast.",
+      "not_authorized": "U kunt dit project niet wijzigen.",
+      "invalid": "Die wijziging is hier niet toegestaan.",
+      "error": "Er ging iets mis. Probeer het opnieuw."
+    },
+    "askBody": "Gelieve aan te leveren: {label}",
+    "actions": {
+      "ask": "Vraag de persoon",
+      "received": "Markeer ontvangen",
+      "checked": "Markeer gecontroleerd",
+      "needed": "Nog steeds nodig",
+      "leave": "Van project halen",
+      "leaveConfirm": "Ja, verwijderen",
+      "cancel": "Annuleren",
+      "save": "Opslaan"
+    },
+    "assignedSince": "Op het project sinds {date}",
+    "checklistRatio": "controlelijst {checked}/{total}",
+    "checklistNone": "nog geen controlelijst",
+    "checklistNoneHint": "Nog geen controlelijstregels voor deze persoon — start er een in het mensenbord hieronder.",
+    "checklistTitle": "Controlelijst",
+    "leaveConfirm": "{name} van dit project halen? De toewijzing wordt beëindigd, niet verwijderd.",
+    "taskStatusLabel": "Status van {title}",
+    "laneWorkTitle": "Werk in deze fase",
+    "laneWorkEmpty": "Geen open werk met deadline binnen de data van deze fase.",
+    "suitableTitle": "Wie het zou kunnen oppakken",
+    "suitableNone": "Er zijn nu geen geschikte mensen leesbaar.",
+    "suitable": {
+      "onProject": "al op het project",
+      "free": "deze week vrij",
+      "why": "Waarom deze: mensen die al op het project zijn met een schone controlelijst, en lijstleden zonder goedgekeurde afwezigheid deze week. Niets wordt gerangschikt."
+    },
+    "assignLink": "Mensen toewijzen op de projectenpagina"
+  },
   "projectStages": {
     "ganttTitle": "Tijdlijn (Gantt)",
     "ganttEmpty": "Voeg geplande data toe aan uw fasen om de tijdlijn te zien.",
