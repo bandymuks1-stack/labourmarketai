@@ -28,6 +28,8 @@ const OTHER_TENANT = "e2e-spine-org-202609051508@labourmarket.ai"; // owns none 
 const NEED_ID = "b0a48f65-6152-40eb-8080-986f87dca211";
 const NEED_ROLE = "welder";
 const NEED_HEADCOUNT = 2;
+const MARKET_NEED_ID = "a2ffd425-4bea-4ffa-91df-27a8b6dcaa89"; // another tenant, via the worker RPC
+const MARKET_ORG_NAME = "Labour market ai Sp. z o.o";           // its VERIFIED company, disclosed by the RPC
 const GEO = "LT%3Acountry"; // the need carries no city, so it is in the approximate country aggregate
 
 const EXPECT_BUILD = process.env.EXPECT_BUILD;
@@ -189,10 +191,15 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
     })));
     log({ step: "marketplace_leg", anchor: nl, rowCount: nlRows.length, rows: nlRows });
     must("another tenant's real demand is reachable through the worker leg", nlRows.length > 0, nlRows.length);
-    // KNOWN GAP, recorded not asserted: the RPC returns `company_name`, but the
-    // canonical contract drops it, so these rows render the organisation as an
-    // explicit "not stated" gap even though we are authorised to name it.
-    log({ step: "known_gap_company_name", note: "RPC exposes company_name; CanonicalDemand does not carry it -> organisation renders as a gap", sample: nlRows[0] || null });
+    // The organisation the RPC already discloses must be NAMED, not printed as
+    // a gap. `a2ffd425` (mason, NL, 40) belongs to a VERIFIED company, so the
+    // worker leg is entitled to the name and the row has to carry it.
+    const nlRow = nlRows.find((r) => r.id === MARKET_NEED_ID) || nlRows[0] || null;
+    log({ step: "organization_disclosure", expected: MARKET_ORG_NAME, row: nlRow });
+    must("a verified company's demand is NAMED, not rendered as a gap",
+      !!nlRow && nlRow.text.includes(MARKET_ORG_NAME), nlRow && nlRow.text);
+    must("and the organisation gap chip is gone for that row",
+      !!nlRow && !/organizacija/i.test(nlRow.text), nlRow && nlRow.text);
     await p.screenshot({ path: path.join(OUT, "06-marketplace-leg.png") });
   }
 
