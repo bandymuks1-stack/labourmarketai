@@ -2,8 +2,10 @@
 
 import "server-only";
 
-import { listWorkerProjects } from "@/lib/projects/worker-project-access";
+import { listMyDocuments } from "@/lib/documents/readiness";
+import { getOwnWorkerId, listOwnReadinessItems, listWorkerProjects } from "@/lib/projects/worker-project-access";
 
+import { deriveWorkerProjectAsks, firstRecordableAsk, type WorkerProjectAsk } from "@/lib/conversation/worker-project-asks";
 import {
   WORKER_PROJECTS_CHAT_LIMIT,
   type WorkerProjectsChatResult,
@@ -17,22 +19,52 @@ import {
  * for a worker whose assignment is real. The SAME read the worker's project
  * page uses (`listWorkerProjects`, RLS-scoped to the worker's own
  * assignments); no ranking, no write, capped for display.
+ *
+ * §12 — what each project still needs from THIS person: the manager's open
+ * checklist rows for the person (`listOwnReadinessItems`, the person's own
+ * rows under `pwri_select`) joined with the person's own documents
+ * (`listMyDocuments`, the documents page's read) by the readiness-item →
+ * document-type map. Two bounded reads more; an unavailable read leaves the
+ * asks empty — it never invents a need or a document.
  */
 export async function loadWorkerProjectsForChat(): Promise<WorkerProjectsChatResult> {
   try {
     const rows = await listWorkerProjects();
     if (rows.length === 0) return { kind: "empty" };
-    const projects = rows
+    const shown = rows
       .slice()
       .sort((a, b) => (a.assignmentStatus === b.assignmentStatus ? 0 : a.assignmentStatus === "active" ? -1 : 1))
-      .slice(0, WORKER_PROJECTS_CHAT_LIMIT)
-      .map((r) => ({
-        projectId: r.projectId,
-        title: r.title?.trim() || "—",
-        place: [r.city, r.country].filter(Boolean).join(", ") || null,
-        assignmentStatus: r.assignmentStatus,
-      }));
-    return { kind: "ok", projects, activeCount: rows.filter((r) => r.assignmentStatus === "active").length };
+      .slice(0, WORKER_PROJECTS_CHAT_LIMIT);
+    const activeIds = shown.filter((r) => r.assignmentStatus === "active").map((r) => r.projectId);
+    let asks: Map<string, WorkerProjectAsk[]> = new Map();
+    if (activeIds.length > 0) {
+      try {
+        const workerId = await getOwnWorkerId();
+        const [items, docs] = await Promise.all([
+          workerId ? listOwnReadinessItems(workerId, activeIds) : Promise.resolve([]),
+          listMyDocuments(),
+        ]);
+        if (items.length > 0) {
+          asks = deriveWorkerProjectAsks(items, docs.kind === "ok" ? docs.documents : [], new Date());
+        }
+      } catch {
+        /* asks stay empty — a failed read never invents a need */
+      }
+    }
+    const projects = shown.map((r) => ({
+      projectId: r.projectId,
+      title: r.title?.trim() || "—",
+      place: [r.city, r.country].filter(Boolean).join(", ") || null,
+      assignmentStatus: r.assignmentStatus,
+      asks: asks.get(r.projectId) ?? [],
+    }));
+    const first = firstRecordableAsk(projects.map((p) => p.asks));
+    return {
+      kind: "ok",
+      projects,
+      activeCount: rows.filter((r) => r.assignmentStatus === "active").length,
+      recordable: first && first.documentTypeSlug ? { documentTypeSlug: first.documentTypeSlug, label: first.label } : null,
+    };
   } catch {
     return { kind: "error" };
   }

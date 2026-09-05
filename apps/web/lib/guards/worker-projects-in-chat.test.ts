@@ -19,7 +19,7 @@ describe("a worker's \"my projects\" are their assignments", () => {
   it("the read is the worker project page's read, use-server, typed in its contract", () => {
     const src = read("lib/conversation/worker-projects.ts");
     expect(src.startsWith('"use server";')).toBe(true);
-    expect(src).toContain('import { listWorkerProjects } from "@/lib/projects/worker-project-access";');
+    expect(src).toContain('import { getOwnWorkerId, listOwnReadinessItems, listWorkerProjects } from "@/lib/projects/worker-project-access";');
     expect(src).not.toMatch(/\.from\(|\.rpc\(/);
     expect(src).not.toMatch(/^export (interface|type|const) /m);
     expect(read("lib/conversation/worker-projects-contract.ts")).toContain("export type WorkerProjectsChatResult");
