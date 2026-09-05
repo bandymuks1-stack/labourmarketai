@@ -1329,6 +1329,57 @@
       "companyNeed": "Personalbedarf melden",
       "project": "Projekt erstellen",
       "accommodationNote": "Unterkunftsstandorte sind noch keine eigene Datenebene — sie erscheinen als echte Signale, sobald diese Ebene hinzugefügt wird."
+    },
+    "world": {
+      "title": "Weltansicht",
+      "lead": "Wo Bedarf, Menschen und Projekte in dem Kartenausschnitt liegen, den Sie gerade sehen. Verschieben oder zoomen Sie die Karte — die Zahlen folgen.",
+      "layersLabel": "Kartenebenen",
+      "layers": {
+        "demand": "Bedarf",
+        "supply": "Menschen",
+        "projects": "Projekte"
+      },
+      "counts": {
+        "inView": "Im Ausschnitt: {places} Orte, {objects} Objekte",
+        "overflow": "Nicht gezeichnet: {places} weitere Orte ({objects} Objekte) — hineinzoomen, um sie zu sehen",
+        "unplaced": "Ohne bekannten Ort: {count}",
+        "withheld": "Kleine Gruppen zurückgehalten: {count} (weniger als 5 Personen)",
+        "truncated": "Mehr als {limit} Einträge im Ausschnitt — die Zahlen sind eine Untergrenze",
+        "cap": "Es werden höchstens {cap} Orte gleichzeitig gezeichnet"
+      },
+      "loading": "Wird aktualisiert…",
+      "provenance": {
+        "fact": "Fakt",
+        "factHint": "der Ort ist im Eintrag angegeben",
+        "derived": "Abgeleitet",
+        "derivedHint": "Position auf Länderebene — der genaue Ort ist nicht angegeben"
+      },
+      "state": {
+        "empty": {
+          "demand": "Kein offener Bedarf in diesem Kartenausschnitt.",
+          "supply": "Keine Personengruppen in diesem Kartenausschnitt zu zeigen.",
+          "projects": "Keines Ihrer Projekte liegt in diesem Kartenausschnitt."
+        },
+        "error": "Diese Ebene konnte gerade nicht gelesen werden. Statt einer Vermutung wird nichts angezeigt.",
+        "noPlaces": "Keine bekannten Orte in diesem Kartenausschnitt. Verschieben Sie die Karte zu einem Land oder einer Stadt.",
+        "signIn": "Melden Sie sich an, um die Weltansicht zu sehen.",
+        "fetchFailed": "Die Kartendaten sind nicht angekommen. Verschieben Sie die Karte, um es erneut zu versuchen."
+      },
+      "notes": {
+        "aggregateOnly": "Menschen werden nur als Gruppen ab 5 Personen gezeigt. Heute speist nur Ihr eigener geteilter Standort diese Ebene."
+      },
+      "list": {
+        "title": "Dieselben {count} Orte als Liste",
+        "count": "{count} Objekte",
+        "approx": "ungefähr",
+        "selected": "ausgewählt",
+        "more": "+{count} weitere"
+      },
+      "scale": {
+        "label": "Maßstab: {scale}",
+        "country": "Länder",
+        "place": "Orte"
+      }
     }
   },
   "demandLocationCapture": {

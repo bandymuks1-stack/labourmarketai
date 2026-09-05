@@ -1329,6 +1329,57 @@
       "companyNeed": "Pateikti įmonės poreikį",
       "project": "Sukurti projektą",
       "accommodationNote": "Apgyvendinimo vietos dar nėra atskiras duomenų sluoksnis — jos pasirodys kaip realūs signalai, kai sluoksnis bus pridėtas."
+    },
+    "world": {
+      "title": "Pasaulio vaizdas",
+      "lead": "Kur yra poreikiai, žmonės ir projektai toje žemėlapio dalyje, kurią matote. Pastumkite ar priartinkite žemėlapį — skaičiai seka kartu.",
+      "layersLabel": "Žemėlapio sluoksniai",
+      "layers": {
+        "demand": "Poreikiai",
+        "supply": "Žmonės",
+        "projects": "Projektai"
+      },
+      "counts": {
+        "inView": "Matoma: {places} vietos, {objects} objektai",
+        "overflow": "Nenupiešta: dar {places} vietos ({objects} objektai) — priartinkite, kad pamatytumėte",
+        "unplaced": "Be žinomos vietos: {count}",
+        "withheld": "Nerodomos mažos grupės: {count} (mažiau nei 5 žmonės)",
+        "truncated": "Šioje dalyje daugiau nei {limit} įrašų — skaičiai yra apatinė riba",
+        "cap": "Vienu metu piešiama ne daugiau kaip {cap} vietų"
+      },
+      "loading": "Atnaujinama…",
+      "provenance": {
+        "fact": "Faktas",
+        "factHint": "vieta nurodyta įraše",
+        "derived": "Išvesta",
+        "derivedHint": "šalies lygio padėtis — tiksli vieta nenurodyta"
+      },
+      "state": {
+        "empty": {
+          "demand": "Šioje žemėlapio dalyje atvirų poreikių nėra.",
+          "supply": "Šioje žemėlapio dalyje nėra rodomų žmonių grupių.",
+          "projects": "Šioje žemėlapio dalyje jūsų projektų nėra."
+        },
+        "error": "Šio sluoksnio dabar nepavyko nuskaityti. Vietoj spėjimo nerodoma nieko.",
+        "noPlaces": "Šioje žemėlapio dalyje nėra žinomų vietų. Pastumkite žemėlapį į šalį ar miestą.",
+        "signIn": "Prisijunkite, kad matytumėte pasaulio vaizdą.",
+        "fetchFailed": "Žemėlapio duomenys neatėjo. Pastumkite žemėlapį, kad pabandytumėte dar kartą."
+      },
+      "notes": {
+        "aggregateOnly": "Žmonės rodomi tik grupėmis nuo 5. Šiandien šį sluoksnį pildo tik jūsų pačių pasidalinta vieta."
+      },
+      "list": {
+        "title": "Tos pačios {count} vietos sąrašu",
+        "count": "{count} objektai",
+        "approx": "apytiksliai",
+        "selected": "pasirinkta",
+        "more": "dar {count}"
+      },
+      "scale": {
+        "label": "Mastelis: {scale}",
+        "country": "šalys",
+        "place": "vietos"
+      }
     }
   },
   "demandLocationCapture": {
