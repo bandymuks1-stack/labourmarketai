@@ -162,6 +162,8 @@ describe("attentionChipHref — every chip leads to a page, or is not shown", ()
   it("link chips carry their own path", () => {
     expect(attentionChipHref("link:/dashboard/inbox")).toBe("/dashboard/inbox");
     expect(attentionChipHref("link:javascript:alert(1)")).toBeNull();
+    expect(attentionChipHref("link://evil.example")).toBeNull();
+    expect(attentionChipHref("link:/dashboard//inbox")).toBe("/dashboard//inbox");
   });
   it("chat-answer chips map to the page that renders the same rows", () => {
     expect(attentionChipHref("candidates")).toBe("/dashboard/company/scouting");

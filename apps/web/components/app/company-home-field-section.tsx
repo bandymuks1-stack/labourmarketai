@@ -573,6 +573,11 @@ export async function CompanyHomeFieldSection({
                 })}
               </div>
             </>
+          ) : field.attention.kind === "unavailable" ? (
+            <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary" data-testid="company-home-attention-unavailable">
+              <AlertTriangle className="h-3.5 w-3.5 text-state-amber" aria-hidden />
+              {t("attention.unavailable")}
+            </p>
           ) : (
             <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary" data-testid="company-home-attention-none">
               <CheckCircle2 className="h-3.5 w-3.5 text-state-success" aria-hidden />

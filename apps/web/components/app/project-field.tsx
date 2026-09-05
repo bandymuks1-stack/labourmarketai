@@ -500,6 +500,12 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
           </ul>
           {field.slotsTotal > field.slots.length ? <p className={META}>{t("moreInList", { n: field.slotsTotal - field.slots.length })}</p> : null}
         </div>
+      ) : !field.tasksApplied ? (
+        // HONESTY (QA Q-1, doctrine §18.1): a failed / unapplied tasks read is a NAMED
+        // unavailable state — never the calm "nothing is missing".
+        <p className="text-sm text-text-muted" data-testid="project-field-slots-unavailable">
+          {t("slotsUnavailable")}
+        </p>
       ) : null}
 
       <div className="flex flex-col gap-2 border-t border-dashed border-brand-cyan/40 pt-3" data-testid="project-field-ready-edge">
@@ -576,7 +582,13 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
           {t("slotsTitle")} · {field.slots.length}/{field.slotsTotal}
         </h3>
         {field.slots.length === 0 ? (
-          <p className="text-sm text-text-muted">{t("slotsNone")}</p>
+          field.tasksApplied ? (
+            <p className="text-sm text-text-muted">{t("slotsNone")}</p>
+          ) : (
+            <p className="text-sm text-text-muted" data-testid="project-field-slots-unavailable">
+              {t("slotsUnavailable")}
+            </p>
+          )
         ) : (
           <ul className="flex flex-col gap-2">
             {field.slots.map((s) => (
