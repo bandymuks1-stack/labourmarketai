@@ -148,6 +148,10 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
         // widening; dropping it on the floor and rendering "not stated" for a
         // name we are allowed to show was the honesty gap this closes.
         organizationName: row.company_name,
+        // This branch returns OTHER tenants' demand by design; it is never the
+        // viewer's own row, and an action scoped to own demand must not be
+        // offered over it.
+        ownedByViewer: false,
         createdAt: row.created_at,
       });
       if (mapped) rows.push(mapped);
@@ -194,6 +198,9 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
       // organisation is NOT the viewer's active workspace — borrowing that name
       // would attach an organisation the row never named. Absent stays absent.
       organizationName: null,
+      // This branch is `profile_id = auth.uid()` — by definition the viewer's
+      // own demand, and the only branch that can say so.
+      ownedByViewer: true,
       createdAt: row.created_at,
     });
     if (mapped) rows.push(mapped);

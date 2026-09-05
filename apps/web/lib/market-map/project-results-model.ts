@@ -79,6 +79,15 @@ export type DemandUnitKind = "project" | "need";
 export interface ProjectResultRow {
   /** Which store this unit came from. Provenance, never re-derived downstream. */
   readonly unitKind: DemandUnitKind;
+  /**
+   * TRUE when this unit is the viewer's OWN demand.
+   *
+   * Provenance, not permission. It lets the panel offer an action scoped to own
+   * demand (scouting) without offering it over another tenant's row, where the
+   * action would dead-end. A `"project"` unit is never a `customer_requests`
+   * row, so it is false there — unknown ownership is not claimed ownership.
+   */
+  readonly ownedByViewer: boolean;
   /** The unit's canonical id IN ITS OWN STORE — a `projects.id` for a
    *  `"project"` unit, a `customer_requests.id` for a `"need"` unit. It keeps
    *  this name because it is the depth-2 address in the URL and every existing
@@ -246,6 +255,9 @@ export function groupIntoProjects(
 
     out.push({
       unitKind: "project",
+      // A project unit is not a customer_requests row; scouting is scoped to
+      // those, so ownership is not claimed here.
+      ownedByViewer: false,
       projectId: p.id,
       title: p.title,
       organization,
@@ -351,6 +363,7 @@ export function groupIntoDemandUnits(
 
     out.push({
       unitKind: "need",
+      ownedByViewer: row.ownedByViewer,
       projectId: row.id,
       title: role,
       organization,

@@ -277,3 +277,45 @@ describe("the organisation name is carried, never invented", () => {
     expect(iface).not.toMatch(/email|phone|contact|profile_id|salary|rate/i);
   });
 });
+
+/**
+ * OWNERSHIP IS PROVENANCE, NOT PERMISSION (2026-09-06).
+ *
+ * The drilldown may offer a real next step — the `candidates` result, backed by
+ * the live matching engine — but ONLY over the viewer's own need, because
+ * `runScouting` requires an employer workspace and reads own demand only
+ * (`profile_id = auth.uid()`). Offering it over another tenant's row would
+ * dead-end in `not-found`, so the row has to say which it is.
+ *
+ * Nothing is unlocked by the flag: it is set by the branch that already knew.
+ */
+describe("own-demand ownership is carried, never assumed", () => {
+  const CANONICAL_IO = "lib/demand/canonical-demand.ts";
+
+  it("only the own-rows branch claims ownership", () => {
+    const src = code(CANONICAL_IO);
+    expect(src).toMatch(/ownedByViewer: true/);
+    expect(src).toMatch(/ownedByViewer: false/);
+    // Exactly one branch may claim it.
+    expect(src.match(/ownedByViewer: true/g)?.length).toBe(1);
+  });
+
+  it("dedup MERGES the two authorized views instead of picking a winner", () => {
+    // The RPC knows the verified name; the own-rows read knows the ownership.
+    // Keeping one copy would throw away half of what the caller was already
+    // entitled to see, and would make both flicker with branch order.
+    const src = code(CANONICAL_MODEL);
+    expect(src).toMatch(/organizationName: base\.organizationName \?\? other\.organizationName/);
+    expect(src).toMatch(/ownedByViewer: base\.ownedByViewer \|\| other\.ownedByViewer/);
+  });
+
+  it("the drilldown offers the own-demand action ONLY for an owned need", () => {
+    const src = readFileSync(
+      join(root, "components/app/workspace/market-drilldown.tsx"),
+      "utf8",
+    ).replace(/\/\*[\s\S]*?\*\//g, " ");
+    expect(src).toMatch(/row\.unitKind === "need" && row\.ownedByViewer && onSelectDemand/);
+    // And the honest not-yet state still exists for every other row.
+    expect(src).toMatch(/data-testid="people-not-yet"/);
+  });
+});

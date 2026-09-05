@@ -12801,6 +12801,7 @@
       "evalNoJudgement": "Tai deterministinis filtro paaiškinimas, ne vertinimas: apie projekto patrauklumą, sėkmės tikimybę ar tinkamumą čia nieko neteigiama.",
       "findPeople": "Rasti tinkamus žmones",
       "peopleNotYet": "Žmonių paieška dar nepristatyta — tai kitas tikslas. Toliau perduodamas šis kontekstas:",
+      "openCandidates": "Peržiūrėti kandidatus šiam poreikiui",
       "workspacePersonal": "Asmeninė erdvė",
       "missing": {
         "city": "miestas",
