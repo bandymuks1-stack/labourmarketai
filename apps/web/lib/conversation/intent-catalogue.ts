@@ -73,6 +73,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "market-map": "the labour-market map",
   activity: "the activity centre / recent activity",
   "messages-view": "messages and conversations inbox",
+  invitations: "invitations addressed to me (join an organization, become a student or an employee)",
 };
 
 /** The catalogue as the proposer receives it — ids + hints, nothing else. */

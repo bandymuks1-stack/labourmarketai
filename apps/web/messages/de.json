@@ -11580,6 +11580,10 @@
         "reviewEngagements": {
           "label": "Meine Arbeitsbeziehungen",
           "description": "Sieh, mit wem du arbeitest, und beende eine Arbeitsbeziehung."
+        },
+        "respondInvitation": {
+          "label": "Einladung annehmen",
+          "description": "Die Annahme schafft eine echte Beziehung zur Organisation — ein wichtiger Schritt."
         }
       },
       "company": {
@@ -12259,7 +12263,26 @@
       "moveDone": "Versetzt: dem neuen Projekt zugewiesen, die bisherige Zuweisung beendet.",
       "moveDonePartial": "Dem neuen Projekt zugewiesen, aber die bisherige Zuweisung konnte nicht beendet werden — er ist in beiden; im Projektfenster abschließen.",
       "moveFailed": "Versetzen fehlgeschlagen — nichts geändert.",
-      "chipMovePrefix": "Versetzen nach"
+      "chipMovePrefix": "Versetzen nach",
+      "briefInvitations": "{who} {count, plural, one {hat Sie eingeladen (# Einladung)} other {hat Sie eingeladen (# Einladungen)}}.",
+      "chipInvitations": "Einladungen",
+      "invitationSomeone": "Jemand",
+      "invitationsIntro": "An Sie gerichtete Einladungen: {count}.",
+      "invitationsEmpty": "Derzeit gibt es keine an Sie gerichteten Einladungen.",
+      "invitationsUnavailable": "Einladungen konnten gerade nicht gelesen werden.",
+      "userInvitations": "Meine Einladungen",
+      "chipNetwork": "Netzwerk",
+      "invAccept": "Annehmen",
+      "invLater": "Später",
+      "invConfirmTitle": "Bestätigung",
+      "invConfirmNote": "Mit der Annahme werden Sie Mitglied dieser Organisation — eine echte, für sie sichtbare Beziehung.",
+      "invConfirm": "Ja, annehmen",
+      "invCancel": "Abbrechen",
+      "invWorking": "Wird ausgeführt…",
+      "invDone": "Angenommen — Sie sind jetzt verbunden.",
+      "invAlreadyAnswered": "Diese Einladung ist nicht mehr offen oder wurde bereits beantwortet.",
+      "invErrorStale": "Der Zustand hat sich geändert — aktualisieren und erneut versuchen.",
+      "invErrorGeneric": "Annahme fehlgeschlagen. Bitte erneut versuchen."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

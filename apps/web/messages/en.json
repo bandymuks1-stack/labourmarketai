@@ -11580,6 +11580,10 @@
         "reviewEngagements": {
           "label": "My engagements",
           "description": "See who you are working with and end an engagement."
+        },
+        "respondInvitation": {
+          "label": "Accept an invitation",
+          "description": "Accepting creates a real relationship with the organization — an important step."
         }
       },
       "company": {
@@ -12259,7 +12263,26 @@
       "moveDone": "Moved: assigned to the new project, the previous assignment ended.",
       "moveDonePartial": "Assigned to the new project, but the previous assignment could not be ended — they are on both; finish it in the project panel.",
       "moveFailed": "The move failed — nothing changed.",
-      "chipMovePrefix": "Move to"
+      "chipMovePrefix": "Move to",
+      "briefInvitations": "{who} {count, plural, one {invited you (# invitation)} other {invited you (# invitations)}}.",
+      "chipInvitations": "Invitations",
+      "invitationSomeone": "Someone",
+      "invitationsIntro": "Invitations addressed to you: {count}.",
+      "invitationsEmpty": "There are no invitations addressed to you right now.",
+      "invitationsUnavailable": "Invitations could not be read right now.",
+      "userInvitations": "My invitations",
+      "chipNetwork": "Network",
+      "invAccept": "Accept",
+      "invLater": "Later",
+      "invConfirmTitle": "Confirmation",
+      "invConfirmNote": "Accepting makes you a member of this organization — a real relationship it can see.",
+      "invConfirm": "Yes, accept",
+      "invCancel": "Cancel",
+      "invWorking": "Working…",
+      "invDone": "Accepted — you are now connected.",
+      "invAlreadyAnswered": "This invitation is no longer open or was already answered.",
+      "invErrorStale": "The state changed — refresh and try again.",
+      "invErrorGeneric": "Could not accept. Try again."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

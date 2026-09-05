@@ -3345,6 +3345,10 @@
         "reviewEngagements": {
           "label": "Mina arbetsrelationer",
           "description": "Se vem du arbetar med och avsluta en arbetsrelation."
+        },
+        "respondInvitation": {
+          "label": "Acceptera inbjudan",
+          "description": "Att acceptera skapar en verklig relation till organisationen — ett viktigt steg."
         }
       },
       "company": {
@@ -3950,7 +3954,26 @@
       "moveDone": "Flyttad: tilldelad det nya projektet, den tidigare tilldelningen avslutad.",
       "moveDonePartial": "Tilldelad det nya projektet, men den tidigare tilldelningen kunde inte avslutas — han finns på båda; avsluta i projektpanelen.",
       "moveFailed": "Flytten misslyckades — inget ändrades.",
-      "chipMovePrefix": "Flytta till"
+      "chipMovePrefix": "Flytta till",
+      "briefInvitations": "{who} {count, plural, one {har bjudit in dig (# inbjudan)} other {har bjudit in dig (# inbjudningar)}}.",
+      "chipInvitations": "Inbjudningar",
+      "invitationSomeone": "Någon",
+      "invitationsIntro": "Inbjudningar till dig: {count}.",
+      "invitationsEmpty": "Det finns inga inbjudningar till dig just nu.",
+      "invitationsUnavailable": "Inbjudningarna kunde inte läsas just nu.",
+      "userInvitations": "Mina inbjudningar",
+      "chipNetwork": "Nätverk",
+      "invAccept": "Acceptera",
+      "invLater": "Senare",
+      "invConfirmTitle": "Bekräftelse",
+      "invConfirmNote": "Genom att acceptera blir du medlem i den här organisationen — en verklig relation som den kan se.",
+      "invConfirm": "Ja, acceptera",
+      "invCancel": "Avbryt",
+      "invWorking": "Arbetar…",
+      "invDone": "Accepterat — ni är nu kopplade.",
+      "invAlreadyAnswered": "Den här inbjudan är inte längre öppen eller har redan besvarats.",
+      "invErrorStale": "Läget ändrades — uppdatera och försök igen.",
+      "invErrorGeneric": "Kunde inte acceptera. Försök igen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

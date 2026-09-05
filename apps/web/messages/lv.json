@@ -3345,6 +3345,10 @@
         "reviewEngagements": {
           "label": "Manas darba attiecības",
           "description": "Redzi, ar ko strādā, un beidz darba attiecības."
+        },
+        "respondInvitation": {
+          "label": "Pieņemt ielūgumu",
+          "description": "Pieņemšana izveido reālu saikni ar organizāciju — svarīgs solis."
         }
       },
       "company": {
@@ -3950,7 +3954,26 @@
       "moveDone": "Pārcelts: piesaistīts jaunajam projektam, iepriekšējā piesaiste beigta.",
       "moveDonePartial": "Piesaistīts jaunajam projektam, bet iepriekšējo piesaisti neizdevās beigt — viņš ir abos; pabeidziet projekta panelī.",
       "moveFailed": "Pārcelt neizdevās — nekas nemainījās.",
-      "chipMovePrefix": "Pārcelt uz"
+      "chipMovePrefix": "Pārcelt uz",
+      "briefInvitations": "{who} {count, plural, one {aicina jūs (# ielūgums)} other {aicina jūs (# ielūgumi)}}.",
+      "chipInvitations": "Ielūgumi",
+      "invitationSomeone": "Kāds",
+      "invitationsIntro": "Jums adresētie ielūgumi: {count}.",
+      "invitationsEmpty": "Šobrīd nav jums adresētu ielūgumu.",
+      "invitationsUnavailable": "Ielūgumus šobrīd neizdevās nolasīt.",
+      "userInvitations": "Mani ielūgumi",
+      "chipNetwork": "Tīkls",
+      "invAccept": "Pieņemt",
+      "invLater": "Vēlāk",
+      "invConfirmTitle": "Apstiprinājums",
+      "invConfirmNote": "Pieņemot jūs kļūstat par šīs organizācijas dalībnieku — reāla saikne, ko tā redz.",
+      "invConfirm": "Jā, pieņemu",
+      "invCancel": "Atcelt",
+      "invWorking": "Notiek…",
+      "invDone": "Pieņemts — tagad esat saistīti.",
+      "invAlreadyAnswered": "Šis ielūgums vairs nav atvērts vai jau ir atbildēts.",
+      "invErrorStale": "Stāvoklis mainījās — atsvaidziniet un mēģiniet vēlreiz.",
+      "invErrorGeneric": "Neizdevās pieņemt. Mēģiniet vēlreiz."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

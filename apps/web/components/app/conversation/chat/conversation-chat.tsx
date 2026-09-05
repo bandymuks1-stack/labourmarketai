@@ -92,6 +92,7 @@ import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
+import { loadInvitationsForChat } from "@/lib/conversation/invitations-chat";
 import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
 import { loadEngagementsForResult } from "@/lib/engagements/engagements-result";
 import {
@@ -103,6 +104,7 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
+import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -238,6 +240,23 @@ export type ChatLabels = {
   chipCard: string;
   chipPrefs: string;
   offersEmpty: string;
+  invitationsIntro: string;
+  invitationsEmpty: string;
+  invitationsUnavailable: string;
+  invitationSomeone: string;
+  userInvitations: string;
+  chipNetwork: string;
+  invAccept: string;
+  invLater: string;
+  invConfirmTitle: string;
+  invConfirmNote: string;
+  invConfirm: string;
+  invCancel: string;
+  invWorking: string;
+  invDone: string;
+  invAlreadyAnswered: string;
+  invErrorStale: string;
+  invErrorGeneric: string;
   /** P0.5 (owner audit): the search dialog's opening line — what we know,
    *  before asking for what is missing. */
   searchAskCriteria: string;
@@ -738,6 +757,7 @@ export function ConversationChat({
   const workTypeLabels = useMemo(() => buildWorkTypeLabelMap(locale), [locale]);
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
+  const tRelationships = useTranslations("relationshipTypes");
   /** The AI's hand on World State, published by the bridge inside the provider. */
   const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
@@ -1875,6 +1895,60 @@ export function ConversationChat({
    * threads that genuinely await this person, and offers a reply that is
    * SENT ONLY AFTER an explicit confirmation of the exact text.
    */
+  /**
+   * INVITATIONS ADDRESSED TO ME (owner contract §4D — someone is waiting on
+   * you; §15 the learner's invitation, §9 the employer's). Transactional
+   * e-mail is an owner gate, so the chat is where a signed-in person learns
+   * that an institution, employer or agency invited them. The read is the
+   * ONE domain read (`lib/invitations/attention`: the network page's
+   * canonical invitations + the dashboard card's roster invitations, the
+   * caller's verified e-mail); accepting runs the ONE dispatcher (strong
+   * tier, explicit confirm) through the SAME accept those pages call. The
+   * network page stays one chip away.
+   */
+  const startInvitations = useCallback(() => {
+    setTyping(true);
+    loadInvitationsForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind !== "ok") {
+          assistant(res.kind === "empty" ? labels.invitationsEmpty : labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+          return;
+        }
+        assistant(labels.invitationsIntro.replace("{count}", String(res.total)), [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+        for (const inv of res.items) {
+          const who = inv.organizationName ?? inv.inviterName ?? labels.invitationSomeone;
+          // The relationship word comes from the ONE localized vocabulary the
+          // CV prints; " · " is layout, not language, so it is composed here.
+          const role = inv.relationshipSlug ? (tRelationships.has(inv.relationshipSlug) ? String(tRelationships(inv.relationshipSlug as never)) : inv.relationshipSlug) : null;
+          pushEmbed(
+            <WorkerInvitationAction
+              invitationRef={inv.ref}
+              locale={locale}
+              title={role ? `${who} · ${role}` : who}
+              subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
+              labels={{
+                accept: labels.invAccept,
+                later: labels.invLater,
+                confirmTitle: labels.invConfirmTitle,
+                confirmNote: labels.invConfirmNote,
+                confirm: labels.invConfirm,
+                cancel: labels.invCancel,
+                working: labels.invWorking,
+                done: labels.invDone,
+                alreadyAnswered: labels.invAlreadyAnswered,
+                errorStale: labels.invErrorStale,
+                errorGeneric: labels.invErrorGeneric,
+              }}
+            />,
+          );
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.invitationsUnavailable, [{ id: "link:/dashboard/network", label: labels.chipNetwork }]);
+      });
+  }, [assistant, pushEmbed, locale, labels, tRelationships]);
   const startMessages = useCallback(() => {
     setTyping(true);
     loadMessagesForChat()
@@ -3525,6 +3599,11 @@ export function ConversationChat({
           // Real state first, then the actions — not a blind menu.
           startProfileSummary("profile");
           break;
+        case "invitations":
+          // The brief invitation line: the same in-chat decision the sentence reaches.
+          user(labels.userInvitations);
+          startInvitations();
+          return;
         case "offers":
           user(labels.userOffers);
           withTyping(() => {
@@ -3766,7 +3845,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -4461,6 +4540,7 @@ export function ConversationChat({
         // §8.1: the chat SHOWS the waiting threads, drafts a reply and
         // sends it after confirmation — the full inbox stays one tap away.
         messages: () => startMessages(),
+        invitations: () => startInvitations(),
         writeEmployer: () => assistant(labels.writeEmployerHint),
       };
       const fallback = () => assistant(fallbackText, starterChips);
@@ -4489,7 +4569,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   const nav = {

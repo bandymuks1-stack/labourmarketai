@@ -3345,6 +3345,10 @@
         "reviewEngagements": {
           "label": "Mine arbejdsrelationer",
           "description": "Se, hvem du arbejder med, og afslut en arbejdsrelation."
+        },
+        "respondInvitation": {
+          "label": "Acceptér invitation",
+          "description": "Accept skaber en reel relation til organisationen — et vigtigt skridt."
         }
       },
       "company": {
@@ -3950,7 +3954,26 @@
       "moveDone": "Flyttet: tildelt det nye projekt, den tidligere tildeling afsluttet.",
       "moveDonePartial": "Tildelt det nye projekt, men den tidligere tildeling kunne ikke afsluttes — han er på begge; afslut i projektpanelet.",
       "moveFailed": "Flytningen mislykkedes — intet ændret.",
-      "chipMovePrefix": "Flyt til"
+      "chipMovePrefix": "Flyt til",
+      "briefInvitations": "{who} {count, plural, one {har inviteret dig (# invitation)} other {har inviteret dig (# invitationer)}}.",
+      "chipInvitations": "Invitationer",
+      "invitationSomeone": "Nogen",
+      "invitationsIntro": "Invitationer til dig: {count}.",
+      "invitationsEmpty": "Der er ingen invitationer til dig lige nu.",
+      "invitationsUnavailable": "Invitationerne kunne ikke læses lige nu.",
+      "userInvitations": "Mine invitationer",
+      "chipNetwork": "Netværk",
+      "invAccept": "Acceptér",
+      "invLater": "Senere",
+      "invConfirmTitle": "Bekræftelse",
+      "invConfirmNote": "Ved at acceptere bliver du medlem af denne organisation — en reel relation, den kan se.",
+      "invConfirm": "Ja, acceptér",
+      "invCancel": "Annuller",
+      "invWorking": "Arbejder…",
+      "invDone": "Accepteret — I er nu forbundet.",
+      "invAlreadyAnswered": "Denne invitation er ikke længere åben eller er allerede besvaret.",
+      "invErrorStale": "Tilstanden ændrede sig — opdatér og prøv igen.",
+      "invErrorGeneric": "Kunne ikke acceptere. Prøv igen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

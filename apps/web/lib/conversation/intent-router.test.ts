@@ -703,6 +703,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn berichten",
     de: "Zeig meine Nachrichten",
   },
+  invitations: {
+    lt: "Mano kvietimai",
+    en: "Show my invitations",
+    ru: "Мои приглашения",
+    nl: "Mijn uitnodigingen",
+    de: "Meine Einladungen",
+  },
   "player-card": {
     lt: "Parodyk mano kortelę",
     en: "Show my card",

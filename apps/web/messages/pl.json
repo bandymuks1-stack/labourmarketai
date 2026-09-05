@@ -3345,6 +3345,10 @@
         "reviewEngagements": {
           "label": "Moje relacje robocze",
           "description": "Zobacz, z kim pracujesz, i zakończ relację roboczą."
+        },
+        "respondInvitation": {
+          "label": "Przyjmij zaproszenie",
+          "description": "Przyjęcie tworzy prawdziwą relację z organizacją — ważny krok."
         }
       },
       "company": {
@@ -3950,7 +3954,26 @@
       "moveDone": "Przeniesiono: przypisany do nowego projektu, poprzednie przypisanie zakończone.",
       "moveDonePartial": "Przypisany do nowego projektu, ale poprzedniego przypisania nie udało się zakończyć — jest w obu; dokończ w panelu projektu.",
       "moveFailed": "Przeniesienie nie powiodło się — nic się nie zmieniło.",
-      "chipMovePrefix": "Przenieś do"
+      "chipMovePrefix": "Przenieś do",
+      "briefInvitations": "{who} {count, plural, one {zaprasza Cię (# zaproszenie)} few {zaprasza Cię (# zaproszenia)} other {zaprasza Cię (# zaproszeń)}}.",
+      "chipInvitations": "Zaproszenia",
+      "invitationSomeone": "Ktoś",
+      "invitationsIntro": "Zaproszenia skierowane do Ciebie: {count}.",
+      "invitationsEmpty": "Obecnie nie ma zaproszeń skierowanych do Ciebie.",
+      "invitationsUnavailable": "Nie udało się teraz odczytać zaproszeń.",
+      "userInvitations": "Moje zaproszenia",
+      "chipNetwork": "Sieć",
+      "invAccept": "Przyjmij",
+      "invLater": "Później",
+      "invConfirmTitle": "Potwierdzenie",
+      "invConfirmNote": "Przyjmując, stajesz się członkiem tej organizacji — to prawdziwa relacja, którą ona widzi.",
+      "invConfirm": "Tak, przyjmuję",
+      "invCancel": "Anuluj",
+      "invWorking": "Trwa…",
+      "invDone": "Przyjęto — jesteście teraz połączeni.",
+      "invAlreadyAnswered": "To zaproszenie nie jest już otwarte lub zostało już odpowiedziane.",
+      "invErrorStale": "Stan się zmienił — odśwież i spróbuj ponownie.",
+      "invErrorGeneric": "Nie udało się przyjąć. Spróbuj ponownie."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

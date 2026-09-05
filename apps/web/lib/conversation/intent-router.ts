@@ -62,6 +62,7 @@ export type ConversationIntent =
   | "market-map" // "parodyk rinkos žemėlapį" — the labour-market map
   | "activity" // "parodyk pranešimus" — the unified activity centre
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
+  | "invitations" // "mano kvietimai" — invitations addressed to me (4D)
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
   | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
@@ -1280,6 +1281,17 @@ const RULES: IntentRule[] = [
       ),
       p("(mano|my|мои|meine|mijn)\\s+(žinut|messages?|сообщени|nachrichten|berichten)", 5),
       p("(neperskaityt|unread|непрочитан|ungelesen|ongelezen)", 4),
+    ],
+  },
+  {
+    // Invitations addressed to ME (owner contract §4D — someone is waiting on
+    // you): "mano kvietimai", "kas mane kviečia?", "gavau kvietimą". Outweighs
+    // the employer's INVITE verbs on purpose: being invited is not inviting.
+    intent: "invitations",
+    patterns: [
+      p("(mano|my|мои|meine|mijn|moje)\\s+(kvietim|invitation|приглашени|einladung|uitnodiging|zaproszeni)", 6),
+      p("(kas|who|кто|wer|wie|kto)\\s+(mane|me|меня|mich|mij|mnie)\\s+(kvie|invit|пригла|einl|uitnod|zapr)", 6),
+      p("(gavau|gavome|i got|i received|получил|erhalten|ontvangen|otrzymał)[^\\s]{0,4}\\s+(kvietim|invitation|приглашени|einladung|uitnodiging|zaproszeni)", 6),
     ],
   },
   {
