@@ -473,6 +473,8 @@ export default async function CompanyScoutingPage({
             reopen: t("lifecycle.reopen"),
             closedNote: t("lifecycle.closedNote"),
             error: t("lifecycle.error"),
+            limitUpgrade: t("lifecycle.limitUpgrade"),
+            limitIndividual: t("lifecycle.limitIndividual"),
           }}
         />
       ) : null}

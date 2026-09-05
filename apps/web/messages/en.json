@@ -4241,7 +4241,9 @@
               "assumptionsTitle": "Assumption notes",
               "humanConfirmNote": "These are suggestions only — you decide what to enter. They never change your numbers."
             }
-          }
+          },
+          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
         }
       },
       "greeting": "Welcome back, {name}",
@@ -5159,21 +5161,22 @@
     "plans": {
       "free": {
         "name": "Free",
-        "tagline": "Get on the market.",
+        "tagline": "For getting started",
         "features": [
-          "1 project",
-          "1 job demand",
-          "Community support"
+          "1 active position",
+          "Matching shortlist and candidate contact",
+          "Bookings, projects, instructions",
+          "Work confirmation by the employer"
         ]
       },
       "business": {
-        "name": "Business",
-        "tagline": "For active employers.",
+        "name": "Organization",
+        "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "10 projects",
-          "25 job demands",
-          "Worker search",
-          "Email support"
+          "Up to 10 active positions",
+          "Everything in Free, at operating scale",
+          "One plan for every organization capability",
+          "Project operations, readiness, reports and CSV"
         ]
       },
       "agency": {
@@ -5200,26 +5203,37 @@
     "faqTitle": "Pricing FAQ",
     "faq": [
       {
-        "q": "Why is there no price shown yet?",
-        "a": "We're pre-launch. Setting a price we can't yet stand behind would be dishonest, so tiers show their scope and the price is confirmed before launch."
+        "q": "Why only one paid plan?",
+        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
       },
       {
         "q": "Will the Free tier stay free?",
-        "a": "Yes. The Free tier is meant to get workers and small employers onto the market with no cost."
+        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
       },
       {
         "q": "How is billing handled?",
-        "a": "Payments are not enabled yet and no card details are collected. For now you can join the waitlist — paid access is arranged directly."
+        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
       },
       {
-        "q": "Can I change tiers later?",
-        "a": "Yes. Tiers are meant to follow your needs; you'll be able to move up or down."
+        "q": "What happens above 10 active positions?",
+        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
       }
     ],
     "priceState": {
       "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
-      "owner_confirmed": "Prices are confirmed, but nothing can be bought yet — payments are not enabled."
-    }
+      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+    },
+    "individual": {
+      "name": "Individual plan",
+      "tagline": "For more than 10 active positions",
+      "question": "Need more?",
+      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "cta": "Contact us"
+    },
+    "priceFree": "€0",
+    "pricePerMonth": "€{price}/month",
+    "ctaStartFree": "Start free in your organization account",
+    "ctaSubscribe": "Activate in your organization account"
   },
   "privacySelfService": {
     "title": "Privacy and your data",
@@ -8049,7 +8063,9 @@
       "close": "Close this need",
       "reopen": "Reopen this need",
       "closedNote": "Closed — hidden from workers.",
-      "error": "Could not save. Try again."
+      "error": "Could not save. Try again.",
+      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
     },
     "freshness": {
       "active": "Recently updated",
@@ -8109,10 +8125,11 @@
     "note": "Plans describe scope, not active billing. Nothing is charged on this page.",
     "plans": {
       "free_worker": "Free Worker",
-      "worker_plus": "Worker Plus",
-      "company_pilot": "Company Pilot",
-      "agency_pilot": "Agency Pilot",
-      "admin_internal": "Admin / Internal"
+      "worker_plus": "Person plus (not offered)",
+      "company_pilot": "Organization",
+      "agency_pilot": "Agency tier (not offered)",
+      "admin_internal": "Admin / Internal",
+      "free_organization": "Organization Free"
     },
     "access": {
       "free": "Free",
@@ -8418,7 +8435,8 @@
     "state": {
       "disabled": "Billing disabled",
       "stripe_test": "Stripe TEST mode",
-      "stripe_live_blocked": "Live blocked"
+      "stripe_live_blocked": "Live blocked",
+      "stripe_live": "Stripe LIVE (owner-armed)"
     },
     "tiles": {
       "payments": "Payments",
@@ -8473,7 +8491,8 @@
         "plan_catalogue": "Plan catalogue and boundaries defined in code",
         "entitlement_coverage": "Entitlement wiring: gates prepared, permissive while payments are off",
         "pricing_copy": "Pricing copy: owner-editable drafts, no live claims",
-        "provider_connection": "Payment provider connection — blocked by design (owner gate)"
+        "provider_connection": "Payment provider connection — blocked by design (owner gate)",
+        "live_activation": "Live activation: code path prepared, inert until the owner sets the activation token, confirms the price table and provides live keys"
       },
       "status": {
         "ready": "Ready",
@@ -9625,6 +9644,11 @@
       "opening": "Opening…",
       "error": "Could not open the billing portal",
       "hint": "Opens the payment provider's portal to cancel or update the payment method. Test mode only — no real charges."
+    },
+    "subscribe": {
+      "title": "Organization plan",
+      "cta": "Activate the Organization plan (up to 10 active positions)",
+      "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization."
     }
   },
   "accountPlan": {
@@ -12136,7 +12160,9 @@
         "errorGeneric": "Could not save. Please try again.",
         "errorInvalid": "Please check the fields and try again.",
         "errorNeedsMigration": "This isn't enabled yet. Please try later.",
-        "errorConflict": "This value already differs. Open advanced mode to replace it."
+        "errorConflict": "This value already differs. Open advanced mode to replace it.",
+        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
       },
       "urgency": {
         "flexible": "Flexible",

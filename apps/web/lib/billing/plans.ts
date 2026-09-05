@@ -17,6 +17,28 @@
 /** Global kill-switch. Stays false for the entire pre-payment sprint. */
 export const PAYMENTS_ENABLED = false as const;
 
+/**
+ * OWNER LAUNCH PRICING (approved 2026-09-05, corrected the same day):
+ *   PERSON            €0   — core person / worker / learner participation
+ *   ORGANIZATION FREE €0   — 1 concurrent active position / open workforce need
+ *   ORGANIZATION      €99  — up to 10 concurrent active positions
+ *   more than 10           — individual plan: contact LabourMarket.ai; no
+ *                            automatic public tier, no invented price.
+ * Prices live ONLY in `plans.price_eur_monthly` (see lib/marketing/plans.ts);
+ * this registry carries the boundary (what a plan DOES), never a figure.
+ * Deferred and NOT sold: ai_plus, vip_media, agency tiers, LMC top-ups,
+ * priority visibility, media upsells, annual and enterprise pricing.
+ */
+export const FREE_ORGANIZATION_PLAN_KEY = "free_organization" as const;
+/** The ONE paid organization plan key (historical slug kept for the
+ *  subscription store, env price slot and admin grants — the label says
+ *  "Organization"). */
+export const ORGANIZATION_PLAN_KEY = "company_pilot" as const;
+/** The paid ceiling; at or above it the next step is a conversation, not a tier. */
+export const OPEN_NEEDS_CONTACT_THRESHOLD = 10 as const;
+/** Plans that exist in the registry but are not offered at launch. */
+export const DEFERRED_PLAN_KEYS = ["worker_plus", "agency_pilot"] as const;
+
 export type PlanAudience = "worker" | "company" | "agency" | "admin";
 
 /** How a user obtains the plan today (no checkout exists). */
@@ -64,6 +86,10 @@ export interface PrePaymentPlan {
   /** i18n key suffix under namespace `plans.<slug>`. */
   readonly labelKey: string;
   readonly entitlements: Readonly<Partial<Record<FeatureKey, Entitlement>>>;
+  /** Launch status of a PAID plan: only `sellable` plans reach checkout;
+   *  `deferred` plans stay in the registry for historical rows / admin
+   *  grants and are never offered or priced. Free/internal plans omit it. */
+  readonly launch?: "sellable" | "deferred";
 }
 
 export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
@@ -81,11 +107,14 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     },
   },
   {
+    // DEFERRED (owner 2026-09-05): PERSON stays free; nothing a person can buy
+    // at launch. Kept only so historical rows / admin grants keep resolving.
     slug: "worker_plus",
     audience: "worker",
     accessState: "payment_not_enabled",
-    cta: "request_pilot_access",
+    cta: "contact",
     labelKey: "worker_plus",
+    launch: "deferred",
     entitlements: {
       worker_profile: true,
       worker_journal: true,
@@ -97,25 +126,61 @@ export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
     },
   },
   {
-    slug: "company_pilot",
+    // ORGANIZATION FREE (owner launch pricing 2026-09-05): every organization
+    // capability at the scale of ONE concurrent active position / open
+    // workforce need — regardless of whether the organization acts as employer,
+    // staffing provider, contractor or training provider (capability-based,
+    // never a role tunnel).
+    slug: FREE_ORGANIZATION_PLAN_KEY,
     audience: "company",
-    accessState: "payment_not_enabled",
-    cta: "request_pilot_access",
-    labelKey: "company_pilot",
+    accessState: "free",
+    cta: "use",
+    labelKey: "free_organization",
     entitlements: {
-      company_create_needs: 5,
+      company_create_needs: 1,
       candidate_readiness_summaries: true,
       booking_requests: true,
       communication: true,
       team_matching: true,
+      agency_multi_company: true,
+      worker_pool: true,
+      doc_readiness_tracking: true,
+      booking_pipeline: true,
     },
   },
   {
+    // ORGANIZATION (the ONE paid organization plan — its monthly price lives
+    // ONLY in `plans.price_eur_monthly`, never here): up to TEN
+    // concurrent active positions / open workforce needs. Above ten there is
+    // no automatic public tier — the individual plan (contact us).
+    slug: ORGANIZATION_PLAN_KEY,
+    audience: "company",
+    accessState: "payment_not_enabled",
+    cta: "request_pilot_access",
+    labelKey: "company_pilot",
+    launch: "sellable",
+    entitlements: {
+      company_create_needs: OPEN_NEEDS_CONTACT_THRESHOLD,
+      candidate_readiness_summaries: true,
+      booking_requests: true,
+      communication: true,
+      team_matching: true,
+      agency_multi_company: true,
+      worker_pool: true,
+      doc_readiness_tracking: true,
+      booking_pipeline: true,
+    },
+  },
+  {
+    // DEFERRED (owner 2026-09-05): agency-specific tiers are not sold at
+    // launch; a workforce provider subscribes to the same ORGANIZATION plan.
+    // Kept only so historical rows / admin grants keep resolving.
     slug: "agency_pilot",
     audience: "agency",
     accessState: "payment_not_enabled",
-    cta: "request_pilot_access",
+    cta: "contact",
     labelKey: "agency_pilot",
+    launch: "deferred",
     entitlements: {
       agency_multi_company: true,
       worker_pool: true,
@@ -148,7 +213,12 @@ export function getPlan(slug: string): PrePaymentPlan | null {
 /** The default free plan for an audience (the one a new user starts on). */
 export function defaultPlanFor(audience: PlanAudience): PrePaymentPlan {
   if (audience === "admin") return getPlan("admin_internal")!;
-  if (audience === "company") return getPlan("company_pilot")!;
-  if (audience === "agency") return getPlan("agency_pilot")!;
+  // One organization plan family for every organization capability.
+  if (audience === "company" || audience === "agency") return getPlan(FREE_ORGANIZATION_PLAN_KEY)!;
   return getPlan("free_worker")!;
+}
+
+/** The plans a person or organization can actually buy at launch. */
+export function isSellablePlan(plan: Pick<PrePaymentPlan, "accessState" | "launch">): boolean {
+  return plan.accessState === "payment_not_enabled" && plan.launch === "sellable";
 }

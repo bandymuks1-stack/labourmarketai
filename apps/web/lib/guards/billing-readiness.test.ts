@@ -34,7 +34,7 @@ import {
   type FeatureKey,
 } from "../billing/plans";
 import { resolveBillingConfig, providerKindFor } from "../billing/config-core";
-import { gateFeature, planIncludes } from "../billing/entitlements";
+import { gateFeature, limitFor, planIncludes } from "../billing/entitlements";
 import {
   resolveEntitlements,
   entitlementAllows,
@@ -324,8 +324,18 @@ describe("plan boundary wiring is complete and real", () => {
       let deniedCount = 0;
       for (const key of Object.keys(plan.entitlements) as FeatureKey[]) {
         if (!planIncludes(plan, key)) continue;
-        // A key legitimately covered by a FREE fallback tier stays open.
+        // A key legitimately covered by a FREE fallback tier stays open —
+        // but a NUMERIC key the fallback also carries must carry a LOWER
+        // ceiling there (owner launch pricing 2026-09-05: ORGANIZATION FREE
+        // has every organization capability at 1 active position; the paid
+        // plan buys the ceiling, not the capability).
         if (fallback.accessState === "free" && planIncludes(fallback, key)) {
+          const paidLimit = limitFor(plan, key);
+          const freeLimit = limitFor(fallback, key);
+          if (paidLimit !== null && freeLimit !== null) {
+            expect(freeLimit, `${plan.slug}.${key}: the free ceiling must be lower`).toBeLessThan(paidLimit);
+            deniedCount += 1;
+          }
           continue;
         }
         deniedCount += 1;

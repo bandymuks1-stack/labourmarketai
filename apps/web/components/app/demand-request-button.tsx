@@ -161,7 +161,7 @@ export function DemandRequestButton({
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual">(
     "idle",
   );
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
@@ -351,7 +351,13 @@ export function DemandRequestButton({
           ? "done"
           : res.code === "needs_migration"
             ? "needsMigration"
-            : "error",
+            : res.code === "over_open_need_limit"
+              // Owner launch pricing 2026-09-05: the plan ceiling, said honestly —
+              // the €99 plan, or the individual plan above it. Nothing charged.
+              ? res.next === "individual_plan"
+                ? "limitIndividual"
+                : "limitUpgrade"
+              : "error",
       );
       // Canonical-journey P3: the submitted request supersedes the draft it
       // was continued from — close the draft (draft→closed, guard-allowed)
@@ -958,6 +964,11 @@ export function DemandRequestButton({
       {state === "error" && (
         <p className="text-xs text-state-danger" role="alert" data-testid="demand-error">
           {t("error")}
+        </p>
+      )}
+      {(state === "limitUpgrade" || state === "limitIndividual") && (
+        <p className="text-xs text-state-warning" role="alert" data-testid="demand-open-need-limit" data-next={state === "limitIndividual" ? "individual_plan" : "upgrade"}>
+          {state === "limitIndividual" ? t("errorOpenNeedLimitIndividual") : t("errorOpenNeedLimitUpgrade")}
         </p>
       )}
       {state === "needsMigration" && (

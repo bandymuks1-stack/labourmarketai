@@ -43,7 +43,11 @@ export type PricingReadinessState = "draft_pricing" | "owner_confirmed";
  * landing freeze, so deleting them is a separate owner call. The real price's
  * only future home is `plans.price_eur_monthly`, surfaced after this flips.
  */
-export const PRICING_READINESS_STATE: PricingReadinessState = "draft_pricing";
+// Owner approval 2026-09-05 (launch pricing): PERSON €0 · ORGANIZATION FREE €0
+// (1 active position) · ORGANIZATION €99/month (up to 10) · more than 10 =
+// individual plan (contact). The figure itself lives ONLY in
+// `plans.price_eur_monthly`; this flag only says the table is confirmed.
+export const PRICING_READINESS_STATE: PricingReadinessState = "owner_confirmed";
 
 // ─── Feature enforcement registry (plan boundary ↔ real checks) ─────────────
 
@@ -102,8 +106,10 @@ export const FEATURE_ENFORCEMENT: Readonly<
   },
   // company
   company_create_needs: {
-    kind: "declared_boundary_only",
-    site: ENTITLEMENT_SEAM,
+    // Owner launch pricing 2026-09-05: enforced on the ONE canonical demand
+    // creation path (FREE 1 / ORGANIZATION 10 / above → individual plan).
+    kind: "server_gate",
+    site: "lib/billing/open-needs-gate.ts",
   },
   candidate_readiness_summaries: {
     kind: "declared_boundary_only",
@@ -228,5 +234,13 @@ export const BILLING_READINESS_ITEMS: readonly BillingReadinessItem[] = [
     key: "provider_connection",
     status: "blocked_by_design",
     proof: "apps/web/lib/billing/provider.ts",
+  },
+  {
+    // D3 (2026-09-02): the live path exists in code and is INERT until the
+    // owner arms it — token in env (G-8) + price table confirmed in code
+    // (G-7) + complete live keys. Prepared, not ready.
+    key: "live_activation",
+    status: "prepared",
+    proof: "apps/web/lib/billing/config-core.ts",
   },
 ];

@@ -17,9 +17,13 @@
  * record: that combination made Stripe stop retrying while replays were
  * skipped as duplicates — the event was lost forever (the pre-fix defect).
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("@/lib/billing/provider", () => ({ getBillingProvider: vi.fn() }));
+// D3: the route reads the adapter STATE to match the event's mode. Every test
+// that predates D3 runs under `stripe_test` (the historical behaviour).
+const billingCfg = vi.hoisted(() => ({ state: "stripe_test" as string, testMode: true }));
+vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => billingCfg }));
 vi.mock("@/lib/billing/subscription-store", () => ({
   recordWebhookEvent: vi.fn(),
   markWebhookProcessed: vi.fn(),
@@ -320,5 +324,34 @@ describe("webhook route — invoice.paid parity", () => {
         status: "incomplete",
       }),
     );
+  });
+});
+
+describe("webhook route — D3 mode match under stripe_live", () => {
+  beforeEach(() => {
+    billingCfg.state = "stripe_live";
+    billingCfg.testMode = false;
+  });
+  afterEach(() => {
+    billingCfg.state = "stripe_test";
+    billingCfg.testMode = true;
+  });
+
+  it("a TEST event under a LIVE adapter → 400 test_event_rejected, nothing recorded", async () => {
+    withEvent({ ...SUB_EVENT, testMode: true });
+    const res = await post();
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ ok: false, reason: "test_event_rejected" });
+    expect(record).not.toHaveBeenCalled();
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("a LIVE event under a LIVE adapter is recorded and processed", async () => {
+    withEvent({ ...SUB_EVENT, testMode: false });
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect(record).toHaveBeenCalledTimes(1);
+    expect(upsert).toHaveBeenCalledTimes(1);
+    expect(processed).toHaveBeenCalledTimes(1);
   });
 });

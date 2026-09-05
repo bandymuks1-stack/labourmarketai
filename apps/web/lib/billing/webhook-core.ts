@@ -306,3 +306,18 @@ export function summarizeRecordedEvent(
 export function assertTestEvent(event: { testMode: boolean }): boolean {
   return event.testMode === true;
 }
+
+/**
+ * D3 (2026-09-02): the event's mode must match the ADAPTER state — a live
+ * event is rejected under `stripe_test` (the historical rule, unchanged) and
+ * a test event is rejected under `stripe_live` (a test-mode replay can never
+ * touch a live entitlement). Any other state accepts nothing.
+ */
+export function eventModeMatches(
+  state: "disabled" | "stripe_test" | "stripe_live" | "stripe_live_blocked",
+  event: { testMode: boolean },
+): boolean {
+  if (state === "stripe_test") return assertTestEvent(event);
+  if (state === "stripe_live") return event.testMode === false;
+  return false;
+}

@@ -1495,6 +1495,19 @@ Both entries below were applied to production in the order shown, with a full ve
 - Append-only **trigger** guards on journal tables (defense-in-depth beyond RLS default-deny) — must respect the correction/supersede/soft-delete lifecycle; `TASKS.md`.
 - `feature_flags` / `proof_of_work` scaffolds (unshipped features) — `TASKS.md`.
 
+## Applied 2026-09-05 — launch pricing DATA update on `public.plans` (no migration, reversible)
+
+Owner approval 2026-09-05 (PERSON €0 · ORGANIZATION FREE €0 / 1 active need · ORGANIZATION €99 / up to 10 · >10 individual plan). Applied via Supabase MCP `execute_sql` as four row UPDATEs — the ONE home a price figure has (`plans.price_eur_monthly`):
+
+| slug | price_eur_monthly | active | note |
+|---|---|---|---|
+| `free` | 0 | true | the €0 card |
+| `business` | 99 | true | renders as the ORGANIZATION card (display name to be set to "Organization" / "Organizacija" at deploy time — the live page still runs the 4-tier code until then) |
+| `agency` | NULL | **false** | retired as a public tier (deferred) |
+| `enterprise` | NULL | **false** | retired as a public tier (deferred) |
+
+Readback after apply: exactly those four rows. Rollback: `update plans set price_eur_monthly = null; update plans set active = true where slug in ('agency','enterprise')`. No schema, policy or function touched; `billing_*` rows still 0.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.

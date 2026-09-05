@@ -4241,7 +4241,9 @@
               "assumptionsTitle": "Hinweise zu Annahmen",
               "humanConfirmNote": "Dies sind nur Vorschläge — Sie entscheiden, was Sie eingeben. Sie ändern niemals Ihre Zahlen."
             }
-          }
+          },
+          "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
+          "errorOpenNeedLimitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan."
         }
       },
       "greeting": "Willkommen zurück, {name}",
@@ -5158,22 +5160,23 @@
     "featuresLabel": "Enthält",
     "plans": {
       "free": {
-        "name": "Free",
-        "tagline": "Auf den Markt kommen.",
+        "name": "Kostenlos",
+        "tagline": "Für den Einstieg",
         "features": [
-          "1 Projekt",
-          "1 Personalbedarf",
-          "Community-Support"
+          "1 aktive Position",
+          "Matching-Shortlist und Kandidatenkontakt",
+          "Buchungen, Projekte, Anweisungen",
+          "Arbeitsbestätigung und bestätigte Fähigkeiten"
         ]
       },
       "business": {
-        "name": "Business",
-        "tagline": "Für aktive Arbeitgeber.",
+        "name": "Organisation",
+        "tagline": "Für Organisationen, die aktiv einstellen und Teams aufbauen",
         "features": [
-          "10 Projekte",
-          "25 Personalbedarfe",
-          "Arbeitskräfte-Suche",
-          "E-Mail-Support"
+          "Bis zu 10 aktive Positionen",
+          "Alles aus Kostenlos, im Betriebsmaßstab",
+          "Ein Plan für jede Organisationsfähigkeit",
+          "Projektbetrieb, Bereitschaft, Berichte und CSV"
         ]
       },
       "agency": {
@@ -5200,26 +5203,37 @@
     "faqTitle": "FAQ zu den Preisen",
     "faq": [
       {
-        "q": "Warum wird noch kein Preis angezeigt?",
-        "a": "Wir sind vor dem Start. Einen Preis festzulegen, hinter dem wir noch nicht stehen können, wäre unehrlich — deshalb zeigen die Stufen ihren Umfang, und der Preis wird vor dem Start bestätigt."
+        "q": "Warum nur ein bezahlter Plan?",
+        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt. Nur der Umfang unterscheidet sich: 1 aktive Position kostenlos, bis zu 10 für 99 €/Monat, darüber ein individueller Plan."
       },
       {
-        "q": "Bleibt die Free-Stufe kostenlos?",
-        "a": "Ja. Die Free-Stufe soll Arbeitskräfte und kleine Arbeitgeber ohne Kosten auf den Markt bringen."
+        "q": "Bleibt der kostenlose Plan kostenlos?",
+        "a": "Ja. Personen bleiben kostenlos, und eine Organisation kann eine aktive Position ohne Kosten führen."
       },
       {
-        "q": "Wie läuft die Abrechnung?",
-        "a": "Zahlungen sind noch nicht aktiviert, und es werden keine Kartendaten erhoben. Vorerst können Sie sich auf die Warteliste eintragen — bezahlter Zugang wird direkt vereinbart."
+        "q": "Wie wird abgerechnet?",
+        "a": "Kartenzahlung über Stripe, Umsatzsteuer über Stripe Tax; Rechnungen, Kündigung und Änderungen im Organisationskonto."
       },
       {
-        "q": "Kann ich die Stufe später wechseln?",
-        "a": "Ja. Die Stufen sollen Ihrem Bedarf folgen; Sie werden hoch- oder herunterwechseln können."
+        "q": "Was passiert über 10 aktiven Positionen?",
+        "a": "Nichts wird automatisch belastet oder hochgestuft. Sie werden gebeten, uns zu kontaktieren, und ein individueller Plan wird vereinbart."
       }
     ],
     "priceState": {
       "draft_pricing": "Die Preise werden vorbereitet — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Die Preise sind bestätigt, aber es kann noch nichts gekauft werden — Zahlungen sind nicht aktiviert."
-    }
+      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
+    },
+    "individual": {
+      "name": "Individueller Plan",
+      "tagline": "Für mehr als 10 aktive Positionen",
+      "question": "Mehr nötig?",
+      "body": "Kontaktieren Sie uns für einen individuellen Plan — Anforderungen, Umfang und Konditionen werden gemeinsam vereinbart. Keine automatische Stufe, kein veröffentlichter Preis.",
+      "cta": "Kontakt aufnehmen"
+    },
+    "priceFree": "0 €",
+    "pricePerMonth": "{price} €/Monat",
+    "ctaStartFree": "Kostenlos im Organisationskonto starten",
+    "ctaSubscribe": "Im Organisationskonto aktivieren"
   },
   "privacySelfService": {
     "title": "Datenschutz und Ihre Daten",
@@ -8049,7 +8063,9 @@
       "close": "Diesen Bedarf schließen",
       "reopen": "Diesen Bedarf wieder öffnen",
       "closedNote": "Geschlossen — für Arbeitskräfte nicht sichtbar.",
-      "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut."
+      "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut.",
+      "limitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
+      "limitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan."
     },
     "freshness": {
       "active": "Kürzlich aktualisiert",
@@ -8109,10 +8125,11 @@
     "note": "Die Pläne beschreiben den Umfang, keine aktive Abrechnung. Auf dieser Seite wird nichts berechnet.",
     "plans": {
       "free_worker": "Free Worker",
-      "worker_plus": "Worker Plus",
-      "company_pilot": "Company Pilot",
-      "agency_pilot": "Agency Pilot",
-      "admin_internal": "Admin / Intern"
+      "worker_plus": "Person Plus (nicht angeboten)",
+      "company_pilot": "Organisation",
+      "agency_pilot": "Agentur-Stufe (nicht angeboten)",
+      "admin_internal": "Admin / Intern",
+      "free_organization": "Organisation (kostenlos)"
     },
     "access": {
       "free": "Kostenlos",
@@ -8418,7 +8435,8 @@
     "state": {
       "disabled": "Abrechnung deaktiviert",
       "stripe_test": "Stripe-TESTMODUS",
-      "stripe_live_blocked": "Live blockiert"
+      "stripe_live_blocked": "Live blockiert",
+      "stripe_live": "Stripe LIVE (vom Eigentümer freigeschaltet)"
     },
     "tiles": {
       "payments": "Zahlungen",
@@ -8473,7 +8491,8 @@
         "plan_catalogue": "Plankatalog und Grenzen im Code definiert",
         "entitlement_coverage": "Berechtigungsverdrahtung: Gates vorbereitet, permissiv solange Zahlungen aus sind",
         "pricing_copy": "Preistexte: vom Eigentümer bearbeitbare Entwürfe, keine Live-Aussagen",
-        "provider_connection": "Verbindung zum Zahlungsanbieter — konzeptbedingt blockiert (Owner-Gate)"
+        "provider_connection": "Verbindung zum Zahlungsanbieter — konzeptbedingt blockiert (Owner-Gate)",
+        "live_activation": "Live-Aktivierung: Codepfad vorbereitet, inaktiv bis der Eigentümer das Aktivierungstoken setzt, die Preistabelle bestätigt und Live-Schlüssel bereitstellt"
       },
       "status": {
         "ready": "Bereit",
@@ -9625,6 +9644,11 @@
       "opening": "Wird geöffnet…",
       "error": "Das Abrechnungsportal konnte nicht geöffnet werden",
       "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode. Nur Testmodus — keine echten Abbuchungen."
+    },
+    "subscribe": {
+      "title": "Plan „Organisation“",
+      "cta": "Plan „Organisation“ aktivieren (bis zu 10 aktive Positionen)",
+      "note": "Sie werden zu Stripe Checkout weitergeleitet; das Abonnement ist an diese Organisation gebunden."
     }
   },
   "accountPlan": {
@@ -12136,7 +12160,9 @@
         "errorGeneric": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
         "errorInvalid": "Bitte Felder prüfen und erneut versuchen.",
         "errorNeedsMigration": "Noch nicht aktiviert. Bitte später.",
-        "errorConflict": "Dieser Wert weicht bereits ab. Öffne den erweiterten Modus zum Ersetzen."
+        "errorConflict": "Dieser Wert weicht bereits ab. Öffne den erweiterten Modus zum Ersetzen.",
+        "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
+        "errorOpenNeedLimitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan."
       },
       "urgency": {
         "flexible": "Flexibel",

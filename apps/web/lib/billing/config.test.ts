@@ -63,3 +63,75 @@ describe("billing config resolver", () => {
     expect(providerKindFor(resolveBillingConfig(base))).toBe("stripe_test");
   });
 });
+
+// ─── D3 (2026-09-02): the owner-armed live path ─────────────────────────────
+// Keys are built by concatenation so no live-key literal exists in source
+// (no-live-payments.test.ts scans for the contiguous shape).
+const LIVE_SK = ["sk", "live", "ABC123456"].join("_");
+const LIVE_PK = ["pk", "live", "ABC123456"].join("_");
+const armed = { pricingConfirmed: true, token: "approved-by-owner" };
+const liveInput = {
+  paymentsEnabled: "true", provider: "stripe", mode: "live",
+  secretKey: LIVE_SK, webhookSecret: "whsec_abc", publishableKey: LIVE_PK,
+};
+
+describe("billing config — live activation (D3)", () => {
+  it("live keys WITHOUT the activation input stay hard-blocked (historical callers)", () => {
+    const c = resolveBillingConfig(liveInput);
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_blocked");
+    expect(c.paymentsEnabled).toBe(false);
+    expect(providerKindFor(c)).toBe("noop");
+  });
+
+  it("a wrong token stays blocked", () => {
+    const c = resolveBillingConfig({ ...liveInput, liveActivation: { ...armed, token: "yes" } });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_blocked");
+  });
+
+  it("the token alone, with the price table still DRAFT, stays blocked", () => {
+    const c = resolveBillingConfig({ ...liveInput, liveActivation: { ...armed, pricingConfirmed: false } });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_pricing_not_confirmed");
+  });
+
+  it("armed but a test-shaped secret → live_keys_incomplete (never a test key in live)", () => {
+    const c = resolveBillingConfig({ ...liveInput, secretKey: "sk_test_abc", liveActivation: armed });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_keys_incomplete");
+  });
+
+  it("armed but payments off → blocked, reason payments_disabled", () => {
+    const c = resolveBillingConfig({ ...liveInput, paymentsEnabled: "false", liveActivation: armed });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("payments_disabled");
+  });
+
+  it("armed but no webhook secret → blocked, reason missing_webhook_secret", () => {
+    const c = resolveBillingConfig({ ...liveInput, webhookSecret: undefined, liveActivation: armed });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("missing_webhook_secret");
+  });
+
+  it("armed + confirmed + complete live keys → stripe_live, payments on, NOT test mode", () => {
+    const c = resolveBillingConfig({ ...liveInput, liveActivation: armed });
+    expect(c.state).toBe("stripe_live");
+    expect(c.paymentsEnabled).toBe(true);
+    expect(c.testMode).toBe(false);
+    expect(c.reason).toBe("ok");
+    expect(providerKindFor(c)).toBe("stripe_live");
+  });
+
+  it("a live KEY under mode=test stays blocked even when armed", () => {
+    const c = resolveBillingConfig({ ...liveInput, mode: "test", liveActivation: armed });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_keys_incomplete");
+  });
+
+  it("never leaks a secret value on the live path either", () => {
+    const c = resolveBillingConfig({ ...liveInput, liveActivation: armed });
+    expect(JSON.stringify(c)).not.toContain(LIVE_SK);
+    expect(JSON.stringify(c)).not.toContain(LIVE_PK);
+  });
+});

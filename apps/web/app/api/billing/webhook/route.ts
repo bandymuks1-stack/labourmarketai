@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getBillingProvider } from "@/lib/billing/provider";
+import { getBillingConfig } from "@/lib/billing/config";
 import {
   isHandledEventType,
   isRecordOnlyEventType,
@@ -9,6 +10,7 @@ import {
   parseInvoiceObject,
   summarizeRecordedEvent,
   assertTestEvent,
+  eventModeMatches,
 } from "@/lib/billing/webhook-core";
 import {
   recordWebhookEvent,
@@ -42,9 +44,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "invalid_signature" }, { status: 400 });
   }
 
-  // Reject a live event outright — this chain is test-only.
-  if (!assertTestEvent(event)) {
-    return NextResponse.json({ ok: false, reason: "live_event_rejected" }, { status: 400 });
+  // The event's mode must match the adapter state: under `stripe_test` a
+  // live event is rejected outright (assertTestEvent — the historical rule);
+  // under `stripe_live` (D3, owner-armed) a TEST event is rejected, so a
+  // test-mode replay can never touch a live entitlement.
+  const billing = getBillingConfig();
+  if (!eventModeMatches(billing.state, event)) {
+    const reason =
+      billing.state === "stripe_live" && assertTestEvent(event)
+        ? "test_event_rejected"
+        : "live_event_rejected";
+    return NextResponse.json({ ok: false, reason }, { status: 400 });
   }
 
   // Idempotency: record first. Only a duplicate whose FIRST delivery finished

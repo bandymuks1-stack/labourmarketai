@@ -4,6 +4,9 @@ import { getBillingConfig } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
+import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
+import { resolveBillingSubject } from "@/lib/billing/billing-subject";
+import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
 import { Card } from "@/components/ui/Card";
 
 /**
@@ -37,9 +40,9 @@ export async function AccountBillingSection({
   const ent = await getEffectiveEntitlements();
 
   const returnNotice =
-    billingReturn === "test_success"
+    billingReturn === "test_success" || billingReturn === "success"
       ? t("returned.success")
-      : billingReturn === "test_cancelled"
+      : billingReturn === "test_cancelled" || billingReturn === "cancelled"
         ? t("returned.cancelled")
         : billingReturn === "portal_return"
           ? t("returned.portal")
@@ -47,14 +50,23 @@ export async function AccountBillingSection({
 
   const status = ent.subscriptionStatus ?? "none";
   const hasSubscription = ent.source === "subscription";
+  // D3: the section is live for BOTH adapter states; the TEST badge only in test.
+  const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
 
-  // The portal opens ONLY for a stored TEST billing customer — never offered
+  // The portal opens ONLY for a stored billing customer — never offered
   // while payments are disabled, and never a dead button.
   let portalAvailable = false;
-  if (cfg.state === "stripe_test" && ent.profileId) {
+  if (billingOn && ent.profileId) {
     const lookup = await findBillingCustomer(ent.profileId);
     portalAvailable = lookup.status === "found";
   }
+  // Owner launch pricing 2026-09-05: the ONE paid plan (ORGANIZATION, €99 —
+  // the figure lives in plans.price_eur_monthly, never here) is ordered HERE,
+  // server-bound to the organization the person acts for with billing
+  // authority; never from a public page, never for a person (PERSON stays
+  // free). The route re-checks membership, plan and price before any session.
+  const subject = billingOn ? await resolveBillingSubject() : null;
+  const canOrder = Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) && !hasSubscription;
 
   return (
     <Card compact>
@@ -67,7 +79,7 @@ export async function AccountBillingSection({
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </p>
-        {cfg.state === "stripe_test" ? (
+        {cfg.testMode ? (
           <span className="rounded-sm border border-state-amber/50 bg-state-amber/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
             {t("testBadge")}
           </span>
@@ -84,7 +96,7 @@ export async function AccountBillingSection({
         </p>
       ) : null}
 
-      {cfg.state !== "stripe_test" ? (
+      {!billingOn ? (
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">
           {t("disabled")}
         </p>
@@ -103,7 +115,19 @@ export async function AccountBillingSection({
               ) : null}
             </>
           ) : (
-            <p className="text-sm text-text-secondary">{t("none")}</p>
+            <>
+              <p className="text-sm text-text-secondary">{t("none")}</p>
+              {canOrder ? (
+                <div className="flex flex-col gap-1" data-testid="account-billing-order">
+                  <p className="text-sm font-semibold text-text-primary">{t("subscribe.title")}</p>
+                  <TestCheckoutButton
+                    planKey={ORGANIZATION_PLAN_KEY}
+                    labels={{ start: t("subscribe.cta"), starting: t("manage.opening"), error: t("manage.error") }}
+                  />
+                  <p className="text-meta text-text-muted">{t("subscribe.note")}</p>
+                </div>
+              ) : null}
+            </>
           )}
 
           {portalAvailable ? (
