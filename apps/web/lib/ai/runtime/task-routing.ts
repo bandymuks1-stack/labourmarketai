@@ -58,6 +58,10 @@ export const AI_TASK_TYPES = [
   /** Aggregate PUBLIC labour-market statistics → a plain-language reading.
    *  The only task in this program whose payload carries no data subject. */
   "explain_market_demand",
+  /** ONE typed chat sentence the deterministic router could not read → ONE
+   *  EXISTING conversation intent id (owner approval 2026-09-05). Unbounded
+   *  free text; Gemini-only by a task-scoped grant. */
+  "propose_conversation_intent",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -404,6 +408,39 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // while every person-describing task here is true.
     humanReview: false,
   },
+  propose_conversation_intent: {
+    taskType: "propose_conversation_intent",
+    riskLevel: "medium",
+    // The sentence, its language, the coarse identity and the intent
+    // catalogue (ids + hints). Nothing about the person or their rows.
+    allowedFields: ["sentence", "locale", "identity", "intent_catalogue"],
+    prohibitedFields: [
+      "worker_profile",
+      "full_cv",
+      "journal_entry_text",
+      "employer_name",
+      "worker_name",
+      "profile_id",
+      "worker_id",
+      "project_id",
+      "canonical_rows",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "conversationIntentOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.01,
+    expectedOutputTokens: 120,
+    maxLatencyMs: 8_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // The output is a proposal the chat re-validates against the intent
+    // registry and then hands to the SAME handler the deterministic router
+    // would have used; nothing is persisted from it and the human decides
+    // every write through the dispatcher's own confirmation tiers.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
@@ -447,6 +484,7 @@ export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   support_onboarding: "draft_follow_up", // guidance / next-step message drafts
   translation_copy: "translate_message",
   market_explanation: "explain_market_demand",
+  conversation_intent: "propose_conversation_intent", // one typed sentence → one EXISTING intent id (proposer, not router)
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {

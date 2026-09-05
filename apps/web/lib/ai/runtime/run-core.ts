@@ -164,7 +164,7 @@ async function tryPreferredSecondary(
   // candidate loop, so the chain's veto never saw it. Without this check the
   // one task that prefers DeepL — `translate_message`, the only
   // SENSITIVE_FREE_TEXT task there is — had a direct route off the platform.
-  const verdict = egressPermitted(DEEPL_PROFILE, sensitivityForRequest(request), grants);
+  const verdict = egressPermitted(DEEPL_PROFILE, sensitivityForRequest(request), grants, taskForRequest(request));
   if (!verdict.permitted) return null;
   const preferred = await deeplCompletionProvider.complete(request, cfg);
   return preferred.status === "ok" ? preferred : null;
@@ -187,6 +187,12 @@ const DEEPL_PROFILE = {
  * than the least — the opposite default would make an unrecognised agent the
  * way around the boundary.
  */
+/** The task a request runs, for a TASK-SCOPED egress grant; undefined for an
+ *  agent this runtime does not recognise (then no scoped grant applies). */
+function taskForRequest(request: AiCompletionRequest): AiTaskType | undefined {
+  return taskTypeForAgent(request.agentKey as AiAgentKey) as AiTaskType | undefined;
+}
+
 function sensitivityForRequest(request: AiCompletionRequest): AiDataSensitivity {
   const task = taskTypeForAgent(request.agentKey as AiAgentKey) as
     | AiTaskType
@@ -205,6 +211,7 @@ function legacyEgressVerdict(
     profile ?? { id: kind, locality: kind === "local" ? "local" : "cloud", costClass: "paid" },
     sensitivityForRequest(request),
     grants,
+    taskForRequest(request),
   );
 }
 

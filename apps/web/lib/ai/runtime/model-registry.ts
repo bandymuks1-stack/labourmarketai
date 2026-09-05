@@ -131,6 +131,7 @@ const GENERAL_TASKS: readonly AiTaskType[] = [
   "translate_message",
   "draft_follow_up",
   "explain_market_demand",
+  "propose_conversation_intent",
 ];
 
 const ANTHROPIC_SOURCE = "Anthropic public pricing, reviewed by owner 2026-06";

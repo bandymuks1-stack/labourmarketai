@@ -119,6 +119,10 @@ export const TASK_SENSITIVITY: Record<AiTaskType, AiDataSensitivity> = {
   draft_follow_up: "PERSONAL",
   // Aggregate counts of published job advertisements for ONE occupation.
   // Nobody is described; nothing is re-joinable to a row. See the note above.
+  // ONE typed chat sentence — unbounded human text; the platform cannot know
+  // what the person typed. Owner-granted for Gemini on 2026-09-05, for this
+  // task only (`data-egress.ts`).
+  propose_conversation_intent: "SENSITIVE_FREE_TEXT",
   explain_market_demand: "PUBLIC",
 };
 
@@ -159,11 +163,12 @@ export function providerEligibleForSensitivity(
   profile: Pick<AiProviderProfile, "id" | "costClass" | "locality">,
   sensitivity: AiDataSensitivity,
   grants?: readonly AiEgressGrant[],
+  task?: AiTaskType,
 ): SensitivityEligibility {
   if (profile.costClass === "disabled") {
     return { eligible: false, reason: "provider is disabled" };
   }
-  const verdict = egressPermitted(profile, sensitivity, grants);
+  const verdict = egressPermitted(profile, sensitivity, grants, task);
   return verdict.permitted
     ? { eligible: true }
     : { eligible: false, reason: verdict.reason };
