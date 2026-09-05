@@ -11,7 +11,7 @@ import type { DemandLifecycleResult } from "@/lib/demand/demand-lifecycle";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction, createProjectAction, type ProjectActionResult } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionResult } from "@/lib/projects/actions";
 import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, type BridgeActionState } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { createWorkTaskForChatAction } from "@/lib/tasks/task-chat-actions";
@@ -256,6 +256,22 @@ export const COMPANY_EXECUTORS: {
     return r.ok
       ? { ok: true, data: r.id ? { id: r.id } : undefined }
       : { ok: false, code: r.code, message: r.message };
+  },
+
+  "company.move-worker": async (input) => {
+    // §11 WHAT-IF → COMMIT: two canonical writes, in the safe order — the
+    // person is assigned to the destination FIRST (`assign_worker_to_project`
+    // re-checks project management + roster), and only then the source
+    // assignment is ended (`end_worker_project_assignment`, audit trail, no
+    // delete). If the second step fails the person is on BOTH projects and
+    // the result says so — never "moved" for a half-done move.
+    const r = await assignWorkerToProjectAction(
+      null,
+      fd({ project_id: input.toProjectId, worker_profile_id: input.workerProfileId }),
+    );
+    if (!r.ok) return { ok: false, code: r.code, message: r.message };
+    const ended = await endAssignmentAction(input.fromProjectId, input.workerProfileId);
+    return { ok: true, data: { assigned: true, ended: ended.ok } };
   },
 
   "company.invite-worker": async (input) => {

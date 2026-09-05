@@ -10,7 +10,7 @@
 | Item | Value |
 |---|---|
 | Production | **FROZEN at `02e4476c`** — Vercel Hobby build rate limit hit 2026-09-04 ~22:57 UTC ("Deployment rate limited — retry in 24 hours" on every commit since, incl. `e4ffd04d` #1502 and `2723d876` #1503). Nothing merged after 02e4476c is live. When the limit lifts (~23:00 UTC 2026-09-05) production needs a NEW push to `main` (or the owner's Redeploy in Vercel) — then run the pending walks: `walk-stage-prod.cjs`, `walk-document-file-prod.cjs` (CLEANUP=1), `walk-employer-proposal-prod.cjs` (WORKER_EMAIL=qa.worker+multiw) |
-| `main` | #1467–#1474 · #1476–#1501 (incl. #1495 pulse, #1497 task, #1498 capacity, #1499 worker projects, #1500 stages, #1501 file core). Open: **#1502** document file in the chat (auto-merge), `fix/cc/stage-status-confirmation` (PR after build). RED draft: **#1475** My Space table (owner gate) |
+| `main` | #1467–#1474 · #1476–#1505 (incl. #1502 document file in the chat, #1503 stage-sentence fix, #1504 task title, #1505 employer "workers answered" rung). Open: **#1506** §11 what-if move (auto-merge). RED draft: **#1475** My Space table (owner gate) |
 | Active P0 chain | PROJECT journey from real state: create → assign → worker log with project_id → pulse → task by sentence → capacity → a stage moved by sentence (#1500; first prod walk exposed the token-tier defect, fix in flight → re-walk `walk-stage-prod.cjs` after deploy). WORKER: the document FILE offered in the thread after the sentence (#1502 → `walk-document-file-prod.cjs` after deploy, then MCP row cleanup). Then: EMPLOYER contact/proposal via the chat panel (S → prod walk) |
 | Real recruiter account | admin of "Labour market ai Sp. z o.o". Last event `dashboard_viewed` 06:15 UTC. **REAL_RECRUITER_USED_PRODUCT = FALSE**. Its next greeting: "Pakviesti klientą · Kandidatai · Projektai" + "Veikiate „…“ vardu" line; its first sentence "noriu pakviesti klientą" is prod-proven with the E2E agency |
 | Real institution | none yet. **REAL_EDUCATION_INSTITUTION_USED_PRODUCT = FALSE** — the whole chain is prod-proven with the E2E institution |
@@ -42,10 +42,11 @@
 
 ## Queue (contract §33; next automatic step first)
 
-1. On resume: consume #1495 (pulse walk) / #1497 (task walk) / #1498 / worker-projects PR chains; then keep evaluating at journey level (owner notes 2026-09-04 late / 2026-09-05).
-2. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
-3. F2: end date / duration in the demand structurer; the site as a project object.
-4. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.
+1. On resume (after the Vercel reset ~23:00 UTC 2026-09-05): a push to `main` (or the owner's Redeploy) → on the new build, in this order: `walk-stage-prod.cjs` (#1503), `CLEANUP=1 walk-document-file-prod.cjs` (#1502; then delete the `document_files` row via MCP), `WORKER_EMAIL=qa.worker+multiw@labourmarket.ai walk-employer-proposal-prod.cjs` (the employer's "workers answered" rung, #1505; delete the `booking_requests` row via MCP after), `walk-task-prod.cjs` (title without the deadline tail, #1504), and a NEW walk for the §11 what-if move (E2E Walker UAB: E2E Worker Two on `3b9c55d3` → "perkelk … į projektą <other project>" → what-if lines → confirm → readback of BOTH assignments; end with the person back on `3b9c55d3`).
+2. Keep evaluating at journey level (owner notes 2026-09-04); the merged-but-unproven set IS the backlog until the freeze lifts — push no more branches than needed (each push is a Vercel deployment).
+3. My Space: count TYPED sentences (intent → chip ref map) so the ask also fires for people who type; reorder gesture.
+4. F2: end date / duration in the demand structurer; the site as a project object.
+5. Real-user watch on resume: `pilot_events` for profile `875eb16b…`.
 
 ## Open owner gates (consolidated, do not re-ask)
 

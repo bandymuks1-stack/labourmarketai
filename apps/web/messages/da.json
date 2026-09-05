@@ -3411,6 +3411,10 @@
         "respondOffer": {
           "label": "Svar på et bureaus tilbud",
           "description": "Accepter eller afvis en kandidat, som et bureau tilbød til jeres behov."
+        },
+        "moveWorker": {
+          "label": "Flyt en person til et andet projekt",
+          "description": "Tildeler det nye projekt og afslutter den tidligere tildeling — efter konsekvensvisningen."
         }
       },
       "education": {
@@ -3839,7 +3843,26 @@
       "documentFileUploaded": "Filen er vedhæftet dokumentet. Her er din parathed nu:",
       "documentFileTooLarge": "Filen er større end 5 MB — intet blev gemt.",
       "documentFileUnsupported": "Denne filtype understøttes ikke — brug PDF, Word eller et foto.",
-      "documentFileFailed": "Filen kunne ikke uploades — intet blev gemt. Prøv i dokumentcentret."
+      "documentFileFailed": "Filen kunne ikke uploades — intet blev gemt. Prøv i dokumentcentret.",
+      "moveNotFound": "Jeg finder ikke den person på det projekt — vælg fra listen.",
+      "moveNoOptions": "Intet at flytte: det kræver mindst to projekter og én tildelt person.",
+      "moveAskWorker": "Hvem skal flyttes? Vælg:",
+      "moveAskProject": "Hvor skal {name} flyttes hen? Vælg:",
+      "moveWhatIfTitle": "Hvis {name} flyttes fra “{from}” til “{to}”:",
+      "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} af hans åbne arbejdspakker bliver der; paratheds-tjekliste der: {checked}/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; paratheds-tjeklisten der starter på 0/{total}.",
+      "moveCountryLine": "• Landet skifter: {from} → {to} — andre dokumentkrav.",
+      "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke tjekkes.",
+      "moveAvailabilityUnknownLine": "• Fravær ukendt — fraværsmodellen svarer ikke her.",
+      "moveAvailabilityLine": "• Inden for {start}–{end} har han {count} fraværsregistreringer.",
+      "moveAvailabilityFreeLine": "• Intet fravær inden for datoerne for “{to}”.",
+      "moveOnlyConfirmLine": "Intet er ændret endnu — kun din bekræftelse ændrer noget.",
+      "moveConfirmChip": "Flyt",
+      "moveCancelChip": "Lad det være",
+      "moveDone": "Flyttet: tildelt det nye projekt, den tidligere tildeling afsluttet.",
+      "moveDonePartial": "Tildelt det nye projekt, men den tidligere tildeling kunne ikke afsluttes — han er på begge; afslut i projektpanelet.",
+      "moveFailed": "Flytningen mislykkedes — intet ændret.",
+      "chipMovePrefix": "Flyt til"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

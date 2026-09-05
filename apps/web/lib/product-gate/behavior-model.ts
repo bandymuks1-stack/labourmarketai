@@ -389,8 +389,11 @@ export const BEHAVIOR_CONFORMANCE = {
   // `company.invite-learner` (the institution's commands by sentence over
   // the ONE dispatcher). Still anchored to a page; still keyed to an actor
   // type (the company holding `training_provider`), so the verdict stands.
-  conversationActions: 44,
-  actionsAnchoredToAPage: 44,
+  // 2026-09-05 (owner contract §11): +1 — `company.move-worker`, the what-if
+  // move's confirmed commit over the two canonical assignment RPCs. Anchored
+  // to the projects page; keyed to the company actor type; verdict unchanged.
+  conversationActions: 45,
+  actionsAnchoredToAPage: 45,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

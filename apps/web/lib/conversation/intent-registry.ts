@@ -117,7 +117,8 @@ export type IntentHandlerId =
   | "cvExport"
   | "addTask"
   | "whoAvailable"
-  | "stageStatus";
+  | "stageStatus"
+  | "moveWorker";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -242,6 +243,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // PROGRESS (§11): a stage moved to a real status, by sentence — resolved
   // against the company's real stages, token-confirmed like every write.
   "stage-status": { domain: "project", access: "write", handler: "stageStatus", ownTyping: true },
+  // §11 WHAT-IF: a person moved between two projects — consequences on both
+  // sides shown first, the commit behind the strong-tier confirmation.
+  "move-worker": { domain: "project", access: "write", handler: "moveWorker", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

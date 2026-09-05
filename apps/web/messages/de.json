@@ -11640,6 +11640,10 @@
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
+        },
+        "moveWorker": {
+          "label": "Eine Person in ein anderes Projekt versetzen",
+          "description": "Weist dem neuen Projekt zu und beendet die bisherige Zuweisung — nach der Folgenabschätzung."
         }
       },
       "education": {
@@ -12142,7 +12146,26 @@
       "documentFileUnsupported": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
       "documentFileFailed": "Die Datei konnte nicht hochgeladen werden — nichts wurde gespeichert. Versuchen Sie es im Dokumentenzentrum.",
       "briefEmployerBookingResponses": "{count, plural, one {# Mitarbeiter hat auf Ihren Buchungsvorschlag geantwortet} other {# Mitarbeiter haben auf Ihre Buchungsvorschläge geantwortet}}.",
-      "chipEmployerBookings": "Meine Vorschläge"
+      "chipEmployerBookings": "Meine Vorschläge",
+      "moveNotFound": "Diese Person finde ich in dem Projekt nicht — bitte aus der Liste wählen.",
+      "moveNoOptions": "Nichts zu verschieben: dafür braucht es mindestens zwei Projekte und eine zugewiesene Person.",
+      "moveAskWorker": "Wen versetzen? Bitte wählen:",
+      "moveAskProject": "Wohin soll {name} versetzt werden? Bitte wählen:",
+      "moveWhatIfTitle": "Wenn {name} von „{from}“ nach „{to}“ wechselt:",
+      "moveFromLine": "• „{from}“: Personen {before} → {after}; {tasks} offene Arbeitspakete bleiben dort bei ihm; Bereitschaftsliste dort: {checked}/{total}.",
+      "moveToLine": "• „{to}“: Personen {before} → {after}; die Bereitschaftsliste dort beginnt bei 0/{total}.",
+      "moveCountryLine": "• Das Land wechselt: {from} → {to} — andere Dokumentanforderungen.",
+      "moveNoDatesLine": "• „{to}“ hat keine Daten — Abwesenheiten können nicht geprüft werden.",
+      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt — das Urlaubsmodell antwortet hier nicht.",
+      "moveAvailabilityLine": "• Im Fenster {start}–{end} hat er {count} Abwesenheitseinträge.",
+      "moveAvailabilityFreeLine": "• Keine Abwesenheiten in den Daten von „{to}“.",
+      "moveOnlyConfirmLine": "Noch ist nichts geändert — erst Ihre Bestätigung ändert etwas.",
+      "moveConfirmChip": "Versetzen",
+      "moveCancelChip": "So lassen",
+      "moveDone": "Versetzt: dem neuen Projekt zugewiesen, die bisherige Zuweisung beendet.",
+      "moveDonePartial": "Dem neuen Projekt zugewiesen, aber die bisherige Zuweisung konnte nicht beendet werden — er ist in beiden; im Projektfenster abschließen.",
+      "moveFailed": "Versetzen fehlgeschlagen — nichts geändert.",
+      "chipMovePrefix": "Versetzen nach"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

@@ -861,6 +861,13 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Fase fundering afgerond",
     de: "Phase Rohbau fertig",
   },
+  "move-worker": {
+    lt: "Perkelk Joną į projektą Vilnius",
+    en: "Move John to project Riga",
+    ru: "Переведи Ивана на проект Рига",
+    nl: "Verplaats Jan naar project Utrecht",
+    de: "Versetze Jan in das Projekt Berlin",
+  },
 };
 
 /**

@@ -253,6 +253,13 @@ const CHAT_KEYS = [
   "stageBlocked",
   "stageFailed",
   "chipStagePrefix",
+  "moveNotFound",
+  "moveNoOptions",
+  "moveAskWorker",
+  "moveConfirmChip",
+  "moveCancelChip",
+  "moveFailed",
+  "chipMovePrefix",
 ] as const;
 
 const WORKLOG_KEYS = [

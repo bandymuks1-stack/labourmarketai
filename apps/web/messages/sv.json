@@ -3411,6 +3411,10 @@
         "respondOffer": {
           "label": "Svara på en byrås erbjudande",
           "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
+        },
+        "moveWorker": {
+          "label": "Flytta en person till ett annat projekt",
+          "description": "Tilldelar det nya projektet och avslutar den tidigare tilldelningen — efter konsekvensvisningen."
         }
       },
       "education": {
@@ -3839,7 +3843,26 @@
       "documentFileUploaded": "Filen är bifogad till dokumentet. Här är din beredskap nu:",
       "documentFileTooLarge": "Filen är större än 5 MB — inget sparades.",
       "documentFileUnsupported": "Den här filtypen stöds inte — använd PDF, Word eller ett foto.",
-      "documentFileFailed": "Filen kunde inte laddas upp — inget sparades. Försök i dokumentcentret."
+      "documentFileFailed": "Filen kunde inte laddas upp — inget sparades. Försök i dokumentcentret.",
+      "moveNotFound": "Jag hittar inte den personen på det projektet — välj från listan.",
+      "moveNoOptions": "Inget att flytta: det kräver minst två projekt och en tilldelad person.",
+      "moveAskWorker": "Vem ska flyttas? Välj:",
+      "moveAskProject": "Vart ska {name} flyttas? Välj:",
+      "moveWhatIfTitle": "Om {name} flyttas från “{from}” till “{to}”:",
+      "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans öppna arbetspaket stannar där; beredskapslista där: {checked}/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslistan där börjar på 0/{total}.",
+      "moveCountryLine": "• Landet byts: {from} → {to} — andra dokumentkrav.",
+      "moveNoDatesLine": "• “{to}” saknar datum — frånvaro kan inte kontrolleras.",
+      "moveAvailabilityUnknownLine": "• Frånvaro okänd — ledighetsmodellen svarar inte här.",
+      "moveAvailabilityLine": "• Inom {start}–{end} har han {count} frånvaroposter.",
+      "moveAvailabilityFreeLine": "• Ingen frånvaro inom datumen för “{to}”.",
+      "moveOnlyConfirmLine": "Inget har ändrats ännu — bara din bekräftelse ändrar något.",
+      "moveConfirmChip": "Flytta",
+      "moveCancelChip": "Lämna som det är",
+      "moveDone": "Flyttad: tilldelad det nya projektet, den tidigare tilldelningen avslutad.",
+      "moveDonePartial": "Tilldelad det nya projektet, men den tidigare tilldelningen kunde inte avslutas — han finns på båda; avsluta i projektpanelen.",
+      "moveFailed": "Flytten misslyckades — inget ändrades.",
+      "chipMovePrefix": "Flytta till"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

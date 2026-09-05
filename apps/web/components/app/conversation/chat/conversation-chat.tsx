@@ -57,6 +57,7 @@ import { companyCreateTaskForm } from "@/lib/conversation/company-forms";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { loadWorkerProjectsForChat } from "@/lib/conversation/worker-projects";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
+import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
@@ -417,6 +418,13 @@ export type ChatLabels = {
   stageBlocked: string;
   stageFailed: string;
   chipStagePrefix: string;
+  moveNotFound: string;
+  moveNoOptions: string;
+  moveAskWorker: string;
+  moveConfirmChip: string;
+  moveCancelChip: string;
+  moveFailed: string;
+  chipMovePrefix: string;
   pinFirstPrefix: string;
   reorderDone: string;
   // Education by sentence (owner contract 2026-09-04 §15).
@@ -2180,6 +2188,137 @@ export function ConversationChat({
     [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed],
   );
 
+  /** §11 WHAT-IF (owner contract 2026-09-04): the consequences of moving ONE
+   *  person from project X to project Y, from the operations centre's own
+   *  reads, shown BEFORE anything changes. Only the confirm chip (strong
+   *  tier, token) commits — assign to Y, then end X, both canonical. */
+  const runMoveWhatIf = useCallback(
+    (workerProfileId: string, fromProjectId: string, toProjectId: string) => {
+      setTyping(true);
+      loadProjectMoveWhatIfForChat({ workerProfileId, fromProjectId, toProjectId })
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(res.kind === "not-found" ? labels.moveNotFound : labels.projectsUnavailable, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          const w = res.whatIf;
+          const out: string[] = [
+            t("moveWhatIfTitle", { name: w.workerName, from: w.from.title, to: w.to.title }),
+            t("moveFromLine", { from: w.from.title, before: w.from.headcountBefore, after: w.from.headcountAfter, tasks: w.from.openTasksForWorker, checked: w.from.readinessChecked, total: w.from.readinessTotal }),
+            t("moveToLine", { to: w.to.title, before: w.to.headcountBefore, after: w.to.headcountAfter, total: w.to.readinessTotal }),
+          ];
+          if (w.countryChanges) out.push(t("moveCountryLine", { from: w.from.country ?? "—", to: w.to.country ?? "—" }));
+          if (!w.to.startDate || !w.to.endDate) out.push(t("moveNoDatesLine", { to: w.to.title }));
+          else if (w.to.unavailabilitySpans === null) out.push(t("moveAvailabilityUnknownLine"));
+          else if (w.to.unavailabilitySpans > 0) out.push(t("moveAvailabilityLine", { count: w.to.unavailabilitySpans, start: w.to.startDate, end: w.to.endDate }));
+          else out.push(t("moveAvailabilityFreeLine", { to: w.to.title }));
+          out.push(t("moveOnlyConfirmLine"));
+          assistant(out.join("\n"), [
+            { id: `move-confirm:${w.workerProfileId}:${w.from.projectId}:${w.to.projectId}`, label: labels.moveConfirmChip },
+            { id: "projects", label: labels.moveCancelChip },
+          ]);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.projectsUnavailable);
+        });
+    },
+    [assistant, t, labels.moveNotFound, labels.projectsUnavailable, labels.chipProjects, labels.moveConfirmChip, labels.moveCancelChip],
+  );
+
+  /** The confirmed commit — strong tier: a fresh token, then the ONE
+   *  dispatcher runs `company.move-worker` (assign to Y, then end X). The
+   *  answer is the executor's: a half-done move is said as such. */
+  const runMoveCommit = useCallback(
+    (workerProfileId: string, fromProjectId: string, toProjectId: string) => {
+      setTyping(true);
+      const input = { workerProfileId, fromProjectId, toProjectId };
+      prepareConfirmationAction("company.move-worker", input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.moveFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.move-worker", input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+          }).then((res) => {
+            setTyping(false);
+            if (!res.ok) {
+              assistant(labels.moveFailed);
+              return;
+            }
+            const ended = (res.data as { ended?: boolean } | undefined)?.ended === true;
+            assistant(ended ? t("moveDone") : t("moveDonePartial"));
+            selectProjectRef.current(toProjectId);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.moveFailed);
+        });
+    },
+    [assistant, locale, t, labels.moveFailed],
+  );
+
+  /** "perkelk Joną į projektą Y": the person and the destination are
+   *  resolved against the company's REAL projects and active assignments;
+   *  what the sentence leaves open is asked with chips built from those rows.
+   *  Company identity only. */
+  const startMoveWorker = useCallback(
+    (sentence: string, picked?: { workerProfileId: string; fromProjectId: string }) => {
+      if (identity !== "company") {
+        if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        else assistant(fallbackText, starterChips);
+        return;
+      }
+      setTyping(true);
+      loadProjectMoveOptionsForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind !== "ok") {
+            assistant(res.kind === "no-company" ? labels.projectsNoCompany : labels.projectsUnavailable);
+            return;
+          }
+          if (res.projects.length < 2 || res.workers.length === 0) {
+            assistant(labels.moveNoOptions, [{ id: "projects", label: labels.chipProjects }]);
+            return;
+          }
+          const lower = sentence.toLowerCase();
+          const nameHit = (name: string) => {
+            const n = name.toLowerCase().trim();
+            if (n.length >= 3 && lower.includes(n)) return true;
+            const first = n.split(/\s+/)[0] ?? "";
+            return first.length >= 3 && new RegExp(`(^|[^\\p{L}])${first.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(lower);
+          };
+          const who = picked
+            ? res.workers.filter((w) => w.workerProfileId === picked.workerProfileId && w.projectId === picked.fromProjectId)
+            : res.workers.filter((w) => nameHit(w.name));
+          const dest = res.projects.filter((p) => p.title.length >= 3 && lower.includes(p.title.toLowerCase()));
+          if (who.length === 1) {
+            const from = who[0];
+            const targets = dest.filter((p) => p.projectId !== from.projectId);
+            if (targets.length === 1) {
+              runMoveWhatIf(from.workerProfileId, from.projectId, targets[0].projectId);
+              return;
+            }
+            const others = res.projects.filter((p) => p.projectId !== from.projectId).slice(0, 4);
+            assistant(t("moveAskProject", { name: from.name }), others.map((p) => ({ id: `move:${from.workerProfileId}:${from.projectId}:${p.projectId}`, label: `${labels.chipMovePrefix}: ${p.title}` })));
+            return;
+          }
+          const candidates = (who.length > 1 ? who : res.workers).slice(0, 4);
+          assistant(labels.moveAskWorker, candidates.map((w) => ({ id: `move-who:${w.workerProfileId}:${w.projectId}`, label: `${w.name} (${w.projectTitle})` })));
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.projectsUnavailable);
+        });
+    },
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, t, runMoveWhatIf],
+  );
+
   /** "Kokius kandidatus pasiūlė agentūra?" — the offers on the company's OWN
    *  demands, from the SAME reads the scouting page renders; each open offer
    *  carries its accept / decline chip. An agency workspace asking this
@@ -2979,6 +3118,22 @@ export function ConversationChat({
             const [, projectId, stageId, status] = chip.id.split(":");
             user(chip.label);
             runStageStatus(projectId || null, stageId, status as StageStatus);
+          } else if (chip.id.startsWith("move-who:")) {
+            // `move-who:<workerProfileId>:<fromProjectId>` — the person picked; the
+            // destination is asked next from the real project list.
+            const [, workerProfileId, fromProjectId] = chip.id.split(":");
+            user(chip.label);
+            startMoveWorker("", { workerProfileId, fromProjectId });
+          } else if (chip.id.startsWith("move:")) {
+            // `move:<workerProfileId>:<from>:<to>` — the what-if, nothing written.
+            const [, workerProfileId, fromProjectId, toProjectId] = chip.id.split(":");
+            user(chip.label);
+            runMoveWhatIf(workerProfileId, fromProjectId, toProjectId);
+          } else if (chip.id.startsWith("move-confirm:")) {
+            // The ONLY chip that changes canonical state — strong tier, token.
+            const [, workerProfileId, fromProjectId, toProjectId] = chip.id.split(":");
+            user(chip.label);
+            runMoveCommit(workerProfileId, fromProjectId, toProjectId);
           } else if (chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")) {
             // The client's decision: the chip carries the offer id and nothing
             // else; the RPC re-checks the demand is theirs and the offer open.
@@ -3009,7 +3164,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, runEducationProgrammes, runPinChip, noteUsage, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
   );
   handleChipRef.current = handleChip;
 
@@ -3684,6 +3839,7 @@ export function ConversationChat({
         addTask: () => startCreateTask(text),
         whoAvailable: () => startWhoAvailable(),
         stageStatus: () => startStageStatus(text),
+        moveWorker: () => startMoveWorker(text),
         // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
         // not the import flow the bare "cv" chip starts. One chip to the one
         // canonical output; a company identity has no own CV to show.
@@ -3703,7 +3859,7 @@ export function ConversationChat({
         assistant(fallbackText, starterChips),
       );
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
   );
 
   const nav = {

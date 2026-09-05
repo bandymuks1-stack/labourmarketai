@@ -96,6 +96,7 @@ export type ConversationIntent =
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
+  | "move-worker" // "perkelk Joną į projektą Y" — a person between projects, what-if first
   | "unknown";
 
 export type IntentMatch = {
@@ -909,6 +910,15 @@ const RULES: IntentRule[] = [
       // frei / verfügbar", "wie is beschikbaar / vrij", "кто свободен".
       p("(kas|who|wer|wie|кто)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
       p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники))", 8),
+    ],
+  },
+  {
+    intent: "move-worker",
+    patterns: [
+      // §11 WHAT-IF: "perkelk Joną į projektą Vilnius", "move John to project
+      // Riga", "verplaats Jan naar project Utrecht", "versetze Jan in das
+      // Projekt Berlin", "переведи Ивана на проект Рига", "przenieś Jana do projektu".
+      p("(perkel|perkelk|move|verplaats|versetz|перевед|перевес|перемест|przenie|przenies)[^\\s]*\\s+.{0,40}(projekt|project|проект)", 12),
     ],
   },
   {
