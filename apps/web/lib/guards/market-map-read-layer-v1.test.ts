@@ -783,7 +783,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
     // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
-expect(count).toBeLessThanOrEqual(263);
+expect(count).toBeLessThanOrEqual(264); // 2026-09-05: +1 public_plans_v1 (RED, owner gate)
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
