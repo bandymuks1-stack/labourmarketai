@@ -300,6 +300,7 @@ const CHAT_KEYS = [
   "readinessGapLine",
   "readinessNoChecklist",
   "readinessNoPeople",
+  "readinessDerivedNote",
   "readinessAsk",
   "readinessNotFound",
   "readinessUnavailable",

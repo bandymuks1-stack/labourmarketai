@@ -22,6 +22,7 @@ const EMPTY: WorkerPlayerCard = {
   documents: null,
   evidenceTimeline: [],
   skillEvidence: [],
+  provenance: { class: "SELF_DECLARED" },
 };
 
 describe("readinessNextSteps — every unmet signal gets a real next step", () => {

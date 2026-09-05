@@ -12430,6 +12430,9 @@
       "readinessGapLine": "• {name} — fehlt: {gaps} ({checked}/{total})",
       "readinessNoChecklist": "Noch keine Dokumentenliste geführt — beginnen Sie sie in der Projektsteuerung.",
       "readinessNoPeople": "Auf diesem Projekt ist noch niemand.",
+      "unnamedPerson": "Person ohne Namen",
+      "unnamedNeed": "Bedarf ohne Titel",
+      "readinessDerivedNote": "Abgeleitet aus der Dokumenten-Checkliste und den Profileinträgen — keine Bewertung.",
       "readinessAsk": "Welches Projekt? Bitte wählen:",
       "readinessNotFound": "Dieses Projekt finde ich unter den aktiven nicht. Welches meinten Sie?",
       "readinessRepliedSuffix": "hat am {date} geantwortet: „{text}“",
@@ -13353,6 +13356,17 @@
       "unmapped": "{count, plural, one {noch # Chance ohne angegebenen Ort — sie erscheint in der Chat-Suche} other {noch # Chancen ohne angegebenen Ort — sie erscheinen in der Chat-Suche}}",
       "unmappedOnly": "{count, plural, one {# echte Chance hat keinen angegebenen Ort und kann nicht gezeichnet werden — finde sie in der Chat-Suche} other {# echte Chancen haben keinen angegebenen Ort und können nicht gezeichnet werden — finde sie in der Chat-Suche}}."
     }
+  },
+  "provenance": {
+    "label": "Herkunft",
+    "selfDeclared": "Aus dem Lebenslauf oder eigenen Angaben — noch nicht bestätigt",
+    "evidenceRecorded": "Durch Einträge belegt — noch nicht bestätigt",
+    "evidenceEntries": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} — noch nicht bestätigt",
+    "evidenceDocument": "Dokument gültig bis {until} — noch nicht bestätigt",
+    "evidenceEntriesAndDocument": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} und ein Dokument gültig bis {until} — noch nicht bestätigt",
+    "employerConfirmed": "Bestätigt von {org}, {date}",
+    "employerConfirmedNoDate": "Von einem Arbeitgeber bestätigt",
+    "systemDerived": "Abgeleitet aus: {source}"
   },
   "evidenceTier": {
     "managerConfirmed": "Durch einen Manager-Eintrag bestätigt",

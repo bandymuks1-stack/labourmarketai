@@ -12430,6 +12430,9 @@
       "readinessGapLine": "• {name} — ontbreekt: {gaps} ({checked}/{total})",
       "readinessNoChecklist": "Er wordt nog geen documentenlijst bijgehouden — begin die in het projectbeheer.",
       "readinessNoPeople": "Er staat nog niemand op dit project.",
+      "unnamedPerson": "Persoon zonder naam",
+      "unnamedNeed": "Behoefte zonder titel",
+      "readinessDerivedNote": "Afgeleid uit de documentenchecklist en profielgegevens — geen beoordeling.",
       "readinessAsk": "Welk project? Kies er een:",
       "readinessNotFound": "Dat project vind ik niet tussen de actieve. Welk bedoelde u?",
       "readinessRepliedSuffix": "antwoordde op {date}: “{text}”",
@@ -13353,6 +13356,17 @@
       "unmapped": "{count, plural, one {nog # kans zonder opgegeven plaats — te vinden in de chatzoekfunctie} other {nog # kansen zonder opgegeven plaats — te vinden in de chatzoekfunctie}}",
       "unmappedOnly": "{count, plural, one {# echte kans heeft geen opgegeven plaats en kan niet getekend worden — vind hem in de chatzoekfunctie} other {# echte kansen hebben geen opgegeven plaats en kunnen niet getekend worden — vind ze in de chatzoekfunctie}}."
     }
+  },
+  "provenance": {
+    "label": "Herkomst",
+    "selfDeclared": "Uit het cv of eigen woorden — nog niet bevestigd",
+    "evidenceRecorded": "Onderbouwd met vastleggingen — nog niet bevestigd",
+    "evidenceEntries": "{count, plural, one {# werkregistratie} other {# werkregistraties}} — nog niet bevestigd",
+    "evidenceDocument": "Document geldig tot {until} — nog niet bevestigd",
+    "evidenceEntriesAndDocument": "{count, plural, one {# werkregistratie} other {# werkregistraties}} en een document geldig tot {until} — nog niet bevestigd",
+    "employerConfirmed": "Bevestigd door {org}, {date}",
+    "employerConfirmedNoDate": "Bevestigd door een werkgever",
+    "systemDerived": "Afgeleid uit: {source}"
   },
   "evidenceTier": {
     "managerConfirmed": "Bevestigd door een managersvermelding",

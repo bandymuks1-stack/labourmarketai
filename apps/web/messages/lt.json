@@ -12430,6 +12430,9 @@
       "readinessGapLine": "• {name} — trūksta: {gaps} ({checked}/{total})",
       "readinessNoChecklist": "Dokumentų sąrašas dar nesekamas — pradėkite jį projekto valdyme.",
       "readinessNoPeople": "Projekte dar nėra žmonių.",
+      "unnamedPerson": "Asmuo be vardo",
+      "unnamedNeed": "Poreikis be pavadinimo",
+      "readinessDerivedNote": "Išvesta iš dokumentų sąrašo ir profilio įrašų — ne įvertinimas.",
       "readinessAsk": "Kuris projektas? Pasirinkite:",
       "readinessNotFound": "Tokio projekto nerandu tarp aktyvių. Kurį turėjote omenyje?",
       "readinessRepliedSuffix": "atsakė {date}: „{text}“",
@@ -13353,6 +13356,17 @@
       "unmapped": "{count, plural, one {dar # galimybė be nurodytos vietos — ji matoma pokalbio paieškoje} few {dar # galimybės be nurodytos vietos — jos matomos pokalbio paieškoje} other {dar # galimybių be nurodytos vietos — jos matomos pokalbio paieškoje}}",
       "unmappedOnly": "{count, plural, one {# reali galimybė yra be nurodytos vietos, todėl žemėlapyje jos parodyti negalima — ją rasi pokalbio paieškoje} other {# realios galimybės yra be nurodytos vietos, todėl žemėlapyje jų parodyti negalima — jas rasi pokalbio paieškoje}}."
     }
+  },
+  "provenance": {
+    "label": "Kilmė",
+    "selfDeclared": "Iš CV ar savo žodžių — dar nepatvirtinta",
+    "evidenceRecorded": "Pagrįsta įrašais — dar nepatvirtinta",
+    "evidenceEntries": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} — dar nepatvirtinta",
+    "evidenceDocument": "Dokumentas galioja iki {until} — dar nepatvirtinta",
+    "evidenceEntriesAndDocument": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} ir dokumentas iki {until} — dar nepatvirtinta",
+    "employerConfirmed": "Patvirtino {org}, {date}",
+    "employerConfirmedNoDate": "Patvirtino darbdavys",
+    "systemDerived": "Išvesta iš: {source}"
   },
   "evidenceTier": {
     "managerConfirmed": "Patvirtinta vadovo įrašu",

@@ -29,6 +29,8 @@ import {
   type ReadinessLevel,
 } from "@/lib/player-card/readiness";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { ProvenanceEdge, ProvenanceLine } from "@/components/app/provenance/provenance-edge";
+import type { ProvenanceClass } from "@/lib/evidence/provenance";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -38,16 +40,32 @@ import { Link } from "@/lib/i18n/navigation";
  * worker-player-card-v1 unchanged).
  *
  * DESIGN_SOUL §1 (vienas kūnas): every glow on this card is the skin of a
- * real internal fact — the gold trust ring appears ONLY when the work card is
- * really confirmed; a skill badge glows green ONLY for worker_skills rows a
+ * real internal fact — a skill badge glows ONLY for worker_skills rows a
  * manager really verified. Zero is shown as a plain zero with a gentle next
  * step, never inflated; skills are labelled self-declared (not verified);
  * nothing here implies AI or employer interest.
+ *
+ * P6 (frozen design contract 2026-09-05 §2.9, §5 P6-subset; design system
+ * F "K1 passport with an edge", M): the card carries the person's PROVENANCE
+ * EDGE — the ONE place gold may appear on a person, and only for the
+ * EMPLOYER_CONFIRMED class DERIVED from a real confirmation row (scorecard
+ * X.28 "gold only for a confirmation"). The material lives in ONE component
+ * (`ProvenanceEdge`); this file never names a gold class itself, and the edge
+ * is always paired with its text equivalent (`ProvenanceLine`).
  */
 
 export interface PlayerCardLabels {
   title: string;
   subtitle: string;
+  /** P6 — the provenance class + its already-localised text equivalent
+   *  ("patvirtino <org>, <date>" / "iš CV, nepatvirtinta" …). The class rides
+   *  with the text so the edge and the words can never disagree. */
+  provenance: {
+    class: ProvenanceClass;
+    /** The small eyebrow word ("Kilmė" / "Source"). */
+    label: string;
+    text: string;
+  };
   skillsLabel: string;
   skillsHint: string;
   candidateLabel: string;
@@ -254,14 +272,21 @@ export function WorkerPlayerCard({
         // clickable; the stat tiles inside now are).
         "card-border bg-card-glow rise-in flex flex-col gap-5 border-t-2 p-5 sm:p-6",
         LEVEL_ACCENT[readiness.level],
-        // Silent-trust rule: no gold confirmation trust ring on this self-view
-        // card — confirmation is an internal signal, never a visible accent.
+        // No gold trust ring or gold accent on the card chrome itself: the
+        // only gold a person may carry is the provenance EDGE below, and only
+        // when a real confirmation row derives EMPLOYER_CONFIRMED (P6).
       )}
       data-testid="worker-player-card"
+      data-provenance={card.provenance.class}
     >
-      {/* ── Identity: avatar + name + profession + readiness ring ── */}
+      {/* ── Identity: provenance edge + avatar + name + profession + readiness ring ── */}
       <header className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-4">
+        <div className="flex min-w-0 items-stretch gap-3">
+          {/* P6 — the provenance edge (design M): dashed grey = self-declared,
+              cyan = evidence, gold = employer-confirmed. Derived class only;
+              the text equivalent sits under the name. */}
+          <ProvenanceEdge provenanceClass={card.provenance.class} />
+          <div className="flex min-w-0 items-center gap-4">
           {identity.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -296,6 +321,20 @@ export function WorkerPlayerCard({
             <p className="truncate text-xs leading-relaxed text-text-secondary">
               {labels.professionName ?? labels.subtitle}
             </p>
+            {/* P6 — the SAME fact as the edge, in words (a11y: state is never
+                colour alone). "Kilmė · patvirtino E2E Walker UAB, 2026-09-05". */}
+            <p className="flex min-w-0 items-baseline gap-1.5">
+              <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+                {labels.provenance.label}
+              </span>
+              <ProvenanceLine
+                provenanceClass={card.provenance.class}
+                text={labels.provenance.text}
+                testid="player-card-provenance"
+                className="truncate"
+              />
+            </p>
+          </div>
           </div>
         </div>
         {/* Status ring — same premium gauge as the landing card, honest signals */}

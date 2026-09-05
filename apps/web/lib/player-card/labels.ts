@@ -7,6 +7,7 @@ import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
+import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -25,6 +26,9 @@ export async function buildPlayerCardLabels(
   // Country names come from the ONE canonical country catalogue the rest of
   // the product reads (never a second list).
   const tlm = await getTranslations("labourMarket");
+  // P6 — the provenance line's words: ONE namespace, one key per fact shape
+  // (`provenanceTextKey`), so every mount of the card says the same thing.
+  const tProv = await getTranslations("provenance");
 
   const availabilityKey = card.availabilityStatus
     ? `editor.availabilityOption.${card.availabilityStatus}`
@@ -64,6 +68,19 @@ export async function buildPlayerCardLabels(
   return {
     title: t("title"),
     subtitle: t("subtitle"),
+    // P6 — the text equivalent of the provenance edge (the edge is never the
+    // only signal). The date is formatted in the viewer's locale; the class
+    // travels with the text so the component reads the fact, not the colour.
+    provenance: {
+      class: card.provenance.class,
+      label: tProv("label"),
+      text: tProv(
+        provenanceTextKey(card.provenance),
+        provenanceTextParams(card.provenance, {
+          date: (iso) => dateFmt.format(new Date(iso)),
+        }),
+      ),
+    },
     skillsLabel: t("skillsLabel"),
     skillsHint: t("skillsHint"),
     candidateLabel: t("candidateLabel"),

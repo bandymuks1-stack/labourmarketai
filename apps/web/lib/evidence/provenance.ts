@@ -150,13 +150,11 @@ export function deriveProvenance(input: ProvenanceInput): Provenance {
 /** The strongest of several provenances (a person over their skills). A
  *  derivation is skipped — it is not a record about the person. */
 export function strongestProvenance(list: readonly Provenance[]): Provenance {
-  let best: Provenance = { class: "SELF_DECLARED" };
+  // `best` starts on the ladder and only ever moves along it, so it can never
+  // hold a SYSTEM_DERIVED value (those are skipped below).
+  let best: Exclude<Provenance, { class: "SYSTEM_DERIVED" }> = { class: "SELF_DECLARED" };
   for (const p of list) {
     if (p.class === "SYSTEM_DERIVED") continue;
-    if (best.class === "SYSTEM_DERIVED") {
-      best = p;
-      continue;
-    }
     if (PROVENANCE_RANK[p.class] > PROVENANCE_RANK[best.class]) best = p;
   }
   return best;
@@ -168,6 +166,7 @@ export function strongestProvenance(list: readonly Provenance[]): Provenance {
  */
 export type ProvenanceTextKey =
   | "selfDeclared"
+  | "evidenceRecorded"
   | "evidenceEntries"
   | "evidenceDocument"
   | "evidenceEntriesAndDocument"
@@ -182,6 +181,10 @@ export function provenanceTextKey(p: Provenance): ProvenanceTextKey {
     case "EVIDENCE_SUPPORTED":
       if (p.validUntil && p.journalEntries > 0) return "evidenceEntriesAndDocument";
       if (p.validUntil) return "evidenceDocument";
+      // Evidence exists (a work_journal-tier skill row, or a recorded document
+      // without a validity date) but nothing is countable for the line — say
+      // "backed by records", never "0 entries".
+      if (p.journalEntries === 0) return "evidenceRecorded";
       return "evidenceEntries";
     case "EMPLOYER_CONFIRMED":
       return p.confirmedAt ? "employerConfirmed" : "employerConfirmedNoDate";

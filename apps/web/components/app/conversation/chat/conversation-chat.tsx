@@ -478,6 +478,9 @@ export type ChatLabels = {
   readinessGapLine: string;
   readinessNoChecklist: string;
   readinessNoPeople: string;
+  /** P2 FACT/DERIVED marking (frozen design §1.7, K): the readiness ratio is
+   *  a computation over records, and the answer says so. */
+  readinessDerivedNote: string;
   readinessAsk: string;
   readinessNotFound: string;
   readinessUnavailable: string;
@@ -2843,7 +2846,9 @@ export function ConversationChat({
               .replace("{total}", String(w.total)) + replied(w);
           });
           const head = labels.readinessIntro.replace("{title}", res.title).replace("{ready}", String(res.readyCount)).replace("{people}", String(res.workerTotal));
-          const tail = res.workerTotal === 0 ? [labels.readinessNoPeople] : res.checklistTracked ? [] : [labels.readinessNoChecklist];
+          // P2 — the ratio lines above are DERIVED (checklist rows + profile
+          // records), not a rating; the design marks a derivation as such.
+          const tail = res.workerTotal === 0 ? [labels.readinessNoPeople] : res.checklistTracked ? [labels.readinessDerivedNote] : [labels.readinessNoChecklist];
           // §12 / §16 — the gap continues into the corrective action that EXISTS:
           // start the checklist when nothing is tracked; mark the first person's
           // first missing row received; ask that person (a work instruction);

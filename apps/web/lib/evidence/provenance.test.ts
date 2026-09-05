@@ -59,9 +59,17 @@ describe("deriveProvenance — truth table", () => {
     expect(provenanceTextParams(p, fmt)).toEqual({ count: 14 });
   });
 
-  it("a work_journal-tier skill row → EVIDENCE_SUPPORTED even with 0 counted links", () => {
+  it("a work_journal-tier skill row → EVIDENCE_SUPPORTED even with 0 counted links — 'backed by records', never '0 entries'", () => {
     const p = deriveProvenance({ skill: { verified: false, source: "work_journal" } });
     expect(p.class).toBe("EVIDENCE_SUPPORTED");
+    expect(provenanceTextKey(p)).toBe("evidenceRecorded");
+    expect(provenanceTextParams(p, fmt)).toEqual({ count: 0 });
+  });
+
+  it("a recorded document WITHOUT a validity date → EVIDENCE_SUPPORTED, 'backed by records'", () => {
+    const p = deriveProvenance({ document: { validUntil: null } });
+    expect(p).toEqual({ class: "EVIDENCE_SUPPORTED", journalEntries: 0, validUntil: null });
+    expect(provenanceTextKey(p)).toBe("evidenceRecorded");
   });
 
   it("a recorded document → EVIDENCE_SUPPORTED with 'sertifikatas iki …'", () => {
