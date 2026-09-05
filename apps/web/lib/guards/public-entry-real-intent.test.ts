@@ -202,6 +202,13 @@ describe("the sentence reaches the conversation through the existing return path
     const consumer = chat.match(/const sayConsumedRef = useRef\(false\);[\s\S]*?\}, \[auth\?\.profile, handleSend\]\);/);
     expect(consumer, "the ?say= consumer effect exists next to handleSend").not.toBeNull();
     const body = consumer![0];
+    // ONCE per mount and only for a signed-in person (QA Q-5): the auth check
+    // precedes the URL read, and the ref flips BEFORE anything is sent — so a
+    // re-render can never send the same sentence twice.
+    expect(body).toContain("if (!auth?.profile) return;");
+    expect(body).toContain("sayConsumedRef.current = true;");
+    expect(body.indexOf("if (!auth?.profile) return;")).toBeLessThan(body.indexOf('.get("say")'));
+    expect(body.indexOf("sayConsumedRef.current = true;")).toBeLessThan(body.indexOf("handleSend("));
     expect(body).toContain('.get("say")');
     expect(body).toContain('url.searchParams.delete("say")');
     expect(body).toContain("window.history.replaceState(");
@@ -209,6 +216,41 @@ describe("the sentence reaches the conversation through the existing return path
     // Negative controls — the exact shortcuts that would fork the path.
     expect(body).not.toMatch(/classifyIntent|dispatchIntent|proposeIntent|fetch\(/);
     expect(body).not.toMatch(/sessionStorage|localStorage/);
+  });
+
+  it("QA Q-4: a ?say= that did not come through our own door is PREFILLED for the person, never sent for them", () => {
+    // A `/dashboard?say=<X>` link anyone can paste must not persist X as the
+    // signed-in person's own turn (nor spend a proposer call). The ONE send in
+    // the effect is behind the referrer rule; the other branch hands the
+    // sentence to the composer. Deleting the rule fails this guard.
+    const raw = read("components/app/conversation/chat/conversation-chat.tsx");
+    const chat = stripComments(raw);
+    const body = chat.match(/const sayConsumedRef = useRef\(false\);[\s\S]*?\}, \[auth\?\.profile, handleSend\]\);/)![0];
+    expect(body).toMatch(
+      /if \(referrerIsOurOwnDoor\(\)\) \{\s*handleSend\(say\.slice\(0, 500\)\);\s*\} else \{\s*setSayPrefill\(say\.slice\(0, 500\)\);\s*\}/,
+    );
+    // Negative control: no unconditional send anywhere in the effect.
+    expect(body.match(/handleSend\(/g)).toHaveLength(1);
+
+    // The rule: a same-origin referrer only. An EMPTY referrer is what a
+    // hostile link can arrange (noreferrer, messaging apps), so it is NOT trusted.
+    const rule = chat.match(/function referrerIsOurOwnDoor\(\): boolean \{[\s\S]*?\n\}/);
+    expect(rule, "the referrer rule exists").not.toBeNull();
+    expect(rule![0]).toContain("document.referrer");
+    expect(rule![0]).toMatch(/if \(!ref\) return false;/);
+    expect(rule![0]).toMatch(/new URL\(ref\)\.origin === window\.location\.origin/);
+    // The justification travels with the code (why the rule is safe for the real journey).
+    expect(raw).toContain("strict-origin-when-cross-origin");
+
+    // The fallback REACHES the person: both composers receive the prefill, the
+    // composer places it in the box, and a send consumes it.
+    expect(chat).toContain('const [sayPrefill, setSayPrefill] = useState("");');
+    expect(chat.match(/prefill=\{sayPrefill\}/g)).toHaveLength(2);
+    const composer = stripComments(read("components/app/conversation/chat/composer.tsx"));
+    expect(composer).toMatch(/prefill\?: string;/);
+    expect(composer).toMatch(/if \(!prefill\) return;\s*setValue\(/);
+    const send = chat.slice(chat.indexOf("const handleSend = useCallback("));
+    expect(send.slice(0, 400)).toContain('setSayPrefill("");');
   });
 });
 

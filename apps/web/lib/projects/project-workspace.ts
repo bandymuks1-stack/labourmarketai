@@ -225,21 +225,26 @@ export async function loadProjectDetailForResult(
     }
 
     let stages: readonly ProjectStageRow[] | null = null;
+    let stageTotal: number | null = null;
     try {
       const data = await listProjectStages(projectId);
       if (data.applied) {
+        stageTotal = data.stages.length;
         stages = data.stages.slice(0, PROJECT_STAGE_LIMIT).map((s) => ({
           id: s.id,
           name: s.name,
           status: s.status,
+          stageOrder: s.stageOrder,
           plannedStart: s.plannedStart,
           plannedEnd: s.plannedEnd,
           actualStart: s.actualStart,
           actualEnd: s.actualEnd,
+          blockedReason: s.blockedReason,
         }));
       }
     } catch {
       stages = null;
+      stageTotal = null;
     }
 
     return {
@@ -259,6 +264,7 @@ export async function loadProjectDetailForResult(
         assignments: assignments.slice(0, PROJECT_ASSIGNMENT_LIMIT),
         assignmentTotal: assignments.length,
         stages,
+        stageTotal,
         canManage,
         pulse,
       },

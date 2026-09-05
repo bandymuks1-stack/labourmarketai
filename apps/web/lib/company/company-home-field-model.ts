@@ -54,6 +54,17 @@ export interface StageTimeline {
 }
 
 /**
+ * The stage shape the timeline needs — satisfied by the canonical
+ * `ProjectStage` AND by the project panel's `ProjectStageRow`, which the
+ * chat's risk row carries (QA Q-3), so the home derives from rows that were
+ * already read instead of reading them again.
+ */
+export type TimelineStage = Pick<
+  ProjectStage,
+  "id" | "name" | "stageOrder" | "plannedStart" | "blockedReason"
+> & { readonly status: string };
+
+/**
  * Now = the first stage in progress (stage order); a blocked stage with no
  * stage in progress is "now" too, because that is what the project is
  * standing on. Next = the first PLANNED stage after the "now" stage in the
@@ -62,7 +73,7 @@ export interface StageTimeline {
  * unreadable), which is reported as such, never as "no stages".
  */
 export function deriveStageTimeline(
-  stages: readonly ProjectStage[] | null,
+  stages: readonly TimelineStage[] | null,
 ): StageTimeline {
   if (stages === null) {
     return { now: { kind: "unavailable" }, next: { kind: "unavailable" }, done: 0, total: 0 };
@@ -94,6 +105,41 @@ export function deriveStageTimeline(
     : { kind: "none" };
 
   return { now, next, done, total: live.length };
+}
+
+/**
+ * QA Q-3 — the risk row already went through the project panel's detail read
+ * (stages, roster). Reuse what it carries; read again ONLY when it carries
+ * nothing (an older producer) or a list the panel's bound cut short — so the
+ * home never shows a done/total computed over a truncated list.
+ *
+ * `undefined` = "read the canonical list yourself"; `null` = the stages were
+ * unreadable in that read (the same fact here — no second attempt, the
+ * timeline says "unavailable" exactly as before).
+ */
+export function carriedStages(
+  row: Pick<ProjectRiskRow, "stages" | "stageTotal">,
+): readonly TimelineStage[] | null | undefined {
+  if (row.stages === undefined) return undefined;
+  if (row.stages === null) return null;
+  if (typeof row.stageTotal === "number" && row.stageTotal <= row.stages.length) {
+    return row.stages;
+  }
+  return undefined;
+}
+
+/**
+ * Same rule for the people chips: the carried names are used when they cover
+ * every chip the row would show (`people` is the full count, the chips are
+ * capped), otherwise the roster read runs as before.
+ */
+export function carriedPeopleNames(
+  row: Pick<ProjectRiskRow, "people" | "peopleNames">,
+): readonly string[] | undefined {
+  if (row.peopleNames === undefined) return undefined;
+  const needed = Math.min(row.people, COMPANY_HOME_PEOPLE_CHIP_LIMIT);
+  if (row.peopleNames.length < needed) return undefined;
+  return row.peopleNames.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT);
 }
 
 /** One risk fact, as an opaque code + count; the surface localizes it. */

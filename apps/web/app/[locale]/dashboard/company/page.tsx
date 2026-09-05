@@ -221,6 +221,12 @@ export default async function CompanyDashboardPage({
    * settings, org members for objects, the gallery summaries) stay after
    * their input, in their own second batch.
    */
+  // The roster read is the ONE member two consumers share (the roster section
+  // and the home field's who-is-free answer — QA Q-3), so it is created here
+  // and both subscribe to the same promise. Still the same tick as the
+  // `Promise.all` below (no `await` in between), so the unhandled-rejection
+  // window described above never opens.
+  const rosterRead = ownCompany ? listActiveCompanyWorkers(ownCompany.id) : null;
   const [
     rAgencyClients,
     rAgencyDemands,
@@ -248,7 +254,7 @@ export default async function CompanyDashboardPage({
     isStaffingAgency ? listAgencyOfferProgress() : null,
     isCompanyOwner && !isStaffingAgency ? listMyConnectionInvites() : null,
     isCompanyOwner && !isStaffingAgency ? listAgencyDemands() : null,
-    ownCompany ? listActiveCompanyWorkers(ownCompany.id) : null,
+    rosterRead,
     ownCompany ? listCompanyWorkerInvitations(ownCompany.id) : null,
     ownCompany ? getOrgMembersData("company", ownCompany.id) : null,
     getOrgWorkObjects(),
@@ -258,10 +264,11 @@ export default async function CompanyDashboardPage({
     // than adding a round trip to a page that already reads fourteen.
     listPendingInterestCountsForCompany(),
     // P5/C1 — the home field: the chat's project-risk, who-is-free and
-    // opening-brief reads plus the canonical stages/assignments per shown
-    // project (≤ 6). Resolves its own company context from the session, so
-    // it joins this batch instead of adding a round trip.
-    ownCompany ? loadCompanyHomeField() : null,
+    // opening-brief reads; stages/assignments per shown project (≤ 6) come
+    // from the risk read itself (QA Q-3). Resolves its own company context
+    // from the session, so it joins this batch instead of adding a round
+    // trip — and it is handed `rosterRead` so the roster is queried once.
+    ownCompany ? loadCompanyHomeField({ roster: rosterRead }) : null,
   ] as const);
 
   // P5 agency client management — staffing-agency mode ONLY. Reads the

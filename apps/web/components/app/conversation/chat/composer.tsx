@@ -45,12 +45,19 @@ export function Composer({
   onSend,
   onAttach,
   variant = "bar",
+  prefill,
 }: {
   placeholder: string;
   attachLabel: string;
   sendLabel: string;
   disabled?: boolean;
   onSend: (text: string) => void;
+  /** A sentence handed to the person to SEND THEMSELVES — the `?say=` hand-off
+   *  when the link did not come through our own door (QA Q-4, see
+   *  `referrerIsOurOwnDoor` in conversation-chat). Placed into the box and
+   *  focused; the composer never sends it. Text already typed stays ahead of
+   *  it, so nothing the person wrote is lost either. */
+  prefill?: string;
   /** Opens the canonical CV flow (the real uploader lives there, not here — one
    *  canonical CV file-pick surface). */
   onAttach?: () => void;
@@ -97,6 +104,15 @@ export function Composer({
     const el = ref.current;
     if (el && el.value) setValue((prev) => (prev ? prev : el.value));
   }, []);
+
+  // The hand-off fallback (QA Q-4): the sentence appears in the box, the box
+  // takes focus, and the person decides whether to send it. Never dropped,
+  // never sent on their behalf.
+  useEffect(() => {
+    if (!prefill) return;
+    setValue((prev) => (prev.trim() ? `${prev}\n${prefill}` : prefill));
+    ref.current?.focus();
+  }, [prefill]);
 
   function submit() {
     const t = value.trim();

@@ -594,6 +594,43 @@ function daysUntil(iso: string): number {
 }
 
 /**
+ * QA Q-4 — did this page load come through OUR OWN door?
+ *
+ * The `?say=` hand-off is produced only by our auth surfaces
+ * (`getSafeReturnPath` over the `next` the landing built), and the last hop
+ * of the real journey is a navigation FROM this origin: the login form's
+ * `window.location.assign(nextPath)`. Our Referrer-Policy is
+ * `strict-origin-when-cross-origin` (next.config), which sends the FULL
+ * referrer same-origin, so that arrival reports `document.referrer` =
+ * our own `/auth/login?next=…` URL. A `/dashboard?say=<X>` link pasted
+ * anywhere else arrives with a foreign referrer — or with an EMPTY one
+ * (messaging apps, mail clients, `rel="noreferrer"`, the address bar).
+ * Empty is exactly what a hostile link can arrange, so empty is NOT trusted.
+ *
+ * Verified consequences for the real journeys: password login → same-origin
+ * → the sentence is sent as before. E-mail-confirmation signup (the link is
+ * opened from a mail client; the callback 302-chains into onboarding, and
+ * the onboarding action's redirect is a client-side navigation that keeps
+ * the document's referrer) and the Google callback (arrives from Google's
+ * origin) report a foreign or empty referrer and take the fallback: the
+ * sentence is placed in the composer for the person to send — never
+ * dropped, never sent for them. What this rule cannot tell apart is a
+ * person who deliberately types their password after following a crafted
+ * `/auth/login?next=/dashboard?say=…` link — that is the same shape as the
+ * landing hand-off itself and needs the person's own credentials; recorded,
+ * not closed here.
+ */
+function referrerIsOurOwnDoor(): boolean {
+  try {
+    const ref = document.referrer;
+    if (!ref) return false;
+    return new URL(ref).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The real conversation window (Real Conversation UI). The WHOLE surface is one
  * chat: a message stream + a bottom composer. The empty state greets the user
  * and offers a few conversation starters; picking one becomes a user message
@@ -830,6 +867,9 @@ export function ConversationChat({
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
+  /** QA Q-4: a `?say=` sentence that did NOT arrive through our own door is
+   *  handed to the composer for the person to send — see `referrerIsOurOwnDoor`. */
+  const [sayPrefill, setSayPrefill] = useState("");
 
   /**
    * Transcript persistence (owner-gated schema). While the RED migration is
@@ -4166,6 +4206,9 @@ export function ConversationChat({
   const handleSend = useCallback(
     (text: string) => {
       user(text);
+      // QA Q-4: whatever is sent, a pending hand-off is consumed — the composer
+      // that mounts after the first turn must not offer the sentence again.
+      setSayPrefill("");
 
       // V10 §36: an explicit correction ("Ne 30, o 300 kg") of the LAST
       // interpretation replaces exactly the corrected fact and re-renders
@@ -4588,6 +4631,12 @@ export function ConversationChat({
    * it. Bounded to the same 500 characters the proposer accepts. Consumed for
    * every identity: an organisation's "Reikia 12 pastolininkų" must land in
    * the demand flow exactly as if typed.
+   *
+   * QA Q-4: it is SENT only when the page load came through our own door
+   * (`referrerIsOurOwnDoor` — same-origin referrer). Otherwise a link anyone
+   * could paste would persist a turn in the person's name and spend a
+   * proposer call; then the sentence is PREFILLED in the composer for the
+   * person to send — never silently dropped.
    */
   const sayConsumedRef = useRef(false);
   useEffect(() => {
@@ -4608,7 +4657,11 @@ export function ConversationChat({
     } catch {
       /* URL cleanup is cosmetic — never block the sentence on it. */
     }
-    handleSend(say.slice(0, 500));
+    if (referrerIsOurOwnDoor()) {
+      handleSend(say.slice(0, 500));
+    } else {
+      setSayPrefill(say.slice(0, 500));
+    }
   }, [auth?.profile, handleSend]);
 
   const nav = {
@@ -4826,6 +4879,7 @@ export function ConversationChat({
                   sendLabel={labels.send}
                   onSend={handleSend}
                   onAttach={handleAttach}
+                  prefill={sayPrefill}
                 />
               }
             />
@@ -4836,6 +4890,7 @@ export function ConversationChat({
                 sendLabel={labels.send}
                 onSend={handleSend}
                 onAttach={handleAttach}
+                prefill={sayPrefill}
               />
             )}
           </div>
