@@ -341,3 +341,73 @@ the caller's OWN need. That signal belongs on the canonical row
 (fill a missing `organizationName`, OR the ownership) instead of PREFERRING one
 of them, which is what #1560 currently does. Do that deliberately, with the
 #1560 tests updated, not as a side effect.
+
+---
+
+## 9. Window 4, close — both slices PROD_PROVEN; the deploy block cleared again
+
+### 9.1 #1560 organisation disclosure — **PROD_PROVEN** on `4ac7f22f`
+
+`walk-market-drilldown-4ac7f22f.log`, **18/18 PASS**. The two new checks:
+
+* the verified company is NAMED — the row reads
+  `mason · atviras poreikis · apytikslė vieta · **Labour market ai Sp. z o.o** · NL`,
+  where before it read `nenurodyta`;
+* the `organizacija` gap chip is gone for that row.
+
+And the honest half held: the employer's OWN LT need still renders
+`nenurodyta`, because the own-rows branch has no company column and never
+borrows the viewer's workspace name.
+
+### 9.2 #1562 own-demand candidates — **PROD_PROVEN** on `6a5c6030`
+
+`walk-market-drilldown-6a5c6030.log`, **22/22 PASS**. Both halves of the rule,
+proven against real rows:
+
+| | own need (`b0a48f65`, the viewer's) | another tenant's need (`a2ffd425`) |
+|---|---|---|
+| `open-candidates` | **1** | **0** |
+| `people-not-yet` | **0** | **1** |
+| click | → `?result=candidates&demand=b0a48f65…` | not offered |
+
+So the drilldown now leads somewhere real for the person who owns the demand,
+and still says the honest not-yet line to everyone else — because
+`runScouting` is scoped to own demand and would dead-end otherwise.
+
+**Readback after both walks:** `customer_requests` 20 (12 submitted) —
+UNCHANGED; `billing_checkout_operations` 1 (the expired one from §1.2);
+`billing_subscriptions` 0; `payment_webhook_events` 0. The walks are
+read-only and left no residue.
+
+### 9.3 Counts — deliberately NOT moved
+
+PROD_PROVEN stays **61 / 75**. Neither slice closes a completion-map ITEM:
+both are quality/coherence fixes inside surfaces already counted (L1 / the
+proven market chain). Reporting 62 or 63 would be double-counting, which §0 of
+this checkpoint already refused once.
+
+### 9.4 The deploy block, twice in one window
+
+It cleared, re-engaged after #1560 merged at 20:35 UTC (§8.2), then cleared
+again on its own — production went `da1ba2eb` → `4ac7f22f` → `6a5c6030`
+without any intervention. No paid plan, no retries, no probing pushes. M1
+remains `EXTERNAL_BLOCKED (intermittent)`; the pattern to expect is minutes-to-
+an-hour of stall, not a day. The walk's `EXPECT_BUILD` guard is what makes this
+safe to work through: it refused to run twice against a stale build and never
+produced a false pass.
+
+### 9.5 What is left, honestly
+
+Nothing autonomous remains on the completion map (the §8.3 table stands). The
+whole remainder is the owner batch — superadmin reconcile, the
+`billing_customers` stale `test_mode`, G-12/#1430, G-1, G-14, G-15/#1436,
+`INVITE_EMAIL_*`, the Vercel plan, the L1 inner-page-navigation decision — plus
+the five billing stages and M5, which need the first real paying customer and
+the first real recruiter.
+
+**G-14 still interacts with the proof**: `E2E Walker UAB` has 0 verified
+companies, which is exactly why its LT need reaches the map only through the
+own-rows leg and why both the isolation check AND the new ownership check are
+meaningful. If G-14 is closed, that need enters the worker feed; update the
+fixture/negative control rather than reading newly lawful visibility as a
+regression.

@@ -172,6 +172,22 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
     !/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(people));
   await p.screenshot({ path: path.join(OUT, "04-people-continuation.png") });
 
+  // ── 4c. the OWN need offers a REAL next step, and it navigates ────────────
+  const ownCandidates = await p.getByTestId("open-candidates").count();
+  const ownNotYet = await p.getByTestId("people-not-yet").count();
+  log({ step: "own_need_continuation", openCandidates: ownCandidates, notYet: ownNotYet });
+  must("the viewer's OWN need offers the candidates step, not a not-yet note",
+    ownCandidates === 1 && ownNotYet === 0, { ownCandidates, ownNotYet });
+  if (ownCandidates === 1) {
+    await p.getByTestId("open-candidates").click();
+    await p.waitForTimeout(6000);
+    const url = p.url();
+    log({ step: "candidates_navigation", url });
+    must("it opens the candidates result for THAT demand",
+      /result=candidates/.test(url) && url.includes("demand=" + NEED_ID), url);
+    await p.screenshot({ path: path.join(OUT, "05-candidates.png") });
+  }
+
   log({ step: "hygiene", consoleErrors, failedRequests });
   must("no failed request on the journey", failedRequests.length === 0, failedRequests);
 
@@ -201,6 +217,21 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
     must("and the organisation gap chip is gone for that row",
       !!nlRow && !/organizacija/i.test(nlRow.text), nlRow && nlRow.text);
     await p.screenshot({ path: path.join(OUT, "06-marketplace-leg.png") });
+
+    // Depth 2 on the OTHER tenant's need: the own-demand action must NOT be
+    // offered there. This is the negative half of the same rule.
+    if (nlRow) {
+      await p.locator(`[data-project-id="${nlRow.id}"]`).first().click().catch(() => {});
+      await p.getByTestId("continue-to-people").waitFor({ timeout: 60000 }).catch(() => {});
+      await p.getByTestId("continue-to-people").click().catch(() => {});
+      await p.getByTestId("people-continuation").waitFor({ timeout: 30000 }).catch(() => {});
+      const otherCandidates = await p.getByTestId("open-candidates").count();
+      const otherNotYet = await p.getByTestId("people-not-yet").count();
+      log({ step: "other_tenant_continuation", openCandidates: otherCandidates, notYet: otherNotYet });
+      must("another tenant's need is NOT offered the own-demand action",
+        otherCandidates === 0 && otherNotYet === 1, { otherCandidates, otherNotYet });
+      await p.screenshot({ path: path.join(OUT, "07-other-tenant-continuation.png") });
+    }
   }
 
   // ── 5. tenant isolation — the same URL, a different tenant ────────────────
