@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { getBillingConfig } from "@/lib/billing/config";
+import { isStripeActive } from "@/lib/billing/config-core";
 
 /**
  * Concierge-first commercial offer (launch repair Scope C).
@@ -23,6 +25,10 @@ import { Link } from "@/lib/i18n/navigation";
 
 export async function ConciergeAccessBanner() {
   const t = await getTranslations("conciergeOffer.banner");
+  // With Stripe LIVE the sentence "public payments are not enabled yet" would
+  // be false (prod walk b6a2e7bf, 2026-09-05). The concierge offer itself stays:
+  // the live variant keeps the direct-service promise without the claim.
+  const live = isStripeActive(getBillingConfig());
 
   return (
     <section
@@ -33,8 +39,8 @@ export async function ConciergeAccessBanner() {
         <span className="rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
           {t("badge")}
         </span>
-        <p className="min-w-0 flex-1 text-xs leading-relaxed text-text-secondary">
-          {t("body")}
+        <p className="min-w-0 flex-1 text-xs leading-relaxed text-text-secondary" data-billing-live={live ? "true" : "false"}>
+          {live ? t("bodyLive") : t("body")}
         </p>
         <Link
           href="/company-need"

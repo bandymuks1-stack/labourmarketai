@@ -8506,6 +8506,7 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Early Access",
+      "bodyLive": "Der Organisationsplan kann im Konto per sicherer Zahlung aktiviert werden. Die ersten Kunden betreuen wir weiterhin direkt: eine Personalanfrage ist kostenlos, der endgültige Umfang wird vor Beginn vereinbart.",
       "body": "Öffentliche Zahlungen sind noch nicht aktiviert. Die ersten Kunden werden direkt betreut: Das Einreichen einer Personalanfrage ist kostenlos, und der endgültige Preis wird immer mit Ihnen bestätigt, bevor bezahlte Arbeit beginnt.",
       "cta": "Personalanfrage einreichen"
     },
