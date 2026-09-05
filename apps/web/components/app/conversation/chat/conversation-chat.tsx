@@ -58,6 +58,8 @@ import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { loadOpenTasksForChat } from "@/lib/conversation/company-tasks";
 import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
 import { loadProjectReadinessForChat } from "@/lib/conversation/project-readiness";
+import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal";
+import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
@@ -3884,14 +3886,16 @@ export function ConversationChat({
       }
 
       const { intent } = classifyIntent(text);
-      // Chat-first execution funnel: was the sentence understood at all? The
-      // intent id and the coarse role only — never the sentence.
-      trackFunnel(
-        intent === "unknown"
-          ? FUNNEL_EVENTS.chatIntentUnrecognized
-          : FUNNEL_EVENTS.chatIntentRecognized,
-        { surface: "chat", step: intent, role_context: roleContextNow },
-      );
+      // Chat-first execution funnel: was the sentence understood, and by WHOM —
+      // the deterministic router (the always-on floor) or, for a sentence it
+      // could not read, the Gemini proposer (owner approval 2026-09-05). The
+      // intent id, the coarse role and the resolution only — never the sentence.
+      const trackResolution = (resolved: ConversationIntent, resolution: "deterministic" | "llm") =>
+        trackFunnel(
+          resolved === "unknown" ? FUNNEL_EVENTS.chatIntentUnrecognized : FUNNEL_EVENTS.chatIntentRecognized,
+          { surface: "chat", step: resolved, role_context: roleContextNow, resolution },
+        );
+      if (intent !== "unknown") trackResolution(intent, "deterministic");
 
       // MY SPACE §4C — the typed sentence is a use of the SAME reference its
       // chip carries ("užrašyk darbą" three times = the log-work chip three
@@ -4228,11 +4232,33 @@ export function ConversationChat({
         messages: () => startMessages(),
         writeEmployer: () => assistant(labels.writeEmployerHint),
       };
-      dispatchIntent(intent, handlers, withTyping, () =>
-        assistant(fallbackText, starterChips),
-      );
+      const fallback = () => assistant(fallbackText, starterChips);
+      if (intent !== "unknown") {
+        dispatchIntent(intent, handlers, withTyping, fallback);
+        return;
+      }
+      // THE GEMINI PROPOSER (owner approval 2026-09-05): asked ONLY about a
+      // sentence the deterministic router could not read. Only an EXISTING
+      // intent id can come back (re-validated server-side against the
+      // registry); it then runs the SAME handler the deterministic path would
+      // have run — the handler asks for what is missing from real rows, and
+      // every write still goes through the dispatcher. Low confidence is
+      // honestly "not understood", never a guess.
+      setTyping(true);
+      proposeConversationIntentAction({ sentence: text, locale, identity })
+        .then((res) => {
+          setTyping(false);
+          const resolved: ConversationIntent = res.kind === "proposal" && res.confidence !== "low" ? res.intent : "unknown";
+          trackResolution(resolved, res.kind === "proposal" ? "llm" : "deterministic");
+          dispatchIntent(resolved, handlers, withTyping, fallback);
+        })
+        .catch(() => {
+          setTyping(false);
+          trackResolution("unknown", "deterministic");
+          dispatchIntent("unknown", handlers, withTyping, fallback);
+        });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   const nav = {
