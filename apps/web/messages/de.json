@@ -11641,6 +11641,18 @@
           "label": "Aufgabenstatus ändern",
           "description": "Eine Aufgabe erhält einen echten Status — in Arbeit, erledigt, blockiert."
         },
+        "setReadinessItem": {
+          "label": "Listenpunkt markieren",
+          "description": "Ein Listenpunkt eines Projektmitarbeiters erhält einen echten Status — benötigt, erhalten, geprüft."
+        },
+        "seedReadinessChecklist": {
+          "label": "Dokumentenliste beginnen",
+          "description": "Für alle Personen im Projekt wird die Standard-Bereitschafts-/Dokumentenliste begonnen."
+        },
+        "requestReadiness": {
+          "label": "Fehlendes anfragen",
+          "description": "Der Mitarbeiter erhält eine Arbeitsanweisung mit dem, was dem Projekt noch fehlt."
+        },
         "respondOffer": {
           "label": "Angebot einer Agentur beantworten",
           "description": "Einen von einer Agentur vorgeschlagenen Kandidaten annehmen oder ablehnen."
@@ -12155,6 +12167,30 @@
       "riskNone": "Noch keine aktiven Projekte — legen Sie das erste an.",
       "riskUnavailable": "Der Projektstand konnte gerade nicht gelesen werden.",
       "chipCreateProject": "Projekt anlegen",
+      "readinessIntro": "Bereitschaft „{title}“ — {ready} von {people} bereit:",
+      "readinessReadyLine": "• {name} — bereit ({checked}/{total})",
+      "readinessGapLine": "• {name} — fehlt: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Noch keine Dokumentenliste geführt — beginnen Sie sie in der Projektsteuerung.",
+      "readinessNoPeople": "Auf diesem Projekt ist noch niemand.",
+      "readinessAsk": "Welches Projekt? Bitte wählen:",
+      "readinessNotFound": "Dieses Projekt finde ich unter den aktiven nicht. Welches meinten Sie?",
+      "readinessUnavailable": "Die Bereitschaft konnte gerade nicht gelesen werden.",
+      "chipReadinessPrefix": "Bereitschaft",
+      "chipOpenOperations": "Projektsteuerung öffnen",
+      "missingName": "ein Name",
+      "missingDeclaredSkills": "angegebene Fähigkeiten",
+      "missingEvidence": "Arbeitsnachweise",
+      "blockedSuffix": "(abgelehnt / abgelaufen)",
+      "readinessSeedChip": "Dokumentenliste beginnen ({count} Pers.)",
+      "readinessSeeded": "Liste begonnen: {count} Pers. × {items} Punkte — alle „benötigt“.",
+      "readinessGotChip": "Erhalten: {label} ({name})",
+      "readinessGotDone": "Als erhalten markiert: {label} ({name}).",
+      "readinessAskChip": "Anfragen: {name}",
+      "readinessAskDone": "Anweisung gesendet: {name} sieht sie in den Nachrichten.",
+      "readinessRequestBody": "Für das Projekt „{title}“ bitte einreichen: {items}.",
+      "readinessWriteFailed": "Die Änderung konnte nicht vorgenommen werden.",
+      "briefInstructions": "Wartende Anweisungen: {count}.",
+      "chipInstructions": "Anweisungen",
       "pinFirstPrefix": "Nach vorn",
       "reorderDone": "Erledigt: „{label}“ steht jetzt vorn.",
       "documentFileOffer": "Dokument erfasst. Die Datei können Sie gleich hier anhängen — PDF, Word oder ein Foto bis 5 MB.",

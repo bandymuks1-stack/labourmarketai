@@ -3412,6 +3412,18 @@
           "label": "Mainīt uzdevuma statusu",
           "description": "Uzdevums tiek atzīmēts ar reālu statusu — izpildē, paveikts, bloķēts."
         },
+        "setReadinessItem": {
+          "label": "Atzīmēt saraksta punktu",
+          "description": "Projekta darbinieka saraksta punkts tiek atzīmēts ar reālu statusu — nepieciešams, saņemts, pārbaudīts."
+        },
+        "seedReadinessChecklist": {
+          "label": "Sākt dokumentu sarakstu",
+          "description": "Visiem projekta cilvēkiem tiek sākts standarta gatavības / dokumentu saraksts."
+        },
+        "requestReadiness": {
+          "label": "Pieprasīt trūkstošo",
+          "description": "Darbinieks saņem darba norādījumu ar to, kas projektam no viņa vēl trūkst."
+        },
         "respondOffer": {
           "label": "Atbildēt uz aģentūras piedāvājumu",
           "description": "Pieņemt vai noraidīt aģentūras piedāvāto kandidātu jūsu vajadzībai."
@@ -3854,6 +3866,30 @@
       "riskNone": "Aktīvu projektu pagaidām nav — izveidojiet pirmo.",
       "riskUnavailable": "Projektu stāvokli šobrīd neizdevās nolasīt.",
       "chipCreateProject": "Izveidot projektu",
+      "readinessIntro": "Gatavība „{title}“ — gatavi {ready} no {people}:",
+      "readinessReadyLine": "• {name} — gatavs ({checked}/{total})",
+      "readinessGapLine": "• {name} — trūkst: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Dokumentu saraksts vēl netiek uzturēts — sāciet to projekta pārvaldībā.",
+      "readinessNoPeople": "Projektā vēl nav cilvēku.",
+      "readinessAsk": "Kurš projekts? Izvēlieties:",
+      "readinessNotFound": "Tādu projektu starp aktīvajiem neatrodu. Kuru domājāt?",
+      "readinessUnavailable": "Gatavību šobrīd neizdevās nolasīt.",
+      "chipReadinessPrefix": "Gatavība",
+      "chipOpenOperations": "Atvērt projekta pārvaldību",
+      "missingName": "vārda",
+      "missingDeclaredSkills": "norādīto prasmju",
+      "missingEvidence": "darba pierādījumu",
+      "blockedSuffix": "(noraidīts / beidzies)",
+      "readinessSeedChip": "Sākt dokumentu sarakstu ({count} cilv.)",
+      "readinessSeeded": "Saraksts sākts: {count} cilv. × {items} punkti — visi „nepieciešams“.",
+      "readinessGotChip": "Saņemts: {label} ({name})",
+      "readinessGotDone": "Atzīmēts kā saņemts: {label} ({name}).",
+      "readinessAskChip": "Pieprasīt: {name}",
+      "readinessAskDone": "Norādījums nosūtīts: {name} to redzēs savās ziņās.",
+      "readinessRequestBody": "Projektam „{title}“ lūdzam iesniegt: {items}.",
+      "readinessWriteFailed": "Izmaiņu neizdevās veikt.",
+      "briefInstructions": "Gaida norādījumi: {count}.",
+      "chipInstructions": "Norādījumi",
       "pinFirstPrefix": "Uz priekšu",
       "reorderDone": "Gatavs: “{label}” tagad ir pirmais.",
       "documentFileOffer": "Dokuments ierakstīts. Failu varat pievienot šeit — PDF, Word vai foto līdz 5 MB.",

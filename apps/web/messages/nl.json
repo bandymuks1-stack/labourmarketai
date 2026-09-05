@@ -11641,6 +11641,18 @@
           "label": "Taakstatus wijzigen",
           "description": "Een taak krijgt een echte status — in uitvoering, klaar, geblokkeerd."
         },
+        "setReadinessItem": {
+          "label": "Lijstpunt markeren",
+          "description": "Een lijstpunt van een projectmedewerker krijgt een echte status — nodig, ontvangen, gecontroleerd."
+        },
+        "seedReadinessChecklist": {
+          "label": "Documentenlijst starten",
+          "description": "Voor iedereen op het project wordt de standaard gereedheids-/documentenlijst gestart."
+        },
+        "requestReadiness": {
+          "label": "Ontbrekende opvragen",
+          "description": "De medewerker ontvangt een werkinstructie met wat het project nog van hem nodig heeft."
+        },
         "respondOffer": {
           "label": "Aanbod van een bureau beantwoorden",
           "description": "Accepteer of wijs een kandidaat af die een bureau voor uw behoefte aanbood."
@@ -12155,6 +12167,30 @@
       "riskNone": "Nog geen actieve projecten — maak het eerste aan.",
       "riskUnavailable": "De projectstand kon nu niet worden gelezen.",
       "chipCreateProject": "Project aanmaken",
+      "readinessIntro": "Gereedheid “{title}” — {ready} van {people} klaar:",
+      "readinessReadyLine": "• {name} — klaar ({checked}/{total})",
+      "readinessGapLine": "• {name} — ontbreekt: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Er wordt nog geen documentenlijst bijgehouden — begin die in het projectbeheer.",
+      "readinessNoPeople": "Er staat nog niemand op dit project.",
+      "readinessAsk": "Welk project? Kies er een:",
+      "readinessNotFound": "Dat project vind ik niet tussen de actieve. Welk bedoelde u?",
+      "readinessUnavailable": "De gereedheid kon nu niet worden gelezen.",
+      "chipReadinessPrefix": "Gereedheid",
+      "chipOpenOperations": "Projectbeheer openen",
+      "missingName": "een naam",
+      "missingDeclaredSkills": "opgegeven vaardigheden",
+      "missingEvidence": "werkbewijs",
+      "blockedSuffix": "(afgewezen / verlopen)",
+      "readinessSeedChip": "Documentenlijst starten ({count} pers.)",
+      "readinessSeeded": "Lijst gestart: {count} pers. × {items} punten — alle “nodig”.",
+      "readinessGotChip": "Ontvangen: {label} ({name})",
+      "readinessGotDone": "Gemarkeerd als ontvangen: {label} ({name}).",
+      "readinessAskChip": "Vragen: {name}",
+      "readinessAskDone": "Instructie verzonden: {name} ziet die in de berichten.",
+      "readinessRequestBody": "Voor project “{title}” graag aanleveren: {items}.",
+      "readinessWriteFailed": "De wijziging kon niet worden gedaan.",
+      "briefInstructions": "Wachtende instructies: {count}.",
+      "chipInstructions": "Instructies",
       "pinFirstPrefix": "Vooraan zetten",
       "reorderDone": "Klaar: “{label}” staat nu vooraan.",
       "documentFileOffer": "Document vastgelegd. U kunt het bestand hier direct toevoegen — PDF, Word of een foto tot 5 MB.",

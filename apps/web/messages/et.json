@@ -3412,6 +3412,18 @@
           "label": "Muuda ülesande olekut",
           "description": "Ülesanne märgitakse tegeliku olekuga — töös, tehtud, blokeeritud."
         },
+        "setReadinessItem": {
+          "label": "Märgi nimekirja punkt",
+          "description": "Projekti töötaja nimekirja punkt märgitakse tegeliku olekuga — vajalik, saadud, kontrollitud."
+        },
+        "seedReadinessChecklist": {
+          "label": "Alusta dokumentide nimekirja",
+          "description": "Kõigile projekti inimestele alustatakse standardset valmisoleku / dokumentide nimekirja."
+        },
+        "requestReadiness": {
+          "label": "Küsi puuduvat",
+          "description": "Töötaja saab tööjuhise sellega, mida projekt temalt veel vajab."
+        },
         "respondOffer": {
           "label": "Vasta agentuuri pakkumisele",
           "description": "Võta vastu või lükka tagasi agentuuri pakutud kandidaat teie vajadusele."
@@ -3854,6 +3866,30 @@
       "riskNone": "Aktiivseid projekte veel pole — looge esimene.",
       "riskUnavailable": "Projektide seisu ei õnnestunud praegu lugeda.",
       "chipCreateProject": "Loo projekt",
+      "readinessIntro": "Valmisolek „{title}“ — valmis {ready} / {people}:",
+      "readinessReadyLine": "• {name} — valmis ({checked}/{total})",
+      "readinessGapLine": "• {name} — puudub: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Dokumentide nimekirja veel ei peeta — alustage seda projekti juhtimises.",
+      "readinessNoPeople": "Projektis pole veel kedagi.",
+      "readinessAsk": "Milline projekt? Valige:",
+      "readinessNotFound": "Sellist projekti aktiivsete seast ei leia. Millist mõtlesite?",
+      "readinessUnavailable": "Valmisolekut ei õnnestunud praegu lugeda.",
+      "chipReadinessPrefix": "Valmisolek",
+      "chipOpenOperations": "Ava projekti juhtimine",
+      "missingName": "nimi",
+      "missingDeclaredSkills": "märgitud oskused",
+      "missingEvidence": "töö tõendid",
+      "blockedSuffix": "(tagasi lükatud / aegunud)",
+      "readinessSeedChip": "Alusta dokumentide nimekirja ({count} in.)",
+      "readinessSeeded": "Nimekiri alustatud: {count} in. × {items} punkti — kõik „vajalik“.",
+      "readinessGotChip": "Saadud: {label} ({name})",
+      "readinessGotDone": "Märgitud saaduks: {label} ({name}).",
+      "readinessAskChip": "Küsi: {name}",
+      "readinessAskDone": "Juhis saadetud: {name} näeb seda oma sõnumites.",
+      "readinessRequestBody": "Projekti „{title}“ jaoks palume esitada: {items}.",
+      "readinessWriteFailed": "Muudatust ei õnnestunud teha.",
+      "briefInstructions": "Ootel juhised: {count}.",
+      "chipInstructions": "Juhised",
       "pinFirstPrefix": "Ettepoole",
       "reorderDone": "Tehtud: „{label}“ on nüüd esimene.",
       "documentFileOffer": "Dokument kirja pandud. Faili saate lisada siinsamas — PDF, Word või foto kuni 5 MB.",

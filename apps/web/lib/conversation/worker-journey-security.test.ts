@@ -112,6 +112,19 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/invitations/actions",
       "@/lib/telemetry/server-funnel",
       "@/lib/telemetry/funnel-events",
+      // Owner correction 2026-09-05 (§11/§12/§16 — readiness must end in a
+      // corrective ACTION, not a read): the operations page's OWN checklist
+      // writes (upsert / seed, both over `upsert_worker_readiness_item`), the
+      // operations centre's own read to list the people a seed covers (RLS:
+      // null = not the caller's project), the default checklist KEYS (labels
+      // come from `projectOps.defaults` in the caller's locale — hence
+      // next-intl server), and the instructions page's own send (a work
+      // instruction in the project's thread). Added consciously; no RPC here.
+      "@/lib/projects/operations-actions",
+      "@/lib/projects/operations",
+      "@/lib/projects/readiness-items",
+      "@/lib/instructions/actions",
+      "next-intl/server",
     ]);
     const imports = [...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]);
     expect(imports.length).toBeGreaterThan(5);

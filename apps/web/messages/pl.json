@@ -3412,6 +3412,18 @@
           "label": "Zmień status zadania",
           "description": "Zadanie otrzymuje rzeczywisty status — w toku, wykonane, zablokowane."
         },
+        "setReadinessItem": {
+          "label": "Oznacz pozycję listy",
+          "description": "Pozycja listy pracownika projektu otrzymuje rzeczywisty status — potrzebne, otrzymane, sprawdzone."
+        },
+        "seedReadinessChecklist": {
+          "label": "Rozpocznij listę dokumentów",
+          "description": "Dla wszystkich osób w projekcie rozpoczyna się standardowa lista gotowości / dokumentów."
+        },
+        "requestReadiness": {
+          "label": "Poproś o brakujące",
+          "description": "Pracownik otrzymuje polecenie pracy z tym, czego projekt jeszcze od niego potrzebuje."
+        },
         "respondOffer": {
           "label": "Odpowiedz na ofertę agencji",
           "description": "Przyjmij lub odrzuć kandydata zaproponowanego przez agencję do Twojej potrzeby."
@@ -3854,6 +3866,30 @@
       "riskNone": "Nie ma jeszcze aktywnych projektów — utwórz pierwszy.",
       "riskUnavailable": "Nie udało się teraz odczytać stanu projektów.",
       "chipCreateProject": "Utwórz projekt",
+      "readinessIntro": "Gotowość „{title}” — gotowych {ready} z {people}:",
+      "readinessReadyLine": "• {name} — gotowy ({checked}/{total})",
+      "readinessGapLine": "• {name} — brakuje: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Lista dokumentów nie jest jeszcze prowadzona — zacznij ją w zarządzaniu projektem.",
+      "readinessNoPeople": "W projekcie nie ma jeszcze ludzi.",
+      "readinessAsk": "Który projekt? Wybierz:",
+      "readinessNotFound": "Nie znajduję takiego projektu wśród aktywnych. Który miałeś na myśli?",
+      "readinessUnavailable": "Nie udało się teraz odczytać gotowości.",
+      "chipReadinessPrefix": "Gotowość",
+      "chipOpenOperations": "Otwórz zarządzanie projektem",
+      "missingName": "imienia",
+      "missingDeclaredSkills": "zadeklarowanych umiejętności",
+      "missingEvidence": "dowodów pracy",
+      "blockedSuffix": "(odrzucone / wygasłe)",
+      "readinessSeedChip": "Rozpocznij listę dokumentów ({count} os.)",
+      "readinessSeeded": "Lista rozpoczęta: {count} os. × {items} pozycji — wszystkie „potrzebne”.",
+      "readinessGotChip": "Otrzymano: {label} ({name})",
+      "readinessGotDone": "Oznaczono jako otrzymane: {label} ({name}).",
+      "readinessAskChip": "Poproś: {name}",
+      "readinessAskDone": "Polecenie wysłane: {name} zobaczy je w swoich wiadomościach.",
+      "readinessRequestBody": "Do projektu „{title}” prosimy dostarczyć: {items}.",
+      "readinessWriteFailed": "Nie udało się wprowadzić zmiany.",
+      "briefInstructions": "Oczekujące polecenia: {count}.",
+      "chipInstructions": "Polecenia",
       "pinFirstPrefix": "Na początek",
       "reorderDone": "Gotowe: „{label}” jest teraz pierwsze.",
       "documentFileOffer": "Dokument zapisany. Plik możesz dodać tutaj — PDF, Word lub zdjęcie do 5 MB.",

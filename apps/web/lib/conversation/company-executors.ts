@@ -16,6 +16,11 @@ import { inviteClientAction, respondCandidateOfferAction, submitOfferAction, typ
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
+import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/projects/operations-actions";
+import { getProjectOperations } from "@/lib/projects/operations";
+import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { sendWorkInstructionAction } from "@/lib/instructions/actions";
+import { getTranslations } from "next-intl/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   createCohortAction,
@@ -359,6 +364,51 @@ export const COMPANY_EXECUTORS: {
     if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
     if (r.kind === "invalid" || r.kind === "invalid_transition" || r.kind === "not_found") return { ok: false, code: "invalid" };
     return { ok: false, code: "error", message: r.message };
+  },
+
+  "company.set-readiness-item": async (input) => {
+    // READINESS is the manager-kept checklist row — the SAME write the
+    // operations page's checklist control calls; the RPC re-checks the gate.
+    const r = await upsertReadinessItemAction({
+      projectId: input.projectId,
+      workerProfileId: input.workerProfileId,
+      itemKey: input.itemKey,
+      label: input.label,
+      status: input.status,
+    });
+    if (r.ok) return { ok: true, data: { status: input.status } };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+  },
+
+  "company.seed-readiness-checklist": async (input, ctx) => {
+    // Start the standard checklist for EVERY person on the project — the same
+    // seed the operations page runs per person, with the same default labels
+    // (`projectOps.defaults`, in the caller's locale). The people come from the
+    // operations centre's own read (RLS: null = not the caller's project).
+    const ops = await getProjectOperations(input.projectId);
+    if (!ops) return { ok: false, code: "not_authorized" };
+    const t = await getTranslations({ locale: ctx.locale, namespace: "projectOps.defaults" });
+    const items = DEFAULT_READINESS_ITEM_KEYS.map((itemKey) => ({ itemKey, label: t(itemKey) }));
+    let seeded = 0;
+    for (const w of ops.workers) {
+      if (w.readinessItems.length > 0) continue;
+      const r = await seedReadinessItemsAction({ projectId: input.projectId, workerProfileId: w.workerProfileId, items });
+      if (!r.ok) return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
+      seeded += 1;
+    }
+    return { ok: true, data: { seeded, items: items.length } };
+  },
+
+  "company.request-readiness": async (input) => {
+    // "Ask the person" = a WORK INSTRUCTION in the project's thread — the same
+    // canonical send the instructions page uses; the RPC requires an ACTIVE
+    // assignment on the project and that the caller manages the worker.
+    const r = await sendWorkInstructionAction(
+      null,
+      fd({ worker_profile_id: input.workerProfileId, body: input.body, project_id: input.projectId }),
+    );
+    if (r.ok) return { ok: true };
+    return { ok: false, code: r.code === "auth" ? "not_authorized" : r.code, message: r.message };
   },
 
   "company.respond-offer": async (input) => {

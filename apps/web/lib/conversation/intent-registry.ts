@@ -120,6 +120,7 @@ export type IntentHandlerId =
   | "stageStatus"
   | "taskStatus"
   | "projectRisk"
+  | "projectReadiness"
   | "moveWorker";
 
 export type IntentDescriptor = {
@@ -250,6 +251,7 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "move-worker": { domain: "project", access: "write", handler: "moveWorker", ownTyping: true },
   "task-status": { domain: "project", access: "write", handler: "taskStatus", ownTyping: true },
   "project-risk": { domain: "project", access: "read", handler: "projectRisk", ownTyping: true },
+  "project-readiness": { domain: "project", access: "read", handler: "projectReadiness", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

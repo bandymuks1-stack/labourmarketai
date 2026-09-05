@@ -47,8 +47,10 @@ describe("the intent registry is the enumerable routing contract", () => {
     // with `stage-status` (a stage moved to a real status, write); 57 → 58
     // with `move-worker` (§11 what-if move between projects, write); 58 → 60
     // with `task-status` (§14 a task moved to a real status, write) and
-    // `project-risk` (every live project's real signals, read).
-    expect(entries.length).toBe(60);
+    // `project-risk` (every live project's real signals, read); 60 → 61 with
+    // `project-readiness` (the people on a live project and what each still
+    // needs, read).
+    expect(entries.length).toBe(61);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
