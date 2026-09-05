@@ -18,6 +18,7 @@ import {
 import {
   COMPLETENESS_FIELDS,
   DEMAND_SOURCE,
+  type DemandUnitKind,
   type MatchReason,
   type MissingField,
   type ProjectEvaluation,
@@ -285,6 +286,7 @@ function ProjectRow({
         onClick={() => onOpen(row.projectId)}
         data-testid="project-row"
         data-project-id={row.projectId}
+        data-unit-kind={row.unitKind}
         data-project-precision={row.precision}
         className="w-full rounded-card border border-ink-500 bg-ink-800/50 p-3 text-left hover:border-brand-blue"
       >
@@ -292,6 +294,7 @@ function ProjectRow({
           <span className="min-w-0 flex-1 break-words font-display text-card-title font-semibold text-text-primary">
             {row.title ?? t("notStated")}
           </span>
+          <UnitKindBadge kind={row.unitKind} />
           <PrecisionBadge precision={row.precision} />
         </span>
 
@@ -743,6 +746,28 @@ function Field({
         {empty ? t("notStated") : value}
       </span>
     </div>
+  );
+}
+
+/**
+ * WHAT KIND OF UNIT THIS ROW IS — an open need, or a project.
+ *
+ * The drilldown lists whatever the canonical demand read returned, and those
+ * are not all the same shape: a `customer_requests` row is one open need an
+ * employer created, a project row carries several. Rendering both under one
+ * word would make the list claim a structure the row does not have, so the row
+ * says which it is instead of the heading guessing for it.
+ */
+function UnitKindBadge({ kind }: { kind: DemandUnitKind }) {
+  const t = useTranslations("conversation.results");
+  return (
+    <span
+      data-testid="unit-kind-badge"
+      data-unit-kind={kind}
+      className="flex-none rounded-md border border-ink-500 px-1.5 text-meta text-text-muted"
+    >
+      {kind === "need" ? t("unitKindNeed") : t("unitKindProject")}
+    </span>
   );
 }
 

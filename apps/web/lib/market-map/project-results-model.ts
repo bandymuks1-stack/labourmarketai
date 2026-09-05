@@ -11,6 +11,7 @@
  * reads, and hands the rows to `groupIntoProjects`. Splitting it that way also
  * means the shaping cannot accidentally acquire a second read path.
  */
+import type { CanonicalDemand } from "@/lib/demand/canonical-demand-model";
 import {
   projectMatchesGeography,
   type GeographySelection,
@@ -51,8 +52,37 @@ export const COMPLETENESS_FIELDS: readonly MissingField[] = [
   "organization",
 ];
 
-/** One project, with the demand behind it summed across its open needs. */
+/**
+ * WHAT ONE ROW IS.
+ *
+ * A row is ONE UNIT OF DEMAND under the selected marker, and it says WHICH KIND
+ * of unit it is so no surface has to guess:
+ *
+ *  - `"need"`    — a `customer_requests` row: the need an employer actually
+ *                  created through the proven employer flow, reached through
+ *                  the ONE canonical demand read. It has no project behind it,
+ *                  so the project-only fields (`endDate`, `projectStatus`,
+ *                  `requiredSkillIds`) are ABSENT — listed in `missing`, never
+ *                  filled with a zero or a placeholder.
+ *  - `"project"` — a project carrying project-scoped open needs: the historical
+ *                  `job_demands → projects` shape, frozen at 0 rows in
+ *                  production since 2026-08-17 and kept as vocabulary (see the
+ *                  header of `project-results.ts`).
+ *
+ * The kind is not cosmetic. A person must not read "project" over a row that is
+ * a single need, and the id in the URL belongs to whichever store the unit came
+ * from.
+ */
+export type DemandUnitKind = "project" | "need";
+
+/** One unit of demand under the marker — see `DemandUnitKind`. */
 export interface ProjectResultRow {
+  /** Which store this unit came from. Provenance, never re-derived downstream. */
+  readonly unitKind: DemandUnitKind;
+  /** The unit's canonical id IN ITS OWN STORE — a `projects.id` for a
+   *  `"project"` unit, a `customer_requests.id` for a `"need"` unit. It keeps
+   *  this name because it is the depth-2 address in the URL and every existing
+   *  caller addresses it that way. */
   readonly projectId: string;
   readonly title: string | null;
   /** Company display name, falling back to the legal name. Null when the
@@ -82,8 +112,12 @@ export interface ProjectResultRow {
 }
 
 /** The single demand-source statement, shown verbatim in the UI so the person
- *  can see which rows the answer came from. */
-export const DEMAND_SOURCE = "job_demands(status=open) → projects" as const;
+ *  can see which rows the answer came from.
+ *
+ *  It names the CANONICAL read, not a table, because that read is what both the
+ *  marker and this list now go through — and because naming `job_demands` here
+ *  while reading `customer_requests` is exactly the drift this slice closed. */
+export const DEMAND_SOURCE = "canonical demand (customer_requests, submitted)" as const;
 
 export type ProjectResultsState = "ok" | "empty" | "unsupported_precision" | "error";
 
@@ -211,6 +245,7 @@ export function groupIntoProjects(
     if (!organization) missing.push("organization");
 
     out.push({
+      unitKind: "project",
       projectId: p.id,
       title: p.title,
       organization,
@@ -234,6 +269,105 @@ export function groupIntoProjects(
 
   // Most demand first, then a stable tiebreak so the order never flickers
   // between reads (an unstable list reads as data changing when it has not).
+  out.sort(
+    (a, b) =>
+      b.openHeadcount - a.openHeadcount ||
+      (a.title ?? "").localeCompare(b.title ?? "") ||
+      a.projectId.localeCompare(b.projectId),
+  );
+  return out;
+}
+
+/**
+ * Shape the CANONICAL demand rows into units under the selected marker.
+ *
+ * THIS IS THE ROW THE PERSON ACTUALLY REACHES. Real demand in this platform is
+ * a `customer_requests` row created through the proven employer flow; it has no
+ * project behind it, so ONE canonical demand row is ONE unit. Nothing is
+ * merged: two needs from the same employer stay two rows, because they are two
+ * commitments with two headcounts and folding them would invent a third.
+ *
+ * SAME FILTER AS THE MARKER, LITERALLY. `projectMatchesGeography` is the same
+ * function `groupIntoProjects` uses and the same rule `market-result.ts`
+ * aggregates by, applied to the same canonical rows the marker was built from.
+ * So the count under the marker and the rows in this list agree by
+ * construction, which is what the header of `project-results.ts` has always
+ * claimed and what reading a second table quietly broke.
+ *
+ * NOTHING IS INVENTED. The canonical contract carries no project title, no
+ * company identity, no end date, no skill ids and no project status for a need
+ * — the worker-visible path is a closed column whitelist and the employer's own
+ * read is scoped to the same fields. Every one of those absences is declared in
+ * `missing` and rendered as an explicit gap. `title` is the employer's OWN role
+ * text, not a generated label; when they stated none, it stays null.
+ *
+ * The caller dedupes (`dedupeCanonicalDemand`) BEFORE this, exactly as the
+ * marker does, so one demand is one row even when two authorized branches
+ * returned it.
+ */
+export function groupIntoDemandUnits(
+  demand: readonly CanonicalDemand[],
+  geography: GeographySelection,
+  cityResolves: (country: string, city: string) => boolean,
+): ProjectResultRow[] {
+  const out: ProjectResultRow[] = [];
+
+  for (const row of demand) {
+    if (
+      !projectMatchesGeography(
+        { country: row.country, city: row.cityLabel },
+        geography,
+        cityResolves,
+      )
+    ) {
+      continue;
+    }
+    // The filter above already required an exact country match, so this is a
+    // narrowing, not a default.
+    const country = (row.country ?? "").toUpperCase();
+    if (country === "") continue;
+
+    const cityText = row.cityLabel?.trim() ?? "";
+    const resolved = cityText !== "" && cityResolves(country, cityText);
+    const role = row.roleText?.trim() || null;
+
+    const missing: MissingField[] = [];
+    if (cityText === "") missing.push("city");
+    // A canonical need carries no dates and no skill ids at all — the gap is
+    // structural, so it is ALWAYS stated rather than silently omitted.
+    missing.push("startDate");
+    missing.push("endDate");
+    if (!role) missing.push("roleTitle");
+    missing.push("requiredSkills");
+    if (row.quantity === null) missing.push("headcount");
+    // The employer's identity is deliberately outside both authorized reads.
+    missing.push("organization");
+
+    out.push({
+      unitKind: "need",
+      projectId: row.id,
+      title: role,
+      organization: null,
+      country,
+      city: cityText === "" ? null : cityText,
+      precision: resolved ? "city" : "country",
+      roles: role ? [role] : [],
+      requiredSkillIds: [],
+      openHeadcount: row.quantity ?? 0,
+      projectStatus: null,
+      startDate: null,
+      endDate: null,
+      openDemandCount: 1,
+      matchReason:
+        geography.precision === "city"
+          ? { code: "city_exact", city: geography.city ?? "", country }
+          : { code: "country_unresolved", country },
+      missing,
+    });
+  }
+
+  // The SAME order as the project list — most demand first, then a stable
+  // tiebreak so the sequence never flickers between reads.
   out.sort(
     (a, b) =>
       b.openHeadcount - a.openHeadcount ||
