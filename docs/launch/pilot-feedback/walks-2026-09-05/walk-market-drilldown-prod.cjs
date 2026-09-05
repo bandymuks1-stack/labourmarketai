@@ -47,12 +47,15 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
   const url = get("NEXT_PUBLIC_SUPABASE_URL"); if (!/gorgitwvdzxbnaxhrsrw/.test(url)) throw new Error("host");
   const admin = createClient(url, get("SUPABASE_SERVICE_ROLE_KEY"), { auth: { autoRefreshToken: false, persistSession: false } });
 
-  // PRE-FLIGHT: the walk asserts against a row that must still be there and still be canonical.
-  const pre = await admin.from("customer_requests")
-    .select("id, status, country, location, team_size, role_or_work_type").eq("id", NEED_ID).single();
-  if (pre.error) throw pre.error;
-  log({ step: "preflight_need", row: pre.data });
-  must("preflight: the need is still submitted, LT, city-less", pre.data.status === "submitted" && pre.data.country === "LT" && !pre.data.location);
+  // PRE-FLIGHT is NOT done here. `service_role` deliberately holds no grant on
+  // `customer_requests` in this project (narrow grants are the posture, not an
+  // oversight), so an admin-client select returns 42501 "permission denied".
+  // Widening the grant to make a WALK convenient would be a real privilege
+  // change to prove a read-only assertion — so the row is verified out of band
+  // through the Supabase MCP instead, and recorded in the walk log.
+  // Verified 2026-09-05 19:2x UTC: b0a48f65 = submitted, LT, location null,
+  // team_size 2, role "welder", owner e2e-walker-202609021438@labourmarket.ai.
+  log({ step: "preflight_need", via: "supabase MCP (service_role has no grant on customer_requests)", id: NEED_ID });
 
   const session = async (email) => {
     const { data: link, error } = await admin.auth.admin.generateLink({ type: "magiclink", email }); if (error) throw error;
@@ -84,9 +87,40 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
   await p.screenshot({ path: path.join(OUT, "01-market.png") });
 
   // ── 2. depth 1 — the drilldown is no longer empty ──────────────────────────
-  if (lt) await p.locator(`[data-anchor-id="${lt.id}"]`).first().click();
-  else await p.goto(`https://labourmarket.ai/lt/dashboard?result=market&geo=${GEO}`, { waitUntil: "domcontentloaded" });
+  let pointerOpened = false;
+  if (lt) {
+    const marker = p.locator(`[data-anchor-id="${lt.id}"]`).first();
+    const geom = await marker.evaluate((e) => {
+      const bb = e.getBoundingClientRect();
+      return { d: (e.getAttribute("d") || "").slice(0, 32), w: Math.round(bb.width), h: Math.round(bb.height) };
+    }).catch(() => null);
+    try {
+      await marker.click({ timeout: 20000 });
+      pointerOpened = true;
+    } catch (e) {
+      log({ step: "pointer_click_failed", geom, error: String(e.message).split("\n")[0].slice(0, 140) });
+    }
+    // A marker a person cannot click is unreachable no matter what the loader
+    // returns behind it. This is the check, not the navigation.
+    must("the marker is reachable BY POINTER, not only by keyboard", pointerOpened, geom);
+  }
+  if (!pointerOpened) {
+    // Continue through the URL so the rest of the chain is still measured and
+    // reported in the same run — the failure above already stands on its own.
+    await p.goto(`https://labourmarket.ai/lt/dashboard?result=market&geo=${GEO}`, { waitUntil: "domcontentloaded" });
+  }
   await p.getByTestId("projects-view").waitFor({ timeout: 60000 });
+  // `projects-view` is the SHELL: it renders a loading line first. A pointer
+  // click is a client-side transition, so unlike a full URL navigation there is
+  // no page load to hide the gap — measuring here counted an unresolved view as
+  // "0 rows and not empty", which is neither answer. Wait for the view to
+  // actually RESOLVE into one of its four states before measuring.
+  await Promise.race([
+    p.getByTestId("projects-list").waitFor({ timeout: 60000 }),
+    p.getByTestId("projects-empty").waitFor({ timeout: 60000 }),
+    p.getByTestId("projects-error").waitFor({ timeout: 60000 }),
+    p.getByTestId("projects-unsupported-precision").waitFor({ timeout: 60000 }),
+  ]).catch(() => {});
   const emptyShown = await p.getByTestId("projects-empty").count();
   const rows = p.getByTestId("project-row");
   const rowCount = await rows.count();
@@ -108,8 +142,12 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
   // ── 3. depth 2 — the evaluation opens on the canonical id ──────────────────
   if (mine) await p.locator(`[data-project-id="${NEED_ID}"]`).first().click();
   await p.getByTestId("project-evaluation").waitFor({ timeout: 60000 });
+  // `project-evaluation` is the OUTER wrapper: it mounts while the evaluation is
+  // still loading, so counting sections here measured an empty shell. Wait for a
+  // control that only exists in the loaded state before measuring.
+  await p.getByTestId("continue-to-people").waitFor({ timeout: 60000 });
   const sections = {};
-  for (const s of ["eval-demand", "eval-geography", "eval-timing", "eval-organization", "eval-data-quality", "eval-explanation"]) {
+  for (const s of ["eval-demand-list", "eval-anchor-relation", "eval-no-judgement", "eval-visibility"]) {
     sections[s] = await p.getByTestId(s).count();
   }
   const source = await p.getByTestId("demand-source").innerText().catch(() => null);
@@ -126,11 +164,37 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
   const people = (await p.getByTestId("people-continuation").innerText()).replace(/\s+/g, " ").trim();
   log({ step: "people", text: people.slice(0, 300) });
   must("THE FINDING CLOSED: the people panel is reachable from real demand", people.length > 0);
-  must("it carries the real canonical context, not a fabricated list", people.includes(NEED_ID));
+  must("it carries the row's REAL values, not a fabricated list",
+    people.includes(NEED_ROLE) && people.includes(String(NEED_HEADCOUNT)));
+  must("and it names them in ordinary words — no raw id leaked back in (#1553)",
+    !/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(people));
   await p.screenshot({ path: path.join(OUT, "04-people-continuation.png") });
 
   log({ step: "hygiene", consoleErrors, failedRequests });
   must("no failed request on the journey", failedRequests.length === 0, failedRequests);
+
+  // ── 4b. the MARKETPLACE leg — another tenant's real need, via the worker RPC
+  // The LT need above is the caller's OWN row. NL-approx belongs to a different
+  // tenant and reaches this person only through `list_open_demand_for_workers`
+  // (worker-gated, verified companies only, closed column whitelist). That is
+  // the leg that makes this a market at all, so it is worth its own evidence.
+  const nl = anchors.find((a) => (a.id || "").startsWith("NL"));
+  if (nl) {
+    await p.goto("https://labourmarket.ai/lt/dashboard?result=market&geo=NL%3Acountry", { waitUntil: "domcontentloaded" });
+    await p.getByTestId("projects-view").waitFor({ timeout: 60000 }).catch(() => {});
+    const nlRows = await p.getByTestId("project-row").evaluateAll((els) => els.map((e) => ({
+      id: e.getAttribute("data-project-id"),
+      kind: e.getAttribute("data-unit-kind"),
+      text: (e.textContent || "").replace(/\s+/g, " ").trim().slice(0, 140),
+    })));
+    log({ step: "marketplace_leg", anchor: nl, rowCount: nlRows.length, rows: nlRows });
+    must("another tenant's real demand is reachable through the worker leg", nlRows.length > 0, nlRows.length);
+    // KNOWN GAP, recorded not asserted: the RPC returns `company_name`, but the
+    // canonical contract drops it, so these rows render the organisation as an
+    // explicit "not stated" gap even though we are authorised to name it.
+    log({ step: "known_gap_company_name", note: "RPC exposes company_name; CanonicalDemand does not carry it -> organisation renders as a gap", sample: nlRows[0] || null });
+    await p.screenshot({ path: path.join(OUT, "06-marketplace-leg.png") });
+  }
 
   // ── 5. tenant isolation — the same URL, a different tenant ────────────────
   const other = await open(OTHER_TENANT, `/lt/dashboard?result=market&geo=${GEO}&project=${NEED_ID}`);

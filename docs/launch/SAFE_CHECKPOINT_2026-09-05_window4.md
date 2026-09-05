@@ -158,3 +158,98 @@ walk in this window except that one checkout operation.
   syntax. Re-anchor such a guard onto the module the invariant moved to, and add
   the negative ("this loader keeps no query of its own"), or the rule silently
   retires itself.
+
+---
+
+## 7. Window 4, later — the drilldown chain walked end to end (addendum)
+
+Written after §1–§6, once #1556 was served. The queued walk did **not** simply
+pass: it found a second defect, and it found three bugs in itself. Both are
+recorded here because a walk that is trusted rather than read is worth nothing.
+
+### 7.1 The priority finding — CLOSED and PROD_PROVEN
+
+`walk-market-drilldown-prod.cjs` against real persisted demand
+(`customer_requests b0a48f65`, LT, "welder", 2, created 2026-09-04 through the
+proven employer flow). On the served build every check of the chain passes:
+
+| Check | Result |
+|---|---|
+| the drilldown is not empty for real canonical demand | **1 row** (was 0 for all four geographies on `f43ce715`) |
+| the row IS the canonical `customer_requests` row | same id `b0a48f65…` |
+| the row declares its provenance | `unit-kind=need` |
+| the employer's OWN role text and headcount | "welder", 2 |
+| depth 2 opens on the canonical id | `?project=b0a48f65…` |
+| the source statement is honest | "Šaltinis: canonical demand (customer_requests, submitted)" |
+| **the people panel is reachable** | renders, carrying the row's real values |
+| no raw id leaked back into it | #1553 holds — ordinary words only |
+| another tenant's real demand via the worker RPC leg | mason / NL / 40 reachable |
+| tenant isolation from a hand-typed URL | 0 rows, `evaluation-not-found` |
+| failed requests | none |
+
+### 7.2 The SECOND defect the walk found — a marker no pointer could hit (#1558)
+
+The map flew to a CONSTANT Europe centre/zoom sized for a large map. The
+dashboard result map is ~319x288: at that size NL falls inside the viewport and
+LT does not, and Leaflet draws an out-of-bounds `circleMarker` as `d="M0 0"`.
+Measured stable over 15 s (`probe-anchor-geometry-8be8502c.log`): `NL-approx`
+drew `M124,145a18,18 …` in a 36x36 box, `LT-approx` drew `M0 0` in a **0x0** box.
+Pointer click timed out with no navigation; keyboard focus + Enter opened the
+drilldown.
+
+So the anchor was in the DOM, announced `role="button"` with an aria-label,
+focusable and keyboard-activatable — and **no mouse or touch user could open
+it**. #1556 made the drilldown RETURN real demand; without #1558 most people
+still could not reach it.
+
+**The working keyboard path is why this survived.** Anything that activates the
+anchor programmatically passes while every real pointer user is blocked. Only a
+genuine pointer click against production exposes it — which is the whole reason
+the definition of done is a walk and not a test.
+
+### 7.3 THREE bugs in the walk itself, found by running it
+
+None of these was a product defect. They are recorded because each one would
+have produced a confident false claim:
+
+1. **Preflight used `service_role` to read `customer_requests` → `42501`.** That
+   grant is deliberately absent (narrow grants are the posture). The row is
+   verified out of band through the Supabase MCP instead. Widening a production
+   grant to make a read-only walk convenient would have been a real privilege
+   change to prove nothing.
+2. **Six `eval-*` test ids that have never existed** (`eval-demand`,
+   `eval-geography`, `eval-timing`, `eval-organization`, `eval-data-quality`,
+   `eval-explanation`), copied from the goal-3 spec. The walk reported every
+   section absent while the panel was plainly on screen.
+3. **Sections counted too early.** `project-evaluation` is the OUTER wrapper and
+   mounts during loading, so the count measured an empty shell. It now waits for
+   a control that only exists in the loaded state.
+
+### 7.4 Pre-existing finding — the goal-3 spec asserts test ids that do not exist
+
+The same six names are asserted in `tests/e2e/goal3-project-evaluation.spec.ts`.
+None exists in `market-drilldown.tsx`. Because the local Supabase stack cannot
+bind on this machine (ports 54290–54389 are in the Windows excluded range), the
+spec has not been runnable and nothing ever caught it — it would fail for
+reasons unrelated to any of this work. Re-anchored onto ids that exist
+(`eval-demand-list`, `eval-anchor-relation`, `eval-visibility`,
+`eval-no-judgement`), and the phantom `eval-organization` replaced with the
+`eval-missing-field` chip, which is how the gap actually renders.
+
+This is the `E2E selector rot` class: an assertion that can never fail is worse
+than no assertion.
+
+### 7.5 Two follow-ups, recorded not done
+
+* **`company_name` is dropped on the floor.** `list_open_demand_for_workers`
+  RETURNS `company_name` (verified companies only), and `canonical-demand.ts`
+  does not carry it, so a worker-visible need renders its organisation as an
+  explicit "nenurodyta" gap even though we are authorised to name it. Withholding
+  disclosable information and printing a gap is worse than showing it. It is a
+  change to the `CanonicalDemand` contract, so it belongs in its own slice.
+* **G-14 dependency on the walk's negative control.** `E2E Walker UAB` has **0
+  verified companies**, which is exactly why its LT need reaches the map only via
+  the own-rows leg and `e2e-spine-org` cannot see it. If the owner ever verifies
+  that company (owner gate G-14), the need enters the worker feed and becomes
+  visible to every worker — and the isolation check in this walk would then fail
+  CORRECTLY. A future window must not read that as a regression.
