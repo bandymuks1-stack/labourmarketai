@@ -5475,6 +5475,60 @@
       "clarifyViewThread": "Het gesprek bekijken",
       "safetyNote": "Bevestig belangrijke veiligheidsinstructies duidelijk.",
       "asksTitle": "Het project heeft van u nog nodig",
+      "ledger": {
+        "ratio": "{have} van {total} in orde",
+        "availability": "Beschikbaarheid",
+        "state": {
+          "valid": "u heeft het",
+          "expiring": "verloopt binnenkort",
+          "missing": "ontbreekt",
+          "unknown": "nog niet bekend"
+        },
+        "level": {
+          "recommended": "aanbevolen",
+          "conditional": "kan nodig zijn"
+        },
+        "why": {
+          "project_checklist": "uw leidinggevende vraagt erom",
+          "country_requirement": "nodig voor werk in {country}",
+          "employer_demand": "gevraagd in dit werkaanbod",
+          "profession": "gebruikelijk voor dit beroep"
+        },
+        "from": {
+          "ownDocument": "uit uw documenten",
+          "ownDocumentUntil": "uit uw documenten, geldig tot {date}",
+          "ownSkill": "uit uw vaardigheden (eigen opgave)",
+          "ownSkillConfirmed": "uit uw vaardigheden (bevestigd door een leidinggevende)",
+          "ownLanguage": "uit uw talen ({level})",
+          "ownProfile": "uit uw profiel",
+          "manager": "lijst van uw leidinggevende: {status}",
+          "notReadable": "kon nu niet worden gelezen",
+          "none": "nog niets vastgelegd"
+        },
+        "managerStatus": {
+          "needed": "wordt verwacht",
+          "missing": "gemarkeerd als ontbrekend",
+          "received": "ontvangen",
+          "checked": "gecontroleerd",
+          "rejected": "afgewezen",
+          "expired": "verlopen"
+        },
+        "resolution": {
+          "addDocument": "Document vastleggen",
+          "issuingAuthority": "Afgegeven door: {title}",
+          "trainingProgram": "Cursus: {title}",
+          "serviceOffering": "Dienst: {title}",
+          "serviceOfferingRate": "Dienst: {title} ({rate})",
+          "addEvidence": "Werkregel toevoegen",
+          "setAvailability": "Beschikbaarheid instellen",
+          "ask": "Nog geen oplossing vastgelegd — vraag uw leidinggevende"
+        },
+        "resolutionWhy": {
+          "assignedToYou": "aan u toegewezen",
+          "nameMatches": "de naam komt overeen"
+        },
+        "rejected": "{count} andere opties pasten niet"
+      },
       "ownReady": "u heeft het",
       "ownExpiring": "verloopt binnenkort",
       "ownNone": "niet vastgelegd",

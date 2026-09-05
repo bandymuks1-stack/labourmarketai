@@ -5475,6 +5475,60 @@
       "clarifyViewThread": "Unterhaltung ansehen",
       "safetyNote": "Bestätigen Sie wichtige Sicherheitsanweisungen eindeutig.",
       "asksTitle": "Das Projekt braucht von Ihnen noch",
+      "ledger": {
+        "ratio": "{have} von {total} vorhanden",
+        "availability": "Verfügbarkeit",
+        "state": {
+          "valid": "Sie haben es",
+          "expiring": "läuft bald ab",
+          "missing": "fehlt",
+          "unknown": "noch nicht bekannt"
+        },
+        "level": {
+          "recommended": "empfohlen",
+          "conditional": "kann nötig sein"
+        },
+        "why": {
+          "project_checklist": "Ihre Führungskraft bittet darum",
+          "country_requirement": "nötig für Arbeit in {country}",
+          "employer_demand": "in diesem Stellenangebot verlangt",
+          "profession": "üblich für diesen Beruf"
+        },
+        "from": {
+          "ownDocument": "aus Ihren Dokumenten",
+          "ownDocumentUntil": "aus Ihren Dokumenten, gültig bis {date}",
+          "ownSkill": "aus Ihren Fähigkeiten (eigene Angabe)",
+          "ownSkillConfirmed": "aus Ihren Fähigkeiten (von einer Führungskraft bestätigt)",
+          "ownLanguage": "aus Ihren Sprachen ({level})",
+          "ownProfile": "aus Ihrem Profil",
+          "manager": "Liste Ihrer Führungskraft: {status}",
+          "notReadable": "konnte gerade nicht gelesen werden",
+          "none": "noch nichts erfasst"
+        },
+        "managerStatus": {
+          "needed": "wird erwartet",
+          "missing": "als fehlend markiert",
+          "received": "erhalten",
+          "checked": "geprüft",
+          "rejected": "abgelehnt",
+          "expired": "abgelaufen"
+        },
+        "resolution": {
+          "addDocument": "Dokument erfassen",
+          "issuingAuthority": "Ausgestellt von: {title}",
+          "trainingProgram": "Kurs: {title}",
+          "serviceOffering": "Dienstleistung: {title}",
+          "serviceOfferingRate": "Dienstleistung: {title} ({rate})",
+          "addEvidence": "Arbeitseintrag hinzufügen",
+          "setAvailability": "Verfügbarkeit angeben",
+          "ask": "Noch keine Lösung erfasst — fragen Sie Ihre Führungskraft"
+        },
+        "resolutionWhy": {
+          "assignedToYou": "Ihnen zugewiesen",
+          "nameMatches": "der Name passt"
+        },
+        "rejected": "{count} weitere Optionen passten nicht"
+      },
       "ownReady": "vorhanden",
       "ownExpiring": "läuft bald ab",
       "ownNone": "nicht erfasst",

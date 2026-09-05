@@ -5475,6 +5475,60 @@
       "clarifyViewThread": "View the conversation",
       "safetyNote": "Confirm important safety instructions clearly.",
       "asksTitle": "The project still needs from you",
+      "ledger": {
+        "ratio": "{have} of {total} in place",
+        "availability": "Availability",
+        "state": {
+          "valid": "you have it",
+          "expiring": "expiring soon",
+          "missing": "missing",
+          "unknown": "not known yet"
+        },
+        "level": {
+          "recommended": "recommended",
+          "conditional": "may be needed"
+        },
+        "why": {
+          "project_checklist": "your manager asks for it",
+          "country_requirement": "needed for work in {country}",
+          "employer_demand": "asked in this job offer",
+          "profession": "usual for this profession"
+        },
+        "from": {
+          "ownDocument": "from your documents",
+          "ownDocumentUntil": "from your documents, valid until {date}",
+          "ownSkill": "from your skills (your own entry)",
+          "ownSkillConfirmed": "from your skills (confirmed by a manager)",
+          "ownLanguage": "from your languages ({level})",
+          "ownProfile": "from your profile",
+          "manager": "your manager's list: {status}",
+          "notReadable": "could not be read right now",
+          "none": "nothing recorded yet"
+        },
+        "managerStatus": {
+          "needed": "waiting for it",
+          "missing": "marked missing",
+          "received": "received",
+          "checked": "checked",
+          "rejected": "rejected",
+          "expired": "expired"
+        },
+        "resolution": {
+          "addDocument": "Record the document",
+          "issuingAuthority": "Issued by: {title}",
+          "trainingProgram": "Course: {title}",
+          "serviceOffering": "Service: {title}",
+          "serviceOfferingRate": "Service: {title} ({rate})",
+          "addEvidence": "Add a work entry",
+          "setAvailability": "Set your availability",
+          "ask": "No solution recorded yet — ask your manager"
+        },
+        "resolutionWhy": {
+          "assignedToYou": "assigned to you",
+          "nameMatches": "the name matches"
+        },
+        "rejected": "{count} other options did not fit"
+      },
       "ownReady": "you have it",
       "ownExpiring": "expiring",
       "ownNone": "not recorded",

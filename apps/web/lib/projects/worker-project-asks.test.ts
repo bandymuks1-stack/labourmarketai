@@ -151,7 +151,8 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     const PAGE = read("app/[locale]/dashboard/instructions/page.tsx");
     expect(PAGE).toContain('import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";');
     expect(PAGE).toMatch(/await loadOwnProjectAsks\(read\.instructions\.map\(\(i\) => i\.projectId\)/);
-    expect(PAGE).toMatch(/<InstructionProjectAsks asks=\{asks\.get\(ins\.projectId\)\?\.asks \?\? \[\]\} labels=\{asksLabels\} \/>/);
+    // (P3 renders the project's requirement ledger beside the asks — the SAME read stays the first prop.)
+    expect(PAGE).toMatch(/<InstructionProjectAsks\s+asks=\{asks\.get\(ins\.projectId\)\?\.asks \?\? \[\]\}\s+labels=\{asksLabels\}/);
     const COMP = read("components/app/instruction-project-asks.tsx");
     expect(COMP).toMatch(/href="\/dashboard\/documents"/);
     expect(COMP).not.toMatch(/\.from\(|\.rpc\(|"use server"|Action\(/);
