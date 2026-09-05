@@ -17,8 +17,7 @@ const SECTION = read("components/app/company-home-field-section.tsx");
 describe("company home — a failed brief is unavailable, not all clear", () => {
   it("the attention read degrades to `unavailable`, never to `none`", () => {
     expect(FIELD).toContain('loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" }))');
-    expect(FIELD).not.toMatch(/\.catch\([^
-]*\{ kind: "none" \}/);
+    expect(FIELD).not.toMatch(/\.catch\([^\n]*\{ kind: "none" \}/);
     expect(FIELD).toMatch(/readonly attention: OpeningBrief \| \{ readonly kind: "unavailable" \}/);
   });
   it("the section renders the unavailable branch before the all-clear branch", () => {
