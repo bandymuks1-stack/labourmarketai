@@ -6243,6 +6243,7 @@
     },
     "attention": {
       "heading": "Vajab teid",
+      "unavailable": "Praegu ei õnnestunud lugeda — miski siin pole kinnitatud korras olevaks.",
       "none": "Kõik korras — miski ei oota teid."
     },
     "partners": {

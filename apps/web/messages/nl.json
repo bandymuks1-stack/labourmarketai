@@ -477,6 +477,7 @@
     "peopleTitle": "Op het project",
     "peopleEmpty": "Er is nog niemand aan dit project toegewezen.",
     "slotsTitle": "Ontbreekt",
+    "slotsUnavailable": "Open werk kon niet worden gelezen — de plekken zijn nu niet beschikbaar, niet leeg.",
     "slotsNone": "Er ontbreekt nu niets.",
     "slot": {
       "label": "Lege plek",
@@ -1676,6 +1677,7 @@
     },
     "attention": {
       "heading": "Heeft u nodig",
+      "unavailable": "Kon nu niet worden gelezen — niets hier is bevestigd als in orde.",
       "none": "Alles in orde — niets wacht op u."
     },
     "partners": {

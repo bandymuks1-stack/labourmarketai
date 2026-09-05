@@ -6243,6 +6243,7 @@
     },
     "attention": {
       "heading": "Trenger deg",
+      "unavailable": "Kunne ikke leses akkurat nå — ingenting her er bekreftet som i orden.",
       "none": "Alt i orden — ingenting venter på deg."
     },
     "partners": {

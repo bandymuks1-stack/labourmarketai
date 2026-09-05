@@ -6243,6 +6243,7 @@
     },
     "attention": {
       "heading": "Wymaga Ciebie",
+      "unavailable": "Nie udało się teraz odczytać — nic tutaj nie jest potwierdzone jako w porządku.",
       "none": "Wszystko w porządku — nic na Ciebie nie czeka."
     },
     "partners": {

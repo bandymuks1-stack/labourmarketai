@@ -60,7 +60,7 @@ export type HomeProjectsResult =
 export interface CompanyHomeField {
   readonly projects: HomeProjectsResult;
   readonly capacity: CapacityChatResult;
-  readonly attention: OpeningBrief;
+  readonly attention: OpeningBrief | { readonly kind: "unavailable" };
 }
 
 async function loadProjectRows(): Promise<HomeProjectsResult> {
@@ -97,7 +97,8 @@ export async function loadCompanyHomeField(): Promise<CompanyHomeField> {
   const [projects, capacity, attention] = await Promise.all([
     loadProjectRows().catch((): HomeProjectsResult => ({ kind: "error" })),
     loadWhoIsAvailableForChat().catch((): CapacityChatResult => ({ kind: "error" })),
-    loadEmployerOpeningBrief().catch((): OpeningBrief => ({ kind: "none" })),
+    // HONESTY (QA Q-2): a failed brief read is "unavailable", never "all clear".
+    loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
   ]);
   return { projects, capacity, attention };
 }

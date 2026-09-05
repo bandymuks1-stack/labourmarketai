@@ -6243,6 +6243,7 @@
     },
     "attention": {
       "heading": "Vajadzīgs jūs",
+      "unavailable": "Šobrīd neizdevās nolasīt — nekas šeit nav apstiprināts kā kārtībā.",
       "none": "Viss kārtībā — nekas jūs negaida."
     },
     "partners": {

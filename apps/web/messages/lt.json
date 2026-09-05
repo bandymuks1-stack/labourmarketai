@@ -477,6 +477,7 @@
     "peopleTitle": "Projekte",
     "peopleEmpty": "Į šį projektą dar niekas nepriskirtas.",
     "slotsTitle": "Trūksta",
+    "slotsUnavailable": "Atvirų darbų nepavyko nuskaityti — vietos šiuo metu neprieinamos, o ne tuščios.",
     "slotsNone": "Šiuo metu nieko netrūksta.",
     "slot": {
       "label": "Tuščia vieta",
@@ -1676,6 +1677,7 @@
     },
     "attention": {
       "heading": "Reikia jūsų",
+      "unavailable": "Šiuo metu nepavyko nuskaityti — niekas čia nepatvirtinta kaip tvarkoje.",
       "none": "Viskas tvarkoje — niekas jūsų nelaukia."
     },
     "partners": {

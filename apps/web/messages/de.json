@@ -477,6 +477,7 @@
     "peopleTitle": "Im Projekt",
     "peopleEmpty": "Diesem Projekt ist noch niemand zugewiesen.",
     "slotsTitle": "Fehlt",
+    "slotsUnavailable": "Offene Arbeiten konnten nicht gelesen werden — die Plätze sind derzeit nicht verfügbar, nicht leer.",
     "slotsNone": "Derzeit fehlt nichts.",
     "slot": {
       "label": "Leere Stelle",
@@ -1676,6 +1677,7 @@
     },
     "attention": {
       "heading": "Braucht Sie",
+      "unavailable": "Konnte gerade nicht gelesen werden — nichts hier ist als erledigt bestätigt.",
       "none": "Alles in Ordnung — nichts wartet auf Sie."
     },
     "partners": {

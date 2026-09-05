@@ -152,7 +152,8 @@ export function selectOpenNeeds(
 export function attentionChipHref(chipId: string): string | null {
   if (chipId.startsWith("link:")) {
     const path = chipId.slice("link:".length);
-    return path.startsWith("/") ? path : null;
+    // A page path only: no scheme, no protocol-relative `//host` (QA Q-6).
+    return path.startsWith("/") && !path.startsWith("//") ? path : null;
   }
   switch (chipId) {
     case "candidates":

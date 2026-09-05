@@ -115,6 +115,22 @@ describe("3 · bounded, time from evidence, derived flagged", () => {
   });
 });
 
+describe("3b · honesty — a failed tasks read is NAMED, never \"nothing is missing\" (QA Q-1, doctrine §18.1)", () => {
+  it("the Field consumes `tasksApplied` and renders the unavailable state in BOTH views", () => {
+    expect(FIELD).toMatch(/!field\.tasksApplied \? \(/);
+    expect(FIELD).toMatch(/field\.tasksApplied \? \(/);
+    expect(FIELD.match(/data-testid="project-field-slots-unavailable"/g)?.length).toBe(2);
+    expect(FIELD.match(/t\("slotsUnavailable"\)/g)?.length).toBe(2);
+  });
+  it("the unavailable copy exists in every routed locale and differs from the empty copy", () => {
+    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+      const m = JSON.parse(read(`messages/${locale}.json`)) as { projectField: Record<string, string> };
+      expect(typeof m.projectField.slotsUnavailable).toBe("string");
+      expect(m.projectField.slotsUnavailable).not.toBe(m.projectField.slotsNone);
+    }
+  });
+});
+
 describe("4 · accessibility — list equivalent, real buttons, state never by colour alone", () => {
   it("offers a list view of the same objects and a keyboard escape", () => {
     expect(FIELD).toMatch(/data-testid="project-field-view-list"/);

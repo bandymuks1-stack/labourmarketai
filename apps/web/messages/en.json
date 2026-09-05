@@ -477,6 +477,7 @@
     "peopleTitle": "On the project",
     "peopleEmpty": "No one is assigned to this project yet.",
     "slotsTitle": "Missing",
+    "slotsUnavailable": "Open work could not be read — the slots are unavailable right now, not empty.",
     "slotsNone": "Nothing is missing right now.",
     "slot": {
       "label": "Empty slot",
@@ -1676,6 +1677,7 @@
     },
     "attention": {
       "heading": "Needs you",
+      "unavailable": "Could not be read right now — nothing here is confirmed as clear.",
       "none": "All clear — nothing waits for you."
     },
     "partners": {
