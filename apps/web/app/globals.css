@@ -41,6 +41,53 @@
   --motion-slow: 420ms;
   --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── THE STRATA — atmosphere of the living world ───────────────────────
+   *
+   * WHY THESE ARE NOT BRAND COLOURS. The UI palette is blue / cyan / violet /
+   * purple, which is the exact palette every AI product on the internet
+   * shipped in 2025. It is fine for CONTROLS — a button should look like a
+   * button — but it cannot carry an identity, because it is the one thing a
+   * competitor already has.
+   *
+   * So the world gets its own material register: the colours work actually
+   * happens in. Concrete dust, oxidised steel, cold-store blue, kiln heat,
+   * clinical linen, greenhouse sap, glass at dusk. Nobody's design system
+   * ships these, which is the point.
+   *
+   * They are ATMOSPHERE ONLY — the world layer behind content. No control, no
+   * text and no state ever resolves to them, so contrast-critical surfaces
+   * keep using the audited UI tokens and this palette can never quietly
+   * become a legibility problem.
+   *
+   * Channels (not hex) so alpha composition works the same way as every other
+   * token in this file, and so the world can be tinted per theme.
+   */
+  --c-strata-site: 176 142 96;        /* concrete dust, timber, hi-vis grit */
+  --c-strata-assembly: 122 132 148;   /* oxidised steel, machine grey-blue */
+  --c-strata-logistics: 92 126 150;   /* cold store, pallet shadow */
+  --c-strata-kitchen: 198 116 62;     /* kiln + copper heat */
+  --c-strata-care: 148 168 176;       /* clinical linen, daylight on tile */
+  --c-strata-cultivation: 106 150 108;/* greenhouse sap */
+  --c-strata-studio: 128 140 190;     /* glass at dusk — the only cool layer */
+
+  /* Depth atmosphere: what fills the space BETWEEN strata. Light in the light
+   * theme, and genuinely dark — not merely grey — in the dark theme, so the
+   * far layers dissolve into distance instead of stopping at a flat wall. */
+  --c-strata-haze: 226 228 234;
+  --c-strata-void: 244 246 251;
+
+  /* Motion for the world. Deliberately far slower than UI motion: interface
+   * feedback must be instant, a world must not twitch. Reusing --motion-base
+   * for a parallax layer is what makes a scene feel like a slideshow. */
+  /* The page's own surface colour, captured so the world can dissolve INTO
+     it. Deliberately NOT re-declared by .world-night: the fade needs the
+     colour of what comes after the world, not the world's own ground. */
+  --c-surface-page: 244 246 251;
+
+  --motion-world-drift: 1400ms;
+  --motion-world-signal: 5200ms;
+  --motion-ease-world: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /* ── LIGHT — the product default ─────────────────────────────────────────── */
@@ -105,6 +152,19 @@
   --c-brand-violet: 123 92 255;
   --c-brand-purple: 181 123 255;
   --c-brand-orange: 255 107 26;
+
+  /* Strata atmosphere, dark theme. Same materials seen under working light
+   * rather than daylight: richer, lower, and lifted just enough to stay
+   * visible against ink-900 without turning into neon. */
+  --c-strata-site: 154 118 72;
+  --c-strata-assembly: 96 108 128;
+  --c-strata-logistics: 66 100 128;
+  --c-strata-kitchen: 186 96 44;
+  --c-strata-care: 112 136 148;
+  --c-strata-cultivation: 78 124 84;
+  --c-strata-studio: 106 120 178;
+  --c-strata-haze: 16 19 31;
+  --c-strata-void: 6 7 13;
   /* state */
   --c-state-live: 0 230 118;
   --c-state-success: 52 211 153;
@@ -663,4 +723,131 @@ a {
 }
 :root[data-theme="dark"] .market-map-host .leaflet-control-attribution {
   background: rgb(0 0 0 / 0.6);
+}
+
+/* ── THE STRATA world layer ───────────────────────────────────────────────
+ *
+ * Only the parts that cannot live in Tailwind: a two-stop atmosphere and the
+ * signal's glow. Everything positional is computed from the depth model in
+ * lib/visual/strata.ts and applied inline, so the world's geometry has ONE
+ * source and a stylesheet can never quietly disagree with the model.
+ */
+/* ── THE NIGHT GROUND ──────────────────────────────────────────────────────
+ *
+ * The world section carries its OWN environment rather than inheriting the
+ * page theme, and that is a compositional necessity, not a preference.
+ *
+ * Two renders proved it. Filled layers on the light page read as coloured
+ * slabs; the same layers dropped to honest low alpha vanished into the white
+ * entirely. Both failures have one cause: a cross-section of the working
+ * world is lit FROM WITHIN, and material light needs dark air to be light
+ * against. On white there is no such thing as a glow — only a stain.
+ *
+ * So this class re-declares the token channels for its own subtree, using the
+ * SAME names the dark theme already defines. Nothing new is invented, the
+ * light product default is untouched everywhere else, and text inside the
+ * section resolves to the audited dark-theme foreground automatically —
+ * which is what keeps contrast correct instead of hand-picked per element.
+ */
+.world-night {
+  --c-ink-900: 6 7 13;
+  --c-ink-800: 11 13 23;
+  --c-ink-700: 16 19 31;
+  --c-ink-600: 26 30 46;
+  --c-ink-500: 82 93 135;
+  --c-text-primary: 244 246 251;
+  --c-text-secondary: 178 187 210;
+  --c-text-muted: 148 158 184;
+
+  --c-strata-site: 154 118 72;
+  --c-strata-assembly: 96 108 128;
+  --c-strata-logistics: 66 100 128;
+  --c-strata-kitchen: 214 126 58;
+  --c-strata-care: 112 136 148;
+  --c-strata-cultivation: 78 124 84;
+  --c-strata-studio: 106 120 178;
+  --c-strata-haze: 16 19 31;
+  --c-strata-void: 6 7 13;
+
+  background-color: rgb(var(--c-strata-void));
+  color: rgb(var(--c-text-primary));
+}
+
+.world-atmosphere {
+  /* ── LIGHT IS WHAT MAKES A NIGHT SCENE READABLE ──────────────────────────
+   *
+   * The previous cut had correct depth ordering and still read as an empty
+   * black frame, because a dark composition with no emitter has nothing for
+   * the eye to travel toward. Darkness is not a mood on its own; it is the
+   * thing light is measured against.
+   *
+   * Three sources, in the order the eye finds them:
+   *   1. HORIZON GLOW — where the deepest strata converge. This is the "light
+   *      in the distance" of an open economy: the visual promise the whole
+   *      composition points at.
+   *   2. SKY — a lifted blue-grey above, so the top of the frame is night air
+   *      rather than an absence of pixels.
+   *   3. GROUND FALLOFF — the near strata sink into their own shadow, which
+   *      is what gives the lower frame weight instead of fog.
+   */
+  background:
+    radial-gradient(
+      64% 26% at 50% 46%,
+      rgb(var(--c-strata-studio) / 0.55) 0%,
+      rgb(var(--c-strata-care) / 0.22) 40%,
+      rgb(var(--c-strata-studio) / 0) 78%
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(var(--c-strata-studio) / 0.34) 0%,
+      rgb(var(--c-strata-studio) / 0.20) 18%,
+      rgb(var(--c-strata-haze) / 0.35) 40%,
+      rgb(var(--c-strata-void) / 0.85) 88%,
+      rgb(var(--c-strata-void)) 100%
+    );
+}
+
+/* Work light pooling at a layer's horizon — the glow of a place that is being
+   worked in. Rendered per stratum and tinted by that stratum's own material,
+   so a construction deck reads warm and a cold store reads blue without any
+   component naming a colour. */
+.world-lightpool {
+  background: radial-gradient(
+    58% 100% at 50% 100%,
+    rgb(var(--c-strata-color) / 0.5) 0%,
+    rgb(var(--c-strata-color) / 0.14) 45%,
+    rgb(var(--c-strata-color) / 0) 100%
+  );
+}
+
+.world-scrim {
+  /* DIRECTIONAL, not a centred disc. The text column lives on the left, so
+     protection belongs on the left — a centred ellipse muted the middle of
+     the frame, which is exactly where the world had to be visible for the
+     hero to read as a place rather than a dark panel. Left is calm air, the
+     right two thirds are open world. */
+  background:
+    linear-gradient(
+      to right,
+      rgb(var(--c-strata-void) / 0.8) 0%,
+      rgb(var(--c-strata-void) / 0.6) 28%,
+      rgb(var(--c-strata-void) / 0.22) 55%,
+      rgb(var(--c-strata-void) / 0) 80%
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(var(--c-strata-void) / 0.7) 0%,
+      rgb(var(--c-strata-void) / 0) 26%
+    );
+}
+
+/* A stated preference wins over every device heuristic. The tier resolver
+   already returns `still` for this case; this is the belt-and-braces layer,
+   because a world that keeps drifting after someone asked it to stop is the
+   kind of bug that ships when only JS enforces the rule. */
+@media (prefers-reduced-motion: reduce) {
+  [data-world-field] * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
