@@ -193,6 +193,23 @@ describe("the sentence reaches the conversation through the existing return path
       expect(stripComments(read(rel))).not.toMatch(/localStorage|sessionStorage|document\.cookie/);
     }
   });
+
+  it("the conversation CONSUMES ?say= once, through the composer's own send path, and strips it from the URL", () => {
+    // Without this the promise "the sentence travels with you" ends at the
+    // dashboard URL. The consumer must be the SAME handleSend the composer
+    // uses (one router, one dispatcher) — never a second parse of the sentence.
+    const chat = stripComments(read("components/app/conversation/chat/conversation-chat.tsx"));
+    const consumer = chat.match(/const sayConsumedRef = useRef\(false\);[\s\S]*?\}, \[auth\?\.profile, handleSend\]\);/);
+    expect(consumer, "the ?say= consumer effect exists next to handleSend").not.toBeNull();
+    const body = consumer![0];
+    expect(body).toContain('.get("say")');
+    expect(body).toContain('url.searchParams.delete("say")');
+    expect(body).toContain("window.history.replaceState(");
+    expect(body).toMatch(/handleSend\(say\.slice\(0, 500\)\)/);
+    // Negative controls — the exact shortcuts that would fork the path.
+    expect(body).not.toMatch(/classifyIntent|dispatchIntent|proposeIntent|fetch\(/);
+    expect(body).not.toMatch(/sessionStorage|localStorage/);
+  });
 });
 
 describe("the entry copy is honest in every routed locale", () => {
