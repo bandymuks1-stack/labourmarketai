@@ -6172,5 +6172,94 @@
         "generic": "Bearbetningen misslyckades. Försök igen."
       }
     }
+  },
+  "companyHome": {
+    "eyebrow": "Din organisation nu",
+    "title": "Projekt i tid och vem som är ledig",
+    "rolesLabel": "Vad organisationen gör",
+    "rolesNone": "Ännu inte angivet vad organisationen gör.",
+    "rolesDeclare": "Ange vad ni gör",
+    "projects": {
+      "heading": "Projekt i tid",
+      "more": "{count, plural, =1 {1 projekt till} other {# projekt till}}",
+      "empty": "Inga projekt ännu. I ett projekt möts människor, faser och dokument.",
+      "emptyCta": "Skapa det första projektet",
+      "noCompany": "Välj organisationen du agerar för att se dess projekt.",
+      "error": "Projekt kunde inte läsas just nu.",
+      "now": "Nu",
+      "next": "Nästa",
+      "risk": "Risk",
+      "nowNone": "Ingen fas pågår",
+      "nowBlocked": "Blockerad: {name}",
+      "stagesUnavailable": "Faser är inte tillgängliga här ännu",
+      "stagesDone": "{done} av {total} faser klara",
+      "nextNone": "Ingen nästa fas planerad",
+      "nextDerived": "härlett från fasernas ordning",
+      "nextFrom": "från {date}",
+      "peopleCount": "{count, plural, =0 {ingen tilldelad} =1 {1 person} other {# personer}}",
+      "riskNone": "Inga signaler",
+      "riskUnknown": "Kan inte läsas just nu",
+      "riskOverdue": "{count, plural, =1 {1 försenad uppgift} other {# försenade uppgifter}}",
+      "riskBlocked": "{count, plural, =1 {1 blockerad fas} other {# blockerade faser}}",
+      "riskDocs": "{count, plural, =1 {1 person med saknade dokument} other {# personer med saknade dokument}}",
+      "riskNobody": "Pågående projekt utan folk",
+      "operations": "Öppna drift",
+      "invite": "Bjud in folk",
+      "status": {
+        "unknown": "Status okänd"
+      }
+    },
+    "capacity": {
+      "heading": "Vem är ledig nu",
+      "free": "ledig",
+      "away": "borta",
+      "awayUntil": "borta till {date}",
+      "absencesUnknown": "Frånvaro registreras inte ännu — ledig betyder att ingen sagt något annat.",
+      "more": "{count, plural, =1 {1 person till på planeringssidan} other {# personer till på planeringssidan}}",
+      "assign": "Sätt på ett projekt",
+      "plan": "Öppna planering",
+      "empty": "Ingen i laget ännu.",
+      "emptyCta": "Bjud in folk",
+      "error": "Tillgänglighet kunde inte läsas just nu."
+    },
+    "missing": {
+      "heading": "Saknas inom 4 veckor",
+      "nothing": "Inget saknas just nu.",
+      "people": "{count, plural, =1 {1 person} other {# personer}}",
+      "from": "från {period}",
+      "status": {
+        "draft": "Utkast",
+        "submitted": "Inskickad",
+        "in_review": "Under granskning",
+        "needs_followup": "Kräver din uppföljning",
+        "approved": "Godkänd",
+        "closed": "Stängd"
+      },
+      "continueDraft": "Fortsätt utkastet",
+      "openNeed": "Öppna behovet",
+      "gapsRow": "{count, plural, =1 {1 person på {project} saknar dokument} other {# personer på {project} saknar dokument}}",
+      "gapsCta": "Kontrollera dokument",
+      "needsCta": "Beskriv ett behov"
+    },
+    "attention": {
+      "heading": "Behöver dig",
+      "none": "Allt i ordning — inget väntar på dig."
+    },
+    "partners": {
+      "heading": "Partner",
+      "empty": "Inga partner ännu.",
+      "agency": "Byrå",
+      "client": "Kund",
+      "team": "Lag",
+      "members": "{count, plural, =1 {1 medlem} other {# medlemmar}}",
+      "pending": "väntar på ditt svar",
+      "status": {
+        "active": "ansluten",
+        "declined": "avböjd",
+        "revoked": "avslutad"
+      },
+      "answer": "Svara på inbjudan",
+      "invite": "Bjud in en partner"
+    }
   }
 }

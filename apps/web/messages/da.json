@@ -6172,5 +6172,94 @@
         "generic": "Behandlingen mislykkedes. Prøv igen."
       }
     }
+  },
+  "companyHome": {
+    "eyebrow": "Din organisation nu",
+    "title": "Projekter i tid og hvem der er ledig",
+    "rolesLabel": "Hvad organisationen laver",
+    "rolesNone": "Endnu ikke angivet, hvad organisationen laver.",
+    "rolesDeclare": "Sig, hvad I laver",
+    "projects": {
+      "heading": "Projekter i tid",
+      "more": "{count, plural, =1 {1 projekt mere} other {# projekter mere}}",
+      "empty": "Ingen projekter endnu. I et projekt mødes mennesker, faser og dokumenter.",
+      "emptyCta": "Opret det første projekt",
+      "noCompany": "Vælg den organisation, du handler for, for at se dens projekter.",
+      "error": "Projekter kunne ikke læses lige nu.",
+      "now": "Nu",
+      "next": "Næste",
+      "risk": "Risiko",
+      "nowNone": "Ingen fase i gang",
+      "nowBlocked": "Blokeret: {name}",
+      "stagesUnavailable": "Faser er endnu ikke tilgængelige her",
+      "stagesDone": "{done} af {total} faser færdige",
+      "nextNone": "Ingen næste fase planlagt",
+      "nextDerived": "udledt af fasernes rækkefølge",
+      "nextFrom": "fra {date}",
+      "peopleCount": "{count, plural, =0 {ingen tildelt} =1 {1 person} other {# personer}}",
+      "riskNone": "Ingen signaler",
+      "riskUnknown": "Kan ikke læses lige nu",
+      "riskOverdue": "{count, plural, =1 {1 forfalden opgave} other {# forfaldne opgaver}}",
+      "riskBlocked": "{count, plural, =1 {1 blokeret fase} other {# blokerede faser}}",
+      "riskDocs": "{count, plural, =1 {1 person med manglende dokumenter} other {# personer med manglende dokumenter}}",
+      "riskNobody": "Igangværende projekt uden folk",
+      "operations": "Åbn drift",
+      "invite": "Inviter folk",
+      "status": {
+        "unknown": "Status ukendt"
+      }
+    },
+    "capacity": {
+      "heading": "Hvem er ledig nu",
+      "free": "ledig",
+      "away": "fraværende",
+      "awayUntil": "fraværende indtil {date}",
+      "absencesUnknown": "Fravær registreres endnu ikke — ledig betyder, at ingen har sagt andet.",
+      "more": "{count, plural, =1 {1 person mere på planlægningssiden} other {# personer mere på planlægningssiden}}",
+      "assign": "Sæt på et projekt",
+      "plan": "Åbn planlægning",
+      "empty": "Ingen på holdet endnu.",
+      "emptyCta": "Inviter folk",
+      "error": "Ledighed kunne ikke læses lige nu."
+    },
+    "missing": {
+      "heading": "Mangler inden for 4 uger",
+      "nothing": "Intet mangler lige nu.",
+      "people": "{count, plural, =1 {1 person} other {# personer}}",
+      "from": "fra {period}",
+      "status": {
+        "draft": "Kladde",
+        "submitted": "Indsendt",
+        "in_review": "Under gennemgang",
+        "needs_followup": "Kræver din opfølgning",
+        "approved": "Godkendt",
+        "closed": "Lukket"
+      },
+      "continueDraft": "Fortsæt kladden",
+      "openNeed": "Åbn behovet",
+      "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
+      "gapsCta": "Tjek dokumenter",
+      "needsCta": "Beskriv et behov"
+    },
+    "attention": {
+      "heading": "Kræver dig",
+      "none": "Alt i orden — intet venter på dig."
+    },
+    "partners": {
+      "heading": "Partnere",
+      "empty": "Ingen partnere endnu.",
+      "agency": "Bureau",
+      "client": "Kunde",
+      "team": "Hold",
+      "members": "{count, plural, =1 {1 medlem} other {# medlemmer}}",
+      "pending": "venter på dit svar",
+      "status": {
+        "active": "forbundet",
+        "declined": "afvist",
+        "revoked": "afsluttet"
+      },
+      "answer": "Besvar invitationen",
+      "invite": "Inviter en partner"
+    }
   }
 }

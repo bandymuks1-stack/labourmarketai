@@ -6172,5 +6172,94 @@
         "generic": "Przetwarzanie nie powiodło się. Spróbuj ponownie."
       }
     }
+  },
+  "companyHome": {
+    "eyebrow": "Twoja organizacja teraz",
+    "title": "Projekty w czasie i kto jest wolny",
+    "rolesLabel": "Czym zajmuje się organizacja",
+    "rolesNone": "Jeszcze nie podano, czym zajmuje się organizacja.",
+    "rolesDeclare": "Powiedz, czym się zajmujecie",
+    "projects": {
+      "heading": "Projekty w czasie",
+      "more": "{count, plural, one {jeszcze # projekt} few {jeszcze # projekty} many {jeszcze # projektów} other {jeszcze # projektu}}",
+      "empty": "Brak projektów. W projekcie spotykają się ludzie, etapy i dokumenty.",
+      "emptyCta": "Utwórz pierwszy projekt",
+      "noCompany": "Wybierz organizację, w imieniu której działasz, aby zobaczyć jej projekty.",
+      "error": "Nie udało się teraz odczytać projektów.",
+      "now": "Teraz",
+      "next": "Dalej",
+      "risk": "Ryzyko",
+      "nowNone": "Żaden etap nie trwa",
+      "nowBlocked": "Zablokowane: {name}",
+      "stagesUnavailable": "Etapy nie są tu jeszcze dostępne",
+      "stagesDone": "Ukończono {done} z {total} etapów",
+      "nextNone": "Nie zaplanowano następnego etapu",
+      "nextDerived": "wyprowadzone z kolejności etapów",
+      "nextFrom": "od {date}",
+      "peopleCount": "{count, plural, =0 {nikt nie przypisany} one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+      "riskNone": "Brak sygnałów",
+      "riskUnknown": "Teraz nie do odczytania",
+      "riskOverdue": "{count, plural, one {# zaległe zadanie} few {# zaległe zadania} many {# zaległych zadań} other {# zaległego zadania}}",
+      "riskBlocked": "{count, plural, one {# zablokowany etap} few {# zablokowane etapy} many {# zablokowanych etapów} other {# zablokowanego etapu}}",
+      "riskDocs": "{count, plural, one {# osobie brakuje dokumentów} few {# osobom brakuje dokumentów} many {# osobom brakuje dokumentów} other {# osobom brakuje dokumentów}}",
+      "riskNobody": "Trwający projekt bez ludzi",
+      "operations": "Otwórz operacje",
+      "invite": "Zaproś ludzi",
+      "status": {
+        "unknown": "Status nieznany"
+      }
+    },
+    "capacity": {
+      "heading": "Kto jest teraz wolny",
+      "free": "wolny",
+      "away": "nieobecny",
+      "awayUntil": "nieobecny do {date}",
+      "absencesUnknown": "Nieobecności nie są jeszcze zapisywane — „wolny” znaczy, że nikt nie powiedział inaczej.",
+      "more": "{count, plural, one {jeszcze # osoba na stronie planowania} few {jeszcze # osoby na stronie planowania} many {jeszcze # osób na stronie planowania} other {jeszcze # osoby na stronie planowania}}",
+      "assign": "Przypisz do projektu",
+      "plan": "Otwórz planowanie",
+      "empty": "W zespole nie ma jeszcze nikogo.",
+      "emptyCta": "Zaproś ludzi",
+      "error": "Nie udało się teraz odczytać dostępności."
+    },
+    "missing": {
+      "heading": "Brakuje w ciągu 4 tygodni",
+      "nothing": "Teraz niczego nie brakuje.",
+      "people": "{count, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+      "from": "od {period}",
+      "status": {
+        "draft": "Szkic",
+        "submitted": "Wysłane",
+        "in_review": "W przeglądzie",
+        "needs_followup": "Wymaga Twojej odpowiedzi",
+        "approved": "Zatwierdzone",
+        "closed": "Zamknięte"
+      },
+      "continueDraft": "Kontynuuj szkic",
+      "openNeed": "Otwórz potrzebę",
+      "gapsRow": "{count, plural, one {# osobie w projekcie „{project}” brakuje dokumentów} few {# osobom w projekcie „{project}” brakuje dokumentów} many {# osobom w projekcie „{project}” brakuje dokumentów} other {# osobom w projekcie „{project}” brakuje dokumentów}}",
+      "gapsCta": "Sprawdź dokumenty",
+      "needsCta": "Opisz potrzebę"
+    },
+    "attention": {
+      "heading": "Wymaga Ciebie",
+      "none": "Wszystko w porządku — nic na Ciebie nie czeka."
+    },
+    "partners": {
+      "heading": "Partnerzy",
+      "empty": "Brak partnerów.",
+      "agency": "Agencja",
+      "client": "Klient",
+      "team": "Zespół",
+      "members": "{count, plural, one {# członek} few {# członków} many {# członków} other {# członka}}",
+      "pending": "czeka na Twoją odpowiedź",
+      "status": {
+        "active": "połączono",
+        "declined": "odrzucono",
+        "revoked": "zakończono"
+      },
+      "answer": "Odpowiedz na zaproszenie",
+      "invite": "Zaproś partnera"
+    }
   }
 }

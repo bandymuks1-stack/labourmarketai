@@ -1516,6 +1516,95 @@
       "workforceNote": "Anstehende Arbeit und Kapazität — Lücken, Risikodatum und ein vorgeschlagener Schritt."
     }
   },
+  "companyHome": {
+    "eyebrow": "Ihre Organisation jetzt",
+    "title": "Projekte in der Zeit und wer frei ist",
+    "rolesLabel": "Was die Organisation tut",
+    "rolesNone": "Noch nicht angegeben, was die Organisation tut.",
+    "rolesDeclare": "Sagen Sie, was Sie tun",
+    "projects": {
+      "heading": "Projekte in der Zeit",
+      "more": "{count, plural, =1 {1 weiteres Projekt} other {# weitere Projekte}}",
+      "empty": "Noch keine Projekte. Im Projekt kommen Menschen, Phasen und Dokumente zusammen.",
+      "emptyCta": "Erstes Projekt anlegen",
+      "noCompany": "Wählen Sie die Organisation, für die Sie handeln, um ihre Projekte zu sehen.",
+      "error": "Projekte konnten gerade nicht gelesen werden.",
+      "now": "Jetzt",
+      "next": "Als Nächstes",
+      "risk": "Risiko",
+      "nowNone": "Keine Phase in Arbeit",
+      "nowBlocked": "Blockiert: {name}",
+      "stagesUnavailable": "Phasen sind hier noch nicht verfügbar",
+      "stagesDone": "{done} von {total} Phasen erledigt",
+      "nextNone": "Keine nächste Phase geplant",
+      "nextDerived": "abgeleitet aus der Reihenfolge der Phasen",
+      "nextFrom": "ab {date}",
+      "peopleCount": "{count, plural, =0 {niemand zugewiesen} =1 {1 Person} other {# Personen}}",
+      "riskNone": "Keine Signale",
+      "riskUnknown": "Gerade nicht lesbar",
+      "riskOverdue": "{count, plural, =1 {1 überfällige Aufgabe} other {# überfällige Aufgaben}}",
+      "riskBlocked": "{count, plural, =1 {1 blockierte Phase} other {# blockierte Phasen}}",
+      "riskDocs": "{count, plural, =1 {1 Person mit fehlenden Dokumenten} other {# Personen mit fehlenden Dokumenten}}",
+      "riskNobody": "Laufendes Projekt ohne Personen",
+      "operations": "Betrieb öffnen",
+      "invite": "Personen einladen",
+      "status": {
+        "unknown": "Status unbekannt"
+      }
+    },
+    "capacity": {
+      "heading": "Wer ist jetzt frei",
+      "free": "frei",
+      "away": "abwesend",
+      "awayUntil": "abwesend bis {date}",
+      "absencesUnknown": "Abwesenheiten werden noch nicht erfasst — frei heißt, niemand hat etwas anderes gesagt.",
+      "more": "{count, plural, =1 {1 weitere Person auf der Planungsseite} other {# weitere Personen auf der Planungsseite}}",
+      "assign": "Einem Projekt zuweisen",
+      "plan": "Planung öffnen",
+      "empty": "Noch niemand im Team.",
+      "emptyCta": "Personen einladen",
+      "error": "Verfügbarkeit konnte gerade nicht gelesen werden."
+    },
+    "missing": {
+      "heading": "Fehlt in den nächsten 4 Wochen",
+      "nothing": "Derzeit fehlt nichts.",
+      "people": "{count, plural, =1 {1 Person} other {# Personen}}",
+      "from": "ab {period}",
+      "status": {
+        "draft": "Entwurf",
+        "submitted": "Eingereicht",
+        "in_review": "In Prüfung",
+        "needs_followup": "Ihre Rückmeldung nötig",
+        "approved": "Genehmigt",
+        "closed": "Geschlossen"
+      },
+      "continueDraft": "Entwurf fortsetzen",
+      "openNeed": "Bedarf öffnen",
+      "gapsRow": "{count, plural, =1 {1 Person auf {project} hat fehlende Dokumente} other {# Personen auf {project} haben fehlende Dokumente}}",
+      "gapsCta": "Dokumente prüfen",
+      "needsCta": "Bedarf beschreiben"
+    },
+    "attention": {
+      "heading": "Braucht Sie",
+      "none": "Alles in Ordnung — nichts wartet auf Sie."
+    },
+    "partners": {
+      "heading": "Partner",
+      "empty": "Noch keine Partner.",
+      "agency": "Agentur",
+      "client": "Kunde",
+      "team": "Eigenes Team",
+      "members": "{count, plural, =1 {1 Mitglied} other {# Mitglieder}}",
+      "pending": "wartet auf Ihre Antwort",
+      "status": {
+        "active": "verbunden",
+        "declined": "abgelehnt",
+        "revoked": "beendet"
+      },
+      "answer": "Einladung beantworten",
+      "invite": "Partner einladen"
+    }
+  },
   "demandReadback": {
     "statusOther": "In Prüfung",
     "heading": "Ihre eingereichten Anfragen",

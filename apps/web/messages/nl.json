@@ -1516,6 +1516,95 @@
       "workforceNote": "Aankomend werk en capaciteit — tekorten, risicodatum en een voorgestelde stap."
     }
   },
+  "companyHome": {
+    "eyebrow": "Uw organisatie nu",
+    "title": "Projecten in de tijd en wie vrij is",
+    "rolesLabel": "Wat de organisatie doet",
+    "rolesNone": "Nog niet aangegeven wat de organisatie doet.",
+    "rolesDeclare": "Zeg wat u doet",
+    "projects": {
+      "heading": "Projecten in de tijd",
+      "more": "{count, plural, =1 {nog 1 project} other {nog # projecten}}",
+      "empty": "Nog geen projecten. In een project komen mensen, fasen en documenten samen.",
+      "emptyCta": "Eerste project aanmaken",
+      "noCompany": "Kies de organisatie namens welke u handelt om haar projecten te zien.",
+      "error": "Projecten konden nu niet worden gelezen.",
+      "now": "Nu",
+      "next": "Volgende",
+      "risk": "Risico",
+      "nowNone": "Geen fase in uitvoering",
+      "nowBlocked": "Geblokkeerd: {name}",
+      "stagesUnavailable": "Fasen zijn hier nog niet beschikbaar",
+      "stagesDone": "{done} van {total} fasen klaar",
+      "nextNone": "Geen volgende fase gepland",
+      "nextDerived": "afgeleid uit de volgorde van de fasen",
+      "nextFrom": "vanaf {date}",
+      "peopleCount": "{count, plural, =0 {niemand toegewezen} =1 {1 persoon} other {# mensen}}",
+      "riskNone": "Geen signalen",
+      "riskUnknown": "Nu niet leesbaar",
+      "riskOverdue": "{count, plural, =1 {1 verlopen taak} other {# verlopen taken}}",
+      "riskBlocked": "{count, plural, =1 {1 geblokkeerde fase} other {# geblokkeerde fasen}}",
+      "riskDocs": "{count, plural, =1 {1 persoon met ontbrekende documenten} other {# mensen met ontbrekende documenten}}",
+      "riskNobody": "Lopend project zonder mensen",
+      "operations": "Operaties openen",
+      "invite": "Mensen uitnodigen",
+      "status": {
+        "unknown": "Status onbekend"
+      }
+    },
+    "capacity": {
+      "heading": "Wie is nu vrij",
+      "free": "vrij",
+      "away": "afwezig",
+      "awayUntil": "afwezig tot {date}",
+      "absencesUnknown": "Afwezigheden worden nog niet vastgelegd — vrij betekent dat niemand iets anders heeft gezegd.",
+      "more": "{count, plural, =1 {nog 1 persoon op de planningspagina} other {nog # mensen op de planningspagina}}",
+      "assign": "Op een project zetten",
+      "plan": "Planning openen",
+      "empty": "Nog niemand in het team.",
+      "emptyCta": "Mensen uitnodigen",
+      "error": "Beschikbaarheid kon nu niet worden gelezen."
+    },
+    "missing": {
+      "heading": "Ontbreekt binnen 4 weken",
+      "nothing": "Op dit moment ontbreekt niets.",
+      "people": "{count, plural, =1 {1 persoon} other {# mensen}}",
+      "from": "vanaf {period}",
+      "status": {
+        "draft": "Concept",
+        "submitted": "Ingediend",
+        "in_review": "In beoordeling",
+        "needs_followup": "Uw opvolging nodig",
+        "approved": "Goedgekeurd",
+        "closed": "Gesloten"
+      },
+      "continueDraft": "Concept voortzetten",
+      "openNeed": "Behoefte openen",
+      "gapsRow": "{count, plural, =1 {1 persoon op {project} mist documenten} other {# mensen op {project} missen documenten}}",
+      "gapsCta": "Documenten controleren",
+      "needsCta": "Een behoefte beschrijven"
+    },
+    "attention": {
+      "heading": "Heeft u nodig",
+      "none": "Alles in orde — niets wacht op u."
+    },
+    "partners": {
+      "heading": "Samenwerkingspartners",
+      "empty": "Nog geen partners.",
+      "agency": "Bureau",
+      "client": "Klant",
+      "team": "Eigen ploeg",
+      "members": "{count, plural, =1 {1 lid} other {# leden}}",
+      "pending": "wacht op uw antwoord",
+      "status": {
+        "active": "verbonden",
+        "declined": "afgewezen",
+        "revoked": "beëindigd"
+      },
+      "answer": "Uitnodiging beantwoorden",
+      "invite": "Een partner uitnodigen"
+    }
+  },
   "demandReadback": {
     "statusOther": "In beoordeling",
     "heading": "Je ingediende aanvragen",

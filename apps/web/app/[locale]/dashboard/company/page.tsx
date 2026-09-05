@@ -81,6 +81,11 @@ import {
   CompanyNoProfileGuide,
 } from "@/components/app/company-next-actions";
 import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
+// P5/C1 (frozen design §2.6, §5 P5): the organisation's home field — projects
+// in time × who is free — composed from the reads the chat already answers
+// with, actionable through the same pages/actions, no conversation needed.
+import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
+import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 
 // W3 rows 7/8/25: the light COMPANY_FIELDS draft form is absorbed by the full
 // demand wizard below (its private save-draft leg writes the same canonical
@@ -232,6 +237,7 @@ export default async function CompanyDashboardPage({
     rWorkObjects,
     rManagedProjects,
     rPendingInterest,
+    rHomeField,
   ] = await Promise.all([
     isStaffingAgency ? listAgencyClients() : null,
     isStaffingAgency ? listAgencyDemands() : null,
@@ -251,6 +257,11 @@ export default async function CompanyDashboardPage({
     // session, so it depends on nothing above and joins this batch rather
     // than adding a round trip to a page that already reads fourteen.
     listPendingInterestCountsForCompany(),
+    // P5/C1 — the home field: the chat's project-risk, who-is-free and
+    // opening-brief reads plus the canonical stages/assignments per shown
+    // project (≤ 6). Resolves its own company context from the session, so
+    // it joins this batch instead of adding a round trip.
+    ownCompany ? loadCompanyHomeField() : null,
   ] as const);
 
   // P5 agency client management — staffing-agency mode ONLY. Reads the
@@ -835,6 +846,41 @@ export default async function CompanyDashboardPage({
         ) : null}
       </header>
 
+      {/* P5/C1 — THE ORGANISATION'S HOME (frozen design §2.6 C1, §5 P5;
+          design system §I): capabilities strip → each active project as one
+          row [now | next DERIVED | risk] → who is free now · missing within
+          4 weeks · needs you · partners. Every object leads to the SAME
+          page/action the chat dispatches; the chat itself stays on demand. */}
+      {rHomeField ? (
+        <CompanyHomeFieldSection
+          locale={locale}
+          capabilities={declaredCapabilities}
+          field={rHomeField}
+          needs={
+            demandReadback.kind === "ok"
+              ? { kind: "ok", rows: demandReadback.rows }
+              : demandReadback.kind === "needs-migration"
+                ? { kind: "needs-migration" }
+                : { kind: "error" }
+          }
+          partners={{
+            agencies:
+              clientInvites && clientInvites.kind === "ok" ? clientInvites.rows : null,
+            clients:
+              agencyClientsState && agencyClientsState.kind === "ok"
+                ? agencyClientsState.rows
+                : null,
+            teams: teamBrigades.applied
+              ? teamBrigades.teams.map((tm) => ({
+                  id: tm.id,
+                  name: tm.name,
+                  members: tm.members.length,
+                }))
+              : null,
+          }}
+        />
+      ) : null}
+
       {/* F3 (production UX repair v2): compact icon-led control bar — every
           core company area is one glance + one tap away, with real counters.
           Long explanations stay inside their sections, never up here. */}
@@ -977,10 +1023,12 @@ export default async function CompanyDashboardPage({
           block because that is what it is — what this organization DOES — and
           not buried in an administration console. */}
       {capabilityOrgId ? (
-        <OrganizationCapabilitiesCard
-          organizationId={capabilityOrgId}
-          declared={declaredCapabilities}
-        />
+        <div id="company-capabilities" className="scroll-mt-20">
+          <OrganizationCapabilitiesCard
+            organizationId={capabilityOrgId}
+            declared={declaredCapabilities}
+          />
+        </div>
       ) : null}
 
       {/* Education institution (training_provider capability): participation
@@ -1039,7 +1087,7 @@ export default async function CompanyDashboardPage({
           kind='agency_offer' to customer_requests), and scouting. Renders
           strictly when companyRow.companyType === "staffing_agency". */}
       {companyRow && companyRow.companyType === "staffing_agency" ? (
-        <>
+        <div id="company-agency" className="flex flex-col gap-6 scroll-mt-20">
         <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="company-agency-mode"
@@ -1127,7 +1175,7 @@ export default async function CompanyDashboardPage({
             locale={locale}
           />
         ) : null}
-        </>
+        </div>
       ) : null}
 
       {/* REAL two-subject bridge — client side: a real (non-agency) company
@@ -1145,12 +1193,14 @@ export default async function CompanyDashboardPage({
       clientInvites.rows.length > 0 &&
       clientBridgeLabels &&
       ownCompany ? (
-        <ClientAgencyBridgeSection
-          invites={clientInvites}
-          clientCompanyId={ownCompany.id}
-          demands={clientBridgeDemands}
-          labels={clientBridgeLabels}
-        />
+        <div id="company-partners-bridge" className="scroll-mt-20">
+          <ClientAgencyBridgeSection
+            invites={clientInvites}
+            clientCompanyId={ownCompany.id}
+            demands={clientBridgeDemands}
+            labels={clientBridgeLabels}
+          />
+        </div>
       ) : null}
 
       {companyRow ? (

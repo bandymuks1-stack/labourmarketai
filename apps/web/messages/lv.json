@@ -6172,5 +6172,94 @@
         "generic": "Neizdevās apstrādāt. Mēģiniet vēlreiz."
       }
     }
+  },
+  "companyHome": {
+    "eyebrow": "Jūsu organizācija tagad",
+    "title": "Projekti laikā un kurš ir brīvs",
+    "rolesLabel": "Ko organizācija dara",
+    "rolesNone": "Vēl nav norādīts, ko organizācija dara.",
+    "rolesDeclare": "Norādiet, ko darāt",
+    "projects": {
+      "heading": "Projekti laikā",
+      "more": "{count, plural, zero {vēl # projektu} one {vēl # projekts} other {vēl # projekti}}",
+      "empty": "Projektu vēl nav. Projektā satiekas cilvēki, posmi un dokumenti.",
+      "emptyCta": "Izveidot pirmo projektu",
+      "noCompany": "Izvēlieties organizāciju, kuras vārdā rīkojaties, lai redzētu tās projektus.",
+      "error": "Projektus šobrīd neizdevās nolasīt.",
+      "now": "Tagad",
+      "next": "Tālāk",
+      "risk": "Risks",
+      "nowNone": "Neviens posms nenotiek",
+      "nowBlocked": "Bloķēts: {name}",
+      "stagesUnavailable": "Posmi šeit vēl nav pieejami",
+      "stagesDone": "Pabeigti {done} no {total} posmiem",
+      "nextNone": "Nākamais posms nav ieplānots",
+      "nextDerived": "izsecināts no posmu secības",
+      "nextFrom": "no {date}",
+      "peopleCount": "{count, plural, =0 {neviens nav piešķirts} zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+      "riskNone": "Signālu nav",
+      "riskUnknown": "Šobrīd nav nolasāms",
+      "riskOverdue": "{count, plural, zero {# nokavētu uzdevumu} one {# nokavēts uzdevums} other {# nokavēti uzdevumi}}",
+      "riskBlocked": "{count, plural, zero {# bloķētu posmu} one {# bloķēts posms} other {# bloķēti posmi}}",
+      "riskDocs": "{count, plural, zero {# cilvēkiem trūkst dokumentu} one {# cilvēkam trūkst dokumentu} other {# cilvēkiem trūkst dokumentu}}",
+      "riskNobody": "Notiekošs projekts bez cilvēkiem",
+      "operations": "Atvērt operācijas",
+      "invite": "Uzaicināt cilvēkus",
+      "status": {
+        "unknown": "Statuss nav zināms"
+      }
+    },
+    "capacity": {
+      "heading": "Kurš tagad ir brīvs",
+      "free": "brīvs",
+      "away": "prombūtnē",
+      "awayUntil": "prombūtnē līdz {date}",
+      "absencesUnknown": "Prombūtnes vēl netiek reģistrētas — brīvs nozīmē, ka neviens nav teicis citādi.",
+      "more": "{count, plural, zero {vēl # cilvēku plānošanas lapā} one {vēl # cilvēks plānošanas lapā} other {vēl # cilvēki plānošanas lapā}}",
+      "assign": "Piešķirt projektam",
+      "plan": "Atvērt plānošanu",
+      "empty": "Komandā vēl neviena nav.",
+      "emptyCta": "Uzaicināt cilvēkus",
+      "error": "Pieejamību šobrīd neizdevās nolasīt."
+    },
+    "missing": {
+      "heading": "Trūkst 4 nedēļu laikā",
+      "nothing": "Šobrīd nekā netrūkst.",
+      "people": "{count, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+      "from": "no {period}",
+      "status": {
+        "draft": "Melnraksts",
+        "submitted": "Iesniegts",
+        "in_review": "Tiek izskatīts",
+        "needs_followup": "Nepieciešama jūsu atbilde",
+        "approved": "Apstiprināts",
+        "closed": "Slēgts"
+      },
+      "continueDraft": "Turpināt melnrakstu",
+      "openNeed": "Atvērt vajadzību",
+      "gapsRow": "{count, plural, zero {# cilvēkiem projektā „{project}” trūkst dokumentu} one {# cilvēkam projektā „{project}” trūkst dokumentu} other {# cilvēkiem projektā „{project}” trūkst dokumentu}}",
+      "gapsCta": "Pārbaudīt dokumentus",
+      "needsCta": "Aprakstīt vajadzību"
+    },
+    "attention": {
+      "heading": "Vajadzīgs jūs",
+      "none": "Viss kārtībā — nekas jūs negaida."
+    },
+    "partners": {
+      "heading": "Partneri",
+      "empty": "Partneru vēl nav.",
+      "agency": "Aģentūra",
+      "client": "Klients",
+      "team": "Komanda",
+      "members": "{count, plural, zero {# dalībnieku} one {# dalībnieks} other {# dalībnieki}}",
+      "pending": "gaida jūsu atbildi",
+      "status": {
+        "active": "savienots",
+        "declined": "noraidīts",
+        "revoked": "pārtraukts"
+      },
+      "answer": "Atbildēt uz uzaicinājumu",
+      "invite": "Uzaicināt partneri"
+    }
   }
 }

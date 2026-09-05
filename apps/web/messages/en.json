@@ -1516,6 +1516,95 @@
       "workforceNote": "Upcoming work vs. capacity — gaps, risk date and a suggested step."
     }
   },
+  "companyHome": {
+    "eyebrow": "Your organisation now",
+    "title": "Projects in time and who is free",
+    "rolesLabel": "What the organisation does",
+    "rolesNone": "Not said yet what the organisation does.",
+    "rolesDeclare": "Say what you do",
+    "projects": {
+      "heading": "Projects in time",
+      "more": "{count, plural, =1 {1 more project} other {# more projects}}",
+      "empty": "No projects yet. A project is where people, stages and documents come together.",
+      "emptyCta": "Create the first project",
+      "noCompany": "Choose the organisation you are acting for to see its projects.",
+      "error": "Projects could not be read right now.",
+      "now": "Now",
+      "next": "Next",
+      "risk": "Risk",
+      "nowNone": "No stage in progress",
+      "nowBlocked": "Blocked: {name}",
+      "stagesUnavailable": "Stages are not available here yet",
+      "stagesDone": "{done} of {total} stages done",
+      "nextNone": "No next stage planned",
+      "nextDerived": "derived from the stage order",
+      "nextFrom": "from {date}",
+      "peopleCount": "{count, plural, =0 {nobody assigned} =1 {1 person} other {# people}}",
+      "riskNone": "No signals",
+      "riskUnknown": "Not readable right now",
+      "riskOverdue": "{count, plural, =1 {1 overdue task} other {# overdue tasks}}",
+      "riskBlocked": "{count, plural, =1 {1 blocked stage} other {# blocked stages}}",
+      "riskDocs": "{count, plural, =1 {1 person with missing documents} other {# people with missing documents}}",
+      "riskNobody": "Live project with nobody on it",
+      "operations": "Open operations",
+      "invite": "Invite people",
+      "status": {
+        "unknown": "Status unknown"
+      }
+    },
+    "capacity": {
+      "heading": "Who is free now",
+      "free": "free",
+      "away": "away",
+      "awayUntil": "away until {date}",
+      "absencesUnknown": "Absences are not recorded yet — free means nobody has said otherwise.",
+      "more": "{count, plural, =1 {1 more person on the planning page} other {# more people on the planning page}}",
+      "assign": "Put on a project",
+      "plan": "Open planning",
+      "empty": "Nobody on the team yet.",
+      "emptyCta": "Invite people",
+      "error": "Availability could not be read right now."
+    },
+    "missing": {
+      "heading": "Missing within 4 weeks",
+      "nothing": "Nothing missing right now.",
+      "people": "{count, plural, =1 {1 person} other {# people}}",
+      "from": "from {period}",
+      "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "in_review": "Being reviewed",
+        "needs_followup": "Needs your follow-up",
+        "approved": "Approved",
+        "closed": "Closed"
+      },
+      "continueDraft": "Continue the draft",
+      "openNeed": "Open the need",
+      "gapsRow": "{count, plural, =1 {1 person on {project} has missing documents} other {# people on {project} have missing documents}}",
+      "gapsCta": "Check documents",
+      "needsCta": "Describe a need"
+    },
+    "attention": {
+      "heading": "Needs you",
+      "none": "All clear — nothing waits for you."
+    },
+    "partners": {
+      "heading": "Partners",
+      "empty": "No partners yet.",
+      "agency": "Agency",
+      "client": "Client",
+      "team": "Team",
+      "members": "{count, plural, =1 {1 member} other {# members}}",
+      "pending": "waiting for your answer",
+      "status": {
+        "active": "connected",
+        "declined": "declined",
+        "revoked": "ended"
+      },
+      "answer": "Answer the invitation",
+      "invite": "Invite a partner"
+    }
+  },
   "demandReadback": {
     "statusOther": "In review",
     "heading": "Your submitted inquiries",
