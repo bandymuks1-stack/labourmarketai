@@ -47,7 +47,12 @@ export interface BillingConfig {
 }
 
 export const LIVE_KEY = /^(sk|pk|rk)_live_/i;
-const LIVE_SECRET = /^sk_live_/;
+// The live SECRET may be a full key (sk_live_) or a LIVE RESTRICTED key
+// (rk_live_) — least privilege in production: the runtime needs only
+// Checkout Sessions / Customers / Customer-portal sessions (write) and
+// Subscriptions (read). A restricted key lacking a permission fails the API
+// call honestly (checkout_failed), never silently. Owner decision 2026-09-05.
+const LIVE_SECRET = /^(sk|rk)_live_/;
 const LIVE_PUBLISHABLE = /^pk_live_/;
 const TEST_SECRET = /^sk_test_/;
 const WEBHOOK_SECRET = /^whsec_/;

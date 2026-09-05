@@ -85,6 +85,17 @@ export function createStripeProvider(): BillingProvider {
               : (input.customerEmail ?? undefined),
             success_url: input.successUrl,
             cancel_url: input.cancelUrl,
+            // VAT (owner decision 2026-09-05: price is tax-EXCLUSIVE, Stripe Tax
+            // computes it by the customer's country — EU B2B reverse charge via
+            // the collected VAT id). Without `automatic_tax` the dashboard's
+            // Tax setting is inert for Checkout. Address is required for the
+            // computation; a reused customer must allow Stripe to store it.
+            automatic_tax: { enabled: true },
+            billing_address_collection: "required",
+            tax_id_collection: { enabled: true },
+            ...(input.providerCustomerId
+              ? { customer_update: { address: "auto", name: "auto" } }
+              : {}),
             metadata,
             // The SAME canonical metadata rides on the subscription object, so
             // customer.subscription.* events carry owner/plan/org linkage even
