@@ -12849,86 +12849,63 @@
     },
     "hero": {
       "headline": "Fragen. Sehen. Einstellen.",
-      "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort.",
-      "chatLabel": "Beispielgespräch",
-      "mapLabel": "Konzeptkarte — illustratives Szenario",
-      "thinking": "Marktsignale werden analysiert…",
-      "answered": "Gefunden. Karte aktualisiert.",
-      "resultLabel": "Ergebnis",
-      "mapHint": "Auf eine Markierung tippen — die Karte antwortet.",
-      "scenario": {
-        "q1": "Wo werden jetzt Elektriker gebraucht?",
-        "q2": "Wo fehlen Schweißer?",
-        "q3": "Wo sind Menschen verfügbar?"
+      "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort."
+    },
+    "entry": {
+      "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
+      "placeholder": "Z. B.: Wir brauchen 12 Gerüstbauer in Rotterdam",
+      "submit": "Verstehen",
+      "examplesLabel": "Zum Beispiel:",
+      "examples": {
+        "hire": "Wir brauchen 12 Gerüstbauer in Rotterdam",
+        "work": "Ich suche Arbeit in Norwegen",
+        "internship": "Wo kann ich ein Praktikum machen?"
       },
-      "result": {
-        "r1": "Höchste Elektriker-Nachfrage — Niederlande",
-        "r2": "Schweißer fehlen an der norwegischen Küste",
-        "r3": "Die meisten verfügbaren Menschen — das Baltikum"
+      "understoodLabel": "Verstanden",
+      "understood": {
+        "need-workers": "Sie brauchen Arbeitskräfte. Wir halten den Bedarf fest — welche Leute, wie viele, wo und ab wann — und suchen die passenden.",
+        "find-workers": "Sie suchen Leute für Arbeit. Wir zeigen, wer nach Beruf und Ort passt.",
+        "candidates": "Sie möchten die Kandidaten für Ihren Bedarf sehen.",
+        "find-work": "Sie suchen Arbeit. Nach Ihrem Beruf und Ort zeigen wir passende Möglichkeiten.",
+        "opportunities": "Sie suchen Möglichkeiten — Arbeit, ein Praktikum oder einen anderen Weg. Wir zeigen, was zu Ihnen passt.",
+        "need-service": "Sie brauchen jemanden, der eine Arbeit erledigt. Wir halten fest, was genau nötig ist, und suchen, wer helfen kann.",
+        "offer-value": "Sie haben etwas anzubieten. Wir halten das Angebot fest, damit es die finden, die es brauchen.",
+        "create-project": "Sie möchten ein Projekt oder eine Baustelle anlegen — mit Ort, Terminen und Leuten.",
+        "projects": "Sie möchten die Projekte Ihres Unternehmens sehen.",
+        "company-overview": "Sie möchten sehen, was in Ihrem Unternehmen passiert — Leute, Projekte, Bedarf.",
+        "create-organization": "Sie möchten ein Unternehmen oder eine Organisation registrieren.",
+        "cv": "Sie möchten mit Ihrem Lebenslauf arbeiten — hochladen oder ansehen.",
+        "log-work": "Sie möchten erledigte Arbeit im Arbeitstagebuch festhalten.",
+        "skill-gap": "Sie möchten wissen, welche Fähigkeiten Ihnen fehlen.",
+        "documents": "Sie sprechen über Dokumente und Zertifikate — was gültig ist, was abläuft, was fehlt.",
+        "add-document": "Sie haben ein Dokument oder Zertifikat, das Sie festhalten möchten.",
+        "learning-compass": "Sie möchten wissen, was Sie als Nächstes lernen sollten.",
+        "profile": "Sie möchten Ihr Profil ergänzen — eine Sprache, eine Fähigkeit, Erfahrung.",
+        "who-available": "Sie möchten wissen, wer in Ihrem Team frei ist.",
+        "invite-candidate": "Sie möchten jemanden in Ihr Team einladen.",
+        "invite-client": "Sie möchten einen Kunden einladen — Sie arbeiten als Agentur.",
+        "propose-candidate": "Sie möchten einem Kunden einen Kandidaten vorschlagen — Sie arbeiten als Agentur.",
+        "client-demand": "Sie möchten sehen, was Ihre Kunden brauchen.",
+        "invite-student": "Sie vertreten eine Bildungseinrichtung und möchten einen Lernenden einladen.",
+        "programmes": "Sie vertreten eine Bildungseinrichtung — Programme, Gruppen, Lernende."
       },
-      "reacting": "Markt reagiert… {count} Signale",
-      "decisionLabel": "BEISPIELENTSCHEIDUNG",
-      "ownQuestionNote": "Das ist ein Beispiel zum Thema Ihrer Frage — keine Antwort aus Ihren Daten. Die echte Antwort gibt es nach der Anmeldung.",
-      "decisionField": {
-        "whyHere": "Warum hier",
-        "whyNow": "Warum jetzt",
-        "whyYou": "Warum Sie",
-        "whyNotElsewhere": "Warum nicht anderswo"
+      "family": {
+        "work": "Sie sprechen über Ihre Arbeit und Ihren beruflichen Weg.",
+        "hire": "Sie sprechen als Arbeitgeber oder Unternehmen — über Leute, Projekte oder Bedarf.",
+        "agency": "Sie sprechen als Agentur — über Kunden und Kandidaten.",
+        "student": "Sie sprechen über das Lernen und den Weg in die Arbeit.",
+        "education": "Sie vertreten eine Bildungseinrichtung."
       },
-      "reason": {
-        "r1a": "Ich prüfe offene Bedarfe nach Rolle und Region…",
-        "r1b": "Ich vergleiche mit verfügbaren Menschen in jedem Gebiet…",
-        "r1c": "Ich gewichte Anfahrtsweg und Starttermine…",
-        "r2a": "Ich suche Schweißbedarfe in der Offshore-Industrie…",
-        "r2b": "Ich prüfe Zertifizierungsanforderungen…",
-        "r2c": "Ich gewichte den saisonalen Projektzyklus…",
-        "r3a": "Ich sammle Verfügbarkeitssignale nach Region…",
-        "r3b": "Ich prüfe Fähigkeiten, die in Arbeitsjournalen belegt sind…",
-        "r3c": "Ich bewerte die Startbereitschaft…"
+      "nextHint": "Um den Bedarf zu speichern und darauf antworten zu können, ist ein Konto nötig. Ihr Satz kommt mit.",
+      "signup": "Konto erstellen",
+      "login": "Ich habe ein Konto — anmelden",
+      "unrecognised": "Das habe ich nicht auf Anhieb verstanden. Was suchen Sie?",
+      "chips": {
+        "work": "Ich suche Arbeit",
+        "hire": "Ich brauche Arbeitskräfte"
       },
-      "decision": {
-        "d1": {
-          "whyHere": "In Rotterdam und Eindhoven gibt es mehr offene Bedarfe als verfügbare Elektriker.",
-          "whyNow": "Die Projekte starten in den nächsten 4 Wochen.",
-          "whyYou": "Ihr Arbeitsjournal enthält 14 Einträge, die Elektroarbeiten belegen.",
-          "next": "Diese Bedarfe ansehen",
-          "whyNotElsewhere": "Belgien und Deutschland zeigen weniger Nachfrage und mehr Wettbewerb um dieselben Menschen."
-        },
-        "d2": {
-          "whyHere": "Der Offshore-Industrie in Stavanger und Bergen fehlen zertifizierte Schweißer.",
-          "whyNow": "Der Vergabezyklus öffnet vor der Wintersaison.",
-          "whyYou": "Sie haben Schweißnachweise und sind reisebereit.",
-          "next": "Anforderungen ansehen",
-          "whyNotElsewhere": "Dänemark hat weniger Projekte; Polen hat mehr lokale Kandidaten für dieselbe Rolle."
-        },
-        "d3": {
-          "whyHere": "In Vilnius und Kaunas sind die meisten Menschen startbereit.",
-          "whyNow": "Ihre Verfügbarkeit wurde in den letzten 2 Wochen bestätigt.",
-          "whyYou": "Ihr Bedarf passt zu deren belegten Fähigkeiten.",
-          "next": "Diese Menschen ansehen",
-          "whyNotElsewhere": "Lettland und Estland haben weniger verfügbare Menschen und spätere Starttermine."
-        }
-      },
-      "askPlaceholder": "Stellen Sie Ihre eigene Frage…",
-      "askSubmit": "Fragen",
-      "unmatched": "In dieser Vorschau beantworte ich nur Fragen zu Elektrikern, Schweißern und verfügbaren Menschen.",
-      "basisLabel": "Worauf das beruht",
-      "basisNote": "Auf den {count} oben abgewogenen Signalen, mit illustrativen Mengen — dies ist ein Konzept-Szenario, nicht der heutige Markt.",
-      "previewLabel": "Am besten passende Person",
-      "previewName": "Jonas P.",
-      "previewRole": "Elektriker · Vilnius · Verfügbar ab September",
-      "previewMetric": {
-        "entries": "Arbeitseinträge",
-        "skills": "Belegte Fähigkeiten",
-        "years": "Jahre"
-      },
-      "previewValue": {
-        "entries": "14",
-        "skills": "3",
-        "years": "7"
-      },
-      "persistAction": "Dieses Ergebnis speichern",
-      "persistWhy": "Ein Konto brauchen Sie nur zum Speichern, Bewerben oder Kontaktieren — Ansehen ist frei."
+      "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
+      "refreshed": "aktualisiert {date}"
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",

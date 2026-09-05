@@ -12849,86 +12849,63 @@
     },
     "hero": {
       "headline": "Paklausk. Pamatyk. Įdarbink.",
-      "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje.",
-      "chatLabel": "Pavyzdinis pokalbis",
-      "mapLabel": "Koncepcinis žemėlapis — iliustracinis scenarijus",
-      "thinking": "Analizuoju rinkos signalus…",
-      "answered": "Radau. Žemėlapis atnaujintas.",
-      "resultLabel": "Rezultatas",
-      "mapHint": "Spustelėk žymeklį — žemėlapis atsako.",
-      "scenario": {
-        "q1": "Kur dabar reikia elektrikų?",
-        "q2": "Kur trūksta suvirintojų?",
-        "q3": "Kur yra laisvų darbuotojų?"
+      "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje."
+    },
+    "entry": {
+      "label": "Parašykite, ko reikia — savais žodžiais",
+      "placeholder": "Pvz.: reikia 12 pastolininkų Roterdame",
+      "submit": "Suprasti",
+      "examplesLabel": "Pavyzdžiui:",
+      "examples": {
+        "hire": "Reikia 12 pastolininkų Roterdame",
+        "work": "Ieškau darbo Norvegijoje",
+        "internship": "Kur galiu atlikti praktiką?"
       },
-      "result": {
-        "r1": "Didžiausia elektrikų paklausa — Nyderlanduose",
-        "r2": "Suvirintojų trūksta Norvegijos pakrantėje",
-        "r3": "Daugiausia laisvų darbuotojų — Baltijos šalyse"
+      "understoodLabel": "Supratau",
+      "understood": {
+        "need-workers": "Jums reikia darbuotojų. Užrašysime poreikį — kokių žmonių, kiek, kur ir nuo kada — ir ieškosime tinkamų.",
+        "find-workers": "Ieškote žmonių darbui. Parodysime, kas tinka pagal profesiją ir vietą.",
+        "candidates": "Norite pamatyti kandidatus į savo poreikį.",
+        "find-work": "Ieškote darbo. Pagal jūsų profesiją ir vietą parodysime tinkamas galimybes.",
+        "opportunities": "Ieškote galimybių — darbo, praktikos ar kito kelio. Parodysime, kas jums tinka.",
+        "need-service": "Jums reikia, kad kas nors atliktų darbą. Užrašysime, ko tiksliai reikia, ir ieškosime, kas gali padėti.",
+        "offer-value": "Turite ką pasiūlyti. Užrašysime pasiūlymą, kad jį rastų tie, kam jo reikia.",
+        "create-project": "Norite sukurti projektą ar objektą — su vieta, terminais ir žmonėmis.",
+        "projects": "Norite matyti savo įmonės projektus.",
+        "company-overview": "Norite matyti, kas vyksta jūsų įmonėje — žmonės, projektai, poreikiai.",
+        "create-organization": "Norite įregistruoti įmonę ar organizaciją.",
+        "cv": "Norite dirbti su savo CV — įkelti arba pasižiūrėti.",
+        "log-work": "Norite užrašyti atliktą darbą į darbo žurnalą.",
+        "skill-gap": "Norite sužinoti, kokių įgūdžių jums trūksta.",
+        "documents": "Kalbate apie dokumentus ir pažymėjimus — kas galioja, kas baigiasi, ko trūksta.",
+        "add-document": "Turite dokumentą ar pažymėjimą, kurį norite užrašyti.",
+        "learning-compass": "Norite sužinoti, ko mokytis toliau.",
+        "profile": "Norite papildyti savo profilį — kalbą, įgūdį, patirtį.",
+        "who-available": "Norite žinoti, kas iš jūsų komandos laisvas.",
+        "invite-candidate": "Norite pakviesti žmogų į savo komandą.",
+        "invite-client": "Norite pakviesti klientą — dirbate kaip agentūra.",
+        "propose-candidate": "Norite pasiūlyti kandidatą klientui — dirbate kaip agentūra.",
+        "client-demand": "Norite matyti, ko reikia jūsų klientams.",
+        "invite-student": "Atstovaujate mokymo įstaigai ir norite pakviesti mokinį.",
+        "programmes": "Atstovaujate mokymo įstaigai — programos, grupės, mokiniai."
       },
-      "reacting": "Rinka reaguoja… {count} signalai",
-      "decisionLabel": "PAVYZDINIS SPRENDIMAS",
-      "ownQuestionNote": "Rodomas pavyzdys pagal jūsų klausimo temą — ne atsakymas iš jūsų duomenų. Tikrą atsakymą gausite prisijungę.",
-      "decisionField": {
-        "whyHere": "Kodėl čia",
-        "whyNow": "Kodėl dabar",
-        "whyYou": "Kodėl tau",
-        "whyNotElsewhere": "Kodėl ne kitur"
+      "family": {
+        "work": "Kalbate apie savo darbą ir profesinį kelią.",
+        "hire": "Kalbate kaip darbdavys ar įmonė — apie žmones, projektus ar poreikius.",
+        "agency": "Kalbate kaip agentūra — apie klientus ir kandidatus.",
+        "student": "Kalbate apie mokymąsi ir kelią į darbą.",
+        "education": "Atstovaujate mokymo įstaigai."
       },
-      "reason": {
-        "r1a": "Tikrinu atvirus poreikius pagal rolę ir regioną…",
-        "r1b": "Lyginu su prieinamais žmonėmis kiekvienoje vietovėje…",
-        "r1c": "Vertinu kelionės atstumą ir pradžios datas…",
-        "r2a": "Ieškau suvirinimo poreikių jūrinėje pramonėje…",
-        "r2b": "Tikrinu sertifikatų reikalavimus…",
-        "r2c": "Vertinu sezoninį projektų ciklą…",
-        "r3a": "Renku prieinamumo signalus pagal regionus…",
-        "r3b": "Tikrinu patvirtintus įgūdžius darbo žurnaluose…",
-        "r3c": "Vertinu pasirengimą pradėti…"
+      "nextHint": "Kad poreikį išsaugotume ir galėtume į jį atsakyti, reikia paskyros. Sakinys keliaus kartu su jumis.",
+      "signup": "Sukurti paskyrą",
+      "login": "Turiu paskyrą — prisijungti",
+      "unrecognised": "Nesupratau iš pirmo karto. Ko ieškote?",
+      "chips": {
+        "work": "Ieškau darbo",
+        "hire": "Reikia darbuotojų"
       },
-      "decision": {
-        "d1": {
-          "whyHere": "Rotterdame ir Eindhovene atvirų poreikių daugiau nei laisvų elektrikų.",
-          "whyNow": "Projektai startuoja per artimiausias 4 savaites.",
-          "whyYou": "Tavo darbo žurnale — 14 įrašų, pagrindžiančių elektros darbus.",
-          "next": "Peržiūrėti šiuos poreikius",
-          "whyNotElsewhere": "Belgijoje ir Vokietijoje poreikis mažesnis, o konkurencija dėl tų pačių žmonių didesnė."
-        },
-        "d2": {
-          "whyHere": "Stavangerio ir Bergeno jūrinėje pramonėje trūksta sertifikuotų suvirintojų.",
-          "whyNow": "Rangos ciklas prasideda prieš žiemos sezoną.",
-          "whyYou": "Turi suvirinimo įrodymų ir esi pasirengęs kelionei.",
-          "next": "Pamatyti reikalavimus",
-          "whyNotElsewhere": "Danijoje projektų mažiau, Lenkijoje — daugiau vietinių kandidatų tai pačiai rolei."
-        },
-        "d3": {
-          "whyHere": "Vilniuje ir Kaune daugiausia žmonių, pasirengusių pradėti.",
-          "whyNow": "Jų prieinamumas patvirtintas per pastarąsias 2 savaites.",
-          "whyYou": "Tavo poreikis atitinka jų patvirtintus įgūdžius.",
-          "next": "Peržiūrėti žmones",
-          "whyNotElsewhere": "Latvijoje ir Estijoje laisvų žmonių mažiau, o pradžios terminai vėlesni."
-        }
-      },
-      "askPlaceholder": "Paklausk savo klausimo…",
-      "askSubmit": "Klausti",
-      "unmatched": "Šioje peržiūroje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
-      "basisLabel": "Kuo tai grindžiama",
-      "basisNote": "Aukščiau pasvertais {count} signalais, naudojant iliustracinius kiekius — tai koncepcinis scenarijus, ne šios dienos rinka.",
-      "previewLabel": "Tinkamiausias žmogus",
-      "previewName": "Jonas P.",
-      "previewRole": "Elektrikas · Vilnius · Laisvas nuo rugsėjo",
-      "previewMetric": {
-        "entries": "Darbo įrašai",
-        "skills": "Pagrįsti įgūdžiai",
-        "years": "Metai"
-      },
-      "previewValue": {
-        "entries": "14",
-        "skills": "3",
-        "years": "7"
-      },
-      "persistAction": "Išsaugoti šį rezultatą",
-      "persistWhy": "Paskyros reikia tik norint išsaugoti, kreiptis ar susisiekti — peržiūrėti gali ir be jos."
+      "numbers": "Dabar platformoje: {vacancies} aktyvių darbo skelbimų · {employers} darbdaviai",
+      "refreshed": "atnaujinta {date}"
     },
     "marketProof": {
       "eyebrow": "Šiuo metu platformoje",

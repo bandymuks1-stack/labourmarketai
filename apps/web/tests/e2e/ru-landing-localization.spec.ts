@@ -31,28 +31,26 @@ const OUT = join(
   "docs", "audits", "evidence", "ru-landing-localization",
 );
 
-/** Strings that MUST render in Russian on the hero. */
+/** Strings that MUST render in Russian on the first screen — the public
+ *  entry (frozen design contract 2026-09-05, P1): the field label, the
+ *  understanding of a real sentence, the doors. */
 const MUST_APPEAR = [
-  // 2026-09-05 (#1511, owner directive): the hero is an EXAMPLE — the label
-  // "РЕШЕНИЕ ИИ" was retired with the pretence it named.
-  "ПРИМЕР РЕШЕНИЯ",
-  "Почему здесь",
-  "Почему сейчас",
-  "Наиболее подходящий человек",
-  "Сохранить результат",
+  "Напишите, что вам нужно",
+  "Понял",
+  "Вам нужны работники",
+  "Создать учётную запись",
+  "У меня есть учётная запись",
 ];
 
-/** Their English originals — every one of these was on the Russian page before. */
+/** Their English originals — none of these may appear on the Russian page. */
 const MUST_BE_GONE = [
-  "AI DECISION",
-  "EXAMPLE DECISION",
-  "Why here",
-  "Why now",
-  "Best matching person",
-  "Save this result",
-  "An account is only needed to save",
-  "Checking open needs by role and region",
-  "Rotterdam and Eindhoven have more open needs",
+  "Write what you need",
+  "Understood",
+  "You need workers",
+  "Create an account",
+  "I have an account",
+  "For example:",
+  "I did not understand at first",
 ];
 
 test.describe("Russian landing hero renders Russian (U-15)", () => {
@@ -63,29 +61,23 @@ test.describe("Russian landing hero renders Russian (U-15)", () => {
 
     const body = page.locator("body");
 
-    // THE CONTINUATION PHASE MUST BE ENTERED, NOT WAITED FOR.
+    // THE UNDERSTANDING MUST BE PRODUCED, NOT WAITED FOR.
     //
-    // Two of MUST_APPEAR — `previewLabel` ("Наиболее подходящий человек") and
-    // `persistAction` ("Сохранить результат") — render only inside
-    // `hero-live-demo`'s `continued` branch, which the visitor reaches by
-    // pressing the decision's next-action button. They are not on the first
-    // paint and no amount of waiting will produce them.
-    //
-    // This spec used to assert them straight after `goto`, so it failed with
-    // the page fully and correctly translated — a localization alarm raised by
-    // a harness that never performed the interaction its own assertion
-    // depended on. Driving the click keeps the assertion strong (the strings
-    // must still be Russian) instead of weakening it to whatever the first
-    // screen happens to show.
-    const nextAction = page.getByTestId("hero-next-action");
+    // Three of MUST_APPEAR — the understanding label, the understanding line
+    // and the two doors — render only after a sentence has been read. The
+    // first example chip is a real Russian sentence routed LIVE through the
+    // deterministic router (P1), so driving it keeps the assertion strong:
+    // the strings must still be Russian, and the router must still read
+    // Russian.
+    const example = page.getByTestId("entry-example").first();
     await expect(
-      nextAction,
-      "the hero decision's next-action control should be present on /ru",
+      example,
+      "the entry's example sentences should be present on /ru",
     ).toBeVisible({ timeout: 30_000 });
-    await nextAction.click();
+    await example.click();
     await expect(
-      page.getByTestId("hero-player-preview"),
-      "clicking the next action should reveal the player-card preview",
+      page.getByTestId("entry-understanding"),
+      "reading the example should produce an understanding",
     ).toBeVisible({ timeout: 15_000 });
 
     for (const phrase of MUST_APPEAR) {
@@ -105,7 +97,9 @@ test.describe("Russian landing hero renders Russian (U-15)", () => {
 
     // A dropped ICU placeholder renders as a literal and is invisible to a
     // "does it look Russian" glance, so it is asserted explicitly.
-    expect(text, "the {count} placeholder leaked as a literal").not.toContain("{count}");
+    for (const placeholder of ["{vacancies}", "{employers}", "{date}"]) {
+      expect(text, `the ${placeholder} placeholder leaked as a literal`).not.toContain(placeholder);
+    }
   });
 
   test("evidence screenshots at 390 / 768 / 1440", async ({ page }) => {

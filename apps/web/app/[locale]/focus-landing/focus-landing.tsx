@@ -8,7 +8,7 @@ import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { MarketingFunnelBeacon } from "@/components/app/marketing-funnel-beacon";
 import { SiteFooter } from "@/components/layouts/site-footer";
 import { SiteNav } from "@/components/layouts/site-nav";
-import { HeroLiveDemo } from "@/components/marketing/hero-live-demo";
+import { PublicEntry } from "@/components/marketing/public-entry";
 import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
@@ -37,13 +37,15 @@ import { LandingModeSwitcher } from "./landing-mode-switcher";
  * and `git log --diff-filter=D` shows 5c78ac5 deleted it, so 7179882 is its
  * final production state by definition rather than by judgement.
  *
- * The composition below is that file's, node for node: hero copy + the
- * cinematic <HeroLiveDemo> over the canonical <MarketMap>, then the product
- * chain carrying the #how-it-works anchor, the market proof band, the Player
- * Card showcase, the trust band and the final CTA band — same order, same
- * wrapper classes, same anchor. All six components are the ORIGINALS: they
- * survived #1221 untouched (`git diff 7179882 main -- components/marketing/`
- * is empty) and this change does not modify any of them.
+ * The composition below is that file's, node for node, with ONE section
+ * replaced under the owner's frozen design contract (2026-09-05, package P1):
+ * hero copy + <PublicEntry> — the visitor's own sentence read by the ONE
+ * deterministic router — where the scripted <HeroLiveDemo> scenario used to
+ * play; then the product chain carrying the #how-it-works anchor, the market
+ * proof band, the Player Card showcase, the trust band and the final CTA
+ * band — same order, same wrapper classes, same anchor. The five other
+ * components are the ORIGINALS: they survived #1221 untouched and P1 does
+ * not modify any of them.
  *
  * ── COMPATIBILITY ONLY — NO MODERNISATION ─────────────────────────────────
  * The original rendered inside the (marketing) route group, whose layout
@@ -94,9 +96,13 @@ export async function FocusLanding({
         <main id="main-content" className="relative">
           {/* ── The restored landing body, verbatim from 7179882 ────────── */}
           <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
-            {/* ── Hero: the first screen IS a session — question, AI, map
-                   reaction, result — on the SAME canonical <MarketMap> the
-                   authenticated ResultPanel mounts. ───────────────────── */}
+            {/* ── Entry: the first screen understands a REAL sentence
+                   (frozen design contract 2026-09-05, package P1). The
+                   scripted hero scenario is gone: the visitor's own words go
+                   through the ONE deterministic router, the page says what it
+                   understood, and the auth doors carry the sentence. The
+                   public numbers are the SAME canonical snapshot the market
+                   proof band prints, omitted when the reader cannot answer. */}
             <section className="flex flex-col gap-5">
               <div className="max-w-3xl">
                 <h1 className="font-display text-hero font-bold tracking-tightest text-text-primary">
@@ -106,7 +112,17 @@ export async function FocusLanding({
                   {tHero("sub")}
                 </p>
               </div>
-              <HeroLiveDemo />
+              <PublicEntry
+                supply={
+                  market.activeVacancies !== null && market.distinctEmployers !== null
+                    ? {
+                        vacancies: market.activeVacancies,
+                        employers: market.distinctEmployers,
+                        refreshedAt: market.lastRefreshedAt,
+                      }
+                    : null
+                }
+              />
             </section>
 
             {/* ── The product chain — six links, journal as pivot. Carries
