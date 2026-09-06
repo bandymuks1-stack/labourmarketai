@@ -84,3 +84,80 @@ describe("3./4. signup copy for a private person, in every served locale", () =>
     });
   }
 });
+
+/**
+ * Orchestrator decisions on the walk's open questions (window 6, 2026-09-06):
+ *  5. A just-onboarded WORKER lands in the conversation (`/dashboard`), not on
+ *     the profile wall — the chat's first turn already greets, names what the
+ *     profile lacks and offers the profile as a chip (owner contract
+ *     2026-09-04 §3/§4A/§7). Company/agency/customer destinations untouched.
+ *  6. The signup form renders the legal notice ONCE and the pilot-feedback
+ *     line as one quiet sentence BELOW the submit; its subcopy no longer
+ *     promises a "role" step — the next step confirms what the person came
+ *     for (the sentence may already have ticked it).
+ *  7. The onboarding country field writes `profiles.country` and
+ *     `workers.current_location_country` (complete_onboarding RPC) — it is
+ *     where the person LIVES, and the label must say so.
+ */
+describe("5. a fresh worker lands in the conversation; other identities keep their first screen", () => {
+  const actions = read("lib/auth/actions.ts");
+  it("worker → /dashboard (the chat), never the profile wall", () => {
+    expect(actions).toMatch(/worker:\s*`\/\$\{locale\}\/dashboard`,/);
+    expect(actions).not.toMatch(/worker:\s*`[^`]*profile#setup-journey`/);
+  });
+  it("company/agency → /dashboard/company, customer → /dashboard/buyer", () => {
+    expect(actions).toMatch(/company:\s*`\/\$\{locale\}\/dashboard\/company`/);
+    expect(actions).toMatch(/agency:\s*`\/\$\{locale\}\/dashboard\/company`/);
+    expect(actions).toMatch(/customer:\s*`\/\$\{locale\}\/dashboard\/buyer`/);
+  });
+  it("a safe ?next= still wins over the role destination (invitation continuity)", () => {
+    expect(actions).toMatch(/isSafeReturnPath\(nextRaw\)[\s\S]*?redirect\(getSafeReturnPath\(nextRaw, locale\)\)/);
+  });
+});
+
+describe("6. signup: one legal notice, the pilot line under the action", () => {
+  const signup = read("components/app/signup-form.tsx");
+  it("the legal notice renders exactly once", () => {
+    expect(signup.match(/<AuthLegalNotice variant="signup"/g)).toHaveLength(1);
+  });
+  it("the pilot-feedback line sits after the submit row, as one quiet line", () => {
+    const submit = signup.indexOf('type="submit"');
+    const pilot = signup.indexOf('data-testid="signup-pilot-line"');
+    expect(submit).toBeGreaterThan(-1);
+    expect(pilot).toBeGreaterThan(submit);
+    expect(signup).not.toMatch(/border-state-warning[^\n]*\n\s*\{t\("disclaimer"\)\}/);
+  });
+  for (const locale of activeLocales) {
+    it(`${locale}: the subcopy no longer promises a "role" step`, () => {
+      const sub = messages(locale).auth.signup.subcopy;
+      expect(sub).not.toMatch(/vaidmen|your role|роль|je rol|Ihre Rolle/i);
+      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt/i);
+    });
+  }
+});
+
+describe("7. the onboarding country field is labelled by what it writes (residence)", () => {
+  it("the RPC writes the field to profiles.country and workers.current_location_country", () => {
+    const rpc = readFileSync(
+      join(web, "..", "..", "supabase", "migrations", "20260805090000_worker_display_name_write_path_v1.sql"),
+      "utf8",
+    );
+    expect(rpc).toMatch(/country\s*=\s*nullif\(trim\(coalesce\(p_country, ''\)\), ''\)/);
+    expect(rpc).toMatch(/current_location_country/);
+  });
+  const RESIDENCE: Record<string, RegExp> = {
+    lt: /gyveni/i,
+    en: /live/i,
+    ru: /живёте|живете/i,
+    nl: /woon/i,
+    de: /wohnen|leben/i,
+  };
+  for (const locale of activeLocales) {
+    it(`${locale}: the label asks where the person lives, not a bare "Country"`, () => {
+      const label = (messages(locale).auth as unknown as { onboarding: Record<string, string> })
+        .onboarding.country_label;
+      expect(label).toMatch(RESIDENCE[locale]);
+      expect(label).not.toMatch(/^(Šalis|Country|Страна|Land)$/);
+    });
+  }
+});

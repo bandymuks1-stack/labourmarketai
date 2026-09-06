@@ -3809,7 +3809,7 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; in the next step you'll say what you came for.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
@@ -3964,7 +3964,7 @@
         "note": "Skills start out waiting for review. Documents, your work journal and reviews from people make them stronger over time."
       },
       "display_name_label": "Display name",
-      "country_label": "Country",
+      "country_label": "Where do you live now?",
       "country_placeholder": "Select your country",
       "error_country_required": "Please choose a country.",
       "profession_label": "What work do you do?",

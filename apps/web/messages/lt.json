@@ -3809,7 +3809,7 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — vaidmenį pasirinksi kitame žingsnyje.",
+      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -3964,7 +3964,7 @@
         "note": "Įgūdžiai pradžioje yra jūsų pačių nurodyti. Dokumentai, darbo žurnalas ir žmonių peržiūros laikui bėgant juos sustiprina."
       },
       "display_name_label": "Rodomas vardas",
-      "country_label": "Šalis",
+      "country_label": "Kur dabar gyveni?",
       "country_placeholder": "Pasirinkite šalį",
       "error_country_required": "Pasirinkite šalį.",
       "profession_label": "Kokį darbą dirbi?",

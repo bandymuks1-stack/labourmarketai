@@ -3809,7 +3809,7 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; Ihre Rolle wählen Sie im nächsten Schritt.",
+      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; im nächsten Schritt sagen Sie, weshalb Sie hier sind.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -3964,7 +3964,7 @@
         "note": "Fähigkeiten sind zunächst selbst angegeben. Dokumente, dein Arbeitsjournal und Bestätigungen von Personen machen sie mit der Zeit stärker."
       },
       "display_name_label": "Anzeigename",
-      "country_label": "Land",
+      "country_label": "Wo wohnen Sie zurzeit?",
       "country_placeholder": "Land auswählen",
       "error_country_required": "Bitte wählen Sie ein Land.",
       "profession_label": "Welche Arbeit machen Sie?",

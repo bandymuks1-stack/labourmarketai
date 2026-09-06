@@ -3809,7 +3809,7 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; daarna kies je je rol.",
+      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; in de volgende stap zeg je waarvoor je komt.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -3964,7 +3964,7 @@
         "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkdagboek en bevestigingen van mensen maken ze na verloop van tijd sterker."
       },
       "display_name_label": "Weergavenaam",
-      "country_label": "Land",
+      "country_label": "Waar woon je nu?",
       "country_placeholder": "Kies je land",
       "error_country_required": "Kies een land.",
       "profession_label": "Welk werk doe je?",
