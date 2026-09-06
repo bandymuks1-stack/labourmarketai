@@ -241,6 +241,52 @@ technical/legal safety.
 
 ---
 
+### 5.6 Delegated authority · bulk import · contribution/evidence graph · AI-agent Living CV (owner direction, window 6, 2026-09-06)
+
+Owner direction recorded in `product/OWNER_MASTER_EXECUTION_CONTRACT_2026-09-04.md` §1c.
+Full inventory (scope matrix, pipeline stages, reuse tables, SQL sketches, RED list):
+[`product/delegated-authority-and-evidence-graph-contract-v1.md`](product/delegated-authority-and-evidence-graph-contract-v1.md).
+This section is the canonical direction; it EXTENDS §5.1–5.3 (nothing removed) and
+composes with `audits/external-assistant-gateway-gap-audit-2026-09-02.md`.
+
+**Principles (binding for every stage):**
+
+| Principle | Meaning |
+|---|---|
+| One person, many contexts | one `profiles` identity acts in many organizations / projects / roles; delegation never creates a second identity or a per-client datastore |
+| Real activity only | every fact enters as a recorded action of a named actor; suggestions (CV extraction, recognition, LLM proposals) are never facts until confirmed (`confirmed-suggestions-foundation.md`) |
+| Living Profile = derivation | the profile is read from evidence rows (journal, allocations, confirmations, documents); nothing writes "the profile" directly |
+| Actor ≠ recorder | who the fact is ABOUT, who RECORDED it, and THROUGH WHAT (browser, connected assistant, import, agent) are three columns, never one. Today only `work_hour_allocations.entered_by` and `journal_entry_metrics.source` separate them; delegated writes record the user alone (contract §A) |
+| Work Unit | GOAL → CONTRIBUTION → DELIVERABLE → OUTCOME → EVIDENCE → BENEFICIARIES, mapped onto `work_tasks` · `journal_entries` / `work_items` / `allocations` · `journal_entry_tasks` · `project_clients` (contract §C) — no new evidence store |
+| Company → worker authority | a company records, corrects and confirms only inside its own engagement / membership (RLS `manages_organization`); it never edits a person's own words (`original_text` is immutable; corrections supersede) |
+| Delegated AI is vendor-neutral | ChatGPT, Claude, any MCP host, a future agent = equal adapters over ONE capability registry; identity from ONE resolver; capability scopes (not client names) decide what may be written; `SEND_EXTERNAL_MESSAGE` stays DENY |
+| Bulk historical import has no side effects | SOURCE (immutable file, sha256) → DRAFT → NORMALIZE → RECONCILE (human decides ambiguity) → PREVIEW → COMMIT (one atomic batch) → REVERSIBLE (batch superseded, never deleted). No invitation, e-mail, approval request or automation may fire from an import — proven for the XLSX importer today (contract §B) and to be pinned by a guard |
+| Corrections / merge / rollback | non-destructive only: `correction_of` / `superseded_by`, batch supersede, alias records; a merge keeps both originals |
+| AI data-quality assistance | AI may flag duplicates, gaps, inconsistencies and propose; a human confirms; AI never raises an evidence class (`provenance.ts` rule 2) |
+| AI / agent Living CV | an agent is an `ai_agent` actor owned by one organization; CAPABILITY ≠ IDENTITY — provider / model / version are run provenance (`ai_runs`), competence comes only from reviewed tasks (contract §D); no agent marketplace |
+| Multi-contributor attribution | PRIMARY / CONTRIBUTORS / SUPERVISOR / APPROVER / BENEFICIARY per Work Unit; today one worker per entry |
+| Privacy / visibility | `visibility_scope` vocabulary exists (`closed|team|org|client_report|public_proof_link`) and RLS forces `closed` on insert — widening is an explicit, per-row, human act; a manager never reads worker documents |
+| Natural opportunity discovery | evidence feeds matching (`worker_skills` roll-up); no scoring of people, no rating system |
+| Research direction | PRODUCT · LONGITUDINAL DATA · RESEARCH · FORECAST · COUNTERFACTUAL stay separate artefacts; only the first two exist (contract §F); research reads redacted rows under a named consent purpose |
+
+**Staged roadmap (each stage is a journey PR; GREEN/RED per the merge envelope; none of it before launch week closes except Stage 0):**
+
+| Stage | Deliverable | Class | Reuses |
+|---|---|---|---|
+| 0 — now | direction recorded (this section); ONE safe action: stamp `recorded_via` on delegated journal writes (contract §A precedent `source_document_file` / `extractor_version`) | GREEN, no migration | `journal_entry_metrics` (free `metric_slug`) |
+| 1 — recorder everywhere | `caller.transport` / client id threaded to every capability write; `work_hour_allocations.source='assistant'` (open vocabulary); conversation dispatcher passes the same | GREEN | existing columns |
+| 2 — capability scopes | OAuth consent lists capability scopes (`profile:read`, `journal:write`, …) mapped to registry ids; connected-apps page shows them; a client without the scope is refused at the door | RED (auth-core) | `auth.oauth_consents.scopes`, `connected-apps.ts` |
+| 3 — reversible import batches | workbook registered as `document_files` (sha256) before preview; `import_batches` + `import_batch_id`; batch supersede; alias records for people/sites; guard: importer imports no emitter | RED (new table + RLS) + GREEN column | `register_document_file_v1`, `resolve-entities.ts`, `correction_of` |
+| 4 — Work Unit + attribution | `work_tasks.deliverable_text/outcome_text/significance` (GREEN); `journal_entry_contributors` (RED); roll-up as a bounded READ | GREEN + RED | `work_tasks`, `journal_entry_tasks`, `review_evidence_links` |
+| 5 — AI agent actor | `profiles.actor_type`; agent membership; agent journal + human confirmation; Living CV shows last validation | RED | `ai_runs`, `usage_cost_events`, `entity-model.ts` |
+| 6 — company operational assistant | read capabilities first (workers, projects, document status), then writes behind Stage 2 scopes; timesheets only through Stage 3 | GREEN (reads) / RED (scoped writes) | capability registry bridges (`conversationActionId`) |
+| 7 — research export | consent purpose row; redacted longitudinal export; forecast / counterfactual only as labelled derived artefacts, never in product rows | RED (consent) | `privacy_consent_*`, `ai_runs` retention |
+
+Review questions A and B (§7) apply to every stage; question C (scale, §5.5) is
+answered by bounded reads and indexed batch / entry keys in the sketches.
+
+---
+
 ## 6. THE EXTENSIBILITY CONTRACT (binding, owner directive §62–71)
 
 > **The canonical architecture is the minimum known product possibility space
