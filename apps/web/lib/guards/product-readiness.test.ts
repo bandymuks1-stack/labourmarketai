@@ -2376,7 +2376,9 @@ describe("no migration files added by this sprint", () => {
     // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
     // rollback; applied by the orchestrator via MCP). RECOUNTED from the
     // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
-const SPRINT_BASELINE = 266;
+    // Bumped 266 -> 267 for search_public_vacancy_previews_count_v2 (RED draft,
+    // SECURITY DEFINER body replace; anon /jobs 500s; Lane H follow-up 2026-09-06).
+const SPRINT_BASELINE = 267;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

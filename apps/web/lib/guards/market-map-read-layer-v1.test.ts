@@ -793,7 +793,8 @@ describe("NO new DB migration in this PR", () => {
     // window 6, 2026-09-06, GREEN additive partial index for the board
     // supply-freshness read; paired rollback). RECOUNTED from the tree:
     // `ls supabase/migrations/*.sql | wc -l` = 266.
-expect(count).toBeLessThanOrEqual(266);
+    // Bumped 266 -> 267 for search_public_vacancy_previews_count_v2 (RED draft, 2026-09-06).
+expect(count).toBeLessThanOrEqual(267);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
