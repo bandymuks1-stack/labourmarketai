@@ -1,0 +1,1225 @@
+<title>LabourMarket.ai</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* R10 Gate 1 — the world is the hero. Northern-dusk palette, light type
+   over a dark living landscape; the input is a control, not the hero. */
+
+:root {
+  --ink: #f2f4f7;
+  --soft: #b9c3d2;
+  --dim: #8492a6;
+  --amber: #f4a95c;
+  --green: #7fd39a;
+  --rose: #ff8fa3;
+  --glass: rgba(13, 22, 32, 0.55);
+  --sans: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font: 16px/1.5 var(--sans); color: var(--ink);
+  background: linear-gradient(180deg, #22374f 0%, #4a5a6b 40%, #17262f 100%);
+  overflow: hidden; -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 8px; }
+
+#land { position: fixed; inset: 0; }
+#world, #life { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#life { pointer-events: none; }
+#skyfall {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #35507049 0%, transparent 60%),
+    linear-gradient(180deg, #22374f 0%, #4a5a6b 44%, #17262f 100%);
+}
+
+/* atmosphere: warm horizon breath + cool edges — reliable overlay grades */
+#atmo { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(16, 28, 44, 0.36) 0%, transparent 22%),
+    radial-gradient(120% 90% at 50% 112%, rgba(8, 14, 20, 0.5), transparent 55%);
+}
+
+/* projected layers */
+#paths { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#markers { position: absolute; inset: 0; pointer-events: none; }
+.mk { position: absolute; left: 0; top: 0; will-change: transform; }
+
+/* city hover targets — the life layer draws the visuals; DOM only for tips */
+.mk-city { pointer-events: auto; cursor: pointer; padding: 9px; }
+.mk-city .dot { display: block; width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 220, 170, 0.0); }
+.mk-city .tip {
+  position: absolute; left: 16px; top: -8px; white-space: nowrap;
+  font-size: 12.5px; padding: 6px 11px; border-radius: 10px;
+  background: rgba(10, 18, 27, 0.82); color: var(--ink);
+  border: 1px solid rgba(255, 200, 140, 0.25);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  opacity: 0; transform: translateY(3px); transition: 0.2s; pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+.mk-city .tip b { font-variant-numeric: tabular-nums; color: var(--amber); }
+.mk-city:hover .tip, .mk-city.is-tip .tip { opacity: 1; transform: none; }
+
+/* intent blooms + labels */
+.mk-bloom { width: 0; height: 0; }
+.mk-bloom .ring {
+  position: absolute; left: 0; top: 0; width: 12px; height: 12px;
+  margin: -6px 0 0 -6px; border-radius: 50%;
+  border: 2px solid rgba(244, 169, 92, 0.85);
+  animation: bloom 2.6s ease-out infinite;
+}
+.mk-bloom .ring:nth-child(2) { animation-delay: 0.85s; }
+.mk-bloom .ring:nth-child(3) { animation-delay: 1.7s; }
+@keyframes bloom { from { transform: scale(0.4); opacity: 1; } to { transform: scale(7); opacity: 0; } }
+.mk-bloom .core {
+  position: absolute; left: 0; top: 0; width: 13px; height: 13px;
+  margin: -6.5px 0 0 -6.5px; border-radius: 50%;
+  background: #ffc98e; box-shadow: 0 0 22px 8px rgba(244, 169, 92, 0.75);
+}
+.mk-bloom.is-rose .ring { border-color: rgba(255, 143, 163, 0.85); }
+.mk-bloom.is-rose .core { background: #ffb3c1; box-shadow: 0 0 22px 8px rgba(255, 143, 163, 0.7); }
+.mk-bloom.is-green .ring { border-color: rgba(127, 211, 154, 0.85); }
+.mk-bloom.is-green .core { background: #a9e7bd; box-shadow: 0 0 22px 8px rgba(127, 211, 154, 0.7); }
+
+.mk-label {
+  white-space: nowrap; font-size: 13px; padding: 7px 13px; border-radius: 11px;
+  background: rgba(10, 18, 27, 0.82); color: var(--ink);
+  border: 1px solid rgba(255, 200, 140, 0.22);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  animation: rise 0.5s ease both;
+}
+.mk-label b { font-variant-numeric: tabular-nums; }
+.mk-label .a { color: var(--amber); }
+.mk-label .g { color: var(--green); }
+.mk-label .r { color: var(--rose); }
+.mk-label i { font-style: normal; color: var(--soft); }
+@keyframes rise { from { opacity: 0; } }
+
+.mk-mote {
+  width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 12px 3px rgba(255, 143, 163, 0.8);
+}
+.mk-mote.is-green { box-shadow: 0 0 12px 3px rgba(127, 211, 154, 0.8); }
+
+#paths path {
+  fill: none; stroke-width: 2.4px; stroke-linecap: round;
+  stroke-dasharray: 6 7; animation: flow 1.1s linear infinite;
+}
+@keyframes flow { to { stroke-dashoffset: -13; } }
+
+/* ── chrome ── */
+#top {
+  position: absolute; z-index: 5; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 26px;
+}
+.wordmark { font-size: 16px; font-weight: 650; letter-spacing: -0.01em; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
+.wordmark i { font-style: normal; color: var(--amber); }
+.enter {
+  font-size: 13.5px; font-weight: 600; text-decoration: none; color: var(--ink);
+  padding: 8px 16px; border-radius: 999px; background: rgba(13, 22, 32, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.16); backdrop-filter: blur(8px); transition: 0.2s;
+}
+.enter:hover { background: rgba(20, 32, 46, 0.75); transform: translateY(-1px); }
+
+/* scale readout */
+#scale {
+  position: absolute; z-index: 5; left: 26px; bottom: 22px;
+  display: flex; flex-direction: column; gap: 1px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+#scale b { font-size: 14.5px; font-weight: 650; }
+#scale span { font-size: 12px; color: var(--soft); }
+.num { font-style: normal; font-variant-numeric: tabular-nums; font-weight: 650; color: var(--amber); }
+#scale i { font-style: normal; }
+
+/* ── the control ── */
+#ask {
+  position: absolute; z-index: 5; left: 50%; bottom: 34px;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 40px));
+  display: flex; flex-direction: column; gap: 9px; align-items: center;
+}
+#say {
+  font-size: 14.5px; text-align: center; color: var(--soft);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+#say b { color: var(--amber); }
+#askForm {
+  display: flex; align-items: center; width: 100%; gap: 8px;
+  background: var(--glass); border: 1px solid rgba(244, 169, 92, 0.4);
+  border-radius: 999px; padding: 5px 5px 5px 20px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px); transition: border-color 0.2s;
+}
+#askForm:focus-within { border-color: rgba(244, 169, 92, 0.85); }
+#askInput {
+  flex: 1; min-width: 0; border: 0; background: none; color: var(--ink);
+  font: 15.5px var(--sans); padding: 9px 0;
+}
+#askInput::placeholder { color: var(--dim); }
+#askForm button {
+  flex: none; width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #f6b76e, #e08a3c); color: #1c1206;
+  font-size: 17px; transition: 0.18s; box-shadow: 0 5px 14px rgba(224, 138, 60, 0.45);
+}
+#askForm button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.try { font-size: 12.5px; color: var(--dim); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5); }
+.try button {
+  color: var(--soft); padding: 2px 3px; border-bottom: 1px dotted rgba(185, 195, 210, 0.45);
+  transition: 0.15s;
+}
+.try button:hover { color: var(--amber); border-color: var(--amber); }
+
+#src {
+  position: absolute; z-index: 5; right: 26px; bottom: 22px;
+  font-size: 10.5px; color: var(--dim); opacity: 0.85;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ── mobile ── */
+@media (max-width: 700px) {
+  #top { padding: 14px 18px; }
+  #scale { left: 18px; bottom: 16px; }
+  #ask { bottom: max(64px, calc(56px + env(safe-area-inset-bottom))); width: calc(100% - 26px); }
+  #say { font-size: 13.5px; }
+  .try { font-size: 12px; }
+  #src { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+  .mk-bloom .ring { animation: none; opacity: 0.5; transform: scale(2.4); }
+  #paths path { animation: none; }
+}
+
+</style>
+
+<div id="land">
+
+  <canvas id="world"></canvas>
+  <canvas id="life"></canvas>
+  <div id="atmo"></div>
+  <div id="skyfall" hidden></div>
+
+  <!-- projected DOM layers (intent labels, city tips) -->
+  <svg id="paths" aria-hidden="true"></svg>
+  <div id="markers" aria-hidden="true"></div>
+
+  <!-- quiet chrome -->
+  <header id="top">
+    <span class="wordmark">LabourMarket<i>.ai</i></span>
+    <a class="enter" href="https://labourmarket.ai" rel="noopener">Pradėti →</a>
+  </header>
+
+  <!-- scale readout -->
+  <div id="scale">
+    <b id="scaleName">Västra Götaland</b>
+    <span><em id="scaleN" class="num">6 289</em> <i id="scaleWhat">aktyvios darbo vietos</i></span>
+  </div>
+
+  <!-- the control of the world -->
+  <div id="ask">
+    <p id="say" aria-live="polite">Gyvas darbo ir vertės pasaulis. Pasakyk, ko reikia.</p>
+    <form id="askForm">
+      <input id="askInput" type="text" placeholder="Ko ieškai arba ką gali pasiūlyti?" autocomplete="off" aria-label="Pasakyk pasauliui">
+      <button type="submit" aria-label="Siųsti">→</button>
+    </form>
+    <p class="try">pabandyk
+      <button data-say="Ieškau sandėlio darbo Göteborge">sandėlio darbas Göteborge</button> ·
+      <button data-say="Kitai savaitei trūksta 4 elektrikų">trūksta 4 elektrikų</button> ·
+      <button data-say="Turiu 30 kg agurkų ir noriu parduoti">turiu 30 kg agurkų</button>
+    </p>
+  </div>
+
+  <p id="src">realūs skaičiai: Arbetsförmedlingen (CC0) · 2026-08-15</p>
+</div>
+
+<script>
+/* GENERATED by tools/build-geometry.mjs — do not edit by hand.
+   Geography: Natural Earth 1:50m (public domain).
+   Counts: labourmarket.ai production, see data/queries.sql. */
+window.R5_GEO = {"provenance":{"source":"Natural Earth 1:50m admin-0 countries (public domain), via world-atlas@2 countries-50m.json","decoded":"TopoJSON decoded and Douglas–Peucker simplified by tools/build-geometry.mjs","note":"Real coastlines. City coordinates are public geographic fact, not derived from vacancy rows (which carry no lat/lng)."},"cities":[{"name":"Stockholm","lat":59.3293,"lng":18.0686},{"name":"Göteborg","lat":57.7089,"lng":11.9746},{"name":"Malmö","lat":55.605,"lng":13.0038},{"name":"Uppsala","lat":59.8586,"lng":17.6389},{"name":"Linköping","lat":58.4109,"lng":15.6216},{"name":"Jönköping","lat":57.7826,"lng":14.1618},{"name":"Örebro","lat":59.2741,"lng":15.2066},{"name":"Umeå","lat":63.8258,"lng":20.263},{"name":"Västerås","lat":59.6099,"lng":16.5448},{"name":"Luleå","lat":65.5842,"lng":22.1547},{"name":"Norrköping","lat":58.5877,"lng":16.1924},{"name":"Lund","lat":55.7047,"lng":13.191},{"name":"Helsingborg","lat":56.0465,"lng":12.6945}],"landmasses":[{"name":"Sweden","role":"subject","rings":[[[11.389,59.037],[11.472,58.91],[11.644,58.926],[11.799,59.29],[11.68,59.592],[11.835,59.697],[11.932,59.863],[12.17,59.914],[12.487,60.106],[12.588,60.45],[12.314,60.893],[12.296,61.002],[12.706,61.059],[12.879,61.353],[12.595,61.542],[12.156,61.721],[12.303,62.285],[12.116,62.592],[12.109,62.92],[12.217,63],[12.001,63.292],[12.213,63.491],[12.174,63.596],[12.793,64],[13.203,64.075],[13.959,64.014],[14.064,64.096],[14.143,64.174],[14.146,64.261],[14.078,64.464],[13.65,64.582],[14.481,65.302],[14.55,65.646],[14.636,65.793],[14.542,66.13],[15.039,66.167],[15.486,66.306],[15.424,66.49],[16.404,67.055],[16.436,67.154],[16.126,67.425],[16.195,67.505],[16.587,67.628],[16.785,67.896],[17.325,68.104],[17.916,67.965],[18.178,68.201],[18.164,68.528],[18.304,68.555],[19.971,68.356],[20.241,68.477],[19.968,68.542],[20.241,68.673],[20.349,68.849],[20.115,69.021],[20.623,69.036],[20.896,68.979],[20.918,68.906],[21.998,68.521],[22.855,68.368],[23.1,68.257],[23.182,68.137],[23.319,68.13],[23.64,67.955],[23.503,67.875],[23.542,67.614],[23.456,67.46],[23.733,67.424],[23.776,67.328],[23.625,67.234],[23.643,67.13],[23.989,66.811],[23.866,66.576],[23.701,66.481],[23.701,66.253],[23.996,66.061],[24.154,65.806],[23.892,65.783],[23.69,65.828],[23.103,65.736],[22.747,65.872],[22.538,65.795],[22.401,65.863],[22.286,65.75],[22.254,65.597],[22.088,65.611],[22.149,65.552],[21.919,65.533],[21.951,65.471],[21.879,65.424],[21.566,65.408],[21.523,65.359],[21.609,65.262],[21.411,65.318],[21.573,65.125],[21.138,64.809],[21.278,64.724],[21.393,64.543],[21.519,64.464],[21.465,64.38],[21.019,64.177],[20.763,63.868],[20.205,63.662],[19.914,63.611],[19.723,63.464],[19.503,63.509],[19.496,63.424],[19.356,63.478],[19.035,63.238],[18.816,63.257],[18.859,63.207],[18.607,63.179],[18.531,63.063],[18.312,62.997],[18.502,62.988],[18.463,62.896],[18.171,62.79],[17.88,62.873],[17.973,62.721],[17.905,62.66],[18.038,62.601],[17.646,62.452],[17.412,62.509],[17.379,62.462],[17.43,62.335],[17.635,62.233],[17.509,62.167],[17.376,61.867],[17.466,61.684],[17.196,61.724],[17.217,61.657],[17.131,61.575],[17.138,61.382],[17.199,61.313],[17.163,61.278],[17.203,60.952],[17.278,60.813],[17.25,60.7],[17.361,60.641],[17.556,60.643],[17.66,60.535],[17.955,60.591],[18.164,60.408],[18.556,60.254],[18.535,60.153],[18.787,60.08],[18.992,59.829],[18.97,59.757],[18.578,59.566],[17.966,59.36],[18.132,59.316],[18.56,59.395],[18.618,59.327],[18.416,59.29],[18.286,59.11],[17.764,58.966],[16.98,58.655],[16.213,58.636],[16.789,58.586],[16.926,58.492],[16.652,58.435],[16.771,58.214],[16.699,58.16],[16.695,57.917],[16.598,57.914],[16.555,57.813],[16.652,57.501],[16.476,57.264],[16.53,57.068],[16.35,56.709],[15.921,56.167],[15.828,56.126],[15.626,56.186],[14.715,56.134],[14.755,56.034],[14.56,56.049],[14.215,55.832],[14.204,55.73],[14.341,55.528],[14.175,55.396],[13.808,55.428],[13.322,55.346],[12.886,55.412],[12.94,55.482],[12.973,55.749],[12.472,56.291],[12.706,56.235],[12.8,56.264],[12.656,56.44],[12.858,56.452],[12.919,56.516],[12.883,56.617],[12.717,56.662],[12.422,56.907],[12.152,57.226],[12.055,57.447],[11.961,57.426],[11.878,57.679],[11.734,57.718],[11.702,57.973],[11.551,58.001],[11.45,58.119],[11.432,58.341],[11.248,58.369],[11.209,58.867],[11.148,58.988],[11.194,59.079],[11.389,59.037]],[[19.075,57.836],[18.816,57.705],[18.79,57.483],[18.909,57.398],[18.783,57.362],[18.7,57.242],[18.477,57.164],[18.34,56.978],[18.146,56.921],[18.207,57.011],[18.286,57.084],[18.106,57.271],[18.153,57.339],[18.135,57.556],[18.538,57.83],[18.805,57.834],[18.902,57.915],[19.075,57.836]],[[16.53,56.291],[16.432,56.244],[16.4,56.311],[16.411,56.568],[16.63,56.877],[16.728,56.902],[16.998,57.318],[17.116,57.32],[16.778,56.804],[16.53,56.291]]]},{"name":"Poland","role":"context","rings":[[[23.604,51.518],[24.097,50.872],[23.978,50.786],[24.09,50.53],[23.409,50.175],[22.65,49.539],[22.808,49.02],[21.638,49.412],[20.364,49.385],[20.058,49.182],[19.755,49.204],[19.773,49.373],[19.442,49.598],[18.967,49.397],[18.564,49.879],[17.628,50.116],[17.703,50.307],[17.415,50.254],[16.879,50.426],[16.99,50.237],[16.638,50.102],[16.209,50.425],[16.36,50.621],[16.008,50.612],[14.992,51.015],[14.982,50.886],[14.809,50.859],[15.018,51.253],[14.6,51.832],[14.751,52.082],[14.553,52.36],[14.618,52.529],[14.128,52.878],[14.413,53.216],[14.258,53.73],[14.582,53.64],[14.557,53.824],[14.197,53.919],[16.188,54.291],[16.558,54.555],[17.844,54.817],[18.758,54.685],[18.438,54.745],[18.589,54.513],[18.978,54.35],[19.604,54.459],[22.822,54.397],[23.37,54.2],[23.91,52.905],[23.902,52.704],[23.175,52.287],[23.654,52.041],[23.604,51.518]]]},{"name":"Norway","role":"context","rings":[[[20.623,69.036],[20.115,69.021],[20.349,68.849],[19.968,68.542],[20.241,68.477],[19.971,68.356],[18.304,68.555],[18.164,68.528],[18.178,68.201],[17.916,67.965],[17.325,68.104],[16.785,67.896],[16.587,67.628],[16.126,67.425],[16.404,67.055],[15.424,66.49],[15.486,66.306],[14.542,66.13],[14.636,65.793],[14.481,65.302],[13.65,64.582],[14.078,64.464],[14.064,64.096],[12.793,64],[12.174,63.596],[12.001,63.292],[12.217,63],[12.116,62.592],[12.303,62.285],[12.156,61.721],[12.879,61.353],[12.706,61.059],[12.296,61.002],[12.588,60.45],[12.487,60.106],[11.932,59.863],[11.68,59.592],[11.799,59.29],[11.644,58.926],[10.834,59.184],[10.644,59.389],[10.597,59.764],[10.179,59.009],[9.844,58.959],[9.556,59.113],[9.657,58.971],[8.167,58.145],[7.004,58.025],[6.878,58.152],[6.59,58.098],[6.658,58.263],[6.053,58.375],[5.517,58.726],[5.611,59.013],[6.1,58.87],[6.363,59],[6.1,58.952],[5.888,59.098],[5.953,59.299],[6.403,59.561],[5.362,59.167],[5.132,59.226],[5.305,59.643],[6.215,59.818],[5.729,59.863],[6.14,60.233],[6.518,60.408],[6.525,60.153],[6.719,60.419],[6.997,60.512],[6.154,60.346],[5.146,59.639],[5.207,60.087],[5.69,60.124],[5.287,60.205],[5.135,60.445],[5.647,60.688],[5.117,60.636],[5.009,61.039],[6.777,61.143],[7.04,60.953],[7.04,61.091],[7.605,61.21],[7.346,61.301],[7.443,61.434],[7.173,61.165],[6.601,61.29],[6.385,61.134],[5.107,61.188],[5.002,61.434],[5.337,61.485],[4.927,61.71],[4.93,61.879],[6.73,61.87],[5.269,61.936],[5.096,62.026],[5.143,62.16],[5.909,62.415],[6.579,62.406],[6.136,62.408],[6.352,62.611],[7.493,62.544],[7.691,62.585],[7.537,62.672],[8.095,62.731],[6.734,62.721],[6.939,62.931],[7.573,63.099],[8.102,63.09],[8.624,62.846],[8.159,63.162],[8.635,63.342],[8.361,63.498],[8.577,63.601],[9.135,63.594],[9.157,63.458],[9.697,63.625],[10.021,63.391],[10.759,63.462],[10.726,63.625],[11.371,63.806],[11.176,63.899],[11.457,64.004],[11.076,63.988],[10.914,63.92],[11.047,63.846],[10.935,63.771],[10.057,63.512],[9.596,63.679],[9.614,63.795],[10.564,64.419],[11.526,64.745],[11.295,64.755],[11.49,64.976],[12.159,65.179],[12.508,65.099],[12.915,65.339],[12.418,65.184],[12.123,65.363],[12.688,65.903],[13.034,65.957],[12.786,66.101],[14.035,66.297],[13.12,66.231],[13.07,66.431],[13.21,66.641],[13.959,66.795],[13.653,66.908],[14.341,67.16],[15.417,67.203],[14.442,67.271],[14.964,67.575],[15.594,67.349],[15.691,67.521],[15.248,67.602],[15.306,67.766],[14.856,67.663],[14.798,67.809],[15.133,67.972],[15.622,67.948],[15.316,68.069],[16.008,68.229],[16.314,67.882],[16.26,68.002],[16.393,68.092],[16.206,68.318],[17.552,68.427],[16.584,68.467],[16.58,68.592],[17.131,68.694],[17.703,69.101],[18.103,69.156],[18.078,69.324],[18.261,69.47],[18.916,69.335],[18.614,69.491],[19.197,69.748],[19.723,69.781],[19.64,69.423],[19.96,69.824],[20.324,69.946],[20.338,69.616],[20.054,69.333],[20.738,69.521],[20.533,69.692],[20.623,69.915],[21.163,69.889],[21.433,70.014],[21.976,69.835],[21.804,70.066],[21.357,70.234],[22.686,70.375],[23.355,69.984],[23.38,70.248],[24.039,70.486],[24.421,70.703],[24.262,70.826],[24.766,71.008],[25.782,70.817],[25.274,70.552],[24.993,70.218],[25.044,70.109],[26.505,70.913],[26.736,70.854],[26.559,70.67],[26.584,70.409],[26.988,70.512],[27.182,70.745],[27.546,70.804],[27.236,70.948],[27.596,71.092],[28.392,70.975],[28.327,70.824],[27.898,70.679],[28.273,70.668],[28.194,70.248],[28.831,70.864],[29.738,70.647],[30.066,70.703],[30.213,70.543],[30.926,70.401],[30.944,70.274],[30.264,70.125],[28.78,70.146],[29.601,69.977],[29.637,69.779],[29.792,69.727],[30.087,69.717],[30.239,69.863],[30.429,69.722],[30.869,69.783],[30.861,69.538],[30.159,69.63],[30.087,69.432],[29.389,69.298],[28.964,69.022],[28.845,69.177],[29.335,69.474],[29.14,69.672],[27.747,70.064],[26.527,69.915],[26.073,69.691],[25.767,69.283],[25.749,68.989],[24.943,68.594],[23.996,68.798],[23.323,68.649],[22.412,68.72],[21.595,69.274],[21.066,69.213],[21.066,69.041],[20.623,69.036]],[[16.785,79.907],[17.833,79.799],[17.955,79.704],[17.667,79.386],[18.398,79.605],[18.816,79.426],[18.679,79.261],[19.892,79.056],[20.612,79.107],[20.767,79.06],[20.5,78.982],[21.39,78.741],[19.676,78.61],[19.15,78.379],[18.996,78.081],[18.438,78.025],[18.229,77.522],[17.847,77.498],[17.152,77.05],[17.25,76.97],[16.976,76.812],[17.062,76.659],[16.699,76.579],[14.366,77.234],[13.995,77.508],[14.694,77.525],[14.92,77.689],[17.034,77.798],[16.915,77.899],[14.089,77.772],[13.79,77.853],[13.682,78.029],[17.001,78.369],[16.45,78.503],[16.695,78.612],[15.417,78.473],[15.255,78.59],[15.385,78.772],[15.018,78.629],[14.69,78.721],[14.467,78.675],[14.431,78.492],[14.64,78.414],[13.149,78.237],[11.367,78.951],[12.404,78.954],[11.983,79.025],[11.893,79.152],[12.084,79.268],[11.979,79.293],[11.209,79.129],[10.737,79.52],[10.809,79.642],[10.683,79.758],[11.702,79.82],[12.289,79.713],[12.282,79.815],[13.693,79.86],[13.916,79.817],[13.779,79.714],[12.555,79.57],[13.333,79.576],[13.956,79.339],[14.038,79.586],[14.593,79.799],[16.342,78.977],[15.828,79.709],[16.245,80.049],[16.785,79.907]],[[20.896,80.249],[22.29,80.049],[22.452,80.402],[23.01,80.475],[23.316,80.424],[23.114,80.187],[24.298,80.36],[27.15,80.06],[27.2,79.907],[26.005,79.617],[25.641,79.404],[23.949,79.194],[22.905,79.23],[22.696,79.329],[22.866,79.412],[20.86,79.398],[19.899,79.534],[19.748,79.617],[20.785,79.749],[18.942,79.737],[18.326,79.86],[18.855,80.037],[17.916,80.143],[19.345,80.117],[19.536,80.164],[19.179,80.331],[19.752,80.227],[19.809,80.327],[19.615,80.463],[20.896,80.249]],[[21.609,78.596],[22.045,78.577],[22.3,78.228],[23.452,78.15],[23.118,77.992],[24.903,77.756],[22.801,77.275],[22.47,77.331],[22.686,77.553],[20.929,77.459],[20.875,77.565],[21.652,77.923],[21.037,78.06],[20.529,78.326],[20.562,78.419],[20.227,78.478],[21.609,78.596]],[[15.759,68.561],[16.152,68.842],[16.479,68.804],[16.519,68.634],[15.975,68.403],[15.039,68.283],[14.258,68.257],[15.414,68.616],[15.565,68.873],[15.482,69.043],[15.892,69.278],[16.13,69.274],[15.813,69.024],[15.928,68.732],[15.759,68.561]],[[17.502,69.597],[18.006,69.505],[17.952,69.198],[16.962,69.069],[16.81,69.071],[16.972,69.139],[17.001,69.363],[17.361,69.382],[17.232,69.477],[17.502,69.597]]]},{"name":"Lithuania","role":"context","rings":[[[22.765,54.357],[22.686,54.563],[22.826,54.87],[22.567,55.06],[21.235,55.265],[21.048,56.07],[21.652,56.315],[22.876,56.396],[24.122,56.264],[24.903,56.398],[25.069,56.2],[25.663,56.105],[26.595,55.667],[26.458,55.343],[26.761,55.294],[25.861,54.919],[25.548,54.332],[25.749,54.259],[25.681,54.14],[25.461,54.292],[24.871,54.145],[24.766,53.975],[23.56,53.919],[23.37,54.2],[22.765,54.357]]]},{"name":"Latvia","role":"context","rings":[[[26.595,55.667],[25.663,56.105],[25.069,56.2],[24.842,56.41],[24.122,56.264],[22.084,56.407],[21.048,56.07],[21.073,56.823],[21.728,57.572],[22.556,57.724],[23.287,57.089],[23.931,57.009],[24.381,57.251],[24.324,57.87],[25.112,58.063],[25.99,57.837],[26.462,57.544],[27.47,57.525],[27.83,57.294],[27.639,56.846],[27.848,56.853],[28.104,56.546],[28.147,56.143],[27.578,55.799],[27.052,55.83],[26.595,55.667]]]},{"name":"Germany","role":"context","rings":[[[9.524,47.524],[8.573,47.775],[8.429,47.591],[7.565,47.607],[7.616,48.157],[8.134,48.973],[6.734,49.161],[6.345,49.452],[6.489,49.798],[6.107,50.095],[6.363,50.317],[6.341,50.452],[5.859,51.03],[6.129,51.147],[6.194,51.411],[5.949,51.803],[6.741,51.911],[6.723,52.081],[6.979,52.206],[7.036,52.381],[6.691,52.53],[7.015,52.633],[7.18,52.966],[7.198,53.282],[7.054,53.376],[7.205,53.655],[8.008,53.69],[8.109,53.468],[8.246,53.445],[8.332,53.607],[8.494,53.395],[8.62,53.876],[9.207,53.857],[9.783,53.555],[8.977,53.926],[8.908,54.261],[8.645,54.294],[8.959,54.539],[8.671,54.903],[9.74,54.825],[10.021,54.674],[9.869,54.473],[11.065,54.28],[10.856,54.009],[11.4,53.945],[12.577,54.468],[13.725,54.154],[13.866,53.853],[14.258,53.73],[14.413,53.216],[14.128,52.878],[14.618,52.529],[14.553,52.36],[14.751,52.082],[14.6,51.832],[15.018,51.253],[14.766,50.819],[14.319,51.037],[14.37,50.899],[12.944,50.407],[12.548,50.393],[12.278,50.182],[12.091,50.301],[12.512,49.895],[12.39,49.739],[12.681,49.414],[13.815,48.767],[13.725,48.543],[13.488,48.583],[13.376,48.362],[12.76,48.107],[12.955,47.89],[12.897,47.722],[13.056,47.656],[13.016,47.479],[12.21,47.718],[11.043,47.394],[10.438,47.551],[10.183,47.279],[9.97,47.505],[9.524,47.524]]]},{"name":"Finland","role":"context","rings":[[[24.154,65.806],[23.701,66.253],[23.701,66.481],[23.989,66.811],[23.643,67.13],[23.733,67.424],[23.456,67.46],[23.503,67.875],[23.64,67.955],[22.855,68.368],[21.998,68.521],[20.623,69.036],[21.066,69.041],[21.066,69.213],[21.595,69.274],[22.412,68.72],[23.323,68.649],[23.996,68.798],[24.943,68.594],[25.749,68.989],[25.767,69.283],[26.012,69.653],[26.527,69.915],[27.891,70.062],[29.14,69.672],[29.335,69.474],[28.845,69.177],[28.964,69.022],[28.413,68.904],[28.773,68.84],[28.471,68.488],[28.687,68.189],[29.342,68.062],[29.979,67.689],[29.065,66.892],[30.087,65.786],[30.095,65.682],[29.716,65.625],[29.821,65.569],[29.608,65.248],[29.828,65.146],[29.601,65.002],[29.702,64.846],[30.109,64.733],[29.986,64.557],[30.109,64.366],[30.512,64.2],[30.505,64.021],[30.21,63.804],[30.055,63.689],[31.182,63.209],[31.535,62.886],[31.185,62.481],[29.252,61.288],[27.668,60.499],[26.534,60.414],[26.57,60.625],[26.379,60.424],[25.954,60.474],[26.037,60.342],[25.756,60.268],[22.963,59.827],[23.197,60.021],[22.866,60.216],[22.794,60.077],[22.462,60.03],[22.585,60.381],[21.436,60.596],[21.361,60.967],[21.606,61.592],[21.256,61.99],[21.343,62.278],[21.105,62.623],[21.472,63.033],[21.652,63.04],[21.544,63.205],[22.318,63.311],[22.243,63.438],[22.531,63.648],[23.6,64.04],[24.558,64.8],[25.288,64.861],[25.346,65.479],[24.676,65.67],[24.63,65.859],[24.154,65.806]]]},{"name":"Estonia","role":"context","rings":[[[27.351,57.528],[26.462,57.544],[25.281,58.049],[24.324,57.87],[24.529,58.355],[24.115,58.266],[23.769,58.362],[23.51,58.658],[23.679,58.787],[23.431,58.921],[23.517,59.108],[24.381,59.473],[25.443,59.521],[25.508,59.639],[26.973,59.45],[28.014,59.485],[28.15,59.374],[27.434,58.787],[27.502,58.221],[27.78,57.87],[27.542,57.799],[27.351,57.528]],[[22.617,58.622],[23.323,58.45],[21.987,57.995],[22.189,58.155],[21.883,58.263],[21.984,58.386],[21.861,58.497],[22.617,58.622]]]},{"name":"Denmark","role":"context","rings":[[[9.74,54.825],[8.671,54.903],[8.617,55.419],[8.131,55.6],[8.163,56.606],[8.671,56.495],[8.887,56.735],[9.196,56.702],[9.254,57.011],[8.991,57.016],[8.771,56.725],[8.469,56.664],[8.285,56.853],[8.62,57.112],[9.553,57.233],[9.963,57.58],[10.611,57.737],[10.46,57.615],[10.525,57.244],[10.294,56.999],[10.284,56.62],[10.928,56.443],[10.755,56.242],[10.374,56.252],[10.183,55.865],[9.905,55.843],[10.024,55.761],[9.592,55.494],[9.671,55.266],[9.455,55.039],[9.689,55.001],[9.74,54.825]],[[12.57,55.785],[12.217,55.466],[12.415,55.285],[12.091,55.188],[12.051,54.815],[11.864,54.773],[11.655,55.186],[11.169,55.329],[11.072,55.629],[10.978,55.721],[11.626,55.957],[11.821,55.697],[11.868,55.968],[12.22,56.119],[12.58,56.065],[12.57,55.785]],[[10.644,55.61],[10.784,55.133],[10.442,55.049],[9.967,55.206],[9.862,55.516],[10.644,55.61]]]}]};
+window.R5_DATA = {"$schema":"./world-snapshot.schema.md","provenance":{"source":"labourmarket.ai production Postgres (project gorgitwvdzxbnaxhrsrw), read-only SELECT","table":"public.public_vacancies","supplier":"Arbetsförmedlingen public job ads (CC0, attribution required, owner-activated 2026-08-09)","queriedAtIso":"2026-08-15T21:20:00Z","inventoryLastSeenAtIso":"2026-08-15T17:34:02.505Z","newestPublishedAtIso":"2026-08-15T19:31:10Z","generator":"docs/design/living-world-r5/tools/build-snapshot.mjs","note":"Every number in this file is a COUNT returned by production. Nothing is rounded, smoothed, or invented. Counts go stale — regenerate before any reuse."},"country":{"iso2":"SE","activeVacancies":41432,"totalRows":41461,"regions":21,"cities":290,"employers":7782,"publishedLast7Days":10260,"classifiedRows":17217,"classifiedSharePct":41.5,"geocodedRows":0},"honesty":{"classification":"Only 17,217 of 41,461 rows (41.5%) carry a profession_slug. EVERY profession count in this file is a count of the CLASSIFIED subset and must be rendered as such — never as a share of the whole inventory.","geocoding":"lat/lng is NULL on 100% of rows. The platform holds no vacancy coordinates. City-level placement in any visualization is derived from the city NAME only; a pin is a city, never a workplace.","categorizationVersion":"41,297 rows are transform_version vacancy-arbetsformedlingen-v2. 164 rows remain v1; pre-v2 profession slugs are known-polluted and are excluded from every profession figure here.","employers":"employer_name is the raw supplier string. No employer is named anywhere in the prototypes — only counted."},"region":{"name":"Västra Götalands län","activeVacancies":6289,"cities":49},"city":{"name":"Göteborg","region":"Västra Götalands län","lat":57.7089,"lng":11.9746,"latLngSource":"Geographic coordinate of the CITY (public knowledge), used to place the camera. NOT derived from vacancy data — vacancies carry no coordinates.","activeVacancies":3078,"employers":1036,"classifiedVacancies":1257,"distinctProfessions":36},"citySelection":{"decidedBy":"evidence, per R5 §6 — not taste","criteria":{"volume":"Göteborg 3,078 active (2nd of 290 cities); 1,036 employers","professionInteraction":"highest profession evenness among high-volume cities: 0.841 (Stockholm 0.815); 17 professions with >=20 active, 12 with >=50","territory":"working river port, shipyard cranes, Göta älv, Ringön industry — real economic activity is visible in a real establishing frame","journalToMatching":"the chain professions all carry real catalogue skills in production (profession_skills)","cinematic":"one continuous geography from river mouth to city block; no impossible adjacency needed"},"runnersUp":[{"city":"Stockholm","activeVacancies":6523,"evenness":0.815,"professionsGe20":20,"rejectedBecause":"largest volume, but care+education and services concentrate 47% of the classified subset — a weaker economic-chain demonstration; also the owner reference frame, so a second city proves the engine is not tied to one plate"},{"city":"Malmö","activeVacancies":1522,"evenness":0.868,"professionsGe20":11,"rejectedBecause":"best evenness but only 3 professions above 50 — the chain breaks"}]},"chain":{"note":"The Göteborg economic chain the flagship camera follows. Each link is a real active-vacancy count for city='Göteborg' in the classified v2 subset.","links":[{"step":1,"professionSlug":"warehouse_worker","activeVacancies":98,"employers":40},{"step":2,"professionSlug":"driver","activeVacancies":78,"employers":61},{"step":3,"professionSlug":"kitchen_helper","activeVacancies":55,"employers":34},{"step":4,"professionSlug":"cook","activeVacancies":72,"employers":56},{"step":5,"professionSlug":"waiter","activeVacancies":51,"employers":35},{"step":6,"professionSlug":"electrician","activeVacancies":71,"employers":47},{"step":7,"professionSlug":"sales_assistant","activeVacancies":62,"employers":41}]},"cityProfessions":[{"slug":"software_developer","n":145,"employers":73},{"slug":"caregiver","n":140,"employers":59},{"slug":"warehouse_worker","n":98,"employers":40},{"slug":"teacher","n":83,"employers":22},{"slug":"driver","n":78,"employers":61},{"slug":"cook","n":72,"employers":56},{"slug":"electrician","n":71,"employers":47},{"slug":"office_administrator","n":65,"employers":52},{"slug":"sales_assistant","n":62,"employers":41},{"slug":"kitchen_helper","n":55,"employers":34},{"slug":"auto_mechanic","n":53,"employers":30},{"slug":"waiter","n":51,"employers":35},{"slug":"cleaner","n":47,"employers":34},{"slug":"customer_service_specialist","n":39,"employers":24},{"slug":"carpenter","n":38,"employers":33},{"slug":"production_worker","n":22,"employers":14},{"slug":"receptionist","n":20,"employers":16},{"slug":"baker","n":19,"employers":13}],"nationalProfessions":[{"slug":"caregiver","n":4152,"cities":282,"employers":817},{"slug":"teacher","n":1527,"cities":230,"employers":439},{"slug":"sales_assistant","n":1060,"cities":166,"employers":289},{"slug":"warehouse_worker","n":923,"cities":143,"employers":246},{"slug":"driver","n":870,"cities":151,"employers":443},{"slug":"cleaner","n":839,"cities":168,"employers":365},{"slug":"software_developer","n":801,"cities":65,"employers":348},{"slug":"cook","n":789,"cities":171,"employers":551},{"slug":"production_worker","n":755,"cities":186,"employers":271},{"slug":"kitchen_helper","n":745,"cities":149,"employers":346},{"slug":"electrician","n":648,"cities":154,"employers":314},{"slug":"gardener","n":104,"cities":72,"employers":33}],"topCities":[{"name":"Stockholm","region":"Stockholms län","n":6523},{"name":"Göteborg","region":"Västra Götalands län","n":3066},{"name":"Malmö","region":"Skåne län","n":1522},{"name":"Uppsala","region":"Uppsala län","n":1073},{"name":"Linköping","region":"Östergötlands län","n":1051},{"name":"Jönköping","region":"Jönköpings län","n":805},{"name":"Örebro","region":"Örebro län","n":716},{"name":"Umeå","region":"Västerbottens län","n":692},{"name":"Västerås","region":"Västmanlands län","n":684},{"name":"Luleå","region":"Norrbottens län","n":625},{"name":"Norrköping","region":"Östergötlands län","n":618},{"name":"Lund","region":"Skåne län","n":600},{"name":"Helsingborg","region":"Skåne län","n":571}],"professionSkills":{"note":"Real rows from production professions x profession_skills x skills. These are the canonical skill slugs the one match engine (lib/market/fit.ts) computes over.","warehouse_worker":["barcode-scanning","forklift-operation","order-picking","packaging","pallet-handling","stock-taking","warehouse-operations"],"driver":["cargo-transport","delivery-driving","driving","forklift-operation"],"cook":["cooking","waiting-tables"],"kitchen_helper":["cleaning-services","dishwashing","kitchen-help"],"electrician":["cable-pulling","electrical-install","electrical-testing","industrial-electric","lighting-install","low-voltage","panel-install"],"sales_assistant":["cashier","customer-service","sales-assistant"]}};
+
+</script>
+<script>
+/* ============================================================================
+   Living Opportunity World R5 — the macro world, in real 3D.
+
+   Raw WebGL. No framework, no CDN, no build step: the prototype opens from
+   disk and is still the real thing.
+
+   THE ONE IDEA:
+   the country's own TERRAIN carries the economy. Land rises where real work
+   is — Stockholm and Göteborg are highlands because production says so.
+   No HUD, no glowing network, no floating rectangle, no particle, no dots
+   on a map. The data shapes the ground; the camera flies over it.
+
+   AND: this is a LANDSCAPE, not a map. Sea, sky, horizon, sun and haze are
+   all present, and the camera descends to an oblique human-adjacent angle —
+   the frame where real photography takes over.
+
+   Geometry: Natural Earth 1:50m coastlines (public domain), vendored by
+   tools/build-geometry.mjs. City coordinates are public geographic fact.
+   Elevation amplitude comes from live production counts — nothing invented.
+   ========================================================================= */
+(function (global) {
+  "use strict";
+
+  /* ── projection ─────────────────────────────────────────────────────── */
+  var CENTER = { lat: 62.0, lng: 16.0 };
+  var KX = Math.cos((60 * Math.PI) / 180);
+  function px(lng) { return (lng - CENTER.lng) * KX; }
+  function pz(lat) { return -(lat - CENTER.lat); }
+
+  var GBG = { lat: 57.7089, lng: 11.9746 };
+
+  /* ── matrices ───────────────────────────────────────────────────────── */
+  function mul(a, b) {
+    var o = new Float32Array(16);
+    for (var i = 0; i < 4; i++)
+      for (var j = 0; j < 4; j++) {
+        var s = 0;
+        for (var k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k];
+        o[i * 4 + j] = s;
+      }
+    return o;
+  }
+  function perspective(fovy, aspect, near, far) {
+    var f = 1 / Math.tan(fovy / 2), o = new Float32Array(16);
+    o[0] = f / aspect; o[5] = f; o[11] = -1;
+    o[10] = (far + near) / (near - far);
+    o[14] = (2 * far * near) / (near - far);
+    return o;
+  }
+  function lookAt(eye, at, up) {
+    var zx = eye[0] - at[0], zy = eye[1] - at[1], zz = eye[2] - at[2];
+    var zl = Math.hypot(zx, zy, zz) || 1; zx /= zl; zy /= zl; zz /= zl;
+    var xx = up[1] * zz - up[2] * zy, xy = up[2] * zx - up[0] * zz, xz = up[0] * zy - up[1] * zx;
+    var xl = Math.hypot(xx, xy, xz) || 1; xx /= xl; xy /= xl; xz /= xl;
+    var yx = zy * xz - zz * xy, yy = zz * xx - zx * xz, yz = zx * xy - zy * xx;
+    return new Float32Array([
+      xx, yx, zx, 0, xy, yy, zy, 0, xz, yz, zz, 0,
+      -(xx * eye[0] + xy * eye[1] + xz * eye[2]),
+      -(yx * eye[0] + yy * eye[1] + yz * eye[2]),
+      -(zx * eye[0] + zy * eye[1] + zz * eye[2]), 1,
+    ]);
+  }
+
+  function inRing(ring, x, y) {
+    var inside = false;
+    for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi)
+        inside = !inside;
+    }
+    return inside;
+  }
+
+  /* Cheap deterministic value noise — gives the ground the irregularity of
+     terrain so it never reads as a chart surface. Purely cosmetic relief;
+     the ECONOMIC signal is the broad rise, which is real data. */
+  function hash(x, z) {
+    var n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
+    return n - Math.floor(n);
+  }
+  function vnoise(x, z) {
+    var xi = Math.floor(x), zi = Math.floor(z);
+    var xf = x - xi, zf = z - zi;
+    var u = xf * xf * (3 - 2 * xf), v = zf * zf * (3 - 2 * zf);
+    var a = hash(xi, zi), b = hash(xi + 1, zi), c = hash(xi, zi + 1), d = hash(xi + 1, zi + 1);
+    return (a * (1 - u) + b * u) * (1 - v) + (c * (1 - u) + d * u) * v;
+  }
+
+  /* ── shaders ────────────────────────────────────────────────────────── */
+
+  var SKY_VERT =
+    "attribute vec2 aP; varying vec2 vP;" +
+    "void main(){ vP=aP; gl_Position=vec4(aP,0.999,1.0); }";
+  var SKY_FRAG = [
+    "precision mediump float; varying vec2 vP;",
+    "uniform vec3 uZenith; uniform vec3 uHorizon; uniform vec3 uSunCol;",
+    "uniform float uHorizonY; uniform float uSunX;",
+    "void main(){",
+    "  float h = clamp((vP.y - uHorizonY) / (1.35 - uHorizonY), 0.0, 1.0);",
+    "  vec3 c = mix(uHorizon, uZenith, pow(h, 0.82));",
+    // low sun bloom sitting ON the horizon, not a lens flare
+    "  float d = distance(vec2(vP.x, vP.y*1.7), vec2(uSunX, uHorizonY*1.7));",
+    "  c += uSunCol * exp(-d*d*3.1) * 0.75;",
+    "  c += uSunCol * exp(-d*d*0.28) * 0.16;",
+    "  gl_FragColor = vec4(c,1.0);",
+    "}",
+  ].join("\n");
+
+  var VERT = [
+    "attribute vec3 aPos; attribute vec3 aNorm; attribute float aAct;",
+    "uniform mat4 uMVP; uniform mat4 uView;",
+    "varying vec3 vN; varying float vH; varying float vAct; varying float vDepth; varying vec3 vW;",
+    "void main(){ vN=aNorm; vH=aPos.y; vAct=aAct; vW=aPos;",
+    "  vec4 vp = uView*vec4(aPos,1.0); vDepth = -vp.z;",
+    "  gl_Position = uMVP*vec4(aPos,1.0); }",
+  ].join("\n");
+
+  var FRAG = [
+    "precision mediump float;",
+    "varying vec3 vN; varying float vH; varying float vAct; varying float vDepth; varying vec3 vW;",
+    "uniform vec3 uSun; uniform vec3 uLow; uniform vec3 uHigh; uniform vec3 uSunCol;",
+    "uniform vec3 uHaze; uniform float uHazeNear; uniform float uHazeFar; uniform float uSubject;",
+    "void main(){",
+    "  vec3 n = normalize(vN);",
+    "  float lam = max(dot(n, normalize(uSun)), 0.0);",
+    "  float sky = 0.62 + 0.38*clamp(n.y,0.0,1.0);",
+    "  float grain = 0.5 + 0.28*sin(vW.x*2.7 + sin(vW.z*1.9)*1.7)",
+"            + 0.17*sin(vW.z*4.3 + sin(vW.x*3.1)*2.2);",
+"  vec3 base = mix(uLow, uHigh, clamp(vH*1.9, 0.0, 1.0));",
+"  base = mix(base*vec3(0.88,0.92,0.85), base*vec3(1.07,1.04,0.99), clamp(grain,0.0,1.0));",
+    // where real work is, the ground is higher AND warmer — one signal, two reads
+    "  base = mix(base, base*vec3(1.20,1.05,0.84), clamp(vAct,0.0,1.0)*0.85);",
+    "  vec3 col = base*(0.62*sky) + base*uSunCol*lam*0.78;",
+    "  col = mix(col*vec3(0.90,0.92,0.94), col, uSubject);",
+    "  float f = clamp((vDepth-uHazeNear)/(uHazeFar-uHazeNear),0.0,1.0); f=f*f;",
+    "  gl_FragColor = vec4(mix(col,uHaze,f*0.95),1.0);",
+    "}",
+  ].join("\n");
+
+  var SEA_FRAG = [
+    "precision mediump float;",
+    "varying vec3 vN; varying float vH; varying float vAct; varying float vDepth; varying vec3 vW;",
+    "uniform vec3 uHaze; uniform float uHazeNear; uniform float uHazeFar;",
+    "uniform vec3 uSeaNear; uniform vec3 uSeaFar; uniform vec3 uSunCol;",
+    "void main(){",
+    "  float f = clamp((vDepth-uHazeNear)/(uHazeFar-uHazeNear),0.0,1.0);",
+    "  vec3 c = mix(uSeaNear, uSeaFar, clamp(vDepth/48.0,0.0,1.0));",
+    // a broad sun path on the water, no sparkle
+    "  c += uSunCol * clamp(vAct,0.0,1.0) * 0.30;",
+    "  gl_FragColor = vec4(mix(c,uHaze,f*f*0.97),1.0);",
+    "}",
+  ].join("\n");
+
+  var LINE_VERT =
+    "attribute vec3 aPos; uniform mat4 uMVP; uniform mat4 uView; varying float vDepth;" +
+    "void main(){ vec4 vp=uView*vec4(aPos,1.0); vDepth=-vp.z; gl_Position=uMVP*vec4(aPos,1.0); }";
+  var LINE_FRAG = [
+    "precision mediump float; varying float vDepth;",
+    "uniform vec3 uColor; uniform vec3 uHaze; uniform float uHazeNear; uniform float uHazeFar;",
+    "void main(){ float f=clamp((vDepth-uHazeNear)/(uHazeFar-uHazeNear),0.0,1.0);",
+    "  gl_FragColor=vec4(mix(uColor,uHaze,f*f*0.97),1.0); }",
+  ].join("\n");
+
+  function compile(gl, type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || "shader");
+    return s;
+  }
+  function program(gl, v, f) {
+    var p = gl.createProgram();
+    gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, v));
+    gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, f));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p) || "link");
+    return p;
+  }
+
+  /* ── the world ──────────────────────────────────────────────────────── */
+
+  function World(canvas, geo, activity) {
+    var gl = canvas.getContext("webgl", { antialias: true, alpha: false, powerPreference: "low-power" });
+    if (!gl) throw new Error("no webgl");
+    this.gl = gl; this.canvas = canvas;
+
+    this.prog = program(gl, VERT, FRAG);
+    this.seaProg = program(gl, VERT, SEA_FRAG);
+    this.lineProg = program(gl, LINE_VERT, LINE_FRAG);
+    this.skyProg = program(gl, SKY_VERT, SKY_FRAG);
+
+    var maxCount = 1;
+    activity.forEach(function (c) { if (c.count > maxCount) maxCount = c.count; });
+    this.field = activity.map(function (c) {
+      return { x: px(c.lng), z: pz(c.lat), a: Math.sqrt(c.count / maxCount) };
+    });
+
+    this.meshes = []; this.lines = [];
+    var self = this;
+    geo.landmasses.forEach(function (l) { self.buildLand(l); self.buildOutline(l); });
+    this.buildSea();
+    this.buildSky();
+
+    gl.enable(gl.DEPTH_TEST);
+  }
+
+  /** Ground height in world units. The BROAD rise is real economic data; the
+   *  fine irregularity is cosmetic terrain so it never reads as a chart. */
+  World.prototype.heightAt = function (x, z, subject) {
+    var terrain =
+      (vnoise(x*0.5,z*0.5)*0.62 + vnoise(x*1.6,z*1.6)*0.28 + vnoise(x*4.1,z*4.1)*0.12) * 0.135;
+    if (!subject) return 0.03 + terrain * 0.5;
+    var h = 0.050 + terrain;
+    var act = 0;
+    for (var i = 0; i < this.field.length; i++) {
+      var f = this.field[i];
+      var dx = x - f.x, dz = z - f.z;
+      // ~0.55° sigma: a city shapes its own district, not the whole country
+      var g = Math.exp(-(dx * dx + dz * dz) / 0.26);
+      h += g * f.a * 0.235;
+      act += g * f.a;
+    }
+    return [h, Math.min(1, act * 1.25)];
+  };
+
+  World.prototype.buildLand = function (land) {
+    var gl = this.gl;
+    var subject = land.role === "subject";
+    var step = subject ? 0.040 : 0.09;
+
+    var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+    land.rings.forEach(function (r) {
+      r.forEach(function (p) {
+        if (p[0] < minX) minX = p[0]; if (p[0] > maxX) maxX = p[0];
+        if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1];
+      });
+    });
+
+    var rings = land.rings, self = this;
+    function inside(lng, lat) {
+      for (var i = 0; i < rings.length; i++) if (inRing(rings[i], lng, lat)) return true;
+      return false;
+    }
+
+    var cols = Math.ceil((maxX - minX) / step), rows = Math.ceil((maxY - minY) / step);
+    while (cols * rows > 460000) {
+      step *= 1.5;
+      cols = Math.ceil((maxX - minX) / step); rows = Math.ceil((maxY - minY) / step);
+    }
+
+    var W = cols + 1;
+    var H = new Float32Array(W * (rows + 1)), A = new Float32Array(W * (rows + 1));
+    for (var r = 0; r <= rows; r++)
+      for (var c = 0; c <= cols; c++) {
+        var lng = minX + c * step, lat = minY + r * step;
+        var h = this.heightAt(px(lng), pz(lat), subject);
+        if (subject) { H[r * W + c] = h[0]; A[r * W + c] = h[1]; }
+        else { H[r * W + c] = h; A[r * W + c] = 0; }
+      }
+
+    var pos = [], nrm = [], act = [];
+    /** Assigned once the solid grid exists; until then the land is flat. */
+    var taperAt = function () { return 1; };
+    var SHORE = 0.012; // land meets water just above sea level, never as a cliff
+    function corner(c, r) {
+      var lng = minX + c * step, lat = minY + r * step;
+      var t = taperAt(c, r);
+      return [px(lng), SHORE + (H[r * W + c] - SHORE) * t, pz(lat), A[r * W + c] * t];
+    }
+    function tri(a, b, cc) {
+      var ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+      var vx = cc[0] - a[0], vy = cc[1] - a[1], vz = cc[2] - a[2];
+      var nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      var nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+      if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+      [a, b, cc].forEach(function (p) {
+        pos.push(p[0], p[1], p[2]); nrm.push(nx, ny, nz); act.push(p[3]);
+      });
+    }
+    /** Coastal wall — land has thickness, so the country is a landmass and
+     *  not a paper cutout lying on the water. */
+    function wall(a, b) {
+      var nx = -(b[2] - a[2]), nz = b[0] - a[0];
+      var nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
+      var a0 = [a[0], 0, a[2]], b0 = [b[0], 0, b[2]];
+      [[a, b, b0], [a, b0, a0]].forEach(function (t) {
+        t.forEach(function (p) {
+          pos.push(p[0], p[1], p[2]); nrm.push(nx, 0.12, nz); act.push(0);
+        });
+      });
+    }
+
+    var solid = [];
+    for (var rr = 0; rr < rows; rr++) {
+      solid[rr] = [];
+      for (var cc2 = 0; cc2 < cols; cc2++)
+        solid[rr][cc2] = inside(minX + (cc2 + 0.5) * step, minY + (rr + 0.5) * step);
+    }
+
+    /* Shoreline taper. Without it every coast is a vertical cliff and the
+       country reads as a table-top model rather than land meeting water.
+       Chebyshev distance from the edge, eased over ~5 cells. */
+    var REACH = 14;
+    var dist = [];
+    for (var dr = 0; dr < rows; dr++) {
+      dist[dr] = new Int16Array(cols);
+      for (var dc = 0; dc < cols; dc++) dist[dr][dc] = solid[dr][dc] ? 32000 : 0;
+    }
+    for (var pass = 0; pass < 2; pass++) {
+      var r0 = pass === 0 ? 0 : rows - 1;
+      var stepR = pass === 0 ? 1 : -1;
+      for (var rq = r0; rq >= 0 && rq < rows; rq += stepR) {
+        var c0 = pass === 0 ? 0 : cols - 1;
+        var stepC = pass === 0 ? 1 : -1;
+        for (var cq = c0; cq >= 0 && cq < cols; cq += stepC) {
+          if (!solid[rq][cq]) continue;
+          var best = dist[rq][cq];
+          for (var oy = -1; oy <= 1; oy++)
+            for (var ox = -1; ox <= 1; ox++) {
+              var ny = rq + oy, nx = cq + ox;
+              var nd = ny < 0 || ny >= rows || nx < 0 || nx >= cols ? 0 : dist[ny][nx];
+              if (nd + 1 < best) best = nd + 1;
+            }
+          dist[rq][cq] = best;
+        }
+      }
+    }
+    function cellTaper(c, r) {
+      if (r < 0 || r >= rows || c < 0 || c >= cols || !solid[r][c]) return 0;
+      var d = Math.min(REACH, dist[r][c]) / REACH;
+      return d * d * (3 - 2 * d);
+    }
+    /** Corner taper = the softest of the four cells that share it, so the
+     *  shore never steps. */
+    taperAt = function (c, r) {
+      return Math.max(
+        cellTaper(c - 1, r - 1), cellTaper(c, r - 1),
+        cellTaper(c - 1, r), cellTaper(c, r),
+      );
+    };
+
+    for (var rr2 = 0; rr2 < rows; rr2++)
+      for (var c2 = 0; c2 < cols; c2++) {
+        if (!solid[rr2][c2]) continue;
+        var p00 = corner(c2, rr2), p10 = corner(c2 + 1, rr2),
+          p11 = corner(c2 + 1, rr2 + 1), p01 = corner(c2, rr2 + 1);
+        tri(p00, p11, p10); tri(p00, p01, p11);
+        if (!solid[rr2][c2 - 1]) wall(p01, p00);
+        if (c2 + 1 >= cols || !solid[rr2][c2 + 1]) wall(p10, p11);
+        if (rr2 === 0 || !solid[rr2 - 1][c2]) wall(p00, p10);
+        if (rr2 + 1 >= rows || !solid[rr2 + 1][c2]) wall(p11, p01);
+      }
+
+    if (!pos.length) return;
+    function buf(arr, size) {
+      var b = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW);
+      return { b: b, size: size };
+    }
+    this.meshes.push({
+      pos: buf(pos, 3), nrm: buf(nrm, 3), act: buf(act, 1),
+      count: pos.length / 3, subject: subject ? 1 : 0,
+    });
+  };
+
+  /** The true coastline, drawn crisp on top of the sampled relief. */
+  World.prototype.buildOutline = function (land) {
+    var gl = this.gl, subject = land.role === "subject", pts = [], self = this;
+    land.rings.forEach(function (ring) {
+      for (var i = 0; i < ring.length; i++) {
+        var a = ring[i], b = ring[(i + 1) % ring.length];
+        [a, b].forEach(function (p) {
+          var h = self.heightAt(px(p[0]), pz(p[1]), subject);
+          pts.push(px(p[0]), 0.018, pz(p[1]));
+        });
+      }
+    });
+    if (!pts.length) return;
+    var b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pts), gl.STATIC_DRAW);
+    this.lines.push({ b: b, count: pts.length / 3, subject: subject });
+  };
+
+  /** Sea to the horizon. Without it the country is a chart; with it the
+   *  frame is a place. `act` carries the sun path down the water. */
+  World.prototype.buildSea = function () {
+    var gl = this.gl, pos = [], nrm = [], act = [];
+    var S = 190, N = 30;
+    var sunX = px(GBG.lng) - 5;
+    for (var i = 0; i < N; i++)
+      for (var j = 0; j < N; j++) {
+        var x0 = -S + (2 * S * i) / N, x1 = -S + (2 * S * (i + 1)) / N;
+        var z0 = -S + (2 * S * j) / N, z1 = -S + (2 * S * (j + 1)) / N;
+        var q = [[x0, z0], [x1, z0], [x1, z1], [x0, z0], [x1, z1], [x0, z1]];
+        for (var k = 0; k < q.length; k++) {
+          pos.push(q[k][0], 0, q[k][1]);
+          nrm.push(0, 1, 0);
+          var d = Math.abs(q[k][0] - sunX);
+          act.push(Math.exp(-(d * d) / 46));
+        }
+      }
+    function buf(arr) {
+      var b = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW);
+      return { b: b };
+    }
+    this.sea = { pos: buf(pos), nrm: buf(nrm), act: buf(act), count: pos.length / 3 };
+  };
+
+  World.prototype.buildSky = function () {
+    var gl = this.gl, b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    this.sky = b;
+  };
+
+  World.prototype.resize = function () {
+    var dpr = Math.min(global.devicePixelRatio || 1, 1.75);
+    var w = Math.floor(this.canvas.clientWidth * dpr) || this.canvas.width;
+    var h = Math.floor(this.canvas.clientHeight * dpr) || this.canvas.height;
+    if (this.canvas.width !== w || this.canvas.height !== h) {
+      this.canvas.width = w; this.canvas.height = h;
+    }
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  };
+
+  /* ── flight path ─────────────────────────────────────────────────────
+     From Scandinavia entire down to a low oblique over the Göta älv mouth.
+     The last key is deliberately eye-level-ish with the horizon high in
+     frame: that is where real photography takes over from geometry. */
+  var GX = px(GBG.lng), GZ = pz(GBG.lat);
+  var KEYS = [
+    { eye: [GX - 11.0, 14.6, GZ + 20.0], at: [GX + 2.2, 0.5, GZ - 4.0], fov: 40, horizon: -0.24 },
+    { eye: [GX - 8.2, 8.4, GZ + 13.6], at: [GX + 0.8, 0.4, GZ - 1.6], fov: 38, horizon: -0.10 },
+    { eye: [GX - 5.2, 3.9, GZ + 8.2], at: [GX - 0.1, 0.32, GZ - 0.8], fov: 36, horizon: 0.04 },
+    { eye: [GX - 3.05, 1.72, GZ + 4.85], at: [GX + 0.70, 0.26, GZ - 1.15], fov: 33, horizon: 0.13 },
+  ];
+  function smooth(t) { return t * t * (3 - 2 * t); }
+  function lerp3(a, b, f) {
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+
+  World.prototype.render = function (t, par) {
+    var gl = this.gl;
+    this.resize();
+
+    var n = KEYS.length - 1;
+    var g = Math.min(0.9999, Math.max(0, t)) * n;
+    var i = Math.floor(g), f = smooth(g - i);
+    var a = KEYS[i], b = KEYS[Math.min(n, i + 1)];
+    var eye = lerp3(a.eye, b.eye, f), at = lerp3(a.at, b.at, f);
+    if (par) {
+      // pointer parallax: shift the look-at a touch, the eye less — depth
+      var s = 0.5 + 2.2 * (1 - t);
+      at = [at[0] + par.dx * s, at[1] + par.dy * s * 0.35, at[2] + par.dy * s * 0.5];
+      eye = [eye[0] + par.dx * s * 0.35, eye[1], eye[2]];
+    }
+    var fov = ((a.fov + (b.fov - a.fov) * f) * Math.PI) / 180;
+
+
+    var aspect = this.canvas.width / Math.max(1, this.canvas.height);
+    var view = lookAt(eye, at, [0, 1, 0]);
+    var mvp = mul(perspective(fov, aspect, 0.04, 420), view);
+    this._mvp = mvp;
+
+    /* The sky is drawn in screen space, so its horizon must be derived from
+       the real camera — otherwise a seam appears where the painted horizon
+       and the sea's true horizon disagree. Project a point at sea level,
+       far along the flattened view direction, and read its NDC height. */
+    var fx = at[0] - eye[0], fz = at[2] - eye[2];
+    var fl = Math.hypot(fx, fz) || 1;
+    var hx = eye[0] + (fx / fl) * 360, hz = eye[2] + (fz / fl) * 360;
+    var cw = mvp[3] * hx + mvp[7] * 0 + mvp[11] * hz + mvp[15];
+    var cy = mvp[1] * hx + mvp[5] * 0 + mvp[9] * hz + mvp[13];
+    var horizonY = Math.max(-1.2, Math.min(1.2, cy / (cw || 1e-6)));
+
+    var hazeNear = 4.5 + 20 * (1 - t);
+    var hazeFar = 26 + 120 * (1 - t);
+    var HAZE = [0.855, 0.879, 0.894];
+    var SUNCOL = [1.0, 0.856, 0.672];
+    /* optional palette override: caller may set world.palette = {haze, sun,
+       zenith, horizon, seaNear, seaFar, landLow, landHigh} */
+    var P = this.palette || {};
+    if (P.haze) HAZE = P.haze;
+    if (P.sun) SUNCOL = P.sun;
+    function pv(key, a, b, c) { return P[key] || [a, b, c]; }
+
+    gl.depthMask(false);
+    gl.disable(gl.DEPTH_TEST);
+    var sp = this.skyProg;
+    gl.useProgram(sp);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.sky);
+    var aP = gl.getAttribLocation(sp, "aP");
+    gl.enableVertexAttribArray(aP);
+    gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform3fv(gl.getUniformLocation(sp, "uZenith"), pv("zenith", 0.442, 0.592, 0.712));
+    gl.uniform3fv(gl.getUniformLocation(sp, "uHorizon"), pv("horizon", 0.855, 0.879, 0.894));
+    gl.uniform3fv(gl.getUniformLocation(sp, "uSunCol"), pv("skySun", 0.46, 0.32, 0.15));
+    gl.uniform1f(gl.getUniformLocation(sp, "uHorizonY"), horizonY);
+    gl.uniform1f(gl.getUniformLocation(sp, "uSunX"), -0.42);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(true);
+    gl.clear(gl.DEPTH_BUFFER_BIT);
+
+    function bindMesh(prog, m) {
+      var aPos = gl.getAttribLocation(prog, "aPos");
+      var aNorm = gl.getAttribLocation(prog, "aNorm");
+      var aAct = gl.getAttribLocation(prog, "aAct");
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.pos.b);
+      gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.nrm.b);
+      gl.enableVertexAttribArray(aNorm); gl.vertexAttribPointer(aNorm, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.act.b);
+      gl.enableVertexAttribArray(aAct); gl.vertexAttribPointer(aAct, 1, gl.FLOAT, false, 0, 0);
+    }
+
+    // sea
+    var sq = this.seaProg;
+    gl.useProgram(sq);
+    gl.uniformMatrix4fv(gl.getUniformLocation(sq, "uMVP"), false, mvp);
+    gl.uniformMatrix4fv(gl.getUniformLocation(sq, "uView"), false, view);
+    gl.uniform3fv(gl.getUniformLocation(sq, "uHaze"), HAZE);
+    gl.uniform1f(gl.getUniformLocation(sq, "uHazeNear"), hazeNear);
+    gl.uniform1f(gl.getUniformLocation(sq, "uHazeFar"), hazeFar);
+    gl.uniform3fv(gl.getUniformLocation(sq, "uSeaNear"), pv("seaNear", 0.310, 0.408, 0.474));
+    gl.uniform3fv(gl.getUniformLocation(sq, "uSeaFar"), pv("seaFar", 0.622, 0.694, 0.744));
+    gl.uniform3fv(gl.getUniformLocation(sq, "uSunCol"), SUNCOL);
+    bindMesh(sq, this.sea);
+    gl.drawArrays(gl.TRIANGLES, 0, this.sea.count);
+
+    // land
+    var p = this.prog;
+    gl.useProgram(p);
+    gl.uniformMatrix4fv(gl.getUniformLocation(p, "uMVP"), false, mvp);
+    gl.uniformMatrix4fv(gl.getUniformLocation(p, "uView"), false, view);
+    gl.uniform3f(gl.getUniformLocation(p, "uSun"), -0.62, 0.30, 0.72);
+    gl.uniform3fv(gl.getUniformLocation(p, "uSunCol"), SUNCOL);
+    gl.uniform3fv(gl.getUniformLocation(p, "uLow"), pv("landLow", 0.462, 0.496, 0.394));
+    gl.uniform3fv(gl.getUniformLocation(p, "uHigh"), pv("landHigh", 0.936, 0.888, 0.762));
+    gl.uniform3fv(gl.getUniformLocation(p, "uHaze"), HAZE);
+    gl.uniform1f(gl.getUniformLocation(p, "uHazeNear"), hazeNear);
+    gl.uniform1f(gl.getUniformLocation(p, "uHazeFar"), hazeFar);
+    var uSubject = gl.getUniformLocation(p, "uSubject");
+    for (var m = 0; m < this.meshes.length; m++) {
+      gl.uniform1f(uSubject, this.meshes[m].subject);
+      bindMesh(p, this.meshes[m]);
+      gl.drawArrays(gl.TRIANGLES, 0, this.meshes[m].count);
+    }
+
+    // coastline
+    var lp = this.lineProg;
+    gl.useProgram(lp);
+    gl.uniformMatrix4fv(gl.getUniformLocation(lp, "uMVP"), false, mvp);
+    gl.uniformMatrix4fv(gl.getUniformLocation(lp, "uView"), false, view);
+    gl.uniform3fv(gl.getUniformLocation(lp, "uHaze"), HAZE);
+    gl.uniform1f(gl.getUniformLocation(lp, "uHazeNear"), hazeNear);
+    gl.uniform1f(gl.getUniformLocation(lp, "uHazeFar"), hazeFar);
+    var lPos = gl.getAttribLocation(lp, "aPos");
+    var uCol = gl.getUniformLocation(lp, "uColor");
+    for (var q = 0; q < this.lines.length; q++) {
+      var ln = this.lines[q];
+      if (ln.subject) gl.uniform3f(uCol, 0.196, 0.180, 0.152);
+      else gl.uniform3f(uCol, 0.50, 0.52, 0.53);
+      gl.bindBuffer(gl.ARRAY_BUFFER, ln.b);
+      gl.enableVertexAttribArray(lPos);
+      gl.vertexAttribPointer(lPos, 3, gl.FLOAT, false, 0, 0);
+      gl.drawArrays(gl.LINES, 0, ln.count);
+    }
+  };
+
+  /** Screen position (CSS px) of a lat/lng point at terrain height, from the
+   *  last rendered frame's camera. Null before the first frame or behind it. */
+  World.prototype.project = function (lng, lat, lift) {
+    var m = this._mvp;
+    if (!m) return null;
+    var x = px(lng), z = pz(lat);
+    var h = this.heightAt(x, z, true)[0] + (lift || 0);
+    var cw = m[3] * x + m[7] * h + m[11] * z + m[15];
+    if (cw <= 0.05) return null;
+    var cx = m[0] * x + m[4] * h + m[8] * z + m[12];
+    var cy = m[1] * x + m[5] * h + m[9] * z + m[13];
+    return {
+      x: (cx / cw * 0.5 + 0.5) * (this.canvas.clientWidth || this.canvas.width),
+      y: (1 - (cy / cw * 0.5 + 0.5)) * (this.canvas.clientHeight || this.canvas.height),
+      w: cw,
+    };
+  };
+
+  global.R5World = {
+    /** Live world, or null when WebGL is unavailable — the caller keeps the
+     *  static first frame. Never throws at the page. */
+    create: function (canvas, geo, activity) {
+      try { return new World(canvas, geo, activity); }
+      catch (e) {
+        if (global.console) console.warn("[R5] world unavailable:", e.message);
+        return null;
+      }
+    },
+  };
+})(window);
+
+</script>
+<script>
+/* R10 Gate 1 runtime — the world is the hero.
+   WebGL terrain (real coastline, real activity) + a canvas life layer:
+   settlements, flowing commerce, activity sparks. One input reorganizes it.
+   Every count shown is a real production count (Arbetsförmedlingen, 08-15). */
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── real counts ── */
+  var CITY_N = { Stockholm: 6523, "Göteborg": 3066, "Malmö": 1522, Uppsala: 1073,
+    "Linköping": 1051, "Jönköping": 805, "Örebro": 716, "Umeå": 692,
+    "Västerås": 684, "Luleå": 625, "Norrköping": 618, Lund: 600, Helsingborg: 571 };
+  var LEVELS = [
+    { until: 0.34, name: "Švedija", n: 41432, what: "aktyvios darbo vietos" },
+    { until: 0.8, name: "Västra Götaland", n: 6289, what: "aktyvios darbo vietos" },
+    { until: 1.01, name: "Göteborg", n: 3078, what: "aktyvios darbo vietos · 1 036 darbdavių" },
+  ];
+
+  /* ── world ── */
+  var canvas = $("#world"), world = null, CITIES = [];
+  if (window.R5World && window.R5_GEO) {
+    CITIES = window.R5_GEO.cities.filter(function (c) { return CITY_N[c.name]; });
+    var activity = CITIES.map(function (c) {
+      return { name: c.name, lat: c.lat, lng: c.lng, count: CITY_N[c.name] };
+    });
+    world = window.R5World.create(canvas, window.R5_GEO, activity);
+  }
+  if (!world) { canvas.style.display = "none"; $("#life").style.display = "none"; $("#skyfall").hidden = false; }
+  if (world) world.palette = {
+    zenith: [0.16, 0.27, 0.40],
+    horizon: [0.93, 0.78, 0.58],
+    skySun: [0.66, 0.42, 0.16],
+    sun: [1.0, 0.82, 0.6],
+    haze: [0.62, 0.6, 0.58],
+    seaNear: [0.10, 0.21, 0.27],
+    seaFar: [0.36, 0.44, 0.50],
+    landLow: [0.28, 0.43, 0.31],
+    landHigh: [0.9, 0.73, 0.47],
+  };
+
+  /* ── camera ── */
+  var t = 0.6, tTarget = 0.6;
+  var parX = 0, parY = 0, parTX = 0, parTY = 0, drift = 0;
+  function nudge(d) { tTarget = Math.max(0.06, Math.min(0.985, tTarget + d)); }
+  window.addEventListener("wheel", function (e) { e.preventDefault(); nudge(e.deltaY * 0.00042); }, { passive: false });
+  var lastTouchY = null;
+  window.addEventListener("touchstart", function (e) {
+    if (e.target.closest("#ask, #top, .mk-city")) return;
+    lastTouchY = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener("touchmove", function (e) {
+    if (lastTouchY == null || e.target.closest("#ask, #top")) return;
+    var y = e.touches[0].clientY;
+    nudge((lastTouchY - y) * 0.0011);
+    lastTouchY = y;
+    e.preventDefault();
+  }, { passive: false });
+  window.addEventListener("touchend", function () { lastTouchY = null; });
+  window.addEventListener("pointermove", function (e) {
+    if (e.pointerType !== "mouse") return;
+    parTX = (e.clientX / window.innerWidth - 0.5) * 0.5;
+    parTY = (e.clientY / window.innerHeight - 0.5) * 0.35;
+  });
+
+  /* ── scale readout ── */
+  var shownN = 6289, level = LEVELS[1];
+  function fmt(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function updateScale() {
+    var lv = LEVELS[0];
+    for (var i = 0; i < LEVELS.length; i++) if (t < LEVELS[i].until) { lv = LEVELS[i]; break; }
+    if (lv !== level) { level = lv; $("#scaleName").textContent = lv.name; $("#scaleWhat").textContent = lv.what; }
+    shownN += (level.n - shownN) * 0.12;
+    if (Math.abs(shownN - level.n) < 1) shownN = level.n;
+    $("#scaleN").textContent = fmt(shownN);
+  }
+
+  /* ── DOM markers (tips + intent) ── */
+  var markers = [], livePaths = [];
+  var mkRoot = $("#markers"), pathsSvg = $("#paths");
+  function addMarker(lng, lat, el, lift, anchor) {
+    mkRoot.appendChild(el);
+    var m = { lng: lng, lat: lat, el: el, lift: lift || 0, anchor: anchor || "" };
+    markers.push(m);
+    return m;
+  }
+  function clearIntent() {
+    markers = markers.filter(function (m) {
+      if (!m.intent) return true;
+      m.el.remove(); return false;
+    });
+    pathsSvg.innerHTML = "";
+    livePaths = [];
+  }
+  function placeDom() {
+    if (!world) return;
+    for (var i = 0; i < markers.length; i++) {
+      var m = markers[i];
+      var p = world.project(m.lng, m.lat, m.lift);
+      if (!p || p.x < -80 || p.x > innerWidth + 80 || p.y < -60 || p.y > innerHeight + 60) {
+        m.el.style.display = "none"; continue;
+      }
+      m.el.style.display = "";
+      m.el.style.transform = "translate3d(" + p.x.toFixed(1) + "px," + p.y.toFixed(1) + "px,0)" + m.anchor;
+    }
+    for (var j = 0; j < livePaths.length; j++) {
+      var L = livePaths[j];
+      var a = world.project(L.a[0], L.a[1], 0.02), b = world.project(L.b[0], L.b[1], 0.02);
+      if (!a || !b) { L.el.setAttribute("d", ""); continue; }
+      var mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - 34;
+      L.el.setAttribute("d", "M" + a.x + " " + a.y + " Q" + mx + " " + my + " " + b.x + " " + b.y);
+    }
+  }
+  CITIES.forEach(function (c) {
+    var el = document.createElement("div");
+    el.className = "mk mk-city";
+    el.innerHTML = '<span class="dot"></span><span class="tip">' + c.name +
+      " · <b>" + fmt(CITY_N[c.name]) + "</b> aktyvios</span>";
+    el.addEventListener("click", function () { el.classList.toggle("is-tip"); });
+    addMarker(c.lng, c.lat, el, 0.02, " translate(-50%,-50%)");
+  });
+
+  /* ── LIFE LAYER: settlements, commerce flows, sparks ── */
+  var life = $("#life"), lctx = life ? life.getContext("2d") : null;
+  function sizeLife() {
+    if (!life) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    life.width = life.clientWidth * dpr;
+    life.height = life.clientHeight * dpr;
+    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  sizeLife();
+  window.addEventListener("resize", sizeLife);
+
+  function hash(s, i) {
+    var h = 2166136261 >>> 0;
+    for (var k = 0; k < s.length; k++) { h ^= s.charCodeAt(k); h = Math.imul(h, 16777619); }
+    h ^= i * 2654435761;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+  }
+
+  /* commerce routes between real cities */
+  var ROUTES = [
+    ["Göteborg", "Stockholm"], ["Göteborg", "Malmö"], ["Göteborg", "Jönköping"],
+    ["Stockholm", "Uppsala"], ["Stockholm", "Norrköping"], ["Malmö", "Lund"],
+    ["Stockholm", "Västerås"], ["Göteborg", "Linköping"],
+  ].map(function (pair) {
+    var A = CITIES.filter(function (c) { return c.name === pair[0]; })[0];
+    var B = CITIES.filter(function (c) { return c.name === pair[1]; })[0];
+    if (!A || !B) return null;
+    var motes = [];
+    for (var i = 0; i < 4; i++) motes.push({ p: hash(pair[0] + pair[1], i), v: 0.00018 + hash(pair[1], i) * 0.00028 });
+    return { a: A, b: B, motes: motes };
+  }).filter(Boolean);
+
+  var sparks = [], nextSpark = 800;
+  function drawLife(now, dt) {
+    if (!lctx || !world) return;
+    var W = life.clientWidth, H = life.clientHeight;
+    lctx.clearRect(0, 0, W, H);
+
+    /* settlements — abstract building silhouettes, scaled by real volume */
+    for (var ci = 0; ci < CITIES.length; ci++) {
+      var c = CITIES[ci];
+      var p = world.project(c.lng, c.lat, 0.004);
+      if (!p || p.x < -60 || p.x > W + 60 || p.y < -40 || p.y > H + 40) continue;
+      var s = Math.max(0.35, Math.min(1.6, 3.4 / p.w));
+      var k = Math.round(3 + Math.log(CITY_N[c.name]) * 1.35);
+      for (var bi = 0; bi < k; bi++) {
+        var off = (hash(c.name, bi) - 0.5) * 30 * s;
+        var bh = (3.5 + hash(c.name, bi + 40) * 13) * s;
+        var bw = (1.6 + hash(c.name, bi + 80) * 2.2) * s;
+        var bx = p.x + off, by = p.y;
+        lctx.fillStyle = "rgba(16, 24, 33, " + (0.5 + 0.3 * Math.min(1, s)).toFixed(2) + ")";
+        lctx.fillRect(bx - bw / 2, by - bh, bw, bh);
+        if (hash(c.name, bi + 120) > 0.35) {
+          lctx.fillStyle = "rgba(255, 198, 130, " + (0.5 + 0.4 * hash(c.name, bi + 160)).toFixed(2) + ")";
+          lctx.fillRect(bx - bw / 2 + 0.5, by - bh + 1 + hash(c.name, bi + 200) * (bh - 2), Math.max(0.8, bw - 1.4), 1.1);
+        }
+      }
+      /* soft ground glow under each settlement */
+      var gr = lctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 26 * s);
+      gr.addColorStop(0, "rgba(255, 186, 110, 0.22)");
+      gr.addColorStop(1, "rgba(255, 186, 110, 0)");
+      lctx.fillStyle = gr;
+      lctx.beginPath(); lctx.arc(p.x, p.y, 26 * s, 0, 6.2832); lctx.fill();
+    }
+
+    /* commerce flows — faint arcs with travelling light */
+    for (var ri = 0; ri < ROUTES.length; ri++) {
+      var r = ROUTES[ri];
+      var A = world.project(r.a.lng, r.a.lat, 0.01), B = world.project(r.b.lng, r.b.lat, 0.01);
+      if (!A || !B) continue;
+      var mx = (A.x + B.x) / 2, my = Math.min(A.y, B.y) - Math.min(90, Math.hypot(B.x - A.x, B.y - A.y) * 0.16);
+      lctx.strokeStyle = "rgba(255, 210, 150, 0.10)";
+      lctx.lineWidth = 1;
+      lctx.beginPath(); lctx.moveTo(A.x, A.y); lctx.quadraticCurveTo(mx, my, B.x, B.y); lctx.stroke();
+      for (var mi = 0; mi < r.motes.length; mi++) {
+        var mo = r.motes[mi];
+        if (!reduced) mo.p = (mo.p + mo.v * dt) % 1;
+        var q = mo.p, iq = 1 - q;
+        var x = iq * iq * A.x + 2 * iq * q * mx + q * q * B.x;
+        var y = iq * iq * A.y + 2 * iq * q * my + q * q * B.y;
+        var mrad = 1.1 + 1.3 * Math.min(1, 3.4 / ((A.w + B.w) / 2));
+        lctx.fillStyle = "rgba(255, 222, 170, 0.85)";
+        lctx.beginPath(); lctx.arc(x, y, mrad, 0, 6.2832); lctx.fill();
+      }
+    }
+
+    /* activity sparks — "something just happened there" */
+    if (!reduced) {
+      nextSpark -= dt;
+      if (nextSpark <= 0) {
+        nextSpark = 1400 + Math.random() * 1800;
+        var sc = CITIES[Math.floor(Math.random() * CITIES.length)];
+        sparks.push({ c: sc, born: now });
+      }
+      for (var si = sparks.length - 1; si >= 0; si--) {
+        var sp = sparks[si];
+        var age = (now - sp.born) / 1600;
+        if (age >= 1) { sparks.splice(si, 1); continue; }
+        var pp = world.project(sp.c.lng, sp.c.lat, 0.012);
+        if (!pp) continue;
+        var ss = Math.max(0.4, Math.min(1.5, 3.4 / pp.w));
+        lctx.strokeStyle = "rgba(255, 208, 140, " + (0.55 * (1 - age)).toFixed(2) + ")";
+        lctx.lineWidth = 1.4;
+        lctx.beginPath(); lctx.arc(pp.x, pp.y, 4 + age * 30 * ss, 0, 6.2832); lctx.stroke();
+      }
+    }
+  }
+
+  /* ── intent layer (kept from R9) ── */
+  function bloom(lng, lat, tone) {
+    var el = document.createElement("div");
+    el.className = "mk mk-bloom" + (tone ? " is-" + tone : "");
+    el.innerHTML = '<span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="core"></span>';
+    var m = addMarker(lng, lat, el, 0.02);
+    m.intent = true;
+    return m;
+  }
+  function label(lng, lat, html) {
+    var el = document.createElement("div");
+    el.className = "mk mk-label";
+    el.innerHTML = html;
+    var m = addMarker(lng, lat, el, 0.12, " translate(-50%,-135%)");
+    m.intent = true;
+    return m;
+  }
+  function path(a, b, color) {
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("stroke", color);
+    pathsSvg.appendChild(p);
+    livePaths.push({ a: a, b: b, el: p });
+  }
+  function mote(from, to, tone, dur) {
+    var el = document.createElement("div");
+    el.className = "mk mk-mote" + (tone ? " is-" + tone : "");
+    var m = addMarker(from[0], from[1], el, 0.03);
+    m.intent = true;
+    var t0 = performance.now();
+    (function step(now) {
+      if (!el.isConnected) return;
+      var k = Math.min(1, (now - t0) / dur);
+      var e = k * k * (3 - 2 * k);
+      m.lng = from[0] + (to[0] - from[0]) * e;
+      m.lat = from[1] + (to[1] - from[1]) * e;
+      if (k < 1) requestAnimationFrame(step);
+      else { m.lng = from[0]; m.lat = from[1]; t0 = performance.now(); requestAnimationFrame(step); }
+    })(t0);
+  }
+  var sayTimer = null;
+  function say(html) {
+    var el = $("#say");
+    clearTimeout(sayTimer);
+    if (reduced) { el.innerHTML = html; return; }
+    el.innerHTML = "";
+    var tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    var full = tmp.textContent, i = 0;
+    (function tick() {
+      i += 2;
+      el.textContent = full.slice(0, i);
+      if (i < full.length) sayTimer = setTimeout(tick, 14);
+      else el.innerHTML = html;
+    })();
+  }
+  var GBG = [11.9746, 57.7089];
+  var INTENTS = [
+    {
+      test: /(darb|sand[eė]l|iešk)/i, go: 0.955,
+      line: "Suprantu — <b>sandėlio darbas Göteborge</b>. Kryptis gyva: 98 aktyvios vietos, 40 darbdavių.",
+      act: function () {
+        bloom(GBG[0], GBG[1]);
+        label(GBG[0], GBG[1], 'Sandėlio kryptis · <b class="a">98</b> aktyvios · <i>40 darbdavių</i>');
+        label(15.5, 59.9, '<i>visoje Švedijoje</i> · <b class="a">923</b> šios krypties vietos').lift = 0.16;
+      },
+    },
+    {
+      test: /(tr[uū]kst|reiki|elektrik|darbuotoj[uų]? reikia)/i, go: 0.9,
+      line: "Paklausa pažymėta: <b>4 elektrikai kitai savaitei</b>. Aplink Göteborgą — 71 aktyvi šios krypties vieta.",
+      act: function () {
+        bloom(GBG[0], GBG[1], "rose");
+        label(GBG[0], GBG[1], 'Užklausa · 4 elektrikai · <b class="r">71</b> aktyvi kryptis · <i>47 darbdaviai</i>');
+        [[12.9401, 57.721], [12.2858, 58.2837], [12.5331, 57.93], [11.9746, 57.8706]].forEach(function (c) {
+          path(c, GBG, "rgba(255,143,163,0.8)");
+          mote(c, GBG, null, 2400 + Math.random() * 1400);
+        });
+      },
+    },
+    {
+      test: /(agurk|parduo|turiu \d|kg|u[žz]augin)/i, go: 0.8,
+      line: "Tai — <b>vertės pasiūla</b>, ne darbo skelbimas. Tas pats pasaulis rodo, kur ji gali būti realizuota.",
+      act: function () {
+        var farm = [13.15, 58.32];
+        bloom(farm[0], farm[1], "green");
+        label(farm[0], farm[1], '30 kg agurkų · <b class="g">pasiūla suprasta</b>').lift = 0.17;
+        path(farm, GBG, "rgba(127,211,154,0.8)");
+        path(farm, [12.9401, 57.721], "rgba(127,211,154,0.6)");
+        mote(farm, GBG, "green", 2600);
+        label(GBG[0], GBG[1], 'Göteborg · <i>realizacijos kryptys</i> · <b class="g">demo</b>').lift = 0.05;
+      },
+    },
+  ];
+  function handle(text) {
+    clearIntent();
+    var it = null;
+    for (var i = 0; i < INTENTS.length; i++) if (INTENTS[i].test.test(text)) { it = INTENTS[i]; break; }
+    if (!it) {
+      say("Suprantu. Pasakyk, ko <b>ieškai</b>, ko <b>reikia</b> ar ką <b>turi</b> — pasaulis reaguos.");
+      return;
+    }
+    say(it.line);
+    tTarget = it.go;
+    it.act();
+  }
+  $("#askForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = $("#askInput").value.trim();
+    if (v) handle(v);
+  });
+  document.querySelectorAll(".try button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      $("#askInput").value = b.dataset.say;
+      handle(b.dataset.say);
+    });
+  });
+
+  /* ── frame loop ── */
+  var lastNow = performance.now();
+  function frame(now) {
+    var dt = Math.min(64, now - lastNow);
+    lastNow = now;
+    drift += 0.0011;
+    var wob = reduced ? 0 : Math.sin(drift) * 0.0028;
+    t += (tTarget - t) * (reduced ? 1 : 0.045);
+    parX += (parTX - parX) * 0.06;
+    parY += (parTY - parY) * 0.06;
+    if (world) world.render(Math.max(0, Math.min(0.9999, t + wob)),
+      reduced ? null : { dx: parX, dy: parY });
+    drawLife(now, dt);
+    placeDom();
+    updateScale();
+    requestAnimationFrame(frame);
+  }
+  if (world) requestAnimationFrame(frame);
+  else updateScale();
+})();
+
+</script>
