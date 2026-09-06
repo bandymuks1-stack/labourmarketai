@@ -4027,7 +4027,12 @@
       "invDone": "Accepteret — I er nu forbundet.",
       "invAlreadyAnswered": "Denne invitation er ikke længere åben eller er allerede besvaret.",
       "invErrorStale": "Tilstanden ændrede sig — opdatér og prøv igen.",
-      "invErrorGeneric": "Kunne ikke acceptere. Prøv igen."
+      "invErrorGeneric": "Kunne ikke acceptere. Prøv igen.",
+      "knownState": {
+        "usingProfile": "Du behøver ikke uploade noget — jeg søger ud fra det, der allerede står i din profil.",
+        "usingProfileNarrowed": "Du behøver ikke uploade noget — jeg søger ud fra din profil og det, du har fortalt indtil nu.",
+        "profileEmpty": "Der står endnu ikke noget i din profil, så jeg kan ikke søge ud fra den. Registrér ét job eller fortæl hvilket fag du har — så søger jeg med det samme."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4477,7 +4482,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Mulighedstype"
+        "opportunityType": "Mulighedstype",
+        "salary": "løn",
+        "language": "sprog",
+        "employment": "ansættelsestype",
+        "radius": "afstand"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4573,11 +4582,6 @@
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
       "chipProjectCsv": "Hent CSV: {title}",
-      "knownState": {
-        "usingProfile": "Du behøver ikke uploade noget — jeg søger ud fra det, der allerede står i din profil.",
-        "usingProfileNarrowed": "Du behøver ikke uploade noget — jeg søger ud fra din profil og det, du har fortalt indtil nu.",
-        "profileEmpty": "Der står endnu ikke noget i din profil, så jeg kan ikke søge ud fra den. Registrér ét job eller fortæl hvilket fag du har — så søger jeg med det samme."
-      },
       "offerCapacity": {
         "needsCompany": "At tilbyde folk hører til en organisation, og du er i dit personlige rum lige nu. Vælg virksomheden — så registrerer jeg tilbuddet med det samme.",
         "personalSpace": "At tilbyde folk eller et team kræver en organisation, og du har ingen endnu. Du kan oprette en virksomhed eller tilbyde din egen ydelse."

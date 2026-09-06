@@ -12647,7 +12647,12 @@
       "invDone": "Geaccepteerd — u bent nu verbonden.",
       "invAlreadyAnswered": "Deze uitnodiging is niet meer open of al beantwoord.",
       "invErrorStale": "De status is gewijzigd — vernieuw en probeer opnieuw.",
-      "invErrorGeneric": "Accepteren mislukt. Probeer opnieuw."
+      "invErrorGeneric": "Accepteren mislukt. Probeer opnieuw.",
+      "knownState": {
+        "usingProfile": "Je hoeft niets te uploaden — ik zoek op basis van wat al in je profiel staat.",
+        "usingProfileNarrowed": "Je hoeft niets te uploaden — ik zoek op basis van je profiel en wat je tot nu toe hebt verteld.",
+        "profileEmpty": "Er staat nog niets in je profiel, dus daarop kan ik niet zoeken. Leg één klus vast of noem je beroep, dan zoek ik meteen."
+      }
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -13391,7 +13396,11 @@
         "accommodation": "Huisvesting",
         "transport": "Vervoer",
         "tool": "Vereist gereedschap",
-        "opportunityType": "Soort kans"
+        "opportunityType": "Soort kans",
+        "salary": "loon",
+        "language": "taal",
+        "employment": "dienstverband",
+        "radius": "afstand"
       },
       "whyFiltered": "Je zei: {words}. Daarop heb ik de zoekopdracht versmald.",
       "whyUnfiltered": "Ik heb je hele lijst doorzocht — je hebt niets versmald.",
@@ -13487,11 +13496,6 @@
       "chipCreateDemand": "Behoefte beschrijven",
       "scoutingPickDemand": "Kies er één, dan laat ik de kandidaten hier in de werkruimte zien.",
       "chipProjectCsv": "CSV downloaden: {title}",
-      "knownState": {
-        "usingProfile": "Je hoeft niets te uploaden — ik zoek op basis van wat al in je profiel staat.",
-        "usingProfileNarrowed": "Je hoeft niets te uploaden — ik zoek op basis van je profiel en wat je tot nu toe hebt verteld.",
-        "profileEmpty": "Er staat nog niets in je profiel, dus daarop kan ik niet zoeken. Leg één klus vast of noem je beroep, dan zoek ik meteen."
-      },
       "offerCapacity": {
         "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
         "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."

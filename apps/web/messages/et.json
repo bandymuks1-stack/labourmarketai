@@ -4027,7 +4027,12 @@
       "invDone": "Vastu võetud — olete nüüd seotud.",
       "invAlreadyAnswered": "See kutse pole enam avatud või on juba vastatud.",
       "invErrorStale": "Olek muutus — värskendage ja proovige uuesti.",
-      "invErrorGeneric": "Vastuvõtmine ebaõnnestus. Proovige uuesti."
+      "invErrorGeneric": "Vastuvõtmine ebaõnnestus. Proovige uuesti.",
+      "knownState": {
+        "usingProfile": "Midagi pole vaja üles laadida — otsin selle põhjal, mis su profiilis juba on.",
+        "usingProfileNarrowed": "Midagi pole vaja üles laadida — otsin su profiili ja seni öeldu põhjal.",
+        "profileEmpty": "Sinu profiilis pole veel midagi, seega ei saa ma selle järgi otsida. Kirjuta üles üks töö või ütle oma amet — ja ma otsin kohe."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4477,7 +4482,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Võimaluse tüüp"
+        "opportunityType": "Võimaluse tüüp",
+        "salary": "tasu",
+        "language": "keel",
+        "employment": "töösuhte liik",
+        "radius": "kaugus"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4573,11 +4582,6 @@
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
       "chipProjectCsv": "Laadi alla CSV: {title}",
-      "knownState": {
-        "usingProfile": "Midagi pole vaja üles laadida — otsin selle põhjal, mis su profiilis juba on.",
-        "usingProfileNarrowed": "Midagi pole vaja üles laadida — otsin su profiili ja seni öeldu põhjal.",
-        "profileEmpty": "Sinu profiilis pole veel midagi, seega ei saa ma selle järgi otsida. Kirjuta üles üks töö või ütle oma amet — ja ma otsin kohe."
-      },
       "offerCapacity": {
         "needsCompany": "Inimeste pakkumine kuulub organisatsioonile ja sa oled praegu oma isiklikus ruumis. Vali ettevõte — ja ma panen pakkumise kohe kirja.",
         "personalSpace": "Inimeste või meeskonna pakkumiseks on vaja organisatsiooni, sul seda veel ei ole. Võid luua ettevõtte või pakkuda oma enda teenust."

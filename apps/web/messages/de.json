@@ -12647,7 +12647,12 @@
       "invDone": "Angenommen — Sie sind jetzt verbunden.",
       "invAlreadyAnswered": "Diese Einladung ist nicht mehr offen oder wurde bereits beantwortet.",
       "invErrorStale": "Der Zustand hat sich geändert — aktualisieren und erneut versuchen.",
-      "invErrorGeneric": "Annahme fehlgeschlagen. Bitte erneut versuchen."
+      "invErrorGeneric": "Annahme fehlgeschlagen. Bitte erneut versuchen.",
+      "knownState": {
+        "usingProfile": "Du musst nichts hochladen — ich suche mit dem, was schon in deinem Profil steht.",
+        "usingProfileNarrowed": "Du musst nichts hochladen — ich suche mit deinem Profil und dem, was du bisher genannt hast.",
+        "profileEmpty": "In deinem Profil steht noch nichts, daher kann ich damit nicht suchen. Erfasse eine Arbeit oder nenne deinen Beruf — dann suche ich sofort."
+      }
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -13391,7 +13396,11 @@
         "accommodation": "Unterkunft",
         "transport": "Transport",
         "tool": "Benötigtes Werkzeug",
-        "opportunityType": "Art der Chance"
+        "opportunityType": "Art der Chance",
+        "salary": "Bezahlung",
+        "language": "Sprache",
+        "employment": "Beschäftigungsart",
+        "radius": "Entfernung"
       },
       "whyFiltered": "Du hast gesagt: {words}. Danach habe ich die Suche eingegrenzt.",
       "whyUnfiltered": "Ich habe deine ganze Liste durchsucht — du hast nichts eingegrenzt.",
@@ -13487,11 +13496,6 @@
       "chipCreateDemand": "Bedarf beschreiben",
       "scoutingPickDemand": "Wähle einen aus, dann zeige ich die Kandidaten direkt hier im Arbeitsbereich.",
       "chipProjectCsv": "CSV herunterladen: {title}",
-      "knownState": {
-        "usingProfile": "Du musst nichts hochladen — ich suche mit dem, was schon in deinem Profil steht.",
-        "usingProfileNarrowed": "Du musst nichts hochladen — ich suche mit deinem Profil und dem, was du bisher genannt hast.",
-        "profileEmpty": "In deinem Profil steht noch nichts, daher kann ich damit nicht suchen. Erfasse eine Arbeit oder nenne deinen Beruf — dann suche ich sofort."
-      },
       "offerCapacity": {
         "needsCompany": "Menschen anzubieten gehört zu einer Organisation, und du bist gerade in deinem persönlichen Bereich. Wähle das Unternehmen — dann halte ich das Angebot sofort fest.",
         "personalSpace": "Um Menschen oder ein Team anzubieten, braucht es eine Organisation, und du hast noch keine. Du kannst ein Unternehmen anlegen oder deine eigene Leistung anbieten."
