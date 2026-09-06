@@ -3903,6 +3903,7 @@
         "intentNote": "Wählen Sie alles Zutreffende — ein Konto trägt alles. Person und Organisation sind die zwei Räume; was Sie darin tun, entscheiden Sie.",
         "saidLabel": "Sie haben geschrieben:",
         "saidHint": "Wir haben angekreuzt, was passt. Ändern Sie es bei Bedarf.",
+        "doorLabel": "Sie haben gewählt:",
         "intent": {
           "work": {
             "title": "Ich suche Arbeit",

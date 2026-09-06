@@ -3903,6 +3903,7 @@
         "intentNote": "Pažymėkite viską, kas tinka — viena paskyra talpina visa tai. Asmuo ir organizacija yra dvi erdvės; ką jose veikiate, sprendžiate jūs.",
         "saidLabel": "Jūs rašėte:",
         "saidHint": "Pažymėjome, kas tiko. Pataisykite, jei reikia.",
+        "doorLabel": "Jūs pasirinkote:",
         "intent": {
           "work": {
             "title": "Ieškau darbo",

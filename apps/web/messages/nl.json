@@ -3903,6 +3903,7 @@
         "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
         "saidLabel": "Je schreef:",
         "saidHint": "We hebben aangevinkt wat past. Pas het aan als het nodig is.",
+        "doorLabel": "U koos:",
         "intent": {
           "work": {
             "title": "Ik zoek werk",
