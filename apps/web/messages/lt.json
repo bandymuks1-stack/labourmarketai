@@ -12647,7 +12647,12 @@
       "invDone": "Priimta — dabar esate susieti.",
       "invAlreadyAnswered": "Šis kvietimas nebegalioja arba jau atsakytas.",
       "invErrorStale": "Būsena pasikeitė — atnaujinkite ir bandykite dar kartą.",
-      "invErrorGeneric": "Nepavyko priimti. Bandykite dar kartą."
+      "invErrorGeneric": "Nepavyko priimti. Bandykite dar kartą.",
+      "knownState": {
+        "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
+        "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
+        "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
+      }
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -13391,7 +13396,11 @@
         "accommodation": "Apgyvendinimas",
         "transport": "Transportas",
         "tool": "Reikalingas įrankis",
-        "opportunityType": "Galimybės tipas"
+        "opportunityType": "Galimybės tipas",
+        "salary": "atlygį",
+        "language": "kalbą",
+        "employment": "etatą",
+        "radius": "atstumą"
       },
       "whyFiltered": "Pasakei: {words}. Pagal tai ir susiaurinau paiešką.",
       "whyUnfiltered": "Ieškojau visame tavo sąraše — nieko nesusiaurinai.",
@@ -13487,11 +13496,6 @@
       "chipCreateDemand": "Aprašyti poreikį",
       "scoutingPickDemand": "Pasirinkite vieną — kandidatus parodysiu čia pat, darbo erdvėje.",
       "chipProjectCsv": "Atsisiųsti CSV: {title}",
-      "knownState": {
-        "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
-        "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
-        "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
-      },
       "offerCapacity": {
         "needsCompany": "Darbuotojų pasiūlymas priklauso organizacijai, o dabar dirbi asmeninėje erdvėje. Pasirink įmonę — ir iškart užrašysiu pasiūlymą.",
         "personalSpace": "Kad galėtum siūlyti žmones ar komandą, reikia organizacijos — kol kas jos neturi. Gali sukurti įmonę arba pasiūlyti savo paties paslaugą."
