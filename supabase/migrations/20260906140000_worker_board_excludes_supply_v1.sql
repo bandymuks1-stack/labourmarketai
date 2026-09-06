@@ -77,6 +77,17 @@
 -- privilege set (postgres, authenticated) is reproduced exactly rather than
 -- assumed to survive.
 --
+-- VOLATILITY IS THE SAME TRAP, AND THIS MIGRATION FELL INTO IT (found
+-- 2026-09-06, before apply). A replace with no volatility marker does not
+-- keep the old one — it resets the function to the VOLATILE default. Read
+-- from production with `pg_get_functiondef`, the live function is
+-- `STABLE SECURITY DEFINER`; the first draft of this migration declared
+-- only `security definer`, so applying it would have silently downgraded a
+-- read-only function to VOLATILE and cost the planner every stable-function
+-- optimisation on the board read. `stable` is therefore restated below.
+-- The rule generalises: a `create or replace` must restate EVERY property
+-- of the live definition, because the parser defaults each omitted one.
+--
 -- ROLLBACK: supabase/rollbacks/20260906140000_worker_board_excludes_supply_v1.down.sql
 -- restores the CURRENT live body verbatim (the same function without the
 -- predicate). Reversible with no data change — this migration writes no
@@ -99,6 +110,7 @@ returns table (
   structured jsonb
 )
 language plpgsql
+stable
 security definer
 set search_path = public
 as $$

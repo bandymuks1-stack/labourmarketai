@@ -2,27 +2,21 @@
 --
 -- Restores the CURRENT live body of `list_open_demand_for_workers()` — the
 -- same function WITHOUT the `kind` predicate the forward migration adds.
--- Byte-identical to production as read on 2026-09-06 (`pg_get_functiondef`),
--- including `security definer` and `set search_path = public`, which a
--- `create or replace` would otherwise drop.
+-- Verified against production 2026-09-06 with `pg_get_functiondef`: the live
+-- function is `STABLE SECURITY DEFINER` with `SET search_path TO 'public'`,
+-- and all three properties are restated below.
+--
+-- A `create or replace` keeps NONE of the properties the new definition
+-- omits — it re-defaults each one. An earlier draft of this file omitted
+-- `stable` (and, through a paste fault, was not even valid SQL), so running
+-- it would have "rolled back" to a function that differs from the live one:
+-- VOLATILE instead of STABLE. A rollback that does not restore the exact
+-- prior definition is not a rollback.
 --
 -- Safe and complete: the forward migration writes no rows and alters no
--- table, so reverting the body is the whole rollback. Applying this makes
--- agency_offer rows visible to workers again (the defect), which is the
--- intended pre-migration state.
-
-create or replace function` DROPS a function's `SET` configuration when
--- the new definition omits it (trap recorded 2026-09-03: a replaced body
--- silently lost `search_path`, leaving a SECURITY DEFINER function with the
--- caller's search_path). `set search_path = public` is therefore restated
--- below, and the grants are re-asserted after the replace so the live
--- privilege set (postgres, authenticated) is reproduced exactly rather than
--- assumed to survive.
---
--- ROLLBACK: supabase/rollbacks/20260906140000_worker_board_excludes_supply_v1.down.sql
--- restores the CURRENT live body verbatim (the same function without the
--- predicate). Reversible with no data change — this migration writes no
--- rows and alters no table.
+-- table, so restoring the body is the whole rollback. Applying this makes
+-- agency_offer rows visible to workers again (the defect), which is by
+-- definition the intended pre-migration state.
 
 create or replace function public.list_open_demand_for_workers()
 returns table (
@@ -41,6 +35,7 @@ returns table (
   structured jsonb
 )
 language plpgsql
+stable
 security definer
 set search_path = public
 as $$
@@ -116,9 +111,7 @@ begin
 end
 $$;
 
--- Re-assert the live privilege set exactly (a replace does not drop these,
--- but stating them keeps the migration self-contained and idempotent).
+-- Re-assert the live privilege set exactly, as the forward migration does.
 revoke all on function public.list_open_demand_for_workers() from public;
 revoke all on function public.list_open_demand_for_workers() from anon;
 grant execute on function public.list_open_demand_for_workers() to authenticated;
-
