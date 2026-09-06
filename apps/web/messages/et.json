@@ -4563,7 +4563,12 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Laadi alla CSV: {title}"
+      "chipProjectCsv": "Laadi alla CSV: {title}",
+      "knownState": {
+        "usingProfile": "Midagi pole vaja üles laadida — otsin selle põhjal, mis su profiilis juba on.",
+        "usingProfileNarrowed": "Midagi pole vaja üles laadida — otsin su profiili ja seni öeldu põhjal.",
+        "profileEmpty": "Sinu profiilis pole veel midagi, seega ei saa ma selle järgi otsida. Kirjuta üles üks töö või ütle oma amet — ja ma otsin kohe."
+      }
     },
     "project": {
       "fieldStatus": "[EN] Status",

@@ -13477,7 +13477,12 @@
       "chipLogWork": "Werk vastleggen",
       "chipCreateDemand": "Behoefte beschrijven",
       "scoutingPickDemand": "Kies er één, dan laat ik de kandidaten hier in de werkruimte zien.",
-      "chipProjectCsv": "CSV downloaden: {title}"
+      "chipProjectCsv": "CSV downloaden: {title}",
+      "knownState": {
+        "usingProfile": "Je hoeft niets te uploaden — ik zoek op basis van wat al in je profiel staat.",
+        "usingProfileNarrowed": "Je hoeft niets te uploaden — ik zoek op basis van je profiel en wat je tot nu toe hebt verteld.",
+        "profileEmpty": "Er staat nog niets in je profiel, dus daarop kan ik niet zoeken. Leg één klus vast of noem je beroep, dan zoek ik meteen."
+      }
     },
     "project": {
       "fieldStatus": "Status",
