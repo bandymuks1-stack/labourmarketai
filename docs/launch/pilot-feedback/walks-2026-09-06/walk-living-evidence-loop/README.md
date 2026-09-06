@@ -31,6 +31,21 @@ COMPANY on `/lt/dashboard/inbox/quick`: one tap "Patvirtinti įrašą ir įgūd�
 Worker board (`list_open_demand_for_workers`) cannot show this need: the RPC joins
 `companies.verification_status = 'verified'` and E2E Walker UAB is unverified — by design.
 
+## Follow-up fixed in this branch (after the walk)
+
+- **Quick-confirm scope.** The tap used to verify EVERY declared-unverified skill of the
+  worker (run 2 verified both skills because both were linked — but an unrelated declared
+  skill would have been verified too). Now `review-queue.ts` reads `journal_entry_skills`
+  for the reviewable ids and `quick-confirm-model.ts` scopes the confirm set to the entry's
+  linked, still-unverified skills; zero links keeps the disclosed worker-wide fallback; a
+  failed skills read is the named `skills_unavailable` state (card says so, confirms nothing).
+  The card's list IS the RPC input (`p_skill_ids`), so no migration.
+- **Receipt after the tap.** Run 2's log shows `company_quick_confirmed … confirmed: false`:
+  `revalidatePath` emptied the queue and the page swapped to the empty state before
+  `quick-confirmed-<id>` rendered. `quick-confirm-queue.tsx` (one client boundary that stays
+  mounted) now keeps a `quick-receipt-<id>` line — "Patvirtinta: <entry first line> · N įgūdžiai"
+  — above the empty state. A re-run of this script should wait for `quick-receipt-` instead.
+
 ## Rollback (execute_sql, committed)
 
 Deleted: audit_logs 1, journal_entry_confirmations 1, journal_entry_skills 2,

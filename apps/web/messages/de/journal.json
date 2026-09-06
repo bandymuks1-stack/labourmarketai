@@ -225,7 +225,10 @@
       "ackDone": "Wird bestätigt ✓",
       "excludedNote": "{count, plural, =0 {Alle Ausnahmen geprüft — die ganze Liste wird bestätigt.} one {# Eintrag mit Ausnahme wird NICHT bestätigt, bis du ihn als geprüft markierst.} other {# Einträge mit Ausnahmen werden NICHT bestätigt, bis du sie als geprüft markierst.}}",
       "outcomeNotAcknowledged": "nicht bestätigt — die Ausnahme blieb ungeprüft",
-      "outcomeBlocked": "nicht bestätigt ({code})"
+      "outcomeBlocked": "nicht bestätigt ({code})",
+      "receipt": "Bestätigt: {title}",
+      "receiptSkills": "{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}",
+      "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst."
     }
   },
   "listEmpty": "Sie haben noch keine Arbeitsnachweise — Ihre Einträge werden hier angezeigt.",
