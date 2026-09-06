@@ -3763,6 +3763,7 @@
       "assignPickWorker": "Hvem skal arbejde på det?",
       "assignNoWorkers": "Der er endnu ingen i dit team at tildele.",
       "assignUnavailable": "Jeg kunne ikke læse dit team lige nu.",
+      "assignEngagementCandidate": "kandidat fra accepteret tilbud",
       "assignDone": "Tildelt projektet.",
       "assignFailed": "Tildelingen kunne ikke gennemføres.",
       "chipEngagements": "Hvem jeg arbejder med",

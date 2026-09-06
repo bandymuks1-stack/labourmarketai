@@ -12332,6 +12332,7 @@
       "assignPickWorker": "Кто должен на нём работать?",
       "assignNoWorkers": "В вашей команде пока некого назначить.",
       "assignUnavailable": "Сейчас не удалось прочитать вашу команду.",
+      "assignEngagementCandidate": "кандидат по принятому предложению",
       "assignDone": "Назначен на проект.",
       "assignFailed": "Назначение выполнить не удалось.",
       "chipEngagements": "С кем я работаю",

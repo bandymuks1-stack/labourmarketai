@@ -373,6 +373,10 @@ export type ChatLabels = {
   assignNoWorkers: string;
   /** The roster could not be read, or its source is not available here. */
   assignUnavailable: string;
+  /** Chip suffix for a person assignable through an ACCEPTED BOOKING
+   *  (agency placement) rather than the roster — the chat's equivalent of the
+   *  page picker's "accepted-offer candidates" group (D5 walk, 2026-09-06). */
+  assignEngagementCandidate: string;
   /** The assignment landed. Followed by the real project result. */
   assignDone: string;
   /** The assignment was refused by the server. The reason is the server's. */
@@ -1865,8 +1869,13 @@ export function ConversationChat({
    *
    * The panel asks; this flow answers. It offers ONE CHIP PER REAL PERSON the
    * server would actually accept — `loadAssignableWorkersForProject` reads the
-   * same population the RPC's second gate (`caller_manages_worker`) allows — so
-   * there is never a control that looks like it works and is then refused.
+   * same population the RPC's two gates allow (the roster via
+   * `caller_manages_worker` AND accepted-booking engagements via
+   * `caller_has_booking_engagement_for_project`), through the same two reads
+   * the projects page uses — so there is never a control that looks like it
+   * works and is then refused, and never a person the page offers that the
+   * chat hides (D5 agency-chain walk, 2026-09-06). An engagement candidate's
+   * chip says so, the way the page's optgroup does.
    *
    * The chip carries `projectId:workerProfileId` and NOTHING else. It is a
    * request, not a permission: the dispatcher re-checks the role, the schema
@@ -1884,7 +1893,10 @@ export function ConversationChat({
               labels.assignPickWorker,
               res.workers.slice(0, 4).map((w) => ({
                 id: `assign:${projectId}:${w.profileId}`,
-                label: w.name,
+                label:
+                  w.source === "engagement"
+                    ? `${w.name} · ${labels.assignEngagementCandidate}`
+                    : w.name,
               })),
             );
             return;
@@ -1909,6 +1921,7 @@ export function ConversationChat({
       labels.assignPickWorker,
       labels.assignNoWorkers,
       labels.assignUnavailable,
+      labels.assignEngagementCandidate,
       labels.projectsNoCompany,
     ],
   );

@@ -3763,6 +3763,7 @@
       "assignPickWorker": "[EN] Who should work on it?",
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Vem jag arbetar med",

@@ -12332,6 +12332,7 @@
       "assignPickWorker": "Wer soll daran arbeiten?",
       "assignNoWorkers": "In deinem Team ist noch niemand, den du zuweisen könntest.",
       "assignUnavailable": "Dein Team konnte gerade nicht gelesen werden.",
+      "assignEngagementCandidate": "Kandidat aus angenommenem Angebot",
       "assignDone": "Dem Projekt zugewiesen.",
       "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden.",
       "chipEngagements": "Mit wem ich arbeite",

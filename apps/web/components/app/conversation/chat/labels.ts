@@ -146,6 +146,7 @@ const CHAT_KEYS = [
   "assignPickWorker",
   "assignNoWorkers",
   "assignUnavailable",
+  "assignEngagementCandidate",
   "assignDone",
   "assignFailed",
   // §7.1 — work relationships. Same rule again: "none recorded", "no company"
