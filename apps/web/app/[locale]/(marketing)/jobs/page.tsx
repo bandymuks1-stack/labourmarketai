@@ -176,6 +176,16 @@ const NOT_PROVISIONED: L = {
   de: "Das öffentliche Stellenboard ist noch nicht aktiviert.",
 };
 
+/** Honest state: the read timed out (Lane H 2026-09-06: 4 of 6 anonymous
+ *  probes answered 500 here) — NOT "0 vacancies found", NOT an error page. */
+const UNAVAILABLE: L = {
+  en: "The job board did not answer in time. Please try again in a moment.",
+  lt: "Darbo skelbimų lenta laiku neatsakė. Pabandyk dar kartą po akimirkos.",
+  ru: "Доска вакансий не ответила вовремя. Попробуйте ещё раз через минуту.",
+  nl: "Het vacaturebord antwoordde niet op tijd. Probeer het zo opnieuw.",
+  de: "Das Stellenboard hat nicht rechtzeitig geantwortet. Bitte gleich noch einmal versuchen.",
+};
+
 const SAVED_TAB: L = {
   en: "Saved",
   lt: "Išsaugoti",
@@ -434,6 +444,14 @@ export default async function JobsPage({
       ) : result.status === "not_provisioned" ? (
         <p className="mt-10 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
           {NOT_PROVISIONED[active]}
+        </p>
+      ) : result.status === "unavailable" ? (
+        <p
+          role="status"
+          data-testid="public-jobs-unavailable"
+          className="mt-10 rounded-md border border-dashed p-6 text-sm text-muted-foreground"
+        >
+          {UNAVAILABLE[active]}
         </p>
       ) : (
         <>
