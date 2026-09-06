@@ -135,9 +135,23 @@ The backbone diagram is recorded in `docs/ARCHITECTURE.md` §5.5.
 
 *Applied silently from 2026-09-05 on to every layer (first instances the same day: the Gemini conversation proposer — one sentence ≤ 500 chars, the intent catalogue only, never the user's world, per-user rate limit, low-cost tier, per-run cost ceiling, every run an `ai_runs` row; the chat's canonical reads — scan limits per project list, per-project detail reads capped). Escalation only for a genuine redesign-level blocker or a paid capacity decision.*
 
-## 1c. Owner direction, window 6 (recorded 2026-09-06 — SUBSTANCE, not verbatim; the owner may replace this block with the exact text)
+## 1c. Owner direction, window 6 (recorded 2026-09-06 — the quoted block is the owner's verbatim wording; the numbered list is the substance of the lane brief)
 
 > Recorded from the window-6 orchestrator brief for lane I+J+K. It names the direction the owner gave for delegated AI, bulk import, the contribution / evidence graph and the AI-agent Living CV. It ADDS to §1–§1b; nothing is removed. Where wording differs from the owner's own text, the owner's text governs.
+
+**Owner's verbatim canonical lines (window 6, 2026-09-06):**
+
+> Canonical short description: „LabourMarket.ai – realaus žmogaus, organizacijų ir veikiančių AI/agentų galimybių tinklas, kuriame reali veikla kuria gyvą profilį, praeitis didina ateities galimybes, o AI padeda iš besikeičiančio pasaulio atrasti prasmingiausius kitus veiksmus.“
+>
+> Canonical public communication axis: „Parodyk, ką moki. Atrask, kur esi reikalingas.“ — do NOT turn this into excessive explanatory copy; the sophistication lives in VISUAL BEHAVIOR + REAL FUNCTION + NATURAL USER INTERACTION.
+>
+> Core loop: REAL ACTIVITY / REAL WORK → RESULT → EVIDENCE → LIVING PROFILE → CAPABILITIES → REAL OPPORTUNITIES → HUMAN CHOICE → ACTION → NEW EXPERIENCE → STRONGER PROFILE. LabourMarket.ai is not primarily a CV editor; it is a real-activity, evidence and opportunity system.
+>
+> Evidence strengths stay distinguishable and are never collapsed into one universal score: SELF_DECLARED · COMPANY_RECORDED · ACTIVITY_EVIDENCED · COUNTERPARTY_CONFIRMED · DOCUMENT_BACKED / VERIFIED · FORMALLY_QUALIFIED / RECOGNIZED · SYSTEM_DERIVED. Roles on a fact: ACTOR · RECORDER · PRIMARY CONTRIBUTOR · CONTRIBUTORS · SUPERVISOR · APPROVER / CONFIRMER · BENEFICIARY · EVIDENCE SOURCE. WHO DID THE WORK ≠ WHO RECORDED THE WORK.
+>
+> Definition of done for launch-critical work: REAL USER → REAL PRODUCTION → CANONICAL PERSISTED DATA → COMPLETE END-TO-END ACTION → RESULT VISIBLE / USABLE → READBACK → HONEST RESIDUE. IMPLEMENTATION COMPLETENESS ≠ PRODUCTION TECHNICAL PROOF ≠ REAL CUSTOMER / LEARNER / MARKET VALIDATION.
+>
+> Not to build now: second matching engine · second Living Profile · second evidence model · second person identity · second organisation model · separate ChatGPT / Claude architectures · second Agentai OS · universal human score · ratings economy · goods marketplace · freelancer clone · career oracle · a giant authorization system before the existing-auth inventory · a research platform · ANY demo-specific education functionality.
 
 1. **One person, many contexts.** A single identity acts across organizations, projects and roles; delegation and import never create a second person, worker or organization model.
 2. **Real activity.** Only recorded actions of named actors become facts. Extracted, recognised or proposed content is a suggestion until a human confirms it.
