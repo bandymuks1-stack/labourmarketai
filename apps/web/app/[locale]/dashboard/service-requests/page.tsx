@@ -13,6 +13,12 @@ import {
   listIncomingRequests,
 } from "@/lib/marketplace/service-requests";
 import {
+  filterByCategory,
+  normalizeDiscoveryCategory,
+  normalizeDiscoveryCountry,
+} from "@/lib/marketplace/service-requests-shared";
+import { listOwnServiceOfferings } from "@/lib/services/service-offerings";
+import {
   MarketplaceLoopSection,
   type MarketplaceLabels,
 } from "@/components/app/marketplace-loop-section";
@@ -34,8 +40,12 @@ import { MarkServiceRequestsSeen } from "@/components/app/mark-service-requests-
  */
 export default async function ServiceRequestsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** Discovery filter (G-E1): `?country=LT&category=buhalterija` — plain GET
+   *  params so the URL is the truth and the filter survives a reload. */
+  searchParams?: Promise<{ country?: string; category?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -47,16 +57,32 @@ export default async function ServiceRequestsPage({
   if (!user)
     redirect(`/${locale}/auth/login?next=/${locale}/dashboard/service-requests`);
 
+  const sp = (await searchParams) ?? {};
+  const country = normalizeDiscoveryCountry(sp.country);
+  const category = normalizeDiscoveryCategory(sp.category);
+
   const t = await getTranslations("marketplace");
-  const [disc, out, inc] = await Promise.all([
-    listDiscoverableOfferings(),
+  // The caller's OWN offerings are read alongside the loop (RLS-scoped, own
+  // rows only) so the provider inbox's empty state can tell the truth: no
+  // active service → no request can arrive; N active → nobody asked yet.
+  const [disc, out, inc, own] = await Promise.all([
+    listDiscoverableOfferings({ country }),
     listOutgoingRequests(),
     listIncomingRequests(),
+    listOwnServiceOfferings(),
   ]);
   const needsMigration =
     disc.kind === "needs-migration" ||
     out.kind === "needs-migration" ||
     inc.kind === "needs-migration";
+  const ownActive =
+    own.kind === "ok" ? own.rows.filter((r) => r.status === "active").length : 0;
+  const discoverable = filterByCategory(disc.kind === "ok" ? disc.rows : [], category);
+  const filter = {
+    country: country ?? "",
+    category: category ?? "",
+    active: country !== null || category !== null,
+  };
 
   const labels: MarketplaceLabels = {
     notAvailable: t("notAvailable"),
@@ -72,6 +98,22 @@ export default async function ServiceRequestsPage({
     // Reuses the existing linkToServices affordance inside the empty state
     // (audit finding F-E2) — no new copy key needed.
     discoverEmptyCta: t("linkToServices"),
+    discoverEmptyWhy: t("discoverEmptyWhy"),
+    discoverEmptyNext: t("discoverEmptyNext"),
+    discoverFilteredEmpty: t("discoverFilteredEmpty"),
+    discoverFilteredEmptyCta: t("filterClear"),
+    outgoingEmptyWhy: t("outgoingEmptyWhy"),
+    incomingEmptyWhy:
+      ownActive === 0
+        ? t("incomingEmptyNoActive")
+        : t("incomingEmptyHasActive", { count: ownActive }),
+    incomingEmptyCta: ownActive === 0 ? t("linkToServices") : null,
+    filterCountry: t("filterCountry"),
+    filterCategory: t("filterCategory"),
+    filterApply: t("filterApply"),
+    filterClear: t("filterClear"),
+    responseNoteLabel: t("responseNoteLabel"),
+    responseNotePlaceholder: t("responseNotePlaceholder"),
     accept: t("accept"),
     decline: t("decline"),
     withdraw: t("withdraw"),
@@ -112,11 +154,12 @@ export default async function ServiceRequestsPage({
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
       <MarketplaceLoopSection
-        discoverable={disc.kind === "ok" ? disc.rows : []}
+        discoverable={discoverable}
         outgoing={out.kind === "ok" ? out.rows : []}
         incoming={inc.kind === "ok" ? inc.rows : []}
         needsMigration={needsMigration}
         labels={labels}
+        filter={filter}
       />
       {/* Cross-link to the other half of the loop — manage / activate the
           services that make you discoverable here. Quiet, secondary affordance. */}
