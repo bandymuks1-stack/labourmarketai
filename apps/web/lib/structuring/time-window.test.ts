@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseTimeWindow, stripEndDatePhrase } from "./time-window";
+import { parseStartDate, parseTimeWindow, stripEndDatePhrase } from "./time-window";
 
 /** 2026-08-13 is a Thursday (UTC). */
 const TODAY = "2026-08-13";
@@ -91,5 +91,46 @@ describe("stripEndDatePhrase — the deadline is its own field, not a title tail
     expect(stripEndDatePhrase("nuvežti medžiagas iki pietų")).toBe("nuvežti medžiagas iki pietų");
     expect(stripEndDatePhrase("go to site 3")).toBe("go to site 3");
     expect(stripEndDatePhrase("sumontuoti pastolius")).toBe("sumontuoti pastolius");
+  });
+});
+
+/**
+ * Window 6 (production 2026-09-06): "reikia suvirintojo nuo spalio" left the
+ * start date EMPTY — only a month WITH a day was read. A bare month after
+ * the from-word is the first of that month (the running month = today);
+ * "rytoj" is tomorrow. Nothing else is invented.
+ */
+describe("a bare month after the from-word, and 'tomorrow'", () => {
+  const TODAY = "2026-09-06";
+  it.each([
+    ["nuo spalio", "2026-10-01"],
+    ["reikia suvirintojo nuo spalio", "2026-10-01"],
+    ["from October", "2026-10-01"],
+    ["с октября", "2026-10-01"],
+    ["nuo rugsėjo", "2026-09-06"], // the running month = from now
+    ["nuo sausio", "2027-01-01"], // already passed this year → next year
+    ["nuo rugsėjo 15", "2026-09-15"], // a stated day still wins
+    ["nuo 15 rugsėjo", "2026-09-15"],
+    ["rytoj", "2026-09-07"],
+    ["reikia dažytojo rytoj", "2026-09-07"],
+    ["nuo rytojaus", "2026-09-07"],
+    ["tomorrow morning", "2026-09-07"],
+    ["завтра", "2026-09-07"],
+  ])("%s → %s", (text, iso) => {
+    expect(parseStartDate(text, TODAY)).toBe(iso);
+    expect(parseTimeWindow(text, TODAY).startIso).toBe(iso);
+  });
+
+  it.each(["nuo pirmadienio", "nuo 8 iki 17", "spalio", "kitą mėnesį", "nuo kito mėnesio", "reikia buhalterio"])(
+    "no absolute start is invented for %s",
+    (text) => {
+      expect(parseStartDate(text, TODAY)).toBeNull();
+    },
+  );
+
+  it("'nuo kito mėnesio' is the next-month window", () => {
+    const w = parseTimeWindow("reikia buhalterio nuo kito mėnesio", TODAY);
+    expect(w.kind).toBe("next_month");
+    expect(w.startIso).toBe("2026-10-01");
   });
 });

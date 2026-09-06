@@ -86,6 +86,7 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
     kind: "next_month",
     res: [
       /kita\s+men/u, // kitą mėnesį (folded "kita menesi")
+      /kito\s+men/u, // "nuo kito mėnesio" — from next month
       /ateinanti\s+men/u,
       /next\s+month/u,
       /следующ[\p{L}]*\s+месяц/u,
@@ -172,6 +173,25 @@ export function parseStartDate(text: string, todayIso: string): string | null {
   if (monthFirst) {
     const month = monthOf(monthFirst[1]);
     if (month) return nextOccurrence(todayIso, month, Number.parseInt(monthFirst[2], 10));
+  }
+  // A bare month after the from-word — "nuo spalio", "from October", "с
+  // октября" — is how an employer states a start most of the time
+  // (production 2026-09-06: "reikia suvirintojo nuo spalio" left the start
+  // empty). The FIRST of that month is the coarsest honest day; the month
+  // already running means "from now". Never a guess at a later day.
+  const bareMonth = folded.match(
+    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+([\\p{L}]+)(?![\\p{L}])`, "u"),
+  );
+  if (bareMonth) {
+    const month = monthOf(bareMonth[1]);
+    if (month) {
+      if (utc(todayIso).getUTCMonth() + 1 === month) return todayIso;
+      return nextOccurrence(todayIso, month, 1);
+    }
+  }
+  // "rytoj" / "nuo rytojaus" / "tomorrow" / "завтра" / "morgen" / "jutro".
+  if (/(?:^|[^\p{L}])(?:rytoj|tomorrow|завтра|morgen|jutro)/u.test(folded)) {
+    return plusDays(todayIso, 1);
   }
   return null;
 }

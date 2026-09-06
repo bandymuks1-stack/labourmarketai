@@ -1,0 +1,53 @@
+{"step":"health","build":"ab16654f"}
+{"leg":"followup-worker","sentence":"ieškau darbo Norvegijoje","text":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","results":0,"firstAnswerMs":7588,"chips":[],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[A1] 'ieškau darbo Norvegijoje' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi."}
+{"check":"[A1] answer reads /Norvegij/i","ok":true,"detail":{"text":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","chips":[]}}
+{"check":"[A1] chip /pridėti šalį|dokument/i","ok":false,"detail":[]}
+{"check":"[A1] not a dead end (a chip after the country answer)","ok":false,"detail":[]}
+{"check":"[A1] says plainly there are no public ads there","ok":false,"detail":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi."}
+{"leg":"followup-worker","sentence":"esu suvirintojas, ieškau darbo Norvegijoje","text":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","results":0,"firstAnswerMs":6335,"chips":[],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[A2] 'esu suvirintojas, ieškau darbo Norvegijoje' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi."}
+{"check":"[A2] answer reads /suvirintoj/i","ok":false,"detail":{"text":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","chips":[]}}
+{"check":"[A2] chip /pridėti šalį|dokument/i","ok":false,"detail":[]}
+{"check":"[A2] not a dead end (a chip after the country answer)","ok":false,"detail":[]}
+{"leg":"followup-worker","sentence":"ieškau darbo Švedijoje","text":"L LabourMarket AI Supratau „Švedijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","results":0,"firstAnswerMs":5368,"chips":[],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[A3] 'ieškau darbo Švedijoje' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Supratau „Švedijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi."}
+{"check":"[A3] answer reads /viešų skelbimų iš oficialių šaltinių/i","ok":false,"detail":{"text":"L LabourMarket AI Supratau „Švedijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","chips":[]}}
+{"check":"[A3] chip /pridėti šalį/i","ok":false,"detail":[]}
+{"check":"[A3] not a dead end (a chip after the country answer)","ok":false,"detail":[]}
+{"leg":"followup-worker","sentence":"Užpildyk darbo žurnalą","text":"","results":0,"firstAnswerMs":5127,"chips":["Išsaugoti","Taisyti"],"form":null,"title":null,"availableFrom":null,"flowOpen":true,"notes":"Užpildyk darbo žurnalą"}
+{"check":"[A4] 'Užpildyk darbo žurnalą' answers (not the menu)","ok":true,"detail":""}
+{"check":"[A4] answer reads /Ką šiandien dirbai/i","ok":false,"detail":{"text":"","chips":["Išsaugoti","Taisyti"]}}
+{"check":"[A4] the journal flow opens with EMPTY evidence (the request is not the work)","ok":false,"detail":{"flowOpen":true,"notes":"Užpildyk darbo žurnalą"}}
+{"check":"[A4] journal rows unchanged (null → null)","ok":false,"detail":{"before":null,"after":null}}
+{"leg":"followup-worker","sentence":"galiu dirbti nuo spalio 1 d.","text":"L LabourMarket AI Tavo dabartiniai paieškos kriterijai: Pageidaujamos šalys: Nyderlandai, Vokietija Dokumentai: 1 dokumentas Atitikmenys būtų tikslesni, jei nurodytum: — įgūdžius — prieinamumą — kalbas — tarifo lūkestį Pageidavimus Ieškau darbo","results":0,"firstAnswerMs":5681,"chips":["Pageidavimus","Ieškau darbo"],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[A5] 'galiu dirbti nuo spalio 1 d.' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Tavo dabartiniai paieškos kriterijai: Pageidaujamos šalys: Nyderlandai, Vokietija Dokumentai: 1 dokumentas Atitikmenys būtų tikslesni, jei nurodytum: — įgūdžius — prieinamumą — kalba"}
+{"check":"[A5] answer reads /gali dirbti nuo/i","ok":false,"detail":{"text":"L LabourMarket AI Tavo dabartiniai paieškos kriterijai: Pageidaujamos šalys: Nyderlandai, Vokietija Dokumentai: 1 dokumentas Atitikmenys būtų tikslesni, jei nurodytum: — įgūdžius — prieinamumą — kalbas — tarifo lūkestį Pageidavimus Ieškau d","chips":["Pageidavimus","Ieškau darbo"]}}
+{"check":"[A5] work card opens with availableFrom /^\\d{4}-10-01$/","ok":false,"detail":null}
+{"leg":"followup-worker","sentence":"dirbau suvirintoju Norvegijoje 3 metus","text":"L LabourMarket AI Kurią dieną ir kiek laiko dirbai? Parašyk, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“.","results":0,"firstAnswerMs":1138,"chips":[],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[A6] 'dirbau suvirintoju Norvegijoje 3 metus' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Kurią dieną ir kiek laiko dirbai? Parašyk, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“."}
+{"check":"[A6] answer reads /suvirintoj/i","ok":false,"detail":{"text":"L LabourMarket AI Kurią dieną ir kiek laiko dirbai? Parašyk, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“.","chips":[]}}
+{"check":"[A6] work-history form opens with the title /suvirintoj/i","ok":false,"detail":null}
+{"leg":"followup-person","sentence":"remontuoju automobilius","text":"","results":0,"firstAnswerMs":-1,"chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[A7] 'remontuoju automobilius' answers (not the menu)","ok":false,"detail":""}
+{"check":"[A7] answer reads /paslaug/i","ok":false,"detail":{"text":"","chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"]}}
+{"check":"[A7] chip /paslaug/i","ok":false,"detail":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"]}
+{"leg":"followup_person_failed_requests","failed":[],"worker":[]}
+{"leg":"followup-company","sentence":"ieškau darbo","text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","results":0,"firstAnswerMs":7684,"chips":[],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[G1] 'ieškau darbo' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai."}
+{"check":"[G1] answer reads /asmenin/i","ok":false,"detail":{"text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":[]}}
+{"check":"[G1] chip /Asmeninė erdvė/i","ok":false,"detail":[]}
+{"check":"[G1] no search result rendered in the company context","ok":true,"detail":0}
+{"check":"[G1] no need form opened","ok":true,"detail":null}
+{"leg":"followup-company","sentence":"remontuoju automobilius","text":"L LabourMarket AI Nesu tikras, ar kažką siūlote, ar ko nors ieškote. Parašykite, ką turite arba ko reikia. Programos ir grupės Kandidatai Projektai","results":0,"firstAnswerMs":4781,"chips":["Programos ir grupės","Kandidatai","Projektai"],"form":null,"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[G2] 'remontuoju automobilius' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Nesu tikras, ar kažką siūlote, ar ko nors ieškote. Parašykite, ką turite arba ko reikia. Programos ir grupės Kandidatai Projektai"}
+{"check":"[G2] answer reads /paslaug/i","ok":false,"detail":{"text":"L LabourMarket AI Nesu tikras, ar kažką siūlote, ar ko nors ieškote. Parašykite, ką turite arba ko reikia. Programos ir grupės Kandidatai Projektai","chips":["Programos ir grupės","Kandidatai","Projektai"]}}
+{"check":"[G2] chip /paslaug/i","ok":false,"detail":["Programos ir grupės","Kandidatai","Projektai"]}
+{"check":"[G2] no need form opened","ok":true,"detail":null}
+{"leg":"followup-company","sentence":"reikia buhalterio paslaugų","text":"","results":0,"firstAnswerMs":1059,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":""},"title":null,"availableFrom":null,"flowOpen":false,"notes":null}
+{"check":"[G3] 'reikia buhalterio paslaugų' answers (not the menu)","ok":false,"detail":""}
+{"check":"[G3] answer reads /paslaug/i","ok":false,"detail":{"text":"","chips":["Tęsti","Atšaukti"]}}
+{"check":"[G3] chip /Rasti paslaugą/i","ok":false,"detail":["Tęsti","Atšaukti"]}
+{"check":"[G3] no need form opened","ok":false,"detail":{"role":"","teamSize":"","startDate":"","location":""}}
+{"leg":"followup_company_failed_requests","failed":[]}
+{"result":"PASS","failed":[],"measureOnly":true}
