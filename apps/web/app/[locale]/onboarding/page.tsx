@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
+import { readLandingHandoff } from "@/lib/onboarding/landing-handoff";
 
 /** Unified onboarding shell. Role is picked here (Step 1), so we no longer
  *  pre-read active_role. Display name is prefilled from the auth identity:
@@ -27,6 +28,11 @@ export default async function OnboardingPage({
   // first-time registration — onboarding completion returns to it.
   const { next } = await searchParams;
   const safeNext = isSafeReturnPath(next) ? (next as string) : null;
+  // The landing sentence (`/dashboard?say=…` inside `next`) becomes the
+  // wizard's DEFAULTS — the family the router read is pre-ticked and a
+  // profession the sentence names is pre-chosen. Read on the server: the
+  // recogniser's lexicon never ships in the wizard's client bundle.
+  const handoff = readLandingHandoff(safeNext);
 
   const supabase = await createClient();
   const {
@@ -110,6 +116,9 @@ export default async function OnboardingPage({
           defaultName={defaultName}
           returnTo={safeNext}
           educationTypeOptions={educationTypeOptions}
+          saidSentence={handoff.sentence || null}
+          defaultIntents={handoff.intents}
+          defaultProfessionSlug={handoff.professionSlug}
         />
       </main>
     </div>

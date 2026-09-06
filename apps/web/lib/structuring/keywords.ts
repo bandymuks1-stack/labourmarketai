@@ -2236,6 +2236,13 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   {
     slug: "auto_mechanic",
     needles: [
+      // The bare "mechanikas" is how a workshop owner says it ("autoservisui
+      // reikia 2 mechanikų", real-user walk 2026-09-06); this is the only
+      // mechanic profession in the catalogue, and every hit is a suggestion
+      // the person confirms, never a persisted fact.
+      "mechanik",
+      "mechanic",
+      "механик",
       "automechanik",
       "autosaltkalv",
       "autošaltkalv",

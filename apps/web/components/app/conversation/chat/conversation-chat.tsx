@@ -47,6 +47,12 @@ import {
   getCompanyForm,
 } from "@/lib/conversation/company-forms";
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
+import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
+import {
+  educationQuestionKind,
+  isEducationQuestionKind,
+  type EducationQuestionKind,
+} from "@/lib/conversation/education-question";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
@@ -180,8 +186,13 @@ function PersonalWorkspaceIntroStream({
  */
 /** Which of the institution's commands a "programmes" sentence asks for —
  *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" {
+function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
   const q = (text ?? "").toLowerCase();
+  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
+  // fits, what skills are missing, where to do practice) is answered from the
+  // institution's real reads — never routed to the owner's own worker answer.
+  const question = educationQuestionKind(q);
+  if (question) return question;
   if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
   const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
   if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
@@ -795,6 +806,10 @@ export function ConversationChat({
   /** V9 value-intent: slug → localized work-type label for honest readbacks
    *  and demand-form prefill (the ONE taxonomy label map, not a new list). */
   const workTypeLabels = useMemo(() => buildWorkTypeLabelMap(locale), [locale]);
+  /** The ONE profession catalogue (49 rows, `professions.json`) — the role
+   *  label offered when a sentence names a profession outside the closed
+   *  work-type set ("reikia 2 mechanikų" → "Automechanikas"). */
+  const tProfessions = useTranslations("professions");
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
   const tRelationships = useTranslations("relationshipTypes");
@@ -965,8 +980,12 @@ export function ConversationChat({
     },
     [pushMessage, persistTurn],
   );
+  /** True once the person has sent their first message — the opening brief
+   *  (a slow read) must never land AFTER it and take the answer's chip row. */
+  const userSpokeRef = useRef(false);
   const user = useCallback(
     (text: string) => {
+      userSpokeRef.current = true;
       pushMessage({ id: nid(), role: "user", kind: "text", text });
       persistTurn("user", text);
     },
@@ -1344,6 +1363,12 @@ export function ConversationChat({
     (identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief())
       .then((brief) => {
         if (brief.kind !== "brief") return; // honest: nothing to report
+        // The brief is a slow read. On production (2026-09-06) it landed
+        // AFTER the person's first sentence and took the answer's chip row —
+        // the worker who asked "kas man trūksta?" saw the brief's chips, not
+        // the answer's. Once the person has spoken, their question owns the
+        // thread; the brief's items keep surfacing through Attention.
+        if (userSpokeRef.current) return;
         pushMessage({
           id: nid(),
           role: "assistant",
@@ -3335,13 +3360,48 @@ export function ConversationChat({
   );
 
   const runEducationProgrammes = useCallback(
-    (mode: "list" | "create" | "cohort" | "assign", programId?: string) => {
+    (mode: "list" | "create" | "cohort" | "assign" | EducationQuestionKind, programId?: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
           assistant(fallbackText, starterChips);
         }
+        return;
+      }
+      if (isEducationQuestionKind(mode)) {
+        // The institution's QUESTION about its students (window 6, lane C):
+        // answered from its real reads (outcomes) or the stated privacy
+        // boundary — localised in the education adapter, same degraded
+        // kinds as the programmes read. Never the owner's own worker answer.
+        setTyping(true);
+        loadEducationAnswerForChat(mode)
+          .then((res) => {
+            setTyping(false);
+            if (res.kind === "no-company") {
+              assistant(labels.engagementsNoCompany, workspaceChips);
+              return;
+            }
+            if (res.kind === "not-institution") {
+              assistant(labels.eduNotInstitution, [
+                { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
+              ]);
+              return;
+            }
+            if (res.kind !== "ok") {
+              assistant(res.line, [
+                { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+              ]);
+              return;
+            }
+            assistant(res.lines.join("\n"), educationChips);
+          })
+          .catch(() => {
+            setTyping(false);
+            assistant(labels.eduUnavailable, [
+              { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+            ]);
+          });
         return;
       }
       if (mode === "create") {
@@ -4004,6 +4064,14 @@ export function ConversationChat({
       const out: Record<string, string | boolean> = { description: original };
       const roleLabel = v.workType ? workTypeLabels[v.workType] : undefined;
       if (roleLabel) out.role = roleLabel;
+      // Real-user walk 2026-09-06: "mano autoservisui reikia 2 mechanikų"
+      // opened the form with the role EMPTY. When the closed work-type set
+      // misses but the profession lexicon hits, the person reads the
+      // profession's name in the field and confirms or edits it — a
+      // suggestion (§7), never a canonical column set behind their back.
+      else if (v.professionSlug && tProfessions.has(v.professionSlug)) {
+        out.role = tProfessions(v.professionSlug as never);
+      }
       // The structurer already read the country out of the sentence; without
       // this the form asked for a location the person had just given. The NAME
       // goes in, never the ISO code — the field is something they are about to
@@ -4031,7 +4099,7 @@ export function ConversationChat({
       }
       return out;
     },
-    [workTypeLabels, countryLabels],
+    [workTypeLabels, countryLabels, tProfessions],
   );
 
   /** V10 §36: the LAST value interpretation, held for explicit corrections.

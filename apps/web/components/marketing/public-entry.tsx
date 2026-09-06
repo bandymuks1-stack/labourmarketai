@@ -58,7 +58,17 @@ const QUESTION_CHIPS = ["work", "hire"] as const satisfies readonly FirstRunInte
 
 /** The example sentences under the field, keyed for i18n. Each is routed
  *  LIVE through the same router when tapped — nothing here is pre-answered. */
-const EXAMPLE_KEYS = ["hire", "work", "internship"] as const;
+const EXAMPLE_KEYS = [
+  "hire",
+  "work",
+  "internship",
+  // Window 6 (2026-09-06, gap G-D1): a professional worker, a service need
+  // and a service offer — the same live routing, no pre-answer. Each reading
+  // is pinned per locale in lib/marketing/public-entry.test.ts.
+  "professional",
+  "needService",
+  "offerService",
+] as const;
 
 export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
   const t = useTranslations("landing.entry");

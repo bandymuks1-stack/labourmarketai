@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -12,6 +12,7 @@ import {
   reviewJournalEntry,
   type ReviewActionState,
 } from "@/lib/journal/review-actions";
+import type { QuickConfirmScope } from "@/lib/journal/quick-confirm-model";
 import { isTerminalStaleOutcome } from "@/lib/learning/learning-shared";
 import { formatUtcDate } from "@/lib/time/display";
 
@@ -21,9 +22,22 @@ export type QuickConfirmEntryView = {
   createdAt: string;
   originalText: string;
   recognizedNames: string[];
-  /** Declared-unverified skills the tap will verify — listed EXPLICITLY on
-   *  the card (no checkboxes, nothing hidden, nothing pre-checked). */
+  /** The skills the tap will verify — listed EXPLICITLY on the card (no
+   *  checkboxes, nothing hidden, nothing pre-checked). Scoped to the entry's
+   *  own linked skills when it has links (quick-confirm-model.ts). */
   skills: { id: string; name: string }[];
+  /** Which rule produced `skills` — `skills_unavailable` is the named read
+   *  failure: the card says so instead of claiming "no unconfirmed skills". */
+  confirmScope: QuickConfirmScope;
+};
+
+/** What a successful tap reports upward — the queue keeps it as a receipt
+ *  after the server re-render removes the confirmed entry from the list. */
+export type QuickConfirmReceipt = {
+  id: string;
+  workerName: string;
+  originalText: string;
+  verifiedSkills: number;
 };
 
 /**
@@ -33,7 +47,14 @@ export type QuickConfirmEntryView = {
  * legally meaningful manager decision: nothing fires automatically and the
  * reject path (short reason) sits right next to the confirm.
  */
-export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
+export function QuickConfirmCard({
+  entry,
+  onConfirmed,
+}: {
+  entry: QuickConfirmEntryView;
+  /** Called once when the tap succeeds (see QuickConfirmReceipt). */
+  onConfirmed?: (receipt: QuickConfirmReceipt) => void;
+}) {
   const t = useTranslations("journal");
   const locale = useLocale();
   const [rejecting, setRejecting] = useState(false);
@@ -52,6 +73,22 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
   const pending = confirmPending || rejectPending;
   const confirmed = confirmState?.ok === true;
   const rejected = rejectState?.ok === true;
+  const verifiedSkills = confirmState?.ok === true ? confirmState.verifiedSkills : 0;
+
+  // Report the success upward exactly once. The action revalidates the route,
+  // so the server re-render drops this entry from the queue and unmounts the
+  // card — the receipt must live in the parent to stay on screen.
+  const reported = useRef(false);
+  useEffect(() => {
+    if (!confirmed || reported.current) return;
+    reported.current = true;
+    onConfirmed?.({
+      id: entry.id,
+      workerName: entry.workerName,
+      originalText: entry.originalText,
+      verifiedSkills,
+    });
+  }, [confirmed, verifiedSkills, entry.id, entry.workerName, entry.originalText, onConfirmed]);
 
   // Report the failure of the action the manager MOST RECENTLY submitted.
   // `useActionState` keeps both results independently and neither is ever
@@ -139,6 +176,7 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
     <li
       className="card-border flex flex-col gap-3 p-4"
       data-testid={`quick-confirm-card-${entry.id}`}
+      data-confirm-scope={entry.confirmScope}
     >
       {/* WHO + WHEN — one glance. */}
       <div className="flex items-baseline justify-between gap-3">
@@ -188,6 +226,13 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
             ))}
           </div>
         </div>
+      ) : entry.confirmScope === "skills_unavailable" ? (
+        <p
+          className="text-meta text-state-warning"
+          data-testid={`quick-skills-unavailable-${entry.id}`}
+        >
+          {t("inbox.quick.skillsUnavailable")}
+        </p>
       ) : (
         <p className="text-meta text-text-muted">
           {t("inbox.quick.entryOnlyNote")}

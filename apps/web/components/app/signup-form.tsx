@@ -285,8 +285,11 @@ export function SignupForm({
         </p>
       </header>
 
-      {/* GDPR Art. 13 first-layer notice must be visible BEFORE the Google
-          button is pressed — the Google path collects account data too. */}
+      {/* GDPR Art. 13 first-layer notice, rendered ONCE and before the first
+          account-creating control (the Google path collects account data
+          too); the e-mail form below is read past it in document order. A
+          second copy above the submit used to render — a real person read the
+          same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
       <AuthLegalNotice variant="signup" />
 
       <GoogleButton
@@ -382,10 +385,6 @@ export function SignupForm({
         />
       </label>
 
-      <p className="rounded-md border border-state-warning/40 px-3 py-2 text-xs leading-relaxed text-state-warning">
-        {t("disclaimer")}
-      </p>
-
       {error && (
         // The already-registered case is the most common reason an owner
         // bounces back here ("I registered yesterday — why am I not in?").
@@ -409,11 +408,6 @@ export function SignupForm({
         </div>
       )}
 
-      {/* Repeated above the submit so the notice is on-screen at the moment
-          the email/password form is submitted — the top instance can be a
-          full viewport away on mobile. */}
-      <AuthLegalNotice variant="signup" />
-
       <div className="flex items-center justify-between">
         <Button type="submit" disabled={disabled}>
           {disabled ? t("signing") : t("submit_label")}
@@ -432,6 +426,12 @@ export function SignupForm({
           </Link>
         </span>
       </div>
+
+      {/* Pilot-feedback line: one quiet sentence under the action, not a
+          warning box between the fields and the button. */}
+      <p className="text-xs leading-relaxed text-text-muted" data-testid="signup-pilot-line">
+        {t("disclaimer")}
+      </p>
     </form>
   );
 }

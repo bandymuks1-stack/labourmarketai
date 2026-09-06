@@ -192,7 +192,9 @@ const RULES: IntentRule[] = [
       // Owner contract 2026-09-04 §16 — the bare question "what am I
       // missing?" names no domain; the answer compares skills AND the
       // required documents of the countries the person wants to work in.
-      p("^\\s*(ko|ką)\\s+(man\\s+)?tr[ūu]ksta\\s*\\??\\s*$", 6),
+      // "kas man trūksta?" is how people actually ask it (real-user walk
+      // 2026-09-06: three runs, every one rescued only by the proposer).
+      p("^\\s*(ko|ką|kas)\\s+(man\\s+)?tr[ūu]ksta\\s*\\??\\s*$", 6),
       p("^\\s*what\\s+am\\s+i\\s+(missing|lacking)\\s*\\??\\s*$", 6),
       p("^\\s*чего\\s+(мне\\s+)?не\\s+хватает\\s*\\??\\s*$", 6),
       p("^\\s*was\\s+fehlt(\\s+mir)?(\\s+noch)?\\s*\\??\\s*$", 6),
@@ -508,6 +510,18 @@ const RULES: IntentRule[] = [
       // handler reads the sentence's verb to pick the form or the list.
       p("(priskir|assign|zuweis|toewijz|назнач|zapisz)\\w*\\s*.{0,24}(student|mokin|learner|schüler|leerling|студент|учащ)\\w*\\s*.{0,24}(grup|kohort|cohort|groep|gruppe|групп|поток)", 8),
       p("(parodyk|rodyk|show|zeig|toon|покажи|список)\\s*.{0,12}(program|grup|kohort|cohort|opleiding|программ|групп)", 6),
+      // Window 6 (lane C, prod walk 2026-09-06): the questions a lecturer asks
+      // ABOUT THEIR STUDENTS — "kokių įgūdžių trūksta mano studentams?",
+      // "kurie studentai tinka šiam darbdaviui?", "kur mano studentai gali
+      // atlikti praktiką?", "rodyk programos rezultatus" — fell to the
+      // WORKER handlers (the owner's own skill gap, a message to an employer,
+      // the owner's own internship search). "My students" is the institution
+      // speaking; the handler reads the question and answers from the
+      // institution's real reads (outcomes) or states the privacy boundary.
+      p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|моих|наши|наших)\\s+(student|mokin|besimokan|learner|schüler|leerling|студент|учащ)", 9),
+      p("(kurie|kuris|which|welche|welke|какие|кто\\s+из)\\s+(student|mokin|besimokan|learner|schüler|leerling|студент|учащ)", 9),
+      p("(student|mokin|besimokan|learner|absolvent|schüler|leerling|студент|program|opleiding|программ)\\w*\\s*.{0,24}(rezultat|outcome|result|ergebnis|resultat|uitkomst|результат)", 8),
+      p("(rezultat|outcome|result|ergebnis|resultat|uitkomst|результат)\\w*\\s*.{0,24}(student|mokin|besimokan|learner|absolvent|schüler|leerling|студент|program|opleiding|программ)", 8),
     ],
   },
   {

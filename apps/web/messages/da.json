@@ -3833,6 +3833,10 @@
       "eduAssignDone": "Elev tildelt holdet.",
       "eduNotInstitution": "Denne organisation er endnu ikke markeret som uddannelsesinstitution. Marker det i virksomhedsafsnittet.",
       "eduUnavailable": "Programmer kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "eduOutcomesConnected": "Tilknyttede studerende: {count}.",
+      "eduOutcomesUnavailable": "Resultaterne kan ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "eduStudentsPrivacy": "Institutionen ser ikke de studerendes færdigheder, dokumenter eller journal — det er deres egne data. Du ser deltagelse og resultattal; hvem der passer, ser arbejdsgiveren selv for sit eget behov.",
+      "eduPracticeHow": "Praktikpladser slås op af arbejdsgivere: en partner opretter en virksomhedskonto og slår et behov op med typen \"praktik\" (ét behov gratis). Dine studerende ser det på deres tavle, når arbejdsgiveren er verificeret.",
       "eduNext": "Hvad nu?",
       "chipCreateProgramme": "Opret program",
       "chipCreateCohort": "Opret hold",
@@ -4240,11 +4244,12 @@
     },
     "cta": {
       "title": "Start der, hvor du er",
-      "subcopy": "Fire døre ind til samme platform — vælg din.",
+      "subcopy": "Fem døre ind til samme platform — vælg din.",
       "worker": "Jeg er arbejdstager",
       "employer": "Jeg er arbejdsgiver",
       "agency": "Jeg repræsenterer et bureau",
-      "partner": "Jeg vil være partner"
+      "partner": "Jeg vil være partner",
+      "institution": "Jeg repræsenterer en skole eller et universitet"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",
@@ -4464,6 +4469,11 @@
       "unsupportedDimension": "Jeg kan endnu ikke filtrere efter {dimension}.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
+      "internshipChooseDirection": "Vælg først en arbejdsretning — uden den kan praktiksøgningen ikke indsnævres.",
+      "internshipAskInstitution": "Spørg din uddannelsesinstitution ({institution}): den ser programmets efterspørgsel på markedet og kan invitere en arbejdsgiver til at slå en praktikplads op.",
+      "internshipCompass": "Kompasset viser, hvad der passer til dig nu, og hvad der mangler.",
+      "chipChooseDirection": "Vælg retning",
+      "chipAllOpportunities": "Alle muligheder",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
       "skillGapLine": "[EN] — {skill}: required by {demands} of them",
       "skillGapNone": "[EN] Nothing is missing: you hold every skill the {demands} visible demands ask for.",

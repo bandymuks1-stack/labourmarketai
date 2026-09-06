@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Skills linked to this entry",
     "helper": "Mark the skills this entry shows — it builds your CV. Not reviewed yet.",
+    "helperConfirmedLinks": "Mark the skills this entry shows — it builds your CV.",
     "saving": "Saving…",
     "saved": "Saved",
     "error": "Could not save. Please try again.",
@@ -3809,12 +3810,12 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; in the next step you'll say what you came for.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
-      "email_label": "Work email",
-      "email_placeholder": "name@company.com",
+      "email_label": "Email",
+      "email_placeholder": "name@example.com",
       "password_label": "Password",
       "password_help": "Min. 8 characters, 1 uppercase, 1 number, 1 special (!@#$%).",
       "confirm_password_label": "Confirm password",
@@ -3831,7 +3832,7 @@
       "error_password_number": "Password must include a number.",
       "error_password_special": "Password must include a special character.",
       "check_email_title": "Confirm your email",
-      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account. If you don't see it, check your spam folder — you can ask for a new link here.",
       "resend_label": "Send the link again",
       "resend_sent": "Sent again. Check your inbox and spam folder.",
       "resend_wait": "You can request another link in {seconds} s."
@@ -3900,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "What did you come here to do?",
         "intentNote": "Pick everything that applies — one account carries all of it. A person and an organisation are the two spaces; what you do inside them is up to you.",
+        "saidLabel": "You wrote:",
+        "saidHint": "We ticked what fits. Change it if needed.",
         "intent": {
           "work": {
             "title": "I'm looking for work",
@@ -3962,7 +3965,7 @@
         "note": "Skills start out waiting for review. Documents, your work journal and reviews from people make them stronger over time."
       },
       "display_name_label": "Display name",
-      "country_label": "Country",
+      "country_label": "Where do you live now?",
       "country_placeholder": "Select your country",
       "error_country_required": "Please choose a country.",
       "profession_label": "What work do you do?",
@@ -4678,7 +4681,7 @@
         },
         {
           "q": "How much does it cost workers?",
-          "a": "The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch."
+          "a": "Everything is free for individuals — your profile, matches, search and messaging never cost a worker anything. Paid plans exist only for organisations and are published on the pricing page."
         },
         {
           "q": "Who sees my profile?",
@@ -4776,7 +4779,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Pricing is announced at launch. Waitlist signups get early-access pricing."
+          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
         },
         {
           "q": "Can we filter by location?",
@@ -4874,7 +4877,7 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "Pricing is announced at launch; waitlist partners get early-access terms."
+          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
@@ -6236,6 +6239,18 @@
     "responded": "Responded",
     "requestedBy": "Requested by",
     "requesterFallback": "Member",
+    "discoverEmptyWhy": "This list fills only when members publish and activate their own services — there are no active ones yet.",
+    "discoverEmptyNext": "We do not send alerts about new services yet — check back later. If you offer services yourself, publish them: signed-in members find an active service here.",
+    "discoverFilteredEmpty": "No active services match this filter.",
+    "outgoingEmptyWhy": "You send a request from the active services list above — one tap.",
+    "incomingEmptyNoActive": "Requests arrive only for active services, and you have no active service yet.",
+    "incomingEmptyHasActive": "{count, plural, one {You have # active service} other {You have # active services}} — signed-in members find it in the list; nobody has sent a request yet.",
+    "filterCountry": "Country",
+    "filterCategory": "Category",
+    "filterApply": "Filter",
+    "filterClear": "Clear filter",
+    "responseNoteLabel": "Note to the requester (optional)",
+    "responseNotePlaceholder": "e.g. available from next month / no capacity right now",
     "newBadge": "new",
     "hubTitle": "Marketplace",
     "hubOffer": "Services I offer",
@@ -12432,6 +12447,10 @@
       "eduAssignDone": "Learner assigned to the cohort.",
       "eduNotInstitution": "This organization is not marked as a training institution yet. Mark it in the company section.",
       "eduUnavailable": "Programmes cannot be read right now. That does not mean there are none.",
+      "eduOutcomesConnected": "Connected students: {count}.",
+      "eduOutcomesUnavailable": "Outcomes cannot be read right now. That does not mean there are none.",
+      "eduStudentsPrivacy": "The institution does not see students' skills, documents or journal — that is their own data. You see participation and outcome counts; which people fit is what the employer sees for its own need.",
+      "eduPracticeHow": "Internships are posted by employers: a partner creates a company account and posts a need with the type “internship” (one need free). Your students see it on their board once the employer is verified.",
       "eduNext": "What next?",
       "chipCreateProgramme": "Create a programme",
       "chipCreateCohort": "Create a cohort",
@@ -13075,11 +13094,12 @@
     },
     "cta": {
       "title": "Start where you are",
-      "subcopy": "Four doors into the same platform — pick yours.",
+      "subcopy": "Five doors into the same platform — pick yours.",
       "worker": "I am a worker",
       "employer": "I am an employer",
       "agency": "I represent an agency",
-      "partner": "I want to become a partner"
+      "partner": "I want to become a partner",
+      "institution": "I represent a school, college or university"
     },
     "loop": {
       "chip": "Sample sequence — real product flow",
@@ -13191,8 +13211,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "Ask. See. Hire.",
-      "sub": "An AI labour-market operating system — conversation, map and result in one place."
+      "headline": "Show what you can do. Find where you are needed.",
+      "sub": "Real experience becomes a living profile, and your skills become real opportunities — for work, a service or an internship."
     },
     "entry": {
       "label": "Write what you need — in your own words",
@@ -13202,7 +13222,10 @@
       "examples": {
         "hire": "I need 12 scaffolders in Rotterdam",
         "work": "Looking for a job in Norway",
-        "internship": "Where can I do an internship?"
+        "internship": "Where can I do an internship?",
+        "professional": "I am an accountant looking for work in Vilnius",
+        "needService": "I need someone to fix the roof",
+        "offerService": "I offer bookkeeping services"
       },
       "understoodLabel": "Understood",
       "understood": {
@@ -13359,6 +13382,11 @@
       "unsupportedDimension": "I can't filter by {dimension} yet.",
       "noSuchValue": "I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
+      "internshipChooseDirection": "First choose a work direction — without it the internship search cannot narrow.",
+      "internshipAskInstitution": "Ask your institution ({institution}): it sees the programme's market demand and can invite an employer to post an internship.",
+      "internshipCompass": "The compass shows what fits you now and what is missing.",
+      "chipChooseDirection": "Choose a direction",
+      "chipAllOpportunities": "All opportunities",
       "skillGapIntro": "{count} required skills are missing from your profile. The ones asked for most:",
       "skillGapLine": "— {skill}: required by {demands} of them",
       "skillGapNone": "Nothing is missing: you hold every skill the {demands} visible demands ask for.",

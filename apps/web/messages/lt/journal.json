@@ -225,7 +225,10 @@
       "ackDone": "Bus patvirtintas ✓",
       "excludedNote": "{count, plural, =0 {Visos išimtys peržiūrėtos — bus patvirtintas visas sąrašas.} one {# įrašas su išimtimi NEBUS patvirtintas, kol jo nepažymėsi peržiūrėtu.} few {# įrašai su išimtimis NEBUS patvirtinti, kol jų nepažymėsi peržiūrėtais.} other {# įrašų su išimtimis NEBUS patvirtinti, kol jų nepažymėsi peržiūrėtais.}}",
       "outcomeNotAcknowledged": "nepatvirtinta — išimtis liko nepažymėta",
-      "outcomeBlocked": "nepatvirtinta ({code})"
+      "outcomeBlocked": "nepatvirtinta ({code})",
+      "receipt": "Patvirtinta: {title}",
+      "receiptSkills": "{count, plural, one {# įgūdis} few {# įgūdžiai} other {# įgūdžių}}",
+      "skillsUnavailable": "Įgūdžių sąrašo nepavyko nuskaityti — palietimas patvirtins tik patį įrašą."
     }
   },
   "listEmpty": "Kol kas neturite darbo įrašų — jūsų įrašai atsiras čia.",
