@@ -145,3 +145,93 @@ describe("market direction — every shipped locale can say it", () => {
     });
   }
 });
+
+/**
+ * THE DIRECTION RULE HAS TO HOLD IN SQL TOO, BECAUSE THAT IS WHERE IT BROKE.
+ *
+ * The TypeScript guards above pin the surfaces that read a row AFTER the
+ * database handed it over. They cannot see the two gated reads that decide
+ * WHICH rows are handed over at all, and both of those shipped without a
+ * `kind` filter:
+ *
+ *   list_open_demand_for_workers   9 rows served to every worker, 2 of them
+ *                                  agency OFFERS rendered as open jobs
+ *                                  (measured on production, fixed #1588)
+ *   list_open_demand_for_agencies  12 rows served to an agency, 2 of them
+ *                                  OTHER agencies' offers rendered as demand
+ *                                  it could staff (measured the same way)
+ *
+ * Both are SECURITY DEFINER, so they bypass RLS and their body IS the
+ * authorisation. A board whose whole meaning is one direction must state that
+ * direction in its own WHERE clause.
+ *
+ * These assertions read the migration that most recently defines each
+ * function — the one whose body is live — so replacing a board function
+ * without the predicate fails here rather than on a worker's screen.
+ */
+describe("market direction — the gated board reads state their direction in SQL", () => {
+  const MIGRATIONS = path.resolve(WEB, "..", "..", "supabase", "migrations");
+
+  /** Board reads: gated, cross-tenant, and directional by definition. */
+  const BOARD_FUNCTIONS = [
+    "list_open_demand_for_workers",
+    "list_open_demand_for_agencies",
+  ] as const;
+
+  /**
+   * The body of the migration that most recently defines `fn`. Migration
+   * filenames sort chronologically (doctrine §16), so the last match wins —
+   * that is the definition production is running.
+   */
+  function liveDefinitionOf(fn: string): { file: string; body: string } {
+    const files = fs
+      .readdirSync(MIGRATIONS)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    let found: { file: string; body: string } | null = null;
+    for (const file of files) {
+      const src = fs.readFileSync(path.join(MIGRATIONS, file), "utf8");
+      const at = src.indexOf(`create or replace function public.${fn}(`);
+      if (at === -1) continue;
+      found = { file, body: src.slice(at) };
+    }
+    if (!found) throw new Error(`no migration defines ${fn}`);
+    return found;
+  }
+
+  for (const fn of BOARD_FUNCTIONS) {
+    it(`${fn} filters on kind with a closed allow-list`, () => {
+      const { file, body } = liveDefinitionOf(fn);
+      // The allow-list, not a deny-list: `<> 'agency_offer'` would let the
+      // NEXT supply kind straight through, which is the whole defect class.
+      expect(
+        body,
+        `${file}: ${fn} does not filter on kind — supply reaches a demand board`,
+      ).toMatch(/cr\.kind is null or cr\.kind in \(/);
+      expect(body, `${file}: ${fn} uses a deny-list`).not.toMatch(
+        /kind\s*(?:<>|!=)\s*'agency_offer'/,
+      );
+      expect(body, `${file}: ${fn} admits a supply kind`).not.toMatch(
+        /cr\.kind in \([^)]*'agency_offer'/,
+      );
+    });
+
+    /**
+     * `create or replace function` keeps NONE of the properties the new
+     * definition omits — it re-defaults every one. Found the hard way: the
+     * first draft of #1588 declared only `security definer`, and the live
+     * function is STABLE, so applying it would have silently downgraded a
+     * read-only function to VOLATILE. A replace must restate everything.
+     */
+    it(`${fn} restates every property a replace would otherwise drop`, () => {
+      const { file, body } = liveDefinitionOf(fn);
+      const header = body.slice(0, body.indexOf("as $$"));
+      for (const prop of ["stable", "security definer", "set search_path"]) {
+        expect(
+          header.toLowerCase(),
+          `${file}: ${fn} omits "${prop}" — a replace re-defaults it`,
+        ).toContain(prop);
+      }
+    });
+  }
+});

@@ -1213,6 +1213,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // RED class, so it carries the acknowledgement marker and ships as a
       // DRAFT with needs-human-gate. NOT applied; owner approval pending.
       "20260906140000_worker_board_excludes_supply_v1.sql",
+      // 2026-09-06: the SAME defect on the agency board — found by sweeping
+      // every SECURITY DEFINER reader of customer_requests for a body that
+      // never mentions `kind`. list_open_demand_for_agencies served an agency
+      // 12 rows, 2 of them OTHER agencies' offers presented as demand it could
+      // staff. RED class (SECURITY DEFINER body replace).
+      "20260906200000_agency_board_excludes_supply_v1.sql",
 ]);
   });
 
