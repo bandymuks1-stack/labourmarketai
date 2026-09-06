@@ -100,7 +100,7 @@ export default async function DashboardHomePage({
       <section
         data-testid="dashboard-profile-read-failed"
         role="status"
-        className="mx-auto flex min-h-[60dvh] w-full max-w-md flex-col items-center justify-center gap-4 px-4 py-16 text-center"
+        className="mx-auto flex min-h-[60dvh] w-full max-w-content flex-col items-center justify-center gap-4 px-4 py-16 text-center"
       >
         <p className="text-sm text-text-primary">{tRead("body")}</p>
         <p className="text-xs text-text-secondary">{tRead("choose")}</p>
