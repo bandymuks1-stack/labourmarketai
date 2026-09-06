@@ -798,7 +798,10 @@ describe("NO new DB migration in this PR", () => {
     // agency SUPPLY offers (kind='agency_offer') were served to every worker
     // as open jobs — measured 2 of 9 rows on production. RED class
     // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
-expect(count).toBeLessThanOrEqual(267);
+    // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06) —
+    // the fifth surface of the market-direction defect class, found by
+    // sweeping every SECURITY DEFINER reader of customer_requests.
+    expect(count).toBeLessThanOrEqual(268);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

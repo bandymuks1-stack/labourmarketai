@@ -2381,7 +2381,12 @@ describe("no migration files added by this sprint", () => {
     // agency SUPPLY offers (kind='agency_offer') were served to every worker
     // as open jobs — measured 2 of 9 rows on production. RED class
     // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
-const SPRINT_BASELINE = 267;
+    // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06):
+    // list_open_demand_for_agencies had no `kind` filter either, so an agency
+    // browsing for work to staff was served OTHER agencies' offers as demand —
+    // measured on production as 2 of 12 rows, through the real RPC under the
+    // agency's own auth. RED class (SECURITY DEFINER body replace).
+const SPRINT_BASELINE = 268;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
