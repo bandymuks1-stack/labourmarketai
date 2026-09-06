@@ -3813,8 +3813,8 @@
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
-      "email_label": "Geschäftliche E-Mail-Adresse",
-      "email_placeholder": "name@company.com",
+      "email_label": "E-Mail-Adresse",
+      "email_placeholder": "name@beispiel.de",
       "password_label": "Passwort",
       "password_help": "Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen (!@#$%).",
       "confirm_password_label": "Passwort bestätigen",
@@ -3831,7 +3831,7 @@
       "error_password_number": "Das Passwort muss eine Zahl enthalten.",
       "error_password_special": "Das Passwort muss ein Sonderzeichen enthalten.",
       "check_email_title": "E-Mail bestätigen",
-      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen.",
+      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen. Keine E-Mail? Prüfe den Spam-Ordner — einen neuen Link kannst du hier anfordern.",
       "resend_label": "Link erneut senden",
       "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
       "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
@@ -3900,6 +3900,8 @@
       "rolePicker": {
         "intentHeading": "Wofür sind Sie hier?",
         "intentNote": "Wählen Sie alles Zutreffende — ein Konto trägt alles. Person und Organisation sind die zwei Räume; was Sie darin tun, entscheiden Sie.",
+        "saidLabel": "Sie haben geschrieben:",
+        "saidHint": "Wir haben angekreuzt, was passt. Ändern Sie es bei Bedarf.",
         "intent": {
           "work": {
             "title": "Ich suche Arbeit",

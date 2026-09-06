@@ -1,0 +1,7 @@
+{"step":"health","build":"def1e185"}
+{"step":"google_button","present":0,"label":"Tęsti su Google"}
+{"step":"google_door","ms":5809,"host":"accounts.google.com","path":"/v3/signin/identifier","hasClientId":true,"redirectUri":"https://gorgitwvdzxbnaxhrsrw.supabase.co/auth/v1/callback","title":"Prisijungti – „Google“ paskyros"}
+{"step":"forgot_form","text":"Pamiršai slaptažodį? Įvesk savo el. paštą ir atsiųsime nuorodą slaptažodžiui atkurti. El. paštas Siųsti nuorodą Grįžti į prisijungimą","scrollW":390}
+{"step":"forgot_after_submit","text":"✓ Patikrink savo el. paštą Jei e2e-join-2026-09-06@labourmarket.ai turi paskyrą, išsiuntėme slaptažodžio atkūrimo nuorodą. Grįžti į prisijungimą"}
+{"step":"reset_page_no_token","url":"/lt/auth/reset-password","text":"Nuoroda negalioja Ši slaptažodžio atkūrimo nuoroda negalioja arba baigėsi jos galiojimas. Prašyti naujos nuorodos"}
+{"result":"STAGE3_DONE"}
