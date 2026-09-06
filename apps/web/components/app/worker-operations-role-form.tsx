@@ -339,7 +339,11 @@ export function WorkerOperationsRoleForm({
           - bridgeReady → interactive enable/disable toggle.
           - otherwise → visibly disabled with the exact blocker note. */}
       <div className="mt-1 flex flex-col gap-1 border-t border-ink-700 pt-2">
-        <div className="flex items-center gap-2 text-meta text-text-muted">
+        {/* A <label>, not a <div>: the 13x13 native box was the whole tap
+            area on phones (measured 2026-09-06); the label is the tap area
+            and carries the mobile floor (globals.css). State itself is
+            changed by the toggle button below, exactly as before. */}
+        <label className="flex items-center gap-2 text-meta text-text-muted">
           <input
             type="checkbox"
             checked={bridge.reviewActive}
@@ -349,7 +353,7 @@ export function WorkerOperationsRoleForm({
             data-testid={`worker-ops-review-toggle-${workerId}`}
           />
           <span>{labels.review.toggleLabel}</span>
-        </div>
+        </label>
 
         {/* Owner provisioning button — only when a reviewer role is set but no
             real engagement link exists yet. */}
