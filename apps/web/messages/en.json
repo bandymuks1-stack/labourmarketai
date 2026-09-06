@@ -12368,6 +12368,15 @@
       "marketMapChip": "Market map",
       "activityChip": "Activity",
       "employerBridgeHint": "You can post this as your company — I will open the need form.",
+      "professionStatement": {
+        "understood": "Understood: {label}.",
+        "inCatalogue": "I can set that as your profession in your profile — then the list shows your market.",
+        "notInCatalogue": "That profession is not in the selectable list yet — record it in your work history in your own words: it shows on your card and CV.",
+        "pastJob": "Understood: {label}. Let's record it in your work history — the title is already filled in; complete the rest.",
+        "readBesideSearch": "Understood: {label}. Once the profession is in your profile, the list shows your market instead of every listing.",
+        "chipSetProfession": "Set profession",
+        "chipRecordExperience": "Record work history"
+      },
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
       "chipServiceRequests": "Find a service",
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",

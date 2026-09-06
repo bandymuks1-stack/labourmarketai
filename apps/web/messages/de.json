@@ -12368,6 +12368,15 @@
       "marketMapChip": "Marktkarte",
       "activityChip": "Aktivität",
       "employerBridgeHint": "Das kannst du als dein Unternehmen einstellen — ich öffne das Bedarfsformular.",
+      "professionStatement": {
+        "understood": "Verstanden: {label}.",
+        "inCatalogue": "Ich kann das als deinen Beruf im Profil eintragen — dann zeigt die Liste deinen Markt.",
+        "notInCatalogue": "Diesen Beruf gibt es in der Auswahlliste noch nicht — trage ihn mit deinen eigenen Worten in den Werdegang ein: er erscheint auf deiner Karte und im CV.",
+        "pastJob": "Verstanden: {label}. Tragen wir das in den Werdegang ein — der Titel ist schon ausgefüllt, ergänze den Rest.",
+        "readBesideSearch": "Verstanden: {label}. Sobald der Beruf im Profil steht, zeigt die Liste deinen Markt statt aller Anzeigen.",
+        "chipSetProfession": "Beruf festlegen",
+        "chipRecordExperience": "Werdegang eintragen"
+      },
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
       "chipServiceRequests": "Leistung finden",
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",

@@ -3772,6 +3772,15 @@
       "engagementsNoCompany": "Pašlaik tu nerīkojies organizācijas vārdā, tāpēc nav saraksta, ko parādīt.",
       "engagementsUnavailable": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav.",
       "employerBridgeHint": "To vari publicēt kā savs uzņēmums — atvēršu pieprasījuma formu.",
+      "professionStatement": {
+        "understood": "Sapratu: {label}.",
+        "inCatalogue": "Varu to iestatīt kā jūsu profesiju profilā — tad saraksts rādīs jūsu tirgu.",
+        "notInCatalogue": "Šādas profesijas izvēles sarakstā vēl nav — ierakstiet to saviem vārdiem darba pieredzē: tā būs redzama jūsu kartītē un CV.",
+        "pastJob": "Sapratu: {label}. Ierakstīsim to darba pieredzē — nosaukums jau ir aizpildīts, aizpildiet pārējo.",
+        "readBesideSearch": "Sapratu: {label}. Kad profesija būs ierakstīta profilā, saraksts rādīs jūsu tirgu, nevis visus sludinājumus.",
+        "chipSetProfession": "Iestatīt profesiju",
+        "chipRecordExperience": "Ierakstīt darba pieredzi"
+      },
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
       "chipServiceRequests": "Atrast pakalpojumu",
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",

@@ -3772,6 +3772,15 @@
       "engagementsNoCompany": "Du handler ikke på vegne av en organisasjon nå, så det finnes ingen liste å vise.",
       "engagementsUnavailable": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen.",
       "employerBridgeHint": "Du kan legge dette ut som bedriften din — jeg åpner behovsskjemaet.",
+      "professionStatement": {
+        "understood": "Forstått: {label}.",
+        "inCatalogue": "Jeg kan sette det som yrket ditt i profilen — da viser listen markedet ditt.",
+        "notInCatalogue": "Det yrket finnes ikke i valglisten ennå — skriv det med egne ord i arbeidserfaringen din: det vises på kortet og CV-en din.",
+        "pastJob": "Forstått: {label}. La oss skrive det i arbeidserfaringen — tittelen er allerede fylt ut, fyll inn resten.",
+        "readBesideSearch": "Forstått: {label}. Når yrket står i profilen, viser listen markedet ditt i stedet for alle annonser.",
+        "chipSetProfession": "Angi yrke",
+        "chipRecordExperience": "Registrer arbeidserfaring"
+      },
       "serviceNeedHint": "Det er en jobb som skal gjøres — jeg viser deg hvem som tilbyr den tjenesten.",
       "chipServiceRequests": "Finn en tjeneste",
       "interestInboxAmbiguous": "Det kan bety to ting — hva vil du se?",

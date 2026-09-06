@@ -139,6 +139,7 @@ import {
   structureValueStatement,
   type ValueStatement,
 } from "@/lib/structuring/value-statement";
+import { readProfessionStatement } from "@/lib/structuring/role-label";
 import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -4026,6 +4027,15 @@ export function ConversationChat({
       else if (v.professionSlug && tProfessions.has(v.professionSlug)) {
         out.role = tProfessions(v.professionSlug as never);
       }
+      // Window 6 (production 2026-09-06): an accountant, a lawyer, an
+      // engineer, a designer, a project manager, a sales specialist — none
+      // is in either closed catalogue, and six of eleven employer sentences
+      // opened the form with the role EMPTY. The person's OWN word, in the
+      // nominative, is the honest free-text label; no canonical column is
+      // set from it (`workType` / `professionSlug` stay null).
+      else if (v.roleLabel) {
+        out.role = v.roleLabel;
+      }
       // The structurer already read the country out of the sentence; without
       // this the form asked for a location the person had just given. The NAME
       // goes in, never the ISO code — the field is something they are about to
@@ -4049,6 +4059,10 @@ export function ConversationChat({
           out.urgency = daysUntil(v.window.startIso) <= 7 ? "this_week" : "flexible";
         } else {
           out.urgency = v.window.kind === "next_month" ? "flexible" : "this_week";
+          // A coarse window ("kitą mėnesį", "kitą savaitę") has a first day:
+          // it goes into the editable start field as the suggestion it is
+          // (production 2026-09-06 left the start empty for "kitą mėnesį").
+          if (v.window.startIso) out.startDate = v.window.startIso;
         }
       }
       return out;
@@ -4333,7 +4347,69 @@ export function ConversationChat({
          * handler in the registry: one matching pipeline, one result surface,
          * no second stack.
          */
-        findWork: () => runWorkflow(() => runFindWork(text)),
+        findWork: () => {
+          // Window 6 (production 2026-09-06): "esu buhalteris, ieškau darbo"
+          // ran the search over an unnarrowed board and never read the
+          // profession the person had just stated. The search still runs;
+          // the ONE fact that would narrow the list is read back FIRST, with
+          // the door that records it — before any foreign listing (G-A1).
+          const stated = readProfessionStatement(text);
+          if (stated && identity !== "company") {
+            const label =
+              stated.professionSlug && tProfessions.has(stated.professionSlug)
+                ? tProfessions(stated.professionSlug as never)
+                : stated.label;
+            assistant(t("professionStatement.readBesideSearch", { label }), [
+              stated.professionSlug
+                ? { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }
+                : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
+            ]);
+          }
+          runWorkflow(() => runFindWork(text));
+        },
+        /**
+         * "esu buhalteris" / "dirbu inžinieriumi" / "dirbau projektų vadovu
+         * 5 metus" (window 6). The sentence is READ (`readProfessionStatement`,
+         * the same reader the router's pattern is built from) and answered
+         * with the doors that already exist: the profile screen sets a
+         * catalogue profession; work history takes any title in the person's
+         * own words (the honest carry for a profession the catalogue lacks);
+         * the board searches. A past-tense job opens the work-history form
+         * with the title already in it. Nothing is persisted here.
+         */
+        professionStatement: () => {
+          const stated = readProfessionStatement(text);
+          if (!stated) {
+            assistant(fallbackText, starterChips);
+            return;
+          }
+          const inCatalogue = Boolean(stated.professionSlug && tProfessions.has(stated.professionSlug));
+          const label = inCatalogue ? tProfessions(stated.professionSlug as never) : stated.label;
+          if (identity === "company") {
+            assistant(t("professionStatement.understood", { label }), [
+              { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") },
+            ]);
+            return;
+          }
+          if (stated.tense === "past") {
+            assistant(t("professionStatement.pastJob", { label }));
+            openForm("worker.add-work-history", undefined, undefined, { title: stated.label });
+            return;
+          }
+          assistant(
+            [
+              t("professionStatement.understood", { label }),
+              inCatalogue ? t("professionStatement.inCatalogue") : t("professionStatement.notInCatalogue"),
+            ].join("\n"),
+            [
+              ...(inCatalogue
+                ? [{ id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }]
+                : []),
+              { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
+              { id: "jobs", label: labels.chipJobs },
+            ],
+          );
+        },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal()),
         figures: () => runWorkflow(() => runFigures()),
@@ -4686,7 +4762,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**

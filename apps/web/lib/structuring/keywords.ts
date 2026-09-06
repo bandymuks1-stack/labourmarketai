@@ -2130,6 +2130,11 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
     slug: "software_developer",
     needles: [
       "programuotoj",
+      // "programinės įrangos kūrėjas" — the formal LT title an employer
+      // writes ("Reikia programinės įrangos kūrėjo", production 2026-09-06
+      // opened the need form with the role empty). Same profession.
+      "programinės įrangos",
+      "programines irangos",
       "разработчик",
       "программист",
       "developer",

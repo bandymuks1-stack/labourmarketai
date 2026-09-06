@@ -61,6 +61,7 @@ export type IntentAccess = "read" | "write" | "route" | "blocked";
  *  share one handler (one question, one engine — never two stacks). */
 export type IntentHandlerId =
   | "findWork"
+  | "professionStatement"
   | "skillGap"
   | "recentJournal"
   | "figures"
@@ -185,6 +186,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // V9/V10: reads the statement, runs channel discovery, renders honest
   // options — state only, nothing persisted.
   "offer-value": { domain: "value", access: "read", handler: "offerValue", ownTyping: false },
+  // "esu buhalteris" / "dirbau projektų vadovu 5 metus" — the person names
+  // their profession or a past job. Reads the sentence, offers the doors
+  // that already exist (profile, work history, the board); persists nothing.
+  "profession-statement": { domain: "profile", access: "read", handler: "professionStatement", ownTyping: false },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },

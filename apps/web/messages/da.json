@@ -3772,6 +3772,15 @@
       "engagementsNoCompany": "Du handler ikke på vegne af en organisation lige nu, så der er ingen liste at vise.",
       "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
       "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen.",
+      "professionStatement": {
+        "understood": "Forstået: {label}.",
+        "inCatalogue": "Jeg kan sætte det som dit erhverv i din profil — så viser listen dit marked.",
+        "notInCatalogue": "Det erhverv findes ikke på valglisten endnu — skriv det med dine egne ord i din erhvervserfaring: det vises på dit kort og dit CV.",
+        "pastJob": "Forstået: {label}. Lad os skrive det i din erhvervserfaring — titlen er allerede udfyldt, udfyld resten.",
+        "readBesideSearch": "Forstået: {label}. Når erhvervet står i din profil, viser listen dit marked i stedet for alle opslag.",
+        "chipSetProfession": "Angiv erhverv",
+        "chipRecordExperience": "Registrér erhvervserfaring"
+      },
       "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
       "chipServiceRequests": "Find en ydelse",
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",

@@ -12368,6 +12368,15 @@
       "marketMapChip": "Marktkaart",
       "activityChip": "Activiteit",
       "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
+      "professionStatement": {
+        "understood": "Begrepen: {label}.",
+        "inCatalogue": "Ik kan dat als je beroep in je profiel zetten — dan toont de lijst jouw markt.",
+        "notInCatalogue": "Dat beroep staat nog niet in de keuzelijst — zet het in je eigen woorden in je werkervaring: het verschijnt op je kaart en cv.",
+        "pastJob": "Begrepen: {label}. Laten we dat in je werkervaring zetten — de titel is al ingevuld, vul de rest aan.",
+        "readBesideSearch": "Begrepen: {label}. Zodra het beroep in je profiel staat, toont de lijst jouw markt in plaats van alle advertenties.",
+        "chipSetProfession": "Beroep instellen",
+        "chipRecordExperience": "Werkervaring vastleggen"
+      },
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",

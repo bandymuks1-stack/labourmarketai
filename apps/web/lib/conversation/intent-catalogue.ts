@@ -38,6 +38,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "need-workers": "a company needs workers: describe a demand / need",
   "need-service": "a company or person needs a service from the marketplace",
   "offer-value": "offer a service or value on the marketplace",
+  "profession-statement": "the person states their profession or a past job ('esu buhalteris', 'dirbau projektų vadovu 5 metus')",
   "company-overview": "overview of the company workspace",
   "create-organization": "create a company or organization",
   context: "which company or role the user is acting for (context readback)",

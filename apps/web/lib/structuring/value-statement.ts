@@ -21,6 +21,7 @@
 import { detectNeedProfession } from "@/lib/market/need-skills";
 import { PROFESSION_HINTS_LT } from "./keywords";
 import { foldText } from "./normalize";
+import { readRoleLabel } from "./role-label";
 import {
   WORK_TYPE_RULES,
   maskServiceNoun,
@@ -63,6 +64,15 @@ export interface ValueStatement {
    *  (the work type keeps precedence) or nothing matched. A suggestion the
    *  person confirms in the form, never a persisted fact by itself. */
   readonly professionSlug: string | null;
+  /** The occupation the person NAMED, in their own words and in the
+   *  nominative ("Reikia buhalterio" → "Buhalteris", "projektų vadovo" →
+   *  "Projektų vadovas") — carried whenever a seek sentence names an
+   *  occupation noun, so a profession OUTSIDE both closed catalogues still
+   *  reaches the need form's role field as an honest free-text label
+   *  (`workType` and `professionSlug` stay null: no pretended match).
+   *  Production 2026-09-06: six of eleven employer sentences lost their
+   *  role this way. */
+  readonly roleLabel: string | null;
   readonly skills: RecognizedSkill[];
   /** ISO-2 market code via the shared COUNTRY_RULES. */
   readonly country: string | null;
@@ -302,6 +312,9 @@ export function structureValueStatement(
     ? null
     : detectNeedProfession(maskServiceNoun(folded));
   if (professionSlug) reasons.push(`profession:${professionSlug}`);
+  const role = readRoleLabel(raw);
+  const roleLabel = role?.label ?? null;
+  if (roleLabel) reasons.push(`role_label:${roleLabel}`);
   const skills = recognizeSkills(raw);
   const { country, city } = resolveCountryAndCity(folded);
   if (country) reasons.push(`country:${country}`);
@@ -312,7 +325,13 @@ export function structureValueStatement(
       `window:${window.kind}${window.days ? `(${window.days}d)` : ""}`,
     );
   }
-  const headcount = detectHeadcount(raw, folded);
+  // A bare SINGULAR occupation after a seek verb ("restoranui reikia
+  // virėjo", "reikia buhalterio") is a need for ONE person — the number the
+  // grammar states, offered in the editable headcount field. A plural with
+  // no number ("reikia suvirintojų") stays open: the count is not stated.
+  const headcount =
+    detectHeadcount(raw, folded) ??
+    (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null);
   if (headcount !== null) reasons.push(`headcount:${headcount}`);
 
   // ── Subject — decided by axis + the facts, never by guessing the user ──
@@ -372,7 +391,9 @@ export function structureValueStatement(
       subject = "work_capacity";
     }
   } else if (axis === "seek") {
-    if (workType || headcount !== null) subject = "workforce";
+    // A named occupation — closed-set or the person's own word — is a
+    // workforce need even before the count is known.
+    if (workType || professionSlug || roleLabel || headcount !== null) subject = "workforce";
   }
   if (subject) reasons.push(`subject:${subject}`);
   if (quantity) reasons.push(`quantity:${quantity.raw}`);
@@ -410,6 +431,8 @@ export function structureValueStatement(
 
   const identifying =
     workType !== null ||
+    professionSlug !== null ||
+    roleLabel !== null ||
     goodsQuantity !== null ||
     headcount !== null ||
     skills.length > 0;
@@ -429,6 +452,7 @@ export function structureValueStatement(
     headcount,
     workType,
     professionSlug,
+    roleLabel,
     skills,
     country,
     city,

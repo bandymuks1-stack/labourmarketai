@@ -12368,6 +12368,15 @@
       "marketMapChip": "Rinkos žemėlapis",
       "activityChip": "Veikla",
       "employerBridgeHint": "Tai gali paskelbti kaip savo įmonė — atidarysiu poreikio formą.",
+      "professionStatement": {
+        "understood": "Supratau: {label}.",
+        "inCatalogue": "Galiu tai nustatyti kaip jūsų profesiją profilyje — tada sąrašas rodys jūsų rinką.",
+        "notInCatalogue": "Tokios profesijos pasirinkimų sąraše dar nėra — įrašykite ją į darbo patirtį savais žodžiais: ji matysis jūsų kortelėje ir CV.",
+        "pastJob": "Supratau: {label}. Įrašykime tai į darbo patirtį — pavadinimą jau įrašiau, likusius laukus užpildykite.",
+        "readBesideSearch": "Supratau: {label}. Kai profesija bus įrašyta profilyje, sąrašas rodys jūsų rinką, o ne visus skelbimus.",
+        "chipSetProfession": "Nustatyti profesiją",
+        "chipRecordExperience": "Įrašyti darbo patirtį"
+      },
       "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
       "chipServiceRequests": "Rasti paslaugą",
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",

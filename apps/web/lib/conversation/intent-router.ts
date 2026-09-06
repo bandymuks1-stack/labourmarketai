@@ -19,6 +19,15 @@
  * Pure module: no server-only imports, no IO — safe on client and trivially
  * unit-testable.
  */
+import {
+  OCCUPATION_STEM_SOURCE,
+  PROFESSION_STATEMENT_ANCHOR_SOURCE,
+  ROLE_NOUN_EXCLUSION_SOURCE,
+  ROLE_SUFFIX_GENITIVE_SOURCE,
+  ROLE_SUFFIX_INSTRUMENTAL_SOURCE,
+  ROLE_SUFFIX_NOMINATIVE_SOURCE,
+  SEEK_VERB_SOURCE,
+} from "@/lib/structuring/role-label";
 
 export type ConversationIntent =
   | "log-work" // "šiandien dirbau nuo 8 iki 17" — record a work-journal entry
@@ -73,6 +82,11 @@ export type ConversationIntent =
   //    capacity) — the structurer (lib/structuring/value-statement.ts)
   //    refines it; the router only opens the door. ─────────────────────────
   | "offer-value" // "turiu 30 kg agurkų ir noriu parduoti" / "turiu dvi laisvas dienas"
+  // ── PROFESSIONAL LANGUAGE (window 6, 2026-09-06): the person names their
+  //    profession or a past job — "esu buhalteris", "dirbu inžinieriumi",
+  //    "dirbau projektų vadovu 5 metus". Measured on production: the first
+  //    two answered nothing and the third opened the PROJECTS list. ────────
+  | "profession-statement"
   // ── AGENCY (real recruiter pilot, 2026-09-04). The first real recruiter
   //    typed "noriu pakviesti klientą" and got the generic fallback: the
   //    agency's whole vocabulary was missing here, although the canonical
@@ -1147,9 +1161,25 @@ const RULES: IntentRule[] = [
       p("\\b(some(one|body))\\s+to\\s+work\\b", 6),
       p("(кто|кого)-нибудь\\s*.{0,25}(работа)", 6),
       p(
-        "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|требу(ется|ются)|brauch(e|en)?|benötig|suche(n)?|zoek(en)?|nodig)\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa)",
+        "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|требу(ется|ются)|brauch(e|en)?|benötig|suche(n)?|zoek(en)?|nodig)\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa)",
         6,
       ),
+      // PROFESSIONAL LANGUAGE (window 6, 2026-09-06). The alternation above
+      // is the manual-trades vocabulary; "Reikia projektų vadovo." scored 0
+      // here and 3 on `projects` (the bare "projektų"), so an employer
+      // asking for a project manager was shown their project list. An
+      // occupation is recognised by its GRAMMAR — a seek verb followed by a
+      // noun in the genitive with an agentive suffix ("buhalterio",
+      // "inžinieriaus", "teisininko", "dizainerio", "specialisto") — or by a
+      // professional stem no catalogue row covers. The suffix, stem and
+      // exclusion sources are the SAME the value structurer reads
+      // (`lib/structuring/role-label.ts`): one vocabulary, nothing to drift.
+      // Generic person nouns and equipment ("kompiuterio") are excluded.
+      p(
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})[^\\s]*?(?:${ROLE_SUFFIX_GENITIVE_SOURCE})\\b`,
+        6,
+      ),
+      p(`(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(?:${OCCUPATION_STEM_SOURCE})`, 6),
     ],
   },
   {
@@ -1193,6 +1223,16 @@ const RULES: IntentRule[] = [
       p("\\biemand\\s*.{0,20}(repareren|schoonmaken|schilderen|installeren)", 6),
       // DE
       p("jemand(en)?\\s*.{0,20}(reparier|putz|streich|installier)", 6),
+      // A seek verb followed by the SERVICE itself — "reikia valymo
+      // paslaugų", "reikia automobilio remonto", "need a repair" — is a job
+      // to be done. A named TRADE ("reikia valytojo", "reikia dažytojo")
+      // carries no service stem and keeps its employer route above. Weight 7:
+      // "ieškau korepetitoriaus paslaugų" names both a person (the tutor,
+      // scoring 6 above) and the SERVICE — the service is what is asked for.
+      p(
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(?:paslaug|remont|valym|dazym|korepetitor|услуг|ремонт|уборк|\\bservices?\\b|\\bcleaning\\b|\\brepair)`,
+        7,
+      ),
     ],
   },
   {
@@ -1231,6 +1271,32 @@ const RULES: IntentRule[] = [
       p("\\bvacancy|vacature|vakans", 1),
       // "in the Netherlands / country" — a search location
       p("(nyderland|olandij|netherland|holland|нидерланд|deutschland|germanij)", 1),
+    ],
+  },
+  {
+    /**
+     * THE PERSON NAMES THEIR PROFESSION OR A PAST JOB (window 6, 2026-09-06).
+     *
+     * Measured on production ca96605b: "esu programuotojas", "esu
+     * dėstytojas" and "dirbu inžinieriumi" answered NOTHING (no intent), and
+     * "dirbau projektų vadovu 5 metus" — a person telling their work history
+     * — opened the projects list on the bare project stem. The sentence
+     * shapes are closed: "esu <occupation-nominative>", "dirbu / dirbau
+     * <occupation-instrumental>", "I am a <professional noun>", "я
+     * <profession>". A sentence that ALSO asks for work ("esu buhalteris,
+     * ieškau darbo") keeps `find-work` — the search runs and the chat reads
+     * the profession beside it — so the guard below excludes seek verbs.
+     * The suffix / stem / exclusion sources are shared with the reader in
+     * `lib/structuring/role-label.ts`.
+     */
+    intent: "profession-statement",
+    patterns: [
+      p(
+        // NB `[^]` (anything), never `[\s\S]`: pattern sources are lower-cased
+        // and `\S` would silently become `\s`.
+        `^(?![^]*(?:iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta))[^]*?\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE}))`,
+        6,
+      ),
     ],
   },
   {
