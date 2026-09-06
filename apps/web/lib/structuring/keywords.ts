@@ -1933,6 +1933,159 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     },
   ]),
 
+  // ── Office & professional catalogue (2026-09-06, window 6 G-D2) ──────────
+  //    Finance, legal, engineering/design, consulting, project management,
+  //    B2B sales, marketing. Seeded by
+  //    20260906120000_professions_catalogue_office_v1 (apply before merge).
+  //    Needles are the ACTIVITY stems a person writes in a journal line
+  //    ("rengiau sutartis", "skaičiavau darbo užmokestį", "dirbau su
+  //    AutoCAD") — never a bare everyday word ("budget", "seo", "smm").
+  ...asSector("finance_legal", [
+    {
+      slug: "financial-reporting",
+      needles: [
+        "finansine atskaitomyb", "finansinę atskaitomyb",
+        "finansines ataskait", "finansinės ataskait", "finansiniu ataskait",
+        "finansinių ataskait", "metine ataskait", "metinę ataskait",
+        "financial report", "financial statement",
+        "финансов отчет", "финансовую отчетност", "финансовой отчетност",
+      ],
+    },
+    {
+      slug: "payroll",
+      needles: [
+        "darbo uzmokes", "darbo užmokes",
+        "atlyginimu skaiciav", "atlyginimų skaičiav",
+        "skaiciavau atlyginim", "skaičiavau atlyginim",
+        "payroll",
+        "расчет зарплат", "расчёт зарплат", "начислял зарплат", "начисление зарплат",
+      ],
+    },
+    {
+      slug: "financial-analysis",
+      needles: [
+        "finansu analiz", "finansų analiz", "finansine analiz", "finansinę analiz",
+        "financial analysis", "financial analys",
+        "финансов анализ", "финансовый анализ",
+      ],
+    },
+    {
+      slug: "budgeting",
+      needles: [
+        "biudzet", "biudžet",
+        "budgeting", "budget plan", "prepared budget", "prepared the budget",
+        "бюджетиров", "составлял бюджет", "составление бюджет",
+      ],
+    },
+    {
+      slug: "tax-accounting",
+      needles: [
+        "mokesciu apskait", "mokesčių apskait",
+        "mokesciu deklarac", "mokesčių deklarac", "pvm deklarac",
+        "tax return", "tax accounting", "tax filing",
+        "налогов учет", "налоговый учёт", "налоговые деклар", "налоговую деклар",
+      ],
+    },
+    {
+      slug: "legal-advice",
+      needles: [
+        "teisines konsultac", "teisinės konsultac",
+        "teisini konsultav", "teisinį konsultav", "konsultavau teisin",
+        "teisine pagalb", "teisinę pagalb",
+        "legal advice", "legal counsel",
+        "юридическ консультац", "юридические консультац", "юридическую консультац",
+      ],
+    },
+    {
+      slug: "contract-drafting",
+      needles: [
+        "rengiau sutart", "parengiau sutart",
+        "sutarciu reng", "sutarčių reng", "sutarties reng",
+        "contract draft", "drafted contract", "drafting contract",
+        "drafted the contract",
+        "составлял договор", "составление договор", "подготовил договор",
+      ],
+    },
+  ]),
+  ...asSector("engineering_design", [
+    {
+      slug: "technical-design",
+      needles: [
+        "techninis projektav", "technini projektav", "techninį projektav",
+        "techninio projekt", "projektavau",
+        "technical design", "engineering design",
+        "проектировал", "техническое проектирован", "технического проектирован",
+      ],
+    },
+    {
+      slug: "cad-drafting",
+      needles: [
+        "autocad", "solidworks",
+        "cad brez", "cad brėž", "braizau cad", "braižiau cad",
+        "braizymas cad", "braižymas cad",
+        "cad drawing", "cad draft",
+        "чертил в cad", "чертеж в cad", "чертежи в cad",
+      ],
+    },
+    {
+      slug: "interior-design",
+      needles: [
+        "interjero dizain", "interjero projekt",
+        "interior design",
+        "дизайн интерьер", "дизайн-проект интерьер",
+      ],
+    },
+  ]),
+  ...asSector("business_management", [
+    {
+      slug: "business-consulting",
+      needles: [
+        "verslo konsultav", "verslo konsultac", "konsultavau versl",
+        "business consult",
+        "бизнес-консульт", "бизнес консульт", "консультировал бизнес",
+      ],
+    },
+    {
+      slug: "project-management",
+      needles: [
+        "projektu valdym", "projektų valdym",
+        "valdziau projekt", "valdžiau projekt", "vadovavau projekt",
+        "project management", "managed project", "managed the project",
+        "управлял проект", "управление проект", "руководил проект",
+      ],
+    },
+    {
+      slug: "digital-marketing",
+      needles: [
+        "skaitmenine rinkodar", "skaitmeninę rinkodar",
+        "google ads", "facebook ads", "seo optimiz", "seo kampan",
+        "socialiniu tinklu rinkodar", "socialinių tinklų rinkodar",
+        "digital marketing", "online marketing", "social media marketing",
+        "цифров маркетинг", "интернет-маркетинг", "таргетированн реклам",
+      ],
+    },
+    {
+      slug: "content-writing",
+      needles: [
+        "turinio kurim", "turinio kūrim",
+        "rasiau straipsn", "rašiau straipsn", "rasiau tekst", "rašiau tekst",
+        "copywrit", "content writ", "wrote article", "blog post",
+        "писал стать", "писал текст", "копирайт",
+      ],
+    },
+  ]),
+  ...asSector("retail_sales", [
+    {
+      slug: "b2b-sales",
+      needles: [
+        "b2b",
+        "pardavimai versl", "pardaviau versl", "verslo klient",
+        "b2b sales", "b2b-verkoop", "b2b-försäljning", "b2b-forsaljning",
+        "продажи b2b", "корпоративн клиент",
+      ],
+    },
+  ]),
+
 ];
 
 /** slug → sector for every first-class recognisable skill. When a slug appears
@@ -2136,6 +2289,14 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "systemutvecklare",
       "mjukvaruutvecklare",
       "programmerare",
+      // A software engineer is this row, not the generic `engineer` row
+      // (2026-09-06, office catalogue) — the longer needle wins.
+      "software engineer",
+      "programines irangos inzinier",
+      "programinės įrangos inžinier",
+      "инженер-программист",
+      "softwareentwickler",
+      "software-ingenieur",
     ],
   },
   { slug: "office_administrator", needles: ["administrator", "администратор"] },
@@ -2307,6 +2468,21 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "продавец",
       "sales assistant",
       "shop assistant",
+      // "pardavėjas konsultantas" is the shop-floor title, not a
+      // `consultant` (2026-09-06, office catalogue) — every inflected pair is
+      // longer than the bare "konsultant" needle, so this row wins.
+      "pardavejas konsultantas",
+      "pardavejo konsultanto",
+      "pardavejai konsultantai",
+      "pardaveju konsultantu",
+      "pardaveja konsultante",
+      "pardavejos konsultantes",
+      "pardavėjas konsultantas",
+      "pardavėjo konsultanto",
+      "pardavėjai konsultantai",
+      "pardavėjų konsultantų",
+      "pardavėja konsultantė",
+      "pardavėjos konsultantės",
     ],
   },
   {
@@ -2333,6 +2509,142 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "оператор станк",
       "production operator",
       "machine operator",
+    ],
+  },
+  // ── Office & professional catalogue (2026-09-06, window 6 G-D2) ──────────
+  //    The production walks proved "Reikia buhalterio." / "reikia teisininko"
+  //    / "esu inžinierius" / "Reikia projektų vadovo." reached the doors with
+  //    an EMPTY role: no catalogue row existed. Rows seeded by
+  //    20260906120000_professions_catalogue_office_v1 (apply before merge).
+  //    Needle rule, the same lesson as «кран» above: the PERSON noun only —
+  //    never the activity, the department or the thing. "buhalterij-" is the
+  //    accounting DEPARTMENT ("buhalterijos paslaugos" is a service offer, not
+  //    a person), "dizain-" the design, "konsultacij-" the consultation,
+  //    "finansav-" the funding, "rinkodar-" alone the marketing itself.
+  {
+    slug: "accountant",
+    needles: [
+      "buhalteris", "buhalterio", "buhalteriui", "buhalteriu", "buhalterių",
+      "buhalteriai", "buhalterius", "buhaltere", "buhalterė", "buhalteres",
+      "buhalterės", "buhalterei", "buhalterėi",
+      "apskaitinink",
+      "бухгалтер",
+      "accountant", "bookkeeper",
+      "buchhalter", "boekhouder", "redovisningsekonom", "ksiegow", "księgow",
+    ],
+  },
+  {
+    slug: "lawyer",
+    needles: [
+      "teisinink", "advokat",
+      "юрист", "адвокат",
+      "lawyer", "attorney", "solicitor",
+      "anwalt", "jurist", "advocaat", "prawnik",
+    ],
+  },
+  // The bare engineer. A CONSTRUCTION-site engineer keeps its own row below
+  // (longer needle), a software engineer the software_developer row above.
+  {
+    slug: "engineer",
+    needles: [
+      "inzinier", "inžinier",
+      "инженер",
+      "engineer",
+      "ingenieur", "ingenjör", "ingenjor", "ingeniør", "ingenior",
+      "inżynier", "inzynier", "insener", "insinööri", "insinoori",
+    ],
+  },
+  {
+    slug: "site_engineer",
+    needles: [
+      "statybos inzinier", "statybos inžinier", "statybu inzinier",
+      "statybų inžinier", "aiksteles inzinier", "aikštelės inžinier",
+      "site engineer", "civil engineer",
+      "инженер-строител", "инженер строител",
+      "bauingenieur", "byggingenjör", "byggingenjor",
+    ],
+  },
+  {
+    slug: "designer",
+    needles: ["dizainer", "дизайнер", "designer", "ontwerper", "disainer"],
+  },
+  {
+    slug: "consultant",
+    needles: [
+      "konsultant", "консультант", "consultant",
+      "berater", "adviseur", "konsulent", "konsultti",
+    ],
+  },
+  {
+    slug: "project_manager",
+    needles: [
+      "projektu vadov", "projektų vadov",
+      "projektu vadybinink", "projektų vadybinink",
+      "project manager",
+      // Inflected RU forms spelled out: "руководитель" also CONTAINS the
+      // driver needle "водител" (руко-водитель), so these must be longer.
+      "руководитель проект", "руководителя проект", "руководителю проект",
+      "руководителем проект", "руководители проект",
+      "менеджер проект", "менеджера проект", "менеджеру проект",
+      "менеджер по проект", "менеджера по проект",
+      "projektleiter", "projectmanager", "projectleider",
+      "projektledare", "projektleder", "prosjektleder",
+      "kierownik projekt", "projektu vadit", "projektijuht",
+      "projektipäällik", "projektipaallik",
+    ],
+  },
+  {
+    slug: "sales_specialist",
+    needles: [
+      "pardavimu specialist", "pardavimų specialist",
+      "pardavimu vadybinink", "pardavimų vadybinink",
+      "pardavimu vadov", "pardavimų vadov",
+      "pardavimu konsultant", "pardavimų konsultant",
+      "pardavimu atstov", "pardavimų atstov",
+      "sales specialist", "sales manager", "sales representative",
+      "sales consultant", "sales executive", "account manager",
+      "менеджер по продаж", "менеджера по продаж", "менеджеру по продаж",
+      "менеджером по продаж", "менеджеры по продаж",
+      "специалист по продаж", "специалиста по продаж", "специалисту по продаж",
+      "специалистом по продаж", "специалисты по продаж",
+      "торговый представител", "торгового представител", "торговому представител",
+      "торговые представител",
+      "vertriebsmitarbeiter", "vertriebsleiter", "accountmanager",
+      "innesäljare", "innesaljare", "fältsäljare", "faltsaljare",
+      "pardosanas special", "muugispetsialist", "myyntiasiantuntija",
+    ],
+  },
+  {
+    slug: "finance_specialist",
+    needles: [
+      "finansinink",
+      "finansu specialist", "finansų specialist",
+      "finansu analitik", "finansų analitik",
+      "finansu vadybinink", "finansų vadybinink",
+      "finance specialist", "financial analyst", "finance manager",
+      "financial controller",
+      "финансист", "финансов аналитик", "финансовый аналитик",
+      "финансового аналитик", "финансовому аналитик",
+      "финансовый специалист", "финансового специалист", "финансовому специалист",
+      "finanzspezialist", "finanzanalyst", "financieel specialist",
+      "financieel analist", "ekonomispecialist", "finantsspetsialist",
+      "talousasiantuntija",
+    ],
+  },
+  {
+    slug: "marketing_specialist",
+    needles: [
+      "rinkodarinink",
+      "rinkodaros specialist", "rinkodaros vadybinink", "rinkodaros vadov",
+      "marketingo specialist", "marketingo vadybinink",
+      "marketing specialist", "marketing manager",
+      "marketolog", "маркетолог",
+      "специалист по маркетинг", "специалиста по маркетинг",
+      "специалисту по маркетинг", "менеджер по маркетинг", "менеджера по маркетинг",
+      "marketingspezialist", "marketingspecialist",
+      "marknadsförare", "marknadsforare", "markedsføringsspesialist",
+      "markedsforingsspesialist", "turundusspetsialist",
+      "markkinoinnin asiantuntija", "marketinga specialist",
     ],
   },
 ];

@@ -2367,7 +2367,16 @@ describe("no migration files added by this sprint", () => {
     // additive evidence columns + billing_checkout_operations table + the
     // billing_customers (owner, provider, test_mode) key. No data loss.
     // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
-const SPRINT_BASELINE = 265;
+    // Bumped 265 -> 266 for the office & professional profession catalogue
+    // seed (20260906120000_professions_catalogue_office_v1, paired rollback;
+    // window 6 G-D2). INSERT … ON CONFLICT DO NOTHING only — 15 skills, 9
+    // professions, 50 profession_skills links; no DDL, no grants, no RLS.
+    // Human-gated by the catalogue-DML policy (draft + needs-human-gate;
+    // owner applies via Supabase MCP, APPLY BEFORE MERGE). RECOUNTED from the
+    // tree on this branch alone: `ls supabase/migrations/*.sql | wc -l` = 266
+    // (two other open drafts, #1566 and #1572, each add one on top of 265;
+    // whichever merges later re-counts).
+const SPRINT_BASELINE = 266;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

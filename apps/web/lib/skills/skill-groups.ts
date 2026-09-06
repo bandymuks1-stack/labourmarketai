@@ -46,6 +46,9 @@ const PROFESSION_SLUGS = new Set<string>([
   "office_administrator", "production_worker", "safety_specialist",
   "sales_assistant", "software_developer", "teacher", "translator", "waiter",
   "warehouse_worker",
+  // office & professional catalogue (20260906120000):
+  "accountant", "consultant", "designer", "engineer", "finance_specialist",
+  "lawyer", "marketing_specialist", "project_manager", "sales_specialist",
 ]);
 
 /** Coordination / business / paperwork abilities. */
@@ -59,6 +62,10 @@ const ADMINISTRATIVE_SLUGS = new Set<string>([
   "procurement", "logistics-planning",
   // universal catalogue (20260704120000):
   "administration", "bookkeeping",
+  // office & professional catalogue (20260906120000):
+  "budgeting", "business-consulting", "contract-drafting", "financial-analysis",
+  "financial-reporting", "legal-advice", "payroll", "project-management",
+  "tax-accounting",
 ]);
 
 /** Transferable, non-trade-specific abilities. */

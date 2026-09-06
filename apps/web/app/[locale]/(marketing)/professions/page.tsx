@@ -107,6 +107,9 @@ const SECTOR_LABEL: Record<SectorKey, L> = {
   repair_maintenance: { en: "Repair & maintenance", lt: "Remontas ir priežiūra", ru: "Ремонт и обслуживание", nl: "Reparatie & onderhoud", de: "Reparatur & Instandhaltung" },
   beauty_services: { en: "Beauty & personal services", lt: "Grožio paslaugos", ru: "Красота и персональные услуги", nl: "Beauty & persoonlijke verzorging", de: "Schönheit & persönliche Dienstleistungen" },
   hr_recruitment: { en: "HR & recruitment", lt: "Personalas ir atranka", ru: "HR и подбор персонала", nl: "HR & werving", de: "HR & Recruiting" },
+  finance_legal: { en: "Finance & legal", lt: "Finansai ir teisė", ru: "Финансы и право", nl: "Financiën & juridisch", de: "Finanzen & Recht" },
+  engineering_design: { en: "Engineering & design", lt: "Inžinerija ir dizainas", ru: "Инженерия и дизайн", nl: "Engineering & ontwerp", de: "Ingenieurwesen & Design" },
+  business_management: { en: "Business & management", lt: "Verslas ir vadyba", ru: "Бизнес и управление", nl: "Business & management", de: "Business & Management" },
   other: { en: "Other", lt: "Kita", ru: "Другое", nl: "Overig", de: "Sonstiges" },
 };
 
