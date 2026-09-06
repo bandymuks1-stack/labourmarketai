@@ -232,7 +232,15 @@ const EMAIL_RX = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
     log({ leg: "person_services_chip", chip });
     await shot(p, "05-person-services-empty");
     must("C1 /dashboard/services offers a way forward (link to requests)", (await p.getByTestId("services-to-requests-link").count()) === 1, null);
-    await p.getByTestId("service-offering-add").click();
+    // The add button is a client toggle: a click that lands before hydration
+    // is a no-op (walk trap seen on 606234cf: the form never appeared). Click
+    // until the form is attached, then fill.
+    for (let attempt = 0; attempt < 6; attempt++) {
+      await p.getByTestId("service-offering-add").click();
+      const opened = await p.getByTestId("service-offering-form").waitFor({ timeout: 5000 }).then(() => true).catch(() => false);
+      if (opened) break;
+      await p.waitForTimeout(1500);
+    }
     await p.getByTestId("service-offering-title").fill(OFFERING_TITLE);
     const inputs = p.getByTestId("service-offering-form").locator("input[type='text'], input:not([type])");
     // title, category, country, rate — in DOM order.
