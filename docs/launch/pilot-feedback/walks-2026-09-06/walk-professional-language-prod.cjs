@@ -112,11 +112,22 @@ const FOLLOWUP_COMPANY = [
 
   const url = get("NEXT_PUBLIC_SUPABASE_URL"); if (!/gorgitwvdzxbnaxhrsrw/.test(url)) throw new Error("host");
   const admin = createClient(url, get("SUPABASE_SERVICE_ROLE_KEY"), { auth: { autoRefreshToken: false, persistSession: false } });
-  const session = async (email) => {
+  const mintSession = async (email) => {
     const { data: link, error } = await admin.auth.admin.generateLink({ type: "magiclink", email }); if (error) throw error;
     const anon = createClient(url, get("NEXT_PUBLIC_SUPABASE_ANON_KEY"), { auth: { autoRefreshToken: false, persistSession: false } });
     const { data: sess, error: v } = await anon.auth.verifyOtp({ email, token: link.properties.email_otp, type: "magiclink" }); if (v) throw v;
-    return "base64-" + Buffer.from(JSON.stringify(sess.session)).toString("base64url");
+    return sess.session;
+  };
+  const session = async (email) => "base64-" + Buffer.from(JSON.stringify(await mintSession(email))).toString("base64url");
+  // The person's OWN client (RLS-scoped): service_role holds no grant on
+  // workers / journal_entries (revoked default privileges), so the A2 row
+  // count is read the way the product reads it — as the person.
+  const asUser = async (email) => {
+    const sess = await mintSession(email);
+    return createClient(url, get("NEXT_PUBLIC_SUPABASE_ANON_KEY"), {
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: { headers: { Authorization: `Bearer ${sess.access_token}` } },
+    });
   };
   const b = await chromium.launch();
   const open = async (email, viewport) => {
@@ -169,15 +180,16 @@ const FOLLOWUP_COMPANY = [
     const notes = flowOpen ? await p.getByTestId("worklog-notes").last().inputValue().catch(() => null) : null;
     return { text, results, firstAnswerMs, chips: chips.slice(-8).map((x) => x.replace(/\s+/g, " ").trim()), form, title, availableFrom, flowOpen, notes };
   };
-  // Journal rows of an identity, read with the admin client (read-only): the
-  // A2 leg asserts the count did not move.
+  // Journal rows of an identity, read AS that identity (RLS: own rows only):
+  // the A2 leg asserts the count did not move. `null` = the read failed —
+  // reported as a failed check, never as "unchanged".
   const journalCount = async (email) => {
-    const { data: prof } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
-    if (!prof) return null;
-    const { data: w } = await admin.from("workers").select("id").eq("profile_id", prof.id).maybeSingle();
-    if (!w) return null;
-    const { count } = await admin.from("journal_entries").select("id", { count: "exact", head: true }).eq("worker_id", w.id);
-    return count ?? null;
+    try {
+      const me = await asUser(email);
+      const { count, error } = await me.from("journal_entries").select("id", { count: "exact", head: true });
+      if (error) { log({ step: "journalCount", email, error: error.message }); return null; }
+      return count ?? null;
+    } catch (e) { log({ step: "journalCount", email, error: String(e && e.message) }); return null; }
   };
   const shot = (p, n) => p.screenshot({ path: path.join(OUT, n + ".png"), fullPage: true }).catch(() => {});
   const check = (name, ok, detail) => (MEASURE_ONLY ? log({ check: name, ok: !!ok, detail }) : must(name, ok, detail));
