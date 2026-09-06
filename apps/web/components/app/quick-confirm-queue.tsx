@@ -1,4 +1,5 @@
 "use client";
+import { Card } from "@/components/ui/Card";
 
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -54,12 +55,11 @@ export function QuickConfirmQueue({
       {receipts.length > 0 ? (
         <ul className="flex flex-col gap-2" data-testid="quick-receipts">
           {receipts.map((r) => (
-            <li
-              key={r.id}
-              className="verified-pop card-border flex flex-col gap-0.5 border-state-success/40 bg-state-success/10 p-4 text-sm text-state-success"
-              data-testid={`quick-receipt-${r.id}`}
-              role="status"
-            >
+            <li key={r.id} data-testid={`quick-receipt-${r.id}`} role="status">
+              <Card
+                compact
+                className="verified-pop flex flex-col gap-0.5 border-state-success/40 bg-state-success/10 text-sm text-state-success"
+              >
               <span>
                 ✓ {t("inbox.quick.receipt", { title: receiptTitle(r.originalText) })}
                 {r.verifiedSkills > 0
@@ -67,6 +67,7 @@ export function QuickConfirmQueue({
                   : null}
               </span>
               <span className="text-meta text-text-muted">{r.workerName}</span>
+              </Card>
             </li>
           ))}
         </ul>
