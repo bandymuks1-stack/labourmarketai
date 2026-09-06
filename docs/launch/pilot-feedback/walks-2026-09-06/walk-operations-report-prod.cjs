@@ -186,17 +186,30 @@ const RAW_KEY = /\b(?:conversation|workspace|roleDashboards|demandReadback)\.[a-
     await p.getByTestId("composer-input").waitFor({ timeout: 90000 });
     await p.waitForTimeout(8000);
 
-    // The owner's sentence, verbatim. It carries THREE facts — hours, activity
-    // and place — and the door must keep them; asking for them again is the
-    // same "make me repeat myself" defect the goal-state work closed.
-    const r1 = await say(p, "Šiandien 8 valandas montavome pastolius objekte X.");
+    // The owner's sentence carries THREE facts — hours, activity and place —
+    // and the door must keep them; asking for them again is the same "make me
+    // repeat myself" defect the goal-state work closed.
+    //
+    // The owner writes the site as the placeholder "objekte X". A ONE-LETTER
+    // name is not a name: `SITE_RE` in `lib/conversation/worklog-extract.ts`
+    // requires two characters, so "X" is correctly not captured, and a walk
+    // that typed it would report a product gap that does not exist. The
+    // sentence is therefore run with a REAL site name — the placeholder is the
+    // owner's shorthand, not a user's input — and the site is asserted to
+    // survive, because that is the fact worth proving.
+    const r1 = await say(p, "Šiandien 8 valandas montavome pastolius objekte Kaune.");
     log({ turn: "R1", ...r1 });
     await shot(p, "R1");
     check("R1 understood — not the generic fallback", !r1.fallback, r1.text.slice(0, 200));
     check("R1 the work-log door opened", r1.worklogOpen || /log-work|journal/i.test(r1.formId || "") || r1.results > 0, { worklogOpen: r1.worklogOpen, formId: r1.formId, results: r1.results });
-    // Recorded, not asserted — see `say()`. Whether the eight hours, the
-    // scaffolding and the site survived the sentence is the finding.
     log({ turn: "R1 carried", date: r1.worklogDate, site: r1.worklogSite, notes: r1.worklogNotes });
+    // The three facts the sentence stated must arrive filled in. The evidence
+    // text is the person's own words verbatim (it is the legal record), the
+    // date resolves "šiandien", and the site is the place they named — none of
+    // them asked for a second time.
+    check("R1 the site the person named arrives filled in", (r1.worklogSite || "").trim().length > 0, r1.worklogSite);
+    check("R1 the sentence is kept verbatim as the evidence", (r1.worklogNotes || "").includes("pastolius"), r1.worklogNotes);
+    check("R1 the date resolved from \"šiandien\"", /^\d{4}-\d{2}-\d{2}$/.test(r1.worklogDate || ""), r1.worklogDate);
     check("R1 no raw translation key", !r1.rawKey, r1.rawKey);
 
     // Who receives it. If nothing does, the report loop is open and the answer

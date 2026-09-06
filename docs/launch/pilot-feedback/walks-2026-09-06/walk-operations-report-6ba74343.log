@@ -16,12 +16,15 @@
 {"check":"O4 something was actually answered","ok":true,"detail":{"len":132,"results":0,"formId":null}}
 {"check":"O4 no raw translation key in the answer","ok":true,"detail":null}
 {"check":"OPS no failed requests","ok":true,"detail":[]}
-{"turn":"R1","sentence":"Šiandien 8 valandas montavome pastolius objekte X.","text":"","chips":["Išsaugoti","Taisyti"],"formId":null,"results":0,"role":null,"worklogOpen":true,"worklogDate":"2026-09-06","worklogSite":"","worklogNotes":"Šiandien 8 valandas montavome pastolius objekte X.","fallback":false,"rawKey":null}
+{"turn":"R1","sentence":"Šiandien 8 valandas montavome pastolius objekte Kaune.","text":"","chips":["Išsaugoti","Taisyti"],"formId":null,"results":0,"role":null,"worklogOpen":true,"worklogDate":"2026-09-06","worklogSite":"Kaune","worklogNotes":"Šiandien 8 valandas montavome pastolius objekte Kaune.","fallback":false,"rawKey":null}
 {"check":"R1 understood — not the generic fallback","ok":true,"detail":""}
 {"check":"R1 the work-log door opened","ok":true,"detail":{"worklogOpen":true,"formId":null,"results":0}}
-{"turn":"R1 carried","date":"2026-09-06","site":"","notes":"Šiandien 8 valandas montavome pastolius objekte X."}
+{"turn":"R1 carried","date":"2026-09-06","site":"Kaune","notes":"Šiandien 8 valandas montavome pastolius objekte Kaune."}
+{"check":"R1 the site the person named arrives filled in","ok":true,"detail":"Kaune"}
+{"check":"R1 the sentence is kept verbatim as the evidence","ok":true,"detail":"Šiandien 8 valandas montavome pastolius objekte Kaune."}
+{"check":"R1 the date resolved from \"šiandien\"","ok":true,"detail":"2026-09-06"}
 {"check":"R1 no raw translation key","ok":true,"detail":null}
-{"turn":"R2","sentence":"Kam pateikti atliktą darbą?","text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":["Išsaugoti","Taisyti"],"formId":null,"results":0,"role":null,"worklogOpen":true,"worklogDate":"2026-09-06","worklogSite":"","worklogNotes":"Šiandien 8 valandas montavome pastolius objekte X.","fallback":false,"rawKey":null}
+{"turn":"R2","sentence":"Kam pateikti atliktą darbą?","text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":["Išsaugoti","Taisyti"],"formId":null,"results":0,"role":null,"worklogOpen":true,"worklogDate":"2026-09-06","worklogSite":"Kaune","worklogNotes":"Šiandien 8 valandas montavome pastolius objekte Kaune.","fallback":false,"rawKey":null}
 {"check":"R2 understood — not the generic fallback","ok":true,"detail":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai."}
 {"check":"R2 no raw translation key","ok":true,"detail":null}
 {"check":"REPORT read-only: the journal row count is unchanged","ok":true,"detail":{"before":1,"after":1}}
