@@ -112,9 +112,9 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
     if (missedDimension === "opportunityType") {
       const { loadInternshipNextSteps } = await import("@/lib/conversation/education-next-steps-server");
       const next = await loadInternshipNextSteps();
-      return { kind: "answer", text: [honest, ...next.lines].join("\n"), explanation, chips: next.chips };
+      return { kind: "answer", text: [honest, ...next.lines].join("\n"), explanation: explanation, chips: next.chips };
     }
-    return { kind: "answer", text: honest, explanation };
+    return { kind: "answer", text: honest, explanation: explanation };
   }
 
   /**
