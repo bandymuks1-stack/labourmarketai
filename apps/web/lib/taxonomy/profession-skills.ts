@@ -1,8 +1,10 @@
 /**
  * Static profession → canonical-skill map (Matching PR4, 2026-07-04).
  *
- * EXACT mirror of the `profession_skills` seed migrations (232 links / 49
- * professions — the same rows live in prod). Matching needs the expansion
+ * EXACT mirror of the `profession_skills` seed migrations (282 links / 58
+ * professions; 232 / 49 live in prod until
+ * 20260906120000_professions_catalogue_office_v1 is applied — APPLY BEFORE
+ * MERGE, see that file's header). Matching needs the expansion
  * OFFLINE and synchronously (owner mandate: no remote calls at runtime), and
  * a static mirror also lets guards run without a DB.
  *
@@ -62,13 +64,28 @@ export const PROFESSION_SKILLS: Readonly<Record<string, readonly string[]>> = {
   nail_technician: ["customer-service", "nail-care"],
   recruiter: ["document-handling", "personnel-admin", "recruitment"],
   laundry_worker: ["cleaning-services", "housekeeping", "laundry"],
+  // Office & professional catalogue (20260906120000, window 6 G-D2): the
+  // walks proved an accountant, a lawyer, an engineer, a designer, a
+  // consultant, a project manager, a sales / finance / marketing specialist
+  // had no row to be — matching by profession could not see them.
+  accountant: ["bookkeeping", "document-handling", "financial-reporting", "office-software", "payroll", "tax-accounting"],
+  finance_specialist: ["bookkeeping", "budgeting", "financial-analysis", "financial-reporting", "office-software", "report-writing"],
+  lawyer: ["contract-drafting", "document-handling", "legal-advice", "negotiation", "research"],
+  engineer: ["blueprint-reading", "cad-drafting", "project-coordination", "quality-control", "technical-design", "work-scheduling"],
+  designer: ["graphic-design", "interior-design", "presenting", "web-design"],
+  consultant: ["business-consulting", "financial-analysis", "presenting", "report-writing", "research", "stakeholder-engagement"],
+  project_manager: ["budgeting", "project-coordination", "project-management", "stakeholder-engagement", "team-coordination", "work-scheduling"],
+  sales_specialist: ["b2b-sales", "customer-service", "negotiation", "partnership-development", "presenting", "sales-assistant"],
+  marketing_specialist: ["content-writing", "digital-marketing", "graphic-design", "presenting", "research"],
 };
 
 /**
  * Every profession slug the platform knows, alphabetical.
  *
- * These are the SAME 49 slugs as `public.professions` in production (verified
- * 2026-08-19), which is what makes this list safe to offer as a choice: the
+ * These are the SAME slugs as `public.professions` in production (49 verified
+ * 2026-08-19; 58 once 20260906120000_professions_catalogue_office_v1 is
+ * applied — apply before merge), which is what makes this list safe to offer
+ * as a choice: the
  * onboarding step below resolves the picked slug back to that table's row, so
  * a slug that drifted out of the registry would resolve to nothing rather than
  * silently record a profession the rest of the product does not know.

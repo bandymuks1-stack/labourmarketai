@@ -1207,6 +1207,16 @@ describe("the migration set is exactly what this slice declared", () => {
       // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
       // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
       "20260905200000_billing_safety_invariants_v1.sql",
+      // 2026-09-06: office & professional profession catalogue seed (window 6
+      // G-D2). The marker records the ROUTE only: INSERT … ON CONFLICT DO
+      // NOTHING into the three canonical catalogue tables (15 skills, 9
+      // professions, 50 links) — no DDL, no grant, no policy — which the
+      // repository's catalogue-DML policy routes through the human gate
+      // (draft + needs-human-gate). NO APPLY APPROVAL EXISTS YET; ships
+      // UNAPPLIED; apply BEFORE merge (the onboarding select and the
+      // education program target resolve the slug against the live table).
+      // Gate record: docs/human-gates/professions-catalogue-office-v1-gate.md.
+      "20260906120000_professions_catalogue_office_v1.sql",
 ]);
   });
 

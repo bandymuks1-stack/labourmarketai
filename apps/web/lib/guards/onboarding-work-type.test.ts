@@ -101,8 +101,13 @@ describe("onboarding asks what work the person does", () => {
     const src = read(join(web, "lib", "taxonomy", "profession-skills.ts"));
     expect(src).toContain("Object.keys(\n  PROFESSION_SKILLS,\n).sort()");
     expect(PROFESSION_SLUGS.length).toBe(Object.keys(PROFESSION_SKILLS).length);
-    // 49 = the row count in production `public.professions` (2026-08-19).
-    expect(PROFESSION_SLUGS.length).toBe(49);
+    // 58 = 49 (the production row count verified 2026-08-19) + the 9 office
+    // & professional rows seeded by 20260906120000_professions_catalogue_
+    // office_v1 (accountant, lawyer, engineer, designer, consultant,
+    // project_manager, sales_specialist, finance_specialist,
+    // marketing_specialist). Apply before merge — until applied the live
+    // table holds 49 and a picked new slug resolves to null.
+    expect(PROFESSION_SLUGS.length).toBe(58);
     expect([...PROFESSION_SLUGS]).toEqual([...PROFESSION_SLUGS].sort());
   });
 

@@ -31,6 +31,9 @@ export type SectorKey =
   | "repair_maintenance"
   | "beauty_services"
   | "hr_recruitment"
+  | "finance_legal"
+  | "engineering_design"
+  | "business_management"
   | "other";
 
 export interface SectorDef {
@@ -78,6 +81,19 @@ export const SECTORS: readonly SectorDef[] = [
     nameEn: "Beauty & personal services",
   },
   { key: "hr_recruitment", nameLt: "Personalas ir atranka", nameEn: "HR & recruitment" },
+  // Office & professional catalogue (2026-09-06, window 6 G-D2) — same
+  // one-row rule. Seeded by 20260906120000_professions_catalogue_office_v1.
+  { key: "finance_legal", nameLt: "Finansai ir teisė", nameEn: "Finance & legal" },
+  {
+    key: "engineering_design",
+    nameLt: "Inžinerija ir dizainas",
+    nameEn: "Engineering & design",
+  },
+  {
+    key: "business_management",
+    nameLt: "Verslas ir vadyba",
+    nameEn: "Business & management",
+  },
   { key: "other", nameLt: "Kita", nameEn: "Other" },
 ];
 
