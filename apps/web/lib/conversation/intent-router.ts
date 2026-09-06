@@ -1093,6 +1093,16 @@ const RULES: IntentRule[] = [
       // V10: "galiu versti / suremontuoti" is an OFFER of a service — it must
       // outrank the translate-REQUEST intent ("išversk…" stays translate).
       p("(galiu|siulau|\\bcan\\b|могу)\\s+.{0,6}(vers|isvers|remontuo|taisy|projektuo|translat|repair|перевести|отремонтир)", 5),
+      // Real-user fitness walk 2026-09-06: an OFFER VERB bound to an everyday
+      // service activity — "galiu kirpti plaukus namuose", "galiu mokyti
+      // matematikos", "siūlau valyti butus" — landed in the not-understood
+      // menu although the services door (/dashboard/services) exists. The
+      // verb is required in the SAME regex: a bare "reikia 2 valytojų" keeps
+      // scoring need-workers. `mokyt[iu]\b` excludes "mokytis" (to learn).
+      p("\\b(galiu|siulau|siulyti|teikiu|can|могу|biete|bied)\\b\\s+(?:[^\\s]+\\s+){0,2}?(kirp|dazy|valy|mokyt[iu]\\b|tvarky|siuv|montuo|pjau|priziur|programuo|konsultuo|apskait|vez[tu]|remont|taisy|paint|clean|teach|tutor|mow|install|sew|babysit|garden|\\bfix\\b)", 5),
+      // "noriu siūlyti buhalterijos paslaugas" — the service NOUN with an
+      // offer verb is an offer of a service, whatever the service is.
+      p("\\b(siulau|siulyti|siulome|teikiu|teikiame|offer|предлага|biete|bied)\\b.{0,40}(paslaug|\\bservices?\\b|услуг|dienst)", 5),
       p("free\\s+days?", 3),
       p("(freie?\\s+tage|vrije\\s+dag(en)?)", 3), // de / nl free days
       p("\\b(habe|heb)\\b\\s*.{0,24}\\b(kg|stück|tonnen|liter|paletten|stuks)", 3),

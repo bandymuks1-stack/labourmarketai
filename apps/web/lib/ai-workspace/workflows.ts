@@ -12,7 +12,11 @@ import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
-import { DOCUMENT_GAP_LINE_CAP, type DocumentGap } from "@/lib/conversation/documents-gap";
+import {
+  DOCUMENT_GAP_LINE_CAP,
+  groupMissingDocumentsByType,
+  type DocumentGap,
+} from "@/lib/conversation/documents-gap";
 import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
 import { readLearningCompass } from "@/lib/learning/learning-compass";
 import { loadAiWorkspaceContext } from "./ai-context";
@@ -244,9 +248,15 @@ async function documentGapSentence(
   t: Awaited<ReturnType<typeof getTranslations>>,
 ): Promise<string> {
   const tDocs = await getTranslations("documents");
-  const list = gap.missing
-    .slice(0, DOCUMENT_GAP_LINE_CAP)
-    .map((m) => (tDocs.has(`types.${m.documentTypeSlug}`) ? (tDocs(`types.${m.documentTypeSlug}` as never) as string) : m.documentTypeSlug))
+  // One name per document TYPE, the countries beside it when there are
+  // several — never the same name repeated per country.
+  const list = groupMissingDocumentsByType(gap.missing, DOCUMENT_GAP_LINE_CAP)
+    .map((g) => {
+      const name = tDocs.has(`types.${g.documentTypeSlug}`)
+        ? (tDocs(`types.${g.documentTypeSlug}` as never) as string)
+        : g.documentTypeSlug;
+      return g.countries.length > 1 ? `${name} (${g.countries.join(", ")})` : name;
+    })
     .join(", ");
   return t("docsGapTail", { count: gap.missing.length, list });
 }

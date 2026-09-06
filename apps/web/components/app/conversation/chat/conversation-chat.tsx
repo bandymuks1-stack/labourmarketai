@@ -1294,6 +1294,34 @@ export function ConversationChat({
   startProfileSummaryRef.current = startProfileSummary;
 
   /**
+   * "Ką man daryti toliau?" asked while ACTING FOR AN ORGANISATION. The
+   * profile summary is the PERSON's ladder (profession, availability, card);
+   * on production (2026-09-06) the company workspace answered exactly that —
+   * "Profesija · Prieinamumas · Darbo kortelė" — to a manager who had asked
+   * about the company. The company's next step is the manager's own ladder
+   * the opening already composes (`loadEmployerOpeningBrief`: reviews,
+   * absences, unread, needs); nothing to report → the company hub door.
+   * Same reads, same honesty, no second brief.
+   */
+  const startCompanyNextStep = useCallback(() => {
+    setTyping(true);
+    const hub = () =>
+      assistant(labels.adminRouteHint, [
+        { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+      ]);
+    loadEmployerOpeningBrief()
+      .then((brief) => {
+        setTyping(false);
+        if (brief.kind === "brief") assistant(brief.lines.join("\n"), brief.chips);
+        else hub();
+      })
+      .catch(() => {
+        setTyping(false);
+        hub();
+      });
+  }, [assistant, labels.adminRouteHint, labels.chipCompanyHub]);
+
+  /**
    * State-aware opening (owner ruling 2026-07-29, W2): the first paint must
    * not be an empty greeting when the product already KNOWS this user
    * (doctrine §18). One server action composes the OPENING BRIEF from the
@@ -4327,7 +4355,10 @@ export function ConversationChat({
         switchContext: () => startSwitchContext(text),
         // These run a real async server read with their own typing cue.
         profileSummary: () => startProfileSummary("profile"),
-        nextActionSummary: () => startProfileSummary("next"),
+        // The COMPANY workspace asks about the company, never about the
+        // person behind it (see `startCompanyNextStep`).
+        nextActionSummary: () =>
+          identity === "company" ? startCompanyNextStep() : startProfileSummary("next"),
         resumeSummary: () => startProfileSummary("resume"),
         criteria: () => startCriteria(),
         // The canonical card, rendered IN the conversation (§5.1).
@@ -4373,7 +4404,23 @@ export function ConversationChat({
               },
             ]);
           } else {
-            assistant(fallbackText, starterChips);
+            // A private person who is an employer nowhere. The sentence NAMED a
+            // trade ("reikia santechniko"), so the router scored it as employer
+            // demand — but for a private person that is a JOB TO BE DONE (§33),
+            // and the door for it already exists (the service-request loop);
+            // the door to become an employer exists too. On production
+            // (2026-09-06) this branch answered the not-understood menu for a
+            // sentence the product had understood perfectly.
+            assistant(labels.serviceNeedHint, [
+              {
+                id: "link:/dashboard/service-requests",
+                label: labels.chipServiceRequests,
+              },
+              {
+                id: "link:/dashboard/start/company",
+                label: labels.chipCreateOrganization,
+              },
+            ]);
           }
         },
         // §33 — "reikia, kad kas nors sutaisytų stogą" is a request for a
@@ -4617,7 +4664,7 @@ export function ConversationChat({
           dispatchIntent("unknown", handlers, withTyping, fallback);
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
   );
 
   /**
