@@ -791,9 +791,11 @@ describe("NO new DB migration in this PR", () => {
     // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
     // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
     // window 6, 2026-09-06, GREEN additive partial index for the board
-    // supply-freshness read; paired rollback). RECOUNTED from the tree:
-    // `ls supabase/migrations/*.sql | wc -l` = 266.
-expect(count).toBeLessThanOrEqual(266);
+    // supply-freshness read; paired rollback; applied via MCP as ledger
+    // 20260906072604). Bumped 266 -> 267 for the notification_events
+    // service_role write grant (20260906060000, RED draft #1566, UNAPPLIED
+    // until owner approval). `ls supabase/migrations/*.sql | wc -l` = 267.
+expect(count).toBeLessThanOrEqual(267);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

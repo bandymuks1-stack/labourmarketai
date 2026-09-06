@@ -1,0 +1,39 @@
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE HUMAN GATE ────────────────────────────────────────────────
+-- SAFETY CLASS: RED (a GRANT is a privilege-surface change, doctrine-guard §4).
+-- Draft PR + `needs-human-gate`; apply ONLY via Supabase MCP `apply_migration`
+-- after explicit owner approval. Never `supabase db push`. The annotation
+-- acknowledges the `grant-or-revoke` finding the static gate emits for this
+-- file — it is an acknowledgement, not an auto-merge pass.
+--
+-- 20260906060000 — notification_events: the service-role write grant that the
+-- emitters have needed since 20260810070000. ADDITIVE; NO DATA LOSS; NO RLS
+-- CHANGE; nothing for anon/authenticated changes.
+--
+-- WHY (measured on production 2026-09-06, window 5):
+--   `information_schema.role_table_grants` for public.notification_events lists
+--   ONLY `authenticated SELECT` (+ the column-level UPDATE(read_at) from v1).
+--   Every emitter in lib/notifications/event-emitters.ts writes through the
+--   ADMIN client (service_role) → INSERT fails 42501 → the fire-and-forget
+--   wrapper logs `[notifications] emit failed unexpectedly (weekly_digest): 42501`
+--   (Vercel runtime log 2026-09-06 05:10 UTC). The table holds 2 rows, the last
+--   from 2026-07-05. In-app Attention (I1/I3) reads other tables and is
+--   unaffected; the notification bell / channel preferences have silently
+--   emitted nothing for two months. The v1 migration revoked all from
+--   public/anon/authenticated and granted the reader back, but never granted
+--   the writer — the default-privilege posture of this project (narrow grants,
+--   revoked defaults) means service_role receives nothing implicitly.
+--
+-- WHAT: the minimum the emitters and the reconcile/mark-processed paths use —
+--   SELECT (duplicate detection / read-back), INSERT (emit), UPDATE (delivery
+--   bookkeeping). No DELETE: the table is append-only evidence (doctrine §3).
+--
+-- Production preflight (read-only): notification_events 2 rows; policies
+--   notification_events_select_own / notification_events_mark_read_own
+--   untouched (service_role bypasses RLS by design, as for every admin write).
+--
+-- ROLLBACK: supabase/rollbacks/20260906060000_notification_events_service_role_grant.down.sql
+--   (revokes exactly these three privileges; nothing else changes).
+
+grant select, insert, update on public.notification_events to service_role;

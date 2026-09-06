@@ -2374,9 +2374,13 @@ describe("no migration files added by this sprint", () => {
     // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
     // window 6, 2026-09-06, GREEN additive: one partial index for the board
     // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
-    // rollback; applied by the orchestrator via MCP). RECOUNTED from the
-    // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
-const SPRINT_BASELINE = 266;
+    // rollback; applied via MCP 2026-09-06 as ledger 20260906072604).
+    // Bumped 266 -> 267 for the notification_events service_role write grant
+    // (20260906060000, RED draft + needs-human-gate, UNAPPLIED until owner
+    // approval): ONE additive GRANT (select/insert/update) so the emitters
+    // stop failing 42501 — no data, no RLS, no anon/authenticated change.
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 267.
+const SPRINT_BASELINE = 267;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
