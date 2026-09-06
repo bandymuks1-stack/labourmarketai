@@ -4376,6 +4376,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Ditt konto kunde inte läsas just nu, så inget utrymme valdes åt dig.",
+      "choose": "Välj ett utrymme eller försök igen.",
+      "retry": "Försök igen"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",

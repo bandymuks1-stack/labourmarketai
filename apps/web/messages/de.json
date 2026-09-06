@@ -13289,6 +13289,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Ihr Konto konnte gerade nicht gelesen werden, deshalb wurde kein Bereich für Sie gewählt.",
+      "choose": "Wählen Sie einen Bereich oder versuchen Sie es erneut.",
+      "retry": "Erneut versuchen"
+    },
     "panel": {
       "regionLabel": "Kontext",
       "workTitle": "Deine Arbeit gerade jetzt",

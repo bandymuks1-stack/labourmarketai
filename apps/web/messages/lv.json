@@ -4376,6 +4376,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Jūsu kontu šobrīd neizdevās nolasīt, tāpēc mēs neizvēlējāmies telpu jūsu vietā.",
+      "choose": "Izvēlieties telpu vai mēģiniet vēlreiz.",
+      "retry": "Mēģināt vēlreiz"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",

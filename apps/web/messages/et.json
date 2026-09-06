@@ -4376,6 +4376,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Teie kontot ei õnnestunud praegu lugeda, seega me ei valinud teie eest ruumi.",
+      "choose": "Valige ruum või proovige uuesti.",
+      "retry": "Proovi uuesti"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",

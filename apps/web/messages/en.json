@@ -13289,6 +13289,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Your account could not be read just now, so no space was chosen for you.",
+      "choose": "Choose a space or try again.",
+      "retry": "Try again"
+    },
     "panel": {
       "regionLabel": "Context",
       "workTitle": "Your work right now",

@@ -63,10 +63,10 @@ export async function LearningCompassSection({
             <p className="text-sm text-text-primary">
               {becoming.professionSlug ? professionLabel(becoming.professionSlug) : t("becomingNone")}
             </p>
-            {becoming.currentEducation ? (
+            {becoming.studyingAt ? (
               <p className="text-xs text-text-secondary">
-                {t("studyingAt", { institution: becoming.currentEducation.institutionName })}
-                {becoming.currentEducation.programOrField
+                {t("studyingAt", { institution: becoming.studyingAt })}
+                {becoming.currentEducation?.programOrField
                   ? ` · ${t("program", { program: becoming.currentEducation.programOrField })}`
                   : ""}
               </p>

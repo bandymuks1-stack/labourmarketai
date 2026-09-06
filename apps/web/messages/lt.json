@@ -13289,6 +13289,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Jūsų paskyros duomenų dabar nepavyko perskaityti, todėl erdvės už jus nepasirinkome.",
+      "choose": "Pasirinkite erdvę arba pabandykite dar kartą.",
+      "retry": "Bandyti dar kartą"
+    },
     "panel": {
       "regionLabel": "Kontekstas",
       "workTitle": "Tavo darbas dabar",

@@ -4376,6 +4376,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Nie udało się teraz odczytać Twojego konta, więc nie wybraliśmy przestrzeni za Ciebie.",
+      "choose": "Wybierz przestrzeń albo spróbuj ponownie.",
+      "retry": "Spróbuj ponownie"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",

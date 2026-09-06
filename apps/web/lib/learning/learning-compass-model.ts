@@ -79,6 +79,13 @@ export interface CompassInput {
   readonly availabilityKnown: boolean;
   /** Active cohort memberships; optional so existing callers stay valid. */
   readonly cohorts?: readonly CompassCohort[];
+  /**
+   * The institution the person is linked to as a STUDENT — the name already
+   * carried by their own active student engagement context (institution↔learner
+   * link v1, #1301). This is the canonical "where I study" fact; an education
+   * row or a cohort only names it as a fallback.
+   */
+  readonly studentInstitutionName?: string | null;
 }
 
 export type CompassMissingSource = "opportunities" | "profession" | "program";
@@ -104,6 +111,11 @@ export interface LearningCompass {
     readonly currentEducation: CompassEducation | null;
     /** The programme(s) / cohort(s) the person is an active member of. */
     readonly cohorts: readonly CompassCohort[];
+    /**
+     * WHERE the person studies, by name — `deriveStudyingAt`. `null` only when
+     * no source names an institution; never a placeholder.
+     */
+    readonly studyingAt: string | null;
   };
   readonly evidence: {
     readonly skillsTotal: number;
@@ -128,9 +140,42 @@ function tierIs(tier: EvidenceTier, ...names: string[]): boolean {
   return names.includes(String(tier));
 }
 
+/**
+ * "Mokotės: {institution}" — the ONE derivation of where the person studies
+ * (W6 honesty, 2026-09-06). Measured on production: a learner linked to their
+ * institution (active student engagement, the org name already loaded) saw
+ * no institution on the compass, because the line was read ONLY from a
+ * `worker_education.is_current` row — a row the linked learner never filled.
+ *
+ * Priority: the active student link (the canonical fact, set by the
+ * institution's own invitation) → the current education row → an active
+ * cohort's institution → `null`. Blank names never count.
+ */
+export function deriveStudyingAt(input: {
+  readonly studentInstitutionName?: string | null;
+  readonly currentEducation: CompassEducation | null;
+  readonly cohorts: readonly CompassCohort[];
+}): string | null {
+  const clean = (v: string | null | undefined): string | null => {
+    const s = v?.trim();
+    return s && s.length > 0 ? s : null;
+  };
+  return (
+    clean(input.studentInstitutionName) ??
+    clean(input.currentEducation?.institutionName) ??
+    input.cohorts.map((c) => clean(c.institutionName)).find((n): n is string => n !== null) ??
+    null
+  );
+}
+
 export function buildLearningCompass(input: CompassInput): LearningCompass {
   const currentEducation = input.education.find((e) => e.isCurrent) ?? null;
   const cohorts = input.cohorts ?? [];
+  const studyingAt = deriveStudyingAt({
+    studentInstitutionName: input.studentInstitutionName,
+    currentEducation,
+    cohorts,
+  });
   const ownSlugs = new Set(input.skills.map((s) => s.slug));
 
   // EvidenceTier = "manager_confirmed" | "work_journal" | "self_declared"
@@ -193,7 +238,7 @@ export function buildLearningCompass(input: CompassInput): LearningCompass {
   if (missing.length > 0) next.push("gain_evidence_for_missing");
 
   return {
-    becoming: { professionSlug: input.professionSlug, currentEducation, cohorts },
+    becoming: { professionSlug: input.professionSlug, currentEducation, cohorts, studyingAt },
     evidence: {
       skillsTotal: input.skills.length,
       skillsConfirmed,

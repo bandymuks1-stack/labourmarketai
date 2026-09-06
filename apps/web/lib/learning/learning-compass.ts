@@ -189,6 +189,13 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
     }
   }
   const cohorts = hasLearnerLink ? await readOwnCohorts(supabase, user.id, organizationNameById) : [];
+  // WHERE the person studies — from the SAME student engagement rows (W6
+  // honesty, 2026-09-06): the compass used to name the institution only from
+  // an education row the linked learner never filled, so a real student of a
+  // real institution saw no institution on their own compass.
+  const studentInstitutionName =
+    engagements.find((e) => e.relationshipSlug === "student" && e.organizationName?.trim())
+      ?.organizationName ?? null;
 
   const compass = buildLearningCompass({
     professionSlug: ctx.subject.professionSlug ?? null,
@@ -198,6 +205,7 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
     opportunities,
     availabilityKnown,
     cohorts,
+    studentInstitutionName,
   });
 
   return {
