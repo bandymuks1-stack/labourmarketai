@@ -99,6 +99,17 @@ export type ConversationIntent =
   //    actions (`agency.invite-client`, `agency.propose-candidate`) already
   //    existed behind the dashboard. Chat-first doctrine: the sentence IS the
   //    entry point; the workspace is the secondary view. ─────────────────
+  // ── SUPPLY DIRECTION (owner window 7 §4, 2026-09-06). The market has TWO
+  //    sides and this product only ever heard one of them. Measured on the
+  //    real router before this rule existed, the owner's own example
+  //    "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose." resolved
+  //    to `find-work` — a staffing agency with twenty welders was read as one
+  //    person looking for a job. "Ieškome darbo savo darbuotojams" and "We
+  //    have workers and we are looking for employers" resolved to
+  //    `need-workers`, the exact inversion: WE HAVE read as WE NEED.
+  //
+  //    MAN REIKIA ↔ AŠ TURIU / GALIU. This is the second side.
+  | "offer-capacity" // "turime 20 suvirintojų, ieškome jiems darbo" — capacity offered to the market
   | "invite-client" // "noriu pakviesti klientą" — agency ↔ client connection
   | "invite-candidate" // "pakviesk darbuotoją į komandą" — roster invitation
   | "client-demand" // "ką klientas pasidalino?" — the requests clients shared
@@ -202,6 +213,64 @@ const SEEK_GUARD_SOURCE =
   "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch";
 
 const RULES: IntentRule[] = [
+  /**
+   * ── SUPPLY DIRECTION — "AŠ TURIU / GALIU" (owner window 7 §4, 2026-09-06)
+   *
+   * FIRST, and weighted above every demand-side rule, because the words
+   * overlap almost completely with them: a supply sentence contains "darbo",
+   * "ieškome" and a profession exactly like a job search does, and contains
+   * "turime" and a headcount exactly like a roster question does. Read one
+   * word at a time it is indistinguishable; read as a whole it is the
+   * opposite of both.
+   *
+   * THE DISCRIMINATOR IS THE SHAPE, NOT A KEYWORD: someone states that they
+   * HAVE people (a count, or a word for people) AND that those people are
+   * being offered to the market (work is sought FOR THEM, they are available,
+   * or they are explicitly offered). Either half alone stays where it was —
+   * "turiu patirties ir ieškau darbo" is still one person's job search, and
+   * "Turime laisvų darbuotojų" with no count is still the employer's own
+   * roster question (`who-available`).
+   *
+   * Deliberately NOT identity-gated here. The router is identity-blind by
+   * design; a company that also supplies, and an agency that also hires, must
+   * both be understood. The HANDLER decides what the sentence can do.
+   */
+  {
+    intent: "offer-capacity",
+    patterns: [
+      // HAVE + (count | people) … SEEKING … WORK/EMPLOYER/PROJECT.
+      // "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose."
+      // "We have workers and we are looking for employers."
+      // "Мы имеем 20 сварщиков и ищем для них работу."
+      p("(turim|turiu|disponuoj|have|hebben|haben|имеем|располага)\\w*\\s*.{0,20}([0-9]{1,4}|darbuotoj|žmoni|žmon|komand|specialist|brigad|worker|people|staff|team|crew|medewerk|mensen|ploeg|mitarbeit|leute|работник|люд|специалист|бригад)\\w*\\s*.{0,40}(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу|reikia|nodig|brauch|нужн)\\w*\\s*.{0,30}(darb|work|job|projekt|project|employer|užsakym|werk|opdracht|werkgever|arbeit|auftrag|arbeitgeb|работ|проект|заказ)", 10),
+      // SEEKING WORK **FOR OUR PEOPLE** — the possessive is what makes it
+      // supply. "Ieškome darbo savo darbuotojams", "looking for work for our
+      // people", "Arbeit für unsere Mitarbeiter".
+      p("(ieško|ieškau|ieškom|paieška|looking|search|seeking|zoek|such|ищем|ищу)\\w*\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|auftrag|работ|проект)\\w*\\s*.{0,20}(savo|mūsų|our|onze|unser|наш|для\\s+наш)\\w*\\s*.{0,20}(darbuotoj|žmon|komand|specialist|worker|people|staff|medewerk|mensen|mitarbeit|leute|работник|люд|специалист)", 10),
+      // WORK **FOR THEM** — the pronoun carries the same possession.
+      // "turim 20 suvirintoju, reikia jiems projektu".
+      p("(jiems|joms|them|voor\\s+hen|für\\s+sie|ihnen|для\\s+них|им)\\s*.{0,20}(darb|work|job|projekt|project|werk|opdracht|arbeit|работ|проект)", 10),
+      // WE CAN OFFER … "Galime pasiūlyti 15 statybininkų", "we can offer",
+      // "wir können … anbieten", "we kunnen … aanbieden".
+      //
+      // THE SUBJECT IS LOAD-BEARING, and both halves cost a real regression:
+      //   * `galim` without a closing boundary also matches "galimYBES", so
+      //     "Kokias galimybes man gali pasiūlyti?" — the owner's own phrase
+      //     for the opportunity board — was read as an agency offering
+      //     capacity;
+      //   * a bare `can` matches "CAN YOU offer me…", which is a question TO
+      //     us, not an offer FROM anyone.
+      // Hence: closed first-person forms, each fully bounded.
+      p("\\b(galime|galim|galiu|we\\s+can|we\\s+kunnen|wij\\s+kunnen|wir\\s+können|wir\\s+konnen|можем|могу)\\b\\s*.{0,16}(pasiūl|siūl|offer|provide|supply|aanbied|leveren|anbiet|bereitstell|предлож|предостав)", 10),
+      // HAVE + COUNT … AVAILABLE. The COUNT is required: "Turime laisvų
+      // darbuotojų" without one is the employer's own roster question and
+      // must stay `who-available`.
+      p("(turim|turiu|have|hebben|haben|имеем|располага)\\w*\\s*.{0,10}[0-9]{1,4}\\s*.{0,30}(laisv|available|beschikbaar|verfügbar|verfuegbar|свобод|доступ)", 10),
+      // AN AGENCY SAYING IT HAS PEOPLE. Only a supplier describes itself this
+      // way, so the sentence needs no second market-facing clause.
+      p("(agent[uū]r|agency|uitzend|bureau|agentur|агент)\\w*\\s*.{0,40}(turim|turiu|have|hebben|haben|имеем|располага)", 9),
+    ],
+  },
   // ── AI workspace intents (W4) ────────────────────────────────────────────
   // First, because each one is a MORE SPECIFIC reading of words that a
   // general rule below would otherwise swallow ("įgūdžiai" → profile,

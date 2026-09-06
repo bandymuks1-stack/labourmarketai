@@ -63,6 +63,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "client-demand": "what the agency's clients need (shared demands)",
   "proposal-status": "status of the agency's proposals / client decisions",
   "agency-offers": "the candidates an agency offered to this company",
+  "offer-capacity":
+    "the speaker HAS people or capacity and is offering them to the market (agency supply: \"we have 20 welders and are looking for work for them\") — the opposite of needing workers",
   "invite-student": "an education institution invites a student / learner",
   programmes: "an institution's programmes, cohorts or learner assignment",
   lmc: "credits, balance or payments (LMC)",

@@ -12006,6 +12006,9 @@
         "moveWorker": {
           "label": "Move a person to another project",
           "description": "Assigns to the new project and ends the previous assignment — after the what-if."
+        },
+        "offerCapacity": {
+          "label": "Record what you are offering"
         }
       },
       "education": {
@@ -12151,7 +12154,13 @@
         "projectCity": "City (optional)",
         "projectCityPlaceholder": "e.g. Rotterdam",
         "rosterWorker": "Roster worker",
-        "proposalNotePlaceholder": "E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "What you are offering",
+        "supplyDescriptionPlaceholder": "E.g. 20 welders with VCA, available from October, Netherlands or Belgium",
+        "supplyRole": "What profession",
+        "supplyRolePlaceholder": "E.g. welder",
+        "supplyTeamSize": "How many people you have",
+        "supplyLocation": "Where they can work"
       },
       "availability": {
         "available": "Available",
@@ -13482,6 +13491,10 @@
         "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
         "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
         "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
+      },
+      "offerCapacity": {
+        "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
+        "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
       }
     },
     "project": {

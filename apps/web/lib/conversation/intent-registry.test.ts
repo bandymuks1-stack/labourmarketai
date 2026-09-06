@@ -58,7 +58,12 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 64 -> 65 with `availability` ("galiu dirbti nuo spalio 1 d." — the
     // person states from when they can work; opens the work card with the
     // date in it, write).
-    expect(entries.length).toBe(65);
+    // 65 -> 66 with `offer-capacity` (owner window 7 §4: "turime 20
+    // suvirintojų, ieškome jiems darbo" — the SUPPLY side of the market,
+    // which until now was routed as a personal job search or, worse,
+    // inverted into "we need 20 welders"; opens the same canonical intake
+    // stamped intent "partner" → kind agency_offer, write).
+    expect(entries.length).toBe(66);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -96,6 +101,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       "log-work",
       "move-worker",
       "need-workers",
+      // SUPPLY — the same canonical intake as a need, stamped "partner".
+      "offer-capacity",
       "programmes",
       "propose-candidate",
       // PROJECT → PROGRESS: a stage moved to a real status, by sentence.

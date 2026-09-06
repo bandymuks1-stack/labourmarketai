@@ -844,6 +844,16 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuw project aanmaken",
     de: "Neues Projekt anlegen",
   },
+  // SUPPLY (owner window 7 §4) — the speaker HAS people and offers them.
+  // Each sentence carries both halves the rule requires: a count or a word
+  // for people, and the market-facing clause that makes it an offer.
+  "offer-capacity": {
+    lt: "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose.",
+    en: "We have 30 welders and we are looking for work for them.",
+    ru: "Мы имеем 20 сварщиков и ищем для них работу.",
+    nl: "Wij hebben 20 lassers beschikbaar.",
+    de: "Wir haben 20 Schweisser verfuegbar.",
+  },
   "agency-offers": {
     lt: "Kokius kandidatus pasiūlė agentūra?",
     en: "Which candidates did the agency offer?",

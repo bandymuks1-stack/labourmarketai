@@ -3463,6 +3463,9 @@
         "moveWorker": {
           "label": "Liiguta inimene teise projekti",
           "description": "Määrab uude projekti ja lõpetab eelmise määramise — pärast tagajärgede vaadet."
+        },
+        "offerCapacity": {
+          "label": "Pane oma pakkumine kirja"
         }
       },
       "education": {
@@ -3606,7 +3609,13 @@
         "projectCity": "Linn (valikuline)",
         "projectCityPlaceholder": "nt Rotterdam",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Mida pakute",
+        "supplyDescriptionPlaceholder": "Nt 20 keevitajat VCA-ga, vabad alates oktoobrist, Holland või Belgia",
+        "supplyRole": "Milline amet",
+        "supplyRolePlaceholder": "Nt keevitaja",
+        "supplyTeamSize": "Kui palju inimesi teil on",
+        "supplyLocation": "Kus nad saavad töötada"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4568,6 +4577,10 @@
         "usingProfile": "Midagi pole vaja üles laadida — otsin selle põhjal, mis su profiilis juba on.",
         "usingProfileNarrowed": "Midagi pole vaja üles laadida — otsin su profiili ja seni öeldu põhjal.",
         "profileEmpty": "Sinu profiilis pole veel midagi, seega ei saa ma selle järgi otsida. Kirjuta üles üks töö või ütle oma amet — ja ma otsin kohe."
+      },
+      "offerCapacity": {
+        "needsCompany": "Inimeste pakkumine kuulub organisatsioonile ja sa oled praegu oma isiklikus ruumis. Vali ettevõte — ja ma panen pakkumise kohe kirja.",
+        "personalSpace": "Inimeste või meeskonna pakkumiseks on vaja organisatsiooni, sul seda veel ei ole. Võid luua ettevõtte või pakkuda oma enda teenust."
       }
     },
     "project": {

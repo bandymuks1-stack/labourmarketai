@@ -45,6 +45,7 @@ import {
   educationAssignLearnerForm,
   educationCreateCohortForm,
   getCompanyForm,
+  supplyOfferFormSpec,
 } from "@/lib/conversation/company-forms";
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
@@ -4806,6 +4807,46 @@ export function ConversationChat({
         // workers gets the honest fallback, never a wrong-audience form.
         // V9: what the sentence already SAID pre-fills the form (visible,
         // editable, still reviewed — nothing submitted on their behalf).
+        /**
+         * SUPPLY — "AŠ TURIU / GALIU" (owner window 7 §4, 2026-09-06).
+         *
+         * "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose."
+         * Before this handler that sentence reached `find-work`: a staffing
+         * agency with twenty welders was answered as one person hunting for a
+         * job. The market has two sides and the product only heard one.
+         *
+         * It opens the SAME canonical intake a need uses, in its supply
+         * wording, stamped `intent: "partner"` → `customer_requests` with
+         * `kind = 'agency_offer'`. One intake, one schema, one confirmation
+         * token, one executor — the door was the only thing missing.
+         */
+        offerCapacity: () => {
+          if (identity === "company") {
+            openForm(
+              supplyOfferFormSpec(),
+              undefined,
+              undefined,
+              demandPrefill(structureValueStatement(text), text),
+            );
+            return;
+          }
+          if (canActAsEmployer && workspaceChips.length > 0) {
+            // They DO represent a company — just not in this space. Capacity
+            // belongs to an organisation, never to a personal profile, so the
+            // honest answer is the real switch, not a refusal.
+            withTyping(() => assistant(t("offerCapacity.needsCompany"), workspaceChips));
+            return;
+          }
+          // A person with no organisation. Offering other people's capacity
+          // is an organisation's act; what this person CAN do is offer their
+          // own service or start the organisation — both already exist.
+          withTyping(() =>
+            assistant(t("offerCapacity.personalSpace"), [
+              { id: "f:company.create-organization", label: labels.chipCreateOrganization },
+              { id: "link:/dashboard/services", label: t("valueIntent.chipServices") },
+            ]),
+          );
+        },
         needWorkers: () => {
           if (identity === "company") {
             openForm(

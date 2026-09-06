@@ -12006,6 +12006,9 @@
         "moveWorker": {
           "label": "Perkelti žmogų į kitą projektą",
           "description": "Priskiria naujam projektui ir baigia ankstesnį priskyrimą — po pasekmių peržiūros."
+        },
+        "offerCapacity": {
+          "label": "Užrašyti, ką siūlote"
         }
       },
       "education": {
@@ -12151,7 +12154,13 @@
         "projectCity": "Miestas (nebūtina)",
         "projectCityPlaceholder": "pvz. Roterdamas",
         "rosterWorker": "Komandos narys",
-        "proposalNotePlaceholder": "Pvz., 5 m. patirtis, gali pradėti pirmadienį"
+        "proposalNotePlaceholder": "Pvz., 5 m. patirtis, gali pradėti pirmadienį",
+        "supplyDescription": "Ką siūlote",
+        "supplyDescriptionPlaceholder": "Pvz., 20 suvirintojų su VCA, laisvi nuo spalio, Nyderlandai arba Belgija",
+        "supplyRole": "Kokios profesijos žmonės",
+        "supplyRolePlaceholder": "Pvz., suvirintojas",
+        "supplyTeamSize": "Kiek žmonių turite",
+        "supplyLocation": "Kur jie gali dirbti"
       },
       "availability": {
         "available": "Laisvas",
@@ -13482,6 +13491,10 @@
         "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
         "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
         "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
+      },
+      "offerCapacity": {
+        "needsCompany": "Darbuotojų pasiūlymas priklauso organizacijai, o dabar dirbi asmeninėje erdvėje. Pasirink įmonę — ir iškart užrašysiu pasiūlymą.",
+        "personalSpace": "Kad galėtum siūlyti žmones ar komandą, reikia organizacijos — kol kas jos neturi. Gali sukurti įmonę arba pasiūlyti savo paties paslaugą."
       }
     },
     "project": {

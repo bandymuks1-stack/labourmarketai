@@ -3463,6 +3463,9 @@
         "moveWorker": {
           "label": "Flytt en person til et annet prosjekt",
           "description": "Tildeler det nye prosjektet og avslutter den forrige tildelingen — etter konsekvensvisningen."
+        },
+        "offerCapacity": {
+          "label": "Registrer det dere tilbyr"
         }
       },
       "education": {
@@ -3606,7 +3609,13 @@
         "projectCity": "By (valgfritt)",
         "projectCityPlaceholder": "f.eks. Rotterdam",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Hva dere tilbyr",
+        "supplyDescriptionPlaceholder": "F.eks. 20 sveisere med VCA, ledige fra oktober, Nederland eller Belgia",
+        "supplyRole": "Hvilket yrke",
+        "supplyRolePlaceholder": "F.eks. sveiser",
+        "supplyTeamSize": "Hvor mange folk dere har",
+        "supplyLocation": "Hvor de kan arbeide"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4568,6 +4577,10 @@
         "usingProfile": "Du trenger ikke laste opp noe — jeg søker med det som allerede står i profilen din.",
         "usingProfileNarrowed": "Du trenger ikke laste opp noe — jeg søker med profilen din og det du har fortalt så langt.",
         "profileEmpty": "Det står ingenting i profilen din ennå, så jeg kan ikke søke ut fra den. Registrer én jobb eller si hvilket yrke du har — så søker jeg med en gang."
+      },
+      "offerCapacity": {
+        "needsCompany": "Å tilby folk hører til en organisasjon, og du er i ditt personlige rom nå. Velg selskapet — så registrerer jeg tilbudet med en gang.",
+        "personalSpace": "Å tilby folk eller et team krever en organisasjon, og du har ingen ennå. Du kan opprette et selskap, eller tilby din egen tjeneste."
       }
     },
     "project": {

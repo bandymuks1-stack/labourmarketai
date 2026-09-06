@@ -3463,6 +3463,9 @@
         "moveWorker": {
           "label": "Pārcelt cilvēku uz citu projektu",
           "description": "Piesaista jaunajam projektam un beidz iepriekšējo piesaisti — pēc seku pārskata."
+        },
+        "offerCapacity": {
+          "label": "Pierakstīt jūsu piedāvājumu"
         }
       },
       "education": {
@@ -3606,7 +3609,13 @@
         "projectCity": "Pilsēta (nav obligāti)",
         "projectCityPlaceholder": "piem. Roterdama",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Ko piedāvājat",
+        "supplyDescriptionPlaceholder": "Piem., 20 metinātāju ar VCA, brīvi no oktobra, Nīderlande vai Beļģija",
+        "supplyRole": "Kāda profesija",
+        "supplyRolePlaceholder": "Piem., metinātājs",
+        "supplyTeamSize": "Cik cilvēku jums ir",
+        "supplyLocation": "Kur viņi var strādāt"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4568,6 +4577,10 @@
         "usingProfile": "Nekas nav jāaugšupielādē — meklēju pēc tā, kas jau ir tavā profilā.",
         "usingProfileNarrowed": "Nekas nav jāaugšupielādē — meklēju pēc tava profila un tā, ko jau esi norādījis.",
         "profileEmpty": "Tavā profilā pagaidām nekā nav, tāpēc pēc tā meklēt nevaru. Pieraksti vienu darbu vai nosauc savu profesiju — un es uzreiz meklēšu."
+      },
+      "offerCapacity": {
+        "needsCompany": "Darbinieku piedāvāšana pieder organizācijai, bet tu pašlaik esi savā personīgajā telpā. Izvēlies uzņēmumu — un es uzreiz pierakstīšu piedāvājumu.",
+        "personalSpace": "Lai piedāvātu cilvēkus vai komandu, vajadzīga organizācija, un tev tādas vēl nav. Vari izveidot uzņēmumu vai piedāvāt savu pakalpojumu."
       }
     },
     "project": {

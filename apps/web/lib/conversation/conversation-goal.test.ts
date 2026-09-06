@@ -140,6 +140,53 @@ describe("C — employer demand (the goal must not flip to job hunting)", () => 
   });
 });
 
+describe("D — agency supply stays SUPPLY across four turns (owner §4)", () => {
+  it("never flips into 'we need 20 welders'", () => {
+    // Before the supply rule existed this sentence resolved to `find-work`:
+    // a staffing agency with twenty welders read as one person job hunting.
+    const t1 = turn(null, "Turime 20 suvirintojų, kuriems ieškome darbo.");
+    expect(t1.kind).toBe("new-goal");
+    expect(t1.goal?.intent).toBe("offer-capacity");
+
+    for (const [text, read] of [
+      ["Nuo spalio.", { start: "2026-10" }],
+      ["Nyderlanduose arba Belgijoje.", { country: "NL" }],
+      ["Jie turi VCA.", undefined],
+    ] as const) {
+      const next = turn(t1.goal, text, read);
+      expect(next.kind).toBe("follow-up");
+      // The one thing that must never happen: the goal becoming demand.
+      expect(next.goal?.intent).toBe("offer-capacity");
+      expect(next.goal?.intent).not.toBe("need-workers");
+      expect(next.goal?.intent).not.toBe("find-work");
+    }
+  });
+
+  it("carries the whole statement forward across the turns", () => {
+    const t1 = turn(null, "Turime 20 suvirintojų, kuriems ieškome darbo.");
+    const t2 = turn(t1.goal, "Nuo spalio.", { start: "2026-10" });
+    const t3 = turn(t2.goal, "Nyderlanduose arba Belgijoje.", { country: "NL" });
+    expect(t3.goal?.filters.start).toBe("2026-10");
+    expect(t3.goal?.filters.country).toBe("NL");
+    // What the supply-offer form is prefilled from: the count and the trade
+    // stated in turn 1 must still be in it at turn 3.
+    const composed = goalSentence(t3.goal, "Nyderlanduose arba Belgijoje.");
+    expect(composed).toContain("20");
+    expect(composed).toContain("suvirintoj");
+  });
+
+  it("an employer's need is still a need — the two directions do not collide", () => {
+    const t1 = turn(null, "Reikia 8 elektrikų nuo spalio.");
+    expect(t1.goal?.intent).toBe("need-workers");
+    const t2 = turn(t1.goal, "Turime 20 suvirintojų, kuriems ieškome darbo.");
+    // A genuinely stated supply sentence DOES open its own goal — the same
+    // organisation may hire and supply, and this is an asserted new goal,
+    // not a weak side effect of one matched word.
+    expect(t2.kind).toBe("new-goal");
+    expect(t2.goal?.intent).toBe("offer-capacity");
+  });
+});
+
 describe("F — correction replaces the fact, it does not create a second one", () => {
   it("'Ne, 12.' corrects the live demand rather than falling to the fallback", () => {
     const t1 = turn(null, "Reikia 10 mechanikų.");

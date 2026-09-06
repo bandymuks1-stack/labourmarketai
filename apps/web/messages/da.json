@@ -3463,6 +3463,9 @@
         "moveWorker": {
           "label": "Flyt en person til et andet projekt",
           "description": "Tildeler det nye projekt og afslutter den tidligere tildeling — efter konsekvensvisningen."
+        },
+        "offerCapacity": {
+          "label": "Registrér hvad I tilbyder"
         }
       },
       "education": {
@@ -3606,7 +3609,13 @@
         "projectCity": "By (valgfrit)",
         "projectCityPlaceholder": "f.eks. Rotterdam",
         "rosterWorker": "Teammedlem",
-        "proposalNotePlaceholder": "F.eks. 5 års erfaring, kan starte mandag"
+        "proposalNotePlaceholder": "F.eks. 5 års erfaring, kan starte mandag",
+        "supplyDescription": "Hvad I tilbyder",
+        "supplyDescriptionPlaceholder": "F.eks. 20 svejsere med VCA, ledige fra oktober, Holland eller Belgien",
+        "supplyRole": "Hvilket fag",
+        "supplyRolePlaceholder": "F.eks. svejser",
+        "supplyTeamSize": "Hvor mange folk I har",
+        "supplyLocation": "Hvor de kan arbejde"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4568,6 +4577,10 @@
         "usingProfile": "Du behøver ikke uploade noget — jeg søger ud fra det, der allerede står i din profil.",
         "usingProfileNarrowed": "Du behøver ikke uploade noget — jeg søger ud fra din profil og det, du har fortalt indtil nu.",
         "profileEmpty": "Der står endnu ikke noget i din profil, så jeg kan ikke søge ud fra den. Registrér ét job eller fortæl hvilket fag du har — så søger jeg med det samme."
+      },
+      "offerCapacity": {
+        "needsCompany": "At tilbyde folk hører til en organisation, og du er i dit personlige rum lige nu. Vælg virksomheden — så registrerer jeg tilbuddet med det samme.",
+        "personalSpace": "At tilbyde folk eller et team kræver en organisation, og du har ingen endnu. Du kan oprette en virksomhed eller tilbyde din egen ydelse."
       }
     },
     "project": {
