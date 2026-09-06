@@ -67,6 +67,16 @@ import { loadProjectReadinessForChat } from "@/lib/conversation/project-readines
 import { loadConfirmWorkForChat } from "@/lib/conversation/confirm-work";
 import type { ConfirmWorkChatResult } from "@/lib/conversation/confirm-work-contract";
 import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal";
+import {
+  advanceGoal,
+  classifyTurn,
+  declineOutstandingOffers,
+  goalSentence,
+  noteOffered,
+  statedConstraintCount,
+  withoutDeclined,
+  type ConversationGoal,
+} from "@/lib/conversation/conversation-goal";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
@@ -671,6 +681,7 @@ export function ConversationChat({
   agencyWorkspace = false,
   learnerContextLine = null,
   starters = null,
+  personHasProfileData = null,
   contextFallback = null,
   workspaceContextLine = null,
   pins = null,
@@ -719,6 +730,18 @@ export function ConversationChat({
    *  from the ONE chat label bag; ids are the existing `handleChip`
    *  vocabulary. */
   starters?: readonly StarterChipSpec[] | null;
+  /**
+   * KNOWN-STATE-FIRST (owner P0 §3, 2026-09-06): does the product already
+   * hold something real about this person — skills, work history or journal
+   * entries? Read on the server in the SAME batch as the starters.
+   *
+   * `null` is UNKNOWN and must stay distinguishable from `false`. When the
+   * person says "tu jau turi mano duomenis" the answer depends on this: with
+   * `true` we say we will use it, with `false` we say honestly that there is
+   * nothing to use yet, and with `null` we claim neither (§10 — never assert
+   * we hold data that canonical state has not proven).
+   */
+  personHasProfileData?: boolean | null;
   /** The not-understood answer, composed on the server from the same
    *  capability tracks ("I can help with needs, candidates, projects,
    *  clients…"). `null` = the identity's plain fallback. */
@@ -977,11 +1000,34 @@ export function ConversationChat({
    *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
    *  sat under the open project sheet and could not be tapped. */
   const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
+
+  /**
+   * THE ACTIVE CONVERSATION GOAL (owner P0 §1/§5, 2026-09-06).
+   *
+   * A ref, not state: every answer in this component reads it through stable
+   * callbacks, and re-rendering the whole thread because a constraint was
+   * remembered would be a regression of its own. It survives every action —
+   * opening a form, a panel, the World — which is the §5 requirement that a
+   * visual action must not destroy the goal a sentence set.
+   */
+  const goalRef = useRef<ConversationGoal | null>(null);
+
   const assistant = useCallback(
     (text: string, chips?: ChoiceChip[]) => {
-      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips });
+      // ANTI-LOOP, at the ONE place chips reach the thread (owner §6). An
+      // action the person has already refused cannot be re-offered by ANY
+      // answer — including the many written long before the goal existed.
+      // This is deliberately not a CV-specific guard: the ledger is keyed on
+      // the action id, so it covers every offer the product makes.
+      const shown = withoutDeclined(goalRef.current, chips) as ChoiceChip[] | undefined;
+      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips: shown });
       persistTurn("assistant", text);
-      if (chips && chips.length > 0) setChipsPostedAt(Date.now());
+      if (shown && shown.length > 0) {
+        setChipsPostedAt(Date.now());
+        // Remember what is on the table, so the next turn can tell whether
+        // the person is refusing it.
+        goalRef.current = noteOffered(goalRef.current, shown.map((c) => c.id));
+      }
     },
     [pushMessage, persistTurn],
   );
@@ -1129,6 +1175,12 @@ export function ConversationChat({
           ].filter(Boolean);
 
           if (res.kind === "matches") {
+            // The world the search actually ran in comes back from the server
+            // and is carried on the goal, so the NEXT turn narrows further
+            // instead of starting over (owner §4, constraint accumulation).
+            if (res.worldState && goalRef.current) {
+              goalRef.current = { ...goalRef.current, filters: res.worldState };
+            }
             const applied = res.appliedFilters
               .map((f) => `${f.label}: ${f.matchedText}`)
               .join(" · ");
@@ -4373,8 +4425,15 @@ export function ConversationChat({
   );
 
   const handleSend = useCallback(
-    (text: string) => {
-      user(text);
+    /**
+     * `sent` is the RAW sentence exactly as typed. It is what the person
+     * sees in the thread, what the router classifies and what the goal
+     * records. Below, `text` becomes the sentence the HANDLERS see — the
+     * same thing for a new goal, and the whole goal so far for a
+     * continuation (see the comment where it is derived).
+     */
+    (sent: string) => {
+      user(sent);
       // QA Q-4: whatever is sent, a pending hand-off is consumed — the composer
       // that mounts after the first turn must not offer the sentence again.
       setSayPrefill("");
@@ -4388,7 +4447,7 @@ export function ConversationChat({
       if (last) {
         const corrected = applyCorrection(
           last.statement,
-          text,
+          sent,
           new Date().toISOString().slice(0, 10),
         );
         if (corrected) {
@@ -4406,22 +4465,111 @@ export function ConversationChat({
             // The OLD value is named as replaced — never silently swapped.
             assistant(t("valueIntent.corrected", { changes }));
             renderValueStatement(corrected.statement, last.text);
+            // A corrected value statement is still the same goal in flight —
+            // the early return must not leave it un-aged.
+            goalRef.current = advanceGoal({
+              goal: goalRef.current,
+              kind: "correction",
+              routedIntent: goalRef.current?.intent ?? "unknown",
+              text: sent,
+            });
           });
           return;
         }
       }
 
-      const { intent } = classifyIntent(text);
+      const { intent: routedIntent, score: routedScore } = classifyIntent(sent);
+
+      /**
+       * ── WHAT KIND OF TURN IS THIS? (owner P0 §4, 2026-09-06) ─────────────
+       *
+       * The deterministic router stays the floor and has just run. This asks
+       * the second question it never asked: is this sentence a CONTINUATION
+       * of what we were already doing?
+       *
+       * The observed failure was the absence of this step. "tu jau turi mano
+       * duomenis" scored 0, fell to the generic fallback, and the fallback's
+       * chip row offered the same import again — twice in a row, because
+       * nothing in the loop knew there had been a first time.
+       */
+      const priorGoal = goalRef.current;
+      const turnKind = classifyTurn({
+        text: sent,
+        routedIntent,
+        routedScore,
+        goal: priorGoal,
+      });
+      goalRef.current = advanceGoal({
+        goal: priorGoal,
+        kind: turnKind,
+        routedIntent,
+        text: sent,
+      });
+
+      // A refusal, or a statement that the product already holds what it was
+      // asking for, retires EVERY offer that was on the table. Both are the
+      // person saying "not this" — the difference is only whether they also
+      // told us why, and neither may be answered by repeating the offer.
+      if (turnKind === "rejection" || turnKind === "use-known-state") {
+        goalRef.current = declineOutstandingOffers(goalRef.current);
+      }
+
+      /**
+       * A CONTINUATION RE-ENTERS THE GOAL, not the router (owner §1/§4).
+       *
+       * "gerai, tada ieškok visoje Europoje", "Ne, 12.", "Nuo spalio.",
+       * "tu jau turi mano duomenis" — none of these name their destination,
+       * and three of the four scored 0. Routed on their own they became a
+       * fallback; routed against the goal they are what they actually are:
+       * the same goal, with one more thing known about it.
+       *
+       * Execution is unchanged. This re-enters the SAME handler the goal's
+       * intent already had — one dispatcher, one registry, one set of
+       * executors — so nothing here can reach a write the sentence could not
+       * have reached on its own.
+       */
+      const continuing =
+        goalRef.current !== null &&
+        (turnKind === "follow-up" ||
+          turnKind === "correction" ||
+          turnKind === "use-known-state");
+
+      const intent: ConversationIntent = continuing
+        ? goalRef.current!.intent
+        : routedIntent;
+
+      /**
+       * THE SENTENCE THE HANDLERS SEE.
+       *
+       * For a new goal it is exactly what the person just typed. For a
+       * continuation it is everything said about THIS goal, latest last —
+       * because the handlers that prefill a form read facts out of words, not
+       * out of `filters`. Without this, "Ne, 12." reopened the employer's
+       * intake carrying only "12" and lost the trade named a turn earlier: a
+       * correction that destroyed the thing it was correcting (owner §9 F —
+       * the canonical state must end up 12 mechanics, not two demands and not
+       * ten). A reader that lets the LAST mention win therefore sees the
+       * correction, and the rest of the goal survives it.
+       */
+      const text = continuing ? goalSentence(goalRef.current, sent) : sent;
       // Chat-first execution funnel: was the sentence understood, and by WHOM —
-      // the deterministic router (the always-on floor) or, for a sentence it
-      // could not read, the Gemini proposer (owner approval 2026-09-05). The
-      // intent id, the coarse role and the resolution only — never the sentence.
-      const trackResolution = (resolved: ConversationIntent, resolution: "deterministic" | "llm") =>
+      // the deterministic router (the always-on floor), the ACTIVE GOAL (a
+      // continuation the router alone reads as `unknown`), or, failing both,
+      // the Gemini proposer (owner approval 2026-09-05). The intent id, the
+      // coarse role and the resolution only — never the sentence. "goal" is
+      // its own value so the owner can measure how much of the conversation
+      // the new memory is actually carrying.
+      const trackResolution = (
+        resolved: ConversationIntent,
+        resolution: "deterministic" | "goal" | "llm",
+      ) =>
         trackFunnel(
           resolved === "unknown" ? FUNNEL_EVENTS.chatIntentUnrecognized : FUNNEL_EVENTS.chatIntentRecognized,
           { surface: "chat", step: resolved, role_context: roleContextNow, resolution },
         );
-      if (intent !== "unknown") trackResolution(intent, "deterministic");
+      if (intent !== "unknown") {
+        trackResolution(intent, continuing ? "goal" : "deterministic");
+      }
 
       // MY SPACE §4C — the typed sentence is a use of the SAME reference its
       // chip carries ("užrašyk darbą" three times = the log-work chip three
@@ -4475,6 +4623,29 @@ export function ConversationChat({
           // profession the person had just stated. The search still runs;
           // the ONE fact that would narrow the list is read back FIRST, with
           // the door that records it — before any foreign listing (G-A1).
+          /**
+           * "tu jau turi mano duomenis" (owner P0 §3/§7/§10, 2026-09-06).
+           *
+           * The person is not asking for an import — they are telling us to
+           * stop asking for one. The answer says what will be used, and it
+           * says it from CANONICAL STATE: `true` promises the profile, and
+           * `false` admits honestly that there is nothing in it yet rather
+           * than claiming to hold data we do not. `null` (the read degraded)
+           * claims neither and simply searches.
+           */
+          if (goalRef.current?.useKnownState) {
+            if (personHasProfileData === true) {
+              assistant(
+                statedConstraintCount(goalRef.current) > 0
+                  ? t("knownState.usingProfileNarrowed")
+                  : t("knownState.usingProfile"),
+              );
+            } else if (personHasProfileData === false) {
+              assistant(t("knownState.profileEmpty"), [
+                { id: "logwork", label: labels.chipLogWork },
+              ]);
+            }
+          }
           const stated = readProfessionStatement(text);
           if (stated) {
             const label =
@@ -4487,7 +4658,9 @@ export function ConversationChat({
                 : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
             ]);
           }
-          return runFindWork(text);
+          // The world earlier turns of THIS goal already narrowed travels
+          // with the search; a new goal carries nothing (owner §4).
+          return runFindWork(text, goalRef.current?.filters);
         }),
         /**
          * "esu buhalteris" / "dirbu inžinieriumi" / "dirbau projektų vadovu

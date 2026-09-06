@@ -28,10 +28,15 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { listMyEngagements } from "@/lib/invitations/network";
 import {
   loadCompanyStarterContext,
+  loadPersonStarterFacts,
   personStarterContext,
   type WorkspaceStarterContext,
 } from "@/lib/conversation/starter-signals";
-import { capabilityPhraseKeys, deriveStarters } from "@/lib/conversation/starters";
+import {
+  capabilityPhraseKeys,
+  deriveStarters,
+  personHasUsableProfile,
+} from "@/lib/conversation/starters";
 import { listMyPins } from "@/lib/workspace/pins";
 import { Link } from "@/lib/i18n/navigation";
 import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
@@ -145,15 +150,23 @@ export default async function DashboardHomePage({
   // opening can acknowledge the real learning context. Every read degrades to
   // the plain greeting — nothing is fabricated.
   const identity = baseIdentityForRole(activeRole) ?? "person";
-  const [{ offers, labels: bookingLabels }, learnerLink, starterContext] = await Promise.all([
-    loadBookingOffers(activeRole),
-    identity === "person" ? loadActiveLearnerLink() : null,
-    identity === "company"
-      ? loadCompanyStarterContext()
-      : Promise.resolve<WorkspaceStarterContext | null>(null),
-  ]);
+  // KNOWN-STATE-FIRST (owner P0 §3, 2026-09-06): the person's suggestions
+  // are derived from what the product already holds about them, so an
+  // account with real skills, history or journal entries is no longer told
+  // its first step is to upload a CV. Read in the SAME parallel batch as the
+  // rest — three bounded head-counts, each degrading to "unknown".
+  const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
+    await Promise.all([
+      loadBookingOffers(activeRole),
+      identity === "person" ? loadActiveLearnerLink() : null,
+      identity === "company"
+        ? loadCompanyStarterContext()
+        : Promise.resolve<WorkspaceStarterContext | null>(null),
+      identity === "person" ? loadPersonStarterFacts() : null,
+    ]);
   const workspace: WorkspaceStarterContext =
-    starterContext ?? personStarterContext(Boolean(learnerLink));
+    starterContext ??
+    personStarterContext(Boolean(learnerLink), personFacts ?? undefined);
   const { agencyWorkspace, educationWorkspace } = workspace;
   const starters = deriveStarters(workspace.signals);
   // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
@@ -231,6 +244,9 @@ export default async function DashboardHomePage({
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}
         starters={starters}
+        personHasProfileData={
+          personFacts ? personHasUsableProfile(personFacts) : null
+        }
         contextFallback={contextFallback}
         workspaceContextLine={workspaceContextLine}
         pins={pins}

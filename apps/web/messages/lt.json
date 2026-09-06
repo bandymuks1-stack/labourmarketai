@@ -13477,7 +13477,12 @@
       "chipLogWork": "Užrašyti darbą",
       "chipCreateDemand": "Aprašyti poreikį",
       "scoutingPickDemand": "Pasirinkite vieną — kandidatus parodysiu čia pat, darbo erdvėje.",
-      "chipProjectCsv": "Atsisiųsti CSV: {title}"
+      "chipProjectCsv": "Atsisiųsti CSV: {title}",
+      "knownState": {
+        "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
+        "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
+        "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
+      }
     },
     "project": {
       "fieldStatus": "Būsena",

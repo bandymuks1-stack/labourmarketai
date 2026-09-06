@@ -20,6 +20,8 @@ import {
 import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
 import { readLearningCompass } from "@/lib/learning/learning-compass";
 import { loadUnchosenCountryNextSteps } from "@/lib/conversation/country-next-steps-server";
+import { mergeFilters as mergeCarriedFilters } from "@/lib/conversation/conversation-goal";
+import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -67,7 +69,15 @@ const ANSWER_LIMIT = 5;
  * honestly — with the countries that ARE there — rather than filtered to an
  * unexplained empty list.
  */
-export async function runFindWork(text: string): Promise<WorkflowResult> {
+export async function runFindWork(
+  text: string,
+  /**
+   * What earlier turns of the SAME goal already narrowed (owner P0 §4). The
+   * caller — the chat's conversation goal — owns this; a new goal hands
+   * nothing, so a fresh search starts in an unnarrowed world.
+   */
+  carry?: DiscoveryFilterState,
+): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (!ctx.hasWorkerProfile) {
@@ -152,21 +162,22 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
   }
 
   /**
-   * ── W6 EXTENSION POINT (persistent filters) ──────────────────────────────
-   * `reading.filters` is the World State the person just expressed. Today it is
-   * applied to THIS search only and then forgotten, so a later sentence starts
-   * from an unnarrowed world.
+   * ── PERSISTENT FILTERS, wired at the seam this comment reserved ──────────
+   * `reading.filters` is the World State THIS sentence expressed. Until the
+   * owner's P0 of 2026-09-06 it was applied to this search only and then
+   * forgotten, so "gerai, tada ieškok visoje Europoje" started from an
+   * unnarrowed world and the profession stated one turn earlier was lost.
    *
-   * When the owner approves persistence, this is the seam: the caller dispatches
-   * `change_world_state` per entry of `reading.filters` before searching, and
-   * the search reads `state.activeFilters` instead of this local value. The
-   * reducer transition already exists and is unit-tested; the map subscribes to
-   * the same slot in W6. See docs/product/AI_WORKSPACE_W4_V1.md §7.
-   *
-   * NOT wired here on purpose: persistence changes behaviour across turns
-   * (when do filters clear?), which is a product decision, not a refactor.
+   * The product decision this was waiting on ("when do filters clear?") has
+   * been made and lives in `lib/conversation/conversation-goal.ts`: they
+   * accumulate for as long as ONE goal is in flight, a later mention of the
+   * same dimension replaces it (that is what a correction is), and an
+   * asserted NEW goal starts from nothing. This function stays stateless —
+   * the goal is the caller's, handed in as `carry` and handed back as
+   * `worldState`.
    */
-  const result = await findWorkForChat(reading.filters);
+  const effective = carry ? mergeCarriedFilters(carry, reading.filters) : reading.filters;
+  const result = await findWorkForChat(effective);
   const dimensionLabel = async (m: WorldStateMatch): Promise<string> =>
     t(`dimension.${m.dimension}` as never) as string;
 
@@ -183,6 +194,7 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
     appliedFilters: await Promise.all(
       applied.map(async (m) => ({ label: await dimensionLabel(m), matchedText: m.matchedText })),
     ),
+    worldState: effective,
   };
 }
 

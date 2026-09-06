@@ -13477,7 +13477,12 @@
       "chipLogWork": "Arbeit eintragen",
       "chipCreateDemand": "Bedarf beschreiben",
       "scoutingPickDemand": "Wähle einen aus, dann zeige ich die Kandidaten direkt hier im Arbeitsbereich.",
-      "chipProjectCsv": "CSV herunterladen: {title}"
+      "chipProjectCsv": "CSV herunterladen: {title}",
+      "knownState": {
+        "usingProfile": "Du musst nichts hochladen — ich suche mit dem, was schon in deinem Profil steht.",
+        "usingProfileNarrowed": "Du musst nichts hochladen — ich suche mit deinem Profil und dem, was du bisher genannt hast.",
+        "profileEmpty": "In deinem Profil steht noch nichts, daher kann ich damit nicht suchen. Erfasse eine Arbeit oder nenne deinen Beruf — dann suche ich sofort."
+      }
     },
     "project": {
       "fieldStatus": "Status",

@@ -13477,7 +13477,12 @@
       "chipLogWork": "Log work",
       "chipCreateDemand": "Describe a need",
       "scoutingPickDemand": "Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Download CSV: {title}"
+      "chipProjectCsv": "Download CSV: {title}",
+      "knownState": {
+        "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
+        "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
+        "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
+      }
     },
     "project": {
       "fieldStatus": "Status",

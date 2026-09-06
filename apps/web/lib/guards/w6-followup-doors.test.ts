@@ -75,7 +75,7 @@ describe("G1 — the company context never runs the person's job search", () => 
     const handler = chat.slice(chat.indexOf("findWork: () => runWorkflow(async () => {"), chat.indexOf("professionStatement: () => {"));
     const guard = handler.indexOf('if (identity === "company") {');
     expect(guard).toBeGreaterThan(-1);
-    expect(guard).toBeLessThan(handler.indexOf("return runFindWork(text);"));
+    expect(guard).toBeLessThan(handler.indexOf("return runFindWork(text, goalRef.current?.filters);"));
     expect(handler).toContain('t("findWorkInCompanyContext")');
     expect(handler).toContain('explanation: { why: t("findWorkInCompanyWhy") }');
     expect(handler).toMatch(/id: `ws:\$\{personal\.id\}`, label: t\("workspacePersonal"\)/);

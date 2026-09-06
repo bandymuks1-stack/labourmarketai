@@ -4563,7 +4563,12 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Pobierz CSV: {title}"
+      "chipProjectCsv": "Pobierz CSV: {title}",
+      "knownState": {
+        "usingProfile": "Nie musisz nic wgrywać — szukam na podstawie tego, co już jest w Twoim profilu.",
+        "usingProfileNarrowed": "Nie musisz nic wgrywać — szukam na podstawie Twojego profilu i tego, co już podałeś.",
+        "profileEmpty": "W Twoim profilu nie ma jeszcze nic, więc nie mogę na nim oprzeć wyszukiwania. Zapisz jedną pracę albo podaj zawód — od razu zacznę szukać."
+      }
     },
     "project": {
       "fieldStatus": "[EN] Status",

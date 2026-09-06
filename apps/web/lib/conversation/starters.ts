@@ -46,6 +46,53 @@ export interface StarterChipSpec {
   readonly labelKey: keyof ChatLabels;
 }
 
+/**
+ * KNOWN-STATE-FIRST on the person side (owner P0 §3, 2026-09-06).
+ *
+ * The company side has read its facts since this module was written; the
+ * PERSON side never did — `personStarters` took one boolean (`learnerLinked`)
+ * and returned the same three chips to everybody, "Įkelti CV" among them,
+ * whether or not the account already held a full profile.
+ *
+ * That is the row the owner saw offered twice in a conversation whose second
+ * turn was literally "tu jau turi mano duomenis". Suggesting an import to
+ * somebody whose skills, history and journal are already in the product is
+ * not a suggestion — it is the product failing to read itself.
+ *
+ * `null` is UNKNOWN, exactly as on the company side: a degraded read
+ * contributes nothing and never becomes a fabricated zero that would claim
+ * the person has no history.
+ */
+export interface PersonStarterFacts {
+  /** Rows in `worker_skills` for this person. */
+  readonly skills: Fact;
+  /** Self-declared work history (`engagement_contexts`, no organisation). */
+  readonly workHistory: Fact;
+  /** Journal entries the person has recorded. */
+  readonly journalEntries: Fact;
+}
+
+export const UNKNOWN_PERSON_FACTS: PersonStarterFacts = Object.freeze({
+  skills: null,
+  workHistory: null,
+  journalEntries: null,
+});
+
+/**
+ * Does the product already hold enough about this person to act on?
+ *
+ * Deliberately generous: ONE real signal is enough. The question this answers
+ * is not "is the profile complete?" but "may we still suggest an import as a
+ * first step?", and the honest answer is no as soon as anything real exists.
+ * All-unknown reads as "we do not know", which keeps the previous behaviour
+ * rather than hiding the import from someone who may genuinely need it.
+ */
+export function personHasUsableProfile(facts: PersonStarterFacts): boolean {
+  return [facts.skills, facts.workHistory, facts.journalEntries].some(
+    (f) => typeof f === "number" && f > 0,
+  );
+}
+
 /** Unknown = the read degraded. It contributes NOTHING — never a fabricated
  *  count, and never a chip that pretends to know the state. */
 export type Fact = number | null;
@@ -80,6 +127,9 @@ export interface StarterSignals {
   readonly facts: CompanyStarterFacts;
   /** Person side: an ACTIVE learner link exists. */
   readonly learnerLinked: boolean;
+  /** Person side: what the product already holds about them (owner P0 §3).
+   *  Absent = not read; the suggestions then keep their previous shape. */
+  readonly personFacts?: PersonStarterFacts;
 }
 
 export const UNKNOWN_FACTS: CompanyStarterFacts = Object.freeze({
@@ -113,14 +163,36 @@ const CHIP = {
   logWork: { id: "logwork", labelKey: "chipLogWork" },
   cv: { id: "cv", labelKey: "chipCv" },
   jobs: { id: "jobs", labelKey: "chipJobs" },
+  /** The person's OWN state — offered instead of an import once real data
+   *  exists. Same `handleChip` id the typed "mano profilis" reaches. */
+  profile: { id: "profile", labelKey: "chipProfile" },
   learningCompass: { id: "link:/dashboard/profile#learning-compass", labelKey: "chipLearningCompass" },
 } as const satisfies Record<string, StarterChipSpec>;
 
-/** The worker default — unchanged since the §D ruling; a linked learner's
- *  first suggestion is their compass (the same person, one more context). */
-export function personStarters(signals: Pick<StarterSignals, "learnerLinked">): StarterChipSpec[] {
-  return signals.learnerLinked
-    ? [CHIP.learningCompass, CHIP.jobs, CHIP.logWork]
+/**
+ * The person's suggestions — now derived from what the product actually holds
+ * about them (owner P0 §3), not a fixed row.
+ *
+ * A linked learner's first suggestion stays their compass (the same person,
+ * one more context). Otherwise the CV import is offered ONLY while nothing
+ * real is known yet; once the person has skills, history or journal entries,
+ * the third suggestion is their own profile — the state they already built —
+ * instead of an invitation to supply it again.
+ *
+ * The chip row is still only a suggestion: the router understands every
+ * sentence whatever is shown here (contract §5–§6).
+ */
+export function personStarters(
+  signals: Pick<StarterSignals, "learnerLinked"> & {
+    readonly personFacts?: PersonStarterFacts;
+  },
+): StarterChipSpec[] {
+  if (signals.learnerLinked) {
+    return [CHIP.learningCompass, CHIP.jobs, CHIP.logWork];
+  }
+  const known = personHasUsableProfile(signals.personFacts ?? UNKNOWN_PERSON_FACTS);
+  return known
+    ? [CHIP.logWork, CHIP.jobs, CHIP.profile]
     : [CHIP.logWork, CHIP.cv, CHIP.jobs];
 }
 

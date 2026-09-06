@@ -4563,7 +4563,12 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Last ned CSV: {title}"
+      "chipProjectCsv": "Last ned CSV: {title}",
+      "knownState": {
+        "usingProfile": "Du trenger ikke laste opp noe — jeg søker med det som allerede står i profilen din.",
+        "usingProfileNarrowed": "Du trenger ikke laste opp noe — jeg søker med profilen din og det du har fortalt så langt.",
+        "profileEmpty": "Det står ingenting i profilen din ennå, så jeg kan ikke søke ut fra den. Registrer én jobb eller si hvilket yrke du har — så søker jeg med en gang."
+      }
     },
     "project": {
       "fieldStatus": "[EN] Status",
