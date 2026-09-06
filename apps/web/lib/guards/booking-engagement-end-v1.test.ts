@@ -1207,6 +1207,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
       // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
       "20260905200000_billing_safety_invariants_v1.sql",
+      // 2026-09-06 (owner window 7 §4): the worker board's gated read
+      // served agency SUPPLY offers to workers as open jobs — measured 2 of
+      // 9 rows on production. The fix is a SECURITY DEFINER body replace =
+      // RED class, so it carries the acknowledgement marker and ships as a
+      // DRAFT with needs-human-gate. NOT applied; owner approval pending.
+      "20260906140000_worker_board_excludes_supply_v1.sql",
 ]);
   });
 

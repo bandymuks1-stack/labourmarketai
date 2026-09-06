@@ -793,7 +793,12 @@ describe("NO new DB migration in this PR", () => {
     // window 6, 2026-09-06, GREEN additive partial index for the board
     // supply-freshness read; paired rollback). RECOUNTED from the tree:
     // `ls supabase/migrations/*.sql | wc -l` = 266.
-expect(count).toBeLessThanOrEqual(266);
+    // Bumped 266 -> 267 for worker_board_excludes_supply_v1 (owner window 7
+    // §4, 2026-09-06): the worker board's gated read had NO `kind` filter, so
+    // agency SUPPLY offers (kind='agency_offer') were served to every worker
+    // as open jobs — measured 2 of 9 rows on production. RED class
+    // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
+expect(count).toBeLessThanOrEqual(267);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

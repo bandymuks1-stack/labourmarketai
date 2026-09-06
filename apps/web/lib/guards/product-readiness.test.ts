@@ -2376,7 +2376,12 @@ describe("no migration files added by this sprint", () => {
     // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
     // rollback; applied by the orchestrator via MCP). RECOUNTED from the
     // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
-const SPRINT_BASELINE = 266;
+    // Bumped 266 -> 267 for worker_board_excludes_supply_v1 (owner window 7
+    // §4, 2026-09-06): the worker board's gated read had NO `kind` filter, so
+    // agency SUPPLY offers (kind='agency_offer') were served to every worker
+    // as open jobs — measured 2 of 9 rows on production. RED class
+    // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
+const SPRINT_BASELINE = 267;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
