@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { isDemandKind } from "@/lib/demand/market-direction";
 import {
   toCanonicalDemand,
   type CanonicalDemand,
@@ -99,6 +100,8 @@ interface OwnRequestRow {
   readonly team_size: number | null;
   readonly location: string | null;
   readonly created_at: string | null;
+  /** The market DIRECTION of the row — see `@/lib/demand/market-direction`. */
+  readonly kind: string | null;
 }
 
 /**
@@ -174,7 +177,7 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
   const employer = await requireEmployerCompany();
   let ownQuery = supabase
     .from("customer_requests")
-    .select("id, role_or_work_type, country, team_size, location, created_at")
+    .select("id, role_or_work_type, country, team_size, location, created_at, kind")
     .eq("status", "submitted");
   if (!employer.ok) {
     ownQuery = ownQuery.or(
@@ -186,6 +189,19 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
   if (own.error) return { state: "error", errorCode: "own_demand_read_failed" };
 
   for (const row of (own.data ?? []) as unknown as OwnRequestRow[]) {
+    // DIRECTION GATE (2026-09-06). This is a DEMAND read, and an agency's own
+    // `agency_offer` is the opposite direction: capacity it HAS, not a need it
+    // has. It arrived here as `actionable: true` canonical demand, so the
+    // shared market surfaces showed an agency's supply as one more thing
+    // somebody needed. A closed allow-list, so an unrecognised future kind is
+    // excluded by default rather than guessed into the demand list.
+    //
+    // The `or` filter above already excludes the employer kinds for a caller
+    // with NO employer workspace; this gate is what an employer caller — the
+    // agency itself, the one who can actually see the row — passes through.
+    // Supply is not deleted, it is read back where it belongs: the company
+    // dashboard renders it as offered capacity.
+    if (!isDemandKind(row.kind)) continue;
     const mapped = toCanonicalDemand({
       id: row.id,
       source: "customer_request",

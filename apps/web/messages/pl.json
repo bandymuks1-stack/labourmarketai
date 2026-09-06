@@ -11,7 +11,9 @@
       "agencyPartnership": "Oferta współpracy"
     },
     "interestWaiting": "{count, plural, one {# osoba czeka na odpowiedź} few {# osoby czekają na odpowiedź} many {# osób czeka na odpowiedź} other {# osoby czeka na odpowiedź}}",
-    "untitledInquiry": "Zapytanie bez nazwy"
+    "untitledInquiry": "Zapytanie bez nazwy",
+    "supplyHeading": "Zaoferowane przez Ciebie zasoby",
+    "supplyNote": "To osoby, o których powiedziałeś rynkowi, że je MASZ, a nie te, których szukasz. Są zapisane i widoczne dla Ciebie. Pracodawcy nie mogą jeszcze wyszukiwać oferowanych zasobów, więc nikt się w tej sprawie nie skontaktował."
   },
   "journey": {
     "eyebrow": "Jak to działa",

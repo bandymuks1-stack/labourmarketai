@@ -11,7 +11,9 @@
       "agencyPartnership": "Partnerskapstilbud"
     },
     "interestWaiting": "{count, plural, one {# person venter på svar} other {# personer venter på svar}}",
-    "untitledInquiry": "Forespørsel uten tittel"
+    "untitledInquiry": "Forespørsel uten tittel",
+    "supplyHeading": "Kapasitet du har tilbudt",
+    "supplyNote": "Dette er personer du har fortalt markedet at du HAR, ikke personer du søker etter. De er lagret og synlige for deg. Arbeidsgivere kan ennå ikke søke i tilbudt kapasitet, så ingen har tatt kontakt om disse."
   },
   "journey": {
     "eyebrow": "Slik fungerer det",
