@@ -97,16 +97,24 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
             .map((v) => v.terms[0])
             .filter((label): label is string => typeof label === "string" && label.length > 0)
             .join(", ");
-    return {
-      kind: "answer",
-      text: alternatives
-        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
-        : t("noSuchValue", { asked: missed[0].matchedText }),
-      explanation: {
-        why: t("whyFromYourBoard"),
-        unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
-      },
+    const honest = alternatives
+      ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
+      : t("noSuchValue", { asked: missed[0].matchedText });
+    const explanation = {
+      why: t("whyFromYourBoard"),
+      unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
     };
+    // MATCHING CONTINUES AFTER "NO" (owner contract §16; prod walk 2026-09-05,
+    // gap G-C2): a student asking for an internship when none is visible is
+    // told so honestly — and then handed the EXISTING next steps (choose a
+    // direction, ask the institution, the compass, the whole board), never a
+    // dead end. The decision and its reads live in the education domain.
+    if (missedDimension === "opportunityType") {
+      const { loadInternshipNextSteps } = await import("@/lib/conversation/education-next-steps-server");
+      const next = await loadInternshipNextSteps();
+      return { kind: "answer", text: [honest, ...next.lines].join("\n"), explanation, chips: next.chips };
+    }
+    return { kind: "answer", text: honest, explanation };
   }
 
   /**
