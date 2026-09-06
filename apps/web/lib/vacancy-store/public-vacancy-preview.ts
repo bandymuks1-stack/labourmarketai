@@ -41,20 +41,6 @@ function asAny(c: SupabaseClient): any {
 /** PostgreSQL undefined_function / PostgREST unknown-RPC. */
 const UNDEFINED_FUNCTION = "42883";
 const POSTGREST_UNKNOWN_RPC = "PGRST202";
-/**
- * PostgreSQL query_canceled — the `anon` role's 3 s statement_timeout fired.
- * MEASURED on production 2026-09-06 (Lane H): 1,571 `canceling statement due
- * to statement timeout` lines in 24 h of Postgres logs, every sampled one in
- * `SQL function "search_public_vacancy_previews_v1"`, 20–135 per hour; the
- * anonymous /lt/jobs answered HTTP 500 on 4 of 6 probes (3.5–4.6 s) because
- * this module re-threw the error into the page. The function's
- * `count(*) over ()` walks all ~47k live rows per call (EXPLAIN ANALYZE:
- * seq scan + WindowAgg, 4.4 s) — the durable fix is the function body
- * (orchestrator/owner: see PERF_HYGIENE_LOG.md); until it lands, a timed-out
- * board is a NAMED state the page can say honestly, never a 500 and never
- * "0 vacancies found".
- */
-const QUERY_CANCELED = "57014";
 
 export const PUBLIC_VACANCY_PAGE_SIZE = 20;
 /** Mirrors the hard cap inside the SQL function. */
@@ -96,9 +82,7 @@ export interface PublicVacancyPreview {
 }
 
 export interface PublicVacancySearchResult {
-  /** `unavailable`: the read did not answer in time (statement timeout) —
-   *  distinct from "not switched on" and from "no jobs". */
-  readonly status: PublicVacancyPreviewStatus | "unavailable";
+  readonly status: PublicVacancyPreviewStatus;
   readonly vacancies: readonly PublicVacancyPreview[];
   readonly totalCount: number;
   readonly hasMore: boolean;
@@ -188,14 +172,6 @@ export async function searchPublicVacancyPreviews(
     if (isNotProvisioned(error.code)) {
       return {
         status: "not_provisioned",
-        vacancies: [],
-        totalCount: 0,
-        hasMore: false,
-      };
-    }
-    if (error.code === QUERY_CANCELED) {
-      return {
-        status: "unavailable",
         vacancies: [],
         totalCount: 0,
         hasMore: false,
