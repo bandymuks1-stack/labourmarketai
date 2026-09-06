@@ -16,6 +16,9 @@ import {
   resolveOwnWorkerId,
 } from "@/lib/opportunities/saved-opportunities";
 import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import {
   PUBLIC_VACANCY_PROFESSION_SLUGS,
   readProfessionSlugParam,
@@ -64,6 +67,16 @@ const INTRO: L = {
   ru: "Актуальные вакансии из официальных публичных источников занятости. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
   nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+};
+
+/** Position name when the preview carries no occupation label (K3 JSON-LD);
+ *  the same generic noun the detail page uses for its heading. */
+const GENERIC_TITLE: L = {
+  en: "Job opening",
+  lt: "Darbo pasiūlymas",
+  ru: "Вакансия",
+  nl: "Vacature",
+  de: "Stellenangebot",
 };
 
 /** The anonymous search matches the OCCUPATION label (the field the card
@@ -321,7 +334,29 @@ export default async function JobsPage({
   };
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* K3 (2026-09-02): anonymous-safe JSON-LD — a CollectionPage/ItemList of
+          positions by occupation label. Built ONLY from the anonymous preview
+          shape, so employer / location / title / links cannot appear (guard:
+          lib/seo/public-job-json-ld.test.ts). JobPosting is deliberately NOT
+          emitted: it would require the employer and the workplace. */}
+      {result.status === "ok" && result.vacancies.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLdScript(
+              buildJobsListJsonLd({
+                origin: MARKETING_ORIGIN,
+                locale: active,
+                name: H1[active],
+                description: INTRO[active],
+                previews: result.vacancies,
+                genericTitle: GENERIC_TITLE[active],
+              }),
+            ),
+          }}
+        />
+      )}
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         {H1[active]}
       </h1>
@@ -512,7 +547,7 @@ export default async function JobsPage({
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }
 
