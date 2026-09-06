@@ -135,6 +135,27 @@ The backbone diagram is recorded in `docs/ARCHITECTURE.md` §5.5.
 
 *Applied silently from 2026-09-05 on to every layer (first instances the same day: the Gemini conversation proposer — one sentence ≤ 500 chars, the intent catalogue only, never the user's world, per-user rate limit, low-cost tier, per-run cost ceiling, every run an `ai_runs` row; the chat's canonical reads — scan limits per project list, per-project detail reads capped). Escalation only for a genuine redesign-level blocker or a paid capacity decision.*
 
+## 1c. Owner direction, window 6 (recorded 2026-09-06 — SUBSTANCE, not verbatim; the owner may replace this block with the exact text)
+
+> Recorded from the window-6 orchestrator brief for lane I+J+K. It names the direction the owner gave for delegated AI, bulk import, the contribution / evidence graph and the AI-agent Living CV. It ADDS to §1–§1b; nothing is removed. Where wording differs from the owner's own text, the owner's text governs.
+
+1. **One person, many contexts.** A single identity acts across organizations, projects and roles; delegation and import never create a second person, worker or organization model.
+2. **Real activity.** Only recorded actions of named actors become facts. Extracted, recognised or proposed content is a suggestion until a human confirms it.
+3. **Living Profile.** The professional identity is derived from evidence — never edited as a document.
+4. **Evidence provenance: actor ≠ recorder.** Every fact carries whom it is about, who recorded it, and through what (browser, connected assistant, import, agent).
+5. **Work Unit / Contribution.** GOAL → CONTRIBUTION → DELIVERABLE → OUTCOME → EVIDENCE → BENEFICIARIES is the unit the graph is built from.
+6. **Company → worker authority.** A company records, corrects and confirms only within its own engagement; it never rewrites a person's own words; corrections supersede, never overwrite.
+7. **Delegated AI is vendor-neutral.** Any assistant is an adapter over the same capabilities and the same identity; scopes decide what it may do; it never sends external messages.
+8. **Bulk historical import with no side effects.** Immutable source, human-reconciled ambiguity, one atomic batch, reversible; no invitation, e-mail, approval request or automation is triggered by an import.
+9. **Corrections / merge / rollback** are non-destructive records.
+10. **AI data-quality assistance** flags and proposes; a human decides; AI never raises an evidence class.
+11. **AI / Agent Living CV.** An agent is a distinct actor owned by an organization; provider / model / version are capability provenance, not identity; competence only from reviewed real tasks.
+12. **Multi-contributor attribution** — primary, contributors, supervisor, approver, beneficiary.
+13. **Privacy / visibility** — closed by default; widening is explicit and per record; tenant boundaries hold.
+14. **Natural opportunity discovery** — evidence feeds matching; no rating of people.
+15. **Research direction** — product, longitudinal data, research, forecast and counterfactual stay separate; research only under a named consent.
+16. **Staged roadmap Stage 0–7** — recorded in `docs/ARCHITECTURE.md` §5.6; nothing beyond Stage 0 before the launch week closes.
+
 ## 2. Execution checkpoint
 
 The concise resumable checkpoint required by §35 is
