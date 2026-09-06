@@ -174,6 +174,18 @@ function firstMatch<T extends { needles: string[] }>(
  *  needs the needle itself: it is the occupation word the employer actually
  *  typed, in their own language, and a number sitting immediately before it is
  *  that occupation's headcount. */
+/**
+ * The SERVICE NOUN is never an occupation. Folded "paslaugas" contains the
+ * care-assistant needle "slaug", and on production (2026-09-06) "noriu
+ * siūlyti buhalterijos paslaugas" was echoed back as "Jūsų teigimu: Slaugos
+ * pagalbininkas" — a claim the person never made. Every occupation match
+ * over free text runs on the masked hay; the honest reading is the service.
+ */
+const SERVICE_NOUN_RE = /\bpaslaug\S*/gu;
+export function maskServiceNoun(hay: string): string {
+  return hay.replace(SERVICE_NOUN_RE, " ");
+}
+
 function firstMatchWithNeedle<T extends { needles: string[] }>(
   rules: T[],
   hay: string,
@@ -282,7 +294,9 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   const roleHay = `${norm(input.role)} ${norm(input.description)} ${norm(input.notes)}`.trim();
   const locHay = `${norm(input.location)} ${roleHay}`.trim();
 
-  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, roleHay);
+  // The service noun is masked first: "buhalterijos paslaugos" must not read
+  // as a care assistant because "paslaug" contains the needle "slaug".
+  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay));
   const workType = wtHit && KNOWN_SLUGS.has(wtHit.rule.slug) ? wtHit.rule.slug : null;
   if (workType) reasons.push(`work_type:${workType}`);
 

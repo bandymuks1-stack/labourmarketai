@@ -19,7 +19,11 @@
  *    parseTimeWindow, word numbers — no second rule set to drift.
  */
 import { foldText } from "./normalize";
-import { WORK_TYPE_RULES, resolveCountryAndCity } from "./structure-need";
+import {
+  WORK_TYPE_RULES,
+  maskServiceNoun,
+  resolveCountryAndCity,
+} from "./structure-need";
 import { recognizeSkills, type RecognizedSkill } from "./skill-recognition";
 import { parseTimeWindow, type TimeWindow } from "./time-window";
 import { extractQuantities } from "./universal-recognition";
@@ -69,7 +73,8 @@ export interface ValueStatement {
 /** Folded axis needles. Order-independent; both sides scored. */
 const OFFER_RES: RegExp[] = [
   /parduo/u, // parduodu / parduoti / noriu parduoti
-  /siul(au|om|ome)/u, // siūlau / siūlome
+  /siul(au|om|ome|yti|ysiu|ysim)/u, // siūlau / siūlome / noriu siūlyti
+  /\bteiki(u|ame)\b/u, // teikiu / teikiame paslaugas
   /\bsell(ing)?\b/u,
   /\boffer(ing)?\b/u,
   /продам|прода(ю|ем)|предлага/u,
@@ -115,6 +120,18 @@ const SERVICE_RE = /paslaug|\bservices?\b|услуг|dienst(en)?\b/u;
  *  without the word "paslauga". Folded needles, LT/EN/RU. */
 const SERVICE_VERB_RE =
   /\bvers(ti|iu|ciau)\b|isvers|remontuoj|suremontuo|taisau|taisyti|sutaisy|projektuoj|suprojektuo|can\s+(translate|repair|design|fix)|могу\s+(перевести|отремонтировать|спроектировать|починить)|перевожу|ремонтирую/u;
+
+/**
+ * An OFFER VERB bound to an everyday service activity (real-user fitness walk
+ * 2026-09-06): "galiu kirpti plaukus namuose", "galiu mokyti matematikos",
+ * "siūlau valyti butus". The verb is what makes it a service somebody can
+ * ORDER; a bare activity stem ("reikia 2 valytojų") must stay employer
+ * demand, so the offer verb is required in the same regex. `mokyt[iu]\b`
+ * deliberately excludes "mokytis" (to learn). Folded needles, LT/EN/RU/DE/NL.
+ */
+const OFFER_ACTIVITY_RE =
+  /\b(galiu|siulau|siulyti|teikiu|can|могу|biete|bied)\b\s+(?:\S+\s+){0,2}?(kirp|dazy|valy|mokyt[iu]\b|tvarky|siuv|montuo|pjau|priziur|programuo|konsultuo|apskait|vez[tu]|remont|taisy|paint|clean|teach|tutor|mow|install|sew|babysit|garden|\bfix\b)/u;
+
 
 /** V10 equipment-capacity reading: the MACHINE is free, not a person. */
 const EQUIPMENT_RE =
@@ -177,7 +194,8 @@ function detectHeadcount(text: string, folded: string): number | null {
   const foldedTokens = tokens.map(foldText);
   const isPersonish = (tok: string): boolean =>
     PERSON_NOUN_RES.some((re) => re.test(tok)) ||
-    WORK_TYPE_RULES.some((r) => r.needles.some((n) => tok.includes(n)));
+    (!/^paslaug/u.test(tok) &&
+      WORK_TYPE_RULES.some((r) => r.needles.some((n) => tok.includes(n))));
 
   const numberAt = (i: number): number | null => {
     if (/^\d{1,4}$/.test(tokens[i])) {
@@ -258,7 +276,7 @@ export function structureValueStatement(
   const quantities = extractQuantities(raw);
   const goodsQuantity =
     quantities.find((q) => GOODS_UNITS.has(q.unit)) ?? null;
-  const wt = firstRuleMatch(WORK_TYPE_RULES, folded);
+  const wt = firstRuleMatch(WORK_TYPE_RULES, maskServiceNoun(folded));
   const workType = wt?.slug ?? null;
   if (workType) reasons.push(`work_type:${workType}`);
   const skills = recognizeSkills(raw);
@@ -283,13 +301,22 @@ export function structureValueStatement(
     !OPERATOR_RE.test(folded) &&
     (AVAILABILITY_RE.test(folded) || RENTAL_MODE_RE.test(folded));
   if (axis === "offer") {
-    if (SERVICE_RE.test(folded) || SERVICE_VERB_RE.test(folded)) {
+    if (
+      SERVICE_RE.test(folded) ||
+      SERVICE_VERB_RE.test(folded) ||
+      OFFER_ACTIVITY_RE.test(folded)
+    ) {
       subject = "service";
       // "galiu versti dokumentus iš lenkų į lietuvių" — the echo carries the
       // person's own description (incl. a language pair when they state one).
+      // For an offer verb + activity ("galiu kirpti plaukus") the echo starts
+      // after the OFFER VERB, so the activity itself is what is echoed.
       const sv = folded.match(SERVICE_VERB_RE);
+      const oa = sv ? null : folded.match(OFFER_ACTIVITY_RE);
       if (sv?.index !== undefined) {
         subjectLabel = echoAfter(raw, endOfWord(raw, sv.index + sv[0].length));
+      } else if (oa?.index !== undefined) {
+        subjectLabel = echoAfter(raw, endOfWord(raw, oa.index + oa[1].length));
       }
     } else if (equipmentCapacity) {
       // V10: the MACHINE is free — a goods/equipment capacity, not a person's.
