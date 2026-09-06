@@ -111,7 +111,7 @@ import {
 } from "@/lib/conversation/dispatch";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
-import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
+import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
   appendAssistantTurn,
@@ -1043,13 +1043,13 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
-        pushEmbed(
+        const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
             locale={locale}
             // V9 value-intent: what the person already SAID pre-fills the
             // fields — visible, editable, still reviewed before any write.
-            initialValues={initialValues}
+            initialValues={values}
             onDone={onDone}
             // Closing a form shows the contextual next step, never a generic
             // menu: worker forms re-read the REAL profile state; the employer
@@ -1067,6 +1067,20 @@ export function ConversationChat({
             continueLabel={continueLabel}
           />,
         );
+        // W6: the work card ALWAYS opens showing what it already holds —
+        // whichever chip or sentence opened it — read through the ONE
+        // canonical worker snapshot; what the caller stated (a parsed date,
+        // `?preferredCountries=…`) is laid OVER the current values. Its
+        // country list is saved whole, so an empty box would have let one
+        // new entry replace the rest (measured, #1579). A failed read opens
+        // the form blank: a blank field is "keep", so nothing is lost.
+        if (actionId === "worker.save-work-card") {
+          loadWorkCardPrefillForChat()
+            .then((r) => render({ ...(r.kind === "prefill" ? r.values : {}), ...(initialValues ?? {}) }))
+            .catch(() => render(initialValues));
+          return;
+        }
+        render(initialValues);
       }
     },
     [locale, pushEmbed, companyFollowup],

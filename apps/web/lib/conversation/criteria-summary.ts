@@ -11,7 +11,28 @@ import {
   presentCriteria,
   type CriteriaLine,
   type CriteriaResult,
+  type WorkCardPrefillResult,
 } from "./criteria-summary-contract";
+import { workCardPrefillFromCard } from "./worker-forms";
+
+/**
+ * W6: the `worker.save-work-card` form opens PREFILLED from the card the
+ * person already has — the same canonical snapshot the criteria answer reads
+ * (one owner of worker-table reads), mapped by the pure `workCardPrefillFromCard`.
+ * Measured on production (#1579): the plain chips opened the form empty, and
+ * `preferred_countries` is saved as a whole list, so a person adding one
+ * country replaced the others. A failed read is returned as a NAMED state.
+ */
+export async function loadWorkCardPrefillForChat(): Promise<WorkCardPrefillResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "unavailable", reason: "not_authed" };
+  const snapshot = await getWorkerCriteriaSnapshot(user.id);
+  if (!snapshot) return { kind: "unavailable", reason: "no_worker" };
+  return { kind: "prefill", values: workCardPrefillFromCard(snapshot) };
+}
 
 /**
  * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's own
