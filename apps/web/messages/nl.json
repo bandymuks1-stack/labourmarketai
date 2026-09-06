@@ -13309,6 +13309,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Uw account kon zojuist niet worden gelezen, dus er is geen ruimte voor u gekozen.",
+      "choose": "Kies een ruimte of probeer het opnieuw.",
+      "retry": "Opnieuw proberen"
+    },
     "panel": {
       "regionLabel": "Context",
       "workTitle": "Jouw werk nu",

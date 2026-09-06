@@ -33,6 +33,17 @@ import {
 } from "@/lib/conversation/starter-signals";
 import { capabilityPhraseKeys, deriveStarters } from "@/lib/conversation/starters";
 import { listMyPins } from "@/lib/workspace/pins";
+import { Link } from "@/lib/i18n/navigation";
+import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
+import {
+  getWorkspaceContext,
+  readSessionWorkspacePointer,
+} from "@/lib/company/active-organization";
+import {
+  classifyDurablePointer,
+  decideDashboardRole,
+  type DurablePointerKind,
+} from "@/lib/auth/dashboard-role-decision";
 
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
@@ -60,7 +71,50 @@ export default async function DashboardHomePage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const session = await getSessionProfile();
-  const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
+  // WHICH ROLE OPENS THIS SCREEN (W6 honesty, 2026-09-06). The old null-to-
+  // worker fallback swallowed a FAILED profile read: a company owner whose row read timed
+  // out was greeted in the personal space as a person, and nothing said so.
+  // The pure decision trusts the row when it was read, falls back to the
+  // person's OWN durable workspace pointer (membership-validated) when it
+  // was not, and otherwise NAMES the failure — the real workspace chooser
+  // plus retry — never a silently chosen workspace.
+  let pointer: DurablePointerKind = null;
+  if (session.profileRead === "failed") {
+    const [stored, ws] = await Promise.all([
+      readSessionWorkspacePointer(),
+      getWorkspaceContext(null),
+    ]);
+    pointer = classifyDurablePointer(
+      stored,
+      ws.workspaces.filter((w) => w.kind === "organization").map((w) => w.id),
+    );
+  }
+  const decision = decideDashboardRole({
+    profileRead: session.profileRead,
+    activeRole: session.profile?.active_role ?? null,
+    pointer,
+  });
+  if (decision.kind === "read-failed") {
+    const tRead = await getTranslations("workspace.readFailed");
+    return (
+      <section
+        data-testid="dashboard-profile-read-failed"
+        role="status"
+        className="mx-auto flex min-h-[60dvh] w-full max-w-content flex-col items-center justify-center gap-4 px-4 py-16 text-center"
+      >
+        <p className="text-sm text-text-primary">{tRead("body")}</p>
+        <p className="text-xs text-text-secondary">{tRead("choose")}</p>
+        <WorkspaceChip />
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
+        >
+          {tRead("retry")}
+        </Link>
+      </section>
+    );
+  }
+  const activeRole: Role = decision.role;
 
   // "Mano erdvė" (S2) — resolved on the server from the readers this request
   // already runs (session profile, workspace context, worker activity, the
@@ -129,14 +183,13 @@ export default async function DashboardHomePage({
     MARKET_COUNTRIES.map((c) => [c, tCountryNames(`countryNames.${c}`)]),
   ) as Record<string, string>;
 
-  // M10 — the learner line is resolved HERE because it carries a placeholder
-  // (`{institution}`), same rule as `greetingNamed`: the raw placeholder must
-  // never reach the screen. Rendered only with the institution's REAL name.
+  // The learner's institution is named ONCE, by the opening brief
+  // (`briefLearner`, lib/conversation/opening-brief.ts). Measured on
+  // production 2026-09-06: this page ALSO composed its own intro line (the
+  // `{institution}` greeting key) from the same engagement, so the learner's
+  // first screen said "Mokotės su X" twice. The engagement read above still
+  // decides the person's starters.
   const tChat = await getTranslations("conversation.chat");
-  const learnerContextLine =
-    identity === "person" && learnerLink
-      ? tChat("learnerGreetingContext", { institution: learnerLink })
-      : null;
   // The not-understood answer and the opening line describe the world the
   // person stands in, composed from the capability tracks the workspace
   // genuinely holds — an agency that is also an employer hears BOTH. Phrases
@@ -177,7 +230,6 @@ export default async function DashboardHomePage({
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}
-        learnerContextLine={learnerContextLine}
         starters={starters}
         contextFallback={contextFallback}
         workspaceContextLine={workspaceContextLine}

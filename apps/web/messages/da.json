@@ -4396,6 +4396,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Din konto kunne ikke læses lige nu, så der blev ikke valgt et rum for dig.",
+      "choose": "Vælg et rum, eller prøv igen.",
+      "retry": "Prøv igen"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",

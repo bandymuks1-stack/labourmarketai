@@ -17,6 +17,14 @@ export type SessionProfileRow = {
 export type SessionProfile = {
   user: { id: string; email?: string } | null;
   profile: SessionProfileRow | null;
+  /**
+   * W6 honesty (2026-09-06): `failed` = the `profiles` read itself ERRORED.
+   * Before this, a failed read and "no row" both arrived as `profile: null`,
+   * and the dashboard root read that null as "a worker" — a company owner
+   * whose row read timed out was greeted in the personal space as a person.
+   * Consumers that decide a workspace must branch on this, never on `null`.
+   */
+  profileRead: "ok" | "failed";
 };
 
 /** The SUPERSET of the columns the per-transport `profiles` consumers read
@@ -66,7 +74,7 @@ export const getSessionProfile = cache(async (): Promise<SessionProfile> => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { user: null, profile: null };
+  if (!user) return { user: null, profile: null, profileRead: "ok" };
 
   // The ONE profiles-row read, shared with the bearer transports (G4). The
   // session shape keeps its existing honest degradation: a failed read
@@ -76,5 +84,6 @@ export const getSessionProfile = cache(async (): Promise<SessionProfile> => {
   return {
     user: { id: user.id, email: user.email },
     profile: read.ok ? read.value : null,
+    profileRead: read.ok ? "ok" : "failed",
   };
 });

@@ -406,10 +406,10 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
 
   // BECOMING
   lines.push(`${tc("becoming")}: ${becoming.professionSlug ? prof(becoming.professionSlug) : tc("becomingNone")}`);
-  if (becoming.currentEducation?.institutionName) {
+  if (becoming.studyingAt) {
     lines.push(
-      tc("studyingAt", { institution: becoming.currentEducation.institutionName }) +
-        (becoming.currentEducation.programOrField ? ` · ${tc("program", { program: becoming.currentEducation.programOrField })}` : ""),
+      tc("studyingAt", { institution: becoming.studyingAt }) +
+        (becoming.currentEducation?.programOrField ? ` · ${tc("program", { program: becoming.currentEducation.programOrField })}` : ""),
     );
   }
   for (const c of becoming.cohorts.slice(0, 2)) {

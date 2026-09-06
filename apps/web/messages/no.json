@@ -4396,6 +4396,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Kontoen din kunne ikke leses akkurat nå, så det ble ikke valgt et rom for deg.",
+      "choose": "Velg et rom, eller prøv igjen.",
+      "retry": "Prøv igjen"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
