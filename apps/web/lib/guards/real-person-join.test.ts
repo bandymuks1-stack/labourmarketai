@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { activeLocales } from "@/lib/i18n/config";
+import { INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { nextPathForIntents } from "@/lib/onboarding/first-run-intent";
+import { readLandingHandoff } from "@/lib/onboarding/landing-handoff";
 
 /**
  * REAL PERSON JOIN (window 6, lane A — walked on production 2026-09-06 as a
@@ -158,6 +161,62 @@ describe("7. the onboarding country field is labelled by what it writes (residen
         .onboarding.country_label;
       expect(label).toMatch(RESIDENCE[locale]);
       expect(label).not.toMatch(/^(Šalis|Country|Страна|Land)$/);
+    });
+  }
+});
+
+/**
+ * 8. THE INSTITUTION DOOR (window 6, lanes F + C — measured on production
+ *    build dd5d92c3): "Atstovauju mokyklai, kolegijai ar universitetui" on the
+ *    landing carried `?next=/dashboard/start/company?capability=training_provider`
+ *    through signup (66/66), and onboarding then asked "Ko atėjote?" with
+ *    nothing ticked — college staff had to guess that "Atstovauju mokymo
+ *    įstaigai" was theirs. The SAME hand-off that reads the sentence now reads
+ *    the door back through the router, ticks the card, shows the door's plain
+ *    words with the same hint, and lets the person's final choice decide the
+ *    destination (a door is a default, not an invitation deep link).
+ */
+describe("8. the institution door pre-ticks the card it routes to; nothing is lost either way", () => {
+  const page = read("app/[locale]/onboarding/page.tsx");
+  const wizard = read("components/app/onboarding-wizard.tsx");
+  it("the door's destination IS the routed destination of the `education` intent (pinned)", () => {
+    expect(nextPathForIntents(["education"])).toBe("/dashboard/start/company?capability=training_provider");
+    expect(INSTITUTION_DOOR_NEXT).toBe(nextPathForIntents(["education"]));
+  });
+  it("the hand-off reads the door back into the `education` card, and only that card", () => {
+    const h = readLandingHandoff(INSTITUTION_DOOR_NEXT);
+    expect(h.intents).toEqual(["education"]);
+    expect(h.door).toEqual(["education"]);
+    expect(h.sentence).toBe("");
+    expect(h.professionSlug).toBeNull();
+    expect(readLandingHandoff(`/lt${INSTITUTION_DOOR_NEXT}`).intents).toEqual(["education"]);
+  });
+  it("the page passes the door and its plain words (landing.cta) down; the wizard shows them with the same hint", () => {
+    expect(page).toMatch(/getTranslations\("landing\.cta"\)/);
+    expect(page).toMatch(/doorIntents=\{handoff\.door\}/);
+    expect(page).toMatch(/doorWords=\{doorWords\}/);
+    expect(wizard).toMatch(/data-testid="onboarding-door"/);
+    expect(wizard).toMatch(/t\("rolePicker\.doorLabel"\)/);
+    // one hint, both origins
+    expect(wizard.match(/t\("rolePicker\.saidHint"\)/g)).toHaveLength(2);
+  });
+  it("a door is a default, not a deep link: the person's final cards route the destination", () => {
+    expect(wizard).toMatch(/const cameThroughDoor = doorIntents\.length > 0;/);
+    expect(wizard).toMatch(/if \(returnTo && !cameThroughDoor\) form\.set\("next", returnTo\);/);
+    // keeping the tick → the door's own path; a real deep link still wins
+    expect(wizard).toMatch(/const routedNext = nextPathForIntents\(intentList\);/);
+  });
+  for (const locale of activeLocales) {
+    it(`${locale}: the "you chose" label exists and the institution door has plain words`, () => {
+      const m = messages(locale);
+      expect(m.auth.onboarding.rolePicker.doorLabel).toBeTruthy();
+      expect(m.auth.onboarding.rolePicker.doorLabel).not.toMatch(/^\[EN\]/);
+      const landing = (JSON.parse(readFileSync(join(web, "messages", `${locale}.json`), "utf8")) as {
+        landing: { cta: Record<string, string> };
+      }).landing.cta;
+      expect(landing.institution).toBeTruthy();
+      expect(landing.employer).toBeTruthy();
+      expect(landing.agency).toBeTruthy();
     });
   }
 });

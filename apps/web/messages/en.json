@@ -3903,6 +3903,7 @@
         "intentNote": "Pick everything that applies — one account carries all of it. A person and an organisation are the two spaces; what you do inside them is up to you.",
         "saidLabel": "You wrote:",
         "saidHint": "We ticked what fits. Change it if needed.",
+        "doorLabel": "You chose:",
         "intent": {
           "work": {
             "title": "I'm looking for work",

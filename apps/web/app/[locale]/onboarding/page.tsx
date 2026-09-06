@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
-import { readLandingHandoff } from "@/lib/onboarding/landing-handoff";
+import { DOOR_WORDS_KEY, readLandingHandoff } from "@/lib/onboarding/landing-handoff";
 
 /** Unified onboarding shell. Role is picked here (Step 1), so we no longer
  *  pre-read active_role. Display name is prefilled from the auth identity:
@@ -33,6 +33,18 @@ export default async function OnboardingPage({
   // profession the sentence names is pre-chosen. Read on the server: the
   // recogniser's lexicon never ships in the wizard's client bundle.
   const handoff = readLandingHandoff(safeNext);
+  // The landing DOOR (`/dashboard/start/company?capability=…` inside `next`)
+  // ticks the card it routes to; its plain words — the button the person
+  // pressed on the landing — are shown back from the landing catalogue,
+  // resolved here so the wizard's client bundle keeps the auth allowlist.
+  const tDoors = handoff.door.length > 0 ? await getTranslations("landing.cta") : null;
+  const doorWords = tDoors
+    ? handoff.door
+        .map((intent) => DOOR_WORDS_KEY[intent])
+        .filter((key): key is NonNullable<typeof key> => key !== undefined)
+        .map((key) => tDoors(key))
+        .join(" · ") || null
+    : null;
 
   const supabase = await createClient();
   const {
@@ -119,6 +131,8 @@ export default async function OnboardingPage({
           saidSentence={handoff.sentence || null}
           defaultIntents={handoff.intents}
           defaultProfessionSlug={handoff.professionSlug}
+          doorIntents={handoff.door}
+          doorWords={doorWords}
         />
       </main>
     </div>
