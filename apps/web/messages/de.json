@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Mit diesem Eintrag verknüpfte Fähigkeiten",
     "helper": "Markieren Sie die Fähigkeiten, die dieser Eintrag zeigt — das baut Ihren Lebenslauf auf. Noch nicht geprüft.",
+    "helperConfirmedLinks": "Markieren Sie die Fähigkeiten, die dieser Eintrag zeigt — das baut Ihren Lebenslauf auf.",
     "saving": "Wird gespeichert…",
     "saved": "Gespeichert",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",

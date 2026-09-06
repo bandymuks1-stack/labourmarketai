@@ -1,0 +1,34 @@
+{"step":"health","build":"ca96605b"}
+{"readback":"BEFORE","entries":null,"worker_skills":[],"links":[],"confirmations":null}
+{"leg":"company_candidates_01-before","state":"candidates-view","header":"Suvirintojas PATEIKTAS","worker2Present":true,"cardText":"Kandidatas 0DBD5E PER MAŽAI DUOMENŲ · 0% REIKALINGŲ ĮGŪDŽIŲ Priimtas Šalis LT Vadovo patvirtinti įgūdžiai 0 Rezervacija Priimta — Trūksta dalies reikalingų įgūdžių Įtraukti į trumpąjį sąrašą Pokalbio ar rezervacijos pradėti dar negalima: šis žmogus nenurodė tai leidžiančio pasiekiamumo.","candidatesOnScreen":6,"failed":[]}
+{"leg":"worker_journal_02-before","chart":"","provenanceLine":[],"entryVisible":false,"failed":[]}
+{"check":"BEFORE: worker2 has zero worker_skills rows (the loop starts from nothing)","ok":true,"detail":[]}
+{"step":"worklog_context_options","opts":[{"v":"3d6ce847-d8b4-4d2f-8057-ee545eb00f8f","t":"Darbuotojas"},{"v":"90da8c16-f3b2-4b05-b5c3-2569ede0926c","t":"E2E Walker UAB"}],"picked":{"v":"90da8c16-f3b2-4b05-b5c3-2569ede0926c","t":"E2E Walker UAB"}}
+{"leg":"worker_action_saved","outcome":"Pridėtas įgūdis: Metalo konstrukcijų montavimas Pridėtas įgūdis: Suvirinimo brėžinių skaitymas","added":["worklog-added-structural-steel","worklog-added-welding-blueprint"],"pending":0,"cvUpdated":true,"matchingNote":true,"error":"","failed":[]}
+{"check":"ACTION: the save reports the recognised skill as ADDED (welding-blueprint)","ok":true,"detail":["worklog-added-structural-steel","worklog-added-welding-blueprint"]}
+{"check":"ACTION: the save says the CV/profile was updated","ok":true,"detail":true}
+{"step":"entry_persisted","entryId":null,"engagement":null}
+{"check":"ACTION: exactly one journal_entries row persisted for the marker","ok":false,"detail":null}
+{"readback":"AFTER_ENTRY_BEFORE_CONFIRM","entries":null,"worker_skills":[],"links":[],"confirmations":null}
+{"check":"EDGE journal→profile: worker_skills now holds welding-blueprint at source=work_journal, verified=false","ok":false,"detail":[]}
+{"check":"EDGE entry→skill link: journal_entry_skills links the entry to welding-blueprint with provenance=recognized","ok":false,"detail":[]}
+{"leg":"company_quick_queue","present":false,"cardText":"","willConfirm":"","failed":[]}
+{"check":"CONFIRM: the entry reaches the company's one-tap queue","ok":false,"detail":""}
+{"check":"CONFIRM: the card names the worker (not a dash)","ok":false,"detail":""}
+{"readback":"AFTER","entries":null,"worker_skills":[],"links":[],"confirmations":null}
+{"leg":"company_candidates_07-after","state":"candidates-view","header":"Suvirintojas PATEIKTAS","worker2Present":true,"cardText":"Kandidatas 0DBD5E STIPRUS ATITIKIMAS · 100% REIKALINGŲ ĮGŪDŽIŲ Priimtas Šalis LT Vadovo patvirtinti įgūdžiai 0 Rezervacija Priimta Įtraukti į trumpąjį sąrašą Pokalbio ar rezervacijos pradėti dar negalima: šis žmogus nenurodė tai leidžiančio pasiekiamumo.","candidatesOnScreen":6,"failed":[]}
+{"leg":"worker_journal_08-after","chart":"","provenanceLine":[],"entryVisible":true,"failed":[]}
+{"check":"EDGE confirm→capability: welding-blueprint is verified=true, source=manager_confirmed, bin=green","ok":false,"detail":[]}
+{"check":"EDGE confirm row: journal_entry_confirmations carries the company owner as confirmer with action=confirm","ok":false,"detail":null}
+{"check":"EDGE capability→matching (employer): worker2 now appears in the company's candidates for its own need","ok":true,"detail":{"before":true,"after":true,"state":"candidates-view"}}
+{"check":"EDGE matching→UI: the candidate card shows the confirmed / skill-fit reading","ok":true,"detail":"Kandidatas 0DBD5E STIPRUS ATITIKIMAS · 100% REIKALINGŲ ĮGŪDŽIŲ Priimtas Šalis LT Vadovo patvirtinti įgūdžiai 0 Rezervacija Priimta Įtraukti į trumpąjį sąrašą Pokalbio ar rezervacijos pradėti dar negalima: šis žmogus nenurodė tai leidžiančio pasiekiamumo."}
+{"check":"EDGE profile provenance: the worker's journal page shows the confirming organisation","ok":false,"detail":{"lines":[],"chart":""}}
+C:\Users\Mano\Documents\labourmarketai-wt\lane-p4-field\docs\launch\pilot-feedback\walks-2026-09-06\walk-living-evidence-loop\walk-living-evidence-loop-prod.cjs:195
+  log({ result: fail.length === 0 ? "PASS" : "FAIL", failed, entryId, marker: MARKER });
+                                                     ^
+
+ReferenceError: failed is not defined
+    at C:\Users\Mano\Documents\labourmarketai-wt\lane-p4-field\docs\launch\pilot-feedback\walks-2026-09-06\walk-living-evidence-loop\walk-living-evidence-loop-prod.cjs:195:54
+
+Node.js v24.14.0
+exit=1
