@@ -789,18 +789,12 @@ describe("NO new DB migration in this PR", () => {
     // widened by test_mode, new billing_checkout_operations table (admin
     // SELECT, service-role writes). No data loss.
     // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
-<<<<<<< HEAD
-    // Bumped 265 -> 266 for the notification_events service_role write grant
-    // (20260906060000, RED draft + needs-human-gate, UNAPPLIED until owner
-    // approval): ONE additive GRANT so the emitters stop failing 42501.
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 266.
-=======
     // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
     // window 6, 2026-09-06, GREEN additive partial index for the board
-    // supply-freshness read; paired rollback). RECOUNTED from the tree:
-    // `ls supabase/migrations/*.sql | wc -l` = 266.
->>>>>>> origin/main
-    // Bumped 266 -> 267: the notification_events grant (RED draft #1566) on top of the applied last_seen index.
+    // supply-freshness read; paired rollback; applied via MCP as ledger
+    // 20260906072604). Bumped 266 -> 267 for the notification_events
+    // service_role write grant (20260906060000, RED draft #1566, UNAPPLIED
+    // until owner approval). `ls supabase/migrations/*.sql | wc -l` = 267.
 expect(count).toBeLessThanOrEqual(267);
   });
 });
