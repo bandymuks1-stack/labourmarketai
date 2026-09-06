@@ -3810,12 +3810,12 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; in the next step you'll say what you came for.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
-      "email_label": "Work email",
-      "email_placeholder": "name@company.com",
+      "email_label": "Email",
+      "email_placeholder": "name@example.com",
       "password_label": "Password",
       "password_help": "Min. 8 characters, 1 uppercase, 1 number, 1 special (!@#$%).",
       "confirm_password_label": "Confirm password",
@@ -3832,7 +3832,7 @@
       "error_password_number": "Password must include a number.",
       "error_password_special": "Password must include a special character.",
       "check_email_title": "Confirm your email",
-      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account. If you don't see it, check your spam folder — you can ask for a new link here.",
       "resend_label": "Send the link again",
       "resend_sent": "Sent again. Check your inbox and spam folder.",
       "resend_wait": "You can request another link in {seconds} s."
@@ -3901,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "What did you come here to do?",
         "intentNote": "Pick everything that applies — one account carries all of it. A person and an organisation are the two spaces; what you do inside them is up to you.",
+        "saidLabel": "You wrote:",
+        "saidHint": "We ticked what fits. Change it if needed.",
         "intent": {
           "work": {
             "title": "I'm looking for work",
@@ -3963,7 +3965,7 @@
         "note": "Skills start out waiting for review. Documents, your work journal and reviews from people make them stronger over time."
       },
       "display_name_label": "Display name",
-      "country_label": "Country",
+      "country_label": "Where do you live now?",
       "country_placeholder": "Select your country",
       "error_country_required": "Please choose a country.",
       "profession_label": "What work do you do?",

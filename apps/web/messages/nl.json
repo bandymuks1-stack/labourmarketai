@@ -3810,12 +3810,12 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; daarna kies je je rol.",
+      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; in de volgende stap zeg je waarvoor je komt.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
-      "email_label": "Zakelijk e-mailadres",
-      "email_placeholder": "naam@bedrijf.nl",
+      "email_label": "E-mailadres",
+      "email_placeholder": "naam@voorbeeld.nl",
       "password_label": "Wachtwoord",
       "password_help": "Min. 8 tekens, 1 hoofdletter, 1 cijfer, 1 speciaal teken (!@#$%).",
       "confirm_password_label": "Bevestig wachtwoord",
@@ -3832,7 +3832,7 @@
       "error_password_number": "Wachtwoord moet een cijfer bevatten.",
       "error_password_special": "Wachtwoord moet een speciaal teken bevatten.",
       "check_email_title": "Bevestig je e-mail",
-      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien.",
+      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
       "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
       "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
@@ -3901,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "Waarvoor kom je?",
         "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
+        "saidLabel": "Je schreef:",
+        "saidHint": "We hebben aangevinkt wat past. Pas het aan als het nodig is.",
         "intent": {
           "work": {
             "title": "Ik zoek werk",
@@ -3963,7 +3965,7 @@
         "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkdagboek en bevestigingen van mensen maken ze na verloop van tijd sterker."
       },
       "display_name_label": "Weergavenaam",
-      "country_label": "Land",
+      "country_label": "Waar woon je nu?",
       "country_placeholder": "Kies je land",
       "error_country_required": "Kies een land.",
       "profession_label": "Welk werk doe je?",

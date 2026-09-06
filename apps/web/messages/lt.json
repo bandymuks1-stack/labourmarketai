@@ -3810,12 +3810,12 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — vaidmenį pasirinksi kitame žingsnyje.",
+      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
-      "email_label": "Darbo el. paštas",
-      "email_placeholder": "vardas@imone.lt",
+      "email_label": "El. paštas",
+      "email_placeholder": "vardas@pastas.lt",
       "password_label": "Slaptažodis",
       "password_help": "Bent 8 simboliai, 1 didžioji raidė, 1 skaičius, 1 specialusis (!@#$%).",
       "confirm_password_label": "Pakartok slaptažodį",
@@ -3832,7 +3832,7 @@
       "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
       "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis.",
       "check_email_title": "Patvirtinkite el. paštą",
-      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją.",
+      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją. Jei laiško nematote — patikrinkite šlamšto aplanką; naujos nuorodos galėsite paprašyti čia.",
       "resend_label": "Siųsti nuorodą dar kartą",
       "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
       "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
@@ -3901,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "Ko atėjote?",
         "intentNote": "Pažymėkite viską, kas tinka — viena paskyra talpina visa tai. Asmuo ir organizacija yra dvi erdvės; ką jose veikiate, sprendžiate jūs.",
+        "saidLabel": "Jūs rašėte:",
+        "saidHint": "Pažymėjome, kas tiko. Pataisykite, jei reikia.",
         "intent": {
           "work": {
             "title": "Ieškau darbo",
@@ -3963,7 +3965,7 @@
         "note": "Įgūdžiai pradžioje yra jūsų pačių nurodyti. Dokumentai, darbo žurnalas ir žmonių peržiūros laikui bėgant juos sustiprina."
       },
       "display_name_label": "Rodomas vardas",
-      "country_label": "Šalis",
+      "country_label": "Kur dabar gyveni?",
       "country_placeholder": "Pasirinkite šalį",
       "error_country_required": "Pasirinkite šalį.",
       "profession_label": "Kokį darbą dirbi?",

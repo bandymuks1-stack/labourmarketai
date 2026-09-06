@@ -1007,7 +1007,11 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
     // The hardcoded /dashboard redirect must be gone — replaced by an
     // assign to the sanitised return path.
     expect(txt).not.toMatch(/router\.replace\("\/dashboard"\)/);
-    expect(txt).toMatch(/window\.location\.assign\(nextPath\)/);
+    // Window 6 (2026-09-06): the sanitised path now goes through the pure
+    // `postLoginDestination` helper (a not-yet-onboarded person is routed to
+    // /onboarding?next=... so the landing sentence survives) — still a
+    // full-document assign, still built from `nextPath`.
+    expect(txt).toMatch(/window\.location\.assign\(\s*postLoginDestination\(\{\s*locale,\s*nextParam,\s*nextPath,\s*onboardedAt\s*\}\)/);
   });
 
   it("signup form reads `next` + carries it into onboarding", () => {
