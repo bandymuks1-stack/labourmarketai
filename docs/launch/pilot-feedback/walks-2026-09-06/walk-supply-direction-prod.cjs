@@ -29,9 +29,17 @@
 //   KEEP=1          → skip S4 (leave the row; use only when debugging).
 //
 // WRITES ONE ROW. That is the point — a read-only walk cannot prove a readback.
-// The row is created by the identity itself through the real UI and is deleted
-// in S4 by id. `customer_requests_delete` is `is_admin()`, so the delete runs
-// through the service-role client, scoped to the single id this run created.
+// The row is created by the identity itself through the real UI and removed in
+// S4 by id.
+//
+// S4 CANNOT COMPLETE ON ITS OWN, and says so instead of pretending. Measured
+// 2026-09-06: `customer_requests_delete` is `is_admin()`, and the service-role
+// connection is refused outright ("permission denied for table
+// customer_requests") because the table's default privileges were revoked —
+// the same class that left the notification emitters dead since July (#1566).
+// So S4 FAILS and logs the exact one-line statement to run through the
+// privileged path. A run of this walk is not finished until that line has been
+// executed and the row is gone.
 const fs = require("node:fs"), path = require("node:path");
 const ROOT = "C:/Users/Mano/Documents/labourmarketai";
 const { chromium } = require(ROOT + "/node_modules/@playwright/test");
@@ -255,7 +263,21 @@ const RAW_KEY = /\b(?:demandReadback|conversation|roleDashboards|workspace)\.[a-
 
   // ── S4 — zero residue ────────────────────────────────────────────────────
   if (newId && !KEEP) {
+    // MEASURED 2026-09-06: this delete returns "permission denied for table
+    // customer_requests". `service_role` holds NO grant here — the revoked
+    // default privileges (the same class that left the notification emitters
+    // dead since July, #1566) — and `customer_requests_delete` is `is_admin()`,
+    // which a service-role connection does not satisfy either. So the walk
+    // CANNOT clean up after itself, and the check below fails loudly with the
+    // exact statement to run rather than reporting a tidy zero.
     const { error: delErr } = await admin.from("customer_requests").delete().eq("id", newId);
+    if (delErr) {
+      log({
+        step: "S4 MANUAL CLEANUP REQUIRED",
+        reason: delErr.message,
+        sql: `delete from public.customer_requests where id = '${newId}';`,
+      });
+    }
     const remaining = await ownRequests(COMPANY);
     const stillThere = (remaining || []).some((r) => r.id === newId);
     check("S4 the row this walk created is gone", !delErr && !stillThere, { delErr: delErr && delErr.message, newId });

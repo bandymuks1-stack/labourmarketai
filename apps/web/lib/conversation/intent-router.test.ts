@@ -1043,3 +1043,56 @@ describe("G3 — every routed intent is reachable in all five active locales", (
     }
   }
 });
+
+/**
+ * Prod walk OPS (2026-09-06, `273bf208`): two of the owner's own §31
+ * operations sentences reached the WRONG SIDE of the product. Neither hit the
+ * generic fallback, so nothing in the suite could see it — both were answered
+ * confidently, and wrongly, by a bare noun stem.
+ *
+ * Both are the same inversion the supply defect was: a question about OTHER
+ * people, or about the company's work, answered as a personal action by the
+ * asker.
+ */
+describe("prod walk OPS — a company's coordination question is not a personal action", () => {
+  it('"Kas rytoj dirba objekte X?" asks who is on site, not for the asker\'s own hours', () => {
+    const m = classifyIntent("Kas rytoj dirba objekte X?");
+    // Was: log-work 1 (bare "objekt" site stem) → the company was asked
+    // "Kurią dieną ir kiek laiko dirbai?" — its own work record.
+    expect(m.intent).toBe("who-available");
+    expect(m.score).toBe(9);
+  });
+
+  it('"Kokie darbai vėluoja?" is a delay question, not a job hunt', () => {
+    const m = classifyIntent("Kokie darbai vėluoja?");
+    // Was: find-work 2 (plural "darbai") → "Darbo paieška yra tavo asmeninis
+    // veiksmas — persijunk į asmeninę erdvę."
+    expect(m.intent).toBe("project-risk");
+    expect(m.score).toBe(11);
+  });
+
+  it("the same two questions route the same way in the other launch languages", () => {
+    expect(classifyIntent("Who works on site tomorrow?").intent).toBe("who-available");
+    expect(classifyIntent("Wer arbeitet morgen auf der Baustelle?").intent).toBe("who-available");
+    expect(classifyIntent("Wie werkt er morgen op de bouwplaats?").intent).toBe("who-available");
+    expect(classifyIntent("Кто работает завтра на объекте?").intent).toBe("who-available");
+    expect(classifyIntent("Which tasks are late?").intent).toBe("project-risk");
+    expect(classifyIntent("Welche Arbeiten sind verzögert?").intent).toBe("project-risk");
+    expect(classifyIntent("Какие работы отстают?").intent).toBe("project-risk");
+  });
+
+  it("neither new rule steals the sentence it must not take", () => {
+    // A PAST-TENSE day is still a work-log entry — the new verb group is
+    // present/future only, so "dirbau"/"dirbome"/"worked" never reach it.
+    expect(classifyIntent("Šiandien 8 valandas montavome pastolius objekte X.").intent).toBe("log-work");
+    expect(classifyIntent("Šiandien dirbau nuo 8 iki 17.").intent).toBe("log-work");
+    expect(classifyIntent("Vakar dirbome objekte Roterdame.").intent).toBe("log-work");
+    // A real job search is still a job search — the delay rule carries no
+    // seeking verb, and the who-rule needs a which-word before the verb.
+    expect(classifyIntent("Ieškau darbo").intent).toBe("find-work");
+    expect(classifyIntent("Rask man darbą Nyderlanduose.").intent).toBe("find-work");
+    expect(classifyIntent("Surask man tinkamus darbus").intent).toBe("find-work");
+    // And the availability question the D1 walk fixed is untouched.
+    expect(classifyIntent("Sužinok, kurie darbuotojai nebus užimti per artimiausias dienas").intent).toBe("who-available");
+  });
+});
