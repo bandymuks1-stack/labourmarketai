@@ -188,6 +188,19 @@ function p(source: string, weight = 1): Pattern {
  * find-work and log-work; the PAST-TENSE verb + a TIME span tips it to
  * log-work, the SEEKING verb tips it to find-work).
  */
+/**
+ * A SENTENCE THAT ALSO SEEKS keeps its seek route. The statement-shaped
+ * intents (profession, availability, present-tense activity) open with a
+ * negative lookahead over these seek forms, so "esu buhalteris, ieškau darbo"
+ * / "I am an accountant looking for work in Vilnius" / "Я бухгалтер, ищу
+ * работу" / "Ik ben accountant en zoek werk" / "Ich bin Buchhalterin und
+ * suche Arbeit" stay `find-work` — the search runs and the statement is read
+ * beside it. One list for the three, all routed locales (lane F landing
+ * examples, 2026-09-06).
+ */
+const SEEK_GUARD_SOURCE =
+  "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch";
+
 const RULES: IntentRule[] = [
   // ── AI workspace intents (W4) ────────────────────────────────────────────
   // First, because each one is a MORE SPECIFIC reading of words that a
@@ -1114,7 +1127,7 @@ const RULES: IntentRule[] = [
     intent: "availability",
     patterns: [
       p(
-        "^(?![^]*(?:iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta))[^]*?\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b",
+        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b`,
         5,
       ),
       p("\\b(galiu|galesiu|galeciau)\\s+(pradeti|pradeciau)\\s+(nuo|kita|sia|rytoj|poryt|po|iki)\\b", 5),
@@ -1145,7 +1158,7 @@ const RULES: IntentRule[] = [
       // so the router and the reader cannot drift. A sentence that also
       // seeks ("remontuoju automobilius, ieškau darbo") keeps find-work.
       p(
-        `^(?![^]*(?:iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta))[^]*?\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
+        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
         5,
       ),
       p("parduo", 4), // parduodu / parduoti / noriu parduoti
@@ -1360,7 +1373,7 @@ const RULES: IntentRule[] = [
       p(
         // NB `[^]` (anything), never `[\s\S]`: pattern sources are lower-cased
         // and `\S` would silently become `\s`.
-        `^(?![^]*(?:iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta))[^]*?\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE}))`,
+        `^(?![^]*(?:${SEEK_GUARD_SOURCE}))[^]*?\\b(?:as\\s+)?(?:${PROFESSION_STATEMENT_ANCHOR_SOURCE})\\b\\s+(?:[^\\s]+\\s+){0,3}?(?!${ROLE_NOUN_EXCLUSION_SOURCE})(?:[^\\s]*?(?:${ROLE_SUFFIX_NOMINATIVE_SOURCE}|${ROLE_SUFFIX_INSTRUMENTAL_SOURCE})\\b|(?:${OCCUPATION_STEM_SOURCE}))`,
         6,
       ),
     ],
