@@ -61,6 +61,7 @@ export type IntentAccess = "read" | "write" | "route" | "blocked";
  *  share one handler (one question, one engine — never two stacks). */
 export type IntentHandlerId =
   | "findWork"
+  | "offerCapacity"
   | "professionStatement"
   | "availabilityStatement"
   | "skillGap"
@@ -245,6 +246,11 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The CLIENT's side of the agency bridge: the offers made on the company's
   // own demands, decided in the chat (accept → canonical booking proposed).
   "agency-offers": { domain: "company", access: "read", handler: "clientOffers", ownTyping: true },
+  // SUPPLY (owner window 7 §4): "turime 20 suvirintojų, ieškome jiems
+  // darbo" — capacity offered to the market. Same canonical intake as a
+  // need (`company.create-demand`, intent "partner" → kind agency_offer),
+  // so it is a company-domain WRITE behind the same confirmation token.
+  "offer-capacity": { domain: "company", access: "write", handler: "offerCapacity", ownTyping: false },
   // Documents first-class (§12/§14): a document RECORDED by sentence through
   // the one inline form over the canonical upsert; readiness re-answers.
   "add-document": { domain: "documents", access: "write", handler: "addDocument", ownTyping: true },

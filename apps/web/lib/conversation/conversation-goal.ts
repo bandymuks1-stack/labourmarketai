@@ -93,6 +93,11 @@ export const GOAL_BEARING_INTENTS: ReadonlySet<ConversationIntent> = new Set([
   "need-service",
   "offer-value",
   "availability",
+  // SUPPLY (owner window 7 §4/§9 D): "Turime 20 suvirintojų, kuriems ieškome
+  // darbo." → "Nuo spalio." → "Nyderlanduose arba Belgijoje." → "Jie turi
+  // VCA." Four turns, ONE capacity statement — and it must never flip into
+  // "we need 20 welders" on the way.
+  "offer-capacity",
 ]);
 
 /**
@@ -370,10 +375,24 @@ export function classifyTurn(input: ClassifyTurnInput): TurnKind {
   if (opensGoal && routedIntent === goal.intent) return "follow-up";
 
   // (6) a short refinement the router could not read, or read only weakly.
+  //
+  // Three signals, any one of which is enough inside a live goal:
+  //   * it opens with a connective / preposition / pronoun ("Nuo spalio.",
+  //     "Jie turi VCA.");
+  //   * it carries a stated value ("tik nuo 3000 eurų", "12");
+  //   * the router recognised SOMETHING but too weakly to be a destination
+  //     ("Nyderlanduose arba Belgijoje." scores 1 — one matched word). A
+  //     recognised word that is not a destination, said in the middle of a
+  //     goal, is a refinement of that goal.
+  //
+  // The third signal is what keeps this from becoming a list of countries and
+  // months, which is exactly the hard-coded accumulation the owner forbade.
   if (
     weak &&
     wordCount(folded) <= FOLLOW_UP_MAX_WORDS &&
-    (anyMatch(CONTINUATION_OPENER, folded) || CARRIES_VALUE.test(folded))
+    (anyMatch(CONTINUATION_OPENER, folded) ||
+      CARRIES_VALUE.test(folded) ||
+      input.routedScore > 0)
   ) {
     return "follow-up";
   }

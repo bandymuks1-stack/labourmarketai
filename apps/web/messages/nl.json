@@ -12006,6 +12006,9 @@
         "moveWorker": {
           "label": "Een persoon naar een ander project verplaatsen",
           "description": "Wijst toe aan het nieuwe project en beëindigt de vorige toewijzing — na de gevolgen."
+        },
+        "offerCapacity": {
+          "label": "Vastleggen wat u aanbiedt"
         }
       },
       "education": {
@@ -12151,7 +12154,13 @@
         "projectCity": "Stad (optioneel)",
         "projectCityPlaceholder": "bijv. Rotterdam",
         "rosterWorker": "Teamlid",
-        "proposalNotePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen"
+        "proposalNotePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen",
+        "supplyDescription": "Wat u aanbiedt",
+        "supplyDescriptionPlaceholder": "Bijv. 20 lassers met VCA, beschikbaar vanaf oktober, Nederland of België",
+        "supplyRole": "Welk beroep",
+        "supplyRolePlaceholder": "Bijv. lasser",
+        "supplyTeamSize": "Hoeveel mensen u heeft",
+        "supplyLocation": "Waar zij kunnen werken"
       },
       "availability": {
         "available": "Beschikbaar",
@@ -13482,6 +13491,10 @@
         "usingProfile": "Je hoeft niets te uploaden — ik zoek op basis van wat al in je profiel staat.",
         "usingProfileNarrowed": "Je hoeft niets te uploaden — ik zoek op basis van je profiel en wat je tot nu toe hebt verteld.",
         "profileEmpty": "Er staat nog niets in je profiel, dus daarop kan ik niet zoeken. Leg één klus vast of noem je beroep, dan zoek ik meteen."
+      },
+      "offerCapacity": {
+        "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
+        "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."
       }
     },
     "project": {

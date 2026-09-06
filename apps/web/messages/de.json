@@ -12006,6 +12006,9 @@
         "moveWorker": {
           "label": "Eine Person in ein anderes Projekt versetzen",
           "description": "Weist dem neuen Projekt zu und beendet die bisherige Zuweisung — nach der Folgenabschätzung."
+        },
+        "offerCapacity": {
+          "label": "Ihr Angebot festhalten"
         }
       },
       "education": {
@@ -12151,7 +12154,13 @@
         "projectCity": "Stadt (optional)",
         "projectCityPlaceholder": "z. B. Rotterdam",
         "rosterWorker": "Teammitglied",
-        "proposalNotePlaceholder": "Z. B. 5 Jahre Erfahrung, kann am Montag anfangen"
+        "proposalNotePlaceholder": "Z. B. 5 Jahre Erfahrung, kann am Montag anfangen",
+        "supplyDescription": "Was Sie anbieten",
+        "supplyDescriptionPlaceholder": "Z. B. 20 Schweißer mit VCA, verfügbar ab Oktober, Niederlande oder Belgien",
+        "supplyRole": "Welcher Beruf",
+        "supplyRolePlaceholder": "Z. B. Schweißer",
+        "supplyTeamSize": "Wie viele Menschen Sie haben",
+        "supplyLocation": "Wo sie arbeiten können"
       },
       "availability": {
         "available": "Verfügbar",
@@ -13482,6 +13491,10 @@
         "usingProfile": "Du musst nichts hochladen — ich suche mit dem, was schon in deinem Profil steht.",
         "usingProfileNarrowed": "Du musst nichts hochladen — ich suche mit deinem Profil und dem, was du bisher genannt hast.",
         "profileEmpty": "In deinem Profil steht noch nichts, daher kann ich damit nicht suchen. Erfasse eine Arbeit oder nenne deinen Beruf — dann suche ich sofort."
+      },
+      "offerCapacity": {
+        "needsCompany": "Menschen anzubieten gehört zu einer Organisation, und du bist gerade in deinem persönlichen Bereich. Wähle das Unternehmen — dann halte ich das Angebot sofort fest.",
+        "personalSpace": "Um Menschen oder ein Team anzubieten, braucht es eine Organisation, und du hast noch keine. Du kannst ein Unternehmen anlegen oder deine eigene Leistung anbieten."
       }
     },
     "project": {

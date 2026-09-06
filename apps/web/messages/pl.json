@@ -3463,6 +3463,9 @@
         "moveWorker": {
           "label": "Przenieś osobę do innego projektu",
           "description": "Przypisuje do nowego projektu i kończy poprzednie przypisanie — po podglądzie skutków."
+        },
+        "offerCapacity": {
+          "label": "Zapisz swoją ofertę"
         }
       },
       "education": {
@@ -3606,7 +3609,13 @@
         "projectCity": "Miasto (opcjonalnie)",
         "projectCityPlaceholder": "np. Rotterdam",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Co oferujecie",
+        "supplyDescriptionPlaceholder": "Np. 20 spawaczy z VCA, dostępni od października, Holandia lub Belgia",
+        "supplyRole": "Jaki zawód",
+        "supplyRolePlaceholder": "Np. spawacz",
+        "supplyTeamSize": "Ilu macie ludzi",
+        "supplyLocation": "Gdzie mogą pracować"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4568,6 +4577,10 @@
         "usingProfile": "Nie musisz nic wgrywać — szukam na podstawie tego, co już jest w Twoim profilu.",
         "usingProfileNarrowed": "Nie musisz nic wgrywać — szukam na podstawie Twojego profilu i tego, co już podałeś.",
         "profileEmpty": "W Twoim profilu nie ma jeszcze nic, więc nie mogę na nim oprzeć wyszukiwania. Zapisz jedną pracę albo podaj zawód — od razu zacznę szukać."
+      },
+      "offerCapacity": {
+        "needsCompany": "Oferowanie pracowników należy do organizacji, a Ty jesteś teraz w przestrzeni osobistej. Wybierz firmę — od razu zapiszę ofertę.",
+        "personalSpace": "Aby oferować ludzi lub zespół, potrzebna jest organizacja, a jeszcze jej nie masz. Możesz założyć firmę albo zaproponować własną usługę."
       }
     },
     "project": {
