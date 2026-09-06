@@ -198,9 +198,31 @@ transaction, with two different real people:
 Residue: **zero.** `journal_entries` back at 40, `journal_entry_confirmations`
 back at 13 — the exact pre-proof counts.
 
-**So why was the owner's real queue empty?** Not because the read is broken.
-`reviewable_journal_entry_ids()` is correct. It returns 0 because **no report
-has ever been written into a review-enabled context.**
+**So why was the owner's real queue empty?** Not because the read is broken —
+`reviewable_journal_entry_ids()` is correct. It returns 0 for that one owner
+because every entry currently awaiting review sits in a context they do not
+manage.
+
+> ### ⚠️ CORRECTION (same day, after a fuller read)
+>
+> An earlier draft of this section said **"no report has ever been written into
+> a review-enabled context."** That was WRONG, and the error mattered: it made
+> the receive loop sound unexercised when it is not.
+>
+> **The loop has been used by real people 13 times**, between 2026-05-30 and
+> 2026-09-05 — including two `changes_requested` returns, which means the
+> RETURN branch has run in production too, not just the happy path:
+>
+> | worker | confirmed by | decisions |
+> |---|---|---|
+> | `sss.ramunas` | `sukysdonatas` | 5 approved, 2 changes_requested |
+> | `sukysdonatas` | `bandymuks1` | 2 approved |
+> | `sss.ramunas` | *(themselves)* | 3 approved — see §6.5 |
+> | e2e worker | e2e walker | 1 approved |
+>
+> The claim was drawn from the 17 UNCONFIRMED entries without also counting the
+> 13 CONFIRMED ones. Confirmed entries leave the unconfirmed set by definition,
+> so reading only that set makes a working loop look like it had never run.
 
 ### 6.4 The real gap this exposed — 15 orphaned work records (§54, §9)
 
@@ -216,6 +238,27 @@ These are real people's real work. They look saved. They are saved. **They can
 reach no verifier, and the worker is told nothing.** That is the owner's §54
 defect exactly: a failure wearing the clothes of a successful empty state.
 
+> ### ⚠️ CORRECTION — how many of the 15 are actually a DEFECT
+>
+> An earlier draft implied all 15 are orphaned in error. They are not, and the
+> split decides how much work remains:
+>
+> | | entries | verdict |
+> |---|---|---|
+> | belong to a person who ALSO holds an employer context with review enabled | **8** | **the real defect** — one person (`sukysdonatas`), newest **2026-07-29** |
+> | belong to people with NO employer context at all | **7** | `self_reported` is the CORRECT state; not a defect |
+>
+> So the wrongly-orphaned population is **8 entries by one person, all before
+> 2026-07-29** — i.e. all BEFORE `resolveEngagementContext` shipped (owner
+> decision 2026-08-20). **No entry written after that date is wrongly
+> orphaned.** The org-less entries dated 2026-09-02 belong to e2e accounts that
+> genuinely have no employer, where rule D (personal) is the right answer.
+>
+> **The write-side reason is therefore already fixed.** What remains is not a
+> new writer fix but (a) telling the worker the state — shipped in #1598 — and
+> (b) a route for the 8 existing orphans, which needs an owner decision because
+> re-pointing someone's work history at an employer is not a silent migration.
+
 The write-side cause is already fixed — `resolveEngagementContext`
 (rules A/B/C/D) shipped and IS wired into the journal page, the capabilities
 registry and the conversation worklog. The 15 orphans **predate it**. What is
@@ -224,6 +267,38 @@ verifier, and (b) any route for the 15 existing orphans.
 
 ---
 
+### 6.5 NEW FINDING — a manager can confirm their own work
+
+Found while verifying the 13 confirmations above. `review_journal_entry`
+authorizes on:
+
+```sql
+if not (public.is_admin() or public.manages_organization(v_org)) then
+  return 'not_authorized';
+end if;
+```
+
+There is **no check that the confirmer is not the worker.** So anyone who
+manages an organization can confirm work they logged against that same
+organization.
+
+This is not hypothetical: **3 of the 13 confirmations on production are
+self-confirmations** (`sss.ramunas` confirming `sss.ramunas`, 2026-06-16 and
+2026-07-05).
+
+It matters because verified work is the platform's trust currency (§9: *"Never
+turn confirmation into an easily gamed reputation-star system"*). A
+self-confirmed entry currently reads as identical to one a supervisor
+confirmed.
+
+**NOT fixed here, deliberately.** Two reasons: it is a `SECURITY DEFINER` body
+change on the authorization path (RED, owner-gated), and the product decision
+is genuinely open — *block* self-confirmation outright, or *record* it as a
+weaker, visibly-distinct grade of evidence. The second is probably right for a
+sole trader who legitimately has nobody above them, and
+`work-verification-state.ts` already has the vocabulary for it (`not_applicable`
+/ `{ kind: "self" }`). **Owner decision required.**
+
 ## 7. Owner §55 acceptance matrix
 
 | Journey | Actor | State | Evidence / what is missing |
@@ -231,8 +306,8 @@ verifier, and (b) any route for the 15 existing orphans.
 | Agency states offered capacity without consuming the employer's need quota | AGENCY | **PRODUCTION TECHNICALLY-PROVEN — human walk missing** | #1594 merged; the count is scoped through the shared allow-list; two `.or()` calls verified to AND (postgrest-js `searchParams.append`, read from source, not assumed). **Not walked:** S2 save as a human was not re-run — browser unreachable. |
 | Worker board shows demand only | WORKER | **PRODUCTION TECHNICALLY-PROVEN — human walk missing** | 7 rows / 0 `agency_offer` through the real RPC as a real worker. **Not walked:** no human looked at the board. |
 | Agency board shows demand only | AGENCY | **BLOCKED — one owner decision** | Fix measured (12→10, 2→0, 0 added). #1596 draft + `needs-human-gate`. |
-| Report submit → receive → act → worker sees status | WORKER + COMPANY | **PRODUCTION TECHNICALLY-PROVEN — human walk missing** | Full chain proven on production, both roles, zero residue (§6.3). **Not walked:** neither screen was seen. |
-| A worker learns who can confirm their work | WORKER | **PARTIAL — decision made, not built** | §6.4 + §8.3. The four states are decided and grounded in data; the chat route and the worker-facing signal are not built. |
+| Report submit → receive → act → worker sees status | WORKER + COMPANY | **PRODUCTION_RPC_PROVEN + PRODUCTION_PERSISTENCE_PROVEN — HUMAN_UI_PROVEN = NO** | Full chain proven on production, both roles, zero residue (§6.3) — AND the loop has 13 real confirmations by real people since 2026-05-30, including 2 `changes_requested` returns (§6.3 correction). **Not walked this window:** neither screen was seen. |
+| A worker learns who can confirm their work | WORKER | **CODE_PROVEN + TEST_PROVEN; HUMAN_UI_PROVEN = NO** | Built in **#1598**: the 8 canonical states, `resolveVerifierOptions`, the RLS-scoped read, and the `who-verifies-work` intent so "Kam pateikti atliktą darbą?" stops reaching job adverts. Verifier resolution is PRODUCTION_RPC_PROVEN against the real orphaned-record holder's contexts. **Not walked:** nobody has typed the sentence into the real chat. |
 | Employer discovers agency supply | COMPANY | **NOT STARTED — and it would be dishonest to start it today** | §8.4. There is no supply inventory to discover: the only two submitted `agency_offer` rows are partnership pings from May/June carrying `{"intent":"partner"}` — no role, no count, no country. The one row with real capacity content is stuck in `draft`. Building the read now would ship a board of empty rows. |
 | Historical import (P0-F/G) | ALL | **NOT STARTED** | Untouched, as in window 8. |
 | Authorized AI/agent import (P0-H) | AI/AGENT | **NOT STARTED** | Untouched. |
