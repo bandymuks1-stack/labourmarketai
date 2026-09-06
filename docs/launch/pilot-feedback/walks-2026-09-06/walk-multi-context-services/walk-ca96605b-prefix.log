@@ -1,0 +1,65 @@
+{"step":"health","build":"ca96605b"}
+{"step":"identities","person":"70851a66-168c-443c-bb7b-d6f4d5112cd6","company":"98212ae5-34aa-402e-b926-21d25495cbd4"}
+{"step":"before","personOwnOfferings":0,"personIncomingRequests":0,"companyOutgoingRequests":0,"personSeenRow":0,"companySeenAt":"2026-09-02T14:41:48.698694+00:00","companyPointer":"a996113c-6155-4ca6-9bac-4fc7bf7db8ae"}
+{"leg":"company_chip","chip":"E2E Walker UAB"}
+{"check":"A0 the walker opens in the company context (chip names E2E Walker UAB)","ok":true,"detail":"E2E Walker UAB"}
+{"leg":"company_greeting","greeting":"L LabourMarket AI Veikiate „E2E Walker UAB“ vardu. Čia galiu padėti su studentais, programomis ir grupėmis, darbuotojų poreikiais, kandidatais, projektais ir komanda. Programos ir grupės Kandidatai Projektai"}
+{"leg":"company_deadline_fact","deadline":"e2e-chat-student-2026-09-04@labourmarket.ai — 2026-09-18"}
+{"check":"A1 G-H1: the nearest-deadline label is never a raw e-mail address","ok":false,"detail":"e2e-chat-student-2026-09-04@labourmarket.ai — 2026-09-18"}
+{"leg":"company_sentence","sentence":"siūlau buhalterijos paslaugas","ms":1605,"results":0,"text":"L LabourMarket AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","chips":["Atidaryti paslaugas"]}
+{"check":"A2 company: \"siūlau buhalterijos paslaugas\" gets an answer","ok":true,"detail":{"ms":1605}}
+{"leg":"company_sentence","sentence":"galiu kirpti plaukus","ms":1121,"results":0,"text":"L LabourMarket AI Jūsų teigimu: kirpti plaukus. Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","chips":["Atidaryti paslaugas"]}
+{"check":"A2 company: \"galiu kirpti plaukus\" gets an answer","ok":true,"detail":{"ms":1121}}
+{"leg":"company_sentence","sentence":"remontuoju automobilius","ms":2072,"results":0,"text":"L LabourMarket AI Nesu tikras, ar kažką siūlote, ar ko nors ieškote. Parašykite, ką turite arba ko reikia. Programos ir grupės Kandidatai Projektai","chips":["Programos ir grupės","Kandidatai","Projektai"]}
+{"check":"A2 company: \"remontuoju automobilius\" gets an answer","ok":true,"detail":{"ms":2072}}
+{"leg":"company_sentence","sentence":"reikia santechniko","ms":-1,"results":0,"text":"","chips":["Tęsti","Atšaukti"]}
+{"check":"A2 company: \"reikia santechniko\" gets an answer","ok":false,"detail":{"ms":-1}}
+{"leg":"company_sentence","sentence":"reikia buhalterio paslaugų","ms":-1,"results":0,"text":"","chips":["Tęsti","Atšaukti","Tęsti","Atšaukti"]}
+{"check":"A2 company: \"reikia buhalterio paslaugų\" gets an answer","ok":false,"detail":{"ms":-1}}
+{"leg":"company_sentence","sentence":"reikia korepetitoriaus","ms":3082,"results":0,"text":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą","chips":["Tęsti","Atšaukti","Tęsti","Atšaukti","Rasti paslaugą"]}
+{"check":"A2 company: \"reikia korepetitoriaus\" gets an answer","ok":true,"detail":{"ms":3082}}
+{"leg":"company_sentence","sentence":"ką man daryti toliau?","ms":3088,"results":0,"text":"L LabourMarket AI 1 studento pakvietimas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. 1 darbo įrašas laukia jūsų peržiūros. Pakviesti studentą Mano pasiūlymai Peržiūros eilė","chips":["Atšaukti","Tęsti","Atšaukti","Pakviesti studentą","Mano pasiūlymai","Peržiūros eilė"]}
+{"check":"A2 company: \"ką man daryti toliau?\" gets an answer","ok":true,"detail":{"ms":3088}}
+{"leg":"company_sentence","sentence":"ieškau darbo","ms":2421,"results":0,"text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":["Tęsti","Atšaukti","Tęsti","Atšaukti"]}
+{"check":"A2 company: \"ieškau darbo\" gets an answer","ok":true,"detail":{"ms":2421}}
+{"check":"A3 company: offering a service reaches the services door (not the menu)","ok":true,"detail":"L LabourMarket AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas"}
+{"check":"A4 company: 'reikia santechniko' is not the not-understood menu","ok":true,"detail":""}
+{"check":"A5 company: 'ką man daryti toliau?' answers in the company's terms (no personal profile ladder)","ok":true,"detail":"L LabourMarket AI 1 studento pakvietimas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. 1 darbo įrašas laukia jūsų peržiūros. Pakviesti studentą Mano pasiūlymai Peržiūros eilė"}
+{"check":"A6 company: 'ieškau darbo' does not silently show the person's job board","ok":true,"detail":{"results":0,"text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai."}}
+{"leg":"company_failed_requests","failed":[]}
+{"leg":"switch_to_personal","chip":"Asmeninė erdvė"}
+{"check":"B1 the chip switches the same identity to the personal space","ok":true,"detail":"Asmeninė erdvė"}
+{"leg":"personal_after_reload","chip":"Asmeninė erdvė","greeting":"L LabourMarket AI Profilyje dar trūksta: Profesija. Mano profilis"}
+{"check":"B2 the personal context survives a reload (durable pointer)","ok":true,"detail":"Asmeninė erdvė"}
+{"leg":"personal_next","text":"","chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"]}
+{"check":"B3 personal: 'ką man daryti toliau?' answers","ok":false,"detail":""}
+{"leg":"back_to_company","chip":"E2E Walker UAB","greeting":"L LabourMarket AI Veikiate „E2E Walker UAB“ vardu. Čia galiu padėti su studentais, programomis ir grupėmis, darbuotojų poreikiais, kandidatais, projektais ir komanda. Programos ir grupės Kandidatai Projektai"}
+{"check":"B4 switching back restores the company context","ok":true,"detail":"E2E Walker UAB"}
+{"check":"B5 after switching back, the opening brief names the company","ok":true,"detail":"L LabourMarket AI Veikiate „E2E Walker UAB“ vardu. Čia galiu padėti su studentais, programomis ir grupėmis, darbuotojų poreikiais, kandidatais, projektais ir komanda. Programos ir grupės Kandidatai Pr"}
+{"check":"B6 the walker's durable pointer is back on the company","ok":true,"detail":{"active_organization_id":"a996113c-6155-4ca6-9bac-4fc7bf7db8ae"}}
+{"leg":"person_services_chip","chip":"Asmeninė erdvė"}
+{"check":"C1 /dashboard/services offers a way forward (link to requests)","ok":true,"detail":null}
+{"leg":"person_offering_created","offeringId":"57206fde-965a-4bf7-bba7-40e6a20a9c96"}
+{"check":"C2 the offering row appears after save","ok":true,"detail":"service-offering-row-57206fde-965a-4bf7-bba7-40e6a20a9c96"}
+{"check":"C3 the offering is ACTIVE after one tap","ok":true,"detail":"AKTYVUS"}
+{"leg":"person_failed_requests","failed":[]}
+{"check":"D1 the company sees the person's offering in discovery","ok":true,"detail":1}
+{"leg":"company_discover_row","offerText":"Buhalterijos paslaugos buhalterija · LT · Nuotoliu · derinama Pateikti užklausą"}
+{"check":"D2 the discover row carries no raw id / e-mail","ok":true,"detail":"Buhalterijos paslaugos buhalterija · LT · Nuotoliu · derinama Pateikti užklausą"}
+{"check":"D3 one tap sends the request (row reads 'Užklausa pateikta')","ok":true,"detail":1}
+{"check":"D4 the request appears under 'Mano užklausos' as sent","ok":true,"detail":1}
+{"leg":"company_failed_requests_sr","failed":[]}
+{"check":"E1 the provider sees the incoming request","ok":true,"detail":1}
+{"leg":"person_incoming_requester","who":"EW Užklausą pateikė: E2E Walker"}
+{"check":"E2 the requester is shown by NAME, never an e-mail or id","ok":true,"detail":"EW Užklausą pateikė: E2E Walker"}
+{"check":"E3 accepting flips the row to 'Priimta' with the message door","ok":true,"detail":"EW Užklausą pateikė: E2E Walker Buhalterijos paslaugos Priimta Parašyti žinutę"}
+{"leg":"company_outgoing_after_accept","t":"Buhalterijos paslaugos Priimta Atsakyta 2026-09-06 Parašyti žinutę"}
+{"check":"F1 the requester sees 'Priimta' + 'Atsakyta <day>' + the message door","ok":true,"detail":"Buhalterijos paslaugos Priimta Atsakyta 2026-09-06 Parašyti žinutę"}
+{"check":"G1 the offering is deleted through the product","ok":true,"detail":null}
+{"step":"after","personOwnOfferings":0,"personIncomingRequests":0,"companyOutgoingRequests":0,"personSeenRow":1,"companySeenAt":"2026-09-06T06:54:44.787981+00:00","companyPointer":"a996113c-6155-4ca6-9bac-4fc7bf7db8ae"}
+{"check":"G2 zero residue: the person's offerings are back to the before-count","ok":true,"detail":{"before":0,"after":0}}
+{"check":"G3 zero residue: the request rows are gone on BOTH sides","ok":true,"detail":{"before":[0,0],"after":[0,0]}}
+{"check":"G4 the walker's durable workspace pointer is unchanged","ok":true,"detail":{"before":"a996113c-6155-4ca6-9bac-4fc7bf7db8ae","after":"a996113c-6155-4ca6-9bac-4fc7bf7db8ae"}}
+{"step":"residue_to_sweep_via_execute_sql","personSeenRowCreated":true,"companySeenAtBumped":{"before":"2026-09-02T14:41:48.698694+00:00","after":"2026-09-06T06:54:44.787981+00:00"}}
+{"result":"FAIL","failed":["A1 G-H1: the nearest-deadline label is never a raw e-mail address","A2 company: \"reikia santechniko\" gets an answer","A2 company: \"reikia buhalterio paslaugų\" gets an answer","B3 personal: 'ką man daryti toliau?' answers"]}
+{"step":"execute_sql_residue_sweep","person_seen_deleted":1,"company_seen_at_restored":"2026-09-02T14:41:48.698694+00:00","global_after":{"service_offerings":2,"service_offering_requests":1,"service_offering_requests_seen":4},"global_before":{"service_offerings":2,"service_offering_requests":1,"service_offering_requests_seen":4},"fixture_left":0,"note":"service_role holds no table grants in production; counts and the seen-row sweep ran via Supabase MCP execute_sql (see walk report)"}
