@@ -131,8 +131,20 @@ export async function searchPublicVacancies(
 
   // One row past the page so "is there more" is answered by evidence rather
   // than by a second count query.
+  //
+  // ORDER DIRECTION IS THE INDEX (production, 2026-09-06). The generic path
+  // (no country, no profession) is served by
+  // `public_vacancies_active_published_idx (published_at DESC NULLS LAST, id)
+  // WHERE is_active`; a plain `DESC` means NULLS FIRST, which that index
+  // cannot deliver, so the planner seq-scanned 47k rows and top-N sorted them:
+  // measured 6,947 ms — mean 2.85 s over 897 calls, max 7.9 s against the
+  // 8 s statement timeout, i.e. the worker board and every sentence that
+  // reads it ("kas man trūksta?") were failing with 57014. With NULLS LAST
+  // the same query walks the index: 2.8 ms. The country and profession
+  // indexes are plain `published_at DESC`, so those paths keep the default.
+  const genericPath = !filters.country && !filters.professionSlug;
   const { data, error } = await q
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: !genericPath })
     .range(offset, offset + limit);
 
   if (error) {

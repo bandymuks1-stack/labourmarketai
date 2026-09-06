@@ -18,6 +18,8 @@
  *    COUNTRY_RULES (structure-need), recognizeSkills, extractQuantities,
  *    parseTimeWindow, word numbers — no second rule set to drift.
  */
+import { detectNeedProfession } from "@/lib/market/need-skills";
+import { PROFESSION_HINTS_LT } from "./keywords";
 import { foldText } from "./normalize";
 import {
   WORK_TYPE_RULES,
@@ -55,6 +57,12 @@ export interface ValueStatement {
   readonly headcount: number | null;
   /** work-categories slug via the shared WORK_TYPE_RULES. */
   readonly workType: string | null;
+  /** Canonical PROFESSION (the 49-row lexicon matching and the profile
+   *  extractor already share) when the closed work-type set misses —
+   *  "reikia 2 mechanikų" → `auto_mechanic`. Null when a work type was read
+   *  (the work type keeps precedence) or nothing matched. A suggestion the
+   *  person confirms in the form, never a persisted fact by itself. */
+  readonly professionSlug: string | null;
   readonly skills: RecognizedSkill[];
   /** ISO-2 market code via the shared COUNTRY_RULES. */
   readonly country: string | null;
@@ -192,10 +200,15 @@ function echoAfter(text: string, anchorEnd: number): string | null {
 function detectHeadcount(text: string, folded: string): number | null {
   const tokens = text.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const foldedTokens = tokens.map(foldText);
+  // A counted PROFESSION noun is a headcount too ("2 mechanikų", "dviejų
+  // programuotojų") — the same lexicon the profession fallback reads.
   const isPersonish = (tok: string): boolean =>
     PERSON_NOUN_RES.some((re) => re.test(tok)) ||
     (!/^paslaug/u.test(tok) &&
-      WORK_TYPE_RULES.some((r) => r.needles.some((n) => tok.includes(n))));
+      (WORK_TYPE_RULES.some((r) => r.needles.some((n) => tok.includes(n))) ||
+        PROFESSION_HINTS_LT.some((r) =>
+          r.needles.some((n) => n.length >= 4 && tok.includes(foldText(n))),
+        )));
 
   const numberAt = (i: number): number | null => {
     if (/^\d{1,4}$/.test(tokens[i])) {
@@ -279,6 +292,16 @@ export function structureValueStatement(
   const wt = firstRuleMatch(WORK_TYPE_RULES, maskServiceNoun(folded));
   const workType = wt?.slug ?? null;
   if (workType) reasons.push(`work_type:${workType}`);
+  // Real-user walk 2026-09-06: "mano autoservisui reikia 2 mechanikų" opened
+  // the need form with the ROLE EMPTY — the closed work-type set is 43 manual
+  // trades, while the platform's profession lexicon (49 rows; matching and
+  // the profile extractor already read it) knows the mechanic, the cook, the
+  // hairdresser, the developer, the teacher. The fallback names the
+  // profession the person named; the work type keeps precedence.
+  const professionSlug = workType
+    ? null
+    : detectNeedProfession(maskServiceNoun(folded));
+  if (professionSlug) reasons.push(`profession:${professionSlug}`);
   const skills = recognizeSkills(raw);
   const { country, city } = resolveCountryAndCity(folded);
   if (country) reasons.push(`country:${country}`);
@@ -405,6 +428,7 @@ export function structureValueStatement(
     offerMode,
     headcount,
     workType,
+    professionSlug,
     skills,
     country,
     city,
