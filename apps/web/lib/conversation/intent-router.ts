@@ -1041,6 +1041,21 @@ const RULES: IntentRule[] = [
       // back. JS \w is ASCII-only, so the LT noun endings are consumed by
       // the gap, not by \w.
       p("(kurie|kuris|kas|which|who|wer|welche|wie|кто|какие)\\s+.{0,24}?(darbuotoj|žmon|komand|worker|people|staff|mitarbeiter|leute|medewerker|mensen|работник|люди)\\w*\\s*.{0,24}?(laisv|neužimt|nebus\\s+užimt|available|free|not\\s+busy|frei|verfügbar|vrij|beschikbaar|свобод|не\\s+занят)", 9),
+      // Prod walk O1 (2026-09-06): "Kas rytoj dirba objekte X?" — a company
+      // asking WHO IS ON a site tomorrow — scored 0 on every rule above (it
+      // says "dirba", not "gali dirbti" and not "laisvas") and 1 on `log-work`,
+      // whose bare "objekt" stem then answered the COMPANY with "Kurią dieną
+      // ir kiek laiko dirbai?": a question about OTHER people, answered as a
+      // request to record the asker's OWN hours. That is the same inversion as
+      // the supply defect — someone else's state read as mine.
+      //
+      // WHICH-word + a present/future WORK verb is a coordination question,
+      // never a work record: nobody writes down their own past day by asking
+      // "who works". The verb group is present/future ONLY — "dirbau",
+      // "dirbome", "worked" are absent — so a past-tense statement keeps its
+      // journal route. Weight 9 so the bare site and day stems in `log-work`
+      // cannot pull it back.
+      p("(kas|kurie|kuris|who|wer|welche|wie|кто|kto)\\s+.{0,24}?(dirba\\b|dirbs\\b|works\\b|working\\b|arbeitet\\b|werkt\\b|работает\\b|pracuje\\b)", 9),
     ],
   },
   {
@@ -1112,6 +1127,20 @@ const RULES: IntentRule[] = [
       p("(rizik|risk|risiko|risico|gef[aä]hrd|угроз|риск|zagro[zż])\\w*\\s*.{0,24}?(projekt|project|проект)", 11),
       p("(kaip\\s+sekasi|how\\s+(are|is)|wie\\s+(l[aä]uft|laufen|steht|stehen)|hoe\\s+(gaat|staat|lopen)|как\\s+(идут|идёт|дела)|jak\\s+(idą|idzie))\\s*.{0,20}?(projekt|project|проект)", 10),
       p("(projekt[uų]|projects|projekte|projecten|проектов|projektów)\\s+(b[uū]kl|b[uū]sen|status|stand|state|состоян|статус|stan\\b)", 10),
+      // Prod walk O3 (2026-09-06): "Kokie darbai vėluoja?" scored 0 here — the
+      // subject group knew only "projekt / objekt", never the everyday word
+      // for the WORK itself — and 2 on `find-work`, whose plural noun
+      // `darb(ai)` fired. So a company asking WHICH WORK IS LATE was answered
+      // "Darbo paieška yra tavo asmeninis veiksmas — persijunk į asmeninę
+      // erdvę": a coordination question turned into a personal job hunt.
+      //
+      // A WORK/TASK noun beside a LATE/BEHIND stem is a delay question in all
+      // of these languages, and no job search is phrased that way — the
+      // seeking verbs (ieškau / rask / suche / zoek) are absent from both
+      // groups, so a real job search cannot be pulled in here. Weight 11,
+      // matching the risk rules above, so a bare noun cannot pull it back.
+      p("(darb|u[zž]duot|task|work|arbeit|werk|работ|задач|prac|zadani)\\w*\\s*.{0,24}?(v[eė]luoj|v[eė]lav|atsilie|behind\\s+schedule|\\blate\\b|overdue|delayed|verz[oö]ger|versp[aä]tet|achterstand|te\\s+laat|отста|просроч|задерж|op[oó][zź]ni|sp[oó][zź]ni)", 11),
+      p("(v[eė]luoj|atsilie|behind\\s+schedule|overdue|delayed|verz[oö]gert|achterstand|отста|просроч|op[oó][zź]ni)\\w*\\s*.{0,24}?(darb|u[zž]duot|task|work|arbeit|werk|работ|задач|prac|zadani)", 11),
     ],
   },
   {

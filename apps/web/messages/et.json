@@ -11,7 +11,9 @@
       "agencyPartnership": "Partnerluspakkumine"
     },
     "interestWaiting": "{count, plural, one {# inimene ootab vastust} other {# inimest ootab vastust}}",
-    "untitledInquiry": "Nimeta päring"
+    "untitledInquiry": "Nimeta päring",
+    "supplyHeading": "Teie pakutud võimekus",
+    "supplyNote": "Need on inimesed, kelle kohta ütlesite turule, et teil ON, mitte need, keda otsite. Need on salvestatud ja teile nähtavad. Tööandjad ei saa pakutud võimekust veel otsida, seega pole nende pärast keegi ühendust võtnud."
   },
   "journey": {
     "eyebrow": "Kuidas see töötab",

@@ -124,6 +124,8 @@ describe("selectOpenNeeds — closed needs drop, drafts lead, bounded", () => {
     id,
     profileId: "p",
     customerId: null,
+    // These fixtures are OPEN NEEDS by construction — the demand direction.
+    direction: "demand",
     title: id,
     needSummary: null,
     country: null,

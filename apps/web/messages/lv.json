@@ -11,7 +11,9 @@
       "agencyPartnership": "Sadarbības piedāvājums"
     },
     "interestWaiting": "{count, plural, zero {# cilvēku gaida atbildi} one {# cilvēks gaida atbildi} other {# cilvēki gaida atbildi}}",
-    "untitledInquiry": "Pieprasījums bez nosaukuma"
+    "untitledInquiry": "Pieprasījums bez nosaukuma",
+    "supplyHeading": "Jūsu piedāvātā kapacitāte",
+    "supplyNote": "Šie ir cilvēki, kurus jūs tirgum norādījāt kā PIEEJAMUS, nevis tie, kurus meklējat. Tie ir saglabāti un redzami jums. Darba devēji pagaidām nevar meklēt piedāvāto kapacitāti, tāpēc par tiem vēl neviens nav sazinājies."
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",

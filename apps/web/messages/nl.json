@@ -1773,7 +1773,9 @@
       "agencyPartnership": "Samenwerkingsvoorstel"
     },
     "interestWaiting": "{count, plural, one {# persoon wacht op een reactie} other {# personen wachten op een reactie}}",
-    "untitledInquiry": "Naamloze aanvraag"
+    "untitledInquiry": "Naamloze aanvraag",
+    "supplyHeading": "Door u aangeboden capaciteit",
+    "supplyNote": "Dit zijn mensen waarvan u de markt hebt verteld dat u ze HEEFT, niet mensen die u zoekt. Ze zijn opgeslagen en voor u zichtbaar. Werkgevers kunnen aangeboden capaciteit nog niet doorzoeken, dus hierover heeft nog niemand contact opgenomen."
   },
   "journey": {
     "eyebrow": "Hoe het werkt",
