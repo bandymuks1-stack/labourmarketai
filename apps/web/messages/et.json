@@ -4240,11 +4240,12 @@
     },
     "cta": {
       "title": "Alusta sealt, kus oled",
-      "subcopy": "Neli ust samale platvormile — vali oma.",
+      "subcopy": "Viis ust samale platvormile — vali oma.",
       "worker": "Olen töötaja",
       "employer": "Olen tööandja",
       "agency": "Esindan agentuuri",
-      "partner": "Soovin saada partneriks"
+      "partner": "Soovin saada partneriks",
+      "institution": "Esindan kooli või ülikooli"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",

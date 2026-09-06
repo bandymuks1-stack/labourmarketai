@@ -278,6 +278,35 @@ import { join } from "node:path";
  * chips, the sentence never in telemetry) and `lib/marketing/
  * public-entry.test.ts` (three sentences → three recognitions in every
  * routed locale; the sentence survives the auth sanitiser).
+ *
+ * WINDOW 6 — PUBLIC DOORS (owner mission 2026-09-06: real launch for real
+ * people, real companies, a real college; window-5 checkpoint gaps G-C1 and
+ * G-D1, both "P0 FRICTION, PUBLIC domain, copy + one door"). Measured
+ * anonymously on production build ca96605b before the change (log +
+ * screenshots in docs/launch/pilot-feedback/walks-2026-09-06/
+ * walk-public-doors/before/): the first screen said "Paklausk. Pamatyk.
+ * Įdarbink." over an internal-vocabulary lead ("AI darbo rinkos operacinė
+ * sistema…"), the three examples read as manual labour, and the final band
+ * had four doors — none for an education institution, so a lecturer had to
+ * guess that "Esu darbdavys" leads to an organisation with the
+ * `training_provider` capability. Three changes, no redesign: (1) a FIFTH
+ * door, "Atstovauju mokyklai ar universitetui →", whose href is DERIVED from
+ * `nextPathForIntents(["education"])` — the existing organisation setup with
+ * the capability preset — carried in `?next=` through the existing return
+ * path; the doors moved into the pure registry `lib/marketing/public-doors.ts`
+ * (frozen with the band) so guard, walk and band read one list; (2) three
+ * more example sentences per routed locale — a professional worker, a
+ * service need, a service offer — every one routed LIVE through the one
+ * router and pinned per intent in `lib/marketing/public-entry.test.ts`;
+ * (3) the hero aligned to the canonical public axis "Parodyk, ką moki.
+ * Atrask, kur esi reikalingas." — still one headline + one lead + the
+ * sentence box. Zero overflow at 390/320 and zero 4xx/5xx were measured
+ * before and are re-verified by the post-merge walk
+ * (walk-public-doors-prod.cjs). The regeneration touched the band hash, the
+ * entry component hash (its example-key list grew from three to six), the
+ * new registry (added to the frozen set) and the three frozen `*.landing`
+ * namespace hashes (cta.institution + cta.subcopy in all 11 catalogs;
+ * hero + entry.examples in the five routed ones). Nothing else moved.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -310,6 +339,8 @@ export const FROZEN_LANDING_FILES = [
   "components/marketing/player-card-showcase.tsx",
   "components/marketing/trust-band.tsx",
   "components/marketing/final-cta-band.tsx",
+  // Window 6, 2026-09-06: the pure door registry the band renders from.
+  "lib/marketing/public-doors.ts",
 ] as const;
 
 /**

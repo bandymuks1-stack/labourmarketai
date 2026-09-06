@@ -4678,7 +4678,7 @@
         },
         {
           "q": "Was kostet es Arbeitskräfte?",
-          "a": "Der Kern ist kostenlos — Ihr Profil, Matches, Suche und Nachrichten kosten Arbeitskräfte niemals etwas. Premium-Extras (Foto- und Videogalerien, der KI-Profilassistent, VIP-Sichtbarkeit) sind mit einer kleinen Gebühr verbunden. Die endgültigen Preise werden vor dem vollständigen Start veröffentlicht."
+          "a": "Für Einzelpersonen ist alles kostenlos — Profil, Matches, Suche und Nachrichten kosten eine Arbeitskraft niemals etwas. Bezahlte Pläne gibt es nur für Organisationen; sie stehen auf der Preisseite."
         },
         {
           "q": "Wer sieht mein Profil?",
@@ -4776,7 +4776,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Die Preise werden zum Start bekannt gegeben. Anmeldungen auf der Warteliste erhalten Early-Access-Preise."
+          "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
         },
         {
           "q": "Können wir nach Standort filtern?",
@@ -4874,7 +4874,7 @@
         },
         {
           "q": "Was kostet es Personalagenturen?",
-          "a": "Die Preise werden zum Start bekannt gegeben; Wartelisten-Partner erhalten Early-Access-Konditionen."
+          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
         },
         {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
@@ -13087,11 +13087,12 @@
     },
     "cta": {
       "title": "Starten Sie dort, wo Sie sind",
-      "subcopy": "Vier Türen in dieselbe Plattform — wählen Sie Ihre.",
+      "subcopy": "Fünf Türen in dieselbe Plattform — wählen Sie Ihre.",
       "worker": "Ich bin Arbeitskraft",
       "employer": "Ich bin Arbeitgeber",
       "agency": "Ich vertrete eine Agentur",
-      "partner": "Ich möchte Partner werden"
+      "partner": "Ich möchte Partner werden",
+      "institution": "Ich vertrete eine Schule oder Hochschule"
     },
     "loop": {
       "chip": "Beispielsequenz — echter Produktablauf",
@@ -13203,8 +13204,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Fragen. Sehen. Einstellen.",
-      "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort."
+      "headline": "Zeig, was du kannst. Finde, wo du gebraucht wirst.",
+      "sub": "Echte Erfahrung wird zu einem lebendigen Profil, und deine Fähigkeiten werden zu echten Chancen — für Arbeit, eine Dienstleistung oder ein Praktikum."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -13214,7 +13215,10 @@
       "examples": {
         "hire": "Wir brauchen 12 Gerüstbauer in Rotterdam",
         "work": "Ich suche Arbeit in Norwegen",
-        "internship": "Wo kann ich ein Praktikum machen?"
+        "internship": "Wo kann ich ein Praktikum machen?",
+        "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
+        "needService": "Ich brauche jemanden, der das Dach repariert",
+        "offerService": "Ich biete Buchhaltungsdienstleistungen an"
       },
       "understoodLabel": "Verstanden",
       "understood": {
