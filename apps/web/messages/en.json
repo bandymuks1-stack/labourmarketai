@@ -12334,6 +12334,7 @@
       "assignPickWorker": "Who should work on it?",
       "assignNoWorkers": "There is nobody on your team to assign yet.",
       "assignUnavailable": "I could not read your team right now.",
+      "assignEngagementCandidate": "accepted-offer candidate",
       "assignDone": "Assigned to the project.",
       "assignFailed": "The assignment could not be made.",
       "chipEngagements": "Who I work with",
