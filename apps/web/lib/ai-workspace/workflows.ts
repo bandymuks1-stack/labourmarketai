@@ -98,15 +98,22 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
             .map((v) => v.terms[0])
             .filter((label): label is string => typeof label === "string" && label.length > 0)
             .join(", ");
-    const understood = alternatives
+    const honest = alternatives
       ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
       : t("noSuchValue", { asked: missed[0].matchedText });
     const explanation = {
       why: t("whyFromYourBoard"),
       unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
     };
-    if (missedDimension !== "country") {
-      return { kind: "answer", text: understood, explanation: explanation };
+    // MATCHING CONTINUES AFTER "NO" (owner contract §16; prod walk 2026-09-05,
+    // gap G-C2): a student asking for an internship when none is visible is
+    // told so honestly — and then handed the EXISTING next steps (choose a
+    // direction, ask the institution, the compass, the whole board), never a
+    // dead end. The decision and its reads live in the education domain.
+    if (missedDimension === "opportunityType") {
+      const { loadInternshipNextSteps } = await import("@/lib/conversation/education-next-steps-server");
+      const next = await loadInternshipNextSteps();
+      return { kind: "answer", text: [honest, ...next.lines].join("\n"), explanation: explanation, chips: next.chips };
     }
     // A COUNTRY THE PERSON HAS NOT CHOSEN YET (real-person join walk,
     // production ca96605b, 2026-09-06): "ieškau darbo Norvegijoje" from a
@@ -120,25 +127,28 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
     // official sources exist there at all — no manufactured listing either
     // way; a failed read is named as a failed read, never as "none". The
     // reads live in the conversation domain (`country-next-steps-server`).
-    const country = await loadUnchosenCountryNextSteps(missed[0].value);
-    const supplyLine =
-      country.supply === "yes"
-        ? t("countryNotChosenListings")
-        : country.supply === "no"
-          ? t("countryNotChosenNoListings")
-          : t("countryNotChosenSupplyUnknown");
-    return {
-      kind: "answer",
-      text: [understood, supplyLine, t("countryNotChosenDoors")].join("\n"),
-      explanation: explanation,
-      chips: [
-        {
-          id: `f:worker.save-work-card?preferredCountries=${country.nextCountries.join(",")}`,
-          label: t("chipAddCountry"),
-        },
-        { id: "documents-gap", label: t("chipDocsGap") },
-      ],
-    };
+    if (missedDimension === "country") {
+      const country = await loadUnchosenCountryNextSteps(missed[0].value);
+      const supplyLine =
+        country.supply === "yes"
+          ? t("countryNotChosenListings")
+          : country.supply === "no"
+            ? t("countryNotChosenNoListings")
+            : t("countryNotChosenSupplyUnknown");
+      return {
+        kind: "answer",
+        text: [honest, supplyLine, t("countryNotChosenDoors")].join("\n"),
+        explanation: explanation,
+        chips: [
+          {
+            id: `f:worker.save-work-card?preferredCountries=${country.nextCountries.join(",")}`,
+            label: t("chipAddCountry"),
+          },
+          { id: "documents-gap", label: t("chipDocsGap") },
+        ],
+      };
+    }
+    return { kind: "answer", text: honest, explanation: explanation };
   }
 
   /**

@@ -1007,7 +1007,11 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
     // The hardcoded /dashboard redirect must be gone — replaced by an
     // assign to the sanitised return path.
     expect(txt).not.toMatch(/router\.replace\("\/dashboard"\)/);
-    expect(txt).toMatch(/window\.location\.assign\(nextPath\)/);
+    // Window 6 (2026-09-06): the sanitised path now goes through the pure
+    // `postLoginDestination` helper (a not-yet-onboarded person is routed to
+    // /onboarding?next=... so the landing sentence survives) — still a
+    // full-document assign, still built from `nextPath`.
+    expect(txt).toMatch(/window\.location\.assign\(\s*postLoginDestination\(\{\s*locale,\s*nextParam,\s*nextPath,\s*onboardedAt\s*\}\)/);
   });
 
   it("signup form reads `next` + carries it into onboarding", () => {
@@ -2367,7 +2371,12 @@ describe("no migration files added by this sprint", () => {
     // additive evidence columns + billing_checkout_operations table + the
     // billing_customers (owner, provider, test_mode) key. No data loss.
     // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
-const SPRINT_BASELINE = 265;
+    // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
+    // window 6, 2026-09-06, GREEN additive: one partial index for the board
+    // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
+    // rollback; applied by the orchestrator via MCP). RECOUNTED from the
+    // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
+const SPRINT_BASELINE = 266;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

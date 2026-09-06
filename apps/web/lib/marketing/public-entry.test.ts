@@ -10,7 +10,9 @@ vi.setConfig({ testTimeout: 30_000 });
 
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
-import { FIRST_RUN_INTENTS } from "@/lib/onboarding/first-run-intent";
+import { FIRST_RUN_INTENTS, nextPathForIntents } from "@/lib/onboarding/first-run-intent";
+
+import { FINAL_CTA_LINKS, INSTITUTION_DOOR_NEXT } from "./public-doors";
 
 import {
   PUBLIC_ENTRY_MAX_CHARS,
@@ -44,16 +46,60 @@ describe("public entry — one sentence, the one router (P1 acceptance)", () => 
     expect(intents.size).toBe(3);
   });
 
+  /**
+   * Window 6 (2026-09-06, gap G-D1): the first screen used to show three
+   * manual-labour sentences. It now shows six — the original three plus a
+   * PROFESSIONAL worker, a SERVICE need and a SERVICE offer — and every one
+   * of them is still routed LIVE through the one router when tapped, so each
+   * must be recognised in every routed locale, and together they must reach
+   * the five intents the door copy relies on. Nothing here is pre-answered.
+   */
+  const EXAMPLE_KEYS = [
+    "hire",
+    "work",
+    "internship",
+    "professional",
+    "needService",
+    "offerService",
+  ] as const;
+  const EXAMPLE_INTENT: Readonly<Record<(typeof EXAMPLE_KEYS)[number], RoutedIntent>> = {
+    hire: "need-workers",
+    work: "find-work",
+    internship: "opportunities",
+    professional: "find-work",
+    needService: "need-service",
+    offerService: "offer-value",
+  };
+
   for (const locale of ACTIVE_LOCALES) {
-    it(`${locale}: the three example sentences on the page each route to a different intent`, () => {
-      const examples = Object.values(entryExamples(locale));
-      expect(examples).toHaveLength(3);
-      const readings = examples.map(readPublicEntry);
-      for (const r of readings) expect(r.kind).toBe("recognised");
-      const ids = new Set(readings.map((r) => (r.kind === "recognised" ? r.intent : "")));
-      expect(ids.size).toBe(3);
+    it(`${locale}: every example sentence on the page routes to its intent`, () => {
+      const examples = entryExamples(locale);
+      expect(Object.keys(examples).sort()).toEqual([...EXAMPLE_KEYS].sort());
+      for (const key of EXAMPLE_KEYS) {
+        const reading = readPublicEntry(examples[key]);
+        expect(reading, `${locale}.${key}: "${examples[key]}"`).toMatchObject({
+          kind: "recognised",
+          intent: EXAMPLE_INTENT[key],
+        });
+      }
+      const ids = new Set(Object.values(EXAMPLE_INTENT));
+      expect(ids.size).toBe(5);
     });
   }
+
+  it("the professional example is a non-manual profession in every routed locale", () => {
+    // accountant — the profession the window-5 walk found missing from the page.
+    const WORD: Record<(typeof ACTIVE_LOCALES)[number], RegExp> = {
+      lt: /buhalter/i,
+      en: /accountant/i,
+      ru: /бухгалтер/i,
+      nl: /accountant/i,
+      de: /buchhalter/i,
+    };
+    for (const locale of ACTIVE_LOCALES) {
+      expect(entryExamples(locale).professional).toMatch(WORD[locale]);
+    }
+  });
 
   it("a sentence the router cannot read is UNRECOGNISED — never a guessed intent", () => {
     expect(readPublicEntry("zzzz qqqq vvvv")).toEqual({
@@ -132,5 +178,69 @@ describe("the sentence is carried through the EXISTING return-path mechanism", (
     const params = new URLSearchParams((next as string).split("?")[1]);
     expect([...params.keys()]).toEqual([PUBLIC_ENTRY_SAY_PARAM]);
     expect(params.get(PUBLIC_ENTRY_SAY_PARAM)).toBe("next=//evil.com&token=abc");
+  });
+});
+
+describe("the doors — window 6 G-C1: an institution has its own door", () => {
+  const ALL_LOCALES = ["en", "lt", "ru", "nl", "de", "da", "no", "sv", "pl", "lv", "et"] as const;
+  const doorCopy = (locale: string): Record<string, string> => {
+    const json = JSON.parse(readFileSync(join(MESSAGES, `${locale}.json`), "utf8")) as {
+      landing: { cta: Record<string, string> };
+    };
+    return json.landing.cta;
+  };
+
+  it("the institution door carries the education intent's own setup path in ?next=", () => {
+    // ONE source of truth: the door goes exactly where onboarding sends an
+    // `education` intent — the existing organisation setup, capability preset.
+    expect(INSTITUTION_DOOR_NEXT).toBe(nextPathForIntents(["education"]));
+    expect(INSTITUTION_DOOR_NEXT).toBe("/dashboard/start/company?capability=training_provider");
+    const door = FINAL_CTA_LINKS.find((l) => l.key === "institution");
+    expect(door).toBeDefined();
+    expect(door!.href.startsWith("/auth/signup?next=")).toBe(true);
+    // …and it survives the auth sanitiser with the capability preset intact.
+    const landed = getSafeReturnPath(decodeURIComponent(door!.href.split("?next=")[1]), "lt");
+    expect(landed).toBe("/lt/dashboard/start/company?capability=training_provider");
+    // Five doors, institution beside agency, partner last — no other door moved.
+    expect(FINAL_CTA_LINKS.map((l) => l.key)).toEqual([
+      "worker",
+      "employer",
+      "agency",
+      "institution",
+      "partner",
+    ]);
+  });
+
+  it("every catalogue names the institution door and no catalogue still counts four", () => {
+    for (const locale of ALL_LOCALES) {
+      const cta = doorCopy(locale);
+      expect(cta.institution, `${locale}.landing.cta.institution`).toMatch(/\S/);
+      expect(cta.institution).not.toMatch(/^\[EN\]/);
+      expect(cta.subcopy, `${locale}.landing.cta.subcopy`).not.toMatch(
+        /\b(four|ketverios|четыре|vier|fire|fyra|czworo|četras|neli)\b/i,
+      );
+    }
+  });
+});
+
+describe("/professions names professionals and services — window 6 G-D1", () => {
+  it("lists finance, legal, engineering, IT, sales, education and design rows", async () => {
+    const { SEO_PROFESSIONS } = await import("@/lib/seo/profession-problem-content");
+    const keys = new Set(SEO_PROFESSIONS.map((p) => p.key));
+    for (const key of [
+      "accountants",
+      "lawyers",
+      "engineers",
+      "software-developers",
+      "sales-managers",
+      "teachers-trainers",
+      "designers-consultants",
+    ]) {
+      expect(keys.has(key), key).toBe(true);
+    }
+    const sectors = new Set<string>(SEO_PROFESSIONS.map((p) => p.sector));
+    for (const sector of ["it_software", "office_admin", "education", "hr_recruitment"]) {
+      expect(sectors.has(sector), sector).toBe(true);
+    }
   });
 });

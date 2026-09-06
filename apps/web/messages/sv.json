@@ -3851,6 +3851,10 @@
       "eduAssignDone": "Elev tilldelad gruppen.",
       "eduNotInstitution": "Den här organisationen är ännu inte markerad som utbildningsinstitution. Markera det i företagsavsnittet.",
       "eduUnavailable": "Programmen kan inte läsas just nu. Det betyder inte att det inte finns några.",
+      "eduOutcomesConnected": "Anslutna studenter: {count}.",
+      "eduOutcomesUnavailable": "Resultaten kan inte läsas just nu. Det betyder inte att det inte finns några.",
+      "eduStudentsPrivacy": "Institutionen ser inte studenternas färdigheter, dokument eller journal — det är deras egna uppgifter. Du ser deltagande och resultatsiffror; vem som passar ser arbetsgivaren själv för sitt eget behov.",
+      "eduPracticeHow": "Praktikplatser läggs upp av arbetsgivare: en partner skapar ett företagskonto och lägger upp ett behov av typen ”praktik” (ett behov gratis). Dina studenter ser det på sin tavla när arbetsgivaren är verifierad.",
       "eduNext": "Vad händer nu?",
       "chipCreateProgramme": "Skapa program",
       "chipCreateCohort": "Skapa grupp",
@@ -4259,11 +4263,12 @@
     },
     "cta": {
       "title": "Börja där du är",
-      "subcopy": "Fyra dörrar in till samma plattform — välj din.",
+      "subcopy": "Fem dörrar in till samma plattform — välj din.",
       "worker": "Jag är arbetstagare",
       "employer": "Jag är arbetsgivare",
       "agency": "Jag företräder en byrå",
-      "partner": "Jag vill bli partner"
+      "partner": "Jag vill bli partner",
+      "institution": "Jag företräder en skola eller ett universitet"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",
@@ -4483,6 +4488,11 @@
       "unsupportedDimension": "Jag kan inte filtrera på {dimension} ännu.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
+      "internshipChooseDirection": "Välj först en arbetsinriktning — utan den kan praktiksökningen inte avgränsas.",
+      "internshipAskInstitution": "Fråga din utbildningsinstitution ({institution}): den ser programmets efterfrågan på marknaden och kan bjuda in en arbetsgivare att lägga upp en praktikplats.",
+      "internshipCompass": "Kompassen visar vad som passar dig nu och vad som saknas.",
+      "chipChooseDirection": "Välj inriktning",
+      "chipAllOpportunities": "Alla möjligheter",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
       "skillGapLine": "[EN] — {skill}: required by {demands} of them",
       "skillGapNone": "[EN] Nothing is missing: you hold every skill the {demands} visible demands ask for.",

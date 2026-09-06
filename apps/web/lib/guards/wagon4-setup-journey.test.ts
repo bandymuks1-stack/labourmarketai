@@ -29,17 +29,41 @@ const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 const JOURNEY = read("components/app/profile-hub-overview.tsx");
 const STEP_KEYS = ["goal", "experience", "review", "location", "availability"];
 
-describe("Wagon 4 — the guide exists and fresh workers land on it", () => {
+describe("Wagon 4 — the guide exists and a fresh worker can reach it in one click", () => {
   it("profile page mounts the surface that carries the journey", () => {
     const page = read("app/[locale]/dashboard/profile/page.tsx");
     expect(page).toMatch(/<ProfileHubOverview/);
+    expect(JOURNEY).toMatch(/id="setup-journey"/);
   });
 
-  it("completeOnboarding sends a fresh worker to the setup journey", () => {
+  /**
+   * Window 6 (2026-09-06): the post-onboarding destination changed. The
+   * owner contract 2026-09-04 §3/§4A/§7 (conversation = primary control
+   * layer; CLEAR NEXT ACTION over information overload; progressive
+   * disclosure) supersedes the July pin that sent a fresh worker straight to
+   * the profile wall. The chat's first turn greets the person, names what
+   * the profile still lacks and offers the profile as a chip — so the
+   * journey is one click away. The page itself is unchanged and reachable.
+   */
+  it("completeOnboarding sends a fresh worker to the conversation, not the profile wall", () => {
     const actions = read("lib/auth/actions.ts");
-    expect(actions).toMatch(
-      /worker:\s*`\/\$\{locale\}\/dashboard\/profile#setup-journey`/,
-    );
+    expect(actions).toMatch(/worker:\s*`\/\$\{locale\}\/dashboard`,/);
+    expect(actions).not.toMatch(/worker:\s*`[^`]*profile#setup-journey`/);
+  });
+
+  it("the other identities keep their own first screens", () => {
+    const actions = read("lib/auth/actions.ts");
+    expect(actions).toMatch(/company:\s*`\/\$\{locale\}\/dashboard\/company`/);
+    expect(actions).toMatch(/agency:\s*`\/\$\{locale\}\/dashboard\/company`/);
+    expect(actions).toMatch(/customer:\s*`\/\$\{locale\}\/dashboard\/buyer`/);
+  });
+
+  it("the chat offers the profile as a chip and the registry routes it to the journey page", () => {
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toMatch(/\{ id: "profile", label: labels\.chipProfile \}/);
+    expect(chat).toMatch(/case "profile":/);
+    const registry = read("lib/conversation/action-registry.ts");
+    expect(registry).toMatch(/id: "worker\.complete-profile"[\s\S]*?advancedRoute: "\/dashboard\/profile"/);
   });
 });
 

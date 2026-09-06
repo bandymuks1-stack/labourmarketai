@@ -58,7 +58,19 @@ export const listMyPendingWorkerInvitations = cache(
 
   const out: PendingWorkerInvitation[] = [];
 
-  const [{ data: co }, { data: ag }] = await Promise.all([
+  // NO `agencies(legal_name)` embed on the agency read (Lane H, 2026-09-06).
+  // `public.agencies` grants NOTHING to `authenticated` in production (only
+  // the postgres owner), and its `agencies_select` policy is owner-only
+  // anyway (`profile_id = auth.uid()`), so an INVITEE could never read the
+  // agency's name through it. With the embed the whole statement failed —
+  // measured 524 `permission denied for table agencies` lines in 24 h of
+  // Postgres logs, one per dashboard render — and `{ data: ag }` silently
+  // became null: "no agency invitations" as a false claim. Read the
+  // invitation rows themselves (SELECT is granted; RLS scopes to the
+  // invitee); the agency name stays the honest "—" until the canonical
+  // organisation path replaces this legacy key space (agencies vs
+  // staffing_agency companies, memory 2026-09-01).
+  const [coRes, agRes] = await Promise.all([
     asAny(supabase)
       .from("company_worker_invitations")
       .select("company_id, note, created_at, companies(display_name, legal_name)")
@@ -68,12 +80,23 @@ export const listMyPendingWorkerInvitations = cache(
       .limit(50),
     asAny(supabase)
       .from("agency_worker_invitations")
-      .select("agency_id, note, created_at, agencies(legal_name)")
+      .select("agency_id, note, created_at")
       .ilike("invited_email", email)
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(50),
   ]);
+  // A failed read is reported, not rendered as "none" (`data ?? []` without
+  // an error check is the swallowed-read-error class, 2026-08-28).
+  for (const [name, res] of [["company", coRes], ["agency", agRes]] as const) {
+    if (res?.error && res.error.code !== RELATION_NOT_FOUND_CODE) {
+      console.error(
+        `[invitations] ${name} pending-invitation read failed: ${res.error.code ?? "unknown"}`,
+      );
+    }
+  }
+  const co = coRes?.data ?? null;
+  const ag = agRes?.data ?? null;
   for (const r of co ?? []) {
     const c = r.companies as { display_name: string | null; legal_name: string | null } | null;
     out.push({

@@ -47,6 +47,12 @@ import {
   getCompanyForm,
 } from "@/lib/conversation/company-forms";
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
+import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
+import {
+  educationQuestionKind,
+  isEducationQuestionKind,
+  type EducationQuestionKind,
+} from "@/lib/conversation/education-question";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
@@ -181,8 +187,13 @@ function PersonalWorkspaceIntroStream({
  */
 /** Which of the institution's commands a "programmes" sentence asks for —
  *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" {
+function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
   const q = (text ?? "").toLowerCase();
+  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
+  // fits, what skills are missing, where to do practice) is answered from the
+  // institution's real reads — never routed to the owner's own worker answer.
+  const question = educationQuestionKind(q);
+  if (question) return question;
   if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
   const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
   if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
@@ -3363,13 +3374,48 @@ export function ConversationChat({
   );
 
   const runEducationProgrammes = useCallback(
-    (mode: "list" | "create" | "cohort" | "assign", programId?: string) => {
+    (mode: "list" | "create" | "cohort" | "assign" | EducationQuestionKind, programId?: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
           assistant(fallbackText, starterChips);
         }
+        return;
+      }
+      if (isEducationQuestionKind(mode)) {
+        // The institution's QUESTION about its students (window 6, lane C):
+        // answered from its real reads (outcomes) or the stated privacy
+        // boundary — localised in the education adapter, same degraded
+        // kinds as the programmes read. Never the owner's own worker answer.
+        setTyping(true);
+        loadEducationAnswerForChat(mode)
+          .then((res) => {
+            setTyping(false);
+            if (res.kind === "no-company") {
+              assistant(labels.engagementsNoCompany, workspaceChips);
+              return;
+            }
+            if (res.kind === "not-institution") {
+              assistant(labels.eduNotInstitution, [
+                { id: "link:/dashboard/company", label: labels.chipEduCapabilities },
+              ]);
+              return;
+            }
+            if (res.kind !== "ok") {
+              assistant(res.line, [
+                { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+              ]);
+              return;
+            }
+            assistant(res.lines.join("\n"), educationChips);
+          })
+          .catch(() => {
+            setTyping(false);
+            assistant(labels.eduUnavailable, [
+              { id: "link:/dashboard/company#institution-programs-title", label: labels.chipProgrammes },
+            ]);
+          });
         return;
       }
       if (mode === "create") {

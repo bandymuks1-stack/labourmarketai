@@ -236,12 +236,17 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   // just picked their primary role should land on THEIR workspace, not
   // the generic /dashboard cockpit (which surfaces worker-shaped
   // prompts like "Profession / Skills / Journal"). A fresh WORKER lands
-  // on the guided setup journey (Wagon 4: registration → work goal →
-  // experience → review → location → availability → profile ready) —
-  // the guide over the canonical profile surface, so their first screen
-  // tells them exactly what to do next.
+  // in the conversation (`/dashboard`): the owner contract 2026-09-04
+  // §3/§4A/§7 makes the conversation the primary control layer with ONE
+  // clear next action, and the chat's first turn already greets the
+  // person, names what the profile still lacks and offers the profile as
+  // a chip. The Wagon 4 setup journey still renders on
+  // `/dashboard/profile#setup-journey` — one click away, not the wall the
+  // person hits first (window 6 real-person walk, 2026-09-06, measured the
+  // wall as the first screen and the chat as the screen that said what to
+  // do next).
   const ROLE_DASHBOARD: Record<Role, string> = {
-    worker: `/${locale}/dashboard/profile#setup-journey`,
+    worker: `/${locale}/dashboard`,
     company: `/${locale}/dashboard/company`,
     agency: `/${locale}/dashboard/company`,
     customer: `/${locale}/dashboard/buyer`,

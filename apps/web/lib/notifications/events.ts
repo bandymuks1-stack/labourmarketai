@@ -248,10 +248,41 @@ export function notificationDedupeKey(
 const FEATURE_ABSENT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"]);
 const UNIQUE_VIOLATION = "23505";
 
+/**
+ * `42501 insufficient_privilege`: the store EXISTS but the writer role holds
+ * no INSERT grant on it. Production has answered every emit this way since
+ * 2026-07-05 (the GRANT is the owner's RED draft, PR #1566). Measured
+ * 2026-09-06: 40 identical `emit failed unexpectedly (weekly_digest): 42501`
+ * lines in 12 h of Vercel runtime logs — one per dashboard render, each
+ * preceded by three reads that only exist to feed the write.
+ *
+ * NAMED STATE, not a retry loop: after one sighting the process skips emits
+ * for `STORE_WRITE_BLOCKED_TTL_MS` and reports `write_blocked` instead of
+ * repeating a write that cannot succeed. The TTL keeps it honest — once the
+ * grant lands, a warm instance resumes within the window and a fresh one
+ * immediately. Nothing about the missing grant is hidden: the log line still
+ * fires, once per window, naming the state.
+ */
+const INSUFFICIENT_PRIVILEGE = "42501";
+const STORE_WRITE_BLOCKED_TTL_MS = 15 * 60 * 1000;
+let storeWriteBlockedUntil = 0;
+
+/** True while the store is known to refuse writes (42501 seen within the TTL). */
+export function isNotificationStoreWriteBlocked(now: number = Date.now()): boolean {
+  return now < storeWriteBlockedUntil;
+}
+
+/** Test seam — clears the process-scoped block. */
+export function resetNotificationStoreWriteBlock(): void {
+  storeWriteBlockedUntil = 0;
+}
+
 export type NotificationWriteOutcome =
   | { readonly kind: "written" }
   | { readonly kind: "duplicate" }
   | { readonly kind: "feature_unavailable" }
+  /** Store present, writer unprivileged (42501) — skipped, not retried. */
+  | { readonly kind: "write_blocked"; readonly code: string }
   | { readonly kind: "unexpected_error"; readonly code: string };
 
 function sanitizeMetadata(
@@ -276,6 +307,9 @@ export async function emitNotificationEvent(
   admin: DbClient,
   input: NotificationEventInput,
 ): Promise<NotificationWriteOutcome> {
+  if (isNotificationStoreWriteBlocked()) {
+    return { kind: "write_blocked", code: INSUFFICIENT_PRIVILEGE };
+  }
   try {
     const { error } = await admin.from("notification_events").insert({
       recipient_profile_id: input.recipientProfileId,
@@ -290,6 +324,13 @@ export async function emitNotificationEvent(
     if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
       return { kind: "feature_unavailable" };
     }
+    if (error.code === INSUFFICIENT_PRIVILEGE) {
+      storeWriteBlockedUntil = Date.now() + STORE_WRITE_BLOCKED_TTL_MS;
+      console.error(
+        `[notifications] store refuses writes (42501 insufficient_privilege) — emits skipped for ${STORE_WRITE_BLOCKED_TTL_MS / 60000} min; the INSERT grant is owner-gated (#1566)`,
+      );
+      return { kind: "write_blocked", code: INSUFFICIENT_PRIVILEGE };
+    }
     return { kind: "unexpected_error", code: error.code ?? "unknown" };
   } catch {
     return { kind: "unexpected_error", code: "thrown" };
@@ -303,8 +344,9 @@ export function emitNotificationEventInBackground(
 ): void {
   void emitNotificationEvent(admin, input).then((outcome) => {
     if (outcome.kind === "unexpected_error") {
-      // Not swallowed silently — the approved degradation (absent store)
-      // never reaches here, so this line only fires on something real.
+      // Not swallowed silently — the approved degradations (absent store,
+      // unprivileged writer) never reach here, so this line only fires on
+      // something real.
       console.error(
         `[notifications] emit failed unexpectedly (${input.eventType}): ${outcome.code}`,
       );

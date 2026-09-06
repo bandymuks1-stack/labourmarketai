@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Vaardigheden gekoppeld aan deze vermelding",
     "helper": "Markeer de vaardigheden die deze vermelding laat zien — zo bouw je je CV op. Nog niet beoordeeld.",
+    "helperConfirmedLinks": "Markeer de vaardigheden die deze vermelding laat zien — zo bouw je je CV op.",
     "saving": "Opslaan…",
     "saved": "Opgeslagen",
     "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
@@ -3809,12 +3810,12 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; daarna kies je je rol.",
+      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; in de volgende stap zeg je waarvoor je komt.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
-      "email_label": "Zakelijk e-mailadres",
-      "email_placeholder": "naam@bedrijf.nl",
+      "email_label": "E-mailadres",
+      "email_placeholder": "naam@voorbeeld.nl",
       "password_label": "Wachtwoord",
       "password_help": "Min. 8 tekens, 1 hoofdletter, 1 cijfer, 1 speciaal teken (!@#$%).",
       "confirm_password_label": "Bevestig wachtwoord",
@@ -3831,7 +3832,7 @@
       "error_password_number": "Wachtwoord moet een cijfer bevatten.",
       "error_password_special": "Wachtwoord moet een speciaal teken bevatten.",
       "check_email_title": "Bevestig je e-mail",
-      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien.",
+      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
       "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
       "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
@@ -3900,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "Waarvoor kom je?",
         "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
+        "saidLabel": "Je schreef:",
+        "saidHint": "We hebben aangevinkt wat past. Pas het aan als het nodig is.",
         "intent": {
           "work": {
             "title": "Ik zoek werk",
@@ -3962,7 +3965,7 @@
         "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkdagboek en bevestigingen van mensen maken ze na verloop van tijd sterker."
       },
       "display_name_label": "Weergavenaam",
-      "country_label": "Land",
+      "country_label": "Waar woon je nu?",
       "country_placeholder": "Kies je land",
       "error_country_required": "Kies een land.",
       "profession_label": "Welk werk doe je?",
@@ -4678,7 +4681,7 @@
         },
         {
           "q": "Hoeveel kost het voor werknemers?",
-          "a": "De kern is gratis — je profiel, matches, zoeken en berichten kosten werknemers nooit iets. Premium-extra's (foto- en videogalerijen, de AI-profielassistent, VIP-zichtbaarheid) hebben een kleine vergoeding. De definitieve prijzen worden vóór de volledige lancering gepubliceerd."
+          "a": "Voor personen is alles gratis — je profiel, matches, zoeken en berichten kosten een werknemer nooit iets. Betaalde plannen bestaan alleen voor organisaties en staan op de prijzenpagina."
         },
         {
           "q": "Wie ziet mijn profiel?",
@@ -4776,7 +4779,7 @@
         },
         {
           "q": "Hoeveel kost het?",
-          "a": "De prijzen worden bij de lancering bekendgemaakt. Wie zich op de wachtlijst inschrijft, krijgt early-access-prijzen."
+          "a": "De prijzen staan op de prijzenpagina: één actieve positie per organisatie is gratis; voor meer posities is het organisatieplan nodig, dat je in je account activeert. Een personeelsbehoefte indienen is gratis."
         },
         {
           "q": "Kunnen we filteren op locatie?",
@@ -4874,7 +4877,7 @@
         },
         {
           "q": "Wat kost het voor uitzendbureaus?",
-          "a": "De prijzen worden bij de lancering bekendgemaakt; wachtlijstpartners krijgen early-accessvoorwaarden."
+          "a": "Een bureau is een organisatie en gebruikt dezelfde plannen: één actieve positie is gratis, voor meer is het organisatieplan van de prijzenpagina nodig. Er is geen apart bureautarief."
         },
         {
           "q": "Kunnen we de zichtbaarheid van werknemers bepalen?",
@@ -6236,6 +6239,18 @@
     "responded": "Beantwoord",
     "requestedBy": "Aangevraagd door",
     "requesterFallback": "Lid",
+    "discoverEmptyWhy": "Deze lijst vult zich alleen wanneer leden hun eigen diensten publiceren en activeren — er zijn nog geen actieve.",
+    "discoverEmptyNext": "Meldingen over nieuwe diensten sturen we nog niet — kom later terug. Bied je zelf diensten aan, publiceer ze dan: een actieve dienst vinden ingelogde leden hier.",
+    "discoverFilteredEmpty": "Geen actieve diensten voor dit filter.",
+    "outgoingEmptyWhy": "Een aanvraag stuur je vanuit de lijst met actieve diensten hierboven — met één tik.",
+    "incomingEmptyNoActive": "Aanvragen komen alleen binnen voor actieve diensten, en je hebt nog geen actieve dienst.",
+    "incomingEmptyHasActive": "{count, plural, one {Je hebt # actieve dienst} other {Je hebt # actieve diensten}} — ingelogde leden vinden die in de lijst; niemand heeft nog een aanvraag gestuurd.",
+    "filterCountry": "Land",
+    "filterCategory": "Categorie",
+    "filterApply": "Filteren",
+    "filterClear": "Filter wissen",
+    "responseNoteLabel": "Notitie aan de aanvrager (optioneel)",
+    "responseNotePlaceholder": "bv. vanaf volgende maand mogelijk / nu geen ruimte",
     "newBadge": "nieuw",
     "hubTitle": "Marktplaats",
     "hubOffer": "Diensten die ik aanbied",
@@ -12450,6 +12465,10 @@
       "eduAssignDone": "Leerling toegewezen aan de groep.",
       "eduNotInstitution": "Deze organisatie is nog niet gemarkeerd als opleidingsinstelling. Markeer dit in het bedrijfsgedeelte.",
       "eduUnavailable": "Opleidingen kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+      "eduOutcomesConnected": "Verbonden studenten: {count}.",
+      "eduOutcomesUnavailable": "De resultaten kunnen nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+      "eduStudentsPrivacy": "De instelling ziet de vaardigheden, documenten of het logboek van studenten niet — dat zijn hun eigen gegevens. U ziet deelname en resultaatcijfers; wie past, ziet de werkgever zelf voor zijn eigen behoefte.",
+      "eduPracticeHow": "Stages worden geplaatst door werkgevers: een partner maakt een bedrijfsaccount aan en plaatst een behoefte met het type ‘stage’ (één behoefte gratis). Uw studenten zien die op hun bord zodra de werkgever geverifieerd is.",
       "eduNext": "Wat nu?",
       "chipCreateProgramme": "Opleiding aanmaken",
       "chipCreateCohort": "Groep aanmaken",
@@ -13094,11 +13113,12 @@
     },
     "cta": {
       "title": "Begin waar je bent",
-      "subcopy": "Vier deuren naar hetzelfde platform — kies de jouwe.",
+      "subcopy": "Vijf deuren naar hetzelfde platform — kies de jouwe.",
       "worker": "Ik ben werknemer",
       "employer": "Ik ben werkgever",
       "agency": "Ik vertegenwoordig een bureau",
-      "partner": "Ik wil partner worden"
+      "partner": "Ik wil partner worden",
+      "institution": "Ik vertegenwoordig een school of universiteit"
     },
     "loop": {
       "chip": "Voorbeeldreeks — echte productflow",
@@ -13210,8 +13230,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Vraag. Zie. Neem aan.",
-      "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek."
+      "headline": "Laat zien wat je kunt. Ontdek waar je nodig bent.",
+      "sub": "Echte ervaring wordt een levend profiel, en je vaardigheden worden echte kansen — voor werk, een dienst of een stage."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -13221,7 +13241,10 @@
       "examples": {
         "hire": "We zoeken 12 steigerbouwers in Rotterdam",
         "work": "Ik zoek werk in Noorwegen",
-        "internship": "Waar kan ik stage lopen?"
+        "internship": "Waar kan ik stage lopen?",
+        "professional": "Ik ben accountant en zoek werk in Vilnius",
+        "needService": "Ik heb iemand nodig om het dak te repareren",
+        "offerService": "Ik bied boekhoudkundige diensten aan"
       },
       "understoodLabel": "Begrepen",
       "understood": {
@@ -13378,6 +13401,11 @@
       "unsupportedDimension": "Op {dimension} kan ik nog niet filteren.",
       "noSuchValue": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar.",
       "noSuchValueWithAlternatives": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar. Wel: {available}.",
+      "internshipChooseDirection": "Kies eerst een werkrichting — zonder die kan de stagezoektocht niet worden verfijnd.",
+      "internshipAskInstitution": "Vraag het aan uw onderwijsinstelling ({institution}): die ziet de marktvraag van de opleiding en kan een werkgever uitnodigen om een stage te plaatsen.",
+      "internshipCompass": "Het kompas laat zien wat nu bij u past en wat ontbreekt.",
+      "chipChooseDirection": "Richting kiezen",
+      "chipAllOpportunities": "Alle kansen",
       "skillGapIntro": "Er ontbreken {count} gevraagde vaardigheden in je profiel. Het vaakst gevraagd:",
       "skillGapLine": "— {skill}: gevraagd door {demands} ervan",
       "skillGapNone": "Er ontbreekt niets: je hebt alle vaardigheden die de {demands} zichtbare aanvragen vragen.",
