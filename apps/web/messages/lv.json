@@ -4240,11 +4240,12 @@
     },
     "cta": {
       "title": "Sāciet tur, kur esat",
-      "subcopy": "Četras durvis uz vienu platformu — izvēlieties savas.",
+      "subcopy": "Piecas durvis uz vienu platformu — izvēlieties savas.",
       "worker": "Esmu darbinieks",
       "employer": "Esmu darba devējs",
       "agency": "Pārstāvu aģentūru",
-      "partner": "Vēlos kļūt par partneri"
+      "partner": "Vēlos kļūt par partneri",
+      "institution": "Pārstāvu skolu vai augstskolu"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",

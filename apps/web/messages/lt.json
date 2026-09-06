@@ -4678,7 +4678,7 @@
         },
         {
           "q": "Kiek kainuoja darbuotojui?",
-          "a": "Pagrindas nemokamas — profilis, atitikimai, paieška ir žinutės darbuotojui niekada nieko nekainuoja. Papildomos premium funkcijos (nuotraukų ir vaizdo galerijos, AI profilio asistentas, VIP matomumas) turi nedidelį mokestį. Galutinės kainos skelbiamos prieš pilną startą."
+          "a": "Asmenims viskas nemokama — profilis, atitikimai, paieška ir žinutės darbuotojui nieko nekainuoja. Mokami planai skirti tik organizacijoms ir paskelbti kainodaros puslapyje."
         },
         {
           "q": "Kas mato mano profilį?",
@@ -4776,7 +4776,7 @@
         },
         {
           "q": "Kiek kainuoja įmonei?",
-          "a": "Kaina skelbiama prieš startą. Užsirašiusiems — ankstyvos prieigos kaina."
+          "a": "Kainos paskelbtos kainodaros puslapyje: viena aktyvi pozicija organizacijai — nemokamai, daugiau pozicijų — organizacijos planas, kurį aktyvuojate paskyroje. Darbuotojų užklausa pateikiama nemokamai."
         },
         {
           "q": "Ar galima atrinkti pagal lokaciją?",
@@ -4874,7 +4874,7 @@
         },
         {
           "q": "Kiek kainuoja agentūroms?",
-          "a": "Kaina skelbiama prieš startą; partneriams sąraše — ankstyvos prieigos sąlygos."
+          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: viena aktyvi pozicija — nemokamai, daugiau — organizacijos planas iš kainodaros puslapio. Atskiro agentūrų tarifo nėra."
         },
         {
           "q": "Ar galime valdyti darbuotojų matomumą?",
@@ -13075,11 +13075,12 @@
     },
     "cta": {
       "title": "Pradėkite ten, kur esate",
-      "subcopy": "Ketverios durys į tą pačią platformą — pasirinkite savas.",
+      "subcopy": "Penkerios durys į tą pačią platformą — pasirinkite savas.",
       "worker": "Esu darbuotojas",
       "employer": "Esu darbdavys",
       "agency": "Atstovauju agentūrai",
-      "partner": "Noriu tapti partneriu"
+      "partner": "Noriu tapti partneriu",
+      "institution": "Atstovauju mokyklai ar universitetui"
     },
     "loop": {
       "chip": "Pavyzdinė seka — reali produkto eiga",
@@ -13191,8 +13192,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Paklausk. Pamatyk. Įdarbink.",
-      "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje."
+      "headline": "Parodyk, ką moki. Atrask, kur esi reikalingas.",
+      "sub": "Tikra patirtis tampa gyvu profiliu, o jūsų gebėjimai — tikromis galimybėmis: darbui, paslaugai ar praktikai."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -13202,7 +13203,10 @@
       "examples": {
         "hire": "Reikia 12 pastolininkų Roterdame",
         "work": "Ieškau darbo Norvegijoje",
-        "internship": "Kur galiu atlikti praktiką?"
+        "internship": "Kur galiu atlikti praktiką?",
+        "professional": "Esu buhalterė, ieškau darbo Vilniuje",
+        "needService": "Reikia, kad kas nors sutaisytų stogą",
+        "offerService": "Siūlau buhalterijos paslaugas"
       },
       "understoodLabel": "Supratau",
       "understood": {

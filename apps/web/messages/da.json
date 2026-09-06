@@ -4240,11 +4240,12 @@
     },
     "cta": {
       "title": "Start der, hvor du er",
-      "subcopy": "Fire døre ind til samme platform — vælg din.",
+      "subcopy": "Fem døre ind til samme platform — vælg din.",
       "worker": "Jeg er arbejdstager",
       "employer": "Jeg er arbejdsgiver",
       "agency": "Jeg repræsenterer et bureau",
-      "partner": "Jeg vil være partner"
+      "partner": "Jeg vil være partner",
+      "institution": "Jeg repræsenterer en skole eller et universitet"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",

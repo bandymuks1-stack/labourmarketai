@@ -4240,11 +4240,12 @@
     },
     "cta": {
       "title": "Zacznij tam, gdzie jesteś",
-      "subcopy": "Czworo drzwi do tej samej platformy — wybierz swoje.",
+      "subcopy": "Pięcioro drzwi do tej samej platformy — wybierz swoje.",
       "worker": "Jestem pracownikiem",
       "employer": "Jestem pracodawcą",
       "agency": "Reprezentuję agencję",
-      "partner": "Chcę zostać partnerem"
+      "partner": "Chcę zostać partnerem",
+      "institution": "Reprezentuję szkołę lub uczelnię"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",

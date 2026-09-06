@@ -4678,7 +4678,7 @@
         },
         {
           "q": "How much does it cost workers?",
-          "a": "The core is free — your profile, matches, search and messaging never cost workers anything. Premium extras (photo + video galleries, the AI profile assistant, VIP visibility) carry a small fee. Final pricing is published before full launch."
+          "a": "Everything is free for individuals — your profile, matches, search and messaging never cost a worker anything. Paid plans exist only for organisations and are published on the pricing page."
         },
         {
           "q": "Who sees my profile?",
@@ -4776,7 +4776,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "Pricing is announced at launch. Waitlist signups get early-access pricing."
+          "a": "Prices are published on the pricing page: one active position per organisation is free; more positions need the organisation plan, activated in your account. Submitting a workforce need is free."
         },
         {
           "q": "Can we filter by location?",
@@ -4874,7 +4874,7 @@
         },
         {
           "q": "How much does it cost agencies?",
-          "a": "Pricing is announced at launch; waitlist partners get early-access terms."
+          "a": "An agency is an organisation and uses the same plans: one active position is free, more need the organisation plan from the pricing page. There is no separate agency tariff."
         },
         {
           "q": "Can we control worker visibility?",
@@ -13075,11 +13075,12 @@
     },
     "cta": {
       "title": "Start where you are",
-      "subcopy": "Four doors into the same platform — pick yours.",
+      "subcopy": "Five doors into the same platform — pick yours.",
       "worker": "I am a worker",
       "employer": "I am an employer",
       "agency": "I represent an agency",
-      "partner": "I want to become a partner"
+      "partner": "I want to become a partner",
+      "institution": "I represent a school or university"
     },
     "loop": {
       "chip": "Sample sequence — real product flow",
@@ -13191,8 +13192,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "Ask. See. Hire.",
-      "sub": "An AI labour-market operating system — conversation, map and result in one place."
+      "headline": "Show what you can do. Find where you are needed.",
+      "sub": "Real experience becomes a living profile, and your skills become real opportunities — for work, a service or an internship."
     },
     "entry": {
       "label": "Write what you need — in your own words",
@@ -13202,7 +13203,10 @@
       "examples": {
         "hire": "I need 12 scaffolders in Rotterdam",
         "work": "Looking for a job in Norway",
-        "internship": "Where can I do an internship?"
+        "internship": "Where can I do an internship?",
+        "professional": "I am an accountant looking for work in Vilnius",
+        "needService": "I need someone to fix the roof",
+        "offerService": "I offer bookkeeping services"
       },
       "understoodLabel": "Understood",
       "understood": {
