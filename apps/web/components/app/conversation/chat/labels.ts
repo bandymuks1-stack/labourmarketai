@@ -374,6 +374,8 @@ const WORKLOG_KEYS = [
   "matchingNote",
   "viewOpportunities",
   "pipelineFailedNote",
+  // The evidence carries no work content — ask, never save the request.
+  "errorNoWorkContent",
 ] as const;
 
 /** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.

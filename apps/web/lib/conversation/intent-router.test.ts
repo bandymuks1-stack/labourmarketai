@@ -759,6 +759,24 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil 30 kg komkommers verkopen",
     de: "Ich möchte 500 Paletten verkaufen",
   },
+  // Window 6 (2026-09-06): the person names their profession — measured on
+  // production, "esu programuotojas" answered nothing at all.
+  "profession-statement": {
+    lt: "Esu buhalteris",
+    en: "I am an accountant",
+    ru: "Я инженер",
+    nl: "Ik ben boekhouder",
+    de: "Ich bin Buchhalter",
+  },
+  // Window 6 follow-up: the person states from WHEN they can work — measured
+  // on production, "galiu dirbti nuo spalio 1 d." was a search with no criteria.
+  availability: {
+    lt: "Galiu dirbti nuo spalio 1 d.",
+    en: "I am available from October",
+    ru: "Могу работать с 1 октября",
+    nl: "Ik kan vanaf oktober werken",
+    de: "Ich kann ab Oktober arbeiten",
+  },
   // ── AGENCY (real recruiter pilot, 2026-09-04) — the first row is the exact
   //    sentence the first real recruiter typed and the product did not
   //    understand. ────────────────────────────────────────────────────────────

@@ -140,6 +140,10 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
     titleKey: "conversation.actions.worker.saveWorkCard.label",
     fields: [
       { name: "availabilityStatus", kind: "select", labelKey: "conversation.forms.fields.availability", options: [{ value: "", labelKey: "conversation.forms.fields.notStated" }, ...availabilityOptions] },
+      // "galiu dirbti nuo spalio 1 d." — the FROM date the card already
+      // stores (`available_from`; the schema and executor carried it, the
+      // form did not). Prefilled from the sentence, editable, ISO day.
+      { name: "availableFrom", kind: "text", labelKey: "conversation.forms.fields.availableFrom", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
       { name: "locationCountry", kind: "text", labelKey: "conversation.forms.fields.locationCountry", placeholderKey: "conversation.forms.fields.countryCodePlaceholder", maxLength: 2 },
       { name: "preferredCountries", kind: "text", labelKey: "conversation.forms.fields.preferredCountries", placeholderKey: "conversation.forms.fields.preferredCountriesPlaceholder" },
       { name: "salaryMin", kind: "number", labelKey: "conversation.forms.fields.salaryMin", placeholderKey: "conversation.forms.fields.salaryMinPlaceholder", min: 0, max: 100000 },
@@ -147,6 +151,7 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
     ],
     build: (st) => ({
       availabilityStatus: s(st.availabilityStatus) || null,
+      availableFrom: /^\d{4}-\d{2}-\d{2}$/.test(s(st.availableFrom)) ? s(st.availableFrom) : null,
       locationCountry: s(st.locationCountry).toUpperCase() || null,
       preferredCountries: s(st.preferredCountries)
         ? s(st.preferredCountries).split(",").map((c) => c.trim().toUpperCase()).filter((c) => c.length === 2)
