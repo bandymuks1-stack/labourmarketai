@@ -62,6 +62,7 @@ export type IntentAccess = "read" | "write" | "route" | "blocked";
 export type IntentHandlerId =
   | "findWork"
   | "professionStatement"
+  | "availabilityStatement"
   | "skillGap"
   | "recentJournal"
   | "figures"
@@ -190,6 +191,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // their profession or a past job. Reads the sentence, offers the doors
   // that already exist (profile, work history, the board); persists nothing.
   "profession-statement": { domain: "profile", access: "read", handler: "professionStatement", ownTyping: false },
+  // "galiu dirbti nuo spalio 1 d." — the person states WHEN they can work.
+  // Opens the ONE work-card form (`worker.save-work-card`) with the parsed
+  // date in it; the write stays behind the form's own review.
+  availability: { domain: "profile", access: "write", handler: "availabilityStatement", ownTyping: false },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },

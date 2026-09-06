@@ -87,7 +87,7 @@ import {
   type IntentHandlers,
 } from "@/lib/conversation/intent-registry";
 import type { WorkspaceInfo } from "@/lib/company/organization-switch";
-import { extractWorkLog } from "@/lib/conversation/worklog-extract";
+import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
@@ -2089,10 +2089,23 @@ export function ConversationChat({
         assistant(labels.clarifyWorkLog);
         return;
       }
+      // THE REQUEST IS NOT THE WORK (production 2026-09-06): "Užpildyk darbo
+      // žurnalą" opened the flow with the request sentence as the entry's
+      // evidence, and two taps later it was persisted as `original_text`.
+      // A sentence with no work content (no time span, no place, no
+      // recognised activity — `journalDraftReadiness`, the same rule the
+      // flow and the schema apply) opens the flow with the evidence field
+      // EMPTY and asks what was done. The flow's own guard and the server
+      // schema refuse to save such a sentence even if it is typed back in.
+      const readiness = journalDraftReadiness(text);
+      const carriesWork = readiness === "ok";
+      if (opts?.explicit && text.trim() !== "" && !carriesWork) {
+        assistant(t("journalAskWhatYouDid"));
+      }
       attachContextRef.current = "worklog";
       pushEmbed(
         <WorkerWorkLogFlow
-          draft={draft}
+          draft={carriesWork ? draft : { ...draft, notes: "" }}
           locale={locale}
           labels={workLogLabels}
           photoFirst={opts?.photoFirst ?? false}
@@ -2104,7 +2117,7 @@ export function ConversationChat({
         />,
       );
     },
-    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog],
+    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog, t],
   );
 
   /**
@@ -3645,6 +3658,14 @@ export function ConversationChat({
             { id: "link:/dashboard/documents", label: labels.documentsChip },
           ]);
           return;
+        case "documents-gap":
+          // "Kokių dokumentų man trūksta?" as a chip — the SAME readiness
+          // answer the `documents` sentence runs (have / expiring / missing
+          // per chosen country), offered from a search that named a country
+          // the person has not chosen yet.
+          user(chip.label);
+          runWorkflow(() => runDocumentsReadiness());
+          return;
         case "player-card":
           // The confirmation line in the opening brief ("the employer
           // confirmed N of your entries") — the SAME card the sentence
@@ -3918,7 +3939,18 @@ export function ConversationChat({
             const [, chipType, chipConversation] = chip.id.split(":");
             startAddDocument("", { typeSlug: chipType, thenReply: chipConversation ? askReplyThreadsRef.current.get(chipConversation) : undefined });
           } else if (chip.id.startsWith("f:")) {
-            openForm(chip.id.slice(2));
+            // `f:<action>[?field=value&…]` — a chip may carry PREFILL for the
+            // form it opens (the answer that names a country the person has
+            // not chosen offers the work card with that country already in
+            // the list). Visible, editable, still reviewed before any write;
+            // the same `initialValues` path the sentence prefills use.
+            const [formAction, query] = chip.id.slice(2).split("?");
+            openForm(
+              formAction,
+              undefined,
+              undefined,
+              query ? Object.fromEntries(new URLSearchParams(query)) : undefined,
+            );
           } else if (chip.id.startsWith("download:")) {
             // §19 EXPORT: a canonical file route (Content-Disposition: attachment)
             // — a full navigation so the browser saves it; `router.push` would
@@ -4347,14 +4379,31 @@ export function ConversationChat({
          * handler in the registry: one matching pipeline, one result surface,
          * no second stack.
          */
-        findWork: () => {
+        findWork: () => runWorkflow(async () => {
+          // THE COMPANY CONTEXT NEVER RUNS THE PERSON'S JOB SEARCH (company
+          // walk 2026-09-06, lane G): "ieškau darbo" in the company space
+          // answered "5 public ads… searched your whole list" while the panel
+          // said the result was unavailable in this context. A job search is
+          // the person's own act; the honest answer here is one line and the
+          // door to the personal space (the same membership-validated `ws:`
+          // switch the context chips run) — rendered through the workflow
+          // contract, so the WHY is stated like every other answer.
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            return {
+              kind: "answer" as const,
+              text: t("findWorkInCompanyContext"),
+              explanation: { why: t("findWorkInCompanyWhy") },
+              chips: personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            };
+          }
           // Window 6 (production 2026-09-06): "esu buhalteris, ieškau darbo"
           // ran the search over an unnarrowed board and never read the
           // profession the person had just stated. The search still runs;
           // the ONE fact that would narrow the list is read back FIRST, with
           // the door that records it — before any foreign listing (G-A1).
           const stated = readProfessionStatement(text);
-          if (stated && identity !== "company") {
+          if (stated) {
             const label =
               stated.professionSlug && tProfessions.has(stated.professionSlug)
                 ? tProfessions(stated.professionSlug as never)
@@ -4365,8 +4414,8 @@ export function ConversationChat({
                 : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
             ]);
           }
-          runWorkflow(() => runFindWork(text));
-        },
+          return runFindWork(text);
+        }),
         /**
          * "esu buhalteris" / "dirbu inžinieriumi" / "dirbau projektų vadovu
          * 5 metus" (window 6). The sentence is READ (`readProfessionStatement`,
@@ -4409,6 +4458,34 @@ export function ConversationChat({
               { id: "jobs", label: labels.chipJobs },
             ],
           );
+        },
+        /**
+         * "galiu dirbti nuo spalio 1 d." (production 2026-09-06: answered as a
+         * search with no criteria). The person stated WHEN they can work — the
+         * availability fact the work card holds. The ONE work-card form opens
+         * (the same `worker.save-work-card` the chip "Nurodyti, kada galiu
+         * dirbti" opens) with the status set to available and the parsed
+         * date in `availableFrom` (`parseStartDate`, the same reader the
+         * demand intake uses for "nuo spalio 5"). Editable, reviewed, then
+         * saved by the form — nothing is persisted from the sentence itself.
+         * In the company space the fact belongs to the person, so the answer
+         * is the door to the personal space.
+         */
+        availabilityStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("availability.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const from = parseStartDate(text, todayIso());
+          assistant(from ? t("availability.understoodFrom", { date: from }) : t("availability.understood"));
+          openForm("worker.save-work-card", undefined, undefined, {
+            availabilityStatus: "available",
+            ...(from ? { availableFrom: from } : {}),
+          });
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal()),

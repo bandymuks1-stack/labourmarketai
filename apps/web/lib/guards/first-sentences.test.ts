@@ -140,9 +140,9 @@ describe("5. a profession outside both catalogues still reaches the form, honest
   });
 
   it("'esu buhalteris, ieškau darbo' reads the profession BEFORE the search runs (G-A1)", () => {
-    const handler = chat.slice(chat.indexOf("findWork: () => {"), chat.indexOf("professionStatement: () => {"));
+    const handler = chat.slice(chat.indexOf("findWork: () => runWorkflow(async () => {"), chat.indexOf("professionStatement: () => {"));
     expect(handler.indexOf("readProfessionStatement(text)")).toBeGreaterThan(-1);
-    expect(handler.indexOf('t("professionStatement.readBesideSearch"')).toBeLessThan(handler.indexOf("runWorkflow(() => runFindWork(text))"));
+    expect(handler.indexOf('t("professionStatement.readBesideSearch"')).toBeLessThan(handler.indexOf("return runFindWork(text);"));
   });
 
   it("every locale carries the professionStatement copy", () => {

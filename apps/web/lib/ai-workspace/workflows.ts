@@ -19,6 +19,7 @@ import {
 } from "@/lib/conversation/documents-gap";
 import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
 import { readLearningCompass } from "@/lib/learning/learning-compass";
+import { loadUnchosenCountryNextSteps } from "@/lib/conversation/country-next-steps-server";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -97,15 +98,46 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
             .map((v) => v.terms[0])
             .filter((label): label is string => typeof label === "string" && label.length > 0)
             .join(", ");
+    const understood = alternatives
+      ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
+      : t("noSuchValue", { asked: missed[0].matchedText });
+    const explanation = {
+      why: t("whyFromYourBoard"),
+      unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
+    };
+    if (missedDimension !== "country") {
+      return { kind: "answer", text: understood, explanation: explanation };
+    }
+    // A COUNTRY THE PERSON HAS NOT CHOSEN YET (real-person join walk,
+    // production ca96605b, 2026-09-06): "ieškau darbo Norvegijoje" from a
+    // worker whose countries were NL ended in "nothing visible there. Visible:
+    // NL." — a dead end with no chip, on the very sentence the landing
+    // advertises. The answer now carries the two doors that already exist:
+    // the work card, where the person adds the country to their own list
+    // (prefilled: their current countries plus the one they just named), and
+    // the documents readiness ("what do I lack for that country?"). It also
+    // says, honestly and from a bounded indexed read, whether public ads from
+    // official sources exist there at all — no manufactured listing either
+    // way; a failed read is named as a failed read, never as "none". The
+    // reads live in the conversation domain (`country-next-steps-server`).
+    const country = await loadUnchosenCountryNextSteps(missed[0].value);
+    const supplyLine =
+      country.supply === "yes"
+        ? t("countryNotChosenListings")
+        : country.supply === "no"
+          ? t("countryNotChosenNoListings")
+          : t("countryNotChosenSupplyUnknown");
     return {
       kind: "answer",
-      text: alternatives
-        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
-        : t("noSuchValue", { asked: missed[0].matchedText }),
-      explanation: {
-        why: t("whyFromYourBoard"),
-        unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
-      },
+      text: [understood, supplyLine, t("countryNotChosenDoors")].join("\n"),
+      explanation: explanation,
+      chips: [
+        {
+          id: `f:worker.save-work-card?preferredCountries=${country.nextCountries.join(",")}`,
+          label: t("chipAddCountry"),
+        },
+        { id: "documents-gap", label: t("chipDocsGap") },
+      ],
     };
   }
 

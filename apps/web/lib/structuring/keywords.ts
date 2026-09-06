@@ -1372,6 +1372,12 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
         "arc weld",
         "elektrodu suvirin",
         "elektrodais suvirin",
+        // "Virinau elektrodu…" — the colloquial "virinti" (to weld) is only
+        // safe WITH the electrode beside it ("virinau vandenį" is boiling).
+        "virinau elektrod",
+        "virinome elektrod",
+        "elektrodu virin",
+        "elektrodais virin",
         "дуговая сварк",
         "дуговой сварк",
         "варил электрод",

@@ -28,9 +28,15 @@ import {
   ROLE_SUFFIX_NOMINATIVE_SOURCE,
   SEEK_VERB_SOURCE,
 } from "@/lib/structuring/role-label";
+import { PRESENT_ACTIVITY_VERB_SOURCE } from "@/lib/structuring/value-statement";
 
 export type ConversationIntent =
   | "log-work" // "šiandien dirbau nuo 8 iki 17" — record a work-journal entry
+  // ── AVAILABILITY (window 6 follow-up, 2026-09-06): "galiu dirbti nuo
+  //    spalio 1 d." was read as a search with no criteria. A stated date from
+  //    which the person can work is the availability fact the work card
+  //    holds; the sentence opens that door with the date already in it. ────
+  | "availability"
   | "find-work" // "rask man darbą Nyderlanduose" — employer/opportunity search
   | "write-employer" // "parašyk šiai įmonei" — draft a human message
   | "translate" // "išversk žinutę į olandų kalbą" — translate text
@@ -1081,6 +1087,39 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    /**
+     * AVAILABILITY STATED IN WORDS (production ca96605b, 2026-09-06): "galiu
+     * dirbti nuo spalio 1 d." scored 0 everywhere and was answered as a job
+     * search with no criteria set. The person said WHEN they can work — the
+     * availability fact the work card already holds (`available_from`,
+     * `availability_status`), reachable until now only by the chip "Nurodyti,
+     * kada galiu dirbti". The shapes are closed: "can (start) work" / "am
+     * free" bound to a from-word or a time word, in every routed locale.
+     * Weight 5 beats the bare `galiu` capacity reading (3) and the `darbo`
+     * noun (1); a sentence that also SEEKS ("galiu dirbti, ieškau darbo")
+     * keeps find-work through the guard.
+     */
+    intent: "availability",
+    patterns: [
+      p(
+        "^(?![^]*(?:iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta))[^]*?\\b(galiu|galeciau|galesiu|galiu\\s+pradeti|galesiu\\s+pradeti)\\s+(pradeti\\s+)?dirbti\\b",
+        5,
+      ),
+      p("\\b(galiu|galesiu|galeciau)\\s+(pradeti|pradeciau)\\s+(nuo|kita|sia|rytoj|poryt|po|iki)\\b", 5),
+      p("\\b(esu|busiu)\\s+laisv[a-z]{0,4}\\s+(nuo|iki|rytoj|ryt|kita|sia|po|visa)\\b", 5),
+      p("\\b(i\\s+am|i'm|i\\s+will\\s+be)\\s+(available|free)\\s+(from|starting|on|next|this|after|until)\\b", 5),
+      p("\\b(available|can\\s+start|can\\s+work)\\s+(from|starting|on|next|this|after)\\b", 5),
+      p("могу\\s+(начать\\s+)?работать\\s+(с|со|после|через)\\b", 5),
+      p("могу\\s+(выйти|приступить|начать)\\s+(с|со|после|через)\\b", 5),
+      p("(свободен|свободна)\\s+(с|со|после|до)\\b", 5),
+      p("\\bkann\\s+(ab|von|nach)\\b.{0,20}(arbeiten|anfangen|beginnen)", 5),
+      p("\\b(bin|ware)\\s+(ab|von)\\s*.{0,20}\\b(verfugbar|frei)\\b", 5),
+      p("\\bverfugbar\\s+(ab|von)\\b", 5),
+      p("\\bkan\\s+(vanaf|per|na)\\b.{0,20}(werken|beginnen|starten)", 5),
+      p("\\bbeschikbaar\\s+(vanaf|per)\\b", 5),
+    ],
+  },
+  {
     // V9 value-intent: a stated OFFER of value — goods to sell or free work
     // capacity. Kept SIMPLE on purpose (the structurer refines): strong sell
     // verbs, have+unit co-occurrence, free-days phrasing. Placed before
@@ -1088,6 +1127,15 @@ const RULES: IntentRule[] = [
     // it win on score anyway.
     intent: "offer-value",
     patterns: [
+      // A PRESENT-TENSE trade activity in the first person ("remontuoju
+      // automobilius", "kerpu plaukus", "I repair cars", "ремонтирую машины")
+      // is a stated SERVICE — the ONE verb list the value structurer reads,
+      // so the router and the reader cannot drift. A sentence that also
+      // seeks ("remontuoju automobilius, ieškau darbo") keeps find-work.
+      p(
+        `^(?![^]*(?:iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta))[^]*?\\b(?:${PRESENT_ACTIVITY_VERB_SOURCE})\\b`,
+        5,
+      ),
       p("parduo", 4), // parduodu / parduoti / noriu parduoti
       p("прода(м|ю|ем)", 4),
       p("\\bsell(ing)?\\b", 4),
@@ -1161,7 +1209,9 @@ const RULES: IntentRule[] = [
       p("\\b(some(one|body))\\s+to\\s+work\\b", 6),
       p("(кто|кого)-нибудь\\s*.{0,25}(работа)", 6),
       p(
-        "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|требу(ется|ются)|brauch(e|en)?|benötig|suche(n)?|zoek(en)?|nodig)\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa)",
+        // `ищу` beside `ищем`: "Ищу сантехника" (public entry, lane F) read
+        // as the person's OWN job search on the bare Russian seek verb.
+        "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|ищу|требу(ется|ются)|brauch(e|en)?|benötig|suche(n)?|zoek(en)?|nodig)\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa)",
         6,
       ),
       // PROFESSIONAL LANGUAGE (window 6, 2026-09-06). The alternation above
@@ -1226,12 +1276,16 @@ const RULES: IntentRule[] = [
       // A seek verb followed by the SERVICE itself — "reikia valymo
       // paslaugų", "reikia automobilio remonto", "need a repair" — is a job
       // to be done. A named TRADE ("reikia valytojo", "reikia dažytojo")
-      // carries no service stem and keeps its employer route above. Weight 7:
-      // "ieškau korepetitoriaus paslaugų" names both a person (the tutor,
-      // scoring 6 above) and the SERVICE — the service is what is asked for.
+      // carries no service stem and keeps its employer route above. Weight 13:
+      // "reikia buhalterio paslaugų" names both a PROFESSION (the accountant,
+      // scoring 6 + 6 above through the genitive suffix AND the professional
+      // stem) and the SERVICE — the service is what is asked for, in the
+      // company context as much as in the personal one (company walk
+      // 2026-09-06: it opened the HIRING form). The weight is set above the
+      // largest sum the occupation rules can reach, not tuned to one sentence.
       p(
         `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(?:paslaug|remont|valym|dazym|korepetitor|услуг|ремонт|уборк|\\bservices?\\b|\\bcleaning\\b|\\brepair)`,
-        7,
+        13,
       ),
     ],
   },

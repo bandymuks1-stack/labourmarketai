@@ -71,10 +71,16 @@ export interface ProfessionStatementReading {
  *  an occupation". When the catalogue gains a row, the slug path takes over. */
 export const OCCUPATION_STEM_SOURCE =
   "buhalter|teisinink|inzinier|dizainer|konsultant|ekonomist|architekt|analitik|finansinink|rinkodarinink|marketolog|vadybinink|" +
-  "accountant|lawyer|engineer|designer|consultant|economist|architect|analyst|" +
-  "бухгалтер|юрист|инженер|дизайнер|консультант|экономист|архитектор|аналитик|" +
+  // Public-entry probe (lane F, 2026-09-06): "We need a developer for our
+  // team" / "Нужен программист" read `unknown` — the EN/RU professional
+  // stems stopped at the office professions. Stems are PREFIXES of a folded
+  // token, so each one is chosen not to open on an everyday thing-word
+  // ("техник" would swallow "техника" = equipment; "nurse" → "nursery").
+  "accountant|lawyer|engineer|designer|consultant|economist|architect|analyst|developer|programmer|manager|specialist|teacher|technician|" +
+  "бухгалтер|юрист|инженер|дизайнер|консультант|экономист|архитектор|аналитик|программист|разработчик|менеджер|специалист|учител|" +
   // de / nl (the two other fully routed locales)
-  "buchhalter|ingenieur|anwalt|jurist|berater|entwickler|boekhouder|advocaat|ontwerper|adviseur|ontwikkelaar|programmeur";
+  "buchhalter|ingenieur|anwalt|jurist|berater|entwickler|programmierer|spezialist|lehrer|techniker|" +
+  "boekhouder|advocaat|ontwerper|adviseur|ontwikkelaar|programmeur|leraar|technicus|monteur";
 
 /** Genitive endings an occupation noun takes after a seek verb — singular
  *  ("buhalterio") and plural ("suvirintojų", typed with or without ų). */
@@ -97,7 +103,10 @@ export const ROLE_NOUN_EXCLUSION_SOURCE =
 
 /** The seek verbs that open an employer/buyer need (folded). */
 export const SEEK_VERB_SOURCE =
-  "reikia|reikes|reiketu|reikalingas|reikalinga|reikalingi|reikalingos|truksta|truks|ieskau|ieskome|ieskom|need|needs|needed|looking\\s+for|нужен|нужна|нужны|нужно|ищем|ищу|требуется|требуются";
+  "reikia|reikes|reiketu|reikalingas|reikalinga|reikalingi|reikalingos|truksta|truks|ieskau|ieskome|ieskom|need|needs|needed|looking\\s+for|нужен|нужна|нужны|нужно|ищем|ищу|требуется|требуются|" +
+  // de / nl — "Wir brauchen 2 Buchhalter", "ich suche einen Elektriker",
+  // "wij zoeken een boekhouder" (lane F probe 2026-09-06: `unknown` before).
+  "brauche|brauchen|benotige|benotigen|suche|suchen|zoek|zoeken";
 
 /** The person-statement anchors (folded). */
 export const PROFESSION_STATEMENT_ANCHOR_SOURCE =

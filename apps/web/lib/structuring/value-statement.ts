@@ -88,6 +88,30 @@ export interface ValueStatement {
   readonly missing: string[];
 }
 
+/**
+ * A PRESENT-TENSE TRADE ACTIVITY in the first person — "remontuoju
+ * automobilius", "kerpu plaukus", "dažau butus", "mokau matematikos",
+ * "I repair cars", "ремонтирую машины", "ich repariere Autos", "ik repareer
+ * auto's". Company-context walk 2026-09-06 (lane G): "remontuoju
+ * automobilius" was answered "I am not sure whether you are offering
+ * something or looking for something" — the sentence is a stated SERVICE
+ * (an action somebody can order), in any context. Whole-word forms only, so
+ * "montuoju" cannot fire inside "sumontuojame"; the LT list holds the
+ * 1st-person singular AND plural of the everyday trades. Folded (no
+ * diacritics), Cyrillic kept. EXPORTED so the intent router composes its
+ * offer-value pattern from this ONE list (wrap with a word boundary).
+ */
+export const PRESENT_ACTIVITY_VERB_SOURCE =
+  "remontuoju|remontuojame|taisau|taisome|kerpu|kerpame|dazau|dazome|valau|valome|montuoju|montuojame|mokau|mokome|siuvu|siuvame|vezu|vezame|vezioju|programuoju|programuojame|konsultuoju|konsultuojame|tvarkau|tvarkome|priziuriu|priziurime|pjaunu|pjauname|statau|statome|muriju|tinkuoju|klijuoju|verciu|verciame|projektuoju|projektuojame|fotografuoju|gaminu|gaminame|kepu|kepame|virinu|suvirinu|masazuoju|treniruoju|slaugau|" +
+  "i\\s+(?:repair|fix|paint|clean|install|teach|tutor|mow|sew|weld|build|design|translate|babysit|cut\\s+hair)|" +
+  "ремонтирую|чиню|крашу|убираю|монтирую|обучаю|шью|вожу|программирую|перевожу|стригу|строю|консультирую|" +
+  "ich\\s+(?:repariere|streiche|putze|montiere|unterrichte|nahe|schweisse|baue|ubersetze)|" +
+  "ik\\s+(?:repareer|schilder|monteer|naai|las|bouw|vertaal)";
+const PRESENT_ACTIVITY_RE = new RegExp(
+  `(?<![\\p{L}])(?:${PRESENT_ACTIVITY_VERB_SOURCE})(?![\\p{L}])`,
+  "u",
+);
+
 /** Folded axis needles. Order-independent; both sides scored. */
 const OFFER_RES: RegExp[] = [
   /parduo/u, // parduodu / parduoti / noriu parduoti
@@ -103,6 +127,8 @@ const OFFER_RES: RegExp[] = [
   /\bavailable\b/u,
   /\bbied\b|\bverkoop/u, // nl (opportunistic)
   /\bbiete\b|verkaufe/u, // de (opportunistic)
+  // "remontuoju automobilius" — stating what one DOES is an offer of it.
+  PRESENT_ACTIVITY_RE,
 ];
 
 const SEEK_RES: RegExp[] = [
@@ -149,7 +175,6 @@ const SERVICE_VERB_RE =
  */
 const OFFER_ACTIVITY_RE =
   /\b(galiu|siulau|siulyti|teikiu|can|могу|biete|bied)\b\s+(?:\S+\s+){0,2}?(kirp|dazy|valy|mokyt[iu]\b|tvarky|siuv|montuo|pjau|priziur|programuo|konsultuo|apskait|vez[tu]|remont|taisy|paint|clean|teach|tutor|mow|install|sew|babysit|garden|\bfix\b)/u;
-
 
 /** V10 equipment-capacity reading: the MACHINE is free, not a person. */
 const EQUIPMENT_RE =
@@ -346,19 +371,24 @@ export function structureValueStatement(
     if (
       SERVICE_RE.test(folded) ||
       SERVICE_VERB_RE.test(folded) ||
-      OFFER_ACTIVITY_RE.test(folded)
+      OFFER_ACTIVITY_RE.test(folded) ||
+      PRESENT_ACTIVITY_RE.test(folded)
     ) {
       subject = "service";
       // "galiu versti dokumentus iš lenkų į lietuvių" — the echo carries the
       // person's own description (incl. a language pair when they state one).
       // For an offer verb + activity ("galiu kirpti plaukus") the echo starts
-      // after the OFFER VERB, so the activity itself is what is echoed.
+      // after the OFFER VERB, so the activity itself is what is echoed; for a
+      // present-tense activity ("kerpu plaukus") after the VERB itself.
       const sv = folded.match(SERVICE_VERB_RE);
       const oa = sv ? null : folded.match(OFFER_ACTIVITY_RE);
+      const pa = sv || oa ? null : folded.match(PRESENT_ACTIVITY_RE);
       if (sv?.index !== undefined) {
         subjectLabel = echoAfter(raw, endOfWord(raw, sv.index + sv[0].length));
       } else if (oa?.index !== undefined) {
         subjectLabel = echoAfter(raw, endOfWord(raw, oa.index + oa[1].length));
+      } else if (pa?.index !== undefined) {
+        subjectLabel = echoAfter(raw, endOfWord(raw, pa.index + pa[0].length));
       }
     } else if (equipmentCapacity) {
       // V10: the MACHINE is free — a goods/equipment capacity, not a person's.
