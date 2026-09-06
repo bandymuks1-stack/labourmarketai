@@ -52,6 +52,19 @@ export const SEO_PROFESSIONS: readonly ProfessionEntry[] = [
   { key: "seasonal-workers", sector: "agriculture", label: { en: "Seasonal workers", lt: "Sezoniniai darbuotojai", ru: "Сезонные работники", nl: "Seizoensarbeiders", de: "Saisonarbeiter" } },
   { key: "admin-staff", sector: "office_admin", label: { en: "Administration staff", lt: "Administracijos darbuotojai", ru: "Административные работники", nl: "Administratief medewerkers", de: "Verwaltungsmitarbeiter" } },
   { key: "sales-service", sector: "retail_sales", label: { en: "Sales / customer service", lt: "Pardavimų / klientų aptarnavimo darbuotojai", ru: "Продажи / обслуживание клиентов", nl: "Verkoop / klantenservice", de: "Vertrieb / Kundenservice" } },
+  // Window 6 (2026-09-06, gap G-D1): the rows above read as manual labour
+  // only. The platform is profession-agnostic — the skills, evidence,
+  // journal and matching model carry an accountant exactly as they carry a
+  // scaffolder — so the professions the page NAMES must say so too.
+  { key: "accountants", sector: "office_admin", label: { en: "Accountants / finance", lt: "Buhalteriai / finansai", ru: "Бухгалтеры / финансы", nl: "Accountants / financiën", de: "Buchhalter / Finanzen" } },
+  { key: "lawyers", sector: "office_admin", label: { en: "Lawyers / legal", lt: "Teisininkai", ru: "Юристы", nl: "Juristen", de: "Juristen" } },
+  { key: "engineers", sector: "manufacturing", label: { en: "Engineers", lt: "Inžinieriai", ru: "Инженеры", nl: "Ingenieurs", de: "Ingenieure" } },
+  { key: "software-developers", sector: "it_software", label: { en: "Software developers", lt: "Programuotojai", ru: "Программисты", nl: "Softwareontwikkelaars", de: "Softwareentwickler" } },
+  { key: "it-support", sector: "it_software", label: { en: "IT support / administrators", lt: "IT priežiūra / administratoriai", ru: "IT-поддержка / администраторы", nl: "IT-support / beheerders", de: "IT-Support / Administratoren" } },
+  { key: "sales-managers", sector: "retail_sales", label: { en: "Sales managers", lt: "Pardavimų vadybininkai", ru: "Менеджеры по продажам", nl: "Salesmanagers", de: "Vertriebsmanager" } },
+  { key: "teachers-trainers", sector: "education", label: { en: "Teachers / trainers", lt: "Mokytojai / dėstytojai", ru: "Учителя / преподаватели", nl: "Docenten / trainers", de: "Lehrer / Ausbilder" } },
+  { key: "designers-consultants", sector: "other", label: { en: "Designers / consultants", lt: "Dizaineriai / konsultantai", ru: "Дизайнеры / консультанты", nl: "Ontwerpers / consultants", de: "Designer / Berater" } },
+  { key: "recruiters-hr", sector: "hr_recruitment", label: { en: "HR / recruiters", lt: "Personalo specialistai", ru: "HR / рекрутеры", nl: "HR / recruiters", de: "HR / Recruiter" } },
 ];
 
 export interface ActorEntry {

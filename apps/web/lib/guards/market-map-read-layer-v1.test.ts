@@ -794,8 +794,11 @@ describe("NO new DB migration in this PR", () => {
     // window 6 G-D2): additive INSERT-only catalogue data (15 skills, 9
     // professions, 50 links), human-gated draft, APPLY BEFORE MERGE. The read
     // layer itself still adds no migration. RECOUNTED on this branch alone:
+    // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
+    // window 6, 2026-09-06, GREEN additive partial index for the board
+    // supply-freshness read; paired rollback). RECOUNTED from the tree:
     // `ls supabase/migrations/*.sql | wc -l` = 266.
-expect(count).toBeLessThanOrEqual(266);
+expect(count).toBeLessThanOrEqual(267);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

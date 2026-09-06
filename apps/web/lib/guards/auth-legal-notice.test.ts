@@ -19,9 +19,12 @@ import { join } from "node:path";
  *     with non-empty accessible names, built from the locale-aware Link
  *     with a single bare path (so exactly ONE /{locale} prefix — no
  *     /lt/lt/... double prefix is constructible);
- *  3. the signup form shows the notice BEFORE the Google button and again
- *     BEFORE the email/password submit; the login form shows it before
- *     its (account-creating) Google button — OAuth cannot bypass it;
+ *  3. the signup form shows the notice ONCE, before the Google button and
+ *     therefore before the email/password submit in document order (a
+ *     second copy above the submit was removed 2026-09-06 — a real person
+ *     read the same paragraph twice on one short form); the login form
+ *     shows it before its (account-creating) Google button — OAuth cannot
+ *     bypass it;
  *  4. no consent-checkbox and no marketing checkbox exists on the paths
  *     (nothing to pre-check), and the copy never frames the Privacy
  *     Policy as a GDPR consent instrument ("I agree to the Privacy…");
@@ -177,18 +180,17 @@ describe("notice placement in the real forms", () => {
   const signupSrc = read("components/app/signup-form.tsx");
   const loginSrc = read("components/app/login-form.tsx");
 
-  it("signup form: notice before the Google button AND again before submit", () => {
+  it("signup form: notice exactly once, before the Google button and before submit", () => {
     const notices = [...signupSrc.matchAll(/<AuthLegalNotice variant="signup"/g)].map(
       (m) => m.index ?? -1,
     );
-    expect(notices).toHaveLength(2);
+    expect(notices).toHaveLength(1);
     const google = signupSrc.indexOf("<GoogleButton");
     const submit = signupSrc.indexOf('type="submit"');
     expect(google).toBeGreaterThan(-1);
     expect(submit).toBeGreaterThan(-1);
     expect(notices[0]).toBeLessThan(google);
-    expect(notices[1]).toBeGreaterThan(google);
-    expect(notices[1]).toBeLessThan(submit);
+    expect(notices[0]).toBeLessThan(submit);
   });
 
   it("login form: googleLogin notice before its account-creating Google button", () => {

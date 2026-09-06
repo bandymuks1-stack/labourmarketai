@@ -489,8 +489,17 @@ export async function readSupplyLastRefreshedAt(
     q = q.eq("country", filters.country.trim().toUpperCase());
   }
 
+  // ORDER DIRECTION IS THE INDEX (Lane H, 2026-09-06) — the same trap the
+  // board listing above fell into. `last_seen_at` is NOT NULL, so DESC NULLS
+  // LAST returns exactly what plain DESC did; the difference is that
+  // `public_vacancies_active_last_seen_idx (last_seen_at DESC NULLS LAST, id)
+  // WHERE is_active` (migration 20260906070000) can only serve an ORDER BY
+  // whose null placement matches. Measured before: 869 calls, mean 270.8 ms,
+  // max 6,747 ms — an index-only scan over every live row plus a top-N sort
+  // to find ONE value, on every board render. Walked from the top, the read
+  // stops at the first live row.
   const { data, error } = await q
-    .order("last_seen_at", { ascending: false })
+    .order("last_seen_at", { ascending: false, nullsFirst: false })
     .limit(1);
 
   if (error) {

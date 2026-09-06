@@ -83,7 +83,10 @@
       "ackDone": "[EN] Will be confirmed ✓",
       "excludedNote": "[EN] {count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
       "outcomeNotAcknowledged": "[EN] not confirmed — the exception was left unreviewed",
-      "outcomeBlocked": "[EN] not confirmed ({code})"
+      "outcomeBlocked": "[EN] not confirmed ({code})",
+      "receipt": "Potwierdzono: {title}",
+      "receiptSkills": "{count, plural, one {# umiejętność} few {# umiejętności} many {# umiejętności} other {# umiejętności}}",
+      "skillsUnavailable": "Nie udało się odczytać listy umiejętności — dotknięcie potwierdzi tylko sam wpis."
     },
     "result": {
       "entrySuperseded": "Wpis został już zastąpiony nowszą wersją — ta karta nie jest już aktualna i zostanie usunięta z listy.",

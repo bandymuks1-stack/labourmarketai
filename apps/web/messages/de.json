@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Mit diesem Eintrag verknüpfte Fähigkeiten",
     "helper": "Markieren Sie die Fähigkeiten, die dieser Eintrag zeigt — das baut Ihren Lebenslauf auf. Noch nicht geprüft.",
+    "helperConfirmedLinks": "Markieren Sie die Fähigkeiten, die dieser Eintrag zeigt — das baut Ihren Lebenslauf auf.",
     "saving": "Wird gespeichert…",
     "saved": "Gespeichert",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
@@ -3809,12 +3810,12 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; Ihre Rolle wählen Sie im nächsten Schritt.",
+      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; im nächsten Schritt sagen Sie, weshalb Sie hier sind.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
-      "email_label": "Geschäftliche E-Mail-Adresse",
-      "email_placeholder": "name@company.com",
+      "email_label": "E-Mail-Adresse",
+      "email_placeholder": "name@beispiel.de",
       "password_label": "Passwort",
       "password_help": "Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen (!@#$%).",
       "confirm_password_label": "Passwort bestätigen",
@@ -3831,7 +3832,7 @@
       "error_password_number": "Das Passwort muss eine Zahl enthalten.",
       "error_password_special": "Das Passwort muss ein Sonderzeichen enthalten.",
       "check_email_title": "E-Mail bestätigen",
-      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen.",
+      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen. Keine E-Mail? Prüfe den Spam-Ordner — einen neuen Link kannst du hier anfordern.",
       "resend_label": "Link erneut senden",
       "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
       "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
@@ -3900,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "Wofür sind Sie hier?",
         "intentNote": "Wählen Sie alles Zutreffende — ein Konto trägt alles. Person und Organisation sind die zwei Räume; was Sie darin tun, entscheiden Sie.",
+        "saidLabel": "Sie haben geschrieben:",
+        "saidHint": "Wir haben angekreuzt, was passt. Ändern Sie es bei Bedarf.",
         "intent": {
           "work": {
             "title": "Ich suche Arbeit",
@@ -3962,7 +3965,7 @@
         "note": "Fähigkeiten sind zunächst selbst angegeben. Dokumente, dein Arbeitsjournal und Bestätigungen von Personen machen sie mit der Zeit stärker."
       },
       "display_name_label": "Anzeigename",
-      "country_label": "Land",
+      "country_label": "Wo wohnen Sie zurzeit?",
       "country_placeholder": "Land auswählen",
       "error_country_required": "Bitte wählen Sie ein Land.",
       "profession_label": "Welche Arbeit machen Sie?",
@@ -4678,7 +4681,7 @@
         },
         {
           "q": "Was kostet es Arbeitskräfte?",
-          "a": "Der Kern ist kostenlos — Ihr Profil, Matches, Suche und Nachrichten kosten Arbeitskräfte niemals etwas. Premium-Extras (Foto- und Videogalerien, der KI-Profilassistent, VIP-Sichtbarkeit) sind mit einer kleinen Gebühr verbunden. Die endgültigen Preise werden vor dem vollständigen Start veröffentlicht."
+          "a": "Für Einzelpersonen ist alles kostenlos — Profil, Matches, Suche und Nachrichten kosten eine Arbeitskraft niemals etwas. Bezahlte Pläne gibt es nur für Organisationen; sie stehen auf der Preisseite."
         },
         {
           "q": "Wer sieht mein Profil?",
@@ -4776,7 +4779,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Die Preise werden zum Start bekannt gegeben. Anmeldungen auf der Warteliste erhalten Early-Access-Preise."
+          "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
         },
         {
           "q": "Können wir nach Standort filtern?",
@@ -4874,7 +4877,7 @@
         },
         {
           "q": "Was kostet es Personalagenturen?",
-          "a": "Die Preise werden zum Start bekannt gegeben; Wartelisten-Partner erhalten Early-Access-Konditionen."
+          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
         },
         {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
@@ -12444,6 +12447,10 @@
       "eduAssignDone": "Lernender der Gruppe zugewiesen.",
       "eduNotInstitution": "Diese Organisation ist noch nicht als Bildungseinrichtung markiert. Markieren Sie das im Unternehmensbereich.",
       "eduUnavailable": "Programme können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "eduOutcomesConnected": "Verbundene Studierende: {count}.",
+      "eduOutcomesUnavailable": "Die Ergebnisse können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "eduStudentsPrivacy": "Die Einrichtung sieht weder Fähigkeiten, Dokumente noch das Journal der Studierenden — das sind ihre eigenen Daten. Sie sehen Teilnahme und Ergebniszahlen; wer passt, sieht der Arbeitgeber selbst für seinen Bedarf.",
+      "eduPracticeHow": "Praktika werden von Arbeitgebern ausgeschrieben: ein Partner legt ein Unternehmenskonto an und veröffentlicht einen Bedarf mit dem Typ „Praktikum“ (ein Bedarf kostenlos). Ihre Studierenden sehen ihn auf ihrem Board, sobald der Arbeitgeber verifiziert ist.",
       "eduNext": "Was als Nächstes?",
       "chipCreateProgramme": "Programm anlegen",
       "chipCreateCohort": "Gruppe anlegen",
@@ -13087,11 +13094,12 @@
     },
     "cta": {
       "title": "Starten Sie dort, wo Sie sind",
-      "subcopy": "Vier Türen in dieselbe Plattform — wählen Sie Ihre.",
+      "subcopy": "Fünf Türen in dieselbe Plattform — wählen Sie Ihre.",
       "worker": "Ich bin Arbeitskraft",
       "employer": "Ich bin Arbeitgeber",
       "agency": "Ich vertrete eine Agentur",
-      "partner": "Ich möchte Partner werden"
+      "partner": "Ich möchte Partner werden",
+      "institution": "Ich vertrete eine Schule oder Hochschule"
     },
     "loop": {
       "chip": "Beispielsequenz — echter Produktablauf",
@@ -13203,8 +13211,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Fragen. Sehen. Einstellen.",
-      "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort."
+      "headline": "Zeig, was du kannst. Finde, wo du gebraucht wirst.",
+      "sub": "Echte Erfahrung wird zu einem lebendigen Profil, und deine Fähigkeiten werden zu echten Chancen — für Arbeit, eine Dienstleistung oder ein Praktikum."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -13214,7 +13222,10 @@
       "examples": {
         "hire": "Wir brauchen 12 Gerüstbauer in Rotterdam",
         "work": "Ich suche Arbeit in Norwegen",
-        "internship": "Wo kann ich ein Praktikum machen?"
+        "internship": "Wo kann ich ein Praktikum machen?",
+        "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
+        "needService": "Ich brauche jemanden, der das Dach repariert",
+        "offerService": "Ich biete Buchhaltungsdienstleistungen an"
       },
       "understoodLabel": "Verstanden",
       "understood": {
@@ -13371,6 +13382,11 @@
       "unsupportedDimension": "Nach {dimension} kann ich noch nicht filtern.",
       "noSuchValue": "Ich habe „{asked}“ verstanden, aber dort ist dir gerade nichts sichtbar.",
       "noSuchValueWithAlternatives": "Ich habe „{asked}“ verstanden, aber dort ist dir gerade nichts sichtbar. Sichtbar ist: {available}.",
+      "internshipChooseDirection": "Wählen Sie zuerst eine Arbeitsrichtung — ohne sie kann die Praktikumssuche nicht eingegrenzt werden.",
+      "internshipAskInstitution": "Fragen Sie Ihre Bildungseinrichtung ({institution}): Sie sieht die Marktnachfrage des Programms und kann einen Arbeitgeber einladen, ein Praktikum auszuschreiben.",
+      "internshipCompass": "Der Kompass zeigt, was jetzt zu Ihnen passt und was fehlt.",
+      "chipChooseDirection": "Richtung wählen",
+      "chipAllOpportunities": "Alle Möglichkeiten",
       "skillGapIntro": "In deinem Profil fehlen {count} geforderte Fähigkeiten. Am häufigsten verlangt:",
       "skillGapLine": "— {skill}: von {demands} davon gefordert",
       "skillGapNone": "Es fehlt nichts: du hast alle Fähigkeiten, die die {demands} sichtbaren Anfragen verlangen.",

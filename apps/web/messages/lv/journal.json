@@ -83,7 +83,10 @@
       "ackDone": "[EN] Will be confirmed ✓",
       "excludedNote": "[EN] {count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
       "outcomeNotAcknowledged": "[EN] not confirmed — the exception was left unreviewed",
-      "outcomeBlocked": "[EN] not confirmed ({code})"
+      "outcomeBlocked": "[EN] not confirmed ({code})",
+      "receipt": "Apstiprināts: {title}",
+      "receiptSkills": "{count, plural, zero {# prasmju} one {# prasme} other {# prasmes}}",
+      "skillsUnavailable": "Prasmju sarakstu neizdevās nolasīt — pieskāriens apstiprinās tikai pašu ierakstu."
     },
     "result": {
       "entrySuperseded": "Ieraksts jau ir aizstāts ar jaunāku versiju — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",

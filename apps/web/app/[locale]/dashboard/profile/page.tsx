@@ -797,7 +797,9 @@ export default async function ProfilePage({
           counts three times, ≈1350 px before the first editable field. Nothing
           was dropped: the old→new map is in
           `docs/audits/W7_S1_PROFILE_HUB_OVERVIEW.md` §5, and the hub inherits
-          the `#setup-journey` anchor `completeOnboarding` deep-links to. */}
+          the `#setup-journey` deep-link anchor (the chat's profile chip and
+          older links reach it; since 2026-09-06 `completeOnboarding` lands a
+          fresh worker in the conversation instead). */}
 
       {/* THE ONE OVERVIEW (W7-S1). Identity, status, what is missing and the
           single next action — with completed steps, work history, evidence

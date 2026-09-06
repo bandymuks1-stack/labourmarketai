@@ -326,9 +326,11 @@ export async function ProfileHubOverview({
 
   return (
     /**
-     * `id="setup-journey"` is INHERITED, not decorative: `completeOnboarding`
-     * sends every fresh worker to `/dashboard/profile#setup-journey`
-     * (lib/auth/actions.ts). The absorbed journey owned that anchor; the hub
+     * `id="setup-journey"` is INHERITED, not decorative: the
+     * `/dashboard/profile#setup-journey` deep link is what the chat's profile
+     * chip and older links reach (`completeOnboarding` sent every fresh
+     * worker here until 2026-09-06; it now lands them in the conversation —
+     * lib/auth/actions.ts). The absorbed journey owned that anchor; the hub
      * owns it now, so the deep link still lands on the steps.
      */
     <section

@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Su šiuo įrašu susieti įgūdžiai",
     "helper": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV. Dar neperžiūrėta.",
+    "helperConfirmedLinks": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV.",
     "saving": "Saugoma…",
     "saved": "Išsaugota",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
@@ -3809,12 +3810,12 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — vaidmenį pasirinksi kitame žingsnyje.",
+      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — kitame žingsnyje patikslinsi, ko atėjai.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
-      "email_label": "Darbo el. paštas",
-      "email_placeholder": "vardas@imone.lt",
+      "email_label": "El. paštas",
+      "email_placeholder": "vardas@pastas.lt",
       "password_label": "Slaptažodis",
       "password_help": "Bent 8 simboliai, 1 didžioji raidė, 1 skaičius, 1 specialusis (!@#$%).",
       "confirm_password_label": "Pakartok slaptažodį",
@@ -3831,7 +3832,7 @@
       "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
       "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis.",
       "check_email_title": "Patvirtinkite el. paštą",
-      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją.",
+      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją. Jei laiško nematote — patikrinkite šlamšto aplanką; naujos nuorodos galėsite paprašyti čia.",
       "resend_label": "Siųsti nuorodą dar kartą",
       "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
       "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
@@ -3900,6 +3901,8 @@
       "rolePicker": {
         "intentHeading": "Ko atėjote?",
         "intentNote": "Pažymėkite viską, kas tinka — viena paskyra talpina visa tai. Asmuo ir organizacija yra dvi erdvės; ką jose veikiate, sprendžiate jūs.",
+        "saidLabel": "Jūs rašėte:",
+        "saidHint": "Pažymėjome, kas tiko. Pataisykite, jei reikia.",
         "intent": {
           "work": {
             "title": "Ieškau darbo",
@@ -3962,7 +3965,7 @@
         "note": "Įgūdžiai pradžioje yra jūsų pačių nurodyti. Dokumentai, darbo žurnalas ir žmonių peržiūros laikui bėgant juos sustiprina."
       },
       "display_name_label": "Rodomas vardas",
-      "country_label": "Šalis",
+      "country_label": "Kur dabar gyveni?",
       "country_placeholder": "Pasirinkite šalį",
       "error_country_required": "Pasirinkite šalį.",
       "profession_label": "Kokį darbą dirbi?",
@@ -4678,7 +4681,7 @@
         },
         {
           "q": "Kiek kainuoja darbuotojui?",
-          "a": "Pagrindas nemokamas — profilis, atitikimai, paieška ir žinutės darbuotojui niekada nieko nekainuoja. Papildomos premium funkcijos (nuotraukų ir vaizdo galerijos, AI profilio asistentas, VIP matomumas) turi nedidelį mokestį. Galutinės kainos skelbiamos prieš pilną startą."
+          "a": "Asmenims viskas nemokama — profilis, atitikimai, paieška ir žinutės darbuotojui nieko nekainuoja. Mokami planai skirti tik organizacijoms ir paskelbti kainodaros puslapyje."
         },
         {
           "q": "Kas mato mano profilį?",
@@ -4776,7 +4779,7 @@
         },
         {
           "q": "Kiek kainuoja įmonei?",
-          "a": "Kaina skelbiama prieš startą. Užsirašiusiems — ankstyvos prieigos kaina."
+          "a": "Kainos paskelbtos kainodaros puslapyje: viena aktyvi pozicija organizacijai — nemokamai, daugiau pozicijų — organizacijos planas, kurį aktyvuojate paskyroje. Darbuotojų užklausa pateikiama nemokamai."
         },
         {
           "q": "Ar galima atrinkti pagal lokaciją?",
@@ -4874,7 +4877,7 @@
         },
         {
           "q": "Kiek kainuoja agentūroms?",
-          "a": "Kaina skelbiama prieš startą; partneriams sąraše — ankstyvos prieigos sąlygos."
+          "a": "Agentūra yra organizacija ir naudojasi tais pačiais planais: viena aktyvi pozicija — nemokamai, daugiau — organizacijos planas iš kainodaros puslapio. Atskiro agentūrų tarifo nėra."
         },
         {
           "q": "Ar galime valdyti darbuotojų matomumą?",
@@ -12444,6 +12447,10 @@
       "eduAssignDone": "Studentas priskirtas grupei.",
       "eduNotInstitution": "Ši organizacija dar nepažymėta kaip mokymo įstaiga. Pažymėkite tai įmonės skiltyje.",
       "eduUnavailable": "Šiuo metu programų perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
+      "eduOutcomesConnected": "Prisijungę studentai: {count}.",
+      "eduOutcomesUnavailable": "Rezultatų dabar perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
+      "eduStudentsPrivacy": "Įstaiga nemato studentų įgūdžių, dokumentų ar žurnalo — tai jų pačių duomenys. Jūs matote dalyvavimą ir rezultatų skaičius; kurie žmonės tinka, mato pats darbdavys savo poreikiui.",
+      "eduPracticeHow": "Praktikos vietas skelbia darbdaviai: partneris susikuria įmonės paskyrą ir paskelbia poreikį su tipu „praktika“ (vienas poreikis nemokamai). Jūsų studentai jį mato savo lentoje, kai darbdavys patvirtintas.",
       "eduNext": "Kas toliau?",
       "chipCreateProgramme": "Sukurti programą",
       "chipCreateCohort": "Sukurti grupę",
@@ -13087,11 +13094,12 @@
     },
     "cta": {
       "title": "Pradėkite ten, kur esate",
-      "subcopy": "Ketverios durys į tą pačią platformą — pasirinkite savas.",
+      "subcopy": "Penkerios durys į tą pačią platformą — pasirinkite savas.",
       "worker": "Esu darbuotojas",
       "employer": "Esu darbdavys",
       "agency": "Atstovauju agentūrai",
-      "partner": "Noriu tapti partneriu"
+      "partner": "Noriu tapti partneriu",
+      "institution": "Atstovauju mokyklai, kolegijai ar universitetui"
     },
     "loop": {
       "chip": "Pavyzdinė seka — reali produkto eiga",
@@ -13203,8 +13211,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Paklausk. Pamatyk. Įdarbink.",
-      "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje."
+      "headline": "Parodyk, ką moki. Atrask, kur esi reikalingas.",
+      "sub": "Tikra patirtis tampa gyvu profiliu, o jūsų gebėjimai — tikromis galimybėmis: darbui, paslaugai ar praktikai."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -13214,7 +13222,10 @@
       "examples": {
         "hire": "Reikia 12 pastolininkų Roterdame",
         "work": "Ieškau darbo Norvegijoje",
-        "internship": "Kur galiu atlikti praktiką?"
+        "internship": "Kur galiu atlikti praktiką?",
+        "professional": "Esu buhalterė, ieškau darbo Vilniuje",
+        "needService": "Reikia, kad kas nors sutaisytų stogą",
+        "offerService": "Siūlau buhalterijos paslaugas"
       },
       "understoodLabel": "Supratau",
       "understood": {
@@ -13371,6 +13382,11 @@
       "unsupportedDimension": "Pagal {dimension} filtruoti dar negaliu.",
       "noSuchValue": "Supratau „{asked}“, bet ten dabar tau nieko nematoma.",
       "noSuchValueWithAlternatives": "Supratau „{asked}“, bet ten dabar tau nieko nematoma. Matoma: {available}.",
+      "internshipChooseDirection": "Pirmiausia pasirink darbo kryptį — be jos praktikos atranka neveikia.",
+      "internshipAskInstitution": "Paklausk savo įstaigos ({institution}): ji mato programos paklausą rinkoje ir gali pakviesti darbdavį paskelbti praktikos vietą.",
+      "internshipCompass": "Kompasas rodo, kas tau tinka dabar ir ko trūksta.",
+      "chipChooseDirection": "Pasirinkti kryptį",
+      "chipAllOpportunities": "Visos galimybės",
       "skillGapIntro": "Tavo profilyje trūksta {count} reikalaujamų įgūdžių. Dažniausiai prašomi:",
       "skillGapLine": "— {skill}: reikalauja {demands} iš jų",
       "skillGapNone": "Nieko netrūksta: turi visus įgūdžius, kurių prašo {demands} matomi poreikiai.",
