@@ -192,7 +192,9 @@ const RULES: IntentRule[] = [
       // Owner contract 2026-09-04 §16 — the bare question "what am I
       // missing?" names no domain; the answer compares skills AND the
       // required documents of the countries the person wants to work in.
-      p("^\\s*(ko|ką)\\s+(man\\s+)?tr[ūu]ksta\\s*\\??\\s*$", 6),
+      // "kas man trūksta?" is how people actually ask it (real-user walk
+      // 2026-09-06: three runs, every one rescued only by the proposer).
+      p("^\\s*(ko|ką|kas)\\s+(man\\s+)?tr[ūu]ksta\\s*\\??\\s*$", 6),
       p("^\\s*what\\s+am\\s+i\\s+(missing|lacking)\\s*\\??\\s*$", 6),
       p("^\\s*чего\\s+(мне\\s+)?не\\s+хватает\\s*\\??\\s*$", 6),
       p("^\\s*was\\s+fehlt(\\s+mir)?(\\s+noch)?\\s*\\??\\s*$", 6),
