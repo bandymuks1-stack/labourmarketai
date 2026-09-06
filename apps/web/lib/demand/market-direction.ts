@@ -72,6 +72,20 @@ export function marketDirection(kind: string | null | undefined): MarketDirectio
   return "other";
 }
 
+/**
+ * The demand kinds as a PostgREST `or` expression, for the reads that must
+ * FILTER in the database rather than after it (a bounded `count`, which never
+ * returns rows to classify). Built from the same set as `marketDirection`, so
+ * the two can never drift: adding a demand kind above changes both.
+ *
+ * `kind.is.null` is part of the expression for the same reason `null` is
+ * demand above — the pre-0028 buyer rows carry no kind and are real demand.
+ */
+export const DEMAND_KIND_OR_FILTER: string = [
+  "kind.is.null",
+  ...[...DEMAND_KINDS].map((k) => `kind.eq.${k}`),
+].join(",");
+
 /** True only for a row a demand surface may render. */
 export function isDemandKind(kind: string | null | undefined): boolean {
   return marketDirection(kind) === "demand";

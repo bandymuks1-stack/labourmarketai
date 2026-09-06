@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  DEMAND_KIND_OR_FILTER,
   isDemandKind,
   isSupplyKind,
   marketDirection,
@@ -66,6 +67,24 @@ describe("marketDirection", () => {
       null,
     ]) {
       expect(isDemandKind(kind) && isSupplyKind(kind)).toBe(false);
+    }
+  });
+});
+
+describe("DEMAND_KIND_OR_FILTER", () => {
+  it("matches every demand kind and the absent kind", () => {
+    expect(DEMAND_KIND_OR_FILTER).toContain("kind.is.null");
+    for (const k of ["company_request", "buyer_request", "customer_request"]) {
+      expect(DEMAND_KIND_OR_FILTER).toContain("kind.eq." + k);
+    }
+  });
+
+  it("names no supply kind — the filter and the classifier cannot disagree", () => {
+    expect(DEMAND_KIND_OR_FILTER).not.toContain("agency_offer");
+    for (const clause of DEMAND_KIND_OR_FILTER.split(",")) {
+      const kind = clause.replace("kind.eq.", "");
+      if (clause === "kind.is.null") continue;
+      expect(marketDirection(kind)).toBe("demand");
     }
   });
 });

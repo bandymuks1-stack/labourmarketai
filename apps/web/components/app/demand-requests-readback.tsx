@@ -9,6 +9,7 @@ import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import { DemandLocationCapture } from "@/components/app/demand-location-capture";
+import { Card } from "@/components/ui/Card";
 
 /**
  * Demand read-back (Slice 1 — demand → matching readiness).
@@ -261,10 +262,11 @@ export function DemandRequestsReadback({
 
   return (
     <>
+      <Card compact>
       <section
         aria-labelledby="demand-readback-title"
         data-testid="demand-requests-readback"
-        className="card-border flex flex-col gap-3 p-5"
+        className="flex flex-col gap-3"
       >
         <div className="flex flex-col gap-1">
           <h2
@@ -308,6 +310,7 @@ export function DemandRequestsReadback({
           </ul>
         )}
       </section>
+      </Card>
 
       {/* THE OTHER DIRECTION. Rendered only when this organisation has actually
           offered capacity — an empty supply section would be noise for every
@@ -315,10 +318,11 @@ export function DemandRequestsReadback({
           offer is stored and readable here, and employer-facing discovery of
           it is not live yet. */}
       {offers.length > 0 && (
+        <Card compact>
         <section
           aria-labelledby="supply-readback-title"
           data-testid="supply-offers-readback"
-          className="card-border flex flex-col gap-3 p-5"
+          className="flex flex-col gap-3"
         >
           <div className="flex flex-col gap-1">
             <h2
@@ -346,6 +350,7 @@ export function DemandRequestsReadback({
             ))}
           </ul>
         </section>
+        </Card>
       )}
     </>
   );
