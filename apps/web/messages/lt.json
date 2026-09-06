@@ -12333,6 +12333,7 @@
       "assignPickWorker": "Kas turėtų jame dirbti?",
       "assignNoWorkers": "Jūsų komandoje kol kas nėra ko priskirti.",
       "assignUnavailable": "Šiuo metu nepavyko nuskaityti jūsų komandos.",
+      "assignEngagementCandidate": "priimto pasiūlymo kandidatas",
       "assignDone": "Priskirta projektui.",
       "assignFailed": "Priskyrimo atlikti nepavyko.",
       "chipEngagements": "Su kuo dirbu",

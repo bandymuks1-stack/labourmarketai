@@ -66,8 +66,11 @@ describe("W7-S2 — touch targets", () => {
 
   it("the floor is applied at the call site, not by resizing the shared Button", () => {
     // Changing the shared `sm` size would resize every small button in the app.
+    // Desktop stays pinned at 36px (px-4 py-2). The `max-md:py-2.5` suffix is
+    // the window-6 mobile tap floor (40px on phones only) — see
+    // lib/guards/mobile-tap-targets.test.ts; it is not a 44px call-site floor.
     const button = read("components/ui/Button.tsx");
-    expect(button).toMatch(/sm:\s*"px-4 py-2 text-sm"/);
+    expect(button).toMatch(/sm:\s*"px-4 py-2 max-md:py-2\.5 text-sm"/);
   });
 });
 
