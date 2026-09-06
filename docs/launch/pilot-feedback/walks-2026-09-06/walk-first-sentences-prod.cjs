@@ -57,22 +57,31 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
     return { c, p, failed };
   };
   const ask = async (p, sentence, maxMs = 45000) => {
+    // The answer is counted in MESSAGES (assistant bubbles + result panels),
+    // not in thread text: a result panel renders outside the thread node and
+    // the thread's innerText is not a stable growth signal (first run of this
+    // walk: the board was on screen while the text capture read "").
     const thread = p.getByTestId("conversation-thread");
-    const before = (await thread.innerText()).length;
+    const assistantBefore = await p.getByTestId("msg-assistant").count();
+    const resultsBefore = await p.getByTestId("msg-result").count();
     const t0 = Date.now();
     await p.getByTestId("composer-input").fill(sentence); await p.getByTestId("composer-input").press("Enter");
-    let text = "";
+    let firstAnswerMs = -1;
     while (Date.now() - t0 < maxMs) {
-      await p.waitForTimeout(1500);
+      await p.waitForTimeout(1000);
       const typing = await p.getByTestId("chat-typing").count();
-      const full = await thread.innerText();
-      if (!typing && full.length > before + 20) { text = full.slice(before); break; }
+      const grew =
+        (await p.getByTestId("msg-assistant").count()) > assistantBefore ||
+        (await p.getByTestId("msg-result").count()) > resultsBefore;
+      if (!typing && grew) { firstAnswerMs = Date.now() - t0; break; }
     }
     // Let a late brief (if any) land, so the chip row we read is the FINAL one.
     await p.waitForTimeout(6000);
     const chips = await thread.locator("button").allInnerTexts().catch(() => []);
-    const finalText = (await thread.innerText()).slice(before);
-    return { text: finalText.replace(/\s+/g, " ").trim(), firstAnswerMs: Date.now() - t0, chips: chips.slice(-6) };
+    const bubbles = await p.getByTestId("msg-assistant").allInnerTexts().catch(() => []);
+    const text = bubbles.slice(assistantBefore).join(" ").replace(/\s+/g, " ").trim();
+    const results = (await p.getByTestId("msg-result").count()) - resultsBefore;
+    return { text, results, firstAnswerMs, chips: chips.slice(-6) };
   };
   const shot = (p, n) => p.screenshot({ path: path.join(OUT, n + ".png"), fullPage: true }).catch(() => {});
 
@@ -95,7 +104,7 @@ const must = (name, ok, detail) => { log({ check: name, ok: !!ok, detail }); if 
     const { c, p, failed } = await open(WORKER, { width: 390, height: 844 });
     const a = await ask(p, "ieškau darbo");
     log({ leg: "worker_find_work", ms: a.firstAnswerMs, text: a.text.slice(0, 200), chips: a.chips });
-    must("'ieškau darbo' answers (board or honest state) within 20 s", a.text.length > 10 && a.firstAnswerMs < 20000, { ms: a.firstAnswerMs });
+    must("'ieškau darbo' answers (board or honest state) within 20 s", (a.text.length > 10 || a.results > 0) && a.firstAnswerMs > 0 && a.firstAnswerMs < 20000, { ms: a.firstAnswerMs, results: a.results });
     must("'ieškau darbo' is not the not-understood menu", !/Galiu padėti su CV, profiliu/i.test(a.text), a.text.slice(0, 160));
     await shot(p, "02-worker-find-work");
 

@@ -115,9 +115,28 @@ What the #1564 walk and the server logs exposed, all measured, all pre-existing:
 * **Lithuania has 0 active public vacancies** (SE 47k+): a Lithuanian worker's first list is
   Swedish by data, not by code. Vacancy sources are an owner/data decision.
 
-### 2.3 Merge / deploy / walk — `fix/cc/first-sentences` — RECORD HERE
+### 2.3 Merge / deploy / walk — #1565 — PROD_PROVEN on `13562988`
 
-_(filled in once served: `walk-first-sentences-prod.cjs` with `EXPECT_BUILD`)_
+**#1565 merged (squash) → `main` `13562988`, served by production** (no Vercel stall).
+`walk-first-sentences-13562988.log` — **PASS 11 / 11**:
+
+| Leg | Observed on `13562988` | Verdict |
+|---|---|---|
+| A/B WORKER "ieškau darbo" | the board answers in **6.4 s** with its honest line ("Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių…") and 20 public listings; no not-understood menu | PROD_PROVEN |
+| A — the hot path itself | `pg_stat_statements` for the NEW statement shape (`… ORDER BY published_at DESC NULLS LAST`): **14 calls, mean 4.7 ms, max 24 ms** (was: 897 calls, mean 2,850 ms, max 7,927 ms); Vercel runtime log since the deploy: **no `vacancy_search_failed` / 57014** (only the 42501 that #1566 addresses) | PROD_PROVEN |
+| C PERSON "reikia dviejų santechnikų" | answer in 1.5 s: "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas." with ITS OWN chips **Rasti paslaugą · Sukurti organizaciją**; no late brief after the person spoke | PROD_PROVEN (closes the #1564 #3 leg too) |
+| D WORKER "kas man trūksta?" | deterministic gap answer: "Nieko netrūksta: turi visus įgūdžius… **Dokumentai: trūksta 4 (Asmens dokumentas (NL, DE), Komandiravimo pranešimas (NL, DE))**" — no name repeated | PROD_PROVEN (closes #1564 #5) |
+| E COMPANY "mano autoservisui reikia 2 mechanikų kitą mėnesį" | the need form opens with role **"Automechanikas"** and headcount **2** (was: role empty) | PROD_PROVEN |
+
+Walk bug fixed in the script (recorded because it produced a false "52 s" on the first
+run): a result panel renders OUTSIDE the thread node and the thread's innerText is not a
+stable growth signal — the answer is counted in MESSAGES (`msg-assistant` / `msg-result`).
+
+**Open draft: #1566** (`fix/cc/notification-events-service-role-grant`, RED, `needs-human-gate`)
+— the ONE GRANT that revives the event-notification layer; migration + rollback + ratchet
+bumps (SPRINT_BASELINE 266); the three ratchet guards pass locally (86 tests). Owner applies via
+MCP `apply_migration`; then the agent re-runs a booking walk and reads back one
+`notification_events` row.
 
 ## 3. Real-user fitness — production walked as people, not as a feature list
 
