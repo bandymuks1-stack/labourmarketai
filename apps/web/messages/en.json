@@ -12647,7 +12647,12 @@
       "invDone": "Accepted — you are now connected.",
       "invAlreadyAnswered": "This invitation is no longer open or was already answered.",
       "invErrorStale": "The state changed — refresh and try again.",
-      "invErrorGeneric": "Could not accept. Try again."
+      "invErrorGeneric": "Could not accept. Try again.",
+      "knownState": {
+        "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
+        "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
+        "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
+      }
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -13391,7 +13396,11 @@
         "accommodation": "Housing",
         "transport": "Transport",
         "tool": "Required tool",
-        "opportunityType": "Opportunity type"
+        "opportunityType": "Opportunity type",
+        "salary": "pay",
+        "language": "language",
+        "employment": "employment type",
+        "radius": "distance"
       },
       "whyFiltered": "You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "I searched your whole board — you did not narrow it.",
@@ -13487,11 +13496,6 @@
       "chipCreateDemand": "Describe a need",
       "scoutingPickDemand": "Pick one and I will show its candidates right here in the workspace.",
       "chipProjectCsv": "Download CSV: {title}",
-      "knownState": {
-        "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
-        "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
-        "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
-      },
       "offerCapacity": {
         "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
         "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
