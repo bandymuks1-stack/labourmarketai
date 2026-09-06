@@ -789,7 +789,11 @@ describe("NO new DB migration in this PR", () => {
     // widened by test_mode, new billing_checkout_operations table (admin
     // SELECT, service-role writes). No data loss.
     // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
-expect(count).toBeLessThanOrEqual(265);
+    // Bumped 265 -> 266 for the notification_events service_role write grant
+    // (20260906060000, RED draft + needs-human-gate, UNAPPLIED until owner
+    // approval): ONE additive GRANT so the emitters stop failing 42501.
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 266.
+expect(count).toBeLessThanOrEqual(266);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
