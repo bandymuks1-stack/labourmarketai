@@ -85,6 +85,11 @@ export function JournalEntrySkillLinks({
   );
   const reviewChips = linkedSelected.filter((s) => needsReview(sourceOf(s.id)));
   const cleanChips = linkedSelected.filter((s) => !needsReview(sourceOf(s.id)));
+  // True ONLY when there is at least one linked chip and every one of them is
+  // backed by a real manager confirmation (worker_skills.verified = true).
+  const allLinkedConfirmed =
+    linkedSelected.length > 0 &&
+    linkedSelected.every((s) => sourceOf(s.id) === "confirmed_by_person");
 
   // Section A (detected from THIS entry's text) — derived, display-only.
   // Detected+declared skills already linked render in the linked list above
@@ -203,7 +208,17 @@ export function JournalEntrySkillLinks({
         {t("signalsHeading")}
       </p>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-meta leading-relaxed text-text-muted">{t("helper")}</p>
+        {/* The helper's default line says the links are "not yet reviewed" —
+            the honest default for a self-asserted evidence link. It must NOT
+            stay on screen once every linked chip is `confirmed_by_person`
+            (a real worker_skills.verified row): measured on production
+            2026-09-06 (walk-living-evidence-loop), a manager-confirmed entry
+            read "✓ chip … Dar neperžiūrėta." The confirmed variant makes no
+            review/verification claim of its own (the chips and the card carry
+            that); it only stops asserting the opposite. */}
+        <p className="text-meta leading-relaxed text-text-muted">
+          {allLinkedConfirmed ? t("helperConfirmedLinks") : t("helper")}
+        </p>
         {status === "error" ? (
           <span className="shrink-0 text-meta text-state-danger" role="alert">
             {t("error")}

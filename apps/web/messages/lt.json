@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Su šiuo įrašu susieti įgūdžiai",
     "helper": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV. Dar neperžiūrėta.",
+    "helperConfirmedLinks": "Pažymėkite įgūdžius, kuriuos rodo šis įrašas — taip pildosi jūsų CV.",
     "saving": "Saugoma…",
     "saved": "Išsaugota",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",

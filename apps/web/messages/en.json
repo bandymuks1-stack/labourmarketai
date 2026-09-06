@@ -1552,6 +1552,7 @@
   "journalSkillLinks": {
     "signalsHeading": "Skills linked to this entry",
     "helper": "Mark the skills this entry shows — it builds your CV. Not reviewed yet.",
+    "helperConfirmedLinks": "Mark the skills this entry shows — it builds your CV.",
     "saving": "Saving…",
     "saved": "Saved",
     "error": "Could not save. Please try again.",
