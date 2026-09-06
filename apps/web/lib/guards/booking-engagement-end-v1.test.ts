@@ -1207,6 +1207,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
       // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
       "20260905200000_billing_safety_invariants_v1.sql",
+      // 2026-09-06: search_public_vacancy_previews_v1 body v2 (RED: SECURITY
+      // DEFINER replace, gate rule g). Same signature/grants; replaces the
+      // count(*) over () that timed out 1,571 times a day for anonymous /jobs.
+      // Marker records the RED classification; owner applies via MCP.
+      "20260906080000_search_public_vacancy_previews_count_v2.sql",
 ]);
   });
 
