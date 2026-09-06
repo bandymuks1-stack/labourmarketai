@@ -253,6 +253,30 @@ verifier, and (b) any route for the 15 existing orphans.
 
 ---
 
+## 7b. Production security posture — checked this window, and it is clean
+
+`get_advisors(security)` on production returned 392 notices. Every one was
+traced; **none is an unreviewed exposure**:
+
+| notice | n | verdict |
+|---|---|---|
+| `authenticated_security_definer_function_executable` | 374 | **By design.** This IS the gated-read architecture — a SECURITY DEFINER function whose body is the authorization. |
+| `anon_security_definer_function_executable` | 9 | **Reviewed.** Exactly the 9 entries in `lib/security/anon-secdef-allowlist.ts`, each carrying a written contract (public caller, authorization, input validation, abuse controls, definer justification, residual risk). No drift on or off the list. |
+| `security_definer_view` (ERROR) | 1 | **Known and intentional.** `worker_absence_scheduling`, guarded by `security-train-a-v1.test.ts` → *"stays SECURITY DEFINER by documented design"*. |
+| `rls_enabled_no_policy` (INFO) | 4 | **Fail-closed.** RLS on with no policy denies everything; all four are internal tables. |
+| `function_search_path_mutable` | 2 | **The only genuinely open hygiene item**, and low severity: `usage_cost_events_forbid_mutation` / `_forbid_truncate` are `SECURITY INVOKER` (verified `prosecdef = false`), so they run as the caller. Worth pinning, not urgent. |
+
+### Two owner actions in the Supabase dashboard — cheap, and launch-relevant (§30)
+
+Neither is reachable from code; both are toggles, and both matter more once
+real people hold accounts:
+
+1. **`auth_otp_long_expiry`** — the email OTP expiry is set to **more than an
+   hour**. Recommended: under an hour.
+2. **`auth_leaked_password_protection`** — **disabled**. Enabling it checks new
+   passwords against HaveIBeenPwned, which is exactly the protection a
+   construction workforce signing up with reused passwords needs.
+
 ## 8. NEXT ACTION for the next agent
 
 **Do the cheap thing first: check the served build.** Two merges landed
