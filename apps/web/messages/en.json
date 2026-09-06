@@ -1773,7 +1773,9 @@
       "agencyPartnership": "Agency partnership"
     },
     "interestWaiting": "{count, plural, one {# person is waiting for a reply} other {# people are waiting for a reply}}",
-    "untitledInquiry": "Untitled inquiry"
+    "untitledInquiry": "Untitled inquiry",
+    "supplyHeading": "Capacity you have offered",
+    "supplyNote": "These are people you told the market you HAVE, not people you asked for. They are stored and visible to you here. Employers cannot search offered capacity yet, so nobody has been contacted about these."
   },
   "journey": {
     "eyebrow": "How it works",

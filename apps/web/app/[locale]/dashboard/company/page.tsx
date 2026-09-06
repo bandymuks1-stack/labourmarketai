@@ -332,6 +332,10 @@ export default async function CompanyDashboardPage({
     },
     heading: tReadback("heading"),
     note: tReadback("note"),
+    // The supply half of the same readback — capacity this organisation has
+    // OFFERED, which is the opposite direction to what it asked for.
+    supplyHeading: tReadback("supplyHeading"),
+    supplyNote: tReadback("supplyNote"),
     workerVisibilityNote: tReadback("workerVisibilityNote"),
     empty: tReadback("empty"),
     created: tReadback("created"),
@@ -865,7 +869,14 @@ export default async function CompanyDashboardPage({
           field={rHomeField}
           needs={
             demandReadback.kind === "ok"
-              ? { kind: "ok", rows: demandReadback.rows }
+              ? {
+                  kind: "ok",
+                  // NEEDS, not every request the organisation owns. An agency's
+                  // own `agency_offer` is capacity it HAS; counting it here made
+                  // the home field answer "what are we missing" with a row that
+                  // said the opposite.
+                  rows: demandReadback.rows.filter((r) => r.direction === "demand"),
+                }
               : demandReadback.kind === "needs-migration"
                 ? { kind: "needs-migration" }
                 : { kind: "error" }

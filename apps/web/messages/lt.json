@@ -1773,7 +1773,9 @@
       "agencyPartnership": "Partnerystės pasiūlymas"
     },
     "interestWaiting": "{count, plural, one {# žmogus laukia atsakymo} few {# žmonės laukia atsakymo} other {# žmonių laukia atsakymo}}",
-    "untitledInquiry": "Užklausa be pavadinimo"
+    "untitledInquiry": "Užklausa be pavadinimo",
+    "supplyHeading": "Jūsų pasiūlyti pajėgumai",
+    "supplyNote": "Čia žmonės, kuriuos rinkai nurodėte TURINTYS, o ne tie, kurių ieškote. Jie išsaugoti ir matomi jums. Darbdaviai kol kas negali ieškoti pasiūlytų pajėgumų, todėl dėl jų dar niekas nesusisiekė."
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",
