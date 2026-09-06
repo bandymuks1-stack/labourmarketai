@@ -6,6 +6,7 @@ import { getEffectiveEntitlements, hasFeature } from "@/lib/billing/effective-en
 import { entitlementAllows } from "@/lib/billing/entitlements-v1";
 import { limitFor } from "@/lib/billing/entitlements";
 import { FREE_ORGANIZATION_PLAN_KEY, OPEN_NEEDS_CONTACT_THRESHOLD, getPlan } from "@/lib/billing/plans";
+import { DEMAND_KIND_OR_FILTER } from "@/lib/demand/market-direction";
 
 /**
  * OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05).
@@ -23,6 +24,24 @@ import { FREE_ORGANIZATION_PLAN_KEY, OPEN_NEEDS_CONTACT_THRESHOLD, getPlan } fro
  * under the caller's RLS. Permissive while billing is disabled (the pilot
  * stays as it is — the same rule the booking gate follows); enforced the
  * moment a Stripe adapter state is active.
+ *
+ * A NEED IS A NEED, AND AN OFFER IS NOT ONE (2026-09-06). The count used to
+ * include every `customer_requests` row of every kind, so an agency's
+ * `agency_offer` — "turime 20 suvirintojų ir ieškome jiems darbo", capacity it
+ * HAS — consumed the employer's active-need allowance. Measured as a hard
+ * block on production the same day: a FREE organisation holding one open need
+ * could not state its capacity at all, and the supply door shipped in #1587
+ * answered the sentence with an upgrade prompt.
+ *
+ * So the count is scoped to the DEMAND direction, through the same closed
+ * allow-list every other surface uses. NOTHING ELSE MOVES: no price, no plan,
+ * no limit, no enforcement rule — only WHICH rows are counted against a
+ * ceiling whose own name is "open needs".
+ *
+ * The consequence is deliberate and stated rather than hidden: offered
+ * capacity is currently UNMETERED. If supply is to be metered it needs its own
+ * limit and its own unit — thirty offered workers are not thirty paid market
+ * intents (owner window 7 §24) — not a borrowed seat in the demand ceiling.
  */
 export const ACTIVE_OPEN_NEED_STATUSES = ["submitted", "in_review", "needs_followup", "approved"] as const;
 
@@ -52,11 +71,14 @@ export async function countActiveOpenNeeds(
   // Rows stamped to the organization, plus the caller's own rows that predate
   // organization stamping (organization_id null) — both are the organization's
   // open needs in practice; neither is counted twice.
+  // Two `or` groups: PostgREST ANDs repeated `or` params, so this reads as
+  // "(mine or the organisation's) AND (a demand kind)".
   const { count, error } = await asAny(supabase)
     .from("customer_requests")
     .select("id", { count: "exact", head: true })
     .in("status", [...ACTIVE_OPEN_NEED_STATUSES])
-    .or(`organization_id.eq.${organizationId},and(profile_id.eq.${profileId},organization_id.is.null)`);
+    .or(`organization_id.eq.${organizationId},and(profile_id.eq.${profileId},organization_id.is.null)`)
+    .or(DEMAND_KIND_OR_FILTER);
   if (error) return null;
   return typeof count === "number" ? count : 0;
 }
