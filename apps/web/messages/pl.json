@@ -4587,7 +4587,19 @@
       "offerCapacity": {
         "needsCompany": "Oferowanie pracowników należy do organizacji, a Ty jesteś teraz w przestrzeni osobistej. Wybierz firmę — od razu zapiszę ofertę.",
         "personalSpace": "Aby oferować ludzi lub zespół, potrzebna jest organizacja, a jeszcze jej nie masz. Możesz założyć firmę albo zaproponować własną usługę."
-      }
+      },
+      "verifierOne": "{organization} może potwierdzić wykonaną przez Ciebie pracę. Twoje wpisy już czekają na potwierdzenie.",
+      "verifierOneNotEnabled": "Twoim pracodawcą jest {organization}, ale nikt tam nie ma jeszcze włączonego potwierdzania pracy. Poproś firmę, aby to włączyła — wtedy będzie mogła potwierdzić.",
+      "verifierChoice": "Twoją pracę mogłaby potwierdzić więcej niż jedna organizacja: {organizations}. Wybierz, do której należy praca — nie będę zgadywać za Ciebie.",
+      "verifierSelf": "{organization} należy do Ciebie, więc nie ma nikogo, kto potwierdziłby Twoją własną pracę. Wpisy pozostają w Twojej historii jako Twój własny zapis.",
+      "verifierNone": "Nie ma jeszcze nikogo, kto mógłby potwierdzić tę pracę — nie jesteś powiązany z organizacją, która mogłaby to zrobić. Praca nie przepada: pozostaje w Twojej historii jako Twój własny, niepotwierdzony dowód. Gdy wskażesz osobę odpowiedzialną lub pracodawcę, będzie można ją potwierdzić.",
+      "verifierUnavailable": "Nie udało się sprawdzić, kto może potwierdzić Twoją pracę.",
+      "verifierUnnamedOrganization": "Twój pracodawca",
+      "whyVerifier": "Pokazuję tylko organizacje, z którymi naprawdę masz aktywną relację.",
+      "whyVerifierChoice": "Kilka organizacji pasuje tak samo, więc nie zgaduję — wybierasz Ty.",
+      "whyVerifierSelf": "Nie możesz potwierdzić własnej pracy — potwierdzenie musi pochodzić od kogoś innego.",
+      "whyVerifierNone": "Żadna z Twoich aktywnych relacji nie wskazuje organizacji mogącej potwierdzić pracę.",
+      "whyVerifierUnavailable": "To znaczy, że nie udało się odczytać danych — a nie że nie ma komu potwierdzić."
     },
     "project": {
       "fieldStatus": "[EN] Status",

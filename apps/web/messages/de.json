@@ -13501,7 +13501,19 @@
       "offerCapacity": {
         "needsCompany": "Menschen anzubieten gehört zu einer Organisation, und du bist gerade in deinem persönlichen Bereich. Wähle das Unternehmen — dann halte ich das Angebot sofort fest.",
         "personalSpace": "Um Menschen oder ein Team anzubieten, braucht es eine Organisation, und du hast noch keine. Du kannst ein Unternehmen anlegen oder deine eigene Leistung anbieten."
-      }
+      },
+      "verifierOne": "{organization} kann die von dir geleistete Arbeit bestätigen. Deine Einträge warten bereits auf die Bestätigung.",
+      "verifierOneNotEnabled": "Dein Arbeitgeber ist {organization}, aber dort kann noch niemand Arbeit bestätigen. Bitte das Unternehmen, das zu aktivieren — dann kann es bestätigen.",
+      "verifierChoice": "Mehr als eine Organisation könnte deine Arbeit bestätigen: {organizations}. Wähle, zu welcher die Arbeit gehört — ich rate nicht für dich.",
+      "verifierSelf": "{organization} gehört dir, es gibt also niemanden über dir, der deine eigene Arbeit bestätigen könnte. Die Einträge bleiben als deine eigene Aufzeichnung in deiner Historie.",
+      "verifierNone": "Es gibt noch niemanden, der diese Arbeit bestätigen kann — du bist mit keiner Organisation verbunden, die das könnte. Die Arbeit geht nicht verloren: Sie bleibt als dein eigener, unbestätigter Nachweis in deiner Historie. Sobald du die verantwortliche Person oder den Arbeitgeber benennst, kann sie bestätigt werden.",
+      "verifierUnavailable": "Ich konnte nicht prüfen, wer deine Arbeit bestätigen kann.",
+      "verifierUnnamedOrganization": "dein Arbeitgeber",
+      "whyVerifier": "Ich zeige nur Organisationen, mit denen du tatsächlich eine aktive Beziehung hast.",
+      "whyVerifierChoice": "Mehrere Organisationen passen gleich gut, deshalb rate ich nicht — du entscheidest.",
+      "whyVerifierSelf": "Du kannst deine eigene Arbeit nicht bestätigen — die Bestätigung muss von jemand anderem kommen.",
+      "whyVerifierNone": "Keine deiner aktiven Beziehungen verweist auf eine Organisation, die Arbeit bestätigen kann.",
+      "whyVerifierUnavailable": "Das heißt, die Daten konnten nicht gelesen werden — nicht, dass niemand bestätigen kann."
     },
     "project": {
       "fieldStatus": "Status",

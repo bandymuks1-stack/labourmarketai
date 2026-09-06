@@ -4587,7 +4587,19 @@
       "offerCapacity": {
         "needsCompany": "Att erbjuda personal hör till en organisation, och du är i ditt personliga utrymme nu. Välj företaget — så registrerar jag erbjudandet direkt.",
         "personalSpace": "Att erbjuda personer eller ett team kräver en organisation, och du har ingen ännu. Du kan skapa ett företag, eller erbjuda din egen tjänst."
-      }
+      },
+      "verifierOne": "{organization} kan bekräfta arbetet du har utfört. Dina poster väntar redan på bekräftelse.",
+      "verifierOneNotEnabled": "Din arbetsgivare är {organization}, men ingen där kan ännu bekräfta arbete. Be företaget aktivera det — då kan de bekräfta.",
+      "verifierChoice": "Fler än en organisation skulle kunna bekräfta ditt arbete: {organizations}. Välj vilken arbetet hör till — jag gissar inte åt dig.",
+      "verifierSelf": "{organization} ägs av dig, så det finns ingen över dig som kan bekräfta ditt eget arbete. Posterna stannar i din historik som din egen notering.",
+      "verifierNone": "Det finns ännu ingen som kan bekräfta det här arbetet — du är inte kopplad till en organisation som kan göra det. Arbetet försvinner inte: det stannar i din historik som ditt eget, obekräftade underlag. När du anger ansvarig person eller arbetsgivare kan det bekräftas.",
+      "verifierUnavailable": "Jag kunde inte kontrollera vem som kan bekräfta ditt arbete.",
+      "verifierUnnamedOrganization": "din arbetsgivare",
+      "whyVerifier": "Jag visar bara organisationer som du faktiskt har en aktiv relation med.",
+      "whyVerifierChoice": "Flera organisationer passar lika bra, så jag gissar inte — du väljer.",
+      "whyVerifierSelf": "Du kan inte bekräfta ditt eget arbete — bekräftelsen måste komma från någon annan.",
+      "whyVerifierNone": "Ingen av dina aktiva relationer pekar på en organisation som kan bekräfta arbete.",
+      "whyVerifierUnavailable": "Det betyder att data inte kunde läsas — inte att ingen kan bekräfta."
     },
     "project": {
       "fieldStatus": "[EN] Status",

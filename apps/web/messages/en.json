@@ -13501,7 +13501,19 @@
       "offerCapacity": {
         "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
         "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
-      }
+      },
+      "verifierOne": "{organization} can confirm the work you have done. Your entries are already waiting for confirmation.",
+      "verifierOneNotEnabled": "Your employer is {organization}, but nobody there is set up to confirm work yet. Ask them to enable it — then they can confirm.",
+      "verifierChoice": "More than one organization could confirm your work: {organizations}. Choose which one the work belongs to — I will not guess for you.",
+      "verifierSelf": "You own {organization}, so there is nobody above you to confirm your own work. The entries stay in your history as your own record.",
+      "verifierNone": "There is nobody to confirm this work yet — you are not linked to an organization that could do it. The work is not lost: it stays in your history as your own submitted, unverified evidence. Once you name the responsible person or employer, it can be confirmed.",
+      "verifierUnavailable": "I could not check who can confirm your work.",
+      "verifierUnnamedOrganization": "your employer",
+      "whyVerifier": "I only show organizations you genuinely hold an active relationship with.",
+      "whyVerifierChoice": "Several organizations fit equally, so I do not guess — you choose.",
+      "whyVerifierSelf": "You cannot confirm your own work — confirmation has to come from someone else.",
+      "whyVerifierNone": "None of your active relationships points to an organization that can confirm work.",
+      "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it."
     },
     "project": {
       "fieldStatus": "Status",

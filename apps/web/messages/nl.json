@@ -13501,7 +13501,19 @@
       "offerCapacity": {
         "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
         "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."
-      }
+      },
+      "verifierOne": "{organization} kan het werk dat je hebt gedaan bevestigen. Je registraties wachten al op bevestiging.",
+      "verifierOneNotEnabled": "Je werkgever is {organization}, maar daar kan nog niemand werk bevestigen. Vraag het bedrijf om dit aan te zetten — dan kunnen ze bevestigen.",
+      "verifierChoice": "Meer dan één organisatie zou je werk kunnen bevestigen: {organizations}. Kies bij welke het werk hoort — ik gok niet voor je.",
+      "verifierSelf": "{organization} is van jou, dus er is niemand boven je om je eigen werk te bevestigen. De registraties blijven in je geschiedenis als je eigen vastlegging.",
+      "verifierNone": "Er is nog niemand die dit werk kan bevestigen — je bent niet verbonden met een organisatie die dat kan. Het werk gaat niet verloren: het blijft in je geschiedenis als je eigen, niet-geverifieerde bewijs. Zodra je de verantwoordelijke persoon of werkgever noemt, kan het bevestigd worden.",
+      "verifierUnavailable": "Ik kon niet controleren wie je werk kan bevestigen.",
+      "verifierUnnamedOrganization": "je werkgever",
+      "whyVerifier": "Ik toon alleen organisaties waarmee je echt een actieve relatie hebt.",
+      "whyVerifierChoice": "Meerdere organisaties passen even goed, dus ik gok niet — jij kiest.",
+      "whyVerifierSelf": "Je kunt je eigen werk niet bevestigen — bevestiging moet van iemand anders komen.",
+      "whyVerifierNone": "Geen van je actieve relaties wijst naar een organisatie die werk kan bevestigen.",
+      "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen."
     },
     "project": {
       "fieldStatus": "Status",

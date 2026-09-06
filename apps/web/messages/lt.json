@@ -13501,7 +13501,19 @@
       "offerCapacity": {
         "needsCompany": "Darbuotojų pasiūlymas priklauso organizacijai, o dabar dirbi asmeninėje erdvėje. Pasirink įmonę — ir iškart užrašysiu pasiūlymą.",
         "personalSpace": "Kad galėtum siūlyti žmones ar komandą, reikia organizacijos — kol kas jos neturi. Gali sukurti įmonę arba pasiūlyti savo paties paslaugą."
-      }
+      },
+      "verifierOne": "Tavo atliktą darbą gali patvirtinti {organization}. Įrašai jau laukia patvirtinimo.",
+      "verifierOneNotEnabled": "Tavo darbdavys yra {organization}, bet ten dar niekam neįjungtas darbų patvirtinimas. Paprašyk įmonės tai įjungti — tada galės patvirtinti.",
+      "verifierChoice": "Tavo darbą galėtų patvirtinti daugiau nei viena organizacija: {organizations}. Pasirink, kuriai priskirti darbą — už tave to nespėsiu.",
+      "verifierSelf": "{organization} priklauso tau, todėl nėra kam patvirtinti tavo paties darbo. Įrašai lieka tavo istorijoje kaip tavo paties pateikti.",
+      "verifierNone": "Kol kas nėra kam patvirtinti šio darbo — nesi susietas su organizacija, kuri galėtų tai padaryti. Darbas nedingsta: lieka tavo istorijoje kaip tavo paties pateiktas, nepatvirtintas įrodymas. Kai nurodysi atsakingą asmenį ar darbdavį, jį bus galima patvirtinti.",
+      "verifierUnavailable": "Nepavyko patikrinti, kas gali patvirtinti tavo darbą.",
+      "verifierUnnamedOrganization": "tavo darbdavys",
+      "whyVerifier": "Rodau tik tas organizacijas, su kuriomis tu realiai turi aktyvų ryšį.",
+      "whyVerifierChoice": "Kelios organizacijos vienodai tinka, todėl nespėlioju — renkiesi tu.",
+      "whyVerifierSelf": "Savo paties darbo patvirtinti negali — patvirtinimas turi ateiti iš kito asmens.",
+      "whyVerifierNone": "Nė vienas tavo aktyvus ryšys nenurodo organizacijos, galinčios patvirtinti darbą.",
+      "whyVerifierUnavailable": "Tai reiškia, kad nepavyko perskaityti duomenų — ne tai, kad patvirtinti nėra kam."
     },
     "project": {
       "fieldStatus": "Būsena",
