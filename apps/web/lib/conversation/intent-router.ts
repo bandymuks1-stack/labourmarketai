@@ -133,6 +133,11 @@ export type ConversationIntent =
   | "project-risk" // "kuris projektas rizikoje?" — every live project's real signals, most first
   | "project-readiness" // "kas trūksta projektui X?" — the people on a live project and what each still needs
   | "confirm-work" // "patvirtink Jono darbą" — the employer confirms a work entry; verified skills follow (§14)
+  // THE WORKER'S SIDE OF THE SAME LOOP. "Kam pateikti atliktą darbą?" is not
+  // a job search and not the employer's confirm command — it is a person
+  // asking WHO CAN VERIFY the work they already did. Before this it scored 1
+  // on `find-work`'s bare `(darbo|darbą)` and was answered with job adverts.
+  | "who-verifies-work" // "kam pateikti atliktą darbą?", "kas gali patvirtinti mano darbą?"
   | "unknown";
 
 export type IntentMatch = {
@@ -1065,6 +1070,35 @@ const RULES: IntentRule[] = [
       // Riga", "verplaats Jan naar project Utrecht", "versetze Jan in das
       // Projekt Berlin", "переведи Ивана на проект Рига", "przenieś Jana do projektu".
       p("(perkel|perkelk|move|verplaats|versetz|перевед|перевес|перемест|przenie|przenies)[^\\s]*\\s+.{0,40}(projekt|project|проект)", 12),
+    ],
+  },
+  {
+    intent: "who-verifies-work",
+    patterns: [
+      // THE WORKER ASKS WHO CAN VERIFY. Owner P0 2026-09-06.
+      //
+      // Measured: "Kam pateikti atliktą darbą?" matched `find-work` on the
+      // bare noun `darbą` (weight 1) and the person was shown job adverts —
+      // they had asked who receives work they had ALREADY done.
+      //
+      // What separates this from every neighbour is the QUESTION WORD plus a
+      // possessive/completed marker, never the noun `darbas` alone:
+      //   · `confirm-work` is the employer's IMPERATIVE ("patvirtink Jono
+      //     darbą") — it names another person and commands; it never asks KAM.
+      //   · `find-work` is about work not yet done; this is about work done.
+      // Weight 12 so the bare noun in `find-work` (1) cannot pull it back.
+
+      // "kam pateikti / kam siųsti / kam rodyti … darbą" — TO WHOM do I submit.
+      p("(kam|kur|who|whom|wem|aan\\s+wie|кому|komu)\\s+.{0,24}?(pateik|pateikt|si[uų]s|siunt|teik|submit|send|hand|einreich|indien|stuur|отправ|пода|prze[sś]l|sk[lł]ada)[^\\s]*\\s*.{0,24}?(darb|work|arbeit|werk|работ|prac|valand|hours|uren|stunden|часов)", 12),
+
+      // "kas gali patvirtinti mano darbą?" — WHO CAN confirm my work.
+      p("(kas|kur|who|wer|wie|кто|kto)\\s+.{0,20}?(gali|can|could|kann|kan|может|mo[zż]e)\\s*.{0,20}?(patvirtin|confirm|verif|best[aä]tig|bevestig|подтверд|potwierd)", 12),
+
+      // "kas patvirtins mano darbą?" — future tense, no modal verb.
+      p("(kas|who|wer|wie|кто|kto)\\s+.{0,20}?(patvirtins|patvirtina|confirms?|verifies|will\\s+confirm|best[aä]tigt|bevestigt|подтвердит|potwierdzi)\\s*.{0,20}?(mano|my|mein|mijn|мо[юей]|m[oó]j|darb|work|arbeit|werk|работ|prac)", 12),
+
+      // "kam reikia patvirtinti mano darbą" / "who needs to confirm my work"
+      p("(kam|who|wer|кому|komu)\\s+.{0,16}?(reikia|needs?|muss|moet|нужно|trzeba)\\s*.{0,16}?(patvirtin|confirm|best[aä]tig|bevestig|подтверд|potwierd)", 12),
     ],
   },
   {

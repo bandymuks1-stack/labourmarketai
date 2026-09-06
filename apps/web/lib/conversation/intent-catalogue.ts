@@ -54,6 +54,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "task-status": "mark a task as done, started or blocked",
   "stage-status": "mark a project stage as done, started or blocked",
   "confirm-work": "the employer confirms a person's work entry (verifies the skills it proves), or sees what awaits confirmation",
+  "who-verifies-work": "who can verify or confirm the work the person has already done, and where to submit it",
   "move-worker": "move a person from one project to another (with the consequences first)",
   "project-risk": "which project is at risk or how the projects are going",
   "project-readiness": "what a project or its team still needs (readiness, documents, gaps)",

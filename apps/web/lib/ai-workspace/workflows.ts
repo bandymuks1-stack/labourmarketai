@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { resolveMyVerifiers } from "@/lib/journal/verifier-read";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
@@ -828,4 +829,101 @@ function matchByName(
     if (hay.includes(name)) out.push({ id: o.id, name: o.name, matchedText: o.name });
   }
   return out;
+}
+
+/**
+ * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — who can verify the work this person already
+ * did (owner P0, 2026-09-06).
+ *
+ * THE DEFECT: this sentence matched `find-work` on the bare noun `darbą` and
+ * the person was shown job adverts. They had not asked for work; they had
+ * asked who RECEIVES work they had already done.
+ *
+ * Window 8 refused to route it somewhere plausible, because guessing a
+ * direction was that window's entire defect class. The product decision was
+ * made instead, and this implements it literally:
+ *
+ *   exactly one valid verifier → name it and say whether it can confirm today
+ *   several                    → present the legitimate choices, choose none
+ *   none                       → say so plainly; the work stays real,
+ *                                self-reported evidence, and the next step is
+ *                                to identify the responsible person
+ *
+ * A VERIFIER IS NEVER INVENTED. Every organization named here is one the
+ * person genuinely holds an active relationship with, read under their own
+ * RLS. `none` is a real answer, not a failure to compute one.
+ *
+ * UNKNOWN IS NOT "NOBODY" (§54). When the contexts cannot be read, this says
+ * it could not check — never "nobody can confirm your work", which would be a
+ * lie produced by an outage.
+ */
+export async function runWhoVerifiesWork(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const answer = await resolveMyVerifiers();
+
+  // The read failed. Say that, and nothing else.
+  if (answer.unavailable) {
+    return blocked(t("verifierUnavailable"), t("whyVerifierUnavailable"));
+  }
+
+  const nameOf = (organizationId: string): string => {
+    const hit = answer.options.find((o) => o.organizationId === organizationId);
+    // An organization with neither display nor legal name is real and common
+    // on production. "your employer" is honest; an empty string is not.
+    return hit?.organizationName?.trim() || t("verifierUnnamedOrganization");
+  };
+  const canConfirm = (organizationId: string): boolean =>
+    answer.options.find((o) => o.organizationId === organizationId)?.confirmationEnabled === true;
+
+  // NO CHIP. W4 (`w4-ai-workspace.test.ts`): a workspace answer never offers a
+  // chip that navigates out of the workspace — the answer IS the answer. The
+  // first draft of this handed over a `link:/dashboard/journal` chip, which is
+  // the old "here is a page, go figure it out" reflex the chat exists to
+  // replace. Every branch below therefore says the whole thing in words,
+  // including the next step.
+
+  switch (answer.resolution.kind) {
+    case "organization": {
+      const id = answer.resolution.organizationId;
+      // Two different truths, never merged: someone can confirm today, or the
+      // employer is known but nobody there is set up to confirm yet.
+      return {
+        kind: "answer",
+        text: canConfirm(id)
+          ? t("verifierOne", { organization: nameOf(id) })
+          : t("verifierOneNotEnabled", { organization: nameOf(id) }),
+        explanation: { why: t("whyVerifier") },
+      };
+    }
+    case "choice": {
+      const names = answer.resolution.organizationIds.map(nameOf).join(" · ");
+      // Several are legitimate, so NOTHING is preselected — the same rule
+      // `resolveEngagementContext` follows when it refuses to guess a context.
+      return {
+        kind: "answer",
+        text: t("verifierChoice", { organizations: names }),
+        explanation: { why: t("whyVerifierChoice") },
+      };
+    }
+    case "self": {
+      return {
+        kind: "answer",
+        text: t("verifierSelf", { organization: nameOf(answer.resolution.organizationId) }),
+        explanation: { why: t("whyVerifierSelf") },
+      };
+    }
+    case "none":
+    default: {
+      // The 15 orphaned records' answer. The work is NOT dismissed: it stays
+      // the person's own recorded evidence, and the honest next step is named.
+      return {
+        kind: "answer",
+        text: t("verifierNone"),
+        explanation: { why: t("whyVerifierNone") },
+      };
+    }
+  }
 }

@@ -4587,7 +4587,19 @@
       "offerCapacity": {
         "needsCompany": "Å tilby folk hører til en organisasjon, og du er i ditt personlige rom nå. Velg selskapet — så registrerer jeg tilbudet med en gang.",
         "personalSpace": "Å tilby folk eller et team krever en organisasjon, og du har ingen ennå. Du kan opprette et selskap, eller tilby din egen tjeneste."
-      }
+      },
+      "verifierOne": "{organization} kan bekrefte arbeidet du har utført. Oppføringene dine venter allerede på bekreftelse.",
+      "verifierOneNotEnabled": "Arbeidsgiveren din er {organization}, men ingen der kan ennå bekrefte arbeid. Be selskapet slå det på — da kan de bekrefte.",
+      "verifierChoice": "Mer enn én organisasjon kunne bekreftet arbeidet ditt: {organizations}. Velg hvilken arbeidet hører til — jeg gjetter ikke for deg.",
+      "verifierSelf": "{organization} eies av deg, så det er ingen over deg som kan bekrefte ditt eget arbeid. Oppføringene blir i historikken din som din egen registrering.",
+      "verifierNone": "Det er ennå ingen som kan bekrefte dette arbeidet — du er ikke knyttet til en organisasjon som kan gjøre det. Arbeidet forsvinner ikke: det blir i historikken din som ditt eget, ubekreftede bevis. Når du oppgir ansvarlig person eller arbeidsgiver, kan det bekreftes.",
+      "verifierUnavailable": "Jeg kunne ikke sjekke hvem som kan bekrefte arbeidet ditt.",
+      "verifierUnnamedOrganization": "arbeidsgiveren din",
+      "whyVerifier": "Jeg viser bare organisasjoner du faktisk har et aktivt forhold til.",
+      "whyVerifierChoice": "Flere organisasjoner passer like godt, så jeg gjetter ikke — du velger.",
+      "whyVerifierSelf": "Du kan ikke bekrefte ditt eget arbeid — bekreftelsen må komme fra noen andre.",
+      "whyVerifierNone": "Ingen av dine aktive forhold peker på en organisasjon som kan bekrefte arbeid.",
+      "whyVerifierUnavailable": "Det betyr at dataene ikke kunne leses — ikke at ingen kan bekrefte."
     },
     "project": {
       "fieldStatus": "[EN] Status",

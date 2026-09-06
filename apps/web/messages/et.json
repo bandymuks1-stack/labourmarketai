@@ -4587,7 +4587,19 @@
       "offerCapacity": {
         "needsCompany": "Inimeste pakkumine kuulub organisatsioonile ja sa oled praegu oma isiklikus ruumis. Vali ettevõte — ja ma panen pakkumise kohe kirja.",
         "personalSpace": "Inimeste või meeskonna pakkumiseks on vaja organisatsiooni, sul seda veel ei ole. Võid luua ettevõtte või pakkuda oma enda teenust."
-      }
+      },
+      "verifierOne": "{organization} saab sinu tehtud töö kinnitada. Sinu sissekanded juba ootavad kinnitust.",
+      "verifierOneNotEnabled": "Sinu tööandja on {organization}, kuid seal ei ole veel kellelgi töö kinnitamine sisse lülitatud. Palu ettevõttel see sisse lülitada — siis saavad nad kinnitada.",
+      "verifierChoice": "Sinu tööd saaks kinnitada rohkem kui üks organisatsioon: {organizations}. Vali, millisele töö kuulub — ma ei oleta sinu eest.",
+      "verifierSelf": "{organization} kuulub sulle, seega pole kedagi, kes sinu enda tööd kinnitaks. Sissekanded jäävad sinu ajalukku sinu enda kirjena.",
+      "verifierNone": "Praegu pole kedagi, kes seda tööd kinnitaks — sa pole seotud organisatsiooniga, kes seda teha saaks. Töö ei kao: see jääb sinu ajalukku sinu enda kinnitamata tõendina. Kui nimetad vastutava isiku või tööandja, saab selle kinnitada.",
+      "verifierUnavailable": "Ma ei saanud kontrollida, kes sinu tööd kinnitada saab.",
+      "verifierUnnamedOrganization": "sinu tööandja",
+      "whyVerifier": "Näitan ainult organisatsioone, kellega sul on tegelikult aktiivne suhe.",
+      "whyVerifierChoice": "Mitu organisatsiooni sobivad võrdselt, seega ma ei oleta — valid sina.",
+      "whyVerifierSelf": "Sa ei saa oma tööd ise kinnitada — kinnitus peab tulema kelleltki teiselt.",
+      "whyVerifierNone": "Ükski sinu aktiivne suhe ei viita organisatsioonile, kes saaks tööd kinnitada.",
+      "whyVerifierUnavailable": "See tähendab, et andmeid ei õnnestunud lugeda — mitte seda, et kinnitajat pole."
     },
     "project": {
       "fieldStatus": "[EN] Status",

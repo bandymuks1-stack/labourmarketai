@@ -63,7 +63,10 @@ describe("the intent registry is the enumerable routing contract", () => {
     // which until now was routed as a personal job search or, worse,
     // inverted into "we need 20 welders"; opens the same canonical intake
     // stamped intent "partner" → kind agency_offer, write).
-    expect(entries.length).toBe(66);
+    // 66 -> 67: `who-verifies-work` (owner P0 2026-09-06). The WORKER's side
+    // of the confirmation loop — "Kam pateikti atliktą darbą?" used to match
+    // `find-work` on the bare noun `darbą` and was answered with job adverts.
+    expect(entries.length).toBe(67);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

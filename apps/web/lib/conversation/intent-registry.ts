@@ -126,6 +126,7 @@ export type IntentHandlerId =
   | "projectRisk"
   | "projectReadiness"
   | "confirmWork"
+  | "whoVerifiesWork"
   | "moveWorker";
 
 export type IntentDescriptor = {
@@ -272,6 +273,11 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "project-risk": { domain: "project", access: "read", handler: "projectRisk", ownTyping: true },
   "project-readiness": { domain: "project", access: "read", handler: "projectReadiness", ownTyping: true },
   "confirm-work": { domain: "journal", access: "write", handler: "confirmWork", ownTyping: true },
+  // The WORKER's side of the confirmation loop (owner P0 2026-09-06). `read`,
+  // not `write`: it answers who could verify the work already recorded and
+  // never confirms anything itself. Its whole reason to exist is that the
+  // honest answer includes "nobody yet" — see work-verification-state.ts.
+  "who-verifies-work": { domain: "journal", access: "read", handler: "whoVerifiesWork", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },

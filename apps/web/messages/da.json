@@ -4587,7 +4587,19 @@
       "offerCapacity": {
         "needsCompany": "At tilbyde folk hører til en organisation, og du er i dit personlige rum lige nu. Vælg virksomheden — så registrerer jeg tilbuddet med det samme.",
         "personalSpace": "At tilbyde folk eller et team kræver en organisation, og du har ingen endnu. Du kan oprette en virksomhed eller tilbyde din egen ydelse."
-      }
+      },
+      "verifierOne": "{organization} kan bekræfte det arbejde, du har udført. Dine registreringer venter allerede på bekræftelse.",
+      "verifierOneNotEnabled": "Din arbejdsgiver er {organization}, men ingen der kan endnu bekræfte arbejde. Bed virksomheden om at slå det til — så kan de bekræfte.",
+      "verifierChoice": "Mere end én organisation kunne bekræfte dit arbejde: {organizations}. Vælg hvilken arbejdet hører til — jeg gætter ikke for dig.",
+      "verifierSelf": "{organization} ejes af dig, så der er ingen over dig til at bekræfte dit eget arbejde. Registreringerne bliver i din historik som din egen optegnelse.",
+      "verifierNone": "Der er endnu ingen, der kan bekræfte dette arbejde — du er ikke tilknyttet en organisation, der kan gøre det. Arbejdet går ikke tabt: det bliver i din historik som dit eget, ubekræftede bevis. Når du angiver den ansvarlige person eller arbejdsgiver, kan det bekræftes.",
+      "verifierUnavailable": "Jeg kunne ikke kontrollere, hvem der kan bekræfte dit arbejde.",
+      "verifierUnnamedOrganization": "din arbejdsgiver",
+      "whyVerifier": "Jeg viser kun organisationer, du reelt har et aktivt forhold til.",
+      "whyVerifierChoice": "Flere organisationer passer lige godt, så jeg gætter ikke — du vælger.",
+      "whyVerifierSelf": "Du kan ikke bekræfte dit eget arbejde — bekræftelsen skal komme fra en anden.",
+      "whyVerifierNone": "Ingen af dine aktive forhold peger på en organisation, der kan bekræfte arbejde.",
+      "whyVerifierUnavailable": "Det betyder, at data ikke kunne læses — ikke at ingen kan bekræfte."
     },
     "project": {
       "fieldStatus": "[EN] Status",

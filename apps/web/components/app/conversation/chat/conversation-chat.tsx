@@ -147,6 +147,7 @@ import {
   runSkillGap,
   runDocumentsReadiness,
   runLearningCompass,
+  runWhoVerifiesWork,
 } from "@/lib/ai-workspace/workflows";
 import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
@@ -5064,6 +5065,14 @@ export function ConversationChat({
             : assistant(labels.learningCompassHint, [
                 { id: "link:/dashboard/profile#learning-compass", label: labels.chipLearningCompass },
               ]),
+        // ── "KAM PATEIKTI ATLIKTĄ DARBĄ?" (owner P0 2026-09-06) ───────────
+        // The WORKER's side of the confirmation loop. This sentence used to
+        // match `find-work` on the bare noun `darbą` and was answered with job
+        // adverts — the person had asked who RECEIVES work they already did.
+        // The workflow names a real verifier, presents a choice when several
+        // are legitimate, and says "nobody yet" plainly when none resolves.
+        // It never invents one.
+        whoVerifiesWork: () => runWorkflow(() => runWhoVerifiesWork()),
         // ── EDUCATION (owner contract 2026-09-04 §15) ─────────────────────
         // The institution's commands by SENTENCE over the ONE dispatcher:
         // "pakviesk studentą" → one question (e-mail) → canonical invitation

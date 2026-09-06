@@ -4587,7 +4587,19 @@
       "offerCapacity": {
         "needsCompany": "Darbinieku piedāvāšana pieder organizācijai, bet tu pašlaik esi savā personīgajā telpā. Izvēlies uzņēmumu — un es uzreiz pierakstīšu piedāvājumu.",
         "personalSpace": "Lai piedāvātu cilvēkus vai komandu, vajadzīga organizācija, un tev tādas vēl nav. Vari izveidot uzņēmumu vai piedāvāt savu pakalpojumu."
-      }
+      },
+      "verifierOne": "{organization} var apstiprināt tavu paveikto darbu. Ieraksti jau gaida apstiprinājumu.",
+      "verifierOneNotEnabled": "Tavs darba devējs ir {organization}, bet tur vēl nevienam nav ieslēgta darbu apstiprināšana. Palūdz uzņēmumam to ieslēgt — tad varēs apstiprināt.",
+      "verifierChoice": "Tavu darbu varētu apstiprināt vairāk nekā viena organizācija: {organizations}. Izvēlies, kurai darbs pieder — es par tevi neminēšu.",
+      "verifierSelf": "{organization} pieder tev, tāpēc nav neviena, kas apstiprinātu tavu paša darbu. Ieraksti paliek tavā vēsturē kā tavs paša pieraksts.",
+      "verifierNone": "Pagaidām nav neviena, kas varētu apstiprināt šo darbu — tu neesi saistīts ar organizāciju, kas to varētu izdarīt. Darbs nepazūd: tas paliek tavā vēsturē kā tavs paša, neapstiprināts pierādījums. Kad norādīsi atbildīgo personu vai darba devēju, to varēs apstiprināt.",
+      "verifierUnavailable": "Neizdevās pārbaudīt, kas var apstiprināt tavu darbu.",
+      "verifierUnnamedOrganization": "tavs darba devējs",
+      "whyVerifier": "Rādu tikai organizācijas, ar kurām tev patiešām ir aktīvas attiecības.",
+      "whyVerifierChoice": "Vairākas organizācijas der vienlīdz labi, tāpēc es neminu — izvēlies tu.",
+      "whyVerifierSelf": "Savu paša darbu apstiprināt nevari — apstiprinājumam jānāk no kāda cita.",
+      "whyVerifierNone": "Neviena no tavām aktīvajām attiecībām nenorāda uz organizāciju, kas var apstiprināt darbu.",
+      "whyVerifierUnavailable": "Tas nozīmē, ka datus neizdevās nolasīt — nevis to, ka nav kam apstiprināt."
     },
     "project": {
       "fieldStatus": "[EN] Status",
