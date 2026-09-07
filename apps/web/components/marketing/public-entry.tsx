@@ -240,7 +240,10 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                every chip stays present, reachable and tabbable (the browser
                scrolls a focused button into view), and the fold is intact.
                From `sm` up it wraps exactly as before. */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+        <div
+          data-testid="entry-example-strip"
+          className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0"
+        >
           <span className="shrink-0 text-meta text-text-muted">{t("examplesLabel")}</span>
           {EXAMPLE_KEYS.map((key) => {
             const example = t(`examples.${key}`);
@@ -253,7 +256,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                   setDraft(example);
                   ask(example);
                 }}
-                className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue sm:whitespace-normal"
+                className="min-h-11 max-w-full shrink-0 rounded-full border border-ink-500 px-3 py-2 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
               >
                 {example}
               </button>

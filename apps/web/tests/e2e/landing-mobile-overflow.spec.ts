@@ -183,8 +183,56 @@ for (const width of MOBILE_WIDTHS) {
        * boxes that were off-screen — chip row, submit, map host, badge, caption
        * — so a future regression reads as itself rather than as a statistic.
        */
+      /**
+       * THE CHIP STRIP IS A SCROLLER BELOW `sm`, SO ITS CONTENT IS NOT ITS BOX.
+       *
+       * The ten example sentences span the graph's ten directions and none may
+       * be dropped, so below `sm` the strip scrolls sideways on one line rather
+       * than stacking 523px tall (2026-09-07, window 11). A chip whose static
+       * box sits past x=320 is then the scroller WORKING, not the page
+       * overflowing — and asserting each chip's resting box says the opposite.
+       *
+       * What actually matters is asserted instead, and it is strictly more:
+       * the strip's own box stays inside the viewport (the page-level
+       * invariant the 2026-08-09 audit was about), AND every chip can be
+       * REACHED — scrolled to and then fully on screen — which the old
+       * per-chip assertion could not express at all. `pageOverflow` above
+       * independently proves the document itself never scrolls sideways.
+       */
+      const strip = page.getByTestId("entry-example-strip");
+      const stripBox = await strip.boundingBox();
+      expect(stripBox, `entry example strip bounding box at ${width}px`).not.toBeNull();
+      expect(
+        stripBox!.x + stripBox!.width,
+        `entry example strip right edge at ${width}px`,
+      ).toBeLessThanOrEqual(width + 0.5);
+      expect(
+        stripBox!.x,
+        `entry example strip left edge at ${width}px`,
+      ).toBeGreaterThanOrEqual(-0.5);
+
+      const chips = await page.getByTestId("entry-example").all();
+      expect(chips.length, `example chips present at ${width}px`).toBeGreaterThan(0);
+      for (const [i, chip] of chips.entries()) {
+        await chip.scrollIntoViewIfNeeded();
+        const box = await chip.boundingBox();
+        expect(box, `example chip ${i} bounding box at ${width}px`).not.toBeNull();
+        expect(
+          box!.x + box!.width,
+          `example chip ${i} unreachable — right edge past the viewport at ${width}px`,
+        ).toBeLessThanOrEqual(width + 0.5);
+        expect(
+          box!.x,
+          `example chip ${i} unreachable — left edge past the viewport at ${width}px`,
+        ).toBeGreaterThanOrEqual(-0.5);
+      }
+      // Scrolling the strip must not have dragged the DOCUMENT sideways.
+      expect(
+        await page.evaluate(() => document.body.scrollWidth),
+        `document scrolls sideways after reaching the last chip at ${width}px`,
+      ).toBeLessThanOrEqual(width);
+
       const named: ReadonlyArray<readonly [string, string]> = [
-        ["entry example chips", "[data-testid='entry-example']"],
         ["entry Suprasti submit", "[data-testid='entry-submit']"],
         ["entry understanding card", "[data-testid='entry-understanding']"],
         // Scoped to the entry: the header carries its own (mobile-hidden)
