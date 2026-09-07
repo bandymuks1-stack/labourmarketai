@@ -122,6 +122,14 @@ export const WORKER_EXECUTORS: {
   },
 
   "worker.save-work-card": async (input) => {
+    // Partial save, the canonical `save_worker_card` rule: an omitted field
+    // (undefined / null → an empty FormData value) KEEPS the recorded value.
+    // The country list is the one multi-value field: `undefined` keeps it,
+    // a non-empty list replaces it whole, and ONLY an explicit `[]` clears
+    // it — carried as its own flag, because an empty list and an omitted
+    // list are the same empty string on the FormData wire (W6, #1579).
+    const clearCountries =
+      input.preferredCountries !== undefined && input.preferredCountries.length === 0;
     const r = await saveWorkerCardAction(
       null,
       fd({
@@ -131,6 +139,7 @@ export const WORKER_EXECUTORS: {
         salary_max: input.salaryMax != null ? String(input.salaryMax) : "",
         location_country: input.locationCountry ?? "",
         preferred_countries: (input.preferredCountries ?? []).join(","),
+        preferred_countries_clear: clearCountries ? "1" : undefined,
       }),
     );
     return r.ok ? { ok: true } : { ok: false, code: r.code, message: r.message };

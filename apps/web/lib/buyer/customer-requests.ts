@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { marketDirection, type MarketDirection } from "@/lib/demand/market-direction";
 
 /**
  * Customer/Buyer demand request service (Stage 2).
@@ -58,6 +59,15 @@ export interface CustomerRequestRow {
   readonly manualReviewNote: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  /**
+   * WHICH SIDE OF THE MARKET this row is. `kind` was always selectable on this
+   * own-rows read and was simply never selected, so every consumer treated a
+   * `"turime 20 suvirintojų"` OFFER as one more thing the organisation had
+   * ASKED FOR. Derived through the one closed-set rule in
+   * `@/lib/demand/market-direction`; `"other"` means an unrecognised kind and
+   * is never rendered as either direction.
+   */
+  readonly direction: MarketDirection;
 }
 
 export type CustomerRequestsListResult =
@@ -112,6 +122,9 @@ function mapRow(
     manualReviewNote: (r.manual_review_note as string | null) ?? null,
     createdAt: r.created_at as string,
     updatedAt: r.updated_at as string,
+    // The stored `kind` is the market DIRECTION, not a label. Resolved once,
+    // here, so no consumer has to know the kind vocabulary.
+    direction: marketDirection((r.kind as string | null) ?? null),
   };
 }
 
@@ -145,7 +158,11 @@ export async function listOwnCustomerRequests(
   let query = asAny(supabase)
     .from("customer_requests")
     .select(
-      "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at",
+      // `kind` carries the market direction. Selecting it adds no privilege —
+      // this read is already `profile_id = auth.uid()` under
+      // `customer_requests_select`; it was simply never asked for, which is
+      // why an agency's OFFER rendered as one of its own needs.
+      "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at, kind",
     )
     .eq("profile_id", user.id);
   if (kinds && kinds.length > 0) query = query.in("kind", kinds);

@@ -108,9 +108,13 @@ export async function saveWorkerCardCore(
 }
 
 /** Uppercased two-letter codes only, max 12 — same rule as the web form's
- *  parser; anything else is dropped, an empty result is null (= keep). */
+ *  parser; anything else is dropped. `null`/absent is null (= keep, the RPC
+ *  coalesces); an EXPLICIT `[]` stays `[]` (= clear, W6) — the one way a
+ *  person can empty the list; a list whose every entry is invalid is null
+ *  (= keep), never a silent clear. */
 export function normalizeCountryList(raw: string[] | null | undefined): string[] | null {
-  if (!raw || raw.length === 0) return null;
+  if (!raw) return null;
+  if (raw.length === 0) return [];
   const codes = raw
     .map((c) => c.trim().toUpperCase())
     .filter((c) => /^[A-Z]{2}$/.test(c))

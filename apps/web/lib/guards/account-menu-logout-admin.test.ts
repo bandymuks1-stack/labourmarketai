@@ -115,7 +115,7 @@ describe("Guard: dashboard layout derives admin via the shared helper", () => {
 
   it("passes profile.active_role + rolesRows into deriveIsAdmin", () => {
     expect(layout).toMatch(
-      /deriveIsAdmin\(\s*\{[\s\S]{0,200}activeRole:\s*profile\.active_role[\s\S]{0,200}profileRoles:\s*rolesRows\s*\?\?\s*\[\]/,
+      /deriveIsAdmin\(\s*\{[\s\S]{0,200}activeRole:\s*profile\??\.active_role\s*(\?\?\s*null)?[\s\S]{0,200}profileRoles:\s*rolesRows\s*\?\?\s*\[\]/,
     );
   });
 });

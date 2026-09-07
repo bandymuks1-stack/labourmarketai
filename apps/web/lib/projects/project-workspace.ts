@@ -9,6 +9,11 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
+import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
+import {
+  composeAssignableWorkers,
+  type AssignableWorker,
+} from "@/lib/projects/assignable-workers";
 import { listProjectStages } from "@/lib/projects/stages";
 import { getProjectStadium } from "@/lib/projects/stadium";
 import { deriveProjectReadinessRatio } from "@/lib/projects/operations-centre-model";
@@ -357,18 +362,34 @@ export async function setProjectStatusAction(
 /**
  * The workers this caller may actually assign, for the chat's assignment step.
  *
- * Deliberately the SAME population the RPC's second gate accepts:
- * `caller_manages_worker` is `company_workers` rows with `status='active'` on a
- * company the caller owns (or the agency equivalent), so the list is read from
- * the canonical `listActiveCompanyWorkers` for the company the caller is acting
- * for. Offering anyone else would be offering a control that the server refuses
- * — the exact "fake control" the product forbids.
+ * Deliberately the SAME population the assignment RPC accepts
+ * — BOTH of its gates, through the SAME two reads the projects page uses:
+ *   - `caller_manages_worker`: the caller's ACTIVE roster, read from the
+ *     canonical `listActiveCompanyWorkers` (bounded: 50 rows);
+ *   - `caller_has_booking_engagement_for_project`: the caller's ACTIVE
+ *     accepted-booking engagements, read from the EXISTING caller-bound RPC
+ *     `list_booking_engagement_workers_v1` via `listBookingEngagementWorkers`
+ *     (SECURITY DEFINER, `companies.profile_id = auth.uid()`, no contact
+ *     fields; one active engagement per (company, worker) pair).
+ * D5 agency-chain walk (2026-09-06): a client who accepted an agency's
+ * candidate could assign that person on the page but not in the chat, because
+ * the chat read the roster alone. Chat and page now reach the same state
+ * through the same reads. The join itself is the pure, guarded
+ * `composeAssignableWorkers` (dedup by profile id; roster wins the label).
  *
- * Contact details are NOT returned: the chat needs a name to show and a profile
- * id to dispatch, and nothing else leaves the server.
+ * Offering anyone else would be offering a control that the server refuses —
+ * the exact "fake control" the product forbids. Contact details are NOT
+ * returned: the chat needs a name to show, a profile id to dispatch and the
+ * source to label honestly, and nothing else leaves the server.
+ *
+ * Degradation stays NAMED: a roster read that fails is `blocked`, never an
+ * empty team; an engagement read that fails is also `blocked` (a half-read
+ * team presented as the whole team is the page/chat split this fixes); an
+ * engagement RPC that is not applied yet simply contributes no candidates,
+ * exactly as the page's picker does.
  */
 export async function loadAssignableWorkersForProject(): Promise<
-  | { kind: "workers"; workers: readonly { profileId: string; name: string }[] }
+  | { kind: "workers"; workers: readonly AssignableWorker[] }
   | { kind: "empty" }
   | { kind: "no-company-context" }
   | { kind: "needs-migration" }
@@ -378,11 +399,15 @@ export async function loadAssignableWorkersForProject(): Promise<
     const ctx = await resolveEmployerCompanyContext();
     if (ctx.kind !== "ok" || !ctx.companyId) return { kind: "no-company-context" };
 
-    const res = await listActiveCompanyWorkers(ctx.companyId);
+    const [res, engagement] = await Promise.all([
+      listActiveCompanyWorkers(ctx.companyId),
+      listBookingEngagementWorkers(),
+    ]);
     if (res.kind === "needs-migration") return { kind: "needs-migration" };
     if (res.kind !== "ok") return { kind: "blocked" };
+    if (engagement.kind === "error") return { kind: "blocked" };
 
-    const workers = res.rows
+    const roster = res.rows
       .filter((r) => r.status === "active" && r.profileId)
       .map((r) => ({
         profileId: r.profileId,
@@ -390,6 +415,7 @@ export async function loadAssignableWorkersForProject(): Promise<
         // caller's OWN roster; the id prefix is the honest last resort.
         name: r.displayName?.trim() || r.profileId.slice(0, 8),
       }));
+    const workers = composeAssignableWorkers(roster, engagement.workers);
     return workers.length > 0 ? { kind: "workers", workers } : { kind: "empty" };
   } catch {
     return { kind: "blocked" };

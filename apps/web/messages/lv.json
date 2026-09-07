@@ -11,7 +11,9 @@
       "agencyPartnership": "Sadarbības piedāvājums"
     },
     "interestWaiting": "{count, plural, zero {# cilvēku gaida atbildi} one {# cilvēks gaida atbildi} other {# cilvēki gaida atbildi}}",
-    "untitledInquiry": "Pieprasījums bez nosaukuma"
+    "untitledInquiry": "Pieprasījums bez nosaukuma",
+    "supplyHeading": "Jūsu piedāvātā kapacitāte",
+    "supplyNote": "Šie ir cilvēki, kurus jūs tirgum norādījāt kā PIEEJAMUS, nevis tie, kurus meklējat. Tie ir saglabāti un redzami jums. Darba devēji pagaidām nevar meklēt piedāvāto kapacitāti, tāpēc par tiem vēl neviens nav sazinājies."
   },
   "journey": {
     "eyebrow": "Kā tas darbojas",
@@ -3463,6 +3465,9 @@
         "moveWorker": {
           "label": "Pārcelt cilvēku uz citu projektu",
           "description": "Piesaista jaunajam projektam un beidz iepriekšējo piesaisti — pēc seku pārskata."
+        },
+        "offerCapacity": {
+          "label": "Pierakstīt jūsu piedāvājumu"
         }
       },
       "education": {
@@ -3560,6 +3565,7 @@
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Pieejams no (GGGG-MM-DD)",
         "demandDescription": "Aprakstiet vajadzību",
         "demandDescriptionPlaceholder": "Piem.: vajadzīgi 4 mūrnieki Kauņā no augusta, darbs 3 mēneši, nepieciešama pieredze",
         "demandRole": "Loma",
@@ -3605,7 +3611,13 @@
         "projectCity": "Pilsēta (nav obligāti)",
         "projectCityPlaceholder": "piem. Roterdama",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Ko piedāvājat",
+        "supplyDescriptionPlaceholder": "Piem., 20 metinātāju ar VCA, brīvi no oktobra, Nīderlande vai Beļģija",
+        "supplyRole": "Kāda profesija",
+        "supplyRolePlaceholder": "Piem., metinātājs",
+        "supplyTeamSize": "Cik cilvēku jums ir",
+        "supplyLocation": "Kur viņi var strādāt"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3763,6 +3775,7 @@
       "assignPickWorker": "[EN] Who should work on it?",
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Ar ko es strādāju",
@@ -3772,6 +3785,23 @@
       "engagementsNoCompany": "Pašlaik tu nerīkojies organizācijas vārdā, tāpēc nav saraksta, ko parādīt.",
       "engagementsUnavailable": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav.",
       "employerBridgeHint": "To vari publicēt kā savs uzņēmums — atvēršu pieprasījuma formu.",
+      "professionStatement": {
+        "understood": "Sapratu: {label}.",
+        "inCatalogue": "Varu to iestatīt kā jūsu profesiju profilā — tad saraksts rādīs jūsu tirgu.",
+        "notInCatalogue": "Šādas profesijas izvēles sarakstā vēl nav — ierakstiet to saviem vārdiem darba pieredzē: tā būs redzama jūsu kartītē un CV.",
+        "pastJob": "Sapratu: {label}. Ierakstīsim to darba pieredzē — nosaukums jau ir aizpildīts, aizpildiet pārējo.",
+        "readBesideSearch": "Sapratu: {label}. Kad profesija būs ierakstīta profilā, saraksts rādīs jūsu tirgu, nevis visus sludinājumus.",
+        "chipSetProfession": "Iestatīt profesiju",
+        "chipRecordExperience": "Ierakstīt darba pieredzi"
+      },
+      "availability": {
+        "understood": "Sapratu — vari strādāt. Ierakstīsim to tavā darba kartē: norādi datumu, no kura.",
+        "understoodFrom": "Sapratu: vari strādāt no {date}. Ierakstīsim to tavā darba kartē — datums jau ir ierakstīts, pārskati un saglabā.",
+        "notInCompany": "Kad vari strādāt — tas ir tavs paša fakts, ne uzņēmuma. Pārslēdzies uz personīgo telpu un pasaki vēlreiz."
+      },
+      "findWorkInCompanyContext": "Darba meklēšana ir tava paša darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personīgo telpu un pajautā vēlreiz.",
+      "findWorkInCompanyWhy": "Darbu meklē cilvēks, ne uzņēmums — atbildu no tavas personīgās telpas.",
+      "journalAskWhatYouDid": "Ko tu šodien darīji? Ieraksti laukā „Ko darīji“ saviem vārdiem — piem. „montēju logus Kauņas objektā no 8 līdz 17“. Pats pieprasījums žurnālā netiek saglabāts.",
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
       "chipServiceRequests": "Atrast pakalpojumu",
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",
@@ -3999,7 +4029,12 @@
       "invDone": "Pieņemts — tagad esat saistīti.",
       "invAlreadyAnswered": "Šis ielūgums vairs nav atvērts vai jau ir atbildēts.",
       "invErrorStale": "Stāvoklis mainījās — atsvaidziniet un mēģiniet vēlreiz.",
-      "invErrorGeneric": "Neizdevās pieņemt. Mēģiniet vēlreiz."
+      "invErrorGeneric": "Neizdevās pieņemt. Mēģiniet vēlreiz.",
+      "knownState": {
+        "usingProfile": "Nekas nav jāaugšupielādē — meklēju pēc tā, kas jau ir tavā profilā.",
+        "usingProfileNarrowed": "Nekas nav jāaugšupielādē — meklēju pēc tava profila un tā, ko jau esi norādījis.",
+        "profileEmpty": "Tavā profilā pagaidām nekā nav, tāpēc pēc tā meklēt nevaru. Pieraksti vienu darbu vai nosauc savu profesiju — un es uzreiz meklēšu."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4024,6 +4059,7 @@
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
       "minutesUnit": "[EN] min",
+      "errorNoWorkContent": "Ierakstam vajadzīgs darbs: ko darīji, kur vai cik ilgi. Uzraksti saviem vārdiem, piem. „montēju logus no 8 līdz 17“.",
       "addedSkillPrefix": "Pievienota prasme",
       "strengthenedSkillPrefix": "Nostiprināta prasme",
       "pendingConfirmPrefix": "Gaida tavu apstiprinājumu",
@@ -4376,6 +4412,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Jūsu kontu šobrīd neizdevās nolasīt, tāpēc mēs neizvēlējāmies telpu jūsu vietā.",
+      "choose": "Izvēlieties telpu vai mēģiniet vēlreiz.",
+      "retry": "Mēģināt vēlreiz"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
@@ -4443,7 +4484,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Iespējas veids"
+        "opportunityType": "Iespējas veids",
+        "salary": "atalgojuma",
+        "language": "valodas",
+        "employment": "nodarbinātības veida",
+        "radius": "attāluma"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4497,6 +4542,12 @@
       "whyDocs": "No jūsu dokumentiem un {countries} prasību saraksta.",
       "whyDocsNoCountry": "No jūsu dokumentiem; bez izvēlētas valsts nav ar ko salīdzināt.",
       "chipWhereToWork": "Kur vēlaties strādāt?",
+      "countryNotChosenListings": "Tur ir publiski sludinājumi no oficiāliem avotiem — pievieno valsti savām vēlmēm, un rādīšu arī tos.",
+      "countryNotChosenNoListings": "Publisku sludinājumu no oficiāliem avotiem tur pašlaik nav.",
+      "countryNotChosenSupplyUnknown": "Publisko sludinājumu avotu pašlaik neizdevās nolasīt — nevaru pateikt, vai tur ir sludinājumi.",
+      "countryNotChosenDoors": "Vari pievienot šo valsti savām valstīm — vajadzības tur redzēsi, tiklīdz tās parādīsies — un pārbaudīt, kādi dokumenti tur vajadzīgi.",
+      "chipAddCountry": "Pievienot valsti manām vēlmēm",
+      "chipDocsGap": "Kādu dokumentu man trūkst?",
       "skillGapNoDemands": "[EN] There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "[EN] Your last {count} journal entries:",
       "journalLine": "[EN] — {day}: {what}",
@@ -4532,7 +4583,23 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Lejupielādēt CSV: {title}"
+      "chipProjectCsv": "Lejupielādēt CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "Darbinieku piedāvāšana pieder organizācijai, bet tu pašlaik esi savā personīgajā telpā. Izvēlies uzņēmumu — un es uzreiz pierakstīšu piedāvājumu.",
+        "personalSpace": "Lai piedāvātu cilvēkus vai komandu, vajadzīga organizācija, un tev tādas vēl nav. Vari izveidot uzņēmumu vai piedāvāt savu pakalpojumu."
+      },
+      "verifierOne": "{organization} var apstiprināt tavu paveikto darbu. Ieraksti jau gaida apstiprinājumu.",
+      "verifierOneNotEnabled": "Tavs darba devējs ir {organization}, bet tur vēl nevienam nav ieslēgta darbu apstiprināšana. Palūdz uzņēmumam to ieslēgt — tad varēs apstiprināt.",
+      "verifierChoice": "Tavu darbu varētu apstiprināt vairāk nekā viena organizācija: {organizations}. Izvēlies, kurai darbs pieder — es par tevi neminēšu.",
+      "verifierSelf": "{organization} pieder tev, tāpēc nav neviena, kas apstiprinātu tavu paša darbu. Ieraksti paliek tavā vēsturē kā tavs paša pieraksts.",
+      "verifierNone": "Pagaidām nav neviena, kas varētu apstiprināt šo darbu — tu neesi saistīts ar organizāciju, kas to varētu izdarīt. Darbs nepazūd: tas paliek tavā vēsturē kā tavs paša, neapstiprināts pierādījums. Kad norādīsi atbildīgo personu vai darba devēju, to varēs apstiprināt.",
+      "verifierUnavailable": "Neizdevās pārbaudīt, kas var apstiprināt tavu darbu.",
+      "verifierUnnamedOrganization": "tavs darba devējs",
+      "whyVerifier": "Rādu tikai organizācijas, ar kurām tev patiešām ir aktīvas attiecības.",
+      "whyVerifierChoice": "Vairākas organizācijas der vienlīdz labi, tāpēc es neminu — izvēlies tu.",
+      "whyVerifierSelf": "Savu paša darbu apstiprināt nevari — apstiprinājumam jānāk no kāda cita.",
+      "whyVerifierNone": "Neviena no tavām aktīvajām attiecībām nenorāda uz organizāciju, kas var apstiprināt darbu.",
+      "whyVerifierUnavailable": "Tas nozīmē, ka datus neizdevās nolasīt — nevis to, ka nav kam apstiprināt."
     },
     "project": {
       "fieldStatus": "[EN] Status",
@@ -4698,7 +4765,10 @@
         "invalid_transition": "[EN] That step is not possible from the current state.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "[EN] Reply from the person this is about",
+      "notPublicYet": "[EN] This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "[EN] Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "[EN] Your experience with {name}",

@@ -257,9 +257,17 @@ describe("fail-closed app side", () => {
     // Reads go through RLS-scoped .from().select(); WRITES are RPC-only —
     // no .insert/.update/.upsert/.delete anywhere in the domain module.
     expect(src).not.toMatch(/\.(insert|update|upsert|delete)\(/);
-    // and the only tables it reads are its own
+    // and the only tables it reads are its own — the two the v1 migration
+    // creates, and nothing else. `experience_responses` joined the set on
+    // 2026-09-07, when the subject's right of reply finally got a READER: the
+    // table shipped with the schema, an RPC and a form, and no surface ever
+    // rendered a reply back to anyone. This assertion is about the domain
+    // BOUNDARY, not about the count, so its own domain's second table belongs
+    // in it — a legacy artifact still would not.
     const tables = [...src.matchAll(/\.from\("([^"]+)"\)/g)].map((m) => m[1]);
-    expect(new Set(tables)).toEqual(new Set(["experience_records"]));
+    expect(new Set(tables)).toEqual(
+      new Set(["experience_records", "experience_responses"]),
+    );
   });
   it("old subjective artifacts stay unmigrated (no backfill anywhere)", () => {
     // The only INSERT into experience_records is the submit RPC's VALUES

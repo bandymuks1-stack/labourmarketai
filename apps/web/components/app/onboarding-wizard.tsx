@@ -62,6 +62,8 @@ export function OnboardingWizard({
   saidSentence = null,
   defaultIntents = [],
   defaultProfessionSlug = null,
+  doorIntents = [],
+  doorWords = null,
 }: {
   defaultName: string;
   /** Safe internal path (e.g. an invite deep link) that onboarding
@@ -75,6 +77,14 @@ export function OnboardingWizard({
   defaultIntents?: readonly FirstRunIntent[];
   /** Registry profession the sentence named (exactly one), else null. */
   defaultProfessionSlug?: string | null;
+  /** The landing DOOR the person came through, when `returnTo` is exactly
+   *  the path the first-run router hands these intents (lib/onboarding/
+   *  landing-handoff, `nextPathForIntents` inverted). A door is a default,
+   *  not an invitation: the person's final choice decides the destination. */
+  doorIntents?: readonly FirstRunIntent[];
+  /** That door's plain words (the landing button the person pressed),
+   *  resolved on the server — shown back, like the sentence. */
+  doorWords?: string | null;
   /** Education-type registry labels, resolved on the SERVER (the
    *  `cvSections.educationTypes` namespace is not part of the auth client
    *  message allowlist, and must not be — the wizard ships ~31 KB, not the
@@ -198,7 +208,13 @@ export function OnboardingWizard({
     }
     // A deep link (invitation) still wins; otherwise a company identity goes
     // straight to the one canonical setup form with the intent's presets.
-    if (returnTo) form.set("next", returnTo);
+    // A landing DOOR is not a deep link (window 6, lanes F + C): its path is
+    // exactly what its pre-ticked card routes to, so the person's final
+    // choice decides — keeping the tick lands on the door's own path, and a
+    // corrected choice ("Ieškau darbo" after the institution door) is not
+    // dragged back to the organisation setup.
+    const cameThroughDoor = doorIntents.length > 0;
+    if (returnTo && !cameThroughDoor) form.set("next", returnTo);
     else {
       const routedNext = nextPathForIntents(intentList);
       if (routedNext) form.set("next", routedNext);
@@ -293,6 +309,24 @@ export function OnboardingWizard({
                   <span className="text-text-muted">{t("rolePicker.saidHint")}</span>
                 </>
               )}
+            </p>
+          )}
+          {/* The landing door, shown back (lanes F + C, 2026-09-06): the
+              person who pressed "Atstovauju mokyklai, kolegijai ar
+              universitetui" is not asked to guess which card is theirs —
+              the card that door routes to is ticked below, with the same
+              hint, and they can change it. */}
+          {!saidSentence && doorWords && defaultIntents.length > 0 && (
+            <p
+              className="text-sm leading-relaxed text-text-secondary"
+              data-testid="onboarding-door"
+              data-preselected="1"
+            >
+              <span className="text-text-muted">{t("rolePicker.doorLabel")}</span>{" "}
+              <span className="font-medium text-text-primary">
+                &bdquo;{doorWords}&ldquo;
+              </span>{" "}
+              <span className="text-text-muted">{t("rolePicker.saidHint")}</span>
             </p>
           )}
         </header>

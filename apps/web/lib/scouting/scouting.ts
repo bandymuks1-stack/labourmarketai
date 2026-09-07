@@ -7,6 +7,7 @@ import {
   resolveEmployerCompanyContext,
   type EmployerContextReason,
 } from "@/lib/company/employer-company-context";
+import { isDemandKind } from "@/lib/demand/market-direction";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
@@ -102,9 +103,14 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
   if (!user) return [];
   if ((await resolveEmployerCompanyContext()).kind !== "ok") return [];
   try {
+    // DIRECTION (SEP-4). Scouting looks for PEOPLE to fill a need. An agency's
+    // own `agency_offer` is a declaration that it HAS people, and it lives in
+    // the same table with the same columns — listing it here offered to scout
+    // candidates for a need that was never recorded. Classified rather than
+    // filtered in the query, so an unrecognised kind is dropped, never guessed.
     const { data } = await asAny(supabase)
       .from("customer_requests")
-      .select("id, title, status, payload, created_at")
+      .select("id, title, status, payload, created_at, kind")
       .eq("profile_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -114,7 +120,8 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
       status: string | null;
       payload: unknown;
       created_at: string;
-    }[]).map((r) => ({
+      kind: string | null;
+    }[]).filter((r) => isDemandKind(r.kind)).map((r) => ({
       id: r.id,
       // RAW stored title. The data layer does not get to pick a display
       // string: an em-dash here would have been an internal placeholder

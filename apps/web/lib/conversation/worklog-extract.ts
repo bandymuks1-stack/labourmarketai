@@ -18,6 +18,8 @@
  * Pure module: no IO. `today` (YYYY-MM-DD) is passed in so the function stays
  * deterministic and unit-testable; the client supplies the real current date.
  */
+import { isExplicitJournalRequest } from "./intent-router";
+import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 export type WorkLogParse = {
   /** ISO date (YYYY-MM-DD) — parsed or defaulted to `today`. */
@@ -192,4 +194,59 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
     notes: raw,
     hasSignal,
   };
+}
+
+/**
+ * IS THIS SENTENCE THE WORK, OR A REQUEST ABOUT THE JOURNAL?
+ *
+ * Production 2026-09-06 (real-person join walk): "Užpildyk darbo žurnalą"
+ * opened the journal flow — correctly, it is an explicit request — but the
+ * flow carried the REQUEST SENTENCE as the entry's evidence, and two taps
+ * later `journal_entries.original_text = 'Užpildyk darbo žurnalą'`. The
+ * request became the record.
+ *
+ * A draft may persist only when the sentence carries WORK CONTENT — at
+ * least one of:
+ *   - a time span or a worked duration ("nuo 8 iki 17", "8 valandas");
+ *   - a place ("objekte Kaune");
+ *   - a recognised activity (the canonical skill recogniser reads it — the
+ *     same one the journal pipeline uses — or a past-tense work verb in the
+ *     person's own language: "montavau", "dirbau", "installed", "работал",
+ *     "gearbeitet").
+ * Otherwise the flow ASKS what was done. A sentence that names the journal
+ * and carries nothing else is a META REQUEST and is refused at the schema
+ * floor too, so no path can save it.
+ *
+ * `today` does not matter here (a date alone is not work content), so the
+ * function takes none and stays trivially pure.
+ */
+export type JournalDraftReadiness = "ok" | "meta-request" | "no-content";
+
+// Past-tense work verbs. LT: the explicit "dirbau/dirbome" plus the regular
+// 1st-person past endings (-avau, -ojau, -ėjau/-ejau, -iau, -inau, -ovau,
+// -uvau, -davau and their plurals) — NEVER a bare "-au", which is also the
+// present tense ("taisau", "valau", "pildau"). EN: a regular "-ed" verb. RU: the
+// -л/-ла/-ли past, with the journal word itself ("журнал" ends in "-ал")
+// excluded. DE/NL: a "ge…t / ge…en" participle.
+const PAST_WORK_VERB_RE =
+  /(?<![\p{L}])(?:dirbau|dirbome|dirbom|worked|работал|работала|работали|gewerkt|gearbeitet)(?![\p{L}])|(?<![\p{L}])[\p{L}]{2,}(?:avau|ojau|ėjau|ejau|iau|inau|ovau|uvau|davau|avome|ojome|ėjome|ejome|iome|inome|ovome|uvome)(?![\p{L}])|(?<![\p{L}])[a-z]{3,}ed(?![\p{L}])|(?<![\p{L}])(?!журнал)[\p{L}]{3,}(?:ал|ала|али|ил|ила|или|ял|яла|яли)(?![\p{L}])|(?<![\p{L}])ge[\p{L}]{3,}(?:t|en)(?![\p{L}])/iu;
+
+export function journalDraftReadiness(text: string): JournalDraftReadiness {
+  const raw = (text ?? "").trim();
+  if (!raw) return "no-content";
+  const parse = extractWorkLog(raw, "2000-01-01");
+  const hasContent =
+    parse.start !== null ||
+    parse.workedMinutes !== null ||
+    parse.site !== null ||
+    PAST_WORK_VERB_RE.test(raw) ||
+    recognizeSkills(raw, 1).length > 0;
+  if (hasContent) return "ok";
+  return isExplicitJournalRequest(raw) ? "meta-request" : "no-content";
+}
+
+/** The server-floor form of the rule: a sentence that only ASKS for the
+ *  journal is never evidence. Used by the log-work input schema. */
+export function isJournalMetaRequest(text: string): boolean {
+  return journalDraftReadiness(text) === "meta-request";
 }

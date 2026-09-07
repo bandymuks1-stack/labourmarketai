@@ -7,33 +7,60 @@
 -- acknowledges the `grant-or-revoke` finding the static gate emits for this
 -- file — it is an acknowledgement, not an auto-merge pass.
 --
--- 20260906060000 — notification_events: the service-role write grant that the
--- emitters have needed since 20260810070000. ADDITIVE; NO DATA LOSS; NO RLS
--- CHANGE; nothing for anon/authenticated changes.
+-- 20260906060000 — the notification spine's SERVICE-ROLE grants: the two the
+-- emitters and the email dispatcher have needed since 20260810070000 /
+-- 20260823160000. ADDITIVE; NO DATA LOSS; NO RLS CHANGE; nothing for anon or
+-- authenticated changes.
 --
--- WHY (measured on production 2026-09-06, window 5):
---   `information_schema.role_table_grants` for public.notification_events lists
---   ONLY `authenticated SELECT` (+ the column-level UPDATE(read_at) from v1).
+-- WHY (measured on production 2026-09-06, re-measured 2026-09-07):
+--   `has_table_privilege('service_role','public.notification_events','INSERT')`
+--   → false. `has_table_privilege('service_role',
+--   'public.notification_preferences','SELECT')` → false.
+--
 --   Every emitter in lib/notifications/event-emitters.ts writes through the
 --   ADMIN client (service_role) → INSERT fails 42501 → the fire-and-forget
 --   wrapper logs `[notifications] emit failed unexpectedly (weekly_digest): 42501`
---   (Vercel runtime log 2026-09-06 05:10 UTC). The table holds 2 rows, the last
---   from 2026-07-05. In-app Attention (I1/I3) reads other tables and is
---   unaffected; the notification bell / channel preferences have silently
---   emitted nothing for two months. The v1 migration revoked all from
---   public/anon/authenticated and granted the reader back, but never granted
---   the writer — the default-privilege posture of this project (narrow grants,
---   revoked defaults) means service_role receives nothing implicitly.
+--   (Vercel runtime log 2026-09-06 05:10 UTC; 40 identical lines in 12 h).
+--   notification_events holds 2 rows, the last from 2026-07-05, and NO
+--   weekly_digest event has ever been written.
 --
--- WHAT: the minimum the emitters and the reconcile/mark-processed paths use —
---   SELECT (duplicate detection / read-back), INSERT (emit), UPDATE (delivery
---   bookkeeping). No DELETE: the table is append-only evidence (doctrine §3).
+--   Both v1 migrations state the intent this file restores. 20260810070000 §RLS
+--   DECISION: "service_role: full (the only writer; emitters run server-side
+--   after the domain write succeeded)". 20260823160000: "The dispatcher reads
+--   consent under service_role (RLS-bypassing by role); no separate grant rows
+--   are needed for service_role in Supabase". The first never issued the grant
+--   it declared; the second's assumption is false in THIS project, whose
+--   posture is narrow grants over revoked defaults (`revoke all ... from
+--   public` in v1 removes the inherited privilege service_role would otherwise
+--   have held). So this is a defect repair against the migrations' own stated
+--   decision, not a widening of it.
 --
--- Production preflight (read-only): notification_events 2 rows; policies
---   notification_events_select_own / notification_events_mark_read_own
---   untouched (service_role bypasses RLS by design, as for every admin write).
+-- WHY notification_preferences MATTERS SEPARATELY, and why leaving it out
+-- would be worse than leaving both out: `readPrefRowsFailOpen` FAILS OPEN. A
+-- denied read returns no rows, so `resolveChannelEnabled` falls back to the
+-- channel defaults — in_app true, email FALSE. Granting only the events table
+-- would therefore make the bell work while silently discarding every stored
+-- email opt-in: a person who ticked the box would get nothing, and no surface
+-- would say so. Consent that cannot be read is consent that cannot be
+-- honoured.
+--
+-- WHAT (the minimum each caller actually uses):
+--   notification_events       SELECT (duplicate detection / read-back),
+--                             INSERT (emit), UPDATE (delivery bookkeeping).
+--                             No DELETE: append-only evidence (doctrine §3).
+--   notification_preferences  SELECT only. The service role READS consent; it
+--                             never writes it. The owner of a preference is
+--                             the only writer, through their own RLS-scoped
+--                             client (the `authenticated` grants v1 issued).
+--
+-- Production preflight (read-only): notification_events 2 rows;
+--   notification_preferences 0 rows; policies notification_events_select_own /
+--   notification_events_mark_read_own / the four notification_preferences
+--   own-row policies untouched (service_role bypasses RLS by design, as for
+--   every admin write).
 --
 -- ROLLBACK: supabase/rollbacks/20260906060000_notification_events_service_role_grant.down.sql
---   (revokes exactly these three privileges; nothing else changes).
+--   (revokes exactly these privileges; nothing else changes).
 
 grant select, insert, update on public.notification_events to service_role;
+grant select on public.notification_preferences to service_role;

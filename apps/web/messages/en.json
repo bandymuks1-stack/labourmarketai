@@ -1773,7 +1773,9 @@
       "agencyPartnership": "Agency partnership"
     },
     "interestWaiting": "{count, plural, one {# person is waiting for a reply} other {# people are waiting for a reply}}",
-    "untitledInquiry": "Untitled inquiry"
+    "untitledInquiry": "Untitled inquiry",
+    "supplyHeading": "Capacity you have offered",
+    "supplyNote": "These are people you told the market you HAVE, not people you asked for. They are stored and visible to you here. Employers cannot search offered capacity yet, so nobody has been contacted about these."
   },
   "journey": {
     "eyebrow": "How it works",
@@ -3903,6 +3905,7 @@
         "intentNote": "Pick everything that applies — one account carries all of it. A person and an organisation are the two spaces; what you do inside them is up to you.",
         "saidLabel": "You wrote:",
         "saidHint": "We ticked what fits. Change it if needed.",
+        "doorLabel": "You chose:",
         "intent": {
           "work": {
             "title": "I'm looking for work",
@@ -4376,7 +4379,8 @@
         "admin": "Admin",
         "planning": "Calendar",
         "network": "Network",
-        "playerCard": "My card"
+        "playerCard": "My card",
+        "adminPlatform": "Platform administration"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -4578,6 +4582,10 @@
         "open": "Open in LabourMarket.ai:",
         "manage": "Manage your notification settings:"
       }
+    },
+    "carriedIntent": {
+      "label": "Continuing",
+      "hint": "You come straight back to this after signing in — the sentence travels with you."
     }
   },
   "shared": {
@@ -12005,6 +12013,9 @@
         "moveWorker": {
           "label": "Move a person to another project",
           "description": "Assigns to the new project and ends the previous assignment — after the what-if."
+        },
+        "offerCapacity": {
+          "label": "Record what you are offering"
         }
       },
       "education": {
@@ -12103,6 +12114,7 @@
         "needsAccommodation": "Need accommodation?",
         "availabilityNote": "Note (optional)",
         "availabilityNotePlaceholder": "e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Available from (YYYY-MM-DD)",
         "demandDescription": "Describe the inquiry",
         "demandDescriptionPlaceholder": "E.g.: need 4 bricklayers in Kaunas from August, 3-month job, experience required",
         "demandRole": "Role",
@@ -12149,7 +12161,13 @@
         "projectCity": "City (optional)",
         "projectCityPlaceholder": "e.g. Rotterdam",
         "rosterWorker": "Roster worker",
-        "proposalNotePlaceholder": "E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "What you are offering",
+        "supplyDescriptionPlaceholder": "E.g. 20 welders with VCA, available from October, Netherlands or Belgium",
+        "supplyRole": "What profession",
+        "supplyRolePlaceholder": "E.g. welder",
+        "supplyTeamSize": "How many people you have",
+        "supplyLocation": "Where they can work"
       },
       "availability": {
         "available": "Available",
@@ -12302,7 +12320,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# client has} other {# clients have}} not confirmed the connection yet.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# learner invitation is} other {# learner invitations are}} still unaccepted.",
       "briefDocumentsExpiring": "{count, plural, one {# document is expiring} other {# documents are expiring}}.",
-      "briefDocumentsMissing": "{count, plural, one {# document is missing for your countries} other {# documents are missing for your countries}}.",
+      "briefDocumentsMissing": "{count, plural, one {Your stated countries still need # document} other {Your stated countries still need # documents}}: {list}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# candidate is waiting for your answer} other {# candidates are waiting for your answer}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agency offer is waiting for your decision} other {# agency offers are waiting for your decision}}.",
       "briefInterestContacted": "{count, plural, one {# company wants to get in touch about your interest} other {# companies want to get in touch about your interest}}.",
@@ -12332,6 +12350,7 @@
       "assignPickWorker": "Who should work on it?",
       "assignNoWorkers": "There is nobody on your team to assign yet.",
       "assignUnavailable": "I could not read your team right now.",
+      "assignEngagementCandidate": "accepted-offer candidate",
       "assignDone": "Assigned to the project.",
       "assignFailed": "The assignment could not be made.",
       "chipEngagements": "Who I work with",
@@ -12383,6 +12402,23 @@
       "marketMapChip": "Market map",
       "activityChip": "Activity",
       "employerBridgeHint": "You can post this as your company — I will open the need form.",
+      "professionStatement": {
+        "understood": "Understood: {label}.",
+        "inCatalogue": "I can set that as your profession in your profile — then the list shows your market.",
+        "notInCatalogue": "That profession is not in the selectable list yet — record it in your work history in your own words: it shows on your card and CV.",
+        "pastJob": "Understood: {label}. Let's record it in your work history — the title is already filled in; complete the rest.",
+        "readBesideSearch": "Understood: {label}. Once the profession is in your profile, the list shows your market instead of every listing.",
+        "chipSetProfession": "Set profession",
+        "chipRecordExperience": "Record work history"
+      },
+      "availability": {
+        "understood": "Understood — you can work. Let's put it on your work card: set the date you can start from.",
+        "understoodFrom": "Understood: you can work from {date}. Let's put it on your work card — the date is already in, review and save.",
+        "notInCompany": "When you can work is your own fact, not the company's. Switch to your personal space and say it again."
+      },
+      "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
+      "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
+      "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
       "chipServiceRequests": "Find a service",
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
@@ -12481,6 +12517,8 @@
       "documentAddUnavailable": "The document catalogue could not be loaded right now — record it in the documents centre.",
       "cvExportHint": "Your verified CV — one sheet of what the system really knows. Open it and print to PDF.",
       "chipCvSheet": "Open the CV sheet",
+      "cvViewHint": "Here is your CV — what the system knows about you today. Open it and look; nothing is uploaded and nothing is changed.",
+      "cvChooseAsk": "What would you like to do with your CV? I can show it, take a new file, or open your profile — the CV is built from it.",
       "taskCreateIntro": "A new task: what must be done, on which project and by when.",
       "taskCreatedNext": "Task recorded. The project pulse shows it as open; assign a person on the tasks screen.",
       "capacityIntro": "Team {from} – {to} ({count} people):",
@@ -12618,7 +12656,12 @@
       "invDone": "Accepted — you are now connected.",
       "invAlreadyAnswered": "This invitation is no longer open or was already answered.",
       "invErrorStale": "The state changed — refresh and try again.",
-      "invErrorGeneric": "Could not accept. Try again."
+      "invErrorGeneric": "Could not accept. Try again.",
+      "knownState": {
+        "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
+        "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
+        "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
+      }
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -12643,6 +12686,7 @@
       "saved": "Entry saved to your work journal.",
       "errorGeneric": "Couldn't save. Please try again.",
       "minutesUnit": "min",
+      "errorNoWorkContent": "An entry needs the work: what you did, where, or for how long. Write it in your own words, e.g. “installed windows from 8 to 17”.",
       "relationship": {
         "employee": "Employee",
         "freelancer": "Freelancer",
@@ -13225,7 +13269,11 @@
         "internship": "Where can I do an internship?",
         "professional": "I am an accountant looking for work in Vilnius",
         "needService": "I need someone to fix the roof",
-        "offerService": "I offer bookkeeping services"
+        "offerService": "I offer bookkeeping services",
+        "offerCapacity": "We have 7 electricians free from Monday",
+        "brigade": "I am looking for a crew for the site",
+        "logWork": "Today I worked 8 hours at the Green Tower site",
+        "verifyWork": "Who could confirm my experience?"
       },
       "understoodLabel": "Understood",
       "understood": {
@@ -13240,7 +13288,7 @@
         "projects": "You want to see your company's projects.",
         "company-overview": "You want to see what is happening in your company — people, projects, needs.",
         "create-organization": "You want to register a company or an organisation.",
-        "cv": "You want to work with your CV — upload it or look at it.",
+        "cv": "You want to upload a CV file. We will read it and show what we found before saving anything.",
         "log-work": "You want to record work you did in the work journal.",
         "skill-gap": "You want to know which skills you are missing.",
         "documents": "You are talking about documents and certificates — what is valid, what expires, what is missing.",
@@ -13253,7 +13301,11 @@
         "propose-candidate": "You want to propose a candidate to a client — you work as an agency.",
         "client-demand": "You want to see what your clients need.",
         "invite-student": "You represent an education institution and want to invite a student.",
-        "programmes": "You represent an education institution — programmes, groups, students."
+        "programmes": "You represent an education institution — programmes, groups, students.",
+        "offer-capacity": "You have people or capacity free. We will record the offer so those who need it can find it.",
+        "who-verifies-work": "You are asking who can confirm work you have already done. We will show who to send it to.",
+        "cv-view": "You want to see your CV — the one the system already holds. Nothing is uploaded or changed.",
+        "cv-choose": "You mentioned your CV. We will ask whether to show it, take a new file, or add to your profile."
       },
       "family": {
         "work": "You are talking about your work and professional path.",
@@ -13289,6 +13341,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Your account could not be read just now, so no space was chosen for you.",
+      "choose": "Choose a space or try again.",
+      "retry": "Try again"
+    },
     "panel": {
       "regionLabel": "Context",
       "workTitle": "Your work right now",
@@ -13356,7 +13413,11 @@
         "accommodation": "Housing",
         "transport": "Transport",
         "tool": "Required tool",
-        "opportunityType": "Opportunity type"
+        "opportunityType": "Opportunity type",
+        "salary": "pay",
+        "language": "language",
+        "employment": "employment type",
+        "radius": "distance"
       },
       "whyFiltered": "You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "I searched your whole board — you did not narrow it.",
@@ -13410,6 +13471,12 @@
       "whyDocs": "From your documents and the requirements list for {countries}.",
       "whyDocsNoCountry": "From your documents; without a chosen country there is nothing to compare against.",
       "chipWhereToWork": "Where do you want to work?",
+      "countryNotChosenListings": "There are public ads from official sources there — add the country to your preferences and I will show them too.",
+      "countryNotChosenNoListings": "There are no public ads from official sources there right now.",
+      "countryNotChosenSupplyUnknown": "The public-ads source could not be read right now — I can't say whether ads exist there.",
+      "countryNotChosenDoors": "You can add this country to your countries — you will see needs there as they appear — and check which documents it requires.",
+      "chipAddCountry": "Add the country to my preferences",
+      "chipDocsGap": "Which documents am I missing?",
       "skillGapNoDemands": "There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "Your last {count} journal entries:",
       "journalLine": "— {day}: {what}",
@@ -13445,7 +13512,23 @@
       "chipLogWork": "Log work",
       "chipCreateDemand": "Describe a need",
       "scoutingPickDemand": "Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Download CSV: {title}"
+      "chipProjectCsv": "Download CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "Offering people belongs to an organisation, and you are in your personal space right now. Choose the company and I will record the offer.",
+        "personalSpace": "Offering people or a team needs an organisation, and you do not have one yet. You can create a company, or offer your own service instead."
+      },
+      "verifierOne": "{organization} can confirm the work you have done. Your entries are already waiting for confirmation.",
+      "verifierOneNotEnabled": "Your employer is {organization}, but nobody there is set up to confirm work yet. Ask them to enable it — then they can confirm.",
+      "verifierChoice": "More than one organization could confirm your work: {organizations}. Choose which one the work belongs to — I will not guess for you.",
+      "verifierSelf": "You own {organization}, so there is nobody above you to confirm your own work. The entries stay in your history as your own record.",
+      "verifierNone": "There is nobody to confirm this work yet — you are not linked to an organization that could do it. The work is not lost: it stays in your history as your own submitted, unverified evidence. Once you name the responsible person or employer, it can be confirmed.",
+      "verifierUnavailable": "I could not check who can confirm your work.",
+      "verifierUnnamedOrganization": "your employer",
+      "whyVerifier": "I only show organizations you genuinely hold an active relationship with.",
+      "whyVerifierChoice": "Several organizations fit equally, so I do not guess — you choose.",
+      "whyVerifierSelf": "You cannot confirm your own work — confirmation has to come from someone else.",
+      "whyVerifierNone": "None of your active relationships points to an organization that can confirm work.",
+      "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it."
     },
     "project": {
       "fieldStatus": "Status",
@@ -13623,7 +13706,10 @@
         "invalid_transition": "That step is not possible from the current state.",
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "Reply from the person this is about",
+      "notPublicYet": "This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "Your experience with {name}",
@@ -13694,7 +13780,7 @@
       "label": "Work readiness",
       "known": "Already set:",
       "next": "Most important now:",
-      "complete": "Everything important is already set.",
+      "complete": "All {count} areas of your work card are stated. Documents and waiting requests are counted separately.",
       "unavailable": "Work readiness could not be shown right now. The conversation works as always."
     },
     "action": {

@@ -111,6 +111,16 @@ describe("one canonical path, honest surfaces (source pins)", () => {
     expect(G).toContain('hasFeature("company_create_needs")');
     expect(G).toMatch(/\.from\("customer_requests"\)/);
     expect(G).toMatch(/\.in\("status", \[\.\.\.ACTIVE_OPEN_NEED_STATUSES\]\)/);
+    // A NEED IS A NEED. The ceiling is "open needs", so the count is scoped to
+    // the DEMAND direction through the shared closed allow-list — an agency's
+    // `agency_offer` is capacity it HAS, and it used to consume the employer's
+    // allowance (measured as a hard production block, 2026-09-06: a FREE
+    // organisation with one open need could not state its capacity at all).
+    // The filter must come from `market-direction`, never be re-listed here,
+    // so the gate and every read surface can never disagree about a kind.
+    expect(G).toMatch(/\.or\(DEMAND_KIND_OR_FILTER\)/);
+    expect(G).toMatch(/from "@\/lib\/demand\/market-direction"/);
+    expect(G).not.toMatch(/kind\.eq\.company_request/);
     expect(G).not.toMatch(/createAdminClient|service_role|\.insert\(|\.update\(/);
     expect(read("lib/billing/readiness.ts")).toMatch(/company_create_needs: \{[\s\S]*?kind: "server_gate",[\s\S]*?site: "lib\/billing\/open-needs-gate\.ts"/);
   });

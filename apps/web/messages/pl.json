@@ -11,7 +11,9 @@
       "agencyPartnership": "Oferta współpracy"
     },
     "interestWaiting": "{count, plural, one {# osoba czeka na odpowiedź} few {# osoby czekają na odpowiedź} many {# osób czeka na odpowiedź} other {# osoby czeka na odpowiedź}}",
-    "untitledInquiry": "Zapytanie bez nazwy"
+    "untitledInquiry": "Zapytanie bez nazwy",
+    "supplyHeading": "Zaoferowane przez Ciebie zasoby",
+    "supplyNote": "To osoby, o których powiedziałeś rynkowi, że je MASZ, a nie te, których szukasz. Są zapisane i widoczne dla Ciebie. Pracodawcy nie mogą jeszcze wyszukiwać oferowanych zasobów, więc nikt się w tej sprawie nie skontaktował."
   },
   "journey": {
     "eyebrow": "Jak to działa",
@@ -3463,6 +3465,9 @@
         "moveWorker": {
           "label": "Przenieś osobę do innego projektu",
           "description": "Przypisuje do nowego projektu i kończy poprzednie przypisanie — po podglądzie skutków."
+        },
+        "offerCapacity": {
+          "label": "Zapisz swoją ofertę"
         }
       },
       "education": {
@@ -3560,6 +3565,7 @@
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Dostępny od (RRRR-MM-DD)",
         "demandDescription": "Opisz zapotrzebowanie",
         "demandDescriptionPlaceholder": "Np.: potrzebuję 4 murarzy w Kownie od sierpnia, praca na 3 miesiące, wymagane doświadczenie",
         "demandRole": "Rola",
@@ -3605,7 +3611,13 @@
         "projectCity": "Miasto (opcjonalnie)",
         "projectCityPlaceholder": "np. Rotterdam",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Co oferujecie",
+        "supplyDescriptionPlaceholder": "Np. 20 spawaczy z VCA, dostępni od października, Holandia lub Belgia",
+        "supplyRole": "Jaki zawód",
+        "supplyRolePlaceholder": "Np. spawacz",
+        "supplyTeamSize": "Ilu macie ludzi",
+        "supplyLocation": "Gdzie mogą pracować"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3763,6 +3775,7 @@
       "assignPickWorker": "[EN] Who should work on it?",
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Z kim pracuję",
@@ -3772,6 +3785,23 @@
       "engagementsNoCompany": "Nie działasz teraz w imieniu organizacji, więc nie ma listy do pokazania.",
       "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
       "employerBridgeHint": "Możesz opublikować to jako swoja firma — otworzę formularz zapotrzebowania.",
+      "professionStatement": {
+        "understood": "Rozumiem: {label}.",
+        "inCatalogue": "Mogę ustawić to jako Twój zawód w profilu — wtedy lista pokaże Twój rynek.",
+        "notInCatalogue": "Tego zawodu nie ma jeszcze na liście wyboru — wpisz go własnymi słowami w doświadczeniu zawodowym: będzie widoczny na Twojej karcie i w CV.",
+        "pastJob": "Rozumiem: {label}. Zapiszmy to w doświadczeniu zawodowym — nazwa jest już wpisana, uzupełnij resztę.",
+        "readBesideSearch": "Rozumiem: {label}. Gdy zawód będzie w profilu, lista pokaże Twój rynek zamiast wszystkich ogłoszeń.",
+        "chipSetProfession": "Ustaw zawód",
+        "chipRecordExperience": "Zapisz doświadczenie"
+      },
+      "availability": {
+        "understood": "Rozumiem — możesz pracować. Zapiszmy to w karcie pracy: podaj datę, od kiedy.",
+        "understoodFrom": "Rozumiem: możesz pracować od {date}. Zapiszmy to w karcie pracy — data jest już wpisana, sprawdź i zapisz.",
+        "notInCompany": "Od kiedy możesz pracować to Twój własny fakt, nie firmy. Przełącz się na przestrzeń osobistą i napisz ponownie."
+      },
+      "findWorkInCompanyContext": "Szukanie pracy to Twoje własne działanie — w przestrzeni firmy go nie uruchamiam. Przełącz się na przestrzeń osobistą i zapytaj ponownie.",
+      "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Twojej przestrzeni osobistej.",
+      "journalAskWhatYouDid": "Co dziś robiłeś? Wpisz w polu „Co robiłeś” własnymi słowami — np. „montowałem okna na budowie w Kownie od 8 do 17”. Sama prośba nie jest zapisywana do dziennika.",
       "serviceNeedHint": "To zadanie do wykonania — pokażę, kto oferuje taką usługę.",
       "chipServiceRequests": "Znajdź usługę",
       "interestInboxAmbiguous": "To może znaczyć dwie rzeczy — co chcesz zobaczyć?",
@@ -3999,7 +4029,12 @@
       "invDone": "Przyjęto — jesteście teraz połączeni.",
       "invAlreadyAnswered": "To zaproszenie nie jest już otwarte lub zostało już odpowiedziane.",
       "invErrorStale": "Stan się zmienił — odśwież i spróbuj ponownie.",
-      "invErrorGeneric": "Nie udało się przyjąć. Spróbuj ponownie."
+      "invErrorGeneric": "Nie udało się przyjąć. Spróbuj ponownie.",
+      "knownState": {
+        "usingProfile": "Nie musisz nic wgrywać — szukam na podstawie tego, co już jest w Twoim profilu.",
+        "usingProfileNarrowed": "Nie musisz nic wgrywać — szukam na podstawie Twojego profilu i tego, co już podałeś.",
+        "profileEmpty": "W Twoim profilu nie ma jeszcze nic, więc nie mogę na nim oprzeć wyszukiwania. Zapisz jedną pracę albo podaj zawód — od razu zacznę szukać."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4024,6 +4059,7 @@
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
       "minutesUnit": "[EN] min",
+      "errorNoWorkContent": "Wpis potrzebuje pracy: co robiłeś, gdzie lub jak długo. Napisz własnymi słowami, np. „montowałem okna od 8 do 17”.",
       "addedSkillPrefix": "Dodano umiejętność",
       "strengthenedSkillPrefix": "Wzmocniono umiejętność",
       "pendingConfirmPrefix": "Czeka na Twoje potwierdzenie",
@@ -4376,6 +4412,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Nie udało się teraz odczytać Twojego konta, więc nie wybraliśmy przestrzeni za Ciebie.",
+      "choose": "Wybierz przestrzeń albo spróbuj ponownie.",
+      "retry": "Spróbuj ponownie"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
@@ -4443,7 +4484,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Rodzaj możliwości"
+        "opportunityType": "Rodzaj możliwości",
+        "salary": "wynagrodzenia",
+        "language": "języka",
+        "employment": "rodzaju zatrudnienia",
+        "radius": "odległości"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4497,6 +4542,12 @@
       "whyDocs": "Z Twoich dokumentów i listy wymagań dla {countries}.",
       "whyDocsNoCountry": "Z Twoich dokumentów; bez wybranego kraju nie ma z czym porównać.",
       "chipWhereToWork": "Gdzie chcesz pracować?",
+      "countryNotChosenListings": "Są tam publiczne ogłoszenia z oficjalnych źródeł — dodaj kraj do swoich preferencji, a pokażę też je.",
+      "countryNotChosenNoListings": "Publicznych ogłoszeń z oficjalnych źródeł obecnie tam nie ma.",
+      "countryNotChosenSupplyUnknown": "Nie udało się teraz odczytać źródła publicznych ogłoszeń — nie mogę powiedzieć, czy są tam ogłoszenia.",
+      "countryNotChosenDoors": "Możesz dodać ten kraj do swoich krajów — potrzeby stamtąd zobaczysz, gdy się pojawią — i sprawdzić, jakich dokumentów tam potrzeba.",
+      "chipAddCountry": "Dodaj kraj do moich preferencji",
+      "chipDocsGap": "Jakich dokumentów mi brakuje?",
       "skillGapNoDemands": "[EN] There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "[EN] Your last {count} journal entries:",
       "journalLine": "[EN] — {day}: {what}",
@@ -4532,7 +4583,23 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Pobierz CSV: {title}"
+      "chipProjectCsv": "Pobierz CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "Oferowanie pracowników należy do organizacji, a Ty jesteś teraz w przestrzeni osobistej. Wybierz firmę — od razu zapiszę ofertę.",
+        "personalSpace": "Aby oferować ludzi lub zespół, potrzebna jest organizacja, a jeszcze jej nie masz. Możesz założyć firmę albo zaproponować własną usługę."
+      },
+      "verifierOne": "{organization} może potwierdzić wykonaną przez Ciebie pracę. Twoje wpisy już czekają na potwierdzenie.",
+      "verifierOneNotEnabled": "Twoim pracodawcą jest {organization}, ale nikt tam nie ma jeszcze włączonego potwierdzania pracy. Poproś firmę, aby to włączyła — wtedy będzie mogła potwierdzić.",
+      "verifierChoice": "Twoją pracę mogłaby potwierdzić więcej niż jedna organizacja: {organizations}. Wybierz, do której należy praca — nie będę zgadywać za Ciebie.",
+      "verifierSelf": "{organization} należy do Ciebie, więc nie ma nikogo, kto potwierdziłby Twoją własną pracę. Wpisy pozostają w Twojej historii jako Twój własny zapis.",
+      "verifierNone": "Nie ma jeszcze nikogo, kto mógłby potwierdzić tę pracę — nie jesteś powiązany z organizacją, która mogłaby to zrobić. Praca nie przepada: pozostaje w Twojej historii jako Twój własny, niepotwierdzony dowód. Gdy wskażesz osobę odpowiedzialną lub pracodawcę, będzie można ją potwierdzić.",
+      "verifierUnavailable": "Nie udało się sprawdzić, kto może potwierdzić Twoją pracę.",
+      "verifierUnnamedOrganization": "Twój pracodawca",
+      "whyVerifier": "Pokazuję tylko organizacje, z którymi naprawdę masz aktywną relację.",
+      "whyVerifierChoice": "Kilka organizacji pasuje tak samo, więc nie zgaduję — wybierasz Ty.",
+      "whyVerifierSelf": "Nie możesz potwierdzić własnej pracy — potwierdzenie musi pochodzić od kogoś innego.",
+      "whyVerifierNone": "Żadna z Twoich aktywnych relacji nie wskazuje organizacji mogącej potwierdzić pracę.",
+      "whyVerifierUnavailable": "To znaczy, że nie udało się odczytać danych — a nie że nie ma komu potwierdzić."
     },
     "project": {
       "fieldStatus": "[EN] Status",
@@ -4698,7 +4765,10 @@
         "invalid_transition": "[EN] That step is not possible from the current state.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "[EN] Reply from the person this is about",
+      "notPublicYet": "[EN] This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "[EN] Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "[EN] Your experience with {name}",

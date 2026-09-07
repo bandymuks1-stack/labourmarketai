@@ -1773,7 +1773,9 @@
       "agencyPartnership": "Samenwerkingsvoorstel"
     },
     "interestWaiting": "{count, plural, one {# persoon wacht op een reactie} other {# personen wachten op een reactie}}",
-    "untitledInquiry": "Naamloze aanvraag"
+    "untitledInquiry": "Naamloze aanvraag",
+    "supplyHeading": "Door u aangeboden capaciteit",
+    "supplyNote": "Dit zijn mensen waarvan u de markt hebt verteld dat u ze HEEFT, niet mensen die u zoekt. Ze zijn opgeslagen en voor u zichtbaar. Werkgevers kunnen aangeboden capaciteit nog niet doorzoeken, dus hierover heeft nog niemand contact opgenomen."
   },
   "journey": {
     "eyebrow": "Hoe het werkt",
@@ -3903,6 +3905,7 @@
         "intentNote": "Kies alles wat van toepassing is — één account draagt het allemaal. Persoon en organisatie zijn de twee ruimtes; wat je erin doet, bepaal je zelf.",
         "saidLabel": "Je schreef:",
         "saidHint": "We hebben aangevinkt wat past. Pas het aan als het nodig is.",
+        "doorLabel": "U koos:",
         "intent": {
           "work": {
             "title": "Ik zoek werk",
@@ -4376,7 +4379,8 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netwerk",
-        "playerCard": "Mijn kaart"
+        "playerCard": "Mijn kaart",
+        "adminPlatform": "Platformbeheer"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -4578,6 +4582,10 @@
         "open": "Openen in LabourMarket.ai:",
         "manage": "Meldingsinstellingen beheren:"
       }
+    },
+    "carriedIntent": {
+      "label": "Je gaat verder met",
+      "hint": "Na het inloggen kom je hier direct op terug — je zin reist met je mee."
     }
   },
   "shared": {
@@ -12005,6 +12013,9 @@
         "moveWorker": {
           "label": "Een persoon naar een ander project verplaatsen",
           "description": "Wijst toe aan het nieuwe project en beëindigt de vorige toewijzing — na de gevolgen."
+        },
+        "offerCapacity": {
+          "label": "Vastleggen wat u aanbiedt"
         }
       },
       "education": {
@@ -12103,6 +12114,7 @@
         "needsAccommodation": "Huisvesting nodig?",
         "availabilityNote": "Notitie (optioneel)",
         "availabilityNotePlaceholder": "Bijv. beschikbaar vanaf augustus, liefst 2-weekse rotaties",
+        "availableFrom": "Beschikbaar vanaf (JJJJ-MM-DD)",
         "demandDescription": "Beschrijf de aanvraag",
         "demandDescriptionPlaceholder": "Bijv.: 4 metselaars nodig in Kaunas vanaf augustus, 3 maanden werk, ervaring vereist",
         "demandRole": "Functie",
@@ -12149,7 +12161,13 @@
         "projectCity": "Stad (optioneel)",
         "projectCityPlaceholder": "bijv. Rotterdam",
         "rosterWorker": "Teamlid",
-        "proposalNotePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen"
+        "proposalNotePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen",
+        "supplyDescription": "Wat u aanbiedt",
+        "supplyDescriptionPlaceholder": "Bijv. 20 lassers met VCA, beschikbaar vanaf oktober, Nederland of België",
+        "supplyRole": "Welk beroep",
+        "supplyRolePlaceholder": "Bijv. lasser",
+        "supplyTeamSize": "Hoeveel mensen u heeft",
+        "supplyLocation": "Waar zij kunnen werken"
       },
       "availability": {
         "available": "Beschikbaar",
@@ -12302,7 +12320,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# klant heeft} other {# klanten hebben}} de verbinding nog niet bevestigd.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# leerlinguitnodiging is} other {# leerlinguitnodigingen zijn}} nog niet geaccepteerd.",
       "briefDocumentsExpiring": "{count, plural, one {# document verloopt binnenkort} other {# documenten verlopen binnenkort}}.",
-      "briefDocumentsMissing": "{count, plural, one {# document ontbreekt voor uw landen} other {# documenten ontbreken voor uw landen}}.",
+      "briefDocumentsMissing": "{count, plural, one {Voor de landen die je noemde ontbreekt nog # document} other {Voor de landen die je noemde ontbreken nog # documenten}}: {list}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidaat wacht op uw antwoord} other {# kandidaten wachten op uw antwoord}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# aanbod van een bureau wacht op uw beslissing} other {# aanbiedingen van bureaus wachten op uw beslissing}}.",
       "briefInterestContacted": "{count, plural, one {# bedrijf wil contact met u over uw interesse} other {# bedrijven willen contact met u over uw interesse}}.",
@@ -12332,6 +12350,7 @@
       "assignPickWorker": "Wie moet eraan werken?",
       "assignNoWorkers": "Er is nog niemand in je team om toe te wijzen.",
       "assignUnavailable": "Ik kon je team nu niet lezen.",
+      "assignEngagementCandidate": "kandidaat uit geaccepteerd aanbod",
       "assignDone": "Toegewezen aan het project.",
       "assignFailed": "De toewijzing kon niet worden gemaakt.",
       "chipEngagements": "Met wie ik werk",
@@ -12383,6 +12402,23 @@
       "marketMapChip": "Marktkaart",
       "activityChip": "Activiteit",
       "employerBridgeHint": "Je kunt dit als je bedrijf plaatsen — ik open het aanvraagformulier.",
+      "professionStatement": {
+        "understood": "Begrepen: {label}.",
+        "inCatalogue": "Ik kan dat als je beroep in je profiel zetten — dan toont de lijst jouw markt.",
+        "notInCatalogue": "Dat beroep staat nog niet in de keuzelijst — zet het in je eigen woorden in je werkervaring: het verschijnt op je kaart en cv.",
+        "pastJob": "Begrepen: {label}. Laten we dat in je werkervaring zetten — de titel is al ingevuld, vul de rest aan.",
+        "readBesideSearch": "Begrepen: {label}. Zodra het beroep in je profiel staat, toont de lijst jouw markt in plaats van alle advertenties.",
+        "chipSetProfession": "Beroep instellen",
+        "chipRecordExperience": "Werkervaring vastleggen"
+      },
+      "availability": {
+        "understood": "Begrepen — je kunt werken. Laten we het op je werkkaart zetten: geef de datum aan vanaf wanneer.",
+        "understoodFrom": "Begrepen: je kunt werken vanaf {date}. Laten we het op je werkkaart zetten — de datum staat er al in, controleer en sla op.",
+        "notInCompany": "Vanaf wanneer je kunt werken is jouw eigen gegeven, niet dat van het bedrijf. Schakel over naar je persoonlijke ruimte en zeg het opnieuw."
+      },
+      "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
+      "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",
+      "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",
@@ -12481,6 +12517,8 @@
       "documentAddUnavailable": "De documentcatalogus kon nu niet worden geladen — leg het document vast in het documentencentrum.",
       "cvExportHint": "Uw geverifieerde cv — één blad met wat het systeem echt weet. Open het en print naar PDF.",
       "chipCvSheet": "Cv-blad openen",
+      "cvViewHint": "Dit is je cv — wat het systeem vandaag over je weet. Open het en bekijk het; er wordt niets geüpload en niets gewijzigd.",
+      "cvChooseAsk": "Wat wil je met je cv doen? Ik kan het tonen, een nieuw bestand aannemen, of je profiel openen — daaruit wordt het cv opgebouwd.",
       "taskCreateIntro": "Een nieuwe taak: wat er moet gebeuren, op welk project en wanneer.",
       "taskCreatedNext": "Taak vastgelegd. De projectpuls toont hem als open; wijs een persoon toe op het takenscherm.",
       "capacityIntro": "Team {from} – {to} ({count} mensen):",
@@ -12618,7 +12656,12 @@
       "invDone": "Geaccepteerd — u bent nu verbonden.",
       "invAlreadyAnswered": "Deze uitnodiging is niet meer open of al beantwoord.",
       "invErrorStale": "De status is gewijzigd — vernieuw en probeer opnieuw.",
-      "invErrorGeneric": "Accepteren mislukt. Probeer opnieuw."
+      "invErrorGeneric": "Accepteren mislukt. Probeer opnieuw.",
+      "knownState": {
+        "usingProfile": "Je hoeft niets te uploaden — ik zoek op basis van wat al in je profiel staat.",
+        "usingProfileNarrowed": "Je hoeft niets te uploaden — ik zoek op basis van je profiel en wat je tot nu toe hebt verteld.",
+        "profileEmpty": "Er staat nog niets in je profiel, dus daarop kan ik niet zoeken. Leg één klus vast of noem je beroep, dan zoek ik meteen."
+      }
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -12643,6 +12686,7 @@
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
+      "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17“.",
       "relationship": {
         "employee": "Werknemer",
         "freelancer": "Freelancer",
@@ -13225,7 +13269,11 @@
         "internship": "Waar kan ik stage lopen?",
         "professional": "Ik ben accountant en zoek werk in Vilnius",
         "needService": "Ik heb iemand nodig om het dak te repareren",
-        "offerService": "Ik bied boekhoudkundige diensten aan"
+        "offerService": "Ik bied boekhoudkundige diensten aan",
+        "offerCapacity": "Wij hebben 7 elektriciens vrij vanaf maandag",
+        "brigade": "Ik zoek een ploeg voor het project",
+        "logWork": "Vandaag heb ik 8 uur op de Green Tower gewerkt",
+        "verifyWork": "Wie zou mijn ervaring kunnen bevestigen?"
       },
       "understoodLabel": "Begrepen",
       "understood": {
@@ -13240,7 +13288,7 @@
         "projects": "U wilt de projecten van uw bedrijf zien.",
         "company-overview": "U wilt zien wat er in uw bedrijf gebeurt — mensen, projecten, behoeften.",
         "create-organization": "U wilt een bedrijf of organisatie registreren.",
-        "cv": "U wilt met uw cv werken — uploaden of bekijken.",
+        "cv": "Je wilt een cv-bestand uploaden. We lezen het en tonen wat we vonden voordat we iets opslaan.",
         "log-work": "U wilt gedaan werk in het werkdagboek vastleggen.",
         "skill-gap": "U wilt weten welke vaardigheden u mist.",
         "documents": "U heeft het over documenten en certificaten — wat geldig is, wat verloopt, wat ontbreekt.",
@@ -13253,7 +13301,11 @@
         "propose-candidate": "U wilt een kandidaat aan een klant voorstellen — u werkt als bureau.",
         "client-demand": "U wilt zien wat uw klanten nodig hebben.",
         "invite-student": "U vertegenwoordigt een onderwijsinstelling en wilt een student uitnodigen.",
-        "programmes": "U vertegenwoordigt een onderwijsinstelling — programma's, groepen, studenten."
+        "programmes": "U vertegenwoordigt een onderwijsinstelling — programma's, groepen, studenten.",
+        "offer-capacity": "Je hebt mensen of capaciteit vrij. We leggen het aanbod vast zodat wie het nodig heeft het vindt.",
+        "who-verifies-work": "Je vraagt wie werk kan bevestigen dat je al hebt gedaan. We laten zien naar wie je het stuurt.",
+        "cv-view": "Je wilt je cv zien — het cv dat het systeem al heeft. Er wordt niets geüpload of gewijzigd.",
+        "cv-choose": "Je noemt je cv. We vragen of we het tonen, een nieuw bestand aannemen of je profiel aanvullen."
       },
       "family": {
         "work": "U heeft het over uw werk en uw loopbaan.",
@@ -13289,6 +13341,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Uw account kon zojuist niet worden gelezen, dus er is geen ruimte voor u gekozen.",
+      "choose": "Kies een ruimte of probeer het opnieuw.",
+      "retry": "Opnieuw proberen"
+    },
     "panel": {
       "regionLabel": "Context",
       "workTitle": "Jouw werk nu",
@@ -13356,7 +13413,11 @@
         "accommodation": "Huisvesting",
         "transport": "Vervoer",
         "tool": "Vereist gereedschap",
-        "opportunityType": "Soort kans"
+        "opportunityType": "Soort kans",
+        "salary": "loon",
+        "language": "taal",
+        "employment": "dienstverband",
+        "radius": "afstand"
       },
       "whyFiltered": "Je zei: {words}. Daarop heb ik de zoekopdracht versmald.",
       "whyUnfiltered": "Ik heb je hele lijst doorzocht — je hebt niets versmald.",
@@ -13410,6 +13471,12 @@
       "whyDocs": "Uit uw documenten en de vereistenlijst voor {countries}.",
       "whyDocsNoCountry": "Uit uw documenten; zonder gekozen land is er niets om mee te vergelijken.",
       "chipWhereToWork": "Waar wilt u werken?",
+      "countryNotChosenListings": "Daar zijn openbare advertenties uit officiële bronnen — voeg het land toe aan je voorkeuren en ik toon ze ook.",
+      "countryNotChosenNoListings": "Openbare advertenties uit officiële bronnen zijn daar op dit moment niet.",
+      "countryNotChosenSupplyUnknown": "De bron van openbare advertenties kon nu niet worden gelezen — ik kan niet zeggen of er daar advertenties zijn.",
+      "countryNotChosenDoors": "Je kunt dit land aan je landen toevoegen — behoeften daar zie je zodra ze verschijnen — en nagaan welke documenten daar nodig zijn.",
+      "chipAddCountry": "Land toevoegen aan mijn voorkeuren",
+      "chipDocsGap": "Welke documenten mis ik?",
       "skillGapNoDemands": "Er zijn nog geen aanvragen voor jou zichtbaar, dus er valt niets te meten.",
       "journalIntro": "Je laatste {count} dagboekregels:",
       "journalLine": "— {day}: {what}",
@@ -13445,7 +13512,23 @@
       "chipLogWork": "Werk vastleggen",
       "chipCreateDemand": "Behoefte beschrijven",
       "scoutingPickDemand": "Kies er één, dan laat ik de kandidaten hier in de werkruimte zien.",
-      "chipProjectCsv": "CSV downloaden: {title}"
+      "chipProjectCsv": "CSV downloaden: {title}",
+      "offerCapacity": {
+        "needsCompany": "Mensen aanbieden hoort bij een organisatie, en je zit nu in je persoonlijke ruimte. Kies het bedrijf, dan leg ik het aanbod meteen vast.",
+        "personalSpace": "Mensen of een team aanbieden vraagt om een organisatie, en die heb je nog niet. Je kunt een bedrijf aanmaken, of je eigen dienst aanbieden."
+      },
+      "verifierOne": "{organization} kan het werk dat je hebt gedaan bevestigen. Je registraties wachten al op bevestiging.",
+      "verifierOneNotEnabled": "Je werkgever is {organization}, maar daar kan nog niemand werk bevestigen. Vraag het bedrijf om dit aan te zetten — dan kunnen ze bevestigen.",
+      "verifierChoice": "Meer dan één organisatie zou je werk kunnen bevestigen: {organizations}. Kies bij welke het werk hoort — ik gok niet voor je.",
+      "verifierSelf": "{organization} is van jou, dus er is niemand boven je om je eigen werk te bevestigen. De registraties blijven in je geschiedenis als je eigen vastlegging.",
+      "verifierNone": "Er is nog niemand die dit werk kan bevestigen — je bent niet verbonden met een organisatie die dat kan. Het werk gaat niet verloren: het blijft in je geschiedenis als je eigen, niet-geverifieerde bewijs. Zodra je de verantwoordelijke persoon of werkgever noemt, kan het bevestigd worden.",
+      "verifierUnavailable": "Ik kon niet controleren wie je werk kan bevestigen.",
+      "verifierUnnamedOrganization": "je werkgever",
+      "whyVerifier": "Ik toon alleen organisaties waarmee je echt een actieve relatie hebt.",
+      "whyVerifierChoice": "Meerdere organisaties passen even goed, dus ik gok niet — jij kiest.",
+      "whyVerifierSelf": "Je kunt je eigen werk niet bevestigen — bevestiging moet van iemand anders komen.",
+      "whyVerifierNone": "Geen van je actieve relaties wijst naar een organisatie die werk kan bevestigen.",
+      "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen."
     },
     "project": {
       "fieldStatus": "Status",
@@ -13623,7 +13706,10 @@
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
-      }
+      },
+      "heading": "Reactie van de persoon over wie dit gaat",
+      "notPublicYet": "Deze reactie is nog niet gepubliceerd. Zij wordt zichtbaar voor de andere partij zodra de moderatie klaar is.",
+      "unreadable": "Reacties konden hier niet worden gelezen. Dat is niet hetzelfde als dat er geen zijn."
     },
     "submit": {
       "about": "Jouw ervaring met {name}",
@@ -13694,7 +13780,7 @@
       "label": "Status van je werkprofiel",
       "known": "Al ingevuld:",
       "next": "Nu het belangrijkst:",
-      "complete": "Alles wat belangrijk is, is al ingevuld.",
+      "complete": "Alle {count} onderdelen van je werkkaart zijn ingevuld. Documenten en openstaande verzoeken tellen apart.",
       "unavailable": "De status van je werkprofiel kon nu niet worden getoond. Het gesprek werkt zoals altijd."
     },
     "action": {

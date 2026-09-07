@@ -11,7 +11,9 @@
       "agencyPartnership": "Partnerskabstilbud"
     },
     "interestWaiting": "{count, plural, one {# person venter på svar} other {# personer venter på svar}}",
-    "untitledInquiry": "Forespørgsel uden titel"
+    "untitledInquiry": "Forespørgsel uden titel",
+    "supplyHeading": "Kapacitet du har tilbudt",
+    "supplyNote": "Det er personer, du har fortalt markedet, at du HAR, ikke personer du søger. De er gemt og synlige for dig. Arbejdsgivere kan endnu ikke søge i tilbudt kapacitet, så ingen har henvendt sig om disse."
   },
   "journey": {
     "eyebrow": "Sådan fungerer det",
@@ -3463,6 +3465,9 @@
         "moveWorker": {
           "label": "Flyt en person til et andet projekt",
           "description": "Tildeler det nye projekt og afslutter den tidligere tildeling — efter konsekvensvisningen."
+        },
+        "offerCapacity": {
+          "label": "Registrér hvad I tilbyder"
         }
       },
       "education": {
@@ -3560,6 +3565,7 @@
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Ledig fra (ÅÅÅÅ-MM-DD)",
         "demandDescription": "Beskriv behovet",
         "demandDescriptionPlaceholder": "F.eks.: 4 murere i Kaunas fra august, 3 måneders arbejde, erfaring kræves",
         "demandRole": "Rolle",
@@ -3605,7 +3611,13 @@
         "projectCity": "By (valgfrit)",
         "projectCityPlaceholder": "f.eks. Rotterdam",
         "rosterWorker": "Teammedlem",
-        "proposalNotePlaceholder": "F.eks. 5 års erfaring, kan starte mandag"
+        "proposalNotePlaceholder": "F.eks. 5 års erfaring, kan starte mandag",
+        "supplyDescription": "Hvad I tilbyder",
+        "supplyDescriptionPlaceholder": "F.eks. 20 svejsere med VCA, ledige fra oktober, Holland eller Belgien",
+        "supplyRole": "Hvilket fag",
+        "supplyRolePlaceholder": "F.eks. svejser",
+        "supplyTeamSize": "Hvor mange folk I har",
+        "supplyLocation": "Hvor de kan arbejde"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3763,6 +3775,7 @@
       "assignPickWorker": "Hvem skal arbejde på det?",
       "assignNoWorkers": "Der er endnu ingen i dit team at tildele.",
       "assignUnavailable": "Jeg kunne ikke læse dit team lige nu.",
+      "assignEngagementCandidate": "kandidat fra accepteret tilbud",
       "assignDone": "Tildelt projektet.",
       "assignFailed": "Tildelingen kunne ikke gennemføres.",
       "chipEngagements": "Hvem jeg arbejder med",
@@ -3772,6 +3785,23 @@
       "engagementsNoCompany": "Du handler ikke på vegne af en organisation lige nu, så der er ingen liste at vise.",
       "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
       "employerBridgeHint": "Du kan slå det op som din virksomhed — jeg åbner behovsformularen.",
+      "professionStatement": {
+        "understood": "Forstået: {label}.",
+        "inCatalogue": "Jeg kan sætte det som dit erhverv i din profil — så viser listen dit marked.",
+        "notInCatalogue": "Det erhverv findes ikke på valglisten endnu — skriv det med dine egne ord i din erhvervserfaring: det vises på dit kort og dit CV.",
+        "pastJob": "Forstået: {label}. Lad os skrive det i din erhvervserfaring — titlen er allerede udfyldt, udfyld resten.",
+        "readBesideSearch": "Forstået: {label}. Når erhvervet står i din profil, viser listen dit marked i stedet for alle opslag.",
+        "chipSetProfession": "Angiv erhverv",
+        "chipRecordExperience": "Registrér erhvervserfaring"
+      },
+      "availability": {
+        "understood": "Forstået — du kan arbejde. Lad os sætte det på dit arbejdskort: angiv datoen fra hvornår.",
+        "understoodFrom": "Forstået: du kan arbejde fra {date}. Lad os sætte det på dit arbejdskort — datoen er allerede udfyldt, gennemse og gem.",
+        "notInCompany": "Hvornår du kan arbejde er dit eget faktum, ikke virksomhedens. Skift til dit personlige rum og sig det igen."
+      },
+      "findWorkInCompanyContext": "At søge job er din egen handling — i virksomhedsrummet kører jeg den ikke. Skift til dit personlige rum og spørg igen.",
+      "findWorkInCompanyWhy": "En person søger job, ikke en virksomhed — jeg svarer fra dit personlige rum.",
+      "journalAskWhatYouDid": "Hvad lavede du i dag? Skriv det i feltet »Hvad du lavede« med dine egne ord — f.eks. »monterede vinduer på byggepladsen i Kaunas fra 8 til 17«. Selve anmodningen gemmes ikke i dagbogen.",
       "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
       "chipServiceRequests": "Find en ydelse",
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
@@ -3999,7 +4029,12 @@
       "invDone": "Accepteret — I er nu forbundet.",
       "invAlreadyAnswered": "Denne invitation er ikke længere åben eller er allerede besvaret.",
       "invErrorStale": "Tilstanden ændrede sig — opdatér og prøv igen.",
-      "invErrorGeneric": "Kunne ikke acceptere. Prøv igen."
+      "invErrorGeneric": "Kunne ikke acceptere. Prøv igen.",
+      "knownState": {
+        "usingProfile": "Du behøver ikke uploade noget — jeg søger ud fra det, der allerede står i din profil.",
+        "usingProfileNarrowed": "Du behøver ikke uploade noget — jeg søger ud fra din profil og det, du har fortalt indtil nu.",
+        "profileEmpty": "Der står endnu ikke noget i din profil, så jeg kan ikke søge ud fra den. Registrér ét job eller fortæl hvilket fag du har — så søger jeg med det samme."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4024,6 +4059,7 @@
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
       "minutesUnit": "[EN] min",
+      "errorNoWorkContent": "En post kræver arbejdet: hvad du lavede, hvor eller hvor længe. Skriv med dine egne ord, f.eks. »monterede vinduer fra 8 til 17«.",
       "addedSkillPrefix": "Færdighed tilføjet",
       "strengthenedSkillPrefix": "Færdighed styrket",
       "pendingConfirmPrefix": "Afventer din bekræftelse",
@@ -4376,6 +4412,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Din konto kunne ikke læses lige nu, så der blev ikke valgt et rum for dig.",
+      "choose": "Vælg et rum, eller prøv igen.",
+      "retry": "Prøv igen"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
@@ -4443,7 +4484,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Mulighedstype"
+        "opportunityType": "Mulighedstype",
+        "salary": "løn",
+        "language": "sprog",
+        "employment": "ansættelsestype",
+        "radius": "afstand"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4497,6 +4542,12 @@
       "whyDocs": "Fra dine dokumenter og kravlisten for {countries}.",
       "whyDocsNoCountry": "Fra dine dokumenter; uden et valgt land er der intet at sammenligne med.",
       "chipWhereToWork": "Hvor vil du arbejde?",
+      "countryNotChosenListings": "Der findes offentlige annoncer fra officielle kilder dér — tilføj landet til dine præferencer, så viser jeg dem også.",
+      "countryNotChosenNoListings": "Offentlige annoncer fra officielle kilder findes ikke dér lige nu.",
+      "countryNotChosenSupplyUnknown": "Kilden til offentlige annoncer kunne ikke læses lige nu — jeg kan ikke sige, om der er annoncer dér.",
+      "countryNotChosenDoors": "Du kan tilføje dette land til dine lande — behov dér ser du, så snart de dukker op — og tjekke, hvilke dokumenter der kræves dér.",
+      "chipAddCountry": "Tilføj landet til mine præferencer",
+      "chipDocsGap": "Hvilke dokumenter mangler jeg?",
       "skillGapNoDemands": "[EN] There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "[EN] Your last {count} journal entries:",
       "journalLine": "[EN] — {day}: {what}",
@@ -4532,7 +4583,23 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Hent CSV: {title}"
+      "chipProjectCsv": "Hent CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "At tilbyde folk hører til en organisation, og du er i dit personlige rum lige nu. Vælg virksomheden — så registrerer jeg tilbuddet med det samme.",
+        "personalSpace": "At tilbyde folk eller et team kræver en organisation, og du har ingen endnu. Du kan oprette en virksomhed eller tilbyde din egen ydelse."
+      },
+      "verifierOne": "{organization} kan bekræfte det arbejde, du har udført. Dine registreringer venter allerede på bekræftelse.",
+      "verifierOneNotEnabled": "Din arbejdsgiver er {organization}, men ingen der kan endnu bekræfte arbejde. Bed virksomheden om at slå det til — så kan de bekræfte.",
+      "verifierChoice": "Mere end én organisation kunne bekræfte dit arbejde: {organizations}. Vælg hvilken arbejdet hører til — jeg gætter ikke for dig.",
+      "verifierSelf": "{organization} ejes af dig, så der er ingen over dig til at bekræfte dit eget arbejde. Registreringerne bliver i din historik som din egen optegnelse.",
+      "verifierNone": "Der er endnu ingen, der kan bekræfte dette arbejde — du er ikke tilknyttet en organisation, der kan gøre det. Arbejdet går ikke tabt: det bliver i din historik som dit eget, ubekræftede bevis. Når du angiver den ansvarlige person eller arbejdsgiver, kan det bekræftes.",
+      "verifierUnavailable": "Jeg kunne ikke kontrollere, hvem der kan bekræfte dit arbejde.",
+      "verifierUnnamedOrganization": "din arbejdsgiver",
+      "whyVerifier": "Jeg viser kun organisationer, du reelt har et aktivt forhold til.",
+      "whyVerifierChoice": "Flere organisationer passer lige godt, så jeg gætter ikke — du vælger.",
+      "whyVerifierSelf": "Du kan ikke bekræfte dit eget arbejde — bekræftelsen skal komme fra en anden.",
+      "whyVerifierNone": "Ingen af dine aktive forhold peger på en organisation, der kan bekræfte arbejde.",
+      "whyVerifierUnavailable": "Det betyder, at data ikke kunne læses — ikke at ingen kan bekræfte."
     },
     "project": {
       "fieldStatus": "[EN] Status",
@@ -4698,7 +4765,10 @@
         "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
-      }
+      },
+      "heading": "Svar fra den person, det handler om",
+      "notPublicYet": "Dette svar er endnu ikke offentliggjort. Det bliver synligt for den anden part, når moderationen er afsluttet.",
+      "unreadable": "Svar kunne ikke læses her. Det er ikke det samme som, at der ingen er."
     },
     "submit": {
       "about": "Din erfaring med {name}",

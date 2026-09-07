@@ -102,10 +102,23 @@ describe("the runtime side: one task, one grant, least privilege", () => {
 
 describe("the chat: deterministic first, the proposer only for unknown, the same handlers, resolution in telemetry", () => {
   it("classifies deterministically, asks the proposer only when unknown, and runs the same dispatchIntent", () => {
-    const classify = CHAT.indexOf("const { intent } = classifyIntent(text);");
+    // The router reads the RAW sentence (`sent`), never the goal-composed one
+    // — composing before classification would let an earlier turn's words
+    // re-trigger an intent the person did not just state.
+    const classify = CHAT.indexOf(
+      "const { intent: routedIntent, score: routedScore } = classifyIntent(sent);",
+    );
     const propose = CHAT.indexOf("proposeConversationIntentAction({ sentence: text, locale, identity })");
     expect(classify).toBeGreaterThan(-1);
     expect(propose).toBeGreaterThan(classify);
+    // THREE TIERS, IN THIS ORDER (owner P0 §1, 2026-09-06). The router is
+    // still the floor and still runs first; the ACTIVE GOAL is consulted
+    // between it and the proposer, so a continuation ("Nuo spalio.") re-enters
+    // the goal's own handler instead of spending a vendor call on a sentence
+    // whose destination we already know.
+    const goalAt = CHAT.indexOf("const turnKind = classifyTurn({");
+    expect(goalAt).toBeGreaterThan(classify);
+    expect(goalAt).toBeLessThan(propose);
     const flow = CHAT.slice(propose - 1200, propose + 1000);
     expect(flow).toContain('if (intent !== "unknown") {');
     expect(flow).toContain("dispatchIntent(intent, handlers, withTyping, fallback)");
@@ -117,8 +130,11 @@ describe("the chat: deterministic first, the proposer only for unknown, the same
     expect(CHAT).not.toMatch(/runAiAgent/);
   });
 
-  it("telemetry names the resolution (deterministic | llm) and never the sentence", () => {
-    expect(CHAT).toContain('trackResolution(intent, "deterministic")');
+  it("telemetry names the resolution (deterministic | goal | llm) and never the sentence", () => {
+    // `goal` is its own value: a turn the router could not read but the
+    // active goal could is a DIFFERENT event from one the router resolved,
+    // and collapsing the two would hide how much work the goal layer does.
+    expect(CHAT).toContain('trackResolution(intent, continuing ? "goal" : "deterministic")');
     expect(CHAT).toContain('res.kind === "proposal" ? "llm" : "deterministic"');
     const at = CHAT.indexOf("const trackResolution =");
     const body = CHAT.slice(at, at + 500);

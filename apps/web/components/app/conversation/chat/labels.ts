@@ -146,6 +146,7 @@ const CHAT_KEYS = [
   "assignPickWorker",
   "assignNoWorkers",
   "assignUnavailable",
+  "assignEngagementCandidate",
   "assignDone",
   "assignFailed",
   // §7.1 — work relationships. Same rule again: "none recorded", "no company"
@@ -250,6 +251,8 @@ const CHAT_KEYS = [
   "documentFileFailed",
   "cvExportHint",
   "chipCvSheet",
+  "cvViewHint",
+  "cvChooseAsk",
   "taskCreateIntro",
   "taskCreatedNext",
   "capacityIntro",
@@ -373,6 +376,8 @@ const WORKLOG_KEYS = [
   "matchingNote",
   "viewOpportunities",
   "pipelineFailedNote",
+  // The evidence carries no work content — ask, never save the request.
+  "errorNoWorkContent",
 ] as const;
 
 /** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.

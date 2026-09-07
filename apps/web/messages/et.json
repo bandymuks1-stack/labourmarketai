@@ -11,7 +11,9 @@
       "agencyPartnership": "Partnerluspakkumine"
     },
     "interestWaiting": "{count, plural, one {# inimene ootab vastust} other {# inimest ootab vastust}}",
-    "untitledInquiry": "Nimeta päring"
+    "untitledInquiry": "Nimeta päring",
+    "supplyHeading": "Teie pakutud võimekus",
+    "supplyNote": "Need on inimesed, kelle kohta ütlesite turule, et teil ON, mitte need, keda otsite. Need on salvestatud ja teile nähtavad. Tööandjad ei saa pakutud võimekust veel otsida, seega pole nende pärast keegi ühendust võtnud."
   },
   "journey": {
     "eyebrow": "Kuidas see töötab",
@@ -3463,6 +3465,9 @@
         "moveWorker": {
           "label": "Liiguta inimene teise projekti",
           "description": "Määrab uude projekti ja lõpetab eelmise määramise — pärast tagajärgede vaadet."
+        },
+        "offerCapacity": {
+          "label": "Pane oma pakkumine kirja"
         }
       },
       "education": {
@@ -3560,6 +3565,7 @@
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Saadaval alates (AAAA-KK-PP)",
         "demandDescription": "Kirjelda vajadust",
         "demandDescriptionPlaceholder": "Nt: vaja 4 müürseppa Kaunases alates augustist, töö 3 kuud, vajalik kogemus",
         "demandRole": "Roll",
@@ -3605,7 +3611,13 @@
         "projectCity": "Linn (valikuline)",
         "projectCityPlaceholder": "nt Rotterdam",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Mida pakute",
+        "supplyDescriptionPlaceholder": "Nt 20 keevitajat VCA-ga, vabad alates oktoobrist, Holland või Belgia",
+        "supplyRole": "Milline amet",
+        "supplyRolePlaceholder": "Nt keevitaja",
+        "supplyTeamSize": "Kui palju inimesi teil on",
+        "supplyLocation": "Kus nad saavad töötada"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3763,6 +3775,7 @@
       "assignPickWorker": "[EN] Who should work on it?",
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
       "assignFailed": "[EN] The assignment could not be made.",
       "chipEngagements": "Kellega ma töötan",
@@ -3772,6 +3785,23 @@
       "engagementsNoCompany": "Sa ei tegutse praegu organisatsiooni nimel, seega pole nimekirja, mida näidata.",
       "engagementsUnavailable": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks.",
       "employerBridgeHint": "Saad selle avaldada oma ettevõttena — avan vajaduse vormi.",
+      "professionStatement": {
+        "understood": "Sain aru: {label}.",
+        "inCatalogue": "Saan selle sinu profiilis ametiks määrata — siis näitab nimekiri sinu turgu.",
+        "notInCatalogue": "Sellist ametit valikus veel pole — kirjuta see oma sõnadega töökogemusse: see on näha sinu kaardil ja CV-s.",
+        "pastJob": "Sain aru: {label}. Kirjutame selle töökogemusse — ametinimetus on juba täidetud, täida ülejäänu.",
+        "readBesideSearch": "Sain aru: {label}. Kui amet on profiilis kirjas, näitab nimekiri sinu turgu, mitte kõiki kuulutusi.",
+        "chipSetProfession": "Määra amet",
+        "chipRecordExperience": "Lisa töökogemus"
+      },
+      "availability": {
+        "understood": "Sain aru — saad töötada. Paneme selle sinu töökaardile: märgi kuupäev, millest alates.",
+        "understoodFrom": "Sain aru: saad töötada alates {date}. Paneme selle sinu töökaardile — kuupäev on juba sees, vaata üle ja salvesta.",
+        "notInCompany": "Millal sa töötada saad, on sinu enda fakt, mitte ettevõtte oma. Lülitu oma isiklikku ruumi ja ütle uuesti."
+      },
+      "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
+      "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
+      "journalAskWhatYouDid": "Mida sa täna tegid? Kirjuta see väljale „Mida tegid“ oma sõnadega — nt „paigaldasin aknaid Kaunase objektil 8–17“. Palvet ennast päevikusse ei salvestata.",
       "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
       "chipServiceRequests": "Leia teenus",
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
@@ -3999,7 +4029,12 @@
       "invDone": "Vastu võetud — olete nüüd seotud.",
       "invAlreadyAnswered": "See kutse pole enam avatud või on juba vastatud.",
       "invErrorStale": "Olek muutus — värskendage ja proovige uuesti.",
-      "invErrorGeneric": "Vastuvõtmine ebaõnnestus. Proovige uuesti."
+      "invErrorGeneric": "Vastuvõtmine ebaõnnestus. Proovige uuesti.",
+      "knownState": {
+        "usingProfile": "Midagi pole vaja üles laadida — otsin selle põhjal, mis su profiilis juba on.",
+        "usingProfileNarrowed": "Midagi pole vaja üles laadida — otsin su profiili ja seni öeldu põhjal.",
+        "profileEmpty": "Sinu profiilis pole veel midagi, seega ei saa ma selle järgi otsida. Kirjuta üles üks töö või ütle oma amet — ja ma otsin kohe."
+      }
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -4024,6 +4059,7 @@
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
       "minutesUnit": "[EN] min",
+      "errorNoWorkContent": "Sissekanne vajab tööd: mida tegid, kus või kui kaua. Kirjuta oma sõnadega, nt „paigaldasin aknaid 8–17“.",
       "addedSkillPrefix": "Oskus lisatud",
       "strengthenedSkillPrefix": "Oskus tugevdatud",
       "pendingConfirmPrefix": "Ootab sinu kinnitust",
@@ -4376,6 +4412,11 @@
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Teie kontot ei õnnestunud praegu lugeda, seega me ei valinud teie eest ruumi.",
+      "choose": "Valige ruum või proovige uuesti.",
+      "retry": "Proovi uuesti"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
@@ -4443,7 +4484,11 @@
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tool",
-        "opportunityType": "Võimaluse tüüp"
+        "opportunityType": "Võimaluse tüüp",
+        "salary": "tasu",
+        "language": "keel",
+        "employment": "töösuhte liik",
+        "radius": "kaugus"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
       "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
@@ -4497,6 +4542,12 @@
       "whyDocs": "Teie dokumentidest ja {countries} nõuete loendist.",
       "whyDocsNoCountry": "Teie dokumentidest; ilma valitud riigita pole millegagi võrrelda.",
       "chipWhereToWork": "Kus soovite töötada?",
+      "countryNotChosenListings": "Seal on avalikke kuulutusi ametlikest allikatest — lisa riik oma eelistustesse ja näitan ka neid.",
+      "countryNotChosenNoListings": "Avalikke kuulutusi ametlikest allikatest seal praegu ei ole.",
+      "countryNotChosenSupplyUnknown": "Avalike kuulutuste allikat ei õnnestunud praegu lugeda — ei oska öelda, kas seal kuulutusi on.",
+      "countryNotChosenDoors": "Võid lisada selle riigi oma riikide hulka — sealseid vajadusi näed kohe, kui need tekivad — ja vaadata, milliseid dokumente seal vaja on.",
+      "chipAddCountry": "Lisa riik minu eelistustesse",
+      "chipDocsGap": "Milliseid dokumente mul puudu on?",
       "skillGapNoDemands": "[EN] There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "[EN] Your last {count} journal entries:",
       "journalLine": "[EN] — {day}: {what}",
@@ -4532,7 +4583,23 @@
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
       "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
-      "chipProjectCsv": "Laadi alla CSV: {title}"
+      "chipProjectCsv": "Laadi alla CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "Inimeste pakkumine kuulub organisatsioonile ja sa oled praegu oma isiklikus ruumis. Vali ettevõte — ja ma panen pakkumise kohe kirja.",
+        "personalSpace": "Inimeste või meeskonna pakkumiseks on vaja organisatsiooni, sul seda veel ei ole. Võid luua ettevõtte või pakkuda oma enda teenust."
+      },
+      "verifierOne": "{organization} saab sinu tehtud töö kinnitada. Sinu sissekanded juba ootavad kinnitust.",
+      "verifierOneNotEnabled": "Sinu tööandja on {organization}, kuid seal ei ole veel kellelgi töö kinnitamine sisse lülitatud. Palu ettevõttel see sisse lülitada — siis saavad nad kinnitada.",
+      "verifierChoice": "Sinu tööd saaks kinnitada rohkem kui üks organisatsioon: {organizations}. Vali, millisele töö kuulub — ma ei oleta sinu eest.",
+      "verifierSelf": "{organization} kuulub sulle, seega pole kedagi, kes sinu enda tööd kinnitaks. Sissekanded jäävad sinu ajalukku sinu enda kirjena.",
+      "verifierNone": "Praegu pole kedagi, kes seda tööd kinnitaks — sa pole seotud organisatsiooniga, kes seda teha saaks. Töö ei kao: see jääb sinu ajalukku sinu enda kinnitamata tõendina. Kui nimetad vastutava isiku või tööandja, saab selle kinnitada.",
+      "verifierUnavailable": "Ma ei saanud kontrollida, kes sinu tööd kinnitada saab.",
+      "verifierUnnamedOrganization": "sinu tööandja",
+      "whyVerifier": "Näitan ainult organisatsioone, kellega sul on tegelikult aktiivne suhe.",
+      "whyVerifierChoice": "Mitu organisatsiooni sobivad võrdselt, seega ma ei oleta — valid sina.",
+      "whyVerifierSelf": "Sa ei saa oma tööd ise kinnitada — kinnitus peab tulema kelleltki teiselt.",
+      "whyVerifierNone": "Ükski sinu aktiivne suhe ei viita organisatsioonile, kes saaks tööd kinnitada.",
+      "whyVerifierUnavailable": "See tähendab, et andmeid ei õnnestunud lugeda — mitte seda, et kinnitajat pole."
     },
     "project": {
       "fieldStatus": "[EN] Status",
@@ -4698,7 +4765,10 @@
         "invalid_transition": "[EN] That step is not possible from the current state.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "[EN] Reply from the person this is about",
+      "notPublicYet": "[EN] This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "[EN] Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "[EN] Your experience with {name}",

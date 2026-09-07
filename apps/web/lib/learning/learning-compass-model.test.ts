@@ -5,6 +5,7 @@ import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 
 import {
   buildLearningCompass,
+  deriveStudyingAt,
   isStudentPath,
   type CompassInput,
   type CompassOpportunity,
@@ -35,7 +36,7 @@ const base: CompassInput = {
 describe("learning compass — pure model", () => {
   it("with nothing declared, every answer is an honest 'nothing yet' and the steps say what unblocks first", () => {
     const c = buildLearningCompass(base);
-    expect(c.becoming).toEqual({ professionSlug: null, currentEducation: null, cohorts: [] });
+    expect(c.becoming).toEqual({ professionSlug: null, currentEducation: null, cohorts: [], studyingAt: null });
     expect(c.evidence).toEqual({
       skillsTotal: 0,
       skillsConfirmed: 0,
@@ -97,6 +98,37 @@ describe("learning compass — pure model", () => {
     expect(isStudentPath({ education: [edu], hasLearnerLink: false })).toBe(true);
     expect(isStudentPath({ education: [{ ...edu, isCurrent: false }], hasLearnerLink: false })).toBe(false);
     expect(isStudentPath({ education: [], hasLearnerLink: true })).toBe(true);
+  });
+
+  it("'studying at' is named from the active student link FIRST (W6 honesty); without a link the old sources stand unchanged", () => {
+    // Measured on production 2026-09-06: a learner linked to "E2E Walker UAB"
+    // (active student engagement) saw no institution on the compass — the
+    // line was derived only from a `worker_education.is_current` row.
+    const edu = { institutionName: "VTU", programOrField: "Electrical", educationTypeSlug: "vocational", isCurrent: true };
+    const cohort = {
+      cohortId: "c1",
+      cohortName: "2026 autumn",
+      programName: "Electrical installation",
+      institutionName: "VTU",
+      targetProfessionSlug: null,
+      educationTypeSlug: null,
+      startsOn: null,
+      endsOn: null,
+      demandCount: null,
+    };
+    // engagement present → the institution is named, even with no education row
+    expect(buildLearningCompass({ ...base, studentInstitutionName: "E2E Walker UAB" }).becoming.studyingAt).toBe("E2E Walker UAB");
+    // the link is the canonical fact: it outranks a self-declared row
+    expect(buildLearningCompass({ ...base, education: [edu], studentInstitutionName: "E2E Walker UAB" }).becoming.studyingAt).toBe("E2E Walker UAB");
+    // no link → unchanged: the current row, then a cohort's institution, then nothing
+    expect(buildLearningCompass({ ...base, education: [edu] }).becoming.studyingAt).toBe("VTU");
+    expect(buildLearningCompass({ ...base, cohorts: [cohort] }).becoming.studyingAt).toBe("VTU");
+    expect(buildLearningCompass(base).becoming.studyingAt).toBeNull();
+    // a blank name is not a name — never a placeholder
+    expect(buildLearningCompass({ ...base, studentInstitutionName: "   " }).becoming.studyingAt).toBeNull();
+    expect(deriveStudyingAt({ studentInstitutionName: null, currentEducation: null, cohorts: [] })).toBeNull();
+    // the link names the institution but invents no education row
+    expect(buildLearningCompass({ ...base, studentInstitutionName: "E2E Walker UAB" }).becoming.currentEducation).toBeNull();
   });
 
   it("cohort membership is carried into 'becoming' untouched; without it the list is empty (callers may omit it)", () => {

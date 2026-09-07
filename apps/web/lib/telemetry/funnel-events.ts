@@ -197,9 +197,11 @@ export type FunnelMetadata = {
   /** Coarse role context: 'worker' | 'company' | 'agency' | 'customer' | 'person'. */
   role_context?: string;
   /** How a chat sentence was resolved: 'deterministic' (the always-on
-   *  router) or 'llm' (the Gemini proposer, owner approval 2026-09-05).
+   *  router), 'goal' (the ACTIVE CONVERSATION GOAL — a continuation such as
+   *  "Nuo spalio." that the router alone reads as unknown; owner P0
+   *  2026-09-06) or 'llm' (the Gemini proposer, owner approval 2026-09-05).
    *  Never the sentence. */
-  resolution?: "deterministic" | "llm";
+  resolution?: "deterministic" | "goal" | "llm";
   /** First-run intent: 'work' | 'hire' | 'agency' | 'student' | 'education',
    *  or a comma-joined set of them. Never free text. */
   intent?: string;

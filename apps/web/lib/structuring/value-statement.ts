@@ -21,6 +21,7 @@
 import { detectNeedProfession } from "@/lib/market/need-skills";
 import { PROFESSION_HINTS_LT } from "./keywords";
 import { foldText } from "./normalize";
+import { readRoleLabel } from "./role-label";
 import {
   WORK_TYPE_RULES,
   maskServiceNoun,
@@ -63,6 +64,15 @@ export interface ValueStatement {
    *  (the work type keeps precedence) or nothing matched. A suggestion the
    *  person confirms in the form, never a persisted fact by itself. */
   readonly professionSlug: string | null;
+  /** The occupation the person NAMED, in their own words and in the
+   *  nominative ("Reikia buhalterio" → "Buhalteris", "projektų vadovo" →
+   *  "Projektų vadovas") — carried whenever a seek sentence names an
+   *  occupation noun, so a profession OUTSIDE both closed catalogues still
+   *  reaches the need form's role field as an honest free-text label
+   *  (`workType` and `professionSlug` stay null: no pretended match).
+   *  Production 2026-09-06: six of eleven employer sentences lost their
+   *  role this way. */
+  readonly roleLabel: string | null;
   readonly skills: RecognizedSkill[];
   /** ISO-2 market code via the shared COUNTRY_RULES. */
   readonly country: string | null;
@@ -77,6 +87,30 @@ export interface ValueStatement {
   /** What would make the statement actionable: "location", "window", … */
   readonly missing: string[];
 }
+
+/**
+ * A PRESENT-TENSE TRADE ACTIVITY in the first person — "remontuoju
+ * automobilius", "kerpu plaukus", "dažau butus", "mokau matematikos",
+ * "I repair cars", "ремонтирую машины", "ich repariere Autos", "ik repareer
+ * auto's". Company-context walk 2026-09-06 (lane G): "remontuoju
+ * automobilius" was answered "I am not sure whether you are offering
+ * something or looking for something" — the sentence is a stated SERVICE
+ * (an action somebody can order), in any context. Whole-word forms only, so
+ * "montuoju" cannot fire inside "sumontuojame"; the LT list holds the
+ * 1st-person singular AND plural of the everyday trades. Folded (no
+ * diacritics), Cyrillic kept. EXPORTED so the intent router composes its
+ * offer-value pattern from this ONE list (wrap with a word boundary).
+ */
+export const PRESENT_ACTIVITY_VERB_SOURCE =
+  "remontuoju|remontuojame|taisau|taisome|kerpu|kerpame|dazau|dazome|valau|valome|montuoju|montuojame|mokau|mokome|siuvu|siuvame|vezu|vezame|vezioju|programuoju|programuojame|konsultuoju|konsultuojame|tvarkau|tvarkome|priziuriu|priziurime|pjaunu|pjauname|statau|statome|muriju|tinkuoju|klijuoju|verciu|verciame|projektuoju|projektuojame|fotografuoju|gaminu|gaminame|kepu|kepame|virinu|suvirinu|masazuoju|treniruoju|slaugau|" +
+  "i\\s+(?:repair|fix|paint|clean|install|teach|tutor|mow|sew|weld|build|design|translate|babysit|cut\\s+hair)|" +
+  "ремонтирую|чиню|крашу|убираю|монтирую|обучаю|шью|вожу|программирую|перевожу|стригу|строю|консультирую|" +
+  "ich\\s+(?:repariere|streiche|putze|montiere|unterrichte|nahe|schweisse|baue|ubersetze)|" +
+  "ik\\s+(?:repareer|schilder|monteer|naai|las|bouw|vertaal)";
+const PRESENT_ACTIVITY_RE = new RegExp(
+  `(?<![\\p{L}])(?:${PRESENT_ACTIVITY_VERB_SOURCE})(?![\\p{L}])`,
+  "u",
+);
 
 /** Folded axis needles. Order-independent; both sides scored. */
 const OFFER_RES: RegExp[] = [
@@ -93,6 +127,8 @@ const OFFER_RES: RegExp[] = [
   /\bavailable\b/u,
   /\bbied\b|\bverkoop/u, // nl (opportunistic)
   /\bbiete\b|verkaufe/u, // de (opportunistic)
+  // "remontuoju automobilius" — stating what one DOES is an offer of it.
+  PRESENT_ACTIVITY_RE,
 ];
 
 const SEEK_RES: RegExp[] = [
@@ -139,7 +175,6 @@ const SERVICE_VERB_RE =
  */
 const OFFER_ACTIVITY_RE =
   /\b(galiu|siulau|siulyti|teikiu|can|могу|biete|bied)\b\s+(?:\S+\s+){0,2}?(kirp|dazy|valy|mokyt[iu]\b|tvarky|siuv|montuo|pjau|priziur|programuo|konsultuo|apskait|vez[tu]|remont|taisy|paint|clean|teach|tutor|mow|install|sew|babysit|garden|\bfix\b)/u;
-
 
 /** V10 equipment-capacity reading: the MACHINE is free, not a person. */
 const EQUIPMENT_RE =
@@ -302,6 +337,9 @@ export function structureValueStatement(
     ? null
     : detectNeedProfession(maskServiceNoun(folded));
   if (professionSlug) reasons.push(`profession:${professionSlug}`);
+  const role = readRoleLabel(raw);
+  const roleLabel = role?.label ?? null;
+  if (roleLabel) reasons.push(`role_label:${roleLabel}`);
   const skills = recognizeSkills(raw);
   const { country, city } = resolveCountryAndCity(folded);
   if (country) reasons.push(`country:${country}`);
@@ -312,7 +350,13 @@ export function structureValueStatement(
       `window:${window.kind}${window.days ? `(${window.days}d)` : ""}`,
     );
   }
-  const headcount = detectHeadcount(raw, folded);
+  // A bare SINGULAR occupation after a seek verb ("restoranui reikia
+  // virėjo", "reikia buhalterio") is a need for ONE person — the number the
+  // grammar states, offered in the editable headcount field. A plural with
+  // no number ("reikia suvirintojų") stays open: the count is not stated.
+  const headcount =
+    detectHeadcount(raw, folded) ??
+    (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null);
   if (headcount !== null) reasons.push(`headcount:${headcount}`);
 
   // ── Subject — decided by axis + the facts, never by guessing the user ──
@@ -327,19 +371,24 @@ export function structureValueStatement(
     if (
       SERVICE_RE.test(folded) ||
       SERVICE_VERB_RE.test(folded) ||
-      OFFER_ACTIVITY_RE.test(folded)
+      OFFER_ACTIVITY_RE.test(folded) ||
+      PRESENT_ACTIVITY_RE.test(folded)
     ) {
       subject = "service";
       // "galiu versti dokumentus iš lenkų į lietuvių" — the echo carries the
       // person's own description (incl. a language pair when they state one).
       // For an offer verb + activity ("galiu kirpti plaukus") the echo starts
-      // after the OFFER VERB, so the activity itself is what is echoed.
+      // after the OFFER VERB, so the activity itself is what is echoed; for a
+      // present-tense activity ("kerpu plaukus") after the VERB itself.
       const sv = folded.match(SERVICE_VERB_RE);
       const oa = sv ? null : folded.match(OFFER_ACTIVITY_RE);
+      const pa = sv || oa ? null : folded.match(PRESENT_ACTIVITY_RE);
       if (sv?.index !== undefined) {
         subjectLabel = echoAfter(raw, endOfWord(raw, sv.index + sv[0].length));
       } else if (oa?.index !== undefined) {
         subjectLabel = echoAfter(raw, endOfWord(raw, oa.index + oa[1].length));
+      } else if (pa?.index !== undefined) {
+        subjectLabel = echoAfter(raw, endOfWord(raw, pa.index + pa[0].length));
       }
     } else if (equipmentCapacity) {
       // V10: the MACHINE is free — a goods/equipment capacity, not a person's.
@@ -372,7 +421,9 @@ export function structureValueStatement(
       subject = "work_capacity";
     }
   } else if (axis === "seek") {
-    if (workType || headcount !== null) subject = "workforce";
+    // A named occupation — closed-set or the person's own word — is a
+    // workforce need even before the count is known.
+    if (workType || professionSlug || roleLabel || headcount !== null) subject = "workforce";
   }
   if (subject) reasons.push(`subject:${subject}`);
   if (quantity) reasons.push(`quantity:${quantity.raw}`);
@@ -410,6 +461,8 @@ export function structureValueStatement(
 
   const identifying =
     workType !== null ||
+    professionSlug !== null ||
+    roleLabel !== null ||
     goodsQuantity !== null ||
     headcount !== null ||
     skills.length > 0;
@@ -429,6 +482,7 @@ export function structureValueStatement(
     headcount,
     workType,
     professionSlug,
+    roleLabel,
     skills,
     country,
     city,

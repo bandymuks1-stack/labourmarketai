@@ -1372,6 +1372,12 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
         "arc weld",
         "elektrodu suvirin",
         "elektrodais suvirin",
+        // "Virinau elektrodu…" — the colloquial "virinti" (to weld) is only
+        // safe WITH the electrode beside it ("virinau vandenį" is boiling).
+        "virinau elektrod",
+        "virinome elektrod",
+        "elektrodu virin",
+        "elektrodais virin",
         "дуговая сварк",
         "дуговой сварк",
         "варил электрод",
@@ -2130,6 +2136,11 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
     slug: "software_developer",
     needles: [
       "programuotoj",
+      // "programinės įrangos kūrėjas" — the formal LT title an employer
+      // writes ("Reikia programinės įrangos kūrėjo", production 2026-09-06
+      // opened the need form with the role empty). Same profession.
+      "programinės įrangos",
+      "programines irangos",
       "разработчик",
       "программист",
       "developer",

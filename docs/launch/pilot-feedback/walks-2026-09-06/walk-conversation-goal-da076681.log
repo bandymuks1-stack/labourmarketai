@@ -1,0 +1,25 @@
+{"step":"health","build":"da076681","region":"dub1"}
+{"turn":"A1","sentence":"Ieškau darbo pagal savo CV","text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":[],"cvUploaderOpen":false,"results":0,"form":null}
+{"check":"A1 the goal is answered, not turned into an upload","ok":true,"detail":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai."}
+{"check":"A1 something was actually answered","ok":true,"detail":{"len":168,"results":0}}
+{"turn":"A2","sentence":"tu jau turi mano duomenis","text":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":[],"cvUploaderOpen":false,"results":0,"form":null}
+{"check":"A2 the CV uploader does NOT reopen","ok":true,"detail":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo s"}
+{"check":"A2 the CV chip is NOT re-offered","ok":true,"detail":[]}
+{"check":"A2 not the generic fallback","ok":true,"detail":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo s"}
+{"turn":"A3","sentence":"gerai, tada ieškok visoje Europoje","text":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":[],"cvUploaderOpen":false,"results":0,"form":null}
+{"check":"A3 the goal survived — not the fallback","ok":true,"detail":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo s"}
+{"check":"A3 the CV uploader stays closed","ok":true,"detail":null}
+{"turn":"A4","sentence":"rodyk tik nuo 3000 eurų","text":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai. Pagal workspace.ai.dimension.salary filtruoti dar negaliu.","chips":[],"cvUploaderOpen":false,"results":0,"form":null}
+{"check":"A4 a pay constraint does not end the conversation","ok":true,"detail":"L LabourMarket AI conversation.chat.knownState.usingProfile L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo s"}
+{"check":"A4 the CV chip is still not back","ok":true,"detail":[]}
+{"check":"A read-only: the journal row count is unchanged","ok":true,"detail":{"before":1,"after":1}}
+{"check":"A no failed requests","ok":true,"detail":[]}
+{"turn":"D1","sentence":"Turime 20 suvirintojų, kuriems ieškome darbo.","text":"","chips":["Tęsti","Atšaukti"],"cvUploaderOpen":false,"results":0,"form":{"role":"Suvirintojas","teamSize":"20","location":""}}
+{"check":"D1 not answered as a personal job search","ok":true,"detail":""}
+{"check":"D1 the offer form opened with the trade and the count","ok":true,"detail":{"role":"Suvirintojas","teamSize":"20","location":""}}
+{"turn":"D2","sentence":"Nuo spalio.","text":"","chips":["Tęsti","Atšaukti","Tęsti","Atšaukti"],"cvUploaderOpen":false,"results":0,"form":{"role":"Suvirintojas","teamSize":"20","location":""}}
+{"check":"D2 the direction did not flip to a need","ok":true,"detail":""}
+{"turn":"D3","sentence":"Nyderlanduose arba Belgijoje.","text":"","chips":["Tęsti","Atšaukti","Tęsti","Atšaukti","Tęsti","Atšaukti"],"cvUploaderOpen":false,"results":0,"form":{"role":"Suvirintojas","teamSize":"20","location":"Nyderlandai"}}
+{"check":"D3 still the same statement","ok":true,"detail":""}
+{"check":"D no failed requests","ok":true,"detail":[]}
+{"done":true,"failures":[]}

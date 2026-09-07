@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { FIRST_RUN_INTENTS, INTENT_IDENTITY, nextPathForIntents } from "./first-run-intent";
 import {
+  DOOR_WORDS_KEY,
   EMPTY_HANDOFF,
+  doorIntentsFromReturnPath,
   professionFromSentence,
   readLandingHandoff,
   sentenceFromReturnPath,
@@ -60,5 +63,93 @@ describe("landing hand-off → onboarding defaults (pure)", () => {
     // every proposed slug must be one the wizard's select actually offers
     const h = readLandingHandoff(NEXT_PLAIN);
     expect(h.professionSlug === null || typeof h.professionSlug === "string").toBe(true);
+  });
+
+  it("a sentence hand-off carries no door", () => {
+    expect(readLandingHandoff(NEXT_LOCALE).door).toEqual([]);
+  });
+});
+
+/**
+ * The landing DOOR (lanes F + C, production build dd5d92c3): the institution
+ * door carries `/dashboard/start/company?capability=training_provider` — the
+ * path the router hands an `education` intent — and onboarding showed
+ * nothing ticked. The hand-off reads the path BACK through the router.
+ */
+describe("landing door → onboarding defaults (nextPathForIntents inverted)", () => {
+  const INSTITUTION = "/dashboard/start/company?capability=training_provider";
+
+  it("capability=training_provider → the 'education' card, no sentence, no profession", () => {
+    const h = readLandingHandoff(INSTITUTION);
+    expect(h).toEqual({ sentence: "", intents: ["education"], professionSlug: null, door: ["education"] });
+  });
+
+  it("reads a locale-prefixed door too, and ignores query order", () => {
+    expect(doorIntentsFromReturnPath(`/lt${INSTITUTION}`)).toEqual(["education"]);
+    expect(doorIntentsFromReturnPath(`/en${INSTITUTION}`)).toEqual(["education"]);
+    expect(
+      doorIntentsFromReturnPath("/dashboard/start/company?capability=training_provider&type=staffing_agency"),
+    ).toEqual(["agency", "education"]);
+    expect(
+      doorIntentsFromReturnPath("/dashboard/start/company?type=staffing_agency&capability=training_provider"),
+    ).toEqual(["agency", "education"]);
+  });
+
+  it("is the exact inverse of the router for every company-intent combination", () => {
+    const company = FIRST_RUN_INTENTS.filter((i) => INTENT_IDENTITY[i] === "company");
+    for (let mask = 1; mask < 1 << company.length; mask += 1) {
+      const intents = company.filter((_, idx) => mask & (1 << idx));
+      const path = nextPathForIntents(intents);
+      expect(path).not.toBeNull();
+      const back = doorIntentsFromReturnPath(path);
+      // the smallest set that routes to this path (a bare setup path = hire)
+      expect(nextPathForIntents(back)).toBe(path);
+      for (const i of back) expect(intents).toContain(i);
+    }
+    expect(doorIntentsFromReturnPath("/dashboard/start/company")).toEqual(["hire"]);
+    expect(doorIntentsFromReturnPath("/dashboard/start/company?type=staffing_agency")).toEqual(["agency"]);
+  });
+
+  it("an unknown capability or type is not a door → nothing is ticked", () => {
+    expect(doorIntentsFromReturnPath("/dashboard/start/company?capability=employer")).toEqual([]);
+    expect(doorIntentsFromReturnPath("/dashboard/start/company?capability=workforce_provider")).toEqual([]);
+    expect(doorIntentsFromReturnPath("/dashboard/start/company?type=client_customer")).toEqual([]);
+    expect(doorIntentsFromReturnPath("/dashboard/start/company?capability=training_provider&new=1")).toEqual([]);
+    expect(readLandingHandoff("/dashboard/start/company?capability=employer")).toBe(EMPTY_HANDOFF);
+  });
+
+  it("worker paths, invitation deep links, foreign URLs and nothing → no door", () => {
+    expect(doorIntentsFromReturnPath("/dashboard")).toEqual([]);
+    expect(doorIntentsFromReturnPath("/dashboard/profile#learning-compass")).toEqual([]);
+    expect(doorIntentsFromReturnPath("/dashboard/invitations/abc")).toEqual([]);
+    expect(doorIntentsFromReturnPath("https://evil.example/dashboard/start/company?capability=training_provider")).toEqual([]);
+    expect(doorIntentsFromReturnPath("//evil.example/dashboard/start/company")).toEqual([]);
+    expect(doorIntentsFromReturnPath(null)).toEqual([]);
+    expect(doorIntentsFromReturnPath(undefined)).toEqual([]);
+  });
+
+  it("both a sentence and a door: the person's own words win; an unreadable sentence keeps the door", () => {
+    const welder = `${INSTITUTION}&say=${encodeURIComponent("esu suvirintojas, ieškau darbo Norvegijoje")}`;
+    const h = readLandingHandoff(welder);
+    expect(h.intents).toEqual(["work"]);
+    expect(h.professionSlug).toBe("welder");
+    expect(h.door).toEqual(["education"]);
+    const unread = readLandingHandoff(`${INSTITUTION}&say=${encodeURIComponent("labas rytas visiems")}`);
+    expect(unread.sentence).toBe("labas rytas visiems");
+    expect(unread.intents).toEqual(["education"]);
+    // an institution sentence through the institution door: consistent
+    const consistent = readLandingHandoff(
+      `${INSTITUTION}&say=${encodeURIComponent("Atstovauju kolegijai, norime kviesti studentus")}`,
+    );
+    expect(consistent.intents.length).toBeLessThanOrEqual(1);
+  });
+
+  it("every door intent maps to a landing.cta key, and only company intents are doors", () => {
+    for (const intent of FIRST_RUN_INTENTS) {
+      const key = DOOR_WORDS_KEY[intent];
+      if (INTENT_IDENTITY[intent] === "company") expect(key).toBeTruthy();
+      else expect(key).toBeUndefined();
+    }
+    expect(DOOR_WORDS_KEY.education).toBe("institution");
   });
 });

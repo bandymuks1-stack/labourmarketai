@@ -2374,13 +2374,25 @@ describe("no migration files added by this sprint", () => {
     // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
     // window 6, 2026-09-06, GREEN additive: one partial index for the board
     // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
-    // rollback; applied via MCP 2026-09-06 as ledger 20260906072604).
-    // Bumped 266 -> 267 for the notification_events service_role write grant
-    // (20260906060000, RED draft + needs-human-gate, UNAPPLIED until owner
-    // approval): ONE additive GRANT (select/insert/update) so the emitters
-    // stop failing 42501 — no data, no RLS, no anon/authenticated change.
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 267.
-const SPRINT_BASELINE = 267;
+    // rollback; applied by the orchestrator via MCP). RECOUNTED from the
+    // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
+    // Bumped 266 -> 267 for worker_board_excludes_supply_v1 (owner window 7
+    // §4, 2026-09-06): the worker board's gated read had NO `kind` filter, so
+    // agency SUPPLY offers (kind='agency_offer') were served to every worker
+    // as open jobs — measured 2 of 9 rows on production. RED class
+    // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
+    // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06):
+    // list_open_demand_for_agencies had no `kind` filter either, so an agency
+    // browsing for work to staff was served OTHER agencies' offers as demand —
+    // measured on production as 2 of 12 rows, through the real RPC under the
+    // agency's own auth. RED class (SECURITY DEFINER body replace).
+    // Bumped 268 -> 269 for the notification-spine service_role grant
+    // (20260906060000, RED + needs-human-gate): TWO additive grants —
+    // select/insert/update on notification_events and select on
+    // notification_preferences — so the emitters and the consent read the
+    // email dispatcher depends on stop failing 42501. No data, no RLS, no
+    // anon/authenticated change.
+const SPRINT_BASELINE = 269;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

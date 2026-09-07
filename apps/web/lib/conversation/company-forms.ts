@@ -129,6 +129,70 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
 ] as const;
 
 /**
+ * THE SUPPLY SIDE OF THE SAME INTAKE (owner window 7 §4, 2026-09-06).
+ *
+ * "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose." is not a
+ * need — it is capacity offered to the market. The canonical object for it
+ * already exists and is already written by the agency's own dashboard form:
+ * a `customer_requests` row with `kind = 'agency_offer'`, which the
+ * `company.create-demand` schema has always accepted as `intent: "partner"`.
+ *
+ * What was missing was only the DOOR: the sentence had nowhere to go, so an
+ * agency stating capacity was read as a person hunting for a job.
+ *
+ * So this is the same action id, the same fields, the same zod schema, the
+ * same confirmation token, the same dispatcher and the same executor — one
+ * intake, not a second one. Exactly two things differ, and both are what the
+ * person READS:
+ *
+ *   * the labels say "offer" rather than "need" (asking an agency to
+ *     "describe the need" for twenty welders it HAS is the same inversion in
+ *     the copy that the router had in its patterns);
+ *   * `build` stamps `intent: "partner"`, so the row lands as `agency_offer`
+ *     and is never mistaken for demand.
+ *
+ * A draft is not offered: the draft payload shape is defined for the
+ * `company_request` kind only (see `companyCreateDemandSchema`), so the
+ * supply form submits or does nothing.
+ */
+export function supplyOfferFormSpec(): WorkerFormSpec {
+  const base = COMPANY_FORMS.find((f) => f.actionId === "company.create-demand");
+  if (!base) throw new Error("company.create-demand form spec missing");
+  return {
+    ...base,
+    titleKey: "conversation.actions.company.offerCapacity.label",
+    fields: base.fields
+      // The draft checkbox has no meaning for this kind — see above.
+      .filter((f) => f.name !== "asDraft")
+      .map((f) =>
+        f.name === "description"
+          ? {
+              ...f,
+              labelKey: "conversation.forms.fields.supplyDescription",
+              placeholderKey: "conversation.forms.fields.supplyDescriptionPlaceholder",
+            }
+          : f.name === "role"
+            ? {
+                ...f,
+                labelKey: "conversation.forms.fields.supplyRole",
+                placeholderKey: "conversation.forms.fields.supplyRolePlaceholder",
+              }
+            : f.name === "teamSize"
+              ? { ...f, labelKey: "conversation.forms.fields.supplyTeamSize" }
+              : f.name === "location"
+                ? { ...f, labelKey: "conversation.forms.fields.supplyLocation" }
+                : f,
+      ),
+    build: (st: FormState) => ({
+      ...base.build(st),
+      intent: "partner",
+      // `mode` is fixed: the draft shape is defined for company_request only.
+      mode: "submit",
+    }),
+  };
+}
+
+/**
  * AGENCY — real recruiter pilot (2026-09-04). "Noriu pakviesti klientą" needs
  * exactly ONE missing fact (the client's e-mail); "pakviesk darbuotoją" the
  * same plus an optional note. Both are important-tier canonical writes, so

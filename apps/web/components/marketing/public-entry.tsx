@@ -68,6 +68,22 @@ const EXAMPLE_KEYS = [
   "professional",
   "needService",
   "offerService",
+  // ── Window 11 (2026-09-07, owner §16/§18): the examples must span the
+  //    GRAPH, not one edge of it. Every sentence above is a person or a
+  //    company looking for the other — which is exactly the reading §16 says
+  //    a visitor leaves with ("job board + worker profile + work journal").
+  //    These four are the directions that reading has no room for, and each
+  //    lands on a capability that already exists:
+  //      offerCapacity — an organisation with SPARE CAPACITY (supply)
+  //      brigade       — a TEAM wanted for a site (measured 2026-09-07: this
+  //                      classified as the person LOOKING FOR WORK — the
+  //                      demand/supply inversion, on the landing)
+  //      logWork       — real work recorded (the evidence spine)
+  //      verifyWork    — who can verify it (the verification chain)
+  "offerCapacity",
+  "brigade",
+  "logWork",
+  "verifyWork",
 ] as const;
 
 export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
@@ -212,7 +228,25 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           </div>
         </form>
 
-        {/* ── Examples — routed live when tapped, never pre-answered ────── */}
+        {/* ── Examples — routed live when tapped, never pre-answered ──────
+               TEN sentences, and none of them may be dropped: each is a
+               different DIRECTION of the graph, which is the whole answer to
+               §16 (a visitor reading only "job + worker + hire" leaves
+               believing this is a job board).
+               They WRAP, at every width, and the cost is stated rather than
+               engineered away: at 375px the row is ~523px tall and the entry
+               card's bottom lands below the fold. §19 asks whether that is
+               appropriate, and the answer here is yes — the label, the field
+               and the submit are all above it; only the examples run past.
+
+               A horizontally-scrolling strip was tried first and reverted the
+               same day. It fixed the height (523px → 48px) and broke the point:
+               at 320px a visitor sees one and a half sentences and has to swipe
+               to discover that the product is more than a job board, which is
+               the §16 complaint restated as a gesture. It also put eight of ten
+               chips outside the viewport, which is exactly what
+               `tests/e2e/landing-mobile-overflow.spec.ts` asserts against —
+               correctly. Hiding breadth is not a density fix. */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {EXAMPLE_KEYS.map((key) => {
