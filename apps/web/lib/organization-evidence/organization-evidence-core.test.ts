@@ -20,9 +20,20 @@ import {
   recordFingerprint,
   recordFingerprintForRow,
 } from "./fingerprint";
-import { matchPerson, matchPlace, personKey, type RosterPerson } from "./person-matching";
+import {
+  matchPerson,
+  matchPlace,
+  personKey,
+  type RosterPerson,
+} from "./person-matching";
 import { MAX_ROWS_PER_SUBMIT, sourceWorkRowSchema, tidy } from "./source-rows";
-import { mapHeaderRow, parseDelimited, readDate, readHours, rowsFromGrid } from "./parse-tabular";
+import {
+  mapHeaderRow,
+  parseDelimited,
+  readDate,
+  readHours,
+  rowsFromGrid,
+} from "./parse-tabular";
 
 /**
  * THE PURE CORE OF THE ORGANIZATION EVIDENCE IMPORT.
@@ -71,14 +82,21 @@ describe("an import can only ever write a REPORTED state", () => {
   });
 
   it("both self- states are marked self-vouched, and no other state is", () => {
-    expect(EVIDENCE_STATES.filter(isSelfVouched)).toEqual(["SELF_REPORTED", "SELF_ATTESTED"]);
+    expect(EVIDENCE_STATES.filter(isSelfVouched)).toEqual([
+      "SELF_REPORTED",
+      "SELF_ATTESTED",
+    ]);
   });
 });
 
 // ── owner decision 3: self-attestation is real, and never independent ──────
 
 describe("a sole trader may attest their own work — and it stays self-attested", () => {
-  const attested = (by: string, role: string, at: string): RecordLifecycleEvent => ({
+  const attested = (
+    by: string,
+    role: string,
+    at: string,
+  ): RecordLifecycleEvent => ({
     eventType: "attested",
     actorRole: role,
     actorProfileId: by,
@@ -92,7 +110,10 @@ describe("a sole trader may attest their own work — and it stays self-attested
       SUBJECT,
     );
     expect(standing.state).toBe("SELF_ATTESTED");
-    expect(standing.attestation).toMatchObject({ self: true, byProfileId: SUBJECT });
+    expect(standing.attestation).toMatchObject({
+      self: true,
+      byProfileId: SUBJECT,
+    });
     // The whole point: it is REAL evidence that never counts as verification.
     expect(standing.independentlyVerified).toBe(false);
   });
@@ -110,8 +131,11 @@ describe("a sole trader may attest their own work — and it stays self-attested
 
   it("the actor's role decides WHICH attested state — a client is not an employer", () => {
     const roleState = (role: string) =>
-      deriveEvidenceStanding("ORGANIZATION_REPORTED", [attested(MANAGER, role, "2026-07-05T10:00:00Z")], SUBJECT)
-        .state;
+      deriveEvidenceStanding(
+        "ORGANIZATION_REPORTED",
+        [attested(MANAGER, role, "2026-07-05T10:00:00Z")],
+        SUBJECT,
+      ).state;
     expect(roleState("client")).toBe("CLIENT_ATTESTED");
     expect(roleState("education_provider")).toBe("INSTITUTION_ATTESTED");
     expect(roleState("assessor")).toBe("ASSESSOR_ATTESTED");
@@ -125,7 +149,14 @@ describe("a sole trader may attest their own work — and it stays self-attested
     // match a null actor into a self-attestation.
     const standing = deriveEvidenceStanding(
       "ORGANIZATION_REPORTED",
-      [{ eventType: "attested", actorRole: "employer", actorProfileId: null, createdAt: "2026-07-05T10:00:00Z" }],
+      [
+        {
+          eventType: "attested",
+          actorRole: "employer",
+          actorProfileId: null,
+          createdAt: "2026-07-05T10:00:00Z",
+        },
+      ],
       null,
     );
     expect(standing.state).toBe("ORGANIZATION_ATTESTED");
@@ -150,7 +181,13 @@ describe("independent verification requires a genuinely distinct party", () => {
   it("a real verification event reaches the one verified state", () => {
     const standing = deriveEvidenceStanding(
       "ORGANIZATION_REPORTED",
-      [{ eventType: "independently_verified", actorProfileId: MANAGER, createdAt: "2026-08-01T10:00:00Z" }],
+      [
+        {
+          eventType: "independently_verified",
+          actorProfileId: MANAGER,
+          createdAt: "2026-08-01T10:00:00Z",
+        },
+      ],
       SUBJECT,
     );
     expect(standing.state).toBe(INDEPENDENTLY_VERIFIED);
@@ -207,8 +244,17 @@ describe("the rollback path hides standing, never the record", () => {
     const standing = deriveEvidenceStanding(
       "ORGANIZATION_REPORTED",
       [
-        { eventType: "attested", actorRole: "employer", actorProfileId: MANAGER, createdAt: "2026-07-05T10:00:00Z" },
-        { eventType: "withdrawn", actorProfileId: MANAGER, createdAt: "2026-07-06T10:00:00Z" },
+        {
+          eventType: "attested",
+          actorRole: "employer",
+          actorProfileId: MANAGER,
+          createdAt: "2026-07-05T10:00:00Z",
+        },
+        {
+          eventType: "withdrawn",
+          actorProfileId: MANAGER,
+          createdAt: "2026-07-06T10:00:00Z",
+        },
       ],
       SUBJECT,
     );
@@ -222,9 +268,22 @@ describe("the rollback path hides standing, never the record", () => {
     const standing = deriveEvidenceStanding(
       "ORGANIZATION_REPORTED",
       [
-        { eventType: "attested", actorRole: "employer", actorProfileId: MANAGER, createdAt: "2026-07-05T10:00:00Z" },
-        { eventType: "withdrawn", actorProfileId: MANAGER, createdAt: "2026-07-06T10:00:00Z" },
-        { eventType: "reinstated", actorProfileId: MANAGER, createdAt: "2026-07-07T10:00:00Z" },
+        {
+          eventType: "attested",
+          actorRole: "employer",
+          actorProfileId: MANAGER,
+          createdAt: "2026-07-05T10:00:00Z",
+        },
+        {
+          eventType: "withdrawn",
+          actorProfileId: MANAGER,
+          createdAt: "2026-07-06T10:00:00Z",
+        },
+        {
+          eventType: "reinstated",
+          actorProfileId: MANAGER,
+          createdAt: "2026-07-07T10:00:00Z",
+        },
       ],
       SUBJECT,
     );
@@ -235,7 +294,13 @@ describe("the rollback path hides standing, never the record", () => {
   it("a dispute is never silently dropped", () => {
     const standing = deriveEvidenceStanding(
       "ORGANIZATION_REPORTED",
-      [{ eventType: "disputed", actorProfileId: SUBJECT, createdAt: "2026-07-06T10:00:00Z" }],
+      [
+        {
+          eventType: "disputed",
+          actorProfileId: SUBJECT,
+          createdAt: "2026-07-06T10:00:00Z",
+        },
+      ],
       SUBJECT,
     );
     expect(standing.state).toBe("DISPUTED");
@@ -245,8 +310,16 @@ describe("the rollback path hides standing, never the record", () => {
     const standing = deriveEvidenceStanding(
       "ORGANIZATION_REPORTED",
       [
-        { eventType: "independently_verified", actorProfileId: MANAGER, createdAt: "2026-08-01T10:00:00Z" },
-        { eventType: "verification_withdrawn", actorProfileId: MANAGER, createdAt: "2026-08-02T10:00:00Z" },
+        {
+          eventType: "independently_verified",
+          actorProfileId: MANAGER,
+          createdAt: "2026-08-01T10:00:00Z",
+        },
+        {
+          eventType: "verification_withdrawn",
+          actorProfileId: MANAGER,
+          createdAt: "2026-08-02T10:00:00Z",
+        },
       ],
       SUBJECT,
     );
@@ -255,8 +328,12 @@ describe("the rollback path hides standing, never the record", () => {
   });
 
   it("with no events at all the reported state passes through untouched", () => {
-    expect(deriveEvidenceStanding("LEGACY_IMPORTED").state).toBe("LEGACY_IMPORTED");
-    expect(deriveEvidenceStanding("LEGACY_IMPORTED").independentlyVerified).toBe(false);
+    expect(deriveEvidenceStanding("LEGACY_IMPORTED").state).toBe(
+      "LEGACY_IMPORTED",
+    );
+    expect(
+      deriveEvidenceStanding("LEGACY_IMPORTED").independentlyVerified,
+    ).toBe(false);
   });
 });
 
@@ -264,14 +341,24 @@ describe("the rollback path hides standing, never the record", () => {
 
 describe("an inference is never readable as a source fact", () => {
   it("a stated field is a fact, an inferred one carries its method", () => {
-    const derived = { projectLabel: { value: "Site A", method: "object_from_text", confidence: 0.6 } };
-    expect(factOrDerived("workDate", ["workDate"], derived)).toEqual({ kind: "fact" });
+    const derived = {
+      projectLabel: {
+        value: "Site A",
+        method: "object_from_text",
+        confidence: 0.6,
+      },
+    };
+    expect(factOrDerived("workDate", ["workDate"], derived)).toEqual({
+      kind: "fact",
+    });
     expect(factOrDerived("projectLabel", ["workDate"], derived)).toEqual({
       kind: "derived",
       derived: derived.projectLabel,
     });
     // Absent is its own answer — "we do not know" must never render as "no".
-    expect(factOrDerived("hours", ["workDate"], derived)).toEqual({ kind: "absent" });
+    expect(factOrDerived("hours", ["workDate"], derived)).toEqual({
+      kind: "absent",
+    });
   });
 
   it("the row schema REFUSES a field claimed as both fact and inference", () => {
@@ -281,7 +368,9 @@ describe("an inference is never readable as a source fact", () => {
       workText: "Tiled the second floor",
       raw: { A: "Jonas Petraitis" },
       factFields: ["workDate"],
-      derived: { workDate: { value: "2026-03-04", method: "dmy_guess", confidence: 0.5 } },
+      derived: {
+        workDate: { value: "2026-03-04", method: "dmy_guess", confidence: 0.5 },
+      },
     };
     const parsed = sourceWorkRowSchema.safeParse(row);
     expect(parsed.success).toBe(false);
@@ -309,7 +398,10 @@ describe("an inference is never readable as a source fact", () => {
     // Defaults must UNDER-claim: nothing is a stated fact unless said so.
     expect(parsed.factFields).toEqual([]);
     expect(parsed.derived).toEqual({});
-    expect(parsed.raw).toEqual({ Vardas: "Jonas Petraitis", Data: "04.03.2026" });
+    expect(parsed.raw).toEqual({
+      Vardas: "Jonas Petraitis",
+      Data: "04.03.2026",
+    });
   });
 
   it("a batch is bounded so thousands of rows arrive as batches, not one request", () => {
@@ -338,8 +430,12 @@ describe("the same fact fingerprints the same way twice", () => {
   });
 
   it("hours normalise, so 8 / 8.0 / 8.00 are ONE fact", () => {
-    expect(recordFingerprint({ ...base, hours: 8.0 })).toBe(recordFingerprint(base));
-    expect(recordFingerprint({ ...base, hours: 8.004 })).toBe(recordFingerprint(base));
+    expect(recordFingerprint({ ...base, hours: 8.0 })).toBe(
+      recordFingerprint(base),
+    );
+    expect(recordFingerprint({ ...base, hours: 8.004 })).toBe(
+      recordFingerprint(base),
+    );
   });
 
   it("the written name and the resolved person id agree, so matching later still collides", () => {
@@ -347,21 +443,36 @@ describe("the same fact fingerprints the same way twice", () => {
     // after must NOT become two facts — but only once the row is actually
     // pointed at that person; the id is the stronger key when present.
     const byName = recordFingerprint(base);
-    const byId = recordFingerprint({ ...base, organizationPersonId: "person-1" });
+    const byId = recordFingerprint({
+      ...base,
+      organizationPersonId: "person-1",
+    });
     expect(byId).not.toBe(byName);
-    expect(recordFingerprint({ ...base, organizationPersonId: "person-1", personLabel: "PETRAITIS, Jonas" })).toBe(byId);
+    expect(
+      recordFingerprint({
+        ...base,
+        organizationPersonId: "person-1",
+        personLabel: "PETRAITIS, Jonas",
+      }),
+    ).toBe(byId);
   });
 
   it("a different day, a different person or different hours is a DIFFERENT fact", () => {
-    expect(recordFingerprint({ ...base, workDate: "2026-03-05" })).not.toBe(recordFingerprint(base));
-    expect(recordFingerprint({ ...base, personLabel: "Petras Jonaitis" })).not.toBe(recordFingerprint(base));
-    expect(recordFingerprint({ ...base, hours: 9 })).not.toBe(recordFingerprint(base));
+    expect(recordFingerprint({ ...base, workDate: "2026-03-05" })).not.toBe(
+      recordFingerprint(base),
+    );
+    expect(
+      recordFingerprint({ ...base, personLabel: "Petras Jonaitis" }),
+    ).not.toBe(recordFingerprint(base));
+    expect(recordFingerprint({ ...base, hours: 9 })).not.toBe(
+      recordFingerprint(base),
+    );
   });
 
   it("casing and spacing in the written name do not create a second fact", () => {
-    expect(recordFingerprint({ ...base, personLabel: "  JONAS   petraitis " })).toBe(
-      recordFingerprint(base),
-    );
+    expect(
+      recordFingerprint({ ...base, personLabel: "  JONAS   petraitis " }),
+    ).toBe(recordFingerprint(base));
   });
 
   it("the fingerprint ignores WHERE the row came from — the same fact from CSV and from an agent is one fact", () => {
@@ -377,20 +488,28 @@ describe("the same fact fingerprints the same way twice", () => {
       ...row,
       raw: { source: "chatgpt", batch: 3 },
     });
-    expect(recordFingerprintForRow(ORG, row)).toBe(recordFingerprintForRow(ORG, sameFactOtherFile));
-  });
-
-  it("two organizations never share a fingerprint", () => {
-    expect(recordFingerprint({ ...base, organizationId: "other-org" })).not.toBe(
-      recordFingerprint(base),
+    expect(recordFingerprintForRow(ORG, row)).toBe(
+      recordFingerprintForRow(ORG, sameFactOtherFile),
     );
   });
 
+  it("two organizations never share a fingerprint", () => {
+    expect(
+      recordFingerprint({ ...base, organizationId: "other-org" }),
+    ).not.toBe(recordFingerprint(base));
+  });
+
   it("canonical JSON sorts keys, so payload hashing is order-independent", () => {
-    expect(canonicalJson({ b: 1, a: { d: 2, c: 3 } })).toBe('{"a":{"c":3,"d":2},"b":1}');
-    expect(fingerprintPayload("x", { a: 1, b: 2 })).toBe(fingerprintPayload("x", { b: 2, a: 1 }));
+    expect(canonicalJson({ b: 1, a: { d: 2, c: 3 } })).toBe(
+      '{"a":{"c":3,"d":2},"b":1}',
+    );
+    expect(fingerprintPayload("x", { a: 1, b: 2 })).toBe(
+      fingerprintPayload("x", { b: 2, a: 1 }),
+    );
     // The label separates namespaces on purpose.
-    expect(fingerprintPayload("x", { a: 1 })).not.toBe(fingerprintPayload("y", { a: 1 }));
+    expect(fingerprintPayload("x", { a: 1 })).not.toBe(
+      fingerprintPayload("y", { a: 1 }),
+    );
   });
 
   it("the chain links each record to the one before it", () => {
@@ -407,8 +526,18 @@ describe("the same fact fingerprints the same way twice", () => {
 
 describe("the matcher never creates anyone", () => {
   const roster: RosterPerson[] = [
-    { id: "p1", displayName: "Jonas Petraitis", normalizedName: personKey("Jonas Petraitis"), externalRef: "1042" },
-    { id: "p2", displayName: "Petras Jonaitis", normalizedName: personKey("Petras Jonaitis"), externalRef: null },
+    {
+      id: "p1",
+      displayName: "Jonas Petraitis",
+      normalizedName: personKey("Jonas Petraitis"),
+      externalRef: "1042",
+    },
+    {
+      id: "p2",
+      displayName: "Petras Jonaitis",
+      normalizedName: personKey("Petras Jonaitis"),
+      externalRef: null,
+    },
   ];
 
   it("the person key folds diacritics, punctuation and word order", () => {
@@ -417,7 +546,9 @@ describe("the matcher never creates anyone", () => {
   });
 
   it("an employee number is the strongest match", () => {
-    expect(matchPerson({ name: "J. Petraitis", externalRef: "1042" }, roster)).toMatchObject({
+    expect(
+      matchPerson({ name: "J. Petraitis", externalRef: "1042" }, roster),
+    ).toMatchObject({
       kind: "matched",
       personId: "p1",
       method: "external_ref",
@@ -427,35 +558,62 @@ describe("the matcher never creates anyone", () => {
 
   it("an exact name matches, at less than full confidence", () => {
     const m = matchPerson({ name: "petraitis jonas" }, roster);
-    expect(m).toMatchObject({ kind: "matched", personId: "p1", method: "exact_name" });
+    expect(m).toMatchObject({
+      kind: "matched",
+      personId: "p1",
+      method: "exact_name",
+    });
     expect(m.kind === "matched" && m.confidence).toBeLessThan(1);
   });
 
   it("two real people with the same name are ASKED about, never guessed", () => {
     const twins: RosterPerson[] = [
       ...roster,
-      { id: "p3", displayName: "Jonas Petraitis", normalizedName: personKey("Jonas Petraitis"), externalRef: null },
+      {
+        id: "p3",
+        displayName: "Jonas Petraitis",
+        normalizedName: personKey("Jonas Petraitis"),
+        externalRef: null,
+      },
     ];
     const m = matchPerson({ name: "Jonas Petraitis" }, twins);
     expect(m.kind).toBe("ambiguous");
-    expect(m.kind === "ambiguous" && m.candidates.map((c) => c.id).sort()).toEqual(["p1", "p3"]);
+    expect(
+      m.kind === "ambiguous" && m.candidates.map((c) => c.id).sort(),
+    ).toEqual(["p1", "p3"]);
   });
 
   it("a duplicated employee number is reported as a roster problem, not resolved", () => {
     const dupes: RosterPerson[] = [
-      { id: "p1", displayName: "A", normalizedName: personKey("A"), externalRef: "1042" },
-      { id: "p2", displayName: "B", normalizedName: personKey("B"), externalRef: "1042" },
+      {
+        id: "p1",
+        displayName: "A",
+        normalizedName: personKey("A"),
+        externalRef: "1042",
+      },
+      {
+        id: "p2",
+        displayName: "B",
+        normalizedName: personKey("B"),
+        externalRef: "1042",
+      },
     ];
-    expect(matchPerson({ name: "A", externalRef: "1042" }, dupes).kind).toBe("ambiguous");
+    expect(matchPerson({ name: "A", externalRef: "1042" }, dupes).kind).toBe(
+      "ambiguous",
+    );
   });
 
   it("an unknown name stays unmatched — it never becomes a new person here", () => {
-    expect(matchPerson({ name: "Someone Unknown" }, roster)).toEqual({ kind: "unmatched" });
+    expect(matchPerson({ name: "Someone Unknown" }, roster)).toEqual({
+      kind: "unmatched",
+    });
     expect(matchPerson({ name: "   " }, roster)).toEqual({ kind: "unmatched" });
   });
 
   it("an empty roster matches nobody, whatever the name", () => {
-    expect(matchPerson({ name: "Jonas Petraitis", externalRef: "1042" }, []).kind).toBe("unmatched");
+    expect(
+      matchPerson({ name: "Jonas Petraitis", externalRef: "1042" }, []).kind,
+    ).toBe("unmatched");
   });
 
   it("a place that was NEVER NAMED is different from one we cannot find", () => {
@@ -463,7 +621,10 @@ describe("the matcher never creates anyone", () => {
     expect(matchPlace(null, objects)).toEqual({ kind: "absent" });
     expect(matchPlace("   ", objects)).toEqual({ kind: "absent" });
     expect(matchPlace("Objektas Z", objects)).toEqual({ kind: "unmatched" });
-    expect(matchPlace("objektas a", objects)).toMatchObject({ kind: "matched", workObjectId: "o1" });
+    expect(matchPlace("objektas a", objects)).toMatchObject({
+      kind: "matched",
+      workObjectId: "o1",
+    });
   });
 });
 
@@ -490,11 +651,20 @@ describe("reading a real spreadsheet without guessing", () => {
   });
 
   it("an ISO date is a fact; an ambiguous D/M date is FLAGGED as a guess", () => {
-    expect(readDate("2026-03-04")).toEqual({ iso: "2026-03-04", ambiguous: false });
+    expect(readDate("2026-03-04")).toEqual({
+      iso: "2026-03-04",
+      ambiguous: false,
+    });
     // 04/03 could be either convention — read day-first and reported as such.
-    expect(readDate("04/03/2026")).toEqual({ iso: "2026-03-04", ambiguous: true });
+    expect(readDate("04/03/2026")).toEqual({
+      iso: "2026-03-04",
+      ambiguous: true,
+    });
     // 25 cannot be a month, so day-first is a fact here, not a guess.
-    expect(readDate("25/03/2026")).toEqual({ iso: "2026-03-25", ambiguous: false });
+    expect(readDate("25/03/2026")).toEqual({
+      iso: "2026-03-25",
+      ambiguous: false,
+    });
     expect(readDate("31/02/2026")).toBeNull();
     expect(readDate("not a date")).toBeNull();
   });
@@ -539,7 +709,10 @@ describe("reading a real spreadsheet without guessing", () => {
   });
 
   it("a sheet with no recognisable header says so instead of inventing columns", () => {
-    const result = rowsFromGrid([["1", "2"], ["3", "4"]]);
+    const result = rowsFromGrid([
+      ["1", "2"],
+      ["3", "4"],
+    ]);
     expect(result.rows).toEqual([]);
     expect(result.skipped[0].reason).toBe("no_header");
   });

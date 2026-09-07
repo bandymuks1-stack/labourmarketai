@@ -1,5 +1,10 @@
 import type { TimesheetGridProposal } from "@/lib/timesheet-import/xlsx-grid-parse";
-import { SOURCE_ROW_FIELDS, tidy, type SourceWorkRow, type SourceRowField } from "@/lib/organization-evidence/source-rows";
+import {
+  SOURCE_ROW_FIELDS,
+  tidy,
+  type SourceWorkRow,
+  type SourceRowField,
+} from "@/lib/organization-evidence/source-rows";
 
 /**
  * SOURCE -> CANONICAL ROWS. Pure: text or a string grid in, `SourceWorkRow[]`
@@ -36,9 +41,15 @@ export const MAX_DELIMITED_ROWS = 20_000;
  */
 export function parseDelimited(text: string): string[][] {
   const body = text.replace(/^﻿/, "");
-  const header = body.slice(0, body.search(/\r?\n/) === -1 ? body.length : body.search(/\r?\n/));
-  const delimiter =
-    header.includes("\t") ? "\t" : (header.split(";").length > header.split(",").length ? ";" : ",");
+  const header = body.slice(
+    0,
+    body.search(/\r?\n/) === -1 ? body.length : body.search(/\r?\n/),
+  );
+  const delimiter = header.includes("\t")
+    ? "\t"
+    : header.split(";").length > header.split(",").length
+      ? ";"
+      : ",";
 
   const rows: string[][] = [];
   let row: string[] = [];
@@ -91,46 +102,141 @@ export function parseDelimited(text: string): string[][] {
  */
 const HEADER_SYNONYMS: Readonly<Record<SourceRowField, readonly string[]>> = {
   personLabel: [
-    "worker", "employee", "name", "person", "full name", "surname name",
-    "darbuotojas", "vardas", "pavarde", "vardas pavarde", "pavarde vardas", "asmuo",
-    "pracownik", "imie nazwisko", "mitarbeiter", "medewerker",
-    "rabotnik", "sotrudnik", "fio",
+    "worker",
+    "employee",
+    "name",
+    "person",
+    "full name",
+    "surname name",
+    "darbuotojas",
+    "vardas",
+    "pavarde",
+    "vardas pavarde",
+    "pavarde vardas",
+    "asmuo",
+    "pracownik",
+    "imie nazwisko",
+    "mitarbeiter",
+    "medewerker",
+    "rabotnik",
+    "sotrudnik",
+    "fio",
   ],
   externalRef: [
-    "employee no", "employee number", "personnel number", "staff id", "tab no",
-    "tabelis", "tabelio nr", "darbuotojo nr", "personalo nr", "nr",
-    "personalnummer", "personeelsnummer", "tabelnyj nomer",
+    "employee no",
+    "employee number",
+    "personnel number",
+    "staff id",
+    "tab no",
+    "tabelis",
+    "tabelio nr",
+    "darbuotojo nr",
+    "personalo nr",
+    "nr",
+    "personalnummer",
+    "personeelsnummer",
+    "tabelnyj nomer",
   ],
   projectLabel: [
-    "object", "site", "project", "address", "location", "workplace",
-    "objektas", "objektai", "statybvete", "projektas", "adresas", "vieta", "darbo vieta",
-    "obiekt", "projekt", "adres", "baustelle", "objekt", "locatie",
-    "obekt", "adres raboty",
+    "object",
+    "site",
+    "project",
+    "address",
+    "location",
+    "workplace",
+    "objektas",
+    "objektai",
+    "statybvete",
+    "projektas",
+    "adresas",
+    "vieta",
+    "darbo vieta",
+    "obiekt",
+    "projekt",
+    "adres",
+    "baustelle",
+    "objekt",
+    "locatie",
+    "obekt",
+    "adres raboty",
   ],
   workDate: [
-    "date", "work date", "day",
-    "data", "diena", "darbo data",
-    "datum", "dag", "data pracy", "data raboty",
+    "date",
+    "work date",
+    "day",
+    "data",
+    "diena",
+    "darbo data",
+    "datum",
+    "dag",
+    "data pracy",
+    "data raboty",
   ],
   periodStart: [
-    "from", "period start", "start", "week start", "date from",
-    "nuo", "laikotarpio pradzia", "pradzia", "savaites pradzia",
-    "von", "vanaf", "od", "s data",
+    "from",
+    "period start",
+    "start",
+    "week start",
+    "date from",
+    "nuo",
+    "laikotarpio pradzia",
+    "pradzia",
+    "savaites pradzia",
+    "von",
+    "vanaf",
+    "od",
+    "s data",
   ],
   periodEnd: [
-    "to", "period end", "end", "week end", "date to",
-    "iki", "laikotarpio pabaiga", "pabaiga", "savaites pabaiga",
-    "bis", "tot", "do", "po data",
+    "to",
+    "period end",
+    "end",
+    "week end",
+    "date to",
+    "iki",
+    "laikotarpio pabaiga",
+    "pabaiga",
+    "savaites pabaiga",
+    "bis",
+    "tot",
+    "do",
+    "po data",
   ],
   hours: [
-    "hours", "hrs", "h", "worked hours", "total hours",
-    "valandos", "val", "darbo valandos", "isdirbta",
-    "stunden", "uren", "godziny", "chasy",
+    "hours",
+    "hrs",
+    "h",
+    "worked hours",
+    "total hours",
+    "valandos",
+    "val",
+    "darbo valandos",
+    "isdirbta",
+    "stunden",
+    "uren",
+    "godziny",
+    "chasy",
   ],
   workText: [
-    "description", "work", "works", "task", "tasks", "notes", "comment", "activity",
-    "aprasymas", "darbai", "atlikti darbai", "uzduotis", "pastabos", "veikla",
-    "beschreibung", "omschrijving", "opis", "opisanie", "vypolnennye raboty",
+    "description",
+    "work",
+    "works",
+    "task",
+    "tasks",
+    "notes",
+    "comment",
+    "activity",
+    "aprasymas",
+    "darbai",
+    "atlikti darbai",
+    "uzduotis",
+    "pastabos",
+    "veikla",
+    "beschreibung",
+    "omschrijving",
+    "opis",
+    "opisanie",
+    "vypolnennye raboty",
   ],
 };
 
@@ -180,14 +286,20 @@ function pad2(n: number): string {
 function isRealDate(y: number, m: number, d: number): boolean {
   if (m < 1 || m > 12 || d < 1 || d > 31) return false;
   const dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  return (
+    dt.getUTCFullYear() === y &&
+    dt.getUTCMonth() === m - 1 &&
+    dt.getUTCDate() === d
+  );
 }
 
 /** `YYYY-MM-DD`, or null when the cell is not a date this parser can read
  *  WITHOUT guessing. An ambiguous `03/04/2023` in a sheet with no other clue
  *  is read as day-first (the European convention of every market this ships
  *  in) and reported as DERIVED by the caller - never as a source fact. */
-export function readDate(raw: string): { iso: string; ambiguous: boolean } | null {
+export function readDate(
+  raw: string,
+): { iso: string; ambiguous: boolean } | null {
   const value = raw.trim();
   if (value === "") return null;
   const iso = ISO_DATE.exec(value);
@@ -198,7 +310,9 @@ export function readDate(raw: string): { iso: string; ambiguous: boolean } | nul
   const ymd = YMD_DOT.exec(value);
   if (ymd) {
     const [y, m, d] = [Number(ymd[1]), Number(ymd[2]), Number(ymd[3])];
-    return isRealDate(y, m, d) ? { iso: `${y}-${pad2(m)}-${pad2(d)}`, ambiguous: false } : null;
+    return isRealDate(y, m, d)
+      ? { iso: `${y}-${pad2(m)}-${pad2(d)}`, ambiguous: false }
+      : null;
   }
   const dmy = DMY.exec(value);
   if (dmy) {
@@ -226,7 +340,10 @@ export interface TabularParseResult {
   readonly rows: readonly SourceWorkRow[];
   /** Source lines that could not become a row, with the reason. Reported, not
    *  dropped: a silently skipped line is missing history nobody notices. */
-  readonly skipped: readonly { readonly rowIndex: number; readonly reason: string }[];
+  readonly skipped: readonly {
+    readonly rowIndex: number;
+    readonly reason: string;
+  }[];
   readonly columns: ColumnMap;
 }
 
@@ -235,7 +352,9 @@ export interface TabularParseResult {
  * The header may be preceded by title lines: the first row that maps BOTH a
  * person column and something datable wins.
  */
-export function rowsFromGrid(grid: readonly (readonly string[])[]): TabularParseResult {
+export function rowsFromGrid(
+  grid: readonly (readonly string[])[],
+): TabularParseResult {
   let headerIndex = -1;
   let columns: ColumnMap = {};
   for (let i = 0; i < Math.min(grid.length, 20); i++) {
@@ -250,7 +369,11 @@ export function rowsFromGrid(grid: readonly (readonly string[])[]): TabularParse
     }
   }
   if (headerIndex === -1) {
-    return { rows: [], skipped: [{ rowIndex: 0, reason: "no_header" }], columns: {} };
+    return {
+      rows: [],
+      skipped: [{ rowIndex: 0, reason: "no_header" }],
+      columns: {},
+    };
   }
 
   const header = grid[headerIndex];
@@ -279,7 +402,10 @@ export function rowsFromGrid(grid: readonly (readonly string[])[]): TabularParse
     }
 
     const factFields: SourceRowField[] = ["personLabel"];
-    const derived: Record<string, { value: string | number | null; method: string; confidence: number }> = {};
+    const derived: Record<
+      string,
+      { value: string | number | null; method: string; confidence: number }
+    > = {};
 
     let workDate: string | null = null;
     const dateCell = cell("workDate");
@@ -288,7 +414,11 @@ export function rowsFromGrid(grid: readonly (readonly string[])[]): TabularParse
       if (read) {
         workDate = read.iso;
         if (read.ambiguous) {
-          derived.workDate = { value: read.iso, method: "date_day_first", confidence: 0.6 };
+          derived.workDate = {
+            value: read.iso,
+            method: "date_day_first",
+            confidence: 0.6,
+          };
         } else {
           factFields.push("workDate");
         }
@@ -303,7 +433,11 @@ export function rowsFromGrid(grid: readonly (readonly string[])[]): TabularParse
       if (read) {
         periodStart = read.iso;
         if (read.ambiguous) {
-          derived.periodStart = { value: read.iso, method: "date_day_first", confidence: 0.6 };
+          derived.periodStart = {
+            value: read.iso,
+            method: "date_day_first",
+            confidence: 0.6,
+          };
         } else factFields.push("periodStart");
       }
     }
@@ -313,7 +447,11 @@ export function rowsFromGrid(grid: readonly (readonly string[])[]): TabularParse
       if (read) {
         periodEnd = read.iso;
         if (read.ambiguous) {
-          derived.periodEnd = { value: read.iso, method: "date_day_first", confidence: 0.6 };
+          derived.periodEnd = {
+            value: read.iso,
+            method: "date_day_first",
+            confidence: 0.6,
+          };
         } else factFields.push("periodEnd");
       }
     }
@@ -397,7 +535,10 @@ export function rowsFromTimesheetProposals(
   for (const p of proposals) {
     if (p.workDate === null) continue;
     const factFields: SourceRowField[] = ["personLabel", "hours"];
-    const derived: Record<string, { value: string | number | null; method: string; confidence: number }> = {};
+    const derived: Record<
+      string,
+      { value: string | number | null; method: string; confidence: number }
+    > = {};
 
     if (opts.monthFromSheet) factFields.push("workDate");
     else {

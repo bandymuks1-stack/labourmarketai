@@ -15154,5 +15154,201 @@
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
+  },
+  "evidenceImport": {
+    "eyebrow": "Istoriniai darbo įrodymai",
+    "title": "Importuoti darbo istoriją",
+    "intro": "Perkelkite organizacijos pačios turimus įrašus — darbo laiko apskaitą, objektų žurnalus, mokymų registrus — į platformą kaip įrodymus, kiekvieną šaltinio faktą laikydami atskirai nuo kiekvienos prielaidos.",
+    "actingFor": "Veikiate kaip",
+    "nothingWrittenYet": "Kol kas nieko neįrašyta. Prieš išsaugant pamatysite tiksliai tai, kas būtų užfiksuota.",
+    "context": {
+      "unauthenticated": "Prisijunkite, kad galėtumėte importuoti įrodymus.",
+      "personalWorkspace": "Esate savo asmeninėje erdvėje. Istoriniai įrodymai priklauso organizacijai — pirmiausia pakeiskite erdvę.",
+      "noOrganization": "Ši paskyra nepriklauso jokiai organizacijai, todėl nėra kam importuoti įrodymų.",
+      "notAMember": "Ši organizacija nėra jūsų. Pasirinkite vieną iš šių:",
+      "chooseOrganization": "Priklausote daugiau nei vienai organizacijai. Pasirinkite, kuri teikia šiuos įrodymus:",
+      "notAuthorized": "Jūsų vaidmuo šioje organizacijoje neapima įrodymų importo. Tai gali padaryti savininkas, administratorius arba vadovas.",
+      "needsMigration": "Šioje aplinkoje įrodymų saugykla dar neįjungta. Duomenų bazės pakeitimas paruoštas ir laukia savininko patvirtinimo; nieko neįrašyta.",
+      "unavailable": "Nepavyko perskaityti įrodymų saugyklos. Tai sistemos problema, o ne tuščia organizacija."
+    },
+    "form": {
+      "title": "1. Šaltinis",
+      "supplierRole": "Kokiu vaidmeniu tai teikiate?",
+      "supplierRoleHint": "Agentūra, teikianti savo darbuotojo valandas kliento objekte, nėra nei darbdavys, nei klientas. Nurodykite, kas esate — tai užfiksuojama su kiekviena eilute.",
+      "sourceKind": "Kokios rūšies šaltinis tai yra?",
+      "sourceLanguage": "Kokia kalba parašytas šaltinis?",
+      "filename": "Failo pavadinimas arba žymė",
+      "reference": "Šaltinio nuoroda",
+      "referenceHint": "Iš kur tai gauta, jūsų žodžiais — archyvo dėžė, aplankas, sistemos pavadinimas.",
+      "notes": "Pastabos",
+      "paste": "Įklijuokite eilutes",
+      "pasteHint": "Po vieną eilutę kiekvienoje eilutėje, stulpelius skiriant kableliu, kabliataškiu arba tabuliacija. Naudojama pirma atpažinta antraštės eilutė; viskas virš jos ignoruojama.",
+      "file": "Arba įkelkite CSV/TSV failą",
+      "submit": "Perskaityti šaltinį",
+      "submitting": "Skaitoma…"
+    },
+    "preview": {
+      "title": "2. Kas būtų užfiksuota",
+      "notPersisted": "Tai jūsų failo interpretacija. NIEKAS čia dar nėra įrodymas.",
+      "empty": "Šiam šaltiniui neparuošta nė viena eilutė.",
+      "counts": {
+        "total": "Perskaityta eilučių",
+        "ready": "Paruošta",
+        "needsPerson": "Asmuo neišspręstas",
+        "needsContext": "Vieta neišspręsta",
+        "duplicates": "Jau importuota",
+        "conflicts": "Prieštaravimai"
+      },
+      "column": {
+        "row": "Eilutė",
+        "person": "Kas",
+        "date": "Data",
+        "hours": "Valandos",
+        "place": "Vieta",
+        "work": "Kas atlikta",
+        "state": "Būsena"
+      },
+      "fact": "Nurodyta šaltinyje",
+      "derived": "Nustatyta mūsų",
+      "derivedMethod": "Būdas",
+      "confidence": "Patikimumas"
+    },
+    "personState": {
+      "unmatched": "Nėra sąraše",
+      "matched": "Sutapatinta",
+      "ambiguous": "Daugiau nei vienas atitikmuo",
+      "created": "Įtrauktas į sąrašą"
+    },
+    "contextState": {
+      "absent": "Vieta nenurodyta",
+      "unmatched": "Vieta nerasta",
+      "matched": "Sutapatinta",
+      "ambiguous": "Daugiau nei vienas atitikmuo",
+      "created": "Sukurta"
+    },
+    "duplicateState": {
+      "new": "Nauja",
+      "duplicate": "Jau importuota",
+      "probable_duplicate": "Tikriausiai jau importuota",
+      "conflict": "Prieštarauja esamam įrašui"
+    },
+    "problem": {
+      "person_not_on_roster": "Šio vardo nėra jūsų sąraše. Pasirinkite asmenį arba jį pridėkite.",
+      "person_ambiguous": "Jūsų sąraše šį vardą turi daugiau nei vienas asmuo. Pasirinkite, kuris.",
+      "context_ambiguous": "Šią žymę atitinka daugiau nei viena vieta. Pasirinkite, kuri.",
+      "already_imported": "Toks pat įrašas jau yra, todėl ši eilutė bus praleista."
+    },
+    "resolve": {
+      "title": "Išspręsti",
+      "choosePerson": "Pasirinkite asmenį",
+      "choosePlace": "Pasirinkite vietą",
+      "save": "Išsaugoti",
+      "addPerson": "Pridėti asmenį",
+      "displayName": "Vardas taip, kaip rašoma jūsų įrašuose",
+      "externalRef": "Darbuotojo arba tabelio numeris",
+      "relationship": "Ryšys su organizacija",
+      "sourceNote": "Iš kur gauti šio asmens duomenys",
+      "create": "Pridėti",
+      "unlinkedNote": "Čia pridėtas asmuo yra jūsų organizacijos įrašas. Tai nėra paskyra ir tai nieko neteigia apie tai, kas jis yra — tikrasis asmuo galės jį prisiimti vėliau."
+    },
+    "relationship": {
+      "employee": "Darbuotojas",
+      "former_employee": "Buvęs darbuotojas",
+      "agency_worker": "Agentūros darbuotojas",
+      "subcontractor": "Subrangovas",
+      "contractor": "Rangovas",
+      "student": "Studentas",
+      "graduate": "Absolventas",
+      "trainee": "Praktikantas",
+      "apprentice": "Pameistrys",
+      "programme_participant": "Programos dalyvis",
+      "volunteer": "Savanoris",
+      "other": "Kita"
+    },
+    "commit": {
+      "title": "3. Užfiksuoti",
+      "evidenceState": "Kaip tai turi būti užfiksuota?",
+      "evidenceStateHint": "Importas visada gali sukurti tik praneštą būseną. Niekas to dar nepatikrino, ir šis langas negali teigti, kad patikrino.",
+      "confirm": "Užfiksuoti {count} eilučių",
+      "confirmNone": "Kol kas nė viena eilutė nėra paruošta fiksuoti",
+      "confirming": "Fiksuojama…",
+      "readOnce": "Prieš patvirtindami perskaitykite tai, kas pateikta aukščiau. Patvirtinimas užfiksuoja tai jūsų organizacijos vardu."
+    },
+    "evidenceState": {
+      "SELF_REPORTED": "Pateikė pats asmuo",
+      "ORGANIZATION_REPORTED": "Praneša organizacija",
+      "LEGACY_IMPORTED": "Perkelta iš senesnės sistemos",
+      "UNVERIFIED": "Pateikta, statusas nenustatytas",
+      "NEEDS_REVIEW": "Reikia žmogaus peržiūros"
+    },
+    "result": {
+      "written": "Užfiksuota",
+      "skipped": "Praleista kaip jau užfiksuota",
+      "notReady": "Liko neišspręsta",
+      "reusedSession": "Šį šaltinį jau esate perskaitę. Jo eilutės rodomos žemiau, o ne skaitomos antrą kartą."
+    },
+    "records": {
+      "title": "4. Kas užfiksuota",
+      "empty": "Iš šio šaltinio dar nieko neužfiksuota.",
+      "importedAt": "Importuota",
+      "supplier": "Pateikta kaip",
+      "source": "Šaltinis",
+      "attest": "Patvirtinti šį įrašą",
+      "attestRole": "Kokiu vaidmeniu",
+      "attestNote": "Pastaba",
+      "attested": "Patvirtinta",
+      "selfAttested": "Patvirtino pats asmuo, apie kurį tai yra",
+      "selfAttestedHint": "Tai tikras, užfiksuotas įrodymas. Tai nėra nepriklausomas patikrinimas ir niekada taip neskaičiuojama.",
+      "notIndependentlyVerified": "Nepatikrinta nepriklausomai",
+      "withdrawn": "Atšaukta"
+    },
+    "withdraw": {
+      "title": "Atšaukti šį importą",
+      "note": "Kodėl",
+      "button": "Atšaukti viską, ką užfiksavo šis importas",
+      "hint": "Niekas neištrinama. Kiekvienas įrašas gauna atšaukimo įrašą, todėl ir įrodymas, ir priežastis lieka matomi."
+    },
+    "role": {
+      "employer": "Darbdavys",
+      "agency": "Agentūra",
+      "client": "Klientas",
+      "end_client": "Galutinis klientas",
+      "project_owner": "Projekto savininkas",
+      "subcontractor": "Subrangovas",
+      "education_provider": "Švietimo įstaiga",
+      "training_provider": "Mokymų teikėjas",
+      "assessor": "Vertintojas",
+      "verifier": "Tikrintojas",
+      "placement_provider": "Praktikos vietos teikėjas",
+      "public_body": "Viešoji įstaiga",
+      "sector_body": "Sektoriaus organizacija",
+      "other": "Kita"
+    },
+    "sourceKind": {
+      "xlsx": "Skaičiuoklė",
+      "csv": "CSV / TSV failas",
+      "pdf": "PDF dokumentas",
+      "api": "Kitos sistemos sąsaja",
+      "agent": "Asistentas",
+      "erp": "ERP sistema",
+      "payroll": "Darbo užmokesčio sistema",
+      "sis": "Studentų apskaitos sistema",
+      "lms": "Mokymosi platforma",
+      "email": "El. paštas",
+      "drive": "Bendrinamas diskas",
+      "manual": "Suvesta ranka"
+    },
+    "error": {
+      "invalid": "Kažkas formoje netinkama. Patikrinkite pažymėtas vietas.",
+      "not_found": "Šio importo, eilutės ar įrašo nebėra.",
+      "unavailable": "Nepavyko pasiekti įrodymų saugyklos. Nieko neįrašyta.",
+      "too_many_rows": "Tai daugiau eilučių, nei telpa į vieną importą. Padalykite šaltinį, pavyzdžiui, pagal metus.",
+      "no_source_supplied": "Nėra nei failo, nei įklijuotų eilučių — nėra ko skaityti.",
+      "file_too_large": "Šis failas per didelis, kad būtų perskaitytas čia.",
+      "file_unreadable": "Šio failo nepavyko perskaityti kaip teksto.",
+      "nothing_parsed": "Nerasta nė vienos tinkamos eilutės. Šaltinyje reikia antraštės eilutės, nurodančios bent asmenį ir datą.",
+      "confirmation_rejected": "Šis importas pasikeitė po to, kai jį peržiūrėjote, todėl nebuvo užfiksuotas. Peržiūrėkite iš naujo ir patvirtinkite naują versiją.",
+      "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota."
+    }
   }
 }

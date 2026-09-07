@@ -89,9 +89,11 @@ export function recordFingerprint(input: {
   readonly hours: number | null;
   readonly workText: string;
 }): string {
-  const person = input.organizationPersonId ?? `name:${normalizeLabel(input.personLabel)}`;
+  const person =
+    input.organizationPersonId ?? `name:${normalizeLabel(input.personLabel)}`;
   const place =
-    input.workObjectId ?? (input.projectLabel ? `label:${normalizeLabel(input.projectLabel)}` : "");
+    input.workObjectId ??
+    (input.projectLabel ? `label:${normalizeLabel(input.projectLabel)}` : "");
   const parts = [
     input.organizationId,
     person,
@@ -109,7 +111,10 @@ export function recordFingerprint(input: {
 export function recordFingerprintForRow(
   organizationId: string,
   row: SourceWorkRow,
-  resolved?: { organizationPersonId?: string | null; workObjectId?: string | null },
+  resolved?: {
+    organizationPersonId?: string | null;
+    workObjectId?: string | null;
+  },
 ): string {
   return recordFingerprint({
     organizationId,

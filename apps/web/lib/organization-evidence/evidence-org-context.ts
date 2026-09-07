@@ -91,7 +91,9 @@ export type EvidenceOrgContext =
 
 /** The membership relationship as a governance role, or null when the
  *  relationship is employment-only (which is never governance authority). */
-function governanceRoleOf(relationship: string | null | undefined): GovernanceRole | null {
+function governanceRoleOf(
+  relationship: string | null | undefined,
+): GovernanceRole | null {
   if (!relationship) return null;
   return isGovernanceRole(relationship) ? relationship : null;
 }
@@ -129,9 +131,12 @@ export async function resolveEvidenceOrganization(
   if (requested) {
     const needle = requested.toLowerCase();
     const matches = orgs.filter(
-      (o) => o.id.toLowerCase() === needle || (o.name ?? "").trim().toLowerCase() === needle,
+      (o) =>
+        o.id.toLowerCase() === needle ||
+        (o.name ?? "").trim().toLowerCase() === needle,
     );
-    if (matches.length !== 1) return { ok: false, reason: "not-a-member", options };
+    if (matches.length !== 1)
+      return { ok: false, reason: "not-a-member", options };
     return authorize(matches[0]);
   }
 
@@ -139,9 +144,10 @@ export async function resolveEvidenceOrganization(
   let activeId: string | null = null;
   try {
     const profileRead = await readProfileRow(caller);
-    const identity = profileRead.ok && profileRead.value?.active_role
-      ? baseIdentityForRole(profileRead.value.active_role)
-      : null;
+    const identity =
+      profileRead.ok && profileRead.value?.active_role
+        ? baseIdentityForRole(profileRead.value.active_role)
+        : null;
     const ctx = await resolveActiveWorkspaceForCaller(caller, identity);
     activeId = ctx.activeWorkspaceId;
   } catch {
@@ -159,9 +165,7 @@ export async function resolveEvidenceOrganization(
   if (orgs.length === 1) return authorize(orgs[0]);
   return { ok: false, reason: "choice-required", options };
 
-  function authorize(
-    w: (typeof orgs)[number],
-  ): EvidenceOrgContext {
+  function authorize(w: (typeof orgs)[number]): EvidenceOrgContext {
     const role = governanceRoleOf(w.relationship);
     if (!role || !hasOrganizationCapability(role, "import-evidence")) {
       return { ok: false, reason: "not-authorized" };

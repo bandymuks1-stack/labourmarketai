@@ -71,17 +71,20 @@ export const sourceWorkRowSchema = z
      *  with the session's `original_language` (doctrine §2.3). */
     workText: z.string().min(1).max(4000),
     /** The source line, verbatim. Never edited by matching or normalisation. */
-    raw: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])),
+    raw: z.record(
+      z.string(),
+      z.union([z.string(), z.number(), z.boolean(), z.null()]),
+    ),
     /** Which canonical fields the SOURCE stated explicitly. */
     factFields: z.array(z.enum(SOURCE_ROW_FIELDS)).default([]),
     /** Every inferred field, with method and confidence. */
     derived: z.record(z.string(), derivedFieldSchema).default({}),
   })
   .strict()
-  .refine(
-    (r) => Boolean(r.workDate) || Boolean(r.periodStart),
-    { message: "a row needs workDate or periodStart", path: ["workDate"] },
-  )
+  .refine((r) => Boolean(r.workDate) || Boolean(r.periodStart), {
+    message: "a row needs workDate or periodStart",
+    path: ["workDate"],
+  })
   .refine(
     (r) => !r.periodEnd || !r.periodStart || r.periodEnd >= r.periodStart,
     { message: "periodEnd is before periodStart", path: ["periodEnd"] },
@@ -90,7 +93,10 @@ export const sourceWorkRowSchema = z
     // The load-bearing invariant: a field may not be claimed as a source fact
     // and reported as an inference at the same time.
     (r) => r.factFields.every((f) => !(f in r.derived)),
-    { message: "a field cannot be both a source fact and derived", path: ["factFields"] },
+    {
+      message: "a field cannot be both a source fact and derived",
+      path: ["factFields"],
+    },
   );
 
 export type SourceWorkRow = z.infer<typeof sourceWorkRowSchema>;

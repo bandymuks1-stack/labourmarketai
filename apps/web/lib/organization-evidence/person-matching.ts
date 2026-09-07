@@ -65,7 +65,10 @@ export type PersonMatch =
   | {
       readonly kind: "ambiguous";
       /** Every real candidate, so the human chooses by name rather than id. */
-      readonly candidates: readonly { readonly id: string; readonly displayName: string }[];
+      readonly candidates: readonly {
+        readonly id: string;
+        readonly displayName: string;
+      }[];
     }
   | { readonly kind: "unmatched" };
 
@@ -140,7 +143,10 @@ export function matchPerson(
     id: p.id,
     name: p.displayName,
   }));
-  const resolution: EntityResolution = resolveEntityLabel(written.name, entities);
+  const resolution: EntityResolution = resolveEntityLabel(
+    written.name,
+    entities,
+  );
   if (resolution.kind === "resolved") {
     const hit = roster.find((p) => p.id === resolution.id);
     return {
@@ -154,7 +160,10 @@ export function matchPerson(
   if (resolution.kind === "ambiguous") {
     return {
       kind: "ambiguous",
-      candidates: resolution.candidates.map((c) => ({ id: c.id, displayName: c.name })),
+      candidates: resolution.candidates.map((c) => ({
+        id: c.id,
+        displayName: c.name,
+      })),
     };
   }
   return { kind: "unmatched" };
@@ -172,7 +181,10 @@ export type PlaceMatch =
     }
   | {
       readonly kind: "ambiguous";
-      readonly candidates: readonly { readonly id: string; readonly name: string }[];
+      readonly candidates: readonly {
+        readonly id: string;
+        readonly name: string;
+      }[];
     }
   | { readonly kind: "unmatched" }
   /** The source named no place at all - different from "named one we cannot

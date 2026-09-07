@@ -3,7 +3,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { DomainCaller } from "@/lib/domain/caller";
-import { normalizeLabel, type ResolveEntity } from "@/lib/timesheet-import/resolve-entities";
+import {
+  normalizeLabel,
+  type ResolveEntity,
+} from "@/lib/timesheet-import/resolve-entities";
+import { orgDisplayName } from "@/lib/company/org-display";
 import {
   deriveEvidenceStanding,
   type ReportedEvidenceState,
@@ -83,7 +87,10 @@ export type EvidenceImportFailure =
   | { readonly kind: "not-authorized"; readonly reason: EvidenceOrgReason }
   | {
       readonly kind: "choice-required";
-      readonly options: readonly { readonly id: string; readonly name: string }[];
+      readonly options: readonly {
+        readonly id: string;
+        readonly name: string;
+      }[];
     }
   /** The store is not provisioned in this environment. NOT "no data". */
   | { readonly kind: "needs-migration" }
@@ -92,12 +99,22 @@ export type EvidenceImportFailure =
   | { readonly kind: "too-many-rows"; readonly limit: number }
   | { readonly kind: "error" };
 
-export type EvidenceImportResult<T> = ({ readonly kind: "ok" } & T) | EvidenceImportFailure;
+export type EvidenceImportResult<T> =
+  | ({ readonly kind: "ok" } & T)
+  | EvidenceImportFailure;
 
-const MISSING_OBJECT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"]);
+const MISSING_OBJECT_CODES = new Set([
+  "42P01",
+  "42883",
+  "PGRST202",
+  "PGRST205",
+]);
 
-function classify(error: { code?: string | null } | null): EvidenceImportFailure {
-  if (error && MISSING_OBJECT_CODES.has(error.code ?? "")) return { kind: "needs-migration" };
+function classify(
+  error: { code?: string | null } | null,
+): EvidenceImportFailure {
+  if (error && MISSING_OBJECT_CODES.has(error.code ?? ""))
+    return { kind: "needs-migration" };
   return { kind: "error" };
 }
 
@@ -198,7 +215,9 @@ export async function createImportSession(
 
   const existing = await db(caller.supabase)
     .from("evidence_import_sessions")
-    .select("id, source_kind, source_filename, source_language, supplier_role, created_at")
+    .select(
+      "id, source_kind, source_filename, source_language, supplier_role, created_at",
+    )
     .eq("organization_id", org.organizationId)
     .eq("source_fingerprint", input.sourceFingerprint)
     .maybeSingle();
@@ -213,7 +232,8 @@ export async function createImportSession(
         organizationId: org.organizationId,
         organizationName: org.organizationName,
         sourceKind: existing.data.source_kind as string,
-        sourceFilename: (existing.data.source_filename as string | null) ?? null,
+        sourceFilename:
+          (existing.data.source_filename as string | null) ?? null,
         sourceLanguage: existing.data.source_language as string,
         supplierRole: existing.data.supplier_role as string,
         createdAt: existing.data.created_at as string,
@@ -274,7 +294,14 @@ async function recordImportEvent(
   e: {
     organizationId: string;
     sessionId: string;
-    eventType: "created" | "rows_submitted" | "previewed" | "committed" | "rolled_back" | "reinstated" | "failed";
+    eventType:
+      | "created"
+      | "rows_submitted"
+      | "previewed"
+      | "committed"
+      | "rolled_back"
+      | "reinstated"
+      | "failed";
     actorKind?: "human" | "agent";
     payload?: Record<string, unknown>;
   },
@@ -300,12 +327,22 @@ async function loadSession(
   caller: DomainCaller,
   sessionId: string,
 ): Promise<
-  | { ok: true; organizationId: string; sourceKind: string; sourceLanguage: string; sourceFilename: string | null; sourceReference: string | null; supplierRole: string }
+  | {
+      ok: true;
+      organizationId: string;
+      sourceKind: string;
+      sourceLanguage: string;
+      sourceFilename: string | null;
+      sourceReference: string | null;
+      supplierRole: string;
+    }
   | { ok: false; failure: EvidenceImportFailure }
 > {
   const res = await db(caller.supabase)
     .from("evidence_import_sessions")
-    .select("organization_id, source_kind, source_language, source_filename, source_reference, supplier_role")
+    .select(
+      "organization_id, source_kind, source_language, source_filename, source_reference, supplier_role",
+    )
     .eq("id", sessionId)
     .maybeSingle();
   if (res.error) return { ok: false, failure: classify(res.error) };
@@ -356,7 +393,10 @@ export async function submitRows(
   rows.forEach((raw, i) => {
     const r = sourceWorkRowSchema.safeParse(raw);
     if (r.success) parsed.push(r.data);
-    else problems.push(`row ${i}: ${r.error.issues.map((x) => x.message).join("; ")}`);
+    else
+      problems.push(
+        `row ${i}: ${r.error.issues.map((x) => x.message).join("; ")}`,
+      );
   });
   if (problems.length > 0) return { kind: "invalid", problems };
 
@@ -402,7 +442,10 @@ export async function submitRows(
   // no-op rather than a duplicate.
   const ins = await db(caller.supabase)
     .from("evidence_import_rows")
-    .upsert(payload, { onConflict: "session_id,row_index", ignoreDuplicates: true })
+    .upsert(payload, {
+      onConflict: "session_id,row_index",
+      ignoreDuplicates: true,
+    })
     .select("id");
   if (ins.error) return classify(ins.error);
 
@@ -425,8 +468,17 @@ export async function submitRows(
 // ── preview ─────────────────────────────────────────────────────────────────
 
 export type PersonState = "unmatched" | "matched" | "ambiguous" | "created";
-export type ContextState = "absent" | "unmatched" | "matched" | "ambiguous" | "created";
-export type DuplicateState = "new" | "duplicate" | "probable_duplicate" | "conflict";
+export type ContextState =
+  | "absent"
+  | "unmatched"
+  | "matched"
+  | "ambiguous"
+  | "created";
+export type DuplicateState =
+  | "new"
+  | "duplicate"
+  | "probable_duplicate"
+  | "conflict";
 
 export interface PreviewRow {
   readonly id: string;
@@ -436,12 +488,18 @@ export interface PreviewRow {
   readonly personId: string | null;
   readonly personName: string | null;
   readonly personConfidence: number | null;
-  readonly personCandidates: readonly { readonly id: string; readonly name: string }[];
+  readonly personCandidates: readonly {
+    readonly id: string;
+    readonly name: string;
+  }[];
   readonly contextLabel: string | null;
   readonly contextState: ContextState;
   readonly workObjectId: string | null;
   readonly workObjectName: string | null;
-  readonly contextCandidates: readonly { readonly id: string; readonly name: string }[];
+  readonly contextCandidates: readonly {
+    readonly id: string;
+    readonly name: string;
+  }[];
   readonly activityDate: string | null;
   readonly periodStart: string | null;
   readonly periodEnd: string | null;
@@ -536,7 +594,8 @@ export async function buildPreview(
 
     if (chosenPersonId) {
       personState = (s.person_state as PersonState) ?? "matched";
-      personName = roster.value.find((p) => p.id === chosenPersonId)?.displayName ?? null;
+      personName =
+        roster.value.find((p) => p.id === chosenPersonId)?.displayName ?? null;
       personConfidence = 1;
     } else if (personLabel) {
       const key = personLabel.toLowerCase();
@@ -552,7 +611,10 @@ export async function buildPreview(
         personConfidence = m.confidence;
       } else if (m.kind === "ambiguous") {
         personState = "ambiguous";
-        personCandidates = m.candidates.map((c) => ({ id: c.id, name: c.displayName }));
+        personCandidates = m.candidates.map((c) => ({
+          id: c.id,
+          name: c.displayName,
+        }));
       }
     }
 
@@ -563,7 +625,8 @@ export async function buildPreview(
 
     if (chosenObjectId) {
       contextState = "matched";
-      workObjectName = objects.value.find((o) => o.id === chosenObjectId)?.name ?? null;
+      workObjectName =
+        objects.value.find((o) => o.id === chosenObjectId)?.name ?? null;
     } else if (contextLabel) {
       const key = contextLabel.toLowerCase();
       let m = placeCache.get(key);
@@ -577,7 +640,10 @@ export async function buildPreview(
         workObjectName = m.name;
       } else if (m.kind === "ambiguous") {
         contextState = "ambiguous";
-        contextCandidates = m.candidates.map((c) => ({ id: c.id, name: c.name }));
+        contextCandidates = m.candidates.map((c) => ({
+          id: c.id,
+          name: c.name,
+        }));
       } else if (m.kind === "unmatched") {
         contextState = "unmatched";
       }
@@ -661,7 +727,11 @@ export async function buildPreview(
         duplicate_state: dup.state,
         duplicate_of_record_id: dup.recordId,
         record_fingerprint: fingerprint,
-        status: ready ? "ready" : dup.state === "duplicate" ? "skipped" : "needs_review",
+        status: ready
+          ? "ready"
+          : dup.state === "duplicate"
+            ? "skipped"
+            : "needs_review",
         problem,
         updated_at: new Date().toISOString(),
       },
@@ -697,11 +767,15 @@ export async function buildPreview(
         needsPerson: preview.filter(
           (r) => r.personState === "unmatched" || r.personState === "ambiguous",
         ).length,
-        needsContext: preview.filter((r) => r.contextState === "ambiguous").length,
+        needsContext: preview.filter((r) => r.contextState === "ambiguous")
+          .length,
         duplicates: preview.filter(
-          (r) => r.duplicateState === "duplicate" || r.duplicateState === "probable_duplicate",
+          (r) =>
+            r.duplicateState === "duplicate" ||
+            r.duplicateState === "probable_duplicate",
         ).length,
-        conflicts: preview.filter((r) => r.duplicateState === "conflict").length,
+        conflicts: preview.filter((r) => r.duplicateState === "conflict")
+          .length,
       },
     },
   };
@@ -752,7 +826,9 @@ function classifyDuplicate(
 
 // ── reads the preview needs ─────────────────────────────────────────────────
 
-type CoreOk<T> = { ok: true; value: T } | { ok: false; failure: EvidenceImportFailure };
+type CoreOk<T> =
+  | { ok: true; value: T }
+  | { ok: false; failure: EvidenceImportFailure };
 
 async function readRoster(
   caller: DomainCaller,
@@ -846,7 +922,9 @@ export async function listRosterPeople(
     readonly search?: string | null;
     readonly limit?: number | null;
   } = {},
-): Promise<EvidenceImportResult<{ organizationId: string; people: RosterPersonView[] }>> {
+): Promise<
+  EvidenceImportResult<{ organizationId: string; people: RosterPersonView[] }>
+> {
   const org = await resolveEvidenceOrganization(caller, input.organizationId);
   if (!org.ok) {
     return org.reason === "choice-required" || org.reason === "not-a-member"
@@ -862,7 +940,8 @@ export async function listRosterPeople(
     .limit(Math.min(Math.max(input.limit ?? 200, 1), 500));
   const search = tidy(input.search ?? "");
   // Escaped so a name containing % or _ searches for itself, not for a wildcard.
-  if (search) q = q.ilike("display_name", `%${search.replace(/[%_\\]/g, "\\$&")}%`);
+  if (search)
+    q = q.ilike("display_name", `%${search.replace(/[%_\\]/g, "\\$&")}%`);
   const res = await q;
   if (res.error) return classify(res.error);
 
@@ -898,7 +977,10 @@ export async function createRosterPerson(
 ): Promise<EvidenceImportResult<{ personId: string; displayName: string }>> {
   const name = tidy(input.displayName);
   if (name.length < 1 || name.length > 200) {
-    return { kind: "invalid", problems: ["display name must be 1..200 characters"] };
+    return {
+      kind: "invalid",
+      problems: ["display name must be 1..200 characters"],
+    };
   }
   const org = await resolveEvidenceOrganization(caller, input.organizationId);
   if (!org.ok) {
@@ -935,11 +1017,15 @@ export async function resolveRow(
     readonly workObjectId?: string | null;
   },
 ): Promise<EvidenceImportResult<{ readonly updated: true }>> {
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const patch: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
   if (input.organizationPersonId !== undefined) {
     patch.organization_person_id = input.organizationPersonId;
     patch.person_state = input.organizationPersonId ? "matched" : "unmatched";
-    patch.person_match_method = input.organizationPersonId ? "human_choice" : null;
+    patch.person_match_method = input.organizationPersonId
+      ? "human_choice"
+      : null;
     patch.person_match_confidence = input.organizationPersonId ? 1 : null;
   }
   if (input.workObjectId !== undefined) {
@@ -952,7 +1038,8 @@ export async function resolveRow(
     .eq("id", input.rowId)
     .select("id");
   if (res.error) return classify(res.error);
-  if (!Array.isArray(res.data) || res.data.length === 0) return { kind: "not-found" };
+  if (!Array.isArray(res.data) || res.data.length === 0)
+    return { kind: "not-found" };
   return { kind: "ok", updated: true };
 }
 
@@ -1007,11 +1094,18 @@ export async function commitImport(
   const notReady = notReadyRes.error ? 0 : (notReadyRes.count ?? 0);
 
   if (ready.length === 0) {
-    return { kind: "ok", written: 0, skippedDuplicates: 0, notReady, recordIds: [] };
+    return {
+      kind: "ok",
+      written: 0,
+      skippedDuplicates: 0,
+      notReady,
+      recordIds: [],
+    };
   }
 
   const importedAt = new Date().toISOString();
-  const state: ReportedEvidenceState = opts?.evidenceState ?? "ORGANIZATION_REPORTED";
+  const state: ReportedEvidenceState =
+    opts?.evidenceState ?? "ORGANIZATION_REPORTED";
 
   // The per-session tamper-evidence chain, in row order (doctrine 3.3).
   let prev: string | null = null;
@@ -1063,7 +1157,9 @@ export async function commitImport(
 
   const written = Array.isArray(ins.data) ? ins.data.length : 0;
   const writtenRowIds = new Set(
-    ((ins.data ?? []) as Record<string, unknown>[]).map((r) => r.import_row_id as string),
+    ((ins.data ?? []) as Record<string, unknown>[]).map(
+      (r) => r.import_row_id as string,
+    ),
   );
 
   // Mark the staged rows. Re-running this is harmless, which is what makes the
@@ -1138,7 +1234,9 @@ async function lifecycleSweep(
     .eq("session_id", sessionId)
     .limit(MAX_ROWS_PER_SESSION);
   if (recs.error) return classify(recs.error);
-  const ids = ((recs.data ?? []) as Record<string, unknown>[]).map((r) => r.id as string);
+  const ids = ((recs.data ?? []) as Record<string, unknown>[]).map(
+    (r) => r.id as string,
+  );
   if (ids.length === 0) return { kind: "ok", affected: 0 };
 
   const ins = await db(caller.supabase)
@@ -1161,7 +1259,10 @@ async function lifecycleSweep(
     eventType: importEvent,
     payload: { records: ids.length },
   });
-  return { kind: "ok", affected: Array.isArray(ins.data) ? ins.data.length : 0 };
+  return {
+    kind: "ok",
+    affected: Array.isArray(ins.data) ? ins.data.length : 0,
+  };
 }
 
 // ── attestation ─────────────────────────────────────────────────────────────
@@ -1292,6 +1393,10 @@ export async function listEvidenceRecords(
   filter: {
     readonly sessionId?: string | null;
     readonly organizationPersonId?: string | null;
+    /** Several subjects at once — the subject-side read passes the roster rows
+     *  already linked to the caller. An EMPTY array means "no subjects", and
+     *  is answered with no records rather than with everything. */
+    readonly organizationPersonIds?: readonly string[] | null;
     readonly limit?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
@@ -1306,12 +1411,19 @@ export async function listEvidenceRecords(
   if (filter.organizationPersonId) {
     q = q.eq("organization_person_id", filter.organizationPersonId);
   }
+  if (filter.organizationPersonIds) {
+    if (filter.organizationPersonIds.length === 0)
+      return { kind: "ok", records: [] };
+    q = q.in("organization_person_id", filter.organizationPersonIds);
+  }
 
   const res = await q;
   if (res.error) return classify(res.error);
 
   const records = ((res.data ?? []) as Record<string, unknown>[]).map((r) => {
-    const events = ((r.organization_evidence_events as Record<string, unknown>[] | null) ?? []).map(
+    const events = (
+      (r.organization_evidence_events as Record<string, unknown>[] | null) ?? []
+    ).map(
       (e): RecordLifecycleEvent => ({
         eventType: e.event_type as RecordLifecycleEvent["eventType"],
         actorRole: (e.actor_role as string | null) ?? null,
@@ -1319,9 +1431,10 @@ export async function listEvidenceRecords(
         actorProfileId: (e.actor_profile_id as string | null) ?? null,
       }),
     );
-    const person = r.organization_people as
-      | { display_name?: string; linked_profile_id?: string | null }
-      | null;
+    const person = r.organization_people as {
+      display_name?: string;
+      linked_profile_id?: string | null;
+    } | null;
     // The subject's linked profile is what lets the derivation tell a
     // self-attestation from an independent one. Unlinked → no subject profile
     // → an attestation cannot be self by construction.
@@ -1364,4 +1477,176 @@ export async function listEvidenceRecords(
   });
 
   return { kind: "ok", records };
+}
+
+// ── the subject's side ──────────────────────────────────────────────────────
+
+/**
+ * One roster record that names the caller, as the caller sees it.
+ *
+ * `linkState` is returned verbatim. `link_proposed` means an organization has
+ * OFFERED the link and is waiting for this person to accept or refuse it; only
+ * `linked` means both sides agree, and only then does the history count as
+ * theirs.
+ */
+export interface SubjectRosterLink {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly organizationName: string | null;
+  readonly displayName: string;
+  readonly relationshipKind: string | null;
+  readonly linkState: "link_proposed" | "linked" | string;
+  readonly linkMethod: string | null;
+}
+
+export interface MyOrganizationEvidence {
+  /** Committed evidence about the caller, from every organization that
+   *  supplied any — the Living CV side of an import. */
+  readonly records: readonly EvidenceRecordView[];
+  /** Every roster record naming the caller, accepted or merely offered. */
+  readonly links: readonly SubjectRosterLink[];
+  /** The offers still awaiting this person's answer. */
+  readonly pendingOffers: readonly SubjectRosterLink[];
+}
+
+/**
+ * WHAT ORGANIZATIONS HAVE RECORDED ABOUT ME.
+ *
+ * The mirror of `listEvidenceRecords` from the subject's side, and the reason
+ * an import is worth anything to the person it is about. RLS is what makes it
+ * safe: `organization_people` shows a person only rows already naming THEM,
+ * and `organization_evidence_records` shows a subject only records whose
+ * roster row is `linked` to them. This function adds no authority of its own —
+ * it asks the two questions in the right order and joins the answers.
+ *
+ * A person who merely appeared in the same file sees nothing.
+ */
+export async function listMyOrganizationEvidence(
+  caller: DomainCaller,
+  opts: { readonly limit?: number } = {},
+): Promise<EvidenceImportResult<MyOrganizationEvidence>> {
+  const peopleRes = await db(caller.supabase)
+    .from("organization_people")
+    .select(
+      "id, organization_id, display_name, relationship_kind, link_state, link_method, organizations(display_name, legal_name)",
+    )
+    .eq("linked_profile_id", caller.userId)
+    .limit(200);
+  if (peopleRes.error) return classify(peopleRes.error);
+
+  const links: SubjectRosterLink[] = (
+    (peopleRes.data ?? []) as Record<string, unknown>[]
+  ).map((r) => {
+    const org = r.organizations as {
+      display_name?: string | null;
+      legal_name?: string | null;
+    } | null;
+    return {
+      id: r.id as string,
+      organizationId: r.organization_id as string,
+      // The ONE org-name rule (`orgDisplayName`) — never an invented name.
+      organizationName: orgDisplayName(org?.display_name, org?.legal_name),
+      displayName: (r.display_name as string) ?? "",
+      relationshipKind: (r.relationship_kind as string | null) ?? null,
+      linkState: (r.link_state as string) ?? "unlinked",
+      linkMethod: (r.link_method as string | null) ?? null,
+    };
+  });
+
+  // Only a CONFIRMED link makes the history this person's. An offer they have
+  // not answered must not quietly start showing their name on someone's work.
+  const confirmed = links
+    .filter((l) => l.linkState === "linked")
+    .map((l) => l.id);
+  const recordsRes = await listEvidenceRecords(caller, {
+    organizationPersonIds: confirmed,
+    limit: opts.limit,
+  });
+  if (recordsRes.kind !== "ok") return recordsRes;
+
+  return {
+    kind: "ok",
+    records: recordsRes.records,
+    links,
+    pendingOffers: links.filter((l) => l.linkState === "link_proposed"),
+  };
+}
+
+/**
+ * The organization OFFERS the link; the person decides.
+ *
+ * The offer can only name a profile that already holds an active engagement or
+ * membership with this organization — that is the database's rule, not this
+ * function's, and it is why identity is never invented by a matching name.
+ */
+export async function offerRosterLink(
+  caller: DomainCaller,
+  input: {
+    readonly personId: string;
+    readonly profileId: string;
+    readonly workerId: string;
+  },
+): Promise<EvidenceImportResult<{ readonly offered: true }>> {
+  const res = await db(caller.supabase)
+    .from("organization_people")
+    .update({
+      link_state: "link_proposed",
+      link_method: "manager_offer",
+      linked_profile_id: input.profileId,
+      linked_worker_id: input.workerId,
+      linked_by: caller.userId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.personId)
+    .eq("link_state", "unlinked")
+    .select("id");
+  if (res.error) return classify(res.error);
+  if (!Array.isArray(res.data) || res.data.length === 0)
+    return { kind: "not-found" };
+  return { kind: "ok", offered: true };
+}
+
+/**
+ * The person answers the offer.
+ *
+ * `accept` makes the link real and their imported history theirs. `refuse`
+ * returns the row to `unlinked`: the organization keeps its own record, and
+ * what it loses is the false claim about whose it is. There is no third
+ * option and no silent default — an unanswered offer stays an offer.
+ */
+export async function respondToRosterLink(
+  caller: DomainCaller,
+  input: { readonly personId: string; readonly decision: "accept" | "refuse" },
+): Promise<
+  EvidenceImportResult<{ readonly linkState: "linked" | "unlinked" }>
+> {
+  const patch =
+    input.decision === "accept"
+      ? {
+          link_state: "linked",
+          link_method: "worker_confirmed",
+          linked_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      : {
+          link_state: "unlinked",
+          link_method: null,
+          linked_profile_id: null,
+          linked_worker_id: null,
+          linked_at: null,
+          updated_at: new Date().toISOString(),
+        };
+  const res = await db(caller.supabase)
+    .from("organization_people")
+    .update(patch)
+    .eq("id", input.personId)
+    .eq("linked_profile_id", caller.userId)
+    .select("id");
+  if (res.error) return classify(res.error);
+  if (!Array.isArray(res.data) || res.data.length === 0)
+    return { kind: "not-found" };
+  return {
+    kind: "ok",
+    linkState: input.decision === "accept" ? "linked" : "unlinked",
+  };
 }

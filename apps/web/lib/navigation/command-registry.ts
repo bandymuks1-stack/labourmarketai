@@ -593,6 +593,64 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // ORGANIZATION evidence import (2026-09-07). Deliberately worded around
+    // "history" and "records" rather than "company": the same route serves an
+    // employer, an agency, a school and a training provider, and someone
+    // looking for it will type the thing they hold, not the role they play.
+    id: "import_work_history",
+    route: "/dashboard/company/evidence-import",
+    audience: "company",
+    labels: {
+      en: "Import work history",
+      lt: "Importuoti darbo istoriją",
+      ru: "Импорт истории работы",
+      nl: "Werkgeschiedenis importeren",
+      de: "Arbeitsgeschichte importieren",
+    },
+    synonyms: {
+      en: [
+        "import work history",
+        "import timesheets",
+        "historical records",
+        "past work",
+        "upload old records",
+        "work evidence import",
+      ],
+      lt: [
+        "importuoti darbo istoriją",
+        "importuoti tabelius",
+        "istoriniai įrašai",
+        "praeities darbai",
+        "įkelti senus įrašus",
+        "darbo įrodymų importas",
+      ],
+      ru: [
+        "импорт истории работы",
+        "импорт табелей",
+        "исторические записи",
+        "прошлые работы",
+        "загрузить старые записи",
+        "импорт доказательств работы",
+      ],
+      nl: [
+        "werkgeschiedenis importeren",
+        "urenstaten importeren",
+        "historische gegevens",
+        "eerder werk",
+        "oude gegevens uploaden",
+        "werkbewijs importeren",
+      ],
+      de: [
+        "arbeitsgeschichte importieren",
+        "stundenzettel importieren",
+        "historische aufzeichnungen",
+        "frühere arbeit",
+        "alte aufzeichnungen hochladen",
+        "arbeitsnachweise importieren",
+      ],
+    },
+  },
+  {
     id: "candidates",
     route: "/dashboard/candidates",
     audience: "company",

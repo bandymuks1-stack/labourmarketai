@@ -47,6 +47,11 @@ const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
     binding: "t",
     namespace: "reports",
   },
+  {
+    file: "app/[locale]/dashboard/company/evidence-import/page.tsx",
+    binding: "t",
+    namespace: "evidenceImport",
+  },
 ];
 
 /** Read a dotted path; undefined when any segment is missing or non-string. */

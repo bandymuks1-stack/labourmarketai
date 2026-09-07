@@ -116,12 +116,19 @@ export const EVIDENCE_STATES: readonly EvidenceState[] = [
   ...LIFECYCLE_EVIDENCE_STATES,
 ];
 
-export function isReportedEvidenceState(v: unknown): v is ReportedEvidenceState {
-  return typeof v === "string" && (REPORTED_EVIDENCE_STATES as readonly string[]).includes(v);
+export function isReportedEvidenceState(
+  v: unknown,
+): v is ReportedEvidenceState {
+  return (
+    typeof v === "string" &&
+    (REPORTED_EVIDENCE_STATES as readonly string[]).includes(v)
+  );
 }
 
 export function isEvidenceState(v: unknown): v is EvidenceState {
-  return typeof v === "string" && (EVIDENCE_STATES as readonly string[]).includes(v);
+  return (
+    typeof v === "string" && (EVIDENCE_STATES as readonly string[]).includes(v)
+  );
 }
 
 /**
@@ -240,7 +247,10 @@ function latestAt(
   events: readonly RecordLifecycleEvent[],
   type: RecordLifecycleEvent["eventType"],
 ): number {
-  return events.reduce((acc, e) => (e.eventType === type ? Math.max(acc, ts(e.createdAt)) : acc), 0);
+  return events.reduce(
+    (acc, e) => (e.eventType === type ? Math.max(acc, ts(e.createdAt)) : acc),
+    0,
+  );
 }
 
 /**
@@ -275,8 +285,10 @@ export function deriveEvidenceStanding(
   const verified = newestOf(events, "independently_verified");
 
   const isWithdrawn = withdrawnAt > 0 && withdrawnAt > reinstatedAt;
-  const attestationStands = attested !== null && ts(attested.createdAt) >= attestationWithdrawnAt;
-  const verificationStands = verified !== null && ts(verified.createdAt) >= verificationWithdrawnAt;
+  const attestationStands =
+    attested !== null && ts(attested.createdAt) >= attestationWithdrawnAt;
+  const verificationStands =
+    verified !== null && ts(verified.createdAt) >= verificationWithdrawnAt;
 
   const attesterIsSubject =
     attestationStands &&
@@ -293,7 +305,10 @@ export function deriveEvidenceStanding(
     : null;
 
   const verification = verificationStands
-    ? { at: verified?.createdAt ?? null, byProfileId: verified?.actorProfileId ?? null }
+    ? {
+        at: verified?.createdAt ?? null,
+        byProfileId: verified?.actorProfileId ?? null,
+      }
     : null;
 
   let state: EvidenceState;
@@ -304,7 +319,8 @@ export function deriveEvidenceStanding(
   else if (attestation) {
     state = attestation.self
       ? "SELF_ATTESTED"
-      : (ROLE_STATE[attestation.role as AttestationActorRole] ?? "THIRD_PARTY_ATTESTED");
+      : (ROLE_STATE[attestation.role as AttestationActorRole] ??
+        "THIRD_PARTY_ATTESTED");
   } else state = base;
 
   return {
@@ -337,13 +353,18 @@ export function canIndependentlyVerify(opts: {
   | { readonly ok: true }
   | {
       readonly ok: false;
-      readonly reason: "no_actor" | "actor_is_subject" | "actor_is_supplier" | "not_a_recorded_party";
+      readonly reason:
+        | "no_actor"
+        | "actor_is_subject"
+        | "actor_is_supplier"
+        | "not_a_recorded_party";
     } {
   if (!opts.actorProfileId) return { ok: false, reason: "no_actor" };
   if (opts.subjectProfileId && opts.subjectProfileId === opts.actorProfileId) {
     return { ok: false, reason: "actor_is_subject" };
   }
-  if (opts.actorManagesSupplier) return { ok: false, reason: "actor_is_supplier" };
+  if (opts.actorManagesSupplier)
+    return { ok: false, reason: "actor_is_supplier" };
   if (!opts.actorIsRecordedVerifyingParty) {
     return { ok: false, reason: "not_a_recorded_party" };
   }

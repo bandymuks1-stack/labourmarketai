@@ -161,9 +161,9 @@ create table if not exists public.organization_people (
     'volunteer','other')),
   source_note       text check (source_note is null or char_length(source_note) <= 500),
   -- The claim link. `unlinked` = the organization knows this person, the
-  -- platform does not. `link_proposed` = the real human proposed the link
-  -- THEMSELVES. `linked` = a manager confirmed it. Never set by an importer,
-  -- and never inferred from a matching name.
+  -- platform does not. `link_proposed` = one side has OFFERED the link.
+  -- `linked` = both sides agree. Never set by an importer, and never inferred
+  -- from a matching name.
   linked_worker_id  uuid references public.workers(id) on delete set null,
   -- Denormalized authorization anchor: the ONE predicate that lets the subject
   -- read their own history without a workers subquery (and a re-entry into
@@ -171,8 +171,12 @@ create table if not exists public.organization_people (
   linked_profile_id uuid references public.profiles(id) on delete set null,
   link_state        text not null default 'unlinked'
                       check (link_state in ('unlinked','link_proposed','linked')),
+  -- HOW the link came about. `manager_offer` is the organization proposing it;
+  -- `worker_confirmed` is the person accepting. `manager_link` remains for the
+  -- case where a manager links a profile that already has an active
+  -- relationship with them, and `invitation` for a link that arrives with one.
   link_method       text check (link_method is null or link_method in
-                      ('manager_link','worker_claim','invitation')),
+                      ('manager_link','manager_offer','worker_confirmed','invitation')),
   linked_at         timestamptz,
   linked_by         uuid references public.profiles(id) on delete set null,
   created_by        uuid default auth.uid() references public.profiles(id) on delete set null,
@@ -195,7 +199,7 @@ create unique index if not exists organization_people_external_ref_uidx
   on public.organization_people (organization_id, external_ref) where external_ref is not null;
 
 comment on table public.organization_people is
-  'A person an organization knows from its own records - employee, agency worker, subcontractor, student, trainee, programme participant. NOT a platform identity and never a substitute for one: an unlinked row asserts nothing about who the human is. The real person may later claim it (link_proposed) and a manager confirms (linked), at which point their imported history joins their Living CV without losing provenance. People are NEVER merged on a matching name alone.';
+  'A person an organization knows from its own records - employee, agency worker, subcontractor, student, trainee, programme participant. NOT a platform identity and never a substitute for one: an unlinked row asserts nothing about who the human is. A manager may OFFER the link to a profile that already holds an active relationship with the organization (link_proposed); only the person themselves accepts it (linked) or refuses it, at which point their imported history joins their Living CV without losing provenance. People are NEVER merged on a matching name alone.';
 
 -- ── 2. evidence_import_sessions - one immutable envelope per source ─────────
 
@@ -613,21 +617,46 @@ create policy organization_people_manager_update on public.organization_people
     )
   );
 
--- The real human proposes the link themselves. They can only ever propose it
--- FOR THEMSELVES (the check pins linked_profile_id to auth.uid() and the
--- worker row to one they own) and they cannot confirm it - `link_proposed` is
--- not `linked`, and only the manager policy above can write that.
-create policy organization_people_self_claim on public.organization_people
+-- ── THE PERSON HAS THE FINAL SAY ───────────────────────────────────────────
+--
+-- The manager policy above may OFFER a link (`link_proposed`) to a profile
+-- that already holds a real active relationship with this organization. Only
+-- the person themselves turns that offer into `linked`, and they may also
+-- refuse it outright — a roster row must never become a claim about someone
+-- over their objection.
+--
+-- WHY THERE IS NO WORKER-INITIATED CLAIM OF AN UNLINKED ROW. Such a policy
+-- would need the person to SELECT unlinked roster rows, and the select policy
+-- above deliberately does not show them: that would let any authenticated
+-- account enumerate an organization's people by name. A policy whose rows are
+-- invisible cannot fire, and a capability that only appears to exist is worse
+-- than one that honestly does not — so the offer comes from the side that
+-- already knows both facts, and the person accepts or refuses it.
+--
+-- The USING clause pins this policy to rows ALREADY naming the caller, so it
+-- can never reach anybody else's record.
+create policy organization_people_subject_decides on public.organization_people
   for update to authenticated
-  using (link_state = 'unlinked')
+  using (linked_profile_id = auth.uid())
   with check (
-    link_state = 'link_proposed'
-    and link_method = 'worker_claim'
-    and linked_profile_id = auth.uid()
-    and exists (
-      select 1 from public.workers w
-       where w.id = organization_people.linked_worker_id
-         and w.profile_id = auth.uid()
+    -- Accept: the offer becomes a link, still pointing at the same person.
+    (
+      link_state = 'linked'
+      and link_method = 'worker_confirmed'
+      and linked_profile_id = auth.uid()
+      and exists (
+        select 1 from public.workers w
+         where w.id = organization_people.linked_worker_id
+           and w.profile_id = auth.uid()
+      )
+    )
+    -- Refuse: "that is not me". The row returns to unlinked and the person
+    -- stops seeing it. The organization keeps its own record; what it loses is
+    -- the false claim about whose it is.
+    or (
+      link_state = 'unlinked'
+      and linked_profile_id is null
+      and linked_worker_id is null
     )
   );
 

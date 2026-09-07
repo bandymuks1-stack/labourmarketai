@@ -23,9 +23,17 @@ import {
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
 import { fingerprintPayload } from "@/lib/organization-evidence/fingerprint";
-import { sourceWorkRowSchema, MAX_ROWS_PER_SUBMIT } from "@/lib/organization-evidence/source-rows";
+import {
+  sourceWorkRowSchema,
+  MAX_ROWS_PER_SUBMIT,
+} from "@/lib/organization-evidence/source-rows";
+// THE shared commit gate — the human UI signs and verifies with the SAME
+// helpers, so the two transports cannot drift apart at the riskiest step.
+import {
+  mintCommitToken,
+  verifyCommitToken,
+} from "@/lib/organization-evidence/commit-confirmation";
 
-import { mintCapabilityConfirmation, verifyCapabilityConfirmation } from "./confirmable";
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
 
 /**
@@ -93,7 +101,11 @@ function fail(f: EvidenceImportFailure): ExecResult {
     case "invalid":
       return { ok: false, code: "invalid", message: f.problems.join("; ") };
     case "not-found":
-      return { ok: false, code: "not_found", message: "No such session, row or record." };
+      return {
+        ok: false,
+        code: "not_found",
+        message: "No such session, row or record.",
+      };
     case "too-many-rows":
       return {
         ok: false,
@@ -101,7 +113,11 @@ function fail(f: EvidenceImportFailure): ExecResult {
         message: `At most ${f.limit} rows. Split the source and submit in batches.`,
       };
     case "error":
-      return { ok: false, code: "unavailable", message: "The evidence store could not be read." };
+      return {
+        ok: false,
+        code: "unavailable",
+        message: "The evidence store could not be read.",
+      };
   }
 }
 
@@ -140,7 +156,10 @@ const organizationResolve: CapabilityDescriptor = {
   inputSchema: orgResolveInput,
   run: async (caller: CapabilityCaller, input): Promise<ExecResult> => {
     const parsed = orgResolveInput.parse(input);
-    const org = await resolveEvidenceOrganization(caller, parsed.organization ?? null);
+    const org = await resolveEvidenceOrganization(
+      caller,
+      parsed.organization ?? null,
+    );
     if (!org.ok) {
       if (org.reason === "choice-required" || org.reason === "not-a-member") {
         return fail({ kind: "choice-required", options: org.options ?? [] });
@@ -256,7 +275,11 @@ const personCreate: CapabilityDescriptor = {
     if (res.kind !== "ok") return fail(res);
     return {
       ok: true,
-      data: { personId: res.personId, name: res.displayName, linkState: "unlinked" },
+      data: {
+        personId: res.personId,
+        name: res.displayName,
+        linkState: "unlinked",
+      },
     };
   },
 };
@@ -362,25 +385,6 @@ const rowsSubmit: CapabilityDescriptor = {
 
 const previewInput = z.object({ sessionId: z.uuid() }).strict();
 
-/**
- * The two halves of the commit token.
- *
- * `commitHashInput` is the DRAFT IDENTITY — what the client asked for, and the
- * only part it can restate. `readyFingerprint` is the STATE the preview
- * actually showed: the exact set of rows that would be written. Binding the
- * token to that set is what makes it genuinely one-time — committing turns
- * those rows into stored records, so the next preview classifies them as
- * `duplicate`, they stop being ready, the fingerprint moves, and a replayed
- * token fails as stale instead of writing anything twice.
- */
-function commitHashInput(sessionId: string) {
-  return { sessionId };
-}
-
-function readyFingerprint(rows: readonly { readonly id: string }[]): string {
-  return `evidence-import-ready:v1:${rows.map((r) => r.id).sort().join(",")}`;
-}
-
 const importPreview: CapabilityDescriptor = {
   id: "evidence.import.preview",
   kind: "draft",
@@ -403,11 +407,10 @@ const importPreview: CapabilityDescriptor = {
     // The token is bound to the EXACT set of rows shown. If anything changes
     // between preview and commit — a row resolved, a duplicate appearing — the
     // token no longer verifies and the assistant must preview again.
-    const token = mintCapabilityConfirmation({
-      actionId: "evidence.import.commit",
-      input: commitHashInput(parsed.sessionId),
+    const token = mintCommitToken({
+      sessionId: parsed.sessionId,
       userId: caller.userId,
-      stateFingerprint: readyFingerprint(ready),
+      readyRows: ready,
     });
 
     return {
@@ -461,7 +464,10 @@ const rowResolve: CapabilityDescriptor = {
     if (res.kind !== "ok") return fail(res);
     return {
       ok: true,
-      data: { rowId: parsed.rowId, note: "Preview again to refresh the token." },
+      data: {
+        rowId: parsed.rowId,
+        note: "Preview again to refresh the token.",
+      },
     };
   },
 };
@@ -500,12 +506,11 @@ const importCommit: CapabilityDescriptor = {
     if (preview.kind !== "ok") return fail(preview);
     const ready = preview.preview.rows.filter((r) => r.ready);
 
-    const verdict = verifyCapabilityConfirmation({
-      actionId: "evidence.import.commit",
+    const verdict = verifyCommitToken({
       token: parsed.confirmationToken,
-      input: commitHashInput(parsed.sessionId),
+      sessionId: parsed.sessionId,
       userId: caller.userId,
-      currentStateFingerprint: readyFingerprint(ready),
+      readyRows: ready,
     });
     if (!verdict.ok) {
       return {
@@ -600,7 +605,10 @@ const recordAttest: CapabilityDescriptor = {
       note: parsed.note ?? null,
     });
     if (res.kind !== "ok") return fail(res);
-    return { ok: true, data: { eventId: res.eventId, independentlyVerified: false } };
+    return {
+      ok: true,
+      data: { eventId: res.eventId, independentlyVerified: false },
+    };
   },
 };
 
@@ -623,7 +631,11 @@ const importWithdraw: CapabilityDescriptor = {
   inputSchema: withdrawInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = withdrawInput.parse(input);
-    const res = await withdrawImport(caller, parsed.sessionId, parsed.note ?? null);
+    const res = await withdrawImport(
+      caller,
+      parsed.sessionId,
+      parsed.note ?? null,
+    );
     if (res.kind !== "ok") return fail(res);
     return {
       ok: true,

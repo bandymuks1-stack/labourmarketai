@@ -15154,5 +15154,201 @@
     "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Uw keuzes worden opgeslagen en gelden zodra die actief is.",
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
+  },
+  "evidenceImport": {
+    "eyebrow": "Historisch werkbewijs",
+    "title": "Werkgeschiedenis importeren",
+    "intro": "Breng de eigen administratie van een organisatie — urenstaten, projectlogboeken, opleidingsregisters — als bewijs naar het platform, waarbij elk feit uit de bron gescheiden blijft van elke gevolgtrekking.",
+    "actingFor": "U handelt namens",
+    "nothingWrittenYet": "Er is nog niets vastgelegd. U ziet precies wat er zou worden vastgelegd voordat er iets wordt opgeslagen.",
+    "context": {
+      "unauthenticated": "Meld u aan om bewijs te importeren.",
+      "personalWorkspace": "U bent in uw persoonlijke ruimte. Historisch bewijs hoort bij een organisatie — wissel eerst van werkruimte.",
+      "noOrganization": "Dit account hoort bij geen enkele organisatie, dus er is niets om bewijs voor te importeren.",
+      "notAMember": "Die organisatie is niet een van de uwe. Kies er een uit deze:",
+      "chooseOrganization": "U hoort bij meer dan één organisatie. Kies welke dit bewijs levert:",
+      "notAuthorized": "Uw rol in deze organisatie omvat het importeren van bewijs niet. Een eigenaar, beheerder of manager kan dit wel.",
+      "needsMigration": "De bewijsopslag is in deze omgeving nog niet ingeschakeld. De databasewijziging is voorbereid en wacht op goedkeuring van de eigenaar; er is niets vastgelegd.",
+      "unavailable": "De bewijsopslag kon niet worden gelezen. Dit is een systeemprobleem, geen lege organisatie."
+    },
+    "form": {
+      "title": "1. De bron",
+      "supplierRole": "In welke hoedanigheid levert u dit aan?",
+      "supplierRoleHint": "Een bureau dat de uren van zijn werknemer op de locatie van een klant meldt, is noch de werkgever noch de klant. Geef aan wie u bent — het wordt bij elke regel vastgelegd.",
+      "sourceKind": "Wat voor soort bron is het?",
+      "sourceLanguage": "In welke taal is de bron geschreven?",
+      "filename": "Bestandsnaam of label",
+      "reference": "Bronverwijzing",
+      "referenceHint": "Waar dit vandaan komt, in uw eigen woorden — een archiefdoos, een map, een systeemnaam.",
+      "notes": "Notities",
+      "paste": "Plak de regels",
+      "pasteHint": "Eén regel per rij, kolommen gescheiden door een komma, puntkomma of tab. De eerste herkende kopregel wordt gebruikt; alles daarboven wordt genegeerd.",
+      "file": "Of upload een CSV/TSV-bestand",
+      "submit": "Lees de bron",
+      "submitting": "Bezig met lezen…"
+    },
+    "preview": {
+      "title": "2. Wat er zou worden vastgelegd",
+      "notPersisted": "Dit is een interpretatie van uw bestand. NIETS hiervan is al bewijs.",
+      "empty": "Voor deze bron zijn geen regels klaargezet.",
+      "counts": {
+        "total": "Gelezen regels",
+        "ready": "Klaar",
+        "needsPerson": "Persoon onopgelost",
+        "needsContext": "Plaats onopgelost",
+        "duplicates": "Al geïmporteerd",
+        "conflicts": "Tegenstrijdigheden"
+      },
+      "column": {
+        "row": "Regel",
+        "person": "Wie",
+        "date": "Datum",
+        "hours": "Uren",
+        "place": "Plaats",
+        "work": "Wat er is gedaan",
+        "state": "Status"
+      },
+      "fact": "Vermeld door de bron",
+      "derived": "Door ons afgeleid",
+      "derivedMethod": "Methode",
+      "confidence": "Zekerheid"
+    },
+    "personState": {
+      "unmatched": "Niet in het bestand",
+      "matched": "Gekoppeld",
+      "ambiguous": "Meer dan één overeenkomst",
+      "created": "Toegevoegd aan het bestand"
+    },
+    "contextState": {
+      "absent": "Geen plaats genoemd",
+      "unmatched": "Plaats niet gevonden",
+      "matched": "Gekoppeld",
+      "ambiguous": "Meer dan één overeenkomst",
+      "created": "Aangemaakt"
+    },
+    "duplicateState": {
+      "new": "Nieuw",
+      "duplicate": "Al geïmporteerd",
+      "probable_duplicate": "Waarschijnlijk al geïmporteerd",
+      "conflict": "In tegenspraak met een bestaande registratie"
+    },
+    "problem": {
+      "person_not_on_roster": "Deze naam staat niet in uw bestand. Kies de persoon of voeg hem toe.",
+      "person_ambiguous": "Meer dan één persoon in uw bestand heeft deze naam. Kies welke.",
+      "context_ambiguous": "Meer dan één plaats past bij dit label. Kies welke.",
+      "already_imported": "Er bestaat al een identieke registratie, dus deze regel wordt overgeslagen."
+    },
+    "resolve": {
+      "title": "Oplossen",
+      "choosePerson": "Kies de persoon",
+      "choosePlace": "Kies de plaats",
+      "save": "Opslaan",
+      "addPerson": "Een persoon toevoegen",
+      "displayName": "Naam zoals uw administratie hem schrijft",
+      "externalRef": "Personeelsnummer",
+      "relationship": "Relatie tot de organisatie",
+      "sourceNote": "Waar de gegevens van deze persoon vandaan komen",
+      "create": "Toevoegen",
+      "unlinkedNote": "Een hier toegevoegde persoon is een registratie van uw organisatie. Het is geen account en zegt niets over wie hij is — de echte persoon kan hem later opeisen."
+    },
+    "relationship": {
+      "employee": "Werknemer",
+      "former_employee": "Voormalig werknemer",
+      "agency_worker": "Uitzendkracht",
+      "subcontractor": "Onderaannemer",
+      "contractor": "Aannemer",
+      "student": "Studerende",
+      "graduate": "Afgestudeerde",
+      "trainee": "Stagiair",
+      "apprentice": "Leerling",
+      "programme_participant": "Programmadeelnemer",
+      "volunteer": "Vrijwilliger",
+      "other": "Anders"
+    },
+    "commit": {
+      "title": "3. Vastleggen",
+      "evidenceState": "Hoe moet dit worden vastgelegd?",
+      "evidenceStateHint": "Een import kan alleen ooit een gemelde status opleveren. Niemand heeft het nog gecontroleerd, en dit scherm kan niet zeggen van wel.",
+      "confirm": "{count} regels vastleggen",
+      "confirmNone": "Nog geen enkele regel is klaar om vast te leggen",
+      "confirming": "Bezig met vastleggen…",
+      "readOnce": "Lees wat hierboven staat voordat u goedkeurt. Goedkeuren legt het vast namens uw organisatie."
+    },
+    "evidenceState": {
+      "SELF_REPORTED": "Door de persoon zelf aangeleverd",
+      "ORGANIZATION_REPORTED": "De organisatie meldt het",
+      "LEGACY_IMPORTED": "Overgezet uit een ouder systeem",
+      "UNVERIFIED": "Aangeleverd, status niet vastgesteld",
+      "NEEDS_REVIEW": "Vraagt om een menselijke blik"
+    },
+    "result": {
+      "written": "Vastgelegd",
+      "skipped": "Overgeslagen als reeds vastgelegd",
+      "notReady": "Onopgelost gebleven",
+      "reusedSession": "U hebt deze bron al gelezen. De regels ervan staan hieronder in plaats van een tweede keer te worden gelezen."
+    },
+    "records": {
+      "title": "4. Wat er is vastgelegd",
+      "empty": "Uit deze bron is nog niets vastgelegd.",
+      "importedAt": "Geïmporteerd",
+      "supplier": "Aangeleverd als",
+      "source": "Bron",
+      "attest": "Sta achter deze registratie",
+      "attestRole": "In welke hoedanigheid",
+      "attestNote": "Notitie",
+      "attested": "Bevestigd",
+      "selfAttested": "Bevestigd door de persoon over wie het gaat",
+      "selfAttestedHint": "Dit is echt, vastgelegd bewijs. Het is geen onafhankelijke verificatie en telt daar nooit als zodanig.",
+      "notIndependentlyVerified": "Niet onafhankelijk geverifieerd",
+      "withdrawn": "Ingetrokken"
+    },
+    "withdraw": {
+      "title": "Deze import ongedaan maken",
+      "note": "Waarom",
+      "button": "Alles intrekken wat deze import heeft vastgelegd",
+      "hint": "Er wordt niets verwijderd. Elke registratie krijgt een intrekkingsnotitie, zodat zowel het bewijs als de reden leesbaar blijven."
+    },
+    "role": {
+      "employer": "Werkgever",
+      "agency": "Bureau",
+      "client": "Klant",
+      "end_client": "Eindklant",
+      "project_owner": "Projecteigenaar",
+      "subcontractor": "Onderaannemer",
+      "education_provider": "Onderwijsinstelling",
+      "training_provider": "Opleidingsaanbieder",
+      "assessor": "Beoordelaar",
+      "verifier": "Verificateur",
+      "placement_provider": "Stagebieder",
+      "public_body": "Overheidsinstantie",
+      "sector_body": "Brancheorganisatie",
+      "other": "Anders"
+    },
+    "sourceKind": {
+      "xlsx": "Rekenblad",
+      "csv": "CSV-/TSV-bestand",
+      "pdf": "PDF-document",
+      "api": "Koppeling van een ander systeem",
+      "agent": "Een assistent",
+      "erp": "ERP-systeem",
+      "payroll": "Salarissysteem",
+      "sis": "Studentenadministratie",
+      "lms": "Leerplatform",
+      "email": "E-mail",
+      "drive": "Gedeelde schijf",
+      "manual": "Met de hand ingevoerd"
+    },
+    "error": {
+      "invalid": "Iets in het formulier is niet bruikbaar. Controleer de gemarkeerde delen.",
+      "not_found": "Die import, regel of registratie bestaat niet meer.",
+      "unavailable": "De bewijsopslag was niet bereikbaar. Er is niets vastgelegd.",
+      "too_many_rows": "Dat zijn meer regels dan één import aankan. Splits de bron, bijvoorbeeld per jaar.",
+      "no_source_supplied": "Geen bestand en geen geplakte regels — er is niets te lezen.",
+      "file_too_large": "Dat bestand is te groot om hier te lezen.",
+      "file_unreadable": "Dat bestand kon niet als tekst worden gelezen.",
+      "nothing_parsed": "Er is geen bruikbare regel gevonden. De bron heeft een kopregel nodig die ten minste een persoon en een datum noemt.",
+      "confirmation_rejected": "Deze import is veranderd nadat u ernaar keek, dus er is niets vastgelegd. Lees hem opnieuw en keur de nieuwe versie goed.",
+      "confirmation_unavailable": "Goedkeuringen kunnen in deze omgeving niet worden ondertekend, dus er is niets vastgelegd."
+    }
   }
 }
