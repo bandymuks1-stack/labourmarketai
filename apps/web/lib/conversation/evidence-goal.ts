@@ -93,6 +93,16 @@ export interface StatedWorkFacts {
 export interface DerivedWorkReadings {
   readonly skillSlugs: readonly string[];
   readonly workDirectionSlug: string | null;
+  /**
+   * The words in the PERSON'S OWN LANGUAGE that triggered each recognition.
+   *
+   * Carried because they are the honest bridge to a standardised meaning: an
+   * ESCO label lookup wants "pastolius", not a whole sentence and not an
+   * English slug. Keeping the person's word also keeps the correspondence
+   * explainable - a mapping nobody can see the reason for is one they cannot
+   * contest.
+   */
+  readonly matchedTerms: readonly string[];
 }
 
 export interface WorkEvidenceDraft {
@@ -115,7 +125,7 @@ export const EMPTY_STATED: StatedWorkFacts = {
 export function emptyEvidenceDraft(): WorkEvidenceDraft {
   return {
     stated: EMPTY_STATED,
-    derived: { skillSlugs: [], workDirectionSlug: null },
+    derived: { skillSlugs: [], workDirectionSlug: null, matchedTerms: [] },
     asked: [],
   };
 }
@@ -162,6 +172,9 @@ export function evidenceFromSuggestions(
     derived: {
       skillSlugs: suggestions.skillSlugs ?? [],
       workDirectionSlug: suggestions.workDirectionSlug ?? null,
+      matchedTerms: (suggestions.skillSuggestions ?? [])
+        .map((r) => r.matchedText.trim())
+        .filter((w) => w.length >= 2),
     },
   };
 }
@@ -194,6 +207,7 @@ export function mergeEvidenceDraft(
       skillSlugs: mergeSlugs(carried.derived.skillSlugs, derived?.skillSlugs ?? []),
       workDirectionSlug:
         derived?.workDirectionSlug ?? carried.derived.workDirectionSlug,
+      matchedTerms: mergeSlugs(carried.derived.matchedTerms, derived?.matchedTerms ?? []),
     },
     asked: carried.asked,
   };
