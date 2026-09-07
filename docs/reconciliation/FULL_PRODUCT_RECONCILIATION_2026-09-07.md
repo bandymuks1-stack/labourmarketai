@@ -2,9 +2,10 @@
 
 > **Status:** evidence record. Not a plan, not a vision, not a roadmap.
 > **Method:** eight parallel source-level domain sweeps over `main` @ `813f1b6`
-> (unshallowed to the full 1,625-commit history), plus a live read of production
-> `gorgitwvdzxbnaxhrsrw` — schema, RLS catalogue, migration ledger, row counts,
-> security advisors — through Supabase MCP.
+> (unshallowed to the full 1,625-commit history), plus a live read of the
+> production project — schema, RLS catalogue, migration ledger, row counts,
+> security advisors — through Supabase MCP. The project ref is deliberately
+> omitted here and everywhere else in this PR (standing owner rule).
 > **Canonical register:** [`docs/CAPABILITY_INVENTORY.md` §6](../CAPABILITY_INVENTORY.md).
 > This file is the reasoning; the register is the list future work must update.
 >
@@ -82,7 +83,8 @@ which is the direction that would break code.
 
 ## 1. PRODUCTION SNAPSHOT — read 2026-09-07T03:46Z
 
-Project `gorgitwvdzxbnaxhrsrw`. 266 applied migrations (max version
+The production project (ref deliberately not written down). 266 applied
+migrations (max version
 `20260906202628`). 190 tables in `public`, **RLS enabled on all 190**.
 
 ### What real people have actually done

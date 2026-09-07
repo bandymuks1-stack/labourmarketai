@@ -15349,6 +15349,18 @@
       "nothing_parsed": "No usable row was found. The source needs a header row naming at least a person and a date.",
       "confirmation_rejected": "This import changed after you looked at it, so it was not recorded. Read it again and approve the new version.",
       "confirmation_unavailable": "Approvals cannot be signed in this environment, so nothing was recorded."
+    },
+    "mine": {
+      "title": "What organizations have recorded about me",
+      "intro": "Work, training and study that an organization imported from its own records. The provenance travels with it: who supplied it, in what capacity, and when.",
+      "notEnabled": "This is not switched on in this environment yet. Nothing is missing from your profile — the store is simply not there to read.",
+      "empty": "No organization has recorded anything about you here yet.",
+      "offersTitle": "Waiting for your answer",
+      "offersHint": "An organization says one of its records is about you. Nothing joins your CV until you say so, and refusing is a real answer — the organization keeps its own record, it just stops naming you.",
+      "accept": "Yes, that is me",
+      "refuse": "No, that is not me",
+      "decisionFailed": "That answer could not be saved. Nothing changed.",
+      "unnamedOrganization": "An organization"
     }
   }
 }

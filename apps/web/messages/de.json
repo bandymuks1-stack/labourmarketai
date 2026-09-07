@@ -15349,6 +15349,18 @@
       "nothing_parsed": "Es wurde keine verwendbare Zeile gefunden. Die Quelle braucht eine Kopfzeile, die mindestens eine Person und ein Datum benennt.",
       "confirmation_rejected": "Dieser Import hat sich geändert, nachdem Sie ihn angesehen haben, daher wurde nichts festgehalten. Sehen Sie ihn erneut an und geben Sie die neue Fassung frei.",
       "confirmation_unavailable": "Freigaben können in dieser Umgebung nicht signiert werden, daher wurde nichts festgehalten."
+    },
+    "mine": {
+      "title": "Was Organisationen über mich festgehalten haben",
+      "intro": "Arbeit, Weiterbildung und Studium, die eine Organisation aus ihren eigenen Aufzeichnungen importiert hat. Die Herkunft reist mit: wer es geliefert hat, in welcher Eigenschaft und wann.",
+      "notEnabled": "Das ist in dieser Umgebung noch nicht eingeschaltet. In Ihrem Profil fehlt nichts — der Speicher ist schlicht nicht da, um gelesen zu werden.",
+      "empty": "Bisher hat hier keine Organisation etwas über Sie festgehalten.",
+      "offersTitle": "Wartet auf Ihre Antwort",
+      "offersHint": "Eine Organisation sagt, einer ihrer Einträge betreffe Sie. Nichts kommt in Ihren Lebenslauf, bevor Sie das bestätigen, und Ablehnen ist eine echte Antwort — die Organisation behält ihren Eintrag, sie nennt Sie darin nur nicht mehr.",
+      "accept": "Ja, das bin ich",
+      "refuse": "Nein, das bin ich nicht",
+      "decisionFailed": "Diese Antwort konnte nicht gespeichert werden. Es hat sich nichts geändert.",
+      "unnamedOrganization": "Eine Organisation"
     }
   }
 }

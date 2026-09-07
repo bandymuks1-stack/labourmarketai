@@ -15349,6 +15349,18 @@
       "nothing_parsed": "Nerasta nė vienos tinkamos eilutės. Šaltinyje reikia antraštės eilutės, nurodančios bent asmenį ir datą.",
       "confirmation_rejected": "Šis importas pasikeitė po to, kai jį peržiūrėjote, todėl nebuvo užfiksuotas. Peržiūrėkite iš naujo ir patvirtinkite naują versiją.",
       "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota."
+    },
+    "mine": {
+      "title": "Ką organizacijos yra užfiksavusios apie mane",
+      "intro": "Darbas, mokymai ir studijos, kuriuos organizacija importavo iš savo pačios įrašų. Kilmė keliauja kartu: kas pateikė, kokiu vaidmeniu ir kada.",
+      "notEnabled": "Šioje aplinkoje tai dar neįjungta. Jūsų profilyje nieko netrūksta — tiesiog nėra saugyklos, kurią būtų galima perskaityti.",
+      "empty": "Kol kas nė viena organizacija čia nieko apie jus neužfiksavo.",
+      "offersTitle": "Laukiama jūsų atsakymo",
+      "offersHint": "Organizacija teigia, kad vienas jos įrašų yra apie jus. Kol nepatvirtinsite, niekas neprisijungs prie jūsų CV, o atsisakymas yra tikras atsakymas — organizacija išsaugo savo įrašą, tik nustoja jame minėti jus.",
+      "accept": "Taip, tai aš",
+      "refuse": "Ne, tai ne aš",
+      "decisionFailed": "Šio atsakymo išsaugoti nepavyko. Niekas nepasikeitė.",
+      "unnamedOrganization": "Organizacija"
     }
   }
 }

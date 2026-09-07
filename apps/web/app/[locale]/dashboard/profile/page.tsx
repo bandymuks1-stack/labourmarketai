@@ -74,6 +74,8 @@ import {
   type WorkerAchievementsRead,
 } from "@/lib/worker/worker-achievements";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
+import { OrganizationEvidenceSection } from "@/components/app/organization-evidence-section";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -212,6 +214,7 @@ export default async function ProfilePage({
     workerRes,
     profRowsRes,
     avatar,
+    myOrgEvidence,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -239,6 +242,21 @@ export default async function ProfilePage({
       .maybeSingle(),
     supabase.from("professions").select("id, slug").eq("is_active", true),
     getOwnAvatar(),
+    /**
+     * The SUBJECT'S side of the organization evidence import (2026-09-07).
+     *
+     * Keyed on `user.id` alone, so it belongs in THIS batch and not after it —
+     * a standalone await would add a serial stage to the render for a read
+     * that depends on nothing the batch produces (W7-S3 ratchet).
+     *
+     * It is outside the worker branch on purpose: a pending offer is about a
+     * PERSON, and someone still deciding whether to accept it must be able to
+     * see it. RLS shows only rows already naming this caller, and only a link
+     * they confirmed produces records — the core does that filtering, not this
+     * page. The migration ships owner-gated, so `needs-migration` renders the
+     * card's honest note rather than a silently empty list.
+     */
+    listMyOrganizationEvidence({ supabase, userId: user.id, locale }, { limit: 100 }),
   ]);
   const profile = profileRes.data;
   const worker = workerRes.data;
@@ -1087,6 +1105,16 @@ export default async function ProfilePage({
           needsMigration={workerEducation.kind === "needs-migration"}
         />
       ) : null}
+
+      {/* What organizations have recorded about me (2026-09-07) — the subject
+          side of the evidence import. It sits beside education because it is
+          the same question from the other direction: what is on record, who
+          put it there, and in what capacity. Never shown as verified. */}
+      <OrganizationEvidenceSection
+        records={myOrgEvidence.kind === "ok" ? myOrgEvidence.records : []}
+        pendingOffers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
+        needsMigration={myOrgEvidence.kind === "needs-migration"}
+      />
 
       {/* Learning Compass (Track C, 2026-09-03) — the student home's five
           answers, rendered only on the student path (a current education row

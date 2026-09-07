@@ -15349,6 +15349,18 @@
       "nothing_parsed": "Er is geen bruikbare regel gevonden. De bron heeft een kopregel nodig die ten minste een persoon en een datum noemt.",
       "confirmation_rejected": "Deze import is veranderd nadat u ernaar keek, dus er is niets vastgelegd. Lees hem opnieuw en keur de nieuwe versie goed.",
       "confirmation_unavailable": "Goedkeuringen kunnen in deze omgeving niet worden ondertekend, dus er is niets vastgelegd."
+    },
+    "mine": {
+      "title": "Wat organisaties over mij hebben vastgelegd",
+      "intro": "Werk, opleiding en studie die een organisatie uit haar eigen administratie heeft geïmporteerd. De herkomst reist mee: wie het aanleverde, in welke hoedanigheid en wanneer.",
+      "notEnabled": "Dit is in deze omgeving nog niet ingeschakeld. Er ontbreekt niets aan uw profiel — de opslag is er eenvoudigweg niet om te lezen.",
+      "empty": "Nog geen enkele organisatie heeft hier iets over u vastgelegd.",
+      "offersTitle": "Wacht op uw antwoord",
+      "offersHint": "Een organisatie zegt dat een van haar registraties over u gaat. Er komt niets in uw cv voordat u dat zegt, en weigeren is een echt antwoord — de organisatie houdt haar eigen registratie, ze noemt u er alleen niet meer in.",
+      "accept": "Ja, dat ben ik",
+      "refuse": "Nee, dat ben ik niet",
+      "decisionFailed": "Dat antwoord kon niet worden opgeslagen. Er is niets gewijzigd.",
+      "unnamedOrganization": "Een organisatie"
     }
   }
 }

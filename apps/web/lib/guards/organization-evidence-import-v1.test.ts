@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { listCapabilities, exposedCapabilities } from "@/lib/capabilities/registry";
+import {
+  listCapabilities,
+  exposedCapabilities,
+} from "@/lib/capabilities/registry";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "@/lib/capabilities/evidence-import-capabilities";
 import {
   ATTESTED_EVIDENCE_STATES,
@@ -35,11 +38,19 @@ const CORE = "lib/organization-evidence/import-core.ts";
 const PAGE = "app/[locale]/dashboard/company/evidence-import/page.tsx";
 const ACTIONS = "app/[locale]/dashboard/company/evidence-import/actions.ts";
 const CAPABILITIES = "lib/capabilities/evidence-import-capabilities.ts";
-const MIGRATION = "supabase/migrations/20260907114500_organization_evidence_import_v1.sql";
+const MIGRATION =
+  "supabase/migrations/20260907114500_organization_evidence_import_v1.sql";
 
 const migration = () =>
   readFileSync(
-    join(APP, "..", "..", "supabase", "migrations", "20260907114500_organization_evidence_import_v1.sql"),
+    join(
+      APP,
+      "..",
+      "..",
+      "supabase",
+      "migrations",
+      "20260907114500_organization_evidence_import_v1.sql",
+    ),
     "utf8",
   );
 
@@ -80,7 +91,10 @@ describe("the human transport and the agent transport share one core", () => {
       const text = read(source);
       expect(text).toContain('from "@/lib/organization-evidence/import-core"');
       for (const fn of CORE_WRITES) {
-        expect(text, `${source} must call ${fn} rather than re-implement it`).toContain(fn);
+        expect(
+          text,
+          `${source} must call ${fn} rather than re-implement it`,
+        ).toContain(fn);
       }
     }
   });
@@ -91,7 +105,10 @@ describe("the human transport and the agent transport share one core", () => {
     // sides of an invariant drift apart.
     for (const source of [ACTIONS, CAPABILITIES, PAGE]) {
       const text = read(source);
-      expect(text, `${source} must not query evidence tables directly`).not.toMatch(
+      expect(
+        text,
+        `${source} must not query evidence tables directly`,
+      ).not.toMatch(
         /\.from\(\s*["'](organization_evidence_\w+|evidence_import_\w+|organization_people)["']/,
       );
     }
@@ -99,14 +116,20 @@ describe("the human transport and the agent transport share one core", () => {
 
   it("the page reads through the core too — no bespoke select for the screen", () => {
     const page = read(PAGE);
-    for (const fn of ["buildPreview", "listRosterPeople", "listEvidenceRecords"]) {
+    for (const fn of [
+      "buildPreview",
+      "listRosterPeople",
+      "listEvidenceRecords",
+    ]) {
       expect(page).toContain(fn);
     }
   });
 
   it("the commit gate itself is ONE module both transports import", () => {
     for (const source of [ACTIONS, CAPABILITIES, PAGE]) {
-      expect(read(source)).toContain("@/lib/organization-evidence/commit-confirmation");
+      expect(read(source)).toContain(
+        "@/lib/organization-evidence/commit-confirmation",
+      );
     }
     // Preview mints, commit verifies — and the two live on opposite sides.
     expect(read(PAGE)).toContain("mintCommitToken");
@@ -158,15 +181,18 @@ describe("an import can never mint trust it did not earn", () => {
     // The whole executable schema is searched rather than one regex slice: an
     // attested value must not be an allowed record state ANYWHERE.
     for (const state of ATTESTED_EVIDENCE_STATES) {
-      expect(sql, `${state} must not be writable onto a record row`).not.toContain(
-        `'${state}'`,
-      );
+      expect(
+        sql,
+        `${state} must not be writable onto a record row`,
+      ).not.toContain(`'${state}'`);
     }
     expect(sql).not.toContain(`'${INDEPENDENTLY_VERIFIED}'`);
     // And every reported state IS present, so the vocabulary in code and the
     // vocabulary in the database are the same list.
     for (const state of REPORTED_EVIDENCE_STATES) {
-      expect(sql, `${state} missing from the schema's CHECK`).toContain(`'${state}'`);
+      expect(sql, `${state} missing from the schema's CHECK`).toContain(
+        `'${state}'`,
+      );
     }
   });
 
@@ -190,8 +216,12 @@ describe("an import can never mint trust it did not earn", () => {
 
   it("the verification policy requires a party that is neither supplier nor subject", () => {
     const sql = migration();
-    const policy = sql.slice(sql.indexOf("organization_evidence_events_verify"));
-    expect(policy).toContain("not public.manages_organization(organization_id)");
+    const policy = sql.slice(
+      sql.indexOf("organization_evidence_events_verify"),
+    );
+    expect(policy).toContain(
+      "not public.manages_organization(organization_id)",
+    );
     // The subject may never verify their own record.
     expect(policy).toMatch(/op\.linked_profile_id\s*=\s*auth\.uid\(\)/);
     // And the verifier's organization must be a RECORDED party on the record.
@@ -220,7 +250,12 @@ describe("who said this, and as what, survives the import", () => {
     expect(migration()).toContain("supplier_role");
     // An agency is offered as its own capacity, distinct from employer and
     // client, so the screen can never present it as the end employer.
-    for (const role of ["agency", "client", "end_client", "education_provider"]) {
+    for (const role of [
+      "agency",
+      "client",
+      "end_client",
+      "education_provider",
+    ]) {
       expect(read(CORE)).toContain(`"${role}"`);
     }
   });
@@ -241,7 +276,10 @@ describe("who said this, and as what, survives the import", () => {
       // and WHO performed a lifecycle act on it
       "actor_profile_id",
     ]) {
-      expect(sql, `${column} must exist so provenance is not collapsed`).toContain(column);
+      expect(
+        sql,
+        `${column} must exist so provenance is not collapsed`,
+      ).toContain(column);
     }
   });
 
@@ -284,7 +322,9 @@ describe("the capabilities are registered, honest and complete", () => {
     expect(byId.get("evidence.import.preview")?.kind).toBe("draft");
     expect(byId.get("evidence.import.commit")?.kind).toBe("confirm");
     // A draft writes nothing, and says so in its annotations.
-    expect(byId.get("evidence.import.preview")?.annotations.readOnlyHint).toBe(true);
+    expect(byId.get("evidence.import.preview")?.annotations.readOnlyHint).toBe(
+      true,
+    );
   });
 
   it("nothing claims to be destructive-free by omission or to reach outside", () => {
@@ -293,7 +333,10 @@ describe("the capabilities are registered, honest and complete", () => {
       // so no capability here is destructive, and none reaches the open world.
       expect(c.annotations.destructiveHint, c.id).toBe(false);
       expect(c.annotations.openWorldHint, c.id).toBe(false);
-      expect(c.description.length, `${c.id} needs a real description`).toBeGreaterThan(60);
+      expect(
+        c.description.length,
+        `${c.id} needs a real description`,
+      ).toBeGreaterThan(60);
     }
   });
 
@@ -325,7 +368,14 @@ describe("the schema change is additive and honestly gated", () => {
 
   it("a rollback exists and refuses to run while evidence is stored", () => {
     const down = readFileSync(
-      join(APP, "..", "..", "supabase", "rollbacks", "20260907114500_organization_evidence_import_v1.down.sql"),
+      join(
+        APP,
+        "..",
+        "..",
+        "supabase",
+        "rollbacks",
+        "20260907114500_organization_evidence_import_v1.down.sql",
+      ),
       "utf8",
     );
     expect(down).toMatch(/organization_evidence_records/);
@@ -334,5 +384,74 @@ describe("the schema change is additive and honestly gated", () => {
 
   it("the file name follows the timestamp convention (doctrine §16)", () => {
     expect(MIGRATION).toMatch(/^supabase\/migrations\/\d{14}_[a-z0-9_]+\.sql$/);
+  });
+});
+
+// ── the subject's side ─────────────────────────────────────────────────────
+
+describe("the person the evidence is about can see it, and consented to it", () => {
+  const PROFILE = "app/[locale]/dashboard/profile/page.tsx";
+  const SUBJECT_CARD = "components/app/organization-evidence-section.tsx";
+  const LINK_ACTIONS = "lib/organization-evidence/roster-link-actions.ts";
+
+  it("the profile page reads the subject side through the core", () => {
+    const page = read(PROFILE);
+    expect(page).toContain("listMyOrganizationEvidence");
+    expect(page).toContain("OrganizationEvidenceSection");
+  });
+
+  it("the subject-side read costs no extra serial stage", () => {
+    // The waterfall ratchet (w7-s3) counts awaits; this states the intent
+    // directly, so a later refactor that pulls the call out of the batch fails
+    // with the REASON rather than only with a number.
+    const page = read(PROFILE)
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\n]*/g, " ");
+    expect(page).not.toMatch(/=\s*await\s+listMyOrganizationEvidence\(/);
+  });
+
+  it("only a CONFIRMED link makes the history theirs", () => {
+    const core = read(CORE);
+    const fn = core.slice(
+      core.indexOf("export async function listMyOrganizationEvidence"),
+    );
+    expect(fn).toMatch(/linkState === "linked"/);
+  });
+
+  it("refusing is a real, offered answer — not a hidden one", () => {
+    const card = read(SUBJECT_CARD);
+    expect(card).toContain('value="refuse"');
+    expect(card).toContain('value="accept"');
+    // And the action accepts exactly those two, with no default.
+    const actions = read(LINK_ACTIONS);
+    expect(actions).toContain('raw !== "accept" && raw !== "refuse"');
+  });
+
+  it("the subject card never claims independent verification", () => {
+    const card = read(SUBJECT_CARD);
+    expect(card).toContain("notIndependentlyVerified");
+    expect(card).toContain("selfAttested");
+    expect(card).not.toMatch(/verified["\s]*[:=]\s*true/);
+  });
+
+  it("the dead worker-claim policy is gone, replaced by the two-sided one", () => {
+    const sql = executableSql();
+    // It could never fire: it targeted `unlinked` rows, which the select
+    // policy hides from everyone but a manager.
+    expect(sql).not.toContain("organization_people_self_claim");
+    expect(sql).not.toContain("worker_claim");
+    expect(sql).toContain("organization_people_subject_decides");
+  });
+
+  it("the subject's policy can only ever touch a row already naming them", () => {
+    const sql = executableSql();
+    const policy = sql.slice(
+      sql.indexOf("create policy organization_people_subject_decides"),
+      sql.indexOf("-- evidence_import_sessions"),
+    );
+    expect(policy).toMatch(/using \(linked_profile_id = auth\.uid\(\)\)/);
+    // Accept and refuse are the only two shapes the check permits.
+    expect(policy).toContain("link_state = 'linked'");
+    expect(policy).toContain("link_state = 'unlinked'");
   });
 });
