@@ -33,8 +33,9 @@ import {
  * user-confirmed proposal into its CANONICAL table:
  *
  *   work history  → engagement_contexts via save_self_declared_work_history_v1
- *                   (DRAFT migration 20260714161000 — honest needs_migration
- *                   until the owner applies it);
+ *                   (migration 20260714161000 — APPLIED; verified on
+ *                   production 2026-09-07. The needs_migration branch stays
+ *                   for environments without it);
  *   education     → worker_education (DRAFT 20260714160000);
  *   language      → worker_languages via save_worker_language_v1 (applied);
  *   certificate   → worker_achievements with slug 'declared_certificate'

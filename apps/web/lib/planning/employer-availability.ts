@@ -146,12 +146,13 @@ export async function getEmployerWorkerAvailability(
   // MINIMISED SELECT — `note` and `absence_type` are never requested. See the
   // module header: this is the enforcement point, not the component.
   //
-  // DEFENCE IN DEPTH, when the database offers it. `worker_absence_scheduling`
-  // (migration 20260808120000, OWNER-GATED — not applied yet) is a relation
-  // that has no reason column at all, so the guarantee stops depending on this
-  // module's discipline. Until it exists the base table is read exactly as
-  // before, with the same minimised column list; the fallback is what makes
-  // this change inert until the migration is approved and applied.
+  // DEFENCE IN DEPTH, and the database now offers it. `worker_absence_scheduling`
+  // (migration 20260808120000) is a relation with no reason column at all, so
+  // the guarantee no longer depends on this module's discipline alone. It is
+  // APPLIED — verified on production 2026-09-07; this comment said "not applied
+  // yet" until then, which under-reported a privacy guarantee that was already
+  // in force. The base-table fallback below is kept for environments without
+  // it, and reads the same minimised column list either way.
   const SCHEDULING_COLUMNS = "id, worker_id, start_date, end_date, status";
   const readAbsences = (relation: string) =>
     (supabase as AnyClient)
