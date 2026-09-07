@@ -618,16 +618,19 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-4",
-    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Tasks",
     worldElement: "projects",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
+    status: "BUILT_AND_USABLE",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/tasks"],
     coreModule: null,
-    surfaces: [],
-    note: "Its own migration says it is 'reachable, functional and pointless'; `follow_up_tasks` duplicates it.",
+    surfaces: [
+      "app/[locale]/dashboard/tasks",
+      "app/[locale]/dashboard/projects/[id]/operations",
+    ],
+    note:
+      "Corrected 2026-09-08: this said `no_navigation`, and tasks is one of the BEST-connected capabilities in the product. `/dashboard/tasks` carries a surfaceRoute in the dashboard module registry, the chat action registry routes to it twice, notification hrefs point at it, the planning model links to it, journal task-evidence builds links into it, and primary-route-smoke covers it. Production carries 2 `work_tasks` and 3 `work_task_events`, so writes have persisted and been acted on. The old note quoted the migration calling it 'reachable, functional and pointless' - that was a judgement about VALUE (`follow_up_tasks` overlaps it), not about reachability, and it was read here as if it meant unreachable. Whether the two task stores should be merged is a real open question; it is not this field.",
   },
   {
     id: "WRK-5",
@@ -676,7 +679,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/quality"],
     coreModule: null,
     surfaces: [],
-    note: "0 rows; no human path opens it.",
+    note: "0 rows; no human path opens it. Measured 2026-09-08: `defects` and `defect_corrections` both hold 0 rows, and neither `/dashboard/quality` nor any defects route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "WRK-9",
@@ -689,7 +692,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/projects"],
     coreModule: null,
     surfaces: [],
-    note: "`project_handover_entries` has no reader surface.",
+    note: "`project_handover_entries` has no reader surface. Measured 2026-09-08: `project_handover_entries` holds 1 row, so it HAS been written once. There is no dashboard-module-registry entry for it; it is reachable only from inside project operations and the handover panel. `no_navigation` is therefore accurate as written - no nav entry of its own - but it is not unreachable.",
   },
   {
     id: "WRK-10",
@@ -702,7 +705,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/economics"],
     coreModule: null,
     surfaces: [],
-    note: "`project_budgets` exists with no surface.",
+    note: "`project_budgets` exists with no surface. Measured 2026-09-08: `project_budgets` holds 0 rows and no economics/budgets route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
 ];
 
@@ -1070,16 +1073,19 @@ const MARKETPLACE: readonly CapabilityRow[] = [
   },
   {
     id: "MKT-2",
-    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Physical resource listings",
     worldElement: "objects",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
+    status: "PARTIAL",
+    strongestEvidence: "CODE_PROVEN",
     anchors: ["lib/marketplace"],
     coreModule: null,
-    surfaces: [],
-    note: "0 rows; no bridge to `assets`.",
+    surfaces: [
+      "app/[locale]/dashboard/listings",
+      "app/[locale]/business/[slug]",
+    ],
+    note:
+      "Corrected 2026-09-08: `no_navigation` was wrong. `/dashboard/listings` exists AND carries a surfaceRoute in the dashboard module registry; the public business page reads listings; chat references them. It is reachable. What is true is the rest of the old note: `marketplace_listings` holds 0 rows on production and there is no bridge to `assets`, so nothing proves the surface works end to end. PARTIAL and CODE_PROVEN for exactly that reason - reachable, wired, never once exercised. Reachability and use are different claims, and collapsing them is what produced the wrong status.",
   },
   {
     id: "MKT-3",
@@ -1116,7 +1122,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/procurement"],
     coreModule: null,
     surfaces: [],
-    note: "No route; an anchor only.",
+    note: "No route; an anchor only. Measured 2026-09-08: `procurement_inquiries`, `procurement_offers` and `procurement_events` all hold 0 rows, and no procurement route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "MKT-6",
@@ -1129,7 +1135,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/trips"],
     coreModule: null,
     surfaces: [],
-    note: "Never reaches the calendar.",
+    note: "Never reaches the calendar. Measured 2026-09-08: `business_trips` and `business_trip_events` both hold 0 rows and no trips route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "MKT-7",
@@ -1355,7 +1361,7 @@ const EDUCATION: readonly CapabilityRow[] = [
     anchors: ["lib/learning"],
     coreModule: null,
     surfaces: [],
-    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL.",
+    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "EDU-6",
