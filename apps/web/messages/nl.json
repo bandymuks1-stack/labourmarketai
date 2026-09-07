@@ -496,7 +496,9 @@
       "unavailable": "De lijst kon nu niet worden gelezen.",
       "why": "Waarom deze: op uw lijst en zonder goedgekeurde afwezigheid tussen {from} en {to}.",
       "absencesUnknown": "Afwezigheden staan nog niet aan, dus niets zegt het tegendeel.",
-      "more": "+{n} vrije mensen buiten dit beeld."
+      "more": "+{n} vrije mensen buiten dit beeld.",
+      "alreadyOn": "kan komen — heeft in deze periode al werk",
+      "alreadyOnNamed": "kan komen — zit al op {what}"
     },
     "tokenState": {
       "clear": "Controlelijst in orde",

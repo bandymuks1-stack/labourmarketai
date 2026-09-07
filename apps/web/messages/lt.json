@@ -496,7 +496,9 @@
       "unavailable": "Sąrašo šiuo metu nepavyko perskaityti.",
       "why": "Kodėl šie: yra jūsų sąraše ir neturi patvirtinto nebuvimo tarp {from} ir {to}.",
       "absencesUnknown": "Nebuvimai dar neįjungti, todėl niekas nesako kitaip.",
-      "more": "+{n} laisvi žmonės už šio rodinio ribų."
+      "more": "+{n} laisvi žmonės už šio rodinio ribų.",
+      "alreadyOn": "gali ateiti — šiuo laikotarpiu jau turi darbų",
+      "alreadyOnNamed": "gali ateiti — jau dirba {what}"
     },
     "tokenState": {
       "clear": "Sąrašas tvarkingas",

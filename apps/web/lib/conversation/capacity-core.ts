@@ -104,6 +104,9 @@ export async function whoIsAvailableCore(
           workerId: w.workerId,
           label,
           state: "unavailable",
+          // The strongest fact the system holds about a person's availability.
+          constraint: "hard_constraint",
+          overridable: false,
           unavailableUntil: lastDayOf(absent.map((u) => u.item)),
           committedTo: null,
         };
@@ -118,12 +121,25 @@ export async function whoIsAvailableCore(
           workerId: w.workerId,
           label,
           state: "committed",
+          // REAL WORK, NOT A PROHIBITION. A project booked A→B does not consume
+          // a person A→B: execution rates vary and capacity runs in parallel.
+          // An overlap here is a warning an authorized actor may override.
+          constraint: "commitment",
+          overridable: true,
           unavailableUntil: lastDayOf(busy),
           // A real title or nothing — never an invented name for the work.
           committedTo: busy.map((c) => c.label).find((l): l is string => !!l) ?? null,
         };
       }
-      return { workerId: w.workerId, label, state: "free", unavailableUntil: null, committedTo: null };
+      return {
+        workerId: w.workerId,
+        label,
+        state: "free",
+        constraint: "none",
+        overridable: true,
+        unavailableUntil: null,
+        committedTo: null,
+      };
     });
     // Free first, then committed (reprioritisable), then away (not).
     const rank = (s: CapacityChatRow["state"]) =>

@@ -496,7 +496,9 @@
       "unavailable": "The roster could not be read right now.",
       "why": "Why these: on your roster and no approved absence between {from} and {to}.",
       "absencesUnknown": "Absences are not switched on yet, so nothing says otherwise.",
-      "more": "+{n} more free people beyond this view."
+      "more": "+{n} more free people beyond this view.",
+      "alreadyOn": "can come — already has work in this period",
+      "alreadyOnNamed": "can come — already on {what}"
     },
     "tokenState": {
       "clear": "Checklist clear",

@@ -224,3 +224,77 @@ describe("a committed worker is not free", () => {
     expect(h.getEmployerWorkerCommitments).toHaveBeenCalledWith(["w1", "w2"], undefined);
   });
 });
+
+/**
+ * COMMITTED IS NOT BLOCKED.
+ * (Owner correction, 2026-09-07: "Do not silently convert COMMITTED into
+ * BLOCKED/UNAVAILABLE.")
+ *
+ * ── THE DEFECT THIS PINS, WHICH I SHIPPED THE SAME DAY ─────────────────────
+ * Capacity was fixed that morning to stop calling a booked worker "free". The
+ * project field's candidate list filtered `state === "free"`, so the moment
+ * that landed, everyone with an accepted booking silently vanished from every
+ * candidate list. A COMMITMENT became a PROHIBITION without anyone deciding
+ * to — a correct fix that produced a worse lie one layer up.
+ *
+ * The rule: a project booked A→B does not consume a person A→B. Construction
+ * and services run at variable rates and in parallel, and planning is the
+ * actor's. Overlap is DETECTED, WARNED about, and overridable by someone
+ * legitimately allowed to. Only a hard constraint withholds a row — and even
+ * then it is counted and reported, never dropped in silence.
+ */
+describe("an overlap is a warning, not a closed door", () => {
+  const committed = (workerId: string, label: string | null) => ({
+    workerId,
+    kind: "project" as const,
+    sourceId: "p1",
+    label,
+    startDate: "2000-01-01",
+    endDate: "2999-12-31",
+  });
+
+  it("a committed worker is OVERRIDABLE; an absent one is not", async () => {
+    h.getEmployerWorkerCommitments.mockResolvedValue({
+      status: "ok",
+      commitments: [committed("w1", "Vilnius site")],
+    });
+    const res = await loadWhoIsAvailableForChat();
+    if (res.kind !== "ok") throw new Error("expected ok");
+
+    const jonas = res.rows.find((r) => r.workerId === "w1");
+    expect(jonas?.constraint).toBe("commitment");
+    // THE assertion: real work does not remove the option.
+    expect(jonas?.overridable).toBe(true);
+
+    const rasa = res.rows.find((r) => r.workerId === "w2"); // approved leave
+    expect(rasa?.constraint).toBe("hard_constraint");
+    expect(rasa?.overridable).toBe(false);
+  });
+
+  it("a free worker carries no constraint and stays overridable", async () => {
+    h.getEmployerWorkerAvailability.mockResolvedValue({ status: "ok", unavailability: [] });
+    const res = await loadWhoIsAvailableForChat();
+    if (res.kind !== "ok") throw new Error("expected ok");
+    for (const r of res.rows) {
+      expect(r.constraint).toBe("none");
+      expect(r.overridable).toBe(true);
+    }
+  });
+
+  it("the three constraint kinds map 1:1 onto the three states", async () => {
+    h.getEmployerWorkerCommitments.mockResolvedValue({
+      status: "ok",
+      commitments: [committed("w1", null)],
+    });
+    const res = await loadWhoIsAvailableForChat();
+    if (res.kind !== "ok") throw new Error("expected ok");
+    const pairs = res.rows.map((r) => [r.state, r.constraint]);
+    // No row may claim a state its constraint contradicts — that mismatch is
+    // exactly how "committed" would drift back into meaning "unavailable".
+    for (const [state, constraint] of pairs) {
+      if (state === "free") expect(constraint).toBe("none");
+      if (state === "committed") expect(constraint).toBe("commitment");
+      if (state === "unavailable") expect(constraint).toBe("hard_constraint");
+    }
+  });
+});

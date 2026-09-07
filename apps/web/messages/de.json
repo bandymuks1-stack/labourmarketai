@@ -496,7 +496,9 @@
       "unavailable": "Die Liste konnte gerade nicht gelesen werden.",
       "why": "Warum diese: in Ihrer Liste und ohne genehmigte Abwesenheit zwischen {from} und {to}.",
       "absencesUnknown": "Abwesenheiten sind noch nicht aktiviert, daher spricht nichts dagegen.",
-      "more": "+{n} weitere freie Personen außerhalb dieser Ansicht."
+      "more": "+{n} weitere freie Personen außerhalb dieser Ansicht.",
+      "alreadyOn": "kann kommen — hat in diesem Zeitraum bereits Arbeit",
+      "alreadyOnNamed": "kann kommen — ist bereits auf {what}"
     },
     "tokenState": {
       "clear": "Checkliste in Ordnung",

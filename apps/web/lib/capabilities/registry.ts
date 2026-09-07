@@ -1431,8 +1431,13 @@ const workforceAvailability: CapabilityDescriptor = {
     "The caller's own active roster over the next 7 days, in three honest " +
     "states: free, committed (an accepted booking or an active project " +
     "assignment), or unavailable (approved leave — the reason is never " +
-    "carried). Reports which of its inputs actually answered, so an unread " +
-    "source is never presented as 'nobody is busy'. Writes nothing.",
+    "carried). COMMITTED IS NOT UNAVAILABLE: each row carries `constraint` " +
+    "(none / commitment / hard_constraint) and `overridable`, because a " +
+    "project booked A to B does not consume a person A to B — work runs at " +
+    "variable rates and in parallel, so an overlap is a warning an authorized " +
+    "actor may accept, not a refusal. Reports which of its inputs actually " +
+    "answered, so an unread source is never presented as 'nobody is busy'. " +
+    "Writes nothing.",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -1477,6 +1482,12 @@ const workforceAvailability: CapabilityDescriptor = {
         rows: result.rows.map((r) => ({
           label: r.label,
           state: r.state,
+          // WHAT KIND of thing this is, and whether a legitimate actor may go
+          // ahead anyway. `committed` is real accepted work and is NOT a bar
+          // to more: a project booked A→B does not consume a person A→B, so an
+          // overlap is a warning to weigh, never an automatic refusal.
+          constraint: r.constraint,
+          overridable: r.overridable,
           notFreeUntil: r.unavailableUntil,
           committedTo: r.committedTo,
         })),
