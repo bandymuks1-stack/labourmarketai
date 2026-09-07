@@ -1,5 +1,5 @@
 import type { TimesheetGridProposal } from "@/lib/timesheet-import/xlsx-grid-parse";
-import { SOURCE_ROW_FIELDS, tidy, type SourceWorkRow, type SourceRowField } from "@/lib/work-history/source-rows";
+import { SOURCE_ROW_FIELDS, tidy, type SourceWorkRow, type SourceRowField } from "@/lib/organization-evidence/source-rows";
 
 /**
  * SOURCE -> CANONICAL ROWS. Pure: text or a string grid in, `SourceWorkRow[]`

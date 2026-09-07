@@ -73,16 +73,27 @@ import {
   getOwnWorkerAchievements,
   type WorkerAchievementsRead,
 } from "@/lib/worker/worker-achievements";
+import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
-const WORKER_RELATIONSHIPS = [
-  "employee",
-  "freelancer",
-  "consultant",
-  "owner",
-  "collaborator",
-];
+/**
+ * WHICH RELATIONSHIPS THE PROFILE'S HISTORY SHOWS.
+ *
+ * This used to be a LOCAL copy of `WORKER_RELATIONSHIPS`, which is the PAID /
+ * CONTRACTED list — so a study placement or volunteering was filtered out of
+ * the person's own profile. `save_self_declared_work_history_v1` has accepted
+ * `student` and `volunteer` in production since 2026-08-27, and the CV, the
+ * read model and the onboarding student step already render them; only this
+ * page dropped them, because it kept its own list.
+ *
+ * The canonical list is `PROFESSIONAL_HISTORY_RELATIONSHIPS` (employment +
+ * practice, `manager` deliberately excluded — an administrative relationship
+ * to an organisation is not the person's own work). Every history surface
+ * filters by that one, and each renders practice under its own heading:
+ * "this happened, and it was a placement" — never "this was a job".
+ */
+const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
@@ -277,14 +288,17 @@ export default async function ProfilePage({
   // here (server component) so the form gets real saved values, null = "not
   // stated" (never rendered as a fabricated "no").
   let availabilityPrefs: AvailabilityPrefsRead | null = null;
-  // Self-stated languages (P2-PR3) — worker_languages from DRAFT migration
-  // 20260711250000 (PR #720). Until the owner applies it the read reports
-  // needs-migration and the section renders its honest explanation state.
+  // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
+  // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
+  // branch is kept for fresh/local databases, not because production lacks it.
   let workerLanguages: WorkerLanguagesRead | null = null;
-  // External profile links (Labour Market OS P6) — worker_external_profiles
-  // from DRAFT migration 20260713210000. Until the owner applies it the read
-  // reports needs-migration and the section renders its honest explanation
-  // state. No automatic import exists — links are worker-added only.
+  // External profile links (Labour Market OS P6) — `worker_external_profiles`
+  // from migration 20260713210000, which is genuinely **NOT applied** (checked
+  // against production 2026-09-07: the table does not exist). This section
+  // therefore renders its honest "not enabled yet" state to every real user,
+  // and has since it shipped. Owner decision 2 in
+  // docs/CAPABILITY_INVENTORY.md §6.3: apply it, or retire the section.
+  // No automatic import exists — links are worker-added only.
   let externalProfiles: ExternalProfilesRead | null = null;
   // Full CV System v1: education + achievements (DRAFT migration
   // 20260714160000 — needs-migration until the owner applies it) and the
@@ -378,7 +392,7 @@ export default async function ProfilePage({
           "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
-        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .in("relationship_slug", HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
         .order("started_at", { ascending: false, nullsFirst: false }),
       // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),

@@ -801,7 +801,14 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06) —
     // the fifth surface of the market-direction defect class, found by
     // sweeping every SECURITY DEFINER reader of customer_requests.
-    expect(count).toBeLessThanOrEqual(268);
+    // Bumped 268 -> 269 for organization_evidence_import_v1 (owner P0,
+    // 2026-09-07): the organization historical evidence import (roster people
+    // that can later be claimed, immutable import sessions, insert-only
+    // evidence records, append-only attestation/verification events). RED
+    // class — new tables need explicit GRANTs on this project — so it ships
+    // draft + needs-human-gate and is NOT applied. Still no migration from the
+    // market-map layer, which remains pure TS over existing tables.
+    expect(count).toBeLessThanOrEqual(269);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

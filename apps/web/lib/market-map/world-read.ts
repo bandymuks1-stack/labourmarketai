@@ -2,13 +2,13 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   dedupeCanonicalDemand,
   placeableDemand,
   toCanonicalDemand,
   type CanonicalDemand,
 } from "@/lib/demand/canonical-demand-model";
+import { DEMAND_KIND_OR_FILTER } from "@/lib/demand/market-direction";
 import { COUNTRY_CENTROID, listKnownCities } from "@/lib/location/city-coordinates";
 import { getOwnMarketSignals } from "./signals";
 import { buildPersonPresenceLayer } from "./spatial-entities";
@@ -207,18 +207,26 @@ async function readDemand(
   }
 
   // Leg 2 — the caller's OWN submitted requests, bounded by the viewport's
-  // countries and by WORLD_ROW_LIMIT. Same Stage-A workspace gate as the
-  // canonical read: no employer workspace → only the non-employer kinds.
-  const employer = await requireEmployerCompany();
-  let ownQuery = supabase
+  // countries and by WORLD_ROW_LIMIT.
+  //
+  // THE DIRECTION FILTER IS UNCONDITIONAL (2026-09-07 reconciliation). It used
+  // to be applied ONLY when the caller had no employer workspace, so an agency
+  // — which does have one — got no direction filter at all and its own
+  // `agency_offer` rows were mapped onto the map as `actionable: true` demand.
+  // That is the same defect #1588 and #1596 fixed on the worker and agency
+  // boards, still live here: two agencies saying "we have people" were shown
+  // to each other as needs.
+  //
+  // The workspace has nothing to do with the direction question. Whether a row
+  // is demand depends on the ROW, and the answer comes from the ONE canonical
+  // filter (`DEMAND_KIND_OR_FILTER`) rather than a second hand-written literal
+  // — the previous inline list had already drifted, omitting `company_request`.
+  const own = await supabase
     .from("customer_requests")
     .select("id, role_or_work_type, country, team_size, location, created_at")
     .eq("status", "submitted")
-    .in("country", [...countries]);
-  if (!employer.ok) {
-    ownQuery = ownQuery.or("kind.is.null,kind.eq.buyer_request,kind.eq.customer_request");
-  }
-  const own = await ownQuery
+    .in("country", [...countries])
+    .or(DEMAND_KIND_OR_FILTER)
     .order("created_at", { ascending: false })
     .limit(WORLD_ROW_LIMIT + 1);
   if (own.error) return { ...out, error: "own_demand_read_failed" };

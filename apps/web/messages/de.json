@@ -13544,6 +13544,7 @@
     "evidenceEntries": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} — noch nicht bestätigt",
     "evidenceDocument": "Dokument gültig bis {until} — noch nicht bestätigt",
     "evidenceEntriesAndDocument": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} und ein Dokument gültig bis {until} — noch nicht bestätigt",
+    "evidenceSelfConfirmed": "Von Ihnen selbst bestätigt — noch nicht unabhängig bestätigt",
     "employerConfirmed": "Bestätigt von {org}, {date}",
     "employerConfirmedNoDate": "Von einem Arbeitgeber bestätigt",
     "systemDerived": "Abgeleitet aus: {source}"

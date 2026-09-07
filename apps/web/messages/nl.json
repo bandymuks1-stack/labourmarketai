@@ -13544,6 +13544,7 @@
     "evidenceEntries": "{count, plural, one {# werkregistratie} other {# werkregistraties}} — nog niet bevestigd",
     "evidenceDocument": "Document geldig tot {until} — nog niet bevestigd",
     "evidenceEntriesAndDocument": "{count, plural, one {# werkregistratie} other {# werkregistraties}} en een document geldig tot {until} — nog niet bevestigd",
+    "evidenceSelfConfirmed": "Door uzelf bevestigd — nog niet onafhankelijk bevestigd",
     "employerConfirmed": "Bevestigd door {org}, {date}",
     "employerConfirmedNoDate": "Bevestigd door een werkgever",
     "systemDerived": "Afgeleid uit: {source}"

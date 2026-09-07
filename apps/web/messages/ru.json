@@ -13544,6 +13544,7 @@
     "evidenceEntries": "{count, plural, one {# запись о работе} few {# записи о работе} many {# записей о работе} other {# записи о работе}} — пока не подтверждено",
     "evidenceDocument": "Документ действует до {until} — пока не подтверждено",
     "evidenceEntriesAndDocument": "{count, plural, one {# запись о работе} few {# записи о работе} many {# записей о работе} other {# записи о работе}} и документ до {until} — пока не подтверждено",
+    "evidenceSelfConfirmed": "Подтверждено вами самими — независимого подтверждения пока нет",
     "employerConfirmed": "Подтвердил работодатель {org}, {date}",
     "employerConfirmedNoDate": "Подтверждено работодателем",
     "systemDerived": "Выведено из: {source}"

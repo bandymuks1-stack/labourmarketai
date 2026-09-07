@@ -63,6 +63,11 @@ const PROVENANCE_KEYS = [
   "evidenceEntries",
   "evidenceDocument",
   "evidenceEntriesAndDocument",
+  // Added 2026-09-07 (owner P0): approved, but only by the subject themselves.
+  // Production carries 3 such rows out of 13, and they used to render exactly
+  // like a supervisor's confirmation. See
+  // lib/guards/self-confirmation-not-independent.test.ts.
+  "evidenceSelfConfirmed",
   "employerConfirmed",
   "employerConfirmedNoDate",
   "systemDerived",

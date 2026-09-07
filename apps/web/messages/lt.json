@@ -13544,6 +13544,7 @@
     "evidenceEntries": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} — dar nepatvirtinta",
     "evidenceDocument": "Dokumentas galioja iki {until} — dar nepatvirtinta",
     "evidenceEntriesAndDocument": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} ir dokumentas iki {until} — dar nepatvirtinta",
+    "evidenceSelfConfirmed": "Patvirtinote patys — nepriklausomo patvirtinimo dar nėra",
     "employerConfirmed": "Patvirtino {org}, {date}",
     "employerConfirmedNoDate": "Patvirtino darbdavys",
     "systemDerived": "Išvesta iš: {source}"

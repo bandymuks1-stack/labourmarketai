@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { normalizeLabel } from "@/lib/timesheet-import/resolve-entities";
-import type { SourceWorkRow } from "@/lib/work-history/source-rows";
+import type { SourceWorkRow } from "@/lib/organization-evidence/source-rows";
 
 /**
  * IDEMPOTENCY - the two fingerprints that make re-importing the same history

@@ -59,8 +59,24 @@ missing. It is built, applied and running, and the repository told the reader
 otherwise. This is the single highest-leverage thing to fix, and it costs no
 migration and no schema change.
 
-`docs/APPLIED_LEDGER.md` already carries a banner admitting 26 entries falsely
-read "PENDING APPLY". The banner is right and the correction was never made.
+**Where the ledger is NOT at fault.** `docs/APPLIED_LEDGER.md` already carries
+a 2026-08-19 correction banner that names all 26 falsely-pending entries, names
+the eight genuinely-unapplied files, and states that the error runs in one
+direction only. That banner is accurate and was verified again today — the same
+eight are still absent from production. The ledger did its job.
+
+The stale statements that actually mislead are **in the code**, at the top of
+the module a reader opens: `lib/worker/worker-education.ts`,
+`app/[locale]/dashboard/profile/page.tsx`, `lib/admin/ai-cost.ts`,
+`lib/agency/clients.ts` and the migration headers themselves. A correction
+banner in a document 1,500 lines away does not reach someone reading a `.ts`
+file, which is why the same conclusions keep being re-derived — twice inside
+this reconciliation, by two independent sweeps.
+
+Two further facts the banner establishes and this reconciliation confirms: the
+eight unapplied files have been known since **2026-08-19** and are still
+unapplied 19 days later; and no ledger row has ever over-reported an apply,
+which is the direction that would break code.
 
 ---
 
@@ -353,7 +369,7 @@ Classified, not merged. §47 forbids destructive refactor during discovery.
 | P0-1 | **Self-confirmation is not distinguished from independent confirmation.** 3 rows on production. Verified work is the platform's trust currency | correctness / trust | **read-side fix needs none** (§11); RPC-side block needs an owner decision |
 | P0-2 | **Supply renders as demand on the market map.** `lib/market-map/world-read.ts:214-239` applies the kind filter only when the viewer has no employer workspace, then maps every row `actionable: true` | correctness | none — code fix |
 | P0-3 | **Nine repo migrations were never applied**, four of them behind live UI showing "not enabled yet" | delivery | owner apply, or an explicit decision to retire them |
-| P0-4 | **Stale in-code apply-status comments** send every reader to the wrong conclusion (§0) | process | none — doc fix |
+| P0-4 | **Stale in-code apply-status comments** send every reader to the wrong conclusion (§0). The ledger's own banner is correct; the comments in `.ts` files are not, and those are what a reader opens | process | none — comment fix |
 | P0-5 | **Capacity ignores approved leave and accepted bookings** — the planning page contradicts itself | correctness | none — code fix, but scope decision on which commitments count |
 | P0-6 | **Two live CI gates are inert** pending one secret: `SUPABASE_DB_URL` arms both the anon-SECDEF catalogue gate and migration parity | safety | **owner: add one read-only secret** |
 | P0-7 | **89 of 94 Playwright specs never run in CI** (5 specs, 27 tests) — selector rot is invisible | quality | none, but needs a decision on auth fixtures |
@@ -437,10 +453,20 @@ The organization historical evidence import (owner P0, 2026-09-07, with the
 ORGANIZATION-root correction applied the same day) is unaffected by this
 reconciliation and is recorded in the register as `EVID-1`.
 
-Its schema is written and GREEN-classified for structure but **RED for merge**
-(new tables need `GRANT`, and this project has no default privileges for
-`authenticated` — verified against three existing tables). It therefore needs
-an owner gate before production apply. Nothing has been applied.
+Its schema is written and **RED for merge**: new tables need `GRANT`, and this
+project has no default privileges for `authenticated` (verified against three
+existing tables). It therefore needs an owner gate before production apply.
+Nothing has been applied.
+
+**The migration deliberately carries no `-- @human-gate-approved` marker**, so
+`migration-safety` reports exactly one honest blocking finding
+(`grant-or-revoke`) and refuses auto-merge. An earlier draft of this file did
+carry the marker with a header explaining that approval was still being sought
+— which is a contradiction: the marker means *an owner approved this*, and
+every other file bearing it names the decision that granted it. A repository
+guard (`booking-engagement-end-v1.test.ts`, "this branch's own migration is the
+ONLY newly marked one") caught it. The gate is left RED, because RED is the
+truth.
 
 What the reconciliation *changed* about it: the correction to
 ORGANIZATION-as-root arrived before any migration was applied, so there is no
@@ -586,5 +612,7 @@ AI_E2E_PROVEN:                 NO — the MCP contract script exists; no MCP e2e
 
 **The most important sentence in this document:** the product is substantially
 larger than any recent summary of it, and the main thing standing between built
-and used is not engineering — it is that the repository keeps telling its own
-readers that finished work is unfinished.
+and used is not engineering — it is that the code keeps telling its own readers
+that finished work is unfinished. The ledger was corrected on 2026-08-19; the
+file headers were not, and a correction a reader never opens is not a
+correction.

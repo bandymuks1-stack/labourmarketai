@@ -1,9 +1,17 @@
--- @human-gate-approved
 -- ============================================================================
--- HUMAN GATE: this file is RED and is presented for owner approval with the
--- exact SQL and the exact policy set below (Merge model -> RED class). The
--- annotation is an ACKNOWLEDGEMENT that the RED findings were examined and are
--- listed here, NOT a self-grant and NOT an auto-merge pass.
+-- ██ RED CLASS — NOT APPROVED, NOT APPLIED. ██
+--
+-- This file deliberately carries NO `-- @human-gate-approved` marker. That
+-- marker means "an owner approved THIS migration", every other file bearing it
+-- names the recorded decision that granted it, and no such decision exists for
+-- this one. Writing it here to make `migration-safety` go green would be the
+-- exact dishonesty the gate exists to prevent — so the gate is left RED, which
+-- is the correct and intended signal for a file awaiting a human gate.
+--
+-- Merge path: draft PR + the `needs-human-gate` label + explicit owner
+-- approval, then apply via Supabase MCP `apply_migration` — never `db push`.
+-- The full SQL and the complete policy set are below, unabridged, for that
+-- review.
 --
 -- THE RED FINDINGS, IN FULL:
 --   * GRANT (detector h) - eight new tables need explicit privileges.
@@ -200,7 +208,7 @@ create table if not exists public.evidence_import_sessions (
   -- The language the SOURCE is written in, stated by whoever supplied it
   -- (doctrine 2.3: original_language, never guessed, never a translation).
   source_language             char(2) not null check (source_language in
-                                ('lt','en','lv','et','nl','de','da','no','sv','pl','ru','fi')),
+                                ('lt','en','lv','et','nl','de','da','no','sv','pl','ru')),
   -- WHICH organization supplied this data, and IN WHAT CAPACITY. The capacity
   -- is required: an agency reporting its worker's hours on a client's site is
   -- not the employer and not the client, and this column is where it says so.
@@ -325,7 +333,7 @@ create table if not exists public.organization_evidence_records (
   -- source was written in (doctrine 2.3). Never a translation.
   original_text               text not null check (char_length(btrim(original_text)) between 1 and 4000),
   original_language           char(2) not null check (original_language in
-                                ('lt','en','lv','et','nl','de','da','no','sv','pl','ru','fi')),
+                                ('lt','en','lv','et','nl','de','da','no','sv','pl','ru')),
   -- THE REPORTED STATES ONLY. There is deliberately no attested value here and
   -- no verified value anywhere on this table: attestation and independent
   -- verification are events (table 6). An import is structurally incapable of
