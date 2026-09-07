@@ -726,16 +726,19 @@ const EVIDENCE: readonly CapabilityRow[] = [
     domain: "evidence",
     title: "Organization historical evidence import",
     worldElement: "work_journal",
-    status: "PARTIAL",
-    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    status: "BLOCKED",
+    strongestEvidence: "CODE_PROVEN",
     anchors: [
       "lib/organization-evidence/import-core.ts",
       "lib/organization-evidence/evidence-state.ts",
+      "lib/organization-evidence/competency-signals.ts",
     ],
     coreModule: "lib/organization-evidence/import-core.ts",
     surfaces: ["app/[locale]/dashboard/profile", "components/app/evidence-import-section.tsx"],
     note:
-      "Owner-approved and APPLIED 2026-09-07 (ledger 20260907180944). The RLS boundary was then exercised on production under real users' auth: a manager wrote a roster row and read it back, a pre-linked identity claim was refused 42501, and an unrelated person read 0 rows and was refused 42501 on write. That transaction was ROLLED BACK, so this is a data-path proof and deliberately NOT PRODUCTION_PERSISTENCE_PROVEN. PARTIAL, not usable: no human has yet imported a real file through the surface, and all eight tables hold 0 rows.",
+      "BLOCKED ON PRODUCTION BY AN RLS RECURSION - and the earlier entry here claiming PRODUCTION_DATA_PATH_PROVEN was WRONG. Applied 2026-09-07 (ledger 20260907180944), then measured again more thoroughly on the same day: FOUR of the eight tables cannot be read at all. Every SELECT on organization_evidence_records, organization_evidence_parties, organization_evidence_events and organization_evidence_competency_signals fails 42P17 'infinite recursion detected in policy'. organization_evidence_records_select subqueries organization_evidence_parties, and organization_evidence_parties_select subqueries organization_evidence_records - a mutual cycle. This takes the import DOWN, not merely degrades it: commitImport ends in .select('id, import_row_id'), and an INSERT ... RETURNING needs the SELECT policy, so the write dies too. WHY THE FIRST VERIFICATION MISSED IT: it exercised organization_people (which has no cross-table policy and works fine) and then checked that the other tables' policies EXISTED, rather than reading through them. Policy presence is not policy reachability - SEP-8 caught in this register's own evidence. The fix is proven, not guessed: a SECURITY DEFINER resolver breaks the cycle on one side, and with it applied in a rolled-back production transaction the whole chain runs - record INSERT ... RETURNING OK, two competency signals written, an 'ai_inference' method REFUSED 23514, a record DELETE still BLOCKED 42501, and a stranger reading 0 records and 0 signals. It ships as a RED draft; production still carries the defect and all eight tables hold 0 rows.",
+    ownerDecision:
+      "Apply 20260907220000_evidence_parties_recursion_fix_v1 - the SECURITY DEFINER resolver that breaks the organization_evidence_records <-> organization_evidence_parties policy cycle. Until it is applied the whole import is 42P17 on production, read AND write.",
   },
   {
     id: "EVID-2",
