@@ -760,11 +760,15 @@ const EVIDENCE: readonly CapabilityRow[] = [
     title: "Work verification state (eight states)",
     worldElement: "work_journal",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/journal/work-verification-state.ts"],
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: [
+      "lib/journal/work-verification-state.ts",
+      "lib/journal/verifier-read.ts",
+    ],
     coreModule: "lib/journal/work-verification-state.ts",
-    surfaces: ["app/[locale]/dashboard/journal"],
-    note: "Shipped 2026-09-06 with ZERO consumers and was wired on 2026-09-07 (#1598); never walked by a human. This is the defect class this register exists to catch.",
+    surfaces: ["app/[locale]/dashboard/journal", "app/[locale]/dashboard/profile"],
+    note:
+      "Shipped 2026-09-06 with ZERO consumers, wired 2026-09-07 (#1598). The chain was then MEASURED against production on 2026-09-08 and it holds end to end - no invented verifier anywhere. Of 79 engagement contexts, 56 carry no organization; of 40 journal entries, 22 (55%) sit in one of those and 18 do not. Zero entries have no context at all. Those 22 are exactly the dead-end population, and the model names them rather than hiding them: `contextIsLive` requires an organization, so they resolve to self_reported / verifier none / nextAction identify_verifier - kept as real evidence, never silently devalued and never attached to an invented employer. The route out is real and reachable: the journal renders identify_verifier as a LINK to /dashboard/profile#capabilities, the anchor exists, and a DetailsHashOpener opens that collapsed <details> on arrival, so the person does not land on a closed accordion (the reachability defect class). A read failure stays UNKNOWN and never renders as 'nobody can confirm your work'. PARTIAL only because no human has walked it in a browser; every layer beneath that is proven.",
   },
   {
     id: "EVID-4",
