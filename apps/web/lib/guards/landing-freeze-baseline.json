@@ -9,7 +9,7 @@
     "app/[locale]/focus-landing/focus-landing.tsx": "22dca61c2968ee7ea5ad7d07ca39a8865e68302e70e3b2a1c396bc03d112568c",
     "app/[locale]/focus-landing/landing-mode-switcher.tsx": "9f762c006b842b566fb3099df06336e444f4cc9fa8a004b18eacff45f725bd7f",
     "app/[locale]/focus-landing/landing-mode-switcher.module.css": "5c7cd0841cb7b002fbd889cd31e9b4c6faeb521dadef5a4afe397adb9c2ad368",
-    "components/marketing/public-entry.tsx": "602a2bf7ec63e845c4ee669cda560c814e492d2d15fd7aa2a8f0b3d740f6aaa1",
+    "components/marketing/public-entry.tsx": "ec9eec73b1bb4a1d710f3fd135698781705429082454cf9d74cd5b86320cbe03",
     "lib/marketing/public-entry.ts": "cc62fe6331475329a8b978ca8ce8b1c7046ccc53824935d8aee375f529d3acd3",
     "components/marketing/product-chain-band.tsx": "1eb683851a35252c7a51114c935921fa05a834f2a27f1ead00c53642c572cf60",
     "components/marketing/market-proof-band.tsx": "20bfa0bbd02d42587225241567df0bfd0ee4409e995d180b017aba43fdbd9a54",
