@@ -359,15 +359,26 @@ describe("the schema change is additive and honestly gated", () => {
     expect(sql).not.toMatch(/\balter\s+policy\b/i);
   });
 
-  it("it carries NO human-gate-approved marker — no owner decision exists yet", () => {
-    // The annotation would let it pass CI while still requiring approval.
-    // Adding it without the owner having approved would be a claim, not a fact.
-    // The header EXPLAINS its absence in prose, so the marker is looked for the
-    // way `migration-safety.mjs` looks for it: on a line of its own.
+  it("it carries the human-gate marker EXACTLY once, and names the decision behind it", () => {
+    // INVERTED 2026-09-07, and the inversion is the guard's point rather
+    // than a weakening of it. This used to assert the marker was ABSENT,
+    // because no owner decision existed. The owner has since approved this
+    // migration by name (EVID-1, HG-2026-09-07) and it was applied.
+    // The old assertion encoded a TRANSIENT fact that has changed, so keeping
+    // it would have made the guard enforce something untrue.
+    //
+    // The replacement is STRICTER, not looser: the marker must appear exactly
+    // once, on a line of its own the way migration-safety.mjs reads it, AND
+    // the file must name the recorded decision it rests on. A marker written
+    // in without a decision behind it still fails here. The marker also never
+    // reclassifies the file to GREEN, so RED CLASS must still be stated.
     const marked = migration()
       .split("\n")
       .filter((l) => /^\s*--\s*@human-gate-approved\s*$/.test(l));
-    expect(marked).toEqual([]);
+    expect(marked).toHaveLength(1);
+    expect(migration()).toContain("EVID-1");
+    expect(migration()).toContain("HG-2026-09-07");
+    expect(migration()).toMatch(/RED CLASS/i);
   });
 
   it("a rollback exists and refuses to run while evidence is stored", () => {

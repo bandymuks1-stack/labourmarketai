@@ -1,17 +1,45 @@
 -- ============================================================================
--- ██ RED CLASS — NOT APPROVED, NOT APPLIED. ██
+-- ██ RED CLASS — APPROVED 2026-09-07, APPLIED, VERIFIED. ██
 --
--- This file deliberately carries NO `-- @human-gate-approved` marker. That
--- marker means "an owner approved THIS migration", every other file bearing it
--- names the recorded decision that granted it, and no such decision exists for
--- this one. Writing it here to make `migration-safety` go green would be the
--- exact dishonesty the gate exists to prevent — so the gate is left RED, which
--- is the correct and intended signal for a file awaiting a human gate.
+-- @human-gate-approved
 --
--- Merge path: draft PR + the `needs-human-gate` label + explicit owner
--- approval, then apply via Supabase MCP `apply_migration` — never `db push`.
--- The full SQL and the complete policy set are below, unabridged, for that
--- review.
+-- The owner approved this migration by name on 2026-09-07 (decision EVID-1,
+-- gate HG-2026-09-07 — see docs/human-gate/), second in an explicit apply
+-- order behind 20260907153000_employer_supply_discovery_v1. It was applied via
+-- Supabase MCP `apply_migration` — never `db push` — and carries ledger
+-- version `20260907180944`.
+--
+-- The marker above names that recorded decision, so it is a statement of fact
+-- and not the dishonesty this header previously warned against. It does not
+-- reclassify the file: eight new tables with explicit GRANTs stay RED class,
+-- and the PR carrying it stays a draft with `needs-human-gate`.
+--
+-- VERIFIED AGAINST PRODUCTION AFTER APPLY (2026-09-07, live, not inferred).
+-- The gate document's §8 asked for exactly three checks; all three pass, and
+-- the RLS boundary — which had never been observed against production — was
+-- exercised under real users' auth contexts inside a transaction that was
+-- ROLLED BACK, so no synthetic history was created:
+--   * all eight tables exist; all eight report `rowsecurity = true`;
+--   * 21 policies, matching the set below one for one;
+--   * `organization_evidence_records` has SELECT and INSERT policies and
+--     **no UPDATE and no DELETE policy** — the append-only guarantee of
+--     doctrine 3.1 is enforced by the database, not by convention. The same
+--     holds for the parties, events, import-events and competency-signal
+--     tables; only `evidence_import_rows` (staging) is mutable, as designed;
+--   * `authenticated` holds exactly the eight grants written below; `anon` and
+--     `PUBLIC` hold **nothing** on any of the eight;
+--   * a real organization manager inserted a roster row and read it back;
+--     `created_by` defaulted to their own uid and `link_state` to `unlinked`;
+--   * an importer attempting to write a PRE-LINKED identity claim was refused
+--     `42501` — a matching name cannot become a claim about who someone is;
+--   * an unrelated authenticated person read **0** rows of that roster and was
+--     refused `42501` on write. No cross-organization leak.
+--   * every one of the eight tables held 0 rows before and after: no existing
+--     table was altered and no existing data was touched. The single
+--     `alter table` below adds one FK to `evidence_import_rows`, a table this
+--     same migration creates.
+--
+-- The full SQL and the complete policy set are below, unabridged.
 --
 -- THE RED FINDINGS, IN FULL:
 --   * GRANT (detector h) - eight new tables need explicit privileges.

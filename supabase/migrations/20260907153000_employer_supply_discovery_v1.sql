@@ -3,11 +3,32 @@
 -- RED CLASS — a NEW `SECURITY DEFINER` reader plus its `GRANT`. Applied via
 -- Supabase MCP `apply_migration`. Never `supabase db push`.
 --
--- This file deliberately carries NO `-- @human-gate-approved` marker: the
--- marker is an acknowledgement that an owner has decided, and no decision
--- exists for this migration yet. Adding it would be a claim, not a fact.
--- `migration-safety` therefore reports its two findings honestly and refuses
--- auto-merge, which is the correct outcome.
+-- @human-gate-approved
+--
+-- APPROVED AND APPLIED. The owner approved this migration by name on
+-- 2026-09-07 (decision DEM-9, gate HG-2026-09-07), together with
+-- 20260907114500_organization_evidence_import_v1, and specified the apply
+-- order: this file first. It was applied via Supabase MCP `apply_migration`
+-- and carries ledger version `20260907180546`.
+--
+-- The marker above is therefore now a statement of fact rather than a claim.
+-- It does NOT make this file GREEN class: a SECURITY DEFINER reader stays RED,
+-- so the PR carrying it remains a draft with `needs-human-gate`. The marker
+-- only records that the human gate it was waiting for has been passed.
+--
+-- VERIFIED AGAINST PRODUCTION AFTER APPLY (2026-09-07, live, not inferred):
+--   * the function exists, is `security definer`, `search_path=public`;
+--   * EXECUTE is held by `authenticated` only — `anon` is refused at the
+--     privilege level with `42501: permission denied for function`, not merely
+--     filtered inside the body;
+--   * called through the REAL applied function under three real users' own
+--     auth contexts, the contract holds exactly as designed:
+--       A  a manager of two organizations who authored neither row  2 of 2
+--       B  the agency that authored one of the two rows             1 of 2
+--       C  a person who manages nothing                             0, no error
+--     A proves the capability, B proves self-exclusion is not over-broad, and
+--     C proves authorization fails closed AND quietly.
+--   * no existing table, policy, function or privilege was altered.
 --
 -- ── THE OTHER HALF OF THE MARKET ─────────────────────────────────────────
 --

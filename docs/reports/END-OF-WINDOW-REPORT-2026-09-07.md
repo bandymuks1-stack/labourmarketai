@@ -117,7 +117,7 @@ explicit authorized-override record, the audit row for an override, and any
 learning from actual-vs-planned execution. What exists today is
 DETECT → WARN. The chain beyond that is not started.
 
-### 1.6 Historical person/company work import — **BLOCKED** (built end to end, unapplied)
+### 1.6 Historical person/company work import — **PARTIAL** (applied 2026-09-07; no human has imported a real file yet)
 
 `TEST_PROVEN` throughout; `CODE_PROVEN` for the server layer; ceiling set by the
 owner gate.
@@ -330,20 +330,47 @@ tables). No trigger, no `SECURITY DEFINER`, no `using (true)`, no
 policy or existing privilege; writes no row. Proven on production in a
 transaction and rolled back.
 
-Neither carries `-- @human-gate-approved`, deliberately: the marker asserts an
-owner approved the file, and no such decision exists.
+**RESOLVED 2026-09-07 — both approved, applied and verified.** The owner
+approved both by name and set the apply order (B first, then A). Both were
+applied via Supabase MCP `apply_migration` and now carry the ledger versions
+`20260907180546` (B) and `20260907180944` (A). Both files now carry
+`-- @human-gate-approved`, which is at last a statement of fact naming the
+recorded decisions DEM-9 and EVID-1; it does not reclassify either file, and
+both stay RED class.
 
-### 1.19 Both Supabase Auth owner actions — **OWNER, still outstanding**
+Verified live afterwards, not inferred. B: `anon` refused `42501` at the
+privilege level, and under three real users' auth the contract held exactly —
+2 of 2 rows for a manager, 1 of 2 for the agency that authored one (self-
+exclusion, not over-broad), 0 and no exception for someone who manages nothing.
+A: all eight tables present with RLS and the 21 reviewed policies,
+`organization_evidence_records` carrying **no UPDATE and no DELETE** policy, the
+eight `authenticated` grants exactly as reviewed and **nothing** to `anon` or
+`PUBLIC`; a manager wrote a roster row and read it back, a pre-linked identity
+claim was refused `42501`, and an unrelated person read 0 rows and was refused
+`42501` on write — inside a transaction that was **rolled back**, so no
+synthetic history exists. Full detail: `docs/owner/OWNER-ACTIONS-RECEIPT-2026-09-07.md` §2b.
 
-Receipt: `docs/owner/OWNER-ACTIONS-RECEIPT-2026-09-07.md`. Both advisors were
-re-read live from production **today** and both still fire:
+### 1.19 The two Supabase Auth owner actions — **one DONE, one BLOCKED_BY_PLAN**
 
-* `auth_otp_long_expiry` — set Email OTP expiry ≤ 3600s.
-* `auth_leaked_password_protection` — enable it.
+Receipt: `docs/owner/OWNER-ACTIONS-RECEIPT-2026-09-07.md`. The rule this section
+set for itself — *do not record either as done until the advisor disappears* —
+was honoured, and the advisors were re-read live on 2026-09-07 after the owner
+acted:
 
-Owner-only dashboard settings; no tool available to this session can write
-Supabase Auth configuration. **Do not record either as done until the advisor
-disappears.**
+* `auth_otp_long_expiry` — **RESOLVED.** The owner changed Email OTP expiry
+  14400 → 3600s. The advisor **no longer appears anywhere** in the live security
+  list. Recorded done on that evidence, not on report.
+* `auth_leaked_password_protection` — **BLOCKED_BY_PLAN.** The owner attempted
+  to enable it and Supabase refused: the project's current plan does not carry
+  the feature. It still fires, and it stays a real open security
+  recommendation — but it is an economic decision for the owner, **not**
+  unresolved implementation work, and no agent may resolve it. It must not be
+  reported as forgotten, fake-enabled, or fixed by upgrading the plan.
+
+The remaining live advisors are 1 ERROR (`security_definer_view` on
+`worker_absence_scheduling`), 4 INFO (`rls_enabled_no_policy`) and 3 WARN. All
+of them predate the two migrations applied today; nothing applied today added a
+security finding.
 
 ---
 

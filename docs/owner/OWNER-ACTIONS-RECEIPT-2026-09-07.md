@@ -89,6 +89,122 @@ no write path from this session.
 
 ---
 
+## 2b. The two approved migrations -- APPLIED AND VERIFIED 2026-09-07
+
+**OUTCOME.** The owner approved both by name and set the apply order. Both were
+applied via Supabase MCP `apply_migration` -- never `db push`, because the
+repository filenames and the production ledger versions are not equivalent and a
+push would try to replay already-applied migrations.
+
+| repository file | ledger version | state |
+|---|---|---|
+| `20260907153000_employer_supply_discovery_v1.sql` | `20260907180546` | applied, verified |
+| `20260907114500_organization_evidence_import_v1.sql` | `20260907180944` | applied, verified |
+
+Neither file's content was modified while applying it. No permission was
+broadened beyond what the reviewed text already granted. Nothing unrelated was
+bypassed. Both remain RED class: the marker they now carry records that the
+human gate was passed, it does not reclassify them.
+
+### What was verified afterwards, read live from production
+
+**`employer_supply_discovery_v1`.** The function exists, is `security definer`
+with `search_path=public`, and `EXECUTE` is held by `authenticated` only. `anon`
+is refused at the privilege level -- `42501: permission denied for function` --
+so it never reaches the body at all. Called through the REAL applied function
+under three real users' own auth contexts:
+
+| caller | rows |
+|---|---|
+| A manager of two organizations, author of neither row | **2 of 2** |
+| B the agency that authored one of the two rows | **1 of 2** |
+| C a person who manages nothing | **0**, and no exception |
+
+A proves the capability -- an employer who could previously discover *no*
+declared workforce at all now sees the whole supply side. B proves
+self-exclusion works and is not over-broad. C proves authorization fails closed
+**and quietly**, so a surface can render an honest empty state instead of
+parsing an error to tell "nothing available" from "not allowed".
+
+One honest limit, measured rather than assumed: all three `agency_offer` rows on
+production carry NULL `role_or_work_type`, `country` and `team_size`. An
+employer therefore discovers *that* capacity exists without learning its shape.
+That is a defect in the declaration path, not in this read, and it is recorded
+against DEM-9 rather than hidden.
+
+**`organization_evidence_import_v1`.** Its RLS had never been observed against
+production before. The gate document's section 8 asked for three checks; all
+three pass, and the boundary was then exercised under real users' auth inside a
+transaction that was **ROLLED BACK**, so no synthetic history was created:
+
+* all eight tables exist, all eight report `rowsecurity = true`, 21 policies
+  matching the reviewed set one for one;
+* `organization_evidence_records` has SELECT and INSERT policies and **no UPDATE
+  and no DELETE policy** -- the append-only guarantee is enforced by the
+  database, not by convention. The same holds for the parties, events,
+  import-events and competency-signal tables. Only `evidence_import_rows`
+  (staging) is mutable, exactly as designed;
+* `authenticated` holds precisely the eight reviewed grants; `anon` and `PUBLIC`
+  hold **nothing** on any of the eight;
+* a real organization manager inserted a roster row and read it back --
+  `created_by` defaulted to their own uid, `link_state` to `unlinked`;
+* an importer attempting to write a **pre-linked** identity claim was refused
+  `42501`. A matching name cannot become a claim about who someone is;
+* an unrelated authenticated person read **0** rows of that roster and was
+  refused `42501` on write. No cross-organization leak;
+* every one of the eight tables held 0 rows before and after. No existing table
+  was altered and no existing row was touched.
+
+**Evidence level, stated precisely.** Both are
+`PRODUCTION_DATA_PATH_PROVEN`. Neither is `PRODUCTION_PERSISTENCE_PROVEN`,
+because the evidence-import writes were deliberately rolled back, and neither is
+`HUMAN_UI_PROVEN`, because nobody has yet driven either surface in a browser.
+
+---
+
+## 2c. Supabase "EXCEEDING USAGE LIMITS" -- investigated, owner decision required
+
+**FINDING.** The organization is on the **free** plan, whose database size limit
+is **500 MB**. The production database is **842 MB** -- about **168% of the
+limit**. Read live 2026-09-07. This is the resource being exceeded; it is not
+Monthly Active Users (56 total auth users, 22 signed in within 30 days, against
+a free-tier allowance far above that).
+
+**WHERE IT IS.** Two tables are 92% of the database:
+
+| table | size | share |
+|---|---|---|
+| `public.esco_labels` | 408 MB | 48.4% |
+| `public.public_vacancies` | 369 MB | 43.8% |
+| everything else combined | ~65 MB | 7.8% |
+
+**RISK TO REAL USERS.** Sustained overage on the free plan is what leads Supabase
+to restrict a project, and a read-only or paused database would take the whole
+product down for real users. Nothing is degraded at the time of writing.
+
+**NON-DESTRUCTIVE MITIGATION THAT NEEDS NO PURCHASE.** `esco_labels` holds
+roughly 1.01M rows across **28 locales**, while the product ships message
+catalogues for **5** (`en`, `lt`, `de`, `nl`, `ru` -- and `ru` has no ESCO labels
+at all). The four locales the product can actually serve account for ~278k rows;
+the other ~736k (73%) serve no reachable surface. Pruning to the served set is
+the single largest reclaim available without spending anything.
+
+That work already exists and is already owner-gated: **PR #1421** carries the
+ESCO locale prune alongside the retention function and the unused-index drop.
+It is a destructive `DELETE`, so it is RED class and **no agent may apply it**.
+
+`public_vacancies` is 79,685 rows with none stale beyond 30 days, so it is
+working data rather than accumulated waste; shrinking it would cost product
+value and is not recommended as the first move.
+
+**THE OWNER DECISION, STATED WITHOUT MAKING IT.** Either (a) approve the
+already-written prune in PR #1421 and reclaim the unreachable locales at no
+cost, or (b) move the project to a paid plan -- which would also unblock the
+leaked-password protection recorded in section 2 as BLOCKED_BY_PLAN. This
+session did not price, choose, purchase or upgrade anything, and must not.
+
+---
+
 ## 3. `SUPABASE_DB_URL` — two CI gates are inert until it exists
 
 **CURRENT STATE.** The secret is not set, so two live CI gates are honestly

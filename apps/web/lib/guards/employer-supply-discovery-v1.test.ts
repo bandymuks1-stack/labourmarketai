@@ -125,11 +125,26 @@ describe("the gated read exposes the shape of capacity, never who has it", () =>
     expect((body.match(/create or replace function/g) ?? []).length).toBe(1);
   });
 
-  it("it carries no human-gate-approved marker — no owner decision exists", () => {
+  it("it carries the human-gate marker EXACTLY once, and names the decision behind it", () => {
+    // INVERTED 2026-09-07, and the inversion is the guard's point rather
+    // than a weakening of it. This used to assert the marker was ABSENT,
+    // because no owner decision existed. The owner has since approved this
+    // migration by name (DEM-9, HG-2026-09-07) and it was applied.
+    // The old assertion encoded a TRANSIENT fact that has changed, so keeping
+    // it would have made the guard enforce something untrue.
+    //
+    // The replacement is STRICTER, not looser: the marker must appear exactly
+    // once, on a line of its own the way migration-safety.mjs reads it, AND
+    // the file must name the recorded decision it rests on. A marker written
+    // in without a decision behind it still fails here. The marker also never
+    // reclassifies the file to GREEN, so RED CLASS must still be stated.
     const marked = sql()
       .split("\n")
       .filter((l) => /^\s*--\s*@human-gate-approved\s*$/.test(l));
-    expect(marked).toEqual([]);
+    expect(marked).toHaveLength(1);
+    expect(sql()).toContain("DEM-9");
+    expect(sql()).toContain("HG-2026-09-07");
+    expect(sql()).toMatch(/RED CLASS/i);
   });
 
   it("a rollback exists and is complete", () => {
