@@ -12288,7 +12288,7 @@
       "historyMore": "Rodyti daugiau",
       "workspaceLabel": "Darbo erdvė",
       "workspacePersonal": "Asmeninė erdvė",
-      "workspaceUnnamed": "Įmonės erdvė",
+      "workspaceUnnamed": "Organizacija be pavadinimo",
       "chipLogWork": "Užfiksuoti darbą",
       "agendaTitle": "Artimiausių {days} d. planas:",
       "agendaEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
@@ -12663,7 +12663,12 @@
         "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
         "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
         "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
-      }
+      },
+      "workspaceUnnamedCompany": "Įmonė be pavadinimo",
+      "workspaceUnnamedAgency": "Agentūra be pavadinimo",
+      "workspaceUnnamedTeam": "Komanda be pavadinimo",
+      "workspaceUnnamedNote": "Pavadinimas nenurodytas",
+      "workspaceNameThis": "Nurodyti pavadinimą"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

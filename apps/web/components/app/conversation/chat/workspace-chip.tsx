@@ -8,9 +8,11 @@ import { useAuthOptional } from "@/lib/auth/context";
 import {
   PERSONAL_WORKSPACE_ID,
   workspaceDisplayLabels,
+  isUnnamedOrganizationLabel,
   type WorkspaceInfo,
 } from "@/lib/company/organization-switch";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
+import { Link } from "@/lib/i18n/navigation";
 import { iconControl } from "./icon-scale";
 
 /**
@@ -80,16 +82,27 @@ export function WorkspaceChip() {
 
   const active =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
-  // Unnamed organizations → the localized fallback, never a dash row — and
-  // never the SAME row twice: two unnamed organizations used to render as two
-  // identical entries, so the switcher could not answer "where am I?" at all
-  // (owner audit defects A/B). The resolver appends a positional suffix only
-  // on a genuine collision; see workspaceDisplayLabels.
+  // Unnamed organizations → a phrase that SAYS the name is missing, never a
+  // dash row and never the SAME row twice (owner audit defects A/B).
+  // TYPE-AWARE, and every phrase says the name is missing (owner walk
+  // 2026-09-07). The previous single "Įmonės erdvė" + positional suffix
+  // rendered as "Įmonės erdvė 1 / 2" beside a real registered company name,
+  // which reads as two more real companies. See workspaceDisplayLabels.
+  const unnamedOrganization = {
+    company: t("workspaceUnnamedCompany"),
+    agency: t("workspaceUnnamedAgency"),
+    team: t("workspaceUnnamedTeam"),
+    other: t("workspaceUnnamed"),
+  } as const;
   const labelById = workspaceDisplayLabels(workspaces, {
     personal: t("workspacePersonal"),
-    unnamedOrganization: t("workspaceUnnamed"),
+    unnamedOrganization,
   });
   const nameOf = (w: WorkspaceInfo) => labelById.get(w.id) ?? w.name;
+  /** Does this row show a "no name stored" phrase rather than a real name? */
+  const unnamed = (w: WorkspaceInfo) =>
+    w.kind === "organization" &&
+    isUnnamedOrganizationLabel(nameOf(w), unnamedOrganization);
 
   // `min-w-0` on the chip root (both variants below) is what lets `truncate`
   // actually fire. Without it the chip's default `min-width: auto` floors it at
@@ -163,9 +176,35 @@ export function WorkspaceChip() {
                   }`}
                 >
                   <span className={`size-2 flex-none rounded-full ${dotClass(w)}`} aria-hidden />
-                  <span className="min-w-0 flex-1 truncate text-left">{nameOf(w)}</span>
+                  {/* An organization whose name was never provided reads as a
+                      STATE, not as a name (owner walk 2026-09-07): the phrase
+                      already says so, and the italic + muted treatment stops it
+                      looking like a company called that in a list beside real
+                      registered names. */}
+                  <span
+                    className={`min-w-0 flex-1 truncate text-left ${
+                      unnamed(w) ? "italic text-text-muted" : ""
+                    }`}
+                    data-unnamed-organization={unnamed(w) ? "yes" : undefined}
+                  >
+                    {nameOf(w)}
+                  </span>
                   {isActive && <Check {...iconControl()} aria-hidden className="flex-none text-brand-blue" />}
                 </button>
+                {/* THE COMPLETION ACTION, offered only to someone who can
+                    actually take it: the owner of an organization that has no
+                    stored name. `saveCompanySetup` already rejects a name
+                    shorter than two characters, so this closes the loop the
+                    legacy backfill left open instead of only describing it. */}
+                {unnamed(w) && w.relationship === "owner" && (
+                  <Link
+                    href={`/dashboard/start/company?org=${encodeURIComponent(w.id)}`}
+                    data-testid={`workspace-name-this-${w.id}`}
+                    className="mx-2 mb-1 block truncate text-meta text-brand-blue underline-offset-4 hover:underline"
+                  >
+                    {t("workspaceNameThis")}
+                  </Link>
+                )}
               </li>
             );
           })}

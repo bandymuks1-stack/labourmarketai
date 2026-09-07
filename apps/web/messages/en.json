@@ -12288,7 +12288,7 @@
       "historyMore": "Show more",
       "workspaceLabel": "Workspace",
       "workspacePersonal": "Personal space",
-      "workspaceUnnamed": "Company workspace",
+      "workspaceUnnamed": "Organisation without a name",
       "chipLogWork": "Log work",
       "agendaTitle": "Your plan for the next {days} days:",
       "agendaEmpty": "Nothing is planned for the next {days} days.",
@@ -12663,7 +12663,12 @@
         "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
         "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
         "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
-      }
+      },
+      "workspaceUnnamedCompany": "Company without a name",
+      "workspaceUnnamedAgency": "Agency without a name",
+      "workspaceUnnamedTeam": "Team without a name",
+      "workspaceUnnamedNote": "No name provided",
+      "workspaceNameThis": "Add a name"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
