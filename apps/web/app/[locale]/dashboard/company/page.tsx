@@ -46,6 +46,7 @@ import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { CompanyWorkersSection } from "@/components/app/company-workers-section";
 import { WorkObjectsSection } from "@/components/app/work-objects-section";
+import { EvidenceImportSection } from "@/components/app/evidence-import-section";
 import { CompanyGallerySection } from "@/components/app/company-gallery-section";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
 import { listOrganizationMembers } from "@/lib/company/memberships";
@@ -107,6 +108,12 @@ export default async function CompanyDashboardPage({
   // `?wf=` precedent) — unknown values are dropped, never rendered raw.
   const sp = (await searchParams) ?? {};
   const rawLc = typeof sp.lc === "string" ? sp.lc : "";
+  // The staged evidence-import source under review, if any. A query param on
+  // THIS workspace rather than a route of its own — see the section's header.
+  const evidenceSession =
+    typeof sp.evidenceSession === "string" && sp.evidenceSession.trim() !== ""
+      ? sp.evidenceSession.trim()
+      : undefined;
   const lifecycleNotice = isLifecycleNotice(rawLc) ? rawLc : null;
   await requireRoleOrRedirect(locale, "company");
 
@@ -1468,6 +1475,17 @@ export default async function CompanyDashboardPage({
           (membership-based authority; supersedes the never-applied
           company_locations draft per the Train M verdict). Honest gated
           state until the LEAD applies the migration. */}
+      {/* ORGANIZATION EVIDENCE IMPORT (owner P0, 2026-09-07) — the company's
+          own history entering the platform as evidence. It sits INSIDE this
+          workspace rather than at a route of its own: the Product Gate is
+          right that a new screen would have to answer the five World-State
+          questions, and four of the honest answers were "no". Nothing about
+          the engine changed — same core, same RLS, same commit gate, same
+          eleven capabilities an authorized assistant drives. */}
+      <div id="evidence-import-zone" className="scroll-mt-20">
+        <EvidenceImportSection locale={locale} sessionId={evidenceSession} />
+      </div>
+
       <div id="company-locations" className="scroll-mt-20">
         <WorkObjectsSection
           state={

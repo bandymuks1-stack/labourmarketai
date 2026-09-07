@@ -78,8 +78,13 @@ export type InviteCompanyWorkerResult =
 
 export async function listActiveCompanyWorkers(
   companyId: string,
+  /** OPTIONAL explicit caller (G4 bridge). Absent = the cookie session, which
+   *  is every existing call site and is unchanged. Present = a bearer or agent
+   *  transport handing in ITS OWN RLS-scoped client, so one read serves both
+   *  without a second implementation. Never a service-role client. */
+  caller?: { readonly supabase: SupabaseClient },
 ): Promise<CompanyWorkersListResult> {
-  const supabase = await createClient();
+  const supabase = caller?.supabase ?? (await createClient());
   const WORKER_JOIN = "workers(profile_id, display_name, profiles(email))";
   const BASE_COLS = `worker_id, status, created_at, ${WORKER_JOIN}`;
   const BRIDGE_COLS = `worker_id, status, created_at, operations_role, operations_title, journal_review_enabled, ${WORKER_JOIN}`;

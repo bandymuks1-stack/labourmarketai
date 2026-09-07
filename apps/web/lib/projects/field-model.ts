@@ -95,6 +95,19 @@ export interface FieldSlot {
 export interface FieldReadyRow {
   readonly workerId: string;
   readonly label: string;
+  /**
+   * TRUE when this person already has real work overlapping the window.
+   *
+   * They are still offered — that is the point. A project booked A→B does not
+   * consume a person A→B, and construction and services run at variable rates
+   * and in parallel, so an overlap is information a planner weighs, not a door
+   * the system closes. The caller renders it as a warning beside the name.
+   */
+  readonly hasOverlap: boolean;
+  /** What they are already on, when the source carries a title. Never invented. */
+  readonly overlapWith: string | null;
+  /** The last day of the overlap inside the window. */
+  readonly overlapUntil: string | null;
 }
 
 export interface FieldReady {
@@ -103,8 +116,15 @@ export interface FieldReady {
   readonly from: string | null;
   readonly to: string | null;
   readonly absencesKnown: boolean;
-  /** Free roster rows beyond FIELD_READY_MAX (counted, not shown). */
+  /** Candidate rows beyond FIELD_READY_MAX (counted, not shown). */
   readonly more: number;
+  /**
+   * People withheld because the system holds a HARD constraint on them
+   * (approved leave). Counted and reported rather than silently dropped: a
+   * planner must be able to see that the list is shorter than the roster and
+   * why. Nothing here deletes the option of asking them.
+   */
+  readonly withheldByHardConstraint: number;
 }
 
 export interface ProjectField {
@@ -253,19 +273,53 @@ export function buildProjectField(input: BuildFieldInput): ProjectField {
   }
   const slots = allSlots.slice(0, FIELD_SLOT_MAX);
 
-  let ready: FieldReady = { kind: "error", rows: [], from: null, to: null, absencesKnown: false, more: 0 };
+  let ready: FieldReady = {
+    kind: "error",
+    rows: [],
+    from: null,
+    to: null,
+    absencesKnown: false,
+    more: 0,
+    withheldByHardConstraint: 0,
+  };
   if (input.capacity) {
     if (input.capacity.kind === "ok") {
-      const free = input.capacity.rows
-        .filter((r) => r.state === "free" && !assigned.has(r.workerId))
-        .map((r) => ({ workerId: r.workerId, label: r.label }));
+      /**
+       * WHO CAN BE CONSIDERED — not "who is idle".
+       *
+       * This filtered on `state === "free"` until 2026-09-07, which meant that
+       * the moment capacity started reading committed work (the same day), a
+       * person with an accepted booking silently vanished from every candidate
+       * list. That converted a COMMITMENT into a PROHIBITION without anyone
+       * deciding to, and it is the exact failure the owner's overlap rule
+       * names: ordinary scheduling overlap must not remove human agency.
+       *
+       * So a committed person is offered, carrying the overlap. Only a HARD
+       * constraint (approved leave) withholds a row, and even that is counted
+       * and reported rather than dropped in silence.
+       */
+      const unassigned = input.capacity.rows.filter((r) => !assigned.has(r.workerId));
+      const withheld = unassigned.filter((r) => r.constraint === "hard_constraint");
+      const candidates = unassigned
+        .filter((r) => r.constraint !== "hard_constraint")
+        .map((r) => ({
+          workerId: r.workerId,
+          label: r.label,
+          hasOverlap: r.constraint === "commitment",
+          overlapWith: r.committedTo,
+          overlapUntil: r.constraint === "commitment" ? r.unavailableUntil : null,
+        }));
+      // Free first, then the ones carrying an overlap — a planner sees the
+      // unconflicted options before the ones that need a decision.
+      candidates.sort((a, b) => Number(a.hasOverlap) - Number(b.hasOverlap));
       ready = {
         kind: "ok",
-        rows: free.slice(0, FIELD_READY_MAX),
+        rows: candidates.slice(0, FIELD_READY_MAX),
         from: input.capacity.from,
         to: input.capacity.to,
         absencesKnown: input.capacity.absencesKnown,
-        more: Math.max(0, free.length - FIELD_READY_MAX),
+        more: Math.max(0, candidates.length - FIELD_READY_MAX),
+        withheldByHardConstraint: withheld.length,
       };
     } else {
       ready = { ...ready, kind: input.capacity.kind };

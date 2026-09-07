@@ -77,12 +77,13 @@ const capacity: CapacityChatResult = {
   from: "2026-09-05",
   to: "2026-09-11",
   rows: [
-    { workerId: "w1", label: "On project", state: "free", unavailableUntil: null },
-    { workerId: "w9", label: "Free one", state: "free", unavailableUntil: null },
-    { workerId: "w8", label: "Away", state: "unavailable", unavailableUntil: "2026-09-10" },
+    { workerId: "w1", label: "On project", state: "free", constraint: "none", overridable: true, unavailableUntil: null, committedTo: null },
+    { workerId: "w9", label: "Free one", state: "free", constraint: "none", overridable: true, unavailableUntil: null, committedTo: null },
+    { workerId: "w8", label: "Away", state: "unavailable", constraint: "hard_constraint", overridable: false, unavailableUntil: "2026-09-10", committedTo: null },
   ],
   rosterTotal: 3,
   absencesKnown: true,
+  commitmentsKnown: true,
 };
 
 describe("lane edge and time are from real status and real dates only", () => {
@@ -171,7 +172,7 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
     expect(field.ready.rows).toEqual([]);
   });
 
-  it("ready edge = the capacity read's FREE rows minus people already on the project", () => {
+  it("ready edge = the capacity read's CANDIDATES minus people already on the project", () => {
     const field = buildProjectField({
       stages: [],
       stagesApplied: true,
@@ -182,7 +183,13 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
       todayIso: TODAY,
     });
     expect(field.ready.kind).toBe("ok");
-    expect(field.ready.rows).toEqual([{ workerId: "w9", label: "Free one" }]);
+    // "Candidates", not "free rows": a commitment no longer removes anyone —
+    // see the overlap describe block below. Only w8's approved leave withholds,
+    // and w1 is already on the project.
+    expect(field.ready.rows).toEqual([
+      { workerId: "w9", label: "Free one", hasOverlap: false, overlapWith: null, overlapUntil: null },
+    ]);
+    expect(field.ready.withheldByHardConstraint).toBe(1);
     expect(field.ready.from).toBe("2026-09-05");
     expect(field.ready.absencesKnown).toBe(true);
     expect(field.slots).toEqual([]);
@@ -215,7 +222,10 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
       workerId: `r${i}`,
       label: `R${i}`,
       state: "free" as const,
+      constraint: "none" as const,
+      overridable: true,
       unavailableUntil: null,
+      committedTo: null,
     }));
     const field = buildProjectField({
       stages,
@@ -223,7 +233,7 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
       workers,
       tasks,
       tasksApplied: true,
-      capacity: { kind: "ok", from: "a", to: "b", rows, rosterTotal: 40, absencesKnown: true },
+      capacity: { kind: "ok", from: "a", to: "b", rows, rosterTotal: 40, absencesKnown: true, commitmentsKnown: true },
       todayIso: TODAY,
     });
     expect(field.lanes).toHaveLength(FIELD_LANE_MAX);
@@ -235,5 +245,95 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
     expect(field.objects).toBeLessThanOrEqual(FIELD_OBJECT_MAX);
     expect(field.people.length).toBe(FIELD_OBJECT_MAX - 12 - 12 - 12);
     expect(field.peopleTotal).toBe(70);
+  });
+});
+
+/**
+ * THE CANDIDATE LIST OFFERS COMMITTED PEOPLE.
+ * (Owner correction, 2026-09-07.)
+ *
+ * This filtered on `state === "free"` until capacity started reading committed
+ * work the same day — at which point everyone with an accepted booking silently
+ * disappeared from every candidate list. A correct fix one layer down produced
+ * a worse lie one layer up: a COMMITMENT rendered as a PROHIBITION, decided by
+ * nobody.
+ */
+describe("an overlap does not remove a candidate", () => {
+  const row = (
+    workerId: string,
+    state: "free" | "committed" | "unavailable",
+    committedTo: string | null = null,
+  ) => ({
+    workerId,
+    label: `L:${workerId}`,
+    state,
+    constraint:
+      state === "free"
+        ? ("none" as const)
+        : state === "committed"
+          ? ("commitment" as const)
+          : ("hard_constraint" as const),
+    overridable: state !== "unavailable",
+    unavailableUntil: state === "free" ? null : "2026-09-10",
+    committedTo,
+  });
+
+  const build = (rows: ReturnType<typeof row>[]) =>
+    buildProjectField({
+      stages: [],
+      stagesApplied: true,
+      workers: [],
+      tasks: [],
+      tasksApplied: true,
+      capacity: {
+        kind: "ok",
+        from: "2026-09-05",
+        to: "2026-09-11",
+        rows,
+        rosterTotal: rows.length,
+        absencesKnown: true,
+        commitmentsKnown: true,
+      },
+      todayIso: TODAY,
+    });
+
+  it("a committed person IS offered, carrying the overlap", () => {
+    const field = build([row("w1", "committed", "Vilnius site")]);
+    const candidate = field.ready.rows.find((r) => r.workerId === "w1");
+    expect(candidate, "a commitment must not remove the option").toBeDefined();
+    expect(candidate?.hasOverlap).toBe(true);
+    expect(candidate?.overlapWith).toBe("Vilnius site");
+    expect(candidate?.overlapUntil).toBe("2026-09-10");
+  });
+
+  it("an overlap with no title says so rather than inventing one", () => {
+    const field = build([row("w2", "committed", null)]);
+    expect(field.ready.rows[0]?.overlapWith).toBeNull();
+    expect(field.ready.rows[0]?.hasOverlap).toBe(true);
+  });
+
+  it("only a HARD constraint withholds — and it is COUNTED, never silent", () => {
+    const field = build([row("w3", "unavailable"), row("w4", "free")]);
+    expect(field.ready.rows.map((r) => r.workerId)).toEqual(["w4"]);
+    // The planner can see the list is shorter than the roster, and why.
+    expect(field.ready.withheldByHardConstraint).toBe(1);
+  });
+
+  it("unconflicted options come first — the overlap is a decision, not a default", () => {
+    const field = build([
+      row("w5", "committed", "Site A"),
+      row("w6", "free"),
+      row("w7", "committed", "Site B"),
+    ]);
+    expect(field.ready.rows.map((r) => r.hasOverlap)).toEqual([false, true, true]);
+  });
+
+  it("a free person carries no overlap", () => {
+    const field = build([row("w8", "free")]);
+    expect(field.ready.rows[0]).toMatchObject({
+      hasOverlap: false,
+      overlapWith: null,
+      overlapUntil: null,
+    });
   });
 });

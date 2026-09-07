@@ -1,5 +1,10 @@
 import { deriveDocumentStatus, type WorkerDocumentRow } from "@/lib/documents/readiness";
 import { documentTypesForReadinessItem } from "@/lib/projects/readiness-items";
+import {
+  assessCapability,
+  type CapabilityAssessment,
+  type CapabilityEvidence,
+} from "@/lib/qualification/capability-standing";
 
 /**
  * WHAT THE PROJECT STILL NEEDS FROM ME: pure derivation (owner contract §11
@@ -24,6 +29,18 @@ export interface WorkerProjectAsk {
   readonly documentTypeSlug: string | null;
   /** The person's own state for that document type; null for non-document rows. */
   readonly own: OwnDocumentState | null;
+  /**
+   * REAL WORK, BESIDE THE PAPER — not instead of it.
+   *
+   * Present only on the row that asks for qualification or SKILL EVIDENCE,
+   * and only when the caller supplied the person's recorded evidence. It
+   * never changes `own`: a required certificate stays required, and
+   * `formalRequirementMet` is the field a deployment decision reads. What it
+   * adds is that five years of confirmed work stops rendering as "not
+   * recorded" — and names the route (recognition of prior learning) that can
+   * actually close the gap.
+   */
+  readonly capability: CapabilityAssessment | null;
 }
 
 export interface OwnReadinessItemLike {
@@ -42,6 +59,11 @@ function rank(s: OwnDocumentState): number {
   return s === "ready" ? 2 : s === "expiring" ? 1 : 0;
 }
 
+/** The readiness rows that ask about capability rather than about a document
+ *  the person either has or does not. Today exactly one — the row whose own
+ *  name already promises to accept skill evidence. */
+const CAPABILITY_ITEM_KEYS: ReadonlySet<string> = new Set(["qualification_or_skill_evidence"]);
+
 export function deriveWorkerProjectAsks(
   items: readonly OwnReadinessItemLike[],
   /** The person's own document records; `null` = the documents read did not
@@ -49,6 +71,10 @@ export function deriveWorkerProjectAsks(
    *  unknown record is not "not recorded". */
   documents: readonly OwnDocumentLike[] | null,
   now: Date,
+  /** The person's recorded work evidence. OPTIONAL: a caller that cannot
+   *  answer the question gets exactly the previous behaviour, never a guess
+   *  in either direction. */
+  evidence?: CapabilityEvidence | null,
 ): Map<string, WorkerProjectAsk[]> {
   const byType = new Map<string, OwnDocumentState>();
   for (const d of documents ?? []) {
@@ -71,7 +97,28 @@ export function deriveWorkerProjectAsks(
         if (st && rank(st) > rank(own)) own = st;
       }
     }
-    list.push({ itemKey: it.itemKey, label: it.label, status: it.status, documentTypeSlug: slugs[0] ?? null, own });
+    // The capability assessment runs only for the capability row, and only
+    // with real evidence in hand. `own` is untouched by it — the formal
+    // answer and the real-work answer are two facts side by side.
+    const capability =
+      evidence && CAPABILITY_ITEM_KEYS.has(it.itemKey)
+        ? assessCapability(
+            {
+              ...evidence,
+              hasValidCredential: own === "ready",
+              hasExpiringCredential: own === "expiring",
+            },
+            { formalRequirementRequired: true },
+          )
+        : null;
+    list.push({
+      itemKey: it.itemKey,
+      label: it.label,
+      status: it.status,
+      documentTypeSlug: slugs[0] ?? null,
+      own,
+      capability,
+    });
     out.set(it.projectId, list);
   }
   return out;

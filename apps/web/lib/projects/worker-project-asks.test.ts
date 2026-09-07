@@ -138,7 +138,16 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     expect(ACCESS).toContain('import { listWorkerInstructions } from "@/lib/instructions/instructions";');
     expect(fn).toContain("listOwnReadinessItems(workerId, ids)");
     // An unanswered documents read is UNKNOWN (null), never "no documents".
-    expect(fn).toMatch(/deriveWorkerProjectAsks\(items, docs\.kind === "ok" \? docs\.documents : null, new Date\(\)\)/);
+    // Pinned as the INTENT rather than one line's exact spelling: the call
+    // gained a fourth argument (the person's recorded work evidence) when
+    // "certificate missing" stopped being the whole answer to the
+    // qualification row, and a pin that breaks on formatting is a pin that
+    // gets relaxed rather than read.
+    expect(fn).toContain("deriveWorkerProjectAsks(");
+    expect(fn).toMatch(/docs\.kind === "ok" \? docs\.documents : null/);
+    // The evidence argument is likewise UNKNOWN-or-real, never zeros.
+    expect(fn).toContain("UNKNOWN_RECORDED_WORK");
+    expect(fn).toContain("getOwnRecordedWorkEvidence(workerId, ownProfileId)");
     expect(fn).toMatch(/if \(ins\.projectId && !instructions\.has\(ins\.projectId\)\)/);
     expect(fn).toMatch(/\.slice\(0, 10\)/);
     // The chat read composes it and a failed read leaves the asks empty.

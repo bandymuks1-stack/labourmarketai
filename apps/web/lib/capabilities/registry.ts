@@ -21,6 +21,7 @@ import {
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
+import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -37,6 +38,7 @@ import {
   submitDemandRequestCore,
 } from "@/lib/demand/demand-request";
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
 import {
   resolveEngagementContext,
@@ -1407,6 +1409,100 @@ const demandCreateConfirm: CapabilityDescriptor = {
   },
 };
 
+
+// ── workforce.availability ────────────────────────────────────────────────
+//
+// "Kas laisvas kitą savaitę?" — the FIRST of the owner's company questions to
+// become an authorized canonical action rather than a chat-only answer.
+//
+// It is the SAME `whoIsAvailableCore` the chat calls, over the same three
+// reads (roster, approved absences, committed work), under the caller's own
+// RLS. That matters more here than anywhere: the defect this module carries a
+// scar from was one surface disagreeing with another about who is free, and a
+// second capacity implementation for agents would recreate it by construction.
+
+const workforceAvailabilityInput = z.object({}).strict();
+
+const workforceAvailability: CapabilityDescriptor = {
+  id: "workforce.availability",
+  kind: "read",
+  title: "Who on my roster is free",
+  description:
+    "The caller's own active roster over the next 7 days, in three honest " +
+    "states: free, committed (an accepted booking or an active project " +
+    "assignment), or unavailable (approved leave — the reason is never " +
+    "carried). COMMITTED IS NOT UNAVAILABLE: each row carries `constraint` " +
+    "(none / commitment / hard_constraint) and `overridable`, because a " +
+    "project booked A to B does not consume a person A to B — work runs at " +
+    "variable rates and in parallel, so an overlap is a warning an authorized " +
+    "actor may accept, not a refusal. Reports which of its inputs actually " +
+    "answered, so an unread source is never presented as 'nobody is busy'. " +
+    "Writes nothing.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workforceAvailabilityInput,
+  run: async (caller): Promise<ExecResult> => {
+    // The employer context is resolved by the caller's OWN chain — the same
+    // gate the demand capabilities pass, never an id from the client.
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const result = await whoIsAvailableCore(employer.companyId, {
+      supabase: caller.supabase,
+      userId: caller.userId,
+    });
+    if (result.kind === "empty") {
+      return {
+        ok: true,
+        data: {
+          actingFor: employer.organizationName,
+          rosterTotal: 0,
+          rows: [],
+          note: "This organization has no active roster members, so there is nobody to report on.",
+        },
+      };
+    }
+    if (result.kind !== "ok") {
+      return result.kind === "no-company"
+        ? demandContextRefusal("no-company-binding")
+        : { ok: false, code: "unavailable", message: "The availability read failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        actingFor: employer.organizationName,
+        from: result.from,
+        to: result.to,
+        rosterTotal: result.rosterTotal,
+        rows: result.rows.map((r) => ({
+          label: r.label,
+          state: r.state,
+          // WHAT KIND of thing this is, and whether a legitimate actor may go
+          // ahead anyway. `committed` is real accepted work and is NOT a bar
+          // to more: a project booked A→B does not consume a person A→B, so an
+          // overlap is a warning to weigh, never an automatic refusal.
+          constraint: r.constraint,
+          overridable: r.overridable,
+          notFreeUntil: r.unavailableUntil,
+          committedTo: r.committedTo,
+        })),
+        // WHICH INPUTS ANSWERED. Reported rather than assumed: production
+        // carried zero absence rows and three real commitments, so
+        // "everybody is free" was once produced entirely from signals nobody
+        // had checked. A client must be able to qualify the answer.
+        absencesKnown: result.absencesKnown,
+        commitmentsKnown: result.commitmentsKnown,
+        structuredDestination: "/dashboard/company/planning",
+      },
+    };
+  },
+};
+
 // ── the registry ───────────────────────────────────────────────────────────
 
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
@@ -1422,6 +1518,13 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   demandCreateDraft,
   demandCreateConfirm,
   contextSwitch,
+  workforceAvailability,
+  // Organization evidence import — the ELEVEN capabilities that give an
+  // authorized assistant the same historical-import flow the web UI performs,
+  // over the same domain core (`lib/organization-evidence/import-core.ts`).
+  // Declared as a group because they are one flow, not eleven unrelated
+  // actions; each descriptor is still reviewed individually in its own file.
+  ...EVIDENCE_IMPORT_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

@@ -47,6 +47,13 @@ const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
     binding: "t",
     namespace: "reports",
   },
+  {
+    // A section of the company workspace, not a route — see the section's own
+    // header. The keys it asks for must still all exist.
+    file: "components/app/evidence-import-section.tsx",
+    binding: "t",
+    namespace: "evidenceImport",
+  },
 ];
 
 /** Read a dotted path; undefined when any segment is missing or non-string. */

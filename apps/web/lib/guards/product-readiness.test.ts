@@ -2386,7 +2386,30 @@ describe("no migration files added by this sprint", () => {
     // browsing for work to staff was served OTHER agencies' offers as demand —
     // measured on production as 2 of 12 rows, through the real RPC under the
     // agency's own auth. RED class (SECURITY DEFINER body replace).
-const SPRINT_BASELINE = 268;
+    // Bumped 268 -> 269 for organization_evidence_import_v1 (owner P0,
+    // 2026-09-07): the organization historical evidence import — 8 additive
+    // tables (roster people claimable by the real human, immutable import
+    // sessions, staging rows, INSERT-ONLY evidence records, party roles, and
+    // append-only attestation / independent-verification events). RED class
+    // because new tables need explicit GRANTs on this project; it carries NO
+    // `@human-gate-approved` marker because no owner decision exists yet, so
+    // `migration-safety` stays RED on purpose. Draft + needs-human-gate,
+    // NOT applied. RECOUNTED from the tree, never summed:
+    // `ls supabase/migrations/*.sql | wc -l` = 269 real files.
+// Bumped 269 -> 270 for employer_supply_discovery_v1 (2026-09-07): the
+// OTHER half of the market-direction work. Six surfaces were fixed for
+// serving supply where demand belongs, and every one of those fixes was
+// subtractive; production carries 2 submitted `agency_offer` rows that NO
+// employer could read, because `customer_requests_select` is own-row /
+// admin / org-demand-access only. This adds one new gated SECURITY
+// DEFINER reader exposing six non-identifying columns. Proven on
+// production inside a transaction under three real users' auth contexts
+// (employer 2 of 2, the supplier themselves 1 of 2, a plain worker 0) and
+// rolled back; the function does not exist on production. RED class,
+// carries NO `@human-gate-approved` marker, NOT applied.
+// RECOUNTED from the tree, never summed:
+// `ls supabase/migrations/*.sql | wc -l` = 270 real files.
+const SPRINT_BASELINE = 270;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

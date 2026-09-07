@@ -726,14 +726,16 @@ const EVIDENCE: readonly CapabilityRow[] = [
     domain: "evidence",
     title: "Organization historical evidence import",
     worldElement: "work_journal",
-    status: "BLOCKED",
-    strongestEvidence: "TEST_PROVEN",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "Schema and pure core are written and NOT on main: they live in the open RED PR, unapplied, awaiting the owner gate.",
-    ownerDecision:
-      "Approve 20260907114500_organization_evidence_import_v1 for apply, or return it (HG-2026-09-07).",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: [
+      "lib/organization-evidence/import-core.ts",
+      "lib/organization-evidence/evidence-state.ts",
+    ],
+    coreModule: "lib/organization-evidence/import-core.ts",
+    surfaces: ["app/[locale]/dashboard/profile", "components/app/evidence-import-section.tsx"],
+    note:
+      "Owner-approved and APPLIED 2026-09-07 (ledger 20260907180944). The RLS boundary was then exercised on production under real users' auth: a manager wrote a roster row and read it back, a pre-linked identity claim was refused 42501, and an unrelated person read 0 rows and was refused 42501 on write. That transaction was ROLLED BACK, so this is a data-path proof and deliberately NOT PRODUCTION_PERSISTENCE_PROVEN. PARTIAL, not usable: no human has yet imported a real file through the surface, and all eight tables hold 0 rows.",
   },
   {
     id: "EVID-2",
@@ -821,14 +823,13 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     domain: "demand_supply",
     title: "Demand/supply semantic boundary",
     worldElement: "market_world_map",
-    status: "PARTIAL",
-    strongestEvidence: "HUMAN_UI_PROVEN",
+    status: "BUILT_AND_USABLE",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
     anchors: ["lib/demand/market-direction.ts"],
     coreModule: "lib/demand/market-direction.ts",
     surfaces: ["app/[locale]/dashboard/opportunities"],
-    ownerDecision:
-      "Apply 20260906140000_worker_board_excludes_supply_v1 — the RPC returns no `kind`, so the worker board cannot be fixed above the database.",
-    note: "Four more own-rows surfaces fixed 2026-09-07 — the market map (which drew an agency's own offer as an actionable need), the org demand rollup, the scouting list and the chat starter count — and the hand-written copies of the kind allow-list are now banned by a guard. What remains is the DATABASE half: `list_open_demand_for_workers` does not return `kind`, so the worker board and the map's worker leg cannot classify in TypeScript at all. That needs the owner-gated migration 20260906140000.",
+    note:
+      "CLOSED, and the owner gate this entry used to carry was STALE. The database half was applied on 2026-09-06 (ledger 20260906194911 and 20260906202628) and did not need the `kind` column the gate asked for: it fixed the direction inside each function with a closed allow-list, which is the stronger form. Read live from production 2026-09-07, all three board readers now classify by direction in the DATABASE — `list_open_demand_for_workers` and `list_open_demand_for_agencies` both admit only (`kind is null or kind in ('company_request','buyer_request')`), and `list_open_supply_for_employers` only (`kind in ('agency_offer')`). Proven, not inferred: called as a real worker, the board returned 7 demand rows and leaked 0 of the 3 agency_offer supply rows. The `kind is null` branch is deliberate — the pre-`kind` rows from migration 0028 are genuine demand. Every allow-list is closed, so the NEXT kind added defaults to invisible rather than to the wrong board.",
   },
   {
     id: "DEM-3",
@@ -907,14 +908,16 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     domain: "demand_supply",
     title: "Organizational supply discovery (agency capacity → employer)",
     worldElement: "market_world_map",
-    status: "BLOCKED",
-    strongestEvidence: "PRODUCTION_RPC_PROVEN",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "Proven in a production transaction under three real users' auth and rolled back; the migration is in the open RED PR, unapplied. Until then an employer cannot discover declared workforce at all.",
-    ownerDecision:
-      "Approve 20260907153000_employer_supply_discovery_v1 for apply, or return it (HG-2026-09-07).",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: ["lib/supply/employer-supply-discovery.ts"],
+    coreModule: "lib/supply/employer-supply-discovery.ts",
+    surfaces: [
+      "app/[locale]/dashboard/company/scouting",
+      "components/app/available-supply-section.tsx",
+    ],
+    note:
+      "Owner-approved and APPLIED 2026-09-07 (ledger 20260907180546), then called on the LIVE function under three real users' auth: a manager of two organizations saw 2 of 2 supply rows, the agency that authored one saw 1 of 2, someone who manages nothing saw 0 with no error, and anon is refused 42501 at the privilege level. The supply side of the market is readable for the first time. PARTIAL for a measured reason: all three agency_offer rows on production carry NULL role_or_work_type, country and team_size, so an employer discovers that capacity exists without learning its shape. Fixing the declaration path, not this read, is the next link.",
   },
 ];
 
@@ -1510,8 +1513,8 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/security"],
     coreModule: null,
     surfaces: [],
-    note: "RLS on every table; two Supabase Auth settings remain owner-only.",
-    ownerDecision: "Email OTP expiry ≤ 3600s and leaked-password protection (§6.3 item 4).",
+    note:
+      "RLS on every table. Of the two owner-only Auth settings this entry used to gate on, one is DONE and the other cannot be done at all on this plan. Email OTP expiry was changed 14400 → 3600s by the owner on 2026-09-07 and verified from the live security advisors afterwards: `auth_otp_long_expiry` no longer appears. Leaked-password protection (HaveIBeenPwned) is BLOCKED_BY_PLAN — Supabase refused the configuration because the project is on the free plan. It stays a real, open security recommendation, but it is an economic decision for the owner and NOT unresolved implementation work; no agent may resolve it and it must not be reported as forgotten.",
   },
   {
     id: "GOV-9",

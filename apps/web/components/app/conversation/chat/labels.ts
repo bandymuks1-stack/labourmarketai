@@ -258,7 +258,12 @@ const CHAT_KEYS = [
   "capacityIntro",
   "capacityFree",
   "capacityBusyUntil",
+  // Committed work is a DIFFERENT answer from leave: one you may
+  // reprioritise, the other you cannot. Two keys, never one word for both.
+  "capacityCommittedUntil",
+  "capacityCommittedToUntil",
   "capacityAbsencesUnknown",
+  "capacityCommitmentsUnknown",
   "capacityEmpty",
   "capacityUnavailable",
   "chipAddTask",

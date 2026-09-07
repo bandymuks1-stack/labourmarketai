@@ -496,7 +496,9 @@
       "unavailable": "The roster could not be read right now.",
       "why": "Why these: on your roster and no approved absence between {from} and {to}.",
       "absencesUnknown": "Absences are not switched on yet, so nothing says otherwise.",
-      "more": "+{n} more free people beyond this view."
+      "more": "+{n} more free people beyond this view.",
+      "alreadyOn": "can come — already has work in this period",
+      "alreadyOnNamed": "can come — already on {what}"
     },
     "tokenState": {
       "clear": "Checklist clear",
@@ -5794,7 +5796,10 @@
       "ownNone": "not recorded",
       "blocked": "(rejected / expired)",
       "record": "Record a document",
-      "helpLine": "A translation helps you understand the instruction, but the original stays preserved."
+      "helpLine": "A translation helps you understand the instruction, but the original stays preserved.",
+      "capabilityDemonstrated": "You have recorded work here that someone else confirmed.",
+      "capabilitySelfReported": "You have recorded work here, not yet confirmed by anyone else.",
+      "capabilityStillRequired": "The document is still required — ask for this experience to be assessed against it."
     }
   },
   "projects": {
@@ -7112,6 +7117,26 @@
     "cv": {
       "verified": "Confirmed",
       "declared": "Declared"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Your own record — nobody has confirmed it",
+        "verifier_not_identified": "No one can confirm this yet",
+        "verifier_available": "Your employer cannot confirm work yet",
+        "verification_pending": "Waiting for confirmation",
+        "verified": "Confirmed",
+        "self_confirmed": "Confirmed by you — not independently",
+        "returned": "Returned for changes",
+        "disputed": "Disputed",
+        "not_applicable": "Nobody stands above you here"
+      },
+      "action": {
+        "await_verifier": "Nothing to do — it is in someone's queue",
+        "ask_employer_to_enable_confirmation": "Ask them to switch confirmation on",
+        "identify_verifier": "Name who you did this for",
+        "respond_to_decision": "Read the decision and reply",
+        "none": "Nothing is missing"
+      }
     }
   },
   "orgMembers": {
@@ -8143,7 +8168,20 @@
         "unverified": "Evidence: self-declared only"
       }
     },
-    "editNeedCta": "Adjust or add a need"
+    "editNeedCta": "Adjust or add a need",
+    "availableSupply": {
+      "title": "Available workforce",
+      "intro": "Crews and specialists that agencies and companies have declared as available. You see the shape of the capacity and where it is — not who is offering it.",
+      "notEnabled": "Not switched on in this environment yet. This is a deployment fact, not a statement about the market.",
+      "readFailed": "The available-workforce list could not be read. This is a system problem, not an empty market.",
+      "empty": "Nobody has declared available workforce that you can see right now.",
+      "unstatedRole": "Work type not stated",
+      "people": "{count} people",
+      "from": "From",
+      "duration": "For",
+      "declared": "Declared",
+      "privacyNote": "Names and contact details are deliberately not shown here. Reaching out is a separate step that the other side has to agree to."
+    }
   },
   "planBoundary": {
     "title": "What paid plans include",
@@ -12664,12 +12702,14 @@
         "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
         "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
       },
+      "capacityCommittedUntil": "already committed until {date}",
+      "capacityCommittedToUntil": "on {what} until {date}",
+      "capacityCommitmentsUnknown": "Bookings and project assignments could not be read, so someone shown as free may already be committed.",
       "workspaceUnnamedCompany": "Company without a name",
       "workspaceUnnamedAgency": "Agency without a name",
       "workspaceUnnamedTeam": "Team without a name",
       "workspaceUnnamedNote": "No name provided",
-      "workspaceNameThis": "Add a name"
-    },
+      "workspaceNameThis": "Add a name"    },
     "worklog": {
       "understood": "Here's what I understood — save it?",
       "loading": "Loading…",
@@ -13593,6 +13633,7 @@
     "evidenceEntries": "{count, plural, one {# work entry} other {# work entries}} — not yet confirmed",
     "evidenceDocument": "Document valid until {until} — not yet confirmed",
     "evidenceEntriesAndDocument": "{count, plural, one {# work entry} other {# work entries}} and a document valid until {until} — not yet confirmed",
+    "evidenceSelfConfirmed": "You confirmed this yourself — not independently confirmed",
     "employerConfirmed": "Confirmed by {org}, {date}",
     "employerConfirmedNoDate": "Confirmed by an employer",
     "systemDerived": "Derived from: {source}"
@@ -15205,5 +15246,213 @@
     "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
     "error": "The change could not be saved and was reverted. Please try again.",
     "unavailable": "Notification settings are not available right now."
+  },
+  "evidenceImport": {
+    "eyebrow": "Historical work evidence",
+    "title": "Import work history",
+    "intro": "Bring an organization's own records — timesheets, project logs, training registers — into the platform as evidence, with every source fact kept separate from every inference.",
+    "actingFor": "Acting for",
+    "nothingWrittenYet": "Nothing has been written yet. You will see exactly what would be recorded before anything is saved.",
+    "context": {
+      "unauthenticated": "Sign in to import evidence.",
+      "personalWorkspace": "You are in your personal space. Historical evidence belongs to an organization — switch workspace first.",
+      "noOrganization": "This account belongs to no organization, so there is nothing to import evidence for.",
+      "notAMember": "That organization is not one of yours. Choose one of these:",
+      "chooseOrganization": "You belong to more than one organization. Choose which one is supplying this evidence:",
+      "notAuthorized": "Your role in this organization does not include importing evidence. An owner, administrator or manager can do it.",
+      "needsMigration": "The evidence store is not switched on in this environment yet. The database change is prepared and waiting for the owner's approval; nothing was written.",
+      "unavailable": "The evidence store could not be read. This is a system problem, not an empty organization."
+    },
+    "form": {
+      "title": "1. The source",
+      "supplierRole": "In what capacity are you supplying this?",
+      "supplierRoleHint": "An agency reporting its worker's hours on a client's site is neither the employer nor the client. Say which one you are — it is recorded with every row.",
+      "sourceKind": "What kind of source is it?",
+      "sourceLanguage": "What language is the source written in?",
+      "filename": "File name or label",
+      "reference": "Source reference",
+      "referenceHint": "Where this came from, in your own words — an archive box, a folder, a system name.",
+      "notes": "Notes",
+      "paste": "Paste the rows",
+      "pasteHint": "One row per line, columns separated by a comma, semicolon or tab. The first recognised header row is used; anything above it is ignored.",
+      "file": "Or upload a CSV/TSV file",
+      "submit": "Read the source",
+      "submitting": "Reading…"
+    },
+    "preview": {
+      "title": "2. What would be recorded",
+      "notPersisted": "This is an interpretation of your file. NOTHING here is evidence yet.",
+      "empty": "No rows were staged for this source.",
+      "counts": {
+        "total": "Rows read",
+        "ready": "Ready",
+        "needsPerson": "Person unresolved",
+        "needsContext": "Place unresolved",
+        "duplicates": "Already imported",
+        "conflicts": "Conflicts"
+      },
+      "column": {
+        "row": "Row",
+        "person": "Who",
+        "date": "Date",
+        "hours": "Hours",
+        "place": "Place",
+        "work": "What was done",
+        "state": "State"
+      },
+      "fact": "Stated by the source",
+      "derived": "Worked out by us",
+      "derivedMethod": "Method",
+      "confidence": "Confidence"
+    },
+    "personState": {
+      "unmatched": "Not on the roster",
+      "matched": "Matched",
+      "ambiguous": "More than one match",
+      "created": "Added to the roster"
+    },
+    "contextState": {
+      "absent": "No place named",
+      "unmatched": "Place not found",
+      "matched": "Matched",
+      "ambiguous": "More than one match",
+      "created": "Created"
+    },
+    "duplicateState": {
+      "new": "New",
+      "duplicate": "Already imported",
+      "probable_duplicate": "Probably already imported",
+      "conflict": "Conflicts with an existing record"
+    },
+    "problem": {
+      "person_not_on_roster": "This name is not on your roster. Choose the person, or add them.",
+      "person_ambiguous": "More than one person on your roster has this name. Choose which one.",
+      "context_ambiguous": "More than one place matches this label. Choose which one.",
+      "already_imported": "An identical record already exists, so this row will be skipped."
+    },
+    "resolve": {
+      "title": "Resolve",
+      "choosePerson": "Choose the person",
+      "choosePlace": "Choose the place",
+      "save": "Save",
+      "addPerson": "Add a person",
+      "displayName": "Name as your records write it",
+      "externalRef": "Employee or personnel number",
+      "relationship": "Relationship to the organization",
+      "sourceNote": "Where this person's details came from",
+      "create": "Add",
+      "unlinkedNote": "A person added here is a record your organization keeps. It is not an account and claims nothing about who they are — the real person can claim it later."
+    },
+    "relationship": {
+      "employee": "Employee",
+      "former_employee": "Former employee",
+      "agency_worker": "Agency worker",
+      "subcontractor": "Subcontractor",
+      "contractor": "Contractor",
+      "student": "Student",
+      "graduate": "Graduate",
+      "trainee": "Trainee",
+      "apprentice": "Apprentice",
+      "programme_participant": "Programme participant",
+      "volunteer": "Volunteer",
+      "other": "Other"
+    },
+    "commit": {
+      "title": "3. Record it",
+      "evidenceState": "How should this be recorded?",
+      "evidenceStateHint": "An import can only ever produce a reported state. Nobody has checked it yet, and this screen cannot say they have.",
+      "confirm": "Record {count} rows",
+      "confirmNone": "No row is ready to be recorded yet",
+      "confirming": "Recording…",
+      "readOnce": "Read what is above before you approve it. Approving records it in your organization's name."
+    },
+    "evidenceState": {
+      "SELF_REPORTED": "The person supplied it themselves",
+      "ORGANIZATION_REPORTED": "The organization reports it",
+      "LEGACY_IMPORTED": "Migrated from an older system",
+      "UNVERIFIED": "Supplied, standing not established",
+      "NEEDS_REVIEW": "Needs a human look"
+    },
+    "result": {
+      "written": "Recorded",
+      "skipped": "Skipped as already recorded",
+      "notReady": "Left unresolved",
+      "reusedSession": "You have already read this source. Its rows are shown below rather than read a second time."
+    },
+    "records": {
+      "title": "4. What is recorded",
+      "empty": "Nothing has been recorded from this source yet.",
+      "importedAt": "Imported",
+      "supplier": "Supplied as",
+      "source": "Source",
+      "attest": "Stand behind this record",
+      "attestRole": "In what capacity",
+      "attestNote": "Note",
+      "attested": "Attested",
+      "selfAttested": "Attested by the person it is about",
+      "selfAttestedHint": "This is real, recorded evidence. It is not independent verification and is never counted as such.",
+      "notIndependentlyVerified": "Not independently verified",
+      "withdrawn": "Withdrawn"
+    },
+    "withdraw": {
+      "title": "Undo this import",
+      "note": "Why",
+      "button": "Withdraw everything this import recorded",
+      "hint": "Nothing is deleted. Every record gains a withdrawal note, so both the evidence and the reason stay readable."
+    },
+    "role": {
+      "employer": "Employer",
+      "agency": "Agency",
+      "client": "Client",
+      "end_client": "End client",
+      "project_owner": "Project owner",
+      "subcontractor": "Subcontractor",
+      "education_provider": "Education provider",
+      "training_provider": "Training provider",
+      "assessor": "Assessor",
+      "verifier": "Verifier",
+      "placement_provider": "Placement provider",
+      "public_body": "Public body",
+      "sector_body": "Sector body",
+      "other": "Other"
+    },
+    "sourceKind": {
+      "xlsx": "Spreadsheet",
+      "csv": "CSV / TSV file",
+      "pdf": "PDF document",
+      "api": "Another system's interface",
+      "agent": "An assistant",
+      "erp": "ERP system",
+      "payroll": "Payroll system",
+      "sis": "Student records system",
+      "lms": "Learning platform",
+      "email": "Email",
+      "drive": "Shared drive",
+      "manual": "Typed in by hand"
+    },
+    "error": {
+      "invalid": "Something in the form is not usable. Check the highlighted parts.",
+      "not_found": "That import, row or record no longer exists.",
+      "unavailable": "The evidence store could not be reached. Nothing was written.",
+      "too_many_rows": "That is more rows than one import can hold. Split the source, for example by year.",
+      "no_source_supplied": "No file and no pasted rows — there is nothing to read.",
+      "file_too_large": "That file is too large to read here.",
+      "file_unreadable": "That file could not be read as text.",
+      "nothing_parsed": "No usable row was found. The source needs a header row naming at least a person and a date.",
+      "confirmation_rejected": "This import changed after you looked at it, so it was not recorded. Read it again and approve the new version.",
+      "confirmation_unavailable": "Approvals cannot be signed in this environment, so nothing was recorded."
+    },
+    "mine": {
+      "title": "What organizations have recorded about me",
+      "intro": "Work, training and study that an organization brought over from its own records. You can always see who sent it, what they were to you at the time, and when.",
+      "notEnabled": "This is not switched on in this environment yet. Nothing is missing from your profile — the store is simply not there to read.",
+      "empty": "No organization has recorded anything about you here yet.",
+      "offersTitle": "Waiting for your answer",
+      "offersHint": "An organization says one of its records is about you. Nothing joins your CV until you say so, and refusing is a real answer — the organization keeps its own record, it just stops naming you.",
+      "accept": "Yes, that is me",
+      "refuse": "No, that is not me",
+      "decisionFailed": "That answer could not be saved. Nothing changed.",
+      "unnamedOrganization": "An organization"
+    }
   }
 }

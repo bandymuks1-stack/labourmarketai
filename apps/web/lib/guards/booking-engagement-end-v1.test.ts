@@ -1211,7 +1211,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // served agency SUPPLY offers to workers as open jobs — measured 2 of
       // 9 rows on production. The fix is a SECURITY DEFINER body replace =
       // RED class, so it carries the acknowledgement marker and ships as a
-      // DRAFT with needs-human-gate. NOT applied; owner approval pending.
+      // DRAFT with needs-human-gate. APPLIED 2026-09-06 as ledger
+      // 20260906194911 (verified live 2026-09-07: the function body now
+      // carries the closed allow-list).
       "20260906140000_worker_board_excludes_supply_v1.sql",
       // 2026-09-06: the SAME defect on the agency board — found by sweeping
       // every SECURITY DEFINER reader of customer_requests for a body that
@@ -1219,6 +1221,18 @@ describe("the migration set is exactly what this slice declared", () => {
       // 12 rows, 2 of them OTHER agencies' offers presented as demand it could
       // staff. RED class (SECURITY DEFINER body replace).
       "20260906200000_agency_board_excludes_supply_v1.sql",
+      // 2026-09-07 (owner decisions EVID-1 and DEM-9, gate HG-2026-09-07).
+      // The owner approved BOTH by name and set the apply order: supply
+      // discovery first, then the evidence import. Both were applied via
+      // Supabase MCP apply_migration as ledger 20260907180546 and
+      // 20260907180944, and both were verified against production
+      // afterwards under real users' auth contexts. Each marker was added
+      // in the same commit that records its decision, per the procedure
+      // this list exists to enforce - the approval did not spread from
+      // anywhere. Both stay RED class: a SECURITY DEFINER reader and eight
+      // new tables with explicit GRANTs are not made GREEN by a marker.
+      "20260907114500_organization_evidence_import_v1.sql",
+      "20260907153000_employer_supply_discovery_v1.sql",
 ]);
   });
 

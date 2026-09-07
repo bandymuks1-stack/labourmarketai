@@ -33,15 +33,28 @@ describe("who is available, by sentence", () => {
 
   it("is a read intent; the read composes the roster read and the absence read, never a query of its own", () => {
     expect(INTENT_REGISTRY["who-available"]).toMatchObject({ domain: "company", access: "read", handler: "whoAvailable" });
-    const READ = readFileSync(join(__dirname, "capacity.ts"), "utf8");
-    expect(READ.startsWith('"use server";')).toBe(true);
-    expect(READ).toContain("requireEmployerCompany()");
-    expect(READ).toContain("listActiveCompanyWorkers(company.companyId)");
-    expect(READ).toContain("getEmployerWorkerAvailability()");
+    // The ACTION resolves the employer context and delegates; the CORE holds
+    // the logic. They were one module until `workforce.availability` made the
+    // same answer reachable by an authorized agent — and a "use server"
+    // module's every export is client-callable, which a core taking a company
+    // id and a caller must not be.
+    const ACTION = readFileSync(join(__dirname, "capacity.ts"), "utf8");
+    const READ = readFileSync(join(__dirname, "capacity-core.ts"), "utf8");
+    expect(ACTION.startsWith('"use server";')).toBe(true);
+    expect(READ.startsWith('"use server";')).toBe(false);
+    expect(ACTION).toContain("requireEmployerCompany()");
+    expect(ACTION).toContain("whoIsAvailableCore(company.companyId, null, preRead)");
+    expect(READ).toContain("listActiveCompanyWorkers(companyId, caller ?? undefined)");
+    expect(READ).toContain("getEmployerWorkerAvailability(caller ?? undefined)");
+    // Committed work is the OTHER half of "who is free" — capacity read only
+    // approved absences until 2026-09-07, and production had zero of those.
+    expect(READ).toContain("getEmployerWorkerCommitments(");
     expect(READ).toContain("unavailabilityOverlaps(window, u.item)");
-    expect(READ).not.toMatch(/\.from\(|\.rpc\(/);
-    // The reason for an absence never travels: the read only touches dates.
-    expect(READ).not.toMatch(/absence_type|\.note\b/);
+    for (const src of [ACTION, READ]) {
+      expect(src).not.toMatch(/\.from\(|\.rpc\(/);
+      // The reason for an absence never travels: the read only touches dates.
+      expect(src).not.toMatch(/absence_type|\.note\b/);
+    }
     expect(CAPACITY_WINDOW_DAYS).toBe(7);
     expect(CAPACITY_CHAT_LIMIT).toBeGreaterThan(0);
   });

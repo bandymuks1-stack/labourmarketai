@@ -44,7 +44,21 @@ export type OrganizationCapability =
    *  ONLY — membership alone is never billing authority. */
   | "manage-billing"
   /** See the member directory of the organization. */
-  | "view-directory";
+  | "view-directory"
+  /**
+   * Import historical evidence the ORGANIZATION holds about people who worked,
+   * studied or trained under it, and attest it in the organization's name.
+   *
+   * OPERATIONAL, deliberately — this is roster-shaped authority (it concerns
+   * the people the organization already manages), not company identity and not
+   * membership administration. A `member` never reaches it.
+   *
+   * It is NOT verification authority: attesting is the organization speaking
+   * for its own records, and the database refuses an attestation whose actor is
+   * the subject. Independent verification requires a separately recorded party
+   * — see lib/organization-evidence/evidence-state.ts.
+   */
+  | "import-evidence";
 
 const ALL: readonly OrganizationCapability[] = [
   "manage-company-profile",
@@ -54,6 +68,7 @@ const ALL: readonly OrganizationCapability[] = [
   "manage-demand",
   "manage-billing",
   "view-directory",
+  "import-evidence",
 ];
 
 const OPERATIONAL: readonly OrganizationCapability[] = [
@@ -61,6 +76,7 @@ const OPERATIONAL: readonly OrganizationCapability[] = [
   "manage-projects",
   "manage-demand",
   "view-directory",
+  "import-evidence",
 ];
 
 const CAPABILITIES: Record<GovernanceRole, ReadonlySet<OrganizationCapability>> = {

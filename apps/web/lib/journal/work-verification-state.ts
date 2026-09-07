@@ -66,6 +66,8 @@ import type { ReviewResult } from "@/lib/journal/review-status";
 /**
  * The canonical verification states. Ordered from "no verifier involved" to
  * "decided", which is also the order the rules below resolve in reverse.
+ *
+ * `self_confirmed` sits beside `verified`, not inside it — see its comment.
  */
 export const WORK_VERIFICATION_STATES = [
   /** WORK CLAIMED / SELF-REPORTED — the person's own record, no employer
@@ -79,8 +81,18 @@ export const WORK_VERIFICATION_STATES = [
   "verifier_available",
   /** VERIFICATION PENDING — it is in an authorized verifier's queue now. */
   "verification_pending",
-  /** VERIFIED / APPROVED — a real confirmation row says so. */
+  /** VERIFIED / APPROVED — a real confirmation row by SOMEONE ELSE says so. */
   "verified",
+  /**
+   * SELF-CONFIRMED — approved, but every approving row was written by the
+   * subject themselves (owner P0, 2026-09-07; 3 real rows on production).
+   *
+   * A legitimate, permanent, honest state — a sole trader genuinely has nobody
+   * above them — and deliberately NOT `verified`: the whole point of the
+   * ladder is that confirming your own work is not the same act as somebody
+   * else confirming it. The record is never deleted or hidden.
+   */
+  "self_confirmed",
   /** RETURNED — the verifier asked for changes. */
   "returned",
   /** DISPUTED — the verifier rejected it. */
@@ -142,6 +154,13 @@ export interface WorkVerificationInput {
   readonly reviewResult: ReviewResult | null;
   /** The entry's engagement context, or null when it has none. */
   readonly context: VerifierContextFacts | null;
+  /**
+   * True when `reviewResult` is `approved` but every approving row was written
+   * by the subject (see `isSelfConfirmedOnly` in review-status.ts). Optional:
+   * a caller that did not select `confirmer_id` cannot answer the question and
+   * gets the previous behaviour rather than a guess in either direction.
+   */
+  readonly selfConfirmedOnly?: boolean;
 }
 
 export interface WorkVerification {
@@ -182,9 +201,11 @@ export function deriveWorkVerificationState(
   //    does not evaporate because the job did.)
   if (reviewResult === "approved") {
     return {
-      state: "verified",
-      verifier: verifierOf(context),
-      nextAction: "none",
+      // A decision the SUBJECT made about themselves is recorded honestly and
+      // separately — never as independent verification.
+      state: input.selfConfirmedOnly ? "self_confirmed" : "verified",
+      verifier: input.selfConfirmedOnly ? { kind: "none" } : verifierOf(context),
+      nextAction: input.selfConfirmedOnly ? "identify_verifier" : "none",
       evidenceUnavailable: false,
     };
   }

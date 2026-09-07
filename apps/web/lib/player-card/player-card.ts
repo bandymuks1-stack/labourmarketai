@@ -252,7 +252,7 @@ async function ownNewestConfirmations(
     const { data, error } = await asAny(supabase)
       .from("journal_entry_confirmations")
       .select(
-        "created_at, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organizations(display_name, legal_name)))",
+        "created_at, confirmer_id, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organizations(display_name, legal_name)))",
       )
       .eq("journal_entries.worker_id", workerId)
       .order("created_at", { ascending: false })
@@ -261,6 +261,7 @@ async function ownNewestConfirmations(
     return (
       data as {
         created_at: string | null;
+        confirmer_id: string | null;
         confirmer_role: string | null;
         confirmation_scope: unknown;
         journal_entries: {
@@ -273,6 +274,10 @@ async function ownNewestConfirmations(
       const org = r.journal_entries?.engagement_contexts?.organizations ?? null;
       return {
         created_at: r.created_at,
+        // WHO decided — selected so `deriveProvenance` can tell an independent
+        // confirmation from the person confirming themselves. Without it the
+        // gold class would be reachable by approving your own work.
+        confirmer_id: r.confirmer_id,
         confirmer_role: r.confirmer_role,
         confirmation_scope: r.confirmation_scope,
         organizationName: org?.display_name ?? org?.legal_name ?? null,
@@ -525,6 +530,9 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     // otherwise SELF_DECLARED. Nothing here is stored or inflated.
     provenance: deriveProvenance({
       confirmations: provenanceRows,
+      // The card is ALWAYS about the signed-in person, so the subject is the
+      // caller. This is what lets rule 2 refuse a self-confirmation.
+      subjectProfileId: user.id,
       journalEntries: evidenceEntries,
       // The tier ladder's top rung comes from the SAME `.eq("verified", true)`
       // read as the badges — the flag is whether that read returned rows,
