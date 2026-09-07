@@ -244,18 +244,32 @@ input to it.
 * **Self-confirmation** — 3 real rows on production, preserved and reclassified,
   never deleted; write-side and read-side agree.
 
-### 1.14 Canonical master register — **DOCUMENTATION ONLY**
+### 1.14 Canonical master register — **BUILT AND USABLE** (corrected 2026-09-07, post-merge)
 
-`CODE_PROVEN` as a document; **NOT technically enforced.**
+`TEST_PROVEN`.
 
-`docs/CAPABILITY_INVENTORY.md` §6 holds ~90 capabilities across 12 domains with
-status, AI access, priority and next action, plus §6.4's nine-migration matrix.
-Two guards *cite* it in prose. **Nothing verifies that the register matches
-reality**, and nothing fails when a capability's status goes stale.
+**This section originally read DOCUMENTATION ONLY, and that is no longer true.**
+It was written before main moved. Merging `origin/main` (five commits, #1601 and
+#1604 among them) brought in exactly the thing this section named as the
+highest-value governance work remaining:
 
-That is the same class of defect as the stale apply-status comments this window
-corrected, one level up. Making the register machine-checked is the highest-value
-governance work remaining and is **not done**.
+* `apps/web/lib/product-gate/capability-register.ts` — the machine-readable half
+  of §6, using the owner's six-value vocabulary;
+* `apps/web/lib/guards/capability-register.test.ts` and
+  `.github/scripts/product-truth.mjs` — the enforcement. A capability id present
+  in one half and absent from the other is a **CI failure**.
+* The register is now authoritative for STATUS; the table in
+  `CAPABILITY_INVENTORY.md` §6 is a dated snapshot beside it.
+
+`docs/CAPABILITY_INVENTORY.md` §6 still holds ~90 capabilities across 12 domains
+plus §6.4's nine-migration matrix, and main added rows for this branch's own
+work: **DEM-9** (organizational supply discovery, BLOCKED), **CAL-10**
+(planned-vs-actual learning, MISSING) and **GOV-9** (the executable
+constitution).
+
+The correction is recorded rather than quietly rewritten, because the original
+finding was accurate when written and the fix came from elsewhere — which is
+itself worth knowing.
 
 ### 1.15 Permanent regression journeys / capability reachability — **PARTIAL**
 
@@ -279,7 +293,9 @@ which is direct evidence that reachability guards do not catch dead wiring.
 4. 2 verified skills platform-wide — the trust ladder isalmost theoretical.
 5. Competency extraction missing → the evidence→competency edge is absent.
 6. ~40 shipped, RLS-guarded tables with **zero rows ever**.
-7. Master register unenforced.
+7. ~~Master register unenforced~~ — **closed** by #1601/#1604, merged in
+   (see §1.14). The register is machine-checked; the snapshot table beside it
+   is not, and that residue is the only part left.
 8. Matching does not consume organizational capacity.
 9. No override/audit/learning chain beyond DETECT → WARN.
 10. `SUPABASE_DB_URL` absent → two CI gates honestly inert.
@@ -425,7 +441,9 @@ the owner's.
 1. Apply both migrations; import a **small authorized sample** first, never the
    full archive.
 2. Competency extraction — the missing EVIDENCE → COMPETENCY edge.
-3. Make the master register machine-checked.
+3. ~~Make the master register machine-checked~~ — **done on main** (#1601,
+   #1604), merged into this branch. What remains is keeping the dated §6
+   snapshot table in step with the machine half.
 4. Matching over organizational capacity, not only worker supply.
 5. The override → audit → actual-result → learning chain beyond DETECT → WARN.
 6. Decide the four live-UI migrations from the nine-migration matrix.
