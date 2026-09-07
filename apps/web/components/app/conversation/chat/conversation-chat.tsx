@@ -71,6 +71,7 @@ import { proposeConversationIntentAction } from "@/lib/conversation/llm-proposal
 import {
   advanceGoal,
   classifyTurn,
+  EVIDENCE_BEARING_INTENTS,
   declineOutstandingOffers,
   goalSentence,
   noteOffered,
@@ -78,6 +79,8 @@ import {
   withoutDeclined,
   type ConversationGoal,
 } from "@/lib/conversation/conversation-goal";
+import { evidenceFromSuggestions } from "@/lib/conversation/evidence-goal";
+import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
@@ -4526,11 +4529,22 @@ export function ConversationChat({
         routedScore,
         goal: priorGoal,
       });
+      // WORK EVIDENCE ACROSS TURNS (addendum §5). A work-logging goal
+      // accumulates an EVIDENCE payload beside the discovery filters, so a
+      // second sentence about the same day enriches one account instead of
+      // re-classifying from scratch. Facts are read with the journal's OWN
+      // recognizer — no second parser — and a discovery goal is unaffected
+      // because `advanceGoal` only merges into a payload that exists.
+      const evidenceTurn =
+        EVIDENCE_BEARING_INTENTS.has(routedIntent) || priorGoal?.evidence
+          ? evidenceFromSuggestions(extractJournalSuggestions(sent), sent)
+          : undefined;
       goalRef.current = advanceGoal({
         goal: priorGoal,
         kind: turnKind,
         routedIntent,
         text: sent,
+        evidence: evidenceTurn,
       });
 
       // A refusal, or a statement that the product already holds what it was
