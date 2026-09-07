@@ -401,7 +401,13 @@ Unsoftened, as required.
 9. **A correct fix can produce a worse lie one layer up.** The capacity →
    candidate-list break is the clearest example, and the owner caught it, not
    the tests.
-10. **The canonical register is documentation, not enforcement.**
+10. ~~**The canonical register is documentation, not enforcement.**~~
+    **Struck 2026-09-07, post-merge.** It was true when written and is not now:
+    #1601/#1604 landed `capability-register.ts`, its guard and `product-truth.mjs`,
+    so the register is machine-checked in `quality` (see §1.14). What survives of
+    this narrowing is narrower: the **prose snapshot table** beside the register
+    is still unenforced, so it can drift from the register the way file-header
+    comments drifted from the ledger (§3.7).
 11. **AI is an operator for import and one capacity question; not yet for
     planning, forecasting or team assembly.**
 12. **No learning loop exists.** FACT / PLAN / FORECAST are correctly kept
