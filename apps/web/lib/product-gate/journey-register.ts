@@ -195,7 +195,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["DEM-2"],
         link: "BROKEN",
         because:
-          "Two boards were fixed (#1588/#1596); further surfaces — the market map worst — still render an agency's offer as demand. One closed-set rule, never a deny-list, is the fix.",
+          "Every own-rows surface now classifies direction: the two boards (#1588/#1596), then the market map, the org demand rollup, the scouting list and the chat starter count (2026-09-07). What is left is not a surface at all — `list_open_demand_for_workers` does not return `kind`, so the worker board and the map's worker leg have nothing to classify. That half needs the owner-gated migration 20260906140000, and until it is applied this step is not honestly LIVE.",
       },
       {
         step: "An authorized employer can discover that supply",

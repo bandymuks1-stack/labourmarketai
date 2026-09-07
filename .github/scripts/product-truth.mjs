@@ -43,7 +43,14 @@ function read(path) {
     );
     process.exit(2);
   }
-  return readFileSync(path, "utf8");
+  // Normalised to LF. A Windows checkout hands these files back with CRLF, and
+  // the structural patterns below anchor on a newline followed by four spaces.
+  // On a CRLF working tree the journey register parsed to ZERO journeys and the
+  // briefing printed "0 journeys" as if that were the truth — a parser handing
+  // back an empty answer for a full file is exactly the SEP-7 failure this
+  // register exists to stop. Fixed here, and asserted below so it cannot come
+  // back quietly.
+  return readFileSync(path, "utf8").split("\r\n").join("\n");
 }
 
 for (const f of REQUIRED) read(f);
@@ -106,8 +113,17 @@ if (process.argv.includes("--check")) {
   const registered = capabilities.map((c) => c.id);
 
   const problems = [];
+  // A parse that comes back empty is a BROKEN PARSER, never a small product.
+  // UNKNOWN is not ZERO (SEP-7): every one of these files is known to hold
+  // rows, so an empty read is this script failing, and it must say so instead
+  // of printing a confident zero.
   if (capabilities.length === 0) problems.push("the machine register parsed to zero capabilities");
   if (documented.length === 0) problems.push("docs/CAPABILITY_INVENTORY.md §6 parsed to zero capabilities");
+  if (nodes.length === 0) problems.push("the product graph parsed to zero nodes");
+  if (journeys.length === 0) problems.push("the journey register parsed to zero journeys");
+  if (links.length === 0) problems.push("the journey register parsed to zero links");
+  if (separations.length === 0) problems.push("the semantic separations parsed to zero rules");
+  if (forbidden.length === 0) problems.push("the forbidden-reductions list parsed to zero entries");
   for (const id of documented) if (!registered.includes(id)) problems.push(`§6 documents ${id}; the machine register does not`);
   for (const id of registered) if (!documented.includes(id)) problems.push(`the machine register holds ${id}; §6 does not`);
 
