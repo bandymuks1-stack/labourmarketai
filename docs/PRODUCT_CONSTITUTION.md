@@ -306,6 +306,108 @@ un-audited, not approved.**
 
 ---
 
+## 14. The canonical product graph (owner text, 2026-09-07 — binding)
+
+**LabourMarket.ai is NOT** a job board, a recruitment site, a staffing
+marketplace, a CV builder, a Work Journal, a timesheet application, a workforce
+planner, an evidence database, a qualification platform, a booking calendar, or
+an AI chatbot. Each of those is **one edge** of the following graph:
+
+> PEOPLE ↔ REAL WORK ↔ SKILLS ↔ EXPERIENCE ↔ EVIDENCE ↔ QUALIFICATIONS ↔
+> ORGANIZATIONS ↔ COMPANIES ↔ AGENCIES ↔ TEAMS/BRIGADES ↔ PROJECTS ↔
+> SITES/OBJECTS ↔ TASKS/WORK STAGES ↔ SERVICES ↔ AVAILABILITY ↔ TIME ↔
+> CAPACITY ↔ CURRENT DEMAND ↔ FUTURE DEMAND ↔ EDUCATION/TRAINING/RECOGNITION ↔
+> COUNTRIES/JURISDICTIONS ↔ MOBILITY ↔ MARKET SIGNALS ↔ COMMERCIAL
+> OPPORTUNITIES.
+
+**Value chain:** REAL WORK → EVIDENCE → CAPABILITY → CAPACITY → DEMAND → MATCH
+→ EXECUTION → VERIFIED RESULT → LIVING HISTORY → BETTER DECISION.
+
+**Flywheel:** real historical work + new real work + verified evidence + project
+results + supply + demand → better labour data → better skill understanding →
+better matching → better planning → better forecasts → better benchmarks →
+better commercial intelligence → more organizations → more real work data.
+
+A task may work on ONE edge. It may **never** redefine the product as that edge.
+
+**Two further principles carried by this section:**
+
+- **Identity ≠ role.** The fundamental entity is an ACTOR. A person is
+  simultaneously employee of one company, owner of another, student of an
+  institution, member of a brigade, assigned to a project, available for
+  another opportunity, a provider and a client. Those are relationships and
+  contexts, never mutually exclusive identities.
+- **Freedom + reality constraints.** The product models reality; it does not
+  constrain human agency. A commitment is not a prohibition and time overlap is
+  not unavailability. Detect → explain → warn → show alternatives → the
+  authorized actor decides → explicit override → audit receipt. Block only for
+  law, safety, authorization, another person's rights, or a genuine hard
+  technical constraint.
+
+**Machine half:** `apps/web/lib/product-gate/product-graph.ts`, enforced by
+`apps/web/lib/guards/product-graph-journeys.test.ts`. A node may go empty only
+with a dated `unrealized` or `narrowedOn` record naming why. `platform` and
+`communication` capabilities are deliberately not graph nodes: the platform is
+the machinery, and chat is one universal interaction surface **over** the graph,
+not the graph itself.
+
+## 15. Distinctions that may never collapse (2026-09-07)
+
+Eight separations. Each has already collapsed once in this product, and each
+collapse gave a real user a confidently wrong answer — none of them crashed, and
+none of them failed CI.
+
+| id | separates | the collapse |
+|---|---|---|
+| SEP-1 | FACT · DERIVED · FORECAST | AI extraction treated as fact |
+| SEP-2 | COMMITMENT · PROHIBITION | *not yet* — the one most likely to collapse next |
+| SEP-3 | EVIDENCE · VERIFICATION | self-confirmation counted as employer confirmation |
+| SEP-4 | DEMAND · SUPPLY | an agency's declared capacity read as its need |
+| SEP-5 | IDENTITY · ROLE | a person forced into one active role |
+| SEP-6 | demonstrated · formal · equivalence · valid credential · missing | five years of real work read as "certificate missing" |
+| SEP-7 | UNKNOWN · ZERO · FAILED · NOT_MEASURED | a failed read rendered as "you have nothing" |
+| SEP-8 | exists · reachable · visible · actionable · correctly interpreted | a complete capability nobody could open |
+
+**Machine half:** `apps/web/lib/product-gate/semantic-separations.ts`. Each
+separation declares its enforcement honestly as `machine`, `tripwire` (the
+vocabulary carrying the distinction must not disappear from its anchor module)
+or `review`.
+
+## 16. Permanent journey contracts (2026-09-07)
+
+Six chains, with permanent ids, in
+`apps/web/lib/product-gate/journey-register.ts`:
+
+`J-WORKER-EVIDENCE` · `J-COMPANY-EXECUTION` · `J-AGENCY-SUPPLY` ·
+`J-INSTITUTION-OUTCOME` · `J-IMPORT-HISTORY` · `J-TIME-FREEDOM`.
+
+Every link is `LIVE`, `BROKEN` or `NOT_BUILT`, and the last two must say why in
+words. **A link claiming to be LIVE whose capabilities are not live in the
+capability register fails CI.** A route rendering is not a journey working; that
+distinction is the whole point of this section.
+
+## 17. What is NOT machine-checkable (honest limits)
+
+The register, the graph and the journey contracts are checked by CI. These are
+not, and pretending otherwise would itself be a SEP-7 violation:
+
+1. **Whether a status is generous.** Nothing proves `PARTIAL` should not be
+   `BROKEN`. Reachability is checked; adequacy is a review question.
+2. **Whether a title still describes reality.** Ids are enforced in both halves
+   of the register; wording is not.
+3. **SEP-7 repo-wide.** Individual readers are guarded; there is no repo-wide
+   proof that every Supabase read checks `error` before using `data`.
+4. **SEP-2 at the schema level.** No unique, exclusion or trigger constraint may
+   reject an overlapping assignment or booking. A migration adding one is a
+   product decision and belongs at the human gate — the static gate cannot tell
+   it apart from ordinary data hygiene.
+5. **Human proof.** `HUMAN_UI_PROVEN` can only be granted by a human walking the
+   surface in a browser and checking the side effects. No test may raise a row
+   to it, and no agent may claim it on a suite going green.
+6. **Whether a capability is any good.** Out of scope, deliberately.
+
+---
+
 ## Hard "do not" list (product)
 
 No billing, payments, production deploy, DNS, env, Supabase migrations, RLS/RPC
@@ -316,3 +418,7 @@ or fake jobs/candidates/companies — introduced as part of product/UX work.
 
 This constitution is amended only by explicit owner/DI decision, recorded here or
 in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§11.
+
+§14–§17 were added on 2026-09-07 from owner text and carry a machine half in
+`apps/web/lib/product-gate/`. Amending them means amending both halves: a rule
+that exists in prose alone is the condition this window was opened to end.

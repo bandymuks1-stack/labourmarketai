@@ -1,5 +1,22 @@
 # Agent Operating Contract — labourmarket.ai
 
+> ⚡ **FIRST COMMAND — run this before any architectural or product change:**
+>
+> ```bash
+> node .github/scripts/product-truth.mjs
+> ```
+>
+> It prints what LabourMarket.ai IS (one labour/work graph, 24 nodes), the
+> eleven reductions it must never be narrowed into, the eight distinctions that
+> may never collapse, the honest status and evidence level of every capability,
+> which canonical journeys are broken, and the open owner decisions. No network,
+> no database, no credentials.
+>
+> This is enforced, not advised: `apps/web/lib/guards/capability-register.test.ts`,
+> `apps/web/lib/guards/product-graph-journeys.test.ts` and the `Product truth`
+> step in `quality.yml` fail on the same data. Full rationale: `AGENTS.md`
+> § FIRST COMMAND.
+
 > 🧭 **START HERE: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — the ONE
 > canonical architecture entry point (owner directive 2026-08-27). It carries
 > the authority order, the product invariants, the three loops, the capability
