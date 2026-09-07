@@ -7105,6 +7105,26 @@
     "cv": {
       "verified": "Patvirtinta",
       "declared": "Nurodyta"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Jūsų pačių įrašas — niekas jo nepatvirtino",
+        "verifier_not_identified": "Kol kas nėra kam to patvirtinti",
+        "verifier_available": "Jūsų darbdavys dar negali patvirtinti darbų",
+        "verification_pending": "Laukiama patvirtinimo",
+        "verified": "Patvirtinta",
+        "self_confirmed": "Patvirtinote patys — ne nepriklausomai",
+        "returned": "Grąžinta pataisyti",
+        "disputed": "Ginčijama",
+        "not_applicable": "Čia virš jūsų nieko nėra"
+      },
+      "action": {
+        "await_verifier": "Nieko daryti nereikia — jau kažkieno eilėje",
+        "ask_employer_to_enable_confirmation": "Paprašykite įjungti patvirtinimą",
+        "identify_verifier": "Nurodykite, kam tai dirbote",
+        "respond_to_decision": "Perskaitykite sprendimą ir atsakykite",
+        "none": "Nieko netrūksta"
+      }
     }
   },
   "orgMembers": {

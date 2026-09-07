@@ -7105,6 +7105,26 @@
     "cv": {
       "verified": "Bevestigd",
       "declared": "Opgegeven"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Uw eigen registratie — niemand heeft die bevestigd",
+        "verifier_not_identified": "Nog niemand kan dit bevestigen",
+        "verifier_available": "Uw werkgever kan werk nog niet bevestigen",
+        "verification_pending": "Wacht op bevestiging",
+        "verified": "Bevestigd",
+        "self_confirmed": "Door uzelf bevestigd — niet onafhankelijk",
+        "returned": "Teruggestuurd voor wijziging",
+        "disputed": "Betwist",
+        "not_applicable": "Hier staat niemand boven u"
+      },
+      "action": {
+        "await_verifier": "Niets te doen — het staat in iemands wachtrij",
+        "ask_employer_to_enable_confirmation": "Vraag om bevestiging aan te zetten",
+        "identify_verifier": "Geef aan voor wie u dit deed",
+        "respond_to_decision": "Lees het besluit en reageer",
+        "none": "Er ontbreekt niets"
+      }
     }
   },
   "orgMembers": {

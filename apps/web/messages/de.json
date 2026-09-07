@@ -7105,6 +7105,26 @@
     "cv": {
       "verified": "Bestätigt",
       "declared": "Angegeben"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Ihre eigene Aufzeichnung — niemand hat sie bestätigt",
+        "verifier_not_identified": "Bisher kann das niemand bestätigen",
+        "verifier_available": "Ihr Arbeitgeber kann Arbeit noch nicht bestätigen",
+        "verification_pending": "Wartet auf Bestätigung",
+        "verified": "Bestätigt",
+        "self_confirmed": "Von Ihnen selbst bestätigt — nicht unabhängig",
+        "returned": "Zur Änderung zurückgegeben",
+        "disputed": "Bestritten",
+        "not_applicable": "Hier steht niemand über Ihnen"
+      },
+      "action": {
+        "await_verifier": "Nichts zu tun — es liegt in einer Warteschlange",
+        "ask_employer_to_enable_confirmation": "Bitten Sie, die Bestätigung einzuschalten",
+        "identify_verifier": "Nennen Sie, für wen Sie das getan haben",
+        "respond_to_decision": "Lesen Sie die Entscheidung und antworten Sie",
+        "none": "Es fehlt nichts"
+      }
     }
   },
   "orgMembers": {

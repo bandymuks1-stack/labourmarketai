@@ -7105,6 +7105,26 @@
     "cv": {
       "verified": "Confirmed",
       "declared": "Declared"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Your own record — nobody has confirmed it",
+        "verifier_not_identified": "No one can confirm this yet",
+        "verifier_available": "Your employer cannot confirm work yet",
+        "verification_pending": "Waiting for confirmation",
+        "verified": "Confirmed",
+        "self_confirmed": "Confirmed by you — not independently",
+        "returned": "Returned for changes",
+        "disputed": "Disputed",
+        "not_applicable": "Nobody stands above you here"
+      },
+      "action": {
+        "await_verifier": "Nothing to do — it is in someone's queue",
+        "ask_employer_to_enable_confirmation": "Ask them to switch confirmation on",
+        "identify_verifier": "Name who you did this for",
+        "respond_to_decision": "Read the decision and reply",
+        "none": "Nothing is missing"
+      }
     }
   },
   "orgMembers": {

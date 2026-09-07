@@ -7105,6 +7105,26 @@
     "cv": {
       "verified": "Подтверждено руководителем",
       "declared": "Заявлено"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Ваша собственная запись — её никто не подтвердил",
+        "verifier_not_identified": "Пока некому это подтвердить",
+        "verifier_available": "Ваш работодатель пока не может подтверждать работы",
+        "verification_pending": "Ожидает подтверждения",
+        "verified": "Подтверждено",
+        "self_confirmed": "Подтверждено вами — не независимо",
+        "returned": "Возвращено на доработку",
+        "disputed": "Оспаривается",
+        "not_applicable": "Здесь над вами никого нет"
+      },
+      "action": {
+        "await_verifier": "Делать ничего не нужно — уже в чьей-то очереди",
+        "ask_employer_to_enable_confirmation": "Попросите включить подтверждение",
+        "identify_verifier": "Укажите, для кого вы это делали",
+        "respond_to_decision": "Прочитайте решение и ответьте",
+        "none": "Ничего не требуется"
+      }
     }
   },
   "orgMembers": {
