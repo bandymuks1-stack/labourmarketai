@@ -14,6 +14,54 @@
 
 ---
 
+## Refresh — 2026-09-07 (supersedes the 2026-08-23 refresh below)
+
+**Method:** snapshot mode again — a lead session with Supabase MCP read-only
+access exported the production ledger to
+`docs/migrations/production-ledger-snapshot.json` (**266 rows**, read
+2026-09-07T03:46:32Z, project `gorgitwvdzxbnaxhrsrw`, max version
+`20260906202628`) during the full product reconciliation
+([`docs/reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md`](../reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md)).
+
+The previous snapshot was **32 applies stale** (234 → 266), i.e. every
+snapshot-mode parity run between 2026-08-23 and today was measuring a ledger
+that no longer existed. Nothing in the gate caught that, because a snapshot
+carries no freshness contract — it is as-of its `read_at` and says so, and
+nobody re-read it.
+
+| | 2026-08-18 | 2026-08-23 | **2026-09-07** |
+|---|---:|---:|---:|
+| Applied in production | 225 | 232 | **266** |
+| Files in `supabase/migrations` | 228 | 235 | **269** |
+| **Applied with no repo file (orphans)** | **0** | **0** | **0** |
+| **Repo files not yet applied** | 9 | 9 | **10** (8 candidates + 1 never-apply + 1 in flight) |
+
+### The nine, named — and the direction NO gate checks
+
+The gate proves *applied → has a repo file*. **Nothing proves the reverse**, and
+the reverse is where the risk now sits: a migration can sit in the repository
+for eight weeks with live UI in front of it and no check says a word.
+Confirmed absent from production by direct `to_regclass` reads on 2026-09-07:
+
+| Migration file | Object | Live code depends on it? |
+|---|---|---|
+| `20260713160000_agency_clients_v1` | `agency_clients` + 3 RPCs | **yes** — `lib/agency/clients.ts`, agency room on `/dashboard/company` |
+| `20260714180000_journal_profession_templates_v1` | `journal_profession_templates` | **yes** — journal composer |
+| `20260713210000_multi_source_talent_v1` | `worker_external_profiles`, `talent_source_records`, `identity_resolution_events` | **yes** — profile external-links section |
+| `20260714170000_worker_opportunity_seen_v1` | `worker_opportunity_seen` + RPC | **yes** — opportunity board "new since last visit" |
+| `20260717150000_demand_interest_seen_v1` | `demand_interest_seen` + RPC | no |
+| `20260713120000_company_locations_v1` | `company_locations` + 2 RPCs | no — superseded by `work_objects` |
+| `20260714211000_dashboard_preferences_v1` | `dashboard_preferences` | no |
+| `20260717130000_open_markets_countries_draft_v1` | country allowlist widening | no |
+| `20260714210000_company_memberships_v1` | superseded draft | **NEVER APPLY** — the file's own header says so; retained only because a guard pins its bytes |
+| `20260907114500_organization_evidence_import_v1` | 8 evidence-import tables | in flight (owner P0, RED, awaiting the human gate) |
+
+Each of the first four renders an honest "not enabled yet" to real users today.
+That is correct behaviour and a real capability gap — see owner decision 2 in
+[`docs/CAPABILITY_INVENTORY.md` §6.3](../CAPABILITY_INVENTORY.md).
+
+---
+
 ## Refresh — 2026-08-23 (supersedes the Result table below; that table is kept as the 2026-08-18 record)
 
 **Method:** the gate's new **snapshot mode** — a lead session with Supabase MCP
