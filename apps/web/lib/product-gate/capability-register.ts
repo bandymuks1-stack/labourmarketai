@@ -1318,16 +1318,19 @@ const EDUCATION: readonly CapabilityRow[] = [
   },
   {
     id: "EDU-3",
-    disconnectedBecause: "no_writer",
     domain: "education",
     title: "Learner outcomes",
     worldElement: "reputation",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/education"],
-    coreModule: null,
-    surfaces: [],
-    note: "`institution_learner_outcomes` has no writer a human can reach.",
+    status: "BUILT_AND_USABLE",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: ["lib/education/institution-outcomes.ts"],
+    coreModule: "lib/education/institution-outcomes.ts",
+    surfaces: [
+      "components/app/institution-learners-section.tsx",
+      "lib/conversation/education-answers.ts",
+    ],
+    note:
+      "This entry was WRONG on both counts and is corrected from production, 2026-09-08. It claimed the learner-outcomes store has no writer a human can reach. There is no such TABLE at all - only an aggregate function taking the organization id, which DERIVES counts over the institution's existing active `student` contexts. A derived report needs no writer by construction, so `no_writer` was not a gap but a category error. Nor was it disconnected: it has two real consumers, the institution learners section and the chat education answers. (The function is named in lib/education/institution-outcomes.ts, the single permitted caller - deliberately not repeated here, because a guard pins that caller by searching for the name and a register entry is documentation, not a call site.) Proven live under real auth: a manager of a `training_provider` organization got learners=1 with suppressed=true - the k-anonymity floor of 5 doing its job, the four counts null so a number can never identify one person - and someone who does not manage that institution was REFUSED 42501. The privacy boundary is the function itself: counts only, never an id, a name, an employer or a request. What is still missing for J-INSTITUTION-OUTCOME is the OTHER half of that link - the institution seeing employer demand - not this half.",
   },
   {
     id: "EDU-4",
