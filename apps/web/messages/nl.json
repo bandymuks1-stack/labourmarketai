@@ -3697,7 +3697,8 @@
     },
     "origin": {
       "live": "Live gegevens",
-      "preview": "Voorbeeld"
+      "preview": "Voorbeeld",
+      "coverage": "Markten, geen activiteit"
     }
   },
   "company": {
@@ -4922,7 +4923,8 @@
     "themeToLight": "Licht thema",
     "how": "Hoe het werkt",
     "menuOpen": "Menu",
-    "menuClose": "Menu sluiten"
+    "menuClose": "Menu sluiten",
+    "market": "De markt"
   },
   "livingMarketReview": {
     "tagline": "De levende arbeidsmarkt van Europa",
@@ -13296,8 +13298,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Laat zien wat je kunt. Ontdek waar je nodig bent.",
-      "sub": "Echte ervaring wordt een levend profiel, en je vaardigheden worden echte kansen — voor werk, een dienst of een stage."
+      "headline": "Zeg in je eigen woorden wat je nodig hebt in je werk.",
+      "sub": "Werk en mensen, ploegen en diensten, vrije capaciteit, gedaan werk en het bewijs ervan — één markt, op echte plekken. Je hoeft vooraf niet te kiezen wie je bent."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -13364,7 +13366,19 @@
         "hire": "Ik zoek werknemers"
       },
       "numbers": "Nu op het platform: {vacancies} actieve vacatures · {employers} werkgevers",
-      "refreshed": "bijgewerkt {date}"
+      "refreshed": "bijgewerkt {date}",
+      "exampleLabels": {
+        "hire": "Ik heb mensen nodig",
+        "work": "Ik zoek werk",
+        "internship": "Waar stage lopen",
+        "professional": "Ik heb een vak",
+        "needService": "Ik heb een dienst nodig",
+        "offerService": "Ik bied diensten aan",
+        "offerCapacity": "Wij hebben mensen vrij",
+        "brigade": "Ik zoek een ploeg",
+        "logWork": "Gedaan werk vastleggen",
+        "verifyWork": "Wie bevestigt dit"
+      }
     },
     "marketProof": {
       "eyebrow": "Nu op het platform",
@@ -13379,6 +13393,21 @@
       },
       "topTitle": "Meest gevraagde beroepen op dit moment",
       "topNote": "Gerangschikt op actieve vacatures op het platform. Een deel van de vacatures is nog niet aan een beroep gekoppeld."
+    },
+    "marketMap": {
+      "eyebrow": "De markt, op plekken",
+      "title": "De arbeidsmarkt bestaat op echte plekken.",
+      "lead": "Mensen, werk en behoeften zijn ergens. De kaart hoort bij het product, het is geen plaatje naast de tekst.",
+      "shows": "De kaart toont de {count, plural, one {# markt} other {# markten}} waarin LabourMarket.ai vandaag actief is. Dat zijn markten, geen activiteit van vandaag.",
+      "notPublished": "Hoeveel werk of hoeveel mensen er op één plek zijn, tonen we bezoekers nog niet — die gegevens publiceren we niet, dus staat er geen enkele geraden stip op deze kaart. Ingelogd zie je de echte stand van jouw markt."
+    },
+    "contexts": {
+      "eyebrow": "Waar te beginnen",
+      "title": "Begin waar je vandaag staat.",
+      "subcopy": "Dit is een startpunt, geen vaste rol. Dezelfde persoon kan werk zoeken, mensen aannemen, een bureau vertegenwoordigen en studeren — één account, contexten kun je altijd toevoegen.",
+      "partnerLead": "Wil je als partner met ons samenwerken?",
+      "partnerLink": "Neem contact op",
+      "moreLead": "Meer over hoe dit voor elk werkt:"
     }
   },
   "workspace": {

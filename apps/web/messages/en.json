@@ -3697,7 +3697,8 @@
     },
     "origin": {
       "live": "Live data",
-      "preview": "Preview"
+      "preview": "Preview",
+      "coverage": "Markets, not activity"
     }
   },
   "company": {
@@ -4922,7 +4923,8 @@
     "themeToLight": "Light theme",
     "how": "How it works",
     "menuOpen": "Menu",
-    "menuClose": "Close menu"
+    "menuClose": "Close menu",
+    "market": "The market"
   },
   "livingMarketReview": {
     "tagline": "The living labour market of Europe",
@@ -13296,8 +13298,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "Show what you can do. Find where you are needed.",
-      "sub": "Real experience becomes a living profile, and your skills become real opportunities — for work, a service or an internship."
+      "headline": "Say what you need at work, in your own words.",
+      "sub": "Work and people, teams and services, spare capacity, work done and the proof of it — one market, in real places. You do not have to decide who you are first."
     },
     "entry": {
       "label": "Write what you need — in your own words",
@@ -13364,7 +13366,19 @@
         "hire": "I need workers"
       },
       "numbers": "On the platform now: {vacancies} active job listings · {employers} employers",
-      "refreshed": "refreshed {date}"
+      "refreshed": "refreshed {date}",
+      "exampleLabels": {
+        "hire": "I need workers",
+        "work": "I am looking for work",
+        "internship": "Where to do a placement",
+        "professional": "I have a profession",
+        "needService": "I need a service",
+        "offerService": "I offer services",
+        "offerCapacity": "We have people free",
+        "brigade": "I need a crew",
+        "logWork": "Record work I did",
+        "verifyWork": "Who can confirm this"
+      }
     },
     "marketProof": {
       "eyebrow": "On the platform right now",
@@ -13379,6 +13393,21 @@
       },
       "topTitle": "Professions most in demand right now",
       "topNote": "Ranked by active job listings on the platform. Some listings are not yet grouped by profession."
+    },
+    "marketMap": {
+      "eyebrow": "The market, in places",
+      "title": "The labour market exists in real places.",
+      "lead": "People, work and needs are somewhere. The map is part of the product, not a picture beside the text.",
+      "shows": "The map marks the {count, plural, one {# market} other {# markets}} LabourMarket.ai operates in today. These are markets, not today's activity.",
+      "notPublished": "How much work or how many people are in any one place is not shown to visitors yet — we do not publish that data, so there is not a single guessed dot on this map. Signed in, you see your market's real state."
+    },
+    "contexts": {
+      "eyebrow": "Where to start",
+      "title": "Start from where you are today.",
+      "subcopy": "This is a starting point, not a permanent role. The same person can look for work, hire, represent an agency and study — one account, and contexts can be added at any time.",
+      "partnerLead": "Want to work with us as a partner?",
+      "partnerLink": "Get in touch",
+      "moreLead": "More on how this works for each:"
     }
   },
   "workspace": {
