@@ -45,6 +45,38 @@
  * PURE. No IO, no clock, no copy. Safe in client and server bundles.
  */
 
+/**
+ * ── THE EXTENSION POINT FOR EXTERNAL LABOUR-MARKET SIGNALS ────────────────
+ *
+ * Recorded here because it is an ARCHITECTURAL fact about this layer, not a
+ * plan: an ESCO concept id is the join key an external intelligence source
+ * would arrive on. JRC / European Commission AI Watch is the named candidate
+ * (occupational AI exposure, changing tasks, changing skill demand,
+ * job-advertisement analysis, training supply).
+ *
+ * The shape such a signal would take, if one is ever admitted:
+ *
+ *   external source -> Agentai OS (verification, licence, cost, provenance)
+ *     -> an ESCO occupation or skill concept
+ *       -> LabourMarket.ai's own real work and real demand
+ *         -> changing competency demand -> gap -> training / RPL -> opportunity
+ *
+ * NOTHING IS BUILT FOR IT AND NOTHING SHOULD BE until a source is verified in
+ * Agentai OS, which stays the external-intelligence authority: duplicating
+ * global collection inside this product is the boundary violation §18 of the
+ * product contract exists to prevent.
+ *
+ * Two rules bind any future signal, and they are why this note sits in the
+ * file that defines what ESCO is NOT:
+ *
+ *   · a signal about an OCCUPATION is never a signal about a PERSON. AI
+ *     exposure, task change and demand shift describe a labour market. Ranking
+ *     a human by them would be the universal score this product refuses, wearing
+ *     an authoritative source as a disguise;
+ *   · such a signal is FORECAST or DERIVED, never FACT (SEP-1), and it must
+ *     carry its source, its date and its confidence or not be stored at all.
+ */
+
 /** ESCO's own two concept families, as stored. */
 export type EscoConceptType = "occupation" | "skill";
 
