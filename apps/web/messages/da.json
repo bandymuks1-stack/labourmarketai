@@ -4765,7 +4765,10 @@
         "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
-      }
+      },
+      "heading": "Svar fra den person, det handler om",
+      "notPublicYet": "Dette svar er endnu ikke offentliggjort. Det bliver synligt for den anden part, når moderationen er afsluttet.",
+      "unreadable": "Svar kunne ikke læses her. Det er ikke det samme som, at der ingen er."
     },
     "submit": {
       "about": "Din erfaring med {name}",

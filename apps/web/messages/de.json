@@ -13733,7 +13733,10 @@
         "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
         "not_found": "Nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
-      }
+      },
+      "heading": "Antwort der Person, um die es geht",
+      "notPublicYet": "Diese Antwort ist noch nicht veröffentlicht. Sie wird für die andere Seite sichtbar, sobald die Moderation abgeschlossen ist.",
+      "unreadable": "Antworten konnten hier nicht gelesen werden. Das ist nicht dasselbe, wie wenn es keine gäbe."
     },
     "submit": {
       "about": "Deine Erfahrung mit {name}",

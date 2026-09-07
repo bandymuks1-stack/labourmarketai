@@ -26,6 +26,47 @@ records and were deliberately left intact rather than rewritten.
 
 ---
 
+## FIRST COMMAND — the agent bootstrap (binding, 2026-09-07)
+
+Before any architectural or product change, run:
+
+```bash
+node .github/scripts/product-truth.mjs
+```
+
+No network, no database, no credentials. It prints, from the same files CI
+enforces:
+
+- **what LabourMarket.ai is** — one living labour/work graph, 24 nodes;
+- **what it must never be narrowed into** — eleven reductions, each with the
+  specific change that would cause it. A job board, a recruitment site, a CV
+  builder and an AI chatbot are each ONE EDGE of the graph. A task may work on
+  one edge; it may never redefine the product as that edge;
+- **the eight distinctions that may never collapse** — each has already
+  collapsed once and cost a real user a wrong answer;
+- **the honest status of every capability** — six values, plus the evidence
+  ladder, with the strongest level actually reached;
+- **the canonical journeys and which links are broken** — the real backlog;
+- **the open owner decisions** — none of which an agent may resolve.
+
+This is not advice. The same data is enforced by
+`apps/web/lib/guards/capability-register.test.ts`,
+`apps/web/lib/guards/product-graph-journeys.test.ts` and the `Product truth`
+step in `quality.yml`. If you add a capability, add its row. If you wire one up,
+raise its status. If you find a claim in the register that is false, fix the
+register in the same PR — a wrong register is worse than none, and saying so is
+never a failure.
+
+**Why this exists.** On 2026-09-07 a full reconciliation found capabilities that
+were built, tested, merged and unreachable by any human; sixteen migrations
+documented as unapplied that were applied; and a code comment claiming zero AI
+runs while production held 47. None of it was a crash and none of it failed CI.
+The register, the graph and the journey contracts are the machine-checked answer
+to the question this repository could not previously answer: **what does this
+product actually do today?**
+
+---
+
 ## Capability pre-flight — before changing ANY product capability
 
 **This repository is PUBLIC.** Detailed capability truth — the functionality

@@ -3,7 +3,11 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { marketDirection } from "@/lib/demand/market-direction";
+import {
+  DEMAND_KIND_OR_FILTER,
+  NON_EMPLOYER_DEMAND_KIND_OR_FILTER,
+  marketDirection,
+} from "@/lib/demand/market-direction";
 
 /**
  * THE MARKET HAS TWO DIRECTIONS AND EVERY SURFACE MUST KNOW WHICH IT HOLDS.
@@ -234,4 +238,126 @@ describe("market direction — the gated board reads state their direction in SQ
       }
     });
   }
+});
+
+/**
+ * ONE ALLOW-LIST, AND NOBODY WRITES IT OUT BY HAND (2026-09-07).
+ *
+ * The blocks above pin the surfaces that were fixed when the defect was found.
+ * They cannot see the second failure mode, which is worse because it looks
+ * correct forever: a surface that DOES filter on `kind` and writes the list out
+ * as a string.
+ *
+ * Two modules carried their own copy of
+ * `kind.is.null,kind.eq.buyer_request,kind.eq.customer_request`. Adding a demand
+ * kind to the rule would have updated the rule, updated every caller that
+ * derives from it, and silently not those two. Nothing would have failed. The
+ * market map would simply have stopped showing a kind of need.
+ *
+ * Four more own-rows surfaces were fixed the same day and are declared here:
+ * the market map's own-requests leg (which mapped an agency's own offer to an
+ * `actionable: true` need on the shared map), the org demand rollup, the
+ * scouting list, and the chat starter's open-needs count.
+ */
+
+const CODE_FILES = (() => {
+  const out: { rel: string; code: string }[] = [];
+  const blank = (src: string) =>
+    src
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+      .replace(/(^|[^:])\/\/[^\n]*/g, (m, p1: string) => p1 + " ".repeat(m.length - p1.length));
+  const walk = (dir: string): void => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === ".next") continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      if (!/\.tsx?$/.test(entry.name) || /\.test\.tsx?$/.test(entry.name)) continue;
+      out.push({
+        rel: path.relative(WEB, full).split(path.sep).join("/"),
+        code: blank(fs.readFileSync(full, "utf8")),
+      });
+    }
+  };
+  for (const d of ["app", "components", "lib"]) walk(path.join(WEB, d));
+  return out;
+})();
+
+describe("market direction — one allow-list, derived everywhere", () => {
+  it("the Stage-A filter is the demand filter minus the employer kind", () => {
+    const all = DEMAND_KIND_OR_FILTER.split(",");
+    const narrow = NON_EMPLOYER_DEMAND_KIND_OR_FILTER.split(",");
+    expect(narrow).not.toContain("kind.eq.company_request");
+    expect(narrow).toContain("kind.is.null");
+    for (const clause of narrow) {
+      expect(all, `${clause} escaped the demand set`).toContain(clause);
+    }
+    expect(all.length - narrow.length, "exactly one kind separates the two").toBe(1);
+  });
+
+  it("an unrecognised kind belongs to NEITHER direction", () => {
+    // The load-bearing property of a closed allow-list: a kind added tomorrow
+    // is invisible to both sides until somebody edits the rule on purpose.
+    expect(marketDirection("worker_offer_v2")).toBe("other");
+    expect(DEMAND_KIND_OR_FILTER).not.toMatch(/worker_offer_v2/);
+  });
+
+  it("no source outside the rule's own module writes a kind filter as a string", () => {
+    const OWNER = "lib/demand/market-direction.ts";
+    const LITERAL = /kind\.eq\.(company_request|buyer_request|customer_request|agency_offer)/;
+    for (const file of CODE_FILES) {
+      if (file.rel === OWNER) continue;
+      expect(
+        LITERAL.test(file.code),
+        `${file.rel} writes a demand kind out as a string. Import DEMAND_KIND_OR_FILTER or NON_EMPLOYER_DEMAND_KIND_OR_FILTER from ${OWNER} — a literal copy stops agreeing with the rule the moment a kind is added, and nothing fails when it does.`,
+      ).toBe(false);
+    }
+  });
+});
+
+describe("market direction — the four own-rows surfaces fixed on 2026-09-07", () => {
+  // Adding a surface here is one line, and that line is the moment somebody
+  // asks "which way is this row facing?"
+  for (const rel of [
+    "lib/market-map/world-read.ts",
+    "lib/company/org-demand-rollup.ts",
+    "lib/scouting/scouting.ts",
+    "lib/conversation/starter-signals.ts",
+  ]) {
+    it(`${rel} reaches the one direction rule`, () => {
+      expect(
+        read(rel).includes("@/lib/demand/market-direction"),
+        `${rel} presents demand and never asks which way the row faces`,
+      ).toBe(true);
+    });
+  }
+
+  it("the three row-classifying reads select the column they classify on", () => {
+    for (const rel of [
+      "lib/market-map/world-read.ts",
+      "lib/company/org-demand-rollup.ts",
+      "lib/scouting/scouting.ts",
+    ]) {
+      expect(
+        /select\([^)]*\bkind\b/.test(read(rel)),
+        `${rel} calls isDemandKind on rows it never selected \`kind\` for`,
+      ).toBe(true);
+    }
+  });
+
+  it("the market map's own-requests leg gates on direction, not on the caller alone", () => {
+    const src = read("lib/market-map/world-read.ts");
+    // Before: the employer path had NO kind filter at all and mapped every own
+    // row with `actionable: true` — an agency's supply drawn as a shared need.
+    expect(src).toMatch(/if \(!isDemandKind\(row\.kind\)\) continue;/);
+    expect(src).toMatch(/employer\.ok \? DEMAND_KIND_OR_FILTER : NON_EMPLOYER_DEMAND_KIND_OR_FILTER/);
+  });
+
+  it("the starter's open-needs count filters in the query, because a head count has no rows", () => {
+    const src = read("lib/conversation/starter-signals.ts");
+    expect(src).toMatch(/\.or\(DEMAND_KIND_OR_FILTER\)/);
+  });
 });

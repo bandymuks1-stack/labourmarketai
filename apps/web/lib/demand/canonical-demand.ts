@@ -3,7 +3,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
-import { isDemandKind } from "@/lib/demand/market-direction";
+import {
+  NON_EMPLOYER_DEMAND_KIND_OR_FILTER,
+  isDemandKind,
+} from "@/lib/demand/market-direction";
 import {
   toCanonicalDemand,
   type CanonicalDemand,
@@ -179,10 +182,11 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
     .from("customer_requests")
     .select("id, role_or_work_type, country, team_size, location, created_at, kind")
     .eq("status", "submitted");
+  // Derived from the ONE kind set (`market-direction.ts`) rather than written
+  // out here: a literal copy stops agreeing with the rule the moment a kind is
+  // added, and this file and the market map each carried their own.
   if (!employer.ok) {
-    ownQuery = ownQuery.or(
-      "kind.is.null,kind.eq.buyer_request,kind.eq.customer_request",
-    );
+    ownQuery = ownQuery.or(NON_EMPLOYER_DEMAND_KIND_OR_FILTER);
   }
   const own = await ownQuery.limit(500);
 

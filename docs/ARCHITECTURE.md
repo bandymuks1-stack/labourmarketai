@@ -348,6 +348,7 @@ architect them out of existence.
 Before any change:
 
 ```
+0. RUN  node .github/scripts/product-truth.mjs   ← the agent bootstrap
 1. READ THIS FILE + the authority it points to
 2. IDENTIFY affected domains
 3. IMPACT / DEPENDENCY analysis
@@ -357,7 +358,7 @@ Before any change:
 7. REGRESSION test  (question A)
 8. NARROWING review (question B, §6.1)
 9. E2E where the change is materially user-facing
-10. UPDATE the capability map (§8)
+10. UPDATE the capability register — BOTH halves (§8)
 ```
 
 **No local task may silently redefine global product architecture.**
@@ -369,13 +370,45 @@ capability, record the decision here, update the gap map. *Canonical* means
 
 ---
 
-## 8. CAPABILITY INVENTORY & GAP MAP
+## 8. CAPABILITY INVENTORY & GAP MAP — EXECUTABLE (2026-09-07)
 
-Maintained in [`docs/CAPABILITY_INVENTORY.md`](CAPABILITY_INVENTORY.md) —
-derived from code and production, not from documentation.
+The register has **two halves of one thing**, and they may not drift:
 
-Classification: `IMPLEMENTED+PROVEN` · `IMPLEMENTED+UNPROVEN` · `PARTIAL` ·
-`MISSING` · `DEFERRED` · `OWNER-GATED` · `ENVIRONMENT-GATED`.
+| half | file | carries |
+|---|---|---|
+| human | [`docs/CAPABILITY_INVENTORY.md`](CAPABILITY_INVENTORY.md) §6 | reasoning, the production snapshot, the owner queue, the nine-migration matrix |
+| machine | `apps/web/lib/product-gate/capability-register.ts` | the CI-enforced claims |
+
+Beside it: `product-graph.ts` (the 24 canonical nodes, §14 of the Product
+Constitution), `journey-register.ts` (the six permanent chains, §16) and
+`semantic-separations.ts` (the eight distinctions, §15).
+
+**Status** (the owner's six values): `BUILT_AND_USABLE` ·
+`BUILT_NOT_CONNECTED` · `PARTIAL` · `ARCHITECTURE_ONLY` · `MISSING` ·
+`BLOCKED`. **Evidence** (strongest level ACTUALLY reached): `NONE` ·
+`CODE_PROVEN` · `TEST_PROVEN` · `PRODUCTION_RPC_PROVEN` ·
+`PRODUCTION_DATA_PATH_PROVEN` · `PRODUCTION_PERSISTENCE_PROVEN` ·
+`HUMAN_UI_PROVEN`. **No test may raise a row to `HUMAN_UI_PROVEN`.**
+
+What CI enforces (`lib/guards/capability-register.test.ts`,
+`product-graph-journeys.test.ts`, `agent-bootstrap.test.ts`, and the
+`Product truth` step in `quality.yml`):
+
+- every claimed implementation and surface **exists**;
+- a capability claimed usable is **reachable** from a real route or component
+  through the import graph — and one claimed disconnected is not;
+- a capability claimed usable is **navigable**: something links to its route.
+  Imported is not reachable, and reachable is not visible — a
+  `BUILT_NOT_CONNECTED` row must say WHICH kind of path is missing, or the
+  claim cannot be falsified;
+- **evidence never outruns status**;
+- the id lists of the two halves are **identical in both directions**, so a
+  capability cannot leave the product by being dropped from one file;
+- a graph node cannot lose its last live capability without a dated record;
+- a journey link cannot be greener than the capability under it;
+- the agent bootstrap itself cannot be removed or unwired.
+
+What it does not enforce is written down, not implied: Product Constitution §17.
 
 ---
 

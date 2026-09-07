@@ -86,6 +86,30 @@ export const DEMAND_KIND_OR_FILTER: string = [
   ...[...DEMAND_KINDS].map((k) => `kind.eq.${k}`),
 ].join(",");
 
+/**
+ * The demand kind that belongs to an EMPLOYER WORKSPACE. Stage-A surfaces gate
+ * it: a caller with no resolved employer workspace reads the narrower set. This
+ * is a SURFACE gate, not a direction rule — `company_request` is demand either
+ * way, and RLS decides what the caller may read at all.
+ */
+const EMPLOYER_DEMAND_KIND = "company_request";
+
+/**
+ * The same expression as `DEMAND_KIND_OR_FILTER`, minus the employer-workspace
+ * kind — for the Stage-A path.
+ *
+ * It exists so that no surface has to write the list out by hand. The market
+ * map carried its own literal copy (`kind.is.null,kind.eq.buyer_request,
+ * kind.eq.customer_request`) until 2026-09-07, which is a drift waiting to
+ * happen: adding a demand kind above would have changed three surfaces and
+ * quietly not that one. Derived here, both filters move together or neither
+ * does.
+ */
+export const NON_EMPLOYER_DEMAND_KIND_OR_FILTER: string = [
+  "kind.is.null",
+  ...[...DEMAND_KINDS].filter((k) => k !== EMPLOYER_DEMAND_KIND).map((k) => `kind.eq.${k}`),
+].join(",");
+
 /** True only for a row a demand surface may render. */
 export function isDemandKind(kind: string | null | undefined): boolean {
   return marketDirection(kind) === "demand";

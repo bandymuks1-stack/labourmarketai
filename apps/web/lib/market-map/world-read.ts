@@ -2,13 +2,18 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import {
+  DEMAND_KIND_OR_FILTER,
+  NON_EMPLOYER_DEMAND_KIND_OR_FILTER,
+  isDemandKind,
+} from "@/lib/demand/market-direction";
 import {
   dedupeCanonicalDemand,
   placeableDemand,
   toCanonicalDemand,
   type CanonicalDemand,
 } from "@/lib/demand/canonical-demand-model";
-import { DEMAND_KIND_OR_FILTER } from "@/lib/demand/market-direction";
 import { COUNTRY_CENTROID, listKnownCities } from "@/lib/location/city-coordinates";
 import { getOwnMarketSignals } from "./signals";
 import { buildPersonPresenceLayer } from "./spatial-entities";
@@ -45,8 +50,9 @@ import {
  *           · customer_requests  select id, role_or_work_type, country,
  *             team_size, location, created_at
  *             where status = 'submitted' and country in ($countries)
- *             [and kind is null / buyer_request / customer_request — when the
- *             caller has no employer workspace, the Stage-A gate verbatim]
+ *             and kind in the DEMAND allow-list (market-direction.ts; the
+ *             narrower non-employer set when the Stage-A gate does not resolve
+ *             an employer workspace)
  *             order by created_at desc limit WORLD_ROW_LIMIT + 1
  *             — RLS `profile_id = auth.uid()` → index
  *             customer_requests_profile_idx (profile_id, created_at desc)
@@ -173,6 +179,10 @@ interface OwnRequestRow {
   readonly team_size: number | null;
   readonly location: string | null;
   readonly created_at: string | null;
+  /** The market DIRECTION of the row. Selected because the map cannot tell an
+   *  offer from a need without it — the four columns it draws are identical
+   *  for both (`@/lib/demand/market-direction`). */
+  readonly kind: string | null;
 }
 
 async function readDemand(
@@ -207,26 +217,28 @@ async function readDemand(
   }
 
   // Leg 2 — the caller's OWN submitted requests, bounded by the viewport's
-  // countries and by WORLD_ROW_LIMIT.
+  // countries and by WORLD_ROW_LIMIT. Same Stage-A workspace gate as the
+  // canonical read: no employer workspace → only the non-employer kinds.
   //
-  // THE DIRECTION FILTER IS UNCONDITIONAL (2026-09-07 reconciliation). It used
-  // to be applied ONLY when the caller had no employer workspace, so an agency
-  // — which does have one — got no direction filter at all and its own
-  // `agency_offer` rows were mapped onto the map as `actionable: true` demand.
-  // That is the same defect #1588 and #1596 fixed on the worker and agency
-  // boards, still live here: two agencies saying "we have people" were shown
-  // to each other as needs.
+  // DIRECTION (SEP-4). The four columns this layer draws — role, country,
+  // team size, city — are IDENTICAL for "we need 8 electricians" and "we have
+  // 20 welders looking for work". Until 2026-09-07 the employer path applied
+  // no `kind` filter at all and mapped every own row with `actionable: true`,
+  // so an agency's own supply offer was drawn on the shared market map as a
+  // need somebody could act on.
   //
-  // The workspace has nothing to do with the direction question. Whether a row
-  // is demand depends on the ROW, and the answer comes from the ONE canonical
-  // filter (`DEMAND_KIND_OR_FILTER`) rather than a second hand-written literal
-  // — the previous inline list had already drifted, omitting `company_request`.
+  // The Stage-A gate is UNCHANGED — a caller without an employer workspace
+  // still sees the narrower set — but neither path writes its own list of
+  // kinds any more. Both filters are derived from the one set in
+  // `market-direction.ts`, so a kind added there reaches this layer instead of
+  // silently disagreeing with it.
+  const employer = await requireEmployerCompany();
   const own = await supabase
     .from("customer_requests")
-    .select("id, role_or_work_type, country, team_size, location, created_at")
+    .select("id, role_or_work_type, country, team_size, location, created_at, kind")
     .eq("status", "submitted")
     .in("country", [...countries])
-    .or(DEMAND_KIND_OR_FILTER)
+    .or(employer.ok ? DEMAND_KIND_OR_FILTER : NON_EMPLOYER_DEMAND_KIND_OR_FILTER)
     .order("created_at", { ascending: false })
     .limit(WORLD_ROW_LIMIT + 1);
   if (own.error) return { ...out, error: "own_demand_read_failed" };
@@ -234,6 +246,10 @@ async function readDemand(
   const ownRows = (own.data ?? []) as unknown as OwnRequestRow[];
   if (ownRows.length > WORLD_ROW_LIMIT) out.truncated = true;
   for (const row of ownRows.slice(0, WORLD_ROW_LIMIT)) {
+    // Belt and braces on the direction: the database filtered, and a row that
+    // still does not classify as demand is dropped rather than guessed at. An
+    // unrecognised kind resolves to "other", never to demand.
+    if (!isDemandKind(row.kind)) continue;
     const mapped = toCanonicalDemand({
       id: row.id,
       source: "customer_request",

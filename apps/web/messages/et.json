@@ -4765,7 +4765,10 @@
         "invalid_transition": "[EN] That step is not possible from the current state.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "[EN] Reply from the person this is about",
+      "notPublicYet": "[EN] This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "[EN] Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "[EN] Your experience with {name}",

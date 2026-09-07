@@ -75,16 +75,33 @@ describe("the market map serves demand only", () => {
     expect(isDemandKind(null)).toBe(true);
   });
 
-  it("the world read filters unconditionally, through the ONE canonical filter", () => {
+  it("EVERY world-read path filters direction through the canonical set", () => {
     const src = read("lib/market-map/world-read.ts");
-    expect(src).toMatch(
-      /import \{ DEMAND_KIND_OR_FILTER \} from "@\/lib\/demand\/market-direction"/,
-    );
-    expect(src).toMatch(/\.or\(DEMAND_KIND_OR_FILTER\)/);
-    // No hand-written kind list may survive anywhere in this file, and the
-    // filter may never again hang off the caller's workspace.
+    /**
+     * SUPERSEDED BY A BETTER FIX, AND RE-PINNED TO THE INTENT.
+     *
+     * This asserted one unconditional `.or(DEMAND_KIND_OR_FILTER)` — my own
+     * 2026-09-07 fix, which removed the Stage-A workspace gate to get the
+     * filter applied on every path. #1602 landed the same fix on main without
+     * that cost: BOTH paths now derive from `market-direction.ts`, and the
+     * narrower non-employer set survives for a caller with no employer
+     * workspace. Theirs is strictly better, so the merge took it.
+     *
+     * What must hold is the INTENT — no path reaches `customer_requests`
+     * without a direction filter, and no filter is hand-written — not the
+     * particular shape my version happened to have.
+     */
+    expect(src).toMatch(/from "@\/lib\/demand\/market-direction"/);
+    expect(src).toContain("DEMAND_KIND_OR_FILTER");
+    // Every `.or(` on this read is one of the canonical filters, never a
+    // literal kind list assembled here.
+    for (const call of src.match(/\.or\([^)]*\)/g) ?? []) {
+      expect(call, `hand-written direction filter: ${call}`).toMatch(
+        /DEMAND_KIND_OR_FILTER|NON_EMPLOYER_DEMAND_KIND_OR_FILTER/,
+      );
+    }
+    // No hand-written kind list may survive anywhere in this file.
     expect(src).not.toMatch(/kind\.eq\.[a-z_]+/);
-    expect(src).not.toMatch(/if \(!employer\.ok\)/);
   });
 
   it("the canonical filter itself still excludes supply", () => {

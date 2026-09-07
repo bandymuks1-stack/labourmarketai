@@ -5,6 +5,12 @@
 > full-product master matrix (§5, six parallel domain sweeps), extended
 > 2026-09-07 with the **canonical master product register (§6)** — the
 > anti-forgetting mechanism every future slice must update.
+>
+> **§6 is EXECUTABLE.** Its machine-readable half is
+> [`apps/web/lib/product-gate/capability-register.ts`](../apps/web/lib/product-gate/capability-register.ts),
+> enforced by `apps/web/lib/guards/capability-register.test.ts` and by
+> `.github/scripts/product-truth.mjs`. The two halves may not drift: a
+> capability id present in one and absent from the other is a CI failure.
 > Entry point: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 > Reasoning and evidence behind §6:
 > [`docs/reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md`](reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md).
@@ -409,7 +415,6 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 4. Unchanged existing gates: #1355 ESCO linkage, #1305 LMC compensate-spend, AI `AI_PROVIDER_MODE` env, LinkedIn/Meta developer apps (only when wanted).
 
 ---
-
 ## 6. CANONICAL MASTER PRODUCT REGISTER (2026-09-07)
 
 > **This section is the anti-forgetting mechanism.** Every future slice updates
@@ -466,6 +471,16 @@ defects, follow-ups, work tasks, LMC, subscriptions, contact disclosures.
 
 ### 6.2 THE REGISTER
 
+> **The machine half is authoritative for STATUS.** The Status / AI / P
+> columns below are the 2026-09-07 snapshot and are not re-checked by CI.
+> The current, CI-enforced classification of every row lives in
+> [`apps/web/lib/product-gate/capability-register.ts`](../apps/web/lib/product-gate/capability-register.ts)
+> using the owner's six-value vocabulary (BUILT_AND_USABLE ·
+> BUILT_NOT_CONNECTED · PARTIAL · ARCHITECTURE_ONLY · MISSING · BLOCKED)
+> plus the evidence ladder. **The id list is enforced in both directions:**
+> a capability in one half and not the other fails
+> `lib/guards/capability-register.test.ts`. That is what makes deleting a
+> capability from the product an explicit act rather than an omission.
 Legend — **Status**: `PROD_HUMAN` production-human-proven · `PROD_DATA`
 production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN` ·
 `DISCONNECTED` · `DUPLICATED` · `LEGACY` · `PLANNED` · `MISSING` ·
@@ -559,6 +574,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | DEM-6 | Team matching | `match-team-v1` | IMPL | — | 2 | admin route only |
 | DEM-7 | Anon public need intake | `company_need_public_intakes` | PROD_DATA (2) | — | 2 | — |
 | DEM-8 | **Saved searches / alerts** | — | **MISSING** | — | 2 | bookmarks exist; recurring queries do not |
+| DEM-9 | **Organizational supply discovery** (agency capacity → employer) | `customer_requests` + gated reader | **BLOCKED** | — | 0 | proven in a prod transaction under 3 real users and rolled back; the migration is unapplied |
 
 #### G. TIME · CAPACITY · BOOKING
 
@@ -573,6 +589,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | CAL-7 | **Capacity reservation** | — | **MISSING** | — | 1 | nothing decrements anything |
 | CAL-8 | **Shifts / rotas / rosters** | — | **MISSING** | — | 2 | keep in the architecture |
 | CAL-9 | Utilisation / FTE | — | **MISSING** | — | 3 | — |
+| CAL-10 | **Planned vs actual → learned duration/capacity** | — | **MISSING** | — | 1 | the flywheel's learning loop; a forecast may never be stored where a fact is read (SEP-1) |
 
 #### H. MARKETPLACE · COMMERCE
 
@@ -634,6 +651,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | GOV-6 | Search / discovery | 4 incompatible stacks | DUPLICATED | — | 2 | no people search anywhere by design |
 | GOV-7 | Reporting / export | 6 real downloads | PARTIAL | — | 2 | CSV/JSON only; no PDF/XLSX generator |
 | GOV-8 | Security / RLS | 190 tables, all RLS | PROD_DATA | — | 0 | 2 real advisor items + 2 owner-only Auth settings |
+| GOV-9 | **Executable product constitution** (register + graph + journeys + separations) | `lib/product-gate/*`, `.github/scripts/product-truth.mjs` | IMPL | — | 0 | what a new agent meets before it can narrow the product |
 
 ### 6.3 OWNER DECISION QUEUE (2026-09-07)
 

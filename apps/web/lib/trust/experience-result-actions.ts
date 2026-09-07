@@ -44,6 +44,12 @@ export type ExperiencesResultView =
       readonly counts: ExperienceCountsState;
       readonly mine: readonly ExperienceRow[];
       readonly aboutMe: readonly ExperienceRow[];
+      /**
+       * Whether replies could be read at all. The rows can be readable while
+       * the replies are not, and the surface must then say nothing about
+       * replies rather than imply there are none.
+       */
+      readonly responsesRead: boolean;
     };
 
 export async function loadExperiencesResultAction(): Promise<ExperiencesResultView> {
@@ -65,5 +71,11 @@ export async function loadExperiencesResultAction(): Promise<ExperiencesResultVi
   // untouched rather than collapsed here.
   const counts = await getExperienceCounts("worker", user.id);
 
-  return { kind: "ready", counts, mine: list.mine, aboutMe: list.aboutMe };
+  return {
+    kind: "ready",
+    counts,
+    mine: list.mine,
+    aboutMe: list.aboutMe,
+    responsesRead: list.responsesRead,
+  };
 }
