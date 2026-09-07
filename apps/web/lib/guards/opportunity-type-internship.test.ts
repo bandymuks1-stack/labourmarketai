@@ -16,7 +16,12 @@ import { describe, expect, it } from "vitest";
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 
 const repo = resolve(__dirname, "..", "..", "..", "..");
-const read = (rel: string) => readFileSync(resolve(repo, rel), "utf8");
+// Newlines are normalised because this guard compares SQL as TEXT. Git checks
+// these .sql files out CRLF on Windows and LF in CI, so without this the two
+// string assertions below fail locally and pass in CI - a false RED that
+// costs every local run time and teaches people to ignore the suite.
+const read = (rel: string) =>
+  readFileSync(resolve(repo, rel), "utf8").replace(/\r\n/g, "\n");
 
 const MIG = "supabase/migrations/20260903130000_opportunity_type_internship_apprenticeship_v1.sql";
 const DOWN = "supabase/rollbacks/20260903130000_opportunity_type_internship_apprenticeship_v1.down.sql";
