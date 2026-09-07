@@ -533,7 +533,7 @@ const importCommit: CapabilityDescriptor = {
         skippedDuplicates: res.skippedDuplicates,
         notReady: res.notReady,
         recordIds: res.recordIds,
-        structuredDestination: "/dashboard/company/evidence-import",
+        structuredDestination: "/dashboard/company#evidence-import",
       },
     };
   },

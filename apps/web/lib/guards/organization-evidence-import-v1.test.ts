@@ -18,7 +18,7 @@ import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
  * ONE IMPORT ENGINE, TWO TRANSPORTS — pinned structurally.
  *
  * The owner command is explicit: "Do not build two separate implementations."
- * A human at `/dashboard/company/evidence-import` and an authorized assistant
+ * A human in the company workspace and an authorized assistant
  * on `/api/mcp` must reach the SAME domain core, the same authority checks and
  * the same commit gate. That property is invisible to typecheck and to every
  * behavioural test — the two surfaces stay green while quietly diverging — so
@@ -35,8 +35,12 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 const CORE = "lib/organization-evidence/import-core.ts";
-const PAGE = "app/[locale]/dashboard/company/evidence-import/page.tsx";
-const ACTIONS = "app/[locale]/dashboard/company/evidence-import/actions.ts";
+// The import is a SECTION of the company workspace, not a route: the Product
+// Gate is right that a new screen must answer the five World-State questions,
+// and four honest answers were "no". Folding it in kept every guarantee below
+// and cost the engine nothing.
+const PAGE = "components/app/evidence-import-section.tsx";
+const ACTIONS = "lib/organization-evidence/import-actions.ts";
 const CAPABILITIES = "lib/capabilities/evidence-import-capabilities.ts";
 const MIGRATION =
   "supabase/migrations/20260907114500_organization_evidence_import_v1.sql";

@@ -1,8 +1,7 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 
-import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { locales } from "@/lib/i18n/config";
 import type { DomainCaller } from "@/lib/domain/caller";
@@ -40,10 +39,24 @@ import {
   resolveEvidenceRowAction,
   startEvidenceImportAction,
   withdrawEvidenceImportAction,
-} from "./actions";
+} from "@/lib/organization-evidence/import-actions";
 
 /**
  * ORGANIZATION EVIDENCE IMPORT — the human face of the one import engine.
+ *
+ * ── WHY THIS IS A SECTION AND NOT A PAGE ───────────────────────────────────
+ * It WAS a page (`/dashboard/company/evidence-import`) for exactly one CI run.
+ * The Product Gate caught it: a new screen must answer the five World-State
+ * questions, and four of my answers were honestly "no" — not on the map, not
+ * AI-driven, not usable without leaving the workspace, and needing a new page.
+ * The only way past that is a scoped OWNER waiver, and asking for one to bless
+ * a page I had just invented — while the same window folded supply discovery
+ * into the existing scouting page correctly — would have been asking the owner
+ * to ratify my own inconsistency.
+ *
+ * So it lives inside the company workspace, like every other thing a manager
+ * does there. Nothing about the engine changed: the same core, the same RLS,
+ * the same commit gate, the same eleven capabilities. Only the container did.
  *
  * ── ORGANIZATION IS THE ROOT, COMPANY IS A ROLE ────────────────────────────
  * The page never asks "which company"; it asks which ORGANIZATION the caller
@@ -70,8 +83,6 @@ import {
  * assistant calls through `evidence.*` on `/api/mcp`, under the same RLS, with
  * the same commit gate. Nothing on this page is implemented twice.
  */
-
-export const dynamic = "force-dynamic";
 
 const SECTION = "flex flex-col gap-4";
 const HEADING =
@@ -102,18 +113,16 @@ function rowTone(row: PreviewRow): string {
   return row.ready ? STATE_TONE.ready : STATE_TONE.needs_review;
 }
 
-export default async function EvidenceImportPage({
-  params,
-  searchParams,
+export async function EvidenceImportSection({
+  locale,
+  /** The staged source being reviewed, from the company page's own
+   *  `?evidenceSession=` — a bookmarkable, shareable URL WITHOUT a route of
+   *  its own, which is the whole point. */
+  sessionId,
 }: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<{ session?: string }>;
+  locale: string;
+  sessionId?: string;
 }) {
-  const { locale } = await params;
-  const { session: sessionId } = await searchParams;
-  setRequestLocale(locale);
-  await requireRoleOrRedirect(locale, "company");
-
   const t = await getTranslations("evidenceImport");
   const supabase = await createClient();
   const {
@@ -125,9 +134,9 @@ export default async function EvidenceImportPage({
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+      <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
         {t("title")}
-      </h1>
+      </h2>
       <p className="text-sm leading-relaxed text-text-secondary">
         {t("intro")}
       </p>
@@ -136,8 +145,9 @@ export default async function EvidenceImportPage({
 
   const shell = (children: React.ReactNode) => (
     <div
-      className="mx-auto flex w-full max-w-content flex-col gap-6"
-      data-testid="evidence-import-page"
+      className="flex w-full flex-col gap-6"
+      data-testid="evidence-import-section"
+      id="evidence-import"
     >
       {header}
       {children}

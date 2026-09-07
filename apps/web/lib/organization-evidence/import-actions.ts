@@ -68,7 +68,9 @@ export type EvidenceImportActionState =
       }[];
     };
 
-const PATH = "/dashboard/company/evidence-import";
+/** The workspace this section lives in. It is no longer a route of its own —
+ *  see the section component's header for why. */
+const PATH = "/dashboard/company";
 
 async function caller(): Promise<DomainCaller | null> {
   const supabase = await createClient();

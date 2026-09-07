@@ -56,14 +56,6 @@ const CLASSIFICATION: Record<string, string> = {
   // zone INSIDE the company workspace; composes the P1–P4 workforce reads.
   "dashboard/company/planning": "REAL_LAUNCH_SURFACE",
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
-  // Organization evidence import (2026-09-07) — the ONE historical-evidence
-  // import, served to a human here and to an authorized assistant through the
-  // `evidence.*` capabilities over the SAME domain core. Organization-rooted,
-  // so it serves an employer, an agency, a school and a training provider
-  // alike. Its migration ships UNAPPLIED and owner-gated, so the page degrades
-  // honestly (`needsMigration`) until it is applied; the surface is real, not
-  // a preview.
-  "dashboard/company/evidence-import": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
   "dashboard/documents": "REAL_LAUNCH_SURFACE",
   // Operational finance records (control room PR I) — repo-safe layer over

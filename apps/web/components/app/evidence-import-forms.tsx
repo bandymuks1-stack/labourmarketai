@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 
 import { useRouter } from "@/lib/i18n/navigation";
-import type { EvidenceImportActionState } from "@/app/[locale]/dashboard/company/evidence-import/actions";
+import type { EvidenceImportActionState } from "@/lib/organization-evidence/import-actions";
 
 /**
  * The interactive shells of the evidence-import workspace.
@@ -113,7 +113,7 @@ export function EvidenceSourceForm({
   useEffect(() => {
     if (state.kind === "ok" && state.sessionId) {
       router.replace(
-        `/dashboard/company/evidence-import?session=${state.sessionId}`,
+        `/dashboard/company?evidenceSession=${state.sessionId}#evidence-import`,
       );
     }
   }, [state, router]);

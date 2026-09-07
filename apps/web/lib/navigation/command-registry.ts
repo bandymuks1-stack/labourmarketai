@@ -598,7 +598,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     // employer, an agency, a school and a training provider, and someone
     // looking for it will type the thing they hold, not the role they play.
     id: "import_work_history",
-    route: "/dashboard/company/evidence-import",
+    route: "/dashboard/company#evidence-import",
     audience: "company",
     labels: {
       en: "Import work history",
