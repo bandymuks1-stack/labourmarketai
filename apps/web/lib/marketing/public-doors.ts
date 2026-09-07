@@ -38,18 +38,56 @@ export const INSTITUTION_DOOR_NEXT: string =
 
 export type FinalDoorKey = "worker" | "employer" | "agency" | "institution" | "partner";
 
+/**
+ * ── PARTNER IS NOT AN ACTOR CONTEXT (owner window 11 §20) ──────────────────
+ *
+ * "Esu darbuotojas / Esu darbdavys / Atstovauju agentūrai / Atstovauju
+ * mokyklai" all answer the same question: *what work am I here to do today?*
+ * Each opens an account and a workspace in the product.
+ *
+ * "Noriu tapti partneriu" answers a different question — a commercial
+ * relationship with the company behind the product — and it opens `/about`,
+ * not a workspace. Sitting it in the same grid put a business-development
+ * enquiry at the same conceptual level as a welder starting work, which is
+ * exactly what §20 asked to be reconsidered.
+ *
+ * It is NOT removed: the door still exists, and the contexts section renders
+ * it as one quiet line beneath the four, with its own framing. Nothing became
+ * unreachable; it stopped pretending to be a starting context.
+ */
+export const STARTING_CONTEXTS: ReadonlyArray<{
+  readonly key: Exclude<FinalDoorKey, "partner">;
+  readonly href: string;
+  readonly variant: "primary" | "secondary";
+  /** The audience page that explains this context — nav lost these links in
+   *  §16, and this is where they are honestly re-offered, by name, at the
+   *  moment a person is deciding. `null` where no such page exists. */
+  readonly learnMore: string | null;
+}> = [
+  { key: "worker", href: "/auth/signup", variant: "primary", learnMore: "/for-workers" },
+  { key: "employer", href: "/company-need", variant: "secondary", learnMore: "/for-companies" },
+  { key: "agency", href: "/auth/signup", variant: "secondary", learnMore: "/for-agencies" },
+  {
+    key: "institution",
+    href: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,
+    variant: "secondary",
+    learnMore: null,
+  },
+];
+
+/** The partner enquiry — a real door, at its own level. */
+export const PARTNER_DOOR = { key: "partner" as const, href: "/about" };
+
+/**
+ * The full door list, unchanged in membership so every existing consumer
+ * (the landing guard, the production walk, the route-existence check) keeps
+ * asserting the SAME five real destinations. Only the PRESENTATION split.
+ */
 export const FINAL_CTA_LINKS: ReadonlyArray<{
   readonly key: FinalDoorKey;
   readonly href: string;
   readonly variant: "primary" | "secondary";
 }> = [
-  { key: "worker", href: "/auth/signup", variant: "primary" },
-  { key: "employer", href: "/company-need", variant: "secondary" },
-  { key: "agency", href: "/auth/signup", variant: "secondary" },
-  {
-    key: "institution",
-    href: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,
-    variant: "secondary",
-  },
-  { key: "partner", href: "/about", variant: "secondary" },
+  ...STARTING_CONTEXTS.map(({ key, href, variant }) => ({ key, href, variant })),
+  { key: PARTNER_DOOR.key, href: PARTNER_DOOR.href, variant: "secondary" as const },
 ];

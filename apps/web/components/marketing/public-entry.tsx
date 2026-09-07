@@ -233,20 +233,31 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                different DIRECTION of the graph, which is the whole answer to
                §16 (a visitor reading only "job + worker + hire" leaves
                believing this is a job board).
-               They WRAP, at every width, and the cost is stated rather than
-               engineered away: at 375px the row is ~523px tall and the entry
-               card's bottom lands below the fold. §19 asks whether that is
-               appropriate, and the answer here is yes — the label, the field
-               and the submit are all above it; only the examples run past.
+               ── THE CHIP SAYS THE TOPIC; THE FIELD SAYS THE SENTENCE ──────
+               (owner window 11 §18 + §19, 2026-09-07)
 
-               A horizontally-scrolling strip was tried first and reverted the
-               same day. It fixed the height (523px → 48px) and broke the point:
-               at 320px a visitor sees one and a half sentences and has to swipe
-               to discover that the product is more than a job board, which is
-               the §16 complaint restated as a gesture. It also put eight of ten
-               chips outside the viewport, which is exactly what
-               `tests/e2e/landing-mobile-overflow.spec.ts` asserts against —
-               correctly. Hiding breadth is not a density fix. */}
+               Ten full sentences as chips measured 523px at 375px — 64% of the
+               viewport — and pushed the entry below the fold. Two wrong answers
+               were tried and rejected before this one:
+
+                 · a horizontally scrolling strip (shipped, reverted same day in
+                   #1607): 48px tall and eight of ten chips outside the
+                   viewport. Hiding breadth is not a density fix, and the e2e
+                   overflow spec said so correctly.
+                 · dropping examples: that removes directions, which is the §16
+                   problem it was meant to solve.
+
+               The chip now carries a SHORT PLAIN-LANGUAGE topic — "Reikia
+               darbuotojų", "Turime laisvų žmonių", "Užrašyti atliktą darbą" —
+               and tapping it writes the FULL example sentence into the field,
+               visibly, then routes that sentence live. Breadth is entirely
+               preserved (all ten, all widths, nothing behind a gesture) at
+               roughly a third of the height, and the interaction now TEACHES
+               the front door: you watch a topic become a sentence you could
+               have typed yourself.
+
+               The labels are ordinary speech, never the product's vocabulary:
+               no SUPPLY, no DEMAND, no "capacity", no "evidence" (§18). */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {EXAMPLE_KEYS.map((key) => {
@@ -256,13 +267,18 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                 key={key}
                 type="button"
                 data-testid="entry-example"
+                // The routed sentence is what the button is FOR, so it is the
+                // accessible name — a screen-reader user hears the same thing
+                // the field is about to be filled with, not the short topic.
+                aria-label={example}
+                title={example}
                 onClick={() => {
                   setDraft(example);
                   ask(example);
                 }}
                 className="min-h-11 rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
               >
-                {example}
+                {t(`exampleLabels.${key}`)}
               </button>
             );
           })}

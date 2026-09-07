@@ -93,11 +93,87 @@ what the public projection returns.
 stays an authenticated capability. §17 is then explicitly deferred, not
 silently dropped.
 
-## 5. What this window did instead
+## 5. UPDATE 2026-09-07 — the map is now ON the landing, at the honest maximum
 
-Nothing about the map. §17 is recorded here rather than answered, and the
-landing's product-breadth problem (§16) was attacked from the other direction —
-the natural-language entry now offers ten example sentences spanning nine
-intents across the graph (spare capacity, a team for a site, real work
-recorded, who can verify it), instead of six that were all one side of the
-market looking for the other.
+The owner's follow-up command: *"The map is not optional merely because its
+data grant is gated. Build everything safely possible around the gated data
+access and leave only the smallest explicit owner decision blocked."*
+
+**Built and shipped** (`components/marketing/public-market-map-band.tsx`,
+`lib/market-map/public-coverage.ts`):
+
+- the section is on `/{locale}`, directly under the natural-language entry,
+  with its own `#market` nav anchor;
+- it draws through the **canonical `<MarketMap>`** in `mode="landing"` — one
+  Leaflet engine, real OSM tiles, real WGS84 centroids. Verified in a browser:
+  **15 tiles, 17 markers**;
+- the markers are the 17 `ACTIVE_MARKETS`, at `precision: "country"`;
+- **no anchor carries a count.** `MarketAnchor.weight` was made optional for
+  exactly this: `0` would assert that nothing is happening in Lithuania
+  (SEP-7). A guard pins that no coverage anchor may acquire a weight, and the
+  negative control was run;
+- a third origin, **`coverage`**, was added so the map's own badge reads
+  *"Rinkos, ne veikla" / "Markets, not activity"* — neither `live` (which would
+  claim today's market is drawn) nor `preview` (which would imply the countries
+  are invented);
+- beneath it, in words: what the markers are, the full country list as a text
+  alternative, and the sentence that per-place activity is not published to
+  visitors — *"there is not a single guessed dot on this map."*
+
+**Still blocked, and it is now exactly one act.** Everything above is
+presentation; the only thing missing is permission for an anonymous caller to
+read a geographic aggregate.
+
+## 6. The owner decision — one migration
+
+Approve ONE of:
+
+**(A) Ship the anonymous geographic aggregate.** RED migration. Applying it
+turns the coverage map into the live market with no further UI work: add a
+reader beside `publicCoverageView()` and change the view's `origin` to `live`.
+
+```sql
+-- k-anonymity INSIDE the function, so no caller can widen it.
+create or replace function public.public_vacancy_geography_v1()
+returns table (country text, city text, vacancies bigint)
+language sql security definer set search_path = public stable as $$
+  with rows as (
+    select v.country, v.city
+    from public.public_vacancies v
+    where v.is_active and (v.expires_at is null or v.expires_at > now())
+  ),
+  by_city as (
+    select country, city, count(*)::bigint as n
+    from rows where country is not null group by country, city
+  )
+  -- n < 3 dropped entirely; n < 5 reported at COUNTRY precision only.
+  select country, case when n >= 5 then city else null end, sum(n)::bigint
+  from by_city where n >= 3
+  group by country, case when n >= 5 then city else null end;
+$$;
+revoke execute on function public.public_vacancy_geography_v1() from public;
+grant execute on function public.public_vacancy_geography_v1() to anon, authenticated;
+```
+
+**Read this before approving:** it partially reverses
+`20260824120000_public_vacancy_anon_boundary_v2`, which removed the last
+location-bearing fields from the anonymous path *deliberately*. The counter-
+argument is that this returns **aggregates only** — no ids, no per-row
+coordinates, no employer, and nothing below the k-threshold. That is a
+judgement about the anonymous boundary, and it is the owner's, not an agent's.
+The SQL is written here rather than committed as a migration file precisely so
+it creates no repo→applied parity debt while it waits (GOV-1).
+
+**(B) Country precision only.** The same function without the `city` column.
+Coarser, a smaller boundary change, and the map already renders country
+precision natively.
+
+**(C) Leave it.** The coverage map stays as shipped. §17 is then answered as
+far as the data allows, and the honest note beneath it remains true.
+
+## 7. What was deliberately NOT done, again
+
+`origin: "demo"` was available and would have filled the map with plausible
+dots. It was not used, for the three reasons in §3 above. A map that shows the
+real markets and says what it cannot show is worth more than one that looks
+busy and lies.
