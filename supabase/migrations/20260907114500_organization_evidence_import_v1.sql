@@ -102,11 +102,15 @@
 --     the REPORTED states. Attestation and verification exist only as
 --     append-only event rows.
 --
---  2. NOBODY ATTESTS THEIR OWN WORK. The insert policy on
---     organization_evidence_events refuses an `attested` event whose actor is
---     the linked profile of the record's subject. The self-confirmation hole
---     found in `review_journal_entry` on 2026-09-06 (3 real self-confirmations
---     on production) cannot be reproduced here.
+--  2. SELF-ATTESTATION IS ALLOWED AND PERMANENTLY MARKED. A representative
+--     may attest the organization's records including their own work (a sole
+--     trader has nobody above them - owner decision 3). The evidence then
+--     derives SELF_ATTESTED, never ORGANIZATION_ATTESTED, and
+--     `countsAsIndependentlyVerified` is false for it. The hole found in
+--     `review_journal_entry` on 2026-09-06 (3 real self-confirmations on
+--     production reading as employer confirmation) cannot be reproduced here,
+--     because the self relationship survives into the derived state instead of
+--     being flattened away.
 --
 --  3. ATTESTATION IS NOT VERIFICATION. `independently_verified` is writable
 --     ONLY by someone who manages an organization recorded as a party in a
@@ -740,26 +744,29 @@ create policy organization_evidence_events_select on public.organization_evidenc
     or public.is_admin()
   );
 
--- THE SELF-ATTESTATION GUARD.
--- A person may SUBMIT or IMPORT their own work - that is legitimate and stays
--- possible. What they may not do is ATTEST it: an `attested` event whose actor
--- is the linked profile of the record's own subject is refused by the
--- database, for managers and owners alike.
+-- ATTESTATION - INCLUDING OF ONE'S OWN WORK (owner decision 3, 2026-09-07).
+--
+-- An authorized representative of the organization may attest the
+-- organization's records, INCLUDING their own work. A sole trader legitimately
+-- has nobody above them, and refusing them would erase real history - the
+-- owner's instruction is explicit that legitimate sole-trader workflows are
+-- preserved.
+--
+-- What that attestation must never do is acquire independent-verification
+-- authority. The separation is SEMANTIC, not a block: when the actor is the
+-- subject, `deriveEvidenceStanding` (lib/organization-evidence/evidence-state.ts)
+-- derives SELF_ATTESTED rather than ORGANIZATION_ATTESTED, and
+-- `countsAsIndependentlyVerified` is false for it - permanently, and visibly.
+--
+--   SELF_REPORTED / SELF_ATTESTED  is NOT  INDEPENDENTLY_VERIFIED
+--
+-- The independence guard lives on the OTHER event, below, where it belongs.
 create policy organization_evidence_events_attest on public.organization_evidence_events
   for insert to authenticated
   with check (
     public.manages_organization(organization_id)
     and actor_profile_id = auth.uid()
     and event_type <> 'independently_verified'
-    and (
-      event_type <> 'attested'
-      or not exists (
-        select 1 from public.organization_evidence_records r
-         join public.organization_people op on op.id = r.organization_person_id
-         where r.id = organization_evidence_events.record_id
-           and op.linked_profile_id = auth.uid()
-      )
-    )
   );
 
 -- THE INDEPENDENCE GUARD.

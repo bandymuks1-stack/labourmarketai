@@ -21,6 +21,7 @@ import {
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
+import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -1422,6 +1423,12 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   demandCreateDraft,
   demandCreateConfirm,
   contextSwitch,
+  // Organization evidence import — the ELEVEN capabilities that give an
+  // authorized assistant the same historical-import flow the web UI performs,
+  // over the same domain core (`lib/organization-evidence/import-core.ts`).
+  // Declared as a group because they are one flow, not eleven unrelated
+  // actions; each descriptor is still reviewed individually in its own file.
+  ...EVIDENCE_IMPORT_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

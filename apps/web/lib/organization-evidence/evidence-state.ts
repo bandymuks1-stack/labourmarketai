@@ -1,50 +1,54 @@
 /**
- * THE evidence-state ladder for company-supplied historical work (owner P0,
- * 2026-09-07). Pure: no IO, no clock, no copy.
+ * THE evidence-state ladder for organization-supplied evidence.
+ * (Owner P0 2026-09-07; ORGANIZATION-root correction and owner decision 3, the
+ * same day.) Pure: no IO, no clock, no copy.
  *
- * ── WHY A SECOND VOCABULARY IS NOT A SECOND TRUTH ──────────────────────────
- * Two canonical vocabularies already exist and neither is replaced here:
+ * ── THE AXIS THIS ADDS, AND THE ONE IT REFUSES TO TOUCH ────────────────────
+ * Two canonical vocabularies already exist and neither is replaced:
  *
- *   `lib/evidence/evidence-tier.ts`   what a worker_skills ROW is worth
+ *   `lib/evidence/evidence-tier.ts`      what a worker_skills ROW is worth
  *   `lib/journal/work-verification-state.ts`
- *                                     what happened to a WORK RECORD and who
- *                                     could verify it
+ *                                        what happened to a WORK RECORD and
+ *                                        who could verify it
  *
- * `work-verification-state.ts` was written (2026-09-06) with this import in
- * mind and says so in its own header: *"Tomorrow's imports enter through these
- * same states… An imported record with a resolvable employer is
- * `verifier_available`; one without is `self_reported`. Neither is ever
- * `verified`."* That still holds and this module does not contradict it.
+ * What neither expresses is the question organization-supplied evidence
+ * raises: **who supplied this, in what capacity, and did anyone independent
+ * stand behind it?** "Ramūnas says he did it", "his employer's 2023 timesheet
+ * says he did it", and "the client confirmed it" are three different claims.
+ * This module is that axis.
  *
- * What that vocabulary cannot express is the question a company import raises
- * and a self-logged journal entry never does: **who supplied this, and in what
- * capacity?** "Ramūnas says he did it" and "the company's 2023 timesheet says
- * he did it" are both unverified, and they are not the same claim. This module
- * is that axis — the SUPPLIER/ATTESTATION axis — and it is deliberately
- * incapable of expressing verification:
+ * ── THE LINE THAT MAY NEVER BE CROSSED (owner decision 3) ──────────────────
  *
- *   there is no VERIFIED value in this type, at all.
+ *     SELF_REPORTED / SELF_ATTESTED   ≠   INDEPENDENTLY_VERIFIED
  *
- * Independent verification stays exactly where it has always been: a real
- * `journal_entry_confirmations` row, derived by `deriveReviewResult`. No
- * import, no attestation and no inference in this file can reach it.
+ * A person MAY report their own work. An authorized organization
+ * representative MAY attest the organization's records — **including their own
+ * work**, because a sole trader legitimately has nobody above them and blocking
+ * them would erase real history. What the result must never do is acquire
+ * independent-verification authority.
+ *
+ * So attestation and verification are two DIFFERENT events with two different
+ * policies, and this derivation keeps the self-relationship visible forever:
+ * an attestation whose actor is the subject derives `SELF_ATTESTED`, never
+ * `ORGANIZATION_ATTESTED`, and `countsAsIndependentlyVerified` is false for it
+ * by construction.
  *
  * ── FACT vs DERIVED ────────────────────────────────────────────────────────
- * A record's evidence state is a FACT about its provenance. Everything the
- * importer INFERRED (which object a line refers to, which person a nickname
- * is) lives in `derived` with its method and confidence and never becomes a
- * source fact. `factOrDerived()` below is the one place that answers "did the
- * source actually say this?" for a rendered field.
+ * A record's state is a FACT about provenance. Everything the importer
+ * INFERRED lives in `derived` with its method and confidence and never becomes
+ * a source fact. `factOrDerived()` is the one answer to "did the source
+ * actually say this?".
  */
 
-/** What the record's own row can carry — the REPORTED states. The DB CHECK on
- *  `work_history_records.evidence_state` is exactly this list, so an import
- *  cannot write an attested state even by mistake. */
+/** What the record's own row may carry — the REPORTED states. The DB CHECK on
+ *  `organization_evidence_records.evidence_state` is exactly this list, so an
+ *  import cannot write an attested state even by mistake. */
 export const REPORTED_EVIDENCE_STATES = [
   /** The person themselves supplied it (an imported personal archive). */
   "SELF_REPORTED",
-  /** The organization supplied it about someone who worked for it. */
-  "COMPANY_REPORTED",
+  /** The organization supplied it about someone who worked, studied or
+   *  trained under it. */
+  "ORGANIZATION_REPORTED",
   /** Migrated from an older system; the original supplier is not recorded. */
   "LEGACY_IMPORTED",
   /** Supplied, but the supplier's standing was not established. */
@@ -55,19 +59,40 @@ export const REPORTED_EVIDENCE_STATES = [
 
 export type ReportedEvidenceState = (typeof REPORTED_EVIDENCE_STATES)[number];
 
-/** The attested states — reachable ONLY through an append-only
- *  `work_history_record_events` row whose actor is NOT the subject. */
+/**
+ * States reachable ONLY through an append-only `organization_evidence_events`
+ * row. Note the deliberate pairing: every attested state has a self- variant,
+ * because the actor being the subject is a permanent property of the evidence,
+ * not an error to be suppressed.
+ */
 export const ATTESTED_EVIDENCE_STATES = [
-  "COMPANY_ATTESTED",
+  /** The organization stands behind it, and the attester is NOT the subject. */
+  "ORGANIZATION_ATTESTED",
+  /** The organization stands behind it and the attester IS the subject — a
+   *  sole trader, or an owner attesting their own work. Legitimate, permanent,
+   *  and never independent verification. */
+  "SELF_ATTESTED",
+  /** A client / end client stood behind it. */
   "CLIENT_ATTESTED",
+  /** An education or training institution stood behind it. */
+  "INSTITUTION_ATTESTED",
+  /** A named assessor stood behind it. */
+  "ASSESSOR_ATTESTED",
+  /** A public body or sector body stood behind it. */
+  "PUBLIC_BODY_ATTESTED",
+  /** Any other party with standing. */
   "THIRD_PARTY_ATTESTED",
 ] as const;
 
 export type AttestedEvidenceState = (typeof ATTESTED_EVIDENCE_STATES)[number];
 
-/** Lifecycle outcomes that are neither a report nor an attestation. */
+/** The ONE state that means somebody independent checked it. Reachable only
+ *  through an `independently_verified` event, whose policy requires a recorded
+ *  party organization that is neither the supplier nor the subject. */
+export const INDEPENDENTLY_VERIFIED = "INDEPENDENTLY_VERIFIED" as const;
+
 export const LIFECYCLE_EVIDENCE_STATES = [
-  /** Withdrawn by the importing organization — the rollback path. The record
+  /** Withdrawn by the supplying organization — the rollback path. The record
    *  and the reason both stay readable; nothing is deleted. */
   "WITHDRAWN",
   /** Someone with standing disputes it. Never silently dropped. */
@@ -81,11 +106,13 @@ export type LifecycleEvidenceState = (typeof LIFECYCLE_EVIDENCE_STATES)[number];
 export type EvidenceState =
   | ReportedEvidenceState
   | AttestedEvidenceState
+  | typeof INDEPENDENTLY_VERIFIED
   | LifecycleEvidenceState;
 
 export const EVIDENCE_STATES: readonly EvidenceState[] = [
   ...REPORTED_EVIDENCE_STATES,
   ...ATTESTED_EVIDENCE_STATES,
+  INDEPENDENTLY_VERIFIED,
   ...LIFECYCLE_EVIDENCE_STATES,
 ];
 
@@ -97,14 +124,62 @@ export function isEvidenceState(v: unknown): v is EvidenceState {
   return typeof v === "string" && (EVIDENCE_STATES as readonly string[]).includes(v);
 }
 
-/** The attestation kinds a record event may carry, and the state each yields. */
-export const ATTESTATION_KINDS = ["company", "client", "third_party"] as const;
-export type AttestationKind = (typeof ATTESTATION_KINDS)[number];
+/**
+ * THE ONE PREDICATE every count, ranking and trust signal must use.
+ *
+ * Owner decision 3: self-confirmations and self-attestations are EXCLUDED from
+ * independently-verified counts, ranking and trust signals. Making that a
+ * function rather than a convention is what stops the next surface from
+ * re-deriving it and getting it wrong — which is exactly how
+ * `review_journal_entry` came to treat a self-confirmation as a confirmation.
+ */
+export function countsAsIndependentlyVerified(state: EvidenceState): boolean {
+  return state === INDEPENDENTLY_VERIFIED;
+}
 
-const ATTESTATION_STATE: Record<AttestationKind, AttestedEvidenceState> = {
-  company: "COMPANY_ATTESTED",
+/** True when the state records the subject vouching for themselves. Real
+ *  evidence, permanently marked as self-referential. */
+export function isSelfVouched(state: EvidenceState): boolean {
+  return state === "SELF_ATTESTED" || state === "SELF_REPORTED";
+}
+
+/** The roles an attestation or verification event may carry. Mirrors the DB
+ *  CHECK on `organization_evidence_events.actor_role`. */
+export const ATTESTATION_ACTOR_ROLES = [
+  "employer",
+  "agency",
+  "client",
+  "end_client",
+  "project_owner",
+  "subcontractor",
+  "education_provider",
+  "training_provider",
+  "assessor",
+  "verifier",
+  "placement_provider",
+  "public_body",
+  "sector_body",
+  "other",
+] as const;
+
+export type AttestationActorRole = (typeof ATTESTATION_ACTOR_ROLES)[number];
+
+/** Which attested state a role produces when the actor is NOT the subject. */
+const ROLE_STATE: Record<AttestationActorRole, AttestedEvidenceState> = {
+  employer: "ORGANIZATION_ATTESTED",
+  agency: "ORGANIZATION_ATTESTED",
+  subcontractor: "ORGANIZATION_ATTESTED",
+  project_owner: "ORGANIZATION_ATTESTED",
   client: "CLIENT_ATTESTED",
-  third_party: "THIRD_PARTY_ATTESTED",
+  end_client: "CLIENT_ATTESTED",
+  education_provider: "INSTITUTION_ATTESTED",
+  training_provider: "INSTITUTION_ATTESTED",
+  placement_provider: "INSTITUTION_ATTESTED",
+  assessor: "ASSESSOR_ATTESTED",
+  verifier: "ASSESSOR_ATTESTED",
+  public_body: "PUBLIC_BODY_ATTESTED",
+  sector_body: "PUBLIC_BODY_ATTESTED",
+  other: "THIRD_PARTY_ATTESTED",
 };
 
 /** One append-only lifecycle row, as read. */
@@ -112,140 +187,165 @@ export interface RecordLifecycleEvent {
   readonly eventType:
     | "attested"
     | "attestation_withdrawn"
+    | "independently_verified"
+    | "verification_withdrawn"
     | "withdrawn"
     | "reinstated"
     | "disputed"
     | "corrected";
-  readonly attestationKind?: AttestationKind | null;
+  readonly actorRole?: AttestationActorRole | string | null;
   /** ISO timestamp; used for latest-wins ordering. */
   readonly createdAt?: string | null;
-  /** Who acted. Carried so a reader can see WHO attested, never to decide
-   *  authority — the database already refused a self-attestation. */
+  /** Who acted. Carried so the derivation can tell a self-attestation from an
+   *  independent one — never to decide authority, which the DB already did. */
   readonly actorProfileId?: string | null;
 }
 
 export interface EvidenceStanding {
-  /** The state to show. */
   readonly state: EvidenceState;
-  /** True while the record is withdrawn — the honest rollback outcome. It is
-   *  NOT deletion and the record stays readable with its reason. */
+  /** True while withdrawn — the honest rollback outcome. NOT deletion. */
   readonly withdrawn: boolean;
-  /** The attestation currently standing, if any. */
   readonly attestation: {
-    readonly kind: AttestationKind;
+    readonly role: string | null;
+    readonly at: string | null;
+    readonly byProfileId: string | null;
+    /** The attester IS the subject. Permanent, visible, and never a defect. */
+    readonly self: boolean;
+  } | null;
+  readonly verification: {
     readonly at: string | null;
     readonly byProfileId: string | null;
   } | null;
-  /**
-   * ALWAYS false. Present so no caller has to remember why the field is
-   * missing: a company import can never be independent verification, and a
-   * reader that wants the real thing must consult
-   * `journal_entry_confirmations` through `deriveReviewResult`.
-   */
-  readonly independentlyVerified: false;
+  /** The ONE flag counts, ranking and trust signals may read. */
+  readonly independentlyVerified: boolean;
 }
 
 function ts(v: string | null | undefined): number {
   return v ? Date.parse(v) || 0 : 0;
 }
 
+function newestOf(
+  events: readonly RecordLifecycleEvent[],
+  type: RecordLifecycleEvent["eventType"],
+): RecordLifecycleEvent | null {
+  let best: RecordLifecycleEvent | null = null;
+  for (const e of events) {
+    if (e.eventType !== type) continue;
+    if (best === null || ts(e.createdAt) >= ts(best.createdAt)) best = e;
+  }
+  return best;
+}
+
+function latestAt(
+  events: readonly RecordLifecycleEvent[],
+  type: RecordLifecycleEvent["eventType"],
+): number {
+  return events.reduce((acc, e) => (e.eventType === type ? Math.max(acc, ts(e.createdAt)) : acc), 0);
+}
+
 /**
- * THE derivation: a record's base (reported) state plus its append-only
- * lifecycle rows → the state a surface may show.
+ * THE derivation: a record's base (reported) state, its append-only lifecycle
+ * rows, and who the record is ABOUT → the state a surface may show.
  *
  * Precedence, strongest signal first:
- *   1. WITHDRAWN — a withdrawal that has not been reinstated hides the
- *      record's standing entirely (but never the record);
+ *   1. WITHDRAWN — a withdrawal not since reinstated hides the standing (never
+ *      the record);
  *   2. DISPUTED — someone with standing contests it;
  *   3. CORRECTED — a correcting record superseded it;
- *   4. the standing attestation, if one was made and not withdrawn;
- *   5. otherwise the reported state, unchanged.
+ *   4. INDEPENDENTLY_VERIFIED — a standing verification event;
+ *   5. the standing attestation, self- or not;
+ *   6. otherwise the reported state, unchanged.
  *
  * Latest-wins WITHIN each event family, exactly as `deriveReviewResult` does
- * for journal confirmations — so a withdraw → reinstate → withdraw sequence
- * reads as withdrawn, and attest → withdraw-attestation reads as merely
- * reported again.
+ * for journal confirmations.
  */
 export function deriveEvidenceStanding(
   base: ReportedEvidenceState,
   events: readonly RecordLifecycleEvent[] = [],
+  subjectProfileId?: string | null,
 ): EvidenceStanding {
-  let withdrawnAt = 0;
-  let reinstatedAt = 0;
-  let disputedAt = 0;
-  let correctedAt = 0;
-  let attested: RecordLifecycleEvent | null = null;
-  let attestationWithdrawnAt = 0;
+  const withdrawnAt = latestAt(events, "withdrawn");
+  const reinstatedAt = latestAt(events, "reinstated");
+  const disputedAt = latestAt(events, "disputed");
+  const correctedAt = latestAt(events, "corrected");
+  const attestationWithdrawnAt = latestAt(events, "attestation_withdrawn");
+  const verificationWithdrawnAt = latestAt(events, "verification_withdrawn");
 
-  for (const e of events) {
-    const at = ts(e.createdAt);
-    switch (e.eventType) {
-      case "withdrawn":
-        withdrawnAt = Math.max(withdrawnAt, at);
-        break;
-      case "reinstated":
-        reinstatedAt = Math.max(reinstatedAt, at);
-        break;
-      case "disputed":
-        disputedAt = Math.max(disputedAt, at);
-        break;
-      case "corrected":
-        correctedAt = Math.max(correctedAt, at);
-        break;
-      case "attested":
-        if (attested === null || at >= ts(attested.createdAt)) attested = e;
-        break;
-      case "attestation_withdrawn":
-        attestationWithdrawnAt = Math.max(attestationWithdrawnAt, at);
-        break;
-    }
-  }
+  const attested = newestOf(events, "attested");
+  const verified = newestOf(events, "independently_verified");
 
   const isWithdrawn = withdrawnAt > 0 && withdrawnAt > reinstatedAt;
-  const attestationStands =
-    attested !== null &&
-    attested.attestationKind != null &&
-    ts(attested.createdAt) >= attestationWithdrawnAt &&
-    !(attestationWithdrawnAt > 0 && ts(attested.createdAt) === 0);
+  const attestationStands = attested !== null && ts(attested.createdAt) >= attestationWithdrawnAt;
+  const verificationStands = verified !== null && ts(verified.createdAt) >= verificationWithdrawnAt;
 
-  const attestation =
-    attestationStands && attested?.attestationKind
-      ? {
-          kind: attested.attestationKind,
-          at: attested.createdAt ?? null,
-          byProfileId: attested.actorProfileId ?? null,
-        }
-      : null;
+  const attesterIsSubject =
+    attestationStands &&
+    Boolean(subjectProfileId) &&
+    attested?.actorProfileId === subjectProfileId;
+
+  const attestation = attestationStands
+    ? {
+        role: (attested?.actorRole as string | null) ?? null,
+        at: attested?.createdAt ?? null,
+        byProfileId: attested?.actorProfileId ?? null,
+        self: attesterIsSubject,
+      }
+    : null;
+
+  const verification = verificationStands
+    ? { at: verified?.createdAt ?? null, byProfileId: verified?.actorProfileId ?? null }
+    : null;
 
   let state: EvidenceState;
   if (isWithdrawn) state = "WITHDRAWN";
   else if (disputedAt > 0) state = "DISPUTED";
   else if (correctedAt > 0) state = "CORRECTED";
-  else if (attestation) state = ATTESTATION_STATE[attestation.kind];
-  else state = base;
+  else if (verificationStands) state = INDEPENDENTLY_VERIFIED;
+  else if (attestation) {
+    state = attestation.self
+      ? "SELF_ATTESTED"
+      : (ROLE_STATE[attestation.role as AttestationActorRole] ?? "THIRD_PARTY_ATTESTED");
+  } else state = base;
 
-  return { state, withdrawn: isWithdrawn, attestation, independentlyVerified: false };
+  return {
+    state,
+    withdrawn: isWithdrawn,
+    attestation,
+    verification,
+    independentlyVerified: countsAsIndependentlyVerified(state),
+  };
 }
 
 /**
- * THE self-confirmation rule, stated once, for every surface that needs it.
+ * THE self-verification rule, stated once, for every surface that needs it.
  *
- * A person may submit, log or import their own work — that is legitimate, and
- * blocking it would erase real history. What they may never do is turn their
- * own action into independent confirmation of themselves. The database refuses
- * the write (the `work_history_record_events` insert policy); this is the same
- * rule as a pure predicate, so a UI can grey the button out and a capability
- * can refuse before it even tries.
+ * Owner decision 3, precisely: a person may report AND attest their own work;
+ * what they may never do is independently verify it. So this predicate governs
+ * VERIFICATION only — `canAttest` deliberately does not exist, because
+ * attestation by the subject is legitimate and is recorded as SELF_ATTESTED.
  */
-export function canAttest(opts: {
-  /** Who is about to attest. */
+export function canIndependentlyVerify(opts: {
+  /** Who is about to verify. */
   readonly actorProfileId: string | null;
   /** The profile the record's subject is linked to, or null when unclaimed. */
   readonly subjectProfileId: string | null;
-}): { readonly ok: true } | { readonly ok: false; readonly reason: "self_attestation" | "no_actor" } {
+  /** Does the actor manage the organization that SUPPLIED the evidence? */
+  readonly actorManagesSupplier: boolean;
+  /** Is the actor's organization a recorded party in a verifying role? */
+  readonly actorIsRecordedVerifyingParty: boolean;
+}):
+  | { readonly ok: true }
+  | {
+      readonly ok: false;
+      readonly reason: "no_actor" | "actor_is_subject" | "actor_is_supplier" | "not_a_recorded_party";
+    } {
   if (!opts.actorProfileId) return { ok: false, reason: "no_actor" };
   if (opts.subjectProfileId && opts.subjectProfileId === opts.actorProfileId) {
-    return { ok: false, reason: "self_attestation" };
+    return { ok: false, reason: "actor_is_subject" };
+  }
+  if (opts.actorManagesSupplier) return { ok: false, reason: "actor_is_supplier" };
+  if (!opts.actorIsRecordedVerifyingParty) {
+    return { ok: false, reason: "not_a_recorded_party" };
   }
   return { ok: true };
 }

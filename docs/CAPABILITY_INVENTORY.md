@@ -654,3 +654,108 @@ Each is independent; none blocks a code train.
    the suite as a local-only tool?
 7. **Org surfaces and the primary nav** — correct the feature catalogue (which
    still calls shipped org workspaces `preparing`), or add nav routes?
+
+### 6.4 THE NINE UNAPPLIED MIGRATIONS — reconciled individually (2026-09-07)
+
+> Owner decision 4: **no bulk apply, no bulk retire.** Each reconciled against
+> current schema, production data, live dependents, superseding migrations,
+> RLS, rollback and this register. Every "PRODUCTION_SCHEMA_STATE: absent" below
+> is a direct `to_regclass` read on 2026-09-07, not an inference.
+>
+> None has been applied. Four have live UI behind them and are P0.
+
+#### P0 — live UI depends on an absent schema capability
+
+**1. `20260713160000_agency_clients_v1`**
+- CAPABILITY: an agency's own private client address book + `demand → client` link.
+- CURRENT_DEPENDENTS: `lib/agency/clients.ts`, `clients-actions.ts`, `clients-model.ts`; `AgencyClientsSection` on `/dashboard/company` (renders for `company_type='staffing_agency'`); `lib/guards/market-map-read-layer-v1.test.ts`.
+- PRODUCTION_SCHEMA_STATE: `agency_clients` **absent**; 3 RPCs absent.
+- SUPERSEDED: **NO.** `agency_client_connections` (applied `20260723155658`) is a *different* model — an invitation-based, bidirectional bridge to a real platform organization. This is a private record of a client that may not be on the platform. Both are legitimate; today only the bridge exists.
+- SAFE_TO_APPLY: **YES** — 1 table, 1 policy, 5 SECURITY DEFINER RPCs, 4 GRANTs, no data DML (the `update`/`delete` lines are inside function bodies), paired rollback present.
+- SAFE_TO_RETIRE: **NO** — retiring means deleting a shipped agency surface and its lib layer.
+- CONSEQUENCE_OF_APPLY: the agency room's client list starts working; nothing existing changes.
+- CONSEQUENCE_OF_RETIRE: an agency capability the product advertises is removed.
+- RECOMMENDATION: **prepare for the human gate.** Highest of the four — it is the only one that gates a whole role's workflow.
+- HUMAN_GATE_REQUIRED: **YES** (SECURITY DEFINER + GRANT).
+
+**2. `20260714170000_worker_opportunity_seen_v1`**
+- CAPABILITY: per-worker "already seen this opportunity" markers — the honest definition of "new".
+- CURRENT_DEPENDENTS: `lib/opportunities/seen.ts` (the single adapter), `recommendations-model.ts`, `weekly-intelligence-model.ts`, `notifications/spine-signals.ts`, `marketplace/worker-opportunities.ts`.
+- PRODUCTION_SCHEMA_STATE: `worker_opportunity_seen` **absent**; RPC absent.
+- SUPERSEDED: **NO.**
+- SAFE_TO_APPLY: **YES** — 1 table, 1 own-rows-only policy, 2 RPCs, 2 GRANTs, no data DML, paired rollback. Privacy-positive by design: the demand owner never learns who saw.
+- SAFE_TO_RETIRE: **NO** without also removing the "new matching jobs" spine signal and the recommendation "Nauja" chip.
+- CONSEQUENCE_OF_APPLY: the new-jobs count can clear; the 7-day `created_at` fallback stops standing in for it.
+- CONSEQUENCE_OF_RETIRE: the badge stays permanently 0 by design, which is honest but dead.
+- RECOMMENDATION: **prepare for the human gate.**
+- HUMAN_GATE_REQUIRED: **YES** (SECURITY DEFINER + GRANT).
+
+**3. `20260714180000_journal_profession_templates_v1`**
+- CAPABILITY: per-profession scaffolding for the journal composer (doctrine §10 slug registry, not a UI enum).
+- CURRENT_DEPENDENTS: `lib/journal/journal-templates.ts`, `journal-templates-model.ts`; `journal-entry-composer.tsx`; `/dashboard/journal`.
+- PRODUCTION_SCHEMA_STATE: `journal_profession_templates` **absent**.
+- SUPERSEDED: **NO.**
+- SAFE_TO_APPLY: **YES** — the *least* risky of the nine: 1 table, 2 policies, **no SECURITY DEFINER function at all**, 2 GRANTs, no data DML, paired rollback.
+- SAFE_TO_RETIRE: possible, but it removes the only answer to "a tiler and a cleaner should not start from the same blank textarea".
+- CONSEQUENCE_OF_APPLY: templates become seedable; the composer's empty state stops being the only state.
+- CONSEQUENCE_OF_RETIRE: journal scaffolding stays a permanent gap.
+- RECOMMENDATION: **prepare for the human gate.** Lowest risk — a reasonable first apply if the owner wants to validate the gate procedure on something small.
+- HUMAN_GATE_REQUIRED: **YES** (GRANT only — no definer body to audit).
+
+**4. `20260713210000_multi_source_talent_v1`**
+- CAPABILITY: three tables — `worker_external_profiles` (P6), `talent_source_records` (P5 provenance), `identity_resolution_events` (P7 audit).
+- CURRENT_DEPENDENTS: **split.** `worker_external_profiles` has a live consumer (`lib/worker/external-profiles.ts` + the profile page section rendering `notEnabled`). `talent_source_records` and `identity_resolution_events` have **zero runtime consumers** — guard tests only.
+- PRODUCTION_SCHEMA_STATE: all three **absent**.
+- SUPERSEDED: **NO.**
+- SAFE_TO_APPLY: **YES technically** (3 tables, 3 policies, 8 definer RPCs, 9 GRANTs, an immutability trigger, no data DML, paired rollback) — but it applies twice as much surface as the live dependency needs.
+- SAFE_TO_RETIRE: **NO** for the external-profiles third; **YES** for the other two on today's evidence.
+- CONSEQUENCE_OF_APPLY: profile external links start working; two unused tables also ship, adding audit surface with no reader.
+- CONSEQUENCE_OF_RETIRE: the profile section must be removed too.
+- RECOMMENDATION: **split before gating.** Prepare an `external_profiles_v1` migration carrying only the one table its live UI needs; leave P5/P7 as recorded architecture. Applying all three to serve one is the kind of unused-surface growth this reconciliation is meant to stop.
+- HUMAN_GATE_REQUIRED: **YES** (SECURITY DEFINER + GRANT + trigger).
+
+#### Retire / never-apply
+
+**5. `20260714210000_company_memberships_v1`**
+- SUPERSEDED: **YES** — by `20260817160000` / the applied `company_memberships` (`20260805195716`). Its own header says `DO NOT APPLY THIS FILE, EVER`: its validation trigger would 42501-reject members whose governance lives only in `company_memberships` — production holds one such active manager.
+- SAFE_TO_APPLY: **NO — applying it would break a live manager's session.**
+- SAFE_TO_RETIRE (delete the file): **NO** — `company-architecture-v1.test.ts` pins its bytes. Keep in tree, never apply.
+- RECOMMENDATION: leave exactly as is. HUMAN_GATE_REQUIRED: n/a.
+
+**6. `20260713120000_company_locations_v1`**
+- SUPERSEDED: **YES** — by `work_objects_v1` (applied `20260817204529`); the ledger already records `SUPERSEDED, MUST NOT BE APPLIED`, pinned by `work-objects-projects-v1.test.ts`.
+- CURRENT_DEPENDENTS: none.
+- SAFE_TO_APPLY: **NO** (a second location truth beside `work_objects`).
+- SAFE_TO_RETIRE: **YES**, but the file is pinned by a guard — keep in tree, never apply.
+- RECOMMENDATION: leave as is. HUMAN_GATE_REQUIRED: n/a.
+
+#### Defer — no live dependent
+
+**7. `20260714211000_dashboard_preferences_v1`**
+- CAPABILITY: server-side dashboard card order/hidden preferences.
+- CURRENT_DEPENDENTS: **none.** The configurable card grid it served was deleted in W3; `dashboard-module-registry.ts` still describes 18 routes but has no renderer.
+- SAFE_TO_APPLY: yes technically; SAFE_TO_RETIRE: yes.
+- RECOMMENDATION: **defer.** Revisit only if the card grid returns. Applying it now creates a table with no writer.
+- HUMAN_GATE_REQUIRED: not yet.
+
+**8. `20260717150000_demand_interest_seen_v1`**
+- CAPABILITY: worker-side "the company responded to my interest" seen markers.
+- CURRENT_DEPENDENTS: **none at runtime** — guards only; `spine-signals.ts` explicitly defers the signal.
+- RECOMMENDATION: **defer** until the interest-response signal is built. Applying first is the wrong order.
+- HUMAN_GATE_REQUIRED: not yet.
+
+**9. `20260717130000_open_markets_countries_draft_v1`**
+- CAPABILITY: adds GE / BE / FR / ES / AT / CH as selectable `countries` rows. Data only — no table, no policy, no function, no GRANT.
+- CURRENT_DEPENDENTS: none directly; every country selector reads `countries`.
+- SAFE_TO_APPLY: technically yes (`insert … on conflict do nothing`); SAFE_TO_RETIRE: yes.
+- RECOMMENDATION: **owner market-scope decision, not an engineering one.** The header is explicit that the static gate may call it GREEN and that the DRAFT header is authoritative. Nothing is blocked by it.
+- HUMAN_GATE_REQUIRED: **YES** — as a market-scope decision.
+
+#### Summary
+
+| | migrations |
+|---|---|
+| Prepare for the human gate (live UI blocked) | `agency_clients_v1`, `worker_opportunity_seen_v1`, `journal_profession_templates_v1`, + a **split** `external_profiles_v1` carved out of `multi_source_talent_v1` |
+| Never apply, keep in tree (guard-pinned) | `company_memberships_v1` (20260714210000), `company_locations_v1` |
+| Defer — no live dependent | `dashboard_preferences_v1`, `demand_interest_seen_v1` |
+| Owner market-scope decision | `open_markets_countries_draft_v1` |

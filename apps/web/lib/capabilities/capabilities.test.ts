@@ -151,6 +151,21 @@ describe("the registry itself", () => {
       "demand.create_draft",
       "demand.create_confirm",
       "context.switch",
+      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
+      // and in order on purpose: exposing a capability is a reviewed product
+      // decision, so a new one must be added HERE, deliberately, to pass.
+      "evidence.organization.resolve",
+      "evidence.people.list",
+      "evidence.person.create",
+      "evidence.import.create_session",
+      "evidence.import.submit_rows",
+      "evidence.import.preview",
+      "evidence.import.resolve_row",
+      "evidence.import.commit",
+      "evidence.records.list",
+      "evidence.record.attest",
+      "evidence.import.withdraw",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -165,6 +180,21 @@ describe("the registry itself", () => {
       "demand.create_draft",
       "demand.create_confirm",
       "context.switch",
+      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
+      // and in order on purpose: exposing a capability is a reviewed product
+      // decision, so a new one must be added HERE, deliberately, to pass.
+      "evidence.organization.resolve",
+      "evidence.people.list",
+      "evidence.person.create",
+      "evidence.import.create_session",
+      "evidence.import.submit_rows",
+      "evidence.import.preview",
+      "evidence.import.resolve_row",
+      "evidence.import.commit",
+      "evidence.records.list",
+      "evidence.record.attest",
+      "evidence.import.withdraw",
     ]);
   });
 
