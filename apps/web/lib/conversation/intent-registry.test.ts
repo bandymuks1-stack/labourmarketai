@@ -66,7 +66,11 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 66 -> 67: `who-verifies-work` (owner P0 2026-09-06). The WORKER's side
     // of the confirmation loop — "Kam pateikti atliktą darbą?" used to match
     // `find-work` on the bare noun `darbą` and was answered with job adverts.
-    expect(entries.length).toBe(67);
+    // 67 -> 69: `cv-view` and `cv-choose` (owner window 11 §5/§30). VIEW ≠
+    // UPLOAD ≠ EDIT ≠ EXPORT, and the bare noun no longer resolves to any of
+    // them — it asks. Measured before the split: 11 of 22 ordinary CV
+    // sentences, including "noriu pamatyti savo CV", opened the IMPORT flow.
+    expect(entries.length).toBe(69);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -128,7 +132,13 @@ describe("the intent registry is the enumerable routing contract", () => {
       "admin-requests",
       "company-overview",
       "create-organization",
+      // The three CV doors are all route-class on purpose: each hands over a
+      // chip to `/cv` (or, for `cv-choose`, to the three real doors) and none
+      // of them can become a second write path. The IMPORT intent (`cv`) is
+      // deliberately NOT here — it is the only one that writes.
+      "cv-choose",
       "cv-export",
+      "cv-view",
       "documents",
       "hours-import",
       "lmc",

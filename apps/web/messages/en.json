@@ -4379,7 +4379,8 @@
         "admin": "Admin",
         "planning": "Calendar",
         "network": "Network",
-        "playerCard": "My card"
+        "playerCard": "My card",
+        "adminPlatform": "Platform administration"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -4581,6 +4582,10 @@
         "open": "Open in LabourMarket.ai:",
         "manage": "Manage your notification settings:"
       }
+    },
+    "carriedIntent": {
+      "label": "Continuing",
+      "hint": "You come straight back to this after signing in — the sentence travels with you."
     }
   },
   "shared": {
@@ -12315,7 +12320,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# client has} other {# clients have}} not confirmed the connection yet.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# learner invitation is} other {# learner invitations are}} still unaccepted.",
       "briefDocumentsExpiring": "{count, plural, one {# document is expiring} other {# documents are expiring}}.",
-      "briefDocumentsMissing": "{count, plural, one {# document is missing for your countries} other {# documents are missing for your countries}}.",
+      "briefDocumentsMissing": "{count, plural, one {Your stated countries still need # document} other {Your stated countries still need # documents}}: {list}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# candidate is waiting for your answer} other {# candidates are waiting for your answer}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agency offer is waiting for your decision} other {# agency offers are waiting for your decision}}.",
       "briefInterestContacted": "{count, plural, one {# company wants to get in touch about your interest} other {# companies want to get in touch about your interest}}.",
@@ -12512,6 +12517,8 @@
       "documentAddUnavailable": "The document catalogue could not be loaded right now — record it in the documents centre.",
       "cvExportHint": "Your verified CV — one sheet of what the system really knows. Open it and print to PDF.",
       "chipCvSheet": "Open the CV sheet",
+      "cvViewHint": "Here is your CV — what the system knows about you today. Open it and look; nothing is uploaded and nothing is changed.",
+      "cvChooseAsk": "What would you like to do with your CV? I can show it, take a new file, or open your profile — the CV is built from it.",
       "taskCreateIntro": "A new task: what must be done, on which project and by when.",
       "taskCreatedNext": "Task recorded. The project pulse shows it as open; assign a person on the tasks screen.",
       "capacityIntro": "Team {from} – {to} ({count} people):",
@@ -13262,7 +13269,11 @@
         "internship": "Where can I do an internship?",
         "professional": "I am an accountant looking for work in Vilnius",
         "needService": "I need someone to fix the roof",
-        "offerService": "I offer bookkeeping services"
+        "offerService": "I offer bookkeeping services",
+        "offerCapacity": "We have 7 electricians free from Monday",
+        "brigade": "I am looking for a crew for the site",
+        "logWork": "Today I worked 8 hours at the Green Tower site",
+        "verifyWork": "Who could confirm my experience?"
       },
       "understoodLabel": "Understood",
       "understood": {
@@ -13277,7 +13288,7 @@
         "projects": "You want to see your company's projects.",
         "company-overview": "You want to see what is happening in your company — people, projects, needs.",
         "create-organization": "You want to register a company or an organisation.",
-        "cv": "You want to work with your CV — upload it or look at it.",
+        "cv": "You want to upload a CV file. We will read it and show what we found before saving anything.",
         "log-work": "You want to record work you did in the work journal.",
         "skill-gap": "You want to know which skills you are missing.",
         "documents": "You are talking about documents and certificates — what is valid, what expires, what is missing.",
@@ -13290,7 +13301,11 @@
         "propose-candidate": "You want to propose a candidate to a client — you work as an agency.",
         "client-demand": "You want to see what your clients need.",
         "invite-student": "You represent an education institution and want to invite a student.",
-        "programmes": "You represent an education institution — programmes, groups, students."
+        "programmes": "You represent an education institution — programmes, groups, students.",
+        "offer-capacity": "You have people or capacity free. We will record the offer so those who need it can find it.",
+        "who-verifies-work": "You are asking who can confirm work you have already done. We will show who to send it to.",
+        "cv-view": "You want to see your CV — the one the system already holds. Nothing is uploaded or changed.",
+        "cv-choose": "You mentioned your CV. We will ask whether to show it, take a new file, or add to your profile."
       },
       "family": {
         "work": "You are talking about your work and professional path.",
@@ -13765,7 +13780,7 @@
       "label": "Work readiness",
       "known": "Already set:",
       "next": "Most important now:",
-      "complete": "Everything important is already set.",
+      "complete": "All {count} areas of your work card are stated. Documents and waiting requests are counted separately.",
       "unavailable": "Work readiness could not be shown right now. The conversation works as always."
     },
     "action": {

@@ -68,6 +68,22 @@ const EXAMPLE_KEYS = [
   "professional",
   "needService",
   "offerService",
+  // ── Window 11 (2026-09-07, owner §16/§18): the examples must span the
+  //    GRAPH, not one edge of it. Every sentence above is a person or a
+  //    company looking for the other — which is exactly the reading §16 says
+  //    a visitor leaves with ("job board + worker profile + work journal").
+  //    These four are the directions that reading has no room for, and each
+  //    lands on a capability that already exists:
+  //      offerCapacity — an organisation with SPARE CAPACITY (supply)
+  //      brigade       — a TEAM wanted for a site (measured 2026-09-07: this
+  //                      classified as the person LOOKING FOR WORK — the
+  //                      demand/supply inversion, on the landing)
+  //      logWork       — real work recorded (the evidence spine)
+  //      verifyWork    — who can verify it (the verification chain)
+  "offerCapacity",
+  "brigade",
+  "logWork",
+  "verifyWork",
 ] as const;
 
 export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
@@ -212,9 +228,20 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           </div>
         </form>
 
-        {/* ── Examples — routed live when tapped, never pre-answered ────── */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
+        {/* ── Examples — routed live when tapped, never pre-answered ──────
+               TEN sentences, and none of them may be dropped: each is a
+               different DIRECTION of the graph, which is the whole answer to
+               §16 (a visitor reading only "job + worker + hire" leaves
+               believing this is a job board).
+               But measured at 375px they stacked 523px tall — 64% of the
+               viewport — and pushed the entry card's bottom to y=999, below
+               the fold, which is §19's density complaint made worse. So below
+               `sm` the strip SCROLLS sideways on one line instead of wrapping:
+               every chip stays present, reachable and tabbable (the browser
+               scrolls a focused button into view), and the fold is intact.
+               From `sm` up it wraps exactly as before. */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+          <span className="shrink-0 text-meta text-text-muted">{t("examplesLabel")}</span>
           {EXAMPLE_KEYS.map((key) => {
             const example = t(`examples.${key}`);
             return (
@@ -226,7 +253,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                   setDraft(example);
                   ask(example);
                 }}
-                className="min-h-11 rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue sm:whitespace-normal"
               >
                 {example}
               </button>

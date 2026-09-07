@@ -4379,7 +4379,8 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netwerk",
-        "playerCard": "Mijn kaart"
+        "playerCard": "Mijn kaart",
+        "adminPlatform": "Platformbeheer"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -4581,6 +4582,10 @@
         "open": "Openen in LabourMarket.ai:",
         "manage": "Meldingsinstellingen beheren:"
       }
+    },
+    "carriedIntent": {
+      "label": "Je gaat verder met",
+      "hint": "Na het inloggen kom je hier direct op terug — je zin reist met je mee."
     }
   },
   "shared": {
@@ -12315,7 +12320,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# klant heeft} other {# klanten hebben}} de verbinding nog niet bevestigd.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# leerlinguitnodiging is} other {# leerlinguitnodigingen zijn}} nog niet geaccepteerd.",
       "briefDocumentsExpiring": "{count, plural, one {# document verloopt binnenkort} other {# documenten verlopen binnenkort}}.",
-      "briefDocumentsMissing": "{count, plural, one {# document ontbreekt voor uw landen} other {# documenten ontbreken voor uw landen}}.",
+      "briefDocumentsMissing": "{count, plural, one {Voor de landen die je noemde ontbreekt nog # document} other {Voor de landen die je noemde ontbreken nog # documenten}}: {list}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidaat wacht op uw antwoord} other {# kandidaten wachten op uw antwoord}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# aanbod van een bureau wacht op uw beslissing} other {# aanbiedingen van bureaus wachten op uw beslissing}}.",
       "briefInterestContacted": "{count, plural, one {# bedrijf wil contact met u over uw interesse} other {# bedrijven willen contact met u over uw interesse}}.",
@@ -12512,6 +12517,8 @@
       "documentAddUnavailable": "De documentcatalogus kon nu niet worden geladen — leg het document vast in het documentencentrum.",
       "cvExportHint": "Uw geverifieerde cv — één blad met wat het systeem echt weet. Open het en print naar PDF.",
       "chipCvSheet": "Cv-blad openen",
+      "cvViewHint": "Dit is je cv — wat het systeem vandaag over je weet. Open het en bekijk het; er wordt niets geüpload en niets gewijzigd.",
+      "cvChooseAsk": "Wat wil je met je cv doen? Ik kan het tonen, een nieuw bestand aannemen, of je profiel openen — daaruit wordt het cv opgebouwd.",
       "taskCreateIntro": "Een nieuwe taak: wat er moet gebeuren, op welk project en wanneer.",
       "taskCreatedNext": "Taak vastgelegd. De projectpuls toont hem als open; wijs een persoon toe op het takenscherm.",
       "capacityIntro": "Team {from} – {to} ({count} mensen):",
@@ -13262,7 +13269,11 @@
         "internship": "Waar kan ik stage lopen?",
         "professional": "Ik ben accountant en zoek werk in Vilnius",
         "needService": "Ik heb iemand nodig om het dak te repareren",
-        "offerService": "Ik bied boekhoudkundige diensten aan"
+        "offerService": "Ik bied boekhoudkundige diensten aan",
+        "offerCapacity": "Wij hebben 7 elektriciens vrij vanaf maandag",
+        "brigade": "Ik zoek een ploeg voor het project",
+        "logWork": "Vandaag heb ik 8 uur op de Green Tower gewerkt",
+        "verifyWork": "Wie zou mijn ervaring kunnen bevestigen?"
       },
       "understoodLabel": "Begrepen",
       "understood": {
@@ -13277,7 +13288,7 @@
         "projects": "U wilt de projecten van uw bedrijf zien.",
         "company-overview": "U wilt zien wat er in uw bedrijf gebeurt — mensen, projecten, behoeften.",
         "create-organization": "U wilt een bedrijf of organisatie registreren.",
-        "cv": "U wilt met uw cv werken — uploaden of bekijken.",
+        "cv": "Je wilt een cv-bestand uploaden. We lezen het en tonen wat we vonden voordat we iets opslaan.",
         "log-work": "U wilt gedaan werk in het werkdagboek vastleggen.",
         "skill-gap": "U wilt weten welke vaardigheden u mist.",
         "documents": "U heeft het over documenten en certificaten — wat geldig is, wat verloopt, wat ontbreekt.",
@@ -13290,7 +13301,11 @@
         "propose-candidate": "U wilt een kandidaat aan een klant voorstellen — u werkt als bureau.",
         "client-demand": "U wilt zien wat uw klanten nodig hebben.",
         "invite-student": "U vertegenwoordigt een onderwijsinstelling en wilt een student uitnodigen.",
-        "programmes": "U vertegenwoordigt een onderwijsinstelling — programma's, groepen, studenten."
+        "programmes": "U vertegenwoordigt een onderwijsinstelling — programma's, groepen, studenten.",
+        "offer-capacity": "Je hebt mensen of capaciteit vrij. We leggen het aanbod vast zodat wie het nodig heeft het vindt.",
+        "who-verifies-work": "Je vraagt wie werk kan bevestigen dat je al hebt gedaan. We laten zien naar wie je het stuurt.",
+        "cv-view": "Je wilt je cv zien — het cv dat het systeem al heeft. Er wordt niets geüpload of gewijzigd.",
+        "cv-choose": "Je noemt je cv. We vragen of we het tonen, een nieuw bestand aannemen of je profiel aanvullen."
       },
       "family": {
         "work": "U heeft het over uw werk en uw loopbaan.",
@@ -13765,7 +13780,7 @@
       "label": "Status van je werkprofiel",
       "known": "Al ingevuld:",
       "next": "Nu het belangrijkst:",
-      "complete": "Alles wat belangrijk is, is al ingevuld.",
+      "complete": "Alle {count} onderdelen van je werkkaart zijn ingevuld. Documenten en openstaande verzoeken tellen apart.",
       "unavailable": "De status van je werkprofiel kon nu niet worden getoond. Het gesprek werkt zoals altijd."
     },
     "action": {

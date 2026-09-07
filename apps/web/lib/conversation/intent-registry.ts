@@ -119,6 +119,11 @@ export type IntentHandlerId =
   | "clientOffers"
   | "addDocument"
   | "cvExport"
+  // The other two halves of the CV (owner window 11 §5/§30): looking at the
+  // one that exists, and the question asked when the sentence does not say
+  // which of the five CV actions is meant.
+  | "cvView"
+  | "cvChoose"
   | "addTask"
   | "whoAvailable"
   | "stageStatus"
@@ -258,6 +263,14 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // The verified CV SHEET (print-to-PDF, outside the shell so no chrome
   // prints) — a route, because the sheet IS the canonical output (§19).
   "cv-export": { domain: "cv", access: "route", handler: "cvExport", ownTyping: false },
+  // LOOKING at the CV that already exists — the SAME `/cv` surface, framed
+  // as a read rather than an export. Separate intent because owner §5 makes
+  // VIEW ≠ EXPORT a distinction the person must hear, not one the product
+  // may quietly collapse just because both open the same page.
+  "cv-view": { domain: "cv", access: "route", handler: "cvView", ownTyping: false },
+  // The sentence named the CV and nothing more. Route, not write: the answer
+  // is a question with the three real doors and no side effect.
+  "cv-choose": { domain: "cv", access: "route", handler: "cvChoose", ownTyping: false },
   // PROJECT → WORK (§11): a work package on the company's project through
   // the one inline form over the one task create.
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },
