@@ -4,9 +4,9 @@ Two views, as required. Nothing below is softened, and no evidence level is
 claimed that was not earned.
 
 **Branch:** `claude/company-historical-work-import-agatsq` · **PR:** #1600
-(draft, `needs-human-gate`) · 10 commits, 72 files, +13,769 / −95.
-**Checks:** `typecheck` ✅ · `lint` ✅ 0 errors · `build` ✅ · `vitest` **1,219
-files, 20,549 tests, 2 skipped** ✅ · `migration-safety` **RED, 3 findings, as
+(draft, `needs-human-gate`) · 13 commits.
+**Checks:** `typecheck` ✅ · `lint` ✅ 0 errors · `build` ✅ · `vitest` **1,220
+files, 20,566 tests, 2 skipped** ✅ · `migration-safety` **RED, 3 findings, as
 intended** (two unapproved migrations, neither carrying `@human-gate-approved`).
 
 **No human UI walk was performed.** Per the owner's timing correction, walks
@@ -82,7 +82,29 @@ migration has been. `PRODUCTION_PERSISTENCE_PROVEN` requires the owner gate.
 | The contradiction | `CODE_PROVEN` — `qualification_or_skill_evidence` mapped to 2 document slugs and nothing else |
 | Independence excludes self-confirmation | `TEST_PROVEN`, source-pinned |
 
-### 1.7 Reconciliation and governance
+### 1.7 Capacity as an authorized action
+
+| piece | evidence |
+|---|---|
+| `workforce.availability` capability | `TEST_PROVEN` — the first of the owner's company questions to become agent-callable |
+| One implementation | `TEST_PROVEN` — a guard pins that the chat action and the capability call the same core, and that the core is **not** a `"use server"` export (its arguments must not be client-reachable) |
+
+### 1.8 Apply-status sweep (owner decision 7)
+
+| piece | evidence |
+|---|---|
+| Twelve claims checked object-by-object against production | `PRODUCTION_DATA_PATH_PROVEN` |
+| Six stale claims corrected | `CODE_PROVEN` + `TEST_PROVEN` |
+| Six correct claims left untouched | `TEST_PROVEN` — a status is never changed to make a metric look better |
+
+**The method matters more than the six fixes.** A filename sweep —
+`supabase/migrations/*.sql` against `supabase_migrations.schema_migrations` —
+reported **231 of 235 migrations "unapplied"**, including one verified applied
+minutes earlier. The repo's filenames do not match the ledger's versions. Only
+asking the database whether the OBJECT exists is sound, and that is now written
+down in a guard so the next window does not rediscover it.
+
+### 1.9 Reconciliation and governance
 
 | piece | evidence |
 |---|---|
@@ -201,18 +223,23 @@ Ordered by graph value per unit of risk. Items 1–2 need the owner; 3–6 do no
    defects 1–3 above.
 2. **Decide the four live-UI migrations** from the nine-migration matrix.
    Users have been shown "not enabled yet" since ~2026-07-13.
-3. **Make capacity an authorized capability**, not only a chat answer — the
-   first of the owner's company questions to become an agent-callable action.
-   No migration; the core exists.
-4. **Connect work objects and tasks to the journal.** 1 object and 0 tasks
+3. ~~Make capacity an authorized capability~~ — **done this window**
+   (`workforce.availability`). The next ones are *"ko mums trūks spalį?"* and
+   *"rask brigadą projektui"*, which need the forecast and team models the
+   graph does not have yet.
+4. **Connect work objects and tasks to the journal.** Measured while
+   considering it: only **3** `site_name` metrics with 3 distinct values
+   against **1** work object — the edge is real but too thin to justify a
+   resolver today. It becomes worth building the moment the evidence import is
+   approved and starts creating objects from real history. 1 object and 0 tasks
    against 40 entries is the emptiest edge in the graph, and the journal
    already carries a site metric that nothing resolves to an object.
 5. **Extract competency signals from committed evidence** — the REAL WORK →
    EVIDENCE → COMPETENCY edge. The table exists in the gated migration; the
    pure extractor can be built and tested now.
-6. **Finish the stale-status sweep** (owner decision 7). Three comments were
-   corrected; the sweep is evidence-based and mechanical, and it stops the
-   rediscovery tax every future window pays.
+6. ~~Finish the stale-status sweep~~ — **done this window**, object by object,
+   with the method recorded. What remains of that debt is the parity gate
+   itself: it proves applied → repo and nothing proves repo → applied.
 
 Deferred deliberately: future demand, corridors, commercial opportunities and
 social acquisition. Each needs a real data foundation the graph does not have
