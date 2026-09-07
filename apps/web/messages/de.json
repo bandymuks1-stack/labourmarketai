@@ -3695,7 +3695,8 @@
     },
     "origin": {
       "live": "Live-Daten",
-      "preview": "Vorschau"
+      "preview": "Vorschau",
+      "coverage": "Märkte, keine Aktivität"
     }
   },
   "company": {
@@ -4920,7 +4921,8 @@
     "themeToLight": "Helles Design",
     "how": "So funktioniert es",
     "menuOpen": "Menü",
-    "menuClose": "Menü schließen"
+    "menuClose": "Menü schließen",
+    "market": "Der Markt"
   },
   "livingMarketReview": {
     "tagline": "Europas lebendiger Arbeitsmarkt",
@@ -13255,8 +13257,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Zeig, was du kannst. Finde, wo du gebraucht wirst.",
-      "sub": "Echte Erfahrung wird zu einem lebendigen Profil, und deine Fähigkeiten werden zu echten Chancen — für Arbeit, eine Dienstleistung oder ein Praktikum."
+      "headline": "Sagen Sie in eigenen Worten, was Sie bei der Arbeit brauchen.",
+      "sub": "Arbeit und Menschen, Kolonnen und Dienstleistungen, freie Kapazität, geleistete Arbeit und ihr Nachweis — ein Markt, an echten Orten. Sie müssen vorher nicht entscheiden, wer Sie sind."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -13323,7 +13325,19 @@
         "hire": "Ich brauche Arbeitskräfte"
       },
       "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
-      "refreshed": "aktualisiert {date}"
+      "refreshed": "aktualisiert {date}",
+      "exampleLabels": {
+        "hire": "Wir brauchen Leute",
+        "work": "Ich suche Arbeit",
+        "internship": "Wo ein Praktikum machen",
+        "professional": "Ich habe einen Beruf",
+        "needService": "Ich brauche eine Leistung",
+        "offerService": "Ich biete Leistungen an",
+        "offerCapacity": "Wir haben Leute frei",
+        "brigade": "Ich suche eine Kolonne",
+        "logWork": "Geleistete Arbeit erfassen",
+        "verifyWork": "Wer bestätigt das"
+      }
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",
@@ -13338,6 +13352,21 @@
       },
       "topTitle": "Aktuell gefragteste Berufe",
       "topNote": "Nach aktiven Stellenanzeigen auf der Plattform. Ein Teil der Anzeigen ist noch keinem Beruf zugeordnet."
+    },
+    "marketMap": {
+      "eyebrow": "Der Markt an Orten",
+      "title": "Der Arbeitsmarkt existiert an echten Orten.",
+      "lead": "Menschen, Arbeit und Bedarf sind irgendwo. Die Karte gehört zum Produkt, sie ist kein Bild neben dem Text.",
+      "shows": "Die Karte zeigt {count, plural, one {den # Markt} other {die # Märkte}}, in denen LabourMarket.ai heute tätig ist. Das sind Märkte, nicht die heutige Aktivität.",
+      "notPublished": "Wie viel Arbeit oder wie viele Menschen an einem Ort sind, zeigen wir Besuchern noch nicht — diese Daten veröffentlichen wir nicht, deshalb steht auf dieser Karte kein einziger geratener Punkt. Angemeldet sehen Sie den echten Stand Ihres Marktes."
+    },
+    "contexts": {
+      "eyebrow": "Wo anfangen",
+      "title": "Beginnen Sie dort, wo Sie heute stehen.",
+      "subcopy": "Das ist ein Einstieg, keine feste Rolle. Dieselbe Person kann Arbeit suchen, einstellen, eine Agentur vertreten und lernen — ein Konto, Kontexte lassen sich jederzeit ergänzen.",
+      "partnerLead": "Möchten Sie als Partner mit uns arbeiten?",
+      "partnerLink": "Kontakt aufnehmen",
+      "moreLead": "Mehr dazu, wie das für jeden funktioniert:"
     }
   },
   "workspace": {

@@ -16,9 +16,7 @@ type LinkVisibility = "always" | "vision-gate";
 type NavLink = {
   key:
     | "jobs"
-    | "workers"
-    | "companies"
-    | "agencies"
+    | "market"
     | "how"
     | "pricing"
     | "about"
@@ -41,17 +39,30 @@ type NavLink = {
 // section to justify a nav item; the audience it named already has a real
 // page behind "Agentūroms" (/for-agencies). A nav item that goes nowhere is a
 // dead CTA, and the shortest honest fix is to stop offering it.
+//
+// ── THE THREE AUDIENCE ITEMS LEFT THE BAR (owner window 11 §16) ────────────
+//
+// `Darbuotojams · Įmonėms · Agentūroms` sat in the primary navigation and, with
+// `Darbo skelbimai` beside them, told every visitor the same thing before they
+// read a word of the page: *this is a job board, and you are one of three kinds
+// of person.* That is the §16 misreading and the §20 identity trap, stated by
+// the navigation itself.
+//
+// NOTHING BECAME UNREACHABLE, which is the condition the owner set. The three
+// pages keep two real paths, and both name the audience:
+//   · the FOOTER already links all three plus `/jobs` (site-footer.tsx);
+//   · the STARTING CONTEXTS section links each one by name, in the place where
+//     a person is actually deciding where to begin.
+//
+// `Darbo skelbimai` STAYS in the bar. It is not a role — it is the public board
+// over the live imported vacancies, the highest-intent destination on the
+// marketing site, and the only internal path a crawler has to it.
+//
+// `Rinka` is new and points at the market map section — the landing's answer to
+// "where does this work?" (§17).
 const ALL_LINKS: readonly NavLink[] = [
-  // FIRST, deliberately. `/jobs` is the public board over 39,241 live imported
-  // vacancies and the highest-intent destination on the marketing site — a
-  // visitor looking for work wants the ads, not an audience page about them.
-  // It shipped with NO link from anywhere: the only route in was the card on
-  // the board itself, so a person landing on the homepage could not reach it
-  // at all and a crawler had no internal path to it either.
   { key: "jobs", href: "/jobs", visibility: "always" },
-  { key: "workers", href: "/for-workers", visibility: "always" },
-  { key: "companies", href: "/for-companies", visibility: "always" },
-  { key: "agencies", href: "/for-agencies", visibility: "always" },
+  { key: "market", href: "/#market", visibility: "always" },
   { key: "how", href: "/#how-it-works", visibility: "always" },
   { key: "pricing", href: "/pricing", visibility: "always" },
   { key: "about", href: "/about", visibility: "always" },

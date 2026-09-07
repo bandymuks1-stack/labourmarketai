@@ -213,7 +213,13 @@ export function MarketMap({
         // Kept deliberately small: at country zoom the Randstad cities sit
         // within ~50km, so generous radii merge Rotterdam/Den Haag/Amsterdam
         // into one blob and the map stops showing WHERE the demand is.
-        const radius = 4 + Math.sqrt(Math.max(a.weight, 1)) * 1.7;
+        // An anchor with NO weight stands for a place, not a quantity (the
+        // public coverage map). It draws at a fixed radius and its label
+        // carries no number — see the note on `MarketAnchor.weight`.
+        const hasWeight = typeof a.weight === "number";
+        const radius = hasWeight
+          ? 4 + Math.sqrt(Math.max(a.weight as number, 1)) * 1.7
+          : 7;
         // An APPROXIMATE country aggregate must not look like a city pin.
         // Dashed and hollow, so precision is legible without reading the
         // tooltip — and it is never colour alone that carries the difference.
@@ -227,10 +233,13 @@ export function MarketMap({
           fillOpacity: dimmed ? 0.15 : approx ? 0.14 : 0.55,
           opacity: dimmed ? 0.35 : 0.95,
         });
-        circle.bindTooltip(`${a.label} · ${a.weight}${approx ? " ~" : ""}`, {
-          direction: "top",
-          offset: [0, -radius],
-        });
+        circle.bindTooltip(
+          hasWeight ? `${a.label} · ${a.weight}${approx ? " ~" : ""}` : a.label,
+          {
+            direction: "top",
+            offset: [0, -radius],
+          },
+        );
         circle.addTo(group);
 
         if (onSelectRegion || onSelectAnchor) {
@@ -251,7 +260,10 @@ export function MarketMap({
             el.setAttribute("role", "button");
             el.setAttribute("data-anchor-id", a.id);
             el.setAttribute("data-anchor-precision", a.precision ?? "city");
-            el.setAttribute("aria-label", `${a.label} · ${a.weight}`);
+            el.setAttribute(
+              "aria-label",
+              hasWeight ? `${a.label} · ${a.weight}` : a.label,
+            );
             el.addEventListener("keydown", (ev) => {
               const key = (ev as KeyboardEvent).key;
               if (key !== "Enter" && key !== " ") return;
@@ -333,12 +345,20 @@ export function MarketMap({
       <span
         data-testid="map-origin-badge"
         className={`pointer-events-none absolute right-2 top-2 rounded-sm border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label ${
-          view.origin === "live"
+          view.origin === "live" || view.origin === "coverage"
             ? "border-ink-500 bg-ink-900/80 text-text-secondary"
             : "border-state-amber/40 bg-state-amber/15 text-state-amber"
         }`}
       >
-        {view.origin === "live" ? tOrigin("live") : tOrigin("preview")}
+        {/* `coverage` is neither live activity nor a preview of made-up data:
+            the countries are real and the map claims nothing about what is
+            happening in them. Labelling it "preview" would say the places are
+            invented; labelling it "live" would say the market is drawn. */}
+        {view.origin === "live"
+          ? tOrigin("live")
+          : view.origin === "coverage"
+            ? tOrigin("coverage")
+            : tOrigin("preview")}
       </span>
       {!ready ? (
         <div className="absolute inset-0 grid place-items-center bg-ink-900/60">

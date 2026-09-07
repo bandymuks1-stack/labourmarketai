@@ -30,9 +30,8 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
     // The public job board — the highest-intent destination on the marketing
     // site, and one that shipped with no nav entry at all.
     ["jobs", "/jobs"],
-    ["workers", "/for-workers"],
-    ["companies", "/for-companies"],
-    ["agencies", "/for-agencies"],
+    // Owner window 11 §17 — the market map section's anchor.
+    ["market", "/#market"],
     // PR-H global landing: "how it works" is a REAL landing anchor (the
     // section that carries it is pinned by lib/guards/global-landing.test.ts)
     // — not a new route, not a dead link.
@@ -45,6 +44,37 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
     ["about", "/about"],
   ])("nav key %s links to %s", (key, href) => {
     expect(nav).toContain(`{ key: "${key}", href: "${href}"`);
+  });
+
+  /**
+   * THE THREE AUDIENCE PAGES LEFT THE BAR AND STAYED REACHABLE
+   * (owner window 11 §16).
+   *
+   * `Darbuotojams · Įmonėms · Agentūroms` in the primary navigation told every
+   * visitor they were one of three fixed kinds of person before they read a
+   * word of the page. The pages themselves are good and were NOT removed — so
+   * the guarantee this file used to make ("the nav names them") is replaced
+   * with the stronger one the owner actually asked for: **they remain reachable
+   * by name, from surfaces a person actually uses.**
+   *
+   * Two independent paths are required, so losing one is a failure rather than
+   * a silent single point of contact.
+   */
+  it.each([
+    ["/for-workers"],
+    ["/for-companies"],
+    ["/for-agencies"],
+  ])("%s is reachable from BOTH the footer and the starting-contexts section", (href) => {
+    const footer = read("components/layouts/site-footer.tsx");
+    const doors = read("lib/marketing/public-doors.ts");
+    expect(footer, `footer no longer links ${href}`).toContain(`href="${href}"`);
+    expect(doors, `no starting context offers ${href}`).toContain(`"${href}"`);
+  });
+
+  it("the starting-contexts section actually renders those learn-more links", () => {
+    const band = read("components/marketing/starting-contexts-band.tsx");
+    expect(band).toMatch(/learnMore/);
+    expect(band).toMatch(/context-learn-more-/);
   });
 
   it("template keys (solutions/resources/company/platform) are gone from the nav", () => {
@@ -71,6 +101,12 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
         // menuOpen/menuClose: the mobile disclosure button's accessible name
         // (beta foundation audit M1). Below `lg` the six primary links are
         // display:none, so the phone header needs its own labelled control.
+        //
+        // agencies/companies/workers: the LABELS stay in the catalogue after
+        // owner window 11 §16 removed their nav ITEMS, because the
+        // starting-contexts section and the footer still render them by name.
+        // A label without a nav item is not a template leftover — it is the
+        // audience page named where a person is actually choosing.
         [
           "about",
           "agencies",
@@ -81,6 +117,8 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
           // template leftovers this list exists to keep out.
           "jobs",
           "login",
+          // market: the §17 market-map anchor (owner window 11).
+          "market",
           "menuClose",
           "menuOpen",
           "pricing",

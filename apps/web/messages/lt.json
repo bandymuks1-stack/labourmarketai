@@ -3695,7 +3695,8 @@
     },
     "origin": {
       "live": "Tikri duomenys",
-      "preview": "Peržiūra"
+      "preview": "Peržiūra",
+      "coverage": "Rinkos, ne veikla"
     }
   },
   "company": {
@@ -4920,7 +4921,8 @@
     "themeToLight": "Šviesi tema",
     "how": "Kaip veikia",
     "menuOpen": "Meniu",
-    "menuClose": "Uždaryti meniu"
+    "menuClose": "Uždaryti meniu",
+    "market": "Rinka"
   },
   "livingMarketReview": {
     "tagline": "Gyvoji Europos darbo rinka",
@@ -13255,8 +13257,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Parodyk, ką moki. Atrask, kur esi reikalingas.",
-      "sub": "Tikra patirtis tampa gyvu profiliu, o jūsų gebėjimai — tikromis galimybėmis: darbui, paslaugai ar praktikai."
+      "headline": "Pasakykite savais žodžiais, ko jums reikia darbe.",
+      "sub": "Darbas ir žmonės, komandos ir paslaugos, laisvi pajėgumai, atlikti darbai ir jų įrodymai — viena rinka, tikrose vietose. Nereikia iš anksto pasirinkti, kas esate."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -13323,7 +13325,19 @@
         "hire": "Reikia darbuotojų"
       },
       "numbers": "Dabar platformoje: {vacancies} aktyvių darbo skelbimų · {employers} darbdaviai",
-      "refreshed": "atnaujinta {date}"
+      "refreshed": "atnaujinta {date}",
+      "exampleLabels": {
+        "hire": "Reikia darbuotojų",
+        "work": "Ieškau darbo",
+        "internship": "Kur atlikti praktiką",
+        "professional": "Turiu profesiją",
+        "needService": "Reikia paslaugos",
+        "offerService": "Siūlau paslaugas",
+        "offerCapacity": "Turime laisvų žmonių",
+        "brigade": "Reikia brigados",
+        "logWork": "Užrašyti atliktą darbą",
+        "verifyWork": "Kas patvirtins patirtį"
+      }
     },
     "marketProof": {
       "eyebrow": "Šiuo metu platformoje",
@@ -13338,6 +13352,21 @@
       },
       "topTitle": "Šiuo metu paklausiausios profesijos",
       "topNote": "Pagal aktyvius darbo skelbimus platformoje. Dalis skelbimų dar nepriskirta profesijai."
+    },
+    "marketMap": {
+      "eyebrow": "Rinka vietose",
+      "title": "Darbo rinka egzistuoja tikrose vietose.",
+      "lead": "Žmonės, darbai ir poreikiai yra kažkur. Žemėlapis yra produkto dalis, o ne paveikslėlis prie teksto.",
+      "shows": "Žemėlapyje {count, plural, one {pažymėta # rinka} few {pažymėtos # rinkos} other {pažymėta # rinkų}}, kuriose LabourMarket.ai veikia šiandien. Tai rinkos, ne šios dienos veikla.",
+      "notPublished": "Kiek darbo ar žmonių yra konkrečioje vietoje, neprisijungusiems kol kas nerodome — tokių duomenų viešai neskelbiame, todėl žemėlapyje nėra nė vieno spėto taško. Prisijungę matote realią savo rinkos būklę."
+    },
+    "contexts": {
+      "eyebrow": "Nuo kur pradėti",
+      "title": "Pradėkite ten, kur šiandien esate.",
+      "subcopy": "Tai tik atspirties taškas, o ne nuolatinis vaidmuo. Tas pats žmogus gali ieškoti darbo, samdyti, atstovauti agentūrai ir mokytis — paskyra viena, kontekstus galima pridėti bet kada.",
+      "partnerLead": "Norite bendradarbiauti su mumis kaip partneris?",
+      "partnerLink": "Susisiekite",
+      "moreLead": "Daugiau apie tai, kaip tai veikia kiekvienam:"
     }
   },
   "workspace": {
