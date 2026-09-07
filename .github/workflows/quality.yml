@@ -132,6 +132,22 @@ jobs:
       - name: Product gate self-test (detectors must fire)
         run: node .github/scripts/product-gate.mjs --self-test
 
+      # Product truth — the capability register's two halves must agree.
+      #
+      # `docs/CAPABILITY_INVENTORY.md` §6 (human) and
+      # `apps/web/lib/product-gate/capability-register.ts` (machine) are ONE
+      # register. This step fails when a capability exists in one half and not
+      # the other, which is how a capability leaves the product without anyone
+      # deciding to remove it. The deeper checks — anchors exist, a usable
+      # capability is reachable from a real surface, a journey link may not be
+      # greener than the capability under it — run in `pnpm -F web test`
+      # (lib/guards/capability-register.test.ts, product-graph-journeys.test.ts).
+      # This is the cheap half, and it is also the agent bootstrap command:
+      # `node .github/scripts/product-truth.mjs` prints what the product is,
+      # what it must never be narrowed into, and which journeys are broken.
+      - name: Product truth (capability register halves agree)
+        run: node .github/scripts/product-truth.mjs --check
+
       # Anon SECURITY DEFINER allowlist — LIVE half.
       #
       # The static half already runs above inside `pnpm -F web test`
