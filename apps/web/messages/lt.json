@@ -15391,7 +15391,7 @@
     },
     "mine": {
       "title": "Ką organizacijos yra užfiksavusios apie mane",
-      "intro": "Darbas, mokymai ir studijos, kuriuos organizacija importavo iš savo pačios įrašų. Kilmė keliauja kartu: kas pateikė, kokiu vaidmeniu ir kada.",
+      "intro": "Darbas, mokymai ir studijos, kuriuos organizacija perkėlė iš savo pačios įrašų. Visada matote, kas juos atsiuntė, kuo jums tuo metu buvo ir kada.",
       "notEnabled": "Šioje aplinkoje tai dar neįjungta. Jūsų profilyje nieko netrūksta — tiesiog nėra saugyklos, kurią būtų galima perskaityti.",
       "empty": "Kol kas nė viena organizacija čia nieko apie jus neužfiksavo.",
       "offersTitle": "Laukiama jūsų atsakymo",

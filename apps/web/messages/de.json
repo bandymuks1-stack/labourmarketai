@@ -15391,7 +15391,7 @@
     },
     "mine": {
       "title": "Was Organisationen über mich festgehalten haben",
-      "intro": "Arbeit, Weiterbildung und Studium, die eine Organisation aus ihren eigenen Aufzeichnungen importiert hat. Die Herkunft reist mit: wer es geliefert hat, in welcher Eigenschaft und wann.",
+      "intro": "Arbeit, Weiterbildung und Studium, die eine Organisation aus ihren eigenen Aufzeichnungen übernommen hat. Sie sehen immer, wer es geschickt hat, was diese Stelle damals für Sie war und wann.",
       "notEnabled": "Das ist in dieser Umgebung noch nicht eingeschaltet. In Ihrem Profil fehlt nichts — der Speicher ist schlicht nicht da, um gelesen zu werden.",
       "empty": "Bisher hat hier keine Organisation etwas über Sie festgehalten.",
       "offersTitle": "Wartet auf Ihre Antwort",

@@ -15391,7 +15391,7 @@
     },
     "mine": {
       "title": "What organizations have recorded about me",
-      "intro": "Work, training and study that an organization imported from its own records. The provenance travels with it: who supplied it, in what capacity, and when.",
+      "intro": "Work, training and study that an organization brought over from its own records. You can always see who sent it, what they were to you at the time, and when.",
       "notEnabled": "This is not switched on in this environment yet. Nothing is missing from your profile — the store is simply not there to read.",
       "empty": "No organization has recorded anything about you here yet.",
       "offersTitle": "Waiting for your answer",

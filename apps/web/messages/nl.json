@@ -15391,7 +15391,7 @@
     },
     "mine": {
       "title": "Wat organisaties over mij hebben vastgelegd",
-      "intro": "Werk, opleiding en studie die een organisatie uit haar eigen administratie heeft geïmporteerd. De herkomst reist mee: wie het aanleverde, in welke hoedanigheid en wanneer.",
+      "intro": "Werk, opleiding en studie die een organisatie uit haar eigen administratie heeft overgezet. U ziet altijd wie het heeft gestuurd, wat diegene toen voor u was en wanneer.",
       "notEnabled": "Dit is in deze omgeving nog niet ingeschakeld. Er ontbreekt niets aan uw profiel — de opslag is er eenvoudigweg niet om te lezen.",
       "empty": "Nog geen enkele organisatie heeft hier iets over u vastgelegd.",
       "offersTitle": "Wacht op uw antwoord",
