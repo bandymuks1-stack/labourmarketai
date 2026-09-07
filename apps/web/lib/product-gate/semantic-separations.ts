@@ -147,7 +147,7 @@ export const SEMANTIC_SEPARATIONS: readonly SemanticSeparation[] = [
     rule:
       "One does not prove the others. A capability that exists, passes tests and has no consumer is not a capability a user has.",
     collapsedBefore:
-      "`work-verification-state.ts` shipped complete with zero consumers; the employer calendar never read the one planning projection; `/dashboard/learning` had no inbound link; a complete service-offering loop had near-zero reachability.",
+      "`work-verification-state.ts` shipped complete with zero consumers, and `/dashboard/learning` has no inbound link to this day. Two more examples in the same list turned out to be the collapse running the OTHER way: the employer calendar and the service-offering loop were both recorded as unreachable and both are reached — one in the import graph, one by eight real links. Naming which KIND of reachability is missing is the whole discipline; a claim that does not say cannot be checked, and rots into a confident wrong answer.",
     enforcement: "machine",
     anchor: "lib/product-gate/capability-register.ts",
     vocabulary: ["coreModule", "surfaces", "BUILT_NOT_CONNECTED"],

@@ -63,9 +63,31 @@ const journeySrc = read(JOURNEYS);
 const separationSrc = read(SEPARATIONS);
 const inventorySrc = read(INVENTORY);
 
-const capabilities = [...registerSrc.matchAll(
-  /id: "([A-Z]+-\d+)",\s*\n\s*domain: "([a-z_]+)",\s*\n(?:\s*internal: true,\s*\n)?\s*title: "((?:[^"\\]|\\.)*)",[\s\S]*?status: "([A-Z_]+)",\s*\n\s*strongestEvidence: "([A-Z_]+)",/g,
-)].map((m) => ({ id: m[1], domain: m[2], title: m[3], status: m[4], evidence: m[5] }));
+// Row by row, never one span-matching pattern across the whole file. The
+// pattern version broke twice — once on a CRLF checkout, once when a new field
+// appeared between two it anchored on — and both times it did not fail, it
+// returned FEWER rows. A parser that quietly returns less of a file is the
+// failure this register exists to stop, so the shape it depends on is now just
+// "a row starts here", and everything else is read inside the row.
+const capabilityChunks = registerSrc.split(/\n  \{\n/).slice(1);
+const capabilities = capabilityChunks
+  .map((chunk) => {
+    const id = /^\s*id: "([A-Z]+-\d+)",/m.exec(chunk);
+    const domain = /^\s*domain: "([a-z_]+)",/m.exec(chunk);
+    const title = /^\s*title: "((?:[^"\\]|\\.)*)",/m.exec(chunk);
+    const status = /^\s*status: "([A-Z_]+)",/m.exec(chunk);
+    const evidence = /^\s*strongestEvidence: "([A-Z_]+)",/m.exec(chunk);
+    return id && domain && title && status && evidence
+      ? {
+          id: id[1],
+          domain: domain[1],
+          title: title[1],
+          status: status[1],
+          evidence: evidence[1],
+        }
+      : null;
+  })
+  .filter((x) => x !== null);
 
 const nodes = [...graphSrc.matchAll(/\n    id: "([a-z_]+)",\n    name: "([^"]+)",/g)].map((m) => ({
   id: m[1],
@@ -118,6 +140,16 @@ if (process.argv.includes("--check")) {
   // rows, so an empty read is this script failing, and it must say so instead
   // of printing a confident zero.
   if (capabilities.length === 0) problems.push("the machine register parsed to zero capabilities");
+  // The parser must not silently skip a row it could not read. Every chunk that
+  // carries a capability id is a row, so a shortfall here means this script
+  // stopped understanding the register's shape — which is how it twice returned
+  // fewer rows without failing.
+  const idBearingChunks = capabilityChunks.filter((c) => /^\s*id: "[A-Z]+-\d+",/m.test(c)).length;
+  if (capabilities.length !== idBearingChunks) {
+    problems.push(
+      `the parser read ${capabilities.length} of ${idBearingChunks} capability rows — it no longer understands the register's shape`,
+    );
+  }
   if (documented.length === 0) problems.push("docs/CAPABILITY_INVENTORY.md §6 parsed to zero capabilities");
   if (nodes.length === 0) problems.push("the product graph parsed to zero nodes");
   if (journeys.length === 0) problems.push("the journey register parsed to zero journeys");

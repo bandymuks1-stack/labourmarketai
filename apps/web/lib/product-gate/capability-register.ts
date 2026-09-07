@@ -131,6 +131,29 @@ export interface CapabilityRow {
   /** One sentence of honest current truth. Debt goes here, not in silence. */
   readonly note: string;
   /**
+   * HOW a `BUILT_NOT_CONNECTED` capability is disconnected. Required for that
+   * status, because "nothing leads to it" is not one claim but several, and
+   * they are checked in different ways:
+   *
+   *   `no_importer`   no module imports it — the import graph proves this, and
+   *                   the guard checks it against the real graph;
+   *   `no_navigation` reachable in code and in the URL bar, and no surface
+   *                   links to it — the guard checks that no `href` exists;
+   *   `orphan_route`  a route with zero inbound links of any kind;
+   *   `no_writer`     readable, and nothing a human can reach creates the data;
+   *   `inert_bridge`  the code runs and the data it links to does not exist.
+   *
+   * Conflating these is itself the SEP-8 collapse: reachable, visible and
+   * actionable are different properties, and a claim that does not say WHICH
+   * one is missing cannot be falsified — so it rots.
+   */
+  readonly disconnectedBecause?:
+    | "no_importer"
+    | "no_navigation"
+    | "orphan_route"
+    | "no_writer"
+    | "inert_bridge";
+  /**
    * True when the USER of this capability is the repository or CI, not a
    * person — governance, gates, registers. The surface and reachability rules
    * do not apply, because there is no surface to reach. Nothing else may set
@@ -377,6 +400,7 @@ const SKILLS: readonly CapabilityRow[] = [
   },
   {
     id: "SKL-6",
+    disconnectedBecause: "inert_bridge",
     domain: "skills",
     title: "ESCO taxonomy",
     worldElement: "skills",
@@ -524,8 +548,8 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
     anchors: ["lib/candidates", "lib/scouting"],
     coreModule: "lib/candidates/candidate-drafts.ts",
-    surfaces: ["app/[locale]/dashboard/talent"],
-    note: "/dashboard/talent is a superadmin sample preview, not a product surface.",
+    surfaces: ["app/[locale]/dashboard/candidates"],
+    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link anywhere — it was named as this row's surface until the navigation guard proved nothing leads there.",
   },
   {
     id: "ORG-8",
@@ -594,6 +618,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-4",
+    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Tasks",
     worldElement: "projects",
@@ -642,6 +667,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-8",
+    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Defects / corrections",
     worldElement: "projects",
@@ -654,6 +680,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-9",
+    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Handover passport",
     worldElement: "projects",
@@ -666,6 +693,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-10",
+    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Project economics",
     worldElement: "projects",
@@ -910,12 +938,12 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     domain: "time_capacity",
     title: "Employer calendar",
     worldElement: "organizations",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "CODE_PROVEN",
-    anchors: ["lib/planning"],
-    coreModule: null,
-    surfaces: [],
-    note: "Everything it needs exists; the employer page never reads the one planning projection.",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/planning/employer-availability.ts"],
+    coreModule: "lib/planning/employer-availability.ts",
+    surfaces: ["app/[locale]/dashboard/company/planning"],
+    note: "CORRECTED 2026-09-07: recorded as disconnected on the claim that the employer page never reads the planning projection. It does — `/dashboard/company/planning` reads `getEmployerWorkerAvailability`, which reuses the canonical planning model\'s own date projection, and the absences page and two conversation paths read it too. What it deliberately does NOT read is the full worker agenda: the employer projection omits `note` and `absence_type` at the QUERY, so an employer learns that somebody is unavailable and never why. Whether an employer also needs a month view is a product question, not a broken wire.",
   },
   {
     id: "CAL-3",
@@ -1028,10 +1056,11 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/services"],
     coreModule: "lib/services/service-offerings-shared.ts",
     surfaces: ["app/[locale]/dashboard/service-requests"],
-    note: "The loop is complete end to end and no navigation leads to it — a human reaches it only by typing the URL. Reachable in the import graph, unreachable in the product.",
+    note: "CORRECTED 2026-09-07: the note this row carried — \"no navigation leads to it, a human reaches it only by typing the URL\" — was false. Bookings, the market map, the opportunities board, the services page, the marketplace loop section, the spine signals and the planning zone all link to it. The claim came from the reconciliation\'s prose and was never checked; the navigation guard added with this correction is what would have caught it. What is actually true: the loop is complete and reachable, and the 2026-09-07 snapshot records no service offerings in production, so nothing has been through it.",
   },
   {
     id: "MKT-2",
+    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Physical resource listings",
     worldElement: "objects",
@@ -1068,6 +1097,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
   },
   {
     id: "MKT-5",
+    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Procurement",
     worldElement: "organizations",
@@ -1080,6 +1110,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
   },
   {
     id: "MKT-6",
+    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Business trips",
     worldElement: "objects",
@@ -1277,6 +1308,7 @@ const EDUCATION: readonly CapabilityRow[] = [
   },
   {
     id: "EDU-3",
+    disconnectedBecause: "no_writer",
     domain: "education",
     title: "Learner outcomes",
     worldElement: "reputation",
@@ -1301,6 +1333,7 @@ const EDUCATION: readonly CapabilityRow[] = [
   },
   {
     id: "EDU-5",
+    disconnectedBecause: "orphan_route",
     domain: "education",
     title: "Human-in-loop learning review",
     worldElement: "skills",
@@ -1309,7 +1342,7 @@ const EDUCATION: readonly CapabilityRow[] = [
     anchors: ["lib/learning"],
     coreModule: null,
     surfaces: [],
-    note: "/dashboard/learning has zero inbound links — an orphan route.",
+    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL.",
   },
   {
     id: "EDU-6",
