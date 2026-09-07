@@ -8,6 +8,7 @@ import { readOrganizationCapabilities } from "@/lib/organizations/capability-rea
 import { organizationCapabilities } from "@/lib/organizations/capabilities";
 import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
 import { listSharedRequestsForAgency, listAgencyOfferProgress } from "@/lib/agency/bridge-read";
+import { DEMAND_KIND_OR_FILTER } from "@/lib/demand/market-direction";
 import { ROLLUP_OPEN_DEMAND_STATUSES } from "@/lib/company/org-demand-rollup";
 import {
   UNKNOWN_FACTS,
@@ -177,9 +178,15 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
     await Promise.all([
       count((c) =>
         c
+          // DIRECTION (SEP-4): this counts OPEN NEEDS. A `head: true` count
+          // returns no rows to classify, so the allow-list is applied in the
+          // query — from the one set in `market-direction.ts`, never a literal
+          // copy. Without it the chat starter told an agency it had open needs
+          // when what it had recorded was available people.
           .from("customer_requests")
           .select("id", { count: "exact", head: true })
           .eq("organization_id", organizationId)
+          .or(DEMAND_KIND_OR_FILTER)
           .in("status", [...ROLLUP_OPEN_DEMAND_STATUSES]),
       ),
       count((c) =>

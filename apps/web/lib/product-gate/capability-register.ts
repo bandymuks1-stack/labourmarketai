@@ -796,7 +796,9 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/demand/market-direction.ts"],
     coreModule: "lib/demand/market-direction.ts",
     surfaces: ["app/[locale]/dashboard/opportunities"],
-    note: "Two boards fixed (#1588/#1596); further surfaces still read an agency's offer as its need. See SEP-4.",
+    ownerDecision:
+      "Apply 20260906140000_worker_board_excludes_supply_v1 — the RPC returns no `kind`, so the worker board cannot be fixed above the database.",
+    note: "Four more own-rows surfaces fixed 2026-09-07 — the market map (which drew an agency's own offer as an actionable need), the org demand rollup, the scouting list and the chat starter count — and the hand-written copies of the kind allow-list are now banned by a guard. What remains is the DATABASE half: `list_open_demand_for_workers` does not return `kind`, so the worker board and the map's worker leg cannot classify in TypeScript at all. That needs the owner-gated migration 20260906140000.",
   },
   {
     id: "DEM-3",
