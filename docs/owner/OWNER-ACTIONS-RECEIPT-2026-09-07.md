@@ -12,11 +12,20 @@ was **read from production on 2026-09-07**, not inferred.
 
 ---
 
-## 1. Supabase Auth — OTP expiry
+## 1. Supabase Auth — OTP expiry — ✅ **RESOLVED 2026-09-07**
 
-**CURRENT STATE.** Not compliant. The security advisor
-`auth_otp_long_expiry` fires on the production project, read live on
-2026-09-07:
+**OUTCOME.** The owner changed the production value from **14400 → 3600
+seconds**. Verified from this session, not taken on report: the security
+advisors were re-read live afterwards and `auth_otp_long_expiry` **no longer
+appears anywhere in the security list**. This is the verification §"HOW TO
+VERIFY" below demanded, so the item is recorded done.
+
+The original statement of the problem is kept below unedited, because a closed
+finding is evidence and deleting it would leave nothing showing what was fixed.
+
+**CURRENT STATE (as first measured, now historical).** Not compliant. The
+security advisor `auth_otp_long_expiry` fires on the production project, read
+live on 2026-09-07:
 
 > *"We have detected that you have enabled the email provider with the OTP
 > expiry set to more than an hour. It is recommended to set this value to less
@@ -41,10 +50,26 @@ Advisors → Security. **Do not record this as done until that advisor is gone.*
 
 ---
 
-## 2. Supabase Auth — leaked-password protection
+## 2. Supabase Auth — leaked-password protection — ⛔ **BLOCKED_BY_PLAN**
 
-**CURRENT STATE.** Not compliant. `auth_leaked_password_protection` fires on the
-production project, read live on 2026-09-07:
+**OUTCOME.** The owner attempted to enable it. **Supabase refused: the
+project's current plan does not offer HaveIBeenPwned protection.**
+
+This is therefore **BLOCKED_BY_PLAN — not unresolved implementation work, and
+not an owner action still outstanding.** Nothing in this repository, and no
+dashboard action on the current plan, can clear it. It becomes actionable again
+only on a plan change, which is a commercial decision and not a technical one.
+
+The advisor **still fires**, re-read live from this session after the attempt,
+and it will keep firing while the plan stands. That is expected and must not be
+read as the action having been skipped. Any future sweep that finds this advisor
+should resolve it against this section rather than re-raising it as new work.
+
+The original statement is kept below unedited for the same reason as §1.
+
+**CURRENT STATE (as first measured).** Not compliant.
+`auth_leaked_password_protection` fires on the production project, read live on
+2026-09-07:
 
 > *"Supabase Auth prevents the use of compromised passwords by checking against
 > HaveIBeenPwned.org. Enable this feature to enhance security."*
