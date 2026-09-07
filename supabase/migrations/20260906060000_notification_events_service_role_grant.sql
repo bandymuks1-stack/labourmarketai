@@ -59,6 +59,44 @@
 --   own-row policies untouched (service_role bypasses RLS by design, as for
 --   every admin write).
 --
+-- ── PROVEN ON PRODUCTION 2026-09-07, IN A TRANSACTION, THEN ROLLED BACK ────
+--
+-- The reason was reproduced rather than inferred, and the fix was measured for
+-- SUFFICIENCY and for MINIMALITY in the same rolled-back transaction.
+--
+-- FIRST, the cause is a GRANT and not RLS. `service_role` has
+-- `rolbypassrls = true` on this project (read from pg_roles), so no policy can
+-- stop it; and `has_table_privilege('service_role', ...)` returns FALSE for
+-- INSERT, SELECT, UPDATE **and** DELETE on notification_events and for SELECT
+-- on notification_preferences. The role holds no privilege at all on either
+-- table. notification_events also has NO INSERT policy - which is consistent,
+-- because the only intended writer bypasses RLS.
+--
+-- REPRODUCTION (`set local role service_role`, the emitter's own write):
+--   1  emit a weekly_digest event BEFORE the grant
+--        -> BLOCKED 42501 "permission denied for table notification_events"
+--           - the exact error in the runtime logs.
+--   2  read notification_preferences BEFORE the grant
+--        -> BLOCKED 42501. This is the silent half: `readPrefRowsFailOpen`
+--           fails OPEN, so a denied read looks like "no preferences" and every
+--           stored email opt-in is discarded without any surface saying so.
+--
+-- SUFFICIENCY (same transaction, after applying the two statements verbatim):
+--   3  the same emit -> WROTE ok
+--   4  the same consent read -> READ 0 rows (honest zero; the table is empty)
+--
+-- MINIMALITY - the two things the grant must NOT enable:
+--   5  DELETE from notification_events -> BLOCKED 42501. Append-only survives;
+--      DELETE is deliberately not granted (doctrine 3.1).
+--   6  INSERT into notification_preferences -> BLOCKED 42501. The service role
+--      READS consent and can never write it. The owner of a preference stays
+--      its only writer, through their own RLS-scoped client.
+--   7  anon / PUBLIC privileges on notification_events -> NONE, unchanged.
+--
+-- NO RESIDUE. Re-measured after the rollback: service_role INSERT still false,
+-- preferences SELECT still false, notification_events still holds 2 rows and
+-- 0 weekly_digest rows. Production is exactly as it was.
+--
 -- ROLLBACK: supabase/rollbacks/20260906060000_notification_events_service_role_grant.down.sql
 --   (revokes exactly these privileges; nothing else changes).
 
