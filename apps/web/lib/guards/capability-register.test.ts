@@ -22,6 +22,12 @@ import {
  *   · every claimed implementation EXISTS on disk;
  *   · a capability claimed usable is REACHABLE from a real surface through the
  *     import graph, and one claimed disconnected is NOT;
+ *   · a capability claimed usable is NAVIGABLE — something links to its route.
+ *     This half was added on 2026-09-07 because the register itself shipped two
+ *     false claims that only it could catch: `/dashboard/service-requests`
+ *     recorded as "reachable only by typing the URL" while eight surfaces link
+ *     to it, and `/dashboard/talent` named as a live surface with no inbound
+ *     link at all;
  *   · the id lists of the two halves are IDENTICAL, in both directions, so a
  *     capability cannot leave the product by being quietly dropped from a file.
  *
@@ -110,6 +116,41 @@ function reachableFromSurfaces(graph: Graph): ReadonlySet<string> {
 
 const graph = buildGraph();
 const reachable = reachableFromSurfaces(graph);
+
+/**
+ * NAVIGATION reachability — the OTHER half of SEP-8, and the half the import
+ * graph cannot see.
+ *
+ * `/dashboard/service-requests` is imported, rendered and complete, and this
+ * register still shipped the claim that "no navigation leads to it — a human
+ * reaches it only by typing the URL". Eight real `href`s said otherwise. The
+ * claim came from prose, was never checked, and nothing could check it, because
+ * the import graph answers a different question.
+ *
+ * So: a dashboard route surface counts as NAVIGABLE when some non-test source
+ * outside that route's own directory carries an href to it. That is checkable,
+ * and it is what "a person can get there" actually means.
+ */
+const dashboardRouteOf = (surface: string): string | null => {
+  const m = /^app\/\[locale\]\/(dashboard\/[a-z0-9-]+(?:\/[a-z0-9-]+)?)$/.exec(surface);
+  return m ? `/${m[1]}` : null;
+};
+
+function navigableRoutes(): ReadonlySet<string> {
+  const found = new Set<string>();
+  for (const file of graph.files) {
+    const source = readFileSync(join(WEB_ROOT, file), "utf8");
+    for (const m of source.matchAll(/["'`](?:\/\$\{locale\})?(\/dashboard\/[a-z0-9/-]+)["'`]/g)) {
+      const route = m[1]!;
+      // A route linking to itself is not navigation.
+      if (file.includes(`app/[locale]${route}/`)) continue;
+      found.add(route);
+    }
+  }
+  return found;
+}
+
+const navigable = navigableRoutes();
 
 const describeRow = (row: CapabilityRow) => `${row.id} (${row.title})`;
 
@@ -233,6 +274,50 @@ describe("a capability nobody can reach is not a capability a user has", () => {
         reachable.has(row.coreModule),
         `${describeRow(row)} is recorded as disconnected, and \`${row.coreModule}\` IS reachable. Somebody wired it — raise the status and say what evidence the wiring reached.`,
       ).toBe(false);
+    }
+  });
+
+  it("a live capability's route surface is one a person can actually reach", () => {
+    for (const row of CAPABILITY_REGISTER) {
+      if (row.internal) continue;
+      if (row.status !== "BUILT_AND_USABLE" && row.status !== "PARTIAL") continue;
+      const routes = row.surfaces.map(dashboardRouteOf).filter((r): r is string => r !== null);
+      if (routes.length === 0) continue; // its surfaces are components, not routes
+      expect(
+        routes.some((r) => navigable.has(r)),
+        `${describeRow(row)} claims status ${row.status}, and NOTHING links to ${routes.join(" or ")}. Imported is not the same as reachable: a person would have to type the URL.`,
+      ).toBe(true);
+    }
+  });
+
+  it("a capability disconnected for want of navigation really has none", () => {
+    for (const row of CAPABILITY_REGISTER) {
+      if (row.disconnectedBecause !== "no_navigation" && row.disconnectedBecause !== "orphan_route") {
+        continue;
+      }
+      for (const route of row.surfaces.map(dashboardRouteOf)) {
+        if (route === null) continue;
+        expect(
+          navigable.has(route),
+          `${describeRow(row)} says nothing navigates to ${route}, and something does. Somebody wired it — raise the status.`,
+        ).toBe(false);
+      }
+    }
+  });
+
+  it("BUILT_NOT_CONNECTED says HOW it is disconnected, so the claim can be falsified", () => {
+    for (const row of CAPABILITY_REGISTER) {
+      if (row.status !== "BUILT_NOT_CONNECTED") continue;
+      expect(
+        row.disconnectedBecause,
+        `${describeRow(row)} claims nothing leads to it without saying which kind of path is missing. "Nothing leads to it" is several different claims, checked in different ways; one that does not say which cannot be checked at all.`,
+      ).toBeTruthy();
+      if (row.disconnectedBecause === "no_importer") {
+        expect(
+          row.coreModule,
+          `${describeRow(row)} claims no importer and names no module to check`,
+        ).toBeTruthy();
+      }
     }
   });
 

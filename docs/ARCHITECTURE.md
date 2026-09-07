@@ -397,6 +397,10 @@ What CI enforces (`lib/guards/capability-register.test.ts`,
 - every claimed implementation and surface **exists**;
 - a capability claimed usable is **reachable** from a real route or component
   through the import graph — and one claimed disconnected is not;
+- a capability claimed usable is **navigable**: something links to its route.
+  Imported is not reachable, and reachable is not visible — a
+  `BUILT_NOT_CONNECTED` row must say WHICH kind of path is missing, or the
+  claim cannot be falsified;
 - **evidence never outruns status**;
 - the id lists of the two halves are **identical in both directions**, so a
   capability cannot leave the product by being dropped from one file;
