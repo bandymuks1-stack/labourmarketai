@@ -84,8 +84,13 @@ matching) and `MKT-1` (service offerings) as `BUILT_NOT_CONNECTED` from the
 reconciliation's prose; the reachability check proved both are reachable in the
 import graph. `MKT-1`'s truth is narrower and more interesting than either
 label: reachable in code, unreachable in the product, because no navigation
-leads to it and a human gets there only by typing the URL. That is now what its
-row says.
+leads to it and a human gets there only by typing the URL.
+
+**That last sentence was itself false, and #1604 corrected it** — seven surfaces
+link to `/dashboard/service-requests`. It is left standing here, with this note,
+because it is the clearest thing in this report: a claim written confidently,
+from prose, about reachability nothing could check. The navigation guard added
+in #1604 is what catches that class now. See the continuation below.
 
 ## 3. AGENT BOOTSTRAP STATUS — **BUILT AND USABLE** · `TEST_PROVEN`
 
@@ -273,6 +278,102 @@ literals — the guard blanks comments, not strings, so it read the register as 
 new undeclared reader of the projection. The notes now say "the one planning
 projection" instead. Exactly the behaviour this window is arguing for: a
 convention that fails a build beats a convention everybody honours.
+
+---
+
+# Continuation — what the register did once it existed
+
+The sections above describe PR #1601, the governance layer. This window did not
+stop there. Three further slices followed, and **every one of them was found by
+the layer itself.**
+
+| PR | what it did |
+|---|---|
+| [#1601](https://github.com/bandymuks1-stack/labourmarketai/pull/1601) | the executable constitution — 4 registers, 3 guards, 1 command |
+| [#1602](https://github.com/bandymuks1-stack/labourmarketai/pull/1602) | four more surfaces stop reading an agency's offer as its need |
+| [#1603](https://github.com/bandymuks1-stack/labourmarketai/pull/1603) | a person's reply to what was written about them finally has a reader |
+| [#1604](https://github.com/bandymuks1-stack/labourmarketai/pull/1604) | the register carried two false reachability claims, and now it can catch them |
+
+## #1602 — DEM-2, the market-direction leak (P0 item 3, closed as far as code can)
+
+Four own-rows surfaces read `customer_requests` without ever selecting `kind`,
+so all four rendered an agency's **offer** as its **need**: the market map
+(which mapped an agency's own supply to an `actionable: true` need on the shared
+map), the org demand rollup, the scouting list, and the chat starter's
+open-needs count.
+
+The second failure mode was worse: two modules carried their own **string copy**
+of the demand allow-list. Adding a kind to the rule would have updated the rule,
+updated every caller deriving from it, and silently not those two. A guard now
+bans the literal outside the module that owns it.
+
+Not fixed, and not fixable here: `list_open_demand_for_workers` returns no
+`kind`, so the worker board has nothing to classify. `DEM-2` stays **PARTIAL**
+with the owner-gated migration named.
+
+## #1603 — EVID-6, a right of reply nobody could see
+
+`experience_responses` shipped with a table, a select policy, a SECURITY
+DEFINER RPC, a form component and a mounted form — and **no reader**. A person
+could answer an account written about them and the reply was visible to nobody,
+including its own author.
+
+Found while building it, and mitigated: the v1 select policy compares an
+unqualified `moderation_status` inside a subquery over `experience_records`, so
+Postgres resolves it to the RECORD's status — the policy hands the experience's
+author a reply that is still submitted, in moderation, or **rejected**. The
+surface now withholds it; correcting the policy is a schema change and is
+recorded as an owner decision.
+
+`EVID-6` drops to `TEST_PROVEN`, because no human has walked it.
+
+## #1604 — the register caught itself, three times
+
+Imported is not reachable, and reachable is not visible. The layer checked the
+first and nothing checked the second, so two of its own rows were wrong:
+`MKT-1` claimed `/dashboard/service-requests` had no navigation (seven surfaces
+link to it) and `CAL-2` claimed the employer page never reads the planning
+projection (it does). A **navigation reachability** check now exists, and found
+a third on its first run: `ORG-7` named a route with no inbound link at all.
+
+`BUILT_NOT_CONNECTED` now has to say HOW — `no_importer`, `no_navigation`,
+`orphan_route`, `no_writer`, `inert_bridge` — because "nothing leads to it" is
+several claims checked in different ways, and one that does not say which cannot
+be falsified. That is the SEP-8 collapse happening inside the file that defines
+SEP-8.
+
+The bootstrap's parser was also caught twice returning **fewer rows without
+failing** — once on a CRLF checkout, once when a field appeared between two
+anchors. It now reads row by row and asserts it read every row.
+
+## Capability truth at the end of the window
+
+| status | start | end |
+|---|---:|---:|
+| `BUILT_AND_USABLE` | 29 | 29 |
+| `PARTIAL` | 50 | 51 |
+| `BUILT_NOT_CONNECTED` | 11 | 10 |
+| `BLOCKED` | 5 | 5 |
+| `ARCHITECTURE_ONLY` | 2 | 2 |
+| `MISSING` | 8 | 8 |
+
+The movement is small and it is *real*: `CAL-2` moved because it was
+misclassified, and `MKT-1` and `ORG-7` are now described correctly. **No
+capability's evidence level was raised by this window.** `EVID-6` was lowered.
+
+## The question, answered again at the end
+
+> *If a completely new coding agent entered this repository with no access to
+> the owner's chat history, what prevents it from accidentally narrowing
+> LabourMarket.ai or disconnecting existing product and data?*
+
+Four registers it must keep in sync with a document, three guards it cannot
+satisfy by hoping, one command it is told to run first, and a CI step that fails
+when the two halves of the product's own definition disagree.
+
+The strongest evidence that this is not decoration: **in the four hours after it
+shipped, it found three false claims in itself and one real defect class in the
+product, and every one of them had been sitting in a green repository.**
 
 ## What this window did NOT do
 
