@@ -12288,7 +12288,7 @@
       "historyMore": "Meer tonen",
       "workspaceLabel": "Werkruimte",
       "workspacePersonal": "Persoonlijke ruimte",
-      "workspaceUnnamed": "Bedrijfswerkruimte",
+      "workspaceUnnamed": "Organisatie zonder naam",
       "chipLogWork": "Werk vastleggen",
       "agendaTitle": "Je planning voor de komende {days} dagen:",
       "agendaEmpty": "Er is niets gepland voor de komende {days} dagen.",
@@ -12663,7 +12663,12 @@
         "usingProfile": "Je hoeft niets te uploaden — ik zoek op basis van wat al in je profiel staat.",
         "usingProfileNarrowed": "Je hoeft niets te uploaden — ik zoek op basis van je profiel en wat je tot nu toe hebt verteld.",
         "profileEmpty": "Er staat nog niets in je profiel, dus daarop kan ik niet zoeken. Leg één klus vast of noem je beroep, dan zoek ik meteen."
-      }
+      },
+      "workspaceUnnamedCompany": "Bedrijf zonder naam",
+      "workspaceUnnamedAgency": "Bureau zonder naam",
+      "workspaceUnnamedTeam": "Ploeg zonder naam",
+      "workspaceUnnamedNote": "Geen naam opgegeven",
+      "workspaceNameThis": "Naam toevoegen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
