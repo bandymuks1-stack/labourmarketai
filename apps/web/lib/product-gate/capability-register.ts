@@ -404,13 +404,25 @@ const SKILLS: readonly CapabilityRow[] = [
     domain: "skills",
     title: "ESCO taxonomy",
     worldElement: "skills",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "CODE_PROVEN",
-    anchors: ["lib/taxonomy"],
-    coreModule: null,
-    surfaces: [],
-    note: "1,045,186 labels sit in production and 0 of 161 platform skills carry an `esco_uri`, so the bridge is inert. The import ran against production; the CAPABILITY has never read a row, which is why the evidence is CODE_PROVEN and not the data-path level the row count would suggest.",
-    ownerDecision: "PR #1355 canonical ESCO linkage stays owner-gated.",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: ["lib/esco/esco-semantics.ts", "lib/esco/esco-lookup.ts", "lib/taxonomy/esco-autocomplete.ts"],
+    // The REACHABLE ESCO core today is the typeahead, not the new semantic
+    // layer: lib/esco has no consumer yet and saying otherwise would be the
+    // exact false-reachability claim this register exists to catch. The
+    // register's own guard refused the stronger version of this line.
+    coreModule: "lib/taxonomy/esco-autocomplete.ts",
+    surfaces: [
+      "components/app/skill-clarify-form.tsx",
+      "components/app/structure-need-form.tsx",
+    ],
+    note:
+      "TWO CLAIMS HERE WERE STALE, corrected 2026-09-08 from production. (1) 'The capability has never read a row' - it reads rows on BOTH sides of the market today: the ESCO typeahead is mounted in skill-clarify (worker) and structure-need (employer demand). (2) The bridge being inert does not make the catalogue unreadable. What IS still true: 0 of 161 platform skills and 0 of 49 professions carry an esco_uri, so nothing joins ESCO to the platform taxonomy. " +
+      "The catalogue itself is substantial and now measured: 1,045,186 labels over 28 locales, 13,939 skills, 3,039 occupations, 126,051 occupation-skill relations (67,600 essential / 58,451 optional). RLS on, authenticated SELECT, no anon. " +
+      "Read live under a real user 2026-09-08: a Lithuanian phrase resolves to an ESCO occupation and the SAME concept comes back as en=construction scaffolder, de=Gerustbauer, sv=stallningsbyggare, no=stillasarbeider, pl=monter rusztowan, nl=steigerbouwer - the cross-language bridge working on real data, and Norway is exactly where the one production supply row points. The occupation decomposes into its essential ESCO skills bilingually (build/dismantle scaffolding, work-at-height safety, interpret 2D/3D plans). A non-construction control behaves the same (lt slaugytojas specialistas -> no spesialsykepleier, 68 essential skills), so the model is not construction-shaped. " +
+      "PERFORMANCE IS A CONTRACT, not a detail: esco_labels_typeahead_idx leads with `locale`, so the same lookup measured 1.5 ms with a locale and 10,076 ms without - 6,500x. lib/esco therefore REQUIRES locales and fans out one indexed query per locale. " +
+      "WHAT IS NOT CONNECTED, stated plainly: the new lib/esco semantic layer (concept resolution, the cross-language bridge, and the occupation-skill relation reader) has NO product consumer yet. Its two natural consumers both sit behind owner gates - joining ESCO to platform slugs needs #1355, and evidence-to-competency needs #1618. It is CODE_PROVEN as TypeScript and its query shapes are proven on production; it is not reachable by a human, and this entry does not pretend otherwise.",
+    ownerDecision: "PR #1355 canonical ESCO linkage stays owner-gated. Its 67 rows were verified on production 2026-09-08 and are structurally sound - all 30 skill URIs and 36 occupation URIs resolve in ESCO, and all 31 skill slugs and 36 profession slugs exist in the platform taxonomy. SEMANTICS ARE NOT ALL SOUND: `teacher` maps to ESCO 'politics lecturer', which is wrong, and six more are worth a look before approval - `caregiver`->companion, `production_worker`->metal products assembler, `customer_service_specialist`->customer experience manager and `office_administrator`->office manager (both promote a worker to a MANAGER), `builder`->house builder and `farm_worker`->crop production worker (both narrow). Approving as-is would write one wrong mapping and several arguable ones into the taxonomy.",
   },
   {
     id: "SKL-7",
