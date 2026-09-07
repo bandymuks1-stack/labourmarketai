@@ -360,7 +360,10 @@ const SKILLS: readonly CapabilityRow[] = [
     anchors: ["lib/structuring"],
     coreModule: "lib/structuring/extract-journal-suggestions.ts",
     surfaces: ["components/app/conversation"],
-    note: "No AI required — the recognition path is deterministic (I-7).",
+    note:
+      "No AI required - the recognition path is deterministic (I-7). MEASURED on production 2026-09-08, the chain runs on real work: 28 journal entries carry a pipeline_version marker (2026-07-19 to 2026-09-04) and journal_entry_skills holds 21 links with provenance `recognized` across 12 entries and 4 workers, plus 27 older links from before provenance existed. " +
+      "THE ACCEPT / REJECT / CORRECT LOOP IS BUILT AND REACHABLE, and it was built the right way: confirmJournalSkillCandidate accepts, rejectJournalSkillCandidate records an entry-scoped APPEND-ONLY marker (`skill_rejected` / `skill_claim_rejected` / `unresolved_dismissed`) that the derivation keeps showing, and confirmJournalAmbiguousChoice resolves an ambiguous candidate. The metric lane is never updated or deleted, so a correction cannot erase what was originally suggested. " +
+      "WHAT THE NUMBERS SAY HONESTLY: 0 links carry `confirmed`, 0 carry `manual`, and there are 0 rejection markers of any kind. The loop has never been exercised by a human. That is ADOPTION, not absence, and it is the reason this row must not be read as proof that correction works in practice - only that it exists and is reachable.",
   },
   {
     id: "SKL-3",
@@ -734,7 +737,10 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/journal/journal-write-core.ts", "lib/journal/journal-list-core.ts"],
     coreModule: "lib/journal/journal-write-core.ts",
     surfaces: ["app/[locale]/dashboard/journal", "components/app/conversation"],
-    note: "The product's strongest chain: chat, journal, MCP and the API all reach one core.",
+    note:
+      "The product's strongest chain: chat, journal, MCP and the API all reach one core. It is already CHAT-FIRST, not form-first, and the copy audit on 2026-09-08 found NO coaching of the person to write for the recognizer - no keyword advice, no required template, no ESCO terminology asked of a human. The opposite, in fact: when recognition finds nothing the copy says so plainly and offers a manual link, and the picker hint states outright that those skills are NOT recognized from the entry, keeping the raw statement separate from the inference. " +
+      "THE ONE REAL GAP, measured the same day: a work-evidence conversation does not survive a turn. `conversation-goal.ts` is the canonical multi-turn memory - it carries an active goal, accumulates stated constraints and remembers what was offered and refused - and `GOAL_BEARING_INTENTS` lists eight intents (find-work, opportunities, need-workers, find-workers, need-service, offer-value, availability, offer-capacity). `log-work` is NOT among them. So 'Siandien montavau PERI klojinius.' followed by 'Sienas.' does not accumulate into ONE evidence context; the second sentence re-classifies from scratch. " +
+      "AND THE ONE-LINE FIX IS THE WRONG FIX, which is why this is recorded rather than shipped: the goal layer accumulates onto the canonical DiscoveryFilterState, a SEARCH vocabulary. Adding `log-work` to that set without an evidence-shaped goal payload would push work-evidence text into a discovery filter - a semantic collapse, and a second meaning for the same field. The correct slice is an evidence goal payload beside the discovery one, reusing the same goal machinery. Nothing here is a second Work Journal or a second evidence model.",
   },
   {
     id: "EVID-1",
