@@ -271,17 +271,27 @@ describe("the entry copy is honest in every routed locale", () => {
       }
     });
 
-    it(`${locale}: the six examples and the per-intent lines are present`, () => {
+    it(`${locale}: the ten examples and the per-intent lines are present`, () => {
       const entry = entryOf(locale);
       // Window 6 (G-D1): the three P1 sentences plus a professional worker,
       // a service need and a service offer — each routed LIVE when tapped
       // (lib/marketing/public-entry.test.ts pins every reading).
+      //
+      // Window 11 (§16/§18): four more, because the first six are all one
+      // side of the market looking for the other, and a visitor reading only
+      // those leaves believing this is a job board. Spare CAPACITY, a TEAM
+      // for a site, REAL WORK recorded, and WHO CAN VERIFY it are the
+      // directions that reading has no room for.
       expect(Object.keys(entry.examples as Entry).sort()).toEqual([
+        "brigade",
         "hire",
         "internship",
+        "logWork",
         "needService",
+        "offerCapacity",
         "offerService",
         "professional",
+        "verifyWork",
         "work",
       ]);
       const understood = entry.understood as Record<string, string>;
@@ -291,6 +301,10 @@ describe("the entry copy is honest in every routed locale", () => {
         "opportunities",
         "need-service",
         "offer-value",
+        "offer-capacity",
+        "find-workers",
+        "log-work",
+        "who-verifies-work",
       ]) {
         expect(understood[intent], `${locale}.understood.${intent}`).toBeTypeOf("string");
       }

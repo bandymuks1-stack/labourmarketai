@@ -124,7 +124,18 @@ export type ConversationIntent =
   | "create-project" // "sukurk projektą Roterdame" — the SITE as a project object (F2)
   | "agency-offers" // "kokius kandidatus pasiūlė agentūra?" — the client's side of the bridge
   | "add-document" // "turiu naują A1 iki 2027-03" — record a document, by sentence
-  | "cv-export" // "parodyk / atsisiųsk mano CV" — the verified CV sheet, not the import
+  | "cv-export" // "atsisiųsk / išspausdink mano CV" — take the sheet OUT
+  // ── THE CV IS FIVE DIFFERENT REQUESTS (owner window 11 §5/§30) ──────────
+  //    VIEW ≠ UPLOAD ≠ IMPORT ≠ EDIT ≠ REPLACE ≠ GENERATE ≠ EXPORT. Measured
+  //    2026-09-07 on this router: of 22 ordinary CV sentences only three
+  //    reached `cv-export`; "noriu pamatyti savo CV", "atidaryk mano CV",
+  //    "kur mano CV", "I want to see my CV", "открой моё резюме" and six more
+  //    all scored 3 on the bare `\bcv\b` noun and landed on `cv` — the
+  //    IMPORT flow. A person asking to SEE what the system holds was answered
+  //    with "Įkelk savo CV." That is a read turned into a write, which §5
+  //    forbids by name.
+  | "cv-view" // "noriu pamatyti savo CV" — open the CV the product already holds
+  | "cv-choose" // the CV named with no verb that separates the five — ASK, never guess
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
@@ -270,7 +281,25 @@ const RULES: IntentRule[] = [
       // HAVE + COUNT … AVAILABLE. The COUNT is required: "Turime laisvų
       // darbuotojų" without one is the employer's own roster question and
       // must stay `who-available`.
-      p("(turim|turiu|have|hebben|haben|имеем|располага)\\w*\\s*.{0,10}[0-9]{1,4}\\s*.{0,30}(laisv|available|beschikbaar|verfügbar|verfuegbar|свобод|доступ)", 10),
+      //
+      // FOUR LOCALES WERE MISSING THE ORDINARY WORD FOR "FREE" (measured
+      // 2026-09-07, owner window 11 §18). The adjective list held `laisv`,
+      // `available`, `beschikbaar`, `verfügbar`, `свобод`, `доступ` — the
+      // FORMAL register only. Nobody says "wir haben 7 Elektriker verfügbar";
+      // they say **frei**. Likewise `vrij` (nl), plain `free` (en), and the
+      // Russian possessive **у нас**, which is how the sentence begins in
+      // Russian at all — `имеем` is bureaucratic. Result: the SUPPLY
+      // direction — the whole point of window 7 — was reachable in Lithuanian
+      // and `unrecognised` in the other four active locales for the single
+      // most ordinary way to say it. Found by putting the sentence on the
+      // landing in five languages, not by a test.
+      p("(turim|turiu|have|hebben|haben|имеем|располага|у\\s+нас|у\\s+меня)\\w*\\s*.{0,10}[0-9]{1,4}\\s*.{0,30}(laisv|available|\\bfree\\b|beschikbaar|\\bvrij|verfügbar|verfuegbar|\\bfrei\\b|свобод|доступ)", 10),
+      // …and the same sentence with the adjective BEFORE the noun, which is
+      // where Lithuanian, Russian and Dutch put it: "Turime 7 LAISVUS
+      // elektrikus", "У нас 7 СВОБОДНЫХ электриков", "Wij hebben 7 VRIJE
+      // elektriciens". Covered by the rule above only when the adjective
+      // follows the count closely enough; this states it plainly.
+      p("(turim|turiu|have|hebben|haben|имеем|у\\s+нас|у\\s+меня)\\w*\\s*.{0,10}[0-9]{1,4}\\s+(laisv|free|vrij|frei|свобод|beschikbar|verfügbar)", 10),
       // AN AGENCY SAYING IT HAS PEOPLE. Only a supplier describes itself this
       // way, so the sentence needs no second market-facing clause.
       p("(agent[uū]r|agency|uitzend|bureau|agentur|агент)\\w*\\s*.{0,40}(turim|turiu|have|hebben|haben|имеем|располага)", 9),
@@ -447,6 +476,21 @@ const RULES: IntentRule[] = [
       p("(finde|zeig)\\s*.{0,24}(arbeiter|leute|mitarbeiter)", 6), // de
       p("(vind|toon|laat)\\s*.{0,24}(arbeiders|mensen|vakmensen|werkers)", 6), // nl
       p("\\bscouting\\b", 4),
+      // ── A BRIGADE FOR A SITE IS DEMAND, NOT A JOB SEARCH ────────────────
+      // Owner window 11 §18 names "Ieškau brigados objektui" as a landing
+      // example. Measured 2026-09-07: it classified `find-work` at weight 3 —
+      // the person looking to HIRE a team was read as a person looking for
+      // work. SEP-4 (DEMAND ≠ SUPPLY), one rule below the surface.
+      //
+      // The team noun ALONE is not enough and deliberately does not appear
+      // here: "ieškau brigados, prie kurios prisijungti" is a worker seeking
+      // a team to JOIN, and the product may not guess between the two. What
+      // resolves it is the WORK OBJECT the team is wanted for — a site, a
+      // project, named work — so all three parts are required.
+      p("(iesk|ieškau|ieškom|surask|reikia|need|looking\\s+for|search|suche|zoek|ищу|ищем|нужн)\\w*\\s*.{0,20}(brigad|komand|\\bteam\\b|\\bcrew\\b|ploeg|kolonne|бригад)\\w*\\s*.{0,24}(objekt|projekt|statyb|darbam|darbams|\\bsite\\b|\\bjob\\s+site\\b|project|baustelle|bouwplaats|объект|стройк)", 8),
+      // …and the same sentence with the object first: "objektui ieškau
+      // brigados", "voor het project zoek ik een ploeg".
+      p("(objekt|projekt|statyb|\\bsite\\b|baustelle|bouwplaats|объект|стройк)\\w*\\s*.{0,24}(iesk|ieškau|surask|reikia|need|looking\\s+for|suche|zoek|ищу|нужн)\\w*\\s*.{0,20}(brigad|komand|\\bteam\\b|\\bcrew\\b|ploeg|kolonne|бригад)", 8),
     ],
   },
   {
@@ -1008,14 +1052,60 @@ const RULES: IntentRule[] = [
       p("(nauj|new|neu|nieuw|нов)\\w*\\s*.{0,10}(pa[zž]ym|sertifik|certificate|zertifikat|certificaat|сертификат|leidim|permit|vergunning|\\ba1\\b|\\bvca\\b)", 9),
     ],
   },
+  /**
+   * ── THE CV, AS FIVE SEPARATE REQUESTS (owner window 11 §5 / §30) ─────────
+   *
+   * These four rules come BEFORE the noun-only `cv` rule further down and are
+   * weighted 8 against its 3, because the distinction they carry is the one
+   * the owner names first: an ambiguous READ must never become a WRITE.
+   *
+   * Reached destination, per rule:
+   *   cv-export → /cv, framed as taking the sheet out (download / print)
+   *   cv-view   → /cv, framed as looking at what the product already holds
+   *   cv        → the CV IMPORT flow — only ever with an explicit write verb
+   *   cv-choose → one question with the three real doors; nothing happens
+   *
+   * `cv-view` and `cv-export` land on the SAME existing page. That is not a
+   * duplicate capability: `/cv` IS the person's CV, and printing it is what
+   * that page does. What differs is the sentence the product answers with,
+   * and §5 says the distinction has to survive in what the person is told.
+   */
   {
     intent: "cv-export",
     patterns: [
-      // SEEING / taking the CV out is not IMPORTING one: "parodyk mano CV",
-      // "atsisiųsk CV", "CV PDF", "eksportuok CV", "show / download / export my
-      // CV", "скачай моё резюме", "download mijn cv", "Lebenslauf herunterladen".
-      p("(parodyk|rodyk|atsisi[uų]s|atsisiųsk|eksportuo|spausdin|show|download|export|print|скача|покаж|экспорт|распечат|toon|download|exporteer|print|zeig|herunterlad|exportier|druck)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
+      // TAKING IT OUT: "atsisiųsk CV", "CV PDF", "eksportuok CV", "download /
+      // export / print my CV", "скачай моё резюме", "Lebenslauf herunterladen".
+      // `parodyk`/`show` moved to `cv-view` below — showing is not exporting,
+      // and the page reached is the same either way.
+      p("(atsisi[uų]s|atsisiųsk|eksportuo|spausdin|download|export|print|скача|экспорт|распечат|exporteer|print|herunterlad|exportier|druck)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
       p("(\\bcv\\b|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,8}(pdf|atsisi[uų]st|export|herunterlad|скача)", 8),
+    ],
+  },
+  {
+    intent: "cv-view",
+    patterns: [
+      // SEEING / OPENING what already exists. Every verb here was measured
+      // against the live router on 2026-09-07 and reached the IMPORT flow.
+      // LT: pamatyti / peržiūrėti / atidaryti / atverti / rodyk / parodyk
+      // EN: see / view / open / look at / check
+      // RU: посмотреть / увидеть / открой / глянуть / покажи
+      // NL: bekijken / zien / openen / tonen   DE: sehen / ansehen / öffnen / zeigen
+      p("(pamaty|maty[ct]|perzi[uū]r|peržiūr|atidary|atvert|atverk|rodyk|parodyk|see\\b|view|open|show|look\\s+at|check|посмотр|увидет|открой|открыт|гляну|покаж|bekijk|zien|openen|tonen|toon|sehen|ansehen|anschau|[oö]ffnen|zeig)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
+      // VERB LAST — Dutch and German put it there ("Ik wil mijn cv BEKIJKEN",
+      // "Ich möchte meinen Lebenslauf ANSEHEN"), and Lithuanian often does
+      // too ("Mano CV parodyk"). Measured: both nl/de parity sentences fell
+      // through to `cv-choose` with only the verb-first rule above, which is
+      // the exact G3 failure mode — a capability reachable in three languages
+      // and silently unreachable in the other two.
+      p("(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,16}(pamaty|perzi[uū]r|peržiūr|atidary|atvert|rodyk|parodyk|\\bsee\\b|view|open|show|bekijk|zien|openen|tonen|sehen|ansehen|anschau|[oö]ffnen|zeig|посмотр|увидет|открыт)", 8),
+      // LOCATING it: "kur mano CV", "where is my CV", "где моё резюме",
+      // "waar is mijn cv", "wo ist mein Lebenslauf".
+      p("(\\bkur\\b|\\bwhere\\b|\\bгде\\b|\\bwaar\\b|\\bwo\\b)\\s*.{0,20}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
+      // READING BACK its content: "ką dabar rodo mano CV", "what does my CV
+      // say", "что показывает моё резюме" — a question about the state, in
+      // both word orders.
+      p("(rodo|rodys|shows|says|показыв|говорит|zeigt|laat\\s+zien|staat)\\s*.{0,16}(\\bcv\\b|résumé|resume|резюме|lebenslauf)", 8),
+      p("(\\bcv\\b|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,16}(rodo|rodys|shows|says|показыв|говорит|zeigt|staat)", 8),
     ],
   },
   {
@@ -1034,7 +1124,17 @@ const RULES: IntentRule[] = [
       // CAPACITY: "kas laisvas šią savaitę?", "kas gali dirbti rytoj?", "kas
       // atostogauja?", "who is available / free", "who can work", "wer ist
       // frei / verfügbar", "wie is beschikbaar / vrij", "кто свободен".
-      p("(kas|who|wer|wie|кто)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
+      // EVERY WHICH-WORD IS BOUNDED ON BOTH SIDES. Measured 2026-09-07 with
+      // the owner's own §18 example: "Vandaag heb ik 8 uur op de Green TOWER
+      // gewerkt" and "Heute habe ich 8 Stunden an der Green TOWER gearbeitet"
+      // both classified `who-available` at weight 9 — a worker recording
+      // their own day was read as a company asking who is free. The cause is
+      // two unbounded stems meeting: `wer` sits inside **to-wer**, and the
+      // present-tense verbs `werkt` / `arbeitet` sit inside the past
+      // participles **ge-werkt** / **ge-arbeitet**. Neither half is unusual;
+      // together they invert the direction of the sentence. `\b` here is the
+      // Unicode-safe boundary, so the launch alphabets are covered too.
+      p("(\\bkas\\b|\\bwho\\b|\\bwer\\b|\\bwie\\b|\\bкто\\b)\\s+.{0,24}?(laisv|gali\\s+dirb|atostog|nedirb|available|free|can\\s+work|verfügbar|frei|kann\\s+arbeit|beschikbaar|vrij|kan\\s+werk|свобод|может\\s+работ|в\\s+отпуск)", 9),
       p("(laisv\\w*\\s+(žmon|darbuotoj|komand)|available\\s+(people|workers|team)|verfügbare\\s+(leute|mitarbeiter)|beschikbare\\s+(mensen|medewerkers)|свободные\\s+(люди|работники))", 8),
       // Prod walk D1 (2026-09-05): "Sužinok, kurie darbuotojai nebus užimti
       // per artimiausias dienas" scored 0 here — the first rule needs "kas /
@@ -1045,7 +1145,7 @@ const RULES: IntentRule[] = [
       // its subject named. Weight 9 so the bare noun stems cannot pull it
       // back. JS \w is ASCII-only, so the LT noun endings are consumed by
       // the gap, not by \w.
-      p("(kurie|kuris|kas|which|who|wer|welche|wie|кто|какие)\\s+.{0,24}?(darbuotoj|žmon|komand|worker|people|staff|mitarbeiter|leute|medewerker|mensen|работник|люди)\\w*\\s*.{0,24}?(laisv|neužimt|nebus\\s+užimt|available|free|not\\s+busy|frei|verfügbar|vrij|beschikbaar|свобод|не\\s+занят)", 9),
+      p("(\\bkurie\\b|\\bkuris\\b|\\bkas\\b|\\bwhich\\b|\\bwho\\b|\\bwer\\b|\\bwelche|\\bwie\\b|\\bкто\\b|\\bкакие\\b)\\s+.{0,24}?(darbuotoj|žmon|komand|worker|people|staff|mitarbeiter|leute|medewerker|mensen|работник|люди)\\w*\\s*.{0,24}?(laisv|neužimt|nebus\\s+užimt|available|free|not\\s+busy|frei|verfügbar|vrij|beschikbaar|свобод|не\\s+занят)", 9),
       // Prod walk O1 (2026-09-06): "Kas rytoj dirba objekte X?" — a company
       // asking WHO IS ON a site tomorrow — scored 0 on every rule above (it
       // says "dirba", not "gali dirbti" and not "laisvas") and 1 on `log-work`,
@@ -1060,7 +1160,13 @@ const RULES: IntentRule[] = [
       // "dirbome", "worked" are absent — so a past-tense statement keeps its
       // journal route. Weight 9 so the bare site and day stems in `log-work`
       // cannot pull it back.
-      p("(kas|kurie|kuris|who|wer|welche|wie|кто|kto)\\s+.{0,24}?(dirba\\b|dirbs\\b|works\\b|working\\b|arbeitet\\b|werkt\\b|работает\\b|pracuje\\b)", 9),
+      // Both halves bounded — see the note on the first rule. The verbs are
+      // the load-bearing half here: `\bwerkt\b` no longer matches inside
+      // "gewerkt", so a Dutch or German worker's PAST-TENSE day keeps its
+      // journal route, which is exactly what this rule's own comment already
+      // promised ("dirbau", "dirbome", "worked" are absent) and did not
+      // deliver for the two languages whose past tense is a prefix.
+      p("(\\bkas\\b|\\bkurie\\b|\\bkuris\\b|\\bwho\\b|\\bwer\\b|\\bwelche|\\bwie\\b|\\bкто\\b|\\bkto\\b)\\s+.{0,24}?(\\bdirba\\b|\\bdirbs\\b|\\bworks\\b|\\bworking\\b|\\barbeitet\\b|\\bwerkt\\b|\\bработает\\b|\\bpracuje\\b)", 9),
     ],
   },
   {
@@ -1092,7 +1198,19 @@ const RULES: IntentRule[] = [
       p("(kam|kur|who|whom|wem|aan\\s+wie|кому|komu)\\s+.{0,24}?(pateik|pateikt|si[uų]s|siunt|teik|submit|send|hand|einreich|indien|stuur|отправ|пода|prze[sś]l|sk[lł]ada)[^\\s]*\\s*.{0,24}?(darb|work|arbeit|werk|работ|prac|valand|hours|uren|stunden|часов)", 12),
 
       // "kas gali patvirtinti mano darbą?" — WHO CAN confirm my work.
-      p("(kas|kur|who|wer|wie|кто|kto)\\s+.{0,20}?(gali|can|could|kann|kan|может|mo[zż]e)\\s*.{0,20}?(patvirtin|confirm|verif|best[aä]tig|bevestig|подтверд|potwierd)", 12),
+      //
+      // `gal[eė]t` was added 2026-09-07: the owner's own §12/§46 phrasing
+      // "Kas galėtų patvirtinti mano patirtį?" uses the CONDITIONAL, and
+      // `gali` is not a prefix of `galėtų` — measured, the sentence scored 6
+      // on the bare `patirt` stem and opened the EXPERIENCES list instead of
+      // the verifier route. The person asking who could vouch for them was
+      // shown what other people had written about them.
+      // Dutch SPLITS its conditional — "Wie ZOU mijn ervaring KUNNEN
+      // bevestigen?" — so `zou kunnen` as one token never matched and the
+      // sentence fell through. Both halves are listed separately, and the
+      // gap before the confirm verb is widened to 28 because the object sits
+      // between them in Dutch and German word order.
+      p("(kas|kur|who|wer|wie|кто|kto)\\s+.{0,20}?(gali|gal[eė]t|can|could|kann|k[oö]nnte|\\bkan\\b|\\bzou\\b|kunnen|может|мог|mo[zż]e)\\w*\\s*.{0,28}?(patvirtin|confirm|verif|best[aä]tig|bevestig|подтверд|potwierd)", 12),
 
       // "kas patvirtins mano darbą?" — future tense, no modal verb.
       p("(kas|who|wer|wie|кто|kto)\\s+.{0,20}?(patvirtins|patvirtina|confirms?|verifies|will\\s+confirm|best[aä]tigt|bevestigt|подтвердит|potwierdzi)\\s*.{0,20}?(mano|my|mein|mijn|мо[юей]|m[oó]j|darb|work|arbeit|werk|работ|prac)", 12),
@@ -1300,6 +1418,17 @@ const RULES: IntentRule[] = [
       p("(verkopen|verkoop|te\\s+koop)", 4), // nl
       p("\\bsiūlau\\b", 3),
       p("предлагаю", 3),
+      // ── "NORIU PASIŪLYTI SAVO PASLAUGAS" ────────────────────────────────
+      // Owner window 11 §18 names this sentence verbatim as a landing
+      // example. Measured 2026-09-07: `unknown`, score 0 — the whole SUPPLY
+      // side of the service market was unreachable in the most ordinary
+      // phrasing anyone uses, because only the present-tense "siūlau" was
+      // matched and never the infinitive it is nearly always said with.
+      // Weight 6 so an explicit offer outranks the 5 of the activity-verb
+      // rule; the SEEK guard above still keeps "siūlau paslaugas, ieškau
+      // klientų" in its own lane.
+      p("(pasi[uū]ly|pasi[uū]lyt|offer|aanbied|anbiet|предлож)\\w*\\s*.{0,24}(paslaug|service|dienst|услуг)", 6),
+      p("(noriu|galiu|want\\s+to|would\\s+like\\s+to|m[oö]chte|wil|хочу|могу)\\s*.{0,16}(pasi[uū]ly|offer|aanbied|anbiet|предлож)", 6),
       p("\\bbiete\\b", 3), // de "ich biete …"
       p("\\bbied\\b|aanbieden", 3), // nl "ik bied … aan"
       p("\\bturiu\\b\\s*.{0,24}\\b(kg|vnt|tonn|litr|ha)", 4),
@@ -1676,14 +1805,41 @@ const RULES: IntentRule[] = [
       p("планы", 1),
     ],
   },
+  /**
+   * CV IMPORT — an explicit WRITE verb, always.
+   *
+   * The four noun-only patterns this rule used to carry (weight 3 each, on
+   * `cv` / `gyvenimo aprašymas` / `резюме` / `lebenslauf`) are what turned
+   * every ordinary read into an upload: naming the object was treated as
+   * asking to replace it. They now live on `cv-choose` below, which ASKS.
+   * Weight 8 so an explicit "įkelk CV" still beats that question outright.
+   */
   {
     intent: "cv",
+    patterns: [
+      p("(įkel|ikel|[iį]ked|prisek|prisegt|prikabin|importuo|nuskaityk|upload|uploaden|import|attach|hochlad|einles|загруз|прикреп|импортир)\\w*\\s*.{0,16}(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)", 8),
+      p("(\\bcv\\b|gyvenimo\\s+apraš|curriculum|résumé|resume|резюме|lebenslauf)\\w*\\s*.{0,16}(įkel|ikel|upload|uploaden|import|прикреп|загруз|hochlad)", 8),
+    ],
+  },
+  /**
+   * THE CV NAMED, AND NOTHING ELSE — the question, not a guess.
+   *
+   * "mano CV", "my CV", "моё резюме" carry no verb that separates VIEW from
+   * UPLOAD from EDIT, and neither does "noriu pakeisti savo CV": REPLACE has
+   * no flow of its own, because the CV is derived from the living profile
+   * rather than stored as a document. Owner §5: *"If uncertain, ask. Never
+   * turn an ambiguous read request into a write."* So this rule exists to be
+   * answered with a question and three real doors, and it deliberately keeps
+   * the weight-3 the noun always had — every rule above outranks it, and a
+   * sentence that is genuinely about something else still wins on its own.
+   */
+  {
+    intent: "cv-choose",
     patterns: [
       p("\\bcv\\b", 3),
       p("(gyvenimo\\s+apraš|curriculum|résumé|resume)", 3),
       p("резюме", 3),
       p("\\blebenslauf\\b", 3),
-      p("(įkelk|upload|загрузи|прикрепи)\\s+.{0,10}(cv|резюме)", 2),
     ],
   },
   {

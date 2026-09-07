@@ -138,6 +138,36 @@ export function entryReturnPath(sentence: string | null | undefined): string | n
 
 export type EntryDoor = "signup" | "login";
 
+/**
+ * The sentence back OUT of a `?next=` value — the return half of
+ * `entryReturnPath`, and the reason it exists is owner window 11 §21.
+ *
+ * The sentence already survived authentication when the owner walked
+ * production: `/lt/auth/login?next=%2Fdashboard%3Fsay%3DIe%C5%A1kau...` is
+ * exactly what the landing emits. What did NOT survive was the person's
+ * knowledge that it had: the login screen said "Prisijungti" and nothing
+ * about what they had just asked for, so from where they stood the request
+ * was gone. This lets the auth screens say it back.
+ *
+ * Defensive by construction: any malformed value yields `null` rather than
+ * throwing, and the result is capped by `normaliseEntrySentence` exactly as
+ * the outbound half is. It reads a value the page already received; it never
+ * reaches a store and never widens what `?next=` may carry.
+ */
+export function sentenceFromReturnPath(next: string | null | undefined): string | null {
+  if (typeof next !== "string" || !next) return null;
+  const q = next.indexOf("?");
+  if (q < 0) return null;
+  let raw: string | null = null;
+  try {
+    raw = new URLSearchParams(next.slice(q + 1)).get(PUBLIC_ENTRY_SAY_PARAM);
+  } catch {
+    return null;
+  }
+  const clean = normaliseEntrySentence(raw);
+  return clean || null;
+}
+
 /** The locale-prefixed href of an auth door, carrying the sentence. */
 export function entryDoorHref(
   locale: string,

@@ -251,6 +251,8 @@ const CHAT_KEYS = [
   "documentFileFailed",
   "cvExportHint",
   "chipCvSheet",
+  "cvViewHint",
+  "cvChooseAsk",
   "taskCreateIntro",
   "taskCreatedNext",
   "capacityIntro",

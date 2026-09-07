@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+
+import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
 import {
@@ -284,6 +286,10 @@ export function SignupForm({
           {t("subcopy")}
         </p>
       </header>
+
+      {/* Owner window 11 §21 — the sentence the visitor typed on the
+          landing travels in `?next=`; this is where they can see that it did. */}
+      <AuthCarriedIntent next={nextParam} />
 
       {/* GDPR Art. 13 first-layer notice, rendered ONCE and before the first
           account-creating control (the Google path collects account data
