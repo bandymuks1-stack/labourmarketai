@@ -79,8 +79,15 @@ export function AccountMenu() {
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     // (The advanced control-room escape hatch died with the route — W3
     // Package 4 deleted /dashboard/advanced entirely.)
+    // The label NAMES WHAT IT ADMINISTERS (owner window 11 §29). The entry
+    // itself is right and correctly gated — the owner is a platform admin and
+    // saw their own control, not a leak. But sitting under an avatar between
+    // "Mano CV" and "Nustatymai", the bare "Administravimas" reads as
+    // "administer my account", which is the one thing it is not. The nav
+    // module keeps `tabs.admin`, where the surrounding context already says
+    // which administration is meant.
     ...(isAdmin && !adminUiHidden
-      ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
+      ? [{ href: "/dashboard/admin", label: t("tabs.adminPlatform"), icon: Shield, testid: "account-menu-admin-link" }]
       : []),
   ];
 
@@ -171,7 +178,12 @@ export function AccountMenu() {
               <Globe className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
               {tCommon("localeSwitch")}
             </span>
-            <LocaleSwitcher />
+            {/* `inline` — this switcher is ALREADY inside this menu's
+                AnchoredOverlay, so it must not open a second portal: the
+                language rows would then sit outside `panelRef` and a tap on
+                one would read as an outside click, closing this menu between
+                mousedown and click. */}
+            <LocaleSwitcher inline />
           </div>
           <Link
             href="/cv"

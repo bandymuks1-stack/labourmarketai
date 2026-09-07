@@ -456,6 +456,10 @@ export type ChatLabels = {
   documentFileFailed: string;
   cvExportHint: string;
   chipCvSheet: string;
+  /** VIEW, not export and not import (owner window 11 §5/§30). */
+  cvViewHint: string;
+  /** The CV named without saying which of the five actions is meant. */
+  cvChooseAsk: string;
   taskCreateIntro: string;
   taskCreatedNext: string;
   capacityIntro: string;
@@ -5114,12 +5118,32 @@ export function ConversationChat({
         projectReadiness: () => startProjectReadiness(text),
         confirmWork: () => startConfirmWork(text),
         moveWorker: () => startMoveWorker(text),
-        // "Parodyk / atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF),
-        // not the import flow the bare "cv" chip starts. One chip to the one
-        // canonical output; a company identity has no own CV to show.
+        // "Atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF), not the
+        // import flow the bare "cv" chip starts. One chip to the one canonical
+        // output; a company identity has no own CV to show.
         cvExport: () =>
           identity === "person"
             ? assistant(labels.cvExportHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
+            : assistant(fallbackText, starterChips),
+        // "Noriu pamatyti savo CV" — the SAME `/cv` page, said as a read.
+        // Before this it reached `cvChip` and opened the import: the person
+        // asked to see what the product holds and was told to upload it
+        // (owner window 11 §30, the exact production journey).
+        cvView: () =>
+          identity === "person"
+            ? assistant(labels.cvViewHint, [{ id: "link:/cv", label: labels.chipCvSheet }])
+            : assistant(fallbackText, starterChips),
+        // The sentence named the CV and stopped. Three real doors, no guess
+        // and no write — owner §5: "If uncertain, ask." The third door is the
+        // profile because the CV is DERIVED from it: "pakeisk mano CV" has no
+        // document to edit, it has a professional history to add to.
+        cvChoose: () =>
+          identity === "person"
+            ? assistant(labels.cvChooseAsk, [
+                { id: "link:/cv", label: labels.chipCvSheet },
+                { id: "cv", label: labels.chipCv },
+                { id: "profile", label: labels.chipProfile },
+              ])
             : assistant(fallbackText, starterChips),
         reminderBlocked: () => assistant(labels.reminderBlocked),
         // No real translation engine — never a fake translation.

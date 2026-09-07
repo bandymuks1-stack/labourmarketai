@@ -61,6 +61,14 @@ describe("public entry — one sentence, the one router (P1 acceptance)", () => 
     "professional",
     "needService",
     "offerService",
+    // Owner window 11 §16/§18 — the four directions the first six had no
+    // room for. `brigade` in particular was measured routing to `find-work`
+    // before the fix: a visitor asking for a TEAM FOR A SITE was read as
+    // asking for a job (SEP-4, DEMAND ≠ SUPPLY).
+    "offerCapacity",
+    "brigade",
+    "logWork",
+    "verifyWork",
   ] as const;
   const EXAMPLE_INTENT: Readonly<Record<(typeof EXAMPLE_KEYS)[number], RoutedIntent>> = {
     hire: "need-workers",
@@ -69,6 +77,10 @@ describe("public entry — one sentence, the one router (P1 acceptance)", () => 
     professional: "find-work",
     needService: "need-service",
     offerService: "offer-value",
+    offerCapacity: "offer-capacity",
+    brigade: "find-workers",
+    logWork: "log-work",
+    verifyWork: "who-verifies-work",
   };
 
   for (const locale of ACTIVE_LOCALES) {
@@ -82,8 +94,13 @@ describe("public entry — one sentence, the one router (P1 acceptance)", () => 
           intent: EXAMPLE_INTENT[key],
         });
       }
+      // Nine distinct intents across ten examples: five market directions
+      // (hire / work / service demand / service supply / capacity supply)
+      // plus team demand, education, real work and verification. The number
+      // is the point — the landing's examples must not all be one edge of
+      // the graph (owner §16).
       const ids = new Set(Object.values(EXAMPLE_INTENT));
-      expect(ids.size).toBe(5);
+      expect(ids.size).toBe(9);
     });
   }
 

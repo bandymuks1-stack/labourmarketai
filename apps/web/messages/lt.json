@@ -4381,7 +4381,8 @@
         "admin": "Administravimas",
         "planning": "Kalendorius",
         "network": "Ryšiai",
-        "playerCard": "Mano kortelė"
+        "playerCard": "Mano kortelė",
+        "adminPlatform": "Platformos administravimas"
       },
       "roleNotice": {
         "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
@@ -4583,6 +4584,10 @@
         "open": "Atidaryti LabourMarket.ai:",
         "manage": "Tvarkyti pranešimų nustatymus:"
       }
+    },
+    "carriedIntent": {
+      "label": "Tęsiate",
+      "hint": "Prisijungę iš karto grįšite prie šito — sakinys keliauja kartu su jumis."
     }
   },
   "shared": {
@@ -12353,7 +12358,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# klientas dar nepatvirtino} few {# klientai dar nepatvirtino} other {# klientų dar nepatvirtino}} ryšio.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# studento pakvietimas dar nepriimtas} few {# studentų pakvietimai dar nepriimti} other {# studentų pakvietimų dar nepriimta}}.",
       "briefDocumentsExpiring": "{count, plural, one {# dokumentas baigia galioti} few {# dokumentai baigia galioti} other {# dokumentų baigia galioti}}.",
-      "briefDocumentsMissing": "{count, plural, one {Trūksta # dokumento jūsų šalims} few {Trūksta # dokumentų jūsų šalims} other {Trūksta # dokumentų jūsų šalims}}.",
+      "briefDocumentsMissing": "{count, plural, one {Jūsų nurodytose šalyse reikia dar # dokumento} few {Jūsų nurodytose šalyse reikia dar # dokumentų} other {Jūsų nurodytose šalyse reikia dar # dokumentų}}: {list}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidatas laukia jūsų atsakymo} few {# kandidatai laukia jūsų atsakymo} other {# kandidatų laukia jūsų atsakymo}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agentūros pasiūlymas laukia jūsų sprendimo} few {# agentūrų pasiūlymai laukia jūsų sprendimo} other {# agentūrų pasiūlymų laukia jūsų sprendimo}}.",
       "briefInterestContacted": "{count, plural, one {# įmonė nori su jumis susisiekti dėl jūsų susidomėjimo} few {# įmonės nori su jumis susisiekti dėl jūsų susidomėjimo} other {# įmonių nori su jumis susisiekti dėl jūsų susidomėjimo}}.",
@@ -12550,6 +12555,8 @@
       "documentAddUnavailable": "Dokumentų katalogo dabar nepavyko įkelti — užrašykite dokumentą dokumentų centre.",
       "cvExportHint": "Jūsų patvirtintas CV — vienas lapas iš to, ką sistema tikrai žino. Atidarykite ir spausdinkite į PDF.",
       "chipCvSheet": "Atidaryti CV lapą",
+      "cvViewHint": "Štai jūsų CV — tai, ką sistema apie jus žino šiandien. Atidarykite ir peržiūrėkite; nieko neįkeliame ir nekeičiame.",
+      "cvChooseAsk": "Ką norite padaryti su savo CV? Galiu jį parodyti, priimti naują failą arba atidaryti profilį — CV sudaromas iš jo.",
       "taskCreateIntro": "Nauja užduotis: kas turi būti padaryta, kuriame projekte ir iki kada.",
       "taskCreatedNext": "Užduotis įrašyta. Projekto pulse ją rodo kaip atvirą; priskirti žmogų galite užduočių lange.",
       "capacityIntro": "Komanda {from} – {to} ({count} žm.):",
@@ -13303,7 +13310,11 @@
         "internship": "Kur galiu atlikti praktiką?",
         "professional": "Esu buhalterė, ieškau darbo Vilniuje",
         "needService": "Reikia, kad kas nors sutaisytų stogą",
-        "offerService": "Siūlau buhalterijos paslaugas"
+        "offerService": "Siūlau buhalterijos paslaugas",
+        "offerCapacity": "Turime 7 laisvus elektrikus nuo pirmadienio",
+        "brigade": "Ieškau brigados objektui",
+        "logWork": "Šiandien Green Tower objekte dirbau 8 valandas",
+        "verifyWork": "Kas galėtų patvirtinti mano patirtį?"
       },
       "understoodLabel": "Supratau",
       "understood": {
@@ -13318,7 +13329,7 @@
         "projects": "Norite matyti savo įmonės projektus.",
         "company-overview": "Norite matyti, kas vyksta jūsų įmonėje — žmonės, projektai, poreikiai.",
         "create-organization": "Norite įregistruoti įmonę ar organizaciją.",
-        "cv": "Norite dirbti su savo CV — įkelti arba pasižiūrėti.",
+        "cv": "Norite įkelti CV failą. Perskaitysime jį ir parodysime, ką radome, prieš ką nors išsaugodami.",
         "log-work": "Norite užrašyti atliktą darbą į darbo žurnalą.",
         "skill-gap": "Norite sužinoti, kokių įgūdžių jums trūksta.",
         "documents": "Kalbate apie dokumentus ir pažymėjimus — kas galioja, kas baigiasi, ko trūksta.",
@@ -13331,7 +13342,11 @@
         "propose-candidate": "Norite pasiūlyti kandidatą klientui — dirbate kaip agentūra.",
         "client-demand": "Norite matyti, ko reikia jūsų klientams.",
         "invite-student": "Atstovaujate mokymo įstaigai ir norite pakviesti mokinį.",
-        "programmes": "Atstovaujate mokymo įstaigai — programos, grupės, mokiniai."
+        "programmes": "Atstovaujate mokymo įstaigai — programos, grupės, mokiniai.",
+        "offer-capacity": "Turite laisvų žmonių ar pajėgumų. Užrašysime pasiūlymą, kad jį rastų tie, kam reikia.",
+        "who-verifies-work": "Klausiate, kas gali patvirtinti jūsų atliktą darbą. Parodysime, kam jį pateikti.",
+        "cv-view": "Norite pamatyti savo CV — tą, kurį sistema jau turi. Nieko neįkelsime ir nepakeisime.",
+        "cv-choose": "Kalbate apie savo CV. Paklausime, ar norite jį pamatyti, įkelti naują, ar papildyti profilį."
       },
       "family": {
         "work": "Kalbate apie savo darbą ir profesinį kelią.",
@@ -13807,7 +13822,7 @@
       "label": "Darbo pasiruošimas",
       "known": "Jau nurodyta:",
       "next": "Svarbiausia dabar:",
-      "complete": "Viskas, kas svarbiausia, jau nurodyta.",
+      "complete": "Visos {count} darbo kortelės sritys nurodytos. Dokumentai ir laukiantys prašymai skaičiuojami atskirai.",
       "unavailable": "Darbo pasiruošimo dabar parodyti nepavyko. Pokalbis veikia kaip visada."
     },
     "action": {

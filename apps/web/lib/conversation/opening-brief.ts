@@ -14,6 +14,10 @@ import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import { listMyEngagements } from "@/lib/invitations/network";
 import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
 import type { WorkerDocumentGapResult } from "@/lib/conversation/documents-gap-server";
+import {
+  DOCUMENT_GAP_LINE_CAP,
+  groupMissingDocumentsByType,
+} from "@/lib/conversation/documents-gap";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
@@ -234,9 +238,32 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
 
   // 3b ── documents missing for the person's OWN stated countries. No
   // country stated → no line (the chat asks, the brief never guesses).
+  //
+  // NAMED, NOT COUNTED (owner window 11 §24). Production said "Trūksta 9
+  // dokumentų jūsų šalims." and nothing else: not which document, not which
+  // country, not whether it is required or merely conditional. The product
+  // already knew all three — `deriveDocumentGap` carries `documentTypeSlug`,
+  // `country` and `requirementLevel` per row, and `runDocumentsReadiness`
+  // renders them — so the brief was the ONE surface throwing the answer away.
+  // It now reuses the SAME `groupMissingDocumentsByType` the workflow uses
+  // (one name per type, its countries beside it), so the two can never
+  // disagree. `missing` never contains a `recommended` row, so naming these
+  // as things the countries require is a fact, not an inference.
   try {
     if (docGap && docGap.kind === "ok" && docGap.gap.expiring.length === 0 && docGap.gap.missing.length > 0 && docGap.countries.length > 0 && lines.length < MAX_LINES) {
-      lines.push(t("briefDocumentsMissing", { count: docGap.gap.missing.length }));
+      const tDocs = await getTranslations("documents");
+      const tLm = await getTranslations("labourMarket");
+      const countryName = (code: string) =>
+        tLm.has(`countryNames.${code}`) ? (tLm(`countryNames.${code}` as never) as string) : code;
+      const list = groupMissingDocumentsByType(docGap.gap.missing, DOCUMENT_GAP_LINE_CAP)
+        .map((g) => {
+          const name = tDocs.has(`types.${g.documentTypeSlug}`)
+            ? (tDocs(`types.${g.documentTypeSlug}` as never) as string)
+            : g.documentTypeSlug;
+          return `${name} (${g.countries.map(countryName).join(", ")})`;
+        })
+        .join("; ");
+      lines.push(t("briefDocumentsMissing", { count: docGap.gap.missing.length, list }));
       addChip("documents-centre", t("documentsChip"));
     }
   } catch {

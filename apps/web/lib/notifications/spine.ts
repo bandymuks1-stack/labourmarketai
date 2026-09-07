@@ -24,6 +24,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
   notificationEventHref,
   readMyNotificationEvents,
+  type NotificationEventMetadata,
 } from "@/lib/notifications/events";
 
 /**
@@ -123,6 +124,15 @@ export async function getDurableNotifications(limit?: number): Promise<
     read_at: string | null;
     /** Canonical surface for the entity this event is about. */
     href?: string;
+    /**
+     * The stored row's own safe render hints (`SAFE_METADATA_KEYS`: country,
+     * roleSlug, startDate). Carried through so the bell can say WHICH market
+     * an event belongs to (owner window 11 §28) — production showed two
+     * "Darbuotojas pareiškė susidomėjimą jūsų poreikiu" rows that were
+     * indistinguishable, because everything the row knew beyond its type was
+     * dropped here. Never free text; the write side gates the keys.
+     */
+    metadata: NotificationEventMetadata;
   }[]
 > {
   const supabase = await createServerClient();
@@ -138,5 +148,6 @@ export async function getDurableNotifications(limit?: number): Promise<
     // into somewhere the reader can actually go. Clearing still happens by
     // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
     href: notificationEventHref(e.entityType),
+    metadata: e.metadata,
   }));
 }

@@ -4381,7 +4381,8 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netzwerk",
-        "playerCard": "Meine Karte"
+        "playerCard": "Meine Karte",
+        "adminPlatform": "Plattform-Administration"
       },
       "roleNotice": {
         "needs_worker_role": "Dieser Link öffnet den Arbeitskraft-Bereich, den Ihr Konto noch nicht hat. Fügen Sie die Arbeitskraft-Rolle im Bereichs-Hub hinzu.",
@@ -4583,6 +4584,10 @@
         "open": "In LabourMarket.ai öffnen:",
         "manage": "Benachrichtigungseinstellungen verwalten:"
       }
+    },
+    "carriedIntent": {
+      "label": "Sie machen weiter mit",
+      "hint": "Nach der Anmeldung sind Sie sofort wieder hier — Ihr Satz reist mit."
     }
   },
   "shared": {
@@ -12353,7 +12358,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# Kunde hat} other {# Kunden haben}} die Verbindung noch nicht bestätigt.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# Einladung eines Lernenden ist} other {# Einladungen von Lernenden sind}} noch nicht angenommen.",
       "briefDocumentsExpiring": "{count, plural, one {# Dokument läuft bald ab} other {# Dokumente laufen bald ab}}.",
-      "briefDocumentsMissing": "{count, plural, one {# Dokument fehlt für Ihre Länder} other {# Dokumente fehlen für Ihre Länder}}.",
+      "briefDocumentsMissing": "{count, plural, one {Für Ihre genannten Länder fehlt noch # Dokument} other {Für Ihre genannten Länder fehlen noch # Dokumente}}: {list}.",
       "briefEmployerInterestWaiting": "{count, plural, one {# Kandidat wartet auf Ihre Antwort} other {# Kandidaten warten auf Ihre Antwort}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# Agenturangebot wartet auf Ihre Entscheidung} other {# Agenturangebote warten auf Ihre Entscheidung}}.",
       "briefInterestContacted": "{count, plural, one {# Unternehmen möchte Sie wegen Ihres Interesses kontaktieren} other {# Unternehmen möchten Sie wegen Ihres Interesses kontaktieren}}.",
@@ -12550,6 +12555,8 @@
       "documentAddUnavailable": "Der Dokumentkatalog konnte gerade nicht geladen werden — erfassen Sie das Dokument im Dokumentencenter.",
       "cvExportHint": "Ihr geprüfter Lebenslauf — ein Blatt mit dem, was das System wirklich weiß. Öffnen und als PDF drucken.",
       "chipCvSheet": "Lebenslauf-Blatt öffnen",
+      "cvViewHint": "Das ist Ihr Lebenslauf — was das System heute über Sie weiß. Öffnen und ansehen; es wird nichts hochgeladen und nichts geändert.",
+      "cvChooseAsk": "Was möchten Sie mit Ihrem Lebenslauf tun? Ich kann ihn zeigen, eine neue Datei annehmen oder Ihr Profil öffnen — daraus entsteht er.",
       "taskCreateIntro": "Eine neue Aufgabe: was zu tun ist, in welchem Projekt und bis wann.",
       "taskCreatedNext": "Aufgabe erfasst. Der Projektpuls zeigt sie als offen; eine Person weisen Sie im Aufgabenbildschirm zu.",
       "capacityIntro": "Team {from} – {to} ({count} Personen):",
@@ -13303,7 +13310,11 @@
         "internship": "Wo kann ich ein Praktikum machen?",
         "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
         "needService": "Ich brauche jemanden, der das Dach repariert",
-        "offerService": "Ich biete Buchhaltungsdienstleistungen an"
+        "offerService": "Ich biete Buchhaltungsdienstleistungen an",
+        "offerCapacity": "Wir haben 7 Elektriker ab Montag frei",
+        "brigade": "Ich suche eine Kolonne für die Baustelle",
+        "logWork": "Heute habe ich 8 Stunden an der Green Tower gearbeitet",
+        "verifyWork": "Wer könnte meine Erfahrung bestätigen?"
       },
       "understoodLabel": "Verstanden",
       "understood": {
@@ -13318,7 +13329,7 @@
         "projects": "Sie möchten die Projekte Ihres Unternehmens sehen.",
         "company-overview": "Sie möchten sehen, was in Ihrem Unternehmen passiert — Leute, Projekte, Bedarf.",
         "create-organization": "Sie möchten ein Unternehmen oder eine Organisation registrieren.",
-        "cv": "Sie möchten mit Ihrem Lebenslauf arbeiten — hochladen oder ansehen.",
+        "cv": "Sie möchten eine Lebenslauf-Datei hochladen. Wir lesen sie und zeigen den Fund vor dem Speichern.",
         "log-work": "Sie möchten erledigte Arbeit im Arbeitstagebuch festhalten.",
         "skill-gap": "Sie möchten wissen, welche Fähigkeiten Ihnen fehlen.",
         "documents": "Sie sprechen über Dokumente und Zertifikate — was gültig ist, was abläuft, was fehlt.",
@@ -13331,7 +13342,11 @@
         "propose-candidate": "Sie möchten einem Kunden einen Kandidaten vorschlagen — Sie arbeiten als Agentur.",
         "client-demand": "Sie möchten sehen, was Ihre Kunden brauchen.",
         "invite-student": "Sie vertreten eine Bildungseinrichtung und möchten einen Lernenden einladen.",
-        "programmes": "Sie vertreten eine Bildungseinrichtung — Programme, Gruppen, Lernende."
+        "programmes": "Sie vertreten eine Bildungseinrichtung — Programme, Gruppen, Lernende.",
+        "offer-capacity": "Sie haben Leute oder Kapazität frei. Wir halten das Angebot fest, damit es gefunden wird.",
+        "who-verifies-work": "Sie fragen, wer bereits geleistete Arbeit bestätigen kann. Wir zeigen, wem Sie sie vorlegen.",
+        "cv-view": "Sie möchten Ihren Lebenslauf ansehen — den, den das System schon hat. Nichts wird geändert.",
+        "cv-choose": "Sie erwähnen Ihren Lebenslauf. Wir fragen: zeigen, neu hochladen oder Ihr Profil ergänzen?"
       },
       "family": {
         "work": "Sie sprechen über Ihre Arbeit und Ihren beruflichen Weg.",
@@ -13807,7 +13822,7 @@
       "label": "Status des Arbeitsprofils",
       "known": "Bereits angegeben:",
       "next": "Jetzt am wichtigsten:",
-      "complete": "Alles Wichtige ist bereits angegeben.",
+      "complete": "Alle {count} Bereiche Ihrer Arbeitskarte sind angegeben. Dokumente und offene Anfragen zählen getrennt.",
       "unavailable": "Der Status deines Arbeitsprofils konnte gerade nicht angezeigt werden. Das Gespräch funktioniert wie immer."
     },
     "action": {

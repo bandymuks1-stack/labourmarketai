@@ -260,8 +260,11 @@ describe("classifyIntent — the six §13 workflow sentences", () => {
     ["Įrašyti šiandienos darbą", "log-work"],
     ["Reikia 4 suvirintojų Vokietijoje nuo rugsėjo", "need-workers"],
     ["Rask man darbą", "find-work"],
-    // Since the CV sheet slice: SEEING the CV is the verified sheet, not the import.
-    ["Parodyk mano CV", "cv-export"],
+    // SEEING the CV is neither the import nor the export (owner window 11
+    // §5/§30). It was `cv-export` while "show" and "download" shared one
+    // rule; they no longer do, and the page reached is the same `/cv` either
+    // way — only the sentence the product answers with changes.
+    ["Parodyk mano CV", "cv-view"],
     ["Sukurk įmonės profilį", "create-organization"],
     ["Parodyk mano rytojaus planą", "calendar-view"],
   ];
@@ -869,11 +872,25 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Ich habe einen neuen Ausweis",
   },
   "cv-export": {
-    lt: "Parodyk mano CV",
+    lt: "Atsisiųsk mano CV",
     en: "Download my CV",
     ru: "Скачай моё резюме",
     nl: "Download mijn cv",
     de: "Meinen Lebenslauf herunterladen",
+  },
+  "cv-view": {
+    lt: "Noriu pamatyti savo CV",
+    en: "I want to see my CV",
+    ru: "Хочу посмотреть своё резюме",
+    nl: "Ik wil mijn cv bekijken",
+    de: "Ich möchte meinen Lebenslauf ansehen",
+  },
+  "cv-choose": {
+    lt: "Mano CV",
+    en: "My CV",
+    ru: "Моё резюме",
+    nl: "Mijn cv",
+    de: "Mein Lebenslauf",
   },
   "add-task": {
     lt: "Pridėk užduotį projektui: sumontuoti pastolius",
