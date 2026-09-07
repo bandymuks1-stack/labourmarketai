@@ -13691,7 +13691,10 @@
         "invalid_transition": "That step is not possible from the current state.",
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "Reply from the person this is about",
+      "notPublicYet": "This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "Your experience with {name}",

@@ -13691,7 +13691,10 @@
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
-      }
+      },
+      "heading": "Reactie van de persoon over wie dit gaat",
+      "notPublicYet": "Deze reactie is nog niet gepubliceerd. Zij wordt zichtbaar voor de andere partij zodra de moderatie klaar is.",
+      "unreadable": "Reacties konden hier niet worden gelezen. Dat is niet hetzelfde als dat er geen zijn."
     },
     "submit": {
       "about": "Jouw ervaring met {name}",

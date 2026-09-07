@@ -174,7 +174,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         step: "The report becomes verified history the company can rely on",
         capabilities: ["EVID-2", "EVID-6"],
         link: "LIVE",
-        proof: "PRODUCTION_PERSISTENCE_PROVEN — the subject's right of reply is write-only (EVID-6 debt)",
+        proof: "PRODUCTION_PERSISTENCE_PROVEN — and the subject's right of reply became readable on 2026-09-07; it had been write-only since the domain shipped (EVID-6)",
       },
     ],
   },
