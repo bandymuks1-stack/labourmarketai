@@ -186,3 +186,56 @@ describe("the app layer adds no authority and hides no state", () => {
     expect(page).toContain("AvailableSupplySection");
   });
 });
+
+// ── capacity as an authorized action ───────────────────────────────────────
+
+describe("capacity is ONE implementation, served to a human and to an agent", () => {
+  const CORE = "lib/conversation/capacity-core.ts";
+  const ACTION = "lib/conversation/capacity.ts";
+  const REGISTRY = "lib/capabilities/registry.ts";
+
+  it("the chat action and the capability both call the SAME core", () => {
+    expect(read(ACTION)).toContain("whoIsAvailableCore");
+    expect(read(REGISTRY)).toContain("whoIsAvailableCore");
+    // And the action module keeps no logic of its own.
+    expect(read(ACTION)).not.toContain("unavailabilityOverlaps");
+  });
+
+  it("the core is NOT a server action — its arguments are not client-reachable", () => {
+    // `capacity.ts` is a "use server" module, so every export it carries is
+    // callable from the browser. A core taking a company id and a caller has
+    // no business being one of those.
+    expect(read(ACTION).startsWith('"use server"')).toBe(true);
+    expect(read(CORE).startsWith('"use server"')).toBe(false);
+    expect(read(CORE)).toContain("whoIsAvailableCore");
+  });
+
+  it("the capability resolves the employer itself and trusts no client id", () => {
+    const src = read(REGISTRY);
+    const fn = src.slice(src.indexOf("const workforceAvailability:"));
+    expect(fn).toContain("requireEmployerCompanyForCaller(caller)");
+    // Its input schema is empty and strict — there is no id to pass.
+    expect(src).toContain("const workforceAvailabilityInput = z.object({}).strict();");
+  });
+
+  it("it runs as the caller, never service-role", () => {
+    const src = read(REGISTRY);
+    const fn = src.slice(src.indexOf("const workforceAvailability:"));
+    expect(fn).toContain("supabase: caller.supabase");
+    expect(fn).not.toMatch(/service[_-]?role/i);
+  });
+
+  it("it reports which inputs answered — an unread source is never 'nobody is busy'", () => {
+    const src = read(REGISTRY);
+    const fn = src.slice(src.indexOf("const workforceAvailability:"));
+    expect(fn).toContain("absencesKnown: result.absencesKnown");
+    expect(fn).toContain("commitmentsKnown: result.commitmentsKnown");
+  });
+
+  it("an empty roster is EMPTY, not an error and not a silent blank", () => {
+    const src = read(REGISTRY);
+    const fn = src.slice(src.indexOf("const workforceAvailability:"));
+    expect(fn).toContain('result.kind === "empty"');
+    expect(fn).toContain("rosterTotal: 0");
+  });
+});

@@ -151,6 +151,10 @@ describe("the registry itself", () => {
       "demand.create_draft",
       "demand.create_confirm",
       "context.switch",
+      // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
+      // company questions to become an authorized action rather than a
+      // chat-only answer, over the SAME core the chat calls.
+      "workforce.availability",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -180,6 +184,10 @@ describe("the registry itself", () => {
       "demand.create_draft",
       "demand.create_confirm",
       "context.switch",
+      // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
+      // company questions to become an authorized action rather than a
+      // chat-only answer, over the SAME core the chat calls.
+      "workforce.availability",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product

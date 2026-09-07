@@ -86,9 +86,11 @@ const READ_LIMIT = 500;
  */
 export async function getEmployerWorkerCommitments(
   workerIds: readonly string[],
+  /** OPTIONAL explicit caller (G4 bridge) — absent = the cookie session. */
+  caller?: { readonly supabase: SupabaseClient },
 ): Promise<EmployerCommittedWorkResult> {
   if (workerIds.length === 0) return { status: "ok", commitments: [] };
-  const supabase = await createClient();
+  const supabase = caller?.supabase ?? (await createClient());
   const ids = workerIds.slice(0, READ_LIMIT);
 
   // ACCEPTED BOOKINGS. `accepted` is the canonical committed status — the same

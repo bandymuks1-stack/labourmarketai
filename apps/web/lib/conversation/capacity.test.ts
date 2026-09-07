@@ -78,7 +78,9 @@ beforeEach(() => {
 describe("loadWhoIsAvailableForChat — the pre-read roster", () => {
   it("without an argument the roster is read here (the chat's path, unchanged)", async () => {
     const res = await loadWhoIsAvailableForChat();
-    expect(h.listActiveCompanyWorkers).toHaveBeenCalledWith("c1");
+    // The explicit-caller argument is `undefined` on the cookie path — the
+    // core passes it through so ONE read serves both transports.
+    expect(h.listActiveCompanyWorkers).toHaveBeenCalledWith("c1", undefined);
     expect(res.kind).toBe("ok");
     if (res.kind !== "ok") return;
     expect(res.rosterTotal).toBe(2);
@@ -219,6 +221,6 @@ describe("a committed worker is not free", () => {
 
   it("only the roster's OWN workers are asked about", async () => {
     await loadWhoIsAvailableForChat();
-    expect(h.getEmployerWorkerCommitments).toHaveBeenCalledWith(["w1", "w2"]);
+    expect(h.getEmployerWorkerCommitments).toHaveBeenCalledWith(["w1", "w2"], undefined);
   });
 });

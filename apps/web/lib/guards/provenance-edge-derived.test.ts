@@ -190,7 +190,9 @@ describe("3. words", () => {
     for (const f of files) {
       expect(readFileSync(f, "utf8"), rel(f)).not.toMatch(/#\$\{\w+(?:\.\w+)*\.slice\(0, ?\d\)\}/);
     }
-    expect(read("lib/conversation/capacity.ts")).toMatch(/t\("unnamedPerson"\)/);
+    // The capacity logic moved to `capacity-core.ts` when the same answer
+    // became reachable by an authorized agent; the fallback noun moved with it.
+    expect(read("lib/conversation/capacity-core.ts")).toMatch(/t\("unnamedPerson"\)/);
     expect(read("lib/conversation/agency-workspace.ts")).toMatch(/tChat\("unnamedPerson"\)/);
     expect(read("lib/conversation/agency-workspace.ts")).toMatch(/tChat\("unnamedNeed"\)/);
   });

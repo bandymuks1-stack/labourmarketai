@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/server";
 import {
   effectiveEndDay,
@@ -107,12 +109,23 @@ const UNDEFINED_COLUMN = "42703";
  * this process computed would be a weaker guarantee than the database's own
  * `caller_manages_worker`.
  */
-export async function getEmployerWorkerAvailability(): Promise<EmployerAvailabilityResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { status: "not-authed" };
+export async function getEmployerWorkerAvailability(
+  /** OPTIONAL explicit caller (G4 bridge). Absent = the cookie session, which
+   *  is every existing call site and is unchanged. Present = a bearer or agent
+   *  transport handing in ITS OWN RLS-scoped client. Never service-role: the
+   *  privacy minimisation above is enforced by the SELECT list, and RLS still
+   *  decides which workers the caller may see at all. */
+  caller?: { readonly supabase: SupabaseClient; readonly userId: string },
+): Promise<EmployerAvailabilityResult> {
+  const supabase = caller?.supabase ?? (await createClient());
+  let userId = caller?.userId ?? null;
+  if (!userId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id ?? null;
+  }
+  if (!userId) return { status: "not-authed" };
 
   const workersRes = await (supabase as AnyClient)
     .from("company_workers")
