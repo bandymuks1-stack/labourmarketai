@@ -1207,6 +1207,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
       // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
       "20260905200000_billing_safety_invariants_v1.sql",
+      // 2026-09-06: notification_events service-role write grant (RED: GRANT =
+      // privilege-surface change, gate rule h). The emitters run through the
+      // admin client and have failed 42501 since July; marker records the RED
+      // classification, owner applies via MCP apply_migration (#1566).
+      "20260906060000_notification_events_service_role_grant.sql",
       // 2026-09-06 (owner window 7 §4): the worker board's gated read
       // served agency SUPPLY offers to workers as open jobs — measured 2 of
       // 9 rows on production. The fix is a SECURITY DEFINER body replace =
@@ -1233,11 +1238,6 @@ describe("the migration set is exactly what this slice declared", () => {
       // new tables with explicit GRANTs are not made GREEN by a marker.
       "20260907114500_organization_evidence_import_v1.sql",
       "20260907153000_employer_supply_discovery_v1.sql",
-      // 2026-09-06: notification_events service-role write grant (RED: GRANT =
-      // privilege-surface change, gate rule h). The emitters run through the
-      // admin client and have failed 42501 since July; marker records the RED
-      // classification, owner applies via MCP apply_migration (#1566).
-      "20260906060000_notification_events_service_role_grant.sql",
 ]);
   });
 
