@@ -122,10 +122,22 @@ spare capacity, a team for a site, real work recorded, who can verify it. Plus
 the four router repairs above, so each new example actually resolves in all five
 active locales.
 
-Measured at 375 px, the ten sentences stacked **523 px** — 64% of the viewport,
-pushing the entry card's bottom to y=999, below the fold. Below `sm` the strip
-now scrolls sideways on one line: **48 px**, card bottom at 524, nothing hidden,
-nothing removed, and better than the six-chip state it replaced (314 px).
+Measured at 375 px, the ten sentences stack **523 px** — 64% of the viewport,
+pushing the entry card's bottom to y=999, below the fold. That cost is accepted
+and stated, not engineered away: the label, the field and the submit are all
+above it; only the examples run past.
+
+**I got this wrong once, and CI caught it (#1607).** My first answer was a
+horizontally scrolling strip below `sm`: 523 px → 48 px, card bottom at 524,
+page not scrolling sideways. It optimised the number I was looking at and broke
+what the chips are for. `tests/e2e/landing-mobile-overflow.spec.ts` failed at
+320 / 360 / 375 — *"entry example chips right edge at 320px"* — and the
+assertion was right: a scrolling strip puts eight of ten chips outside the
+viewport by construction, and at 320 px a visitor sees one and a half sentences.
+Discovering that the product is more than a job board became a swipe nobody
+performs, which is §16 restated as a gesture and paid for with §19. **Hiding
+breadth is not a density fix.** Reverted to wrap; 27/27 on the CI subset against
+a production build.
 
 ## 6. What was connected rather than rebuilt
 
@@ -171,7 +183,7 @@ a door rather than connecting one:
 | 20 | Chat → existing capability | **improved** — 4 new correct routes, 1 read/write separation, 3 boundary repairs | `TEST_PROVEN` |
 | 21 | Search / reachability | **BUILT_AND_USABLE, honest** — curated command registry + the caller's own RLS-scoped objects, people search explicitly excluded and said so. **No change needed** | audited |
 | 22 | Calendar / freedom / conflicts | **unchanged** — `J-TIME-FREEDOM` still has DETECT → WARN and five `NOT_BUILT` links | — |
-| 23 | Mobile / responsive | **improved** — the landing strip measured at 375 px, before and after | browser-measured |
+| 23 | Mobile / responsive | **measured, and one regression of my own caught by CI and reverted (#1607).** The example row is taller on a phone than before — accepted, stated in the component, not hidden | browser-measured at 320/360/375, then 27/27 e2e against a production build |
 | 24 | Data preservation / security | **unchanged** — no migration, no schema, no policy, no new read scope | — |
 
 **25. Full quality suite.** `tsc --noEmit` clean · `eslint` 0 errors (39
@@ -260,10 +272,15 @@ something is the CV import losing the bare noun. It did not lose the
 import sentences across five locales still reach `cvChip`, and that `cv` remains
 the ONLY intent pointing at that handler. The chip is untouched.
 
-**No capability was hidden.** The landing gained four examples and lost none.
-The ten chips are all present at every width — measured, not assumed: 10 chips
-present at 375 px, the strip scrolling rather than truncating, the page not
-scrolling sideways.
+**No capability was hidden** — though it briefly was, and that is the honest
+version. The landing gained four examples and lost none, and all ten are now
+*visible* at every width, asserted per chip by
+`tests/e2e/landing-mobile-overflow.spec.ts` at 320 / 360 / 375. My first
+attempt at the density problem put eight of them behind a horizontal swipe;
+that spec failed on the merged commit and #1607 reverted it. The guard was
+already there and it was right — which is the whole argument for keeping
+assertions that measure what a person can actually see, rather than what the
+DOM contains.
 
 **No capability was duplicated.** `cv-view` and `cv-export` route to the SAME
 existing `/cv` page. `cv-choose` offers the three doors that already exist. The

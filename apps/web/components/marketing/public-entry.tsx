@@ -233,15 +233,22 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                different DIRECTION of the graph, which is the whole answer to
                §16 (a visitor reading only "job + worker + hire" leaves
                believing this is a job board).
-               But measured at 375px they stacked 523px tall — 64% of the
-               viewport — and pushed the entry card's bottom to y=999, below
-               the fold, which is §19's density complaint made worse. So below
-               `sm` the strip SCROLLS sideways on one line instead of wrapping:
-               every chip stays present, reachable and tabbable (the browser
-               scrolls a focused button into view), and the fold is intact.
-               From `sm` up it wraps exactly as before. */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
-          <span className="shrink-0 text-meta text-text-muted">{t("examplesLabel")}</span>
+               They WRAP, at every width, and the cost is stated rather than
+               engineered away: at 375px the row is ~523px tall and the entry
+               card's bottom lands below the fold. §19 asks whether that is
+               appropriate, and the answer here is yes — the label, the field
+               and the submit are all above it; only the examples run past.
+
+               A horizontally-scrolling strip was tried first and reverted the
+               same day. It fixed the height (523px → 48px) and broke the point:
+               at 320px a visitor sees one and a half sentences and has to swipe
+               to discover that the product is more than a job board, which is
+               the §16 complaint restated as a gesture. It also put eight of ten
+               chips outside the viewport, which is exactly what
+               `tests/e2e/landing-mobile-overflow.spec.ts` asserts against —
+               correctly. Hiding breadth is not a density fix. */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {EXAMPLE_KEYS.map((key) => {
             const example = t(`examples.${key}`);
             return (
@@ -253,7 +260,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                   setDraft(example);
                   ask(example);
                 }}
-                className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue sm:whitespace-normal"
+                className="min-h-11 rounded-full border border-ink-500 px-3 text-support font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
               >
                 {example}
               </button>
