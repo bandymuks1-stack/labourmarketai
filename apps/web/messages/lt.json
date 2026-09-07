@@ -12326,7 +12326,7 @@
       "historyMore": "Rodyti daugiau",
       "workspaceLabel": "Darbo erdvė",
       "workspacePersonal": "Asmeninė erdvė",
-      "workspaceUnnamed": "Įmonės erdvė",
+      "workspaceUnnamed": "Organizacija be pavadinimo",
       "chipLogWork": "Užfiksuoti darbą",
       "agendaTitle": "Artimiausių {days} d. planas:",
       "agendaEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
@@ -12704,8 +12704,12 @@
       },
       "capacityCommittedUntil": "jau užimtas iki {date}",
       "capacityCommittedToUntil": "dirba {what} iki {date}",
-      "capacityCommitmentsUnknown": "Nepavyko perskaityti rezervacijų ir priskyrimų projektams, todėl kaip laisvas rodomas žmogus gali būti jau užimtas."
-    },
+      "capacityCommitmentsUnknown": "Nepavyko perskaityti rezervacijų ir priskyrimų projektams, todėl kaip laisvas rodomas žmogus gali būti jau užimtas.",
+      "workspaceUnnamedCompany": "Įmonė be pavadinimo",
+      "workspaceUnnamedAgency": "Agentūra be pavadinimo",
+      "workspaceUnnamedTeam": "Komanda be pavadinimo",
+      "workspaceUnnamedNote": "Pavadinimas nenurodytas",
+      "workspaceNameThis": "Nurodyti pavadinimą"    },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
       "loading": "Kraunama…",

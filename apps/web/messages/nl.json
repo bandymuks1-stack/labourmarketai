@@ -12326,7 +12326,7 @@
       "historyMore": "Meer tonen",
       "workspaceLabel": "Werkruimte",
       "workspacePersonal": "Persoonlijke ruimte",
-      "workspaceUnnamed": "Bedrijfswerkruimte",
+      "workspaceUnnamed": "Organisatie zonder naam",
       "chipLogWork": "Werk vastleggen",
       "agendaTitle": "Je planning voor de komende {days} dagen:",
       "agendaEmpty": "Er is niets gepland voor de komende {days} dagen.",
@@ -12704,8 +12704,12 @@
       },
       "capacityCommittedUntil": "al toegezegd tot {date}",
       "capacityCommittedToUntil": "op {what} tot {date}",
-      "capacityCommitmentsUnknown": "Boekingen en projecttoewijzingen konden niet worden gelezen, dus wie als vrij wordt getoond kan al toegezegd zijn."
-    },
+      "capacityCommitmentsUnknown": "Boekingen en projecttoewijzingen konden niet worden gelezen, dus wie als vrij wordt getoond kan al toegezegd zijn.",
+      "workspaceUnnamedCompany": "Bedrijf zonder naam",
+      "workspaceUnnamedAgency": "Bureau zonder naam",
+      "workspaceUnnamedTeam": "Ploeg zonder naam",
+      "workspaceUnnamedNote": "Geen naam opgegeven",
+      "workspaceNameThis": "Naam toevoegen"    },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
       "loading": "Laden…",

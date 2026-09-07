@@ -12326,7 +12326,7 @@
       "historyMore": "Mehr anzeigen",
       "workspaceLabel": "Arbeitsbereich",
       "workspacePersonal": "Persönlicher Bereich",
-      "workspaceUnnamed": "Unternehmens-Arbeitsbereich",
+      "workspaceUnnamed": "Organisation ohne Namen",
       "chipLogWork": "Arbeit erfassen",
       "agendaTitle": "Dein Plan für die nächsten {days} Tage:",
       "agendaEmpty": "Für die nächsten {days} Tage ist nichts geplant.",
@@ -12704,8 +12704,12 @@
       },
       "capacityCommittedUntil": "bereits verplant bis {date}",
       "capacityCommittedToUntil": "auf {what} bis {date}",
-      "capacityCommitmentsUnknown": "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein."
-    },
+      "capacityCommitmentsUnknown": "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
+      "workspaceUnnamedCompany": "Unternehmen ohne Namen",
+      "workspaceUnnamedAgency": "Agentur ohne Namen",
+      "workspaceUnnamedTeam": "Kolonne ohne Namen",
+      "workspaceUnnamedNote": "Kein Name angegeben",
+      "workspaceNameThis": "Namen angeben"    },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
       "loading": "Wird geladen…",

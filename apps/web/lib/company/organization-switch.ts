@@ -179,33 +179,94 @@ export function resolveActiveOrganizationId(
  * fallback string was itself the defect: it made distinct workspaces
  * indistinguishable.
  *
- * The rule: an unnamed workspace keeps the honest fallback, and gets a
- * positional suffix ONLY when it would otherwise collide with another
- * workspace bearing the same text. Nothing is invented — a number is not a
- * name, it is a way to say "this is the second one". A single unnamed
- * organization therefore reads exactly as before, with no stray "1".
+ * ── THE FIX FOR THAT BECAME THE NEXT DEFECT (owner walk, 2026-09-07) ───────
+ *
+ * The answer then was a positional suffix, argued as "a number is not a name,
+ * it is a way to say 'this is the second one'." On production the owner read:
+ *
+ *     Asmeninė erdvė
+ *     Įmonės erdvė 1            <- unnamed organization
+ *     Labour market ai Sp. z o.o
+ *     Įmonės erdvė 2            <- another unnamed organization
+ *
+ * and could not tell whether those were real companies, incomplete records,
+ * synthetic placeholders or orphaned test data. The argument was wrong:
+ * "Įmonės erdvė 1" sits in a list beside a real registered company name and
+ * reads as one. UNKNOWN was rendered as KNOWN.
+ *
+ * ── WHAT THE ROWS ACTUALLY ARE (traced on production, 2026-09-07) ──────────
+ *
+ * Real organizations. Not synthetic, not test data, and nothing to delete:
+ *
+ *   · 5 of 17 production organizations have neither `display_name` nor
+ *     `legal_name`. Every one carries a `legacy_company_id` or
+ *     `legacy_agency_id`; ZERO were created nameless by the current product.
+ *   · Provenance is migration `0013_work_journal_m1.sql`, whose backfill
+ *     copies `legal_name` / `display_name` from `companies` / `agencies`
+ *     verbatim. The legacy rows were themselves NULL, so **no name was ever
+ *     lost — none ever existed.**
+ *   · They hold real memberships and, in two cases, real content (one carries
+ *     a live `customer_requests` row).
+ *   · The intake path is already closed: `saveCompanySetup` rejects a name
+ *     shorter than 2 characters, which is why the count is a fixed legacy
+ *     residue rather than a growing one.
+ *
+ * ── THE RULE NOW ──────────────────────────────────────────────────────────
+ *
+ * An organization with no stored name is labelled with a phrase that SAYS SO,
+ * chosen by its real type ("Įmonė be pavadinimo" / "Agentūra be pavadinimo").
+ * The type is real data and is usually enough to tell two of them apart. If
+ * two unnamed organizations of the SAME type still collide, the discriminator
+ * is a fragment of the organization id — unmistakably a reference, never
+ * mistakable for a name. No counter, ever.
  *
  * Pure so the ordering is identical everywhere the context is rendered, and so
  * the collision rule is unit-testable without a browser.
  */
+/** The unnamed-organization phrases, one per organization type. Each must
+ *  SAY that the name is missing — none of them may read as a name. */
+export type UnnamedOrganizationLabels = Readonly<
+  Record<"company" | "agency" | "team" | "other", string>
+>;
+
+/**
+ * Is this workspace label an honest "no name stored" phrase rather than a
+ * name the organization actually has? Exported so surfaces can render it
+ * differently — italic, muted, with a "name this organization" action — and
+ * so the guard can assert the distinction survives.
+ */
+export function isUnnamedOrganizationLabel(
+  label: string,
+  labels: UnnamedOrganizationLabels,
+): boolean {
+  return Object.values(labels).some((l) => label === l || label.startsWith(`${l} ·`));
+}
+
 export function workspaceDisplayLabels(
   workspaces: readonly WorkspaceInfo[],
-  labels: { readonly personal: string; readonly unnamedOrganization: string },
+  labels: {
+    readonly personal: string;
+    readonly unnamedOrganization: UnnamedOrganizationLabels;
+  },
 ): Map<string, string> {
   const base = new Map<string, string>();
   for (const w of workspaces) {
+    if (w.kind === "personal") {
+      base.set(w.id, labels.personal);
+      continue;
+    }
+    // The stored name, or an explicit statement that there is none — chosen
+    // by the organization's REAL type, which is the first honest thing that
+    // tells two unnamed workspaces apart.
     base.set(
       w.id,
-      w.kind === "personal"
-        ? labels.personal
-        : w.name.trim() || labels.unnamedOrganization,
+      w.name.trim() || labels.unnamedOrganization[w.organizationType ?? "other"],
     );
   }
   // Which texts are claimed by more than one workspace?
   const counts = new Map<string, number>();
   for (const text of base.values()) counts.set(text, (counts.get(text) ?? 0) + 1);
 
-  const seen = new Map<string, number>();
   const out = new Map<string, string>();
   for (const w of workspaces) {
     const text = base.get(w.id)!;
@@ -213,9 +274,15 @@ export function workspaceDisplayLabels(
       out.set(w.id, text);
       continue;
     }
-    const n = (seen.get(text) ?? 0) + 1;
-    seen.set(text, n);
-    out.set(w.id, `${text} ${n}`);
+    // STILL COLLIDING — two unnamed organizations of the SAME type. The
+    // discriminator is a fragment of the organization's own id: unmistakably
+    // a reference, never mistakable for a name. A counter is what this code
+    // used to append, and a counter is exactly what the owner read as a name
+    // on production ("Įmonės erdvė 1", "Įmonės erdvė 2" — see the note above).
+    //
+    // The personal workspace can never reach here (there is only ever one),
+    // so no id fragment is ever shown for it.
+    out.set(w.id, `${text} · ${w.id.slice(0, 8)}`);
   }
   return out;
 }

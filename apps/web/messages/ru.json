@@ -12326,7 +12326,7 @@
       "historyMore": "Показать ещё",
       "workspaceLabel": "Рабочее пространство",
       "workspacePersonal": "Личное пространство",
-      "workspaceUnnamed": "Рабочее пространство компании",
+      "workspaceUnnamed": "Организация без названия",
       "chipLogWork": "Записать работу",
       "agendaTitle": "Ваш план на ближайшие {days} дней:",
       "agendaEmpty": "На ближайшие {days} дней ничего не запланировано.",
@@ -12704,8 +12704,12 @@
       },
       "capacityCommittedUntil": "уже занят до {date}",
       "capacityCommittedToUntil": "на {what} до {date}",
-      "capacityCommitmentsUnknown": "Бронирования и назначения на проекты прочитать не удалось, поэтому показанный как свободный человек может быть уже занят."
-    },
+      "capacityCommitmentsUnknown": "Бронирования и назначения на проекты прочитать не удалось, поэтому показанный как свободный человек может быть уже занят.",
+      "workspaceUnnamedCompany": "Компания без названия",
+      "workspaceUnnamedAgency": "Агентство без названия",
+      "workspaceUnnamedTeam": "Бригада без названия",
+      "workspaceUnnamedNote": "Название не указано",
+      "workspaceNameThis": "Указать название"    },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",
       "loading": "Загрузка…",
