@@ -763,11 +763,13 @@ const EVIDENCE: readonly CapabilityRow[] = [
     title: "Experience records + disputes + right of reply",
     worldElement: "reputation",
     status: "PARTIAL",
-    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
-    anchors: ["lib/evidence"],
-    coreModule: null,
-    surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`experience_responses` is WRITE-ONLY — a person can reply and no surface renders the reply.",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/evidence", "lib/trust/experience-records.ts"],
+    coreModule: "lib/trust/experience-records.ts",
+    surfaces: ["components/app/workspace/experiences-result.tsx"],
+    note: "The right of reply got a READER on 2026-09-07 — `experience_responses` had shipped with a schema, an RPC, a policy and a form, and no surface had ever rendered a reply, to either side. The reply now shows with its own moderation state, and an unreadable reply says so rather than reading as none. Not yet walked by a human, so the evidence drops to TEST_PROVEN until it is.",
+    ownerDecision:
+      "The v1 select policy compares an unqualified `moderation_status` inside a subquery over `experience_records`, so it resolves to the RECORD's status and hands the experience author a reply moderation has not published. The surface now withholds it; correcting the policy is a schema change (RED).",
   },
 ];
 

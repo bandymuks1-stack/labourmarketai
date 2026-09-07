@@ -13691,7 +13691,10 @@
         "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
         "not_found": "Nerasta.",
         "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
-      }
+      },
+      "heading": "Asmens, apie kurį rašoma, atsakymas",
+      "notPublicYet": "Šis atsakymas dar nepaskelbtas. Kitai pusei jis taps matomas, kai baigsis moderavimas.",
+      "unreadable": "Atsakymų čia perskaityti nepavyko. Tai nėra tas pat, kas jų neturėti."
     },
     "submit": {
       "about": "Jūsų patirtis su {name}",
