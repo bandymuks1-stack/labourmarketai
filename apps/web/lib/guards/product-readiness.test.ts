@@ -2409,7 +2409,15 @@ describe("no migration files added by this sprint", () => {
 // carries NO `@human-gate-approved` marker, NOT applied.
 // RECOUNTED from the tree, never summed:
 // `ls supabase/migrations/*.sql | wc -l` = 270 real files.
-const SPRINT_BASELINE = 270;
+    // Bumped 270 -> 271 for evidence_parties_recursion_fix_v1 (2026-09-07):
+    // the organization evidence import applied earlier the same day shipped a
+    // MUTUAL RLS recursion - records_select subqueries parties, parties_select
+    // subqueries records - so four of its eight tables answer 42P17 on every
+    // read, and INSERT ... RETURNING dies with them. One SECURITY DEFINER
+    // resolver breaks the cycle on the parties side; records_select is not
+    // touched. RED (SECURITY DEFINER + policy replace), owner-gated, NOT
+    // applied. Proven in a rolled-back production transaction.
+const SPRINT_BASELINE = 271;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

@@ -1233,6 +1233,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // new tables with explicit GRANTs are not made GREEN by a marker.
       "20260907114500_organization_evidence_import_v1.sql",
       "20260907153000_employer_supply_discovery_v1.sql",
+      // 2026-09-07: the recursion repair for the import applied hours earlier.
+      // Carries the marker as a RISK ACKNOWLEDGEMENT only - no owner decision
+      // exists for it yet, which is stated in the file's own header. RED
+      // (SECURITY DEFINER + policy replace); draft + needs-human-gate.
+      "20260907220000_evidence_parties_recursion_fix_v1.sql",
 ]);
   });
 
