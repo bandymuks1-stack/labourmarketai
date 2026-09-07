@@ -135,6 +135,9 @@ export default async function InstructionsPage({
     ownNone: t("card.ownNone"),
     blocked: t("card.blocked"),
     record: t("card.record"),
+    capabilityDemonstrated: t("card.capabilityDemonstrated"),
+    capabilitySelfReported: t("card.capabilitySelfReported"),
+    capabilityStillRequired: t("card.capabilityStillRequired"),
   };
 
   // P3 — the contextual requirement ledger per instruction project (frozen

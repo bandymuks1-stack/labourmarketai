@@ -5787,7 +5787,10 @@
       "ownNone": "neįrašyta",
       "blocked": "(atmesta / pasibaigė)",
       "record": "Įrašyti dokumentą",
-      "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas."
+      "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas.",
+      "capabilityDemonstrated": "Turite čia užfiksuotų darbų, kuriuos patvirtino kitas asmuo.",
+      "capabilitySelfReported": "Turite čia užfiksuotų darbų, kurių dar niekas kitas nepatvirtino.",
+      "capabilityStillRequired": "Dokumentas vis tiek reikalingas — paprašykite, kad ši patirtis būtų įvertinta jo atžvilgiu."
     }
   },
   "projects": {

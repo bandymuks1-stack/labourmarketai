@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { listMyDocuments } from "@/lib/documents/readiness";
 import { listWorkerInstructions } from "@/lib/instructions/instructions";
 import { deriveWorkerProjectAsks, type WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
+import {
+  UNKNOWN_RECORDED_WORK,
+  getOwnRecordedWorkEvidence,
+} from "@/lib/qualification/capability-evidence";
 
 /**
  * Worker-side project access (F11 / RC2 — role-aware project routing).
@@ -58,6 +62,17 @@ export interface WorkerProjectListItem {
   readonly assignmentStatus: "active" | "ended";
   readonly assignedAt: string;
 }
+
+/** The caller's own profile id. Request-cached beside `getOwnWorkerId`, which
+ *  already resolves the same session — the capability read needs the PROFILE
+ *  id to tell a self-confirmation from an independent one. */
+export const getOwnProfileId = cache(async (): Promise<string | null> => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.id ?? null;
+});
 
 /** The caller's own worker id, or null when they have no worker row.
  *  Request-cached: the ledger, the project view and the asks read all ask
@@ -246,8 +261,46 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
   if (ids.length === 0) return out;
   const workerId = await getOwnWorkerId();
   if (!workerId) return out;
-  const [items, docs, read] = await Promise.all([listOwnReadinessItems(workerId, ids), listMyDocuments(), listWorkerInstructions()]);
-  const asks = items.length > 0 ? deriveWorkerProjectAsks(items, docs.kind === "ok" ? docs.documents : null, new Date()) : new Map<string, WorkerProjectAsk[]>();
+  const [items, docs, read, ownProfileId] = await Promise.all([
+    listOwnReadinessItems(workerId, ids),
+    listMyDocuments(),
+    listWorkerInstructions(),
+    getOwnProfileId(),
+  ]);
+  /**
+   * REAL WORK IS READ BESIDE THE PAPER (owner correction 2026-09-07).
+   *
+   * The `qualification_or_skill_evidence` row used to be answered by two
+   * document types and nothing else, so a person with years of confirmed work
+   * and no certificate read exactly like a person with nothing. The counts
+   * below let the derivation say both things at once — the certificate is
+   * still required, AND the work exists. A caller that cannot answer hands in
+   * the UNKNOWN shape rather than zeros.
+   */
+  const evidence =
+    items.length > 0 && ownProfileId
+      ? await getOwnRecordedWorkEvidence(workerId, ownProfileId).catch(
+          () => UNKNOWN_RECORDED_WORK,
+        )
+      : null;
+  const asks =
+    items.length > 0
+      ? deriveWorkerProjectAsks(
+          items,
+          docs.kind === "ok" ? docs.documents : null,
+          new Date(),
+          evidence
+            ? {
+                ...evidence,
+                // The document layer already decided what is recorded and in
+                // date; the derivation fills these from `own`.
+                hasValidCredential: false,
+                hasExpiringCredential: false,
+                hasRecognizedEquivalence: false,
+              }
+            : null,
+        )
+      : new Map<string, WorkerProjectAsk[]>();
   const instructions = new Map<string, OwnProjectAsks["instruction"]>();
   if (read.kind === "ok") {
     for (const ins of read.instructions) {

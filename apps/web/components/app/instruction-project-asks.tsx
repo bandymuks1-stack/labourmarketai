@@ -34,6 +34,18 @@ export interface InstructionProjectAsksLabels {
   readonly ownNone: string;
   readonly blocked: string;
   readonly record: string;
+  /**
+   * REAL WORK, SHOWN BESIDE THE PAPER (owner correction 2026-09-07).
+   *
+   * `capabilityDemonstrated` / `capabilitySelfReported` say that recorded
+   * work exists; `capabilityStillRequired` says, in the same breath, that the
+   * certificate is still required. Both sentences render together or neither
+   * does — showing the first without the second would tell someone they are
+   * deployable when they are not.
+   */
+  readonly capabilityDemonstrated: string;
+  readonly capabilitySelfReported: string;
+  readonly capabilityStillRequired: string;
 }
 
 /** Copy resolved by the page (server side) — the component holds no strings. */
@@ -224,6 +236,23 @@ export function InstructionProjectAsks({
                 {a.label}
                 {blocked ? <span className="text-text-muted"> {labels.blocked}</span> : null}
                 {own ? <span className={a.own === "ready" ? "text-state-success" : "text-state-amber"}> ({own})</span> : null}
+                {/* Five years of real work is not "certificate missing". When
+                    the person has recorded work the paper does not capture,
+                    it is said — and the formal requirement is said with it, in
+                    the same breath, never instead of it. */}
+                {a.capability?.hasUncountedRealWork ? (
+                  <span
+                    className="mt-0.5 block text-meta leading-snug text-text-secondary"
+                    data-testid="instruction-project-ask-capability"
+                    data-standing={a.capability.standing}
+                    data-formal-met={a.capability.formalRequirementMet ? "true" : "false"}
+                  >
+                    {a.capability.standing === "demonstrated_capability"
+                      ? labels.capabilityDemonstrated
+                      : labels.capabilitySelfReported}{" "}
+                    <span className="text-text-muted">{labels.capabilityStillRequired}</span>
+                  </span>
+                ) : null}
               </li>
             );
           })}

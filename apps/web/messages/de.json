@@ -5787,7 +5787,10 @@
       "ownNone": "nicht erfasst",
       "blocked": "(abgelehnt / abgelaufen)",
       "record": "Dokument erfassen",
-      "helpLine": "Eine Übersetzung hilft Ihnen, die Anweisung zu verstehen, aber das Original bleibt erhalten."
+      "helpLine": "Eine Übersetzung hilft Ihnen, die Anweisung zu verstehen, aber das Original bleibt erhalten.",
+      "capabilityDemonstrated": "Sie haben hier erfasste Arbeit, die jemand anderes bestätigt hat.",
+      "capabilitySelfReported": "Sie haben hier erfasste Arbeit, die noch niemand anderes bestätigt hat.",
+      "capabilityStillRequired": "Das Dokument bleibt erforderlich — lassen Sie diese Erfahrung daraufhin bewerten."
     }
   },
   "projects": {

@@ -5787,7 +5787,10 @@
       "ownNone": "niet vastgelegd",
       "blocked": "(afgewezen / verlopen)",
       "record": "Document vastleggen",
-      "helpLine": "Een vertaling helpt je de instructie te begrijpen, maar het origineel blijft bewaard."
+      "helpLine": "Een vertaling helpt je de instructie te begrijpen, maar het origineel blijft bewaard.",
+      "capabilityDemonstrated": "U hebt hier vastgelegd werk dat iemand anders heeft bevestigd.",
+      "capabilitySelfReported": "U hebt hier vastgelegd werk dat nog door niemand anders is bevestigd.",
+      "capabilityStillRequired": "Het document blijft vereist — vraag of deze ervaring daaraan getoetst kan worden."
     }
   },
   "projects": {
