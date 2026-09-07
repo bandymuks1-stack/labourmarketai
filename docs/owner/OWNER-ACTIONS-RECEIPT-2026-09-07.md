@@ -162,46 +162,67 @@ because the evidence-import writes were deliberately rolled back, and neither is
 
 ---
 
-## 2c. Supabase "EXCEEDING USAGE LIMITS" -- investigated, owner decision required
+## 2c. Supabase "EXCEEDING USAGE LIMITS" -- investigated; ESCO is PRESERVED
 
-**FINDING.** The organization is on the **free** plan, whose database size limit
-is **500 MB**. The production database is **842 MB** -- about **168% of the
-limit**. Read live 2026-09-07. This is the resource being exceeded; it is not
-Monthly Active Users (56 total auth users, 22 signed in within 30 days, against
-a free-tier allowance far above that).
+> **ESCO IS NOT TO BE PRUNED.** The canonical plan is
+> [`docs/operations/esco-storage-optimization-plan.md`](../operations/esco-storage-optimization-plan.md)
+> **v2**, which records the owner directive of **2026-08-13** (V10 §21-22):
+> *do not delete ESCO languages; "currently unused" is not "unneeded"; optimization
+> must preserve full 28-language capability.* The owner restated it on
+> **2026-09-07**, adding that the dataset must serve workers originating
+> **outside the EU** -- whose languages are precisely the ones a "keep only the
+> shipped locales" rule would delete.
+>
+> **A correction.** An earlier revision of this section recommended the ESCO
+> locale prune in PR #1421 as the cheapest reclaim. That was **wrong**, and it
+> was wrong against a directive this repository had already recorded three
+> weeks earlier. It is withdrawn. It is corrected in place rather than deleted,
+> so nobody re-derives it from a silent gap. The migration
+> `20260902160200_esco_labels_locale_scope_v1` in PR #1421 must **not** be
+> applied; the other two files in that PR are separable and unaffected.
 
-**WHERE IT IS.** Two tables are 92% of the database:
+**FINDING.** Free plan; **500 MB** database limit; production measured at
+**842 MB** on 2026-09-07 -- about **168%**. This is the exceeded resource, not
+Monthly Active Users (56 auth users, 22 signed in within 30 days).
 
-| table | size | share |
-|---|---|---|
-| `public.esco_labels` | 408 MB | 48.4% |
-| `public.public_vacancies` | 369 MB | 43.8% |
-| everything else combined | ~65 MB | 7.8% |
+**WHAT THIS SESSION ADDS TO THE CANONICAL PLAN.** The plan v2 covers
+`esco_labels` thoroughly (B1/B1b index reshape, B2 drop the surrogate pkey, B3
+cold/hot split without deletion). Two facts it does not carry:
 
-**RISK TO REAL USERS.** Sustained overage on the free plan is what leads Supabase
-to restrict a project, and a read-only or paused database would take the whole
-product down for real users. Nothing is degraded at the time of writing.
+**1. The cheapest win in the whole database is not in ESCO at all.**
+`public_vacancies` is **369 MB** -- 78 MB heap, **174 MB TOAST** (the raw and
+translated descriptions) and **117 MB indexes**. Inside those indexes,
+`public_vacancies_fulltext_idx` is **87 MB and has recorded ZERO scans**, and
+`public_vacancies_skill_slugs_idx` (1.5 MB) is also zero. Statistics were last
+reset **2026-05-07**, so that is 0 uses in **123 days**, not a stale counter.
+Dropping both reclaims **~88 MB (10.5% of the database)**, touches no ESCO data,
+loses no information -- an index is derived and rebuilt by one statement -- and
+is already written as `20260902160100_public_vacancies_unused_indexes_v1` in PR
+#1421, with a guard that **refuses to run** if any scan has been recorded since
+the decision. This is the single best cost/risk ratio available.
 
-**NON-DESTRUCTIVE MITIGATION THAT NEEDS NO PURCHASE.** `esco_labels` holds
-roughly 1.01M rows across **28 locales**, while the product ships message
-catalogues for **5** (`en`, `lt`, `de`, `nl`, `ru` -- and `ru` has no ESCO labels
-at all). The four locales the product can actually serve account for ~278k rows;
-the other ~736k (73%) serve no reachable surface. Pruning to the served set is
-the single largest reclaim available without spending anything.
+**2. B3's trigger condition is now met.** Plan v2 recommends the cold/hot split
+"ONLY if storage pressure becomes real", noting the DB was 500 MB and that the
+owner should confirm headroom first. Headroom is now **negative**: 842 MB against
+a 500 MB cap. B3's own estimate is **-170 MB with zero language loss** (hot table
+keeps the platform locales; the other locales move to `esco_labels_cold` with the
+arbiter index only; a locale promotion moves rows back or unions the view). That
+is the largest ESCO-preserving reclaim on the table, and the condition it was
+waiting for has arrived.
 
-That work already exists and is already owner-gated: **PR #1421** carries the
-ESCO locale prune alongside the retention function and the unused-index drop.
-It is a destructive `DELETE`, so it is RED class and **no agent may apply it**.
+**RISK TO REAL USERS.** Sustained free-plan overage is what leads Supabase to
+restrict a project; a read-only or paused database would take the product down.
+Nothing is degraded at the time of writing.
 
-`public_vacancies` is 79,685 rows with none stale beyond 30 days, so it is
-working data rather than accumulated waste; shrinking it would cost product
-value and is not recommended as the first move.
-
-**THE OWNER DECISION, STATED WITHOUT MAKING IT.** Either (a) approve the
-already-written prune in PR #1421 and reclaim the unreachable locales at no
-cost, or (b) move the project to a paid plan -- which would also unblock the
-leaked-password protection recorded in section 2 as BLOCKED_BY_PLAN. This
-session did not price, choose, purchase or upgrade anything, and must not.
+**THE OWNER DECISION, STATED WITHOUT MAKING IT.** Index and cold/hot work alone
+does not return the project under 500 MB: rung 1 gives roughly 754 MB, plus B2
+roughly 715 MB, plus B3 roughly 545 MB. Reaching the free-tier limit **without
+deleting anything** is therefore marginal at best, which makes the real choice
+(a) work the ESCO-preserving ladder to cut the overage and buy time, (b) move to
+a paid plan -- which would also unblock the leaked-password protection recorded
+in section 2 as BLOCKED_BY_PLAN, or (c) both. This session did not price, choose,
+purchase or upgrade anything, and must not. Every rung is DDL on production and
+stays owner-gated like any other RED item.
 
 ---
 
