@@ -75,6 +75,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "documents",
   "draft",
   "errorBoundary",
+  /** Organization evidence import (2026-09-07): the import workspace's forms
+   *  and the subject-side "what organizations have recorded about me" card are
+   *  both client components reading `evidenceImport.*`. */
+  "evidenceImport",
   "features",
   "finance",
   "followUp",

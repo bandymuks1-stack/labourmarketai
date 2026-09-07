@@ -413,7 +413,16 @@ function ReadyButton({ row, pressed, onClick }: { row: FieldReadyRow; pressed: b
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-semibold text-text-primary">{row.label}</span>
-        <span className={META}>{t("ready.canCome")}</span>
+        {/* AN OVERLAP IS A WARNING, NOT A CLOSED DOOR. The person is offered
+            either way — a project booked A→B does not consume them A→B — and
+            the planner decides with the conflict in front of them. */}
+        <span className={META} data-overlap={row.hasOverlap ? "true" : "false"}>
+          {row.hasOverlap
+            ? row.overlapWith
+              ? t("ready.alreadyOnNamed", { what: row.overlapWith })
+              : t("ready.alreadyOn")
+            : t("ready.canCome")}
+        </span>
       </span>
     </button>
   );

@@ -13,7 +13,8 @@ import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TrustBand } from "@/components/marketing/trust-band";
-import { FinalCtaBand } from "@/components/marketing/final-cta-band";
+import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
+import { PublicMarketMapBand } from "@/components/marketing/public-market-map-band";
 import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
   pickMessages,
@@ -125,28 +126,52 @@ export async function FocusLanding({
               />
             </section>
 
+            {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
+                   Second, directly under the entry, because it answers the
+                   question a visitor has immediately after "what is this?" —
+                   *does it work where I am?* The canonical <MarketMap> draws
+                   the markets this product operates in, at real centroids,
+                   and says in words what it is NOT showing.
+
+                   The market PROOF renders INSIDE it. That is the §16 move:
+                   46k vacancies and 8k employers used to be a section of their
+                   own, which made the counts read as the product's definition.
+                   As evidence under the map they support the story instead of
+                   being it. Nothing was removed — same band, same canonical
+                   snapshot, same figures. ─────────────────────────────── */}
+            <PublicMarketMapBand>
+              <MarketProofBand market={market} locale={locale} />
+            </PublicMarketMapBand>
+
+            {/* ── §20 STARTING CONTEXTS ─────────────────────────────────
+                   Moved UP, from the very bottom of a 4,967px page to the
+                   third screen. A visitor who does not want to type a sentence
+                   had to scroll past everything to find a door; §19 asks how
+                   long it takes before someone understands how to start, and
+                   the honest answer was "too long". Same five real
+                   destinations, reframed as contexts (§20). ────────────── */}
+            <StartingContextsBand />
+
             {/* ── The product chain — six links, journal as pivot. Carries
-                   the #how-it-works nav anchor. ─────────────────────────── */}
+                   the #how-it-works nav anchor.
+
+                   Now BELOW the map and the doors (§19). All six steps and all
+                   six bodies are intact — this is a change of order, not of
+                   content: the chain explains the product to someone who has
+                   decided to care, and it was standing between the entry and
+                   the reason to use it. ─────────────────────────────────── */}
             <div id="how-it-works" className="scroll-mt-24">
               <ProductChainBand />
             </div>
 
-            {/* ── Market proof — the CURRENT verified counts from the
-                   canonical public vacancy contract, the same projection the
-                   LIVE panel renders, plus the data-derived top-profession
-                   ranking. Coverage framing only; Sweden is named as the
-                   source of the figures, never as the product's scope. ──── */}
-            <MarketProofBand market={market} locale={locale} />
-
-            {/* ── Player Card + the proof system: fact vs proven skill vs
-                   opinion, and the source-backed market evidence. ──────── */}
+            {/* ── Player Card: the real card, the real component (§19 — kept
+                   in full, moved down). It is the densest thing on the page and
+                   it belongs after the explanation it illustrates, not before
+                   it. ─────────────────────────────────────────────────── */}
             <PlayerCardShowcase />
 
             {/* ── Trust & security — verifiable claims only ─────────────── */}
             <TrustBand />
-
-            {/* ── Final CTA band — four real doors, no dead links ───────── */}
-            <FinalCtaBand />
           </div>
         </main>
         <SiteFooter />

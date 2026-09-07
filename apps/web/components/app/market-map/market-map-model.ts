@@ -48,8 +48,17 @@ export interface MarketAnchor {
   readonly precision?: AnchorPrecision;
   readonly lat: number;
   readonly lng: number;
-  /** Aggregate magnitude — headcount needed, people available, project count. */
-  readonly weight: number;
+  /**
+   * Aggregate magnitude — headcount needed, people available, project count.
+   *
+   * OPTIONAL since the public landing map (owner window 11 §17). An anchor
+   * that stands for a PLACE rather than a quantity has no honest number to
+   * carry, and `0` is not that number: SEP-7 forbids rendering UNKNOWN as
+   * ZERO, and "Lietuva · 0" on a coverage map states that nothing is
+   * happening in Lithuania. Absent means the map draws the place at a fixed
+   * radius and labels it with its name alone.
+   */
+  readonly weight?: number;
   readonly layer: MarketMapLayer;
   /** Country ISO-2, used to tie an anchor to a highlighted region. */
   readonly country: string;
@@ -73,8 +82,17 @@ export interface MarketRegion {
  *                   ONLY on the public landing, and always labelled. It shows
  *                   what the product does; it never claims to be today's market.
  *  - `acceptance` — deterministic local fixtures.
+ *  - `coverage`   — REAL geography, no activity claim at all: the markets the
+ *                   product operates in, drawn at real centroids. Added for the
+ *                   public landing map (owner window 11 §17). It exists because
+ *                   the two honest alternatives were both wrong: `live` would
+ *                   claim these places hold today's market, and `demo`/`preview`
+ *                   would imply the countries are made up. They are not — the
+ *                   set is `MARKET_COUNTRIES`. What is genuinely unavailable to
+ *                   an anonymous visitor is per-place ACTIVITY, and the surface
+ *                   says that in words rather than drawing a guess.
  */
-export type MarketDataOrigin = "live" | "demo" | "acceptance";
+export type MarketDataOrigin = "live" | "demo" | "acceptance" | "coverage";
 
 export interface MarketMapView {
   readonly regions: readonly MarketRegion[];

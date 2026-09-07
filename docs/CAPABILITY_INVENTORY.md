@@ -34,6 +34,13 @@
 
 ## 1. PRODUCTION SNAPSHOT (2026-08-27, project `gorgitwvdzxbnaxhrsrw`)
 
+> **SUPERSEDED 2026-09-07 — see §6.1 for the current read.** The table below is
+> kept as the 2026-08-27 record. Two of its lines were already wrong by
+> 2026-08-28 and stayed wrong for ten days: **`ai_runs` and `usage_cost_events`
+> are NOT zero.** Production holds 47 of each (2026-08-28 → 2026-09-06, Gemini,
+> real spend $0.0396). "No AI has ever run in production" was a true statement
+> that nobody re-measured after it stopped being true.
+
 | table | rows | reading |
 |---|---|---|
 | `profiles` / `workers` | 36 / 36 | real people |
@@ -407,6 +414,7 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 3. Email channel: `INVITE_EMAIL_PROVIDER/API_KEY/FROM` env + Supabase SMTP decision (M6).
 4. Unchanged existing gates: #1355 ESCO linkage, #1305 LMC compensate-spend, AI `AI_PROVIDER_MODE` env, LinkedIn/Meta developer apps (only when wanted).
 
+---
 ## 6. CANONICAL MASTER PRODUCT REGISTER (2026-09-07)
 
 > **This section is the anti-forgetting mechanism.** Every future slice updates
@@ -473,7 +481,6 @@ defects, follow-ups, work tasks, LMC, subscriptions, contact disclosures.
 > a capability in one half and not the other fails
 > `lib/guards/capability-register.test.ts`. That is what makes deleting a
 > capability from the product an explicit act rather than an omission.
-
 Legend — **Status**: `PROD_HUMAN` production-human-proven · `PROD_DATA`
 production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN` ·
 `DISCONNECTED` · `DUPLICATED` · `LEGACY` · `PLANNED` · `MISSING` ·
@@ -769,3 +776,4 @@ Each is independent; none blocks a code train.
 | Prepare for the human gate (live UI blocked) | `agency_clients_v1`, `worker_opportunity_seen_v1`, `journal_profession_templates_v1`, + a **split** `external_profiles_v1` carved out of `multi_source_talent_v1` |
 | Never apply, keep in tree (guard-pinned) | `company_memberships_v1` (20260714210000), `company_locations_v1` |
 | Defer — no live dependent | `dashboard_preferences_v1`, `demand_interest_seen_v1` |
+| Owner market-scope decision | `open_markets_countries_draft_v1` |

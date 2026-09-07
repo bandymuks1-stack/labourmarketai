@@ -63,6 +63,11 @@ const PROVENANCE_KEYS = [
   "evidenceEntries",
   "evidenceDocument",
   "evidenceEntriesAndDocument",
+  // Added 2026-09-07 (owner P0): approved, but only by the subject themselves.
+  // Production carries 3 such rows out of 13, and they used to render exactly
+  // like a supervisor's confirmation. See
+  // lib/guards/self-confirmation-not-independent.test.ts.
+  "evidenceSelfConfirmed",
   "employerConfirmed",
   "employerConfirmedNoDate",
   "systemDerived",
@@ -185,7 +190,9 @@ describe("3. words", () => {
     for (const f of files) {
       expect(readFileSync(f, "utf8"), rel(f)).not.toMatch(/#\$\{\w+(?:\.\w+)*\.slice\(0, ?\d\)\}/);
     }
-    expect(read("lib/conversation/capacity.ts")).toMatch(/t\("unnamedPerson"\)/);
+    // The capacity logic moved to `capacity-core.ts` when the same answer
+    // became reachable by an authorized agent; the fallback noun moved with it.
+    expect(read("lib/conversation/capacity-core.ts")).toMatch(/t\("unnamedPerson"\)/);
     expect(read("lib/conversation/agency-workspace.ts")).toMatch(/tChat\("unnamedPerson"\)/);
     expect(read("lib/conversation/agency-workspace.ts")).toMatch(/tChat\("unnamedNeed"\)/);
   });

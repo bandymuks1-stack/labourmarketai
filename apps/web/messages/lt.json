@@ -496,7 +496,9 @@
       "unavailable": "Sąrašo šiuo metu nepavyko perskaityti.",
       "why": "Kodėl šie: yra jūsų sąraše ir neturi patvirtinto nebuvimo tarp {from} ir {to}.",
       "absencesUnknown": "Nebuvimai dar neįjungti, todėl niekas nesako kitaip.",
-      "more": "+{n} laisvi žmonės už šio rodinio ribų."
+      "more": "+{n} laisvi žmonės už šio rodinio ribų.",
+      "alreadyOn": "gali ateiti — šiuo laikotarpiu jau turi darbų",
+      "alreadyOnNamed": "gali ateiti — jau dirba {what}"
     },
     "tokenState": {
       "clear": "Sąrašas tvarkingas",
@@ -3695,7 +3697,8 @@
     },
     "origin": {
       "live": "Tikri duomenys",
-      "preview": "Peržiūra"
+      "preview": "Peržiūra",
+      "coverage": "Rinkos, ne veikla"
     }
   },
   "company": {
@@ -4920,7 +4923,8 @@
     "themeToLight": "Šviesi tema",
     "how": "Kaip veikia",
     "menuOpen": "Meniu",
-    "menuClose": "Uždaryti meniu"
+    "menuClose": "Uždaryti meniu",
+    "market": "Rinka"
   },
   "livingMarketReview": {
     "tagline": "Gyvoji Europos darbo rinka",
@@ -5792,7 +5796,10 @@
       "ownNone": "neįrašyta",
       "blocked": "(atmesta / pasibaigė)",
       "record": "Įrašyti dokumentą",
-      "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas."
+      "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas.",
+      "capabilityDemonstrated": "Turite čia užfiksuotų darbų, kuriuos patvirtino kitas asmuo.",
+      "capabilitySelfReported": "Turite čia užfiksuotų darbų, kurių dar niekas kitas nepatvirtino.",
+      "capabilityStillRequired": "Dokumentas vis tiek reikalingas — paprašykite, kad ši patirtis būtų įvertinta jo atžvilgiu."
     }
   },
   "projects": {
@@ -7110,6 +7117,26 @@
     "cv": {
       "verified": "Patvirtinta",
       "declared": "Nurodyta"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Jūsų pačių įrašas — niekas jo nepatvirtino",
+        "verifier_not_identified": "Kol kas nėra kam to patvirtinti",
+        "verifier_available": "Jūsų darbdavys dar negali patvirtinti darbų",
+        "verification_pending": "Laukiama patvirtinimo",
+        "verified": "Patvirtinta",
+        "self_confirmed": "Patvirtinote patys — ne nepriklausomai",
+        "returned": "Grąžinta pataisyti",
+        "disputed": "Ginčijama",
+        "not_applicable": "Čia virš jūsų nieko nėra"
+      },
+      "action": {
+        "await_verifier": "Nieko daryti nereikia — jau kažkieno eilėje",
+        "ask_employer_to_enable_confirmation": "Paprašykite įjungti patvirtinimą",
+        "identify_verifier": "Nurodykite, kam tai dirbote",
+        "respond_to_decision": "Perskaitykite sprendimą ir atsakykite",
+        "none": "Nieko netrūksta"
+      }
     }
   },
   "orgMembers": {
@@ -7235,7 +7262,7 @@
     "readinessPanel": {
       "title": "Kaip pagerinti pasiruošimą",
       "intro": "Štai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.",
-      "allReady": "Viskas paruošta — profilis pilnas.",
+      "allReady": "Jūsų kortelė užpildyta. Dokumentai darbui konkrečioje šalyje skaičiuojami atskirai — žr. žemiau.",
       "countryFit": "Darbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų."
     },
     "readinessSteps": {
@@ -8141,7 +8168,20 @@
         "unverified": "Įrodymai: tik paties deklaruota"
       }
     },
-    "editNeedCta": "Patikslinti arba pridėti poreikį"
+    "editNeedCta": "Patikslinti arba pridėti poreikį",
+    "availableSupply": {
+      "title": "Laisva darbo jėga",
+      "intro": "Brigados ir specialistai, kuriuos agentūros ir įmonės nurodė kaip laisvus. Matote pajėgumo pobūdį ir kur jis yra — ne kas jį siūlo.",
+      "notEnabled": "Šioje aplinkoje dar neįjungta. Tai faktas apie diegimą, o ne teiginys apie rinką.",
+      "readFailed": "Laisvos darbo jėgos sąrašo nepavyko perskaityti. Tai sistemos problema, o ne tuščia rinka.",
+      "empty": "Kol kas niekas nenurodė laisvos darbo jėgos, kurią galėtumėte matyti.",
+      "unstatedRole": "Darbo pobūdis nenurodytas",
+      "people": "{count} žmonių",
+      "from": "Nuo",
+      "duration": "Trukmė",
+      "declared": "Nurodyta",
+      "privacyNote": "Vardai ir kontaktai čia sąmoningai nerodomi. Susisiekimas yra atskiras žingsnis, kuriam kita pusė turi sutikti."
+    }
   },
   "planBoundary": {
     "title": "Ką apima mokami planai",
@@ -12286,7 +12326,7 @@
       "historyMore": "Rodyti daugiau",
       "workspaceLabel": "Darbo erdvė",
       "workspacePersonal": "Asmeninė erdvė",
-      "workspaceUnnamed": "Įmonės erdvė",
+      "workspaceUnnamed": "Organizacija be pavadinimo",
       "chipLogWork": "Užfiksuoti darbą",
       "agendaTitle": "Artimiausių {days} d. planas:",
       "agendaEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
@@ -12661,8 +12701,15 @@
         "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
         "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
         "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
-      }
-    },
+      },
+      "capacityCommittedUntil": "jau užimtas iki {date}",
+      "capacityCommittedToUntil": "dirba {what} iki {date}",
+      "capacityCommitmentsUnknown": "Nepavyko perskaityti rezervacijų ir priskyrimų projektams, todėl kaip laisvas rodomas žmogus gali būti jau užimtas.",
+      "workspaceUnnamedCompany": "Įmonė be pavadinimo",
+      "workspaceUnnamedAgency": "Agentūra be pavadinimo",
+      "workspaceUnnamedTeam": "Komanda be pavadinimo",
+      "workspaceUnnamedNote": "Pavadinimas nenurodytas",
+      "workspaceNameThis": "Nurodyti pavadinimą"    },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
       "loading": "Kraunama…",
@@ -13255,8 +13302,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Parodyk, ką moki. Atrask, kur esi reikalingas.",
-      "sub": "Tikra patirtis tampa gyvu profiliu, o jūsų gebėjimai — tikromis galimybėmis: darbui, paslaugai ar praktikai."
+      "headline": "Pasakykite savais žodžiais, ko jums reikia darbe.",
+      "sub": "Darbas ir žmonės, komandos ir paslaugos, laisvi pajėgumai, atlikti darbai ir jų įrodymai — viena rinka, tikrose vietose. Nereikia iš anksto pasirinkti, kas esate."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -13323,7 +13370,19 @@
         "hire": "Reikia darbuotojų"
       },
       "numbers": "Dabar platformoje: {vacancies} aktyvių darbo skelbimų · {employers} darbdaviai",
-      "refreshed": "atnaujinta {date}"
+      "refreshed": "atnaujinta {date}",
+      "exampleLabels": {
+        "hire": "Reikia darbuotojų",
+        "work": "Ieškau darbo",
+        "internship": "Kur atlikti praktiką",
+        "professional": "Turiu profesiją",
+        "needService": "Reikia paslaugos",
+        "offerService": "Siūlau paslaugas",
+        "offerCapacity": "Turime laisvų žmonių",
+        "brigade": "Reikia brigados",
+        "logWork": "Užrašyti atliktą darbą",
+        "verifyWork": "Kas patvirtins patirtį"
+      }
     },
     "marketProof": {
       "eyebrow": "Šiuo metu platformoje",
@@ -13338,6 +13397,21 @@
       },
       "topTitle": "Šiuo metu paklausiausios profesijos",
       "topNote": "Pagal aktyvius darbo skelbimus platformoje. Dalis skelbimų dar nepriskirta profesijai."
+    },
+    "marketMap": {
+      "eyebrow": "Rinka vietose",
+      "title": "Darbo rinka egzistuoja tikrose vietose.",
+      "lead": "Žmonės, darbai ir poreikiai yra kažkur. Žemėlapis yra produkto dalis, o ne paveikslėlis prie teksto.",
+      "shows": "Žemėlapyje {count, plural, one {pažymėta # rinka} few {pažymėtos # rinkos} other {pažymėta # rinkų}}, kuriose LabourMarket.ai veikia šiandien. Tai rinkos, ne šios dienos veikla.",
+      "notPublished": "Kiek darbo ar žmonių yra konkrečioje vietoje, neprisijungusiems kol kas nerodome — tokių duomenų viešai neskelbiame, todėl žemėlapyje nėra nė vieno spėto taško. Prisijungę matote realią savo rinkos būklę."
+    },
+    "contexts": {
+      "eyebrow": "Nuo kur pradėti",
+      "title": "Pradėkite ten, kur šiandien esate.",
+      "subcopy": "Tai tik atspirties taškas, o ne nuolatinis vaidmuo. Tas pats žmogus gali ieškoti darbo, samdyti, atstovauti agentūrai ir mokytis — paskyra viena, kontekstus galima pridėti bet kada.",
+      "partnerLead": "Norite bendradarbiauti su mumis kaip partneris?",
+      "partnerLink": "Susisiekite",
+      "moreLead": "Daugiau apie tai, kaip tai veikia kiekvienam:"
     }
   },
   "workspace": {
@@ -13559,6 +13633,7 @@
     "evidenceEntries": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} — dar nepatvirtinta",
     "evidenceDocument": "Dokumentas galioja iki {until} — dar nepatvirtinta",
     "evidenceEntriesAndDocument": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} ir dokumentas iki {until} — dar nepatvirtinta",
+    "evidenceSelfConfirmed": "Patvirtinote patys — nepriklausomo patvirtinimo dar nėra",
     "employerConfirmed": "Patvirtino {org}, {date}",
     "employerConfirmedNoDate": "Patvirtino darbdavys",
     "systemDerived": "Išvesta iš: {source}"
@@ -15171,5 +15246,213 @@
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
+  },
+  "evidenceImport": {
+    "eyebrow": "Istoriniai darbo įrodymai",
+    "title": "Importuoti darbo istoriją",
+    "intro": "Perkelkite organizacijos pačios turimus įrašus — darbo laiko apskaitą, objektų žurnalus, mokymų registrus — į platformą kaip įrodymus, kiekvieną šaltinio faktą laikydami atskirai nuo kiekvienos prielaidos.",
+    "actingFor": "Veikiate kaip",
+    "nothingWrittenYet": "Kol kas nieko neįrašyta. Prieš išsaugant pamatysite tiksliai tai, kas būtų užfiksuota.",
+    "context": {
+      "unauthenticated": "Prisijunkite, kad galėtumėte importuoti įrodymus.",
+      "personalWorkspace": "Esate savo asmeninėje erdvėje. Istoriniai įrodymai priklauso organizacijai — pirmiausia pakeiskite erdvę.",
+      "noOrganization": "Ši paskyra nepriklauso jokiai organizacijai, todėl nėra kam importuoti įrodymų.",
+      "notAMember": "Ši organizacija nėra jūsų. Pasirinkite vieną iš šių:",
+      "chooseOrganization": "Priklausote daugiau nei vienai organizacijai. Pasirinkite, kuri teikia šiuos įrodymus:",
+      "notAuthorized": "Jūsų vaidmuo šioje organizacijoje neapima įrodymų importo. Tai gali padaryti savininkas, administratorius arba vadovas.",
+      "needsMigration": "Šioje aplinkoje įrodymų saugykla dar neįjungta. Duomenų bazės pakeitimas paruoštas ir laukia savininko patvirtinimo; nieko neįrašyta.",
+      "unavailable": "Nepavyko perskaityti įrodymų saugyklos. Tai sistemos problema, o ne tuščia organizacija."
+    },
+    "form": {
+      "title": "1. Šaltinis",
+      "supplierRole": "Kokiu vaidmeniu tai teikiate?",
+      "supplierRoleHint": "Agentūra, teikianti savo darbuotojo valandas kliento objekte, nėra nei darbdavys, nei klientas. Nurodykite, kas esate — tai užfiksuojama su kiekviena eilute.",
+      "sourceKind": "Kokios rūšies šaltinis tai yra?",
+      "sourceLanguage": "Kokia kalba parašytas šaltinis?",
+      "filename": "Failo pavadinimas arba žymė",
+      "reference": "Šaltinio nuoroda",
+      "referenceHint": "Iš kur tai gauta, jūsų žodžiais — archyvo dėžė, aplankas, sistemos pavadinimas.",
+      "notes": "Pastabos",
+      "paste": "Įklijuokite eilutes",
+      "pasteHint": "Po vieną eilutę kiekvienoje eilutėje, stulpelius skiriant kableliu, kabliataškiu arba tabuliacija. Naudojama pirma atpažinta antraštės eilutė; viskas virš jos ignoruojama.",
+      "file": "Arba įkelkite CSV/TSV failą",
+      "submit": "Perskaityti šaltinį",
+      "submitting": "Skaitoma…"
+    },
+    "preview": {
+      "title": "2. Kas būtų užfiksuota",
+      "notPersisted": "Tai jūsų failo interpretacija. NIEKAS čia dar nėra įrodymas.",
+      "empty": "Šiam šaltiniui neparuošta nė viena eilutė.",
+      "counts": {
+        "total": "Perskaityta eilučių",
+        "ready": "Paruošta",
+        "needsPerson": "Asmuo neišspręstas",
+        "needsContext": "Vieta neišspręsta",
+        "duplicates": "Jau importuota",
+        "conflicts": "Prieštaravimai"
+      },
+      "column": {
+        "row": "Eilutė",
+        "person": "Kas",
+        "date": "Data",
+        "hours": "Valandos",
+        "place": "Vieta",
+        "work": "Kas atlikta",
+        "state": "Būsena"
+      },
+      "fact": "Nurodyta šaltinyje",
+      "derived": "Nustatyta mūsų",
+      "derivedMethod": "Būdas",
+      "confidence": "Patikimumas"
+    },
+    "personState": {
+      "unmatched": "Nėra sąraše",
+      "matched": "Sutapatinta",
+      "ambiguous": "Daugiau nei vienas atitikmuo",
+      "created": "Įtrauktas į sąrašą"
+    },
+    "contextState": {
+      "absent": "Vieta nenurodyta",
+      "unmatched": "Vieta nerasta",
+      "matched": "Sutapatinta",
+      "ambiguous": "Daugiau nei vienas atitikmuo",
+      "created": "Sukurta"
+    },
+    "duplicateState": {
+      "new": "Nauja",
+      "duplicate": "Jau importuota",
+      "probable_duplicate": "Tikriausiai jau importuota",
+      "conflict": "Prieštarauja esamam įrašui"
+    },
+    "problem": {
+      "person_not_on_roster": "Šio vardo nėra jūsų sąraše. Pasirinkite asmenį arba jį pridėkite.",
+      "person_ambiguous": "Jūsų sąraše šį vardą turi daugiau nei vienas asmuo. Pasirinkite, kuris.",
+      "context_ambiguous": "Šią žymę atitinka daugiau nei viena vieta. Pasirinkite, kuri.",
+      "already_imported": "Toks pat įrašas jau yra, todėl ši eilutė bus praleista."
+    },
+    "resolve": {
+      "title": "Išspręsti",
+      "choosePerson": "Pasirinkite asmenį",
+      "choosePlace": "Pasirinkite vietą",
+      "save": "Išsaugoti",
+      "addPerson": "Pridėti asmenį",
+      "displayName": "Vardas taip, kaip rašoma jūsų įrašuose",
+      "externalRef": "Darbuotojo arba tabelio numeris",
+      "relationship": "Ryšys su organizacija",
+      "sourceNote": "Iš kur gauti šio asmens duomenys",
+      "create": "Pridėti",
+      "unlinkedNote": "Čia pridėtas asmuo yra jūsų organizacijos įrašas. Tai nėra paskyra ir tai nieko neteigia apie tai, kas jis yra — tikrasis asmuo galės jį prisiimti vėliau."
+    },
+    "relationship": {
+      "employee": "Darbuotojas",
+      "former_employee": "Buvęs darbuotojas",
+      "agency_worker": "Agentūros darbuotojas",
+      "subcontractor": "Subrangovas",
+      "contractor": "Rangovas",
+      "student": "Studentas",
+      "graduate": "Absolventas",
+      "trainee": "Praktikantas",
+      "apprentice": "Pameistrys",
+      "programme_participant": "Programos dalyvis",
+      "volunteer": "Savanoris",
+      "other": "Kita"
+    },
+    "commit": {
+      "title": "3. Užfiksuoti",
+      "evidenceState": "Kaip tai turi būti užfiksuota?",
+      "evidenceStateHint": "Importas visada gali sukurti tik praneštą būseną. Niekas to dar nepatikrino, ir šis langas negali teigti, kad patikrino.",
+      "confirm": "Užfiksuoti {count} eilučių",
+      "confirmNone": "Kol kas nė viena eilutė nėra paruošta fiksuoti",
+      "confirming": "Fiksuojama…",
+      "readOnce": "Prieš patvirtindami perskaitykite tai, kas pateikta aukščiau. Patvirtinimas užfiksuoja tai jūsų organizacijos vardu."
+    },
+    "evidenceState": {
+      "SELF_REPORTED": "Pateikė pats asmuo",
+      "ORGANIZATION_REPORTED": "Praneša organizacija",
+      "LEGACY_IMPORTED": "Perkelta iš senesnės sistemos",
+      "UNVERIFIED": "Pateikta, statusas nenustatytas",
+      "NEEDS_REVIEW": "Reikia žmogaus peržiūros"
+    },
+    "result": {
+      "written": "Užfiksuota",
+      "skipped": "Praleista kaip jau užfiksuota",
+      "notReady": "Liko neišspręsta",
+      "reusedSession": "Šį šaltinį jau esate perskaitę. Jo eilutės rodomos žemiau, o ne skaitomos antrą kartą."
+    },
+    "records": {
+      "title": "4. Kas užfiksuota",
+      "empty": "Iš šio šaltinio dar nieko neužfiksuota.",
+      "importedAt": "Importuota",
+      "supplier": "Pateikta kaip",
+      "source": "Šaltinis",
+      "attest": "Patvirtinti šį įrašą",
+      "attestRole": "Kokiu vaidmeniu",
+      "attestNote": "Pastaba",
+      "attested": "Patvirtinta",
+      "selfAttested": "Patvirtino pats asmuo, apie kurį tai yra",
+      "selfAttestedHint": "Tai tikras, užfiksuotas įrodymas. Tai nėra nepriklausomas patikrinimas ir niekada taip neskaičiuojama.",
+      "notIndependentlyVerified": "Nepatikrinta nepriklausomai",
+      "withdrawn": "Atšaukta"
+    },
+    "withdraw": {
+      "title": "Atšaukti šį importą",
+      "note": "Kodėl",
+      "button": "Atšaukti viską, ką užfiksavo šis importas",
+      "hint": "Niekas neištrinama. Kiekvienas įrašas gauna atšaukimo įrašą, todėl ir įrodymas, ir priežastis lieka matomi."
+    },
+    "role": {
+      "employer": "Darbdavys",
+      "agency": "Agentūra",
+      "client": "Klientas",
+      "end_client": "Galutinis klientas",
+      "project_owner": "Projekto savininkas",
+      "subcontractor": "Subrangovas",
+      "education_provider": "Švietimo įstaiga",
+      "training_provider": "Mokymų teikėjas",
+      "assessor": "Vertintojas",
+      "verifier": "Tikrintojas",
+      "placement_provider": "Praktikos vietos teikėjas",
+      "public_body": "Viešoji įstaiga",
+      "sector_body": "Sektoriaus organizacija",
+      "other": "Kita"
+    },
+    "sourceKind": {
+      "xlsx": "Skaičiuoklė",
+      "csv": "CSV / TSV failas",
+      "pdf": "PDF dokumentas",
+      "api": "Kitos sistemos sąsaja",
+      "agent": "Asistentas",
+      "erp": "ERP sistema",
+      "payroll": "Darbo užmokesčio sistema",
+      "sis": "Studentų apskaitos sistema",
+      "lms": "Mokymosi platforma",
+      "email": "El. paštas",
+      "drive": "Bendrinamas diskas",
+      "manual": "Suvesta ranka"
+    },
+    "error": {
+      "invalid": "Kažkas formoje netinkama. Patikrinkite pažymėtas vietas.",
+      "not_found": "Šio importo, eilutės ar įrašo nebėra.",
+      "unavailable": "Nepavyko pasiekti įrodymų saugyklos. Nieko neįrašyta.",
+      "too_many_rows": "Tai daugiau eilučių, nei telpa į vieną importą. Padalykite šaltinį, pavyzdžiui, pagal metus.",
+      "no_source_supplied": "Nėra nei failo, nei įklijuotų eilučių — nėra ko skaityti.",
+      "file_too_large": "Šis failas per didelis, kad būtų perskaitytas čia.",
+      "file_unreadable": "Šio failo nepavyko perskaityti kaip teksto.",
+      "nothing_parsed": "Nerasta nė vienos tinkamos eilutės. Šaltinyje reikia antraštės eilutės, nurodančios bent asmenį ir datą.",
+      "confirmation_rejected": "Šis importas pasikeitė po to, kai jį peržiūrėjote, todėl nebuvo užfiksuotas. Peržiūrėkite iš naujo ir patvirtinkite naują versiją.",
+      "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota."
+    },
+    "mine": {
+      "title": "Ką organizacijos yra užfiksavusios apie mane",
+      "intro": "Darbas, mokymai ir studijos, kuriuos organizacija perkėlė iš savo pačios įrašų. Visada matote, kas juos atsiuntė, kuo jums tuo metu buvo ir kada.",
+      "notEnabled": "Šioje aplinkoje tai dar neįjungta. Jūsų profilyje nieko netrūksta — tiesiog nėra saugyklos, kurią būtų galima perskaityti.",
+      "empty": "Kol kas nė viena organizacija čia nieko apie jus neužfiksavo.",
+      "offersTitle": "Laukiama jūsų atsakymo",
+      "offersHint": "Organizacija teigia, kad vienas jos įrašų yra apie jus. Kol nepatvirtinsite, niekas neprisijungs prie jūsų CV, o atsisakymas yra tikras atsakymas — organizacija išsaugo savo įrašą, tik nustoja jame minėti jus.",
+      "accept": "Taip, tai aš",
+      "refuse": "Ne, tai ne aš",
+      "decisionFailed": "Šio atsakymo išsaugoti nepavyko. Niekas nepasikeitė.",
+      "unnamedOrganization": "Organizacija"
+    }
   }
 }

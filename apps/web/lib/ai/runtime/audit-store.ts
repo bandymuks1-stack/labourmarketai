@@ -2,9 +2,14 @@
  * ai_runs audit store — SERVER-ONLY, best-effort persistence (AI Router v1).
  *
  * Persists the routing audit record built by task-routing.ts into the
- * append-only `ai_runs` table (gated draft migration
- * 20260714150000_ai_runs_audit_v1.sql) and supplies the persisted daily-run
- * counter for the AI_DAILY_RUN_BUDGET guard.
+ * append-only `ai_runs` table (migration 20260714150000_ai_runs_audit_v1.sql
+ * — APPLIED; verified on production 2026-09-07, 47 rows) and supplies the
+ * persisted daily-run counter for the AI_DAILY_RUN_BUDGET guard.
+ *
+ * Until 2026-09-07 this header described the migration as still awaiting the
+ * owner, while the table had been live and collecting real runs since
+ * 2026-08-28. The absent-table handling below is kept — it is what makes a
+ * fresh environment safe — but it is a fallback, not the state of production.
  *
  * INVARIANTS:
  *   - NEVER throws: any failure (missing service key, table not applied,

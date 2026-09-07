@@ -2,31 +2,34 @@
 
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
-
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
-import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
-import { getEmployerWorkerAvailability, unavailabilityOverlaps } from "@/lib/planning/employer-availability";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 
-import {
-  CAPACITY_CHAT_LIMIT,
-  CAPACITY_WINDOW_DAYS,
-  type CapacityChatResult,
-  type CapacityChatRow,
-  type CapacityPreRead,
+import type {
+  CapacityChatResult,
+  CapacityPreRead,
 } from "@/lib/conversation/capacity-contract";
-
-function isoDay(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
 
 /**
  * "Kas laisvas šią savaitę?" — the company's ACTIVE roster (the same read
- * the company page's roster section performs) against the employer-side
- * unavailability read (approved absences; the query never carries the
- * reason). A worker is FREE when no approved absence overlaps the window,
- * otherwise UNAVAILABLE until the last overlapping day. No ranking, no new
- * table, no write. Every degraded state is a named kind.
+ * the company page's roster section performs) against BOTH things that can
+ * make a person not free: the employer-side unavailability read (approved
+ * absences; the query never carries the reason) and their committed work
+ * (accepted bookings and active project assignments).
+ *
+ * ── WHY BOTH, AND WHY THIS WAS WRONG ──────────────────────────────────────
+ * Until 2026-09-07 this read ONE signal: approved absences. Measured on
+ * production that day — `worker_absences` 0 rows, `booking_requests` 1
+ * accepted, `project_worker_assignments` 3 active. The one input capacity
+ * consulted was empty and the only real commitments that existed were
+ * invisible, so every worker read as FREE, always. An employer planning next
+ * week was told the opposite of what the calendar showed on the same screen.
+ *
+ * A worker is FREE when neither an absence nor a commitment overlaps the
+ * window; UNAVAILABLE when an absence does; COMMITTED when only work does.
+ * Absence outranks commitment because leave is the harder constraint. No
+ * ranking, no new table, no write. Every degraded state is a named kind, and
+ * an input that did not answer is reported as unknown rather than as "no".
  *
  * `preRead` (QA Q-3): a server caller that has ALREADY issued the roster read
  * for the same request (the company home, which the company page composes
@@ -43,38 +46,6 @@ export async function loadWhoIsAvailableForChat(
 ): Promise<CapacityChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
-  try {
-    const [roster, availability, t] = await Promise.all([
-      preRead?.roster ?? listActiveCompanyWorkers(company.companyId),
-      getEmployerWorkerAvailability(),
-      // P2 object language (L1): a person the roster cannot name is said in
-      // ordinary words, never as a raw id fragment.
-      getTranslations("conversation.chat"),
-    ]);
-    if (!roster || roster.kind !== "ok" || !Array.isArray(roster.rows)) return { kind: "error" };
-    const active = roster.rows.filter((w) => w.status === "active");
-    if (active.length === 0) return { kind: "empty" };
-
-    const today = new Date();
-    const end = new Date(today.getTime() + (CAPACITY_WINDOW_DAYS - 1) * 86_400_000);
-    const window = { startDate: isoDay(today), endDate: isoDay(end) };
-    const absencesKnown = availability.status === "ok";
-    const unavailability = availability.status === "ok" ? availability.unavailability : [];
-
-    const rows: CapacityChatRow[] = active.map((w) => {
-      const label = w.displayName ?? (w.email ? w.email.split("@")[0] : t("unnamedPerson"));
-      const hits = unavailability.filter((u) => u.workerId === w.workerId && unavailabilityOverlaps(window, u.item));
-      if (hits.length === 0) return { workerId: w.workerId, label, state: "free", unavailableUntil: null };
-      const until = hits
-        .map((u) => u.item.endDate ?? u.item.startDate)
-        .filter((d): d is string => typeof d === "string" && d.length > 0)
-        .sort()
-        .at(-1) ?? null;
-      return { workerId: w.workerId, label, state: "unavailable", unavailableUntil: until };
-    });
-    rows.sort((a, b) => (a.state === b.state ? a.label.localeCompare(b.label) : a.state === "free" ? -1 : 1));
-    return { kind: "ok", from: window.startDate, to: window.endDate, rows: rows.slice(0, CAPACITY_CHAT_LIMIT), rosterTotal: active.length, absencesKnown };
-  } catch {
-    return { kind: "error" };
-  }
+  return whoIsAvailableCore(company.companyId, null, preRead);
 }
+

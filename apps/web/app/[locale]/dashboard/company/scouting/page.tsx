@@ -24,6 +24,8 @@ import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-bu
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
 import { FeatureNote } from "@/components/app/feature-note";
+import { AvailableSupplySection } from "@/components/app/available-supply-section";
+import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
@@ -128,9 +130,13 @@ export default async function CompanyScoutingPage({
   const tPipe = await getTranslations("candidatePipeline");
   // Localized skill names for the bounded facet chips (Wagon 1).
   const tSkill = await getTranslations("skillNames");
-  const [demands, pendingInterest] = await Promise.all([
+  const [demands, pendingInterest, availableSupply] = await Promise.all([
     listCompanyDemands(),
     listPendingInterestCountsForCompany(),
+    // The supply half of discovery. In the SAME batch as the demand reads —
+    // it depends on nothing they produce, so a serial await would cost a
+    // render stage for nothing.
+    listAvailableSupplyForEmployer({ limit: 50 }),
   ]);
   /**
    * SOMEBODY WAITING OUTRANKS EVERY OTHER DEFAULT.
@@ -266,6 +272,13 @@ export default async function CompanyScoutingPage({
           {t("privacy.profileSafe")}
         </p>
       </section>
+
+      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
+          the candidate half rather than in a separate product. Until this
+          landed, an agency's declared capacity was readable only by that agency
+          and an admin: the supply side of the market was written and
+          undiscoverable. */}
+      <AvailableSupplySection state={availableSupply} />
 
       {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
           Paid wider access is inert while billing is disabled; no fake unlock. */}

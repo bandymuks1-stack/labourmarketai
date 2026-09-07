@@ -496,7 +496,9 @@
       "unavailable": "Die Liste konnte gerade nicht gelesen werden.",
       "why": "Warum diese: in Ihrer Liste und ohne genehmigte Abwesenheit zwischen {from} und {to}.",
       "absencesUnknown": "Abwesenheiten sind noch nicht aktiviert, daher spricht nichts dagegen.",
-      "more": "+{n} weitere freie Personen außerhalb dieser Ansicht."
+      "more": "+{n} weitere freie Personen außerhalb dieser Ansicht.",
+      "alreadyOn": "kann kommen — hat in diesem Zeitraum bereits Arbeit",
+      "alreadyOnNamed": "kann kommen — ist bereits auf {what}"
     },
     "tokenState": {
       "clear": "Checkliste in Ordnung",
@@ -3695,7 +3697,8 @@
     },
     "origin": {
       "live": "Live-Daten",
-      "preview": "Vorschau"
+      "preview": "Vorschau",
+      "coverage": "Märkte, keine Aktivität"
     }
   },
   "company": {
@@ -4920,7 +4923,8 @@
     "themeToLight": "Helles Design",
     "how": "So funktioniert es",
     "menuOpen": "Menü",
-    "menuClose": "Menü schließen"
+    "menuClose": "Menü schließen",
+    "market": "Der Markt"
   },
   "livingMarketReview": {
     "tagline": "Europas lebendiger Arbeitsmarkt",
@@ -5792,7 +5796,10 @@
       "ownNone": "nicht erfasst",
       "blocked": "(abgelehnt / abgelaufen)",
       "record": "Dokument erfassen",
-      "helpLine": "Eine Übersetzung hilft Ihnen, die Anweisung zu verstehen, aber das Original bleibt erhalten."
+      "helpLine": "Eine Übersetzung hilft Ihnen, die Anweisung zu verstehen, aber das Original bleibt erhalten.",
+      "capabilityDemonstrated": "Sie haben hier erfasste Arbeit, die jemand anderes bestätigt hat.",
+      "capabilitySelfReported": "Sie haben hier erfasste Arbeit, die noch niemand anderes bestätigt hat.",
+      "capabilityStillRequired": "Das Dokument bleibt erforderlich — lassen Sie diese Erfahrung daraufhin bewerten."
     }
   },
   "projects": {
@@ -7110,6 +7117,26 @@
     "cv": {
       "verified": "Bestätigt",
       "declared": "Angegeben"
+    },
+    "verification": {
+      "state": {
+        "self_reported": "Ihre eigene Aufzeichnung — niemand hat sie bestätigt",
+        "verifier_not_identified": "Bisher kann das niemand bestätigen",
+        "verifier_available": "Ihr Arbeitgeber kann Arbeit noch nicht bestätigen",
+        "verification_pending": "Wartet auf Bestätigung",
+        "verified": "Bestätigt",
+        "self_confirmed": "Von Ihnen selbst bestätigt — nicht unabhängig",
+        "returned": "Zur Änderung zurückgegeben",
+        "disputed": "Bestritten",
+        "not_applicable": "Hier steht niemand über Ihnen"
+      },
+      "action": {
+        "await_verifier": "Nichts zu tun — es liegt in einer Warteschlange",
+        "ask_employer_to_enable_confirmation": "Bitten Sie, die Bestätigung einzuschalten",
+        "identify_verifier": "Nennen Sie, für wen Sie das getan haben",
+        "respond_to_decision": "Lesen Sie die Entscheidung und antworten Sie",
+        "none": "Es fehlt nichts"
+      }
     }
   },
   "orgMembers": {
@@ -7235,7 +7262,7 @@
     "readinessPanel": {
       "title": "So verbessern Sie Ihre Bereitschaft",
       "intro": "Das sollten Sie als Nächstes vervollständigen, um Ihre Karte zu stärken.",
-      "allReady": "Alles bereit — Ihr Profil ist vollständig.",
+      "allReady": "Ihre Profilkarte ist vollständig. Dokumente für die Arbeit in einem bestimmten Land werden separat gezählt — siehe unten.",
       "countryFit": "Für die Arbeit in einem anderen Land sind die richtigen Dokumente nötig. Ohne sie werden Sie nicht als bereit für Arbeit im Ausland angezeigt — Sie sehen nur legale Wege (Unternehmen übernimmt den Papierkram, Dokumentenunterstützung). Das System verspricht niemals das Recht auf Arbeit ohne Dokumente."
     },
     "readinessSteps": {
@@ -8141,7 +8168,20 @@
         "unverified": "Nachweis: nur selbst angegeben"
       }
     },
-    "editNeedCta": "Bedarf anpassen oder hinzufügen"
+    "editNeedCta": "Bedarf anpassen oder hinzufügen",
+    "availableSupply": {
+      "title": "Verfügbare Arbeitskräfte",
+      "intro": "Kolonnen und Fachkräfte, die Agenturen und Unternehmen als verfügbar gemeldet haben. Sie sehen die Art der Kapazität und wo sie ist — nicht, wer sie anbietet.",
+      "notEnabled": "In dieser Umgebung noch nicht eingeschaltet. Das ist eine Tatsache über die Installation, keine Aussage über den Markt.",
+      "readFailed": "Die Liste verfügbarer Arbeitskräfte konnte nicht gelesen werden. Das ist ein Systemproblem, kein leerer Markt.",
+      "empty": "Bisher hat niemand verfügbare Arbeitskräfte gemeldet, die Sie sehen können.",
+      "unstatedRole": "Art der Arbeit nicht angegeben",
+      "people": "{count} Personen",
+      "from": "Ab",
+      "duration": "Für",
+      "declared": "Gemeldet",
+      "privacyNote": "Namen und Kontaktdaten werden hier bewusst nicht gezeigt. Kontakt aufzunehmen ist ein eigener Schritt, dem die andere Seite zustimmen muss."
+    }
   },
   "planBoundary": {
     "title": "Was bezahlte Pläne enthalten",
@@ -12286,7 +12326,7 @@
       "historyMore": "Mehr anzeigen",
       "workspaceLabel": "Arbeitsbereich",
       "workspacePersonal": "Persönlicher Bereich",
-      "workspaceUnnamed": "Unternehmens-Arbeitsbereich",
+      "workspaceUnnamed": "Organisation ohne Namen",
       "chipLogWork": "Arbeit erfassen",
       "agendaTitle": "Dein Plan für die nächsten {days} Tage:",
       "agendaEmpty": "Für die nächsten {days} Tage ist nichts geplant.",
@@ -12661,8 +12701,15 @@
         "usingProfile": "Du musst nichts hochladen — ich suche mit dem, was schon in deinem Profil steht.",
         "usingProfileNarrowed": "Du musst nichts hochladen — ich suche mit deinem Profil und dem, was du bisher genannt hast.",
         "profileEmpty": "In deinem Profil steht noch nichts, daher kann ich damit nicht suchen. Erfasse eine Arbeit oder nenne deinen Beruf — dann suche ich sofort."
-      }
-    },
+      },
+      "capacityCommittedUntil": "bereits verplant bis {date}",
+      "capacityCommittedToUntil": "auf {what} bis {date}",
+      "capacityCommitmentsUnknown": "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
+      "workspaceUnnamedCompany": "Unternehmen ohne Namen",
+      "workspaceUnnamedAgency": "Agentur ohne Namen",
+      "workspaceUnnamedTeam": "Kolonne ohne Namen",
+      "workspaceUnnamedNote": "Kein Name angegeben",
+      "workspaceNameThis": "Namen angeben"    },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
       "loading": "Wird geladen…",
@@ -13255,8 +13302,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Zeig, was du kannst. Finde, wo du gebraucht wirst.",
-      "sub": "Echte Erfahrung wird zu einem lebendigen Profil, und deine Fähigkeiten werden zu echten Chancen — für Arbeit, eine Dienstleistung oder ein Praktikum."
+      "headline": "Sagen Sie in eigenen Worten, was Sie bei der Arbeit brauchen.",
+      "sub": "Arbeit und Menschen, Kolonnen und Dienstleistungen, freie Kapazität, geleistete Arbeit und ihr Nachweis — ein Markt, an echten Orten. Sie müssen vorher nicht entscheiden, wer Sie sind."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -13323,7 +13370,19 @@
         "hire": "Ich brauche Arbeitskräfte"
       },
       "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
-      "refreshed": "aktualisiert {date}"
+      "refreshed": "aktualisiert {date}",
+      "exampleLabels": {
+        "hire": "Wir brauchen Leute",
+        "work": "Ich suche Arbeit",
+        "internship": "Wo ein Praktikum machen",
+        "professional": "Ich habe einen Beruf",
+        "needService": "Ich brauche eine Leistung",
+        "offerService": "Ich biete Leistungen an",
+        "offerCapacity": "Wir haben Leute frei",
+        "brigade": "Ich suche eine Kolonne",
+        "logWork": "Geleistete Arbeit erfassen",
+        "verifyWork": "Wer bestätigt das"
+      }
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",
@@ -13338,6 +13397,21 @@
       },
       "topTitle": "Aktuell gefragteste Berufe",
       "topNote": "Nach aktiven Stellenanzeigen auf der Plattform. Ein Teil der Anzeigen ist noch keinem Beruf zugeordnet."
+    },
+    "marketMap": {
+      "eyebrow": "Der Markt an Orten",
+      "title": "Der Arbeitsmarkt existiert an echten Orten.",
+      "lead": "Menschen, Arbeit und Bedarf sind irgendwo. Die Karte gehört zum Produkt, sie ist kein Bild neben dem Text.",
+      "shows": "Die Karte zeigt {count, plural, one {den # Markt} other {die # Märkte}}, in denen LabourMarket.ai heute tätig ist. Das sind Märkte, nicht die heutige Aktivität.",
+      "notPublished": "Wie viel Arbeit oder wie viele Menschen an einem Ort sind, zeigen wir Besuchern noch nicht — diese Daten veröffentlichen wir nicht, deshalb steht auf dieser Karte kein einziger geratener Punkt. Angemeldet sehen Sie den echten Stand Ihres Marktes."
+    },
+    "contexts": {
+      "eyebrow": "Wo anfangen",
+      "title": "Beginnen Sie dort, wo Sie heute stehen.",
+      "subcopy": "Das ist ein Einstieg, keine feste Rolle. Dieselbe Person kann Arbeit suchen, einstellen, eine Agentur vertreten und lernen — ein Konto, Kontexte lassen sich jederzeit ergänzen.",
+      "partnerLead": "Möchten Sie als Partner mit uns arbeiten?",
+      "partnerLink": "Kontakt aufnehmen",
+      "moreLead": "Mehr dazu, wie das für jeden funktioniert:"
     }
   },
   "workspace": {
@@ -13559,6 +13633,7 @@
     "evidenceEntries": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} — noch nicht bestätigt",
     "evidenceDocument": "Dokument gültig bis {until} — noch nicht bestätigt",
     "evidenceEntriesAndDocument": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} und ein Dokument gültig bis {until} — noch nicht bestätigt",
+    "evidenceSelfConfirmed": "Von Ihnen selbst bestätigt — noch nicht unabhängig bestätigt",
     "employerConfirmed": "Bestätigt von {org}, {date}",
     "employerConfirmedNoDate": "Von einem Arbeitgeber bestätigt",
     "systemDerived": "Abgeleitet aus: {source}"
@@ -15171,5 +15246,213 @@
     "emailInactiveNote": "Der E-Mail-Versand ist auf der Plattform noch nicht aktiv. Ihre Auswahl wird gespeichert und gilt, sobald er aktiv ist.",
     "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
     "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
+  },
+  "evidenceImport": {
+    "eyebrow": "Historische Arbeitsnachweise",
+    "title": "Arbeitsgeschichte importieren",
+    "intro": "Übertragen Sie die eigenen Aufzeichnungen einer Organisation — Stundenzettel, Projektbücher, Schulungsregister — als Nachweise auf die Plattform, wobei jede Tatsache aus der Quelle von jeder Schlussfolgerung getrennt bleibt.",
+    "actingFor": "Sie handeln für",
+    "nothingWrittenYet": "Es wurde noch nichts festgehalten. Sie sehen genau, was festgehalten würde, bevor irgendetwas gespeichert wird.",
+    "context": {
+      "unauthenticated": "Melden Sie sich an, um Nachweise zu importieren.",
+      "personalWorkspace": "Sie befinden sich in Ihrem persönlichen Bereich. Historische Nachweise gehören zu einer Organisation — wechseln Sie zuerst den Arbeitsbereich.",
+      "noOrganization": "Dieses Konto gehört zu keiner Organisation, es gibt also nichts, wofür Nachweise importiert werden könnten.",
+      "notAMember": "Diese Organisation ist nicht eine der Ihren. Wählen Sie eine aus diesen:",
+      "chooseOrganization": "Sie gehören zu mehr als einer Organisation. Wählen Sie, welche diese Nachweise liefert:",
+      "notAuthorized": "Ihre Rolle in dieser Organisation umfasst den Import von Nachweisen nicht. Eine Inhaberin, ein Administrator oder eine Führungskraft kann das tun.",
+      "needsMigration": "Der Nachweisspeicher ist in dieser Umgebung noch nicht eingeschaltet. Die Datenbankänderung ist vorbereitet und wartet auf die Freigabe der Eigentümerseite; es wurde nichts festgehalten.",
+      "unavailable": "Der Nachweisspeicher konnte nicht gelesen werden. Das ist ein Systemproblem, keine leere Organisation."
+    },
+    "form": {
+      "title": "1. Die Quelle",
+      "supplierRole": "In welcher Eigenschaft liefern Sie das?",
+      "supplierRoleHint": "Eine Agentur, die die Stunden ihres Mitarbeitenden auf der Baustelle eines Kunden meldet, ist weder Arbeitgeber noch Kunde. Geben Sie an, wer Sie sind — es wird bei jeder Zeile festgehalten.",
+      "sourceKind": "Um welche Art von Quelle handelt es sich?",
+      "sourceLanguage": "In welcher Sprache ist die Quelle geschrieben?",
+      "filename": "Dateiname oder Bezeichnung",
+      "reference": "Quellenangabe",
+      "referenceHint": "Woher das stammt, in Ihren eigenen Worten — ein Archivkarton, ein Ordner, ein Systemname.",
+      "notes": "Notizen",
+      "paste": "Zeilen einfügen",
+      "pasteHint": "Eine Zeile pro Datensatz, Spalten getrennt durch Komma, Semikolon oder Tabulator. Die erste erkannte Kopfzeile wird verwendet; alles darüber wird ignoriert.",
+      "file": "Oder laden Sie eine CSV-/TSV-Datei hoch",
+      "submit": "Quelle einlesen",
+      "submitting": "Wird gelesen…"
+    },
+    "preview": {
+      "title": "2. Was festgehalten würde",
+      "notPersisted": "Das ist eine Auslegung Ihrer Datei. NICHTS davon ist bereits ein Nachweis.",
+      "empty": "Für diese Quelle wurden keine Zeilen vorbereitet.",
+      "counts": {
+        "total": "Gelesene Zeilen",
+        "ready": "Bereit",
+        "needsPerson": "Person ungeklärt",
+        "needsContext": "Ort ungeklärt",
+        "duplicates": "Bereits importiert",
+        "conflicts": "Widersprüche"
+      },
+      "column": {
+        "row": "Zeile",
+        "person": "Wer",
+        "date": "Datum",
+        "hours": "Stunden",
+        "place": "Ort",
+        "work": "Was getan wurde",
+        "state": "Zustand"
+      },
+      "fact": "Von der Quelle angegeben",
+      "derived": "Von uns erschlossen",
+      "derivedMethod": "Verfahren",
+      "confidence": "Sicherheit"
+    },
+    "personState": {
+      "unmatched": "Nicht in der Liste",
+      "matched": "Zugeordnet",
+      "ambiguous": "Mehr als eine Übereinstimmung",
+      "created": "Zur Liste hinzugefügt"
+    },
+    "contextState": {
+      "absent": "Kein Ort genannt",
+      "unmatched": "Ort nicht gefunden",
+      "matched": "Zugeordnet",
+      "ambiguous": "Mehr als eine Übereinstimmung",
+      "created": "Angelegt"
+    },
+    "duplicateState": {
+      "new": "Neu",
+      "duplicate": "Bereits importiert",
+      "probable_duplicate": "Wahrscheinlich bereits importiert",
+      "conflict": "Widerspricht einem vorhandenen Eintrag"
+    },
+    "problem": {
+      "person_not_on_roster": "Dieser Name steht nicht in Ihrer Liste. Wählen Sie die Person oder fügen Sie sie hinzu.",
+      "person_ambiguous": "Mehr als eine Person in Ihrer Liste trägt diesen Namen. Wählen Sie, welche.",
+      "context_ambiguous": "Mehr als ein Ort passt zu dieser Bezeichnung. Wählen Sie, welcher.",
+      "already_imported": "Ein identischer Eintrag besteht bereits, diese Zeile wird daher übersprungen."
+    },
+    "resolve": {
+      "title": "Klären",
+      "choosePerson": "Person wählen",
+      "choosePlace": "Ort wählen",
+      "save": "Speichern",
+      "addPerson": "Person hinzufügen",
+      "displayName": "Name, wie ihn Ihre Unterlagen schreiben",
+      "externalRef": "Personalnummer",
+      "relationship": "Verhältnis zur Organisation",
+      "sourceNote": "Woher die Angaben zu dieser Person stammen",
+      "create": "Hinzufügen",
+      "unlinkedNote": "Eine hier hinzugefügte Person ist ein Eintrag Ihrer Organisation. Es ist kein Konto und sagt nichts darüber aus, wer sie ist — die reale Person kann ihn später beanspruchen."
+    },
+    "relationship": {
+      "employee": "Beschäftigte Person",
+      "former_employee": "Ehemals beschäftigte Person",
+      "agency_worker": "Zeitarbeitskraft",
+      "subcontractor": "Nachunternehmen",
+      "contractor": "Auftragnehmende Person",
+      "student": "Studierende Person",
+      "graduate": "Absolvierende Person",
+      "trainee": "Praktikantin oder Praktikant",
+      "apprentice": "Auszubildende Person",
+      "programme_participant": "Programmteilnahme",
+      "volunteer": "Freiwillige Person",
+      "other": "Sonstiges"
+    },
+    "commit": {
+      "title": "3. Festhalten",
+      "evidenceState": "Wie soll das festgehalten werden?",
+      "evidenceStateHint": "Ein Import kann immer nur einen gemeldeten Zustand erzeugen. Niemand hat es bislang geprüft, und dieser Bildschirm kann das Gegenteil nicht behaupten.",
+      "confirm": "{count} Zeilen festhalten",
+      "confirmNone": "Noch ist keine Zeile bereit, festgehalten zu werden",
+      "confirming": "Wird festgehalten…",
+      "readOnce": "Lesen Sie das Obenstehende, bevor Sie freigeben. Die Freigabe hält es im Namen Ihrer Organisation fest."
+    },
+    "evidenceState": {
+      "SELF_REPORTED": "Von der Person selbst geliefert",
+      "ORGANIZATION_REPORTED": "Die Organisation meldet es",
+      "LEGACY_IMPORTED": "Aus einem älteren System übernommen",
+      "UNVERIFIED": "Geliefert, Stellung nicht festgestellt",
+      "NEEDS_REVIEW": "Braucht einen menschlichen Blick"
+    },
+    "result": {
+      "written": "Festgehalten",
+      "skipped": "Als bereits festgehalten übersprungen",
+      "notReady": "Ungeklärt geblieben",
+      "reusedSession": "Sie haben diese Quelle bereits eingelesen. Ihre Zeilen stehen unten, statt ein zweites Mal gelesen zu werden."
+    },
+    "records": {
+      "title": "4. Was festgehalten ist",
+      "empty": "Aus dieser Quelle wurde noch nichts festgehalten.",
+      "importedAt": "Importiert",
+      "supplier": "Geliefert als",
+      "source": "Quelle",
+      "attest": "Für diesen Eintrag einstehen",
+      "attestRole": "In welcher Eigenschaft",
+      "attestNote": "Notiz",
+      "attested": "Bestätigt",
+      "selfAttested": "Bestätigt von der Person, um die es geht",
+      "selfAttestedHint": "Das ist ein echter, festgehaltener Nachweis. Es ist keine unabhängige Prüfung und zählt nie als solche.",
+      "notIndependentlyVerified": "Nicht unabhängig geprüft",
+      "withdrawn": "Zurückgezogen"
+    },
+    "withdraw": {
+      "title": "Diesen Import rückgängig machen",
+      "note": "Warum",
+      "button": "Alles zurückziehen, was dieser Import festgehalten hat",
+      "hint": "Es wird nichts gelöscht. Jeder Eintrag erhält einen Rückzugsvermerk, sodass Nachweis und Grund lesbar bleiben."
+    },
+    "role": {
+      "employer": "Arbeitgeber",
+      "agency": "Agentur",
+      "client": "Kunde",
+      "end_client": "Endkunde",
+      "project_owner": "Projekteigentümer",
+      "subcontractor": "Nachunternehmen",
+      "education_provider": "Bildungseinrichtung",
+      "training_provider": "Weiterbildungsanbieter",
+      "assessor": "Prüfende Stelle",
+      "verifier": "Bestätigende Stelle",
+      "placement_provider": "Praktikumsstelle",
+      "public_body": "Behörde",
+      "sector_body": "Branchenverband",
+      "other": "Sonstiges"
+    },
+    "sourceKind": {
+      "xlsx": "Tabellenkalkulation",
+      "csv": "CSV-/TSV-Datei",
+      "pdf": "PDF-Dokument",
+      "api": "Schnittstelle eines anderen Systems",
+      "agent": "Eine Assistenz",
+      "erp": "ERP-System",
+      "payroll": "Lohnsystem",
+      "sis": "Studierendenverwaltung",
+      "lms": "Lernplattform",
+      "email": "E-Mail",
+      "drive": "Gemeinsames Laufwerk",
+      "manual": "Von Hand eingegeben"
+    },
+    "error": {
+      "invalid": "Etwas im Formular ist nicht verwendbar. Prüfen Sie die hervorgehobenen Stellen.",
+      "not_found": "Diesen Import, diese Zeile oder diesen Eintrag gibt es nicht mehr.",
+      "unavailable": "Der Nachweisspeicher war nicht erreichbar. Es wurde nichts festgehalten.",
+      "too_many_rows": "Das sind mehr Zeilen, als ein Import fassen kann. Teilen Sie die Quelle auf, etwa nach Jahren.",
+      "no_source_supplied": "Keine Datei und keine eingefügten Zeilen — es gibt nichts zu lesen.",
+      "file_too_large": "Diese Datei ist zu groß, um sie hier zu lesen.",
+      "file_unreadable": "Diese Datei konnte nicht als Text gelesen werden.",
+      "nothing_parsed": "Es wurde keine verwendbare Zeile gefunden. Die Quelle braucht eine Kopfzeile, die mindestens eine Person und ein Datum benennt.",
+      "confirmation_rejected": "Dieser Import hat sich geändert, nachdem Sie ihn angesehen haben, daher wurde nichts festgehalten. Sehen Sie ihn erneut an und geben Sie die neue Fassung frei.",
+      "confirmation_unavailable": "Freigaben können in dieser Umgebung nicht signiert werden, daher wurde nichts festgehalten."
+    },
+    "mine": {
+      "title": "Was Organisationen über mich festgehalten haben",
+      "intro": "Arbeit, Weiterbildung und Studium, die eine Organisation aus ihren eigenen Aufzeichnungen übernommen hat. Sie sehen immer, wer es geschickt hat, was diese Stelle damals für Sie war und wann.",
+      "notEnabled": "Das ist in dieser Umgebung noch nicht eingeschaltet. In Ihrem Profil fehlt nichts — der Speicher ist schlicht nicht da, um gelesen zu werden.",
+      "empty": "Bisher hat hier keine Organisation etwas über Sie festgehalten.",
+      "offersTitle": "Wartet auf Ihre Antwort",
+      "offersHint": "Eine Organisation sagt, einer ihrer Einträge betreffe Sie. Nichts kommt in Ihren Lebenslauf, bevor Sie das bestätigen, und Ablehnen ist eine echte Antwort — die Organisation behält ihren Eintrag, sie nennt Sie darin nur nicht mehr.",
+      "accept": "Ja, das bin ich",
+      "refuse": "Nein, das bin ich nicht",
+      "decisionFailed": "Diese Antwort konnte nicht gespeichert werden. Es hat sich nichts geändert.",
+      "unnamedOrganization": "Eine Organisation"
+    }
   }
 }

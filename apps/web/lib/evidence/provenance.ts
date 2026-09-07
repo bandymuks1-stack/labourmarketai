@@ -1,5 +1,9 @@
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
-import { deriveReviewResult, type ConfirmationRow } from "@/lib/journal/review-status";
+import {
+  deriveReviewResult,
+  isSelfConfirmation,
+  type ConfirmationRow,
+} from "@/lib/journal/review-status";
 
 /**
  * PROVENANCE — THE ONE derivation of "why believe this" (frozen design
@@ -29,7 +33,13 @@ import { deriveReviewResult, type ConfirmationRow } from "@/lib/journal/review-s
  *      its top rung). The confirming organisation is whatever the caller could
  *      READ — an unreadable name stays `null` and renders as a dash, never as
  *      an invented confirmer. AI never raises the class (M: "AI siūlo,
- *      niekada nepakelia");
+ *      niekada nepakelia"). **A row the SUBJECT wrote about themselves does
+ *      not count here** (owner P0, 2026-09-07): `review_journal_entry` never
+ *      checked that the reviewer is not the worker, and production carries 3
+ *      real self-confirmations out of 13. The row stays — it is real evidence
+ *      and deleting it would destroy history — but it lands in
+ *      EVIDENCE_SUPPORTED carrying `selfConfirmedOnly`, and the text
+ *      equivalent says so. Passing no `subjectProfileId` changes nothing;
  *   3. EVIDENCE_SUPPORTED from the person's own journal entries linked to the
  *      subject, a `work_journal`-tier skill row, or a recorded document;
  *   4. otherwise SELF_DECLARED — never inflated.
@@ -64,6 +74,15 @@ export interface ProvenanceInput {
   /** Set when the value is a computation over records — names its source
    *  (a slug the consumer localises), e.g. "requirement-ledger". */
   readonly derivedFrom?: string | null;
+  /**
+   * The profile the evidence is ABOUT (owner P0, 2026-09-07).
+   *
+   * Supplied so rule 2 below can tell an independent confirmation from the
+   * subject confirming themselves. Omitted, nothing changes: a caller that
+   * did not select `confirmer_id` cannot answer the question and this module
+   * refuses to guess an answer in either direction.
+   */
+  readonly subjectProfileId?: string | null;
 }
 
 export type Provenance =
@@ -72,6 +91,12 @@ export type Provenance =
       readonly class: "EVIDENCE_SUPPORTED";
       readonly journalEntries: number;
       readonly validUntil: string | null;
+      /**
+       * True when an approving confirmation EXISTS but every approving row was
+       * written by the subject themselves. The work is real and recorded; what
+       * it is not is independently confirmed, and the text equivalent says so.
+       */
+      readonly selfConfirmedOnly?: boolean;
     }
   | {
       readonly class: "EMPLOYER_CONFIRMED";
@@ -122,7 +147,19 @@ export function deriveProvenance(input: ProvenanceInput): Provenance {
   const derivedFrom = cleanName(input.derivedFrom);
   if (derivedFrom) return { class: "SYSTEM_DERIVED", derivedFrom };
 
-  const confirmations = input.confirmations ?? [];
+  const allConfirmations = input.confirmations ?? [];
+  // THE INDEPENDENCE FILTER (owner P0, 2026-09-07). A row the SUBJECT wrote
+  // about themselves is a real, permanent record — it is simply not somebody
+  // else's confirmation, and only somebody else's may reach the gold class.
+  // With no `subjectProfileId`, or on rows without `confirmer_id`, this is the
+  // identity: existing callers keep their exact previous behaviour.
+  const confirmations = allConfirmations.filter(
+    (r) => !isSelfConfirmation(r, input.subjectProfileId),
+  );
+  const selfConfirmedOnly =
+    allConfirmations.length > confirmations.length &&
+    deriveReviewResult(allConfirmations) === "approved" &&
+    deriveReviewResult(confirmations) !== "approved";
   const approved = confirmations.length > 0 ? newestApproved(confirmations) : null;
   const tier = input.skill ? deriveEvidenceTier(input.skill) : "self_declared";
 
@@ -136,11 +173,12 @@ export function deriveProvenance(input: ProvenanceInput): Provenance {
 
   const journalEntries = Math.max(0, Math.floor(input.journalEntries ?? 0));
   const document = input.document ?? null;
-  if (journalEntries > 0 || tier === "work_journal" || document) {
+  if (journalEntries > 0 || tier === "work_journal" || document || selfConfirmedOnly) {
     return {
       class: "EVIDENCE_SUPPORTED",
       journalEntries,
       validUntil: document?.validUntil ?? null,
+      ...(selfConfirmedOnly ? { selfConfirmedOnly: true } : {}),
     };
   }
 
@@ -170,6 +208,8 @@ export type ProvenanceTextKey =
   | "evidenceEntries"
   | "evidenceDocument"
   | "evidenceEntriesAndDocument"
+  /** Approved — but only by the subject themselves. Says so out loud. */
+  | "evidenceSelfConfirmed"
   | "employerConfirmed"
   | "employerConfirmedNoDate"
   | "systemDerived";
@@ -179,6 +219,9 @@ export function provenanceTextKey(p: Provenance): ProvenanceTextKey {
     case "SELF_DECLARED":
       return "selfDeclared";
     case "EVIDENCE_SUPPORTED":
+      // The self-confirmation fact outranks the counting variants: "you
+      // approved this yourself" is the thing the reader must not miss.
+      if (p.selfConfirmedOnly) return "evidenceSelfConfirmed";
       if (p.validUntil && p.journalEntries > 0) return "evidenceEntriesAndDocument";
       if (p.validUntil) return "evidenceDocument";
       // Evidence exists (a work_journal-tier skill row, or a recorded document

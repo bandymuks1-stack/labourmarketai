@@ -29,6 +29,16 @@ export interface ConfirmationRow {
   readonly created_at?: string | null;
   /** The reviewer's engagement role (manager / owner / external_manager). */
   readonly confirmer_role?: string | null;
+  /**
+   * WHO decided — `journal_entry_confirmations.confirmer_id`.
+   *
+   * Optional because most readers do not need it and did not select it. A
+   * reader that wants to know whether a decision was INDEPENDENT must select
+   * it and use `deriveIndependentReviewResult`; absent, this module cannot
+   * tell a self-confirmation from a supervisor's and says so by leaving the
+   * independence question unanswerable rather than assuming an answer.
+   */
+  readonly confirmer_id?: string | null;
 }
 
 export function isReviewDecision(value: unknown): value is ReviewDecision {
@@ -80,6 +90,71 @@ export function deriveReviewResult(
     if (decision) return decision;
   }
   return "submitted";
+}
+
+/**
+ * IS THIS DECISION THE SUBJECT'S OWN? (owner P0, 2026-09-07.)
+ *
+ * `review_journal_entry` authorises on `manages_organization` and never checks
+ * that the reviewer is not the worker. Measured on production 2026-09-07: of
+ * 13 real confirmations, **3 are self-confirmations** — one person, holding an
+ * `owner` engagement, approving their own entries on 2026-06-16 and 2026-07-05.
+ *
+ * That is not necessarily abuse: a sole trader legitimately has nobody above
+ * them, and deleting the rows would destroy real evidence. What is wrong is
+ * that a self-approved entry currently READS exactly like one a supervisor
+ * confirmed, and confirmed work is the platform's trust currency (doctrine §9,
+ * ARCHITECTURE I-4: participation ≠ leadership, and here: submitting ≠ being
+ * confirmed).
+ *
+ * So this module answers the two questions separately and never conflates them:
+ *
+ *   `deriveReviewResult`             what was DECIDED (a self-confirmation is
+ *                                    still a real decision — unchanged)
+ *   `deriveIndependentReviewResult`  what someone OTHER THAN THE SUBJECT
+ *                                    decided (the trust question)
+ *
+ * Blocking the write is a `SECURITY DEFINER` authorization change and an open
+ * product decision (owner-gated). Classifying the read is neither, needs no
+ * migration, and destroys nothing.
+ */
+export function isSelfConfirmation(
+  row: ConfirmationRow,
+  subjectProfileId: string | null | undefined,
+): boolean {
+  if (!subjectProfileId) return false;
+  return Boolean(row.confirmer_id) && row.confirmer_id === subjectProfileId;
+}
+
+/**
+ * The review result counting ONLY decisions made by someone other than the
+ * subject. Same latest-wins rule, one row set narrower.
+ *
+ * With no `subjectProfileId`, or on rows that never selected `confirmer_id`,
+ * this equals `deriveReviewResult` — a reader that did not ask the question
+ * gets the behaviour it had before, never a silently weakened one.
+ */
+export function deriveIndependentReviewResult(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+  subjectProfileId: string | null | undefined,
+): ReviewResult {
+  if (!confirmations || confirmations.length === 0) return "submitted";
+  return deriveReviewResult(
+    confirmations.filter((r) => !isSelfConfirmation(r, subjectProfileId)),
+  );
+}
+
+/** True when the entry reads as approved, but every approving row was written
+ *  by the subject themselves — the state that must never render as employer
+ *  confirmation. */
+export function isSelfConfirmedOnly(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+  subjectProfileId: string | null | undefined,
+): boolean {
+  return (
+    deriveReviewResult(confirmations) === "approved" &&
+    deriveIndependentReviewResult(confirmations, subjectProfileId) !== "approved"
+  );
 }
 
 /** The latest review decision's ORIGIN — who (engagement role) + when.

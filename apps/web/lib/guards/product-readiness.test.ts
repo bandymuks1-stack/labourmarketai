@@ -2386,13 +2386,26 @@ describe("no migration files added by this sprint", () => {
     // browsing for work to staff was served OTHER agencies' offers as demand —
     // measured on production as 2 of 12 rows, through the real RPC under the
     // agency's own auth. RED class (SECURITY DEFINER body replace).
-    // Bumped 268 -> 269 for the notification-spine service_role grant
-    // (20260906060000, RED + needs-human-gate): TWO additive grants —
-    // select/insert/update on notification_events and select on
-    // notification_preferences — so the emitters and the consent read the
-    // email dispatcher depends on stop failing 42501. No data, no RLS, no
-    // anon/authenticated change.
-const SPRINT_BASELINE = 269;
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 271 files.
+    //
+    // 269 -> 270: the two 2026-09-07 owner-approved migrations
+    // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
+    // are now APPLIED (ledger 20260907180944 and 20260907180546) and both
+    // carry `@human-gate-approved` naming the decisions EVID-1 / DEM-9. The
+    // comments that stood here called them "NOT applied" and said they carry
+    // "NO marker"; that was true when written and is false now, so it is
+    // corrected rather than carried forward. They remain RED class - a marker
+    // acknowledges risk, it never reclassifies a file to GREEN.
+    //
+    // 270 -> 271: the notification-spine service_role grant (20260906060000,
+    // #1566). Two additive grants - select/insert/update on
+    // notification_events, select on notification_preferences - so the
+    // emitters and the email dispatcher's consent read stop failing 42501.
+    // Measured on production 2026-09-07: service_role holds NO privilege on
+    // either table, and `rolbypassrls` is true, so RLS is not the blocker -
+    // the missing GRANT is. RED (privilege surface), owner-gated, NOT applied.
+const SPRINT_BASELINE = 271;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

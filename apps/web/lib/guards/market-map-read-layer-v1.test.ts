@@ -801,10 +801,26 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06) —
     // the fifth surface of the market-direction defect class, found by
     // sweeping every SECURITY DEFINER reader of customer_requests.
-    // Bumped 268 -> 269 for the notification-spine service_role grant
-    // (20260906060000, #1566): the emitters and the email dispatcher run
-    // through the admin client and have failed 42501 since July.
-    expect(count).toBeLessThanOrEqual(269);
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 271 files.
+    //
+    // 269 -> 270: the two 2026-09-07 owner-approved migrations
+    // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
+    // are now APPLIED (ledger 20260907180944 and 20260907180546) and both
+    // carry `@human-gate-approved` naming the decisions EVID-1 / DEM-9. The
+    // comments that stood here called them "NOT applied" and said they carry
+    // "NO marker"; that was true when written and is false now, so it is
+    // corrected rather than carried forward. They remain RED class - a marker
+    // acknowledges risk, it never reclassifies a file to GREEN.
+    //
+    // 270 -> 271: the notification-spine service_role grant (20260906060000,
+    // #1566). Two additive grants - select/insert/update on
+    // notification_events, select on notification_preferences - so the
+    // emitters and the email dispatcher's consent read stop failing 42501.
+    // Measured on production 2026-09-07: service_role holds NO privilege on
+    // either table, and `rolbypassrls` is true, so RLS is not the blocker -
+    // the missing GRANT is. RED (privilege surface), owner-gated, NOT applied.
+    expect(count).toBeLessThanOrEqual(271);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
