@@ -77,9 +77,10 @@ describe("the journal surface actually asks the question", () => {
 });
 
 describe("the vocabulary is complete in every active locale", () => {
-  const catalogs = Object.fromEntries(
-    ACTIVE_LOCALES.map((l) => [l, JSON.parse(read(`messages/${l}.json`))]),
-  ) as Record<string, Record<string, Record<string, Record<string, string>>>>;
+  type Catalog = { journal?: { verification?: { state?: Record<string, string>; action?: Record<string, string> } } };
+  const catalogs: Record<string, Catalog> = Object.fromEntries(
+    ACTIVE_LOCALES.map((l) => [l, JSON.parse(read(`messages/${l}.json`)) as Catalog]),
+  );
 
   for (const locale of ACTIVE_LOCALES) {
     it(`${locale}: every canonical state has a real string`, () => {

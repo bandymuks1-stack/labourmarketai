@@ -8156,7 +8156,20 @@
         "unverified": "Įrodymai: tik paties deklaruota"
       }
     },
-    "editNeedCta": "Patikslinti arba pridėti poreikį"
+    "editNeedCta": "Patikslinti arba pridėti poreikį",
+    "availableSupply": {
+      "title": "Laisva darbo jėga",
+      "intro": "Brigados ir specialistai, kuriuos agentūros ir įmonės nurodė kaip laisvus. Matote pajėgumo pobūdį ir kur jis yra — ne kas jį siūlo.",
+      "notEnabled": "Šioje aplinkoje dar neįjungta. Tai faktas apie diegimą, o ne teiginys apie rinką.",
+      "readFailed": "Laisvos darbo jėgos sąrašo nepavyko perskaityti. Tai sistemos problema, o ne tuščia rinka.",
+      "empty": "Kol kas niekas nenurodė laisvos darbo jėgos, kurią galėtumėte matyti.",
+      "unstatedRole": "Darbo pobūdis nenurodytas",
+      "people": "{count} žmonių",
+      "from": "Nuo",
+      "duration": "Trukmė",
+      "declared": "Nurodyta",
+      "privacyNote": "Vardai ir kontaktai čia sąmoningai nerodomi. Susisiekimas yra atskiras žingsnis, kuriam kita pusė turi sutikti."
+    }
   },
   "planBoundary": {
     "title": "Ką apima mokami planai",

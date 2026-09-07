@@ -8156,7 +8156,20 @@
         "unverified": "Nachweis: nur selbst angegeben"
       }
     },
-    "editNeedCta": "Bedarf anpassen oder hinzufügen"
+    "editNeedCta": "Bedarf anpassen oder hinzufügen",
+    "availableSupply": {
+      "title": "Verfügbare Arbeitskräfte",
+      "intro": "Kolonnen und Fachkräfte, die Agenturen und Unternehmen als verfügbar gemeldet haben. Sie sehen die Art der Kapazität und wo sie ist — nicht, wer sie anbietet.",
+      "notEnabled": "In dieser Umgebung noch nicht eingeschaltet. Das ist eine Tatsache über die Installation, keine Aussage über den Markt.",
+      "readFailed": "Die Liste verfügbarer Arbeitskräfte konnte nicht gelesen werden. Das ist ein Systemproblem, kein leerer Markt.",
+      "empty": "Bisher hat niemand verfügbare Arbeitskräfte gemeldet, die Sie sehen können.",
+      "unstatedRole": "Art der Arbeit nicht angegeben",
+      "people": "{count} Personen",
+      "from": "Ab",
+      "duration": "Für",
+      "declared": "Gemeldet",
+      "privacyNote": "Namen und Kontaktdaten werden hier bewusst nicht gezeigt. Kontakt aufzunehmen ist ein eigener Schritt, dem die andere Seite zustimmen muss."
+    }
   },
   "planBoundary": {
     "title": "Was bezahlte Pläne enthalten",

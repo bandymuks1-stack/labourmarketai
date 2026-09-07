@@ -2396,7 +2396,20 @@ describe("no migration files added by this sprint", () => {
     // `migration-safety` stays RED on purpose. Draft + needs-human-gate,
     // NOT applied. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 269 real files.
-const SPRINT_BASELINE = 269;
+// Bumped 269 -> 270 for employer_supply_discovery_v1 (2026-09-07): the
+// OTHER half of the market-direction work. Six surfaces were fixed for
+// serving supply where demand belongs, and every one of those fixes was
+// subtractive; production carries 2 submitted `agency_offer` rows that NO
+// employer could read, because `customer_requests_select` is own-row /
+// admin / org-demand-access only. This adds one new gated SECURITY
+// DEFINER reader exposing six non-identifying columns. Proven on
+// production inside a transaction under three real users' auth contexts
+// (employer 2 of 2, the supplier themselves 1 of 2, a plain worker 0) and
+// rolled back; the function does not exist on production. RED class,
+// carries NO `@human-gate-approved` marker, NOT applied.
+// RECOUNTED from the tree, never summed:
+// `ls supabase/migrations/*.sql | wc -l` = 270 real files.
+const SPRINT_BASELINE = 270;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

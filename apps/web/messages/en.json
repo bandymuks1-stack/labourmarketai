@@ -8156,7 +8156,20 @@
         "unverified": "Evidence: self-declared only"
       }
     },
-    "editNeedCta": "Adjust or add a need"
+    "editNeedCta": "Adjust or add a need",
+    "availableSupply": {
+      "title": "Available workforce",
+      "intro": "Crews and specialists that agencies and companies have declared as available. You see the shape of the capacity and where it is — not who is offering it.",
+      "notEnabled": "Not switched on in this environment yet. This is a deployment fact, not a statement about the market.",
+      "readFailed": "The available-workforce list could not be read. This is a system problem, not an empty market.",
+      "empty": "Nobody has declared available workforce that you can see right now.",
+      "unstatedRole": "Work type not stated",
+      "people": "{count} people",
+      "from": "From",
+      "duration": "For",
+      "declared": "Declared",
+      "privacyNote": "Names and contact details are deliberately not shown here. Reaching out is a separate step that the other side has to agree to."
+    }
   },
   "planBoundary": {
     "title": "What paid plans include",

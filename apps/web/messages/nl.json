@@ -8156,7 +8156,20 @@
         "unverified": "Bewijs: alleen zelf opgegeven"
       }
     },
-    "editNeedCta": "Behoefte aanpassen of toevoegen"
+    "editNeedCta": "Behoefte aanpassen of toevoegen",
+    "availableSupply": {
+      "title": "Beschikbare arbeidskracht",
+      "intro": "Ploegen en specialisten die bureaus en bedrijven als beschikbaar hebben opgegeven. U ziet de vorm van de capaciteit en waar die is — niet wie die aanbiedt.",
+      "notEnabled": "In deze omgeving nog niet ingeschakeld. Dat is een feit over de uitrol, geen uitspraak over de markt.",
+      "readFailed": "De lijst met beschikbare arbeidskracht kon niet worden gelezen. Dit is een systeemprobleem, geen lege markt.",
+      "empty": "Niemand heeft beschikbare arbeidskracht opgegeven die u nu kunt zien.",
+      "unstatedRole": "Soort werk niet opgegeven",
+      "people": "{count} mensen",
+      "from": "Vanaf",
+      "duration": "Voor",
+      "declared": "Opgegeven",
+      "privacyNote": "Namen en contactgegevens worden hier bewust niet getoond. Contact opnemen is een aparte stap waarmee de andere partij moet instemmen."
+    }
   },
   "planBoundary": {
     "title": "Wat betaalde plannen omvatten",

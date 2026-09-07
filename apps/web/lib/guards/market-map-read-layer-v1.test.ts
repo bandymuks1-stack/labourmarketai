@@ -808,7 +808,18 @@ describe("NO new DB migration in this PR", () => {
     // class — new tables need explicit GRANTs on this project — so it ships
     // draft + needs-human-gate and is NOT applied. Still no migration from the
     // market-map layer, which remains pure TS over existing tables.
-    expect(count).toBeLessThanOrEqual(269);
+    // Bumped 269 -> 270 for employer_supply_discovery_v1 (2026-09-07): the
+    // OTHER half of the market-direction work. Six surfaces were fixed for
+    // serving supply where demand belongs, and every one of those fixes was
+    // subtractive; production carries 2 submitted `agency_offer` rows that NO
+    // employer could read, because `customer_requests_select` is own-row /
+    // admin / org-demand-access only. This adds one new gated SECURITY
+    // DEFINER reader exposing six non-identifying columns. Proven on
+    // production inside a transaction under three real users' auth contexts
+    // (employer 2 of 2, the supplier themselves 1 of 2, a plain worker 0) and
+    // rolled back; the function does not exist on production. RED class,
+    // carries NO `@human-gate-approved` marker, NOT applied.
+    expect(count).toBeLessThanOrEqual(270);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
