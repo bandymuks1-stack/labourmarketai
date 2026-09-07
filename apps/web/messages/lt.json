@@ -12687,7 +12687,10 @@
         "usingProfile": "Gerai — įkelti nieko nereikia. Ieškau pagal tai, kas jau yra tavo profilyje.",
         "usingProfileNarrowed": "Gerai — įkelti nieko nereikia. Ieškau pagal tavo profilį ir tai, ką jau nurodei.",
         "profileEmpty": "Tavo profilyje kol kas nėra nė vieno įrašo, tad ieškoti pagal jį dar negaliu. Užfiksuok bent vieną darbą arba parašyk savo profesiją — ir iškart ieškosiu."
-      }
+      },
+      "capacityCommittedUntil": "jau užimtas iki {date}",
+      "capacityCommittedToUntil": "dirba {what} iki {date}",
+      "capacityCommitmentsUnknown": "Nepavyko perskaityti rezervacijų ir priskyrimų projektams, todėl kaip laisvas rodomas žmogus gali būti jau užimtas."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

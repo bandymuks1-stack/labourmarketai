@@ -77,12 +77,13 @@ const capacity: CapacityChatResult = {
   from: "2026-09-05",
   to: "2026-09-11",
   rows: [
-    { workerId: "w1", label: "On project", state: "free", unavailableUntil: null },
-    { workerId: "w9", label: "Free one", state: "free", unavailableUntil: null },
-    { workerId: "w8", label: "Away", state: "unavailable", unavailableUntil: "2026-09-10" },
+    { workerId: "w1", label: "On project", state: "free", unavailableUntil: null, committedTo: null },
+    { workerId: "w9", label: "Free one", state: "free", unavailableUntil: null, committedTo: null },
+    { workerId: "w8", label: "Away", state: "unavailable", unavailableUntil: "2026-09-10", committedTo: null },
   ],
   rosterTotal: 3,
   absencesKnown: true,
+  commitmentsKnown: true,
 };
 
 describe("lane edge and time are from real status and real dates only", () => {
@@ -216,6 +217,7 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
       label: `R${i}`,
       state: "free" as const,
       unavailableUntil: null,
+      committedTo: null,
     }));
     const field = buildProjectField({
       stages,
@@ -223,7 +225,7 @@ describe("buildProjectField — a projection, bounded, derived flagged", () => {
       workers,
       tasks,
       tasksApplied: true,
-      capacity: { kind: "ok", from: "a", to: "b", rows, rosterTotal: 40, absencesKnown: true },
+      capacity: { kind: "ok", from: "a", to: "b", rows, rosterTotal: 40, absencesKnown: true, commitmentsKnown: true },
       todayIso: TODAY,
     });
     expect(field.lanes).toHaveLength(FIELD_LANE_MAX);

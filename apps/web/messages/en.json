@@ -12687,7 +12687,10 @@
         "usingProfile": "Nothing to upload — I'll search using what is already in your profile.",
         "usingProfileNarrowed": "Nothing to upload — I'll search using your profile and what you have told me so far.",
         "profileEmpty": "There is nothing in your profile yet, so I cannot search from it. Record one job or tell me your profession, and I will search straight away."
-      }
+      },
+      "capacityCommittedUntil": "already committed until {date}",
+      "capacityCommittedToUntil": "on {what} until {date}",
+      "capacityCommitmentsUnknown": "Bookings and project assignments could not be read, so someone shown as free may already be committed."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

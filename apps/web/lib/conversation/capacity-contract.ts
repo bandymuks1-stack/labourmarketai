@@ -29,9 +29,26 @@ export const CAPACITY_CHAT_LIMIT = 8;
 export interface CapacityChatRow {
   readonly workerId: string;
   readonly label: string;
-  /** Free for the whole window, or the last unavailable day inside it. */
-  readonly state: "free" | "unavailable";
+  /**
+   * THREE STATES, NOT TWO (2026-09-07).
+   *
+   * "Not free" was never one thing. A person on approved leave and a person
+   * already working on your project are both unavailable and are not the same
+   * fact: one you cannot plan around, the other you may reprioritise.
+   * Collapsing them would replace a false "free" with a vague "busy" — a
+   * smaller lie rather than none.
+   *
+   * `unavailable` (an absence) outranks `committed` (booked or assigned work),
+   * because leave is the harder constraint.
+   */
+  readonly state: "free" | "committed" | "unavailable";
+  /** The last day inside the window on which the person is not free, for
+   *  whichever state won. Null when free. */
   readonly unavailableUntil: string | null;
+  /** What the person is committed to, when `state` is `committed`. Null
+   *  otherwise, and null when the source row carries no title — never an
+   *  invented name. */
+  readonly committedTo: string | null;
 }
 
 export type CapacityChatResult =
@@ -45,6 +62,16 @@ export type CapacityChatResult =
        *  as "free" only in the sense that nothing says otherwise; the chat
        *  says so. */
       readonly absencesKnown: boolean;
+      /**
+       * False when the committed-work read failed or is not provisioned.
+       *
+       * It exists for the same reason `absencesKnown` does, and its absence is
+       * what let this defect run: production carries ZERO absence rows and
+       * three real commitments, so "everybody is free" was produced entirely
+       * from signals nobody had checked. A surface must be able to say which
+       * of its inputs actually answered.
+       */
+      readonly commitmentsKnown: boolean;
     }
   | { readonly kind: "no-company" }
   | { readonly kind: "empty" }

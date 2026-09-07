@@ -461,7 +461,10 @@ export type ChatLabels = {
   capacityIntro: string;
   capacityFree: string;
   capacityBusyUntil: string;
+  capacityCommittedUntil: string;
+  capacityCommittedToUntil: string;
   capacityAbsencesUnknown: string;
+  capacityCommitmentsUnknown: string;
   capacityEmpty: string;
   capacityUnavailable: string;
   chipAddTask: string;
@@ -3289,13 +3292,31 @@ export function ConversationChat({
           assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
           return;
         }
-        const lines = res.rows.map((r) =>
-          r.state === "free"
-            ? `• ${r.label} — ${labels.capacityFree}`
-            : `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", r.unavailableUntil ?? res.to)}`,
-        );
+        // THREE ANSWERS, NOT TWO. "Away until Friday" and "on the Vilnius
+        // site until Friday" are different facts an employer plans around
+        // differently; saying "busy" for both would trade a false "free" for
+        // a vague one.
+        const lines = res.rows.map((r) => {
+          const until = r.unavailableUntil ?? res.to;
+          if (r.state === "free") return `• ${r.label} — ${labels.capacityFree}`;
+          if (r.state === "unavailable") {
+            return `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", until)}`;
+          }
+          // A real title when the source carries one, the plain phrasing when
+          // it does not — never an invented name for the work.
+          return r.committedTo
+            ? `• ${r.label} — ${labels.capacityCommittedToUntil.replace("{what}", r.committedTo).replace("{date}", until)}`
+            : `• ${r.label} — ${labels.capacityCommittedUntil.replace("{date}", until)}`;
+        });
         const head = labels.capacityIntro.replace("{from}", res.from).replace("{to}", res.to).replace("{count}", String(res.rosterTotal));
-        assistant([head, ...lines, ...(res.absencesKnown ? [] : [labels.capacityAbsencesUnknown])].join("\n"), [
+        // An input that did not answer is named. Production carried ZERO
+        // absence rows and three real commitments, so "everybody is free" was
+        // once produced entirely from signals nobody had checked.
+        const caveats = [
+          ...(res.absencesKnown ? [] : [labels.capacityAbsencesUnknown]),
+          ...(res.commitmentsKnown ? [] : [labels.capacityCommitmentsUnknown]),
+        ];
+        assistant([head, ...lines, ...caveats].join("\n"), [
           { id: "projects", label: labels.chipProjects },
           { id: "f:company.create-task", label: labels.chipAddTask },
         ]);

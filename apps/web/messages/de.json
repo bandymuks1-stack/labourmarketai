@@ -12687,7 +12687,10 @@
         "usingProfile": "Du musst nichts hochladen — ich suche mit dem, was schon in deinem Profil steht.",
         "usingProfileNarrowed": "Du musst nichts hochladen — ich suche mit deinem Profil und dem, was du bisher genannt hast.",
         "profileEmpty": "In deinem Profil steht noch nichts, daher kann ich damit nicht suchen. Erfasse eine Arbeit oder nenne deinen Beruf — dann suche ich sofort."
-      }
+      },
+      "capacityCommittedUntil": "bereits verplant bis {date}",
+      "capacityCommittedToUntil": "auf {what} bis {date}",
+      "capacityCommitmentsUnknown": "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
