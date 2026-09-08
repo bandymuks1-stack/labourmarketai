@@ -570,15 +570,28 @@ export async function runFigures(): Promise<WorkflowResult> {
         chips: [{ id: "logwork", label: t("chipLogWork") }],
       };
     }
+    // A count we could not read must not be STATED as a number. The two
+    // journal figures are nullable (see lib/reports/evidence-report.ts), and
+    // interpolating null here would put a number nobody counted — or the word
+    // itself — into a sentence the person reads as fact. The skills figures
+    // are always counted, so those are still given.
+    const entriesUnread =
+      view.evidence.journalEntries === null ||
+      view.evidence.confirmations === null;
     return {
       kind: "answer",
       text: [
-        t("figuresWorker", {
-          entries: view.evidence.journalEntries,
-          confirmations: view.evidence.confirmations,
-          skills: view.evidence.totalSkills,
-          confirmed: view.evidence.confirmed,
-        }),
+        entriesUnread
+          ? t("figuresWorkerUnread", {
+              skills: view.evidence.totalSkills,
+              confirmed: view.evidence.confirmed,
+            })
+          : t("figuresWorker", {
+              entries: view.evidence.journalEntries ?? 0,
+              confirmations: view.evidence.confirmations ?? 0,
+              skills: view.evidence.totalSkills,
+              confirmed: view.evidence.confirmed,
+            }),
         t("figuresNoHoursLedger"),
       ].join("\n"),
       explanation: { why: t("whyFigures") },

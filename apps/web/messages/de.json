@@ -13559,6 +13559,7 @@
       "journalUnlabelled": "(ohne Beschreibung)",
       "journalEmpty": "In den letzten {days} Tagen hast du keine Einträge.",
       "figuresWorker": "{entries} Einträge, davon {confirmations} von einer Führungskraft bestätigt. {skills} Fähigkeiten gespeichert, {confirmed} bestätigt.",
+      "figuresWorkerUnread": "{skills} Fähigkeiten gespeichert, {confirmed} bestätigt. Die Anzahl deiner Journaleinträge und Bestätigungen konnte ich gerade nicht lesen — das ist nicht dasselbe wie keine zu haben. Frag gleich noch einmal.",
       "figuresNoHoursLedger": "Die Plattform führt kein Register genehmigter Stunden, deshalb kann ich keine Stundenzahl nennen — sie erfasst bestätigte Einträge.",
       "figuresWorkerEmpty": "Du hast noch keine erfassten Arbeitsnachweise.",
       "figuresOrgIntro": "Dein Unternehmen, wie erfasst:",

@@ -13559,6 +13559,7 @@
       "journalUnlabelled": "(no description)",
       "journalEmpty": "You have no journal entries in the last {days} days.",
       "figuresWorker": "{entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "{skills} skills saved, {confirmed} confirmed. I could not read your journal entry and confirmation counts just now — that is not the same as having none. Ask again in a moment.",
       "figuresNoHoursLedger": "The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "You have no recorded work evidence yet.",
       "figuresOrgIntro": "Your organization, as recorded:",

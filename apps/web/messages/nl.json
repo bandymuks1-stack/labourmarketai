@@ -13559,6 +13559,7 @@
       "journalUnlabelled": "(geen omschrijving)",
       "journalEmpty": "Je hebt geen dagboekregels in de afgelopen {days} dagen.",
       "figuresWorker": "{entries} dagboekregels, waarvan {confirmations} bevestigd door een leidinggevende. {skills} vaardigheden opgeslagen, {confirmed} bevestigd.",
+      "figuresWorkerUnread": "{skills} vaardigheden opgeslagen, {confirmed} bevestigd. Ik kon je aantal journaalregels en bevestigingen zojuist niet lezen — dat is niet hetzelfde als er geen hebben. Vraag het zo meteen opnieuw.",
       "figuresNoHoursLedger": "Het platform houdt geen register van goedgekeurde uren bij, dus een urencijfer kan ik niet geven — het legt bevestigde regels vast.",
       "figuresWorkerEmpty": "Je hebt nog geen vastgelegd werkbewijs.",
       "figuresOrgIntro": "Je organisatie, zoals vastgelegd:",
