@@ -1267,6 +1267,16 @@ describe("the migration set is exactly what this slice declared", () => {
       // before any insert. SELECT only on both; owner-approved and applied
       // via MCP apply_migration (#1566).
       "20260908070000_notification_recipient_discovery_service_role_select.sql",
+      // 2026-09-08, UNAPPLIED. The two evidence-integrity repairs. The owner
+      // approved their IMPLEMENTATION and stopped before the apply, so each
+      // marker here is the doctrine RISK ACKNOWLEDGEMENT that lets a
+      // deliberate RED file pass the static gate - not an approval to apply,
+      // and each file says so in its own header. EVID-6 narrows a SELECT
+      // policy (a reply's own moderation_status, not the record's); EVID-2
+      // adds a nullable column plus a SECURITY DEFINER insert trigger and
+      // backfills nothing.
+      "20260908120000_experience_response_moderation_scope_v1.sql",
+      "20260908130000_journal_confirmation_self_marker_v1.sql",
 ]);
   });
 
