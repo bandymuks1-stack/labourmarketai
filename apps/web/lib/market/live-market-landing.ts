@@ -139,6 +139,8 @@ export async function readFreshLiveMarketLandingSnapshot(
    *  statements this snapshot puts in flight at once. Production passes
    *  nothing and gets the anonymous client built below. */
   suppliedClient?: SupabaseClient,
+  /** See `resolveProfessions` on the exported reader. */
+  resolveProfessions: boolean = true,
 ): Promise<LiveMarketLandingSnapshot> {
   let publicClient: SupabaseClient;
   if (suppliedClient) {
@@ -171,7 +173,7 @@ export async function readFreshLiveMarketLandingSnapshot(
   const professionResults: (Awaited<
     ReturnType<typeof searchPublicVacancyPreviews>
   > | null)[] = [];
-  for (const slug of PROFESSION_FILTER_SLUGS) {
+  for (const slug of resolveProfessions ? PROFESSION_FILTER_SLUGS : []) {
     if (Date.now() - startedAt >= PROFESSION_READ_BUDGET_MS) {
       professionResults.push(null);
       continue;
@@ -230,12 +232,45 @@ export async function readFreshLiveMarketLandingSnapshot(
 
 /**
  * The public supply changes daily, not second-by-second. A five-minute shared
- * cache keeps the command view current without putting nine network RPCs in
+ * cache keeps the command view current without putting the anonymous RPCs in
  * front of every visitor's first paint. The next request after expiry refreshes
  * the bounded anonymous snapshot; no user/session state enters this cache.
+ *
+ * `unstable_cache` keys on the arguments as well as the key parts, so the two
+ * modes below occupy two entries and never serve each other's result.
  */
-export const readLiveMarketLandingSnapshot = unstable_cache(
-  readFreshLiveMarketLandingSnapshot,
+const readCachedSnapshot = unstable_cache(
+  (resolveProfessions: boolean) =>
+    readFreshLiveMarketLandingSnapshot(undefined, resolveProfessions),
   ["live-market-landing-v1"],
   { revalidate: 300 },
 );
+
+/**
+ * ── WHY THE DEFAULT LANDING ASKS FOR LESS ─────────────────────────────────
+ *
+ * Every consumer of this snapshot was enumerated. `/` (FOCUS) reads exactly
+ * three fields — `activeVacancies`, `distinctEmployers`, `lastRefreshedAt` —
+ * through `focus-landing.tsx` and `market-proof-band.tsx`, and reads
+ * `professions` NOWHERE. The profession chips that band renders come from its
+ * own static `TOP_PROFESSION_FAMILY_SLUGS` list, which is a different set from
+ * `PROFESSION_FILTER_SLUGS` above and is not derived from live data at all.
+ *
+ * The only consumers of `professions` are the two `/live-market-review` files,
+ * which render a per-profession count and one sample vacancy.
+ *
+ * So the profession reads were work the default landing paid for and never
+ * used. `resolveProfessions: false` declines to issue them. This is ONE
+ * reader, not two: both surfaces resolve the same supply counts through the
+ * same function and the same freshness window, so the two presentations can
+ * never drift into showing different market numbers.
+ *
+ * An unresolved profession stays `unavailable` with a `null` count. It is not
+ * zero and must never become zero: "we did not ask" is not "there are none".
+ */
+export function readLiveMarketLandingSnapshot(options?: {
+  /** Default `true`. `false` skips the per-profession reads entirely. */
+  readonly resolveProfessions?: boolean;
+}): Promise<LiveMarketLandingSnapshot> {
+  return readCachedSnapshot(options?.resolveProfessions ?? true);
+}
