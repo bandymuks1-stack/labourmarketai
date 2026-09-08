@@ -4,7 +4,9 @@ import {
   BadgeCheck,
   CalendarDays,
   Globe2,
+  Hammer,
   History,
+  Images,
   MapPin,
   NotebookPen,
   UserRound,
@@ -16,6 +18,8 @@ import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
+import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
+import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
 
 export const dynamic = "force-dynamic";
 
@@ -123,6 +127,15 @@ export default async function PersonPage({
     (c) => typeof c === "string" && c.trim().length > 0,
   );
 
+  // REAL WORK and WHAT THEY OFFER. Both already existed and were rendered
+  // everywhere except on a person's own page: the photos on the author's own
+  // gallery, the offerings on the provider's own list and on the ORGANIZATION
+  // public page. Both reads are RLS-scoped and neither is a second store.
+  const [workPhotos, offerings] = await Promise.all([
+    readWorkPhotosFor((worker.profile_id as string | null) ?? ""),
+    listActiveOfferingsByProvider((worker.profile_id as string | null) ?? ""),
+  ]);
+
   const name =
     (worker.display_name as string | null)?.trim() ||
     anonymizedWorkerLabel(worker.id as string);
@@ -220,6 +233,122 @@ export default async function PersonPage({
           />
         </div>
       </header>
+
+      {/* WHAT THEY CAN DO — the concrete work offered, not a profession label.
+          Only ACTIVE offerings: the table's own discovery policy publishes
+          those and withholds drafts, so the filter matches the permission
+          rather than widening past it. */}
+      <section className="flex flex-col gap-3" data-testid="person-services">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <Hammer className="h-3.5 w-3.5" aria-hidden />
+          {t("servicesTitle")}
+          {offerings.kind === "ok" && offerings.rows.length > 0
+            ? ` · ${offerings.rows.length}`
+            : null}
+        </h2>
+        {offerings.kind === "unavailable" ? (
+          <Card variant="error" compact>
+            <p className="text-sm text-text-secondary" data-testid="person-services-error">
+              {t("servicesUnavailable")}
+            </p>
+          </Card>
+        ) : offerings.rows.length === 0 ? (
+          <Card variant="empty" compact>
+            <p className="text-sm text-text-secondary">{t("servicesEmpty")}</p>
+          </Card>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {offerings.rows.map((o) => (
+              <li key={o.id} data-testid="person-service">
+                <Card compact className="flex flex-col gap-1">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="text-sm font-medium text-text-primary">
+                      {o.title}
+                    </span>
+                    {o.remote ? (
+                      <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                        {t("serviceRemote")}
+                      </span>
+                    ) : null}
+                    {o.locationCountry ? (
+                      <span className="inline-flex items-center gap-1 font-mono text-meta text-text-muted">
+                        <MapPin className="h-3 w-3" aria-hidden />
+                        {o.locationCountry}
+                      </span>
+                    ) : null}
+                    {/* The provider's OWN words for what it costs. Never a
+                        computed or inferred figure. */}
+                    {o.rateText ? (
+                      <span className="font-mono text-meta text-text-secondary">
+                        {o.rateText}
+                      </span>
+                    ) : null}
+                  </div>
+                  {o.description ? (
+                    <p className="text-sm text-text-secondary">{o.description}</p>
+                  ) : null}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* REAL WORK — photographs of work actually done, from the SAME journal
+          evidence store the author's own gallery reads. No portfolio model, no
+          second upload path, and no journal text: this page selects no private
+          narrative, and a photo of a finished weld is not the sentence the
+          person wrote about their day. */}
+      <section className="flex flex-col gap-3" data-testid="person-photos">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <Images className="h-3.5 w-3.5" aria-hidden />
+          {t("photosTitle")}
+          {workPhotos.status === "ok" && workPhotos.photos.length > 0
+            ? ` · ${workPhotos.photos.length}`
+            : null}
+        </h2>
+        {workPhotos.status === "unavailable" ? (
+          <Card variant="error" compact>
+            <p className="text-sm text-text-secondary" data-testid="person-photos-error">
+              {t("photosUnavailable")}
+            </p>
+          </Card>
+        ) : workPhotos.photos.length === 0 ? (
+          <Card variant="empty" compact>
+            <p className="text-sm text-text-secondary">{t("photosEmpty")}</p>
+          </Card>
+        ) : (
+          <>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {workPhotos.photos.map((ph) => (
+                <li key={ph.photoId} data-testid="person-photo">
+                  <Card compact className="overflow-hidden p-0">
+                    {ph.signedUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={ph.signedUrl}
+                        alt={t("photoAlt")}
+                        className="aspect-[4/3] w-full bg-ink-800 object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      // A missing preview is said, never drawn as a broken image.
+                      <div className="flex aspect-[4/3] w-full items-center justify-center bg-ink-800 px-3 text-center text-meta leading-relaxed text-text-muted">
+                        {t("photosPreviewsUnavailable")}
+                      </div>
+                    )}
+                  </Card>
+                </li>
+              ))}
+            </ul>
+            {workPhotos.previewsUnavailable ? (
+              <p className="text-meta leading-relaxed text-text-muted">
+                {t("photosPreviewsUnavailable")}
+              </p>
+            ) : null}
+          </>
+        )}
+      </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">

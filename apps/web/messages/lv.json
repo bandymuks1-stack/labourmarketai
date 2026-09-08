@@ -2707,7 +2707,16 @@
     "workCurrent": "Tagad",
     "kindEmployment": "Nodarbinātība",
     "kindPractice": "Prakse",
-    "mobility": "Var strādāt"
+    "mobility": "Var strādāt",
+    "photosTitle": "Reāls darbs",
+    "photosEmpty": "Nav darba fotoattēlu, ko rādīt",
+    "photosUnavailable": "Neizdevās ielādēt darba fotoattēlus",
+    "photosPreviewsUnavailable": "Fotoattēlu priekšskatījumi pašlaik nav pieejami",
+    "servicesTitle": "Ko šī persona prot",
+    "servicesEmpty": "Vēl nekas nav piedāvāts",
+    "servicesUnavailable": "Neizdevās ielādēt piedāvātos pakalpojumus",
+    "serviceRemote": "Attālināti",
+    "photoAlt": "Paveiktā darba fotoattēls"
   },
   "marketMapBase": {
     "previewTitle": "Izvēlēta jauna vieta — vēl nav saglabāta",

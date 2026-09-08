@@ -2707,7 +2707,16 @@
     "workCurrent": "Praegu",
     "kindEmployment": "Töösuhe",
     "kindPractice": "Praktika",
-    "mobility": "Saab töötada"
+    "mobility": "Saab töötada",
+    "photosTitle": "Tegelik töö",
+    "photosEmpty": "Tööfotosid pole näidata",
+    "photosUnavailable": "Tööfotosid ei õnnestunud laadida",
+    "photosPreviewsUnavailable": "Fotode eelvaated ei ole praegu saadaval",
+    "servicesTitle": "Mida see inimene oskab",
+    "servicesEmpty": "Veel pole midagi pakutud",
+    "servicesUnavailable": "Pakutavaid teenuseid ei õnnestunud laadida",
+    "serviceRemote": "Kaugtöö",
+    "photoAlt": "Tehtud töö foto"
   },
   "marketMapBase": {
     "previewTitle": "Uus koht valitud — pole veel salvestatud",

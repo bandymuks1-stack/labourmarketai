@@ -2707,7 +2707,16 @@
     "workCurrent": "Nu",
     "kindEmployment": "Ansættelse",
     "kindPractice": "Praktik",
-    "mobility": "Kan arbejde i"
+    "mobility": "Kan arbejde i",
+    "photosTitle": "Reelt arbejde",
+    "photosEmpty": "Ingen arbejdsfotos at vise",
+    "photosUnavailable": "Arbejdsfotos kunne ikke indlæses",
+    "photosPreviewsUnavailable": "Forhåndsvisning af fotos er ikke tilgængelig lige nu",
+    "servicesTitle": "Hvad personen kan",
+    "servicesEmpty": "Intet tilbudt endnu",
+    "servicesUnavailable": "Tilbudte ydelser kunne ikke indlæses",
+    "serviceRemote": "Fjernarbejde",
+    "photoAlt": "Foto af udført arbejde"
   },
   "marketMapBase": {
     "previewTitle": "Nyt sted valgt — endnu ikke gemt",
