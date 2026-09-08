@@ -802,7 +802,7 @@ describe("NO new DB migration in this PR", () => {
     // the fifth surface of the market-direction defect class, found by
     // sweeping every SECURITY DEFINER reader of customer_requests.
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
-    // = 271 files.
+    // = 272 files.
     //
     // 269 -> 270: the two 2026-09-07 owner-approved migrations
     // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
@@ -819,8 +819,31 @@ describe("NO new DB migration in this PR", () => {
     // emitters and the email dispatcher's consent read stop failing 42501.
     // Measured on production 2026-09-07: service_role holds NO privilege on
     // either table, and `rolbypassrls` is true, so RLS is not the blocker -
-    // the missing GRANT is. RED (privilege surface), owner-gated, NOT applied.
-    expect(count).toBeLessThanOrEqual(271);
+    // the missing GRANT is. RED (privilege surface), owner-gated. The line
+    // here once said "NOT applied"; the owner approved it and it went to
+    // production 2026-09-08 as ledger 20260908061619, so that is corrected
+    // rather than carried forward. RED class is unchanged by having applied.
+    //
+    // 271 -> 272: the recipient-discovery reads (20260908070000, same PR).
+    // The write grant alone did NOT fix the cron. The first real invocation
+    // after it landed still returned HTTP 503 - not 401, so auth was fine and
+    // the function ran ~930 ms before failing. The digest sweep opens by
+    // reading journal_entries.worker_id and then workers(id, profile_id), and
+    // service_role held no privilege on EITHER, so PostgREST answered 42501
+    // and `if (error) return { kind: "unavailable" }` became the 503 before a
+    // single row could be written (notification_events was still 2 rows / 0
+    // digests afterwards - nothing was half-delivered). Reproduced under
+    // `set local role service_role` in a deliberately aborted transaction:
+    // journal_entries=BLOCKED_42501 workers=BLOCKED_42501. SELECT ONLY on
+    // both; no write privilege, because the spine reads domain rows and never
+    // writes them. It also un-breaks `workerProfileId()`, which discards its
+    // error and so reported a denied read as "row_unreadable" - the booking
+    // and absence emitters were silently dead for the same reason. Email is
+    // NOT implicated: the email hop runs only after a successful insert, is
+    // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
+    // RED (privilege surface), owner-approved, APPLIED to production
+    // 2026-09-08 as ledger 20260908065654.
+    expect(count).toBeLessThanOrEqual(272);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

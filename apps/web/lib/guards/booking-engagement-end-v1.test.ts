@@ -1238,6 +1238,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // new tables with explicit GRANTs are not made GREEN by a marker.
       "20260907114500_organization_evidence_import_v1.sql",
       "20260907153000_employer_supply_discovery_v1.sql",
+      // 2026-09-08: the recipient-discovery half of the same repair (RED:
+      // GRANT = privilege-surface change, gate rule h). The write grant alone
+      // left the cron returning 503 - the sweep could not READ
+      // journal_entries or workers to find a recipient, so it failed 42501
+      // before any insert. SELECT only on both; owner-approved and applied
+      // via MCP apply_migration (#1566).
+      "20260908070000_notification_recipient_discovery_service_role_select.sql",
 ]);
   });
 
