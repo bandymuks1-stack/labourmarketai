@@ -14,6 +14,42 @@
 
 ---
 
+## Refresh — 2026-09-08 (supersedes the 2026-09-07 refresh below)
+
+**Method:** snapshot mode. The 2026-09-07 snapshot was **6 applies stale**
+(266 → 272). The six new rows were read live with
+`select version, name from supabase_migrations.schema_migrations where version >
+'20260906202628' order by version`, and the confirming read at that instant
+returned `count(*) = 272`, `max(version) = 20260908082301` — so **266 + 6 = 272**
+makes the append complete rather than assumed.
+
+**Result:** `LEDGER_SNAPSHOT=… pnpm check:migration-parity` → **PASS**.
+272 applied in production, 274 files in repo, every production migration has a
+repository file. The 9 repo files with no ledger row are unapplied drafts and
+are reported as informational.
+
+**Why this refresh exists, and why it is not enough.** On 2026-09-08 production
+ran **ahead of `main`**: `notification_events_service_role_grant` and
+`notification_recipient_discovery_service_role_select` were applied to
+production while their files existed only on an unmerged branch (#1566). No CI
+gate caught it, because the live parity gate is inert without
+`secrets.SUPABASE_DB_URL` — see **GOV-1**. A snapshot carries no freshness
+contract; it is as-of its `read_at` and nothing re-reads it on its own. This
+refresh closes today's gap and does not close the class.
+
+| | 2026-08-18 | 2026-08-23 | 2026-09-07 | **2026-09-08** |
+|---|---:|---:|---:|---:|
+| Applied in production | 225 | 232 | 266 | **272** |
+| Files in `supabase/migrations` | 228 | 235 | 269 | **274** |
+
+Applied in this window: `employer_supply_discovery_v1` and
+`organization_evidence_import_v1` (2026-09-07), the two notification grants
+(by another session earlier the same day), then `evidence_parties_recursion_fix_v1`
+(EVID-1) and `esco_canonical_linkage_67` — the last two under explicit owner
+approval, each verified against production after the apply.
+
+---
+
 ## Refresh — 2026-09-07 (supersedes the 2026-08-23 refresh below)
 
 **Method:** snapshot mode again — a lead session with Supabase MCP read-only
