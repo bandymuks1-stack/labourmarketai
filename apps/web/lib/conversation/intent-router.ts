@@ -910,6 +910,52 @@ const RULES: IntentRule[] = [
       // nl — both orders: "urenstaat importeren" / "importeer de uren"
       p("(urenstaat|urenbriefje|uren|excel)\\w*\\s*.{0,16}(importeren|uploaden|inlezen)", 8),
       p("(importeer|upload|lees)\\s*.{0,20}(urenstaat|urenbriefje|uren|excel)", 8),
+      // ── "I WANT TO BRING MY PAST WORK IN" ───────────────────────────────
+      //
+      // Every rule above needs the word TIMESHEET (or hours, or excel). Nobody
+      // says that first. Measured 2026-09-08:
+      //
+      //   lt "noriu įkelti senus darbo duomenis"          -> find-work
+      //   de "ich möchte meine alten Arbeitsdaten hochladen" -> find-work
+      //   en "i want to upload my old work history"       -> unknown
+      //   ru "хочу загрузить старые данные о работе"      -> unknown
+      //   nl "ik wil mijn oude werkgegevens uploaden"     -> unknown
+      //
+      // The two that answered are worse than the three that did not: a person
+      // asking to UPLOAD their history was shown JOB ADVERTS. They landed on
+      // `find-work`'s bare `darbo` / `arbeit` noun at weight 1–3 — a fallback
+      // artefact, not a reading. J-IMPORT-HISTORY is a canonical journey and
+      // it had no front door in four of the five routed locales.
+      //
+      // Three shapes, because the languages build the sentence differently:
+      // verb-first (lt/en/ru), verb-last (de/nl), and no verb at all.
+      //
+      // An "old / previous" marker is REQUIRED. Without it "upload my CV"
+      // would be captured from the CV family, which is a different request
+      // with its own five-way split.
+      p(
+        "(įkel|importuo|perkel|upload|import|загруз|импортир|перенес|hochlad|importier|einles|importeer|inlez)" +
+          "\\w*\\s*.{0,28}(sen|ankstesn|buvusi|istorin|old|previous|past|earlier|former|historical|" +
+          "стар|прежн|предыдущ|прошл|alte|früher|fruher|bisherig|vergangen|oude|vorige|eerdere)" +
+          "\\w*\\s*.{0,20}(darb|valand|duomen|work|job|hour|data|histor|данн|работ|час|arbeit|beruf|stunden|werk|uren)",
+        8,
+      ),
+      // Verb-last, which is how German and Dutch actually say it:
+      // "meine alten Arbeitsdaten hochladen", "mijn oude werkgegevens uploaden".
+      p(
+        "(sen|ankstesn|old|previous|past|стар|прежн|прошл|alte|früher|fruher|bisherig|vergangen|oude|vorige|eerdere)" +
+          "\\w*\\s*.{0,24}(darb|valand|duomen|work|job|hour|data|histor|данн|работ|час|arbeit|beruf|stunden|werk|uren)" +
+          "\\w*\\s*.{0,24}(įkel|importuo|perkel|upload|import|загруз|импортир|hochlad|importier|einles|importeer|inlez)",
+        8,
+      ),
+      // No verb at all — the person describes what they are holding:
+      // "i have my previous jobs in a spreadsheet".
+      p(
+        "(sen|ankstesn|old|previous|past|стар|прежн|прошл|alte|früher|fruher|oude|vorige|eerdere)" +
+          "\\w*\\s*.{0,24}(darb|work|job|hour|valand|работ|час|arbeit|stunden|werk|uren)" +
+          "\\w*\\s*.{0,24}(spreadsheet|excel|xlsx|csv|эксел|табел)",
+        8,
+      ),
     ],
   },
   {
