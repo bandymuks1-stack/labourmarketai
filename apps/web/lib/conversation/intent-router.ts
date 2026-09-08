@@ -302,7 +302,10 @@ const RULES: IntentRule[] = [
       p("(turim|turiu|have|hebben|haben|имеем|у\\s+нас|у\\s+меня)\\w*\\s*.{0,10}[0-9]{1,4}\\s+(laisv|free|vrij|frei|свобод|beschikbar|verfügbar)", 10),
       // AN AGENCY SAYING IT HAS PEOPLE. Only a supplier describes itself this
       // way, so the sentence needs no second market-facing clause.
-      p("(agent[uū]r|agency|uitzend|bureau|agentur|агент)\\w*\\s*.{0,40}(turim|turiu|have|hebben|haben|имеем|располага)", 9),
+      // `turi` — the THIRD person — was missing, so "mūsų agentūra turi 15
+      // montuotojų" (our agency has 15 fitters) measured `unknown`. An agency
+      // speaks about itself in the third person as readily as the first.
+      p("(agent[uū]r|agency|uitzend|bureau|agentur|агент)\\w*\\s*.{0,40}(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|располага)", 9),
       // …AND THE WAY AN AGENCY ACTUALLY INTRODUCES ITSELF (measured
       // 2026-09-08 on the public entry). The rule above requires a HAVE verb,
       // but nobody writes "we are an agency and we have 30 workers" — they
@@ -1530,6 +1533,29 @@ const RULES: IntentRule[] = [
       p("\\beinstellen\\b", 3), // de "Leute einstellen"
       p("\\baannemen\\b", 3), // nl "mensen aannemen"
       p("\\breikia\\s+žmoni", 3), // "reikia žmonių"
+      // SOMEBODY, WITHOUT NAMING A TRADE — in the other four locales. The
+      // line above has covered Lithuanian since the demand path was built;
+      // "we need people in rotterdam" measured `unknown` on 2026-09-08, as
+      // did its de/nl/ru forms. An employer who has not yet decided the trade
+      // is the FIRST sentence of a demand, not an unrecognisable one.
+      //
+      // The seek verb is the shared vocabulary, so this cannot drift from the
+      // rest of the demand side. The noun list is generic PERSON words only:
+      // "work"/"job" are deliberately absent, because "I need work" is the
+      // opposite direction and belongs to find-work.
+      p(
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих)`,
+        5,
+      ),
+      // DUTCH PUTS THE VERB LAST. "wij hebben 12 lassers nodig" is the
+      // ordinary way to say "we need 12 welders", and it measured `unknown`:
+      // every demand rule here expects the seek verb BEFORE the noun, which
+      // is simply not how the sentence is built.
+      //
+      // Restricted to the PLURAL `hebben` on purpose. "Ik heb een baan nodig"
+      // — I need a JOB — is a worker, the opposite direction, and it uses
+      // `heb`. Pinned as a negative control.
+      p("\\bhebben\\b\\s*.{0,30}\\bnodig\\b", 6),
       p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
       p("\\bbrigad", 2), // team/brigade need
       // V9 audit finding: "kitą mėnesį trūks keturių suvirintojų" carried no
@@ -1659,7 +1685,12 @@ const RULES: IntentRule[] = [
       // fail this pattern, so that fix cannot be undone here.
       p(
         "(\\bieškau\\b|\\bищу\\b|\\bik\\s+zoek\\b|\\bich\\s+suche\\b|" +
-          "\\bi\\s+(am\\s+)?(looking\\s+for|seeking|want|need))" +
+          // "im looking for a job as a welder" — measured 2026-09-08. Without
+          // the apostrophe "i'm" is a SINGLE token, so `\\bi\\s+` never fired
+          // and the sentence fell back to the employer reading: the same
+          // demand/supply inversion this rule exists to prevent, reachable by
+          // nothing more than typing the way people type.
+          "\\bi'?m\\b|\\bi\\s+(am\\s+)?(looking\\s+for|seeking|want|need))" +
           "\\s*(?:[^\\s]+\\s+){0,3}?" +
           "(darb(o|ą|us|ai|ą)\\b|работ(у|ы)\\b|\\bwerk\\b|\\bbaan\\b|" +
           "\\barbeit\\b|\\bstelle\\b|\\bjob\\b|\\bwork\\b)",
