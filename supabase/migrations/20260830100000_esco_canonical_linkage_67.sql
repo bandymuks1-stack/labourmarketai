@@ -6,10 +6,59 @@
 -- docs/taxonomy/esco-apply-review-2026-08-30.md. Rollback file:
 -- supabase/rollbacks/20260830100000_esco_canonical_linkage_67.down.sql.
 --
--- ESCO canonical linkage: the 67 EXACT / HIGH_CONFIDENCE rows of the owner-
--- reviewed mapping dry run (docs/taxonomy/esco-mapping-dryrun-2026-08-30.json;
--- review pack docs/taxonomy/esco-apply-review-2026-08-30.md). 31 skills +
--- 36 professions. AMBIGUOUS / NO_MATCH / curated-suggestion rows are NOT here.
+-- ESCO canonical linkage, from the owner-reviewed mapping dry run
+-- (docs/taxonomy/esco-mapping-dryrun-2026-08-30.json; review pack
+-- docs/taxonomy/esco-apply-review-2026-08-30.md). AMBIGUOUS / NO_MATCH /
+-- curated-suggestion rows are NOT here.
+--
+-- 65 ROWS, NOT 67 — corrected 2026-09-08 after a semantic review against the
+-- production catalogue. The filename keeps its original suffix because a
+-- migration filename is never renamed (§16); the count in it is historical.
+-- Every URI in the original 67 resolved structurally, which is exactly why the
+-- review was needed: a valid URI is not a correct meaning.
+--
+-- ── TWO ROWS REMOVED, because the PLATFORM concept is broader than anything
+--    ESCO offers, and a falsely precise mapping is worse than none ──────────
+--
+--   teacher     ESCO has NO generic "teacher" occupation. The row pointed at
+--               "politics lecturer" (ISCO 2310, TERTIARY teaching) — an
+--               arbitrary pick that would have told every schoolteacher on the
+--               platform they lecture in politics. Primary (2341), secondary
+--               (2330) and vocational (2320) all exist and are different jobs;
+--               which one applies is a question about the PERSON, answered
+--               from their evidence context, not a constant in a table.
+--   caregiver   ESCO has no generic care-work occupation either. The row
+--               pointed at "companion" — ISCO 5162, COMPANIONS AND VALETS,
+--               which is domestic service, not care. "home care aide" (5322)
+--               and "healthcare assistant" (5321) are real but are different
+--               settings, and picking one for everybody repeats the mistake.
+--
+-- Both are left UNRESOLVED on purpose. An unresolved slug degrades honestly —
+-- matching simply does not use ESCO for it — while a wrong one propagates a
+-- confident falsehood through every surface that trusts the taxonomy.
+--
+-- ── FOUR ROWS RE-POINTED, away from a promotion or a narrowing ────────────
+--
+--   customer_service_specialist  was "customer experience manager" ISCO 2431,
+--                                which is ADVERTISING AND MARKETING — the
+--                                wrong occupational family, and a promotion
+--                                from worker to manager.
+--                                now  "customer service representative" 4225.
+--   office_administrator         was "office manager" ISCO 3341, an
+--                                administrative SUPERVISOR.
+--                                now  "office clerk" 4110.
+--   production_worker            was "metal products assembler", which
+--                                narrowed every factory to metals.
+--                                now  "factory hand" 9329.
+--   builder                      was "house builder", which narrowed to
+--                                residential.
+--                                now  "building construction worker" 9313.
+--
+-- ── ONE FLAGGED ROW DELIBERATELY KEPT ────────────────────────────────────
+--
+--   farm_worker → "crop production worker" does narrow away livestock, but the
+--   obvious alternative, "mixed farmer", is ISCO 6130 — a farm OPERATOR rather
+--   than a worker, which would be a worse error. Kept until stronger evidence.
 --
 -- RULES (binding, mirrored by lib/guards/esco-linkage-migration.test.ts):
 --   * UPDATE only — no DDL, no inserts, no deletes, no RLS change.
@@ -68,13 +117,12 @@ begin
     ('profession', 'baker', 'http://data.europa.eu/esco/occupation/1aadb308-432a-4d01-b54b-b4f7f76dd419'),
     ('profession', 'barber', 'http://data.europa.eu/esco/occupation/4e0c14d6-b170-40f1-bcdc-703c0b92109b'),
     ('profession', 'barista', 'http://data.europa.eu/esco/occupation/bf7d8b16-4e2c-48ef-b44e-dc25b2d0ab61'),
-    ('profession', 'builder', 'http://data.europa.eu/esco/occupation/59cc9783-7289-4e1d-b80b-93c1776f49cc'),
+    ('profession', 'builder', 'http://data.europa.eu/esco/occupation/fb7e2f4f-1545-42f1-972e-94082e49c6dc'),
     ('profession', 'call_centre_agent', 'http://data.europa.eu/esco/occupation/0ededdc2-050a-4ec3-8e70-6295105fcd19'),
-    ('profession', 'caregiver', 'http://data.europa.eu/esco/occupation/d5954a2b-a525-45b7-b6d9-b62efafc6c78'),
     ('profession', 'carpenter', 'http://data.europa.eu/esco/occupation/2a22ff9e-de3b-408d-b312-5034896cc4f4'),
     ('profession', 'concrete_worker', 'http://data.europa.eu/esco/occupation/a9068f84-cecd-4cbb-9acb-e20c714435ec'),
     ('profession', 'cook', 'http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e'),
-    ('profession', 'customer_service_specialist', 'http://data.europa.eu/esco/occupation/9c9752b7-3e3b-4a08-8553-b63a013f8072'),
+    ('profession', 'customer_service_specialist', 'http://data.europa.eu/esco/occupation/13d1b2b4-99dd-44da-9734-c9f74bae18f7'),
     ('profession', 'electrician', 'http://data.europa.eu/esco/occupation/4910419f-b4af-4f59-b544-9dbebc8a74f0'),
     ('profession', 'farm_worker', 'http://data.europa.eu/esco/occupation/c9191f7f-28b5-4df8-991d-804c53009b83'),
     ('profession', 'furniture_assembler', 'http://data.europa.eu/esco/occupation/d7f3d76b-23e8-447e-93d5-da13ff9bc102'),
@@ -85,16 +133,15 @@ begin
     ('profession', 'mason', 'http://data.europa.eu/esco/occupation/05f321f8-055b-407d-bf19-e0ddabda56b7'),
     ('profession', 'merchandiser', 'http://data.europa.eu/esco/occupation/f1fcad3b-fdf0-444a-81b0-e50e96f8966a'),
     ('profession', 'nail_technician', 'http://data.europa.eu/esco/occupation/bced9b86-d4e7-42f8-bb47-acb2001b9bd0'),
-    ('profession', 'office_administrator', 'http://data.europa.eu/esco/occupation/6e6839b6-099c-4802-906e-7f2c8203ee69'),
+    ('profession', 'office_administrator', 'http://data.europa.eu/esco/occupation/6c999fc7-c6b7-4ef3-a4b9-af124a1783a2'),
     ('profession', 'plumber', 'http://data.europa.eu/esco/occupation/ed3cf43d-c2c1-4c46-82fc-1375e27e0290'),
-    ('profession', 'production_worker', 'http://data.europa.eu/esco/occupation/af2f3615-63ab-44dc-957d-c9660410d336'),
+    ('profession', 'production_worker', 'http://data.europa.eu/esco/occupation/245be6d1-fe9a-4ac8-9f81-122a687e4724'),
     ('profession', 'receptionist', 'http://data.europa.eu/esco/occupation/f7b04542-d8c7-42db-8475-e63b507cce82'),
     ('profession', 'roofer', 'http://data.europa.eu/esco/occupation/b4c6d1b0-929e-48be-9f67-47bd8c30658b'),
     ('profession', 'sales_assistant', 'http://data.europa.eu/esco/occupation/9ba74e8a-c40c-4228-9998-eb3c7a5c11df'),
     ('profession', 'site_engineer', 'http://data.europa.eu/esco/occupation/2a914d26-42aa-46b5-acf3-097d51ba4617'),
     ('profession', 'site_manager', 'http://data.europa.eu/esco/occupation/faed05c0-c1d1-4e34-b575-0dea96459e56'),
     ('profession', 'software_developer', 'http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1'),
-    ('profession', 'teacher', 'http://data.europa.eu/esco/occupation/c593ded7-2e97-44a5-a5f3-f6115ff98233'),
     ('profession', 'tiler', 'http://data.europa.eu/esco/occupation/02447817-ea01-4d8b-b09c-8bc128e447e6'),
     ('profession', 'translator', 'http://data.europa.eu/esco/occupation/1a07bd7d-2e1d-4930-a84a-1a442b8f2a44'),
     ('profession', 'waiter', 'http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471'),
@@ -190,13 +237,12 @@ end $$;
 --   ('baker', 'http://data.europa.eu/esco/occupation/1aadb308-432a-4d01-b54b-b4f7f76dd419'),
 --   ('barber', 'http://data.europa.eu/esco/occupation/4e0c14d6-b170-40f1-bcdc-703c0b92109b'),
 --   ('barista', 'http://data.europa.eu/esco/occupation/bf7d8b16-4e2c-48ef-b44e-dc25b2d0ab61'),
---   ('builder', 'http://data.europa.eu/esco/occupation/59cc9783-7289-4e1d-b80b-93c1776f49cc'),
+--   ('builder', 'http://data.europa.eu/esco/occupation/fb7e2f4f-1545-42f1-972e-94082e49c6dc'),
 --   ('call_centre_agent', 'http://data.europa.eu/esco/occupation/0ededdc2-050a-4ec3-8e70-6295105fcd19'),
---   ('caregiver', 'http://data.europa.eu/esco/occupation/d5954a2b-a525-45b7-b6d9-b62efafc6c78'),
 --   ('carpenter', 'http://data.europa.eu/esco/occupation/2a22ff9e-de3b-408d-b312-5034896cc4f4'),
 --   ('concrete_worker', 'http://data.europa.eu/esco/occupation/a9068f84-cecd-4cbb-9acb-e20c714435ec'),
 --   ('cook', 'http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e'),
---   ('customer_service_specialist', 'http://data.europa.eu/esco/occupation/9c9752b7-3e3b-4a08-8553-b63a013f8072'),
+--   ('customer_service_specialist', 'http://data.europa.eu/esco/occupation/13d1b2b4-99dd-44da-9734-c9f74bae18f7'),
 --   ('electrician', 'http://data.europa.eu/esco/occupation/4910419f-b4af-4f59-b544-9dbebc8a74f0'),
 --   ('farm_worker', 'http://data.europa.eu/esco/occupation/c9191f7f-28b5-4df8-991d-804c53009b83'),
 --   ('furniture_assembler', 'http://data.europa.eu/esco/occupation/d7f3d76b-23e8-447e-93d5-da13ff9bc102'),
@@ -207,16 +253,15 @@ end $$;
 --   ('mason', 'http://data.europa.eu/esco/occupation/05f321f8-055b-407d-bf19-e0ddabda56b7'),
 --   ('merchandiser', 'http://data.europa.eu/esco/occupation/f1fcad3b-fdf0-444a-81b0-e50e96f8966a'),
 --   ('nail_technician', 'http://data.europa.eu/esco/occupation/bced9b86-d4e7-42f8-bb47-acb2001b9bd0'),
---   ('office_administrator', 'http://data.europa.eu/esco/occupation/6e6839b6-099c-4802-906e-7f2c8203ee69'),
+--   ('office_administrator', 'http://data.europa.eu/esco/occupation/6c999fc7-c6b7-4ef3-a4b9-af124a1783a2'),
 --   ('plumber', 'http://data.europa.eu/esco/occupation/ed3cf43d-c2c1-4c46-82fc-1375e27e0290'),
---   ('production_worker', 'http://data.europa.eu/esco/occupation/af2f3615-63ab-44dc-957d-c9660410d336'),
+--   ('production_worker', 'http://data.europa.eu/esco/occupation/245be6d1-fe9a-4ac8-9f81-122a687e4724'),
 --   ('receptionist', 'http://data.europa.eu/esco/occupation/f7b04542-d8c7-42db-8475-e63b507cce82'),
 --   ('roofer', 'http://data.europa.eu/esco/occupation/b4c6d1b0-929e-48be-9f67-47bd8c30658b'),
 --   ('sales_assistant', 'http://data.europa.eu/esco/occupation/9ba74e8a-c40c-4228-9998-eb3c7a5c11df'),
 --   ('site_engineer', 'http://data.europa.eu/esco/occupation/2a914d26-42aa-46b5-acf3-097d51ba4617'),
 --   ('site_manager', 'http://data.europa.eu/esco/occupation/faed05c0-c1d1-4e34-b575-0dea96459e56'),
 --   ('software_developer', 'http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1'),
---   ('teacher', 'http://data.europa.eu/esco/occupation/c593ded7-2e97-44a5-a5f3-f6115ff98233'),
 --   ('tiler', 'http://data.europa.eu/esco/occupation/02447817-ea01-4d8b-b09c-8bc128e447e6'),
 --   ('translator', 'http://data.europa.eu/esco/occupation/1a07bd7d-2e1d-4930-a84a-1a442b8f2a44'),
 --   ('waiter', 'http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471'),

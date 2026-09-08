@@ -25,6 +25,10 @@ const MIGRATION = resolve(
   "supabase/migrations/20260830100000_esco_canonical_linkage_67.sql",
 );
 const ARTIFACT = resolve(REPO, "docs/taxonomy/esco-mapping-dryrun-2026-08-30.json");
+const ROLLBACK = resolve(
+  REPO,
+  "supabase/rollbacks/20260830100000_esco_canonical_linkage_67.down.sql",
+);
 
 interface ArtifactRow {
   readonly labourmarket_canonical_slug: string;
@@ -51,22 +55,79 @@ const planPairs = [...liveSql.matchAll(PLAN_RE)].map((m) => ({
   uri: m[3],
 }));
 
+/**
+ * THE SEMANTIC CORRECTIONS, 2026-09-08.
+ *
+ * The artifact is an automated dry run, and every URI in it resolves — which
+ * is precisely why a review was needed. A structurally valid URI is not a
+ * correct meaning, and six rows were wrong in a way no structural check could
+ * see (measured against the production catalogue, ISCO groups quoted in the
+ * migration header).
+ *
+ * So the migration is no longer pinned to the artifact verbatim. It is pinned
+ * to the artifact PLUS this explicit list — which is stricter, not looser: any
+ * divergence NOT named here still fails, and each one named here had to be
+ * written down with its reason.
+ */
+const REMOVED_AS_UNRESOLVED: ReadonlySet<string> = new Set([
+  // ESCO has no generic "teacher"; the artifact picked "politics lecturer"
+  // (ISCO 2310, tertiary). Which level applies is a fact about the PERSON.
+  "teacher",
+  // ESCO has no generic care-work occupation; the artifact picked "companion"
+  // (ISCO 5162 — companions and valets, i.e. domestic service).
+  "caregiver",
+]);
+
+const REPOINTED: Readonly<Record<string, string>> = {
+  // was "customer experience manager" (ISCO 2431, advertising and marketing)
+  customer_service_specialist:
+    "http://data.europa.eu/esco/occupation/13d1b2b4-99dd-44da-9734-c9f74bae18f7",
+  // was "office manager" (ISCO 3341, administrative supervisors)
+  office_administrator:
+    "http://data.europa.eu/esco/occupation/6c999fc7-c6b7-4ef3-a4b9-af124a1783a2",
+  // was "metal products assembler" — narrowed every factory to metals
+  production_worker:
+    "http://data.europa.eu/esco/occupation/245be6d1-fe9a-4ac8-9f81-122a687e4724",
+  // was "house builder" — narrowed to residential
+  builder: "http://data.europa.eu/esco/occupation/fb7e2f4f-1545-42f1-972e-94082e49c6dc",
+};
+
 const approved = (rows: ArtifactRow[]) =>
   rows
     .filter((r) => r.confidence === "EXACT" || r.confidence === "HIGH_CONFIDENCE")
-    .map((r) => ({ slug: r.labourmarket_canonical_slug, uri: r.esco_uri }));
+    .filter((r) => !REMOVED_AS_UNRESOLVED.has(r.labourmarket_canonical_slug))
+    .map((r) => ({
+      slug: r.labourmarket_canonical_slug,
+      uri: REPOINTED[r.labourmarket_canonical_slug] ?? r.esco_uri,
+    }));
 
 describe("esco linkage migration — pinned to the mapping artifact", () => {
-  it("contains exactly the artifact's EXACT/HIGH rows: 31 skills + 36 professions", () => {
+  it("contains the artifact's EXACT/HIGH rows plus the reviewed corrections: 31 skills + 34 professions", () => {
     const skillPlan = planPairs.filter((p) => p.t === "skill");
     const profPlan = planPairs.filter((p) => p.t === "profession");
     expect(skillPlan).toHaveLength(31);
-    expect(profPlan).toHaveLength(36);
-    expect(planPairs).toHaveLength(67);
+    // 36 minus the two left UNRESOLVED because the platform concept is broader
+    // than anything ESCO offers. The filename keeps its historical "67".
+    expect(profPlan).toHaveLength(34);
+    expect(planPairs).toHaveLength(65);
 
     const key = (x: { slug: string; uri: string | null }) => `${x.slug}→${x.uri}`;
     expect(new Set(skillPlan.map(key))).toEqual(new Set(approved(artifact.skills).map(key)));
     expect(new Set(profPlan.map(key))).toEqual(new Set(approved(artifact.professions).map(key)));
+  });
+
+  it("a slug left UNRESOLVED never reappears in the migration or the rollback", () => {
+    // A falsely precise mapping is worse than none: an unresolved slug simply
+    // does not use ESCO, while a wrong one propagates a confident falsehood
+    // through every surface that trusts the taxonomy.
+    const down = readFileSync(ROLLBACK, "utf8");
+    for (const slug of REMOVED_AS_UNRESOLVED) {
+      expect(planPairs.some((p) => p.slug === slug), `${slug} must stay unresolved`).toBe(false);
+      // A plain substring, not a regex: escaping a bracket through a template
+      // literal is how the first attempt at this line produced an unterminated
+      // group instead of a test.
+      expect(down.includes("('" + slug + "',"), `${slug} in rollback`).toBe(false);
+    }
   });
 
   it("never writes an AMBIGUOUS or NO_MATCH slug", () => {
@@ -124,7 +185,7 @@ describe("esco linkage migration — pinned to the mapping artifact", () => {
     }
   });
 
-  it("ships the governance rollback FILE with the same 67 pairs, value-guarded", () => {
+  it("ships the governance rollback FILE with the same 65 pairs, value-guarded", () => {
     const down = readFileSync(
       resolve(REPO, "supabase/rollbacks/20260830100000_esco_canonical_linkage_67.down.sql"),
       "utf8",
