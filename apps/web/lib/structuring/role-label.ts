@@ -87,6 +87,21 @@ export const OCCUPATION_STEM_SOURCE =
 export const ROLE_SUFFIX_GENITIVE_SOURCE =
   "ininko|ininku|ininkes|tojo|toju|tojos|ejo|eju|ejos|erio|eriu|eres|isto|istu|istes|ieriaus|ieriu|oriaus|oriu|ovo|ovu|oves|iko|iku|ikes|anto|antu|antes|ologo|ologu|ologes";
 
+/**
+ * THE MANUAL TRADES, as people write them (folded stems).
+ *
+ * Lived inline inside the employer-demand rule of the intent router until
+ * 2026-09-08, which meant the DEMAND side knew every trade and the SUPPLY
+ * side knew none: "reikia 12 pastoliniku" was understood and "turime 20
+ * pastoliniku" was not. A vocabulary only one direction can read is how a
+ * market becomes one-directional. It lives here, beside
+ * `OCCUPATION_STEM_SOURCE`, so both directions read the SAME list.
+ *
+ * Stems, not words: they must match every case ending the languages use.
+ */
+export const TRADE_STEM_SOURCE =
+  "suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa";
+
 /** Nominative endings after "esu" (masc./fem.). */
 export const ROLE_SUFFIX_NOMINATIVE_SOURCE =
   "ininkas|ininke|tojas|toja|ejas|eja|eris|ere|istas|iste|ierius|iere|orius|ore|ovas|ove|ikas|ike|antas|ante|ologas|ologe";
