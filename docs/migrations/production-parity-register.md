@@ -14,6 +14,24 @@
 
 ---
 
+## Refresh — 2026-09-08 (post #1572 apply; supersedes the earlier 2026-09-08 refresh below)
+
+Appended `20260908110702 search_public_vacancy_previews_count_v2` — #1572, applied
+under owner approval. The confirming read returned `count(*) = 273`,
+`max(version) = 20260908110702`, so **272 + 1 = 273** closes exactly.
+
+`LEDGER_SNAPSHOT=… pnpm check:migration-parity` → **PASS**. 273 applied,
+275 files in `supabase/migrations`, every production migration has a repository
+file. The 9 files with no ledger row are unapplied drafts, reported as
+informational.
+
+Repo ↔ ledger ↔ `main` are reconciled in the SAME pull request that carries the
+migration, so `main` never records a state production does not have — the gap
+that opened this morning when two notification grants reached production from
+an unmerged branch.
+
+---
+
 ## Refresh — 2026-09-08 (supersedes the 2026-09-07 refresh below)
 
 **Method:** snapshot mode. The 2026-09-07 snapshot was **6 applies stale**

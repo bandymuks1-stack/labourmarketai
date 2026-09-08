@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-09-08T09:14:32Z",
-  "method": "Supabase MCP execute_sql (read-only). Refreshed 2026-09-08 during the owner-gate execution window: the 2026-09-07 snapshot (266 rows, max 20260906202628) was 6 applies stale. The 6 appended rows were read with `select version, name from supabase_migrations.schema_migrations where version > '20260906202628' order by version`, and the confirming read at that instant returned count(*) = 272, max(version) = 20260908082301 - 266 + 6 = 272, so the append is complete rather than assumed. read_at is that confirming read and is never stamped later than the read it describes. Four of the six were applied in this window (two notification grants applied earlier the same day by another session, then EVID-1 and the ESCO linkage under owner approval).",
+  "read_at": "2026-09-08T11:07:02Z",
+  "method": "Supabase MCP execute_sql (read-only). Refreshed 2026-09-08 immediately after applying 20260906080000_search_public_vacancy_previews_count_v2 (#1572, owner-approved with a condition), which entered the ledger as version 20260908110702. Appended to the 272-row snapshot taken earlier the same day; the confirming read returned count(*) = 273 and max(version) = 20260908110702, so 272 + 1 = 273 closes exactly. read_at is that confirming read and is never stamped later than the read it describes.",
   "project_ref": "gorgitwvdzxbnaxhrsrw",
-  "row_count": 272,
+  "row_count": 273,
   "rows": [
     {
       "version": "0001",
@@ -1091,6 +1091,10 @@
     {
       "version": "20260908082301",
       "name": "esco_canonical_linkage_67"
+    },
+    {
+      "version": "20260908110702",
+      "name": "search_public_vacancy_previews_count_v2"
     }
   ]
 }
