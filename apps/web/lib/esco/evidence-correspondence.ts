@@ -7,6 +7,7 @@ import { escoConceptLabels, lookupEscoConcepts } from "./esco-lookup";
 import {
   ESCO_IS_NOT,
   isDisplayableLabel,
+  isSafeLabelMatch,
   type EscoConceptType,
   type EscoLabelMatch,
   type EscoRead,
@@ -132,13 +133,15 @@ export async function escoCorrespondenceForEvidence(
     //   authoritative European vocabulary, with a straight face.
     //
     // A wrong signal is worse than none (the recognizer's own owner rule), so
-    // this path accepts only a label the person's word matches EXACTLY. That
-    // returns few correspondences and no invented ones. The rich, reliable
+    // this path accepts only a SAFE match: the exact label, or the term
+    // followed by a parenthetical sense ("scaffolder (construction)"). See
+    // isSafeLabelMatch, which was measured in both directions. That returns
+    // few correspondences and no invented ones. The rich, reliable
     // direction is the other one — an occupation phrase resolves cleanly
     // ("pastolių montuotojas" → no "stillasarbeider") and an occupation
     // decomposes into its essential skills — and it is reached through
     // `lookupEscoConcepts` with conceptType "occupation", not through here.
-    const best = found.value.find((m) => m.method === "exact_label");
+    const best = found.value.find((m) => isSafeLabelMatch(term, m.matchedLabel));
     if (!best) continue;
 
     // The other half is a lookup BY CONCEPT, not by text: once the concept is
