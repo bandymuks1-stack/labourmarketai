@@ -369,8 +369,42 @@ export const SCOPED_OWNER_WAIVERS = [
      * change; the DB half is the already-applied `20260824120000` SECDEF
      * narrowing. Same surfaces, strictly less exposure — the World-State
      * answers stay honestly "no" for the anonymous visitor.
+     *
+     * ── #1649 (2026-09-08) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-08):
+     *   "I approve adding ONLY PR 1649 to the existing
+     *    `public-acquisition-route-jobs` waiver `pullRequests` list.
+     *    This is NOT general authority to self-approve future waivers.
+     *    Do not broaden, weaken or change the waiver criteria/scope."
+     *
+     * Exactly that was done: one number added to `pullRequests`. The axiom,
+     * the six codes per surface, the three surfaces, the file list, the
+     * expected finding set, the expiry and the subset rule are byte-unchanged,
+     * and `product-gate.mjs` is not touched by this PR at all.
+     *
+     * Pre-conditions checked by RUNNING the gate on this head rather than
+     * reasoning about it — the same head, twice, differing only in the number:
+     *   BASE_SHA=origin/main PR_NUMBER=1649 → 18 violations, and EVERY
+     *                                         `not waived` line carried the
+     *                                         single reason `pr-not-covered`;
+     *                                         zero cited any other reason.
+     *   BASE_SHA=origin/main PR_NUMBER=1255 → PRODUCT_GATE_PASS_WITH_SCOPED_
+     *                                         TRANSITIONAL_WAIVER
+     * The diff adds ZERO findings; the waiver was working correctly and simply
+     * did not list this PR. The subset rule therefore still binds.
+     *
+     * WHAT #1649 ACTUALLY DOES to these surfaces: it makes a FAILURE honest.
+     * `searchPublicVacancyPreviews` re-threw a statement timeout, so the board
+     * answered HTTP 500; catching it and returning an empty list would have
+     * been worse, because that tells a person the labour market is empty when
+     * the read simply did not answer. `57014` now maps to a NAMED
+     * `unavailable` state, distinct from "not provisioned" and from a genuine
+     * zero (SEP-7). No new route, no new page, no new component, no auth
+     * change, no change to the projection or to what an anonymous visitor may
+     * see. The World-State answers stay honestly "no" for the same anonymous
+     * caller this surface exists for.
      */
-    pullRequests: [1184, 1193, 1203, 1208, 1255],
+    pullRequests: [1184, 1193, 1203, 1208, 1255, 1649],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
