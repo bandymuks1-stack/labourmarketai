@@ -890,7 +890,8 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     anchors: ["lib/vacancy-import", "lib/vacancy-store"],
     coreModule: "lib/vacancy-store/vacancy-read.ts",
     surfaces: ["app/[locale]/(marketing)/jobs"],
-    note: "77k vacancies live and NO scheduler — ingestion is a manual script or an admin panel action.",
+    note:
+      "80,708 vacancies live (47,710 active) and NO scheduler - ingestion is a manual script or an admin panel action. THE PUBLIC SURFACE WAS FAILING AND THIS ENTRY DID NOT SAY SO, corrected 2026-09-08 from production logs: `search_public_vacancy_previews_v1` computed total_count with `count(*) over ()`, walking every live row per call, and the 24 h to 2026-09-08 carried 1,595 statement timeouts of which EVERY ONE was that function under `postgrest`/`authenticator` - real anonymous traffic at ~66/hour, answered to the person as HTTP 500. Owner-approved and fixed the same day (ledger 20260908110702): the unfiltered total now reads the cron singleton. Measured under the real `anon` role with statement_timeout=3s - unfiltered 2.7 ms (was 3,351 ms cold), warm 1.0-1.3 ms, total_count 47,710 correct, per-filter totals correct, projection unchanged, privileges unchanged, and `anon` still refused 42501 on both `public_vacancies` and the counts singleton. The last organic timeout was 10:49:51, seventeen minutes BEFORE the apply, and none has followed. The profession-filtered path is ~14 ms slower because its total became a second scan - recorded, not hidden. PARTIAL is now about the MISSING SCHEDULER, not about the board falling over.",
   },
   {
     id: "DEM-5",
