@@ -864,7 +864,18 @@ describe("NO new DB migration in this PR", () => {
     // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
     // ambiguous occupation; confidently wrong is the defect this removes.
     // Verified by fingerprint match between production and the file.
-expect(count).toBeLessThanOrEqual(274);
+    //
+    // 274 -> 276: the two evidence-integrity repairs, BOTH UNAPPLIED.
+    // 20260908120000 (EVID-6) narrows experience_responses_select so a reply's
+    // visibility is decided by the REPLY's own moderation_status, not the
+    // record's - the unqualified column that handed an experience author a
+    // reply moderation had not published. 20260908130000 (EVID-2) records
+    // whether a confirmation was self-confirmed, with a NULLABLE column and NO
+    // backfill, because a `default false` would silently reclassify the three
+    // existing self-confirmed rows. Both RED, both owner-gated at the APPLY
+    // step: the owner approved the implementation on 2026-09-08 and stopped
+    // before production.
+expect(count).toBeLessThanOrEqual(276);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

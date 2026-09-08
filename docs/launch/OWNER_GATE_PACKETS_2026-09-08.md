@@ -242,3 +242,83 @@ GREEN-class candidate rather than a gate.
 **Not claimed:** these nine were checked for *applied-state and supersession*
 only. Their internal correctness was not re-reviewed in this pass, and this
 appendix does not pretend otherwise.
+
+---
+
+# APPENDIX C — EVID-6 and EVID-2, prepared and stopped before the apply
+
+The owner approved the **implementation** of both on 2026-09-08 and said to
+stop before production. Neither file has been applied or trial-applied.
+Both ship in a draft PR with `needs-human-gate`.
+
+## EVID-6 — `20260908120000_experience_response_moderation_scope_v1`
+
+**The defect, live on production.** `experience_responses_select`'s third
+branch tests `moderation_status` inside a subquery over `experience_records`,
+so it resolves to the **record's** status. The **reply's own** status is never
+consulted — and both tables carry that column. An experience author can
+therefore read a reply moderation has **not** published (`submitted`,
+`in_moderation`, `rejected`) for as long as the record is published.
+
+It looks correct because unqualified `moderation_status` inside that subquery
+means `r`, which is what the author meant for the record and not what they
+meant for the reply — and Postgres prints the stored policy with `r.` already
+prefixed, so reading it back does not reveal the mistake either.
+
+**The repair.** Add the reply's own published check and **qualify every column
+reference explicitly**. Strictly narrowing: the branch keeps every condition it
+had and gains one. The subject's own branch is untouched, so a person always
+sees their own reply in every state — including while it is in moderation,
+which is when they most need it.
+
+**Risk / data / access:** replaces one SELECT policy. No table, column, row,
+grant or other policy altered. No role gains anything — it can only *remove*
+rows from a result set. Rollback restores the exact pre-existing policy
+(captured from `pg_policies`, not reconstructed).
+
+**Honest limit:** production holds **0** `experience_responses` rows, so there
+is no data on which to demonstrate the before/after. The **defect** is
+production-measured; the **repair** is CODE_PROVEN only.
+
+## EVID-2 — `20260908130000_journal_confirmation_self_marker_v1`
+
+**Why it records rather than forbids.** All three self-confirmed production
+rows carry `confirmer_role='owner'` — an **owner-operator confirming their own
+work**. A sole trader who is both the company and the worker is a legitimate
+user, not an abuse. Refusing the insert would break them and erase a true fact.
+SEP-3 does not require self-confirmation to be impossible; it requires that it
+never be **mistaken** for somebody else's word.
+
+**The column is nullable on purpose.** `default false` would have written FALSE
+onto the three existing self-confirmed rows — a silent reclassification of real
+evidence, and precisely what the owner forbade. `NULL` therefore means **not
+recorded at write time**, which is the honest state of all 13 legacy rows.
+SEP-7 held in a column: **UNKNOWN ≠ FALSE.**
+
+**Risk / data / access:** additive column + `SECURITY DEFINER` BEFORE INSERT
+trigger. No existing row read, written, deleted or reclassified. No policy, no
+grant, no RPC signature change. Append-only posture unchanged — still no UPDATE
+and no DELETE policy, and this adds neither. Rollback drops the column and the
+trigger; it destroys no independent evidence, because every value was derived
+from `journal_entries + workers` and can be re-derived.
+
+**Honest limit:** the **defect** is production-measured (13 rows, 3
+self-confirmed, all `role='owner'`); the **repair** is CODE_PROVEN only.
+
+## A SEPARATE decision the owner asked to be raised on its own
+
+**Should the three existing self-confirmed rows be backfilled?**
+
+After the trigger is applied, new rows carry `true`/`false` and the 13 legacy
+rows stay `NULL` — honestly "not recorded". Backfilling the three from the
+`journal_entries → workers.profile_id` join would make them explicit.
+
+* **For:** the fact is already derivable and already surfaced by the read-side
+  fix; leaving NULL means every future reader must remember to derive it.
+* **Against:** it is a **write to existing evidence rows**. The owner's
+  instruction was not to reclassify them silently, and a backfill is exactly
+  that write — even though the value it would write is true.
+
+**Recommendation: do it as its own migration, or not at all.** It must not ride
+along inside the marker migration, because that would blur "we started
+recording this" with "we changed what the record says". Not included here.
