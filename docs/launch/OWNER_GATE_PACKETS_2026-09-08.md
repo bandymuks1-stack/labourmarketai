@@ -164,3 +164,81 @@ data lifecycle (the ESCO locale prune and unused-index drop already drafted in
 #1421), not a plan purchase. **No plan should be bought to resolve this**; if a
 paid tier is ever the answer it is an owner act, recorded here as a
 recommendation only.
+
+---
+
+# APPENDIX A — outcomes, recorded the same day
+
+The point of this file is to stop being true silently. Recorded 2026-09-08,
+after the owner's decisions.
+
+| gate | outcome |
+|---|---|
+| **EVID-1 / #1618** | **APPROVED → APPLIED**, ledger `20260908080950`. Read restored on all four formerly-recursing tables; a full write chain (`records` + `parties` `INSERT … RETURNING`) ran in a rolled-back transaction; a person who manages nothing reads 0 with no error; `anon` is refused EXECUTE on the resolver; residue re-counted at 0. Rollback verified a faithful inverse of a pre-apply snapshot. Merged. |
+| **#1566** | **Already applied before the decision** (ledger `20260908061619`, `20260908065654`) — *not* re-applied. The branch's entire executable content is four `GRANT`s that production already held, and `anon` gained nothing. Merged to reconcile repo with database. `notification_events` holds 6 rows, newest 07:28 UTC: the emitters work. |
+| **#1635** | **APPROVED → APPLIED**, ledger `20260908082301`. 65 mappings (31 of 161 skills, 34 of 49 professions). `teacher` and `caregiver` deliberately **UNMAPPED**. Verified by fingerprint (`4a86d46c…`, 65 sorted triples) on both sides rather than by eye. |
+| **#1355** | **CLOSED as superseded** — `merge-base --is-ancestor` confirmed true before closing. |
+| **EVID-6 / EVID-2** | Implementation approved; **nothing applied**. See Appendix B. |
+| PER-11 · MKT-7 · ORG-2 | Not approved / deferred by the owner. Unchanged. |
+| `auth_leaked_password_protection` | Stays **BLOCKED_BY_PLAN**. |
+| anon public functions · fail-closed RLS tables | Unchanged, deliberately. Verified `anon` and `authenticated` hold **no** table privileges on all four RLS-without-policy tables — fail-closed by design, not a defect. |
+
+---
+
+# APPENDIX B — the remaining open RED / draft PRs, triaged
+
+Checked against `main` and production on 2026-09-08. **Nothing here was applied.**
+
+## Still real, and the highest-value of the set
+
+**#1572 — the anonymous jobs board is slow, and the premise is NOT stale.**
+Measured on production:
+
+| query | time |
+|---|---|
+| `search_public_vacancy_previews_v1(null, null, 20, 0)` | **4 743 ms** |
+| the identical query without `count(*) over ()` | **1.98 ms** |
+
+`count(*) over ()` is a window over the whole filtered set, so Postgres
+materialises every one of ~47 000 matching rows before `LIMIT 20` and the
+`public_vacancies_active_published_idx` index cannot stop early. A ~2 400×
+penalty on the **worker's public entry point**. #1572's design — take
+`total_count` from the supply singleton instead — is correct, and that
+singleton (`public_vacancy_supply_counts`) already exists and is fresh
+(46 802 active, computed 08:30 today). RED (SECURITY DEFINER): owner-gated.
+`count_public_vacancies_v1()` is already fine at 14.8 ms, so the September-06
+index fixed the count and left the previews path untouched.
+
+**#1573** depends on #1572 — an honest named state instead of a 500 or a fake
+zero. No migration; GREEN-class once #1572 lands.
+
+**#1421 — the lever for the database-size problem, now quantified.**
+`esco_labels` is **408 MB / 1 045 186 rows over 28 locales**; the product
+serves 11. **617 347 rows (59%) are prunable — roughly 240 MB, about 29% of the
+whole 820 MB database.** This is the alternative to buying a plan. It is a
+`DELETE`, so it stays RED and owner-gated.
+
+## Superseded or empty — safe housekeeping
+
+* **#1046** is superseded by **#1440** (`worker_demand_org_attribution` **v1**
+  vs **v2**, same defect). Not a git ancestor — a re-port — so it needs an
+  explicit close rather than an automatic one.
+* **#897** has a **zero-file diff against `main`**: its content is already
+  absorbed. Closable, but left alone here because it is the billing engine and
+  MKT-7 is explicitly deferred.
+
+## Still real, unapplied, no premise change found
+
+`#1577` professions catalogue seed · `#1496` first-party supply bridge
+(consent/intent gaps recorded) · `#1475` workspace pins · `#1440` worker-board
+org attribution v2 · `#1436` invitation binds org membership · `#1430`
+companies contact minimisation · `#1426` work-plan primitive · `#1266` ai_runs
+retention de-linking · `#1045` admin-grant service-role repair.
+
+Verified for each that its migration is **absent from the production ledger**.
+`#1433` (public-jobs JSON-LD) carries **no migration at all** and is a
+GREEN-class candidate rather than a gate.
+
+**Not claimed:** these nine were checked for *applied-state and supersession*
+only. Their internal correctness was not re-reviewed in this pass, and this
+appendix does not pretend otherwise.

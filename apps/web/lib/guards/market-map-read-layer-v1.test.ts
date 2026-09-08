@@ -855,7 +855,16 @@ describe("NO new DB migration in this PR", () => {
     // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
     // + policy replace) - applying it does not make it GREEN.
 
-    expect(count).toBeLessThanOrEqual(273);
+        //
+    // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
+    // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
+    // the two ambiguous cases stay UNMAPPED on purpose, because generic
+    // "teacher" had mapped to a tertiary POLITICS LECTURER and generic
+    // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
+    // ambiguous occupation; confidently wrong is the defect this removes.
+    // Verified by fingerprint match between production and the file.
+expect(count).toBeLessThanOrEqual(274);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

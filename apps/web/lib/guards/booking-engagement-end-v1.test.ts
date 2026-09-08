@@ -1137,6 +1137,19 @@ describe("the migration set is exactly what this slice declared", () => {
       // additions are the allocation source, the allocation-wins dedupe and
       // the combined 500-line cap. The marker lets CI classify it; merge and
       // production apply stay with the main session after review.
+      // 2026-08-30, APPROVED AND APPLIED 2026-09-08 (owner decision on #1635).
+      // The 67-row ESCO canonical linkage. The marker began as the doctrine
+      // ACKNOWLEDGEMENT that a data migration (UPDATE of
+      // skills/professions.esco_uri) is RED by classification; the owner then
+      // approved it by name and it was applied via Supabase MCP
+      // apply_migration as ledger 20260908082301. Write-if-null,
+      // corpus-asserted, paired rollback - it can only fill a NULL and refuses
+      // to overwrite a different esco_uri. Verified after the apply by
+      // FINGERPRINT rather than by eye: the applied rows and this file both
+      // hash to 4a86d46c3701871e06d8c355d76173f4 over 65 sorted
+      // type|slug|uri triples, so no transcription error exists. RED class is
+      // unchanged by having been applied.
+      "20260830100000_esco_canonical_linkage_67.sql",
       "20260831170000_timesheet_compute_allocations_v1.sql",
       // 2026-09-01: the agency disclosure-revocation package
       // (20260901052300) carries the marker because its RED content is the

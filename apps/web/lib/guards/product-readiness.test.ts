@@ -2440,7 +2440,16 @@ describe("no migration files added by this sprint", () => {
     // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
     // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
     // + policy replace) - applying it does not make it GREEN.
-const SPRINT_BASELINE = 273;
+    //
+    // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
+    // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
+    // the two ambiguous cases stay UNMAPPED on purpose, because generic
+    // "teacher" had mapped to a tertiary POLITICS LECTURER and generic
+    // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
+    // ambiguous occupation; confidently wrong is the defect this removes.
+    // Verified by fingerprint match between production and the file.
+const SPRINT_BASELINE = 274;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
