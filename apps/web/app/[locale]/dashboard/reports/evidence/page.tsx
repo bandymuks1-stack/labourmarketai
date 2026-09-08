@@ -58,8 +58,14 @@ export default async function EvidenceReportPage({
     supportedSkills: supported,
     unsupportedSkills: unsupported,
     awaitingConfirmation: supported,
-    journalEntries: cv.signals.journalEntries,
-    confirmations: cv.signals.managerConfirmations,
+    // KNOWN GAP, made visible rather than silent: buildEvidenceReport
+    // takes plain numbers, so it cannot yet express "unread". A failed
+    // count therefore still reads as 0 HERE and the section states
+    // "empty". Widening that contract also moves deriveProvenance's
+    // classes, which is an evidence-semantics decision and not a
+    // drive-by change - see the PR for the follow-up.
+    journalEntries: cv.signals.journalEntries ?? 0,
+    confirmations: cv.signals.managerConfirmations ?? 0,
     hasWorkNeedContext: false,
   });
   const byKey = Object.fromEntries(report.sections.map((s) => [s.key, s]));

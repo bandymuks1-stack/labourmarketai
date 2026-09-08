@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Some of these could not be counted just now, and are shown as “—”. It does not mean you have none — the numbers simply could not be read. Reload in a moment.",
     "title": "Trust signals",
     "caption": "These counts come straight from your work records.",
     "verifiedSkills": "Manager-confirmed skills",

@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Części z tych rzeczy nie udało się teraz policzyć i są pokazane jako „—”. To nie znaczy, że ich nie masz — po prostu nie dało się odczytać liczb. Odśwież za chwilę.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",

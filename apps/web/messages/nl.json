@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Een deel hiervan kon zojuist niet worden geteld en wordt als “—” getoond. Het betekent niet dat u er geen hebt — de getallen konden alleen niet worden gelezen. Laad zo meteen opnieuw.",
     "title": "Vertrouwenssignalen",
     "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties.",
     "verifiedSkills": "Door manager bevestigde vaardigheden",

@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Einige davon konnten gerade nicht gezählt werden und werden als „—“ angezeigt. Das heißt nicht, dass Sie keine haben — die Zahlen ließen sich nur nicht lesen. Laden Sie gleich neu.",
     "title": "Vertrauenssignale",
     "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
     "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",

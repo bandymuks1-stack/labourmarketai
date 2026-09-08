@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Noe av dette kunne ikke telles akkurat nå og vises som «—». Det betyr ikke at du ikke har noen — tallene kunne bare ikke leses. Last inn på nytt om et øyeblikk.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
