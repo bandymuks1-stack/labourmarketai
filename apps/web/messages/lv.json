@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
@@ -2210,6 +2211,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Daļu no tā, ko šie cilvēki ir fiksējuši, tikko neizdevās nolasīt, tāpēc šī secība nav uzticama. Neviens šeit netiek rādīts ar mazāk, nekā viņam ir — vienkārši trūkst faktu, pēc kuriem salīdzināt. Pārlādējiet pēc brīža.",
+      "capped": "Ne visi tika salīdzināti. Šai vajadzībai atbilst vairāk redzamu darbinieku, nekā ietilpst vienā sarakstā, tāpēc vispirms tika iegūti tie {count}, kuru prasmes, profesija un valsts atbilst vistiešāk — nekad jaunākie reģistrējumi. Sašauriniet vajadzību, lai būtu droši, ka tiek salīdzināti īstie cilvēki.",
+      "complete": "Visi {count} redzamie darbinieki tika salīdzināti ar šo vajadzību."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
@@ -4554,6 +4560,7 @@
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "Saglabātas prasmes: {skills}, apstiprinātas: {confirmed}. Tikko neizdevās nolasīt tavu dienasgrāmatas ierakstu un apstiprinājumu skaitu — tas nav tas pats, kas to neesamība. Pajautā vēlreiz pēc brīža.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",

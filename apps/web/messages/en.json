@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Some of these could not be counted just now, and are shown as “—”. It does not mean you have none — the numbers simply could not be read. Reload in a moment.",
     "title": "Trust signals",
     "caption": "These counts come straight from your work records.",
     "verifiedSkills": "Manager-confirmed skills",
@@ -8130,6 +8131,7 @@
       "noMatches": "No candidates match the selected filters."
     },
     "pool": {
+      "factsUnreadable": "Some of what these people have recorded could not be read just now, so this order is not reliable. Nobody here has been shown as having less than they do — the facts behind the comparison are simply missing. Reload in a moment.",
       "capped": "Not everyone was compared. More discoverable workers fit this need than one list can hold, so the {count} whose skills, profession and country match it most directly were retrieved first — never the newest registrations. Narrow the need to be sure the right people are compared.",
       "complete": "All {count} discoverable workers were compared against this need."
     },
@@ -13557,6 +13559,7 @@
       "journalUnlabelled": "(no description)",
       "journalEmpty": "You have no journal entries in the last {days} days.",
       "figuresWorker": "{entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "{skills} skills saved, {confirmed} confirmed. I could not read your journal entry and confirmation counts just now — that is not the same as having none. Ask again in a moment.",
       "figuresNoHoursLedger": "The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "You have no recorded work evidence yet.",
       "figuresOrgIntro": "Your organization, as recorded:",

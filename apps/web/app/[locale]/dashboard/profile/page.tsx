@@ -904,6 +904,7 @@ export default async function ProfilePage({
             managerConfirmations: tTrust("managerConfirmations"),
             journalEntries: tTrust("journalEntries"),
             zeroHint: tTrust("zeroHint"),
+            unreadHint: tTrust("unreadHint"),
           }}
         />
       ) : null}

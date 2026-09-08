@@ -123,7 +123,21 @@ export interface SupplyRetrievalReport {
   /** Stage-1 reads that hit `STAGE1_ID_SCAN_CAP`. Non-empty means the tier's
    *  id set is incomplete — reported, never hidden. */
   readonly truncatedStages: readonly SupplyRetrievalTier[];
+  /**
+   * Stage-2 fact reads that FAILED. Non-empty means the pool was compared on
+   * an incomplete fact set — the ranking is not trustworthy, and saying so is
+   * the only honest option.
+   *
+   * This is a DIFFERENT statement from `capped` / `truncatedStages`, which say
+   * "we did not look at everyone". Here we did look at everyone and could not
+   * read what we needed about them, so a worker with skills can be ranked as a
+   * worker with none. Empty is the normal case and means the facts were read.
+   */
+  readonly unreadableFacts: readonly SupplyFactRead[];
 }
+
+/** A Stage-2 read whose failure changes what a candidate LOOKS like. */
+export type SupplyFactRead = "workers" | "skills" | "professions";
 
 /** Normalise first, THEN bound: the charset check judges the value that would
  *  actually reach SQL, not the raw text. */
@@ -234,6 +248,9 @@ export function selectPoolIds(
       poolSize: selected.length,
       capped: ordered.length > effectiveBudget,
       truncatedStages,
+      // Stage 1 reads ids only; the fact reads happen in Stage 2, so this is
+      // filled in by the caller that performs them.
+      unreadableFacts: [],
     },
   };
 }
@@ -253,5 +270,6 @@ export function explicitIdsReport(
     poolSize: selected.length,
     capped: requested.length > selected.length,
     truncatedStages: [],
+    unreadableFacts: [],
   };
 }

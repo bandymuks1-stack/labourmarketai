@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "En del av detta gick inte att räkna just nu och visas som ”—”. Det betyder inte att du saknar dem — siffrorna gick bara inte att läsa. Ladda om om en stund.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
@@ -2210,6 +2211,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "En del av det dessa personer har registrerat gick inte att läsa just nu, så den här ordningen är inte tillförlitlig. Ingen visas här med mindre än vad de har — det är fakta bakom jämförelsen som saknas. Ladda om om en stund.",
+      "capped": "Alla jämfördes inte. Fler synliga arbetare passar det här behovet än vad en lista rymmer, så de {count} vars kompetenser, yrke och land stämmer mest direkt hämtades först — aldrig de senast registrerade. Avgränsa behovet för att vara säker på att rätt personer jämförs.",
+      "complete": "Alla {count} synliga arbetare jämfördes mot det här behovet."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
@@ -4554,6 +4560,7 @@
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "{skills} färdigheter sparade, {confirmed} bekräftade. Jag kunde inte läsa antalet journalanteckningar och bekräftelser just nu — det är inte samma sak som att sakna dem. Fråga igen om en stund.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",

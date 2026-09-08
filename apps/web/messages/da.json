@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Noget af dette kunne ikke tælles lige nu og vises som “—”. Det betyder ikke, at du ingen har — tallene kunne bare ikke læses. Genindlæs om et øjeblik.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "Leder-bekræftede færdigheder",
@@ -2210,6 +2211,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Noget af det, disse personer har registreret, kunne ikke læses lige nu, så denne rækkefølge er ikke pålidelig. Ingen vises her med mindre, end de har — det er fakta bag sammenligningen, der mangler. Genindlæs om et øjeblik.",
+      "capped": "Ikke alle blev sammenlignet. Flere synlige arbejdere passer til dette behov, end én liste kan rumme, så de {count}, hvis kompetencer, fag og land passer mest direkte, blev hentet først — aldrig de nyeste registreringer. Indsnævr behovet for at være sikker på, at de rette personer sammenlignes.",
+      "complete": "Alle {count} synlige arbejdere blev sammenlignet med dette behov."
+    },
     "tiers": {
       "negotiables": "Punkter til drøftelse",
       "missing": "Manglende oplysninger",
@@ -4554,6 +4560,7 @@
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "{skills} færdigheder gemt, {confirmed} bekræftet. Jeg kunne ikke læse antallet af dine journalposter og bekræftelser lige nu — det er ikke det samme som ikke at have nogen. Spørg igen om et øjeblik.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",

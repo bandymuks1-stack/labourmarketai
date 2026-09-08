@@ -14,6 +14,7 @@ import {
   selectPoolIds,
   STAGE1_ID_SCAN_CAP,
   SUPPLY_POOL_BUDGET,
+  type SupplyFactRead,
   type SupplyRetrievalPlan,
   type SupplyRetrievalReport,
   type TierResult,
@@ -285,7 +286,17 @@ export async function buildSupplyCandidates(
       "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, preferred_contract_type, experience_years, created_at, updated_at",
     )
     .in("id", poolIds);
-  if (error || !Array.isArray(workers) || workers.length === 0) {
+  if (error) {
+    // A FAILED read is not an empty pool. Returning poolSize 0 alone told the
+    // employer "we compared nobody", which is true, while leaving out that we
+    // could not read the pool at all — and an empty candidate list reads as a
+    // statement about the supply.
+    return {
+      candidates: [],
+      retrieval: { ...retrieval, poolSize: 0, unreadableFacts: ["workers"] },
+    };
+  }
+  if (!Array.isArray(workers) || workers.length === 0) {
     return { candidates: [], retrieval: { ...retrieval, poolSize: 0 } };
   }
 
@@ -378,6 +389,18 @@ export async function buildSupplyCandidates(
             () => ({ data: null }),
           ),
   ]);
+
+  // WHY THESE TWO ARE CHECKED AND THE OTHERS ARE NOT. `prefsRes`, `langsRes`
+  // and `practiceRes` map their errors to `null` ON PURPOSE above: those
+  // stores are human-gated and may not be applied, and null travels to the
+  // subject as an honest "not stated". `worker_skills` and
+  // `worker_professions` are neither gated nor optional — they are the facts
+  // the ranking is MADE of. Falling back to an empty set there does not say
+  // "not stated"; it says "this worker has no skills", and the engine then
+  // ranks a fully skilled person as unskilled, confidently.
+  const unreadableFacts: SupplyFactRead[] = [];
+  if (skillsRes.error) unreadableFacts.push("skills");
+  if (profsRes.error) unreadableFacts.push("professions");
 
   for (const s of (skillsRes.data ?? []) as {
     worker_id: string;
@@ -503,5 +526,8 @@ export async function buildSupplyCandidates(
     };
   });
 
-  return { candidates, retrieval: { ...retrieval, poolSize: candidates.length } };
+  return {
+    candidates,
+    retrieval: { ...retrieval, poolSize: candidates.length, unreadableFacts },
+  };
 }

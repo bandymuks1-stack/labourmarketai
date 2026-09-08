@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Kai kurių iš šių dalykų dabar nepavyko suskaičiuoti, todėl rodoma „—“. Tai nereiškia, kad jų neturite — tiesiog nepavyko perskaityti skaičių. Perkraukite po akimirkos.",
     "title": "Pasitikėjimo signalai",
     "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų.",
     "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
@@ -8130,6 +8131,7 @@
       "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
     },
     "pool": {
+      "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkraukite po akimirkos.",
       "capped": "Palyginti ne visi. Šį poreikį atitinka daugiau matomų darbuotojų, nei telpa į vieną sąrašą, todėl pirmiausia paimti {count} darbuotojai, kurių įgūdžiai, profesija ir šalis labiausiai atitinka poreikį, o ne naujausiai užsiregistravusieji. Patikslinkite poreikį, kad būtų palyginti tinkami žmonės.",
       "complete": "Su šiuo poreikiu palyginti visi {count} matomi darbuotojai."
     },
@@ -13557,6 +13559,7 @@
       "journalUnlabelled": "(be aprašymo)",
       "journalEmpty": "Per paskutines {days} dienas žurnalo įrašų neturi.",
       "figuresWorker": "{entries} žurnalo įrašai, iš jų {confirmations} patvirtinti vadovo. Įrašyti {skills} įgūdžiai, patvirtinti {confirmed}.",
+      "figuresWorkerUnread": "Išsaugota įgūdžių: {skills}, patvirtinta: {confirmed}. Dabar nepavyko perskaityti tavo dienoraščio įrašų ir patvirtinimų skaičiaus — tai nėra tas pats, kaip jų neturėti. Paklausk dar kartą po akimirkos.",
       "figuresNoHoursLedger": "Platforma nekaupia patvirtintų valandų registro, todėl valandų skaičiaus pateikti negaliu — kaupiami patvirtinti įrašai.",
       "figuresWorkerEmpty": "Kol kas neturi įrašytų darbo įrodymų.",
       "figuresOrgIntro": "Tavo organizacija, kaip įrašyta:",

@@ -77,8 +77,9 @@ export interface WorkerEvidenceFigures {
   readonly totalSkills: number;
   readonly workSupported: number;
   readonly confirmed: number;
-  readonly journalEntries: number;
-  readonly confirmations: number;
+  /** `null` = not readable. Never a 0 that nobody counted. */
+  readonly journalEntries: number | null;
+  readonly confirmations: number | null;
 }
 
 export interface WorkerReportsView {
@@ -195,8 +196,10 @@ async function readWorkerEvidence(): Promise<WorkerEvidenceFigures | null> {
       totalSkills: report.totalSkills,
       workSupported: byKey.profileEvidence?.metrics.workSupported ?? 0,
       confirmed: byKey.profileEvidence?.metrics.confirmed ?? 0,
-      journalEntries: byKey.workEntrySummary?.metrics.entries ?? 0,
-      confirmations: byKey.workEntrySummary?.metrics.confirmations ?? 0,
+      // The section OMITS these keys when the count could not be read, so
+      // `?? null` carries the unknown through instead of minting a zero here.
+      journalEntries: byKey.workEntrySummary?.metrics.entries ?? null,
+      confirmations: byKey.workEntrySummary?.metrics.confirmations ?? null,
     };
   } catch {
     return null;

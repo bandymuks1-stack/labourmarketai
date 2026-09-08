@@ -334,3 +334,99 @@ Then the honest product change is the opposite one: **stop computing DISPUTED**
 until a causer exists, so the model does not carry a state the world cannot
 produce. That is a GREEN change and an agent may do it — but it should be an
 owner's choice which way this closes, not a default.
+
+---
+
+# APPENDIX D — the security advisor output, re-measured 2026-09-08
+
+Recorded so the same four findings are not re-investigated, and so none of them
+is "fixed" into a regression. **Six advisor categories, and not one is
+unfinished work.**
+
+| finding | verdict |
+|---|---|
+| `security_definer_view` — **ERROR** — `public.worker_absence_scheduling` | **DELIBERATE. Do not fix.** Already documented and guarded by `lib/guards/security-train-a-v1.test.ts`. The reason is now measurable: `worker_absences_select` lets a manager read only `status = 'requested'`, while scheduling needs `approved`. The view carries its OWN authorization predicate — `caller_manages_worker(worker_id) OR is_admin() OR the worker themselves` — and exposes six columns. Making it `security_invoker` would not tighten anything; it would break the manager's scheduling read. |
+| `function_search_path_mutable` — **WARN** — `usage_cost_events_forbid_mutation`, `usage_cost_events_forbid_truncate` | **BENIGN, and not worth a migration.** Both are `SECURITY INVOKER` (`prosecdef = false`), and each body is a single `raise exception` that references **no database object at all**. There is nothing a mutable `search_path` could shadow, so the warning has no exploit path here. Setting `search_path` would clear the lint and change no behaviour, at the cost of a migration file and the three count ratchets. Recorded rather than shipped. |
+| `anon_security_definer_function_executable` — WARN | **DELIBERATE. Do not fix.** The intentional public surface (public vacancy counts, public business profile / listings / services). Revoking would break anonymous browsing. Previously confirmed. |
+| `authenticated_security_definer_function_executable` — WARN | Expected: this is how every gated write path in the product is built. |
+| `rls_enabled_no_policy` — INFO | **Fail-closed by design.** Verified previously that `anon` and `authenticated` hold no table privileges on those tables. |
+| `auth_leaked_password_protection` — WARN | **BLOCKED_BY_PLAN.** The current Supabase plan rejects it. Not unfinished work. |
+
+**Nothing in the advisor output is currently actionable.** If a future window
+finds this list shorter or longer, that is a real change worth investigating;
+if it finds it identical, it should stop here rather than re-derive it.
+
+---
+
+# APPENDIX E — EDU-7 · an institution cannot correct a programme it created
+
+Opened the same day as Appendix C, from the same kind of measurement. **Nothing
+applied.** PR #1648, RED draft, `needs-human-gate`.
+
+## The defect, measured on production 2026-09-08
+
+`education_programs` carries **exactly one policy — a `SELECT`**. Every write
+goes through `create_education_program_v1`, and **no update function exists** in
+`pg_proc`. A programme is immutable from the moment it is created: name, target
+profession, education type and description are fixed forever.
+
+That is not a cosmetic limit, because of what the target profession does:
+
+| check | result |
+|---|---|
+| `count_public_vacancies_by_profession_v1` | exists, **39 professions** with real active-vacancy counts |
+| its grants | `EXECUTE` to `authenticated`, **not** `anon` |
+| `readInstitutionPrograms` | already composes it |
+| the surface | renders it per programme at `program-demand-<id>` on `/dashboard/company` |
+| production's one programme | `target_profession_slug` is **NULL** |
+
+So the employer-demand signal an institution needs is **built, reachable and
+correct**, and the one live programme will read "no direction" **permanently**,
+because the field that switches it on cannot be set after creation.
+
+The whole point of the education chain is that an institution can *aim* at the
+labour market. Today it can miss once, at creation, and never re-aim.
+
+## The change
+
+`update_education_program_v1(uuid, text, text, text, text)` — the exact
+counterpart of the create function, with its authorization **copied rather than
+re-invented**: a manager of the programme's own organization, that organization
+still holding `training_provider`, and both slugs validated against the same
+active `professions` / `education_types` catalogues.
+
+Two properties make it narrow rather than a general programme writer, and both
+are guarded:
+
+* the **organization is read FROM THE ROW**, never taken from the caller — the
+  signature does not accept an organization id at all, so a manager of one
+  organization cannot edit another's programme;
+* `organization_id`, `created_by`, `created_at` and `id` are **not updatable**,
+  so a programme can never be moved or re-attributed.
+
+One refusal (`42501 not_manager`) covers both "not yours" and "no such
+programme", so a caller cannot learn a programme exists from the error.
+
+Archival and deletion are deliberately **not** in this packet: removing a
+programme with cohorts and members under it is a different decision with a
+different blast radius.
+
+## Risk / rollback
+
+**RED** — one new `SECURITY DEFINER` function. No policy, table, column or
+grant on an existing object is altered, and no existing function is replaced.
+Cohorts, members and outcomes are untouched, so correcting a programme's own
+fields cannot detach a learner. Production holds **1** programme. Rollback:
+`supabase/rollbacks/20260908120000_education_program_correction_v1.down.sql`
+(drops the one function; corrections already made stay, because reverting them
+would discard data an authorized manager deliberately changed).
+
+**Recommendation: APPLY.** It is the smallest change that lets the weakest of
+the four actors act at all, and the capability it unblocks is already built.
+
+## Note on merge order
+
+#1646 (EVID-7) and #1648 (this one) each add one migration and each bump the
+three migration-count ratchets 275 → 276. **Whichever merges second needs a
+one-line bump to 277.** They are otherwise independent and may be approved in
+either order, or separately.

@@ -1351,7 +1351,9 @@ const EDUCATION: readonly CapabilityRow[] = [
     anchors: ["lib/education"],
     coreModule: "lib/education/programs.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "One programme, one cohort, zero members in production — the journey has never run end to end.",
+    note:
+      "One programme, one cohort, zero members in production - the journey has never run end to end. The WRITE paths are all present and reachable: create programme, create cohort, assign learner and remove member are all on `/dashboard/company`, and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with. " +
+      "ONE REAL GAP, measured 2026-09-08: a programme cannot be CORRECTED. `education_programs` carries a single SELECT policy and every write goes through `create_education_program_v1`; there is no update function in `pg_proc`. Name, target profession, education type and description are fixed at creation, so a field skipped once is skipped permanently - and because the target profession is what activates the employer-demand signal (EDU-6), the one live programme reads `demandUnknown` and always will.",
   },
   {
     id: "EDU-3",
@@ -1399,12 +1401,15 @@ const EDUCATION: readonly CapabilityRow[] = [
     domain: "education",
     title: "Institution reporting",
     worldElement: "organizations",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "Programmes exist; no report and no export.",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: ["lib/education/programs.ts"],
+    coreModule: "lib/education/programs.ts",
+    surfaces: ["components/app/institution-programs-section.tsx"],
+    note:
+      "CORRECTED 2026-09-08. This row said MISSING with no anchors, no surfaces and 'Programmes exist; no report and no export', and the journey register repeated it as 'an institution cannot see employer demand'. HALF of that was already false, and a register REDDER than the product is not a safe error: it invites the next window to build a demand reader that exists, which is how a second demand model gets born. " +
+      "WHAT IS BUILT AND MEASURED ON PRODUCTION: `readInstitutionPrograms` already composes `count_public_vacancies_by_profession_v1`, the canonical per-profession count over the public vacancy pool. Verified live: the function EXISTS, returns 39 professions with real active-vacancy counts, and holds EXECUTE for `authenticated` and NOT for `anon`. `institution-programs-section.tsx` renders it per programme at `program-demand-<id>`, and the surface is mounted on `/dashboard/company`, so it is reachable by a training-provider manager rather than orphaned. It is also HONEST where it cannot answer: a programme with no target profession renders `demandUnknown`, never 0 - SEP-7 held at the surface. Nothing here needed building; it needed measuring. " +
+      "WHAT IS GENUINELY MISSING is narrower than the old note claimed, and it is two things. FIRST, there is no report and no export - an institution can read demand on screen and cannot take it anywhere. SECOND, and this is the one that bites today: production's single programme carries NO target profession, so the number it would show is `demandUnknown` FOREVER. `education_programs` has exactly ONE policy, a SELECT; every write goes through `create_education_program_v1`, and no update function exists in `pg_proc`. A programme is immutable after creation, so an institution that skipped the optional profession field at creation can never turn the market signal on. The demand reader is not the blocker - correcting a programme is.",
   },
 ];
 

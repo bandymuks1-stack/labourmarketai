@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Osa sellest ei õnnestunud praegu kokku lugeda ja on näidatud kui „—“. See ei tähenda, et teil neid ei ole — lihtsalt ei õnnestunud numbreid lugeda. Laadige hetke pärast uuesti.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
@@ -2210,6 +2211,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Osa sellest, mille need inimesed on kirja pannud, ei õnnestunud praegu lugeda, seega see järjestus ei ole usaldusväärne. Kedagi ei näidata siin väiksemana, kui ta on — puuduvad lihtsalt võrdluse aluseks olevad faktid. Laadige hetke pärast uuesti.",
+      "capped": "Kõiki ei võrreldud. Sellele vajadusele sobib rohkem nähtavaid töötajaid, kui ühte nimekirja mahub, seega toodi esmalt need {count}, kelle oskused, amet ja riik vastavad sellele kõige otsesemalt — mitte kunagi kõige uuemad registreerumised. Piiritlege vajadus, et olla kindel, et võrreldakse õigeid inimesi.",
+      "complete": "Kõiki {count} nähtavat töötajat võrreldi selle vajadusega."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
@@ -4554,6 +4560,7 @@
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "Salvestatud oskusi: {skills}, kinnitatud: {confirmed}. Ma ei suutnud praegu lugeda sinu päevikukannete ja kinnituste arvu — see ei ole sama mis nende puudumine. Küsi hetke pärast uuesti.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",

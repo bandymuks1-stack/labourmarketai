@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Een deel hiervan kon zojuist niet worden geteld en wordt als “—” getoond. Het betekent niet dat u er geen hebt — de getallen konden alleen niet worden gelezen. Laad zo meteen opnieuw.",
     "title": "Vertrouwenssignalen",
     "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties.",
     "verifiedSkills": "Door manager bevestigde vaardigheden",
@@ -8130,6 +8131,7 @@
       "noMatches": "Geen kandidaten voldoen aan de gekozen filters."
     },
     "pool": {
+      "factsUnreadable": "Een deel van wat deze mensen hebben vastgelegd kon zojuist niet worden gelezen, dus deze volgorde is niet betrouwbaar. Niemand wordt hier met minder getoond dan hij heeft — de feiten achter de vergelijking ontbreken simpelweg. Laad zo meteen opnieuw.",
       "capped": "Niet iedereen is vergeleken. Er passen meer zichtbare werknemers bij deze vraag dan in één lijst passen, dus zijn eerst de {count} opgehaald van wie vaardigheden, beroep en land het beste aansluiten, niet de nieuwste registraties. Maak de vraag specifieker zodat de juiste mensen worden vergeleken.",
       "complete": "Alle {count} zichtbare werknemers zijn met deze vraag vergeleken."
     },
@@ -13557,6 +13559,7 @@
       "journalUnlabelled": "(geen omschrijving)",
       "journalEmpty": "Je hebt geen dagboekregels in de afgelopen {days} dagen.",
       "figuresWorker": "{entries} dagboekregels, waarvan {confirmations} bevestigd door een leidinggevende. {skills} vaardigheden opgeslagen, {confirmed} bevestigd.",
+      "figuresWorkerUnread": "{skills} vaardigheden opgeslagen, {confirmed} bevestigd. Ik kon je aantal journaalregels en bevestigingen zojuist niet lezen — dat is niet hetzelfde als er geen hebben. Vraag het zo meteen opnieuw.",
       "figuresNoHoursLedger": "Het platform houdt geen register van goedgekeurde uren bij, dus een urencijfer kan ik niet geven — het legt bevestigde regels vast.",
       "figuresWorkerEmpty": "Je hebt nog geen vastgelegd werkbewijs.",
       "figuresOrgIntro": "Je organisatie, zoals vastgelegd:",

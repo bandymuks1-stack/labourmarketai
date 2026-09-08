@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Noe av dette kunne ikke telles akkurat nå og vises som «—». Det betyr ikke at du ikke har noen — tallene kunne bare ikke leses. Last inn på nytt om et øyeblikk.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
@@ -2210,6 +2211,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Noe av det disse personene har registrert kunne ikke leses akkurat nå, så denne rekkefølgen er ikke pålitelig. Ingen vises her med mindre enn de har — det er fakta bak sammenligningen som mangler. Last inn på nytt om et øyeblikk.",
+      "capped": "Ikke alle ble sammenlignet. Flere synlige arbeidere passer til dette behovet enn én liste rommer, så de {count} med de mest direkte samsvarende ferdighetene, yrket og landet ble hentet først — aldri de nyeste registreringene. Snevre inn behovet for å være sikker på at de rette personene sammenlignes.",
+      "complete": "Alle {count} synlige arbeidere ble sammenlignet med dette behovet."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
@@ -4554,6 +4560,7 @@
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "{skills} ferdigheter lagret, {confirmed} bekreftet. Jeg klarte ikke å lese antallet journaloppføringer og bekreftelser akkurat nå — det er ikke det samme som å ikke ha noen. Spør igjen om et øyeblikk.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",

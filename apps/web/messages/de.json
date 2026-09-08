@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Einige davon konnten gerade nicht gezählt werden und werden als „—“ angezeigt. Das heißt nicht, dass Sie keine haben — die Zahlen ließen sich nur nicht lesen. Laden Sie gleich neu.",
     "title": "Vertrauenssignale",
     "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
     "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
@@ -8130,6 +8131,7 @@
       "noMatches": "Keine Kandidaten entsprechen den gewählten Filtern."
     },
     "pool": {
+      "factsUnreadable": "Ein Teil dessen, was diese Personen erfasst haben, konnte gerade nicht gelesen werden, daher ist diese Reihenfolge nicht verlässlich. Niemand wird hier mit weniger dargestellt, als er hat — es fehlen schlicht die Fakten für den Vergleich. Laden Sie gleich neu.",
       "capped": "Es wurden nicht alle verglichen. Zu diesem Bedarf passen mehr sichtbare Arbeitskräfte, als in eine Liste passen. Deshalb wurden zuerst die {count} geladen, deren Qualifikationen, Beruf und Land am besten passen, nicht die neuesten Registrierungen. Grenzen Sie den Bedarf ein, damit die richtigen Personen verglichen werden.",
       "complete": "Alle {count} sichtbaren Arbeitskräfte wurden mit diesem Bedarf verglichen."
     },
@@ -13557,6 +13559,7 @@
       "journalUnlabelled": "(ohne Beschreibung)",
       "journalEmpty": "In den letzten {days} Tagen hast du keine Einträge.",
       "figuresWorker": "{entries} Einträge, davon {confirmations} von einer Führungskraft bestätigt. {skills} Fähigkeiten gespeichert, {confirmed} bestätigt.",
+      "figuresWorkerUnread": "{skills} Fähigkeiten gespeichert, {confirmed} bestätigt. Die Anzahl deiner Journaleinträge und Bestätigungen konnte ich gerade nicht lesen — das ist nicht dasselbe wie keine zu haben. Frag gleich noch einmal.",
       "figuresNoHoursLedger": "Die Plattform führt kein Register genehmigter Stunden, deshalb kann ich keine Stundenzahl nennen — sie erfasst bestätigte Einträge.",
       "figuresWorkerEmpty": "Du hast noch keine erfassten Arbeitsnachweise.",
       "figuresOrgIntro": "Dein Unternehmen, wie erfasst:",
