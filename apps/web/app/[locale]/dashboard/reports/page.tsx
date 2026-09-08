@@ -59,14 +59,22 @@ function journalWindowKeyFrom(
     : null;
 }
 
-function MetricTile({ label, value }: { label: string; value: number }) {
+/** `value === null` means the count could not be read. An em dash, never a
+ *  0 — this tile is a person reading their own evidence. */
+function MetricTile({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | null;
+}) {
   return (
     <div className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/40 p-3">
       <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </dt>
       <dd className="text-lg font-semibold tabular-nums text-text-primary">
-        {value}
+        {value === null ? "—" : value}
       </dd>
     </div>
   );

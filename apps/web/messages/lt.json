@@ -13559,6 +13559,7 @@
       "journalUnlabelled": "(be aprašymo)",
       "journalEmpty": "Per paskutines {days} dienas žurnalo įrašų neturi.",
       "figuresWorker": "{entries} žurnalo įrašai, iš jų {confirmations} patvirtinti vadovo. Įrašyti {skills} įgūdžiai, patvirtinti {confirmed}.",
+      "figuresWorkerUnread": "Išsaugota įgūdžių: {skills}, patvirtinta: {confirmed}. Dabar nepavyko perskaityti tavo dienoraščio įrašų ir patvirtinimų skaičiaus — tai nėra tas pats, kaip jų neturėti. Paklausk dar kartą po akimirkos.",
       "figuresNoHoursLedger": "Platforma nekaupia patvirtintų valandų registro, todėl valandų skaičiaus pateikti negaliu — kaupiami patvirtinti įrašai.",
       "figuresWorkerEmpty": "Kol kas neturi įrašytų darbo įrodymų.",
       "figuresOrgIntro": "Tavo organizacija, kaip įrašyta:",

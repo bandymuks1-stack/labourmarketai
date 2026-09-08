@@ -77,8 +77,9 @@ export interface WorkerEvidenceFigures {
   readonly totalSkills: number;
   readonly workSupported: number;
   readonly confirmed: number;
-  readonly journalEntries: number;
-  readonly confirmations: number;
+  /** `null` = not readable. Never a 0 that nobody counted. */
+  readonly journalEntries: number | null;
+  readonly confirmations: number | null;
 }
 
 export interface WorkerReportsView {
@@ -186,14 +187,8 @@ async function readWorkerEvidence(): Promise<WorkerEvidenceFigures | null> {
         ...cv.declaredClaims.map((c) => c.label),
       ],
       awaitingConfirmation: supported,
-      // KNOWN GAP, made visible rather than silent: buildEvidenceReport
-      // takes plain numbers, so it cannot yet express "unread". A failed
-      // count therefore still reads as 0 HERE and the section states
-      // "empty". Widening that contract also moves deriveProvenance's
-      // classes, which is an evidence-semantics decision and not a
-      // drive-by change - see the PR for the follow-up.
-      journalEntries: cv.signals.journalEntries ?? 0,
-      confirmations: cv.signals.managerConfirmations ?? 0,
+      journalEntries: cv.signals.journalEntries,
+      confirmations: cv.signals.managerConfirmations,
       hasWorkNeedContext: false,
     });
     const byKey = Object.fromEntries(report.sections.map((s) => [s.key, s]));
@@ -201,8 +196,10 @@ async function readWorkerEvidence(): Promise<WorkerEvidenceFigures | null> {
       totalSkills: report.totalSkills,
       workSupported: byKey.profileEvidence?.metrics.workSupported ?? 0,
       confirmed: byKey.profileEvidence?.metrics.confirmed ?? 0,
-      journalEntries: byKey.workEntrySummary?.metrics.entries ?? 0,
-      confirmations: byKey.workEntrySummary?.metrics.confirmations ?? 0,
+      // The section OMITS these keys when the count could not be read, so
+      // `?? null` carries the unknown through instead of minting a zero here.
+      journalEntries: byKey.workEntrySummary?.metrics.entries ?? null,
+      confirmations: byKey.workEntrySummary?.metrics.confirmations ?? null,
     };
   } catch {
     return null;

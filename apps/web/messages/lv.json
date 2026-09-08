@@ -4560,6 +4560,7 @@
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "Saglabātas prasmes: {skills}, apstiprinātas: {confirmed}. Tikko neizdevās nolasīt tavu dienasgrāmatas ierakstu un apstiprinājumu skaitu — tas nav tas pats, kas to neesamība. Pajautā vēlreiz pēc brīža.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",

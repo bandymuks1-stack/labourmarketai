@@ -191,8 +191,9 @@ export default async function AssistPage({
                   <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(`summaries.worker.${key}`)}
                   </dt>
+                  {/* null = not readable; an em dash, never a 0. */}
                   <dd className="text-lg font-semibold tabular-nums text-text-primary">
-                    {value}
+                    {value === null ? "—" : value}
                   </dd>
                 </div>
               ))}
