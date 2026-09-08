@@ -20,6 +20,7 @@ proven, the measurement is named; where it is only test-proven, it says so.
 | **#1652** | A trust count we could not read stops reading as *"you have none"*. | 9 tests + negative control |
 | **#1653** | The education owner-gate packet, beside the evidence one. | Docs only |
 | **#1655** | An unread count never prints as "null" on a person's CV. | 3 assertions + negative control |
+| **#1656** | "Empty" is a claim, and an unread count is not entitled to make it. | 10 tests + negative control |
 
 **None of these is HUMAN_UI_PROVEN.** They are unit/behaviour-proven and CI-green.
 The failure paths they fix are, by construction, hard to stage in a browser — a
@@ -41,6 +42,12 @@ must not appear as a number we did.
 **The lesson worth keeping:** widening a type to carry honesty moves the
 dishonesty downstream, to every renderer that assumed the value could not be
 null. Follow the type to its render sites; the compiler will not flag this one.
+
+It paid off twice. The same discipline applied to `#1656` surfaced a **fifth**
+consumer nobody had listed — the chat answer, which stated
+*"{entries} journal entries, {confirmations} of them confirmed"* from counts
+that may never have been read. There the compiler DID help, because the value
+became nullable in a position that could not accept it.
 
 ### The one thing that IS production-verified this window
 
@@ -165,11 +172,13 @@ override receipt, actual-vs-plan, learned durations).
 
 1. **The owner's two decisions** (#1646, #1648). Both unblock an actor from
    acting at all, and both are reversible.
-2. **`buildEvidenceReport` cannot express "unread".** Deferred on purpose and
-   marked at all three call sites: a failed count still reads as `0` there and
-   the section still says "empty". Widening it also moves `deriveProvenance`'s
-   classes — an evidence-semantics decision that deserves its own slice, not a
-   drive-by change.
+2. ~~`buildEvidenceReport` cannot express "unread".~~ **Done in #1656.** The
+   deferral's stated reason turned out to be wrong and was checked before
+   acting: `deriveProvenance` is called only from the player card, never from
+   the evidence report, so no evidence-semantics class moved. Following the
+   type also found a **fifth** consumer the first pass had missed — the chat
+   answer in `lib/ai-workspace/workflows.ts`, which interpolated the counts
+   into a sentence a person reads as fact.
 3. **The institution's report/export half** (EDU-6's remaining gap). Only
    sensible after #1648, because until a programme can be corrected there is
    nothing worth exporting.
