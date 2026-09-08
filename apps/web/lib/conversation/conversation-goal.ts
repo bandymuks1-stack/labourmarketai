@@ -55,6 +55,13 @@ import {
 import type { UnsupportedDimension } from "@/lib/ai-workspace/world-state-language";
 import { fold, UNICODE_WORD_BOUNDARY } from "@/lib/conversation/intent-router";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import {
+  emptyEvidenceDraft,
+  mergeEvidenceDraft,
+  type DerivedWorkReadings,
+  type StatedWorkFacts,
+  type WorkEvidenceDraft,
+} from "./evidence-goal";
 
 /**
  * ONE pattern builder, the same two corrections the router's `p()` makes —
@@ -98,6 +105,13 @@ export const GOAL_BEARING_INTENTS: ReadonlySet<ConversationIntent> = new Set([
   // VCA." Four turns, ONE capacity statement — and it must never flip into
   // "we need 20 welders" on the way.
   "offer-capacity",
+  // WORK EVIDENCE (addendum §5). "Šiandien montavau PERI klojinius." →
+  // "Sienas." → "Pats montavau." is ONE account of one day's work, and before
+  // this each sentence re-classified from scratch. It accumulates on the
+  // goal's `evidence` payload, NEVER on `filters`: what a person DID and what
+  // a person is LOOKING FOR are different questions and must not share a
+  // field. See lib/conversation/evidence-goal.ts.
+  "log-work",
 ]);
 
 /**
@@ -145,6 +159,17 @@ export interface ConversationGoal {
    * thread's own transcript is a separate, already-existing mechanism.
    */
   readonly said: readonly string[];
+  /**
+   * WORK-EVIDENCE accumulation, for a goal that is about what the person DID
+   * rather than what they are looking for.
+   *
+   * Beside `filters`, never inside it. `filters` is the discovery vocabulary
+   * (profession, country, start…); this is the evidence vocabulary (object,
+   * role, duration, quantity, context) plus the recognizer's separate derived
+   * readings. Null for every discovery goal, and `filters` stays empty for an
+   * evidence goal — neither ever holds the other's meaning.
+   */
+  readonly evidence: WorkEvidenceDraft | null;
 }
 
 /** How many sentences of one goal are kept for prefill composition. */
@@ -176,8 +201,21 @@ export function emptyGoal(intent: ConversationIntent): ConversationGoal {
     declined: [],
     useKnownState: false,
     said: [],
+    evidence: EVIDENCE_BEARING_INTENTS.has(intent) ? emptyEvidenceDraft() : null,
   };
 }
+
+/**
+ * The goals whose memory is EVIDENCE-shaped rather than search-shaped.
+ *
+ * One member today. It is a set rather than an equality check because the
+ * distinction is a property of the intent, not of `log-work` specifically:
+ * confirming work, or importing a shift, would belong here too and must not
+ * have to edit a conditional to say so.
+ */
+export const EVIDENCE_BEARING_INTENTS: ReadonlySet<ConversationIntent> = new Set([
+  "log-work",
+]);
 
 /**
  * The words this goal has been described with, as ONE sentence for a handler
@@ -436,6 +474,16 @@ export interface AdvanceGoalInput {
   readonly unsupported?: readonly UnsupportedDimension[];
   /** The sentence this turn carried — kept on the goal for prefill. */
   readonly text?: string;
+  /**
+   * What this turn added to a WORK-EVIDENCE goal, already split into what the
+   * person stated and what the recognizer derived. Ignored for discovery
+   * goals, which have no evidence payload — passing it to one cannot
+   * accidentally create one.
+   */
+  readonly evidence?: {
+    readonly stated?: Partial<StatedWorkFacts>;
+    readonly derived?: Partial<DerivedWorkReadings>;
+  };
 }
 
 /**
@@ -456,6 +504,13 @@ export function advanceGoal(input: AdvanceGoalInput): ConversationGoal | null {
       filters: mergeFilters(fresh.filters, turnFilters),
       unsupported: turnUnsupported,
       said: said ? [said] : [],
+      evidence: fresh.evidence
+        ? mergeEvidenceDraft(
+            fresh.evidence,
+            input.evidence?.stated ?? {},
+            input.evidence?.derived,
+          )
+        : null,
     };
   }
 
@@ -479,6 +534,17 @@ export function advanceGoal(input: AdvanceGoalInput): ConversationGoal | null {
     useKnownState: goal.useKnownState || kind === "use-known-state",
     said:
       carriesFacts && said ? [...goal.said, said].slice(-SAID_MEMORY) : goal.said,
+    // Evidence accumulates on exactly the turns that carry facts, by the same
+    // rule as `said`: a refusal or a bare "yes" is not part of the account of
+    // the work. A discovery goal has no payload and gets none here.
+    evidence:
+      goal.evidence && carriesFacts
+        ? mergeEvidenceDraft(
+            goal.evidence,
+            input.evidence?.stated ?? {},
+            input.evidence?.derived,
+          )
+        : goal.evidence,
   };
 
   return merged.turns > GOAL_MAX_TURNS ? null : merged;

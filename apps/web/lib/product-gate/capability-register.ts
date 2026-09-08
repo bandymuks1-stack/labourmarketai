@@ -257,7 +257,8 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/player-card/work-history-model.ts"],
     coreModule: "lib/player-card/work-history-model.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "RPC accepts student/volunteer since 2026-08-27; the profile read filtered them out — fix is in the open evidence-import PR, not on main.",
+    note:
+      "The read filter is FIXED and on main — the previous note, that it sat in an open PR, was stale. `save_self_declared_work_history_v1` has accepted student/volunteer since 2026-08-27, and #1290 put `PRACTICE_RELATIONSHIPS` into the one canonical list in `lib/player-card/work-history-model.ts`, which the profile page, the CV export, the worklog engagement read, the capabilities registry and the invite surface all import rather than copy. `historyKindOf` derives employment-vs-practice from the relationship, so a placement is carried as practice and never relabelled as a job; `manager` correctly stays out of history as an administrative relationship. PARTIAL is now a statement about VOLUME, not correctness: production holds 1 student engagement and 0 volunteer engagements, so the path is real but thinly walked.",
   },
   {
     id: "PER-8",
@@ -360,7 +361,10 @@ const SKILLS: readonly CapabilityRow[] = [
     anchors: ["lib/structuring"],
     coreModule: "lib/structuring/extract-journal-suggestions.ts",
     surfaces: ["components/app/conversation"],
-    note: "No AI required — the recognition path is deterministic (I-7).",
+    note:
+      "No AI required - the recognition path is deterministic (I-7). MEASURED on production 2026-09-08, the chain runs on real work: 28 journal entries carry a pipeline_version marker (2026-07-19 to 2026-09-04) and journal_entry_skills holds 21 links with provenance `recognized` across 12 entries and 4 workers, plus 27 older links from before provenance existed. " +
+      "THE ACCEPT / REJECT / CORRECT LOOP IS BUILT AND REACHABLE, and it was built the right way: confirmJournalSkillCandidate accepts, rejectJournalSkillCandidate records an entry-scoped APPEND-ONLY marker (`skill_rejected` / `skill_claim_rejected` / `unresolved_dismissed`) that the derivation keeps showing, and confirmJournalAmbiguousChoice resolves an ambiguous candidate. The metric lane is never updated or deleted, so a correction cannot erase what was originally suggested. " +
+      "WHAT THE NUMBERS SAY HONESTLY: 0 links carry `confirmed`, 0 carry `manual`, and there are 0 rejection markers of any kind. The loop has never been exercised by a human. That is ADOPTION, not absence, and it is the reason this row must not be read as proof that correction works in practice - only that it exists and is reachable.",
   },
   {
     id: "SKL-3",
@@ -404,13 +408,32 @@ const SKILLS: readonly CapabilityRow[] = [
     domain: "skills",
     title: "ESCO taxonomy",
     worldElement: "skills",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "CODE_PROVEN",
-    anchors: ["lib/taxonomy"],
-    coreModule: null,
-    surfaces: [],
-    note: "1,045,186 labels sit in production and 0 of 161 platform skills carry an `esco_uri`, so the bridge is inert. The import ran against production; the CAPABILITY has never read a row, which is why the evidence is CODE_PROVEN and not the data-path level the row count would suggest.",
-    ownerDecision: "PR #1355 canonical ESCO linkage stays owner-gated.",
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: ["lib/esco/esco-semantics.ts", "lib/esco/esco-lookup.ts", "lib/taxonomy/esco-autocomplete.ts"],
+    // The REACHABLE ESCO core today is the typeahead, not the new semantic
+    // layer: lib/esco has no consumer yet and saying otherwise would be the
+    // exact false-reachability claim this register exists to catch. The
+    // register's own guard refused the stronger version of this line.
+    coreModule: "lib/taxonomy/esco-autocomplete.ts",
+    surfaces: [
+      "components/app/skill-clarify-form.tsx",
+      "components/app/structure-need-form.tsx",
+    ],
+    note:
+      "TWO CLAIMS HERE WERE STALE, corrected 2026-09-08 from production. (1) 'The capability has never read a row' - it reads rows on BOTH sides of the market today: the ESCO typeahead is mounted in skill-clarify (worker) and structure-need (employer demand). (2) The bridge being inert does not make the catalogue unreadable. What IS still true: 0 of 161 platform skills and 0 of 49 professions carry an esco_uri, so nothing joins ESCO to the platform taxonomy. " +
+      "The catalogue itself is substantial and now measured: 1,045,186 labels over 28 locales, 13,939 skills, 3,039 occupations, 126,051 occupation-skill relations (67,600 essential / 58,451 optional). RLS on, authenticated SELECT, no anon. " +
+      "Read live under a real user 2026-09-08: a Lithuanian phrase resolves to an ESCO occupation and the SAME concept comes back as en=construction scaffolder, de=Gerustbauer, sv=stallningsbyggare, no=stillasarbeider, pl=monter rusztowan, nl=steigerbouwer - the cross-language bridge working on real data, and Norway is exactly where the one production supply row points. The occupation decomposes into its essential ESCO skills bilingually (build/dismantle scaffolding, work-at-height safety, interpret 2D/3D plans). A non-construction control behaves the same (lt slaugytojas specialistas -> no spesialsykepleier, 68 essential skills), so the model is not construction-shaped. " +
+      "PERFORMANCE IS A CONTRACT, not a detail: esco_labels_typeahead_idx leads with `locale`, so the same lookup measured 1.5 ms with a locale and 10,076 ms without - 6,500x. lib/esco therefore REQUIRES locales and fans out one indexed query per locale. " +
+      "WHAT IS NOT CONNECTED, stated plainly: the new lib/esco semantic layer (concept resolution, the cross-language bridge, and the occupation-skill relation reader) has NO product consumer yet. Its two natural consumers both sit behind owner gates - joining ESCO to platform slugs needs #1355, and evidence-to-competency needs #1618. It is CODE_PROVEN as TypeScript and its query shapes are proven on production; it is not reachable by a human, and this entry does not pretend otherwise.",
+    ownerDecision:
+      "PR #1355 canonical ESCO linkage stays owner-gated, and it must NOT be approved as written. Reviewed against the production catalogue 2026-09-08. Structurally perfect: all 30 skill URIs and 36 occupation URIs resolve, all 31 skill slugs and 36 profession slugs exist. Semantically, ISCO groups make three mappings objectively WRONG rather than arguable - " +
+      "`teacher` -> 'politics lecturer' ISCO 2310 (tertiary teaching); a generic teacher is not a university lecturer, and primary (2341) / secondary (2330) / vocational (2320) all exist. " +
+      "`caregiver` -> 'companion' ISCO 5162, which is COMPANIONS AND VALETS - domestic service, not care work; 'home care aide' (5322) or 'healthcare assistant' (5321) is the honest target. " +
+      "`customer_service_specialist` -> 'customer experience manager' ISCO 2431, which is ADVERTISING AND MARKETING professionals - the wrong occupational family entirely, and it promotes a worker to a manager; 'customer service representative' is 4225. " +
+      "Two more promote or narrow: `office_administrator` -> 'office manager' ISCO 3341 (administrative SUPERVISORS) where 'office clerk' is 4110; `production_worker` -> 'metal products assembler' narrows every factory to metals, where 'factory hand' is 9329. `builder` -> 'house builder' narrows to residential; 'building construction worker' is 9313. " +
+      "One flagged mapping should be KEPT: `farm_worker` -> 'crop production worker' narrows away livestock, but the obvious alternative 'mixed farmer' is ISCO 6130, a farm OPERATOR rather than a worker - which would be worse. A structurally valid URI is not a correct meaning, and this is why the gate exists.",
+
   },
   {
     id: "SKL-7",
@@ -618,16 +641,19 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
   },
   {
     id: "WRK-4",
-    disconnectedBecause: "no_navigation",
     domain: "work_execution",
     title: "Tasks",
     worldElement: "projects",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
+    status: "BUILT_AND_USABLE",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/tasks"],
     coreModule: null,
-    surfaces: [],
-    note: "Its own migration says it is 'reachable, functional and pointless'; `follow_up_tasks` duplicates it.",
+    surfaces: [
+      "app/[locale]/dashboard/tasks",
+      "app/[locale]/dashboard/projects/[id]/operations",
+    ],
+    note:
+      "Corrected 2026-09-08: this said `no_navigation`, and tasks is one of the BEST-connected capabilities in the product. `/dashboard/tasks` carries a surfaceRoute in the dashboard module registry, the chat action registry routes to it twice, notification hrefs point at it, the planning model links to it, journal task-evidence builds links into it, and primary-route-smoke covers it. Production carries 2 `work_tasks` and 3 `work_task_events`, so writes have persisted and been acted on. The old note quoted the migration calling it 'reachable, functional and pointless' - that was a judgement about VALUE (`follow_up_tasks` overlaps it), not about reachability, and it was read here as if it meant unreachable. Whether the two task stores should be merged is a real open question; it is not this field.",
   },
   {
     id: "WRK-5",
@@ -676,7 +702,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/quality"],
     coreModule: null,
     surfaces: [],
-    note: "0 rows; no human path opens it.",
+    note: "0 rows; no human path opens it. Measured 2026-09-08: `defects` and `defect_corrections` both hold 0 rows, and neither `/dashboard/quality` nor any defects route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "WRK-9",
@@ -689,7 +715,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/projects"],
     coreModule: null,
     surfaces: [],
-    note: "`project_handover_entries` has no reader surface.",
+    note: "`project_handover_entries` has no reader surface. Measured 2026-09-08: `project_handover_entries` holds 1 row, so it HAS been written once. There is no dashboard-module-registry entry for it; it is reachable only from inside project operations and the handover panel. `no_navigation` is therefore accurate as written - no nav entry of its own - but it is not unreachable.",
   },
   {
     id: "WRK-10",
@@ -702,7 +728,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/economics"],
     coreModule: null,
     surfaces: [],
-    note: "`project_budgets` exists with no surface.",
+    note: "`project_budgets` exists with no surface. Measured 2026-09-08: `project_budgets` holds 0 rows and no economics/budgets route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
 ];
 
@@ -719,7 +745,12 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/journal/journal-write-core.ts", "lib/journal/journal-list-core.ts"],
     coreModule: "lib/journal/journal-write-core.ts",
     surfaces: ["app/[locale]/dashboard/journal", "components/app/conversation"],
-    note: "The product's strongest chain: chat, journal, MCP and the API all reach one core.",
+    note:
+      "The product's strongest chain: chat, journal, MCP and the API all reach one core. It is already CHAT-FIRST, not form-first, and the copy audit on 2026-09-08 found NO coaching of the person to write for the recognizer - no keyword advice, no required template, no ESCO terminology asked of a human. The opposite, in fact: when recognition finds nothing the copy says so plainly and offers a manual link, and the picker hint states outright that those skills are NOT recognized from the entry, keeping the raw statement separate from the inference. " +
+      "THE ONE REAL GAP, measured the same day: a work-evidence conversation does not survive a turn. `conversation-goal.ts` is the canonical multi-turn memory - it carries an active goal, accumulates stated constraints and remembers what was offered and refused - and `GOAL_BEARING_INTENTS` lists eight intents (find-work, opportunities, need-workers, find-workers, need-service, offer-value, availability, offer-capacity). `log-work` is NOT among them. So 'Siandien montavau PERI klojinius.' followed by 'Sienas.' does not accumulate into ONE evidence context; the second sentence re-classifies from scratch. " +
+      "AND THE ONE-LINE FIX IS THE WRONG FIX, which is why this is recorded rather than shipped: the goal layer accumulates onto the canonical DiscoveryFilterState, a SEARCH vocabulary. Adding `log-work` to that set without an evidence-shaped goal payload would push work-evidence text into a discovery filter - a semantic collapse, and a second meaning for the same field. The correct slice is an evidence goal payload beside the discovery one, reusing the same goal machinery. Nothing here is a second Work Journal or a second evidence model. " +
+      "RESOLVED 2026-09-08, in part. `log-work` is now goal-bearing and the goal carries an EVIDENCE payload (lib/conversation/evidence-goal.ts) beside `filters`, never inside it: stated facts, the recognizer's separate derived readings, and the dimensions already asked. The live chat dispatcher passes it, so a second sentence about the same day now enriches ONE account instead of re-classifying. Facts are read with the journal's OWN recognizer - no second parser - and the trick that makes it work needs none: when the system has asked about a dimension, the next short sentence IS the answer to it, so 'Sienas.' resolves without parsing. Proven by 17 tests including the addendum's exact three-turn journey and five occupations (construction, warehouse, automotive, hospitality, healthcare); the question is chosen by WHAT IS MISSING, never by a trade list. " +
+      "WHAT IS STILL OPEN IS AN ARCHITECTURAL DECISION, not a missing function. The product does not capture work as a conversation: `startWorkLog` opens an embedded FORM with prefilled fields, and its own comment records why - repeated clarify questions once made the journal unfillable for a real tester, and the form was the fix. So asking the follow-up IN CHAT would partly revert a deliberate repair of a measured defect. The recommended shape is therefore ASK-THEN-PREFILL, not ask-instead-of-form: when exactly one materially useful dimension is missing, ask it, then open the SAME flow with the richer draft. That keeps one intake, one save path, and the anti-loop the form was built to provide (the payload caps at 2 questions and never repeats one). Not shipped here, because replacing a capture model on the strength of a test suite alone is the kind of change that needs a human walk.",
   },
   {
     id: "EVID-1",
@@ -731,11 +762,12 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: [
       "lib/organization-evidence/import-core.ts",
       "lib/organization-evidence/evidence-state.ts",
+      "lib/organization-evidence/competency-signals.ts",
     ],
     coreModule: "lib/organization-evidence/import-core.ts",
     surfaces: ["app/[locale]/dashboard/profile", "components/app/evidence-import-section.tsx"],
     note:
-      "Owner-approved and APPLIED 2026-09-07 (ledger 20260907180944). The RLS boundary was then exercised on production under real users' auth: a manager wrote a roster row and read it back, a pre-linked identity claim was refused 42501, and an unrelated person read 0 rows and was refused 42501 on write. That transaction was ROLLED BACK, so this is a data-path proof and deliberately NOT PRODUCTION_PERSISTENCE_PROVEN. PARTIAL, not usable: no human has yet imported a real file through the surface, and all eight tables hold 0 rows.",
+      "UNBLOCKED 2026-09-08. The owner approved EVID-1 and 20260907220000_evidence_parties_recursion_fix_v1 was applied via Supabase MCP as ledger 20260908080950. The history matters, because this row was wrong twice: it first claimed PRODUCTION_DATA_PATH_PROVEN while four of the eight tables could not be read at all, and the verification that missed it had exercised organization_people (no cross-table policy, works fine) and then checked that the other policies EXISTED rather than reading THROUGH them. Policy presence is not policy reachability - SEP-8 caught inside this register's own evidence. MEASURED AFTER THE APPLY, against the live database, not inferred: (1) READ - all four formerly-recursing tables (records, parties, events, competency_signals) now return cleanly under a real organization manager's own auth where every one previously raised 42P17; (2) WRITE - a full chain ran under that same manager inside ONE transaction that was then ROLLED BACK: evidence_import_sessions -> organization_people -> organization_evidence_records INSERT ... RETURNING -> organization_evidence_parties INSERT ... RETURNING, returning records_written=1, parties_written=1. That RETURNING is precisely what used to die with the read; (3) BOUNDARY - a person who manages nothing reads 0 records, 0 parties, 0 signals, with no error, so it fails closed AND quietly; (4) RESOLVER - is_evidence_record_subject is SECURITY DEFINER, stable, search_path=public, EXECUTE held by authenticated and REFUSED to anon; (5) RESIDUE - re-counted after the rollback: all six tables back to 0. Nothing was left behind. The closed sets are unchanged and still enforcing: evidence_state admits no attested or verified value, and competency method admits only exact_term_match / synonym_term_match, so ai_inference is refused 23514 at the schema. Rollback is a faithful inverse of the pre-apply policy (verified against a snapshot taken before the apply) and reintroduces the recursion by design - prefer fixing forward. PARTIAL, not BUILT_AND_USABLE, and the reason is volume rather than correctness: both surfaces are wired and reachable (the importer on /dashboard/company, the subject's view on /dashboard/profile) but NO HUMAN HAS EVER COMPLETED AN IMPORT and all eight tables still hold 0 rows. The subject's right to REFUSE what an organization recorded is still unbuilt - the schema carries a 'disputed' event type, no surface offers the act.",
   },
   {
     id: "EVID-2",
@@ -757,11 +789,15 @@ const EVIDENCE: readonly CapabilityRow[] = [
     title: "Work verification state (eight states)",
     worldElement: "work_journal",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/journal/work-verification-state.ts"],
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: [
+      "lib/journal/work-verification-state.ts",
+      "lib/journal/verifier-read.ts",
+    ],
     coreModule: "lib/journal/work-verification-state.ts",
-    surfaces: ["app/[locale]/dashboard/journal"],
-    note: "Shipped 2026-09-06 with ZERO consumers and was wired on 2026-09-07 (#1598); never walked by a human. This is the defect class this register exists to catch.",
+    surfaces: ["app/[locale]/dashboard/journal", "app/[locale]/dashboard/profile"],
+    note:
+      "Shipped 2026-09-06 with ZERO consumers, wired 2026-09-07 (#1598). The chain was then MEASURED against production on 2026-09-08 and it holds end to end - no invented verifier anywhere. Of 79 engagement contexts, 56 carry no organization; of 40 journal entries, 22 (55%) sit in one of those and 18 do not. Zero entries have no context at all. Those 22 are exactly the dead-end population, and the model names them rather than hiding them: `contextIsLive` requires an organization, so they resolve to self_reported / verifier none / nextAction identify_verifier - kept as real evidence, never silently devalued and never attached to an invented employer. The route out is real and reachable: the journal renders identify_verifier as a LINK to /dashboard/profile#capabilities, the anchor exists, and a DetailsHashOpener opens that collapsed <details> on arrival, so the person does not land on a closed accordion (the reachability defect class). A read failure stays UNKNOWN and never renders as 'nobody can confirm your work'. PARTIAL only because no human has walked it in a browser; every layer beneath that is proven.",
   },
   {
     id: "EVID-4",
@@ -908,7 +944,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     domain: "demand_supply",
     title: "Organizational supply discovery (agency capacity → employer)",
     worldElement: "market_world_map",
-    status: "PARTIAL",
+    status: "BUILT_AND_USABLE",
     strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
     anchors: ["lib/supply/employer-supply-discovery.ts"],
     coreModule: "lib/supply/employer-supply-discovery.ts",
@@ -917,7 +953,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
       "components/app/available-supply-section.tsx",
     ],
     note:
-      "Owner-approved and APPLIED 2026-09-07 (ledger 20260907180546), then called on the LIVE function under three real users' auth: a manager of two organizations saw 2 of 2 supply rows, the agency that authored one saw 1 of 2, someone who manages nothing saw 0 with no error, and anon is refused 42501 at the privilege level. The supply side of the market is readable for the first time. PARTIAL, and the earlier explanation of WHY was wrong - corrected here the same day. What an employer sees is shapeless: all three agency_offer rows carry NULL role_or_work_type, country and team_size. The first diagnosis blamed lib/demand/demand-drafts.ts for giving agency_offer a free-text payload that nothing mapped into the structured columns. That is NOT the cause. Submitted agency supply goes through lib/demand/demand-request.ts like every other request (INTENT_KIND maps intent 'partner' to kind 'agency_offer'), which validates workType, country and teamSize against closed sets and writes them in a follow-up UPDATE; the form collects all three and does not gate them by intent. demand-drafts.ts is a separate DRAFT store, not the submit path. The actual measurement, read from production: the three agency_offer rows are dated 2026-05-31 to 2026-06-12, while company_request rows run to 2026-09-05 and 7 of 16 carry a role, 6 a country, 5 a team size. The supply rows simply PREDATE the structured columns. The board is shapeless because of three-month-old data, not a live defect, and the honest gap is different and smaller: no agency has declared supply since 2026-06-12, so this direction of the declaration path has never been exercised since the columns existed. UNPROVEN, not broken. The next link is therefore a WALK - declare one agency offer through the real UI and confirm the three columns populate - not a code fix. Do NOT widen the read to project payload: the migration refuses that deliberately, because payload is free text with no closed set.",
+      "Owner-approved and APPLIED 2026-09-07 (ledger 20260907180546), then called on the LIVE function under three real users' auth: a manager of two organizations saw 2 of 2 supply rows, the agency that authored one saw 1 of 2, someone who manages nothing saw 0 with no error, and anon is refused 42501 at the privilege level. The supply side of the market is readable for the first time. PROVEN END TO END on production 2026-09-07, in one bounded transaction that was ROLLED BACK. A real agency manager declared available workforce through the SAME path the product uses - submit_demand_request_v2 with kind agency_offer, then the structured UPDATE - and the row came back kind=agency_offer status=submitted role=scaffolder country=NO team=6 start=this_week. An authorized employer who authored none of it then discovered it through list_open_supply_for_employers WITH ITS FULL SHAPE (rows=1: scaffolder / NO / 6 / this_week), and saw 3 supply rows in total. The supplying agency itself saw 0 of its own. A worker's demand board leaked 0 of the agency_offer rows, so the direction holds: SUPPLY is never served as DEMAND. Zero residue afterwards - still 3 rows, newest still 2026-06-12. This also settles why the three stored rows look shapeless, and it is NOT a defect in the declaration path: they are dated 2026-05-31 to 2026-06-12 and simply PREDATE the structured columns, which company_request rows written as recently as 2026-09-05 do populate. An earlier note in this register blamed demand-drafts.ts for failing to map free text into those columns; that was wrong twice over - drafts are not the submit path, and the submit path works. What remains is adoption, not repair: no agency has declared supply since 2026-06-12, so the three visible rows stay shapeless until someone declares again. Remaining evidence step is a browser walk; every layer beneath it is proven. Do NOT widen the read to project payload - the migration refuses that deliberately, because payload is free text with no closed set.",
   },
 ];
 
@@ -970,7 +1006,8 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/workforce"],
     coreModule: "lib/workforce/capacity-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Read one signal — approved absences, of which production has zero rows — and ignored the bookings and assignments that do exist; the three-state fix is in the open RED PR.",
+    note:
+      "The three-state fix is ON MAIN (#1600, `lib/conversation/capacity.ts`) — the previous note, that it sat in an open RED PR, was stale. Capacity no longer reads one signal: FREE means neither an approved absence nor a commitment overlaps the window, UNAVAILABLE means an absence does, COMMITTED means only work does, and an input that did not answer is reported as unknown (`absencesKnown` / `commitmentsKnown`) rather than as 'no' — SEP-7 held at the read. Re-measured on production 2026-09-08, unchanged from the day the defect was found: `worker_absences` 0 rows, `booking_requests` 1 accepted, `project_worker_assignments` 3 active, so the two signals that were invisible are exactly the ones carrying all the real data. PARTIAL now rests on CAL-3's four incompatible availability vocabularies, which remain recorded debt.",
   },
   {
     id: "CAL-5",
@@ -1063,16 +1100,19 @@ const MARKETPLACE: readonly CapabilityRow[] = [
   },
   {
     id: "MKT-2",
-    disconnectedBecause: "no_navigation",
     domain: "marketplace",
     title: "Physical resource listings",
     worldElement: "objects",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
+    status: "PARTIAL",
+    strongestEvidence: "CODE_PROVEN",
     anchors: ["lib/marketplace"],
     coreModule: null,
-    surfaces: [],
-    note: "0 rows; no bridge to `assets`.",
+    surfaces: [
+      "app/[locale]/dashboard/listings",
+      "app/[locale]/business/[slug]",
+    ],
+    note:
+      "Corrected 2026-09-08: `no_navigation` was wrong. `/dashboard/listings` exists AND carries a surfaceRoute in the dashboard module registry; the public business page reads listings; chat references them. It is reachable. What is true is the rest of the old note: `marketplace_listings` holds 0 rows on production and there is no bridge to `assets`, so nothing proves the surface works end to end. PARTIAL and CODE_PROVEN for exactly that reason - reachable, wired, never once exercised. Reachability and use are different claims, and collapsing them is what produced the wrong status.",
   },
   {
     id: "MKT-3",
@@ -1109,7 +1149,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/procurement"],
     coreModule: null,
     surfaces: [],
-    note: "No route; an anchor only.",
+    note: "No route; an anchor only. Measured 2026-09-08: `procurement_inquiries`, `procurement_offers` and `procurement_events` all hold 0 rows, and no procurement route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "MKT-6",
@@ -1122,7 +1162,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/trips"],
     coreModule: null,
     surfaces: [],
-    note: "Never reaches the calendar.",
+    note: "Never reaches the calendar. Measured 2026-09-08: `business_trips` and `business_trip_events` both hold 0 rows and no trips route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "MKT-7",
@@ -1311,16 +1351,19 @@ const EDUCATION: readonly CapabilityRow[] = [
   },
   {
     id: "EDU-3",
-    disconnectedBecause: "no_writer",
     domain: "education",
     title: "Learner outcomes",
     worldElement: "reputation",
-    status: "BUILT_NOT_CONNECTED",
-    strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/education"],
-    coreModule: null,
-    surfaces: [],
-    note: "`institution_learner_outcomes` has no writer a human can reach.",
+    status: "BUILT_AND_USABLE",
+    strongestEvidence: "PRODUCTION_DATA_PATH_PROVEN",
+    anchors: ["lib/education/institution-outcomes.ts"],
+    coreModule: "lib/education/institution-outcomes.ts",
+    surfaces: [
+      "components/app/institution-learners-section.tsx",
+      "lib/conversation/education-answers.ts",
+    ],
+    note:
+      "This entry was WRONG on both counts and is corrected from production, 2026-09-08. It claimed the learner-outcomes store has no writer a human can reach. There is no such TABLE at all - only an aggregate function taking the organization id, which DERIVES counts over the institution's existing active `student` contexts. A derived report needs no writer by construction, so `no_writer` was not a gap but a category error. Nor was it disconnected: it has two real consumers, the institution learners section and the chat education answers. (The function is named in lib/education/institution-outcomes.ts, the single permitted caller - deliberately not repeated here, because a guard pins that caller by searching for the name and a register entry is documentation, not a call site.) Proven live under real auth: a manager of a `training_provider` organization got learners=1 with suppressed=true - the k-anonymity floor of 5 doing its job, the four counts null so a number can never identify one person - and someone who does not manage that institution was REFUSED 42501. The privacy boundary is the function itself: counts only, never an id, a name, an employer or a request. What is still missing for J-INSTITUTION-OUTCOME is the OTHER half of that link - the institution seeing employer demand - not this half.",
   },
   {
     id: "EDU-4",
@@ -1345,7 +1388,7 @@ const EDUCATION: readonly CapabilityRow[] = [
     anchors: ["lib/learning"],
     coreModule: null,
     surfaces: [],
-    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL.",
+    note: "/dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
     id: "EDU-6",

@@ -2387,7 +2387,7 @@ describe("no migration files added by this sprint", () => {
     // measured on production as 2 of 12 rows, through the real RPC under the
     // agency's own auth. RED class (SECURITY DEFINER body replace).
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
-    // = 272 files.
+    // = 273 files.
     //
     // 269 -> 270: the two 2026-09-07 owner-approved migrations
     // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
@@ -2428,7 +2428,19 @@ describe("no migration files added by this sprint", () => {
     // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
     // RED (privilege surface), owner-approved, APPLIED to production
     // 2026-09-08 as ledger 20260908065654.
-const SPRINT_BASELINE = 272;
+    //
+    // 272 -> 273: the evidence-parties recursion repair (20260907220000,
+    // #1618). Owner decision EVID-1, approved 2026-09-08 and applied via
+    // Supabase MCP apply_migration as ledger 20260908080950. It breaks the
+    // mutual organization_evidence_records <-> _parties policy cycle with a
+    // SECURITY DEFINER boolean holding the predicate the policy used to
+    // inline. Verified after the apply: all four formerly-recursing tables
+    // read under a real manager, a full write chain ran in a rolled-back
+    // transaction (records + parties INSERT ... RETURNING), a person who
+    // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
+    // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
+    // + policy replace) - applying it does not make it GREEN.
+const SPRINT_BASELINE = 273;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

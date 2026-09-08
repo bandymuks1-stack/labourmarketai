@@ -1238,6 +1238,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // new tables with explicit GRANTs are not made GREEN by a marker.
       "20260907114500_organization_evidence_import_v1.sql",
       "20260907153000_employer_supply_discovery_v1.sql",
+
+      // 2026-09-07, APPROVED AND APPLIED 2026-09-08 (owner decision EVID-1).
+      // The marker began as a risk ACKNOWLEDGEMENT with no decision behind it;
+      // the owner then approved it by name and it was applied via Supabase MCP
+      // apply_migration as ledger 20260908080950. Verified afterwards against
+      // production: all four formerly-recursing tables read, a full write chain
+      // ran in a rolled-back transaction, and residue was re-counted at 0. RED
+      // (SECURITY DEFINER + policy replace) - a marker never makes it GREEN.
+      "20260907220000_evidence_parties_recursion_fix_v1.sql",
       // 2026-09-08: the recipient-discovery half of the same repair (RED:
       // GRANT = privilege-surface change, gate rule h). The write grant alone
       // left the cron returning 503 - the sweep could not READ

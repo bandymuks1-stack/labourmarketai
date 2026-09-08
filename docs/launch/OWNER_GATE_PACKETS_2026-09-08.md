@@ -1,0 +1,166 @@
+# Owner-decision packets — 2026-09-08
+
+Three RED drafts are open and none may be self-approved by an agent. Each was
+re-verified against **production** on 2026-09-08 rather than taken from the
+branch description, because a previous window's status claims had drifted from
+what the database actually contains.
+
+Nothing in this document has been applied. Production is unchanged.
+
+---
+
+## EVID-1 — PR #1618 · the RLS recursion that takes the evidence import down
+
+**Migration** `20260907220000_evidence_parties_recursion_fix_v1`
+**Class** RED — a new `SECURITY DEFINER` function plus one policy replacement.
+
+### The defect, re-measured on production 2026-09-08
+
+Confirmed still live, unchanged:
+
+* `organization_evidence_records_select` subqueries `..._parties`, and
+  `organization_evidence_parties_select` subqueries `..._records`. The cycle is
+  mutual, so four of the import's eight tables raise
+  `42P17 infinite recursion detected in policy` on **every read**:
+  records, parties, events, competency_signals.
+* The resolver `is_evidence_record_subject` **does not exist** (`to_regprocedure`
+  returns null) — the earlier production proof was rolled back as documented.
+* All eight tables hold **0 rows**.
+
+This takes the import **down**, not merely degrades it: `commitImport` ends in a
+`.select()`, and an `INSERT ... RETURNING` must evaluate the SELECT policy, so
+the write dies with the read.
+
+### What the schema already has (applied, ledger `20260907180944`)
+
+The import schema itself is live and its guarantees are enforcing:
+
+* `organization_evidence_records_evidence_state_check` admits only
+  SELF_REPORTED, ORGANIZATION_REPORTED, LEGACY_IMPORTED, UNVERIFIED, NEEDS_REVIEW
+  — **an import cannot write an attested or verified state** (SEP-3 held at the
+  schema, not by code convention).
+* `organization_evidence_competency_signals_method_check` admits only
+  `exact_term_match` and `synonym_term_match` — `ai_inference` is refused 23514.
+  Inference cannot masquerade as evidence.
+
+The engine, both transports and the commit gate are **on main** (#1600).
+
+### The change
+
+One `SECURITY DEFINER` boolean, `is_evidence_record_subject(uuid)`, holding the
+*exact* predicate the parties policy previously inlined — caller is the roster
+record's `linked_profile_id` **and** the link is `linked`. The parties policy
+then calls it instead of re-entering `organization_evidence_records`, so
+`records → parties → (no further policy)`.
+
+**Nothing widens.** The function takes a record id and returns a boolean: no
+rows, no columns. `authenticated` only; `public` and `anon` revoked by name.
+`organization_evidence_records_select` is not touched. The alternative —
+widening a policy — would expose whole rows instead of one boolean, so this is
+the narrower choice, not the looser one.
+
+### Impact of NOT applying
+
+The organization evidence import is the shared spine of four actors: a company
+importing its own historical work, an agency importing assignments, an
+institution recording practice, and the **person the records are about**. The
+subject's own read is the branch the recursion kills, so today the one party who
+most needs to see what an organization recorded about them is precisely who
+cannot.
+
+### Risk / rollback
+
+Non-destructive: replaces one SELECT policy, adds one function. No table,
+column, row, or grant on an existing object is altered, and there is no data to
+lose (0 rows). Rollback:
+`supabase/rollbacks/20260907220000_evidence_parties_recursion_fix_v1.down.sql`.
+
+**Recommendation: APPLY.** Highest severity of the three, blocks four actors,
+and is the only one of the three whose absence takes a shipped capability from
+degraded to dead.
+
+---
+
+## #1566 — `notification_events` service-role write grant
+
+**Class** RED — a grant.
+
+### State
+
+The emitters have failed `42501` since July: `service_role` holds no write grant
+on `notification_events`. Recorded in memory as a real miss (1 of 5 signals
+never delivered live).
+
+**Not re-proven in this window.** The branch carries a documented
+reproduce-and-roll-back on production. It needs a fresh measurement before
+apply, and the packet should not claim more than was measured today.
+
+### Impact of NOT applying
+
+Notifications are the product's only asynchronous path to a human who is not
+currently looking at the screen — an interest expressed, a booking proposed, a
+confirmation requested. Every one of those is a cross-actor handoff, so a dead
+emitter degrades the loop between actors rather than one actor's surface.
+
+**Recommendation: re-measure, then apply.** A grant is reversible and narrow.
+
+---
+
+## #1635 — six wrong ESCO mappings corrected, two left unresolved
+
+**Migration** `20260830100000_esco_canonical_linkage_67`
+**Class** RED — taxonomy data, unapplied.
+
+### State
+
+Removes mappings that were confidently wrong, notably a generic *teacher* that
+mapped to a tertiary **politics lecturer**, and a generic *caregiver* that
+mapped to **companions/valets**. Two ambiguous cases are deliberately left
+unmapped rather than guessed.
+
+### Why the direction matters more than the coverage
+
+ESCO is a semantic interoperability layer, not a score and not permission to
+guess. A wrong mapping is worse than an absent one: it tells a person the system
+has understood them when it has not, and it propagates into matching. *Unknown*
+is the correct answer for an ambiguous occupation; *confidently wrong* is the
+defect this migration removes.
+
+**Recommendation: APPLY.** It removes false positives and adds no new claim.
+Taxonomy-only, reversible, no privilege change.
+
+---
+
+## Also open, and correctly gated
+
+Verified on production 2026-09-08, still real, still owner-only:
+
+| Gate | Verified state |
+|---|---|
+| **EVID-6** | **Confirmed live.** `experience_responses_select`'s subquery over `experience_records` resolves `moderation_status` to the **record's**, never the reply's own — both tables have the column. An experience author can therefore read a reply moderation has not published. The surface withholds it today, so this is defence-in-depth, but the policy is wrong and correcting it is a schema change. |
+| **EVID-2** | **Re-measured 2026-09-08:** `journal_entry_confirmations` holds 13 confirmations, of which **3 are self-confirmed** (the entry's own worker is the confirmer). Self-confirmation is not blocked; classification is the weaker mitigation. SEP-3 holds only because the tier ladder distinguishes them — the write itself is permitted. |
+| **PER-11** | `external_profiles` does **not** exist on production — nothing applied, decision genuinely open. |
+| **ORG-2** | `organization_roles` **does** exist; the seven gates still read the industry lock. The decision is whether to migrate them, not whether the table is there. |
+| **MKT-7** | Two independent owner acts arm real charging. Untouched. |
+| **GOV-1 / GOV-3** | Environment and fixture-strategy decisions, not code. |
+
+## Not a code gap — record as blocked, do not "fix"
+
+* `auth_leaked_password_protection` — **BLOCKED_BY_PLAN**. The current Supabase
+  plan rejects it. This is not unfinished work.
+* The nine `anon`-executable `SECURITY DEFINER` functions in the advisor output
+  are the **intentional public surface** (public vacancy counts, public business
+  profile/listings/services). Revoking them would break anonymous browsing.
+  Deliberate; previously confirmed as findings that must not be "fixed".
+
+## Supabase usage limits
+
+The earlier "exceeding usage limits" signal is dominated by database size.
+**Measured 2026-09-08:** public schema totals **820 MB**, of which **806 MB
+(98.3%)** is ESCO plus vacancy tables — up from 789 MB / 96.6% on 2026-09-02, so
+the concentration is still growing. Product data is a rounding error against it.
+The lever is
+data lifecycle (the ESCO locale prune and unused-index drop already drafted in
+#1421), not a plan purchase. **No plan should be bought to resolve this**; if a
+paid tier is ever the answer it is an owner act, recorded here as a
+recommendation only.

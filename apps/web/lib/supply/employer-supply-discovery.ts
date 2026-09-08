@@ -34,10 +34,22 @@ import { createClient } from "@/lib/supabase/server";
  * function itself, not from a check here.
  *
  * ── HONEST STATES ──────────────────────────────────────────────────────────
- * The migration behind this ships owner-gated and is NOT applied. `needs
- * -migration` is therefore a real, expected state today, and it is reported as
- * itself — never as "no workforce is available", which would be a lie about
+ * The migration behind this is APPLIED to production (owner-approved 2026-09-07
+ * as decision DEM-9, ledger version `20260907180546`). `needs-migration` is
+ * therefore no longer the expected state on production — but it is KEPT, and
+ * must be, because it is still the truth in any environment where the function
+ * is absent (a fresh local reset, a preview branch, a rollback). It is reported
+ * as itself — never as "no workforce is available", which would be a lie about
  * the market rather than a fact about this environment (#1314, §54).
+ *
+ * VERIFIED AGAINST THE LIVE FUNCTION, 2026-09-08, under four real auth
+ * contexts: a manager of two organizations who authored neither row read 2 of
+ * 2; the agency that authored one read 1 of 2 (self-exclusion); a manager of
+ * one organization read 2 of 2; a person who manages nothing read 0 with no
+ * error; `anon` is refused `42501` at the privilege level rather than filtered
+ * inside the body. Authorization fails closed AND quietly, which is what lets
+ * the empty state below be rendered without distinguishing "no supply" from
+ * "not allowed".
  */
 
 /** The gated read's row, as the product reads it. */

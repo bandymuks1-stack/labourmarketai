@@ -802,7 +802,7 @@ describe("NO new DB migration in this PR", () => {
     // the fifth surface of the market-direction defect class, found by
     // sweeping every SECURITY DEFINER reader of customer_requests.
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
-    // = 272 files.
+    // = 273 files.
     //
     // 269 -> 270: the two 2026-09-07 owner-approved migrations
     // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
@@ -842,8 +842,20 @@ describe("NO new DB migration in this PR", () => {
     // NOT implicated: the email hop runs only after a successful insert, is
     // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
     // RED (privilege surface), owner-approved, APPLIED to production
-    // 2026-09-08 as ledger 20260908065654.
-    expect(count).toBeLessThanOrEqual(272);
+    // 2026-09-08 as ledger 20260908065654.    //
+    // 272 -> 273: the evidence-parties recursion repair (20260907220000,
+    // #1618). Owner decision EVID-1, approved 2026-09-08 and applied via
+    // Supabase MCP apply_migration as ledger 20260908080950. It breaks the
+    // mutual organization_evidence_records <-> _parties policy cycle with a
+    // SECURITY DEFINER boolean holding the predicate the policy used to
+    // inline. Verified after the apply: all four formerly-recursing tables
+    // read under a real manager, a full write chain ran in a rolled-back
+    // transaction (records + parties INSERT ... RETURNING), a person who
+    // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
+    // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
+    // + policy replace) - applying it does not make it GREEN.
+
+    expect(count).toBeLessThanOrEqual(273);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

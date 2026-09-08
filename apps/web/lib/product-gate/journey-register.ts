@@ -16,9 +16,19 @@
  * So a journey is declared as an ORDERED CHAIN, and every link carries its own
  * honest state. A link may be `LIVE`, `BROKEN` or `NOT_BUILT` — and `BROKEN`
  * and `NOT_BUILT` must say why, in words, in the file. The guard
- * (`lib/guards/product-graph-journeys.test.ts`) enforces the direction that
- * matters: a link claiming to be LIVE whose capabilities are not live in the
- * register is a CI failure. Nobody can mark a chain green by hoping.
+ * (`lib/guards/product-graph-journeys.test.ts`) enforces BOTH directions:
+ *
+ *   · a link claiming LIVE whose capabilities are not live is a CI failure —
+ *     nobody can mark a chain green by hoping;
+ *   · a link claiming BROKEN or NOT_BUILT that is REDDER than every capability
+ *     under it is also a CI failure — added 2026-09-08, after five steps had
+ *     drifted that way while CI stayed green.
+ *
+ * The second direction was missing for a reason worth remembering: underclaiming
+ * feels safe. It is not. `product-truth.mjs` prints these steps as "the real
+ * backlog", so a stale BROKEN tells the owner and every future agent that
+ * something which works does not — and it lets the two registers contradict
+ * each other in the one place the product records its own status.
  *
  * Journey ids are PERMANENT. A journey is retired by recording a retirement,
  * never by deleting it — a deleted journey is a product that got smaller with
@@ -47,6 +57,14 @@ export interface JourneyStep {
   readonly because?: string;
   /** The strongest proof this specific step has actually reached. */
   readonly proof?: string;
+  /**
+   * Deliberate acknowledgement that this BROKEN step's every capability is
+   * BUILT_AND_USABLE, so the break is in the CONNECTION between them and not
+   * in any one part. The guard demands it, because the far commoner cause of
+   * that shape is a stale step: five of them were on 2026-09-08. Setting it
+   * means `because` must name what fails BETWEEN the capabilities.
+   */
+  readonly breakIsBetweenCapabilities?: true;
 }
 
 export interface Journey {
@@ -147,9 +165,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "It sees who is free and who is committed",
         capabilities: ["CAL-4", "CAL-3"],
-        link: "BROKEN",
-        because:
-          "Capacity read one signal — approved absences, of which production has zero rows — and ignored the accepted bookings and active assignments that do exist. The three-state fix is written and sits in the open RED PR, unapplied.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — the three-state read is on main (`lib/conversation/capacity.ts`, #1600) and consults all three signals, not one. Re-measured on production 2026-09-08 and unchanged from the day the defect was found: `worker_absences` 0 rows, `booking_requests` 1 accepted, `project_worker_assignments` 3 active. FREE means neither an absence nor a commitment overlaps the window, UNAVAILABLE means an absence does, COMMITTED means only work does — and an input that did not answer is reported as unknown (`absencesKnown` / `commitmentsKnown`), never as 'no'. CAL-3's four availability vocabularies remain recorded debt, which is why the capability stays PARTIAL while this step is live.",
       },
       {
         step: "It records a need",
@@ -160,9 +178,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "It discovers external supply for that need",
         capabilities: ["DEM-9", "DEM-5"],
-        link: "BROKEN",
-        because:
-          "An employer cannot read declared agency capacity at all: `customer_requests_select` is own-row/admin/org-demand-access. The gated reader was proven in a production transaction under three real users and rolled back; its migration is unapplied.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_RPC_PROVEN — the reader is no longer a rolled-back candidate. `20260907153000_employer_supply_discovery_v1` was owner-approved (DEM-9, gate HG-2026-09-07) and APPLIED as ledger `20260907180546`, and the app half shipped on main in #1600 (`lib/supply/employer-supply-discovery.ts` → `AvailableSupplySection`, rendered unconditionally near the top of the scouting page so an employer with no demand of their own still sees it). Re-measured against the LIVE function on 2026-09-08 under four real auth contexts: a manager of two organizations who authored neither row saw 2 of 2; the agency that authored one saw 1 of 2 (self-exclusion holds); a manager of one organization saw 2 of 2; a person who manages nothing saw 0 with no error; `anon` is refused `42501` at the privilege level, not merely filtered. DEM-5 stays PARTIAL — matching that supply to the need is the weaker half, discovery is not.",
       },
       {
         step: "Work is executed and reported",
@@ -193,15 +211,16 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Every surface reads that direction correctly",
         capabilities: ["DEM-2"],
-        link: "BROKEN",
-        because:
-          "Every own-rows surface now classifies direction: the two boards (#1588/#1596), then the market map, the org demand rollup, the scouting list and the chat starter count (2026-09-07). What is left is not a surface at all — `list_open_demand_for_workers` does not return `kind`, so the worker board and the map's worker leg have nothing to classify. That half needs the owner-gated migration 20260906140000, and until it is applied this step is not honestly LIVE.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_RPC_PROVEN — the database half is applied. Every own-rows surface classifies direction (#1588/#1596, then the market map, the org demand rollup, the scouting list and the chat starter count), and the half that was missing — `list_open_demand_for_workers` having no `kind` to classify — closed when `worker_board_excludes_supply_v1` was applied as ledger `20260906194911` (with `agency_board_excludes_supply_v1` as `20260906202628`). Re-measured on production 2026-09-08 under a real worker's auth: the board served 7 rows and leaked 0 of the 3 `agency_offer` rows. SUPPLY is never served as DEMAND, on the surfaces or under them.",
       },
       {
         step: "An authorized employer can discover that supply",
         capabilities: ["DEM-9"],
-        link: "BROKEN",
-        because: "Same unapplied reader as J-COMPANY-EXECUTION. Today only the declaring agency can read its own declaration.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_RPC_PROVEN — same applied reader as J-COMPANY-EXECUTION (ledger `20260907180546`), re-verified 2026-09-08. It is no longer true that only the declaring agency can read its own declaration: a real employer who authored none of the rows read 2 of 2, and the declaring agency is excluded from its own. What an employer learns is deliberately six non-identifying columns — work type, country, team size, start, duration, declared-at — never the supplying organization's name, profile, notes or contact. Making contact stays a separate consented act, and this read creates no path to one.",
       },
       {
         step: "Supply meets a real need",
@@ -251,9 +270,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "A learner's practice is recorded as real work on their own profile",
         capabilities: ["PER-7", "EVID-0"],
-        link: "BROKEN",
-        because:
-          "The RPC has accepted student/volunteer relationships since 2026-08-27 and the profile read filtered them out; the fix is in the open PR, not on main.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — the filter fix merged as #1290 and is on main. `PRACTICE_RELATIONSHIPS` (student, volunteer) sits in the ONE canonical list in `lib/player-card/work-history-model.ts`, and every consumer reads it rather than a copy: the profile page, the CV export, the worklog engagement read, the capabilities registry and the invite surface. `historyKindOf` derives employment-vs-practice from the relationship and never guesses, so a placement is carried as practice rather than relabelled as a job. Production holds 1 `student` engagement, so the path has real data under it. PER-7 stays PARTIAL on volume, not on correctness — one learner is not yet a proven vertical.",
       },
       {
         step: "Practice becomes evidence and then competency",
@@ -270,8 +289,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "The institution sees employer demand and reports outcomes",
         capabilities: ["EDU-3", "EDU-6"],
-        link: "NOT_BUILT",
-        because: "Outcomes have no writer a human can reach and there is no report or export at all.",
+        link: "BROKEN",
+        because:
+          "Half of this link is live, so NOT_BUILT was wrong — and the old reason ('outcomes have no writer a human can reach') was itself corrected on the capability side on 2026-09-08 and never here. Outcomes (EDU-3) need no writer by construction: there is no outcomes TABLE, only an aggregate that DERIVES counts over the institution's existing active `student` contexts, and it has two real consumers — the institution learners section and the chat education answers. Proven live under real auth: a manager of a training_provider organization got learners=1 with suppressed=true, the k-anonymity floor of 5 nulling the four counts so a number can never identify one person; a non-manager was REFUSED 42501. What is genuinely absent is the OTHER half (EDU-6, MISSING): an institution cannot see employer demand, and there is no report or export. Until that exists an institution can measure itself but cannot aim at the labour market, which is the whole point of the chain.",
       },
     ],
   },
@@ -290,22 +310,23 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "An organization imports its own historical work records",
         capabilities: ["EVID-1"],
-        link: "NOT_BUILT",
-        because:
-          "The engine, the schema, both transports and the commit gate are written and sit in the open RED PR. Nothing is on main and nothing is applied to production. It is owner decision 1 of window 10.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — the recursion that took this down is repaired. The owner approved EVID-1 on 2026-09-08 and `20260907220000_evidence_parties_recursion_fix_v1` was applied as ledger `20260908080950`. Measured against the live database afterwards: all four formerly-recursing tables now read cleanly under a real organization manager where each previously raised `42P17`, and the full write chain ran under that same manager in ONE transaction that was then ROLLED BACK — sessions → people → records `INSERT ... RETURNING` → parties `INSERT ... RETURNING`, returning 1 and 1. Zero residue: all six tables re-counted at 0 afterwards. Both surfaces are reachable — the importer on `/dashboard/company`, the subject's view on `/dashboard/profile`. LIVE describes the CHAIN; EVID-1 stays PARTIAL because no human has yet completed an import and all eight tables still hold 0 rows.",
       },
       {
         step: "An import can never write an attested or verified state",
         capabilities: ["SKL-3", "EVID-1"],
-        link: "NOT_BUILT",
-        because:
-          "The CHECK constraint that makes this a schema guarantee rather than a code convention is in the unapplied migration.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — the guarantee is APPLIED, enforcing, and now exercised by an import that can actually run. Verified on production 2026-09-08: `organization_evidence_records_evidence_state_check` admits only SELF_REPORTED, ORGANIZATION_REPORTED, LEGACY_IMPORTED, UNVERIFIED and NEEDS_REVIEW, so no import can write an attested or verified state even if the code tried, and `organization_evidence_competency_signals_method_check` admits only exact_term_match and synonym_term_match, so `ai_inference` is refused 23514. A real import write then completed through those constraints (ORGANIZATION_REPORTED accepted) in a rolled-back transaction. SEP-3 (EVIDENCE ≠ VERIFICATION) is a schema guarantee here, not a code convention — inference cannot dress itself as verification even by mistake.",
       },
       {
         step: "The subject sees what an organization recorded about them, and may refuse it",
         capabilities: ["EVID-1", "PER-12"],
-        link: "NOT_BUILT",
-        because: "Two-sided consent ships with the same unapplied migration.",
+        link: "BROKEN",
+        because:
+          "HALF of this step is now repaired and half is genuinely unbuilt, so it stays BROKEN with a narrower reason. The SEEING half worked again on 2026-09-08: the subject's branch of `organization_evidence_parties_select` was the exact path the 42P17 cycle killed — answering 'who else stands in this record' required a subquery back into `organization_evidence_records` — and the applied fix (ledger `20260908080950`) lifts that predicate into the SECURITY DEFINER boolean `is_evidence_record_subject`, which returns no rows and leaks no column, restoring the read WITHOUT widening any policy. The person the data is about can read it again. REFUSING is what is missing: the schema's closed event set carries `disputed`, and no surface offers the subject that act, so today they can see a record and not contest it. That is the remaining gap, and it is UI work, not a migration.",
       },
     ],
   },
