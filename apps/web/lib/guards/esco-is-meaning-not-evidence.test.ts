@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+
+import { isSafeLabelMatch } from "@/lib/esco/esco-semantics";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -108,5 +110,54 @@ describe("the locale contract is structural, not advisory", () => {
     expect(src).toContain("not_imported");
     expect(src).toContain("42P01");
     expect(src).toMatch(/status: "unavailable"/);
+  });
+});
+
+describe("ESCO is not a blind candidate generator for free text", () => {
+  /**
+   * MEASURED ON PRODUCTION 2026-09-08, and recorded because the idea is
+   * attractive and wrong.
+   *
+   * Recognition is silent for automotive: "Keičiau stabdžių diskus ir
+   * kaladėles" produces no candidate. ESCO holds a million multilingual
+   * labels, so the obvious next thought is to let ESCO fill the gap from the
+   * person's own words. Reading what ESCO actually holds in Lithuanian for
+   * that domain says no:
+   *
+   *   automobilių elektros sistemos    vehicle electrical systems
+   *   elektriniai varikliai            electric motors
+   *   ekologiškos automobilių technologijos   green automotive technologies
+   *
+   * These are KNOWLEDGE concepts — nouns naming a field — not the ACTION a
+   * mechanic performed. Nothing there means "changed the brake discs".
+   *
+   * And the failure would not be a polite miss. A mechanic's "variklis"
+   * (engine) prefix-matches "duomenų bazių varikliai" — DATABASE ENGINES. A
+   * pipeline that generated candidates this way would tell a car mechanic
+   * their work demonstrates database management systems.
+   *
+   * So the answer to a silent recognizer is NOT ESCO. It is what is already
+   * built: ask the person the one materially useful question, keep their
+   * answer as structured evidence, and let them link a skill by hand. Silence
+   * plus a good question beats a confident wrong concept.
+   */
+  it("the safe-match rule rejects the database-engines collision outright", () => {
+    expect(isSafeLabelMatch("varikliai", "duomenų bazių varikliai")).toBe(false);
+    expect(isSafeLabelMatch("variklis", "duomenų bazių varikliai")).toBe(false);
+  });
+
+  it("a knowledge-domain label is not an action, and is not matched by one", () => {
+    // "I changed the brake discs" must not reach "vehicle electrical systems".
+    expect(isSafeLabelMatch("keičiau stabdžių diskus", "automobilių elektros sistemos")).toBe(false);
+    expect(isSafeLabelMatch("stabdžių diskus", "automobilių elektros sistemos")).toBe(false);
+  });
+
+  it("no module turns a silent recognizer into an ESCO guess", () => {
+    // If a future author wires one, it has to pass this file first.
+    const src = read("lib/esco/evidence-correspondence.ts");
+    // Candidates come from the recognizer's OWN matched terms, never from
+    // re-searching the raw sentence when recognition found nothing.
+    expect(src).toContain("draft.derived.matchedTerms");
+    expect(src).not.toMatch(/stated\.activity.*lookupEscoConcepts/s);
   });
 });
