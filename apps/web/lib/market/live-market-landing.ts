@@ -1,7 +1,10 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import { requireSupabaseClientEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/types";
 import {
@@ -58,17 +61,53 @@ const PROFESSION_FILTER_SLUGS = [
   "farm_worker",
 ] as const;
 
-async function readWithOneRetry<T>(
-  reader: () => Promise<T>,
-): Promise<T | null> {
+/**
+ * ── WHY THIS READS ONE PROFESSION AT A TIME, AND WHY IT STOPS ─────────────
+ *
+ * Measured on production; the dated evidence and the failing-before proof are
+ * pinned in `lib/guards/landing-fanout-is-sequential.test.ts` (this file may
+ * carry no bare four-digit literal, so the date lives there — see the
+ * hardcoded-total guard in `verified-market-data-live.test.ts`).
+ *
+ * This module was the SOURCE of the public vacancy RPC timeouts, and the
+ * shape of the evidence names it exactly: the
+ * postgres log carries `canceling statement due to statement timeout` in
+ * groups of EXACTLY TEN inside a single second (14:58:41, 15:07:04), and ten
+ * is the length of the list above. One landing render issued all ten
+ * profession reads through `Promise.all`, so a single render was ten
+ * concurrent anonymous statements against a 377 MB table.
+ *
+ * They are ten DIFFERENT queries — one per slug — so the RPC-result
+ * coalescing added for the same symptom cannot merge them, and must not: its
+ * key is the parameter tuple, and two different professions are not the same
+ * question. The fan-out had to be removed where it is CREATED, which is here.
+ *
+ * The per-call cost is not small when the table is cold. Warm, the ten total
+ * 947 ms (47–452 ms each). On a cold buffer cache a single profession read
+ * measured 2.5 s, and one measured 9.8 s. `farm_worker` is the worst case for
+ * a structural reason: it has no active vacancies at all, so its `LIMIT` can
+ * never be satisfied early and it scans to the end — 6.6 s, returning zero
+ * rows. Ten of those at once is what exceeded the `anon` role's 3 s
+ * statement_timeout together.
+ *
+ * A budget is not a timeout. An abandoned statement keeps running inside
+ * postgres, so racing one would HIDE the work rather than remove it. This
+ * declines to START further reads once the snapshot has spent its budget,
+ * which genuinely does less. A profession that was not read carries
+ * `basis: "unavailable"` — never a substituted zero, which would claim there
+ * are no such jobs.
+ */
+const PROFESSION_READ_BUDGET_MS = 6_000;
+
+async function readOrNull<T>(reader: () => Promise<T>): Promise<T | null> {
   try {
     return await reader();
   } catch {
-    try {
-      return await reader();
-    } catch {
-      return null;
-    }
+    // No retry. A statement timeout no longer throws — the public reader
+    // returns an honest `unavailable` — so a throw here is an UNRECOGNISED
+    // failure, and immediately repeating it would only add load to a database
+    // that has just failed. The previous one-shot retry doubled every wave.
+    return null;
   }
 }
 
@@ -95,36 +134,59 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
  * so the map may truthfully resolve supply to Sweden but not invent a city or
  * region distribution inside Sweden.
  */
-async function readFreshLiveMarketLandingSnapshot(): Promise<LiveMarketLandingSnapshot> {
-  let publicEnv: ReturnType<typeof requireSupabaseClientEnv>;
-  try {
-    publicEnv = requireSupabaseClientEnv();
-  } catch {
-    // Local/CI prerenders may intentionally have no public Supabase env. The
-    // panel then renders no counts at all; production with env continues
-    // through the live readers below.
-    return unavailableSnapshot();
+export async function readFreshLiveMarketLandingSnapshot(
+  /** Injected only by the concurrency guard, which has to observe how many
+   *  statements this snapshot puts in flight at once. Production passes
+   *  nothing and gets the anonymous client built below. */
+  suppliedClient?: SupabaseClient,
+): Promise<LiveMarketLandingSnapshot> {
+  let publicClient: SupabaseClient;
+  if (suppliedClient) {
+    publicClient = suppliedClient;
+  } else {
+    let publicEnv: ReturnType<typeof requireSupabaseClientEnv>;
+    try {
+      publicEnv = requireSupabaseClientEnv();
+    } catch {
+      // Local/CI prerenders may intentionally have no public Supabase env. The
+      // panel then renders no counts at all; production with env continues
+      // through the live readers below.
+      return unavailableSnapshot();
+    }
+    const { url, anonKey } = publicEnv;
+    publicClient = createSupabaseClient<Database>(url, anonKey, {
+      auth: {
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        persistSession: false,
+      },
+    });
   }
-  const { url, anonKey } = publicEnv;
-  const publicClient = createSupabaseClient<Database>(url, anonKey, {
-    auth: {
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-      persistSession: false,
-    },
-  });
 
-  const [supplyResult, ...professionResults] = await Promise.all([
-    readWithOneRetry(() => readPublicVacancySupplyCounts(publicClient)),
-    ...PROFESSION_FILTER_SLUGS.map((slug) =>
-      readWithOneRetry(() =>
+  const supplyResult = await readOrNull(() =>
+    readPublicVacancySupplyCounts(publicClient),
+  );
+
+  const startedAt = Date.now();
+  const professionResults: (Awaited<
+    ReturnType<typeof searchPublicVacancyPreviews>
+  > | null)[] = [];
+  for (const slug of PROFESSION_FILTER_SLUGS) {
+    if (Date.now() - startedAt >= PROFESSION_READ_BUDGET_MS) {
+      professionResults.push(null);
+      continue;
+    }
+    // Sequential on purpose: see PROFESSION_READ_BUDGET_MS above. One
+    // anonymous statement at a time from this path, never ten.
+    professionResults.push(
+      await readOrNull(() =>
         searchPublicVacancyPreviews(
           { professionSlug: slug, page: 1 },
           publicClient,
         ),
       ),
-    ),
-  ]);
+    );
+  }
 
   const supply =
     supplyResult?.status === "ok"
