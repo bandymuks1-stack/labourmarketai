@@ -242,3 +242,95 @@ GREEN-class candidate rather than a gate.
 **Not claimed:** these nine were checked for *applied-state and supersession*
 only. Their internal correctness was not re-reviewed in this pass, and this
 appendix does not pretend otherwise.
+
+---
+
+# APPENDIX C — EVID-7 · the subject can see a record about them and can never refuse it
+
+Opened by a later window on 2026-09-08, after Appendix B. **Nothing applied.**
+This appendix exists because Appendix B's own follow-up work was mis-sized: the
+journey register and the EVID-1 capability row both described this gap as
+"UI work, not a migration", and that is wrong.
+
+## What was measured, at three levels
+
+Against production, 2026-09-08, read-only:
+
+**1. RLS — no INSERT policy can ever admit the subject.**
+`organization_evidence_events` carries exactly two:
+
+| policy | `with check` | admits the subject? |
+|---|---|---|
+| `organization_evidence_events_attest` | `manages_organization(organization_id) and actor_profile_id = auth.uid() and event_type <> 'independently_verified'` | **No.** The subject of an imported record is precisely a person who does *not* manage the recording organization — that is what the import is for. |
+| `organization_evidence_events_verify` | `event_type = 'independently_verified'` … `and not exists (… op.linked_profile_id = auth.uid())` | **No**, and deliberately so: it excludes the subject by name, and admits only one event type that is not `disputed`. |
+
+**2. No `SECURITY DEFINER` route around it.** No function in `pg_proc` writes to
+`organization_evidence_events`. The three dispute RPCs that do exist —
+`open_experience_dispute`, `review_experience_dispute`,
+`resolve_experience_dispute` — belong to `experience_records` (EVID-6), a
+different table with a different meaning. Reusing them here would collapse two
+evidence models into one.
+
+**3. No application writer.** The only two writers are in `import-core.ts`: the
+importing organization's rollback/reinstate, and its own attestation. Nothing in
+the repository emits `event_type = 'disputed'`.
+
+## Why this is worse than an ordinary missing feature
+
+`deriveEvidenceStanding` ranks **DISPUTED second in precedence**, above
+CORRECTED, above INDEPENDENTLY_VERIFIED, above every attestation. The model
+therefore computes a state that **no actor in the system can cause**. The
+reader half is complete and the causer does not exist.
+
+Concretely: an employer, an agency or an institution can write a record about a
+person, attest it in its own name, and the person can read it — and has no act
+available to them at all. SEP-3 (EVIDENCE ≠ VERIFICATION) survives, but the
+weaker guarantee that a record about a person is answerable *by that person*
+does not.
+
+**Consequence for the plan:** a UI-only slice would ship a refuse button that
+returns `42501` to the one person it exists for. That is worse than no button —
+it converts a silent absence into a visible broken promise. The register now
+says so.
+
+## The proposed change (written, NOT applied, NOT yet in a branch)
+
+A narrow `SECURITY DEFINER` RPC, `dispute_organization_evidence_record_v1(p_record_id uuid, p_note text)`:
+
+* inserts exactly one row, with `event_type = 'disputed'` **hard-coded** — the
+  caller cannot choose the event type, so this is not a general event writer;
+* admits the caller **only** when `is_evidence_record_subject(p_record_id)` — the
+  boolean the owner already approved and applied as ledger `20260908080950`,
+  reused rather than duplicated;
+* `actor_profile_id = auth.uid()`, no `actor_role` (the check constraint forbids
+  one on this event type), no `actor_organization_id`;
+* `EXECUTE` to `authenticated` only; `public` and `anon` revoked by name;
+* returns the event id, no rows and no columns of any other table.
+
+**Nothing widens.** No existing policy, table, column or grant is altered. The
+record itself is never mutated — `disputed` is an append-only lifecycle event,
+exactly as `withdrawn` and `corrected` already are, so a dispute cannot delete
+or edit what an organization recorded. Both sides stay on the record, which is
+the point.
+
+Rate limiting is deliberately **not** in this packet: one dispute row per
+subject per record is the natural bound, and it should be a unique constraint if
+the owner wants it, not application logic.
+
+## Class and risk
+
+**RED** — a new `SECURITY DEFINER` function is a write path, and this repository
+gates those regardless of how narrow they are. Reversible: `drop function`, with
+a rollback shipped beside it. All eight import tables hold **0 rows**, so there
+is no data to migrate and no back-fill.
+
+**Recommendation: APPLY.** It is the only act that makes an already-computed
+state reachable, and it is the person's half of a chain whose organization half
+is already live.
+
+## If the owner declines
+
+Then the honest product change is the opposite one: **stop computing DISPUTED**
+until a causer exists, so the model does not carry a state the world cannot
+produce. That is a GREEN change and an agent may do it — but it should be an
+owner's choice which way this closes, not a default.
