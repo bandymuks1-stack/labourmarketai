@@ -158,6 +158,8 @@ describe("ESCO is not a blind candidate generator for free text", () => {
     // Candidates come from the recognizer's OWN matched terms, never from
     // re-searching the raw sentence when recognition found nothing.
     expect(src).toContain("draft.derived.matchedTerms");
-    expect(src).not.toMatch(/stated\.activity.*lookupEscoConcepts/s);
+    // [\s\S]* rather than the /s flag: this tsconfig targets below es2018,
+    // and tsc rejects the flag (TS1501) even though vitest runs it happily.
+    expect(src).not.toMatch(/stated\.activity[\s\S]*lookupEscoConcepts/);
   });
 });
