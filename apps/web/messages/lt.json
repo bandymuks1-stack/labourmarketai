@@ -13643,6 +13643,7 @@
     "workJournal": "Pagrįsta darbo žurnalo įrašais",
     "selfDeclared": "Pateikta paties",
     "autoConfirmQualifier": "patvirtinta pagal iš anksto nustatytą taisyklę",
+    "selfConfirmQualifier": "patvirtino tas pats žmogus, kuris atliko darbą",
     "binLegendTitle": "Įrodymų užtikrintumas",
     "binLegendRed": "įrašų dar nėra",
     "binLegendGreen": "pirmieji įrašai",

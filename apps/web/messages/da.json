@@ -4627,6 +4627,7 @@
     "workJournal": "Underbygget af arbejdsjournal-indførsler",
     "selfDeclared": "Selvangivet",
     "autoConfirmQualifier": "bekræftet efter en forudindstillet regel",
+    "selfConfirmQualifier": "bekræftet af den samme person, som udførte arbejdet",
     "binLegendTitle": "Evidenssikkerhed",
     "binLegendRed": "ingen registreringer endnu",
     "binLegendGreen": "første registreringer",

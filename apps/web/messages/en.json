@@ -13643,6 +13643,7 @@
     "workJournal": "Backed by work journal entries",
     "selfDeclared": "Self-declared",
     "autoConfirmQualifier": "confirmed by a preset rule",
+    "selfConfirmQualifier": "confirmed by the person who did the work",
     "binLegendTitle": "Evidence assurance",
     "binLegendRed": "no records yet",
     "binLegendGreen": "first records",

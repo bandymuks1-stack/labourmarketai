@@ -4627,6 +4627,7 @@
     "workJournal": "[EN] Backed by work journal entries",
     "selfDeclared": "[EN] Self-declared",
     "autoConfirmQualifier": "[EN] confirmed by a preset rule",
+    "selfConfirmQualifier": "bekreftet av den samme personen som utførte arbeidet",
     "binLegendTitle": "[EN] Evidence assurance",
     "binLegendRed": "[EN] no records yet",
     "binLegendGreen": "[EN] first records",
