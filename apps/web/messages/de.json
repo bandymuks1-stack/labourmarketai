@@ -10898,7 +10898,15 @@
     "skillWorkBacked": "Durch Arbeitstagebuch-Einträge belegt",
     "skillDeclared": "Selbst angegeben",
     "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt.",
-    "skillsReadError": "Die Fähigkeiten konnten gerade nicht geladen werden. Bitte versuchen Sie es gleich erneut."
+    "skillsReadError": "Die Fähigkeiten konnten gerade nicht geladen werden. Bitte versuchen Sie es gleich erneut.",
+    "workTitle": "Erfasste Arbeit",
+    "workEmpty": "Noch keine erfasste Arbeit",
+    "workUnavailable": "Erfasste Arbeit konnte nicht geladen werden",
+    "workScopeNote": "Zeigt nur die Arbeit, die Sie sehen dürfen.",
+    "workCurrent": "Jetzt",
+    "kindEmployment": "Anstellung",
+    "kindPractice": "Praktikum",
+    "mobility": "Kann arbeiten in"
   },
   "companyGallery": {
     "title": "Galerie",
@@ -12711,7 +12719,8 @@
       "workspaceUnnamedAgency": "Agentur ohne Namen",
       "workspaceUnnamedTeam": "Kolonne ohne Namen",
       "workspaceUnnamedNote": "Kein Name angegeben",
-      "workspaceNameThis": "Namen angeben"    },
+      "workspaceNameThis": "Namen angeben"
+    },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
       "loading": "Wird geladen…",

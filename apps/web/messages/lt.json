@@ -10898,7 +10898,15 @@
     "skillWorkBacked": "Pagrįsta darbo žurnalo įrašais",
     "skillDeclared": "Pateikta paties",
     "skillsLegend": "Su vadovo įrašu — įgūdį lydi vadovo įrašas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta.",
-    "skillsReadError": "Įgūdžių šiuo metu nepavyko įkelti. Pabandykite netrukus dar kartą."
+    "skillsReadError": "Įgūdžių šiuo metu nepavyko įkelti. Pabandykite netrukus dar kartą.",
+    "workTitle": "Įrašytas darbas",
+    "workEmpty": "Kol kas nėra įrašyto darbo",
+    "workUnavailable": "Nepavyko įkelti įrašyto darbo",
+    "workScopeNote": "Rodomas tik tas darbas, kurį jums leidžiama matyti.",
+    "workCurrent": "Dabar",
+    "kindEmployment": "Darbas",
+    "kindPractice": "Praktika",
+    "mobility": "Gali dirbti"
   },
   "companyGallery": {
     "title": "Galerija",
@@ -12711,7 +12719,8 @@
       "workspaceUnnamedAgency": "Agentūra be pavadinimo",
       "workspaceUnnamedTeam": "Komanda be pavadinimo",
       "workspaceUnnamedNote": "Pavadinimas nenurodytas",
-      "workspaceNameThis": "Nurodyti pavadinimą"    },
+      "workspaceNameThis": "Nurodyti pavadinimą"
+    },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
       "loading": "Kraunama…",

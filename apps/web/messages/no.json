@@ -2699,7 +2699,15 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Bekreftet — godkjent av en leder. Underbygget av arbeid — synlig fra arbeidsjournalens innlegg. Selvoppgitt — lagt til av personen, ennå ikke kontrollert."
+    "skillsLegend": "Bekreftet — godkjent av en leder. Underbygget av arbeid — synlig fra arbeidsjournalens innlegg. Selvoppgitt — lagt til av personen, ennå ikke kontrollert.",
+    "workTitle": "Registrert arbeid",
+    "workEmpty": "Ingen registrert arbeid ennå",
+    "workUnavailable": "Kunne ikke laste registrert arbeid",
+    "workScopeNote": "Viser bare arbeidet du har tilgang til å se.",
+    "workCurrent": "Nå",
+    "kindEmployment": "Ansettelse",
+    "kindPractice": "Praksis",
+    "mobility": "Kan arbeide i"
   },
   "marketMapBase": {
     "previewTitle": "Nytt sted valgt — ikke lagret ennå",

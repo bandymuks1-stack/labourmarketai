@@ -2699,7 +2699,15 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Kinnitatud — juhi poolt heaks kiidetud. Tööga tõendatud — nähtav tööpäeviku sissekannetest. Ise märgitud — isiku lisatud, veel kontrollimata."
+    "skillsLegend": "Kinnitatud — juhi poolt heaks kiidetud. Tööga tõendatud — nähtav tööpäeviku sissekannetest. Ise märgitud — isiku lisatud, veel kontrollimata.",
+    "workTitle": "Salvestatud töö",
+    "workEmpty": "Salvestatud tööd veel ei ole",
+    "workUnavailable": "Salvestatud tööd ei õnnestunud laadida",
+    "workScopeNote": "Kuvatakse ainult see töö, mida teil on lubatud näha.",
+    "workCurrent": "Praegu",
+    "kindEmployment": "Töösuhe",
+    "kindPractice": "Praktika",
+    "mobility": "Saab töötada"
   },
   "marketMapBase": {
     "previewTitle": "Uus koht valitud — pole veel salvestatud",

@@ -69,4 +69,59 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryEntry[]> => 
   }
 });
 
+/**
+ * ANOTHER PERSON'S RECORDED WORK — the same spine, read for someone else.
+ *
+ * The person page (`/dashboard/people/[workerId]`) could show WHO someone is
+ * and WHAT THEY CLAIM, and nothing at all about what they had actually done.
+ * The data was there the whole time: `engagement_contexts` is the canonical
+ * person↔organization spine, and it already answers this question for the
+ * caller's own card.
+ *
+ * PERMISSION IS THE DATABASE'S, NOT THIS MODULE'S. `engagement_contexts`
+ * select RLS is
+ *   `profile_id = auth.uid() OR manages_organization(organization_id) OR is_admin()`
+ * so a viewer sees the subject's engagements ONLY with organizations they
+ * themselves manage. Nothing here loosens that: it adds no policy, no grant
+ * and no service-role client, and a viewer with no standing simply receives
+ * zero rows. That is why the surface says what it is showing rather than
+ * claiming to show a complete history — it is the part the viewer is entitled
+ * to, which is not the same thing.
+ *
+ * A FAILED READ IS NOT AN EMPTY HISTORY. `getOwnWorkHistory` above degrades to
+ * `[]` because the owner's card has other signals around it; here the section
+ * IS the signal, so a broken read must never render as "this person has done
+ * nothing". The three outcomes stay three.
+ */
+export type WorkHistoryRead =
+  | { readonly status: "ok"; readonly entries: readonly WorkHistoryEntry[] }
+  | { readonly status: "unavailable" };
+
+export async function readRecordedWorkFor(
+  profileId: string,
+): Promise<WorkHistoryRead> {
+  if (!profileId) return { status: "ok", entries: [] };
+  const supabase = await createClient();
+  try {
+    const res = await asAny(supabase)
+      .from("engagement_contexts")
+      .select(
+        "id, title, relationship_slug, started_at, ended_at, status, country_code, organizations(display_name, legal_name)",
+      )
+      .eq("profile_id", profileId)
+      // The SAME relationship filter the card, the CV and the profile use —
+      // one history, not a fourth variant of it.
+      .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS])
+      .order("started_at", { ascending: false, nullsFirst: false })
+      .limit(WORK_HISTORY_LIMIT);
+    if (res.error) return { status: "unavailable" };
+    return {
+      status: "ok",
+      entries: deriveWorkHistory((res.data ?? []) as WorkHistorySourceRow[]),
+    };
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
 export type { WorkHistoryEntry };

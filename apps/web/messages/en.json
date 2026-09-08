@@ -10898,7 +10898,15 @@
     "skillWorkBacked": "Backed by work journal entries",
     "skillDeclared": "Self-declared",
     "skillsLegend": "With manager record — a manager record accompanies the skill. Work-backed — visible from work journal entries. Self-declared — added by the person.",
-    "skillsReadError": "Skills could not be loaded right now. Try again shortly."
+    "skillsReadError": "Skills could not be loaded right now. Try again shortly.",
+    "workTitle": "Recorded work",
+    "workEmpty": "No recorded work yet",
+    "workUnavailable": "Recorded work could not be loaded",
+    "workScopeNote": "Shows the work you are authorised to see.",
+    "workCurrent": "Now",
+    "kindEmployment": "Employment",
+    "kindPractice": "Practice",
+    "mobility": "Can work in"
   },
   "companyGallery": {
     "title": "Gallery",
@@ -12711,7 +12719,8 @@
       "workspaceUnnamedAgency": "Agency without a name",
       "workspaceUnnamedTeam": "Team without a name",
       "workspaceUnnamedNote": "No name provided",
-      "workspaceNameThis": "Add a name"    },
+      "workspaceNameThis": "Add a name"
+    },
     "worklog": {
       "understood": "Here's what I understood — save it?",
       "loading": "Loading…",

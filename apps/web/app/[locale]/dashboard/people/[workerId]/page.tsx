@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   BadgeCheck,
   CalendarDays,
+  Globe2,
+  History,
   MapPin,
   NotebookPen,
   UserRound,
@@ -10,8 +12,10 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
+import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +63,10 @@ export default async function PersonPage({
   const { data: worker } = await supabase
     .from("workers")
     .select(
-      "id, profile_id, display_name, headline, experience_years, current_location_country, availability_status, available_from",
+      // `preferred_countries` is the same already-authorised row, and it is
+      // already in PROFILE_SAFE_PREVIEW_FIELDS — it was simply never
+      // rendered here, so the page could not answer WHERE CAN THEY WORK.
+      "id, profile_id, display_name, headline, experience_years, current_location_country, preferred_countries, availability_status, available_from",
     )
     .eq("id", workerId)
     .maybeSingle();
@@ -104,6 +111,17 @@ export default async function PersonPage({
     return { id: r.skill_id, label, state };
   });
   const shown = skills.filter((s) => s.label);
+
+  // WHAT HAVE THEY ACTUALLY DONE — the question this page could not answer.
+  // Permission is the database's: `engagement_contexts` select RLS returns
+  // only the engagements this viewer is entitled to (their own, or an
+  // organization they manage). Nothing is loosened to render it.
+  const recordedWork = await readRecordedWorkFor(
+    (worker.profile_id as string | null) ?? "",
+  );
+  const mobility = ((worker.preferred_countries as string[] | null) ?? []).filter(
+    (c) => typeof c === "string" && c.trim().length > 0,
+  );
 
   const name =
     (worker.display_name as string | null)?.trim() ||
@@ -185,6 +203,15 @@ export default async function PersonPage({
               {t("experienceYears", { n: worker.experience_years })}
             </span>
           ) : null}
+          {mobility.length > 0 ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="person-mobility"
+            >
+              <Globe2 className="h-3 w-3" aria-hidden />
+              {t("mobility")}: {mobility.join(", ")}
+            </span>
+          ) : null}
         </div>
         <div>
           <MessageButton
@@ -236,6 +263,73 @@ export default async function PersonPage({
         <p className="inline-flex items-center gap-2 text-meta leading-relaxed text-text-muted">
           <NotebookPen className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {t("skillsLegend")}
+        </p>
+      </section>
+
+      {/* WHAT THEY HAVE ACTUALLY DONE. Skills are what a person can do; this
+          is what they did, and the page carried none of it. The rows come from
+          the SAME `engagement_contexts` spine the person's own card, CV and
+          profile read — one history, not a fourth variant of it. */}
+      <section className="flex flex-col gap-3" data-testid="person-work">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <History className="h-3.5 w-3.5" aria-hidden />
+          {t("workTitle")}
+          {recordedWork.status === "ok" && recordedWork.entries.length > 0
+            ? ` · ${recordedWork.entries.length}`
+            : null}
+        </h2>
+        {recordedWork.status === "unavailable" ? (
+          // UNKNOWN is not ZERO. This section IS the evidence signal here, so
+          // a failed read must never render as "this person has done nothing".
+          <Card variant="error" compact>
+            <p className="text-sm text-text-secondary" data-testid="person-work-error">
+              {t("workUnavailable")}
+            </p>
+          </Card>
+        ) : recordedWork.entries.length === 0 ? (
+          <Card variant="empty" compact>
+            <p className="text-sm text-text-secondary">{t("workEmpty")}</p>
+          </Card>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {recordedWork.entries.map((e) => (
+              <li key={e.id} data-testid="person-work-entry">
+                <Card compact className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="text-sm font-medium text-text-primary">
+                  {e.title ?? e.organizationName ?? "—"}
+                </span>
+                {e.organizationName && e.title ? (
+                  <span className="text-sm text-text-secondary">
+                    {e.organizationName}
+                  </span>
+                ) : null}
+                {/* EMPLOYMENT and PRACTICE are not the same claim. A
+                    placement is carried as practice, never relabelled a job. */}
+                <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                  {e.kind === "practice" ? t("kindPractice") : t("kindEmployment")}
+                </span>
+                {e.startedAt ? (
+                  <span className="font-mono text-meta text-text-muted">
+                    {e.startedAt}
+                    {e.current ? ` — ${t("workCurrent")}` : e.endedAt ? ` — ${e.endedAt}` : ""}
+                  </span>
+                ) : null}
+                {e.countryCode ? (
+                  <span className="inline-flex items-center gap-1 font-mono text-meta text-text-muted">
+                    <MapPin className="h-3 w-3" aria-hidden />
+                    {e.countryCode}
+                  </span>
+                ) : null}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+        {/* Said plainly, because it is true: this is the part the viewer is
+            entitled to see, which is not the same as a complete history. */}
+        <p className="inline-flex items-center gap-2 text-meta leading-relaxed text-text-muted">
+          <NotebookPen className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {t("workScopeNote")}
         </p>
       </section>
     </div>

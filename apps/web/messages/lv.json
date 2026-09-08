@@ -2699,7 +2699,15 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Apstiprināts — apstiprinājis vadītājs. Pamatots ar darbu — redzams no darba žurnāla ierakstiem. Paša norādīts — pievienojusi pati persona, vēl nav pārbaudīts."
+    "skillsLegend": "Apstiprināts — apstiprinājis vadītājs. Pamatots ar darbu — redzams no darba žurnāla ierakstiem. Paša norādīts — pievienojusi pati persona, vēl nav pārbaudīts.",
+    "workTitle": "Reģistrētais darbs",
+    "workEmpty": "Vēl nav reģistrēta darba",
+    "workUnavailable": "Neizdevās ielādēt reģistrēto darbu",
+    "workScopeNote": "Rāda tikai to darbu, ko jums ir atļauts redzēt.",
+    "workCurrent": "Tagad",
+    "kindEmployment": "Nodarbinātība",
+    "kindPractice": "Prakse",
+    "mobility": "Var strādāt"
   },
   "marketMapBase": {
     "previewTitle": "Izvēlēta jauna vieta — vēl nav saglabāta",

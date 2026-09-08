@@ -2699,7 +2699,15 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Bekräftad — godkänd av en chef. Styrkt av arbete — syns i arbetsjournalens inlägg. Självangiven — tillagd av personen, ännu inte kontrollerad."
+    "skillsLegend": "Bekräftad — godkänd av en chef. Styrkt av arbete — syns i arbetsjournalens inlägg. Självangiven — tillagd av personen, ännu inte kontrollerad.",
+    "workTitle": "Registrerat arbete",
+    "workEmpty": "Inget registrerat arbete ännu",
+    "workUnavailable": "Kunde inte ladda registrerat arbete",
+    "workScopeNote": "Visar bara det arbete du har behörighet att se.",
+    "workCurrent": "Nu",
+    "kindEmployment": "Anställning",
+    "kindPractice": "Praktik",
+    "mobility": "Kan arbeta i"
   },
   "marketMapBase": {
     "previewTitle": "Ny plats vald — inte sparad ännu",
