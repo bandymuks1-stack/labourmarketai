@@ -303,6 +303,46 @@ const RULES: IntentRule[] = [
       // AN AGENCY SAYING IT HAS PEOPLE. Only a supplier describes itself this
       // way, so the sentence needs no second market-facing clause.
       p("(agent[uū]r|agency|uitzend|bureau|agentur|агент)\\w*\\s*.{0,40}(turim|turiu|have|hebben|haben|имеем|располага)", 9),
+      // …AND THE WAY AN AGENCY ACTUALLY INTRODUCES ITSELF (measured
+      // 2026-09-08 on the public entry). The rule above requires a HAVE verb,
+      // but nobody writes "we are an agency and we have 30 workers" — they
+      // write "we ARE an agency WITH 30 available workers". So:
+      //
+      //   en "We are a staffing agency with 30 available workers to offer"
+      //        -> `who-available`, an employer's roster QUESTION — the exact
+      //           direction inversion this intent exists to prevent
+      //   nl "Wij zijn een uitzendbureau met 30 beschikbare werknemers" -> unknown
+      //   de "Wir sind eine Zeitarbeitsfirma mit 30 verfügbaren Mitarbeitern" -> unknown
+      //
+      // German additionally had NO agency noun here at all: `agentur` does
+      // not appear in Zeitarbeitsfirma, Personaldienstleister or
+      // Arbeitnehmerüberlassung, which is what German actually calls this.
+      //
+      // The self-description alone is deliberately NOT enough. An agency also
+      // speaks as DEMAND ("we are an agency looking for 12 welders for our
+      // client"), so a COUNT or an availability word is required — the supply
+      // signal — and even then the employer reading outscores this one on
+      // such a sentence, which is pinned as a negative control.
+      p(
+        "(\\bwe\\s+are|\\bwij\\s+zijn|\\bwir\\s+sind|\\besame\\b|\\bмы\\b)\\s*.{0,24}" +
+          "(agent[uū]r|agency|uitzend|bureau|agentur|zeitarbeit|personaldienstleist|" +
+          "arbeitnehmer[uü]berlassung|personeelsbemiddel|detacheer|агент|кадров)" +
+          "\\w*\\s*.{0,40}" +
+          // AN AVAILABILITY WORD, NOT A BARE COUNT. The first draft accepted
+          // a number here and the negative control caught it immediately:
+          // "We are a staffing agency looking for 12 welders for our client"
+          // matched, and won at weight 9 over the employer reading's 6 — an
+          // agency HIRING would have been filed as an agency OFFERING. A
+          // count says how many people are mentioned; only the availability
+          // word says they are on offer.
+          //
+          // Stems, not whole words: German inflects ("freien", "verfügbaren")
+          // and Dutch drops a letter ("beschikbare" is not "beschikbaar"), so
+          // a trailing \\b here would silently match nothing.
+          "(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|" +
+          "\\bvrij|свобод|доступ)",
+        9,
+      ),
     ],
   },
   // ── AI workspace intents (W4) ────────────────────────────────────────────
