@@ -430,3 +430,84 @@ the four actors act at all, and the capability it unblocks is already built.
 three migration-count ratchets 275 → 276. **Whichever merges second needs a
 one-line bump to 277.** They are otherwise independent and may be approved in
 either order, or separately.
+
+---
+
+# APPENDIX G — the four stranded records, reconciled (NO BACKFILL APPROVED)
+
+Owner asked for a per-record packet and said explicitly not to assume all four
+need the same repair. **They do not.** Nothing was written.
+
+## What the investigation changed
+
+The four are **not** missing an engagement outright. Every worker already has a
+**personal engagement with `organization_id = NULL`**, created by the trigger
+`ensure_worker_personal_engagement` on `workers`. That is the PERSONAL CONTEXT
+of the multi-actor model — 56 of 79 engagement rows are of this kind, by design,
+and they must be preserved. What the four lack is the **employer-org-bound**
+engagement, which is why `belongs_to_organization(employer_org)` is false.
+
+The prepared fix is correctly scoped: it matches on `organization_id = v_org`,
+so it adds the employer relationship and never touches the personal row.
+
+## Common to all four (FACT, not inference)
+
+* an `accept_company_worker_invitation` audit row with `result: "linked"`;
+* an `accepted` row in `company_worker_invitations` for that company;
+* `company_workers.status = 'active'`;
+* the organization resolves 1:1 through `organizations.legacy_company_id`;
+* **no** engagement to that org in any state — so a repair resurrects nothing
+  that was deliberately ended. No contradiction exists in any record.
+
+`belongs_to_organization` is false for exactly one reason in all four: the
+function accepts an engagement **or** a membership scoped to that organization,
+and neither exists. The personal NULL-org engagement cannot satisfy it, and
+should not.
+
+## Per record
+
+| # | profile | organisation | nature | accepted | intended relationship |
+|---|---|---|---|---|---|
+| 1 | `af8cc32f` | **UAB NONSTOP GROUP** | **REAL company** | 2026-06-16 | **FACT** |
+| 2 | `70851a66` | E2E Spine UAB (testinis) | test fixture | 2026-09-05 | FACT, but on a test entity |
+| 3 | `8cda6488` | E2E Agentūra UAB (testinis subjektas) | test fixture | 2026-09-04 | FACT, but on a test entity |
+| 4 | `c267dc8b` | QA-SYNTHETIC Alfa (testinis subjektas) | synthetic QA | 2026-08-06 | FACT, but on a synthetic entity |
+
+Record 3 is instructive: the same person accepted a **second** company on
+2026-09-02 and that one DOES have an org-bound engagement — created by a
+different path (the institution/provisioning route). So the defect is specific
+to the legacy roster accept, not to the person.
+
+## Proposed repair, which differs by record
+
+**Record 1 — recommend repair.** A real person at a real employer, locked out of
+their own employer's `organizations` row. One insert:
+`engagement_contexts(profile, org, 'employee', 'active', is_primary = false)`.
+
+**Records 2–4 — recommend NO backfill.** Repairing test and synthetic fixtures
+buys nothing and risks pinning a fixture into a state a future test did not
+choose. The better use of them is to exercise the FIXED forward path once
+#1658 is applied, which validates the fix on the very rows that demonstrate the
+bug. If they are re-accepted through the repaired function they heal themselves.
+
+## What the repair would grant, exactly
+
+`belongs_to_organization(org)` becomes true, which turns on **six SELECT
+policies**: `organizations`, `organization_roles`, `training_programs`,
+`review_cycles`, `leave_balance_policies`, `workflow_definitions` — for that one
+organization. It grants **no** governance capability: `company_memberships` is
+untouched, so `has_org_demand_access`, `is_active_org_member` and
+`manages_organization` are unaffected.
+
+## Rollback
+
+Delete the specific inserted `engagement_contexts` row(s) by id. Clean, because
+the repair inserts and never updates: no prior value is overwritten, so nothing
+has to be reconstructed. The personal NULL-org row is never touched in either
+direction.
+
+## The decision
+
+1. Repair **record 1** only, or all four, or none.
+2. Whether a backfill happens at all is separate from applying #1658, which
+   fixes the forward path and is itself still ungated.
