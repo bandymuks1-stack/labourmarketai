@@ -80,6 +80,7 @@ import {
   type ConversationGoal,
 } from "@/lib/conversation/conversation-goal";
 import { evidenceFromSuggestions } from "@/lib/conversation/evidence-goal";
+import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
@@ -2171,7 +2172,30 @@ export function ConversationChat({
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
     (text: string, opts?: { photoFirst?: boolean; explicit?: boolean }) => {
-      const draft = extractWorkLog(text, todayIso());
+      // ASK -> PREFILL -> THE EXISTING SAVE FLOW.
+      //
+      // When a work-evidence conversation is in flight, the form opens filled
+      // from EVERYTHING the person already said - all their sentences as the
+      // evidence text, plus the site and duration they gave in answers. Nobody
+      // should have to type again what they just told the chat.
+      //
+      // With no conversation this is byte-for-byte `extractWorkLog`, so a
+      // chip, the journal hand-off and a plain sentence behave exactly as they
+      // did. And `hasSignal` can only rise, never fall, so the clarify
+      // question can never come back after the person has answered it - the
+      // loop the form was built to end stays ended.
+      const evidenceGoal =
+        goalRef.current?.evidence && goalRef.current.intent === "log-work"
+          ? goalRef.current
+          : null;
+      const draft = evidenceGoal
+        ? worklogDraftFromEvidence({
+            said: evidenceGoal.said,
+            evidence: evidenceGoal.evidence,
+            today: todayIso(),
+            latest: text,
+          })
+        : extractWorkLog(text, todayIso());
       // A photo-led log is a deliberate request to attach evidence, so the
       // flow opens even with nothing parsed — the short text stays required
       // inside it. A TYPED sentence with no signal still gets the one clarify
