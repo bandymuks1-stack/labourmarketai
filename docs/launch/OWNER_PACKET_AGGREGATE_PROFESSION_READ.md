@@ -1,13 +1,24 @@
 # Owner packet — the single-aggregate path for the landing profession reads
 
-**Status: PREPARED, NOTHING APPLIED.** No grant issued, no migration written,
-no anon surface widened. Requested under owner decision item 4.
+**Status: CLOSED — DECIDED, NOT ADOPTED.** Owner decision 2026-09-08.
 
-**Headline recommendation: DO NOT grant `anon` EXECUTE.** The packet was
-prepared as instructed, and preparing it surfaced a cheaper and safer answer
-that needs no database change at all. Evidence below; the aggregate evidence
-(A–M) is given in full anyway, because you asked for it and because it is what
-proves the recommendation.
+This is no longer an open owner gate. It is kept as the record of a decision
+and of the measurement that produced it. **Nothing in it is planned work.**
+
+## THE DECISION
+
+- **`anon` EXECUTE on `count_public_vacancies_by_profession_v1`: DECLINED.**
+  Not requested, not granted, and not to be requested again on this evidence.
+- **The aggregate is NOT added to the public landing.**
+- **No migration, no index, no Redis/Upstash, no shared cache** for this issue.
+- **Adopted instead:** the default `/` (FOCUS) stops issuing the ten
+  profession reads it never renders — PR #1663. FOCUS goes from 11 database
+  calls per snapshot to 1, with no migration, no grant and no rendered change.
+- `/live-market-review` keeps its profession reads, because it genuinely
+  renders them.
+
+The evidence below is why. It was assembled to justify a grant and instead
+proved the grant unnecessary.
 
 ---
 
