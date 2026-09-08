@@ -555,7 +555,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
 | EVID-0 | **Work Journal** (4 transports, 1 core) | `journal_entries` + 7 satellites | **PROD_HUMAN** | R + PC | — | the product's strongest chain |
-| EVID-1 | **Organization historical evidence import** | `organization_people`, `evidence_import_*`, `organization_evidence_*` | **IN PROGRESS** | planned | 0 | owner P0 2026-09-07; schema + pure core written; **RED, not applied** |
+| EVID-1 | **Organization historical evidence import** | `organization_people`, `evidence_import_*`, `organization_evidence_*` | **PARTIAL** | production data path | 0 | owner-approved 2026-09-08; recursion fix APPLIED (ledger `20260908080950`); read + write proven under real auth, rolled back, zero residue; **no human import yet** |
 | EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | **OWNER?** self-confirmation: block in the RPC, or keep the weaker classification? |
 | EVID-3 | Work verification state (8 states) | `lib/journal/work-verification-state` | IMPL | — | 1 | never walked by a human |
 | EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |

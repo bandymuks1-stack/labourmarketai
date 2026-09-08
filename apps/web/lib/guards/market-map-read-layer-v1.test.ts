@@ -819,7 +819,15 @@ describe("NO new DB migration in this PR", () => {
     // (employer 2 of 2, the supplier themselves 1 of 2, a plain worker 0) and
     // rolled back; the function does not exist on production. RED class,
     // carries NO `@human-gate-approved` marker, NOT applied.
-    expect(count).toBeLessThanOrEqual(270);
+    // Bumped 270 -> 271 for evidence_parties_recursion_fix_v1 (2026-09-07):
+    // the organization evidence import applied earlier the same day shipped a
+    // MUTUAL RLS recursion - records_select subqueries parties, parties_select
+    // subqueries records - so four of its eight tables answer 42P17 on every
+    // read, and INSERT ... RETURNING dies with them. One SECURITY DEFINER
+    // resolver breaks the cycle on the parties side; records_select is not
+    // touched. RED (SECURITY DEFINER + policy replace), owner-gated, NOT
+    // applied. Proven in a rolled-back production transaction.
+    expect(count).toBeLessThanOrEqual(271);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
