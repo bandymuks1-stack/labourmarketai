@@ -651,10 +651,22 @@ const RULES: IntentRule[] = [
     patterns: [
       // "sukurk programą", "nauja grupė / kohorta", "create a cohort",
       // "Programm anlegen", "nieuwe opleiding", "создать программу"
-      p("(sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов)\\w*\\s*.{0,20}(program|kurs|grup|kohort|cohort|kursus|opleiding|программ|курс|групп|когорт)", 7),
+      // REGISTER is how an institution says it (measured 2026-09-08, public
+      // entry). "We are a training provider and want to register a
+      // programme" scored 0 here and landed `unknown` — as did the lt, ru and
+      // nl forms, and the de one resolved to `opportunities`, the WORKER
+      // board. The fourth actor's opening sentence reached nothing in four of
+      // the five routed locales. The verb family was create/new/add only; an
+      // institution does not "create" its programme, it registers it.
+      // Collision-safe: every one of these still requires a programme noun
+      // within 20 characters, so "registruoti darbo laiką" cannot reach here.
+      p("(sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов|registruo|[iį]registr|register|registrier|registreer|registrer|регистр)\\w*\\s*.{0,20}(program|kurs|grup|kohort|cohort|kursus|opleiding|программ|курс|групп|когорт)", 7),
       p("(mano|mūsų|my|our|meine|unsere|mijn|onze|мои|наши)\\s+(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)", 6),
       // noun → verb: "Programm anlegen", "opleiding aanmaken", "programą sukurti"
-      p("(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)\\w*\\s*.{0,16}(sukur|kurti|create|erstell|anleg|aanmak|создать|создай)", 7),
+      // Same verb family in the noun-first order German and Dutch actually
+      // use: "Ausbildungsprogramm registrieren", "opleidingsprogramma
+      // registreren".
+      p("(program|kurs|grup|kohort|cohort|opleiding|программ|курс|групп|когорт)\\w*\\s*.{0,16}(sukur|kurti|create|erstell|anleg|aanmak|создать|создай|registruo|register|registrier|registrer|registreer)", 7),
       // Owner contract 2026-09-04 §15 — the institution's other two commands
       // by sentence: "priskirk studentą grupei" (assign a learner to a
       // cohort) and "parodyk programas / grupes" (read). Both land here; the
