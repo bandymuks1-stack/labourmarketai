@@ -334,3 +334,24 @@ Then the honest product change is the opposite one: **stop computing DISPUTED**
 until a causer exists, so the model does not carry a state the world cannot
 produce. That is a GREEN change and an agent may do it — but it should be an
 owner's choice which way this closes, not a default.
+
+---
+
+# APPENDIX D — the security advisor output, re-measured 2026-09-08
+
+Recorded so the same four findings are not re-investigated, and so none of them
+is "fixed" into a regression. **Six advisor categories, and not one is
+unfinished work.**
+
+| finding | verdict |
+|---|---|
+| `security_definer_view` — **ERROR** — `public.worker_absence_scheduling` | **DELIBERATE. Do not fix.** Already documented and guarded by `lib/guards/security-train-a-v1.test.ts`. The reason is now measurable: `worker_absences_select` lets a manager read only `status = 'requested'`, while scheduling needs `approved`. The view carries its OWN authorization predicate — `caller_manages_worker(worker_id) OR is_admin() OR the worker themselves` — and exposes six columns. Making it `security_invoker` would not tighten anything; it would break the manager's scheduling read. |
+| `function_search_path_mutable` — **WARN** — `usage_cost_events_forbid_mutation`, `usage_cost_events_forbid_truncate` | **BENIGN, and not worth a migration.** Both are `SECURITY INVOKER` (`prosecdef = false`), and each body is a single `raise exception` that references **no database object at all**. There is nothing a mutable `search_path` could shadow, so the warning has no exploit path here. Setting `search_path` would clear the lint and change no behaviour, at the cost of a migration file and the three count ratchets. Recorded rather than shipped. |
+| `anon_security_definer_function_executable` — WARN | **DELIBERATE. Do not fix.** The intentional public surface (public vacancy counts, public business profile / listings / services). Revoking would break anonymous browsing. Previously confirmed. |
+| `authenticated_security_definer_function_executable` — WARN | Expected: this is how every gated write path in the product is built. |
+| `rls_enabled_no_policy` — INFO | **Fail-closed by design.** Verified previously that `anon` and `authenticated` hold no table privileges on those tables. |
+| `auth_leaked_password_protection` — WARN | **BLOCKED_BY_PLAN.** The current Supabase plan rejects it. Not unfinished work. |
+
+**Nothing in the advisor output is currently actionable.** If a future window
+finds this list shorter or longer, that is a real change worth investigating;
+if it finds it identical, it should stop here rather than re-derive it.
