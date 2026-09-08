@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Osa sellest ei õnnestunud praegu kokku lugeda ja on näidatud kui „—“. See ei tähenda, et teil neid ei ole — lihtsalt ei õnnestunud numbreid lugeda. Laadige hetke pärast uuesti.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",

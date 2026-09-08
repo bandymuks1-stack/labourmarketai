@@ -7751,6 +7751,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Kai kurių iš šių dalykų dabar nepavyko suskaičiuoti, todėl rodoma „—“. Tai nereiškia, kad jų neturite — tiesiog nepavyko perskaityti skaičių. Perkraukite po akimirkos.",
     "title": "Pasitikėjimo signalai",
     "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų.",
     "verifiedSkills": "Vadovo patvirtinti įgūdžiai",

@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",

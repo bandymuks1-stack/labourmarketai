@@ -1698,6 +1698,7 @@
     }
   },
   "trust": {
+    "unreadHint": "En del av detta gick inte att räkna just nu och visas som ”—”. Det betyder inte att du saknar dem — siffrorna gick bara inte att läsa. Ladda om om en stund.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
