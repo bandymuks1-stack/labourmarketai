@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+
+import { isSafeLabelMatch } from "@/lib/esco/esco-semantics";
 import { join } from "node:path";
 
 /**
@@ -29,11 +31,24 @@ const read = (rel: string) => readFileSync(join(WEB, rel), "utf8").replace(/\r\n
 const SRC = "lib/esco/evidence-correspondence.ts";
 
 describe("the evidence→ESCO correspondence refuses weak matches", () => {
-  it("accepts only an EXACT label match", () => {
+  it("selects through the measured safe-match predicate, never a raw prefix", () => {
+    // Refined 2026-09-08 from exact-only to isSafeLabelMatch, and the refinement
+    // is STRICTER where it matters and looser only where it was measured safe:
+    // it still rejects both production false positives, and it recovers
+    // "scaffolder (construction)", which has no exact label and which a real
+    // production supply row depends on.
     const src = read(SRC);
-    expect(src).toContain('m.method === "exact_label"');
-    // A prefix hit must never be the one selected here.
+    expect(src).toContain("isSafeLabelMatch(term, m.matchedLabel)");
+    // Taking the top hit blind is what produced the false positives.
     expect(src).not.toMatch(/found\.value\[0\]/);
+  });
+
+  it("the predicate itself still refuses both measured false positives", () => {
+    // Asserted on the real function, not on its source text: a guard that only
+    // greps cannot tell whether the rule still WORKS.
+    expect(isSafeLabelMatch("montuoti", "montuoti ekranus")).toBe(false);
+    expect(isSafeLabelMatch("painter", "painter on glass")).toBe(false);
+    expect(isSafeLabelMatch("scaffolder", "scaffolder (construction)")).toBe(true);
   });
 
   it("the measured false positive is named in the code, not just avoided", () => {

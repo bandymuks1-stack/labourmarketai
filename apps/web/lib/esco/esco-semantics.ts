@@ -202,6 +202,41 @@ export function isDisplayableLabel(labelType: EscoLabelType): boolean {
 }
 
 /**
+ * IS THIS MATCH SAFE TO PRESENT AS A CORRESPONDENCE?
+ *
+ * Measured twice on production, 2026-09-08, in both directions — and both
+ * times a plain prefix match produced a confidently wrong answer:
+ *
+ *   skills       "montuoti" (to install) → "montuoti ekranus", MOUNT VISUAL
+ *                DISPLAYS. A formwork installer told they mount displays.
+ *   occupations  "painter" → "painter on glass". A construction painter told
+ *                they paint glass.
+ *
+ * But rejecting every prefix would throw away a correspondence that is plainly
+ * right and that the product actually needs: "scaffolder" has NO exact ESCO
+ * label, and its real one is "scaffolder (construction)" — the term, then a
+ * parenthetical disambiguator. Production carries a real supply row for
+ * scaffolders in Norway, so losing that would cost something concrete.
+ *
+ * So the rule is: an EXACT label, or the term followed by a PARENTHETICAL.
+ * "scaffolder (construction)" passes; "painter on glass" and "montuoti
+ * ekranus" do not, because continuing a term with more WORDS changes what it
+ * denotes, while continuing it with a bracket only says which sense is meant.
+ *
+ * The comparison is case-insensitive and whitespace-trimmed, and nothing else
+ * is normalised: folding diacritics here would let "šalis" match "salis",
+ * which in a 28-language catalogue is exactly how a wrong concept gets in.
+ */
+export function isSafeLabelMatch(term: string, label: string): boolean {
+  const t = term.trim().toLowerCase();
+  const l = label.trim().toLowerCase();
+  if (t.length === 0 || l.length === 0) return false;
+  if (t === l) return true;
+  // The term, then a bracketed sense. Nothing else counts as safe.
+  return l.startsWith(t + " (") || l.startsWith(t + "(");
+}
+
+/**
  * THE GUARD RAIL, as a value rather than a comment.
  *
  * Anything that turns an ESCO correspondence into a claim about a person must

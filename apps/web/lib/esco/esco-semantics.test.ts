@@ -8,6 +8,7 @@ import {
   ESCO_IS_NOT,
   ESCO_LABEL_RANK,
   isDisplayableLabel,
+  isSafeLabelMatch,
   type EscoLabelMatch,
 } from "./esco-semantics";
 
@@ -127,5 +128,47 @@ describe("what an ESCO concept is NOT", () => {
     for (const forbidden of ["hasskill", "personskill", "verify", "qualif", "score"]) {
       expect(names).not.toContain(forbidden);
     }
+  });
+});
+
+describe("isSafeLabelMatch — the two measured false positives", () => {
+  it("rejects the SKILL false positive measured on production", () => {
+    // "montuoti" (to install) → "montuoti ekranus" = mount visual displays.
+    // A formwork installer must never be told their work denotes that.
+    expect(isSafeLabelMatch("montuoti", "montuoti ekranus")).toBe(false);
+  });
+
+  it("rejects the OCCUPATION false positive measured on production", () => {
+    // A construction painter is not a glass painter.
+    expect(isSafeLabelMatch("painter", "painter on glass")).toBe(false);
+  });
+
+  it("accepts the parenthetical sense, which is a real and needed match", () => {
+    // "scaffolder" has NO exact ESCO label; its real one is this. Production
+    // carries a real supply row for scaffolders in Norway.
+    expect(isSafeLabelMatch("scaffolder", "scaffolder (construction)")).toBe(true);
+    expect(isSafeLabelMatch("scaffolder", "scaffolder(construction)")).toBe(true);
+  });
+
+  it("accepts an exact label, whatever the casing or padding", () => {
+    expect(isSafeLabelMatch("welder", "welder")).toBe(true);
+    expect(isSafeLabelMatch("  Welder ", "WELDER")).toBe(true);
+  });
+
+  it("continuing a term with more WORDS is never safe", () => {
+    // The general form of both measured failures: more words change what a
+    // term denotes; a bracket only says which sense is meant.
+    expect(isSafeLabelMatch("welder", "welder helper")).toBe(false);
+    expect(isSafeLabelMatch("cook", "cook chill technician")).toBe(false);
+  });
+
+  it("empty inputs are never a match", () => {
+    expect(isSafeLabelMatch("", "welder")).toBe(false);
+    expect(isSafeLabelMatch("welder", "")).toBe(false);
+  });
+
+  it("it does NOT fold diacritics, on purpose", () => {
+    // In a 28-language catalogue, folding here is how a wrong concept gets in.
+    expect(isSafeLabelMatch("salis", "šalis")).toBe(false);
   });
 });
