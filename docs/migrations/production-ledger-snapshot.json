@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-09-07T03:46:32Z",
-  "method": "Supabase MCP execute_sql (read-only): select version, name from supabase_migrations.schema_migrations, read in two ordered halves (version < 20260713000000 and >= ). Refreshed during the 2026-09-07 full product reconciliation: the previous snapshot was 32 applies stale (234 -> 266). read_at is the confirming read: count(*) = 266, max(version) = 20260906202628, taken at that instant - never stamped later than the read it describes.",
+  "read_at": "2026-09-08T09:14:32Z",
+  "method": "Supabase MCP execute_sql (read-only). Refreshed 2026-09-08 during the owner-gate execution window: the 2026-09-07 snapshot (266 rows, max 20260906202628) was 6 applies stale. The 6 appended rows were read with `select version, name from supabase_migrations.schema_migrations where version > '20260906202628' order by version`, and the confirming read at that instant returned count(*) = 272, max(version) = 20260908082301 - 266 + 6 = 272, so the append is complete rather than assumed. read_at is that confirming read and is never stamped later than the read it describes. Four of the six were applied in this window (two notification grants applied earlier the same day by another session, then EVID-1 and the ESCO linkage under owner approval).",
   "project_ref": "gorgitwvdzxbnaxhrsrw",
-  "row_count": 266,
+  "row_count": 272,
   "rows": [
     {
       "version": "0001",
@@ -1067,6 +1067,30 @@
     {
       "version": "20260906202628",
       "name": "agency_board_excludes_supply_v1"
+    },
+    {
+      "version": "20260907180546",
+      "name": "employer_supply_discovery_v1"
+    },
+    {
+      "version": "20260907180944",
+      "name": "organization_evidence_import_v1"
+    },
+    {
+      "version": "20260908061619",
+      "name": "notification_events_service_role_grant"
+    },
+    {
+      "version": "20260908065654",
+      "name": "notification_recipient_discovery_service_role_select"
+    },
+    {
+      "version": "20260908080950",
+      "name": "evidence_parties_recursion_fix_v1"
+    },
+    {
+      "version": "20260908082301",
+      "name": "esco_canonical_linkage_67"
     }
   ]
 }

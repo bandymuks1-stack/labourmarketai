@@ -1468,8 +1468,10 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: [".github/scripts/migration-safety.mjs"],
     coreModule: null,
     surfaces: [],
-    note: "The repo→applied direction is unchecked; one read-only secret arms two inert gates.",
-    ownerDecision: "Provide SUPABASE_DB_URL (§6.3 item 3).",
+    note:
+      "One read-only secret arms two gates that are inert today: the live anon SECURITY DEFINER allowlist check and the repo<->production migration-parity check. Both currently report SKIPPED with a warning. THIS IS NOT THEORETICAL - on 2026-09-08 production ran AHEAD of main: two notification grants were applied to production while their migration files existed only on an unmerged branch, and no CI gate caught it. The parity gate is exactly the check that would have. Partial cover was added the same day instead: the snapshot was refreshed from the live ledger (266 -> 272 rows, max 20260908082301) and snapshot-mode parity PASSES - 272 applied, 274 files, every production migration has a repository file. A snapshot carries no freshness contract, so it is a weaker substitute and says so.",
+    ownerDecision:
+      "Add a READ-ONLY `SUPABASE_DB_URL` as a GitHub Actions secret (repo Settings -> Secrets and variables -> Actions -> New repository secret). It must never be pasted into a chat, a file or a PR - an agent may not handle it, and this entry deliberately does not ask for the value. Use a role with SELECT only; the gates read `supabase_migrations.schema_migrations` and `pg_proc`/`pg_policies` and write nothing.",
   },
   {
     id: "GOV-2",
@@ -1495,8 +1497,8 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: [".github/workflows/e2e-smoke.yml"],
     coreModule: null,
     surfaces: [],
-    note: "A small subset of the local suite runs in CI.",
-    ownerDecision: "Build an authenticated fixture strategy, or accept the suite as a local-only tool (§6.3 item 6).",
+    note:
+      "DECIDED 2026-09-08, as an engineering call rather than an owner gate (the owner delegated it explicitly). The suite is ACCEPTED AS A LOCAL-ONLY TOOL and CI keeps the unauthenticated smoke subset. The alternative - an authenticated fixture strategy - means minting real sessions in CI, which needs either long-lived seeded credentials in a secret or a login flow against production; both put a real identity into CI for a signal that local runs already give. The cost is not the fixtures, it is what they would have to hold. WHAT THIS COSTS, stated so nobody misreads a green CI: authenticated journeys are NOT covered by CI, so `quality` passing says nothing about whether a signed-in worker, employer, agency or institution can complete their chain. That evidence comes from local runs and from production walks, and the evidence ladder already refuses to promote either to HUMAN_UI_PROVEN on CI alone. Revisit only if CI gains a way to hold a session without holding a credential.",
   },
   {
     id: "GOV-4",
