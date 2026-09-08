@@ -170,6 +170,87 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
   };
 }
 
+/**
+ * IDENTICAL ANONYMOUS READS ARE ANSWERED ONCE — the thundering-herd fix.
+ *
+ * ── WHAT PRODUCTION ACTUALLY DOES (measured 2026-09-08) ────────────────────
+ * Every call to this RPC arrives with `user_agent = "node"`: it is the Next.js
+ * server rendering `/jobs`, never a browser. `/jobs` is `force-dynamic` and
+ * calls this exactly once per render, so N concurrent renders are N database
+ * queries.
+ *
+ * The failures are not slow queries. Ten DISTINCT postgres sessions timed out
+ * within 135 ms of each other, and the SAME ten timed out again 3.03 s later —
+ * which is why every timeout count in the logs is an exact multiple of 10 or
+ * 20, never 3, 7 or 13. At 12:42 the edge log carried 60 HTTP requests to this
+ * one RPC in a single minute (40 × 200, 20 × 500), so the second wave is a new
+ * batch of HTTP requests, not an internal retry. Measured individually the same
+ * calls take 1–144 ms; ten at once against a 377 MB table exceed the `anon`
+ * role's 3 s statement_timeout together.
+ *
+ * ── WHY THE CACHE LIVES HERE AND NOT ON THE PAGE ───────────────────────────
+ * `/jobs` renders SESSION-DEPENDENT content — it reads `hasSessionCookie` and a
+ * worker's PRIVATE saved-bookmark list — and `/jobs/[id]` is `force-dynamic`
+ * for exactly this reason, written down there: a member's full ad must never be
+ * replayed to an anonymous visitor from a shared cache. So page/ISR/CDN caching
+ * is NOT available and is not attempted.
+ *
+ * What IS shareable is this RPC's RESULT. `search_public_vacancy_previews_v1`
+ * consults no `auth.uid()`, no `auth.jwt()` and no `current_setting` — verified
+ * against the live function — so its output depends ONLY on its four
+ * parameters. Two callers passing the same parameters are entitled to
+ * byte-identical bytes, whoever they are. That is the whole justification, and
+ * it is why the key below is the parameter tuple and nothing else.
+ *
+ * ── THREE MECHANISMS, EACH BOUNDED ─────────────────────────────────────────
+ *   COALESCE   concurrent identical calls share ONE in-flight promise, so a
+ *              burst of ten renders becomes one query.
+ *   CACHE      a successful result is reused for FRESH_MS. Only `ok` is cached:
+ *              `not_provisioned` is an environment fact and `unavailable` is a
+ *              failure, and neither may be served as though it were data.
+ *   COOLDOWN   after a timeout the next identical call is answered `unavailable`
+ *              for COOLDOWN_MS instead of re-issuing. This module adds no
+ *              retries of its own; the cooldown exists so somebody else's retry
+ *              wave cannot re-hammer a database that just failed.
+ *
+ * FRESH_MS is deliberately far shorter than the staleness this endpoint already
+ * accepts: `total_count` comes from a cron singleton refreshed every 10 minutes
+ * and may already be that old by design. Nothing here makes a freshness claim
+ * to a person, so no "stale" badge is owed at this scale.
+ */
+const FRESH_MS = 30_000;
+const COOLDOWN_MS = 3_000;
+/** Bounded so a crawler walking pages cannot grow this without limit. */
+const MAX_ENTRIES = 64;
+
+type CacheEntry =
+  | { readonly kind: "fresh"; readonly at: number; readonly value: PublicVacancySearchResult }
+  | { readonly kind: "cooldown"; readonly at: number };
+
+const resultCache = new Map<string, CacheEntry>();
+const inFlight = new Map<string, Promise<PublicVacancySearchResult>>();
+
+/** The parameter tuple, and ONLY the parameter tuple. Anything caller-specific
+ *  appearing in this key would mean the cached value is not shareable. */
+function cacheKey(query: string | null, professionSlug: string | null, offset: number): string {
+  return JSON.stringify([query, professionSlug, offset, PUBLIC_VACANCY_PAGE_SIZE]);
+}
+
+function remember(key: string, entry: CacheEntry): void {
+  if (resultCache.size >= MAX_ENTRIES) {
+    const oldest = resultCache.keys().next();
+    if (!oldest.done) resultCache.delete(oldest.value);
+  }
+  resultCache.set(key, entry);
+}
+
+/** Exported for the guard and for tests: a fresh process must behave like a
+ *  fresh process, and a test must not inherit another test's cache. */
+export function __resetPublicVacancyCache(): void {
+  resultCache.clear();
+  inFlight.clear();
+}
+
 export async function searchPublicVacancyPreviews(
   input: {
     query?: string | null;
@@ -181,13 +262,57 @@ export async function searchPublicVacancyPreviews(
   const page = Math.max(1, Math.floor(input.page ?? 1));
   const limit = PUBLIC_VACANCY_PAGE_SIZE;
   const offset = (page - 1) * limit;
+  const queryParam = input.query?.trim() || null;
+  const slugParam = input.professionSlug?.trim() || null;
+  const key = cacheKey(queryParam, slugParam, offset);
+  const now = Date.now();
+
+  const cached = resultCache.get(key);
+  if (cached) {
+    if (cached.kind === "fresh" && now - cached.at < FRESH_MS) return cached.value;
+    if (cached.kind === "cooldown" && now - cached.at < COOLDOWN_MS) {
+      // Somebody's retry arriving inside the cooldown. Answer honestly rather
+      // than re-issuing into a database that just failed this exact query.
+      return { status: "unavailable", vacancies: [], totalCount: 0, hasMore: false };
+    }
+    resultCache.delete(key);
+  }
+
+  const pending = inFlight.get(key);
+  if (pending) return pending;
+
+  const run = (async (): Promise<PublicVacancySearchResult> => {
+    const result = await runSearch({ queryParam, slugParam, limit, offset }, suppliedClient);
+    if (result.status === "ok") remember(key, { kind: "fresh", at: Date.now(), value: result });
+    else if (result.status === "unavailable") remember(key, { kind: "cooldown", at: Date.now() });
+    return result;
+  })();
+
+  inFlight.set(key, run);
+  try {
+    return await run;
+  } finally {
+    inFlight.delete(key);
+  }
+}
+
+async function runSearch(
+  params: {
+    queryParam: string | null;
+    slugParam: string | null;
+    limit: number;
+    offset: number;
+  },
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancySearchResult> {
+  const { queryParam, slugParam, limit, offset } = params;
 
   const supabase = suppliedClient ?? (await createClient());
   const { data, error } = await asAny(supabase).rpc(
     "search_public_vacancy_previews_v1",
     {
-      p_query: input.query?.trim() || null,
-      p_profession_slug: input.professionSlug?.trim() || null,
+      p_query: queryParam,
+      p_profession_slug: slugParam,
       p_limit: limit,
       p_offset: offset,
     },

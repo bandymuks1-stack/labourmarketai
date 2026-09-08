@@ -143,6 +143,8 @@ begin
   --
   -- A relationship, never a governance seat: `company_memberships` is not
   -- touched, so no demand access and no org-admin capability is granted here.
+  -- The person's PERSONAL engagement (organization_id is null) is a different
+  -- row entirely and is never read, updated or replaced by this block.
   select o.id into v_org
   from public.organizations o
   where o.legacy_company_id = p_company_id
