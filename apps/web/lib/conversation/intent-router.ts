@@ -21,6 +21,7 @@
  */
 import {
   OCCUPATION_STEM_SOURCE,
+  TRADE_STEM_SOURCE,
   PROFESSION_STATEMENT_ANCHOR_SOURCE,
   ROLE_NOUN_EXCLUSION_SOURCE,
   ROLE_SUFFIX_GENITIVE_SOURCE,
@@ -306,6 +307,35 @@ const RULES: IntentRule[] = [
       // montuotojų" (our agency has 15 fitters) measured `unknown`. An agency
       // speaks about itself in the third person as readily as the first.
       p("(agent[uū]r|agency|uitzend|bureau|agentur|агент)\\w*\\s*.{0,40}(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|располага)", 9),
+      // ── HAVE + COUNT + A TRADE. The plainest capacity sentence there is ──
+      //
+      // "turime 20 pastolininkų" and "turim 8 suvirintojus nuo pirmadienio"
+      // measured `unknown` on 2026-09-08 — no market clause, no availability
+      // adjective, nothing but WE HAVE, HOW MANY and WHAT TRADE. That is how
+      // a subcontractor actually opens.
+      //
+      // It could not be written before, because the trades vocabulary lived
+      // INSIDE the employer-demand rule: the demand side knew every trade and
+      // the supply side knew none, so "reikia 12 pastolininkų" was understood
+      // and "turime 20 pastolininkų" was not. `TRADE_STEM_SOURCE` is now
+      // shared, and both directions read the same list.
+      //
+      // The COUNT is required, and the noun must be a TRADE. "Turime 20
+      // darbuotojų" — the generic worker noun, no trade — is deliberately not
+      // matched: it is as likely to be an employer describing its own payroll
+      // as an agency offering people, and `darbuotoj` is absent from this
+      // vocabulary for that reason.
+      p(
+        `(turim|turiu|turi|have|has|hebben|heeft|haben|hat|имеем|у\\s+нас|располага)\\w*\\s*.{0,16}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
+        9,
+      ),
+      // …and the same capacity stated as AVAILABILITY, with no verb at all:
+      // "nuo spalio 5 d. laisvi 3 elektrikai". A date, an availability word, a
+      // count and a trade — no "we have" anywhere.
+      p(
+        `(laisv|available|\\bfree|beschikba|verfügbar|verfuegbar|\\bfrei|\\bvrij|свобод)\\w*\\s*.{0,12}[0-9]{1,4}\\s*.{0,24}(?:${TRADE_STEM_SOURCE})`,
+        9,
+      ),
       // …AND THE WAY AN AGENCY ACTUALLY INTRODUCES ITSELF (measured
       // 2026-09-08 on the public entry). The rule above requires a HAVE verb,
       // but nobody writes "we are an agency and we have 30 workers" — they
@@ -1555,7 +1585,15 @@ const RULES: IntentRule[] = [
       // Restricted to the PLURAL `hebben` on purpose. "Ik heb een baan nodig"
       // — I need a JOB — is a worker, the opposite direction, and it uses
       // `heb`. Pinned as a negative control.
-      p("\\bhebben\\b\\s*.{0,30}\\bnodig\\b", 6),
+      // Weight 10, above the supply side's HAVE + COUNT + TRADE rule. "wij
+      // hebben 12 lassers nodig" satisfies BOTH readings on its face — it
+      // literally says HAVE, 12, LASSERS — and the supply rule matched it
+      // first, turning "we need 12 welders" into "we are offering 12
+      // welders". `nodig` closing the clause is what settles it: in Dutch the
+      // verb-final "nodig" means NEED and nothing else, so it outranks the
+      // pattern it would otherwise be mistaken for. Caught by the supply
+      // guard's cross-check, not in production.
+      p("\\bhebben\\b\\s*.{0,30}\\bnodig\\b", 10),
       p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
       p("\\bbrigad", 2), // team/brigade need
       // V9 audit finding: "kitą mėnesį trūks keturių suvirintojų" carried no
@@ -1575,7 +1613,7 @@ const RULES: IntentRule[] = [
       p(
         // `ищу` beside `ищем`: "Ищу сантехника" (public entry, lane F) read
         // as the person's OWN job search on the bare Russian seek verb.
-        "(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|ищу|требу(ется|ются)|brauch(e|en)?|benötig|suche(n)?|zoek(en)?|nodig)\\s*.{0,30}(suvirin|elektrik|santechnik|stali(aus|ų|u)|mūrinink|dažytoj|stogden|plytel|vairuotoj|krautuv|ekskavator|virėj|padavėj|valytoj|pakuotoj|rinkėj|(?<!pa)slaug|welder|electrician|plumber|carpenter|painter|driver|cleaner|cook|сварщик|электрик|сантехник|водител|повар|уборщ|маляр|плотник|каменщик|schweißer|schweisser|klempner|maler|fahrer|koch|lasser|loodgieter|schilder|chauffeur|schoonmaker|kok\\b|tischler|timmerman|pastolinink|scaffolder|betonuotoj|concrete|tinkuotoj|plasterer|armat[uū]rinink|rebar|steel\\s+fixer|izoliuotoj|insulat|монтажник|бетонщик|штукатур|арматурщик|изолировщик|ger[uü]stbauer|steigerbouwer|betonbauer|betonwerker|stuckateur|stukadoor|betoniarz|tynkarz|zbrojarz|rusztowa)",
+        `(reikia|reikės|trūks(ta)?|ieškau|ieškom(e)?|need(s|ed)?|looking\\s+for|нужн|ищем|ищу|требу(ется|ются)|brauch(e|en)?|benötig|suche(n)?|zoek(en)?|nodig)\\s*.{0,30}(${TRADE_STEM_SOURCE})`,
         6,
       ),
       // PROFESSIONAL LANGUAGE (window 6, 2026-09-06). The alternation above

@@ -119,11 +119,21 @@ describe("5. a profession outside both catalogues still reaches the form, honest
       "ROLE_NOUN_EXCLUSION_SOURCE",
       "OCCUPATION_STEM_SOURCE",
       "PROFESSION_STATEMENT_ANCHOR_SOURCE",
+      // The manual trades joined the shared sources on 2026-09-08. They had
+      // lived INLINE inside the employer-demand rule, which is precisely the
+      // "second list" this test forbids — and it had a cost: only the demand
+      // side could read them, so "reikia 12 pastolininkų" was understood and
+      // "turime 20 pastolininkų" was not.
+      "TRADE_STEM_SOURCE",
     ]) {
       expect(router, name).toContain(`\${${name}}`);
     }
-    // The service noun must not read as the care assistant in the router either.
-    expect(router).toContain("(?<!pa)slaug");
+    // The service noun must not read as the care assistant. This lived in the
+    // router while the trades did; it is asserted where the vocabulary now is,
+    // which is the same invariant checked at its source rather than at one of
+    // its call sites.
+    const roleLabel = read("lib", "structuring", "role-label.ts");
+    expect(roleLabel).toContain("(?<!pa)slaug");
   });
 
   it("profession-statement is registered and handled with the EXISTING doors only", () => {
