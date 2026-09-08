@@ -1846,6 +1846,9 @@
         "members": "{count} learners",
         "noLearnersYet": "No connected learners to assign yet — invite students first.",
         "form": {
+          "editProgram": "Correct this programme",
+          "saveProgram": "Save changes",
+          "setDirectionHint": "Choose the profession this programme leads to, and the number of jobs currently open for it appears beside the programme. Without it there is nothing to count against.",
           "programName": "Programme name",
           "targetProfession": "Leads to (work direction)",
           "noProfession": "— not set —",

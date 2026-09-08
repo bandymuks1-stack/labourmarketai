@@ -2474,6 +2474,10 @@ describe("no migration files added by this sprint", () => {
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
     //
+    // 277 -> 278: EDU-7, an institution can correct a programme it created
+    //   (20260908120000, paired rollback). RED, owner-gated, UNAPPLIED.
+    //   Rebased over the supply bridge on 2026-09-09; RECOUNTED from the
+    //   tree: `ls supabase/migrations/*.sql | wc -l` = 278 files.
     // 276 -> 277: the first-party supply bridge
     // (20260904120000_first_party_supply_representation_v1, paired rollback).
     // A new consent purpose, the partner_supply_representation declaration
@@ -2484,7 +2488,7 @@ describe("no migration files added by this sprint", () => {
     // RED class; owner approval given 2026-09-09 for THIS migration only.
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
     // = 277 files.
-const SPRINT_BASELINE = 277;
+const SPRINT_BASELINE = 278;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

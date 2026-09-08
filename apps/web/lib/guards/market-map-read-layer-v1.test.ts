@@ -889,6 +889,10 @@ describe("NO new DB migration in this PR", () => {
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
     //
+    // 277 -> 278: EDU-7, an institution can correct a programme it created
+    //   (20260908120000, paired rollback). RED, owner-gated, UNAPPLIED.
+    //   Rebased over the supply bridge on 2026-09-09; RECOUNTED from the
+    //   tree: `ls supabase/migrations/*.sql | wc -l` = 278 files.
     // 276 -> 277: the first-party supply bridge
     // (20260904120000_first_party_supply_representation_v1, paired rollback).
     // A new consent purpose, the partner_supply_representation declaration
@@ -899,7 +903,7 @@ describe("NO new DB migration in this PR", () => {
     // RED class; owner approval given 2026-09-09 for THIS migration only.
     // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
     // = 277 files.
-expect(count).toBeLessThanOrEqual(277);
+expect(count).toBeLessThanOrEqual(278);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

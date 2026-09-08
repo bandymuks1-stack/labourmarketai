@@ -1846,6 +1846,9 @@
         "members": "{count} Lernende",
         "noLearnersYet": "Noch keine verbundenen Lernenden zum Zuweisen — laden Sie zuerst Studierende ein.",
         "form": {
+          "editProgram": "Dieses Programm korrigieren",
+          "saveProgram": "Änderungen speichern",
+          "setDirectionHint": "Wählen Sie den Beruf, auf den dieses Programm hinführt, und neben dem Programm erscheint, wie viele Stellen dafür aktuell offen sind. Ohne ihn gibt es nichts, wogegen gezählt werden könnte.",
           "programName": "Name des Studiengangs",
           "targetProfession": "Führt zu (Arbeitsrichtung)",
           "noProfession": "— nicht festgelegt —",

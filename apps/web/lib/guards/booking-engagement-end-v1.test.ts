@@ -1295,6 +1295,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // before any insert. SELECT only on both; owner-approved and applied
       // via MCP apply_migration (#1566).
       "20260908070000_notification_recipient_discovery_service_role_select.sql",
+      // An institution can CORRECT a programme it created - the field that
+      // turns the employer-demand count on was fixed at creation. RED,
+      // owner-gated, unapplied.
+      "20260908120000_education_program_correction_v1.sql",
 ]);
   });
 
