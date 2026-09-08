@@ -2210,6 +2210,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Noe av det disse personene har registrert kunne ikke leses akkurat nå, så denne rekkefølgen er ikke pålitelig. Ingen vises her med mindre enn de har — det er fakta bak sammenligningen som mangler. Last inn på nytt om et øyeblikk.",
+      "capped": "Ikke alle ble sammenlignet. Flere synlige arbeidere passer til dette behovet enn én liste rommer, så de {count} med de mest direkte samsvarende ferdighetene, yrket og landet ble hentet først — aldri de nyeste registreringene. Snevre inn behovet for å være sikker på at de rette personene sammenlignes.",
+      "complete": "Alle {count} synlige arbeidere ble sammenlignet med dette behovet."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",

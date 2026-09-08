@@ -8130,6 +8130,7 @@
       "noMatches": "Geen kandidaten voldoen aan de gekozen filters."
     },
     "pool": {
+      "factsUnreadable": "Een deel van wat deze mensen hebben vastgelegd kon zojuist niet worden gelezen, dus deze volgorde is niet betrouwbaar. Niemand wordt hier met minder getoond dan hij heeft — de feiten achter de vergelijking ontbreken simpelweg. Laad zo meteen opnieuw.",
       "capped": "Niet iedereen is vergeleken. Er passen meer zichtbare werknemers bij deze vraag dan in één lijst passen, dus zijn eerst de {count} opgehaald van wie vaardigheden, beroep en land het beste aansluiten, niet de nieuwste registraties. Maak de vraag specifieker zodat de juiste mensen worden vergeleken.",
       "complete": "Alle {count} zichtbare werknemers zijn met deze vraag vergeleken."
     },

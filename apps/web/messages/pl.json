@@ -2210,6 +2210,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Części tego, co te osoby zapisały, nie udało się teraz odczytać, więc ta kolejność nie jest wiarygodna. Nikt nie jest tu pokazany jako mający mniej, niż ma — po prostu brakuje faktów do porównania. Odśwież za chwilę.",
+      "capped": "Nie porównano wszystkich. Do tej potrzeby pasuje więcej widocznych pracowników, niż mieści jedna lista, więc pobrano najpierw tych {count}, których umiejętności, zawód i kraj odpowiadają jej najbardziej bezpośrednio — nigdy najnowsze rejestracje. Zawęź potrzebę, aby mieć pewność, że porównywane są właściwe osoby.",
+      "complete": "Wszystkich {count} widocznych pracowników porównano z tą potrzebą."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
