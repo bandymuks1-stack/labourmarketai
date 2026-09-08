@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { readFreshLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
@@ -174,5 +177,94 @@ describe("NEGATIVE CONTROL — this reader adds no retries of its own", () => {
     // The failed one degrades honestly rather than being retried.
     const failed = snapshot.professions.find((p) => p.basis === "unavailable");
     expect(failed?.totalCount).toBeNull();
+  });
+});
+
+describe("FOCUS does not pay for reads it never renders", () => {
+  /**
+   * Every consumer of the snapshot was enumerated: `/` (FOCUS) reads
+   * activeVacancies, distinctEmployers and lastRefreshedAt, and reads
+   * `professions` NOWHERE. Its profession chips come from the static
+   * TOP_PROFESSION_FAMILY_SLUGS list in market-proof-band.tsx, a different
+   * set from PROFESSION_FILTER_SLUGS and not derived from live data.
+   */
+  it("issues ONE read, and zero profession reads", async () => {
+    const c = makeClient({ rows: [VACANCY_ROW] });
+    await readFreshLiveMarketLandingSnapshot(c.client, false);
+
+    expect(c.calls).toHaveLength(1);
+    expect(c.calls[0].name).toBe("count_public_vacancies_v1");
+    expect(
+      c.calls.filter((call) => call.name === "search_public_vacancy_previews_v1"),
+    ).toHaveLength(0);
+  });
+
+  it("LIVE still gets every profession it genuinely renders", async () => {
+    // /live-market-review renders a per-profession count AND one sample
+    // vacancy, so its reads must survive this optimisation untouched.
+    const c = makeClient({ rows: [VACANCY_ROW] });
+    const snapshot = await readFreshLiveMarketLandingSnapshot(c.client, true);
+
+    expect(
+      c.calls.filter((call) => call.name === "search_public_vacancy_previews_v1"),
+    ).toHaveLength(10);
+    expect(snapshot.professions.every((p) => p.basis === "live")).toBe(true);
+    expect(snapshot.professions.some((p) => p.jobs.length > 0)).toBe(true);
+  });
+
+  it("every field FOCUS actually consumes is semantically identical", async () => {
+    __resetPublicVacancyCache();
+    const focus = await readFreshLiveMarketLandingSnapshot(
+      makeClient({ rows: [VACANCY_ROW] }).client,
+      false,
+    );
+    __resetPublicVacancyCache();
+    const live = await readFreshLiveMarketLandingSnapshot(
+      makeClient({ rows: [VACANCY_ROW] }).client,
+      true,
+    );
+
+    expect(focus.activeVacancies).toBe(live.activeVacancies);
+    expect(focus.distinctEmployers).toBe(live.distinctEmployers);
+    expect(focus.lastRefreshedAt).toBe(live.lastRefreshedAt);
+    expect(focus.basis).toBe(live.basis);
+    expect(focus.professions).toHaveLength(live.professions.length);
+  });
+
+  it("an unresolved profession is `unavailable` and null, NEVER zero", async () => {
+    const c = makeClient({ rows: [VACANCY_ROW] });
+    const snapshot = await readFreshLiveMarketLandingSnapshot(c.client, false);
+
+    // "We did not ask" is not "there are none". A zero here would be a
+    // fabricated market claim on the most-visited page in the product.
+    expect(snapshot.professions).toHaveLength(10);
+    for (const profession of snapshot.professions) {
+      expect(profession.basis).toBe("unavailable");
+      expect(profession.totalCount).toBeNull();
+      expect(profession.totalCount).not.toBe(0);
+      expect(profession.jobs).toEqual([]);
+    }
+  });
+
+  it("the default is still the FULL read - skipping must be explicit", async () => {
+    // A caller that forgets the flag must get MORE data, never less: a silent
+    // default of `false` would strip /live-market-review without a diff.
+    const c = makeClient({ rows: [VACANCY_ROW] });
+    await readFreshLiveMarketLandingSnapshot(c.client);
+    expect(
+      c.calls.filter((call) => call.name === "search_public_vacancy_previews_v1"),
+    ).toHaveLength(10);
+  });
+
+  it("FOCUS wires the skip - restoring the fan-out there fails here", async () => {
+    // The behavioural tests above prove the READER honours the flag. This
+    // pins that the FOCUS page actually passes it, which is the half a reader
+    // test cannot see.
+    const focusPage = readFileSync(
+      join(__dirname, "..", "..", "app", "[locale]", "focus-landing", "focus-landing.tsx"),
+      "utf8",
+    );
+    expect(focusPage).toContain("readLiveMarketLandingSnapshot");
+    expect(focusPage).toMatch(/resolveProfessions:\s*false/);
   });
 });

@@ -72,7 +72,10 @@ export async function FocusLanding({
   // `unstable_cache` entry — one market truth, one freshness window, no
   // FOCUS-only reader (owner command §9/§12).
   const [market, t, tHero] = await Promise.all([
-    readLiveMarketLandingSnapshot(),
+    // FOCUS renders the supply counts only; it reads `professions`
+    // nowhere, so it does not pay for the per-profession reads. Same
+    // reader, same freshness window, same market numbers as LIVE.
+    readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.hero"),
   ]);
