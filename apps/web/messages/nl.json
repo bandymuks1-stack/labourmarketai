@@ -15465,6 +15465,13 @@
       "confirmation_unavailable": "Goedkeuringen kunnen in deze omgeving niet worden ondertekend, dus er is niets vastgelegd."
     },
     "mine": {
+      "contest": "Dit klopt niet",
+      "contestHint": "Bezwaar maken wist niet wat de organisatie heeft opgeschreven. Uw bezwaar komt ernaast te staan en beide blijven bij het record, zodat iedereen die het leest ziet dat u het er niet mee eens was. U kunt het later intrekken.",
+      "contestNote": "Wat klopt er niet aan? (optioneel)",
+      "withdrawContest": "Mijn bezwaar intrekken",
+      "contested": "U hebt hiertegen bezwaar gemaakt",
+      "contestFailed": "Dit kon niet worden opgeslagen. Er is niets veranderd.",
+      "contestNotEnabled": "Bezwaar maken tegen een record staat in deze omgeving nog niet aan.",
       "title": "Wat organisaties over mij hebben vastgelegd",
       "intro": "Werk, opleiding en studie die een organisatie uit haar eigen administratie heeft overgezet. U ziet altijd wie het heeft gestuurd, wat diegene toen voor u was en wanneer.",
       "notEnabled": "Dit is in deze omgeving nog niet ingeschakeld. Er ontbreekt niets aan uw profiel — de opslag is er eenvoudigweg niet om te lezen.",

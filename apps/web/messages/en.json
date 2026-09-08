@@ -15465,6 +15465,13 @@
       "confirmation_unavailable": "Approvals cannot be signed in this environment, so nothing was recorded."
     },
     "mine": {
+      "contest": "This is not right",
+      "contestHint": "Contesting does not delete what the organization wrote. Your objection is recorded beside it and both stay on the record, so anyone reading it sees that you disagreed. You can take it back later.",
+      "contestNote": "What is wrong with it? (optional)",
+      "withdrawContest": "Take back my objection",
+      "contested": "You have contested this",
+      "contestFailed": "That could not be saved. Nothing changed.",
+      "contestNotEnabled": "Contesting a record is not switched on in this environment yet.",
       "title": "What organizations have recorded about me",
       "intro": "Work, training and study that an organization brought over from its own records. You can always see who sent it, what they were to you at the time, and when.",
       "notEnabled": "This is not switched on in this environment yet. Nothing is missing from your profile — the store is simply not there to read.",

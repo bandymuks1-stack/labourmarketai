@@ -9,6 +9,7 @@ import {
 } from "@/lib/timesheet-import/resolve-entities";
 import { orgDisplayName } from "@/lib/company/org-display";
 import {
+  anyStandingDispute,
   deriveEvidenceStanding,
   type ReportedEvidenceState,
   type RecordLifecycleEvent,
@@ -1428,6 +1429,12 @@ export interface EvidenceRecordView {
   /** ALWAYS false for an imported record. Independent verification lives in a
    *  separate event with its own policy and is never implied by an import. */
   readonly independentlyVerified: boolean;
+  /** Does the CALLER's own contest stand on this record right now? Drives which
+   *  act the subject's surface offers - contest, or withdraw the contest. It is
+   *  deliberately per-caller: `state === "DISPUTED"` can also be an
+   *  organization contesting a record it received, and that is not the reader's
+   *  to withdraw. */
+  readonly disputedByMe: boolean;
 }
 
 /**
@@ -1523,6 +1530,9 @@ export async function listEvidenceRecords(
           }
         : null,
       independentlyVerified: standing.independentlyVerified,
+      disputedByMe: anyStandingDispute(
+        events.filter((e) => e.actorProfileId === caller.userId),
+      ),
     } satisfies EvidenceRecordView;
   });
 
@@ -1699,4 +1709,74 @@ export async function respondToRosterLink(
     kind: "ok",
     linkState: input.decision === "accept" ? "linked" : "unlinked",
   };
+}
+
+// ── the subject CONTESTS a record ───────────────────────────────────────────
+
+/**
+ * THE SUBJECT'S ANSWER TO THE CONTENT, not to the link.
+ *
+ * The roster-link refusal above answers a different question — "may this
+ * organization name me at all", once, all-or-nothing. Once linked, a single
+ * false line could not be contested, and refusing the whole link to escape one
+ * wrong record would have discarded the true records with it.
+ *
+ * A contest NEVER mutates or deletes what the organization recorded. It appends
+ * one lifecycle event, exactly as `withdrawn` and `corrected` do, so both sides
+ * stay on the record — which is the difference between contesting and erasing.
+ *
+ * WHY AN RPC AND NOT A TABLE WRITE: `organization_evidence_events` has two
+ * INSERT policies and neither can ever admit the subject (one requires
+ * `manages_organization`, the other admits only `independently_verified` and
+ * excludes the subject by name). The RPC is the narrow write path — the event
+ * type is hard-coded inside it, so this is not a general event writer.
+ *
+ * `42501` is the honest refusal for both "not the subject" and "no such
+ * record": a caller must not learn a record exists by getting a different
+ * error for it.
+ */
+async function callDisputeRpc(
+  caller: DomainCaller,
+  fn:
+    | "dispute_organization_evidence_record_v1"
+    | "withdraw_organization_evidence_dispute_v1",
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<EvidenceImportResult<{ readonly eventId: string }>> {
+  const note = (input.note ?? "").trim();
+  if (note.length > 1000) {
+    return { kind: "invalid", problems: ["note_too_long"] };
+  }
+  const res = await db(caller.supabase).rpc(fn, {
+    p_record_id: input.recordId,
+    p_note: note === "" ? null : note,
+  });
+  if (res.error) {
+    // P0002 from the withdraw path means there is no standing contest of the
+    // caller's own to take back — a stale screen, not a permissions problem.
+    if (res.error.code === "P0002") return { kind: "not-found" };
+    return classify(res.error);
+  }
+  return { kind: "ok", eventId: String(res.data) };
+}
+
+export async function disputeEvidenceRecord(
+  caller: DomainCaller,
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<EvidenceImportResult<{ readonly eventId: string }>> {
+  return callDisputeRpc(
+    caller,
+    "dispute_organization_evidence_record_v1",
+    input,
+  );
+}
+
+export async function withdrawEvidenceRecordDispute(
+  caller: DomainCaller,
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<EvidenceImportResult<{ readonly eventId: string }>> {
+  return callDisputeRpc(
+    caller,
+    "withdraw_organization_evidence_dispute_v1",
+    input,
+  );
 }

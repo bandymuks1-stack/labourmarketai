@@ -6,6 +6,10 @@ import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/Card";
 
 import {
+  respondToEvidenceRecordAction,
+  type EvidenceDisputeActionResult,
+} from "@/lib/organization-evidence/dispute-actions";
+import {
   respondToRosterLinkAction,
   type RosterLinkActionResult,
 } from "@/lib/organization-evidence/roster-link-actions";
@@ -78,6 +82,105 @@ function OfferDecision({
         }
       >
         {state?.ok === false ? labels.errorMsg : ""}
+      </p>
+    </form>
+  );
+}
+
+/**
+ * THE SUBJECT'S ANSWER TO THE CONTENT — distinct from the offer above, which
+ * answers only "is this me".
+ *
+ * Contesting appends an objection beside the record. It never edits or deletes
+ * what the organization wrote, and the copy says so before the person acts,
+ * because a control named "this is not right" would otherwise read as a delete
+ * button. The inverse act is offered in the same place, so a contest raised in
+ * error is not permanent.
+ */
+function ContestDecision({
+  recordId,
+  disputedByMe,
+  labels,
+}: {
+  recordId: string;
+  disputedByMe: boolean;
+  labels: {
+    contest: string;
+    contestHint: string;
+    contestNote: string;
+    withdrawContest: string;
+    contested: string;
+    failed: string;
+    notEnabled: string;
+  };
+}) {
+  const [state, submit, pending] = useActionState<
+    EvidenceDisputeActionResult | null,
+    FormData
+  >(respondToEvidenceRecordAction, null);
+  // The server is the authority on whether a contest stands; until it answers,
+  // the row as read is.
+  const standing = state?.ok === true ? state.disputed : disputedByMe;
+  return (
+    <form
+      action={submit}
+      className="mt-1 flex flex-col gap-1.5 border-t border-ink-600 pt-2"
+      data-testid={`evidence-contest-${recordId}`}
+      data-contested={standing ? "true" : "false"}
+    >
+      <input type="hidden" name="record_id" value={recordId} readOnly />
+      {standing ? (
+        <>
+          <p className="font-mono text-meta uppercase tracking-label text-state-amber">
+            {labels.contested}
+          </p>
+          <button
+            type="submit"
+            name="decision"
+            value="withdraw"
+            disabled={pending}
+            className="self-start rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary disabled:opacity-50"
+          >
+            {labels.withdrawContest}
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="text-xs leading-relaxed text-text-muted">
+            {labels.contestHint}
+          </p>
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            <span className="sr-only">{labels.contestNote}</span>
+            <input
+              type="text"
+              name="note"
+              maxLength={1000}
+              placeholder={labels.contestNote}
+              className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+            />
+          </label>
+          <button
+            type="submit"
+            name="decision"
+            value="dispute"
+            disabled={pending}
+            className="self-start rounded-md border border-state-warning/50 bg-state-warning/10 px-3 py-1.5 text-xs font-semibold text-state-warning disabled:opacity-50"
+          >
+            {labels.contest}
+          </button>
+        </>
+      )}
+      <p
+        role="alert"
+        className={
+          state?.ok === false ? "text-xs text-state-warning" : "sr-only"
+        }
+      >
+        {state?.ok === false
+          ? state.code === "needs_migration"
+            ? labels.notEnabled
+            : labels.failed
+          : ""}
       </p>
     </form>
   );
@@ -208,6 +311,19 @@ export function OrganizationEvidenceSection({
                 <p className="text-xs text-text-muted">
                   {tRecords("notIndependentlyVerified")}
                 </p>
+                <ContestDecision
+                  recordId={rec.id}
+                  disputedByMe={rec.disputedByMe}
+                  labels={{
+                    contest: t("contest"),
+                    contestHint: t("contestHint"),
+                    contestNote: t("contestNote"),
+                    withdrawContest: t("withdrawContest"),
+                    contested: t("contested"),
+                    failed: t("contestFailed"),
+                    notEnabled: t("contestNotEnabled"),
+                  }}
+                />
               </li>
             ))}
           </ul>

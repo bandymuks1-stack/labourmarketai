@@ -857,6 +857,8 @@ describe("NO new DB migration in this PR", () => {
 
         //
     // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // 274 -> 275: EVID-7, the subject of an imported evidence record can
+    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
     // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
     // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
     // the two ambiguous cases stay UNMAPPED on purpose, because generic
@@ -888,7 +890,10 @@ describe("NO new DB migration in this PR", () => {
     // the multi-actor model. Body re-derived from the LIVE function rather than
     // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
     // UNAPPLIED and owner-gated.
-expect(count).toBeLessThanOrEqual(276);
+    //
+    // 276 -> 277: EVID-7, the subject of an imported evidence record can
+    //   contest it (20260908110000). RED, owner-gated, UNAPPLIED.
+expect(count).toBeLessThanOrEqual(277);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

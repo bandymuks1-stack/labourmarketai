@@ -15465,6 +15465,13 @@
       "confirmation_unavailable": "Šioje aplinkoje patvirtinimų pasirašyti negalima, todėl nieko neužfiksuota."
     },
     "mine": {
+      "contest": "Tai neteisinga",
+      "contestHint": "Ginčijimas neterina to, ką organizacija užrašė. Jūsų prieštaravimas įrašomas šalia, ir abu lieka įraše — kiekvienas skaitantis mato, kad nesutikote. Vėliau galite jį atšaukti.",
+      "contestNote": "Kas čia negerai? (nebūtina)",
+      "withdrawContest": "Atšaukti prieštaravimą",
+      "contested": "Jūs tai užginčijote",
+      "contestFailed": "Nepavyko išsaugoti. Niekas nepasikeitė.",
+      "contestNotEnabled": "Įrašo ginčijimas šioje aplinkoje dar neįjungtas.",
       "title": "Ką organizacijos yra užfiksavusios apie mane",
       "intro": "Darbas, mokymai ir studijos, kuriuos organizacija perkėlė iš savo pačios įrašų. Visada matote, kas juos atsiuntė, kuo jums tuo metu buvo ir kada.",
       "notEnabled": "Šioje aplinkoje tai dar neįjungta. Jūsų profilyje nieko netrūksta — tiesiog nėra saugyklos, kurią būtų galima perskaityti.",
