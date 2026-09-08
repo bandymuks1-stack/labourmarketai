@@ -430,3 +430,93 @@ the four actors act at all, and the capability it unblocks is already built.
 three migration-count ratchets 275 → 276. **Whichever merges second needs a
 one-line bump to 277.** They are otherwise independent and may be approved in
 either order, or separately.
+
+---
+
+# APPENDIX F — #1436, investigated and prepared (NOT applied)
+
+Owner directed this investigation 2026-09-08 and said explicitly: do not apply a
+new #1436 production migration without separate approval. **Nothing was applied.**
+
+## The PR title is misleading, and following it would be a mistake
+
+It says *"invitation accept binds organisation membership"*. The migration does
+**not** touch `company_memberships`, and it must not. The product keeps two
+distinct things:
+
+| | meaning |
+|---|---|
+| `engagement_contexts` | a **relationship** — employee, student, collaborator, mentor. Vocabulary lives in `relationship_types` as **data**, deliberately, so today's actor taxonomy is not frozen (ARCHITECTURE §6.2) |
+| `company_memberships` | a **governance seat with a role**. `has_org_demand_access` requires owner/admin/manager/external_manager |
+
+`belongs_to_organization` already accepts **either** — that is the multi-actor
+model working as designed. Writing a membership row for every accepted worker
+would hand governance-shaped access to every employee and student and would
+reduce a person to a company member. **Identity is not a fixed role.**
+
+## The defect, reproduced on production
+
+`accept_company_worker_invitation` (the legacy roster path) links a worker into
+`company_workers` and writes **no** `engagement_contexts` row.
+
+**Four of seven** active `company_workers` rows have a resolvable organization
+and neither an engagement nor a membership:
+
+```
+profile 8cda6488… → org 5e40a05a…
+profile af8cc32f… → org 20b2c802…
+profile 70851a66… → org 9b96648a…
+profile c267dc8b… → org 9e4f4467…
+```
+
+Under the first one's **own auth**, live:
+
+```
+belongs_to_organization(org)  false
+is_active_org_member(org)     false
+manages_organization(org)     false
+```
+
+**Six RLS policies** gate on `belongs_to_organization`, so that person cannot
+read `organizations` — their own employer's row — nor `organization_roles`,
+`training_programs`, `review_cycles`, `leave_balance_policies`,
+`workflow_definitions`.
+
+## What the prepared migration does
+
+Adds one block to the existing function: resolve the organization via
+`organizations.legacy_company_id`, and insert an `engagement_contexts` row with
+`relationship_slug = 'employee'` if none is active. Idempotent. Runs for the
+already-linked case too, so re-accepting heals a stranded row.
+
+**Re-derived from the LIVE function body**, not from the original branch, which
+is **227 commits stale** — a stale `CREATE OR REPLACE` silently reverts whatever
+landed in between. In particular the live identity check is preserved verbatim:
+the invitation must be **pending and addressed to the session's verified JWT
+email**; `profiles.email` is never consulted because it is user-writable history,
+not identity. A careless port that dropped that would create an impersonation
+vector, and the guard now pins it.
+
+## Risk
+
+| question | answer |
+|---|---|
+| changes/deletes data? | **No.** No UPDATE, no DELETE, no backfill |
+| widens privileges? | **No GRANT, no REVOKE, no policy.** It makes `belongs_to_organization` true for people who genuinely accepted — turning on six SELECT policies for their own employer, which is the intended effect and the thing to review |
+| governance access? | **None.** `company_memberships` untouched, so `has_org_demand_access` is unaffected |
+| rollback | paired `.down.sql`, restoring the live body captured before the change. **Honest caveat:** engagement rows already created are NOT deleted by the rollback — they record a true relationship. Rollback reverses behaviour, not state |
+
+## The judgement the owner still owns
+
+Should an accepted employee be able to read their employer's `organizations`
+row, training programmes, review cycles, leave-balance policies, organization
+roles and workflow definitions? The fix says yes, by restoring the belonging the
+acceptance already established. That is a **visibility decision**, not a
+mechanical repair, which is why it stays gated.
+
+## Separately: the four already-stranded people
+
+This fixes the path **forward only**. The four existing rows stay broken unless
+backfilled, and a backfill is a write to existing production data — raised on
+its own, exactly as the EVID-2 backfill was, rather than smuggled into a
+behaviour fix.
