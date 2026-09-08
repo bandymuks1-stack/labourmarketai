@@ -2699,7 +2699,15 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Potwierdzone — zatwierdzone przez menedżera. Poparte pracą — widoczne z wpisów dziennika pracy. Zadeklarowane — dodane przez osobę, jeszcze niezweryfikowane."
+    "skillsLegend": "Potwierdzone — zatwierdzone przez menedżera. Poparte pracą — widoczne z wpisów dziennika pracy. Zadeklarowane — dodane przez osobę, jeszcze niezweryfikowane.",
+    "workTitle": "Zapisana praca",
+    "workEmpty": "Brak zapisanej pracy",
+    "workUnavailable": "Nie udało się wczytać zapisanej pracy",
+    "workScopeNote": "Pokazuje tylko pracę, którą możesz zobaczyć.",
+    "workCurrent": "Teraz",
+    "kindEmployment": "Zatrudnienie",
+    "kindPractice": "Praktyka",
+    "mobility": "Może pracować w"
   },
   "marketMapBase": {
     "previewTitle": "Wybrano nowe miejsce — jeszcze nie zapisane",

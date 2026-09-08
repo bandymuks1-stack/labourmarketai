@@ -10898,7 +10898,15 @@
     "skillWorkBacked": "Onderbouwd door werkdagboek-invoer",
     "skillDeclared": "Zelf opgegeven",
     "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd.",
-    "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw."
+    "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw.",
+    "workTitle": "Vastgelegd werk",
+    "workEmpty": "Nog geen vastgelegd werk",
+    "workUnavailable": "Vastgelegd werk kon niet worden geladen",
+    "workScopeNote": "Toont alleen het werk dat u mag zien.",
+    "workCurrent": "Nu",
+    "kindEmployment": "Dienstverband",
+    "kindPractice": "Stage",
+    "mobility": "Kan werken in"
   },
   "companyGallery": {
     "title": "Galerij",
@@ -12711,7 +12719,8 @@
       "workspaceUnnamedAgency": "Bureau zonder naam",
       "workspaceUnnamedTeam": "Ploeg zonder naam",
       "workspaceUnnamedNote": "Geen naam opgegeven",
-      "workspaceNameThis": "Naam toevoegen"    },
+      "workspaceNameThis": "Naam toevoegen"
+    },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
       "loading": "Laden…",

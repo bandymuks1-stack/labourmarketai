@@ -2699,7 +2699,15 @@
     "skillVerified": "Bekræftet af en leders registrering",
     "skillWorkBacked": "Underbygget af arbejdsjournal-indførsler",
     "skillDeclared": "Selvangivet",
-    "skillsLegend": "Bekræftet — godkendt af en leder. Underbygget af arbejde — fremgår af arbejdsjournalens indlæg. Selvangivet — tilføjet af personen, endnu ikke kontrolleret."
+    "skillsLegend": "Bekræftet — godkendt af en leder. Underbygget af arbejde — fremgår af arbejdsjournalens indlæg. Selvangivet — tilføjet af personen, endnu ikke kontrolleret.",
+    "workTitle": "Registreret arbejde",
+    "workEmpty": "Intet registreret arbejde endnu",
+    "workUnavailable": "Registreret arbejde kunne ikke indlæses",
+    "workScopeNote": "Viser kun det arbejde, du har adgang til at se.",
+    "workCurrent": "Nu",
+    "kindEmployment": "Ansættelse",
+    "kindPractice": "Praktik",
+    "mobility": "Kan arbejde i"
   },
   "marketMapBase": {
     "previewTitle": "Nyt sted valgt — endnu ikke gemt",
