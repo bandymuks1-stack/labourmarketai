@@ -41,6 +41,29 @@ function asAny(c: SupabaseClient): any {
 /** PostgreSQL undefined_function / PostgREST unknown-RPC. */
 const UNDEFINED_FUNCTION = "42883";
 const POSTGREST_UNKNOWN_RPC = "PGRST202";
+/**
+ * PostgreSQL query_canceled — the `anon` role's 3 s statement_timeout fired.
+ *
+ * THE CAUSE IS FIXED. `search_public_vacancy_previews_v1` computed its
+ * `total_count` with `count(*) over ()`, walking every live row on every call.
+ * Production logs for the 24 h to 2026-09-08 carried 1,595 `canceling
+ * statement due to statement timeout` lines and EVERY ONE of them was
+ * `SQL function "search_public_vacancy_previews_v1" statement 1`, from
+ * `postgrest`/`authenticator` — real anonymous traffic, ~66/hour. The board
+ * answered HTTP 500 because this module re-threw into the page. The body was
+ * replaced on 2026-09-08 (ledger 20260908110702); the last organic timeout was
+ * 10:49:51, seventeen minutes before the apply, and the unfiltered read now
+ * measures 2.7 ms under the real `anon` role.
+ *
+ * THIS HANDLER STAYS ANYWAY, and that is the point. A statement timeout is
+ * always possible — a slower filter, a colder cache, a bigger table next year.
+ * What must never happen again is the SHAPE of the failure: a read that did not
+ * answer became either a 500 or, worse, "0 vacancies found". Those are three
+ * different facts and the product owes the person the true one. `unavailable`
+ * is a named state distinct from `not provisioned` and from an empty result —
+ * unknown is not zero.
+ */
+const QUERY_CANCELED = "57014";
 
 export const PUBLIC_VACANCY_PAGE_SIZE = 20;
 /** Mirrors the hard cap inside the SQL function. */
@@ -82,7 +105,9 @@ export interface PublicVacancyPreview {
 }
 
 export interface PublicVacancySearchResult {
-  readonly status: PublicVacancyPreviewStatus;
+  /** `unavailable`: the read did not answer in time (statement timeout) —
+   *  distinct from "not switched on" and from "no jobs". */
+  readonly status: PublicVacancyPreviewStatus | "unavailable";
   readonly vacancies: readonly PublicVacancyPreview[];
   readonly totalCount: number;
   readonly hasMore: boolean;
@@ -172,6 +197,14 @@ export async function searchPublicVacancyPreviews(
     if (isNotProvisioned(error.code)) {
       return {
         status: "not_provisioned",
+        vacancies: [],
+        totalCount: 0,
+        hasMore: false,
+      };
+    }
+    if (error.code === QUERY_CANCELED) {
+      return {
+        status: "unavailable",
         vacancies: [],
         totalCount: 0,
         hasMore: false,
