@@ -1230,7 +1230,8 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     anchors: ["lib/notifications"],
     coreModule: "lib/notifications/spine-signals.ts",
     surfaces: ["components/app"],
-    note: "All twenty are emitted; the email channel is inert because no provider is configured.",
+    note:
+      "CORRECTED 2026-09-08. This said flatly that all twenty are emitted. They were NOT: service_role held no write grant on notification_events, so every emitter failed 42501 from July until the grant was applied on 2026-09-08 (ledger 20260908061619, and the recipient-discovery SELECTs at 20260908065654 - the write grant alone left the cron returning 503, because the sweep could not read journal_entries or workers to find a recipient). The claim was true of the CODE and false of the PRODUCT, which is the distinction this register exists to keep. NOW MEASURED END TO END on production: 6 events exist, 4 of them written today after the grant; every row carries a recipient; and the readback is correctly scoped - a real recipient reads exactly their own 1 of 6, a person who is not a recipient reads 0. Emission and read are proven; the email channel is still inert because no provider is configured, which is what keeps this PARTIAL.",
   },
   {
     id: "COM-4",
@@ -1238,11 +1239,12 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     title: "Weekly digest",
     worldElement: "communication",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/notifications"],
     coreModule: null,
     surfaces: [],
-    note: "The only cron in the product; delivery depends on COM-3's inert channel.",
+    note:
+      "PROMOTED 2026-09-08 from TEST_PROVEN on real evidence, not on a green suite: the cron actually ran and PERSISTED, writing 4 weekly_digest rows to notification_events at 07:09 and 07:28 UTC - the first digests this product has ever stored. Until that morning it could not: it returned HTTP 503 because service_role could read neither journal_entries nor workers to find a recipient. The only cron in the product. Still PARTIAL because DELIVERY is not persistence - the email channel remains inert with no provider configured, so a digest is stored and readable in-product and reaches nobody by mail.",
   },
   {
     id: "COM-5",
