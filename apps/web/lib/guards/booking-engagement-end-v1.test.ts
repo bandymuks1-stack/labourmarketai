@@ -1194,6 +1194,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // grants nothing, and imports nothing. Owner-approved 2026-09-01 per
       // docs/intelligence/labour-economics-metrics-v1.md §6.
       "20260901140000_labour_economics_metric_widening_v1.sql",
+      // 2026-09-02, UNAPPLIED (#1436 port). The legacy roster accept links a
+      // worker into company_workers and writes NO engagement_contexts row, so
+      // `belongs_to_organization` is false for them and six RLS policies lock
+      // them out of their own employer — the `organizations` row included.
+      // Four of seven active company_workers are in that state on production.
+      // It binds a RELATIONSHIP, never a governance seat: company_memberships
+      // is deliberately untouched. The marker is the risk ACKNOWLEDGEMENT that
+      // lets a RED file pass the static gate; the owner directed the
+      // investigation and said explicitly not to apply without separate
+      // approval. RED (SECURITY DEFINER body replace).
+      "20260902230000_accept_invitation_binds_org_membership_v1.sql",
       // 2026-09-03: RED batch A: supply-counts row (definer swap + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.
       "20260903100000_public_vacancy_supply_counts_v1.sql",
       // 2026-09-03: RED batch A: agency offer decision (CHECK widening + definer + grants); owner approval "Apply batch 2026-09-03 A+B+C"; APPLIED TO PROD, ledger recorded in FINAL_COMPLETION_REGISTER §4.

@@ -433,7 +433,105 @@ either order, or separately.
 
 ---
 
-# APPENDIX G — the four stranded records, reconciled (NO BACKFILL APPROVED)
+# APPENDIX F — #1436, investigated and prepared
+
+> **SUPERSEDED BY APPENDIX H.** Owner approved this on 2026-09-08 and it is
+> APPLIED (ledger `20260908143925`). The "not applied" statements below are the
+> record as written before that decision; they are kept, not corrected in place.
+
+Owner directed this investigation 2026-09-08 and said explicitly: do not apply a
+new #1436 production migration without separate approval. **Nothing was applied.**
+
+## The PR title is misleading, and following it would be a mistake
+
+It says *"invitation accept binds organisation membership"*. The migration does
+**not** touch `company_memberships`, and it must not. The product keeps two
+distinct things:
+
+| | meaning |
+|---|---|
+| `engagement_contexts` | a **relationship** — employee, student, collaborator, mentor. Vocabulary lives in `relationship_types` as **data**, deliberately, so today's actor taxonomy is not frozen (ARCHITECTURE §6.2) |
+| `company_memberships` | a **governance seat with a role**. `has_org_demand_access` requires owner/admin/manager/external_manager |
+
+`belongs_to_organization` already accepts **either** — that is the multi-actor
+model working as designed. Writing a membership row for every accepted worker
+would hand governance-shaped access to every employee and student and would
+reduce a person to a company member. **Identity is not a fixed role.**
+
+## The defect, reproduced on production
+
+`accept_company_worker_invitation` (the legacy roster path) links a worker into
+`company_workers` and writes **no** `engagement_contexts` row.
+
+**Four of seven** active `company_workers` rows have a resolvable organization
+and neither an engagement nor a membership:
+
+```
+profile 8cda6488… → org 5e40a05a…
+profile af8cc32f… → org 20b2c802…
+profile 70851a66… → org 9b96648a…
+profile c267dc8b… → org 9e4f4467…
+```
+
+Under the first one's **own auth**, live:
+
+```
+belongs_to_organization(org)  false
+is_active_org_member(org)     false
+manages_organization(org)     false
+```
+
+**Six RLS policies** gate on `belongs_to_organization`, so that person cannot
+read `organizations` — their own employer's row — nor `organization_roles`,
+`training_programs`, `review_cycles`, `leave_balance_policies`,
+`workflow_definitions`.
+
+## What the prepared migration does
+
+Adds one block to the existing function: resolve the organization via
+`organizations.legacy_company_id`, and insert an `engagement_contexts` row with
+`relationship_slug = 'employee'` if none is active. Idempotent. Runs for the
+already-linked case too, so re-accepting heals a stranded row.
+
+**Re-derived from the LIVE function body**, not from the original branch, which
+is **227 commits stale** — a stale `CREATE OR REPLACE` silently reverts whatever
+landed in between. In particular the live identity check is preserved verbatim:
+the invitation must be **pending and addressed to the session's verified JWT
+email**; `profiles.email` is never consulted because it is user-writable history,
+not identity. A careless port that dropped that would create an impersonation
+vector, and the guard now pins it.
+
+## Risk
+
+| question | answer |
+|---|---|
+| changes/deletes data? | **No.** No UPDATE, no DELETE, no backfill |
+| widens privileges? | **No GRANT, no REVOKE, no policy.** It makes `belongs_to_organization` true for people who genuinely accepted — turning on six SELECT policies for their own employer, which is the intended effect and the thing to review |
+| governance access? | **None.** `company_memberships` untouched, so `has_org_demand_access` is unaffected |
+| rollback | paired `.down.sql`, restoring the live body captured before the change. **Honest caveat:** engagement rows already created are NOT deleted by the rollback — they record a true relationship. Rollback reverses behaviour, not state |
+
+## The judgement the owner still owns
+
+Should an accepted employee be able to read their employer's `organizations`
+row, training programmes, review cycles, leave-balance policies, organization
+roles and workflow definitions? The fix says yes, by restoring the belonging the
+acceptance already established. That is a **visibility decision**, not a
+mechanical repair, which is why it stays gated.
+
+## Separately: the four already-stranded people
+
+This fixes the path **forward only**. The four existing rows stay broken unless
+backfilled, and a backfill is a write to existing production data — raised on
+its own, exactly as the EVID-2 backfill was, rather than smuggled into a
+behaviour fix.
+
+---
+
+# APPENDIX G — the four stranded records, reconciled
+
+> **PARTLY SUPERSEDED BY APPENDIX H.** The owner then approved a backfill for
+> ONE record (`af8cc32f` → UAB NONSTOP GROUP), which is done. The other three
+> remain un-backfilled, as recommended below.
 
 Owner asked for a per-record packet and said explicitly not to assume all four
 need the same repair. **They do not.** Nothing was written.
@@ -511,3 +609,86 @@ direction.
 1. Repair **record 1** only, or all four, or none.
 2. Whether a backfill happens at all is separate from applying #1658, which
    fixes the forward path and is itself still ungated.
+
+
+---
+
+# APPENDIX H — what the owner decided on 2026-09-08, and what was actually done
+
+## 1. #1658 — APPROVED AND APPLIED
+
+Ledger **`20260908143925 accept_invitation_binds_org_membership_v1`**.
+
+Pre-apply concurrency check: main unchanged at `d6b68022`, ledger 273/head
+`20260908110702`, version `20260902230000` absent, live function did not bind
+engagements — no other session had applied or superseded it. The rollback file
+was verified **byte-faithful to the live body** first (length 1806, md5
+`63e5f61f…` on both sides).
+
+**One honest deviation.** The applied body is not byte-identical to the reviewed
+packet: a two-line comment was added at apply time saying the personal
+NULL-organization row is never read, updated or replaced. The **executable code**
+is identical — comment-stripped and normalised, both sides hash to
+`b8d5f183…` at 2680 characters. The repository file has been reconciled to match
+what was applied.
+
+`company_memberships` appears in the applied function **only inside a comment**;
+the executable code never references it (verified by stripping comments on the
+live body).
+
+### Verified on production, in a rolled-back transaction
+
+| check | result |
+|---|---|
+| BEFORE `belongs_to_organization(employer)` | false, 0 engagements |
+| `accept()` | `already_linked` — and healed anyway, by design |
+| AFTER `belongs_to_organization(employer)` | **true** |
+| `is_active_org_member` / `has_org_demand_access` / `manages_organization` | **false / false / false** |
+| unrelated organization | **false** |
+| `company_memberships` created | **0** |
+| personal NULL-org context | **still active** |
+| engagements to employer | exactly **1** |
+
+Residue re-counted after rollback: engagements 79, personal NULL-org 56,
+memberships 19 — all unchanged.
+
+## 2. Historical backfill — ONE record, approved and done
+
+`af8cc32f` → **UAB NONSTOP GROUP** (`20b2c802`). New engagement
+**`181d16a7-04a4-4eab-a301-ea91803e7316`**.
+
+Re-verified immediately before writing: organisation name exactly UAB NONSTOP
+GROUP, org↔company mapping correct, roster `active`, invitation `accepted`
+against the person's own session-verified e-mail, one acceptance audit row — so
+the relationship is **FACT, not inference** — nothing existing to overwrite, and
+zero memberships.
+
+**Readback under the person's own auth:** `belongs_to_organization` **true**;
+`is_active_org_member`, `has_org_demand_access`, `manages_organization` all
+**false**; an unrelated organization still **false**; they can now read their own
+employer's `organizations` row, and exactly two organizations are visible to
+them — bounded, not global.
+
+Before → after rows: personal `70fb14cc` **unchanged**, existing `21792c71`
+**unchanged**, one row added. Nothing replaced or destroyed.
+
+**Rollback:** `delete from public.engagement_contexts where id =
+'181d16a7-04a4-4eab-a301-ea91803e7316';` — recorded in the audit row itself
+(`owner_approved_reconciliation_1436`).
+
+## 3. The other three records — NOT backfilled
+
+Unchanged, as recommended. The synthetic record `c267dc8b` was used as **bounded
+test evidence** for the forward path inside a rolled-back transaction, which
+proved the fixed function heals a stranded record without persisting anything.
+No external communication, notification or irreversible action was triggered.
+
+## 4. The invariant this established
+
+**PERSONAL CONTEXT != BROKEN ORGANIZATION RELATIONSHIP.**
+**ENGAGEMENT/RELATIONSHIP != GOVERNANCE MEMBERSHIP.**
+
+56 of 79 engagement rows carry `organization_id = NULL` and are created by the
+`ensure_worker_personal_engagement` trigger. They are the personal context of the
+multi-actor model. They are not defects, they must not be mass-converted, and
+they cannot satisfy `belongs_to_organization` — correctly.

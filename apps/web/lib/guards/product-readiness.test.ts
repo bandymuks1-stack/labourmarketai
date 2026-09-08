@@ -2460,7 +2460,20 @@ describe("no migration files added by this sprint", () => {
     // the filtered total became a second scan - a real regression, far below
     // the timeout, recorded rather than hidden. RED (SECURITY DEFINER body
     // replace); body only - same signature, same projection, no GRANT.
-const SPRINT_BASELINE = 275;
+    //
+    // 275 -> 276: the accepted-worker organization binding (20260902230000,
+    // #1436, port). REPRODUCED on production 2026-09-08: the legacy roster
+    // accept links a worker into company_workers and writes NO
+    // engagement_contexts row, so `belongs_to_organization` is false for them
+    // and SIX RLS policies lock them out of their own employer - including the
+    // `organizations` row itself. Four of seven active company_workers are in
+    // that state today. It binds a RELATIONSHIP, never a governance seat:
+    // company_memberships is deliberately untouched, because a membership row
+    // would hand demand-shaped access to every accepted employee and collapse
+    // the multi-actor model. Body re-derived from the LIVE function rather than
+    // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
+    // UNAPPLIED and owner-gated.
+const SPRINT_BASELINE = 276;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
