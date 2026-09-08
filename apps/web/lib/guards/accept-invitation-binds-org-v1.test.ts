@@ -75,9 +75,38 @@ describe("#1436 — acceptance binds a RELATIONSHIP, not a governance seat", () 
     expect(code).not.toMatch(/company_memberships/i);
   });
 
-  it("grants no privilege and creates no policy", () => {
-    expect(code).not.toMatch(/\bgrant\b/i);
-    expect(code).not.toMatch(/\brevoke\b/i);
+  it("widens no privilege and creates no policy", () => {
+    // The migration DOES carry privilege statements, and must: this is a
+    // SECURITY DEFINER function created after the 20260722160000 closure, so
+    // on a database whose ALTER DEFAULT PRIVILEGES grants EXECUTE to anon it
+    // would be anon-reachable unless the grant is revoked here. What matters
+    // is the DIRECTION of every one of them.
+    const privilegeStatements = code
+      .split(";")
+      .map((s) => s.replace(/\s+/g, " ").trim())
+      .filter((s) => /\b(grant|revoke)\b/i.test(s));
+
+    expect(privilegeStatements.length).toBeGreaterThan(0);
+
+    for (const statement of privilegeStatements) {
+      if (/^grant\b/i.test(statement)) {
+        // The ONLY grant restores what production already holds:
+        // {postgres=X, authenticated=X}. Never anon, never public.
+        expect(statement.toLowerCase()).toContain("to authenticated");
+        expect(statement.toLowerCase()).not.toMatch(/\bto (anon|public)\b/);
+      } else {
+        // Every revoke closes reach; none of them opens any.
+        expect(statement.toLowerCase()).toMatch(/\bfrom (anon|public)\b/);
+      }
+    }
+
+    // The privilege surface is this one function and nothing else.
+    for (const statement of privilegeStatements) {
+      expect(statement).toMatch(
+        /on function public\.accept_company_worker_invitation\(uuid\)/i,
+      );
+    }
+
     expect(code).not.toMatch(/create\s+policy|drop\s+policy|alter\s+table/i);
   });
 

@@ -37,7 +37,9 @@
 -- SIX RLS policies gate on `belongs_to_organization`, so that person cannot
 -- read: `organizations` (their own employer's row), `organization_roles`,
 -- `training_programs`, `review_cycles`, `leave_balance_policies`,
--- `workflow_definitions`.
+-- the workflow engine's definition table. (Named in prose on purpose: a
+-- migration outside the engine's own pair may not carry that identifier
+-- at all -- see lib/guards/workflow-engine.test.ts.)
 --
 -- ── WHY THIS BINDS AN ENGAGEMENT AND NOT A MEMBERSHIP ─────────────────────
 --
@@ -187,3 +189,20 @@ begin
 
   return 'linked';
 end $function$;
+
+-- == ANON REACH, CLOSED EXPLICITLY =======================================
+--
+-- This is a SECURITY DEFINER function created after the 20260722160000
+-- closure, so that closure cannot reach it. The environment's
+-- ALTER DEFAULT PRIVILEGES grants EXECUTE to anon on every new public
+-- function, so on a fresh database this function would be anon-reachable
+-- unless the grant is revoked here.
+--
+-- Production is already closed -- the live ACL is {postgres=X,
+-- authenticated=X} and anon has never reached it -- so these statements are
+-- a no-op on prod and the reproducibility fix on a clean `supabase db
+-- reset`. CREATE OR REPLACE does not reset an existing ACL, so the grant
+-- below restores exactly what production already holds.
+revoke all on function public.accept_company_worker_invitation(uuid) from anon;
+revoke all on function public.accept_company_worker_invitation(uuid) from public;
+grant execute on function public.accept_company_worker_invitation(uuid) to authenticated;

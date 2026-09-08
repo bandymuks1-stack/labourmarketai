@@ -87,3 +87,10 @@ begin
 
   return 'linked';
 end $function$;
+
+-- The forward migration closes anon reach explicitly; the rollback must
+-- close it too, or reverting would re-open this SECURITY DEFINER function
+-- to anon on any database whose default privileges grant EXECUTE.
+revoke all on function public.accept_company_worker_invitation(uuid) from anon;
+revoke all on function public.accept_company_worker_invitation(uuid) from public;
+grant execute on function public.accept_company_worker_invitation(uuid) to authenticated;
