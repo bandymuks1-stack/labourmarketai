@@ -49,8 +49,36 @@ describe("a self-confirmation is never presented as external proof", () => {
   it("it is DERIVED from the confirmer id, never from the role", () => {
     // confirmer_role is 'owner' on all 13 production rows including the 3
     // self-confirmed ones, so a role-based rule would silently pass them.
-    expect(core).toContain("confirmer_id");
-    expect(core).toMatch(/c\.confirmer_id === user\.id/);
+    expect(core).toMatch(/\.eq\("confirmer_id", user\.id\)/);
+  });
+
+  it("the confirmer id is FILTERED on, never SELECTED into this path", () => {
+    // `verified-cv-honesty` forbids the confirmed-proof query from carrying an
+    // identity, and it is right: the first version of this fix added
+    // confirmer_id to that select and CI caught it. Filtering asks the narrower
+    // question and fetches strictly less — the rows come back carrying only
+    // their own coordinates.
+    // Scoped to the CONFIRMATIONS reads only. The CV legitimately selects the
+    // subject's own `full_name` from `profiles` — that is the person's own
+    // name on their own CV, not a third party's identity.
+    const confirmationSelects = core
+      .split('.from("journal_entry_confirmations")')
+      .slice(1)
+      .map((chunk) => chunk.match(/\.select\(\s*"([^"]*)"\s*\)/)?.[1] ?? "");
+    expect(confirmationSelects.length).toBeGreaterThan(0);
+    for (const cols of confirmationSelects) {
+      expect(cols, `a confirmations select carries an identity: ${cols}`).not.toMatch(
+        /confirmer_id|full_name|email|profiles/,
+      );
+    }
+  });
+
+  it("self-ness is matched per CONFIRMATION, not per entry", () => {
+    // An entry can carry several confirmations and only the latest is
+    // rendered. Matching by entry alone would label a manager-confirmed row as
+    // self-confirmed whenever an older self-confirmation also existed.
+    expect(core).toMatch(/entry_id, created_at/);
+    expect(core).toMatch(/\$\{row\.entryId\}\|\$\{row\.confirmedAt\}/);
   });
 
   it("the confirmer's identity is never carried into the proof row", () => {

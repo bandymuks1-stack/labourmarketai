@@ -428,11 +428,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   if (entries.length > 0) {
     const { data: confs } = await supabase
       .from("journal_entry_confirmations")
-      // `confirmer_id` is selected ONLY to compare it with the CV subject's
-      // own profile id (EVID-2). It never leaves this function: the proof row
-      // carries a boolean, never the confirmer's identity — the role-only rule
-      // above is unchanged.
-      .select("entry_id, confirmer_role, confirmer_id, created_at, confirmation_scope")
+      .select("entry_id, confirmer_role, created_at, confirmation_scope")
       .in("entry_id", entries.map((e) => e.id))
       .order("created_at", { ascending: false });
     const seen = new Set<string>();
@@ -460,14 +456,40 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         // W6 slice 1: policy-written rows carry their honest marker through
         // to the render — automatic never looks identical to hand-confirmed.
         automatic: scope?.action === "auto_confirm",
-        // EVID-2: the confirmer is this CV's own subject. `user.id` is the
-        // PROFILE id and the worker was resolved from it above, so this is a
-        // direct identity comparison, not an inference.
-        selfConfirmed:
-          typeof c.confirmer_id === "string" && c.confirmer_id === user.id,
+        // EVID-2: filled below, from a query that FILTERS on confirmer_id
+        // without ever selecting it.
+        selfConfirmed: false,
       });
       const pid = entryById.get(c.entry_id)?.projectId;
       if (pid) projectIds.add(pid);
+    }
+
+    // EVID-2 — WHICH of these confirmations did the CV's own subject write?
+    //
+    // The confirmer's identity must never be FETCHED into this path: the
+    // confirmed-proof query carries the ROLE only, and a guard pins that
+    // (`verified-cv-honesty`). So this asks the narrower question instead —
+    // it FILTERS on `confirmer_id` and selects only the row's own coordinates.
+    // No identity is returned, and the only id involved is the subject's own,
+    // which they already know. This fetches strictly LESS than reading the
+    // column would.
+    //
+    // Matched on (entry_id, created_at) rather than entry_id alone, because an
+    // entry can carry more than one confirmation and only the LATEST one is
+    // rendered above. Marking by entry would label a manager-confirmed row as
+    // self-confirmed whenever an older self-confirmation also existed.
+    if (confirmedRows.length > 0) {
+      const { data: selfRows } = await supabase
+        .from("journal_entry_confirmations")
+        .select("entry_id, created_at")
+        .eq("confirmer_id", user.id)
+        .in("entry_id", confirmedRows.map((r) => r.entryId));
+      const selfKeys = new Set(
+        (selfRows ?? []).map((r) => `${r.entry_id}|${r.created_at}`),
+      );
+      for (const row of confirmedRows) {
+        row.selfConfirmed = selfKeys.has(`${row.entryId}|${row.confirmedAt}`);
+      }
     }
 
     // Project titles the worker's own entries link to — graceful null when
