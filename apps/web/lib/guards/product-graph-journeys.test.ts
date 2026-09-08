@@ -198,6 +198,66 @@ describe("the permanent journey contracts", () => {
     }
   });
 
+  /**
+   * THE GUARD ABOVE ONLY LOOKED ONE WAY, AND THAT IS HOW THE REGISTERS DRIFTED.
+   *
+   * "A journey link may not be greener than the capability under it" caught a
+   * step that overclaimed. Nothing caught a step that UNDERclaimed — and on
+   * 2026-09-08 five of them had, because #1600 corrected the capability
+   * register and left the journey register saying the opposite:
+   *
+   *   · "An authorized employer can discover that supply"  BROKEN, while DEM-9
+   *     was BUILT_AND_USABLE and the reader had been APPLIED to production
+   *     (ledger 20260907180546) for a day.
+   *   · "Every surface reads that direction correctly"     BROKEN, while its
+   *     blocking migration was applied as ledger 20260906194911.
+   *   · "It sees who is free and who is committed"         BROKEN, while the
+   *     three-state read was already on main.
+   *   · "A learner's practice is recorded as real work"    BROKEN, while the
+   *     fix had merged as #1290.
+   *   · "The institution sees employer demand and reports outcomes"
+   *     NOT_BUILT, repeating a reason EDU-3's own note had already retracted.
+   *
+   * CI was green throughout, because underclaiming broke no assertion. That is
+   * not a harmless direction of error: `product-truth.mjs` prints these steps
+   * as "the real backlog", so the owner and every future agent were told that
+   * capabilities which work do not, and the two registers contradicted each
+   * other in the one place the product keeps its own status.
+   *
+   * Both rules below are read straight off `LinkState`'s own definitions.
+   */
+  it("a step may not be redder than every capability under it", () => {
+    for (const j of JOURNEY_REGISTER) {
+      for (const step of j.steps) {
+        // NOT_BUILT means "not built at any layer". One live capability
+        // underneath is a direct contradiction of that sentence.
+        if (step.link === "NOT_BUILT") {
+          for (const id of step.capabilities) {
+            const row = capabilityById(id)!;
+            expect(
+              row.status === "BUILT_AND_USABLE",
+              `${j.id} · "${step.step}" is NOT_BUILT — "not built at any layer" — but ${id} is BUILT_AND_USABLE. If part of this step exists and the chain still does not connect, the honest link is BROKEN with a reason that says which part is missing.`,
+            ).toBe(false);
+          }
+        }
+
+        // BROKEN means the pieces exist and the chain does not connect. That is
+        // a real state, but if EVERY piece is BUILT_AND_USABLE the break has to
+        // be BETWEEN them — and the register must then say so, rather than rest
+        // on a capability being unbuilt when none of them is.
+        if (step.link === "BROKEN" && step.capabilities.length > 0) {
+          const rows = step.capabilities.map((id) => capabilityById(id)!);
+          if (rows.every((r) => r.status === "BUILT_AND_USABLE")) {
+            expect(
+              step.breakIsBetweenCapabilities === true,
+              `${j.id} · "${step.step}" is BROKEN, but every capability it names (${step.capabilities.join(", ")}) is BUILT_AND_USABLE. Either the step is stale and should be LIVE, or a capability is greener than it should be, or the break really is in the connection between them — in which case set breakIsBetweenCapabilities: true and say in "because" what fails BETWEEN the parts.`,
+            ).toBe(true);
+          }
+        }
+      }
+    }
+  });
+
   it("a broken or unbuilt step says why, in words", () => {
     for (const j of JOURNEY_REGISTER) {
       for (const step of j.steps) {

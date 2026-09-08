@@ -257,7 +257,8 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/player-card/work-history-model.ts"],
     coreModule: "lib/player-card/work-history-model.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "RPC accepts student/volunteer since 2026-08-27; the profile read filtered them out — fix is in the open evidence-import PR, not on main.",
+    note:
+      "The read filter is FIXED and on main — the previous note, that it sat in an open PR, was stale. `save_self_declared_work_history_v1` has accepted student/volunteer since 2026-08-27, and #1290 put `PRACTICE_RELATIONSHIPS` into the one canonical list in `lib/player-card/work-history-model.ts`, which the profile page, the CV export, the worklog engagement read, the capabilities registry and the invite surface all import rather than copy. `historyKindOf` derives employment-vs-practice from the relationship, so a placement is carried as practice and never relabelled as a job; `manager` correctly stays out of history as an administrative relationship. PARTIAL is now a statement about VOLUME, not correctness: production holds 1 student engagement and 0 volunteer engagements, so the path is real but thinly walked.",
   },
   {
     id: "PER-8",
@@ -1007,7 +1008,8 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/workforce"],
     coreModule: "lib/workforce/capacity-model.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Read one signal — approved absences, of which production has zero rows — and ignored the bookings and assignments that do exist; the three-state fix is in the open RED PR.",
+    note:
+      "The three-state fix is ON MAIN (#1600, `lib/conversation/capacity.ts`) — the previous note, that it sat in an open RED PR, was stale. Capacity no longer reads one signal: FREE means neither an approved absence nor a commitment overlaps the window, UNAVAILABLE means an absence does, COMMITTED means only work does, and an input that did not answer is reported as unknown (`absencesKnown` / `commitmentsKnown`) rather than as 'no' — SEP-7 held at the read. Re-measured on production 2026-09-08, unchanged from the day the defect was found: `worker_absences` 0 rows, `booking_requests` 1 accepted, `project_worker_assignments` 3 active, so the two signals that were invisible are exactly the ones carrying all the real data. PARTIAL now rests on CAL-3's four incompatible availability vocabularies, which remain recorded debt.",
   },
   {
     id: "CAL-5",
