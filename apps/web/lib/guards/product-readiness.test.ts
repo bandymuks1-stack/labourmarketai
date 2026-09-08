@@ -2386,38 +2386,61 @@ describe("no migration files added by this sprint", () => {
     // browsing for work to staff was served OTHER agencies' offers as demand —
     // measured on production as 2 of 12 rows, through the real RPC under the
     // agency's own auth. RED class (SECURITY DEFINER body replace).
-    // Bumped 268 -> 269 for organization_evidence_import_v1 (owner P0,
-    // 2026-09-07): the organization historical evidence import — 8 additive
-    // tables (roster people claimable by the real human, immutable import
-    // sessions, staging rows, INSERT-ONLY evidence records, party roles, and
-    // append-only attestation / independent-verification events). RED class
-    // because new tables need explicit GRANTs on this project; it carries NO
-    // `@human-gate-approved` marker because no owner decision exists yet, so
-    // `migration-safety` stays RED on purpose. Draft + needs-human-gate,
-    // NOT applied. RECOUNTED from the tree, never summed:
-    // `ls supabase/migrations/*.sql | wc -l` = 269 real files.
-// Bumped 269 -> 270 for employer_supply_discovery_v1 (2026-09-07): the
-// OTHER half of the market-direction work. Six surfaces were fixed for
-// serving supply where demand belongs, and every one of those fixes was
-// subtractive; production carries 2 submitted `agency_offer` rows that NO
-// employer could read, because `customer_requests_select` is own-row /
-// admin / org-demand-access only. This adds one new gated SECURITY
-// DEFINER reader exposing six non-identifying columns. Proven on
-// production inside a transaction under three real users' auth contexts
-// (employer 2 of 2, the supplier themselves 1 of 2, a plain worker 0) and
-// rolled back; the function does not exist on production. RED class,
-// carries NO `@human-gate-approved` marker, NOT applied.
-// RECOUNTED from the tree, never summed:
-// `ls supabase/migrations/*.sql | wc -l` = 270 real files.
-    // Bumped 270 -> 271 for evidence_parties_recursion_fix_v1 (2026-09-07):
-    // the organization evidence import applied earlier the same day shipped a
-    // MUTUAL RLS recursion - records_select subqueries parties, parties_select
-    // subqueries records - so four of its eight tables answer 42P17 on every
-    // read, and INSERT ... RETURNING dies with them. One SECURITY DEFINER
-    // resolver breaks the cycle on the parties side; records_select is not
-    // touched. RED (SECURITY DEFINER + policy replace), owner-gated, NOT
-    // applied. Proven in a rolled-back production transaction.
-const SPRINT_BASELINE = 271;
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 273 files.
+    //
+    // 269 -> 270: the two 2026-09-07 owner-approved migrations
+    // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
+    // are now APPLIED (ledger 20260907180944 and 20260907180546) and both
+    // carry `@human-gate-approved` naming the decisions EVID-1 / DEM-9. The
+    // comments that stood here called them "NOT applied" and said they carry
+    // "NO marker"; that was true when written and is false now, so it is
+    // corrected rather than carried forward. They remain RED class - a marker
+    // acknowledges risk, it never reclassifies a file to GREEN.
+    //
+    // 270 -> 271: the notification-spine service_role grant (20260906060000,
+    // #1566). Two additive grants - select/insert/update on
+    // notification_events, select on notification_preferences - so the
+    // emitters and the email dispatcher's consent read stop failing 42501.
+    // Measured on production 2026-09-07: service_role holds NO privilege on
+    // either table, and `rolbypassrls` is true, so RLS is not the blocker -
+    // the missing GRANT is. RED (privilege surface), owner-gated. The line
+    // here once said "NOT applied"; the owner approved it and it went to
+    // production 2026-09-08 as ledger 20260908061619, so that is corrected
+    // rather than carried forward. RED class is unchanged by having applied.
+    //
+    // 271 -> 272: the recipient-discovery reads (20260908070000, same PR).
+    // The write grant alone did NOT fix the cron. The first real invocation
+    // after it landed still returned HTTP 503 - not 401, so auth was fine and
+    // the function ran ~930 ms before failing. The digest sweep opens by
+    // reading journal_entries.worker_id and then workers(id, profile_id), and
+    // service_role held no privilege on EITHER, so PostgREST answered 42501
+    // and `if (error) return { kind: "unavailable" }` became the 503 before a
+    // single row could be written (notification_events was still 2 rows / 0
+    // digests afterwards - nothing was half-delivered). Reproduced under
+    // `set local role service_role` in a deliberately aborted transaction:
+    // journal_entries=BLOCKED_42501 workers=BLOCKED_42501. SELECT ONLY on
+    // both; no write privilege, because the spine reads domain rows and never
+    // writes them. It also un-breaks `workerProfileId()`, which discards its
+    // error and so reported a denied read as "row_unreadable" - the booking
+    // and absence emitters were silently dead for the same reason. Email is
+    // NOT implicated: the email hop runs only after a successful insert, is
+    // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
+    // RED (privilege surface), owner-approved, APPLIED to production
+    // 2026-09-08 as ledger 20260908065654.
+    //
+    // 272 -> 273: the evidence-parties recursion repair (20260907220000,
+    // #1618). Owner decision EVID-1, approved 2026-09-08 and applied via
+    // Supabase MCP apply_migration as ledger 20260908080950. It breaks the
+    // mutual organization_evidence_records <-> _parties policy cycle with a
+    // SECURITY DEFINER boolean holding the predicate the policy used to
+    // inline. Verified after the apply: all four formerly-recursing tables
+    // read under a real manager, a full write chain ran in a rolled-back
+    // transaction (records + parties INSERT ... RETURNING), a person who
+    // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
+    // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
+    // + policy replace) - applying it does not make it GREEN.
+const SPRINT_BASELINE = 273;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

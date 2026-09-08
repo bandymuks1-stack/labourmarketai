@@ -1207,6 +1207,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // (chat); APPLIED TO PROD 2026-09-05 18:49 UTC as ledger
       // 20260905184921, readback recorded in FINAL_COMPLETION_REGISTER §4.
       "20260905200000_billing_safety_invariants_v1.sql",
+      // 2026-09-06: notification_events service-role write grant (RED: GRANT =
+      // privilege-surface change, gate rule h). The emitters run through the
+      // admin client and have failed 42501 since July; marker records the RED
+      // classification, owner applies via MCP apply_migration (#1566).
+      "20260906060000_notification_events_service_role_grant.sql",
       // 2026-09-06 (owner window 7 §4): the worker board's gated read
       // served agency SUPPLY offers to workers as open jobs — measured 2 of
       // 9 rows on production. The fix is a SECURITY DEFINER body replace =
@@ -1233,11 +1238,22 @@ describe("the migration set is exactly what this slice declared", () => {
       // new tables with explicit GRANTs are not made GREEN by a marker.
       "20260907114500_organization_evidence_import_v1.sql",
       "20260907153000_employer_supply_discovery_v1.sql",
-      // 2026-09-07: the recursion repair for the import applied hours earlier.
-      // Carries the marker as a RISK ACKNOWLEDGEMENT only - no owner decision
-      // exists for it yet, which is stated in the file's own header. RED
-      // (SECURITY DEFINER + policy replace); draft + needs-human-gate.
+
+      // 2026-09-07, APPROVED AND APPLIED 2026-09-08 (owner decision EVID-1).
+      // The marker began as a risk ACKNOWLEDGEMENT with no decision behind it;
+      // the owner then approved it by name and it was applied via Supabase MCP
+      // apply_migration as ledger 20260908080950. Verified afterwards against
+      // production: all four formerly-recursing tables read, a full write chain
+      // ran in a rolled-back transaction, and residue was re-counted at 0. RED
+      // (SECURITY DEFINER + policy replace) - a marker never makes it GREEN.
       "20260907220000_evidence_parties_recursion_fix_v1.sql",
+      // 2026-09-08: the recipient-discovery half of the same repair (RED:
+      // GRANT = privilege-surface change, gate rule h). The write grant alone
+      // left the cron returning 503 - the sweep could not READ
+      // journal_entries or workers to find a recipient, so it failed 42501
+      // before any insert. SELECT only on both; owner-approved and applied
+      // via MCP apply_migration (#1566).
+      "20260908070000_notification_recipient_discovery_service_role_select.sql",
 ]);
   });
 
