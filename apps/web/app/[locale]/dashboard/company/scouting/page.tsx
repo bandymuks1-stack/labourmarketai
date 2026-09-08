@@ -214,6 +214,12 @@ export default async function CompanyScoutingPage({
   const poolIncomplete =
     result?.kind === "ok" &&
     (result.retrieval.capped || result.retrieval.truncatedStages.length > 0);
+  // A DIFFERENT statement from poolIncomplete, and it must not be folded into
+  // it: there the pool was short, here the pool was whole and the facts under
+  // the ranking could not be read. A worker with skills can then be ranked as
+  // a worker with none, so the ranking itself is what is untrustworthy.
+  const factsUnreadable =
+    result?.kind === "ok" && result.retrieval.unreadableFacts.length > 0;
 
   const statusLabels = {
     strong: t("status.strong"),
@@ -374,6 +380,15 @@ export default async function CompanyScoutingPage({
           {poolIncomplete
             ? t("pool.capped", { count: result.retrieval.poolSize })
             : t("pool.complete", { count: result.retrieval.poolSize })}
+        </p>
+      ) : null}
+
+      {factsUnreadable ? (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/10 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+          data-testid="scouting-facts-unreadable"
+        >
+          {t("pool.factsUnreadable")}
         </p>
       ) : null}
 

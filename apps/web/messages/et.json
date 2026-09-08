@@ -2210,6 +2210,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Osa sellest, mille need inimesed on kirja pannud, ei õnnestunud praegu lugeda, seega see järjestus ei ole usaldusväärne. Kedagi ei näidata siin väiksemana, kui ta on — puuduvad lihtsalt võrdluse aluseks olevad faktid. Laadige hetke pärast uuesti.",
+      "capped": "Kõiki ei võrreldud. Sellele vajadusele sobib rohkem nähtavaid töötajaid, kui ühte nimekirja mahub, seega toodi esmalt need {count}, kelle oskused, amet ja riik vastavad sellele kõige otsesemalt — mitte kunagi kõige uuemad registreerumised. Piiritlege vajadus, et olla kindel, et võrreldakse õigeid inimesi.",
+      "complete": "Kõiki {count} nähtavat töötajat võrreldi selle vajadusega."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",

@@ -2210,6 +2210,11 @@
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "Daļu no tā, ko šie cilvēki ir fiksējuši, tikko neizdevās nolasīt, tāpēc šī secība nav uzticama. Neviens šeit netiek rādīts ar mazāk, nekā viņam ir — vienkārši trūkst faktu, pēc kuriem salīdzināt. Pārlādējiet pēc brīža.",
+      "capped": "Ne visi tika salīdzināti. Šai vajadzībai atbilst vairāk redzamu darbinieku, nekā ietilpst vienā sarakstā, tāpēc vispirms tika iegūti tie {count}, kuru prasmes, profesija un valsts atbilst vistiešāk — nekad jaunākie reģistrējumi. Sašauriniet vajadzību, lai būtu droši, ka tiek salīdzināti īstie cilvēki.",
+      "complete": "Visi {count} redzamie darbinieki tika salīdzināti ar šo vajadzību."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
