@@ -19,10 +19,28 @@ proven, the measurement is named; where it is only test-proven, it says so.
 | **#1651** | A failed fact read stops ranking a worker as if the fact were absent. | 9 tests, both directions |
 | **#1652** | A trust count we could not read stops reading as *"you have none"*. | 9 tests + negative control |
 | **#1653** | The education owner-gate packet, beside the evidence one. | Docs only |
+| **#1655** | An unread count never prints as "null" on a person's CV. | 3 assertions + negative control |
 
 **None of these is HUMAN_UI_PROVEN.** They are unit/behaviour-proven and CI-green.
 The failure paths they fix are, by construction, hard to stage in a browser — a
 walk would prove the success path, which already worked.
+
+### A defect this window CAUSED, and caught
+
+Widening the trust counts to `number | null` (#1652) reached the CV page, where
+the three summary figures are rendered twice. React renders `null` as an empty
+box, and the compact layout **interpolated** it — putting the literal text
+"Journal entries: null" onto the document a person hands to an employer.
+
+It was found by tracing where the widened type actually landed, not by a test
+failing: `tsc` was clean throughout, because `null` is a perfectly valid thing
+to interpolate. Fixed in #1655 — resolved once into an em dash before either
+renderer sees it, and never a `0`, because on a CV a number we did not count
+must not appear as a number we did.
+
+**The lesson worth keeping:** widening a type to carry honesty moves the
+dishonesty downstream, to every renderer that assumed the value could not be
+null. Follow the type to its render sites; the compiler will not flag this one.
 
 ### The one thing that IS production-verified this window
 
