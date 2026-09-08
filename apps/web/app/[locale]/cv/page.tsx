@@ -754,6 +754,18 @@ export default async function VerifiedCvPage({
                           {" "}· {tTier("autoConfirmQualifier")}
                         </span>
                       ) : null}
+                      {/* EVID-2: a self-confirmation is real, and it is not an
+                          employer's word. It is labelled here rather than
+                          hidden, so this document cannot present the worker's
+                          own attestation as somebody else's. */}
+                      {row.selfConfirmed ? (
+                        <span
+                          className="text-zinc-500"
+                          data-testid="cv-proof-self-confirm-qualifier"
+                        >
+                          {" "}· {tTier("selfConfirmQualifier")}
+                        </span>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

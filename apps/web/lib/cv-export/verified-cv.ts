@@ -79,6 +79,27 @@ export type VerifiedCvProofRow = {
   /** W6 slice 1: true when the confirmation was written by the policy-gated
    *  auto-confirm RPC — rendered with a factual qualifier, never hidden. */
   automatic: boolean;
+  /**
+   * TRUE when the confirmer IS the person the entry belongs to (EVID-2).
+   *
+   * This CV is the document a person shows an employer, and until 2026-09-08
+   * a self-confirmation reached it indistinguishable from an employer's:
+   * the row carried only `confirmer_role`, every production row carries
+   * `owner`, and 3 of the 13 confirmations on production are the worker
+   * confirming their own entry. So "Confirmed work proof" silently included
+   * work nobody but the worker had attested.
+   *
+   * SEP-3 (EVIDENCE ≠ VERIFICATION) is the rule being kept here. The row is
+   * NOT hidden and NOT deleted — self-reported work is still real work, and
+   * the register's own history says an import may never quietly reclassify
+   * what a human wrote. It is LABELLED, exactly as `automatic` is, so the
+   * reader can tell an external confirmation from an internal one.
+   *
+   * Derived, never stored: `confirmer_id === the CV subject's profile id`.
+   * That keeps the existing 3 rows untouched while making their provenance
+   * legible, which is what the owner asked for before any data change.
+   */
+  selfConfirmed: boolean;
 };
 
 export type VerifiedCvLanguage = { lang: string; level: string };
@@ -407,7 +428,11 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   if (entries.length > 0) {
     const { data: confs } = await supabase
       .from("journal_entry_confirmations")
-      .select("entry_id, confirmer_role, created_at, confirmation_scope")
+      // `confirmer_id` is selected ONLY to compare it with the CV subject's
+      // own profile id (EVID-2). It never leaves this function: the proof row
+      // carries a boolean, never the confirmer's identity — the role-only rule
+      // above is unchanged.
+      .select("entry_id, confirmer_role, confirmer_id, created_at, confirmation_scope")
       .in("entry_id", entries.map((e) => e.id))
       .order("created_at", { ascending: false });
     const seen = new Set<string>();
@@ -417,6 +442,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       confirmedAt: string;
       confirmerRole: string;
       automatic: boolean;
+      selfConfirmed: boolean;
     }[] = [];
     for (const c of confs ?? []) {
       const scope = c.confirmation_scope as {
@@ -434,6 +460,11 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         // W6 slice 1: policy-written rows carry their honest marker through
         // to the render — automatic never looks identical to hand-confirmed.
         automatic: scope?.action === "auto_confirm",
+        // EVID-2: the confirmer is this CV's own subject. `user.id` is the
+        // PROFILE id and the worker was resolved from it above, so this is a
+        // direct identity comparison, not an inference.
+        selfConfirmed:
+          typeof c.confirmer_id === "string" && c.confirmer_id === user.id,
       });
       const pid = entryById.get(c.entry_id)?.projectId;
       if (pid) projectIds.add(pid);
@@ -461,6 +492,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         projectTitle: pid ? (projectTitleById.get(pid) ?? null) : null,
         confirmerRole: row.confirmerRole,
         automatic: row.automatic,
+        selfConfirmed: row.selfConfirmed,
       });
     }
     proof.sort((a, b) => (a.confirmedAt < b.confirmedAt ? 1 : -1));

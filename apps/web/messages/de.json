@@ -13643,6 +13643,7 @@
     "workJournal": "Durch Arbeitstagebuch-Einträge belegt",
     "selfDeclared": "Selbst angegeben",
     "autoConfirmQualifier": "nach einer voreingestellten Regel bestätigt",
+    "selfConfirmQualifier": "von derselben Person bestätigt, die die Arbeit ausgeführt hat",
     "binLegendTitle": "Nachweis-Absicherung",
     "binLegendRed": "noch keine Einträge",
     "binLegendGreen": "erste Einträge",

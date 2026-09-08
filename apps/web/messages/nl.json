@@ -13643,6 +13643,7 @@
     "workJournal": "Onderbouwd door werkdagboek-invoer",
     "selfDeclared": "Zelf opgegeven",
     "autoConfirmQualifier": "bevestigd volgens een vooraf ingestelde regel",
+    "selfConfirmQualifier": "bevestigd door dezelfde persoon die het werk deed",
     "binLegendTitle": "Bewijszekerheid",
     "binLegendRed": "nog geen registraties",
     "binLegendGreen": "eerste registraties",
