@@ -1578,6 +1578,50 @@ const RULES: IntentRule[] = [
   {
     intent: "find-work",
     patterns: [
+      // ── THE PERSON SEEKS WORK, NOT A WORKER (SEP-4: DEMAND ≠ SUPPLY) ────
+      //
+      // Measured 2026-09-08 on the PUBLIC ENTRY, the first sentence a visitor
+      // ever types. "Ieškau darbo suvirintoju Vokietijoje" classified as
+      // `need-workers` — a person looking for a welding job was read as an
+      // employer hiring welders. The same inversion held in ru, nl and de;
+      // only en escaped, and only by accident (its occupation list has
+      // "welder" and the sentence said "welding").
+      //
+      // The mechanism: `need-workers` scores 6 for a seek verb within 30
+      // characters of an occupation stem, and that alternation includes the
+      // FIRST-PERSON SINGULAR forms (ieškau / ищу / suche / zoek) added to
+      // catch "Ieškau santechniko" — a person who needs a plumber. Both
+      // sentences open identically. The discriminator is the WORK NOUN: one
+      // seeks a PLUMBER, the other seeks WORK.
+      //
+      // So this is a direction rule, not a deny-list. It fires only when a
+      // first-person-singular seeker names WORK, and it must outrank the 6
+      // above, because naming the work noun is strictly more specific than
+      // naming a trade.
+      //
+      // FIRST PERSON SINGULAR ONLY, deliberately. "Ieškome darbo savo
+      // darbuotojams" and "We are looking for work for our welders" are an
+      // AGENCY offering capacity, and an earlier fix (see the offer-capacity
+      // note above) exists precisely because they once resolved to
+      // `find-work`. `ieškome`, `zoeken`, `suchen` and "we are looking" all
+      // fail this pattern, so that fix cannot be undone here.
+      p(
+        "(\\bieškau\\b|\\bищу\\b|\\bik\\s+zoek\\b|\\bich\\s+suche\\b|" +
+          "\\bi\\s+(am\\s+)?(looking\\s+for|seeking|want|need))" +
+          "\\s*(?:[^\\s]+\\s+){0,3}?" +
+          "(darb(o|ą|us|ai|ą)\\b|работ(у|ы)\\b|\\bwerk\\b|\\bbaan\\b|" +
+          "\\barbeit\\b|\\bstelle\\b|\\bjob\\b|\\bwork\\b)",
+        // Top of the table on purpose. "Ieškau darbo suvirintoju" scores 12 on
+        // the employer side, because the occupation stem fires TWO weight-6
+        // seek rules at once; anything lower loses to it and leaves the
+        // inversion in place for exactly the sentences that name a trade.
+        // Weighting is safe here in a way it would not be elsewhere: this
+        // pattern fires ONLY on a first-person-singular seeker who names WORK
+        // as the object, which is unambiguously supply, so a high weight
+        // cannot capture an employer sentence — it can only decide one that
+        // was already decided wrongly.
+        10,
+      ),
       p("\\brask\\b", 3),
       p("\\bieškau\\b", 3),
       p("\\bieškok\\b", 3),
