@@ -31,6 +31,10 @@ import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
 } from "./evidence-org-context";
+import {
+  competencySignalRows,
+  deriveCompetencySignals,
+} from "./competency-signals";
 
 /**
  * THE ORGANIZATION EVIDENCE IMPORT — one domain core, every transport.
@@ -1161,6 +1165,52 @@ export async function commitImport(
       (r) => r.import_row_id as string,
     ),
   );
+
+  // ── EVIDENCE → COMPETENCY ────────────────────────────────────────────────
+  //
+  // The records are the FACT. These are a DERIVED reading of them: which
+  // canonical skills the organization's own description of the work named.
+  // The table shipped with this schema and had no producer until now, which
+  // left REAL WORK → EVIDENCE → CAPABILITY broken at its last link.
+  //
+  // BEST-EFFORT BY DESIGN. A failure here must never fail a commit that has
+  // already written evidence: the evidence is what the person's history rests
+  // on, and a missing derivation is recoverable (re-running the commit
+  // re-derives it) while a lost import is not. So this neither returns nor
+  // throws on failure.
+  //
+  // Idempotent: `ignoreDuplicates` against the table's unique
+  // (record_id, term), so the safely-re-runnable commit above stays safely
+  // re-runnable.
+  const textByRowId = new Map(
+    ready.map((r) => [r.id as string, (r.activity_text as string | null) ?? ""]),
+  );
+  const signalRows = ((ins.data ?? []) as Record<string, unknown>[])
+    .filter((r) => writtenRowIds.has(r.import_row_id as string))
+    .flatMap((r) =>
+      competencySignalRows(
+        session.organizationId,
+        r.id as string,
+        deriveCompetencySignals(textByRowId.get(r.import_row_id as string)),
+      ),
+    );
+  if (signalRows.length > 0) {
+    const sig = await db(caller.supabase)
+      .from("organization_evidence_competency_signals")
+      .upsert(signalRows, {
+        onConflict: "record_id,term",
+        ignoreDuplicates: true,
+      });
+    if (sig.error) {
+      // Named, not swallowed: a read that fails must never look like "this
+      // person demonstrated nothing" (SEP-7).
+      console.error(
+        "[evidence] competency signals not written:",
+        sig.error.code,
+        sig.error.message,
+      );
+    }
+  }
 
   // Mark the staged rows. Re-running this is harmless, which is what makes the
   // whole commit safely re-runnable after a partial failure.
