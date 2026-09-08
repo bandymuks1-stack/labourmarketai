@@ -1225,6 +1225,16 @@ describe("the migration set is exactly what this slice declared", () => {
       // admin client and have failed 42501 since July; marker records the RED
       // classification, owner applies via MCP apply_migration (#1566).
       "20260906060000_notification_events_service_role_grant.sql",
+      // 2026-09-06, APPROVED WITH A CONDITION and applied 2026-09-08 (#1572).
+      // `count(*) over ()` window-counted every live row on every anonymous
+      // call, so the board exceeded anon's statement_timeout=3s and answered
+      // HTTP 500. Body-only replace: same signature, same projection, no
+      // GRANT, `title_raw` and `attribution_code` still NULL. The owner's
+      // condition was a dedicated guard, which is
+      // lib/guards/jobs-count-secdef-v2.test.ts — the original branch shipped
+      // none. RED (SECURITY DEFINER body replace); applying it does not make
+      // it GREEN.
+      "20260906080000_search_public_vacancy_previews_count_v2.sql",
       // 2026-09-06 (owner window 7 §4): the worker board's gated read
       // served agency SUPPLY offers to workers as open jobs — measured 2 of
       // 9 rows on production. The fix is a SECURITY DEFINER body replace =

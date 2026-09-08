@@ -2449,7 +2449,18 @@ describe("no migration files added by this sprint", () => {
     // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
     // ambiguous occupation; confidently wrong is the defect this removes.
     // Verified by fingerprint match between production and the file.
-const SPRINT_BASELINE = 274;
+    //
+    // 274 -> 275: the anonymous board's total_count (20260906080000, #1572).
+    // Owner-approved 2026-09-08 WITH A CONDITION (a dedicated guard, which is
+    // lib/guards/jobs-count-secdef-v2.test.ts). `count(*) over ()` window-
+    // counted every live row on every anon call; measured on production with
+    // both bodies timed back-to-back in one transaction, warmed: unfiltered
+    // 97/90 ms warm and 3351 ms COLD -> 1/1 ms, against anon's
+    // statement_timeout=3s. The profession filter costs ~14 ms more because
+    // the filtered total became a second scan - a real regression, far below
+    // the timeout, recorded rather than hidden. RED (SECURITY DEFINER body
+    // replace); body only - same signature, same projection, no GRANT.
+const SPRINT_BASELINE = 275;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
