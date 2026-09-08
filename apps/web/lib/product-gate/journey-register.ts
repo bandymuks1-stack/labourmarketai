@@ -310,23 +310,23 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "An organization imports its own historical work records",
         capabilities: ["EVID-1"],
-        link: "BROKEN",
-        because:
-          "BROKEN, not NOT_BUILT — every layer exists and the chain does not connect. The engine, both transports and the commit gate are ON MAIN (`lib/organization-evidence/*`, #1600), and the schema IS APPLIED to production as ledger `20260907180944`: all eight tables, their policies and their CHECK constraints are live. What is missing is one repair. `organization_evidence_records_select` and `organization_evidence_parties_select` reference each other, so four of the eight tables raise `42P17 infinite recursion detected in policy` on every read — and because `commitImport` ends in a `.select()`, an `INSERT ... RETURNING` must evaluate that SELECT policy, so the WRITE dies with the read. Confirmed unchanged on production 2026-09-08: the mutual cycle is still present, the resolver `is_evidence_record_subject` does not exist, and all eight tables hold 0 rows. The fix is `20260907220000_evidence_parties_recursion_fix_v1` in draft PR #1618 — owner decision EVID-1, unapplied. An agent may not self-approve it.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — the recursion that took this down is repaired. The owner approved EVID-1 on 2026-09-08 and `20260907220000_evidence_parties_recursion_fix_v1` was applied as ledger `20260908080950`. Measured against the live database afterwards: all four formerly-recursing tables now read cleanly under a real organization manager where each previously raised `42P17`, and the full write chain ran under that same manager in ONE transaction that was then ROLLED BACK — sessions → people → records `INSERT ... RETURNING` → parties `INSERT ... RETURNING`, returning 1 and 1. Zero residue: all six tables re-counted at 0 afterwards. Both surfaces are reachable — the importer on `/dashboard/company`, the subject's view on `/dashboard/profile`. LIVE describes the CHAIN; EVID-1 stays PARTIAL because no human has yet completed an import and all eight tables still hold 0 rows.",
       },
       {
         step: "An import can never write an attested or verified state",
         capabilities: ["SKL-3", "EVID-1"],
-        link: "BROKEN",
-        because:
-          "The guarantee itself is APPLIED and enforcing — the earlier reason, that the CHECK sits in an unapplied migration, is false. Verified on production 2026-09-08: `organization_evidence_records_evidence_state_check` admits only SELF_REPORTED, ORGANIZATION_REPORTED, LEGACY_IMPORTED, UNVERIFIED and NEEDS_REVIEW, so no import can write an attested or verified state even if the code tried; and `organization_evidence_competency_signals_method_check` admits only exact_term_match and synonym_term_match, so `ai_inference` is refused 23514 at the schema. SEP-3 (EVIDENCE ≠ VERIFICATION) is a schema guarantee here, not a code convention. The step stays BROKEN only because no import can run at all while EVID-1's recursion stands — the constraint is proven by refusal, never yet by an import it allowed.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — the guarantee is APPLIED, enforcing, and now exercised by an import that can actually run. Verified on production 2026-09-08: `organization_evidence_records_evidence_state_check` admits only SELF_REPORTED, ORGANIZATION_REPORTED, LEGACY_IMPORTED, UNVERIFIED and NEEDS_REVIEW, so no import can write an attested or verified state even if the code tried, and `organization_evidence_competency_signals_method_check` admits only exact_term_match and synonym_term_match, so `ai_inference` is refused 23514. A real import write then completed through those constraints (ORGANIZATION_REPORTED accepted) in a rolled-back transaction. SEP-3 (EVIDENCE ≠ VERIFICATION) is a schema guarantee here, not a code convention — inference cannot dress itself as verification even by mistake.",
       },
       {
         step: "The subject sees what an organization recorded about them, and may refuse it",
         capabilities: ["EVID-1", "PER-12"],
         link: "BROKEN",
         because:
-          "The subject's read path is APPLIED, and it is the exact path the recursion kills. `organization_evidence_parties_select` carries a branch letting the SUBJECT of a record see who else stands in it, and answering that required a subquery back into `organization_evidence_records` — which is one half of the 42P17 cycle. So the person this data is about is precisely who cannot read it today. The repair in PR #1618 lifts that subquery into a SECURITY DEFINER boolean (`is_evidence_record_subject`) that returns no rows and leaks no column, restoring the subject's read WITHOUT widening any policy. Refusal is the half that is genuinely not built yet: an append-only `disputed` event type exists in the schema's closed set, but no surface offers the subject that act.",
+          "HALF of this step is now repaired and half is genuinely unbuilt, so it stays BROKEN with a narrower reason. The SEEING half worked again on 2026-09-08: the subject's branch of `organization_evidence_parties_select` was the exact path the 42P17 cycle killed — answering 'who else stands in this record' required a subquery back into `organization_evidence_records` — and the applied fix (ledger `20260908080950`) lifts that predicate into the SECURITY DEFINER boolean `is_evidence_record_subject`, which returns no rows and leaks no column, restoring the read WITHOUT widening any policy. The person the data is about can read it again. REFUSING is what is missing: the schema's closed event set carries `disputed`, and no surface offers the subject that act, so today they can see a record and not contest it. That is the remaining gap, and it is UI work, not a migration.",
       },
     ],
   },
