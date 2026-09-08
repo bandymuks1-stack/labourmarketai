@@ -2707,7 +2707,16 @@
     "workCurrent": "Teraz",
     "kindEmployment": "Zatrudnienie",
     "kindPractice": "Praktyka",
-    "mobility": "Może pracować w"
+    "mobility": "Może pracować w",
+    "photosTitle": "Prawdziwa praca",
+    "photosEmpty": "Brak zdjęć z pracy do pokazania",
+    "photosUnavailable": "Nie udało się wczytać zdjęć z pracy",
+    "photosPreviewsUnavailable": "Podglądy zdjęć są teraz niedostępne",
+    "servicesTitle": "Co ta osoba potrafi",
+    "servicesEmpty": "Nic jeszcze nie zaoferowano",
+    "servicesUnavailable": "Nie udało się wczytać oferowanych usług",
+    "serviceRemote": "Zdalnie",
+    "photoAlt": "Zdjęcie wykonanej pracy"
   },
   "marketMapBase": {
     "previewTitle": "Wybrano nowe miejsce — jeszcze nie zapisane",

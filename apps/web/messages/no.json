@@ -2707,7 +2707,16 @@
     "workCurrent": "Nå",
     "kindEmployment": "Ansettelse",
     "kindPractice": "Praksis",
-    "mobility": "Kan arbeide i"
+    "mobility": "Kan arbeide i",
+    "photosTitle": "Reelt arbeid",
+    "photosEmpty": "Ingen arbeidsbilder å vise",
+    "photosUnavailable": "Kunne ikke laste arbeidsbilder",
+    "photosPreviewsUnavailable": "Forhåndsvisning av bilder er utilgjengelig akkurat nå",
+    "servicesTitle": "Hva personen kan",
+    "servicesEmpty": "Ingenting tilbudt ennå",
+    "servicesUnavailable": "Kunne ikke laste tilbudte tjenester",
+    "serviceRemote": "Eksternt",
+    "photoAlt": "Bilde av utført arbeid"
   },
   "marketMapBase": {
     "previewTitle": "Nytt sted valgt — ikke lagret ennå",

@@ -2707,7 +2707,16 @@
     "workCurrent": "Nu",
     "kindEmployment": "Anställning",
     "kindPractice": "Praktik",
-    "mobility": "Kan arbeta i"
+    "mobility": "Kan arbeta i",
+    "photosTitle": "Verkligt arbete",
+    "photosEmpty": "Inga arbetsbilder att visa",
+    "photosUnavailable": "Kunde inte ladda arbetsbilder",
+    "photosPreviewsUnavailable": "Förhandsvisningar av bilder är inte tillgängliga just nu",
+    "servicesTitle": "Vad personen kan",
+    "servicesEmpty": "Inget erbjudet ännu",
+    "servicesUnavailable": "Kunde inte ladda erbjudna tjänster",
+    "serviceRemote": "På distans",
+    "photoAlt": "Foto på utfört arbete"
   },
   "marketMapBase": {
     "previewTitle": "Ny plats vald — inte sparad ännu",

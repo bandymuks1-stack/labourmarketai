@@ -10906,7 +10906,16 @@
     "workCurrent": "Now",
     "kindEmployment": "Employment",
     "kindPractice": "Practice",
-    "mobility": "Can work in"
+    "mobility": "Can work in",
+    "photosTitle": "Real work",
+    "photosEmpty": "No work photos to show",
+    "photosUnavailable": "Work photos could not be loaded",
+    "photosPreviewsUnavailable": "Photo previews are unavailable right now",
+    "servicesTitle": "What they can do",
+    "servicesEmpty": "Nothing offered yet",
+    "servicesUnavailable": "Offered services could not be loaded",
+    "serviceRemote": "Remote",
+    "photoAlt": "Photo of completed work"
   },
   "companyGallery": {
     "title": "Gallery",

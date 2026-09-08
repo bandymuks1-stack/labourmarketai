@@ -10906,7 +10906,16 @@
     "workCurrent": "Dabar",
     "kindEmployment": "Darbas",
     "kindPractice": "Praktika",
-    "mobility": "Gali dirbti"
+    "mobility": "Gali dirbti",
+    "photosTitle": "Tikras darbas",
+    "photosEmpty": "Nėra rodytinų darbo nuotraukų",
+    "photosUnavailable": "Nepavyko įkelti darbo nuotraukų",
+    "photosPreviewsUnavailable": "Nuotraukų peržiūros šiuo metu nepasiekiamos",
+    "servicesTitle": "Ką jie gali padaryti",
+    "servicesEmpty": "Kol kas nieko nesiūloma",
+    "servicesUnavailable": "Nepavyko įkelti siūlomų paslaugų",
+    "serviceRemote": "Nuotoliniu būdu",
+    "photoAlt": "Atlikto darbo nuotrauka"
   },
   "companyGallery": {
     "title": "Galerija",

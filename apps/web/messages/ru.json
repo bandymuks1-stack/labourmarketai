@@ -10906,7 +10906,16 @@
     "workCurrent": "Сейчас",
     "kindEmployment": "Работа",
     "kindPractice": "Практика",
-    "mobility": "Может работать"
+    "mobility": "Может работать",
+    "photosTitle": "Реальная работа",
+    "photosEmpty": "Нет фотографий работы",
+    "photosUnavailable": "Не удалось загрузить фотографии работы",
+    "photosPreviewsUnavailable": "Просмотр фотографий сейчас недоступен",
+    "servicesTitle": "Что он может сделать",
+    "servicesEmpty": "Пока ничего не предлагается",
+    "servicesUnavailable": "Не удалось загрузить предлагаемые услуги",
+    "serviceRemote": "Удалённо",
+    "photoAlt": "Фотография выполненной работы"
   },
   "companyGallery": {
     "title": "Галерея",

@@ -10906,7 +10906,16 @@
     "workCurrent": "Jetzt",
     "kindEmployment": "Anstellung",
     "kindPractice": "Praktikum",
-    "mobility": "Kann arbeiten in"
+    "mobility": "Kann arbeiten in",
+    "photosTitle": "Echte Arbeit",
+    "photosEmpty": "Keine Arbeitsfotos vorhanden",
+    "photosUnavailable": "Arbeitsfotos konnten nicht geladen werden",
+    "photosPreviewsUnavailable": "Fotovorschauen sind derzeit nicht verfügbar",
+    "servicesTitle": "Was diese Person kann",
+    "servicesEmpty": "Noch nichts angeboten",
+    "servicesUnavailable": "Angebotene Leistungen konnten nicht geladen werden",
+    "serviceRemote": "Ortsunabhängig",
+    "photoAlt": "Foto abgeschlossener Arbeit"
   },
   "companyGallery": {
     "title": "Galerie",

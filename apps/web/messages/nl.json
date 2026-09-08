@@ -10906,7 +10906,16 @@
     "workCurrent": "Nu",
     "kindEmployment": "Dienstverband",
     "kindPractice": "Stage",
-    "mobility": "Kan werken in"
+    "mobility": "Kan werken in",
+    "photosTitle": "Echt werk",
+    "photosEmpty": "Geen werkfoto's om te tonen",
+    "photosUnavailable": "Werkfoto's konden niet worden geladen",
+    "photosPreviewsUnavailable": "Fotovoorbeelden zijn nu niet beschikbaar",
+    "servicesTitle": "Wat deze persoon kan doen",
+    "servicesEmpty": "Nog niets aangeboden",
+    "servicesUnavailable": "Aangeboden diensten konden niet worden geladen",
+    "serviceRemote": "Op afstand",
+    "photoAlt": "Foto van uitgevoerd werk"
   },
   "companyGallery": {
     "title": "Galerij",
